@@ -6,11 +6,22 @@
 <preferences/>
 <find_panel_settings/>
 <vnodes>
+<v t="ekr.20201209145256.1"><vh>Startup</vh>
+<v t="ekr.20201209145256.2"><vh>@button backup</vh></v>
+<v t="ekr.20201209145330.1"><vh>@button write-leojs</vh>
+<v t="ekr.20201209145330.2"><vh>check_file_names</vh></v>
+<v t="ekr.20201209145330.3"><vh>check_nodes</vh></v>
+<v t="ekr.20201209145330.4"><vh>get_content</vh></v>
+<v t="ekr.20201209145330.5"><vh>main</vh></v>
+<v t="ekr.20201209145330.6"><vh>oops</vh></v>
+</v>
+</v>
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh></v>
 <v t="felix.20201208224703.1"><vh>@clean CONTRIBUTING.md</vh></v>
 </v>
+<v t="ekr.20201209145358.1"><vh>Code</vh>
 <v t="felix.20201208214322.1"><vh>@clean src/extension.ts</vh>
 <v t="felix.20201208215613.1"><vh>activate</vh></v>
 <v t="felix.20201208215619.1"><vh>deactivate</vh></v>
@@ -93,8 +104,103 @@
 </v>
 <v t="felix.20201208221945.1"><vh>keybindings</vh></v>
 </v>
+</v>
 </vnodes>
 <tnodes>
+<t tx="ekr.20201209145256.1"></t>
+<t tx="ekr.20201209145256.2">c.backup_helper(sub_dir='leojs')
+</t>
+<t tx="ekr.20201209145303.1">@language rest
+@wrap
+
+- Create devel.
+- Update Leojs.leo in devel.</t>
+<t tx="ekr.20201209145330.1">"""
+Update leojs.leo from the given list of nodes.
+
+This must be run from myLeojs.leo.
+"""
+g.cls()
+import os
+@others
+main(node_list = ['Startup', 'Documentation', 'Code'])
+</t>
+<t tx="ekr.20201209145330.2">def check_file_names():
+    """
+    Return the path to leojs.leo.
+    
+    Return None and give an error if:
+    - We are not running from myLeojs.leo or
+    - Leojs.leo does not exist.
+    """
+    if c.shortFileName() != 'myLeojs.leo':
+        oops('Run this script only from myLeojs.leo')
+        return None
+    base_dir = os.path.dirname(c.fileName())
+    path = os.path.join(base_dir, 'leojs.leo')
+    if not os.path.exists(path):
+        oops(f"Not found: {path}")
+        return None
+    return os.path.normpath(path)</t>
+<t tx="ekr.20201209145330.3">def check_nodes(node_list):
+    """Return True if all nodes are found."""
+    result = []
+    for node in node_list:
+        p = g.findTopLevelNode(c, node, exact=True)
+        if p:
+            result.append(p.copy())
+        else:
+            oops(f"Top-level node {node} not found")
+            return []
+    return result</t>
+<t tx="ekr.20201209145330.4">def get_content(positions_list):
+    """
+    Return the desired contents of leoPyRef.leo.
+    
+    Based on code by Виталије Милошевић.
+    """
+    # Make only one copy for all calls.
+    fc = c.fileCommands
+    fc.currentPosition = c.p
+    fc.rootPosition = c.rootPosition()
+    fc.vnodesDict = {}
+    # Put the file
+    fc.outputFile = g.FileLikeObject()
+    fc.putProlog()
+    fc.putHeader()
+    fc.putGlobals()
+    fc.putPrefs()
+    fc.putFindSettings()
+    fc.put("&lt;vnodes&gt;\n")
+    for p in positions_list:
+        # An optimization: Write the next top-level node.
+        fc.putVnode(p, isIgnore=p.isAtIgnoreNode())
+    fc.put("&lt;/vnodes&gt;\n")
+    fc.putTnodes()
+    fc.putPostlog()
+    return fc.outputFile.getvalue()
+</t>
+<t tx="ekr.20201209145330.5">def main(node_list):
+    """The main line."""
+    c.endEditing()
+    path = check_file_names()
+    if not path:
+        return
+    positions_list = check_nodes(node_list)
+    if not positions_list:
+        return
+    content = get_content(positions_list)
+    with open(path, 'w', encoding="utf-8", newline='\n') as f:
+        f.write(content)
+    print('')
+    g.es_print(f"Updated {path}")
+</t>
+<t tx="ekr.20201209145330.6">def oops(message):
+    """Print an error message"""
+    print('')
+    g.es_print(message)
+    print('')</t>
+<t tx="ekr.20201209145358.1"></t>
 <t tx="felix.20201208214250.2"></t>
 <t tx="felix.20201208214319.1"># leojs
 
@@ -115,17 +221,11 @@ import { JsOutlineProvider } from './leoOutline';
 {
   "name": "leojs",
   "displayName": "leojs",
-  "description": "Leo Literate Editor with Outline in Typescript",
+  "description": "Leo's kernel in Typescript",
   "version": "0.1.0",
-  "engines": {
-    "vscode": "^1.51.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "*"
-  ],
+  "engines": { "vscode": "^1.51.0"},
+  "categories": ["Other"],
+  "activationEvents": ["*"],
   "main": "./dist/extension.js",
   "contributes": {
     @others
@@ -165,7 +265,8 @@ import { JsOutlineProvider } from './leoOutline';
 
 ## 0.1.00
 
-- Initial state</t>
+- Initial state
+</t>
 <t tx="felix.20201208215536.1">import * as vscode from "vscode";
 
 @language typescript
@@ -451,7 +552,6 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.window.registerTreeDataProvider('leoJsExplorer', jsOutlineProvider);
 	vscode.commands.executeCommand('setContext', 'leoReady', true);
 	vscode.commands.executeCommand('setContext', 'leoTreeOpened', true);
-
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
@@ -2424,8 +2524,14 @@ export function removeFileFromGlobal(p_context: vscode.ExtensionContext, p_file:
 export function buildNodeIconPaths(p_context: vscode.ExtensionContext): Icon[] {
     return Array(16).fill("").map((p_val, p_index) =&gt; {
         return {
-            light: p_context.asAbsolutePath(Constants.GUI.ICON_LIGHT_PATH + padNumber2(p_index) + Constants.GUI.ICON_FILE_EXT),
-            dark: p_context.asAbsolutePath(Constants.GUI.ICON_DARK_PATH + padNumber2(p_index) + Constants.GUI.ICON_FILE_EXT)
+            light: p_context.asAbsolutePath(
+                Constants.GUI.ICON_LIGHT_PATH +
+                padNumber2(p_index) +
+                Constants.GUI.ICON_FILE_EXT),
+            dark: p_context.asAbsolutePath(
+                Constants.GUI.ICON_DARK_PATH +
+                padNumber2(p_index) +
+                Constants.GUI.ICON_FILE_EXT)
         };
     });
 }
@@ -2578,7 +2684,8 @@ export interface MinibufferCommand extends vscode.QuickPickItem {
  * * When refreshing the outline and getting to Leo's selected node
  */
 export const enum RevealType {
-    NoReveal = 0, // In apToLeoNode conversion, If if the global revealType is "NoReveal" and its the selected node, re-use the old id
+    NoReveal = 0,   // In apToLeoNode conversion. True:
+                    // Re-use the old if the global revealType is "NoReveal" and it's the selected node.
     Reveal,
     RevealSelect,
     RevealSelectFocus
@@ -2592,7 +2699,8 @@ export interface ReqRefresh {
     node?: boolean; // Reveal received selected node (Navigation only, no tree change)
     tree?: boolean; // Tree needs refresh
     body?: boolean; // Body needs refresh
-    states?: boolean; // States needs refresh (changed, canUndo, canRedo, canDemote, canPromote, canDehoist)
+    states?: boolean; // States needs refresh:
+                      // (changed, canUndo, canRedo, canDemote, canPromote, canDehoist)
     buttons?: boolean; // Buttons needs refresh
     documents?: boolean; // Documents needs refresh
 }
@@ -2662,8 +2770,9 @@ private _getBestOpenFolderUri(): vscode.Uri {
         }
     }
     if (!w_openedFileEnvUri) {
-        w_openedFileEnvUri = vscode.Uri.file("~"); // TODO : set as home folder properly, this doesn't work
-        // ! EXAMPLE WITH os : const homedir = require('os').homedir();
+        w_openedFileEnvUri = vscode.Uri.file("~");
+            // TODO : set as home folder properly, this doesn't work
+            // ! EXAMPLE WITH os : const homedir = require('os').homedir();
     }
     return w_openedFileEnvUri;
 }
@@ -2694,7 +2803,8 @@ public getLeoFileUrl(p_saveAsFlag?: boolean): Promise&lt;string&gt; {
                     this._fileBrowserActive = false;
                     if (p_chosenLeoFile) {
                         // single string
-                        p_resolve(p_chosenLeoFile.fsPath.replace(/\\/g, "/")); // Replace backslashes for windows support
+                        // Replace backslashes for windows support
+                        p_resolve(p_chosenLeoFile.fsPath.replace(/\\/g, "/")); 
                     } else {
                         p_resolve(""); // not rejection - resolve empty string
                     }
@@ -2710,7 +2820,8 @@ public getLeoFileUrl(p_saveAsFlag?: boolean): Promise&lt;string&gt; {
                     this._fileBrowserActive = false;
                     if (p_chosenLeoFile) {
                         // array instead of single string
-                        p_resolve(p_chosenLeoFile[0].fsPath.replace(/\\/g, "/")); // Replace backslashes for windows support
+                         // Replace backslashes for windows support
+                        p_resolve(p_chosenLeoFile[0].fsPath.replace(/\\/g, "/"));
                     } else {
                         p_resolve("");
                     }
@@ -2720,7 +2831,9 @@ public getLeoFileUrl(p_saveAsFlag?: boolean): Promise&lt;string&gt; {
 }
 
 </t>
-<t tx="felix.20201208224703.1"># How to install and run the development version
+<t tx="felix.20201208224703.1">@language rest
+@wrap
+# How to install and run the development version
 
 Thanks for trying out the development version of LeoInteg! :sunglasses: Contributions and pull requests are more than welcome!
 
