@@ -63,8 +63,14 @@ export function removeFileFromGlobal(p_context: vscode.ExtensionContext, p_file:
 export function buildNodeIconPaths(p_context: vscode.ExtensionContext): Icon[] {
     return Array(16).fill("").map((p_val, p_index) => {
         return {
-            light: p_context.asAbsolutePath(Constants.GUI.ICON_LIGHT_PATH + padNumber2(p_index) + Constants.GUI.ICON_FILE_EXT),
-            dark: p_context.asAbsolutePath(Constants.GUI.ICON_DARK_PATH + padNumber2(p_index) + Constants.GUI.ICON_FILE_EXT)
+            light: p_context.asAbsolutePath(
+                Constants.GUI.ICON_LIGHT_PATH +
+                padNumber2(p_index) +
+                Constants.GUI.ICON_FILE_EXT),
+            dark: p_context.asAbsolutePath(
+                Constants.GUI.ICON_DARK_PATH +
+                padNumber2(p_index) +
+                Constants.GUI.ICON_FILE_EXT)
         };
     });
 }
