@@ -15,6 +15,7 @@
 <v t="ekr.20201209145330.5"><vh>main</vh></v>
 <v t="ekr.20201209145330.6"><vh>oops</vh></v>
 </v>
+<v t="ekr.20201209152713.1"><vh>script: split contributes/command section</vh></v>
 </v>
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
@@ -110,11 +111,6 @@
 <t tx="ekr.20201209145256.1"></t>
 <t tx="ekr.20201209145256.2">c.backup_helper(sub_dir='leojs')
 </t>
-<t tx="ekr.20201209145303.1">@language rest
-@wrap
-
-- Create devel.
-- Update Leojs.leo in devel.</t>
 <t tx="ekr.20201209145330.1">"""
 Update leojs.leo from the given list of nodes.
 
@@ -201,6 +197,46 @@ main(node_list = ['Startup', 'Documentation', 'Code'])
     g.es_print(message)
     print('')</t>
 <t tx="ekr.20201209145358.1"></t>
+<t tx="ekr.20201209152713.1">"""
+Script: split the "commands" node of the "contributes" section into separate nodes.
+
+After running this script, it will be easy to alphabetize the commands and to group them with organizer nodes if desired.
+"""
+g.cls()
+root = g.findNodeAnywhere(c, 'commands')
+last = c.lastTopLevel()
+parent = last.insertAfter()
+parent.h = 'command tree'
+command_lines, level = [], 0
+for i, line in enumerate(g.splitLines(root.b)):
+    line_s = line.strip()
+    if command_lines:  # Accumulating a new node.
+        command_lines.append(line)
+        if line_s.endswith(('}', '},')):
+            level -= 1
+            if level == 0:
+                # End of command.
+                p = parent.insertAsLastChild()
+                h = command_lines[1].strip()
+                head = '"command": "leojs.'
+                assert h.startswith(head), (i, repr(h))
+                if h.endswith(','): h = h[:-1]
+                if h.endswith('"'): h = h[:-1]
+                p.h = h[len(head):]
+                p.b = ''.join(command_lines)
+                # g.printObj(command_lines)
+                command_lines = []
+        elif line_s.endswith('{'):
+            level += 1
+        else:
+            pass
+    elif line_s.endswith('{'):
+        level = 1
+        command_lines = [line]
+    elif line_s:
+        assert line_s.endswith('[') or line_s.startswith('],'), (i, repr(line))
+        # print('OUTSIDE', repr(line))
+c.redraw()</t>
 <t tx="felix.20201208214250.2"></t>
 <t tx="felix.20201208214319.1"># leojs
 
