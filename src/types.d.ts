@@ -1,6 +1,13 @@
 import * as vscode from "vscode";
 import { LeoNode } from "./leoNode";
 
+export interface PNode {
+    header: string;
+    children: PNode[];
+    parent?: PNode;
+    body: string;
+}
+
 /**
  * * When refreshing the outline and getting to Leo's selected node
  */

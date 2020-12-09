@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { Constants } from "./constants";
-import { Icon } from "./types"; // ArchivedPosition included to help debug
+import { Icon, PNode } from "./types"; // ArchivedPosition included to help debug
 
 /**
  * * Implementation of tree nodes for usage in a TreeDataProvider
@@ -13,9 +13,8 @@ export class LeoNode extends vscode.TreeItem {
 
     constructor(
         public label: string, // Node headline
-        public gnx: string,
         public collapsibleState: vscode.TreeItemCollapsibleState, // Computed in receiver/creator
-        public ap: string, // Key for leo's node position
+        public ap: PNode, // Pointer/reference for leo's node position
         public childIndex: number, // For debugging purposes
         public cloned: boolean,
         public dirty: boolean,
@@ -55,7 +54,7 @@ export class LeoNode extends vscode.TreeItem {
      */
     public copyProperties(p_node: LeoNode): LeoNode {
         this.label = p_node.label;
-        this.gnx = p_node.gnx;
+
         this.collapsibleState = p_node.collapsibleState;
         this.ap = p_node.ap;
         this.childIndex = p_node.childIndex;
