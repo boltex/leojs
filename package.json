@@ -1,17 +1,11 @@
 {
   "name": "leojs",
   "displayName": "leojs",
-  "description": "Leo Literate Editor with Outline in Typescript",
+  "description": "Leo's kernel in Typescript",
   "version": "0.1.0",
-  "engines": {
-    "vscode": "^1.51.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "*"
-  ],
+  "engines": { "vscode": "^1.51.0"},
+  "categories": ["Other"],
+  "activationEvents": ["*"],
   "main": "./dist/extension.js",
   "contributes": {
     "views": {

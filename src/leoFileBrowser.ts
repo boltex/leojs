@@ -30,8 +30,9 @@ export class LeoFilesBrowser {
             }
         }
         if (!w_openedFileEnvUri) {
-            w_openedFileEnvUri = vscode.Uri.file("~"); // TODO : set as home folder properly, this doesn't work
-            // ! EXAMPLE WITH os : const homedir = require('os').homedir();
+            w_openedFileEnvUri = vscode.Uri.file("~");
+                // TODO : set as home folder properly, this doesn't work
+                // ! EXAMPLE WITH os : const homedir = require('os').homedir();
         }
         return w_openedFileEnvUri;
     }
@@ -61,7 +62,8 @@ export class LeoFilesBrowser {
                         this._fileBrowserActive = false;
                         if (p_chosenLeoFile) {
                             // single string
-                            p_resolve(p_chosenLeoFile.fsPath.replace(/\\/g, "/")); // Replace backslashes for windows support
+                            // Replace backslashes for windows support
+                            p_resolve(p_chosenLeoFile.fsPath.replace(/\\/g, "/")); 
                         } else {
                             p_resolve(""); // not rejection - resolve empty string
                         }
@@ -77,7 +79,8 @@ export class LeoFilesBrowser {
                         this._fileBrowserActive = false;
                         if (p_chosenLeoFile) {
                             // array instead of single string
-                            p_resolve(p_chosenLeoFile[0].fsPath.replace(/\\/g, "/")); // Replace backslashes for windows support
+                             // Replace backslashes for windows support
+                            p_resolve(p_chosenLeoFile[0].fsPath.replace(/\\/g, "/"));
                         } else {
                             p_resolve("");
                         }

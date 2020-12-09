@@ -12,7 +12,8 @@ export interface PNode {
  * * When refreshing the outline and getting to Leo's selected node
  */
 export const enum RevealType {
-    NoReveal = 0, // In apToLeoNode conversion, If if the global revealType is "NoReveal" and its the selected node, re-use the old id
+    NoReveal = 0,   // In apToLeoNode conversion. True:
+                    // Re-use the old if the global revealType is "NoReveal" and it's the selected node.
     Reveal,
     RevealSelect,
     RevealSelectFocus
@@ -25,7 +26,8 @@ export interface ReqRefresh {
     node?: boolean; // Reveal received selected node (Navigation only, no tree change)
     tree?: boolean; // Tree needs refresh
     body?: boolean; // Body needs refresh
-    states?: boolean; // States needs refresh (changed, canUndo, canRedo, canDemote, canPromote, canDehoist)
+    states?: boolean; // States needs refresh:
+                      // (changed, canUndo, canRedo, canDemote, canPromote, canDehoist)
     buttons?: boolean; // Buttons needs refresh
     documents?: boolean; // Documents needs refresh
 }
