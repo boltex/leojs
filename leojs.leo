@@ -163,7 +163,7 @@ import { JsOutlineProvider } from './leoOutline';
 </t>
 <t tx="felix.20201208214506.1"># Change Log
 
-## 0.1.00
+## 0.1.00 12.9.2020.
 
 - Initial state</t>
 <t tx="felix.20201208215536.1">import * as vscode from "vscode";
@@ -451,7 +451,6 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.window.registerTreeDataProvider('leoJsExplorer', jsOutlineProvider);
 	vscode.commands.executeCommand('setContext', 'leoReady', true);
 	vscode.commands.executeCommand('setContext', 'leoTreeOpened', true);
-
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
@@ -2720,7 +2719,10 @@ public getLeoFileUrl(p_saveAsFlag?: boolean): Promise&lt;string&gt; {
 }
 
 </t>
-<t tx="felix.20201208224703.1"># How to install and run the development version
+<t tx="felix.20201208224703.1">@language rest
+@wrap
+
+# How to install and run the development version
 
 Thanks for trying out the development version of LeoInteg! :sunglasses: Contributions and pull requests are more than welcome!
 
