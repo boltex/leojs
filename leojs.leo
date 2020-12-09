@@ -17,7 +17,13 @@
 </v>
 <v t="felix.20201208223531.1"><vh>@clean src/leojs.ts</vh></v>
 <v t="felix.20201208223553.1"><vh>@clean src/leoOutline.ts</vh></v>
-<v t="felix.20201208223554.1"><vh>@clean src/leoNode.ts</vh></v>
+<v t="felix.20201208223554.1"><vh>@clean src/leoNode.ts</vh>
+<v t="felix.20201209004316.1"><vh>class LeoNode</vh>
+<v t="felix.20201209004316.2"><vh>copyProperties</vh></v>
+<v t="felix.20201209004316.3"><vh>setRoot</vh></v>
+<v t="felix.20201209004316.4"><vh>_getNodeContextValue</vh></v>
+</v>
+</v>
 <v t="felix.20201208215536.1"><vh>@clean src/constants.ts</vh>
 <v t="felix.20201208215536.2"><vh>class Constants</vh>
 <v t="felix.20201208215536.3"><vh>general constants</vh></v>
@@ -44,24 +50,12 @@
 <v t="felix.20201208224407.16"><vh>setContext</vh></v>
 </v>
 <v t="felix.20201208224420.1"><vh>@clean src/types.d.ts</vh>
-<v t="felix.20201208224420.2"><vh>ConfigMembers</vh></v>
-<v t="felix.20201208224420.3"><vh>ConfigSetting</vh></v>
 <v t="felix.20201208224420.4"><vh>RevealType</vh></v>
 <v t="felix.20201208224420.5"><vh>RefreshType</vh></v>
 <v t="felix.20201208224420.6"><vh>UserCommand</vh></v>
 <v t="felix.20201208224420.7"><vh>ShowBodyParam</vh></v>
-<v t="felix.20201208224420.8"><vh>LeoAction</vh></v>
-<v t="felix.20201208224420.9"><vh>LeoLogEntry</vh></v>
 <v t="felix.20201208224420.10"><vh>ArchivedPosition</vh></v>
-<v t="felix.20201208224420.11"><vh>LeoPackageStates</vh></v>
-<v t="felix.20201208224420.12"><vh>LeoBridgePackageOpenedInfo</vh></v>
-<v t="felix.20201208224420.13"><vh>LeoBridgePackage</vh></v>
-<v t="felix.20201208224420.14"><vh>LeoDocument</vh></v>
-<v t="felix.20201208224420.15"><vh>LeoButton</vh></v>
 <v t="felix.20201208224420.16"><vh>Icon</vh></v>
-<v t="felix.20201208224420.17"><vh>BodyTimeInfo</vh></v>
-<v t="felix.20201208224420.18"><vh>BodyPosition</vh></v>
-<v t="felix.20201208224420.19"><vh>BodySelectionInfo</vh></v>
 <v t="felix.20201208224420.20"><vh>showSaveAsDialogParameters</vh></v>
 <v t="felix.20201208224420.21"><vh>runAskYesNoDialogParameters</vh></v>
 <v t="felix.20201208224420.22"><vh>runWarnMessageDialogParameters</vh></v>
@@ -923,6 +917,11 @@ export function deactivate() { }
     "title": "Sort Children"
   },
   {
+    "command": "leointeg.sortChildrenSelectionFromOutline",
+    "category": "Leo",
+    "title": "Sort Children"
+  },
+  {
     "command": "leointeg.sortSiblingsSelection",
     "category": "Leo",
     "title": "Sort Siblings"
@@ -1142,14 +1141,6 @@ export function deactivate() { }
 </t>
 <t tx="felix.20201208221652.1">"commandPalette": [
   {
-    "command": "leointeg.startServer",
-    "when": "!leoBridgeReady &amp;&amp; !leoTreeOpened &amp;&amp; !leoServerStarted"
-  },
-  {
-    "command": "leointeg.connectToServer",
-    "when": "!leoBridgeReady &amp;&amp; !leoTreeOpened"
-  },
-  {
     "command": "leointeg.executeScript",
     "when": "leoTreeOpened"
   },
@@ -1159,23 +1150,23 @@ export function deactivate() { }
   },
   {
     "command": "leointeg.showLogPane",
-    "when": "leoBridgeReady"
+    "when": "leoReady"
   },
   {
     "command": "leointeg.openLeoFile",
-    "when": "leoBridgeReady"
+    "when": "leoReady"
   },
   {
     "command": "leointeg.recentLeoFiles",
-    "when": "leoBridgeReady"
+    "when": "leoReady"
   },
   {
     "command": "leointeg.switchLeoFile",
-    "when": "leoBridgeReady &amp;&amp; leoTreeOpened"
+    "when": "leoReady &amp;&amp; leoTreeOpened"
   },
   {
     "command": "leointeg.newLeoFile",
-    "when": "leoBridgeReady"
+    "when": "leoReady"
   },
   {
     "command": "leointeg.closeLeoFile",
@@ -1267,6 +1258,10 @@ export function deactivate() { }
   },
   {
     "command": "leointeg.sortChildrenSelection",
+    "when": "leoTreeOpened &amp;&amp; leoChild"
+  },
+  {
+    "command": "leointeg.sortChildrenSelectionFromOutline",
     "when": "leoTreeOpened &amp;&amp; leoChild"
   },
   {
@@ -1602,12 +1597,12 @@ export function deactivate() { }
 <t tx="felix.20201208221809.1">"view/title": [
   {
     "command": "leointeg.openLeoFile",
-    "when": "view =~ /leoDocuments/ &amp;&amp; leoBridgeReady",
+    "when": "view =~ /leoDocuments/ &amp;&amp; leoReady",
     "group": "navigation@1"
   },
   {
     "command": "leointeg.newLeoFile",
-    "when": "view =~ /leoDocuments/ &amp;&amp; leoBridgeReady",
+    "when": "view =~ /leoDocuments/ &amp;&amp; leoReady",
     "group": "navigation@1"
   },
   {
@@ -1617,17 +1612,17 @@ export function deactivate() { }
   },
   {
     "command": "leointeg.connectToServer",
-    "when": "view =~ /leoIntegration/ &amp;&amp; !leoBridgeReady &amp;&amp; !leoTreeOpened",
+    "when": "view =~ /leoIntegration/ &amp;&amp; !leoReady &amp;&amp; !leoTreeOpened",
     "group": "navigation@1"
   },
   {
     "command": "leointeg.openLeoFile",
-    "when": "view =~ /leoIntegration/ &amp;&amp; leoBridgeReady",
+    "when": "view =~ /leoIntegration/ &amp;&amp; leoReady",
     "group": "navigation@1"
   },
   {
     "command": "leointeg.newLeoFile",
-    "when": "view =~ /leoIntegration/ &amp;&amp; leoBridgeReady",
+    "when": "view =~ /leoIntegration/ &amp;&amp; leoReady",
     "group": "navigation@1"
   },
   {
@@ -2291,10 +2286,20 @@ export function deactivate() { }
 </t>
 <t tx="felix.20201208223531.1"></t>
 <t tx="felix.20201208223553.1"></t>
-<t tx="felix.20201208223554.1"></t>
+<t tx="felix.20201208223554.1">import * as vscode from "vscode";
+import { Constants } from "./constants";
+import { Icon } from "./types"; // ArchivedPosition included to help debug
+
+/**
+ * * Implementation of tree nodes for usage in a TreeDataProvider
+ */
+@others
+@language typescript
+@tabwidth -4
+</t>
 <t tx="felix.20201208224407.1">import * as vscode from "vscode";
 import { Constants } from "./constants";
-import { Icon, UserCommand, ArchivedPosition } from "./types";
+import { Icon } from "./types";
 import { LeoNode } from "./leoNode";
 
 // String and other types/structures helper functions, along with common vscode API calls
@@ -2338,11 +2343,11 @@ export function isIconChangedByEdit(p_node: LeoNode, p_newHasBody: boolean): boo
 }
 
 </t>
-<t tx="felix.20201208224407.14"> /**
- * Builds a 'Leo Scheme' vscode.Uri from a gnx (or strings like 'LEO BODY' or empty strings to decorate breadcrumbs)
- * @param p_str leo node gnx strings are used to build Uri
- * @returns A vscode 'Uri' object
- */
+<t tx="felix.20201208224407.14">/**
+* Builds a 'Leo Scheme' vscode.Uri from a gnx (or strings like 'LEO BODY' or empty strings to decorate breadcrumbs)
+* @param p_str leo node gnx strings are used to build Uri
+* @returns A vscode 'Uri' object
+*/
 export function strToLeoUri(p_str: string): vscode.Uri {
     return vscode.Uri.parse(Constants.URI_SCHEME_HEADER + p_str);
 }
@@ -2362,7 +2367,7 @@ export function leoUriToStr(p_uri: vscode.Uri): string {
 </t>
 <t tx="felix.20201208224407.16">/**
  * * Sets a vscode context variable with 'vscode.commands.executeCommand' &amp; 'setContext'
- * @param p_key Key string name such as constants 'bridgeReady' or 'treeOpened', etc.
+ * @param p_key Key string name such as constants 'leoReady' or 'treeOpened', etc.
  * @param p_value Value to be assigned to the p_key 'key'
  * @returns A Thenable that is returned by the executeCommand call
  */
@@ -2509,82 +2514,6 @@ export interface ArchivedPosition {
 }
 
 </t>
-<t tx="felix.20201208224420.11">/**
- * * Object sent back from leoInteg's 'getStates' command
- */
-export interface LeoPackageStates {
-    changed: boolean; // Leo document has changed (is dirty)
-    canUndo: boolean; // Leo document can undo the last operation done
-    canRedo: boolean; // Leo document can redo the last operation 'undone'
-    canDemote: boolean; // Currently selected node can have its siblings demoted
-    canPromote: boolean; // Currently selected node can have its children promoted
-    canDehoist: boolean; // Leo Document is currently hoisted and can be de-hoisted
-}
-
-</t>
-<t tx="felix.20201208224420.12">/**
- * * Returned info about currently opened and editing document
- * Used after opening, switching or setting the opened document
- */
-export interface LeoBridgePackageOpenedInfo {
-    total: number;
-    filename: string;
-    node: ArchivedPosition;
-}
-
-</t>
-<t tx="felix.20201208224420.13">/**
- * * Main interface for JSON sent from Leo back to leoInteg
- */
-export interface LeoBridgePackage {
-    id: number; // TODO : Could be used for error checking
-    // * Each of those top level member is an answer from a "Constants.LEOBRIDGE" command
-    allGnx?: string[];
-    bodyLength?: number;
-    bodyData?: string;
-    bodyStates?: {
-        language: string;
-        selection: BodySelectionInfo;
-    }
-    node?: ArchivedPosition;
-    nodes?: ArchivedPosition[];
-    states?: LeoPackageStates;
-    closed?: {
-        total: number;
-        filename?: string;
-        node?: ArchivedPosition;
-    },
-    opened?: LeoBridgePackageOpenedInfo,
-    setOpened?: LeoBridgePackageOpenedInfo,
-    openedFiles?: {
-        index: number;
-        files: LeoDocument[];
-    }
-    buttons?: LeoButton[];
-    commands?: MinibufferCommand[];
-}
-
-</t>
-<t tx="felix.20201208224420.14">/**
- * * Leo document structure used in the 'Opened Leo Documents' tree view provider sent back by the server
- */
-export interface LeoDocument {
-    name: string;
-    index: number;
-    changed: boolean;
-    selected: boolean;
-}
-
-</t>
-<t tx="felix.20201208224420.15">/**
- * * Leo '@button' structure used in the '@buttons' tree view provider sent back by the server
- */
-export interface LeoButton {
-    name: string;
-    index: string; // STRING KEY
-}
-
-</t>
 <t tx="felix.20201208224420.16">/**
  * * Icon path names used in leoNodes for rendering in treeview
  */
@@ -2594,75 +2523,10 @@ export interface Icon {
 }
 
 </t>
-<t tx="felix.20201208224420.17">/**
- * * LeoBody virtual file time information object
- */
-export interface BodyTimeInfo {
-    gnx: string;
-    ctime: number;
-    mtime: number;
-}
-
-</t>
-<t tx="felix.20201208224420.18">/**
- * * Body position
- * Used in BodySelectionInfo interface
- */
-export interface BodyPosition {
-    line: number;
-    col: number;
-}
-
-</t>
-<t tx="felix.20201208224420.19">/**
- * * LeoBody cursor active position and text selection state, along with gnx
- */
-export interface BodySelectionInfo {
-    gnx: string;
-    // scroll is stored as-is as the 'scrollBarSpot' in Leo
-    scroll: {
-        start: BodyPosition;
-        end: BodyPosition;
-    }
-    active: BodyPosition;
-    start: BodyPosition;
-    end: BodyPosition;
-}
-
-</t>
-<t tx="felix.20201208224420.2">/**
- * * Types of the various JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
- */
-export interface ConfigMembers {
-    checkForChangeExternalFiles: string;
-    defaultReloadIgnore: string;
-    leoTreeBrowse: boolean;
-    treeKeepFocus: boolean;
-    treeKeepFocusWhenAside: boolean;
-    statusBarString: string;
-    statusBarColor: string;
-    treeInExplorer: boolean;
-    showOpenAside: boolean;
-    showEditOnNodes: boolean;
-    showArrowsOnNodes: boolean;
-    showAddOnNodes: boolean;
-    showMarkOnNodes: boolean;
-    showCloneOnNodes: boolean;
-    showCopyOnNodes: boolean;
-    invertNodeContrast: boolean;
-    leoPythonCommand: string;
-    startServerAutomatically: boolean;
-    connectToServerAutomatically: boolean;
-    connectionAddress: string;
-    connectionPort: number;
-}
-
-</t>
 <t tx="felix.20201208224420.20">/**
  * * Parameter structure used in the 'runSaveFileDialog' equivalent when asking user input
  */
 export interface showSaveAsDialogParameters {
-    // See TODO in leoAsync.ts
     "initialFile": string;
     "title": string;
     "message": string;
@@ -2723,15 +2587,6 @@ export interface MinibufferCommand extends vscode.QuickPickItem {
     func: string;
 }
 </t>
-<t tx="felix.20201208224420.3">/**
- * * Structure for configuration settings changes used along with welcome/settings webview.
- */
-export interface ConfigSetting {
-    code: string;
-    value: any;
-}
-
-</t>
 <t tx="felix.20201208224420.4">/**
  * * When refreshing the outline and getting to Leo's selected node
  */
@@ -2760,7 +2615,7 @@ export interface ReqRefresh {
  * * Stackable front end commands
  */
 export interface UserCommand {
-    action: string; // String from Constants.LEOBRIDGE, which are commands for leobridgeserver
+    action: string;
     node?: LeoNode | undefined;  // We can START a stack with a targeted command
     text?: string | undefined; // If a string is required, for headline, etc.
     refreshType: ReqRefresh; // Minimal refresh level required by this command
@@ -2780,26 +2635,6 @@ export interface ShowBodyParam {
     showBodyKeepFocus: boolean,
     force_open?: boolean
 }
-</t>
-<t tx="felix.20201208224420.8">
-/**
- * * Stackable leoBridge actions to be performed by Leo
- */
-export interface LeoAction {
-    parameter: string; // to pass along with action to python's side
-    deferredPayload?: any | undefined; // Used when the action already has a return value ready but is also waiting for python's side
-    resolveFn: (result: any) =&gt; void; // call that with an answer from python's (or other) side
-    rejectFn: (reason: any) =&gt; void; // call if problem is encountered
-}
-
-</t>
-<t tx="felix.20201208224420.9">/**
- * * Simple 'string log entry' package format
- */
-export interface LeoLogEntry {
-    log: string;
-}
-
 </t>
 <t tx="felix.20201208224441.1">import * as vscode from "vscode";
 import { Constants } from "./constants";
@@ -2920,6 +2755,149 @@ public static VSCODE_COMMANDS = {
     CLOSE_ACTIVE_EDITOR: "workbench.action.closeActiveEditor",
     QUICK_OPEN: "workbench.action.quickOpen"
 };
+
+</t>
+<t tx="felix.20201209004316.1">export class LeoNode extends vscode.TreeItem {
+
+    public contextValue: string; // * Context string is checked in package.json with 'when' clauses
+
+    public isRoot: boolean = false; // * for hoist/dehoist context flags purposes
+
+    constructor(
+        public label: string, // Node headline
+        public gnx: string,
+        public collapsibleState: vscode.TreeItemCollapsibleState, // Computed in receiver/creator
+        public ap: string, // Key for leo's node position
+        public childIndex: number, // For debugging purposes
+        public cloned: boolean,
+        public dirty: boolean,
+        public marked: boolean,
+        public atFile: boolean,
+        public hasBody: boolean,
+        public u: any,
+        private _icons: Icon[], // pointer to global array of node icons
+        private _id: string
+    ) {
+        super(label, collapsibleState);
+        this.contextValue = this._getNodeContextValue();
+        this.command = {
+            command: Constants.COMMANDS.SELECT_NODE,
+            title: '',
+            arguments: [this]
+        };
+    }
+
+    // * TO HELP DEBUG
+    // get description(): string {
+    //     // * some smaller grayed-out text accompanying the main label
+    //     const w_ap: ArchivedPosition = JSON.parse(this.ap);
+    //     return "child:" + w_ap.childIndex + " lvl:" + w_ap.level + " gnx:" + w_ap.gnx;
+    // }
+
+    // get description(): string {
+    //     // * some smaller grayed-out text accompanying the main label
+    //     return "id:" + this.id;
+    // }
+
+    /**
+     * * Sets this node properties (dirty, marked, etc.) by copying from a given node.
+     * * This is needed by the outline provider when refreshing a single node.
+     * @param p_node Node to copy properties from.
+     * @returns Node itself with the new properties applied
+     */
+    @others
+}
+</t>
+<t tx="felix.20201209004316.2">public copyProperties(p_node: LeoNode): LeoNode {
+    this.label = p_node.label;
+    this.gnx = p_node.gnx;
+    this.collapsibleState = p_node.collapsibleState;
+    this.ap = p_node.ap;
+    this.childIndex = p_node.childIndex;
+    this.cloned = p_node.cloned;
+    this.dirty = p_node.dirty;
+    this.marked = p_node.marked;
+    this.atFile = p_node.atFile;
+    this.hasBody = p_node.hasBody;
+    this.isRoot = p_node.isRoot;
+    this.contextValue = this._getNodeContextValue();
+    return this;
+}
+
+</t>
+<t tx="felix.20201209004316.3">/**
+ * * Set this node as the root for hoist/dehoist context flags purposes
+ */
+public setRoot(): void {
+    this.isRoot = true;
+    this.contextValue = this._getNodeContextValue();
+}
+
+</t>
+<t tx="felix.20201209004316.4">private _getNodeContextValue(): string {
+    // Start it with 'leoNodeMarked' or 'leoNodeUnmarked'
+    let w_contextValue = Constants.CONTEXT_FLAGS.NODE_UNMARKED;
+    if (this.marked) {
+        w_contextValue = Constants.CONTEXT_FLAGS.NODE_MARKED;
+    }
+    // then append 'leoNodeAtFile' to existing if needed
+    if (this.atFile) {
+        w_contextValue += Constants.CONTEXT_FLAGS.NODE_ATFILE;
+    }
+    // then append 'leoNodeCloned' to existing if needed
+    if (this.cloned) {
+        w_contextValue += Constants.CONTEXT_FLAGS.NODE_CLONED;
+    }
+    // and finally, check for 'root' too
+    if (this.isRoot) {
+        w_contextValue += Constants.CONTEXT_FLAGS.NODE_ROOT;
+    } else {
+        w_contextValue += Constants.CONTEXT_FLAGS.NODE_NOT_ROOT;
+    }
+    return w_contextValue;
+}
+
+// @ts-ignore
+public get iconPath(): Icon {
+    // From Leo's leoNodes.py computeIcon function
+    // 1=has Body, 2=marked, 4=cloned, 8=dirty
+    let w_icon: number =
+        (+this.dirty &lt;&lt; 3) |
+        (+this.cloned &lt;&lt; 2) |
+        (+this.marked &lt;&lt; 1) |
+        +this.hasBody;
+    return this._icons[w_icon];
+}
+
+// Optional id for the tree item that has to be unique across tree.
+// The id is used to preserve the selection and expansion state of the tree item.
+// If not provided, an id is generated using the tree item's label.
+// Note that when labels change, ids will change and that selection and expansion state cannot be kept stable anymore.
+// @ts-ignore
+public get id(): string { return this._id; }
+
+// @ts-ignore
+public get description(): string {
+    // * some smaller grayed-out text accompanying the main label
+    if (this.u) {
+        return "\u{1F4CE} (" + Object.keys(this.u).length + ")";
+    } else {
+        // return "id:" + this.id; // ! debug test
+        // return "gnx:" + this.gnx; // ! debug test
+        return ""; // Falsy will not be shown
+    }
+}
+
+// @ts-ignore
+public get tooltip(): string {
+    if (this.u) {
+        //  "\ntotal keys is :" + Object.keys(this.u).length
+        return this.label + "\n" +
+            JSON.stringify(this.u, undefined, 2);
+    } else {
+        return this.label; // * Whole headline as tooltip
+    }
+}
 
 </t>
 </tnodes>
