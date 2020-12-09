@@ -1,6 +1,9 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+
+// - `src/extension.ts` - this is the main file where you will provide the implementation of your command.
+//   - The file exports one function, `activate`, which is called the very first time your extension is activated (in this case by executing the command).
+//     Inside the `activate` function we call `registerCommand`.
+//   - We pass the function containing the implementation of the command as the second parameter to `registerCommand`.
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -24,4 +27,4 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
