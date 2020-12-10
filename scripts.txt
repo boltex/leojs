@@ -108,7 +108,12 @@ After running this script, it will be easy to alphabetize the commands and
 to group them with organizer nodes if desired.
 """
 g.cls()
-root = g.findNodeAnywhere(c, 'commands')
+parent_h = '@clean package.json'
+parent = g.findNodeAnywhere(c, parent_h)
+assert parent, f"Not found: {parent_h}"
+root_h = 'commands'
+root = g.findNodeInTree(c, parent, root_h)
+assert root, f"Not found: {root_h}"
 last = c.lastTopLevel()
 parent = last.insertAfter()
 parent.h = 'command tree'
