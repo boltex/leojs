@@ -94,6 +94,7 @@
 </v>
 </v>
 <v t="felix.20201208214449.1"><vh>@clean package.json</vh>
+<v t="ekr.20201210033824.1"><vh>&lt;&lt; contributes &gt;&gt;</vh>
 <v t="felix.20201208222541.1"><vh>views</vh></v>
 <v t="felix.20201208221211.1"><vh>viewsWelcome</vh></v>
 <v t="felix.20201208220441.1"><vh>commands</vh></v>
@@ -104,6 +105,9 @@
 <v t="felix.20201208221847.1"><vh>view/item/context</vh></v>
 </v>
 <v t="felix.20201208221945.1"><vh>keybindings</vh></v>
+</v>
+<v t="ekr.20201210033748.1"><vh>&lt;&lt; scripts &gt;&gt;</vh></v>
+<v t="ekr.20201210033804.1"><vh>&lt;&lt; devDependencies &gt;&gt;</vh></v>
 </v>
 </v>
 </vnodes>
@@ -129,8 +133,8 @@ main(node_list = ['Startup', 'Documentation', 'Code'])
     - We are not running from myLeojs.leo or
     - Leojs.leo does not exist.
     """
-    if c.shortFileName() != 'myLeojs.leo':
-        oops('Run this script only from myLeojs.leo')
+    if c.shortFileName() == 'leojs.leo':
+        oops("Don't run this script from leojs.leo")
         return None
     base_dir = os.path.dirname(c.fileName())
     path = os.path.join(base_dir, 'leojs.leo')
@@ -200,7 +204,8 @@ main(node_list = ['Startup', 'Documentation', 'Code'])
 <t tx="ekr.20201209152713.1">"""
 Script: split the "commands" node of the "contributes" section into separate nodes.
 
-After running this script, it will be easy to alphabetize the commands and to group them with organizer nodes if desired.
+After running this script, it will be easy to alphabetize the commands and
+to group them with organizer nodes if desired.
 """
 g.cls()
 root = g.findNodeAnywhere(c, 'commands')
@@ -237,6 +242,32 @@ for i, line in enumerate(g.splitLines(root.b)):
         assert line_s.endswith('[') or line_s.startswith('],'), (i, repr(line))
         # print('OUTSIDE', repr(line))
 c.redraw()</t>
+<t tx="ekr.20201210033748.1">"vscode:prepublish": "npm run package",
+"compile": "webpack --devtool nosources-source-map --config ./build/node-extension.webpack.config.js",
+"watch": "webpack --watch --devtool nosources-source-map --info-verbosity verbose --config ./build/node-extension.webpack.config.js",
+"package": "webpack --mode production --config ./build/node-extension.webpack.config.js",
+"test-compile": "tsc -p ./",
+"test-watch": "tsc -watch -p ./",
+"pretest": "npm run test-compile &amp;&amp; npm run lint",
+"lint": "tslint -p ./",
+"OldLint": "eslint src --ext ts",
+"test": "node ./out/test/runTest.js"</t>
+<t tx="ekr.20201210033804.1">"@types/vscode": "^1.51.0",
+"@types/glob": "^7.1.3",
+"@types/mocha": "^8.0.0",
+"@types/node": "^12.11.7",
+"eslint": "^7.9.0",
+"@typescript-eslint/eslint-plugin": "^4.1.1",
+"@typescript-eslint/parser": "^4.1.1",
+"glob": "^7.1.6",
+"mocha": "^8.1.3",
+"typescript": "^4.0.2",
+"vscode-test": "^1.4.0",
+"ts-loader": "^8.0.3",
+"tslint": "^6.1.3",
+"webpack": "^4.44.1",
+"webpack-cli": "^3.3.12"</t>
+<t tx="ekr.20201210033824.1">@others</t>
 <t tx="felix.20201208214250.2"></t>
 <t tx="felix.20201208214319.1"># leojs
 
@@ -264,36 +295,13 @@ import { JsOutlineProvider } from './leoOutline';
   "activationEvents": ["*"],
   "main": "./dist/extension.js",
   "contributes": {
-    @others
+    &lt;&lt; contributes &gt;&gt;
   },
   "scripts": {
-    "vscode:prepublish": "npm run package",
-    "compile": "webpack --devtool nosources-source-map --config ./build/node-extension.webpack.config.js",
-    "watch": "webpack --watch --devtool nosources-source-map --info-verbosity verbose --config ./build/node-extension.webpack.config.js",
-    "package": "webpack --mode production --config ./build/node-extension.webpack.config.js",
-    "test-compile": "tsc -p ./",
-    "test-watch": "tsc -watch -p ./",
-    "pretest": "npm run test-compile &amp;&amp; npm run lint",
-    "lint": "tslint -p ./",
-    "OldLint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    &lt;&lt; scripts &gt;&gt;
   },
   "devDependencies": {
-    "@types/vscode": "^1.51.0",
-    "@types/glob": "^7.1.3",
-    "@types/mocha": "^8.0.0",
-    "@types/node": "^12.11.7",
-    "eslint": "^7.9.0",
-    "@typescript-eslint/eslint-plugin": "^4.1.1",
-    "@typescript-eslint/parser": "^4.1.1",
-    "glob": "^7.1.6",
-    "mocha": "^8.1.3",
-    "typescript": "^4.0.2",
-    "vscode-test": "^1.4.0",
-    "ts-loader": "^8.0.3",
-    "tslint": "^6.1.3",
-    "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12"
+    &lt;&lt; devDependencies &gt;&gt;
   }
 }
 </t>
