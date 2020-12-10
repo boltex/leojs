@@ -2931,7 +2931,7 @@ public get tooltip(): string {
         },
         {
             header: "node2",
-            body: "node2 body",
+            body: "", // Empty body should display icon without blue square
             children: []
         },
 
