@@ -100,7 +100,7 @@ def oops(message):
     print('')
 #@-others
 main(node_list = ['Startup', 'Documentation', 'Code'])
-#@+node:ekr.20201209152713.1: ** script: split contributes/command section
+#@+node:ekr.20201209152713.1: ** script: split contributes/commands (works)
 """
 Script: split the "commands" node of the "contributes" section into separate nodes.
 
@@ -142,6 +142,10 @@ for i, line in enumerate(g.splitLines(root.b)):
         assert line_s.endswith('[') or line_s.startswith('],'), (i, repr(line))
         # print('OUTSIDE', repr(line))
 c.redraw()
+#@+node:ekr.20201210041738.1: ** script: split contributes/menus (new)
+g.es_print('not ready', p.h)
+#@+node:ekr.20201210041817.1: ** script: split contributes/keybindings (new)
+g.es_print('not ready', p.h)
 #@+node:ekr.20201210035719.1: ** script: diff-pr
 import leo.commands.editFileCommands as efc
 x = efc.GitDiffController(c)
