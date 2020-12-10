@@ -102,8 +102,10 @@ def oops(message):
 main(node_list = ['Startup', 'Documentation', 'Code'])
 #@+node:ekr.20201210092221.1: ** @button diff-pr
 import leo.commands.editFileCommands as efc
+import os
 
-efc.GitDiffController(c).diff_pull_request()
+x = efc.GitDiffController(c)
+x.diff_pull_request(directory=os.curdir)
 #@+node:ekr.20201209152713.1: ** script: split contributes/commands (works)
 """
 Split the "commands" node of the "contributes" section into separate nodes.
