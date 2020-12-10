@@ -7,15 +7,7 @@
 <find_panel_settings/>
 <vnodes>
 <v t="ekr.20201209145256.1"><vh>Startup</vh>
-<v t="ekr.20201209145256.2"><vh>@button backup</vh></v>
-<v t="ekr.20201209145330.1"><vh>@button write-leojs</vh>
-<v t="ekr.20201209145330.2"><vh>check_file_names</vh></v>
-<v t="ekr.20201209145330.3"><vh>check_nodes</vh></v>
-<v t="ekr.20201209145330.4"><vh>get_content</vh></v>
-<v t="ekr.20201209145330.5"><vh>main</vh></v>
-<v t="ekr.20201209145330.6"><vh>oops</vh></v>
-</v>
-<v t="ekr.20201209152713.1"><vh>script: split contributes/command section</vh></v>
+<v t="ekr.20201210035538.1"><vh>@file scripts.txt</vh></v>
 </v>
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
@@ -113,135 +105,7 @@
 </vnodes>
 <tnodes>
 <t tx="ekr.20201209145256.1"></t>
-<t tx="ekr.20201209145256.2">c.backup_helper(sub_dir='leojs')
-</t>
-<t tx="ekr.20201209145330.1">"""
-Update leojs.leo from the given list of nodes.
-
-This must be run from myLeojs.leo.
-"""
-g.cls()
-import os
-@others
-main(node_list = ['Startup', 'Documentation', 'Code'])
-</t>
-<t tx="ekr.20201209145330.2">def check_file_names():
-    """
-    Return the path to leojs.leo.
-    
-    Return None and give an error if:
-    - We are not running from myLeojs.leo or
-    - Leojs.leo does not exist.
-    """
-    if c.shortFileName() == 'leojs.leo':
-        oops("Don't run this script from leojs.leo")
-        return None
-    base_dir = os.path.dirname(c.fileName())
-    path = os.path.join(base_dir, 'leojs.leo')
-    if not os.path.exists(path):
-        oops(f"Not found: {path}")
-        return None
-    return os.path.normpath(path)</t>
-<t tx="ekr.20201209145330.3">def check_nodes(node_list):
-    """Return True if all nodes are found."""
-    result = []
-    for node in node_list:
-        p = g.findTopLevelNode(c, node, exact=True)
-        if p:
-            result.append(p.copy())
-        else:
-            oops(f"Top-level node {node} not found")
-            return []
-    return result</t>
-<t tx="ekr.20201209145330.4">def get_content(positions_list):
-    """
-    Return the desired contents of leoPyRef.leo.
-    
-    Based on code by Виталије Милошевић.
-    """
-    # Make only one copy for all calls.
-    fc = c.fileCommands
-    fc.currentPosition = c.p
-    fc.rootPosition = c.rootPosition()
-    fc.vnodesDict = {}
-    # Put the file
-    fc.outputFile = g.FileLikeObject()
-    fc.putProlog()
-    fc.putHeader()
-    fc.putGlobals()
-    fc.putPrefs()
-    fc.putFindSettings()
-    fc.put("&lt;vnodes&gt;\n")
-    for p in positions_list:
-        # An optimization: Write the next top-level node.
-        fc.putVnode(p, isIgnore=p.isAtIgnoreNode())
-    fc.put("&lt;/vnodes&gt;\n")
-    fc.putTnodes()
-    fc.putPostlog()
-    return fc.outputFile.getvalue()
-</t>
-<t tx="ekr.20201209145330.5">def main(node_list):
-    """The main line."""
-    c.endEditing()
-    path = check_file_names()
-    if not path:
-        return
-    positions_list = check_nodes(node_list)
-    if not positions_list:
-        return
-    content = get_content(positions_list)
-    with open(path, 'w', encoding="utf-8", newline='\n') as f:
-        f.write(content)
-    print('')
-    g.es_print(f"Updated {path}")
-</t>
-<t tx="ekr.20201209145330.6">def oops(message):
-    """Print an error message"""
-    print('')
-    g.es_print(message)
-    print('')</t>
 <t tx="ekr.20201209145358.1"></t>
-<t tx="ekr.20201209152713.1">"""
-Script: split the "commands" node of the "contributes" section into separate nodes.
-
-After running this script, it will be easy to alphabetize the commands and
-to group them with organizer nodes if desired.
-"""
-g.cls()
-root = g.findNodeAnywhere(c, 'commands')
-last = c.lastTopLevel()
-parent = last.insertAfter()
-parent.h = 'command tree'
-command_lines, level = [], 0
-for i, line in enumerate(g.splitLines(root.b)):
-    line_s = line.strip()
-    if command_lines:  # Accumulating a new node.
-        command_lines.append(line)
-        if line_s.endswith(('}', '},')):
-            level -= 1
-            if level == 0:
-                # End of command.
-                p = parent.insertAsLastChild()
-                h = command_lines[1].strip()
-                head = '"command": "leojs.'
-                assert h.startswith(head), (i, repr(h))
-                if h.endswith(','): h = h[:-1]
-                if h.endswith('"'): h = h[:-1]
-                p.h = h[len(head):]
-                p.b = ''.join(command_lines)
-                # g.printObj(command_lines)
-                command_lines = []
-        elif line_s.endswith('{'):
-            level += 1
-        else:
-            pass
-    elif line_s.endswith('{'):
-        level = 1
-        command_lines = [line]
-    elif line_s:
-        assert line_s.endswith('[') or line_s.startswith('],'), (i, repr(line))
-        # print('OUTSIDE', repr(line))
-c.redraw()</t>
 <t tx="ekr.20201210033748.1">"vscode:prepublish": "npm run package",
 "compile": "webpack --devtool nosources-source-map --config ./build/node-extension.webpack.config.js",
 "watch": "webpack --watch --devtool nosources-source-map --info-verbosity verbose --config ./build/node-extension.webpack.config.js",
