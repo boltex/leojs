@@ -216,7 +216,7 @@ for child in menus_p.children():
             # print('OUTSIDE', repr(line))
     c.redraw()
 #@+node:ekr.20201210041817.1: ** script: split contributes/keybindings (new)
-g.es_print('not ready', p.h)
+g.es_print('not ready', p.h)  # Changed.
 #@+node:ekr.20201210035719.1: ** script: diff-pr
 import leo.commands.editFileCommands as efc
 x = efc.GitDiffController(c)
