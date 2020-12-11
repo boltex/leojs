@@ -3,9 +3,27 @@
   "displayName": "leojs",
   "description": "Leo's kernel in Typescript",
   "version": "0.1.0",
-  "engines": { "vscode": "^1.51.0"},
-  "categories": ["Other"],
-  "activationEvents": ["*"],
+  "engines": {
+    "vscode": "^1.51.0"
+  },
+  "keywords": [
+    "leo",
+    "literate",
+    "editor",
+    "outline",
+    "programming"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "icon": "resources/leoapp128px.png",
+  "galleryBanner": {
+    "color": "#fffbdc",
+    "theme": "light"
+  },
+  "activationEvents": [
+    "*"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "views": {
@@ -232,6 +250,11 @@
         "command": "leojs.unmarkSelectionFromOutline",
         "category": "Leo",
         "title": "Unmark"
+      },
+      {
+        "command": "leojs.unmarkAll",
+        "category": "Leo",
+        "title": "Unmark All"
       },
       {
         "command": "leojs.copyNode",
@@ -548,6 +571,26 @@
         "title": "Expand And Go Right"
       },
       {
+        "command": "leojs.gotoNextMarked",
+        "category": "Leo",
+        "title": "Goto Next Marked"
+      },
+      {
+        "command": "leojs.gotoNextClone",
+        "category": "Leo",
+        "title": "Goto Next Clone"
+      },
+      {
+        "command": "leojs.gotoNextCloneSelection",
+        "category": "Leo",
+        "title": "Goto Next Clone"
+      },
+      {
+        "command": "leojs.gotoNextCloneSelectionFromOutline",
+        "category": "Leo",
+        "title": "Goto Next Clone"
+      },
+      {
         "command": "leojs.hoistNode",
         "category": "Leo",
         "title": "Hoist"
@@ -647,26 +690,6 @@
         "title": "Diff Marked Nodes"
       },
       {
-        "command": "leojs.gotoNextMarked",
-        "category": "Leo",
-        "title": "Goto Next Marked"
-      },
-      {
-        "command": "leojs.gotoNextClone",
-        "category": "Leo",
-        "title": "Goto Next Clone"
-      },
-      {
-        "command": "leojs.gotoNextCloneSelection",
-        "category": "Leo",
-        "title": "Goto Next Clone"
-      },
-      {
-        "command": "leojs.gotoNextCloneSelectionFromOutline",
-        "category": "Leo",
-        "title": "Goto Next Clone"
-      },
-      {
         "command": "leojs.markChangedItems",
         "category": "Leo",
         "title": "Mark Changed Items"
@@ -675,11 +698,6 @@
         "command": "leojs.markSubheads",
         "category": "Leo",
         "title": "Mark Subheads"
-      },
-      {
-        "command": "leojs.unmarkAll",
-        "category": "Leo",
-        "title": "Unmark All"
       },
       {
         "command": "leojs.cloneMarkedNodes",
@@ -764,6 +782,10 @@
           "when": "leoTreeOpened && leoMarked"
         },
         {
+          "command": "leojs.unmarkAll",
+          "when": "leoTreeOpened"
+        },
+        {
           "command": "leojs.copyNodeSelection",
           "when": "leoTreeOpened"
         },
@@ -781,6 +803,14 @@
         },
         {
           "command": "leojs.deleteSelection",
+          "when": "leoTreeOpened"
+        },
+        {
+          "command": "leojs.extract",
+          "when": "leoTreeOpened"
+        },
+        {
+          "command": "leojs.extractNames",
           "when": "leoTreeOpened"
         },
         {
@@ -868,14 +898,6 @@
           "when": "leoTreeOpened"
         },
         {
-          "command": "leojs.extract",
-          "when": "leoTreeOpened"
-        },
-        {
-          "command": "leojs.extractNames",
-          "when": "leoTreeOpened"
-        },
-        {
           "command": "leojs.copyMarked",
           "when": "leoTreeOpened"
         },
@@ -889,10 +911,6 @@
         },
         {
           "command": "leojs.markSubheads",
-          "when": "leoTreeOpened"
-        },
-        {
-          "command": "leojs.unmarkAll",
           "when": "leoTreeOpened"
         },
         {
