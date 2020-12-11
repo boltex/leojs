@@ -8,6 +8,8 @@
 <vnodes>
 <v t="ekr.20201209145256.1"><vh>Startup</vh>
 <v t="ekr.20201210035538.1"><vh>@file scripts.txt</vh></v>
+<v t="ekr.20201211012552.1"><vh>COPY: script: split contributes/commands (works)</vh></v>
+<v t="ekr.20201211012610.1"><vh>COPY: script: split contributes/menus (partially works)</vh></v>
 </v>
 <v t="felix.20201208214250.2"><vh>Documentation</vh>
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
@@ -132,6 +134,141 @@
 "webpack": "^4.44.1",
 "webpack-cli": "^3.3.12"</t>
 <t tx="ekr.20201210033824.1">@others</t>
+<t tx="ekr.20201210083337.1"></t>
+<t tx="ekr.20201210083358.1">@language rest
+@wrap
+
+https://github.com/boltex/leojs/issues/10
+
+@language python
+@nosearch
+</t>
+<t tx="ekr.20201210092134.1">@language rest
+@wrap
+
+** Merge devel into package.json.
+
+- Should git-diff diff .leo files?
+
+Careful!
+- Must add "outer" lines somewhere!
+- Do *not* alphabetize nodes on first commit.
+</t>
+<t tx="ekr.20201210094645.1">import leo.commands.editFileCommands as efc
+import os
+
+x = efc.GitDiffController(c)
+x.diff_pull_request(directory=os.curdir)
+</t>
+<t tx="ekr.20201211012552.1">"""
+Split the "commands" node of the "contributes" section into separate nodes.
+
+Inner entries have the form:
+
+  {
+    "command": "leojs.test",
+    "category": "Leo",
+    "title": "Test leojs"
+  },
+"""
+g.cls()
+outer_parent_h = '@clean package.json'
+outer_parent = g.findNodeAnywhere(c, outer_parent_h)
+assert outer_parent, f"Not found: {outer_parent_h}"
+root_h = 'commands'
+root = g.findNodeInTree(c, outer_parent, root_h)
+assert root, f"Not found: {root_h}"
+last = c.lastTopLevel()
+parent = last.insertAfter()
+parent.h = 'command tree'
+command_lines, level = [], 0
+for i, line in enumerate(g.splitLines(root.b)):
+    line_s = line.strip()
+    if command_lines:  # Accumulating a new node.
+        command_lines.append(line)
+        if line_s.endswith(('}', '},')):
+            level -= 1
+            if level == 0:
+                # End of command.
+                p = parent.insertAsLastChild()
+                h = command_lines[1].strip()
+                head = '"command": "leojs.'
+                assert h.startswith(head), (i, repr(h))
+                if h.endswith(','): h = h[:-1]
+                if h.endswith('"'): h = h[:-1]
+                p.h = h[len(head):]
+                p.b = ''.join(command_lines)
+                # g.printObj(command_lines)
+                command_lines = []
+        elif line_s.endswith('{'):
+            level += 1
+        else:
+            pass
+    elif line_s.endswith('{'):
+        level = 1
+        command_lines = [line]
+    elif line_s:
+        assert line_s.endswith('[') or line_s.startswith('],'), (i, repr(line))
+        # print('OUTSIDE', repr(line))
+c.redraw()
+</t>
+<t tx="ekr.20201211012610.1">"""
+Split the "menus" node of the "contributes" section into separate nodes.
+
+Inner entries have the form:
+    
+  {
+    "command": "leojs.executeScript",
+    "when": "leoTreeOpened"
+  },
+"""
+g.cls()
+outer_parent_h = '@clean package.json'
+outer_parent = g.findNodeAnywhere(c, outer_parent_h)
+assert outer_parent, f"Not found: {outer_parent_h}"
+menus_h = 'menus'
+menus_p = g.findNodeInTree(c, outer_parent, menus_h)
+assert menus_p, f"Not found: {menus_h}"
+last = c.lastTopLevel()
+menu_parent = last.insertAfter()
+menu_parent.h = 'menu tree'
+# The 'menus' node contains @others.
+# Create an organizer node for each child.
+for child in menus_p.children():
+    parent = menu_parent.insertAsLastChild()
+    parent.h = child.h
+    command_lines, level = [], 0
+    for i, line in enumerate(g.splitLines(child.b)):
+        line_s = line.strip()
+        # print(line_s)
+        if command_lines:  # Accumulating a new node.
+            command_lines.append(line)
+            if line_s.endswith(('}', '},')):
+                level -= 1
+                if level == 0:
+                    # End of command.
+                    p = parent.insertAsLastChild()
+                    h = command_lines[1].strip()
+                    head = '"command": "leojs.'
+                    assert h.startswith(head), (i, repr(h))
+                    if h.endswith(','): h = h[:-1]
+                    if h.endswith('"'): h = h[:-1]
+                    p.h = h[len(head):]
+                    p.b = ''.join(command_lines)
+                    # g.printObj(command_lines)
+                    command_lines = []
+            elif line_s.endswith('{'):
+                level += 1
+            else:
+                pass
+        elif line_s.endswith('{'):
+            level = 1
+            command_lines = [line]
+        elif line_s:
+            assert line_s.endswith(('[', ']')) or line_s.startswith('],'), (i, repr(line))
+            # print('OUTSIDE', repr(line))
+    c.redraw()
+</t>
 <t tx="felix.20201208214250.2"></t>
 <t tx="felix.20201208214319.1"># leojs
 
