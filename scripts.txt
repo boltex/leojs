@@ -260,5 +260,21 @@ g.es_print('not ready', p.h)  # Changed.
 import leo.commands.editFileCommands as efc
 x = efc.GitDiffController(c)
 x.diff_pull_request(branch_name = 'package.json')
+#@+node:ekr.20201213061102.1: ** script: unindent-tree
+"""Unindent body text of selected tree by 2 spaces."""
+g.cls()
+h = 'commands'
+root = g.findTopLevelNode(c, h)
+assert root, h
+for p in root.children():
+    if p.b.startswith('  '):  # Protect against running the script twice.
+        result = []
+        for s in g.splitLines(p.b):
+            if s.startswith('  '):
+                result.append(s[2:])
+            else:
+                result.append(s)
+        p.b = ''.join(result)
+print('done')
 #@-others
 #@-leo

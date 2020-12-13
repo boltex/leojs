@@ -89,7 +89,119 @@
 <v t="ekr.20201210033824.1"><vh>&lt;&lt; contributes &gt;&gt;</vh>
 <v t="felix.20201208222541.1"><vh>views</vh></v>
 <v t="felix.20201208221211.1"><vh>viewsWelcome</vh></v>
-<v t="felix.20201208220441.1"><vh>commands</vh></v>
+<v t="felix.20201208220441.1"><vh>commands</vh>
+<v t="ekr.20201213060317.2"><vh>test</vh></v>
+<v t="ekr.20201213060317.3"><vh>executeScript</vh></v>
+<v t="ekr.20201213060317.4"><vh>minibuffer</vh></v>
+<v t="ekr.20201213060317.5"><vh>removeButton</vh></v>
+<v t="ekr.20201213060317.6"><vh>showBody</vh></v>
+<v t="ekr.20201213060317.7"><vh>showOutline</vh></v>
+<v t="ekr.20201213060317.8"><vh>showLogPane</vh></v>
+<v t="ekr.20201213060317.9"><vh>openLeoFile</vh></v>
+<v t="ekr.20201213060317.10"><vh>recentLeoFiles</vh></v>
+<v t="ekr.20201213060317.11"><vh>switchLeoFile</vh></v>
+<v t="ekr.20201213060317.12"><vh>newLeoFile</vh></v>
+<v t="ekr.20201213060317.13"><vh>closeLeoFile</vh></v>
+<v t="ekr.20201213060317.14"><vh>saveLeoFile</vh></v>
+<v t="ekr.20201213060317.15"><vh>saveLeoFileFromOutline</vh></v>
+<v t="ekr.20201213060317.16"><vh>saveAsLeoFile</vh></v>
+<v t="ekr.20201213060317.17"><vh>refreshFromDisk</vh></v>
+<v t="ekr.20201213060317.18"><vh>refreshFromDiskSelection</vh></v>
+<v t="ekr.20201213060317.19"><vh>refreshFromDiskSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.20"><vh>gitDiff</vh></v>
+<v t="ekr.20201213060317.21"><vh>selectTreeNode</vh></v>
+<v t="ekr.20201213060317.22"><vh>openAside</vh></v>
+<v t="ekr.20201213060317.23"><vh>contractAll</vh></v>
+<v t="ekr.20201213060317.24"><vh>contractAllFromOutline</vh></v>
+<v t="ekr.20201213060317.25"><vh>editHeadline</vh></v>
+<v t="ekr.20201213060317.26"><vh>editSelectedHeadline</vh></v>
+<v t="ekr.20201213060317.27"><vh>editSelectedHeadlineFromOutline</vh></v>
+<v t="ekr.20201213060317.28"><vh>mark</vh></v>
+<v t="ekr.20201213060317.29"><vh>markSelection</vh></v>
+<v t="ekr.20201213060317.30"><vh>markSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.31"><vh>unmark</vh></v>
+<v t="ekr.20201213060317.32"><vh>unmarkSelection</vh></v>
+<v t="ekr.20201213060317.33"><vh>unmarkSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.34"><vh>copyNode</vh></v>
+<v t="ekr.20201213060317.35"><vh>copyNodeSelection</vh></v>
+<v t="ekr.20201213060317.36"><vh>cutNode</vh></v>
+<v t="ekr.20201213060317.37"><vh>cutNodeSelection</vh></v>
+<v t="ekr.20201213060317.38"><vh>cutNodeSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.39"><vh>pasteNode</vh></v>
+<v t="ekr.20201213060317.40"><vh>pasteNodeAtSelection</vh></v>
+<v t="ekr.20201213060317.41"><vh>pasteNodeAtSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.42"><vh>pasteNodeAsClone</vh></v>
+<v t="ekr.20201213060317.43"><vh>pasteNodeAsCloneAtSelection</vh></v>
+<v t="ekr.20201213060317.44"><vh>pasteNodeAsCloneAtSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.45"><vh>delete</vh></v>
+<v t="ekr.20201213060317.46"><vh>deleteSelection</vh></v>
+<v t="ekr.20201213060317.47"><vh>deleteSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.48"><vh>extract</vh></v>
+<v t="ekr.20201213060317.49"><vh>extractNames</vh></v>
+<v t="ekr.20201213060317.50"><vh>moveOutlineDown</vh></v>
+<v t="ekr.20201213060317.51"><vh>moveOutlineDownSelection</vh></v>
+<v t="ekr.20201213060317.52"><vh>moveOutlineDownSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.53"><vh>moveOutlineLeft</vh></v>
+<v t="ekr.20201213060317.54"><vh>moveOutlineLeftSelection</vh></v>
+<v t="ekr.20201213060317.55"><vh>moveOutlineLeftSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.56"><vh>moveOutlineRight</vh></v>
+<v t="ekr.20201213060317.57"><vh>moveOutlineRightSelection</vh></v>
+<v t="ekr.20201213060317.58"><vh>moveOutlineRightSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.59"><vh>moveOutlineUp</vh></v>
+<v t="ekr.20201213060317.60"><vh>moveOutlineUpSelection</vh></v>
+<v t="ekr.20201213060317.61"><vh>moveOutlineUpSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.62"><vh>insertNode</vh></v>
+<v t="ekr.20201213060317.63"><vh>insertNodeSelection</vh></v>
+<v t="ekr.20201213060317.64"><vh>insertNodeSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.65"><vh>insertNodeSelectionInterrupt</vh></v>
+<v t="ekr.20201213060317.66"><vh>cloneNode</vh></v>
+<v t="ekr.20201213060317.67"><vh>cloneNodeSelection</vh></v>
+<v t="ekr.20201213060317.68"><vh>cloneNodeSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.69"><vh>promote</vh></v>
+<v t="ekr.20201213060317.70"><vh>promoteSelection</vh></v>
+<v t="ekr.20201213060317.71"><vh>promoteSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.72"><vh>demote</vh></v>
+<v t="ekr.20201213060317.73"><vh>demoteSelection</vh></v>
+<v t="ekr.20201213060317.74"><vh>demoteSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.75"><vh>sortChildrenSelection</vh></v>
+<v t="ekr.20201213060317.76"><vh>sortChildrenSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.77"><vh>sortSiblingsSelection</vh></v>
+<v t="ekr.20201213060317.78"><vh>sortSiblingsSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.79"><vh>gotoFirstVisible</vh></v>
+<v t="ekr.20201213060317.80"><vh>gotoLastVisible</vh></v>
+<v t="ekr.20201213060317.81"><vh>pageUp</vh></v>
+<v t="ekr.20201213060317.82"><vh>pageDown</vh></v>
+<v t="ekr.20201213060317.83"><vh>gotoLastSibling</vh></v>
+<v t="ekr.20201213060317.84"><vh>gotoNextVisible</vh></v>
+<v t="ekr.20201213060317.85"><vh>gotoPrevVisible</vh></v>
+<v t="ekr.20201213060317.86"><vh>contractOrGoLeft</vh></v>
+<v t="ekr.20201213060317.87"><vh>expandAndGoRight</vh></v>
+<v t="ekr.20201213060317.88"><vh>hoistNode</vh></v>
+<v t="ekr.20201213060317.89"><vh>hoistSelection</vh></v>
+<v t="ekr.20201213060317.90"><vh>hoistSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.91"><vh>deHoist</vh></v>
+<v t="ekr.20201213060317.92"><vh>deHoistFromOutline</vh></v>
+<v t="ekr.20201213060317.93"><vh>undo</vh></v>
+<v t="ekr.20201213060317.94"><vh>undoFromOutline</vh></v>
+<v t="ekr.20201213060317.95"><vh>redo</vh></v>
+<v t="ekr.20201213060317.96"><vh>redoFromOutline</vh></v>
+<v t="ekr.20201213060317.97"><vh>cloneFindAll</vh></v>
+<v t="ekr.20201213060317.98"><vh>cloneFindAllFlattened</vh></v>
+<v t="ekr.20201213060317.99"><vh>cloneFindMarked</vh></v>
+<v t="ekr.20201213060317.100"><vh>cloneFindFlattenedMarked</vh></v>
+<v t="ekr.20201213060317.101"><vh>copyMarked</vh></v>
+<v t="ekr.20201213060317.102"><vh>diffMarkedNodes</vh></v>
+<v t="ekr.20201213060317.103"><vh>gotoNextMarked</vh></v>
+<v t="ekr.20201213060317.104"><vh>gotoNextClone</vh></v>
+<v t="ekr.20201213060317.105"><vh>gotoNextCloneSelection</vh></v>
+<v t="ekr.20201213060317.106"><vh>gotoNextCloneSelectionFromOutline</vh></v>
+<v t="ekr.20201213060317.107"><vh>markChangedItems</vh></v>
+<v t="ekr.20201213060317.108"><vh>markSubheads</vh></v>
+<v t="ekr.20201213060317.109"><vh>unmarkAll</vh></v>
+<v t="ekr.20201213060317.110"><vh>cloneMarkedNodes</vh></v>
+<v t="ekr.20201213060317.111"><vh>deleteMarkedNodes</vh></v>
+<v t="ekr.20201213060317.112"><vh>moveMarkedNodes</vh></v>
+</v>
 <v t="felix.20201208221448.1"><vh>menus</vh>
 <v t="felix.20201208221652.1"><vh>commandPalette</vh></v>
 <v t="felix.20201208221716.1"><vh>explorer/context</vh></v>
@@ -106,6 +218,58 @@
 <tnodes>
 <t tx="ekr.20201209145256.1"></t>
 <t tx="ekr.20201209145358.1"></t>
+<t tx="ekr.20201209152713.1">"""
+Split the "commands" node of the "contributes" section into separate nodes.
+
+Inner entries have the form:
+
+  {
+    "command": "leojs.test",
+    "category": "Leo",
+    "title": "Test leojs"
+  },
+"""
+g.cls()
+outer_parent_h = '@clean package.json'
+outer_parent = g.findNodeAnywhere(c, outer_parent_h)
+assert outer_parent, f"Not found: {outer_parent_h}"
+root_h = 'commands'
+root = g.findNodeInTree(c, outer_parent, root_h)
+assert root, f"Not found: {root_h}"
+last = c.lastTopLevel()
+parent = last.insertAfter()
+parent.h = 'command tree'
+command_lines, level = [], 0
+for i, line in enumerate(g.splitLines(root.b)):
+    line_s = line.strip()
+    if command_lines:  # Accumulating a new node.
+        command_lines.append(line)
+        if line_s.endswith(('}', '},')):
+            level -= 1
+            if level == 0:
+                # End of command.
+                p = parent.insertAsLastChild()
+                h = command_lines[1].strip()
+                head = '"command": "leojs.'
+                assert h.startswith(head), (i, repr(h))
+                if h.endswith(','): h = h[:-1]
+                if h.endswith('"'): h = h[:-1]
+                p.h = h[len(head):]
+                p.b = ''.join(command_lines)
+                # g.printObj(command_lines)
+                command_lines = []
+        elif line_s.endswith('{'):
+            level += 1
+        else:
+            pass
+    elif line_s.endswith('{'):
+        level = 1
+        command_lines = [line]
+    elif line_s:
+        assert line_s.endswith('[') or line_s.startswith('],'), (i, repr(line))
+        # print('OUTSIDE', repr(line))
+c.redraw()
+</t>
 <t tx="ekr.20201210033748.1">"vscode:prepublish": "npm run package",
 "compile": "webpack --devtool nosources-source-map --config ./build/node-extension.webpack.config.js",
 "watch": "webpack --watch --devtool nosources-source-map --info-verbosity verbose --config ./build/node-extension.webpack.config.js",
@@ -115,7 +279,8 @@
 "pretest": "npm run test-compile &amp;&amp; npm run lint",
 "lint": "tslint -p ./",
 "OldLint": "eslint src --ext ts",
-"test": "node ./out/test/runTest.js"</t>
+"test": "node ./out/test/runTest.js"
+</t>
 <t tx="ekr.20201210033804.1">"@types/vscode": "^1.51.0",
 "@types/glob": "^7.1.3",
 "@types/mocha": "^8.0.0",
@@ -130,8 +295,10 @@
 "ts-loader": "^8.0.3",
 "tslint": "^6.1.3",
 "webpack": "^4.44.1",
-"webpack-cli": "^3.3.12"</t>
-<t tx="ekr.20201210033824.1">@others</t>
+"webpack-cli": "^3.3.12"
+</t>
+<t tx="ekr.20201210033824.1">@others
+</t>
 <t tx="ekr.20201210083337.1"></t>
 <t tx="ekr.20201210083358.1">@language rest
 @wrap
@@ -154,8 +321,6 @@ x.diff_pull_request(directory=os.curdir)
 <t tx="ekr.20201211090458.1">@language rest
 @wrap
 
-- Email: I have uploaded a study outline of LeoVue.leo to leo-editor-contrib.
-- Improve @button backup.
 - Finish scripts in leo.js.
 
 First project:
@@ -203,6 +368,804 @@ To https://github.com/boltex/leojs.git
    34e049d..6b293e0  package.json -&gt; package.json
  ! [remote rejected] devel -&gt; devel (protected branch hook declined)
 error: failed to push some refs to 'https://github.com/boltex/leojs.git'</t>
+<t tx="ekr.20201213060317.10">{
+  "command": "leojs.recentLeoFiles",
+  "category": "Leo",
+  "title": "Recent Files"
+},
+</t>
+<t tx="ekr.20201213060317.100">{
+  "command": "leojs.cloneFindFlattenedMarked",
+  "category": "Leo",
+  "title": "cffm - Clone Find Flattened Marked"
+},
+</t>
+<t tx="ekr.20201213060317.101">{
+  "command": "leojs.copyMarked",
+  "category": "Leo",
+  "title": "Copy Marked"
+},
+</t>
+<t tx="ekr.20201213060317.102">{
+  "command": "leojs.diffMarkedNodes",
+  "category": "Leo",
+  "title": "Diff Marked Nodes"
+},
+</t>
+<t tx="ekr.20201213060317.103">{
+  "command": "leojs.gotoNextMarked",
+  "category": "Leo",
+  "title": "Goto Next Marked"
+},
+</t>
+<t tx="ekr.20201213060317.104">{
+  "command": "leojs.gotoNextClone",
+  "category": "Leo",
+  "title": "Goto Next Clone"
+},
+</t>
+<t tx="ekr.20201213060317.105">{
+  "command": "leojs.gotoNextCloneSelection",
+  "category": "Leo",
+  "title": "Goto Next Clone"
+},
+</t>
+<t tx="ekr.20201213060317.106">{
+  "command": "leojs.gotoNextCloneSelectionFromOutline",
+  "category": "Leo",
+  "title": "Goto Next Clone"
+},
+</t>
+<t tx="ekr.20201213060317.107">{
+  "command": "leojs.markChangedItems",
+  "category": "Leo",
+  "title": "Mark Changed Items"
+},
+</t>
+<t tx="ekr.20201213060317.108">{
+  "command": "leojs.markSubheads",
+  "category": "Leo",
+  "title": "Mark Subheads"
+},
+</t>
+<t tx="ekr.20201213060317.109">{
+  "command": "leojs.unmarkAll",
+  "category": "Leo",
+  "title": "Unmark All"
+},
+</t>
+<t tx="ekr.20201213060317.11">{
+  "command": "leojs.switchLeoFile",
+  "title": "Switch Leo File",
+  "category": "Leo",
+  "icon": {
+    "light": "resources/light/switch.svg",
+    "dark": "resources/dark/switch.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.110">{
+  "command": "leojs.cloneMarkedNodes",
+  "category": "Leo",
+  "title": "Clone Marked Nodes"
+},
+</t>
+<t tx="ekr.20201213060317.111">{
+  "command": "leojs.deleteMarkedNodes",
+  "category": "Leo",
+  "title": "Delete Marked Nodes"
+},
+</t>
+<t tx="ekr.20201213060317.112">{
+  "command": "leojs.moveMarkedNodes",
+  "category": "Leo",
+  "title": "Move Marked Nodes"
+}
+</t>
+<t tx="ekr.20201213060317.12">{
+  "command": "leojs.newLeoFile",
+  "title": "New Leo File",
+  "category": "Leo",
+  "icon": {
+    "light": "resources/light/new-file.svg",
+    "dark": "resources/dark/new-file.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.13">{
+  "command": "leojs.closeLeoFile",
+  "title": "Close Leo File",
+  "category": "Leo",
+  "icon": {
+    "light": "resources/light/close.svg",
+    "dark": "resources/dark/close.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.14">{
+  "command": "leojs.saveLeoFile",
+  "category": "Leo",
+  "title": "Save Leo File",
+  "icon": {
+    "light": "resources/light/save.svg",
+    "dark": "resources/dark/save.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.15">{
+  "command": "leojs.saveLeoFileFromOutline",
+  "category": "Leo",
+  "title": "Save Leo File",
+  "icon": {
+    "light": "resources/light/save.svg",
+    "dark": "resources/dark/save.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.16">{
+  "command": "leojs.saveAsLeoFile",
+  "category": "Leo",
+  "title": "Save Leo File as...",
+  "icon": {
+    "light": "resources/light/save-as.svg",
+    "dark": "resources/dark/save-as.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.17">{
+  "command": "leojs.refreshFromDisk",
+  "category": "Leo",
+  "title": "Refresh from Disk"
+},
+</t>
+<t tx="ekr.20201213060317.18">{
+  "command": "leojs.refreshFromDiskSelection",
+  "category": "Leo",
+  "title": "Refresh from Disk"
+},
+</t>
+<t tx="ekr.20201213060317.19">{
+  "command": "leojs.refreshFromDiskSelectionFromOutline",
+  "category": "Leo",
+  "title": "Refresh from Disk"
+},
+</t>
+<t tx="ekr.20201213060317.2">{
+  "command": "leojs.test",
+  "category": "Leo",
+  "title": "Test leojs"
+},
+</t>
+<t tx="ekr.20201213060317.20">{
+  "command": "leojs.gitDiff",
+  "category": "Leo",
+  "title": "Git Diff"
+},
+</t>
+<t tx="ekr.20201213060317.21">{
+  "command": "leojs.selectTreeNode",
+  "category": "Leo",
+  "title": "Select Node"
+},
+</t>
+<t tx="ekr.20201213060317.22">{
+  "command": "leojs.openAside",
+  "category": "Leo",
+  "title": "Open to the Side"
+},
+</t>
+<t tx="ekr.20201213060317.23">{
+  "command": "leojs.contractAll",
+  "category": "Leo",
+  "title": "Contract All",
+  "icon": {
+    "light": "resources/light/collapse.svg",
+    "dark": "resources/dark/collapse.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.24">{
+  "command": "leojs.contractAllFromOutline",
+  "category": "Leo",
+  "title": "Contract All",
+  "icon": {
+    "light": "resources/light/collapse.svg",
+    "dark": "resources/dark/collapse.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.25">{
+  "command": "leojs.editHeadline",
+  "category": "Leo",
+  "title": "Edit Headline",
+  "icon": {
+    "light": "resources/light/edit.svg",
+    "dark": "resources/dark/edit.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.26">{
+  "command": "leojs.editSelectedHeadline",
+  "category": "Leo",
+  "title": "Edit Headline"
+},
+</t>
+<t tx="ekr.20201213060317.27">{
+  "command": "leojs.editSelectedHeadlineFromOutline",
+  "category": "Leo",
+  "title": "Edit Headline"
+},
+</t>
+<t tx="ekr.20201213060317.28">{
+  "command": "leojs.mark",
+  "category": "Leo",
+  "title": "Mark",
+  "icon": {
+    "light": "resources/light/mark.svg",
+    "dark": "resources/dark/mark.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.29">{
+  "command": "leojs.markSelection",
+  "category": "Leo",
+  "title": "Mark"
+},
+</t>
+<t tx="ekr.20201213060317.3">{
+  "command": "leojs.executeScript",
+  "category": "Leo",
+  "title": "Execute Script"
+},
+</t>
+<t tx="ekr.20201213060317.30">{
+  "command": "leojs.markSelectionFromOutline",
+  "category": "Leo",
+  "title": "Mark"
+},
+</t>
+<t tx="ekr.20201213060317.31">{
+  "command": "leojs.unmark",
+  "category": "Leo",
+  "title": "Unmark",
+  "icon": {
+    "light": "resources/light/unmark.svg",
+    "dark": "resources/dark/unmark.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.32">{
+  "command": "leojs.unmarkSelection",
+  "category": "Leo",
+  "title": "Unmark"
+},
+</t>
+<t tx="ekr.20201213060317.33">{
+  "command": "leojs.unmarkSelectionFromOutline",
+  "category": "Leo",
+  "title": "Unmark"
+},
+</t>
+<t tx="ekr.20201213060317.34">{
+  "command": "leojs.copyNode",
+  "category": "Leo",
+  "title": "Copy Node",
+  "icon": {
+    "light": "resources/light/clipboard.svg",
+    "dark": "resources/dark/clipboard.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.35">{
+  "command": "leojs.copyNodeSelection",
+  "category": "Leo",
+  "title": "Copy Node"
+},
+</t>
+<t tx="ekr.20201213060317.36">{
+  "command": "leojs.cutNode",
+  "category": "Leo",
+  "title": "Cut Node"
+},
+</t>
+<t tx="ekr.20201213060317.37">{
+  "command": "leojs.cutNodeSelection",
+  "category": "Leo",
+  "title": "Cut Node"
+},
+</t>
+<t tx="ekr.20201213060317.38">{
+  "command": "leojs.cutNodeSelectionFromOutline",
+  "category": "Leo",
+  "title": "Cut Node"
+},
+</t>
+<t tx="ekr.20201213060317.39">{
+  "command": "leojs.pasteNode",
+  "category": "Leo",
+  "title": "Paste Node"
+},
+</t>
+<t tx="ekr.20201213060317.4">{
+  "command": "leojs.minibuffer",
+  "category": "Leo",
+  "title": "Minibuffer"
+},
+</t>
+<t tx="ekr.20201213060317.40">{
+  "command": "leojs.pasteNodeAtSelection",
+  "category": "Leo",
+  "title": "Paste Node"
+},
+</t>
+<t tx="ekr.20201213060317.41">{
+  "command": "leojs.pasteNodeAtSelectionFromOutline",
+  "category": "Leo",
+  "title": "Paste Node"
+},
+</t>
+<t tx="ekr.20201213060317.42">{
+  "command": "leojs.pasteNodeAsClone",
+  "category": "Leo",
+  "title": "Paste Node as Clone"
+},
+</t>
+<t tx="ekr.20201213060317.43">{
+  "command": "leojs.pasteNodeAsCloneAtSelection",
+  "category": "Leo",
+  "title": "Paste Node as Clone"
+},
+</t>
+<t tx="ekr.20201213060317.44">{
+  "command": "leojs.pasteNodeAsCloneAtSelectionFromOutline",
+  "category": "Leo",
+  "title": "Paste Node as Clone"
+},
+</t>
+<t tx="ekr.20201213060317.45">{
+  "command": "leojs.delete",
+  "category": "Leo",
+  "title": "Delete",
+  "icon": {
+    "light": "resources/light/close.svg",
+    "dark": "resources/dark/close.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.46">{
+  "command": "leojs.deleteSelection",
+  "category": "Leo",
+  "title": "Delete Node"
+},
+</t>
+<t tx="ekr.20201213060317.47">{
+  "command": "leojs.deleteSelectionFromOutline",
+  "category": "Leo",
+  "title": "Delete Node"
+},
+</t>
+<t tx="ekr.20201213060317.48">{
+  "command": "leojs.extract",
+  "category": "Leo",
+  "title": "Extract"
+},
+</t>
+<t tx="ekr.20201213060317.49">{
+  "command": "leojs.extractNames",
+  "category": "Leo",
+  "title": "Extract Names"
+},
+</t>
+<t tx="ekr.20201213060317.5">{
+  "command": "leojs.removeButton",
+  "category": "Leo",
+  "title": "Remove Button"
+},
+</t>
+<t tx="ekr.20201213060317.50">{
+  "command": "leojs.moveOutlineDown",
+  "category": "Leo",
+  "title": "Move Outline Down",
+  "icon": {
+    "light": "resources/light/arrow-down.svg",
+    "dark": "resources/dark/arrow-down.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.51">{
+  "command": "leojs.moveOutlineDownSelection",
+  "category": "Leo",
+  "title": "Move Outline Down"
+},
+</t>
+<t tx="ekr.20201213060317.52">{
+  "command": "leojs.moveOutlineDownSelectionFromOutline",
+  "category": "Leo",
+  "title": "Move Outline Down"
+},
+</t>
+<t tx="ekr.20201213060317.53">{
+  "command": "leojs.moveOutlineLeft",
+  "category": "Leo",
+  "title": "Move Outline Left",
+  "icon": {
+    "light": "resources/light/arrow-left.svg",
+    "dark": "resources/dark/arrow-left.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.54">{
+  "command": "leojs.moveOutlineLeftSelection",
+  "category": "Leo",
+  "title": "Move Outline Left"
+},
+</t>
+<t tx="ekr.20201213060317.55">{
+  "command": "leojs.moveOutlineLeftSelectionFromOutline",
+  "category": "Leo",
+  "title": "Move Outline Left"
+},
+</t>
+<t tx="ekr.20201213060317.56">{
+  "command": "leojs.moveOutlineRight",
+  "category": "Leo",
+  "title": "Move Outline Right",
+  "icon": {
+    "light": "resources/light/arrow-right.svg",
+    "dark": "resources/dark/arrow-right.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.57">{
+  "command": "leojs.moveOutlineRightSelection",
+  "category": "Leo",
+  "title": "Move Outline Right"
+},
+</t>
+<t tx="ekr.20201213060317.58">{
+  "command": "leojs.moveOutlineRightSelectionFromOutline",
+  "category": "Leo",
+  "title": "Move Outline Right"
+},
+</t>
+<t tx="ekr.20201213060317.59">{
+  "command": "leojs.moveOutlineUp",
+  "category": "Leo",
+  "title": "Move Outline Up",
+  "icon": {
+    "light": "resources/light/arrow-up.svg",
+    "dark": "resources/dark/arrow-up.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.6">{
+  "command": "leojs.showBody",
+  "category": "Leo",
+  "title": "Focus to Body"
+},
+</t>
+<t tx="ekr.20201213060317.60">{
+  "command": "leojs.moveOutlineUpSelection",
+  "category": "Leo",
+  "title": "Move Outline Up"
+},
+</t>
+<t tx="ekr.20201213060317.61">{
+  "command": "leojs.moveOutlineUpSelectionFromOutline",
+  "category": "Leo",
+  "title": "Move Outline Up"
+},
+</t>
+<t tx="ekr.20201213060317.62">{
+  "command": "leojs.insertNode",
+  "category": "Leo",
+  "title": "Insert Node",
+  "icon": {
+    "light": "resources/light/plus.svg",
+    "dark": "resources/dark/plus.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.63">{
+  "command": "leojs.insertNodeSelection",
+  "category": "Leo",
+  "title": "Insert Node",
+  "icon": {
+    "light": "resources/light/plus.svg",
+    "dark": "resources/dark/plus.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.64">{
+  "command": "leojs.insertNodeSelectionFromOutline",
+  "category": "Leo",
+  "title": "Insert Node",
+  "icon": {
+    "light": "resources/light/plus.svg",
+    "dark": "resources/dark/plus.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.65">{
+  "command": "leojs.insertNodeSelectionInterrupt",
+  "category": "Leo",
+  "title": "Insert Node",
+  "icon": {
+    "light": "resources/light/plus.svg",
+    "dark": "resources/dark/plus.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.66">{
+  "command": "leojs.cloneNode",
+  "category": "Leo",
+  "title": "Clone Node",
+  "icon": {
+    "light": "resources/light/link.svg",
+    "dark": "resources/dark/link.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.67">{
+  "command": "leojs.cloneNodeSelection",
+  "category": "Leo",
+  "title": "Clone Node"
+},
+</t>
+<t tx="ekr.20201213060317.68">{
+  "command": "leojs.cloneNodeSelectionFromOutline",
+  "category": "Leo",
+  "title": "Clone Node"
+},
+</t>
+<t tx="ekr.20201213060317.69">{
+  "command": "leojs.promote",
+  "category": "Leo",
+  "title": "Promote Children"
+},
+</t>
+<t tx="ekr.20201213060317.7">{
+  "command": "leojs.showOutline",
+  "category": "Leo",
+  "title": "Focus to Tree"
+},
+</t>
+<t tx="ekr.20201213060317.70">{
+  "command": "leojs.promoteSelection",
+  "category": "Leo",
+  "title": "Promote Children"
+},
+</t>
+<t tx="ekr.20201213060317.71">{
+  "command": "leojs.promoteSelectionFromOutline",
+  "category": "Leo",
+  "title": "Promote Children"
+},
+</t>
+<t tx="ekr.20201213060317.72">{
+  "command": "leojs.demote",
+  "category": "Leo",
+  "title": "Demote Siblings"
+},
+</t>
+<t tx="ekr.20201213060317.73">{
+  "command": "leojs.demoteSelection",
+  "category": "Leo",
+  "title": "Demote Siblings"
+},
+</t>
+<t tx="ekr.20201213060317.74">{
+  "command": "leojs.demoteSelectionFromOutline",
+  "category": "Leo",
+  "title": "Demote Siblings"
+},
+</t>
+<t tx="ekr.20201213060317.75">{
+  "command": "leojs.sortChildrenSelection",
+  "category": "Leo",
+  "title": "Sort Children"
+},
+</t>
+<t tx="ekr.20201213060317.76">{
+  "command": "leojs.sortChildrenSelectionFromOutline",
+  "category": "Leo",
+  "title": "Sort Children"
+},
+</t>
+<t tx="ekr.20201213060317.77">{
+  "command": "leojs.sortSiblingsSelection",
+  "category": "Leo",
+  "title": "Sort Siblings"
+},
+</t>
+<t tx="ekr.20201213060317.78">{
+  "command": "leojs.sortSiblingsSelectionFromOutline",
+  "category": "Leo",
+  "title": "Sort Siblings"
+},
+</t>
+<t tx="ekr.20201213060317.79">{
+  "command": "leojs.gotoFirstVisible",
+  "category": "Leo",
+  "title": "Goto First Visible"
+},
+</t>
+<t tx="ekr.20201213060317.8">{
+  "command": "leojs.showLogPane",
+  "category": "Leo",
+  "title": "Show Log Pane"
+},
+</t>
+<t tx="ekr.20201213060317.80">{
+  "command": "leojs.gotoLastVisible",
+  "category": "Leo",
+  "title": "Goto Last Visible"
+},
+</t>
+<t tx="ekr.20201213060317.81">{
+  "command": "leojs.pageUp",
+  "category": "Leo",
+  "title": "Page Up"
+},
+</t>
+<t tx="ekr.20201213060317.82">{
+  "command": "leojs.pageDown",
+  "category": "Leo",
+  "title": "Page Down"
+},
+</t>
+<t tx="ekr.20201213060317.83">{
+  "command": "leojs.gotoLastSibling",
+  "category": "Leo",
+  "title": "Goto Last Sibling"
+},
+</t>
+<t tx="ekr.20201213060317.84">{
+  "command": "leojs.gotoNextVisible",
+  "category": "Leo",
+  "title": "Goto Next Visible"
+},
+</t>
+<t tx="ekr.20201213060317.85">{
+  "command": "leojs.gotoPrevVisible",
+  "category": "Leo",
+  "title": "Goto Prev Visible"
+},
+</t>
+<t tx="ekr.20201213060317.86">{
+  "command": "leojs.contractOrGoLeft",
+  "category": "Leo",
+  "title": "Contract Or Go Left"
+},
+</t>
+<t tx="ekr.20201213060317.87">{
+  "command": "leojs.expandAndGoRight",
+  "category": "Leo",
+  "title": "Expand And Go Right"
+},
+</t>
+<t tx="ekr.20201213060317.88">{
+  "command": "leojs.hoistNode",
+  "category": "Leo",
+  "title": "Hoist"
+},
+</t>
+<t tx="ekr.20201213060317.89">{
+  "command": "leojs.hoistSelection",
+  "category": "Leo",
+  "title": "Hoist"
+},
+</t>
+<t tx="ekr.20201213060317.9">{
+  "command": "leojs.openLeoFile",
+  "title": "Open Leo File",
+  "category": "Leo",
+  "icon": {
+    "light": "resources/light/folder.svg",
+    "dark": "resources/dark/folder.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.90">{
+  "command": "leojs.hoistSelectionFromOutline",
+  "category": "Leo",
+  "title": "Hoist"
+},
+</t>
+<t tx="ekr.20201213060317.91">{
+  "command": "leojs.deHoist",
+  "category": "Leo",
+  "title": "De-Hoist",
+  "icon": {
+    "light": "resources/light/dehoist.svg",
+    "dark": "resources/dark/dehoist.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.92">{
+  "command": "leojs.deHoistFromOutline",
+  "category": "Leo",
+  "title": "De-Hoist",
+  "icon": {
+    "light": "resources/light/dehoist.svg",
+    "dark": "resources/dark/dehoist.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.93">{
+  "command": "leojs.undo",
+  "category": "Leo",
+  "title": "Undo",
+  "icon": {
+    "light": "resources/light/undo.svg",
+    "dark": "resources/dark/undo.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.94">{
+  "command": "leojs.undoFromOutline",
+  "category": "Leo",
+  "title": "Undo",
+  "icon": {
+    "light": "resources/light/undo.svg",
+    "dark": "resources/dark/undo.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.95">{
+  "command": "leojs.redo",
+  "category": "Leo",
+  "title": "Redo",
+  "icon": {
+    "light": "resources/light/redo.svg",
+    "dark": "resources/dark/redo.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.96">{
+  "command": "leojs.redoFromOutline",
+  "category": "Leo",
+  "title": "Redo",
+  "icon": {
+    "light": "resources/light/redo.svg",
+    "dark": "resources/dark/redo.svg"
+  }
+},
+</t>
+<t tx="ekr.20201213060317.97">{
+  "command": "leojs.cloneFindAll",
+  "category": "Leo",
+  "title": "Clone Find All"
+},
+</t>
+<t tx="ekr.20201213060317.98">{
+  "command": "leojs.cloneFindAllFlattened",
+  "category": "Leo",
+  "title": "Clone Find All Flattened"
+},
+</t>
+<t tx="ekr.20201213060317.99">{
+  "command": "leojs.cloneFindMarked",
+  "category": "Leo",
+  "title": "Clone Find Marked"
+},
+</t>
+<t tx="ekr.20201213061102.1">"""Unindent body text of selected tree by 2 spaces."""
+g.cls()
+h = 'commands'
+root = g.findTopLevelNode(c, h)
+assert root, h
+for p in root.children():
+    if p.b.startswith('  '):  # Protect against running the script twice.
+        result = []
+        for s in g.splitLines(p.b):
+            if s.startswith('  '):
+                result.append(s[2:])
+            else:
+                result.append(s)
+        p.b = ''.join(result)
+print('done')
+</t>
 <t tx="felix.20201208214250.2"></t>
 <t tx="felix.20201208214319.1"># leojs
 
@@ -551,677 +1514,7 @@ export function deactivate() { }
 
 </t>
 <t tx="felix.20201208220441.1">"commands": [
-  {
-    "command": "leojs.test",
-    "category": "Leo",
-    "title": "Test leojs"
-  },
-  {
-    "command": "leojs.executeScript",
-    "category": "Leo",
-    "title": "Execute Script"
-  },
-  {
-    "command": "leojs.minibuffer",
-    "category": "Leo",
-    "title": "Minibuffer"
-  },
-  {
-    "command": "leojs.removeButton",
-    "category": "Leo",
-    "title": "Remove Button"
-  },
-  {
-    "command": "leojs.showBody",
-    "category": "Leo",
-    "title": "Focus to Body"
-  },
-  {
-    "command": "leojs.showOutline",
-    "category": "Leo",
-    "title": "Focus to Tree"
-  },
-  {
-    "command": "leojs.showLogPane",
-    "category": "Leo",
-    "title": "Show Log Pane"
-  },
-  {
-    "command": "leojs.openLeoFile",
-    "title": "Open Leo File",
-    "category": "Leo",
-    "icon": {
-      "light": "resources/light/folder.svg",
-      "dark": "resources/dark/folder.svg"
-    }
-  },
-  {
-    "command": "leojs.recentLeoFiles",
-    "category": "Leo",
-    "title": "Recent Files"
-  },
-  {
-    "command": "leojs.switchLeoFile",
-    "title": "Switch Leo File",
-    "category": "Leo",
-    "icon": {
-      "light": "resources/light/switch.svg",
-      "dark": "resources/dark/switch.svg"
-    }
-  },
-  {
-    "command": "leojs.newLeoFile",
-    "title": "New Leo File",
-    "category": "Leo",
-    "icon": {
-      "light": "resources/light/new-file.svg",
-      "dark": "resources/dark/new-file.svg"
-    }
-  },
-  {
-    "command": "leojs.closeLeoFile",
-    "title": "Close Leo File",
-    "category": "Leo",
-    "icon": {
-      "light": "resources/light/close.svg",
-      "dark": "resources/dark/close.svg"
-    }
-  },
-  {
-    "command": "leojs.saveLeoFile",
-    "category": "Leo",
-    "title": "Save Leo File",
-    "icon": {
-      "light": "resources/light/save.svg",
-      "dark": "resources/dark/save.svg"
-    }
-  },
-  {
-    "command": "leojs.saveLeoFileFromOutline",
-    "category": "Leo",
-    "title": "Save Leo File",
-    "icon": {
-      "light": "resources/light/save.svg",
-      "dark": "resources/dark/save.svg"
-    }
-  },
-  {
-    "command": "leojs.saveAsLeoFile",
-    "category": "Leo",
-    "title": "Save Leo File as...",
-    "icon": {
-      "light": "resources/light/save-as.svg",
-      "dark": "resources/dark/save-as.svg"
-    }
-  },
-  {
-    "command": "leojs.refreshFromDisk",
-    "category": "Leo",
-    "title": "Refresh from Disk"
-  },
-  {
-    "command": "leojs.refreshFromDiskSelection",
-    "category": "Leo",
-    "title": "Refresh from Disk"
-  },
-  {
-    "command": "leojs.refreshFromDiskSelectionFromOutline",
-    "category": "Leo",
-    "title": "Refresh from Disk"
-  },
-  {
-    "command": "leojs.gitDiff",
-    "category": "Leo",
-    "title": "Git Diff"
-  },
-  {
-    "command": "leojs.selectTreeNode",
-    "category": "Leo",
-    "title": "Select Node"
-  },
-  {
-    "command": "leojs.openAside",
-    "category": "Leo",
-    "title": "Open to the Side"
-  },
-  {
-    "command": "leojs.contractAll",
-    "category": "Leo",
-    "title": "Contract All",
-    "icon": {
-      "light": "resources/light/collapse.svg",
-      "dark": "resources/dark/collapse.svg"
-    }
-  },
-  {
-    "command": "leojs.contractAllFromOutline",
-    "category": "Leo",
-    "title": "Contract All",
-    "icon": {
-      "light": "resources/light/collapse.svg",
-      "dark": "resources/dark/collapse.svg"
-    }
-  },
-  {
-    "command": "leojs.editHeadline",
-    "category": "Leo",
-    "title": "Edit Headline",
-    "icon": {
-      "light": "resources/light/edit.svg",
-      "dark": "resources/dark/edit.svg"
-    }
-  },
-  {
-    "command": "leojs.editSelectedHeadline",
-    "category": "Leo",
-    "title": "Edit Headline"
-  },
-  {
-    "command": "leojs.editSelectedHeadlineFromOutline",
-    "category": "Leo",
-    "title": "Edit Headline"
-  },
-  {
-    "command": "leojs.mark",
-    "category": "Leo",
-    "title": "Mark",
-    "icon": {
-      "light": "resources/light/mark.svg",
-      "dark": "resources/dark/mark.svg"
-    }
-  },
-  {
-    "command": "leojs.markSelection",
-    "category": "Leo",
-    "title": "Mark"
-  },
-  {
-    "command": "leojs.markSelectionFromOutline",
-    "category": "Leo",
-    "title": "Mark"
-  },
-  {
-    "command": "leojs.unmark",
-    "category": "Leo",
-    "title": "Unmark",
-    "icon": {
-      "light": "resources/light/unmark.svg",
-      "dark": "resources/dark/unmark.svg"
-    }
-  },
-  {
-    "command": "leojs.unmarkSelection",
-    "category": "Leo",
-    "title": "Unmark"
-  },
-  {
-    "command": "leojs.unmarkSelectionFromOutline",
-    "category": "Leo",
-    "title": "Unmark"
-  },
-  {
-    "command": "leojs.copyNode",
-    "category": "Leo",
-    "title": "Copy Node",
-    "icon": {
-      "light": "resources/light/clipboard.svg",
-      "dark": "resources/dark/clipboard.svg"
-    }
-  },
-  {
-    "command": "leojs.copyNodeSelection",
-    "category": "Leo",
-    "title": "Copy Node"
-  },
-  {
-    "command": "leojs.cutNode",
-    "category": "Leo",
-    "title": "Cut Node"
-  },
-  {
-    "command": "leojs.cutNodeSelection",
-    "category": "Leo",
-    "title": "Cut Node"
-  },
-  {
-    "command": "leojs.cutNodeSelectionFromOutline",
-    "category": "Leo",
-    "title": "Cut Node"
-  },
-  {
-    "command": "leojs.pasteNode",
-    "category": "Leo",
-    "title": "Paste Node"
-  },
-  {
-    "command": "leojs.pasteNodeAtSelection",
-    "category": "Leo",
-    "title": "Paste Node"
-  },
-  {
-    "command": "leojs.pasteNodeAtSelectionFromOutline",
-    "category": "Leo",
-    "title": "Paste Node"
-  },
-  {
-    "command": "leojs.pasteNodeAsClone",
-    "category": "Leo",
-    "title": "Paste Node as Clone"
-  },
-  {
-    "command": "leojs.pasteNodeAsCloneAtSelection",
-    "category": "Leo",
-    "title": "Paste Node as Clone"
-  },
-  {
-    "command": "leojs.pasteNodeAsCloneAtSelectionFromOutline",
-    "category": "Leo",
-    "title": "Paste Node as Clone"
-  },
-  {
-    "command": "leojs.delete",
-    "category": "Leo",
-    "title": "Delete",
-    "icon": {
-      "light": "resources/light/close.svg",
-      "dark": "resources/dark/close.svg"
-    }
-  },
-  {
-    "command": "leojs.deleteSelection",
-    "category": "Leo",
-    "title": "Delete Node"
-  },
-  {
-    "command": "leojs.deleteSelectionFromOutline",
-    "category": "Leo",
-    "title": "Delete Node"
-  },
-  {
-    "command": "leojs.extract",
-    "category": "Leo",
-    "title": "Extract"
-  },
-  {
-    "command": "leojs.extractNames",
-    "category": "Leo",
-    "title": "Extract Names"
-  },
-  {
-    "command": "leojs.moveOutlineDown",
-    "category": "Leo",
-    "title": "Move Outline Down",
-    "icon": {
-      "light": "resources/light/arrow-down.svg",
-      "dark": "resources/dark/arrow-down.svg"
-    }
-  },
-  {
-    "command": "leojs.moveOutlineDownSelection",
-    "category": "Leo",
-    "title": "Move Outline Down"
-  },
-  {
-    "command": "leojs.moveOutlineDownSelectionFromOutline",
-    "category": "Leo",
-    "title": "Move Outline Down"
-  },
-  {
-    "command": "leojs.moveOutlineLeft",
-    "category": "Leo",
-    "title": "Move Outline Left",
-    "icon": {
-      "light": "resources/light/arrow-left.svg",
-      "dark": "resources/dark/arrow-left.svg"
-    }
-  },
-  {
-    "command": "leojs.moveOutlineLeftSelection",
-    "category": "Leo",
-    "title": "Move Outline Left"
-  },
-  {
-    "command": "leojs.moveOutlineLeftSelectionFromOutline",
-    "category": "Leo",
-    "title": "Move Outline Left"
-  },
-  {
-    "command": "leojs.moveOutlineRight",
-    "category": "Leo",
-    "title": "Move Outline Right",
-    "icon": {
-      "light": "resources/light/arrow-right.svg",
-      "dark": "resources/dark/arrow-right.svg"
-    }
-  },
-  {
-    "command": "leojs.moveOutlineRightSelection",
-    "category": "Leo",
-    "title": "Move Outline Right"
-  },
-  {
-    "command": "leojs.moveOutlineRightSelectionFromOutline",
-    "category": "Leo",
-    "title": "Move Outline Right"
-  },
-  {
-    "command": "leojs.moveOutlineUp",
-    "category": "Leo",
-    "title": "Move Outline Up",
-    "icon": {
-      "light": "resources/light/arrow-up.svg",
-      "dark": "resources/dark/arrow-up.svg"
-    }
-  },
-  {
-    "command": "leojs.moveOutlineUpSelection",
-    "category": "Leo",
-    "title": "Move Outline Up"
-  },
-  {
-    "command": "leojs.moveOutlineUpSelectionFromOutline",
-    "category": "Leo",
-    "title": "Move Outline Up"
-  },
-  {
-    "command": "leojs.insertNode",
-    "category": "Leo",
-    "title": "Insert Node",
-    "icon": {
-      "light": "resources/light/plus.svg",
-      "dark": "resources/dark/plus.svg"
-    }
-  },
-  {
-    "command": "leojs.insertNodeSelection",
-    "category": "Leo",
-    "title": "Insert Node",
-    "icon": {
-      "light": "resources/light/plus.svg",
-      "dark": "resources/dark/plus.svg"
-    }
-  },
-  {
-    "command": "leojs.insertNodeSelectionFromOutline",
-    "category": "Leo",
-    "title": "Insert Node",
-    "icon": {
-      "light": "resources/light/plus.svg",
-      "dark": "resources/dark/plus.svg"
-    }
-  },
-  {
-    "command": "leojs.insertNodeSelectionInterrupt",
-    "category": "Leo",
-    "title": "Insert Node",
-    "icon": {
-      "light": "resources/light/plus.svg",
-      "dark": "resources/dark/plus.svg"
-    }
-  },
-  {
-    "command": "leojs.cloneNode",
-    "category": "Leo",
-    "title": "Clone Node",
-    "icon": {
-      "light": "resources/light/link.svg",
-      "dark": "resources/dark/link.svg"
-    }
-  },
-  {
-    "command": "leojs.cloneNodeSelection",
-    "category": "Leo",
-    "title": "Clone Node"
-  },
-  {
-    "command": "leojs.cloneNodeSelectionFromOutline",
-    "category": "Leo",
-    "title": "Clone Node"
-  },
-  {
-    "command": "leojs.promote",
-    "category": "Leo",
-    "title": "Promote Children"
-  },
-  {
-    "command": "leojs.promoteSelection",
-    "category": "Leo",
-    "title": "Promote Children"
-  },
-  {
-    "command": "leojs.promoteSelectionFromOutline",
-    "category": "Leo",
-    "title": "Promote Children"
-  },
-  {
-    "command": "leojs.demote",
-    "category": "Leo",
-    "title": "Demote Siblings"
-  },
-  {
-    "command": "leojs.demoteSelection",
-    "category": "Leo",
-    "title": "Demote Siblings"
-  },
-  {
-    "command": "leojs.demoteSelectionFromOutline",
-    "category": "Leo",
-    "title": "Demote Siblings"
-  },
-  {
-    "command": "leojs.sortChildrenSelection",
-    "category": "Leo",
-    "title": "Sort Children"
-  },
-  {
-    "command": "leojs.sortChildrenSelectionFromOutline",
-    "category": "Leo",
-    "title": "Sort Children"
-  },
-  {
-    "command": "leojs.sortSiblingsSelection",
-    "category": "Leo",
-    "title": "Sort Siblings"
-  },
-  {
-    "command": "leojs.sortSiblingsSelectionFromOutline",
-    "category": "Leo",
-    "title": "Sort Siblings"
-  },
-  {
-    "command": "leojs.gotoFirstVisible",
-    "category": "Leo",
-    "title": "Goto First Visible"
-  },
-  {
-    "command": "leojs.gotoLastVisible",
-    "category": "Leo",
-    "title": "Goto Last Visible"
-  },
-  {
-    "command": "leojs.pageUp",
-    "category": "Leo",
-    "title": "Page Up"
-  },
-  {
-    "command": "leojs.pageDown",
-    "category": "Leo",
-    "title": "Page Down"
-  },
-  {
-    "command": "leojs.gotoLastSibling",
-    "category": "Leo",
-    "title": "Goto Last Sibling"
-  },
-  {
-    "command": "leojs.gotoNextVisible",
-    "category": "Leo",
-    "title": "Goto Next Visible"
-  },
-  {
-    "command": "leojs.gotoPrevVisible",
-    "category": "Leo",
-    "title": "Goto Prev Visible"
-  },
-  {
-    "command": "leojs.contractOrGoLeft",
-    "category": "Leo",
-    "title": "Contract Or Go Left"
-  },
-  {
-    "command": "leojs.expandAndGoRight",
-    "category": "Leo",
-    "title": "Expand And Go Right"
-  },
-  {
-    "command": "leojs.hoistNode",
-    "category": "Leo",
-    "title": "Hoist"
-  },
-  {
-    "command": "leojs.hoistSelection",
-    "category": "Leo",
-    "title": "Hoist"
-  },
-  {
-    "command": "leojs.hoistSelectionFromOutline",
-    "category": "Leo",
-    "title": "Hoist"
-  },
-  {
-    "command": "leojs.deHoist",
-    "category": "Leo",
-    "title": "De-Hoist",
-    "icon": {
-      "light": "resources/light/dehoist.svg",
-      "dark": "resources/dark/dehoist.svg"
-    }
-  },
-  {
-    "command": "leojs.deHoistFromOutline",
-    "category": "Leo",
-    "title": "De-Hoist",
-    "icon": {
-      "light": "resources/light/dehoist.svg",
-      "dark": "resources/dark/dehoist.svg"
-    }
-  },
-  {
-    "command": "leojs.undo",
-    "category": "Leo",
-    "title": "Undo",
-    "icon": {
-      "light": "resources/light/undo.svg",
-      "dark": "resources/dark/undo.svg"
-    }
-  },
-  {
-    "command": "leojs.undoFromOutline",
-    "category": "Leo",
-    "title": "Undo",
-    "icon": {
-      "light": "resources/light/undo.svg",
-      "dark": "resources/dark/undo.svg"
-    }
-  },
-  {
-    "command": "leojs.redo",
-    "category": "Leo",
-    "title": "Redo",
-    "icon": {
-      "light": "resources/light/redo.svg",
-      "dark": "resources/dark/redo.svg"
-    }
-  },
-  {
-    "command": "leojs.redoFromOutline",
-    "category": "Leo",
-    "title": "Redo",
-    "icon": {
-      "light": "resources/light/redo.svg",
-      "dark": "resources/dark/redo.svg"
-    }
-  },
-  {
-    "command": "leojs.cloneFindAll",
-    "category": "Leo",
-    "title": "Clone Find All"
-  },
-  {
-    "command": "leojs.cloneFindAllFlattened",
-    "category": "Leo",
-    "title": "Clone Find All Flattened"
-  },
-  {
-    "command": "leojs.cloneFindMarked",
-    "category": "Leo",
-    "title": "Clone Find Marked"
-  },
-  {
-    "command": "leojs.cloneFindFlattenedMarked",
-    "category": "Leo",
-    "title": "cffm - Clone Find Flattened Marked"
-  },
-  {
-    "command": "leojs.copyMarked",
-    "category": "Leo",
-    "title": "Copy Marked"
-  },
-  {
-    "command": "leojs.diffMarkedNodes",
-    "category": "Leo",
-    "title": "Diff Marked Nodes"
-  },
-  {
-    "command": "leojs.gotoNextMarked",
-    "category": "Leo",
-    "title": "Goto Next Marked"
-  },
-  {
-    "command": "leojs.gotoNextClone",
-    "category": "Leo",
-    "title": "Goto Next Clone"
-  },
-  {
-    "command": "leojs.gotoNextCloneSelection",
-    "category": "Leo",
-    "title": "Goto Next Clone"
-  },
-  {
-    "command": "leojs.gotoNextCloneSelectionFromOutline",
-    "category": "Leo",
-    "title": "Goto Next Clone"
-  },
-  {
-    "command": "leojs.markChangedItems",
-    "category": "Leo",
-    "title": "Mark Changed Items"
-  },
-  {
-    "command": "leojs.markSubheads",
-    "category": "Leo",
-    "title": "Mark Subheads"
-  },
-  {
-    "command": "leojs.unmarkAll",
-    "category": "Leo",
-    "title": "Unmark All"
-  },
-  {
-    "command": "leojs.cloneMarkedNodes",
-    "category": "Leo",
-    "title": "Clone Marked Nodes"
-  },
-  {
-    "command": "leojs.deleteMarkedNodes",
-    "category": "Leo",
-    "title": "Delete Marked Nodes"
-  },
-  {
-    "command": "leojs.moveMarkedNodes",
-    "category": "Leo",
-    "title": "Move Marked Nodes"
-  }
+  @others
 ],
 </t>
 <t tx="felix.20201208221211.1">"viewsWelcome": [
