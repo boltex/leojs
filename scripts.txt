@@ -198,16 +198,9 @@ for i, line in enumerate(g.splitLines(root.b)):
         assert line_s.endswith('[') or line_s.startswith('],'), (i, repr(line))
         # print('OUTSIDE', repr(line))
 c.redraw()
-#@+node:ekr.20201210041738.1: ** script: split contributes/menus (works)
+#@+node:ekr.20201210041738.1: ** script: split contributes/menus (completed)
 """
 Split the "menus" node of the "contributes" section into separate nodes.
-
-Inner entries have the form:
-    
-  {
-    "command": "leojs.executeScript",
-    "when": "leoTreeOpened"
-  },
 """
 g.cls()
 assert False, "Do not run this script again"
@@ -259,8 +252,54 @@ for child in menus_p.children():
             # print('OUTSIDE', repr(line))
     c.redraw()
 print('done')
-#@+node:ekr.20201210041817.1: ** script: split contributes/keybindings (new)
-g.es_print('not ready', p.h)  # Changed.
+#@+node:ekr.20201210041817.1: ** script: split contributes/keybindings (completed)
+"""
+Split the "keybindings" node of the "contributes" section into separate nodes.
+"""
+# g.cls()
+assert False, "Do not do this script again"
+outer_parent_h = '@clean package.json'
+outer_parent = g.findNodeAnywhere(c, outer_parent_h)
+assert outer_parent, f"Not found: {outer_parent_h}"
+keybindings_h = 'keybindings'
+keybindings_p = g.findNodeInTree(c, outer_parent, keybindings_h)
+assert keybindings_p, f"Not found: {keybindings_h}"
+last = c.lastTopLevel()
+keybindings_parent = last.insertAfter()
+keybindings_parent.h = 'keybindings tree'
+command_lines, level = [], 0
+for i, line in enumerate(g.splitLines(keybindings_p.b)):
+    line_s = line.strip()
+    if command_lines:  # Accumulating a new node.
+        assert line.startswith('  '), repr(line)
+        command_lines.append(line[2:])
+        if line_s.endswith(('}', '},')):
+            level -= 1
+            if level == 0:
+                # End of command.
+                p = keybindings_parent.insertAsLastChild()
+                h = command_lines[1].strip()
+                prefix = '"command": "leojs.'
+                assert h.startswith(prefix), (i, repr(h))
+                if h.endswith(','): h = h[:-1]
+                if h.endswith('"'): h = h[:-1]
+                p.h = h[len(prefix):]
+                p.b = ''.join(command_lines)
+                command_lines = []
+        elif line_s.endswith('{'):
+            level += 1
+        else:
+            pass
+    elif line_s.endswith('{'):
+        # Start a new command.
+        level = 1
+        assert line.startswith('  '), repr(line)
+        command_lines.append(line[2:])
+    elif line_s:
+        assert line_s.endswith(('[', ']')) or line_s.startswith('],'), (i, repr(line))
+        # print('OUTSIDE', repr(line))
+c.redraw()
+print('done')
 #@+node:ekr.20201210035719.1: ** script: diff-pr
 import leo.commands.editFileCommands as efc
 x = efc.GitDiffController(c)

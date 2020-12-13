@@ -354,7 +354,90 @@
 <v t="ekr.20201213064703.149"><vh>gotoNextClone</vh></v>
 </v>
 </v>
-<v t="felix.20201208221945.1"><vh>keybindings</vh></v>
+<v t="felix.20201208221945.1"><vh>keybindings</vh>
+<v t="ekr.20201213070431.2"><vh>executeScript</vh></v>
+<v t="ekr.20201213070431.3"><vh>executeScript</vh></v>
+<v t="ekr.20201213070431.4"><vh>minibuffer</vh></v>
+<v t="ekr.20201213070431.5"><vh>showOutline</vh></v>
+<v t="ekr.20201213070431.6"><vh>showOutline</vh></v>
+<v t="ekr.20201213070431.7"><vh>showBody</vh></v>
+<v t="ekr.20201213070431.8"><vh>showBody</vh></v>
+<v t="ekr.20201213070431.9"><vh>showBody</vh></v>
+<v t="ekr.20201213070431.10"><vh>showBody</vh></v>
+<v t="ekr.20201213070431.11"><vh>saveLeoFileFromOutline</vh></v>
+<v t="ekr.20201213070431.12"><vh>saveLeoFile</vh></v>
+<v t="ekr.20201213070431.13"><vh>contractAll</vh></v>
+<v t="ekr.20201213070431.14"><vh>contractAllFromOutline</vh></v>
+<v t="ekr.20201213070431.15"><vh>editSelectedHeadline</vh></v>
+<v t="ekr.20201213070431.16"><vh>editSelectedHeadlineFromOutline</vh></v>
+<v t="ekr.20201213070431.17"><vh>markSelection</vh></v>
+<v t="ekr.20201213070431.18"><vh>markSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.19"><vh>unmarkSelection</vh></v>
+<v t="ekr.20201213070431.20"><vh>unmarkSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.21"><vh>extract</vh></v>
+<v t="ekr.20201213070431.22"><vh>extract</vh></v>
+<v t="ekr.20201213070431.23"><vh>extractNames</vh></v>
+<v t="ekr.20201213070431.24"><vh>extractNames</vh></v>
+<v t="ekr.20201213070431.25"><vh>moveOutlineDownSelection</vh></v>
+<v t="ekr.20201213070431.26"><vh>moveOutlineDownSelection</vh></v>
+<v t="ekr.20201213070431.27"><vh>moveOutlineDownSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.28"><vh>moveOutlineDownSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.29"><vh>moveOutlineDownSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.30"><vh>moveOutlineLeftSelection</vh></v>
+<v t="ekr.20201213070431.31"><vh>moveOutlineLeftSelection</vh></v>
+<v t="ekr.20201213070431.32"><vh>moveOutlineLeftSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.33"><vh>moveOutlineLeftSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.34"><vh>moveOutlineLeftSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.35"><vh>moveOutlineRightSelection</vh></v>
+<v t="ekr.20201213070431.36"><vh>moveOutlineRightSelection</vh></v>
+<v t="ekr.20201213070431.37"><vh>moveOutlineRightSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.38"><vh>moveOutlineRightSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.39"><vh>moveOutlineRightSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.40"><vh>moveOutlineUpSelection</vh></v>
+<v t="ekr.20201213070431.41"><vh>moveOutlineUpSelection</vh></v>
+<v t="ekr.20201213070431.42"><vh>moveOutlineUpSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.43"><vh>moveOutlineUpSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.44"><vh>moveOutlineUpSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.45"><vh>sortSiblingsSelection</vh></v>
+<v t="ekr.20201213070431.46"><vh>sortSiblingsSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.47"><vh>promoteSelection</vh></v>
+<v t="ekr.20201213070431.48"><vh>promoteSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.49"><vh>demoteSelection</vh></v>
+<v t="ekr.20201213070431.50"><vh>demoteSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.51"><vh>insertNodeSelection</vh></v>
+<v t="ekr.20201213070431.52"><vh>insertNodeSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.53"><vh>insertNodeSelectionInterrupt</vh></v>
+<v t="ekr.20201213070431.54"><vh>cloneNodeSelection</vh></v>
+<v t="ekr.20201213070431.55"><vh>cloneNodeSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.56"><vh>cutNodeSelection</vh></v>
+<v t="ekr.20201213070431.57"><vh>cutNodeSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.58"><vh>copyNodeSelection</vh></v>
+<v t="ekr.20201213070431.59"><vh>copyNodeSelection</vh></v>
+<v t="ekr.20201213070431.60"><vh>pasteNodeAtSelection</vh></v>
+<v t="ekr.20201213070431.61"><vh>pasteNodeAtSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.62"><vh>deleteSelection</vh></v>
+<v t="ekr.20201213070431.63"><vh>deleteSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.64"><vh>gotoFirstVisible</vh></v>
+<v t="ekr.20201213070431.65"><vh>gotoLastSibling</vh></v>
+<v t="ekr.20201213070431.66"><vh>gotoFirstVisible</vh></v>
+<v t="ekr.20201213070431.67"><vh>gotoLastVisible</vh></v>
+<v t="ekr.20201213070431.68"><vh>pageUp</vh></v>
+<v t="ekr.20201213070431.69"><vh>pageDown</vh></v>
+<v t="ekr.20201213070431.70"><vh>gotoNextCloneSelectionFromOutline</vh></v>
+<v t="ekr.20201213070431.71"><vh>gotoNextCloneSelection</vh></v>
+<v t="ekr.20201213070431.72"><vh>gotoNextVisible</vh></v>
+<v t="ekr.20201213070431.73"><vh>gotoNextVisible</vh></v>
+<v t="ekr.20201213070431.74"><vh>gotoNextVisible</vh></v>
+<v t="ekr.20201213070431.75"><vh>gotoPrevVisible</vh></v>
+<v t="ekr.20201213070431.76"><vh>gotoPrevVisible</vh></v>
+<v t="ekr.20201213070431.77"><vh>gotoPrevVisible</vh></v>
+<v t="ekr.20201213070431.78"><vh>contractOrGoLeft</vh></v>
+<v t="ekr.20201213070431.79"><vh>contractOrGoLeft</vh></v>
+<v t="ekr.20201213070431.80"><vh>contractOrGoLeft</vh></v>
+<v t="ekr.20201213070431.81"><vh>expandAndGoRight</vh></v>
+<v t="ekr.20201213070431.82"><vh>expandAndGoRight</vh></v>
+<v t="ekr.20201213070431.83"><vh>expandAndGoRight</vh></v>
+</v>
 </v>
 <v t="ekr.20201210033748.1"><vh>&lt;&lt; scripts &gt;&gt;</vh></v>
 <v t="ekr.20201210033804.1"><vh>&lt;&lt; devDependencies &gt;&gt;</vh></v>
@@ -1991,6 +2074,559 @@ error: failed to push some refs to 'https://github.com/boltex/leojs.git'</t>
   "when": "false"
 },
 </t>
+<t tx="ekr.20201213070431.10">{
+  "command": "leojs.showBody",
+  "key": "enter",
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.11">{
+  "command": "leojs.saveLeoFileFromOutline",
+  "key": "ctrl+s",
+  "mac": "cmd+s",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments/"
+},
+</t>
+<t tx="ekr.20201213070431.12">{
+  "command": "leojs.saveLeoFile",
+  "key": "ctrl+s",
+  "mac": "cmd+s",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.13">{
+  "command": "leojs.contractAll",
+  "key": "alt+-",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.14">{
+  "command": "leojs.contractAllFromOutline",
+  "key": "alt+-",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+},
+</t>
+<t tx="ekr.20201213070431.15">{
+  "command": "leojs.editSelectedHeadline",
+  "key": "ctrl+h",
+  "mac": "cmd+h",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.16">{
+  "command": "leojs.editSelectedHeadlineFromOutline",
+  "key": "ctrl+h",
+  "mac": "cmd+h",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.17">{
+  "command": "leojs.markSelection",
+  "key": "ctrl+m",
+  "mac": "cmd+m",
+  "when": "leoTreeOpened &amp;&amp; !leoMarked &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.18">{
+  "command": "leojs.markSelectionFromOutline",
+  "key": "ctrl+m",
+  "mac": "cmd+m",
+  "when": "leoTreeOpened &amp;&amp; !leoMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.19">{
+  "command": "leojs.unmarkSelection",
+  "key": "ctrl+m",
+  "mac": "cmd+m",
+  "when": "leoTreeOpened &amp;&amp; leoMarked &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.2">{
+  "command": "leojs.executeScript",
+  "key": "ctrl+b",
+  "mac": "cmd+b",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.20">{
+  "command": "leojs.unmarkSelectionFromOutline",
+  "key": "ctrl+m",
+  "mac": "cmd+m",
+  "when": "leoTreeOpened &amp;&amp; leoMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.21">{
+  "command": "leojs.extract",
+  "key": "ctrl+shift+d",
+  "mac": "cmd+shift+d",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.22">{
+  "command": "leojs.extract",
+  "key": "ctrl+shift+d",
+  "mac": "cmd+shift+d",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.23">{
+  "command": "leojs.extractNames",
+  "key": "ctrl+shift+n",
+  "mac": "cmd++shift+n",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.24">{
+  "command": "leojs.extractNames",
+  "key": "ctrl+shift+n",
+  "mac": "cmd+shift+n",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.25">{
+  "command": "leojs.moveOutlineDownSelection",
+  "key": "ctrl+d",
+  "mac": "cmd+d",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.26">{
+  "command": "leojs.moveOutlineDownSelection",
+  "key": "shift+alt+down",
+  "mac": "shift+alt+down",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.27">{
+  "command": "leojs.moveOutlineDownSelectionFromOutline",
+  "key": "ctrl+d",
+  "mac": "cmd+d",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.28">{
+  "command": "leojs.moveOutlineDownSelectionFromOutline",
+  "key": "shift+down",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.29">{
+  "command": "leojs.moveOutlineDownSelectionFromOutline",
+  "key": "shift+alt+down",
+  "mac": "shift+alt+down",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.3">{
+  "command": "leojs.executeScript",
+  "key": "ctrl+b",
+  "mac": "cmd+b",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.30">{
+  "command": "leojs.moveOutlineLeftSelection",
+  "key": "ctrl+l",
+  "mac": "cmd+l",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.31">{
+  "command": "leojs.moveOutlineLeftSelection",
+  "key": "shift+alt+left",
+  "mac": "shift+alt+left",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.32">{
+  "command": "leojs.moveOutlineLeftSelectionFromOutline",
+  "key": "ctrl+l",
+  "mac": "cmd+l",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.33">{
+  "command": "leojs.moveOutlineLeftSelectionFromOutline",
+  "key": "shift+left",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.34">{
+  "command": "leojs.moveOutlineLeftSelectionFromOutline",
+  "key": "shift+alt+left",
+  "mac": "shift+alt+left",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.35">{
+  "command": "leojs.moveOutlineRightSelection",
+  "key": "ctrl+r",
+  "mac": "cmd+r",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.36">{
+  "command": "leojs.moveOutlineRightSelection",
+  "key": "shift+alt+right",
+  "mac": "shift+alt+right",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.37">{
+  "command": "leojs.moveOutlineRightSelectionFromOutline",
+  "key": "ctrl+r",
+  "mac": "cmd+r",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.38">{
+  "command": "leojs.moveOutlineRightSelectionFromOutline",
+  "key": "shift+right",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.39">{
+  "command": "leojs.moveOutlineRightSelectionFromOutline",
+  "key": "shift+alt+right",
+  "mac": "shift+alt+right",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.4">{
+  "command": "leojs.minibuffer",
+  "key": "alt+x",
+  "when": "leoTreeOpened"
+},
+</t>
+<t tx="ekr.20201213070431.40">{
+  "command": "leojs.moveOutlineUpSelection",
+  "key": "ctrl+u",
+  "mac": "cmd+u",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.41">{
+  "command": "leojs.moveOutlineUpSelection",
+  "key": "shift+alt+up",
+  "mac": "shift+alt+up",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.42">{
+  "command": "leojs.moveOutlineUpSelectionFromOutline",
+  "key": "ctrl+u",
+  "mac": "cmd+u",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.43">{
+  "command": "leojs.moveOutlineUpSelectionFromOutline",
+  "key": "shift+up",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.44">{
+  "command": "leojs.moveOutlineUpSelectionFromOutline",
+  "key": "shift+alt+up",
+  "mac": "shift+alt+up",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.45">{
+  "command": "leojs.sortSiblingsSelection",
+  "key": "alt+a",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.46">{
+  "command": "leojs.sortSiblingsSelectionFromOutline",
+  "key": "alt+a",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.47">{
+  "command": "leojs.promoteSelection",
+  "key": "ctrl+[BracketLeft]",
+  "win": "ctrl+oem_4",
+  "linux": "ctrl+[",
+  "mac": "cmd+[BracketLeft]",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.48">{
+  "command": "leojs.promoteSelectionFromOutline",
+  "key": "ctrl+[BracketLeft]",
+  "win": "ctrl+oem_4",
+  "linux": "ctrl+[",
+  "mac": "cmd+[BracketLeft]",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.49">{
+  "command": "leojs.demoteSelection",
+  "key": "ctrl+[BracketRight]",
+  "win": "ctrl+oem_6",
+  "linux": "ctrl+]",
+  "mac": "cmd+[BracketRight]",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.5">{
+  "command": "leojs.showOutline",
+  "key": "alt+t",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.50">{
+  "command": "leojs.demoteSelectionFromOutline",
+  "key": "ctrl+[BracketRight]",
+  "win": "ctrl+oem_6",
+  "linux": "ctrl+]",
+  "mac": "cmd+[BracketRight]",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.51">{
+  "command": "leojs.insertNodeSelection",
+  "key": "ctrl+i",
+  "mac": "cmd+i",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.52">{
+  "command": "leojs.insertNodeSelectionFromOutline",
+  "key": "ctrl+i",
+  "mac": "cmd+i",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.53">{
+  "command": "leojs.insertNodeSelectionInterrupt",
+  "key": "ctrl+i",
+  "mac": "cmd+i",
+  "when": "leoTreeOpened &amp;&amp; !sideBarFocus &amp;&amp; !editorTextFocus"
+},
+</t>
+<t tx="ekr.20201213070431.54">{
+  "command": "leojs.cloneNodeSelection",
+  "key": "ctrl+[Backquote]",
+  "win": "ctrl+oem_7",
+  "linux": "ctrl+'",
+  "mac": "cmd+[Backquote]",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.55">{
+  "command": "leojs.cloneNodeSelectionFromOutline",
+  "key": "ctrl+[Backquote]",
+  "win": "ctrl+oem_7",
+  "linux": "ctrl+'",
+  "mac": "cmd+[Backquote]",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.56">{
+  "command": "leojs.cutNodeSelection",
+  "key": "ctrl+shift+x",
+  "mac": "cmd+shift+x",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.57">{
+  "command": "leojs.cutNodeSelectionFromOutline",
+  "key": "ctrl+shift+x",
+  "mac": "cmd+shift+x",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.58">{
+  "command": "leojs.copyNodeSelection",
+  "key": "ctrl+shift+c",
+  "mac": "cmd+shift+c",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.59">{
+  "command": "leojs.copyNodeSelection",
+  "key": "ctrl+shift+c",
+  "mac": "cmd+shift+c",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.6">{
+  "command": "leojs.showOutline",
+  "key": "ctrl+t",
+  "mac": "cmd+t",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.60">{
+  "command": "leojs.pasteNodeAtSelection",
+  "key": "ctrl+shift+v",
+  "mac": "cmd+shift+v",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.61">{
+  "command": "leojs.pasteNodeAtSelectionFromOutline",
+  "key": "ctrl+shift+v",
+  "mac": "cmd+shift+v",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.62">{
+  "command": "leojs.deleteSelection",
+  "key": "ctrl+shift+backspace",
+  "mac": "cmd+shift+backspace",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.63">{
+  "command": "leojs.deleteSelectionFromOutline",
+  "key": "ctrl+shift+backspace",
+  "mac": "cmd+shift+backspace",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.64">{
+  "command": "leojs.gotoFirstVisible",
+  "key": "alt+home",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.65">{
+  "command": "leojs.gotoLastSibling",
+  "key": "alt+end",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.66">{
+  "command": "leojs.gotoFirstVisible",
+  "key": "home",
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.67">{
+  "command": "leojs.gotoLastVisible",
+  "key": "end",
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.68">{
+  "command": "leojs.pageUp",
+  "key": "pageup",
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.69">{
+  "command": "leojs.pageDown",
+  "key": "pagedown",
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.7">{
+  "command": "leojs.showBody",
+  "key": "ctrl+t",
+  "mac": "cmd+t",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+},
+</t>
+<t tx="ekr.20201213070431.70">{
+  "command": "leojs.gotoNextCloneSelectionFromOutline",
+  "key": "alt+n",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.71">{
+  "command": "leojs.gotoNextCloneSelection",
+  "key": "alt+n",
+  "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.72">{
+  "command": "leojs.gotoNextVisible",
+  "key": "down",
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.73">{
+  "command": "leojs.gotoNextVisible",
+  "key": "alt+down",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+},
+</t>
+<t tx="ekr.20201213070431.74">{
+  "command": "leojs.gotoNextVisible",
+  "key": "alt+down",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.75">{
+  "command": "leojs.gotoPrevVisible",
+  "key": "up",
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.76">{
+  "command": "leojs.gotoPrevVisible",
+  "key": "alt+up",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+},
+</t>
+<t tx="ekr.20201213070431.77">{
+  "command": "leojs.gotoPrevVisible",
+  "key": "alt+up",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection  &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.78">{
+  "command": "leojs.contractOrGoLeft",
+  "key": "left",
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.79">{
+  "command": "leojs.contractOrGoLeft",
+  "key": "alt+left",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+},
+</t>
+<t tx="ekr.20201213070431.8">{
+  "command": "leojs.showBody",
+  "key": "alt+d",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+},
+</t>
+<t tx="ekr.20201213070431.80">{
+  "command": "leojs.contractOrGoLeft",
+  "key": "alt+left",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+},
+</t>
+<t tx="ekr.20201213070431.81">{
+  "command": "leojs.expandAndGoRight",
+  "key": "right",
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+},
+</t>
+<t tx="ekr.20201213070431.82">{
+  "command": "leojs.expandAndGoRight",
+  "key": "alt+right",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+},
+</t>
+<t tx="ekr.20201213070431.83">{
+  "command": "leojs.expandAndGoRight",
+  "key": "alt+right",
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
+}
+</t>
+<t tx="ekr.20201213070431.9">{
+  "command": "leojs.showBody",
+  "key": "tab",
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+},
+</t>
 <t tx="felix.20201208214250.2"></t>
 <t tx="felix.20201208214319.1"># leojs
 
@@ -2375,477 +3011,7 @@ export function deactivate() { }
 ]
 </t>
 <t tx="felix.20201208221945.1">"keybindings": [
-  {
-    "command": "leojs.executeScript",
-    "key": "ctrl+b",
-    "mac": "cmd+b",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.executeScript",
-    "key": "ctrl+b",
-    "mac": "cmd+b",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.minibuffer",
-    "key": "alt+x",
-    "when": "leoTreeOpened"
-  },
-  {
-    "command": "leojs.showOutline",
-    "key": "alt+t",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.showOutline",
-    "key": "ctrl+t",
-    "mac": "cmd+t",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.showBody",
-    "key": "ctrl+t",
-    "mac": "cmd+t",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
-  },
-  {
-    "command": "leojs.showBody",
-    "key": "alt+d",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
-  },
-  {
-    "command": "leojs.showBody",
-    "key": "tab",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
-  },
-  {
-    "command": "leojs.showBody",
-    "key": "enter",
-    "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.saveLeoFileFromOutline",
-    "key": "ctrl+s",
-    "mac": "cmd+s",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments/"
-  },
-  {
-    "command": "leojs.saveLeoFile",
-    "key": "ctrl+s",
-    "mac": "cmd+s",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.contractAll",
-    "key": "alt+-",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.contractAllFromOutline",
-    "key": "alt+-",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
-  },
-  {
-    "command": "leojs.editSelectedHeadline",
-    "key": "ctrl+h",
-    "mac": "cmd+h",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.editSelectedHeadlineFromOutline",
-    "key": "ctrl+h",
-    "mac": "cmd+h",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.markSelection",
-    "key": "ctrl+m",
-    "mac": "cmd+m",
-    "when": "leoTreeOpened &amp;&amp; !leoMarked &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.markSelectionFromOutline",
-    "key": "ctrl+m",
-    "mac": "cmd+m",
-    "when": "leoTreeOpened &amp;&amp; !leoMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.unmarkSelection",
-    "key": "ctrl+m",
-    "mac": "cmd+m",
-    "when": "leoTreeOpened &amp;&amp; leoMarked &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.unmarkSelectionFromOutline",
-    "key": "ctrl+m",
-    "mac": "cmd+m",
-    "when": "leoTreeOpened &amp;&amp; leoMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.extract",
-    "key": "ctrl+shift+d",
-    "mac": "cmd+shift+d",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.extract",
-    "key": "ctrl+shift+d",
-    "mac": "cmd+shift+d",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.extractNames",
-    "key": "ctrl+shift+n",
-    "mac": "cmd++shift+n",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.extractNames",
-    "key": "ctrl+shift+n",
-    "mac": "cmd+shift+n",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.moveOutlineDownSelection",
-    "key": "ctrl+d",
-    "mac": "cmd+d",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.moveOutlineDownSelection",
-    "key": "shift+alt+down",
-    "mac": "shift+alt+down",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.moveOutlineDownSelectionFromOutline",
-    "key": "ctrl+d",
-    "mac": "cmd+d",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.moveOutlineDownSelectionFromOutline",
-    "key": "shift+down",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.moveOutlineDownSelectionFromOutline",
-    "key": "shift+alt+down",
-    "mac": "shift+alt+down",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.moveOutlineLeftSelection",
-    "key": "ctrl+l",
-    "mac": "cmd+l",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.moveOutlineLeftSelection",
-    "key": "shift+alt+left",
-    "mac": "shift+alt+left",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.moveOutlineLeftSelectionFromOutline",
-    "key": "ctrl+l",
-    "mac": "cmd+l",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.moveOutlineLeftSelectionFromOutline",
-    "key": "shift+left",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.moveOutlineLeftSelectionFromOutline",
-    "key": "shift+alt+left",
-    "mac": "shift+alt+left",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.moveOutlineRightSelection",
-    "key": "ctrl+r",
-    "mac": "cmd+r",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.moveOutlineRightSelection",
-    "key": "shift+alt+right",
-    "mac": "shift+alt+right",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.moveOutlineRightSelectionFromOutline",
-    "key": "ctrl+r",
-    "mac": "cmd+r",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.moveOutlineRightSelectionFromOutline",
-    "key": "shift+right",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.moveOutlineRightSelectionFromOutline",
-    "key": "shift+alt+right",
-    "mac": "shift+alt+right",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.moveOutlineUpSelection",
-    "key": "ctrl+u",
-    "mac": "cmd+u",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.moveOutlineUpSelection",
-    "key": "shift+alt+up",
-    "mac": "shift+alt+up",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.moveOutlineUpSelectionFromOutline",
-    "key": "ctrl+u",
-    "mac": "cmd+u",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.moveOutlineUpSelectionFromOutline",
-    "key": "shift+up",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.moveOutlineUpSelectionFromOutline",
-    "key": "shift+alt+up",
-    "mac": "shift+alt+up",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.sortSiblingsSelection",
-    "key": "alt+a",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.sortSiblingsSelectionFromOutline",
-    "key": "alt+a",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.promoteSelection",
-    "key": "ctrl+[BracketLeft]",
-    "win": "ctrl+oem_4",
-    "linux": "ctrl+[",
-    "mac": "cmd+[BracketLeft]",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.promoteSelectionFromOutline",
-    "key": "ctrl+[BracketLeft]",
-    "win": "ctrl+oem_4",
-    "linux": "ctrl+[",
-    "mac": "cmd+[BracketLeft]",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.demoteSelection",
-    "key": "ctrl+[BracketRight]",
-    "win": "ctrl+oem_6",
-    "linux": "ctrl+]",
-    "mac": "cmd+[BracketRight]",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.demoteSelectionFromOutline",
-    "key": "ctrl+[BracketRight]",
-    "win": "ctrl+oem_6",
-    "linux": "ctrl+]",
-    "mac": "cmd+[BracketRight]",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.insertNodeSelection",
-    "key": "ctrl+i",
-    "mac": "cmd+i",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.insertNodeSelectionFromOutline",
-    "key": "ctrl+i",
-    "mac": "cmd+i",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.insertNodeSelectionInterrupt",
-    "key": "ctrl+i",
-    "mac": "cmd+i",
-    "when": "leoTreeOpened &amp;&amp; !sideBarFocus &amp;&amp; !editorTextFocus"
-  },
-  {
-    "command": "leojs.cloneNodeSelection",
-    "key": "ctrl+[Backquote]",
-    "win": "ctrl+oem_7",
-    "linux": "ctrl+'",
-    "mac": "cmd+[Backquote]",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.cloneNodeSelectionFromOutline",
-    "key": "ctrl+[Backquote]",
-    "win": "ctrl+oem_7",
-    "linux": "ctrl+'",
-    "mac": "cmd+[Backquote]",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.cutNodeSelection",
-    "key": "ctrl+shift+x",
-    "mac": "cmd+shift+x",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.cutNodeSelectionFromOutline",
-    "key": "ctrl+shift+x",
-    "mac": "cmd+shift+x",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.copyNodeSelection",
-    "key": "ctrl+shift+c",
-    "mac": "cmd+shift+c",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.copyNodeSelection",
-    "key": "ctrl+shift+c",
-    "mac": "cmd+shift+c",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.pasteNodeAtSelection",
-    "key": "ctrl+shift+v",
-    "mac": "cmd+shift+v",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.pasteNodeAtSelectionFromOutline",
-    "key": "ctrl+shift+v",
-    "mac": "cmd+shift+v",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.deleteSelection",
-    "key": "ctrl+shift+backspace",
-    "mac": "cmd+shift+backspace",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.deleteSelectionFromOutline",
-    "key": "ctrl+shift+backspace",
-    "mac": "cmd+shift+backspace",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.gotoFirstVisible",
-    "key": "alt+home",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.gotoLastSibling",
-    "key": "alt+end",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.gotoFirstVisible",
-    "key": "home",
-    "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.gotoLastVisible",
-    "key": "end",
-    "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.pageUp",
-    "key": "pageup",
-    "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.pageDown",
-    "key": "pagedown",
-    "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.gotoNextCloneSelectionFromOutline",
-    "key": "alt+n",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.gotoNextCloneSelection",
-    "key": "alt+n",
-    "when": "leoTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.gotoNextVisible",
-    "key": "down",
-    "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.gotoNextVisible",
-    "key": "alt+down",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
-  },
-  {
-    "command": "leojs.gotoNextVisible",
-    "key": "alt+down",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.gotoPrevVisible",
-    "key": "up",
-    "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.gotoPrevVisible",
-    "key": "alt+up",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
-  },
-  {
-    "command": "leojs.gotoPrevVisible",
-    "key": "alt+up",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection  &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.contractOrGoLeft",
-    "key": "left",
-    "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.contractOrGoLeft",
-    "key": "alt+left",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
-  },
-  {
-    "command": "leojs.contractOrGoLeft",
-    "key": "alt+left",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  },
-  {
-    "command": "leojs.expandAndGoRight",
-    "key": "right",
-    "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
-  },
-  {
-    "command": "leojs.expandAndGoRight",
-    "key": "alt+right",
-    "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
-  },
-  {
-    "command": "leojs.expandAndGoRight",
-    "key": "alt+right",
-    "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
-  }
+  @others
 ]
 </t>
 <t tx="felix.20201208222541.1">"views": {
