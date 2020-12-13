@@ -293,6 +293,7 @@ import { LeoJs } from './leojs';
 import { JsOutlineProvider } from './leoOutline';
 import { Constants } from './constants';
 import { LeoButtonNode } from './leoButtonNode';
+import { LeoNode } from './leoNode';
 
 @language typescript
 @tabwidth -4
@@ -405,6 +406,7 @@ public static COMMANDS = {
     SAVE_AS_FILE: Constants.NAME + ".saveAsLeoFile",
     CLOSE_FILE: Constants.NAME + ".closeLeoFile",
     MINIBUFFER: Constants.NAME + ".minibuffer",
+    GIT_DIFF: Constants.NAME + ".gitDiff",
     // At-buttons
     CLICK_BUTTON: Constants.NAME + ".clickButton",
     REMOVE_BUTTON: Constants.NAME + ".removeButton",
@@ -644,7 +646,6 @@ export function activate(p_context: vscode.ExtensionContext) {
     utils.setContext(Constants.CONTEXT_FLAGS.LEO_READY, false); // Barely started activating the extension so not ready.
     utils.setContext(Constants.CONTEXT_FLAGS.TREE_OPENED, false); // No Leo file opened yet.
 
-
     const w_leo: LeoJs = new LeoJs(p_context);
 
     // Shortcut pointers for readability
@@ -668,8 +669,6 @@ export function activate(p_context: vscode.ExtensionContext) {
         states: true
     };
 
-
-
     const w_commands: [string, (...args: any[]) =&gt; any][] = [
 
         // ! REMOVE TESTS ENTRIES FROM PACKAGE.JSON FOR MASTER BRANCH RELEASES !
@@ -688,17 +687,7 @@ export function activate(p_context: vscode.ExtensionContext) {
     vscode.commands.executeCommand('setContext', 'leoReady', true);
     vscode.commands.executeCommand('setContext', 'leoTreeOpened', true);
 
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with registerCommand
-    // The commandId parameter must match the command field in package.json
-    let disposable = vscode.commands.registerCommand('leojs.test', () =&gt; {
-        // The code you place here will be executed every time your command is executed
 
-        // Display a message box to the user
-        vscode.window.showInformationMessage('Hello World from leojs!');
-    });
-
-    context.subscriptions.push(disposable);
 }
 
 </t>
@@ -809,13 +798,41 @@ import {
     ShowBodyParam,
 } from "./types";
 import { LeoNode } from "./leoNode";
+import { LeoButtonNode } from "./leoButtonNode";
 /**
  * Implements https://github.com/leo-editor/leo-editor/issues/1025
  */
 export class LeoJs {
 
+    private _bodyMainSelectionColumn: vscode.ViewColumn | undefined; // Column of last body 'textEditor' found, set to 1
+
+    private _bodyTextDocument: vscode.TextDocument | undefined; // Set when selected in tree by user, or opening a Leo file in showBody. and by _locateOpenedBody.
+
+    private _lastTreeView: vscode.TreeView&lt;LeoNode&gt;; // Last visible treeview
+
+    private _lastSelectedNode: LeoNode | undefined; // Last selected node we got a hold of; leoTreeView.selection maybe newer and unprocessed
+    get lastSelectedNode(): LeoNode | undefined {
+        return this._lastSelectedNode;
+    }
+    set lastSelectedNode(p_leoNode: LeoNode | undefined) { // Needs undefined type because it cannot be set in the constructor
+        this._lastSelectedNode = p_leoNode;
+        if (p_leoNode) {
+            utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_MARKED, p_leoNode.marked); // Global context to 'flag' the selected node's marked state
+        }
+    }
+
     constructor(private _context: vscode.ExtensionContext) {
-        //
+        // * Create Leo stand-alone view and Explorer view outline panes
+        // Uses 'select node' command, so 'onDidChangeSelection' is not used
+        this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
+        this._leoTreeView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeView)));
+        this._leoTreeView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeView)));
+        this._leoTreeView.onDidChangeVisibility((p_event =&gt; this._onTreeViewVisibilityChanged(p_event, false))); // * Trigger 'show tree in Leo's view'
+        this._leoTreeExView = vscode.window.createTreeView(Constants.TREEVIEW_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
+        this._leoTreeExView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeExView)));
+        this._leoTreeExView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeExView)));
+        this._leoTreeExView.onDidChangeVisibility((p_event =&gt; this._onTreeViewVisibilityChanged(p_event, true))); // * Trigger 'show tree in explorer view'
+        this._lastTreeView = this.config.treeInExplorer ? this._leoTreeExView : this._leoTreeView;
     }
 
     /**
@@ -858,9 +875,65 @@ export class LeoJs {
         // return Promise.resolve(undefined); // if cancelled
     }
 
-    public closeLeoFile(): void {}
-    public newLeoFile(): void {}
+    public clickAtButton(p_node: LeoButtonNode): void { }
+    public removeAtButton(p_node: LeoButtonNode): void { }
 
+    public closeLeoFile(): void { }
+    public newLeoFile(): void { }
+    public openLeoFile(p_uri?: vscode.Uri): void { }
+    public showRecentLeoFiles(): void { }
+    public saveAsLeoFile(p_fromOutline?: boolean): void { }
+    public saveLeoFile(p_fromOutline?: boolean): void { }
+    public switchLeoFile(): void { }
+    public selectOpenedLeoDocument(p_index: number): void { }
+
+    public editHeadline(p_node?: LeoNode, p_fromOutline?: boolean): void { }
+    public insertNode(p_node?: LeoNode, p_fromOutline?: boolean, p_interrupt?: boolean): void { }
+    public changeMark(p_mark: boolean, p_node?: LeoNode, p_fromOutline?: boolean): void { }
+
+
+    public selectTreeNode(p_node: LeoNode, p_internalCall?: boolean, p_aside?: boolean): void { }
+    public showLogPane(): void { }
+
+    /**
+     * * Show the outline, with Leo's selected node also selected, and optionally focussed
+     * @param p_focusOutline Flag for focus to be placed in outline
+     */
+    public showOutline(p_focusOutline?: boolean): void {
+        if (this.lastSelectedNode) {
+            this._lastTreeView.reveal(this.lastSelectedNode, {
+                select: true,
+                focus: p_focusOutline
+            });
+        }
+    }
+
+    /**
+   * * Opens an an editor for the currently selected node: "this.bodyUri". If already opened, this just 'reveals' it
+   * @param p_aside Flag for opening the editor beside any currently opened and focused editor
+   * @param p_preserveFocus flag that when true will stop the editor from taking focus once opened
+   */
+    public showBody(p_aside: boolean, p_preserveFocus?: boolean): Thenable&lt;vscode.TextEditor | undefined&gt; {
+        const w_showOptions: vscode.TextDocumentShowOptions = p_aside ?
+            {
+                viewColumn: vscode.ViewColumn.Beside,
+                preserveFocus: p_preserveFocus, // an optional flag that when true will stop the editor from taking focus
+                preview: true // should text document be in preview only? set false for fully opened
+                // selection is instead set when the GET_BODY_STATES above resolves
+            } : {
+                viewColumn: this._bodyMainSelectionColumn ? this._bodyMainSelectionColumn : 1, // view column in which the editor should be shown
+                preserveFocus: p_preserveFocus, // an optional flag that when true will stop the editor from taking focus
+                preview: false // should text document be in preview only? set false for fully opened
+                // selection is instead set when the GET_BODY_STATES above resolves
+            };
+
+        // TODO : THIS IS PLACEHOLDER CODE
+        if (this._bodyTextDocument) {
+            return vscode.window.showTextDocument(this._bodyTextDocument, w_showOptions);
+        } else {
+            return Promise.resolve(undefined);
+        }
+    }
 
     /**
      * Test/Dummy command
@@ -3417,263 +3490,64 @@ public refreshTreeRoot(): void {
 
 [CMD.SET_OPENED_FILE, (p_index: number) =&gt; w_leo.selectOpenedLeoDocument(p_index)],
 
-[CMD.REFRESH_FROM_DISK, (p_node: LeoNode) =&gt; w_leo.command(CMD.REFRESH_FROM_DISK, p_node, true, false)],
+[CMD.REFRESH_FROM_DISK, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.REFRESH_FROM_DISK, p_node, REFRESH_TREE_BODY, false)],
 
-[CMD.REFRESH_FROM_DISK_SELECTION, () =&gt; w_leo.command(CMD.REFRESH_FROM_DISK_SELECTION, U, REFRESH_TREE_BODY, false)],
+[CMD.REFRESH_FROM_DISK_SELECTION, () =&gt; w_leo.command(LEOCMD.REFRESH_FROM_DISK, U, REFRESH_TREE_BODY, false)],
 
-[CMD.REFRESH_FROM_DISK_SELECTION_FO, () =&gt; w_leo.command({
-    action: BRIDGE.REFRESH_FROM_DISK_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.GIT_DIFF, () =&gt; w_leo.command({
-    action: BRIDGE.GIT_DIFF,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: false
-})],
+[CMD.REFRESH_FROM_DISK_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.REFRESH_FROM_DISK, U, REFRESH_TREE_BODY, true)],
+
+[CMD.GIT_DIFF, () =&gt; w_leo.command(LEOCMD.GIT_DIFF, U, REFRESH_TREE_BODY, false)],
 
 [CMD.HEADLINE, (p_node: LeoNode) =&gt; w_leo.editHeadline(p_node, true)],
 [CMD.HEADLINE_SELECTION, () =&gt; w_leo.editHeadline(U, false)],
 [CMD.HEADLINE_SELECTION_FO, () =&gt; w_leo.editHeadline(U, true)],
 
 // cut/copy/paste/delete given node.
-[CMD.COPY, (p_node: LeoNode) =&gt; w_leo.command({
-    action: BRIDGE.COPY_PNODE,
-    node: p_node,
-    refreshType: NO_REFRESH,
-    fromOutline: true,
-    keepSelection: true
-})],
-[CMD.CUT, (p_node: LeoNode) =&gt; w_leo.command({
-    action: BRIDGE.CUT_PNODE,
-    node: p_node,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true,
-    keepSelection: true
-})],
-[CMD.DELETE, (p_node: LeoNode) =&gt; w_leo.command({
-    action: BRIDGE.DELETE_PNODE,
-    node: p_node,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true,
-    keepSelection: true
-})],
-[CMD.PASTE, (p_node: LeoNode) =&gt; w_leo.command({
-    action: BRIDGE.PASTE_PNODE,
-    node: p_node,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true,
-    keepSelection: false
-})],
-[CMD.PASTE_CLONE, (p_node: LeoNode) =&gt; w_leo.command({
-    action: BRIDGE.PASTE_CLONE_PNODE,
-    node: p_node,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true,
-    keepSelection: false
-})],
+[CMD.COPY, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.COPY_PNODE, p_node, NO_REFRESH, true, true)],
+[CMD.CUT, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.CUT_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.DELETE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.DELETE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.PASTE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.PASTE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
+[CMD.PASTE_CLONE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.PASTE_CLONE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
 
 // cut/copy/paste/delete current selection (self.commander.p)
-[CMD.COPY_SELECTION, () =&gt; w_leo.command({
-    action: BRIDGE.COPY_PNODE,
-    node: U,
-    refreshType: NO_REFRESH,
-    fromOutline: false
-})],
-[CMD.CUT_SELECTION, () =&gt; w_leo.command({
-    action: BRIDGE.CUT_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: false
-})],
-[CMD.CUT_SELECTION_FO, () =&gt; w_leo.command({
-    action: BRIDGE.CUT_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.DELETE_SELECTION, () =&gt; w_leo.command({
-    action: BRIDGE.DELETE_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: false
-})],
-[CMD.DELETE_SELECTION_FO, () =&gt; w_leo.command({
-    action: BRIDGE.DELETE_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.PASTE_CLONE_SELECTION, () =&gt; w_leo.command({
-    action: BRIDGE.PASTE_CLONE_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: false
-})],
-[CMD.PASTE_CLONE_SELECTION_FO, () =&gt; w_leo.command({
-    action: BRIDGE.PASTE_CLONE_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.PASTE_SELECTION, () =&gt; w_leo.command({
-    action: BRIDGE.PASTE_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: false
-})],
-[CMD.PASTE_SELECTION_FO, () =&gt; w_leo.command({
-    action: BRIDGE.PASTE_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
+[CMD.COPY_SELECTION, () =&gt; w_leo.command(LEOCMD.COPY_PNODE, U, NO_REFRESH, false)],
+[CMD.CUT_SELECTION, () =&gt; w_leo.command(LEOCMD.CUT_PNODE, U, REFRESH_TREE_BODY, false)],
+[CMD.CUT_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.CUT_PNODE, U, REFRESH_TREE_BODY, true)],
+[CMD.DELETE_SELECTION, () =&gt; w_leo.command(LEOCMD.DELETE_PNODE, U, REFRESH_TREE_BODY, false)],
+[CMD.DELETE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.DELETE_PNODE, U, REFRESH_TREE_BODY, true)],
+[CMD.PASTE_CLONE_SELECTION, () =&gt; w_leo.command(LEOCMD.PASTE_CLONE_PNODE, U, REFRESH_TREE_BODY, false)],
+[CMD.PASTE_CLONE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.PASTE_CLONE_PNODE, U, REFRESH_TREE_BODY, true)],
+[CMD.PASTE_SELECTION, () =&gt; w_leo.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, false)],
+[CMD.PASTE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, true)],
 
-[CMD.CONTRACT_ALL, () =&gt; w_leo.command({
-    action: BRIDGE.CONTRACT_ALL,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: false
-})],
-[CMD.CONTRACT_ALL_FO, () =&gt; w_leo.command({
-    action: BRIDGE.CONTRACT_ALL,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.CONTRACT_OR_GO_LEFT, () =&gt; w_leo.command({
-    action: BRIDGE.CONTRACT_OR_GO_LEFT,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.EXPAND_AND_GO_RIGHT, () =&gt; w_leo.command({
-    action: BRIDGE.EXPAND_AND_GO_RIGHT,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
+[CMD.CONTRACT_ALL, () =&gt; w_leo.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, false)],
+[CMD.CONTRACT_ALL_FO, () =&gt; w_leo.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, true)],
+[CMD.CONTRACT_OR_GO_LEFT, () =&gt; w_leo.command(LEOCMD.CONTRACT_OR_GO_LEFT, U, REFRESH_TREE_BODY, true)],
+[CMD.EXPAND_AND_GO_RIGHT, () =&gt; w_leo.command(LEOCMD.EXPAND_AND_GO_RIGHT, U, REFRESH_TREE_BODY, true)],
 
-[CMD.GOTO_NEXT_CLONE, (p_node: LeoNode) =&gt; w_leo.command({
-    action: BRIDGE.GOTO_NEXT_CLONE,
-    node: p_node,
-    refreshType: REFRESH_NODE_BODY,
-    fromOutline: true
-})],
-[CMD.GOTO_NEXT_CLONE_SELECTION, () =&gt; w_leo.command({
-    action: BRIDGE.GOTO_NEXT_CLONE,
-    node: U,
-    refreshType: REFRESH_NODE_BODY,
-    fromOutline: false
-})],
-[CMD.GOTO_NEXT_CLONE_SELECTION_FO, () =&gt; w_leo.command({
-    action: BRIDGE.GOTO_NEXT_CLONE,
-    node: U,
-    refreshType: REFRESH_NODE_BODY,
-    fromOutline: true
-})],
+[CMD.GOTO_NEXT_CLONE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, p_node, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_NEXT_CLONE_SELECTION, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, false)],
+[CMD.GOTO_NEXT_CLONE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, true)],
 
-[CMD.GOTO_NEXT_MARKED, () =&gt; w_leo.command({
-    action: BRIDGE.GOTO_NEXT_MARKED,
-    node: U,
-    refreshType: REFRESH_NODE_BODY,
-    fromOutline: true
-})],
-[CMD.GOTO_FIRST_VISIBLE, () =&gt; w_leo.command({
-    action: BRIDGE.GOTO_FIRST_VISIBLE,
-    node: U,
-    refreshType: REFRESH_NODE_BODY,
-    fromOutline: true
-})],
-[CMD.GOTO_LAST_SIBLING, () =&gt; w_leo.command({
-    action: BRIDGE.GOTO_LAST_SIBLING,
-    node: U,
-    refreshType: REFRESH_NODE_BODY,
-    fromOutline: true
-})],
-[CMD.GOTO_LAST_VISIBLE, () =&gt; w_leo.command({
-    action: BRIDGE.GOTO_LAST_VISIBLE,
-    node: U,
-    refreshType: REFRESH_NODE_BODY,
-    fromOutline: true
-})],
-[CMD.GOTO_NEXT_VISIBLE, () =&gt; w_leo.command({
-    action: BRIDGE.GOTO_NEXT_VISIBLE,
-    node: U,
-    refreshType: REFRESH_NODE_BODY,
-    fromOutline: true
-})],
-[CMD.GOTO_PREV_VISIBLE, () =&gt; w_leo.command({
-    action: BRIDGE.GOTO_PREV_VISIBLE,
-    node: U,
-    refreshType: REFRESH_NODE_BODY,
-    fromOutline: true
-})],
+[CMD.GOTO_NEXT_MARKED, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_MARKED, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_FIRST_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_FIRST_VISIBLE, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_LAST_SIBLING, () =&gt; w_leo.command(LEOCMD.GOTO_LAST_SIBLING, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_LAST_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_LAST_VISIBLE, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_NEXT_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_VISIBLE, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_PREV_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_PREV_VISIBLE, U, REFRESH_NODE_BODY, true)],
 
-[CMD.PAGE_UP, () =&gt; w_leo.command({
-    action: BRIDGE.PAGE_UP,
-    node: U,
-    refreshType: REFRESH_NODE_BODY,
-    fromOutline: true
-})],
-[CMD.PAGE_DOWN, () =&gt; w_leo.command({
-    action: BRIDGE.PAGE_DOWN,
-    node: U,
-    refreshType: REFRESH_NODE_BODY,
-    fromOutline: true
-})],
+[CMD.PAGE_UP, () =&gt; w_leo.command(LEOCMD.PAGE_UP, U, REFRESH_NODE_BODY, true)],
+[CMD.PAGE_DOWN, () =&gt; w_leo.command(LEOCMD.PAGE_DOWN, U, REFRESH_NODE_BODY, true)],
 
-[CMD.DEHOIST, () =&gt; w_leo.command({
-    action: BRIDGE.DEHOIST,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: false
-})],
-[CMD.DEHOIST_FO, () =&gt; w_leo.command({
-    action: BRIDGE.DEHOIST,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.HOIST, (p_node: LeoNode) =&gt; w_leo.command({
-    action: BRIDGE.HOIST_PNODE,
-    node: p_node,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.HOIST_SELECTION, () =&gt; w_leo.command({
-    action: BRIDGE.HOIST_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: false
-})],
-[CMD.HOIST_SELECTION_FO, () =&gt; w_leo.command({
-    action: BRIDGE.HOIST_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: true
-})],
+[CMD.DEHOIST, () =&gt; w_leo.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, false)],
+[CMD.DEHOIST_FO, () =&gt; w_leo.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, true)],
+[CMD.HOIST, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.HOIST_PNODE, p_node, REFRESH_TREE_BODY, true)],
+[CMD.HOIST_SELECTION, () =&gt; w_leo.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, false)],
+[CMD.HOIST_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, true)],
 
-[CMD.CLONE, (p_node: LeoNode) =&gt; w_leo.command({
-    action: BRIDGE.CLONE_PNODE,
-    node: p_node,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.CLONE_SELECTION, () =&gt; w_leo.command({
-    action: BRIDGE.CLONE_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: false
-})],
-[CMD.CLONE_SELECTION_FO, () =&gt; w_leo.command({
-    action: BRIDGE.CLONE_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: true
-})],
+[CMD.CLONE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.CLONE_PNODE, p_node, REFRESH_TREE_BODY, true)],
+[CMD.CLONE_SELECTION, () =&gt; w_leo.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, false)],
+[CMD.CLONE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, true)],
 
 [CMD.INSERT, (p_node: LeoNode) =&gt; w_leo.insertNode(p_node, true)],
 [CMD.INSERT_SELECTION, () =&gt; w_leo.insertNode(U, false)],
@@ -3691,248 +3565,57 @@ public refreshTreeRoot(): void {
 [CMD.UNMARK_SELECTION, () =&gt; w_leo.changeMark(false, U, false)],
 [CMD.UNMARK_SELECTION_FO, () =&gt; w_leo.changeMark(false, U, true)],
 
-[CMD.EXTRACT, () =&gt; w_leo.command({
-    action: BRIDGE.EXTRACT,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: false
-})],
-[CMD.EXTRACT_NAMES, () =&gt; w_leo.command({
-    action: BRIDGE.EXTRACT_NAMES,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: false
-})],
+[CMD.EXTRACT, () =&gt; w_leo.command(LEOCMD.EXTRACT, U, REFRESH_TREE_BODY, false)],
+[CMD.EXTRACT_NAMES, () =&gt; w_leo.command(LEOCMD.EXTRACT_NAMES, U, REFRESH_TREE_BODY, false)],
 
-[CMD.MOVE_DOWN, (p_node: LeoNode) =&gt; w_leo.command({
-    action: BRIDGE.MOVE_PNODE_DOWN,
-    node: p_node,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true,
-    keepSelection: true
-})],
-[CMD.MOVE_DOWN_SELECTION, () =&gt; w_leo.command({
-    action: BRIDGE.MOVE_PNODE_DOWN,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: false
-})],
-[CMD.MOVE_DOWN_SELECTION_FO, () =&gt; w_leo.command({
-    action: BRIDGE.MOVE_PNODE_DOWN,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: true
-})],
+[CMD.MOVE_DOWN, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_DOWN_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, false)],
+[CMD.MOVE_DOWN_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, true)],
 
-[CMD.MOVE_LEFT, (p_node: LeoNode) =&gt; w_leo.command({
-    action: BRIDGE.MOVE_PNODE_LEFT,
-    node: p_node,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true,
-    keepSelection: true
-})],
-[CMD.MOVE_LEFT_SELECTION, () =&gt; w_leo.command({
-    action: BRIDGE.MOVE_PNODE_LEFT,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: false
-})],
-[CMD.MOVE_LEFT_SELECTION_FO, () =&gt; w_leo.command({
-    action: BRIDGE.MOVE_PNODE_LEFT,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: true
-})],
+[CMD.MOVE_LEFT, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_LEFT_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, false)],
+[CMD.MOVE_LEFT_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, true)],
 
-[CMD.MOVE_RIGHT, (p_node: LeoNode) =&gt; w_leo.command({
-    action: BRIDGE.MOVE_PNODE_RIGHT,
-    node: p_node,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true,
-    keepSelection: true
-})],
-[CMD.MOVE_RIGHT_SELECTION, () =&gt; w_leo.command({
-    action: BRIDGE.MOVE_PNODE_RIGHT,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: false
-})],
-[CMD.MOVE_RIGHT_SELECTION_FO, () =&gt; w_leo.command({
-    action: BRIDGE.MOVE_PNODE_RIGHT,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: true
-})],
+[CMD.MOVE_RIGHT, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_RIGHT_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, false)],
+[CMD.MOVE_RIGHT_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, true)],
 
-[CMD.MOVE_UP, (p_node: LeoNode) =&gt; w_leo.command({
-    action: BRIDGE.MOVE_PNODE_UP,
-    node: p_node,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true,
-    keepSelection: true
-})],
-[CMD.MOVE_UP_SELECTION, () =&gt; w_leo.command({
-    action: BRIDGE.MOVE_PNODE_UP,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: false
-})],
-[CMD.MOVE_UP_SELECTION_FO, () =&gt; w_leo.command({
-    action: BRIDGE.MOVE_PNODE_UP,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: true
-})],
+[CMD.MOVE_UP, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_UP_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, false)],
+[CMD.MOVE_UP_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, true)],
 
-[CMD.DEMOTE, (p_node: LeoNode) =&gt; w_leo.command({
-    action: BRIDGE.DEMOTE_PNODE,
-    node: p_node,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true,
-    keepSelection: true
-})],
-[CMD.DEMOTE_SELECTION, () =&gt; w_leo.command({
-    action: BRIDGE.DEMOTE_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: false
-})],
-[CMD.DEMOTE_SELECTION_FO, () =&gt; w_leo.command({
-    action: BRIDGE.DEMOTE_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: true
-})],
-[CMD.PROMOTE, (p_node: LeoNode) =&gt; w_leo.command({
-    action: BRIDGE.PROMOTE_PNODE,
-    node: p_node,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true,
-    keepSelection: true
-})],
-[CMD.PROMOTE_SELECTION, () =&gt; w_leo.command({
-    action: BRIDGE.PROMOTE_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: false
-})],
-[CMD.PROMOTE_SELECTION_FO, () =&gt; w_leo.command({
-    action: BRIDGE.PROMOTE_PNODE,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: true
-})],
+[CMD.DEMOTE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.DEMOTE_SELECTION, () =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, false)],
+[CMD.DEMOTE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, true)],
+[CMD.PROMOTE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.PROMOTE_SELECTION, () =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, false)],
+[CMD.PROMOTE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, true)],
 
-[CMD.SORT_CHILDREN, () =&gt; w_leo.command({
-    action: BRIDGE.SORT_CHILDREN,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: false,
-    keepSelection: true
-})],
-[CMD.SORT_SIBLING, () =&gt; w_leo.command({
-    action: BRIDGE.SORT_SIBLINGS,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: false,
-    keepSelection: true
-})],
-[CMD.SORT_SIBLING_FO, () =&gt; w_leo.command({
-    action: BRIDGE.SORT_SIBLINGS,
-    node: U,
-    refreshType: REFRESH_TREE,
-    fromOutline: true,
-    keepSelection: true
-})],
+[CMD.SORT_CHILDREN, () =&gt; w_leo.command(LEOCMD.SORT_CHILDREN, U, REFRESH_TREE, false, true)],
+[CMD.SORT_SIBLING, () =&gt; w_leo.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, false, true)],
+[CMD.SORT_SIBLING_FO, () =&gt; w_leo.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, true, true)],
 
-[CMD.REDO, () =&gt; w_leo.command({
-    action: BRIDGE.REDO,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: false
-})],
-[CMD.REDO_FO, () =&gt; w_leo.command({
-    action: BRIDGE.REDO,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.UNDO, () =&gt; w_leo.command({
-    action: BRIDGE.UNDO,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: false
-})],
-[CMD.UNDO_FO, () =&gt; w_leo.command({
-    action: BRIDGE.UNDO,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-
-[CMD.CONNECT, () =&gt; w_leo.connect()],
-[CMD.START_SERVER, () =&gt; w_leo.startServer()],
+[CMD.REDO, () =&gt; w_leo.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, false)],
+[CMD.REDO_FO, () =&gt; w_leo.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, true)],
+[CMD.UNDO, () =&gt; w_leo.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, false)],
+[CMD.UNDO_FO, () =&gt; w_leo.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, true)],
 
 // Called by nodes in tree when selected either by mouse, or with enter
 [CMD.SELECT_NODE, (p_node: LeoNode) =&gt; w_leo.selectTreeNode(p_node, false, false)],
 [CMD.OPEN_ASIDE, (p_node: LeoNode) =&gt; w_leo.selectTreeNode(p_node, false, true)],
 
 [CMD.SHOW_OUTLINE, () =&gt; w_leo.showOutline(true)], // Also focuses on outline
-
 [CMD.SHOW_LOG, () =&gt; w_leo.showLogPane()],
 [CMD.SHOW_BODY, () =&gt; w_leo.showBody(false)], // Also focuses on body
 
-[CMD.SHOW_WELCOME, () =&gt; w_leoSettingsWebview.openWebview()],
-[CMD.SHOW_SETTINGS, () =&gt; w_leoSettingsWebview.openWebview()], // Same as SHOW_WELCOME
-
-[CMD.COPY_MARKED, () =&gt; w_leo.command({
-    action: BRIDGE.COPY_MARKED,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.DIFF_MARKED_NODES, () =&gt; w_leo.command({
-    action: BRIDGE.DIFF_MARKED_NODES,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.MARK_CHANGED_ITEMS, () =&gt; w_leo.command({
-    action: BRIDGE.MARK_CHANGED_ITEMS,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.MARK_SUBHEADS, () =&gt; w_leo.command({
-    action: BRIDGE.MARK_SUBHEADS,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.UNMARK_ALL, () =&gt; w_leo.command({
-    action: BRIDGE.UNMARK_ALL,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.CLONE_MARKED_NODES, () =&gt; w_leo.command({
-    action: BRIDGE.CLONE_MARKED_NODES,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.DELETE_MARKED_NODES, () =&gt; w_leo.command({
-    action: BRIDGE.DELETE_MARKED_NODES,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
-[CMD.MOVE_MARKED_NODES, () =&gt; w_leo.command({
-    action: BRIDGE.MOVE_MARKED_NODES,
-    node: U,
-    refreshType: REFRESH_TREE_BODY,
-    fromOutline: true
-})],
+[CMD.COPY_MARKED, () =&gt; w_leo.command(LEOCMD.COPY_MARKED, U, REFRESH_TREE_BODY, true)],
+[CMD.DIFF_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.DIFF_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
+[CMD.MARK_CHANGED_ITEMS, () =&gt; w_leo.command(LEOCMD.MARK_CHANGED_ITEMS, U, REFRESH_TREE_BODY, true)],
+[CMD.MARK_SUBHEADS, () =&gt; w_leo.command(LEOCMD.MARK_SUBHEADS, U, REFRESH_TREE_BODY, true)],
+[CMD.UNMARK_ALL, () =&gt; w_leo.command(LEOCMD.UNMARK_ALL, U, REFRESH_TREE_BODY, true)],
+[CMD.CLONE_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.CLONE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
+[CMD.DELETE_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.DELETE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
+[CMD.MOVE_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.MOVE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
 
 // TODO : @boltex More commands for issue #24
 // [CMD.CLONE_FIND_ALL, () =&gt; showInfo("TODO: cloneFindAll command")],
@@ -3946,6 +3629,61 @@ public refreshTreeRoot(): void {
  */
 public static LEO_COMMANDS = {
     EXECUTE_SCRIPT: "executeScript",
+    REFRESH_FROM_DISK: "refreshFromDisk",
+    GIT_DIFF: "gitDiff",
+    // Goto operations
+    PAGE_UP: "pageUp",
+    PAGE_DOWN: "pageDown",
+    GOTO_FIRST_VISIBLE: "goToFirstVisibleNode",
+    GOTO_LAST_VISIBLE: "goToLastVisibleNode",
+    GOTO_LAST_SIBLING: "goToLastSibling",
+    GOTO_NEXT_VISIBLE: "selectVisNext",
+    GOTO_PREV_VISIBLE: "selectVisBack",
+    GOTO_NEXT_MARKED: "goToNextMarkedHeadline",
+    GOTO_NEXT_CLONE: "goToNextClone",
+    CONTRACT_OR_GO_LEFT: "contractNodeOrGoToParent",
+    EXPAND_AND_GO_RIGHT: "expandNodeAndGoToFirstChild",
+    CONTRACT_ALL: "contractAllHeadlines",
+    // Leo Operations
+    MARK_PNODE: "markPNode",
+    UNMARK_PNODE: "unmarkPNode",
+    COPY_PNODE: "copyOutline",
+    CUT_PNODE: "cutPNode",
+    PASTE_PNODE: "pasteOutline",
+    PASTE_CLONE_PNODE: "pasteOutlineRetainingClones",
+    DELETE_PNODE: "deletePNode",
+    MOVE_PNODE_DOWN: "moveOutlineDown",
+    MOVE_PNODE_LEFT: "moveOutlineLeft",
+    MOVE_PNODE_RIGHT: "moveOutlineRight",
+    MOVE_PNODE_UP: "moveOutlineUp",
+    INSERT_PNODE: "insertPNode",
+    INSERT_NAMED_PNODE: "insertNamedPNode",
+    CLONE_PNODE: "clonePNode",
+    PROMOTE_PNODE: "promote",
+    DEMOTE_PNODE: "demote",
+    REFRESH_FROM_DISK_PNODE: "refreshFromDisk",
+    SORT_CHILDREN: "sortChildren",
+    SORT_SIBLINGS: "sortSiblings",
+    UNDO: "undo",
+    REDO: "redo",
+    GET_STATES: "getStates",
+    HOIST_PNODE: "hoist",
+    DEHOIST: "dehoist",
+    EXTRACT: "extract",
+    EXTRACT_NAMES: "extractNames",
+    COPY_MARKED: "copyMarked",
+    DIFF_MARKED_NODES: "deleteMarked",
+    MARK_CHANGED_ITEMS: "markChangedHeadlines",
+    MARK_SUBHEADS: "markSubheads",
+    UNMARK_ALL: "unmarkAll",
+    CLONE_MARKED_NODES: "cloneMarked",
+    DELETE_MARKED_NODES: "deleteMarked",
+    MOVE_MARKED_NODES: "moveMarked",
+    // Clone-find functionality
+    CLONE_FIND_ALL: "cloneFindAll",
+    CLONE_FIND_ALL_FLATTENED: "cloneFindAllFlattened",
+    CLONE_FIND_MARKED: "cloneFindMarked",
+    CLONE_FIND_FLATTENED_MARKED: "cloneFindFlattenedMarked",
 };
 
 </t>
