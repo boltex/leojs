@@ -476,29 +476,8 @@
 </t>
 <t tx="ekr.20201210033824.1">@others
 </t>
-<t tx="ekr.20201210083337.1"></t>
-<t tx="ekr.20201210083358.1">@language rest
-@wrap
-
-https://github.com/boltex/leojs/issues/10
-
-Careful!
-- Must add "outer" lines somewhere!
-- Do *not* alphabetize nodes on first commit.
-
-@language python
-@nosearch
-</t>
-<t tx="ekr.20201210094645.1">import leo.commands.editFileCommands as efc
-import os
-
-x = efc.GitDiffController(c)
-x.diff_pull_request(directory=os.curdir)
-</t>
 <t tx="ekr.20201211090458.1">@language rest
 @wrap
-
-- Finish scripts in leo.js.
 
 First project:
 - Start with .leo file chooser.
