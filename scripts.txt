@@ -145,7 +145,7 @@ import os
 
 x = efc.GitDiffController(c)
 x.diff_pull_request(directory=os.curdir)
-#@+node:ekr.20201209152713.1: ** script: split contributes/commands (works)
+#@+node:ekr.20201209152713.1: ** script: split contributes/commands (completed)
 """
 Split the "commands" node of the "contributes" section into separate nodes.
 
@@ -158,6 +158,7 @@ Inner entries have the form:
   },
 """
 g.cls()
+assert False, "Don't run this script again"
 outer_parent_h = '@clean package.json'
 outer_parent = g.findNodeAnywhere(c, outer_parent_h)
 assert outer_parent, f"Not found: {outer_parent_h}"
@@ -197,7 +198,7 @@ for i, line in enumerate(g.splitLines(root.b)):
         assert line_s.endswith('[') or line_s.startswith('],'), (i, repr(line))
         # print('OUTSIDE', repr(line))
 c.redraw()
-#@+node:ekr.20201210041738.1: ** script: split contributes/menus (partially works)
+#@+node:ekr.20201210041738.1: ** script: split contributes/menus (works)
 """
 Split the "menus" node of the "contributes" section into separate nodes.
 
@@ -209,6 +210,7 @@ Inner entries have the form:
   },
 """
 g.cls()
+assert False, "Do not run this script again"
 outer_parent_h = '@clean package.json'
 outer_parent = g.findNodeAnywhere(c, outer_parent_h)
 assert outer_parent, f"Not found: {outer_parent_h}"
@@ -226,20 +228,20 @@ for child in menus_p.children():
     command_lines, level = [], 0
     for i, line in enumerate(g.splitLines(child.b)):
         line_s = line.strip()
-        # print(line_s)
         if command_lines:  # Accumulating a new node.
-            command_lines.append(line)
+            assert line.startswith('  '), repr(line)
+            command_lines.append(line[2:])
             if line_s.endswith(('}', '},')):
                 level -= 1
                 if level == 0:
                     # End of command.
                     p = parent.insertAsLastChild()
                     h = command_lines[1].strip()
-                    head = '"command": "leojs.'
-                    assert h.startswith(head), (i, repr(h))
+                    prefix = '"command": "leojs.'
+                    assert h.startswith(prefix), (i, repr(h))
                     if h.endswith(','): h = h[:-1]
                     if h.endswith('"'): h = h[:-1]
-                    p.h = h[len(head):]
+                    p.h = h[len(prefix):]
                     p.b = ''.join(command_lines)
                     # g.printObj(command_lines)
                     command_lines = []
@@ -248,12 +250,15 @@ for child in menus_p.children():
             else:
                 pass
         elif line_s.endswith('{'):
+            # Start a new command.
             level = 1
-            command_lines = [line]
+            assert line.startswith('  '), repr(line)
+            command_lines.append(line[2:])
         elif line_s:
             assert line_s.endswith(('[', ']')) or line_s.startswith('],'), (i, repr(line))
             # print('OUTSIDE', repr(line))
     c.redraw()
+print('done')
 #@+node:ekr.20201210041817.1: ** script: split contributes/keybindings (new)
 g.es_print('not ready', p.h)  # Changed.
 #@+node:ekr.20201210035719.1: ** script: diff-pr
