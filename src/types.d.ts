@@ -80,6 +80,14 @@ export interface ArchivedPosition {
 }
 
 /**
+ * * Leo '@button' structure used in the '@buttons' tree view provider
+ */
+export interface LeoButton {
+    name: string;
+    index: string; // STRING KEY
+}
+
+/**
  * * Icon path names used in leoNodes for rendering in treeview
  */
 export interface Icon {
