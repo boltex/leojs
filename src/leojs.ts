@@ -21,7 +21,7 @@ import { LeoDocumentsProvider } from "./leoDocuments";
 import { LeoStates } from "./leoStates";
 
 /**
- * Implements https://github.com/leo-editor/leo-editor/issues/1025
+ * Creates and manages instances of the UI elements along with their events
  */
 export class LeoJs {
     // * State flags
@@ -48,7 +48,7 @@ export class LeoJs {
     get lastSelectedNode(): LeoNode | undefined {
         return this._lastSelectedNode;
     }
-    set lastSelectedNode(p_leoNode: LeoNode | undefined) { // Needs undefined type because it cannot be set in the constructor
+    set lastSelectedNode(p_leoNode: LeoNode | undefined) { // Needs undefined: cannot be set in the constructor
         this._lastSelectedNode = p_leoNode;
         if (p_leoNode) {
             utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_MARKED, p_leoNode.marked); // Global context to 'flag' the selected node's marked state
@@ -126,7 +126,6 @@ export class LeoJs {
         this.getStates = debounce(this._triggerGetStates, Constants.STATES_DEBOUNCE_DELAY);
         this.refreshDocumentsPane = debounce(this._refreshDocumentsPane, Constants.DOCUMENTS_DEBOUNCE_DELAY);
     }
-
     /**
      * 'getStates' action for use in debounced method call
      */
@@ -144,6 +143,18 @@ export class LeoJs {
             // this.leoStates.setLeoStateFlags(this._leoStates); //
         }
     }
+    /**
+     * * Show the outline, with Leo's selected node also selected, and optionally focussed
+     * @param p_focusOutline Flag for focus to be placed in outline
+     */
+    public showOutline(p_focusOutline?: boolean): void {
+        if (this.lastSelectedNode) {
+            this._lastTreeView.reveal(this.lastSelectedNode, {
+                select: true,
+                focus: p_focusOutline
+            });
+        }
+    }
 
     /**
      * Public method to refresh the documents pane
@@ -151,54 +162,6 @@ export class LeoJs {
      */
     private _refreshDocumentsPane(): void {
         this._leoDocumentsProvider.refreshTreeRoot();
-    }
-
-
-    /**
-     * * Handles the node expanding and collapsing interactions by the user in the treeview
-     * @param p_event The event passed by vscode
-     * @param p_expand True if it was an expand, false if it was a collapse event
-     * @param p_treeView Pointer to the treeview itself, either the standalone treeview or the one under the explorer
-     */
-    private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent<LeoNode>, p_expand: boolean, p_treeView: vscode.TreeView<LeoNode>): void {
-        // * Expanding or collapsing via the treeview interface selects the node to mimic Leo
-    }
-
-    /**
-     * * Handle the change of visibility of either outline treeview and refresh it if its visible
-     * @param p_event The treeview-visibility-changed event passed by vscode
-     * @param p_explorerView Flag to signify that the treeview who triggered this event is the one in the explorer view
-     */
-    private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
-        if (p_event.visible) {
-            this._lastTreeView = p_explorerView ? this._leoTreeExView : this._leoTreeView;
-            //  this._refreshOutline(true, RevealType.RevealSelect);
-        }
-    }
-
-
-    /**
-     * * Handle the change of visibility of either outline treeview and refresh it if its visible
-     * @param p_event The treeview-visibility-changed event passed by vscode
-     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
-     */
-    private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
-        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
-        if (p_event.visible) {
-            this.refreshDocumentsPane();
-        }
-    }
-
-    /**
-     * * Handle the change of visibility of either outline treeview and refresh it if its visible
-     * @param p_event The treeview-visibility-changed event passed by vscode
-     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
-     */
-    private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
-        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
-        if (p_event.visible) {
-            this._leoButtonsProvider.refreshTreeRoot();
-        }
     }
 
     /**
@@ -230,6 +193,55 @@ export class LeoJs {
         }, 0);
     }
 
+    /**
+     * * Handles the node expanding and collapsing interactions by the user in the treeview
+     * @param p_event The event passed by vscode
+     * @param p_expand True if it was an expand, false if it was a collapse event
+     * @param p_treeView Pointer to the treeview itself, either the standalone treeview or the one under the explorer
+     */
+    private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent<LeoNode>, p_expand: boolean, p_treeView: vscode.TreeView<LeoNode>): void {
+        // * Expanding or collapsing via the treeview interface selects the node to mimic Leo
+    }
+
+    /**
+     * * Handle the change of visibility of either outline treeview and refresh it if its visible
+     * @param p_event The treeview-visibility-changed event passed by vscode
+     * @param p_explorerView Flag to signify that the treeview who triggered this event is the one in the explorer view
+     */
+    private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
+        if (p_event.visible) {
+            this._lastTreeView = p_explorerView ? this._leoTreeExView : this._leoTreeView;
+            //  this._refreshOutline(true, RevealType.RevealSelect);
+        }
+    }
+
+    /**
+     * * Handle the change of visibility of either outline treeview and refresh it if its visible
+     * @param p_event The treeview-visibility-changed event passed by vscode
+     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
+     */
+    private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
+        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
+        if (p_event.visible) {
+            this.refreshDocumentsPane();
+        }
+    }
+
+    /**
+     * * Handle the change of visibility of either outline treeview and refresh it if its visible
+     * @param p_event The treeview-visibility-changed event passed by vscode
+     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
+     */
+    private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
+        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
+        if (p_event.visible) {
+            this._leoButtonsProvider.refreshTreeRoot();
+        }
+    }
+
+
+    public selectTreeNode(p_node: LeoNode, p_internalCall?: boolean, p_aside?: boolean): void { }
+        
     /**
      * Leo Command
      * @param p_cmd Command name string
@@ -270,9 +282,11 @@ export class LeoJs {
         // return Promise.resolve(undefined); // if cancelled
     }
 
+    public editHeadline(p_node?: LeoNode, p_fromOutline?: boolean): void { }
+    public insertNode(p_node?: LeoNode, p_fromOutline?: boolean, p_interrupt?: boolean): void { }
+    public changeMark(p_mark: boolean, p_node?: LeoNode, p_fromOutline?: boolean): void { }
     public clickAtButton(p_node: LeoButtonNode): void { }
     public removeAtButton(p_node: LeoButtonNode): void { }
-
     public closeLeoFile(): void { }
     public newLeoFile(): void { }
     public openLeoFile(p_uri?: vscode.Uri): void { }
@@ -281,28 +295,6 @@ export class LeoJs {
     public saveLeoFile(p_fromOutline?: boolean): void { }
     public switchLeoFile(): void { }
     public selectOpenedLeoDocument(p_index: number): void { }
-
-    public editHeadline(p_node?: LeoNode, p_fromOutline?: boolean): void { }
-    public insertNode(p_node?: LeoNode, p_fromOutline?: boolean, p_interrupt?: boolean): void { }
-    public changeMark(p_mark: boolean, p_node?: LeoNode, p_fromOutline?: boolean): void { }
-
-
-    public selectTreeNode(p_node: LeoNode, p_internalCall?: boolean, p_aside?: boolean): void { }
-    public showLogPane(): void { }
-
-    /**
-     * * Show the outline, with Leo's selected node also selected, and optionally focussed
-     * @param p_focusOutline Flag for focus to be placed in outline
-     */
-    public showOutline(p_focusOutline?: boolean): void {
-        if (this.lastSelectedNode) {
-            this._lastTreeView.reveal(this.lastSelectedNode, {
-                select: true,
-                focus: p_focusOutline
-            });
-        }
-    }
-
     /**
     * * Opens an an editor for the currently selected node: "this.bodyUri". If already opened, this just 'reveals' it
     * @param p_aside Flag for opening the editor beside any currently opened and focused editor
@@ -329,7 +321,7 @@ export class LeoJs {
             return Promise.resolve(undefined);
         }
     }
-
+    public showLogPane(): void { }
     /**
      * Test/Dummy command
      * @returns Thenable from the tested functionality
@@ -338,4 +330,6 @@ export class LeoJs {
         console.log("Test called!");
         return Promise.resolve(true);
     }
+    
+
 }
