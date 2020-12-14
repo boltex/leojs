@@ -1,5 +1,5 @@
 #@+leo-ver=5-thin
-#@+node:ekr.20201210035538.1: * @file scripts.txt
+#@+node:ekr.20201214084854.1: * @file scripts.txt
 #@@language python
 """
 This file contains @button nodes and other scripts for use in leojs.leo.
@@ -9,7 +9,7 @@ This file reduces git diffs agains leojs.leo itself.
 This file has a .txt extension to avoid warnings from pyflakes.
 """
 #@+others
-#@+node:ekr.20201209145256.2: ** @button backup
+#@+node:ekr.20201214084854.2: ** @button backup
 """
 Back up files to ~/Backup/leojs, preserving os.curdir.
 """
@@ -19,7 +19,7 @@ backup_dir = g.get_backup_path('leojs')
 stamp = g.standard_timestamp()
 # Functions...
 #@+others
-#@+node:ekr.20201212180934.1: *3* function: main
+#@+node:ekr.20201214084854.3: *3* function: main
 def main():
     if not backup_dir:
         print('No backup directory')
@@ -32,7 +32,7 @@ def main():
         g.es_exception()
     finally:
         os.chdir(old_cwd)
-#@+node:ekr.20201211112621.1: *3* function: backup_file
+#@+node:ekr.20201214084854.4: *3* function: backup_file
 def backup_file(filename):
     """Back up the file to ~/Backup/leojs"""
     branch, commit = g.gitInfo(filename)
@@ -50,7 +50,7 @@ def backup_file(filename):
     g.es_print(f"wrote: {write_path}")
 #@-others
 main()
-#@+node:ekr.20201209145330.1: ** @button write-leojs
+#@+node:ekr.20201214084854.5: ** @button write-leojs
 """
 Update leojs.leo from the given list of nodes.
 
@@ -59,7 +59,7 @@ This must be run from myLeojs.leo.
 g.cls()
 import os
 #@+others
-#@+node:ekr.20201209145330.2: *3* check_file_names
+#@+node:ekr.20201214084854.6: *3* check_file_names
 def check_file_names():
     """
     Return the path to leojs.leo.
@@ -77,7 +77,7 @@ def check_file_names():
         oops(f"Not found: {path}")
         return None
     return os.path.normpath(path)
-#@+node:ekr.20201209145330.3: *3* check_nodes
+#@+node:ekr.20201214084854.7: *3* check_nodes
 def check_nodes(node_list):
     """Return True if all nodes are found."""
     result = []
@@ -89,7 +89,7 @@ def check_nodes(node_list):
             oops(f"Top-level node {node} not found")
             return []
     return result
-#@+node:ekr.20201209145330.4: *3* get_content
+#@+node:ekr.20201214084854.8: *3* get_content
 def get_content(positions_list):
     """
     Return the desired contents of leoPyRef.leo.
@@ -116,7 +116,7 @@ def get_content(positions_list):
     fc.putTnodes()
     fc.putPostlog()
     return fc.outputFile.getvalue()
-#@+node:ekr.20201209145330.5: *3* main
+#@+node:ekr.20201214084854.9: *3* main
 def main(node_list):
     """The main line."""
     c.endEditing()
@@ -131,7 +131,7 @@ def main(node_list):
         f.write(content)
     print('')
     g.es_print(f"Updated {path}")
-#@+node:ekr.20201209145330.6: *3* oops
+#@+node:ekr.20201214084854.10: *3* oops
 def oops(message):
     """Print an error message"""
     print('')
@@ -139,13 +139,13 @@ def oops(message):
     print('')
 #@-others
 main(node_list = ['Startup', 'Documentation', 'Code'])
-#@+node:ekr.20201210092221.1: ** @button diff-pr
+#@+node:ekr.20201214084854.11: ** @button diff-pr
 import leo.commands.editFileCommands as efc
 import os
 
 x = efc.GitDiffController(c)
 x.diff_pull_request(directory=os.curdir)
-#@+node:ekr.20201209152713.1: ** script: split contributes/commands (completed)
+#@+node:ekr.20201214084854.12: ** script: split contributes/commands (completed)
 """
 Split the "commands" node of the "contributes" section into separate nodes.
 
@@ -158,7 +158,7 @@ Inner entries have the form:
   },
 """
 g.cls()
-assert False, "Don't run this script again"
+assert False, "Don't run this script again"  ###
 outer_parent_h = '@clean package.json'
 outer_parent = g.findNodeAnywhere(c, outer_parent_h)
 assert outer_parent, f"Not found: {outer_parent_h}"
@@ -198,12 +198,12 @@ for i, line in enumerate(g.splitLines(root.b)):
         assert line_s.endswith('[') or line_s.startswith('],'), (i, repr(line))
         # print('OUTSIDE', repr(line))
 c.redraw()
-#@+node:ekr.20201210041738.1: ** script: split contributes/menus (completed)
+#@+node:ekr.20201214084854.13: ** script: split contributes/menus (completed)
 """
 Split the "menus" node of the "contributes" section into separate nodes.
 """
 g.cls()
-assert False, "Do not run this script again"
+assert False, "Do not run this script again"  ###
 outer_parent_h = '@clean package.json'
 outer_parent = g.findNodeAnywhere(c, outer_parent_h)
 assert outer_parent, f"Not found: {outer_parent_h}"
@@ -252,12 +252,12 @@ for child in menus_p.children():
             # print('OUTSIDE', repr(line))
     c.redraw()
 print('done')
-#@+node:ekr.20201210041817.1: ** script: split contributes/keybindings (completed)
+#@+node:ekr.20201214084854.14: ** script: split contributes/keybindings (completed)
 """
 Split the "keybindings" node of the "contributes" section into separate nodes.
 """
 # g.cls()
-assert False, "Do not do this script again"
+assert False, "Do not do this script again"  ###
 outer_parent_h = '@clean package.json'
 outer_parent = g.findNodeAnywhere(c, outer_parent_h)
 assert outer_parent, f"Not found: {outer_parent_h}"
@@ -300,11 +300,11 @@ for i, line in enumerate(g.splitLines(keybindings_p.b)):
         # print('OUTSIDE', repr(line))
 c.redraw()
 print('done')
-#@+node:ekr.20201210035719.1: ** script: diff-pr
+#@+node:ekr.20201214084854.15: ** script: diff-pr
 import leo.commands.editFileCommands as efc
 x = efc.GitDiffController(c)
 x.diff_pull_request(branch_name = 'package.json')
-#@+node:ekr.20201213061102.1: ** script: unindent-tree
+#@+node:ekr.20201214084854.16: ** script: unindent-tree
 """Unindent body text of selected tree by 2 spaces."""
 g.cls()
 h = 'commands'
