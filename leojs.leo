@@ -473,13 +473,57 @@
 "tslint": "^6.1.3",
 "webpack": "^4.44.1",
 "webpack-cli": "^3.3.12"
-  },
-  "dependencies": {
-"@types/debounce": "^1.2.0",
-"debounce": "^1.2.0"
 </t>
 <t tx="ekr.20201210033824.1">@others
 </t>
+<t tx="ekr.20201211090458.1">@language rest
+@wrap
+
+First project:
+- Start with .leo file chooser.
+
+Study:
+- Study: Typing composition system in typescript.
+  (how to define types for objects and variables etc.)
+- Look at github actions and projects.
+- Learn about vs-code unit testing.</t>
+<t tx="ekr.20201211090458.2">@language rest
+@wrap
+
+My first recommendation for building good vscode extension development knowledge is to 'git clone' this repo on your pc : https://github.com/microsoft/vscode-extension-samples
+
+tip: do not open the whole thing in vscode, instead, right click one of the subfolders for a particular extension example, choose "open with vscode" and try out or look at the code for a project 'individually'. (to actually run and try a sample instead of just looking at its source code, in each case, a simple "npm install" in the terminal will install all dependencies for any particular example, and then hitting F5 will start the sample in its own window. But you know that already for finishing the basics tutorials ;)  hehe)
+
+It gives good examples for distinct and precise aspects of vscode without overwhelming aspects of a full-blown extension which tries to do a dozen things at once.</t>
+<t tx="ekr.20201211090458.3">When running this in leointegration.ts:
+
+
+public test(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+    // return this.statusBarOnClick();
+    let a = 2;
+    console.log("initial test call");
+    eval("console.log(a)");
+
+
+I see:
+
+    initial test call 
+    2 
+
+in the console! :)</t>
+<t tx="ekr.20201211090458.4">c:\leo.repo\leojs&gt;c:\apps\Git\bin\git.exe push
+Counting objects: 2, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (2/2), 304 bytes | 304.00 KiB/s, done.
+Total 2 (delta 1), reused 0 (delta 0)
+remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+remote: error: GH006: Protected branch update failed for refs/heads/devel.
+remote: error: At least 1 approving review is required by reviewers with write access.
+To https://github.com/boltex/leojs.git
+   34e049d..6b293e0  package.json -&gt; package.json
+ ! [remote rejected] devel -&gt; devel (protected branch hook declined)
+error: failed to push some refs to 'https://github.com/boltex/leojs.git'</t>
 <t tx="ekr.20201213060317.10">{
   "command": "leojs.recentLeoFiles",
   "category": "Leo",
@@ -2625,6 +2669,10 @@ import { LeoNode } from './leoNode';
   },
   "devDependencies": {
     &lt;&lt; devDependencies &gt;&gt;
+  },
+  "dependencies": {
+    "@types/debounce": "^1.2.0",
+    "debounce": "^1.2.0"
   }
 }
 </t>
