@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
 import * as utils from "./utils";
 import { Constants } from "./constants";
-import { LeoIntegration } from "./leoIntegration";
+import { LeoJs } from "./leojs";
+
 
 /**
  * * Statusbar indicator controller service
@@ -24,14 +25,14 @@ export class LeoStatusBar {
 
     constructor(
         private _context: vscode.ExtensionContext,
-        private _leoIntegration: LeoIntegration
+        private _leoJs: LeoJs
     ) {
         this._leoStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
-        this._leoStatusBarItem.color = this._leoIntegration.config.statusBarColor;
+        this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
 
         // this._leoStatusBarItem.command = Constants.COMMANDS.SWITCH_FILE;
         this._leoStatusBarItem.command = "leointeg.test"; // just call test function for now to help debugging
-        this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR + this._leoIntegration.config.statusBarString;
+        this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR;
         this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_ON;
         _context.subscriptions.push(this._leoStatusBarItem);
         this._leoStatusBarItem.hide();
@@ -100,12 +101,12 @@ export class LeoStatusBar {
         utils.setContext(Constants.CONTEXT_FLAGS.LEO_SELECTED, !!this.statusBarFlag);
 
         this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR +
-            (this._string ? this._string : this._leoIntegration.config.statusBarString) + " " +
-            (this._leoIntegration.leoStates.leoOpenedFileName ? utils.getFileFromPath(this._leoIntegration.leoStates.leoOpenedFileName) : Constants.UNTITLED_FILE_NAME);
+            (this._string ? this._string : '') + " " +
+            (this._leoJs.leoStates.leoOpenedFileName ? utils.getFileFromPath(this._leoJs.leoStates.leoOpenedFileName) : Constants.UNTITLED_FILE_NAME);
 
         // Also check in constructor for statusBar properties (the createStatusBarItem call itself)
-        if (this.statusBarFlag && this._leoIntegration.leoStates.fileOpenedReady) {
-            this._leoStatusBarItem.color = "#" + this._leoIntegration.config.statusBarColor;
+        if (this.statusBarFlag && this._leoJs.leoStates.fileOpenedReady) {
+            this._leoStatusBarItem.color = "#" + Constants.GUI.STATUSBAR_COLOR;
             this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_ON;
         } else {
             this._leoStatusBarItem.color = this._statusbarNormalColor;

@@ -30,7 +30,23 @@
 </v>
 <v t="felix.20201208214322.1"><vh>@clean src/extension.ts</vh>
 <v t="felix.20201208215613.1"><vh>activate</vh>
-<v t="felix.20201212152138.1"><vh>&lt;&lt; Define entries for all commands &gt;&gt;</vh></v>
+<v t="felix.20201212152138.1"><vh>&lt;&lt; Define entries for all commands &gt;&gt;</vh>
+<v t="felix.20201213214955.1"><vh>Scripting &amp; @buttons</vh></v>
+<v t="felix.20201213215037.1"><vh>Leo File Documents</vh></v>
+<v t="felix.20201213223428.1"><vh>Headline Editing</vh></v>
+<v t="felix.20201213223452.1"><vh>Node Editing</vh></v>
+<v t="felix.20201213230148.1"><vh>Tree View Interaction</vh></v>
+<v t="felix.20201213230202.1"><vh>Goto Nodes</vh></v>
+<v t="felix.20201213230208.1"><vh>Hoisting</vh></v>
+<v t="felix.20201213230549.1"><vh>Outline Editing</vh></v>
+<v t="felix.20201213230722.1"><vh>Mark/Unmark</vh></v>
+<v t="felix.20201213230740.1"><vh>Body Editing</vh></v>
+<v t="felix.20201213230753.1"><vh>Move Nodes</vh></v>
+<v t="felix.20201213230856.1"><vh>Undo</vh></v>
+<v t="felix.20201213231052.1"><vh>Show UI panes</vh></v>
+<v t="felix.20201213231111.1"><vh>Marked Nodes Commands</vh></v>
+<v t="felix.20201213231131.1"><vh>Clone Find Commands</vh></v>
+</v>
 </v>
 <v t="felix.20201208215619.1"><vh>deactivate</vh></v>
 </v>
@@ -92,7 +108,6 @@
 <v t="felix.20201212205523.1"><vh>@clean src/leoStates.ts</vh>
 <v t="felix.20201212205523.2"><vh>class LeoStates</vh>
 <v t="felix.20201212205523.3"><vh>General State Flags</vh>
-<v t="felix.20201212205523.4"><vh>leoBridgeReady &amp; helper</vh></v>
 <v t="felix.20201212205523.5"><vh>fileOpenedReady &amp; helper</vh></v>
 <v t="felix.20201212205523.6"><vh>leoOpenedFileName</vh></v>
 <v t="felix.20201212205523.7"><vh>leoChanged &amp; helper</vh></v>
@@ -132,7 +147,8 @@
 <v t="felix.20201208224420.5"><vh>RefreshType</vh></v>
 <v t="felix.20201208224420.6"><vh>UserCommand</vh></v>
 <v t="felix.20201208224420.7"><vh>ShowBodyParam</vh></v>
-<v t="felix.20201208224420.10"><vh>ArchivedPosition</vh></v>
+<v t="felix.20201213171536.1"><vh>LeoPackageStates</vh></v>
+<v t="felix.20201213211652.1"><vh>LeoDocument</vh></v>
 <v t="felix.20201212210637.1"><vh>LeoButton</vh></v>
 <v t="felix.20201208224420.16"><vh>Icon</vh></v>
 <v t="felix.20201208224420.20"><vh>showSaveAsDialogParameters</vh></v>
@@ -159,6 +175,7 @@
 </v>
 <v t="felix.20201208214449.1"><vh>@clean package.json</vh>
 <v t="ekr.20201210033824.1"><vh>&lt;&lt; contributes &gt;&gt;</vh>
+<v t="felix.20201213234300.1"><vh>viewsContainers</vh></v>
 <v t="felix.20201208222541.1"><vh>views</vh></v>
 <v t="felix.20201208221211.1"><vh>viewsWelcome</vh></v>
 <v t="felix.20201208220441.1"><vh>commands</vh>
@@ -261,7 +278,7 @@
 "OldLint": "eslint src --ext ts",
 "test": "node ./out/test/runTest.js"
 </t>
-<t tx="ekr.20201210033804.1">"@types/vscode": "^1.51.0",
+<t tx="ekr.20201210033804.1">"@types/vscode": "^1.52.0",
 "@types/glob": "^7.1.3",
 "@types/mocha": "^8.0.0",
 "@types/node": "^12.11.7",
@@ -290,7 +307,6 @@ Literate Editor with Outline _in Typescript_ version 0.1.00
 import * as utils from "./utils";
 import { ReqRefresh } from "./types";
 import { LeoJs } from './leojs';
-import { JsOutlineProvider } from './leoOutline';
 import { Constants } from './constants';
 import { LeoButtonNode } from './leoButtonNode';
 import { LeoNode } from './leoNode';
@@ -304,11 +320,17 @@ import { LeoNode } from './leoNode';
 @tabwidth -2
 {
   "name": "leojs",
-  "displayName": "leojs",
-  "description": "Leo's kernel in Typescript",
+  "displayName": "Leo Editor for Visual Studio Code",
+  "description": "Leo, the literate editor with outline extension for Visual Studio Code.",
   "version": "0.1.0",
+  "publisher": "boltex",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/boltex/leointeg"
+  },
   "engines": {
-    "vscode": "^1.51.0"
+    "vscode": "^1.52.0"
   },
   "keywords": [
     "leo",
@@ -387,7 +409,12 @@ public static CONTEXT_FLAGS = {
     NODE_ATFILE: "leoNodeAtFile", // Selected node is an @file or @clean, etc...
     NODE_CLONED: "leoNodeCloned",
     NODE_ROOT: "leoNodeRoot",
-    NODE_NOT_ROOT: "leoNodeNotRoot"
+    NODE_NOT_ROOT: "leoNodeNotRoot",
+    // Flags for Leo documents tree view icons and hover node command buttons
+    DOCUMENT_SELECTED_TITLED: "leoDocumentSelectedTitled",
+    DOCUMENT_TITLED: "leoDocumentTitled",
+    DOCUMENT_SELECTED_UNTITLED: "leoDocumentSelectedUntitled",
+    DOCUMENT_UNTITLED: "leoDocumentUntitled",
 };
 
 </t>
@@ -528,25 +555,26 @@ export class Constants {
 </t>
 <t tx="felix.20201208215536.3">public static NAME: string = "leojs";
 
+public static TREEVIEW_ID: string = "leojs";
 public static TREEVIEW_EXPLORER_ID: string = "leojsExplorer";
 
+public static DOCUMENTS_ID: string = "leoDocuments";
+public static DOCUMENTS_EXPLORER_ID: string = "leoDocumentsExplorer";
+
+public static BUTTONS_ID: string = "leoButtons";
+public static BUTTONS_EXPLORER_ID: string = "leoButtonsExplorer";
+
 public static FILE_EXTENSION: string = "leo";
-
 public static URI_LEO_SCHEME: string = "leo";
-
 public static URI_FILE_SCHEME: string = "file";
-
 public static URI_SCHEME_HEADER: string = "leo:/";
-
 public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files";
-
 public static UNTITLED_FILE_NAME: string = "untitled";
-
 public static RECENT_FILES_KEY: string = "leoRecentFiles";
-
 public static LAST_FILES_KEY: string = "leoLastFiles";
 
 public static STATES_DEBOUNCE_DELAY: number = 100;
+public static DOCUMENTS_DEBOUNCE_DELAY: number = 100;
 
 </t>
 <t tx="felix.20201208215536.4">/**
@@ -565,11 +593,13 @@ public static GUI = {
     ICON_DARK_PATH: "resources/dark/box",
     ICON_FILE_EXT: ".svg",
     STATUSBAR_INDICATOR: "$(keyboard) ",
+    STATUSBAR_COLOR: "fb7c47",
     QUICK_OPEN_LEO_COMMANDS: "&gt;leo: ",
     EXPLORER_TREEVIEW_PREFIX: "LEO ",
     TREEVIEW_TITLE: "OUTLINE",
     BODY_TITLE: "LEO BODY",
-    LOG_PANE_TITLE: "Leo Log Window"
+    LOG_PANE_TITLE: "Leo Log Window",
+    THEME_STATUSBAR: "statusBar.foreground"
 };
 
 </t>
@@ -610,7 +640,9 @@ public static USER_MESSAGES = {
     CHANGES_DETECTED: "Changes to external files were detected.",
     REFRESHED: " Nodes refreshed.", // with voluntary leading space
     IGNORED: " They were ignored.", // with voluntary leading space
-    TOO_FAST: "Leo is busy! " // with voluntary trailing space
+    TOO_FAST: "Leo is busy! ", // with voluntary trailing space
+    STATUSBAR_TOOLTIP_ON: "Leo Key Bindings are in effect",
+    STATUSBAR_TOOLTIP_OFF: "Leo Key Bindings off",
 };
 
 </t>
@@ -633,14 +665,7 @@ public static ASK_SAVE_CHANGES_BUTTONS: vscode.MessageItem[] = [
 ];
 
 </t>
-<t tx="felix.20201208215613.1">// - `src/extension.ts` - this is the main file where you will provide the implementation of your command.
-//   - The file exports one function, `activate`, which is called the very first time your extension is activated (in this case by executing the command).
-//     Inside the `activate` function we call `registerCommand`.
-//   - We pass the function containing the implementation of the command as the second parameter to `registerCommand`.
-
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(p_context: vscode.ExtensionContext) {
+<t tx="felix.20201208215613.1">export function activate(p_context: vscode.ExtensionContext) {
 
     // Reset Extension context flags (used in 'when' clauses in package.json)
     utils.setContext(Constants.CONTEXT_FLAGS.LEO_READY, false); // Barely started activating the extension so not ready.
@@ -681,13 +706,6 @@ export function activate(p_context: vscode.ExtensionContext) {
         p_context.subscriptions.push(vscode.commands.registerCommand(...p_command));
     });
 
-
-    const jsOutlineProvider = new JsOutlineProvider(p_context);
-    vscode.window.registerTreeDataProvider('leoJsExplorer', jsOutlineProvider);
-    vscode.commands.executeCommand('setContext', 'leoReady', true);
-    vscode.commands.executeCommand('setContext', 'leoTreeOpened', true);
-
-
 }
 
 </t>
@@ -701,9 +719,44 @@ export function deactivate() { }
 </t>
 <t tx="felix.20201208221211.1">"viewsWelcome": [
   {
-    "view": "leoJsExplorer",
+    "view": "leojs",
     "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.openLeoFile)",
-    "when": "!leoTreeOpened"
+    "when": "leoReady &amp;&amp; !leoTreeOpened"
+  },
+  {
+    "view": "leojsExplorer",
+    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.openLeoFile)",
+    "when": "leoReady &amp;&amp; !leoTreeOpened"
+  },
+  {
+    "view": "leoDocuments",
+    "contents": "There are no Leo files currently opened",
+    "when": "leoReady &amp;&amp; !leoTreeOpened"
+  },
+  {
+    "view": "leoDocumentsExplorer",
+    "contents": "There are no Leo files currently opened",
+    "when": "leoReady &amp;&amp; !leoTreeOpened"
+  },
+  {
+    "view": "leoButtons",
+    "contents": "There are no Leo files currently opened",
+    "when": "leoReady &amp;&amp; !leoTreeOpened"
+  },
+  {
+    "view": "leoButtonsExplorer",
+    "contents": "There are no Leo files currently opened",
+    "when": "leoReady &amp;&amp; !leoTreeOpened"
+  },
+  {
+    "view": "leoButtons",
+    "contents": "There are no @buttons in this outline",
+    "when": "leoReady &amp;&amp; leoTreeOpened"
+  },
+  {
+    "view": "leoButtonsExplorer",
+    "contents": "There are no @buttons in this outline",
+    "when": "leoReady &amp;&amp; leoTreeOpened"
   }
 ],
 </t>
@@ -726,42 +779,42 @@ export function deactivate() { }
 <t tx="felix.20201208221809.1">"view/title": [
   {
     "command": "leojs.openLeoFile",
-    "when": "view =~ /leoJs/ &amp;&amp; leoReady",
+    "when": "view =~ /leojs/ &amp;&amp; leoReady",
     "group": "navigation@1"
   },
   {
     "command": "leojs.newLeoFile",
-    "when": "view =~ /leoJs/ &amp;&amp; leoReady",
+    "when": "view =~ /leojs/ &amp;&amp; leoReady",
     "group": "navigation@1"
   },
   {
     "command": "leojs.saveLeoFileFromOutline",
-    "when": "view =~ /leoJs/ &amp;&amp; leoTreeOpened &amp;&amp; leoTreeTitled &amp;&amp; leoChanged",
+    "when": "view =~ /leojs/ &amp;&amp; leoTreeOpened &amp;&amp; leoTreeTitled &amp;&amp; leoChanged",
     "group": "navigation@2"
   },
   {
     "command": "leojs.saveAsLeoFile",
-    "when": "view =~ /leoJs/ &amp;&amp; leoTreeOpened &amp;&amp; !leoTreeTitled",
+    "when": "view =~ /leojs/ &amp;&amp; leoTreeOpened &amp;&amp; !leoTreeTitled",
     "group": "navigation@2"
   },
   {
     "command": "leojs.undoFromOutline",
-    "when": "view =~ /leoJs/ &amp;&amp; leoTreeOpened &amp;&amp; leoCanUndo",
+    "when": "view =~ /leojs/ &amp;&amp; leoTreeOpened &amp;&amp; leoCanUndo",
     "group": "navigation@3"
   },
   {
     "command": "leojs.redoFromOutline",
-    "when": "view =~ /leoJs/ &amp;&amp; leoTreeOpened &amp;&amp; leoCanRedo",
+    "when": "view =~ /leojs/ &amp;&amp; leoTreeOpened &amp;&amp; leoCanRedo",
     "group": "navigation@4"
   },
   {
     "command": "leojs.deHoistFromOutline",
-    "when": "view =~ /leoJs/ &amp;&amp; leoTreeOpened &amp;&amp; leoCanDehoist",
+    "when": "view =~ /leojs/ &amp;&amp; leoTreeOpened &amp;&amp; leoCanDehoist",
     "group": "navigation@5"
   },
   {
     "command": "leojs.contractAllFromOutline",
-    "when": "view =~ /leoJs/ &amp;&amp; leoTreeOpened",
+    "when": "view =~ /leojs/ &amp;&amp; leoTreeOpened",
     "group": "navigation@6"
   }
 ],
@@ -777,9 +830,36 @@ export function deactivate() { }
 <t tx="felix.20201208222541.1">"views": {
   "explorer": [
     {
-      "id": "leoJsExplorer",
-      "name": "Leo",
+      "id": "leojsExplorer",
+      "name": "Leo Outline",
       "contextualTitle": "Leo"
+    },
+    {
+      "id": "leoDocumentsExplorer",
+      "name": "Leo Documents",
+      "contextualTitle": "Leo"
+    },
+    {
+      "id": "leoButtonsExplorer",
+      "name": "Leo Buttons",
+      "contextualTitle": "Leo"
+    }
+  ],
+  "leojsView": [
+    {
+      "id": "leojs",
+      "contextualTitle": "Leo",
+      "name": "Outline"
+    },
+    {
+      "id": "leoDocuments",
+      "contextualTitle": "Leo",
+      "name": "Documents"
+    },
+    {
+      "id": "leoButtons",
+      "contextualTitle": "Leo",
+      "name": "Buttons"
     }
   ]
 },
@@ -797,17 +877,37 @@ import {
     UserCommand,
     ShowBodyParam,
 } from "./types";
+
 import { LeoNode } from "./leoNode";
+import { LeoOutlineProvider } from './leoOutline';
 import { LeoButtonNode } from "./leoButtonNode";
+import { LeoButtonsProvider } from "./leoButtons";
+import { LeoDocumentNode } from "./leoDocumentNode";
+import { LeoDocumentsProvider } from "./leoDocuments";
+import { LeoStates } from "./leoStates";
+
 /**
  * Implements https://github.com/leo-editor/leo-editor/issues/1025
  */
 export class LeoJs {
+    // * State flags
+    public leoStates: LeoStates;
+
+    // * Icon Paths (Singleton static arrays)
+    public nodeIcons: Icon[] = [];
+    public documentIcons: Icon[] = [];
+    public buttonIcons: Icon[] = [];
+
+    private _refreshType: ReqRefresh = {}; // Flags for commands to require parts of UI to refresh
 
     private _bodyMainSelectionColumn: vscode.ViewColumn | undefined; // Column of last body 'textEditor' found, set to 1
 
     private _bodyTextDocument: vscode.TextDocument | undefined; // Set when selected in tree by user, or opening a Leo file in showBody. and by _locateOpenedBody.
 
+    // * Outline Pane
+    private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
+    private _leoTreeView: vscode.TreeView&lt;LeoNode&gt;; // Outline tree view added to the Tree View Container with an Activity Bar icon
+    private _leoTreeExView: vscode.TreeView&lt;LeoNode&gt;; // Outline tree view added to the Explorer Sidebar
     private _lastTreeView: vscode.TreeView&lt;LeoNode&gt;; // Last visible treeview
 
     private _lastSelectedNode: LeoNode | undefined; // Last selected node we got a hold of; leoTreeView.selection maybe newer and unprocessed
@@ -821,9 +921,49 @@ export class LeoJs {
         }
     }
 
+    // * Documents Pane
+    private _leoDocumentsProvider: LeoDocumentsProvider;
+    private _leoDocuments: vscode.TreeView&lt;LeoDocumentNode&gt;;
+    private _leoDocumentsExplorer: vscode.TreeView&lt;LeoDocumentNode&gt;;
+    private _currentDocumentChanged: boolean = false; // if clean and an edit is done: refresh opened documents view
+
+    // * '@button' pane
+    private _leoButtonsProvider: LeoButtonsProvider;
+    private _leoButtons: vscode.TreeView&lt;LeoButtonNode&gt;;
+    private _leoButtonsExplorer: vscode.TreeView&lt;LeoButtonNode&gt;;
+
+    // * Log and terminal Panes
+    private _leoLogPane: vscode.OutputChannel = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
+    private _leoTerminalPane: vscode.OutputChannel | undefined;
+
+    // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
+    public getStates: (() =&gt; void) &amp; {
+        clear(): void;
+    } &amp; {
+        flush(): void;
+    };
+
+    // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
+    public refreshDocumentsPane: (() =&gt; void) &amp; {
+        clear(): void;
+    } &amp; {
+        flush(): void;
+    };
+
     constructor(private _context: vscode.ExtensionContext) {
-        // * Create Leo stand-alone view and Explorer view outline panes
-        // Uses 'select node' command, so 'onDidChangeSelection' is not used
+        // * Setup States
+        this.leoStates = new LeoStates(_context, this);
+
+        // * Build Icon filename paths
+        this.nodeIcons = utils.buildNodeIconPaths(_context);
+        this.documentIcons = utils.buildDocumentIconPaths(_context);
+        this.buttonIcons = utils.buildButtonsIconPaths(_context);
+
+        // * Create file browser instance
+        // this._leoFilesBrowser = new LeoFilesBrowser(_context);
+
+        // * Create a single data provider for both outline trees, Leo view and Explorer view
+        this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons);
         this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
         this._leoTreeView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeView)));
         this._leoTreeView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeView)));
@@ -832,7 +972,128 @@ export class LeoJs {
         this._leoTreeExView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeExView)));
         this._leoTreeExView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeExView)));
         this._leoTreeExView.onDidChangeVisibility((p_event =&gt; this._onTreeViewVisibilityChanged(p_event, true))); // * Trigger 'show tree in explorer view'
-        this._lastTreeView = this.config.treeInExplorer ? this._leoTreeExView : this._leoTreeView;
+        this._lastTreeView = this._leoTreeExView;
+
+        // * Create Leo Opened Documents Treeview Providers and tree views
+        this._leoDocumentsProvider = new LeoDocumentsProvider(this);
+        this._leoDocuments = vscode.window.createTreeView(Constants.DOCUMENTS_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
+        this._leoDocuments.onDidChangeVisibility((p_event =&gt; this._onDocTreeViewVisibilityChanged(p_event, false)));
+        this._leoDocumentsExplorer = vscode.window.createTreeView(Constants.DOCUMENTS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
+        this._leoDocumentsExplorer.onDidChangeVisibility((p_event =&gt; this._onDocTreeViewVisibilityChanged(p_event, true)));
+
+        // * Create '@buttons' Treeview Providers and tree views
+        this._leoButtonsProvider = new LeoButtonsProvider(this);
+        this._leoButtons = vscode.window.createTreeView(Constants.BUTTONS_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
+        this._leoButtons.onDidChangeVisibility((p_event =&gt; this._onButtonsTreeViewVisibilityChanged(p_event, false)));
+        this._leoButtonsExplorer = vscode.window.createTreeView(Constants.BUTTONS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
+        this._leoButtonsExplorer.onDidChangeVisibility((p_event =&gt; this._onButtonsTreeViewVisibilityChanged(p_event, true)));
+
+        // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
+        this.getStates = debounce(this._triggerGetStates, Constants.STATES_DEBOUNCE_DELAY);
+        this.refreshDocumentsPane = debounce(this._refreshDocumentsPane, Constants.DOCUMENTS_DEBOUNCE_DELAY);
+    }
+
+    /**
+     * 'getStates' action for use in debounced method call
+     */
+    private _triggerGetStates(): void {
+        if (this._refreshType.documents) {
+            this._refreshType.documents = false;
+            this.refreshDocumentsPane();
+        }
+        if (this._refreshType.buttons) {
+            this._refreshType.buttons = false;
+            this._leoButtonsProvider.refreshTreeRoot();
+        }
+        if (this._refreshType.states) {
+            this._refreshType.states = false;
+            // this.leoStates.setLeoStateFlags(this._leoStates); //
+        }
+    }
+
+    /**
+     * Public method to refresh the documents pane
+     * Document Panel May be refreshed by other services (states service, ...)
+     */
+    private _refreshDocumentsPane(): void {
+        this._leoDocumentsProvider.refreshTreeRoot();
+    }
+
+
+    /**
+     * * Handles the node expanding and collapsing interactions by the user in the treeview
+     * @param p_event The event passed by vscode
+     * @param p_expand True if it was an expand, false if it was a collapse event
+     * @param p_treeView Pointer to the treeview itself, either the standalone treeview or the one under the explorer
+     */
+    private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;LeoNode&gt;, p_expand: boolean, p_treeView: vscode.TreeView&lt;LeoNode&gt;): void {
+        // * Expanding or collapsing via the treeview interface selects the node to mimic Leo
+    }
+
+    /**
+     * * Handle the change of visibility of either outline treeview and refresh it if its visible
+     * @param p_event The treeview-visibility-changed event passed by vscode
+     * @param p_explorerView Flag to signify that the treeview who triggered this event is the one in the explorer view
+     */
+    private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
+        if (p_event.visible) {
+            this._lastTreeView = p_explorerView ? this._leoTreeExView : this._leoTreeView;
+            //  this._refreshOutline(true, RevealType.RevealSelect);
+        }
+    }
+
+
+    /**
+     * * Handle the change of visibility of either outline treeview and refresh it if its visible
+     * @param p_event The treeview-visibility-changed event passed by vscode
+     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
+     */
+    private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
+        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
+        if (p_event.visible) {
+            this.refreshDocumentsPane();
+        }
+    }
+
+    /**
+     * * Handle the change of visibility of either outline treeview and refresh it if its visible
+     * @param p_event The treeview-visibility-changed event passed by vscode
+     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
+     */
+    private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
+        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
+        if (p_event.visible) {
+            this._leoButtonsProvider.refreshTreeRoot();
+        }
+    }
+
+    /**
+     * * Places selection on the required node with a 'timeout'. Used after refreshing the opened Leo documents view.
+     * @param p_documentNode Document node instance in the Leo document view to be the 'selected' one.
+     */
+    public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
+        this._currentDocumentChanged = p_documentNode.documentEntry.changed;
+        this.leoStates.leoOpenedFileName = p_documentNode.documentEntry.name;
+        setTimeout(() =&gt; {
+            if (!this._leoDocuments.visible &amp;&amp; !this._leoDocumentsExplorer.visible) {
+                return;
+            }
+            let w_trigger = false;
+            let w_docView: vscode.TreeView&lt;LeoDocumentNode&gt;;
+            if (this._leoDocuments.visible) {
+                w_docView = this._leoDocuments;
+            } else {
+                w_docView = this._leoDocumentsExplorer;
+            }
+            if (w_docView.selection.length &amp;&amp; w_docView.selection[0] === p_documentNode) {
+                // console.log('already selected!');
+            } else {
+                w_trigger = true;
+            }
+            if (w_trigger) {
+                w_docView.reveal(p_documentNode, { select: true, focus: false });
+            }
+        }, 0);
     }
 
     /**
@@ -909,10 +1170,10 @@ export class LeoJs {
     }
 
     /**
-   * * Opens an an editor for the currently selected node: "this.bodyUri". If already opened, this just 'reveals' it
-   * @param p_aside Flag for opening the editor beside any currently opened and focused editor
-   * @param p_preserveFocus flag that when true will stop the editor from taking focus once opened
-   */
+    * * Opens an an editor for the currently selected node: "this.bodyUri". If already opened, this just 'reveals' it
+    * @param p_aside Flag for opening the editor beside any currently opened and focused editor
+    * @param p_preserveFocus flag that when true will stop the editor from taking focus once opened
+    */
     public showBody(p_aside: boolean, p_preserveFocus?: boolean): Thenable&lt;vscode.TextEditor | undefined&gt; {
         const w_showOptions: vscode.TextDocumentShowOptions = p_aside ?
             {
@@ -949,7 +1210,6 @@ export class LeoJs {
 import { LeoNode } from './leoNode';
 import { ProviderResult } from "vscode";
 import { Icon, PNode } from './types';
-import * as utils from "./utils";
 
 @others
 @language typescript
@@ -1164,31 +1424,6 @@ import { LeoNode } from "./leoNode";
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201208224420.10">/**
- * * ArchivedPosition format package from Leo's leoflexx.py
- */
-export interface ArchivedPosition {
-    hasBody: boolean;       // bool(p.b),
-    hasChildren: boolean;   // p.hasChildren()
-    childIndex: number;     // p._childIndex
-    cloned: boolean;        // p.isCloned()
-    dirty: boolean;         // p.isDirty()
-    expanded: boolean;      // p.isExpanded()
-    gnx: string;            // p.v.gnx
-    level: number;          // p.level()
-    headline: string;       // p.h
-    marked: boolean;        // p.isMarked()
-    atFile: boolean         // p.isAnyAtFileNode():
-    selected: boolean;      // p == commander.p
-    u?: any;               // User Attributes
-    stack: {
-        gnx: string;        // stack_v.gnx
-        childIndex: number; // stack_childIndex
-        headline: string;   // stack_v.h
-    }[];                    // for (stack_v, stack_childIndex) in p.stack]
-}
-
-</t>
 <t tx="felix.20201208224420.16">/**
  * * Icon path names used in leoNodes for rendering in treeview
  */
@@ -1267,7 +1502,7 @@ export interface MinibufferCommand extends vscode.QuickPickItem {
  */
 export const enum RevealType {
     NoReveal = 0,   // In apToLeoNode conversion. True:
-                    // Re-use the old if the global revealType is "NoReveal" and it's the selected node.
+    // Re-use the old if the global revealType is "NoReveal" and it's the selected node.
     Reveal,
     RevealSelect,
     RevealSelectFocus
@@ -1282,7 +1517,7 @@ export interface ReqRefresh {
     tree?: boolean; // Tree needs refresh
     body?: boolean; // Body needs refresh
     states?: boolean; // States needs refresh:
-                      // (changed, canUndo, canRedo, canDemote, canPromote, canDehoist)
+    // (changed, canUndo, canRedo, canDemote, canPromote, canDehoist)
     buttons?: boolean; // Buttons needs refresh
     documents?: boolean; // Documents needs refresh
 }
@@ -1304,7 +1539,7 @@ export interface UserCommand {
 
 </t>
 <t tx="felix.20201208224420.7">/**
- * * Object container for parameters of leoIntegration's "apply-selected-node-to-body" method
+ * * Object container for parameters of leoJs "apply-selected-node-to-body" method
  */
 export interface ShowBodyParam {
     node: LeoNode,
@@ -1582,7 +1817,7 @@ public get tooltip(): string {
 }
 
 </t>
-<t tx="felix.20201209011931.1">export class JsOutlineProvider implements vscode.TreeDataProvider&lt;LeoNode&gt; {
+<t tx="felix.20201209011931.1">export class LeoOutlineProvider implements vscode.TreeDataProvider&lt;LeoNode&gt; {
     private _onDidChangeTreeData: vscode.EventEmitter&lt;LeoNode | undefined&gt; = new vscode.EventEmitter&lt;LeoNode | undefined&gt;();
 
     private _icons: Icon[];
@@ -1621,8 +1856,8 @@ public get tooltip(): string {
     @others
 }
 </t>
-<t tx="felix.20201209011931.2">constructor(private _context: vscode.ExtensionContext) {
-    this._icons = this._buildNodeIconPaths(_context);
+<t tx="felix.20201209011931.2">constructor(p_icons: Icon[]) {
+    this._icons = p_icons;
 }
 
 
@@ -1655,16 +1890,7 @@ public refreshTreeRoot(): void {
 }
 
 </t>
-<t tx="felix.20201209011931.7">private _buildNodeIconPaths(p_context: vscode.ExtensionContext): Icon[] {
-    return Array(16).fill("").map((p_val, p_index) =&gt; {
-        return {
-            light: p_context.asAbsolutePath("resources/light/box" + utils.padNumber2(p_index) + ".svg"),
-            dark: p_context.asAbsolutePath("resources/dark/box" + utils.padNumber2(p_index) + ".svg")
-        };
-    });
-}
-
-</t>
+<t tx="felix.20201209011931.7"></t>
 <t tx="felix.20201209011931.8">private _LeoNodeArray(p_children: PNode[]): LeoNode[] {
     const w_children: LeoNode[] = [];
     if (p_children &amp;&amp; p_children.length) {
@@ -1824,11 +2050,6 @@ public refreshTreeRoot(): void {
 },
 </t>
 <t tx="felix.20201211003313.1">{
-  "command": "leojs.selectTreeNode",
-  "category": "Leo",
-  "title": "Select Node"
-},
-{
   "command": "leojs.openAside",
   "category": "Leo",
   "title": "Open to the Side"
@@ -2641,10 +2862,6 @@ public refreshTreeRoot(): void {
  },
 </t>
 <t tx="felix.20201211014532.1"> {
-   "command": "leojs.selectTreeNode",
-   "when": "false"
- },
- {
    "command": "leojs.openAside",
    "when": "false"
  },
@@ -2997,7 +3214,7 @@ public refreshTreeRoot(): void {
   "command": "leojs.executeScript",
   "key": "ctrl+b",
   "mac": "cmd+b",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.minibuffer",
@@ -3020,29 +3237,29 @@ public refreshTreeRoot(): void {
   "command": "leojs.showBody",
   "key": "ctrl+t",
   "mac": "cmd+t",
-  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leoDocuments|leoButtons/"
 },
 {
   "command": "leojs.showBody",
   "key": "alt+d",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leoDocuments|leoButtons/"
 },
 {
   "command": "leojs.showBody",
   "key": "tab",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leoDocuments|leoButtons/"
 },
 {
   "command": "leojs.showBody",
   "key": "enter",
-  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 </t>
 <t tx="felix.20201211021317.1">{
   "command": "leojs.saveLeoFileFromOutline",
   "key": "ctrl+s",
   "mac": "cmd+s",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leoDocuments/"
 },
 {
   "command": "leojs.saveLeoFile",
@@ -3059,7 +3276,7 @@ public refreshTreeRoot(): void {
 {
   "command": "leojs.contractAllFromOutline",
   "key": "alt+-",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leoDocuments|leoButtons/"
 },
 </t>
 <t tx="felix.20201211021323.1">{
@@ -3072,7 +3289,7 @@ public refreshTreeRoot(): void {
   "command": "leojs.editSelectedHeadlineFromOutline",
   "key": "ctrl+h",
   "mac": "cmd+h",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 </t>
 <t tx="felix.20201211021326.1">{
@@ -3085,7 +3302,7 @@ public refreshTreeRoot(): void {
   "command": "leojs.markSelectionFromOutline",
   "key": "ctrl+m",
   "mac": "cmd+m",
-  "when": "leoTreeOpened &amp;&amp; !leoMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; !leoMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.unmarkSelection",
@@ -3097,7 +3314,7 @@ public refreshTreeRoot(): void {
   "command": "leojs.unmarkSelectionFromOutline",
   "key": "ctrl+m",
   "mac": "cmd+m",
-  "when": "leoTreeOpened &amp;&amp; leoMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; leoMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 </t>
 <t tx="felix.20201211021329.1">{
@@ -3110,7 +3327,7 @@ public refreshTreeRoot(): void {
   "command": "leojs.extract",
   "key": "ctrl+shift+d",
   "mac": "cmd+shift+d",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.extractNames",
@@ -3122,7 +3339,7 @@ public refreshTreeRoot(): void {
   "command": "leojs.extractNames",
   "key": "ctrl+shift+n",
   "mac": "cmd+shift+n",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 </t>
 <t tx="felix.20201211021341.1">{
@@ -3141,18 +3358,18 @@ public refreshTreeRoot(): void {
   "command": "leojs.moveOutlineDownSelectionFromOutline",
   "key": "ctrl+d",
   "mac": "cmd+d",
-  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.moveOutlineDownSelectionFromOutline",
   "key": "shift+down",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.moveOutlineDownSelectionFromOutline",
   "key": "shift+alt+down",
   "mac": "shift+alt+down",
-  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.moveOutlineLeftSelection",
@@ -3170,18 +3387,18 @@ public refreshTreeRoot(): void {
   "command": "leojs.moveOutlineLeftSelectionFromOutline",
   "key": "ctrl+l",
   "mac": "cmd+l",
-  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.moveOutlineLeftSelectionFromOutline",
   "key": "shift+left",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.moveOutlineLeftSelectionFromOutline",
   "key": "shift+alt+left",
   "mac": "shift+alt+left",
-  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.moveOutlineRightSelection",
@@ -3199,18 +3416,18 @@ public refreshTreeRoot(): void {
   "command": "leojs.moveOutlineRightSelectionFromOutline",
   "key": "ctrl+r",
   "mac": "cmd+r",
-  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.moveOutlineRightSelectionFromOutline",
   "key": "shift+right",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.moveOutlineRightSelectionFromOutline",
   "key": "shift+alt+right",
   "mac": "shift+alt+right",
-  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.moveOutlineUpSelection",
@@ -3228,18 +3445,18 @@ public refreshTreeRoot(): void {
   "command": "leojs.moveOutlineUpSelectionFromOutline",
   "key": "ctrl+u",
   "mac": "cmd+u",
-  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.moveOutlineUpSelectionFromOutline",
   "key": "shift+up",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.moveOutlineUpSelectionFromOutline",
   "key": "shift+alt+up",
   "mac": "shift+alt+up",
-  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 </t>
 <t tx="felix.20201211021345.1">{
@@ -3250,7 +3467,7 @@ public refreshTreeRoot(): void {
 {
   "command": "leojs.sortSiblingsSelectionFromOutline",
   "key": "alt+a",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.promoteSelection",
@@ -3266,7 +3483,7 @@ public refreshTreeRoot(): void {
   "win": "ctrl+oem_4",
   "linux": "ctrl+[",
   "mac": "cmd+[BracketLeft]",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.demoteSelection",
@@ -3282,7 +3499,7 @@ public refreshTreeRoot(): void {
   "win": "ctrl+oem_6",
   "linux": "ctrl+]",
   "mac": "cmd+[BracketRight]",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.insertNodeSelection",
@@ -3294,7 +3511,7 @@ public refreshTreeRoot(): void {
   "command": "leojs.insertNodeSelectionFromOutline",
   "key": "ctrl+i",
   "mac": "cmd+i",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.insertNodeSelectionInterrupt",
@@ -3316,7 +3533,7 @@ public refreshTreeRoot(): void {
   "win": "ctrl+oem_7",
   "linux": "ctrl+'",
   "mac": "cmd+[Backquote]",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 </t>
 <t tx="felix.20201211021351.1">{
@@ -3329,7 +3546,7 @@ public refreshTreeRoot(): void {
   "command": "leojs.cutNodeSelectionFromOutline",
   "key": "ctrl+shift+x",
   "mac": "cmd+shift+x",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.copyNodeSelection",
@@ -3341,7 +3558,7 @@ public refreshTreeRoot(): void {
   "command": "leojs.copyNodeSelection",
   "key": "ctrl+shift+c",
   "mac": "cmd+shift+c",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.pasteNodeAtSelection",
@@ -3353,7 +3570,7 @@ public refreshTreeRoot(): void {
   "command": "leojs.pasteNodeAtSelectionFromOutline",
   "key": "ctrl+shift+v",
   "mac": "cmd+shift+v",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.deleteSelection",
@@ -3365,43 +3582,43 @@ public refreshTreeRoot(): void {
   "command": "leojs.deleteSelectionFromOutline",
   "key": "ctrl+shift+backspace",
   "mac": "cmd+shift+backspace",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 </t>
 <t tx="felix.20201211021358.1">{
   "command": "leojs.gotoFirstVisible",
   "key": "alt+home",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.gotoLastSibling",
   "key": "alt+end",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.gotoFirstVisible",
   "key": "home",
-  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.gotoLastVisible",
   "key": "end",
-  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.pageUp",
   "key": "pageup",
-  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.pageDown",
   "key": "pagedown",
-  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.gotoNextCloneSelectionFromOutline",
   "key": "alt+n",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.gotoNextCloneSelection",
@@ -3411,12 +3628,12 @@ public refreshTreeRoot(): void {
 {
   "command": "leojs.gotoNextVisible",
   "key": "down",
-  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.gotoNextVisible",
   "key": "alt+down",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leoDocuments|leoButtons/"
 },
 {
   "command": "leojs.gotoNextVisible",
@@ -3426,12 +3643,12 @@ public refreshTreeRoot(): void {
 {
   "command": "leojs.gotoPrevVisible",
   "key": "up",
-  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.gotoPrevVisible",
   "key": "alt+up",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leoDocuments|leoButtons/"
 },
 {
   "command": "leojs.gotoPrevVisible",
@@ -3441,12 +3658,12 @@ public refreshTreeRoot(): void {
 {
   "command": "leojs.contractOrGoLeft",
   "key": "left",
-  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.contractOrGoLeft",
   "key": "alt+left",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leoDocuments|leoButtons/"
 },
 {
   "command": "leojs.contractOrGoLeft",
@@ -3456,12 +3673,12 @@ public refreshTreeRoot(): void {
 {
   "command": "leojs.expandAndGoRight",
   "key": "right",
-  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs/"
+  "when": "leoTreeBrowse &amp;&amp; leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
 },
 {
   "command": "leojs.expandAndGoRight",
   "key": "alt+right",
-  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leoJs|leoDocuments|leoButtons/"
+  "when": "leoTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leoDocuments|leoButtons/"
 },
 {
   "command": "leojs.expandAndGoRight",
@@ -3469,160 +3686,7 @@ public refreshTreeRoot(): void {
   "when": "leoTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leo"
 }
 </t>
-<t tx="felix.20201212152138.1">// * Define entries for all commands
-[CMD.MINIBUFFER, () =&gt; w_leo.minibuffer()], // Is referenced in package.json
-
-[CMD.EXECUTE, () =&gt; w_leo.command(LEOCMD.EXECUTE_SCRIPT, U, REFRESH_TREE_BODY, false)],
-
-[CMD.CLICK_BUTTON, (p_node: LeoButtonNode) =&gt; w_leo.clickAtButton(p_node)], // Not referenced in package.json
-[CMD.REMOVE_BUTTON, (p_node: LeoButtonNode) =&gt; w_leo.removeAtButton(p_node)],
-
-[CMD.CLOSE_FILE, () =&gt; w_leo.closeLeoFile()],
-[CMD.NEW_FILE, () =&gt; w_leo.newLeoFile()],
-
-[CMD.OPEN_FILE, (p_uri?: vscode.Uri) =&gt; w_leo.openLeoFile(p_uri)],
-
-[CMD.RECENT_FILES, () =&gt; w_leo.showRecentLeoFiles()],
-[CMD.SAVE_AS_FILE, () =&gt; w_leo.saveAsLeoFile()],
-[CMD.SAVE_FILE, () =&gt; w_leo.saveLeoFile()],
-[CMD.SAVE_FILE_FO, () =&gt; w_leo.saveLeoFile(true)],
-[CMD.SWITCH_FILE, () =&gt; w_leo.switchLeoFile()],
-
-[CMD.SET_OPENED_FILE, (p_index: number) =&gt; w_leo.selectOpenedLeoDocument(p_index)],
-
-[CMD.REFRESH_FROM_DISK, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.REFRESH_FROM_DISK, p_node, REFRESH_TREE_BODY, false)],
-
-[CMD.REFRESH_FROM_DISK_SELECTION, () =&gt; w_leo.command(LEOCMD.REFRESH_FROM_DISK, U, REFRESH_TREE_BODY, false)],
-
-[CMD.REFRESH_FROM_DISK_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.REFRESH_FROM_DISK, U, REFRESH_TREE_BODY, true)],
-
-[CMD.GIT_DIFF, () =&gt; w_leo.command(LEOCMD.GIT_DIFF, U, REFRESH_TREE_BODY, false)],
-
-[CMD.HEADLINE, (p_node: LeoNode) =&gt; w_leo.editHeadline(p_node, true)],
-[CMD.HEADLINE_SELECTION, () =&gt; w_leo.editHeadline(U, false)],
-[CMD.HEADLINE_SELECTION_FO, () =&gt; w_leo.editHeadline(U, true)],
-
-// cut/copy/paste/delete given node.
-[CMD.COPY, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.COPY_PNODE, p_node, NO_REFRESH, true, true)],
-[CMD.CUT, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.CUT_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.DELETE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.DELETE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.PASTE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.PASTE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
-[CMD.PASTE_CLONE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.PASTE_CLONE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
-
-// cut/copy/paste/delete current selection (self.commander.p)
-[CMD.COPY_SELECTION, () =&gt; w_leo.command(LEOCMD.COPY_PNODE, U, NO_REFRESH, false)],
-[CMD.CUT_SELECTION, () =&gt; w_leo.command(LEOCMD.CUT_PNODE, U, REFRESH_TREE_BODY, false)],
-[CMD.CUT_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.CUT_PNODE, U, REFRESH_TREE_BODY, true)],
-[CMD.DELETE_SELECTION, () =&gt; w_leo.command(LEOCMD.DELETE_PNODE, U, REFRESH_TREE_BODY, false)],
-[CMD.DELETE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.DELETE_PNODE, U, REFRESH_TREE_BODY, true)],
-[CMD.PASTE_CLONE_SELECTION, () =&gt; w_leo.command(LEOCMD.PASTE_CLONE_PNODE, U, REFRESH_TREE_BODY, false)],
-[CMD.PASTE_CLONE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.PASTE_CLONE_PNODE, U, REFRESH_TREE_BODY, true)],
-[CMD.PASTE_SELECTION, () =&gt; w_leo.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, false)],
-[CMD.PASTE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, true)],
-
-[CMD.CONTRACT_ALL, () =&gt; w_leo.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, false)],
-[CMD.CONTRACT_ALL_FO, () =&gt; w_leo.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, true)],
-[CMD.CONTRACT_OR_GO_LEFT, () =&gt; w_leo.command(LEOCMD.CONTRACT_OR_GO_LEFT, U, REFRESH_TREE_BODY, true)],
-[CMD.EXPAND_AND_GO_RIGHT, () =&gt; w_leo.command(LEOCMD.EXPAND_AND_GO_RIGHT, U, REFRESH_TREE_BODY, true)],
-
-[CMD.GOTO_NEXT_CLONE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, p_node, REFRESH_NODE_BODY, true)],
-[CMD.GOTO_NEXT_CLONE_SELECTION, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, false)],
-[CMD.GOTO_NEXT_CLONE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, true)],
-
-[CMD.GOTO_NEXT_MARKED, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_MARKED, U, REFRESH_NODE_BODY, true)],
-[CMD.GOTO_FIRST_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_FIRST_VISIBLE, U, REFRESH_NODE_BODY, true)],
-[CMD.GOTO_LAST_SIBLING, () =&gt; w_leo.command(LEOCMD.GOTO_LAST_SIBLING, U, REFRESH_NODE_BODY, true)],
-[CMD.GOTO_LAST_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_LAST_VISIBLE, U, REFRESH_NODE_BODY, true)],
-[CMD.GOTO_NEXT_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_VISIBLE, U, REFRESH_NODE_BODY, true)],
-[CMD.GOTO_PREV_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_PREV_VISIBLE, U, REFRESH_NODE_BODY, true)],
-
-[CMD.PAGE_UP, () =&gt; w_leo.command(LEOCMD.PAGE_UP, U, REFRESH_NODE_BODY, true)],
-[CMD.PAGE_DOWN, () =&gt; w_leo.command(LEOCMD.PAGE_DOWN, U, REFRESH_NODE_BODY, true)],
-
-[CMD.DEHOIST, () =&gt; w_leo.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, false)],
-[CMD.DEHOIST_FO, () =&gt; w_leo.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, true)],
-[CMD.HOIST, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.HOIST_PNODE, p_node, REFRESH_TREE_BODY, true)],
-[CMD.HOIST_SELECTION, () =&gt; w_leo.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, false)],
-[CMD.HOIST_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, true)],
-
-[CMD.CLONE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.CLONE_PNODE, p_node, REFRESH_TREE_BODY, true)],
-[CMD.CLONE_SELECTION, () =&gt; w_leo.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, false)],
-[CMD.CLONE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, true)],
-
-[CMD.INSERT, (p_node: LeoNode) =&gt; w_leo.insertNode(p_node, true)],
-[CMD.INSERT_SELECTION, () =&gt; w_leo.insertNode(U, false)],
-[CMD.INSERT_SELECTION_FO, () =&gt; w_leo.insertNode(U, true)],
-
-// Special command for when inserting rapidly more than one node without
-// even specifying a headline label, such as spamming CTRL+I rapidly.
-[CMD.INSERT_SELECTION_INTERRUPT, () =&gt; w_leo.insertNode(U, false, true)],
-
-[CMD.MARK, (p_node: LeoNode) =&gt; w_leo.changeMark(true, p_node, true)],
-[CMD.MARK_SELECTION, () =&gt; w_leo.changeMark(true, U, false)],
-[CMD.MARK_SELECTION_FO, () =&gt; w_leo.changeMark(true, U, true)],
-
-[CMD.UNMARK, (p_node: LeoNode) =&gt; w_leo.changeMark(false, p_node, true)],
-[CMD.UNMARK_SELECTION, () =&gt; w_leo.changeMark(false, U, false)],
-[CMD.UNMARK_SELECTION_FO, () =&gt; w_leo.changeMark(false, U, true)],
-
-[CMD.EXTRACT, () =&gt; w_leo.command(LEOCMD.EXTRACT, U, REFRESH_TREE_BODY, false)],
-[CMD.EXTRACT_NAMES, () =&gt; w_leo.command(LEOCMD.EXTRACT_NAMES, U, REFRESH_TREE_BODY, false)],
-
-[CMD.MOVE_DOWN, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.MOVE_DOWN_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, false)],
-[CMD.MOVE_DOWN_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, true)],
-
-[CMD.MOVE_LEFT, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.MOVE_LEFT_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, false)],
-[CMD.MOVE_LEFT_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, true)],
-
-[CMD.MOVE_RIGHT, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.MOVE_RIGHT_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, false)],
-[CMD.MOVE_RIGHT_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, true)],
-
-[CMD.MOVE_UP, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.MOVE_UP_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, false)],
-[CMD.MOVE_UP_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, true)],
-
-[CMD.DEMOTE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.DEMOTE_SELECTION, () =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, false)],
-[CMD.DEMOTE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, true)],
-[CMD.PROMOTE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.PROMOTE_SELECTION, () =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, false)],
-[CMD.PROMOTE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, true)],
-
-[CMD.SORT_CHILDREN, () =&gt; w_leo.command(LEOCMD.SORT_CHILDREN, U, REFRESH_TREE, false, true)],
-[CMD.SORT_SIBLING, () =&gt; w_leo.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, false, true)],
-[CMD.SORT_SIBLING_FO, () =&gt; w_leo.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, true, true)],
-
-[CMD.REDO, () =&gt; w_leo.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, false)],
-[CMD.REDO_FO, () =&gt; w_leo.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, true)],
-[CMD.UNDO, () =&gt; w_leo.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, false)],
-[CMD.UNDO_FO, () =&gt; w_leo.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, true)],
-
-// Called by nodes in tree when selected either by mouse, or with enter
-[CMD.SELECT_NODE, (p_node: LeoNode) =&gt; w_leo.selectTreeNode(p_node, false, false)],
-[CMD.OPEN_ASIDE, (p_node: LeoNode) =&gt; w_leo.selectTreeNode(p_node, false, true)],
-
-[CMD.SHOW_OUTLINE, () =&gt; w_leo.showOutline(true)], // Also focuses on outline
-[CMD.SHOW_LOG, () =&gt; w_leo.showLogPane()],
-[CMD.SHOW_BODY, () =&gt; w_leo.showBody(false)], // Also focuses on body
-
-[CMD.COPY_MARKED, () =&gt; w_leo.command(LEOCMD.COPY_MARKED, U, REFRESH_TREE_BODY, true)],
-[CMD.DIFF_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.DIFF_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
-[CMD.MARK_CHANGED_ITEMS, () =&gt; w_leo.command(LEOCMD.MARK_CHANGED_ITEMS, U, REFRESH_TREE_BODY, true)],
-[CMD.MARK_SUBHEADS, () =&gt; w_leo.command(LEOCMD.MARK_SUBHEADS, U, REFRESH_TREE_BODY, true)],
-[CMD.UNMARK_ALL, () =&gt; w_leo.command(LEOCMD.UNMARK_ALL, U, REFRESH_TREE_BODY, true)],
-[CMD.CLONE_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.CLONE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
-[CMD.DELETE_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.DELETE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
-[CMD.MOVE_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.MOVE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
-
-// TODO : @boltex More commands for issue #24
-// [CMD.CLONE_FIND_ALL, () =&gt; showInfo("TODO: cloneFindAll command")],
-// [CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; showInfo("TODO: cloneFindAllFlattened command")],
-// [CMD.CLONE_FIND_MARKED, () =&gt; showInfo("TODO: cloneFindMarked command")],
-// [CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; showInfo("TODO: cloneFindFlattenedMarked command")],
-
+<t tx="felix.20201212152138.1">@others
 </t>
 <t tx="felix.20201212200700.1">/**
  * Leo command names that are called from vscode's gui/menu/buttons/keybindings triggers
@@ -3759,7 +3823,7 @@ public get description(): string | boolean {
 
 </t>
 <t tx="felix.20201212205319.1">import * as vscode from "vscode";
-import { LeoIntegration } from "./leoIntegration";
+import { LeoJs } from './leojs';
 import { LeoButtonNode } from "./leoButtonNode";
 import { ProviderResult } from "vscode";
 import { Constants } from "./constants";
@@ -3778,7 +3842,7 @@ export class LeoButtonsProvider implements vscode.TreeDataProvider&lt;LeoButtonN
 
     readonly onDidChangeTreeData: vscode.Event&lt;LeoButtonNode | undefined&gt; = this._onDidChangeTreeData.event;
 
-    constructor(private _leoIntegration: LeoIntegration) { }
+    constructor(private _leoJs: LeoJs) { }
 
     @others
 }
@@ -3799,23 +3863,8 @@ public refreshTreeRoot(): void {
 <t tx="felix.20201212205319.5">public getChildren(element?: LeoButtonNode): Thenable&lt;LeoButtonNode[]&gt; {
 
     // if called with element, or not ready, give back empty array as there won't be any children
-    if (this._leoIntegration.leoStates.fileOpenedReady &amp;&amp; !element) {
-
-        // call action to get get list, and convert to LeoButtonNode(s) array
-        return this._leoIntegration.sendAction(Constants.LEOBRIDGE.GET_BUTTONS).then(p_package =&gt; {
-            if (p_package &amp;&amp; p_package) {
-                const w_list: LeoButtonNode[] = [];
-                const w_buttons: LeoButton[] = p_package.buttons!;
-                if (w_buttons &amp;&amp; w_buttons.length) {
-                    w_buttons.forEach((i_button: LeoButton) =&gt; {
-                        w_list.push(new LeoButtonNode(i_button, this._leoIntegration));
-                    });
-                }
-                return Promise.resolve(w_list);
-            } else {
-                return Promise.resolve([]);
-            }
-        });
+    if (this._leoJs.leoStates.fileOpenedReady &amp;&amp; !element) {
+        return Promise.resolve([]); // TODO get list from leoJs
     } else {
         return Promise.resolve([]); // Defaults to an empty list of children
     }
@@ -3832,7 +3881,8 @@ public refreshTreeRoot(): void {
 import { Constants } from "./constants";
 import { LeoDocument, Icon } from "./types";
 import * as utils from "./utils";
-import { LeoIntegration } from "./leoIntegration";
+import { LeoJs } from "./leojs";
+
 
 @language typescript
 @tabwidth -4
@@ -3848,7 +3898,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
 
     constructor(
         public documentEntry: LeoDocument,
-        private _leoIntegration: LeoIntegration
+        private _leoJs: LeoJs
     ) {
         super(documentEntry.name);
         // Setup this instance
@@ -3862,7 +3912,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
         };
         // If this was created as a selected node, make sure it's selected as we may have opened/closed document
         if (this.documentEntry.selected) {
-            this._leoIntegration.setDocumentSelection(this);
+            this._leoJs.setDocumentSelection(this);
             this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
         } else {
             this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_UNTITLED;
@@ -3874,7 +3924,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
 </t>
 <t tx="felix.20201212205325.3">// @ts-ignore
 public get iconPath(): Icon {
-    return this._leoIntegration.documentIcons[this.documentEntry.changed ? 1 : 0];
+    return this._leoJs.documentIcons[this.documentEntry.changed ? 1 : 0];
 }
 
 </t>
@@ -3886,7 +3936,8 @@ public get id(): string {
 
 </t>
 <t tx="felix.20201212205330.1">import * as vscode from "vscode";
-import { LeoIntegration } from "./leoIntegration";
+import { LeoJs } from './leojs';
+
 import { LeoDocumentNode } from "./leoDocumentNode";
 import { ProviderResult } from "vscode";
 import { Constants } from "./constants";
@@ -3905,7 +3956,7 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider&lt;LeoDocum
 
     readonly onDidChangeTreeData: vscode.Event&lt;LeoDocumentNode | undefined&gt; = this._onDidChangeTreeData.event;
 
-    constructor(private _leoIntegration: LeoIntegration) { }
+    constructor(private _leoJs: LeoJs) { }
 
     @others
 }
@@ -3924,30 +3975,10 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201212205330.5">public getChildren(element?: LeoDocumentNode): Thenable&lt;LeoDocumentNode[]&gt; {
-
     // if called with element, or not ready, give back empty array as there won't be any children
-    if (this._leoIntegration.leoStates.fileOpenedReady &amp;&amp; !element) {
+    if (this._leoJs.leoStates.fileOpenedReady &amp;&amp; !element) {
 
-        // call action to get get list, and convert to LeoDocumentNode(s) array
-        return this._leoIntegration.sendAction(Constants.LEOBRIDGE.GET_OPENED_FILES).then(p_package =&gt; {
-            if (p_package &amp;&amp; p_package) {
-                const w_list: LeoDocumentNode[] = [];
-                const w_files: LeoDocument[] = p_package.openedFiles!.files;
-
-                let w_index: number = 0;
-
-                if (w_files &amp;&amp; w_files.length) {
-                    w_files.forEach((i_file: LeoDocument) =&gt; {
-                        w_list.push(new LeoDocumentNode(i_file, this._leoIntegration));
-                        w_index++;
-                    });
-                }
-
-                return Promise.resolve(w_list);
-            } else {
-                return Promise.resolve([]);
-            }
-        });
+        return Promise.resolve([]); // TODO : get list!
     } else {
         return Promise.resolve([]); // Defaults to an empty list of children
     }
@@ -3962,8 +3993,8 @@ public refreshTreeRoot(): void {
 </t>
 <t tx="felix.20201212205523.1">import * as vscode from "vscode";
 import * as utils from "./utils";
+import { LeoJs } from "./leojs";
 import { Constants } from "./constants";
-import { LeoIntegration } from "./leoIntegration";
 import { LeoNode } from "./leoNode";
 import { LeoPackageStates } from "./types";
 
@@ -4086,7 +4117,7 @@ set leoRoot(p_value: boolean) {
 </t>
 <t tx="felix.20201212205523.21">constructor(
     private _context: vscode.ExtensionContext,
-    private _leoIntegration: LeoIntegration
+    private _leoJs: LeoJs
 ) { }
 
 </t>
@@ -4111,17 +4142,6 @@ set leoRoot(p_value: boolean) {
 }
 </t>
 <t tx="felix.20201212205523.3"></t>
-<t tx="felix.20201212205523.4">// * Connected to a Leo bridge server
-private _leoBridgeReady: boolean = false;
-get leoBridgeReady(): boolean {
-    return this._leoBridgeReady;
-}
-set leoBridgeReady(p_value: boolean) {
-    this._leoBridgeReady = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.BRIDGE_READY, p_value);
-}
-
-</t>
 <t tx="felix.20201212205523.5">// * A Leo file is opened
 private _fileOpenedReady: boolean = false; // Sets context flag along with treeview title
 get fileOpenedReady(): boolean {
@@ -4130,9 +4150,6 @@ get fileOpenedReady(): boolean {
 set fileOpenedReady(p_value: boolean) {
     this._fileOpenedReady = p_value;
     utils.setContext(Constants.CONTEXT_FLAGS.TREE_OPENED, p_value);
-    this._leoIntegration.setTreeViewTitle(
-        p_value ? Constants.GUI.TREEVIEW_TITLE : Constants.GUI.TREEVIEW_TITLE_INTEGRATION
-    );
 }
 
 </t>
@@ -4160,7 +4177,7 @@ get leoChanged(): boolean {
 set leoChanged(p_value: boolean) {
     if (this._leoChanged !== p_value) {
         // Refresh Documents Panel
-        this._leoIntegration.refreshDocumentsPane();
+        this._leoJs.refreshDocumentsPane();
     }
     this._leoChanged = p_value;
     utils.setContext(Constants.CONTEXT_FLAGS.LEO_CHANGED, p_value);
@@ -4190,7 +4207,8 @@ set leoCanRedo(p_value: boolean) {
 <t tx="felix.20201212205532.1">import * as vscode from "vscode";
 import * as utils from "./utils";
 import { Constants } from "./constants";
-import { LeoIntegration } from "./leoIntegration";
+import { LeoJs } from "./leojs";
+
 
 @language typescript
 @tabwidth -4
@@ -4217,14 +4235,14 @@ export class LeoStatusBar {
 
     constructor(
         private _context: vscode.ExtensionContext,
-        private _leoIntegration: LeoIntegration
+        private _leoJs: LeoJs
     ) {
         this._leoStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
-        this._leoStatusBarItem.color = this._leoIntegration.config.statusBarColor;
+        this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
 
         // this._leoStatusBarItem.command = Constants.COMMANDS.SWITCH_FILE;
         this._leoStatusBarItem.command = "leointeg.test"; // just call test function for now to help debugging
-        this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR + this._leoIntegration.config.statusBarString;
+        this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR;
         this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_ON;
         _context.subscriptions.push(this._leoStatusBarItem);
         this._leoStatusBarItem.hide();
@@ -4301,12 +4319,12 @@ private _updateLeoObjectIndicator(): void {
     utils.setContext(Constants.CONTEXT_FLAGS.LEO_SELECTED, !!this.statusBarFlag);
 
     this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR +
-        (this._string ? this._string : this._leoIntegration.config.statusBarString) + " " +
-        (this._leoIntegration.leoStates.leoOpenedFileName ? utils.getFileFromPath(this._leoIntegration.leoStates.leoOpenedFileName) : Constants.UNTITLED_FILE_NAME);
+        (this._string ? this._string : '') + " " +
+        (this._leoJs.leoStates.leoOpenedFileName ? utils.getFileFromPath(this._leoJs.leoStates.leoOpenedFileName) : Constants.UNTITLED_FILE_NAME);
 
     // Also check in constructor for statusBar properties (the createStatusBarItem call itself)
-    if (this.statusBarFlag &amp;&amp; this._leoIntegration.leoStates.fileOpenedReady) {
-        this._leoStatusBarItem.color = "#" + this._leoIntegration.config.statusBarColor;
+    if (this.statusBarFlag &amp;&amp; this._leoJs.leoStates.fileOpenedReady) {
+        this._leoStatusBarItem.color = "#" + Constants.GUI.STATUSBAR_COLOR;
         this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_ON;
     } else {
         this._leoStatusBarItem.color = this._statusbarNormalColor;
@@ -4337,6 +4355,179 @@ public static BUTTON_STRINGS = {
 </t>
 <t tx="felix.20201212215331.1">"@types/debounce": "^1.2.0",
 "debounce": "^1.2.0"
+</t>
+<t tx="felix.20201213171536.1">/**
+ * * Object sent back from leoInteg's 'getStates' command
+ */
+export interface LeoPackageStates {
+    changed: boolean; // Leo document has changed (is dirty)
+    canUndo: boolean; // Leo document can undo the last operation done
+    canRedo: boolean; // Leo document can redo the last operation 'undone'
+    canDemote: boolean; // Currently selected node can have its siblings demoted
+    canPromote: boolean; // Currently selected node can have its children promoted
+    canDehoist: boolean; // Leo Document is currently hoisted and can be de-hoisted
+}
+
+</t>
+<t tx="felix.20201213211652.1">/**
+ * * Leo document structure used in the 'Opened Leo Documents' tree view provider sent back by the server
+ */
+export interface LeoDocument {
+    name: string;
+    index: number;
+    changed: boolean;
+    selected: boolean;
+}
+
+</t>
+<t tx="felix.20201213214955.1">[CMD.EXECUTE, () =&gt; w_leo.command(LEOCMD.EXECUTE_SCRIPT, U, REFRESH_TREE_BODY, false)],
+
+[CMD.MINIBUFFER, () =&gt; w_leo.minibuffer()], // Is referenced in package.json
+
+[CMD.CLICK_BUTTON, (p_node: LeoButtonNode) =&gt; w_leo.clickAtButton(p_node)], // Not referenced in package.json
+[CMD.REMOVE_BUTTON, (p_node: LeoButtonNode) =&gt; w_leo.removeAtButton(p_node)],</t>
+<t tx="felix.20201213215037.1">[CMD.CLOSE_FILE, () =&gt; w_leo.closeLeoFile()],
+[CMD.NEW_FILE, () =&gt; w_leo.newLeoFile()],
+
+[CMD.OPEN_FILE, (p_uri?: vscode.Uri) =&gt; w_leo.openLeoFile(p_uri)],
+
+[CMD.RECENT_FILES, () =&gt; w_leo.showRecentLeoFiles()],
+[CMD.SAVE_AS_FILE, () =&gt; w_leo.saveAsLeoFile()],
+[CMD.SAVE_FILE, () =&gt; w_leo.saveLeoFile()],
+[CMD.SAVE_FILE_FO, () =&gt; w_leo.saveLeoFile(true)],
+[CMD.SWITCH_FILE, () =&gt; w_leo.switchLeoFile()],
+
+[CMD.SET_OPENED_FILE, (p_index: number) =&gt; w_leo.selectOpenedLeoDocument(p_index)],
+
+[CMD.REFRESH_FROM_DISK, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.REFRESH_FROM_DISK, p_node, REFRESH_TREE_BODY, false)],
+
+[CMD.REFRESH_FROM_DISK_SELECTION, () =&gt; w_leo.command(LEOCMD.REFRESH_FROM_DISK, U, REFRESH_TREE_BODY, false)],
+
+[CMD.REFRESH_FROM_DISK_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.REFRESH_FROM_DISK, U, REFRESH_TREE_BODY, true)],
+
+[CMD.GIT_DIFF, () =&gt; w_leo.command(LEOCMD.GIT_DIFF, U, REFRESH_TREE_BODY, false)],</t>
+<t tx="felix.20201213223428.1">[CMD.HEADLINE, (p_node: LeoNode) =&gt; w_leo.editHeadline(p_node, true)],
+[CMD.HEADLINE_SELECTION, () =&gt; w_leo.editHeadline(U, false)],
+[CMD.HEADLINE_SELECTION_FO, () =&gt; w_leo.editHeadline(U, true)],</t>
+<t tx="felix.20201213223452.1">// cut/copy/paste/delete given node.
+[CMD.COPY, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.COPY_PNODE, p_node, NO_REFRESH, true, true)],
+[CMD.CUT, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.CUT_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.DELETE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.DELETE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.PASTE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.PASTE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
+[CMD.PASTE_CLONE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.PASTE_CLONE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
+
+// cut/copy/paste/delete current selection (self.commander.p)
+[CMD.COPY_SELECTION, () =&gt; w_leo.command(LEOCMD.COPY_PNODE, U, NO_REFRESH, false)],
+[CMD.CUT_SELECTION, () =&gt; w_leo.command(LEOCMD.CUT_PNODE, U, REFRESH_TREE_BODY, false)],
+[CMD.CUT_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.CUT_PNODE, U, REFRESH_TREE_BODY, true)],
+[CMD.DELETE_SELECTION, () =&gt; w_leo.command(LEOCMD.DELETE_PNODE, U, REFRESH_TREE_BODY, false)],
+[CMD.DELETE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.DELETE_PNODE, U, REFRESH_TREE_BODY, true)],
+[CMD.PASTE_CLONE_SELECTION, () =&gt; w_leo.command(LEOCMD.PASTE_CLONE_PNODE, U, REFRESH_TREE_BODY, false)],
+[CMD.PASTE_CLONE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.PASTE_CLONE_PNODE, U, REFRESH_TREE_BODY, true)],
+[CMD.PASTE_SELECTION, () =&gt; w_leo.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, false)],
+[CMD.PASTE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, true)],</t>
+<t tx="felix.20201213230148.1">// Called by nodes in the tree when selected either by mouse, or with enter
+[CMD.SELECT_NODE, (p_node: LeoNode) =&gt; w_leo.selectTreeNode(p_node, false, false)],
+[CMD.OPEN_ASIDE, (p_node: LeoNode) =&gt; w_leo.selectTreeNode(p_node, false, true)],
+
+[CMD.CONTRACT_ALL, () =&gt; w_leo.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, false)],
+[CMD.CONTRACT_ALL_FO, () =&gt; w_leo.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, true)],
+
+[CMD.CONTRACT_OR_GO_LEFT, () =&gt; w_leo.command(LEOCMD.CONTRACT_OR_GO_LEFT, U, REFRESH_TREE_BODY, true)],
+[CMD.EXPAND_AND_GO_RIGHT, () =&gt; w_leo.command(LEOCMD.EXPAND_AND_GO_RIGHT, U, REFRESH_TREE_BODY, true)],</t>
+<t tx="felix.20201213230202.1">[CMD.GOTO_NEXT_CLONE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, p_node, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_NEXT_CLONE_SELECTION, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, false)],
+[CMD.GOTO_NEXT_CLONE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, true)],
+
+[CMD.GOTO_NEXT_MARKED, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_MARKED, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_FIRST_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_FIRST_VISIBLE, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_LAST_SIBLING, () =&gt; w_leo.command(LEOCMD.GOTO_LAST_SIBLING, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_LAST_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_LAST_VISIBLE, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_NEXT_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_VISIBLE, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_PREV_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_PREV_VISIBLE, U, REFRESH_NODE_BODY, true)],
+
+[CMD.PAGE_UP, () =&gt; w_leo.command(LEOCMD.PAGE_UP, U, REFRESH_NODE_BODY, true)],
+[CMD.PAGE_DOWN, () =&gt; w_leo.command(LEOCMD.PAGE_DOWN, U, REFRESH_NODE_BODY, true)],</t>
+<t tx="felix.20201213230208.1">[CMD.DEHOIST, () =&gt; w_leo.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, false)],
+[CMD.DEHOIST_FO, () =&gt; w_leo.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, true)],
+[CMD.HOIST, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.HOIST_PNODE, p_node, REFRESH_TREE_BODY, true)],
+[CMD.HOIST_SELECTION, () =&gt; w_leo.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, false)],
+[CMD.HOIST_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, true)],</t>
+<t tx="felix.20201213230549.1">[CMD.INSERT, (p_node: LeoNode) =&gt; w_leo.insertNode(p_node, true)],
+[CMD.INSERT_SELECTION, () =&gt; w_leo.insertNode(U, false)],
+[CMD.INSERT_SELECTION_FO, () =&gt; w_leo.insertNode(U, true)],
+// Special command for when inserting rapidly more than one node without
+// even specifying a headline label, e.g. spamming CTRL+I rapidly.
+[CMD.INSERT_SELECTION_INTERRUPT, () =&gt; w_leo.insertNode(U, false, true)],
+
+[CMD.CLONE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.CLONE_PNODE, p_node, REFRESH_TREE_BODY, true)],
+[CMD.CLONE_SELECTION, () =&gt; w_leo.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, false)],
+[CMD.CLONE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, true)],
+
+[CMD.PROMOTE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.PROMOTE_SELECTION, () =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, false)],
+[CMD.PROMOTE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, true)],
+
+[CMD.DEMOTE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.DEMOTE_SELECTION, () =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, false)],
+[CMD.DEMOTE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, true)],
+
+[CMD.SORT_CHILDREN, () =&gt; w_leo.command(LEOCMD.SORT_CHILDREN, U, REFRESH_TREE, false, true)],
+[CMD.SORT_SIBLING, () =&gt; w_leo.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, false, true)],
+[CMD.SORT_SIBLING_FO, () =&gt; w_leo.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, true, true)],</t>
+<t tx="felix.20201213230722.1">[CMD.MARK, (p_node: LeoNode) =&gt; w_leo.changeMark(true, p_node, true)],
+[CMD.MARK_SELECTION, () =&gt; w_leo.changeMark(true, U, false)],
+[CMD.MARK_SELECTION_FO, () =&gt; w_leo.changeMark(true, U, true)],
+
+[CMD.UNMARK, (p_node: LeoNode) =&gt; w_leo.changeMark(false, p_node, true)],
+[CMD.UNMARK_SELECTION, () =&gt; w_leo.changeMark(false, U, false)],
+[CMD.UNMARK_SELECTION_FO, () =&gt; w_leo.changeMark(false, U, true)],
+
+[CMD.UNMARK_ALL, () =&gt; w_leo.command(LEOCMD.UNMARK_ALL, U, REFRESH_TREE_BODY, true)],</t>
+<t tx="felix.20201213230740.1">[CMD.EXTRACT, () =&gt; w_leo.command(LEOCMD.EXTRACT, U, REFRESH_TREE_BODY, false)],
+[CMD.EXTRACT_NAMES, () =&gt; w_leo.command(LEOCMD.EXTRACT_NAMES, U, REFRESH_TREE_BODY, false)],</t>
+<t tx="felix.20201213230753.1">[CMD.MOVE_DOWN, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_DOWN_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, false)],
+[CMD.MOVE_DOWN_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, true)],
+
+[CMD.MOVE_LEFT, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_LEFT_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, false)],
+[CMD.MOVE_LEFT_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, true)],
+
+[CMD.MOVE_RIGHT, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_RIGHT_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, false)],
+[CMD.MOVE_RIGHT_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, true)],
+
+[CMD.MOVE_UP, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_UP_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, false)],
+[CMD.MOVE_UP_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, true)],</t>
+<t tx="felix.20201213230856.1">[CMD.REDO, () =&gt; w_leo.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, false)],
+[CMD.REDO_FO, () =&gt; w_leo.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, true)],
+[CMD.UNDO, () =&gt; w_leo.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, false)],
+[CMD.UNDO_FO, () =&gt; w_leo.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, true)],</t>
+<t tx="felix.20201213231052.1">[CMD.SHOW_OUTLINE, () =&gt; w_leo.showOutline(true)], // Also focuses on outline
+[CMD.SHOW_LOG, () =&gt; w_leo.showLogPane()],
+[CMD.SHOW_BODY, () =&gt; w_leo.showBody(false)], // Also focuses on body</t>
+<t tx="felix.20201213231111.1">[CMD.COPY_MARKED, () =&gt; w_leo.command(LEOCMD.COPY_MARKED, U, REFRESH_TREE_BODY, true)],
+[CMD.DIFF_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.DIFF_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
+[CMD.MARK_CHANGED_ITEMS, () =&gt; w_leo.command(LEOCMD.MARK_CHANGED_ITEMS, U, REFRESH_TREE_BODY, true)],
+[CMD.MARK_SUBHEADS, () =&gt; w_leo.command(LEOCMD.MARK_SUBHEADS, U, REFRESH_TREE_BODY, true)],
+[CMD.CLONE_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.CLONE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
+[CMD.DELETE_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.DELETE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
+[CMD.MOVE_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.MOVE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],</t>
+<t tx="felix.20201213231131.1">[CMD.CLONE_FIND_ALL, () =&gt; w_leo.command(LEOCMD.CLONE_FIND_ALL, U, REFRESH_TREE_BODY, true)],
+[CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; w_leo.command(LEOCMD.CLONE_FIND_ALL_FLATTENED, U, REFRESH_TREE_BODY, true)],
+[CMD.CLONE_FIND_MARKED, () =&gt; w_leo.command(LEOCMD.CLONE_FIND_MARKED, U, REFRESH_TREE_BODY, true)],
+[CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; w_leo.command(LEOCMD.CLONE_FIND_FLATTENED_MARKED, U, REFRESH_TREE_BODY, true)]</t>
+<t tx="felix.20201213234300.1">"viewsContainers": {
+  "activitybar": [
+    {
+      "id": "leojsView",
+      "title": "Leo",
+      "icon": "resources/icon.svg"
+    }
+  ]
+},
 </t>
 </tnodes>
 </leo_file>

@@ -13,7 +13,7 @@ export interface PNode {
  */
 export const enum RevealType {
     NoReveal = 0,   // In apToLeoNode conversion. True:
-                    // Re-use the old if the global revealType is "NoReveal" and it's the selected node.
+    // Re-use the old if the global revealType is "NoReveal" and it's the selected node.
     Reveal,
     RevealSelect,
     RevealSelectFocus
@@ -27,7 +27,7 @@ export interface ReqRefresh {
     tree?: boolean; // Tree needs refresh
     body?: boolean; // Body needs refresh
     states?: boolean; // States needs refresh:
-                      // (changed, canUndo, canRedo, canDemote, canPromote, canDehoist)
+    // (changed, canUndo, canRedo, canDemote, canPromote, canDehoist)
     buttons?: boolean; // Buttons needs refresh
     documents?: boolean; // Documents needs refresh
 }
@@ -47,7 +47,7 @@ export interface UserCommand {
 }
 
 /**
- * * Object container for parameters of leoIntegration's "apply-selected-node-to-body" method
+ * * Object container for parameters of leoJs "apply-selected-node-to-body" method
  */
 export interface ShowBodyParam {
     node: LeoNode,
@@ -56,27 +56,25 @@ export interface ShowBodyParam {
     force_open?: boolean
 }
 /**
- * * ArchivedPosition format package from Leo's leoflexx.py
+ * * Object sent back from leoInteg's 'getStates' command
  */
-export interface ArchivedPosition {
-    hasBody: boolean;       // bool(p.b),
-    hasChildren: boolean;   // p.hasChildren()
-    childIndex: number;     // p._childIndex
-    cloned: boolean;        // p.isCloned()
-    dirty: boolean;         // p.isDirty()
-    expanded: boolean;      // p.isExpanded()
-    gnx: string;            // p.v.gnx
-    level: number;          // p.level()
-    headline: string;       // p.h
-    marked: boolean;        // p.isMarked()
-    atFile: boolean         // p.isAnyAtFileNode():
-    selected: boolean;      // p == commander.p
-    u?: any;               // User Attributes
-    stack: {
-        gnx: string;        // stack_v.gnx
-        childIndex: number; // stack_childIndex
-        headline: string;   // stack_v.h
-    }[];                    // for (stack_v, stack_childIndex) in p.stack]
+export interface LeoPackageStates {
+    changed: boolean; // Leo document has changed (is dirty)
+    canUndo: boolean; // Leo document can undo the last operation done
+    canRedo: boolean; // Leo document can redo the last operation 'undone'
+    canDemote: boolean; // Currently selected node can have its siblings demoted
+    canPromote: boolean; // Currently selected node can have its children promoted
+    canDehoist: boolean; // Leo Document is currently hoisted and can be de-hoisted
+}
+
+/**
+ * * Leo document structure used in the 'Opened Leo Documents' tree view provider sent back by the server
+ */
+export interface LeoDocument {
+    name: string;
+    index: number;
+    changed: boolean;
+    selected: boolean;
 }
 
 /**

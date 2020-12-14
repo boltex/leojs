@@ -2,7 +2,8 @@ import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { LeoDocument, Icon } from "./types";
 import * as utils from "./utils";
-import { LeoIntegration } from "./leoIntegration";
+import { LeoJs } from "./leojs";
+
 
 /**
  * * Opened Leo documents tree view node item implementation for usage in a TreeDataProvider
@@ -14,7 +15,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
 
     constructor(
         public documentEntry: LeoDocument,
-        private _leoIntegration: LeoIntegration
+        private _leoJs: LeoJs
     ) {
         super(documentEntry.name);
         // Setup this instance
@@ -28,7 +29,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
         };
         // If this was created as a selected node, make sure it's selected as we may have opened/closed document
         if (this.documentEntry.selected) {
-            this._leoIntegration.setDocumentSelection(this);
+            this._leoJs.setDocumentSelection(this);
             this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
         } else {
             this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_UNTITLED;
@@ -37,7 +38,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
 
     // @ts-ignore
     public get iconPath(): Icon {
-        return this._leoIntegration.documentIcons[this.documentEntry.changed ? 1 : 0];
+        return this._leoJs.documentIcons[this.documentEntry.changed ? 1 : 0];
     }
 
     // @ts-ignore

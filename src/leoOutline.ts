@@ -2,9 +2,8 @@ import * as vscode from 'vscode';
 import { LeoNode } from './leoNode';
 import { ProviderResult } from "vscode";
 import { Icon, PNode } from './types';
-import * as utils from "./utils";
 
-export class JsOutlineProvider implements vscode.TreeDataProvider<LeoNode> {
+export class LeoOutlineProvider implements vscode.TreeDataProvider<LeoNode> {
     private _onDidChangeTreeData: vscode.EventEmitter<LeoNode | undefined> = new vscode.EventEmitter<LeoNode | undefined>();
 
     private _icons: Icon[];
@@ -40,8 +39,8 @@ export class JsOutlineProvider implements vscode.TreeDataProvider<LeoNode> {
 
     private _uniqueId: number = 0;
 
-    constructor(private _context: vscode.ExtensionContext) {
-        this._icons = this._buildNodeIconPaths(_context);
+    constructor(p_icons: Icon[]) {
+        this._icons = p_icons;
     }
 
 
@@ -67,15 +66,6 @@ export class JsOutlineProvider implements vscode.TreeDataProvider<LeoNode> {
     public getParent(element: LeoNode): ProviderResult<LeoNode> | null {
         // Buttons are just a list, as such, entries are always child of root so return null
         return null;
-    }
-
-    private _buildNodeIconPaths(p_context: vscode.ExtensionContext): Icon[] {
-        return Array(16).fill("").map((p_val, p_index) => {
-            return {
-                light: p_context.asAbsolutePath("resources/light/box" + utils.padNumber2(p_index) + ".svg"),
-                dark: p_context.asAbsolutePath("resources/dark/box" + utils.padNumber2(p_index) + ".svg")
-            };
-        });
     }
 
     private _LeoNodeArray(p_children: PNode[]): LeoNode[] {

@@ -11,17 +11,37 @@ import {
     UserCommand,
     ShowBodyParam,
 } from "./types";
+
 import { LeoNode } from "./leoNode";
+import { LeoOutlineProvider } from './leoOutline';
 import { LeoButtonNode } from "./leoButtonNode";
+import { LeoButtonsProvider } from "./leoButtons";
+import { LeoDocumentNode } from "./leoDocumentNode";
+import { LeoDocumentsProvider } from "./leoDocuments";
+import { LeoStates } from "./leoStates";
+
 /**
  * Implements https://github.com/leo-editor/leo-editor/issues/1025
  */
 export class LeoJs {
+    // * State flags
+    public leoStates: LeoStates;
+
+    // * Icon Paths (Singleton static arrays)
+    public nodeIcons: Icon[] = [];
+    public documentIcons: Icon[] = [];
+    public buttonIcons: Icon[] = [];
+
+    private _refreshType: ReqRefresh = {}; // Flags for commands to require parts of UI to refresh
 
     private _bodyMainSelectionColumn: vscode.ViewColumn | undefined; // Column of last body 'textEditor' found, set to 1
 
     private _bodyTextDocument: vscode.TextDocument | undefined; // Set when selected in tree by user, or opening a Leo file in showBody. and by _locateOpenedBody.
 
+    // * Outline Pane
+    private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
+    private _leoTreeView: vscode.TreeView<LeoNode>; // Outline tree view added to the Tree View Container with an Activity Bar icon
+    private _leoTreeExView: vscode.TreeView<LeoNode>; // Outline tree view added to the Explorer Sidebar
     private _lastTreeView: vscode.TreeView<LeoNode>; // Last visible treeview
 
     private _lastSelectedNode: LeoNode | undefined; // Last selected node we got a hold of; leoTreeView.selection maybe newer and unprocessed
@@ -35,9 +55,49 @@ export class LeoJs {
         }
     }
 
+    // * Documents Pane
+    private _leoDocumentsProvider: LeoDocumentsProvider;
+    private _leoDocuments: vscode.TreeView<LeoDocumentNode>;
+    private _leoDocumentsExplorer: vscode.TreeView<LeoDocumentNode>;
+    private _currentDocumentChanged: boolean = false; // if clean and an edit is done: refresh opened documents view
+
+    // * '@button' pane
+    private _leoButtonsProvider: LeoButtonsProvider;
+    private _leoButtons: vscode.TreeView<LeoButtonNode>;
+    private _leoButtonsExplorer: vscode.TreeView<LeoButtonNode>;
+
+    // * Log and terminal Panes
+    private _leoLogPane: vscode.OutputChannel = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
+    private _leoTerminalPane: vscode.OutputChannel | undefined;
+
+    // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
+    public getStates: (() => void) & {
+        clear(): void;
+    } & {
+        flush(): void;
+    };
+
+    // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
+    public refreshDocumentsPane: (() => void) & {
+        clear(): void;
+    } & {
+        flush(): void;
+    };
+
     constructor(private _context: vscode.ExtensionContext) {
-        // * Create Leo stand-alone view and Explorer view outline panes
-        // Uses 'select node' command, so 'onDidChangeSelection' is not used
+        // * Setup States
+        this.leoStates = new LeoStates(_context, this);
+
+        // * Build Icon filename paths
+        this.nodeIcons = utils.buildNodeIconPaths(_context);
+        this.documentIcons = utils.buildDocumentIconPaths(_context);
+        this.buttonIcons = utils.buildButtonsIconPaths(_context);
+
+        // * Create file browser instance
+        // this._leoFilesBrowser = new LeoFilesBrowser(_context);
+
+        // * Create a single data provider for both outline trees, Leo view and Explorer view
+        this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons);
         this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
         this._leoTreeView.onDidExpandElement((p_event => this._onChangeCollapsedState(p_event, true, this._leoTreeView)));
         this._leoTreeView.onDidCollapseElement((p_event => this._onChangeCollapsedState(p_event, false, this._leoTreeView)));
@@ -46,7 +106,128 @@ export class LeoJs {
         this._leoTreeExView.onDidExpandElement((p_event => this._onChangeCollapsedState(p_event, true, this._leoTreeExView)));
         this._leoTreeExView.onDidCollapseElement((p_event => this._onChangeCollapsedState(p_event, false, this._leoTreeExView)));
         this._leoTreeExView.onDidChangeVisibility((p_event => this._onTreeViewVisibilityChanged(p_event, true))); // * Trigger 'show tree in explorer view'
-        this._lastTreeView = this.config.treeInExplorer ? this._leoTreeExView : this._leoTreeView;
+        this._lastTreeView = this._leoTreeExView;
+
+        // * Create Leo Opened Documents Treeview Providers and tree views
+        this._leoDocumentsProvider = new LeoDocumentsProvider(this);
+        this._leoDocuments = vscode.window.createTreeView(Constants.DOCUMENTS_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
+        this._leoDocuments.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, false)));
+        this._leoDocumentsExplorer = vscode.window.createTreeView(Constants.DOCUMENTS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
+        this._leoDocumentsExplorer.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, true)));
+
+        // * Create '@buttons' Treeview Providers and tree views
+        this._leoButtonsProvider = new LeoButtonsProvider(this);
+        this._leoButtons = vscode.window.createTreeView(Constants.BUTTONS_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
+        this._leoButtons.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, false)));
+        this._leoButtonsExplorer = vscode.window.createTreeView(Constants.BUTTONS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
+        this._leoButtonsExplorer.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, true)));
+
+        // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
+        this.getStates = debounce(this._triggerGetStates, Constants.STATES_DEBOUNCE_DELAY);
+        this.refreshDocumentsPane = debounce(this._refreshDocumentsPane, Constants.DOCUMENTS_DEBOUNCE_DELAY);
+    }
+
+    /**
+     * 'getStates' action for use in debounced method call
+     */
+    private _triggerGetStates(): void {
+        if (this._refreshType.documents) {
+            this._refreshType.documents = false;
+            this.refreshDocumentsPane();
+        }
+        if (this._refreshType.buttons) {
+            this._refreshType.buttons = false;
+            this._leoButtonsProvider.refreshTreeRoot();
+        }
+        if (this._refreshType.states) {
+            this._refreshType.states = false;
+            // this.leoStates.setLeoStateFlags(this._leoStates); //
+        }
+    }
+
+    /**
+     * Public method to refresh the documents pane
+     * Document Panel May be refreshed by other services (states service, ...)
+     */
+    private _refreshDocumentsPane(): void {
+        this._leoDocumentsProvider.refreshTreeRoot();
+    }
+
+
+    /**
+     * * Handles the node expanding and collapsing interactions by the user in the treeview
+     * @param p_event The event passed by vscode
+     * @param p_expand True if it was an expand, false if it was a collapse event
+     * @param p_treeView Pointer to the treeview itself, either the standalone treeview or the one under the explorer
+     */
+    private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent<LeoNode>, p_expand: boolean, p_treeView: vscode.TreeView<LeoNode>): void {
+        // * Expanding or collapsing via the treeview interface selects the node to mimic Leo
+    }
+
+    /**
+     * * Handle the change of visibility of either outline treeview and refresh it if its visible
+     * @param p_event The treeview-visibility-changed event passed by vscode
+     * @param p_explorerView Flag to signify that the treeview who triggered this event is the one in the explorer view
+     */
+    private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
+        if (p_event.visible) {
+            this._lastTreeView = p_explorerView ? this._leoTreeExView : this._leoTreeView;
+            //  this._refreshOutline(true, RevealType.RevealSelect);
+        }
+    }
+
+
+    /**
+     * * Handle the change of visibility of either outline treeview and refresh it if its visible
+     * @param p_event The treeview-visibility-changed event passed by vscode
+     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
+     */
+    private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
+        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
+        if (p_event.visible) {
+            this.refreshDocumentsPane();
+        }
+    }
+
+    /**
+     * * Handle the change of visibility of either outline treeview and refresh it if its visible
+     * @param p_event The treeview-visibility-changed event passed by vscode
+     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
+     */
+    private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
+        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
+        if (p_event.visible) {
+            this._leoButtonsProvider.refreshTreeRoot();
+        }
+    }
+
+    /**
+     * * Places selection on the required node with a 'timeout'. Used after refreshing the opened Leo documents view.
+     * @param p_documentNode Document node instance in the Leo document view to be the 'selected' one.
+     */
+    public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
+        this._currentDocumentChanged = p_documentNode.documentEntry.changed;
+        this.leoStates.leoOpenedFileName = p_documentNode.documentEntry.name;
+        setTimeout(() => {
+            if (!this._leoDocuments.visible && !this._leoDocumentsExplorer.visible) {
+                return;
+            }
+            let w_trigger = false;
+            let w_docView: vscode.TreeView<LeoDocumentNode>;
+            if (this._leoDocuments.visible) {
+                w_docView = this._leoDocuments;
+            } else {
+                w_docView = this._leoDocumentsExplorer;
+            }
+            if (w_docView.selection.length && w_docView.selection[0] === p_documentNode) {
+                // console.log('already selected!');
+            } else {
+                w_trigger = true;
+            }
+            if (w_trigger) {
+                w_docView.reveal(p_documentNode, { select: true, focus: false });
+            }
+        }, 0);
     }
 
     /**
@@ -123,10 +304,10 @@ export class LeoJs {
     }
 
     /**
-   * * Opens an an editor for the currently selected node: "this.bodyUri". If already opened, this just 'reveals' it
-   * @param p_aside Flag for opening the editor beside any currently opened and focused editor
-   * @param p_preserveFocus flag that when true will stop the editor from taking focus once opened
-   */
+    * * Opens an an editor for the currently selected node: "this.bodyUri". If already opened, this just 'reveals' it
+    * @param p_aside Flag for opening the editor beside any currently opened and focused editor
+    * @param p_preserveFocus flag that when true will stop the editor from taking focus once opened
+    */
     public showBody(p_aside: boolean, p_preserveFocus?: boolean): Thenable<vscode.TextEditor | undefined> {
         const w_showOptions: vscode.TextDocumentShowOptions = p_aside ?
             {

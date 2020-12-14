@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as utils from "./utils";
+import { LeoJs } from "./leojs";
 import { Constants } from "./constants";
-import { LeoIntegration } from "./leoIntegration";
 import { LeoNode } from "./leoNode";
 import { LeoPackageStates } from "./types";
 
@@ -12,16 +12,6 @@ import { LeoPackageStates } from "./types";
  */
 export class LeoStates {
 
-    // * Connected to a Leo bridge server
-    private _leoBridgeReady: boolean = false;
-    get leoBridgeReady(): boolean {
-        return this._leoBridgeReady;
-    }
-    set leoBridgeReady(p_value: boolean) {
-        this._leoBridgeReady = p_value;
-        utils.setContext(Constants.CONTEXT_FLAGS.BRIDGE_READY, p_value);
-    }
-
     // * A Leo file is opened
     private _fileOpenedReady: boolean = false; // Sets context flag along with treeview title
     get fileOpenedReady(): boolean {
@@ -30,9 +20,6 @@ export class LeoStates {
     set fileOpenedReady(p_value: boolean) {
         this._fileOpenedReady = p_value;
         utils.setContext(Constants.CONTEXT_FLAGS.TREE_OPENED, p_value);
-        this._leoIntegration.setTreeViewTitle(
-            p_value ? Constants.GUI.TREEVIEW_TITLE : Constants.GUI.TREEVIEW_TITLE_INTEGRATION
-        );
     }
 
     // * Currently opened Leo file path and name, empty string if new unsaved file.
@@ -58,7 +45,7 @@ export class LeoStates {
     set leoChanged(p_value: boolean) {
         if (this._leoChanged !== p_value) {
             // Refresh Documents Panel
-            this._leoIntegration.refreshDocumentsPane();
+            this._leoJs.refreshDocumentsPane();
         }
         this._leoChanged = p_value;
         utils.setContext(Constants.CONTEXT_FLAGS.LEO_CHANGED, p_value);
@@ -176,7 +163,7 @@ export class LeoStates {
 
     constructor(
         private _context: vscode.ExtensionContext,
-        private _leoIntegration: LeoIntegration
+        private _leoJs: LeoJs
     ) { }
 
     public setSelectedNodeFlags(p_node: LeoNode): void {

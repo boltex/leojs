@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { LeoIntegration } from "./leoIntegration";
+import { LeoJs } from './leojs';
 import { LeoButtonNode } from "./leoButtonNode";
 import { ProviderResult } from "vscode";
 import { Constants } from "./constants";
@@ -14,7 +14,7 @@ export class LeoButtonsProvider implements vscode.TreeDataProvider<LeoButtonNode
 
     readonly onDidChangeTreeData: vscode.Event<LeoButtonNode | undefined> = this._onDidChangeTreeData.event;
 
-    constructor(private _leoIntegration: LeoIntegration) { }
+    constructor(private _leoJs: LeoJs) { }
 
     /**
      * * Refresh the whole outline
@@ -30,23 +30,8 @@ export class LeoButtonsProvider implements vscode.TreeDataProvider<LeoButtonNode
     public getChildren(element?: LeoButtonNode): Thenable<LeoButtonNode[]> {
 
         // if called with element, or not ready, give back empty array as there won't be any children
-        if (this._leoIntegration.leoStates.fileOpenedReady && !element) {
-
-            // call action to get get list, and convert to LeoButtonNode(s) array
-            return this._leoIntegration.sendAction(Constants.LEOBRIDGE.GET_BUTTONS).then(p_package => {
-                if (p_package && p_package) {
-                    const w_list: LeoButtonNode[] = [];
-                    const w_buttons: LeoButton[] = p_package.buttons!;
-                    if (w_buttons && w_buttons.length) {
-                        w_buttons.forEach((i_button: LeoButton) => {
-                            w_list.push(new LeoButtonNode(i_button, this._leoIntegration));
-                        });
-                    }
-                    return Promise.resolve(w_list);
-                } else {
-                    return Promise.resolve([]);
-                }
-            });
+        if (this._leoJs.leoStates.fileOpenedReady && !element) {
+            return Promise.resolve([]); // TODO get list from leoJs
         } else {
             return Promise.resolve([]); // Defaults to an empty list of children
         }

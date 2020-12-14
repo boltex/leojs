@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import { LeoIntegration } from "./leoIntegration";
+import { LeoJs } from './leojs';
+
 import { LeoDocumentNode } from "./leoDocumentNode";
 import { ProviderResult } from "vscode";
 import { Constants } from "./constants";
@@ -14,7 +15,7 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoDocument
 
     readonly onDidChangeTreeData: vscode.Event<LeoDocumentNode | undefined> = this._onDidChangeTreeData.event;
 
-    constructor(private _leoIntegration: LeoIntegration) { }
+    constructor(private _leoJs: LeoJs) { }
 
     /**
      * * Refresh the whole outline
@@ -28,30 +29,10 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoDocument
     }
 
     public getChildren(element?: LeoDocumentNode): Thenable<LeoDocumentNode[]> {
-
         // if called with element, or not ready, give back empty array as there won't be any children
-        if (this._leoIntegration.leoStates.fileOpenedReady && !element) {
+        if (this._leoJs.leoStates.fileOpenedReady && !element) {
 
-            // call action to get get list, and convert to LeoDocumentNode(s) array
-            return this._leoIntegration.sendAction(Constants.LEOBRIDGE.GET_OPENED_FILES).then(p_package => {
-                if (p_package && p_package) {
-                    const w_list: LeoDocumentNode[] = [];
-                    const w_files: LeoDocument[] = p_package.openedFiles!.files;
-
-                    let w_index: number = 0;
-
-                    if (w_files && w_files.length) {
-                        w_files.forEach((i_file: LeoDocument) => {
-                            w_list.push(new LeoDocumentNode(i_file, this._leoIntegration));
-                            w_index++;
-                        });
-                    }
-
-                    return Promise.resolve(w_list);
-                } else {
-                    return Promise.resolve([]);
-                }
-            });
+            return Promise.resolve([]); // TODO : get list!
         } else {
             return Promise.resolve([]); // Defaults to an empty list of children
         }

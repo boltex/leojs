@@ -7,25 +7,26 @@ export class Constants {
 
     public static NAME: string = "leojs";
 
+    public static TREEVIEW_ID: string = "leojs";
     public static TREEVIEW_EXPLORER_ID: string = "leojsExplorer";
 
+    public static DOCUMENTS_ID: string = "leoDocuments";
+    public static DOCUMENTS_EXPLORER_ID: string = "leoDocumentsExplorer";
+
+    public static BUTTONS_ID: string = "leoButtons";
+    public static BUTTONS_EXPLORER_ID: string = "leoButtonsExplorer";
+
     public static FILE_EXTENSION: string = "leo";
-
     public static URI_LEO_SCHEME: string = "leo";
-
     public static URI_FILE_SCHEME: string = "file";
-
     public static URI_SCHEME_HEADER: string = "leo:/";
-
     public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files";
-
     public static UNTITLED_FILE_NAME: string = "untitled";
-
     public static RECENT_FILES_KEY: string = "leoRecentFiles";
-
     public static LAST_FILES_KEY: string = "leoLastFiles";
 
     public static STATES_DEBOUNCE_DELAY: number = 100;
+    public static DOCUMENTS_DEBOUNCE_DELAY: number = 100;
 
     /**
      * Strings used in the workbench interface panels (not for messages or dialogs)
@@ -43,11 +44,13 @@ export class Constants {
         ICON_DARK_PATH: "resources/dark/box",
         ICON_FILE_EXT: ".svg",
         STATUSBAR_INDICATOR: "$(keyboard) ",
+        STATUSBAR_COLOR: "fb7c47",
         QUICK_OPEN_LEO_COMMANDS: ">leo: ",
         EXPLORER_TREEVIEW_PREFIX: "LEO ",
         TREEVIEW_TITLE: "OUTLINE",
         BODY_TITLE: "LEO BODY",
-        LOG_PANE_TITLE: "Leo Log Window"
+        LOG_PANE_TITLE: "Leo Log Window",
+        THEME_STATUSBAR: "statusBar.foreground"
     };
 
     /**
@@ -87,7 +90,9 @@ export class Constants {
         CHANGES_DETECTED: "Changes to external files were detected.",
         REFRESHED: " Nodes refreshed.", // with voluntary leading space
         IGNORED: " They were ignored.", // with voluntary leading space
-        TOO_FAST: "Leo is busy! " // with voluntary trailing space
+        TOO_FAST: "Leo is busy! ", // with voluntary trailing space
+        STATUSBAR_TOOLTIP_ON: "Leo Key Bindings are in effect",
+        STATUSBAR_TOOLTIP_OFF: "Leo Key Bindings off",
     };
 
     /**
@@ -150,7 +155,12 @@ export class Constants {
         NODE_ATFILE: "leoNodeAtFile", // Selected node is an @file or @clean, etc...
         NODE_CLONED: "leoNodeCloned",
         NODE_ROOT: "leoNodeRoot",
-        NODE_NOT_ROOT: "leoNodeNotRoot"
+        NODE_NOT_ROOT: "leoNodeNotRoot",
+        // Flags for Leo documents tree view icons and hover node command buttons
+        DOCUMENT_SELECTED_TITLED: "leoDocumentSelectedTitled",
+        DOCUMENT_TITLED: "leoDocumentTitled",
+        DOCUMENT_SELECTED_UNTITLED: "leoDocumentSelectedUntitled",
+        DOCUMENT_UNTITLED: "leoDocumentUntitled",
     };
 
     /**
