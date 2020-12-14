@@ -7,25 +7,26 @@ export class Constants {
 
     public static NAME: string = "leojs";
 
+    public static TREEVIEW_ID: string = "leojs";
     public static TREEVIEW_EXPLORER_ID: string = "leojsExplorer";
 
+    public static DOCUMENTS_ID: string = "leoDocuments";
+    public static DOCUMENTS_EXPLORER_ID: string = "leoDocumentsExplorer";
+
+    public static BUTTONS_ID: string = "leoButtons";
+    public static BUTTONS_EXPLORER_ID: string = "leoButtonsExplorer";
+
     public static FILE_EXTENSION: string = "leo";
-
     public static URI_LEO_SCHEME: string = "leo";
-
     public static URI_FILE_SCHEME: string = "file";
-
     public static URI_SCHEME_HEADER: string = "leo:/";
-
     public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files";
-
     public static UNTITLED_FILE_NAME: string = "untitled";
-
     public static RECENT_FILES_KEY: string = "leoRecentFiles";
-
     public static LAST_FILES_KEY: string = "leoLastFiles";
 
     public static STATES_DEBOUNCE_DELAY: number = 100;
+    public static DOCUMENTS_DEBOUNCE_DELAY: number = 100;
 
     /**
      * Strings used in the workbench interface panels (not for messages or dialogs)
@@ -43,17 +44,31 @@ export class Constants {
         ICON_DARK_PATH: "resources/dark/box",
         ICON_FILE_EXT: ".svg",
         STATUSBAR_INDICATOR: "$(keyboard) ",
+        STATUSBAR_COLOR: "fb7c47",
         QUICK_OPEN_LEO_COMMANDS: ">leo: ",
         EXPLORER_TREEVIEW_PREFIX: "LEO ",
         TREEVIEW_TITLE: "OUTLINE",
         BODY_TITLE: "LEO BODY",
-        LOG_PANE_TITLE: "Leo Log Window"
+        LOG_PANE_TITLE: "Leo Log Window",
+        THEME_STATUSBAR: "statusBar.foreground"
     };
 
     /**
      * Basic user messages strings for messages and dialogs
      */
     public static USER_MESSAGES = {
+        SCRIPT_BUTTON: "Creates a button from selected node's script",
+        SCRIPT_BUTTON_TOOLTIP:
+            "The 'Script Button' button creates a new button.\n" +
+            "Its name will be the headline of the presently selected node\n" +
+            "Hitting this newly created button executes the button's script.\n" +
+            "\n" +
+            "For example, to run a script on any part of an outline:\n" +
+            "\n" +
+            "1.  Select the node containing a script. (Ex.: \"g.es(p.h)\")\n" +
+            "2.  Press 'Script Button'. This will create a new button.\n" +
+            "3.  Select a node on which you want to run the script.\n" +
+            "4.  Press the *new* button.",
         SAVE_CHANGES: "Save changes to",
         BEFORE_CLOSING: "before closing?",
         CANCEL: "Cancel",
@@ -75,7 +90,19 @@ export class Constants {
         CHANGES_DETECTED: "Changes to external files were detected.",
         REFRESHED: " Nodes refreshed.", // with voluntary leading space
         IGNORED: " They were ignored.", // with voluntary leading space
-        TOO_FAST: "Leo is busy! " // with voluntary trailing space
+        TOO_FAST: "Leo is busy! ", // with voluntary trailing space
+        STATUSBAR_TOOLTIP_ON: "Leo Key Bindings are in effect",
+        STATUSBAR_TOOLTIP_OFF: "Leo Key Bindings off",
+    };
+
+    /**
+     * * Strings used in 'at-button' panel display in LeoButtonNode
+     */
+    public static BUTTON_STRINGS = {
+        NULL_WIDGET: "nullButtonWidget",
+        SCRIPT_BUTTON: "script-button",
+        ADD_BUTTON: "leoButtonAdd",
+        NORMAL_BUTTON: "leoButtonNode"
     };
 
     /**
@@ -128,7 +155,12 @@ export class Constants {
         NODE_ATFILE: "leoNodeAtFile", // Selected node is an @file or @clean, etc...
         NODE_CLONED: "leoNodeCloned",
         NODE_ROOT: "leoNodeRoot",
-        NODE_NOT_ROOT: "leoNodeNotRoot"
+        NODE_NOT_ROOT: "leoNodeNotRoot",
+        // Flags for Leo documents tree view icons and hover node command buttons
+        DOCUMENT_SELECTED_TITLED: "leoDocumentSelectedTitled",
+        DOCUMENT_TITLED: "leoDocumentTitled",
+        DOCUMENT_SELECTED_UNTITLED: "leoDocumentSelectedUntitled",
+        DOCUMENT_UNTITLED: "leoDocumentUntitled",
     };
 
     /**
@@ -142,7 +174,7 @@ export class Constants {
     };
 
     /**
-     * All commands this expansion exposes (in package.json, contributes > commands)
+     * All commands this expansion exposes to the user via GUI/keybindings in package.json
      */
     public static COMMANDS = {
         // Leo Documents
@@ -156,6 +188,10 @@ export class Constants {
         SAVE_AS_FILE: Constants.NAME + ".saveAsLeoFile",
         CLOSE_FILE: Constants.NAME + ".closeLeoFile",
         MINIBUFFER: Constants.NAME + ".minibuffer",
+        GIT_DIFF: Constants.NAME + ".gitDiff",
+        // At-buttons
+        CLICK_BUTTON: Constants.NAME + ".clickButton",
+        REMOVE_BUTTON: Constants.NAME + ".removeButton",
         // Outline Node User Interaction
         SELECT_NODE: Constants.NAME + ".selectTreeNode",
         OPEN_ASIDE: Constants.NAME + ".openAside", // selects and opens body splitting the workspace
@@ -261,6 +297,68 @@ export class Constants {
         CLONE_FIND_ALL_FLATTENED: Constants.NAME + ".cloneFindAllFlattened",
         CLONE_FIND_MARKED: Constants.NAME + ".cloneFindMarked",
         CLONE_FIND_FLATTENED_MARKED: Constants.NAME + ".cloneFindFlattenedMarked",
+    };
+
+    /**
+     * Leo command names that are called from vscode's gui/menu/buttons/keybindings triggers
+     */
+    public static LEO_COMMANDS = {
+        EXECUTE_SCRIPT: "executeScript",
+        REFRESH_FROM_DISK: "refreshFromDisk",
+        GIT_DIFF: "gitDiff",
+        // Goto operations
+        PAGE_UP: "pageUp",
+        PAGE_DOWN: "pageDown",
+        GOTO_FIRST_VISIBLE: "goToFirstVisibleNode",
+        GOTO_LAST_VISIBLE: "goToLastVisibleNode",
+        GOTO_LAST_SIBLING: "goToLastSibling",
+        GOTO_NEXT_VISIBLE: "selectVisNext",
+        GOTO_PREV_VISIBLE: "selectVisBack",
+        GOTO_NEXT_MARKED: "goToNextMarkedHeadline",
+        GOTO_NEXT_CLONE: "goToNextClone",
+        CONTRACT_OR_GO_LEFT: "contractNodeOrGoToParent",
+        EXPAND_AND_GO_RIGHT: "expandNodeAndGoToFirstChild",
+        CONTRACT_ALL: "contractAllHeadlines",
+        // Leo Operations
+        MARK_PNODE: "markPNode",
+        UNMARK_PNODE: "unmarkPNode",
+        COPY_PNODE: "copyOutline",
+        CUT_PNODE: "cutPNode",
+        PASTE_PNODE: "pasteOutline",
+        PASTE_CLONE_PNODE: "pasteOutlineRetainingClones",
+        DELETE_PNODE: "deletePNode",
+        MOVE_PNODE_DOWN: "moveOutlineDown",
+        MOVE_PNODE_LEFT: "moveOutlineLeft",
+        MOVE_PNODE_RIGHT: "moveOutlineRight",
+        MOVE_PNODE_UP: "moveOutlineUp",
+        INSERT_PNODE: "insertPNode",
+        INSERT_NAMED_PNODE: "insertNamedPNode",
+        CLONE_PNODE: "clonePNode",
+        PROMOTE_PNODE: "promote",
+        DEMOTE_PNODE: "demote",
+        REFRESH_FROM_DISK_PNODE: "refreshFromDisk",
+        SORT_CHILDREN: "sortChildren",
+        SORT_SIBLINGS: "sortSiblings",
+        UNDO: "undo",
+        REDO: "redo",
+        GET_STATES: "getStates",
+        HOIST_PNODE: "hoist",
+        DEHOIST: "dehoist",
+        EXTRACT: "extract",
+        EXTRACT_NAMES: "extractNames",
+        COPY_MARKED: "copyMarked",
+        DIFF_MARKED_NODES: "deleteMarked",
+        MARK_CHANGED_ITEMS: "markChangedHeadlines",
+        MARK_SUBHEADS: "markSubheads",
+        UNMARK_ALL: "unmarkAll",
+        CLONE_MARKED_NODES: "cloneMarked",
+        DELETE_MARKED_NODES: "deleteMarked",
+        MOVE_MARKED_NODES: "moveMarked",
+        // Clone-find functionality
+        CLONE_FIND_ALL: "cloneFindAll",
+        CLONE_FIND_ALL_FLATTENED: "cloneFindAllFlattened",
+        CLONE_FIND_MARKED: "cloneFindMarked",
+        CLONE_FIND_FLATTENED_MARKED: "cloneFindFlattenedMarked",
     };
 
 }
