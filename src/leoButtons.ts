@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { LeoJs } from './leojs';
+import { LeoUI } from './leoUI';
 import { LeoButtonNode } from "./leoButtonNode";
 import { ProviderResult } from "vscode";
 import { Constants } from "./constants";
@@ -14,7 +14,7 @@ export class LeoButtonsProvider implements vscode.TreeDataProvider<LeoButtonNode
 
     readonly onDidChangeTreeData: vscode.Event<LeoButtonNode | undefined> = this._onDidChangeTreeData.event;
 
-    constructor(private _leoJs: LeoJs) { }
+    constructor(private _leoJs: LeoUI) { }
 
     /**
      * * Refresh the whole outline
@@ -31,7 +31,13 @@ export class LeoButtonsProvider implements vscode.TreeDataProvider<LeoButtonNode
 
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoJs.leoStates.fileOpenedReady && !element) {
-            return Promise.resolve([]); // TODO get list from leoJs
+            // TODO get list from leoJs
+            return Promise.resolve([
+                new LeoButtonNode({ name: 'script-button', index: 'nullButtonWidget' }, this._leoJs.buttonIcons),
+                new LeoButtonNode({ name: 'button name 2', index: 'key2' }, this._leoJs.buttonIcons),
+                new LeoButtonNode({ name: 'button name 3', index: 'key3' }, this._leoJs.buttonIcons)
+
+            ]);
         } else {
             return Promise.resolve([]); // Defaults to an empty list of children
         }

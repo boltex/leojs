@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as utils from "./utils";
-import { LeoJs } from "./leojs";
+import { LeoUI } from "./leoUI";
 import { Constants } from "./constants";
 import { LeoNode } from "./leoNode";
 import { LeoPackageStates } from "./types";
@@ -11,6 +11,16 @@ import { LeoPackageStates } from "./types";
  * Changes UI by changing vscode's context variables
  */
 export class LeoStates {
+
+    // * General 'Leo is ready' state
+    private _leoReady: boolean = false;
+    get leoReady(): boolean {
+        return this._leoReady;
+    }
+    set leoReady(p_value: boolean) {
+        this._leoReady = p_value;
+        utils.setContext(Constants.CONTEXT_FLAGS.LEO_READY, p_value);
+    }
 
     // * A Leo file is opened
     private _fileOpenedReady: boolean = false; // Sets context flag along with treeview title
@@ -163,7 +173,7 @@ export class LeoStates {
 
     constructor(
         private _context: vscode.ExtensionContext,
-        private _leoJs: LeoJs
+        private _leoJs: LeoUI
     ) { }
 
     public setSelectedNodeFlags(p_node: LeoNode): void {

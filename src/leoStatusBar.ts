@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as utils from "./utils";
 import { Constants } from "./constants";
-import { LeoJs } from "./leojs";
+import { LeoUI } from "./leoUI";
 
 
 /**
@@ -25,7 +25,7 @@ export class LeoStatusBar {
 
     constructor(
         private _context: vscode.ExtensionContext,
-        private _leoJs: LeoJs
+        private _leoJs: LeoUI
     ) {
         this._leoStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
         this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;

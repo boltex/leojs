@@ -1,18 +1,14 @@
 import * as vscode from 'vscode';
 import * as utils from "./utils";
 import { ReqRefresh } from "./types";
-import { LeoJs } from './leojs';
+import { LeoUI } from './leoUI';
 import { Constants } from './constants';
 import { LeoButtonNode } from './leoButtonNode';
 import { LeoNode } from './leoNode';
 
 export function activate(p_context: vscode.ExtensionContext) {
 
-    // Reset Extension context flags (used in 'when' clauses in package.json)
-    utils.setContext(Constants.CONTEXT_FLAGS.LEO_READY, false); // Barely started activating the extension so not ready.
-    utils.setContext(Constants.CONTEXT_FLAGS.TREE_OPENED, false); // No Leo file opened yet.
-
-    const w_leo: LeoJs = new LeoJs(p_context);
+    const w_leo: LeoUI = new LeoUI(p_context);
 
     // Shortcut pointers for readability
     const U = undefined;
@@ -184,6 +180,8 @@ export function activate(p_context: vscode.ExtensionContext) {
     w_commands.map(function (p_command) {
         p_context.subscriptions.push(vscode.commands.registerCommand(...p_command));
     });
+    
+    
 
 }
 

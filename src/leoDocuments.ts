@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { LeoJs } from './leojs';
+import { LeoUI } from './leoUI';
 
 import { LeoDocumentNode } from "./leoDocumentNode";
 import { ProviderResult } from "vscode";
@@ -15,7 +15,7 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoDocument
 
     readonly onDidChangeTreeData: vscode.Event<LeoDocumentNode | undefined> = this._onDidChangeTreeData.event;
 
-    constructor(private _leoJs: LeoJs) { }
+    constructor(private _leoJs: LeoUI) { }
 
     /**
      * * Refresh the whole outline
@@ -31,8 +31,14 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoDocument
     public getChildren(element?: LeoDocumentNode): Thenable<LeoDocumentNode[]> {
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoJs.leoStates.fileOpenedReady && !element) {
+            // TODO : get real list!
+            return Promise.resolve([
 
-            return Promise.resolve([]); // TODO : get list!
+                new LeoDocumentNode({ name: "fakeSelectedDoc1.leo", index: 0, changed: false, selected: true }, this._leoJs),
+                new LeoDocumentNode({ name: "fakeChangedDoc2.leo", index: 1, changed: true, selected: false }, this._leoJs),
+                new LeoDocumentNode({ name: "fakeDoc3.leo", index: 2, changed: false, selected: false }, this._leoJs)
+
+            ]);
         } else {
             return Promise.resolve([]); // Defaults to an empty list of children
         }
