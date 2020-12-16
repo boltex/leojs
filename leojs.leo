@@ -15,6 +15,23 @@
 <v t="felix.20201208224703.1"><vh>@clean CONTRIBUTING.md</vh></v>
 </v>
 <v t="ekr.20201209145358.1"><vh>Code</vh>
+<v t="felix.20201215231023.1"><vh>@clean src/leoFiles.js</vh>
+<v t="felix.20201215231023.2"><vh>&lt;&lt; xslTemplate &gt;&gt;</vh></v>
+<v t="felix.20201215231023.3"><vh>function transform</vh>
+<v t="felix.20201215231023.4"><vh>function serverTransform(resolve, reject)</vh></v>
+<v t="felix.20201215231023.5"><vh>function clientTransform(resolve, reject)</vh></v>
+</v>
+<v t="felix.20201215231023.6"><vh>function loadDoc </vh>
+<v t="felix.20201215231023.7"><vh>.then(function (response)</vh></v>
+<v t="felix.20201215231023.8"><vh>.catch(function (error)</vh></v>
+</v>
+<v t="felix.20201215231023.9"><vh>function cleanText</vh></v>
+<v t="felix.20201215231023.10"><vh>function isRelative</vh></v>
+<v t="felix.20201215231023.11"><vh>function getLeoJSON</vh></v>
+<v t="felix.20201215231023.12"><vh>function transformLeoXML2XML</vh></v>
+<v t="felix.20201215231023.13"><vh>function transformLeoXML2JSON</vh></v>
+<v t="felix.20201215231023.14"><vh>function transformLeoXML</vh></v>
+</v>
 <v t="felix.20201214151326.1"><vh>@clean src/constants.ts</vh>
 <v t="felix.20201214151326.2"><vh>class Constants</vh>
 <v t="felix.20201214151326.3"><vh>general constants</vh></v>
@@ -50,7 +67,9 @@
 </v>
 <v t="felix.20201208215619.1"><vh>deactivate</vh></v>
 </v>
-<v t="felix.20201214194412.1"><vh>@clean src/leojs.ts</vh></v>
+<v t="felix.20201214194412.1"><vh>@clean src/leojs.ts</vh>
+<v t="felix.20201215224237.1"><vh>class leojs</vh></v>
+</v>
 <v t="felix.20201214194144.1"><vh>@clean src/leoUI.ts</vh>
 <v t="felix.20201214195752.1"><vh>class LeoUI</vh>
 <v t="felix.20201214194144.2"><vh>Constructor</vh></v>
@@ -2354,10 +2373,16 @@ import { LeoStates } from "./leoStates";
 <t tx="felix.20201214194144.7"></t>
 <t tx="felix.20201214194144.8"></t>
 <t tx="felix.20201214194144.9"></t>
-<t tx="felix.20201214194412.1">@language typescript
+<t tx="felix.20201214194412.1">import * as leoFiles from "./leoFiles";
+@language typescript
 @tabwidth -4
 
-// https://github.com/leo-editor/leo-editor/issues/1025</t>
+// https://github.com/leo-editor/leo-editor/issues/1025
+
+// For now give results to tree view panels (outline, documents and at-buttons)
+
+@others
+</t>
 <t tx="felix.20201214195752.1">/**
  * Creates and manages instances of the UI elements along with their events
  */
@@ -2551,6 +2576,7 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
 <t tx="felix.20201214202749.1">public selectTreeNode(p_node: LeoNode, p_internalCall?: boolean, p_aside?: boolean): Thenable&lt;unknown&gt; {
     vscode.window.showInformationMessage('TODO: Implement selectTreeNode');
     console.log('set flags for ', p_node);
+    
     console.log('selectTreeNode called so Refresh Body' + p_aside ? ' but opened aside' : '');
 
     return Promise.resolve(true);
@@ -3918,6 +3944,16 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 <t tx="felix.20201214205159.55">"view/title": [
   {
     "command": "leojs.openLeoFile",
+    "when": "view =~ /leoDocuments/ &amp;&amp; leoReady",
+    "group": "navigation@1"
+  },
+  {
+    "command": "leojs.newLeoFile",
+    "when": "view =~ /leoDocuments/ &amp;&amp; leoReady",
+    "group": "navigation@1"
+  },
+  {
+    "command": "leojs.openLeoFile",
     "when": "view =~ /leojs/ &amp;&amp; leoReady",
     "group": "navigation@1"
   },
@@ -4632,7 +4668,8 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 "webpack-cli": "^3.3.12"
 </t>
 <t tx="felix.20201214205159.81">"@types/debounce": "^1.2.0",
-"debounce": "^1.2.0"
+"debounce": "^1.2.0",
+"axios": "^0.19.0"
 </t>
 <t tx="felix.20201214205159.9">{
   "command": "leojs.showBody",
@@ -4826,6 +4863,243 @@ set leoReady(p_value: boolean) {
     this._leoReady = p_value;
     utils.setContext(Constants.CONTEXT_FLAGS.LEO_READY, p_value);
 }
+
+</t>
+<t tx="felix.20201215224237.1">class Leojs {
+
+    constructor() { }
+
+}
+</t>
+<t tx="felix.20201215231023.1">// import escape from 'escape-html'
+import axios from 'axios'
+
+&lt;&lt; xslTemplate &gt;&gt;
+
+@language javascript
+@tabwidth -2
+@others
+
+export {getLeoJSON, transformLeoXML, transformLeoXML2XML, transform}
+
+</t>
+<t tx="felix.20201215231023.10">function isRelative (url) {
+  var ok = true
+  if (/^http/.test(url)) {
+    ok = false
+  }
+  return ok
+}
+
+</t>
+<t tx="felix.20201215231023.11">function getLeoJSON (filename, id) {
+  if (filename.indexOf('#') &gt; 0) {
+    filename = filename.substring(0, filename.indexOf('#'))
+  }
+  var p = new Promise((resolve, reject) =&gt; {
+    if (!filename.match(/static/) &amp;&amp; isRelative(filename)) {
+      // filename = 'static/' + filename
+    }
+    if (!filename.match(/\.leo$/)) {
+      filename = filename + '.leo'
+    }
+    loadDoc(filename, 'Text')
+      .then(xmlString =&gt; {
+        return transformLeoXML(xmlString, id)
+      })
+      .then(data =&gt; {resolve(data)})
+  })
+  return p
+}
+
+</t>
+<t tx="felix.20201215231023.12">function transformLeoXML2XML(xmlString, startId, parser) {
+  const p = new Promise((resolve, reject) =&gt; {
+
+    let oParser = null
+    if (parser) {
+      oParser = new parser()
+    } else {
+      oParser = new DOMParser()
+    }
+    const xml = oParser.parseFromString(xmlString, 'text/xml')
+    const tnodes = xml.getElementsByTagName('t')
+    let textItems = {}
+    for (let i = 0; i &lt; tnodes.length; i++) {
+      let el = tnodes[i]
+      let elText = el.textContent
+      let a = el.getAttribute('tx')
+      a = a.replace(/\./g, '_')
+      a = a.replace(/^.*?_/, '')
+      if (startId) {
+        a = startId + '-' + a
+      }
+      if (
+        (/^@language /.test(elText)) &amp;&amp;
+        (!/^@language html/.test(elText)) &amp;&amp;
+        (!/^@language md/.test(elText))
+      ) {
+        // elText = escape(elText)
+      }
+      textItems[a] = elText
+    }
+    const vnodes = xml.getElementsByTagName('v')
+    let pid
+    for (let i = 0; i &lt; vnodes.length; i++) {
+      pid = i + 1
+      if (startId) {
+        pid = startId + '-' + pid
+      }
+      vnodes[i].setAttribute('id', '"' + pid + '"')
+    }
+    resolve({xml, textItems})
+
+  })
+  return p
+}
+
+</t>
+<t tx="felix.20201215231023.13">function transformLeoXML2JSON (data, startId, parser, transformer, serializer) {
+    const p = new Promise((resolve, reject) =&gt; {
+      const xml = data.xml
+      const textItems = data.textItems
+      transform(xml, xslTemplate, transformer, serializer).then(jsdata =&gt; {
+        jsdata = jsdata.replace(/&lt;\?xml version="1\.0" encoding="UTF-8"\?&gt;/,'')
+        jsdata = jsdata.replace(/,\s?$/, '') // kludge to get rid of trailing comma
+        jsdata = '[' + jsdata + ']'
+        jsdata = JSON.parse(jsdata)
+        jsdata.forEach(d =&gt; cleanText(d, startId))
+        const xdata = {}
+        xdata.data = jsdata
+        xdata.textItems = textItems
+        return (xdata)
+      }).then(data =&gt; resolve(data))
+    })
+    return p
+}
+
+</t>
+<t tx="felix.20201215231023.14">function transformLeoXML(xmlString, startId, parser, transformer, serializer){
+  return transformLeoXML2XML(xmlString, startId, parser)
+    .then(data =&gt; transformLeoXML2JSON(data, startId, parser, transformer, serializer))
+}
+
+</t>
+<t tx="felix.20201215231023.2">@language html
+const xslTemplate = `
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+
+  &lt;xsl:template match="/"&gt;
+    &lt;xsl:apply-templates/&gt;
+  &lt;/xsl:template&gt;
+
+  &lt;xsl:template match="v"&gt;
+    &lt;xsl:variable name="t" select="@t"/&gt;
+    &lt;xsl:variable name="nodeSet" select="//v[@t=$t]"/&gt;
+    &lt;xsl:variable name="double_quote"&gt;"&lt;/xsl:variable&gt;
+    &lt;xsl:variable name="apos"&gt;'&lt;/xsl:variable&gt;
+    {
+    "id":  &lt;xsl:value-of select="@id"/&gt;,
+    "t":   "&lt;xsl:value-of select="translate(@t,'.','_')"/&gt;",
+    "name":"&lt;xsl:value-of select="translate($nodeSet[1]/vh,concat('\',$double_quote),concat('|',$apos))"/&gt;",
+    "children":[&lt;xsl:apply-templates select="$nodeSet[1]/v"/&gt;]
+    }
+    &lt;xsl:if test="position()!=last()"&gt;,&lt;/xsl:if&gt;
+  &lt;/xsl:template&gt;
+
+  &lt;xsl:template match="text()"/&gt;
+
+&lt;/xsl:stylesheet&gt;
+`
+
+</t>
+<t tx="felix.20201215231023.3">function transform (xml, xslString, transformer, serializer) {
+  @others
+}
+
+</t>
+<t tx="felix.20201215231023.4">function serverTransform(resolve, reject) {
+  const xmlString = new serializer().serializeToString(xml)
+  const config = {
+    xslt: xslString,
+    source: xmlString,
+    result: String,
+    props: {
+      indent: 'yes'
+    }
+  }
+  transformer.transform(config, (err, result) =&gt; {
+    if (err) {
+      console.log('ERROR:', err)
+      return reject()
+    }
+    resolve(result)
+  })
+}
+
+</t>
+<t tx="felix.20201215231023.5">function clientTransform(resolve, reject) {
+  const oParser = new DOMParser()
+  const xsl = oParser.parseFromString(xslString, 'text/xml')
+  const xsltProcessor = new XSLTProcessor()
+  xsltProcessor.importStylesheet(xsl)
+  const resultDocument = xsltProcessor.transformToFragment(xml, document)
+  resolve(resultDocument.textContent)
+}
+
+const p = new Promise((resolve, reject) =&gt; {
+  if (transformer) {
+    return serverTransform(resolve, reject)
+  } else {
+    return clientTransform(resolve, reject)
+  }
+})
+return p
+
+</t>
+<t tx="felix.20201215231023.6">function loadDoc (filename) {
+  console.log('loading file:', filename)
+  var p = new Promise((resolve, reject) =&gt; {
+    axios.get(filename)
+    @others
+  })
+  return p
+}
+
+</t>
+<t tx="felix.20201215231023.7">.then(function (response) {
+  resolve(response.data)
+})
+</t>
+<t tx="felix.20201215231023.8">.catch(function (error) {
+  console.log(error)
+  reject()
+})
+</t>
+<t tx="felix.20201215231023.9">function cleanText(data, startId){
+  data.name = data.name.replace(/&lt;&lt;/g, '\u00AB')
+  data.name = data.name.replace(/&gt;&gt;/g, '\u00BB')
+  data.name = data.name.replace(/'/g, '\x27')
+  data.name = data.name.replace(/"/g, '\x22')
+  //data.name = escape(data.name)
+  data.name = data.name.replace(/&amp;#39;/g,'\x27')
+  data.id = data.id + ''; // probably unneeded now
+  let children = data.children;
+  if (!children) { return }
+  for (let i = 0; i &lt; children.length; i++){
+    cleanText(children[i], startId)
+  }
+  data.t = data.t.replace(/^.*?_/,'') // remove file uid
+  if (startId) {
+    data.t = startId + '-' + data.t + ''
+  }
+}
+/**
+ * TODO: move to util, also is in store/index, review logic for relative / subtrees
+ * Is url relative
+ * @param url {string}
+ * @returns {boolean} - if is relative
+ */
 
 </t>
 </tnodes>

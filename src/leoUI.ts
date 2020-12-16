@@ -252,6 +252,7 @@ export class LeoUI {
     public selectTreeNode(p_node: LeoNode, p_internalCall?: boolean, p_aside?: boolean): Thenable<unknown> {
         vscode.window.showInformationMessage('TODO: Implement selectTreeNode');
         console.log('set flags for ', p_node);
+        
         console.log('selectTreeNode called so Refresh Body' + p_aside ? ' but opened aside' : '');
 
         return Promise.resolve(true);

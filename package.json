@@ -1240,6 +1240,16 @@
       "view/title": [
         {
           "command": "leojs.openLeoFile",
+          "when": "view =~ /leoDocuments/ && leoReady",
+          "group": "navigation@1"
+        },
+        {
+          "command": "leojs.newLeoFile",
+          "when": "view =~ /leoDocuments/ && leoReady",
+          "group": "navigation@1"
+        },
+        {
+          "command": "leojs.openLeoFile",
           "when": "view =~ /leojs/ && leoReady",
           "group": "navigation@1"
         },
@@ -1907,6 +1917,7 @@
   },
   "dependencies": {
     "@types/debounce": "^1.2.0",
-    "debounce": "^1.2.0"
+    "debounce": "^1.2.0",
+    "axios": "^0.19.0"
   }
 }
