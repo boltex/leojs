@@ -161,6 +161,8 @@ export class Constants {
         DOCUMENT_TITLED: "leoDocumentTitled",
         DOCUMENT_SELECTED_UNTITLED: "leoDocumentSelectedUntitled",
         DOCUMENT_UNTITLED: "leoDocumentUntitled",
+        // UI
+        LEO_TREE_BROWSE: "leoTreeBrowse", // Override vscode's tree behavior with Leo's own
     };
 
     /**

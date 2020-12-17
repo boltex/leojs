@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { LeoDocument, Icon } from "./types";
 import * as utils from "./utils";
-import { LeoJs } from "./leojs";
+import { LeoUI } from "./leoUI";
 
 
 /**
@@ -15,7 +15,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
 
     constructor(
         public documentEntry: LeoDocument,
-        private _leoJs: LeoJs
+        private _leoJs: LeoUI
     ) {
         super(documentEntry.name);
         // Setup this instance
