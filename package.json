@@ -785,6 +785,114 @@
         "command": "leojs.moveMarkedNodes",
         "category": "Leo",
         "title": "Move Marked Nodes"
+      },
+      {
+        "command": "leojs.showEditOnNodes",
+        "category": "Leo",
+        "title": "Show edit-headline icon",
+        "icon": {
+          "light": "resources/light/no-check.svg",
+          "dark": "resources/dark/no-check.svg"
+        }
+      },
+      {
+        "command": "leojs.showAddOnNodes",
+        "category": "Leo",
+        "title": "Show edit-headline icon",
+        "icon": {
+          "light": "resources/light/no-check.svg",
+          "dark": "resources/dark/no-check.svg"
+        }
+      },
+      {
+        "command": "leojs.showArrowsOnNodes",
+        "category": "Leo",
+        "title": "Show edit-headline icon",
+        "icon": {
+          "light": "resources/light/no-check.svg",
+          "dark": "resources/dark/no-check.svg"
+        }
+      },
+      {
+        "command": "leojs.showCopyOnNodes",
+        "category": "Leo",
+        "title": "Show edit-headline icon",
+        "icon": {
+          "light": "resources/light/no-check.svg",
+          "dark": "resources/dark/no-check.svg"
+        }
+      },
+      {
+        "command": "leojs.showCloneOnNodes",
+        "category": "Leo",
+        "title": "Show edit-headline icon",
+        "icon": {
+          "light": "resources/light/no-check.svg",
+          "dark": "resources/dark/no-check.svg"
+        }
+      },
+      {
+        "command": "leojs.showMarkOnNodes",
+        "category": "Leo",
+        "title": "Show edit-headline icon",
+        "icon": {
+          "light": "resources/light/no-check.svg",
+          "dark": "resources/dark/no-check.svg"
+        }
+      },
+      {
+        "command": "leojs.hideEditOnNodes",
+        "category": "Leo",
+        "title": "Hide edit-headline icon",
+        "icon": {
+          "light": "resources/light/check.svg",
+          "dark": "resources/dark/check.svg"
+        }
+      },
+      {
+        "command": "leojs.hideAddOnNodes",
+        "category": "Leo",
+        "title": "Hide edit-headline icon",
+        "icon": {
+          "light": "resources/light/check.svg",
+          "dark": "resources/dark/check.svg"
+        }
+      },
+      {
+        "command": "leojs.hideArrowsOnNodes",
+        "category": "Leo",
+        "title": "Hide edit-headline icon",
+        "icon": {
+          "light": "resources/light/check.svg",
+          "dark": "resources/dark/check.svg"
+        }
+      },
+      {
+        "command": "leojs.hideCopyOnNodes",
+        "category": "Leo",
+        "title": "Hide edit-headline icon",
+        "icon": {
+          "light": "resources/light/check.svg",
+          "dark": "resources/dark/check.svg"
+        }
+      },
+      {
+        "command": "leojs.hideCloneOnNodes",
+        "category": "Leo",
+        "title": "Hide edit-headline icon",
+        "icon": {
+          "light": "resources/light/check.svg",
+          "dark": "resources/dark/check.svg"
+        }
+      },
+      {
+        "command": "leojs.hideMarkOnNodes",
+        "category": "Leo",
+        "title": "Hide edit-headline icon",
+        "icon": {
+          "light": "resources/light/check.svg",
+          "dark": "resources/dark/check.svg"
+        }
       }
     ],
     "menus": {
@@ -1287,6 +1395,54 @@
           "command": "leojs.contractAllFromOutline",
           "when": "view =~ /leojs/ && leoTreeOpened",
           "group": "navigation@6"
+        },
+        {
+          "command": "leojs.hideEditOnNodes",
+          "when": "view =~ /leojs/ && showEditOnNodes"
+        },
+        {
+          "command": "leojs.hideAddOnNodes",
+          "when": "view =~ /leojs/ && showAddOnNodes"
+        },
+        {
+          "command": "leojs.hideArrowsOnNodes",
+          "when": "view =~ /leojs/ && showArrowsOnNodes"
+        },
+        {
+          "command": "leojs.hideCopyOnNodes",
+          "when": "view =~ /leojs/ && showCopyOnNodes"
+        },
+        {
+          "command": "leojs.hideCloneOnNodes",
+          "when": "view =~ /leojs/ && showCloneOnNodes"
+        },
+        {
+          "command": "leojs.hideMarkOnNodes",
+          "when": "view =~ /leojs/ && showMarkOnNodes"
+        },
+        {
+          "command": "leojs.showEditOnNodes",
+          "when": "view =~ /leojs/ && !showEditOnNodes"
+        },
+        {
+          "command": "leojs.showAddOnNodes",
+          "when": "view =~ /leojs/ && !showAddOnNodes"
+        },
+        {
+          "command": "leojs.showArrowsOnNodes",
+          "when": "view =~ /leojs/ && !showArrowsOnNodes"
+        },
+        {
+          "command": "leojs.showCopyOnNodes",
+          "when": "view =~ /leojs/ && !showCopyOnNodes"
+        },
+        {
+          "command": "leojs.showCloneOnNodes",
+          "when": "view =~ /leojs/ && !showCloneOnNodes"
+        },
+        {
+          "command": "leojs.showMarkOnNodes",
+          "when": "view =~ /leojs/ && !showMarkOnNodes"
         }
       ],
       "view/item/context": [
