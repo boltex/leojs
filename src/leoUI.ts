@@ -43,6 +43,7 @@ export class LeoUI {
     private _leoTreeView: vscode.TreeView<LeoNode>; // Outline tree view added to the Tree View Container with an Activity Bar icon
     private _leoTreeExView: vscode.TreeView<LeoNode>; // Outline tree view added to the Explorer Sidebar
     private _lastTreeView: vscode.TreeView<LeoNode>; // Last visible treeview
+    private _treeId: number = 0; // Starting salt for tree node murmurhash generated Ids
 
     private _lastSelectedNode: LeoNode | undefined; // Last selected node we got a hold of; leoTreeView.selection maybe newer and unprocessed
     get lastSelectedNode(): LeoNode | undefined {
@@ -128,7 +129,7 @@ export class LeoUI {
 
         // Reset Extension context flags (used in 'when' clauses in package.json)
         this.leoStates.leoReady = true;
-        this.leoStates.fileOpenedReady = true;
+        this.leoStates.fileOpenedReady = true;  // TODO : IMPLEMENT
 
 
         // Set some context flags already 'true' at startup - NO CONFIG SETTINGS FOR NOW IN LEOJS
@@ -163,6 +164,22 @@ export class LeoUI {
                 select: true,
                 focus: p_focusOutline
             });
+        }
+    }
+
+    /**
+     * * Refreshes the outline. A reveal type can be passed along to specify the reveal type for the selected node
+     * @param p_revealType Facultative reveal type to specify type of reveal when the 'selected node' is encountered
+     */
+    private _refreshOutline(p_revealType?: RevealType): void {
+        // Force showing last used Leo outline first
+        if (this.lastSelectedNode && !(this._leoTreeExView.visible || this._leoTreeView.visible)) {
+            this._lastTreeView.reveal(this.lastSelectedNode)
+                .then(() => {
+                    this._leoTreeProvider.refreshTreeRoot();
+                });
+        } else {
+            this._leoTreeProvider.refreshTreeRoot();
         }
     }
 
@@ -221,7 +238,7 @@ export class LeoUI {
     private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
         if (p_event.visible) {
             this._lastTreeView = p_explorerView ? this._leoTreeExView : this._leoTreeView;
-            //  this._refreshOutline(true, RevealType.RevealSelect);
+            this._refreshOutline(RevealType.RevealSelect);
         }
     }
 
@@ -252,8 +269,10 @@ export class LeoUI {
     public selectTreeNode(p_node: LeoNode, p_internalCall?: boolean, p_aside?: boolean): Thenable<unknown> {
         vscode.window.showInformationMessage('TODO: Implement selectTreeNode');
         console.log('set flags for ', p_node);
-        
+
         console.log('selectTreeNode called so Refresh Body' + p_aside ? ' but opened aside' : '');
+
+        this.lastSelectedNode = p_node;
 
         return Promise.resolve(true);
     }
@@ -482,7 +501,20 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
-
+    /**
+     * Toggles a context value for the 'when' clauses of the available commands in package.json
+     * @param p_param String name of the context variable
+     * @param p_value Its value to be set
+     */
+    public toggleSetting(p_param: string, p_value: boolean): void {
+        utils.setContext(p_param, p_value);
+        if (
+            (p_param.startsWith("show") || p_param.startsWith("hide")) &&
+            this.leoStates.fileOpenedReady
+        ) {
+            this._refreshOutline(RevealType.RevealSelect);
+        }
+    }
 
     /**
      * Test/Dummy command

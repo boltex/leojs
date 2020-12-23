@@ -163,6 +163,12 @@ export class Constants {
         DOCUMENT_UNTITLED: "leoDocumentUntitled",
         // UI
         LEO_TREE_BROWSE: "leoTreeBrowse", // Override vscode's tree behavior with Leo's own
+        SHOW_EDIT: "showEditOnNodes",
+        SHOW_ARROWS: "showArrowsOnNodes",
+        SHOW_ADD: "showAddOnNodes",
+        SHOW_MARK: "showMarkOnNodes",
+        SHOW_CLONE: "showCloneOnNodes",
+        SHOW_COPY: "showCopyOnNodes",
     };
 
     /**
@@ -179,6 +185,21 @@ export class Constants {
      * All commands this expansion exposes to the user via GUI/keybindings in package.json
      */
     public static COMMANDS = {
+        // Toggle UI Settings
+        ENABLE_LEO_TREE_NAV: Constants.NAME + ".enableLeoTreeNav",
+        SHOW_EDIT_ON_NODES: Constants.NAME + ".showEditOnNodes",
+        SHOW_ADD_ON_NODES: Constants.NAME + ".showAddOnNodes",
+        SHOW_ARROWS_ON_NODES: Constants.NAME + ".showArrowsOnNodes",
+        SHOW_COPY_ON_NODES: Constants.NAME + ".showCopyOnNodes",
+        SHOW_CLONE_ON_NODES: Constants.NAME + ".showCloneOnNodes",
+        SHOW_MARK_ON_NODES: Constants.NAME + ".showMarkOnNodes",
+        DISABLE_LEO_TREE_NAV: Constants.NAME + ".disableLeoTreeNav",
+        HIDE_EDIT_ON_NODES: Constants.NAME + ".hideEditOnNodes",
+        HIDE_ADD_ON_NODES: Constants.NAME + ".hideAddOnNodes",
+        HIDE_ARROWS_ON_NODES: Constants.NAME + ".hideArrowsOnNodes",
+        HIDE_COPY_ON_NODES: Constants.NAME + ".hideCopyOnNodes",
+        HIDE_CLONE_ON_NODES: Constants.NAME + ".hideCloneOnNodes",
+        HIDE_MARK_ON_NODES: Constants.NAME + ".hideMarkOnNodes",
         // Leo Documents
         SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
         OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY

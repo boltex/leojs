@@ -14,6 +14,7 @@ export function activate(p_context: vscode.ExtensionContext) {
     const U = undefined;
     const CMD = Constants.COMMANDS;
     const LEOCMD = Constants.LEO_COMMANDS;
+    const CTX = Constants.CONTEXT_FLAGS;
 
     const NO_REFRESH: ReqRefresh = {};
     const REFRESH_NODE_BODY: ReqRefresh = {
@@ -35,6 +36,22 @@ export function activate(p_context: vscode.ExtensionContext) {
 
         // ! REMOVE TESTS ENTRIES FROM PACKAGE.JSON FOR MASTER BRANCH RELEASES !
         ["leointeg.test", () => w_leo.test()], // Test function useful when debugging
+
+        [CMD.ENABLE_LEO_TREE_NAV, () => w_leo.toggleSetting(CTX.LEO_TREE_BROWSE, true)],
+        [CMD.SHOW_EDIT_ON_NODES, () => w_leo.toggleSetting(CTX.SHOW_EDIT, true)],
+        [CMD.SHOW_ADD_ON_NODES, () => w_leo.toggleSetting(CTX.SHOW_ADD, true)],
+        [CMD.SHOW_ARROWS_ON_NODES, () => w_leo.toggleSetting(CTX.SHOW_ARROWS, true)],
+        [CMD.SHOW_COPY_ON_NODES, () => w_leo.toggleSetting(CTX.SHOW_COPY, true)],
+        [CMD.SHOW_CLONE_ON_NODES, () => w_leo.toggleSetting(CTX.SHOW_CLONE, true)],
+        [CMD.SHOW_MARK_ON_NODES, () => w_leo.toggleSetting(CTX.SHOW_MARK, true)],
+
+        [CMD.DISABLE_LEO_TREE_NAV, () => w_leo.toggleSetting(CTX.LEO_TREE_BROWSE, false)],
+        [CMD.HIDE_EDIT_ON_NODES, () => w_leo.toggleSetting(CTX.SHOW_EDIT, false)],
+        [CMD.HIDE_ADD_ON_NODES, () => w_leo.toggleSetting(CTX.SHOW_ADD, false)],
+        [CMD.HIDE_ARROWS_ON_NODES, () => w_leo.toggleSetting(CTX.SHOW_ARROWS, false)],
+        [CMD.HIDE_COPY_ON_NODES, () => w_leo.toggleSetting(CTX.SHOW_COPY, false)],
+        [CMD.HIDE_CLONE_ON_NODES, () => w_leo.toggleSetting(CTX.SHOW_CLONE, false)],
+        [CMD.HIDE_MARK_ON_NODES, () => w_leo.toggleSetting(CTX.SHOW_MARK, false)],
 
         [CMD.EXECUTE, () => w_leo.command(LEOCMD.EXECUTE_SCRIPT, U, REFRESH_TREE_BODY, false)],
 
@@ -180,8 +197,8 @@ export function activate(p_context: vscode.ExtensionContext) {
     w_commands.map(function (p_command) {
         p_context.subscriptions.push(vscode.commands.registerCommand(...p_command));
     });
-    
-    
+
+
 
 }
 

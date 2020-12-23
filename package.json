@@ -787,9 +787,18 @@
         "title": "Move Marked Nodes"
       },
       {
+        "command": "leojs.enableLeoTreeNav",
+        "category": "Leo",
+        "title": "Enable Leo Tree Navigation",
+        "icon": {
+          "light": "resources/light/no-check.svg",
+          "dark": "resources/dark/no-check.svg"
+        }
+      },
+      {
         "command": "leojs.showEditOnNodes",
         "category": "Leo",
-        "title": "Show edit-headline icon",
+        "title": "Show edit-headline",
         "icon": {
           "light": "resources/light/no-check.svg",
           "dark": "resources/dark/no-check.svg"
@@ -798,7 +807,7 @@
       {
         "command": "leojs.showAddOnNodes",
         "category": "Leo",
-        "title": "Show edit-headline icon",
+        "title": "Show Add Node",
         "icon": {
           "light": "resources/light/no-check.svg",
           "dark": "resources/dark/no-check.svg"
@@ -807,7 +816,7 @@
       {
         "command": "leojs.showArrowsOnNodes",
         "category": "Leo",
-        "title": "Show edit-headline icon",
+        "title": "Show move-commands",
         "icon": {
           "light": "resources/light/no-check.svg",
           "dark": "resources/dark/no-check.svg"
@@ -816,7 +825,7 @@
       {
         "command": "leojs.showCopyOnNodes",
         "category": "Leo",
-        "title": "Show edit-headline icon",
+        "title": "Show Copy Node",
         "icon": {
           "light": "resources/light/no-check.svg",
           "dark": "resources/dark/no-check.svg"
@@ -825,7 +834,7 @@
       {
         "command": "leojs.showCloneOnNodes",
         "category": "Leo",
-        "title": "Show edit-headline icon",
+        "title": "Show Clone Node",
         "icon": {
           "light": "resources/light/no-check.svg",
           "dark": "resources/dark/no-check.svg"
@@ -834,16 +843,25 @@
       {
         "command": "leojs.showMarkOnNodes",
         "category": "Leo",
-        "title": "Show edit-headline icon",
+        "title": "Show Mark/Unmark Node",
         "icon": {
           "light": "resources/light/no-check.svg",
           "dark": "resources/dark/no-check.svg"
         }
       },
       {
+        "command": "leojs.disableLeoTreeNav",
+        "category": "Leo",
+        "title": "Disable Leo Tree Navigation",
+        "icon": {
+          "light": "resources/light/check.svg",
+          "dark": "resources/dark/check.svg"
+        }
+      },
+      {
         "command": "leojs.hideEditOnNodes",
         "category": "Leo",
-        "title": "Hide edit-headline icon",
+        "title": "Hide edit-headline",
         "icon": {
           "light": "resources/light/check.svg",
           "dark": "resources/dark/check.svg"
@@ -852,7 +870,7 @@
       {
         "command": "leojs.hideAddOnNodes",
         "category": "Leo",
-        "title": "Hide edit-headline icon",
+        "title": "Hide Add Node",
         "icon": {
           "light": "resources/light/check.svg",
           "dark": "resources/dark/check.svg"
@@ -861,7 +879,7 @@
       {
         "command": "leojs.hideArrowsOnNodes",
         "category": "Leo",
-        "title": "Hide edit-headline icon",
+        "title": "Hide move-commands",
         "icon": {
           "light": "resources/light/check.svg",
           "dark": "resources/dark/check.svg"
@@ -870,7 +888,7 @@
       {
         "command": "leojs.hideCopyOnNodes",
         "category": "Leo",
-        "title": "Hide edit-headline icon",
+        "title": "Hide Copy Node",
         "icon": {
           "light": "resources/light/check.svg",
           "dark": "resources/dark/check.svg"
@@ -879,7 +897,7 @@
       {
         "command": "leojs.hideCloneOnNodes",
         "category": "Leo",
-        "title": "Hide edit-headline icon",
+        "title": "Hide Clone Node",
         "icon": {
           "light": "resources/light/check.svg",
           "dark": "resources/dark/check.svg"
@@ -888,7 +906,7 @@
       {
         "command": "leojs.hideMarkOnNodes",
         "category": "Leo",
-        "title": "Hide edit-headline icon",
+        "title": "Hide Mark/Unmark Node",
         "icon": {
           "light": "resources/light/check.svg",
           "dark": "resources/dark/check.svg"
@@ -1397,6 +1415,10 @@
           "group": "navigation@6"
         },
         {
+          "command": "leojs.disableLeoTreeNav",
+          "when": "view =~ /leojs/ && leoTreeBrowse"
+        },
+        {
           "command": "leojs.hideEditOnNodes",
           "when": "view =~ /leojs/ && showEditOnNodes"
         },
@@ -1419,6 +1441,10 @@
         {
           "command": "leojs.hideMarkOnNodes",
           "when": "view =~ /leojs/ && showMarkOnNodes"
+        },
+        {
+          "command": "leojs.enableLeoTreeNav",
+          "when": "view =~ /leojs/ && !leoTreeBrowse"
         },
         {
           "command": "leojs.showEditOnNodes",

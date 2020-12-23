@@ -48,6 +48,7 @@
 <v t="felix.20201208214322.1"><vh>@clean src/extension.ts</vh>
 <v t="felix.20201214150149.1"><vh>activate</vh>
 <v t="felix.20201214150149.2"><vh>&lt;&lt; Define entries for all commands &gt;&gt;</vh>
+<v t="felix.20201221015535.1"><vh>Toggle UI Settings</vh></v>
 <v t="felix.20201214150149.3"><vh>Scripting &amp; @buttons</vh></v>
 <v t="felix.20201214150149.4"><vh>Leo File Documents</vh></v>
 <v t="felix.20201214150149.5"><vh>Headline Editing</vh></v>
@@ -78,6 +79,7 @@
 </v>
 <v t="felix.20201214194144.4"><vh>Refresh UI</vh>
 <v t="felix.20201214202118.1"><vh>showOutline</vh></v>
+<v t="felix.20201222013904.1"><vh>_refreshOutline</vh></v>
 <v t="felix.20201214202123.1"><vh>_refreshDocumentsPane</vh></v>
 <v t="felix.20201214202128.1"><vh>setDocumentSelection</vh></v>
 </v>
@@ -116,6 +118,7 @@
 <v t="felix.20201214211655.1"><vh>showLogPane</vh></v>
 </v>
 <v t="felix.20201214194144.11"><vh>Other</vh>
+<v t="felix.20201221234735.1"><vh>toggleSetting</vh></v>
 <v t="felix.20201214211706.1"><vh>test</vh></v>
 </v>
 </v>
@@ -127,7 +130,7 @@
 <v t="felix.20201209011931.4"><vh>getTreeItem</vh></v>
 <v t="felix.20201209011931.5"><vh>getChildren</vh></v>
 <v t="felix.20201209011931.6"><vh>getParent</vh></v>
-<v t="felix.20201209011931.8"><vh>_jsNodeArray</vh></v>
+<v t="felix.20201209011931.8"><vh>_LeoNodeArray</vh></v>
 </v>
 </v>
 <v t="felix.20201208223554.1"><vh>@clean src/leoNode.ts</vh>
@@ -387,7 +390,7 @@ import { Icon, PNode } from "./types"; // ArchivedPosition included to help debu
 /**
  * * Implementation of tree nodes for usage in a TreeDataProvider
  */
- 
+
 @language typescript
 @tabwidth -4
 @others
@@ -802,6 +805,8 @@ public setRoot(): void {
 <t tx="felix.20201209011931.1">export class LeoOutlineProvider implements vscode.TreeDataProvider&lt;LeoNode&gt; {
     private _onDidChangeTreeData: vscode.EventEmitter&lt;LeoNode | undefined&gt; = new vscode.EventEmitter&lt;LeoNode | undefined&gt;();
 
+    readonly onDidChangeTreeData: vscode.Event&lt;LeoNode | undefined&gt; = this._onDidChangeTreeData.event;
+
     private _icons: Icon[];
 
     private _model: PNode[] = [
@@ -903,6 +908,7 @@ public refreshTreeRoot(): void {
     const U = undefined;
     const CMD = Constants.COMMANDS;
     const LEOCMD = Constants.LEO_COMMANDS;
+    const CTX = Constants.CONTEXT_FLAGS;
 
     const NO_REFRESH: ReqRefresh = {};
     const REFRESH_NODE_BODY: ReqRefresh = {
@@ -931,8 +937,8 @@ public refreshTreeRoot(): void {
     w_commands.map(function (p_command) {
         p_context.subscriptions.push(vscode.commands.registerCommand(...p_command));
     });
-    
-    
+
+
 
 }
 
@@ -1103,6 +1109,21 @@ public refreshTreeRoot(): void {
  * All commands this expansion exposes to the user via GUI/keybindings in package.json
  */
 public static COMMANDS = {
+    // Toggle UI Settings
+    ENABLE_LEO_TREE_NAV: Constants.NAME + ".enableLeoTreeNav",
+    SHOW_EDIT_ON_NODES: Constants.NAME + ".showEditOnNodes",
+    SHOW_ADD_ON_NODES: Constants.NAME + ".showAddOnNodes",
+    SHOW_ARROWS_ON_NODES: Constants.NAME + ".showArrowsOnNodes",
+    SHOW_COPY_ON_NODES: Constants.NAME + ".showCopyOnNodes",
+    SHOW_CLONE_ON_NODES: Constants.NAME + ".showCloneOnNodes",
+    SHOW_MARK_ON_NODES: Constants.NAME + ".showMarkOnNodes",
+    DISABLE_LEO_TREE_NAV: Constants.NAME + ".disableLeoTreeNav",
+    HIDE_EDIT_ON_NODES: Constants.NAME + ".hideEditOnNodes",
+    HIDE_ADD_ON_NODES: Constants.NAME + ".hideAddOnNodes",
+    HIDE_ARROWS_ON_NODES: Constants.NAME + ".hideArrowsOnNodes",
+    HIDE_COPY_ON_NODES: Constants.NAME + ".hideCopyOnNodes",
+    HIDE_CLONE_ON_NODES: Constants.NAME + ".hideCloneOnNodes",
+    HIDE_MARK_ON_NODES: Constants.NAME + ".hideMarkOnNodes",
     // Leo Documents
     SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
     OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
@@ -1460,6 +1481,12 @@ public static CONTEXT_FLAGS = {
     DOCUMENT_UNTITLED: "leoDocumentUntitled",
     // UI
     LEO_TREE_BROWSE: "leoTreeBrowse", // Override vscode's tree behavior with Leo's own
+    SHOW_EDIT: "showEditOnNodes",
+    SHOW_ARROWS: "showArrowsOnNodes",
+    SHOW_ADD: "showAddOnNodes",
+    SHOW_MARK: "showMarkOnNodes",
+    SHOW_CLONE: "showCloneOnNodes",
+    SHOW_COPY: "showCopyOnNodes",
 };
 
 </t>
@@ -2358,7 +2385,7 @@ import { LeoStates } from "./leoStates";
 
     // Reset Extension context flags (used in 'when' clauses in package.json)
     this.leoStates.leoReady = true;
-    this.leoStates.fileOpenedReady = true;
+    this.leoStates.fileOpenedReady = true;  // TODO : IMPLEMENT
 
 
     // Set some context flags already 'true' at startup - NO CONFIG SETTINGS FOR NOW IN LEOJS
@@ -2407,6 +2434,7 @@ export class LeoUI {
     private _leoTreeView: vscode.TreeView&lt;LeoNode&gt;; // Outline tree view added to the Tree View Container with an Activity Bar icon
     private _leoTreeExView: vscode.TreeView&lt;LeoNode&gt;; // Outline tree view added to the Explorer Sidebar
     private _lastTreeView: vscode.TreeView&lt;LeoNode&gt;; // Last visible treeview
+    private _treeId: number = 0; // Starting salt for tree node murmurhash generated Ids
 
     private _lastSelectedNode: LeoNode | undefined; // Last selected node we got a hold of; leoTreeView.selection maybe newer and unprocessed
     get lastSelectedNode(): LeoNode | undefined {
@@ -2543,7 +2571,7 @@ private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;LeoNod
 private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
     if (p_event.visible) {
         this._lastTreeView = p_explorerView ? this._leoTreeExView : this._leoTreeView;
-        //  this._refreshOutline(true, RevealType.RevealSelect);
+        this._refreshOutline(RevealType.RevealSelect);
     }
 }
 
@@ -2577,8 +2605,10 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
 <t tx="felix.20201214202749.1">public selectTreeNode(p_node: LeoNode, p_internalCall?: boolean, p_aside?: boolean): Thenable&lt;unknown&gt; {
     vscode.window.showInformationMessage('TODO: Implement selectTreeNode');
     console.log('set flags for ', p_node);
-    
+
     console.log('selectTreeNode called so Refresh Body' + p_aside ? ' but opened aside' : '');
+
+    this.lastSelectedNode = p_node;
 
     return Promise.resolve(true);
 }
@@ -3994,6 +4024,10 @@ public minibuffer(): Thenable&lt;unknown&gt; {
     "group": "navigation@6"
   },
   {
+    "command": "leojs.disableLeoTreeNav",
+    "when": "view =~ /leojs/ &amp;&amp; leoTreeBrowse"
+  },
+  {
     "command": "leojs.hideEditOnNodes",
     "when": "view =~ /leojs/ &amp;&amp; showEditOnNodes"
   },
@@ -4016,6 +4050,10 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   {
     "command": "leojs.hideMarkOnNodes",
     "when": "view =~ /leojs/ &amp;&amp; showMarkOnNodes"
+  },
+  {
+    "command": "leojs.enableLeoTreeNav",
+    "when": "view =~ /leojs/ &amp;&amp; !leoTreeBrowse"
   },
   {
     "command": "leojs.showEditOnNodes",
@@ -4773,8 +4811,6 @@ public showBody(p_aside: boolean, p_preserveFocus?: boolean): Thenable&lt;vscode
     // return Promise.resolve(undefined); // if cancelled
 }
 
-
-
 </t>
 <t tx="felix.20201214211706.1">/**
  * Test/Dummy command
@@ -5152,9 +5188,18 @@ return p
 
 </t>
 <t tx="felix.20201218000931.1">{
+  "command": "leojs.enableLeoTreeNav",
+  "category": "Leo",
+  "title": "Enable Leo Tree Navigation",
+  "icon": {
+    "light": "resources/light/no-check.svg",
+    "dark": "resources/dark/no-check.svg"
+  }
+},
+{
   "command": "leojs.showEditOnNodes",
   "category": "Leo",
-  "title": "Show edit-headline icon",
+  "title": "Show edit-headline",
   "icon": {
     "light": "resources/light/no-check.svg",
     "dark": "resources/dark/no-check.svg"
@@ -5163,7 +5208,7 @@ return p
 {
   "command": "leojs.showAddOnNodes",
   "category": "Leo",
-  "title": "Show edit-headline icon",
+  "title": "Show Add Node",
   "icon": {
     "light": "resources/light/no-check.svg",
     "dark": "resources/dark/no-check.svg"
@@ -5172,7 +5217,7 @@ return p
 {
   "command": "leojs.showArrowsOnNodes",
   "category": "Leo",
-  "title": "Show edit-headline icon",
+  "title": "Show move-commands",
   "icon": {
     "light": "resources/light/no-check.svg",
     "dark": "resources/dark/no-check.svg"
@@ -5181,7 +5226,7 @@ return p
 {
   "command": "leojs.showCopyOnNodes",
   "category": "Leo",
-  "title": "Show edit-headline icon",
+  "title": "Show Copy Node",
   "icon": {
     "light": "resources/light/no-check.svg",
     "dark": "resources/dark/no-check.svg"
@@ -5190,7 +5235,7 @@ return p
 {
   "command": "leojs.showCloneOnNodes",
   "category": "Leo",
-  "title": "Show edit-headline icon",
+  "title": "Show Clone Node",
   "icon": {
     "light": "resources/light/no-check.svg",
     "dark": "resources/dark/no-check.svg"
@@ -5199,16 +5244,25 @@ return p
 {
   "command": "leojs.showMarkOnNodes",
   "category": "Leo",
-  "title": "Show edit-headline icon",
+  "title": "Show Mark/Unmark Node",
   "icon": {
     "light": "resources/light/no-check.svg",
     "dark": "resources/dark/no-check.svg"
   }
 },
 {
+  "command": "leojs.disableLeoTreeNav",
+  "category": "Leo",
+  "title": "Disable Leo Tree Navigation",
+  "icon": {
+    "light": "resources/light/check.svg",
+    "dark": "resources/dark/check.svg"
+  }
+},
+{
   "command": "leojs.hideEditOnNodes",
   "category": "Leo",
-  "title": "Hide edit-headline icon",
+  "title": "Hide edit-headline",
   "icon": {
     "light": "resources/light/check.svg",
     "dark": "resources/dark/check.svg"
@@ -5217,7 +5271,7 @@ return p
 {
   "command": "leojs.hideAddOnNodes",
   "category": "Leo",
-  "title": "Hide edit-headline icon",
+  "title": "Hide Add Node",
   "icon": {
     "light": "resources/light/check.svg",
     "dark": "resources/dark/check.svg"
@@ -5226,7 +5280,7 @@ return p
 {
   "command": "leojs.hideArrowsOnNodes",
   "category": "Leo",
-  "title": "Hide edit-headline icon",
+  "title": "Hide move-commands",
   "icon": {
     "light": "resources/light/check.svg",
     "dark": "resources/dark/check.svg"
@@ -5235,7 +5289,7 @@ return p
 {
   "command": "leojs.hideCopyOnNodes",
   "category": "Leo",
-  "title": "Hide edit-headline icon",
+  "title": "Hide Copy Node",
   "icon": {
     "light": "resources/light/check.svg",
     "dark": "resources/dark/check.svg"
@@ -5244,7 +5298,7 @@ return p
 {
   "command": "leojs.hideCloneOnNodes",
   "category": "Leo",
-  "title": "Hide edit-headline icon",
+  "title": "Hide Clone Node",
   "icon": {
     "light": "resources/light/check.svg",
     "dark": "resources/dark/check.svg"
@@ -5253,12 +5307,62 @@ return p
 {
   "command": "leojs.hideMarkOnNodes",
   "category": "Leo",
-  "title": "Hide edit-headline icon",
+  "title": "Hide Mark/Unmark Node",
   "icon": {
     "light": "resources/light/check.svg",
     "dark": "resources/dark/check.svg"
   }
 }
+</t>
+<t tx="felix.20201221015535.1">[CMD.ENABLE_LEO_TREE_NAV, () =&gt; w_leo.toggleSetting(CTX.LEO_TREE_BROWSE, true)],
+[CMD.SHOW_EDIT_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_EDIT, true)],
+[CMD.SHOW_ADD_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_ADD, true)],
+[CMD.SHOW_ARROWS_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_ARROWS, true)],
+[CMD.SHOW_COPY_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_COPY, true)],
+[CMD.SHOW_CLONE_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_CLONE, true)],
+[CMD.SHOW_MARK_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_MARK, true)],
+
+[CMD.DISABLE_LEO_TREE_NAV, () =&gt; w_leo.toggleSetting(CTX.LEO_TREE_BROWSE, false)],
+[CMD.HIDE_EDIT_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_EDIT, false)],
+[CMD.HIDE_ADD_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_ADD, false)],
+[CMD.HIDE_ARROWS_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_ARROWS, false)],
+[CMD.HIDE_COPY_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_COPY, false)],
+[CMD.HIDE_CLONE_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_CLONE, false)],
+[CMD.HIDE_MARK_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_MARK, false)],
+
+</t>
+<t tx="felix.20201221234735.1">/**
+ * Toggles a context value for the 'when' clauses of the available commands in package.json
+ * @param p_param String name of the context variable
+ * @param p_value Its value to be set
+ */
+public toggleSetting(p_param: string, p_value: boolean): void {
+    utils.setContext(p_param, p_value);
+    if (
+        (p_param.startsWith("show") || p_param.startsWith("hide")) &amp;&amp;
+        this.leoStates.fileOpenedReady
+    ) {
+        this._refreshOutline(RevealType.RevealSelect);
+    }
+}
+
+</t>
+<t tx="felix.20201222013904.1">/**
+ * * Refreshes the outline. A reveal type can be passed along to specify the reveal type for the selected node
+ * @param p_revealType Facultative reveal type to specify type of reveal when the 'selected node' is encountered
+ */
+private _refreshOutline(p_revealType?: RevealType): void {
+    // Force showing last used Leo outline first
+    if (this.lastSelectedNode &amp;&amp; !(this._leoTreeExView.visible || this._leoTreeView.visible)) {
+        this._lastTreeView.reveal(this.lastSelectedNode)
+            .then(() =&gt; {
+                this._leoTreeProvider.refreshTreeRoot();
+            });
+    } else {
+        this._leoTreeProvider.refreshTreeRoot();
+    }
+}
+
 </t>
 </tnodes>
 </leo_file>

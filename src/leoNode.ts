@@ -5,7 +5,7 @@ import { Icon, PNode } from "./types"; // ArchivedPosition included to help debu
 /**
  * * Implementation of tree nodes for usage in a TreeDataProvider
  */
- 
+
 export class LeoNode extends vscode.TreeItem {
 
     public contextValue: string; // * Context string is checked in package.json with 'when' clauses

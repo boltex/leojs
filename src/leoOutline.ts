@@ -6,6 +6,8 @@ import { Icon, PNode } from './types';
 export class LeoOutlineProvider implements vscode.TreeDataProvider<LeoNode> {
     private _onDidChangeTreeData: vscode.EventEmitter<LeoNode | undefined> = new vscode.EventEmitter<LeoNode | undefined>();
 
+    readonly onDidChangeTreeData: vscode.Event<LeoNode | undefined> = this._onDidChangeTreeData.event;
+
     private _icons: Icon[];
 
     private _model: PNode[] = [
