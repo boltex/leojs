@@ -378,6 +378,7 @@ export function deactivate() { }
 import { LeoNode } from './leoNode';
 import { ProviderResult } from "vscode";
 import { Icon, PNode } from './types';
+import { Leojs } from './leojs';
 
 @language typescript
 @tabwidth -4
@@ -807,44 +808,15 @@ public setRoot(): void {
 
     readonly onDidChangeTreeData: vscode.Event&lt;LeoNode | undefined&gt; = this._onDidChangeTreeData.event;
 
-    private _icons: Icon[];
-
-    private _model: PNode[] = [
-        {
-            header: "node1",
-            body: "node1 body",
-            children: [
-                {
-                    header: "nodeInside1",
-                    body: "nodeInside1 body",
-                    children: []
-                }, {
-                    header: "nodeInside2",
-                    body: "nodeInside2 body",
-                    children: []
-                },
-            ]
-        },
-        {
-            header: "node2",
-            body: "", // Empty body should display icon without blue square
-            children: []
-        },
-
-        {
-            header: "node3",
-            body: "node3 body",
-            children: []
-        },
-    ];
-
     private _uniqueId: number = 0;
 
     @others
 }
 </t>
-<t tx="felix.20201209011931.2">constructor(p_icons: Icon[]) {
-    this._icons = p_icons;
+<t tx="felix.20201209011931.2">constructor(
+    private _icons: Icon[],
+    private _leo: Leojs
+) {
 }
 
 
@@ -866,7 +838,7 @@ public refreshTreeRoot(): void {
     if (element) {
         return Promise.resolve(this._LeoNodeArray(element.ap.children));
     } else {
-        return Promise.resolve(this._LeoNodeArray(this._model));
+        return Promise.resolve(this._LeoNodeArray(this._leo.positions));
     }
 }
 
@@ -1502,11 +1474,11 @@ public static VSCODE_COMMANDS = {
 
 </t>
 <t tx="felix.20201214151419.1">import * as vscode from "vscode";
-import { LeoUI } from './leoUI';
 import { LeoButtonNode } from "./leoButtonNode";
 import { ProviderResult } from "vscode";
-import { Constants } from "./constants";
-import { LeoButton } from "./types";
+import { Icon } from "./types";
+import { LeoStates } from "./leoStates";
+import { Leojs } from "./leojs";
 
 @language typescript
 @tabwidth -4
@@ -1521,7 +1493,11 @@ export class LeoButtonsProvider implements vscode.TreeDataProvider&lt;LeoButtonN
 
     readonly onDidChangeTreeData: vscode.Event&lt;LeoButtonNode | undefined&gt; = this._onDidChangeTreeData.event;
 
-    constructor(private _leoJs: LeoUI) { }
+    constructor(
+        private _leoStates: LeoStates,
+        private _icons: Icon[],
+        private _leojs: Leojs
+    ) { }
 
     @others
 }
@@ -1540,19 +1516,14 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201214151419.5">public getChildren(element?: LeoButtonNode): Thenable&lt;LeoButtonNode[]&gt; {
-
+    const w_children: LeoButtonNode[] = [];
     // if called with element, or not ready, give back empty array as there won't be any children
-    if (this._leoJs.leoStates.fileOpenedReady &amp;&amp; !element) {
-        // TODO get list from leoJs
-        return Promise.resolve([
-            new LeoButtonNode({ name: 'script-button', index: 'nullButtonWidget' }, this._leoJs.buttonIcons),
-            new LeoButtonNode({ name: 'button name 2', index: 'key2' }, this._leoJs.buttonIcons),
-            new LeoButtonNode({ name: 'button name 3', index: 'key3' }, this._leoJs.buttonIcons)
-
-        ]);
-    } else {
-        return Promise.resolve([]); // Defaults to an empty list of children
+    if (this._leoStates.fileOpenedReady &amp;&amp; !element) {
+        this._leojs.atButtons.forEach(p_button =&gt; {
+            w_children.push(new LeoButtonNode(p_button, this._icons));
+        });
     }
+    return Promise.resolve(w_children); // Defaults to an empty list of children
 }
 
 </t>
@@ -1638,8 +1609,8 @@ import { LeoUI } from './leoUI';
 
 import { LeoDocumentNode } from "./leoDocumentNode";
 import { ProviderResult } from "vscode";
-import { Constants } from "./constants";
-import { LeoDocument } from "./types";
+import { LeoStates } from "./leoStates";
+import { Leojs } from "./leojs";
 
 @language typescript
 @tabwidth -4
@@ -1654,7 +1625,11 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider&lt;LeoDocum
 
     readonly onDidChangeTreeData: vscode.Event&lt;LeoDocumentNode | undefined&gt; = this._onDidChangeTreeData.event;
 
-    constructor(private _leoJs: LeoUI) { }
+    constructor(
+        private _leoStates: LeoStates,
+        private _leoUI: LeoUI,
+        private _leojs: Leojs
+    ) { }
 
     @others
 }
@@ -1673,19 +1648,14 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201214151429.5">public getChildren(element?: LeoDocumentNode): Thenable&lt;LeoDocumentNode[]&gt; {
+    const w_children: LeoDocumentNode[] = [];
     // if called with element, or not ready, give back empty array as there won't be any children
-    if (this._leoJs.leoStates.fileOpenedReady &amp;&amp; !element) {
-        // TODO : get real list!
-        return Promise.resolve([
-
-            new LeoDocumentNode({ name: "fakeSelectedDoc1.leo", index: 0, changed: false, selected: true }, this._leoJs),
-            new LeoDocumentNode({ name: "fakeChangedDoc2.leo", index: 1, changed: true, selected: false }, this._leoJs),
-            new LeoDocumentNode({ name: "fakeDoc3.leo", index: 2, changed: false, selected: false }, this._leoJs)
-
-        ]);
-    } else {
-        return Promise.resolve([]); // Defaults to an empty list of children
+    if (this._leoStates.fileOpenedReady &amp;&amp; !element) {
+        this._leojs.documents.forEach(p_doc =&gt; {
+            w_children.push(new LeoDocumentNode(p_doc, this._leoUI));
+        });
     }
+    return Promise.resolve(w_children); // Defaults to an empty list of children
 }
 
 </t>
@@ -2326,6 +2296,7 @@ import {
     UserCommand,
     ShowBodyParam,
 } from "./types";
+import { Leojs } from "./leojs";
 
 import { LeoNode } from "./leoNode";
 import { LeoOutlineProvider } from './leoOutline';
@@ -2350,11 +2321,14 @@ import { LeoStates } from "./leoStates";
     this.documentIcons = utils.buildDocumentIconPaths(_context);
     this.buttonIcons = utils.buildButtonsIconPaths(_context);
 
+    // * Create leo core class
+    this._leo = new Leojs();
+
     // * Create file browser instance
     // this._leoFilesBrowser = new LeoFilesBrowser(_context);
 
     // * Create a single data provider for both outline trees, Leo view and Explorer view
-    this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons);
+    this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this._leo);
     this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
     this._leoTreeView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeView)));
     this._leoTreeView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeView)));
@@ -2366,14 +2340,14 @@ import { LeoStates } from "./leoStates";
     this._lastTreeView = this._leoTreeExView;
 
     // * Create Leo Opened Documents Treeview Providers and tree views
-    this._leoDocumentsProvider = new LeoDocumentsProvider(this);
+    this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this, this._leo);
     this._leoDocuments = vscode.window.createTreeView(Constants.DOCUMENTS_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
     this._leoDocuments.onDidChangeVisibility((p_event =&gt; this._onDocTreeViewVisibilityChanged(p_event, false)));
     this._leoDocumentsExplorer = vscode.window.createTreeView(Constants.DOCUMENTS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
     this._leoDocumentsExplorer.onDidChangeVisibility((p_event =&gt; this._onDocTreeViewVisibilityChanged(p_event, true)));
 
     // * Create '@buttons' Treeview Providers and tree views
-    this._leoButtonsProvider = new LeoButtonsProvider(this);
+    this._leoButtonsProvider = new LeoButtonsProvider(this.leoStates, this.buttonIcons, this._leo);
     this._leoButtons = vscode.window.createTreeView(Constants.BUTTONS_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
     this._leoButtons.onDidChangeVisibility((p_event =&gt; this._onButtonsTreeViewVisibilityChanged(p_event, false)));
     this._leoButtonsExplorer = vscode.window.createTreeView(Constants.BUTTONS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
@@ -2402,6 +2376,7 @@ import { LeoStates } from "./leoStates";
 <t tx="felix.20201214194144.8"></t>
 <t tx="felix.20201214194144.9"></t>
 <t tx="felix.20201214194412.1">import * as leoFiles from "./leoFiles";
+import { LeoButton, LeoDocument, PNode } from "./types";
 @language typescript
 @tabwidth -4
 
@@ -2422,6 +2397,8 @@ export class LeoUI {
     public nodeIcons: Icon[] = [];
     public documentIcons: Icon[] = [];
     public buttonIcons: Icon[] = [];
+
+    private _leo: Leojs;
 
     private _refreshType: ReqRefresh = {}; // Flags for commands to require parts of UI to refresh
 
@@ -4950,7 +4927,52 @@ set leoReady(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20201215224237.1">class Leojs {
+<t tx="felix.20201215224237.1">export class Leojs {
+
+    // (naive) model of the outline
+    // simulates _yieldAllRootChildren from leoInteg's leobridgeserver.py
+    public positions: PNode[] = [
+        {
+            header: "node1",
+            body: "node1 body",
+            children: [
+                {
+                    header: "nodeInside1",
+                    body: "nodeInside1 body",
+                    children: []
+                }, {
+                    header: "nodeInside2",
+                    body: "nodeInside2 body",
+                    children: []
+                },
+            ]
+        },
+        {
+            header: "node2",
+            body: "", // Empty body should display icon without blue square
+            children: []
+        },
+
+        {
+            header: "node3",
+            body: "node3 body",
+            children: []
+        },
+    ];
+
+    // Fake documents array
+    public documents: LeoDocument[] = [
+        { name: "fakeSelectedDoc1.leo", index: 0, changed: false, selected: true },
+        { name: "fakeChangedDoc2.leo", index: 1, changed: true, selected: false },
+        { name: "fakeDoc3.leo", index: 2, changed: false, selected: false }
+    ];
+
+    // Fake @ buttons array
+    public atButtons: LeoButton[] = [
+        { name: 'script-button', index: 'nullButtonWidget' },
+        { name: 'button name 2', index: 'key2' },
+        { name: 'button name 3', index: 'key3' }
+    ];
 
     constructor() { }
 

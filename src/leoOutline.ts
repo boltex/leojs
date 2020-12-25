@@ -2,47 +2,19 @@ import * as vscode from 'vscode';
 import { LeoNode } from './leoNode';
 import { ProviderResult } from "vscode";
 import { Icon, PNode } from './types';
+import { Leojs } from './leojs';
 
 export class LeoOutlineProvider implements vscode.TreeDataProvider<LeoNode> {
     private _onDidChangeTreeData: vscode.EventEmitter<LeoNode | undefined> = new vscode.EventEmitter<LeoNode | undefined>();
 
     readonly onDidChangeTreeData: vscode.Event<LeoNode | undefined> = this._onDidChangeTreeData.event;
 
-    private _icons: Icon[];
-
-    private _model: PNode[] = [
-        {
-            header: "node1",
-            body: "node1 body",
-            children: [
-                {
-                    header: "nodeInside1",
-                    body: "nodeInside1 body",
-                    children: []
-                }, {
-                    header: "nodeInside2",
-                    body: "nodeInside2 body",
-                    children: []
-                },
-            ]
-        },
-        {
-            header: "node2",
-            body: "", // Empty body should display icon without blue square
-            children: []
-        },
-
-        {
-            header: "node3",
-            body: "node3 body",
-            children: []
-        },
-    ];
-
     private _uniqueId: number = 0;
 
-    constructor(p_icons: Icon[]) {
-        this._icons = p_icons;
+    constructor(
+        private _icons: Icon[],
+        private _leo: Leojs
+    ) {
     }
 
 
@@ -61,7 +33,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<LeoNode> {
         if (element) {
             return Promise.resolve(this._LeoNodeArray(element.ap.children));
         } else {
-            return Promise.resolve(this._LeoNodeArray(this._model));
+            return Promise.resolve(this._LeoNodeArray(this._leo.positions));
         }
     }
 

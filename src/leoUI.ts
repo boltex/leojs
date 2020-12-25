@@ -11,6 +11,7 @@ import {
     UserCommand,
     ShowBodyParam,
 } from "./types";
+import { Leojs } from "./leojs";
 
 import { LeoNode } from "./leoNode";
 import { LeoOutlineProvider } from './leoOutline';
@@ -31,6 +32,8 @@ export class LeoUI {
     public nodeIcons: Icon[] = [];
     public documentIcons: Icon[] = [];
     public buttonIcons: Icon[] = [];
+
+    private _leo: Leojs;
 
     private _refreshType: ReqRefresh = {}; // Flags for commands to require parts of UI to refresh
 
@@ -94,11 +97,14 @@ export class LeoUI {
         this.documentIcons = utils.buildDocumentIconPaths(_context);
         this.buttonIcons = utils.buildButtonsIconPaths(_context);
 
+        // * Create leo core class
+        this._leo = new Leojs();
+
         // * Create file browser instance
         // this._leoFilesBrowser = new LeoFilesBrowser(_context);
 
         // * Create a single data provider for both outline trees, Leo view and Explorer view
-        this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons);
+        this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this._leo);
         this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
         this._leoTreeView.onDidExpandElement((p_event => this._onChangeCollapsedState(p_event, true, this._leoTreeView)));
         this._leoTreeView.onDidCollapseElement((p_event => this._onChangeCollapsedState(p_event, false, this._leoTreeView)));
@@ -110,14 +116,14 @@ export class LeoUI {
         this._lastTreeView = this._leoTreeExView;
 
         // * Create Leo Opened Documents Treeview Providers and tree views
-        this._leoDocumentsProvider = new LeoDocumentsProvider(this);
+        this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this, this._leo);
         this._leoDocuments = vscode.window.createTreeView(Constants.DOCUMENTS_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
         this._leoDocuments.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, false)));
         this._leoDocumentsExplorer = vscode.window.createTreeView(Constants.DOCUMENTS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
         this._leoDocumentsExplorer.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, true)));
 
         // * Create '@buttons' Treeview Providers and tree views
-        this._leoButtonsProvider = new LeoButtonsProvider(this);
+        this._leoButtonsProvider = new LeoButtonsProvider(this.leoStates, this.buttonIcons, this._leo);
         this._leoButtons = vscode.window.createTreeView(Constants.BUTTONS_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
         this._leoButtons.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, false)));
         this._leoButtonsExplorer = vscode.window.createTreeView(Constants.BUTTONS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
