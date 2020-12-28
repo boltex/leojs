@@ -7,7 +7,7 @@ import { LeoButton, LeoDocument, PNode } from "./types";
 
 export class Leojs {
 
-    // (naive) model of the outline
+    // FAKE model of the outline (PNodes are temporary replacement of positions + vnodes)
     // simulates _yieldAllRootChildren from leoInteg's leobridgeserver.py
     public positions: PNode[] = [
         {
@@ -38,20 +38,39 @@ export class Leojs {
         },
     ];
 
-    // Fake documents array
+    // Fake documents array (rendered in tree view but is just a list - no node relationships)
     public documents: LeoDocument[] = [
         { name: "fakeSelectedDoc1.leo", index: 0, changed: false, selected: true },
         { name: "fakeChangedDoc2.leo", index: 1, changed: true, selected: false },
         { name: "fakeDoc3.leo", index: 2, changed: false, selected: false }
     ];
 
-    // Fake @ buttons array
+    // Fake @ buttons array (rendered in tree view but is just a list - no node relationships)
     public atButtons: LeoButton[] = [
         { name: 'script-button', index: 'nullButtonWidget' },
         { name: 'button name 2', index: 'key2' },
         { name: 'button name 3', index: 'key3' }
     ];
 
-    constructor() { }
+    constructor() {
+        // insert parent properties in fake positions
+        this.positions.forEach(p_position => {
+            // set to undefined at first for root nodes
+            this._setPNodeParents(p_position, undefined);
+        });
+    }
+
+    /**
+     * Recursive method to fill the parent properties of the temporary fake position-structure
+     * @param p_position
+     * @param p_parent
+     */
+    private _setPNodeParents(p_position: PNode, p_parent?: PNode): void {
+        p_position.parent = p_parent; // set its parent
+        p_position.children.forEach(p_child => {
+            this._setPNodeParents(p_child, p_position);
+        });
+    }
+
 
 }

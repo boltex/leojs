@@ -4,10 +4,10 @@ import { ProviderResult } from "vscode";
 import { Icon, PNode } from './types';
 import { Leojs } from './leojs';
 
-export class LeoOutlineProvider implements vscode.TreeDataProvider<LeoNode> {
-    private _onDidChangeTreeData: vscode.EventEmitter<LeoNode | undefined> = new vscode.EventEmitter<LeoNode | undefined>();
+export class LeoOutlineProvider implements vscode.TreeDataProvider<PNode> {
+    private _onDidChangeTreeData: vscode.EventEmitter<PNode | undefined> = new vscode.EventEmitter<PNode | undefined>();
 
-    readonly onDidChangeTreeData: vscode.Event<LeoNode | undefined> = this._onDidChangeTreeData.event;
+    readonly onDidChangeTreeData: vscode.Event<PNode | undefined> = this._onDidChangeTreeData.event;
 
     private _uniqueId: number = 0;
 
@@ -25,43 +25,36 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<LeoNode> {
         this._onDidChangeTreeData.fire(undefined);
     }
 
-    public getTreeItem(element: LeoNode): Thenable<LeoNode> | LeoNode {
-        return element;
+    public getTreeItem(element: PNode): Thenable<LeoNode> | LeoNode {
+        // Build a LeoNode (a vscode tree node) from the PNode
+        return new LeoNode(element.header,
+            element.children.length ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
+            element, // ap
+            false, // cloned
+            false, // dirty
+            false, // marked
+            false, // atFile
+            !!element.body && !!element.body.length,
+            false, // u
+            this._icons,
+            "id" + this._uniqueId++
+        );
     }
 
-    public getChildren(element?: LeoNode): Thenable<LeoNode[]> {
+    public getChildren(element?: PNode): Thenable<PNode[]> {
         if (element) {
-            return Promise.resolve(this._LeoNodeArray(element.ap.children));
+            return Promise.resolve(element.children);
         } else {
-            return Promise.resolve(this._LeoNodeArray(this._leo.positions));
+            return Promise.resolve(this._leo.positions);
         }
     }
 
-    public getParent(element: LeoNode): ProviderResult<LeoNode> | null {
+    public getParent(element: PNode): ProviderResult<PNode> {
         // Buttons are just a list, as such, entries are always child of root so return null
-        return null;
-    }
-
-    private _LeoNodeArray(p_children: PNode[]): LeoNode[] {
-        const w_children: LeoNode[] = [];
-        if (p_children && p_children.length) {
-            p_children.forEach((p_node, p_index) => {
-                w_children.push(new LeoNode(p_node.header,
-                    p_node.children.length ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
-                    p_node, // ap
-                    p_index, // childIndex
-                    false, // cloned
-                    false, // dirty
-                    false, // marked
-                    false, // atFile
-                    !!p_node.body && !!p_node.body.length,
-                    false, // u
-                    this._icons,
-                    "id" + this._uniqueId++
-                ));
-            });
+        if (element) {
+            return element.parent;
         }
-        return w_children;
+        return undefined;
     }
 
 }

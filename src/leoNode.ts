@@ -16,7 +16,6 @@ export class LeoNode extends vscode.TreeItem {
         public label: string, // Node headline
         public collapsibleState: vscode.TreeItemCollapsibleState, // Computed in receiver/creator
         public ap: PNode, // Pointer/reference for leo's node position
-        public childIndex: number, // For debugging purposes
         public cloned: boolean,
         public dirty: boolean,
         public marked: boolean,
@@ -58,7 +57,6 @@ export class LeoNode extends vscode.TreeItem {
 
         this.collapsibleState = p_node.collapsibleState;
         this.ap = p_node.ap;
-        this.childIndex = p_node.childIndex;
         this.cloned = p_node.cloned;
         this.dirty = p_node.dirty;
         this.marked = p_node.marked;

@@ -43,9 +43,9 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoDocument
         return Promise.resolve(w_children); // Defaults to an empty list of children
     }
 
-    public getParent(element: LeoDocumentNode): ProviderResult<LeoDocumentNode> | null {
+    public getParent(element: LeoDocumentNode): ProviderResult<LeoDocumentNode> {
         // Leo documents are just a list, as such, entries are always child of root, so return null
-        return null;
+        return undefined;
     }
 
 }
