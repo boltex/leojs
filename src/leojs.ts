@@ -61,7 +61,7 @@ export class Leojs {
     }
 
     /**
-     * Recursive method to fill the parent properties of the temporary fake position-structure
+     * Recursive method to fill the parent properties of fake position-structure
      * @param p_position
      * @param p_parent
      */

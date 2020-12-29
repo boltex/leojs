@@ -3,6 +3,7 @@ import { LeoNode } from './leoNode';
 import { ProviderResult } from "vscode";
 import { Icon, PNode } from './types';
 import { Leojs } from './leojs';
+import { LeoUI } from './leoUI';
 
 export class LeoOutlineProvider implements vscode.TreeDataProvider<PNode> {
     private _onDidChangeTreeData: vscode.EventEmitter<PNode | undefined> = new vscode.EventEmitter<PNode | undefined>();
@@ -13,6 +14,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<PNode> {
 
     constructor(
         private _icons: Icon[],
+        private _leoUI: LeoUI,
         private _leo: Leojs
     ) {
     }
@@ -26,8 +28,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<PNode> {
     }
 
     public getTreeItem(element: PNode): Thenable<LeoNode> | LeoNode {
-        // Build a LeoNode (a vscode tree node) from the PNode
-        return new LeoNode(element.header,
+        const w_leoNode = new LeoNode(element.header,
             element.children.length ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
             element, // ap
             false, // cloned
@@ -39,6 +40,13 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<PNode> {
             this._icons,
             "id" + this._uniqueId++
         );
+
+        if (element.selected) {
+            this._leoUI.gotSelectedNode(element);
+        }
+
+        // Build a LeoNode (a vscode tree node) from the PNode
+        return w_leoNode;
     }
 
     public getChildren(element?: PNode): Thenable<PNode[]> {

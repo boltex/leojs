@@ -29,6 +29,11 @@ export class LeoUI {
     // * State flags
     public leoStates: LeoStates;
 
+    // * temporary / fake config
+    public config: { [key: string]: boolean } = {
+
+    };
+
     // * Icon Paths (Singleton static arrays)
     public nodeIcons: Icon[] = [];
     public documentIcons: Icon[] = [];
@@ -49,7 +54,7 @@ export class LeoUI {
     private _leoTreeView: vscode.TreeView<PNode>; // Outline tree view added to the Tree View Container with an Activity Bar icon
     private _leoTreeExView: vscode.TreeView<PNode>; // Outline tree view added to the Explorer Sidebar
     private _lastTreeView: vscode.TreeView<PNode>; // Last visible treeview
-    private _treeId: number = 0; // Starting salt for tree node murmurhash generated Ids
+    private _treeId: number = 0; // Starting salt for tree node murmurhash generated Ids // unused so far in leojs
 
     private _lastSelectedNode: LeoNode | undefined; // Last selected node we got a hold of; leoTreeView.selection maybe newer and unprocessed
     get lastSelectedNode(): LeoNode | undefined {
@@ -60,6 +65,16 @@ export class LeoUI {
         if (p_leoNode) {
             utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_MARKED, p_leoNode.marked); // Global context to 'flag' the selected node's marked state
         }
+    }
+
+    // * Body pane
+    private _bodyUri: vscode.Uri = utils.strToLeoUri("");
+    get bodyUri(): vscode.Uri {
+        return this._bodyUri;
+    }
+    set bodyUri(p_uri: vscode.Uri) {
+        // this._leoFileSystem.setBodyTime(p_uri);
+        this._bodyUri = p_uri;
     }
 
     // * Documents Pane
@@ -114,7 +129,7 @@ export class LeoUI {
         // this._leoFilesBrowser = new LeoFilesBrowser(_context);
 
         // * Create a single data provider for both outline trees, Leo view and Explorer view
-        this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this._leo);
+        this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this, this._leo);
         this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
         this._leoTreeView.onDidExpandElement((p_event => this._onChangeCollapsedState(p_event, true, this._leoTreeView)));
         this._leoTreeView.onDidCollapseElement((p_event => this._onChangeCollapsedState(p_event, false, this._leoTreeView)));
@@ -155,7 +170,7 @@ export class LeoUI {
     }
 
     /**
-     * 'getStates' action for use in debounced method call
+     * * 'getStates' action for use in debounced method call
      */
     private _triggerGetStates(): void {
         if (this._refreshType.documents) {
@@ -168,7 +183,7 @@ export class LeoUI {
         }
         if (this._refreshType.states) {
             this._refreshType.states = false;
-            // this.leoStates.setLeoStateFlags(this._leoStates); //
+            // this.leoStates.setLeoStateFlags(this._leo.getLeoStates);
         }
     }
 
@@ -176,13 +191,13 @@ export class LeoUI {
      * * Setup leoInteg's UI for having no opened Leo documents
      */
     private _setupNoOpenedLeoDocument(): void {
-        // this.leoStates.fileOpenedReady = false;
-        // this._bodyTextDocument = undefined;
-        // this.lastSelectedNode = undefined;
-        // this._refreshOutline(false, RevealType.NoReveal);
-        // this.refreshDocumentsPane();
-        // this._leoButtonsProvider.refreshTreeRoot();
-        // this.closeBody();
+        this.leoStates.fileOpenedReady = false;
+        this._bodyTextDocument = undefined;
+        this.lastSelectedNode = undefined;
+        this._refreshOutline(false, RevealType.NoReveal);
+        this.refreshDocumentsPane();
+        this._leoButtonsProvider.refreshTreeRoot();
+        this.closeBody();
     }
 
     /**
@@ -242,6 +257,16 @@ export class LeoUI {
                 focus: p_focusOutline
             });
         }
+    }
+
+    /**
+     * * Handle selected node being created for the outline
+     * @param p_element PNode that was just created and detected as selected node
+     */
+    public gotSelectedNode(p_element: PNode): void {
+        //
+        console.log('Got selected node:', p_element.header);
+
     }
 
     /**
@@ -317,7 +342,7 @@ export class LeoUI {
      */
     private _refreshOutline(p_incrementTreeID: boolean, p_revealType?: RevealType): void {
         if (p_incrementTreeID) {
-            this._treeId++;
+            this._treeId++; // unused so far in leojs
         }
         if (p_revealType !== undefined) { // To check if selected node should self-select while redrawing whole tree
             this._revealType = p_revealType; // To be read/cleared (in arrayToLeoNodesArray instead of directly by nodes)
@@ -334,7 +359,7 @@ export class LeoUI {
     }
 
     /**
-     * Public method to refresh the documents pane
+     * * Public method exposed as 'refreshDocumentsPane' setter/getter to refresh the documents pane
      * Document Panel May be refreshed by other services (states service, ...)
      */
     private _refreshDocumentsPane(): void {
@@ -352,7 +377,6 @@ export class LeoUI {
             if (!this._leoDocuments.visible && !this._leoDocumentsExplorer.visible) {
                 return;
             }
-            let w_trigger = false;
             let w_docView: vscode.TreeView<LeoDocumentNode>;
             if (this._leoDocuments.visible) {
                 w_docView = this._leoDocuments;
@@ -360,13 +384,14 @@ export class LeoUI {
                 w_docView = this._leoDocumentsExplorer;
             }
             if (w_docView.selection.length && w_docView.selection[0] === p_documentNode) {
-                // console.log('already selected!');
+                console.log('setDocumentSelection: already selected!');
+
             } else {
-                w_trigger = true;
-            }
-            if (w_trigger) {
+                console.log('setDocumentSelection: selecting in tree');
+
                 w_docView.reveal(p_documentNode, { select: true, focus: false });
             }
+
         }, 0);
     }
 
@@ -378,6 +403,25 @@ export class LeoUI {
      */
     private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent<PNode>, p_expand: boolean, p_treeView: vscode.TreeView<PNode>): void {
         // * Expanding or collapsing via the treeview interface selects the node to mimic Leo
+        // this.triggerBodySave(true);
+        // if (p_treeView.selection[0] && p_treeView.selection[0] === p_event.element) {
+        //     // * This happens if the tree selection is the same as the expanded/collapsed node: Just have Leo do the same
+        //     // Pass
+        // } else {
+        //     // * This part only happens if the user clicked on the arrow without trying to select the node
+        //     this._revealTreeViewNode(p_event.element, { select: true, focus: false }); // No force focus : it breaks collapse/expand when direct parent
+        //     this.selectTreeNode(p_event.element, true);  // not waiting for a .then(...) so not to add any lag
+        // }
+        // this.sendAction(p_expand ? Constants.LEOBRIDGE.EXPAND_NODE : Constants.LEOBRIDGE.COLLAPSE_NODE, p_event.element.apJson)
+        //     .then(() => {
+        //         if (this.config.leoTreeBrowse) {
+        //             this._refreshOutline(true, RevealType.RevealSelect);
+        //         }
+        //     });
+
+        console.log("Set Expand/Collapse in leojs");
+        this._refreshOutline(true, RevealType.RevealSelect);
+
     }
 
     /**
@@ -571,7 +615,7 @@ export class LeoUI {
 
         vscode.window.showInformationMessage('TODO: Implement closeLeoFile');
 
-        const w_fakeTotalOpened = 0;
+        const w_fakeTotalOpened = 1;
 
         if (w_fakeTotalOpened) {
             this.launchRefresh();
@@ -624,11 +668,14 @@ export class LeoUI {
     public saveAsLeoFile(p_fromOutline?: boolean): Thenable<unknown> {
 
         this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
+
         vscode.window.showInformationMessage('TODO: Implement saveAsLeoFile' +
             " called from " +
             (p_fromOutline ? "outline" : "body")
         );
+
         this.launchRefresh();
+
         // if saved
         return Promise.resolve(true);
 
@@ -636,12 +683,16 @@ export class LeoUI {
     }
 
     public saveLeoFile(p_fromOutline?: boolean): Thenable<unknown> {
+
         this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
+
         vscode.window.showInformationMessage('TODO: Implement saveLeoFile' +
             " called from " +
             (p_fromOutline ? "outline" : "body")
         );
+
         this.launchRefresh();
+
         // if saved
         return Promise.resolve(true);
 
@@ -649,16 +700,20 @@ export class LeoUI {
     }
 
     public switchLeoFile(): Thenable<unknown> {
+
         vscode.window.showInformationMessage('TODO: Implement switchLeoFile');
 
-        // if worked
+        // vscode.window.showQuickPick(w_entries, w_pickOptions);
+        //     then
         // return Promise.resolve(this.selectOpenedLeoDocument(p_chosenDocument.value));
+
         return Promise.resolve(true);
 
         // return Promise.resolve(undefined); // if cancelled
     }
 
     public selectOpenedLeoDocument(p_index: number): Thenable<unknown> {
+
         vscode.window.showInformationMessage('TODO: Implement selectOpenedLeoDocument' +
             " index: " + p_index);
 
@@ -694,8 +749,28 @@ export class LeoUI {
         if (this._bodyTextDocument) {
             return vscode.window.showTextDocument(this._bodyTextDocument, w_showOptions);
         } else {
+            console.log('showBody: no _bodyTextDocument set to show');
+
             return Promise.resolve(undefined);
         }
+    }
+
+    /**
+     * * Closes any body pane opened in this vscode window instance
+     */
+    public closeBody(): void {
+        // TODO : CLEAR UNDO HISTORY AND FILE HISTORY for this.bodyUri !
+        if (this.bodyUri) {
+            vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', this.bodyUri.path);
+        }
+        vscode.window.visibleTextEditors.forEach(p_textEditor => {
+            if (p_textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+                vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', p_textEditor.document.uri.path);
+                if (p_textEditor.hide) {
+                    p_textEditor.hide();
+                }
+            }
+        });
     }
 
     public showLogPane(): Thenable<unknown> {
@@ -720,6 +795,9 @@ export class LeoUI {
         ) {
             this._refreshOutline(true, RevealType.RevealSelect);
         }
+        // keep a copy in fake config until a real config setting class is implemented
+        this.config[p_param] = p_value;
+
     }
 
     /**

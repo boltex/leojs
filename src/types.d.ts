@@ -3,6 +3,7 @@ import { LeoNode } from "./leoNode";
 
 export interface PNode {
     header: string;
+    selected: boolean;
     children: PNode[];
     parent?: PNode;
     body: string;
