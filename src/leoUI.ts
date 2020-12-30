@@ -264,8 +264,11 @@ export class LeoUI {
      * @param p_element PNode that was just created and detected as selected node
      */
     public gotSelectedNode(p_element: PNode): void {
-        //
+
         console.log('Got selected node:', p_element.header);
+
+        // set context flags
+        this.leoStates.setSelectedNodeFlags(p_element);
 
     }
 
@@ -420,7 +423,10 @@ export class LeoUI {
         //     });
 
         console.log("Set Expand/Collapse in leojs");
-        this._refreshOutline(true, RevealType.RevealSelect);
+        if (this.config.leoTreeBrowse) {
+            this._refreshOutline(true, RevealType.RevealSelect);
+        }
+
 
     }
 

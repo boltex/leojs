@@ -31,12 +31,12 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<PNode> {
         const w_leoNode = new LeoNode(element.header,
             element.children.length ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
             element, // ap
-            false, // cloned
-            false, // dirty
-            false, // marked
-            false, // atFile
+            !!element.cloned, // cloned
+            !!element.dirty, // dirty
+            !!element.marked, // marked
+            !!element.atFile, // atFile
             !!element.body && !!element.body.length,
-            false, // u
+            false, // 'u' - user defined data
             this._icons,
             "id" + this._uniqueId++
         );

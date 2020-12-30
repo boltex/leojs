@@ -839,12 +839,12 @@ public refreshTreeRoot(): void {
     const w_leoNode = new LeoNode(element.header,
         element.children.length ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
         element, // ap
-        false, // cloned
-        false, // dirty
-        false, // marked
-        false, // atFile
+        !!element.cloned, // cloned
+        !!element.dirty, // dirty
+        !!element.marked, // marked
+        !!element.atFile, // atFile
         !!element.body &amp;&amp; !!element.body.length,
-        false, // u
+        false, // 'u' - user defined data
         this._icons,
         "id" + this._uniqueId++
     );
@@ -1733,8 +1733,7 @@ public get id(): string {
 import * as utils from "./utils";
 import { LeoUI } from "./leoUI";
 import { Constants } from "./constants";
-import { LeoNode } from "./leoNode";
-import { LeoPackageStates } from "./types";
+import { LeoPackageStates, PNode } from "./types";
 
 @language typescript
 @tabwidth -4
@@ -1849,14 +1848,14 @@ export class LeoStates {
 ) { }
 
 </t>
-<t tx="felix.20201214151447.21">public setSelectedNodeFlags(p_node: LeoNode): void {
+<t tx="felix.20201214151447.21">public setSelectedNodeFlags(p_node: PNode): void {
     this.leoRoot = false; // * RESET the root flag : It is set by vscode instead right after getting list of children for root of outline
-    this.leoMarked = p_node.marked;
-    this.leoCloned = p_node.cloned;
-    this.leoDirty = p_node.dirty;
-    this.leoEmpty = !p_node.hasBody;
-    this.leoChild = !(p_node.collapsibleState === vscode.TreeItemCollapsibleState.None);
-    this.leoAtFile = p_node.atFile;
+    this.leoMarked = !!p_node.marked;
+    this.leoCloned = !!p_node.cloned;
+    this.leoDirty = !!p_node.dirty;
+    this.leoEmpty = !p_node.body.length;
+    this.leoChild = !!p_node.children.length;
+    this.leoAtFile = !!p_node.atFile;
 }
 
 </t>
@@ -2198,11 +2197,16 @@ export interface MinibufferCommand extends vscode.QuickPickItem {
 }
 </t>
 <t tx="felix.20201214154816.2">export interface PNode {
+    // Fake structure. Use Position.v.isCloned(), etc. instead
     header: string;
-    selected: boolean;
     children: PNode[];
     parent?: PNode;
     body: string;
+    selected?: boolean;
+    marked?: boolean;
+    cloned?: boolean;
+    dirty?: boolean;
+    atFile?: boolean;
 }
 
 </t>
@@ -2588,7 +2592,10 @@ private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;PNode&
     //     });
 
     console.log("Set Expand/Collapse in leojs");
-    this._refreshOutline(true, RevealType.RevealSelect);
+    if (this.config.leoTreeBrowse) {
+        this._refreshOutline(true, RevealType.RevealSelect);
+    }
+
 
 }
 
@@ -5061,6 +5068,7 @@ set leoReady(p_value: boolean) {
                 {
                     header: "nodeInside1",
                     body: "nodeInside1 body",
+                    marked: true,
                     children: []
                 }, {
                     header: "nodeInside2",
@@ -5070,13 +5078,15 @@ set leoReady(p_value: boolean) {
             ]
         },
         {
-            header: "node2",
+            header: "node2selected",
+            selected: true,
             body: "", // Empty body should display icon without blue square
             children: []
         },
 
         {
-            header: "node3",
+            header: "@file node3",
+            atFile: true,
             body: "node3 body",
             children: []
         },
@@ -5690,8 +5700,11 @@ public closeBody(): void {
  * @param p_element PNode that was just created and detected as selected node
  */
 public gotSelectedNode(p_element: PNode): void {
-    //
+
     console.log('Got selected node:', p_element.header);
+
+    // set context flags
+    this.leoStates.setSelectedNodeFlags(p_element);
 
 }
 

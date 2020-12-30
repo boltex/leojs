@@ -17,6 +17,7 @@ export class Leojs {
                 {
                     header: "nodeInside1",
                     body: "nodeInside1 body",
+                    marked: true,
                     children: []
                 }, {
                     header: "nodeInside2",
@@ -26,13 +27,15 @@ export class Leojs {
             ]
         },
         {
-            header: "node2",
+            header: "node2selected",
+            selected: true,
             body: "", // Empty body should display icon without blue square
             children: []
         },
 
         {
-            header: "node3",
+            header: "@file node3",
+            atFile: true,
             body: "node3 body",
             children: []
         },

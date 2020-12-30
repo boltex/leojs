@@ -2,11 +2,16 @@ import * as vscode from "vscode";
 import { LeoNode } from "./leoNode";
 
 export interface PNode {
+    // Fake structure. Use Position.v.isCloned(), etc. instead
     header: string;
-    selected: boolean;
     children: PNode[];
     parent?: PNode;
     body: string;
+    selected?: boolean;
+    marked?: boolean;
+    cloned?: boolean;
+    dirty?: boolean;
+    atFile?: boolean;
 }
 
 /**

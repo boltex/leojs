@@ -2,8 +2,7 @@ import * as vscode from "vscode";
 import * as utils from "./utils";
 import { LeoUI } from "./leoUI";
 import { Constants } from "./constants";
-import { LeoNode } from "./leoNode";
-import { LeoPackageStates } from "./types";
+import { LeoPackageStates, PNode } from "./types";
 
 /**
  * * Global states service
@@ -176,14 +175,14 @@ export class LeoStates {
         private _leoJs: LeoUI
     ) { }
 
-    public setSelectedNodeFlags(p_node: LeoNode): void {
+    public setSelectedNodeFlags(p_node: PNode): void {
         this.leoRoot = false; // * RESET the root flag : It is set by vscode instead right after getting list of children for root of outline
-        this.leoMarked = p_node.marked;
-        this.leoCloned = p_node.cloned;
-        this.leoDirty = p_node.dirty;
-        this.leoEmpty = !p_node.hasBody;
-        this.leoChild = !(p_node.collapsibleState === vscode.TreeItemCollapsibleState.None);
-        this.leoAtFile = p_node.atFile;
+        this.leoMarked = !!p_node.marked;
+        this.leoCloned = !!p_node.cloned;
+        this.leoDirty = !!p_node.dirty;
+        this.leoEmpty = !p_node.body.length;
+        this.leoChild = !!p_node.children.length;
+        this.leoAtFile = !!p_node.atFile;
     }
 
     public setLeoStateFlags(p_states: LeoPackageStates): void {
