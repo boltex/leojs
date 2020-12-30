@@ -2408,7 +2408,13 @@ export class LeoUI {
 
     // * temporary / fake config
     public config: { [key: string]: boolean } = {
-
+        leoTreeBrowse: true,
+        showEditOnNodes: false,
+        showArrowsOnNodes: false,
+        showAddOnNodes: false,
+        showMarkOnNodes: false,
+        showCloneOnNodes: false,
+        showCopyOnNodes: false,
     };
 
     // * Icon Paths (Singleton static arrays)
