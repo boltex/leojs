@@ -212,8 +212,10 @@ function transformLeoXML(xmlString, startId, parser, transformer, serializer) {
     );
 }
 
-function test() {
-    console.log('testing import');
+function test(p_message) {
+    console.log('Output message : ' + p_message);
 }
 
-export { getLeoJSON, transformLeoXML, transformLeoXML2XML, transform, test };
+var testVar = "some String";
+
+export { getLeoJSON, transformLeoXML, transformLeoXML2XML, transform, test, testVar };

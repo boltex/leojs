@@ -2388,7 +2388,8 @@ import { LeoStates } from "./leoStates";
 <t tx="felix.20201214194144.7"></t>
 <t tx="felix.20201214194144.8"></t>
 <t tx="felix.20201214194144.9"></t>
-<t tx="felix.20201214194412.1">import * as abc from './leoFiles';
+<t tx="felix.20201214194412.1">// import * as abc from './leoFiles'; // works
+import { test, testVar } from './leoFiles'; // works too
 import { LeoButton, LeoDocument, PNode } from './types';
 @language typescript
 @tabwidth -4
@@ -5128,7 +5129,12 @@ set leoReady(p_value: boolean) {
             // set to undefined at first for root nodes
             this._setPNodeParents(p_position, undefined);
         });
-        abc.test();
+
+
+
+        // abc.test("the string is " + abc.testVar);
+        test("the string is " + testVar);
+
     }
 
     /**
@@ -5201,11 +5207,13 @@ function transformLeoXML(xmlString, startId, parser, transformer, serializer) {
     );
 }
 
-function test() {
-    console.log('testing import');
+function test(p_message) {
+    console.log('Output message : ' + p_message);
 }
 
-export { getLeoJSON, transformLeoXML, transformLeoXML2XML, transform, test };
+var testVar = "some String";
+
+export { getLeoJSON, transformLeoXML, transformLeoXML2XML, transform, test, testVar };
 </t>
 <t tx="felix.20201215231023.10">function isRelative(url) {
     var ok = true;
