@@ -1,5 +1,11 @@
+
+import * as vscode from 'vscode';
+
 // import * as abc from './leoFiles'; // works
 import { test, testVar } from './leoFiles'; // works too
+
+import * as leo from './leo/leo'; // Your tests from leojs4 :)
+
 import { LeoButton, LeoDocument, PNode } from './types';
 
 // https://github.com/leo-editor/leo-editor/issues/1025
@@ -77,6 +83,10 @@ export class Leojs {
 
         // abc.test("the string is " + abc.testVar);
         test("the string is " + testVar);
+
+        const info = vscode.window.showInformationMessage;
+        leo.test(info);
+
 
     }
 

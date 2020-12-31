@@ -2388,8 +2388,14 @@ import { LeoStates } from "./leoStates";
 <t tx="felix.20201214194144.7"></t>
 <t tx="felix.20201214194144.8"></t>
 <t tx="felix.20201214194144.9"></t>
-<t tx="felix.20201214194412.1">// import * as abc from './leoFiles'; // works
+<t tx="felix.20201214194412.1">
+import * as vscode from 'vscode';
+
+// import * as abc from './leoFiles'; // works
 import { test, testVar } from './leoFiles'; // works too
+
+import * as leo from './leo/leo'; // Your tests from leojs4 :)
+
 import { LeoButton, LeoDocument, PNode } from './types';
 @language typescript
 @tabwidth -4
@@ -5134,6 +5140,10 @@ set leoReady(p_value: boolean) {
 
         // abc.test("the string is " + abc.testVar);
         test("the string is " + testVar);
+
+        const info = vscode.window.showInformationMessage;
+        leo.test(info);
+
 
     }
 
