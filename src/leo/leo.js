@@ -1,10 +1,12 @@
-// import { test2 } from "./app/leoApp.mjs";
-const app = require('./app/leoApp');
+import { test2 } from "./app/leoApp";
+// const app = require('./app/leoApp');
 
 function test(info) {
-    info("leo.js:test 2");
-    app.test2(info);
+    // info("leo.js:test 2");
+    console.log("leo.js:test")
+    // app.test2(info);
+    test2(info)
 }
 
-// export {test};
-module.exports = {test};
+export {test};
+// module.exports = {test};
