@@ -2388,8 +2388,8 @@ import { LeoStates } from "./leoStates";
 <t tx="felix.20201214194144.7"></t>
 <t tx="felix.20201214194144.8"></t>
 <t tx="felix.20201214194144.9"></t>
-<t tx="felix.20201214194412.1">import * as leoFiles from "./leoFiles";
-import { LeoButton, LeoDocument, PNode } from "./types";
+<t tx="felix.20201214194412.1">import * as abc from './leoFiles';
+import { LeoButton, LeoDocument, PNode } from './types';
 @language typescript
 @tabwidth -4
 
@@ -5063,61 +5063,72 @@ set leoReady(p_value: boolean) {
 
 </t>
 <t tx="felix.20201215224237.1">export class Leojs {
-
     // FAKE model of the outline (PNodes are temporary replacement of positions + vnodes)
     // simulates _yieldAllRootChildren from leoInteg's leobridgeserver.py
     public positions: PNode[] = [
         {
-            header: "node1",
-            body: "node1 body",
+            header: 'node1',
+            body: 'node1 body',
             children: [
                 {
-                    header: "nodeInside1",
-                    body: "nodeInside1 body",
+                    header: 'nodeInside1',
+                    body: 'nodeInside1 body',
                     marked: true,
-                    children: []
-                }, {
-                    header: "nodeInside2",
-                    body: "nodeInside2 body",
-                    children: []
+                    children: [],
                 },
-            ]
+                {
+                    header: 'nodeInside2',
+                    body: 'nodeInside2 body',
+                    children: [],
+                },
+            ],
         },
         {
-            header: "node2selected",
+            header: 'node2selected',
             selected: true,
-            body: "", // Empty body should display icon without blue square
-            children: []
+            body: '', // Empty body should display icon without blue square
+            children: [],
         },
 
         {
-            header: "@file node3",
+            header: '@file node3',
             atFile: true,
-            body: "node3 body",
-            children: []
+            body: 'node3 body',
+            children: [],
         },
     ];
 
     // Fake documents array (rendered in tree view but is just a list - no node relationships)
     public documents: LeoDocument[] = [
-        { name: "fakeSelectedDoc1.leo", index: 0, changed: false, selected: true },
-        { name: "fakeChangedDoc2.leo", index: 1, changed: true, selected: false },
-        { name: "fakeDoc3.leo", index: 2, changed: false, selected: false }
+        {
+            name: 'fakeSelectedDoc1.leo',
+            index: 0,
+            changed: false,
+            selected: true,
+        },
+        {
+            name: 'fakeChangedDoc2.leo',
+            index: 1,
+            changed: true,
+            selected: false,
+        },
+        { name: 'fakeDoc3.leo', index: 2, changed: false, selected: false },
     ];
 
     // Fake @ buttons array (rendered in tree view but is just a list - no node relationships)
     public atButtons: LeoButton[] = [
         { name: 'script-button', index: 'nullButtonWidget' },
         { name: 'button name 2', index: 'key2' },
-        { name: 'button name 3', index: 'key3' }
+        { name: 'button name 3', index: 'key3' },
     ];
 
     constructor() {
         // insert parent properties in fake positions
-        this.positions.forEach(p_position =&gt; {
+        this.positions.forEach((p_position) =&gt; {
             // set to undefined at first for root nodes
             this._setPNodeParents(p_position, undefined);
         });
+        abc.test();
     }
 
     /**
@@ -5127,127 +5138,133 @@ set leoReady(p_value: boolean) {
      */
     private _setPNodeParents(p_position: PNode, p_parent?: PNode): void {
         p_position.parent = p_parent; // set its parent
-        p_position.children.forEach(p_child =&gt; {
+        p_position.children.forEach((p_child) =&gt; {
             this._setPNodeParents(p_child, p_position);
         });
     }
-
-
 }
 </t>
 <t tx="felix.20201215231023.1">// import escape from 'escape-html'
-import axios from 'axios'
+import axios from 'axios';
 
 &lt;&lt; xslTemplate &gt;&gt;
-
+function transform(xml, xslString, transformer, serializer) {
 @language javascript
 @tabwidth -2
 @others
+            ) {
+                // elText = escape(elText)
+            }
+            textItems[a] = elText;
+        }
+        const vnodes = xml.getElementsByTagName('v');
+        let pid;
+        for (let i = 0; i &lt; vnodes.length; i++) {
+            pid = i + 1;
+            if (startId) {
+                pid = startId + '-' + pid;
+            }
+            vnodes[i].setAttribute('id', '"' + pid + '"');
+        }
+        resolve({ xml, textItems });
+    });
+    return p;
+}
 
-export {getLeoJSON, transformLeoXML, transformLeoXML2XML, transform}
+function transformLeoXML2JSON(data, startId, parser, transformer, serializer) {
+    const p = new Promise((resolve, reject) =&gt; {
+        const xml = data.xml;
+        const textItems = data.textItems;
+        transform(xml, xslTemplate, transformer, serializer)
+            .then((jsdata) =&gt; {
+                jsdata = jsdata.replace(
+                    /&lt;\?xml version="1\.0" encoding="UTF-8"\?&gt;/,
+                    ''
+                );
+                jsdata = jsdata.replace(/,\s?$/, ''); // kludge to get rid of trailing comma
+                jsdata = '[' + jsdata + ']';
+                jsdata = JSON.parse(jsdata);
+                jsdata.forEach((d) =&gt; cleanText(d, startId));
+                const xdata = {};
+                xdata.data = jsdata;
+                xdata.textItems = textItems;
+                return xdata;
+            })
+            .then((data) =&gt; resolve(data));
+    });
+    return p;
+}
 
+function transformLeoXML(xmlString, startId, parser, transformer, serializer) {
+    return transformLeoXML2XML(xmlString, startId, parser).then((data) =&gt;
+        transformLeoXML2JSON(data, startId, parser, transformer, serializer)
+    );
+}
+
+function test() {
+    console.log('testing import');
+}
+
+export { getLeoJSON, transformLeoXML, transformLeoXML2XML, transform, test };
 </t>
-<t tx="felix.20201215231023.10">function isRelative (url) {
-  var ok = true
-  if (/^http/.test(url)) {
-    ok = false
-  }
-  return ok
+<t tx="felix.20201215231023.10">function isRelative(url) {
+    var ok = true;
+    if (/^http/.test(url)) {
+        ok = false;
+    }
+    return ok;
 }
 
 </t>
-<t tx="felix.20201215231023.11">function getLeoJSON (filename, id) {
-  if (filename.indexOf('#') &gt; 0) {
-    filename = filename.substring(0, filename.indexOf('#'))
-  }
-  var p = new Promise((resolve, reject) =&gt; {
-    if (!filename.match(/static/) &amp;&amp; isRelative(filename)) {
-      // filename = 'static/' + filename
+<t tx="felix.20201215231023.11">function getLeoJSON(filename, id) {
+    if (filename.indexOf('#') &gt; 0) {
+        filename = filename.substring(0, filename.indexOf('#'));
     }
-    if (!filename.match(/\.leo$/)) {
-      filename = filename + '.leo'
-    }
-    loadDoc(filename, 'Text')
-      .then(xmlString =&gt; {
-        return transformLeoXML(xmlString, id)
-      })
-      .then(data =&gt; {resolve(data)})
-  })
-  return p
+    var p = new Promise((resolve, reject) =&gt; {
+        if (!filename.match(/static/) &amp;&amp; isRelative(filename)) {
+            // filename = 'static/' + filename
+        }
+        if (!filename.match(/\.leo$/)) {
+            filename = filename + '.leo';
+        }
+        loadDoc(filename, 'Text')
+            .then((xmlString) =&gt; {
+                return transformLeoXML(xmlString, id);
+            })
+            .then((data) =&gt; {
+                resolve(data);
+            });
+    });
+    return p;
 }
 
 </t>
 <t tx="felix.20201215231023.12">function transformLeoXML2XML(xmlString, startId, parser) {
-  const p = new Promise((resolve, reject) =&gt; {
-
-    let oParser = null
-    if (parser) {
-      oParser = new parser()
-    } else {
-      oParser = new DOMParser()
-    }
-    const xml = oParser.parseFromString(xmlString, 'text/xml')
-    const tnodes = xml.getElementsByTagName('t')
-    let textItems = {}
-    for (let i = 0; i &lt; tnodes.length; i++) {
-      let el = tnodes[i]
-      let elText = el.textContent
-      let a = el.getAttribute('tx')
-      a = a.replace(/\./g, '_')
-      a = a.replace(/^.*?_/, '')
-      if (startId) {
-        a = startId + '-' + a
-      }
-      if (
-        (/^@language /.test(elText)) &amp;&amp;
-        (!/^@language html/.test(elText)) &amp;&amp;
-        (!/^@language md/.test(elText))
-      ) {
-        // elText = escape(elText)
-      }
-      textItems[a] = elText
-    }
-    const vnodes = xml.getElementsByTagName('v')
-    let pid
-    for (let i = 0; i &lt; vnodes.length; i++) {
-      pid = i + 1
-      if (startId) {
-        pid = startId + '-' + pid
-      }
-      vnodes[i].setAttribute('id', '"' + pid + '"')
-    }
-    resolve({xml, textItems})
-
-  })
-  return p
-}
-
 </t>
-<t tx="felix.20201215231023.13">function transformLeoXML2JSON (data, startId, parser, transformer, serializer) {
-    const p = new Promise((resolve, reject) =&gt; {
-      const xml = data.xml
-      const textItems = data.textItems
-      transform(xml, xslTemplate, transformer, serializer).then(jsdata =&gt; {
-        jsdata = jsdata.replace(/&lt;\?xml version="1\.0" encoding="UTF-8"\?&gt;/,'')
-        jsdata = jsdata.replace(/,\s?$/, '') // kludge to get rid of trailing comma
-        jsdata = '[' + jsdata + ']'
-        jsdata = JSON.parse(jsdata)
-        jsdata.forEach(d =&gt; cleanText(d, startId))
-        const xdata = {}
-        xdata.data = jsdata
-        xdata.textItems = textItems
-        return (xdata)
-      }).then(data =&gt; resolve(data))
-    })
-    return p
-}
-
+<t tx="felix.20201215231023.13">    const p = new Promise((resolve, reject) =&gt; {
+        let oParser = null;
+        if (parser) {
+            oParser = new parser();
+        } else {
+            oParser = new DOMParser();
+        }
+        const xml = oParser.parseFromString(xmlString, 'text/xml');
+        const tnodes = xml.getElementsByTagName('t');
+        let textItems = {};
+        for (let i = 0; i &lt; tnodes.length; i++) {
+            let el = tnodes[i];
+            let elText = el.textContent;
+            let a = el.getAttribute('tx');
+            a = a.replace(/\./g, '_');
+            a = a.replace(/^.*?_/, '');
+            if (startId) {
+                a = startId + '-' + a;
 </t>
-<t tx="felix.20201215231023.14">function transformLeoXML(xmlString, startId, parser, transformer, serializer){
-  return transformLeoXML2XML(xmlString, startId, parser)
-    .then(data =&gt; transformLeoXML2JSON(data, startId, parser, transformer, serializer))
-}
-
+<t tx="felix.20201215231023.14">            }
+            if (
+                /^@language /.test(elText) &amp;&amp;
+                !/^@language html/.test(elText) &amp;&amp;
+                !/^@language md/.test(elText)
 </t>
 <t tx="felix.20201215231023.2">@language html
 const xslTemplate = `
@@ -5274,89 +5291,90 @@ const xslTemplate = `
   &lt;xsl:template match="text()"/&gt;
 
 &lt;/xsl:stylesheet&gt;
-`
+`;
 
 </t>
-<t tx="felix.20201215231023.3">function transform (xml, xslString, transformer, serializer) {
+<t tx="felix.20201215231023.3">    function serverTransform(resolve, reject) {
   @others
-}
-
+function loadDoc(filename) {
+    console.log('loading file:', filename);
 </t>
-<t tx="felix.20201215231023.4">function serverTransform(resolve, reject) {
-  const xmlString = new serializer().serializeToString(xml)
-  const config = {
-    xslt: xslString,
-    source: xmlString,
-    result: String,
-    props: {
-      indent: 'yes'
-    }
+<t tx="felix.20201215231023.4">      const xmlString = new serializer().serializeToString(xml);
+      const config = {
+          xslt: xslString,
+          source: xmlString,
+          result: String,
+          props: {
+              indent: 'yes',
+          },
+      };
+      transformer.transform(config, (err, result) =&gt; {
+          if (err) {
+              console.log('ERROR:', err);
+              return reject();
+          }
+          resolve(result);
+      });
   }
-  transformer.transform(config, (err, result) =&gt; {
-    if (err) {
-      console.log('ERROR:', err)
-      return reject()
-    }
-    resolve(result)
-  })
-}
 
+  function clientTransform(resolve, reject) {
 </t>
-<t tx="felix.20201215231023.5">function clientTransform(resolve, reject) {
-  const oParser = new DOMParser()
-  const xsl = oParser.parseFromString(xslString, 'text/xml')
-  const xsltProcessor = new XSLTProcessor()
-  xsltProcessor.importStylesheet(xsl)
-  const resultDocument = xsltProcessor.transformToFragment(xml, document)
-  resolve(resultDocument.textContent)
-}
-
-const p = new Promise((resolve, reject) =&gt; {
-  if (transformer) {
-    return serverTransform(resolve, reject)
-  } else {
-    return clientTransform(resolve, reject)
+<t tx="felix.20201215231023.5">      const oParser = new DOMParser();
+      const xsl = oParser.parseFromString(xslString, 'text/xml');
+      const xsltProcessor = new XSLTProcessor();
+      xsltProcessor.importStylesheet(xsl);
+      const resultDocument = xsltProcessor.transformToFragment(xml, document);
+      resolve(resultDocument.textContent);
   }
-})
-return p
+
+  const p = new Promise((resolve, reject) =&gt; {
+      if (transformer) {
+          return serverTransform(resolve, reject);
+      } else {
+          return clientTransform(resolve, reject);
+      }
+  });
+  return p;
+}
 
 </t>
-<t tx="felix.20201215231023.6">function loadDoc (filename) {
-  console.log('loading file:', filename)
-  var p = new Promise((resolve, reject) =&gt; {
-    axios.get(filename)
+<t tx="felix.20201215231023.6">    var p = new Promise((resolve, reject) =&gt; {
+        axios
+            .get(filename)
+            .then(function (response) {
     @others
-  })
-  return p
+    return p;
 }
 
+function cleanText(data, startId) {
 </t>
-<t tx="felix.20201215231023.7">.then(function (response) {
-  resolve(response.data)
-})
+<t tx="felix.20201215231023.7">            resolve(response.data);
+        })
+        .catch(function (error) {
 </t>
-<t tx="felix.20201215231023.8">.catch(function (error) {
-  console.log(error)
-  reject()
-})
+<t tx="felix.20201215231023.8">            console.log(error);
+            reject();
+        });
+});
 </t>
-<t tx="felix.20201215231023.9">function cleanText(data, startId){
-  data.name = data.name.replace(/&lt;&lt;/g, '\u00AB')
-  data.name = data.name.replace(/&gt;&gt;/g, '\u00BB')
-  data.name = data.name.replace(/'/g, '\x27')
-  data.name = data.name.replace(/"/g, '\x22')
-  //data.name = escape(data.name)
-  data.name = data.name.replace(/&amp;#39;/g,'\x27')
-  data.id = data.id + ''; // probably unneeded now
-  let children = data.children;
-  if (!children) { return }
-  for (let i = 0; i &lt; children.length; i++){
-    cleanText(children[i], startId)
-  }
-  data.t = data.t.replace(/^.*?_/,'') // remove file uid
-  if (startId) {
-    data.t = startId + '-' + data.t + ''
-  }
+<t tx="felix.20201215231023.9">    data.name = data.name.replace(/&lt;&lt;/g, '\u00AB');
+    data.name = data.name.replace(/&gt;&gt;/g, '\u00BB');
+    data.name = data.name.replace(/'/g, '\x27');
+    data.name = data.name.replace(/"/g, '\x22');
+    //data.name = escape(data.name)
+    data.name = data.name.replace(/&amp;#39;/g, '\x27');
+    data.id = data.id + ''; // probably unneeded now
+    let children = data.children;
+    if (!children) {
+        return;
+    }
+    for (let i = 0; i &lt; children.length; i++) {
+        cleanText(children[i], startId);
+    }
+    data.t = data.t.replace(/^.*?_/, ''); // remove file uid
+    if (startId) {
+        data.t = startId + '-' + data.t + '';
+    }
 }
 /**
  * TODO: move to util, also is in store/index, review logic for relative / subtrees
