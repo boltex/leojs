@@ -6,6 +6,32 @@
 import os
 import re
 import sys
+#@+<< define g.globalDirectiveList >>
+#@+node:ekr.20210101093155.1: ** << define g.globalDirectiveList >>
+# Visible externally so plugins may add to the list of directives.
+globalDirectiveList = [
+    # Order does not matter.
+    'all',
+    'beautify',
+    'colorcache', 'code', 'color', 'comment', 'c',
+    'delims', 'doc',
+    'encoding', 'end_raw',
+    'first', 'header', 'ignore',
+    'killbeautify', 'killcolor',
+    'language', 'last', 'lineending',
+    'markup',
+    'nobeautify',
+    'nocolor-node', 'nocolor', 'noheader', 'nowrap',
+    'nopyflakes',  # Leo 6.1.
+    'nosearch',  # Leo 5.3.
+    'others', 'pagewidth', 'path', 'quiet',
+    'raw', 'root-code', 'root-doc', 'root', 'silent',
+    'tabwidth', 'terse',
+    'unit', 'verbose', 'wrap',
+]
+
+directives_pat = None  # Set below.
+#@-<< define g.globalDirectiveList >>
 #@+others
 #@+node:ekr.20201227040845.31: ** class g.FileLikeObject (coreGlobals.py)
 # Note: we could use StringIo for this.
@@ -170,6 +196,21 @@ def es_print(*args, **keys):
     """Print all non-keyword args, and put them to the log pane."""
     pr(*args, **keys)
     es(*args, **keys)
+#@+node:ekr.20210101092909.1: ** g.isDirective     (coreGlobals.py)
+# Patterns used only in this module...
+g_is_directive_pattern = re.compile(r'^\s*@([\w-]+)\s*')
+    # This pattern excludes @encoding.whatever and @encoding(whatever)
+    # It must allow @language python, @nocolor-node, etc.
+
+def isDirective(s):
+    """Return True if s starts with a directive."""
+    m = g_is_directive_pattern.match(s)
+    if m:
+        s2 = s[m.end(1) :]
+        if s2 and s2[0] in ".(":
+            return False
+        return bool(m.group(1) in globalDirectiveList)
+    return False
 #@+node:ekr.20201227072502.1: ** g.is_special      (coreGlobals.py)
 def is_special(s, directive):
     """Return True if the body text contains the @ directive."""
@@ -182,6 +223,13 @@ def is_special(s, directive):
     if m:
         return True, m.start(1)
     return False, -1
+#@+node:ekr.20210101093047.1: ** g.isWordChar*     (coreGlobals.py)
+def isWordChar(ch):
+    """Return True if ch should be considered a letter."""
+    return ch and (ch.isalnum() or ch == '_')
+
+def isWordChar1(ch):
+    return ch and (ch.isalpha() or ch == '_')
 #@+node:ekr.20201227070747.1: ** g.match           (coreGlobals.py)
 # Warning: this code makes no assumptions about what follows pattern.
 
@@ -332,6 +380,13 @@ def skip_to_char(s, i, ch):
     if j == -1:
         return len(s), s[i:]
     return j, s[i:j]
+#@+node:ekr.20210101092818.1: ** g.skip_id         (coreGlobals.py)
+def skip_id(s, i, chars=None):
+    chars = toUnicode(chars) if chars else ''
+    n = len(s)
+    while i < n and (isWordChar(s[i]) or s[i] in chars):
+        i += 1
+    return i
 #@+node:ekr.20201227072555.1: ** g.skip_ws*        (coreGlobals.py)
 def skip_ws(s, i):
     n = len(s)

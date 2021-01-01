@@ -1,13 +1,13 @@
 #@+leo-ver=5-thin
 #@+node:ekr.20210101063433.2: * @file src/ekr/coreApp.py
-import leoGlobals as g
-import leoNodes
+import coreGlobals as g
+import coreNodes
 
-# import leoMenu
-# import leoUndo
+# import coreMenu
+# import coreUndo
 
 # Tell pyflakes (and jslint) to chill.
-assert leoNodes
+assert coreNodes
 
 # def main():
     # console.log('dummyLeoApp.py:', __file__)

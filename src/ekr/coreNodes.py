@@ -4,7 +4,7 @@
 #@@first
 """Leo's fundamental data classes, for leoInteg."""
 
-from leo.core import leoGlobals as g
+import coreGlobals as g
 
 #@+others
 #@+node:ekr.20210101064206.2: ** class NodeIndices
@@ -1323,7 +1323,8 @@ class Position:
                             f"duplicate gnx: {child_v.fileIndex!r} "
                             f"v: {child_v} parent: {parent.v}")
                         ### To do: g.app.nodeIndices does not exist. ###
-                        child_v.fileIndex = g.app.nodeIndices.getNewIndex(v=child_v)
+                        ### child_v.fileIndex = g.app.nodeIndices.getNewIndex(v=child_v)
+                        child_v.fileIndex = gNodeIndices.getNewIndex(v=child_v)
                         assert child_v.gnx != parent.v.gnx
                         # Should be ok to continue.
                         p.moveToFirstChild()
@@ -1911,7 +1912,7 @@ class VNode:
             # The start of the selected body text.
         ###
         ### g.app.nodeIndices does not exist. ###
-        g.app.nodeIndices.new_vnode_helper(context, gnx, self)
+        ### g.app.nodeIndices.new_vnode_helper(context, gnx, self)
         assert self.fileIndex, g.callers()
     #@+node:ekr.20210101064206.145: *4* v.__repr__ & v.__str__
     def __repr__(self):
@@ -2345,9 +2346,10 @@ class VNode:
         # Fix bug: https://bugs.launchpad.net/leo-editor/+bug/1245535
         # API allows headlines to contain newlines.
         v = self
-        if g.isUnicode(s):
-            v._headString = s.replace('\n', '')
-            return
+        ###
+            # if g.isUnicode(s):
+                # v._headString = s.replace('\n', '')
+                # return
         s = g.toUnicode(s, reportErrors=True)
         v._headString = s.replace('\n', '')
         ### self.contentModified()  # #1413.
@@ -2558,6 +2560,9 @@ vnode = VNode  # compatibility.
 
 #@@beautify
 #@-others
+
+gNodeIndices = NodeIndices('ekr')
+
 #@@language python
 #@@tabwidth -4
 #@@pagewidth 70
