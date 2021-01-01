@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 // import * as abc from './leoFiles'; // works
 import { test, testVar } from './leoFiles'; // works too
 
-import * as leo from './leo/leo'; // Your tests from leojs4 :)
+import * as leo from './ekr/test/leo'; // Your tests from leojs4 :)
 
 import { LeoButton, LeoDocument, PNode } from './types';
 
