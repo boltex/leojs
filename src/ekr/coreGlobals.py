@@ -148,7 +148,7 @@ def es(*args, **keys):
     print(','.join(result))
 
 #@+node:ekr.20201227045227.1: ** g.es_exception    (coreGlobals.py)
-def es_exception(full=True, c=None, color="red"):
+def es_exception(): ### full=True, c=None, color="red"):
     
     return '<no file>', 0 ### To do
     
@@ -170,7 +170,7 @@ def es_print(*args, **keys):
     """Print all non-keyword args, and put them to the log pane."""
     pr(*args, **keys)
     es(*args, **keys)
-#@+node:ekr.20201227072502.1: ** g.is_special
+#@+node:ekr.20201227072502.1: ** g.is_special      (coreGlobals.py)
 def is_special(s, directive):
     """Return True if the body text contains the @ directive."""
     assert(directive and directive[0] == '@')
@@ -182,7 +182,7 @@ def is_special(s, directive):
     if m:
         return True, m.start(1)
     return False, -1
-#@+node:ekr.20201227070747.1: ** g.match
+#@+node:ekr.20201227070747.1: ** g.match           (coreGlobals.py)
 # Warning: this code makes no assumptions about what follows pattern.
 
 def match(s, i, pattern):
@@ -398,62 +398,7 @@ def toUnicode(s, encoding=None, reportErrors=False):
 #@+node:ekr.20201227042310.1: ** g.trace           (coreGlobals.py)
 def trace(*args, **keys):
     """Print a tracing message."""
-    # Don't use g here: in standalone mode g is a NullObject!
-    # Compute the effective args.
-    d = {'align': 0, 'before': '', 'newline': True, 'caller_level': 1, 'noname': False}
-    d = doKeywordArgs(keys, d)
-    newline = d.get('newline')
-    align = d.get('align', 0)
-    caller_level = d.get('caller_level', 1)
-    noname = d.get('noname')
-    # Compute the caller name.
-    if noname:
-        name = ''
-    else:
-        try:  # get the function name from the call stack.
-            f1 = sys._getframe(caller_level)  # The stack frame, one level up.
-            code1 = f1.f_code  # The code object
-            name = code1.co_name  # The code name
-        except Exception:
-            name = shortFileName(__file__)
-        if name == '<module>':
-            name = shortFileName(__file__)
-        if name.endswith('.pyc'):
-            name = name[:-1]
-    # Pad the caller name.
-    if align != 0 and len(name) < abs(align):
-        pad = ' ' * (abs(align) - len(name))
-        if align > 0: name = name + pad
-        else: name = pad + name
-    # Munge *args into s.
-    result = [name] if name else []
-    #
-    # Put leading newlines into the prefix.
-    if isinstance(args, tuple):
-        args = list(args)
-    if args and isinstance(args[0], str):
-        prefix = ''
-        while args[0].startswith('\n'):
-            prefix += '\n'
-            args[0] = args[0][1:]
-    else:
-        prefix = ''
-    for arg in args:
-        if isinstance(arg, str):
-            pass
-        elif isinstance(arg, bytes):
-            arg = toUnicode(arg)
-        else:
-            arg = repr(arg)
-        if result:
-            result.append(" " + arg)
-        else:
-            result.append(arg)
-    s = d.get('before') + ''.join(result)
-    if prefix:
-        prefix = prefix[1:]  # One less newline.
-        pr(prefix)
-    pr(s, newline=newline)
+    print(args)
 #@-others
 #@@language python
 #@@tabwidth -4
