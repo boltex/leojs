@@ -3,7 +3,6 @@
 #@+node:ekr.20201227040845.1: * @file src/ekr/coreGlobals.py
 #@@first
 """Global classes and functions, for use by leoInteg."""
-import os
 import re
 import sys
 #@+<< define g.globalDirectiveList >>
@@ -371,7 +370,8 @@ def printObj(obj, indent='', printCaller=False, tag=None):
 #@+node:ekr.20201227044510.1: ** g.shortFileName   (coreGlobals.py)
 def shortFileName(fileName):
     """Return the base name of a path."""
-    return os.path.basename(fileName) if fileName else ''
+    # return os.path.basename(fileName) if fileName else ''
+    return fileName  ###
 
 shortFilename = shortFileName
 #@+node:ekr.20201227070623.1: ** g.skip_to_char    (coreGlobals.py)
