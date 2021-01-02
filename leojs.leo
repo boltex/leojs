@@ -360,6 +360,9 @@
 <v t="felix.20210102031032.1"><vh>p.generators</vh>
 <v t="felix.20210102031240.1"><vh>p.children</vh></v>
 </v>
+<v t="felix.20210102035853.1"><vh>p.Moving, Inserting, Deleting, Cloning, Sorting</vh>
+<v t="felix.20210102035859.1"><vh>p.copy</vh></v>
+</v>
 </v>
 <v t="felix.20210102015005.3"><vh>class PosList</vh>
 <v t="felix.20210102021644.1"><vh>children</vh></v>
@@ -5808,13 +5811,23 @@ export class NodeIndices {
  */
 export class Position {
 
+    v: VNode;
+    _childIndex: number;
+    stack: { v: VNode, childIndex: number }[];
+
     @others
 
 }
 
 </t>
-<t tx="felix.20210102015005.2">constructor() {
-    //
+<t tx="felix.20210102015005.2">constructor(v: VNode, childIndex: number = 0, stack?: any[]) {
+    this.v = v;
+    this._childIndex = childIndex;
+    if (stack) {
+        this.stack = stack;
+    } else {
+        this.stack = [];
+    }
 }
 
 </t>
@@ -5847,13 +5860,14 @@ export class VNode {
  * Return a PosList instance containing pointers to
  * all the immediate children of nodes in PosList self.
  */
-public children() {
-
+public children(): Position[] {
+    const res: PosList = [];
     this.forEach((p: Position) =&gt; {
         p.children().forEach(child_p =&gt; {
-
+            res.push(child_p.copy());
         });
     });
+    return res;
 }
 
 </t>
@@ -5884,6 +5898,12 @@ public filter_b() {
 <t tx="felix.20210102031032.1"></t>
 <t tx="felix.20210102031240.1">public children(copy: boolean = true): Iterator&lt;Position&gt; {
     return []; // TODO : return a real iterator see https://basarat.gitbook.io/typescript/future-javascript/iterators
+}
+
+</t>
+<t tx="felix.20210102035853.1"></t>
+<t tx="felix.20210102035859.1">public copy(): Position {
+    return new Position(this.v, this._childIndex, this.stack);
 }
 
 </t>

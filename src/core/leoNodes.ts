@@ -38,12 +38,26 @@ export class NodeIndices {
  */
 export class Position {
 
-    constructor() {
-        //
+    v: VNode;
+    _childIndex: number;
+    stack: { v: VNode, childIndex: number }[];
+
+    constructor(v: VNode, childIndex: number = 0, stack?: any[]) {
+        this.v = v;
+        this._childIndex = childIndex;
+        if (stack) {
+            this.stack = stack;
+        } else {
+            this.stack = [];
+        }
     }
 
     public children(copy: boolean = true): Iterator<Position> {
         return []; // TODO : return a real iterator see https://basarat.gitbook.io/typescript/future-javascript/iterators
+    }
+
+    public copy(): Position {
+        return new Position(this.v, this._childIndex, this.stack);
     }
 
 
@@ -58,13 +72,14 @@ export class PosList extends Array {
      * Return a PosList instance containing pointers to
      * all the immediate children of nodes in PosList self.
      */
-    public children() {
-
+    public children(): Position[] {
+        const res: PosList = new PosList;
         this.forEach((p: Position) => {
             p.children().forEach(child_p => {
-
+                res.push(child_p.copy());
             });
         });
+        return res;
     }
 
     /**
