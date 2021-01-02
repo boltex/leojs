@@ -4,7 +4,7 @@ import { ReqRefresh } from "./types";
 import { LeoUI } from './leoUI';
 import { Constants } from './constants';
 import { LeoButtonNode } from './leoButtonNode';
-import { LeoNode } from './leoNode';
+import { LeoNode } from './leoOutlineNode';
 
 export function activate(p_context: vscode.ExtensionContext) {
 

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { Icon } from "./types";
-import { LeoNode } from "./leoNode";
+import { LeoNode } from "./leoOutlineNode";
 
 // String and other types/structures helper functions, along with common vscode API calls
 

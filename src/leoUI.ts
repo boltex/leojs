@@ -14,7 +14,7 @@ import {
 } from "./types";
 import { Leojs } from "./leojs";
 
-import { LeoNode } from "./leoNode";
+import { LeoNode } from "./leoOutlineNode";
 import { LeoOutlineProvider } from './leoOutline';
 import { LeoButtonNode } from "./leoButtonNode";
 import { LeoButtonsProvider } from "./leoButtons";

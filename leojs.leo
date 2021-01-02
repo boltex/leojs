@@ -14,7 +14,7 @@
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh></v>
 <v t="felix.20201208224703.1"><vh>@clean CONTRIBUTING.md</vh></v>
 </v>
-<v t="ekr.20201209145358.1"><vh>Code</vh>
+<v t="ekr.20201209145358.1"><vh>VSCode Extension</vh>
 <v t="felix.20201215231023.1"><vh>@clean src/leoFiles.js</vh>
 <v t="felix.20201215231023.2"><vh>&lt;&lt; xslTemplate &gt;&gt;</vh></v>
 <v t="felix.20201215231023.3"><vh>function transform</vh>
@@ -139,7 +139,7 @@
 <v t="felix.20201209011931.8"><vh>_LeoNodeArray</vh></v>
 </v>
 </v>
-<v t="felix.20201208223554.1"><vh>@clean src/leoNode.ts</vh>
+<v t="felix.20201208223554.1"><vh>@clean src/leoOutlineNode.ts</vh>
 <v t="felix.20201209004316.1"><vh>class LeoNode</vh>
 <v t="felix.20201209004316.2"><vh>copyProperties</vh></v>
 <v t="felix.20201209004316.3"><vh>setRoot</vh></v>
@@ -346,6 +346,10 @@
 <v t="felix.20201214205159.81"><vh>&lt;&lt; dependencies &gt;&gt;</vh></v>
 </v>
 </v>
+<v t="felix.20210102000055.1"><vh>Leo</vh>
+<v t="felix.20210102000100.1"><vh>Core Classes</vh></v>
+<v t="felix.20210102000121.1"><vh>Command Classes</vh></v>
+</v>
 </vnodes>
 <tnodes>
 <t tx="ekr.20201209145256.1"></t>
@@ -363,7 +367,7 @@ import { ReqRefresh } from "./types";
 import { LeoUI } from './leoUI';
 import { Constants } from './constants';
 import { LeoButtonNode } from './leoButtonNode';
-import { LeoNode } from './leoNode';
+import { LeoNode } from './leoOutlineNode';
 
 @language typescript
 @tabwidth -4
@@ -381,7 +385,7 @@ export function deactivate() { }
 
 </t>
 <t tx="felix.20201208223553.1">import * as vscode from 'vscode';
-import { LeoNode } from './leoNode';
+import { LeoNode } from './leoOutlineNode';
 import { ProviderResult } from "vscode";
 import { Icon, PNode } from './types';
 import { Leojs } from './leojs';
@@ -406,7 +410,7 @@ import { Icon, PNode } from "./types"; // ArchivedPosition included to help debu
 <t tx="felix.20201208224407.1">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { Icon } from "./types";
-import { LeoNode } from "./leoNode";
+import { LeoNode } from "./leoOutlineNode";
 
 // String and other types/structures helper functions, along with common vscode API calls
 
@@ -2117,7 +2121,7 @@ public get tooltip(): string {
 
 </t>
 <t tx="felix.20201214154816.1">import * as vscode from "vscode";
-import { LeoNode } from "./leoNode";
+import { LeoNode } from "./leoOutlineNode";
 
 @language typescript
 @tabwidth -4
@@ -2310,7 +2314,7 @@ import {
 } from "./types";
 import { Leojs } from "./leojs";
 
-import { LeoNode } from "./leoNode";
+import { LeoNode } from "./leoOutlineNode";
 import { LeoOutlineProvider } from './leoOutline';
 import { LeoButtonNode } from "./leoButtonNode";
 import { LeoButtonsProvider } from "./leoButtons";
@@ -2389,13 +2393,6 @@ import { LeoStates } from "./leoStates";
 <t tx="felix.20201214194144.8"></t>
 <t tx="felix.20201214194144.9"></t>
 <t tx="felix.20201214194412.1">
-import * as vscode from 'vscode';
-
-// import * as abc from './leoFiles'; // works
-import { test, testVar } from './leoFiles'; // works too
-
-import * as leo from './leo/leo'; // Your tests from leojs4 :)
-
 import { LeoButton, LeoDocument, PNode } from './types';
 @language typescript
 @tabwidth -4
@@ -5135,16 +5132,6 @@ set leoReady(p_value: boolean) {
             // set to undefined at first for root nodes
             this._setPNodeParents(p_position, undefined);
         });
-
-
-
-        // abc.test("the string is " + abc.testVar);
-        test("the string is " + testVar);
-
-        const info = vscode.window.showInformationMessage;
-        leo.test(info);
-
-
     }
 
     /**
@@ -5751,5 +5738,8 @@ public gotSelectedNode(p_element: PNode): void {
 }
 
 </t>
+<t tx="felix.20210102000055.1"></t>
+<t tx="felix.20210102000100.1"></t>
+<t tx="felix.20210102000121.1"></t>
 </tnodes>
 </leo_file>

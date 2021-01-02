@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { LeoNode } from './leoNode';
+import { LeoNode } from './leoOutlineNode';
 import { ProviderResult } from "vscode";
 import { Icon, PNode } from './types';
 import { Leojs } from './leojs';

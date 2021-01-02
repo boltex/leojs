@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { LeoNode } from "./leoNode";
+import { LeoNode } from "./leoOutlineNode";
 
 export interface PNode {
     // Fake structure. Use Position.v.isCloned(), etc. instead
