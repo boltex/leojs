@@ -1,9 +1,14 @@
 import * as vscode from 'vscode';
 
 // import * as abc from './leoFiles'; // works
-import { test, testVar } from './leoFiles'; // works too
+//// import { test, testVar } from './leoFiles'; // works too
 
-import * as leo from './ekr/test/leo'; // Your tests from leojs4 :)
+// import * as leo from './ekr/test/leo'; // Your tests from leojs4 :)
+
+import {test} from './ekr/test-ts/leo';  // NEW
+
+// EKR: NEW
+test();
 
 import { LeoButton, LeoDocument, PNode } from './types';
 
@@ -12,6 +17,8 @@ import { LeoButton, LeoDocument, PNode } from './types';
 // For now give results to tree view panels (outline, documents and at-buttons)
 
 export class Leojs {
+
+
     // FAKE model of the outline (PNodes are temporary replacement of positions + vnodes)
     // simulates _yieldAllRootChildren from leoInteg's leobridgeserver.py
     public positions: PNode[] = [

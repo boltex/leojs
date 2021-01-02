@@ -9,4 +9,4 @@ function test() {
     test2();
 }
 
-// export {test};
+export {test};
