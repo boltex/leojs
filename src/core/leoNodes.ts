@@ -1,4 +1,5 @@
-// * Leo's fundamental data classes.
+// Leo's fundamental data classes.
+
 /**
  * A class managing global node indices (gnx's).
  */
@@ -6,7 +7,7 @@ export class NodeIndices {
 
     defaultId: string;
     lastIndex: number;
-    stack: any[]; // # A stack of open commanders.
+    stack: any[]; // A stack of open commanders.
     timeString: string; //  Set by setTimeStamp.
     userId: string;
 
@@ -164,6 +165,7 @@ export class VNode {
         this.scrollBarSpot = 0;
         this.selectionLength = 0;
         this.selectionStart = 0;
+        g.app.nodeIndices.new_vnode_helper(context, gnx, this);
     }
 
 

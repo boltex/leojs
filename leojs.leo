@@ -5772,7 +5772,8 @@ public gotSelectedNode(p_element: PNode): void {
 <t tx="felix.20210102012410.1"></t>
 <t tx="felix.20210102012632.1">@language typescript
 @tabwidth -4
-// * Leo's fundamental data classes.
+// Leo's fundamental data classes.
+
 @others
 </t>
 <t tx="felix.20210102014453.1">/**
@@ -5782,7 +5783,7 @@ export class NodeIndices {
 
     defaultId: string;
     lastIndex: number;
-    stack: any[]; // # A stack of open commanders.
+    stack: any[]; // A stack of open commanders.
     timeString: string; //  Set by setTimeStamp.
     userId: string;
 
@@ -5892,6 +5893,7 @@ export class VNode {
     this.scrollBarSpot = 0;
     this.selectionLength = 0;
     this.selectionStart = 0;
+    g.app.nodeIndices.new_vnode_helper(context, gnx, this);
 }
 
 </t>
