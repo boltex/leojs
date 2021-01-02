@@ -369,6 +369,7 @@
 <v t="felix.20210102021646.1"><vh>filter_h</vh></v>
 <v t="felix.20210102021651.1"><vh>filter_b</vh></v>
 </v>
+<v t="felix.20210102150654.1"><vh>Enum StatusFlags</vh></v>
 <v t="felix.20210102015917.1"><vh>class VNode</vh>
 <v t="felix.20210102015917.2"><vh>constructor</vh></v>
 </v>
@@ -5846,6 +5847,32 @@ export class PosList extends Array {
  */
 export class VNode {
 
+    // * The primary data: headline and body text.
+    _headString: string;
+    _bodyString: string;
+
+    // * Structure data...
+    children: VNode[]; // Ordered list of all children of this node.
+    parents: VNode[]; // Unordered list of all parents of this node.
+
+    // * Other essential data...
+    fileIndex: string; // The immutable fileIndex (gnx) for this node. Set below.
+    iconVal: number; // The present value of the node's icon.
+    statusBits: number; // status bits
+
+    // * Information that is never written to any file...
+    // The context containing context.hiddenRootNode.
+    // Required so we can compute top-level siblings.
+    // It is named .context rather than .c to emphasize its limited usage.
+    context: any;
+    expandedPositions: Position[]; // Positions that should be expanded.
+
+    // * Cursor, text selection and scrolling position
+    insertSpot: number; // Location of previous insert point.
+    scrollBarSpot: number; // Previous value of scrollbar position.
+    selectionLength: number; // The length of the selected body text.
+    selectionStart: number; // The start of the selected body text.
+
     @others
 
 }
@@ -5861,7 +5888,7 @@ export class VNode {
  * all the immediate children of nodes in PosList self.
  */
 public children(): Position[] {
-    const res: PosList = [];
+    const res: PosList = new PosList;
     this.forEach((p: Position) =&gt; {
         p.children().forEach(child_p =&gt; {
             res.push(child_p.copy());
@@ -5904,6 +5931,25 @@ public filter_b() {
 <t tx="felix.20210102035853.1"></t>
 <t tx="felix.20210102035859.1">public copy(): Position {
     return new Position(this.v, this._childIndex, this.stack);
+}
+
+</t>
+<t tx="felix.20210102150654.1">enum StatusFlags {
+    // Define the meaning of status bits in new vnodes.
+    // Archived...
+    clonedBit = 0x01,  // True: VNode has clone mark.
+    // unused      0x02,
+    expandedBit = 0x04,  // True: VNode is expanded.
+    markedBit = 0x08,  // True: VNode is marked
+    // unused    = 0x10, // (was orphanBit)
+    selectedBit = 0x20,  // True: VNode is current VNode.
+    topBit = 0x40,  // True: VNode was top VNode when saved.
+    // Not archived...
+    richTextBit = 0x080,  // Determines whether we use &lt;bt&gt; or &lt;btr&gt; tags.
+    visitedBit = 0x100,
+    dirtyBit = 0x200,
+    writeBit = 0x400,
+    orphanBit = 0x800  // True: error in @&lt;file&gt; tree prevented it from being written.
 }
 
 </t>
