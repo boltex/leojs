@@ -1,7 +1,7 @@
-// leojs.src.ekr.test.app.js
+// leojs/src/ekr/test-ts/app.ts
 
-function test2(info) {
-    console.log("app.js:test2")
+export function test2() {
+    console.log("app.ts:test2");
 }
 
-export {test2};
+// export {test2};

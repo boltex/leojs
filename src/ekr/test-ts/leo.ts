@@ -1,12 +1,12 @@
-// leojs.src.ekr.test.leo.js
+// leojs/src/ekr/test-ts/leo.js
 
-// node --experimental-import-meta-resolve leo.js
+import { test2 } from "./app";
 
-import { test2 } from "./app.js";
+// app = require("./app")
 
-function test(info) {
-    console.log("leo.js:test")
-    test2(info)
+function test() {
+    console.log("leo.ts:test");
+    test2();
 }
 
-export {test};
+// export {test};
