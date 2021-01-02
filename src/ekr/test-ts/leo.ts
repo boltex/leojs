@@ -4,9 +4,9 @@ import { test2 } from "./app";
 
 // app = require("./app")
 
-function test() {
+export function test() {
     console.log("leo.ts:test");
     test2();
 }
 
-export {test};
+// export {test};
