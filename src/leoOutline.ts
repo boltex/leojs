@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { LeoNode } from './leoOutlineNode';
+import { LeoOutlineNode } from './leoOutlineNode';
 import { ProviderResult } from "vscode";
 import { Icon, PNode } from './types';
 import { Leojs } from './leojs';
@@ -27,8 +27,8 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<PNode> {
         this._onDidChangeTreeData.fire(undefined);
     }
 
-    public getTreeItem(element: PNode): Thenable<LeoNode> | LeoNode {
-        const w_leoNode = new LeoNode(element.header,
+    public getTreeItem(element: PNode): Thenable<LeoOutlineNode> | LeoOutlineNode {
+        const w_leoNode = new LeoOutlineNode(element.header,
             element.children.length ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
             element, // ap
             !!element.cloned, // cloned

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { LeoNode } from "./leoOutlineNode";
+import { LeoOutlineNode } from "./leoOutlineNode";
 
 export interface PNode {
     // Fake structure. Use Position.v.isCloned(), etc. instead
@@ -43,7 +43,7 @@ export interface ReqRefresh {
  */
 export interface UserCommand {
     action: string;
-    node?: LeoNode | undefined;  // We can START a stack with a targeted command
+    node?: LeoOutlineNode | undefined;  // We can START a stack with a targeted command
     text?: string | undefined; // If a string is required, for headline, etc.
     refreshType: ReqRefresh; // Minimal refresh level required by this command
     fromOutline: boolean; // Focus back on outline instead of body
@@ -56,7 +56,7 @@ export interface UserCommand {
  * * Object container for parameters of leoJs "apply-selected-node-to-body" method
  */
 export interface ShowBodyParam {
-    node: LeoNode,
+    node: LeoOutlineNode,
     aside: boolean,
     showBodyKeepFocus: boolean,
     force_open?: boolean

@@ -347,7 +347,30 @@
 </v>
 </v>
 <v t="felix.20210102000055.1"><vh>Leo</vh>
-<v t="felix.20210102000100.1"><vh>Core Classes</vh></v>
+<v t="felix.20210102000100.1"><vh>Core Classes</vh>
+<v t="felix.20210102012334.1"><vh>@clean src/core/leoApp.ts</vh></v>
+<v t="felix.20210102012410.1"><vh>@clean src/core/leoGlobals.ts</vh></v>
+<v t="felix.20210102012632.1"><vh>@clean src/core/leoNodes.ts</vh>
+<v t="felix.20210102014453.1"><vh>class NodeIndices</vh>
+<v t="felix.20210102014804.1"><vh>ni.constructor</vh></v>
+<v t="felix.20210102024358.1"><vh>ni.setTimeStamp</vh></v>
+</v>
+<v t="felix.20210102015005.1"><vh>class Position</vh>
+<v t="felix.20210102015005.2"><vh>p.constructor</vh></v>
+<v t="felix.20210102031032.1"><vh>p.generators</vh>
+<v t="felix.20210102031240.1"><vh>p.children</vh></v>
+</v>
+</v>
+<v t="felix.20210102015005.3"><vh>class PosList</vh>
+<v t="felix.20210102021644.1"><vh>children</vh></v>
+<v t="felix.20210102021646.1"><vh>filter_h</vh></v>
+<v t="felix.20210102021651.1"><vh>filter_b</vh></v>
+</v>
+<v t="felix.20210102015917.1"><vh>class VNode</vh>
+<v t="felix.20210102015917.2"><vh>constructor</vh></v>
+</v>
+</v>
+</v>
 <v t="felix.20210102000121.1"><vh>Command Classes</vh></v>
 </v>
 </vnodes>
@@ -367,7 +390,7 @@ import { ReqRefresh } from "./types";
 import { LeoUI } from './leoUI';
 import { Constants } from './constants';
 import { LeoButtonNode } from './leoButtonNode';
-import { LeoNode } from './leoOutlineNode';
+import { LeoOutlineNode } from './leoOutlineNode';
 
 @language typescript
 @tabwidth -4
@@ -385,7 +408,7 @@ export function deactivate() { }
 
 </t>
 <t tx="felix.20201208223553.1">import * as vscode from 'vscode';
-import { LeoNode } from './leoOutlineNode';
+import { LeoOutlineNode } from './leoOutlineNode';
 import { ProviderResult } from "vscode";
 import { Icon, PNode } from './types';
 import { Leojs } from './leojs';
@@ -410,7 +433,7 @@ import { Icon, PNode } from "./types"; // ArchivedPosition included to help debu
 <t tx="felix.20201208224407.1">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { Icon } from "./types";
-import { LeoNode } from "./leoOutlineNode";
+import { LeoOutlineNode } from "./leoOutlineNode";
 
 // String and other types/structures helper functions, along with common vscode API calls
 
@@ -445,7 +468,7 @@ export function getFileFromPath(p_path: string): string {
  * @param p_newHasBody Flag to signify presence of body content, to be compared with its current state
  * @returns True if it would change the icon with actual body content, false otherwise
  */
-export function isIconChangedByEdit(p_node: LeoNode, p_newHasBody: boolean): boolean {
+export function isIconChangedByEdit(p_node: LeoOutlineNode, p_newHasBody: boolean): boolean {
     if (!p_node.dirty || (p_node.hasBody === !p_newHasBody)) {
         return true;
     }
@@ -714,7 +737,7 @@ Furthermore, if you've never ran a vscode extension in an **Extension Developmen
 If you're having problems, try [running this sample extension](https://github.com/Microsoft/vscode-extension-samples/tree/master/helloworld-sample#running-the-sample) first to catch underlying problems or missing dependencies.
 
 </t>
-<t tx="felix.20201209004316.1">export class LeoNode extends vscode.TreeItem {
+<t tx="felix.20201209004316.1">export class LeoOutlineNode extends vscode.TreeItem {
 
     public contextValue: string; // * Context string is checked in package.json with 'when' clauses
 
@@ -763,7 +786,7 @@ If you're having problems, try [running this sample extension](https://github.co
     @others
 }
 </t>
-<t tx="felix.20201209004316.2">public copyProperties(p_node: LeoNode): LeoNode {
+<t tx="felix.20201209004316.2">public copyProperties(p_node: LeoOutlineNode): LeoOutlineNode {
     this.label = p_node.label;
 
     this.collapsibleState = p_node.collapsibleState;
@@ -839,8 +862,8 @@ public refreshTreeRoot(): void {
 }
 
 </t>
-<t tx="felix.20201209011931.4">public getTreeItem(element: PNode): Thenable&lt;LeoNode&gt; | LeoNode {
-    const w_leoNode = new LeoNode(element.header,
+<t tx="felix.20201209011931.4">public getTreeItem(element: PNode): Thenable&lt;LeoOutlineNode&gt; | LeoOutlineNode {
+    const w_leoNode = new LeoOutlineNode(element.header,
         element.children.length ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
         element, // ap
         !!element.cloned, // cloned
@@ -924,22 +947,22 @@ public refreshTreeRoot(): void {
 }
 
 </t>
-<t tx="felix.20201214150149.10">[CMD.INSERT, (p_node: LeoNode) =&gt; w_leo.insertNode(p_node, true)],
+<t tx="felix.20201214150149.10">[CMD.INSERT, (p_node: LeoOutlineNode) =&gt; w_leo.insertNode(p_node, true)],
 [CMD.INSERT_SELECTION, () =&gt; w_leo.insertNode(U, false)],
 [CMD.INSERT_SELECTION_FO, () =&gt; w_leo.insertNode(U, true)],
 // Special command for when inserting rapidly more than one node without
 // even specifying a headline label, e.g. spamming CTRL+I rapidly.
 [CMD.INSERT_SELECTION_INTERRUPT, () =&gt; w_leo.insertNode(U, false, true)],
 
-[CMD.CLONE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.CLONE_PNODE, p_node, REFRESH_TREE_BODY, true)],
+[CMD.CLONE, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.CLONE_PNODE, p_node, REFRESH_TREE_BODY, true)],
 [CMD.CLONE_SELECTION, () =&gt; w_leo.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, false)],
 [CMD.CLONE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, true)],
 
-[CMD.PROMOTE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.PROMOTE, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.PROMOTE_SELECTION, () =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, false)],
 [CMD.PROMOTE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, true)],
 
-[CMD.DEMOTE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.DEMOTE, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.DEMOTE_SELECTION, () =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, false)],
 [CMD.DEMOTE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, true)],
 
@@ -947,11 +970,11 @@ public refreshTreeRoot(): void {
 [CMD.SORT_SIBLING, () =&gt; w_leo.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, false, true)],
 [CMD.SORT_SIBLING_FO, () =&gt; w_leo.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, true, true)],
 </t>
-<t tx="felix.20201214150149.11">[CMD.MARK, (p_node: LeoNode) =&gt; w_leo.changeMark(true, p_node, true)],
+<t tx="felix.20201214150149.11">[CMD.MARK, (p_node: LeoOutlineNode) =&gt; w_leo.changeMark(true, p_node, true)],
 [CMD.MARK_SELECTION, () =&gt; w_leo.changeMark(true, U, false)],
 [CMD.MARK_SELECTION_FO, () =&gt; w_leo.changeMark(true, U, true)],
 
-[CMD.UNMARK, (p_node: LeoNode) =&gt; w_leo.changeMark(false, p_node, true)],
+[CMD.UNMARK, (p_node: LeoOutlineNode) =&gt; w_leo.changeMark(false, p_node, true)],
 [CMD.UNMARK_SELECTION, () =&gt; w_leo.changeMark(false, U, false)],
 [CMD.UNMARK_SELECTION_FO, () =&gt; w_leo.changeMark(false, U, true)],
 
@@ -960,19 +983,19 @@ public refreshTreeRoot(): void {
 <t tx="felix.20201214150149.12">[CMD.EXTRACT, () =&gt; w_leo.command(LEOCMD.EXTRACT, U, REFRESH_TREE_BODY, false)],
 [CMD.EXTRACT_NAMES, () =&gt; w_leo.command(LEOCMD.EXTRACT_NAMES, U, REFRESH_TREE_BODY, false)],
 </t>
-<t tx="felix.20201214150149.13">[CMD.MOVE_DOWN, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, p_node, REFRESH_TREE_BODY, true, true)],
+<t tx="felix.20201214150149.13">[CMD.MOVE_DOWN, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.MOVE_DOWN_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, false)],
 [CMD.MOVE_DOWN_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, true)],
 
-[CMD.MOVE_LEFT, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_LEFT, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.MOVE_LEFT_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, false)],
 [CMD.MOVE_LEFT_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, true)],
 
-[CMD.MOVE_RIGHT, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_RIGHT, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.MOVE_RIGHT_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, false)],
 [CMD.MOVE_RIGHT_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, true)],
 
-[CMD.MOVE_UP, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_UP, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.MOVE_UP_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, false)],
 [CMD.MOVE_UP_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, true)],
 </t>
@@ -1020,7 +1043,7 @@ public refreshTreeRoot(): void {
 
 [CMD.SET_OPENED_FILE, (p_index: number) =&gt; w_leo.selectOpenedLeoDocument(p_index)],
 
-[CMD.REFRESH_FROM_DISK, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.REFRESH_FROM_DISK, p_node, REFRESH_TREE_BODY, false)],
+[CMD.REFRESH_FROM_DISK, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.REFRESH_FROM_DISK, p_node, REFRESH_TREE_BODY, false)],
 
 [CMD.REFRESH_FROM_DISK_SELECTION, () =&gt; w_leo.command(LEOCMD.REFRESH_FROM_DISK, U, REFRESH_TREE_BODY, false)],
 
@@ -1028,16 +1051,16 @@ public refreshTreeRoot(): void {
 
 [CMD.GIT_DIFF, () =&gt; w_leo.command(LEOCMD.GIT_DIFF, U, REFRESH_TREE_BODY, false)],
 </t>
-<t tx="felix.20201214150149.5">[CMD.HEADLINE, (p_node: LeoNode) =&gt; w_leo.editHeadline(p_node, true)],
+<t tx="felix.20201214150149.5">[CMD.HEADLINE, (p_node: LeoOutlineNode) =&gt; w_leo.editHeadline(p_node, true)],
 [CMD.HEADLINE_SELECTION, () =&gt; w_leo.editHeadline(U, false)],
 [CMD.HEADLINE_SELECTION_FO, () =&gt; w_leo.editHeadline(U, true)],
 </t>
 <t tx="felix.20201214150149.6">// cut/copy/paste/delete given node.
-[CMD.COPY, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.COPY_PNODE, p_node, NO_REFRESH, true, true)],
-[CMD.CUT, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.CUT_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.DELETE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.DELETE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.PASTE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.PASTE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
-[CMD.PASTE_CLONE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.PASTE_CLONE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
+[CMD.COPY, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.COPY_PNODE, p_node, NO_REFRESH, true, true)],
+[CMD.CUT, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.CUT_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.DELETE, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.DELETE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.PASTE, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.PASTE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
+[CMD.PASTE_CLONE, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.PASTE_CLONE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
 
 // cut/copy/paste/delete current selection (self.commander.p)
 [CMD.COPY_SELECTION, () =&gt; w_leo.command(LEOCMD.COPY_PNODE, U, NO_REFRESH, false)],
@@ -1051,8 +1074,8 @@ public refreshTreeRoot(): void {
 [CMD.PASTE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, true)],
 </t>
 <t tx="felix.20201214150149.7">// Called by nodes in the tree when selected either by mouse, or with enter
-[CMD.SELECT_NODE, (p_node: LeoNode) =&gt; w_leo.selectTreeNode(p_node, false, false)],
-[CMD.OPEN_ASIDE, (p_node: LeoNode) =&gt; w_leo.selectTreeNode(p_node, false, true)],
+[CMD.SELECT_NODE, (p_node: LeoOutlineNode) =&gt; w_leo.selectTreeNode(p_node, false, false)],
+[CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) =&gt; w_leo.selectTreeNode(p_node, false, true)],
 
 [CMD.CONTRACT_ALL, () =&gt; w_leo.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, false)],
 [CMD.CONTRACT_ALL_FO, () =&gt; w_leo.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, true)],
@@ -1060,7 +1083,7 @@ public refreshTreeRoot(): void {
 [CMD.CONTRACT_OR_GO_LEFT, () =&gt; w_leo.command(LEOCMD.CONTRACT_OR_GO_LEFT, U, REFRESH_TREE_BODY, true)],
 [CMD.EXPAND_AND_GO_RIGHT, () =&gt; w_leo.command(LEOCMD.EXPAND_AND_GO_RIGHT, U, REFRESH_TREE_BODY, true)],
 </t>
-<t tx="felix.20201214150149.8">[CMD.GOTO_NEXT_CLONE, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, p_node, REFRESH_NODE_BODY, true)],
+<t tx="felix.20201214150149.8">[CMD.GOTO_NEXT_CLONE, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, p_node, REFRESH_NODE_BODY, true)],
 [CMD.GOTO_NEXT_CLONE_SELECTION, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, false)],
 [CMD.GOTO_NEXT_CLONE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, true)],
 
@@ -1076,7 +1099,7 @@ public refreshTreeRoot(): void {
 </t>
 <t tx="felix.20201214150149.9">[CMD.DEHOIST, () =&gt; w_leo.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, false)],
 [CMD.DEHOIST_FO, () =&gt; w_leo.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, true)],
-[CMD.HOIST, (p_node: LeoNode) =&gt; w_leo.command(LEOCMD.HOIST_PNODE, p_node, REFRESH_TREE_BODY, true)],
+[CMD.HOIST, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.HOIST_PNODE, p_node, REFRESH_TREE_BODY, true)],
 [CMD.HOIST_SELECTION, () =&gt; w_leo.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, false)],
 [CMD.HOIST_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, true)],
 </t>
@@ -2121,7 +2144,7 @@ public get tooltip(): string {
 
 </t>
 <t tx="felix.20201214154816.1">import * as vscode from "vscode";
-import { LeoNode } from "./leoOutlineNode";
+import { LeoOutlineNode } from "./leoOutlineNode";
 
 @language typescript
 @tabwidth -4
@@ -2245,7 +2268,7 @@ export interface ReqRefresh {
  */
 export interface UserCommand {
     action: string;
-    node?: LeoNode | undefined;  // We can START a stack with a targeted command
+    node?: LeoOutlineNode | undefined;  // We can START a stack with a targeted command
     text?: string | undefined; // If a string is required, for headline, etc.
     refreshType: ReqRefresh; // Minimal refresh level required by this command
     fromOutline: boolean; // Focus back on outline instead of body
@@ -2259,7 +2282,7 @@ export interface UserCommand {
  * * Object container for parameters of leoJs "apply-selected-node-to-body" method
  */
 export interface ShowBodyParam {
-    node: LeoNode,
+    node: LeoOutlineNode,
     aside: boolean,
     showBodyKeepFocus: boolean,
     force_open?: boolean
@@ -2314,7 +2337,7 @@ import {
 } from "./types";
 import { Leojs } from "./leojs";
 
-import { LeoNode } from "./leoOutlineNode";
+import { LeoOutlineNode } from "./leoOutlineNode";
 import { LeoOutlineProvider } from './leoOutline';
 import { LeoButtonNode } from "./leoButtonNode";
 import { LeoButtonsProvider } from "./leoButtons";
@@ -2443,11 +2466,11 @@ export class LeoUI {
     private _lastTreeView: vscode.TreeView&lt;PNode&gt;; // Last visible treeview
     private _treeId: number = 0; // Starting salt for tree node murmurhash generated Ids // unused so far in leojs
 
-    private _lastSelectedNode: LeoNode | undefined; // Last selected node we got a hold of; leoTreeView.selection maybe newer and unprocessed
-    get lastSelectedNode(): LeoNode | undefined {
+    private _lastSelectedNode: LeoOutlineNode | undefined; // Last selected node we got a hold of; leoTreeView.selection maybe newer and unprocessed
+    get lastSelectedNode(): LeoOutlineNode | undefined {
         return this._lastSelectedNode;
     }
-    set lastSelectedNode(p_leoNode: LeoNode | undefined) { // Needs undefined: cannot be set in the constructor
+    set lastSelectedNode(p_leoNode: LeoOutlineNode | undefined) { // Needs undefined: cannot be set in the constructor
         this._lastSelectedNode = p_leoNode;
         if (p_leoNode) {
             utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_MARKED, p_leoNode.marked); // Global context to 'flag' the selected node's marked state
@@ -2649,7 +2672,7 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
 }
 
 </t>
-<t tx="felix.20201214202749.1">public selectTreeNode(p_node: LeoNode, p_internalCall?: boolean, p_aside?: boolean): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214202749.1">public selectTreeNode(p_node: LeoOutlineNode, p_internalCall?: boolean, p_aside?: boolean): Thenable&lt;unknown&gt; {
     vscode.window.showInformationMessage('TODO: Implement selectTreeNode');
     console.log('set flags for ', p_node);
 
@@ -2671,7 +2694,7 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
  */
 public command(
     p_cmd: string,
-    p_node: LeoNode | undefined,
+    p_node: LeoOutlineNode | undefined,
     p_refreshType: ReqRefresh,
     p_fromOutline: boolean,
     p_keepSelection?: boolean
@@ -2714,7 +2737,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214202759.1">public editHeadline(p_node?: LeoNode, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214202759.1">public editHeadline(p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
@@ -2734,7 +2757,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214202800.1">public insertNode(p_node?: LeoNode, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214202800.1">public insertNode(p_node?: LeoOutlineNode, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
@@ -2755,7 +2778,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214202802.1">public changeMark(p_mark: boolean, p_node?: LeoNode, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214202802.1">public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true });
 
@@ -5741,5 +5764,128 @@ public gotSelectedNode(p_element: PNode): void {
 <t tx="felix.20210102000055.1"></t>
 <t tx="felix.20210102000100.1"></t>
 <t tx="felix.20210102000121.1"></t>
+<t tx="felix.20210102012334.1"></t>
+<t tx="felix.20210102012410.1"></t>
+<t tx="felix.20210102012632.1">@language typescript
+@tabwidth -4
+// * Leo's fundamental data classes.
+@others
+</t>
+<t tx="felix.20210102014453.1">/**
+ * A class managing global node indices (gnx's).
+ */
+export class NodeIndices {
+
+    defaultId: string;
+    lastIndex: number;
+    stack: any[]; // # A stack of open commanders.
+    timeString: string; //  Set by setTimeStamp.
+    userId: string;
+
+    @others
+
+}
+
+</t>
+<t tx="felix.20210102014804.1">constructor(id_: string) {
+    // Ctor for NodeIndices class.
+    this.defaultId = id_;
+    this.lastIndex = 0;
+    this.stack = [];
+    this.timeString = '';
+    this.userId = id_;
+    this.setTimeStamp();
+}
+
+</t>
+<t tx="felix.20210102015005.1">/**
+ * A position marks the spot in a tree traversal. A position p consists of a VNode
+ * p.v, a child index p._childIndex, and a stack of tuples (v,childIndex), one for
+ * each ancestor **at the spot in tree traversal. Positions p has a unique set of
+ * parents.
+
+ * The p.moveToX methods may return a null (invalid) position p with p.v = None.
+ */
+export class Position {
+
+    @others
+
+}
+
+</t>
+<t tx="felix.20210102015005.2">constructor() {
+    //
+}
+
+</t>
+<t tx="felix.20210102015005.3">/**
+ * PosList extends a regular array by adding helper methods
+ */
+export class PosList extends Array {
+
+    @others
+
+}
+
+</t>
+<t tx="felix.20210102015917.1">/**
+ * * Closes any body pane opened in this vscode window instance
+ */
+export class VNode {
+
+    @others
+
+}
+
+</t>
+<t tx="felix.20210102015917.2">constructor() {
+    //
+}
+
+</t>
+<t tx="felix.20210102021644.1">/**
+ * Return a PosList instance containing pointers to
+ * all the immediate children of nodes in PosList self.
+ */
+public children() {
+
+    this.forEach((p: Position) =&gt; {
+        p.children().forEach(child_p =&gt; {
+
+        });
+    });
+}
+
+</t>
+<t tx="felix.20210102021646.1">/**
+ * Find all the nodes in PosList self where zero or more characters at
+ * the beginning of the headline match regex
+ */
+public filter_h() {
+    //
+}
+
+</t>
+<t tx="felix.20210102021651.1">/**
+ * Find all the nodes in PosList self where body matches regex
+ * one or more times.
+ */
+public filter_b() {
+    //
+}
+
+</t>
+<t tx="felix.20210102024358.1">public setTimeStamp(): void {
+    //
+
+}
+
+</t>
+<t tx="felix.20210102031032.1"></t>
+<t tx="felix.20210102031240.1">public children(copy: boolean = true): Iterator&lt;Position&gt; {
+    return []; // TODO : return a real iterator see https://basarat.gitbook.io/typescript/future-javascript/iterators
+}
+
+</t>
 </tnodes>
 </leo_file>

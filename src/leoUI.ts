@@ -14,7 +14,7 @@ import {
 } from "./types";
 import { Leojs } from "./leojs";
 
-import { LeoNode } from "./leoOutlineNode";
+import { LeoOutlineNode } from "./leoOutlineNode";
 import { LeoOutlineProvider } from './leoOutline';
 import { LeoButtonNode } from "./leoButtonNode";
 import { LeoButtonsProvider } from "./leoButtons";
@@ -62,11 +62,11 @@ export class LeoUI {
     private _lastTreeView: vscode.TreeView<PNode>; // Last visible treeview
     private _treeId: number = 0; // Starting salt for tree node murmurhash generated Ids // unused so far in leojs
 
-    private _lastSelectedNode: LeoNode | undefined; // Last selected node we got a hold of; leoTreeView.selection maybe newer and unprocessed
-    get lastSelectedNode(): LeoNode | undefined {
+    private _lastSelectedNode: LeoOutlineNode | undefined; // Last selected node we got a hold of; leoTreeView.selection maybe newer and unprocessed
+    get lastSelectedNode(): LeoOutlineNode | undefined {
         return this._lastSelectedNode;
     }
-    set lastSelectedNode(p_leoNode: LeoNode | undefined) { // Needs undefined: cannot be set in the constructor
+    set lastSelectedNode(p_leoNode: LeoOutlineNode | undefined) { // Needs undefined: cannot be set in the constructor
         this._lastSelectedNode = p_leoNode;
         if (p_leoNode) {
             utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_MARKED, p_leoNode.marked); // Global context to 'flag' the selected node's marked state
@@ -472,7 +472,7 @@ export class LeoUI {
         }
     }
 
-    public selectTreeNode(p_node: LeoNode, p_internalCall?: boolean, p_aside?: boolean): Thenable<unknown> {
+    public selectTreeNode(p_node: LeoOutlineNode, p_internalCall?: boolean, p_aside?: boolean): Thenable<unknown> {
         vscode.window.showInformationMessage('TODO: Implement selectTreeNode');
         console.log('set flags for ', p_node);
 
@@ -493,7 +493,7 @@ export class LeoUI {
      */
     public command(
         p_cmd: string,
-        p_node: LeoNode | undefined,
+        p_node: LeoOutlineNode | undefined,
         p_refreshType: ReqRefresh,
         p_fromOutline: boolean,
         p_keepSelection?: boolean
@@ -534,7 +534,7 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
-    public editHeadline(p_node?: LeoNode, p_fromOutline?: boolean): Thenable<unknown> {
+    public editHeadline(p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable<unknown> {
 
         this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
@@ -553,7 +553,7 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
-    public insertNode(p_node?: LeoNode, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable<unknown> {
+    public insertNode(p_node?: LeoOutlineNode, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable<unknown> {
 
         this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
@@ -573,7 +573,7 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
-    public changeMark(p_mark: boolean, p_node?: LeoNode, p_fromOutline?: boolean): Thenable<unknown> {
+    public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable<unknown> {
 
         this._setupRefresh(!!p_fromOutline, { tree: true });
 

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { Icon } from "./types";
-import { LeoNode } from "./leoOutlineNode";
+import { LeoOutlineNode } from "./leoOutlineNode";
 
 // String and other types/structures helper functions, along with common vscode API calls
 
@@ -136,7 +136,7 @@ export function getFileFromPath(p_path: string): string {
  * @param p_newHasBody Flag to signify presence of body content, to be compared with its current state
  * @returns True if it would change the icon with actual body content, false otherwise
  */
-export function isIconChangedByEdit(p_node: LeoNode, p_newHasBody: boolean): boolean {
+export function isIconChangedByEdit(p_node: LeoOutlineNode, p_newHasBody: boolean): boolean {
     if (!p_node.dirty || (p_node.hasBody === !p_newHasBody)) {
         return true;
     }
