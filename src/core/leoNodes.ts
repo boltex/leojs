@@ -144,14 +144,26 @@ export class VNode {
     context: any;
     expandedPositions: Position[]; // Positions that should be expanded.
 
-    // * Cursor, text selection and scrolling position
+    // * Cursor location, text selection and scrolling information
     insertSpot: number; // Location of previous insert point.
     scrollBarSpot: number; // Previous value of scrollbar position.
     selectionLength: number; // The length of the selected body text.
     selectionStart: number; // The start of the selected body text.
 
-    constructor() {
-        //
+    constructor(context: any, gnx?: string) {
+        this._headString = 'newHeadline';
+        this._bodyString = '';
+        this.children = [];
+        this.parents = [];
+        this.fileIndex = '';
+        this.iconVal = 0;
+        this.statusBits = 0;
+        this.context = context;
+        this.expandedPositions = [];
+        this.insertSpot = 0;
+        this.scrollBarSpot = 0;
+        this.selectionLength = 0;
+        this.selectionStart = 0;
     }
 
 
