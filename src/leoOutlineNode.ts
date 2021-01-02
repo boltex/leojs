@@ -6,7 +6,7 @@ import { Icon, PNode } from "./types"; // ArchivedPosition included to help debu
  * * Implementation of tree nodes for usage in a TreeDataProvider
  */
 
-export class LeoNode extends vscode.TreeItem {
+export class LeoOutlineNode extends vscode.TreeItem {
 
     public contextValue: string; // * Context string is checked in package.json with 'when' clauses
 
@@ -52,7 +52,7 @@ export class LeoNode extends vscode.TreeItem {
      * @param p_node Node to copy properties from.
      * @returns Node itself with the new properties applied
      */
-    public copyProperties(p_node: LeoNode): LeoNode {
+    public copyProperties(p_node: LeoOutlineNode): LeoOutlineNode {
         this.label = p_node.label;
 
         this.collapsibleState = p_node.collapsibleState;

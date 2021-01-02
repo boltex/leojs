@@ -1,4 +1,3 @@
-
 import * as vscode from 'vscode';
 
 // import * as abc from './leoFiles'; // works
@@ -78,16 +77,6 @@ export class Leojs {
             // set to undefined at first for root nodes
             this._setPNodeParents(p_position, undefined);
         });
-
-
-
-        // abc.test("the string is " + abc.testVar);
-        test("the string is " + testVar);
-
-        const info = vscode.window.showInformationMessage;
-        leo.test(info);
-
-
     }
 
     /**
