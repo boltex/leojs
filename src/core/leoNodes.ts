@@ -53,9 +53,97 @@ export class Position {
         }
     }
 
-    public children(copy: boolean = true): Iterator<Position> {
-        return []; // TODO : return a real iterator see https://basarat.gitbook.io/typescript/future-javascript/iterators
+    /**
+     * Yield all child positions of p.
+     */
+    public *children(copy: boolean = true): Generator<Position> {
+        const p = this.firstChild();
+        while (p) {
+            yield (copy ? p.copy() : p);
+            p.moveToNext();
+        }
     }
+
+    /*
+    def anyAtFileNodeName(self): return self.v.anyAtFileNodeName()
+
+    def atAutoNodeName(self): return self.v.atAutoNodeName()
+
+    def atCleanNodeName(self): return self.v.atCleanNodeName()
+
+    def atEditNodeName(self): return self.v.atEditNodeName()
+
+    def atFileNodeName(self): return self.v.atFileNodeName()
+
+    def atNoSentinelsFileNodeName(self): return self.v.atNoSentinelsFileNodeName()
+    # def atRawFileNodeName         (self): return self.v.atRawFileNodeName()
+
+    def atShadowFileNodeName(self): return self.v.atShadowFileNodeName()
+
+    def atSilentFileNodeName(self): return self.v.atSilentFileNodeName()
+
+    def atThinFileNodeName(self): return self.v.atThinFileNodeName()
+    # New names, less confusing
+    atNoSentFileNodeName = atNoSentinelsFileNodeName
+    atAsisFileNodeName = atSilentFileNodeName
+
+    def isAnyAtFileNode(self): return self.v.isAnyAtFileNode()
+
+    def isAtAllNode(self): return self.v.isAtAllNode()
+
+    def isAtAutoNode(self): return self.v.isAtAutoNode()
+
+    def isAtAutoRstNode(self): return self.v.isAtAutoRstNode()
+
+    def isAtCleanNode(self): return self.v.isAtCleanNode()
+
+    def isAtEditNode(self): return self.v.isAtEditNode()
+
+    def isAtFileNode(self): return self.v.isAtFileNode()
+
+    def isAtIgnoreNode(self): return self.v.isAtIgnoreNode()
+
+    def isAtNoSentinelsFileNode(self): return self.v.isAtNoSentinelsFileNode()
+
+    def isAtOthersNode(self): return self.v.isAtOthersNode()
+
+    def isAtRstFileNode(self): return self.v.isAtRstFileNode()
+
+    def isAtSilentFileNode(self): return self.v.isAtSilentFileNode()
+
+    def isAtShadowFileNode(self): return self.v.isAtShadowFileNode()
+
+    def isAtThinFileNode(self): return self.v.isAtThinFileNode()
+    # New names, less confusing:
+    isAtNoSentFileNode = isAtNoSentinelsFileNode
+    isAtAsisFileNode = isAtSilentFileNode
+    # Utilities.
+
+    def matchHeadline(self, pattern): return self.v.matchHeadline(pattern)
+    */
+    public bodyString(): string { return this.v.bodyString(); }
+
+    public headString(): string {
+        return this.v.headString();
+    }
+
+    public cleanHeadString(): string {
+        return this.v.cleanHeadString();
+    }
+
+    public isDirty(): boolean { return this.v.isDirty(); }
+
+    public isMarked(): boolean { return this.v.isMarked(); }
+
+    public isOrphan(): boolean { return this.v.isOrphan(); }
+
+    public isSelected(): boolean { return this.v.isSelected(); }
+
+    public isTopBitSet(): boolean { return this.v.isTopBitSet(); }
+
+    public isVisited(): boolean { return this.v.isVisited(); }
+
+    public status(): number { return this.v.status(); }
 
     public copy(): Position {
         return new Position(this.v, this._childIndex, this.stack);
@@ -167,6 +255,122 @@ export class VNode {
         this.selectionStart = 0;
         g.app.nodeIndices.new_vnode_helper(context, gnx, this);
     }
+
+    public bodyString() {
+        return this._bodyString;
+    }
+
+    /**
+     * Returns the first child or undefined if no children
+     */
+    public firstChild(): VNode | undefined {
+        if (this.children.length) {
+            return this.children[0];
+        }
+        return undefined;
+    }
+
+    public hasChildren(): boolean {
+        return !!this.children.length;
+    }
+
+    /**
+     * Returns the last child or undefined if no children
+     */
+    public lastChild(): VNode | undefined {
+        if (this.children.length) {
+            return this.children[this.children.length - 1];
+        }
+        return undefined;
+    }
+
+    /**
+     * childIndex and nthChild are zero-based.
+     */
+    public nthChild(n: number): VNode | undefined {
+        if (0 <= n && n < this.children.length) {
+            return this.children[n];
+        }
+        return undefined;
+    }
+
+    public numberOfChildren(): number {
+        return this.children.length;
+    }
+
+    /**
+     * (New in 4.2) Return a list of all direct parent vnodes of a VNode.
+     * This is NOT the same as the list of ancestors of the VNode.
+     */
+    public directParents(): VNode[] {
+        return this.parents;
+    }
+
+    /**
+     * Return True if this VNode contains body text.
+     */
+    public hasBody(): boolean {
+        return !!this._bodyString && this._bodyString.length > 0;
+    }
+
+    /**
+     * Return the headline string.
+     */
+    public headString() {
+        return this._headString;
+    }
+
+    /**
+     * Return the headline string. Same as headString.
+     */
+    public cleanHeadString() {
+        return this._headString;
+    }
+
+    /**
+     * Return True if v is the n'th child of parent_v.
+     */
+    public isNthChildOf(n: number, parent_v: VNode): boolean {
+        const children: VNode[] | undefined = parent_v ? parent_v.children : undefined;
+        return !!children && 0 <= n && n < children.length && children[n] === this;
+    }
+
+    public isCloned(): boolean {
+        return this.parents.length > 1;
+    }
+
+    public isDirty(): boolean {
+        return (this.statusBits & StatusFlags.dirtyBit) !== 0;
+    }
+
+    public isMarked(): boolean {
+        return (this.statusBits & StatusFlags.markedBit) !== 0;
+    }
+
+    public isOrphan(): boolean {
+        return (this.statusBits & StatusFlags.orphanBit) !== 0;
+    }
+
+    public isSelected(): boolean {
+        return (this.statusBits & StatusFlags.selectedBit) !== 0;
+    }
+
+    public isTopBitSet(): boolean {
+        return (this.statusBits & StatusFlags.topBit) !== 0;
+    }
+
+    public isVisited(): boolean {
+        return (this.statusBits & StatusFlags.visitedBit) !== 0;
+    }
+
+    public isWriteBit(): boolean {
+        return (this.statusBits & StatusFlags.writeBit) !== 0;
+    }
+
+    public status(): number {
+        return this.statusBits;
+    }
+
 
 
 }

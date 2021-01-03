@@ -4,6 +4,7 @@
  * Important: This module imports no other Leo module.
  */
 import * as fs from 'fs';
+import { LeoApp } from './leoApp';
 
 export const isMac: boolean = process.platform.startsWith('darwin');
 export const isWindows: boolean = process.platform.startsWith('win');
@@ -312,5 +313,13 @@ export const g_tabwidth_pat = new RegExp(String.raw`(^@tabwidth)`, 'm');
 
 
 export const tree_popup_handlers: ((...args: any[]) => any)[] = [];  // Set later.
-export const user_dict: { [key: string]: any } = {};
+export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionary for free use
+
+// Was set when creating leoGlobals instance in leoRun.py and in leoBridge.py
+export const app: LeoApp = new LeoApp();
+
+// Global status vars.
+export let inScript:boolean = false; // A synonym for app.inScript
+export let unitTesting :boolean = false; // A synonym for app.unitTesting.
+
 

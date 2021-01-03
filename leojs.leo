@@ -348,7 +348,47 @@
 </v>
 <v t="felix.20210102000055.1"><vh>Leo</vh>
 <v t="felix.20210102000100.1"><vh>Core Classes</vh>
-<v t="felix.20210102012334.1"><vh>@clean src/core/leoApp.ts</vh></v>
+<v t="felix.20210102012334.1"><vh>@clean src/core/leoApp.ts</vh>
+<v t="felix.20210102211149.1"><vh>&lt;&lt; imports &gt;&gt; (leoApp)</vh></v>
+<v t="felix.20210102213337.1"><vh>class IdleTimeManager</vh>
+<v t="felix.20210102213337.2"><vh>itm.add_callback</vh></v>
+<v t="felix.20210102213337.3"><vh>itm.on_idle</vh></v>
+<v t="felix.20210102213337.4"><vh>itm.start</vh></v>
+</v>
+<v t="felix.20210102214000.1"><vh>class LeoApp</vh>
+<v t="felix.20210102214029.1"><vh>app.Birth &amp; startup</vh>
+<v t="felix.20210103024632.2"><vh>&lt;&lt; LeoApp: command-line arguments &gt;&gt;</vh></v>
+<v t="felix.20210103024632.3"><vh>&lt;&lt; LeoApp: Debugging &amp; statistics &gt;&gt;</vh></v>
+<v t="felix.20210103024632.4"><vh>&lt;&lt; LeoApp: error messages &gt;&gt;</vh></v>
+<v t="felix.20210103024632.5"><vh>&lt;&lt; LeoApp: global directories &gt;&gt;</vh></v>
+<v t="felix.20210103024632.6"><vh>&lt;&lt; LeoApp: global data &gt;&gt;</vh></v>
+<v t="felix.20210103024632.7"><vh>&lt;&lt; LeoApp: global controller/manager objects &gt;&gt;</vh></v>
+<v t="felix.20210103024632.8"><vh>&lt;&lt; LeoApp: global reader/writer data &gt;&gt;</vh></v>
+<v t="felix.20210103024632.9"><vh>&lt;&lt; LeoApp: global status vars &gt;&gt;</vh></v>
+<v t="felix.20210103024632.10"><vh>&lt;&lt; LeoApp: the global log &gt;&gt;</vh></v>
+<v t="felix.20210103024632.11"><vh>&lt;&lt; LeoApp: global theme data &gt;&gt;</vh></v>
+<v t="felix.20210103024632.12"><vh>&lt;&lt; LeoApp: global types &gt;&gt;</vh></v>
+<v t="felix.20210103024632.13"><vh>&lt;&lt; LeoApp: plugins and event handlers &gt;&gt;</vh></v>
+<v t="felix.20210103024632.14"><vh>&lt;&lt; LeoApp: scripting ivars &gt;&gt;</vh></v>
+<v t="felix.20210103024632.15"><vh>&lt;&lt; LeoApp: unit testing ivars &gt;&gt;</vh></v>
+<v t="felix.20210102214102.1"><vh>constructor</vh></v>
+<v t="felix.20210103024632.16"><vh>app.define_delegate_language_dict</vh></v>
+<v t="felix.20210103024632.17"><vh>app.define_extension_dict</vh></v>
+<v t="felix.20210103024632.18"><vh>app.define_global_constants</vh></v>
+<v t="felix.20210103024632.19"><vh>app.define_language_delims_dict</vh></v>
+<v t="felix.20210103024632.20"><vh>app.define_language_extension_dict</vh></v>
+<v t="felix.20210103024632.21"><vh>app.init_at_auto_names</vh></v>
+<v t="felix.20210103024632.22"><vh>app.init_at_file_names</vh></v>
+</v>
+</v>
+</v>
+<v t="felix.20210102211445.1"><vh>@clean src/core/leoExternalFiles.ts</vh>
+<v t="felix.20210102211748.1"><vh>class ExternalFile</vh>
+<v t="felix.20210102211748.2"><vh>ef.shortFileName</vh></v>
+<v t="felix.20210102211748.3"><vh>ef.exists</vh></v>
+</v>
+<v t="felix.20210102211754.1"><vh>class ExternalFilesController</vh></v>
+</v>
 <v t="felix.20210102012410.1"><vh>@clean src/core/leoGlobals.ts</vh>
 <v t="felix.20210102180352.1"><vh> &lt;&lt; global switches &gt;&gt; (leoGlobals.py)</vh></v>
 <v t="felix.20210102181122.1"><vh>&lt;&lt; imports &gt;&gt; (leoGlobals)</vh></v>
@@ -375,6 +415,13 @@
 <v t="felix.20210102031032.1"><vh>p.generators</vh>
 <v t="felix.20210102031240.1"><vh>p.children</vh></v>
 </v>
+<v t="felix.20210102232930.1"><vh>p.Getters</vh>
+<v t="felix.20210102233013.1"><vh>p.VNode proxies</vh>
+<v t="felix.20210102233013.2"><vh>p.Comparisons</vh></v>
+<v t="felix.20210102233013.3"><vh>p.Headline &amp; body strings</vh></v>
+<v t="felix.20210102233013.4"><vh>p.Status bits</vh></v>
+</v>
+</v>
 <v t="felix.20210102035853.1"><vh>p.Moving, Inserting, Deleting, Cloning, Sorting</vh>
 <v t="felix.20210102035859.1"><vh>p.copy</vh></v>
 </v>
@@ -387,6 +434,32 @@
 <v t="felix.20210102150654.1"><vh>Enum StatusFlags</vh></v>
 <v t="felix.20210102015917.1"><vh>class VNode</vh>
 <v t="felix.20210102015917.2"><vh>constructor</vh></v>
+<v t="felix.20210102234910.1"><vh>v.Getters</vh>
+<v t="felix.20210102234915.1"><vh>v.bodyString</vh></v>
+<v t="felix.20210102235015.1"><vh>v.Children</vh>
+<v t="felix.20210103000631.1"><vh>v.firstChild</vh></v>
+<v t="felix.20210103003546.1"><vh>v.hasChildren</vh></v>
+<v t="felix.20210103003705.1"><vh>v.lastChild</vh></v>
+<v t="felix.20210103010323.1"><vh>v.nthChild</vh></v>
+<v t="felix.20210103010327.1"><vh>v.numberOfChildren</vh></v>
+</v>
+<v t="felix.20210103011425.1"><vh>v.directParents</vh></v>
+<v t="felix.20210103011621.1"><vh>v.hasBody</vh></v>
+<v t="felix.20210103013608.1"><vh>v.headString</vh></v>
+<v t="felix.20210103023444.1"><vh>v.cleanHeadString</vh></v>
+<v t="felix.20210103013802.1"><vh>v.isNthChildOf</vh></v>
+<v t="felix.20210103013805.1"><vh>v.Status Bits</vh>
+<v t="felix.20210103013805.2"><vh>v.isCloned</vh></v>
+<v t="felix.20210103013805.3"><vh>v.isDirty</vh></v>
+<v t="felix.20210103013805.4"><vh>v.isMarked</vh></v>
+<v t="felix.20210103013805.5"><vh>v.isOrphan</vh></v>
+<v t="felix.20210103013805.6"><vh>v.isSelected</vh></v>
+<v t="felix.20210103013805.7"><vh>v.isTopBitSet</vh></v>
+<v t="felix.20210103013805.8"><vh>v.isVisited</vh></v>
+<v t="felix.20210103013805.9"><vh>v.isWriteBit</vh></v>
+<v t="felix.20210103013805.10"><vh>v.status</vh></v>
+</v>
+</v>
 </v>
 </v>
 </v>
@@ -5783,13 +5856,21 @@ public gotSelectedNode(p_element: PNode): void {
 <t tx="felix.20210102000055.1"></t>
 <t tx="felix.20210102000100.1"></t>
 <t tx="felix.20210102000121.1"></t>
-<t tx="felix.20210102012334.1"></t>
-<t tx="felix.20210102012410.1">
+<t tx="felix.20210102012334.1">&lt;&lt; imports &gt;&gt;
+@others
+@language typescript
+@tabwidth -4
+
+</t>
+<t tx="felix.20210102012410.1">@language typescript
+@tabwidth -4
+
 /*
  * Global constants, variables and utility functions used throughout Leo.
  * Important: This module imports no other Leo module.
  */
 import * as fs from 'fs';
+import { LeoApp } from './leoApp';
 
 export const isMac: boolean = process.platform.startsWith('darwin');
 export const isWindows: boolean = process.platform.startsWith('win');
@@ -5802,7 +5883,16 @@ export const isWindows: boolean = process.platform.startsWith('win');
 &lt;&lt; define regex's &gt;&gt;
 
 export const tree_popup_handlers: ((...args: any[]) =&gt; any)[] = [];  // Set later.
-export const user_dict: { [key: string]: any } = {};
+export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionary for free use
+
+// Was set when creating leoGlobals instance in leoRun.py and in leoBridge.py
+export const app: LeoApp = new LeoApp();
+
+// Global status vars.
+export let inScript:boolean = false; // A synonym for app.inScript
+export let unitTesting :boolean = false; // A synonym for app.unitTesting.
+
+@others
 
 </t>
 <t tx="felix.20210102012632.1">@language typescript
@@ -5911,6 +6001,7 @@ export class VNode {
 
     @others
 
+
 }
 
 </t>
@@ -5972,8 +6063,15 @@ public filter_b() {
 
 </t>
 <t tx="felix.20210102031032.1"></t>
-<t tx="felix.20210102031240.1">public children(copy: boolean = true): Iterator&lt;Position&gt; {
-    return []; // TODO : return a real iterator see https://basarat.gitbook.io/typescript/future-javascript/iterators
+<t tx="felix.20210102031240.1">/**
+ * Yield all child positions of p.
+ */
+public *children(copy: boolean = true): Generator&lt;Position&gt; {
+    const p = this.firstChild();
+    while (p) {
+        yield (copy ? p.copy() : p);
+        p.moveToNext();
+    }
 }
 
 </t>
@@ -6317,6 +6415,1163 @@ export const g_tabwidth_pat = new RegExp(String.raw`(^@tabwidth)`, 'm');
     import urllib
     import urllib.parse as urlparse
 */
+</t>
+<t tx="felix.20210102211149.1">/*
+    import leo.core.leoGlobals as g
+    import leo.core.leoExternalFiles as leoExternalFiles
+    import importlib
+    import io
+    StringIO = io.StringIO
+    import os
+    import optparse
+    import subprocess
+    import string
+    import sys
+    import time
+    import traceback
+    import zipfile
+    import platform
+    import sqlite3
+*/
+
+</t>
+<t tx="felix.20210102211445.1">@language typescript
+@tabwidth -4
+@others
+
+</t>
+<t tx="felix.20210102211748.1">/**
+ * A class holding all data about an external file.
+ */
+export class ExternalFile {
+/*
+    def __init__(self, c, ext, p, path, time):
+        '''Ctor for ExternalFile class.'''
+        self.c = c
+        self.ext = ext
+        self.p = p and p.copy()
+            # The nearest @&lt;file&gt; node.
+        self.path = path
+        self.time = time  # Used to inhibit endless dialog loop.
+                          # See efc.idle_check_open_with_file.
+
+    def __repr__(self):
+        return f"&lt;ExternalFile: {self.time:20} {g.shortFilename(self.path)}&gt;"
+
+    __str__ = __repr__
+*/
+
+    @others
+
+}
+
+</t>
+<t tx="felix.20210102211748.2">/*
+def shortFileName(self):
+    return g.shortFilename(self.path)
+*/
+
+</t>
+<t tx="felix.20210102211748.3">/*
+def exists(self):
+    '''Return True if the external file still exists.'''
+    return g.os_path_exists(self.path)
+*/
+
+</t>
+<t tx="felix.20210102211754.1">/**
+ *  A class tracking changes to external files:
+ *
+ *  - temp files created by open-with commands.
+ *  - external files corresponding to @file nodes.
+ *
+ *  This class raises a dialog when a file changes outside of Leo.
+ *
+ *  **Naming conventions**:
+ *
+ *  - d is always a dict created by the @open-with logic.
+ *    This dict describes *only* how to open the file.
+ *
+ *  - ef is always an ExternalFiles instance.
+*/
+export class ExternalFilesController {
+
+    @others
+
+}</t>
+<t tx="felix.20210102213337.1">/**
+ *  A singleton class to manage idle-time handling. This class handles all
+ *  details of running code at idle time, including running 'idle' hooks.
+ *
+ *  Any code can call g.app.idleTimeManager.add_callback(callback) to cause
+ *  the callback to be called at idle time forever.
+ */
+export class IdleTimeManager {
+
+    callback_list: ((...args: any[]) =&gt; any)[];
+    timer: any;
+
+    /**
+     * Ctor for IdleTimeManager class.
+    */
+    constructor() {
+        this.callback_list = [];
+        this.timer = null;
+    }
+
+    @others
+
+}
+
+</t>
+<t tx="felix.20210102213337.2">/*
+def add_callback(self, callback):
+    """Add a callback to be called at every idle time."""
+    self.callback_list.append(callback)
+*/
+
+</t>
+<t tx="felix.20210102213337.3">/*
+on_idle_count = 0
+
+def on_idle(self, timer):
+    """IdleTimeManager: Run all idle-time callbacks."""
+    if not g.app: return
+    if g.app.killed: return
+    if not g.app.pluginsController:
+        g.trace('No g.app.pluginsController', g.callers())
+        timer.stop()
+        return  # For debugger.
+    self.on_idle_count += 1
+    # Handle the registered callbacks.
+    for callback in self.callback_list:
+        try:
+            callback()
+        except Exception:
+            g.es_exception()
+            g.es_print(f"removing callback: {callback}")
+            self.callback_list.remove(callback)
+    # Handle idle-time hooks.
+    g.app.pluginsController.on_idle()
+
+*/
+
+</t>
+<t tx="felix.20210102213337.4">/*
+def start(self):
+    """Start the idle-time timer."""
+    self.timer = g.IdleTime(
+        self.on_idle,
+        delay=500,
+        tag='IdleTimeManager.on_idle')
+    if self.timer:
+        self.timer.start()
+*/
+
+</t>
+<t tx="felix.20210102214000.1">/**
+ * A class representing the Leo application itself.
+ * instance variables of this class are Leo's global variables.
+ */
+export class LeoApp {
+
+    @others
+
+}
+
+</t>
+<t tx="felix.20210102214029.1">&lt;&lt; LeoApp: command-line arguments &gt;&gt;
+&lt;&lt; LeoApp: Debugging &amp; statistics &gt;&gt;
+&lt;&lt; LeoApp: error messages &gt;&gt;
+&lt;&lt; LeoApp: global directories &gt;&gt;
+&lt;&lt; LeoApp: global data &gt;&gt;
+&lt;&lt; LeoApp: global controller/manager objects &gt;&gt;
+&lt;&lt; LeoApp: global reader/writer data &gt;&gt;
+&lt;&lt; LeoApp: global status vars &gt;&gt;
+&lt;&lt; LeoApp: the global log &gt;&gt;
+&lt;&lt; LeoApp: global theme data &gt;&gt;
+&lt;&lt; LeoApp: global types &gt;&gt;
+&lt;&lt; LeoApp: plugins and event handlers &gt;&gt;
+&lt;&lt; LeoApp: scripting ivars &gt;&gt;
+&lt;&lt; LeoApp: unit testing ivars &gt;&gt;
+
+public delegate_language_dict: { [key: string]: string } = {};
+public extension_dict: { [key: string]: string } = {};
+public extra_extension_dict: { [key: string]: string } = {};
+
+@others
+
+</t>
+<t tx="felix.20210102214102.1">constructor() {
+    // Define all global data.
+    this.define_delegate_language_dict();
+    this.init_at_auto_names();
+    this.init_at_file_names();
+    this.define_global_constants();
+    this.define_language_delims_dict();
+    this.define_language_extension_dict();
+    this.define_extension_dict();
+}
+
+</t>
+<t tx="felix.20210102232930.1"></t>
+<t tx="felix.20210102233013.1"></t>
+<t tx="felix.20210102233013.2">/*
+def anyAtFileNodeName(self): return self.v.anyAtFileNodeName()
+
+def atAutoNodeName(self): return self.v.atAutoNodeName()
+
+def atCleanNodeName(self): return self.v.atCleanNodeName()
+
+def atEditNodeName(self): return self.v.atEditNodeName()
+
+def atFileNodeName(self): return self.v.atFileNodeName()
+
+def atNoSentinelsFileNodeName(self): return self.v.atNoSentinelsFileNodeName()
+# def atRawFileNodeName         (self): return self.v.atRawFileNodeName()
+
+def atShadowFileNodeName(self): return self.v.atShadowFileNodeName()
+
+def atSilentFileNodeName(self): return self.v.atSilentFileNodeName()
+
+def atThinFileNodeName(self): return self.v.atThinFileNodeName()
+# New names, less confusing
+atNoSentFileNodeName = atNoSentinelsFileNodeName
+atAsisFileNodeName = atSilentFileNodeName
+
+def isAnyAtFileNode(self): return self.v.isAnyAtFileNode()
+
+def isAtAllNode(self): return self.v.isAtAllNode()
+
+def isAtAutoNode(self): return self.v.isAtAutoNode()
+
+def isAtAutoRstNode(self): return self.v.isAtAutoRstNode()
+
+def isAtCleanNode(self): return self.v.isAtCleanNode()
+
+def isAtEditNode(self): return self.v.isAtEditNode()
+
+def isAtFileNode(self): return self.v.isAtFileNode()
+
+def isAtIgnoreNode(self): return self.v.isAtIgnoreNode()
+
+def isAtNoSentinelsFileNode(self): return self.v.isAtNoSentinelsFileNode()
+
+def isAtOthersNode(self): return self.v.isAtOthersNode()
+
+def isAtRstFileNode(self): return self.v.isAtRstFileNode()
+
+def isAtSilentFileNode(self): return self.v.isAtSilentFileNode()
+
+def isAtShadowFileNode(self): return self.v.isAtShadowFileNode()
+
+def isAtThinFileNode(self): return self.v.isAtThinFileNode()
+# New names, less confusing:
+isAtNoSentFileNode = isAtNoSentinelsFileNode
+isAtAsisFileNode = isAtSilentFileNode
+# Utilities.
+
+def matchHeadline(self, pattern): return self.v.matchHeadline(pattern)
+*/
+</t>
+<t tx="felix.20210102233013.3">public bodyString(): string { return this.v.bodyString(); }
+
+public headString(): string {
+    return this.v.headString();
+}
+
+public cleanHeadString(): string {
+    return this.v.cleanHeadString();
+}
+
+</t>
+<t tx="felix.20210102233013.4">public isDirty(): boolean { return this.v.isDirty(); }
+
+public isMarked(): boolean { return this.v.isMarked(); }
+
+public isOrphan(): boolean { return this.v.isOrphan(); }
+
+public isSelected(): boolean { return this.v.isSelected(); }
+
+public isTopBitSet(): boolean { return this.v.isTopBitSet(); }
+
+public isVisited(): boolean { return this.v.isVisited(); }
+
+public status(): number { return this.v.status(); }
+
+</t>
+<t tx="felix.20210102234910.1"></t>
+<t tx="felix.20210102234915.1">public bodyString() {
+    return this._bodyString;
+}
+
+</t>
+<t tx="felix.20210102235015.1"></t>
+<t tx="felix.20210103000631.1">/**
+ * Returns the first child or undefined if no children
+ */
+public firstChild(): VNode | undefined {
+    if (this.children.length) {
+        return this.children[0];
+    }
+    return undefined;
+}
+
+</t>
+<t tx="felix.20210103003546.1">public hasChildren(): boolean {
+    return !!this.children.length;
+}
+
+</t>
+<t tx="felix.20210103003705.1">/**
+ * Returns the last child or undefined if no children
+ */
+public lastChild(): VNode | undefined {
+    if (this.children.length) {
+        return this.children[this.children.length - 1];
+    }
+    return undefined;
+}
+
+</t>
+<t tx="felix.20210103010323.1">/**
+ * childIndex and nthChild are zero-based.
+ */
+public nthChild(n: number): VNode | undefined {
+    if (0 &lt;= n &amp;&amp; n &lt; this.children.length) {
+        return this.children[n];
+    }
+    return undefined;
+}
+
+</t>
+<t tx="felix.20210103010327.1">public numberOfChildren(): number {
+    return this.children.length;
+}
+
+</t>
+<t tx="felix.20210103011425.1">/**
+ * (New in 4.2) Return a list of all direct parent vnodes of a VNode.
+ * This is NOT the same as the list of ancestors of the VNode.
+ */
+public directParents(): VNode[] {
+    return this.parents;
+}
+
+</t>
+<t tx="felix.20210103011621.1">/**
+ * Return True if this VNode contains body text.
+ */
+public hasBody(): boolean {
+    return !!this._bodyString &amp;&amp; this._bodyString.length &gt; 0;
+}
+
+</t>
+<t tx="felix.20210103013608.1">/**
+ * Return the headline string.
+ */
+public headString() {
+    return this._headString;
+}
+
+</t>
+<t tx="felix.20210103013802.1">/**
+ * Return True if v is the n'th child of parent_v.
+ */
+public isNthChildOf(n: number, parent_v: VNode): boolean {
+    const children: VNode[] | undefined = parent_v ? parent_v.children : undefined;
+    return !!children &amp;&amp; 0 &lt;= n &amp;&amp; n &lt; children.length &amp;&amp; children[n] === this;
+}
+
+</t>
+<t tx="felix.20210103013805.1"></t>
+<t tx="felix.20210103013805.10">public status(): number {
+    return this.statusBits;
+}
+
+</t>
+<t tx="felix.20210103013805.2">public isCloned(): boolean {
+    return this.parents.length &gt; 1;
+}
+
+</t>
+<t tx="felix.20210103013805.3">public isDirty(): boolean {
+    return (this.statusBits &amp; StatusFlags.dirtyBit) !== 0;
+}
+
+</t>
+<t tx="felix.20210103013805.4">public isMarked(): boolean {
+    return (this.statusBits &amp; StatusFlags.markedBit) !== 0;
+}
+
+</t>
+<t tx="felix.20210103013805.5">public isOrphan(): boolean {
+    return (this.statusBits &amp; StatusFlags.orphanBit) !== 0;
+}
+
+</t>
+<t tx="felix.20210103013805.6">public isSelected(): boolean {
+    return (this.statusBits &amp; StatusFlags.selectedBit) !== 0;
+}
+
+</t>
+<t tx="felix.20210103013805.7">public isTopBitSet(): boolean {
+    return (this.statusBits &amp; StatusFlags.topBit) !== 0;
+}
+
+</t>
+<t tx="felix.20210103013805.8">public isVisited(): boolean {
+    return (this.statusBits &amp; StatusFlags.visitedBit) !== 0;
+}
+
+</t>
+<t tx="felix.20210103013805.9">public isWriteBit(): boolean {
+    return (this.statusBits &amp; StatusFlags.writeBit) !== 0;
+}
+
+</t>
+<t tx="felix.20210103023444.1">/**
+ * Return the headline string. Same as headString.
+ */
+public cleanHeadString() {
+    return this._headString;
+}
+
+</t>
+<t tx="felix.20210103024632.10">// To be moved to the LogManager.
+public log = null; // The LeoFrame containing the present log.
+public logInited: boolean = false; // False: all log message go to logWaiting list.
+public logIsLocked: boolean = false; // True: no changes to log are allowed.
+public logWaiting: any[] = []; // List of tuples(s, color, newline) waiting to go to a log.
+public printWaiting: any[] = []; // Queue of messages to be sent to the printer.
+public signon: string = '';
+public signon1: string = '';
+public signon2: string = '';
+
+</t>
+<t tx="felix.20210103024632.11">public theme_directory = null;
+// The directory from which the theme file was loaded, if any.
+// Set only by LM.readGlobalSettingsFiles.
+// Used by the StyleSheetManager class.
+
+</t>
+<t tx="felix.20210103024632.12">/*
+from leo.core import leoFrame
+from leo.core import leoGui
+
+public nullGui = leoGui.NullGui()
+public nullLog = leoFrame.NullLog()
+*/
+
+</t>
+<t tx="felix.20210103024632.13">public hookError: boolean = false; // True: suppress further calls to hooks.
+// g.doHook sets g.app.hookError on all exceptions.
+// Scripts may reset g.app.hookError to try again.
+public hookFunction = null;
+// Application wide hook function.
+public idle_time_hooks_enabled: boolean = true;
+// True: idle - time hooks are enabled.
+
+</t>
+<t tx="felix.20210103024632.14">public searchDict: any = {};
+// For communication between find / change scripts.
+public scriptDict: any = {};
+// For use by scripts.Cleared before running each script.
+public scriptResult = null;   // For use by leoPymacs.
+public permanentScriptDict = {};   // For use by scrips.Never cleared automatically.
+
+public isExternalUnitTest: boolean = false; // True: we are running a unit test externally.
+public runningAllUnitTests: boolean = false; // True: we are running all unit tests(Only for local tests).
+</t>
+<t tx="felix.20210103024632.15">public suppressImportChecks: boolean = false;
+// Used only in basescanner.py ;
+// True: suppress importCommands.check
+public unitTestDict = {};   // For communication between unit tests and code.
+public unitTestGui = null;   // A way to override the gui in external unit tests.
+public unitTesting = false;   // True if unit testing.
+public unitTestMenusDict = {};   // Created in LeoMenu.createMenuEntries for a unit test. ;   // keys are command names.values are sets of strokes.
+</t>
+<t tx="felix.20210103024632.16">public define_delegate_language_dict(): void {
+    this.delegate_language_dict = {
+        // Keys are new language names.
+        // Values are existing languages in leo / modes.
+        "less": "css",
+        "hbs": "html",
+        "handlebars": "html",
+        //"rust": "c",
+        // "vue": "c",
+    };
+}
+
+</t>
+<t tx="felix.20210103024632.17">public define_extension_dict():void{
+
+    // Keys are extensions, values are languages
+    this.extension_dict = {
+    // "ada": "ada",
+    "ada": "ada95", // modes / ada95.py exists.
+        "ahk": "autohotkey",
+    "aj": "aspect_j",
+    "apdl": "apdl",
+    "as": "actionscript", // jason 2003-07 - 03
+        "asp": "asp",
+    "awk": "awk",
+    "b": "b",
+    "bas": "rapidq", // fil 2004-march - 11
+        "bash": "shellscript",
+    "bat": "batch",
+    "bbj": "bbj",
+    "bcel": "bcel",
+    "bib": "bibtex",
+    "c": "c",
+    "c++": "cplusplus",
+    "cbl": "cobol", // Only one extension is valid: .cob
+        "cfg": "config",
+    "cfm": "coldfusion",
+    "clj": "clojure", // 2013 / 09 / 25: Fix bug 879338.
+        "cljs": "clojure",
+    "cljc": "clojure",
+    "ch": "chill", // Other extensions, .c186,.c286
+        "coffee": "coffeescript",
+    "conf": "apacheconf",
+    "cpp": "cplusplus", // 2020 / 08 / 12: was cpp.
+        "css": "css",
+    "d": "d",
+    "dart": "dart",
+    "e": "eiffel",
+    "el": "elisp",
+    "eml": "mail",
+    "erl": "erlang",
+    "ex": "elixir",
+    "f": "fortran",
+    "f90": "fortran90",
+    "factor": "factor",
+    "forth": "forth",
+    "g": "antlr",
+    "groovy": "groovy",
+    "h": "c", // 2012 / 05 / 23.
+        "handlebars": "html", // McNab.
+        "hbs": "html", // McNab.
+        "hs": "haskell",
+    "html": "html",
+    "hx": "haxe",
+    "i": "swig",
+    "i4gl": "i4gl",
+    "icn": "icon",
+    "idl": "idl",
+    "inf": "inform",
+    "info": "texinfo",
+    "ini": "ini",
+    "io": "io",
+    "ipynb": "jupyter",
+    "iss": "inno_setup",
+    "java": "java",
+    "jhtml": "jhtml",
+    "jmk": "jmk",
+    "js": "javascript", // For javascript import test.
+        "jsp": "javaserverpage",
+    "json": "json",
+    // "jsp": "jsp",
+    "ksh": "kshell",
+    "kv": "kivy", // PeckJ 2014/05/05
+        "latex": "latex",
+    "less": "css", // McNab
+        "lua": "lua", // ddm 13/02/06
+        "ly": "lilypond",
+    "m": "matlab",
+    "mak": "makefile",
+    "md": "md", // PeckJ 2013/02/07
+        "ml": "ml",
+    "mm": "objective_c", // Only one extension is valid: .m
+        "mod": "modula3",
+    "mpl": "maple",
+    "mqsc": "mqsc",
+    "nqc": "nqc",
+    "nsi": "nsi", // EKR: 2010/10/27
+        // "nsi": "nsis2",
+    "nw": "noweb",
+    "occ": "occam",
+    "otl": "vimoutline", // TL 8/25/08 Vim's outline plugin
+        "p": "pascal",
+     // "p": "pop11", // Conflicts with pascal.
+        "php": "php",
+    "pike": "pike",
+    "pl": "perl",
+    "pl1": "pl1",
+    "po": "gettext",
+    "pod": "perlpod",
+    "pov": "povray",
+    "prg": "foxpro",
+    "pro": "prolog",
+    "ps": "postscript",
+    "psp": "psp",
+    "ptl": "ptl",
+    "py": "python",
+    "pyx": "cython", // Other extensions, .pyd,.pyi
+        // "pyx": "pyrex",
+    // "r": "r", # modes / r.py does not exist.
+        "r": "rebol", // jason 2003-07 - 03
+        "rb": "ruby", // thyrsus 2008-11 - 05
+        "rest": "rst",
+    "rex": "objectrexx",
+    "rhtml": "rhtml",
+    "rib": "rib",
+    "rs": "rust", // EKR: 2019/08/11
+        "sas": "sas",
+    "scala": "scala",
+    "scm": "scheme",
+    "scpt": "applescript",
+    "sgml": "sgml",
+    "sh": "shell", // DS 4/1/04.modes / shell.py exists.
+        "shtml": "shtml",
+    "sm": "smalltalk",
+    "splus": "splus",
+    "sql": "plsql", // qt02537 2005-05 - 27
+        "sqr": "sqr",
+    "ss": "ssharp",
+    "ssi": "shtml",
+    "sty": "latex",
+    "tcl": "tcl", // modes / tcl.py exists.
+        // "tcl": "tcltk",
+    "tex": "latex",
+    // "tex": "tex",
+    "tpl": "tpl",
+    "ts": "typescript",
+    "txt": "plain",
+    // "txt": "text",
+    // "txt": "unknown", # Set when @comment is seen.
+"uc": "uscript",
+"v": "verilog",
+"vbs": "vbscript",
+"vhd": "vhdl",
+"vhdl": "vhdl",
+"vim": "vim",
+"vtl": "velocity",
+"w": "cweb",
+"wiki": "moin",
+"xml": "xml",
+"xom": "omnimark",
+"xsl": "xsl",
+"yaml": "yaml",
+"vue": "javascript",
+"zpt": "zpt"
+};
+
+/*
+    # These aren't real languages, or have no delims...
+        # cvs_commit, dsssl, embperl, freemarker, hex, jcl,
+        # patch, phpsection, progress, props, pseudoplain,
+        # relax_ng_compact, rtf, svn_commit.
+
+    # These have extensions which conflict with other languages.
+        # assembly_macro32: .asm or.a
+        # assembly_mcs51:   .asm or.a
+        # assembly_parrot:  .asm or.a
+        # assembly_r2000:   .asm or.a
+        # assembly_x86:     .asm or.a
+        # squidconf:        .conf
+        # rpmspec:          .rpm
+
+    # Extra language extensions, used to associate extensions with mode files.
+    # Used by importCommands.languageForExtension.
+    # Keys are extensions, values are corresponding mode file(without.py)
+    # A value of 'none' is a signal to unit tests that no extension file exists.
+    
+*/
+    
+    this.extra_extension_dict = {
+        'pod': 'perl',
+        'unknown_language': 'none',
+        'w': 'none' // cweb
+    };
+}
+
+</t>
+<t tx="felix.20210103024632.18">def define_global_constants(self):
+    # self.prolog_string = "&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;"
+self.prolog_prefix_string = "&lt;?xml version=\"1.0\" encoding="
+self.prolog_postfix_string = "?&gt;"
+self.prolog_namespace_string = 'xmlns:leo="http://edreamleo.org/namespaces/leo-python-editor/1.1"'
+</t>
+<t tx="felix.20210103024632.19">@nobeautify
+
+def define_language_delims_dict(self):
+
+self.language_delims_dict = {
+# Internally, lower case is used for all language names.
+        # Keys are languages, values are 1, 2 or 3-tuples of delims.
+        "actionscript": "// /* */", # jason 2003-07 - 03
+        "ada": "--",
+"ada95": "--",
+"ahk": ";",
+"antlr": "// /* */",
+"apacheconf": "#",
+"apdl": "!",
+"applescript": "-- (* *)",
+"asp": "&lt;!-- --&gt;",
+"aspect_j": "// /* */",
+"assembly_macro32": ";",
+"assembly_mcs51": ";",
+"assembly_parrot": "#",
+"assembly_r2000": "#",
+"assembly_x86": ";",
+"autohotkey": "; /* */", # TL - AutoHotkey language
+        "awk": "#",
+"b": "// /* */",
+"batch": "REM_", # Use the REM hack.
+        "bbj": "/* */",
+"bcel": "// /* */",
+"bibtex": "%",
+"c": "// /* */", # C, C++ or objective C.
+        "chill"              : "/* */",
+"clojure"            : ";", # 2013 / 09 / 25: Fix bug 879338.
+"cobol"              : "*",
+"coldfusion"         : "&lt;!-- --&gt;",
+    "coffeescript"       : "#", # 2016 / 02 / 26.
+"config"             : "#", # Leo 4.5.1
+"cplusplus"          : "// /* */",
+"cpp"                : "// /* */",# C++.
+"csharp"             : "// /* */", # C#
+"css"                : "/* */", # 4 / 1 / 04
+"cweb"               : "@q@ @&gt;", # Use the "cweb hack"
+"cython"             : "#",
+"d"                  : "// /* */",
+    "dart"               : "// /* */", # Leo 5.0.
+        "doxygen"            : "#",
+"eiffel"             : "--",
+    "elisp"              : ";",
+        "erlang"             : "%",
+            "elixir"             : "#",
+                "factor"             : "!_ ( )", # Use the rem hack.
+        "forth"              : "\\_ _(_ _)", # Use the "REM hack"
+"fortran"            : "C",
+"fortran90"          : "!",
+    "foxpro"             : "&amp;&amp;",
+        "gettext"            : "# ",
+            "groovy"             : "// /* */",
+                "handlebars"         : "&lt;!-- --&gt;", # McNab: delegate to html.
+        "haskell"            : "--_ {-_ _-}",
+"haxe"               : "// /* */",
+    "hbs"                : "&lt;!-- --&gt;", # McNab: delegate to html.
+        "html"               : "&lt;!-- --&gt;",
+"i4gl"               : "-- { }",
+    "icon"               : "#",
+        "idl"                : "// /* */",
+            "inform"             : "!",
+                "ini"                : ";",
+                    "inno_setup"         : ";",
+                        "interlis"           : "/* */",
+                            "io"                 : "// */",
+                                "java"               : "// /* */",
+                                    "javascript"         : "// /* */", # EKR: 2011 / 11 / 12: For javascript import test.
+        "javaserverpage"     : "&lt;%-- --%&gt;", # EKR: 2011 / 11 / 25(See also, jsp)
+"jhtml"              : "&lt;!-- --&gt;",
+"jmk"                : "#",
+    "json"               : "#", # EKR: 2020 / 07 / 27: Json has no delims.This is a dummy entry.
+        "jsp"                : "&lt;%-- --%&gt;",
+"jupyter"            : "&lt;%-- --%&gt;", # Default to markdown ?
+    "kivy" : "#", # PeckJ 2014 / 05 / 05
+"kshell"             : "#", # Leo 4.5.1.
+        "latex"              : "%",
+"less"               : "/* */", # NcNab: delegate to css.
+        "lilypond"           : "% %{ %}",
+"lisp"               : ";", # EKR: 2010 / 09 / 29
+"lotos"              : "(* *)",
+"lua"                : "--", # ddm 13 / 02 / 06
+"mail"               : "&gt;",
+"makefile"           : "#",
+    "maple"              : "//",
+        "markdown"           : "&lt;!-- --&gt;", # EKR, 2018 / 03 / 03: html comments.
+        "matlab"             : "%", # EKR: 2011 / 10 / 21
+"md"                 : "&lt;!-- --&gt;", # PeckJ: 2013 / 02 / 08
+"ml"                 : "(* *)",
+"modula3"            : "(* *)",
+    "moin"               : "##",
+        "mqsc"               : "*",
+            "netrexx"            : "-- /* */",
+                "noweb"              : "%", # EKR: 2009 - 01 - 30. Use Latex for doc chunks.
+        "nqc"                : "// /* */",
+    "nsi"                : ";", # EKR: 2010 / 10 / 27
+"nsis2"              : ";",
+"objective_c"        : "// /* */",
+    "objectrexx"         : "-- /* */",
+        "occam"              : "--",
+            "omnimark"           : ";",
+                "pandoc"             : "&lt;!-- --&gt;",
+                    "pascal"             : "// { }",
+                        "perl"               : "#",
+                            "perlpod"            : "# __=pod__ __=cut__", # 9 / 25 / 02: The perlpod hack.
+        "php"                : "// /* */", # 6 / 23 / 07: was "//",
+"pike"               : "// /* */",
+    "pl1"                : "/* */",
+        "plain"              : "#", # We must pick something.
+        "plsql"              : "-- /* */", # SQL scripts qt02537 2005 - 05 - 27
+"pop11"              : ";;; /* */",
+"postscript"         : "%",
+    "povray"             : "// /* */",
+        "powerdynamo"        : "// &lt;!-- --&gt;",
+            "prolog"             : "% /* */",
+                "psp"                : "&lt;!-- --&gt;",
+                    "ptl"                : "#",
+                        "pvwave"             : ";",
+                            "pyrex"              : "#",
+                                "python"             : "#",
+                                    "r"                  : "#",
+                                        "rapidq"             : "'", # fil 2004 - march - 11
+"rebol"              : ";", # jason 2003 - 07 - 03
+"redcode"            : ";",
+"rest"               : ".._",
+    "rhtml"              : "&lt;%# %&gt;",
+        "rib"                : "#",
+            "rpmspec"            : "#",
+                "rst"                : ".._",
+                    "rust"               : "// /* */",
+                        "ruby"               : "#", # thyrsus 2008 - 11 - 05
+"rview"              : "// /* */",
+"sas"                : "* /* */",
+    "scala"              : "// /* */",
+        "scheme"             : "; #| |#",
+            "sdl_pr"             : "/* */",
+                "sgml"               : "&lt;!-- --&gt;",
+                    "shell"              : "#",     # shell scripts
+"shellscript"        : "#",
+"shtml"              : "&lt;!-- --&gt;",
+    "smalltalk"          : '" "', # Comments are enclosed in double quotes(!!)
+"smi_mib"            : "--",
+"splus"              : "#",
+    "sqr"                : "!",
+        "squidconf"          : "#",
+            "ssharp"             : "#",
+                "swig"               : "// /* */",
+                    "tcl"                : "#",
+                        "tcltk"              : "#",
+                            "tex"                : "%", # Bug fix: 2008 - 1 - 30: Fixed Mark Edginton's bug.
+"text"               : "#", # We must pick something.
+        "texinfo"            : "@c",
+"tpl"                : "&lt;!-- --&gt;",
+    "tsql"               : "-- /* */",
+        "typescript"         : "// /* */", # For typescript import test.
+        "unknown"            : "#", # Set when @comment is seen.
+        "unknown_language"   : '#--unknown-language--', # For unknown extensions in @shadow files.
+        "uscript"            : "// /* */",
+"vbscript"           : "'",
+    "velocity"           : "## #* *#",
+        "verilog"            : "// /* */",
+            "vhdl"               : "--",
+                "vim"                : "\"",
+                    "vimoutline"         : "#", # TL 8 / 25 / 08 Vim's outline plugin
+"xml"                : "&lt;!-- --&gt;",
+"xsl"                : "&lt;!-- --&gt;",
+    "xslt"               : "&lt;!-- --&gt;",
+        "yaml"               : "#",
+            "zpt"                : "&lt;!-- --&gt;",
+
+        # These aren't real languages, or have no delims...
+        # "cvs_commit"         : "",
+        # "dsssl"              : "; &lt;!-- --&gt;",
+        # "embperl"            : "&lt;!-- --&gt;",  # Internal colorizing state.
+# "freemarker"         : "",
+        # "hex"                : "",
+        # "jcl"                : "",
+        # "patch"              : "",
+        # "phpsection"         : "&lt;!-- --&gt;",  # Internal colorizing state.
+# "props"              : "#",         # Unknown language.
+    # "pseudoplain"        : "",
+        # "relax_ng_compact"   : "#",         # An xml schema.
+# "rtf"                : "",
+        # "svn_commit"         : "",
+    }
+</t>
+<t tx="felix.20210103024632.2">public batchMode: boolean = false; // True: run in batch mode.
+public debug = []; // A list of switches to be enabled.
+public diff: boolean = false; // True: run Leo in diff mode.
+public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
+public failFast: boolean = false; // True: Use the failfast option in unit tests.
+public gui = null; // The gui class.
+public guiArgName = null; // The gui name given in --gui option.
+public ipython_inited: boolean = false; // True if leoIpython.py imports succeeded.
+public isTheme: boolean = false; // True: load files as theme files (ignore myLeoSettings.leo).
+public listen_to_log_flag: boolean = false; // True: execute listen-to-log command.
+public qt_use_tabs: boolean = false; // True: using qt gui: allow tabbed main window.
+public loaded_session: boolean = false; // Set at startup if no files specified on command line.
+public silentMode: boolean = false; // True: no sign-on.
+public start_fullscreen: boolean = false; // For qt_frame plugin.
+public start_maximized: boolean = false; // For qt_frame plugin.
+public start_minimized: boolean = false; // For qt_frame plugin.
+public trace_binding = null; // The name of a binding to trace, or None.
+public trace_setting = null; // The name of a setting to trace, or None.
+public translateToUpperCase: boolean = false; // Never set to True.
+public useIpython: boolean = false; // True: add support for IPython.
+public use_psyco: boolean = false; // True: use psyco optimization.
+public use_splash_screen: boolean = true; // True: put up a splash screen.
+
+</t>
+<t tx="felix.20210103024632.20">@nobeautify
+
+def define_language_extension_dict(self):
+
+    # Used only by g.app.externalFilesController.get_ext.
+
+    # Keys are languages, values are extensions.
+self.language_extension_dict = {
+"actionscript": "as", # jason 2003-07 - 03
+        "ada": "ada",
+"ada95": "ada",
+"ahk": "ahk",
+"antlr": "g",
+"apacheconf": "conf",
+"apdl": "apdl",
+"applescript": "scpt",
+"asp": "asp",
+"aspect_j": "aj",
+"autohotkey": "ahk", # TL - AutoHotkey language
+        "awk": "awk",
+"b": "b",
+"batch": "bat", # Leo 4.5.1.
+        "bbj": "bbj",
+"bcel": "bcel",
+"bibtex": "bib",
+"c": "c",
+"chill": "ch", # Only one extension is valid: .c186, .c286
+        "clojure": "clj", # 2013 / 09 / 25: Fix bug 879338.
+        "cobol"         : "cbl", # Only one extension is valid: .cob
+        "coldfusion": "cfm",
+"coffeescript": "coffee",
+"config": "cfg",
+"cplusplus": "c++",
+"cpp": "cpp",
+"css": "css", # 4 / 1 / 04
+        "cweb": "w",
+"cython": "pyx", # Only one extension is valid at present: .pyi, .pyd.
+        "d": "d",
+"dart": "dart",
+"eiffel": "e",
+"elisp": "el",
+"erlang": "erl",
+"elixir": "ex",
+"factor": "factor",
+"forth": "forth",
+"fortran": "f",
+"fortran90": "f90",
+"foxpro": "prg",
+"gettext": "po",
+"groovy": "groovy",
+"haskell": "hs",
+"haxe": "hx",
+"html": "html",
+"i4gl": "i4gl",
+"icon": "icn",
+"idl": "idl",
+"inform": "inf",
+"ini": "ini",
+"inno_setup": "iss",
+"io": "io",
+"java": "java",
+"javascript": "js", # EKR: 2011/11/12: For javascript import test.
+        "javaserverpage": "jsp", # EKR: 2011/11/25
+        "jhtml": "jhtml",
+"jmk": "jmk",
+"json": "json",
+"jsp": "jsp",
+"jupyter": "ipynb",
+"kivy": "kv", # PeckJ 2014/05/05
+        "kshell": "ksh", # Leo 4.5.1.
+        "latex": "tex", # 1 / 8 / 04
+        "lilypond": "ly",
+"lua": "lua", # ddm 13/02/06
+        "mail": "eml",
+"makefile": "mak",
+"maple": "mpl",
+"matlab": "m",
+"md": "md", # PeckJ: 2013/02/07
+        "ml": "ml",
+"modula3": "mod",
+"moin": "wiki",
+"mqsc": "mqsc",
+"noweb": "nw",
+"nqc": "nqc",
+"nsi": "nsi", # EKR: 2010/10/27
+        "nsis2": "nsi",
+"objective_c": "mm", # Only one extension is valid: .m
+        "objectrexx": "rex",
+"occam": "occ",
+"omnimark": "xom",
+"pascal": "p",
+"perl": "pl",
+"perlpod": "pod",
+"php": "php",
+"pike": "pike",
+"pl1": "pl1",
+"plain": "txt",
+"plsql": "sql", # qt02537 2005-05 - 27
+        # "pop11"       : "p", # Conflicts with pascall.
+        "postscript": "ps",
+"povray": "pov",
+"prolog": "pro",
+"psp": "psp",
+"ptl": "ptl",
+"pyrex": "pyx",
+"python": "py",
+"r": "r",
+"rapidq": "bas", # fil 2004-march - 11
+        "rebol": "r", # jason 2003-07 - 03
+        "rhtml": "rhtml",
+"rib": "rib",
+"rst": "rest",
+"ruby": "rb", # thyrsus 2008-11 - 05
+        "rust": "rs", # EKR: 2019/08/11
+        "sas": "sas",
+"scala": "scala",
+"scheme": "scm",
+"sgml": "sgml",
+"shell": "sh", # DS 4/1/04
+        "shellscript": "bash",
+"shtml": "ssi", # Only one extension is valid: .shtml
+        "smalltalk": "sm",
+"splus": "splus",
+"sqr": "sqr",
+"ssharp": "ss",
+"swig": "i",
+"tcl": "tcl",
+"tcltk": "tcl",
+"tex": "tex",
+"texinfo": "info",
+"text": "txt",
+"tpl": "tpl",
+"tsql": "sql", # A guess.
+        "typescript": "ts",
+"unknown": "txt", # Set when @comment is seen.
+        "uscript"       : "uc",
+"vbscript"      : "vbs",
+    "velocity"      : "vtl",
+        "verilog"       : "v",
+            "vhdl"          : "vhd", # Only one extension is valid: .vhdl
+"vim"           : "vim",
+"vimoutline"    : "otl", # TL 8 / 25 / 08 Vim's outline plugin
+"xml"           : "xml",
+"xsl"           : "xsl",
+    "xslt"          : "xsl",
+        "yaml"          : "yaml",
+            "zpt"           : "zpt",
+    }
+
+    # These aren't real languages, or have no delims...
+        # cvs_commit, dsssl, embperl, freemarker, hex, jcl,
+        # patch, phpsection, progress, props, pseudoplain,
+        # relax_ng_compact, rtf, svn_commit.
+
+    # These have extensions which conflict with other languages.
+        # assembly_macro32: .asm or.a
+        # assembly_mcs51:   .asm or.a
+        # assembly_parrot:  .asm or.a
+        # assembly_r2000:   .asm or.a
+        # assembly_x86:     .asm or.a
+        # squidconf:        .conf
+        # rpmspec:          .rpm
+</t>
+<t tx="felix.20210103024632.21">def init_at_auto_names(self):
+"""Init the app.atAutoNames set."""
+self.atAutoNames = set([
+"@auto-rst", "@auto",
+])
+</t>
+<t tx="felix.20210103024632.22">def init_at_file_names(self):
+"""Init the app.atFileNames set."""
+self.atFileNames = set([
+"@asis",
+"@edit",
+"@file-asis", "@file-thin", "@file-nosent", "@file",
+"@clean", "@nosent",
+"@shadow",
+"@thin",
+])
+</t>
+<t tx="felix.20210103024632.3">public count: number = 0; // General purpose debugging count.
+public debug_dict: any = {}; // For general use.
+public disable_redraw: boolean = false; // True: disable all redraws.
+public disableSave: boolean = false; // May be set by plugins.
+public idle_timers: any[] = []; // A list of IdleTime instances, so they persist.
+public log_listener: any = null; // The process created by the 'listen-for-log' command.
+public positions: number = 0; // The number of positions generated.
+public scanErrors: number = 0; // The number of errors seen by g.scanError.
+public structure_errors: number = 0; // Set by p.safeMoveToThreadNext.
+public statsDict: any = {}; // dict used by g.stat, g.clear_stats, g.print_stats.
+public statsLockout: boolean = false; // A lockout to prevent unbound recursion while gathering stats.
+public validate_outline: boolean = false; // True: enables c.validate_outline. (slow)
+
+</t>
+<t tx="felix.20210103024632.4">public menuWarningsGiven: boolean = false; // True: suppress warnings in menu code.
+public unicodeErrorGiven: boolean = true; // True: suppress unicode trace-backs.
+
+</t>
+<t tx="felix.20210103024632.5">public extensionsDir = null; // The leo / extensions directory
+public globalConfigDir = null; // leo / config directory
+public globalOpenDir = null; // The directory last used to open a file.
+public homeDir = null; // The user's home directory.
+public homeLeoDir = null; // The user's home/.leo directory.
+public loadDir = null; // The leo / core directory.
+public machineDir = null; // The machine - specific directory.
+
+</t>
+<t tx="felix.20210103024632.6">public atAutoNames: Set&lt;string&gt; = new Set(); // The set of all @auto spellings.
+public atFileNames: Set&lt;string&gt; = new Set(); // The set of all built -in @&lt;file&gt;spellings.
+
+public globalKillBuffer: any[] = []; // The global kill buffer.
+public globalRegisters: any = {}; // The global register list.
+public leoID: string = ''; // The id part of gnx's, using empty for falsy.
+public loadedThemes: any[] = []; // List of loaded theme.leo files.
+public lossage: any[] = []; // List of last 100 keystrokes.
+public paste_c: any = null; // The commander that pasted the last outline.
+public spellDict: any = null; // The singleton PyEnchant spell dict.
+public numberOfUntitledWindows: number = 0; // Number of opened untitled windows.
+public windowList: any[] = []; // Global list of all frames.
+public realMenuNameDict = {}; // Translations of menu names.
+
+</t>
+<t tx="felix.20210103024632.7">// Most of these are defined in initApp.
+public backgroundProcessManager: any = null; // The singleton BackgroundProcessManager instance.
+public commander_cacher: any = null; // The singleton leoCacher.CommanderCacher instance.
+public commander_db: any = null; // The singleton db, managed by g.app.commander_cacher.
+public config: any = null; // The singleton leoConfig instance.
+public db: any = null; // The singleton global db, managed by g.app.global_cacher.
+public externalFilesController: any = null; // The singleton ExternalFilesController instance.
+public global_cacher: any = null; // The singleton leoCacher.GlobalCacher instance.
+public idleTimeManager: any = null; // The singleton IdleTimeManager instance.
+public ipk: any = null; // python kernel instance
+public loadManager: any = null; // The singleton LoadManager instance.
+// public logManager: any = null;
+// The singleton LogManager instance.
+// public openWithManager: any = null;
+// The singleton OpenWithManager instance.
+public nodeIndices: any = null; // The singleton nodeIndices instance.
+public pluginsController: any = null; // The singleton PluginsManager instance. public sessionManager: any = null; // The singleton SessionManager instance. // The Commands class...
+public commandName: any = null; // The name of the command being executed.
+public commandInterruptFlag: boolean = false; // True: command within a command.
+
+</t>
+<t tx="felix.20210103024632.8">// From leoAtFile.py.
+public atAutoWritersDict: any = {};
+public writersDispatchDict: any = {};
+// From leoImport.py
+public atAutoDict: any = {};
+// Keys are @auto names, values are scanner classes.
+public classDispatchDict: any = {};
+
+</t>
+<t tx="felix.20210103024632.9">public already_open_files: any[] = []; // A list of file names that * might * be open in another copy of Leo.
+public dragging: boolean = false; // True: dragging.
+public inBridge: boolean = false; // True: running from leoBridge module.
+public inScript: boolean = false; // True: executing a script.
+public initing: boolean = true; // True: we are initializing the app.
+public initComplete: boolean = false; // True: late bindings are not allowed.
+public killed: boolean = false; // True: we are about to destroy the root window.
+public openingSettingsFile: boolean = false; // True, opening a settings file.
+public preReadFlag: boolean = false; // True: we are pre - reading a settings file.
+public quitting: boolean = false; // True: quitting.Locks out some events.
+public restarting: boolean = false; // True: restarting all of Leo.#1240.
+public reverting: boolean = false; // True: executing the revert command.
+public syntax_error_files: any[] = [];
+
 </t>
 </tnodes>
 </leo_file>
