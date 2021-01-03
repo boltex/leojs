@@ -28,9 +28,9 @@ class NodeIndices:
     def _get_time(self):
         """Return the text representation of the present time."""
         ### Not ready yet.
-        # javascript:
-        #   var d = new Date();
-        #   var n = d.getTime();
+            # javascript:
+            #   var d = new Date();
+            #   var n = d.getTime();
         return "<Time: %Y%m%d%H%M%S>"
         
         # return time.strftime(
@@ -201,8 +201,6 @@ class Position:
     #@+node:ekr.20210101064206.18: *4*  p.__init__
     def __init__(self, v, childIndex=0, stack=None):
         """Create a new position with the given childIndex and parent stack."""
-        # To support ZODB the code must set v._p_changed = 1
-        # whenever any mutable VNode object changes.
         self._childIndex = childIndex
         self.v = v
         # Stack entries are tuples (v, childIndex).
@@ -1322,8 +1320,6 @@ class Position:
                         g.error(
                             f"duplicate gnx: {child_v.fileIndex!r} "
                             f"v: {child_v} parent: {parent.v}")
-                        ### To do: g.app.nodeIndices does not exist. ###
-                        ### child_v.fileIndex = g.app.nodeIndices.getNewIndex(v=child_v)
                         child_v.fileIndex = gNodeIndices.getNewIndex(v=child_v)
                         assert child_v.gnx != parent.v.gnx
                         # Should be ok to continue.
@@ -1357,64 +1353,6 @@ class Position:
     def copy(self):
         """"Return an independent copy of a position."""
         return Position(self.v, self._childIndex, self.stack)
-    #@+node:ekr.20210101064206.97: *4* p.copyTreeAfter, copyTreeTo
-    # These used by unit tests, by the group_operations plugin,
-    # and by the files-compare-leo-files command.
-
-    # To do: use v.copyTree instead.
-
-    def copyTreeAfter(self, copyGnxs=False):
-        """Copy p and insert it after itself."""
-        p = self
-        p2 = p.insertAfter()
-        p.copyTreeFromSelfTo(p2, copyGnxs=copyGnxs)
-        return p2
-        
-
-    def copyTreeFromSelfTo(self, p2, copyGnxs=False):
-        p = self
-        p2.v._headString = g.toUnicode(p.h, reportErrors=True)  # 2017/01/24
-        p2.v._bodyString = g.toUnicode(p.b, reportErrors=True)  # 2017/01/24
-        #
-        # #1019794: p.copyTreeFromSelfTo, should deepcopy p.v.u.
-        #
-        # Transcrypt doesn't support Python's copy module.
-        #            but *does* have a deepcopy function.
-        ### p2.v.u = deepcopy(p.v.u)
-       
-        #
-        if copyGnxs:
-            p2.v.fileIndex = p.v.fileIndex
-        # 2009/10/02: no need to copy arg to iter
-        for child in p.children():
-            child2 = p2.insertAsLastChild()
-            child.copyTreeFromSelfTo(child2, copyGnxs=copyGnxs)
-    #@+node:ekr.20210101064206.98: *4* p.copyWithNewVnodes
-    def copyWithNewVnodes(self, copyMarked=False):
-        """
-        Return an **unliked** copy of p with a new vnode v.
-        The new vnode is complete copy of v and all its descendants.
-        """
-        p = self
-        return Position(v=p.v.copyTree(copyMarked))
-    #@+node:ekr.20210101064206.99: *4* p.createNodeHierarchy
-    def createNodeHierarchy(self, heads, forcecreate=False):
-        """ Create the proper hierarchy of nodes with headlines defined in
-            'heads' as children of the current position
-
-            params:
-            heads - list of headlines in order to create, i.e. ['foo','bar','baz']
-                    will create:
-                      self
-                      -foo
-                      --bar
-                      ---baz
-            forcecreate - If False (default), will not create nodes unless they don't exist
-                          If True, will create nodes regardless of existing nodes
-            returns the final position ('baz' in the above example)
-        """
-        c = self.v.context
-        return c.createNodeHierarchy(heads, parent=self, forcecreate=forcecreate)
     #@+node:ekr.20210101064206.100: *4* p.deleteAllChildren
     def deleteAllChildren(self):
         """
@@ -1876,11 +1814,7 @@ class VNode:
     #@+node:ekr.20210101064206.143: *3* v.Birth & death
     #@+node:ekr.20210101064206.144: *4* v.__init
     def __init__(self, context, gnx=None):
-        """
-        Ctor for the VNode class.
-        To support ZODB, the code must set v._p_changed = 1 whenever
-        v.unknownAttributes or any mutable VNode object changes.
-        """
+        """Ctor for the VNode class."""
         # The primary data: headline and body text.
         self._headString = 'newHeadline'
         self._bodyString = ''
@@ -1910,9 +1844,7 @@ class VNode:
             # The length of the selected body text.
         self.selectionStart = 0
             # The start of the selected body text.
-        ###
-        ### g.app.nodeIndices does not exist. ###
-        ### g.app.nodeIndices.new_vnode_helper(context, gnx, self)
+        gNodeIndices.new_vnode_helper(context, gnx, self)
         assert self.fileIndex, g.callers()
     #@+node:ekr.20210101064206.145: *4* v.__repr__ & v.__str__
     def __repr__(self):
@@ -1951,7 +1883,7 @@ class VNode:
     def anyAtFileNodeName(self):
         """Return the file name following an @file node or an empty string."""
         return (
-            ### was g.app.atAutoNames and g.app.atFileNames.
+            # was g.app.atAutoNames and g.app.atFileNames.
             self.findAtFileName(self.atAutoNames) or
             self.findAtFileName(self.atFileNames))
     #@+node:ekr.20210101064206.150: *4* v.at...FileNodeName
@@ -2009,7 +1941,6 @@ class VNode:
     #@+node:ekr.20210101064206.151: *4* v.isAtAllNode
     def isAtAllNode(self):
         """Returns True if the receiver contains @others in its body at the start of a line."""
-        ###
         flag, i = g.is_special(self._bodyString, "@all")
         return flag
     #@+node:ekr.20210101064206.152: *4* v.isAnyAtFileNode
@@ -2085,36 +2016,6 @@ class VNode:
         pattern = g.toUnicode(pattern)
         pattern = pattern.lower().replace(' ', '').replace('\t', '')
         return h.startswith(pattern)
-    #@+node:ekr.20210101064206.157: *3* v.copyTree
-
-    def copyTree(self, copyMarked=False):
-        """
-        Return an all-new tree of vnodes that are copies of self and all its
-        descendants.
-
-        **Important**: the v.parents ivar must be [] for all nodes.
-        v._addParentLinks will set all parents.
-        """
-        v = self
-        # Allocate a new vnode and gnx with empty children & parents.
-        v2 = VNode(context=v.context, gnx=None)
-        assert v2.parents == [], v2.parents
-        assert v2.gnx
-        assert v.gnx != v2.gnx
-        # Copy vnode fields. Do **not** set v2.parents.
-        v2._headString = g.toUnicode(v._headString, reportErrors=True)
-        v2._bodyString = g.toUnicode(v._bodyString, reportErrors=True)
-        #
-        # Transcrypt doesn't support Python's copy module
-        #            but *does* have a deepcopy function.
-        ### v2.u = deepcopy(v.u)
-        #
-        if copyMarked and v.isMarked():
-            v2.setMarked()
-        # Recursively copy all descendant vnodes.
-        for child in v.children:
-            v2.children.append(child.copyTree(copyMarked))
-        return v2
     #@+node:ekr.20210101064206.158: *3* v.Getters
     #@+node:ekr.20210101064206.159: *4* v.bodyString
     body_unicode_warning = False
@@ -2339,20 +2240,16 @@ class VNode:
                 self.unicode_warning_given = True
                 g.error(s)
                 g.es_exception()
-        ### self.contentModified()  # #1413.
-        ### signal_manager.emit(self.context, 'body_changed', self)
+        # self.contentModified()  # #1413.
+        # signal_manager.emit(self.context, 'body_changed', self)
 
     def setHeadString(self, s):
         # Fix bug: https://bugs.launchpad.net/leo-editor/+bug/1245535
         # API allows headlines to contain newlines.
         v = self
-        ###
-            # if g.isUnicode(s):
-                # v._headString = s.replace('\n', '')
-                # return
         s = g.toUnicode(s, reportErrors=True)
         v._headString = s.replace('\n', '')
-        ### self.contentModified()  # #1413.
+        # self.contentModified()  # #1413.
 
     initBodyString = setBodyString
     initHeadString = setHeadString
@@ -2412,31 +2309,20 @@ class VNode:
         """Adjust links after adding a link to v."""
         v = self
         v.context.frame.tree.generation += 1
-        parent_v.childrenModified()
-            # For a plugin.
         # Update parent_v.children & v.parents.
         parent_v.children.insert(childIndex, v)
         v.parents.append(parent_v)
-        # Set zodb changed flags.
-        v._p_changed = 1
-        parent_v._p_changed = 1
     #@+node:ekr.20210101064206.206: *4* v._addLink & _addParentLinks
     def _addLink(self, childIndex, parent_v):
         """Adjust links after adding a link to v."""
         v = self
         v.context.frame.tree.generation += 1
-        parent_v.childrenModified()
-            # For a plugin.
         # Update parent_v.children & v.parents.
         parent_v.children.insert(childIndex, v)
         v.parents.append(parent_v)
-        # Set zodb changed flags.
-        v._p_changed = 1
-        parent_v._p_changed = 1
-        # If v has only one parent, we adjust all
-        # the parents links in the descendant tree.
-        # This handles clones properly when undoing a delete.
         if len(v.parents) == 1:
+            # Adjust the parents links in the descendant tree.
+            # This handles clones properly when undoing a delete.
             for child in v.children:
                 child._addParentLinks(parent=v)
     #@+node:ekr.20210101064206.207: *5* v._addParentLinks
@@ -2452,7 +2338,6 @@ class VNode:
         """Adjust links after cutting a link to v."""
         v = self
         v.context.frame.tree.generation += 1
-        parent_v.childrenModified()
         assert parent_v.children[childIndex] == v
         del parent_v.children[childIndex]
         if parent_v in v.parents:
@@ -2462,12 +2347,9 @@ class VNode:
                 g.error(f"{parent_v} not in parents of {v}")
                 g.trace('v.parents:')
                 g.printObj(v.parents)
-        v._p_changed = 1
-        parent_v._p_changed = 1
-        # If v has no more parents, we adjust all
-        # the parent links in the descendant tree.
-        # This handles clones properly when deleting a tree.
         if not v.parents:
+            # Adjust the parents links in the descendant tree.
+            # This handles clones properly when deleting a tree.
             for child in v.children:
                 child._cutParentLinks(parent=v)
     #@+node:ekr.20210101064206.209: *5* v._cutParentLinks

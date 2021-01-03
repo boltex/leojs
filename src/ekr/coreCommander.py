@@ -6,9 +6,8 @@
 from leo.core import leoGlobals as g
 from leo.core import leoNodes
 
-
 #@+others
-#@+node:ekr.20210102120444.55: ** class Commands (object)
+#@+node:ekr.20210102120444.55: ** class Commands
 class Commander:
     """
     A per-outline class.
@@ -19,9 +18,21 @@ class Commander:
     def __init__(self, fileName):
         # Official ivars.
         self._currentPosition = None
-        self.frame = None
+        # self.frame = None  # This will be a leojs frame, not Leo's wrapper class.
+        self.hiddenRootNode = None
+        self.mFileName = None
+        self.mRelativeFileName = None
 
     #@+others
+    #@+node:ekr.20210103133751.1: *3* c.Drawing & coloring
+    def recolor(self):
+        pass  ### Not ready yet.
+
+    def redraw(self):
+        pass  ### Not ready yet.
+        
+    def redraw_after_icons_changed(self):
+        pass  ### Not ready yet.
     #@+node:ekr.20210102120444.56: *3* c.Generators
     #@+node:ekr.20210102120444.57: *4* c.all_nodes & all_unique_nodes
     def all_nodes(self):
@@ -355,34 +366,25 @@ class Commander:
     def clearChanged(self):
         """clear the marker that indicates that the .leo file has been changed."""
         c = self
-        if not c.frame:
-            return
         c.changed = False
-        if c.loading:
-            return  # don't update while loading.
         # Clear all dirty bits _before_ setting the caption.
         for v in c.all_unique_nodes():
             v.clearDirty()
         c.changed = False
-        # Do nothing for null frames.
-        assert c.gui
-        if c.gui.guiName() == 'nullGui':
-            return
-        if not c.frame.top:
-            return
-        master = getattr(c.frame.top, 'leo_master', None)
-        if master:
-            master.setChanged(c, False)
-                # LeoTabbedTopLevel.setChanged.
-        s = c.frame.getTitle()
-        if len(s) > 2 and s[0:2] == "* ":
-            c.frame.setTitle(s[2:])
+        ### Old code.
+            # master = getattr(c.frame.top, 'leo_master', None)
+            # if master:
+                # master.setChanged(c, False)
+                    # # LeoTabbedTopLevel.setChanged.
+            # s = c.frame.getTitle()
+            # if len(s) > 2 and s[0:2] == "* ":
+                # c.frame.setTitle(s[2:])
     #@+node:ekr.20210102120444.87: *4* c.clearMarked
     def clearMarked(self, p):
         c = self
         p.v.clearMarked()
         g.doHook("clear-mark", c=c, p=p)
-    #@+node:ekr.20210102120444.88: *4* c.setBodyString
+    #@+node:ekr.20210102120444.88: *4* c.setBodyString (to do)
     def setBodyString(self, p, s):
         """
         This is equivalent to p.b = s.
@@ -392,48 +394,38 @@ class Commander:
         c, v = self, p.v
         if not c or not v:
             return
-        s = g.toUnicode(s)
-        current = c.p
-        # 1/22/05: Major change: the previous test was: 'if p == current:'
-        # This worked because commands work on the presently selected node.
-        # But setRecentFiles may change a _clone_ of the selected node!
-        if current and p.v == current.v:
-            w = c.frame.body.wrapper
-            w.setAllText(s)
-            v.setSelection(0,0)
-            c.recolor()
-        # Keep the body text in the VNode up-to-date.
-        if v.b != s:
-            v.setBodyString(s)
-            v.setSelection(0, 0)
-            p.setDirty()
-            if not c.isChanged():
-                c.setChanged()
-            c.redraw_after_icons_changed()
+        ### Old code
+            # s = g.toUnicode(s)
+            # current = c.p
+            # if current and p.v == current.v:
+                # w = c.frame.body.wrapper
+                # w.setAllText(s)
+                # v.setSelection(0,0)
+                # c.recolor()
+            # # Keep the body text in the VNode up-to-date.
+            # if v.b != s:
+                # v.setBodyString(s)
+                # v.setSelection(0, 0)
+                # p.setDirty()
+                # if not c.isChanged():
+                    # c.setChanged()
+                # c.redraw_after_icons_changed()
     #@+node:ekr.20210102120444.89: *4* c.setChanged
     def setChanged(self, redrawFlag=True):
         """Set the marker that indicates that the .leo file has been changed."""
         c = self
-        if not c.frame:
-            return
         c.changed = True
-        if c.loading:
-            return  # don't update while loading.
         # Do nothing for null frames.
-        assert c.gui
-        if c.gui.guiName() == 'nullGui':
-            return
-        if not c.frame.top:
-            return
         if not redrawFlag:  # Prevent flash when fixing #387.
             return
-        master = getattr(c.frame.top, 'leo_master', None)
-        if master:
-            master.setChanged(c, True)
-                # LeoTabbedTopLevel.setChanged.
-        s = c.frame.getTitle()
-        if len(s) > 2 and s[0] != '*':
-            c.frame.setTitle("* " + s)
+        ### Old code.
+            # master = getattr(c.frame.top, 'leo_master', None)
+            # if master:
+                # master.setChanged(c, True)
+                    # # LeoTabbedTopLevel.setChanged.
+            # s = c.frame.getTitle()
+            # if len(s) > 2 and s[0] != '*':
+                # c.frame.setTitle("* " + s)
     #@+node:ekr.20210102120444.90: *4* c.setCurrentPosition
     _currentCount = 0
 

@@ -47,7 +47,7 @@ class LeoFind:
         self.changeTextList = []
         # Widget ivars...
         self.change_ctrl = None
-        ### self.s_ctrl = SearchWidget()
+        self.s_ctrl = SearchWidget()
             # A helper widget for searches.
         self.find_text = ""
         self.change_text = ""
@@ -406,13 +406,14 @@ class LeoFind:
         finally:
             self.reverse = False
     #@+node:ekr.20210102145531.36: *4* find.focusToFind
-    @cmd('focus-to-find')
-    def focusToFind(self, event=None):
-        c = self.c
-        if c.config.getBool('use-find-dialog', default=True):
-            g.app.gui.openFindDialog(c)
-        else:
-            c.frame.log.selectTab('Find')
+    ###
+        # @cmd('focus-to-find')
+        # def focusToFind(self, event=None):
+            # c = self.c
+            # if c.config.getBool('use-find-dialog', default=True):
+                # g.app.gui.openFindDialog(c)
+            # else:
+                # c.frame.log.selectTab('Find')
     #@+node:ekr.20210102145531.37: *4* find.helpForFindCommands
     def helpForFindCommands(self, event=None):
         """Called from Find panel.  Redirect."""
@@ -2555,6 +2556,58 @@ class LeoFind:
         if s and s[-1] in ('\r', '\n'):
             s = s[:-1]
         self.change_text = s
+    #@-others
+#@+node:ekr.20210103132816.1: ** class SearchWidget
+class SearchWidget:
+    """A class to simulating high-level interface widget."""
+    # This could be a StringTextWrapper, but this code is simple and good.
+
+    def __init__(self, *args, **keys):
+        self.s = ''  # The widget text
+        self.i = 0  # The insert point
+        self.sel = 0, 0  # The selection range
+
+    def __repr__(self):
+        return f"SearchWidget id: {id(self)}"
+    #@+others
+    #@+node:ekr.20210103132816.2: *3* getters (LeoFind)
+    def getAllText(self): return self.s
+
+    def getInsertPoint(self): return self.i  # Returns Python index.
+
+    def getSelectionRange(self): return self.sel  # Returns Python indices.
+    #@+node:ekr.20210103132816.3: *3* setters (LeoFind)
+    def delete(self, i, j=None):
+        i = self.toPythonIndex(i)
+        if j is None: j = i + 1
+        else: j = self.toPythonIndex(j)
+        self.s = self.s[:i] + self.s[j:]
+        # Bug fix: 2011/11/13: Significant in external tests.
+        self.i = i
+        self.sel = i, i
+
+    def insert(self, i, s):
+        if not s: return
+        i = self.toPythonIndex(i)
+        self.s = self.s[:i] + s + self.s[i:]
+        self.i = i
+        self.sel = i, i
+
+    def setAllText(self, s):
+        self.s = s
+        self.i = 0
+        self.sel = 0, 0
+
+    def setInsertPoint(self, i, s=None):
+        self.i = i
+
+    def setSelectionRange(self, i, j, insert=None):
+        self.sel = self.toPythonIndex(i), self.toPythonIndex(j)
+        if insert is not None:
+            self.i = self.toPythonIndex(insert)
+    #@+node:ekr.20210103132816.4: *3* toPythonIndex (LeoFind)
+    def toPythonIndex(self, i):
+        return g.toPythonIndex(self.s, i)
     #@-others
 #@-others
 #@@language python

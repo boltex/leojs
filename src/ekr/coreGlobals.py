@@ -3,8 +3,8 @@
 #@+node:ekr.20201227040845.1: * @file src/ekr/coreGlobals.py
 #@@first
 """Global classes and functions, for use by leoInteg."""
+import os
 import re
-import sys
 #@+<< define g.globalDirectiveList >>
 #@+node:ekr.20210101093155.1: ** << define g.globalDirectiveList >>
 # Visible externally so plugins may add to the list of directives.
@@ -115,31 +115,32 @@ def callers(n=4, count=0, excludeCaller=True, verbose=False):
     if verbose:
         return ''.join([f"\n  {z}" for z in result])
     return ','.join(result)
-#@+node:ekr.20201227044712.2: *3* g._callerName   (coreGlobals.py)
+#@+node:ekr.20201227044712.2: ** g._callerName     (coreGlobals.py)
 def _callerName(n, verbose=False):
     
-    ### This won't work on Transcrypt, or vs-code.
+    return "<_callerName>"
 
-    try:
-        # get the function name from the call stack.
-        f1 = sys._getframe(n)  # The stack frame, n levels up.
-        code1 = f1.f_code  # The code object
-        sfn = shortFilename(code1.co_filename)  # The file name.
-        locals_ = f1.f_locals  # The local namespace.
-        name = code1.co_name
-        line = code1.co_firstlineno
-        if verbose:
-            obj = locals_.get('self')
-            full_name = f"{obj.__class__.__name__}.{name}" if obj else name
-            return f"line {line:4} {sfn:>30} {full_name}"
-        return name
-    except ValueError:
-        return ''
-            # The stack is not deep enough OR
-            # sys._getframe does not exist on this platform.
-    except Exception:
-        es_exception()
-        return ''  # "<no caller name>"
+    ### This won't work in JavaScript.
+        # try:
+            # # get the function name from the call stack.
+            # f1 = sys._getframe(n)  # The stack frame, n levels up.
+            # code1 = f1.f_code  # The code object
+            # sfn = shortFilename(code1.co_filename)  # The file name.
+            # locals_ = f1.f_locals  # The local namespace.
+            # name = code1.co_name
+            # line = code1.co_firstlineno
+            # if verbose:
+                # obj = locals_.get('self')
+                # full_name = f"{obj.__class__.__name__}.{name}" if obj else name
+                # return f"line {line:4} {sfn:>30} {full_name}"
+            # return name
+        # except ValueError:
+            # return ''
+                # # The stack is not deep enough OR
+                # # sys._getframe does not exist on this platform.
+        # except Exception:
+            # es_exception()
+            # return ''  # "<no caller name>"
 #@+node:ekr.20201227042826.1: ** g.doKeywordArgs   (coreGlobals.py)
 def doKeywordArgs(keys, d=None):
     """
@@ -173,9 +174,9 @@ def es(*args, **keys):
     print(','.join(result))
 
 #@+node:ekr.20201227045227.1: ** g.es_exception    (coreGlobals.py)
-def es_exception(): ### full=True, c=None, color="red"):
+def es_exception():
     
-    return '<no file>', 0 ### To do
+    return '<no file>', 0  # To do
     
     ### Old code
         # typ, val, tb = sys.exc_info()
@@ -239,21 +240,6 @@ def match_word(s, i, pattern):
 
     pat = fr"\b{pattern}\b"
     return bool(re.search(pat, s[i:]))
-    ### Old code.
-        # # Using a regex is surprisingly tricky.
-        # if pattern is None:
-            # return False
-        # if i > 0 and g.isWordChar(s[i - 1]):
-            # return False
-        # j = len(pattern)
-        # if j == 0:
-            # return False
-        # if s.find(pattern, i, i + j) != i:
-            # return False
-        # if i + j >= len(s):
-            # return True
-        # ch = s[i + j]
-        # return not g.isWordChar(ch)
 #@+node:ekr.20201227040845.163: ** g.objToSTring     (coreGlobals.py)
 def objToString(obj, indent='', printCaller=False, tag=None):
     """Pretty print any Python object to a string."""
@@ -370,8 +356,7 @@ def printObj(obj, indent='', printCaller=False, tag=None):
 #@+node:ekr.20201227044510.1: ** g.shortFileName   (coreGlobals.py)
 def shortFileName(fileName):
     """Return the base name of a path."""
-    # return os.path.basename(fileName) if fileName else ''
-    return fileName  ###
+    return os.path.basename(fileName) if fileName else ''
 
 shortFilename = shortFileName
 #@+node:ekr.20201227070623.1: ** g.skip_to_char    (coreGlobals.py)

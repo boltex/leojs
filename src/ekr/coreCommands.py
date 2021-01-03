@@ -3,7 +3,7 @@
 #@+node:ekr.20210102120444.2: * @file src/ekr/coreCommands.py
 #@@first
 
-import os  ### To be deleted.
+import os
 import sys
 import time
 
@@ -99,58 +99,6 @@ def createCloneFindPredicateRoot(self, flatten, undoType):
     root = c.lastTopLevel().insertAfter()
     root.h = undoType + (' (flattened)' if flatten else '')
     return root
-#@+node:ekr.20210102120444.7: *3* c.createNodeHierarchy
-def createNodeHierarchy(self, heads, parent=None, forcecreate=False):
-    """ Create the proper hierarchy of nodes with headlines defined in
-        'heads' under 'parent'
-
-        params:
-        parent - parent node to start from.  Set to None for top-level nodes
-        heads - list of headlines in order to create, i.e. ['foo','bar','baz']
-                will create:
-                  parent
-                  -foo
-                  --bar
-                  ---baz
-        forcecreate - If False (default), will not create nodes unless they don't exist
-                      If True, will create nodes regardless of existing nodes
-        returns the final position ('baz' in the above example)
-    """
-    u = self.undoer
-    undoType = 'Create Node Hierarchy'
-    undoType2 = 'Insert Node In Hierarchy'
-    u_node = parent or self.rootPosition()
-    undoData = u.beforeChangeGroup(u_node, undoType)
-    changed_node = False
-    for idx, head in enumerate(heads):
-        if parent is None and idx == 0:  # if parent = None, create top level node for first head
-            if not forcecreate:
-                for pos in self.all_positions():
-                    if pos.h == head:
-                        parent = pos
-                        break
-            if parent is None or forcecreate:
-                u_d = u.beforeInsertNode(u_node)
-                n = self.rootPosition().insertAfter()
-                n.h = head
-                u.afterInsertNode(n, undoType2, u_d)
-                parent = n
-        else:  # else, simply create child nodes each round
-            if not forcecreate:
-                for ch in parent.children():
-                    if ch.h == head:
-                        parent = ch
-                        changed_node = True
-                        break
-            if parent.h != head or not changed_node or forcecreate:
-                u_d = u.beforeInsertNode(parent)
-                n = parent.insertAsLastChild()
-                n.h = head
-                u.afterInsertNode(n, undoType2, u_d)
-                parent = n
-        changed_node = False
-    u.afterChangeGroup(parent, undoType, undoData)
-    return parent  # actually the last created/found position
 #@+node:ekr.20210102120444.8: *3* c.deletePositionsInList
 def deletePositionsInList(self, aList, redraw=True):
     """
