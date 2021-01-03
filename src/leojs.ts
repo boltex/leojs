@@ -6,8 +6,8 @@ import * as vscode from 'vscode';
 // import * as leo from './ekr/test/leo'; // Your tests from leojs4 :)
 
 // EKR: This works!
-import {test} from './ekr/test-ts/leo';
-test();
+// import {test} from './ekr/test-ts/leo';
+// test();
 
 import { LeoButton, LeoDocument, PNode } from './types';
 
