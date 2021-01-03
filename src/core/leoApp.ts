@@ -230,6 +230,7 @@ export class LeoApp {
 
     public isExternalUnitTest: boolean = false; // True: we are running a unit test externally.
     public runningAllUnitTests: boolean = false; // True: we are running all unit tests(Only for local tests).
+
     public suppressImportChecks: boolean = false;
     // Used only in basescanner.py ;
     // True: suppress importCommands.check
@@ -237,6 +238,7 @@ export class LeoApp {
     public unitTestGui = null;   // A way to override the gui in external unit tests.
     public unitTesting = false;   // True if unit testing.
     public unitTestMenusDict = {};   // Created in LeoMenu.createMenuEntries for a unit test. ;   // keys are command names.values are sets of strokes.
+
 
     public delegate_language_dict: { [key: string]: string } = {};
     public extension_dict: { [key: string]: string } = {};
@@ -461,9 +463,6 @@ export class LeoApp {
 
     public define_language_delims_dict(): void {
 
-
-
-
         this.language_delims_dict = {
             // Internally, lower case is used for all language names.
             // Keys are languages, values are 1, 2 or 3-tuples of delims.
@@ -650,6 +649,7 @@ export class LeoApp {
         };
 
     }
+
     public define_language_extension_dict(): void {
 
         // Used only by g.app.externalFilesController.get_ext.
@@ -814,6 +814,7 @@ export class LeoApp {
         */
 
     }
+
     /**
      * Init the app.atAutoNames set.
      */
@@ -834,6 +835,7 @@ export class LeoApp {
             "@thin",
         ]);
     }
+
 
 
 }

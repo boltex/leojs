@@ -6888,6 +6888,7 @@ public permanentScriptDict = {};   // For use by scrips.Never cleared automatica
 
 public isExternalUnitTest: boolean = false; // True: we are running a unit test externally.
 public runningAllUnitTests: boolean = false; // True: we are running all unit tests(Only for local tests).
+
 </t>
 <t tx="felix.20210103024632.15">public suppressImportChecks: boolean = false;
 // Used only in basescanner.py ;
@@ -6896,6 +6897,7 @@ public unitTestDict = {};   // For communication between unit tests and code.
 public unitTestGui = null;   // A way to override the gui in external unit tests.
 public unitTesting = false;   // True if unit testing.
 public unitTestMenusDict = {};   // Created in LeoMenu.createMenuEntries for a unit test. ;   // keys are command names.values are sets of strokes.
+
 </t>
 <t tx="felix.20210103024632.16">public define_delegate_language_dict(): void {
     this.delegate_language_dict = {
@@ -7103,9 +7105,6 @@ public unitTestMenusDict = {};   // Created in LeoMenu.createMenuEntries for a u
 </t>
 <t tx="felix.20210103024632.19">public define_language_delims_dict(): void {
 
-
-
-
     this.language_delims_dict = {
         // Internally, lower case is used for all language names.
         // Keys are languages, values are 1, 2 or 3-tuples of delims.
@@ -7292,6 +7291,7 @@ public unitTestMenusDict = {};   // Created in LeoMenu.createMenuEntries for a u
     };
 
 }
+
 </t>
 <t tx="felix.20210103024632.2">public batchMode: boolean = false; // True: run in batch mode.
 public debug = []; // A list of switches to be enabled.
@@ -7481,6 +7481,7 @@ public use_splash_screen: boolean = true; // True: put up a splash screen.
     */
 
 }
+
 </t>
 <t tx="felix.20210103024632.21">/**
  * Init the app.atAutoNames set.
@@ -7503,6 +7504,7 @@ public init_at_file_names(): void {
         "@thin",
     ]);
 }
+
 </t>
 <t tx="felix.20210103024632.3">public count: number = 0; // General purpose debugging count.
 public debug_dict: any = {}; // For general use.
