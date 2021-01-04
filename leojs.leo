@@ -394,16 +394,20 @@
 <v t="felix.20210102181122.1"><vh>&lt;&lt; imports &gt;&gt; (leoGlobals)</vh></v>
 <v t="felix.20210102180402.1"><vh>&lt;&lt; define g.globalDirectiveList &gt;&gt;</vh></v>
 <v t="felix.20210102180405.1"><vh>&lt;&lt; define global decorator dicts &gt;&gt; (leoGlobals.py)</vh></v>
-<v t="felix.20210102180409.1"><vh>&lt;&lt; define g.Decorators &gt;&gt;</vh>
-<v t="felix.20210102180409.2"><vh>g.callback</vh></v>
-<v t="felix.20210102180409.3"><vh>g.check_cmd_instance_dict</vh></v>
-<v t="felix.20210102180409.4"><vh>g.command (decorator)</vh></v>
-<v t="felix.20210102180409.5"><vh>g.command_alias</vh></v>
-<v t="felix.20210102180409.6"><vh>g.commander_command (decorator)</vh></v>
-<v t="felix.20210102180409.7"><vh>g.ivars2instance</vh></v>
-<v t="felix.20210102180409.8"><vh>g.new_cmd_decorator (decorator)</vh></v>
-</v>
 <v t="felix.20210102180413.1"><vh>&lt;&lt; define regex's &gt;&gt;</vh></v>
+<v t="felix.20210103231554.1"><vh>class g.FileLikeObject (coreGlobals.py)</vh>
+<v t="felix.20210103231554.2"><vh>FileLikeObject.clear (coreGlobals.py)</vh></v>
+<v t="felix.20210103231554.3"><vh>FileLikeObject.close (coreGlobals.py)</vh></v>
+<v t="felix.20210103231554.4"><vh>FileLikeObject.flush (coreGlobals.py)</vh></v>
+<v t="felix.20210103231554.5"><vh>FileLikeObject.get &amp; getvalue &amp; read (coreGlobals.py)</vh></v>
+<v t="felix.20210103231554.6"><vh>FileLikeObject.readline (coreGlobals.py)</vh></v>
+<v t="felix.20210103231554.7"><vh>FileLikeObject.write  (coreGlobals.py)</vh></v>
+</v>
+<v t="felix.20210103234820.1"><vh>g.angleBrackets   (coreGlobals.py)</vh></v>
+<v t="felix.20210104000547.1"><vh>g.caller          (coreGlobals.py)</vh></v>
+<v t="felix.20210104001301.1"><vh>g.callers         (coreGlobals.py)</vh></v>
+<v t="felix.20210104010331.1"><vh>g._callerName     (coreGlobals.py)</vh></v>
+<v t="felix.20210104003932.1"><vh>g.splitLines      (coreGlobals.py)</vh></v>
 </v>
 <v t="felix.20210102012632.1"><vh>@clean src/core/leoNodes.ts</vh>
 <v t="felix.20210102014453.1"><vh>class NodeIndices</vh>
@@ -5879,7 +5883,6 @@ export const isWindows: boolean = process.platform.startsWith('win');
 &lt;&lt; imports &gt;&gt;
 &lt;&lt; define g.globalDirectiveList &gt;&gt;
 &lt;&lt; define global decorator dicts &gt;&gt;
-&lt;&lt; define g.decorators &gt;&gt;
 &lt;&lt; define regex's &gt;&gt;
 
 export const tree_popup_handlers: ((...args: any[]) =&gt; any)[] = [];  // Set later.
@@ -6173,202 +6176,6 @@ export const cmd_instance_dict: { [key: string]: string[] } = {
 };
 
 </t>
-<t tx="felix.20210102180409.1">@others
-</t>
-<t tx="felix.20210102180409.2">/*
-def callback(func):
-    """
-    A global decorator that protects Leo against crashes in callbacks.
-
-    This is the recommended way of defining all callback.
-
-        @g.callback
-        def a_callback(...):
-            c = event.get('c')
-            ...
-    """
-
-    def callback_wrapper(*args, **keys):
-        """Callback for the @g.callback decorator."""
-        try:
-            return func(*args, **keys)
-        except Exception:
-            g.es_exception()
-
-    return callback_wrapper
-*/
-
-</t>
-<t tx="felix.20210102180409.3">/*
-def check_cmd_instance_dict(c, g):
-    """
-    Check g.check_cmd_instance_dict.
-    This is a permanent unit test, called from c.finishCreate.
-    """
-    d = cmd_instance_dict
-    for key in d:
-        ivars = d.get(key)
-        obj = ivars2instance(c, g, ivars)
-            # Produces warnings.
-        if obj:
-            name = obj.__class__.__name__
-            if name != key:
-                g.trace('class mismatch', key, name)
-*/
-
-</t>
-<t tx="felix.20210102180409.4">/*
-class Command:
-    """
-    A global decorator for creating commands.
-
-    This is the recommended way of defining all new commands, including
-    commands that could befined inside a class. The typical usage is:
-
-        @g.command('command-name')
-        def A_Command(event):
-            c = event.get('c')
-            ...
-
-    g can *not* be used anywhere in this class!
-    """
-
-    def __init__(self, name, **kwargs):
-        """Ctor for command decorator class."""
-        self.name = name
-
-    def __call__(self, func):
-        """Register command for all future commanders."""
-        global_commands_dict[self.name] = func
-        if app:
-            for c in app.commanders():
-                c.k.registerCommand(self.name, func)
-        # Inject ivars for plugins_menu.py.
-        func.__func_name__ = func.__name__ # For leoInteg.
-        func.is_command = True
-        func.command_name = self.name
-        return func
-
-command = Command
-*/
-
-</t>
-<t tx="felix.20210102180409.5">/*
-def command_alias(alias, func):
-    """Create an alias for the *already defined* method in the Commands class."""
-    import leo.core.leoCommands as leoCommands
-    assert hasattr(leoCommands.Commands, func.__name__)
-    funcToMethod(func, leoCommands.Commands, alias)
-*/
-
-</t>
-<t tx="felix.20210102180409.6">/*
-class CommanderCommand:
-    """
-    A global decorator for creating commander commands, that is, commands
-    that were formerly methods of the Commands class in leoCommands.py.
-
-    Usage:
-
-        @g.command('command-name')
-        def command_name(self, *args, **kwargs):
-            ...
-
-    The decorator injects command_name into the Commander class and calls
-    funcToMethod so the ivar will be injected in all future commanders.
-
-    g can *not* be used anywhere in this class!
-    """
-
-    def __init__(self, name, **kwargs):
-        """Ctor for command decorator class."""
-        self.name = name
-
-    def __call__(self, func):
-        """Register command for all future commanders."""
-
-        def commander_command_wrapper(event):
-            c = event.get('c')
-            method = getattr(c, func.__name__, None)
-            method(event=event)
-
-        # Inject ivars for plugins_menu.py.
-        commander_command_wrapper.__func_name__ = func.__name__ # For leoInteg.
-        commander_command_wrapper.__name__ = self.name
-        commander_command_wrapper.__doc__ = func.__doc__
-        global_commands_dict[self.name] = commander_command_wrapper
-        if app:
-            import leo.core.leoCommands as leoCommands
-            funcToMethod(func, leoCommands.Commands)
-            for c in app.commanders():
-                c.k.registerCommand(self.name, func)
-        # Inject ivars for plugins_menu.py.
-        func.is_command = True
-        func.command_name = self.name
-        return func
-
-commander_command = CommanderCommand
-*/
-
-</t>
-<t tx="felix.20210102180409.7">/*
-def ivars2instance(c, g, ivars):
-    """
-    Return the instance of c given by ivars.
-    ivars is a list of strings.
-    A special case: ivars may be 'g', indicating the leoGlobals module.
-    """
-    if not ivars:
-        g.trace('can not happen: no ivars')
-        return None
-    ivar = ivars[0]
-    if ivar not in ('c', 'g'):
-        g.trace('can not happen: unknown base', ivar)
-        return None
-    obj = c if ivar == 'c' else g
-    for ivar in ivars[1:]:
-        obj = getattr(obj, ivar, None)
-        if not obj:
-            g.trace('can not happen: unknown attribute', obj, ivar, ivars)
-            break
-    return obj
-*/
-
-</t>
-<t tx="felix.20210102180409.8">/*
-def new_cmd_decorator(name, ivars):
-    """
-    Return a new decorator for a command with the given name.
-    Compute the class *instance* using the ivar string or list.
-
-    Don't even think about removing the @cmd decorators!
-    See https://github.com/leo-editor/leo-editor/issues/325
-    """
-
-    def _decorator(func):
-
-        def new_cmd_wrapper(event):
-            c = event.c
-            self = g.ivars2instance(c, g, ivars)
-            try:
-                func(self, event=event)
-                    # Don't use a keyword for self.
-                    # This allows the VimCommands class to use vc instead.
-            except Exception:
-                g.es_exception()
-
-        new_cmd_wrapper.__func_name__ = func.__name__ # For leoInteg.
-        new_cmd_wrapper.__name__ = name
-        new_cmd_wrapper.__doc__ = func.__doc__
-        global_commands_dict[name] = new_cmd_wrapper
-            # Put the *wrapper* into the global dict.
-        return func
-            # The decorator must return the func itself.
-
-    return _decorator
-*/
-
-</t>
 <t tx="felix.20210102180413.1">export const g_language_pat = new RegExp(String.raw`^@language\s+(\w+)+`, 'm');
 // Regex used by this module, and in leoColorizer.py.
 
@@ -6416,6 +6223,7 @@ export const g_tabwidth_pat = new RegExp(String.raw`(^@tabwidth)`, 'm');
     import urllib
     import urllib.parse as urlparse
 */
+
 </t>
 <t tx="felix.20210102211149.1">/*
     import leo.core.leoGlobals as g
@@ -7591,6 +7399,174 @@ public quitting: boolean = false; // True: quitting.Locks out some events.
 public restarting: boolean = false; // True: restarting all of Leo.#1240.
 public reverting: boolean = false; // True: executing the revert command.
 public syntax_error_files: any[] = [];
+
+</t>
+<t tx="felix.20210103231554.1">/**
+ * Define a file-like object for redirecting writes to a string.
+ * The caller is responsible for handling newlines correctly.
+ */
+export class FileLikeObject {
+
+    public encoding:string;
+    public ptr:number;
+    private _list:string[];
+
+    constructor( encoding:string='utf-8', fromString?:string) {
+        this.encoding = encoding || 'utf-8';
+        this._list = splitLines(fromString);  // Must preserve newlines!
+        this.ptr = 0;
+    }
+
+    @others
+
+}
+</t>
+<t tx="felix.20210103231554.2">public clear(): void {
+    this._list = [];
+}
+
+</t>
+<t tx="felix.20210103231554.3">public close(): void {
+    // pass
+}
+
+</t>
+<t tx="felix.20210103231554.4">public flush(): void {
+    // pass
+}
+
+</t>
+<t tx="felix.20210103231554.5">public get():string {
+    return this._list.join();
+}
+
+// Todo : maybe add names to prototype instead
+public getvalue():string {
+    return this.get();
+}
+
+public read():string {
+    return this.get();
+}
+
+</t>
+<t tx="felix.20210103231554.6">/**
+ * Read the next line using at.list and at.ptr.
+ */
+public readline():string {
+    if(this.ptr &lt; this._list.length){
+        const line:string = this._list[this.ptr];
+        this.ptr++;
+        return line;
+    }
+    return '';
+}
+
+</t>
+<t tx="felix.20210103231554.7">public write(s:string):void {
+    if(s){
+        this._list.push(s);
+    }
+}
+
+</t>
+<t tx="felix.20210103234820.1">
+/**
+ * Return &lt; &lt; s &gt; &gt;
+ */
+export function angleBrackets(s:string):string {
+    const lt = "&lt;&lt;";
+    const rt = "&gt;&gt;";
+    return lt + s + rt;
+}
+
+</t>
+<t tx="felix.20210104000547.1">/**
+ * Return the caller name i levels up the stack.
+ */
+export function caller(i:number=1):string {
+    return callers(i + 1).split(',')[0];
+}
+
+</t>
+<t tx="felix.20210104001301.1">/**
+ * Return a string containing a comma-separated list of the callers
+ * of the function that called callerList.
+ *
+ * excludeCaller: True (the default), callers itself is not on the list.
+ *   
+ * If the `verbose` keyword is True, return a list separated by newlines.
+ */
+export function callers(n:number=4, count:number=0, excludeCaller:boolean=true, verbose:boolean=false):string {
+    // Be careful to call _callerName with smaller values of i first:
+    // sys._getframe throws ValueError if there are less than i entries.
+    let result:string[] = [];
+    let i:number = excludeCaller?3:2;
+    while (1){
+        let s:string = _callerName(n=i, verbose=verbose);
+        if (s){
+            result.push(s);
+        }
+        if (!s || result.length &gt;= n){
+            break;
+        }
+        i += 1;
+    }
+
+    result.reverse();
+    if (count &gt; 0){
+        result = result.slice(0,count);
+    }
+    if (verbose){
+        return ''; //''.join([f"\n  {z}" for z in result]);
+    }
+    return result.join(',');
+}
+
+</t>
+<t tx="felix.20210104003932.1">/**
+ * Split s into lines, preserving the number of lines and the endings
+ * of all lines, including the last line.
+ */
+export function splitLines(s?:string): string[] {
+    if(s){
+        return s.split(/\r?\n/);
+    }else{
+        return [];
+    }
+}
+
+</t>
+<t tx="felix.20210104010331.1">// TODO : see Error().stack to access names from the call stack
+export function _callerName(n:number, verbose:boolean=false):string {
+    return "&lt;_callerName&gt;";
+}
+
+/*
+    About _callerName: see https://nodejs.org/api/errors.html#errors_error_stack
+
+    ### This won't work in JavaScript.
+        # try:
+            # # get the function name from the call stack.
+            # f1 = sys._getframe(n)  # The stack frame, n levels up.
+            # code1 = f1.f_code  # The code object
+            # sfn = shortFilename(code1.co_filename)  # The file name.
+            # locals_ = f1.f_locals  # The local namespace.
+            # name = code1.co_name
+            # line = code1.co_firstlineno
+            # if verbose:
+                # obj = locals_.get('self')
+                # full_name = f"{obj.__class__.__name__}.{name}" if obj else name
+                # return f"line {line:4} {sfn:&gt;30} {full_name}"
+            # return name
+        # except ValueError:
+            # return ''
+                # # The stack is not deep enough OR
+                # # sys._getframe does not exist on this platform.
+        # except Exception:
+            # es_exception()
+            # return ''  # "&lt;no caller name&gt;"
+*/
 
 </t>
 </tnodes>
