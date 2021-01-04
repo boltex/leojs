@@ -64,7 +64,6 @@ class LeoFind:
             # Set of vnodes.
         #
         # Ivars containing internal state...
-        self.buttonFlag = False
         self.changeAllFlag = False
         self.findAllFlag = False
         self.findAllUniqueFlag = False
@@ -430,79 +429,6 @@ class LeoFind:
         options = fc.computeFindOptionsInStatusArea()
         c.frame.statusLine.put(options)
     #@+node:ekr.20210103213410.1: *3* LeoFind: Helpers
-    #@+node:ekr.20210102145531.100: *4* find.changeSelection & helper
-    # Replace selection with self.change_text.
-    # If no selection, insert self.change_text at the cursor.
-
-    def changeSelection(self):
-        c = self.c
-        p = self.p or c.p  # 2015/06/22
-        wrapper = c.frame.body and c.frame.body.wrapper
-        w = c.edit_widget(p) if self.in_headline else wrapper
-        if not w:
-            self.in_headline = False
-            w = wrapper
-        if not w: return False
-        oldSel = sel = w.getSelectionRange()
-        start, end = sel
-        if start > end: start, end = end, start
-        if start == end:
-            g.es("no text selected"); return False
-        # Replace the selection in _both_ controls.
-        start, end = oldSel
-        change_text = self.change_text
-        # Perform regex substitutions of \1, \2, ...\9 in the change text.
-        if self.pattern_match and self.match_obj:
-            groups = self.match_obj.groups()
-            if groups:
-                change_text = self.makeRegexSubs(change_text, groups)
-        # change_text = change_text.replace('\\n','\n').replace('\\t','\t')
-        change_text = self.replaceBackSlashes(change_text)
-        for w2 in (w, self.s_ctrl):
-            if start != end: w2.delete(start, end)
-            w2.insert(start, change_text)
-            w2.setInsertPoint(start if self.reverse else start + len(change_text))
-        # Update the selection for the next match.
-        w.setSelectionRange(start, start + len(change_text))
-        c.widgetWantsFocus(w)
-        # No redraws here: they would destroy the headline selection.
-        if self.mark_changes:
-            p.setMarked()
-            p.setDirty()
-        if self.in_headline:
-            pass
-        else:
-            c.frame.body.onBodyChanged('Change', oldSel=oldSel)
-        c.frame.tree.updateIcon(p)  # redraw only the icon.
-        return True
-    #@+node:ekr.20210102145531.101: *5* makeRegexSubs
-    def makeRegexSubs(self, change_text, groups):
-        """
-        Substitute group[i-1] for \\i strings in change_text.
-        """
-
-        def repl(match_object):
-            # # 1494...
-            n = int(match_object.group(1)) - 1
-            if 0 <= n < len(groups):
-                return (
-                    groups[n].
-                        replace(r'\b', r'\\b').
-                        replace(r'\f', r'\\f').
-                        replace(r'\n', r'\\n').
-                        replace(r'\r', r'\\r').
-                        replace(r'\t', r'\\t').
-                        replace(r'\v', r'\\v'))
-            # No replacement.
-            return match_object.group(0)
-
-        result = re.sub(r'\\([0-9])', repl, change_text)
-        # print(
-            # f"makeRegexSubs:\n"
-            # f"change_text: {change_text!s}\n"
-            # f"     groups: {groups!s}\n"
-            # f"     result: {result!s}")
-        return result
     #@+node:ekr.20210102145531.102: *4* find.changeThenFind
     def changeThenFind(self):
         if not self.checkArgs():
@@ -510,18 +436,7 @@ class LeoFind:
         self.initInHeadline()
         if self.changeSelection():
             self.findNext(False)  # don't reinitialize
-    #@+node:ekr.20210102145531.137: *4* find.checkArgs
-    def checkArgs(self):
-        val = True
-        if not self.search_headline and not self.search_body:
-            g.es("not searching headline or body")
-            val = False
-        s = self.ftm.getFindText()
-        if not s:
-            g.es("empty find patttern")
-            val = False
-        return val
-    #@+node:ekr.20210102145531.105: *4* find.findAll & helpers
+    #@+node:ekr.20210102145531.105: *4* find.findAll & helpers (refactor)
     def findAll(self, clone_find_all=False, clone_find_all_flattened=False):
 
         c, flatten = self.c, clone_find_all_flattened
@@ -716,7 +631,7 @@ class LeoFind:
             pos, newpos = self.searchHelper(s, 0, len(s), self.find_text)
             if pos != -1: return True
         return False
-    #@+node:ekr.20210102145531.113: *4* find.findNext & helper
+    #@+node:ekr.20210102145531.113: *4* find.findNext & helper (return success)
     def findNext(self, initFlag=True):
         """Find the next instance of the pattern."""
         if not self.checkArgs():
@@ -970,7 +885,7 @@ class LeoFind:
         p = self.p or c.p
         s = p.h if self.in_headline else p.b
         self.init_s_ctrl(s, ins)
-    #@+node:ekr.20210102145531.141: *4* find.initInHeadline & helper
+    #@+node:ekr.20210102145531.141: *4* find.initInHeadline
     def initInHeadline(self):
         """
         Select the first pane to search for incremental searches and changes.
@@ -984,64 +899,6 @@ class LeoFind:
             self.in_headline = self.focusInTree()
         else:
             self.in_headline = self.search_headline
-    #@+node:ekr.20210102145531.142: *5* find.focusInTree
-    def focusInTree(self):
-        """
-        Return True is the focus widget w is anywhere in the tree pane.
-
-        Note: the focus may be in the find pane.
-        """
-        c = self.c
-        ftm = self.ftm
-        w = ftm.entry_focus or g.app.gui.get_focus(raw=True)
-        ftm.entry_focus = None  # Only use this focus widget once!
-        w_name = c.widget_name(w)
-        if self.buttonFlag and self.was_in_headline in (True, False):
-            # Fix bug: https://groups.google.com/d/msg/leo-editor/RAzVPihqmkI/-tgTQw0-LtwJ
-            self.in_headline = self.was_in_headline
-            val = self.was_in_headline
-        # Easy case: focus in body.
-        elif w == c.frame.body.wrapper:
-            val = False
-        elif w == c.frame.tree.treeWidget:
-            val = True
-        else:
-            val = w_name.startswith('head')
-        return val
-    #@+node:ekr.20210102145531.143: *4* find.initInteractiveCommands
-    def initInteractiveCommands(self):
-        """
-        Init an interactive command.  This is tricky!
-
-        *Always* start in the presently selected widget, provided that
-        searching is enabled for that widget. Always start at the present
-        insert point for the body pane. For headlines, start at beginning or
-        end of the headline text.
-        """
-        c = self.c
-        p = self.p = c.p  # *Always* start with the present node.
-        wrapper = c.frame.body and c.frame.body.wrapper
-        headCtrl = c.edit_widget(p)
-        # w is the real widget.  It may not exist for headlines.
-        w = headCtrl if self.in_headline else wrapper
-        # We only use the insert point, *never* the selection range.
-        # None is a signal to self.initNextText()
-        ins = w.getInsertPoint() if w else None
-        self.errors = 0
-        self.initNextText(ins=ins)
-        if w: c.widgetWantsFocus(w)
-        # Init suboutline-only:
-        if self.suboutline_only and not self.onlyPosition:
-            self.onlyPosition = p.copy()
-        # Wrap does not apply to limited searches.
-        if (self.wrap and
-            not self.node_only and
-            not self.suboutline_only and
-            self.wrapPosition is None
-        ):
-            self.wrapping = True
-            self.wrapPos = ins
-            # Do not set self.wrapPosition here: that must be done after the first search.
     #@+node:ekr.20210102145531.145: *4* find.reset_state_ivars
     def reset_state_ivars(self):
         """Reset ivars related to suboutline-only and wrapped searches."""
@@ -1049,60 +906,6 @@ class LeoFind:
         self.wrapping = False
         self.wrapPosition = None
         self.wrapPos = None
-    #@+node:ekr.20210102145531.146: *4* find.restore (headline hack)
-    def restore(self, data):
-        """Restore the screen and clear state after a search fails."""
-        c = self.c
-        in_headline, editing, p, w, insert, start, end, junk = data
-        self.was_in_headline = False  # 2015/03/25
-        if 0:  # Don't do this here.
-            # Reset ivars related to suboutline-only and wrapped searches.
-            self.reset_state_ivars()
-        c.frame.bringToFront()  # Needed on the Mac
-        # Don't try to reedit headline.
-        if p and c.positionExists(p):
-            c.selectPosition(p)
-        else:
-            c.selectPosition(c.rootPosition())  # New in Leo 4.5.
-        self.restoreAfterFindDef()
-        # Fix bug 1258373: https://bugs.launchpad.net/leo-editor/+bug/1258373
-        if in_headline:
-            c.selectPosition(p)
-            if False and editing:
-                c.editHeadline()
-            else:
-                c.treeWantsFocus()
-        else:
-            # Looks good and provides clear indication of failure or termination.
-            w.setSelectionRange(start, end, insert=insert)
-            w.seeInsertPoint()
-            c.widgetWantsFocus(w)
-    #@+node:ekr.20210102145531.148: *4* find.save
-    def save(self):
-        """Save everything needed to restore after a search fails."""
-        c = self.c
-        p = self.p or c.p
-        # Fix bug 1258373: https://bugs.launchpad.net/leo-editor/+bug/1258373
-        if self.in_headline:
-            e = c.edit_widget(p)
-            w = e or c.frame.tree.canvas
-            insert, start, end = None, None, None
-        else:
-            w = c.frame.body.wrapper
-            e = None
-            insert = w.getInsertPoint()
-            sel = w.getSelectionRange()
-            if len(sel) == 2:
-                start, end = sel
-            else:
-                start, end = None, None
-        editing = e is not None
-        expanded = set(
-            gnx for gnx, v in c.fileCommands.gnxDict.items() if v.isExpanded())
-        # TODO: this is naive solution that treat all clones the same way if one is expanded
-        #       then every other clone is expanded too. A proper way would be to remember
-        #       each clone separately
-        return self.in_headline, editing, p.copy(), w, insert, start, end, expanded
     #@+node:ekr.20210102145531.124: *4* find.search & helpers
     def search(self):
         """
@@ -1115,7 +918,7 @@ class LeoFind:
         if self.find_def_data and p.v in self.find_seen:
             # Don't find defs/vars multiple times.
             return None, None
-        w = self.s_ctrl
+        w = self.s_ctrl  ### This is *not* gui code. ###
         index = w.getInsertPoint()
         s = w.getAllText()
         ###
@@ -1321,8 +1124,209 @@ class LeoFind:
         if 0:  # We _must_ retain the editing status for incremental searches!
             self.c.endEditing()
         # Fix bug
-        self.buttonFlag = False
         self.update_ivars()
+    #@+node:ekr.20210103214511.1: *3* LeoFind: Helpers w/ gui code
+    # These contain gui code. They will be rewritten or deleted.
+    #@+node:ekr.20210102145531.100: *4* find.changeSelection & helper
+    # Replace selection with self.change_text.
+    # If no selection, insert self.change_text at the cursor.
+
+    def changeSelection(self):
+        c = self.c
+        p = self.p or c.p  # 2015/06/22
+        wrapper = c.frame.body and c.frame.body.wrapper
+        w = c.edit_widget(p) if self.in_headline else wrapper
+        if not w:
+            self.in_headline = False
+            w = wrapper
+        if not w: return False
+        oldSel = sel = w.getSelectionRange()
+        start, end = sel
+        if start > end: start, end = end, start
+        if start == end:
+            g.es("no text selected"); return False
+        # Replace the selection in _both_ controls.
+        start, end = oldSel
+        change_text = self.change_text
+        # Perform regex substitutions of \1, \2, ...\9 in the change text.
+        if self.pattern_match and self.match_obj:
+            groups = self.match_obj.groups()
+            if groups:
+                change_text = self.makeRegexSubs(change_text, groups)
+        # change_text = change_text.replace('\\n','\n').replace('\\t','\t')
+        change_text = self.replaceBackSlashes(change_text)
+        for w2 in (w, self.s_ctrl):
+            if start != end: w2.delete(start, end)
+            w2.insert(start, change_text)
+            w2.setInsertPoint(start if self.reverse else start + len(change_text))
+        # Update the selection for the next match.
+        w.setSelectionRange(start, start + len(change_text))
+        c.widgetWantsFocus(w)
+        # No redraws here: they would destroy the headline selection.
+        if self.mark_changes:
+            p.setMarked()
+            p.setDirty()
+        if self.in_headline:
+            pass
+        else:
+            c.frame.body.onBodyChanged('Change', oldSel=oldSel)
+        c.frame.tree.updateIcon(p)  # redraw only the icon.
+        return True
+    #@+node:ekr.20210102145531.101: *5* makeRegexSubs
+    def makeRegexSubs(self, change_text, groups):
+        """
+        Substitute group[i-1] for \\i strings in change_text.
+        """
+
+        def repl(match_object):
+            # # 1494...
+            n = int(match_object.group(1)) - 1
+            if 0 <= n < len(groups):
+                return (
+                    groups[n].
+                        replace(r'\b', r'\\b').
+                        replace(r'\f', r'\\f').
+                        replace(r'\n', r'\\n').
+                        replace(r'\r', r'\\r').
+                        replace(r'\t', r'\\t').
+                        replace(r'\v', r'\\v'))
+            # No replacement.
+            return match_object.group(0)
+
+        result = re.sub(r'\\([0-9])', repl, change_text)
+        # print(
+            # f"makeRegexSubs:\n"
+            # f"change_text: {change_text!s}\n"
+            # f"     groups: {groups!s}\n"
+            # f"     result: {result!s}")
+        return result
+    #@+node:ekr.20210102145531.137: *4* find.checkArgs
+    def checkArgs(self):
+        val = True
+        if not self.search_headline and not self.search_body:
+            g.es("not searching headline or body")
+            val = False
+        s = self.ftm.getFindText()
+        if not s:
+            g.es("empty find patttern")
+            val = False
+        return val
+    #@+node:ekr.20210102145531.142: *4* find.focusInTree (must be rewritten)
+    def focusInTree(self):
+        """
+        Return True is the focus widget w is anywhere in the tree pane.
+
+        Note: the focus may be in the find pane.
+        """
+        return False ###
+        
+        ### Old code.
+            # c = self.c
+            # ftm = self.ftm
+            # w = ftm.entry_focus or g.app.gui.get_focus(raw=True)
+            # ftm.entry_focus = None  # Only use this focus widget once!
+            # w_name = c.widget_name(w)
+            # ###
+                # # if self.buttonFlag and self.was_in_headline in (True, False):
+                    # # # Fix bug: https://groups.google.com/d/msg/leo-editor/RAzVPihqmkI/-tgTQw0-LtwJ
+                    # # self.in_headline = self.was_in_headline
+                    # # val = self.was_in_headline
+            # # Easy case: focus in body.
+            # if w == c.frame.body.wrapper:
+                # val = False
+            # elif w == c.frame.tree.treeWidget:
+                # val = True
+            # else:
+                # val = w_name.startswith('head')
+            # return val
+    #@+node:ekr.20210102145531.143: *4* find.initInteractiveCommands
+    def initInteractiveCommands(self):
+        """
+        Init an interactive command.  This is tricky!
+
+        *Always* start in the presently selected widget, provided that
+        searching is enabled for that widget. Always start at the present
+        insert point for the body pane. For headlines, start at beginning or
+        end of the headline text.
+        """
+        c = self.c
+        p = self.p = c.p  # *Always* start with the present node.
+        wrapper = c.frame.body and c.frame.body.wrapper
+        headCtrl = c.edit_widget(p)
+        # w is the real widget.  It may not exist for headlines.
+        w = headCtrl if self.in_headline else wrapper
+        # We only use the insert point, *never* the selection range.
+        # None is a signal to self.initNextText()
+        ins = w.getInsertPoint() if w else None
+        self.errors = 0
+        self.initNextText(ins=ins)
+        if w: c.widgetWantsFocus(w)
+        # Init suboutline-only:
+        if self.suboutline_only and not self.onlyPosition:
+            self.onlyPosition = p.copy()
+        # Wrap does not apply to limited searches.
+        if (self.wrap and
+            not self.node_only and
+            not self.suboutline_only and
+            self.wrapPosition is None
+        ):
+            self.wrapping = True
+            self.wrapPos = ins
+            # Do not set self.wrapPosition here: that must be done after the first search.
+    #@+node:ekr.20210102145531.146: *4* find.restore (headline hack)
+    def restore(self, data):
+        """Restore the screen and clear state after a search fails."""
+        c = self.c
+        in_headline, editing, p, w, insert, start, end, junk = data
+        self.was_in_headline = False  # 2015/03/25
+        if 0:  # Don't do this here.
+            # Reset ivars related to suboutline-only and wrapped searches.
+            self.reset_state_ivars()
+        c.frame.bringToFront()  # Needed on the Mac
+        # Don't try to reedit headline.
+        if p and c.positionExists(p):
+            c.selectPosition(p)
+        else:
+            c.selectPosition(c.rootPosition())  # New in Leo 4.5.
+        self.restoreAfterFindDef()
+        # Fix bug 1258373: https://bugs.launchpad.net/leo-editor/+bug/1258373
+        if in_headline:
+            c.selectPosition(p)
+            if False and editing:
+                c.editHeadline()
+            else:
+                c.treeWantsFocus()
+        else:
+            # Looks good and provides clear indication of failure or termination.
+            w.setSelectionRange(start, end, insert=insert)
+            w.seeInsertPoint()
+            c.widgetWantsFocus(w)
+    #@+node:ekr.20210102145531.148: *4* find.save
+    def save(self):
+        """Save everything needed to restore after a search fails."""
+        c = self.c
+        p = self.p or c.p
+        # Fix bug 1258373: https://bugs.launchpad.net/leo-editor/+bug/1258373
+        if self.in_headline:
+            e = c.edit_widget(p)
+            w = e or c.frame.tree.canvas
+            insert, start, end = None, None, None
+        else:
+            w = c.frame.body.wrapper
+            e = None
+            insert = w.getInsertPoint()
+            sel = w.getSelectionRange()
+            if len(sel) == 2:
+                start, end = sel
+            else:
+                start, end = None, None
+        editing = e is not None
+        expanded = set(
+            gnx for gnx, v in c.fileCommands.gnxDict.items() if v.isExpanded())
+        # TODO: this is naive solution that treat all clones the same way if one is expanded
+        #       then every other clone is expanded too. A proper way would be to remember
+        #       each clone separately
+        return self.in_headline, editing, p.copy(), w, insert, start, end, expanded
     #@+node:ekr.20210102145531.135: *4* find.showStatus
     def showStatus(self, found):
         """Show the find status the Find dialog, if present, and the status line."""
@@ -1342,7 +1346,7 @@ class LeoFind:
         if not found:  # Fixes: #457
             self.radioButtonsChanged = True
             self.reset_state_ivars()
-    #@+node:ekr.20210102145531.149: *4* find.showSuccess (headline hack)
+    #@+node:ekr.20210102145531.149: *4* find.showSuccess
     def showSuccess(self, pos, newpos, showState=True):
         """Display the result of a successful find operation."""
         c = self.c
@@ -1385,7 +1389,7 @@ class LeoFind:
             g.app.gui.show_find_success(c, self.in_headline, insert, p)
         c.frame.bringToFront()
         return w  # Support for isearch.
-    #@+node:ekr.20210102145531.150: *4* find.update_ivars (to be deleted)
+    #@+node:ekr.20210102145531.150: *4* find.update_ivars
     def update_ivars(self):
         """Update ivars from the find panel."""
         c = self.c
