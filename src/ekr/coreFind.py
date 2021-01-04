@@ -442,7 +442,7 @@ class LeoFind:
             # else:
                 # self.openFindTab(event)
                 # self.ftm.init_focus()
-    #@+node:ekr.20210102145531.85: *4* find.wordSearchBackward/Forward (test)
+    #@+node:ekr.20210102145531.85: *4* find.wordSearchBackward/Forward
     @cmd('word-search-backward')
     def wordSearchBackward(self, event):
         self.setupArgs(forward=False, regexp=False, word=True)
