@@ -91,9 +91,8 @@ class LeoFind:
             # Persists between calls.
         self.state_on_start_of_search = None
             # keeps all state data that should be restored once the search is exhausted
-    #@+node:ekr.20210102145531.21: *3* LeoFind.Commands
-    #@+node:ekr.20210102145531.61: *4* Interactive (minibuffer)
-    #@+node:ekr.20210102145531.62: *5* find.minibufferCloneFindAll
+    #@+node:ekr.20210102145531.61: *3* Interactive Commands (To be deleted?)
+    #@+node:ekr.20210102145531.62: *4* find.minibufferCloneFindAll
     @cmd('clone-find-all')
     @cmd('find-clone-all')
     @cmd('cfa')
@@ -128,7 +127,7 @@ class LeoFind:
         self.setup_command()
         self.findAll(clone_find_all=True)
         c.treeWantsFocus()
-    #@+node:ekr.20210102145531.63: *5* find.minibufferCloneFindAllFlattened
+    #@+node:ekr.20210102145531.63: *4* find.minibufferCloneFindAllFlattened
     @cmd('clone-find-all-flattened')
     @cmd('find-clone-all-flattened')
     @cmd('cff')
@@ -164,7 +163,7 @@ class LeoFind:
         self.setup_command()
         self.findAll(clone_find_all=True, clone_find_all_flattened=True)
         c.treeWantsFocus()
-    #@+node:ekr.20210102145531.64: *5* find.minibufferCloneFindTag & helpers
+    #@+node:ekr.20210102145531.64: *4* find.minibufferCloneFindTag & helpers
     @cmd('clone-find-tag')
     @cmd('find-clone-tag')
     @cmd('cft')
@@ -192,7 +191,7 @@ class LeoFind:
         self.find_text = k.arg
         self.cloneFindTag(k.arg)
         c.treeWantsFocus()
-    #@+node:ekr.20210102145531.103: *6* find.cloneFindTag
+    #@+node:ekr.20210102145531.103: *5* find.cloneFindTag
     def cloneFindTag(self, tag):
         """Handle the clone-find-tag command."""
         c, u = self.c, self.c.undoer
@@ -213,7 +212,7 @@ class LeoFind:
         else:
             g.es_print(f"tag not found: {self.find_text}")
         return len(clones)
-    #@+node:ekr.20210102145531.104: *6* find.createCloneTagNodes
+    #@+node:ekr.20210102145531.104: *5* find.createCloneTagNodes
     def createCloneTagNodes(self, clones):
         """
         Create a "Found Tag" node as the last node of the outline.
@@ -233,7 +232,7 @@ class LeoFind:
             n = found.numberOfChildren()
             p2._linkCopiedAsNthChild(found, n)
         return found
-    #@+node:ekr.20210102145531.65: *5* find.minibufferFindAll
+    #@+node:ekr.20210102145531.65: *4* find.minibufferFindAll
     @cmd('find-all')
     def minibufferFindAll(self, event=None):
         """
@@ -242,7 +241,7 @@ class LeoFind:
         """
         self.ftm.clear_focus()
         self.searchWithPresentOptions(event, findAllFlag=True)
-    #@+node:ekr.20210102145531.66: *5* find.minibufferFindAllUnique
+    #@+node:ekr.20210102145531.66: *4* find.minibufferFindAllUnique
     @cmd('find-all-unique-regex')
     def minibufferFindAllUniqueRegex(self, event=None):
         """
@@ -253,13 +252,13 @@ class LeoFind:
         self.match_obj = None
         self.unique_matches = set()
         self.searchWithPresentOptions(event, findAllFlag=True, findAllUniqueFlag=True)
-    #@+node:ekr.20210102145531.67: *5* find.minibufferReplaceAll
+    #@+node:ekr.20210102145531.67: *4* find.minibufferReplaceAll
     @cmd('replace-all')
     def minibufferReplaceAll(self, event=None):
         """Replace all instances of the search string with the replacement string."""
         self.ftm.clear_focus()
         self.searchWithPresentOptions(event, changeAllFlag=True)
-    #@+node:ekr.20210102145531.68: *5* find.minibufferTagChildren & helper
+    #@+node:ekr.20210102145531.68: *4* find.minibufferTagChildren & helper
     @cmd('tag-children')
     def minibufferTagChildren(self, event=None):
         """tag-children: prompt for a tag and add it to all children of c.p."""
@@ -274,7 +273,7 @@ class LeoFind:
         k.showStateAndMode()
         self.tagChildren(k.arg)
         c.treeWantsFocus()
-    #@+node:ekr.20210102145531.69: *6* find.tagChildren
+    #@+node:ekr.20210102145531.69: *5* find.tagChildren
     def tagChildren(self, tag):
         """Handle the clone-find-tag command."""
         c = self.c
@@ -285,7 +284,38 @@ class LeoFind:
             g.es_print(f"Added {tag} tag to {len(list(c.p.children()))} nodes")
         else:
             g.es_print('nodetags not active')
-    #@+node:ekr.20210102145531.78: *5* find.seachForward/Backward
+    #@+node:ekr.20210102145531.77: *4* find.reSearchBackward/Forward
+    @cmd('re-search-backward')
+    def reSearchBackward(self, event):
+        self.setupArgs(forward=False, regexp=True, word=None)
+        self.stateZeroHelper(event,
+            'Regexp Search Backward:', self.reSearch1,
+            escapes=['\t'])  # The Tab Easter Egg.
+
+    @cmd('re-search-forward')
+    def reSearchForward(self, event):
+        self.setupArgs(forward=True, regexp=True, word=None)
+        self.stateZeroHelper(event,
+            prefix='Regexp Search:',
+            handler=self.reSearch1,
+            escapes=['\t'])  # The Tab Easter Egg.
+
+    def reSearch1(self, event):
+        c, k = self.c, self.k
+        if k.getArgEscapeFlag:
+            self.setReplaceString1(event=None)
+        else:
+            self.updateFindList(k.arg)
+            self.lastStateHelper()
+            pattern = k.arg
+            self.setupSearchPattern(pattern)
+            c.widgetWantsFocusNow(self.w)
+            self.p = c.p
+            self.findNextCommand()  # This handles the reverse option.
+            
+            
+            
+    #@+node:ekr.20210102145531.78: *4* find.seachForward/Backward
     @cmd('search-backward')
     def searchBackward(self, event):
         self.setupArgs(forward=False, regexp=False, word=False)
@@ -314,7 +344,105 @@ class LeoFind:
             c.widgetWantsFocusNow(self.w)
             self.p = c.p
             self.findNextCommand()
-    #@+node:ekr.20210102145531.85: *5* find.wordSearchBackward/Forward (test)
+    #@+node:ekr.20210102145531.80: *4* find.searchWithPresentOptions & helpers
+    @cmd('set-search-string')
+    def searchWithPresentOptions(self, event,
+    findAllFlag=False,
+    findAllUniqueFlag=False,
+    changeAllFlag=False,
+    ):
+        """Open the search pane and get the search string."""
+        # Remember the entry focus, just as when using the find pane.
+        self.changeAllFlag = changeAllFlag
+        self.findAllFlag = findAllFlag
+        self.findAllUniqueFlag = findAllUniqueFlag
+        self.ftm.set_entry_focus()
+        escapes = ['\t']
+        escapes.extend(self.findEscapes())
+        self.stateZeroHelper(event,
+            'Search: ', self.searchWithPresentOptions1,
+            escapes=escapes)  # The Tab Easter Egg.
+
+    def searchWithPresentOptions1(self, event):
+
+        c, k = self.c, self.k
+        if k.getArgEscapeFlag:
+            # 2015/06/30: Special cases for F2/F3 to the escapes
+            if event.stroke in self.findEscapes():
+                command = self.escapeCommand(event)
+                func = c.commandsDict.get(command)
+                k.clearState()
+                k.resetLabel()
+                k.showStateAndMode()
+                if func:
+                    func(event)
+                else:
+                    g.trace('unknown command', command)
+                    return
+            else:
+                # Switch to the replace command.
+                if self.findAllFlag:
+                    self.changeAllFlag = True
+                k.getArgEscapeFlag = False
+                self.setupSearchPattern(k.arg)
+                self.setReplaceString1(event=None)
+        else:
+            self.updateFindList(k.arg)
+            k.clearState()
+            k.resetLabel()
+            k.showStateAndMode()
+            if self.findAllFlag:
+                self.setupSearchPattern(k.arg)
+                self.setup_command()
+                self.findAll()
+            else:
+                self.updateFindList(k.arg)
+                self.lastStateHelper()
+                self.setupSearchPattern(k.arg)
+                c.widgetWantsFocusNow(self.w)
+                self.p = c.p
+                self.findNextCommand()
+
+    #@+node:ekr.20210102145531.81: *5* find.findEscapes
+    def findEscapes(self):
+        """Return the keystrokes corresponding to find-next & find-prev commands."""
+        d = self.c.k.computeInverseBindingDict()
+        results = []
+        for command in ('find-def', 'find-next', 'find-prev', 'find-var',):
+            aList = d.get(command, [])
+            for data in aList:
+                pane, stroke = data
+                if pane.startswith('all'):
+                    results.append(stroke)
+        return results
+    #@+node:ekr.20210102145531.82: *5* find.escapeCommand
+    def escapeCommand(self, event):
+        """Return the escaped command to execute."""
+        d = self.c.k.bindingsDict
+        aList = d.get(event.stroke)
+        for bi in aList:
+            if bi.stroke == event.stroke:
+                return bi.commandName
+        return None
+    #@+node:ekr.20210102145531.43: *4* find.startSearch
+    @cmd('start-search')
+    def startSearch(self, event):
+        w = self.editWidget(event)
+        # This causes problems.
+            # if self.minibuffer_mode:
+                # self.c.frame.log.selectTab('Find')
+        if w:
+            self.preloadFindPattern(w)
+        self.find_seen = set()
+        
+        ### To do
+            # if self.minibuffer_mode:
+                # self.ftm.clear_focus()
+                # self.searchWithPresentOptions(event)
+            # else:
+                # self.openFindTab(event)
+                # self.ftm.init_focus()
+    #@+node:ekr.20210102145531.85: *4* find.wordSearchBackward/Forward (test)
     @cmd('word-search-backward')
     def wordSearchBackward(self, event):
         self.setupArgs(forward=False, regexp=False, word=True)
@@ -336,8 +464,8 @@ class LeoFind:
         c.widgetWantsFocusNow(self.w)
         self.p = c.p
         self.findNextCommand()
-    #@+node:ekr.20210103193237.1: *4* Non-interactive
-    #@+node:ekr.20210102145531.94: *5* find.change
+    #@+node:ekr.20210103193237.1: *3* Non-interactive Commands
+    #@+node:ekr.20210102145531.94: *4* find.change
     @cmd('replace')
     def change(self, event=None):
         if self.checkArgs():
@@ -345,13 +473,13 @@ class LeoFind:
             self.changeSelection()
 
     replace = change
-    #@+node:ekr.20210102145531.23: *5* find.changeThenFindCommand
+    #@+node:ekr.20210102145531.23: *4* find.changeThenFindCommand
     @cmd('replace-then-find')
     def changeThenFindCommand(self, event=None):
         """Handle the replace-then-find command."""
         self.setup_command()
         self.changeThenFind()
-    #@+node:ekr.20210102145531.27: *5* find.findDef, findVar & helpers
+    #@+node:ekr.20210102145531.27: *4* find.findDef, findVar & helpers
     @cmd('find-def')
     def findDef(self, event=None):
         """Find the def or class under the cursor."""
@@ -361,7 +489,7 @@ class LeoFind:
     def findVar(self, event=None):
         """Find the var under the cursor."""
         self.findDefHelper(event, defFlag=False)
-    #@+node:ekr.20210102145531.28: *6* findDefHelper & helpers
+    #@+node:ekr.20210102145531.28: *5* findDefHelper & helpers
     def findDefHelper(self, event, defFlag):
         """Find the definition of the class, def or var under the cursor."""
         c, find, ftm = self.c, self, self.ftm
@@ -440,7 +568,7 @@ class LeoFind:
             c.redraw()
             w.setSelectionRange(i, j, insert=ins)
             c.bodyWantsFocusNow()
-    #@+node:ekr.20210102145531.29: *7* switchStyle
+    #@+node:ekr.20210102145531.29: *6* switchStyle
     def switchStyle(self, word):
         """
         Switch between camelCase and underscore_style function defintiions.
@@ -469,7 +597,7 @@ class LeoFind:
             result.append(ch.lower())
         s = ''.join(result)
         return None if s == word else s
-    #@+node:ekr.20210102145531.30: *7* initFindDef
+    #@+node:ekr.20210102145531.30: *6* initFindDef
     def initFindDef(self, event):
         """Init the find-def command. Return the word to find or None."""
         c = self.c
@@ -493,7 +621,7 @@ class LeoFind:
             if found:
                 return word[len(tag) :].strip()
         return word
-    #@+node:ekr.20210102145531.31: *7* find.saveBeforeFindDef
+    #@+node:ekr.20210102145531.31: *6* find.saveBeforeFindDef
     def saveBeforeFindDef(self, p):
         """Save the find settings in effect before a find-def command."""
         if not self.find_def_data:
@@ -505,7 +633,7 @@ class LeoFind:
                 search_headline=self.search_headline,
                 whole_word=self.whole_word,
             )
-    #@+node:ekr.20210102145531.32: *7* find.setFindDefOptions
+    #@+node:ekr.20210102145531.32: *6* find.setFindDefOptions
     def setFindDefOptions(self, p):
         """Set the find options needed for the find-def command."""
         self.ignore_case = False
@@ -515,7 +643,7 @@ class LeoFind:
         self.search_body = True
         self.search_headline = False
         self.whole_word = True
-    #@+node:ekr.20210102145531.33: *7* find.restoreAfterFindDef
+    #@+node:ekr.20210102145531.33: *6* find.restoreAfterFindDef
     def restoreAfterFindDef(self):
         """Restore find settings in effect before a find-def command."""
         # pylint: disable=no-member
@@ -530,13 +658,13 @@ class LeoFind:
             self.search_headline = b.search_headline
             self.whole_word = b.whole_word
             self.find_def_data = None
-    #@+node:ekr.20210102145531.34: *5* find.findNextCommand
+    #@+node:ekr.20210102145531.34: *4* find.findNextCommand
     @cmd('find-next')
     def findNextCommand(self, event=None):
         """The find-next command."""
         self.setup_command()
         self.findNext()
-    #@+node:ekr.20210102145531.35: *5* find.findPrevCommand
+    #@+node:ekr.20210102145531.35: *4* find.findPrevCommand
     @cmd('find-prev')
     def findPrevCommand(self, event=None):
         """Handle F2 (find-previous)"""
@@ -546,142 +674,7 @@ class LeoFind:
             self.findNext()
         finally:
             self.reverse = False
-    #@+node:ekr.20210102145531.38: *5* find.hideFindTab
-    @cmd('find-tab-hide')
-    def hideFindTab(self, event=None):
-        """Hide the Find tab."""
-        c = self.c
-        if self.minibuffer_mode:
-            c.k.keyboardQuit()
-        else:
-            self.c.frame.log.selectTab('Log')
-    #@+node:ekr.20210102145531.39: *5* find.openFindTab
-    @cmd('find-tab-open')
-    def openFindTab(self, event=None, show=True):
-        """Open the Find tab in the log pane."""
-        c = self.c
-        if c.config.getBool('use-find-dialog', default=True):
-            g.app.gui.openFindDialog(c)
-        else:
-            c.frame.log.selectTab('Find')
-    #@+node:ekr.20210102145531.77: *5* find.reSearchBackward/Forward
-    @cmd('re-search-backward')
-    def reSearchBackward(self, event):
-        self.setupArgs(forward=False, regexp=True, word=None)
-        self.stateZeroHelper(event,
-            'Regexp Search Backward:', self.reSearch1,
-            escapes=['\t'])  # The Tab Easter Egg.
-
-    @cmd('re-search-forward')
-    def reSearchForward(self, event):
-        self.setupArgs(forward=True, regexp=True, word=None)
-        self.stateZeroHelper(event,
-            prefix='Regexp Search:',
-            handler=self.reSearch1,
-            escapes=['\t'])  # The Tab Easter Egg.
-
-    def reSearch1(self, event):
-        c, k = self.c, self.k
-        if k.getArgEscapeFlag:
-            self.setReplaceString1(event=None)
-        else:
-            self.updateFindList(k.arg)
-            self.lastStateHelper()
-            pattern = k.arg
-            self.setupSearchPattern(pattern)
-            c.widgetWantsFocusNow(self.w)
-            self.p = c.p
-            self.findNextCommand()  # This handles the reverse option.
-            
-            
-            
-    #@+node:ekr.20210102145531.44: *5* find.returnToOrigin
-    @cmd('search-return-to-origin')
-    def returnToOrigin(self, event):
-        data = self.state_on_start_of_search
-        if not data: return
-        self.restore(data)
-        self.restoreAllExpansionStates(data[-1], redraw=True)
-    #@+node:ekr.20210102145531.80: *5* find.searchWithPresentOptions & helpers
-    @cmd('set-search-string')
-    def searchWithPresentOptions(self, event,
-    findAllFlag=False,
-    findAllUniqueFlag=False,
-    changeAllFlag=False,
-    ):
-        """Open the search pane and get the search string."""
-        # Remember the entry focus, just as when using the find pane.
-        self.changeAllFlag = changeAllFlag
-        self.findAllFlag = findAllFlag
-        self.findAllUniqueFlag = findAllUniqueFlag
-        self.ftm.set_entry_focus()
-        escapes = ['\t']
-        escapes.extend(self.findEscapes())
-        self.stateZeroHelper(event,
-            'Search: ', self.searchWithPresentOptions1,
-            escapes=escapes)  # The Tab Easter Egg.
-
-    def searchWithPresentOptions1(self, event):
-
-        c, k = self.c, self.k
-        if k.getArgEscapeFlag:
-            # 2015/06/30: Special cases for F2/F3 to the escapes
-            if event.stroke in self.findEscapes():
-                command = self.escapeCommand(event)
-                func = c.commandsDict.get(command)
-                k.clearState()
-                k.resetLabel()
-                k.showStateAndMode()
-                if func:
-                    func(event)
-                else:
-                    g.trace('unknown command', command)
-                    return
-            else:
-                # Switch to the replace command.
-                if self.findAllFlag:
-                    self.changeAllFlag = True
-                k.getArgEscapeFlag = False
-                self.setupSearchPattern(k.arg)
-                self.setReplaceString1(event=None)
-        else:
-            self.updateFindList(k.arg)
-            k.clearState()
-            k.resetLabel()
-            k.showStateAndMode()
-            if self.findAllFlag:
-                self.setupSearchPattern(k.arg)
-                self.setup_command()
-                self.findAll()
-            else:
-                self.updateFindList(k.arg)
-                self.lastStateHelper()
-                self.setupSearchPattern(k.arg)
-                c.widgetWantsFocusNow(self.w)
-                self.p = c.p
-                self.findNextCommand()
-
-    #@+node:ekr.20210102145531.81: *6* find.findEscapes
-    def findEscapes(self):
-        """Return the keystrokes corresponding to find-next & find-prev commands."""
-        d = self.c.k.computeInverseBindingDict()
-        results = []
-        for command in ('find-def', 'find-next', 'find-prev', 'find-var',):
-            aList = d.get(command, [])
-            for data in aList:
-                pane, stroke = data
-                if pane.startswith('all'):
-                    results.append(stroke)
-        return results
-    #@+node:ekr.20210102145531.82: *6* find.escapeCommand
-    def escapeCommand(self, event):
-        """Return the escaped command to execute."""
-        d = self.c.k.bindingsDict
-        aList = d.get(event.stroke)
-        for bi in aList:
-            if bi.stroke == event.stroke:
-                return bi.commandName
-        return None
+    #@+node:ekr.20210103210611.1: *4* find.Option commands
     #@+node:ekr.20210102145531.88: *5* find.set-find-* commands
     @cmd('set-find-everywhere')
     def setFindScopeEveryWhere(self, event=None):
@@ -752,22 +745,6 @@ class LeoFind:
             if val: z.append(s)
         part2 = ' '.join(z)
         return part1, part2
-    #@+node:ekr.20210102145531.43: *5* find.startSearch
-    @cmd('start-search')
-    def startSearch(self, event):
-        w = self.editWidget(event)
-        # This causes problems.
-            # if self.minibuffer_mode:
-                # self.c.frame.log.selectTab('Find')
-        if w:
-            self.preloadFindPattern(w)
-        self.find_seen = set()
-        if self.minibuffer_mode:
-            self.ftm.clear_focus()
-            self.searchWithPresentOptions(event)
-        else:
-            self.openFindTab(event)
-            self.ftm.init_focus()
     #@+node:ekr.20210102145531.87: *5* find.toggle-find-*-option commands
     @cmd('toggle-find-collapses-nodes')
     def toggleFindCollapesNodes(self, event):
@@ -1716,7 +1693,8 @@ class LeoFind:
         """
         c = self.c
         p = self.p or c.p
-        if (self.ignore_dups or self.find_def_data) and p.v in self.find_seen:
+        ### if (self.ignore_dups or self.find_def_data) and p.v in self.find_seen:
+        if self.find_def_data and p.v in self.find_seen:
             # Don't find defs/vars multiple times.
             return None, None
         w = self.s_ctrl
@@ -1753,7 +1731,8 @@ class LeoFind:
                 return None, None
         ins = min(pos, newpos) if self.reverse else max(pos, newpos)
         w.setSelectionRange(pos, newpos, insert=ins)
-        if (self.ignore_dups or self.find_def_data):
+        ### if (self.ignore_dups or self.find_def_data):
+        if self.find_def_data:
             self.find_seen.add(p.v)
         return pos, newpos
     #@+node:ekr.20210102145531.125: *5* find.passedWrapPoint
@@ -2037,19 +2016,21 @@ class LeoFind:
     #@+node:ekr.20210102145531.83: *4* find.stateZeroHelper
     def stateZeroHelper(self, event, prefix, handler, escapes=None):
 
-        c, k = self.c, self.k
+        ### c, k = self.c, self.k
+        k = self.k
         self.w = self.editWidget(event)
         if not self.w:
             g.trace('no self.w')
             return
         k.setLabelBlue(prefix)
-        # New in Leo 5.2: minibuffer modes shows options in status area.
-        if self.minibuffer_mode:
-            self.showFindOptionsInStatusArea()
-        elif c.config.getBool('use-find-dialog', default=True):
-            g.app.gui.openFindDialog(c)
-        else:
-            c.frame.log.selectTab('Find')
+        ### To do...
+            # minibuffer modes shows options in status area.
+            # if self.minibuffer_mode:
+                # self.showFindOptionsInStatusArea()
+            # elif c.config.getBool('use-find-dialog', default=True):
+                # g.app.gui.openFindDialog(c)
+            # else:
+                # c.frame.log.selectTab('Find')
         self.addFindStringToLabel(protect=False)
         if escapes is None: escapes = []
         k.getArgEscapes = escapes
