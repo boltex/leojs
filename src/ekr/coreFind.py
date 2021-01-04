@@ -16,17 +16,14 @@ def cmd(name):
 class LeoFind:
     """The base class for Leo's Find commands."""
     #@+others
-    #@+node:ekr.20210102145531.8: *3* LeoFind.birth
-    #@+node:ekr.20210102145531.9: *4* LeoFind.__init__
+    #@+node:ekr.20210102145531.9: *3* LeoFind.__init__
     #@@nobeautify
 
     def __init__(self, c):
         """Ctor for LeoFind class."""
         self.c = c
         self.errors = 0
-        self.expert_mode = False
-            # Set in finishCreate.
-        self.ftm = None
+        self.ftm = None  ###
             # Created by dw.createFindTab.
         self.frame = None
         self.k = c.k
@@ -60,7 +57,7 @@ class LeoFind:
         self.radioButtonsChanged = False
             # Set by ftm.radio_button_callback
         #
-        # Communication betweenfind-def and startSearch
+        # Communication between find-def and startSearch
         self.find_def_data = None
             # Saved regular find settings.
         self.find_seen = set()
@@ -94,22 +91,6 @@ class LeoFind:
             # Persists between calls.
         self.state_on_start_of_search = None
             # keeps all state data that should be restored once the search is exhausted
-    #@+node:ekr.20210102145531.11: *4* LeoFind.finishCreate
-    def finishCreate(self):
-        # New in 4.11.1.
-        # Must be called when config settings are valid.
-        c = self.c
-        self.reloadSettings()
-        # now that configuration settings are valid,
-        # we can finish creating the Find pane.
-        dw = c.frame.top
-        if dw: dw.finishCreateLogPane()
-    #@+node:ekr.20210102145531.12: *4* LeoFind.reloadSettings
-    def reloadSettings(self):
-        """LeoFind.reloadSettings."""
-        c = self.c
-        self.ignore_dups = c.config.getBool('find-ignore-duplicates', default=False)
-        self.minibuffer_mode = c.config.getBool('minibuffer-find-mode', default=False)
     #@+node:ekr.20210102145531.21: *3* LeoFind.Commands
     #@+node:ekr.20210102145531.61: *4* Interactive (minibuffer)
     #@+node:ekr.20210102145531.62: *5* find.minibufferCloneFindAll
