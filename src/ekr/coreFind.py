@@ -333,41 +333,6 @@ class LeoFind:
             c.widgetWantsFocusNow(self.w)
             self.p = c.p
             self.findNextCommand()
-    #@+node:ekr.20210102145531.79: *5* find.setReplaceString
-    @cmd('set-replace-string')
-    def setReplaceString(self, event):
-        """A state handler to get the replacement string."""
-        prompt = 'Replace ' + ('Regex' if self.pattern_match else 'String')
-        prefix = f"{prompt}: "
-        self.stateZeroHelper(event,
-            prefix=prefix,
-            handler=self.setReplaceString1)
-
-    def setReplaceString1(self, event):
-        k = self.k
-        prompt = 'Replace ' + ('Regex' if self.pattern_match else 'String')
-        self._sString = k.arg
-        self.updateFindList(k.arg)
-        s = f"{prompt}: {self._sString} With: "
-        k.setLabelBlue(s)
-        self.addChangeStringToLabel()
-        k.getNextArg(self.setReplaceString2)
-
-    def setReplaceString2(self, event):
-        c, k = self.c, self.k
-        self.updateChangeList(k.arg)
-        self.lastStateHelper()
-        find_pattern = self._sString
-        change_pattern = k.arg
-        self.setupSearchPattern(find_pattern)
-        self.setupChangePattern(change_pattern)
-        c.widgetWantsFocusNow(self.w)
-        self.p = c.p
-        if self.changeAllFlag:
-            self.changeAllCommand()
-        else:
-            # This handles the reverse option.
-            self.findNextCommand()
     #@+node:ekr.20210102145531.85: *5* find.wordSearchBackward/Forward (test)
     @cmd('word-search-backward')
     def wordSearchBackward(self, event):
@@ -877,8 +842,8 @@ class LeoFind:
         options = fc.computeFindOptionsInStatusArea()
         c.frame.statusLine.put(options)
     #@+node:ekr.20210102145531.93: *3* LeoFind.Helpers
-    #@+node:ekr.20210102145531.95: *4* find.changeAll & helpers
-    def changeAll(self):
+    #@+node:ekr.20210102145531.95: *4* find.changeAllHelper & helper
+    def changeAllHelper(self):
 
         c, current, u = self.c, self.c.p, self.c.undoer
         undoType = 'Replace All'
@@ -1036,21 +1001,6 @@ class LeoFind:
         # #1166: Complete the result using s0.
         result.append(s0[prev_i:])
         return count, ''.join(result)
-    #@+node:ekr.20210102145531.40: *4* find.changeAllCommand
-    def changeAllCommand(self, event=None):
-        c = self.c
-        self.setup_command()
-        self.changeAll()
-        # Bugs #947, #880 and #722:
-        # Set ancestor @<file> nodes by brute force.
-        for p in c.all_positions():
-            if (
-                p.anyAtFileNodeName()
-                and not p.v.isDirty()
-                and any([p2.v.isDirty() for p2 in p.subtree()])
-            ):
-                p.setDirty()
-        c.redraw()
     #@+node:ekr.20210102145531.100: *4* find.changeSelection & helper
     # Replace selection with self.change_text.
     # If no selection, insert self.change_text at the cursor.
@@ -2196,6 +2146,45 @@ class LeoFind:
         k.clearState()
         k.resetLabel()
         k.showStateAndMode()
+    #@+node:ekr.20210103203458.1: *4* find.setReplaceString1/2
+    # These two helpers *are* called.
+
+    def setReplaceString1(self, event):
+        k = self.k
+        prompt = 'Replace ' + ('Regex' if self.pattern_match else 'String')
+        self._sString = k.arg
+        self.updateFindList(k.arg)
+        s = f"{prompt}: {self._sString} With: "
+        k.setLabelBlue(s)
+        self.addChangeStringToLabel()
+        k.getNextArg(self.setReplaceString2)
+
+    def setReplaceString2(self, event):
+        c, k = self.c, self.k
+        self.updateChangeList(k.arg)
+        self.lastStateHelper()
+        find_pattern = self._sString
+        change_pattern = k.arg
+        self.setupSearchPattern(find_pattern)
+        self.setupChangePattern(change_pattern)
+        c.widgetWantsFocusNow(self.w)
+        self.p = c.p
+        if self.changeAllFlag:
+            self.setup_command()
+            self.changeAllHelper()
+            # Bugs #947, #880 and #722:
+            # Set ancestor @<file> nodes by brute force.
+            for p in c.all_positions():
+                if (
+                    p.anyAtFileNodeName()
+                    and not p.v.isDirty()
+                    and any([p2.v.isDirty() for p2 in p.subtree()])
+                ):
+                    p.setDirty()
+            c.redraw()
+        else:
+            # This handles the reverse option.
+            self.findNextCommand()
     #@-others
 #@+node:ekr.20210103132816.1: ** class SearchWidget (coreFind.py)
 class SearchWidget:
