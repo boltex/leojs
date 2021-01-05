@@ -220,7 +220,7 @@ class LeoFind:
         The list is *not* flattened: clones appear only once in the
         descendants of the organizer node.
         """
-        self.clone_find_all_helper(flatten=False, settings=settings)
+        return self.clone_find_all_helper(flatten=False, settings=settings)
         
     @cmd('clone-find-all-flattened')
     @cmd('cff')
@@ -231,7 +231,7 @@ class LeoFind:
         Create an organizer node whose descendants contain clones of all nodes
         matching the search string, except @nosearch trees.
         """
-        self.clone_find_all_helper(flatten=True, settings=settings)
+        return self.clone_find_all_helper(flatten=True, settings=settings)
     #@+node:ekr.20210105173904.1: *5* find.clone_find_all_helper
     def clone_find_all_helper(self, flatten, settings):
         c, u = self.c, self.c.undoer
@@ -277,6 +277,7 @@ class LeoFind:
             c.selectPosition(found)
         ### else: self.restore(data)
         g.es("found", count, "matches for", self.find_text)
+        return count  # Might be useful for the gui update.
     #@+node:ekr.20210102145531.27: *4* find.findDef, findVar & helpers
     @cmd('find-def')
     def findDef(self, event=None):
