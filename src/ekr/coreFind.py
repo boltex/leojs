@@ -207,9 +207,8 @@ class LeoFind:
             # f"     groups: {groups!s}\n"
             # f"     result: {result!s}")
         return result
-    #@+node:ekr.20210102145531.62: *4* find.clone_find_all (changed)
+    #@+node:ekr.20210102145531.62: *4* find.clone_find_all/flattened (new)
     @cmd('clone-find-all')
-    # @cmd('find-clone-all')
     @cmd('cfa')
     def clone_find_all(self, settings=None):
         """
@@ -221,52 +220,8 @@ class LeoFind:
         The list is *not* flattened: clones appear only once in the
         descendants of the organizer node.
         """
-        c, u = self.c, self.c.undoer
-        if settings:
-            self.init(settings)
-        if not self.check_args():
-            return 0
-            # Sets self.p and self.onlyPosition.
-        if self.pattern_match:
-            ok = self.precompilePattern()
-            if not ok: return 0
-        if self.suboutline_only:
-            p = c.p
-            after = p.nodeAfterTree()
-        else:
-            p = c.rootPosition()
-            after = None
-        count, found = 0, None
-        clones, skip = [], set()
-        while p and p != after:
-            progress = p.copy()
-            if p.v in skip:
-                p.moveToThreadNext()
-            elif g.inAtNosearch(p):
-                p.moveToNodeAfterTree()
-            elif self.findNextBatchMatch(p):
-                count += 1
-                if p not in clones:
-                    clones.append(p.copy())
-                # Don't look at the node or it's descendants.
-                for p2 in p.self_and_subtree(copy=False):
-                    skip.add(p2.v)
-                p.moveToNodeAfterTree()
-            else:
-                p.moveToThreadNext()
-            assert p != progress
-        if clones:
-            undoData = u.beforeInsertNode(c.p)
-            found = self.createCloneFindAllNodes(clones, flattened=False)
-            u.afterInsertNode(found, 'Clone Find All', undoData)
-            assert c.positionExists(found, trace=True), found
-            c.setChanged()
-            c.selectPosition(found)
-        ### else: self.restore(data)
-        g.es("found", count, "matches for", self.find_text)
-        return count
-
-    #@+node:ekr.20210105165037.1: *4* find.clone_find_all_flattened (new)
+        self.clone_find_all_helper(flatten=False, settings=settings)
+        
     @cmd('clone-find-all-flattened')
     @cmd('cff')
     def clone_find_all_flattened(self, settings=None):
@@ -276,6 +231,9 @@ class LeoFind:
         Create an organizer node whose descendants contain clones of all nodes
         matching the search string, except @nosearch trees.
         """
+        self.clone_find_all_helper(flatten=True, settings=settings)
+    #@+node:ekr.20210105173904.1: *5* find.clone_find_all_helper
+    def clone_find_all_helper(self, flatten, settings):
         c, u = self.c, self.c.undoer
         if settings:
             self.init(settings)
@@ -312,15 +270,13 @@ class LeoFind:
             assert p != progress
         if clones:
             undoData = u.beforeInsertNode(c.p)
-            found = self.createCloneFindAllNodes(clones, flattened=True)
+            found = self.create_clone_find_all_nodes(clones, flattened=False)
             u.afterInsertNode(found, 'Clone Find All', undoData)
             assert c.positionExists(found, trace=True), found
             c.setChanged()
             c.selectPosition(found)
         ### else: self.restore(data)
         g.es("found", count, "matches for", self.find_text)
-        return count
-
     #@+node:ekr.20210102145531.27: *4* find.findDef, findVar & helpers
     @cmd('find-def')
     def findDef(self, event=None):
@@ -528,8 +484,8 @@ class LeoFind:
             g.es_print("empty find patttern")
             return False
         return True
-    #@+node:ekr.20210102145531.107: *4* find.createCloneFindAllNodes
-    def createCloneFindAllNodes(self, clones, flattened):
+    #@+node:ekr.20210102145531.107: *4* find.create_clone_find_all_nodes
+    def create_clone_find_all_nodes(self, clones, flattened):
         """
         Create a "Found" node as the last node of the outline.
         Clone all positions in the clones set a children of found.
