@@ -407,6 +407,14 @@
 <v t="felix.20210104000547.1"><vh>g.caller          (coreGlobals.py)</vh></v>
 <v t="felix.20210104001301.1"><vh>g.callers         (coreGlobals.py)</vh></v>
 <v t="felix.20210104010331.1"><vh>g._callerName     (coreGlobals.py)</vh></v>
+<v t="felix.20210104194650.1"><vh>g.doKeywordArgs   (coreGlobals.py)</vh></v>
+<v t="felix.20210104210231.1"><vh>g.error           (coreGlobals.py)</vh></v>
+<v t="felix.20210104210234.1"><vh>g.es              (coreGlobals.py)</vh></v>
+<v t="felix.20210104210248.1"><vh>g.es_exception    (coreGlobals.py)</vh></v>
+<v t="felix.20210104210254.1"><vh>g.es_print        (coreGlobals.py)</vh></v>
+<v t="felix.20210104210259.1"><vh>g.isDirective     (coreGlobals.py)</vh></v>
+<v t="felix.20210104210307.1"><vh>g.is_special      (coreGlobals.py)</vh></v>
+<v t="felix.20210104210316.1"><vh>g.isWordChar*     (coreGlobals.py)</vh></v>
 <v t="felix.20210104003932.1"><vh>g.splitLines      (coreGlobals.py)</vh></v>
 </v>
 <v t="felix.20210102012632.1"><vh>@clean src/core/leoNodes.ts</vh>
@@ -469,6 +477,7 @@
 </v>
 <v t="felix.20210102000121.1"><vh>Command Classes</vh></v>
 </v>
+<v t="felix.20210104211547.1"><vh>git diff revs: 332469bd HEAD</vh></v>
 </vnodes>
 <tnodes>
 <t tx="ekr.20201209145256.1"></t>
@@ -5892,8 +5901,8 @@ export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionar
 export const app: LeoApp = new LeoApp();
 
 // Global status vars.
-export let inScript:boolean = false; // A synonym for app.inScript
-export let unitTesting :boolean = false; // A synonym for app.unitTesting.
+export let inScript: boolean = false; // A synonym for app.inScript
+export let unitTesting: boolean = false; // A synonym for app.unitTesting.
 
 @others
 
@@ -7407,11 +7416,11 @@ public syntax_error_files: any[] = [];
  */
 export class FileLikeObject {
 
-    public encoding:string;
-    public ptr:number;
-    private _list:string[];
+    public encoding: string;
+    public ptr: number;
+    private _list: string[];
 
-    constructor( encoding:string='utf-8', fromString?:string) {
+    constructor(encoding: string = 'utf-8', fromString?: string) {
         this.encoding = encoding || 'utf-8';
         this._list = splitLines(fromString);  // Must preserve newlines!
         this.ptr = 0;
@@ -7420,6 +7429,7 @@ export class FileLikeObject {
     @others
 
 }
+
 </t>
 <t tx="felix.20210103231554.2">public clear(): void {
     this._list = [];
@@ -7436,16 +7446,16 @@ export class FileLikeObject {
 }
 
 </t>
-<t tx="felix.20210103231554.5">public get():string {
+<t tx="felix.20210103231554.5">public get(): string {
     return this._list.join();
 }
 
 // Todo : maybe add names to prototype instead
-public getvalue():string {
+public getvalue(): string {
     return this.get();
 }
 
-public read():string {
+public read(): string {
     return this.get();
 }
 
@@ -7453,9 +7463,9 @@ public read():string {
 <t tx="felix.20210103231554.6">/**
  * Read the next line using at.list and at.ptr.
  */
-public readline():string {
-    if(this.ptr &lt; this._list.length){
-        const line:string = this._list[this.ptr];
+public readline(): string {
+    if (this.ptr &lt; this._list.length) {
+        const line: string = this._list[this.ptr];
         this.ptr++;
         return line;
     }
@@ -7463,18 +7473,17 @@ public readline():string {
 }
 
 </t>
-<t tx="felix.20210103231554.7">public write(s:string):void {
-    if(s){
+<t tx="felix.20210103231554.7">public write(s: string): void {
+    if (s) {
         this._list.push(s);
     }
 }
 
 </t>
-<t tx="felix.20210103234820.1">
-/**
+<t tx="felix.20210103234820.1">/**
  * Return &lt; &lt; s &gt; &gt;
  */
-export function angleBrackets(s:string):string {
+export function angleBrackets(s: string): string {
     const lt = "&lt;&lt;";
     const rt = "&gt;&gt;";
     return lt + s + rt;
@@ -7484,7 +7493,7 @@ export function angleBrackets(s:string):string {
 <t tx="felix.20210104000547.1">/**
  * Return the caller name i levels up the stack.
  */
-export function caller(i:number=1):string {
+export function caller(i: number = 1): string {
     return callers(i + 1).split(',')[0];
 }
 
@@ -7494,30 +7503,30 @@ export function caller(i:number=1):string {
  * of the function that called callerList.
  *
  * excludeCaller: True (the default), callers itself is not on the list.
- *   
+ *
  * If the `verbose` keyword is True, return a list separated by newlines.
  */
-export function callers(n:number=4, count:number=0, excludeCaller:boolean=true, verbose:boolean=false):string {
+export function callers(n: number = 4, count: number = 0, excludeCaller: boolean = true, verbose: boolean = false): string {
     // Be careful to call _callerName with smaller values of i first:
     // sys._getframe throws ValueError if there are less than i entries.
-    let result:string[] = [];
-    let i:number = excludeCaller?3:2;
-    while (1){
-        let s:string = _callerName(n=i, verbose=verbose);
-        if (s){
+    let result: string[] = [];
+    let i: number = excludeCaller ? 3 : 2;
+    while (1) {
+        let s: string = _callerName(n = i, verbose = verbose);
+        if (s) {
             result.push(s);
         }
-        if (!s || result.length &gt;= n){
+        if (!s || result.length &gt;= n) {
             break;
         }
         i += 1;
     }
 
     result.reverse();
-    if (count &gt; 0){
-        result = result.slice(0,count);
+    if (count &gt; 0) {
+        result = result.slice(0, count);
     }
-    if (verbose){
+    if (verbose) {
         return ''; //''.join([f"\n  {z}" for z in result]);
     }
     return result.join(',');
@@ -7528,17 +7537,17 @@ export function callers(n:number=4, count:number=0, excludeCaller:boolean=true, 
  * Split s into lines, preserving the number of lines and the endings
  * of all lines, including the last line.
  */
-export function splitLines(s?:string): string[] {
-    if(s){
+export function splitLines(s?: string): string[] {
+    if (s) {
         return s.split(/\r?\n/);
-    }else{
+    } else {
         return [];
     }
 }
 
 </t>
 <t tx="felix.20210104010331.1">// TODO : see Error().stack to access names from the call stack
-export function _callerName(n:number, verbose:boolean=false):string {
+export function _callerName(n: number, verbose: boolean = false): string {
     return "&lt;_callerName&gt;";
 }
 
@@ -7568,6 +7577,140 @@ export function _callerName(n:number, verbose:boolean=false):string {
             # return ''  # "&lt;no caller name&gt;"
 */
 
+</t>
+<t tx="felix.20210104194650.1">/**
+ * Return a result dict that is a copy of the keys dict
+ * with missing items replaced by defaults in d dict.
+ */
+export function doKeywordArgs(keys: { [key: string]: any }, d: { [key: string]: any } = {}): { [key: string]: any } {
+    if (d === null) {
+        d = {}; // May be unnecessary
+    }
+    const result: { [key: string]: any } = {};
+
+    for (var key in d) {
+        if (d.hasOwnProperty(key)) {
+            const default_val = d[key];
+
+            const isBool: boolean = [true, false].includes(default_val);
+            const val: any = keys.hasOwnProperty(key) ? keys[key] : null;
+
+            if (isBool &amp;&amp; [true, 'True', 'true'].includes(val)) {
+                result[key] = true;
+            } else if (isBool &amp;&amp; [false, 'False', 'false'].includes(val)) {
+                result[key] = false;
+            } else if (val === null) {
+                result[key] = default_val;
+            } else {
+                result[key] = val;
+            }
+        }
+    }
+
+    return result;
+}
+
+</t>
+<t tx="felix.20210104210231.1">export const error = console.error;
+
+</t>
+<t tx="felix.20210104210234.1">export const es = console.log;
+
+</t>
+<t tx="felix.20210104210248.1">export function es_exception(): string {
+    return '&lt;no file&gt;';
+}
+
+/*
+    ### Old code
+        # typ, val, tb = sys.exc_info()
+        # # val is the second argument to the raise statement.
+        # if full:
+            # lines = traceback.format_exception(typ, val, tb)
+        # else:
+            # lines = traceback.format_exception_only(typ, val)
+        # for line in lines:
+            # g.es_print_error(line, color=color)
+        # fileName, n = g.getLastTracebackFileAndLineNumber()
+        # return fileName, n
+*/
+
+</t>
+<t tx="felix.20210104210254.1">/**
+ * Print all non-keyword args, and put them to the log pane.
+ * Python code was:
+ *     pr(*args, **keys)
+ *     es(*args, **keys)
+ */
+export const es_print = console.log;
+
+</t>
+<t tx="felix.20210104210259.1">// Patterns used only in this module...
+const g_is_directive_pattern = new RegExp('^\s*@([\w-]+)\s*');
+    // This pattern excludes @encoding.whatever and @encoding(whatever)
+    // It must allow @language python, @nocolor-node, etc.
+
+/**
+ * Return True if s starts with a directive.
+ */
+export function isDirective(s:string):boolean {
+    const m:string = s.match(g_is_directive_pattern);
+
+    if (m) {
+    // TODO see https://docs.python.org/3/library/re.html#re.Match.end
+        const s2:string = "";
+        if(s2 &amp;&amp; ".(".includes(s2.charAt(0)) ){
+            return false;
+        }
+        
+        return xx
+    }
+    
+    return false;
+}
+
+
+/*
+def isDirective(s):
+    """Return True if s starts with a directive."""
+    m = g_is_directive_pattern.match(s)
+    if m:
+        s2 = s[m.end(1) :]
+        if s2 and s2[0] in ".(":
+            return False
+        return bool(m.group(1) in globalDirectiveList)
+    return False
+*/
+</t>
+<t tx="felix.20210104210307.1">/*
+def is_special(s, directive):
+    """Return True if the body text contains the @ directive."""
+    assert(directive and directive[0] == '@')
+    lws = directive in ("@others", "@all")
+        # Most directives must start the line.
+    pattern = r'^\s*(%s\b)' if lws else r'^(%s\b)'
+    pattern = re.compile(pattern % directive, re.MULTILINE)
+    m = re.search(pattern, s)
+    if m:
+        return True, m.start(1)
+    return False, -1
+*/
+
+</t>
+<t tx="felix.20210104210316.1">/**
+ * Return True if ch should be considered a letter.
+ */
+public isWordChar(ch:string): boolean{
+    return ch &amp;&amp; (/^[0-9a-zA-Z]$/.test(ch) || ch === '_');
+}
+
+public isWordChar1(ch:string): boolean {
+    return ch &amp;&amp; (/^[a-zA-Z]$/.test(ch) || ch === '_');
+}
+
+</t>
+<t tx="felix.20210104211547.1">@ignore
+@nosearch
 </t>
 </tnodes>
 </leo_file>
