@@ -1223,49 +1223,70 @@ class TestFind (unittest.TestCase):
         self.settings = self.x.default_settings()
         
     #@+others
-    #@+node:ekr.20210106124121.1: *3* TestFind.clone-find-all
-    ### settings.find_text = r'^def\b'  # 'clone_find_all'
-    ### settings.change_text = 'def'  # Don't actually change anything!
-    ### settings.pattern_match = True
-    ### settings.suboutline_only = True
-
-    # x.clone_find_all_flattened(settings)
-
+    #@+node:ekr.20210106141701.1: *3* Commands...
+    #@+node:ekr.20210106124121.1: *4* TestFind.clone-find-all
     def test_clone_find_all(self):
+        x = self.x
         settings = self.settings
-        # regex find.
+        # Regex find.
         settings.find_text = r'^def\b'
+        settings.change_text = 'def'  # Don't actually change anything!
         settings.pattern_match = True
-        self.x.clone_find_all(settings)
+        x.clone_find_all(settings)
+        # Word find.
         settings.find_text = 'def'
         settings.match_word = True
         settings.pattern_match = False
-        self.x.clone_find_all(settings)
+        x.clone_find_all(settings)
+        # Suboutline only.
+        settings.suboutline_only = True
+        x.clone_find_all(settings)
         # print(self.c.lastTopLevel().h)
 
     def test_clone_find_all_errors(self):
+        # No find pattern.
         self.x.clone_find_all(self.settings)
         
-    #@+node:ekr.20210106133012.1: *3* TestFind.clone-find-all-flattened
+    #@+node:ekr.20210106133012.1: *4* TestFind.clone-find-all-flattened
     def test_clone_find_all_flattened(self):
+        x = self.x
         settings = self.settings
         # regex find.
         settings.find_text = r'^def\b'
         settings.pattern_match = True
-        self.x.clone_find_all_flattened(settings)
+        x.clone_find_all_flattened(settings)
         # word find.
         settings.find_text = 'def'
         settings.match_word = True
         settings.pattern_match = False
-        self.x.clone_find_all_flattened(settings)
+        x.clone_find_all_flattened(settings)
+        # Suboutline only.
+        settings.suboutline_only = True
+        x.clone_find_all_flattened(settings)
         # print(self.c.lastTopLevel().h)
 
     def test_clone_find_all_flattened_errors(self):
-        
         # No find pattern.
-        self.x.clone_find_all(self.settings)
+        self.x.clone_find_all_flattened(self.settings)
         
-    #@+node:ekr.20210106133506.1: *3* TestFind.test_bad compile_pattern
+    #@+node:ekr.20210106141951.1: *4* TestFind.find-all
+    def test_find_all(self):
+        x = self.x
+        # Test 1.
+        settings = self.settings
+        settings.find_text = r'^def\b'
+        settings.pattern_match = True
+        x.find_all(settings)
+        # Test 2.
+        settings.suboutline_only = True
+        x.find_all(settings)
+        
+    def test_find_all_errors(self):
+        # No find pattern.
+        self.x.find_all(self.settings)
+        
+    #@+node:ekr.20210106141654.1: *3* Helpers...
+    #@+node:ekr.20210106133506.1: *4* TestFind.test_bad compile_pattern
     def test_bad_compile_pattern(self):
         
         # Bad search pattern.
@@ -1273,7 +1294,7 @@ class TestFind (unittest.TestCase):
         settings.find_text = r'^def\b(('
         settings.pattern_match = True
         self.x.clone_find_all(settings)
-    #@+node:ekr.20210106133737.1: *3* TestFind.test_check_args
+    #@+node:ekr.20210106133737.1: *4* TestFind.test_check_args
     def test_check_args(self):
         
         # Bad search patterns..
@@ -1287,7 +1308,7 @@ class TestFind (unittest.TestCase):
         settings.search_body = True
         x.clone_find_all(settings)
         
-    #@+node:ekr.20210106134128.1: *3* TestFind.compute_result_status
+    #@+node:ekr.20210106134128.1: *4* TestFind.compute_result_status
     def test_compute_result_status(self):
         
         x = self.x
@@ -1309,7 +1330,7 @@ class TestFind (unittest.TestCase):
         x.init(partial_settings)
         x.compute_result_status(find_all_flag=False)
         
-    #@+node:ekr.20210106140751.1: *3* TestFind.replace_back_slashes
+    #@+node:ekr.20210106140751.1: *4* TestFind.replace_back_slashes
     def test_replace_back_slashes(self):
         
         x = self.x
@@ -1325,7 +1346,7 @@ class TestFind (unittest.TestCase):
     #@-others
 #@-others
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover (not covered by py-cov)
     unittest.main()
 
 #@@language python
