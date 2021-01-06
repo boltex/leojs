@@ -262,7 +262,7 @@ class LeoFind:
             n = found.numberOfChildren()
             p2._linkCopiedAsNthChild(found, n)
         return found
-    #@+node:ekr.20210102145531.105: *4* find-all (test)
+    #@+node:ekr.20210102145531.105: *4* find-all
     @cmd('find-all')
     def find_all(self, settings):
         """find-all"""
@@ -487,22 +487,24 @@ class LeoFind:
                 search_headline=self.search_headline,
                 whole_word=self.whole_word,
             )
-    #@+node:ekr.20210102145531.34: *4* find-next (test)
+    #@+node:ekr.20210102145531.34: *4* find-next
     @cmd('find-next')
-    def findNextCommand(self, event=None):
+    def find_next(self, settings=None):
         """The find-next command."""
-        ### self.findNext()
-        self.findNextMatch()
-    #@+node:ekr.20210102145531.35: *4* find-prev (test)
+        pos, newpos = self.findNextMatch(settings)
+        return pos, newpos, self.p  # For tests.
+    #@+node:ekr.20210102145531.35: *4* find-prev
     @cmd('find-prev')
-    def findPrevCommand(self, event=None):
+    def find_prev(self, settings=None):
         """Handle F2 (find-previous)"""
+        if settings:
+            self.init(settings)
         self.reverse = True
         try:
-            ### self.findNext()
-            self.findNextMatch()
+            pos, newpos = self.findNextMatch(settings)
         finally:
             self.reverse = False
+        return pos, newpos, self.p  # For tests.
     #@+node:ekr.20210102145531.23: *4* replace-then-find (test)
     @cmd('replace-then-find')
     def change_then_find(self, event=None):
@@ -692,15 +694,15 @@ class LeoFind:
             if pos != -1: return True
         return False
     #@+node:ekr.20210102145531.115: *4* find.findNextMatch & helpers
-    def findNextMatch(self):
+    def findNextMatch(self, settings=None):
         """
         Resume the search where it left off.
         
         Update self.p on exit.
         """
-        if not self.search_headline and not self.search_body:
-            return None, None
-        if not self.find_text:
+        if settings:
+            self.init(settings)
+        if not self.check_args():
             return None, None
         self.errors = 0
         attempts = 0
@@ -755,7 +757,6 @@ class LeoFind:
         p, w = self.p, self.s_ctrl
         assert p
         s = p.h if self.in_headline else p.b
-        g.trace(len(s))
         if self.reverse:
             i, j = w.sel
             if i is not None and j is not None and i != j:
