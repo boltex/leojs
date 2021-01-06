@@ -121,6 +121,103 @@ class LeoFind:
     # All these commands are non-interactive.
 
     # To do: remove all gui-related code.
+    #@+node:ekr.20210106064831.1: *4*  Later or never
+    #@+node:ekr.20210102145531.64: *5* clone-find-tag (rewrite)
+    @cmd('clone-find-tag')
+    @cmd('cft')
+    def find_tag(self, event=None):
+        """
+        clone-find-tag (aka find-clone-tag and cft).
+
+        Create an organizer node whose descendants contain clones of all
+        nodes matching the given tag, except @nosearch trees.
+
+        The list is *always* flattened: every cloned node appears as a
+        direct child of the organizer node, even if the clone also is a
+        descendant of another cloned node.
+        """
+        ### To do
+        # if self.editWidget(event):  # sets self.w
+            # self.stateZeroHelper(event,
+                # prefix='Clone Find Tag: ',
+                # handler=self.minibufferCloneFindTag1)
+
+    # def minibufferCloneFindTag1(self, event):
+        # c, k = self.c, self.k
+        # k.clearState()
+        # k.resetLabel()
+        # k.showStateAndMode()
+        # self.find_text = k.arg
+        # self.cloneFindTag(k.arg)
+        # c.treeWantsFocus()
+    #@+node:ekr.20210102145531.103: *6* find.cloneFindTag
+    def cloneFindTag(self, tag):
+        """Handle the clone-find-tag command."""
+        c, u = self.c, self.c.undoer
+        tc = c.theTagController
+        if not tc:
+            g.es_print('nodetags not active')
+            return 0
+        clones = tc.get_tagged_nodes(tag)
+        if clones:
+            undoType = 'Clone Find Tag'
+            undoData = u.beforeInsertNode(c.p)
+            found = self.createCloneTagNodes(clones)
+            u.afterInsertNode(found, undoType, undoData)
+            assert c.positionExists(found, trace=True), found
+            c.setChanged()
+            c.selectPosition(found)
+            c.redraw()
+        else:
+            g.es_print(f"tag not found: {self.find_text}")
+        return len(clones)
+    #@+node:ekr.20210102145531.104: *6* find.createCloneTagNodes
+    def createCloneTagNodes(self, clones):
+        """
+        Create a "Found Tag" node as the last node of the outline.
+        Clone all positions in the clones set as children of found.
+        """
+        c, p = self.c, self.c.p
+        # Create the found node.
+        assert c.positionExists(c.lastTopLevel()), c.lastTopLevel()
+        found = c.lastTopLevel().insertAfter()
+        assert found
+        assert c.positionExists(found), found
+        found.h = f"Found Tag: {self.find_text}"
+        # Clone nodes as children of the found node.
+        for p in clones:
+            # Create the clone directly as a child of found.
+            p2 = p.copy()
+            n = found.numberOfChildren()
+            p2._linkCopiedAsNthChild(found, n)
+        return found
+    #@+node:ekr.20210102145531.68: *5* tag-children (rewrite)
+    @cmd('tag-children')
+    def tag_children(self, event=None):
+        """tag-children: prompt for a tag and add it to all children of c.p."""
+        ### To do
+        # if self.editWidget(event):  # sets self.w
+            # self.stateZeroHelper(event,
+                # prefix='Tag Children: ',
+                # handler=self.minibufferTagChildren1)
+    # def minibufferTagChildren1(self, event):
+        # c, k = self.c, self.k
+        # k.clearState()
+        # k.resetLabel()
+        # k.showStateAndMode()
+        # self.tagChildren(k.arg)
+        # c.treeWantsFocus()
+    #@+node:ekr.20210102145531.69: *6* find.tagChildren
+    def tagChildren(self, tag):
+        """Handle the clone-find-tag command."""
+        c = self.c
+        tc = c.theTagController
+        if tc:
+            for p in c.p.children():
+                tc.add_tag(p, tag)
+            g.es_print(f"Added {tag} tag to {len(list(c.p.children()))} nodes")
+        else:
+            g.es_print('nodetags not active')
     #@+node:ekr.20210102145531.62: *4* clone-find-all/flattened
     @cmd('clone-find-all')
     @cmd('cfa')
@@ -197,75 +294,6 @@ class LeoFind:
             c.selectPosition(found)
         g.es("found", count, "matches for", self.find_text)
         return count  # Might be useful for the gui update.
-    #@+node:ekr.20210102145531.64: *4* clone-find-tag (rewrite)
-    @cmd('clone-find-tag')
-    @cmd('cft')
-    def find_tag(self, event=None):
-        """
-        clone-find-tag (aka find-clone-tag and cft).
-
-        Create an organizer node whose descendants contain clones of all
-        nodes matching the given tag, except @nosearch trees.
-
-        The list is *always* flattened: every cloned node appears as a
-        direct child of the organizer node, even if the clone also is a
-        descendant of another cloned node.
-        """
-        ### To do
-        # if self.editWidget(event):  # sets self.w
-            # self.stateZeroHelper(event,
-                # prefix='Clone Find Tag: ',
-                # handler=self.minibufferCloneFindTag1)
-
-    # def minibufferCloneFindTag1(self, event):
-        # c, k = self.c, self.k
-        # k.clearState()
-        # k.resetLabel()
-        # k.showStateAndMode()
-        # self.find_text = k.arg
-        # self.cloneFindTag(k.arg)
-        # c.treeWantsFocus()
-    #@+node:ekr.20210102145531.103: *5* find.cloneFindTag
-    def cloneFindTag(self, tag):
-        """Handle the clone-find-tag command."""
-        c, u = self.c, self.c.undoer
-        tc = c.theTagController
-        if not tc:
-            g.es_print('nodetags not active')
-            return 0
-        clones = tc.get_tagged_nodes(tag)
-        if clones:
-            undoType = 'Clone Find Tag'
-            undoData = u.beforeInsertNode(c.p)
-            found = self.createCloneTagNodes(clones)
-            u.afterInsertNode(found, undoType, undoData)
-            assert c.positionExists(found, trace=True), found
-            c.setChanged()
-            c.selectPosition(found)
-            c.redraw()
-        else:
-            g.es_print(f"tag not found: {self.find_text}")
-        return len(clones)
-    #@+node:ekr.20210102145531.104: *5* find.createCloneTagNodes
-    def createCloneTagNodes(self, clones):
-        """
-        Create a "Found Tag" node as the last node of the outline.
-        Clone all positions in the clones set as children of found.
-        """
-        c, p = self.c, self.c.p
-        # Create the found node.
-        assert c.positionExists(c.lastTopLevel()), c.lastTopLevel()
-        found = c.lastTopLevel().insertAfter()
-        assert found
-        assert c.positionExists(found), found
-        found.h = f"Found Tag: {self.find_text}"
-        # Clone nodes as children of the found node.
-        for p in clones:
-            # Create the clone directly as a child of found.
-            p2 = p.copy()
-            n = found.numberOfChildren()
-            p2._linkCopiedAsNthChild(found, n)
-        return found
     #@+node:ekr.20210102145531.105: *4* find-all
     @cmd('find-all')
     def find_all(self, settings):
@@ -286,7 +314,7 @@ class LeoFind:
             self.p = c.rootPosition()
             after = None
         count, found, result = 0, None, []
-        while self.p != after:  ### New
+        while self.p != after:
             pos, newpos = self.findNextMatch()  # sets self.p
             p = self.p
             if pos is None:
@@ -315,69 +343,74 @@ class LeoFind:
         return count
     #@+node:ekr.20210102145531.27: *4* find-def, find-var (test)
     @cmd('find-def')
-    def find_def(self, event=None):
+    def find_def(self, settings=None):
         """Find the def or class under the cursor."""
-        self.findDefHelper(event, defFlag=True)
+        return self.find_def_helper(defFlag=True, settings=settings)
 
     @cmd('find-var')
-    def find_var(self, event=None):
+    def find_var(self, settings=None):
         """Find the var under the cursor."""
-        self.findDefHelper(event, defFlag=False)
-    #@+node:ekr.20210102145531.28: *5* find.findDefHelper & helpers (changed)
-    def findDefHelper(self, event, defFlag):
+        return self.find_def_helper(defFlag=False, settings=settings)
+    #@+node:ekr.20210102145531.28: *5* find.find_def_helper & helpers (changed)
+    def find_def_helper(self, defFlag, settings):
         """Find the definition of the class, def or var under the cursor."""
-        find = self
         c, w = self.c, self.c.frame.body.wrapper
         if not w:
             return
-        word = self.initFindDef(event)
-        if not word:
+        if settings:
+            self.init(settings)
+        ### word = self.initFindDef(event)
+        if not self.find_text:
+            g.trace('no find text')
             return
-        save_sel = w.getSelectionRange()
-        ins = w.getInsertPoint()
+        ### save_sel = w.getSelectionRange()
+        ### ins = w.getInsertPoint()
         # For the command, always start in the root position.
-        old_p = c.p
-        p = c.rootPosition()
+        ### old_p = c.p
+        p = self.p = c.rootPosition()
         # Required.
-        c.selectPosition(p)
-        c.redraw()
+        ### c.selectPosition(p)
+        c.redraw(p)
         c.bodyWantsFocusNow()
         # Set up the search.
         if defFlag:
-            prefix = 'class' if word[0].isupper() else 'def'
-            find_pattern = prefix + ' ' + word
+            prefix = 'class' if self.find_text[0].isupper() else 'def'
+            self.find_text = prefix + ' ' + self.find_text
         else:
-            find_pattern = word + ' ='
-        find.find_text = find_pattern
+            self.find_text = self.find_text + ' ='
+        g.trace('Look for', self.find_text, self.p.h)
         # Save previous settings.
-        find.saveBeforeFindDef(p)
-        find.setFindDefOptions(p)
+        self.saveBeforeFindDef(p)
+        self.setFindDefOptions(p)
         self.find_seen = set()
+        ### Make this a setting.
         use_cff = c.config.getBool('find-def-creates-clones', default=False)
-        count = 0
+        count, found = 0, False
         if use_cff:
-            count = find.clone_find_all_flattened()
+            count = self.clone_find_all_flattened()
             found = count > 0
         else:
             # #1592.  Ignore hits under control of @nosearch
             while True:
                 pos, newpos = self.findNextMatch()
-                if pos is None or not g.inAtNosearch(c.p):
+                found = pos is not None
+                if found or not g.inAtNosearch(c.p):
                     break
-        if not found and defFlag:
+        if not found and defFlag and not self.find_text.startswith('class'):
             # Leo 5.7.3: Look for an alternative defintion of function/methods.
-            word2 = self.switchStyle(word)
+            word2 = self.switchStyle(self.find_text)
             if word2:
-                find_pattern = prefix + ' ' + word2
-                find.find_text = find_pattern
+                self.find_text = prefix + ' ' + word2
+                g.trace('Look for', self.find_text)
                 if use_cff:
-                    count = find.clone_find_all()
+                    count = self.clone_find_all()
                     found = count > 0
                 else:
                     # #1592.  Ignore hits under control of @nosearch
                     while True:
-                        pos, newpos = find.findNext()
-                        if pos is None or not g.inAtNosearch(c.p):
+                        pos, newpos = self.findNext()
+                        found = pos is not None
+                        if found or not g.inAtNosearch(c.p):
                             break
         if found and use_cff:
             last = c.lastTopLevel()
@@ -385,20 +418,25 @@ class LeoFind:
                 # It's annoying to create a clone in this case.
                 # Undo the clone find and just select the proper node.
                 last.doDelete()
-                find.findNext()
+                self.findNext()
             else:
                 c.selectPosition(last)
-        if found:
-            self.find_seen.add(c.p.v)
-            self.restoreAfterFindDef()
+            return None, None, last
+        elif found:
+            g.trace('Found', self.p.h)
+            return pos, newpos, self.p
+            ### self.find_seen.add(self.p.v)
+            ### self.restoreAfterFindDef()
                 # Failing to do this causes massive confusion!
-        else:
-            c.selectPosition(old_p)
-            self.restoreAfterFindDef()  # 2016/03/24
-            i, j = save_sel
-            c.redraw()
-            w.setSelectionRange(i, j, insert=ins)
-            c.bodyWantsFocusNow()
+        
+        g.trace('Not found', self.find_text)
+        return None, None, None
+        # c.selectPosition(old_p)
+        # self.restoreAfterFindDef()  # 2016/03/24
+        # i, j = save_sel
+        # c.redraw()
+        # w.setSelectionRange(i, j, insert=ins)
+        # c.bodyWantsFocusNow()
     #@+node:ekr.20210102145531.29: *6* find.switchStyle
     def switchStyle(self, word):
         """
@@ -428,30 +466,6 @@ class LeoFind:
             result.append(ch.lower())
         s = ''.join(result)
         return None if s == word else s
-    #@+node:ekr.20210102145531.30: *6* find.initFindDef
-    def initFindDef(self, event):
-        """Init the find-def command. Return the word to find or None."""
-        c = self.c
-        w = c.frame.body.wrapper
-        # First get the word.
-        c.bodyWantsFocusNow()
-        w = c.frame.body.wrapper
-        if not w.hasSelection():
-            c.editCommands.extendToWord(event, select=True)
-        word = w.getSelectedText().strip()
-        if not word:
-            return None
-            #
-        # Transcrypt does not support Python's keyword module.
-            # if keyword.iskeyword(word):
-            #     return None
-        #
-        # Return word, stripped of preceding class or def.
-        for tag in ('class ', 'def '):
-            found = word.startswith(tag) and len(word) > len(tag)
-            if found:
-                return word[len(tag) :].strip()
-        return word
     #@+node:ekr.20210102145531.32: *6* find.setFindDefOptions
     def setFindDefOptions(self, p):
         """Set the find options needed for the find-def command."""
@@ -507,14 +521,19 @@ class LeoFind:
         finally:
             self.reverse = False
         return pos, newpos, self.p  # For tests.
+    #@+node:ekr.20210102145531.67: *4* replace-all (rewrite)
+    @cmd('replace-all')
+    def replace_all(self, event=None):
+        """Replace all instances of the search string with the replacement string."""
+        ### self.searchWithPresentOptions(event, changeAllFlag=True)
     #@+node:ekr.20210102145531.23: *4* replace-then-find
     @cmd('replace-then-find')
     def replace_then_find(self, event=None):
         """Handle the replace-then-find command."""
         if self.changeSelection():
             pos, newpos = self.findNext()
-            return pos, newpos
-        return None, None
+            return pos, newpos, self.p
+        return None, None, None
 
     #@+node:ekr.20210102145531.100: *5* find.changeSelection (gui code)
     # Replace selection with self.change_text.
@@ -587,38 +606,6 @@ class LeoFind:
             # f"     groups: {groups!s}\n"
             # f"     result: {result!s}")
         return result
-    #@+node:ekr.20210102145531.67: *4* replace-all (rewrite)
-    @cmd('replace-all')
-    def replace_all(self, event=None):
-        """Replace all instances of the search string with the replacement string."""
-        ### self.searchWithPresentOptions(event, changeAllFlag=True)
-    #@+node:ekr.20210102145531.68: *4* tag-children (rewrite)
-    @cmd('tag-children')
-    def tag_children(self, event=None):
-        """tag-children: prompt for a tag and add it to all children of c.p."""
-        ### To do
-        # if self.editWidget(event):  # sets self.w
-            # self.stateZeroHelper(event,
-                # prefix='Tag Children: ',
-                # handler=self.minibufferTagChildren1)
-    # def minibufferTagChildren1(self, event):
-        # c, k = self.c, self.k
-        # k.clearState()
-        # k.resetLabel()
-        # k.showStateAndMode()
-        # self.tagChildren(k.arg)
-        # c.treeWantsFocus()
-    #@+node:ekr.20210102145531.69: *5* find.tagChildren
-    def tagChildren(self, tag):
-        """Handle the clone-find-tag command."""
-        c = self.c
-        tc = c.theTagController
-        if tc:
-            for p in c.p.children():
-                tc.add_tag(p, tag)
-            g.es_print(f"Added {tag} tag to {len(list(c.p.children()))} nodes")
-        else:
-            g.es_print('nodetags not active')
     #@+node:ekr.20210103213410.1: *3* LeoFind: Helpers
     #@+node:ekr.20210102145531.137: *4* find.check_args (changed)
     def check_args(self):
@@ -723,7 +710,7 @@ class LeoFind:
                 break  # Abort the search.
             if pos is not None:
                 # Success.
-                # g.trace('Found', self.p.h, pos)
+                g.trace('Found', self.p.h, pos)
                 return pos, newpos
             # Searching the pane failed: switch to another pane or node.
             if self.shouldStayInNode(p):
@@ -734,8 +721,8 @@ class LeoFind:
                 # Switch to the next/prev node, if possible.
                 attempts += 1
                 p = self.p = self.nextNodeAfterFail(p)
-                # g.trace('Try', p.h)
                 if p:  # Found another node: select the proper pane.
+                    # g.trace('Try', p.h)
                     self.in_headline = self.firstSearchPane()
                     self.initNextText()
         return None, None
@@ -787,6 +774,7 @@ class LeoFind:
             and not c.hoistStack)
         # Move to the next position.
         p = p.threadBack() if self.reverse else p.threadNext()
+        # g.trace(p and p.h or 'None')
         # Check it.
         if p and self.outsideSearchRange(p):
             return None
@@ -795,8 +783,6 @@ class LeoFind:
             self.wrapPos = 0 if self.reverse else len(p.b)
             p = self.doWrap()
         if not p:
-            return None
-        if wrap and p == self.wrapPosition:
             return None
         return p
     #@+node:ekr.20210102145531.116: *6* find.doWrap
@@ -869,9 +855,8 @@ class LeoFind:
             elif not self.search_body:
                 status.append('headline-only')
         if not find_all_flag:
-            ###
-                # if self.wrapping:
-                #     status.append('wrapping')
+            if self.wrapping:
+                status.append('wrapping')
             if self.suboutline_only:
                 status.append('[outline-only]')
             elif self.node_only:
