@@ -361,9 +361,7 @@ class LeoFind:
         else:
             # #1592.  Ignore hits under control of @nosearch
             while True:
-                ### found = find.findNext()
                 pos, newpos = self.findNextMatch()
-                ### if not found or not g.inAtNosearch(c.p):
                 if pos is None or not g.inAtNosearch(c.p):
                     break
         if not found and defFlag:
@@ -378,8 +376,8 @@ class LeoFind:
                 else:
                     # #1592.  Ignore hits under control of @nosearch
                     while True:
-                        found = find.findNext()
-                        if not found or not g.inAtNosearch(c.p):
+                        pos, newpos = find.findNext()
+                        if pos is None or not g.inAtNosearch(c.p):
                             break
         if found and use_cff:
             last = c.lastTopLevel()
@@ -509,25 +507,29 @@ class LeoFind:
         finally:
             self.reverse = False
         return pos, newpos, self.p  # For tests.
-    #@+node:ekr.20210102145531.23: *4* replace-then-find (test)
+    #@+node:ekr.20210102145531.23: *4* replace-then-find
     @cmd('replace-then-find')
     def replace_then_find(self, event=None):
         """Handle the replace-then-find command."""
         if self.changeSelection():
-            self.findNext()
+            pos, newpos = self.findNext()
+            return pos, newpos
+        return None, None
 
     #@+node:ekr.20210102145531.100: *5* find.changeSelection (gui code)
     # Replace selection with self.change_text.
     # If no selection, insert self.change_text at the cursor.
 
     def changeSelection(self):
+        # g.pdb()
         c, p = self.c, self.p
         wrapper = c.frame.body and c.frame.body.wrapper
         w = c.edit_widget(p) if self.in_headline else wrapper
         if not w:
             self.in_headline = False
             w = wrapper
-        if not w: return False
+        if not w:
+            return False
         oldSel = sel = w.getSelectionRange()
         start, end = sel
         if start > end: start, end = end, start
@@ -681,9 +683,9 @@ class LeoFind:
     def findNext(self):
         """Find the next instance of the pattern."""
         if not self.check_args():
-            return False  # for vim-mode find commands.
+            return None, None
         pos, newpos = self.findNextMatch()
-        return pos is not None
+        return pos, newpos
     #@+node:ekr.20210102145531.112: *4* find.findNextBatchMatch
     def findNextBatchMatch(self, p):
         """Find the next batch match at p."""
@@ -721,6 +723,7 @@ class LeoFind:
                 break  # Abort the search.
             if pos is not None:
                 # Success.
+                # g.trace('Found', self.p.h, pos)
                 return pos, newpos
             # Searching the pane failed: switch to another pane or node.
             if self.shouldStayInNode(p):
@@ -731,6 +734,7 @@ class LeoFind:
                 # Switch to the next/prev node, if possible.
                 attempts += 1
                 p = self.p = self.nextNodeAfterFail(p)
+                # g.trace('Try', p.h)
                 if p:  # Found another node: select the proper pane.
                     self.in_headline = self.firstSearchPane()
                     self.initNextText()
