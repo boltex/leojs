@@ -196,7 +196,7 @@ class LeoFind:
     #@+node:ekr.20210102145531.64: *4* clone-find-tag (rewrite)
     @cmd('clone-find-tag')
     @cmd('cft')
-    def minibufferCloneFindTag(self, event=None):
+    def find_tag(self, event=None):
         """
         clone-find-tag (aka find-clone-tag and cft).
 
@@ -311,12 +311,12 @@ class LeoFind:
         return count
     #@+node:ekr.20210102145531.27: *4* find-def, find-var (test)
     @cmd('find-def')
-    def findDef(self, event=None):
+    def find_def(self, event=None):
         """Find the def or class under the cursor."""
         self.findDefHelper(event, defFlag=True)
 
     @cmd('find-var')
-    def findVar(self, event=None):
+    def find_var(self, event=None):
         """Find the var under the cursor."""
         self.findDefHelper(event, defFlag=False)
     #@+node:ekr.20210102145531.28: *5* find.findDefHelper & helpers (changed)
@@ -507,7 +507,7 @@ class LeoFind:
         return pos, newpos, self.p  # For tests.
     #@+node:ekr.20210102145531.23: *4* replace-then-find (test)
     @cmd('replace-then-find')
-    def change_then_find(self, event=None):
+    def replace_then_find(self, event=None):
         """Handle the replace-then-find command."""
         if self.changeSelection():
             self.findNext()
@@ -583,12 +583,12 @@ class LeoFind:
         return result
     #@+node:ekr.20210102145531.67: *4* replace-all (rewrite)
     @cmd('replace-all')
-    def minibufferReplaceAll(self, event=None):
+    def replace_all(self, event=None):
         """Replace all instances of the search string with the replacement string."""
         ### self.searchWithPresentOptions(event, changeAllFlag=True)
     #@+node:ekr.20210102145531.68: *4* tag-children (rewrite)
     @cmd('tag-children')
-    def minibufferTagChildren(self, event=None):
+    def tag_children(self, event=None):
         """tag-children: prompt for a tag and add it to all children of c.p."""
         ### To do
         # if self.editWidget(event):  # sets self.w
