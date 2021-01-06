@@ -341,7 +341,7 @@ class LeoFind:
             c.setChanged()
         g.es("found", count, "matches for", self.find_text)
         return count
-    #@+node:ekr.20210102145531.27: *4* find-def, find-var (test)
+    #@+node:ekr.20210102145531.27: *4* find-def, find-var
     @cmd('find-def')
     def find_def(self, settings=None):
         """Find the def or class under the cursor."""
