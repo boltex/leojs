@@ -5,8 +5,11 @@ import re
 import sys
 import time
 import unittest
+# pylint: disable=import-self
 ### from src.ekr import coreFind as g
 from leo.core import leoGlobals as g
+from src.ekr import coreFind
+from src.ekr import coreTest
 
 def cmd(name):
     """Command decorator for the findCommands class."""
@@ -152,9 +155,10 @@ class LeoFind:
     #@+node:ekr.20210105173904.1: *5* find.clone_find_all_helper & helper
     def clone_find_all_helper(self, flatten, settings):
         c, u = self.c, self.c.undoer
+        tag = 'clone-find-all-flattened' if flatten else 'clone-find-all'
         if settings:
             self.init(settings)
-        if not self.check_args():
+        if not self.check_args(tag):
             return 0
         if self.pattern_match:
             ok = self.compile_pattern()
@@ -270,7 +274,7 @@ class LeoFind:
         c, u, w = self.c, self.c.undoer, self.s_ctrl
         if settings:
             self.init(settings)
-        if not self.check_args():
+        if not self.check_args('find-all'):
             return 0
         if self.pattern_match:
             ok = self.compile_pattern()
@@ -324,11 +328,12 @@ class LeoFind:
     def find_def_helper(self, defFlag, settings):
         """Find the definition of the class, def or var under the cursor."""
         c, w = self.c, self.c.frame.body.wrapper
+        tag = 'find-def' if defFlag else 'find-var'
         if not w:
             return None, None, None
         if settings:
             self.init(settings)
-        if not self.check_args():
+        if not self.check_args(tag):
             return None, None, None
         if not self.find_text:
             g.trace('no find text')
@@ -483,7 +488,7 @@ class LeoFind:
         undoType = 'Replace All'
         if settings:
             self.init(settings)
-        if not self.check_args():
+        if not self.check_args('replace-all'):
             return
         t1 = time.process_time()
         count = 0
@@ -643,7 +648,7 @@ class LeoFind:
         """Handle the replace-then-find command."""
         if settings:
             self.init(settings)
-        if not self.check_args():
+        if not self.check_args('replace-then-find'):
             return None, None, None
         if self.changeSelection():
             pos, newpos = self.find_next_match()
@@ -735,12 +740,12 @@ class LeoFind:
         g.es_print(f"Added {tag} tag to {len(list(c.p.children()))} nodes")
     #@+node:ekr.20210103213410.1: *3* LeoFind: Helpers
     #@+node:ekr.20210102145531.137: *4* find.check_args
-    def check_args(self):
+    def check_args(self, tag):
         if not self.search_headline and not self.search_body:
             g.es_print("not searching headline or body")
             return False
         if not self.find_text:
-            g.es_print("empty find patttern")
+            g.es_print(f"\n{tag}: empty find patttern")
             return False
         return True
     #@+node:ekr.20210102145531.121: *4* find.compile_pattern
@@ -779,17 +784,16 @@ class LeoFind:
                 status.append('head')
             if self.search_body:
                 status.append('body')
-        else:
-            if not self.search_headline:
-                status.append('body-only')
-            elif not self.search_body:
-                status.append('headline-only')
-        if not find_all_flag:
             if self.wrapping:
                 status.append('wrapping')
+        else:
+            if self.search_headline:
+                status.append('headline-only')
+            if self.search_body:
+                status.append('body-only')
             if self.suboutline_only:
                 status.append('[outline-only]')
-            elif self.node_only:
+            if self.node_only:
                 status.append('[node-only]')
         return f" ({', '.join(status)})" if status else ''
     #@+node:ekr.20210102145531.107: *4* find.create_clone_find_all_nodes
@@ -838,7 +842,7 @@ class LeoFind:
         """
         if settings:
             self.init(settings)
-        if not self.check_args():
+        if not self.check_args('find_next_match'):
             return None, None
         self.errors = 0
         attempts = 0
@@ -1208,6 +1212,103 @@ class SearchWidget:
         self.sel = self.toPythonIndex(i), self.toPythonIndex(j)
         if insert is not None:
             self.i = self.toPythonIndex(insert)
+    #@-others
+#@+node:ekr.20210106123815.1: ** class TestFind (unittest.TestCase)
+class TestFind (unittest.TestCase):
+    """Test cases for coreFind.py"""
+    
+    def setUp(self):
+        self.c = coreTest.create_app()
+        self.x = coreFind.LeoFind(self.c)
+        self.settings = self.x.default_settings()
+        
+    #@+others
+    #@+node:ekr.20210106124121.1: *3* TestFind.clone-find-all
+    ### settings.find_text = r'^def\b'  # 'clone_find_all'
+    ### settings.change_text = 'def'  # Don't actually change anything!
+    ### settings.pattern_match = True
+    ### settings.suboutline_only = True
+
+    # x.clone_find_all_flattened(settings)
+
+    def test_clone_find_all(self):
+        settings = self.settings
+        # regex find.
+        settings.find_text = r'^def\b'
+        settings.pattern_match = True
+        self.x.clone_find_all(settings)
+        settings.find_text = 'def'
+        settings.match_word = True
+        settings.pattern_match = False
+        self.x.clone_find_all(settings)
+        # print(self.c.lastTopLevel().h)
+
+    def test_clone_find_all_errors(self):
+        self.x.clone_find_all(self.settings)
+        
+    #@+node:ekr.20210106133012.1: *3* TestFind.clone-find-all-flattened
+    def test_clone_find_all_flattened(self):
+        settings = self.settings
+        # regex find.
+        settings.find_text = r'^def\b'
+        settings.pattern_match = True
+        self.x.clone_find_all_flattened(settings)
+        # word find.
+        settings.find_text = 'def'
+        settings.match_word = True
+        settings.pattern_match = False
+        self.x.clone_find_all_flattened(settings)
+        # print(self.c.lastTopLevel().h)
+
+    def test_clone_find_all_flattened_errors(self):
+        
+        # No find pattern.
+        self.x.clone_find_all(self.settings)
+        
+    #@+node:ekr.20210106133506.1: *3* TestFind.test_bad compile_pattern
+    def test_bad_compile_pattern(self):
+        
+        # Bad search pattern.
+        settings = self.settings
+        settings.find_text = r'^def\b(('
+        settings.pattern_match = True
+        self.x.clone_find_all(settings)
+    #@+node:ekr.20210106133737.1: *3* TestFind.test_check_args
+    def test_check_args(self):
+        
+        # Bad search patterns..
+        x = self.x
+        settings = self.settings
+        # Not searching headline or body.
+        settings.search_body = False
+        settings.search_headline = False
+        x.clone_find_all(settings)
+        # Empty find pattern.
+        settings.search_body = True
+        x.clone_find_all(settings)
+        
+    #@+node:ekr.20210106134128.1: *3* TestFind.compute_result_status
+    def test_compute_result_status(self):
+        
+        x = self.x
+        # find_all_flag is True
+        all_settings = x.default_settings()
+        all_settings.ignore_case = True
+        all_settings.pattern_match = True
+        all_settings.whole_word = True
+        all_settings.wrapping = True
+        x.init(all_settings)
+        x.compute_result_status(find_all_flag=True)
+        # find_all_flag is False
+        partial_settings = x.default_settings()
+        partial_settings.search_body = True
+        partial_settings.search_headline = True
+        partial_settings.node_only = True
+        partial_settings.suboutline_only = True
+        partial_settings.wrapping = True
+        x.init(partial_settings)
+        x.compute_result_status(find_all_flag=False)
+        
     #@-others
 #@-others
 
