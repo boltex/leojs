@@ -34,6 +34,7 @@ class LeoFind:
         self.suboutline_only = None
         self.reverse = None
         self.whole_word = None
+        self.wrapping = None
         # Widget ivars...
         self.s_ctrl = SearchWidget()
         #
@@ -77,12 +78,14 @@ class LeoFind:
         self.search_headline = settings.search_headline
         self.suboutline_only = settings.suboutline_only
         self.whole_word = settings.whole_word
+        self.wrapping = settings.wrapping
         #
         # Init state.
         self.errors = 0
         self.in_headline = self.was_in_headline = settings.in_headline
         self.p = p = settings.p.copy()
         self.onlyPosition = self.p if self.suboutline_only else None
+        self.wrapPos = 0 if self.reverse else len(p.b)
         #
         # Init the search widget.
         s = p.h if self.in_headline else p.b
@@ -112,6 +115,7 @@ class LeoFind:
             search_headline = True,
             suboutline_only = False,
             whole_word = False,
+            wrapping = False,
         )
     #@+node:ekr.20210103193237.1: *3* LeoFind: Commands
     # All these commands are non-interactive.
@@ -767,17 +771,41 @@ class LeoFind:
             ins = 0
         w.setAllText(s)
         w.setInsertPoint(ins)
-    #@+node:ekr.20210102145531.119: *5* find.nextNodeAfterFail & helper
+    #@+node:ekr.20210102145531.119: *5* find.nextNodeAfterFail & helpers
     def nextNodeAfterFail(self, p):
-        """
-        Return the next node after a failed search or None.
-        """
+        """Return the next node after a failed search or None."""
+        c = self.c
+        # Wrapping is disabled by any limitation of search.
+        wrap = (
+            self.wrapping
+            and not self.node_only
+            and not self.suboutline_only
+            and not c.hoistStack)
+        # Move to the next position.
         p = p.threadBack() if self.reverse else p.threadNext()
+        # Check it.
+        if p and self.outsideSearchRange(p):
+            return None
+        if not p and wrap:
+            # Stateless wrap: Just set wrapPos and p.
+            self.wrapPos = 0 if self.reverse else len(p.b)
+            p = self.doWrap()
         if not p:
             return None
-        if self.outsideSearchRange(p):
+        if wrap and p == self.wrapPosition:
             return None
         return p
+    #@+node:ekr.20210102145531.116: *6* find.doWrap
+    def doWrap(self):
+        """Return the position resulting from a wrap."""
+        c = self.c
+        if self.reverse:
+            p = c.rootPosition()
+            while p and p.hasNext():
+                p = p.next()
+            p = p.lastNode()
+            return p
+        return c.rootPosition()
     #@+node:ekr.20210102145531.120: *6* find.outsideSearchRange
     def outsideSearchRange(self, p):
         """
