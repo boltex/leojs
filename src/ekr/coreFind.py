@@ -356,21 +356,15 @@ class LeoFind:
         """Find the definition of the class, def or var under the cursor."""
         c, w = self.c, self.c.frame.body.wrapper
         if not w:
-            return
+            return None, None, None
         if settings:
             self.init(settings)
-        ### word = self.initFindDef(event)
         if not self.find_text:
             g.trace('no find text')
-            return
-        ### save_sel = w.getSelectionRange()
-        ### ins = w.getInsertPoint()
-        # For the command, always start in the root position.
-        ### old_p = c.p
+            return None, None, None
+        # Always start in the root position.
         p = self.p = c.rootPosition()
-        # Required.
-        ### c.selectPosition(p)
-        c.redraw(p)
+        c.redraw(p)  # Required.
         c.bodyWantsFocusNow()
         # Set up the search.
         if defFlag:
@@ -378,14 +372,14 @@ class LeoFind:
             self.find_text = prefix + ' ' + self.find_text
         else:
             self.find_text = self.find_text + ' ='
-        g.trace('Look for', self.find_text, self.p.h)
+        ### g.trace('Look for', self.find_text, self.p.h)
         # Save previous settings.
         self.saveBeforeFindDef(p)
         self.setFindDefOptions(p)
-        self.find_seen = set()
         ### Make this a setting.
         use_cff = c.config.getBool('find-def-creates-clones', default=False)
         count, found = 0, False
+        self.find_seen = set()
         if use_cff:
             count = self.clone_find_all_flattened()
             found = count > 0
@@ -401,7 +395,7 @@ class LeoFind:
             word2 = self.switchStyle(self.find_text)
             if word2:
                 self.find_text = prefix + ' ' + word2
-                g.trace('Look for', self.find_text)
+                ### g.trace('Look for', self.find_text)
                 if use_cff:
                     count = self.clone_find_all()
                     found = count > 0
@@ -422,21 +416,38 @@ class LeoFind:
             else:
                 c.selectPosition(last)
             return None, None, last
-        elif found:
-            g.trace('Found', self.p.h)
-            return pos, newpos, self.p
-            ### self.find_seen.add(self.p.v)
-            ### self.restoreAfterFindDef()
+        if found:
+            ### g.trace('Found', self.p.h)
+            self.restoreAfterFindDef()
                 # Failing to do this causes massive confusion!
-        
-        g.trace('Not found', self.find_text)
+            return pos, newpos, self.p
+        ### g.trace('Not found', self.find_text)
         return None, None, None
-        # c.selectPosition(old_p)
-        # self.restoreAfterFindDef()  # 2016/03/24
-        # i, j = save_sel
-        # c.redraw()
-        # w.setSelectionRange(i, j, insert=ins)
-        # c.bodyWantsFocusNow()
+    #@+node:ekr.20210102145531.33: *6* find.restoreAfterFindDef
+    def restoreAfterFindDef(self):
+        """Restore find settings in effect before a find-def command."""
+        # pylint: disable=no-member
+            # Bunch has these members
+        b = self.find_def_data  # A g.Bunch
+        if b:
+            self.ignore_case = b.ignore_case
+            ### self.p = b.p
+            self.pattern_match = b.pattern_match
+            self.reverse = False
+            self.search_body = b.search_body
+            self.search_headline = b.search_headline
+            self.whole_word = b.whole_word
+            self.find_def_data = None
+    #@+node:ekr.20210102145531.32: *6* find.setFindDefOptions
+    def setFindDefOptions(self, p):
+        """Set the find options needed for the find-def command."""
+        self.ignore_case = False
+        self.p = p.copy()
+        self.pattern_match = False
+        self.reverse = False
+        self.search_body = True
+        self.search_headline = False
+        self.whole_word = True
     #@+node:ekr.20210102145531.29: *6* find.switchStyle
     def switchStyle(self, word):
         """
@@ -466,31 +477,6 @@ class LeoFind:
             result.append(ch.lower())
         s = ''.join(result)
         return None if s == word else s
-    #@+node:ekr.20210102145531.32: *6* find.setFindDefOptions
-    def setFindDefOptions(self, p):
-        """Set the find options needed for the find-def command."""
-        self.ignore_case = False
-        self.p = p.copy()
-        self.pattern_match = False
-        self.reverse = False
-        self.search_body = True
-        self.search_headline = False
-        self.whole_word = True
-    #@+node:ekr.20210102145531.33: *6* find.restoreAfterFindDef
-    def restoreAfterFindDef(self):
-        """Restore find settings in effect before a find-def command."""
-        # pylint: disable=no-member
-            # Bunch has these members
-        b = self.find_def_data  # A g.Bunch
-        if b:
-            self.ignore_case = b.ignore_case
-            self.p = b.p
-            self.pattern_match = b.pattern_match
-            self.reverse = False
-            self.search_body = b.search_body
-            self.search_headline = b.search_headline
-            self.whole_word = b.whole_word
-            self.find_def_data = None
     #@+node:ekr.20210102145531.31: *5* find.saveBeforeFindDef
     def saveBeforeFindDef(self, p):
         """Save the find settings in effect before a find-def command."""
@@ -710,7 +696,7 @@ class LeoFind:
                 break  # Abort the search.
             if pos is not None:
                 # Success.
-                g.trace('Found', self.p.h, pos)
+                ### g.trace('Found', self.p.h, pos)
                 return pos, newpos
             # Searching the pane failed: switch to another pane or node.
             if self.shouldStayInNode(p):
