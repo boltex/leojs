@@ -38,7 +38,6 @@ class LeoFind:
         self.whole_word = None
         # Widget ivars...
         self.s_ctrl = SearchWidget()
-        ### self.radioButtonsChanged = False
         #
         # Communication between find-def and startSearch
         self.find_def_data = None
@@ -62,9 +61,6 @@ class LeoFind:
             # Fix bug: https://groups.google.com/d/msg/leo-editor/RAzVPihqmkI/-tgTQw0-LtwJ
         self.onlyPosition = None
             # The starting node for suboutline-only searches.
-        
-        ### self.state_on_start_of_search = None
-            # keeps all state data that should be restored once the search is exhausted
     #@+node:ekr.20210105122004.1: *3* find.init
     def init(self, settings):
         """Initial all ivars from settings."""
@@ -217,19 +213,20 @@ class LeoFind:
         direct child of the organizer node, even if the clone also is a
         descendant of another cloned node.
         """
-        if self.editWidget(event):  # sets self.w
-            self.stateZeroHelper(event,
-                prefix='Clone Find Tag: ',
-                handler=self.minibufferCloneFindTag1)
+        ### To do
+        # if self.editWidget(event):  # sets self.w
+            # self.stateZeroHelper(event,
+                # prefix='Clone Find Tag: ',
+                # handler=self.minibufferCloneFindTag1)
 
-    def minibufferCloneFindTag1(self, event):
-        c, k = self.c, self.k
-        k.clearState()
-        k.resetLabel()
-        k.showStateAndMode()
-        self.find_text = k.arg
-        self.cloneFindTag(k.arg)
-        c.treeWantsFocus()
+    # def minibufferCloneFindTag1(self, event):
+        # c, k = self.c, self.k
+        # k.clearState()
+        # k.resetLabel()
+        # k.showStateAndMode()
+        # self.find_text = k.arg
+        # self.cloneFindTag(k.arg)
+        # c.treeWantsFocus()
     #@+node:ekr.20210102145531.103: *5* find.cloneFindTag
     def cloneFindTag(self, tag):
         """Handle the clone-find-tag command."""
@@ -278,8 +275,7 @@ class LeoFind:
         Create a summary node containing descriptions of all matches of the
         search string.
         """
-        self.ftm.clear_focus()
-        self.searchWithPresentOptions(event, findAllFlag=True)
+        ### self.searchWithPresentOptions(event, findAllFlag=True)
     #@+node:ekr.20210102145531.27: *4* find-def, find-var (test)
     @cmd('find-def')
     def findDef(self, event=None):
@@ -293,7 +289,6 @@ class LeoFind:
     #@+node:ekr.20210102145531.28: *5* find.findDefHelper & helpers (changed)
     def findDefHelper(self, event, defFlag):
         """Find the definition of the class, def or var under the cursor."""
-        ### c, find, ftm = self.c, self, self.ftm
         find = self
         c, w = self.c, self.c.frame.body.wrapper
         if not w:
@@ -317,7 +312,6 @@ class LeoFind:
         else:
             find_pattern = word + ' ='
         find.find_text = find_pattern
-        ### ftm.setFindText(find_pattern)
         # Save previous settings.
         find.saveBeforeFindDef(p)
         find.setFindDefOptions(p)
@@ -325,13 +319,12 @@ class LeoFind:
         use_cff = c.config.getBool('find-def-creates-clones', default=False)
         count = 0
         if use_cff:
-            ### count = find.findAll(clone_find_all=True, clone_find_all_flattened=True)
             count = find.clone_find_all_flattened()
             found = count > 0
         else:
             # #1592.  Ignore hits under control of @nosearch
             while True:
-                found = find.findNext() ### initFlag=False)
+                found = find.findNext()
                 if not found or not g.inAtNosearch(c.p):
                     break
         if not found and defFlag:
@@ -340,15 +333,13 @@ class LeoFind:
             if word2:
                 find_pattern = prefix + ' ' + word2
                 find.find_text = find_pattern
-                ### ftm.setFindText(find_pattern)
                 if use_cff:
-                    ### count = find.findAll( clone_find_all=True, clone_find_all_flattened=True)
                     count = find.clone_find_all()
                     found = count > 0
                 else:
                     # #1592.  Ignore hits under control of @nosearch
                     while True:
-                        found = find.findNext() ### initFlag=False)
+                        found = find.findNext()
                         if not found or not g.inAtNosearch(c.p):
                             break
         if found and use_cff:
@@ -357,7 +348,7 @@ class LeoFind:
                 # It's annoying to create a clone in this case.
                 # Undo the clone find and just select the proper node.
                 last.doDelete()
-                find.findNext() ### initFlag=False)
+                find.findNext()
             else:
                 c.selectPosition(last)
         if found:
@@ -465,13 +456,11 @@ class LeoFind:
     @cmd('find-next')
     def findNextCommand(self, event=None):
         """The find-next command."""
-        ### self.setup_command()
         self.findNext()
     #@+node:ekr.20210102145531.35: *4* find-prev (test)
     @cmd('find-prev')
     def findPrevCommand(self, event=None):
         """Handle F2 (find-previous)"""
-        ### self.setup_command()
         self.reverse = True
         try:
             self.findNext()
@@ -560,23 +549,23 @@ class LeoFind:
     @cmd('replace-all')
     def minibufferReplaceAll(self, event=None):
         """Replace all instances of the search string with the replacement string."""
-        self.ftm.clear_focus()
-        self.searchWithPresentOptions(event, changeAllFlag=True)
+        ### self.searchWithPresentOptions(event, changeAllFlag=True)
     #@+node:ekr.20210102145531.68: *4* tag-children (rewrite)
     @cmd('tag-children')
     def minibufferTagChildren(self, event=None):
         """tag-children: prompt for a tag and add it to all children of c.p."""
-        if self.editWidget(event):  # sets self.w
-            self.stateZeroHelper(event,
-                prefix='Tag Children: ',
-                handler=self.minibufferTagChildren1)
-    def minibufferTagChildren1(self, event):
-        c, k = self.c, self.k
-        k.clearState()
-        k.resetLabel()
-        k.showStateAndMode()
-        self.tagChildren(k.arg)
-        c.treeWantsFocus()
+        ### To do
+        # if self.editWidget(event):  # sets self.w
+            # self.stateZeroHelper(event,
+                # prefix='Tag Children: ',
+                # handler=self.minibufferTagChildren1)
+    # def minibufferTagChildren1(self, event):
+        # c, k = self.c, self.k
+        # k.clearState()
+        # k.resetLabel()
+        # k.showStateAndMode()
+        # self.tagChildren(k.arg)
+        # c.treeWantsFocus()
     #@+node:ekr.20210102145531.69: *5* find.tagChildren
     def tagChildren(self, tag):
         """Handle the clone-find-tag command."""
@@ -692,36 +681,20 @@ class LeoFind:
             else:
                 result.append('%s%s\n%s' % ('-' * 20, p.h, line.rstrip() + '\n'))
                 p.setVisited()
-        if result: ### or self.unique_matches:
+        if result:
             undoData = u.beforeInsertNode(p)
             found = self.createFindAllNode(result)
             u.afterInsertNode(found, 'Find All', undoData)
             c.selectPosition(found)
             c.setChanged()
-        ### else: self.restore(data)
         return count
     #@+node:ekr.20210102145531.113: *4* find.findNext & helper (changed, to be deleted)
     def findNext(self):
         """Find the next instance of the pattern."""
         if not self.check_args():
             return False  # for vim-mode find commands.
-        # initFlag is False for change-then-find.
-        # if initFlag:
-            # self.initInHeadline()
-            # data = self.save()
-            # self.initInteractiveCommands()
-        # else:
-            # data = self.save()
         pos, newpos = self.findNextMatch()
         return pos is not None
-        ###
-            # if pos is None:
-                # self.restore(data)
-                # self.showStatus(False)
-                # return False  # for vim-mode find commands.
-            # self.showSuccess(pos, newpos)
-            # self.showStatus(True)
-            # return True  # for vim-mode find commands.
     #@+node:ekr.20210102145531.112: *4* find.findNextBatchMatch
     def findNextBatchMatch(self, p):
         """Find the next batch match at p."""
@@ -745,7 +718,7 @@ class LeoFind:
             return None, None
         self.errors = 0
         attempts = 0
-        if self.pattern_match: ### or self.findAllUniqueFlag:
+        if self.pattern_match:
             ok = self.precompilePattern()
             if not ok: return None, None
         while p:
@@ -808,14 +781,9 @@ class LeoFind:
         - self.in_headline indicates what text to use.
         - self.reverse indicates how to set the insertion point.
         """
-        ### c = self.c
         p, w = self.p, self.s_ctrl
         assert p
         s = p.h if self.in_headline else p.b
-        ### tree = c.frame and c.frame.tree
-        ### if tree and hasattr(tree, 'killEditing'):
-        ###    tree.killEditing()
-        ins = None
         if self.reverse:
             i, j = w.sel
             if i is not None and j is not None and i != j:
@@ -824,7 +792,6 @@ class LeoFind:
                 ins = len(s)
         else:
             ins = 0
-        ### self.init_s_ctrl(s, ins)
         w.setAllText(s)
         w.setInsertPoint(ins)
     #@+node:ekr.20210102145531.119: *5* find.nextNodeAfterFail & helper
@@ -950,19 +917,12 @@ class LeoFind:
         Returns (pos, newpos) or (None,None).
         """
         p = self.p
-        ### if (self.ignore_dups or self.find_def_data) and p.v in self.find_seen:
         if self.find_def_data and p.v in self.find_seen:
             # Don't find defs/vars multiple times.
             return None, None
         w = self.s_ctrl  ### This is *not* gui code. ###
         index = w.getInsertPoint()
         s = w.getAllText()
-        ###
-            # if sys.platform.lower().startswith('win'):
-                # s = s.replace('\r', '')
-                    # # Ignore '\r' characters, which may appear in @edit nodes.
-                    # # Fixes this bug: https://groups.google.com/forum/#!topic/leo-editor/yR8eL5cZpi4
-                    # # This hack would be dangerous on MacOs: it uses '\r' instead of '\n' (!)
         if not s:
             return None, None
         stopindex = 0 if self.reverse else len(s)
@@ -989,7 +949,6 @@ class LeoFind:
                 return None, None
         ins = min(pos, newpos) if self.reverse else max(pos, newpos)
         w.setSelectionRange(pos, newpos, insert=ins)
-        ### if (self.ignore_dups or self.find_def_data):
         if self.find_def_data:
             self.find_seen.add(p.v)
         return pos, newpos
@@ -1008,7 +967,7 @@ class LeoFind:
         """Dispatch the proper search method based on settings."""
         backwards = self.reverse
         nocase = self.ignore_case
-        regexp = self.pattern_match ### or self.findAllUniqueFlag
+        regexp = self.pattern_match
         word = self.whole_word
         if backwards: i, j = j, i
         if not s[i:j] or not pattern:
