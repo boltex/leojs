@@ -6192,6 +6192,10 @@ export const cmd_instance_dict: { [key: string]: string[] } = {
 export const g_is_directive_pattern = new RegExp(String.raw`^\s*@([\w-]+)\s*`);
 // This pattern excludes @encoding.whatever and @encoding(whatever)
 // It must allow @language python, @nocolor-node, etc.
+
+// Patterns used only in this module...
+const g_is_directive_pattern = new RegExp('^\s*@([\w-]+)\s*');
+
 export const g_noweb_root = new RegExp('&lt;' + '&lt;' + '*' + '&gt;' + '&gt;' + '=', 'm');
 export const g_pos_pattern = new RegExp(String.raw`:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$`);
 export const g_tabwidth_pat = new RegExp(String.raw`(^@tabwidth)`, 'm');
@@ -7622,7 +7626,7 @@ export function doKeywordArgs(keys: { [key: string]: any }, d: { [key: string]: 
 }
 
 /*
-    ### Old code
+    ### es_exception Old code
         # typ, val, tb = sys.exc_info()
         # # val is the second argument to the raise statement.
         # if full:
@@ -7645,27 +7649,25 @@ export function doKeywordArgs(keys: { [key: string]: any }, d: { [key: string]: 
 export const es_print = console.log;
 
 </t>
-<t tx="felix.20210104210259.1">// Patterns used only in this module...
-const g_is_directive_pattern = new RegExp('^\s*@([\w-]+)\s*');
+<t tx="felix.20210104210259.1">/**
+ * Return True if s starts with a directive.
+ */
+export function isDirective(s: string): boolean {
+    const m: string = s.match(g_is_directive_pattern);
+
     // This pattern excludes @encoding.whatever and @encoding(whatever)
     // It must allow @language python, @nocolor-node, etc.
 
-/**
- * Return True if s starts with a directive.
- */
-export function isDirective(s:string):boolean {
-    const m:string = s.match(g_is_directive_pattern);
-
     if (m) {
-    // TODO see https://docs.python.org/3/library/re.html#re.Match.end
-        const s2:string = "";
-        if(s2 &amp;&amp; ".(".includes(s2.charAt(0)) ){
+        // TODO see https://docs.python.org/3/library/re.html#re.Match.end
+        const s2: string = "";
+        if (s2 &amp;&amp; ".(".includes(s2.charAt(0))) {
             return false;
         }
-        
+
         return xx
     }
-    
+
     return false;
 }
 
@@ -7700,11 +7702,11 @@ def is_special(s, directive):
 <t tx="felix.20210104210316.1">/**
  * Return True if ch should be considered a letter.
  */
-public isWordChar(ch:string): boolean{
+public isWordChar(ch: string): boolean{
     return ch &amp;&amp; (/^[0-9a-zA-Z]$/.test(ch) || ch === '_');
 }
 
-public isWordChar1(ch:string): boolean {
+public isWordChar1(ch: string): boolean {
     return ch &amp;&amp; (/^[a-zA-Z]$/.test(ch) || ch === '_');
 }
 

@@ -114,16 +114,17 @@ export const cmd_instance_dict: { [key: string]: string[] } = {
     'VimCommands': ['c', 'vimCommands'],
 };
 
-export const g_language_pat = new RegExp(String.raw`^@language\s+(\w+)+`, 'm');
+export const g_language_pat = new RegExp(/^@language\s+(\w+)+/, 'm');
 // Regex used by this module, and in leoColorizer.py.
 
 // Patterns used only in this module...
-export const g_is_directive_pattern = new RegExp(String.raw`^\s*@([\w-]+)\s*`);
+export const g_is_directive_pattern = new RegExp(/^\s*@([\w-]+)\s*/);
 // This pattern excludes @encoding.whatever and @encoding(whatever)
 // It must allow @language python, @nocolor-node, etc.
+
 export const g_noweb_root = new RegExp('<' + '<' + '*' + '>' + '>' + '=', 'm');
-export const g_pos_pattern = new RegExp(String.raw`:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$`);
-export const g_tabwidth_pat = new RegExp(String.raw`(^@tabwidth)`, 'm');
+export const g_pos_pattern = new RegExp(/:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$/);
+export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
 
 
 export const tree_popup_handlers: ((...args: any[]) => any)[] = [];  // Set later.
@@ -320,7 +321,7 @@ export function es_exception(): string {
 }
 
 /*
-    ### Old code
+    ### es_exception Old code
         # typ, val, tb = sys.exc_info()
         # # val is the second argument to the raise statement.
         # if full:
@@ -341,27 +342,25 @@ export function es_exception(): string {
  */
 export const es_print = console.log;
 
-// Patterns used only in this module...
-const g_is_directive_pattern = new RegExp('^\s*@([\w-]+)\s*');
-    // This pattern excludes @encoding.whatever and @encoding(whatever)
-    // It must allow @language python, @nocolor-node, etc.
-
 /**
  * Return True if s starts with a directive.
  */
-export function isDirective(s:string):boolean {
-    const m:string = s.match(g_is_directive_pattern);
+export function isDirective(s: string): boolean {
+    const m: string = s.match(g_is_directive_pattern);
+
+    // This pattern excludes @encoding.whatever and @encoding(whatever)
+    // It must allow @language python, @nocolor-node, etc.
 
     if (m) {
-    // TODO see https://docs.python.org/3/library/re.html#re.Match.end
-        const s2:string = "";
-        if(s2 && ".(".includes(s2.charAt(0)) ){
+        // TODO see https://docs.python.org/3/library/re.html#re.Match.end
+        const s2: string = "";
+        if (s2 && ".(".includes(s2.charAt(0))) {
             return false;
         }
-        
+
         return xx
     }
-    
+
     return false;
 }
 
@@ -394,11 +393,11 @@ def is_special(s, directive):
 /**
  * Return True if ch should be considered a letter.
  */
-public isWordChar(ch:string): boolean{
+public isWordChar(ch: string): boolean{
     return ch && (/^[0-9a-zA-Z]$/.test(ch) || ch === '_');
 }
 
-public isWordChar1(ch:string): boolean {
+public isWordChar1(ch: string): boolean {
     return ch && (/^[a-zA-Z]$/.test(ch) || ch === '_');
 }
 
