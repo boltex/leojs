@@ -123,11 +123,10 @@ class LeoFind:
     # All these commands are non-interactive.
 
     # To do: remove all gui-related code.
-    #@+node:ekr.20210106064831.1: *4*  Later or never
-    #@+node:ekr.20210102145531.64: *5* clone-find-tag (rewrite)
+    #@+node:ekr.20210102145531.64: *4* clone-find-tag (rewrite)
     @cmd('clone-find-tag')
     @cmd('cft')
-    def find_tag(self, event=None):
+    def clone_find_tag(self, tag):
         """
         clone-find-tag (aka find-clone-tag and cft).
 
@@ -138,43 +137,26 @@ class LeoFind:
         direct child of the organizer node, even if the clone also is a
         descendant of another cloned node.
         """
-        ### To do
-        # if self.editWidget(event):  # sets self.w
-            # self.stateZeroHelper(event,
-                # prefix='Clone Find Tag: ',
-                # handler=self.minibufferCloneFindTag1)
-
-    # def minibufferCloneFindTag1(self, event):
-        # c, k = self.c, self.k
-        # k.clearState()
-        # k.resetLabel()
-        # k.showStateAndMode()
-        # self.find_text = k.arg
-        # self.cloneFindTag(k.arg)
-        # c.treeWantsFocus()
-    #@+node:ekr.20210102145531.103: *6* find.cloneFindTag
-    def cloneFindTag(self, tag):
-        """Handle the clone-find-tag command."""
         c, u = self.c, self.c.undoer
         tc = c.theTagController
         if not tc:
             g.es_print('nodetags not active')
-            return 0
+            return 0, c.p
         clones = tc.get_tagged_nodes(tag)
-        if clones:
-            undoType = 'Clone Find Tag'
-            undoData = u.beforeInsertNode(c.p)
-            found = self.createCloneTagNodes(clones)
-            u.afterInsertNode(found, undoType, undoData)
-            assert c.positionExists(found, trace=True), found
-            c.setChanged()
-            c.selectPosition(found)
-            c.redraw()
-        else:
-            g.es_print(f"tag not found: {self.find_text}")
-        return len(clones)
-    #@+node:ekr.20210102145531.104: *6* find.createCloneTagNodes
-    def createCloneTagNodes(self, clones):
+        if not clones:
+            g.es_print(f"tag not found: {tag}")
+            tc.show_all_tags()
+            return 0, c.p
+        undoData = u.beforeInsertNode(c.p)
+        found = self.create_clone_tag_nodes(clones)
+        u.afterInsertNode(found, 'Clone Find Tag', undoData)
+        assert c.positionExists(found, trace=True), found
+        c.setChanged()
+        ### c.selectPosition(found)
+        ### c.redraw()
+        return len(clones), found
+    #@+node:ekr.20210102145531.104: *5* find.create_clone_tag_nodes
+    def create_clone_tag_nodes(self, clones):
         """
         Create a "Found Tag" node as the last node of the outline.
         Clone all positions in the clones set as children of found.
@@ -193,7 +175,7 @@ class LeoFind:
             n = found.numberOfChildren()
             p2._linkCopiedAsNthChild(found, n)
         return found
-    #@+node:ekr.20210102145531.68: *5* tag-children (rewrite)
+    #@+node:ekr.20210102145531.68: *4* tag-children (rewrite)
     @cmd('tag-children')
     def tag_children(self, event=None):
         """tag-children: prompt for a tag and add it to all children of c.p."""
@@ -209,7 +191,7 @@ class LeoFind:
         # k.showStateAndMode()
         # self.tagChildren(k.arg)
         # c.treeWantsFocus()
-    #@+node:ekr.20210102145531.69: *6* find.tagChildren
+    #@+node:ekr.20210102145531.69: *5* find.tagChildren
     def tagChildren(self, tag):
         """Handle the clone-find-tag command."""
         c = self.c
