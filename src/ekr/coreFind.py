@@ -268,14 +268,56 @@ class LeoFind:
             n = found.numberOfChildren()
             p2._linkCopiedAsNthChild(found, n)
         return found
-    #@+node:ekr.20210102145531.65: *4* find-all (rewrite)
+    #@+node:ekr.20210102145531.105: *4* find-all (test)
     @cmd('find-all')
-    def minibufferFindAll(self, event=None):
+    def find_all(self, settings):
         """
-        Create a summary node containing descriptions of all matches of the
-        search string.
+        find-all
         """
-        ### self.searchWithPresentOptions(event, findAllFlag=True)
+        c, u, w = self.c, self.c.undoer, self.s_ctrl
+        if settings:
+            self.init(settings)
+        if not self.check_args():
+            return 0
+        if self.pattern_match:
+            ok = self.precompilePattern()
+            if not ok: return 0
+        if self.suboutline_only:
+            p = self.p
+            after = p.nodeAfterTree()
+        else:
+            # Always search the entire outline.
+            p = c.rootPosition()
+            after = None
+        self.p = p
+        ### count = self.find_all_helper(after, p)
+        count, found, result = 0, None, []
+        while self.p != after:  ### New
+            pos, newpos = self.findNextMatch()  # sets self.p
+            if pos is None:
+                 break
+            count += 1
+            s = w.getAllText()
+            i, j = g.getLine(s, pos)
+            line = s[i:j]
+            if self.search_body and self.search_headline:
+                result.append('%s%s\n%s%s\n' % (
+                    '-' * 20, p.h,
+                    "head: " if self.in_headline else "body: ",
+                    line.rstrip() + '\n'))
+            elif p.isVisited():
+                result.append(line.rstrip() + '\n')
+            else:
+                result.append('%s%s\n%s' % ('-' * 20, p.h, line.rstrip() + '\n'))
+                p.setVisited()
+        if result:
+            undoData = u.beforeInsertNode(p)
+            found = self.createFindAllNode(result)
+            u.afterInsertNode(found, 'Find All', undoData)
+            c.selectPosition(found)
+            c.setChanged()
+        g.es("found", count, "matches for", self.find_text)
+        return count
     #@+node:ekr.20210102145531.27: *4* find-def, find-var (test)
     @cmd('find-def')
     def findDef(self, event=None):
@@ -324,8 +366,10 @@ class LeoFind:
         else:
             # #1592.  Ignore hits under control of @nosearch
             while True:
-                found = find.findNext()
-                if not found or not g.inAtNosearch(c.p):
+                ### found = find.findNext()
+                pos, newpos = self.findNextMatch()
+                ### if not found or not g.inAtNosearch(c.p):
+                if pos is None or not g.inAtNosearch(c.p):
                     break
         if not found and defFlag:
             # Leo 5.7.3: Look for an alternative defintion of function/methods.
@@ -456,14 +500,16 @@ class LeoFind:
     @cmd('find-next')
     def findNextCommand(self, event=None):
         """The find-next command."""
-        self.findNext()
+        ### self.findNext()
+        self.findNextMatch()
     #@+node:ekr.20210102145531.35: *4* find-prev (test)
     @cmd('find-prev')
     def findPrevCommand(self, event=None):
         """Handle F2 (find-previous)"""
         self.reverse = True
         try:
-            self.findNext()
+            ### self.findNext()
+            self.findNextMatch()
         finally:
             self.reverse = False
     #@+node:ekr.20210102145531.23: *4* replace-then-find (test)
@@ -637,58 +683,7 @@ class LeoFind:
         result = sorted(self.unique_matches)
         found.b = '\n'.join(result)
         return found
-    #@+node:ekr.20210102145531.105: *4* find.find_all & helper (changed)
-    def find_all(self, settings):
-
-        c = self.c
-        self.init(settings)
-        if not self.check_args():
-            return 0
-        if self.pattern_match:
-            ok = self.precompilePattern()
-            if not ok: return 0
-        if self.suboutline_only:
-            p = c.p
-            after = p.nodeAfterTree()
-        else:
-            # Always search the entire outline.
-            p = c.rootPosition()
-            after = None
-        self.p = p
-        count = self.find_all_helper(after, p)
-        g.es("found", count, "matches for", self.find_text)
-        return count
-    #@+node:ekr.20210102145531.109: *5* find.find_all_helper
-    def find_all_helper(self, after, p):
-        """Handle the find-all command from p to after."""
-        c, u, w = self.c, self.c.undoer, self.s_ctrl
-        count, found, result = 0, None, []
-        while 1:
-            pos, newpos = self.findNextMatch()
-            if pos is None:
-                 break
-            count += 1
-            s = w.getAllText()
-            i, j = g.getLine(s, pos)
-            line = s[i:j]
-            if self.search_body and self.search_headline:
-                result.append('%s%s\n%s%s\n' % (
-                    '-' * 20, p.h,
-                    "head: " if self.in_headline else "body: ",
-                    line.rstrip() + '\n'))
-            elif p.isVisited():
-                result.append(line.rstrip() + '\n')
-            else:
-                result.append('%s%s\n%s' % ('-' * 20, p.h, line.rstrip() + '\n'))
-                p.setVisited()
-        if result:
-            undoData = u.beforeInsertNode(p)
-            found = self.createFindAllNode(result)
-            u.afterInsertNode(found, 'Find All', undoData)
-            c.selectPosition(found)
-            c.setChanged()
-        return count
-    #@+node:ekr.20210102145531.113: *4* find.findNext & helper (To be deleted)
+    #@+node:ekr.20210102145531.113: *4* find.findNext
     def findNext(self):
         """Find the next instance of the pattern."""
         if not self.check_args():
@@ -710,7 +705,11 @@ class LeoFind:
         return False
     #@+node:ekr.20210102145531.115: *4* find.findNextMatch & helpers
     def findNextMatch(self):
-        """Resume the search where it left off."""
+        """
+        Resume the search where it left off.
+        
+        Update self.p on exit.
+        """
         c, p = self.c, self.p
         if not self.search_headline and not self.search_body:
             return None, None
@@ -747,17 +746,6 @@ class LeoFind:
                     self.in_headline = self.firstSearchPane()
                     self.initNextText()
         return None, None
-    #@+node:ekr.20210102145531.116: *5* find.doWrap
-    def doWrap(self):
-        """Return the position resulting from a wrap."""
-        c = self.c
-        if self.reverse:
-            p = c.rootPosition()
-            while p and p.hasNext():
-                p = p.next()
-            p = p.lastNode()
-            return p
-        return c.rootPosition()
     #@+node:ekr.20210102145531.117: *5* find.firstSearchPane
     def firstSearchPane(self):
         """
@@ -796,25 +784,30 @@ class LeoFind:
         w.setInsertPoint(ins)
     #@+node:ekr.20210102145531.119: *5* find.nextNodeAfterFail & helper
     def nextNodeAfterFail(self, p):
-        """Return the next node after a failed search or None."""
-        c = self.c
-        # Wrapping is disabled by any limitation of screen or search.
-        wrap = (self.wrapping and not self.node_only and
-            not self.suboutline_only and not c.hoistStack)
-        if wrap and not self.wrapPosition:
-            self.wrapPosition = p.copy()
-            self.wrapPos = 0 if self.reverse else len(p.b)
+        """
+        Return the next node after a failed search or None.
+        """
+        ###
+            # c = self.c
+            # Wrapping is disabled by any limitation of screen or search.
+            # wrap = (self.wrapping and not self.node_only and
+                # not self.suboutline_only and not c.hoistStack)
+            # if wrap and not self.wrapPosition:
+                # self.wrapPosition = p.copy()
+                # self.wrapPos = 0 if self.reverse else len(p.b)
         # Move to the next position.
         p = p.threadBack() if self.reverse else p.threadNext()
         # Check it.
         if p and self.outsideSearchRange(p):
             return None
-        if not p and wrap:
-            p = self.doWrap()
+        ###
+            # if not p and wrap:
+                # p = self.doWrap()
         if not p:
             return None
-        if wrap and p == self.wrapPosition:
-            return None
+        ###
+            # if wrap and p == self.wrapPosition:
+                # return None
         return p
     #@+node:ekr.20210102145531.120: *6* find.outsideSearchRange
     def outsideSearchRange(self, p):
