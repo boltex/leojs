@@ -327,6 +327,8 @@ class LeoFind:
             return None, None, None
         if settings:
             self.init(settings)
+        if not self.check_args():
+            return None, None, None
         if not self.find_text:
             g.trace('no find text')
             return None, None, None
@@ -368,7 +370,7 @@ class LeoFind:
                 else:
                     # #1592.  Ignore hits under control of @nosearch
                     while True:
-                        pos, newpos = self.findNext()
+                        pos, newpos = self.find_next_match()
                         found = pos is not None
                         if found or not g.inAtNosearch(c.p):
                             break
@@ -378,7 +380,8 @@ class LeoFind:
                 # It's annoying to create a clone in this case.
                 # Undo the clone find and just select the proper node.
                 last.doDelete()
-                self.findNext()
+                ### self.findNext()
+                self.find_next_match()
             else:
                 c.selectPosition(last)
             return None, None, last
@@ -635,10 +638,14 @@ class LeoFind:
         return count, ''.join(result)
     #@+node:ekr.20210102145531.23: *4* replace-then-find
     @cmd('replace-then-find')
-    def replace_then_find(self, event=None):
+    def replace_then_find(self, settings):
         """Handle the replace-then-find command."""
+        if settings:
+            self.init(settings)
+        if not self.check_args():
+            return None, None, None
         if self.changeSelection():
-            pos, newpos = self.findNext()
+            pos, newpos = self.find_next_match()
             return pos, newpos, self.p
         return None, None, None
 
@@ -968,13 +975,6 @@ class LeoFind:
             self.search_headline and self.search_body and (
             (self.reverse and not self.in_headline) or
             (not self.reverse and self.in_headline)))
-    #@+node:ekr.20210102145531.113: *4* find.findNext
-    def findNext(self):
-        """Find the next instance of the pattern."""
-        if not self.check_args():
-            return None, None
-        pos, newpos = self.find_next_match()
-        return pos, newpos
     #@+node:ekr.20210102145531.131: *4* find.replace_back_slashes
     def replace_back_slashes(self, s):
         """Carefully replace backslashes in a search pattern."""
