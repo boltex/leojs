@@ -1309,6 +1309,19 @@ class TestFind (unittest.TestCase):
         x.init(partial_settings)
         x.compute_result_status(find_all_flag=False)
         
+    #@+node:ekr.20210106140751.1: *3* TestFind.replace_back_slashes
+    def test_replace_back_slashes(self):
+        
+        x = self.x
+        table = (
+            (r'a\bc', r'a\bc'),
+            (r'a\\bc', r'a\bc'),
+            (r'a\tc', 'a\tc'), # Replace \t by a tab.
+            (r'a\nc', 'a\nc'), # Replace \n by a newline.
+        )
+        for s, expected in table:
+            result = x.replace_back_slashes(s)
+            assert result == expected, (s, result, expected)
     #@-others
 #@-others
 
