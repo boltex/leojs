@@ -2,6 +2,8 @@
 #@+node:ekr.20210102145531.1: * @file src/ekr/coreFind.py
 """Leo's gui-independent find classes."""
 import re
+import sys
+import time
 ### from src.ekr import coreFind as g
 from leo.core import leoGlobals as g
 
@@ -72,7 +74,7 @@ class LeoFind:
         # Init option ivars.
         self.ignore_case = settings.ignore_case
         self.node_only = settings.node_only
-        self.pattern_match = settings.pattern_match
+        self.pattern_match = settings.pattern_match 
         self.reverse = settings.reverse
         self.search_body = settings.search_body
         self.search_headline = settings.search_headline
@@ -507,11 +509,178 @@ class LeoFind:
         finally:
             self.reverse = False
         return pos, newpos, self.p  # For tests.
-    #@+node:ekr.20210102145531.67: *4* replace-all (rewrite)
+    #@+node:ekr.20210102145531.67: *4* replace-all (test)
     @cmd('replace-all')
-    def replace_all(self, event=None):
+    def replace_all(self, settings):
         """Replace all instances of the search string with the replacement string."""
-        ### self.searchWithPresentOptions(event, changeAllFlag=True)
+        c, current, u = self.c, self.c.p, self.c.undoer
+        undoType = 'Replace All'
+        if settings:
+            self.init(settings)
+        if not self.check_args():
+            return
+        t1 = time.process_time()
+        ### self.initInHeadline()
+        ### saveData = self.save()
+        ### self.initBatchCommands()
+        count = 0
+        u.beforeChangeGroup(current, undoType)
+        # Fix bug 338172: ReplaceAll will not replace newlines
+        # indicated as \n in target string.
+        if not self.find_text:
+            return
+        if not self.search_headline and not self.search_body:
+            return
+        self.change_text = self.replaceBackSlashes(self.change_text)
+        if self.pattern_match:
+            ok = self.precompilePattern()
+            if not ok:
+                return
+        # #1428: Honor limiters in replace-all.
+        if self.node_only:
+            positions = [c.p]
+        elif self.suboutline_only:
+            positions = c.p.self_and_subtree()
+        else:
+            positions = c.all_unique_positions()
+        count = 0
+        for p in positions:
+            count_h, count_b = 0, 0
+            undoData = u.beforeChangeNodeContents(p)
+            if self.search_headline:
+                count_h, new_h = self.batchSearchAndReplace(p.h)
+                if count_h:
+                    count += count_h
+                    p.h = new_h
+            if self.search_body:
+                count_b, new_b = self.batchSearchAndReplace(p.b)
+                if count_b:
+                    count += count_b
+                    p.b = new_b
+            if count_h or count_b:
+                u.afterChangeNodeContents(p, undoType, undoData)
+        p = c.p
+        u.afterChangeGroup(p, undoType, reportFlag=True)
+        t2 = time.process_time()
+        g.es_print(f"changed {count} instances{g.plural(count)} in {t2 - t1:4.2f} sec.")
+        #
+        # Bugs #947, #880 and #722:
+        # Set ancestor @<file> nodes by brute force.
+        for p in c.all_positions():
+            if (
+                p.anyAtFileNodeName()
+                and not p.v.isDirty()
+                and any([p2.v.isDirty() for p2 in p.subtree()])
+            ):
+                p.setDirty()
+        # # # c.recolor()
+        # # # c.redraw(p)
+        ### self.restore(saveData)
+    #@+node:ekr.20210106081141.2: *5* find.batchSearchAndReplace & helpers
+    def batchSearchAndReplace(self, s):
+        """
+        Search s for self.find_text and replace with self.change_text.
+        
+        Return (found, new text)
+        """
+        if sys.platform.lower().startswith('win'):
+            s = s.replace('\r', '')
+                # Ignore '\r' characters, which may appear in @edit nodes.
+                # Fixes this bug: https://groups.google.com/forum/#!topic/leo-editor/yR8eL5cZpi4
+                # This hack would be dangerous on MacOs: it uses '\r' instead of '\n' (!)
+        if not s:
+            return False, None
+        #
+        # Order matters: regex matches ignore whole-word.
+        if self.pattern_match:
+            return self.batchRegexReplace(s)
+        if self.whole_word:
+            return self.batchWordReplace(s)
+        return self.batchPlainReplace(s)
+    #@+node:ekr.20210106081141.3: *6* find.batchPlainReplace
+    def batchPlainReplace(self, s):
+        """
+        Perform all plain find/replace on s.\
+        return (count, new_s)
+        """
+        find, change = self.find_text, self.change_text
+        # #1166: s0 and find0 aren't affected by ignore-case.
+        s0 = s
+        find0 = self.replaceBackSlashes(find)
+        if self.ignore_case:
+            s = s0.lower()
+            find = find0.lower()
+        count, prev_i, result = 0, 0, []
+        while True:
+            # #1166: Scan using s and find.
+            i = s.find(find, prev_i)
+            if i == -1:
+                break
+            # #1166: Replace using s0 & change.
+            count += 1
+            result.append(s0[prev_i:i])
+            result.append(change)
+            prev_i = i + len(find)
+        # #1166: Complete the result using s0.
+        result.append(s0[prev_i:])
+        return count, ''.join(result)
+    #@+node:ekr.20210106081141.4: *6* find.batchRegexReplace
+    def batchRegexReplace(self, s):
+        """
+        Perform all regex find/replace on s.
+        return (count, new_s)
+        """
+        count, prev_i, result = 0, 0, []
+
+        flags = re.MULTILINE
+        if self.ignore_case:
+            flags |= re.IGNORECASE
+        for m in re.finditer(self.find_text, s, flags):
+            count += 1
+            i = m.start()
+            result.append(s[prev_i:i])
+            # #1748.
+            groups = m.groups()
+            if groups:
+                change_text = self.makeRegexSubs(self.change_text, groups)
+            else:
+                change_text = self.change_text
+            result.append(change_text)
+            prev_i = m.end()
+        # Compute the result.
+        result.append(s[prev_i:])
+        s = ''.join(result)
+        return count, s
+    #@+node:ekr.20210106081141.5: *6* find.batchWordReplace
+    def batchWordReplace(self, s):
+        """
+        Perform all whole word find/replace on s.
+        return (count, new_s)
+        """
+        find, change = self.find_text, self.change_text
+        # #1166: s0 and find0 aren't affected by ignore-case.
+        s0 = s
+        find0 = self.replaceBackSlashes(find)
+        if self.ignore_case:
+            s = s0.lower()
+            find = find0.lower()
+        count, prev_i, result = 0, 0, []
+        while True:
+            # #1166: Scan using s and find.
+            i = s.find(find, prev_i)
+            if i == -1:
+                break
+            # #1166: Replace using s0, change & find0.
+            result.append(s0[prev_i:i])
+            if g.match_word(s, i, find):
+                count += 1
+                result.append(change)
+            else:
+                result.append(find0)
+            prev_i = i + len(find)
+        # #1166: Complete the result using s0.
+        result.append(s0[prev_i:])
+        return count, ''.join(result)
     #@+node:ekr.20210102145531.23: *4* replace-then-find
     @cmd('replace-then-find')
     def replace_then_find(self, event=None):
@@ -869,6 +1038,26 @@ class LeoFind:
             g.warning('invalid regular expression:', self.find_text)
             self.errors += 1  # Abort the search.
             return False
+    #@+node:ekr.20210102145531.131: *4* find.replaceBackSlashes
+    def replaceBackSlashes(self, s):
+        """Carefully replace backslashes in a search pattern."""
+        # This is NOT the same as:
+        # s.replace('\\n','\n').replace('\\t','\t').replace('\\\\','\\')
+        # because there is no rescanning.
+        i = 0
+        while i + 1 < len(s):
+            if s[i] == '\\':
+                ch = s[i + 1]
+                if ch == '\\':
+                    s = s[:i] + s[i + 1 :]  # replace \\ by \
+                elif ch == 'n':
+                    s = s[:i] + '\n' + s[i + 2 :]  # replace the \n by a newline
+                elif ch == 't':
+                    s = s[:i] + '\t' + s[i + 2 :]  # replace \t by a tab
+                else:
+                    i += 1  # Skip the escaped character.
+            i += 1
+        return s
     #@+node:ekr.20210102145531.124: *4* find.search & helpers
     def search(self):
         """
@@ -1026,26 +1215,6 @@ class LeoFind:
                 return mo.start(), mo.end()
         self.match_obj = None
         return -1, -1
-    #@+node:ekr.20210102145531.131: *6* find.replaceBackSlashes
-    def replaceBackSlashes(self, s):
-        """Carefully replace backslashes in a search pattern."""
-        # This is NOT the same as:
-        # s.replace('\\n','\n').replace('\\t','\t').replace('\\\\','\\')
-        # because there is no rescanning.
-        i = 0
-        while i + 1 < len(s):
-            if s[i] == '\\':
-                ch = s[i + 1]
-                if ch == '\\':
-                    s = s[:i] + s[i + 1 :]  # replace \\ by \
-                elif ch == 'n':
-                    s = s[:i] + '\n' + s[i + 2 :]  # replace the \n by a newline
-                elif ch == 't':
-                    s = s[:i] + '\t' + s[i + 2 :]  # replace \t by a tab
-                else:
-                    i += 1  # Skip the escaped character.
-            i += 1
-        return s
     #@-others
 #@+node:ekr.20210103132816.1: ** class SearchWidget (coreFind.py)
 class SearchWidget:
