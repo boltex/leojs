@@ -17,7 +17,7 @@ def cmd(name):
 class LeoFind:
     """The base class for Leo's Find commands."""
     #@+others
-    #@+node:ekr.20210102145531.9: *3* find.__init__ (changed)
+    #@+node:ekr.20210102145531.9: *3* find.__init__
     #@@nobeautify
 
     def __init__(self, c):
@@ -93,7 +93,7 @@ class LeoFind:
         s = p.h if self.in_headline else p.b
         w.setAllText(s)
         w.setInsertPoint(len(s) if self.reverse else 0)
-    #@+node:ekr.20210105123301.1: *4* find.init_settings (new)
+    #@+node:ekr.20210105123301.1: *4* find.init_settings
     def init_settings(self, settings):
         """Initialize all user settings."""
         
@@ -353,7 +353,7 @@ class LeoFind:
     def find_var(self, settings=None):
         """Find the var under the cursor."""
         return self.find_def_helper(defFlag=False, settings=settings)
-    #@+node:ekr.20210102145531.28: *5* find.find_def_helper & helpers (changed)
+    #@+node:ekr.20210102145531.28: *5* find.find_def_helper & helpers
     def find_def_helper(self, defFlag, settings):
         """Find the definition of the class, def or var under the cursor."""
         c, w = self.c, self.c.frame.body.wrapper
@@ -509,7 +509,7 @@ class LeoFind:
         finally:
             self.reverse = False
         return pos, newpos, self.p  # For tests.
-    #@+node:ekr.20210102145531.67: *4* replace-all & helper
+    #@+node:ekr.20210102145531.67: *4* replace-all & helpers
     @cmd('replace-all')
     def replace_all(self, settings):
         """Replace all instances of the search string with the replacement string."""
@@ -758,7 +758,7 @@ class LeoFind:
             # f"     result: {result!s}")
         return result
     #@+node:ekr.20210103213410.1: *3* LeoFind: Helpers
-    #@+node:ekr.20210102145531.137: *4* find.check_args (changed)
+    #@+node:ekr.20210102145531.137: *4* find.check_args
     def check_args(self):
         if not self.search_headline and not self.search_body:
             g.es_print("not searching headline or body")
