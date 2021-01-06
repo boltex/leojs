@@ -509,7 +509,7 @@ class LeoFind:
         finally:
             self.reverse = False
         return pos, newpos, self.p  # For tests.
-    #@+node:ekr.20210102145531.67: *4* replace-all (test)
+    #@+node:ekr.20210102145531.67: *4* replace-all & helper
     @cmd('replace-all')
     def replace_all(self, settings):
         """Replace all instances of the search string with the replacement string."""
@@ -527,10 +527,6 @@ class LeoFind:
         u.beforeChangeGroup(current, undoType)
         # Fix bug 338172: ReplaceAll will not replace newlines
         # indicated as \n in target string.
-        if not self.find_text:
-            return
-        if not self.search_headline and not self.search_body:
-            return
         self.change_text = self.replaceBackSlashes(self.change_text)
         if self.pattern_match:
             ok = self.precompilePattern()
@@ -548,12 +544,12 @@ class LeoFind:
             count_h, count_b = 0, 0
             undoData = u.beforeChangeNodeContents(p)
             if self.search_headline:
-                count_h, new_h = self.batchSearchAndReplace(p.h)
+                count_h, new_h = self.replace_all_helper(p.h)
                 if count_h:
                     count += count_h
                     p.h = new_h
             if self.search_body:
-                count_b, new_b = self.batchSearchAndReplace(p.b)
+                count_b, new_b = self.replace_all_helper(p.b)
                 if count_b:
                     count += count_b
                     p.b = new_b
@@ -576,8 +572,8 @@ class LeoFind:
         # # # c.recolor()
         # # # c.redraw(p)
         ### self.restore(saveData)
-    #@+node:ekr.20210106081141.2: *5* find.batchSearchAndReplace & helpers
-    def batchSearchAndReplace(self, s):
+    #@+node:ekr.20210106081141.2: *5* find.replace_all_helper & helpers
+    def replace_all_helper(self, s):
         """
         Search s for self.find_text and replace with self.change_text.
         
