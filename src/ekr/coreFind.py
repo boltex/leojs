@@ -4,6 +4,7 @@
 import re
 import sys
 import time
+import unittest
 ### from src.ekr import coreFind as g
 from leo.core import leoGlobals as g
 
@@ -1209,6 +1210,10 @@ class SearchWidget:
             self.i = self.toPythonIndex(insert)
     #@-others
 #@-others
+
+if __name__ == '__main__':
+    unittest.main()
+
 #@@language python
 #@@tabwidth -4
 #@@pagewidth 70
