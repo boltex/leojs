@@ -600,7 +600,7 @@ class LeoFind:
         assert found
         assert c.positionExists(found), found
         found.h = f"Found:{self.find_text}"
-        status = self.getFindResultStatus(find_all=True)
+        status = self.getFindResultStatus(find_all_flag=True)
         status = status.strip().lstrip('(').rstrip(')').strip()
         flat = 'flattened, ' if flattened else ''
         found.b = f"@nosearch\n\n# {flat}{status}\n\n# found {len(clones)} nodes"
@@ -620,7 +620,7 @@ class LeoFind:
         found = c.lastTopLevel().insertAfter()
         assert found
         found.h = f"Found All:{self.find_text}"
-        status = self.getFindResultStatus(find_all=True)
+        status = self.getFindResultStatus(find_all_flag=True)
         status = status.strip().lstrip('(').rstrip(')').strip()
         found.b = f"# {status}\n{''.join(result)}"
         return found
@@ -631,7 +631,7 @@ class LeoFind:
         found = c.lastTopLevel().insertAfter()
         assert found
         found.h = f"Found Unique Regex:{self.find_text}"
-        # status = self.getFindResultStatus(find_all=True)
+        # status = self.getFindResultStatus(find_all_flag=True)
         # status = status.strip().lstrip('(').rstrip(')').strip()
         # found.b = '# %s\n%s' % (status, ''.join(result))
         result = sorted(self.unique_matches)
@@ -688,7 +688,7 @@ class LeoFind:
             c.selectPosition(found)
             c.setChanged()
         return count
-    #@+node:ekr.20210102145531.113: *4* find.findNext & helper (changed, to be deleted)
+    #@+node:ekr.20210102145531.113: *4* find.findNext & helper (To be deleted)
     def findNext(self):
         """Find the next instance of the pattern."""
         if not self.check_args():
@@ -855,16 +855,16 @@ class LeoFind:
             (self.reverse and not self.in_headline) or
             (not self.reverse and self.in_headline)))
     #@+node:ekr.20210102145531.114: *4* find.getFindResultStatus
-    def getFindResultStatus(self, find_all=False):
+    def getFindResultStatus(self, find_all_flag=False):
         """Return the status to be shown in the status line after a find command completes."""
         status = []
         if self.whole_word:
-            status.append('word' if find_all else 'word-only')
+            status.append('word' if find_all_flag else 'word-only')
         if self.ignore_case:
             status.append('ignore-case')
         if self.pattern_match:
             status.append('regex')
-        if find_all:
+        if find_all_flag:
             if self.search_headline:
                 status.append('head')
             if self.search_body:
@@ -874,7 +874,7 @@ class LeoFind:
                 status.append('body-only')
             elif not self.search_body:
                 status.append('headline-only')
-        if not find_all:
+        if not find_all_flag:
             if self.wrapping:
                 status.append('wrapping')
             if self.suboutline_only:
