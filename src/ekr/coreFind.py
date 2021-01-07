@@ -216,7 +216,7 @@ class LeoFind:
             self.reverse = False
             pos, newpos = self.searchHelper(s, 0, len(s), self.find_text)
             if pos != -1: return True
-        return False
+        return False  # pragma: no cover
     #@+node:ekr.20210102145531.64: *4* clone-find-tag
     @cmd('clone-find-tag')
     @cmd('cft')
@@ -297,14 +297,16 @@ class LeoFind:
             i, j = g.getLine(s, pos)
             line = s[i:j]
             if self.search_body and self.search_headline:
-                result.append('%s%s\n%s%s\n' % (
-                    '-' * 20, p.h,
-                    "head: " if self.in_headline else "body: ",
-                    line.rstrip() + '\n'))
+                kind = "head" if self.in_headline else "body"
+                result.append(
+                    f"{'-' * 20} {p.h}\n"
+                    f"{kind}: {line.rstrip()}\n\n")
             elif p.isVisited():
                 result.append(line.rstrip() + '\n')
             else:
-                result.append('%s%s\n%s' % ('-' * 20, p.h, line.rstrip() + '\n'))
+                result.append(
+                    f"{'-' * 20} {p.h}\n"
+                    f"{line.rstrip()}\n\n")
                 p.setVisited()
         if result:
             undoData = u.beforeInsertNode(c.p)
@@ -1326,6 +1328,11 @@ class TestFind (unittest.TestCase):
         # Test 2.
         settings.suboutline_only = True
         x.find_all(settings)
+        # Test 3.
+        settings.suboutline_only = False
+        settings.search_headline = False
+        x.find_all(settings)
+        
         
     def test_find_all_errors(self):
         # No find pattern.
