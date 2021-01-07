@@ -215,7 +215,7 @@ class LeoFind:
             self.reverse = False
             pos, newpos = self.searchHelper(s, 0, len(s), self.find_text)
             if pos != -1: return True
-        return False  # pragma: no cover
+        return False  # pragma: no cover (to do)
     #@+node:ekr.20210102145531.64: *4* clone-find-tag
     @cmd('clone-find-tag')
     @cmd('cft')
@@ -388,7 +388,7 @@ class LeoFind:
                 # Undo the clone find and just select the proper node.
                 last.doDelete()
                 self.find_next_match(p)
-            else:   # pragma: no cover (to do)
+            else:  # pragma: no cover (to do)
                 c.selectPosition(last)
             return None, None, last
         self.restoreAfterFindDef()
@@ -1167,8 +1167,8 @@ class SearchWidget:
     # This could be a StringTextWrapper, but this code is simple and good.
 
     def __init__(self, *args, **keys):
-        self.s = ''  # The widget text
-        self.i = 0  # The insert point
+        self.s = ''      # The widget text
+        self.i = 0       # The insert point
         self.sel = 0, 0  # The selection range
 
     def __repr__(self):  # pragma: no cover (debugging only)
@@ -1547,7 +1547,7 @@ class TestFind (unittest.TestCase):
     #@-others
 #@-others
 
-if __name__ == '__main__':  # pragma: no cover (not covered by py-cov)
+if __name__ == '__main__':  # pragma: no cover (not for py-cov)
     unittest.main()
 
 #@@language python
