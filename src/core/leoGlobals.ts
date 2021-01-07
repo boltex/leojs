@@ -3,6 +3,7 @@
  * Global constants, variables and utility functions used throughout Leo.
  * Important: This module imports no other Leo module.
  */
+import { assert } from 'console';
 import * as fs from 'fs';
 import { LeoApp } from './leoApp';
 
@@ -346,36 +347,32 @@ export const es_print = console.log;
  * Return True if s starts with a directive.
  */
 export function isDirective(s: string): boolean {
-    const m: string = s.match(g_is_directive_pattern);
 
-    // This pattern excludes @encoding.whatever and @encoding(whatever)
-    // It must allow @language python, @nocolor-node, etc.
-
+    const m: RegExpExecArray | null = g_is_directive_pattern.exec(s);
     if (m) {
-        // TODO see https://docs.python.org/3/library/re.html#re.Match.end
-        const s2: string = "";
+        // This pattern excludes @encoding.whatever and @encoding(whatever)
+        // It must allow @language python, @nocolor-node, etc.
+        const s2: string = s.substring(m.index + m[0].length); // text from end of match #1 (the word after @)
         if (s2 && ".(".includes(s2.charAt(0))) {
             return false;
         }
-
-        return xx
+        return globalDirectiveList.includes(m[1]);
     }
-
     return false;
 }
 
+/**
+ * Return True if the body text contains the @ directive.
+ */
+export function is_special(s: string, directive: string): boolean {
+    console.assert(s);
 
-/*
-def isDirective(s):
-    """Return True if s starts with a directive."""
-    m = g_is_directive_pattern.match(s)
-    if m:
-        s2 = s[m.end(1) :]
-        if s2 and s2[0] in ".(":
-            return False
-        return bool(m.group(1) in globalDirectiveList)
-    return False
-*/
+    return false;
+
+}
+
+
+
 /*
 def is_special(s, directive):
     """Return True if the body text contains the @ directive."""
@@ -393,12 +390,12 @@ def is_special(s, directive):
 /**
  * Return True if ch should be considered a letter.
  */
-public isWordChar(ch: string): boolean{
-    return ch && (/^[0-9a-zA-Z]$/.test(ch) || ch === '_');
+export function isWordChar(ch: string): boolean {
+    return !!ch && (/^[0-9a-zA-Z]$/.test(ch) || ch === '_');
 }
 
-public isWordChar1(ch: string): boolean {
-    return ch && (/^[a-zA-Z]$/.test(ch) || ch === '_');
+export function isWordChar1(ch: string): boolean {
+    return !!ch && (/^[a-zA-Z]$/.test(ch) || ch === '_');
 }
 
 /**

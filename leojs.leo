@@ -5882,6 +5882,7 @@ public gotSelectedNode(p_element: PNode): void {
  * Global constants, variables and utility functions used throughout Leo.
  * Important: This module imports no other Leo module.
  */
+import { assert } from 'console';
 import * as fs from 'fs';
 import { LeoApp } from './leoApp';
 
@@ -6185,20 +6186,17 @@ export const cmd_instance_dict: { [key: string]: string[] } = {
 };
 
 </t>
-<t tx="felix.20210102180413.1">export const g_language_pat = new RegExp(String.raw`^@language\s+(\w+)+`, 'm');
+<t tx="felix.20210102180413.1">export const g_language_pat = new RegExp(/^@language\s+(\w+)+/, 'm');
 // Regex used by this module, and in leoColorizer.py.
 
 // Patterns used only in this module...
-export const g_is_directive_pattern = new RegExp(String.raw`^\s*@([\w-]+)\s*`);
+export const g_is_directive_pattern = new RegExp(/^\s*@([\w-]+)\s*/);
 // This pattern excludes @encoding.whatever and @encoding(whatever)
 // It must allow @language python, @nocolor-node, etc.
 
-// Patterns used only in this module...
-const g_is_directive_pattern = new RegExp('^\s*@([\w-]+)\s*');
-
 export const g_noweb_root = new RegExp('&lt;' + '&lt;' + '*' + '&gt;' + '&gt;' + '=', 'm');
-export const g_pos_pattern = new RegExp(String.raw`:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$`);
-export const g_tabwidth_pat = new RegExp(String.raw`(^@tabwidth)`, 'm');
+export const g_pos_pattern = new RegExp(/:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$/);
+export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
 
 </t>
 <t tx="felix.20210102181122.1">/*
@@ -7653,38 +7651,34 @@ export const es_print = console.log;
  * Return True if s starts with a directive.
  */
 export function isDirective(s: string): boolean {
-    const m: string = s.match(g_is_directive_pattern);
 
-    // This pattern excludes @encoding.whatever and @encoding(whatever)
-    // It must allow @language python, @nocolor-node, etc.
-
+    const m: RegExpExecArray | null = g_is_directive_pattern.exec(s);
     if (m) {
-        // TODO see https://docs.python.org/3/library/re.html#re.Match.end
-        const s2: string = "";
+        // This pattern excludes @encoding.whatever and @encoding(whatever)
+        // It must allow @language python, @nocolor-node, etc.
+        const s2: string = s.substring(m.index + m[0].length); // text from end of match #1 (the word after @)
         if (s2 &amp;&amp; ".(".includes(s2.charAt(0))) {
             return false;
         }
-
-        return xx
+        return globalDirectiveList.includes(m[1]);
     }
-
     return false;
 }
 
+</t>
+<t tx="felix.20210104210307.1">/**
+ * Return True if the body text contains the @ directive.
+ */
+export function is_special(s: string, directive: string): boolean {
+    console.assert(s);
+
+    return false;
+
+}
+
+
 
 /*
-def isDirective(s):
-    """Return True if s starts with a directive."""
-    m = g_is_directive_pattern.match(s)
-    if m:
-        s2 = s[m.end(1) :]
-        if s2 and s2[0] in ".(":
-            return False
-        return bool(m.group(1) in globalDirectiveList)
-    return False
-*/
-</t>
-<t tx="felix.20210104210307.1">/*
 def is_special(s, directive):
     """Return True if the body text contains the @ directive."""
     assert(directive and directive[0] == '@')
@@ -7702,12 +7696,12 @@ def is_special(s, directive):
 <t tx="felix.20210104210316.1">/**
  * Return True if ch should be considered a letter.
  */
-public isWordChar(ch: string): boolean{
-    return ch &amp;&amp; (/^[0-9a-zA-Z]$/.test(ch) || ch === '_');
+export function isWordChar(ch: string): boolean {
+    return !!ch &amp;&amp; (/^[0-9a-zA-Z]$/.test(ch) || ch === '_');
 }
 
-public isWordChar1(ch: string): boolean {
-    return ch &amp;&amp; (/^[a-zA-Z]$/.test(ch) || ch === '_');
+export function isWordChar1(ch: string): boolean {
+    return !!ch &amp;&amp; (/^[a-zA-Z]$/.test(ch) || ch === '_');
 }
 
 </t>
