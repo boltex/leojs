@@ -295,7 +295,6 @@ class LeoFind:
         while p != after:
             # We can't assert progress on p, because
             # there can be multiple matches in one p.
-            assert count < 100, p.h  ### Testing
             p, pos, newpos = self.find_next_match(p)
             if p is None or pos is None:
                  break
@@ -366,7 +365,7 @@ class LeoFind:
                 progress = p.v
                 p, pos, newpos = self.find_next_match(p)
                 found = pos is not None
-                if found or not g.inAtNosearch(p):  ### Was c.p
+                if found or not g.inAtNosearch(p):
                     break
                 assert p.v != progress, p.h
         if not found and defFlag and not self.find_text.startswith('class'):
@@ -383,10 +382,12 @@ class LeoFind:
                         progress = p.v
                         p, pos, newpos = self.find_next_match(p)
                         found = pos is not None
-                        if found or not g.inAtNosearch(p):  ### was c.p.
+                        if found or not g.inAtNosearch(p):
                             break
                         assert p.v != progress, p.h
-        if found and settings.use_cff:
+        if not found:
+            return None, None, None
+        if settings.use_cff:
             last = c.lastTopLevel()
             if count == 1:
                 # It's annoying to create a clone in this case.
@@ -396,11 +397,10 @@ class LeoFind:
             else:
                 c.selectPosition(last)
             return None, None, last
-        if found:
-            self.restoreAfterFindDef()
-                # Failing to do this causes massive confusion!
-            return p, pos, newpos  ### Changed order.
-        return None, None, None
+        self.restoreAfterFindDef()
+            # Failing to do this causes massive confusion!
+        return p, pos, newpos
+        
     #@+node:ekr.20210102145531.33: *6* find.restoreAfterFindDef
     def restoreAfterFindDef(self):
         """Restore find settings in effect before a find-def command."""
@@ -528,15 +528,11 @@ class LeoFind:
                 if count_h:
                     count += count_h
                     p.h = new_h
-                    ### g.trace(p.h, p.isDirty())
-                    ### p.setDirty()  ###
             if self.search_body:
                 count_b, new_b = self.replace_all_helper(p.b)
                 if count_b:
                     count += count_b
                     p.b = new_b
-                    ### g.trace(p.h, p.isDirty())
-                    ### p.setDirty()  ###
             if count_h or count_b:
                 u.afterChangeNodeContents(p, undoType, undoData)
         p = c.p
@@ -1380,7 +1376,6 @@ class TestFind (unittest.TestCase):
 
         c, settings, x = self.c, self.settings, self.x
         settings.find_text = 'def top1'
-        settings.p = self.c.rootPosition() ###
         # find-next
         p, pos, newpos = x.find_next(settings)
         assert p and p.h == 'Node 1', p.h
