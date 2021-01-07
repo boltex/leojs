@@ -276,7 +276,7 @@ class LeoFind:
     @cmd('find-all')
     def find_all(self, settings):
         """find-all"""
-        c, u, w = self.c, self.c.undoer, self.s_ctrl
+        c, p, u, w = self.c, self.p, self.c.undoer, self.s_ctrl
         if settings:
             self.init(settings)
         if not self.check_args('find-all'):
@@ -285,17 +285,19 @@ class LeoFind:
             ok = self.compile_pattern()
             if not ok: return 0
         if self.suboutline_only:
-            # Start with self.p.
-            after = self.p.nodeAfterTree()
+            # Start with p.
+            after = p.nodeAfterTree()
         else:
             # Always search the entire outline.
-            self.p = c.rootPosition()
+            p = c.rootPosition()
             after = None
         count, found, result = 0, None, []
-        while self.p != after:
-            pos, newpos = self.find_next_match()  # sets self.p
-            p = self.p
-            if pos is None:
+        while p != after:
+            # We can't assert progress on p, because
+            # there can be multiple matches in one p.
+            assert count < 100, p.h  ### Testing
+            p, pos, newpos = self.find_next_match(p)
+            if p is None or pos is None:
                  break
             count += 1
             s = w.getAllText()
@@ -341,7 +343,7 @@ class LeoFind:
         if not self.check_args(tag):
             return None, None, None
         # Always start in the root position.
-        p = self.p = c.rootPosition()
+        p = c.rootPosition()
         c.redraw(p)  # Required.
         c.bodyWantsFocusNow()
         # Set up the search.
@@ -360,11 +362,13 @@ class LeoFind:
             found = count > 0
         else:
             # #1592.  Ignore hits under control of @nosearch
-            while True:
-                pos, newpos = self.find_next_match()
+            while p:
+                progress = p.v
+                p, pos, newpos = self.find_next_match(p)
                 found = pos is not None
-                if found or not g.inAtNosearch(c.p):
+                if found or not g.inAtNosearch(p):  ### Was c.p
                     break
+                assert p.v != progress, p.h
         if not found and defFlag and not self.find_text.startswith('class'):
             # Leo 5.7.3: Look for an alternative defintion of function/methods.
             word2 = self.switchStyle(self.find_text)
@@ -375,25 +379,27 @@ class LeoFind:
                     found = count > 0
                 else:
                     # #1592.  Ignore hits under control of @nosearch
-                    while True:
-                        pos, newpos = self.find_next_match()
+                    while p:
+                        progress = p.v
+                        p, pos, newpos = self.find_next_match(p)
                         found = pos is not None
-                        if found or not g.inAtNosearch(c.p):
+                        if found or not g.inAtNosearch(p):  ### was c.p.
                             break
+                        assert p.v != progress, p.h
         if found and settings.use_cff:
             last = c.lastTopLevel()
             if count == 1:
                 # It's annoying to create a clone in this case.
                 # Undo the clone find and just select the proper node.
                 last.doDelete()
-                self.find_next_match()
+                self.find_next_match(p)
             else:
                 c.selectPosition(last)
             return None, None, last
         if found:
             self.restoreAfterFindDef()
                 # Failing to do this causes massive confusion!
-            return pos, newpos, self.p
+            return p, pos, newpos  ### Changed order.
         return None, None, None
     #@+node:ekr.20210102145531.33: *6* find.restoreAfterFindDef
     def restoreAfterFindDef(self):
@@ -403,7 +409,6 @@ class LeoFind:
         b = self.find_def_data  # A g.Bunch
         if b:
             self.ignore_case = b.ignore_case
-            ### self.p = b.p
             self.pattern_match = b.pattern_match
             self.reverse = False
             self.search_body = b.search_body
@@ -463,22 +468,30 @@ class LeoFind:
             )
     #@+node:ekr.20210102145531.34: *4* find-next
     @cmd('find-next')
-    def find_next(self, settings=None):
+    def find_next(self, settings):
         """The find-next command."""
-        pos, newpos = self.find_next_match(settings)
-        return pos, newpos, self.p  # For tests.
+        assert settings
+        self.init(settings)
+        if not self.check_args('find-next'):
+            return None, None, None
+        p = self.p
+        p, pos, newpos = self.find_next_match(p, settings)
+        return p, pos, newpos # For tests.
     #@+node:ekr.20210102145531.35: *4* find-prev
     @cmd('find-prev')
-    def find_prev(self, settings=None):
-        """Handle F2 (find-previous)"""
-        if settings:
-            self.init(settings)
+    def find_prev(self, settings):
+        """The find-prev command."""
+        assert settings
+        self.init(settings)
+        if not self.check_args('find-prev'):
+            return None, None, None
+        p = self.p
         self.reverse = True
         try:
-            pos, newpos = self.find_next_match(settings)
+            p, pos, newpos = self.find_next_match(p, settings)
         finally:
             self.reverse = False
-        return pos, newpos, self.p  # For tests.
+        return p, pos, newpos # For tests. ## Changed order
     #@+node:ekr.20210102145531.67: *4* replace-all & helpers
     @cmd('replace-all')
     def replace_all(self, settings):
@@ -649,13 +662,14 @@ class LeoFind:
     @cmd('replace-then-find')
     def replace_then_find(self, settings):
         """Handle the replace-then-find command."""
+        p = self.p
         if settings:
             self.init(settings)
         if not self.check_args('replace-then-find'):
             return None, None, None
         if self.changeSelection():
-            pos, newpos = self.find_next_match()
-            return pos, newpos, self.p
+            p, pos, newpos = self.find_next_match(p)
+            return p, pos, newpos
         return None, None, None
 
     #@+node:ekr.20210102145531.100: *5* find.changeSelection (gui code)
@@ -837,22 +851,21 @@ class LeoFind:
         found.b = f"# {status}\n{''.join(result)}"
         return found
     #@+node:ekr.20210102145531.115: *4* find.find_next_match & helpers
-    def find_next_match(self, settings=None):
+    def find_next_match(self, p, settings=None):
         """
         Resume the search where it left off.
         
-        Update self.p on exit.
+        Return (p, pos, newpos) or (None, None, None)
         """
         if settings:
             self.init(settings)
         if not self.check_args('find_next_match'):
-            return None, None
+            return None, None, None
         self.errors = 0
         attempts = 0
         if self.pattern_match:
             ok = self.compile_pattern()
-            if not ok: return None, None
-        p = self.p
+            if not ok: return None, None, None
         while p:
             pos, newpos = self.search()
             if self.errors:
@@ -860,21 +873,21 @@ class LeoFind:
                 break  # Abort the search.
             if pos is not None:
                 # Success.
-                return pos, newpos
+                return p, pos, newpos
             # Searching the pane failed: switch to another pane or node.
             if self.shouldStayInNode(p):
                 # Switching panes is possible.  Do so.
                 self.in_headline = not self.in_headline
-                self.initNextText()
+                self.initNextText(p)
             else:
                 # Switch to the next/prev node, if possible.
                 attempts += 1
-                p = self.p = self.nextNodeAfterFail(p)
+                p = self.nextNodeAfterFail(p)
                 if p:  # Found another node: select the proper pane.
                     # g.trace('Try', p.h)
                     self.in_headline = self.firstSearchPane()
-                    self.initNextText()
-        return None, None
+                    self.initNextText(p)
+        return None, None, None
     #@+node:ekr.20210102145531.117: *5* find.firstSearchPane
     def firstSearchPane(self):
         """
@@ -892,14 +905,13 @@ class LeoFind:
         g.trace('can not happen: no search enabled')
         return False  # search the body.
     #@+node:ekr.20210102145531.118: *5* find.initNextText (gui code)
-    def initNextText(self):
+    def initNextText(self, p):
         """
         Init s_ctrl when a search fails. On entry:
         - self.in_headline indicates what text to use.
         - self.reverse indicates how to set the insertion point.
         """
-        p, w = self.p, self.s_ctrl
-        assert p
+        w = self.s_ctrl
         s = p.h if self.in_headline else p.b
         if self.reverse:
             i, j = w.sel
@@ -1368,9 +1380,10 @@ class TestFind (unittest.TestCase):
 
         c, settings, x = self.c, self.settings, self.x
         settings.find_text = 'def top1'
+        settings.p = self.c.rootPosition() ###
         # find-next
-        pos, newpos, p = x.find_next(settings)
-        assert p.h == 'Node 1', p.h
+        p, pos, newpos = x.find_next(settings)
+        assert p and p.h == 'Node 1', p.h
         s = p.b[pos:newpos]
         assert s == settings.find_text, repr(s)
         # find-prev: starts at end, so we stay in the node.
@@ -1379,7 +1392,7 @@ class TestFind (unittest.TestCase):
         grand_child = child.firstChild()
         settings.p = grand_child
         settings.find_text = 'def child2'
-        pos, newpos, p = x.find_prev(settings)
+        p, pos, newpos = x.find_prev(settings)
         assert p.h == 'child 2', p.h
         s = p.b[pos:newpos]
         assert s == settings.find_text, repr(s)
@@ -1389,7 +1402,7 @@ class TestFind (unittest.TestCase):
         settings, x = self.settings, self.x
         settings.find_text = 'child5'
         # Test 1.
-        pos, newpos, p = x.find_def(settings)
+        p, pos, newpos = x.find_def(settings)
         assert p and p.h == 'child 5'
         s = p.b[pos:newpos]
         assert s == 'def child5', repr(s)
@@ -1409,7 +1422,7 @@ class TestFind (unittest.TestCase):
         
         settings, x = self.settings, self.x
         settings.find_text = r'v5'
-        pos, newpos, p = x.find_var(settings)
+        p, pos, newpos = x.find_var(settings)
         assert p and p.h == 'child 5', repr(p)
         s = p.b[pos:newpos]
         assert s == 'v5 =', repr(s)
