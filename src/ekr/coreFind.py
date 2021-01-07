@@ -1251,8 +1251,7 @@ class TestFind (unittest.TestCase):
             make_child(n+3, p2)
     #@+node:ekr.20210106170636.1: *4* TestFind.test_tree
     def test_tree(self):
-        
-        g.trace('=====')
+
         table = (
             (0, 'Root'),
             (1, 'Node 1'),
@@ -1350,10 +1349,19 @@ class TestFind (unittest.TestCase):
         settings.p = grand_child
         settings.find_text = 'def child2'
         pos, newpos, p = x.find_prev(settings)
-        print(pos, newpos, p.h)
         assert p.h == 'child 2', p.h
         s = p.b[pos:newpos]
         assert s == settings.find_text, repr(s)
+    #@+node:ekr.20210106180832.1: *4* TestFind.find-def
+    def test_find_def(self):
+        
+        x = self.x
+        settings = self.settings
+        settings.find_text = r'child5'
+        pos, newpos, p = x.find_def(settings)
+        assert p and p.h == 'child 5'
+        s = p.b[pos:newpos]
+        assert s == 'def child5', repr(s)
     #@+node:ekr.20210106141654.1: *3* Tests of Helpers...
     #@+node:ekr.20210106133506.1: *4* TestFind.test_bad compile_pattern
     def test_bad_compile_pattern(self):
