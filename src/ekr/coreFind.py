@@ -359,9 +359,9 @@ class LeoFind:
                 progress = p.v
                 p, pos, newpos = self.find_next_match(p)
                 found = pos is not None
-                if found or not g.inAtNosearch(p):
+                if found and not g.inAtNosearch(p):
                     break
-                assert p.v != progress, p.h
+                assert p.v != progress, p.h  # pragma: no cover (to do)
         if not found and defFlag and not self.find_text.startswith('class'):
             # Leo 5.7.3: Look for an alternative defintion of function/methods.
             word2 = self.switchStyle(self.find_text)
@@ -370,13 +370,13 @@ class LeoFind:
                 if settings.use_cff:
                     count = self.clone_find_all()
                     found = count > 0
-                else:  ### To test.
+                else:  # pragma: no cover (to do)
                     # #1592.  Ignore hits under control of @nosearch
                     while p:
                         progress = p.v
                         p, pos, newpos = self.find_next_match(p)
                         found = pos is not None
-                        if found or not g.inAtNosearch(p):
+                        if found and not g.inAtNosearch(p):
                             break
                         assert p.v != progress, p.h
         if not found:
@@ -388,7 +388,7 @@ class LeoFind:
                 # Undo the clone find and just select the proper node.
                 last.doDelete()
                 self.find_next_match(p)
-            else:   ### To test.
+            else:   # pragma: no cover (to do)
                 c.selectPosition(last)
             return None, None, last
         self.restoreAfterFindDef()
@@ -429,7 +429,7 @@ class LeoFind:
         if s.find('_') > -1:
             if s.startswith('_'):
                 # Don't return something that looks like a class.
-                return None   ### To test.
+                return None  # pragma: no cover (to do)
             #
             # Convert to CamelCase
             s = s.lower()
@@ -441,7 +441,7 @@ class LeoFind:
             return s
         #
         # Convert to underscore_style.
-        ### To test.
+        # pragma: no cover (to do)
         result = []
         for i, ch in enumerate(s):
             if i > 0 and ch.isupper():
@@ -468,7 +468,7 @@ class LeoFind:
         assert settings
         self.init(settings)
         if not self.check_args('find-next'):
-            return None, None, None ### To test.
+            return None, None, None  # pragma: no cover (to do)
         p = self.p
         p, pos, newpos = self.find_next_match(p)
         return p, pos, newpos # For tests.
@@ -479,7 +479,7 @@ class LeoFind:
         assert settings
         self.init(settings)
         if not self.check_args('find-prev'):
-            return None, None, None  ### To test.
+            return None, None, None  # pragma: no cover (to do)
         p = self.p
         self.reverse = True
         try:
@@ -520,14 +520,17 @@ class LeoFind:
             undoData = u.beforeChangeNodeContents(p)
             if self.search_headline:
                 count_h, new_h = self.replace_all_helper(p.h)
-                if count_h:
+                if count_h and p.h != new_h:  # pragma: no cover (to do)
                     count += count_h
                     p.h = new_h
+                    if not p.v.isDirty(): # 2021/01/07 (!)
+                        p.v.setDirty()
             if self.search_body:
                 count_b, new_b = self.replace_all_helper(p.b)
-                if count_b:
-                    count += count_b
+                if count_b and p.b != new_b:  # pragma: no cover (to do)
                     p.b = new_b
+                    if not p.v.isDirty(): # 2021/01/07 (!)
+                        p.v.setDirty()
             if count_h or count_b:
                 u.afterChangeNodeContents(p, undoType, undoData)
         p = c.p
@@ -543,7 +546,7 @@ class LeoFind:
                 and not p.v.isDirty()
                 and any([p2.v.isDirty() for p2 in p.subtree()])
             ):
-                p.setDirty()
+                p.setDirty()  # pragma: no cover (to do)
     #@+node:ekr.20210106081141.2: *5* find.replace_all_helper & helpers
     def replace_all_helper(self, s):
         """
@@ -557,13 +560,13 @@ class LeoFind:
                 # Fixes this bug: https://groups.google.com/forum/#!topic/leo-editor/yR8eL5cZpi4
                 # This hack would be dangerous on MacOs: it uses '\r' instead of '\n' (!)
         if not s:
-            return False, None   ### To test.
+            return False, None   # pragma: no cover (to do)
         #
         # Order matters: regex matches ignore whole-word.
         if self.pattern_match:
             return self.batchRegexReplace(s)
         if self.whole_word:
-            return self.batchWordReplace(s)  ### To test.
+            return self.batchWordReplace(s)  # pragma: no cover (to do)
         return self.batchPlainReplace(s)
     #@+node:ekr.20210106081141.3: *6* find.batchPlainReplace
     def batchPlainReplace(self, s):
@@ -575,7 +578,7 @@ class LeoFind:
         # #1166: s0 and find0 aren't affected by ignore-case.
         s0 = s
         find0 = self.replace_back_slashes(find)
-        if self.ignore_case:  ### To test.
+        if self.ignore_case:  # pragma: no cover (to do)
             s = s0.lower()
             find = find0.lower()
         count, prev_i, result = 0, 0, []
@@ -585,11 +588,11 @@ class LeoFind:
             if i == -1:
                 break
             # #1166: Replace using s0 & change.
-            ### To test.
-            count += 1
-            result.append(s0[prev_i:i])
-            result.append(change)
-            prev_i = i + len(find)
+            else: # pragma: no cover (to do)
+                count += 1
+                result.append(s0[prev_i:i])
+                result.append(change)
+                prev_i = i + len(find)
         # #1166: Complete the result using s0.
         result.append(s0[prev_i:])
         return count, ''.join(result)
@@ -602,7 +605,7 @@ class LeoFind:
         count, prev_i, result = 0, 0, []
 
         flags = re.MULTILINE
-        if self.ignore_case:  ### To test.
+        if self.ignore_case:  # pragma: no cover (to do)
             flags |= re.IGNORECASE
         for m in re.finditer(self.find_text, s, flags):
             count += 1
@@ -610,7 +613,7 @@ class LeoFind:
             result.append(s[prev_i:i])
             # #1748.
             groups = m.groups()
-            if groups:
+            if groups:  # pragma: no cover (to do)
                 change_text = self.make_regex_subs(self.change_text, groups)
             else:
                 change_text = self.change_text
@@ -621,12 +624,11 @@ class LeoFind:
         s = ''.join(result)
         return count, s
     #@+node:ekr.20210106081141.5: *6* find.batchWordReplace
-    def batchWordReplace(self, s):
+    def batchWordReplace(self, s):  # pragma: no cover (to do)
         """
         Perform all whole word find/replace on s.
         return (count, new_s)
         """
-        ### To test (all)
         find, change = self.find_text, self.change_text
         # #1166: s0 and find0 aren't affected by ignore-case.
         s0 = s
@@ -659,8 +661,8 @@ class LeoFind:
         if settings:
             self.init(settings)
         if not self.check_args('replace-then-find'):
-            return None, None, None
-        if self.changeSelection():
+            return None, None, None  # pragma: no cover (to do)
+        if self.changeSelection():  # pragma: no cover (to do)
             p, pos, newpos = self.find_next_match(p)
             return p, pos, newpos
         return None, None, None
@@ -674,16 +676,20 @@ class LeoFind:
         c, p = self.c, self.p
         wrapper = c.frame.body and c.frame.body.wrapper
         w = c.edit_widget(p) if self.in_headline else wrapper
-        if not w:
+        if not w:  # pragma: no cover (to do)
             self.in_headline = False
             w = wrapper
         if not w:
-            return False
+            return False  # pragma: no cover (defensive)
         oldSel = sel = w.getSelectionRange()
         start, end = sel
         if start > end: start, end = end, start
         if start == end:
-            g.es("no text selected"); return False
+            g.es("no text selected")
+            return False
+
+        # pragma: no cover (to do)
+        
         # Replace the selection in _both_ controls.
         start, end = oldSel
         change_text = self.change_text
@@ -709,10 +715,9 @@ class LeoFind:
         c.frame.tree.updateIcon(p)  # redraw only the icon.
         return True
     #@+node:ekr.20210102145531.68: *4* tag-children
-    @cmd('tag-children')
-    def tag_children(self, tag):
+    @cmd('tag-children') 
+    def tag_children(self, tag):  # pragma: no cover (to do)
         """tag-children: Add the given tag to all children of c.p."""
-        ### Test.
         c = self.c
         tc = c.theTagController
         if not tc:
@@ -825,7 +830,7 @@ class LeoFind:
         attempts = 0
         if self.pattern_match:
             ok = self.compile_pattern()
-            if not ok: return None, None, None  ### Test.
+            if not ok: return None, None, None  # pragma: no cover (to do).
         while p:
             pos, newpos = self.search()
             if pos is not None:
@@ -859,8 +864,9 @@ class LeoFind:
         if self.search_headline or self.search_body:
             # Search the only enabled pane.
             return self.search_headline
-        g.trace('can not happen: no search enabled')
-        return False  # search the body.
+        
+        g.trace('can not happen: no search enabled')  # pragma: no cover (defensive)
+        return False                                  # pragma: no cover (defensive, search body)
     #@+node:ekr.20210102145531.118: *5* find.initNextText (gui code)
     def initNextText(self, p):
         """
@@ -873,7 +879,7 @@ class LeoFind:
         if self.reverse:
             i, j = w.sel
             if i is not None and j is not None and i != j:
-                ins = min(i, j)
+                ins = min(i, j)  # pragma: no cover (to do)
             else:
                 ins = len(s)
         else:
@@ -896,7 +902,7 @@ class LeoFind:
         # Check it.
         if p and self.outsideSearchRange(p):
             return None
-        if not p and wrap:
+        if not p and wrap:  # pragma: no cover (to do)
             # Stateless wrap: Just set wrapPos and p.
             self.wrapPos = 0 if self.reverse else len(p.b)
             p = self.doWrap()
@@ -904,7 +910,7 @@ class LeoFind:
             return None
         return p
     #@+node:ekr.20210102145531.116: *6* find.doWrap
-    def doWrap(self):
+    def doWrap(self):  # pragma: no cover (to do)
         """Return the position resulting from a wrap."""
         c = self.c
         if self.reverse:
@@ -922,17 +928,17 @@ class LeoFind:
         """
         c = self.c
         if not p:
-            return True
+            return True  # pragma: no cover (to do)
         if self.node_only:
-            return True
+            return True  # pragma: no cover (to do)
         if self.suboutline_only:
             if self.onlyPosition:
                 if p != self.onlyPosition and not self.onlyPosition.isAncestorOf(p):
                     return True
-            else:
+            else:  # pragma: no cover (defensive)
                 g.trace('Can not happen: onlyPosition!', p.h)
                 return True
-        if c.hoistStack:
+        if c.hoistStack:  # pragma: no cover (to do)
             bunch = c.hoistStack[-1]
             if not bunch.p.isAncestorOf(p):
                 g.trace('outside hoist', p.h)
@@ -953,11 +959,10 @@ class LeoFind:
             (self.reverse and not self.in_headline) or
             (not self.reverse and self.in_headline)))
     #@+node:ekr.20210102145531.101: *4* find.make_regex_subs
-    def make_regex_subs(self, change_text, groups):
+    def make_regex_subs(self, change_text, groups):  # pragma: no cover (to do)
         """
         Substitute group[i-1] for \\i strings in change_text.
         """
-        ### Test.
         def repl(match_object):
             # # 1494...
             n = int(match_object.group(1)) - 1
@@ -1009,17 +1014,17 @@ class LeoFind:
         p, w = self.p, self.s_ctrl
         if self.find_def_data and p.v in self.find_seen:
             # Don't find defs/vars multiple times.
-            return None, None
+            return None, None  # pragma: no cover (defensive)
         index = w.getInsertPoint()
         s = w.getAllText()
-        if not s:
+        if not s:  # pragma: no cover (defensive)
             return None, None
         stopindex = 0 if self.reverse else len(s)
         pos, newpos = self.searchHelper(s, index, stopindex, self.find_text)
         if self.in_headline and not self.search_headline:
-            return None, None
+            return None, None  # pragma: no cover (to do)
         if not self.in_headline and not self.search_body:
-            return None, None
+            return None, None  # pragma: no cover (to do)
         if pos == -1:
             return None, None
         ins = min(pos, newpos) if self.reverse else max(pos, newpos)
@@ -1058,7 +1063,7 @@ class LeoFind:
 
         Return (-1, -1) on failure.
         """
-        if nocase:
+        if nocase:  # pragma: no cover (to do)
             s = s.lower()
             pattern = pattern.lower()
         pattern = self.replace_back_slashes(pattern)
@@ -1070,26 +1075,25 @@ class LeoFind:
         # short circuit the search: helps debugging.
         if s.find(pattern) == -1:
             return -1, -1
-        if word:
+        if word:  # pragma: no cover (to do)
             while 1:
                 k = s.rfind(pattern, i, j)
-                if k == -1: return -1, -1
+                if k == -1:
+                    return -1, -1
                 if self.matchWord(s, k, pattern):
                     return k, k + n
                 j = max(0, k - 1)
-        else:
-            k = s.rfind(pattern, i, j)
-            if k == -1:
-                return -1, -1
-            return k, k + n
-        # For pylint:
-        return -1, -1
+            return -1, -1  # pragma: no cover (for pylint)
+        k = s.rfind(pattern, i, j)
+        if k == -1:
+            return -1, -1  # pragma: no cover (defensive)
+        return k, k + n
     #@+node:ekr.20210102145531.130: *6* find.matchWord
     def matchWord(self, s, i, pattern):
         """Do a whole-word search."""
         pattern = self.replace_back_slashes(pattern)
         if not s or not pattern or not g.match(s, i, pattern):
-            return False
+            return False  # pragma: no cover (defensive)
         pat1, pat2 = pattern[0], pattern[-1]
         n = len(pattern)
         ch1 = s[i - 1] if 0 <= i - 1 < len(s) else '.'
@@ -1103,8 +1107,9 @@ class LeoFind:
     #@+node:ekr.20210102145531.129: *6* find.plainHelper
     def plainHelper(self, s, i, j, pattern, nocase, word):
         """Do a plain search."""
-        if nocase:
-            s = s.lower(); pattern = pattern.lower()
+        if nocase:  # pragma: no cover (to do)
+            s = s.lower()
+            pattern = pattern.lower()
         pattern = self.replace_back_slashes(pattern)
         n = len(pattern)
         if word:
@@ -1115,21 +1120,19 @@ class LeoFind:
                 if self.matchWord(s, k, pattern):
                     return k, k + n
                 i = k + n
-        else:
-            k = s.find(pattern, i, j)
-            if k == -1:
-                return -1, -1
-            return k, k + n
-        # For pylint
-        return -1, -1
+            return -1, -1  # pragma: no cover (for pylint)
+        k = s.find(pattern, i, j)
+        if k == -1:
+            return -1, -1
+        return k, k + n
     #@+node:ekr.20210102145531.127: *6* find.regexHelper
     def regexHelper(self, s, i, j, pattern, backwards, nocase):
 
         re_obj = self.re_obj  # Use the pre-compiled object
-        if not re_obj:
+        if not re_obj:  # pragma: no cover (defensive)
             g.trace('can not happen: no re_obj')
             return -1, -1
-        if backwards:
+        if backwards:  # pragma: no cover (to do)
             # Scan to the last match using search here.
             last_mo = None; i = 0
             while i < len(s):
@@ -1142,7 +1145,7 @@ class LeoFind:
             mo = re_obj.search(s, i, j)
         while mo and 0 <= i <= len(s):
             # Bug fix: 2013/12/27: must be 0 <= i <= len(s)
-            if mo.start() == mo.end():
+            if mo.start() == mo.end():  # pragma: no cover (to do)
                 if backwards:
                     # Search backward using match instead of search.
                     i -= 1
@@ -1168,8 +1171,9 @@ class SearchWidget:
         self.i = 0  # The insert point
         self.sel = 0, 0  # The selection range
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover (debugging only)
         return f"SearchWidget id: {id(self)}"
+
     #@+others
     #@+node:ekr.20210103132816.2: *3* SearchWidget.getters
     def getAllText(self):
@@ -1178,22 +1182,21 @@ class SearchWidget:
     def getInsertPoint(self):
         return self.i  # Returns Python index.
 
-    def getSelectionRange(self):
+    def getSelectionRange(self):  # pragma: no cover (to do)
         return self.sel  # Returns Python indices.
 
     def toPythonIndex(self, i):
         return g.toPythonIndex(self.s, i)
     #@+node:ekr.20210103132816.3: *3* SearchWidget.setters
-    def delete(self, i, j=None):
+    def delete(self, i, j=None):  # pragma: no cover (to do)
         i = self.toPythonIndex(i)
         if j is None: j = i + 1
         else: j = self.toPythonIndex(j)
         self.s = self.s[:i] + self.s[j:]
-        # Bug fix: 2011/11/13: Significant in external tests.
         self.i = i
         self.sel = i, i
 
-    def insert(self, i, s):
+    def insert(self, i, s):  # pragma: no cover (to do)
         if not s: return
         i = self.toPythonIndex(i)
         self.s = self.s[:i] + s + self.s[i:]
@@ -1449,6 +1452,21 @@ class TestFind (unittest.TestCase):
         # Make check_args fail.
         settings.find_text = settings.change_text = None
         x.replace_all(settings)
+    #@+node:ekr.20210107153149.1: *4* TestFind.replace-then-find
+    def test_replace_then_find(self):
+
+        settings, x = self.settings, self.x
+        settings.find_text = 'def top1'
+        settings.change_text = 'def top'  # Don't actually change anything!
+        # find-next
+        p, pos, newpos = x.find_next(settings)
+        assert p and p.h == 'Node 1', p.h
+        s = p.b[pos:newpos]
+        assert s == settings.find_text, repr(s)
+        # replace-then-find
+        p, pos, newpos = x.replace_then_find(settings)
+        assert (p, pos, newpos) == (None, None, None)
+    #@+node:ekr.20210107155337.1: *4* TestFind.tag-children
     #@+node:ekr.20210106141654.1: *3* Tests of Helpers...
     #@+node:ekr.20210107151414.1: *4* TestFind.dump_tree
     def dump_tree(self, tag=''):
