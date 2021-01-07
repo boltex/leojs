@@ -1236,13 +1236,13 @@ class TestFind (unittest.TestCase):
         def make_child(n, p):
             p2 = p.insertAsLastChild()
             p2.h = f"child {n}"
-            p2.b = f"def child{n}():\n    pass\n"
+            p2.b = f"def child{n}():\n    v{n} = 2\n"
             return p2
 
         def make_top(n):
             p = root.insertAsLastChild()
             p.h = f"Node {n}"
-            p.b = f"def top{n}():\n    pass\n"
+            p.b = f"def top{n}():\n    v{n} = 3\n"
             return p
             
         for n in range(0, 4, 3):
@@ -1362,6 +1362,16 @@ class TestFind (unittest.TestCase):
         assert p and p.h == 'child 5'
         s = p.b[pos:newpos]
         assert s == 'def child5', repr(s)
+    #@+node:ekr.20210106181550.1: *4* TestFind.find-var
+    def test_find_var(self):
+        
+        x = self.x
+        settings = self.settings
+        settings.find_text = r'v5'
+        pos, newpos, p = x.find_var(settings)
+        assert p and p.h == 'child 5', repr(p)
+        s = p.b[pos:newpos]
+        assert s == 'v5 =', repr(s)
     #@+node:ekr.20210106141654.1: *3* Tests of Helpers...
     #@+node:ekr.20210106133506.1: *4* TestFind.test_bad compile_pattern
     def test_bad_compile_pattern(self):
