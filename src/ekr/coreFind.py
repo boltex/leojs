@@ -1221,9 +1221,56 @@ class TestFind (unittest.TestCase):
         self.c = coreTest.create_app()
         self.x = coreFind.LeoFind(self.c)
         self.settings = self.x.default_settings()
+        self.make_test_tree()
         
     #@+others
-    #@+node:ekr.20210106141701.1: *3* Commands...
+    #@+node:ekr.20210106170813.1: *3* TestFind: setup
+    #@+node:ekr.20210106170840.1: *4* TestFind.make_test_tree
+    def make_test_tree(self):
+        """Make a test tree for other tests"""
+        c = self.c
+        root = c.rootPosition()
+        root.h = 'Root'
+        root.b = f"def root():\n    pass\n"
+
+        def make_child(n, p):
+            p2 = p.insertAsLastChild()
+            p2.h = f"child {n}"
+            p2.b = f"def child{n}():\n    pass\n"
+            return p2
+
+        def make_top(n):
+            p = root.insertAsLastChild()
+            p.h = f"Node {n}"
+            p.b = f"def top{n}():\n    pass\n"
+            return p
+            
+        for n in range(0, 4, 3):
+            p = make_top(n+1)
+            p2 = make_child(n+2, p)
+            make_child(n+3, p2)
+    #@+node:ekr.20210106170636.1: *4* TestFind.test_tree
+    def test_tree(self):
+        
+        g.trace('=====')
+        table = (
+            (0, 'Root'),
+            (1, 'Node 1'),
+            (2, 'child 2'),
+            (3, 'child 3'),
+            (1, 'Node 4'),
+            (2, 'child 5'),
+            (3, 'child 6'),
+        )
+        i = 0
+        for p in self.c.all_positions():
+            level, h = table[i]
+            i += 1
+            assert p.h == h, (p.h, h)
+            assert p.level() == level, (p.level(), level, p.h)
+            # print(' '*p.level(), p.h)
+            # g.printObj(g.splitLines(p.b), tag=p.h)
+    #@+node:ekr.20210106141701.1: *3* Tests of Commands...
     #@+node:ekr.20210106124121.1: *4* TestFind.clone-find-all
     def test_clone_find_all(self):
         x = self.x
@@ -1285,7 +1332,29 @@ class TestFind (unittest.TestCase):
         # No find pattern.
         self.x.find_all(self.settings)
         
-    #@+node:ekr.20210106141654.1: *3* Helpers...
+    #@+node:ekr.20210106173343.1: *4* TestFind.find-next & find-prev
+    def test_find_next(self):
+
+        c, x = self.c, self.x
+        settings = self.settings
+        settings.find_text = 'def top1'
+        # find-next
+        pos, newpos, p = x.find_next(settings)
+        assert p.h == 'Node 1', p.h
+        s = p.b[pos:newpos]
+        assert s == settings.find_text, repr(s)
+        # find-prev: starts at end, so we stay in the node.
+        last = c.lastTopLevel()
+        child = last.firstChild()
+        grand_child = child.firstChild()
+        settings.p = grand_child
+        settings.find_text = 'def child2'
+        pos, newpos, p = x.find_prev(settings)
+        print(pos, newpos, p.h)
+        assert p.h == 'child 2', p.h
+        s = p.b[pos:newpos]
+        assert s == settings.find_text, repr(s)
+    #@+node:ekr.20210106141654.1: *3* Tests of Helpers...
     #@+node:ekr.20210106133506.1: *4* TestFind.test_bad compile_pattern
     def test_bad_compile_pattern(self):
         
