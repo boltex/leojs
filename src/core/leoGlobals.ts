@@ -3,6 +3,7 @@
  * Global constants, variables and utility functions used throughout Leo.
  * Important: This module imports no other Leo module.
  */
+import { assert } from 'console';
 import * as fs from 'fs';
 import { LeoApp } from './leoApp';
 
@@ -114,16 +115,17 @@ export const cmd_instance_dict: { [key: string]: string[] } = {
     'VimCommands': ['c', 'vimCommands'],
 };
 
-export const g_language_pat = new RegExp(String.raw`^@language\s+(\w+)+`, 'm');
+export const g_language_pat = new RegExp(/^@language\s+(\w+)+/, 'm');
 // Regex used by this module, and in leoColorizer.py.
 
 // Patterns used only in this module...
-export const g_is_directive_pattern = new RegExp(String.raw`^\s*@([\w-]+)\s*`);
+export const g_is_directive_pattern = new RegExp(/^\s*@([\w-]+)\s*/);
 // This pattern excludes @encoding.whatever and @encoding(whatever)
 // It must allow @language python, @nocolor-node, etc.
+
 export const g_noweb_root = new RegExp('<' + '<' + '*' + '>' + '>' + '=', 'm');
-export const g_pos_pattern = new RegExp(String.raw`:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$`);
-export const g_tabwidth_pat = new RegExp(String.raw`(^@tabwidth)`, 'm');
+export const g_pos_pattern = new RegExp(/:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$/);
+export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
 
 
 export const tree_popup_handlers: ((...args: any[]) => any)[] = [];  // Set later.
@@ -133,8 +135,8 @@ export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionar
 export const app: LeoApp = new LeoApp();
 
 // Global status vars.
-export let inScript:boolean = false; // A synonym for app.inScript
-export let unitTesting :boolean = false; // A synonym for app.unitTesting.
+export let inScript: boolean = false; // A synonym for app.inScript
+export let unitTesting: boolean = false; // A synonym for app.unitTesting.
 
 /**
  * Define a file-like object for redirecting writes to a string.
@@ -142,11 +144,11 @@ export let unitTesting :boolean = false; // A synonym for app.unitTesting.
  */
 export class FileLikeObject {
 
-    public encoding:string;
-    public ptr:number;
-    private _list:string[];
+    public encoding: string;
+    public ptr: number;
+    private _list: string[];
 
-    constructor( encoding:string='utf-8', fromString?:string) {
+    constructor(encoding: string = 'utf-8', fromString?: string) {
         this.encoding = encoding || 'utf-8';
         this._list = splitLines(fromString);  // Must preserve newlines!
         this.ptr = 0;
@@ -164,33 +166,33 @@ export class FileLikeObject {
         // pass
     }
 
-    public get():string {
+    public get(): string {
         return this._list.join();
     }
 
     // Todo : maybe add names to prototype instead
-    public getvalue():string {
+    public getvalue(): string {
         return this.get();
     }
 
-    public read():string {
+    public read(): string {
         return this.get();
     }
 
     /**
      * Read the next line using at.list and at.ptr.
      */
-    public readline():string {
-        if(this.ptr < this._list.length){
-            const line:string = this._list[this.ptr];
+    public readline(): string {
+        if (this.ptr < this._list.length) {
+            const line: string = this._list[this.ptr];
             this.ptr++;
             return line;
         }
         return '';
     }
 
-    public write(s:string):void {
-        if(s){
+    public write(s: string): void {
+        if (s) {
             this._list.push(s);
         }
     }
@@ -201,7 +203,7 @@ export class FileLikeObject {
 /**
  * Return < < s > >
  */
-export function angleBrackets(s:string):string {
+export function angleBrackets(s: string): string {
     const lt = "<<";
     const rt = ">>";
     return lt + s + rt;
@@ -210,7 +212,7 @@ export function angleBrackets(s:string):string {
 /**
  * Return the caller name i levels up the stack.
  */
-export function caller(i:number=1):string {
+export function caller(i: number = 1): string {
     return callers(i + 1).split(',')[0];
 }
 
@@ -219,37 +221,37 @@ export function caller(i:number=1):string {
  * of the function that called callerList.
  *
  * excludeCaller: True (the default), callers itself is not on the list.
- *   
+ *
  * If the `verbose` keyword is True, return a list separated by newlines.
  */
-export function callers(n:number=4, count:number=0, excludeCaller:boolean=true, verbose:boolean=false):string {
+export function callers(n: number = 4, count: number = 0, excludeCaller: boolean = true, verbose: boolean = false): string {
     // Be careful to call _callerName with smaller values of i first:
     // sys._getframe throws ValueError if there are less than i entries.
-    let result:string[] = [];
-    let i:number = excludeCaller?3:2;
-    while (1){
-        let s:string = _callerName(n=i, verbose=verbose);
-        if (s){
+    let result: string[] = [];
+    let i: number = excludeCaller ? 3 : 2;
+    while (1) {
+        let s: string = _callerName(n = i, verbose = verbose);
+        if (s) {
             result.push(s);
         }
-        if (!s || result.length >= n){
+        if (!s || result.length >= n) {
             break;
         }
         i += 1;
     }
 
     result.reverse();
-    if (count > 0){
-        result = result.slice(0,count);
+    if (count > 0) {
+        result = result.slice(0, count);
     }
-    if (verbose){
+    if (verbose) {
         return ''; //''.join([f"\n  {z}" for z in result]);
     }
     return result.join(',');
 }
 
 // TODO : see Error().stack to access names from the call stack
-export function _callerName(n:number, verbose:boolean=false):string {
+export function _callerName(n: number, verbose: boolean = false): string {
     return "<_callerName>";
 }
 
@@ -280,13 +282,130 @@ export function _callerName(n:number, verbose:boolean=false):string {
 */
 
 /**
+ * Return a result dict that is a copy of the keys dict
+ * with missing items replaced by defaults in d dict.
+ */
+export function doKeywordArgs(keys: { [key: string]: any }, d: { [key: string]: any } = {}): { [key: string]: any } {
+    if (d === null) {
+        d = {}; // May be unnecessary
+    }
+    const result: { [key: string]: any } = {};
+
+    for (var key in d) {
+        if (d.hasOwnProperty(key)) {
+            const default_val = d[key];
+
+            const isBool: boolean = [true, false].includes(default_val);
+            const val: any = keys.hasOwnProperty(key) ? keys[key] : null;
+
+            if (isBool && [true, 'True', 'true'].includes(val)) {
+                result[key] = true;
+            } else if (isBool && [false, 'False', 'false'].includes(val)) {
+                result[key] = false;
+            } else if (val === null) {
+                result[key] = default_val;
+            } else {
+                result[key] = val;
+            }
+        }
+    }
+
+    return result;
+}
+
+export const error = console.error;
+
+export const es = console.log;
+
+export function es_exception(): string {
+    return '<no file>';
+}
+
+/*
+    ### es_exception Old code
+        # typ, val, tb = sys.exc_info()
+        # # val is the second argument to the raise statement.
+        # if full:
+            # lines = traceback.format_exception(typ, val, tb)
+        # else:
+            # lines = traceback.format_exception_only(typ, val)
+        # for line in lines:
+            # g.es_print_error(line, color=color)
+        # fileName, n = g.getLastTracebackFileAndLineNumber()
+        # return fileName, n
+*/
+
+/**
+ * Print all non-keyword args, and put them to the log pane.
+ * Python code was:
+ *     pr(*args, **keys)
+ *     es(*args, **keys)
+ */
+export const es_print = console.log;
+
+/**
+ * Return True if s starts with a directive.
+ */
+export function isDirective(s: string): boolean {
+
+    const m: RegExpExecArray | null = g_is_directive_pattern.exec(s);
+    if (m) {
+        // This pattern excludes @encoding.whatever and @encoding(whatever)
+        // It must allow @language python, @nocolor-node, etc.
+        const s2: string = s.substring(m.index + m[0].length); // text from end of match #1 (the word after @)
+        if (s2 && ".(".includes(s2.charAt(0))) {
+            return false;
+        }
+        return globalDirectiveList.includes(m[1]);
+    }
+    return false;
+}
+
+/**
+ * Return True if the body text contains the @ directive.
+ */
+export function is_special(s: string, directive: string): boolean {
+    console.assert(s);
+
+    return false;
+
+}
+
+
+
+/*
+def is_special(s, directive):
+    """Return True if the body text contains the @ directive."""
+    assert(directive and directive[0] == '@')
+    lws = directive in ("@others", "@all")
+        # Most directives must start the line.
+    pattern = r'^\s*(%s\b)' if lws else r'^(%s\b)'
+    pattern = re.compile(pattern % directive, re.MULTILINE)
+    m = re.search(pattern, s)
+    if m:
+        return True, m.start(1)
+    return False, -1
+*/
+
+/**
+ * Return True if ch should be considered a letter.
+ */
+export function isWordChar(ch: string): boolean {
+    return !!ch && (/^[0-9a-zA-Z]$/.test(ch) || ch === '_');
+}
+
+export function isWordChar1(ch: string): boolean {
+    return !!ch && (/^[a-zA-Z]$/.test(ch) || ch === '_');
+}
+
+/**
  * Split s into lines, preserving the number of lines and the endings
  * of all lines, including the last line.
  */
-export function splitLines(s?:string): string[] {
-    if(s){
+export function splitLines(s?: string): string[] {
+    if (s) {
         return s.split(/\r?\n/);
-    }else{
+    } else {
         return [];
     }
 }
