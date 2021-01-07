@@ -27,7 +27,6 @@ class LeoFind:
     def __init__(self, c):
         """Ctor for LeoFind class."""
         self.c = c
-        ### self.errors = 0
         self.re_obj = None
         # Set in init_settings...
         self.find_text = ""
@@ -90,7 +89,6 @@ class LeoFind:
         self.use_cff = False  # For find-def
         #
         # Init state.
-        ### self.errors = 0
         self.in_headline = self.was_in_headline = settings.in_headline
         self.p = p = settings.p.copy()
         self.onlyPosition = self.p if self.suboutline_only else None
@@ -752,7 +750,6 @@ class LeoFind:
             return True
         except Exception:
             g.warning('invalid regular expression:', self.find_text)
-            ### self.errors += 1  # Abort the search.
             return False
     #@+node:ekr.20210102145531.114: *4* find.compute_result_status
     def compute_result_status(self, find_all_flag=False):
@@ -825,21 +822,12 @@ class LeoFind:
         
         Return (p, pos, newpos) or (None, None, None)
         """
-        # if settings:
-            # self.init(settings)
-        # if not self.check_args('find_next_match'):
-            # return None, None, 
-        ### self.errors = 0
         attempts = 0
         if self.pattern_match:
             ok = self.compile_pattern()
             if not ok: return None, None, None  ### Test.
         while p:
             pos, newpos = self.search()
-            ###
-                # if self.errors:
-                    # g.trace('find errors')
-                    # break  # Abort the search.
             if pos is not None:
                 # Success.
                 return p, pos, newpos
