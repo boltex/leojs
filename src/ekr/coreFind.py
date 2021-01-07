@@ -716,14 +716,14 @@ class LeoFind:
         return True
     #@+node:ekr.20210102145531.68: *4* tag-children
     @cmd('tag-children') 
-    def tag_children(self, tag):  # pragma: no cover (to do)
+    def tag_children(self, p, tag):  # pragma: no cover (to do)
         """tag-children: Add the given tag to all children of c.p."""
         c = self.c
         tc = c.theTagController
         if not tc:
             g.es_print('nodetags not active')
             return
-        for p in c.p.children():
+        for p in p.children():
             tc.add_tag(p, tag)
         g.es_print(f"Added {tag} tag to {len(list(c.p.children()))} nodes")
     #@+node:ekr.20210103213410.1: *3* LeoFind: Helpers
@@ -1467,9 +1467,20 @@ class TestFind (unittest.TestCase):
         p, pos, newpos = x.replace_then_find(settings)
         assert (p, pos, newpos) == (None, None, None)
     #@+node:ekr.20210107155337.1: *4* TestFind.tag-children
+    def test_tag_children(self):
+        
+        c, x = self.c, self.x
+        
+        class DummyTagController:
+            def add_tag(self, p, tag):
+                pass
+
+        p = c.rootPosition().next()
+        c.theTagController = DummyTagController()
+        x.tag_children(p, 'test')
     #@+node:ekr.20210106141654.1: *3* Tests of Helpers...
     #@+node:ekr.20210107151414.1: *4* TestFind.dump_tree
-    def dump_tree(self, tag=''):
+    def dump_tree(self, tag=''):  # pragma: no cover (debugging)
         """Dump the test tree created by make_test_tree."""
         c = self.c
         print('dump_tree', tag)
