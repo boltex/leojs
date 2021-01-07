@@ -3,6 +3,7 @@
 #@+node:ekr.20201227040845.1: * @file src/ekr/coreGlobals.py
 #@@first
 """Global classes and functions, for use by leoInteg."""
+import operator  # For g.Bunch.
 import os
 import re
 #@+<< define g.globalDirectiveList >>
@@ -32,6 +33,64 @@ globalDirectiveList = [
 directives_pat = None  # Set below.
 #@-<< define g.globalDirectiveList >>
 #@+others
+#@+node:ekr.20210107085120.1: ** class g.Bunch     (coreGlobals.py)
+class Bunch:
+    """
+    From The Python Cookbook:
+
+        Create a Bunch whenever you want to group a few variables:
+        
+            point = Bunch(datum=y, squared=y*y, coord=x)
+        
+        You can read/write the named attributes you just created, add others,
+        del some of them, etc::
+        
+            if point.squared > threshold:
+                point.isok = True
+    """
+
+    def __init__(self, **keywords):
+        self.__dict__.update(keywords)
+
+    def __repr__(self):
+        return self.toString()
+
+    def ivars(self):
+        return sorted(self.__dict__)
+
+    def keys(self):
+        return sorted(self.__dict__)
+
+    def toString(self):
+        tag = self.__dict__.get('tag')
+        entries = [
+            f"{key}: {str(self.__dict__.get(key)) or repr(self.__dict__.get(key))}"
+                for key in self.ivars() if key != 'tag'
+        ]
+        # Fail.
+        result = [f'g.Bunch({tag or ""})']
+        result.extend(entries)
+        return '\n    '.join(result) + '\n'
+
+    # Used by new undo code.
+
+    def __setitem__(self, key, value):
+        """Support aBunch[key] = val"""
+        return operator.setitem(self.__dict__, key, value)
+
+    def __getitem__(self, key):
+        """Support aBunch[key]"""
+        # g.pr('g.Bunch.__getitem__', key)
+        return operator.getitem(self.__dict__, key)
+
+    def get(self, key, theDefault=None):
+        return self.__dict__.get(key, theDefault)
+
+    def __contains__(self, key):  # New.
+        # g.pr('g.Bunch.__contains__', key in self.__dict__, key)
+        return key in self.__dict__
+
+bunch = Bunch
 #@+node:ekr.20201227040845.31: ** class g.FileLikeObject (coreGlobals.py)
 # Note: we could use StringIo for this.
 

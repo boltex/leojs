@@ -75,7 +75,7 @@ class LeoFind:
         self.change_text = settings.change_text
         self.find_text = settings.find_text
         #
-        # Init option ivars.
+        # Init find options.
         self.ignore_case = settings.ignore_case
         self.node_only = settings.node_only
         self.pattern_match = settings.pattern_match 
@@ -85,6 +85,9 @@ class LeoFind:
         self.suboutline_only = settings.suboutline_only
         self.whole_word = settings.whole_word
         self.wrapping = settings.wrapping
+        #
+        # Init user options
+        self.use_cff = False  # For find-def
         #
         # Init state.
         self.errors = 0
@@ -112,7 +115,7 @@ class LeoFind:
             # Find/change strings...
             find_text = '',
             change_text = '',
-            # Options...
+            # Find options...
             ignore_case = False,
             node_only = False,
             pattern_match = False,
@@ -122,6 +125,8 @@ class LeoFind:
             suboutline_only = False,
             whole_word = False,
             wrapping = False,
+            # User options.
+            use_cff = False,  # For find-def.
         )
     #@+node:ekr.20210103193237.1: *3* LeoFind: Commands
     # All these commands are non-interactive.
@@ -329,16 +334,11 @@ class LeoFind:
     #@+node:ekr.20210102145531.28: *5* find.find_def_helper & helpers
     def find_def_helper(self, defFlag, settings):
         """Find the definition of the class, def or var under the cursor."""
-        c, w = self.c, self.c.frame.body.wrapper
+        c = self.c
         tag = 'find-def' if defFlag else 'find-var'
-        if not w:
-            return None, None, None
         if settings:
             self.init(settings)
         if not self.check_args(tag):
-            return None, None, None
-        if not self.find_text:
-            g.trace('no find text')
             return None, None, None
         # Always start in the root position.
         p = self.p = c.rootPosition()
@@ -353,11 +353,9 @@ class LeoFind:
         # Save previous settings.
         self.saveBeforeFindDef(p)
         self.setFindDefOptions(p)
-        ### Make this a setting.
-        use_cff = c.config.getBool('find-def-creates-clones', default=False)
         count, found = 0, False
         self.find_seen = set()
-        if use_cff:
+        if settings.use_cff:
             count = self.clone_find_all_flattened()
             found = count > 0
         else:
@@ -372,7 +370,7 @@ class LeoFind:
             word2 = self.switchStyle(self.find_text)
             if word2:
                 self.find_text = prefix + ' ' + word2
-                if use_cff:
+                if settings.use_cff:
                     count = self.clone_find_all()
                     found = count > 0
                 else:
@@ -382,13 +380,12 @@ class LeoFind:
                         found = pos is not None
                         if found or not g.inAtNosearch(c.p):
                             break
-        if found and use_cff:
+        if found and settings.use_cff:
             last = c.lastTopLevel()
             if count == 1:
                 # It's annoying to create a clone in this case.
                 # Undo the clone find and just select the proper node.
                 last.doDelete()
-                ### self.findNext()
                 self.find_next_match()
             else:
                 c.selectPosition(last)
@@ -518,17 +515,21 @@ class LeoFind:
                 if count_h:
                     count += count_h
                     p.h = new_h
+                    ### g.trace(p.h, p.isDirty())
+                    ### p.setDirty()  ###
             if self.search_body:
                 count_b, new_b = self.replace_all_helper(p.b)
                 if count_b:
                     count += count_b
                     p.b = new_b
+                    ### g.trace(p.h, p.isDirty())
+                    ### p.setDirty()  ###
             if count_h or count_b:
                 u.afterChangeNodeContents(p, undoType, undoData)
         p = c.p
         u.afterChangeGroup(p, undoType, reportFlag=True)
         t2 = time.process_time()
-        g.es_print(f"changed {count} instances{g.plural(count)} in {t2 - t1:4.2f} sec.")
+        g.es_print(f"changed {count} instance{g.plural(count)} in {t2 - t1:4.2f} sec.")
         #
         # Bugs #947, #880 and #722:
         # Set ancestor @<file> nodes by brute force.
@@ -1251,6 +1252,11 @@ class TestFind (unittest.TestCase):
             p = make_top(n+1)
             p2 = make_child(n+2, p)
             make_child(n+3, p2)
+            
+        for p in c.all_positions():
+            p.v.clearDirty()
+            p.v.clearVisited()
+
     #@+node:ekr.20210106170636.1: *4* TestFind.test_tree
     def test_tree(self):
 
@@ -1274,8 +1280,7 @@ class TestFind (unittest.TestCase):
     #@+node:ekr.20210106141701.1: *3* Tests of Commands...
     #@+node:ekr.20210106124121.1: *4* TestFind.clone-find-all
     def test_clone_find_all(self):
-        x = self.x
-        settings = self.settings
+        settings, x = self.settings, self.x
         # Regex find.
         settings.find_text = r'^def\b'
         settings.change_text = 'def'  # Don't actually change anything!
@@ -1297,8 +1302,7 @@ class TestFind (unittest.TestCase):
         
     #@+node:ekr.20210106133012.1: *4* TestFind.clone-find-all-flattened
     def test_clone_find_all_flattened(self):
-        x = self.x
-        settings = self.settings
+        settings, x = self.settings, self.x
         # regex find.
         settings.find_text = r'^def\b'
         settings.pattern_match = True
@@ -1317,11 +1321,32 @@ class TestFind (unittest.TestCase):
         # No find pattern.
         self.x.clone_find_all_flattened(self.settings)
         
+    #@+node:ekr.20210106215700.1: *4* TestFind.clone-find-tag
+    def test_clone_find_tag(self):
+        c, x = self.c, self.x
+        
+        class DummyTagController:
+            
+            def __init__(self, clones):
+                self.clones = clones
+                
+            def get_tagged_nodes(self, tag):
+                return self.clones
+                
+            def show_all_tags(self):
+                pass
+
+        c.theTagController = DummyTagController([c.rootPosition()])
+        x.clone_find_tag('test')
+        c.theTagController = DummyTagController([])
+        x.clone_find_tag('test')
+        c.theTagController = None
+        x.clone_find_tag('test')
+        
     #@+node:ekr.20210106141951.1: *4* TestFind.find-all
     def test_find_all(self):
-        x = self.x
+        settings, x = self.settings, self.x
         # Test 1.
-        settings = self.settings
         settings.find_text = r'^def\b'
         settings.pattern_match = True
         x.find_all(settings)
@@ -1331,8 +1356,8 @@ class TestFind (unittest.TestCase):
         # Test 3.
         settings.suboutline_only = False
         settings.search_headline = False
+        settings.p.setVisited()
         x.find_all(settings)
-        
         
     def test_find_all_errors(self):
         # No find pattern.
@@ -1341,8 +1366,7 @@ class TestFind (unittest.TestCase):
     #@+node:ekr.20210106173343.1: *4* TestFind.find-next & find-prev
     def test_find_next(self):
 
-        c, x = self.c, self.x
-        settings = self.settings
+        c, settings, x = self.c, self.settings, self.x
         settings.find_text = 'def top1'
         # find-next
         pos, newpos, p = x.find_next(settings)
@@ -1362,23 +1386,70 @@ class TestFind (unittest.TestCase):
     #@+node:ekr.20210106180832.1: *4* TestFind.find-def
     def test_find_def(self):
         
-        x = self.x
-        settings = self.settings
-        settings.find_text = r'child5'
+        settings, x = self.settings, self.x
+        settings.find_text = 'child5'
+        # Test 1.
         pos, newpos, p = x.find_def(settings)
         assert p and p.h == 'child 5'
         s = p.b[pos:newpos]
         assert s == 'def child5', repr(s)
+        # Test 2: use_cff.
+        settings.use_cff = True
+        x.find_def(settings)
+        # Test 3: switch style.
+        settings.find_text = 'child_5'
+        x.find_def(settings)
+        # Make check_args fail.
+        settings.find_text = settings.change_text = None
+        x.find_def(settings)
+        
+        
     #@+node:ekr.20210106181550.1: *4* TestFind.find-var
     def test_find_var(self):
         
-        x = self.x
-        settings = self.settings
+        settings, x = self.settings, self.x
         settings.find_text = r'v5'
         pos, newpos, p = x.find_var(settings)
         assert p and p.h == 'child 5', repr(p)
         s = p.b[pos:newpos]
         assert s == 'v5 =', repr(s)
+    #@+node:ekr.20210106215321.1: *4* TestFind.replace-all
+    def test_replace_all(self):
+        
+        c, settings, x = self.c, self.settings, self.x
+        root = c.rootPosition()
+        settings.find_text = 'pattern_match'
+        settings.change_text = 'pattern_match'
+        settings.ignore_case = False
+        settings.match_word = True
+        settings.pattern_match = False
+        settings.suboutline_only = False
+        x.replace_all(settings)
+        # Node only.
+        settings.node_only = True
+        x.replace_all(settings)
+        settings.node_only = False
+        # Suboutline only.
+        settings.suboutline_only = True
+        x.replace_all(settings)
+        settings.suboutline_only = False
+        # Pattern match.
+        settings.pattern_match = True
+        x.replace_all(settings)
+        # Multiple matches
+        root.h = 'abc'
+        root.b = 'abc\nxyz abc\n'
+        settings.find_text = settings.change_text = 'abc'
+        x.replace_all(settings)
+        # Set ancestor @file node dirty.
+        root.h = '@file xyzzy'
+        settings.find_text = settings.change_text = 'child1'
+        # Bad pattern.
+        settings.find_text = 'abc((('
+        x.replace_all(settings)
+        # Make check_args fail.
+        settings.find_text = settings.change_text = None
+        x.replace_all(settings)
     #@+node:ekr.20210106141654.1: *3* Tests of Helpers...
     #@+node:ekr.20210106133506.1: *4* TestFind.test_bad compile_pattern
     def test_bad_compile_pattern(self):
