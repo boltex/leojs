@@ -27,7 +27,7 @@ class LeoFind:
     def __init__(self, c):
         """Ctor for LeoFind class."""
         self.c = c
-        self.errors = 0
+        ### self.errors = 0
         self.re_obj = None
         # Set in init_settings...
         self.find_text = ""
@@ -90,7 +90,7 @@ class LeoFind:
         self.use_cff = False  # For find-def
         #
         # Init state.
-        self.errors = 0
+        ### self.errors = 0
         self.in_headline = self.was_in_headline = settings.in_headline
         self.p = p = settings.p.copy()
         self.onlyPosition = self.p if self.suboutline_only else None
@@ -174,17 +174,13 @@ class LeoFind:
         else:
             p = c.rootPosition()
             after = None
-        # g.trace('-----', flatten, p.h)
         count, found = 0, None
         clones, skip = [], set()
         while p and p != after:
-            # g.trace(p.h)
             progress = p.copy()
-            if p.v in skip:
-                # g.trace('skip', p.h)
+            if p.v in skip:  # pragma: no cover
                 p.moveToThreadNext()
             elif g.inAtNosearch(p):
-                # g.trace('nosearch', p.h)
                 p.moveToNodeAfterTree()
             elif self.find_next_batch_match(p):
                 count += 1
@@ -376,7 +372,7 @@ class LeoFind:
                 if settings.use_cff:
                     count = self.clone_find_all()
                     found = count > 0
-                else:
+                else:  ### To test.
                     # #1592.  Ignore hits under control of @nosearch
                     while p:
                         progress = p.v
@@ -394,7 +390,7 @@ class LeoFind:
                 # Undo the clone find and just select the proper node.
                 last.doDelete()
                 self.find_next_match(p)
-            else:
+            else:   ### To test.
                 c.selectPosition(last)
             return None, None, last
         self.restoreAfterFindDef()
@@ -435,7 +431,7 @@ class LeoFind:
         if s.find('_') > -1:
             if s.startswith('_'):
                 # Don't return something that looks like a class.
-                return None
+                return None   ### To test.
             #
             # Convert to CamelCase
             s = s.lower()
@@ -447,6 +443,7 @@ class LeoFind:
             return s
         #
         # Convert to underscore_style.
+        ### To test.
         result = []
         for i, ch in enumerate(s):
             if i > 0 and ch.isupper():
@@ -473,9 +470,9 @@ class LeoFind:
         assert settings
         self.init(settings)
         if not self.check_args('find-next'):
-            return None, None, None
+            return None, None, None ### To test.
         p = self.p
-        p, pos, newpos = self.find_next_match(p, settings)
+        p, pos, newpos = self.find_next_match(p)
         return p, pos, newpos # For tests.
     #@+node:ekr.20210102145531.35: *4* find-prev
     @cmd('find-prev')
@@ -484,11 +481,11 @@ class LeoFind:
         assert settings
         self.init(settings)
         if not self.check_args('find-prev'):
-            return None, None, None
+            return None, None, None  ### To test.
         p = self.p
         self.reverse = True
         try:
-            p, pos, newpos = self.find_next_match(p, settings)
+            p, pos, newpos = self.find_next_match(p)
         finally:
             self.reverse = False
         return p, pos, newpos # For tests. ## Changed order
@@ -562,13 +559,13 @@ class LeoFind:
                 # Fixes this bug: https://groups.google.com/forum/#!topic/leo-editor/yR8eL5cZpi4
                 # This hack would be dangerous on MacOs: it uses '\r' instead of '\n' (!)
         if not s:
-            return False, None
+            return False, None   ### To test.
         #
         # Order matters: regex matches ignore whole-word.
         if self.pattern_match:
             return self.batchRegexReplace(s)
         if self.whole_word:
-            return self.batchWordReplace(s)
+            return self.batchWordReplace(s)  ### To test.
         return self.batchPlainReplace(s)
     #@+node:ekr.20210106081141.3: *6* find.batchPlainReplace
     def batchPlainReplace(self, s):
@@ -580,7 +577,7 @@ class LeoFind:
         # #1166: s0 and find0 aren't affected by ignore-case.
         s0 = s
         find0 = self.replace_back_slashes(find)
-        if self.ignore_case:
+        if self.ignore_case:  ### To test.
             s = s0.lower()
             find = find0.lower()
         count, prev_i, result = 0, 0, []
@@ -590,6 +587,7 @@ class LeoFind:
             if i == -1:
                 break
             # #1166: Replace using s0 & change.
+            ### To test.
             count += 1
             result.append(s0[prev_i:i])
             result.append(change)
@@ -606,7 +604,7 @@ class LeoFind:
         count, prev_i, result = 0, 0, []
 
         flags = re.MULTILINE
-        if self.ignore_case:
+        if self.ignore_case:  ### To test.
             flags |= re.IGNORECASE
         for m in re.finditer(self.find_text, s, flags):
             count += 1
@@ -615,7 +613,7 @@ class LeoFind:
             # #1748.
             groups = m.groups()
             if groups:
-                change_text = self.makeRegexSubs(self.change_text, groups)
+                change_text = self.make_regex_subs(self.change_text, groups)
             else:
                 change_text = self.change_text
             result.append(change_text)
@@ -630,6 +628,7 @@ class LeoFind:
         Perform all whole word find/replace on s.
         return (count, new_s)
         """
+        ### To test (all)
         find, change = self.find_text, self.change_text
         # #1166: s0 and find0 aren't affected by ignore-case.
         s0 = s
@@ -694,7 +693,7 @@ class LeoFind:
         if self.pattern_match and self.match_obj:
             groups = self.match_obj.groups()
             if groups:
-                change_text = self.makeRegexSubs(change_text, groups)
+                change_text = self.make_regex_subs(change_text, groups)
         # change_text = change_text.replace('\\n','\n').replace('\\t','\t')
         change_text = self.replace_back_slashes(change_text)
         for w2 in (w, self.s_ctrl):
@@ -711,38 +710,11 @@ class LeoFind:
             c.frame.body.onBodyChanged('Change', oldSel=oldSel)
         c.frame.tree.updateIcon(p)  # redraw only the icon.
         return True
-    #@+node:ekr.20210102145531.101: *5* find.makeRegexSubs
-    def makeRegexSubs(self, change_text, groups):
-        """
-        Substitute group[i-1] for \\i strings in change_text.
-        """
-
-        def repl(match_object):
-            # # 1494...
-            n = int(match_object.group(1)) - 1
-            if 0 <= n < len(groups):
-                return (
-                    groups[n].
-                        replace(r'\b', r'\\b').
-                        replace(r'\f', r'\\f').
-                        replace(r'\n', r'\\n').
-                        replace(r'\r', r'\\r').
-                        replace(r'\t', r'\\t').
-                        replace(r'\v', r'\\v'))
-            # No replacement.
-            return match_object.group(0)
-
-        result = re.sub(r'\\([0-9])', repl, change_text)
-        # print(
-            # f"makeRegexSubs:\n"
-            # f"change_text: {change_text!s}\n"
-            # f"     groups: {groups!s}\n"
-            # f"     result: {result!s}")
-        return result
     #@+node:ekr.20210102145531.68: *4* tag-children
     @cmd('tag-children')
     def tag_children(self, tag):
         """tag-children: Add the given tag to all children of c.p."""
+        ### Test.
         c = self.c
         tc = c.theTagController
         if not tc:
@@ -780,7 +752,7 @@ class LeoFind:
             return True
         except Exception:
             g.warning('invalid regular expression:', self.find_text)
-            self.errors += 1  # Abort the search.
+            ### self.errors += 1  # Abort the search.
             return False
     #@+node:ekr.20210102145531.114: *4* find.compute_result_status
     def compute_result_status(self, find_all_flag=False):
@@ -847,26 +819,27 @@ class LeoFind:
         found.b = f"# {status}\n{''.join(result)}"
         return found
     #@+node:ekr.20210102145531.115: *4* find.find_next_match & helpers
-    def find_next_match(self, p, settings=None):
+    def find_next_match(self, p):
         """
         Resume the search where it left off.
         
         Return (p, pos, newpos) or (None, None, None)
         """
-        if settings:
-            self.init(settings)
-        if not self.check_args('find_next_match'):
-            return None, None, None
-        self.errors = 0
+        # if settings:
+            # self.init(settings)
+        # if not self.check_args('find_next_match'):
+            # return None, None, 
+        ### self.errors = 0
         attempts = 0
         if self.pattern_match:
             ok = self.compile_pattern()
-            if not ok: return None, None, None
+            if not ok: return None, None, None  ### Test.
         while p:
             pos, newpos = self.search()
-            if self.errors:
-                g.trace('find errors')
-                break  # Abort the search.
+            ###
+                # if self.errors:
+                    # g.trace('find errors')
+                    # break  # Abort the search.
             if pos is not None:
                 # Success.
                 return p, pos, newpos
@@ -991,6 +964,34 @@ class LeoFind:
             self.search_headline and self.search_body and (
             (self.reverse and not self.in_headline) or
             (not self.reverse and self.in_headline)))
+    #@+node:ekr.20210102145531.101: *4* find.make_regex_subs
+    def make_regex_subs(self, change_text, groups):
+        """
+        Substitute group[i-1] for \\i strings in change_text.
+        """
+        ### Test.
+        def repl(match_object):
+            # # 1494...
+            n = int(match_object.group(1)) - 1
+            if 0 <= n < len(groups):
+                return (
+                    groups[n].
+                        replace(r'\b', r'\\b').
+                        replace(r'\f', r'\\f').
+                        replace(r'\n', r'\\n').
+                        replace(r'\r', r'\\r').
+                        replace(r'\t', r'\\t').
+                        replace(r'\v', r'\\v'))
+            # No replacement.
+            return match_object.group(0)
+
+        result = re.sub(r'\\([0-9])', repl, change_text)
+        # print(
+            # f"make_regex_subs:\n"
+            # f"change_text: {change_text!s}\n"
+            # f"     groups: {groups!s}\n"
+            # f"     result: {result!s}")
+        return result
     #@+node:ekr.20210102145531.131: *4* find.replace_back_slashes
     def replace_back_slashes(self, s):
         """Carefully replace backslashes in a search pattern."""
@@ -1227,15 +1228,14 @@ class SearchWidget:
 #@+node:ekr.20210106123815.1: ** class TestFind (unittest.TestCase)
 class TestFind (unittest.TestCase):
     """Test cases for coreFind.py"""
-    
+    #@+others
+    #@+node:ekr.20210106170813.1: *3* TestFind: Birth
+    #@+node:ekr.20210107151326.1: *4* TestFind.ctor
     def setUp(self):
         self.c = coreTest.create_app()
         self.x = coreFind.LeoFind(self.c)
         self.settings = self.x.default_settings()
         self.make_test_tree()
-        
-    #@+others
-    #@+node:ekr.20210106170813.1: *3* TestFind: setup
     #@+node:ekr.20210106170840.1: *4* TestFind.make_test_tree
     def make_test_tree(self):
         """Make a test tree for other tests"""
@@ -1243,6 +1243,7 @@ class TestFind (unittest.TestCase):
         root = c.rootPosition()
         root.h = 'Root'
         root.b = f"def root():\n    pass\n"
+        last = root
 
         def make_child(n, p):
             p2 = p.insertAsLastChild()
@@ -1250,16 +1251,16 @@ class TestFind (unittest.TestCase):
             p2.b = f"def child{n}():\n    v{n} = 2\n"
             return p2
 
-        def make_top(n):
-            p = root.insertAsLastChild()
+        def make_top(n, sib):
+            p = sib.insertAfter()
             p.h = f"Node {n}"
             p.b = f"def top{n}():\n    v{n} = 3\n"
             return p
             
         for n in range(0, 4, 3):
-            p = make_top(n+1)
-            p2 = make_child(n+2, p)
-            make_child(n+3, p2)
+            last = make_top(n+1, last)
+            child = make_child(n+2, last)
+            make_child(n+3, child)
             
         for p in c.all_positions():
             p.v.clearDirty()
@@ -1270,12 +1271,12 @@ class TestFind (unittest.TestCase):
 
         table = (
             (0, 'Root'),
-            (1, 'Node 1'),
-            (2, 'child 2'),
-            (3, 'child 3'),
-            (1, 'Node 4'),
-            (2, 'child 5'),
-            (3, 'child 6'),
+            (0, 'Node 1'),
+            (1, 'child 2'),
+            (2, 'child 3'),
+            (0, 'Node 4'),
+            (1, 'child 5'),
+            (2, 'child 6'),
         )
         i = 0
         for p in self.c.all_positions():
@@ -1383,9 +1384,11 @@ class TestFind (unittest.TestCase):
         assert s == settings.find_text, repr(s)
         # find-prev: starts at end, so we stay in the node.
         last = c.lastTopLevel()
+        print('last', last.h)
         child = last.firstChild()
         grand_child = child.firstChild()
-        settings.p = grand_child
+        assert grand_child.h == 'child 6', grand_child.h
+        settings.p = grand_child.copy()
         settings.find_text = 'def child2'
         p, pos, newpos = x.find_prev(settings)
         assert p.h == 'child 2', p.h
@@ -1459,6 +1462,14 @@ class TestFind (unittest.TestCase):
         settings.find_text = settings.change_text = None
         x.replace_all(settings)
     #@+node:ekr.20210106141654.1: *3* Tests of Helpers...
+    #@+node:ekr.20210107151414.1: *4* TestFind.dump_tree
+    def dump_tree(self, tag=''):
+        """Dump the test tree created by make_test_tree."""
+        c = self.c
+        print('dump_tree', tag)
+        for p in c.all_positions():
+            print(' '*p.level(), p.h)
+            # g.printObj(g.splitLines(p.b), tag=p.h)
     #@+node:ekr.20210106133506.1: *4* TestFind.test_bad compile_pattern
     def test_bad_compile_pattern(self):
         
