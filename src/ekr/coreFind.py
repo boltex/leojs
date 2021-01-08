@@ -520,17 +520,15 @@ class LeoFind:
             undoData = u.beforeChangeNodeContents(p)
             if self.search_headline:
                 count_h, new_h = self.replace_all_helper(p.h)
-                if count_h and p.h != new_h:  # pragma: no cover (to do)
+                if count_h and p.h != new_h:
                     count += count_h
-                    p.h = new_h
-                    if not p.v.isDirty(): # 2021/01/07 (!)
-                        p.v.setDirty()
+                    p.v.h = new_h
+                    p.v.setDirty()
             if self.search_body:
                 count_b, new_b = self.replace_all_helper(p.b)
-                if count_b and p.b != new_b:  # pragma: no cover (to do)
-                    p.b = new_b
-                    if not p.v.isDirty(): # 2021/01/07 (!)
-                        p.v.setDirty()
+                if count_b and p.b != new_b:
+                    p.v.b = new_b
+                    p.v.setDirty()
             if count_h or count_b:
                 u.afterChangeNodeContents(p, undoType, undoData)
         p = c.p
@@ -546,7 +544,7 @@ class LeoFind:
                 and not p.v.isDirty()
                 and any([p2.v.isDirty() for p2 in p.subtree()])
             ):
-                p.setDirty()  # pragma: no cover (to do)
+                p.v.setDirty()
     #@+node:ekr.20210106081141.2: *5* find.replace_all_helper & helpers
     def replace_all_helper(self, s):
         """
@@ -560,18 +558,18 @@ class LeoFind:
                 # Fixes this bug: https://groups.google.com/forum/#!topic/leo-editor/yR8eL5cZpi4
                 # This hack would be dangerous on MacOs: it uses '\r' instead of '\n' (!)
         if not s:
-            return False, None   # pragma: no cover (to do)
+            return False, None   # pragma: no cover (minor)
         #
         # Order matters: regex matches ignore whole-word.
         if self.pattern_match:
             return self.batchRegexReplace(s)
         if self.whole_word:
-            return self.batchWordReplace(s)  # pragma: no cover (to do)
+            return self.batchWordReplace(s)
         return self.batchPlainReplace(s)
     #@+node:ekr.20210106081141.3: *6* find.batchPlainReplace
     def batchPlainReplace(self, s):
         """
-        Perform all plain find/replace on s.\
+        Perform all plain find/replace on s.
         return (count, new_s)
         """
         find, change = self.find_text, self.change_text
@@ -588,11 +586,10 @@ class LeoFind:
             if i == -1:
                 break
             # #1166: Replace using s0 & change.
-            else: # pragma: no cover (to do)
-                count += 1
-                result.append(s0[prev_i:i])
-                result.append(change)
-                prev_i = i + len(find)
+            count += 1
+            result.append(s0[prev_i:i])
+            result.append(change)
+            prev_i = i + len(find)
         # #1166: Complete the result using s0.
         result.append(s0[prev_i:])
         return count, ''.join(result)
@@ -878,7 +875,7 @@ class LeoFind:
         if self.reverse:
             i, j = w.sel
             if i is not None and j is not None and i != j:
-                ins = min(i, j)  # pragma: no cover (to do)
+                ins = min(i, j)  # pragma: no cover (minor)
             else:
                 ins = len(s)
         else:
@@ -1394,11 +1391,10 @@ class TestFind (unittest.TestCase):
         assert s == 'v5 =', repr(s)
     #@+node:ekr.20210106215321.1: *4* TestFind.replace-all
     def test_replace_all(self):
-        
         c, settings, x = self.c, self.settings, self.x
         root = c.rootPosition()
-        settings.find_text = 'pattern_match'
-        settings.change_text = 'pattern_match'
+        settings.find_text = 'def'
+        settings.change_text = '_DEF_'
         settings.ignore_case = False
         settings.match_word = True
         settings.pattern_match = False
@@ -1423,6 +1419,34 @@ class TestFind (unittest.TestCase):
         # Set ancestor @file node dirty.
         root.h = '@file xyzzy'
         settings.find_text = settings.change_text = 'child1'
+        
+    def test_replace_all_with_at_file_node(self):
+        c, settings, x = self.c, self.settings, self.x
+        root = c.rootPosition().next()  # Must have children.
+        settings.find_text = 'def'
+        settings.change_text = '_DEF_'
+        settings.ignore_case = False
+        settings.match_word = True
+        settings.pattern_match = False
+        settings.suboutline_only = False
+        # Ensure that the @file node is marked dirty.
+        root.h = '@file xyzzy.py'
+        root.b = ''
+        root.v.clearDirty()
+        assert root.anyAtFileNodeName()
+        x.replace_all(settings)
+        assert root.v.isDirty(), root.h
+        
+    def test_replace_all_headline(self):
+        settings, x = self.settings, self.x
+        settings.find_text = 'child'
+        settings.change_text = '_CHILD_'
+        settings.ignore_case = False
+        settings.in_headline = True
+        settings.match_word = True
+        settings.pattern_match = False
+        settings.suboutline_only = False
+        x.replace_all(settings)
     #@+node:ekr.20210107153149.1: *4* TestFind.replace-then-find
     def test_replace_then_find(self):
         settings, w, x = self.settings, self.c.frame.body.wrapper, self.x
@@ -1487,7 +1511,7 @@ class TestFind (unittest.TestCase):
         c = self.c
         print('dump_tree', tag)
         for p in c.all_positions():
-            print(' '*p.level(), p.h)
+            print(' '*p.level(),  p.h, 'dirty', p.v.isDirty())
             # g.printObj(g.splitLines(p.b), tag=p.h)
     #@+node:ekr.20210106133506.1: *4* TestFind.bad compile_pattern
     def test_argument_errors(self):
