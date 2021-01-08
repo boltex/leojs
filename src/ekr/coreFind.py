@@ -1184,7 +1184,7 @@ class SearchWidget:
         return self.sel  # Returns Python indices.
 
     def toPythonIndex(self, i):
-        return g.toPythonIndex(self.s, i)
+        return i
     #@+node:ekr.20210103132816.3: *3* SearchWidget.setters
     def delete(self, i, j=None):  # pragma: no cover (to do)
         i = self.toPythonIndex(i)
