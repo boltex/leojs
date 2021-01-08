@@ -674,7 +674,7 @@ class LeoFind:
     def change_selection(self):
 
         c, p = self.c, self.p
-        wrapper = c.frame.body and c.frame.body.wrapper
+        wrapper = c.frame.body.wrapper
         w = c.edit_widget(p) if self.in_headline else wrapper
         ### This may change for vs-code.
             # if not w:
@@ -1179,25 +1179,21 @@ class SearchWidget:
         return self.s
 
     def getInsertPoint(self):
-        return self.i  # Returns Python index.
+        return self.i
 
-    def getSelectionRange(self):  # pragma: no cover (to do)
-        return self.sel  # Returns Python indices.
-
-    def toPythonIndex(self, i):
-        return i
+    def getSelectionRange(self):  # pragma: no cover (minor)
+        return self.sel
     #@+node:ekr.20210103132816.3: *3* SearchWidget.setters
-    def delete(self, i, j=None):  # pragma: no cover (to do)
-        i = self.toPythonIndex(i)
-        if j is None: j = i + 1
-        else: j = self.toPythonIndex(j)
+    def delete(self, i, j=None):
+        if j is None:  # pragma: no cover (defensive)
+            j = i + 1
         self.s = self.s[:i] + self.s[j:]
         self.i = i
         self.sel = i, i
 
-    def insert(self, i, s):  # pragma: no cover (to do)
-        if not s: return
-        i = self.toPythonIndex(i)
+    def insert(self, i, s):
+        if not s:  # pragma: no cover (defensive)
+            return
         self.s = self.s[:i] + s + self.s[i:]
         self.i = i
         self.sel = i, i
@@ -1211,9 +1207,9 @@ class SearchWidget:
         self.i = i
 
     def setSelectionRange(self, i, j, insert=None):
-        self.sel = self.toPythonIndex(i), self.toPythonIndex(j)
+        self.sel = i, j
         if insert is not None:
-            self.i = self.toPythonIndex(insert)
+            self.i = insert
     #@-others
 #@+node:ekr.20210106123815.1: ** class TestFind (unittest.TestCase)
 class TestFind (unittest.TestCase):
