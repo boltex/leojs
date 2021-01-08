@@ -661,17 +661,17 @@ class LeoFind:
         if settings:
             self.init(settings)
         if not self.check_args('replace-then-find'):
-            return None, None, None  # pragma: no cover (to do)
-        if self.changeSelection():  # pragma: no cover (to do)
+            return None, None, None
+        if self.change_selection():
             p, pos, newpos = self.find_next_match(p)
             return p, pos, newpos
         return None, None, None
 
-    #@+node:ekr.20210102145531.100: *5* find.changeSelection (gui code)
+    #@+node:ekr.20210102145531.100: *5* find.change_selection (gui code)
     # Replace selection with self.change_text.
     # If no selection, insert self.change_text at the cursor.
 
-    def changeSelection(self):
+    def change_selection(self):
 
         c, p = self.c, self.p
         wrapper = c.frame.body and c.frame.body.wrapper
@@ -679,17 +679,13 @@ class LeoFind:
         if not w:  # pragma: no cover (to do)
             self.in_headline = False
             w = wrapper
-        if not w:
-            return False  # pragma: no cover (defensive)
         oldSel = sel = w.getSelectionRange()
         start, end = sel
-        if start > end: start, end = end, start
+        if start > end:
+            start, end = end, start
         if start == end:
             g.es("no text selected")
             return False
-
-        # pragma: no cover (to do)
-        
         # Replace the selection in _both_ controls.
         start, end = oldSel
         change_text = self.change_text
@@ -701,18 +697,20 @@ class LeoFind:
         # change_text = change_text.replace('\\n','\n').replace('\\t','\t')
         change_text = self.replace_back_slashes(change_text)
         for w2 in (w, self.s_ctrl):
-            if start != end: w2.delete(start, end)
+            if start != end:
+                w2.delete(start, end)
             w2.insert(start, change_text)
             w2.setInsertPoint(start if self.reverse else start + len(change_text))
         # Update the selection for the next match.
         w.setSelectionRange(start, start + len(change_text))
-        c.widgetWantsFocus(w)
-        # No redraws here: they would destroy the headline selection.
-        if self.in_headline:
-            pass
-        else:
-            c.frame.body.onBodyChanged('Change', oldSel=oldSel)
-        c.frame.tree.updateIcon(p)  # redraw only the icon.
+        ###
+            # c.widgetWantsFocus(w)
+            # # No redraws here: they would destroy the headline selection.
+            # if self.in_headline:
+                # pass
+            # else:
+                # c.frame.body.onBodyChanged('Change', oldSel=oldSel)
+            # c.frame.tree.updateIcon(p)  # redraw only the icon.
         return True
     #@+node:ekr.20210102145531.68: *4* tag-children
     @cmd('tag-children') 
@@ -1431,7 +1429,7 @@ class TestFind (unittest.TestCase):
     #@+node:ekr.20210107153149.1: *4* TestFind.replace-then-find
     def test_replace_then_find(self):
 
-        settings, x = self.settings, self.x
+        settings, w, x = self.settings, self.c.frame.body.wrapper, self.x
         settings.find_text = 'def top1'
         settings.change_text = 'def top'  # Don't actually change anything!
         # find-next
@@ -1440,8 +1438,11 @@ class TestFind (unittest.TestCase):
         s = p.b[pos:newpos]
         assert s == settings.find_text, repr(s)
         # replace-then-find
-        p, pos, newpos = x.replace_then_find(settings)
-        assert (p, pos, newpos) == (None, None, None)
+        w.setSelectionRange(pos, newpos, insert=pos)
+        x.replace_then_find(settings)
+        # Failure exit.
+        w.setSelectionRange(0, 0)
+        x.replace_then_find(settings)
     #@+node:ekr.20210107155337.1: *4* TestFind.tag-children
     def test_tag_children(self):
         
@@ -1497,6 +1498,7 @@ class TestFind (unittest.TestCase):
         x.find_next_match(None)
         x.find_prev(settings)
         x.replace_all(settings)
+        x.replace_then_find(settings)
     #@+node:ekr.20210106134128.1: *4* TestFind.compute_result_status
     def test_compute_result_status(self):
         
