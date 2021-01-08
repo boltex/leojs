@@ -1251,7 +1251,6 @@ class TestFind (unittest.TestCase):
 
     #@+node:ekr.20210106170636.1: *4* TestFind.test_tree
     def test_tree(self):
-
         table = (
             (0, 'Root'),
             (0, 'Node 1'),
@@ -1339,7 +1338,6 @@ class TestFind (unittest.TestCase):
         x.find_all(settings)
     #@+node:ekr.20210106173343.1: *4* TestFind.find-next & find-prev
     def test_find_next(self):
-
         c, settings, x = self.c, self.settings, self.x
         settings.find_text = 'def top1'
         # find-next
@@ -1361,7 +1359,6 @@ class TestFind (unittest.TestCase):
         assert s == settings.find_text, repr(s)
     #@+node:ekr.20210106180832.1: *4* TestFind.find-def
     def test_find_def(self):
-        
         settings, x = self.settings, self.x
         settings.find_text = 'child5'
         # Test 1.
@@ -1378,11 +1375,9 @@ class TestFind (unittest.TestCase):
         # Make check_args fail.
         settings.find_text = settings.change_text = None
         x.find_def(settings)
-        
-        
+
     #@+node:ekr.20210106181550.1: *4* TestFind.find-var
     def test_find_var(self):
-        
         settings, x = self.settings, self.x
         settings.find_text = r'v5'
         p, pos, newpos = x.find_var(settings)
@@ -1525,7 +1520,6 @@ class TestFind (unittest.TestCase):
         x.replace_all(settings)
     #@+node:ekr.20210106133737.1: *4* TestFind.check_args
     def test_check_args(self):
-        
         # Bad search patterns..
         x = self.x
         settings = self.settings
@@ -1548,7 +1542,6 @@ class TestFind (unittest.TestCase):
         x.replace_then_find(settings)
     #@+node:ekr.20210106134128.1: *4* TestFind.compute_result_status
     def test_compute_result_status(self):
-        
         x = self.x
         # find_all_flag is True
         all_settings = x.default_settings()
@@ -1567,10 +1560,8 @@ class TestFind (unittest.TestCase):
         partial_settings.wrapping = True
         x.init(partial_settings)
         x.compute_result_status(find_all_flag=False)
-        
     #@+node:ekr.20210106140751.1: *4* TestFind.replace_back_slashes
     def test_replace_back_slashes(self):
-        
         x = self.x
         table = (
             (r'a\bc', r'a\bc'),
@@ -1583,7 +1574,6 @@ class TestFind (unittest.TestCase):
             assert result == expected, (s, result, expected)
     #@-others
 #@-others
-
 if __name__ == '__main__':  # pragma: no cover (not for py-cov)
     unittest.main()
 
