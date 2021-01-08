@@ -1452,6 +1452,8 @@ class TestFind (unittest.TestCase):
                 pass
 
         p = c.rootPosition().next()
+        c.theTagController = None
+        x.tag_children(p, 'test')
         c.theTagController = DummyTagController()
         x.tag_children(p, 'test')
     #@+node:ekr.20210106141654.1: *3* Tests of Helpers...
