@@ -222,8 +222,9 @@ class LeoFind:
         for s in table:
             self.reverse = False
             pos, newpos = self.searchHelper(s, 0, len(s), self.find_text)
-            if pos != -1: return True
-        return False  # pragma: no cover (to do)
+            if pos != -1:
+                return True
+        return False
     #@+node:ekr.20210102145531.64: *4* clone-find-tag
     @cmd('clone-find-tag')
     @cmd('cft')
@@ -1588,6 +1589,13 @@ class TestFind (unittest.TestCase):
         for p in c.all_positions():
             print(' '*p.level(),  p.h, 'dirty', p.v.isDirty())
             # g.printObj(g.splitLines(p.b), tag=p.h)
+    #@+node:ekr.20210108142845.1: *4* TestFind.find_next_batch_match
+    def test_find_next_batch_match(self):
+        c, settings, x = self.c, self.settings, self.x
+        p = c.rootPosition()
+        for find in ('xxx', 'def'):
+            settings.find_text = find
+            x.find_next_batch_match(p)
     #@+node:ekr.20210108141032.1: *4* TestFind.match_word
     def test_match_word(self):
         x = self.x
