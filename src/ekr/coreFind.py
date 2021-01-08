@@ -676,12 +676,13 @@ class LeoFind:
         c, p = self.c, self.p
         wrapper = c.frame.body and c.frame.body.wrapper
         w = c.edit_widget(p) if self.in_headline else wrapper
-        if not w:  # pragma: no cover (to do)
-            self.in_headline = False
-            w = wrapper
+        ### This may change for vs-code.
+            # if not w:
+                # self.in_headline = False
+                # w = wrapper
         oldSel = sel = w.getSelectionRange()
         start, end = sel
-        if start > end:
+        if start > end:  # pragma: no cover (may depend on the widget)
             start, end = end, start
         if start == end:
             g.es("no text selected")
@@ -1428,10 +1429,9 @@ class TestFind (unittest.TestCase):
         settings.find_text = settings.change_text = 'child1'
     #@+node:ekr.20210107153149.1: *4* TestFind.replace-then-find
     def test_replace_then_find(self):
-
         settings, w, x = self.settings, self.c.frame.body.wrapper, self.x
         settings.find_text = 'def top1'
-        settings.change_text = 'def top'  # Don't actually change anything!
+        settings.change_text = 'def top'
         # find-next
         p, pos, newpos = x.find_next(settings)
         assert p and p.h == 'Node 1', p.h
@@ -1443,6 +1443,33 @@ class TestFind (unittest.TestCase):
         # Failure exit.
         w.setSelectionRange(0, 0)
         x.replace_then_find(settings)
+        
+    def test_replace_then_find_regex(self):
+        settings, w, x = self.settings, self.c.frame.body.wrapper, self.x
+        settings.find_text = r'(def) top1'
+        settings.change_text = r'\1\1'
+        settings.pattern_match = True
+        # find-next
+        p, pos, newpos = x.find_next(settings)
+        s = p.b[pos:newpos]
+        assert s == 'def top1', repr(s)
+        # replace-then-find
+        w.setSelectionRange(pos, newpos, insert=pos)
+        x.replace_then_find(settings)
+        
+    def test_replace_then_find_in_headline(self):
+        settings, x = self.settings, self.x
+        p = settings.p
+        settings.find_text = 'Node 1'
+        settings.change_text = 'Node 1a'
+        settings.in_headline = True
+        # find-next
+        p, pos, newpos = x.find_next(settings)
+        assert p and p.h == settings.find_text, p.h
+        w = self.c.edit_widget(p)
+        assert w
+        s = p.h[pos:newpos]
+        assert s == settings.find_text, repr(s)
     #@+node:ekr.20210107155337.1: *4* TestFind.tag-children
     def test_tag_children(self):
         
