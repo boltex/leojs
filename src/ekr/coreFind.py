@@ -133,7 +133,7 @@ class LeoFind:
     #@+node:ekr.20210102145531.62: *4* clone-find-all/flattened
     @cmd('clone-find-all')
     @cmd('cfa')
-    def clone_find_all(self, settings):
+    def clone_find_all_cmd(self, settings):
         """
         clone-find-all (aka cfa).
 
@@ -152,7 +152,7 @@ class LeoFind:
 
     @cmd('clone-find-all-flattened')
     @cmd('cff')
-    def clone_find_all_flattened(self, settings):
+    def clone_find_all_flattened_cmd(self, settings):
         """
         clone-find-all-flattened (aka cff).
 
@@ -359,7 +359,7 @@ class LeoFind:
         count, found = 0, False
         self.find_seen = set()
         if settings.use_cff:
-            count = self.clone_find_all_flattened(settings)
+            count = self.clone_find_all_flattened_cmd(settings)
             found = count > 0
         else:
             # #1592.  Ignore hits under control of @nosearch
@@ -376,7 +376,7 @@ class LeoFind:
             if word2:
                 self.find_text = prefix + ' ' + word2
                 if settings.use_cff:
-                    count = self.clone_find_all(settings)
+                    count = self.clone_find_all_cmd(settings)
                     found = count > 0
                 else:  # pragma: no cover (to do)
                     # #1592.  Ignore hits under control of @nosearch
@@ -1049,14 +1049,14 @@ class LeoFind:
         if regexp:
             pos, newpos = self.regexHelper(s, i, j, pattern, backwards, nocase)
         elif backwards:
-            pos, newpos = self.backwardsHelper(s, i, j, pattern, nocase, word)
+            pos, newpos = self.backwards_helper(s, i, j, pattern, nocase, word)
         else:
             pos, newpos = self.plainHelper(s, i, j, pattern, nocase, word)
         return pos, newpos
-    #@+node:ekr.20210102145531.128: *6* find.backwardsHelper
+    #@+node:ekr.20210102145531.128: *6* find.backwards_helper
     debugIndices = []
 
-    def backwardsHelper(self, s, i, j, pattern, nocase, word):
+    def backwards_helper(self, s, i, j, pattern, nocase, word):
         """
         rfind(sub [,start [,end]])
 
@@ -1284,30 +1284,30 @@ class TestFind (unittest.TestCase):
         settings.find_text = r'^def\b'
         settings.change_text = 'def'  # Don't actually change anything!
         settings.pattern_match = True
-        x.clone_find_all(settings)
+        x.clone_find_all_cmd(settings)
         # Word find.
         settings.find_text = 'def'
         settings.match_word = True
         settings.pattern_match = False
-        x.clone_find_all(settings)
+        x.clone_find_all_cmd(settings)
         # Suboutline only.
         settings.suboutline_only = True
-        x.clone_find_all(settings)
+        x.clone_find_all_cmd(settings)
     #@+node:ekr.20210106133012.1: *4* TestFind.clone-find-all-flattened
     def test_clone_find_all_flattened(self):
         settings, x = self.settings, self.x
         # regex find.
         settings.find_text = r'^def\b'
         settings.pattern_match = True
-        x.clone_find_all_flattened(settings)
+        x.clone_find_all_flattened_cmd(settings)
         # word find.
         settings.find_text = 'def'
         settings.match_word = True
         settings.pattern_match = False
-        x.clone_find_all_flattened(settings)
+        x.clone_find_all_flattened_cmd(settings)
         # Suboutline only.
         settings.suboutline_only = True
-        x.clone_find_all_flattened(settings)
+        x.clone_find_all_flattened_cmd(settings)
     #@+node:ekr.20210106215700.1: *4* TestFind.clone-find-tag
     def test_clone_find_tag(self):
         c, x = self.c, self.x
@@ -1523,7 +1523,7 @@ class TestFind (unittest.TestCase):
         # Bad search pattern.
         settings.find_text = r'^def\b(('
         settings.pattern_match = True
-        x.clone_find_all(settings)
+        x.clone_find_all_cmd(settings)
         x.find_next_match(p=None)
         x.replace_all(settings)
     #@+node:ekr.20210106133737.1: *4* TestFind.check_args
@@ -1534,12 +1534,12 @@ class TestFind (unittest.TestCase):
         # Not searching headline or body.
         settings.search_body = False
         settings.search_headline = False
-        x.clone_find_all(settings)
+        x.clone_find_all_cmd(settings)
         # Empty find pattern.
         settings.search_body = True
         settings.find_text = ''
-        x.clone_find_all(settings)
-        x.clone_find_all_flattened(settings)
+        x.clone_find_all_cmd(settings)
+        x.clone_find_all_flattened_cmd(settings)
         x.find_all(settings)
         x.find_def(settings)
         x.find_var(settings)
