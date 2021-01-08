@@ -1083,11 +1083,11 @@ class LeoFind:
             while 1:
                 k = s.rfind(pattern, i, j)
                 if k == -1:
-                    return -1, -1
+                    break
                 if self.match_word(s, k, pattern):
                     return k, k + n
                 j = max(0, k - 1)
-            return -1, -1  # pragma: no cover (for pylint)
+            return -1, -1
         k = s.rfind(pattern, i, j)
         if k == -1:
             return -1, -1
@@ -1111,7 +1111,7 @@ class LeoFind:
     #@+node:ekr.20210102145531.129: *6* find.plain_helper
     def plain_helper(self, s, i, j, pattern, nocase, word):
         """Do a plain search."""
-        if nocase:  # pragma: no cover (to do)
+        if nocase:
             s = s.lower()
             pattern = pattern.lower()
         pattern = self.replace_back_slashes(pattern)
@@ -1120,11 +1120,11 @@ class LeoFind:
             while 1:
                 k = s.find(pattern, i, j)
                 if k == -1:
-                    return -1, -1
+                    break
                 if self.match_word(s, k, pattern):
                     return k, k + n
                 i = k + n
-            return -1, -1  # pragma: no cover (for pylint)
+            return -1, -1
         k = s.find(pattern, i, j)
         if k == -1:
             return -1, -1
@@ -1510,10 +1510,8 @@ class TestFind (unittest.TestCase):
     #@+node:ekr.20210106141654.1: *3* Tests of Helpers...
     #@+node:ekr.20210108135526.1: *4* TestFind.backwards_helper
     def test_backwards_helper(self):
-        
         settings, x = self.settings, self.x
         pattern = 'def'
-        s = 'def spam():\n'
         for nocase in (True, False):
             settings.ignore_case = nocase
             for word in (True, False):
@@ -1596,6 +1594,18 @@ class TestFind (unittest.TestCase):
         x.match_word("def spam():", 0, "spam")
         x.match_word("def spam():", 0, "xxx")
         
+    #@+node:ekr.20210108141944.1: *4* TestFind.plain_helper
+    def test_plain_helper(self):
+        settings, x = self.settings, self.x
+        pattern = 'def'
+        for nocase in (True, False):
+            settings.ignore_case = nocase
+            for word in (True, False):
+                for s in ('def spam():\n', 'define'):
+                    settings.whole_word = word
+                    x.init(settings)
+                    x.plain_helper(s, 0, len(s), pattern, nocase, word)
+                    x.plain_helper(s, 0, 0, pattern, nocase, word)
     #@+node:ekr.20210106140751.1: *4* TestFind.replace_back_slashes
     def test_replace_back_slashes(self):
         x = self.x
