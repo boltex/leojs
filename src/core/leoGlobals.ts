@@ -371,8 +371,6 @@ export function is_special(s: string, directive: string): boolean {
 
 }
 
-
-
 /*
 def is_special(s, directive):
     """Return True if the body text contains the @ directive."""
@@ -396,6 +394,18 @@ export function isWordChar(ch: string): boolean {
 
 export function isWordChar1(ch: string): boolean {
     return !!ch && (/^[a-zA-Z]$/.test(ch) || ch === '_');
+}
+
+export function match(s: string, i: number, pattern: string): boolean {
+    // Warning: this code makes no assumptions about what follows pattern.
+    // Equivalent to original in python (only looks in specific substring)
+    // return s and pattern and s.find(pattern, i, i + len(pattern)) == i
+    return !!s && !!pattern && s.substring(i, i + pattern.length + 1).search(pattern) === 0;
+}
+
+export function match_word(s: string, i: number, pattern: string): boolean {
+    const pat = new RegExp("\\b" + pattern + "\\b");
+    return s.substring(i).search(pat) >= 0;
 }
 
 /**
