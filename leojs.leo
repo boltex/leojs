@@ -415,6 +415,8 @@
 <v t="felix.20210104210259.1"><vh>g.isDirective     (coreGlobals.py)</vh></v>
 <v t="felix.20210104210307.1"><vh>g.is_special      (coreGlobals.py)</vh></v>
 <v t="felix.20210104210316.1"><vh>g.isWordChar*     (coreGlobals.py)</vh></v>
+<v t="felix.20210108005428.1"><vh>g.match           (coreGlobals.py)</vh></v>
+<v t="felix.20210108011201.1"><vh>g.match_word      (coreGlobals.py)</vh></v>
 <v t="felix.20210104003932.1"><vh>g.splitLines      (coreGlobals.py)</vh></v>
 </v>
 <v t="felix.20210102012632.1"><vh>@clean src/core/leoNodes.ts</vh>
@@ -7676,8 +7678,6 @@ export function is_special(s: string, directive: string): boolean {
 
 }
 
-
-
 /*
 def is_special(s, directive):
     """Return True if the body text contains the @ directive."""
@@ -7707,6 +7707,20 @@ export function isWordChar1(ch: string): boolean {
 </t>
 <t tx="felix.20210104211547.1">@ignore
 @nosearch
+</t>
+<t tx="felix.20210108005428.1">export function match(s: string, i: number, pattern: string): boolean {
+    // Warning: this code makes no assumptions about what follows pattern.
+    // Equivalent to original in python (only looks in specific substring)
+    // return s and pattern and s.find(pattern, i, i + len(pattern)) == i
+    return !!s &amp;&amp; !!pattern &amp;&amp; s.substring(i, i + pattern.length + 1).search(pattern) === 0;
+}
+
+</t>
+<t tx="felix.20210108011201.1">export function match_word(s: string, i: number, pattern: string): boolean {
+    const pat = new RegExp("\\b" + pattern + "\\b");
+    return s.substring(i).search(pat) &gt;= 0;
+}
+
 </t>
 </tnodes>
 </leo_file>
