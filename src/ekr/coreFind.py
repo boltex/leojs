@@ -104,7 +104,7 @@ class LeoFind:
         
     #@+node:ekr.20210105154602.1: *3* find.default_settings
     def default_settings(self):
-        """Return a g.Bunch representing all default settings."""
+        """Return a dict representing all default settings."""
         c = self.c
         return g.Bunch(
             # State...
@@ -184,7 +184,7 @@ class LeoFind:
         clones, skip = [], set()
         while p and p != after:
             progress = p.copy()
-            if p.v in skip:  # pragma: no cover
+            if p.v in skip:  # pragma: no cover (minor)
                 p.moveToThreadNext()
             elif g.inAtNosearch(p):
                 p.moveToNodeAfterTree()
@@ -914,7 +914,7 @@ class LeoFind:
             return None
         return p
     #@+node:ekr.20210102145531.116: *6* find.do_wrap
-    def do_wrap(self):  # pragma: no cover (to do)
+    def do_wrap(self):
         """Return the position resulting from a wrap."""
         c = self.c
         if self.reverse:
@@ -1568,6 +1568,14 @@ class TestFind (unittest.TestCase):
         partial_settings.wrapping = True
         x.init(partial_settings)
         x.compute_result_status(find_all_flag=False)
+    #@+node:ekr.20210108134225.1: *4* TestFind.do_wrap
+    def test_do_wrap(self):
+        settings, x = self.settings, self.x
+        for reverse in (True, False):
+            settings.reverse = reverse
+            x.init(settings)
+            x.do_wrap()
+
     #@+node:ekr.20210106140751.1: *4* TestFind.replace_back_slashes
     def test_replace_back_slashes(self):
         x = self.x
