@@ -1047,11 +1047,11 @@ class LeoFind:
         if not s[i:j] or not pattern:
             return -1, -1
         if regexp:
-            pos, newpos = self.regexHelper(s, i, j, pattern, backwards, nocase)
+            pos, newpos = self.regex_helper(s, i, j, pattern, backwards, nocase)
         elif backwards:
             pos, newpos = self.backwards_helper(s, i, j, pattern, nocase, word)
         else:
-            pos, newpos = self.plainHelper(s, i, j, pattern, nocase, word)
+            pos, newpos = self.plain_helper(s, i, j, pattern, nocase, word)
         return pos, newpos
     #@+node:ekr.20210102145531.128: *6* find.backwards_helper
     debugIndices = []
@@ -1067,7 +1067,7 @@ class LeoFind:
 
         Return (-1, -1) on failure.
         """
-        if nocase:  # pragma: no cover (to do)
+        if nocase:
             s = s.lower()
             pattern = pattern.lower()
         pattern = self.replace_back_slashes(pattern)
@@ -1079,21 +1079,21 @@ class LeoFind:
         # short circuit the search: helps debugging.
         if s.find(pattern) == -1:
             return -1, -1
-        if word:  # pragma: no cover (to do)
+        if word:
             while 1:
                 k = s.rfind(pattern, i, j)
                 if k == -1:
                     return -1, -1
-                if self.matchWord(s, k, pattern):
+                if self.match_word(s, k, pattern):
                     return k, k + n
                 j = max(0, k - 1)
             return -1, -1  # pragma: no cover (for pylint)
         k = s.rfind(pattern, i, j)
         if k == -1:
-            return -1, -1  # pragma: no cover (defensive)
+            return -1, -1
         return k, k + n
-    #@+node:ekr.20210102145531.130: *6* find.matchWord
-    def matchWord(self, s, i, pattern):
+    #@+node:ekr.20210102145531.130: *6* find.match_word
+    def match_word(self, s, i, pattern):
         """Do a whole-word search."""
         pattern = self.replace_back_slashes(pattern)
         if not s or not pattern or not g.match(s, i, pattern):
@@ -1108,8 +1108,8 @@ class LeoFind:
         isWordCh2 = g.isWordChar(ch2)
         inWord = isWordPat1 and isWordCh1 or isWordPat2 and isWordCh2
         return not inWord
-    #@+node:ekr.20210102145531.129: *6* find.plainHelper
-    def plainHelper(self, s, i, j, pattern, nocase, word):
+    #@+node:ekr.20210102145531.129: *6* find.plain_helper
+    def plain_helper(self, s, i, j, pattern, nocase, word):
         """Do a plain search."""
         if nocase:  # pragma: no cover (to do)
             s = s.lower()
@@ -1121,7 +1121,7 @@ class LeoFind:
                 k = s.find(pattern, i, j)
                 if k == -1:
                     return -1, -1
-                if self.matchWord(s, k, pattern):
+                if self.match_word(s, k, pattern):
                     return k, k + n
                 i = k + n
             return -1, -1  # pragma: no cover (for pylint)
@@ -1129,8 +1129,8 @@ class LeoFind:
         if k == -1:
             return -1, -1
         return k, k + n
-    #@+node:ekr.20210102145531.127: *6* find.regexHelper
-    def regexHelper(self, s, i, j, pattern, backwards, nocase):
+    #@+node:ekr.20210102145531.127: *6* find.regex_helper
+    def regex_helper(self, s, i, j, pattern, backwards, nocase):
 
         re_obj = self.re_obj  # Use the pre-compiled object
         if not re_obj:  # pragma: no cover (defensive)
@@ -1508,14 +1508,20 @@ class TestFind (unittest.TestCase):
         c.theTagController = DummyTagController()
         x.tag_children(p, 'test')
     #@+node:ekr.20210106141654.1: *3* Tests of Helpers...
-    #@+node:ekr.20210107151414.1: *4* TestFind.dump_tree
-    def dump_tree(self, tag=''):  # pragma: no cover (debugging)
-        """Dump the test tree created by make_test_tree."""
-        c = self.c
-        print('dump_tree', tag)
-        for p in c.all_positions():
-            print(' '*p.level(),  p.h, 'dirty', p.v.isDirty())
-            # g.printObj(g.splitLines(p.b), tag=p.h)
+    #@+node:ekr.20210108135526.1: *4* TestFind.backwards_helper
+    def test_backwards_helper(self):
+        
+        settings, x = self.settings, self.x
+        pattern = 'def'
+        s = 'def spam():\n'
+        for nocase in (True, False):
+            settings.ignore_case = nocase
+            for word in (True, False):
+                for s in ('def spam():\n', 'define spam'):
+                    settings.whole_word = word
+                    x.init(settings)
+                    x.backwards_helper(s, 0, len(s), pattern, nocase, word)
+                    x.backwards_helper(s, 0, 0, pattern, nocase, word)
     #@+node:ekr.20210106133506.1: *4* TestFind.bad compile_pattern
     def test_argument_errors(self):
 
@@ -1576,6 +1582,14 @@ class TestFind (unittest.TestCase):
             x.init(settings)
             x.do_wrap()
 
+    #@+node:ekr.20210107151414.1: *4* TestFind.dump_tree
+    def dump_tree(self, tag=''):  # pragma: no cover (debugging)
+        """Dump the test tree created by make_test_tree."""
+        c = self.c
+        print('dump_tree', tag)
+        for p in c.all_positions():
+            print(' '*p.level(),  p.h, 'dirty', p.v.isDirty())
+            # g.printObj(g.splitLines(p.b), tag=p.h)
     #@+node:ekr.20210106140751.1: *4* TestFind.replace_back_slashes
     def test_replace_back_slashes(self):
         x = self.x
