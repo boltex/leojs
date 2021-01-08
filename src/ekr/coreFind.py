@@ -836,7 +836,7 @@ class LeoFind:
             ok = self.compile_pattern()
             if not ok: return None, None, None
         while p:
-            pos, newpos = self.search()
+            pos, newpos = self.search_helper()
             if pos is not None:
                 # Success.
                 return p, pos, newpos
@@ -1009,8 +1009,8 @@ class LeoFind:
                     i += 1  # Skip the escaped character.
             i += 1
         return s
-    #@+node:ekr.20210102145531.124: *4* find.search & helpers
-    def search(self):
+    #@+node:ekr.20210102145531.124: *4* find.search_helper & helpers
+    def search_helper(self):
         """
         Search s_ctrl for self.find_text with present options.
         Returns (pos, newpos) or (None,None).
