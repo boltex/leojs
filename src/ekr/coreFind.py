@@ -673,11 +673,11 @@ class LeoFind:
         return None, None, None
 
     #@+node:ekr.20210102145531.100: *5* find.change_selection (gui code)
-    # Replace selection with self.change_text.
-    # If no selection, insert self.change_text at the cursor.
-
     def change_selection(self):
-
+        """
+        Replace selection with self.change_text.
+        If no selection, insert self.change_text at the cursor.
+        """
         c, p = self.c, self.p
         wrapper = c.frame.body.wrapper
         w = c.edit_widget(p) if self.in_headline else wrapper
