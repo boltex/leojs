@@ -468,7 +468,7 @@ class LeoFind:
         assert settings
         self.init(settings)
         if not self.check_args('find-next'):
-            return None, None, None  # pragma: no cover (to do)
+            return None, None, None
         p = self.p
         p, pos, newpos = self.find_next_match(p)
         return p, pos, newpos # For tests.
@@ -479,14 +479,14 @@ class LeoFind:
         assert settings
         self.init(settings)
         if not self.check_args('find-prev'):
-            return None, None, None  # pragma: no cover (to do)
+            return None, None, None
         p = self.p
         self.reverse = True
         try:
             p, pos, newpos = self.find_next_match(p)
         finally:
             self.reverse = False
-        return p, pos, newpos # For tests. ## Changed order
+        return p, pos, newpos
     #@+node:ekr.20210102145531.67: *4* replace-all & helpers
     @cmd('replace-all')
     def replace_all(self, settings):
@@ -672,7 +672,7 @@ class LeoFind:
     # If no selection, insert self.change_text at the cursor.
 
     def changeSelection(self):
-        # g.pdb()
+
         c, p = self.c, self.p
         wrapper = c.frame.body and c.frame.body.wrapper
         w = c.edit_widget(p) if self.in_headline else wrapper
@@ -716,7 +716,7 @@ class LeoFind:
         return True
     #@+node:ekr.20210102145531.68: *4* tag-children
     @cmd('tag-children') 
-    def tag_children(self, p, tag):  # pragma: no cover (to do)
+    def tag_children(self, p, tag):
         """tag-children: Add the given tag to all children of c.p."""
         c = self.c
         tc = c.theTagController
@@ -830,7 +830,7 @@ class LeoFind:
         attempts = 0
         if self.pattern_match:
             ok = self.compile_pattern()
-            if not ok: return None, None, None  # pragma: no cover (to do).
+            if not ok: return None, None, None
         while p:
             pos, newpos = self.search()
             if pos is not None:
@@ -1294,12 +1294,6 @@ class TestFind (unittest.TestCase):
         # Suboutline only.
         settings.suboutline_only = True
         x.clone_find_all(settings)
-        # print(self.c.lastTopLevel().h)
-
-    def test_clone_find_all_errors(self):
-        # No find pattern.
-        self.x.clone_find_all(self.settings)
-        
     #@+node:ekr.20210106133012.1: *4* TestFind.clone-find-all-flattened
     def test_clone_find_all_flattened(self):
         settings, x = self.settings, self.x
@@ -1315,12 +1309,6 @@ class TestFind (unittest.TestCase):
         # Suboutline only.
         settings.suboutline_only = True
         x.clone_find_all_flattened(settings)
-        # print(self.c.lastTopLevel().h)
-
-    def test_clone_find_all_flattened_errors(self):
-        # No find pattern.
-        self.x.clone_find_all_flattened(self.settings)
-        
     #@+node:ekr.20210106215700.1: *4* TestFind.clone-find-tag
     def test_clone_find_tag(self):
         c, x = self.c, self.x
@@ -1342,7 +1330,6 @@ class TestFind (unittest.TestCase):
         x.clone_find_tag('test')
         c.theTagController = None
         x.clone_find_tag('test')
-        
     #@+node:ekr.20210106141951.1: *4* TestFind.find-all
     def test_find_all(self):
         settings, x = self.settings, self.x
@@ -1358,11 +1345,6 @@ class TestFind (unittest.TestCase):
         settings.search_headline = False
         settings.p.setVisited()
         x.find_all(settings)
-        
-    def test_find_all_errors(self):
-        # No find pattern.
-        self.x.find_all(self.settings)
-        
     #@+node:ekr.20210106173343.1: *4* TestFind.find-next & find-prev
     def test_find_next(self):
 
@@ -1446,12 +1428,6 @@ class TestFind (unittest.TestCase):
         # Set ancestor @file node dirty.
         root.h = '@file xyzzy'
         settings.find_text = settings.change_text = 'child1'
-        # Bad pattern.
-        settings.find_text = 'abc((('
-        x.replace_all(settings)
-        # Make check_args fail.
-        settings.find_text = settings.change_text = None
-        x.replace_all(settings)
     #@+node:ekr.20210107153149.1: *4* TestFind.replace-then-find
     def test_replace_then_find(self):
 
@@ -1487,15 +1463,17 @@ class TestFind (unittest.TestCase):
         for p in c.all_positions():
             print(' '*p.level(), p.h)
             # g.printObj(g.splitLines(p.b), tag=p.h)
-    #@+node:ekr.20210106133506.1: *4* TestFind.test_bad compile_pattern
-    def test_bad_compile_pattern(self):
-        
+    #@+node:ekr.20210106133506.1: *4* TestFind.bad compile_pattern
+    def test_argument_errors(self):
+
+        settings, x = self.settings, self.x
         # Bad search pattern.
-        settings = self.settings
         settings.find_text = r'^def\b(('
         settings.pattern_match = True
-        self.x.clone_find_all(settings)
-    #@+node:ekr.20210106133737.1: *4* TestFind.test_check_args
+        x.clone_find_all(settings)
+        x.find_next_match(p=None)
+        x.replace_all(settings)
+    #@+node:ekr.20210106133737.1: *4* TestFind.check_args
     def test_check_args(self):
         
         # Bad search patterns..
@@ -1507,8 +1485,16 @@ class TestFind (unittest.TestCase):
         x.clone_find_all(settings)
         # Empty find pattern.
         settings.search_body = True
+        settings.find_text = ''
         x.clone_find_all(settings)
-        
+        x.clone_find_all_flattened(settings)
+        x.find_all(settings)
+        x.find_def(settings)
+        x.find_var(settings)
+        x.find_next(settings)
+        x.find_next_match(None)
+        x.find_prev(settings)
+        x.replace_all(settings)
     #@+node:ekr.20210106134128.1: *4* TestFind.compute_result_status
     def test_compute_result_status(self):
         
