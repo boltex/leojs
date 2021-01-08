@@ -1097,7 +1097,7 @@ class LeoFind:
         """Do a whole-word search."""
         pattern = self.replace_back_slashes(pattern)
         if not s or not pattern or not g.match(s, i, pattern):
-            return False  # pragma: no cover (defensive)
+            return False
         pat1, pat2 = pattern[0], pattern[-1]
         n = len(pattern)
         ch1 = s[i - 1] if 0 <= i - 1 < len(s) else '.'
@@ -1590,6 +1590,12 @@ class TestFind (unittest.TestCase):
         for p in c.all_positions():
             print(' '*p.level(),  p.h, 'dirty', p.v.isDirty())
             # g.printObj(g.splitLines(p.b), tag=p.h)
+    #@+node:ekr.20210108141032.1: *4* TestFind.match_word
+    def test_match_word(self):
+        x = self.x
+        x.match_word("def spam():", 0, "spam")
+        x.match_word("def spam():", 0, "xxx")
+        
     #@+node:ekr.20210106140751.1: *4* TestFind.replace_back_slashes
     def test_replace_back_slashes(self):
         x = self.x
