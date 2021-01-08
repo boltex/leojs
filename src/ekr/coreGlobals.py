@@ -48,6 +48,7 @@ class Bunch:
             if point.squared > threshold:
                 point.isok = True
     """
+    # Note to Félix: This class loosely corresponds to json.
 
     def __init__(self, **keywords):
         self.__dict__.update(keywords)

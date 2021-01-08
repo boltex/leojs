@@ -133,7 +133,7 @@ class LeoFind:
     #@+node:ekr.20210102145531.62: *4* clone-find-all/flattened
     @cmd('clone-find-all')
     @cmd('cfa')
-    def clone_find_all(self, settings=None):
+    def clone_find_all(self, settings):
         """
         clone-find-all (aka cfa).
 
@@ -142,27 +142,35 @@ class LeoFind:
 
         The list is *not* flattened: clones appear only once in the
         descendants of the organizer node.
-        """
-        return self.clone_find_all_helper(flatten=False, settings=settings)
         
+        Return the number of found nodes.
+        """
+        self.init(settings)
+        if not self.check_args('clone-find-all'):
+            return 0
+        return self.clone_find_all_helper(False, settings)
+
     @cmd('clone-find-all-flattened')
     @cmd('cff')
-    def clone_find_all_flattened(self, settings=None):
+    def clone_find_all_flattened(self, settings):
         """
         clone-find-all-flattened (aka cff).
 
         Create an organizer node whose descendants contain clones of all nodes
         matching the search string, except @nosearch trees.
         """
-        return self.clone_find_all_helper(flatten=True, settings=settings)
+        self.init(settings)
+        if not self.check_args('clone-find-all-flattened'):
+            return 0
+        return self.clone_find_all_helper(True, settings)
     #@+node:ekr.20210105173904.1: *5* find.clone_find_all_helper & helper
     def clone_find_all_helper(self, flatten, settings):
+        """
+        The common part of the clone-find commands.
+        
+        Return the number of found nodes.
+        """
         c, u = self.c, self.c.undoer
-        tag = 'clone-find-all-flattened' if flatten else 'clone-find-all'
-        if settings:
-            self.init(settings)
-        if not self.check_args(tag):
-            return 0
         if self.pattern_match:
             ok = self.compile_pattern()
             if not ok: return 0
@@ -351,7 +359,7 @@ class LeoFind:
         count, found = 0, False
         self.find_seen = set()
         if settings.use_cff:
-            count = self.clone_find_all_flattened()
+            count = self.clone_find_all_flattened(settings)
             found = count > 0
         else:
             # #1592.  Ignore hits under control of @nosearch
@@ -368,7 +376,7 @@ class LeoFind:
             if word2:
                 self.find_text = prefix + ' ' + word2
                 if settings.use_cff:
-                    count = self.clone_find_all()
+                    count = self.clone_find_all(settings)
                     found = count > 0
                 else:  # pragma: no cover (to do)
                     # #1592.  Ignore hits under control of @nosearch
