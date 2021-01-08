@@ -570,12 +570,12 @@ class LeoFind:
         #
         # Order matters: regex matches ignore whole-word.
         if self.pattern_match:
-            return self.batchRegexReplace(s)
+            return self.batch_regex_replace(s)
         if self.whole_word:
-            return self.batchWordReplace(s)
-        return self.batchPlainReplace(s)
-    #@+node:ekr.20210106081141.3: *6* find.batchPlainReplace
-    def batchPlainReplace(self, s):
+            return self.batch_word_replace(s)
+        return self.batch_plain_replace(s)
+    #@+node:ekr.20210106081141.3: *6* find.batch_plain_replace
+    def batch_plain_replace(self, s):
         """
         Perform all plain find/replace on s.
         return (count, new_s)
@@ -601,8 +601,8 @@ class LeoFind:
         # #1166: Complete the result using s0.
         result.append(s0[prev_i:])
         return count, ''.join(result)
-    #@+node:ekr.20210106081141.4: *6* find.batchRegexReplace
-    def batchRegexReplace(self, s):
+    #@+node:ekr.20210106081141.4: *6* find.batch_regex_replace
+    def batch_regex_replace(self, s):
         """
         Perform all regex find/replace on s.
         return (count, new_s)
@@ -628,8 +628,8 @@ class LeoFind:
         result.append(s[prev_i:])
         s = ''.join(result)
         return count, s
-    #@+node:ekr.20210106081141.5: *6* find.batchWordReplace
-    def batchWordReplace(self, s):  # pragma: no cover (to do)
+    #@+node:ekr.20210106081141.5: *6* find.batch_word_replace
+    def batch_word_replace(self, s):  # pragma: no cover (to do)
         """
         Perform all whole word find/replace on s.
         return (count, new_s)
@@ -851,11 +851,11 @@ class LeoFind:
                 p = self.nextNodeAfterFail(p)
                 if p:  # Found another node: select the proper pane.
                     # g.trace('Try', p.h)
-                    self.in_headline = self.firstSearchPane()
+                    self.in_headline = self.first_search_pane()
                     self.initNextText(p)
         return None, None, None
-    #@+node:ekr.20210102145531.117: *5* find.firstSearchPane
-    def firstSearchPane(self):
+    #@+node:ekr.20210102145531.117: *5* find.first_search_pane
+    def first_search_pane(self):
         """
         Set return the value of self.in_headline
         indicating which pane to search first.
@@ -909,12 +909,12 @@ class LeoFind:
         if not p and wrap:  # pragma: no cover (to do)
             # Stateless wrap: Just set wrapPos and p.
             self.wrapPos = 0 if self.reverse else len(p.b)
-            p = self.doWrap()
+            p = self.do_wrap()
         if not p:
             return None
         return p
-    #@+node:ekr.20210102145531.116: *6* find.doWrap
-    def doWrap(self):  # pragma: no cover (to do)
+    #@+node:ekr.20210102145531.116: *6* find.do_wrap
+    def do_wrap(self):  # pragma: no cover (to do)
         """Return the position resulting from a wrap."""
         c = self.c
         if self.reverse:
