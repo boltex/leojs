@@ -1013,17 +1013,17 @@ class LeoFind:
         p, w = self.p, self.s_ctrl
         if self.find_def_data and p.v in self.find_seen:
             # Don't find defs/vars multiple times.
-            return None, None  # pragma: no cover (defensive)
+            return None, None  # pragma: no cover (minor)
         index = w.getInsertPoint()
         s = w.getAllText()
-        if not s:  # pragma: no cover (defensive)
+        if not s:  # pragma: no cover (minor)
             return None, None
         stopindex = 0 if self.reverse else len(s)
         pos, newpos = self.searchHelper(s, index, stopindex, self.find_text)
         if self.in_headline and not self.search_headline:
-            return None, None  # pragma: no cover (to do)
+            return None, None  # pragma: no cover (minor)
         if not self.in_headline and not self.search_body:
-            return None, None  # pragma: no cover (to do)
+            return None, None  # pragma: no cover (minor)
         if pos == -1:
             return None, None
         ins = min(pos, newpos) if self.reverse else max(pos, newpos)
