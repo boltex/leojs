@@ -571,7 +571,7 @@ class LeoFind:
                 # Fixes this bug: https://groups.google.com/forum/#!topic/leo-editor/yR8eL5cZpi4
                 # This hack would be dangerous on MacOs: it uses '\r' instead of '\n' (!)
         if not s:
-            return False, None   # pragma: no cover (minor)
+            return False, None
         #
         # Order matters: regex matches ignore whole-word.
         if self.pattern_match:
@@ -1764,6 +1764,21 @@ class TestFind (unittest.TestCase):
                     x.init(settings)
                     x.plain_helper(s, 0, len(s), pattern, nocase, word)
                     x.plain_helper(s, 0, 0, pattern, nocase, word)
+    #@+node:ekr.20210109065545.1: *4* TestFind.replace_all_helper
+    def test_replace_all_helper(self):
+        settings, x = self.settings, self.x
+        settings.find_text = 'xyzzy'
+        settings.change_text = 'xYzzy'
+        s = 'abc xyzzy done'
+        x.replace_all_helper('')  # Error test.
+        for regex in (True, False):
+            settings.pattern_match = regex
+            for word in (True, False):
+                settings.whole_word = word
+                x.init(settings)
+                # if word and not regex:
+                    # g.pdb()
+                x.replace_all_helper(s)
     #@+node:ekr.20210106140751.1: *4* TestFind.replace_back_slashes
     def test_replace_back_slashes(self):
         x = self.x
