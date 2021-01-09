@@ -1164,19 +1164,14 @@ class LeoFind:
         self.match_obj = None
         return -1, -1
     #@+node:ekr.20210109050100.1: *3* LeoFind: Tests
-    #@+node:ekr.20210109044638.1: *4* find.test_one, test_two
+    #@+node:ekr.20210109044638.1: *4* find.test_one
     def test_one(self):
-        g.trace('=====')
         settings = self.default_settings()
         settings.p = settings.p.h
         g.printObj(settings, tag='test_one: default_settings')
-        
-    def test_two(self):
-        g.trace('=====')
     #@+node:ekr.20210109050619.1: *4* find.test_clone-find-all
     def test_clone_find_all(self):
-        g.trace('=====')
-        settings, x = self.settings, self
+        settings, x = self.default_settings(), self
         # Regex find.
         settings.find_text = r'^def\b'
         settings.change_text = 'def'  # Don't actually change anything!
@@ -1190,6 +1185,9 @@ class LeoFind:
         # Suboutline only.
         settings.suboutline_only = True
         x.clone_find_all_cmd(settings)
+    #@+node:ekr.20210109054145.1: *4* find_test_fail
+    def test_fail(self):
+        assert False, 'LeoFind.test_fail'
     #@-others
 #@+node:ekr.20210103132816.1: ** class SearchWidget (coreFind.py)
 class SearchWidget:
@@ -1304,29 +1302,35 @@ class TestFind (unittest.TestCase):
             # g.printObj(g.splitLines(p.b), tag=p.h)
     #@+node:ekr.20210109041513.1: *4* TestFind.test_all
     def test_all(self):
-        """Experimental"""
+        """Run all test_* methods in LeoFind class as if they were unit tests."""
+        
         g.cls() ###
+        
+        # Create another TestCase so subTest will work.
+        ###class OuterTestCase(unittest.TestCase):
+            
+            ###def test_inner_test_all(self):
         c = coreTest.create_app()
         x = coreFind.LeoFind(c)
         tests = [getattr(x, z) for z in dir(x) if z.startswith('test_')]
         test_names = [z.__name__ for z in tests]
         
         g.printObj(test_names, tag='===== Names of test functions in LeoFind')
-        try:
-            suite = unittest.TestSuite()
+        
+        for func in tests:
             
-            for func in tests:
-                
-                class TestWrapper(unittest.TestCase):
-                    def runTest(self, func=func):
-                        # print('testing', func.__name__)
-                        return func()
-                        
-                suite.addTest(TestWrapper())
-            result = unittest.TestResult()
-            suite.run(result)
-        except Exception:
-            g.es_exception()
+            class TestWrapper(unittest.TestCase):
+                def runTest(self, func=func):
+                    try:
+                        func()
+                        # print('PASS:', func.__name__)
+                    except Exception:
+                        print('FAIL:', func.__name__)
+                        g.es_exception()
+                        raise
+
+            test = TestWrapper()
+            test.run()
                     
     #@+node:ekr.20210106141701.1: *3* Tests of Commands...
     #@+node:ekr.20210106124121.1: *4* TestFind.clone-find-all
