@@ -221,7 +221,7 @@ class LeoFind:
             table.append(p.b)
         for s in table:
             self.reverse = False
-            pos, newpos = self.searchHelper(s, 0, len(s), self.find_text)
+            pos, newpos = self.inner_search_helper(s, 0, len(s), self.find_text)
             if pos != -1:
                 return True
         return False
@@ -241,12 +241,15 @@ class LeoFind:
         """
         c, u = self.c, self.c.undoer
         tc = c.theTagController
+        testing = getattr(g, 'unitTesting')
         if not tc:
-            g.es_print('nodetags not active')
+            if not testing:  # pragma: no cover (skip)
+                g.es_print('nodetags not active')  
             return 0, c.p
         clones = tc.get_tagged_nodes(tag)
         if not clones:
-            g.es_print(f"tag not found: {tag}")
+            if not testing: # pragma: no cover (skip)
+                g.es_print(f"tag not found: {tag}") 
             tc.show_all_tags()
             return 0, c.p
         undoData = u.beforeInsertNode(c.p)
@@ -544,7 +547,7 @@ class LeoFind:
         p = c.p
         u.afterChangeGroup(p, undoType, reportFlag=True)
         t2 = time.process_time()
-        if not getattr(g, 'unitTesting', None):  # pragma: no cover (skipped)
+        if not getattr(g, 'unitTesting', None):  # pragma: no cover (skip)
             g.es_print(
                 f"changed {count} instance{g.plural(count)} "
                 f"in {t2 - t1:4.2f} sec.")
@@ -731,13 +734,16 @@ class LeoFind:
     def tag_children(self, p, tag):
         """tag-children: Add the given tag to all children of c.p."""
         c = self.c
+        testing = getattr(g, 'unitTesting')
         tc = c.theTagController
         if not tc:
-            g.es_print('nodetags not active')
+            if not testing:  # pragma: no cover (skip)
+                g.es_print('nodetags not active')
             return
         for p in p.children():
             tc.add_tag(p, tag)
-        g.es_print(f"Added {tag} tag to {len(list(c.p.children()))} nodes")
+        if not testing:  # pragma: no cover (skip)
+            g.es_print(f"Added {tag} tag to {len(list(c.p.children()))} nodes")
     #@+node:ekr.20210103213410.1: *3* LeoFind: Helpers
     #@+node:ekr.20210102145531.137: *4* find.check_args
     def check_args(self, tag):
@@ -852,7 +858,7 @@ class LeoFind:
                 # Success.
                 return p, pos, newpos
             # Searching the pane failed: switch to another pane or node.
-            if self.shouldStayInNode(p):
+            if self.should_stay_in_node(p):
                 # Switching panes is possible.  Do so.
                 self.in_headline = not self.in_headline
                 self.init_next_text(p)
@@ -960,8 +966,8 @@ class LeoFind:
                 g.warning('found match outside of hoisted outline')
                 return True
         return False  # Within range.
-    #@+node:ekr.20210102145531.122: *5* find.shouldStayInNode
-    def shouldStayInNode(self, p):
+    #@+node:ekr.20210102145531.122: *5* find.should_stay_in_node
+    def should_stay_in_node(self, p):
         """Return True if the find should simply switch panes."""
         # Errors here cause the find command to fail badly.
         # Switch only if:
@@ -973,6 +979,138 @@ class LeoFind:
             self.search_headline and self.search_body and (
             (self.reverse and not self.in_headline) or
             (not self.reverse and self.in_headline)))
+    #@+node:ekr.20210102145531.126: *4* find.inner_search_helper & helpers
+    def inner_search_helper(self, s, i, j, pattern):
+        """Dispatch the proper search method based on settings."""
+        backwards = self.reverse
+        nocase = self.ignore_case
+        regexp = self.pattern_match
+        word = self.whole_word
+        if backwards:
+            i, j = j, i
+        if not s[i:j] or not pattern:
+            return -1, -1
+        if regexp:
+            pos, newpos = self.regex_helper(s, i, j, pattern, backwards, nocase)
+        elif backwards:
+            pos, newpos = self.backwards_helper(s, i, j, pattern, nocase, word)
+        else:
+            pos, newpos = self.plain_helper(s, i, j, pattern, nocase, word)
+        return pos, newpos
+    #@+node:ekr.20210102145531.128: *5* find.backwards_helper
+    debugIndices = []
+
+    def backwards_helper(self, s, i, j, pattern, nocase, word):
+        """
+        rfind(sub [,start [,end]])
+
+        Return the highest index in the string where substring sub is found,
+        such that sub is contained within s[start,end].
+        
+        Optional arguments start and end are interpreted as in slice notation.
+
+        Return (-1, -1) on failure.
+        """
+        if nocase:
+            s = s.lower()
+            pattern = pattern.lower()
+        pattern = self.replace_back_slashes(pattern)
+        n = len(pattern)
+        # Put the indices in range.  Indices can get out of range
+        # because the search code strips '\r' characters when searching @edit nodes.
+        i = max(0, i)
+        j = min(len(s), j)
+        # short circuit the search: helps debugging.
+        if s.find(pattern) == -1:
+            return -1, -1
+        if word:
+            while 1:
+                k = s.rfind(pattern, i, j)
+                if k == -1:
+                    break
+                if self.match_word(s, k, pattern):
+                    return k, k + n
+                j = max(0, k - 1)
+            return -1, -1
+        k = s.rfind(pattern, i, j)
+        if k == -1:
+            return -1, -1
+        return k, k + n
+    #@+node:ekr.20210102145531.130: *5* find.match_word
+    def match_word(self, s, i, pattern):
+        """Do a whole-word search."""
+        pattern = self.replace_back_slashes(pattern)
+        if not s or not pattern or not g.match(s, i, pattern):
+            return False
+        pat1, pat2 = pattern[0], pattern[-1]
+        n = len(pattern)
+        ch1 = s[i - 1] if 0 <= i - 1 < len(s) else '.'
+        ch2 = s[i + n] if 0 <= i + n < len(s) else '.'
+        isWordPat1 = g.isWordChar(pat1)
+        isWordPat2 = g.isWordChar(pat2)
+        isWordCh1 = g.isWordChar(ch1)
+        isWordCh2 = g.isWordChar(ch2)
+        inWord = isWordPat1 and isWordCh1 or isWordPat2 and isWordCh2
+        return not inWord
+    #@+node:ekr.20210102145531.129: *5* find.plain_helper
+    def plain_helper(self, s, i, j, pattern, nocase, word):
+        """Do a plain search."""
+        if nocase:
+            s = s.lower()
+            pattern = pattern.lower()
+        pattern = self.replace_back_slashes(pattern)
+        n = len(pattern)
+        if word:
+            while 1:
+                k = s.find(pattern, i, j)
+                if k == -1:
+                    break
+                if self.match_word(s, k, pattern):
+                    return k, k + n
+                i = k + n
+            return -1, -1
+        k = s.find(pattern, i, j)
+        if k == -1:
+            return -1, -1
+        return k, k + n
+    #@+node:ekr.20210102145531.127: *5* find.regex_helper
+    def regex_helper(self, s, i, j, pattern, backwards, nocase):
+        """Called from inner_search_helper"""
+        re_obj = self.re_obj  # Use the pre-compiled object
+        if not re_obj:
+            if not getattr(g, 'unitTesting', None):  # pragma: no cover (skip)
+                g.trace('can not happen: no re_obj')
+            return -1, -1
+        if backwards:
+            # Scan to the last match using search here.
+            i, last_mo = 0, None
+            while i < len(s):
+                mo = re_obj.search(s, i, j)
+                if not mo:
+                    break
+                i += 1
+                last_mo = mo
+            mo = last_mo
+        else:
+            mo = re_obj.search(s, i, j)
+        ### if mo: g.trace(i, mo, mo.start(), mo.end())  ###
+        while mo and 0 <= i <= len(s):
+            if mo.start() == mo.end():
+                if backwards:
+                    # Search backward using match instead of search.
+                    i -= 1
+                    while 0 <= i < len(s):
+                        mo = re_obj.match(s, i, j)
+                        if mo: break
+                        i -= 1
+                else:
+                    i += 1
+                    mo = re_obj.search(s, i, j)
+            else:
+                self.match_obj = mo
+                return mo.start(), mo.end()
+        self.match_obj = None
+        return -1, -1
     #@+node:ekr.20210102145531.101: *4* find.make_regex_subs
     def make_regex_subs(self, change_text, groups):
         """
@@ -1037,7 +1175,7 @@ class LeoFind:
         if not s:  # pragma: no cover (minor)
             return None, None
         stopindex = 0 if self.reverse else len(s)
-        pos, newpos = self.searchHelper(s, index, stopindex, self.find_text)
+        pos, newpos = self.inner_search_helper(s, index, stopindex, self.find_text)
         if self.in_headline and not self.search_headline:
             return None, None  # pragma: no cover (minor)
         if not self.in_headline and not self.search_body:
@@ -1049,134 +1187,6 @@ class LeoFind:
         if self.find_def_data:
             self.find_seen.add(p.v)
         return pos, newpos
-    #@+node:ekr.20210102145531.126: *5* find.searchHelper & helpers
-    def searchHelper(self, s, i, j, pattern):
-        """Dispatch the proper search method based on settings."""
-        backwards = self.reverse
-        nocase = self.ignore_case
-        regexp = self.pattern_match
-        word = self.whole_word
-        if backwards: i, j = j, i
-        if not s[i:j] or not pattern:
-            return -1, -1
-        if regexp:
-            pos, newpos = self.regex_helper(s, i, j, pattern, backwards, nocase)
-        elif backwards:
-            pos, newpos = self.backwards_helper(s, i, j, pattern, nocase, word)
-        else:
-            pos, newpos = self.plain_helper(s, i, j, pattern, nocase, word)
-        return pos, newpos
-    #@+node:ekr.20210102145531.128: *6* find.backwards_helper
-    debugIndices = []
-
-    def backwards_helper(self, s, i, j, pattern, nocase, word):
-        """
-        rfind(sub [,start [,end]])
-
-        Return the highest index in the string where substring sub is found,
-        such that sub is contained within s[start,end].
-        
-        Optional arguments start and end are interpreted as in slice notation.
-
-        Return (-1, -1) on failure.
-        """
-        if nocase:
-            s = s.lower()
-            pattern = pattern.lower()
-        pattern = self.replace_back_slashes(pattern)
-        n = len(pattern)
-        # Put the indices in range.  Indices can get out of range
-        # because the search code strips '\r' characters when searching @edit nodes.
-        i = max(0, i)
-        j = min(len(s), j)
-        # short circuit the search: helps debugging.
-        if s.find(pattern) == -1:
-            return -1, -1
-        if word:
-            while 1:
-                k = s.rfind(pattern, i, j)
-                if k == -1:
-                    break
-                if self.match_word(s, k, pattern):
-                    return k, k + n
-                j = max(0, k - 1)
-            return -1, -1
-        k = s.rfind(pattern, i, j)
-        if k == -1:
-            return -1, -1
-        return k, k + n
-    #@+node:ekr.20210102145531.130: *6* find.match_word
-    def match_word(self, s, i, pattern):
-        """Do a whole-word search."""
-        pattern = self.replace_back_slashes(pattern)
-        if not s or not pattern or not g.match(s, i, pattern):
-            return False
-        pat1, pat2 = pattern[0], pattern[-1]
-        n = len(pattern)
-        ch1 = s[i - 1] if 0 <= i - 1 < len(s) else '.'
-        ch2 = s[i + n] if 0 <= i + n < len(s) else '.'
-        isWordPat1 = g.isWordChar(pat1)
-        isWordPat2 = g.isWordChar(pat2)
-        isWordCh1 = g.isWordChar(ch1)
-        isWordCh2 = g.isWordChar(ch2)
-        inWord = isWordPat1 and isWordCh1 or isWordPat2 and isWordCh2
-        return not inWord
-    #@+node:ekr.20210102145531.129: *6* find.plain_helper
-    def plain_helper(self, s, i, j, pattern, nocase, word):
-        """Do a plain search."""
-        if nocase:
-            s = s.lower()
-            pattern = pattern.lower()
-        pattern = self.replace_back_slashes(pattern)
-        n = len(pattern)
-        if word:
-            while 1:
-                k = s.find(pattern, i, j)
-                if k == -1:
-                    break
-                if self.match_word(s, k, pattern):
-                    return k, k + n
-                i = k + n
-            return -1, -1
-        k = s.find(pattern, i, j)
-        if k == -1:
-            return -1, -1
-        return k, k + n
-    #@+node:ekr.20210102145531.127: *6* find.regex_helper
-    def regex_helper(self, s, i, j, pattern, backwards, nocase):
-
-        re_obj = self.re_obj  # Use the pre-compiled object
-        if not re_obj:  # pragma: no cover (defensive)
-            g.trace('can not happen: no re_obj')
-            return -1, -1
-        if backwards:
-            # Scan to the last match using search here.
-            last_mo = None; i = 0
-            while i < len(s):
-                mo = re_obj.search(s, i, j)
-                if not mo:
-                    break
-                i += 1
-                last_mo = mo
-            mo = last_mo
-        else:
-            mo = re_obj.search(s, i, j)
-        while mo and 0 <= i <= len(s):
-            if mo.start() == mo.end():
-                if backwards:
-                    # Search backward using match instead of search.
-                    i -= 1
-                    while 0 <= i < len(s):
-                        mo = re_obj.match(s, i, j)
-                        if mo: break
-                        i -= 1
-                else:
-                    i += 1; mo = re_obj.search(s, i, j)
-            else:
-                self.match_obj = mo
-                return mo.start(), mo.end()
-        self.match_obj = None
-        return -1, -1
     #@-others
 #@+node:ekr.20210103132816.1: ** class SearchWidget (coreFind.py)
 class SearchWidget:
@@ -1264,12 +1274,16 @@ class TestFind (unittest.TestCase):
             p.v.clearDirty()
             p.v.clearVisited()
 
-    #@+node:ekr.20210107151326.1: *4* TestFind.setUp
+    #@+node:ekr.20210107151326.1: *4* TestFind.setUp & tearDown
     def setUp(self):
+        g.unitTesting = True
         self.c = coreTest.create_app()
         self.x = coreFind.LeoFind(self.c)
         self.settings = self.x.default_settings()
         self.make_test_tree()
+
+    def tearDown(self):
+        g.unitTesting = False
     #@+node:ekr.20210106170636.1: *4* TestFind.test_tree
     def test_tree(self):
         table = (
@@ -1368,7 +1382,6 @@ class TestFind (unittest.TestCase):
         assert s == settings.find_text, repr(s)
         # find-prev: starts at end, so we stay in the node.
         last = c.lastTopLevel()
-        print('last', last.h)
         child = last.firstChild()
         grand_child = child.firstChild()
         assert grand_child.h == 'child 6', grand_child.h
@@ -1735,12 +1748,9 @@ class TestFind (unittest.TestCase):
             assert result == expected, (s, result, expected)
     #@+node:ekr.20210108221711.1: *4* TestFind.regex_helper
     def test_regex_helper(self):
-        settings, x = self.settings, self.x
+        x = self.x
         pattern = r'(.*)pattern'
         x.re_obj = re.compile(pattern)
-        settings.find_text = pattern
-        settings.change_text = r'\1Pattern'
-        settings.pattern_match = True
         table = (
             'test pattern',  # Match.
             'xxx',  # No match.
@@ -1753,6 +1763,10 @@ class TestFind (unittest.TestCase):
                     else:
                         i = j = 0
                     x.regex_helper(s, i, j, backwards, pattern, nocase)
+        # Error test.
+        x.re_obj = None
+        x.regex_helper("", 0, 0, False, pattern, False)
+        
 
         # for change_text, groups, expected in table:
             # result = x.make_regex_subs(change_text, groups)
