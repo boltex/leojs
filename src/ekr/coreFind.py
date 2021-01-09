@@ -6,7 +6,7 @@ import sys
 import time
 import unittest
 # pylint: disable=import-self
-### from src.ekr import coreFind as g
+# from src.ekr import coreFind as g
 from leo.core import leoGlobals as g
 from src.ekr import coreFind
 from src.ekr import coreTest
@@ -364,7 +364,6 @@ class LeoFind:
             found = count > 0
         else:
             # #1592.  Ignore hits under control of @nosearch
-            ### g.pdb()
             p = root
             while p:
                 progress = p.v
@@ -685,7 +684,7 @@ class LeoFind:
         c, p = self.c, self.p
         wrapper = c.frame.body.wrapper
         w = c.edit_widget(p) if self.in_headline else wrapper
-        ### This may change for vs-code.
+        ### For vs-code?
             # if not w:
                 # self.in_headline = False
                 # w = wrapper
@@ -713,7 +712,7 @@ class LeoFind:
             w2.setInsertPoint(start if self.reverse else start + len(change_text))
         # Update the selection for the next match.
         w.setSelectionRange(start, start + len(change_text))
-        ###
+        ### For vs-code?
             # c.widgetWantsFocus(w)
             # # No redraws here: they would destroy the headline selection.
             # if self.in_headline:
@@ -1385,7 +1384,6 @@ class TestFind (unittest.TestCase):
         # Test3: not found after switching style.
         settings.p = root.next()
         settings.find_text = 'def notFound'
-        ### g.pdb()
         x.find_def(settings)
         
     def test_find_def_use_cff(self):
