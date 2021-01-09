@@ -849,14 +849,14 @@ class LeoFind:
             if self.shouldStayInNode(p):
                 # Switching panes is possible.  Do so.
                 self.in_headline = not self.in_headline
-                self.initNextText(p)
+                self.init_next_text(p)
             else:
                 # Switch to the next/prev node, if possible.
                 attempts += 1
                 p = self.nextNodeAfterFail(p)
                 if p:  # Found another node: select the proper pane.
                     self.in_headline = self.first_search_pane()
-                    self.initNextText(p)
+                    self.init_next_text(p)
         return None, None, None
     #@+node:ekr.20210102145531.117: *5* find.first_search_pane
     def first_search_pane(self):
@@ -875,8 +875,8 @@ class LeoFind:
         
         g.trace('can not happen: no search enabled')  # pragma: no cover (defensive)
         return False                                  # pragma: no cover (defensive, search body)
-    #@+node:ekr.20210102145531.118: *5* find.initNextText (gui code)
-    def initNextText(self, p):
+    #@+node:ekr.20210102145531.118: *5* find.init_next_text (gui code)
+    def init_next_text(self, p):
         """
         Init s_ctrl when a search fails. On entry:
         - self.in_headline indicates what text to use.
@@ -887,13 +887,15 @@ class LeoFind:
         if self.reverse:
             i, j = w.sel
             if i is not None and j is not None and i != j:
-                ins = min(i, j)  # pragma: no cover (minor)
+                ins = min(i, j)
             else:
                 ins = len(s)
         else:
             ins = 0
+        ### For vs-code. Also required for tests.
         w.setAllText(s)
         w.setInsertPoint(ins)
+        return ins  # For tests.
     #@+node:ekr.20210102145531.119: *5* find.nextNodeAfterFail & helpers
     def nextNodeAfterFail(self, p):
         """Return the next node after a failed search or None."""
@@ -1647,6 +1649,17 @@ class TestFind (unittest.TestCase):
         for find in ('xxx', 'def'):
             settings.find_text = find
             x.find_next_batch_match(p)
+    #@+node:ekr.20210108215023.1: *4* TestFind.init_next_text
+    def test_init_next_text(self):
+        settings, x = self.settings, self.x
+        for reverse in (True, False):
+            settings.reverse = reverse
+            for in_head in (True, False):
+                settings.in_headline = in_head
+                x.init(settings)
+                for sel in (0, 0), (0, 2):
+                    x.s_ctrl.sel = sel
+                    x.init_next_text(settings.p)
     #@+node:ekr.20210108212435.1: *4* TestFind.make_regex_subs
     def test_make_regex_subs(self):
         x = self.x
