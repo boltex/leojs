@@ -587,11 +587,12 @@ class LeoFind:
         # #1166: s0 and find0 aren't affected by ignore-case.
         s0 = s
         find0 = self.replace_back_slashes(find)
-        if self.ignore_case:  # pragma: no cover (to do)
+        if self.ignore_case:
             s = s0.lower()
             find = find0.lower()
         count, prev_i, result = 0, 0, []
         while True:
+            progress = prev_i
             # #1166: Scan using s and find.
             i = s.find(find, prev_i)
             if i == -1:
@@ -600,7 +601,8 @@ class LeoFind:
             count += 1
             result.append(s0[prev_i:i])
             result.append(change)
-            prev_i = i + len(find)
+            prev_i = max(prev_i + 1, i + len(find))  # 2021/01/08 (!)
+            assert prev_i > progress, prev_i
         # #1166: Complete the result using s0.
         result.append(s0[prev_i:])
         return count, ''.join(result)
@@ -1559,6 +1561,17 @@ class TestFind (unittest.TestCase):
             s = 'abc b z'
             count, s2 = x.batch_word_replace(s)
             assert count == 1 and s2 == 'abc B z', (ignore, count, repr(s2))
+    #@+node:ekr.20210108203155.1: *4* TestFind.batch_plain_replace
+    def test_batch_plain_replace(self):
+        settings, x = self.settings, self.x
+        settings.find_text = 'b'
+        settings.change_text = 'B'
+        for ignore in (True, False):
+            settings.ignore_case = ignore
+            x.init(settings)
+            s = 'abc b z'
+            count, s2 = x.batch_plain_replace(s)
+            assert count == 2 and s2 == 'aBc B z', (ignore, count, repr(s2))
     #@+node:ekr.20210106133737.1: *4* TestFind.check_args
     def test_check_args(self):
         # Bad search patterns..
