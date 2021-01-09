@@ -1309,33 +1309,33 @@ class TestFind (unittest.TestCase):
     #@+node:ekr.20210109041513.1: *4* TestFind.test_all
     def test_all(self):
         """Run all test_* methods in LeoFind class as if they were unit tests."""
+        # To do: report each test in the test suite as separate tests.
+        try:
+            g.unitTesting = True
+            c = coreTest.create_app()
+            x = coreFind.LeoFind(c)
+            tests = [getattr(x, z) for z in dir(x) if z.startswith('test_')]
+            if 0:
+                test_names = [z.__name__ for z in tests]
+                g.printObj(test_names, tag='test functions in LeoFind')
+            result = unittest.TestResult()
+            suite = unittest.TestSuite()
+            for func in tests:
+                
+                class TestWrapper(unittest.TestCase):
+                    def runTest(self, func=func):
+                        try:
+                            func()
+                        except Exception:
+                            print('FAIL:', func.__name__)
+                            g.es_exception()
+                            raise
         
-        g.cls()
-        g.unitTesting = True
-
-        c = coreTest.create_app()
-        x = coreFind.LeoFind(c)
-        tests = [getattr(x, z) for z in dir(x) if z.startswith('test_')]
-        test_names = [z.__name__ for z in tests]
-        
-        g.printObj(test_names, tag='===== Names of test functions in LeoFind')
-        
-        result = unittest.TestResult()
-        suite = unittest.TestSuite()
-        for func in tests:
-            
-            class TestWrapper(unittest.TestCase):
-                def runTest(self, func=func):
-                    try:
-                        func()
-                    except Exception:
-                        print('FAIL:', func.__name__)
-                        g.es_exception()
-                        raise
-
-            test = TestWrapper()
-            suite.addTest(test)
-        suite.run(result)
+                test = TestWrapper()
+                suite.addTest(test)
+            suite.run(result)
+        finally:
+            g.unitTesting = True
     #@+node:ekr.20210106141701.1: *3* Tests of Commands...
     #@+node:ekr.20210106124121.1: *4* TestFind.clone-find-all
     def test_clone_find_all(self):
