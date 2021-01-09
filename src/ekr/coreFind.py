@@ -699,7 +699,7 @@ class LeoFind:
                 # w = wrapper
         oldSel = sel = w.getSelectionRange()
         start, end = sel
-        if start > end:  # pragma: no cover (may depend on the widget)
+        if start > end:  # pragma: no cover (depends on the widget)
             start, end = end, start
         if start == end:
             g.es("no text selected")
@@ -749,11 +749,11 @@ class LeoFind:
     def check_args(self, tag):
         if not self.search_headline and not self.search_body:
             if not getattr(g, 'unitTesting', None):
-                g.es_print("not searching headline or body")  # pragma: no cover (skipped)
+                g.es_print("not searching headline or body")  # pragma: no cover (skip)
             return False
         if not self.find_text:
             if not getattr(g, 'unitTesting', None):
-                g.es_print(f"{tag}: empty find pattern")  # pragma: no cover (skipped)
+                g.es_print(f"{tag}: empty find pattern")  # pragma: no cover (skip)
             return False
         return True
     #@+node:ekr.20210102145531.121: *4* find.compile_pattern
@@ -774,7 +774,7 @@ class LeoFind:
             self.re_obj = re.compile(s, flags)
             return True
         except Exception:
-            if not getattr(g, 'unitTesting', None):  # pragma: no cover (skipped)
+            if not getattr(g, 'unitTesting', None):  # pragma: no cover (skip)
                 g.warning('invalid regular expression:', self.find_text)
             return False
     #@+node:ekr.20210102145531.114: *4* find.compute_result_status
@@ -1209,7 +1209,7 @@ class SearchWidget:
         self.i = 0       # The insert point
         self.sel = 0, 0  # The selection range
 
-    def __repr__(self):  # pragma: no cover (debugging only)
+    def __repr__(self):  # pragma: no cover (skip)
         return f"SearchWidget id: {id(self)}"
 
     #@+others
@@ -1673,7 +1673,7 @@ class TestFind (unittest.TestCase):
             x.do_wrap()
 
     #@+node:ekr.20210107151414.1: *4* TestFind.dump_tree
-    def dump_tree(self, tag=''):  # pragma: no cover (debugging)
+    def dump_tree(self, tag=''):  # pragma: no cover (skip)
         """Dump the test tree created by make_test_tree."""
         c = self.c
         print('dump_tree', tag)
@@ -1803,7 +1803,7 @@ class TestFind (unittest.TestCase):
                 f"     got: {result!r}")
     #@-others
 #@-others
-if __name__ == '__main__':  # pragma: no cover (not for py-cov)
+if __name__ == '__main__':  # pragma: no cover (skip)
     unittest.main()
 
 #@@language python
