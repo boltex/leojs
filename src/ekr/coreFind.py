@@ -977,11 +977,18 @@ class LeoFind:
     def make_regex_subs(self, change_text, groups):
         """
         Substitute group[i-1] for \\i strings in change_text.
+        
+        Groups is a tuple of strings, one for every matched group.
         """
+        
+        g.printObj(list(groups), tag=f"groups in {change_text!r}")
+
         def repl(match_object):
+            """re.sub calls this function once per group."""
             # # 1494...
             n = int(match_object.group(1)) - 1
             if 0 <= n < len(groups):
+                # Executed only if the change text contains groups that match.
                 return (
                     groups[n].
                         replace(r'\b', r'\\b').
@@ -1674,9 +1681,9 @@ class TestFind (unittest.TestCase):
         pattern = r'(.*)pattern'
         x.re_obj = re.compile(pattern)
         s = 'test pattern'
-        mo = x.re_obj.search(s)
-        change_text = r'\1Pattern'
-        x.make_regex_subs(change_text, mo)
+        m = x.re_obj.search(s)
+        change_text = r'\1Pattern\2'  # \2 is non-matching group.
+        x.make_regex_subs(change_text, m.groups())
     #@+node:ekr.20210108141032.1: *4* TestFind.match_word
     def test_match_word(self):
         x = self.x
