@@ -1093,15 +1093,15 @@ class LeoFind:
             mo = last_mo
         else:
             mo = re_obj.search(s, i, j)
-        ### if mo: g.trace(i, mo, mo.start(), mo.end())  ###
+        # if mo and mo.group(0) != 'def': g.trace(i, mo, mo.start(), mo.end())  ###
         while mo and 0 <= i <= len(s):
-            if mo.start() == mo.end():
-                if backwards:
+            if mo.start() == mo.end(): # pragma: no cover (To do)
+                if backwards: 
                     # Search backward using match instead of search.
                     i -= 1
                     while 0 <= i < len(s):
                         mo = re_obj.match(s, i, j)
-                        if mo: break
+                        if mo: break  ###???
                         i -= 1
                 else:
                     i += 1
