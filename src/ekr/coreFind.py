@@ -632,7 +632,7 @@ class LeoFind:
         s = ''.join(result)
         return count, s
     #@+node:ekr.20210106081141.5: *6* find.batch_word_replace
-    def batch_word_replace(self, s):  # pragma: no cover (to do)
+    def batch_word_replace(self, s):
         """
         Perform all whole word find/replace on s.
         return (count, new_s)
@@ -646,6 +646,7 @@ class LeoFind:
             find = find0.lower()
         count, prev_i, result = 0, 0, []
         while True:
+            progress = prev_i
             # #1166: Scan using s and find.
             i = s.find(find, prev_i)
             if i == -1:
@@ -657,7 +658,8 @@ class LeoFind:
                 result.append(change)
             else:
                 result.append(find0)
-            prev_i = i + len(find)
+            prev_i = max(prev_i + 1, i + len(find))  # 2021/01/08 (!)
+            assert prev_i > progress, prev_i
         # #1166: Complete the result using s0.
         result.append(s0[prev_i:])
         return count, ''.join(result)
@@ -1546,6 +1548,17 @@ class TestFind (unittest.TestCase):
         x.clone_find_all_cmd(settings)
         x.find_next_match(p=None)
         x.replace_all(settings)
+    #@+node:ekr.20210108190436.1: *4* TestFind.batch_word_replace
+    def test_batch_word_replace(self):
+        settings, x = self.settings, self.x
+        settings.find_text = 'b'
+        settings.change_text = 'B'
+        for ignore in (True, False):
+            settings.ignore_case = ignore
+            x.init(settings)
+            s = 'abc b z'
+            count, s2 = x.batch_word_replace(s)
+            assert count == 1 and s2 == 'abc B z', (ignore, count, repr(s2))
     #@+node:ekr.20210106133737.1: *4* TestFind.check_args
     def test_check_args(self):
         # Bad search patterns..
