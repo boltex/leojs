@@ -1154,7 +1154,8 @@ class LeoFind:
             last_mo = None; i = 0
             while i < len(s):
                 mo = re_obj.search(s, i, j)
-                if not mo: break
+                if not mo:
+                    break
                 i += 1
                 last_mo = mo
             mo = last_mo
@@ -1740,20 +1741,19 @@ class TestFind (unittest.TestCase):
         settings.find_text = pattern
         settings.change_text = r'\1Pattern'
         settings.pattern_match = True
-        s = 'test pattern'
-        i, j = 0, 0
+        table = (
+            'test pattern',  # Match.
+            'xxx',  # No match.
+        )
         for backwards in (True, False):
             for nocase in (True, False):
-                x.regex_helper(s, i, j, backwards, pattern, nocase)
+                for s in table:
+                    if backwards:
+                        i = j = len(s)
+                    else:
+                        i = j = 0
+                    x.regex_helper(s, i, j, backwards, pattern, nocase)
 
-
-        # x = self.x
-        # pattern = r'.?'
-        # x.match_obj = re.compile(pattern)
-        # table = (
-            # ###
-        
-        # )
         # for change_text, groups, expected in table:
             # result = x.make_regex_subs(change_text, groups)
             # assert result == expected, (
