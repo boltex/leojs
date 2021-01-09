@@ -742,7 +742,7 @@ class LeoFind:
             g.es_print("not searching headline or body")
             return False
         if not self.find_text:
-            g.es_print(f"\n{tag}: empty find patttern")
+            g.es_print(f"{tag}: empty find pattern")
             return False
         return True
     #@+node:ekr.20210102145531.121: *4* find.compile_pattern
@@ -1163,6 +1163,33 @@ class LeoFind:
                 return mo.start(), mo.end()
         self.match_obj = None
         return -1, -1
+    #@+node:ekr.20210109050100.1: *3* LeoFind: Tests
+    #@+node:ekr.20210109044638.1: *4* find.test_one, test_two
+    def test_one(self):
+        g.trace('=====')
+        settings = self.default_settings()
+        settings.p = settings.p.h
+        g.printObj(settings, tag='test_one: default_settings')
+        
+    def test_two(self):
+        g.trace('=====')
+    #@+node:ekr.20210109050619.1: *4* find.test_clone-find-all
+    def test_clone_find_all(self):
+        g.trace('=====')
+        settings, x = self.settings, self
+        # Regex find.
+        settings.find_text = r'^def\b'
+        settings.change_text = 'def'  # Don't actually change anything!
+        settings.pattern_match = True
+        x.clone_find_all_cmd(settings)
+        # Word find.
+        settings.find_text = 'def'
+        settings.match_word = True
+        settings.pattern_match = False
+        x.clone_find_all_cmd(settings)
+        # Suboutline only.
+        settings.suboutline_only = True
+        x.clone_find_all_cmd(settings)
     #@-others
 #@+node:ekr.20210103132816.1: ** class SearchWidget (coreFind.py)
 class SearchWidget:
@@ -1219,13 +1246,7 @@ class SearchWidget:
 class TestFind (unittest.TestCase):
     """Test cases for coreFind.py"""
     #@+others
-    #@+node:ekr.20210106170813.1: *3* TestFind: Birth
-    #@+node:ekr.20210107151326.1: *4* TestFind.ctor
-    def setUp(self):
-        self.c = coreTest.create_app()
-        self.x = coreFind.LeoFind(self.c)
-        self.settings = self.x.default_settings()
-        self.make_test_tree()
+    #@+node:ekr.20210106170813.1: *3* TestFind: Top level
     #@+node:ekr.20210106170840.1: *4* TestFind.make_test_tree
     def make_test_tree(self):
         """Make a test tree for other tests"""
@@ -1256,6 +1277,12 @@ class TestFind (unittest.TestCase):
             p.v.clearDirty()
             p.v.clearVisited()
 
+    #@+node:ekr.20210107151326.1: *4* TestFind.setUp
+    def setUp(self):
+        self.c = coreTest.create_app()
+        self.x = coreFind.LeoFind(self.c)
+        self.settings = self.x.default_settings()
+        self.make_test_tree()
     #@+node:ekr.20210106170636.1: *4* TestFind.test_tree
     def test_tree(self):
         table = (
@@ -1275,6 +1302,32 @@ class TestFind (unittest.TestCase):
             assert p.level() == level, (p.level(), level, p.h)
             # print(' '*p.level(), p.h)
             # g.printObj(g.splitLines(p.b), tag=p.h)
+    #@+node:ekr.20210109041513.1: *4* TestFind.test_all
+    def test_all(self):
+        """Experimental"""
+        g.cls() ###
+        c = coreTest.create_app()
+        x = coreFind.LeoFind(c)
+        tests = [getattr(x, z) for z in dir(x) if z.startswith('test_')]
+        test_names = [z.__name__ for z in tests]
+        
+        g.printObj(test_names, tag='===== Names of test functions in LeoFind')
+        try:
+            suite = unittest.TestSuite()
+            
+            for func in tests:
+                
+                class TestWrapper(unittest.TestCase):
+                    def runTest(self, func=func):
+                        # print('testing', func.__name__)
+                        return func()
+                        
+                suite.addTest(TestWrapper())
+            result = unittest.TestResult()
+            suite.run(result)
+        except Exception:
+            g.es_exception()
+                    
     #@+node:ekr.20210106141701.1: *3* Tests of Commands...
     #@+node:ekr.20210106124121.1: *4* TestFind.clone-find-all
     def test_clone_find_all(self):
@@ -1663,9 +1716,10 @@ class TestFind (unittest.TestCase):
     #@+node:ekr.20210108212435.1: *4* TestFind.make_regex_subs
     def test_make_regex_subs(self):
         x = self.x
-        ### x.match_obj = ???
+        pattern = r'.?'
+        x.match_obj = re.compile(pattern)
         table = (
-            
+            ###
         
         )
         for change_text, groups, expected in table:
@@ -1714,6 +1768,16 @@ class TestFind (unittest.TestCase):
         for s, expected in table:
             result = x.replace_back_slashes(s)
             assert result == expected, (s, result, expected)
+    #@+node:ekr.20210108221711.1: *4* TestFind.regex_helper (more work needed)
+    def test_regex_helper(self):
+        x = self.x
+        pattern = r'^pattern'
+        x.re_obj = re.compile(pattern)
+        s = 'test pattern'
+        i, j = 0, 0
+        for backwards in (True, False):
+            for nocase in (True, False):
+                x.regex_helper(s, i, j, backwards, pattern, nocase)
     #@+node:ekr.20210108210039.1: *4* TestFind.switch_style
     def test_switch_style(self):
         x = self.x
