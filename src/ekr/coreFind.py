@@ -706,7 +706,6 @@ class LeoFind:
             groups = self.match_obj.groups()
             if groups:
                 change_text = self.make_regex_subs(change_text, groups)
-        # change_text = change_text.replace('\\n','\n').replace('\\t','\t')
         change_text = self.replace_back_slashes(change_text)
         for w2 in (w, self.s_ctrl):
             if start != end:
@@ -856,7 +855,6 @@ class LeoFind:
                 attempts += 1
                 p = self.nextNodeAfterFail(p)
                 if p:  # Found another node: select the proper pane.
-                    # g.trace('Try', p.h)
                     self.in_headline = self.first_search_pane()
                     self.initNextText(p)
         return None, None, None
@@ -908,11 +906,10 @@ class LeoFind:
             and not c.hoistStack)
         # Move to the next position.
         p = p.threadBack() if self.reverse else p.threadNext()
-        # g.trace(p and p.h or 'None')
         # Check it.
-        if p and self.outsideSearchRange(p):
+        if p and self.outside_search_range(p):
             return None
-        if not p and wrap:  # pragma: no cover (to do)
+        if not p and wrap:
             # Stateless wrap: Just set wrapPos and p.
             self.wrapPos = 0 if self.reverse else len(p.b)
             p = self.do_wrap()
@@ -930,17 +927,17 @@ class LeoFind:
             p = p.lastNode()
             return p
         return c.rootPosition()
-    #@+node:ekr.20210102145531.120: *6* find.outsideSearchRange
-    def outsideSearchRange(self, p):
+    #@+node:ekr.20210102145531.120: *6* find.outside_search_range
+    def outside_search_range(self, p):
         """
         Return True if the search is about to go outside its range, assuming
         both the headline and body text of the present node have been searched.
         """
         c = self.c
         if not p:
-            return True  # pragma: no cover (to do)
+            return True  # pragma: no cover (minor)
         if self.node_only:
-            return True  # pragma: no cover (to do)
+            return True  # pragma: no cover (minor)
         if self.suboutline_only:
             if self.onlyPosition:
                 if p != self.onlyPosition and not self.onlyPosition.isAncestorOf(p):
@@ -948,7 +945,7 @@ class LeoFind:
             else:  # pragma: no cover (defensive)
                 g.trace('Can not happen: onlyPosition!', p.h)
                 return True
-        if c.hoistStack:  # pragma: no cover (to do)
+        if c.hoistStack:  # pragma: no cover (defensive)
             bunch = c.hoistStack[-1]
             if not bunch.p.isAncestorOf(p):
                 g.trace('outside hoist', p.h)
@@ -969,7 +966,7 @@ class LeoFind:
             (self.reverse and not self.in_headline) or
             (not self.reverse and self.in_headline)))
     #@+node:ekr.20210102145531.101: *4* find.make_regex_subs
-    def make_regex_subs(self, change_text, groups):  # pragma: no cover (to do)
+    def make_regex_subs(self, change_text, groups):
         """
         Substitute group[i-1] for \\i strings in change_text.
         """
@@ -989,11 +986,6 @@ class LeoFind:
             return match_object.group(0)
 
         result = re.sub(r'\\([0-9])', repl, change_text)
-        # print(
-            # f"make_regex_subs:\n"
-            # f"change_text: {change_text!s}\n"
-            # f"     groups: {groups!s}\n"
-            # f"     result: {result!s}")
         return result
     #@+node:ekr.20210102145531.131: *4* find.replace_back_slashes
     def replace_back_slashes(self, s):
@@ -1142,7 +1134,7 @@ class LeoFind:
         if not re_obj:  # pragma: no cover (defensive)
             g.trace('can not happen: no re_obj')
             return -1, -1
-        if backwards:  # pragma: no cover (to do)
+        if backwards:
             # Scan to the last match using search here.
             last_mo = None; i = 0
             while i < len(s):
@@ -1154,8 +1146,7 @@ class LeoFind:
         else:
             mo = re_obj.search(s, i, j)
         while mo and 0 <= i <= len(s):
-            # Bug fix: 2013/12/27: must be 0 <= i <= len(s)
-            if mo.start() == mo.end():  # pragma: no cover (to do)
+            if mo.start() == mo.end():
                 if backwards:
                     # Search backward using match instead of search.
                     i -= 1
@@ -1656,6 +1647,21 @@ class TestFind (unittest.TestCase):
         for find in ('xxx', 'def'):
             settings.find_text = find
             x.find_next_batch_match(p)
+    #@+node:ekr.20210108212435.1: *4* TestFind.make_regex_subs
+    def test_make_regex_subs(self):
+        x = self.x
+        ### x.match_obj = ???
+        table = (
+            
+        
+        )
+        for change_text, groups, expected in table:
+            result = x.make_regex_subs(change_text, groups)
+            assert result == expected, (
+                f"change_text: {change_text}\n"
+                f"     groups: {groups}\n"
+                f"   expected: {expected}\n"
+                f"        got: {result}")
     #@+node:ekr.20210108141032.1: *4* TestFind.match_word
     def test_match_word(self):
         x = self.x
