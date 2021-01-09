@@ -345,8 +345,8 @@ class LeoFind:
         if not self.check_args(tag):
             return None, None, None
         # Always start in the root position.
-        p = c.rootPosition()
-        c.redraw(p)  # Required.
+        root = c.rootPosition()
+        c.redraw(root)  # Required.
         c.bodyWantsFocusNow()
         # Set up the search.
         if defFlag:
@@ -355,8 +355,8 @@ class LeoFind:
         else:
             self.find_text = self.find_text + ' ='
         # Save previous settings.
-        self.saveBeforeFindDef(p)
-        self.setFindDefOptions(p)
+        self.saveBeforeFindDef(root)
+        self.setFindDefOptions(root)
         count, found = 0, False
         self.find_seen = set()
         if settings.use_cff:
@@ -364,13 +364,15 @@ class LeoFind:
             found = count > 0
         else:
             # #1592.  Ignore hits under control of @nosearch
+            ### g.pdb()
+            p = root
             while p:
                 progress = p.v
                 p, pos, newpos = self.find_next_match(p)
                 found = pos is not None
                 if found and not g.inAtNosearch(p):
                     break
-                assert p.v != progress, p.h  # pragma: no cover (to do)
+                assert not p or p.v != progress, p.h  
         if not found and defFlag and not self.find_text.startswith('class'):
             # Leo 5.7.3: Look for an alternative defintion of function/methods.
             word2 = self.switchStyle(self.find_text)
@@ -379,15 +381,16 @@ class LeoFind:
                 if settings.use_cff:
                     count = self.clone_find_all_cmd(settings)
                     found = count > 0
-                else:  # pragma: no cover (to do)
+                else:
                     # #1592.  Ignore hits under control of @nosearch
+                    p = root  # bug fix!
                     while p:
                         progress = p.v
                         p, pos, newpos = self.find_next_match(p)
                         found = pos is not None
                         if found and not g.inAtNosearch(p):
-                            break
-                        assert p.v != progress, p.h
+                            break  # pragma: no cover (minor)
+                        assert not p or p.v != progress, p.h
         if not found:
             return None, None, None
         if settings.use_cff:
@@ -396,7 +399,7 @@ class LeoFind:
                 # It's annoying to create a clone in this case.
                 # Undo the clone find and just select the proper node.
                 last.doDelete()
-                self.find_next_match(p)
+                self.find_next_match(root)
             else:  # pragma: no cover (to do)
                 c.selectPosition(last)
             return None, None, last
@@ -1368,23 +1371,37 @@ class TestFind (unittest.TestCase):
         assert s == settings.find_text, repr(s)
     #@+node:ekr.20210106180832.1: *4* TestFind.find-def
     def test_find_def(self):
-        settings, x = self.settings, self.x
+        c, settings, x = self.c, self.settings, self.x
+        root = c.rootPosition()
         settings.find_text = 'child5'
         # Test 1.
         p, pos, newpos = x.find_def(settings)
         assert p and p.h == 'child 5'
         s = p.b[pos:newpos]
         assert s == 'def child5', repr(s)
-        # Test 2: use_cff.
+        # Test 2: switch style.
+        settings.find_text = 'child_5'
+        x.find_def(settings)
+        # Test3: not found after switching style.
+        settings.p = root.next()
+        settings.find_text = 'def notFound'
+        ### g.pdb()
+        x.find_def(settings)
+        
+    def test_find_def_use_cff(self):
+        settings, x = self.settings, self.x
+        settings.find_text = 'child5'
+        # Test 1: Set p *without* use_cff.
+        p, pos, newpos = x.find_def(settings)
+        assert p and p.h == 'child 5'
+        s = p.b[pos:newpos]
+        assert s == 'def child5', repr(s)
+        # Test 2.
         settings.use_cff = True
         x.find_def(settings)
         # Test 3: switch style.
         settings.find_text = 'child_5'
         x.find_def(settings)
-        # Make check_args fail.
-        settings.find_text = settings.change_text = None
-        x.find_def(settings)
-
     #@+node:ekr.20210106181550.1: *4* TestFind.find-var
     def test_find_var(self):
         settings, x = self.settings, self.x
