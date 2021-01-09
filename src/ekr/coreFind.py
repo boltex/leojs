@@ -544,7 +544,10 @@ class LeoFind:
         p = c.p
         u.afterChangeGroup(p, undoType, reportFlag=True)
         t2 = time.process_time()
-        g.es_print(f"changed {count} instance{g.plural(count)} in {t2 - t1:4.2f} sec.")
+        if not getattr(g, 'unitTesting', None):  # pragma: no cover (skipped)
+            g.es_print(
+                f"changed {count} instance{g.plural(count)} "
+                f"in {t2 - t1:4.2f} sec.")
         #
         # Bugs #947, #880 and #722:
         # Set ancestor @<file> nodes by brute force.
@@ -739,10 +742,12 @@ class LeoFind:
     #@+node:ekr.20210102145531.137: *4* find.check_args
     def check_args(self, tag):
         if not self.search_headline and not self.search_body:
-            g.es_print("not searching headline or body")
+            if not getattr(g, 'unitTesting', None):
+                g.es_print("not searching headline or body")  # pragma: no cover (skipped)
             return False
         if not self.find_text:
-            g.es_print(f"{tag}: empty find pattern")
+            if not getattr(g, 'unitTesting', None):
+                g.es_print(f"{tag}: empty find pattern")  # pragma: no cover (skipped)
             return False
         return True
     #@+node:ekr.20210102145531.121: *4* find.compile_pattern
@@ -763,7 +768,8 @@ class LeoFind:
             self.re_obj = re.compile(s, flags)
             return True
         except Exception:
-            g.warning('invalid regular expression:', self.find_text)
+            if not getattr(g, 'unitTesting', None):  # pragma: no cover (skipped)
+                g.warning('invalid regular expression:', self.find_text)
             return False
     #@+node:ekr.20210102145531.114: *4* find.compute_result_status
     def compute_result_status(self, find_all_flag=False):
@@ -1304,12 +1310,9 @@ class TestFind (unittest.TestCase):
     def test_all(self):
         """Run all test_* methods in LeoFind class as if they were unit tests."""
         
-        g.cls() ###
-        
-        # Create another TestCase so subTest will work.
-        ###class OuterTestCase(unittest.TestCase):
-            
-            ###def test_inner_test_all(self):
+        g.cls()
+        g.unitTesting = True
+
         c = coreTest.create_app()
         x = coreFind.LeoFind(c)
         tests = [getattr(x, z) for z in dir(x) if z.startswith('test_')]
@@ -1317,21 +1320,22 @@ class TestFind (unittest.TestCase):
         
         g.printObj(test_names, tag='===== Names of test functions in LeoFind')
         
+        result = unittest.TestResult()
+        suite = unittest.TestSuite()
         for func in tests:
             
             class TestWrapper(unittest.TestCase):
                 def runTest(self, func=func):
                     try:
                         func()
-                        # print('PASS:', func.__name__)
                     except Exception:
                         print('FAIL:', func.__name__)
                         g.es_exception()
                         raise
 
             test = TestWrapper()
-            test.run()
-                    
+            suite.addTest(test)
+        suite.run(result)
     #@+node:ekr.20210106141701.1: *3* Tests of Commands...
     #@+node:ekr.20210106124121.1: *4* TestFind.clone-find-all
     def test_clone_find_all(self):
