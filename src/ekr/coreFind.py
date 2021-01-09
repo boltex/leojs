@@ -981,7 +981,7 @@ class LeoFind:
         Groups is a tuple of strings, one for every matched group.
         """
         
-        g.printObj(list(groups), tag=f"groups in {change_text!r}")
+        # g.printObj(list(groups), tag=f"groups in {change_text!r}")
 
         def repl(match_object):
             """re.sub calls this function once per group."""
@@ -1675,13 +1675,9 @@ class TestFind (unittest.TestCase):
                     x.init_next_text(settings.p)
     #@+node:ekr.20210108212435.1: *4* TestFind.make_regex_subs
     def test_make_regex_subs(self):
-        
-        # settings, x = self.settings, self.x
         x = self.x
-        pattern = r'(.*)pattern'
-        x.re_obj = re.compile(pattern)
-        s = 'test pattern'
-        m = x.re_obj.search(s)
+        x.re_obj = re.compile(r'(.*)pattern')  # The search pattern.
+        m = x.re_obj.search('test pattern')  # The find pattern.
         change_text = r'\1Pattern\2'  # \2 is non-matching group.
         x.make_regex_subs(change_text, m.groups())
     #@+node:ekr.20210108141032.1: *4* TestFind.match_word
