@@ -1169,31 +1169,6 @@ class LeoFind:
                 return mo.start(), mo.end()
         self.match_obj = None
         return -1, -1
-    #@+node:ekr.20210109050100.1: *3* LeoFind: Tests
-    #@+node:ekr.20210109044638.1: *4* find.test_one
-    def test_one(self):
-        settings = self.default_settings()
-        settings.p = settings.p.h
-        g.printObj(settings, tag='test_one: default_settings')
-    #@+node:ekr.20210109050619.1: *4* find.test_clone-find-all
-    def test_clone_find_all(self):
-        settings, x = self.default_settings(), self
-        # Regex find.
-        settings.find_text = r'^def\b'
-        settings.change_text = 'def'  # Don't actually change anything!
-        settings.pattern_match = True
-        x.clone_find_all_cmd(settings)
-        # Word find.
-        settings.find_text = 'def'
-        settings.match_word = True
-        settings.pattern_match = False
-        x.clone_find_all_cmd(settings)
-        # Suboutline only.
-        settings.suboutline_only = True
-        x.clone_find_all_cmd(settings)
-    #@+node:ekr.20210109054145.1: *4* find_test_fail
-    def test_fail(self):
-        assert False, 'LeoFind.test_fail'
     #@-others
 #@+node:ekr.20210103132816.1: ** class SearchWidget (coreFind.py)
 class SearchWidget:
@@ -1306,36 +1281,6 @@ class TestFind (unittest.TestCase):
             assert p.level() == level, (p.level(), level, p.h)
             # print(' '*p.level(), p.h)
             # g.printObj(g.splitLines(p.b), tag=p.h)
-    #@+node:ekr.20210109041513.1: *4* TestFind.test_all
-    def test_all(self):
-        """Run all test_* methods in LeoFind class as if they were unit tests."""
-        # To do: report each test in the test suite as separate tests.
-        try:
-            g.unitTesting = True
-            c = coreTest.create_app()
-            x = coreFind.LeoFind(c)
-            tests = [getattr(x, z) for z in dir(x) if z.startswith('test_')]
-            if 0:
-                test_names = [z.__name__ for z in tests]
-                g.printObj(test_names, tag='test functions in LeoFind')
-            result = unittest.TestResult()
-            suite = unittest.TestSuite()
-            for func in tests:
-                
-                class TestWrapper(unittest.TestCase):
-                    def runTest(self, func=func):
-                        try:
-                            func()
-                        except Exception:
-                            print('FAIL:', func.__name__)
-                            g.es_exception()
-                            raise
-        
-                test = TestWrapper()
-                suite.addTest(test)
-            suite.run(result)
-        finally:
-            g.unitTesting = True
     #@+node:ekr.20210106141701.1: *3* Tests of Commands...
     #@+node:ekr.20210106124121.1: *4* TestFind.clone-find-all
     def test_clone_find_all(self):
@@ -1723,20 +1668,15 @@ class TestFind (unittest.TestCase):
                     x.init_next_text(settings.p)
     #@+node:ekr.20210108212435.1: *4* TestFind.make_regex_subs
     def test_make_regex_subs(self):
-        x = self.x
-        pattern = r'.?'
-        x.match_obj = re.compile(pattern)
-        table = (
-            ###
         
-        )
-        for change_text, groups, expected in table:
-            result = x.make_regex_subs(change_text, groups)
-            assert result == expected, (
-                f"change_text: {change_text}\n"
-                f"     groups: {groups}\n"
-                f"   expected: {expected}\n"
-                f"        got: {result}")
+        # settings, x = self.settings, self.x
+        x = self.x
+        pattern = r'(.*)pattern'
+        x.re_obj = re.compile(pattern)
+        s = 'test pattern'
+        mo = x.re_obj.search(s)
+        change_text = r'\1Pattern'
+        x.make_regex_subs(change_text, mo)
     #@+node:ekr.20210108141032.1: *4* TestFind.match_word
     def test_match_word(self):
         x = self.x
@@ -1776,8 +1716,6 @@ class TestFind (unittest.TestCase):
             for word in (True, False):
                 settings.whole_word = word
                 x.init(settings)
-                # if word and not regex:
-                    # g.pdb()
                 x.replace_all_helper(s)
     #@+node:ekr.20210106140751.1: *4* TestFind.replace_back_slashes
     def test_replace_back_slashes(self):
@@ -1791,16 +1729,35 @@ class TestFind (unittest.TestCase):
         for s, expected in table:
             result = x.replace_back_slashes(s)
             assert result == expected, (s, result, expected)
-    #@+node:ekr.20210108221711.1: *4* TestFind.regex_helper (more work needed)
+    #@+node:ekr.20210108221711.1: *4* TestFind.regex_helper
     def test_regex_helper(self):
-        x = self.x
-        pattern = r'^pattern'
+        settings, x = self.settings, self.x
+        pattern = r'(.*)pattern'
         x.re_obj = re.compile(pattern)
+        settings.find_text = pattern
+        settings.change_text = r'\1Pattern'
+        settings.pattern_match = True
         s = 'test pattern'
         i, j = 0, 0
         for backwards in (True, False):
             for nocase in (True, False):
                 x.regex_helper(s, i, j, backwards, pattern, nocase)
+
+
+        # x = self.x
+        # pattern = r'.?'
+        # x.match_obj = re.compile(pattern)
+        # table = (
+            # ###
+        
+        # )
+        # for change_text, groups, expected in table:
+            # result = x.make_regex_subs(change_text, groups)
+            # assert result == expected, (
+                # f"change_text: {change_text}\n"
+                # f"     groups: {groups}\n"
+                # f"   expected: {expected}\n"
+                # f"        got: {result}")
     #@+node:ekr.20210108210039.1: *4* TestFind.switch_style
     def test_switch_style(self):
         x = self.x
