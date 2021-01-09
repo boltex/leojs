@@ -615,7 +615,7 @@ class LeoFind:
         count, prev_i, result = 0, 0, []
 
         flags = re.MULTILINE
-        if self.ignore_case:  # pragma: no cover (to do)
+        if self.ignore_case:
             flags |= re.IGNORECASE
         for m in re.finditer(self.find_text, s, flags):
             count += 1
@@ -623,7 +623,7 @@ class LeoFind:
             result.append(s[prev_i:i])
             # #1748.
             groups = m.groups()
-            if groups:  # pragma: no cover (to do)
+            if groups:
                 change_text = self.make_regex_subs(self.change_text, groups)
             else:
                 change_text = self.change_text
@@ -1572,6 +1572,28 @@ class TestFind (unittest.TestCase):
             s = 'abc b z'
             count, s2 = x.batch_plain_replace(s)
             assert count == 2 and s2 == 'aBc B z', (ignore, count, repr(s2))
+    #@+node:ekr.20210108203711.1: *4* TestFind.batch_regex_replace
+    def test_batch_regex_replace(self):
+        settings, x = self.settings, self.x
+        # settings.find_text = 'b'
+        # settings.change_text = 'B'
+        s = 'abc b z'
+        table = (
+            (1, 2, 'B', 'B', 'aBc B z'),
+            (0, 2, 'b', 'B', 'aBc B z'),
+            (1, 2, r'([BX])', 'B', 'aBc B z'),
+        )
+        for ignore, count, find, change, expected_s in table:
+            settings.ignore_case = bool(ignore)
+            settings.find_text = find
+            settings.change_text = change
+            x.init(settings)
+            actual_count, actual_s = x.batch_regex_replace(s)
+            assert actual_count == count and actual_s == expected_s, (
+                f"ignore: {ignore} find: {find} change {change}\n"
+                f"expected count: {count} s: {expected_s}\n"
+                f"     got count: {actual_count} s: {actual_s}")
+               
     #@+node:ekr.20210106133737.1: *4* TestFind.check_args
     def test_check_args(self):
         # Bad search patterns..
