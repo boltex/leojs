@@ -374,7 +374,7 @@ class LeoFind:
                 assert not p or p.v != progress, p.h  
         if not found and defFlag and not self.find_text.startswith('class'):
             # Leo 5.7.3: Look for an alternative defintion of function/methods.
-            word2 = self.switchStyle(self.find_text)
+            word2 = self.switch_style(self.find_text)
             if word2:
                 self.find_text = prefix + ' ' + word2
                 if settings.use_cff:
@@ -430,18 +430,19 @@ class LeoFind:
         self.search_body = True
         self.search_headline = False
         self.whole_word = True
-    #@+node:ekr.20210102145531.29: *6* find.switchStyle
-    def switchStyle(self, word):
+    #@+node:ekr.20210102145531.29: *6* find.switch_style
+    def switch_style(self, word):
         """
         Switch between camelCase and underscore_style function defintiions.
         Return None if there would be no change.
         """
         s = word
+        if not s:
+            return None
+        # Don't return something that looks like a class. Changed!
+        if s[0].isupper():
+            return None
         if s.find('_') > -1:
-            if s.startswith('_'):
-                # Don't return something that looks like a class.
-                return None  # pragma: no cover (to do)
-            #
             # Convert to CamelCase
             s = s.lower()
             while s:
@@ -450,9 +451,7 @@ class LeoFind:
                     break
                 s = s[:i] + s[i + 1 :].capitalize()
             return s
-        #
         # Convert to underscore_style.
-        # pragma: no cover (to do)
         result = []
         for i, ch in enumerate(s):
             if i > 0 and ch.isupper():
@@ -1575,8 +1574,6 @@ class TestFind (unittest.TestCase):
     #@+node:ekr.20210108203711.1: *4* TestFind.batch_regex_replace
     def test_batch_regex_replace(self):
         settings, x = self.settings, self.x
-        # settings.find_text = 'b'
-        # settings.change_text = 'B'
         s = 'abc b z'
         table = (
             (1, 2, 'B', 'B', 'aBc B z'),
@@ -1689,6 +1686,21 @@ class TestFind (unittest.TestCase):
         for s, expected in table:
             result = x.replace_back_slashes(s)
             assert result == expected, (s, result, expected)
+    #@+node:ekr.20210108210039.1: *4* TestFind.switch_style
+    def test_switch_style(self):
+        x = self.x
+        table = (
+            ('', None),
+            ('TestClass', None),
+            ('camelCase', 'camel_case'),
+            ('under_score', 'underScore'),
+        )
+        for s, expected in table:
+            result = x.switch_style(s)
+            assert result == expected, (
+                f"       s: {s}\n"
+                f"expected: {expected!r}\n"
+                f"     got: {result!r}")
     #@-others
 #@-others
 if __name__ == '__main__':  # pragma: no cover (not for py-cov)
