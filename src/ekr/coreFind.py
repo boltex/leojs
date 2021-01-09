@@ -853,7 +853,7 @@ class LeoFind:
             else:
                 # Switch to the next/prev node, if possible.
                 attempts += 1
-                p = self.nextNodeAfterFail(p)
+                p = self.next_node_after_fail(p)
                 if p:  # Found another node: select the proper pane.
                     self.in_headline = self.first_search_pane()
                     self.init_next_text(p)
@@ -896,8 +896,8 @@ class LeoFind:
         w.setAllText(s)
         w.setInsertPoint(ins)
         return ins  # For tests.
-    #@+node:ekr.20210102145531.119: *5* find.nextNodeAfterFail & helpers
-    def nextNodeAfterFail(self, p):
+    #@+node:ekr.20210102145531.119: *5* find.next_node_after_fail & helpers
+    def next_node_after_fail(self, p):
         """Return the next node after a failed search or None."""
         c = self.c
         # Wrapping is disabled by any limitation of search.
@@ -1681,6 +1681,15 @@ class TestFind (unittest.TestCase):
         x.match_word("def spam():", 0, "spam")
         x.match_word("def spam():", 0, "xxx")
         
+    #@+node:ekr.20210108221001.1: *4* TestFind.next_node_after_fail
+    def test_next_node_after_fail(self):
+        settings, x = self.settings, self.x
+        for reverse in (True, False):
+            settings.reverse = reverse
+            for wrapping in (True, False):
+                settings.wrapping = wrapping
+                x.init(settings)
+                x.next_node_after_fail(settings.p)
     #@+node:ekr.20210108141944.1: *4* TestFind.plain_helper
     def test_plain_helper(self):
         settings, x = self.settings, self.x
