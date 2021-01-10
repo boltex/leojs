@@ -2,18 +2,366 @@
 #@+leo-ver=5-thin
 #@+node:ekr.20210102120444.2: * @file src/ekr/coreCommands.py
 #@@first
+"""Leo's user commands, from various files."""
 
 import os
+import re
 import sys
 import time
 
+# For testing, use the *real* leoGlobals.
 from leo.core import leoGlobals as g
+# from src.ekr import coreGlobals as g
 
+# Félix: Feel free to ignore.
 def cmd(name):
     """Command decorator for the Commands class."""
-    return g.new_cmd_decorator(name, ['c',])
+    # return g.new_cmd_decorator(name, ['c',])
 
 #@+others
+#@+node:ekr.20210102121211.1: ** from commanderFindCommands.py
+#@+node:ekr.20210102121211.2: *3* c.cffm & c.cfam
+@g.commander_command('clone-find-all-marked')
+@g.commander_command('cfam')
+def cloneFindAllMarked(self, event=None):
+    """
+    clone-find-all-marked, aka cfam.
+
+    Create an organizer node whose descendants contain clones of all marked
+    nodes. The list is *not* flattened: clones appear only once in the
+    descendants of the organizer node.
+    """
+    c = self
+    cloneFindMarkedHelper(c, flatten=False)
+
+@g.commander_command('clone-find-all-flattened-marked')
+@g.commander_command('cffm')
+def cloneFindAllFlattenedMarked(self, event=None):
+    """
+    clone-find-all-flattened-marked, aka cffm.
+
+    Create an organizer node whose direct children are clones of all marked
+    nodes. The list is flattened: every cloned node appears as a direct
+    child of the organizer node, even if the clone also is a descendant of
+    another cloned node.
+    """
+    c = self
+    cloneFindMarkedHelper(c, flatten=True)
+#@+node:ekr.20210102121211.3: *3* c.cloneFindParents
+@g.commander_command('clone-find-parents')
+def cloneFindParents(self, event=None):
+    """
+    Create an organizer node whose direct children are clones of all
+    parents of the selected node, which must be a clone.
+    """
+    c, u = self, self.undoer
+    p = c.p
+    if not p: return
+    if not p.isCloned():
+        g.es(f"not a clone: {p.h}")
+        return
+    p0 = p.copy()
+    undoType = 'Find Clone Parents'
+    aList = c.vnode2allPositions(p.v)
+    if not aList:
+        g.trace('can not happen: no parents')
+        return
+    # Create the node as the last top-level node.
+    # All existing positions remain valid.
+    u.beforeChangeGroup(p0, undoType)
+    top = c.rootPosition()
+    while top.hasNext():
+        top.moveToNext()
+    b = u.beforeInsertNode(p0)
+    found = top.insertAfter()
+    found.h = f"Found: parents of {p.h}"
+    u.afterInsertNode(found, 'insert', b)
+    seen = []
+    for p2 in aList:
+        parent = p2.parent()
+        if parent and parent.v not in seen:
+            seen.append(parent.v)
+            b = u.beforeCloneNode(parent)
+            clone = parent.clone()
+            clone.moveToLastChildOf(found)
+            u.afterCloneNode(clone, 'clone', b)
+    u.afterChangeGroup(p0, undoType)
+    c.selectPosition(found)
+    c.setChanged(True)
+    c.redraw()
+#@+node:ekr.20210102121211.4: *3* def cloneFindMarkedHelper
+def cloneFindMarkedHelper(c, flatten):
+    """Helper for clone-find-marked commands."""
+
+    def isMarked(p):
+        return p.isMarked()
+
+    c.cloneFindByPredicate(
+        generator=c.all_unique_positions,
+        predicate=isMarked,
+        failMsg='No marked nodes',
+        flatten=flatten,
+        redraw=True,
+        undoType='clone-find-marked',
+    )
+    # Unmarking all nodes is convenient.
+    for v in c.all_unique_nodes():
+        if v.isMarked():
+            v.clearMarked()
+    found = c.lastTopLevel()
+    c.selectPosition(found)
+    found.b = f"# Found {found.numberOfChildren()} marked nodes"
+#@+node:ekr.20210110061148.1: ** from importCommands.py
+#@+node:ekr.20210110061158.1: *3* class RecursiveImportController
+class RecursiveImportController:
+    """Recursively import all python files in a directory and clean the result."""
+    #@+others
+    #@+node:ekr.20210110061158.2: *4* ric.ctor
+    def __init__(self, c, kind,
+        # force_at_others = False, #tag:no-longer-used
+        add_context=None,  # Override setting only if True/False
+        add_file_context=None,  # Override setting only if True/False
+        add_path=True,
+        recursive=True,
+        safe_at_file=True,
+        theTypes=None,
+        ignore_pattern=None,
+    ):
+        """Ctor for RecursiveImportController class."""
+        self.c = c
+        self.add_path = add_path
+        self.file_pattern = re.compile(r'^(([@])+(auto|clean|edit|file|nosent))')
+        self.kind = kind
+            # in ('@auto', '@clean', '@edit', '@file', '@nosent')
+        # self.force_at_others = force_at_others #tag:no-longer-used
+        self.recursive = recursive
+        self.root = None
+        self.safe_at_file = safe_at_file
+        self.theTypes = theTypes
+        self.ignore_pattern = ignore_pattern or re.compile(r'\.git|node_modules')
+        # #1605:
+
+        def set_bool(setting, val):
+            if val not in (True, False):
+                return
+            c.config.set(None, 'bool', setting, val, warn=True)
+            
+        set_bool('add-context-to-headlines', add_context)
+        set_bool('add-file-context-to-headlines', add_file_context)
+    #@+node:ekr.20210110061158.3: *4* ric.run & helpers
+    def run(self, dir_):
+        """
+        Import all files whose extension matches self.theTypes in dir_.
+        In fact, dir_ can be a path to a single file.
+        """
+        if self.kind not in ('@auto', '@clean', '@edit', '@file', '@nosent'):
+            g.es('bad kind param', self.kind, color='red')
+        try:
+            c = self.c
+            p1 = self.root = c.p
+            t1 = time.time()
+            g.app.disable_redraw = True
+            bunch = c.undoer.beforeChangeTree(p1)
+            # Leo 5.6: Always create a new last top-level node.
+            last = c.lastTopLevel()
+            parent = last.insertAfter()
+            parent.v.h = 'imported files'
+            # Leo 5.6: Special case for a single file.
+            self.n_files = 0
+            if g.os_path_isfile(dir_):
+                g.es_print('\nimporting file:', dir_)
+                self.import_one_file(dir_, parent)
+            else:
+                self.import_dir(dir_, parent)
+            self.post_process(parent, dir_)
+                # Fix # 1033.
+            c.undoer.afterChangeTree(p1, 'recursive-import', bunch)
+        except Exception:
+            g.es_print('Exception in recursive import')
+            g.es_exception()
+        finally:
+            g.app.disable_redraw = False
+            for p2 in parent.self_and_subtree(copy=False):
+                p2.contract()
+            c.redraw(parent)
+        t2 = time.time()
+        n = len(list(parent.self_and_subtree()))
+        g.es_print(
+            f"imported {n} node{g.plural(n)} "
+            f"in {self.n_files} file{g.plural(self.n_files)} "
+            f"in {t2 - t1:2.2f} seconds")
+    #@+node:ekr.20210110061158.4: *5* ric.import_dir
+    def import_dir(self, dir_, parent):
+        """Import selected files from dir_, a directory."""
+        if g.os_path_isfile(dir_):
+            files = [dir_]
+        else:
+            g.es_print('importing directory:', dir_)
+            files = os.listdir(dir_)
+        dirs, files2 = [], []
+        for path in files:
+            try:
+                # Fix #408. Catch path exceptions.
+                # The idea here is to keep going on small errors.
+                path = g.os_path_join(dir_, path)
+                if g.os_path_isfile(path):
+                    name, ext = g.os_path_splitext(path)
+                    if ext in self.theTypes:
+                        files2.append(path)
+                elif self.recursive:
+                    if not self.ignore_pattern.search(path):
+                        dirs.append(path)
+            except OSError:
+                g.es_print('Exception computing', path)
+                g.es_exception()
+        if files or dirs:
+            assert parent and parent.v != self.root.v, g.callers()
+            parent = parent.insertAsLastChild()
+            parent.v.h = dir_
+            if files2:
+                for f in files2:
+                    if not self.ignore_pattern.search(f):
+                        self.import_one_file(f, parent=parent)
+            if dirs:
+                assert self.recursive
+                for dir_ in sorted(dirs):
+                    self.import_dir(dir_, parent)
+    #@+node:ekr.20210110061158.5: *5* ric.import_one_file
+    def import_one_file(self, path, parent):
+        """Import one file to the last top-level node."""
+        c = self.c
+        self.n_files += 1
+        assert parent and parent.v != self.root.v, g.callers()
+        if self.kind == '@edit':
+            p = parent.insertAsLastChild()
+            p.v.h = path.replace('\\', '/')
+            s, e = g.readFileIntoString(path, kind=self.kind)
+            p.v.b = s
+            return
+        # #1484: Use this for @auto as well.
+        c.importCommands.importFilesCommand(
+            files=[path],
+            parent=parent,
+            redrawFlag=False,
+            shortFn=True,
+            treeType='@file',  # '@auto','@clean','@nosent' cause problems.
+        )
+        p = parent.lastChild()
+        p.h = self.kind + p.h[5:]
+            # Bug fix 2017/10/27: honor the requested kind.
+        if self.safe_at_file:
+            p.v.h = '@' + p.v.h
+    #@+node:ekr.20210110061158.6: *5* ric.post_process & helpers
+    def post_process(self, p, prefix):
+        """
+        Traverse p's tree, replacing all nodes that start with prefix
+        by the smallest equivalent @path or @file node.
+        """
+        self.fix_back_slashes(p)
+        prefix = prefix.replace('\\', '/')
+        if self.kind not in ('@auto', '@edit'):
+            self.remove_empty_nodes(p)
+        if p.firstChild():
+            self.minimize_headlines(p.firstChild(), prefix)
+        self.clear_dirty_bits(p)
+        self.add_class_names(p)
+    #@+node:ekr.20210110061158.7: *6* ric.add_class_names
+    def add_class_names(self, p):
+        """Add class names to headlines for all descendant nodes."""
+        # pylint: disable=no-else-continue
+        after, class_name = None, None
+        class_paren_pattern = re.compile(r'(.*)\(.*\)\.(.*)')
+        paren_pattern = re.compile(r'(.*)\(.*\.py\)')
+        for p in p.self_and_subtree(copy=False):
+            # Part 1: update the status.
+            m = self.file_pattern.match(p.h)
+            if m:
+                # prefix = m.group(1)
+                # fn = g.shortFileName(p.h[len(prefix):].strip())
+                after, class_name = None, None
+                continue
+            elif p.h.startswith('@path '):
+                after, class_name = None, None
+            elif p.h.startswith('class '):
+                class_name = p.h[5:].strip()
+                if class_name:
+                    after = p.nodeAfterTree()
+                    continue
+            elif p == after:
+                after, class_name = None, None
+            # Part 2: update the headline.
+            if class_name:
+                if p.h.startswith(class_name):
+                    m = class_paren_pattern.match(p.h)
+                    if m:
+                        p.h = f"{m.group(1)}.{m.group(2)}".rstrip()
+                else:
+                    p.h = f"{class_name}.{p.h}"
+            else:
+                m = paren_pattern.match(p.h)
+                if m:
+                    p.h = m.group(1).rstrip()
+            # elif fn:
+                # tag = ' (%s)' % fn
+                # if not p.h.endswith(tag):
+                    # p.h += tag
+    #@+node:ekr.20210110061158.8: *6* ric.clear_dirty_bits
+    def clear_dirty_bits(self, p):
+        c = self.c
+        c.clearChanged()  # Clears *all* dirty bits.
+        for p in p.self_and_subtree(copy=False):
+            p.clearDirty()
+    #@+node:ekr.20210110061158.9: *6* ric.dump_headlines
+    def dump_headlines(self, p):
+        # show all headlines.
+        for p in p.self_and_subtree(copy=False):
+            print(p.h)
+    #@+node:ekr.20210110061158.10: *6* ric.fix_back_slashes
+    def fix_back_slashes(self, p):
+        """Convert backslash to slash in all headlines."""
+        for p in p.self_and_subtree(copy=False):
+            s = p.h.replace('\\', '/')
+            if s != p.h:
+                p.v.h = s
+    #@+node:ekr.20210110061158.11: *6* ric.minimize_headlines & helper
+    def minimize_headlines(self, p, prefix):
+        """Create @path nodes to minimize the paths required in descendant nodes."""
+        if prefix and not prefix.endswith('/'):
+            prefix = prefix + '/'
+        m = self.file_pattern.match(p.h)
+        if m:
+            # It's an @file node of some kind. Strip off the prefix.
+            kind = m.group(0)
+            path = p.h[len(kind) :].strip()
+            stripped = self.strip_prefix(path, prefix)
+            p.h = f"{kind} {stripped or path}"
+            # Put the *full* @path directive in the body.
+            if self.add_path and prefix:
+                tail = g.os_path_dirname(stripped).rstrip('/')
+                p.b = f"@path {prefix}{tail}\n{p.b}"
+        else:
+            # p.h is a path.
+            path = p.h
+            stripped = self.strip_prefix(path, prefix)
+            p.h = f"@path {stripped or path}"
+            for p in p.children():
+                self.minimize_headlines(p, prefix + stripped)
+    #@+node:ekr.20210110061158.12: *7* ric.strip_prefix
+    def strip_prefix(self, path, prefix):
+        """Strip the prefix from the path and return the result."""
+        if path.startswith(prefix):
+            return path[len(prefix) :]
+        return ''  # A signal.
+    #@+node:ekr.20210110061158.13: *6* ric.remove_empty_nodes
+    def remove_empty_nodes(self, p):
+        """Remove empty nodes. Not called for @auto or @edit trees."""
+        c = self.c
+        aList = [
+            p2 for p2 in p.self_and_subtree()
+                if not p2.b and not p2.hasChildren()]
+        if aList:
+            c.deletePositionsInList(aList, redraw=False)
+    #@-others
 #@+node:ekr.20210102120444.3: ** from leoCommands.py
 #@+node:ekr.20210102120444.4: *3* c.cloneFindByPredicated
 def cloneFindByPredicate(self,
@@ -334,7 +682,7 @@ def unredirectScriptOutput(self):
     if c.exists and c.config.redirect_execute_script_output_to_log_pane:
         g.restoreStderr()
         g.restoreStdout()
-#@+node:ekr.20210102120444.17: *3* c.Git
+#@+node:ekr.20210102120444.17: *3* c.Git (low priority)
 #@+node:ekr.20210102120444.18: *4* c.diff_file
 def diff_file(self, fn, rev1='HEAD', rev2='', directory=None):
     """
@@ -378,7 +726,7 @@ def git_diff(self, rev1='HEAD', rev2='', directory=None):
         rev1=rev1,
         rev2=rev2,
     )
-#@+node:ekr.20210102120444.22: *3* c.File
+#@+node:ekr.20210102120444.22: *3* c.File (necessary??)
 #@+node:ekr.20210102120444.23: *4* c.archivedPositionToPosition (new)
 def archivedPositionToPosition(self, s):
     """Convert an archived position (a string) to a position."""
@@ -1069,98 +1417,6 @@ def scanAtRootDirectives(self, aList):
         if 'root' in d:
             return 'doc' if start_in_doc else 'code'
     return None
-#@+node:ekr.20210102121211.1: ** from commanderFindCommands.py
-#@+node:ekr.20210102121211.2: *3* c.cffm & c.cfam
-@g.commander_command('clone-find-all-marked')
-@g.commander_command('cfam')
-def cloneFindAllMarked(self, event=None):
-    """
-    clone-find-all-marked, aka cfam.
-
-    Create an organizer node whose descendants contain clones of all marked
-    nodes. The list is *not* flattened: clones appear only once in the
-    descendants of the organizer node.
-    """
-    c = self
-    cloneFindMarkedHelper(c, flatten=False)
-
-@g.commander_command('clone-find-all-flattened-marked')
-@g.commander_command('cffm')
-def cloneFindAllFlattenedMarked(self, event=None):
-    """
-    clone-find-all-flattened-marked, aka cffm.
-
-    Create an organizer node whose direct children are clones of all marked
-    nodes. The list is flattened: every cloned node appears as a direct
-    child of the organizer node, even if the clone also is a descendant of
-    another cloned node.
-    """
-    c = self
-    cloneFindMarkedHelper(c, flatten=True)
-#@+node:ekr.20210102121211.3: *3* c.cloneFindParents
-@g.commander_command('clone-find-parents')
-def cloneFindParents(self, event=None):
-    """
-    Create an organizer node whose direct children are clones of all
-    parents of the selected node, which must be a clone.
-    """
-    c, u = self, self.undoer
-    p = c.p
-    if not p: return
-    if not p.isCloned():
-        g.es(f"not a clone: {p.h}")
-        return
-    p0 = p.copy()
-    undoType = 'Find Clone Parents'
-    aList = c.vnode2allPositions(p.v)
-    if not aList:
-        g.trace('can not happen: no parents')
-        return
-    # Create the node as the last top-level node.
-    # All existing positions remain valid.
-    u.beforeChangeGroup(p0, undoType)
-    top = c.rootPosition()
-    while top.hasNext():
-        top.moveToNext()
-    b = u.beforeInsertNode(p0)
-    found = top.insertAfter()
-    found.h = f"Found: parents of {p.h}"
-    u.afterInsertNode(found, 'insert', b)
-    seen = []
-    for p2 in aList:
-        parent = p2.parent()
-        if parent and parent.v not in seen:
-            seen.append(parent.v)
-            b = u.beforeCloneNode(parent)
-            clone = parent.clone()
-            clone.moveToLastChildOf(found)
-            u.afterCloneNode(clone, 'clone', b)
-    u.afterChangeGroup(p0, undoType)
-    c.selectPosition(found)
-    c.setChanged(True)
-    c.redraw()
-#@+node:ekr.20210102121211.4: *3* def cloneFindMarkedHelper
-def cloneFindMarkedHelper(c, flatten):
-    """Helper for clone-find-marked commands."""
-
-    def isMarked(p):
-        return p.isMarked()
-
-    c.cloneFindByPredicate(
-        generator=c.all_unique_positions,
-        predicate=isMarked,
-        failMsg='No marked nodes',
-        flatten=flatten,
-        redraw=True,
-        undoType='clone-find-marked',
-    )
-    # Unmarking all nodes is convenient.
-    for v in c.all_unique_nodes():
-        if v.isMarked():
-            v.clearMarked()
-    found = c.lastTopLevel()
-    c.selectPosition(found)
-    found.b = f"# Found {found.numberOfChildren()} marked nodes"
 #@-others
 
 #@@language python
