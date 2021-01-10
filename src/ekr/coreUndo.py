@@ -11,7 +11,80 @@ from leo.core import leoGlobals as g
 # from src.ekr import coreFind as g
 from src.ekr import coreTest
 
+# Félix: Feel free to disregard this decorator.
+def cmd(name):
+    """Command decorator for the Undoer class."""
+    # return g.new_cmd_decorator(name, ['c', 'undoer',])
+
 #@+others
+#@+node:ekr.20210109203637.1: ** class TestUndo (unittest.TestCase)
+class TestUndo (unittest.TestCase):
+    """Test cases for coreUndo.py"""
+    #@+others
+    #@+node:ekr.20210109203637.2: *3* TestUndo: Top level
+    #@+node:ekr.20210109203637.3: *4* TestUndo.make_test_tree
+    def make_test_tree(self):
+        """Make a test tree for other tests"""
+        c = self.c
+        root = c.rootPosition()
+        root.h = 'Root'
+        root.b = f"def root():\n    pass\n"
+        last = root
+
+        def make_child(n, p):
+            p2 = p.insertAsLastChild()
+            p2.h = f"child {n}"
+            p2.b = f"def child{n}():\n    v{n} = 2\n"
+            return p2
+
+        def make_top(n, sib):
+            p = sib.insertAfter()
+            p.h = f"Node {n}"
+            p.b = f"def top{n}():\n    v{n} = 3\n"
+            return p
+            
+        for n in range(0, 4, 3):
+            last = make_top(n+1, last)
+            child = make_child(n+2, last)
+            make_child(n+3, child)
+            
+        for p in c.all_positions():
+            p.v.clearDirty()
+            p.v.clearVisited()
+
+    #@+node:ekr.20210109203637.4: *4* TestUndo.setUp & tearDown
+    def setUp(self):
+        
+        # pylint: disable=import-self
+        from src.ekr import coreFind
+        g.unitTesting = True
+        self.c = coreTest.create_app()
+        self.x = coreFind.LeoFind(self.c)
+        self.settings = self.x.default_settings()
+        self.make_test_tree()
+
+    def tearDown(self):
+        g.unitTesting = False
+    #@+node:ekr.20210109203637.5: *4* TestUndo.test_tree
+    def test_tree(self):
+        table = (
+            (0, 'Root'),
+            (0, 'Node 1'),
+            (1, 'child 2'),
+            (2, 'child 3'),
+            (0, 'Node 4'),
+            (1, 'child 5'),
+            (2, 'child 6'),
+        )
+        i = 0
+        for p in self.c.all_positions():
+            level, h = table[i]
+            i += 1
+            assert p.h == h, (p.h, h)
+            assert p.level() == level, (p.level(), level, p.h)
+            # print(' '*p.level(), p.h)
+            # g.printObj(g.splitLines(p.b), tag=p.h)
+    #@-others
 #@+node:ekr.20210109201336.3: ** class Undoer
 class Undoer:
     """A class that implements unlimited undo and redo."""
@@ -19,12 +92,11 @@ class Undoer:
     # pylint: disable=unsubscriptable-object
     # So that ivars can be inited to None rather than [].
     #@+others
-    #@+node:ekr.20210109201336.4: *3* u.Birth
-    #@+node:ekr.20210109201336.5: *4* u.__init__
+    #@+node:ekr.20210109201336.5: *3* u.__init__
     def __init__(self, c):
         self.c = c
         self.granularity = None  # Set in reloadSettings.
-        self.max_undo_stack_size = c.config.getInt('max-undo-stack-size') or 0
+        ### self.max_undo_stack_size = c.config.getInt('max-undo-stack-size') or 0
         # State ivars...
         self.beads = []  # List of undo nodes.
         self.bead = -1  # Index of the present bead: -1:len(beads)
@@ -36,7 +108,7 @@ class Undoer:
         self.realUndoMenuLabel = "Can't Undo"
         self.undoing = False  # True if executing an Undo command.
         self.redoing = False  # True if executing a Redo command.
-        self.per_node_undo = False  # True: v may contain undo_info ivar.
+        ### self.per_node_undo = False  # True: v may contain undo_info ivar.
         # New in 4.2...
         self.optionalIvars = []
         # Set the following ivars to keep pylint happy.
@@ -57,7 +129,6 @@ class Undoer:
         self.newP = None
         self.newParent = None
         self.newParent_v = None
-        self.newRecentFiles = None
         self.newSel = None
         self.newTree = None
         self.newYScroll = None
@@ -70,7 +141,6 @@ class Undoer:
         self.oldN = None
         self.oldParent = None
         self.oldParent_v = None
-        self.oldRecentFiles = None
         self.oldSel = None
         self.oldTree = None
         self.oldYScroll = None
@@ -78,21 +148,6 @@ class Undoer:
         self.prevSel = None
         self.sortChildren = None
         self.verboseUndoGroup = None
-        self.reloadSettings()
-    #@+node:ekr.20210109201336.6: *4* u.reloadSettings
-    def reloadSettings(self):
-        """Undoer.reloadSettings."""
-        c = self.c
-        self.granularity = c.config.getString('undo-granularity')
-        if self.granularity:
-            self.granularity = self.granularity.lower()
-        if self.granularity not in ('node', 'line', 'word', 'char'):
-            self.granularity = 'line'
-    #@+node:ekr.20210109201336.7: *4* u.cmd (decorator)
-    def cmd(name):
-        """Command decorator for the Undoer class."""
-        # pylint: disable=no-self-argument
-        return g.new_cmd_decorator(name, ['c', 'undoer',])
     #@+node:ekr.20210109201336.8: *3* u.Internal helpers
     #@+node:ekr.20210109201336.9: *4* u.clearOptionalIvars
     def clearOptionalIvars(self):
@@ -100,23 +155,6 @@ class Undoer:
         u.p = None  # The position/node being operated upon for undo and redo.
         for ivar in u.optionalIvars:
             setattr(u, ivar, None)
-    #@+node:ekr.20210109201336.10: *4* u.cutStack
-    def cutStack(self):
-        u = self; n = u.max_undo_stack_size
-        if u.bead >= n > 0 and not g.app.unitTesting:
-            # Do nothing if we are in the middle of creating a group.
-            i = len(u.beads) - 1
-            while i >= 0:
-                bunch = u.beads[i]
-                if hasattr(bunch, 'kind') and bunch.kind == 'beforeGroup':
-                    return
-                i -= 1
-            # This work regardless of how many items appear after bead n.
-                # g.trace('Cutting undo stack to %d entries' % (n))
-            u.beads = u.beads[-n :]
-            u.bead = n - 1
-        if 'undo' in g.app.debug and 'verbose' in g.app.debug:
-            print(f"u.cutStack: {len(u.beads):3}")
     #@+node:ekr.20210109201336.11: *4* u.dumpBead
     def dumpBead(self, n):
         u = self
@@ -144,8 +182,9 @@ class Undoer:
             return None
         bunch = u.beads[n]
         self.setIvarsFromBunch(bunch)
-        if 'undo' in g.app.debug:
-            print(f" u.getBead: {n:3} of {len(u.beads)}")
+        ###
+            # if 'undo' in g.app.debug:
+                # print(f" u.getBead: {n:3} of {len(u.beads)}")
         return bunch
     #@+node:ekr.20210109201336.13: *4* u.peekBead
     def peekBead(self, n):
@@ -168,8 +207,9 @@ class Undoer:
             u.beads[u.bead:] = [bunch]
             # Recalculate the menu labels.
             u.setUndoTypes()
-        if 'undo' in g.app.debug:
-            print(f"u.pushBead: {len(u.beads):3} {bunch.undoType}")
+        ###
+            # if 'undo' in g.app.debug:
+                # print(f"u.pushBead: {len(u.beads):3} {bunch.undoType}")
     #@+node:ekr.20210109201336.15: *4* u.redoMenuName, undoMenuName
     def redoMenuName(self, name):
         if name == "Can't Redo":
@@ -202,49 +242,51 @@ class Undoer:
     # These routines update both the ivar and the menu label.
 
     def setRedoType(self, theType):
+        pass  # To do in vs-code.
 
-        u = self; frame = u.c.frame
-        if not isinstance(theType, str):
-            g.trace(f"oops: expected string for command, got {theType!r}")
-            g.trace(g.callers())
-            theType = '<unknown>'
-        menu = frame.menu.getMenu("Edit")
-        name = u.redoMenuName(theType)
-        if name != u.redoMenuLabel:
-            # Update menu using old name.
-            realLabel = frame.menu.getRealMenuName(name)
-            if realLabel == name:
-                underline = -1 if g.match(name, 0, "Can't") else 0
-            else:
-                underline = realLabel.find("&")
-            realLabel = realLabel.replace("&", "")
-            frame.menu.setMenuLabel(
-                menu, u.realRedoMenuLabel, realLabel, underline=underline)
-            u.redoMenuLabel = name
-            u.realRedoMenuLabel = realLabel
+        # u = self; frame = u.c.frame
+        # if not isinstance(theType, str):
+            # g.trace(f"oops: expected string for command, got {theType!r}")
+            # g.trace(g.callers())
+            # theType = '<unknown>'
+        # menu = frame.menu.getMenu("Edit")
+        # name = u.redoMenuName(theType)
+        # if name != u.redoMenuLabel:
+            # # Update menu using old name.
+            # realLabel = frame.menu.getRealMenuName(name)
+            # if realLabel == name:
+                # underline = -1 if g.match(name, 0, "Can't") else 0
+            # else:
+                # underline = realLabel.find("&")
+            # realLabel = realLabel.replace("&", "")
+            # frame.menu.setMenuLabel(
+                # menu, u.realRedoMenuLabel, realLabel, underline=underline)
+            # u.redoMenuLabel = name
+            # u.realRedoMenuLabel = realLabel
     #@+node:ekr.20210109201336.18: *4* u.setUndoType
     def setUndoType(self, theType):
+        pass  # To do in vs-code.
 
-        u = self; frame = u.c.frame
-        if not isinstance(theType, str):
-            g.trace(f"oops: expected string for command, got {repr(theType)}")
-            g.trace(g.callers())
-            theType = '<unknown>'
-        menu = frame.menu.getMenu("Edit")
-        name = u.undoMenuName(theType)
-        if name != u.undoMenuLabel:
-            # Update menu using old name.
-            realLabel = frame.menu.getRealMenuName(name)
-            if realLabel == name:
-                underline = -1 if g.match(name, 0, "Can't") else 0
-            else:
-                underline = realLabel.find("&")
-            realLabel = realLabel.replace("&", "")
-            frame.menu.setMenuLabel(
-                menu, u.realUndoMenuLabel, realLabel, underline=underline)
-            u.undoType = theType
-            u.undoMenuLabel = name
-            u.realUndoMenuLabel = realLabel
+        # u = self; frame = u.c.frame
+        # if not isinstance(theType, str):
+            # g.trace(f"oops: expected string for command, got {repr(theType)}")
+            # g.trace(g.callers())
+            # theType = '<unknown>'
+        # menu = frame.menu.getMenu("Edit")
+        # name = u.undoMenuName(theType)
+        # if name != u.undoMenuLabel:
+            # # Update menu using old name.
+            # realLabel = frame.menu.getRealMenuName(name)
+            # if realLabel == name:
+                # underline = -1 if g.match(name, 0, "Can't") else 0
+            # else:
+                # underline = realLabel.find("&")
+            # realLabel = realLabel.replace("&", "")
+            # frame.menu.setMenuLabel(
+                # menu, u.realUndoMenuLabel, realLabel, underline=underline)
+            # u.undoType = theType
+            # u.undoMenuLabel = name
+            # u.realUndoMenuLabel = realLabel
     #@+node:ekr.20210109201336.19: *4* u.setUndoTypes
     def setUndoTypes(self):
 
@@ -261,7 +303,7 @@ class Undoer:
             u.setRedoType(bunch.undoType)
         else:
             u.setRedoType("Can't Redo")
-        u.cutStack()
+        ### u.cutStack()
     #@+node:ekr.20210109201336.20: *4* u.restoreTree & helpers
     def restoreTree(self, treeInfo):
         """Use the tree info to restore all VNode data,
@@ -349,11 +391,6 @@ class Undoer:
         if hasattr(v, 'unknownAttributes'):
             bunch.unknownAttributes = v.unknownAttributes
         return bunch
-    #@+node:ekr.20210109201336.27: *4* u.trace
-    def trace(self):
-        ivars = ('kind', 'undoType')
-        for ivar in ivars:
-            g.pr(ivar, getattr(self, ivar))
     #@+node:ekr.20210109201336.28: *4* u.updateMarks
     def updateMarks(self, oldOrNew):
         """Update dirty and marked bits."""
@@ -500,15 +537,6 @@ class Undoer:
         bunch.newText = w.getAllText()
         bunch.newTree = u.saveTree(p)
         u.pushBead(bunch)
-    #@+node:ekr.20210109201336.36: *5* u.afterClearRecentFiles
-    def afterClearRecentFiles(self, bunch):
-        u = self
-        bunch.newRecentFiles = g.app.config.recentFiles[:]
-        bunch.undoType = 'Clear Recent Files'
-        bunch.undoHelper = u.undoClearRecentFiles
-        bunch.redoHelper = u.redoClearRecentFiles
-        u.pushBead(bunch)
-        return bunch
     #@+node:ekr.20210109201336.37: *5* u.afterCloneMarkedNodes
     def afterCloneMarkedNodes(self, p):
         u = self
@@ -770,12 +798,6 @@ class Undoer:
         bunch.oldSel = w.getSelectionRange()
         bunch.oldText = w.getAllText()
         bunch.oldTree = u.saveTree(p)
-        return bunch
-    #@+node:ekr.20210109201336.56: *5* u.beforeClearRecentFiles
-    def beforeClearRecentFiles(self):
-        u = self; p = u.c.p
-        bunch = u.createCommonBunch(p)
-        bunch.oldRecentFiles = g.app.config.recentFiles[:]
         return bunch
     #@+node:ekr.20210109201336.57: *5* u.beforeCloneNode
     def beforeCloneNode(self, p):
@@ -1098,8 +1120,10 @@ class Undoer:
         #@-<< adjust the undo stack, clearing all forward entries >>
         if 'undo' in g.app.debug and 'verbose' in g.app.debug:
             print(f"u.doTyping: {len(oldText)} => {len(newText)}")
-        if u.per_node_undo:
-            u.putIvarsToVnode(p)
+            
+        ###
+        # if u.per_node_undo:
+            # u.putIvarsToVnode(p)
         #
         # Finish updating the text.
         p.v.setBodyString(newText)
@@ -1141,34 +1165,6 @@ class Undoer:
         if menu:
             frame.menu.enableMenu(menu, u.redoMenuLabel, u.canRedo())
             frame.menu.enableMenu(menu, u.undoMenuLabel, u.canUndo())
-    #@+node:ekr.20210109201336.77: *4* u.onSelect & helpers
-    def onSelect(self, old_p, p):
-
-        u = self
-        if u.per_node_undo:
-            if old_p and u.beads:
-                u.putIvarsToVnode(old_p)
-            u.setIvarsFromVnode(p)
-            u.setUndoTypes()
-    #@+node:ekr.20210109201336.78: *5* u.putIvarsToVnode
-    def putIvarsToVnode(self, p):
-
-        u, v = self, p.v
-        assert self.per_node_undo
-        bunch = g.bunch()
-        for key in self.optionalIvars:
-            bunch[key] = getattr(u, key)
-        # Put these ivars by hand.
-        for key in ('bead', 'beads', 'undoType',):
-            bunch[key] = getattr(u, key)
-        v.undo_info = bunch
-    #@+node:ekr.20210109201336.79: *5* u.setIvarsFromVnode
-    def setIvarsFromVnode(self, p):
-        u = self; v = p.v
-        assert self.per_node_undo
-        u.clearUndoState()
-        if hasattr(v, 'undo_info'):
-            u.setIvarsFromBunch(v.undo_info)
     #@+node:ekr.20210109201336.80: *4* u.updateAfterTyping
     def updateAfterTyping(self, p, w):
         """
@@ -1295,12 +1291,6 @@ class Undoer:
         u.p.initHeadString(u.newHead)
         # This is required so.  Otherwise redraw will revert the change!
         c.frame.tree.setHeadline(u.p, u.newHead)
-    #@+node:ekr.20210109201336.86: *4* u.redoClearRecentFiles
-    def redoClearRecentFiles(self):
-        u = self; c = u.c
-        rf = g.app.recentFilesManager
-        rf.setRecentFiles(u.newRecentFiles[:])
-        rf.createRecentFilesMenuItems(c)
     #@+node:ekr.20210109201336.87: *4* u.redoCloneMarkedNodes
     def redoCloneMarkedNodes(self):
         u = self; c = u.c
@@ -1539,8 +1529,9 @@ class Undoer:
             return
         # End editing *before* getting state.
         c.endEditing()
-        if u.per_node_undo:  # 2011/05/19
-            u.setIvarsFromVnode(c.p)
+        ###
+            # if u.per_node_undo:
+                # u.setIvarsFromVnode(c.p)
         if not u.canUndo():
             return
         if not u.getBead(u.bead):
@@ -1605,12 +1596,6 @@ class Undoer:
         u.p.initHeadString(u.oldHead)
         # This is required.  Otherwise c.redraw will revert the change!
         c.frame.tree.setHeadline(u.p, u.oldHead)
-    #@+node:ekr.20210109201336.108: *4* u.undoClearRecentFiles
-    def undoClearRecentFiles(self):
-        u = self; c = u.c
-        rf = g.app.recentFilesManager
-        rf.setRecentFiles(u.oldRecentFiles[:])
-        rf.createRecentFilesMenuItems(c)
     #@+node:ekr.20210109201336.109: *4* u.undoCloneMarkedNodes
     def undoCloneMarkedNodes(self):
         u = self
@@ -1913,102 +1898,35 @@ class Undoer:
             w.setYScrollPosition(u.yview)
     #@+node:ekr.20210109201336.128: *3* u.update_status
     def update_status(self):
-        """
-        Update status after either an undo or redo:
-        """
-        c, u = self.c, self
-        w = c.frame.body.wrapper
-        # Redraw and recolor.
-        c.frame.body.updateEditors()  # New in Leo 4.4.8.
-        #
-        # Set the new position.
-        if 0:  # Don't do this: it interferes with selection ranges.
-            # This strange code forces a recomputation of the root position.
-            c.selectPosition(c.p)
-        else:
-            c.setCurrentPosition(c.p)
-        #
-        # # 1451. *Always* set the changed bit.
-        # Redrawing *must* be done here before setting u.undoing to False.
-        i, j = w.getSelectionRange()
-        ins = w.getInsertPoint()
-        c.redraw()
-        c.recolor()
-        if u.inHead:
-            c.editHeadline()
-            u.inHead = False
-        else:
-            c.bodyWantsFocus()
-            w.setSelectionRange(i, j, insert=ins)
-            w.seeInsertPoint()
-    #@-others
-#@+node:ekr.20210109203637.1: ** class TestUndo (unittest.TestCase)
-class TestUndo (unittest.TestCase):
-    """Test cases for coreUndo.py"""
-    #@+others
-    #@+node:ekr.20210109203637.2: *3* TestUndo: Top level
-    #@+node:ekr.20210109203637.3: *4* TestUndo.make_test_tree
-    def make_test_tree(self):
-        """Make a test tree for other tests"""
-        c = self.c
-        root = c.rootPosition()
-        root.h = 'Root'
-        root.b = f"def root():\n    pass\n"
-        last = root
-
-        def make_child(n, p):
-            p2 = p.insertAsLastChild()
-            p2.h = f"child {n}"
-            p2.b = f"def child{n}():\n    v{n} = 2\n"
-            return p2
-
-        def make_top(n, sib):
-            p = sib.insertAfter()
-            p.h = f"Node {n}"
-            p.b = f"def top{n}():\n    v{n} = 3\n"
-            return p
-            
-        for n in range(0, 4, 3):
-            last = make_top(n+1, last)
-            child = make_child(n+2, last)
-            make_child(n+3, child)
-            
-        for p in c.all_positions():
-            p.v.clearDirty()
-            p.v.clearVisited()
-
-    #@+node:ekr.20210109203637.4: *4* TestUndo.setUp & tearDown
-    def setUp(self):
+        """Update status after either an undo or redo."""
         
-        # pylint: disable=import-self
-        from src.ekr import coreFind
-        g.unitTesting = True
-        self.c = coreTest.create_app()
-        self.x = coreFind.LeoFind(self.c)
-        self.settings = self.x.default_settings()
-        self.make_test_tree()
-
-    def tearDown(self):
-        g.unitTesting = False
-    #@+node:ekr.20210109203637.5: *4* TestUndo.test_tree
-    def test_tree(self):
-        table = (
-            (0, 'Root'),
-            (0, 'Node 1'),
-            (1, 'child 2'),
-            (2, 'child 3'),
-            (0, 'Node 4'),
-            (1, 'child 5'),
-            (2, 'child 6'),
-        )
-        i = 0
-        for p in self.c.all_positions():
-            level, h = table[i]
-            i += 1
-            assert p.h == h, (p.h, h)
-            assert p.level() == level, (p.level(), level, p.h)
-            # print(' '*p.level(), p.h)
-            # g.printObj(g.splitLines(p.b), tag=p.h)
+        # For vs-code.
+        
+        # c, u = self.c, self
+        # w = c.frame.body.wrapper
+        # # Redraw and recolor.
+        # c.frame.body.updateEditors()  # New in Leo 4.4.8.
+        # #
+        # # Set the new position.
+        # if 0:  # Don't do this: it interferes with selection ranges.
+            # # This strange code forces a recomputation of the root position.
+            # c.selectPosition(c.p)
+        # else:
+            # c.setCurrentPosition(c.p)
+        # #
+        # # # 1451. *Always* set the changed bit.
+        # # Redrawing *must* be done here before setting u.undoing to False.
+        # i, j = w.getSelectionRange()
+        # ins = w.getInsertPoint()
+        # c.redraw()
+        # c.recolor()
+        # if u.inHead:
+            # c.editHeadline()
+            # u.inHead = False
+        # else:
+            # c.bodyWantsFocus()
+            # w.setSelectionRange(i, j, insert=ins)
+            # w.seeInsertPoint()
     #@-others
 #@-others
 if __name__ == '__main__':  # pragma: no cover (skip)

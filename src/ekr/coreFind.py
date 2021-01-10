@@ -11,10 +11,10 @@ from leo.core import leoGlobals as g
 
 from src.ekr import coreTest
 
+# Félix: Feel free to disregard this decorator.
 def cmd(name):
     """Command decorator for the findCommands class."""
-    # pylint: disable=no-self-argument
-    return g.new_cmd_decorator(name, ['c', 'findCommands',])
+    # return g.new_cmd_decorator(name, ['c', 'findCommands',])
 
 #@+others
 #@+node:ekr.20210102145531.7: ** class LeoFind
