@@ -7,7 +7,7 @@ import operator  # For g.Bunch.
 import os
 import re
 
-# Félix: This global is too convenient to omit.
+# Heh: Félix already added this.
 unitTesting = False
 #@+<< define g.globalDirectiveList >>
 #@+node:ekr.20210101093155.1: ** << define g.globalDirectiveList >>
