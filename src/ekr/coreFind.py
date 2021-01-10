@@ -241,14 +241,13 @@ class LeoFind:
         """
         c, u = self.c, self.c.undoer
         tc = c.theTagController
-        testing = getattr(g, 'unitTesting')
         if not tc:
-            if not testing:  # pragma: no cover (skip)
+            if not g.unitTesting:  # pragma: no cover (skip)
                 g.es_print('nodetags not active')  
             return 0, c.p
         clones = tc.get_tagged_nodes(tag)
         if not clones:
-            if not testing: # pragma: no cover (skip)
+            if not g.unitTesting: # pragma: no cover (skip)
                 g.es_print(f"tag not found: {tag}") 
             tc.show_all_tags()
             return 0, c.p
@@ -547,7 +546,7 @@ class LeoFind:
         p = c.p
         u.afterChangeGroup(p, undoType, reportFlag=True)
         t2 = time.process_time()
-        if not getattr(g, 'unitTesting', None):  # pragma: no cover (skip)
+        if not g.unitTesting:  # pragma: no cover (skip)
             g.es_print(
                 f"changed {count} instance{g.plural(count)} "
                 f"in {t2 - t1:4.2f} sec.")
@@ -734,25 +733,24 @@ class LeoFind:
     def tag_children(self, p, tag):
         """tag-children: Add the given tag to all children of c.p."""
         c = self.c
-        testing = getattr(g, 'unitTesting')
         tc = c.theTagController
         if not tc:
-            if not testing:  # pragma: no cover (skip)
+            if not g.unitTesting:  # pragma: no cover (skip)
                 g.es_print('nodetags not active')
             return
         for p in p.children():
             tc.add_tag(p, tag)
-        if not testing:  # pragma: no cover (skip)
+        if not g.unitTesting:  # pragma: no cover (skip)
             g.es_print(f"Added {tag} tag to {len(list(c.p.children()))} nodes")
     #@+node:ekr.20210103213410.1: *3* LeoFind: Helpers
     #@+node:ekr.20210102145531.137: *4* find.check_args
     def check_args(self, tag):
         if not self.search_headline and not self.search_body:
-            if not getattr(g, 'unitTesting', None):
+            if not g.unitTesting:
                 g.es_print("not searching headline or body")  # pragma: no cover (skip)
             return False
         if not self.find_text:
-            if not getattr(g, 'unitTesting', None):
+            if not g.unitTesting:
                 g.es_print(f"{tag}: empty find pattern")  # pragma: no cover (skip)
             return False
         return True
@@ -774,7 +772,7 @@ class LeoFind:
             self.re_obj = re.compile(s, flags)
             return True
         except Exception:
-            if not getattr(g, 'unitTesting', None):  # pragma: no cover (skip)
+            if not g.unitTesting:  # pragma: no cover (skip)
                 g.warning('invalid regular expression:', self.find_text)
             return False
     #@+node:ekr.20210102145531.114: *4* find.compute_result_status
@@ -1078,7 +1076,7 @@ class LeoFind:
         """Called from inner_search_helper"""
         re_obj = self.re_obj  # Use the pre-compiled object
         if not re_obj:
-            if not getattr(g, 'unitTesting', None):  # pragma: no cover (skip)
+            if not g.unitTesting:  # pragma: no cover (skip)
                 g.trace('can not happen: no re_obj')
             return -1, -1
         if backwards:
