@@ -50,6 +50,12 @@ def backup_file(filename):
     g.es_print(f"wrote: {write_path}")
 #@-others
 main()
+#@+node:ekr.20201214084854.11: ** @button diff-pr
+import leo.commands.editFileCommands as efc
+import os
+
+x = efc.GitDiffController(c)
+x.diff_pull_request(directory=os.curdir)
 #@+node:ekr.20201214084854.5: ** @button write-leojs
 """
 Update leojs.leo from the given list of nodes.
@@ -139,12 +145,35 @@ def oops(message):
     print('')
 #@-others
 main(node_list = ['Startup', 'Documentation', 'Code'])
-#@+node:ekr.20201214084854.11: ** @button diff-pr
+#@+node:ekr.20210108061249.1: ** script: Batch change
+g.cls()
+h = '@file src/ekr/coreFind.py'
+root = g.findNodeAnywhere(c, h)
+assert root
+replacements = (
+    # ('clone_find_all', 'clone_find_all_cmd'),
+    # ('clone_find_all_flattened', 'clone_find_all_flattened_cmd'),
+    # ('backwardsHelper', 'backwards_helper')
+    # ('batchPlainReplace', 'batch_plain_replace'),
+    # ('batchRegexReplace', 'batch_regex_replace'),
+    # ('batchWordReplace', 'batch_word_replace'),
+    # ('doWrap', 'do_wrap'),
+    # ('firstSearchPane', 'first_search_pane'),
+    # ('search', 'search_helper'),
+    # ('matchWord', 'match_word'),
+    # ('plainHelper', 'plain_helper'),
+    # ('regexHelper', 'regex_helper'),
+)
+settings = dict(suboutline_only=True, whole_word=True)
+count = c.findCommands.batch_change(root, replacements, settings)
+if count:
+    c.save()
+else:
+    print('done')
+#@+node:ekr.20201214084854.15: ** script: diff-pr
 import leo.commands.editFileCommands as efc
-import os
-
 x = efc.GitDiffController(c)
-x.diff_pull_request(directory=os.curdir)
+x.diff_pull_request(branch_name = 'package.json')
 #@+node:ekr.20201214084854.12: ** script: split contributes/commands (completed)
 """
 Split the "commands" node of the "contributes" section into separate nodes.
@@ -198,6 +227,54 @@ for i, line in enumerate(g.splitLines(root.b)):
         assert line_s.endswith('[') or line_s.startswith('],'), (i, repr(line))
         # print('OUTSIDE', repr(line))
 c.redraw()
+#@+node:ekr.20201214084854.14: ** script: split contributes/keybindings (completed)
+"""
+Split the "keybindings" node of the "contributes" section into separate nodes.
+"""
+# g.cls()
+assert False, "Do not do this script again"  ###
+outer_parent_h = '@clean package.json'
+outer_parent = g.findNodeAnywhere(c, outer_parent_h)
+assert outer_parent, f"Not found: {outer_parent_h}"
+keybindings_h = 'keybindings'
+keybindings_p = g.findNodeInTree(c, outer_parent, keybindings_h)
+assert keybindings_p, f"Not found: {keybindings_h}"
+last = c.lastTopLevel()
+keybindings_parent = last.insertAfter()
+keybindings_parent.h = 'keybindings tree'
+command_lines, level = [], 0
+for i, line in enumerate(g.splitLines(keybindings_p.b)):
+    line_s = line.strip()
+    if command_lines:  # Accumulating a new node.
+        assert line.startswith('  '), repr(line)
+        command_lines.append(line[2:])
+        if line_s.endswith(('}', '},')):
+            level -= 1
+            if level == 0:
+                # End of command.
+                p = keybindings_parent.insertAsLastChild()
+                h = command_lines[1].strip()
+                prefix = '"command": "leojs.'
+                assert h.startswith(prefix), (i, repr(h))
+                if h.endswith(','): h = h[:-1]
+                if h.endswith('"'): h = h[:-1]
+                p.h = h[len(prefix):]
+                p.b = ''.join(command_lines)
+                command_lines = []
+        elif line_s.endswith('{'):
+            level += 1
+        else:
+            pass
+    elif line_s.endswith('{'):
+        # Start a new command.
+        level = 1
+        assert line.startswith('  '), repr(line)
+        command_lines.append(line[2:])
+    elif line_s:
+        assert line_s.endswith(('[', ']')) or line_s.startswith('],'), (i, repr(line))
+        # print('OUTSIDE', repr(line))
+c.redraw()
+print('done')
 #@+node:ekr.20201214084854.13: ** script: split contributes/menus (completed)
 """
 Split the "menus" node of the "contributes" section into separate nodes.
@@ -252,58 +329,6 @@ for child in menus_p.children():
             # print('OUTSIDE', repr(line))
     c.redraw()
 print('done')
-#@+node:ekr.20201214084854.14: ** script: split contributes/keybindings (completed)
-"""
-Split the "keybindings" node of the "contributes" section into separate nodes.
-"""
-# g.cls()
-assert False, "Do not do this script again"  ###
-outer_parent_h = '@clean package.json'
-outer_parent = g.findNodeAnywhere(c, outer_parent_h)
-assert outer_parent, f"Not found: {outer_parent_h}"
-keybindings_h = 'keybindings'
-keybindings_p = g.findNodeInTree(c, outer_parent, keybindings_h)
-assert keybindings_p, f"Not found: {keybindings_h}"
-last = c.lastTopLevel()
-keybindings_parent = last.insertAfter()
-keybindings_parent.h = 'keybindings tree'
-command_lines, level = [], 0
-for i, line in enumerate(g.splitLines(keybindings_p.b)):
-    line_s = line.strip()
-    if command_lines:  # Accumulating a new node.
-        assert line.startswith('  '), repr(line)
-        command_lines.append(line[2:])
-        if line_s.endswith(('}', '},')):
-            level -= 1
-            if level == 0:
-                # End of command.
-                p = keybindings_parent.insertAsLastChild()
-                h = command_lines[1].strip()
-                prefix = '"command": "leojs.'
-                assert h.startswith(prefix), (i, repr(h))
-                if h.endswith(','): h = h[:-1]
-                if h.endswith('"'): h = h[:-1]
-                p.h = h[len(prefix):]
-                p.b = ''.join(command_lines)
-                command_lines = []
-        elif line_s.endswith('{'):
-            level += 1
-        else:
-            pass
-    elif line_s.endswith('{'):
-        # Start a new command.
-        level = 1
-        assert line.startswith('  '), repr(line)
-        command_lines.append(line[2:])
-    elif line_s:
-        assert line_s.endswith(('[', ']')) or line_s.startswith('],'), (i, repr(line))
-        # print('OUTSIDE', repr(line))
-c.redraw()
-print('done')
-#@+node:ekr.20201214084854.15: ** script: diff-pr
-import leo.commands.editFileCommands as efc
-x = efc.GitDiffController(c)
-x.diff_pull_request(branch_name = 'package.json')
 #@+node:ekr.20201214084854.16: ** script: unindent-tree
 """Unindent body text of selected tree by 2 spaces."""
 g.cls()
