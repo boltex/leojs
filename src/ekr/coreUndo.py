@@ -95,17 +95,18 @@ class Undoer:
     #@+node:ekr.20210109201336.5: *3* u.__init__
     def __init__(self, c):
         self.c = c
-        self.granularity = None  # Set in reloadSettings.
+        # self.granularity = None  # Set in reloadSettings.
+        self.granularity = 'line'  ### User setting.
         ### self.max_undo_stack_size = c.config.getInt('max-undo-stack-size') or 0
         # State ivars...
         self.beads = []  # List of undo nodes.
         self.bead = -1  # Index of the present bead: -1:len(beads)
         self.undoType = "Can't Undo"
         # These must be set here, _not_ in clearUndoState.
-        self.redoMenuLabel = "Can't Redo"
-        self.undoMenuLabel = "Can't Undo"
-        self.realRedoMenuLabel = "Can't Redo"
-        self.realUndoMenuLabel = "Can't Undo"
+        # self.redoMenuLabel = "Can't Redo"
+        # self.undoMenuLabel = "Can't Undo"
+        # self.realRedoMenuLabel = "Can't Redo"
+        # self.realUndoMenuLabel = "Can't Undo"
         self.undoing = False  # True if executing an Undo command.
         self.redoing = False  # True if executing a Redo command.
         ### self.per_node_undo = False  # True: v may contain undo_info ivar.
@@ -155,6 +156,18 @@ class Undoer:
         u.p = None  # The position/node being operated upon for undo and redo.
         for ivar in u.optionalIvars:
             setattr(u, ivar, None)
+    #@+node:ekr.20210109201336.63: *4* u.createCommonBunch
+    def createCommonBunch(self, p):
+        """Return a bunch containing all common undo info.
+        This is mostly the info for recreating an empty node at position p."""
+        u = self
+        c = u.c
+        w = c.frame.body.wrapper
+        return g.Bunch(
+            oldMarked=p and p.isMarked(),
+            oldSel=w and w.getSelectionRange() or None,
+            p=p and p.copy(),
+        )
     #@+node:ekr.20210109201336.11: *4* u.dumpBead
     def dumpBead(self, n):
         u = self
@@ -220,90 +233,6 @@ class Undoer:
         if name == "Can't Undo":
             return name
         return "Undo " + name
-    #@+node:ekr.20210109201336.16: *4* u.setIvarsFromBunch
-    def setIvarsFromBunch(self, bunch):
-        u = self
-        u.clearOptionalIvars()
-        if 0:  # Debugging.
-            g.pr('-' * 40)
-            for key in list(bunch.keys()):
-                g.trace(f"{key:20} {bunch.get(key)!r}")
-            g.pr('-' * 20)
-        if g.unitTesting:  # #1694: An ever-present unit test.
-            val = bunch.get('oldMarked')
-            assert val in (True, False), f"{val!r} {g.callers()!s}"
-        # bunch is not a dict, so bunch.keys() is required.
-        for key in list(bunch.keys()):
-            val = bunch.get(key)
-            setattr(u, key, val)
-            if key not in u.optionalIvars:
-                u.optionalIvars.append(key)
-    #@+node:ekr.20210109201336.17: *4* u.setRedoType
-    # These routines update both the ivar and the menu label.
-
-    def setRedoType(self, theType):
-        pass  # To do in vs-code.
-
-        # u = self; frame = u.c.frame
-        # if not isinstance(theType, str):
-            # g.trace(f"oops: expected string for command, got {theType!r}")
-            # g.trace(g.callers())
-            # theType = '<unknown>'
-        # menu = frame.menu.getMenu("Edit")
-        # name = u.redoMenuName(theType)
-        # if name != u.redoMenuLabel:
-            # # Update menu using old name.
-            # realLabel = frame.menu.getRealMenuName(name)
-            # if realLabel == name:
-                # underline = -1 if g.match(name, 0, "Can't") else 0
-            # else:
-                # underline = realLabel.find("&")
-            # realLabel = realLabel.replace("&", "")
-            # frame.menu.setMenuLabel(
-                # menu, u.realRedoMenuLabel, realLabel, underline=underline)
-            # u.redoMenuLabel = name
-            # u.realRedoMenuLabel = realLabel
-    #@+node:ekr.20210109201336.18: *4* u.setUndoType
-    def setUndoType(self, theType):
-        pass  # To do in vs-code.
-
-        # u = self; frame = u.c.frame
-        # if not isinstance(theType, str):
-            # g.trace(f"oops: expected string for command, got {repr(theType)}")
-            # g.trace(g.callers())
-            # theType = '<unknown>'
-        # menu = frame.menu.getMenu("Edit")
-        # name = u.undoMenuName(theType)
-        # if name != u.undoMenuLabel:
-            # # Update menu using old name.
-            # realLabel = frame.menu.getRealMenuName(name)
-            # if realLabel == name:
-                # underline = -1 if g.match(name, 0, "Can't") else 0
-            # else:
-                # underline = realLabel.find("&")
-            # realLabel = realLabel.replace("&", "")
-            # frame.menu.setMenuLabel(
-                # menu, u.realUndoMenuLabel, realLabel, underline=underline)
-            # u.undoType = theType
-            # u.undoMenuLabel = name
-            # u.realUndoMenuLabel = realLabel
-    #@+node:ekr.20210109201336.19: *4* u.setUndoTypes
-    def setUndoTypes(self):
-
-        u = self
-        # Set the undo type and undo menu label.
-        bunch = u.peekBead(u.bead)
-        if bunch:
-            u.setUndoType(bunch.undoType)
-        else:
-            u.setUndoType("Can't Undo")
-        # Set only the redo menu label.
-        bunch = u.peekBead(u.bead + 1)
-        if bunch:
-            u.setRedoType(bunch.undoType)
-        else:
-            u.setRedoType("Can't Redo")
-        ### u.cutStack()
     #@+node:ekr.20210109201336.20: *4* u.restoreTree & helpers
     def restoreTree(self, treeInfo):
         """Use the tree info to restore all VNode data,
@@ -391,6 +320,94 @@ class Undoer:
         if hasattr(v, 'unknownAttributes'):
             bunch.unknownAttributes = v.unknownAttributes
         return bunch
+    #@+node:ekr.20210109201336.16: *4* u.setIvarsFromBunch
+    def setIvarsFromBunch(self, bunch):
+        u = self
+        u.clearOptionalIvars()
+        if 0:  # Debugging.
+            g.pr('-' * 40)
+            for key in list(bunch.keys()):
+                g.trace(f"{key:20} {bunch.get(key)!r}")
+            g.pr('-' * 20)
+        if g.unitTesting:  # #1694: An ever-present unit test.
+            val = bunch.get('oldMarked')
+            assert val in (True, False), f"{val!r} {g.callers()!s}"
+        # bunch is not a dict, so bunch.keys() is required.
+        for key in list(bunch.keys()):
+            val = bunch.get(key)
+            setattr(u, key, val)
+            if key not in u.optionalIvars:
+                u.optionalIvars.append(key)
+    #@+node:ekr.20210109201336.17: *4* u.setRedoType
+    # These routines update both the ivar and the menu label.
+
+    def setRedoType(self, theType):
+        pass
+        
+        ### To do in vs-code.
+            # u = self; frame = u.c.frame
+            # if not isinstance(theType, str):
+                # g.trace(f"oops: expected string for command, got {theType!r}")
+                # g.trace(g.callers())
+                # theType = '<unknown>'
+            # menu = frame.menu.getMenu("Edit")
+            # name = u.redoMenuName(theType)
+            # if name != u.redoMenuLabel:
+                # # Update menu using old name.
+                # realLabel = frame.menu.getRealMenuName(name)
+                # if realLabel == name:
+                    # underline = -1 if g.match(name, 0, "Can't") else 0
+                # else:
+                    # underline = realLabel.find("&")
+                # realLabel = realLabel.replace("&", "")
+                # frame.menu.setMenuLabel(
+                    # menu, u.realRedoMenuLabel, realLabel, underline=underline)
+                # u.redoMenuLabel = name
+                # u.realRedoMenuLabel = realLabel
+    #@+node:ekr.20210109201336.18: *4* u.setUndoType
+    def setUndoType(self, theType):
+        
+        u = self
+        u.undoType = theType
+       
+        ### # To do in vs-code.
+            # u = self; frame = u.c.frame
+            # if not isinstance(theType, str):
+                # g.trace(f"oops: expected string for command, got {repr(theType)}")
+                # g.trace(g.callers())
+                # theType = '<unknown>'
+            # menu = frame.menu.getMenu("Edit")
+            # name = u.undoMenuName(theType)
+            # if name != u.undoMenuLabel:
+                # # Update menu using old name.
+                # realLabel = frame.menu.getRealMenuName(name)
+                # if realLabel == name:
+                    # underline = -1 if g.match(name, 0, "Can't") else 0
+                # else:
+                    # underline = realLabel.find("&")
+                # realLabel = realLabel.replace("&", "")
+                # frame.menu.setMenuLabel(
+                    # menu, u.realUndoMenuLabel, realLabel, underline=underline)
+                # u.undoType = theType
+                # u.undoMenuLabel = name
+                # u.realUndoMenuLabel = realLabel
+    #@+node:ekr.20210109201336.19: *4* u.setUndoTypes
+    def setUndoTypes(self):
+
+        u = self
+        # Set the undo type and undo menu label.
+        bunch = u.peekBead(u.bead)
+        if bunch:
+            u.setUndoType(bunch.undoType)
+        else:
+            u.setUndoType("Can't Undo")
+        # Set only the redo menu label.
+        bunch = u.peekBead(u.bead + 1)
+        if bunch:
+            u.setRedoType(bunch.undoType)
+        else:
+            u.setRedoType("Can't Redo")
+        ### u.cutStack()
     #@+node:ekr.20210109201336.28: *4* u.updateMarks
     def updateMarks(self, oldOrNew):
         """Update dirty and marked bits."""
@@ -852,18 +869,6 @@ class Undoer:
         u.bead += 1
         u.beads[u.bead:] = [bunch]
         return bunch
-    #@+node:ekr.20210109201336.63: *5* u.createCommonBunch
-    def createCommonBunch(self, p):
-        """Return a bunch containing all common undo info.
-        This is mostly the info for recreating an empty node at position p."""
-        u = self
-        c = u.c
-        w = c.frame.body.wrapper
-        return g.Bunch(
-            oldMarked=p and p.isMarked(),
-            oldSel=w and w.getSelectionRange() or None,
-            p=p and p.copy(),
-        )
     #@+node:ekr.20210109201336.64: *4* u.canRedo & canUndo
     # Translation does not affect these routines.
 
