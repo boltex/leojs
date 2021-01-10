@@ -50,9 +50,5 @@ def create_app():
             f"commander: {(t4-t2):.3f}\n"
             f"    total: {(t4-t1):.3f}\n")
     return c
-#@+node:ekr.20210104121029.10: ** function: splitLines
-def splitLines(s):
-    """Same as g.splitLines(s)"""
-    return s.splitlines(True) if s else []
 #@-others
 #@-leo
