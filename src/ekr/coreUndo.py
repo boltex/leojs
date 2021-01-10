@@ -4,18 +4,20 @@
 leojs undo/redo manager.
 See leoCore.py for the theory of operation.
 """
+import unittest
+
 # For now, use Leo's leoGlobals module.
 from leo.core import leoGlobals as g
 # from src.ekr import coreFind as g
+from src.ekr import coreTest
 
-# pylint: disable=unpacking-non-sequence
 #@+others
 #@+node:ekr.20210109201336.3: ** class Undoer
 class Undoer:
     """A class that implements unlimited undo and redo."""
     # pylint: disable=not-an-iterable
     # pylint: disable=unsubscriptable-object
-    # So that ivars can be inited to None rather thatn [].
+    # So that ivars can be inited to None rather than [].
     #@+others
     #@+node:ekr.20210109201336.4: *3* u.Birth
     #@+node:ekr.20210109201336.5: *4* u.__init__
@@ -1940,7 +1942,78 @@ class Undoer:
             w.setSelectionRange(i, j, insert=ins)
             w.seeInsertPoint()
     #@-others
+#@+node:ekr.20210109203637.1: ** class TestUndo (unittest.TestCase)
+class TestUndo (unittest.TestCase):
+    """Test cases for coreUndo.py"""
+    #@+others
+    #@+node:ekr.20210109203637.2: *3* TestUndo: Top level
+    #@+node:ekr.20210109203637.3: *4* TestUndo.make_test_tree
+    def make_test_tree(self):
+        """Make a test tree for other tests"""
+        c = self.c
+        root = c.rootPosition()
+        root.h = 'Root'
+        root.b = f"def root():\n    pass\n"
+        last = root
+
+        def make_child(n, p):
+            p2 = p.insertAsLastChild()
+            p2.h = f"child {n}"
+            p2.b = f"def child{n}():\n    v{n} = 2\n"
+            return p2
+
+        def make_top(n, sib):
+            p = sib.insertAfter()
+            p.h = f"Node {n}"
+            p.b = f"def top{n}():\n    v{n} = 3\n"
+            return p
+            
+        for n in range(0, 4, 3):
+            last = make_top(n+1, last)
+            child = make_child(n+2, last)
+            make_child(n+3, child)
+            
+        for p in c.all_positions():
+            p.v.clearDirty()
+            p.v.clearVisited()
+
+    #@+node:ekr.20210109203637.4: *4* TestUndo.setUp & tearDown
+    def setUp(self):
+        
+        # pylint: disable=import-self
+        from src.ekr import coreFind
+        g.unitTesting = True
+        self.c = coreTest.create_app()
+        self.x = coreFind.LeoFind(self.c)
+        self.settings = self.x.default_settings()
+        self.make_test_tree()
+
+    def tearDown(self):
+        g.unitTesting = False
+    #@+node:ekr.20210109203637.5: *4* TestUndo.test_tree
+    def test_tree(self):
+        table = (
+            (0, 'Root'),
+            (0, 'Node 1'),
+            (1, 'child 2'),
+            (2, 'child 3'),
+            (0, 'Node 4'),
+            (1, 'child 5'),
+            (2, 'child 6'),
+        )
+        i = 0
+        for p in self.c.all_positions():
+            level, h = table[i]
+            i += 1
+            assert p.h == h, (p.h, h)
+            assert p.level() == level, (p.level(), level, p.h)
+            # print(' '*p.level(), p.h)
+            # g.printObj(g.splitLines(p.b), tag=p.h)
+    #@-others
 #@-others
+if __name__ == '__main__':  # pragma: no cover (skip)
+    unittest.main()
+
 #@@language python
 #@@tabwidth -4
 #@@pagewidth 70

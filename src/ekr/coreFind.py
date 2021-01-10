@@ -17,7 +17,7 @@ def cmd(name):
     return g.new_cmd_decorator(name, ['c', 'findCommands',])
 
 #@+others
-#@+node:ekr.20210102145531.7: ** class LeoFind (coreFind.py)
+#@+node:ekr.20210102145531.7: ** class LeoFind
 class LeoFind:
     """The base class for Leo's Find commands."""
     #@+others
@@ -1196,7 +1196,7 @@ class LeoFind:
             self.find_seen.add(p.v)
         return pos, newpos
     #@-others
-#@+node:ekr.20210103132816.1: ** class SearchWidget (coreFind.py)
+#@+node:ekr.20210103132816.1: ** class SearchWidget
 class SearchWidget:
     """A class to simulating high-level interface widget."""
     # This could be a StringTextWrapper, but this code is simple and good.
