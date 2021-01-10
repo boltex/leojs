@@ -2,9 +2,13 @@
 #@+leo-ver=5-thin
 #@+node:ekr.20210102120444.53: * @file src/ekr/coreCommander.py
 #@@first
+"""Leo'Commands class, for leojs"""
 
+# For testing, use the *real* leoGlobals.
 from leo.core import leoGlobals as g
-from leo.core import leoNodes
+# from src.ekr import coreGlobals as g
+
+from src.ekr import coreNodes as leoNodes
 
 #@+others
 #@+node:ekr.20210102120444.55: ** class Commands
@@ -26,13 +30,13 @@ class Commander:
     #@+others
     #@+node:ekr.20210103133751.1: *3* c.Drawing & coloring
     def recolor(self):
-        pass  ### Not ready yet.
+        pass  ### For vs-code
 
     def redraw(self):
-        pass  ### Not ready yet.
+        pass  ### For vs-code
         
     def redraw_after_icons_changed(self):
-        pass  ### Not ready yet.
+        pass  ### For vs-code
     #@+node:ekr.20210102120444.56: *3* c.Generators
     #@+node:ekr.20210102120444.57: *4* c.all_nodes & all_unique_nodes
     def all_nodes(self):
