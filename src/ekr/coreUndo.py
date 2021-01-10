@@ -103,8 +103,8 @@ class Undoer:
         self.bead = -1  # Index of the present bead: -1:len(beads)
         self.undoType = "Can't Undo"
         # These must be set here, _not_ in clearUndoState.
-        # self.redoMenuLabel = "Can't Redo"
-        # self.undoMenuLabel = "Can't Undo"
+        self.redoMenuLabel = "Can't Redo"
+        self.undoMenuLabel = "Can't Undo"
         # self.realRedoMenuLabel = "Can't Redo"
         # self.realUndoMenuLabel = "Can't Undo"
         self.undoing = False  # True if executing an Undo command.
