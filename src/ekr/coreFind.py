@@ -5,10 +5,10 @@ import re
 import sys
 import time
 import unittest
-# pylint: disable=import-self
+# For now, use Leo's leoGlobals module.
 # from src.ekr import coreFind as g
 from leo.core import leoGlobals as g
-from src.ekr import coreFind
+
 from src.ekr import coreTest
 
 def cmd(name):
@@ -1096,9 +1096,8 @@ class LeoFind:
         if mo:
             self.match_obj = mo
             return mo.start(), mo.end()
-        else:
-            self.match_obj = None
-            return -1, -1
+        self.match_obj = None
+        return -1, -1
         #
         # The following is mysterious.
         # Félix, please don't both with it.
@@ -1287,6 +1286,9 @@ class TestFind (unittest.TestCase):
 
     #@+node:ekr.20210107151326.1: *4* TestFind.setUp & tearDown
     def setUp(self):
+        
+        # pylint: disable=import-self
+        from src.ekr import coreFind
         g.unitTesting = True
         self.c = coreTest.create_app()
         self.x = coreFind.LeoFind(self.c)
@@ -1773,11 +1775,11 @@ class TestFind (unittest.TestCase):
                         i = j = len(s)
                     else:
                         i = j = 0
-                    x.regex_helper(s, i, j, backwards, pattern, nocase)
+                    x.regex_helper(s, i, j, pattern, backwards, nocase)
         # Error test.
         x.re_obj = None
-        x.regex_helper("", 0, 0, False, pattern, False)
-        
+        backwards = pattern = nocase = None
+        x.regex_helper("", 0, 0, pattern, backwards, nocase)
 
         # for change_text, groups, expected in table:
             # result = x.make_regex_subs(change_text, groups)
