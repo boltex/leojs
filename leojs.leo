@@ -241,6 +241,7 @@
 <v t="felix.20201214154816.16"><vh>ChooseDocumentItem</vh></v>
 <v t="felix.20201214154816.17"><vh>MinibufferCommand</vh></v>
 </v>
+<v t="felix.20210110210346.1"><vh>@clean src/declarations.d.ts</vh></v>
 <v t="felix.20201208224407.1"><vh>@clean src/utils.ts</vh>
 <v t="felix.20201208224407.2"><vh>padNumber2</vh></v>
 <v t="felix.20201208224407.4"><vh>addFileToGlobal</vh></v>
@@ -382,6 +383,11 @@
 </v>
 </v>
 </v>
+<v t="felix.20210110222544.1"><vh>@clean src/core/leoCommander.ts</vh>
+<v t="felix.20210110223514.1"><vh>class Commander</vh>
+<v t="felix.20210110223547.1"><vh>constructor</vh></v>
+</v>
+</v>
 <v t="felix.20210102211445.1"><vh>@clean src/core/leoExternalFiles.ts</vh>
 <v t="felix.20210102211748.1"><vh>class ExternalFile</vh>
 <v t="felix.20210102211748.2"><vh>ef.shortFileName</vh></v>
@@ -417,11 +423,24 @@
 <v t="felix.20210104210316.1"><vh>g.isWordChar*     (coreGlobals.py)</vh></v>
 <v t="felix.20210108005428.1"><vh>g.match           (coreGlobals.py)</vh></v>
 <v t="felix.20210108011201.1"><vh>g.match_word      (coreGlobals.py)</vh></v>
+<v t="felix.20210109001345.1"><vh>g.objToSTring     (coreGlobals.py)</vh></v>
+<v t="felix.20210109002058.1"><vh>g.plural          (coreGlobals.py)</vh></v>
+<v t="felix.20210109003521.1"><vh>g.pr              (coreGlobals.py)</vh></v>
+<v t="felix.20210109004916.1"><vh>g.printObj        (coreGlobals.py)</vh></v>
+<v t="felix.20210109005341.1"><vh>g.shortFileName   (coreGlobals.py)</vh></v>
+<v t="felix.20210109180936.1"><vh>g.skip_to_char    (coreGlobals.py)</vh></v>
+<v t="felix.20210109190137.1"><vh>g.skip_id         (coreGlobals.py)</vh></v>
+<v t="felix.20210109192733.1"><vh>g.skip_ws*        (coreGlobals.py)</vh></v>
 <v t="felix.20210104003932.1"><vh>g.splitLines      (coreGlobals.py)</vh></v>
+<v t="felix.20210109224332.1"><vh>g.toEncodedString (coreGlobals.py)</vh></v>
+<v t="felix.20210110163748.1"><vh>g.toUnicode       (coreGlobals.py)</vh></v>
+<v t="felix.20210110163753.1"><vh>g.trace           (coreGlobals.py)</vh></v>
 </v>
 <v t="felix.20210102012632.1"><vh>@clean src/core/leoNodes.ts</vh>
 <v t="felix.20210102014453.1"><vh>class NodeIndices</vh>
 <v t="felix.20210102014804.1"><vh>ni.constructor</vh></v>
+<v t="felix.20210110183334.1"><vh>ni._get_time</vh></v>
+<v t="felix.20210110213751.1"><vh>ni.check_gnx</vh></v>
 <v t="felix.20210102024358.1"><vh>ni.setTimeStamp</vh></v>
 </v>
 <v t="felix.20210102015005.1"><vh>class Position</vh>
@@ -479,7 +498,6 @@
 </v>
 <v t="felix.20210102000121.1"><vh>Command Classes</vh></v>
 </v>
-<v t="felix.20210104211547.1"><vh>git diff revs: 332469bd HEAD</vh></v>
 </vnodes>
 <tnodes>
 <t tx="ekr.20201209145256.1"></t>
@@ -4958,8 +4976,10 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 "webpack-cli": "^3.3.12"
 </t>
 <t tx="felix.20201214205159.81">"@types/debounce": "^1.2.0",
-"debounce": "^1.2.0",
-"axios": "^0.19.0"
+"axios": "^0.19.0",
+"@types/date-format-lite": "^17.7.0",
+"date-format-lite": "^17.7.0",
+"debounce": "^1.2.0"
 </t>
 <t tx="felix.20201214205159.9">{
   "command": "leojs.showBody",
@@ -5880,12 +5900,13 @@ public gotSelectedNode(p_element: PNode): void {
 <t tx="felix.20210102012410.1">@language typescript
 @tabwidth -4
 
-/*
+/**
  * Global constants, variables and utility functions used throughout Leo.
  * Important: This module imports no other Leo module.
  */
 import { assert } from 'console';
 import * as fs from 'fs';
+import * as path from 'path';
 import { LeoApp } from './leoApp';
 
 export const isMac: boolean = process.platform.startsWith('darwin');
@@ -5907,12 +5928,17 @@ export const app: LeoApp = new LeoApp();
 export let inScript: boolean = false; // A synonym for app.inScript
 export let unitTesting: boolean = false; // A synonym for app.unitTesting.
 
+export let unicode_warnings: { [key: string]: any } = {};  // Keys are callers.
+
 @others
 
 </t>
 <t tx="felix.20210102012632.1">@language typescript
 @tabwidth -4
 // Leo's fundamental data classes.
+
+import * as g from './leoGlobals';
+import "date-format-lite";
 
 @others
 
@@ -6072,9 +6098,11 @@ public filter_b() {
 }
 
 </t>
-<t tx="felix.20210102024358.1">public setTimeStamp(): void {
-    //
-
+<t tx="felix.20210102024358.1">/**
+ * Set the timestamp string to be used by getNewIndex until further notice
+ */
+public setTimeStamp(): void {
+    this.timeString = this._get_time();
 }
 
 </t>
@@ -6255,6 +6283,7 @@ export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
     import platform
     import sqlite3
 */
+
 
 </t>
 <t tx="felix.20210102211445.1">@language typescript
@@ -7618,7 +7647,8 @@ export function doKeywordArgs(keys: { [key: string]: any }, d: { [key: string]: 
 <t tx="felix.20210104210231.1">export const error = console.error;
 
 </t>
-<t tx="felix.20210104210234.1">export const es = console.log;
+<t tx="felix.20210104210234.1">// TODO : Replace with output to proper 'Leo log pane'
+export const es = console.log;
 
 </t>
 <t tx="felix.20210104210248.1">export function es_exception(): string {
@@ -7641,6 +7671,7 @@ export function doKeywordArgs(keys: { [key: string]: any }, d: { [key: string]: 
 
 </t>
 <t tx="felix.20210104210254.1">/**
+ * TODO : This is a temporary console output
  * Print all non-keyword args, and put them to the log pane.
  * Python code was:
  *     pr(*args, **keys)
@@ -7705,9 +7736,6 @@ export function isWordChar1(ch: string): boolean {
 }
 
 </t>
-<t tx="felix.20210104211547.1">@ignore
-@nosearch
-</t>
 <t tx="felix.20210108005428.1">export function match(s: string, i: number, pattern: string): boolean {
     // Warning: this code makes no assumptions about what follows pattern.
     // Equivalent to original in python (only looks in specific substring)
@@ -7719,6 +7747,297 @@ export function isWordChar1(ch: string): boolean {
 <t tx="felix.20210108011201.1">export function match_word(s: string, i: number, pattern: string): boolean {
     const pat = new RegExp("\\b" + pattern + "\\b");
     return s.substring(i).search(pat) &gt;= 0;
+}
+
+</t>
+<t tx="felix.20210109001345.1">/**
+ * Pretty print any Python object to a string.
+ * TODO : Temporary json stringify
+ */
+export function objToString(obj: any, indent = '', printCaller = false, tag = null): string {
+    return JSON.stringify(obj);
+
+    // # pylint: disable=undefined-loop-variable
+    //     # Looks like a a pylint bug.
+    // #
+    // # Compute s.
+    // if isinstance(obj, dict):
+    //     s = dictToString(obj, indent=indent)
+    // elif isinstance(obj, list):
+    //     s = listToString(obj, indent=indent)
+    // elif isinstance(obj, tuple):
+    //     s = tupleToString(obj, indent=indent)
+    // elif isinstance(obj, str):
+    //     # Print multi-line strings as lists.
+    //     s = obj
+    //     lines = splitLines(s)
+    //     if len(lines) &gt; 1:
+    //         s = listToString(lines, indent=indent)
+    //     else:
+    //         s = repr(s)
+    // else:
+    //     s = repr(obj)
+    // #
+    // # Compute the return value.
+    // if printCaller and tag:
+    //     prefix = f"{caller()}: {tag}"
+    // elif printCaller or tag:
+    //     prefix = caller() if printCaller else tag
+    // else:
+    //     prefix = None
+    // if prefix:
+    //     sep = '\n' if '\n' in s else ' '
+    //     return f"{prefix}:{sep}{s}"
+    // return s
+
+}
+
+</t>
+<t tx="felix.20210109002058.1">/**
+ * Return "s" or "" depending on n.
+ */
+export function plural(obj: any): string {
+    let n: number;
+    if (Array.isArray(obj) || ((typeof obj) === "string")) {
+        n = obj.length;
+    } else if ((typeof obj) === "object") {
+        n = Object.keys(obj).length;
+    } else {
+        n = obj;
+    }
+    return n === 1 ? '' : "s";
+}
+
+</t>
+<t tx="felix.20210109003521.1">/**
+ * Print all non-keyword args.
+ */
+export const pr = console.log;
+// TODO : Replace with output to proper 'Leo terminal output'
+// def pr(*args, **keys):
+//     """ Print all non-keyword args."""
+//     result = []
+//     for arg in args:
+//         if isinstance(arg, str):
+//             result.append(arg)
+//         else:
+//             result.append(repr(arg))
+//     print(','.join(result))
+
+</t>
+<t tx="felix.20210109004916.1">/**
+ * Pretty print any Python object using pr.
+ */
+export function printObj(obj: any, indent = '', printCaller = false, tag = null): void {
+    // TODO : Replace with output to proper pr function
+    //     pr(objToString(obj, indent=indent, printCaller=printCaller, tag=tag))
+    pr(obj);
+}
+
+</t>
+<t tx="felix.20210109005341.1">/**
+ * Return the base name of a path.
+ */
+export function shortFileName(fileName: string): string {
+    //  return os.path.basename(fileName) if fileName else ''
+    return fileName ? path.basename(fileName) : '';
+
+}
+
+export const shortFilename = shortFileName;
+
+</t>
+<t tx="felix.20210109180936.1">/**
+ * Returns object instead of original python tuple
+ */
+export function skip_to_char(s: string, i: number, ch: string): { position: number; result: string; } {
+    const j: number = s.indexOf(ch, i);
+    if (j === -1) {
+        return {
+            position: s.length,
+            result: s.substring(i)
+        };
+    }
+    return {
+        position: j,
+        result: s.substring(i, j)
+    };
+}
+
+</t>
+<t tx="felix.20210109190137.1">export function skip_id(s: string, i: number, chars: string | null = null): number {
+    chars = chars ? chars.toString() : '';
+    const n = s.length;
+    while (i &lt; n &amp;&amp; (isWordChar(s.charAt(i)) || chars.indexOf(s.charAt(i)) &gt;= 0)) {
+        i += 1;
+    }
+    return i;
+}
+
+</t>
+<t tx="felix.20210109192733.1">export function skip_ws(s: string, i: number): number {
+    const n: number = s.length;
+    while (i &lt; n &amp;&amp; ('\t '.indexOf(s.charAt(i)))) {
+        i += 1;
+    }
+    return i;
+}
+
+export function skip_ws_and_nl(s: string, i: number): number {
+    const n: number = s.length;
+    while (i &lt; n &amp;&amp; (' \t\n\r'.indexOf(s.charAt(i)))) {
+        i += 1;
+    }
+    return i;
+}
+
+</t>
+<t tx="felix.20210109224332.1">/**
+ * Convert unicode string to an encoded string.
+ */
+export function toEncodedString(s: any, encoding = 'utf-8', reportErrors = false): string {
+    if ((typeof s) !== "string") {
+        return s;
+    }
+    // TODO : TEST AND CHECK IF MORE THAN utf-8 IS NEEDED
+    // use atob() for ascii to base 64, or other functionality for more encodings
+    // (other examples)
+    //     btoa(unescape(encodeURIComponent(str))))
+    //     decodeURIComponent(JSON.parse('"' + s.replace('"', '\\"') + '"'));
+    // OTHER EXAMPLES
+    // str.replace(/[^\0-~]/g, function(ch) {
+    //     return "\\u" + ("000" + ch.charCodeAt().toString(16)).slice(-4);
+    // });
+
+    // ORIGINAL
+    // * These are the only significant calls to s.encode in Leo.
+    // try:
+    //     s = s.encode(encoding, "strict")
+    // except UnicodeError:
+    //     s = s.encode(encoding, "replace")
+    //     if reportErrors:
+    //         error(f"Error converting {s} from unicode to {encoding} encoding")
+
+    return s; // skip for now
+}
+
+</t>
+<t tx="felix.20210110163748.1">/**
+ * Convert bytes to unicode if necessary.
+ */
+export function toUnicode(s: any, encoding: string | null = null, reportErrors = false): string {
+    // TODO : SEE g.toEncodedString.
+
+    // ORIGINAL
+    // if isinstance(s, str):
+    //     return s
+    // tag = 'g.toUnicode'
+    // if not isinstance(s, bytes):
+    //     if callers() not in unicode_warnings:
+    //         unicode_warnings[callers] = True
+    //         error(f"{tag}: unexpected argument of type {s.__class__.__name__}")
+    //         trace(callers())
+    //     return ''
+    // if not encoding:
+    //     encoding = 'utf-8'
+    // try:
+    //     s = s.decode(encoding, 'strict')
+    // except(UnicodeDecodeError, UnicodeError):
+    //     # https://wiki.python.org/moin/UnicodeDecodeError
+    //     s = s.decode(encoding, 'replace')
+    //     if reportErrors:
+    //         error(f"{tag}: unicode error. encoding: {encoding!r}, s:\n{s!r}")
+    //         trace(callers())
+    // except Exception:
+    //     es_exception()
+    //     error(f"{tag}: unexpected error! encoding: {encoding!r}, s:\n{s!r}")
+    //     trace(callers())
+    // return s
+
+    return s; // Skip for now
+}
+
+</t>
+<t tx="felix.20210110163753.1">/**
+ * Print a tracing message
+ */
+export const trace = console.log;
+// TODO : Replace with output to proper 'Leo terminal output'  The string is: pythön!
+
+</t>
+<t tx="felix.20210110183334.1">private _get_time(): string {
+    const now = new Date();
+    // GNX example: felix.20210110163753.1
+    // using https://www.npmjs.com/package/date-format-lite#syntax
+    return now.format("YYYYMMDDhhmmss");
+}
+
+</t>
+<t tx="felix.20210110210346.1">@language typescript
+@tabwidth -4
+
+// ambient module declaration for https://www.npmjs.com/package/date-format-lite
+declare module "date-format-lite" { }
+
+// date-format-lite augments built-in Date
+interface Date {
+    format: (format?: string) =&gt; string;
+    masks: { default: string };
+}
+
+</t>
+<t tx="felix.20210110213751.1">/**
+ * Check that no vnode exists with the given gnx in fc.gnxDict.
+ */
+public check_gnx(c: any, gnx: string, v: VNode): void {
+    // TODO : Type 'c' as Commands class 
+
+    if (gnx === 'hidden-root-vnode-gnx') {
+        // No longer an error.
+        // fast.readWithElementTree always generates a nominal hidden vnode.
+        return;
+    }
+
+    // TODO : Check in "gnxDict" from passed commander parameter
+
+    // fc = c.fileCommands
+    // v2 = fc.gnxDict.get(gnx)
+    // if v2 and v2 != v:
+    //     g.error(
+    //         f"getNewIndex: gnx clash {gnx}\n"
+    //         f"          v: {v}\n"
+    //         f"         v2: {v2}")
+
+}
+
+</t>
+<t tx="felix.20210110222544.1">@others
+@language typescript
+@tabwidth -4
+
+
+</t>
+<t tx="felix.20210110223514.1">import { Position } from "./leoNodes";
+
+/**
+ * A per-outline class.
+ * The "c" predefined object is an instance of this class.
+ */
+export class Commander {
+
+    // Official ivars.
+    private _currentPosition: Position | null = null;
+    public hiddenRootNode = null;
+    public mFileName: string;
+    public mRelativeFileName = null;
+
+    @others
+
+}
+
+</t>
+<t tx="felix.20210110223547.1">constructor(fileName: string) {
+    this.mFileName = fileName;
 }
 
 </t>

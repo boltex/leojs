@@ -1,5 +1,8 @@
 // Leo's fundamental data classes.
 
+import * as g from './leoGlobals';
+import "date-format-lite";
+
 /**
  * A class managing global node indices (gnx's).
  */
@@ -21,9 +24,42 @@ export class NodeIndices {
         this.setTimeStamp();
     }
 
-    public setTimeStamp(): void {
-        //
+    private _get_time(): string {
+        const now = new Date();
+        // GNX example: felix.20210110163753.1
+        // using https://www.npmjs.com/package/date-format-lite#syntax
+        return now.format("YYYYMMDDhhmmss");
+    }
 
+    /**
+     * Check that no vnode exists with the given gnx in fc.gnxDict.
+     */
+    public check_gnx(c: any, gnx: string, v: VNode): void {
+        // TODO : Type 'c' as Commands class 
+
+        if (gnx === 'hidden-root-vnode-gnx') {
+            // No longer an error.
+            // fast.readWithElementTree always generates a nominal hidden vnode.
+            return;
+        }
+
+        // TODO : Check in "gnxDict" from passed commander parameter
+
+        // fc = c.fileCommands
+        // v2 = fc.gnxDict.get(gnx)
+        // if v2 and v2 != v:
+        //     g.error(
+        //         f"getNewIndex: gnx clash {gnx}\n"
+        //         f"          v: {v}\n"
+        //         f"         v2: {v2}")
+
+    }
+
+    /**
+     * Set the timestamp string to be used by getNewIndex until further notice
+     */
+    public setTimeStamp(): void {
+        this.timeString = this._get_time();
     }
 
 

@@ -16,6 +16,7 @@
     import sqlite3
 */
 
+
 /**
  *  A singleton class to manage idle-time handling. This class handles all
  *  details of running code at idle time, including running 'idle' hooks.

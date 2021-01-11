@@ -1,10 +1,11 @@
 
-/*
+/**
  * Global constants, variables and utility functions used throughout Leo.
  * Important: This module imports no other Leo module.
  */
 import { assert } from 'console';
 import * as fs from 'fs';
+import * as path from 'path';
 import { LeoApp } from './leoApp';
 
 export const isMac: boolean = process.platform.startsWith('darwin');
@@ -137,6 +138,8 @@ export const app: LeoApp = new LeoApp();
 // Global status vars.
 export let inScript: boolean = false; // A synonym for app.inScript
 export let unitTesting: boolean = false; // A synonym for app.unitTesting.
+
+export let unicode_warnings: { [key: string]: any } = {};  // Keys are callers.
 
 /**
  * Define a file-like object for redirecting writes to a string.
@@ -315,6 +318,7 @@ export function doKeywordArgs(keys: { [key: string]: any }, d: { [key: string]: 
 
 export const error = console.error;
 
+// TODO : Replace with output to proper 'Leo log pane'
 export const es = console.log;
 
 export function es_exception(): string {
@@ -336,6 +340,7 @@ export function es_exception(): string {
 */
 
 /**
+ * TODO : This is a temporary console output
  * Print all non-keyword args, and put them to the log pane.
  * Python code was:
  *     pr(*args, **keys)
@@ -409,6 +414,140 @@ export function match_word(s: string, i: number, pattern: string): boolean {
 }
 
 /**
+ * Pretty print any Python object to a string.
+ * TODO : Temporary json stringify
+ */
+export function objToString(obj: any, indent = '', printCaller = false, tag = null): string {
+    return JSON.stringify(obj);
+
+    // # pylint: disable=undefined-loop-variable
+    //     # Looks like a a pylint bug.
+    // #
+    // # Compute s.
+    // if isinstance(obj, dict):
+    //     s = dictToString(obj, indent=indent)
+    // elif isinstance(obj, list):
+    //     s = listToString(obj, indent=indent)
+    // elif isinstance(obj, tuple):
+    //     s = tupleToString(obj, indent=indent)
+    // elif isinstance(obj, str):
+    //     # Print multi-line strings as lists.
+    //     s = obj
+    //     lines = splitLines(s)
+    //     if len(lines) > 1:
+    //         s = listToString(lines, indent=indent)
+    //     else:
+    //         s = repr(s)
+    // else:
+    //     s = repr(obj)
+    // #
+    // # Compute the return value.
+    // if printCaller and tag:
+    //     prefix = f"{caller()}: {tag}"
+    // elif printCaller or tag:
+    //     prefix = caller() if printCaller else tag
+    // else:
+    //     prefix = None
+    // if prefix:
+    //     sep = '\n' if '\n' in s else ' '
+    //     return f"{prefix}:{sep}{s}"
+    // return s
+
+}
+
+/**
+ * Return "s" or "" depending on n.
+ */
+export function plural(obj: any): string {
+    let n: number;
+    if (Array.isArray(obj) || ((typeof obj) === "string")) {
+        n = obj.length;
+    } else if ((typeof obj) === "object") {
+        n = Object.keys(obj).length;
+    } else {
+        n = obj;
+    }
+    return n === 1 ? '' : "s";
+}
+
+/**
+ * Print all non-keyword args.
+ */
+export const pr = console.log;
+// TODO : Replace with output to proper 'Leo terminal output'
+// def pr(*args, **keys):
+//     """ Print all non-keyword args."""
+//     result = []
+//     for arg in args:
+//         if isinstance(arg, str):
+//             result.append(arg)
+//         else:
+//             result.append(repr(arg))
+//     print(','.join(result))
+
+/**
+ * Pretty print any Python object using pr.
+ */
+export function printObj(obj: any, indent = '', printCaller = false, tag = null): void {
+    // TODO : Replace with output to proper pr function
+    //     pr(objToString(obj, indent=indent, printCaller=printCaller, tag=tag))
+    pr(obj);
+}
+
+/**
+ * Return the base name of a path.
+ */
+export function shortFileName(fileName: string): string {
+    //  return os.path.basename(fileName) if fileName else ''
+    return fileName ? path.basename(fileName) : '';
+
+}
+
+export const shortFilename = shortFileName;
+
+/**
+ * Returns object instead of original python tuple
+ */
+export function skip_to_char(s: string, i: number, ch: string): { position: number; result: string; } {
+    const j: number = s.indexOf(ch, i);
+    if (j === -1) {
+        return {
+            position: s.length,
+            result: s.substring(i)
+        };
+    }
+    return {
+        position: j,
+        result: s.substring(i, j)
+    };
+}
+
+export function skip_id(s: string, i: number, chars: string | null = null): number {
+    chars = chars ? chars.toString() : '';
+    const n = s.length;
+    while (i < n && (isWordChar(s.charAt(i)) || chars.indexOf(s.charAt(i)) >= 0)) {
+        i += 1;
+    }
+    return i;
+}
+
+export function skip_ws(s: string, i: number): number {
+    const n: number = s.length;
+    while (i < n && ('\t '.indexOf(s.charAt(i)))) {
+        i += 1;
+    }
+    return i;
+}
+
+export function skip_ws_and_nl(s: string, i: number): number {
+    const n: number = s.length;
+    while (i < n && (' \t\n\r'.indexOf(s.charAt(i)))) {
+        i += 1;
+    }
+    return i;
+}
+
+/**
  * Split s into lines, preserving the number of lines and the endings
  * of all lines, including the last line.
  */
@@ -419,5 +558,75 @@ export function splitLines(s?: string): string[] {
         return [];
     }
 }
+
+/**
+ * Convert unicode string to an encoded string.
+ */
+export function toEncodedString(s: any, encoding = 'utf-8', reportErrors = false): string {
+    if ((typeof s) !== "string") {
+        return s;
+    }
+    // TODO : TEST AND CHECK IF MORE THAN utf-8 IS NEEDED
+    // use atob() for ascii to base 64, or other functionality for more encodings
+    // (other examples)
+    //     btoa(unescape(encodeURIComponent(str))))
+    //     decodeURIComponent(JSON.parse('"' + s.replace('"', '\\"') + '"'));
+    // OTHER EXAMPLES
+    // str.replace(/[^\0-~]/g, function(ch) {
+    //     return "\\u" + ("000" + ch.charCodeAt().toString(16)).slice(-4);
+    // });
+
+    // ORIGINAL
+    // * These are the only significant calls to s.encode in Leo.
+    // try:
+    //     s = s.encode(encoding, "strict")
+    // except UnicodeError:
+    //     s = s.encode(encoding, "replace")
+    //     if reportErrors:
+    //         error(f"Error converting {s} from unicode to {encoding} encoding")
+
+    return s; // skip for now
+}
+
+/**
+ * Convert bytes to unicode if necessary.
+ */
+export function toUnicode(s: any, encoding: string | null = null, reportErrors = false): string {
+    // TODO : SEE g.toEncodedString.
+
+    // ORIGINAL
+    // if isinstance(s, str):
+    //     return s
+    // tag = 'g.toUnicode'
+    // if not isinstance(s, bytes):
+    //     if callers() not in unicode_warnings:
+    //         unicode_warnings[callers] = True
+    //         error(f"{tag}: unexpected argument of type {s.__class__.__name__}")
+    //         trace(callers())
+    //     return ''
+    // if not encoding:
+    //     encoding = 'utf-8'
+    // try:
+    //     s = s.decode(encoding, 'strict')
+    // except(UnicodeDecodeError, UnicodeError):
+    //     # https://wiki.python.org/moin/UnicodeDecodeError
+    //     s = s.decode(encoding, 'replace')
+    //     if reportErrors:
+    //         error(f"{tag}: unicode error. encoding: {encoding!r}, s:\n{s!r}")
+    //         trace(callers())
+    // except Exception:
+    //     es_exception()
+    //     error(f"{tag}: unexpected error! encoding: {encoding!r}, s:\n{s!r}")
+    //     trace(callers())
+    // return s
+
+    return s; // Skip for now
+}
+
+/**
+ * Print a tracing message
+ */
+export const trace = console.log;
+// TODO : Replace with output to proper 'Leo terminal output'  The string is: pythön!
 
 
