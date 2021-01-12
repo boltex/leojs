@@ -386,6 +386,7 @@
 <v t="felix.20210110222544.1"><vh>@clean src/core/leoCommander.ts</vh>
 <v t="felix.20210110223514.1"><vh>class Commander</vh>
 <v t="felix.20210110223547.1"><vh>constructor</vh></v>
+<v t="felix.20210112001859.1"><vh>c.Drawing &amp; coloring</vh></v>
 </v>
 </v>
 <v t="felix.20210102211445.1"><vh>@clean src/core/leoExternalFiles.ts</vh>
@@ -453,6 +454,11 @@
 <v t="felix.20210102233013.2"><vh>p.Comparisons</vh></v>
 <v t="felix.20210102233013.3"><vh>p.Headline &amp; body strings</vh></v>
 <v t="felix.20210102233013.4"><vh>p.Status bits</vh></v>
+</v>
+<v t="felix.20210112010737.1"><vh>p.children &amp; parents</vh>
+<v t="felix.20210112010737.2"><vh>p.childIndex</vh></v>
+<v t="felix.20210112010737.3"><vh>p.directParents</vh></v>
+<v t="felix.20210112010737.4"><vh>p.hasChildren &amp; p.numberOfChildren</vh></v>
 </v>
 </v>
 <v t="felix.20210102035853.1"><vh>p.Moving, Inserting, Deleting, Cloning, Sorting</vh>
@@ -5988,6 +5994,54 @@ export class Position {
 
 }
 
+// Aliases for Position members
+export interface Position {
+    back: () =&gt; any;
+    firstChild: () =&gt; any;
+    lastChild: () =&gt; any;
+    lastNode: () =&gt; any;
+    next: () =&gt; any;
+    nodeAfterTree: () =&gt; any;
+    nthChild: () =&gt; any;
+    parent: () =&gt; any;
+    threadBack: () =&gt; any;
+    threadNext: () =&gt; any;
+    visBack: () =&gt; any;
+    visNext: () =&gt; any;
+    hasVisBack: () =&gt; any;
+    hasVisNext: () =&gt; any;
+    hasFirstChild: () =&gt; any;
+    atNoSentFileNodeName: () =&gt; any;
+    atAsisFileNodeName: () =&gt; any;
+    isAtNoSentFileNode: () =&gt; any;
+    isAtAsisFileNode: () =&gt; any;
+}
+
+Position.prototype.back = Position.prototype.getBack;
+Position.prototype.firstChild = Position.prototype.getFirstChild;
+Position.prototype.lastChild = Position.prototype.getLastChild;
+Position.prototype.lastNode = Position.prototype.getLastNode;
+// Position.prototype.lastVisible = Position.prototype.getLastVisible # New in 4.2 (was in tk tree code).;
+Position.prototype.next = Position.prototype.getNext;
+Position.prototype.nodeAfterTree = Position.prototype.getNodeAfterTree;
+Position.prototype.nthChild = Position.prototype.getNthChild;
+Position.prototype.parent = Position.prototype.getParent;
+Position.prototype.threadBack = Position.prototype.getThreadBack;
+Position.prototype.threadNext = Position.prototype.getThreadNext;
+Position.prototype.visBack = Position.prototype.getVisBack;
+Position.prototype.visNext = Position.prototype.getVisNext;
+// New in Leo 4.4.3:
+Position.prototype.hasVisBack = Position.prototype.visBack;
+Position.prototype.hasVisNext = Position.prototype.visNext;
+// from p.children &amp; parents
+Position.prototype.hasFirstChild = Position.prototype.hasChildren;
+// New names, less confusing
+Position.prototype.atNoSentFileNodeName = Position.prototype.atNoSentinelsFileNodeName;
+Position.prototype.atAsisFileNodeName = Position.prototype.atSilentFileNodeName;
+
+Position.prototype.isAtNoSentFileNode = Position.prototype.isAtNoSentinelsFileNode;
+Position.prototype.isAtAsisFileNode = Position.prototype.isAtSilentFileNode;
+
 </t>
 <t tx="felix.20210102015005.2">constructor(v: VNode, childIndex: number = 0, stack?: any[]) {
     this.v = v;
@@ -6472,63 +6526,79 @@ public language_extension_dict: { [key: string]: string } = {};
 </t>
 <t tx="felix.20210102232930.1"></t>
 <t tx="felix.20210102233013.1"></t>
-<t tx="felix.20210102233013.2">/*
-def anyAtFileNodeName(self): return self.v.anyAtFileNodeName()
+<t tx="felix.20210102233013.2">public anyAtFileNodeName(): any {
+    return this.v.anyAtFileNodeName();
+}
+public atAutoNodeName(): any {
+    return this.v.atAutoNodeName();
+}
+public atCleanNodeName(): any {
+    return this.v.atCleanNodeName();
+}
+public atEditNodeName(): any {
+    return this.v.atEditNodeName();
+}
+public atFileNodeName(): any {
+    return this.v.atFileNodeName();
+}
+public atNoSentinelsFileNodeName(): any {
+    return this.v.atNoSentinelsFileNodeName();
+}
+public atShadowFileNodeName(): any {
+    return this.v.atShadowFileNodeName();
+}
+public atSilentFileNodeName(): any {
+    return this.v.atSilentFileNodeName();
+}
+public atThinFileNodeName(): any {
+    return this.v.atThinFileNodeName();
+}
+public isAnyAtFileNode(): any {
+    return this.v.isAnyAtFileNode();
+}
+public isAtAllNode(): any {
+    return this.v.isAtAllNode();
+}
+public isAtAutoNode(): any {
+    return this.v.isAtAutoNode();
+}
+public isAtAutoRstNode(): any {
+    return this.v.isAtAutoRstNode();
+}
+public isAtCleanNode(): any {
+    return this.v.isAtCleanNode();
+}
+public isAtEditNode(): any {
+    return this.v.isAtEditNode();
+}
+public isAtFileNode(): any {
+    return this.v.isAtFileNode();
+}
+public isAtIgnoreNode(): any {
+    return this.v.isAtIgnoreNode();
+}
+public isAtNoSentinelsFileNode(): any {
+    return this.v.isAtNoSentinelsFileNode();
+}
+public isAtOthersNode(): any {
+    return this.v.isAtOthersNode();
+}
+public isAtRstFileNode(): any {
+    return this.v.isAtRstFileNode();
+}
+public isAtSilentFileNode(): any {
+    return this.v.isAtSilentFileNode();
+}
+public isAtShadowFileNode(): any {
+    return this.v.isAtShadowFileNode();
+}
+public isAtThinFileNode(): any {
+    return this.v.isAtThinFileNode();
+}
+public matchHeadline(): any {
+    return this.v.matchHeadline();
+}
 
-def atAutoNodeName(self): return self.v.atAutoNodeName()
-
-def atCleanNodeName(self): return self.v.atCleanNodeName()
-
-def atEditNodeName(self): return self.v.atEditNodeName()
-
-def atFileNodeName(self): return self.v.atFileNodeName()
-
-def atNoSentinelsFileNodeName(self): return self.v.atNoSentinelsFileNodeName()
-# def atRawFileNodeName         (self): return self.v.atRawFileNodeName()
-
-def atShadowFileNodeName(self): return self.v.atShadowFileNodeName()
-
-def atSilentFileNodeName(self): return self.v.atSilentFileNodeName()
-
-def atThinFileNodeName(self): return self.v.atThinFileNodeName()
-# New names, less confusing
-atNoSentFileNodeName = atNoSentinelsFileNodeName
-atAsisFileNodeName = atSilentFileNodeName
-
-def isAnyAtFileNode(self): return self.v.isAnyAtFileNode()
-
-def isAtAllNode(self): return self.v.isAtAllNode()
-
-def isAtAutoNode(self): return self.v.isAtAutoNode()
-
-def isAtAutoRstNode(self): return self.v.isAtAutoRstNode()
-
-def isAtCleanNode(self): return self.v.isAtCleanNode()
-
-def isAtEditNode(self): return self.v.isAtEditNode()
-
-def isAtFileNode(self): return self.v.isAtFileNode()
-
-def isAtIgnoreNode(self): return self.v.isAtIgnoreNode()
-
-def isAtNoSentinelsFileNode(self): return self.v.isAtNoSentinelsFileNode()
-
-def isAtOthersNode(self): return self.v.isAtOthersNode()
-
-def isAtRstFileNode(self): return self.v.isAtRstFileNode()
-
-def isAtSilentFileNode(self): return self.v.isAtSilentFileNode()
-
-def isAtShadowFileNode(self): return self.v.isAtShadowFileNode()
-
-def isAtThinFileNode(self): return self.v.isAtThinFileNode()
-# New names, less confusing:
-isAtNoSentFileNode = isAtNoSentinelsFileNode
-isAtAsisFileNode = isAtSilentFileNode
-# Utilities.
-
-def matchHeadline(self, pattern): return self.v.matchHeadline(pattern)
-*/
 </t>
 <t tx="felix.20210102233013.3">public bodyString(): string { return this.v.bodyString(); }
 
@@ -7990,7 +8060,7 @@ interface Date {
  * Check that no vnode exists with the given gnx in fc.gnxDict.
  */
 public check_gnx(c: any, gnx: string, v: VNode): void {
-    // TODO : Type 'c' as Commands class 
+    // TODO : Type 'c' as Commands class
 
     if (gnx === 'hidden-root-vnode-gnx') {
         // No longer an error.
@@ -8038,6 +8108,40 @@ export class Commander {
 </t>
 <t tx="felix.20210110223547.1">constructor(fileName: string) {
     this.mFileName = fileName;
+}
+
+</t>
+<t tx="felix.20210112001859.1">public recolor():void {
+    console.log("recolor");
+}
+
+public redraw():void {
+    console.log("redraw");
+}
+
+public redraw_after_icons_changed():void {
+    console.log("redraw_after_icons_changed");
+}
+
+</t>
+<t tx="felix.20210112010737.1"></t>
+<t tx="felix.20210112010737.2">// This used to be time-critical code.
+public childIndex(): number {
+    return this._childIndex;
+}
+
+</t>
+<t tx="felix.20210112010737.3">public directParents(): any {
+    return this.v.directParents();
+}
+
+</t>
+<t tx="felix.20210112010737.4">public hasChildren(): boolean {
+    return this.v.children.length &gt; 0;
+}
+
+public numberOfChildren(): number {
+    return this.v.children.length;
 }
 
 </t>

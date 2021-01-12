@@ -35,7 +35,7 @@ export class NodeIndices {
      * Check that no vnode exists with the given gnx in fc.gnxDict.
      */
     public check_gnx(c: any, gnx: string, v: VNode): void {
-        // TODO : Type 'c' as Commands class 
+        // TODO : Type 'c' as Commands class
 
         if (gnx === 'hidden-root-vnode-gnx') {
             // No longer an error.
@@ -100,63 +100,79 @@ export class Position {
         }
     }
 
-    /*
-    def anyAtFileNodeName(self): return self.v.anyAtFileNodeName()
+    public anyAtFileNodeName(): any {
+        return this.v.anyAtFileNodeName();
+    }
+    public atAutoNodeName(): any {
+        return this.v.atAutoNodeName();
+    }
+    public atCleanNodeName(): any {
+        return this.v.atCleanNodeName();
+    }
+    public atEditNodeName(): any {
+        return this.v.atEditNodeName();
+    }
+    public atFileNodeName(): any {
+        return this.v.atFileNodeName();
+    }
+    public atNoSentinelsFileNodeName(): any {
+        return this.v.atNoSentinelsFileNodeName();
+    }
+    public atShadowFileNodeName(): any {
+        return this.v.atShadowFileNodeName();
+    }
+    public atSilentFileNodeName(): any {
+        return this.v.atSilentFileNodeName();
+    }
+    public atThinFileNodeName(): any {
+        return this.v.atThinFileNodeName();
+    }
+    public isAnyAtFileNode(): any {
+        return this.v.isAnyAtFileNode();
+    }
+    public isAtAllNode(): any {
+        return this.v.isAtAllNode();
+    }
+    public isAtAutoNode(): any {
+        return this.v.isAtAutoNode();
+    }
+    public isAtAutoRstNode(): any {
+        return this.v.isAtAutoRstNode();
+    }
+    public isAtCleanNode(): any {
+        return this.v.isAtCleanNode();
+    }
+    public isAtEditNode(): any {
+        return this.v.isAtEditNode();
+    }
+    public isAtFileNode(): any {
+        return this.v.isAtFileNode();
+    }
+    public isAtIgnoreNode(): any {
+        return this.v.isAtIgnoreNode();
+    }
+    public isAtNoSentinelsFileNode(): any {
+        return this.v.isAtNoSentinelsFileNode();
+    }
+    public isAtOthersNode(): any {
+        return this.v.isAtOthersNode();
+    }
+    public isAtRstFileNode(): any {
+        return this.v.isAtRstFileNode();
+    }
+    public isAtSilentFileNode(): any {
+        return this.v.isAtSilentFileNode();
+    }
+    public isAtShadowFileNode(): any {
+        return this.v.isAtShadowFileNode();
+    }
+    public isAtThinFileNode(): any {
+        return this.v.isAtThinFileNode();
+    }
+    public matchHeadline(): any {
+        return this.v.matchHeadline();
+    }
 
-    def atAutoNodeName(self): return self.v.atAutoNodeName()
-
-    def atCleanNodeName(self): return self.v.atCleanNodeName()
-
-    def atEditNodeName(self): return self.v.atEditNodeName()
-
-    def atFileNodeName(self): return self.v.atFileNodeName()
-
-    def atNoSentinelsFileNodeName(self): return self.v.atNoSentinelsFileNodeName()
-    # def atRawFileNodeName         (self): return self.v.atRawFileNodeName()
-
-    def atShadowFileNodeName(self): return self.v.atShadowFileNodeName()
-
-    def atSilentFileNodeName(self): return self.v.atSilentFileNodeName()
-
-    def atThinFileNodeName(self): return self.v.atThinFileNodeName()
-    # New names, less confusing
-    atNoSentFileNodeName = atNoSentinelsFileNodeName
-    atAsisFileNodeName = atSilentFileNodeName
-
-    def isAnyAtFileNode(self): return self.v.isAnyAtFileNode()
-
-    def isAtAllNode(self): return self.v.isAtAllNode()
-
-    def isAtAutoNode(self): return self.v.isAtAutoNode()
-
-    def isAtAutoRstNode(self): return self.v.isAtAutoRstNode()
-
-    def isAtCleanNode(self): return self.v.isAtCleanNode()
-
-    def isAtEditNode(self): return self.v.isAtEditNode()
-
-    def isAtFileNode(self): return self.v.isAtFileNode()
-
-    def isAtIgnoreNode(self): return self.v.isAtIgnoreNode()
-
-    def isAtNoSentinelsFileNode(self): return self.v.isAtNoSentinelsFileNode()
-
-    def isAtOthersNode(self): return self.v.isAtOthersNode()
-
-    def isAtRstFileNode(self): return self.v.isAtRstFileNode()
-
-    def isAtSilentFileNode(self): return self.v.isAtSilentFileNode()
-
-    def isAtShadowFileNode(self): return self.v.isAtShadowFileNode()
-
-    def isAtThinFileNode(self): return self.v.isAtThinFileNode()
-    # New names, less confusing:
-    isAtNoSentFileNode = isAtNoSentinelsFileNode
-    isAtAsisFileNode = isAtSilentFileNode
-    # Utilities.
-
-    def matchHeadline(self, pattern): return self.v.matchHeadline(pattern)
-    */
     public bodyString(): string { return this.v.bodyString(); }
 
     public headString(): string {
@@ -181,12 +197,77 @@ export class Position {
 
     public status(): number { return this.v.status(); }
 
+    // This used to be time-critical code.
+    public childIndex(): number {
+        return this._childIndex;
+    }
+
+    public directParents(): any {
+        return this.v.directParents();
+    }
+
+    public hasChildren(): boolean {
+        return this.v.children.length > 0;
+    }
+
+    public numberOfChildren(): number {
+        return this.v.children.length;
+    }
+
     public copy(): Position {
         return new Position(this.v, this._childIndex, this.stack);
     }
 
 
 }
+
+// Aliases for Position members
+export interface Position {
+    back: () => any;
+    firstChild: () => any;
+    lastChild: () => any;
+    lastNode: () => any;
+    next: () => any;
+    nodeAfterTree: () => any;
+    nthChild: () => any;
+    parent: () => any;
+    threadBack: () => any;
+    threadNext: () => any;
+    visBack: () => any;
+    visNext: () => any;
+    hasVisBack: () => any;
+    hasVisNext: () => any;
+    hasFirstChild: () => any;
+    atNoSentFileNodeName: () => any;
+    atAsisFileNodeName: () => any;
+    isAtNoSentFileNode: () => any;
+    isAtAsisFileNode: () => any;
+}
+
+Position.prototype.back = Position.prototype.getBack;
+Position.prototype.firstChild = Position.prototype.getFirstChild;
+Position.prototype.lastChild = Position.prototype.getLastChild;
+Position.prototype.lastNode = Position.prototype.getLastNode;
+// Position.prototype.lastVisible = Position.prototype.getLastVisible # New in 4.2 (was in tk tree code).;
+Position.prototype.next = Position.prototype.getNext;
+Position.prototype.nodeAfterTree = Position.prototype.getNodeAfterTree;
+Position.prototype.nthChild = Position.prototype.getNthChild;
+Position.prototype.parent = Position.prototype.getParent;
+Position.prototype.threadBack = Position.prototype.getThreadBack;
+Position.prototype.threadNext = Position.prototype.getThreadNext;
+Position.prototype.visBack = Position.prototype.getVisBack;
+Position.prototype.visNext = Position.prototype.getVisNext;
+// New in Leo 4.4.3:
+Position.prototype.hasVisBack = Position.prototype.visBack;
+Position.prototype.hasVisNext = Position.prototype.visNext;
+// from p.children & parents
+Position.prototype.hasFirstChild = Position.prototype.hasChildren;
+// New names, less confusing
+Position.prototype.atNoSentFileNodeName = Position.prototype.atNoSentinelsFileNodeName;
+Position.prototype.atAsisFileNodeName = Position.prototype.atSilentFileNodeName;
+
+Position.prototype.isAtNoSentFileNode = Position.prototype.isAtNoSentinelsFileNode;
+Position.prototype.isAtAsisFileNode = Position.prototype.isAtSilentFileNode;
 
 /**
  * PosList extends a regular array by adding helper methods

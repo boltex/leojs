@@ -16,6 +16,18 @@ export class Commander {
         this.mFileName = fileName;
     }
 
+    public recolor():void {
+        console.log("recolor");
+    }
+
+    public redraw():void {
+        console.log("redraw");
+    }
+
+    public redraw_after_icons_changed():void {
+        console.log("redraw_after_icons_changed");
+    }
+
 
 }
 
