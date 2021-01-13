@@ -786,21 +786,18 @@ class LeoFind:
         if self.pattern_match:
             status.append('regex')
         if find_all_flag:
-            if self.search_headline:
-                status.append('head')
-            if self.search_body:
-                status.append('body')
             if self.wrapping:
                 status.append('wrapping')
         else:
-            if self.search_headline:
-                status.append('headline-only')
-            if self.search_body:
-                status.append('body-only')
             if self.suboutline_only:
                 status.append('[outline-only]')
             if self.node_only:
                 status.append('[node-only]')
+        # 2021/01/13: Fix confusing report.
+        if self.search_headline:
+            status.append('headline')
+        if self.search_body:
+            status.append('body')
         return f" ({', '.join(status)})" if status else ''
     #@+node:ekr.20210102145531.107: *4* find.create_clone_find_all_nodes
     def create_clone_find_all_nodes(self, clones, flattened):
