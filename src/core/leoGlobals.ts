@@ -367,28 +367,22 @@ export function isDirective(s: string): boolean {
 }
 
 /**
- * Return True if the body text contains the @ directive.
+ * Return non-negative number if the body text contains the @ directive.
  */
-export function is_special(s: string, directive: string): boolean {
-    console.assert(s);
+export function is_special(s: string, directive: string): number {
+    console.assert(directive && directive.substring(0,1)==='@');
+    // Most directives must start the line.
+    const lws: boolean = ["@others", "@all"].includes(directive);
+    const pattern = lws?new RegExp("^\\s*("+directive+"\\b)", 'm'):new RegExp("^("+directive+"\\b)", 'm');
 
-    return false;
+    const m = pattern.exec(s);
 
+    if(m){
+        // javascript returns index including spaces before the match after newline
+        return m.index+m[0].length-m[1].length;
+    }
+    return -1;
 }
-
-/*
-def is_special(s, directive):
-    """Return True if the body text contains the @ directive."""
-    assert(directive and directive[0] == '@')
-    lws = directive in ("@others", "@all")
-        # Most directives must start the line.
-    pattern = r'^\s*(%s\b)' if lws else r'^(%s\b)'
-    pattern = re.compile(pattern % directive, re.MULTILINE)
-    m = re.search(pattern, s)
-    if m:
-        return True, m.start(1)
-    return False, -1
-*/
 
 /**
  * Return True if ch should be considered a letter.
