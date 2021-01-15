@@ -6118,12 +6118,16 @@ export class VNode {
 export interface VNode {
     atNoSentFileNodeName: () =&gt; any;
     atAsisFileNodeName: () =&gt; any;
+    isAtNoSentFileNode: () =&gt; any;
+    isAtAsisFileNode: () =&gt; any;
 }
 
 // New names, less confusing
 /*
 VNode.prototype.atNoSentFileNodeName = VNode.prototype.atNoSentinelsFileNodeName;
 VNode.prototype.atAsisFileNodeName = VNode.prototype.atSilentFileNodeName;
+VNode.prototype.isAtNoSentFileNode = VNode.prototype.isAtNoSentinelsFileNode;
+VNode.prototype.isAtAsisFileNode = VNode.prototype.isAtSilentFileNode;
 */
 
 </t>
@@ -6621,8 +6625,8 @@ public isAtShadowFileNode(): any {
 public isAtThinFileNode(): any {
     return this.v.isAtThinFileNode();
 }
-public matchHeadline(): any {
-    return this.v.matchHeadline();
+public matchHeadline(pattern: string): any {
+    return this.v.matchHeadline(pattern);
 }
 
 </t>
@@ -8166,36 +8170,43 @@ public numberOfChildren(): number {
 
 </t>
 <t tx="felix.20210112210731.1"></t>
-<t tx="felix.20210112210731.10">def matchHeadline(self, pattern):
-    """Returns True if the headline matches the pattern ignoring whitespace and case.
+<t tx="felix.20210112210731.10">/**
+ * Returns True if the headline matches the pattern ignoring whitespace and case.
+ * The headline may contain characters following the successfully matched pattern.
+ */
+public matchHeadline(pattern: string): boolean {
+    const v: VNode = this;
+    let h: string = g.toUnicode(v.headString());
+    h = h.toLowerCase().replace(' ', '').replace('\t', '');
+    // equivalent to h = h.lstrip('.')
+    // 2013/04/05. Allow leading period before section names.
+    while (h.charAt(0) === '.') {
+        h = h.substring(1);
+    }
+    pattern = g.toUnicode(pattern);
+    pattern = pattern.toLowerCase().replace(' ', '').replace('\t', '');
+    return h.startsWith(pattern);
+}
 
-    The headline may contain characters following the successfully matched pattern."""
-    v = self
-    h = g.toUnicode(v.headString())
-    h = h.lower().replace(' ', '').replace('\t', '')
-    h = h.lstrip('.')  # 2013/04/05. Allow leading period before section names.
-    pattern = g.toUnicode(pattern)
-    pattern = pattern.lower().replace(' ', '').replace('\t', '')
-    return h.startswith(pattern)
 </t>
 <t tx="felix.20210112210731.2">/**
  * Return the name following one of the names in nameList or "".
  */
-public findAtFileName(names:string[], h?:string):string {
+public findAtFileName(names: string[], h?: string): string {
     // Allow h argument for unit testing.
-    if(!h){
+    if (!h) {
         h = this.headString();
     }
 
-    if (!g.match(h, 0, '@')){
+    if (!g.match(h, 0, '@')) {
         return "";
     }
-        
-    const i:number = g.skip_id(h, 1, '-');
-    
-    const word:string = h.substring(0, i);
-    
-    if(names.includes(word) &amp;&amp; g.match_word(h, 0, word)){
+
+    const i: number = g.skip_id(h, 1, '-');
+
+    const word: string = h.substring(0, i);
+
+    if (names.includes(word) &amp;&amp; g.match_word(h, 0, word)) {
         const name = h.substring(i).trim();
         return name;
     }
@@ -8207,19 +8218,19 @@ public findAtFileName(names:string[], h?:string):string {
 <t tx="felix.20210112210731.3">/**
  * Return the file name following an @file node or an empty string.
  */
-public anyAtFileNodeName():string {
+public anyAtFileNodeName(): string {
     return (
         // was g.app.atAutoNames and g.app.atFileNames.
         this.findAtFileName(this.atAutoNames) ||
         this.findAtFileName(this.atFileNames)
-        );
+    );
 }
 
 </t>
 <t tx="felix.20210112210731.4">// These return the filename following @xxx, in v.headString.
 // Return the the empty string if v is not an @xxx node.
 
-public atAutoNodeName(h?:string){
+public atAutoNodeName(h?: string) {
     return this.findAtFileName(this.atAutoNames, h);
 }
 
@@ -8227,49 +8238,49 @@ public atAutoNodeName(h?:string){
 // That is, we fall back on code in leoRst.py if no
 // importer or writer for reStructuredText exists.
 
-public atAutoRstNodeName(h?:string){
-    const names:string[] = ["@auto-rst"];
+public atAutoRstNodeName(h?: string) {
+    const names: string[] = ["@auto-rst"];
     return this.findAtFileName(names, h);
 }
 
-public atCleanNodeName(){
-    const names:string[] = ["@clean"];
+public atCleanNodeName() {
+    const names: string[] = ["@clean"];
     return this.findAtFileName(names);
 }
 
-public atEditNodeName(){
-    const names:string[] = ["@edit"];
+public atEditNodeName() {
+    const names: string[] = ["@edit"];
     return this.findAtFileName(names);
 }
 
-public atFileNodeName(){
-    const names:string[] = ["@file", "@thin"];
-        // Fix #403.
+public atFileNodeName() {
+    const names: string[] = ["@file", "@thin"];
+    // Fix #403.
     return this.findAtFileName(names);
 }
 
-public atNoSentinelsFileNodeName(){
-    const names:string[] = ["@nosent", "@file-nosent"];
+public atNoSentinelsFileNodeName() {
+    const names: string[] = ["@nosent", "@file-nosent"];
     return this.findAtFileName(names);
 }
 
-public atRstFileNodeName(){
-    const names:string[] = ["@rst"];
+public atRstFileNodeName() {
+    const names: string[] = ["@rst"];
     return this.findAtFileName(names);
 }
 
-public atShadowFileNodeName(){
-    const names:string[] = ["@shadow"];
+public atShadowFileNodeName() {
+    const names: string[] = ["@shadow"];
     return this.findAtFileName(names);
 }
 
-public atSilentFileNodeName(){
-    const names:string[] = ["@asis", "@file-asis"];
+public atSilentFileNodeName() {
+    const names: string[] = ["@asis", "@file-asis"];
     return this.findAtFileName(names);
 }
 
 public atThinFileNodeName() {
-    const names:string[] = ["@thin", "@file-thin"];
+    const names: string[] = ["@thin", "@file-thin"];
     return this.findAtFileName(names);
 }
 
@@ -8277,72 +8288,87 @@ public atThinFileNodeName() {
 <t tx="felix.20210112210731.5">/**
  * Returns True if the receiver contains @others in its body at the start of a line.
  */
-public isAtAllNode():boolean {
-    flag, i = g.is_special(self._bodyString, "@all")
-    return flag
+public isAtAllNode(): boolean {
+    const flag: boolean = g.is_special(this._bodyString, "@all") &lt; 0;
+    return flag;
 }
 
 </t>
-<t tx="felix.20210112210731.6">def isAnyAtFileNode(self):
-    """Return True if v is any kind of @file or related node."""
-    # This routine should be as fast as possible.
-    # It is called once for every VNode when writing a file.
-    h = self.headString()
-    return h and h[0] == '@' and self.anyAtFileNodeName()
+<t tx="felix.20210112210731.6">/**
+ * Return True if v is any kind of @file or related node.
+ */
+public isAnyAtFileNode(): boolean {
+    // This routine should be as fast as possible.
+    // It is called once for every VNode when writing a file.
+    const h: string = this.headString();
+    return !!h &amp;&amp; h.substring(0, 1) === '@' &amp;&amp; !!this.anyAtFileNodeName();
+}
+
 </t>
-<t tx="felix.20210112210731.7">def isAtAutoNode(self):
-    return bool(self.atAutoNodeName())
+<t tx="felix.20210112210731.7">public isAtAutoNode(): boolean {
+    return !!this.atAutoNodeName();
+}
 
-def isAtAutoRstNode(self):
-    return bool(self.atAutoRstNodeName())
+public isAtAutoRstNode(): boolean {
+    return !!this.atAutoRstNodeName();
+}
 
-def isAtCleanNode(self):
-    return bool(self.atCleanNodeName())
+public isAtCleanNode(): boolean {
+    return !!this.atCleanNodeName();
+}
 
-def isAtEditNode(self):
-    return bool(self.atEditNodeName())
+public isAtEditNode(): boolean {
+    return !!this.atEditNodeName();
+}
 
-def isAtFileNode(self):
-    return bool(self.atFileNodeName())
+public isAtFileNode(): boolean {
+    return !!this.atFileNodeName();
+}
 
-def isAtRstFileNode(self):
-    return bool(self.atRstFileNodeName())
+public isAtRstFileNode(): boolean {
+    return !!this.atRstFileNodeName();
+}
 
-def isAtNoSentinelsFileNode(self):
-    return bool(self.atNoSentinelsFileNodeName())
+public isAtNoSentinelsFileNode(): boolean {
+    return !!this.atNoSentinelsFileNodeName();
+}
 
-def isAtSilentFileNode(self):  # @file-asis
-    return bool(self.atSilentFileNodeName())
+public isAtSilentFileNode(): boolean {
+    // @file-asis
+    return !!this.atSilentFileNodeName();
+}
 
-def isAtShadowFileNode(self):
-    return bool(self.atShadowFileNodeName())
+public isAtShadowFileNode(): boolean {
+    return !!this.atShadowFileNodeName();
+}
 
-def isAtThinFileNode(self):
-    return bool(self.atThinFileNodeName())
+public isAtThinFileNode(): boolean {
+    return !!this.atThinFileNodeName();
+}
 
-# New names, less confusing:
-
-isAtNoSentFileNode = isAtNoSentinelsFileNode
-isAtAsisFileNode = isAtSilentFileNode
 </t>
-<t tx="felix.20210112210731.8">def isAtIgnoreNode(self):
-    """
-    Returns True if:
-        
-    - the vnode' body contains @ignore at the start of a line or
+<t tx="felix.20210112210731.8">/**
+ * Returns True if:
+ * - the vnode' body contains @ignore at the start of a line or
+ * - the vnode's headline starts with @ignore.
+ */
+public isAtIgnoreNode(): boolean {
+    if (g.match_word(this._headString, 0, '@ignore')) {
+        return true;
+    }
+    const flag: boolean = g.is_special(this._bodyString, "@ignore") &lt; 0;
+    return flag;
+}
 
-    - the vnode's headline starts with @ignore.
-    """
-    # v = self
-    if g.match_word(self._headString, 0, '@ignore'):
-        return True
-    flag, i = g.is_special(self._bodyString, "@ignore")
-    return flag
 </t>
-<t tx="felix.20210112210731.9">def isAtOthersNode(self):
-    """Returns True if the receiver contains @others in its body at the start of a line."""
-    flag, i = g.is_special(self._bodyString, "@others")
-    return flag
+<t tx="felix.20210112210731.9">/**
+ * Returns True if the receiver contains @others in its body at the start of a line.
+ */
+public isAtOthersNode(): boolean {
+    const flag: boolean = g.is_special(this._bodyString, "@others") &lt; 0;
+    return flag;
+}
+
 </t>
 </tnodes>
 </leo_file>
