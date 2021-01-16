@@ -510,6 +510,31 @@
 <v t="felix.20210103013805.10"><vh>v.status</vh></v>
 </v>
 </v>
+<v t="felix.20210115195450.1"><vh>v.Setters</vh>
+<v t="felix.20210115195450.2"><vh> v.Dirty bits</vh>
+<v t="felix.20210115195450.3"><vh>v.clearDirty</vh></v>
+<v t="felix.20210115195450.4"><vh>v.setDirty</vh></v>
+</v>
+<v t="felix.20210115195450.5"><vh> v.Status bits</vh>
+<v t="felix.20210115195450.6"><vh>v.clearClonedBit</vh></v>
+<v t="felix.20210115195450.7"><vh>v.clearMarked</vh></v>
+<v t="felix.20210115195450.8"><vh>v.clearWriteBit</vh></v>
+<v t="felix.20210115195450.9"><vh>v.clearOrphan</vh></v>
+<v t="felix.20210115195450.10"><vh>v.clearVisited</vh></v>
+<v t="felix.20210115195450.11"><vh>v.contract/expand/initExpandedBit/isExpanded</vh></v>
+<v t="felix.20210115195450.12"><vh>v.initStatus</vh></v>
+<v t="felix.20210115195450.13"><vh>v.setClonedBit &amp; initClonedBit</vh></v>
+<v t="felix.20210115195450.14"><vh>v.setMarked &amp; initMarkedBit</vh></v>
+<v t="felix.20210115195450.15"><vh>v.setOrphan</vh></v>
+<v t="felix.20210115195450.16"><vh>v.setSelected</vh></v>
+<v t="felix.20210115195450.17"><vh>v.setVisited</vh></v>
+<v t="felix.20210115195450.18"><vh>v.setWriteBit</vh></v>
+</v>
+<v t="felix.20210115195450.19"><vh>v.computeIcon &amp; setIcon</vh></v>
+<v t="felix.20210115195450.20"><vh>v.saveCursorAndScroll</vh></v>
+<v t="felix.20210115195450.21"><vh>v.setBodyString &amp; v.setHeadString</vh></v>
+<v t="felix.20210115195450.22"><vh>v.setSelection</vh></v>
+</v>
 </v>
 </v>
 </v>
@@ -6108,6 +6133,8 @@ export class VNode {
     selectionLength: number; // The length of the selected body text.
     selectionStart: number; // The start of the selected body text.
 
+    unicode_warning_given: boolean = false;
+
     @others
 
 
@@ -6120,6 +6147,10 @@ export interface VNode {
     atAsisFileNodeName: () =&gt; any;
     isAtNoSentFileNode: () =&gt; any;
     isAtAsisFileNode: () =&gt; any;
+    initBodyString: () =&gt; any;
+    initHeadString: () =&gt; any;
+    setHeadText: () =&gt; any;
+    setTnodeText: () =&gt; any;
 }
 
 // New names, less confusing
@@ -6128,6 +6159,10 @@ VNode.prototype.atNoSentFileNodeName = VNode.prototype.atNoSentinelsFileNodeName
 VNode.prototype.atAsisFileNodeName = VNode.prototype.atSilentFileNodeName;
 VNode.prototype.isAtNoSentFileNode = VNode.prototype.isAtNoSentinelsFileNode;
 VNode.prototype.isAtAsisFileNode = VNode.prototype.isAtSilentFileNode;
+VNode.prototype.initBodyString = VNode.prototype.setBodyString;
+VNode.prototype.setHeadText = VNode.prototype.setHeadString;
+VNode.prototype.initHeadString = VNode.prototype.setHeadString;
+VNode.prototype.setTnodeText = VNode.prototype.setBodyString;
 */
 
 </t>
@@ -7437,7 +7472,7 @@ public use_splash_screen: boolean = true; // True: put up a splash screen.
  * Init the app.atAutoNames set.
  */
 public init_at_auto_names(): void {
-    this.atAutoNames = new Set(["@auto-rst", "@auto"]);
+    this.atAutoNames = ["@auto-rst", "@auto"];
 }
 
 </t>
@@ -7445,14 +7480,14 @@ public init_at_auto_names(): void {
  * Init the app.atFileNames set.
  */
 public init_at_file_names(): void {
-    this.atFileNames = new Set([
+    this.atFileNames = [
         "@asis",
         "@edit",
         "@file-asis", "@file-thin", "@file-nosent", "@file",
         "@clean", "@nosent",
         "@shadow",
         "@thin",
-    ]);
+    ];
 }
 
 </t>
@@ -7483,8 +7518,8 @@ public loadDir = null; // The leo / core directory.
 public machineDir = null; // The machine - specific directory.
 
 </t>
-<t tx="felix.20210103024632.6">public atAutoNames: Set&lt;string&gt; = new Set(); // The set of all @auto spellings.
-public atFileNames: Set&lt;string&gt; = new Set(); // The set of all built -in @&lt;file&gt;spellings.
+<t tx="felix.20210103024632.6">public atAutoNames: string[] = []; // The set of all @auto spellings.
+public atFileNames: string[] = []; // The set of all built -in @&lt;file&gt;spellings.
 
 public globalKillBuffer: any[] = []; // The global kill buffer.
 public globalRegisters: any = {}; // The global register list.
@@ -8221,8 +8256,11 @@ public findAtFileName(names: string[], h?: string): string {
 public anyAtFileNodeName(): string {
     return (
         // was g.app.atAutoNames and g.app.atFileNames.
-        this.findAtFileName(this.atAutoNames) ||
-        this.findAtFileName(this.atFileNames)
+        // this.findAtFileName(this.atAutoNames) ||
+        // this.findAtFileName(this.atFileNames)
+
+        this.findAtFileName(g.app.atAutoNames) ||
+        this.findAtFileName(g.app.atFileNames)
     );
 }
 
@@ -8231,7 +8269,8 @@ public anyAtFileNodeName(): string {
 // Return the the empty string if v is not an @xxx node.
 
 public atAutoNodeName(h?: string) {
-    return this.findAtFileName(this.atAutoNames, h);
+    // return this.findAtFileName(this.atAutoNames, h);
+    return this.findAtFileName(g.app.atAutoNames, h);
 }
 
 // Retain this special case as part of the "escape hatch".
@@ -8367,6 +8406,219 @@ public isAtIgnoreNode(): boolean {
 public isAtOthersNode(): boolean {
     const flag: boolean = g.is_special(this._bodyString, "@others") &lt; 0;
     return flag;
+}
+
+</t>
+<t tx="felix.20210115195450.1"></t>
+<t tx="felix.20210115195450.10">public clearVisited(): void {
+    this.statusBits &amp;= ~StatusFlags.visitedBit;
+}
+
+</t>
+<t tx="felix.20210115195450.11">/**
+ * Contract the node.
+ */
+public contract(): void {
+    this.statusBits &amp;= ~StatusFlags.expandedBit;
+}
+
+
+/**
+ * Expand the node.
+ */
+public expand(): void {
+    this.statusBits |= StatusFlags.expandedBit;
+}
+
+
+/**
+ * Init self.statusBits.
+ */
+public initExpandedBit(): void {
+    this.statusBits |= StatusFlags.expandedBit;
+}
+
+
+/**
+ * Return True if the VNode expansion bit is set.
+ */
+public isExpanded(): boolean {
+    return !!(this.statusBits &amp; StatusFlags.expandedBit);
+}
+
+</t>
+<t tx="felix.20210115195450.12">public initStatus(status: number): void {
+    this.statusBits = status;
+}
+
+</t>
+<t tx="felix.20210115195450.13">public setClonedBit(): void {
+    this.statusBits |= StatusFlags.clonedBit;
+}
+
+public initClonedBit(val: boolean): void {
+    if (val) {
+        this.statusBits |= StatusFlags.clonedBit;
+    } else {
+        this.statusBits &amp;= ~StatusFlags.clonedBit;
+    }
+}
+
+</t>
+<t tx="felix.20210115195450.14">public setMarked(): void {
+    this.statusBits |= StatusFlags.markedBit;
+}
+
+public initMarkedBit(): void {
+    this.statusBits |= StatusFlags.markedBit;
+}
+
+</t>
+<t tx="felix.20210115195450.15">/**
+ * Set the vnode's orphan bit.
+ */
+public setOrphan(): void {
+    this.statusBits |= StatusFlags.orphanBit;
+}
+
+</t>
+<t tx="felix.20210115195450.16">/**
+ * This only sets the selected bit.
+ */
+public setSelected(): void {
+    this.statusBits |= StatusFlags.selectedBit;
+}
+
+</t>
+<t tx="felix.20210115195450.17">/**
+ * Compatibility routine for scripts
+ */
+public setVisited(): void {
+    this.statusBits |= StatusFlags.visitedBit;
+}
+
+</t>
+<t tx="felix.20210115195450.18">public setWriteBit(): void {
+    this.statusBits |= StatusFlags.writeBit;
+}
+
+</t>
+<t tx="felix.20210115195450.19">public computeIcon(): number {
+    let val: number = 0;
+    const v: VNode = this;
+    if (v.hasBody()) { val += 1; }
+    if (v.isMarked()) { val += 2; }
+    if (v.isCloned()) { val += 4; }
+    if (v.isDirty()) { val += 8; }
+    return val;
+}
+
+public setIcon(): void {
+    //  pass # Compatibility routine for old scripts
+}
+
+</t>
+<t tx="felix.20210115195450.2"></t>
+<t tx="felix.20210115195450.20">/**
+ * Conserve cursor and scroll positions
+ * from the UI into this vnode's
+ * insertSpot and scrollBarSpot
+ */
+public saveCursorAndScroll(): void {
+    // TODO
+
+    /*
+    const v:VNode = this;
+    const c:any = v.context;
+
+    w = c.frame.body
+    if not w:
+        return
+    try:
+        v.scrollBarSpot = w.getYScrollPosition()
+        v.insertSpot = w.getInsertPoint()
+    except AttributeError:
+        # 2011/03/21: w may not support the high-level interface.
+        pass
+    */
+
+}
+
+</t>
+<t tx="felix.20210115195450.21">public setBodyString(s: string): void {
+    const v: VNode = this;
+    if ((typeof s) === 'string') {
+        v._bodyString = s;
+        return;
+    }
+    // TODO : Check if needed
+    try {
+        v._bodyString = g.toUnicode(s, null, true);
+    }
+    catch (Exception) {
+        if (!this.unicode_warning_given) {
+            this.unicode_warning_given = true;
+            g.error(s);
+            g.es_exception();
+        }
+    }
+    // self.contentModified()  # #1413.
+    // signal_manager.emit(self.context, 'body_changed', self)
+}
+
+public setHeadString(s: string): void {
+    // Fix bug: https://bugs.launchpad.net/leo-editor/+bug/1245535
+    // API allows headlines to contain newlines.
+    const v: VNode = this;
+    s = g.toUnicode(s, null, true);
+    v._headString = s.replace('\n', '');
+    // self.contentModified()  # #1413.
+}
+
+</t>
+<t tx="felix.20210115195450.22">public setSelection(start: number, length: number): void {
+    const v: VNode = this;
+    v.selectionStart = start;
+    v.selectionLength = length;
+}
+
+</t>
+<t tx="felix.20210115195450.3">/**
+ * Clear the vnode dirty bit.
+ */
+public clearDirty(): void {
+    this.statusBits &amp;= ~StatusFlags.dirtyBit;
+}
+
+</t>
+<t tx="felix.20210115195450.4">/**
+ * Set the vnode dirty bit.
+ * This method is fast, but dangerous. Unlike p.setDirty, this method does
+ * not call v.setAllAncestorAtFileNodesDirty.
+ */
+public setDirty(): void {
+    this.statusBits |= StatusFlags.dirtyBit;
+}
+
+</t>
+<t tx="felix.20210115195450.5"></t>
+<t tx="felix.20210115195450.6">public clearClonedBit(): void {
+    this.statusBits &amp;= ~StatusFlags.clonedBit;
+}
+
+</t>
+<t tx="felix.20210115195450.7">public clearMarked(): void {
+    this.statusBits &amp;= ~StatusFlags.markedBit;
+}
+
+</t>
+<t tx="felix.20210115195450.8">public clearWriteBit(): void {
+    this.statusBits &amp;= ~StatusFlags.writeBit;
+}
+
+</t>
+<t tx="felix.20210115195450.9">public clearOrphan(): void {
+    this.statusBits &amp;= ~StatusFlags.orphanBit;
 }
 
 </t>

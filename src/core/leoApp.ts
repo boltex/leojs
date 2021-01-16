@@ -135,8 +135,8 @@ export class LeoApp {
     public loadDir = null; // The leo / core directory.
     public machineDir = null; // The machine - specific directory.
 
-    public atAutoNames: Set<string> = new Set(); // The set of all @auto spellings.
-    public atFileNames: Set<string> = new Set(); // The set of all built -in @<file>spellings.
+    public atAutoNames: string[] = []; // The set of all @auto spellings.
+    public atFileNames: string[] = []; // The set of all built -in @<file>spellings.
 
     public globalKillBuffer: any[] = []; // The global kill buffer.
     public globalRegisters: any = {}; // The global register list.
@@ -820,21 +820,21 @@ export class LeoApp {
      * Init the app.atAutoNames set.
      */
     public init_at_auto_names(): void {
-        this.atAutoNames = new Set(["@auto-rst", "@auto"]);
+        this.atAutoNames = ["@auto-rst", "@auto"];
     }
 
     /**
      * Init the app.atFileNames set.
      */
     public init_at_file_names(): void {
-        this.atFileNames = new Set([
+        this.atFileNames = [
             "@asis",
             "@edit",
             "@file-asis", "@file-thin", "@file-nosent", "@file",
             "@clean", "@nosent",
             "@shadow",
             "@thin",
-        ]);
+        ];
     }
 
 

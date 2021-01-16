@@ -358,6 +358,8 @@ export class VNode {
     selectionLength: number; // The length of the selected body text.
     selectionStart: number; // The start of the selected body text.
 
+    unicode_warning_given: boolean = false;
+
     constructor(context: any, gnx?: string) {
         this._headString = 'newHeadline';
         this._bodyString = '';
@@ -406,8 +408,11 @@ export class VNode {
     public anyAtFileNodeName(): string {
         return (
             // was g.app.atAutoNames and g.app.atFileNames.
-            this.findAtFileName(this.atAutoNames) ||
-            this.findAtFileName(this.atFileNames)
+            // this.findAtFileName(this.atAutoNames) ||
+            // this.findAtFileName(this.atFileNames)
+
+            this.findAtFileName(g.app.atAutoNames) ||
+            this.findAtFileName(g.app.atFileNames)
         );
     }
 
@@ -415,7 +420,8 @@ export class VNode {
     // Return the the empty string if v is not an @xxx node.
 
     public atAutoNodeName(h?: string) {
-        return this.findAtFileName(this.atAutoNames, h);
+        // return this.findAtFileName(this.atAutoNames, h);
+        return this.findAtFileName(g.app.atAutoNames, h);
     }
 
     // Retain this special case as part of the "escape hatch".
@@ -681,6 +687,197 @@ export class VNode {
         return this.statusBits;
     }
 
+    /**
+     * Clear the vnode dirty bit.
+     */
+    public clearDirty(): void {
+        this.statusBits &= ~StatusFlags.dirtyBit;
+    }
+
+    /**
+     * Set the vnode dirty bit.
+     * This method is fast, but dangerous. Unlike p.setDirty, this method does
+     * not call v.setAllAncestorAtFileNodesDirty.
+     */
+    public setDirty(): void {
+        this.statusBits |= StatusFlags.dirtyBit;
+    }
+
+    public clearClonedBit(): void {
+        this.statusBits &= ~StatusFlags.clonedBit;
+    }
+
+    public clearMarked(): void {
+        this.statusBits &= ~StatusFlags.markedBit;
+    }
+
+    public clearWriteBit(): void {
+        this.statusBits &= ~StatusFlags.writeBit;
+    }
+
+    public clearOrphan(): void {
+        this.statusBits &= ~StatusFlags.orphanBit;
+    }
+
+    public clearVisited(): void {
+        this.statusBits &= ~StatusFlags.visitedBit;
+    }
+
+    /**
+     * Contract the node.
+     */
+    public contract(): void {
+        this.statusBits &= ~StatusFlags.expandedBit;
+    }
+
+
+    /**
+     * Expand the node.
+     */
+    public expand(): void {
+        this.statusBits |= StatusFlags.expandedBit;
+    }
+
+
+    /**
+     * Init self.statusBits.
+     */
+    public initExpandedBit(): void {
+        this.statusBits |= StatusFlags.expandedBit;
+    }
+
+
+    /**
+     * Return True if the VNode expansion bit is set.
+     */
+    public isExpanded(): boolean {
+        return !!(this.statusBits & StatusFlags.expandedBit);
+    }
+
+    public initStatus(status: number): void {
+        this.statusBits = status;
+    }
+
+    public setClonedBit(): void {
+        this.statusBits |= StatusFlags.clonedBit;
+    }
+
+    public initClonedBit(val: boolean): void {
+        if (val) {
+            this.statusBits |= StatusFlags.clonedBit;
+        } else {
+            this.statusBits &= ~StatusFlags.clonedBit;
+        }
+    }
+
+    public setMarked(): void {
+        this.statusBits |= StatusFlags.markedBit;
+    }
+
+    public initMarkedBit(): void {
+        this.statusBits |= StatusFlags.markedBit;
+    }
+
+    /**
+     * Set the vnode's orphan bit.
+     */
+    public setOrphan(): void {
+        this.statusBits |= StatusFlags.orphanBit;
+    }
+
+    /**
+     * This only sets the selected bit.
+     */
+    public setSelected(): void {
+        this.statusBits |= StatusFlags.selectedBit;
+    }
+
+    /**
+     * Compatibility routine for scripts
+     */
+    public setVisited(): void {
+        this.statusBits |= StatusFlags.visitedBit;
+    }
+
+    public setWriteBit(): void {
+        this.statusBits |= StatusFlags.writeBit;
+    }
+
+    public computeIcon(): number {
+        let val: number = 0;
+        const v: VNode = this;
+        if (v.hasBody()) { val += 1; }
+        if (v.isMarked()) { val += 2; }
+        if (v.isCloned()) { val += 4; }
+        if (v.isDirty()) { val += 8; }
+        return val;
+    }
+
+    public setIcon(): void {
+        //  pass # Compatibility routine for old scripts
+    }
+
+    /**
+     * Conserve cursor and scroll positions
+     * from the UI into this vnode's
+     * insertSpot and scrollBarSpot
+     */
+    public saveCursorAndScroll(): void {
+        // TODO
+
+        /*
+        const v:VNode = this;
+        const c:any = v.context;
+
+        w = c.frame.body
+        if not w:
+            return
+        try:
+            v.scrollBarSpot = w.getYScrollPosition()
+            v.insertSpot = w.getInsertPoint()
+        except AttributeError:
+            # 2011/03/21: w may not support the high-level interface.
+            pass
+        */
+
+    }
+
+    public setBodyString(s: string): void {
+        const v: VNode = this;
+        if ((typeof s) === 'string') {
+            v._bodyString = s;
+            return;
+        }
+        // TODO : Check if needed
+        try {
+            v._bodyString = g.toUnicode(s, null, true);
+        }
+        catch (Exception) {
+            if (!this.unicode_warning_given) {
+                this.unicode_warning_given = true;
+                g.error(s);
+                g.es_exception();
+            }
+        }
+        // self.contentModified()  # #1413.
+        // signal_manager.emit(self.context, 'body_changed', self)
+    }
+
+    public setHeadString(s: string): void {
+        // Fix bug: https://bugs.launchpad.net/leo-editor/+bug/1245535
+        // API allows headlines to contain newlines.
+        const v: VNode = this;
+        s = g.toUnicode(s, null, true);
+        v._headString = s.replace('\n', '');
+        // self.contentModified()  # #1413.
+    }
+
+    public setSelection(start: number, length: number): void {
+        const v: VNode = this;
+        v.selectionStart = start;
+        v.selectionLength = length;
+    }
+
 
 
 }
@@ -692,6 +889,10 @@ export interface VNode {
     atAsisFileNodeName: () => any;
     isAtNoSentFileNode: () => any;
     isAtAsisFileNode: () => any;
+    initBodyString: () => any;
+    initHeadString: () => any;
+    setHeadText: () => any;
+    setTnodeText: () => any;
 }
 
 // New names, less confusing
@@ -700,6 +901,10 @@ VNode.prototype.atNoSentFileNodeName = VNode.prototype.atNoSentinelsFileNodeName
 VNode.prototype.atAsisFileNodeName = VNode.prototype.atSilentFileNodeName;
 VNode.prototype.isAtNoSentFileNode = VNode.prototype.isAtNoSentinelsFileNode;
 VNode.prototype.isAtAsisFileNode = VNode.prototype.isAtSilentFileNode;
+VNode.prototype.initBodyString = VNode.prototype.setBodyString;
+VNode.prototype.setHeadText = VNode.prototype.setHeadString;
+VNode.prototype.initHeadString = VNode.prototype.setHeadString;
+VNode.prototype.setTnodeText = VNode.prototype.setBodyString;
 */
 
 
