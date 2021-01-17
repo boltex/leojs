@@ -535,6 +535,8 @@
 <v t="felix.20210115195450.21"><vh>v.setBodyString &amp; v.setHeadString</vh></v>
 <v t="felix.20210115195450.22"><vh>v.setSelection</vh></v>
 </v>
+<v t="felix.20210116003530.1"><vh>v.setAllAncestorAtFileNodesDirty &amp; helpers</vh></v>
+<v t="felix.20210116003538.1"><vh>v.Inserting &amp; cloning</vh></v>
 </v>
 </v>
 </v>
@@ -8621,6 +8623,56 @@ public setDirty(): void {
     this.statusBits &amp;= ~StatusFlags.orphanBit;
 }
 
+</t>
+<t tx="felix.20210116003530.1">/**
+ * Original idea by Виталије Милошевић (Vitalije Milosevic).
+ * Modified by EKR.
+ * Translated by Félix
+ */
+public setAllAncestorAtFileNodesDirty():void {
+    const v: VNode = this;
+    const hiddenRootVnode:VNode = v.context.hiddenRootNode;
+
+    function *v_and_parents(v:VNode): Generator&lt;VNode&gt; {
+        if (v !== hiddenRootVnode){
+            yield v;
+            for (let parent_v of v.parents){
+                yield* v_and_parents(parent_v);
+            }
+        }
+    }
+    
+    // There is no harm in calling v2.setDirty redundantly.
+    
+    for (let v2 of v_and_parents(v)){
+        if(v2.isAnyAtFileNode()){
+            v2.setDirty();
+        }
+    }
+}
+
+</t>
+<t tx="felix.20210116003538.1">def cloneAsNthChild(self, parent_v, n):
+    # Does not check for illegal clones!
+    v = self
+    v._linkAsNthChild(parent_v, n)
+    return v
+
+def insertAsFirstChild(self):
+    v = self
+    return v.insertAsNthChild(0)
+
+def insertAsLastChild(self):
+    v = self
+    return v.insertAsNthChild(len(v.children))
+
+def insertAsNthChild(self, n):
+    v = self
+    assert 0 &lt;= n &lt;= len(v.children)
+    v2 = VNode(v.context)
+    v2._linkAsNthChild(v, n)
+    assert v.children[n] == v2
+    return v2
 </t>
 </tnodes>
 </leo_file>

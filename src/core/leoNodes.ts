@@ -878,6 +878,54 @@ export class VNode {
         v.selectionLength = length;
     }
 
+    /**
+     * Original idea by Виталије Милошевић (Vitalije Milosevic).
+     * Modified by EKR.
+     * Translated by Félix
+     */
+    public setAllAncestorAtFileNodesDirty():void {
+        const v: VNode = this;
+        const hiddenRootVnode:VNode = v.context.hiddenRootNode;
+
+        function *v_and_parents(v:VNode): Generator<VNode> {
+            if (v !== hiddenRootVnode){
+                yield v;
+                for (let parent_v of v.parents){
+                    yield* v_and_parents(parent_v);
+                }
+            }
+        }
+        
+        // There is no harm in calling v2.setDirty redundantly.
+        
+        for (let v2 of v_and_parents(v)){
+            if(v2.isAnyAtFileNode()){
+                v2.setDirty();
+            }
+        }
+    }
+
+    def cloneAsNthChild(self, parent_v, n):
+        # Does not check for illegal clones!
+        v = self
+        v._linkAsNthChild(parent_v, n)
+        return v
+
+    def insertAsFirstChild(self):
+        v = self
+        return v.insertAsNthChild(0)
+
+    def insertAsLastChild(self):
+        v = self
+        return v.insertAsNthChild(len(v.children))
+
+    def insertAsNthChild(self, n):
+        v = self
+        assert 0 <= n <= len(v.children)
+        v2 = VNode(v.context)
+        v2._linkAsNthChild(v, n)
+        assert v.children[n] == v2
+        return v2
 
 
 }
