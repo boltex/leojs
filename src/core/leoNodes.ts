@@ -2,6 +2,7 @@
 
 import * as g from './leoGlobals';
 import "date-format-lite";
+import { Commander } from './leoCommander';
 
 /**
  * A class managing global node indices (gnx's).
@@ -34,7 +35,7 @@ export class NodeIndices {
     /**
      * Check that no vnode exists with the given gnx in fc.gnxDict.
      */
-    public check_gnx(c: any, gnx: string, v: VNode): void {
+    public check_gnx(c: Commander, gnx: string, v: VNode): void {
         // TODO : Type 'c' as Commands class
 
         if (gnx === 'hidden-root-vnode-gnx') {
@@ -358,6 +359,7 @@ export class VNode {
     selectionLength: number; // The length of the selected body text.
     selectionStart: number; // The start of the selected body text.
 
+    private unknownAttributes: undefined | {[key:string]:any};
     unicode_warning_given: boolean = false;
 
     constructor(context: any, gnx?: string) {
@@ -883,49 +885,247 @@ export class VNode {
      * Modified by EKR.
      * Translated by Félix
      */
-    public setAllAncestorAtFileNodesDirty():void {
+    public setAllAncestorAtFileNodesDirty(): void {
         const v: VNode = this;
-        const hiddenRootVnode:VNode = v.context.hiddenRootNode;
+        const hiddenRootVnode: VNode = v.context.hiddenRootNode;
 
-        function *v_and_parents(v:VNode): Generator<VNode> {
-            if (v !== hiddenRootVnode){
+        function* v_and_parents(v: VNode): Generator<VNode> {
+            if (v !== hiddenRootVnode) {
                 yield v;
-                for (let parent_v of v.parents){
+                for (let parent_v of v.parents) {
                     yield* v_and_parents(parent_v);
                 }
             }
         }
-        
+
         // There is no harm in calling v2.setDirty redundantly.
-        
-        for (let v2 of v_and_parents(v)){
-            if(v2.isAnyAtFileNode()){
+
+        for (let v2 of v_and_parents(v)) {
+            if (v2.isAnyAtFileNode()) {
                 v2.setDirty();
             }
         }
     }
 
-    def cloneAsNthChild(self, parent_v, n):
-        # Does not check for illegal clones!
-        v = self
-        v._linkAsNthChild(parent_v, n)
-        return v
+    /**
+     * Does not check for illegal clones!
+     */
+    public cloneAsNthChild(parent_v: VNode, n: number): VNode {
+        const v: VNode = this;
+        v._linkAsNthChild(parent_v, n);
+        return v;
+    }
 
-    def insertAsFirstChild(self):
-        v = self
-        return v.insertAsNthChild(0)
+    public insertAsFirstChild(): VNode {
+        const v: VNode = this;
+        return v.insertAsNthChild(0);
+    }
 
-    def insertAsLastChild(self):
-        v = self
-        return v.insertAsNthChild(len(v.children))
+    public insertAsLastChild(): VNode {
+        const v: VNode = this;
+        return v.insertAsNthChild(v.children.length);
+    }
 
-    def insertAsNthChild(self, n):
-        v = self
-        assert 0 <= n <= len(v.children)
-        v2 = VNode(v.context)
-        v2._linkAsNthChild(v, n)
-        assert v.children[n] == v2
-        return v2
+    public insertAsNthChild(n: number): VNode {
+        const v: VNode = this;
+        console.assert(0 <= n && n <= v.children.length);
+        const v2: VNode = new VNode(v.context);
+        v2._linkAsNthChild(v, n);
+        console.assert(v.children[n] === v2);
+        return v2;
+    }
+
+    /**
+     * Adjust links after adding a link to v.
+     */
+    public _addCopiedLink(childIndex: number, parent_v: VNode): void {
+        const v: VNode = this;
+        v.context.frame.tree.generation += 1;
+        // Update parent_v.children & v.parents.
+        parent_v.children.splice(childIndex, 0, v);
+        v.parents.push(parent_v);
+    }
+
+    /**
+     * Adjust links after adding a link to v.
+     */
+    public _addLink(childIndex:number, parent_v: VNode):void{
+        const v: VNode = this;
+        v.context.frame.tree.generation += 1;
+        // Update parent_v.children & v.parents.
+        parent_v.children.splice(childIndex, 0, v);
+        v.parents.push(parent_v);
+        if (v.parents.length === 1){
+            // Adjust the parents links in the descendant tree.
+            // This handles clones properly when undoing a delete.
+            for (let child of v.children){
+                child._addParentLinks(v);
+            }
+        }
+    }
+
+    /**
+     * Used by addLink to adjust parent links in the descendant tree
+     */
+    public _addParentLinks(parent:VNode):void{
+        const v: VNode = this;
+        v.parents.push(parent);
+        if (v.parents.length  === 1){
+            for (let child of v.children){
+                child._addParentLinks(v);
+            }
+        }
+    }
+
+    /**
+     * Adjust links after cutting a link to v.
+     */
+    public _cutLink(childIndex:number, parent_v:VNode):void{
+        const v: VNode = this;
+        v.context.frame.tree.generation += 1;
+        console.assert(parent_v.children[childIndex] === v);
+        parent_v.children.splice(childIndex, 1);
+        if( v.parents.includes(parent_v)){
+            try{
+                for(let i = 0; i < v.parents.length; i++){ 
+                    if (v.parents[i] === parent_v) {
+                        v.parents.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+            catch(ValueError){
+                g.error(parent_v + " not in parents of "+v);
+                g.trace('v.parents:');
+                g.printObj(v.parents);
+            }
+        }
+        
+        
+        
+        if (!v.parents.length){
+            // Adjust the parents links in the descendant tree.
+            // This handles clones properly when deleting a tree.
+            for(let child of v.children){
+                child._cutParentLinks(v);
+            }
+        }
+    }
+
+    /**
+     * Used by cutLink to adjust parent links in the descendant tree
+     */
+    public _cutParentLinks(parent: VNode){
+        const v: VNode = this;
+        
+        for(let i = 0; i < v.parents.length; i++){ 
+            if (v.parents[i] === parent) {
+                v.parents.splice(i, 1);
+                break;
+            }
+        }
+            
+        if (!v.parents.length){
+            // Adjust the parents links in the descendant tree.
+            // This handles clones properly when deleting a tree.
+            for(let child of v.children){
+                child._cutParentLinks(v);
+            }
+        }            
+                
+    }
+
+    /**
+     * Delete all children of self.
+     * This is a low-level method, used by the read code.
+     * It is not intended as a general replacement for p.doDelete().
+     */
+    public _deleteAllChildren():void {
+        const v: VNode = this;
+        
+        for (let v2 of v.children){
+            try{
+                for(let i = 0; i < v2.parents.length; i++){ 
+                    if (v2.parents[i] === v) {
+                        v2.parents.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+            catch(ValueError){
+                g.error(v+ " not in parents of "+v2);
+                g.trace('v2.parents:');
+                g.printObj(v2.parents);
+            }
+        }
+
+        v.children = [];
+    }
+
+    /**
+     * Links self as the n'th child of VNode pv
+     */
+    public _linkAsNthChild(parent_v:VNode, n:number):void {
+        const v: VNode = this; // The child node.
+        v._addLink(n, parent_v);
+    }
+
+    /**
+     * VNode body string property
+     */
+    public get b(){
+        const v: VNode = this;
+        return v.bodyString();
+    }
+
+    public set b(val:string){
+        const v: VNode = this;
+        v.setBodyString(val);
+    }
+
+    /**
+     * VNode headline string property
+     */
+    public get h(){
+        const v: VNode = this;
+        return v.headString();
+    }
+
+    public set h(val:string){
+        const v: VNode = this;
+        v.setHeadString(val);
+    }
+
+    /**
+     * VNode u property
+     */
+    public get u(){
+        const v: VNode = this;
+        if(!v.unknownAttributes){
+            v.unknownAttributes = {};
+        }
+        return v.unknownAttributes;
+    }
+
+    public set u(val:any){
+        const v: VNode = this;
+        if(val===null){
+            v.unknownAttributes = undefined;
+        }
+        else if((typeof val)=== 'object'){
+            v.unknownAttributes = val;
+        }else {
+            throw new Error("unknownAttributes ValueError");
+        }
+    }
+
+    /**
+     * VNode gnx property
+     */
+    public get gnx(){
+        const v: VNode = this;
+        return v.fileIndex;
+    }
 
 
 }

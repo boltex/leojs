@@ -382,6 +382,7 @@
 <v t="felix.20210103024632.22"><vh>app.init_at_file_names</vh></v>
 </v>
 </v>
+<v t="felix.20210118015431.1"><vh>class LoadManager</vh></v>
 </v>
 <v t="felix.20210110222544.1"><vh>@clean src/core/leoCommander.ts</vh>
 <v t="felix.20210110223514.1"><vh>class Commander</vh>
@@ -537,6 +538,23 @@
 </v>
 <v t="felix.20210116003530.1"><vh>v.setAllAncestorAtFileNodesDirty &amp; helpers</vh></v>
 <v t="felix.20210116003538.1"><vh>v.Inserting &amp; cloning</vh></v>
+<v t="felix.20210117025748.1"><vh>v.Low level methods</vh>
+<v t="felix.20210117025748.2"><vh>v._addCopiedLink</vh></v>
+<v t="felix.20210117025748.3"><vh>v._addLink &amp; _addParentLinks</vh>
+<v t="felix.20210117025748.4"><vh>v._addParentLinks</vh></v>
+</v>
+<v t="felix.20210117025748.5"><vh>v._cutLink &amp; _cutParentLinks</vh>
+<v t="felix.20210117025748.6"><vh>v._cutParentLinks</vh></v>
+</v>
+<v t="felix.20210117025748.7"><vh>v._deleteAllChildren</vh></v>
+<v t="felix.20210117025748.8"><vh>v._linkAsNthChild</vh></v>
+</v>
+<v t="felix.20210117160548.1"><vh>v.Properties</vh>
+<v t="felix.20210117160548.2"><vh>v.b Property</vh></v>
+<v t="felix.20210117160548.3"><vh>v.h property</vh></v>
+<v t="felix.20210117160548.4"><vh>v.u Property</vh></v>
+<v t="felix.20210117160548.5"><vh>v.gnx Property</vh></v>
+</v>
 </v>
 </v>
 </v>
@@ -2590,6 +2608,17 @@ import { LeoButton, LeoDocument, PNode } from './types';
 @tabwidth -4
 
 // https://github.com/leo-editor/leo-editor/issues/1025
+
+/* 
+  TODO : Replace this file (leojs.ts) by 
+
+    g.app = leoApp.LeoApp()
+    g.app.loadManager = leoApp.LoadManager()
+    g.app.loadManager.load(fileName, pymacs)
+
+
+
+*/
 
 // For now give results to tree view panels (outline, documents and at-buttons)
 
@@ -5983,6 +6012,7 @@ export let unicode_warnings: { [key: string]: any } = {};  // Keys are callers.
 
 import * as g from './leoGlobals';
 import "date-format-lite";
+import { Commander } from './leoCommander';
 
 @others
 
@@ -6135,10 +6165,10 @@ export class VNode {
     selectionLength: number; // The length of the selected body text.
     selectionStart: number; // The start of the selected body text.
 
+    private unknownAttributes: undefined | {[key:string]:any};
     unicode_warning_given: boolean = false;
 
     @others
-
 
 }
 
@@ -8120,7 +8150,7 @@ interface Date {
 <t tx="felix.20210110213751.1">/**
  * Check that no vnode exists with the given gnx in fc.gnxDict.
  */
-public check_gnx(c: any, gnx: string, v: VNode): void {
+public check_gnx(c: Commander, gnx: string, v: VNode): void {
     // TODO : Type 'c' as Commands class
 
     if (gnx === 'hidden-root-vnode-gnx') {
@@ -8629,50 +8659,263 @@ public setDirty(): void {
  * Modified by EKR.
  * Translated by Félix
  */
-public setAllAncestorAtFileNodesDirty():void {
+public setAllAncestorAtFileNodesDirty(): void {
     const v: VNode = this;
-    const hiddenRootVnode:VNode = v.context.hiddenRootNode;
+    const hiddenRootVnode: VNode = v.context.hiddenRootNode;
 
-    function *v_and_parents(v:VNode): Generator&lt;VNode&gt; {
-        if (v !== hiddenRootVnode){
+    function* v_and_parents(v: VNode): Generator&lt;VNode&gt; {
+        if (v !== hiddenRootVnode) {
             yield v;
-            for (let parent_v of v.parents){
+            for (let parent_v of v.parents) {
                 yield* v_and_parents(parent_v);
             }
         }
     }
-    
+
     // There is no harm in calling v2.setDirty redundantly.
-    
-    for (let v2 of v_and_parents(v)){
-        if(v2.isAnyAtFileNode()){
+
+    for (let v2 of v_and_parents(v)) {
+        if (v2.isAnyAtFileNode()) {
             v2.setDirty();
         }
     }
 }
 
 </t>
-<t tx="felix.20210116003538.1">def cloneAsNthChild(self, parent_v, n):
-    # Does not check for illegal clones!
-    v = self
-    v._linkAsNthChild(parent_v, n)
-    return v
+<t tx="felix.20210116003538.1">/**
+ * Does not check for illegal clones!
+ */
+public cloneAsNthChild(parent_v: VNode, n: number): VNode {
+    const v: VNode = this;
+    v._linkAsNthChild(parent_v, n);
+    return v;
+}
 
-def insertAsFirstChild(self):
-    v = self
-    return v.insertAsNthChild(0)
+public insertAsFirstChild(): VNode {
+    const v: VNode = this;
+    return v.insertAsNthChild(0);
+}
 
-def insertAsLastChild(self):
-    v = self
-    return v.insertAsNthChild(len(v.children))
+public insertAsLastChild(): VNode {
+    const v: VNode = this;
+    return v.insertAsNthChild(v.children.length);
+}
 
-def insertAsNthChild(self, n):
-    v = self
-    assert 0 &lt;= n &lt;= len(v.children)
-    v2 = VNode(v.context)
-    v2._linkAsNthChild(v, n)
-    assert v.children[n] == v2
-    return v2
+public insertAsNthChild(n: number): VNode {
+    const v: VNode = this;
+    console.assert(0 &lt;= n &amp;&amp; n &lt;= v.children.length);
+    const v2: VNode = new VNode(v.context);
+    v2._linkAsNthChild(v, n);
+    console.assert(v.children[n] === v2);
+    return v2;
+}
+
 </t>
+<t tx="felix.20210117025748.1"></t>
+<t tx="felix.20210117025748.2">/**
+ * Adjust links after adding a link to v.
+ */
+public _addCopiedLink(childIndex: number, parent_v: VNode): void {
+    const v: VNode = this;
+    v.context.frame.tree.generation += 1;
+    // Update parent_v.children &amp; v.parents.
+    parent_v.children.splice(childIndex, 0, v);
+    v.parents.push(parent_v);
+}
+
+</t>
+<t tx="felix.20210117025748.3">/**
+ * Adjust links after adding a link to v.
+ */
+public _addLink(childIndex:number, parent_v: VNode):void{
+    const v: VNode = this;
+    v.context.frame.tree.generation += 1;
+    // Update parent_v.children &amp; v.parents.
+    parent_v.children.splice(childIndex, 0, v);
+    v.parents.push(parent_v);
+    if (v.parents.length === 1){
+        // Adjust the parents links in the descendant tree.
+        // This handles clones properly when undoing a delete.
+        for (let child of v.children){
+            child._addParentLinks(v);
+        }
+    }
+}
+
+</t>
+<t tx="felix.20210117025748.4">/**
+ * Used by addLink to adjust parent links in the descendant tree
+ */
+public _addParentLinks(parent:VNode):void{
+    const v: VNode = this;
+    v.parents.push(parent);
+    if (v.parents.length  === 1){
+        for (let child of v.children){
+            child._addParentLinks(v);
+        }
+    }
+}
+
+</t>
+<t tx="felix.20210117025748.5">/**
+ * Adjust links after cutting a link to v.
+ */
+public _cutLink(childIndex:number, parent_v:VNode):void{
+    const v: VNode = this;
+    v.context.frame.tree.generation += 1;
+    console.assert(parent_v.children[childIndex] === v);
+    parent_v.children.splice(childIndex, 1);
+    if( v.parents.includes(parent_v)){
+        try{
+            for(let i = 0; i &lt; v.parents.length; i++){ 
+                if (v.parents[i] === parent_v) {
+                    v.parents.splice(i, 1);
+                    break;
+                }
+            }
+        }
+        catch(ValueError){
+            g.error(parent_v + " not in parents of "+v);
+            g.trace('v.parents:');
+            g.printObj(v.parents);
+        }
+    }
+    
+    
+    
+    if (!v.parents.length){
+        // Adjust the parents links in the descendant tree.
+        // This handles clones properly when deleting a tree.
+        for(let child of v.children){
+            child._cutParentLinks(v);
+        }
+    }
+}
+
+</t>
+<t tx="felix.20210117025748.6">/**
+ * Used by cutLink to adjust parent links in the descendant tree
+ */
+public _cutParentLinks(parent: VNode){
+    const v: VNode = this;
+    
+    for(let i = 0; i &lt; v.parents.length; i++){ 
+        if (v.parents[i] === parent) {
+            v.parents.splice(i, 1);
+            break;
+        }
+    }
+        
+    if (!v.parents.length){
+        // Adjust the parents links in the descendant tree.
+        // This handles clones properly when deleting a tree.
+        for(let child of v.children){
+            child._cutParentLinks(v);
+        }
+    }            
+            
+}
+
+</t>
+<t tx="felix.20210117025748.7">/**
+ * Delete all children of self.
+ * This is a low-level method, used by the read code.
+ * It is not intended as a general replacement for p.doDelete().
+ */
+public _deleteAllChildren():void {
+    const v: VNode = this;
+    
+    for (let v2 of v.children){
+        try{
+            for(let i = 0; i &lt; v2.parents.length; i++){ 
+                if (v2.parents[i] === v) {
+                    v2.parents.splice(i, 1);
+                    break;
+                }
+            }
+        }
+        catch(ValueError){
+            g.error(v+ " not in parents of "+v2);
+            g.trace('v2.parents:');
+            g.printObj(v2.parents);
+        }
+    }
+
+    v.children = [];
+}
+
+</t>
+<t tx="felix.20210117025748.8">/**
+ * Links self as the n'th child of VNode pv
+ */
+public _linkAsNthChild(parent_v:VNode, n:number):void {
+    const v: VNode = this; // The child node.
+    v._addLink(n, parent_v);
+}
+
+</t>
+<t tx="felix.20210117160548.1"></t>
+<t tx="felix.20210117160548.2">/**
+ * VNode body string property
+ */
+public get b(){
+    const v: VNode = this;
+    return v.bodyString();
+}
+
+public set b(val:string){
+    const v: VNode = this;
+    v.setBodyString(val);
+}
+
+</t>
+<t tx="felix.20210117160548.3">/**
+ * VNode headline string property
+ */
+public get h(){
+    const v: VNode = this;
+    return v.headString();
+}
+
+public set h(val:string){
+    const v: VNode = this;
+    v.setHeadString(val);
+}
+
+</t>
+<t tx="felix.20210117160548.4">/**
+ * VNode u property
+ */
+public get u(){
+    const v: VNode = this;
+    if(!v.unknownAttributes){
+        v.unknownAttributes = {};
+    }
+    return v.unknownAttributes;
+}
+
+public set u(val:any){
+    const v: VNode = this;
+    if(val===null){
+        v.unknownAttributes = undefined;
+    }
+    else if((typeof val)=== 'object'){
+        v.unknownAttributes = val;
+    }else {
+        throw new Error("unknownAttributes ValueError");
+    }
+}
+
+</t>
+<t tx="felix.20210117160548.5">/**
+ * VNode gnx property
+ */
+public get gnx(){
+    const v: VNode = this;
+    return v.fileIndex;
+}
+
+</t>
+<t tx="felix.20210118015431.1"></t>
 </tnodes>
 </leo_file>
