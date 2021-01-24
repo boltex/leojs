@@ -381,13 +381,34 @@
 <v t="felix.20210103024632.21"><vh>app.init_at_auto_names</vh></v>
 <v t="felix.20210103024632.22"><vh>app.init_at_file_names</vh></v>
 </v>
+<v t="felix.20210123212411.1"><vh>app.newCommander</vh></v>
 </v>
-<v t="felix.20210118015431.1"><vh>class LoadManager</vh></v>
+<v t="felix.20210118015431.1"><vh>class LoadManager</vh>
+<v t="felix.20210119234943.1"><vh> LM.ctor</vh></v>
+<v t="felix.20210120004121.1"><vh>LM.load &amp; helpers</vh>
+<v t="felix.20210120004121.3"><vh>LM.doPostPluginsInit &amp; helpers</vh>
+<v t="felix.20210120004121.4"><vh>LM.make_screen_shot</vh></v>
+<v t="felix.20210120004121.5"><vh>LM.openEmptyWorkBook</vh></v>
+</v>
+<v t="felix.20210120004121.6"><vh>LM.doPrePluginsInit &amp; helpers</vh>
+<v t="felix.20210120004121.16"><vh>LM.initApp</vh></v>
+</v>
+<v t="felix.20210120004121.31"><vh>LM.loadLocalFile &amp; helper</vh>
+<v t="felix.20210120004121.32"><vh>LM.openFileByName &amp; helpers</vh></v>
+</v>
+</v>
+</v>
 </v>
 <v t="felix.20210110222544.1"><vh>@clean src/core/leoCommander.ts</vh>
 <v t="felix.20210110223514.1"><vh>class Commander</vh>
 <v t="felix.20210110223547.1"><vh>constructor</vh></v>
 <v t="felix.20210112001859.1"><vh>c.Drawing &amp; coloring</vh></v>
+</v>
+</v>
+<v t="felix.20210122000014.1"><vh>@clean src/core/leoFileCommands.ts</vh>
+<v t="felix.20210123003936.1"><vh>&lt;&lt; imports &gt;&gt; (leoFileCommands)</vh></v>
+<v t="felix.20210122003236.1"><vh>class FileCommands</vh>
+<v t="felix.20210123002801.1"><vh>constructor</vh></v>
 </v>
 </v>
 <v t="felix.20210102211445.1"><vh>@clean src/core/leoExternalFiles.ts</vh>
@@ -572,7 +593,6 @@ Literate Editor with Outline _in Typescript_ version 0.1.00
 **Enjoy!**
 </t>
 <t tx="felix.20201208214322.1">import * as vscode from 'vscode';
-import * as utils from "./utils";
 import { ReqRefresh } from "./types";
 import { LeoUI } from './leoUI';
 import { Constants } from './constants';
@@ -1093,7 +1113,7 @@ public refreshTreeRoot(): void {
 </t>
 <t tx="felix.20201214150149.1">export function activate(p_context: vscode.ExtensionContext) {
 
-    const w_leo: LeoUI = new LeoUI(p_context);
+    const w_leoUI: LeoUI = new LeoUI(p_context);
 
     // Shortcut pointers for readability
     const U = undefined;
@@ -1120,7 +1140,7 @@ public refreshTreeRoot(): void {
     const w_commands: [string, (...args: any[]) =&gt; any][] = [
 
         // ! REMOVE TESTS ENTRIES FROM PACKAGE.JSON FOR MASTER BRANCH RELEASES !
-        ["leointeg.test", () =&gt; w_leo.test()], // Test function useful when debugging
+        ["leointeg.test", () =&gt; w_leoUI.test()], // Test function useful when debugging
 
         &lt;&lt; Define entries for all commands &gt;&gt;
     ];
@@ -1134,161 +1154,161 @@ public refreshTreeRoot(): void {
 }
 
 </t>
-<t tx="felix.20201214150149.10">[CMD.INSERT, (p_node: LeoOutlineNode) =&gt; w_leo.insertNode(p_node, true)],
-[CMD.INSERT_SELECTION, () =&gt; w_leo.insertNode(U, false)],
-[CMD.INSERT_SELECTION_FO, () =&gt; w_leo.insertNode(U, true)],
+<t tx="felix.20201214150149.10">[CMD.INSERT, (p_node: LeoOutlineNode) =&gt; w_leoUI.insertNode(p_node, true)],
+[CMD.INSERT_SELECTION, () =&gt; w_leoUI.insertNode(U, false)],
+[CMD.INSERT_SELECTION_FO, () =&gt; w_leoUI.insertNode(U, true)],
 // Special command for when inserting rapidly more than one node without
 // even specifying a headline label, e.g. spamming CTRL+I rapidly.
-[CMD.INSERT_SELECTION_INTERRUPT, () =&gt; w_leo.insertNode(U, false, true)],
+[CMD.INSERT_SELECTION_INTERRUPT, () =&gt; w_leoUI.insertNode(U, false, true)],
 
-[CMD.CLONE, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.CLONE_PNODE, p_node, REFRESH_TREE_BODY, true)],
-[CMD.CLONE_SELECTION, () =&gt; w_leo.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, false)],
-[CMD.CLONE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, true)],
+[CMD.CLONE, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.CLONE_PNODE, p_node, REFRESH_TREE_BODY, true)],
+[CMD.CLONE_SELECTION, () =&gt; w_leoUI.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, false)],
+[CMD.CLONE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, true)],
 
-[CMD.PROMOTE, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.PROMOTE_SELECTION, () =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, false)],
-[CMD.PROMOTE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, true)],
+[CMD.PROMOTE, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.PROMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.PROMOTE_SELECTION, () =&gt; w_leoUI.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, false)],
+[CMD.PROMOTE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, true)],
 
-[CMD.DEMOTE, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.DEMOTE_SELECTION, () =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, false)],
-[CMD.DEMOTE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, true)],
+[CMD.DEMOTE, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.DEMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.DEMOTE_SELECTION, () =&gt; w_leoUI.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, false)],
+[CMD.DEMOTE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, true)],
 
-[CMD.SORT_CHILDREN, () =&gt; w_leo.command(LEOCMD.SORT_CHILDREN, U, REFRESH_TREE, false, true)],
-[CMD.SORT_SIBLING, () =&gt; w_leo.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, false, true)],
-[CMD.SORT_SIBLING_FO, () =&gt; w_leo.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, true, true)],
+[CMD.SORT_CHILDREN, () =&gt; w_leoUI.command(LEOCMD.SORT_CHILDREN, U, REFRESH_TREE, false, true)],
+[CMD.SORT_SIBLING, () =&gt; w_leoUI.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, false, true)],
+[CMD.SORT_SIBLING_FO, () =&gt; w_leoUI.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, true, true)],
 </t>
-<t tx="felix.20201214150149.11">[CMD.MARK, (p_node: LeoOutlineNode) =&gt; w_leo.changeMark(true, p_node, true)],
-[CMD.MARK_SELECTION, () =&gt; w_leo.changeMark(true, U, false)],
-[CMD.MARK_SELECTION_FO, () =&gt; w_leo.changeMark(true, U, true)],
+<t tx="felix.20201214150149.11">[CMD.MARK, (p_node: LeoOutlineNode) =&gt; w_leoUI.changeMark(true, p_node, true)],
+[CMD.MARK_SELECTION, () =&gt; w_leoUI.changeMark(true, U, false)],
+[CMD.MARK_SELECTION_FO, () =&gt; w_leoUI.changeMark(true, U, true)],
 
-[CMD.UNMARK, (p_node: LeoOutlineNode) =&gt; w_leo.changeMark(false, p_node, true)],
-[CMD.UNMARK_SELECTION, () =&gt; w_leo.changeMark(false, U, false)],
-[CMD.UNMARK_SELECTION_FO, () =&gt; w_leo.changeMark(false, U, true)],
+[CMD.UNMARK, (p_node: LeoOutlineNode) =&gt; w_leoUI.changeMark(false, p_node, true)],
+[CMD.UNMARK_SELECTION, () =&gt; w_leoUI.changeMark(false, U, false)],
+[CMD.UNMARK_SELECTION_FO, () =&gt; w_leoUI.changeMark(false, U, true)],
 
-[CMD.UNMARK_ALL, () =&gt; w_leo.command(LEOCMD.UNMARK_ALL, U, REFRESH_TREE_BODY, true)],
+[CMD.UNMARK_ALL, () =&gt; w_leoUI.command(LEOCMD.UNMARK_ALL, U, REFRESH_TREE_BODY, true)],
 </t>
-<t tx="felix.20201214150149.12">[CMD.EXTRACT, () =&gt; w_leo.command(LEOCMD.EXTRACT, U, REFRESH_TREE_BODY, false)],
-[CMD.EXTRACT_NAMES, () =&gt; w_leo.command(LEOCMD.EXTRACT_NAMES, U, REFRESH_TREE_BODY, false)],
+<t tx="felix.20201214150149.12">[CMD.EXTRACT, () =&gt; w_leoUI.command(LEOCMD.EXTRACT, U, REFRESH_TREE_BODY, false)],
+[CMD.EXTRACT_NAMES, () =&gt; w_leoUI.command(LEOCMD.EXTRACT_NAMES, U, REFRESH_TREE_BODY, false)],
 </t>
-<t tx="felix.20201214150149.13">[CMD.MOVE_DOWN, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.MOVE_DOWN_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, false)],
-[CMD.MOVE_DOWN_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, true)],
+<t tx="felix.20201214150149.13">[CMD.MOVE_DOWN, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_DOWN_SELECTION, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, false)],
+[CMD.MOVE_DOWN_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, true)],
 
-[CMD.MOVE_LEFT, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.MOVE_LEFT_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, false)],
-[CMD.MOVE_LEFT_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, true)],
+[CMD.MOVE_LEFT, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_LEFT, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_LEFT_SELECTION, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, false)],
+[CMD.MOVE_LEFT_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, true)],
 
-[CMD.MOVE_RIGHT, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.MOVE_RIGHT_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, false)],
-[CMD.MOVE_RIGHT_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, true)],
+[CMD.MOVE_RIGHT, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_RIGHT, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_RIGHT_SELECTION, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, false)],
+[CMD.MOVE_RIGHT_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, true)],
 
-[CMD.MOVE_UP, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.MOVE_UP_SELECTION, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, false)],
-[CMD.MOVE_UP_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, true)],
+[CMD.MOVE_UP, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_UP, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_UP_SELECTION, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, false)],
+[CMD.MOVE_UP_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, true)],
 </t>
-<t tx="felix.20201214150149.14">[CMD.REDO, () =&gt; w_leo.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, false)],
-[CMD.REDO_FO, () =&gt; w_leo.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, true)],
-[CMD.UNDO, () =&gt; w_leo.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, false)],
-[CMD.UNDO_FO, () =&gt; w_leo.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, true)],
+<t tx="felix.20201214150149.14">[CMD.REDO, () =&gt; w_leoUI.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, false)],
+[CMD.REDO_FO, () =&gt; w_leoUI.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, true)],
+[CMD.UNDO, () =&gt; w_leoUI.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, false)],
+[CMD.UNDO_FO, () =&gt; w_leoUI.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, true)],
 </t>
-<t tx="felix.20201214150149.15">[CMD.SHOW_OUTLINE, () =&gt; w_leo.showOutline(true)], // Also focuses on outline
-[CMD.SHOW_LOG, () =&gt; w_leo.showLogPane()],
-[CMD.SHOW_BODY, () =&gt; w_leo.showBody(false)], // Also focuses on body
+<t tx="felix.20201214150149.15">[CMD.SHOW_OUTLINE, () =&gt; w_leoUI.showOutline(true)], // Also focuses on outline
+[CMD.SHOW_LOG, () =&gt; w_leoUI.showLogPane()],
+[CMD.SHOW_BODY, () =&gt; w_leoUI.showBody(false)], // Also focuses on body
 </t>
-<t tx="felix.20201214150149.16">[CMD.COPY_MARKED, () =&gt; w_leo.command(LEOCMD.COPY_MARKED, U, REFRESH_TREE_BODY, true)],
-[CMD.DIFF_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.DIFF_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
-[CMD.MARK_CHANGED_ITEMS, () =&gt; w_leo.command(LEOCMD.MARK_CHANGED_ITEMS, U, REFRESH_TREE_BODY, true)],
-[CMD.MARK_SUBHEADS, () =&gt; w_leo.command(LEOCMD.MARK_SUBHEADS, U, REFRESH_TREE_BODY, true)],
-[CMD.CLONE_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.CLONE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
-[CMD.DELETE_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.DELETE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
-[CMD.MOVE_MARKED_NODES, () =&gt; w_leo.command(LEOCMD.MOVE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
+<t tx="felix.20201214150149.16">[CMD.COPY_MARKED, () =&gt; w_leoUI.command(LEOCMD.COPY_MARKED, U, REFRESH_TREE_BODY, true)],
+[CMD.DIFF_MARKED_NODES, () =&gt; w_leoUI.command(LEOCMD.DIFF_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
+[CMD.MARK_CHANGED_ITEMS, () =&gt; w_leoUI.command(LEOCMD.MARK_CHANGED_ITEMS, U, REFRESH_TREE_BODY, true)],
+[CMD.MARK_SUBHEADS, () =&gt; w_leoUI.command(LEOCMD.MARK_SUBHEADS, U, REFRESH_TREE_BODY, true)],
+[CMD.CLONE_MARKED_NODES, () =&gt; w_leoUI.command(LEOCMD.CLONE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
+[CMD.DELETE_MARKED_NODES, () =&gt; w_leoUI.command(LEOCMD.DELETE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
+[CMD.MOVE_MARKED_NODES, () =&gt; w_leoUI.command(LEOCMD.MOVE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
 </t>
-<t tx="felix.20201214150149.17">[CMD.CLONE_FIND_ALL, () =&gt; w_leo.command(LEOCMD.CLONE_FIND_ALL, U, REFRESH_TREE_BODY, true)],
-[CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; w_leo.command(LEOCMD.CLONE_FIND_ALL_FLATTENED, U, REFRESH_TREE_BODY, true)],
-[CMD.CLONE_FIND_MARKED, () =&gt; w_leo.command(LEOCMD.CLONE_FIND_MARKED, U, REFRESH_TREE_BODY, true)],
-[CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; w_leo.command(LEOCMD.CLONE_FIND_FLATTENED_MARKED, U, REFRESH_TREE_BODY, true)]
+<t tx="felix.20201214150149.17">[CMD.CLONE_FIND_ALL, () =&gt; w_leoUI.command(LEOCMD.CLONE_FIND_ALL, U, REFRESH_TREE_BODY, true)],
+[CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; w_leoUI.command(LEOCMD.CLONE_FIND_ALL_FLATTENED, U, REFRESH_TREE_BODY, true)],
+[CMD.CLONE_FIND_MARKED, () =&gt; w_leoUI.command(LEOCMD.CLONE_FIND_MARKED, U, REFRESH_TREE_BODY, true)],
+[CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; w_leoUI.command(LEOCMD.CLONE_FIND_FLATTENED_MARKED, U, REFRESH_TREE_BODY, true)]
 </t>
 <t tx="felix.20201214150149.2">@others
 </t>
-<t tx="felix.20201214150149.3">[CMD.EXECUTE, () =&gt; w_leo.command(LEOCMD.EXECUTE_SCRIPT, U, REFRESH_TREE_BODY, false)],
+<t tx="felix.20201214150149.3">[CMD.EXECUTE, () =&gt; w_leoUI.command(LEOCMD.EXECUTE_SCRIPT, U, REFRESH_TREE_BODY, false)],
 
-[CMD.MINIBUFFER, () =&gt; w_leo.minibuffer()], // Is referenced in package.json
+[CMD.MINIBUFFER, () =&gt; w_leoUI.minibuffer()], // Is referenced in package.json
 
-[CMD.CLICK_BUTTON, (p_node: LeoButtonNode) =&gt; w_leo.clickAtButton(p_node)], // Not referenced in package.json
-[CMD.REMOVE_BUTTON, (p_node: LeoButtonNode) =&gt; w_leo.removeAtButton(p_node)],
+[CMD.CLICK_BUTTON, (p_node: LeoButtonNode) =&gt; w_leoUI.clickAtButton(p_node)], // Not referenced in package.json
+[CMD.REMOVE_BUTTON, (p_node: LeoButtonNode) =&gt; w_leoUI.removeAtButton(p_node)],
 </t>
-<t tx="felix.20201214150149.4">[CMD.CLOSE_FILE, () =&gt; w_leo.closeLeoFile()],
-[CMD.NEW_FILE, () =&gt; w_leo.newLeoFile()],
+<t tx="felix.20201214150149.4">[CMD.CLOSE_FILE, () =&gt; w_leoUI.closeLeoFile()],
+[CMD.NEW_FILE, () =&gt; w_leoUI.newLeoFile()],
 
-[CMD.OPEN_FILE, (p_uri?: vscode.Uri) =&gt; w_leo.openLeoFile(p_uri)],
+[CMD.OPEN_FILE, (p_uri?: vscode.Uri) =&gt; w_leoUI.openLeoFile(p_uri)],
 
-[CMD.RECENT_FILES, () =&gt; w_leo.showRecentLeoFiles()],
-[CMD.SAVE_AS_FILE, () =&gt; w_leo.saveAsLeoFile()],
-[CMD.SAVE_FILE, () =&gt; w_leo.saveLeoFile()],
-[CMD.SAVE_FILE_FO, () =&gt; w_leo.saveLeoFile(true)],
-[CMD.SWITCH_FILE, () =&gt; w_leo.switchLeoFile()],
+[CMD.RECENT_FILES, () =&gt; w_leoUI.showRecentLeoFiles()],
+[CMD.SAVE_AS_FILE, () =&gt; w_leoUI.saveAsLeoFile()],
+[CMD.SAVE_FILE, () =&gt; w_leoUI.saveLeoFile()],
+[CMD.SAVE_FILE_FO, () =&gt; w_leoUI.saveLeoFile(true)],
+[CMD.SWITCH_FILE, () =&gt; w_leoUI.switchLeoFile()],
 
-[CMD.SET_OPENED_FILE, (p_index: number) =&gt; w_leo.selectOpenedLeoDocument(p_index)],
+[CMD.SET_OPENED_FILE, (p_index: number) =&gt; w_leoUI.selectOpenedLeoDocument(p_index)],
 
-[CMD.REFRESH_FROM_DISK, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.REFRESH_FROM_DISK, p_node, REFRESH_TREE_BODY, false)],
+[CMD.REFRESH_FROM_DISK, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.REFRESH_FROM_DISK, p_node, REFRESH_TREE_BODY, false)],
 
-[CMD.REFRESH_FROM_DISK_SELECTION, () =&gt; w_leo.command(LEOCMD.REFRESH_FROM_DISK, U, REFRESH_TREE_BODY, false)],
+[CMD.REFRESH_FROM_DISK_SELECTION, () =&gt; w_leoUI.command(LEOCMD.REFRESH_FROM_DISK, U, REFRESH_TREE_BODY, false)],
 
-[CMD.REFRESH_FROM_DISK_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.REFRESH_FROM_DISK, U, REFRESH_TREE_BODY, true)],
+[CMD.REFRESH_FROM_DISK_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.REFRESH_FROM_DISK, U, REFRESH_TREE_BODY, true)],
 
-[CMD.GIT_DIFF, () =&gt; w_leo.command(LEOCMD.GIT_DIFF, U, REFRESH_TREE_BODY, false)],
+[CMD.GIT_DIFF, () =&gt; w_leoUI.command(LEOCMD.GIT_DIFF, U, REFRESH_TREE_BODY, false)],
 </t>
-<t tx="felix.20201214150149.5">[CMD.HEADLINE, (p_node: LeoOutlineNode) =&gt; w_leo.editHeadline(p_node, true)],
-[CMD.HEADLINE_SELECTION, () =&gt; w_leo.editHeadline(U, false)],
-[CMD.HEADLINE_SELECTION_FO, () =&gt; w_leo.editHeadline(U, true)],
+<t tx="felix.20201214150149.5">[CMD.HEADLINE, (p_node: LeoOutlineNode) =&gt; w_leoUI.editHeadline(p_node, true)],
+[CMD.HEADLINE_SELECTION, () =&gt; w_leoUI.editHeadline(U, false)],
+[CMD.HEADLINE_SELECTION_FO, () =&gt; w_leoUI.editHeadline(U, true)],
 </t>
 <t tx="felix.20201214150149.6">// cut/copy/paste/delete given node.
-[CMD.COPY, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.COPY_PNODE, p_node, NO_REFRESH, true, true)],
-[CMD.CUT, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.CUT_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.DELETE, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.DELETE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.PASTE, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.PASTE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
-[CMD.PASTE_CLONE, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.PASTE_CLONE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
+[CMD.COPY, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.COPY_PNODE, p_node, NO_REFRESH, true, true)],
+[CMD.CUT, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.CUT_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.DELETE, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.DELETE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.PASTE, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.PASTE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
+[CMD.PASTE_CLONE, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
 
 // cut/copy/paste/delete current selection (self.commander.p)
-[CMD.COPY_SELECTION, () =&gt; w_leo.command(LEOCMD.COPY_PNODE, U, NO_REFRESH, false)],
-[CMD.CUT_SELECTION, () =&gt; w_leo.command(LEOCMD.CUT_PNODE, U, REFRESH_TREE_BODY, false)],
-[CMD.CUT_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.CUT_PNODE, U, REFRESH_TREE_BODY, true)],
-[CMD.DELETE_SELECTION, () =&gt; w_leo.command(LEOCMD.DELETE_PNODE, U, REFRESH_TREE_BODY, false)],
-[CMD.DELETE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.DELETE_PNODE, U, REFRESH_TREE_BODY, true)],
-[CMD.PASTE_CLONE_SELECTION, () =&gt; w_leo.command(LEOCMD.PASTE_CLONE_PNODE, U, REFRESH_TREE_BODY, false)],
-[CMD.PASTE_CLONE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.PASTE_CLONE_PNODE, U, REFRESH_TREE_BODY, true)],
-[CMD.PASTE_SELECTION, () =&gt; w_leo.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, false)],
-[CMD.PASTE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, true)],
+[CMD.COPY_SELECTION, () =&gt; w_leoUI.command(LEOCMD.COPY_PNODE, U, NO_REFRESH, false)],
+[CMD.CUT_SELECTION, () =&gt; w_leoUI.command(LEOCMD.CUT_PNODE, U, REFRESH_TREE_BODY, false)],
+[CMD.CUT_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.CUT_PNODE, U, REFRESH_TREE_BODY, true)],
+[CMD.DELETE_SELECTION, () =&gt; w_leoUI.command(LEOCMD.DELETE_PNODE, U, REFRESH_TREE_BODY, false)],
+[CMD.DELETE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.DELETE_PNODE, U, REFRESH_TREE_BODY, true)],
+[CMD.PASTE_CLONE_SELECTION, () =&gt; w_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, U, REFRESH_TREE_BODY, false)],
+[CMD.PASTE_CLONE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, U, REFRESH_TREE_BODY, true)],
+[CMD.PASTE_SELECTION, () =&gt; w_leoUI.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, false)],
+[CMD.PASTE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, true)],
 </t>
 <t tx="felix.20201214150149.7">// Called by nodes in the tree when selected either by mouse, or with enter
-[CMD.SELECT_NODE, (p_node: LeoOutlineNode) =&gt; w_leo.selectTreeNode(p_node, false, false)],
-[CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) =&gt; w_leo.selectTreeNode(p_node, false, true)],
+[CMD.SELECT_NODE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node, false, false)],
+[CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node, false, true)],
 
-[CMD.CONTRACT_ALL, () =&gt; w_leo.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, false)],
-[CMD.CONTRACT_ALL_FO, () =&gt; w_leo.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, true)],
+[CMD.CONTRACT_ALL, () =&gt; w_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, false)],
+[CMD.CONTRACT_ALL_FO, () =&gt; w_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, true)],
 
-[CMD.CONTRACT_OR_GO_LEFT, () =&gt; w_leo.command(LEOCMD.CONTRACT_OR_GO_LEFT, U, REFRESH_TREE_BODY, true)],
-[CMD.EXPAND_AND_GO_RIGHT, () =&gt; w_leo.command(LEOCMD.EXPAND_AND_GO_RIGHT, U, REFRESH_TREE_BODY, true)],
+[CMD.CONTRACT_OR_GO_LEFT, () =&gt; w_leoUI.command(LEOCMD.CONTRACT_OR_GO_LEFT, U, REFRESH_TREE_BODY, true)],
+[CMD.EXPAND_AND_GO_RIGHT, () =&gt; w_leoUI.command(LEOCMD.EXPAND_AND_GO_RIGHT, U, REFRESH_TREE_BODY, true)],
 </t>
-<t tx="felix.20201214150149.8">[CMD.GOTO_NEXT_CLONE, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, p_node, REFRESH_NODE_BODY, true)],
-[CMD.GOTO_NEXT_CLONE_SELECTION, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, false)],
-[CMD.GOTO_NEXT_CLONE_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, true)],
+<t tx="felix.20201214150149.8">[CMD.GOTO_NEXT_CLONE, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, p_node, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_NEXT_CLONE_SELECTION, () =&gt; w_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, false)],
+[CMD.GOTO_NEXT_CLONE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, true)],
 
-[CMD.GOTO_NEXT_MARKED, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_MARKED, U, REFRESH_NODE_BODY, true)],
-[CMD.GOTO_FIRST_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_FIRST_VISIBLE, U, REFRESH_NODE_BODY, true)],
-[CMD.GOTO_LAST_SIBLING, () =&gt; w_leo.command(LEOCMD.GOTO_LAST_SIBLING, U, REFRESH_NODE_BODY, true)],
-[CMD.GOTO_LAST_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_LAST_VISIBLE, U, REFRESH_NODE_BODY, true)],
-[CMD.GOTO_NEXT_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_NEXT_VISIBLE, U, REFRESH_NODE_BODY, true)],
-[CMD.GOTO_PREV_VISIBLE, () =&gt; w_leo.command(LEOCMD.GOTO_PREV_VISIBLE, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_NEXT_MARKED, () =&gt; w_leoUI.command(LEOCMD.GOTO_NEXT_MARKED, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_FIRST_VISIBLE, () =&gt; w_leoUI.command(LEOCMD.GOTO_FIRST_VISIBLE, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_LAST_SIBLING, () =&gt; w_leoUI.command(LEOCMD.GOTO_LAST_SIBLING, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_LAST_VISIBLE, () =&gt; w_leoUI.command(LEOCMD.GOTO_LAST_VISIBLE, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_NEXT_VISIBLE, () =&gt; w_leoUI.command(LEOCMD.GOTO_NEXT_VISIBLE, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_PREV_VISIBLE, () =&gt; w_leoUI.command(LEOCMD.GOTO_PREV_VISIBLE, U, REFRESH_NODE_BODY, true)],
 
-[CMD.PAGE_UP, () =&gt; w_leo.command(LEOCMD.PAGE_UP, U, REFRESH_NODE_BODY, true)],
-[CMD.PAGE_DOWN, () =&gt; w_leo.command(LEOCMD.PAGE_DOWN, U, REFRESH_NODE_BODY, true)],
+[CMD.PAGE_UP, () =&gt; w_leoUI.command(LEOCMD.PAGE_UP, U, REFRESH_NODE_BODY, true)],
+[CMD.PAGE_DOWN, () =&gt; w_leoUI.command(LEOCMD.PAGE_DOWN, U, REFRESH_NODE_BODY, true)],
 </t>
-<t tx="felix.20201214150149.9">[CMD.DEHOIST, () =&gt; w_leo.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, false)],
-[CMD.DEHOIST_FO, () =&gt; w_leo.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, true)],
-[CMD.HOIST, (p_node: LeoOutlineNode) =&gt; w_leo.command(LEOCMD.HOIST_PNODE, p_node, REFRESH_TREE_BODY, true)],
-[CMD.HOIST_SELECTION, () =&gt; w_leo.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, false)],
-[CMD.HOIST_SELECTION_FO, () =&gt; w_leo.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, true)],
+<t tx="felix.20201214150149.9">[CMD.DEHOIST, () =&gt; w_leoUI.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, false)],
+[CMD.DEHOIST_FO, () =&gt; w_leoUI.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, true)],
+[CMD.HOIST, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.HOIST_PNODE, p_node, REFRESH_TREE_BODY, true)],
+[CMD.HOIST_SELECTION, () =&gt; w_leoUI.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, false)],
+[CMD.HOIST_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, true)],
 </t>
 <t tx="felix.20201214151326.1">import * as vscode from "vscode";
 
@@ -5739,21 +5759,21 @@ function cleanText(data, startId) {
   }
 }
 </t>
-<t tx="felix.20201221015535.1">[CMD.ENABLE_LEO_TREE_NAV, () =&gt; w_leo.toggleSetting(CTX.LEO_TREE_BROWSE, true)],
-[CMD.SHOW_EDIT_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_EDIT, true)],
-[CMD.SHOW_ADD_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_ADD, true)],
-[CMD.SHOW_ARROWS_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_ARROWS, true)],
-[CMD.SHOW_COPY_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_COPY, true)],
-[CMD.SHOW_CLONE_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_CLONE, true)],
-[CMD.SHOW_MARK_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_MARK, true)],
+<t tx="felix.20201221015535.1">[CMD.ENABLE_LEO_TREE_NAV, () =&gt; w_leoUI.toggleSetting(CTX.LEO_TREE_BROWSE, true)],
+[CMD.SHOW_EDIT_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_EDIT, true)],
+[CMD.SHOW_ADD_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_ADD, true)],
+[CMD.SHOW_ARROWS_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_ARROWS, true)],
+[CMD.SHOW_COPY_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_COPY, true)],
+[CMD.SHOW_CLONE_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_CLONE, true)],
+[CMD.SHOW_MARK_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_MARK, true)],
 
-[CMD.DISABLE_LEO_TREE_NAV, () =&gt; w_leo.toggleSetting(CTX.LEO_TREE_BROWSE, false)],
-[CMD.HIDE_EDIT_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_EDIT, false)],
-[CMD.HIDE_ADD_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_ADD, false)],
-[CMD.HIDE_ARROWS_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_ARROWS, false)],
-[CMD.HIDE_COPY_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_COPY, false)],
-[CMD.HIDE_CLONE_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_CLONE, false)],
-[CMD.HIDE_MARK_ON_NODES, () =&gt; w_leo.toggleSetting(CTX.SHOW_MARK, false)],
+[CMD.DISABLE_LEO_TREE_NAV, () =&gt; w_leoUI.toggleSetting(CTX.LEO_TREE_BROWSE, false)],
+[CMD.HIDE_EDIT_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_EDIT, false)],
+[CMD.HIDE_ADD_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_ADD, false)],
+[CMD.HIDE_ARROWS_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_ARROWS, false)],
+[CMD.HIDE_COPY_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_COPY, false)],
+[CMD.HIDE_CLONE_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_CLONE, false)],
+[CMD.HIDE_MARK_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_MARK, false)],
 
 </t>
 <t tx="felix.20201221234735.1">/**
@@ -6435,7 +6455,9 @@ export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
     import sqlite3
 */
 
-
+import * as g from './leoGlobals';
+import { LeoUI } from '../leoUI';
+import { Commander } from './leoCommander';
 </t>
 <t tx="felix.20210102211445.1">@language typescript
 @tabwidth -4
@@ -6609,8 +6631,9 @@ public language_extension_dict: { [key: string]: string } = {};
 @others
 
 </t>
-<t tx="felix.20210102214102.1">constructor() {
+<t tx="felix.20210102214102.1">constructor(gui:LeoUI) {
     // Define all global data.
+    this.gui=gui;
     this.define_delegate_language_dict();
     this.init_at_auto_names();
     this.init_at_file_names();
@@ -7315,7 +7338,7 @@ public debug = []; // A list of switches to be enabled.
 public diff: boolean = false; // True: run Leo in diff mode.
 public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
 public failFast: boolean = false; // True: Use the failfast option in unit tests.
-public gui = null; // The gui class.
+public gui:LeoUI; // The gui class.
 public guiArgName = null; // The gui name given in --gui option.
 public ipython_inited: boolean = false; // True if leoIpython.py imports succeeded.
 public isTheme: boolean = false; // True: load files as theme files (ignore myLeoSettings.leo).
@@ -8176,12 +8199,13 @@ public check_gnx(c: Commander, gnx: string, v: VNode): void {
 @language typescript
 @tabwidth -4
 
-
 </t>
 <t tx="felix.20210110223514.1">import { Position } from "./leoNodes";
+import * as g from './leoGlobals';
+import { LeoUI } from '../leoUI';
 
 /**
- * A per-outline class.
+ * A per-outline class. Called 'class Commands' in Leo's python source
  * The "c" predefined object is an instance of this class.
  */
 export class Commander {
@@ -8191,14 +8215,22 @@ export class Commander {
     public hiddenRootNode = null;
     public mFileName: string;
     public mRelativeFileName = null;
+    public gui:LeoUI;
 
     @others
 
 }
 
 </t>
-<t tx="felix.20210110223547.1">constructor(fileName: string) {
+<t tx="felix.20210110223547.1">constructor(
+    fileName: string,
+    gui?:LeoUI,
+    previousSettings?:any,
+    relativeFileName?:any
+
+) {
     this.mFileName = fileName;
+    this.gui = gui || g.app.gui;
 }
 
 </t>
@@ -8916,6 +8948,416 @@ public get gnx(){
 }
 
 </t>
-<t tx="felix.20210118015431.1"></t>
+<t tx="felix.20210118015431.1">/**
+ * A class to manage loading .leo files, including configuration files.
+ */
+export class LoadManager {
+
+    // Global settings &amp; shortcuts dicts...
+    // The are the defaults for computing settings and shortcuts for all loaded files.
+    
+    // A g.TypedDict: the join of settings in leoSettings.leo &amp; myLeoSettings.leo.
+    public globalSettingsDict: {[key:string]:any}|undefined; 
+    // A g.TypedDict: the join of shortcuts in leoSettings.leo &amp; myLeoSettings.leo
+    public globalBindingsDict: {[key:string]:any}|undefined; 
+    
+    public files: string []; // List of files to be loaded.
+    public options: {[key:string]:any}; // Dictionary of user options. Keys are option names.
+    public old_argv: string []; // A copy of sys.argv for debugging.
+    public more_cmdline_files: boolean; // True when more files remain on the command line to be loaded.
+    
+    @others
+}
+</t>
+<t tx="felix.20210119234943.1">constructor() {
+    this.globalSettingsDict = undefined;
+    this.globalBindingsDict = undefined;
+    this.files = [];
+    this.options = {};
+    this.old_argv = [];
+    this.more_cmdline_files = false;
+}
+
+</t>
+<t tx="felix.20210120004121.1">/**
+ * This is Leo's main startup method.
+ */
+public load(fileName?:string): void {
+    // SIMPLIFIED JS VERSION 
+    const lm:LoadManager = this;
+
+    const t1 = process.hrtime();
+    
+    lm.doPrePluginsInit(fileName); // sets lm.options and lm.files
+    const t2 = process.hrtime();    
+    
+    lm.doPostPluginsInit();
+    const t3 = process.hrtime();
+
+    // console.log('Startup PrePluginsInit' );
+    // console.log('Startup PostPluginsInit' );
+
+}
+
+</t>
+<t tx="felix.20210120004121.16">def initApp(verbose:boolean): void {
+
+
+/*
+    self.createAllImporterData()
+        # Can be done early. Uses only g.app.loadDir
+    assert g.app.loadManager
+    from leo.core import leoBackground
+    from leo.core import leoConfig
+    from leo.core import leoNodes
+    from leo.core import leoPlugins
+    from leo.core import leoSessions
+    # Import leoIPython only if requested.  The import is quite slow.
+    self.setStdStreams()
+    if g.app.useIpython:
+        from leo.core import leoIPython
+            # This launches the IPython Qt Console.  It *is* required.
+        assert leoIPython  # suppress pyflakes/flake8 warning.
+    # Make sure we call the new leoPlugins.init top-level function.
+    leoPlugins.init()
+    # Force the user to set g.app.leoID.
+    g.app.setLeoID(verbose=verbose)
+    # Create early classes *after* doing plugins.init()
+    g.app.idleTimeManager = IdleTimeManager()
+    g.app.backgroundProcessManager = leoBackground.BackgroundProcessManager()
+    g.app.externalFilesController = leoExternalFiles.ExternalFilesController()
+    g.app.recentFilesManager = RecentFilesManager()
+    g.app.config = leoConfig.GlobalConfigManager()
+    g.app.nodeIndices = leoNodes.NodeIndices(g.app.leoID)
+    g.app.sessionManager = leoSessions.SessionManager()
+    # Complete the plugins class last.
+    g.app.pluginsController.finishCreate()
+*/
+
+}
+
+</t>
+<t tx="felix.20210120004121.3">/**
+ * Create a Leo window for each file in the lm.files list.
+ */ 
+public doPostPluginsInit():boolean {
+    // Clear g.app.initing _before_ creating commanders.
+    const lm:LoadManager = this;
+    g.app.initing = false;  // "idle" hooks may now call g.app.forceShutdown.
+    // Create the main frame.Show it and all queued messages.
+    let c:Commander;
+    let c1:Commander|undefined;
+    let fn:string;
+    if (lm.files.length){
+        try{  // #1403.
+            for (let n = 0; n &lt; lm.files.length; n++) {
+                const fn = lm.files[n];
+                lm.more_cmdline_files = n &lt; (lm.files.length - 1);
+                c = lm.loadLocalFile(fn, g.app.gui);
+                    // Returns None if the file is open in another instance of Leo.
+                if (c &amp;&amp; !c1){  // #1416:
+                    c1 = c;
+                }
+            }
+        }
+        catch(exception){
+            g.es_print(`Unexpected exception reading ${fn}`);
+            g.es_exception();
+            c = undefined;
+        }
+    }
+    // Load (and save later) a session *only* if the command line contains no files.
+    g.app.loaded_session = not lm.files
+    if (g.app.sessionManager and g.app.loaded_session){
+        try:  // #1403.
+            aList = g.app.sessionManager.load_snapshot()
+            if aList:
+                g.app.sessionManager.load_session(c1, aList)
+                // #659.
+                if g.app.windowList:
+                    c = c1 = g.app.windowList[0].c
+                else:
+                    c = c1 = None
+        except Exception:
+            g.es_print('Can not load session')
+            g.es_exception()
+    }
+    // Enable redraws.
+    g.app.disable_redraw = false;
+    
+    if (!c1){
+        try: // #1403.
+            c1 = lm.openEmptyWorkBook();
+                // Calls LM.loadLocalFile.
+        except Exception:
+            g.es_print('Can not create empty workbook');
+            g.es_exception();
+    }
+    c = c1;
+    if (!c){
+        // Leo is out of options: Force an immediate exit.
+        return false;
+    }
+    // #199.
+    g.app.runAlreadyOpenDialog(c1);
+
+    // Final inits...
+    g.app.logInited = true;
+    g.app.initComplete = true;
+    c.setLog();
+    c.redraw();
+    g.doHook("start2", c=c, p=c.p, fileName=c.fileName());
+    c.initialFocusHelper();
+    screenshot_fn = lm.options.get('screenshot_fn');
+    if (screenshot_fn){
+        lm.make_screen_shot(screenshot_fn)
+        return false;  // Force an immediate exit.
+    }
+    return true;
+}
+
+</t>
+<t tx="felix.20210120004121.31">public loadLocalFile(fn:string, gui:LeoUI, old_c?:Commander):Commander{
+    /*Completely read a file, creating the corresonding outline.
+
+    1. If fn is an existing .leo file (possibly zipped), read it twice:
+    the first time with a NullGui to discover settings,
+    the second time with the requested gui to create the outline.
+
+    2. If fn is an external file:
+    get settings from the leoSettings.leo and myLeoSetting.leo, then
+    create a "wrapper" outline continain an @file node for the external file.
+
+    3. If fn is empty:
+    get settings from the leoSettings.leo and myLeoSetting.leo or default settings,
+    or open an empty outline.
+    */
+    const lm:LoadManager = this;
+    let c:Commander;
+    // Step 0: Return if the file is already open.
+    fn = g.os_path_finalize(fn);
+    if (fn){
+        c = lm.findOpenFile(fn);
+        if (c){
+            return c;
+        }
+    }
+    // Step 1: get the previous settings.
+    // For .leo files (and zipped .leo files) this pre-reads the file in a null gui.
+    // Otherwise, get settings from leoSettings.leo, myLeoSettings.leo, or default settings.
+    const previousSettings:any = lm.getPreviousSettings(fn);
+    // Step 2: open the outline in the requested gui.
+    // For .leo files (and zipped .leo file) this opens the file a second time.
+    c = lm.openFileByName(fn, gui, old_c, previousSettings);
+    return c;
+}
+</t>
+<t tx="felix.20210120004121.32">/**
+ * Read the local file whose full path is fn using the given gui.
+ * fn may be a Leo file (including .leo or zipped file) or an external file.
+ *
+ * This is not a pre-read: the previousSettings always exist and
+ * the commander created here persists until the user closes the outline. 
+ *
+ * Reads the entire outline if fn exists and is a .leo file or zipped file.
+ * Creates an empty outline if fn is a non-existent Leo file.
+ * Creates an wrapper outline if fn is an external file, existing or not.
+ */
+public openFileByName(fn:string, old_c?:Commander, previousSettings?:any): Commander{
+    lm:LoadManager = this;
+    // Disable the log.
+    g.app.setLog(None);
+    g.app.lockLog();
+    // Create the a commander for the .leo file.
+    // Important.  The settings don't matter for pre-reads!
+    // For second read, the settings for the file are *exactly* previousSettings.
+    c = g.app.newCommander(fn, gui=gui, previousSettings);
+    // Open the file, if possible.
+    g.doHook('open0')
+    theFile = lm.openLeoOrZipFile(fn)
+    if isinstance(theFile, sqlite3.Connection):
+        // this commander is associated with sqlite db
+        c.sqlite_connection = theFile
+    // Enable the log.
+    g.app.unlockLog()
+    c.frame.log.enable(True)
+    // Phase 2: Create the outline.
+    g.doHook("open1", old_c=None, c=c, new_c=c, fileName=fn)
+    if theFile:
+        readAtFileNodesFlag = bool(previousSettings)
+        // The log is not set properly here.
+        ok = lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag, theFile) // c.fileCommands.openLeoFile(theFile)
+            // Call c.fileCommands.openLeoFile to read the .leo file.
+        if not ok: return None
+    else:
+        // Create a wrapper .leo file if:
+        // a) fn is a .leo file that does not exist or
+        // b) fn is an external file, existing or not.
+        lm.initWrapperLeoFile(c, fn)
+    g.doHook("open2", old_c=None, c=c, new_c=c, fileName=fn)
+    // Phase 3: Complete the initialization.
+    g.app.writeWaitingLog(c)
+    c.setLog()
+    lm.createMenu(c, fn)
+    lm.finishOpen(c) // c.initAfterLoad()
+    return c;
+}
+
+</t>
+<t tx="felix.20210120004121.4">public make_screen_shot(fn): void {
+    // TODO
+    /*
+    """Create a screenshot of the present Leo outline and save it to path."""
+    if g.app.gui.guiName() == 'qt':
+        m = g.loadOnePlugin('screenshots')
+        m.make_screen_shot(fn)
+    */
+}
+
+</t>
+<t tx="felix.20210120004121.5">public openEmptyWorkBook(): Commander {
+    // TODO
+    /*
+    """Open an empty frame and paste the contents of CheatSheet.leo into it."""
+    lm = self
+    # Create an empty frame.
+    fn = lm.computeWorkbookFileName()
+    if not fn:
+        return None  # #1415
+    c = lm.loadLocalFile(fn, gui=g.app.gui, old_c=None)
+    if not c:
+        return None  # #1201: AttributeError below.
+    # Open the cheatsheet, but not in batch mode.
+    if not g.app.batchMode and not g.os_path_exists(fn):
+        # #933: Save clipboard.
+        old_clipboard = g.app.gui.getTextFromClipboard()
+        # Paste the contents of CheetSheet.leo into c.
+        c2 = c.openCheatSheet(redraw=False)
+        if c2:
+            for p2 in c2.rootPosition().self_and_siblings():
+                c2.setCurrentPosition(p2)  # 1380
+                c2.copyOutline()
+                p = c.pasteOutline()
+                # #1380 &amp; #1381: Add guard &amp; use vnode methods to prevent redraw.
+                if p:
+                    c.setCurrentPosition(p)  # 1380
+                    p.v.contract()
+                    p.v.clearDirty()
+            c2.close(new_c=c)
+            # Delete the dummy first node.
+            root = c.rootPosition()
+            root.doDelete(newNode=root.next())
+            c.target_language = 'rest'
+                # Settings not parsed the first time.
+            c.clearChanged()
+            c.redraw(c.rootPosition())  # # 1380: Select the root.
+        # #933: Restore clipboard
+        g.app.gui.replaceClipboardWith(old_clipboard)
+    return c
+    */
+    
+}
+
+</t>
+<t tx="felix.20210120004121.6">public doPrePluginsInit(fileName):void {
+    """ Scan options, set directories and read settings."""
+    const lm = this;
+    // lm.computeStandardDirectories();
+    // lm.adjustSysPath();
+        // A do-nothing.
+    // Scan the options as early as possible.
+    const options = {} // lm.scanOptions(fileName);
+    lm.options = options;
+
+    script = options['script'];
+    verbose = !script;
+    // Init the app.
+    lm.initApp(verbose);
+    // g.app.setGlobalDb()
+    // lm.reportDirectories(verbose)
+    // Read settings *after* setting g.app.config and *before* opening plugins.
+    // This means if-gui has effect only in per-file settings.
+    // lm.readGlobalSettingsFiles()
+        // reads only standard settings files, using a null gui.
+        // uses lm.files[0] to compute the local directory
+        // that might contain myLeoSettings.leo.
+    // Read the recent files file.
+    // localConfigFile = lm.files[0] if lm.files else None
+    // g.app.recentFilesManager.readRecentFiles(localConfigFile)
+    // Create the gui after reading options and settings.
+    // lm.createGui(pymacs)
+    // We can't print the signon until we know the gui.
+    // g.app.computeSignon()  // Set app.signon/signon1 for commanders.
+}
+
+</t>
+<t tx="felix.20210122000014.1">&lt;&lt; imports &gt;&gt;
+@others
+@language typescript
+@tabwidth -4
+
+</t>
+<t tx="felix.20210122003236.1">/**
+ *
+ */
+export class FileCommands {
+
+    @others
+
+}
+
+</t>
+<t tx="felix.20210123002801.1">constructor(){
+
+}
+
+</t>
+<t tx="felix.20210123003936.1">/*
+    import binascii
+    from collections import defaultdict
+    from contextlib import contextmanager
+    import difflib
+    import hashlib
+    import io
+    import os
+    import pickle
+    import sqlite3
+    import tempfile
+    import time
+    import zipfile
+    import xml.etree.ElementTree as ElementTree
+    import xml.sax
+    import xml.sax.saxutils
+    from leo.core import leoGlobals as g
+    from leo.core import leoNodes
+    # Abbreviations
+    StringIO = io.StringIO
+    BytesIO = io.BytesIO
+*/
+
+import * as g from './leoGlobals';
+
+</t>
+<t tx="felix.20210123212411.1">/**
+ * Create a commander and its view frame for the Leo main window.
+ */
+public newCommander(
+    fileName:string,
+    gui:LeoUI,
+    previousSettings?:any,
+    relativeFileName?:any,
+): Commander{
+    // Create the commander and its subcommanders.
+    // This takes about 3/4 sec when called by the leoBridge module.
+    // Timeit reports 0.0175 sec when using a nullGui.
+    const c = new Commander(
+        fileName,
+        gui,
+        previousSettings,
+        relativeFileName
+    );
+    return c;
+}
+</t>
 </tnodes>
 </leo_file>

@@ -16,7 +16,9 @@
     import sqlite3
 */
 
-
+import * as g from './leoGlobals';
+import { LeoUI } from '../leoUI';
+import { Commander } from './leoCommander';
 /**
  *  A singleton class to manage idle-time handling. This class handles all
  *  details of running code at idle time, including running 'idle' hooks.
@@ -93,7 +95,7 @@ export class LeoApp {
     public diff: boolean = false; // True: run Leo in diff mode.
     public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
-    public gui = null; // The gui class.
+    public gui:LeoUI; // The gui class.
     public guiArgName = null; // The gui name given in --gui option.
     public ipython_inited: boolean = false; // True if leoIpython.py imports succeeded.
     public isTheme: boolean = false; // True: load files as theme files (ignore myLeoSettings.leo).
@@ -250,8 +252,9 @@ export class LeoApp {
     public language_delims_dict: { [key: string]: string } = {};
     public language_extension_dict: { [key: string]: string } = {};
 
-    constructor() {
+    constructor(gui:LeoUI) {
         // Define all global data.
+        this.gui=gui;
         this.define_delegate_language_dict();
         this.init_at_auto_names();
         this.init_at_file_names();
@@ -838,7 +841,359 @@ export class LeoApp {
     }
 
 
+    /**
+     * Create a commander and its view frame for the Leo main window.
+     */
+    public newCommander(
+        fileName:string,
+        gui:LeoUI,
+        previousSettings?:any,
+        relativeFileName?:any,
+    ): Commander{
+        // Create the commander and its subcommanders.
+        // This takes about 3/4 sec when called by the leoBridge module.
+        // Timeit reports 0.0175 sec when using a nullGui.
+        const c = new Commander(
+            fileName,
+            gui,
+            previousSettings,
+            relativeFileName
+        );
+        return c;
+    }
 
 }
 
+/**
+ * A class to manage loading .leo files, including configuration files.
+ */
+export class LoadManager {
+
+    // Global settings & shortcuts dicts...
+    // The are the defaults for computing settings and shortcuts for all loaded files.
+    
+    // A g.TypedDict: the join of settings in leoSettings.leo & myLeoSettings.leo.
+    public globalSettingsDict: {[key:string]:any}|undefined; 
+    // A g.TypedDict: the join of shortcuts in leoSettings.leo & myLeoSettings.leo
+    public globalBindingsDict: {[key:string]:any}|undefined; 
+    
+    public files: string []; // List of files to be loaded.
+    public options: {[key:string]:any}; // Dictionary of user options. Keys are option names.
+    public old_argv: string []; // A copy of sys.argv for debugging.
+    public more_cmdline_files: boolean; // True when more files remain on the command line to be loaded.
+    
+    constructor() {
+        this.globalSettingsDict = undefined;
+        this.globalBindingsDict = undefined;
+        this.files = [];
+        this.options = {};
+        this.old_argv = [];
+        this.more_cmdline_files = false;
+    }
+
+    /**
+     * This is Leo's main startup method.
+     */
+    public load(fileName?:string): void {
+        // SIMPLIFIED JS VERSION 
+        const lm:LoadManager = this;
+
+        const t1 = process.hrtime();
+        
+        lm.doPrePluginsInit(fileName); // sets lm.options and lm.files
+        const t2 = process.hrtime();    
+        
+        lm.doPostPluginsInit();
+        const t3 = process.hrtime();
+
+        // console.log('Startup PrePluginsInit' );
+        // console.log('Startup PostPluginsInit' );
+
+    }
+
+    /**
+     * Create a Leo window for each file in the lm.files list.
+     */ 
+    public doPostPluginsInit():boolean {
+        // Clear g.app.initing _before_ creating commanders.
+        const lm:LoadManager = this;
+        g.app.initing = false;  // "idle" hooks may now call g.app.forceShutdown.
+        // Create the main frame.Show it and all queued messages.
+        let c:Commander;
+        let c1:Commander|undefined;
+        let fn:string;
+        if (lm.files.length){
+            try{  // #1403.
+                for (let n = 0; n < lm.files.length; n++) {
+                    const fn = lm.files[n];
+                    lm.more_cmdline_files = n < (lm.files.length - 1);
+                    c = lm.loadLocalFile(fn, g.app.gui);
+                        // Returns None if the file is open in another instance of Leo.
+                    if (c && !c1){  // #1416:
+                        c1 = c;
+                    }
+                }
+            }
+            catch(exception){
+                g.es_print(`Unexpected exception reading ${fn}`);
+                g.es_exception();
+                c = undefined;
+            }
+        }
+        // Load (and save later) a session *only* if the command line contains no files.
+        g.app.loaded_session = not lm.files
+        if (g.app.sessionManager and g.app.loaded_session){
+            try:  // #1403.
+                aList = g.app.sessionManager.load_snapshot()
+                if aList:
+                    g.app.sessionManager.load_session(c1, aList)
+                    // #659.
+                    if g.app.windowList:
+                        c = c1 = g.app.windowList[0].c
+                    else:
+                        c = c1 = None
+            except Exception:
+                g.es_print('Can not load session')
+                g.es_exception()
+        }
+        // Enable redraws.
+        g.app.disable_redraw = false;
+        
+        if (!c1){
+            try: // #1403.
+                c1 = lm.openEmptyWorkBook();
+                    // Calls LM.loadLocalFile.
+            except Exception:
+                g.es_print('Can not create empty workbook');
+                g.es_exception();
+        }
+        c = c1;
+        if (!c){
+            // Leo is out of options: Force an immediate exit.
+            return false;
+        }
+        // #199.
+        g.app.runAlreadyOpenDialog(c1);
+
+        // Final inits...
+        g.app.logInited = true;
+        g.app.initComplete = true;
+        c.setLog();
+        c.redraw();
+        g.doHook("start2", c=c, p=c.p, fileName=c.fileName());
+        c.initialFocusHelper();
+        screenshot_fn = lm.options.get('screenshot_fn');
+        if (screenshot_fn){
+            lm.make_screen_shot(screenshot_fn)
+            return false;  // Force an immediate exit.
+        }
+        return true;
+    }
+
+    public make_screen_shot(fn): void {
+        // TODO
+        /*
+        """Create a screenshot of the present Leo outline and save it to path."""
+        if g.app.gui.guiName() == 'qt':
+            m = g.loadOnePlugin('screenshots')
+            m.make_screen_shot(fn)
+        */
+    }
+
+    public openEmptyWorkBook(): Commander {
+        // TODO
+        /*
+        """Open an empty frame and paste the contents of CheatSheet.leo into it."""
+        lm = self
+        # Create an empty frame.
+        fn = lm.computeWorkbookFileName()
+        if not fn:
+            return None  # #1415
+        c = lm.loadLocalFile(fn, gui=g.app.gui, old_c=None)
+        if not c:
+            return None  # #1201: AttributeError below.
+        # Open the cheatsheet, but not in batch mode.
+        if not g.app.batchMode and not g.os_path_exists(fn):
+            # #933: Save clipboard.
+            old_clipboard = g.app.gui.getTextFromClipboard()
+            # Paste the contents of CheetSheet.leo into c.
+            c2 = c.openCheatSheet(redraw=False)
+            if c2:
+                for p2 in c2.rootPosition().self_and_siblings():
+                    c2.setCurrentPosition(p2)  # 1380
+                    c2.copyOutline()
+                    p = c.pasteOutline()
+                    # #1380 & #1381: Add guard & use vnode methods to prevent redraw.
+                    if p:
+                        c.setCurrentPosition(p)  # 1380
+                        p.v.contract()
+                        p.v.clearDirty()
+                c2.close(new_c=c)
+                # Delete the dummy first node.
+                root = c.rootPosition()
+                root.doDelete(newNode=root.next())
+                c.target_language = 'rest'
+                    # Settings not parsed the first time.
+                c.clearChanged()
+                c.redraw(c.rootPosition())  # # 1380: Select the root.
+            # #933: Restore clipboard
+            g.app.gui.replaceClipboardWith(old_clipboard)
+        return c
+        */
+        
+    }
+
+    public doPrePluginsInit(fileName):void {
+        """ Scan options, set directories and read settings."""
+        const lm = this;
+        // lm.computeStandardDirectories();
+        // lm.adjustSysPath();
+            // A do-nothing.
+        // Scan the options as early as possible.
+        const options = {} // lm.scanOptions(fileName);
+        lm.options = options;
+
+        script = options['script'];
+        verbose = !script;
+        // Init the app.
+        lm.initApp(verbose);
+        // g.app.setGlobalDb()
+        // lm.reportDirectories(verbose)
+        // Read settings *after* setting g.app.config and *before* opening plugins.
+        // This means if-gui has effect only in per-file settings.
+        // lm.readGlobalSettingsFiles()
+            // reads only standard settings files, using a null gui.
+            // uses lm.files[0] to compute the local directory
+            // that might contain myLeoSettings.leo.
+        // Read the recent files file.
+        // localConfigFile = lm.files[0] if lm.files else None
+        // g.app.recentFilesManager.readRecentFiles(localConfigFile)
+        // Create the gui after reading options and settings.
+        // lm.createGui(pymacs)
+        // We can't print the signon until we know the gui.
+        // g.app.computeSignon()  // Set app.signon/signon1 for commanders.
+    }
+
+    def initApp(verbose:boolean): void {
+
+
+    /*
+        self.createAllImporterData()
+            # Can be done early. Uses only g.app.loadDir
+        assert g.app.loadManager
+        from leo.core import leoBackground
+        from leo.core import leoConfig
+        from leo.core import leoNodes
+        from leo.core import leoPlugins
+        from leo.core import leoSessions
+        # Import leoIPython only if requested.  The import is quite slow.
+        self.setStdStreams()
+        if g.app.useIpython:
+            from leo.core import leoIPython
+                # This launches the IPython Qt Console.  It *is* required.
+            assert leoIPython  # suppress pyflakes/flake8 warning.
+        # Make sure we call the new leoPlugins.init top-level function.
+        leoPlugins.init()
+        # Force the user to set g.app.leoID.
+        g.app.setLeoID(verbose=verbose)
+        # Create early classes *after* doing plugins.init()
+        g.app.idleTimeManager = IdleTimeManager()
+        g.app.backgroundProcessManager = leoBackground.BackgroundProcessManager()
+        g.app.externalFilesController = leoExternalFiles.ExternalFilesController()
+        g.app.recentFilesManager = RecentFilesManager()
+        g.app.config = leoConfig.GlobalConfigManager()
+        g.app.nodeIndices = leoNodes.NodeIndices(g.app.leoID)
+        g.app.sessionManager = leoSessions.SessionManager()
+        # Complete the plugins class last.
+        g.app.pluginsController.finishCreate()
+    */
+
+    }
+
+    public loadLocalFile(fn:string, gui:LeoUI, old_c?:Commander):Commander{
+        /*Completely read a file, creating the corresonding outline.
+
+        1. If fn is an existing .leo file (possibly zipped), read it twice:
+        the first time with a NullGui to discover settings,
+        the second time with the requested gui to create the outline.
+
+        2. If fn is an external file:
+        get settings from the leoSettings.leo and myLeoSetting.leo, then
+        create a "wrapper" outline continain an @file node for the external file.
+
+        3. If fn is empty:
+        get settings from the leoSettings.leo and myLeoSetting.leo or default settings,
+        or open an empty outline.
+        */
+        const lm:LoadManager = this;
+        let c:Commander;
+        // Step 0: Return if the file is already open.
+        fn = g.os_path_finalize(fn);
+        if (fn){
+            c = lm.findOpenFile(fn);
+            if (c){
+                return c;
+            }
+        }
+        // Step 1: get the previous settings.
+        // For .leo files (and zipped .leo files) this pre-reads the file in a null gui.
+        // Otherwise, get settings from leoSettings.leo, myLeoSettings.leo, or default settings.
+        const previousSettings:any = lm.getPreviousSettings(fn);
+        // Step 2: open the outline in the requested gui.
+        // For .leo files (and zipped .leo file) this opens the file a second time.
+        c = lm.openFileByName(fn, gui, old_c, previousSettings);
+        return c;
+    }
+    /**
+     * Read the local file whose full path is fn using the given gui.
+     * fn may be a Leo file (including .leo or zipped file) or an external file.
+     *
+     * This is not a pre-read: the previousSettings always exist and
+     * the commander created here persists until the user closes the outline. 
+     *
+     * Reads the entire outline if fn exists and is a .leo file or zipped file.
+     * Creates an empty outline if fn is a non-existent Leo file.
+     * Creates an wrapper outline if fn is an external file, existing or not.
+     */
+    public openFileByName(fn:string, old_c?:Commander, previousSettings?:any): Commander{
+        lm:LoadManager = this;
+        // Disable the log.
+        g.app.setLog(None);
+        g.app.lockLog();
+        // Create the a commander for the .leo file.
+        // Important.  The settings don't matter for pre-reads!
+        // For second read, the settings for the file are *exactly* previousSettings.
+        c = g.app.newCommander(fn, gui=gui, previousSettings);
+        // Open the file, if possible.
+        g.doHook('open0')
+        theFile = lm.openLeoOrZipFile(fn)
+        if isinstance(theFile, sqlite3.Connection):
+            // this commander is associated with sqlite db
+            c.sqlite_connection = theFile
+        // Enable the log.
+        g.app.unlockLog()
+        c.frame.log.enable(True)
+        // Phase 2: Create the outline.
+        g.doHook("open1", old_c=None, c=c, new_c=c, fileName=fn)
+        if theFile:
+            readAtFileNodesFlag = bool(previousSettings)
+            // The log is not set properly here.
+            ok = lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag, theFile) // c.fileCommands.openLeoFile(theFile)
+                // Call c.fileCommands.openLeoFile to read the .leo file.
+            if not ok: return None
+        else:
+            // Create a wrapper .leo file if:
+            // a) fn is a .leo file that does not exist or
+            // b) fn is an external file, existing or not.
+            lm.initWrapperLeoFile(c, fn)
+        g.doHook("open2", old_c=None, c=c, new_c=c, fileName=fn)
+        // Phase 3: Complete the initialization.
+        g.app.writeWaitingLog(c)
+        c.setLog()
+        lm.createMenu(c, fn)
+        lm.finishOpen(c) // c.initAfterLoad()
+        return c;
+    }
+
+}
 
