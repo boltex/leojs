@@ -4,25 +4,25 @@ import axios from 'axios';
 const xslTemplate = `
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-  <xsl:template match="/">
-    <xsl:apply-templates/>
-  </xsl:template>
+    <xsl:template match="/">
+        <xsl:apply-templates/>
+    </xsl:template>
 
-  <xsl:template match="v">
-    <xsl:variable name="t" select="@t"/>
-    <xsl:variable name="nodeSet" select="//v[@t=$t]"/>
-    <xsl:variable name="double_quote">"</xsl:variable>
-    <xsl:variable name="apos">'</xsl:variable>
-    {
-    "id":  <xsl:value-of select="@id"/>,
-    "t":   "<xsl:value-of select="translate(@t,'.','_')"/>",
-    "name":"<xsl:value-of select="translate($nodeSet[1]/vh,concat('\',$double_quote),concat('|',$apos))"/>",
-    "children":[<xsl:apply-templates select="$nodeSet[1]/v"/>]
-    }
-    <xsl:if test="position()!=last()">,</xsl:if>
-  </xsl:template>
+    <xsl:template match="v">
+        <xsl:variable name="t" select="@t"/>
+        <xsl:variable name="nodeSet" select="//v[@t=$t]"/>
+        <xsl:variable name="double_quote">"</xsl:variable>
+        <xsl:variable name="apos">'</xsl:variable>
+        {
+            "id":  <xsl:value-of select="@id"/>,
+            "t":   "<xsl:value-of select="translate(@t,'.','_')"/>",
+            "name":"<xsl:value-of select="translate($nodeSet[1]/vh,concat('\',$double_quote),concat('|',$apos))"/>",
+            "children":[<xsl:apply-templates select="$nodeSet[1]/v"/>]
+        }
+        <xsl:if test="position()!=last()">,</xsl:if>
+    </xsl:template>
 
-  <xsl:template match="text()"/>
+    <xsl:template match="text()"/>
 
 </xsl:stylesheet>
 `;
@@ -102,13 +102,13 @@ function cleanText(data, startId) {
         data.t = startId + '-' + data.t + '';
     }
 }
+
 /**
  * TODO: move to util, also is in store/index, review logic for relative / subtrees
  * Is url relative
  * @param url {string}
  * @returns {boolean} - if is relative
  */
-
 function isRelative(url) {
     var ok = true;
     if (/^http/.test(url)) {
@@ -218,4 +218,6 @@ function test(p_message) {
 
 var testVar = "some String";
 
+
 export { getLeoJSON, transformLeoXML, transformLeoXML2XML, transform, test, testVar };
+

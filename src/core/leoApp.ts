@@ -919,9 +919,9 @@ export class LoadManager {
         const lm:LoadManager = this;
         g.app.initing = false;  // "idle" hooks may now call g.app.forceShutdown.
         // Create the main frame.Show it and all queued messages.
-        let c:Commander;
+        let c:Commander|undefined;
         let c1:Commander|undefined;
-        let fn:string;
+        let fn:string = "";
         if (lm.files.length){
             try{  // #1403.
                 for (let n = 0; n < lm.files.length; n++) {
@@ -940,32 +940,40 @@ export class LoadManager {
                 c = undefined;
             }
         }
+        
         // Load (and save later) a session *only* if the command line contains no files.
-        g.app.loaded_session = not lm.files
-        if (g.app.sessionManager and g.app.loaded_session){
-            try:  // #1403.
-                aList = g.app.sessionManager.load_snapshot()
+        /*
+        g.app.loaded_session = !lm.files.length;
+        if (g.app.sessionManager && g.app.loaded_session){
+            try{  // #1403.
+                aList = g.app.sessionManager.load_snapshot();
                 if aList:
-                    g.app.sessionManager.load_session(c1, aList)
+                    g.app.sessionManager.load_session(c1, aList);
                     // #659.
                     if g.app.windowList:
-                        c = c1 = g.app.windowList[0].c
+                        c = c1 = g.app.windowList[0].c;
                     else:
-                        c = c1 = None
-            except Exception:
-                g.es_print('Can not load session')
-                g.es_exception()
+                        c = c1 = None;
+            }
+            
+            catch( Exception){
+                g.es_print('Can not load session');
+                g.es_exception();
+            }
         }
+        */
         // Enable redraws.
         g.app.disable_redraw = false;
         
         if (!c1){
-            try: // #1403.
+            try{ // #1403.
                 c1 = lm.openEmptyWorkBook();
                     // Calls LM.loadLocalFile.
-            except Exception:
+            }
+            catch( Exception){
                 g.es_print('Can not create empty workbook');
                 g.es_exception();
+            }
         }
         c = c1;
         if (!c){
@@ -973,25 +981,27 @@ export class LoadManager {
             return false;
         }
         // #199.
-        g.app.runAlreadyOpenDialog(c1);
+        // TODO
+        // g.app.runAlreadyOpenDialog(c1);
 
         // Final inits...
         g.app.logInited = true;
         g.app.initComplete = true;
-        c.setLog();
-        c.redraw();
-        g.doHook("start2", c=c, p=c.p, fileName=c.fileName());
-        c.initialFocusHelper();
-        screenshot_fn = lm.options.get('screenshot_fn');
+        // c.setLog();
+        // c.redraw();
+        // g.doHook("start2", c=c, p=c.p, fileName=c.fileName());
+        // c.initialFocusHelper();
+        const screenshot_fn:string = lm.options['screenshot_fn'];
         if (screenshot_fn){
-            lm.make_screen_shot(screenshot_fn)
+            lm.make_screen_shot(screenshot_fn);
             return false;  // Force an immediate exit.
         }
         return true;
     }
 
-    public make_screen_shot(fn): void {
+    public make_screen_shot(fn:string): void {
         // TODO
+        console.log('TODO: make_screen_shot');
         /*
         """Create a screenshot of the present Leo outline and save it to path."""
         if g.app.gui.guiName() == 'qt':
@@ -1000,13 +1010,16 @@ export class LoadManager {
         */
     }
 
-    public openEmptyWorkBook(): Commander {
+    /**
+     * Open an empty frame and paste the contents of CheatSheet.leo into it.
+     */
+    public openEmptyWorkBook(): Commander| undefined {
         // TODO
+        const lm:LoadManager = this;
+        
         /*
-        """Open an empty frame and paste the contents of CheatSheet.leo into it."""
-        lm = self
-        # Create an empty frame.
-        fn = lm.computeWorkbookFileName()
+        // Create an empty frame.
+        const fn:string = lm.computeWorkbookFileName();
         if not fn:
             return None  # #1415
         c = lm.loadLocalFile(fn, gui=g.app.gui, old_c=None)
@@ -1040,23 +1053,30 @@ export class LoadManager {
             g.app.gui.replaceClipboardWith(old_clipboard)
         return c
         */
-        
+        const fn:string = "";
+        const c = lm.loadLocalFile(fn,g.app.gui);
+        if (!c){
+            return undefined;
+        }
+        return c;
     }
 
-    public doPrePluginsInit(fileName):void {
-        """ Scan options, set directories and read settings."""
-        const lm = this;
+    /**
+     * Scan options, set directories and read settings.
+     */
+    public doPrePluginsInit(fileName?:string):void {
+        const lm:LoadManager = this;
         // lm.computeStandardDirectories();
         // lm.adjustSysPath();
             // A do-nothing.
         // Scan the options as early as possible.
-        const options = {} // lm.scanOptions(fileName);
+        const options = {}; // lm.scanOptions(fileName);
         lm.options = options;
 
-        script = options['script'];
-        verbose = !script;
+        // const script:string = options['script'];
+        // const verbose:boolean = !script;
         // Init the app.
-        lm.initApp(verbose);
+        lm.initApp(); // lm.initApp(verbose);
         // g.app.setGlobalDb()
         // lm.reportDirectories(verbose)
         // Read settings *after* setting g.app.config and *before* opening plugins.
@@ -1074,7 +1094,7 @@ export class LoadManager {
         // g.app.computeSignon()  // Set app.signon/signon1 for commanders.
     }
 
-    def initApp(verbose:boolean): void {
+    public initApp(verbose?:boolean): void {
 
 
     /*
@@ -1126,9 +1146,11 @@ export class LoadManager {
         or open an empty outline.
         */
         const lm:LoadManager = this;
-        let c:Commander;
+        let c:Commander| undefined;
+        
         // Step 0: Return if the file is already open.
-        fn = g.os_path_finalize(fn);
+        // fn = g.os_path_finalize(fn);
+        
         if (fn){
             c = lm.findOpenFile(fn);
             if (c){
@@ -1138,7 +1160,8 @@ export class LoadManager {
         // Step 1: get the previous settings.
         // For .leo files (and zipped .leo files) this pre-reads the file in a null gui.
         // Otherwise, get settings from leoSettings.leo, myLeoSettings.leo, or default settings.
-        const previousSettings:any = lm.getPreviousSettings(fn);
+        const previousSettings:any = undefined; // lm.getPreviousSettings(fn);
+        
         // Step 2: open the outline in the requested gui.
         // For .leo files (and zipped .leo file) this opens the file a second time.
         c = lm.openFileByName(fn, gui, old_c, previousSettings);
@@ -1155,26 +1178,33 @@ export class LoadManager {
      * Creates an empty outline if fn is a non-existent Leo file.
      * Creates an wrapper outline if fn is an external file, existing or not.
      */
-    public openFileByName(fn:string, old_c?:Commander, previousSettings?:any): Commander{
-        lm:LoadManager = this;
+    public openFileByName(fn:string, gui:LeoUI, old_c?:Commander, previousSettings?:any): Commander| undefined{
+        const lm:LoadManager = this;
         // Disable the log.
-        g.app.setLog(None);
-        g.app.lockLog();
+        // g.app.setLog(None);
+        // g.app.lockLog();
+        
         // Create the a commander for the .leo file.
         // Important.  The settings don't matter for pre-reads!
         // For second read, the settings for the file are *exactly* previousSettings.
-        c = g.app.newCommander(fn, gui=gui, previousSettings);
+        const c:Commander = g.app.newCommander(fn, gui, previousSettings);
         // Open the file, if possible.
-        g.doHook('open0')
-        theFile = lm.openLeoOrZipFile(fn)
+        // g.doHook('open0');
+        
+        /*
+        theFile = lm.openLeoOrZipFile(fn);
         if isinstance(theFile, sqlite3.Connection):
             // this commander is associated with sqlite db
             c.sqlite_connection = theFile
+        */    
+            
         // Enable the log.
-        g.app.unlockLog()
-        c.frame.log.enable(True)
+        // g.app.unlockLog();
+        // c.frame.log.enable(true);
+        
         // Phase 2: Create the outline.
-        g.doHook("open1", old_c=None, c=c, new_c=c, fileName=fn)
+        // g.doHook("open1", old_c=None, c=c, new_c=c, fileName=fn)
+        /*
         if theFile:
             readAtFileNodesFlag = bool(previousSettings)
             // The log is not set properly here.
@@ -1186,13 +1216,43 @@ export class LoadManager {
             // a) fn is a .leo file that does not exist or
             // b) fn is an external file, existing or not.
             lm.initWrapperLeoFile(c, fn)
-        g.doHook("open2", old_c=None, c=c, new_c=c, fileName=fn)
+          
+        */  
+        // g.doHook("open2", old_c=None, c=c, new_c=c, fileName=fn)
+        
         // Phase 3: Complete the initialization.
-        g.app.writeWaitingLog(c)
-        c.setLog()
-        lm.createMenu(c, fn)
-        lm.finishOpen(c) // c.initAfterLoad()
+        // g.app.writeWaitingLog(c)
+        // c.setLog()
+        // lm.createMenu(c, fn)
+        // lm.finishOpen(c); // c.initAfterLoad()
+        const ok:boolean = c.fileCommands.openLeoFile(fn);
         return c;
+    }
+
+    /**
+     * Returns the commander of already opened Leo file
+     * returns undefined otherwise
+     */
+    public findOpenFile(fn:string):Commander | undefined{
+        // TODO: check in opened commanders array (g.app.windowList or other as needed)
+        /*
+        def munge(name):
+            return g.os_path_normpath(name or '').lower()
+
+        for frame in g.app.windowList:
+            c = frame.c
+            if g.os_path_realpath(munge(fn)) == g.os_path_realpath(munge(c.mFileName)):
+                # Don't call frame.bringToFront(), it breaks --minimize
+                c.setLog()
+                # Selecting the new tab ensures focus is set.
+                master = getattr(frame.top, 'leo_master', None)
+                if master:  # master is a TabbedTopLevel.
+                    master.select(frame.c)
+                c.outerUpdate()
+                return c
+        return None
+        */
+        return undefined;
     }
 
 }
