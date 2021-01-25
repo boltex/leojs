@@ -224,25 +224,25 @@ export class Position {
 
 // Aliases for Position members
 export interface Position {
-    back: () => any;
-    firstChild: () => any;
-    lastChild: () => any;
-    lastNode: () => any;
-    next: () => any;
-    nodeAfterTree: () => any;
-    nthChild: () => any;
-    parent: () => any;
-    threadBack: () => any;
-    threadNext: () => any;
-    visBack: () => any;
-    visNext: () => any;
-    hasVisBack: () => any;
-    hasVisNext: () => any;
-    hasFirstChild: () => any;
-    atNoSentFileNodeName: () => any;
-    atAsisFileNodeName: () => any;
-    isAtNoSentFileNode: () => any;
-    isAtAsisFileNode: () => any;
+    back: () => Position;
+    firstChild: () => Position;
+    lastChild: () => Position;
+    lastNode: () => Position;
+    next: () => Position;
+    nodeAfterTree: () => Position;
+    nthChild: () => Position;
+    parent: () => Position;
+    threadBack: () => Position;
+    threadNext: () => Position;
+    visBack: () => Position;
+    visNext: () => Position;
+    hasVisBack: () => Position;
+    hasVisNext: () => Position;
+    hasFirstChild: () => boolean;
+    atNoSentFileNodeName: () => string;
+    atAsisFileNodeName: () => string;
+    isAtNoSentFileNode: () => boolean;
+    isAtAsisFileNode: () => boolean;
 }
 
 /*

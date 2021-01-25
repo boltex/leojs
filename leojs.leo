@@ -6081,25 +6081,25 @@ export class Position {
 
 // Aliases for Position members
 export interface Position {
-    back: () =&gt; any;
-    firstChild: () =&gt; any;
-    lastChild: () =&gt; any;
-    lastNode: () =&gt; any;
-    next: () =&gt; any;
-    nodeAfterTree: () =&gt; any;
-    nthChild: () =&gt; any;
-    parent: () =&gt; any;
-    threadBack: () =&gt; any;
-    threadNext: () =&gt; any;
-    visBack: () =&gt; any;
-    visNext: () =&gt; any;
-    hasVisBack: () =&gt; any;
-    hasVisNext: () =&gt; any;
-    hasFirstChild: () =&gt; any;
-    atNoSentFileNodeName: () =&gt; any;
-    atAsisFileNodeName: () =&gt; any;
-    isAtNoSentFileNode: () =&gt; any;
-    isAtAsisFileNode: () =&gt; any;
+    back: () =&gt; Position;
+    firstChild: () =&gt; Position;
+    lastChild: () =&gt; Position;
+    lastNode: () =&gt; Position;
+    next: () =&gt; Position;
+    nodeAfterTree: () =&gt; Position;
+    nthChild: () =&gt; Position;
+    parent: () =&gt; Position;
+    threadBack: () =&gt; Position;
+    threadNext: () =&gt; Position;
+    visBack: () =&gt; Position;
+    visNext: () =&gt; Position;
+    hasVisBack: () =&gt; Position;
+    hasVisNext: () =&gt; Position;
+    hasFirstChild: () =&gt; boolean;
+    atNoSentFileNodeName: () =&gt; string;
+    atAsisFileNodeName: () =&gt; string;
+    isAtNoSentFileNode: () =&gt; boolean;
+    isAtAsisFileNode: () =&gt; boolean;
 }
 
 /*
