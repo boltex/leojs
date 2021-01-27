@@ -252,9 +252,8 @@ export class LeoApp {
     public language_delims_dict: { [key: string]: string } = {};
     public language_extension_dict: { [key: string]: string } = {};
 
-    constructor(gui:LeoUI) {
+    constructor() {
         // Define all global data.
-        this.gui=gui;
         this.define_delegate_language_dict();
         this.init_at_auto_names();
         this.init_at_file_names();

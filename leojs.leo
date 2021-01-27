@@ -463,6 +463,8 @@
 <v t="felix.20210110163753.1"><vh>g.trace           (coreGlobals.py)</vh></v>
 </v>
 <v t="felix.20210102012632.1"><vh>@clean src/core/leoNodes.ts</vh>
+<v t="felix.20210127001502.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
+<v t="felix.20210127001508.1"><vh>&lt;&lt; interfaces &gt;&gt;</vh></v>
 <v t="felix.20210102014453.1"><vh>class NodeIndices</vh>
 <v t="felix.20210102014804.1"><vh>ni.constructor</vh></v>
 <v t="felix.20210110183334.1"><vh>ni._get_time</vh></v>
@@ -470,6 +472,17 @@
 <v t="felix.20210102024358.1"><vh>ni.setTimeStamp</vh></v>
 </v>
 <v t="felix.20210102015005.1"><vh>class Position</vh>
+<v t="felix.20210126210412.1"><vh> p.ctor &amp; other special methods...</vh>
+<v t="felix.20210126210419.1"><vh>p.constructor</vh></v>
+<v t="felix.20210126210412.3"><vh>p.__eq__ &amp; __ne__</vh></v>
+<v t="felix.20210126210412.4"><vh>p.__ge__ &amp; __le__&amp; __lt__</vh></v>
+<v t="felix.20210126210412.5"><vh>p.__gt__</vh></v>
+<v t="felix.20210126210412.6"><vh>p.__nonzero__ &amp; __bool__</vh></v>
+<v t="felix.20210126210412.7"><vh>p.__str__ and p.__repr__</vh></v>
+<v t="felix.20210126210412.8"><vh>p.archivedPosition</vh></v>
+<v t="felix.20210126210412.9"><vh>p.dump</vh></v>
+<v t="felix.20210126210412.10"><vh>p.key &amp; p.sort_key &amp; __hash__</vh></v>
+</v>
 <v t="felix.20210102015005.2"><vh>p.constructor</vh></v>
 <v t="felix.20210102031032.1"><vh>p.generators</vh>
 <v t="felix.20210102031240.1"><vh>p.children</vh></v>
@@ -486,8 +499,45 @@
 <v t="felix.20210112010737.4"><vh>p.hasChildren &amp; p.numberOfChildren</vh></v>
 </v>
 </v>
-<v t="felix.20210102035853.1"><vh>p.Moving, Inserting, Deleting, Cloning, Sorting</vh>
+<v t="felix.20210125233441.1"><vh>p.moveToX</vh>
+<v t="felix.20210125233441.2"><vh>p.moveToBack</vh></v>
+<v t="felix.20210125233441.3"><vh>p.moveToFirstChild</vh></v>
+<v t="felix.20210125233441.4"><vh>p.moveToLastChild</vh></v>
+<v t="felix.20210125233441.5"><vh>p.moveToLastNode</vh></v>
+<v t="felix.20210125233441.6"><vh>p.moveToNext</vh></v>
+<v t="felix.20210125233441.7"><vh>p.moveToNodeAfterTree</vh></v>
+<v t="felix.20210125233441.8"><vh>p.moveToNthChild</vh></v>
+<v t="felix.20210125233441.9"><vh>p.moveToParent</vh></v>
+<v t="felix.20210125233441.10"><vh>p.moveToThreadBack</vh></v>
+<v t="felix.20210125233441.11"><vh>p.moveToThreadNext</vh></v>
+<v t="felix.20210125233441.12"><vh>p.moveToVisBack &amp; helper</vh>
+<v t="felix.20210125233441.13"><vh>checkVisBackLimit</vh></v>
+</v>
+<v t="felix.20210125233441.14"><vh>p.moveToVisNext &amp; helper</vh>
+<v t="felix.20210125233441.15"><vh>checkVisNextLimit</vh></v>
+</v>
+<v t="felix.20210125233441.16"><vh>p.safeMoveToThreadNext</vh></v>
+</v>
+<v t="felix.20210126001920.1"><vh>p.Moving, Inserting, Deleting, Cloning, Sorting</vh>
+<v t="felix.20210126001920.2"><vh>p.clone</vh></v>
 <v t="felix.20210102035859.1"><vh>p.copy</vh></v>
+<v t="felix.20210126001920.4"><vh>p.deleteAllChildren</vh></v>
+<v t="felix.20210126001920.5"><vh>p.doDelete</vh></v>
+<v t="felix.20210126001920.6"><vh>p.insertAfter</vh></v>
+<v t="felix.20210126001920.7"><vh>p.insertAsLastChild</vh></v>
+<v t="felix.20210126001920.8"><vh>p.insertAsNthChild</vh></v>
+<v t="felix.20210126001920.9"><vh>p.insertBefore</vh></v>
+<v t="felix.20210126001920.10"><vh>p.invalidOutline</vh></v>
+<v t="felix.20210126001920.11"><vh>p.moveAfter</vh></v>
+<v t="felix.20210126001920.12"><vh>p.moveToFirst/LastChildOf</vh></v>
+<v t="felix.20210126001920.13"><vh>p.moveToNthChildOf</vh></v>
+<v t="felix.20210126001920.14"><vh>p.moveToRoot (changed)</vh></v>
+<v t="felix.20210126001920.15"><vh>p.promote</vh></v>
+<v t="felix.20210126001920.16"><vh>p.validateOutlineWithParent</vh>
+<v t="felix.20210126001920.17"><vh>&lt;&lt; validate parent ivar &gt;&gt;</vh></v>
+<v t="felix.20210126001920.18"><vh>&lt;&lt; validate childIndex ivar &gt;&gt;</vh></v>
+<v t="felix.20210126001920.19"><vh>&lt;&lt; validate x ivar &gt;&gt;</vh></v>
+</v>
 </v>
 </v>
 <v t="felix.20210102015005.3"><vh>class PosList</vh>
@@ -6027,9 +6077,8 @@ export let unicode_warnings: { [key: string]: any } = {};  // Keys are callers.
 @tabwidth -4
 // Leo's fundamental data classes.
 
-import * as g from './leoGlobals';
-import "date-format-lite";
-import { Commander } from './leoCommander';
+&lt;&lt; imports &gt;&gt;
+&lt;&lt; interfaces &gt;&gt;
 
 @others
 
@@ -6066,14 +6115,18 @@ export class NodeIndices {
  * p.v, a child index p._childIndex, and a stack of tuples (v,childIndex), one for
  * each ancestor **at the spot in tree traversal. Positions p has a unique set of
  * parents.
-
+ *
  * The p.moveToX methods may return a null (invalid) position p with p.v = None.
+ * 
+ * No operator overload in js/ts, so "strict-comparisons" is set in tslint.json
+ * to force usage of special methods to compare &amp; evaluate equalities.
+ *
  */
 export class Position {
 
     v: VNode;
     _childIndex: number;
-    stack: { v: VNode, childIndex: number }[];
+    stack: StackEntry[];
 
     @others
 
@@ -6100,6 +6153,7 @@ export interface Position {
     atAsisFileNodeName: () =&gt; string;
     isAtNoSentFileNode: () =&gt; boolean;
     isAtAsisFileNode: () =&gt; boolean;
+    __repr__: () =&gt; string;
 }
 
 /*
@@ -6127,6 +6181,7 @@ Position.prototype.atAsisFileNodeName = Position.prototype.atSilentFileNodeName;
 
 Position.prototype.isAtNoSentFileNode = Position.prototype.isAtNoSentinelsFileNode;
 Position.prototype.isAtAsisFileNode = Position.prototype.isAtSilentFileNode;
+Position.prototype.__repr__ = Position.prototype.__str__;
 */
 
 </t>
@@ -6287,7 +6342,6 @@ public *children(copy: boolean = true): Generator&lt;Position&gt; {
 }
 
 </t>
-<t tx="felix.20210102035853.1"></t>
 <t tx="felix.20210102035859.1">public copy(): Position {
     return new Position(this.v, this._childIndex, this.stack);
 }
@@ -6628,9 +6682,8 @@ public language_extension_dict: { [key: string]: string } = {};
 @others
 
 </t>
-<t tx="felix.20210102214102.1">constructor(gui:LeoUI) {
+<t tx="felix.20210102214102.1">constructor() {
     // Define all global data.
-    this.gui=gui;
     this.define_delegate_language_dict();
     this.init_at_auto_names();
     this.init_at_file_names();
@@ -9426,6 +9479,680 @@ var testVar = "some String";
 </t>
 <t tx="felix.20210124225736.1">// import escape from 'escape-html'
 import axios from 'axios';
+
+</t>
+<t tx="felix.20210125233441.1">@ These routines change self to a new position "in place".
+That is, these methods must _never_ call p.copy().
+
+When moving to a nonexistent position, these routines simply set p.v = None,
+leaving the p.stack unchanged. This allows the caller to "undo" the effect of
+the invalid move by simply restoring the previous value of p.v.
+
+These routines all return self on exit so the following kind of code will work:
+    after = p.copy().moveToNodeAfterTree()
+
+</t>
+<t tx="felix.20210125233441.10">/**
+ * Move a position to it's threadBack position.
+ */
+public moveToThreadBack(): Position {
+    const p:Position = this;
+    if p.hasBack():
+        p.moveToBack()
+        p.moveToLastNode()
+    else:
+        p.moveToParent()
+    return p;
+}
+
+</t>
+<t tx="felix.20210125233441.11">/**
+ * Move a position to threadNext position.
+ */
+public moveToThreadNext(): Position {
+    const p:Position = this;
+    if p.v:
+        if p.v.children:
+            p.moveToFirstChild()
+        elif p.hasNext():
+            p.moveToNext()
+        else:
+            p.moveToParent()
+            while p:
+                if p.hasNext():
+                    p.moveToNext()
+                    break  #found
+                p.moveToParent()
+            # not found.
+    return p
+}
+
+</t>
+<t tx="felix.20210125233441.12">/**
+ * Move a position to the position of the previous visible node.
+ */
+public moveToVisBack(c:Commander): Position {
+    const p:Position = this;
+    limit, limitIsVisible = c.visLimit()
+    while p:
+        # Short-circuit if possible.
+        back = p.back()
+        if back and back.hasChildren() and back.isExpanded():
+            p.moveToThreadBack()
+        elif back:
+            p.moveToBack()
+        else:
+            p.moveToParent()  # Same as p.moveToThreadBack()
+        if p:
+            if limit:
+                done, val = self.checkVisBackLimit(limit, limitIsVisible, p)
+                if done:
+                    return val  # A position or None
+            if p.isVisible(c):
+                return p
+    return p;
+}
+
+</t>
+<t tx="felix.20210125233441.13">/**
+ * Return done, p or None
+ */
+public checkVisBackLimit(limit:Position, limitIsVisible:boolean, p:Position): {done: boolean; p:Position|undefined;} {
+    c = p.v.context;
+    if (limit === p){
+        if (limitIsVisible &amp;&amp; p.isVisible(c)){
+            return {done:true, p:p};
+        }
+        return {done:true, p:undefined};
+    }
+    if (limit.isAncestorOf(p)){
+        return  {done:false, p:undefined};
+    }
+    return  {done:true, p:undefined};
+}
+
+</t>
+<t tx="felix.20210125233441.14">/**
+ * Move a position to the position of the next visible node.
+ */
+public moveToVisNext(c:Commander):Position {
+    const p:Position = this;
+    limit, limitIsVisible = c.visLimit()
+    while p:
+        if p.hasChildren():
+            if p.isExpanded():
+                p.moveToFirstChild()
+            else:
+                p.moveToNodeAfterTree()
+        elif p.hasNext():
+            p.moveToNext()
+        else:
+            p.moveToThreadNext()
+        if p:
+            if limit and self.checkVisNextLimit(limit, p):
+                return None
+            if p.isVisible(c):
+                return p
+    return p;
+}
+
+</t>
+<t tx="felix.20210125233441.15">/**
+ * Return True is p is outside limit of visible nodes.
+ */
+public checkVisNextLimit(limit:Position , p:Position):boolean {
+    return limit != p and not limit.isAncestorOf(p);
+}
+
+</t>
+<t tx="felix.20210125233441.16">/**
+ * Move a position to threadNext position.
+ * Issue an error if any vnode is an ancestor of itself.
+ */
+public safeMoveToThreadNext(): Position {
+    const p:Position = this;
+    if p.v:
+        child_v = p.v.children and p.v.children[0]
+        if child_v:
+            for parent in p.self_and_parents(copy=False):
+                if child_v == parent.v:
+                    g.error(f"vnode: {child_v} is its own parent")
+                    # Allocating a new vnode would be difficult.
+                    # Just remove child_v from parent.v.children.
+                    parent.v.children = [
+                        v2 for v2 in parent.v.children if not v2 == child_v]
+                    if parent.v in child_v.parents:
+                        child_v.parents.remove(parent.v)
+                    # Try not to hang.
+                    p.moveToParent()
+                    break
+                elif child_v.fileIndex == parent.v.fileIndex:
+                    g.error(
+                        f"duplicate gnx: {child_v.fileIndex!r} "
+                        f"v: {child_v} parent: {parent.v}")
+                    child_v.fileIndex = gNodeIndices.getNewIndex(v=child_v)
+                    assert child_v.gnx != parent.v.gnx
+                    # Should be ok to continue.
+                    p.moveToFirstChild()
+                    break
+            else:
+                p.moveToFirstChild()
+        elif p.hasNext():
+            p.moveToNext()
+        else:
+            p.moveToParent()
+            while p:
+                if p.hasNext():
+                    p.moveToNext()
+                    break  # found
+                p.moveToParent()
+            # not found.
+    return p;
+}
+
+</t>
+<t tx="felix.20210125233441.2">/**
+ * Move self to its previous sibling.
+ */
+public moveToBack():Position {
+    const p:Position = this;
+    const n:number = p._childIndex;
+    const parent_v:VNode = p._parentVnode();
+        // Returns None if p.v is None.
+    // Do not assume n is in range: this is used by positionExists.
+    if parent_v and p.v and 0 &lt; n &lt;= len(parent_v.children):
+        p._childIndex -= 1;
+        p.v = parent_v.children[n - 1];
+    else:
+        p.v = undefined;
+    return p;
+}
+
+</t>
+<t tx="felix.20210125233441.3">/**
+ * Move a position to it's first child's position.
+ */
+public moveToFirstChild():Position{
+    const p:Position = this;
+    if p.v and p.v.children:
+        p.stack.append((p.v, p._childIndex),)
+        p.v = p.v.children[0]
+        p._childIndex = 0
+    else:
+        p.v = None
+    return p;
+}
+
+</t>
+<t tx="felix.20210125233441.4">/**
+ * Move a position to it's last child's position.
+ */
+public moveToLastChild():Position{
+    const p:Position = this;
+    if p.v and p.v.children:
+        p.stack.append((p.v, p._childIndex),)
+        n = len(p.v.children)
+        p.v = p.v.children[n - 1]
+        p._childIndex = n - 1
+    else:
+        p.v = None
+    return p;
+}
+
+</t>
+<t tx="felix.20210125233441.5">/**
+ * Move a position to last node of its tree.
+ *  N.B. Returns p if p has no children.
+ */
+public moveToLastNode():Position{
+    const p:Position = this;
+    // Huge improvement for 4.2.
+    while p.hasChildren():
+        p.moveToLastChild()
+    return p;
+}
+
+</t>
+<t tx="felix.20210125233441.6">/**
+ * Move a position to its next sibling.
+ */
+public moveToNext():Position{
+    const p:Position = this;    
+    const n:number = p._childIndex;
+    const parent_v:VNode = p._parentVnode();
+        // Returns None if p.v is None.
+    if (!p.v){
+        g.trace('no p.v:', p, g.callers());
+    }
+    if (p.v &amp;&amp; parent_v &amp;&amp; parent_v.children.length &gt; (n + 1)){
+        p._childIndex = n + 1;
+        p.v = parent_v.children[n + 1];
+    }else{
+        p.v = undefined;
+    }
+    return p;
+}
+
+</t>
+<t tx="felix.20210125233441.7">/**
+ * Move a position to the node after the position's tree.
+ */
+public moveToNodeAfterTree():Position {
+    const p:Position = this;
+    while p:
+        if p.hasNext():
+            p.moveToNext()
+            break
+        p.moveToParent()
+    return p;
+}
+
+</t>
+<t tx="felix.20210125233441.8">/**
+ * Move to Nth child
+ */
+public moveToNthChild(n:number):Position {
+    const p:Position = this;
+    if p.v and len(p.v.children) &gt; n:
+        p.stack.append((p.v, p._childIndex),)
+        p.v = p.v.children[n]
+        p._childIndex = n
+    else:
+        p.v = None
+    return p;
+}
+
+</t>
+<t tx="felix.20210125233441.9">/**
+ * Move a position to its parent position.
+ */
+public moveToParent():Position {
+    const p:Position = this;
+    if p.v and p.stack:
+        p.v, p._childIndex = p.stack.pop()
+    else:
+        p.v = None
+    return p
+}
+
+</t>
+<t tx="felix.20210126001920.1"></t>
+<t tx="felix.20210126001920.10">def invalidOutline(self, message):
+    p = self
+    if p.hasParent():
+        node = p.parent()
+    else:
+        node = p
+    p.v.context.alert(f"invalid outline: {message}\n{node}")
+</t>
+<t tx="felix.20210126001920.11">def moveAfter(self, a):
+    """Move a position after position a."""
+    p = self  # Do NOT copy the position!
+    a._adjustPositionBeforeUnlink(p)
+    p._unlink()
+    p._linkAfter(a)
+    return p
+</t>
+<t tx="felix.20210126001920.12">def moveToFirstChildOf(self, parent):
+    """Move a position to the first child of parent."""
+    p = self  # Do NOT copy the position!
+    return p.moveToNthChildOf(parent, 0)  # Major bug fix: 2011/12/04
+
+def moveToLastChildOf(self, parent):
+    """Move a position to the last child of parent."""
+    p = self  # Do NOT copy the position!
+    n = parent.numberOfChildren()
+    if p.parent() == parent:
+        n -= 1  # 2011/12/10: Another bug fix.
+    return p.moveToNthChildOf(parent, n)  # Major bug fix: 2011/12/04
+</t>
+<t tx="felix.20210126001920.13">def moveToNthChildOf(self, parent, n):
+    """Move a position to the nth child of parent."""
+    p = self  # Do NOT copy the position!
+    parent._adjustPositionBeforeUnlink(p)
+    p._unlink()
+    p._linkAsNthChild(parent, n)
+    return p
+</t>
+<t tx="felix.20210126001920.14">def moveToRoot(self):
+    """Move self to the root position."""
+    p = self  # Do NOT copy the position!
+    #
+    # #1631. The old root can not possibly be affected by unlinking p.
+    p._unlink()
+    p._linkAsRoot()
+    return p
+</t>
+<t tx="felix.20210126001920.15">def promote(self):
+    """A low-level promote helper."""
+    p = self  # Do NOT copy the position.
+    parent_v = p._parentVnode()
+    children = p.v.children
+    # Add the children to parent_v's children.
+    n = p.childIndex() + 1
+    z = parent_v.children[:]
+    parent_v.children = z[:n]
+    parent_v.children.extend(children)
+    parent_v.children.extend(z[n:])
+    # Remove v's children.
+    p.v.children = []
+    # Adjust the parent links in the moved children.
+    # There is no need to adjust descendant links.
+    for child in children:
+        child.parents.remove(p.v)
+        child.parents.append(parent_v)
+</t>
+<t tx="felix.20210126001920.16"># This routine checks the structure of the receiver's tree.
+
+def validateOutlineWithParent(self, pv):
+    p = self
+    result = True  # optimists get only unpleasant surprises.
+    parent = p.getParent()
+    childIndex = p._childIndex
+    &lt;&lt; validate parent ivar &gt;&gt;
+    &lt;&lt; validate childIndex ivar &gt;&gt;
+    &lt;&lt; validate x ivar &gt;&gt;
+    # Recursively validate all the children.
+    for child in p.children():
+        r = child.validateOutlineWithParent(p)
+        if not r: result = False
+    return result
+</t>
+<t tx="felix.20210126001920.17">if parent != pv:
+    p.invalidOutline("Invalid parent link: " + repr(parent))
+</t>
+<t tx="felix.20210126001920.18">if pv:
+    if childIndex &lt; 0:
+        p.invalidOutline("missing childIndex" + childIndex)
+    elif childIndex &gt;= pv.numberOfChildren():
+        p.invalidOutline("missing children entry for index: " + childIndex)
+elif childIndex &lt; 0:
+    p.invalidOutline("negative childIndex" + childIndex)
+</t>
+<t tx="felix.20210126001920.19">if not p.v and pv:
+    self.invalidOutline("Empty t")
+</t>
+<t tx="felix.20210126001920.2">/**
+ * Create a clone of back.
+ * Returns the newly created position.
+ */
+public clone(): Position {
+    const p:Position = this;
+    p2 = p.copy()  # Do *not* copy the VNode!
+    p2._linkAfter(p)  # This should "just work"
+    return p2
+}
+
+</t>
+<t tx="felix.20210126001920.4">/**
+ * Delete all children of the receiver and set p.dirty().
+ */
+public deleteAllChildren(): void {
+    const p:Position = this;
+    p.setDirty();  // Mark @file nodes dirty!
+    while (p.hasChildren()){
+        p.firstChild().doDelete();
+    }
+}
+
+</t>
+<t tx="felix.20210126001920.5">/** 
+ * Deletes position p from the outline.
+ *    
+ * This is the main delete routine.
+ * It deletes the receiver's entire tree from the screen.
+ * Because of the undo command we never actually delete vnodes.
+ */
+public doDelete(newNode?:Position): void {
+    p = self
+    p.setDirty(); // Mark @file nodes dirty!
+    sib = p.copy();
+    while sib.hasNext():
+        sib.moveToNext();
+        if sib == newNode:
+            // Adjust newNode._childIndex if newNode is a following sibling of p.
+            newNode._childIndex -= 1
+            break;
+    p._unlink();
+}
+
+</t>
+<t tx="felix.20210126001920.6">/**
+ * Inserts a new position after self.
+ * Returns the newly created position.
+ */
+public insertAfter(): Position {
+    p = self;
+    context = p.v.context;
+    p2 = self.copy();
+    p2.v = new VNode(context);
+    p2.v.iconVal = 0;
+    p2._linkAfter(p);
+    return p2;
+}
+
+</t>
+<t tx="felix.20210126001920.7">def insertAsLastChild(self):
+    """Inserts a new VNode as the last child of self.
+
+    Returns the newly created position."""
+    p = self
+    n = p.numberOfChildren()
+    return p.insertAsNthChild(n)
+</t>
+<t tx="felix.20210126001920.8">def insertAsNthChild(self, n):
+    """
+    Inserts a new node as the the nth child of self.
+    self must have at least n-1 children.
+
+    Returns the newly created position.
+    """
+    p = self; context = p.v.context
+    p2 = self.copy()
+    p2.v = VNode(context=context)
+    p2.v.iconVal = 0
+    p2._linkAsNthChild(p, n)
+    return p2
+</t>
+<t tx="felix.20210126001920.9">def insertBefore(self):
+    """Inserts a new position before self.
+
+    Returns the newly created position.
+
+    """
+    p = self
+    parent = p.parent()
+    if p.hasBack():
+        back = p.getBack()
+        p = back.insertAfter()
+    elif parent:
+        p = parent.insertAsNthChild(0)
+    else:
+        p = p.insertAfter()
+        p.moveToRoot()
+    return p
+</t>
+<t tx="felix.20210126210412.1"></t>
+<t tx="felix.20210126210412.10">def key(self):
+    const p:Position = this;
+    // For unified nodes we must include a complete key,
+    // so we can distinguish between clones.
+    result = []
+    for z in p.stack:
+        v, childIndex = z
+        result.append(f"{id(v)}:{childIndex}")
+    result.append(f"{id(p.v)}:{p._childIndex}")
+    return '.'.join(result)
+
+def sort_key(self, p):
+    return [int(s.split(':')[1]) for s in p.key().split('.')]
+
+/*
+ Positions should *not* be hashable.
+
+ From https://docs.python.org/3/reference/datamodel.html#object.__hash__
+
+ If a class defines mutable objects and implements an __eq__() method, it
+ should not implement __hash__(), since the implementation of hashable
+ collections requires that a key’s hash value is immutable (if the object’s
+ hash value changes, it will be in the wrong hash bucket).
+*/
+
+__hash__ = None
+</t>
+<t tx="felix.20210126210412.3">/** 
+ * Return True if two positions are equivalent.
+ */ 
+public __eq__(p2):boolean {
+    const p1:Position = this;
+    // Don't use g.trace: it might call p.__eq__ or p.__ne__.
+    if (!(p2 instanceof Position)){
+        return false;
+    }
+    if (!p2 || !p2.v){
+        return !p1.v;
+    }
+    return (p1.v === p2.v &amp;&amp;
+        p1._childIndex === p2._childIndex &amp;&amp;
+        p1.stack.length === p2.stack.length &amp;&amp; 
+        p1.stack.every((p_value, p_index) =&gt; p_value === p2.stack[p_index]));
+}
+
+/** 
+ * Return True if two postions are not equivalent.
+ */ 
+public __ne__(p2):boolean{
+    return !this.__eq__(p2)
+}
+
+</t>
+<t tx="felix.20210126210412.4">public __ge__( other:Position):boolean {
+    return this.__eq__(other) || this.__gt__(other);
+}
+
+
+public __le__( other:Position):boolean{
+    return this.__eq__(other) || this.__lt__(other);
+}
+
+
+public __lt__( other:Position):boolean{
+    return !this.__eq__(other) &amp;&amp; !this.__gt__(other);
+}
+
+</t>
+<t tx="felix.20210126210412.5">/**
+ * Return True if self appears after other in outline order.
+ */
+public __gt__(other:Position):boolean{
+    const stack1:StackEntry[] = this.stack;
+    const stack2:StackEntry[] = other.stack;
+    const n1:number = stack1.length; 
+    const n2:number = stack2.length; 
+    const n:number = n1&lt;n2?n1:n2;
+    // Compare the common part of the stacks.
+    for (let nx=0; nx&lt;n; nx++){
+        if(stack1[nx].childIndex&gt;stack2[nx].childIndex){
+            return true;
+        }
+        if(stack1[nx].childIndex&gt;stack2[nx].childIndex){
+            return false;
+        }
+    }
+    let x1:number;
+    let x2:number;
+    // Finish the comparison.
+    if (n1 === n2){
+        x1 = this._childIndex;
+        x2 = other._childIndex;
+        return x1 &gt; x2;
+    }
+    if (n1 &lt; n2){
+        x1 = this._childIndex; 
+        x2 = other.stack[n].childIndex;
+        return x1 &gt; x2;
+    }
+    // n1 &gt; n2
+    // 2011/07/28: Bug fix suggested by SegundoBob.
+    x1 = other._childIndex; 
+    x2 = this.stack[n].childIndex;
+    return x2 &gt;= x1;
+}
+
+</t>
+<t tx="felix.20210126210412.6">/**
+ * Return True if a position is valid.
+ *  
+ * The tests 'if p' or 'if not p' are the _only_ correct ways to test
+ * whether a position p is valid.
+ *  
+ * Tests like 'if p is None' or 'if p is not None' will not work properly.
+ */
+public __bool__():boolean {
+    return !!this.v;
+}
+
+</t>
+<t tx="felix.20210126210412.7">public __str__():string{
+    const p:Position = this;
+    if (p.v){
+        return (
+            "&lt;pos " +
+            `childIndex: ${p._childIndex} ` +
+            `lvl: ${p.level()} ` +
+            `key: ${p.key()} ` +
+            `${p.h}` +
+            "&gt;"
+        );
+    }
+    return `&lt;pos [${p.stack.length}] None&gt;`;
+}
+
+</t>
+<t tx="felix.20210126210412.8">def archivedPosition(self, root_p=None):
+    """Return a representation of a position suitable for use in .leo files."""
+    p = self
+    if root_p is None:
+        aList = [z._childIndex for z in p.self_and_parents()]
+    else:
+        aList = []
+        for z in p.self_and_parents(copy=False):
+            if z == root_p:
+                aList.append(0)
+                break
+            else:
+                aList.append(z._childIndex)
+    aList.reverse()
+    return aList
+</t>
+<t tx="felix.20210126210412.9">def dumpLink(self, link):
+    return link if link else "&lt;none&gt;"
+
+def dump(self, label=""):
+    const p:Position = this;
+    if p.v:
+        p.v.dump()  // Don't print a label
+</t>
+<t tx="felix.20210126210419.1">/**
+ * Create a new position with the given childIndex and parent stack.
+ */
+constructor(v: VNode, childIndex: number = 0, stack?: any[]) {
+    this._childIndex = childIndex;
+    this.v = v;
+    if (stack) {
+        this.stack = [...stack]; // Creating a copy here is safest and best.
+    } else {
+        this.stack = []; 
+    }
+}
+
+</t>
+<t tx="felix.20210127001502.1">import * as g from './leoGlobals';
+import "date-format-lite";
+import { Commander } from './leoCommander';
+
+</t>
+<t tx="felix.20210127001508.1">interface StackEntry { v: VNode; childIndex: number; }
 
 </t>
 </tnodes>
