@@ -464,7 +464,6 @@
 </v>
 <v t="felix.20210102012632.1"><vh>@clean src/core/leoNodes.ts</vh>
 <v t="felix.20210127001502.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
-<v t="felix.20210127001508.1"><vh>&lt;&lt; interfaces &gt;&gt;</vh></v>
 <v t="felix.20210102014453.1"><vh>class NodeIndices</vh>
 <v t="felix.20210102014804.1"><vh>ni.constructor</vh></v>
 <v t="felix.20210110183334.1"><vh>ni._get_time</vh></v>
@@ -6090,7 +6089,6 @@ export let unicode_warnings: { [key: string]: any } = {};  // Keys are callers.
 // Leo's fundamental data classes.
 
 &lt;&lt; imports &gt;&gt;
-&lt;&lt; interfaces &gt;&gt;
 
 @others
 
@@ -6134,9 +6132,11 @@ export class NodeIndices {
  * to force usage of special methods to compare &amp; evaluate equalities.
  *
  */
+export interface StackEntry { v: VNode; childIndex: number; }
+
 export class Position {
 
-    v: VNode|undefined;
+    v: VNode;
     _childIndex: number;
     stack: StackEntry[];
 
@@ -9788,36 +9788,52 @@ public moveToParent():Position {
 
 </t>
 <t tx="felix.20210126001920.1"></t>
-<t tx="felix.20210126001920.10">def invalidOutline(self, message):
+<t tx="felix.20210126001920.10">public  invalidOutline(message): void {
     p = self
     if p.hasParent():
         node = p.parent()
     else:
         node = p
     p.v.context.alert(f"invalid outline: {message}\n{node}")
+}
+
 </t>
-<t tx="felix.20210126001920.11">def moveAfter(self, a):
-    """Move a position after position a."""
+<t tx="felix.20210126001920.11">/**
+ * Move a position after position a.
+ */ 
+public moveAfter( a): Position {
     p = self  # Do NOT copy the position!
     a._adjustPositionBeforeUnlink(p)
     p._unlink()
     p._linkAfter(a)
     return p
-</t>
-<t tx="felix.20210126001920.12">def moveToFirstChildOf(self, parent):
-    """Move a position to the first child of parent."""
-    p = self  # Do NOT copy the position!
-    return p.moveToNthChildOf(parent, 0)  # Major bug fix: 2011/12/04
+}
 
-def moveToLastChildOf(self, parent):
-    """Move a position to the last child of parent."""
+</t>
+<t tx="felix.20210126001920.12">/**
+ * Move a position to the first child of parent.
+ */
+public  moveToFirstChildOf(parent): Position {
+    p = self  # Do NOT copy the position!
+    return p.moveToNthChildOf(parent, 0);  // Major bug fix: 2011/12/04
+}
+
+/**
+ * Move a position to the last child of parent.
+ */
+public moveToLastChildOf(parent): Position{
     p = self  # Do NOT copy the position!
     n = parent.numberOfChildren()
     if p.parent() == parent:
         n -= 1  # 2011/12/10: Another bug fix.
-    return p.moveToNthChildOf(parent, n)  # Major bug fix: 2011/12/04
+    return p.moveToNthChildOf(parent, n);  // Major bug fix: 2011/12/04
+}
+
 </t>
-<t tx="felix.20210126001920.13">def moveToNthChildOf(self, parent, n):
+<t tx="felix.20210126001920.13">/**
+ * 
+ */
+public  moveToNthChildOf(self, parent, n):
     """Move a position to the nth child of parent."""
     p = self  # Do NOT copy the position!
     parent._adjustPositionBeforeUnlink(p)
@@ -9825,7 +9841,10 @@ def moveToLastChildOf(self, parent):
     p._linkAsNthChild(parent, n)
     return p
 </t>
-<t tx="felix.20210126001920.14">def moveToRoot(self):
+<t tx="felix.20210126001920.14">/**
+ * 
+ */
+public moveToRoot(self):
     """Move self to the root position."""
     p = self  # Do NOT copy the position!
     #
@@ -9834,7 +9853,10 @@ def moveToLastChildOf(self, parent):
     p._linkAsRoot()
     return p
 </t>
-<t tx="felix.20210126001920.15">def promote(self):
+<t tx="felix.20210126001920.15">/**
+ * 
+ */
+public promote(self):
     """A low-level promote helper."""
     p = self  # Do NOT copy the position.
     parent_v = p._parentVnode()
@@ -9853,9 +9875,10 @@ def moveToLastChildOf(self, parent):
         child.parents.remove(p.v)
         child.parents.append(parent_v)
 </t>
-<t tx="felix.20210126001920.16"># This routine checks the structure of the receiver's tree.
-
-def validateOutlineWithParent(self, pv):
+<t tx="felix.20210126001920.16">/**
+ *  This routine checks the structure of the receiver's tree.
+ */
+public validateOutlineWithParent(self, pv):
     p = self
     result = True  # optimists get only unpleasant surprises.
     parent = p.getParent()
@@ -9943,34 +9966,42 @@ public insertAfter(): Position {
 }
 
 </t>
-<t tx="felix.20210126001920.7">def insertAsLastChild(self):
-    """Inserts a new VNode as the last child of self.
-
-    Returns the newly created position."""
+<t tx="felix.20210126001920.7">/**
+ * Inserts a new VNode as the last child of self.
+ * Returns the newly created position.
+ */
+public insertAsLastChild():Position {
     p = self
     n = p.numberOfChildren()
     return p.insertAsNthChild(n)
+}
+
 </t>
-<t tx="felix.20210126001920.8">def insertAsNthChild(self, n):
-    """
-    Inserts a new node as the the nth child of self.
+<t tx="felix.20210126001920.8">/**
+Inserts a new node as the the nth child of self.
     self must have at least n-1 children.
 
     Returns the newly created position.
-    """
+ */
+public  insertAsNthChild(n): Position {
     p = self; context = p.v.context
     p2 = self.copy()
     p2.v = VNode(context=context)
     p2.v.iconVal = 0
     p2._linkAsNthChild(p, n)
-    return p2
+    return p2;
+}
+
+
 </t>
-<t tx="felix.20210126001920.9">def insertBefore(self):
-    """Inserts a new position before self.
+<t tx="felix.20210126001920.9">
+/**
+Inserts a new position before self.
 
     Returns the newly created position.
 
-    """
+ */
+public insertBefore(): Position {
     p = self
     parent = p.parent()
     if p.hasBack():
@@ -9982,6 +10013,8 @@ public insertAfter(): Position {
         p = p.insertAfter()
         p.moveToRoot()
     return p
+}
+
 </t>
 <t tx="felix.20210126210412.1"></t>
 <t tx="felix.20210126210412.10">public key():string {
@@ -10195,9 +10228,6 @@ import "date-format-lite";
 import { Commander } from './leoCommander';
 
 </t>
-<t tx="felix.20210127001508.1">interface StackEntry { v: VNode; childIndex: number; }
-
-</t>
 <t tx="felix.20210127234205.1">/*
    These methods are only for the use of low-level code
    in leoNodes.py, leoFileCommands.py and leoUndo.py.
@@ -10253,112 +10283,121 @@ public badUnlink(self, parent_v, n, child): void {
 <t tx="felix.20210127234205.2">/**
  * Adjust position p before unlinking p2.
  */
-public _adjustPositionBeforeUnlink(self, p2): void {
+public _adjustPositionBeforeUnlink(p2:Position): void {
     // p will change if p2 is a previous sibling of p or
     // p2 is a previous sibling of any ancestor of p.
-    p = self;
-    sib = p.copy();
+    const p:Position = this;
+    const sib:Position = p.copy();
     // A special case for previous siblings.
     // Adjust p._childIndex, not the stack's childIndex.
-    while sib.hasBack():
-        sib.moveToBack()
-        if sib == p2:
-            p._childIndex -= 1
-            return
-            
+    while(sib.hasBack()){
+        sib.moveToBack();
+        if (sib.__eq__(p2)){
+            p._childIndex -= 1;
+            return;
+        }
+    }
+
     // Adjust p's stack.
-    stack = []; changed = False; i = 0
-    while i &lt; len(p.stack):
-        v, childIndex = p.stack[i]
-        p3 = Position(v=v, childIndex=childIndex, stack=stack[:i])
-        while p3:
-            if p2 == p3:
-                # 2011/02/25: compare full positions, not just vnodes.
-                # A match with the to-be-moved node.
-                stack.append((v, childIndex - 1),)
-                changed = True
-                break  # terminate only the inner loop.
-            p3.moveToBack()
-        else:
-            stack.append((v, childIndex),)
-        i += 1
-        
-    if changed:
-        p.stack = stack
+    const stack:StackEntry[] = []; 
+    let changed:boolean = false;
+    let i:number = 0;
+    while (i &lt; p.stack.length){
+        const v = p.stack[i].v;
+        const childIndex = p.stack[i].childIndex;
+        const p3 = new Position(v, childIndex, stack.slice(0,i)); // stack[:i]
+        while (p3.__bool__()){
+            if (p2.__eq__(p3)){
+                // 2011/02/25: compare full positions, not just vnodes.
+                // A match with the to-be-moved node.
+                stack.push({v:v, childIndex:childIndex - 1});
+                changed = true;
+                break;  // terminate only the inner loop.
+            }
+            p3.moveToBack();
+            if(!p3.__bool__()){
+                stack.push({v:v, childIndex:childIndex});
+            }
+        }
+        i += 1;
+    }
+    if (changed){
+        p.stack = stack;
+    }
 }
 
 </t>
 <t tx="felix.20210127234205.3">/**
  * Link self after p_after.
  */
-public _linkAfter( p_after): void {
-    p = self
-    parent_v = p_after._parentVnode()
-    p.stack = p_after.stack[:]
-    p._childIndex = p_after._childIndex + 1
-    child = p.v
-    n = p_after._childIndex + 1
-    child._addLink(n, parent_v)
+public _linkAfter(p_after:Position): void {
+    const p:Position = this;
+    const parent_v = p_after._parentVnode();
+    p.stack = [...p_after.stack];
+    p._childIndex = p_after._childIndex + 1;
+    const child:VNode = p.v;
+    const n:number = p_after._childIndex + 1;
+    child._addLink(n, parent_v);
 }
 
 </t>
 <t tx="felix.20210127234205.4">/**
  * Link self, a newly copied tree, after p_after.
  */
-public _linkCopiedAfter(self, p_after): void {
-    p = self 
-    parent_v = p_after._parentVnode()
-    p.stack = p_after.stack[:]
-    p._childIndex = p_after._childIndex + 1
-    child = p.v
-    n = p_after._childIndex + 1
-    child._addCopiedLink(n, parent_v)
+public _linkCopiedAfter(p_after:Position): void {
+    const p:Position = this;
+    const parent_v:VNode = p_after._parentVnode();
+    p.stack = [...p_after.stack];
+    p._childIndex = p_after._childIndex + 1;
+    const child:VNode = p.v;
+    const n:number = p_after._childIndex + 1;
+    child._addCopiedLink(n, parent_v);
 }
 
 </t>
 <t tx="felix.20210127234205.5">/**
  * Link self as the n'th child of the parent.
  */
-public _linkAsNthChild(self, parent, n): void {
-    p = self
-    parent_v = parent.v
-    p.stack = parent.stack[:]
-    p.stack.append((parent_v, parent._childIndex),)
-    p._childIndex = n
-    child = p.v
-    child._addLink(n, parent_v)
+public _linkAsNthChild(parent, n): void {
+    const p:Position = this;
+    const parent_v:VNode = parent.v;
+    p.stack = parent.stack[:];
+    p.stack.append((parent_v, parent._childIndex),);
+    p._childIndex = n;
+    const child:VNode = p.v;
+    child._addLink(n, parent_v);
 }
 
 </t>
 <t tx="felix.20210127234205.6">/**
  * Link a copied self as the n'th child of the parent.
  */
-public _linkCopiedAsNthChild(self, parent, n): void {
-    p = self
-    parent_v = parent.v
-    p.stack = parent.stack[:]
-    p.stack.append((parent_v, parent._childIndex),)
-    p._childIndex = n
-    child = p.v
-    child._addCopiedLink(n, parent_v)
+public _linkCopiedAsNthChild(parent:Position, n:number): void {
+    const p:Position = this;
+    const parent_v:VNode = parent.v;
+    p.stack = [...parent.stack];
+    p.stack.push({v:parent_v, childIndex: parent._childIndex});
+    p._childIndex = n;
+    const child:VNode = p.v;
+    child._addCopiedLink(n, parent_v);
 }
 
 </t>
 <t tx="felix.20210127234205.7">/**
  * Link self as the root node.
  */
-public _linkAsRoot(self): Position {
-    p = self
-    assert(p.v)
-    parent_v = p.v.context.hiddenRootNode
-    assert parent_v, g.callers()
+public _linkAsRoot(): Position {
+    const p:Position = this; 
+    console.assert(p.v);
+    const parent_v:VNode = p.v.context.hiddenRootNode;
+    console.assert(parent_v, g.callers());
     
     // Make p the root position.
-    p.stack = []
-    p._childIndex = 0
+    p.stack = [];
+    p._childIndex = 0;
     
     // Make p.v the first child of parent_v.
-    p.v._addLink(0, parent_v)
+    p.v._addLink(0, parent_v);
     return p;
 }
 
@@ -10367,14 +10406,16 @@ public _linkAsRoot(self): Position {
  * Return the parent VNode.
  * Return the hiddenRootNode if there is no other parent.
  */
-public _parentVnode(self): VNode | undefined {
-    p = self 
-    if p.v:
-        data = p.stack and p.stack[-1]
-        if data:
-            v, junk = data
+public _parentVnode(): VNode | undefined {
+    const p:Position = this; 
+    if (p.v){
+        const data = !!p.stack.length &amp;&amp; p.stack[p.stack.length-1];
+        if (data){
+            const v:VNode = data.v;
             return v;
-        return p.v.context.hiddenRootNode
+        }
+        return p.v.context.hiddenRootNode;
+    }
     return undefined;
 }
 
@@ -10382,7 +10423,7 @@ public _parentVnode(self): VNode | undefined {
 <t tx="felix.20210127234205.9">/**
  * A low-level method to replace p.v by a p2.v.
  */
-public _relinkAsCloneOf(self, p2): void {
+public _relinkAsCloneOf(p2:Position): void {
     p = self
     v = p.v
     v2 = p2.v
