@@ -79,7 +79,8 @@ export class NodeIndices {
  * to force usage of special methods to compare & evaluate equalities.
  *
  */
-export interface StackEntry { v: VNode; childIndex: number; }
+
+export type StackEntry =  [VNode, number];
 
 export class Position {
 
@@ -90,7 +91,7 @@ export class Position {
     /**
      * Create a new position with the given childIndex and parent stack.
      */
-    constructor(v: VNode, childIndex: number = 0, stack?: any[]) {
+    constructor(v: VNode, childIndex: number = 0, stack?: StackEntry[]) {
         this._childIndex = childIndex;
         this.v = v;
         if (stack) {
@@ -109,7 +110,7 @@ export class Position {
         if (!(p2 instanceof Position)){
             return false;
         }
-        if (!p2 || !p2.v){
+        if (!p2.__bool__() || !p2.v){
             return !p1.v;
         }
         // Modified by Félix to prevent object direct comparison (p1.v === p2.v)
@@ -119,16 +120,16 @@ export class Position {
                 p1.stack.length === p2.stack.length && 
                 p1.stack.every(
                     (p_value, p_index) => {
-                        return p_value.childIndex === p2.stack[p_index].childIndex &&
-                        p_value.v.fileIndex === p2.stack[p_index].v.fileIndex;
+                        return p_value[1] === p2.stack[p_index][1] &&
+                        p_value[0].fileIndex === p2.stack[p_index][0].fileIndex;
                     }
                 )
             );
     }
 
-    /** 
+    /**
      * Return True if two postions are not equivalent.
-     */ 
+     */
     public __ne__(p2:Position):boolean{
         return !this.__eq__(p2);
     }
@@ -158,16 +159,16 @@ export class Position {
         const n:number = n1<n2?n1:n2;
         // Compare the common part of the stacks.
         for (let nx=0; nx<n; nx++){
-            if(stack1[nx].childIndex>stack2[nx].childIndex){
+            if(stack1[nx][1]>stack2[nx][1]){
                 return true;
             }
-            if(stack1[nx].childIndex>stack2[nx].childIndex){
+            if(stack1[nx][1]<stack2[nx][1]){
                 return false;
             }
         }
+        // Finish the comparison.
         let x1:number;
         let x2:number;
-        // Finish the comparison.
         if (n1 === n2){
             x1 = this._childIndex;
             x2 = other._childIndex;
@@ -175,13 +176,13 @@ export class Position {
         }
         if (n1 < n2){
             x1 = this._childIndex; 
-            x2 = other.stack[n].childIndex;
+            x2 = other.stack[n][1];
             return x1 > x2;
         }
         // n1 > n2
         // 2011/07/28: Bug fix suggested by SegundoBob.
         x1 = other._childIndex; 
-        x2 = this.stack[n].childIndex;
+        x2 = this.stack[n][1];
         return x2 >= x1;
     }
 
@@ -254,8 +255,8 @@ export class Position {
         // so we can distinguish between clones.
         const result:string[] = [];
         for (let z of p.stack){
-            const v:VNode = z.v;
-            const childIndex: number = z.childIndex;
+            const v:VNode = z[0];
+            const childIndex: number = z[1];
             result.push(`${v.fileIndex}:${childIndex}`);
         }
         result.push(`${p.v.fileIndex}:${p._childIndex}`);
@@ -266,7 +267,6 @@ export class Position {
         const result :number[] = [];
         for(let s of p.key().split('.')) {
           result.push(Number(s.split(':')[1]));
-        
         }
         return result;
     }
@@ -437,20 +437,20 @@ export class Position {
         let changed:boolean = false;
         let i:number = 0;
         while (i < p.stack.length){
-            const v = p.stack[i].v;
-            const childIndex = p.stack[i].childIndex;
+            const v:VNode = p.stack[i][0];
+            const childIndex:number = p.stack[i][1];
             const p3 = new Position(v, childIndex, stack.slice(0,i)); // stack[:i]
             while (p3.__bool__()){
                 if (p2.__eq__(p3)){
                     // 2011/02/25: compare full positions, not just vnodes.
                     // A match with the to-be-moved node.
-                    stack.push({v:v, childIndex:childIndex - 1});
+                    stack.push([v, childIndex - 1]);
                     changed = true;
                     break;  // terminate only the inner loop.
                 }
                 p3.moveToBack();
                 if(!p3.__bool__()){
-                    stack.push({v:v, childIndex:childIndex});
+                    stack.push([v, childIndex]);
                 }
             }
             i += 1;
@@ -465,7 +465,7 @@ export class Position {
      */
     public _linkAfter(p_after:Position): void {
         const p:Position = this;
-        const parent_v = p_after._parentVnode();
+        const parent_v = p_after._parentVnode()!;
         p.stack = [...p_after.stack];
         p._childIndex = p_after._childIndex + 1;
         const child:VNode = p.v;
@@ -478,7 +478,7 @@ export class Position {
      */
     public _linkCopiedAfter(p_after:Position): void {
         const p:Position = this;
-        const parent_v:VNode = p_after._parentVnode();
+        const parent_v:VNode = p_after._parentVnode()!;
         p.stack = [...p_after.stack];
         p._childIndex = p_after._childIndex + 1;
         const child:VNode = p.v;
@@ -489,11 +489,11 @@ export class Position {
     /**
      * Link self as the n'th child of the parent.
      */
-    public _linkAsNthChild(parent, n): void {
+    public _linkAsNthChild(parent:Position, n:number): void {
         const p:Position = this;
         const parent_v:VNode = parent.v;
-        p.stack = parent.stack[:];
-        p.stack.append((parent_v, parent._childIndex),);
+        p.stack = [...parent.stack];
+        p.stack.push([parent_v, parent._childIndex]);
         p._childIndex = n;
         const child:VNode = p.v;
         child._addLink(n, parent_v);
@@ -506,7 +506,7 @@ export class Position {
         const p:Position = this;
         const parent_v:VNode = parent.v;
         p.stack = [...parent.stack];
-        p.stack.push({v:parent_v, childIndex: parent._childIndex});
+        p.stack.push([parent_v, parent._childIndex]);
         p._childIndex = n;
         const child:VNode = p.v;
         child._addCopiedLink(n, parent_v);
@@ -539,7 +539,7 @@ export class Position {
         if (p.v){
             const data = !!p.stack.length && p.stack[p.stack.length-1];
             if (data){
-                const v:VNode = data.v;
+                const v:VNode = data[0];
                 return v;
             }
             return p.v.context.hiddenRootNode;
@@ -551,66 +551,72 @@ export class Position {
      * A low-level method to replace p.v by a p2.v.
      */
     public _relinkAsCloneOf(p2:Position): void {
-        p = self
-        v = p.v
-        v2 = p2.v
-        parent_v = p._parentVnode()
-        if not parent_v:
-            g.error('no parent_v', p)
-            return
-        if parent_v.children[p._childIndex] == v:
-            parent_v.children[p._childIndex] = v2
-            v2.parents.append(parent_v)
+        const p:Position = this;
+        const v:VNode = p.v;
+        const v2:VNode = p2.v;
+        const parent_v:VNode|undefined = p._parentVnode();
+        if(!parent_v){
+            g.error('no parent_v', p);
+            return;
+        }
+        // Compare fileIndex instead of v directly
+        if( parent_v.children[p._childIndex].fileIndex === v.fileIndex){
+            parent_v.children[p._childIndex] = v2;
+            v2.parents.push(parent_v);
             // p.v no longer truly exists.
             // p.v = p2.v
-        else:
+        }else{
             g.error(
                 'parent_v.children[childIndex] != v',
-                p, parent_v.children, p._childIndex, v)
+                p, parent_v.children, p._childIndex, v);
+        }
     }
 
     /**
      * Unlink the receiver p from the tree.
      */
-    public _unlink(self): void {
-        p = self;
-        n = p._childIndex;
-        parent_v = p._parentVnode()
+    public _unlink(): void {
+        const p:Position = this;
+        const n:number = p._childIndex;
+        const parent_v:VNode = p._parentVnode()!;
             // returns None if p.v is None
-        child = p.v
-        assert(p.v)
-        assert(parent_v)
+        const child:VNode = p.v;
+        console.assert(p.v);
+        console.assert(parent_v);
         // Delete the child.
-        if (0 <= n < len(parent_v.children) and
-            parent_v.children[n] == child
-        ):
+        if( (0 <= n && 
+            n < parent_v.children.length &&
+            parent_v.children[n].fileIndex === child.fileIndex
+        )){
             // This is the only call to v._cutlink.
-            child._cutLink(n, parent_v)
-        else:
-            self.badUnlink(parent_v, n, child)
+            child._cutLink(n, parent_v);
+        }else{
+            this.badUnlink(parent_v, n, child);
+        }
     }
 
     /**
      * badUnlink error trace output
      */
-    public badUnlink(self, parent_v, n, child): void {
+    public badUnlink(parent_v:VNode, n:number, child:VNode): void {
 
-        if 0 <= n < len(parent_v.children):
-            g.trace(f"**can not happen: children[{n}] != p.v")
+        if( 0 <= n && n< parent_v.children.length){
+            g.trace(`**can not happen: children[{n}] != p.v`);
             g.trace('parent_v.children...\n',
-                g.listToString(parent_v.children))
-            g.trace('parent_v', parent_v)
-            g.trace('parent_v.children[n]', parent_v.children[n])
-            g.trace('child', child)
-            g.trace('** callers:', g.callers())
-        else:
+                g.listToString(parent_v.children));
+            g.trace('parent_v', parent_v);
+            g.trace('parent_v.children[n]', parent_v.children[n]);
+            g.trace('child', child);
+            g.trace('** callers:', g.callers());
+        }else{
             g.trace(
-                f"**can not happen: bad child index: {n}, "
-                f"len(children): {len(parent_v.children)}")
+                `**can not happen: bad child index: ${n}, `,
+                `children.length: ${parent_v.children.length}`);
             g.trace('parent_v.children...\n',
-                g.listToString(parent_v.children))
-            g.trace('parent_v', parent_v, 'child', child)
-            g.trace('** callers:', g.callers())
+                g.listToString(parent_v.children));
+            g.trace('parent_v', parent_v, 'child', child);
+            g.trace('** callers:', g.callers());
+        }
     }
 
     /* These routines change self to a new position "in place".
@@ -630,7 +636,7 @@ export class Position {
     public moveToBack():Position {
         const p:Position = this;
         const n:number = p._childIndex;
-        const parent_v:VNode = p._parentVnode(); // Returns None if p.v is None.
+        const parent_v:VNode = p._parentVnode()!; // Returns None if p.v is None.
             
         // Do not assume n is in range: this is used by positionExists.
         if (
@@ -642,6 +648,8 @@ export class Position {
             p._childIndex -= 1;
             p.v = parent_v.children[n - 1];
         }else{
+            // * For now, use undefined p.v to signal null/invalid positions
+                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -653,12 +661,12 @@ export class Position {
     public moveToFirstChild():Position{
         const p:Position = this;
         if (p.v && p.v.children){
-            p.stack.push(
-             {v:p.v, childIndex:p._childIndex }
-            );
+            p.stack.push([p.v, p._childIndex]);
             p.v = p.v.children[0];
             p._childIndex = 0;
         }else{
+            // * For now, use undefined p.v to signal null/invalid positions
+                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -669,13 +677,17 @@ export class Position {
      */
     public moveToLastChild():Position{
         const p:Position = this;
-        if p.v and p.v.children:
-            p.stack.append((p.v, p._childIndex),)
-            n = len(p.v.children)
-            p.v = p.v.children[n - 1]
-            p._childIndex = n - 1
-        else:
-            p.v = None
+        let n:number;
+        if (p.v && p.v.children.length){
+            p.stack.push([p.v, p._childIndex]);
+            n = p.v.children.length;
+            p.v = p.v.children[n - 1];
+            p._childIndex = n - 1;
+        }else{
+            // * For now, use undefined p.v to signal null/invalid positions
+                //@ts-ignore
+            p.v = undefined;
+        }
         return p;
     }
 
@@ -686,8 +698,9 @@ export class Position {
     public moveToLastNode():Position{
         const p:Position = this;
         // Huge improvement for 4.2.
-        while p.hasChildren():
-            p.moveToLastChild()
+        while (p.hasChildren()){
+            p.moveToLastChild();
+        }
         return p;
     }
 
@@ -697,7 +710,7 @@ export class Position {
     public moveToNext():Position{
         const p:Position = this;    
         const n:number = p._childIndex;
-        const parent_v:VNode = p._parentVnode();
+        const parent_v:VNode = p._parentVnode()!;
             // Returns None if p.v is None.
         if (!p.v){
             g.trace('no p.v:', p, g.callers());
@@ -706,6 +719,8 @@ export class Position {
             p._childIndex = n + 1;
             p.v = parent_v.children[n + 1];
         }else{
+            // * For now, use undefined p.v to signal null/invalid positions
+                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -716,11 +731,13 @@ export class Position {
      */
     public moveToNodeAfterTree():Position {
         const p:Position = this;
-        while p:
-            if p.hasNext():
-                p.moveToNext()
-                break
-            p.moveToParent()
+        while( p.__bool__()){
+            if( p.hasNext()){
+                p.moveToNext();
+                break;
+            }
+            p.moveToParent();
+        }
         return p;
     }
 
@@ -729,12 +746,15 @@ export class Position {
      */
     public moveToNthChild(n:number):Position {
         const p:Position = this;
-        if p.v and len(p.v.children) > n:
-            p.stack.append((p.v, p._childIndex),)
-            p.v = p.v.children[n]
-            p._childIndex = n
-        else:
-            p.v = None
+        if (p.v && p.v.children.length > n){
+            p.stack.push([p.v, p._childIndex]);
+            p.v = p.v.children[n];
+            p._childIndex = n;
+        }else{
+            // * For now, use undefined p.v to signal null/invalid positions
+                //@ts-ignore
+            p.v = undefined;
+        }
         return p;
     }
 
@@ -743,11 +763,16 @@ export class Position {
      */
     public moveToParent():Position {
         const p:Position = this;
-        if p.v and p.stack:
-            p.v, p._childIndex = p.stack.pop()
-        else:
-            p.v = None
-        return p
+        if (p.v && p.stack.length){
+            const item:StackEntry = p.stack.pop()!;
+            p.v = item[0];
+            p._childIndex = item[1];
+        }else{
+            // * For now, use undefined p.v to signal null/invalid positions
+                //@ts-ignore
+            p.v = undefined;
+        }
+        return p;
     }
 
     /**
@@ -755,11 +780,12 @@ export class Position {
      */
     public moveToThreadBack(): Position {
         const p:Position = this;
-        if p.hasBack():
-            p.moveToBack()
-            p.moveToLastNode()
-        else:
-            p.moveToParent()
+        if (p.hasBack()){
+            p.moveToBack();
+            p.moveToLastNode();
+        }else{
+            p.moveToParent();
+        }
         return p;
     }
 
@@ -768,20 +794,24 @@ export class Position {
      */
     public moveToThreadNext(): Position {
         const p:Position = this;
-        if p.v:
-            if p.v.children:
-                p.moveToFirstChild()
-            elif p.hasNext():
-                p.moveToNext()
-            else:
-                p.moveToParent()
-                while p:
-                    if p.hasNext():
-                        p.moveToNext()
-                        break  #found
-                    p.moveToParent()
-                # not found.
-        return p
+        if(p.v){
+            if(p.v.children.length){
+                p.moveToFirstChild();
+            }else if(p.hasNext()){
+                p.moveToNext();
+            }else{
+                p.moveToParent();
+                while(p.__bool__()){
+                    if(p.hasNext()){
+                        p.moveToNext();
+                        break;  //found
+                    }
+                    p.moveToParent();
+                // not found.
+                }
+            }
+        }
+        return p;
     }
 
     /**
@@ -789,23 +819,28 @@ export class Position {
      */
     public moveToVisBack(c:Commander): Position {
         const p:Position = this;
-        limit, limitIsVisible = c.visLimit()
-        while p:
-            # Short-circuit if possible.
-            back = p.back()
-            if back and back.hasChildren() and back.isExpanded():
+        const visLimit:{limit:Position, visible:boolean} = c.visLimit();
+        const limit:Position = visLimit.limit;
+        const limitIsVisible:boolean = visLimit.visible;
+        while  (p.__bool__()){
+            // Short-circuit if possible.
+            const back:Position = p.back();
+            if back.__bool__() && back.hasChildren() && back.isExpanded(){
                 p.moveToThreadBack()
-            elif back:
+            }
+            else if( back.__bool__()){
                 p.moveToBack()
-            else:
-                p.moveToParent()  # Same as p.moveToThreadBack()
+            } else{
+                p.moveToParent()  // Same as p.moveToThreadBack()
+            }
             if p:
                 if limit:
                     done, val = self.checkVisBackLimit(limit, limitIsVisible, p)
                     if done:
-                        return val  # A position or None
+                        return val;  // A position or None
                 if p.isVisible(c):
-                    return p
+                    return p;
+        }
         return p;
     }
 
@@ -831,22 +866,27 @@ export class Position {
      */
     public moveToVisNext(c:Commander):Position {
         const p:Position = this;
-        limit, limitIsVisible = c.visLimit()
-        while p:
-            if p.hasChildren():
-                if p.isExpanded():
-                    p.moveToFirstChild()
-                else:
-                    p.moveToNodeAfterTree()
-            elif p.hasNext():
-                p.moveToNext()
-            else:
-                p.moveToThreadNext()
+        const visLimit:{limit:Position, visible:boolean} = c.visLimit();
+        const limit:Position = visLimit.limit;
+        const limitIsVisible:boolean = visLimit.visible;
+        while (p.__bool__()){
+            if(p.hasChildren()){
+                if(p.isExpanded()){
+                    p.moveToFirstChild();
+                }else{
+                    p.moveToNodeAfterTree();
+                }
+            }else if(p.hasNext()){
+                p.moveToNext();
+            }else{
+                p.moveToThreadNext();
+            }
             if p:
                 if limit and self.checkVisNextLimit(limit, p):
                     return None
                 if p.isVisible(c):
                     return p
+        }
         return p;
     }
 
@@ -854,7 +894,7 @@ export class Position {
      * Return True is p is outside limit of visible nodes.
      */
     public checkVisNextLimit(limit:Position , p:Position):boolean {
-        return limit != p and not limit.isAncestorOf(p);
+        return !limit.__eq__(p) && !limit.isAncestorOf(p);
     }
 
     /**
@@ -869,13 +909,13 @@ export class Position {
                 for parent in p.self_and_parents(copy=False):
                     if child_v == parent.v:
                         g.error(f"vnode: {child_v} is its own parent")
-                        # Allocating a new vnode would be difficult.
-                        # Just remove child_v from parent.v.children.
+                        // Allocating a new vnode would be difficult.
+                        // Just remove child_v from parent.v.children.
                         parent.v.children = [
                             v2 for v2 in parent.v.children if not v2 == child_v]
                         if parent.v in child_v.parents:
                             child_v.parents.remove(parent.v)
-                        # Try not to hang.
+                        // Try not to hang.
                         p.moveToParent()
                         break
                     elif child_v.fileIndex == parent.v.fileIndex:
@@ -884,7 +924,7 @@ export class Position {
                             f"v: {child_v} parent: {parent.v}")
                         child_v.fileIndex = gNodeIndices.getNewIndex(v=child_v)
                         assert child_v.gnx != parent.v.gnx
-                        # Should be ok to continue.
+                        // Should be ok to continue.
                         p.moveToFirstChild()
                         break
                 else:
@@ -896,9 +936,9 @@ export class Position {
                 while p:
                     if p.hasNext():
                         p.moveToNext()
-                        break  # found
+                        break  // found
                     p.moveToParent()
-                # not found.
+                // not found.
         return p;
     }
 
@@ -1274,6 +1314,25 @@ export class VNode {
         this.selectionLength = 0;
         this.selectionStart = 0;
         g.app.nodeIndices.new_vnode_helper(context, gnx, this);
+    }
+
+    public __repr__():string{
+        return f"<VNode {self.gnx} {self.headString()}>"
+    }
+
+    public dumpLink(link):string{
+        return link if link else "<none>";
+    }
+
+    public dump(label=""):void {
+        const v: VNode = this;
+        const s:string = '-'.repeat(10);
+        print(`${s} ${label} ${v}`);
+        // print('gnx: %s' % v.gnx)
+        print(`parents.length: {v.parents.length}`);
+        print(`children.length: {v.children.length}`);
+        print(`parents: ${g.listToString(v.parents)}`);
+        print(`children: ${g.listToString(v.children)}`);
     }
 
     /**
@@ -2038,6 +2097,8 @@ export interface VNode {
     initHeadString: () => any;
     setHeadText: () => any;
     setTnodeText: () => any;
+    __str__:() => string;
+
 }
 
 // New names, less confusing
@@ -2050,6 +2111,7 @@ VNode.prototype.initBodyString = VNode.prototype.setBodyString;
 VNode.prototype.setHeadText = VNode.prototype.setHeadString;
 VNode.prototype.initHeadString = VNode.prototype.setHeadString;
 VNode.prototype.setTnodeText = VNode.prototype.setBodyString;
+VNode.prototype.__str__ = VNode.prototype.__repr__;
 */
 
 

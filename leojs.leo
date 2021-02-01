@@ -406,6 +406,47 @@
 <v t="felix.20210110223514.1"><vh>class Commander</vh>
 <v t="felix.20210110223547.1"><vh>constructor</vh></v>
 <v t="felix.20210112001859.1"><vh>c.Drawing &amp; coloring</vh></v>
+<v t="felix.20210131011508.1"><vh>c.Generators</vh>
+<v t="felix.20210131011508.2"><vh>c.all_nodes &amp; all_unique_nodes</vh></v>
+<v t="felix.20210131011508.3"><vh>c.all_positions</vh></v>
+<v t="felix.20210131011508.4"><vh>c.all_positions_for_v</vh></v>
+<v t="felix.20210131011508.5"><vh>c.all_roots</vh></v>
+<v t="felix.20210131011508.6"><vh>c.all_unique_positions</vh></v>
+<v t="felix.20210131011508.7"><vh>c.all_unique_roots</vh></v>
+<v t="felix.20210131011508.8"><vh>c.safe_all_positions</vh></v>
+</v>
+<v t="felix.20210131011420.1"><vh>c.Getters</vh>
+<v t="felix.20210131011420.2"><vh>c.currentPosition</vh></v>
+<v t="felix.20210131011420.3"><vh>c.fileName &amp; relativeFileName &amp; shortFileName</vh></v>
+<v t="felix.20210131011420.4"><vh>c.firstVisible</vh></v>
+<v t="felix.20210131011420.5"><vh>c.getTabWidth</vh></v>
+<v t="felix.20210131011420.6"><vh>c.is...Position</vh>
+<v t="felix.20210131011420.7"><vh>c.currentPositionIsRootPosition</vh></v>
+<v t="felix.20210131011420.8"><vh>c.currentPositionHasNext</vh></v>
+<v t="felix.20210131011420.9"><vh>c.isCurrentPosition</vh></v>
+<v t="felix.20210131011420.10"><vh>c.isRootPosition</vh></v>
+</v>
+<v t="felix.20210131011420.11"><vh>c.isChanged</vh></v>
+<v t="felix.20210131011420.12"><vh>c.lastTopLevel</vh></v>
+<v t="felix.20210131011420.13"><vh>c.nullPosition</vh></v>
+<v t="felix.20210131011420.14"><vh>c.positionExists</vh>
+<v t="felix.20210131011420.15"><vh>c.dumpPosition</vh></v>
+</v>
+<v t="felix.20210131011420.16"><vh>c.rootPosition</vh></v>
+<v t="felix.20210131011420.17"><vh>c.shouldBeExpanded</vh></v>
+<v t="felix.20210131011440.1"><vh>c.visLimit</vh></v>
+</v>
+<v t="felix.20210131011549.1"><vh>c.Properties</vh></v>
+<v t="felix.20210131011607.1"><vh>c.Setters</vh>
+<v t="felix.20210131011607.2"><vh>c.appendStringToBody</vh></v>
+<v t="felix.20210131011607.3"><vh>c.clearAllMarked</vh></v>
+<v t="felix.20210131011607.4"><vh>c.clearAllVisited</vh></v>
+<v t="felix.20210131011607.5"><vh>c.clearChanged</vh></v>
+<v t="felix.20210131011607.6"><vh>c.clearMarked</vh></v>
+<v t="felix.20210131011607.7"><vh>c.setBodyString (to do)</vh></v>
+<v t="felix.20210131011607.8"><vh>c.setChanged</vh></v>
+<v t="felix.20210131011607.9"><vh>c.setCurrentPosition</vh></v>
+</v>
 </v>
 </v>
 <v t="felix.20210122000014.1"><vh>@clean src/core/leoFileCommands.ts</vh>
@@ -449,7 +490,8 @@
 <v t="felix.20210104210316.1"><vh>g.isWordChar*     (coreGlobals.py)</vh></v>
 <v t="felix.20210108005428.1"><vh>g.match           (coreGlobals.py)</vh></v>
 <v t="felix.20210108011201.1"><vh>g.match_word      (coreGlobals.py)</vh></v>
-<v t="felix.20210109001345.1"><vh>g.objToSTring     (coreGlobals.py)</vh></v>
+<v t="felix.20210109001345.1"><vh>g.listToString     (coreGlobals.py)</vh></v>
+<v t="felix.20210130235311.1"><vh>g.objToSTring     (coreGlobals.py)</vh></v>
 <v t="felix.20210109002058.1"><vh>g.plural          (coreGlobals.py)</vh></v>
 <v t="felix.20210109003521.1"><vh>g.pr              (coreGlobals.py)</vh></v>
 <v t="felix.20210109004916.1"><vh>g.printObj        (coreGlobals.py)</vh></v>
@@ -558,7 +600,11 @@
 </v>
 <v t="felix.20210102150654.1"><vh>Enum StatusFlags</vh></v>
 <v t="felix.20210102015917.1"><vh>class VNode</vh>
+<v t="felix.20210130233340.1"><vh>v.Birth &amp; death</vh>
 <v t="felix.20210102015917.2"><vh>constructor</vh></v>
+<v t="felix.20210130233340.3"><vh>v.__repr__ &amp; v.__str__</vh></v>
+<v t="felix.20210130233340.4"><vh>v.dump</vh></v>
+</v>
 <v t="felix.20210112210731.1"><vh>v.Comparisons</vh>
 <v t="felix.20210112210731.2"><vh>v.findAtFileName</vh></v>
 <v t="felix.20210112210731.3"><vh>v.anyAtFileNodeName</vh></v>
@@ -6132,7 +6178,8 @@ export class NodeIndices {
  * to force usage of special methods to compare &amp; evaluate equalities.
  *
  */
-export interface StackEntry { v: VNode; childIndex: number; }
+
+export type StackEntry =  [VNode, number];
 
 export class Position {
 
@@ -6256,6 +6303,8 @@ export interface VNode {
     initHeadString: () =&gt; any;
     setHeadText: () =&gt; any;
     setTnodeText: () =&gt; any;
+    __str__:() =&gt; string;
+
 }
 
 // New names, less confusing
@@ -6268,6 +6317,7 @@ VNode.prototype.initBodyString = VNode.prototype.setBodyString;
 VNode.prototype.setHeadText = VNode.prototype.setHeadString;
 VNode.prototype.initHeadString = VNode.prototype.setHeadString;
 VNode.prototype.setTnodeText = VNode.prototype.setBodyString;
+VNode.prototype.__str__ = VNode.prototype.__repr__;
 */
 
 </t>
@@ -7986,45 +8036,11 @@ export function isWordChar1(ch: string): boolean {
 
 </t>
 <t tx="felix.20210109001345.1">/**
- * Pretty print any Python object to a string.
+ * Pretty print any array / python list to string
  * TODO : Temporary json stringify
  */
-export function objToString(obj: any, indent = '', printCaller = false, tag = null): string {
-    return JSON.stringify(obj);
-
-    // # pylint: disable=undefined-loop-variable
-    //     # Looks like a a pylint bug.
-    // #
-    // # Compute s.
-    // if isinstance(obj, dict):
-    //     s = dictToString(obj, indent=indent)
-    // elif isinstance(obj, list):
-    //     s = listToString(obj, indent=indent)
-    // elif isinstance(obj, tuple):
-    //     s = tupleToString(obj, indent=indent)
-    // elif isinstance(obj, str):
-    //     # Print multi-line strings as lists.
-    //     s = obj
-    //     lines = splitLines(s)
-    //     if len(lines) &gt; 1:
-    //         s = listToString(lines, indent=indent)
-    //     else:
-    //         s = repr(s)
-    // else:
-    //     s = repr(obj)
-    // #
-    // # Compute the return value.
-    // if printCaller and tag:
-    //     prefix = f"{caller()}: {tag}"
-    // elif printCaller or tag:
-    //     prefix = caller() if printCaller else tag
-    // else:
-    //     prefix = None
-    // if prefix:
-    //     sep = '\n' if '\n' in s else ' '
-    //     return f"{prefix}:{sep}{s}"
-    // return s
-
+export function listToString(obj: any): string {
+    return JSON.stringify(obj, undefined, 4);
 }
 
 </t>
@@ -9499,11 +9515,12 @@ These routines all return self on exit so the following kind of code will work:
  */
 public moveToThreadBack(): Position {
     const p:Position = this;
-    if p.hasBack():
-        p.moveToBack()
-        p.moveToLastNode()
-    else:
-        p.moveToParent()
+    if (p.hasBack()){
+        p.moveToBack();
+        p.moveToLastNode();
+    }else{
+        p.moveToParent();
+    }
     return p;
 }
 
@@ -9513,20 +9530,24 @@ public moveToThreadBack(): Position {
  */
 public moveToThreadNext(): Position {
     const p:Position = this;
-    if p.v:
-        if p.v.children:
-            p.moveToFirstChild()
-        elif p.hasNext():
-            p.moveToNext()
-        else:
-            p.moveToParent()
-            while p:
-                if p.hasNext():
-                    p.moveToNext()
-                    break  #found
-                p.moveToParent()
-            # not found.
-    return p
+    if(p.v){
+        if(p.v.children.length){
+            p.moveToFirstChild();
+        }else if(p.hasNext()){
+            p.moveToNext();
+        }else{
+            p.moveToParent();
+            while(p.__bool__()){
+                if(p.hasNext()){
+                    p.moveToNext();
+                    break;  //found
+                }
+                p.moveToParent();
+            // not found.
+            }
+        }
+    }
+    return p;
 }
 
 </t>
@@ -9535,23 +9556,28 @@ public moveToThreadNext(): Position {
  */
 public moveToVisBack(c:Commander): Position {
     const p:Position = this;
-    limit, limitIsVisible = c.visLimit()
-    while p:
-        # Short-circuit if possible.
-        back = p.back()
-        if back and back.hasChildren() and back.isExpanded():
+    const visLimit:{limit:Position, visible:boolean} = c.visLimit();
+    const limit:Position = visLimit.limit;
+    const limitIsVisible:boolean = visLimit.visible;
+    while  (p.__bool__()){
+        // Short-circuit if possible.
+        const back:Position = p.back();
+        if back.__bool__() &amp;&amp; back.hasChildren() &amp;&amp; back.isExpanded(){
             p.moveToThreadBack()
-        elif back:
+        }
+        else if( back.__bool__()){
             p.moveToBack()
-        else:
-            p.moveToParent()  # Same as p.moveToThreadBack()
+        } else{
+            p.moveToParent()  // Same as p.moveToThreadBack()
+        }
         if p:
             if limit:
                 done, val = self.checkVisBackLimit(limit, limitIsVisible, p)
                 if done:
-                    return val  # A position or None
+                    return val;  // A position or None
             if p.isVisible(c):
-                return p
+                return p;
+    }
     return p;
 }
 
@@ -9579,22 +9605,27 @@ public checkVisBackLimit(limit:Position, limitIsVisible:boolean, p:Position): {d
  */
 public moveToVisNext(c:Commander):Position {
     const p:Position = this;
-    limit, limitIsVisible = c.visLimit()
-    while p:
-        if p.hasChildren():
-            if p.isExpanded():
-                p.moveToFirstChild()
-            else:
-                p.moveToNodeAfterTree()
-        elif p.hasNext():
-            p.moveToNext()
-        else:
-            p.moveToThreadNext()
+    const visLimit:{limit:Position, visible:boolean} = c.visLimit();
+    const limit:Position = visLimit.limit;
+    const limitIsVisible:boolean = visLimit.visible;
+    while (p.__bool__()){
+        if(p.hasChildren()){
+            if(p.isExpanded()){
+                p.moveToFirstChild();
+            }else{
+                p.moveToNodeAfterTree();
+            }
+        }else if(p.hasNext()){
+            p.moveToNext();
+        }else{
+            p.moveToThreadNext();
+        }
         if p:
             if limit and self.checkVisNextLimit(limit, p):
                 return None
             if p.isVisible(c):
                 return p
+    }
     return p;
 }
 
@@ -9603,7 +9634,7 @@ public moveToVisNext(c:Commander):Position {
  * Return True is p is outside limit of visible nodes.
  */
 public checkVisNextLimit(limit:Position , p:Position):boolean {
-    return limit != p and not limit.isAncestorOf(p);
+    return !limit.__eq__(p) &amp;&amp; !limit.isAncestorOf(p);
 }
 
 </t>
@@ -9619,13 +9650,13 @@ public safeMoveToThreadNext(): Position {
             for parent in p.self_and_parents(copy=False):
                 if child_v == parent.v:
                     g.error(f"vnode: {child_v} is its own parent")
-                    # Allocating a new vnode would be difficult.
-                    # Just remove child_v from parent.v.children.
+                    // Allocating a new vnode would be difficult.
+                    // Just remove child_v from parent.v.children.
                     parent.v.children = [
                         v2 for v2 in parent.v.children if not v2 == child_v]
                     if parent.v in child_v.parents:
                         child_v.parents.remove(parent.v)
-                    # Try not to hang.
+                    // Try not to hang.
                     p.moveToParent()
                     break
                 elif child_v.fileIndex == parent.v.fileIndex:
@@ -9634,7 +9665,7 @@ public safeMoveToThreadNext(): Position {
                         f"v: {child_v} parent: {parent.v}")
                     child_v.fileIndex = gNodeIndices.getNewIndex(v=child_v)
                     assert child_v.gnx != parent.v.gnx
-                    # Should be ok to continue.
+                    // Should be ok to continue.
                     p.moveToFirstChild()
                     break
             else:
@@ -9646,9 +9677,9 @@ public safeMoveToThreadNext(): Position {
             while p:
                 if p.hasNext():
                     p.moveToNext()
-                    break  # found
+                    break  // found
                 p.moveToParent()
-            # not found.
+            // not found.
     return p;
 }
 
@@ -9659,7 +9690,7 @@ public safeMoveToThreadNext(): Position {
 public moveToBack():Position {
     const p:Position = this;
     const n:number = p._childIndex;
-    const parent_v:VNode = p._parentVnode(); // Returns None if p.v is None.
+    const parent_v:VNode = p._parentVnode()!; // Returns None if p.v is None.
         
     // Do not assume n is in range: this is used by positionExists.
     if (
@@ -9671,6 +9702,8 @@ public moveToBack():Position {
         p._childIndex -= 1;
         p.v = parent_v.children[n - 1];
     }else{
+        // * For now, use undefined p.v to signal null/invalid positions
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9683,12 +9716,12 @@ public moveToBack():Position {
 public moveToFirstChild():Position{
     const p:Position = this;
     if (p.v &amp;&amp; p.v.children){
-        p.stack.push(
-         {v:p.v, childIndex:p._childIndex }
-        );
+        p.stack.push([p.v, p._childIndex]);
         p.v = p.v.children[0];
         p._childIndex = 0;
     }else{
+        // * For now, use undefined p.v to signal null/invalid positions
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9700,13 +9733,17 @@ public moveToFirstChild():Position{
  */
 public moveToLastChild():Position{
     const p:Position = this;
-    if p.v and p.v.children:
-        p.stack.append((p.v, p._childIndex),)
-        n = len(p.v.children)
-        p.v = p.v.children[n - 1]
-        p._childIndex = n - 1
-    else:
-        p.v = None
+    let n:number;
+    if (p.v &amp;&amp; p.v.children.length){
+        p.stack.push([p.v, p._childIndex]);
+        n = p.v.children.length;
+        p.v = p.v.children[n - 1];
+        p._childIndex = n - 1;
+    }else{
+        // * For now, use undefined p.v to signal null/invalid positions
+            //@ts-ignore
+        p.v = undefined;
+    }
     return p;
 }
 
@@ -9718,8 +9755,9 @@ public moveToLastChild():Position{
 public moveToLastNode():Position{
     const p:Position = this;
     // Huge improvement for 4.2.
-    while p.hasChildren():
-        p.moveToLastChild()
+    while (p.hasChildren()){
+        p.moveToLastChild();
+    }
     return p;
 }
 
@@ -9730,7 +9768,7 @@ public moveToLastNode():Position{
 public moveToNext():Position{
     const p:Position = this;    
     const n:number = p._childIndex;
-    const parent_v:VNode = p._parentVnode();
+    const parent_v:VNode = p._parentVnode()!;
         // Returns None if p.v is None.
     if (!p.v){
         g.trace('no p.v:', p, g.callers());
@@ -9739,6 +9777,8 @@ public moveToNext():Position{
         p._childIndex = n + 1;
         p.v = parent_v.children[n + 1];
     }else{
+        // * For now, use undefined p.v to signal null/invalid positions
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9750,11 +9790,13 @@ public moveToNext():Position{
  */
 public moveToNodeAfterTree():Position {
     const p:Position = this;
-    while p:
-        if p.hasNext():
-            p.moveToNext()
-            break
-        p.moveToParent()
+    while( p.__bool__()){
+        if( p.hasNext()){
+            p.moveToNext();
+            break;
+        }
+        p.moveToParent();
+    }
     return p;
 }
 
@@ -9764,12 +9806,15 @@ public moveToNodeAfterTree():Position {
  */
 public moveToNthChild(n:number):Position {
     const p:Position = this;
-    if p.v and len(p.v.children) &gt; n:
-        p.stack.append((p.v, p._childIndex),)
-        p.v = p.v.children[n]
-        p._childIndex = n
-    else:
-        p.v = None
+    if (p.v &amp;&amp; p.v.children.length &gt; n){
+        p.stack.push([p.v, p._childIndex]);
+        p.v = p.v.children[n];
+        p._childIndex = n;
+    }else{
+        // * For now, use undefined p.v to signal null/invalid positions
+            //@ts-ignore
+        p.v = undefined;
+    }
     return p;
 }
 
@@ -9779,11 +9824,16 @@ public moveToNthChild(n:number):Position {
  */
 public moveToParent():Position {
     const p:Position = this;
-    if p.v and p.stack:
-        p.v, p._childIndex = p.stack.pop()
-    else:
-        p.v = None
-    return p
+    if (p.v &amp;&amp; p.stack.length){
+        const item:StackEntry = p.stack.pop()!;
+        p.v = item[0];
+        p._childIndex = item[1];
+    }else{
+        // * For now, use undefined p.v to signal null/invalid positions
+            //@ts-ignore
+        p.v = undefined;
+    }
+    return p;
 }
 
 </t>
@@ -10023,8 +10073,8 @@ public insertBefore(): Position {
     // so we can distinguish between clones.
     const result:string[] = [];
     for (let z of p.stack){
-        const v:VNode = z.v;
-        const childIndex: number = z.childIndex;
+        const v:VNode = z[0];
+        const childIndex: number = z[1];
         result.push(`${v.fileIndex}:${childIndex}`);
     }
     result.push(`${p.v.fileIndex}:${p._childIndex}`);
@@ -10035,7 +10085,6 @@ public sort_key(p:Position):number[]{
     const result :number[] = [];
     for(let s of p.key().split('.')) {
       result.push(Number(s.split(':')[1]));
-    
     }
     return result;
 }
@@ -10063,7 +10112,7 @@ public __eq__(p2:Position):boolean {
     if (!(p2 instanceof Position)){
         return false;
     }
-    if (!p2 || !p2.v){
+    if (!p2.__bool__() || !p2.v){
         return !p1.v;
     }
     // Modified by Félix to prevent object direct comparison (p1.v === p2.v)
@@ -10073,16 +10122,16 @@ public __eq__(p2:Position):boolean {
             p1.stack.length === p2.stack.length &amp;&amp; 
             p1.stack.every(
                 (p_value, p_index) =&gt; {
-                    return p_value.childIndex === p2.stack[p_index].childIndex &amp;&amp;
-                    p_value.v.fileIndex === p2.stack[p_index].v.fileIndex;
+                    return p_value[1] === p2.stack[p_index][1] &amp;&amp;
+                    p_value[0].fileIndex === p2.stack[p_index][0].fileIndex;
                 }
             )
         );
 }
 
-/** 
+/**
  * Return True if two postions are not equivalent.
- */ 
+ */
 public __ne__(p2:Position):boolean{
     return !this.__eq__(p2);
 }
@@ -10114,16 +10163,16 @@ public __gt__(other:Position):boolean{
     const n:number = n1&lt;n2?n1:n2;
     // Compare the common part of the stacks.
     for (let nx=0; nx&lt;n; nx++){
-        if(stack1[nx].childIndex&gt;stack2[nx].childIndex){
+        if(stack1[nx][1]&gt;stack2[nx][1]){
             return true;
         }
-        if(stack1[nx].childIndex&gt;stack2[nx].childIndex){
+        if(stack1[nx][1]&lt;stack2[nx][1]){
             return false;
         }
     }
+    // Finish the comparison.
     let x1:number;
     let x2:number;
-    // Finish the comparison.
     if (n1 === n2){
         x1 = this._childIndex;
         x2 = other._childIndex;
@@ -10131,13 +10180,13 @@ public __gt__(other:Position):boolean{
     }
     if (n1 &lt; n2){
         x1 = this._childIndex; 
-        x2 = other.stack[n].childIndex;
+        x2 = other.stack[n][1];
         return x1 &gt; x2;
     }
     // n1 &gt; n2
     // 2011/07/28: Bug fix suggested by SegundoBob.
     x1 = other._childIndex; 
-    x2 = this.stack[n].childIndex;
+    x2 = this.stack[n][1];
     return x2 &gt;= x1;
 }
 
@@ -10212,7 +10261,7 @@ public dump(label?=""):void {
 <t tx="felix.20210126210419.1">/**
  * Create a new position with the given childIndex and parent stack.
  */
-constructor(v: VNode, childIndex: number = 0, stack?: any[]) {
+constructor(v: VNode, childIndex: number = 0, stack?: StackEntry[]) {
     this._childIndex = childIndex;
     this.v = v;
     if (stack) {
@@ -10237,46 +10286,49 @@ import { Commander } from './leoCommander';
 <t tx="felix.20210127234205.10">/**
  * Unlink the receiver p from the tree.
  */
-public _unlink(self): void {
-    p = self;
-    n = p._childIndex;
-    parent_v = p._parentVnode()
+public _unlink(): void {
+    const p:Position = this;
+    const n:number = p._childIndex;
+    const parent_v:VNode = p._parentVnode()!;
         // returns None if p.v is None
-    child = p.v
-    assert(p.v)
-    assert(parent_v)
+    const child:VNode = p.v;
+    console.assert(p.v);
+    console.assert(parent_v);
     // Delete the child.
-    if (0 &lt;= n &lt; len(parent_v.children) and
-        parent_v.children[n] == child
-    ):
+    if( (0 &lt;= n &amp;&amp; 
+        n &lt; parent_v.children.length &amp;&amp;
+        parent_v.children[n].fileIndex === child.fileIndex
+    )){
         // This is the only call to v._cutlink.
-        child._cutLink(n, parent_v)
-    else:
-        self.badUnlink(parent_v, n, child)
+        child._cutLink(n, parent_v);
+    }else{
+        this.badUnlink(parent_v, n, child);
+    }
 }
 
 </t>
 <t tx="felix.20210127234205.11">/**
  * badUnlink error trace output
  */
-public badUnlink(self, parent_v, n, child): void {
+public badUnlink(parent_v:VNode, n:number, child:VNode): void {
 
-    if 0 &lt;= n &lt; len(parent_v.children):
-        g.trace(f"**can not happen: children[{n}] != p.v")
+    if( 0 &lt;= n &amp;&amp; n&lt; parent_v.children.length){
+        g.trace(`**can not happen: children[{n}] != p.v`);
         g.trace('parent_v.children...\n',
-            g.listToString(parent_v.children))
-        g.trace('parent_v', parent_v)
-        g.trace('parent_v.children[n]', parent_v.children[n])
-        g.trace('child', child)
-        g.trace('** callers:', g.callers())
-    else:
+            g.listToString(parent_v.children));
+        g.trace('parent_v', parent_v);
+        g.trace('parent_v.children[n]', parent_v.children[n]);
+        g.trace('child', child);
+        g.trace('** callers:', g.callers());
+    }else{
         g.trace(
-            f"**can not happen: bad child index: {n}, "
-            f"len(children): {len(parent_v.children)}")
+            `**can not happen: bad child index: ${n}, `,
+            `children.length: ${parent_v.children.length}`);
         g.trace('parent_v.children...\n',
-            g.listToString(parent_v.children))
-        g.trace('parent_v', parent_v, 'child', child)
-        g.trace('** callers:', g.callers())
+            g.listToString(parent_v.children));
+        g.trace('parent_v', parent_v, 'child', child);
+        g.trace('** callers:', g.callers());
+    }
 }
 
 </t>
@@ -10303,20 +10355,20 @@ public _adjustPositionBeforeUnlink(p2:Position): void {
     let changed:boolean = false;
     let i:number = 0;
     while (i &lt; p.stack.length){
-        const v = p.stack[i].v;
-        const childIndex = p.stack[i].childIndex;
+        const v:VNode = p.stack[i][0];
+        const childIndex:number = p.stack[i][1];
         const p3 = new Position(v, childIndex, stack.slice(0,i)); // stack[:i]
         while (p3.__bool__()){
             if (p2.__eq__(p3)){
                 // 2011/02/25: compare full positions, not just vnodes.
                 // A match with the to-be-moved node.
-                stack.push({v:v, childIndex:childIndex - 1});
+                stack.push([v, childIndex - 1]);
                 changed = true;
                 break;  // terminate only the inner loop.
             }
             p3.moveToBack();
             if(!p3.__bool__()){
-                stack.push({v:v, childIndex:childIndex});
+                stack.push([v, childIndex]);
             }
         }
         i += 1;
@@ -10332,7 +10384,7 @@ public _adjustPositionBeforeUnlink(p2:Position): void {
  */
 public _linkAfter(p_after:Position): void {
     const p:Position = this;
-    const parent_v = p_after._parentVnode();
+    const parent_v = p_after._parentVnode()!;
     p.stack = [...p_after.stack];
     p._childIndex = p_after._childIndex + 1;
     const child:VNode = p.v;
@@ -10346,7 +10398,7 @@ public _linkAfter(p_after:Position): void {
  */
 public _linkCopiedAfter(p_after:Position): void {
     const p:Position = this;
-    const parent_v:VNode = p_after._parentVnode();
+    const parent_v:VNode = p_after._parentVnode()!;
     p.stack = [...p_after.stack];
     p._childIndex = p_after._childIndex + 1;
     const child:VNode = p.v;
@@ -10358,11 +10410,11 @@ public _linkCopiedAfter(p_after:Position): void {
 <t tx="felix.20210127234205.5">/**
  * Link self as the n'th child of the parent.
  */
-public _linkAsNthChild(parent, n): void {
+public _linkAsNthChild(parent:Position, n:number): void {
     const p:Position = this;
     const parent_v:VNode = parent.v;
-    p.stack = parent.stack[:];
-    p.stack.append((parent_v, parent._childIndex),);
+    p.stack = [...parent.stack];
+    p.stack.push([parent_v, parent._childIndex]);
     p._childIndex = n;
     const child:VNode = p.v;
     child._addLink(n, parent_v);
@@ -10376,7 +10428,7 @@ public _linkCopiedAsNthChild(parent:Position, n:number): void {
     const p:Position = this;
     const parent_v:VNode = parent.v;
     p.stack = [...parent.stack];
-    p.stack.push({v:parent_v, childIndex: parent._childIndex});
+    p.stack.push([parent_v, parent._childIndex]);
     p._childIndex = n;
     const child:VNode = p.v;
     child._addCopiedLink(n, parent_v);
@@ -10411,7 +10463,7 @@ public _parentVnode(): VNode | undefined {
     if (p.v){
         const data = !!p.stack.length &amp;&amp; p.stack[p.stack.length-1];
         if (data){
-            const v:VNode = data.v;
+            const v:VNode = data[0];
             return v;
         }
         return p.v.context.hiddenRootNode;
@@ -10424,24 +10476,524 @@ public _parentVnode(): VNode | undefined {
  * A low-level method to replace p.v by a p2.v.
  */
 public _relinkAsCloneOf(p2:Position): void {
-    p = self
-    v = p.v
-    v2 = p2.v
-    parent_v = p._parentVnode()
-    if not parent_v:
-        g.error('no parent_v', p)
-        return
-    if parent_v.children[p._childIndex] == v:
-        parent_v.children[p._childIndex] = v2
-        v2.parents.append(parent_v)
+    const p:Position = this;
+    const v:VNode = p.v;
+    const v2:VNode = p2.v;
+    const parent_v:VNode|undefined = p._parentVnode();
+    if(!parent_v){
+        g.error('no parent_v', p);
+        return;
+    }
+    // Compare fileIndex instead of v directly
+    if( parent_v.children[p._childIndex].fileIndex === v.fileIndex){
+        parent_v.children[p._childIndex] = v2;
+        v2.parents.push(parent_v);
         // p.v no longer truly exists.
         // p.v = p2.v
-    else:
+    }else{
         g.error(
             'parent_v.children[childIndex] != v',
-            p, parent_v.children, p._childIndex, v)
+            p, parent_v.children, p._childIndex, v);
+    }
 }
 
+</t>
+<t tx="felix.20210130233340.1"></t>
+<t tx="felix.20210130233340.3">public __repr__():string{
+    return f"&lt;VNode {self.gnx} {self.headString()}&gt;"
+}
+
+</t>
+<t tx="felix.20210130233340.4">public dumpLink(link):string{
+    return link if link else "&lt;none&gt;";
+}
+
+public dump(label=""):void {
+    const v: VNode = this;
+    const s:string = '-'.repeat(10);
+    print(`${s} ${label} ${v}`);
+    // print('gnx: %s' % v.gnx)
+    print(`parents.length: {v.parents.length}`);
+    print(`children.length: {v.children.length}`);
+    print(`parents: ${g.listToString(v.parents)}`);
+    print(`children: ${g.listToString(v.children)}`);
+}
+
+</t>
+<t tx="felix.20210130235311.1">/**
+ * Pretty print any Python object to a string.
+ * TODO : Temporary json stringify
+ */
+export function objToString(obj: any, indent = '', printCaller = false, tag = null): string {
+    return JSON.stringify(obj);
+
+    // # pylint: disable=undefined-loop-variable
+    //     # Looks like a a pylint bug.
+    // #
+    // # Compute s.
+    // if isinstance(obj, dict):
+    //     s = dictToString(obj, indent=indent)
+    // elif isinstance(obj, list):
+    //     s = listToString(obj, indent=indent)
+    // elif isinstance(obj, tuple):
+    //     s = tupleToString(obj, indent=indent)
+    // elif isinstance(obj, str):
+    //     # Print multi-line strings as lists.
+    //     s = obj
+    //     lines = splitLines(s)
+    //     if len(lines) &gt; 1:
+    //         s = listToString(lines, indent=indent)
+    //     else:
+    //         s = repr(s)
+    // else:
+    //     s = repr(obj)
+    // #
+    // # Compute the return value.
+    // if printCaller and tag:
+    //     prefix = f"{caller()}: {tag}"
+    // elif printCaller or tag:
+    //     prefix = caller() if printCaller else tag
+    // else:
+    //     prefix = None
+    // if prefix:
+    //     sep = '\n' if '\n' in s else ' '
+    //     return f"{prefix}:{sep}{s}"
+    // return s
+
+}
+
+</t>
+<t tx="felix.20210131011420.1"></t>
+<t tx="felix.20210131011420.10">def isRootPosition(self, p):
+    c = self
+    root = c.rootPosition()
+    return p and root and p == root  # 2011/03/03
+</t>
+<t tx="felix.20210131011420.11">def isChanged(self):
+    return self.changed
+</t>
+<t tx="felix.20210131011420.12">def lastTopLevel(self):
+    """Return the last top-level position in the outline."""
+    c = self
+    p = c.rootPosition()
+    while p.hasNext():
+        p.moveToNext()
+    return p
+</t>
+<t tx="felix.20210131011420.13">def nullPosition(self):
+    """
+    New in Leo 5.5: Return None.
+    Using empty positions masks problems in program logic.
+
+    In fact, there are no longer any calls to this method in Leo's core.
+    """
+    g.trace('This method is deprecated. Instead, just use None.')
+    # pylint complains if we return None.
+</t>
+<t tx="felix.20210131011420.14">def positionExists(self, p, root=None, trace=False):
+    """Return True if a position exists in c's tree"""
+    if not p or not p.v: return False
+
+    rstack = root.stack + [(root.v, root._childIndex)] if root else []
+    pstack = p.stack + [(p.v, p._childIndex)]
+
+    if len(rstack) &gt; len(pstack): return False
+
+    par = self.hiddenRootNode
+    for j, x in enumerate(pstack):
+        if j &lt; len(rstack) and x != rstack[j]: return False
+        v, i = x
+        if i &gt;= len(par.children) or v is not par.children[i]:
+            return False
+        par = v
+    return True
+</t>
+<t tx="felix.20210131011420.15">def dumpPosition(self, p):
+    """Dump position p and it's ancestors."""
+    g.trace('=====', p.h, p._childIndex)
+    for i, data in enumerate(p.stack):
+        v, childIndex = data
+        print(f"{i} {childIndex} {v._headString}")
+</t>
+<t tx="felix.20210131011420.16">_rootCount = 0
+
+def rootPosition(self):
+    """Return the root position.
+
+    Root position is the first position in the document. Other
+    top level positions are siblings of this node.
+    """
+    c = self
+    # 2011/02/25: Compute the position directly.
+    if c.hiddenRootNode.children:
+        v = c.hiddenRootNode.children[0]
+        return leoNodes.Position(v, childIndex=0, stack=None)
+    return None
+
+# For compatibiility with old scripts...
+
+rootVnode = rootPosition
+findRootPosition = rootPosition
+</t>
+<t tx="felix.20210131011420.17">def shouldBeExpanded(self, p):
+    """Return True if the node at position p should be expanded."""
+    c, v = self, p.v
+    if not p.hasChildren():
+        return False
+    # Always clear non-existent positions.
+    v.expandedPositions = [z for z in v.expandedPositions if c.positionExists(z)]
+    if not p.isCloned():
+        # Do not call p.isExpanded here! It calls this method.
+        return p.v.isExpanded()
+    if p.isAncestorOf(c.p):
+        return True
+    for p2 in v.expandedPositions:
+        if p == p2:
+            return True
+    return False
+</t>
+<t tx="felix.20210131011420.2">def currentPosition(self):
+    """
+    Return a copy of the presently selected position or a new null
+    position. So c.p.copy() is never necessary.
+    """
+    c = self
+    if hasattr(c, '_currentPosition') and getattr(c, '_currentPosition'):
+        # *Always* return a copy.
+        return c._currentPosition.copy()
+    return c.rootPosition()
+
+# For compatibiility with old scripts...
+
+currentVnode = currentPosition
+</t>
+<t tx="felix.20210131011420.3"># Compatibility with scripts
+
+def fileName(self):
+    s = self.mFileName or ""
+    if g.isWindows:
+        s = s.replace('\\', '/')
+    return s
+
+def relativeFileName(self):
+    return self.mRelativeFileName or self.mFileName
+
+def shortFileName(self):
+    return g.shortFileName(self.mFileName)
+
+shortFilename = shortFileName
+</t>
+<t tx="felix.20210131011420.4">def firstVisible(self):
+    """Move to the first visible node of the present chapter or hoist."""
+    c = self; p = c.p
+    while 1:
+        back = p.visBack(c)
+        if back and back.isVisible(c):
+            p = back
+        else: break
+    return p
+</t>
+<t tx="felix.20210131011420.5">def getTabWidth(self, p):
+    """Return the tab width in effect at p."""
+    c = self
+    val = g.scanAllAtTabWidthDirectives(c, p)
+    return val
+</t>
+<t tx="felix.20210131011420.6"></t>
+<t tx="felix.20210131011420.7">def currentPositionIsRootPosition(self):
+    """Return True if the current position is the root position.
+
+    This method is called during idle time, so not generating positions
+    here fixes a major leak.
+    """
+    c = self
+    root = c.rootPosition()
+    return c._currentPosition and root and c._currentPosition == root
+    # return (
+        # c._currentPosition and c._rootPosition and
+        # c._currentPosition == c._rootPosition)
+</t>
+<t tx="felix.20210131011420.8">def currentPositionHasNext(self):
+    """Return True if the current position is the root position.
+
+    This method is called during idle time, so not generating positions
+    here fixes a major leak.
+    """
+    c = self; current = c._currentPosition
+    return current and current.hasNext()
+</t>
+<t tx="felix.20210131011420.9">def isCurrentPosition(self, p):
+    c = self
+    if p is None or c._currentPosition is None:
+        return False
+    return p == c._currentPosition
+</t>
+<t tx="felix.20210131011440.1">def visLimit(self):
+    """
+    Return the topmost visible node.
+    This is affected by chapters and hoists.
+    """
+    c = self; cc = c.chapterController
+    if c.hoistStack:
+        bunch = c.hoistStack[-1]
+        p = bunch.p
+        limitIsVisible = not cc or not p.h.startswith('@chapter')
+        return p, limitIsVisible
+    return None, None
+</t>
+<t tx="felix.20210131011508.1"></t>
+<t tx="felix.20210131011508.2">def all_nodes(self):
+    """A generator returning all vnodes in the outline, in outline order."""
+    c = self
+    for p in c.all_positions():
+        yield p.v
+
+def all_unique_nodes(self):
+    """A generator returning each vnode of the outline."""
+    c = self
+    for p in c.all_unique_positions(copy=False):
+        yield p.v
+</t>
+<t tx="felix.20210131011508.3">def all_positions(self, copy=True):
+    """A generator return all positions of the outline, in outline order."""
+    c = self
+    p = c.rootPosition()
+    while p:
+        yield p.copy() if copy else p
+        p.moveToThreadNext()
+</t>
+<t tx="felix.20210131011508.4">def all_positions_for_v(self, v, stack=None):
+    """
+    Generates all positions p in this outline where p.v is v.
+    
+    Should be called with stack=None.
+    
+    The generated positions are not necessarily in outline order.
+    
+    By Виталије Милошевић (Vitalije Milosevic).
+    """
+    c = self
+
+    if stack is None:
+        stack = []
+
+    if not isinstance(v, leoNodes.VNode):
+        g.es_print(f"not a VNode: {v!r}")
+        return  # Stop the generator.
+
+    def allinds(v, target_v):
+        """Yield all indices i such that v.children[i] == target_v."""
+        for i, x in enumerate(v.children):
+            if x is target_v:
+                yield i
+
+    def stack2pos(stack):
+        """Convert the stack to a position."""
+        v, i = stack[-1]
+        return leoNodes.Position(v, i, stack[:-1])
+
+    for v2 in set(v.parents):
+        for i in allinds(v2, v):
+            stack.insert(0, (v, i))
+            if v2 is c.hiddenRootNode:
+                yield stack2pos(stack)
+            else:
+                yield from c.all_positions_for_v(v2, stack)
+            stack.pop(0)
+</t>
+<t tx="felix.20210131011508.5">def all_roots(self, copy=True, predicate=None):
+    """
+    A generator yielding *all* the root positions in the outline that
+    satisfy the given predicate. p.isAnyAtFileNode is the default
+    predicate.
+
+    The generator yields all **root** anywhere in the outline that satisfy
+    the predicate. Once a root is found, the generator skips its subtree.
+    """
+    c = self
+    if predicate is None:
+
+        # pylint: disable=function-redefined
+
+        def predicate(p):
+            return p.isAnyAtFileNode()
+
+    p = c.rootPosition()
+    while p:
+        if predicate(p):
+            yield p.copy()  # 2017/02/19
+            p.moveToNodeAfterTree()
+        else:
+            p.moveToThreadNext()
+</t>
+<t tx="felix.20210131011508.6">def all_unique_positions(self, copy=True):
+    """
+    A generator return all positions of the outline, in outline order.
+    Returns only the first position for each vnode.
+    """
+    c = self
+    p = c.rootPosition()
+    seen = set()
+    while p:
+        if p.v in seen:
+            p.moveToNodeAfterTree()
+        else:
+            seen.add(p.v)
+            yield p.copy() if copy else p
+            p.moveToThreadNext()
+</t>
+<t tx="felix.20210131011508.7">def all_unique_roots(self, copy=True, predicate=None):
+    """
+    A generator yielding all unique root positions in the outline that
+    satisfy the given predicate. p.isAnyAtFileNode is the default
+    predicate.
+
+    The generator yields all **root** anywhere in the outline that satisfy
+    the predicate. Once a root is found, the generator skips its subtree.
+    """
+    c = self
+    if predicate is None:
+
+        # pylint: disable=function-redefined
+
+        def predicate(p):
+            return p.isAnyAtFileNode()
+
+    seen = set()
+    p = c.rootPosition()
+    while p:
+        if p.v not in seen and predicate(p):
+            seen.add(p.v)
+            yield p.copy() if copy else p
+            p.moveToNodeAfterTree()
+        else:
+            p.moveToThreadNext()
+</t>
+<t tx="felix.20210131011508.8">def safe_all_positions(self, copy=True):
+    """
+    A generator returning all positions of the outline. This generator does
+    *not* assume that vnodes are never their own ancestors.
+    """
+    c = self
+    p = c.rootPosition()  # Make one copy.
+    while p:
+        yield p.copy() if copy else p
+        p.safeMoveToThreadNext()
+</t>
+<t tx="felix.20210131011549.1">def __get_p(self):
+    c = self
+    return c.currentPosition()
+
+p = property(
+    __get_p,  # No setter.
+    doc="commander current position property")
+</t>
+<t tx="felix.20210131011607.1"></t>
+<t tx="felix.20210131011607.2">def appendStringToBody(self, p, s):
+
+    if s:
+        p.b = p.b + g.toUnicode(s)
+</t>
+<t tx="felix.20210131011607.3">def clearAllMarked(self):
+    c = self
+    for p in c.all_unique_positions(copy=False):
+        p.v.clearMarked()
+</t>
+<t tx="felix.20210131011607.4">def clearAllVisited(self):
+    c = self
+    for p in c.all_unique_positions(copy=False):
+        p.v.clearVisited()
+        p.v.clearWriteBit()
+</t>
+<t tx="felix.20210131011607.5">def clearChanged(self):
+    """clear the marker that indicates that the .leo file has been changed."""
+    c = self
+    c.changed = False
+    # Clear all dirty bits _before_ setting the caption.
+    for v in c.all_unique_nodes():
+        v.clearDirty()
+    c.changed = False
+    ### Old code.
+        # master = getattr(c.frame.top, 'leo_master', None)
+        # if master:
+            # master.setChanged(c, False)
+                # # LeoTabbedTopLevel.setChanged.
+        # s = c.frame.getTitle()
+        # if len(s) &gt; 2 and s[0:2] == "* ":
+            # c.frame.setTitle(s[2:])
+</t>
+<t tx="felix.20210131011607.6">def clearMarked(self, p):
+    c = self
+    p.v.clearMarked()
+    g.doHook("clear-mark", c=c, p=p)
+</t>
+<t tx="felix.20210131011607.7">def setBodyString(self, p, s):
+    """
+    This is equivalent to p.b = s.
+    
+    Warning: This method may call c.recolor() or c.redraw().
+    """
+    c, v = self, p.v
+    if not c or not v:
+        return
+    ### Old code
+        # s = g.toUnicode(s)
+        # current = c.p
+        # if current and p.v == current.v:
+            # w = c.frame.body.wrapper
+            # w.setAllText(s)
+            # v.setSelection(0,0)
+            # c.recolor()
+        # # Keep the body text in the VNode up-to-date.
+        # if v.b != s:
+            # v.setBodyString(s)
+            # v.setSelection(0, 0)
+            # p.setDirty()
+            # if not c.isChanged():
+                # c.setChanged()
+            # c.redraw_after_icons_changed()
+</t>
+<t tx="felix.20210131011607.8">def setChanged(self, redrawFlag=True):
+    """Set the marker that indicates that the .leo file has been changed."""
+    c = self
+    c.changed = True
+    # Do nothing for null frames.
+    if not redrawFlag:  # Prevent flash when fixing #387.
+        return
+    ### Old code.
+        # master = getattr(c.frame.top, 'leo_master', None)
+        # if master:
+            # master.setChanged(c, True)
+                # # LeoTabbedTopLevel.setChanged.
+        # s = c.frame.getTitle()
+        # if len(s) &gt; 2 and s[0] != '*':
+            # c.frame.setTitle("* " + s)
+</t>
+<t tx="felix.20210131011607.9">_currentCount = 0
+
+def setCurrentPosition(self, p):
+    """
+    Set the presently selected position. For internal use only.
+    Client code should use c.selectPosition instead.
+    """
+    c = self
+    if not p:
+        g.trace('===== no p', g.callers())
+        return
+    if c.positionExists(p):
+        if c._currentPosition and p == c._currentPosition:
+            pass  # We have already made a copy.
+        else:  # Make a copy _now_
+            c._currentPosition = p.copy()
+    else:  # 2011/02/25:
+        c._currentPosition = c.rootPosition()
+        g.trace(f"Invalid position: {repr(p and p.h)}")
+        g.trace(g.callers())
+        # Don't kill unit tests for this kind of problem.
+
+# For compatibiility with old scripts.
+
+setCurrentVnode = setCurrentPosition
 </t>
 </tnodes>
 </leo_file>

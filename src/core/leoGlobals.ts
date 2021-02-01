@@ -408,6 +408,14 @@ export function match_word(s: string, i: number, pattern: string): boolean {
 }
 
 /**
+ * Pretty print any array / python list to string
+ * TODO : Temporary json stringify
+ */
+export function listToString(obj: any): string {
+    return JSON.stringify(obj, undefined, 4);
+}
+
+/**
  * Pretty print any Python object to a string.
  * TODO : Temporary json stringify
  */
