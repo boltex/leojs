@@ -166,7 +166,7 @@ export class LeoApp {
     // The singleton LogManager instance.
     // public openWithManager: any = null;
     // The singleton OpenWithManager instance.
-    public nodeIndices: any = null; // The singleton nodeIndices instance.
+    public nodeIndices: NodeIndices; // The singleton nodeIndices instance.
     public pluginsController: any = null; // The singleton PluginsManager instance. public sessionManager: any = null; // The singleton SessionManager instance. // The Commands class...
     public commandName: any = null; // The name of the command being executed.
     public commandInterruptFlag: boolean = false; // True: command within a command.

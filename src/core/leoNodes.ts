@@ -409,6 +409,244 @@ export class Position {
         return this.v.children.length;
     }
 
+    # These methods are useful abbreviations.
+    # Warning: they make copies of positions, so they should be used _sparingly_
+
+    def getBack(self): return self.copy().moveToBack()
+
+    def getFirstChild(self): return self.copy().moveToFirstChild()
+
+    def getLastChild(self): return self.copy().moveToLastChild()
+
+    def getLastNode(self): return self.copy().moveToLastNode()
+    # def getLastVisible   (self): return self.copy().moveToLastVisible()
+
+    def getNext(self): return self.copy().moveToNext()
+
+    def getNodeAfterTree(self): return self.copy().moveToNodeAfterTree()
+
+    def getNthChild(self, n): return self.copy().moveToNthChild(n)
+
+    def getParent(self): return self.copy().moveToParent()
+
+    def getThreadBack(self): return self.copy().moveToThreadBack()
+
+    def getThreadNext(self): return self.copy().moveToThreadNext()
+    # New in Leo 4.4.3 b2: add c args.
+
+    def getVisBack(self, c): return self.copy().moveToVisBack(c)
+
+    def getVisNext(self, c): return self.copy().moveToVisNext(c)
+    # These are efficient enough now that iterators are the normal way to traverse the tree!
+    back = getBack
+    firstChild = getFirstChild
+    lastChild = getLastChild
+    lastNode = getLastNode
+    # lastVisible   = getLastVisible # New in 4.2 (was in tk tree code).
+    next = getNext
+    nodeAfterTree = getNodeAfterTree
+    nthChild = getNthChild
+    parent = getParent
+    threadBack = getThreadBack
+    threadNext = getThreadNext
+    visBack = getVisBack
+    visNext = getVisNext
+    # New in Leo 4.4.3:
+    hasVisBack = visBack
+    hasVisNext = visNext
+    def get_UNL(
+        self,
+        with_file=True,
+        with_proto=False,
+        with_index=True,
+        with_count=False,
+    ):
+        """
+        with_file=True - include path to Leo file
+        with_proto=False - include 'file://'
+        with_index - include ',x' at end where x is child index in parent
+        with_count - include ',x,y' at end where y zero based count of same headlines
+        """
+        aList = []
+        for i in self.self_and_parents(copy=False):
+            if with_index or with_count:
+                count = 0
+                ind = 0
+                p = i.copy()
+                while p.hasBack():
+                    ind = ind + 1
+                    p.moveToBack()
+                    if i.h == p.h:
+                        count = count + 1
+                aList.append(i.h.replace('-->', '--%3E') + ":" + str(ind))
+                    # g.recursiveUNLFind and sf.copy_to_my_settings undo this replacement.
+                if count or with_count:
+                    aList[-1] = aList[-1] + "," + str(count)
+            else:
+                aList.append(i.h.replace('-->', '--%3E'))
+                    # g.recursiveUNLFind  and sf.copy_to_my_settings undo this replacement.
+        UNL = '-->'.join(reversed(aList))
+        if with_proto:
+            # return ("file://%s#%s" % (self.v.context.fileName(), UNL)).replace(' ', '%20')
+            s = "unl:" + f"//{self.v.context.fileName()}#{UNL}"
+            return s.replace(' ', '%20')
+        if with_file:
+            return f"{self.v.context.fileName()}#{UNL}"
+        return UNL
+    def hasBack(self):
+        p = self
+        return p.v and p._childIndex > 0
+
+    def hasNext(self):
+        p = self
+        try:
+            parent_v = p._parentVnode()
+                # Returns None if p.v is None.
+            return p.v and parent_v and p._childIndex + 1 < len(parent_v.children)
+        except Exception:
+            g.trace('*** Unexpected exception')
+            g.es_exception()
+            return None
+
+    def hasParent(self):
+        p = self
+        return p.v and p.stack
+
+    def hasThreadBack(self):
+        p = self
+        return p.hasParent() or p.hasBack()
+            # Much cheaper than computing the actual value.
+    def hasThreadNext(self):
+        p = self
+        if not p.v: return False
+        if p.hasChildren() or p.hasNext(): return True
+        n = len(p.stack) - 1
+        while n >= 0:
+            v, childIndex = p.stack[n]
+            # See how many children v's parent has.
+            if n == 0:
+                parent_v = v.context.hiddenRootNode
+            else:
+                parent_v, junk = p.stack[n - 1]
+            if len(parent_v.children) > childIndex + 1:
+                # v has a next sibling.
+                return True
+            n -= 1
+        return False
+    def findRootPosition(self):
+        # 2011/02/25: always use c.rootPosition
+        p = self
+        c = p.v.context
+        return c.rootPosition()
+    def isAncestorOf(self, p2):
+        """Return True if p is one of the direct ancestors of p2."""
+        p = self
+        c = p.v.context
+        if not c.positionExists(p2):
+            return False
+        for z in p2.stack:
+            # 2013/12/25: bug fix: test childIndices.
+            # This is required for the new per-position expansion scheme.
+            parent_v, parent_childIndex = z
+            if parent_v == p.v and parent_childIndex == p._childIndex:
+                return True
+        return False
+    def isCloned(self):
+        p = self
+        return p.v.isCloned()
+    def isRoot(self):
+        p = self
+        return not p.hasParent() and not p.hasBack()
+    def isVisible(self, c):
+        """Return True if p is visible in c's outline."""
+        p = self
+
+        def visible(p, root=None):
+            for parent in p.parents(copy=False):
+                if parent and parent == root:
+                    # #12.
+                    return True
+                if not c.shouldBeExpanded(parent):
+                    return False
+            return True
+
+        if c.hoistStack:
+            root = c.hoistStack[-1].p
+            if p == root:
+                # #12.
+                return True
+            return root.isAncestorOf(p) and visible(p, root=root)
+        for root in c.rootPosition().self_and_siblings(copy=False):
+            if root == p or root.isAncestorOf(p):
+                return visible(p)
+        return False
+    def level(self):
+        """Return the number of p's parents."""
+        p = self
+        return len(p.stack) if p.v else 0
+
+    simpleLevel = level
+    def positionAfterDeletedTree(self):
+        """Return the position corresponding to p.nodeAfterTree() after this node is
+        deleted. This will be p.nodeAfterTree() unless p.next() exists.
+
+        This method allows scripts to traverse an outline, deleting nodes during the
+        traversal. The pattern is::
+
+            p = c.rootPosition()
+            while p:
+            if <delete p?>:
+                next = p.positionAfterDeletedTree()
+                p.doDelete()
+                p = next
+            else:
+                p.moveToThreadNext()
+
+        This method also allows scripts to *move* nodes during a traversal, **provided**
+        that nodes are moved to a "safe" spot so that moving a node does not change the
+        position of any other nodes.
+
+        For example, the move-marked-nodes command first creates a **move node**, called
+        'Clones of marked nodes'. All moved nodes become children of this move node.
+        **Inserting** these nodes as children of the "move node" does not change the
+        positions of other nodes. **Deleting** these nodes *may* change the position of
+        nodes, but the pattern above handles this complication cleanly.
+        """
+        p = self
+        next = p.next()
+        if next:
+            # The new position will be the same as p, except for p.v.
+            p = p.copy()
+            p.v = next.v
+            return p
+        return p.nodeAfterTree()
+    def textOffset(self):
+        """
+        Return the fcol offset of self.
+        Return None if p is has no ancestor @<file> node.
+        http://tinyurl.com/5nescw
+        """
+        p = self
+        found, offset = False, 0
+        for p in p.self_and_parents(copy=False):
+            if p.isAnyAtFileNode():
+                # Ignore parent of @<file> node.
+                found = True
+                break
+            parent = p.parent()
+            if not parent:
+                break
+            # If p is a section definition, search the parent for the reference.
+            # Otherwise, search the parent for @others.
+            h = p.h.strip()
+            i = h.find('<<')
+            j = h.find('>>')
+            target = h[i : j + 2] if -1 < i < j else '@others'
+            for s in parent.b.split('\n'):
+                if s.find(target) > -1:
+                    offset += g.skip_ws(s, 0)
+                    break
+        return offset if found else None
     /*
        These methods are only for the use of low-level code
        in leoNodes.py, leoFileCommands.py and leoUndo.py.
@@ -649,7 +887,7 @@ export class Position {
             p.v = parent_v.children[n - 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                        //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -666,7 +904,7 @@ export class Position {
             p._childIndex = 0;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                        //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -685,7 +923,7 @@ export class Position {
             p._childIndex = n - 1;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                        //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -720,7 +958,7 @@ export class Position {
             p.v = parent_v.children[n + 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                        //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -752,7 +990,7 @@ export class Position {
             p._childIndex = n;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                        //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -769,7 +1007,7 @@ export class Position {
             p._childIndex = item[1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                        //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -817,7 +1055,7 @@ export class Position {
     /**
      * Move a position to the position of the previous visible node.
      */
-    public moveToVisBack(c:Commander): Position {
+    public moveToVisBack(c:Commander): Position|undefined {
         const p:Position = this;
         const visLimit:{limit:Position, visible:boolean} = c.visLimit();
         const limit:Position = visLimit.limit;
@@ -825,21 +1063,27 @@ export class Position {
         while  (p.__bool__()){
             // Short-circuit if possible.
             const back:Position = p.back();
-            if back.__bool__() && back.hasChildren() && back.isExpanded(){
-                p.moveToThreadBack()
+            if( back.__bool__() && back.hasChildren() && back.isExpanded()){
+                p.moveToThreadBack();
             }
-            else if( back.__bool__()){
-                p.moveToBack()
+            else if(back.__bool__()){
+                p.moveToBack();
             } else{
-                p.moveToParent()  // Same as p.moveToThreadBack()
+                p.moveToParent();  // Same as p.moveToThreadBack()
             }
-            if p:
-                if limit:
-                    done, val = self.checkVisBackLimit(limit, limitIsVisible, p)
-                    if done:
+            if (p.__bool__()){
+                if(limit){
+                    let done:boolean;
+                    let val:Position|undefined;
+                    [done, val] = this.checkVisBackLimit(limit, limitIsVisible, p);
+                    if (done){
                         return val;  // A position or None
-                if p.isVisible(c):
+                    }
+                }
+                if( p.isVisible(c)){
                     return p;
+                }
+            }
         }
         return p;
     }
@@ -847,24 +1091,24 @@ export class Position {
     /**
      * Return done, p or None
      */
-    public checkVisBackLimit(limit:Position, limitIsVisible:boolean, p:Position): {done: boolean; p:Position|undefined;} {
+    public checkVisBackLimit(limit:Position, limitIsVisible:boolean, p:Position): [ boolean, Position|undefined] {
         c = p.v.context;
         if (limit === p){
             if (limitIsVisible && p.isVisible(c)){
-                return {done:true, p:p};
+                return [true, p];
             }
-            return {done:true, p:undefined};
+            return [true, undefined];
         }
         if (limit.isAncestorOf(p)){
-            return  {done:false, p:undefined};
+            return  [false, undefined];
         }
-        return  {done:true, p:undefined};
+        return  [true, undefined];
     }
 
     /**
      * Move a position to the position of the next visible node.
      */
-    public moveToVisNext(c:Commander):Position {
+    public moveToVisNext(c:Commander):Position|undefined {
         const p:Position = this;
         const visLimit:{limit:Position, visible:boolean} = c.visLimit();
         const limit:Position = visLimit.limit;
@@ -881,11 +1125,14 @@ export class Position {
             }else{
                 p.moveToThreadNext();
             }
-            if p:
-                if limit and self.checkVisNextLimit(limit, p):
-                    return None
-                if p.isVisible(c):
-                    return p
+            if(p){
+                if (limit && this.checkVisNextLimit(limit, p)){
+                    return undefined;
+                }
+                if( p.isVisible(c)){
+                    return p;
+                }
+            }
         }
         return p;
     }
@@ -903,42 +1150,62 @@ export class Position {
      */
     public safeMoveToThreadNext(): Position {
         const p:Position = this;
-        if p.v:
-            child_v = p.v.children and p.v.children[0]
-            if child_v:
-                for parent in p.self_and_parents(copy=False):
-                    if child_v == parent.v:
-                        g.error(f"vnode: {child_v} is its own parent")
+        if(p.v){
+            const child_v:VNode| false = !!p.v.children.length && p.v.children[0];
+            if(child_v){
+                let brokeFor:boolean= false;
+                for(let parent of p.self_and_parents(false)){
+                    if(child_v.fileIndex === parent.v.fileIndex){
+                        g.error(`vnode: ${child_v} is its own parent`);
                         // Allocating a new vnode would be difficult.
                         // Just remove child_v from parent.v.children.
-                        parent.v.children = [
-                            v2 for v2 in parent.v.children if not v2 == child_v]
-                        if parent.v in child_v.parents:
-                            child_v.parents.remove(parent.v)
+                        parent.v.children = [];
+                        for(let v2 of parent.v.children){
+                            if(v2.fileIndex !== child_v.fileIndex){
+                                parent.v.children .push(v2);
+                            }
+                        }
+                        if(child_v.parents.includes(parent.v)){
+                            // child_v.parents.remove(parent.v);
+                            const index = child_v.parents.indexOf(parent.v);
+                            if (index > -1) {
+                                child_v.parents.splice(index, 1);
+                            }
+                        }
                         // Try not to hang.
-                        p.moveToParent()
-                        break
-                    elif child_v.fileIndex == parent.v.fileIndex:
+                        p.moveToParent();
+                        brokeFor= true;
+                        break;
+                    }else if( child_v.fileIndex === parent.v.fileIndex){
                         g.error(
-                            f"duplicate gnx: {child_v.fileIndex!r} "
-                            f"v: {child_v} parent: {parent.v}")
-                        child_v.fileIndex = gNodeIndices.getNewIndex(v=child_v)
-                        assert child_v.gnx != parent.v.gnx
+                            `duplicate gnx: ${child_v.fileIndex} ` +
+                            `v: ${child_v} parent: ${parent.v}`);
+                        child_v.fileIndex = g.app.nodeIndices.getNewIndex(child_v);
+                        console.assert(child_v.gnx !== parent.v.gnx);
                         // Should be ok to continue.
-                        p.moveToFirstChild()
-                        break
-                else:
-                    p.moveToFirstChild()
-            elif p.hasNext():
-                p.moveToNext()
-            else:
-                p.moveToParent()
-                while p:
-                    if p.hasNext():
-                        p.moveToNext()
-                        break  // found
-                    p.moveToParent()
+                        p.moveToFirstChild();
+                        brokeFor= true;
+                        break;
+                    }
+                }
+                if(!brokeFor){
+                    //  for else
+                    p.moveToFirstChild();
+                }
+            }else if(p.hasNext()){
+                p.moveToNext();
+            }else{
+                p.moveToParent();
+                while (p){
+                    if(p.hasNext()){
+                        p.moveToNext();
+                        break;  // found
+                    }
+                    p.moveToParent();
                 // not found.
+                }
+            }
+        }
         return p;
     }
 
@@ -976,15 +1243,17 @@ export class Position {
      * Because of the undo command we never actually delete vnodes.
      */
     public doDelete(newNode?:Position): void {
-        p = self
+        const p:Position = this;
         p.setDirty(); // Mark @file nodes dirty!
-        sib = p.copy();
-        while sib.hasNext():
+        const sib = p.copy();
+        while (sib.hasNext()){
             sib.moveToNext();
-            if sib == newNode:
+            if (!!newNode && sib.__eq__(newNode)){
                 // Adjust newNode._childIndex if newNode is a following sibling of p.
-                newNode._childIndex -= 1
+                newNode._childIndex -= 1;
                 break;
+            }
+        }
         p._unlink();
     }
 
@@ -993,9 +1262,9 @@ export class Position {
      * Returns the newly created position.
      */
     public insertAfter(): Position {
-        p = self;
-        context = p.v.context;
-        p2 = self.copy();
+        const p:Position = this;
+        const context:Commander = p.v.context;
+        const p2:Position  = this.copy();
         p2.v = new VNode(context);
         p2.v.iconVal = 0;
         p2._linkAfter(p);
@@ -1007,153 +1276,173 @@ export class Position {
      * Returns the newly created position.
      */
     public insertAsLastChild():Position {
-        p = self
-        n = p.numberOfChildren()
-        return p.insertAsNthChild(n)
+        const p:Position = this;
+        const n:number = p.numberOfChildren();
+        return p.insertAsNthChild(n);
     }
 
     /**
-    Inserts a new node as the the nth child of self.
-        self must have at least n-1 children.
-
-        Returns the newly created position.
+     * Inserts a new node as the the nth child of self.
+     * self must have at least n-1 children.
+     * Returns the newly created position.
      */
     public  insertAsNthChild(n): Position {
-        p = self; context = p.v.context
-        p2 = self.copy()
-        p2.v = VNode(context=context)
-        p2.v.iconVal = 0
-        p2._linkAsNthChild(p, n)
+        const p:Position = this;
+        const context:Commander = p.v.context;
+        const p2:Position = this.copy();
+        p2.v = new VNode(context);
+        p2.v.iconVal = 0;
+        p2._linkAsNthChild(p, n);
         return p2;
     }
 
-
-
     /**
-    Inserts a new position before self.
-
-        Returns the newly created position.
-
+     * Inserts a new position before self.
+     * Returns the newly created position.
      */
     public insertBefore(): Position {
-        p = self
-        parent = p.parent()
-        if p.hasBack():
-            back = p.getBack()
-            p = back.insertAfter()
-        elif parent:
-            p = parent.insertAsNthChild(0)
-        else:
-            p = p.insertAfter()
+        let p:Position = this;
+        const parent:Position = p.parent();
+        let back:Position;
+        if (p.hasBack()){
+            back = p.getBack();
+            p = back.insertAfter();
+        }else if( parent.__bool__()){
+            p = parent.insertAsNthChild(0);
+        }else{
+            p = p.insertAfter();
             p.moveToRoot()
-        return p
+        }
+        return p;
     }
 
-    public  invalidOutline(message): void {
-        p = self
-        if p.hasParent():
-            node = p.parent()
-        else:
-            node = p
-        p.v.context.alert(f"invalid outline: {message}\n{node}")
+    /**
+     * Prints out error message about invalid outline
+     */
+    public invalidOutline(message:string): void {
+        const p:Position = this;
+        let node:Position;
+        if (p.hasParent()){
+            node = p.parent();
+        }   else{
+            node = p;
+        }
+        p.v.context.alert(`invalid outline: ${message}\n${node}`);
     }
 
     /**
      * Move a position after position a.
-     */ 
-    public moveAfter( a): Position {
-        p = self  # Do NOT copy the position!
-        a._adjustPositionBeforeUnlink(p)
-        p._unlink()
-        p._linkAfter(a)
-        return p
+     */
+    public moveAfter(a:Position): Position {
+        const p:Position = this;  // Do NOT copy the position!
+        a._adjustPositionBeforeUnlink(p);
+        p._unlink();
+        p._linkAfter(a);
+        return p;
     }
 
     /**
      * Move a position to the first child of parent.
      */
-    public  moveToFirstChildOf(parent): Position {
-        p = self  # Do NOT copy the position!
+    public  moveToFirstChildOf(parent:Position): Position {
+        const p:Position = this; // Do NOT copy the position!
         return p.moveToNthChildOf(parent, 0);  // Major bug fix: 2011/12/04
     }
 
     /**
      * Move a position to the last child of parent.
      */
-    public moveToLastChildOf(parent): Position{
-        p = self  # Do NOT copy the position!
-        n = parent.numberOfChildren()
-        if p.parent() == parent:
-            n -= 1  # 2011/12/10: Another bug fix.
+    public moveToLastChildOf(parent:Position): Position{
+        const p:Position = this;  // Do NOT copy the position!
+        let n:number = parent.numberOfChildren();
+        if( p.parent().__eq__(parent)){
+            n -= 1;  // 2011/12/10: Another bug fix.
+        }
         return p.moveToNthChildOf(parent, n);  // Major bug fix: 2011/12/04
     }
 
     /**
-     * 
+     * Move a position to the nth child of parent.
      */
-    public  moveToNthChildOf(self, parent, n):
-        """Move a position to the nth child of parent."""
-        p = self  # Do NOT copy the position!
-        parent._adjustPositionBeforeUnlink(p)
-        p._unlink()
-        p._linkAsNthChild(parent, n)
-        return p
+    public moveToNthChildOf(parent:Position, n:number):Position {
+        const p:Position = this;  // Do NOT copy the position!
+        parent._adjustPositionBeforeUnlink(p);
+        p._unlink();
+        p._linkAsNthChild(parent, n);
+        return p;
+    }
+
     /**
-     * 
+     * Move self to the root position.
      */
-    public moveToRoot(self):
-        """Move self to the root position."""
-        p = self  # Do NOT copy the position!
-        #
-        # #1631. The old root can not possibly be affected by unlinking p.
-        p._unlink()
-        p._linkAsRoot()
-        return p
+    public moveToRoot():Position{
+        const p:Position = this;  //  Do NOT copy the position!
+        // #1631. The old root can not possibly be affected by unlinking p.
+        p._unlink();
+        p._linkAsRoot();
+        return p;
+    }
+
     /**
-     * 
+     * A low-level promote helper.
      */
-    public promote(self):
-        """A low-level promote helper."""
-        p = self  # Do NOT copy the position.
-        parent_v = p._parentVnode()
-        children = p.v.children
-        # Add the children to parent_v's children.
-        n = p.childIndex() + 1
-        z = parent_v.children[:]
-        parent_v.children = z[:n]
-        parent_v.children.extend(children)
-        parent_v.children.extend(z[n:])
-        # Remove v's children.
-        p.v.children = []
-        # Adjust the parent links in the moved children.
-        # There is no need to adjust descendant links.
-        for child in children:
-            child.parents.remove(p.v)
-            child.parents.append(parent_v)
+    public promote():void {
+        const p:Position = this; //  Do NOT copy the position.
+        const parent_v:VNode = p._parentVnode()!;
+        const children: VNode[] = p.v.children;
+        // Add the children to parent_v's children.
+        const n:number = p.childIndex() + 1;
+        const z:VNode[] = [... parent_v.children];
+        parent_v.children = z.slice(0,n);
+        parent_v.children.push(...children);
+        parent_v.children.push(...z.slice(n));
+        // Remove v's children.
+        p.v.children = [];
+        // Adjust the parent links in the moved children.
+        // There is no need to adjust descendant links.
+        for (let child of children){
+            // child.parents.remove(p.v);
+            const index = child.parents.indexOf(p.v);
+            if (index > -1) {
+                child.parents.splice(index, 1);
+            }
+            child.parents.push(parent_v);
+        }
+    }
+
     /**
-     *  This routine checks the structure of the receiver's tree.
+     * This routine checks the structure of the receiver's tree.
      */
-    public validateOutlineWithParent(self, pv):
-        p = self
-        result = True  # optimists get only unpleasant surprises.
-        parent = p.getParent()
-        childIndex = p._childIndex
-        if parent != pv:
-            p.invalidOutline("Invalid parent link: " + repr(parent))
-        if pv:
-            if childIndex < 0:
-                p.invalidOutline("missing childIndex" + childIndex)
-            elif childIndex >= pv.numberOfChildren():
-                p.invalidOutline("missing children entry for index: " + childIndex)
-        elif childIndex < 0:
-            p.invalidOutline("negative childIndex" + childIndex)
-        if not p.v and pv:
-            self.invalidOutline("Empty t")
-        # Recursively validate all the children.
-        for child in p.children():
-            r = child.validateOutlineWithParent(p)
-            if not r: result = False
-        return result
+    public validateOutlineWithParent(pv:Position):boolean{
+        const p:Position = this;
+        let result:boolean = true;  // optimists get only unpleasant surprises.
+        const parent:Position = p.getParent();
+        const childIndex:number = p._childIndex;
+        if (!parent.__eq__(pv)){
+            p.invalidOutline("Invalid parent link: " + JSON. stringify(parent));
+        }
+        if( pv.__bool__()){
+            if(childIndex < 0){
+                p.invalidOutline("missing childIndex" + childIndex);
+            }else if(childIndex >= pv.numberOfChildren()){
+                p.invalidOutline("missing children entry for index: " + childIndex);
+            }
+        }else if(childIndex < 0){
+            p.invalidOutline("negative childIndex" + childIndex);
+        }
+        if( !p.v && pv.__bool__()){
+            this.invalidOutline("Empty t");
+        }
+        // Recursively validate all the children.
+        for(let child of p.children()){
+            const r:boolean = child.validateOutlineWithParent(p);
+            if(!r){
+                result = false;
+            }
+        }
+        return result;
+    }
+
 
 }
 
@@ -1317,22 +1606,22 @@ export class VNode {
     }
 
     public __repr__():string{
-        return f"<VNode {self.gnx} {self.headString()}>"
+        return `<VNode ${this.gnx} ${this.headString()}>`;
     }
 
-    public dumpLink(link):string{
-        return link if link else "<none>";
+    public dumpLink(link:string):string{
+        return link?link:"<none>";
     }
 
     public dump(label=""):void {
         const v: VNode = this;
         const s:string = '-'.repeat(10);
-        print(`${s} ${label} ${v}`);
-        // print('gnx: %s' % v.gnx)
-        print(`parents.length: {v.parents.length}`);
-        print(`children.length: {v.children.length}`);
-        print(`parents: ${g.listToString(v.parents)}`);
-        print(`children: ${g.listToString(v.children)}`);
+        console.log(`${s} ${label} ${v}`);
+        // console.log('gnx: %s' % v.gnx)
+        console.log(`parents.length: {v.parents.length}`);
+        console.log(`children.length: {v.children.length}`);
+        console.log(`parents: ${g.listToString(v.parents)}`);
+        console.log(`children: ${g.listToString(v.children)}`);
     }
 
     /**
