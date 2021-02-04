@@ -409,185 +409,225 @@ export class Position {
         return this.v.children.length;
     }
 
-    # These methods are useful abbreviations.
-    # Warning: they make copies of positions, so they should be used _sparingly_
+    // These methods are useful abbreviations.
+    // Warning: they make copies of positions, so they should be used _sparingly_
 
-    def getBack(self): return self.copy().moveToBack()
+    public getBack():Position {return this.copy().moveToBack();}
 
-    def getFirstChild(self): return self.copy().moveToFirstChild()
+    public getFirstChild():Position {return this.copy().moveToFirstChild();}
 
-    def getLastChild(self): return self.copy().moveToLastChild()
+    public getLastChild():Position {return this.copy().moveToLastChild();}
 
-    def getLastNode(self): return self.copy().moveToLastNode()
-    # def getLastVisible   (self): return self.copy().moveToLastVisible()
+    public getLastNode():Position {return this.copy().moveToLastNode();}
+    // def getLastVisible   (): return this.copy().moveToLastVisible();
 
-    def getNext(self): return self.copy().moveToNext()
+    public getNext():Position {return this.copy().moveToNext();}
 
-    def getNodeAfterTree(self): return self.copy().moveToNodeAfterTree()
+    public getNodeAfterTree():Position {return this.copy().moveToNodeAfterTree();}
 
-    def getNthChild(self, n): return self.copy().moveToNthChild(n)
+    public getNthChild(n:number):Position {return this.copy().moveToNthChild(n);}
 
-    def getParent(self): return self.copy().moveToParent()
+    public getParent():Position {return this.copy().moveToParent();}
 
-    def getThreadBack(self): return self.copy().moveToThreadBack()
+    public getThreadBack():Position {return this.copy().moveToThreadBack();}
 
-    def getThreadNext(self): return self.copy().moveToThreadNext()
-    # New in Leo 4.4.3 b2: add c args.
+    public getThreadNext():Position {return this.copy().moveToThreadNext();}
+    // New in Leo 4.4.3 b2: add c args.
 
-    def getVisBack(self, c): return self.copy().moveToVisBack(c)
+    public getVisBack(c:Commander):Position {return this.copy().moveToVisBack(c)!;}
 
-    def getVisNext(self, c): return self.copy().moveToVisNext(c)
-    # These are efficient enough now that iterators are the normal way to traverse the tree!
-    back = getBack
-    firstChild = getFirstChild
-    lastChild = getLastChild
-    lastNode = getLastNode
-    # lastVisible   = getLastVisible # New in 4.2 (was in tk tree code).
-    next = getNext
-    nodeAfterTree = getNodeAfterTree
-    nthChild = getNthChild
-    parent = getParent
-    threadBack = getThreadBack
-    threadNext = getThreadNext
-    visBack = getVisBack
-    visNext = getVisNext
-    # New in Leo 4.4.3:
-    hasVisBack = visBack
-    hasVisNext = visNext
-    def get_UNL(
-        self,
-        with_file=True,
-        with_proto=False,
-        with_index=True,
-        with_count=False,
-    ):
-        """
-        with_file=True - include path to Leo file
-        with_proto=False - include 'file://'
-        with_index - include ',x' at end where x is child index in parent
-        with_count - include ',x,y' at end where y zero based count of same headlines
-        """
-        aList = []
-        for i in self.self_and_parents(copy=False):
-            if with_index or with_count:
-                count = 0
-                ind = 0
-                p = i.copy()
-                while p.hasBack():
-                    ind = ind + 1
-                    p.moveToBack()
-                    if i.h == p.h:
-                        count = count + 1
-                aList.append(i.h.replace('-->', '--%3E') + ":" + str(ind))
-                    # g.recursiveUNLFind and sf.copy_to_my_settings undo this replacement.
-                if count or with_count:
-                    aList[-1] = aList[-1] + "," + str(count)
-            else:
-                aList.append(i.h.replace('-->', '--%3E'))
-                    # g.recursiveUNLFind  and sf.copy_to_my_settings undo this replacement.
-        UNL = '-->'.join(reversed(aList))
-        if with_proto:
-            # return ("file://%s#%s" % (self.v.context.fileName(), UNL)).replace(' ', '%20')
-            s = "unl:" + f"//{self.v.context.fileName()}#{UNL}"
-            return s.replace(' ', '%20')
-        if with_file:
-            return f"{self.v.context.fileName()}#{UNL}"
-        return UNL
-    def hasBack(self):
-        p = self
-        return p.v and p._childIndex > 0
+    public getVisNext(c:Commander):Position {return this.copy().moveToVisNext(c)!;}
 
-    def hasNext(self):
-        p = self
-        try:
-            parent_v = p._parentVnode()
-                # Returns None if p.v is None.
-            return p.v and parent_v and p._childIndex + 1 < len(parent_v.children)
-        except Exception:
-            g.trace('*** Unexpected exception')
-            g.es_exception()
-            return None
+    /**
+     * with_file = True - include path to Leo file
+     * with_proto = False - include 'file://'
+     * with_index - include ',x' at end where x is child index in parent
+     * with_count - include ',x,y' at end where y zero based count of same headlines
+     */
+    public get_UNL(with_file?=true, with_proto?=false, with_index?=true, with_count?=false):string {
+        const aList:string[] = [];
+        for(let i of this.self_and_parents(false)){
+            if( with_index || with_count){
+                let count:number = 0;
+                let ind:number = 0;
+                const p:Position = i.copy();
+                while( p.hasBack()){
+                    ind = ind + 1;
+                    p.moveToBack();
+                    if(i.h === p.h){
+                        count = count + 1;
+                    }
+                }
+                aList.push(i.h.replace('-->', '--%3E') + ":" + ind.toString());
+                    // g.recursiveUNLFind and sf.copy_to_my_settings undo this replacement.
+                if( count || with_count){
+                    aList[-1] = aList[-1] + "," + count.toString();
+                }
+            }else{
+                aList.push(i.h.replace('-->', '--%3E'));
+                    // g.recursiveUNLFind  and sf.copy_to_my_settings undo this replacement.
+            }
+        }
 
-    def hasParent(self):
-        p = self
-        return p.v and p.stack
+        const UNL:string = aList.reverse().join('-->');
+        if (with_proto){
+            // return ("file://%s#%s" % (self.v.context.fileName(), UNL)).replace(' ', '%20')
+            const s:string = "unl:" + `//${this.v.context.fileName()}#${UNL}`;
+            return s.replace(' ', '%20');
+        }
+        if(with_file){
+            return `${this.v.context.fileName()}#${UNL}`;
+        }
+        return UNL;
+    }
 
-    def hasThreadBack(self):
-        p = self
-        return p.hasParent() or p.hasBack()
-            # Much cheaper than computing the actual value.
-    def hasThreadNext(self):
-        p = self
-        if not p.v: return False
-        if p.hasChildren() or p.hasNext(): return True
-        n = len(p.stack) - 1
-        while n >= 0:
-            v, childIndex = p.stack[n]
-            # See how many children v's parent has.
-            if n == 0:
-                parent_v = v.context.hiddenRootNode
-            else:
-                parent_v, junk = p.stack[n - 1]
-            if len(parent_v.children) > childIndex + 1:
-                # v has a next sibling.
-                return True
-            n -= 1
-        return False
-    def findRootPosition(self):
-        # 2011/02/25: always use c.rootPosition
-        p = self
-        c = p.v.context
-        return c.rootPosition()
-    def isAncestorOf(self, p2):
-        """Return True if p is one of the direct ancestors of p2."""
-        p = self
-        c = p.v.context
-        if not c.positionExists(p2):
-            return False
-        for z in p2.stack:
-            # 2013/12/25: bug fix: test childIndices.
-            # This is required for the new per-position expansion scheme.
-            parent_v, parent_childIndex = z
-            if parent_v == p.v and parent_childIndex == p._childIndex:
-                return True
-        return False
-    def isCloned(self):
-        p = self
-        return p.v.isCloned()
-    def isRoot(self):
-        p = self
-        return not p.hasParent() and not p.hasBack()
-    def isVisible(self, c):
-        """Return True if p is visible in c's outline."""
-        p = self
+    public hasBack():boolean{
+        const p:Position = this;
+        return p.v && p._childIndex > 0;
+    }
 
-        def visible(p, root=None):
-            for parent in p.parents(copy=False):
-                if parent and parent == root:
-                    # #12.
-                    return True
-                if not c.shouldBeExpanded(parent):
-                    return False
-            return True
+    public hasNext():boolean|undefined{
+        const p:Position = this;
+        try{
+            const parent_v:VNode = p._parentVnode();
+                // Returns None if p.v is None.
+            return p.v && parent_v && p._childIndex + 1 < parent_v.children.length;
+        }
+        catch (Exception){
+            g.trace('*** Unexpected exception');
+            g.es_exception();
+            return undefined;
+        }
+    }
 
-        if c.hoistStack:
-            root = c.hoistStack[-1].p
-            if p == root:
-                # #12.
-                return True
-            return root.isAncestorOf(p) and visible(p, root=root)
-        for root in c.rootPosition().self_and_siblings(copy=False):
-            if root == p or root.isAncestorOf(p):
-                return visible(p)
-        return False
-    def level(self):
-        """Return the number of p's parents."""
-        p = self
-        return len(p.stack) if p.v else 0
+    public hasParent():boolean{
+        const p:Position = this;
+        return p.v && !!p.stack.length;
+    }
 
-    simpleLevel = level
-    def positionAfterDeletedTree(self):
-        """Return the position corresponding to p.nodeAfterTree() after this node is
+    public hasThreadBack():boolean{
+        const p:Position = this;
+        return p.hasParent() || p.hasBack();
+            // Much cheaper than computing the actual value.
+    }
+
+    public hasThreadNext():boolean{
+        const p:Position = this;
+        if(!p.v){
+            return false;
+        }
+        if( p.hasChildren() || p.hasNext()){
+            return true;
+        }
+        let n:number = p.stack.length - 1;
+        while( n >= 0){
+            let v:VNode;
+            let childIndex:number;
+            let parent_v:VNode;
+            [v, childIndex] = p.stack[n];
+            // See how many children v's parent has.
+            if (n === 0){
+                parent_v = v.context.hiddenRootNode;
+            }else{
+                parent_v= p.stack[n - 1][0];
+            }
+            if (parent_v.children.length > childIndex + 1){
+                // v has a next sibling.
+                return true;
+            }
+            n -= 1;
+        }
+        return false;
+    }
+
+    public findRootPosition():Position{
+        // 2011/02/25: always use c.rootPosition
+        const p:Position = this;
+        const c:Commander = p.v.context;
+        return c.rootPosition();
+    }
+
+    /**
+     * Return True if p is one of the direct ancestors of p2.
+     */
+    public isAncestorOf(p2:Position):boolean{
+        const p:Position = this;
+        const c:Commander = p.v.context;
+        if(!c.positionExists(p2)){
+            return false;
+        }
+        for(let z of p2.stack){
+            // 2013/12/25: bug fix: test childIndices.
+            // This is required for the new per-position expansion scheme.
+            let parent_v:VNode;
+            let parent_childIndex:number;
+            [parent_v, parent_childIndex] = z;
+            if(
+                parent_v.fileIndex === p.v.fileIndex &&
+                parent_childIndex === p._childIndex
+            ){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public isCloned():boolean{
+        const p:Position = this;
+        return p.v.isCloned();
+    }
+
+    public isRoot():boolean {
+        const p:Position = this;
+        return !p.hasParent() && !p.hasBack();
+    }
+
+    /**
+     * Return True if p is visible in c's outline.
+     */
+    public isVisible(c:Commander):boolean {
+        const p:Position = this;
+
+        function visible(p:Position, root?:Position){
+            for (let parent of p.parents(false)){
+                if (parent.__bool__() && parent.__eq__(root)){
+                    // #12.
+                    return true;
+                }
+                if(!c.shouldBeExpanded(parent)){
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        if(c.hoistStack.length){
+            const root:Position = c.hoistStack[-1].p;
+            if(p.__eq__(root)){
+                // #12.
+                return true;
+            }
+            return root.isAncestorOf(p) && visible(p, root);
+        }
+        for(let root of c.rootPosition().self_and_siblings(false)){
+            if( root.__eq__(p) || root.isAncestorOf(p)){
+                return visible(p);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return the number of p's parents.
+     */
+    public level():number {
+        const p:Position = this;
+        return p.v?p.stack.length:0;
+    }
+
+    /**
+     * * * * * * * * * * * * * * * * * * * * * * * * * * *
+        Return the position corresponding to p.nodeAfterTree() after this node is
         deleted. This will be p.nodeAfterTree() unless p.next() exists.
 
         This method allows scripts to traverse an outline, deleting nodes during the
@@ -611,42 +651,58 @@ export class Position {
         **Inserting** these nodes as children of the "move node" does not change the
         positions of other nodes. **Deleting** these nodes *may* change the position of
         nodes, but the pattern above handles this complication cleanly.
-        """
-        p = self
-        next = p.next()
-        if next:
-            # The new position will be the same as p, except for p.v.
-            p = p.copy()
-            p.v = next.v
-            return p
-        return p.nodeAfterTree()
-    def textOffset(self):
-        """
+     * * * * * * * * * * * * * * * * * * * * * * * * * * *
+     */
+    public positionAfterDeletedTree():Position {
+        const p:Position = this;
+        const next:Position = p.next();
+        if(next.__bool__()){
+            // The new position will be the same as p, except for p.v.
+            p = p.copy();
+            p.v = next.v;
+            return p;
+        }
+        return p.nodeAfterTree();
+    }
+
+    /**
+     * """
         Return the fcol offset of self.
         Return None if p is has no ancestor @<file> node.
         http://tinyurl.com/5nescw
         """
-        p = self
-        found, offset = False, 0
-        for p in p.self_and_parents(copy=False):
-            if p.isAnyAtFileNode():
-                # Ignore parent of @<file> node.
-                found = True
-                break
-            parent = p.parent()
-            if not parent:
-                break
-            # If p is a section definition, search the parent for the reference.
-            # Otherwise, search the parent for @others.
-            h = p.h.strip()
-            i = h.find('<<')
-            j = h.find('>>')
-            target = h[i : j + 2] if -1 < i < j else '@others'
-            for s in parent.b.split('\n'):
-                if s.find(target) > -1:
-                    offset += g.skip_ws(s, 0)
-                    break
-        return offset if found else None
+     */
+    public textOffset():number|undefined {
+        const p1:Position = this;
+        let found:boolean =false;
+        let offset:number= 0;
+        for(let p of p1.self_and_parents(false)){
+            if (p.isAnyAtFileNode()){
+                // Ignore parent of @<file> node.
+                found = true;
+                break;
+            }
+            const parent:Position = p.parent();
+            if (!parent.__bool__()){
+                break;
+            }
+            // If p is a section definition, search the parent for the reference.
+            // Otherwise, search the parent for @others.
+            const h:string = p.h.strip();
+            const i:number = h.indexOf('<<');
+            const j:number = h.indexOf('>>');
+            // const target:string = h[i : j + 2] if -1 < i < j else '@others'
+            const target:string = (-1 < i && i < j)?h.slice(i, j+2):'@others';
+            for (let s of parent.b.split('\n')){
+                if (s.indexOf(target) > -1){
+                    offset += g.skip_ws(s, 0);
+                    break;
+                }
+            }
+        }
+        return found?offset:undefined;
+    }
+
     /*
        These methods are only for the use of low-level code
        in leoNodes.py, leoFileCommands.py and leoUndo.py.
@@ -887,7 +943,7 @@ export class Position {
             p.v = parent_v.children[n - 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                        //@ts-ignore
+                                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -904,7 +960,7 @@ export class Position {
             p._childIndex = 0;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                        //@ts-ignore
+                                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -923,7 +979,7 @@ export class Position {
             p._childIndex = n - 1;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                        //@ts-ignore
+                                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -958,7 +1014,7 @@ export class Position {
             p.v = parent_v.children[n + 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                        //@ts-ignore
+                                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -990,7 +1046,7 @@ export class Position {
             p._childIndex = n;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                        //@ts-ignore
+                                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1007,7 +1063,7 @@ export class Position {
             p._childIndex = item[1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                        //@ts-ignore
+                                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1454,12 +1510,12 @@ export interface Position {
     lastNode: () => Position;
     next: () => Position;
     nodeAfterTree: () => Position;
-    nthChild: () => Position;
+    nthChild: (n:number) => Position;
     parent: () => Position;
     threadBack: () => Position;
     threadNext: () => Position;
-    visBack: () => Position;
-    visNext: () => Position;
+    hasVisBack: (c:Commander) => Position;
+    hasVisNext: (c:Commander) => Position;
     hasVisBack: () => Position;
     hasVisNext: () => Position;
     hasFirstChild: () => boolean;
@@ -1468,9 +1524,9 @@ export interface Position {
     isAtNoSentFileNode: () => boolean;
     isAtAsisFileNode: () => boolean;
     __repr__: () => string;
+    simpleLevel: ()=>number;
 }
 
-/*
 Position.prototype.back = Position.prototype.getBack;
 Position.prototype.firstChild = Position.prototype.getFirstChild;
 Position.prototype.lastChild = Position.prototype.getLastChild;
@@ -1496,8 +1552,7 @@ Position.prototype.atAsisFileNodeName = Position.prototype.atSilentFileNodeName;
 Position.prototype.isAtNoSentFileNode = Position.prototype.isAtNoSentinelsFileNode;
 Position.prototype.isAtAsisFileNode = Position.prototype.isAtSilentFileNode;
 Position.prototype.__repr__ = Position.prototype.__str__;
-*/
-
+Position.prototype.simpleLevel = Position.prototype.level;
 /**
  * PosList extends a regular array by adding helper methods
  */
