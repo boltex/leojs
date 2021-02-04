@@ -513,7 +513,7 @@
 <v t="felix.20210102024358.1"><vh>ni.setTimeStamp</vh></v>
 </v>
 <v t="felix.20210102015005.1"><vh>class Position</vh>
-<v t="felix.20210126210412.1"><vh> p.ctor &amp; other special methods...</vh>
+<v t="felix.20210126210412.1"><vh>p.ctor &amp; other special methods...</vh>
 <v t="felix.20210126210419.1"><vh>p.constructor</vh></v>
 <v t="felix.20210126210412.3"><vh>p.__eq__ &amp; __ne__</vh></v>
 <v t="felix.20210126210412.4"><vh>p.__ge__ &amp; __le__&amp; __lt__</vh></v>
@@ -6216,10 +6216,10 @@ export interface Position {
     parent: () =&gt; Position;
     threadBack: () =&gt; Position;
     threadNext: () =&gt; Position;
+    visBack: (c:Commander) =&gt; Position;
+    visNext: (c:Commander) =&gt; Position;
     hasVisBack: (c:Commander) =&gt; Position;
     hasVisNext: (c:Commander) =&gt; Position;
-    hasVisBack: () =&gt; Position;
-    hasVisNext: () =&gt; Position;
     hasFirstChild: () =&gt; boolean;
     atNoSentFileNodeName: () =&gt; string;
     atAsisFileNodeName: () =&gt; string;
@@ -6243,8 +6243,8 @@ Position.prototype.threadNext = Position.prototype.getThreadNext;
 Position.prototype.visBack = Position.prototype.getVisBack;
 Position.prototype.visNext = Position.prototype.getVisNext;
 // New in Leo 4.4.3:
-Position.prototype.hasVisBack = Position.prototype.visBack;
-Position.prototype.hasVisNext = Position.prototype.visNext;
+Position.prototype.hasVisBack = Position.prototype.getVisBack;
+Position.prototype.hasVisNext = Position.prototype.getVisNext;
 // from p.children &amp; parents
 Position.prototype.hasFirstChild = Position.prototype.hasChildren;
 // New names, less confusing
@@ -9603,8 +9603,8 @@ public moveToVisBack(c:Commander): Position|undefined {
  * Return done, p or None
  */
 public checkVisBackLimit(limit:Position, limitIsVisible:boolean, p:Position): [ boolean, Position|undefined] {
-    c = p.v.context;
-    if (limit === p){
+    const c:Commander = p.v.context;
+    if (limit.__eq__(p)){
         if (limitIsVisible &amp;&amp; p.isVisible(c)){
             return [true, p];
         }
@@ -10024,9 +10024,9 @@ public validateOutlineWithParent(pv:Position):boolean{
  */
 public clone(): Position {
     const p:Position = this;
-    p2 = p.copy()  # Do *not* copy the VNode!
-    p2._linkAfter(p)  # This should "just work"
-    return p2
+    const p2:Position  = p.copy();  // Do *not* copy the VNode!
+    p2._linkAfter(p); // This should "just work"
+    return p2;
 }
 
 </t>
@@ -10096,7 +10096,7 @@ public insertAsLastChild():Position {
  * self must have at least n-1 children.
  * Returns the newly created position.
  */
-public  insertAsNthChild(n): Position {
+public  insertAsNthChild(n:number): Position {
     const p:Position = this;
     const context:Commander = p.v.context;
     const p2:Position = this.copy();

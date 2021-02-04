@@ -1148,8 +1148,8 @@ export class Position {
      * Return done, p or None
      */
     public checkVisBackLimit(limit:Position, limitIsVisible:boolean, p:Position): [ boolean, Position|undefined] {
-        c = p.v.context;
-        if (limit === p){
+        const c:Commander = p.v.context;
+        if (limit.__eq__(p)){
             if (limitIsVisible && p.isVisible(c)){
                 return [true, p];
             }
@@ -1271,9 +1271,9 @@ export class Position {
      */
     public clone(): Position {
         const p:Position = this;
-        p2 = p.copy()  # Do *not* copy the VNode!
-        p2._linkAfter(p)  # This should "just work"
-        return p2
+        const p2:Position  = p.copy();  // Do *not* copy the VNode!
+        p2._linkAfter(p); // This should "just work"
+        return p2;
     }
 
     public copy(): Position {
@@ -1342,7 +1342,7 @@ export class Position {
      * self must have at least n-1 children.
      * Returns the newly created position.
      */
-    public  insertAsNthChild(n): Position {
+    public  insertAsNthChild(n:number): Position {
         const p:Position = this;
         const context:Commander = p.v.context;
         const p2:Position = this.copy();
@@ -1514,10 +1514,10 @@ export interface Position {
     parent: () => Position;
     threadBack: () => Position;
     threadNext: () => Position;
+    visBack: (c:Commander) => Position;
+    visNext: (c:Commander) => Position;
     hasVisBack: (c:Commander) => Position;
     hasVisNext: (c:Commander) => Position;
-    hasVisBack: () => Position;
-    hasVisNext: () => Position;
     hasFirstChild: () => boolean;
     atNoSentFileNodeName: () => string;
     atAsisFileNodeName: () => string;
@@ -1541,8 +1541,8 @@ Position.prototype.threadNext = Position.prototype.getThreadNext;
 Position.prototype.visBack = Position.prototype.getVisBack;
 Position.prototype.visNext = Position.prototype.getVisNext;
 // New in Leo 4.4.3:
-Position.prototype.hasVisBack = Position.prototype.visBack;
-Position.prototype.hasVisNext = Position.prototype.visNext;
+Position.prototype.hasVisBack = Position.prototype.getVisBack;
+Position.prototype.hasVisNext = Position.prototype.getVisNext;
 // from p.children & parents
 Position.prototype.hasFirstChild = Position.prototype.hasChildren;
 // New names, less confusing
