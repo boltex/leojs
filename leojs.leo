@@ -524,6 +524,11 @@
 <v t="felix.20210126210412.9"><vh>p.dump</vh></v>
 <v t="felix.20210126210412.10"><vh>p.key &amp; p.sort_key &amp; __hash__</vh></v>
 </v>
+<v t="felix.20210204224730.1"><vh>p.File Conversion</vh>
+<v t="felix.20210204224730.2"><vh>p.convertTreeToString</vh></v>
+<v t="felix.20210204224730.3"><vh>p.moreHead</vh></v>
+<v t="felix.20210204224730.4"><vh>p.moreBody</vh></v>
+</v>
 <v t="felix.20210102031032.1"><vh>p.generators</vh>
 <v t="felix.20210102031240.1"><vh>p.children</vh></v>
 </v>
@@ -9743,7 +9748,7 @@ public moveToBack():Position {
         p.v = parent_v.children[n - 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9761,7 +9766,7 @@ public moveToFirstChild():Position{
         p._childIndex = 0;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9781,7 +9786,7 @@ public moveToLastChild():Position{
         p._childIndex = n - 1;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9818,7 +9823,7 @@ public moveToNext():Position{
         p.v = parent_v.children[n + 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9852,7 +9857,7 @@ public moveToNthChild(n:number):Position {
         p._childIndex = n;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9870,7 +9875,7 @@ public moveToParent():Position {
         p._childIndex = item[1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -10312,7 +10317,7 @@ public archivedPosition(root_p?:Position):number[]{
     return link?link:"&lt;none&gt;";
 }
 
-public dump(label?=""):void {
+public dump(label?:string):void {
     const p:Position = this;
     if (p.v){
         p.v.dump();  // Don't print a label
@@ -11094,7 +11099,7 @@ public getVisNext(c:Commander):Position {return this.copy().moveToVisNext(c)!;}
  * with_index - include ',x' at end where x is child index in parent
  * with_count - include ',x,y' at end where y zero based count of same headlines
  */
-public get_UNL(with_file?=true, with_proto?=false, with_index?=true, with_count?=false):string {
+public get_UNL(with_file=true, with_proto=false, with_index=true, with_count=false):string {
     const aList:string[] = [];
     for(let i of this.self_and_parents(false)){
         if( with_index || with_count){
@@ -11140,7 +11145,7 @@ public get_UNL(with_file?=true, with_proto?=false, with_index?=true, with_count?
 public hasNext():boolean|undefined{
     const p:Position = this;
     try{
-        const parent_v:VNode = p._parentVnode();
+        const parent_v:VNode = p._parentVnode()!;
             // Returns None if p.v is None.
         return p.v &amp;&amp; parent_v &amp;&amp; p._childIndex + 1 &lt; parent_v.children.length;
     }
@@ -11313,7 +11318,7 @@ public level():number {
  * * * * * * * * * * * * * * * * * * * * * * * * * * *
  */
 public positionAfterDeletedTree():Position {
-    const p:Position = this;
+    let p:Position = this;
     const next:Position = p.next();
     if(next.__bool__()){
         // The new position will be the same as p, except for p.v.
@@ -11361,6 +11366,72 @@ public textOffset():number|undefined {
         }
     }
     return found?offset:undefined;
+}
+
+</t>
+<t tx="felix.20210204224730.1">/*
+    - convertTreeToString and moreHead can't be VNode methods because they use level().
+    - moreBody could be anywhere: it may as well be a postion method.
+*/
+
+</t>
+<t tx="felix.20210204224730.2">/**
+ * Convert a positions  suboutline to a string in MORE format.
+ */
+public convertTreeToString():string {
+    const p1:Position = this;
+    const level1 = p1.level();
+    const array:string[] = [];
+    for(let p of p1.self_and_subtree(false)){
+        array.push(p.moreHead(level1) + '\n');
+        const body:string = p.moreBody();
+        if(body){
+            array.push(body + '\n');
+        }
+    }
+    return array.join('');
+}
+
+</t>
+<t tx="felix.20210204224730.3">/**
+ * Return the headline string in MORE format.
+ */
+public moreHead(firstLevel:number, useVerticalBar?:boolean):string {
+    // useVerticalBar is unused, but it would be useful in over-ridden methods.
+    const p:Position = this;
+    const level:number = this.level() - firstLevel;
+    const plusMinus:string = p.hasChildren()?"+":"-";
+    const pad: string = '\t'.repeat(level);
+    return `${pad}${plusMinus} ${p.h}`;
+}
+
+</t>
+<t tx="felix.20210204224730.4">/*
+    + test line
+    - test line
+    \ test line
+    test line +
+    test line -
+    test line \
+    More lines...
+*/
+
+/**
+ * Returns the body string in MORE format.
+ * Inserts a backslash before any leading plus, minus or backslash.
+ */
+public moreBody():string {
+    const p:Position = this;
+    const array:string[] = [];
+    const lines:string[] = p.b.split('\n');
+    for(let s of lines){
+        const i:number = g.skip_ws(s, 0);
+        if(i &lt; s.length &amp;&amp; ['+', '-', '\\'].includes(s[i])){
+            s = s.slice(0,i) + '\\' + s.slice(i);
+        }
+        array.push(s);
+    }
+    return array.join('\n');
 }
 
 </t>
