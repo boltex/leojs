@@ -357,6 +357,249 @@ export class Position {
         }
     }
 
+    // * Compatibility with old code...
+    // children_iter = children
+
+    /**
+     * Yield all siblings positions that follow p, not including p.
+     */
+    public *following_siblings(copy: boolean = true): Generator<Position> {
+        let p:Position = this;
+        p = p.next();
+        while(p.__bool__()){
+            yield (copy ? p.copy() : p);
+            p.moveToNext();
+        }
+    }
+
+    // * Compatibility with old code...
+    // following_siblings_iter = following_siblings
+
+    /**
+     * A generator yielding all the root positions "near" p1 = self that
+        satisfy the given predicate. p.isAnyAtFileNode is the default
+        predicate.
+
+        The search first proceeds up the p's tree. If a root is found, this
+        generator yields just that root.
+
+        Otherwise, the generator yields all nodes in p.subtree() that satisfy
+        the predicate. Once a root is found, the generator skips its subtree.
+     */
+    public *nearest_roots(copy=true, predicate?: (p:Position) => boolean ): Generator<Position> {
+        if(!predicate){
+            // pylint: disable=function-redefined
+            predicate = function(p:Position):boolean {
+                return p.isAnyAtFileNode();
+            };
+        }
+
+        // First, look up the tree.
+        let p1:Position =  this;
+        for(let p of p1.self_and_parents(false)){
+            if(predicate(p)){
+                yield (copy ? p.copy() : p);
+                return;
+            }
+        }
+        
+        // Next, look for all .md files in the tree.
+        const after:Position = p1.nodeAfterTree();
+        const p:Position = p1;
+        while(p.__bool__() && !p.__eq__(after)){
+            if (predicate(p)){
+                yield (copy ? p.copy() : p);
+                p.moveToNodeAfterTree();
+            }else{
+                p.moveToThreadNext();
+            }
+        }
+    }
+
+    /**
+     *  A generator yielding all unique root positions "near" p1 = self that
+        satisfy the given predicate. p.isAnyAtFileNode is the default
+        predicate.
+
+        The search first proceeds up the p's tree. If a root is found, this
+        generator yields just that root.
+
+        Otherwise, the generator yields all unique nodes in p.subtree() that
+        satisfy the predicate. Once a root is found, the generator skips its
+        subtree.
+     */
+    public *nearest_unique_roots(copy=true, predicate?: (p:Position) => boolean): Generator<Position> {
+        if(!predicate){
+            // pylint: disable=function-redefined
+            predicate = function(p:Position):boolean {
+                return p.isAnyAtFileNode();
+            };
+        }
+        
+        // First, look up the tree.
+        let p1:Position =  this;
+        for(let p of p1.self_and_parents(false)){
+            if(predicate(p)){
+                yield (copy ? p.copy() : p);
+                return;
+            }
+        }
+        
+        // Next, look for all unique .md files in the tree.
+        const seen: VNode[] = [];
+        const after:Position = p1.nodeAfterTree();
+        const p:Position = p1;
+        while(p.__bool__() && !p.__eq__(after)){
+            if (predicate(p)){
+                if (!seen.includes(p.v)){
+                    seen.push(p.v);
+                    yield (copy ? p.copy() : p);
+                }
+                p.moveToNodeAfterTree();
+            }else{
+                p.moveToThreadNext();
+            }
+        }
+    }
+
+    // * Compatibility with old code...
+    // nearest = nearest_unique_roots
+
+    /**
+     * Yield p.v and all vnodes in p's subtree.
+     */
+    public *nodes(): Generator<VNode> {
+        let p:Position =  this;
+        p = p.copy();
+        const after:Position = p.nodeAfterTree();
+        while(p.__bool__() && !p.__eq__(after)){  // bug fix: 2013/10/12
+            yield p.v;
+            p.moveToThreadNext();
+        }
+    }
+
+    // * Compatibility with old code.
+    // tnodes_iter = nodes
+    // vnodes_iter = nodes
+
+    /**
+     * Yield all parent positions of p.
+     */
+    public *parents(copy:boolean=true): Generator<Position> {
+        let p:Position =  this;
+        p = p.parent();
+        while(p.__bool__()){
+            yield (copy ? p.copy() : p);
+            p.moveToParent();
+        }
+    }
+
+    // * Compatibility with old code...
+    // parents_iter = parents
+
+    /**
+     * Yield p and all parent positions of p.
+     */
+    public *self_and_parents(copy:boolean=true): Generator<Position> {
+        let p:Position =  this;
+        p = p.copy();
+        while(p.__bool__()){
+            yield (copy ? p.copy() : p);
+            p.moveToParent();
+        }
+    }
+
+    // * Compatibility with old code...
+    // self_and_parents_iter = self_and_parents
+
+    /**
+     * Yield all sibling positions of p including p.
+     */
+    public *self_and_siblings(copy:boolean=true): Generator<Position> {
+        let p:Position =  this;
+        p = p.copy();
+        while (p.hasBack()){
+            p.moveToBack();
+        }
+        while(p.__bool__()){
+            yield (copy ? p.copy() : p);
+            p.moveToNext();
+        }
+    }
+
+    // * Compatibility with old code...
+    // self_and_siblings_iter = self_and_siblings
+
+    /**
+     * Yield p and all positions in p's subtree.
+     */
+    public *self_and_subtree(copy:boolean=true): Generator<Position> {
+        let p:Position =  this;
+        p = p.copy();
+        const after:Position  = p.nodeAfterTree();
+        while(p.__bool__() && !p.__eq__(after)){
+            yield (copy ? p.copy() : p);
+            p.moveToThreadNext();
+        }
+    }
+
+    // * Compatibility with old code...
+    // self_and_subtree_iter = self_and_subtree
+
+    /**
+     * Yield all positions in p's subtree, but not p.
+     */
+    public *subtree(copy:boolean=true): Generator<Position> {
+        let p:Position =  this;
+        p = p.copy();
+        const after:Position  = p.nodeAfterTree();
+        p.moveToThreadNext();
+        while(p.__bool__() && !p.__eq__(after)){
+            yield (copy ? p.copy() : p);
+            p.moveToThreadNext();
+        }
+    }
+
+    //* Compatibility with old code...
+    // subtree_iter = subtree
+
+    /**
+     * Yield p.v and all unique vnodes in p's subtree.
+     */
+    public *unique_nodes(): Generator<Position> {
+        const p:Position =  this;
+        const seen: VNode[] = [];
+        for(let p of p.self_and_subtree(false)){
+            if (!seen.includes(p.v)){
+                seen.push(p.v);
+                yield p.v;
+            }
+        }
+    }
+
+    // * Compatibility with old code.
+    // unique_tnodes_iter = unique_nodes
+    // nique_vnodes_iter = unique_nodes
+
+    /**
+     * Yield p and all other unique positions in p's subtree.
+     */
+    public *unique_subtree(copy:boolean=true): Generator<Position> {
+        const p:Position =  this;
+        const seen: VNode[] = [];
+        for(let p of p.subtree()){
+            if (!seen.includes(p.v)){
+                seen.push(p.v);
+                // Fixed bug 1255208: p.unique_subtree returns vnodes, not positions.
+                yield (copy ? p.copy() : p);
+            }
+        }
+    }
+
+    // * Compatibility with old code...
+    // subtree_with_unique_tnodes_iter = unique_subtree
+    // subtree_with_unique_vnodes_iter = unique_subtree
+
     public anyAtFileNodeName(): any {
         return this.v.anyAtFileNodeName();
     }
@@ -652,7 +895,7 @@ export class Position {
 
         function visible(p:Position, root?:Position){
             for (let parent of p.parents(false)){
-                if (parent.__bool__() && parent.__eq__(root)){
+                if (parent.__bool__() && parent.__eq__(root!)){
                     // #12.
                     return true;
                 }
@@ -1005,7 +1248,7 @@ export class Position {
             p.v = parent_v.children[n - 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                        //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1022,7 +1265,7 @@ export class Position {
             p._childIndex = 0;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                        //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1041,7 +1284,7 @@ export class Position {
             p._childIndex = n - 1;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                        //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1076,7 +1319,7 @@ export class Position {
             p.v = parent_v.children[n + 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                        //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1108,7 +1351,7 @@ export class Position {
             p._childIndex = n;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                        //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1125,7 +1368,7 @@ export class Position {
             p._childIndex = item[1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                        //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1429,7 +1672,7 @@ export class Position {
             p = parent.insertAsNthChild(0);
         }else{
             p = p.insertAfter();
-            p.moveToRoot()
+            p.moveToRoot();
         }
         return p;
     }
