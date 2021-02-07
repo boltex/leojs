@@ -1248,7 +1248,7 @@ export class Position {
             p.v = parent_v.children[n - 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1265,7 +1265,7 @@ export class Position {
             p._childIndex = 0;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1284,7 +1284,7 @@ export class Position {
             p._childIndex = n - 1;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1319,7 +1319,7 @@ export class Position {
             p.v = parent_v.children[n + 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1351,7 +1351,7 @@ export class Position {
             p._childIndex = n;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1368,7 +1368,7 @@ export class Position {
             p._childIndex = item[1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1473,7 +1473,6 @@ export class Position {
         const p:Position = this;
         const visLimit:[Position, boolean] = c.visLimit();
         const limit:Position = visLimit[0];
-        const limitIsVisible:boolean = visLimit[1];
         while (p.__bool__()){
             if(p.hasChildren()){
                 if(p.isExpanded()){
@@ -1906,6 +1905,155 @@ export class Position {
         p.v.u = val;
     }
 
+    /**
+     * Contract p.v and clear p.v.expandedPositions list.
+     */
+    public contract():void {
+        const p:Position =  this;
+        const v:VNode = this.v;
+        v.expandedPositions = v.expandedPositions.filter(z=>!z.__eq__(p));
+        v.contract();
+    }
+
+    public expand():void {
+        const p:Position =  this;
+        const v:VNode = this.v;
+        v.expandedPositions = v.expandedPositions.filter(z=>!z.__eq__(p));
+        let isBreak:boolean=false;
+        for(let p2 of v.expandedPositions){
+            if(p.__eq__(p2)){
+                isBreak = true;
+                break;
+            }
+        }
+        if(!isBreak){
+            v.expandedPositions.push(p.copy());
+        }
+        v.expand();
+    }
+
+    public isExpanded():boolean {
+        const p:Position =  this;
+        if(p.isCloned()){
+            const c:Commander = p.v.context;
+            return c.shouldBeExpanded(p);
+        }
+        return p.v.isExpanded();
+    }
+
+    // Clone bits are no longer used.
+    // Dirty bits are handled carefully by the position class.
+
+    public clearMarked():void { return this.v.clearMarked(); }
+
+    public clearOrphan():void { return this.v.clearOrphan(); }
+
+    public clearVisited():void { return this.v.clearVisited(); }
+
+    public initExpandedBit():void { return this.v.initExpandedBit(); }
+
+    public initMarkedBit():void { return this.v.initMarkedBit(); }
+
+    public initStatus(status:number):void { return this.v.initStatus(status); }
+
+    public setMarked():void { return this.v.setMarked(); }
+
+    public setOrphan():void { return this.v.setOrphan(); }
+
+    public setSelected():void { return this.v.setSelected(); }
+
+    public setVisited():void { return this.v.setVisited(); }
+
+    public computeIcon():number {
+        return this.v.computeIcon();
+    }
+
+    public setIcon():void {
+        // Compatibility routine for old scripts
+    }
+
+    public setSelection(start:number, length:number):void {
+        return this.v.setSelection(start, length);
+    }
+
+    public restoreCursorAndScroll(): void {
+        this.v.restoreCursorAndScroll();
+    }
+
+    public saveCursorAndScroll():void {
+        this.v.saveCursorAndScroll();
+    }
+
+    public setBodyString(s:string):void{
+        const p:Position =  this;
+        return p.v.setBodyString(s);
+    }
+
+    public initHeadString(s:string):void{
+        const p:Position =  this;
+        p.v.initHeadString(s);
+    }
+
+    public setHeadString(s:string):void{
+        const p:Position =  this;
+        p.v.initHeadString(s);
+        p.setDirty();
+    }
+
+    // Compatibility routine for scripts.
+
+    public clearVisitedInTree():void {
+        for(let p of this.self_and_subtree(false)){
+            p.clearVisited();
+        }
+    }
+
+    public clearAllVisitedInTree():void {
+        for(let p of this.self_and_subtree(false)){
+            p.v.clearVisited();
+            p.v.clearWriteBit();
+        }
+    }
+
+    /**
+     * (p) Set p.v dirty.
+     */
+    public clearDirty():void {
+        const p:Position =  this;
+        p.v.clearDirty();
+    }
+
+    /**
+     * Returns True if position p or one of p's parents is an @ignore node.
+     */
+    public inAtIgnoreRange():boolean {
+        const p1:Position =  this;
+        for(let p of p1.self_and_parents(false)){
+            if(p.isAtIgnoreNode()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Set all ancestor @<file> nodes dirty, including ancestors of all clones of p.
+     */
+    public setAllAncestorAtFileNodesDirty():void {
+        const p:Position =  this;
+        p.v.setAllAncestorAtFileNodesDirty();
+    }
+
+    /** 
+     * Mark a node and all ancestor @file nodes dirty.
+     * p.setDirty() is no longer expensive.
+     */
+    public setDirty(): void {
+        const p:Position =  this;
+        p.v.setAllAncestorAtFileNodesDirty();
+        p.v.setDirty();
+    }
+
 
 }
 
@@ -1932,6 +2080,10 @@ export interface Position {
     isAtAsisFileNode: () => boolean;
     __repr__: () => string;
     simpleLevel: ()=>number;
+
+    initBodyString : (s:string)=>void;
+    setTnodeText: (s:string)=>void;
+    scriptSetBodyString : (s:string)=>void;
 }
 
 Position.prototype.back = Position.prototype.getBack;
@@ -1960,6 +2112,11 @@ Position.prototype.isAtNoSentFileNode = Position.prototype.isAtNoSentinelsFileNo
 Position.prototype.isAtAsisFileNode = Position.prototype.isAtSilentFileNode;
 Position.prototype.__repr__ = Position.prototype.__str__;
 Position.prototype.simpleLevel = Position.prototype.level;
+
+Position.prototype.initBodyString = Position.prototype.setBodyString;
+Position.prototype.setTnodeText = Position.prototype.setBodyString;
+Position.prototype.scriptSetBodyString = Position.prototype.setBodyString;
+
 /**
  * PosList extends a regular array by adding helper methods
  */
@@ -2017,7 +2174,7 @@ enum StatusFlags {
 }
 
 /**
- * * Closes any body pane opened in this vscode window instance
+ * VNode class.
  */
 export class VNode {
 
@@ -2844,16 +3001,15 @@ export interface VNode {
     atAsisFileNodeName: () => any;
     isAtNoSentFileNode: () => any;
     isAtAsisFileNode: () => any;
-    initBodyString: () => any;
-    initHeadString: () => any;
-    setHeadText: () => any;
-    setTnodeText: () => any;
+    initBodyString: (s:string) => void;
+    initHeadString: (s:string) => void;
+    setHeadText: (s:string) => void;
+    setTnodeText: (s:string) => void;
     __str__:() => string;
-
 }
 
 // New names, less confusing
-/*
+
 VNode.prototype.atNoSentFileNodeName = VNode.prototype.atNoSentinelsFileNodeName;
 VNode.prototype.atAsisFileNodeName = VNode.prototype.atSilentFileNodeName;
 VNode.prototype.isAtNoSentFileNode = VNode.prototype.isAtNoSentinelsFileNode;
@@ -2863,6 +3019,5 @@ VNode.prototype.setHeadText = VNode.prototype.setHeadString;
 VNode.prototype.initHeadString = VNode.prototype.setHeadString;
 VNode.prototype.setTnodeText = VNode.prototype.setBodyString;
 VNode.prototype.__str__ = VNode.prototype.__repr__;
-*/
 
 

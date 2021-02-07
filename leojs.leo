@@ -629,6 +629,26 @@
 <v t="felix.20210206014421.6"><vh>p.nosentinels property</vh></v>
 <v t="felix.20210206014421.7"><vh>p.u Property</vh></v>
 </v>
+<v t="felix.20210207005040.1"><vh>p.Setters</vh>
+<v t="felix.20210207005040.2"><vh>p.VNode proxies</vh>
+<v t="felix.20210207005040.3"><vh>p.contract/expand/isExpanded</vh></v>
+<v t="felix.20210207005040.4"><vh>p.Status bits</vh></v>
+<v t="felix.20210207005040.5"><vh>p.computeIcon &amp; p.setIcon</vh></v>
+<v t="felix.20210207005040.6"><vh>p.setSelection</vh></v>
+<v t="felix.20210207005040.7"><vh>p.restore/saveCursorAndScroll</vh></v>
+</v>
+<v t="felix.20210207005040.8"><vh>p.setBodyString &amp; setHeadString</vh></v>
+<v t="felix.20210207005040.9"><vh>p.Visited bits</vh>
+<v t="felix.20210207005040.10"><vh>p.clearVisitedInTree</vh></v>
+<v t="felix.20210207005040.11"><vh>p.clearAllVisitedInTree</vh></v>
+</v>
+<v t="felix.20210207005040.12"><vh>p.Dirty bits</vh>
+<v t="felix.20210207005040.13"><vh>p.clearDirty</vh></v>
+<v t="felix.20210207005040.14"><vh>p.inAtIgnoreRange</vh></v>
+<v t="felix.20210207005040.15"><vh>p.setAllAncestorAtFileNodesDirty</vh></v>
+<v t="felix.20210207005040.16"><vh>p.setDirty</vh></v>
+</v>
+</v>
 </v>
 <v t="felix.20210102015005.3"><vh>class PosList</vh>
 <v t="felix.20210102021644.1"><vh>children</vh></v>
@@ -6251,6 +6271,10 @@ export interface Position {
     isAtAsisFileNode: () =&gt; boolean;
     __repr__: () =&gt; string;
     simpleLevel: ()=&gt;number;
+
+    initBodyString : (s:string)=&gt;void;
+    setTnodeText: (s:string)=&gt;void;
+    scriptSetBodyString : (s:string)=&gt;void;
 }
 
 Position.prototype.back = Position.prototype.getBack;
@@ -6279,6 +6303,11 @@ Position.prototype.isAtNoSentFileNode = Position.prototype.isAtNoSentinelsFileNo
 Position.prototype.isAtAsisFileNode = Position.prototype.isAtSilentFileNode;
 Position.prototype.__repr__ = Position.prototype.__str__;
 Position.prototype.simpleLevel = Position.prototype.level;
+
+Position.prototype.initBodyString = Position.prototype.setBodyString;
+Position.prototype.setTnodeText = Position.prototype.setBodyString;
+Position.prototype.scriptSetBodyString = Position.prototype.setBodyString;
+
 </t>
 <t tx="felix.20210102015005.3">/**
  * PosList extends a regular array by adding helper methods
@@ -6291,7 +6320,7 @@ export class PosList extends Array {
 
 </t>
 <t tx="felix.20210102015917.1">/**
- * * Closes any body pane opened in this vscode window instance
+ * VNode class.
  */
 export class VNode {
 
@@ -6335,16 +6364,15 @@ export interface VNode {
     atAsisFileNodeName: () =&gt; any;
     isAtNoSentFileNode: () =&gt; any;
     isAtAsisFileNode: () =&gt; any;
-    initBodyString: () =&gt; any;
-    initHeadString: () =&gt; any;
-    setHeadText: () =&gt; any;
-    setTnodeText: () =&gt; any;
+    initBodyString: (s:string) =&gt; void;
+    initHeadString: (s:string) =&gt; void;
+    setHeadText: (s:string) =&gt; void;
+    setTnodeText: (s:string) =&gt; void;
     __str__:() =&gt; string;
-
 }
 
 // New names, less confusing
-/*
+
 VNode.prototype.atNoSentFileNodeName = VNode.prototype.atNoSentinelsFileNodeName;
 VNode.prototype.atAsisFileNodeName = VNode.prototype.atSilentFileNodeName;
 VNode.prototype.isAtNoSentFileNode = VNode.prototype.isAtNoSentinelsFileNode;
@@ -6354,7 +6382,6 @@ VNode.prototype.setHeadText = VNode.prototype.setHeadString;
 VNode.prototype.initHeadString = VNode.prototype.setHeadString;
 VNode.prototype.setTnodeText = VNode.prototype.setBodyString;
 VNode.prototype.__str__ = VNode.prototype.__repr__;
-*/
 
 </t>
 <t tx="felix.20210102015917.2">constructor(context: any, gnx?: string) {
@@ -9650,7 +9677,6 @@ public moveToVisNext(c:Commander):Position|undefined {
     const p:Position = this;
     const visLimit:[Position, boolean] = c.visLimit();
     const limit:Position = visLimit[0];
-    const limitIsVisible:boolean = visLimit[1];
     while (p.__bool__()){
         if(p.hasChildren()){
             if(p.isExpanded()){
@@ -9769,7 +9795,7 @@ public moveToBack():Position {
         p.v = parent_v.children[n - 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-        //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9787,7 +9813,7 @@ public moveToFirstChild():Position{
         p._childIndex = 0;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-        //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9807,7 +9833,7 @@ public moveToLastChild():Position{
         p._childIndex = n - 1;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-        //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9844,7 +9870,7 @@ public moveToNext():Position{
         p.v = parent_v.children[n + 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-        //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9878,7 +9904,7 @@ public moveToNthChild(n:number):Position {
         p._childIndex = n;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-        //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9896,7 +9922,7 @@ public moveToParent():Position {
         p._childIndex = item[1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-        //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -11817,5 +11843,170 @@ public set u(val:any) {
 }
 
 </t>
+<t tx="felix.20210207005040.1"></t>
+<t tx="felix.20210207005040.10">// Compatibility routine for scripts.
+
+public clearVisitedInTree():void {
+    for(let p of this.self_and_subtree(false)){
+        p.clearVisited();
+    }
+}
+
+</t>
+<t tx="felix.20210207005040.11">public clearAllVisitedInTree():void {
+    for(let p of this.self_and_subtree(false)){
+        p.v.clearVisited();
+        p.v.clearWriteBit();
+    }
+}
+
+</t>
+<t tx="felix.20210207005040.12"></t>
+<t tx="felix.20210207005040.13">/**
+ * (p) Set p.v dirty.
+ */
+public clearDirty():void {
+    const p:Position =  this;
+    p.v.clearDirty();
+}
+
+</t>
+<t tx="felix.20210207005040.14">/**
+ * Returns True if position p or one of p's parents is an @ignore node.
+ */
+public inAtIgnoreRange():boolean {
+    const p1:Position =  this;
+    for(let p of p1.self_and_parents(false)){
+        if(p.isAtIgnoreNode()){
+            return true;
+        }
+    }
+    return false;
+}
+
+</t>
+<t tx="felix.20210207005040.15">/**
+ * Set all ancestor @&lt;file&gt; nodes dirty, including ancestors of all clones of p.
+ */
+public setAllAncestorAtFileNodesDirty():void {
+    const p:Position =  this;
+    p.v.setAllAncestorAtFileNodesDirty();
+}
+
+</t>
+<t tx="felix.20210207005040.16">/** 
+ * Mark a node and all ancestor @file nodes dirty.
+ * p.setDirty() is no longer expensive.
+ */
+public setDirty(): void {
+    const p:Position =  this;
+    p.v.setAllAncestorAtFileNodesDirty();
+    p.v.setDirty();
+}
+
+</t>
+<t tx="felix.20210207005040.2"></t>
+<t tx="felix.20210207005040.3">/**
+ * Contract p.v and clear p.v.expandedPositions list.
+ */
+public contract():void {
+    const p:Position =  this;
+    const v:VNode = this.v;
+    v.expandedPositions = v.expandedPositions.filter(z=&gt;!z.__eq__(p));
+    v.contract();
+}
+
+public expand():void {
+    const p:Position =  this;
+    const v:VNode = this.v;
+    v.expandedPositions = v.expandedPositions.filter(z=&gt;!z.__eq__(p));
+    let isBreak:boolean=false;
+    for(let p2 of v.expandedPositions){
+        if(p.__eq__(p2)){
+            isBreak = true;
+            break;
+        }
+    }
+    if(!isBreak){
+        v.expandedPositions.push(p.copy());
+    }
+    v.expand();
+}
+
+public isExpanded():boolean {
+    const p:Position =  this;
+    if(p.isCloned()){
+        const c:Commander = p.v.context;
+        return c.shouldBeExpanded(p);
+    }
+    return p.v.isExpanded();
+}
+
+</t>
+<t tx="felix.20210207005040.4">// Clone bits are no longer used.
+// Dirty bits are handled carefully by the position class.
+
+public clearMarked():void { return this.v.clearMarked(); }
+
+public clearOrphan():void { return this.v.clearOrphan(); }
+
+public clearVisited():void { return this.v.clearVisited(); }
+
+public initExpandedBit():void { return this.v.initExpandedBit(); }
+
+public initMarkedBit():void { return this.v.initMarkedBit(); }
+
+public initStatus(status:number):void { return this.v.initStatus(status); }
+
+public setMarked():void { return this.v.setMarked(); }
+
+public setOrphan():void { return this.v.setOrphan(); }
+
+public setSelected():void { return this.v.setSelected(); }
+
+public setVisited():void { return this.v.setVisited(); }
+
+</t>
+<t tx="felix.20210207005040.5">public computeIcon():number {
+    return this.v.computeIcon();
+}
+
+public setIcon():void {
+    // Compatibility routine for old scripts
+}
+
+</t>
+<t tx="felix.20210207005040.6">public setSelection(start:number, length:number):void {
+    return this.v.setSelection(start, length);
+}
+
+</t>
+<t tx="felix.20210207005040.7">public restoreCursorAndScroll(): void {
+    this.v.restoreCursorAndScroll();
+}
+
+public saveCursorAndScroll():void {
+    this.v.saveCursorAndScroll();
+}
+
+</t>
+<t tx="felix.20210207005040.8">public setBodyString(s:string):void{
+    const p:Position =  this;
+    return p.v.setBodyString(s);
+}
+
+public initHeadString(s:string):void{
+    const p:Position =  this;
+    p.v.initHeadString(s);
+}
+
+public setHeadString(s:string):void{
+    const p:Position =  this;
+    p.v.initHeadString(s);
+    p.setDirty();
+}
+
+</t>
+<t tx="felix.20210207005040.9"></t>
 </tnodes>
 </leo_file>
