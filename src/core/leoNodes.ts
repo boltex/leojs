@@ -80,7 +80,7 @@ export class NodeIndices {
  *
  */
 
-export type StackEntry =  [VNode, number];
+export type StackEntry = [VNode, number];
 
 export class Position {
 
@@ -351,7 +351,7 @@ export class Position {
      */
     public *children(copy: boolean = true): Generator<Position> {
         const p = this.firstChild();
-        while (p) {
+        while (p.__bool__()) {
             yield (copy ? p.copy() : p);
             p.moveToNext();
         }
@@ -566,10 +566,10 @@ export class Position {
     /**
      * Yield p.v and all unique vnodes in p's subtree.
      */
-    public *unique_nodes(): Generator<Position> {
-        const p:Position =  this;
+    public *unique_nodes(): Generator<VNode> {
+        const p1:Position =  this;
         const seen: VNode[] = [];
-        for(let p of p.self_and_subtree(false)){
+        for(let p of p1.self_and_subtree(false)){
             if (!seen.includes(p.v)){
                 seen.push(p.v);
                 yield p.v;
@@ -579,15 +579,15 @@ export class Position {
 
     // * Compatibility with old code.
     // unique_tnodes_iter = unique_nodes
-    // nique_vnodes_iter = unique_nodes
+    // unique_vnodes_iter = unique_nodes
 
     /**
      * Yield p and all other unique positions in p's subtree.
      */
     public *unique_subtree(copy:boolean=true): Generator<Position> {
-        const p:Position =  this;
+        const p1:Position =  this;
         const seen: VNode[] = [];
-        for(let p of p.subtree()){
+        for(let p of p1.subtree()){
             if (!seen.includes(p.v)){
                 seen.push(p.v);
                 // Fixed bug 1255208: p.unique_subtree returns vnodes, not positions.
@@ -993,7 +993,7 @@ export class Position {
             }
             // If p is a section definition, search the parent for the reference.
             // Otherwise, search the parent for @others.
-            const h:string = p.h.strip();
+            const h:string = p.h.trim();
             const i:number = h.indexOf('<<');
             const j:number = h.indexOf('>>');
             // const target:string = h[i : j + 2] if -1 < i < j else '@others'
@@ -1248,7 +1248,7 @@ export class Position {
             p.v = parent_v.children[n - 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                        //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1265,7 +1265,7 @@ export class Position {
             p._childIndex = 0;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                        //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1284,7 +1284,7 @@ export class Position {
             p._childIndex = n - 1;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                        //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1319,7 +1319,7 @@ export class Position {
             p.v = parent_v.children[n + 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                        //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1351,7 +1351,7 @@ export class Position {
             p._childIndex = n;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                        //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1368,7 +1368,7 @@ export class Position {
             p._childIndex = item[1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                        //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1418,9 +1418,9 @@ export class Position {
      */
     public moveToVisBack(c:Commander): Position|undefined {
         const p:Position = this;
-        const visLimit:{limit:Position, visible:boolean} = c.visLimit();
-        const limit:Position = visLimit.limit;
-        const limitIsVisible:boolean = visLimit.visible;
+        const visLimit:[Position, boolean] = c.visLimit();
+        const limit:Position = visLimit[0];
+        const limitIsVisible:boolean = visLimit[1];
         while  (p.__bool__()){
             // Short-circuit if possible.
             const back:Position = p.back();
@@ -1471,9 +1471,9 @@ export class Position {
      */
     public moveToVisNext(c:Commander):Position|undefined {
         const p:Position = this;
-        const visLimit:{limit:Position, visible:boolean} = c.visLimit();
-        const limit:Position = visLimit.limit;
-        const limitIsVisible:boolean = visLimit.visible;
+        const visLimit:[Position, boolean] = c.visLimit();
+        const limit:Position = visLimit[0];
+        const limitIsVisible:boolean = visLimit[1];
         while (p.__bool__()){
             if(p.hasChildren()){
                 if(p.isExpanded()){
@@ -1486,7 +1486,7 @@ export class Position {
             }else{
                 p.moveToThreadNext();
             }
-            if(p){
+            if(p.__bool__()){
                 if (limit && this.checkVisNextLimit(limit, p)){
                     return undefined;
                 }
@@ -1557,7 +1557,7 @@ export class Position {
                 p.moveToNext();
             }else{
                 p.moveToParent();
-                while (p){
+                while (p.__bool__()){
                     if(p.hasNext()){
                         p.moveToNext();
                         break;  // found
@@ -1804,6 +1804,108 @@ export class Position {
         return result;
     }
 
+    /**
+     * position body string property
+     */
+    public get b():string{
+        const p:Position =  this;
+        return p.bodyString();
+    }
+
+    /**
+     *  Set the body text of a position.
+     *
+     *  **Warning: the p.b = whatever is *expensive* because it calls
+     *  c.setBodyString().
+     *
+     *  Usually, code *should* use this setter, despite its cost, because it
+     *  update's Leo's outline pane properly. Calling c.redraw() is *not*
+     *  enough.
+     *
+     *  This performance gotcha becomes important for repetitive commands, like
+     *  cff, replace-all and recursive import. In such situations, code should
+     *  use p.v.b instead of p.b.
+     */
+    public set b(val:string) {
+        const p:Position =  this;
+        const c:Commander|false = !!p.v && p.v.context;
+        if (c){
+            c.setBodyString(p, val);
+            // Warning: c.setBodyString is *expensive*.
+        }
+    }
+
+    /**
+     * position property returning the headline string
+     */
+    public get h():string {
+        const p:Position =  this;
+        return p.headString();
+    }
+
+    /**
+     *  Set the headline text of a position.
+     *
+     *  **Warning: the p.h = whatever is *expensive* because it calls
+     *  c.setHeadString().
+     *
+     *  Usually, code *should* use this setter, despite its cost, because it
+     *  update's Leo's outline pane properly. Calling c.redraw() is *not*
+     *  enough.
+     *
+     *  This performance gotcha becomes important for repetitive commands, like
+     *  cff, replace-all and recursive import. In such situations, code should
+     *  use p.v.h instead of p.h.
+     */
+    public set h(val:string) {
+        const p:Position =  this;
+        const c:Commander|false = !!p.v && p.v.context;
+        if (c){
+            c.setHeadString(p, val);
+            // Warning: c.setHeadString is *expensive*.
+        }
+    }
+
+    /**
+     * position gnx property
+     */
+    public get gnx():string{
+        const p:Position =  this;
+        return p.v.fileIndex;
+    }
+
+    /**
+     * position property returning the script formed by p and its descendants
+     */
+    public get script():string {
+        const p:Position =  this;
+        return g.getScript(p.v.context, p,
+            false,  //  Always return the entire expansion.
+            true, // forcePythonSentinels
+            false); // useSentinels
+    }
+
+    /** 
+     * position property returning the body text without sentinels
+     */
+    public get nosentinels():string {
+        const p:Position =  this;
+        return g.splitLines(p.b).filter(z=>!g.isDirective(z)).join('');
+    }
+
+    /**
+     * p.u property
+     */
+    public get u():any {
+        const p:Position =  this;
+        return p.v.u;
+    }
+
+    public set u(val:any) {
+        const p:Position =  this;
+        p.v.u = val;
+    }
+
 
 }
 
@@ -1870,9 +1972,9 @@ export class PosList extends Array {
     public children(): Position[] {
         const res: PosList = new PosList;
         this.forEach((p: Position) => {
-            p.children().forEach(child_p => {
+            for(let child_p of p.children()){
                 res.push(child_p.copy());
-            });
+            }
         });
         return res;
     }
@@ -2255,7 +2357,7 @@ export class VNode {
      */
     public isNthChildOf(n: number, parent_v: VNode): boolean {
         const children: VNode[] | undefined = parent_v ? parent_v.children : undefined;
-        return !!children && 0 <= n && n < children.length && children[n] === this;
+        return !!children && 0 <= n && n < children.length && children[n].fileIndex === this.fileIndex;
     }
 
     public isCloned(): boolean {
@@ -2495,7 +2597,7 @@ export class VNode {
         const hiddenRootVnode: VNode = v.context.hiddenRootNode;
 
         function* v_and_parents(v: VNode): Generator<VNode> {
-            if (v !== hiddenRootVnode) {
+            if (v.fileIndex !== hiddenRootVnode.fileIndex) {
                 yield v;
                 for (let parent_v of v.parents) {
                     yield* v_and_parents(parent_v);
@@ -2536,7 +2638,7 @@ export class VNode {
         console.assert(0 <= n && n <= v.children.length);
         const v2: VNode = new VNode(v.context);
         v2._linkAsNthChild(v, n);
-        console.assert(v.children[n] === v2);
+        console.assert(v.children[n].fileIndex === v2.fileIndex);
         return v2;
     }
 
@@ -2588,12 +2690,12 @@ export class VNode {
     public _cutLink(childIndex:number, parent_v:VNode):void{
         const v: VNode = this;
         v.context.frame.tree.generation += 1;
-        console.assert(parent_v.children[childIndex] === v);
+        console.assert(parent_v.children[childIndex].fileIndex === v.fileIndex);
         parent_v.children.splice(childIndex, 1);
         if( v.parents.includes(parent_v)){
             try{
-                for(let i = 0; i < v.parents.length; i++){ 
-                    if (v.parents[i] === parent_v) {
+                for(let i = 0; i < v.parents.length; i++){
+                    if (v.parents[i].fileIndex === parent_v.fileIndex) {
                         v.parents.splice(i, 1);
                         break;
                     }
@@ -2624,7 +2726,7 @@ export class VNode {
         const v: VNode = this;
         
         for(let i = 0; i < v.parents.length; i++){ 
-            if (v.parents[i] === parent) {
+            if (v.parents[i].fileIndex === parent.fileIndex) {
                 v.parents.splice(i, 1);
                 break;
             }
@@ -2651,7 +2753,7 @@ export class VNode {
         for (let v2 of v.children){
             try{
                 for(let i = 0; i < v2.parents.length; i++){ 
-                    if (v2.parents[i] === v) {
+                    if (v2.parents[i].fileIndex === v.fileIndex) {
                         v2.parents.splice(i, 1);
                         break;
                     }
