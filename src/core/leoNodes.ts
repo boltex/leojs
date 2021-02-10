@@ -600,76 +600,99 @@ export class Position {
     // subtree_with_unique_tnodes_iter = unique_subtree
     // subtree_with_unique_vnodes_iter = unique_subtree
 
-    public anyAtFileNodeName(): any {
+    public anyAtFileNodeName(): string {
         return this.v.anyAtFileNodeName();
     }
-    public atAutoNodeName(): any {
+
+    public atAutoNodeName(): string {
         return this.v.atAutoNodeName();
     }
-    public atCleanNodeName(): any {
+
+    public atCleanNodeName(): string {
         return this.v.atCleanNodeName();
     }
-    public atEditNodeName(): any {
+
+    public atEditNodeName(): string {
         return this.v.atEditNodeName();
     }
-    public atFileNodeName(): any {
+
+    public atFileNodeName(): string {
         return this.v.atFileNodeName();
     }
-    public atNoSentinelsFileNodeName(): any {
+
+    public atNoSentinelsFileNodeName(): string {
         return this.v.atNoSentinelsFileNodeName();
     }
-    public atShadowFileNodeName(): any {
+
+    public atShadowFileNodeName(): string {
         return this.v.atShadowFileNodeName();
     }
-    public atSilentFileNodeName(): any {
+
+    public atSilentFileNodeName(): string {
         return this.v.atSilentFileNodeName();
     }
-    public atThinFileNodeName(): any {
+
+    public atThinFileNodeName(): string {
         return this.v.atThinFileNodeName();
     }
-    public isAnyAtFileNode(): any {
+
+    public isAnyAtFileNode(): boolean {
         return this.v.isAnyAtFileNode();
     }
-    public isAtAllNode(): any {
+
+    public isAtAllNode(): boolean {
         return this.v.isAtAllNode();
     }
-    public isAtAutoNode(): any {
+
+    public isAtAutoNode(): boolean {
         return this.v.isAtAutoNode();
     }
-    public isAtAutoRstNode(): any {
+
+    public isAtAutoRstNode(): boolean {
         return this.v.isAtAutoRstNode();
     }
-    public isAtCleanNode(): any {
+
+    public isAtCleanNode(): boolean {
         return this.v.isAtCleanNode();
     }
-    public isAtEditNode(): any {
+
+    public isAtEditNode(): boolean {
         return this.v.isAtEditNode();
     }
-    public isAtFileNode(): any {
+
+    public isAtFileNode(): boolean {
         return this.v.isAtFileNode();
     }
-    public isAtIgnoreNode(): any {
+
+    public isAtIgnoreNode(): boolean {
         return this.v.isAtIgnoreNode();
     }
-    public isAtNoSentinelsFileNode(): any {
+
+    public isAtNoSentinelsFileNode(): boolean {
         return this.v.isAtNoSentinelsFileNode();
     }
-    public isAtOthersNode(): any {
+
+    public isAtOthersNode(): boolean {
         return this.v.isAtOthersNode();
     }
-    public isAtRstFileNode(): any {
+
+    public isAtRstFileNode(): boolean {
         return this.v.isAtRstFileNode();
     }
-    public isAtSilentFileNode(): any {
+
+    public isAtSilentFileNode(): boolean {
         return this.v.isAtSilentFileNode();
     }
-    public isAtShadowFileNode(): any {
+
+    public isAtShadowFileNode(): boolean {
         return this.v.isAtShadowFileNode();
     }
-    public isAtThinFileNode(): any {
+
+    public isAtThinFileNode(): boolean {
         return this.v.isAtThinFileNode();
     }
-    public matchHeadline(pattern: string): any {
+
+    public matchHeadline(pattern: string): boolean {
         return this.v.matchHeadline(pattern);
     }
 
@@ -1248,7 +1271,7 @@ export class Position {
             p.v = parent_v.children[n - 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1265,7 +1288,7 @@ export class Position {
             p._childIndex = 0;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1284,7 +1307,7 @@ export class Position {
             p._childIndex = n - 1;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1319,7 +1342,7 @@ export class Position {
             p.v = parent_v.children[n + 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1351,7 +1374,7 @@ export class Position {
             p._childIndex = n;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1368,7 +1391,7 @@ export class Position {
             p._childIndex = item[1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -2054,6 +2077,58 @@ export class Position {
         p.v.setDirty();
     }
 
+    /**
+     * Return True if p.b contains an @all directive.
+     */
+    public is_at_all(): boolean {
+        const p:Position =  this;
+        return (
+            p.isAnyAtFileNode() &&
+            !!g.splitLines(p.b).reduce((acc, s):boolean=>{
+                if(g.match_word(s, 0, '@all')){
+                    return true;
+                }else {
+                    return !!acc;
+                }
+            }, false)
+            // any([g.match_word(s, 0, '@all') for s in g.splitLines(p.b)])
+        );
+    }
+
+    /**
+     * Return True if p or one of p's ancestors is an @all node.
+     */
+    public in_at_all_tree():boolean {
+        const p1:Position =  this;
+        for(let p of p1.self_and_parents(false)){
+            if(p.is_at_all()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return True if p is an @ignore node.
+     */
+    public is_at_ignore():boolean {
+        const p:Position =  this;
+        return g.match_word(p.h, 0, '@ignore');
+    }
+
+    /**
+     * Return True if p or one of p's ancestors is an @ignore node
+     */ 
+    public in_at_ignore_tree():boolean {
+        const p1:Position =  this;
+        for(let p of p1.self_and_parents(false)){
+            if(g.match_word(p.h, 0, '@ignore')){
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 }
 
@@ -2187,7 +2262,7 @@ export class VNode {
     parents: VNode[]; // Unordered list of all parents of this node.
 
     // * Other essential data...
-    fileIndex: string; // The immutable fileIndex (gnx) for this node. Set below.
+    fileIndex: string; // The immutable fileIndex (gnx) for this node. Set below.wwwwwwwwwwwww
     iconVal: number; // The present value of the node's icon.
     statusBits: number; // status bits
 
@@ -2195,7 +2270,7 @@ export class VNode {
     // The context containing context.hiddenRootNode.
     // Required so we can compute top-level siblings.
     // It is named .context rather than .c to emphasize its limited usage.
-    context: any;
+    context: Commander;
     expandedPositions: Position[]; // Positions that should be expanded.
 
     // * Cursor location, text selection and scrolling information
@@ -2236,9 +2311,9 @@ export class VNode {
         const v: VNode = this;
         const s:string = '-'.repeat(10);
         console.log(`${s} ${label} ${v}`);
-        // console.log('gnx: %s' % v.gnx)
-        console.log(`parents.length: {v.parents.length}`);
-        console.log(`children.length: {v.children.length}`);
+        // console.log(`gnx: ${v.gnx}`);
+        console.log(`parents.length: ${v.parents.length}`);
+        console.log(`children.length: ${v.children.length}`);
         console.log(`parents: ${g.listToString(v.parents)}`);
         console.log(`children: ${g.listToString(v.children)}`);
     }
@@ -2436,6 +2511,34 @@ export class VNode {
         pattern = g.toUnicode(pattern);
         pattern = pattern.toLowerCase().replace(' ', '').replace('\t', '');
         return h.startsWith(pattern);
+    }
+
+    /**
+     * Return an all-new tree of vnodes that are copies of self and all its
+     * descendants.
+     *
+     * **Important**: the v.parents ivar must be [] for all nodes.
+     * v._addParentLinks will set all parents.
+     */
+    public copyTree(copyMarked?:boolean):VNode {
+        const v:VNode = this;
+        // Allocate a new vnode and gnx with empty children & parents.
+        const v2:VNode = new VNode(v.context);
+        console.assert(v2.parents.length===0, v2.parents.length.toString());
+        console.assert(v2.gnx);
+        console.assert(v.gnx !== v2.gnx);
+        // Copy vnode fields. Do **not** set v2.parents.
+        v2._headString = g.toUnicode(v._headString, null, true);
+        v2._bodyString = g.toUnicode(v._bodyString, null, true);
+        v2.u = JSON.parse(JSON.stringify(v.u)); // Deep Copy 
+        if(copyMarked && v.isMarked()){
+            v2.setMarked();
+        }
+        // Recursively copy all descendant vnodes.
+        for(let child of v.children){
+            v2.children.push(child.copyTree(copyMarked));
+        }
+        return v2;
     }
 
     public bodyString() {
@@ -2669,6 +2772,11 @@ export class VNode {
         this.statusBits |= StatusFlags.writeBit;
     }
 
+    public childrenModified():void {
+        // TODO: needed?
+        // g.childrenModifiedSet.add(this);
+    }
+
     public computeIcon(): number {
         let val: number = 0;
         const v: VNode = this;
@@ -2681,6 +2789,54 @@ export class VNode {
 
     public setIcon(): void {
         //  pass # Compatibility routine for old scripts
+    }
+
+    public contentModified():void {
+        // TODO: needed?
+        // g.contentModifiedSet.add(this);
+    }
+
+    // Called only by LeoTree.selectHelper.
+
+    /**
+     * Restore the cursor position and scroll so it is visible.
+     */
+    public restoreCursorAndScroll(): void {
+        // TODO
+        /*
+        const traceTime:boolean = false && !g.unitTesting;
+        const v:VNode = this;
+        let ins:number = v.insertSpot;
+        // start, n = v.selectionStart, v.selectionLength
+        const spot:number = v.scrollBarSpot;
+        const body: any = this.context.frame.body;
+        const w:any = body.wrapper;
+        // Fix bug 981849: incorrect body content shown.
+        if(ins===undefined){
+           ins = 0;
+        }
+        // This is very expensive for large text.
+        let t1:number;
+        if (traceTime){
+           t1 = time.time();
+        }
+        if(body.wrapper.setInsertPoint && body.wrapper.setInsertPoint!==undefined){
+            w.setInsertPoint(ins);
+        }
+        if (traceTime){
+            const delta_t:number = time.time() - t1;
+            if( delta_t > 0.1){
+                g.trace(`${delta_t} sec`);
+            }
+        }
+        // Override any changes to the scrollbar setting that might
+        // have been done above by w.setSelectionRange or w.setInsertPoint.
+        if (spot !== undefined){
+            w.setYScrollPosition(spot);
+            v.scrollBarSpot = spot;
+        }
+        // Never call w.see here.
+        */
     }
 
     /**
@@ -2906,7 +3062,6 @@ export class VNode {
      */
     public _deleteAllChildren():void {
         const v: VNode = this;
-        
         for (let v2 of v.children){
             try{
                 for(let i = 0; i < v2.parents.length; i++){ 
@@ -2922,7 +3077,6 @@ export class VNode {
                 g.printObj(v2.parents);
             }
         }
-
         v.children = [];
     }
 
@@ -2937,7 +3091,7 @@ export class VNode {
     /**
      * VNode body string property
      */
-    public get b(){
+    public get b():string{
         const v: VNode = this;
         return v.bodyString();
     }
@@ -2950,7 +3104,7 @@ export class VNode {
     /**
      * VNode headline string property
      */
-    public get h(){
+    public get h():string{
         const v: VNode = this;
         return v.headString();
     }
@@ -2963,7 +3117,7 @@ export class VNode {
     /**
      * VNode u property
      */
-    public get u(){
+    public get u():any{
         const v: VNode = this;
         if(!v.unknownAttributes){
             v.unknownAttributes = {};
@@ -2994,13 +3148,12 @@ export class VNode {
 
 }
 
-
 // Aliases for VNode members
 export interface VNode {
-    atNoSentFileNodeName: () => any;
-    atAsisFileNodeName: () => any;
-    isAtNoSentFileNode: () => any;
-    isAtAsisFileNode: () => any;
+    atNoSentFileNodeName: () => string;
+    atAsisFileNodeName: () => string;
+    isAtNoSentFileNode: () => boolean;
+    isAtAsisFileNode: () => boolean;
     initBodyString: (s:string) => void;
     initHeadString: (s:string) => void;
     setHeadText: (s:string) => void;

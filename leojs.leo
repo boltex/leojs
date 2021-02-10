@@ -649,6 +649,10 @@
 <v t="felix.20210207005040.16"><vh>p.setDirty</vh></v>
 </v>
 </v>
+<v t="felix.20210208001026.1"><vh>p.Predicates</vh>
+<v t="felix.20210208001026.2"><vh>p.is_at_all &amp; is_at_all_tree</vh></v>
+<v t="felix.20210208001026.3"><vh>p.is_at_ignore &amp; in_at_ignore_tree</vh></v>
+</v>
 </v>
 <v t="felix.20210102015005.3"><vh>class PosList</vh>
 <v t="felix.20210102021644.1"><vh>children</vh></v>
@@ -673,6 +677,7 @@
 <v t="felix.20210112210731.9"><vh>v.isAtOthersNode</vh></v>
 <v t="felix.20210112210731.10"><vh>v.matchHeadline</vh></v>
 </v>
+<v t="felix.20210207195152.1"><vh>v.copyTree</vh></v>
 <v t="felix.20210102234910.1"><vh>v.Getters</vh>
 <v t="felix.20210102234915.1"><vh>v.bodyString</vh></v>
 <v t="felix.20210102235015.1"><vh>v.Children</vh>
@@ -719,7 +724,10 @@
 <v t="felix.20210115195450.17"><vh>v.setVisited</vh></v>
 <v t="felix.20210115195450.18"><vh>v.setWriteBit</vh></v>
 </v>
+<v t="felix.20210207213301.1"><vh>v.childrenModified</vh></v>
 <v t="felix.20210115195450.19"><vh>v.computeIcon &amp; setIcon</vh></v>
+<v t="felix.20210207213314.1"><vh>v.contentModified</vh></v>
+<v t="felix.20210207213328.1"><vh>v.restoreCursorAndScroll</vh></v>
 <v t="felix.20210115195450.20"><vh>v.saveCursorAndScroll</vh></v>
 <v t="felix.20210115195450.21"><vh>v.setBodyString &amp; v.setHeadString</vh></v>
 <v t="felix.20210115195450.22"><vh>v.setSelection</vh></v>
@@ -6333,7 +6341,7 @@ export class VNode {
     parents: VNode[]; // Unordered list of all parents of this node.
 
     // * Other essential data...
-    fileIndex: string; // The immutable fileIndex (gnx) for this node. Set below.
+    fileIndex: string; // The immutable fileIndex (gnx) for this node. Set below.wwwwwwwwwwwww
     iconVal: number; // The present value of the node's icon.
     statusBits: number; // status bits
 
@@ -6341,7 +6349,7 @@ export class VNode {
     // The context containing context.hiddenRootNode.
     // Required so we can compute top-level siblings.
     // It is named .context rather than .c to emphasize its limited usage.
-    context: any;
+    context: Commander;
     expandedPositions: Position[]; // Positions that should be expanded.
 
     // * Cursor location, text selection and scrolling information
@@ -6357,13 +6365,12 @@ export class VNode {
 
 }
 
-
 // Aliases for VNode members
 export interface VNode {
-    atNoSentFileNodeName: () =&gt; any;
-    atAsisFileNodeName: () =&gt; any;
-    isAtNoSentFileNode: () =&gt; any;
-    isAtAsisFileNode: () =&gt; any;
+    atNoSentFileNodeName: () =&gt; string;
+    atAsisFileNodeName: () =&gt; string;
+    isAtNoSentFileNode: () =&gt; boolean;
+    isAtAsisFileNode: () =&gt; boolean;
     initBodyString: (s:string) =&gt; void;
     initHeadString: (s:string) =&gt; void;
     setHeadText: (s:string) =&gt; void;
@@ -6811,76 +6818,99 @@ public language_extension_dict: { [key: string]: string } = {};
 
 </t>
 <t tx="felix.20210102233013.1"></t>
-<t tx="felix.20210102233013.2">public anyAtFileNodeName(): any {
+<t tx="felix.20210102233013.2">public anyAtFileNodeName(): string {
     return this.v.anyAtFileNodeName();
 }
-public atAutoNodeName(): any {
+
+public atAutoNodeName(): string {
     return this.v.atAutoNodeName();
 }
-public atCleanNodeName(): any {
+
+public atCleanNodeName(): string {
     return this.v.atCleanNodeName();
 }
-public atEditNodeName(): any {
+
+public atEditNodeName(): string {
     return this.v.atEditNodeName();
 }
-public atFileNodeName(): any {
+
+public atFileNodeName(): string {
     return this.v.atFileNodeName();
 }
-public atNoSentinelsFileNodeName(): any {
+
+public atNoSentinelsFileNodeName(): string {
     return this.v.atNoSentinelsFileNodeName();
 }
-public atShadowFileNodeName(): any {
+
+public atShadowFileNodeName(): string {
     return this.v.atShadowFileNodeName();
 }
-public atSilentFileNodeName(): any {
+
+public atSilentFileNodeName(): string {
     return this.v.atSilentFileNodeName();
 }
-public atThinFileNodeName(): any {
+
+public atThinFileNodeName(): string {
     return this.v.atThinFileNodeName();
 }
-public isAnyAtFileNode(): any {
+
+public isAnyAtFileNode(): boolean {
     return this.v.isAnyAtFileNode();
 }
-public isAtAllNode(): any {
+
+public isAtAllNode(): boolean {
     return this.v.isAtAllNode();
 }
-public isAtAutoNode(): any {
+
+public isAtAutoNode(): boolean {
     return this.v.isAtAutoNode();
 }
-public isAtAutoRstNode(): any {
+
+public isAtAutoRstNode(): boolean {
     return this.v.isAtAutoRstNode();
 }
-public isAtCleanNode(): any {
+
+public isAtCleanNode(): boolean {
     return this.v.isAtCleanNode();
 }
-public isAtEditNode(): any {
+
+public isAtEditNode(): boolean {
     return this.v.isAtEditNode();
 }
-public isAtFileNode(): any {
+
+public isAtFileNode(): boolean {
     return this.v.isAtFileNode();
 }
-public isAtIgnoreNode(): any {
+
+public isAtIgnoreNode(): boolean {
     return this.v.isAtIgnoreNode();
 }
-public isAtNoSentinelsFileNode(): any {
+
+public isAtNoSentinelsFileNode(): boolean {
     return this.v.isAtNoSentinelsFileNode();
 }
-public isAtOthersNode(): any {
+
+public isAtOthersNode(): boolean {
     return this.v.isAtOthersNode();
 }
-public isAtRstFileNode(): any {
+
+public isAtRstFileNode(): boolean {
     return this.v.isAtRstFileNode();
 }
-public isAtSilentFileNode(): any {
+
+public isAtSilentFileNode(): boolean {
     return this.v.isAtSilentFileNode();
 }
-public isAtShadowFileNode(): any {
+
+public isAtShadowFileNode(): boolean {
     return this.v.isAtShadowFileNode();
 }
-public isAtThinFileNode(): any {
+
+public isAtThinFileNode(): boolean {
     return this.v.isAtThinFileNode();
 }
-public matchHeadline(pattern: string): any {
+
+public matchHeadline(pattern: string): boolean {
     return this.v.matchHeadline(pattern);
 }
 
@@ -8331,7 +8361,7 @@ public check_gnx(c: Commander, gnx: string, v: VNode): void {
 @tabwidth -4
 
 </t>
-<t tx="felix.20210110223514.1">import { Position } from "./leoNodes";
+<t tx="felix.20210110223514.1">import { Position, VNode, StackEntry } from "./leoNodes";
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
 
@@ -8342,11 +8372,12 @@ import { LeoUI } from '../leoUI';
 export class Commander {
 
     // Official ivars.
-    private _currentPosition: Position | null = null;
-    public hiddenRootNode = null;
+    private _currentPosition: Position | undefined;
+    public hiddenRootNode: VNode | undefined;
     public mFileName: string;
     public mRelativeFileName = null;
     public gui:LeoUI;
+    public frame: any; // TODO : FAKE FRAME
 
     @others
 
@@ -8358,7 +8389,6 @@ export class Commander {
     gui?:LeoUI,
     previousSettings?:any,
     relativeFileName?:any
-
 ) {
     this.mFileName = fileName;
     this.gui = gui || g.app.gui;
@@ -8987,7 +9017,6 @@ public _cutParentLinks(parent: VNode){
  */
 public _deleteAllChildren():void {
     const v: VNode = this;
-    
     for (let v2 of v.children){
         try{
             for(let i = 0; i &lt; v2.parents.length; i++){ 
@@ -9003,7 +9032,6 @@ public _deleteAllChildren():void {
             g.printObj(v2.parents);
         }
     }
-
     v.children = [];
 }
 
@@ -9021,7 +9049,7 @@ public _linkAsNthChild(parent_v:VNode, n:number):void {
 <t tx="felix.20210117160548.2">/**
  * VNode body string property
  */
-public get b(){
+public get b():string{
     const v: VNode = this;
     return v.bodyString();
 }
@@ -9035,7 +9063,7 @@ public set b(val:string){
 <t tx="felix.20210117160548.3">/**
  * VNode headline string property
  */
-public get h(){
+public get h():string{
     const v: VNode = this;
     return v.headString();
 }
@@ -9049,7 +9077,7 @@ public set h(val:string){
 <t tx="felix.20210117160548.4">/**
  * VNode u property
  */
-public get u(){
+public get u():any{
     const v: VNode = this;
     if(!v.unknownAttributes){
         v.unknownAttributes = {};
@@ -9795,7 +9823,7 @@ public moveToBack():Position {
         p.v = parent_v.children[n - 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9813,7 +9841,7 @@ public moveToFirstChild():Position{
         p._childIndex = 0;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9833,7 +9861,7 @@ public moveToLastChild():Position{
         p._childIndex = n - 1;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9870,7 +9898,7 @@ public moveToNext():Position{
         p.v = parent_v.children[n + 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9904,7 +9932,7 @@ public moveToNthChild(n:number):Position {
         p._childIndex = n;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9922,7 +9950,7 @@ public moveToParent():Position {
         p._childIndex = item[1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -10626,9 +10654,9 @@ public dump(label=""):void {
     const v: VNode = this;
     const s:string = '-'.repeat(10);
     console.log(`${s} ${label} ${v}`);
-    // console.log('gnx: %s' % v.gnx)
-    console.log(`parents.length: {v.parents.length}`);
-    console.log(`children.length: {v.children.length}`);
+    // console.log(`gnx: ${v.gnx}`);
+    console.log(`parents.length: ${v.parents.length}`);
+    console.log(`children.length: ${v.children.length}`);
     console.log(`parents: ${g.listToString(v.parents)}`);
     console.log(`children: ${g.listToString(v.children)}`);
 }
@@ -10678,31 +10706,36 @@ export function objToString(obj: any, indent = '', printCaller = false, tag = nu
 
 </t>
 <t tx="felix.20210131011420.1"></t>
-<t tx="felix.20210131011420.10">def isRootPosition(self, p):
-    c = self
+<t tx="felix.20210131011420.10">public isRootPosition(self, p):
+    const c:Commander = this;
     root = c.rootPosition()
-    return p and root and p == root  # 2011/03/03
+    return p and root and p == root  // 2011/03/03
+
 </t>
-<t tx="felix.20210131011420.11">def isChanged(self):
+<t tx="felix.20210131011420.11">public isChanged(self):
     return self.changed
+
 </t>
-<t tx="felix.20210131011420.12">def lastTopLevel(self):
-    """Return the last top-level position in the outline."""
-    c = self
+<t tx="felix.20210131011420.12">/**
+ * Return the last top-level position in the outline.
+ */
+public lastTopLevel():
+    const c:Commander = this;
     p = c.rootPosition()
     while p.hasNext():
         p.moveToNext()
     return p
-</t>
-<t tx="felix.20210131011420.13">def nullPosition(self):
-    """
-    New in Leo 5.5: Return None.
-    Using empty positions masks problems in program logic.
 
-    In fact, there are no longer any calls to this method in Leo's core.
-    """
+</t>
+<t tx="felix.20210131011420.13">/**
+ * New in Leo 5.5: Return None.
+ * Using empty positions masks problems in program logic.
+ * In fact, there are no longer any calls to this method in Leo's core.
+ */
+public nullPosition(self):
     g.trace('This method is deprecated. Instead, just use None.')
-    # pylint complains if we return None.
+    // pylint complains if we return None.
+
 </t>
 <t tx="felix.20210131011420.14">def positionExists(self, p, root=None, trace=False):
     """Return True if a position exists in c's tree"""
@@ -10721,43 +10754,51 @@ export function objToString(obj: any, indent = '', printCaller = false, tag = nu
             return False
         par = v
     return True
+
 </t>
-<t tx="felix.20210131011420.15">def dumpPosition(self, p):
-    """Dump position p and it's ancestors."""
+<t tx="felix.20210131011420.15">/**
+ * Dump position p and it's ancestors.
+ */
+public dumpPosition(self, p):
     g.trace('=====', p.h, p._childIndex)
     for i, data in enumerate(p.stack):
         v, childIndex = data
         print(f"{i} {childIndex} {v._headString}")
+
 </t>
 <t tx="felix.20210131011420.16">_rootCount = 0
 
-def rootPosition(self):
-    """Return the root position.
-
-    Root position is the first position in the document. Other
-    top level positions are siblings of this node.
-    """
-    c = self
-    # 2011/02/25: Compute the position directly.
+/**
+ * Return the root position.
+ *
+ * Root position is the first position in the document. Other
+ * top level positions are siblings of this node.
+ */
+public rootPosition(self):
+    const c:Commander = this;
+    // 2011/02/25: Compute the position directly.
     if c.hiddenRootNode.children:
         v = c.hiddenRootNode.children[0]
         return leoNodes.Position(v, childIndex=0, stack=None)
     return None
 
-# For compatibiility with old scripts...
+// * For compatibiility with old scripts...
+// rootVnode = rootPosition
+// findRootPosition = rootPosition
 
-rootVnode = rootPosition
-findRootPosition = rootPosition
 </t>
-<t tx="felix.20210131011420.17">def shouldBeExpanded(self, p):
-    """Return True if the node at position p should be expanded."""
-    c, v = self, p.v
+<t tx="felix.20210131011420.17">/**
+ * Return True if the node at position p should be expanded.
+ */
+public shouldBeExpanded(self, p):
+    const c:Commander = this;
+    v = p.v
     if not p.hasChildren():
         return False
-    # Always clear non-existent positions.
+    // Always clear non-existent positions.
     v.expandedPositions = [z for z in v.expandedPositions if c.positionExists(z)]
     if not p.isCloned():
-        # Do not call p.isExpanded here! It calls this method.
+        // Do not call p.isExpanded here! It calls this method.
         return p.v.isExpanded()
     if p.isAncestorOf(c.p):
         return True
@@ -10765,349 +10806,446 @@ findRootPosition = rootPosition
         if p == p2:
             return True
     return False
+
 </t>
-<t tx="felix.20210131011420.2">def currentPosition(self):
-    """
-    Return a copy of the presently selected position or a new null
-    position. So c.p.copy() is never necessary.
-    """
-    c = self
-    if hasattr(c, '_currentPosition') and getattr(c, '_currentPosition'):
-        # *Always* return a copy.
-        return c._currentPosition.copy()
-    return c.rootPosition()
+<t tx="felix.20210131011420.2">/**
+ * Return a copy of the presently selected position or a new null
+ * position. So c.p.copy() is never necessary.
+ */
+public currentPosition(): Position {
+    const c:Commander = this;
+    if (c._currentPosition){
+        // *Always* return a copy.
+        return c._currentPosition.copy();
+    }
+    return c.rootPosition();
+}
 
-# For compatibiility with old scripts...
+// For compatibiility with old scripts...
+// currentVnode = currentPosition
 
-currentVnode = currentPosition
 </t>
-<t tx="felix.20210131011420.3"># Compatibility with scripts
+<t tx="felix.20210131011420.3">// Compatibility with scripts
 
-def fileName(self):
+public fileName(self):
     s = self.mFileName or ""
     if g.isWindows:
         s = s.replace('\\', '/')
     return s
 
-def relativeFileName(self):
+
+public relativeFileName(self):
     return self.mRelativeFileName or self.mFileName
 
-def shortFileName(self):
+public shortFileName(self):
     return g.shortFileName(self.mFileName)
 
-shortFilename = shortFileName
+// * Alternative Naming
+// shortFilename = shortFileName
+
 </t>
-<t tx="felix.20210131011420.4">def firstVisible(self):
-    """Move to the first visible node of the present chapter or hoist."""
-    c = self; p = c.p
+<t tx="felix.20210131011420.4">/**
+ * Move to the first visible node of the present chapter or hoist.
+ */
+public firstVisible(self):
+    const c:Commander = this;
+    p = c.p
     while 1:
         back = p.visBack(c)
         if back and back.isVisible(c):
             p = back
         else: break
     return p
+
 </t>
-<t tx="felix.20210131011420.5">def getTabWidth(self, p):
-    """Return the tab width in effect at p."""
-    c = self
+<t tx="felix.20210131011420.5">/**
+ * Return the tab width in effect at p.
+ */
+public getTabWidth(self, p):
+    const c:Commander = this;
     val = g.scanAllAtTabWidthDirectives(c, p)
     return val
+
 </t>
 <t tx="felix.20210131011420.6"></t>
-<t tx="felix.20210131011420.7">def currentPositionIsRootPosition(self):
-    """Return True if the current position is the root position.
+<t tx="felix.20210131011420.7">/**
+ * Return True if the current position is the root position.
+ *
+ * This method is called during idle time, so not generating positions
+ * here fixes a major leak.
+ */
+public currentPositionIsRootPosition(self):
 
-    This method is called during idle time, so not generating positions
-    here fixes a major leak.
-    """
-    c = self
+    const c:Commander = this;
     root = c.rootPosition()
     return c._currentPosition and root and c._currentPosition == root
-    # return (
-        # c._currentPosition and c._rootPosition and
-        # c._currentPosition == c._rootPosition)
+    
+    // return (
+        // c._currentPosition and c._rootPosition and
+        // c._currentPosition == c._rootPosition)
+
 </t>
-<t tx="felix.20210131011420.8">def currentPositionHasNext(self):
-    """Return True if the current position is the root position.
+<t tx="felix.20210131011420.8">/**
+ * Return True if the current position is the root position.
 
     This method is called during idle time, so not generating positions
     here fixes a major leak.
-    """
-    c = self; current = c._currentPosition
+ */
+public currentPositionHasNext(self):
+    const c:Commander = this;
+    current = c._currentPosition
     return current and current.hasNext()
+
 </t>
-<t tx="felix.20210131011420.9">def isCurrentPosition(self, p):
-    c = self
+<t tx="felix.20210131011420.9">public isCurrentPosition(self, p):
+    const c:Commander = this;
     if p is None or c._currentPosition is None:
         return False
     return p == c._currentPosition
+
 </t>
-<t tx="felix.20210131011440.1">def visLimit(self):
-    """
-    Return the topmost visible node.
-    This is affected by chapters and hoists.
-    """
-    c = self; cc = c.chapterController
+<t tx="felix.20210131011440.1">/**
+ * Return the topmost visible node.
+ * This is affected by chapters and hoists.
+ */
+public visLimit(self):
+    const c:Commander = this;
+    cc = c.chapterController
     if c.hoistStack:
         bunch = c.hoistStack[-1]
         p = bunch.p
         limitIsVisible = not cc or not p.h.startswith('@chapter')
         return p, limitIsVisible
     return None, None
+
 </t>
 <t tx="felix.20210131011508.1"></t>
-<t tx="felix.20210131011508.2">def all_nodes(self):
-    """A generator returning all vnodes in the outline, in outline order."""
-    c = self
-    for p in c.all_positions():
-        yield p.v
+<t tx="felix.20210131011508.2">/**
+ * A generator returning all vnodes in the outline, in outline order.
+ */
+public *all_nodes(): Generator&lt;VNode&gt; {
+    const c:Commander = this;
+    for(let p of c.all_positions()){
+        yield p.v;
+    }
+}
 
-def all_unique_nodes(self):
-    """A generator returning each vnode of the outline."""
-    c = self
-    for p in c.all_unique_positions(copy=False):
-        yield p.v
+
+/**
+ * A generator returning each vnode of the outline.
+ */
+public *all_unique_nodes(): Generator&lt;VNode&gt; {
+    const c:Commander = this;
+    for(let p of c.all_unique_positions(false)){
+        yield p.v;
+    }
+}
+
 </t>
-<t tx="felix.20210131011508.3">def all_positions(self, copy=True):
-    """A generator return all positions of the outline, in outline order."""
-    c = self
-    p = c.rootPosition()
-    while p:
-        yield p.copy() if copy else p
-        p.moveToThreadNext()
+<t tx="felix.20210131011508.3">/**
+ * A generator return all positions of the outline, in outline order.
+ */
+public *all_positions(copy?=true):Generator&lt;Position&gt; {
+    const c:Commander = this;
+    const p:Position = c.rootPosition();
+    while( p.__bool__()){
+        yield (copy ? p.copy() : p);
+        p.moveToThreadNext();
+    }
+}
+
 </t>
-<t tx="felix.20210131011508.4">def all_positions_for_v(self, v, stack=None):
-    """
-    Generates all positions p in this outline where p.v is v.
+<t tx="felix.20210131011508.4">/**
+ * Generates all positions p in this outline where p.v is v.
+ *  
+ *  Should be called with stack=None.
+ *  
+ *  The generated positions are not necessarily in outline order.
+ *  
+ *  By Виталије Милошевић (Vitalije Milosevic).
+ */
+public *all_positions_for_v(v:VNode, stack?:StackEntry[]):Generator&lt;Position&gt; {
+
+    const c:Commander = this;
+
+    if (!stack){
+        stack = [];
+    }
     
-    Should be called with stack=None.
+    if (!(v instanceof VNode)) {
+        g.es_print(`not a VNode: ${JSON.stringify(v)}`);
+        return;  // Stop the generator.
+    }
+
+    /** 
+     * Yield all indices i such that v.children[i] == target_v.
+     */
+    function *allinds(v:VNode, target_v:VNode): Generator&lt;number&gt;{
+        const arrayLength=v.children.length;
+        for (var i = 0; i &lt; arrayLength; i++) {
+            if(v.children[i].gnx === target_v.gnx){
+                yield i;
+            }
+        }
+    }
+
+    /** 
+     * Convert the stack to a position.
+     */
+    function stack2pos(stack:StackEntry[]): Position{
+        let v:VNode;
+        let i:number;
+        [v, i] = stack[stack.length - 1];
+        return new Position(v, i, stack.slice(0,-1));
+    }
+
+    for(let v2 of v.parents){
+        for(let i of allinds(v2, v)){
+            stack.unshift([v, i]);
+            if(v2.gnx === c.hiddenRootNode!.gnx){
+                yield stack2pos(stack);
+            }else{
+                yield* c.all_positions_for_v(v2, stack);
+            }
+            stack.shift();
+        }
+    }
+}
+
+</t>
+<t tx="felix.20210131011508.5">/**
+ * A generator yielding *all* the root positions in the outline that
+ * satisfy the given predicate. p.isAnyAtFileNode is the default
+ * predicate.
+ *
+ * The generator yields all **root** anywhere in the outline that satisfy
+ * the predicate. Once a root is found, the generator skips its subtree.
+ */
+public *all_roots(copy?=true, predicate?: (p:Position) =&gt; boolean):Generator&lt;Position&gt; {
+    const c:Commander = this;
     
-    The generated positions are not necessarily in outline order.
+    if(!predicate){
+        // pylint: disable=function-redefined
+        predicate = function(p:Position):boolean {
+            return p.isAnyAtFileNode();
+        };
+    }
+
+    const p:Position = c.rootPosition();
+    while(p.__bool__()){
+        if (predicate(p)){
+            yield p.copy();  // 2017/02/19
+            p.moveToNodeAfterTree();
+        }else{
+            p.moveToThreadNext();
+        }
+    }
+}
+
+</t>
+<t tx="felix.20210131011508.6">/**
+ * A generator return all positions of the outline, in outline order.
+ * Returns only the first position for each vnode.
+ */
+public *all_unique_positions(copy?=true):Generator&lt;Position&gt; {
+    const c:Commander = this;
+    const p:Position = c.rootPosition();
+    const seen:VNode[] = [];
+    while (p.__bool__()){
+        if(seen.includes(p.v)){
+            p.moveToNodeAfterTree();
+        }else{
+            seen.push(p.v);
+            yield (copy ? p.copy() : p);
+            p.moveToThreadNext();
+        }
+    }
+}
+
+</t>
+<t tx="felix.20210131011508.7">/**
+ * A generator yielding all unique root positions in the outline that
+ * satisfy the given predicate. p.isAnyAtFileNode is the default
+ * predicate.
+ *
+ * The generator yields all **root** anywhere in the outline that satisfy
+ * the predicate. Once a root is found, the generator skips its subtree.
+ */
+public *all_unique_roots(copy?=true, predicate?: (p:Position) =&gt; boolean):Generator&lt;Position&gt; {
+    const c:Commander = this;
     
-    By Виталије Милошевић (Vitalije Milosevic).
-    """
-    c = self
+    if(!predicate){
+        // pylint: disable=function-redefined
+        predicate = function(p:Position):boolean {
+            return p.isAnyAtFileNode();
+        };
+    }
 
-    if stack is None:
-        stack = []
-
-    if not isinstance(v, leoNodes.VNode):
-        g.es_print(f"not a VNode: {v!r}")
-        return  # Stop the generator.
-
-    def allinds(v, target_v):
-        """Yield all indices i such that v.children[i] == target_v."""
-        for i, x in enumerate(v.children):
-            if x is target_v:
-                yield i
-
-    def stack2pos(stack):
-        """Convert the stack to a position."""
-        v, i = stack[-1]
-        return leoNodes.Position(v, i, stack[:-1])
-
-    for v2 in set(v.parents):
-        for i in allinds(v2, v):
-            stack.insert(0, (v, i))
-            if v2 is c.hiddenRootNode:
-                yield stack2pos(stack)
-            else:
-                yield from c.all_positions_for_v(v2, stack)
-            stack.pop(0)
+    const seen:VNode[] = [];
+    const p:Position = c.rootPosition();
+    while (p.__bool__()){
+        if(!seen.includes(p.v) &amp;&amp; predicate(p)){
+            seen.push(p.v);
+            yield (copy ? p.copy() : p);
+            p.moveToNodeAfterTree();
+        }else{
+            p.moveToThreadNext();
+        }
+    }
+}
 </t>
-<t tx="felix.20210131011508.5">def all_roots(self, copy=True, predicate=None):
-    """
-    A generator yielding *all* the root positions in the outline that
-    satisfy the given predicate. p.isAnyAtFileNode is the default
-    predicate.
+<t tx="felix.20210131011508.8">/**
+ * A generator returning all positions of the outline. This generator does
+ * *not* assume that vnodes are never their own ancestors.
+ */
+public *safe_all_positions(copy?=true): Generator&lt;Position&gt; {
+    const c:Commander = this;
+    const p:Position = c.rootPosition(); // Make one copy.
+    while (p.__bool__()){
+        yield (copy ? p.copy() : p);
+        p.safeMoveToThreadNext();
+    }
+}
 
-    The generator yields all **root** anywhere in the outline that satisfy
-    the predicate. Once a root is found, the generator skips its subtree.
-    """
-    c = self
-    if predicate is None:
-
-        # pylint: disable=function-redefined
-
-        def predicate(p):
-            return p.isAnyAtFileNode()
-
-    p = c.rootPosition()
-    while p:
-        if predicate(p):
-            yield p.copy()  # 2017/02/19
-            p.moveToNodeAfterTree()
-        else:
-            p.moveToThreadNext()
 </t>
-<t tx="felix.20210131011508.6">def all_unique_positions(self, copy=True):
-    """
-    A generator return all positions of the outline, in outline order.
-    Returns only the first position for each vnode.
-    """
-    c = self
-    p = c.rootPosition()
-    seen = set()
-    while p:
-        if p.v in seen:
-            p.moveToNodeAfterTree()
-        else:
-            seen.add(p.v)
-            yield p.copy() if copy else p
-            p.moveToThreadNext()
-</t>
-<t tx="felix.20210131011508.7">def all_unique_roots(self, copy=True, predicate=None):
-    """
-    A generator yielding all unique root positions in the outline that
-    satisfy the given predicate. p.isAnyAtFileNode is the default
-    predicate.
-
-    The generator yields all **root** anywhere in the outline that satisfy
-    the predicate. Once a root is found, the generator skips its subtree.
-    """
-    c = self
-    if predicate is None:
-
-        # pylint: disable=function-redefined
-
-        def predicate(p):
-            return p.isAnyAtFileNode()
-
-    seen = set()
-    p = c.rootPosition()
-    while p:
-        if p.v not in seen and predicate(p):
-            seen.add(p.v)
-            yield p.copy() if copy else p
-            p.moveToNodeAfterTree()
-        else:
-            p.moveToThreadNext()
-</t>
-<t tx="felix.20210131011508.8">def safe_all_positions(self, copy=True):
-    """
-    A generator returning all positions of the outline. This generator does
-    *not* assume that vnodes are never their own ancestors.
-    """
-    c = self
-    p = c.rootPosition()  # Make one copy.
-    while p:
-        yield p.copy() if copy else p
-        p.safeMoveToThreadNext()
-</t>
-<t tx="felix.20210131011549.1">def __get_p(self):
-    c = self
+<t tx="felix.20210131011549.1">/**
+ *
+ */
+public __get_p(self):
+    const c:Commander = this;
     return c.currentPosition()
 
 p = property(
     __get_p,  # No setter.
     doc="commander current position property")
+
 </t>
 <t tx="felix.20210131011607.1"></t>
-<t tx="felix.20210131011607.2">def appendStringToBody(self, p, s):
+<t tx="felix.20210131011607.2">public appendStringToBody(self, p, s):
 
     if s:
         p.b = p.b + g.toUnicode(s)
+
+
 </t>
-<t tx="felix.20210131011607.3">def clearAllMarked(self):
-    c = self
+<t tx="felix.20210131011607.3">/**
+ *
+ */
+public clearAllMarked(self):
+    const c:Commander = this;
     for p in c.all_unique_positions(copy=False):
         p.v.clearMarked()
+
 </t>
-<t tx="felix.20210131011607.4">def clearAllVisited(self):
-    c = self
+<t tx="felix.20210131011607.4">/**
+ *
+ */
+public clearAllVisited(self):
+    const c:Commander = this;
     for p in c.all_unique_positions(copy=False):
         p.v.clearVisited()
         p.v.clearWriteBit()
+
 </t>
-<t tx="felix.20210131011607.5">def clearChanged(self):
-    """clear the marker that indicates that the .leo file has been changed."""
-    c = self
+<t tx="felix.20210131011607.5">/**
+ * clear the marker that indicates that the .leo file has been changed.
+ */
+public clearChanged(self):
+    const c:Commander = this;
     c.changed = False
-    # Clear all dirty bits _before_ setting the caption.
+    // Clear all dirty bits _before_ setting the caption.
     for v in c.all_unique_nodes():
         v.clearDirty()
     c.changed = False
-    ### Old code.
-        # master = getattr(c.frame.top, 'leo_master', None)
-        # if master:
-            # master.setChanged(c, False)
-                # # LeoTabbedTopLevel.setChanged.
-        # s = c.frame.getTitle()
-        # if len(s) &gt; 2 and s[0:2] == "* ":
-            # c.frame.setTitle(s[2:])
+    // * Old code.
+        // master = getattr(c.frame.top, 'leo_master', None)
+        // if master:
+            // master.setChanged(c, False)
+                // // LeoTabbedTopLevel.setChanged.
+        // s = c.frame.getTitle()
+        // if len(s) &gt; 2 and s[0:2] == "* ":
+            // c.frame.setTitle(s[2:])
+
 </t>
-<t tx="felix.20210131011607.6">def clearMarked(self, p):
-    c = self
-    p.v.clearMarked()
-    g.doHook("clear-mark", c=c, p=p)
+<t tx="felix.20210131011607.6">/**
+ *
+ */
+public clearMarked(p):void {
+    const c:Commander = this;
+    p.v.clearMarked();
+    g.doHook("clear-mark", c, p);
+}
+
 </t>
-<t tx="felix.20210131011607.7">def setBodyString(self, p, s):
-    """
-    This is equivalent to p.b = s.
-    
-    Warning: This method may call c.recolor() or c.redraw().
-    """
+<t tx="felix.20210131011607.7">/**
+ * This is equivalent to p.b = s.
+ * Warning: This method may call c.recolor() or c.redraw().
+ */
+public setBodyString(self, p, s):
     c, v = self, p.v
     if not c or not v:
         return
-    ### Old code
-        # s = g.toUnicode(s)
-        # current = c.p
-        # if current and p.v == current.v:
-            # w = c.frame.body.wrapper
-            # w.setAllText(s)
-            # v.setSelection(0,0)
-            # c.recolor()
-        # # Keep the body text in the VNode up-to-date.
-        # if v.b != s:
-            # v.setBodyString(s)
-            # v.setSelection(0, 0)
-            # p.setDirty()
-            # if not c.isChanged():
-                # c.setChanged()
-            # c.redraw_after_icons_changed()
+    // * Old code
+        // s = g.toUnicode(s)
+        // current = c.p
+        // if current and p.v == current.v:
+            // w = c.frame.body.wrapper
+            // w.setAllText(s)
+            // v.setSelection(0,0)
+            // c.recolor()
+        // // Keep the body text in the VNode up-to-date.
+        // if v.b != s:
+            // v.setBodyString(s)
+            // v.setSelection(0, 0)
+            // p.setDirty()
+            // if not c.isChanged():
+                // c.setChanged()
+            // c.redraw_after_icons_changed()
+
 </t>
-<t tx="felix.20210131011607.8">def setChanged(self, redrawFlag=True):
-    """Set the marker that indicates that the .leo file has been changed."""
-    c = self
+<t tx="felix.20210131011607.8">/**
+ * Set the marker that indicates that the .leo file has been changed.
+ */
+public setChanged(redrawFlag:boolean=true): void {
+    const c:Commander = this;
     c.changed = True
-    # Do nothing for null frames.
-    if not redrawFlag:  # Prevent flash when fixing #387.
+    // Do nothing for null frames.
+    if not redrawFlag:  // Prevent flash when fixing #387.
         return
-    ### Old code.
-        # master = getattr(c.frame.top, 'leo_master', None)
-        # if master:
-            # master.setChanged(c, True)
-                # # LeoTabbedTopLevel.setChanged.
-        # s = c.frame.getTitle()
-        # if len(s) &gt; 2 and s[0] != '*':
-            # c.frame.setTitle("* " + s)
-</t>
+    // * Old code.
+        // master = getattr(c.frame.top, 'leo_master', None)
+        // if master:
+            // master.setChanged(c, True)
+                // // LeoTabbedTopLevel.setChanged.
+        // s = c.frame.getTitle()
+        // if len(s) &gt; 2 and s[0] != '*':
+            // c.frame.setTitle("* " + s)
+}</t>
 <t tx="felix.20210131011607.9">_currentCount = 0
 
-def setCurrentPosition(self, p):
-    """
-    Set the presently selected position. For internal use only.
-    Client code should use c.selectPosition instead.
-    """
-    c = self
+/**
+ * Set the presently selected position. For internal use only.
+ * Client code should use c.selectPosition instead.
+ */
+public setCurrentPosition(self, p):
+    const c:Commander = this;
     if not p:
         g.trace('===== no p', g.callers())
         return
     if c.positionExists(p):
         if c._currentPosition and p == c._currentPosition:
-            pass  # We have already made a copy.
-        else:  # Make a copy _now_
+            pass  // We have already made a copy.
+        else:  // Make a copy _now_
             c._currentPosition = p.copy()
-    else:  # 2011/02/25:
+    else:  // 2011/02/25:
         c._currentPosition = c.rootPosition()
         g.trace(f"Invalid position: {repr(p and p.h)}")
         g.trace(g.callers())
-        # Don't kill unit tests for this kind of problem.
+        // Don't kill unit tests for this kind of problem.
 
-# For compatibiility with old scripts.
+// * For compatibiility with old scripts.
+//setCurrentVnode = setCurrentPosition
 
-setCurrentVnode = setCurrentPosition
 </t>
 <t tx="felix.20210202235315.1"></t>
 <t tx="felix.20210202235315.10">// These methods are useful abbreviations.
@@ -12008,5 +12146,145 @@ public setHeadString(s:string):void{
 
 </t>
 <t tx="felix.20210207005040.9"></t>
+<t tx="felix.20210207195152.1">/**
+ * Return an all-new tree of vnodes that are copies of self and all its
+ * descendants.
+ *
+ * **Important**: the v.parents ivar must be [] for all nodes.
+ * v._addParentLinks will set all parents.
+ */
+public copyTree(copyMarked?:boolean):VNode {
+    const v:VNode = this;
+    // Allocate a new vnode and gnx with empty children &amp; parents.
+    const v2:VNode = new VNode(v.context);
+    console.assert(v2.parents.length===0, v2.parents.length.toString());
+    console.assert(v2.gnx);
+    console.assert(v.gnx !== v2.gnx);
+    // Copy vnode fields. Do **not** set v2.parents.
+    v2._headString = g.toUnicode(v._headString, null, true);
+    v2._bodyString = g.toUnicode(v._bodyString, null, true);
+    v2.u = JSON.parse(JSON.stringify(v.u)); // Deep Copy 
+    if(copyMarked &amp;&amp; v.isMarked()){
+        v2.setMarked();
+    }
+    // Recursively copy all descendant vnodes.
+    for(let child of v.children){
+        v2.children.push(child.copyTree(copyMarked));
+    }
+    return v2;
+}
+
+</t>
+<t tx="felix.20210207213301.1">public childrenModified():void {
+    // TODO: needed?
+    // g.childrenModifiedSet.add(this);
+}
+
+</t>
+<t tx="felix.20210207213314.1">public contentModified():void {
+    // TODO: needed?
+    // g.contentModifiedSet.add(this);
+}
+
+</t>
+<t tx="felix.20210207213328.1">// Called only by LeoTree.selectHelper.
+
+/**
+ * Restore the cursor position and scroll so it is visible.
+ */
+public restoreCursorAndScroll(): void {
+    // TODO
+    /*
+    const traceTime:boolean = false &amp;&amp; !g.unitTesting;
+    const v:VNode = this;
+    let ins:number = v.insertSpot;
+    // start, n = v.selectionStart, v.selectionLength
+    const spot:number = v.scrollBarSpot;
+    const body: any = this.context.frame.body;
+    const w:any = body.wrapper;
+    // Fix bug 981849: incorrect body content shown.
+    if(ins===undefined){
+       ins = 0;
+    }
+    // This is very expensive for large text.
+    let t1:number;
+    if (traceTime){
+       t1 = time.time();
+    }
+    if(body.wrapper.setInsertPoint &amp;&amp; body.wrapper.setInsertPoint!==undefined){
+        w.setInsertPoint(ins);
+    }
+    if (traceTime){
+        const delta_t:number = time.time() - t1;
+        if( delta_t &gt; 0.1){
+            g.trace(`${delta_t} sec`);
+        }
+    }
+    // Override any changes to the scrollbar setting that might
+    // have been done above by w.setSelectionRange or w.setInsertPoint.
+    if (spot !== undefined){
+        w.setYScrollPosition(spot);
+        v.scrollBarSpot = spot;
+    }
+    // Never call w.see here.
+    */
+}
+
+</t>
+<t tx="felix.20210208001026.1"></t>
+<t tx="felix.20210208001026.2">/**
+ * Return True if p.b contains an @all directive.
+ */
+public is_at_all(): boolean {
+    const p:Position =  this;
+    return (
+        p.isAnyAtFileNode() &amp;&amp;
+        !!g.splitLines(p.b).reduce((acc, s):boolean=&gt;{
+            if(g.match_word(s, 0, '@all')){
+                return true;
+            }else {
+                return !!acc;
+            }
+        }, false)
+        // any([g.match_word(s, 0, '@all') for s in g.splitLines(p.b)])
+    );
+}
+
+/**
+ * Return True if p or one of p's ancestors is an @all node.
+ */
+public in_at_all_tree():boolean {
+    const p1:Position =  this;
+    for(let p of p1.self_and_parents(false)){
+        if(p.is_at_all()){
+            return true;
+        }
+    }
+    return false;
+}
+
+</t>
+<t tx="felix.20210208001026.3">/**
+ * Return True if p is an @ignore node.
+ */
+public is_at_ignore():boolean {
+    const p:Position =  this;
+    return g.match_word(p.h, 0, '@ignore');
+}
+
+/**
+ * Return True if p or one of p's ancestors is an @ignore node
+ */ 
+public in_at_ignore_tree():boolean {
+    const p1:Position =  this;
+    for(let p of p1.self_and_parents(false)){
+        if(g.match_word(p.h, 0, '@ignore')){
+            return true;
+        }
+    }
+    return false;
+}
+
+</t>
 </tnodes>
 </leo_file>
