@@ -1140,7 +1140,7 @@ export class Position {
     public _linkAsRoot(): Position {
         const p:Position = this; 
         console.assert(p.v);
-        const parent_v:VNode = p.v.context.hiddenRootNode;
+        const parent_v:VNode = p.v.context.hiddenRootNode!;
         console.assert(parent_v, g.callers());
         
         // Make p the root position.
@@ -1271,7 +1271,7 @@ export class Position {
             p.v = parent_v.children[n - 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1288,7 +1288,7 @@ export class Position {
             p._childIndex = 0;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1307,7 +1307,7 @@ export class Position {
             p._childIndex = n - 1;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1342,7 +1342,7 @@ export class Position {
             p.v = parent_v.children[n + 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1374,7 +1374,7 @@ export class Position {
             p._childIndex = n;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1391,7 +1391,7 @@ export class Position {
             p._childIndex = item[1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
             p.v = undefined;
         }
         return p;

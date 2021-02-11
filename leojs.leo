@@ -8372,12 +8372,20 @@ import { LeoUI } from '../leoUI';
 export class Commander {
 
     // Official ivars.
+    private _topPosition : Position | undefined;
     private _currentPosition: Position | undefined;
+    
     public hiddenRootNode: VNode | undefined;
+    
     public mFileName: string;
     public mRelativeFileName = null;
     public gui:LeoUI;
     public frame: any; // TODO : FAKE FRAME
+    
+    // File Ivars
+    public changed: boolean = false;
+
+    // _currentCount = 0
 
     @others
 
@@ -10583,7 +10591,7 @@ public _linkCopiedAsNthChild(parent:Position, n:number): void {
 public _linkAsRoot(): Position {
     const p:Position = this; 
     console.assert(p.v);
-    const parent_v:VNode = p.v.context.hiddenRootNode;
+    const parent_v:VNode = p.v.context.hiddenRootNode!;
     console.assert(parent_v, g.callers());
     
     // Make p the root position.
@@ -10706,25 +10714,32 @@ export function objToString(obj: any, indent = '', printCaller = false, tag = nu
 
 </t>
 <t tx="felix.20210131011420.1"></t>
-<t tx="felix.20210131011420.10">public isRootPosition(self, p):
+<t tx="felix.20210131011420.10">public isRootPosition(p):boolean {
     const c:Commander = this;
-    root = c.rootPosition()
-    return p and root and p == root  // 2011/03/03
+    const root:Position = c.rootPosition();
+    return !!p &amp;&amp;
+           !!root &amp;&amp;
+           p.__bool__() &amp;&amp;
+           root.__bool__() &amp;&amp; p.__eq__(root);
+}
 
 </t>
-<t tx="felix.20210131011420.11">public isChanged(self):
-    return self.changed
+<t tx="felix.20210131011420.11">public isChanged():boolean {
+    return this.changed;
+}
 
 </t>
 <t tx="felix.20210131011420.12">/**
  * Return the last top-level position in the outline.
  */
-public lastTopLevel():
+public lastTopLevel():Position {
     const c:Commander = this;
-    p = c.rootPosition()
-    while p.hasNext():
-        p.moveToNext()
-    return p
+    const p:Position = c.rootPosition();
+    while(p.hasNext()){
+        p.moveToNext();
+    }
+    return p;
+}
 
 </t>
 <t tx="felix.20210131011420.13">/**
@@ -10732,57 +10747,87 @@ public lastTopLevel():
  * Using empty positions masks problems in program logic.
  * In fact, there are no longer any calls to this method in Leo's core.
  */
-public nullPosition(self):
-    g.trace('This method is deprecated. Instead, just use None.')
+public nullPosition():void {
+    g.trace('This method is deprecated. Instead, just use None.');
     // pylint complains if we return None.
+}
 
 </t>
-<t tx="felix.20210131011420.14">def positionExists(self, p, root=None, trace=False):
-    """Return True if a position exists in c's tree"""
-    if not p or not p.v: return False
+<t tx="felix.20210131011420.14">/**
+ * Return True if a position exists in c's tree
+ */
+public positionExists(p:Position, root?:Position, trace?:boolean):boolean {
 
-    rstack = root.stack + [(root.v, root._childIndex)] if root else []
-    pstack = p.stack + [(p.v, p._childIndex)]
+    if(!p || !p.__bool__() || !p.v){
+        return false;
+    }
 
-    if len(rstack) &gt; len(pstack): return False
+    const rstack:StackEntry[] = (root &amp;&amp; root.__bool__())?root.stack.concat([root.v, root._childIndex]):[];
+    const pstack:StackEntry[] = p.stack.concat([p.v, p._childIndex]);
 
-    par = self.hiddenRootNode
-    for j, x in enumerate(pstack):
-        if j &lt; len(rstack) and x != rstack[j]: return False
-        v, i = x
-        if i &gt;= len(par.children) or v is not par.children[i]:
-            return False
-        par = v
-    return True
+    if(rstack.length &gt; pstack.length){
+        return false;
+    }
+
+    let par:VNode = this.hiddenRootNode!;
+    
+    let arrayLength:number = pstack.length;
+
+    for(let j=0; j&lt;arrayLength; j++){
+        const x:StackEntry = pstack[j];
+    
+        if (j &lt; rstack.length &amp;&amp; (x[0].gnx !== rstack[j][0].gnx || x[1] !== rstack[j][1])){
+            return false;
+        }
+        
+        let v:VNode;
+        let i:number;
+        [v, i] = x;
+        
+        if( i &gt;= par.children.length || v.gnx !== par.children[i].gnx ){
+            return false;
+        }
+            
+        par = v;
+    }
+    return true;
+}
 
 </t>
 <t tx="felix.20210131011420.15">/**
  * Dump position p and it's ancestors.
  */
-public dumpPosition(self, p):
-    g.trace('=====', p.h, p._childIndex)
-    for i, data in enumerate(p.stack):
-        v, childIndex = data
-        print(f"{i} {childIndex} {v._headString}")
+public dumpPosition(p:Position):void {
+    g.trace('=====', p.h, p._childIndex);
+    
+    let arrayLength:number = p.stack.length;
+    for(let i=0; i&lt;arrayLength; i++){
+        const data = p.stack[i];
+        let v:VNode;
+        let childIndex:number;
+        [v, childIndex] = data;
+        console.log(`${i} ${childIndex} ${v._headString}`);
+    }
+}
 
 </t>
-<t tx="felix.20210131011420.16">_rootCount = 0
-
-/**
+<t tx="felix.20210131011420.16">/**
  * Return the root position.
  *
  * Root position is the first position in the document. Other
  * top level positions are siblings of this node.
  */
-public rootPosition(self):
+public rootPosition():Position|undefined {
     const c:Commander = this;
     // 2011/02/25: Compute the position directly.
-    if c.hiddenRootNode.children:
-        v = c.hiddenRootNode.children[0]
-        return leoNodes.Position(v, childIndex=0, stack=None)
-    return None
+    if(!!c.hiddenRootNode &amp;&amp; c.hiddenRootNode.children.length){
+        const v:VNode = c.hiddenRootNode.children[0];
+        return new Position(v, 0, undefined);
+    }
+    return undefined;
+}
 
-// * For compatibiility with old scripts...
+// * For compatibility with old scripts...
 // rootVnode = rootPosition
 // findRootPosition = rootPosition
 
@@ -10790,29 +10835,37 @@ public rootPosition(self):
 <t tx="felix.20210131011420.17">/**
  * Return True if the node at position p should be expanded.
  */
-public shouldBeExpanded(self, p):
+public shouldBeExpanded(p:Position):boolean {
     const c:Commander = this;
-    v = p.v
-    if not p.hasChildren():
-        return False
+    const v:VNode = p.v;
+    if (!p.hasChildren()){
+        return false;
+    }
     // Always clear non-existent positions.
-    v.expandedPositions = [z for z in v.expandedPositions if c.positionExists(z)]
-    if not p.isCloned():
+    // v.expandedPositions: Position[] = [z for z in v.expandedPositions if c.positionExists(z)]
+    v.expandedPositions = v.expandedPositions.filter(z=&gt;c.positionExists(z));
+    
+    if (!p.isCloned()){
         // Do not call p.isExpanded here! It calls this method.
-        return p.v.isExpanded()
-    if p.isAncestorOf(c.p):
-        return True
-    for p2 in v.expandedPositions:
-        if p == p2:
-            return True
-    return False
+        return p.v.isExpanded();
+    }
+    if(p.isAncestorOf(c.p)){
+        return true;
+    }
+    for(let p2 of v.expandedPositions){
+        if(p.__eq__(p2)){
+            return true;
+        }
+    }
+    return false;
+}
 
 </t>
 <t tx="felix.20210131011420.2">/**
  * Return a copy of the presently selected position or a new null
  * position. So c.p.copy() is never necessary.
  */
-public currentPosition(): Position {
+public currentPosition(): Position|undefined {
     const c:Commander = this;
     if (c._currentPosition){
         // *Always* return a copy.
@@ -10827,18 +10880,21 @@ public currentPosition(): Position {
 </t>
 <t tx="felix.20210131011420.3">// Compatibility with scripts
 
-public fileName(self):
-    s = self.mFileName or ""
-    if g.isWindows:
-        s = s.replace('\\', '/')
-    return s
+public fileName():string {
+    let s:string = this.mFileName || "";
+    if (g.isWindows){
+        s = s.replace('\\', '/');
+    }
+    return s;
+}
 
+public relativeFileName():string {
+    return this.mRelativeFileName || this.mFileName;
+}
 
-public relativeFileName(self):
-    return self.mRelativeFileName or self.mFileName
-
-public shortFileName(self):
-    return g.shortFileName(self.mFileName)
+public shortFileName():string {
+    return g.shortFileName(this.mFileName);
+}
 
 // * Alternative Naming
 // shortFilename = shortFileName
@@ -10847,24 +10903,29 @@ public shortFileName(self):
 <t tx="felix.20210131011420.4">/**
  * Move to the first visible node of the present chapter or hoist.
  */
-public firstVisible(self):
+public firstVisible():Position {
     const c:Commander = this;
-    p = c.p
-    while 1:
-        back = p.visBack(c)
-        if back and back.isVisible(c):
-            p = back
-        else: break
-    return p
+    let p:Position = c.p;
+    while( 1){
+        let back:Position = p.visBack(c);
+        if( back.__bool__() &amp;&amp; back.isVisible(c)){
+            p = back;
+        }else{
+            break;
+        }
+    }
+    return p;
+}
 
 </t>
 <t tx="felix.20210131011420.5">/**
  * Return the tab width in effect at p.
  */
-public getTabWidth(self, p):
+public getTabWidth(p:Position):number {
     const c:Commander = this;
-    val = g.scanAllAtTabWidthDirectives(c, p)
-    return val
+    const val:number = g.scanAllAtTabWidthDirectives(c, p);
+    return val;
+}
 
 </t>
 <t tx="felix.20210131011420.6"></t>
@@ -10874,12 +10935,15 @@ public getTabWidth(self, p):
  * This method is called during idle time, so not generating positions
  * here fixes a major leak.
  */
-public currentPositionIsRootPosition(self):
-
+public currentPositionIsRootPosition():boolean {
     const c:Commander = this;
-    root = c.rootPosition()
-    return c._currentPosition and root and c._currentPosition == root
-    
+    const root:Position = c.rootPosition();
+    return !!c._currentPosition &amp;&amp;
+           !!root &amp;&amp;
+           c._currentPosition.__bool__() &amp;&amp;
+           root.__bool__() &amp;&amp; c._currentPosition.__eq__(root);
+}
+
     // return (
         // c._currentPosition and c._rootPosition and
         // c._currentPosition == c._rootPosition)
@@ -10891,32 +10955,38 @@ public currentPositionIsRootPosition(self):
     This method is called during idle time, so not generating positions
     here fixes a major leak.
  */
-public currentPositionHasNext(self):
+public currentPositionHasNext():boolean {
     const c:Commander = this;
-    current = c._currentPosition
-    return current and current.hasNext()
+    const current:Position = c._currentPosition!;
+    return current &amp;&amp; current.__bool__() &amp;&amp; current.hasNext()!;
+    return false;
+}
 
 </t>
-<t tx="felix.20210131011420.9">public isCurrentPosition(self, p):
+<t tx="felix.20210131011420.9">public isCurrentPosition(p:Position):boolean {
     const c:Commander = this;
-    if p is None or c._currentPosition is None:
-        return False
-    return p == c._currentPosition
+    if(!p || !c._currentPosition ||
+        !p.__bool__() || !!c._currentPosition.__bool__()){
+        return false;
+    }
+    return p.__eq__(c._currentPosition);
+}
 
 </t>
 <t tx="felix.20210131011440.1">/**
  * Return the topmost visible node.
  * This is affected by chapters and hoists.
  */
-public visLimit(self):
+public visLimit(): [Position, boolean]|undefined {
     const c:Commander = this;
-    cc = c.chapterController
+    const cc:any = false;// c.chapterController
     if c.hoistStack:
-        bunch = c.hoistStack[-1]
-        p = bunch.p
-        limitIsVisible = not cc or not p.h.startswith('@chapter')
-        return p, limitIsVisible
-    return None, None
+        bunch = c.hoistStack[-1];
+        p = bunch.p;
+        limitIsVisible = !cc || !p.h.startswith('@chapter');
+        return [p, limitIsVisible];
+    return undefined;
+}
 
 </t>
 <t tx="felix.20210131011508.1"></t>
@@ -11109,48 +11179,41 @@ public *safe_all_positions(copy?=true): Generator&lt;Position&gt; {
 
 </t>
 <t tx="felix.20210131011549.1">/**
- *
+ * commander current position property
  */
-public __get_p(self):
+public get p():Position {
     const c:Commander = this;
-    return c.currentPosition()
-
-p = property(
-    __get_p,  # No setter.
-    doc="commander current position property")
+    return c.currentPosition();
+}
 
 </t>
 <t tx="felix.20210131011607.1"></t>
-<t tx="felix.20210131011607.2">public appendStringToBody(self, p, s):
-
-    if s:
-        p.b = p.b + g.toUnicode(s)
-
+<t tx="felix.20210131011607.2">public appendStringToBody(p:Position, s:string): void {
+    if (s){
+        p.b = p.b + g.toUnicode(s);
+    }
+}
 
 </t>
-<t tx="felix.20210131011607.3">/**
- *
- */
-public clearAllMarked(self):
+<t tx="felix.20210131011607.3">public clearAllMarked(): void {
     const c:Commander = this;
     for p in c.all_unique_positions(copy=False):
         p.v.clearMarked()
+}
 
 </t>
-<t tx="felix.20210131011607.4">/**
- *
- */
-public clearAllVisited(self):
+<t tx="felix.20210131011607.4">public clearAllVisited(): void {
     const c:Commander = this;
     for p in c.all_unique_positions(copy=False):
         p.v.clearVisited()
         p.v.clearWriteBit()
+}
 
 </t>
 <t tx="felix.20210131011607.5">/**
  * clear the marker that indicates that the .leo file has been changed.
  */
-public clearChanged(self):
+public clearChanged(): void {
     const c:Commander = this;
     c.changed = False
     // Clear all dirty bits _before_ setting the caption.
@@ -11165,12 +11228,10 @@ public clearChanged(self):
         // s = c.frame.getTitle()
         // if len(s) &gt; 2 and s[0:2] == "* ":
             // c.frame.setTitle(s[2:])
+}
 
 </t>
-<t tx="felix.20210131011607.6">/**
- *
- */
-public clearMarked(p):void {
+<t tx="felix.20210131011607.6">public clearMarked(p):void {
     const c:Commander = this;
     p.v.clearMarked();
     g.doHook("clear-mark", c, p);
@@ -11181,37 +11242,40 @@ public clearMarked(p):void {
  * This is equivalent to p.b = s.
  * Warning: This method may call c.recolor() or c.redraw().
  */
-public setBodyString(self, p, s):
+public setBodyString(p:Position, s:string): void {
     c, v = self, p.v
     if not c or not v:
         return
-    // * Old code
-        // s = g.toUnicode(s)
-        // current = c.p
-        // if current and p.v == current.v:
-            // w = c.frame.body.wrapper
-            // w.setAllText(s)
-            // v.setSelection(0,0)
-            // c.recolor()
-        // // Keep the body text in the VNode up-to-date.
-        // if v.b != s:
-            // v.setBodyString(s)
-            // v.setSelection(0, 0)
-            // p.setDirty()
-            // if not c.isChanged():
-                // c.setChanged()
-            // c.redraw_after_icons_changed()
+    s = g.toUnicode(s)
+    current = c.p
+    // 1/22/05: Major change: the previous test was: 'if p == current:'
+    // This worked because commands work on the presently selected node.
+    // But setRecentFiles may change a _clone_ of the selected node!
+    if current and p.v == current.v:
+        w = c.frame.body.wrapper
+        w.setAllText(s)
+        v.setSelection(0,0)
+        c.recolor()
+    // Keep the body text in the VNode up-to-date.
+    if v.b != s:
+        v.setBodyString(s)
+        v.setSelection(0, 0)
+        p.setDirty()
+        if not c.isChanged():
+            c.setChanged()
+        c.redraw_after_icons_changed()
+}
 
 </t>
 <t tx="felix.20210131011607.8">/**
  * Set the marker that indicates that the .leo file has been changed.
  */
-public setChanged(redrawFlag:boolean=true): void {
+public setChanged(redrawFlag?:boolean=true): void {
     const c:Commander = this;
-    c.changed = True
+    c.changed = true;
     // Do nothing for null frames.
-    if not redrawFlag:  // Prevent flash when fixing #387.
-        return
+    //if !redrawFlag:  // Prevent flash when fixing #387.
+    //    return
     // * Old code.
         // master = getattr(c.frame.top, 'leo_master', None)
         // if master:
@@ -11220,14 +11284,14 @@ public setChanged(redrawFlag:boolean=true): void {
         // s = c.frame.getTitle()
         // if len(s) &gt; 2 and s[0] != '*':
             // c.frame.setTitle("* " + s)
-}</t>
-<t tx="felix.20210131011607.9">_currentCount = 0
+}
 
-/**
+</t>
+<t tx="felix.20210131011607.9">/**
  * Set the presently selected position. For internal use only.
  * Client code should use c.selectPosition instead.
  */
-public setCurrentPosition(self, p):
+public setCurrentPosition(p):void {
     const c:Commander = this;
     if not p:
         g.trace('===== no p', g.callers())
@@ -11242,6 +11306,7 @@ public setCurrentPosition(self, p):
         g.trace(f"Invalid position: {repr(p and p.h)}")
         g.trace(g.callers())
         // Don't kill unit tests for this kind of problem.
+}
 
 // * For compatibiility with old scripts.
 //setCurrentVnode = setCurrentPosition
