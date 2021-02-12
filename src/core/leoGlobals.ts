@@ -3,10 +3,11 @@
  * Global constants, variables and utility functions used throughout Leo.
  * Important: This module imports no other Leo module.
  */
-import { assert } from 'console';
 import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
+import { Commander } from './leoCommander';
+import { Position } from "./leoNodes";
 
 export const isMac: boolean = process.platform.startsWith('darwin');
 export const isWindows: boolean = process.platform.startsWith('win');
@@ -316,6 +317,51 @@ export function doKeywordArgs(keys: { [key: string]: any }, d: { [key: string]: 
     return result;
 }
 
+/**
+ *
+  This global function calls a hook routine. Hooks are identified by the
+    tag param.
+
+    Returns the value returned by the hook routine, or None if the there is
+    an exception.
+
+    We look for a hook routine in three places:
+    1. c.hookFunction
+    2. app.hookFunction
+    3. leoPlugins.doPlugins()
+
+    Set app.hookError on all exceptions.
+    Scripts may reset app.hookError to try again.
+ */
+export function doHook(tag:string, ...args: any[]):any {
+/*
+    if g.app.killed or g.app.hookError:
+        return None
+    if args:
+        # A minor error in Leo's core.
+        g.pr(f"***ignoring args param.  tag = {tag}")
+    if not g.app.config.use_plugins:
+        if tag in ('open0', 'start1'):
+            g.warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.")
+        return None
+    # Get the hook handler function.  Usually this is doPlugins.
+    c = keywords.get("c")
+    # pylint: disable=consider-using-ternary
+    f = (c and c.hookFunction) or g.app.hookFunction
+    if not f:
+        g.app.hookFunction = f = g.app.pluginsController.doPlugins
+    try:
+        # Pass the hook to the hook handler.
+        # g.pr('doHook',f.__name__,keywords.get('c'))
+        return f(tag, keywords)
+    except Exception:
+        g.es_exception()
+        g.app.hookError = True  # Supress this function.
+        g.app.idle_time_hooks_enabled = False
+        return None
+*/
+}
+
 export const error = console.error;
 
 // TODO : Replace with output to proper 'Leo log pane'
@@ -347,6 +393,20 @@ export function es_exception(): string {
  *     es(*args, **keys)
  */
 export const es_print = console.log;
+
+/**
+ * Return the expansion of the selected text of node p.
+ * Return the expansion of all of node p's body text if
+ * p is not the current node or if there is no text selection.
+ */
+export function getScript(c:Commander, p:Position,
+    useSelectedText:boolean=true,
+    forcePythonSentinels:boolean=true,
+    useSentinels:boolean=true
+):string  {
+    console.log("get script called");
+    return "";
+}
 
 /**
  * Return True if s starts with a directive.

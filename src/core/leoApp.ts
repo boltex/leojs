@@ -18,6 +18,7 @@
 
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
+import { NodeIndices } from './leoNodes';
 import { Commander } from './leoCommander';
 /**
  *  A singleton class to manage idle-time handling. This class handles all
@@ -95,7 +96,9 @@ export class LeoApp {
     public diff: boolean = false; // True: run Leo in diff mode.
     public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
-    public gui:LeoUI; // The gui class.
+    // public gui:LeoUI; // The gui class.
+    // TODO
+    public gui: any;
     public guiArgName = null; // The gui name given in --gui option.
     public ipython_inited: boolean = false; // True if leoIpython.py imports succeeded.
     public isTheme: boolean = false; // True: load files as theme files (ignore myLeoSettings.leo).
@@ -261,6 +264,8 @@ export class LeoApp {
         this.define_language_delims_dict();
         this.define_language_extension_dict();
         this.define_extension_dict();
+        // this.gui = p_gui;
+        this.nodeIndices = new NodeIndices(g.app.leoID);
     }
 
     public define_delegate_language_dict(): void {
@@ -1163,7 +1168,7 @@ export class LoadManager {
         
         // Step 2: open the outline in the requested gui.
         // For .leo files (and zipped .leo file) this opens the file a second time.
-        c = lm.openFileByName(fn, gui, old_c, previousSettings);
+        c = lm.openFileByName(fn, gui, old_c, previousSettings)!;
         return c;
     }
     /**
@@ -1224,7 +1229,9 @@ export class LoadManager {
         // c.setLog()
         // lm.createMenu(c, fn)
         // lm.finishOpen(c); // c.initAfterLoad()
-        const ok:boolean = c.fileCommands.openLeoFile(fn);
+
+        // TODO : OPEN LEO FILE
+        const ok: boolean = true; // c.fileCommands.openLeoFile(fn);
         return c;
     }
 

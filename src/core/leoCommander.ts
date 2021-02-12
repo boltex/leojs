@@ -18,9 +18,11 @@ export class Commander {
     public mRelativeFileName = null;
     public gui:LeoUI;
     public frame: any; // TODO : FAKE FRAME
+    public hoistStack:any[] = [];
     
     // File Ivars
     public changed: boolean = false;
+    
 
     // _currentCount = 0
 
@@ -46,6 +48,8 @@ export class Commander {
         console.log("redraw_after_icons_changed");
     }
 
+    public alert(...arg:any[]):void {}
+
     /**
      * A generator returning all vnodes in the outline, in outline order.
      */
@@ -70,10 +74,10 @@ export class Commander {
     /**
      * A generator return all positions of the outline, in outline order.
      */
-    public *all_positions(copy?=true):Generator<Position> {
+    public *all_positions(copy=true):Generator<Position> {
         const c:Commander = this;
-        const p:Position = c.rootPosition();
-        while( p.__bool__()){
+        const p:Position|undefined = c.rootPosition();
+        while(p && p.__bool__()){
             yield (copy ? p.copy() : p);
             p.moveToThreadNext();
         }
@@ -144,7 +148,7 @@ export class Commander {
      * The generator yields all **root** anywhere in the outline that satisfy
      * the predicate. Once a root is found, the generator skips its subtree.
      */
-    public *all_roots(copy?=true, predicate?: (p:Position) => boolean):Generator<Position> {
+    public *all_roots(copy=true, predicate?: (p:Position) => boolean):Generator<Position> {
         const c:Commander = this;
         
         if(!predicate){
@@ -154,8 +158,8 @@ export class Commander {
             };
         }
 
-        const p:Position = c.rootPosition();
-        while(p.__bool__()){
+        const p:Position|undefined = c.rootPosition();
+        while(p && p.__bool__()){
             if (predicate(p)){
                 yield p.copy();  // 2017/02/19
                 p.moveToNodeAfterTree();
@@ -169,11 +173,11 @@ export class Commander {
      * A generator return all positions of the outline, in outline order.
      * Returns only the first position for each vnode.
      */
-    public *all_unique_positions(copy?=true):Generator<Position> {
+    public *all_unique_positions(copy=true):Generator<Position> {
         const c:Commander = this;
-        const p:Position = c.rootPosition();
+        const p:Position|undefined = c.rootPosition();
         const seen:VNode[] = [];
-        while (p.__bool__()){
+        while (p && p.__bool__()){
             if(seen.includes(p.v)){
                 p.moveToNodeAfterTree();
             }else{
@@ -192,7 +196,7 @@ export class Commander {
      * The generator yields all **root** anywhere in the outline that satisfy
      * the predicate. Once a root is found, the generator skips its subtree.
      */
-    public *all_unique_roots(copy?=true, predicate?: (p:Position) => boolean):Generator<Position> {
+    public *all_unique_roots(copy=true, predicate?: (p:Position) => boolean):Generator<Position> {
         const c:Commander = this;
         
         if(!predicate){
@@ -203,8 +207,8 @@ export class Commander {
         }
 
         const seen:VNode[] = [];
-        const p:Position = c.rootPosition();
-        while (p.__bool__()){
+        const p:Position| undefined = c.rootPosition();
+        while (p && p.__bool__()){
             if(!seen.includes(p.v) && predicate(p)){
                 seen.push(p.v);
                 yield (copy ? p.copy() : p);
@@ -218,10 +222,10 @@ export class Commander {
      * A generator returning all positions of the outline. This generator does
      * *not* assume that vnodes are never their own ancestors.
      */
-    public *safe_all_positions(copy?=true): Generator<Position> {
+    public *safe_all_positions(copy=true): Generator<Position> {
         const c:Commander = this;
-        const p:Position = c.rootPosition(); // Make one copy.
-        while (p.__bool__()){
+        const p:Position|undefined = c.rootPosition(); // Make one copy.
+        while (p && p.__bool__()){
             yield (copy ? p.copy() : p);
             p.safeMoveToThreadNext();
         }
@@ -240,7 +244,7 @@ export class Commander {
         return c.rootPosition();
     }
 
-    // For compatibiility with old scripts...
+    // For compatibility with old scripts...
     // currentVnode = currentPosition
 
     // Compatibility with scripts
@@ -286,7 +290,9 @@ export class Commander {
      */
     public getTabWidth(p:Position):number {
         const c:Commander = this;
-        const val:number = g.scanAllAtTabWidthDirectives(c, p);
+        // const val:number = g.scanAllAtTabWidthDirectives(c, p);
+        // TODO: NEEDED?
+        const val:number = 10;
         return val;
     }
 
@@ -298,11 +304,11 @@ export class Commander {
      */
     public currentPositionIsRootPosition():boolean {
         const c:Commander = this;
-        const root:Position = c.rootPosition();
+        const root:Position|undefined = c.rootPosition();
         return !!c._currentPosition &&
-               !!root &&
-               c._currentPosition.__bool__() &&
-               root.__bool__() && c._currentPosition.__eq__(root);
+                !!root &&
+                c._currentPosition.__bool__() &&
+                root.__bool__() && c._currentPosition.__eq__(root);
     }
 
         // return (
@@ -331,13 +337,13 @@ export class Commander {
         return p.__eq__(c._currentPosition);
     }
 
-    public isRootPosition(p):boolean {
+    public isRootPosition(p:Position):boolean {
         const c:Commander = this;
-        const root:Position = c.rootPosition();
+        const root:Position|undefined = c.rootPosition();
         return !!p &&
-               !!root &&
-               p.__bool__() &&
-               root.__bool__() && p.__eq__(root);
+                !!root &&
+                p.__bool__() &&
+                root.__bool__() && p.__eq__(root);
     }
 
     public isChanged():boolean {
@@ -349,11 +355,11 @@ export class Commander {
      */
     public lastTopLevel():Position {
         const c:Commander = this;
-        const p:Position = c.rootPosition();
-        while(p.hasNext()){
+        const p:Position|undefined = c.rootPosition();
+        while(p && p.hasNext()){
             p.moveToNext();
         }
-        return p;
+        return p!;
     }
 
     /**
@@ -477,11 +483,12 @@ export class Commander {
     public visLimit(): [Position, boolean]|undefined {
         const c:Commander = this;
         const cc:any = false;// c.chapterController
-        if c.hoistStack:
-            bunch = c.hoistStack[-1];
-            p = bunch.p;
-            limitIsVisible = !cc || !p.h.startswith('@chapter');
+        if(c.hoistStack.length){
+            const bunch:any = c.hoistStack[c.hoistStack.length-1];
+            const p:Position = bunch.p;
+            const limitIsVisible:boolean = !cc || !p.h.startsWith('@chapter');
             return [p, limitIsVisible];
+        }
         return undefined;
     }
 
@@ -490,7 +497,7 @@ export class Commander {
      */
     public get p():Position {
         const c:Commander = this;
-        return c.currentPosition();
+        return c.currentPosition()!;
     }
 
     public appendStringToBody(p:Position, s:string): void {
@@ -501,15 +508,17 @@ export class Commander {
 
     public clearAllMarked(): void {
         const c:Commander = this;
-        for p in c.all_unique_positions(copy=False):
-            p.v.clearMarked()
+        for(let p of c.all_unique_positions(false)){
+            p.v.clearMarked();
+        }
     }
 
     public clearAllVisited(): void {
         const c:Commander = this;
-        for p in c.all_unique_positions(copy=False):
-            p.v.clearVisited()
-            p.v.clearWriteBit()
+        for(let p of c.all_unique_positions(false)){
+            p.v.clearVisited();
+            p.v.clearWriteBit();
+        }
     }
 
     /**
@@ -517,11 +526,12 @@ export class Commander {
      */
     public clearChanged(): void {
         const c:Commander = this;
-        c.changed = False
+        c.changed = false;
         // Clear all dirty bits _before_ setting the caption.
-        for v in c.all_unique_nodes():
-            v.clearDirty()
-        c.changed = False
+        for(let v of c.all_unique_nodes()){
+            v.clearDirty();
+        }
+        c.changed = false;
         // * Old code.
             // master = getattr(c.frame.top, 'leo_master', None)
             // if master:
@@ -532,7 +542,7 @@ export class Commander {
                 // c.frame.setTitle(s[2:])
     }
 
-    public clearMarked(p):void {
+    public clearMarked(p:Position):void {
         const c:Commander = this;
         p.v.clearMarked();
         g.doHook("clear-mark", c, p);
@@ -543,33 +553,52 @@ export class Commander {
      * Warning: This method may call c.recolor() or c.redraw().
      */
     public setBodyString(p:Position, s:string): void {
-        c, v = self, p.v
-        if not c or not v:
-            return
-        s = g.toUnicode(s)
-        current = c.p
+        const c:Commander = this;
+        const v:VNode = p.v;
+        if(!c || !v){
+            return;
+        }
+        s = g.toUnicode(s);
+        const current:Position = c.p;
         // 1/22/05: Major change: the previous test was: 'if p == current:'
         // This worked because commands work on the presently selected node.
         // But setRecentFiles may change a _clone_ of the selected node!
-        if current and p.v == current.v:
-            w = c.frame.body.wrapper
-            w.setAllText(s)
-            v.setSelection(0,0)
-            c.recolor()
+        if(current && current.__bool__() && p.v.gnx === current.v.gnx){
+            // * Leo used to send it to gui
+            // const w:any = c.frame.body.wrapper;
+            // w.setAllText(s);
+            v.setSelection(0,0);
+            c.recolor();
+        }
         // Keep the body text in the VNode up-to-date.
-        if v.b != s:
-            v.setBodyString(s)
-            v.setSelection(0, 0)
-            p.setDirty()
-            if not c.isChanged():
-                c.setChanged()
-            c.redraw_after_icons_changed()
+        if (v.b !== s){
+            v.setBodyString(s);
+            v.setSelection(0, 0);
+            p.setDirty();
+            if(!c.isChanged()){
+                c.setChanged();
+            }
+            c.redraw_after_icons_changed();
+        }
+    }
+
+    /**
+     * Set the p's headline and the corresponding tree widget to s.
+     * This is used in by unit tests to restore the outline.
+     */
+    public setHeadString(p:Position, s:string):void {
+        const c:Commander = this;
+        p.initHeadString(s);
+        p.setDirty();
+        // Change the actual tree widget so
+        // A later call to c.endEditing or c.redraw will use s.
+        c.frame.tree.setHeadline(p, s);
     }
 
     /**
      * Set the marker that indicates that the .leo file has been changed.
      */
-    public setChanged(redrawFlag?:boolean=true): void {
+    public setChanged(redrawFlag:boolean=true): void {
         const c:Commander = this;
         c.changed = true;
         // Do nothing for null frames.
@@ -589,24 +618,28 @@ export class Commander {
      * Set the presently selected position. For internal use only.
      * Client code should use c.selectPosition instead.
      */
-    public setCurrentPosition(p):void {
+    public setCurrentPosition(p:Position):void {
         const c:Commander = this;
-        if not p:
-            g.trace('===== no p', g.callers())
-            return
-        if c.positionExists(p):
-            if c._currentPosition and p == c._currentPosition:
-                pass  // We have already made a copy.
-            else:  // Make a copy _now_
-                c._currentPosition = p.copy()
-        else:  // 2011/02/25:
-            c._currentPosition = c.rootPosition()
-            g.trace(f"Invalid position: {repr(p and p.h)}")
-            g.trace(g.callers())
+        if(!(p && p.__bool__())){
+            g.trace('===== no p', g.callers());
+            return;
+        }
+        if(c.positionExists(p)){
+            if(c._currentPosition && p.__eq__(c._currentPosition)){
+                // We have already made a copy.
+                // pass;  
+            } else { // Make a copy _now_
+                c._currentPosition = p.copy();
+            }
+        } else{ // 2011/02/25:
+            c._currentPosition = c.rootPosition();
+            g.trace(`Invalid position: ${p.h}`);
+            g.trace(g.callers());
             // Don't kill unit tests for this kind of problem.
+        }
     }
 
-    // * For compatibiility with old scripts.
+    // * For compatibility with old scripts.
     //setCurrentVnode = setCurrentPosition
 
 

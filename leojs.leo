@@ -443,7 +443,8 @@
 <v t="felix.20210131011607.4"><vh>c.clearAllVisited</vh></v>
 <v t="felix.20210131011607.5"><vh>c.clearChanged</vh></v>
 <v t="felix.20210131011607.6"><vh>c.clearMarked</vh></v>
-<v t="felix.20210131011607.7"><vh>c.setBodyString (to do)</vh></v>
+<v t="felix.20210131011607.7"><vh>c.setBodyString</vh></v>
+<v t="felix.20210211234142.1"><vh>c.setHeadString</vh></v>
 <v t="felix.20210131011607.8"><vh>c.setChanged</vh></v>
 <v t="felix.20210131011607.9"><vh>c.setCurrentPosition</vh></v>
 </v>
@@ -481,10 +482,12 @@
 <v t="felix.20210104001301.1"><vh>g.callers         (coreGlobals.py)</vh></v>
 <v t="felix.20210104010331.1"><vh>g._callerName     (coreGlobals.py)</vh></v>
 <v t="felix.20210104194650.1"><vh>g.doKeywordArgs   (coreGlobals.py)</vh></v>
+<v t="felix.20210211222711.1"><vh>g.doHook</vh></v>
 <v t="felix.20210104210231.1"><vh>g.error           (coreGlobals.py)</vh></v>
 <v t="felix.20210104210234.1"><vh>g.es              (coreGlobals.py)</vh></v>
 <v t="felix.20210104210248.1"><vh>g.es_exception    (coreGlobals.py)</vh></v>
 <v t="felix.20210104210254.1"><vh>g.es_print        (coreGlobals.py)</vh></v>
+<v t="felix.20210211234504.1"><vh>g.getScript</vh></v>
 <v t="felix.20210104210259.1"><vh>g.isDirective     (coreGlobals.py)</vh></v>
 <v t="felix.20210104210307.1"><vh>g.is_special      (coreGlobals.py)</vh></v>
 <v t="felix.20210104210316.1"><vh>g.isWordChar*     (coreGlobals.py)</vh></v>
@@ -6166,10 +6169,11 @@ public gotSelectedNode(p_element: PNode): void {
  * Global constants, variables and utility functions used throughout Leo.
  * Important: This module imports no other Leo module.
  */
-import { assert } from 'console';
 import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
+import { Commander } from './leoCommander';
+import { Position } from "./leoNodes";
 
 export const isMac: boolean = process.platform.startsWith('darwin');
 export const isWindows: boolean = process.platform.startsWith('win');
@@ -6631,6 +6635,7 @@ export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
 
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
+import { NodeIndices } from './leoNodes';
 import { Commander } from './leoCommander';
 </t>
 <t tx="felix.20210102211445.1">@language typescript
@@ -6814,6 +6819,8 @@ public language_extension_dict: { [key: string]: string } = {};
     this.define_language_delims_dict();
     this.define_language_extension_dict();
     this.define_extension_dict();
+    // this.gui = p_gui;
+    this.nodeIndices = new NodeIndices(g.app.leoID);
 }
 
 </t>
@@ -7533,7 +7540,9 @@ public debug = []; // A list of switches to be enabled.
 public diff: boolean = false; // True: run Leo in diff mode.
 public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
 public failFast: boolean = false; // True: Use the failfast option in unit tests.
-public gui:LeoUI; // The gui class.
+// public gui:LeoUI; // The gui class.
+// TODO
+public gui: any;
 public guiArgName = null; // The gui name given in --gui option.
 public ipython_inited: boolean = false; // True if leoIpython.py imports succeeded.
 public isTheme: boolean = false; // True: load files as theme files (ignore myLeoSettings.leo).
@@ -8381,9 +8390,11 @@ export class Commander {
     public mRelativeFileName = null;
     public gui:LeoUI;
     public frame: any; // TODO : FAKE FRAME
+    public hoistStack:any[] = [];
     
     // File Ivars
     public changed: boolean = false;
+    
 
     // _currentCount = 0
 
@@ -8414,6 +8425,8 @@ public redraw():void {
 public redraw_after_icons_changed():void {
     console.log("redraw_after_icons_changed");
 }
+
+public alert(...arg:any[]):void {}
 
 </t>
 <t tx="felix.20210112010737.1"></t>
@@ -8862,7 +8875,7 @@ public setDirty(): void {
  */
 public setAllAncestorAtFileNodesDirty(): void {
     const v: VNode = this;
-    const hiddenRootVnode: VNode = v.context.hiddenRootNode;
+    const hiddenRootVnode: VNode = v.context.hiddenRootNode!;
 
     function* v_and_parents(v: VNode): Generator&lt;VNode&gt; {
         if (v.fileIndex !== hiddenRootVnode.fileIndex) {
@@ -9327,7 +9340,7 @@ public doPostPluginsInit():boolean {
     
     // Step 2: open the outline in the requested gui.
     // For .leo files (and zipped .leo file) this opens the file a second time.
-    c = lm.openFileByName(fn, gui, old_c, previousSettings);
+    c = lm.openFileByName(fn, gui, old_c, previousSettings)!;
     return c;
 }
 </t>
@@ -9389,7 +9402,9 @@ public openFileByName(fn:string, gui:LeoUI, old_c?:Commander, previousSettings?:
     // c.setLog()
     // lm.createMenu(c, fn)
     // lm.finishOpen(c); // c.initAfterLoad()
-    const ok:boolean = c.fileCommands.openLeoFile(fn);
+
+    // TODO : OPEN LEO FILE
+    const ok: boolean = true; // c.fileCommands.openLeoFile(fn);
     return c;
 }
 
@@ -9656,31 +9671,33 @@ public moveToThreadNext(): Position {
  */
 public moveToVisBack(c:Commander): Position|undefined {
     const p:Position = this;
-    const visLimit:[Position, boolean] = c.visLimit();
-    const limit:Position = visLimit[0];
-    const limitIsVisible:boolean = visLimit[1];
-    while  (p.__bool__()){
-        // Short-circuit if possible.
-        const back:Position = p.back();
-        if( back.__bool__() &amp;&amp; back.hasChildren() &amp;&amp; back.isExpanded()){
-            p.moveToThreadBack();
-        }
-        else if(back.__bool__()){
-            p.moveToBack();
-        } else{
-            p.moveToParent();  // Same as p.moveToThreadBack()
-        }
-        if (p.__bool__()){
-            if(limit){
-                let done:boolean;
-                let val:Position|undefined;
-                [done, val] = this.checkVisBackLimit(limit, limitIsVisible, p);
-                if (done){
-                    return val;  // A position or None
-                }
+    const visLimit: [Position, boolean] | undefined = c.visLimit();
+    if(visLimit){
+        const limit:Position = visLimit[0];
+        const limitIsVisible:boolean = visLimit[1];
+        while  (visLimit &amp;&amp; p.__bool__()){
+            // Short-circuit if possible.
+            const back:Position = p.back();
+            if( back.__bool__() &amp;&amp; back.hasChildren() &amp;&amp; back.isExpanded()){
+                p.moveToThreadBack();
             }
-            if( p.isVisible(c)){
-                return p;
+            else if(back.__bool__()){
+                p.moveToBack();
+            } else{
+                p.moveToParent();  // Same as p.moveToThreadBack()
+            }
+            if (p.__bool__()){
+                if(limit){
+                    let done:boolean;
+                    let val:Position|undefined;
+                    [done, val] = this.checkVisBackLimit(limit, limitIsVisible, p);
+                    if (done){
+                        return val;  // A position or None
+                    }
+                }
+                if( p.isVisible(c)){
+                    return p;
+                }
             }
         }
     }
@@ -9711,26 +9728,28 @@ public checkVisBackLimit(limit:Position, limitIsVisible:boolean, p:Position): [ 
  */
 public moveToVisNext(c:Commander):Position|undefined {
     const p:Position = this;
-    const visLimit:[Position, boolean] = c.visLimit();
-    const limit:Position = visLimit[0];
-    while (p.__bool__()){
-        if(p.hasChildren()){
-            if(p.isExpanded()){
-                p.moveToFirstChild();
+    const visLimit:[Position, boolean]|undefined = c.visLimit();
+    if(visLimit){
+        const limit:Position = visLimit[0];
+        while (p.__bool__()){
+            if(p.hasChildren()){
+                if(p.isExpanded()){
+                    p.moveToFirstChild();
+                }else{
+                    p.moveToNodeAfterTree();
+                }
+            }else if(p.hasNext()){
+                p.moveToNext();
             }else{
-                p.moveToNodeAfterTree();
+                p.moveToThreadNext();
             }
-        }else if(p.hasNext()){
-            p.moveToNext();
-        }else{
-            p.moveToThreadNext();
-        }
-        if(p.__bool__()){
-            if (limit &amp;&amp; this.checkVisNextLimit(limit, p)){
-                return undefined;
-            }
-            if( p.isVisible(c)){
-                return p;
+            if(p.__bool__()){
+                if (limit &amp;&amp; this.checkVisNextLimit(limit, p)){
+                    return undefined;
+                }
+                if( p.isVisible(c)){
+                    return p;
+                }
             }
         }
     }
@@ -9831,7 +9850,7 @@ public moveToBack():Position {
         p.v = parent_v.children[n - 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9849,7 +9868,7 @@ public moveToFirstChild():Position{
         p._childIndex = 0;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9869,7 +9888,7 @@ public moveToLastChild():Position{
         p._childIndex = n - 1;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9906,7 +9925,7 @@ public moveToNext():Position{
         p.v = parent_v.children[n + 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9940,7 +9959,7 @@ public moveToNthChild(n:number):Position {
         p._childIndex = n;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9958,7 +9977,7 @@ public moveToParent():Position {
         p._childIndex = item[1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                            //@ts-ignore
+                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -10422,8 +10441,8 @@ constructor(v: VNode, childIndex: number = 0, stack?: StackEntry[]) {
 }
 
 </t>
-<t tx="felix.20210127001502.1">import * as g from './leoGlobals';
-import "date-format-lite";
+<t tx="felix.20210127001502.1">import "date-format-lite";
+import * as g from './leoGlobals';
 import { Commander } from './leoCommander';
 
 </t>
@@ -10714,13 +10733,13 @@ export function objToString(obj: any, indent = '', printCaller = false, tag = nu
 
 </t>
 <t tx="felix.20210131011420.1"></t>
-<t tx="felix.20210131011420.10">public isRootPosition(p):boolean {
+<t tx="felix.20210131011420.10">public isRootPosition(p:Position):boolean {
     const c:Commander = this;
-    const root:Position = c.rootPosition();
+    const root:Position|undefined = c.rootPosition();
     return !!p &amp;&amp;
-           !!root &amp;&amp;
-           p.__bool__() &amp;&amp;
-           root.__bool__() &amp;&amp; p.__eq__(root);
+            !!root &amp;&amp;
+            p.__bool__() &amp;&amp;
+            root.__bool__() &amp;&amp; p.__eq__(root);
 }
 
 </t>
@@ -10734,11 +10753,11 @@ export function objToString(obj: any, indent = '', printCaller = false, tag = nu
  */
 public lastTopLevel():Position {
     const c:Commander = this;
-    const p:Position = c.rootPosition();
-    while(p.hasNext()){
+    const p:Position|undefined = c.rootPosition();
+    while(p &amp;&amp; p.hasNext()){
         p.moveToNext();
     }
-    return p;
+    return p!;
 }
 
 </t>
@@ -10874,7 +10893,7 @@ public currentPosition(): Position|undefined {
     return c.rootPosition();
 }
 
-// For compatibiility with old scripts...
+// For compatibility with old scripts...
 // currentVnode = currentPosition
 
 </t>
@@ -10923,7 +10942,9 @@ public firstVisible():Position {
  */
 public getTabWidth(p:Position):number {
     const c:Commander = this;
-    const val:number = g.scanAllAtTabWidthDirectives(c, p);
+    // const val:number = g.scanAllAtTabWidthDirectives(c, p);
+    // TODO: NEEDED?
+    const val:number = 10;
     return val;
 }
 
@@ -10937,11 +10958,11 @@ public getTabWidth(p:Position):number {
  */
 public currentPositionIsRootPosition():boolean {
     const c:Commander = this;
-    const root:Position = c.rootPosition();
+    const root:Position|undefined = c.rootPosition();
     return !!c._currentPosition &amp;&amp;
-           !!root &amp;&amp;
-           c._currentPosition.__bool__() &amp;&amp;
-           root.__bool__() &amp;&amp; c._currentPosition.__eq__(root);
+            !!root &amp;&amp;
+            c._currentPosition.__bool__() &amp;&amp;
+            root.__bool__() &amp;&amp; c._currentPosition.__eq__(root);
 }
 
     // return (
@@ -10980,11 +11001,12 @@ public currentPositionHasNext():boolean {
 public visLimit(): [Position, boolean]|undefined {
     const c:Commander = this;
     const cc:any = false;// c.chapterController
-    if c.hoistStack:
-        bunch = c.hoistStack[-1];
-        p = bunch.p;
-        limitIsVisible = !cc || !p.h.startswith('@chapter');
+    if(c.hoistStack.length){
+        const bunch:any = c.hoistStack[c.hoistStack.length-1];
+        const p:Position = bunch.p;
+        const limitIsVisible:boolean = !cc || !p.h.startsWith('@chapter');
         return [p, limitIsVisible];
+    }
     return undefined;
 }
 
@@ -11015,10 +11037,10 @@ public *all_unique_nodes(): Generator&lt;VNode&gt; {
 <t tx="felix.20210131011508.3">/**
  * A generator return all positions of the outline, in outline order.
  */
-public *all_positions(copy?=true):Generator&lt;Position&gt; {
+public *all_positions(copy=true):Generator&lt;Position&gt; {
     const c:Commander = this;
-    const p:Position = c.rootPosition();
-    while( p.__bool__()){
+    const p:Position|undefined = c.rootPosition();
+    while(p &amp;&amp; p.__bool__()){
         yield (copy ? p.copy() : p);
         p.moveToThreadNext();
     }
@@ -11091,7 +11113,7 @@ public *all_positions_for_v(v:VNode, stack?:StackEntry[]):Generator&lt;Position&
  * The generator yields all **root** anywhere in the outline that satisfy
  * the predicate. Once a root is found, the generator skips its subtree.
  */
-public *all_roots(copy?=true, predicate?: (p:Position) =&gt; boolean):Generator&lt;Position&gt; {
+public *all_roots(copy=true, predicate?: (p:Position) =&gt; boolean):Generator&lt;Position&gt; {
     const c:Commander = this;
     
     if(!predicate){
@@ -11101,8 +11123,8 @@ public *all_roots(copy?=true, predicate?: (p:Position) =&gt; boolean):Generator&
         };
     }
 
-    const p:Position = c.rootPosition();
-    while(p.__bool__()){
+    const p:Position|undefined = c.rootPosition();
+    while(p &amp;&amp; p.__bool__()){
         if (predicate(p)){
             yield p.copy();  // 2017/02/19
             p.moveToNodeAfterTree();
@@ -11117,11 +11139,11 @@ public *all_roots(copy?=true, predicate?: (p:Position) =&gt; boolean):Generator&
  * A generator return all positions of the outline, in outline order.
  * Returns only the first position for each vnode.
  */
-public *all_unique_positions(copy?=true):Generator&lt;Position&gt; {
+public *all_unique_positions(copy=true):Generator&lt;Position&gt; {
     const c:Commander = this;
-    const p:Position = c.rootPosition();
+    const p:Position|undefined = c.rootPosition();
     const seen:VNode[] = [];
-    while (p.__bool__()){
+    while (p &amp;&amp; p.__bool__()){
         if(seen.includes(p.v)){
             p.moveToNodeAfterTree();
         }else{
@@ -11141,7 +11163,7 @@ public *all_unique_positions(copy?=true):Generator&lt;Position&gt; {
  * The generator yields all **root** anywhere in the outline that satisfy
  * the predicate. Once a root is found, the generator skips its subtree.
  */
-public *all_unique_roots(copy?=true, predicate?: (p:Position) =&gt; boolean):Generator&lt;Position&gt; {
+public *all_unique_roots(copy=true, predicate?: (p:Position) =&gt; boolean):Generator&lt;Position&gt; {
     const c:Commander = this;
     
     if(!predicate){
@@ -11152,8 +11174,8 @@ public *all_unique_roots(copy?=true, predicate?: (p:Position) =&gt; boolean):Gen
     }
 
     const seen:VNode[] = [];
-    const p:Position = c.rootPosition();
-    while (p.__bool__()){
+    const p:Position| undefined = c.rootPosition();
+    while (p &amp;&amp; p.__bool__()){
         if(!seen.includes(p.v) &amp;&amp; predicate(p)){
             seen.push(p.v);
             yield (copy ? p.copy() : p);
@@ -11168,10 +11190,10 @@ public *all_unique_roots(copy?=true, predicate?: (p:Position) =&gt; boolean):Gen
  * A generator returning all positions of the outline. This generator does
  * *not* assume that vnodes are never their own ancestors.
  */
-public *safe_all_positions(copy?=true): Generator&lt;Position&gt; {
+public *safe_all_positions(copy=true): Generator&lt;Position&gt; {
     const c:Commander = this;
-    const p:Position = c.rootPosition(); // Make one copy.
-    while (p.__bool__()){
+    const p:Position|undefined = c.rootPosition(); // Make one copy.
+    while (p &amp;&amp; p.__bool__()){
         yield (copy ? p.copy() : p);
         p.safeMoveToThreadNext();
     }
@@ -11183,7 +11205,7 @@ public *safe_all_positions(copy?=true): Generator&lt;Position&gt; {
  */
 public get p():Position {
     const c:Commander = this;
-    return c.currentPosition();
+    return c.currentPosition()!;
 }
 
 </t>
@@ -11197,16 +11219,18 @@ public get p():Position {
 </t>
 <t tx="felix.20210131011607.3">public clearAllMarked(): void {
     const c:Commander = this;
-    for p in c.all_unique_positions(copy=False):
-        p.v.clearMarked()
+    for(let p of c.all_unique_positions(false)){
+        p.v.clearMarked();
+    }
 }
 
 </t>
 <t tx="felix.20210131011607.4">public clearAllVisited(): void {
     const c:Commander = this;
-    for p in c.all_unique_positions(copy=False):
-        p.v.clearVisited()
-        p.v.clearWriteBit()
+    for(let p of c.all_unique_positions(false)){
+        p.v.clearVisited();
+        p.v.clearWriteBit();
+    }
 }
 
 </t>
@@ -11215,11 +11239,12 @@ public get p():Position {
  */
 public clearChanged(): void {
     const c:Commander = this;
-    c.changed = False
+    c.changed = false;
     // Clear all dirty bits _before_ setting the caption.
-    for v in c.all_unique_nodes():
-        v.clearDirty()
-    c.changed = False
+    for(let v of c.all_unique_nodes()){
+        v.clearDirty();
+    }
+    c.changed = false;
     // * Old code.
         // master = getattr(c.frame.top, 'leo_master', None)
         // if master:
@@ -11231,7 +11256,7 @@ public clearChanged(): void {
 }
 
 </t>
-<t tx="felix.20210131011607.6">public clearMarked(p):void {
+<t tx="felix.20210131011607.6">public clearMarked(p:Position):void {
     const c:Commander = this;
     p.v.clearMarked();
     g.doHook("clear-mark", c, p);
@@ -11243,34 +11268,40 @@ public clearChanged(): void {
  * Warning: This method may call c.recolor() or c.redraw().
  */
 public setBodyString(p:Position, s:string): void {
-    c, v = self, p.v
-    if not c or not v:
-        return
-    s = g.toUnicode(s)
-    current = c.p
+    const c:Commander = this;
+    const v:VNode = p.v;
+    if(!c || !v){
+        return;
+    }
+    s = g.toUnicode(s);
+    const current:Position = c.p;
     // 1/22/05: Major change: the previous test was: 'if p == current:'
     // This worked because commands work on the presently selected node.
     // But setRecentFiles may change a _clone_ of the selected node!
-    if current and p.v == current.v:
-        w = c.frame.body.wrapper
-        w.setAllText(s)
-        v.setSelection(0,0)
-        c.recolor()
+    if(current &amp;&amp; current.__bool__() &amp;&amp; p.v.gnx === current.v.gnx){
+        // * Leo used to send it to gui
+        // const w:any = c.frame.body.wrapper;
+        // w.setAllText(s);
+        v.setSelection(0,0);
+        c.recolor();
+    }
     // Keep the body text in the VNode up-to-date.
-    if v.b != s:
-        v.setBodyString(s)
-        v.setSelection(0, 0)
-        p.setDirty()
-        if not c.isChanged():
-            c.setChanged()
-        c.redraw_after_icons_changed()
+    if (v.b !== s){
+        v.setBodyString(s);
+        v.setSelection(0, 0);
+        p.setDirty();
+        if(!c.isChanged()){
+            c.setChanged();
+        }
+        c.redraw_after_icons_changed();
+    }
 }
 
 </t>
 <t tx="felix.20210131011607.8">/**
  * Set the marker that indicates that the .leo file has been changed.
  */
-public setChanged(redrawFlag?:boolean=true): void {
+public setChanged(redrawFlag:boolean=true): void {
     const c:Commander = this;
     c.changed = true;
     // Do nothing for null frames.
@@ -11291,24 +11322,28 @@ public setChanged(redrawFlag?:boolean=true): void {
  * Set the presently selected position. For internal use only.
  * Client code should use c.selectPosition instead.
  */
-public setCurrentPosition(p):void {
+public setCurrentPosition(p:Position):void {
     const c:Commander = this;
-    if not p:
-        g.trace('===== no p', g.callers())
-        return
-    if c.positionExists(p):
-        if c._currentPosition and p == c._currentPosition:
-            pass  // We have already made a copy.
-        else:  // Make a copy _now_
-            c._currentPosition = p.copy()
-    else:  // 2011/02/25:
-        c._currentPosition = c.rootPosition()
-        g.trace(f"Invalid position: {repr(p and p.h)}")
-        g.trace(g.callers())
+    if(!(p &amp;&amp; p.__bool__())){
+        g.trace('===== no p', g.callers());
+        return;
+    }
+    if(c.positionExists(p)){
+        if(c._currentPosition &amp;&amp; p.__eq__(c._currentPosition)){
+            // We have already made a copy.
+            // pass;  
+        } else { // Make a copy _now_
+            c._currentPosition = p.copy();
+        }
+    } else{ // 2011/02/25:
+        c._currentPosition = c.rootPosition();
+        g.trace(`Invalid position: ${p.h}`);
+        g.trace(g.callers());
         // Don't kill unit tests for this kind of problem.
+    }
 }
 
-// * For compatibiility with old scripts.
+// * For compatibility with old scripts.
 //setCurrentVnode = setCurrentPosition
 
 </t>
@@ -11434,7 +11469,7 @@ public hasThreadBack():boolean{
         [v, childIndex] = p.stack[n];
         // See how many children v's parent has.
         if (n === 0){
-            parent_v = v.context.hiddenRootNode;
+            parent_v = v.context.hiddenRootNode!;
         }else{
             parent_v= p.stack[n - 1][0];
         }
@@ -11452,7 +11487,7 @@ public hasThreadBack():boolean{
     // 2011/02/25: always use c.rootPosition
     const p:Position = this;
     const c:Commander = p.v.context;
-    return c.rootPosition();
+    return c.rootPosition()!;
 }
 
 </t>
@@ -11521,7 +11556,7 @@ public isVisible(c:Commander):boolean {
         }
         return root.isAncestorOf(p) &amp;&amp; visible(p, root);
     }
-    for(let root of c.rootPosition().self_and_siblings(false)){
+    for(let root of c.rootPosition()!.self_and_siblings(false)){
         if( root.__eq__(p) || root.isAncestorOf(p)){
             return visible(p);
         }
@@ -12348,6 +12383,81 @@ public in_at_ignore_tree():boolean {
         }
     }
     return false;
+}
+
+</t>
+<t tx="felix.20210211222711.1">/**
+ *
+  This global function calls a hook routine. Hooks are identified by the
+    tag param.
+
+    Returns the value returned by the hook routine, or None if the there is
+    an exception.
+
+    We look for a hook routine in three places:
+    1. c.hookFunction
+    2. app.hookFunction
+    3. leoPlugins.doPlugins()
+
+    Set app.hookError on all exceptions.
+    Scripts may reset app.hookError to try again.
+ */
+export function doHook(tag:string, ...args: any[]):any {
+/*
+    if g.app.killed or g.app.hookError:
+        return None
+    if args:
+        # A minor error in Leo's core.
+        g.pr(f"***ignoring args param.  tag = {tag}")
+    if not g.app.config.use_plugins:
+        if tag in ('open0', 'start1'):
+            g.warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.")
+        return None
+    # Get the hook handler function.  Usually this is doPlugins.
+    c = keywords.get("c")
+    # pylint: disable=consider-using-ternary
+    f = (c and c.hookFunction) or g.app.hookFunction
+    if not f:
+        g.app.hookFunction = f = g.app.pluginsController.doPlugins
+    try:
+        # Pass the hook to the hook handler.
+        # g.pr('doHook',f.__name__,keywords.get('c'))
+        return f(tag, keywords)
+    except Exception:
+        g.es_exception()
+        g.app.hookError = True  # Supress this function.
+        g.app.idle_time_hooks_enabled = False
+        return None
+*/
+}
+
+</t>
+<t tx="felix.20210211234142.1">/**
+ * Set the p's headline and the corresponding tree widget to s.
+ * This is used in by unit tests to restore the outline.
+ */
+public setHeadString(p:Position, s:string):void {
+    const c:Commander = this;
+    p.initHeadString(s);
+    p.setDirty();
+    // Change the actual tree widget so
+    // A later call to c.endEditing or c.redraw will use s.
+    c.frame.tree.setHeadline(p, s);
+}
+
+</t>
+<t tx="felix.20210211234504.1">/**
+ * Return the expansion of the selected text of node p.
+ * Return the expansion of all of node p's body text if
+ * p is not the current node or if there is no text selection.
+ */
+export function getScript(c:Commander, p:Position,
+    useSelectedText:boolean=true,
+    forcePythonSentinels:boolean=true,
+    useSentinels:boolean=true
+):string  {
+    console.log("get script called");
+    return "";
 }
 
 </t>

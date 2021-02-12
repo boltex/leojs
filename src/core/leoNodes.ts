@@ -1,7 +1,7 @@
 // Leo's fundamental data classes.
 
-import * as g from './leoGlobals';
 import "date-format-lite";
+import * as g from './leoGlobals';
 import { Commander } from './leoCommander';
 
 
@@ -855,7 +855,7 @@ export class Position {
             [v, childIndex] = p.stack[n];
             // See how many children v's parent has.
             if (n === 0){
-                parent_v = v.context.hiddenRootNode;
+                parent_v = v.context.hiddenRootNode!;
             }else{
                 parent_v= p.stack[n - 1][0];
             }
@@ -872,7 +872,7 @@ export class Position {
         // 2011/02/25: always use c.rootPosition
         const p:Position = this;
         const c:Commander = p.v.context;
-        return c.rootPosition();
+        return c.rootPosition()!;
     }
 
     /**
@@ -937,7 +937,7 @@ export class Position {
             }
             return root.isAncestorOf(p) && visible(p, root);
         }
-        for(let root of c.rootPosition().self_and_siblings(false)){
+        for(let root of c.rootPosition()!.self_and_siblings(false)){
             if( root.__eq__(p) || root.isAncestorOf(p)){
                 return visible(p);
             }
@@ -1271,7 +1271,7 @@ export class Position {
             p.v = parent_v.children[n - 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                //@ts-ignore
+                                    //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1288,7 +1288,7 @@ export class Position {
             p._childIndex = 0;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                //@ts-ignore
+                                    //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1307,7 +1307,7 @@ export class Position {
             p._childIndex = n - 1;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                //@ts-ignore
+                                    //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1342,7 +1342,7 @@ export class Position {
             p.v = parent_v.children[n + 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                //@ts-ignore
+                                    //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1374,7 +1374,7 @@ export class Position {
             p._childIndex = n;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                //@ts-ignore
+                                    //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1391,7 +1391,7 @@ export class Position {
             p._childIndex = item[1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                //@ts-ignore
+                                    //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1441,31 +1441,33 @@ export class Position {
      */
     public moveToVisBack(c:Commander): Position|undefined {
         const p:Position = this;
-        const visLimit:[Position, boolean] = c.visLimit();
-        const limit:Position = visLimit[0];
-        const limitIsVisible:boolean = visLimit[1];
-        while  (p.__bool__()){
-            // Short-circuit if possible.
-            const back:Position = p.back();
-            if( back.__bool__() && back.hasChildren() && back.isExpanded()){
-                p.moveToThreadBack();
-            }
-            else if(back.__bool__()){
-                p.moveToBack();
-            } else{
-                p.moveToParent();  // Same as p.moveToThreadBack()
-            }
-            if (p.__bool__()){
-                if(limit){
-                    let done:boolean;
-                    let val:Position|undefined;
-                    [done, val] = this.checkVisBackLimit(limit, limitIsVisible, p);
-                    if (done){
-                        return val;  // A position or None
-                    }
+        const visLimit: [Position, boolean] | undefined = c.visLimit();
+        if(visLimit){
+            const limit:Position = visLimit[0];
+            const limitIsVisible:boolean = visLimit[1];
+            while  (visLimit && p.__bool__()){
+                // Short-circuit if possible.
+                const back:Position = p.back();
+                if( back.__bool__() && back.hasChildren() && back.isExpanded()){
+                    p.moveToThreadBack();
                 }
-                if( p.isVisible(c)){
-                    return p;
+                else if(back.__bool__()){
+                    p.moveToBack();
+                } else{
+                    p.moveToParent();  // Same as p.moveToThreadBack()
+                }
+                if (p.__bool__()){
+                    if(limit){
+                        let done:boolean;
+                        let val:Position|undefined;
+                        [done, val] = this.checkVisBackLimit(limit, limitIsVisible, p);
+                        if (done){
+                            return val;  // A position or None
+                        }
+                    }
+                    if( p.isVisible(c)){
+                        return p;
+                    }
                 }
             }
         }
@@ -1494,26 +1496,28 @@ export class Position {
      */
     public moveToVisNext(c:Commander):Position|undefined {
         const p:Position = this;
-        const visLimit:[Position, boolean] = c.visLimit();
-        const limit:Position = visLimit[0];
-        while (p.__bool__()){
-            if(p.hasChildren()){
-                if(p.isExpanded()){
-                    p.moveToFirstChild();
+        const visLimit:[Position, boolean]|undefined = c.visLimit();
+        if(visLimit){
+            const limit:Position = visLimit[0];
+            while (p.__bool__()){
+                if(p.hasChildren()){
+                    if(p.isExpanded()){
+                        p.moveToFirstChild();
+                    }else{
+                        p.moveToNodeAfterTree();
+                    }
+                }else if(p.hasNext()){
+                    p.moveToNext();
                 }else{
-                    p.moveToNodeAfterTree();
+                    p.moveToThreadNext();
                 }
-            }else if(p.hasNext()){
-                p.moveToNext();
-            }else{
-                p.moveToThreadNext();
-            }
-            if(p.__bool__()){
-                if (limit && this.checkVisNextLimit(limit, p)){
-                    return undefined;
-                }
-                if( p.isVisible(c)){
-                    return p;
+                if(p.__bool__()){
+                    if (limit && this.checkVisNextLimit(limit, p)){
+                        return undefined;
+                    }
+                    if( p.isVisible(c)){
+                        return p;
+                    }
                 }
             }
         }
@@ -2907,7 +2911,7 @@ export class VNode {
      */
     public setAllAncestorAtFileNodesDirty(): void {
         const v: VNode = this;
-        const hiddenRootVnode: VNode = v.context.hiddenRootNode;
+        const hiddenRootVnode: VNode = v.context.hiddenRootNode!;
 
         function* v_and_parents(v: VNode): Generator<VNode> {
             if (v.fileIndex !== hiddenRootVnode.fileIndex) {
