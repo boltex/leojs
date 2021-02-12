@@ -5,7 +5,8 @@ import { Icon, PNode } from "./types"; // ArchivedPosition included to help debu
 /**
  * * Implementation of tree nodes for usage in a TreeDataProvider
  */
-export class LeoNode extends vscode.TreeItem {
+
+export class LeoOutlineNode extends vscode.TreeItem {
 
     public contextValue: string; // * Context string is checked in package.json with 'when' clauses
 
@@ -15,7 +16,6 @@ export class LeoNode extends vscode.TreeItem {
         public label: string, // Node headline
         public collapsibleState: vscode.TreeItemCollapsibleState, // Computed in receiver/creator
         public ap: PNode, // Pointer/reference for leo's node position
-        public childIndex: number, // For debugging purposes
         public cloned: boolean,
         public dirty: boolean,
         public marked: boolean,
@@ -52,12 +52,11 @@ export class LeoNode extends vscode.TreeItem {
      * @param p_node Node to copy properties from.
      * @returns Node itself with the new properties applied
      */
-    public copyProperties(p_node: LeoNode): LeoNode {
+    public copyProperties(p_node: LeoOutlineNode): LeoOutlineNode {
         this.label = p_node.label;
 
         this.collapsibleState = p_node.collapsibleState;
         this.ap = p_node.ap;
-        this.childIndex = p_node.childIndex;
         this.cloned = p_node.cloned;
         this.dirty = p_node.dirty;
         this.marked = p_node.marked;
@@ -124,7 +123,7 @@ export class LeoNode extends vscode.TreeItem {
         if (this.u) {
             return "\u{1F4CE} (" + Object.keys(this.u).length + ")";
         } else {
-            // return "id:" + this.id; // ! debug test
+            return "id:" + this.id; // ! debug test
             // return "gnx:" + this.gnx; // ! debug test
             return ""; // Falsy will not be shown
         }

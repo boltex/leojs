@@ -1,0 +1,324 @@
+#@+leo-ver=5-thin
+#@+node:ekr.20201214084854.1: * @file scripts.txt
+#@@language python
+"""
+This file contains @button nodes and other scripts for use in leojs.leo.
+
+This file reduces git diffs agains leojs.leo itself.
+
+This file has a .txt extension to avoid warnings from pyflakes.
+"""
+#@+others
+#@+node:ekr.20201214084854.2: ** @button backup
+"""
+Back up files to ~/Backup/leojs, preserving os.curdir.
+"""
+import os
+# Constants...
+backup_dir = g.get_backup_path('leojs')
+stamp = g.standard_timestamp()
+# Functions...
+#@+others
+#@+node:ekr.20201214084854.3: *3* function: main
+def main():
+    if not backup_dir:
+        print('No backup directory')
+        return
+    old_cwd = os.getcwd()
+    try:
+        backup_file('myLeojs.leo')
+        backup_file('scripts.txt')
+    except Exception:
+        g.es_exception()
+    finally:
+        os.chdir(old_cwd)
+#@+node:ekr.20201214084854.4: *3* function: backup_file
+def backup_file(filename):
+    """Back up the file to ~/Backup/leojs"""
+    branch, commit = g.gitInfo(filename)
+    if not branch:
+        g.trace('No branch')
+        return
+    c_path = os.path.dirname(c.fileName())
+    read_path = os.path.join(c_path, filename)
+    write_path = os.path.normpath(os.path.join(
+        backup_dir, f"{branch}-{stamp}-{filename}"))
+    with open(read_path, 'r') as f:
+        contents = f.read()
+    with open(write_path, 'w') as f:
+        f.write(contents)
+    g.es_print(f"wrote: {write_path}")
+#@-others
+main()
+#@+node:ekr.20201214084854.5: ** @button write-leojs
+"""
+Update leojs.leo from the given list of nodes.
+
+This must be run from myLeojs.leo.
+"""
+g.cls()
+import os
+#@+others
+#@+node:ekr.20201214084854.6: *3* check_file_names
+def check_file_names():
+    """
+    Return the path to leojs.leo.
+    
+    Return None and give an error if:
+    - We are not running from myLeojs.leo or
+    - Leojs.leo does not exist.
+    """
+    if c.shortFileName() == 'leojs.leo':
+        oops("Don't run this script from leojs.leo")
+        return None
+    base_dir = os.path.dirname(c.fileName())
+    path = os.path.join(base_dir, 'leojs.leo')
+    if not os.path.exists(path):
+        oops(f"Not found: {path}")
+        return None
+    return os.path.normpath(path)
+#@+node:ekr.20201214084854.7: *3* check_nodes
+def check_nodes(node_list):
+    """Return True if all nodes are found."""
+    result = []
+    for node in node_list:
+        p = g.findTopLevelNode(c, node, exact=True)
+        if p:
+            result.append(p.copy())
+        else:
+            oops(f"Top-level node {node} not found")
+            return []
+    return result
+#@+node:ekr.20201214084854.8: *3* get_content
+def get_content(positions_list):
+    """
+    Return the desired contents of leoPyRef.leo.
+    
+    Based on code by Виталије Милошевић.
+    """
+    # Make only one copy for all calls.
+    fc = c.fileCommands
+    fc.currentPosition = c.p
+    fc.rootPosition = c.rootPosition()
+    fc.vnodesDict = {}
+    # Put the file
+    fc.outputFile = g.FileLikeObject()
+    fc.putProlog()
+    fc.putHeader()
+    fc.putGlobals()
+    fc.putPrefs()
+    fc.putFindSettings()
+    fc.put("<vnodes>\n")
+    for p in positions_list:
+        # An optimization: Write the next top-level node.
+        fc.putVnode(p, isIgnore=p.isAtIgnoreNode())
+    fc.put("</vnodes>\n")
+    fc.putTnodes()
+    fc.putPostlog()
+    return fc.outputFile.getvalue()
+#@+node:ekr.20201214084854.9: *3* main
+def main(node_list):
+    """The main line."""
+    c.endEditing()
+    path = check_file_names()
+    if not path:
+        return
+    positions_list = check_nodes(node_list)
+    if not positions_list:
+        return
+    content = get_content(positions_list)
+    with open(path, 'w', encoding="utf-8", newline='\n') as f:
+        f.write(content)
+    print('')
+    g.es_print(f"Updated {path}")
+#@+node:ekr.20201214084854.10: *3* oops
+def oops(message):
+    """Print an error message"""
+    print('')
+    g.es_print(message)
+    print('')
+#@-others
+main(node_list = ['Startup', 'Documentation', 'Code'])
+#@+node:ekr.20201214084854.11: ** @button diff-pr
+import leo.commands.editFileCommands as efc
+import os
+
+x = efc.GitDiffController(c)
+x.diff_pull_request(directory=os.curdir)
+#@+node:ekr.20201214084854.12: ** script: split contributes/commands (completed)
+"""
+Split the "commands" node of the "contributes" section into separate nodes.
+
+Inner entries have the form:
+
+  {
+    "command": "leojs.test",
+    "category": "Leo",
+    "title": "Test leojs"
+  },
+"""
+g.cls()
+assert False, "Don't run this script again"  ###
+outer_parent_h = '@clean package.json'
+outer_parent = g.findNodeAnywhere(c, outer_parent_h)
+assert outer_parent, f"Not found: {outer_parent_h}"
+root_h = 'commands'
+root = g.findNodeInTree(c, outer_parent, root_h)
+assert root, f"Not found: {root_h}"
+last = c.lastTopLevel()
+parent = last.insertAfter()
+parent.h = 'command tree'
+command_lines, level = [], 0
+for i, line in enumerate(g.splitLines(root.b)):
+    line_s = line.strip()
+    if command_lines:  # Accumulating a new node.
+        command_lines.append(line)
+        if line_s.endswith(('}', '},')):
+            level -= 1
+            if level == 0:
+                # End of command.
+                p = parent.insertAsLastChild()
+                h = command_lines[1].strip()
+                head = '"command": "leojs.'
+                assert h.startswith(head), (i, repr(h))
+                if h.endswith(','): h = h[:-1]
+                if h.endswith('"'): h = h[:-1]
+                p.h = h[len(head):]
+                p.b = ''.join(command_lines)
+                # g.printObj(command_lines)
+                command_lines = []
+        elif line_s.endswith('{'):
+            level += 1
+        else:
+            pass
+    elif line_s.endswith('{'):
+        level = 1
+        command_lines = [line]
+    elif line_s:
+        assert line_s.endswith('[') or line_s.startswith('],'), (i, repr(line))
+        # print('OUTSIDE', repr(line))
+c.redraw()
+#@+node:ekr.20201214084854.13: ** script: split contributes/menus (completed)
+"""
+Split the "menus" node of the "contributes" section into separate nodes.
+"""
+g.cls()
+assert False, "Do not run this script again"  ###
+outer_parent_h = '@clean package.json'
+outer_parent = g.findNodeAnywhere(c, outer_parent_h)
+assert outer_parent, f"Not found: {outer_parent_h}"
+menus_h = 'menus'
+menus_p = g.findNodeInTree(c, outer_parent, menus_h)
+assert menus_p, f"Not found: {menus_h}"
+last = c.lastTopLevel()
+menu_parent = last.insertAfter()
+menu_parent.h = 'menu tree'
+# The 'menus' node contains @others.
+# Create an organizer node for each child.
+for child in menus_p.children():
+    parent = menu_parent.insertAsLastChild()
+    parent.h = child.h
+    command_lines, level = [], 0
+    for i, line in enumerate(g.splitLines(child.b)):
+        line_s = line.strip()
+        if command_lines:  # Accumulating a new node.
+            assert line.startswith('  '), repr(line)
+            command_lines.append(line[2:])
+            if line_s.endswith(('}', '},')):
+                level -= 1
+                if level == 0:
+                    # End of command.
+                    p = parent.insertAsLastChild()
+                    h = command_lines[1].strip()
+                    prefix = '"command": "leojs.'
+                    assert h.startswith(prefix), (i, repr(h))
+                    if h.endswith(','): h = h[:-1]
+                    if h.endswith('"'): h = h[:-1]
+                    p.h = h[len(prefix):]
+                    p.b = ''.join(command_lines)
+                    # g.printObj(command_lines)
+                    command_lines = []
+            elif line_s.endswith('{'):
+                level += 1
+            else:
+                pass
+        elif line_s.endswith('{'):
+            # Start a new command.
+            level = 1
+            assert line.startswith('  '), repr(line)
+            command_lines.append(line[2:])
+        elif line_s:
+            assert line_s.endswith(('[', ']')) or line_s.startswith('],'), (i, repr(line))
+            # print('OUTSIDE', repr(line))
+    c.redraw()
+print('done')
+#@+node:ekr.20201214084854.14: ** script: split contributes/keybindings (completed)
+"""
+Split the "keybindings" node of the "contributes" section into separate nodes.
+"""
+# g.cls()
+assert False, "Do not do this script again"  ###
+outer_parent_h = '@clean package.json'
+outer_parent = g.findNodeAnywhere(c, outer_parent_h)
+assert outer_parent, f"Not found: {outer_parent_h}"
+keybindings_h = 'keybindings'
+keybindings_p = g.findNodeInTree(c, outer_parent, keybindings_h)
+assert keybindings_p, f"Not found: {keybindings_h}"
+last = c.lastTopLevel()
+keybindings_parent = last.insertAfter()
+keybindings_parent.h = 'keybindings tree'
+command_lines, level = [], 0
+for i, line in enumerate(g.splitLines(keybindings_p.b)):
+    line_s = line.strip()
+    if command_lines:  # Accumulating a new node.
+        assert line.startswith('  '), repr(line)
+        command_lines.append(line[2:])
+        if line_s.endswith(('}', '},')):
+            level -= 1
+            if level == 0:
+                # End of command.
+                p = keybindings_parent.insertAsLastChild()
+                h = command_lines[1].strip()
+                prefix = '"command": "leojs.'
+                assert h.startswith(prefix), (i, repr(h))
+                if h.endswith(','): h = h[:-1]
+                if h.endswith('"'): h = h[:-1]
+                p.h = h[len(prefix):]
+                p.b = ''.join(command_lines)
+                command_lines = []
+        elif line_s.endswith('{'):
+            level += 1
+        else:
+            pass
+    elif line_s.endswith('{'):
+        # Start a new command.
+        level = 1
+        assert line.startswith('  '), repr(line)
+        command_lines.append(line[2:])
+    elif line_s:
+        assert line_s.endswith(('[', ']')) or line_s.startswith('],'), (i, repr(line))
+        # print('OUTSIDE', repr(line))
+c.redraw()
+print('done')
+#@+node:ekr.20201214084854.15: ** script: diff-pr
+import leo.commands.editFileCommands as efc
+x = efc.GitDiffController(c)
+x.diff_pull_request(branch_name = 'package.json')
+#@+node:ekr.20201214084854.16: ** script: unindent-tree
+"""Unindent body text of selected tree by 2 spaces."""
+g.cls()
+h = 'commands'
+root = g.findTopLevelNode(c, h)
+assert root, h
+for p in root.children():
+    if p.b.startswith('  '):  # Protect against running the script twice.
+        result = []
+        for s in g.splitLines(p.b):
+            if s.startswith('  '):
+                result.append(s[2:])
+            else:
+                result.append(s)
+        p.b = ''.join(result)
+print('done')
+#@-others
+#@-leo
