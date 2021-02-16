@@ -50,6 +50,8 @@ export class Commander {
 
     public alert(...arg:any[]):void {}
 
+    // These methods are a fundamental, unchanging, part of Leo's API.
+
     /**
      * A generator returning all vnodes in the outline, in outline order.
      */
@@ -363,6 +365,23 @@ export class Commander {
     }
 
     /**
+      *Move to the last visible node of the present chapter or hoist.
+     */
+    public lastVisible():Position {
+        const c:Commander = this;
+        let p:Position = c.p;
+        while(1){
+            const next:Position = p.visNext(c);
+            if (next && next.__bool__() && next.isVisible(c)){
+                p = next;
+            } else{
+                break;
+            }
+        }
+        return p;
+    }
+
+    /**
      * New in Leo 5.5: Return None.
      * Using empty positions masks problems in program logic.
      * In fact, there are no longer any calls to this method in Leo's core.
@@ -493,6 +512,74 @@ export class Commander {
     }
 
     /**
+     * Given a VNode v, find all valid positions p such that p.v = v.
+     * Not really all, just all for each of v's distinct immediate parents.
+     */
+    public vnode2allPositions(v:VNode):Position[]{
+        const c:Commander = this;
+        const context:Commander = v.context;  // v's commander.
+        // console.assert(c.fileName === context.fileName);
+        const positions:Position[] = [];
+        let n:number;
+        for(let immediate of v.parents){
+            if(immediate.children.includes(v)){
+                n = immediate.children.indexOf(v);
+            }else{
+                continue;
+            }
+            const stack:StackEntry[] =[[v, n]];
+            let isBreak:boolean= false;
+            while(immediate.parents.length){
+                const parent:VNode = immediate.parents[0];
+                if(parent.children.includes(immediate)){
+                    n = parent.children.indexOf(immediate);
+                }else{
+                    isBreak=true;
+                    break;
+                }
+                stack.unshift([immediate, n]);
+                immediate = parent;
+            }
+            if(!immediate.parents.length && !isBreak){
+                [v, n] = stack.pop()!;
+                const p:Position = new Position(v, n, stack);
+                positions.push(p);
+            }
+        }
+        return positions;
+    }
+
+    /**
+     * Given a VNode v, construct a valid position p such that p.v = v.
+     */
+    public vnode2position(v:VNode):Position|undefined {
+        const c:Commander = this;
+        const context:Commander = v.context;  // v's commander.
+        // console.assert(c.fileName === context.fileName);
+        const stack:StackEntry[] = [];
+        let n:number;
+        while(v.parents.length){
+            const parent:VNode = v.parents[0];
+
+            if(parent.children.includes(v)){
+                n = parent.children.indexOf(v);
+            }else{
+                return undefined;
+            }
+            stack.unshift([v, n]);
+            v = parent;
+        }
+        // v.parents includes the hidden root node.
+        if(!stack.length){
+            // a VNode not in the tree
+            return undefined;
+        }
+        [v, n] = stack.pop()!;
+        const p:Position = new Position(v, n, stack);
+        return p;
+    }
+
+    /**
      * commander current position property
      */
     public get p():Position {
@@ -583,19 +670,6 @@ export class Commander {
     }
 
     /**
-     * Set the p's headline and the corresponding tree widget to s.
-     * This is used in by unit tests to restore the outline.
-     */
-    public setHeadString(p:Position, s:string):void {
-        const c:Commander = this;
-        p.initHeadString(s);
-        p.setDirty();
-        // Change the actual tree widget so
-        // A later call to c.endEditing or c.redraw will use s.
-        c.frame.tree.setHeadline(p, s);
-    }
-
-    /**
      * Set the marker that indicates that the .leo file has been changed.
      */
     public setChanged(redrawFlag:boolean=true): void {
@@ -641,6 +715,83 @@ export class Commander {
 
     // * For compatibility with old scripts.
     //setCurrentVnode = setCurrentPosition
+
+    /**
+     * Set the p's headline and the corresponding tree widget to s.
+     * This is used in by unit tests to restore the outline.
+     */
+    public setHeadString(p:Position, s:string):void {
+        const c:Commander = this;
+        p.initHeadString(s);
+        p.setDirty();
+        // Change the actual tree widget so
+        // A later call to c.endEditing or c.redraw will use s.
+        c.frame.tree.setHeadline(p, s);
+    }
+
+    public setMarked(p:Position):void {
+        const c:Commander= this;
+        p.setMarked();
+        p.setDirty();  // Defensive programming.
+        g.doHook("set-mark", c, p);
+    }
+
+    /** 
+     * Return the root position.
+     */
+    public topPosition():Position | undefined {
+        const c:Commander = this;
+        if (c._topPosition && c._topPosition.__bool__()){
+            return c._topPosition.copy();
+        }
+        return undefined;
+    }
+
+    /** 
+     * Set the root positioin.
+     */
+    public setTopPosition(p:Position):void {
+        const c:Commander = this;
+        if (p && p.__bool__()){
+            c._topPosition = p.copy();
+        }
+        else{
+            c._topPosition = undefined;
+        }
+    }
+
+    // Define these for compatibiility with old scripts...
+
+    // topVnode = topPosition
+    // setTopVnode = setTopPosition
+    /**
+     * Trims trailing blank lines from a node.
+     * It is surprising difficult to do this during Untangle.
+     */
+    public trimTrailingLines(p:Position):void {
+        // ### c = self
+        const body:String = p.b;
+        const lines:string[] = body.split('\n');
+        let i:number = lines.length - 1;
+        let changed:boolean = false;
+        while(i >= 0){
+            const line:string = lines[i];
+            const j:number = g.skip_ws(line, 0);
+            if(j + 1 === line.length){
+                // del lines[i];
+                lines.splice(i, 1);
+                i -= 1;
+                changed = true;
+            }else{
+                break;
+            }
+        }
+        if(changed){
+            p.b = body + '\n';
+            // p.b = ''.join(body) + '\n';  // Add back one last newline.
+            // Don't set the dirty bit: it would just be annoying.
+        }
+    }
 
 
 }

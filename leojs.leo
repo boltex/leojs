@@ -406,6 +406,7 @@
 <v t="felix.20210110223514.1"><vh>class Commander</vh>
 <v t="felix.20210110223547.1"><vh>constructor</vh></v>
 <v t="felix.20210112001859.1"><vh>c.Drawing &amp; coloring</vh></v>
+<v t="felix.20210215185050.1"><vh>c.API</vh>
 <v t="felix.20210131011508.1"><vh>c.Generators</vh>
 <v t="felix.20210131011508.2"><vh>c.all_nodes &amp; all_unique_nodes</vh></v>
 <v t="felix.20210131011508.3"><vh>c.all_positions</vh></v>
@@ -428,6 +429,7 @@
 </v>
 <v t="felix.20210131011420.11"><vh>c.isChanged</vh></v>
 <v t="felix.20210131011420.12"><vh>c.lastTopLevel</vh></v>
+<v t="felix.20210215204131.1"><vh>c.lastVisible</vh></v>
 <v t="felix.20210131011420.13"><vh>c.nullPosition</vh></v>
 <v t="felix.20210131011420.14"><vh>c.positionExists</vh>
 <v t="felix.20210131011420.15"><vh>c.dumpPosition</vh></v>
@@ -435,6 +437,8 @@
 <v t="felix.20210131011420.16"><vh>c.rootPosition</vh></v>
 <v t="felix.20210131011420.17"><vh>c.shouldBeExpanded</vh></v>
 <v t="felix.20210131011440.1"><vh>c.visLimit</vh></v>
+<v t="felix.20210215204308.1"><vh>c.vnode2allPositions</vh></v>
+<v t="felix.20210215204322.1"><vh>c.vnode2position</vh></v>
 </v>
 <v t="felix.20210131011549.1"><vh>c.Properties</vh></v>
 <v t="felix.20210131011607.1"><vh>c.Setters</vh>
@@ -444,9 +448,13 @@
 <v t="felix.20210131011607.5"><vh>c.clearChanged</vh></v>
 <v t="felix.20210131011607.6"><vh>c.clearMarked</vh></v>
 <v t="felix.20210131011607.7"><vh>c.setBodyString</vh></v>
-<v t="felix.20210211234142.1"><vh>c.setHeadString</vh></v>
 <v t="felix.20210131011607.8"><vh>c.setChanged</vh></v>
 <v t="felix.20210131011607.9"><vh>c.setCurrentPosition</vh></v>
+<v t="felix.20210211234142.1"><vh>c.setHeadString</vh></v>
+<v t="felix.20210215204844.1"><vh>c.setMarked (calls hook)</vh></v>
+<v t="felix.20210215204937.1"><vh>c.topPosition &amp; c.setTopPosition</vh></v>
+<v t="felix.20210215205009.1"><vh>c.trimTrailingLines</vh></v>
+</v>
 </v>
 </v>
 </v>
@@ -9850,7 +9858,7 @@ public moveToBack():Position {
         p.v = parent_v.children[n - 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                //@ts-ignore
+                                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9868,7 +9876,7 @@ public moveToFirstChild():Position{
         p._childIndex = 0;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                //@ts-ignore
+                                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9888,7 +9896,7 @@ public moveToLastChild():Position{
         p._childIndex = n - 1;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                //@ts-ignore
+                                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9925,7 +9933,7 @@ public moveToNext():Position{
         p.v = parent_v.children[n + 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                //@ts-ignore
+                                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9959,7 +9967,7 @@ public moveToNthChild(n:number):Position {
         p._childIndex = n;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                //@ts-ignore
+                                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9977,7 +9985,7 @@ public moveToParent():Position {
         p._childIndex = item[1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                //@ts-ignore
+                                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -12458,6 +12466,164 @@ export function getScript(c:Commander, p:Position,
 ):string  {
     console.log("get script called");
     return "";
+}
+
+</t>
+<t tx="felix.20210215185050.1">// These methods are a fundamental, unchanging, part of Leo's API.
+
+</t>
+<t tx="felix.20210215204131.1">/**
+  *Move to the last visible node of the present chapter or hoist.
+ */
+public lastVisible():Position {
+    const c:Commander = this;
+    let p:Position = c.p;
+    while(1){
+        const next:Position = p.visNext(c);
+        if (next &amp;&amp; next.__bool__() &amp;&amp; next.isVisible(c)){
+            p = next;
+        } else{
+            break;
+        }
+    }
+    return p;
+}
+
+</t>
+<t tx="felix.20210215204308.1">/**
+ * Given a VNode v, find all valid positions p such that p.v = v.
+ * Not really all, just all for each of v's distinct immediate parents.
+ */
+public vnode2allPositions(v:VNode):Position[]{
+    const c:Commander = this;
+    const context:Commander = v.context;  // v's commander.
+    // console.assert(c.fileName === context.fileName);
+    const positions:Position[] = [];
+    let n:number;
+    for(let immediate of v.parents){
+        if(immediate.children.includes(v)){
+            n = immediate.children.indexOf(v);
+        }else{
+            continue;
+        }
+        const stack:StackEntry[] =[[v, n]];
+        let isBreak:boolean= false;
+        while(immediate.parents.length){
+            const parent:VNode = immediate.parents[0];
+            if(parent.children.includes(immediate)){
+                n = parent.children.indexOf(immediate);
+            }else{
+                isBreak=true;
+                break;
+            }
+            stack.unshift([immediate, n]);
+            immediate = parent;
+        }
+        if(!immediate.parents.length &amp;&amp; !isBreak){
+            [v, n] = stack.pop()!;
+            const p:Position = new Position(v, n, stack);
+            positions.push(p);
+        }
+    }
+    return positions;
+}
+
+</t>
+<t tx="felix.20210215204322.1">/**
+ * Given a VNode v, construct a valid position p such that p.v = v.
+ */
+public vnode2position(v:VNode):Position|undefined {
+    const c:Commander = this;
+    const context:Commander = v.context;  // v's commander.
+    // console.assert(c.fileName === context.fileName);
+    const stack:StackEntry[] = [];
+    let n:number;
+    while(v.parents.length){
+        const parent:VNode = v.parents[0];
+
+        if(parent.children.includes(v)){
+            n = parent.children.indexOf(v);
+        }else{
+            return undefined;
+        }
+        stack.unshift([v, n]);
+        v = parent;
+    }
+    // v.parents includes the hidden root node.
+    if(!stack.length){
+        // a VNode not in the tree
+        return undefined;
+    }
+    [v, n] = stack.pop()!;
+    const p:Position = new Position(v, n, stack);
+    return p;
+}
+
+</t>
+<t tx="felix.20210215204844.1">public setMarked(p:Position):void {
+    const c:Commander= this;
+    p.setMarked();
+    p.setDirty();  // Defensive programming.
+    g.doHook("set-mark", c, p);
+}
+
+</t>
+<t tx="felix.20210215204937.1">/** 
+ * Return the root position.
+ */
+public topPosition():Position | undefined {
+    const c:Commander = this;
+    if (c._topPosition &amp;&amp; c._topPosition.__bool__()){
+        return c._topPosition.copy();
+    }
+    return undefined;
+}
+
+/** 
+ * Set the root positioin.
+ */
+public setTopPosition(p:Position):void {
+    const c:Commander = this;
+    if (p &amp;&amp; p.__bool__()){
+        c._topPosition = p.copy();
+    }
+    else{
+        c._topPosition = undefined;
+    }
+}
+
+// Define these for compatibiility with old scripts...
+
+// topVnode = topPosition
+// setTopVnode = setTopPosition
+</t>
+<t tx="felix.20210215205009.1">/**
+ * Trims trailing blank lines from a node.
+ * It is surprising difficult to do this during Untangle.
+ */
+public trimTrailingLines(p:Position):void {
+    // ### c = self
+    const body:String = p.b;
+    const lines:string[] = body.split('\n');
+    let i:number = lines.length - 1;
+    let changed:boolean = false;
+    while(i &gt;= 0){
+        const line:string = lines[i];
+        const j:number = g.skip_ws(line, 0);
+        if(j + 1 === line.length){
+            // del lines[i];
+            lines.splice(i, 1);
+            i -= 1;
+            changed = true;
+        }else{
+            break;
+        }
+    }
+    if(changed){
+        p.b = body + '\n';
+        // p.b = ''.join(body) + '\n';  // Add back one last newline.
+        // Don't set the dirty bit: it would just be annoying.
+    }
 }
 
 </t>
