@@ -457,19 +457,6 @@
 </v>
 </v>
 </v>
-<v t="felix.20210122000014.1"><vh>@clean src/core/leoFileCommands.ts</vh>
-<v t="felix.20210123003936.1"><vh>&lt;&lt; imports &gt;&gt; (leoFileCommands)</vh></v>
-<v t="felix.20210122003236.1"><vh>class FileCommands</vh>
-<v t="felix.20210123002801.1"><vh>constructor</vh></v>
-</v>
-</v>
-<v t="felix.20210102211445.1"><vh>@clean src/core/leoExternalFiles.ts</vh>
-<v t="felix.20210102211748.1"><vh>class ExternalFile</vh>
-<v t="felix.20210102211748.2"><vh>ef.shortFileName</vh></v>
-<v t="felix.20210102211748.3"><vh>ef.exists</vh></v>
-</v>
-<v t="felix.20210102211754.1"><vh>class ExternalFilesController</vh></v>
-</v>
 <v t="felix.20210102012410.1"><vh>@clean src/core/leoGlobals.ts</vh>
 <v t="felix.20210102180352.1"><vh> &lt;&lt; global switches &gt;&gt; (leoGlobals.py)</vh></v>
 <v t="felix.20210102181122.1"><vh>&lt;&lt; imports &gt;&gt; (leoGlobals)</vh></v>
@@ -764,7 +751,6 @@
 </v>
 </v>
 </v>
-<v t="felix.20210102000121.1"><vh>Command Classes</vh></v>
 </v>
 </vnodes>
 <tnodes>
@@ -6162,7 +6148,6 @@ public gotSelectedNode(p_element: PNode): void {
 </t>
 <t tx="felix.20210102000055.1"></t>
 <t tx="felix.20210102000100.1"></t>
-<t tx="felix.20210102000121.1"></t>
 <t tx="felix.20210102012334.1">&lt;&lt; imports &gt;&gt;
 @others
 @language typescript
@@ -6645,70 +6630,6 @@ import { LeoUI } from '../leoUI';
 import { NodeIndices } from './leoNodes';
 import { Commander } from './leoCommander';
 </t>
-<t tx="felix.20210102211445.1">@language typescript
-@tabwidth -4
-@others
-
-</t>
-<t tx="felix.20210102211748.1">/**
- * A class holding all data about an external file.
- */
-export class ExternalFile {
-/*
-    def __init__(self, c, ext, p, path, time):
-        '''Ctor for ExternalFile class.'''
-        self.c = c
-        self.ext = ext
-        self.p = p and p.copy()
-            # The nearest @&lt;file&gt; node.
-        self.path = path
-        self.time = time  # Used to inhibit endless dialog loop.
-                          # See efc.idle_check_open_with_file.
-
-    def __repr__(self):
-        return f"&lt;ExternalFile: {self.time:20} {g.shortFilename(self.path)}&gt;"
-
-    __str__ = __repr__
-*/
-
-    @others
-
-}
-
-</t>
-<t tx="felix.20210102211748.2">/*
-def shortFileName(self):
-    return g.shortFilename(self.path)
-*/
-
-</t>
-<t tx="felix.20210102211748.3">/*
-def exists(self):
-    '''Return True if the external file still exists.'''
-    return g.os_path_exists(self.path)
-*/
-
-</t>
-<t tx="felix.20210102211754.1">/**
- *  A class tracking changes to external files:
- *
- *  - temp files created by open-with commands.
- *  - external files corresponding to @file nodes.
- *
- *  This class raises a dialog when a file changes outside of Leo.
- *
- *  **Naming conventions**:
- *
- *  - d is always a dict created by the @open-with logic.
- *    This dict describes *only* how to open the file.
- *
- *  - ef is always an ExternalFiles instance.
-*/
-export class ExternalFilesController {
-
-    @others
-
-}</t>
 <t tx="felix.20210102213337.1">/**
  *  A singleton class to manage idle-time handling. This class handles all
  *  details of running code at idle time, including running 'idle' hooks.
@@ -8396,13 +8317,17 @@ export class Commander {
     public mFileName: string;
     public mRelativeFileName = null;
     public gui:LeoUI;
-    public frame: any; // TODO : FAKE FRAME
-    public hoistStack:any[] = [];
+    public frame: any; // TODO : fake frame needed?
+    public hoistStack:any[] = []; // Stack of nodes to be root of drawn tree.
+    
+    
+    public expansionLevel:number = 0;
+    public expansionNode: Position|undefined; // The last node we expanded or contracted.
+    public nodeConflictFileName:string ="";
     
     // File Ivars
     public changed: boolean = false;
     
-
     // _currentCount = 0
 
     @others
@@ -8433,7 +8358,9 @@ public redraw_after_icons_changed():void {
     console.log("redraw_after_icons_changed");
 }
 
-public alert(...arg:any[]):void {}
+public alert(...arg:any[]):void {
+    console.log(...arg);
+}
 
 </t>
 <t tx="felix.20210112010737.1"></t>
@@ -9512,53 +9439,6 @@ public doPrePluginsInit(fileName?:string):void {
     // We can't print the signon until we know the gui.
     // g.app.computeSignon()  // Set app.signon/signon1 for commanders.
 }
-
-</t>
-<t tx="felix.20210122000014.1">&lt;&lt; imports &gt;&gt;
-@others
-@language typescript
-@tabwidth -4
-
-</t>
-<t tx="felix.20210122003236.1">/**
- *
- */
-export class FileCommands {
-
-    @others
-
-}
-
-</t>
-<t tx="felix.20210123002801.1">constructor(){
-
-}
-
-</t>
-<t tx="felix.20210123003936.1">/*
-    import binascii
-    from collections import defaultdict
-    from contextlib import contextmanager
-    import difflib
-    import hashlib
-    import io
-    import os
-    import pickle
-    import sqlite3
-    import tempfile
-    import time
-    import zipfile
-    import xml.etree.ElementTree as ElementTree
-    import xml.sax
-    import xml.sax.saxutils
-    from leo.core import leoGlobals as g
-    from leo.core import leoNodes
-    # Abbreviations
-    StringIO = io.StringIO
-    BytesIO = io.BytesIO
-*/
-
-import * as g from './leoGlobals';
 
 </t>
 <t tx="felix.20210123212411.1">/**

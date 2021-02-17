@@ -17,13 +17,17 @@ export class Commander {
     public mFileName: string;
     public mRelativeFileName = null;
     public gui:LeoUI;
-    public frame: any; // TODO : FAKE FRAME
-    public hoistStack:any[] = [];
+    public frame: any; // TODO : fake frame needed?
+    public hoistStack:any[] = []; // Stack of nodes to be root of drawn tree.
+    
+    
+    public expansionLevel:number = 0;
+    public expansionNode: Position|undefined; // The last node we expanded or contracted.
+    public nodeConflictFileName:string ="";
     
     // File Ivars
     public changed: boolean = false;
     
-
     // _currentCount = 0
 
     constructor(
@@ -48,7 +52,9 @@ export class Commander {
         console.log("redraw_after_icons_changed");
     }
 
-    public alert(...arg:any[]):void {}
+    public alert(...arg:any[]):void {
+        console.log(...arg);
+    }
 
     // These methods are a fundamental, unchanging, part of Leo's API.
 
