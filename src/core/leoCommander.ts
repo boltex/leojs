@@ -760,38 +760,10 @@ export class Commander {
         }
     }
 
-    // Define these for compatibiility with old scripts...
+    // Define these for compatibility with old scripts...
 
     // topVnode = topPosition
     // setTopVnode = setTopPosition
-    /**
-     * Trims trailing blank lines from a node.
-     * It is surprising difficult to do this during Untangle.
-     */
-    public trimTrailingLines(p:Position):void {
-        // ### c = self
-        const body:String = p.b;
-        const lines:string[] = body.split('\n');
-        let i:number = lines.length - 1;
-        let changed:boolean = false;
-        while(i >= 0){
-            const line:string = lines[i];
-            const j:number = g.skip_ws(line, 0);
-            if(j + 1 === line.length){
-                // del lines[i];
-                lines.splice(i, 1);
-                i -= 1;
-                changed = true;
-            }else{
-                break;
-            }
-        }
-        if(changed){
-            p.b = body + '\n';
-            // p.b = ''.join(body) + '\n';  // Add back one last newline.
-            // Don't set the dirty bit: it would just be annoying.
-        }
-    }
 
 
 }
