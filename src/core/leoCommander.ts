@@ -754,7 +754,7 @@ export class Commander {
     }
 
     /** 
-     * Set the root positioin.
+     * Set the root position.
      */
     public setTopPosition(p:Position):void {
         const c:Commander = this;

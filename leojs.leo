@@ -6509,7 +6509,7 @@ export const globalDirectiveList: string[] = [
     'others', 'pagewidth', 'path', 'quiet',
     'raw', 'root-code', 'root-doc', 'root', 'silent',
     'tabwidth', 'terse',
-    'unit', 'verbose', 'wrap',
+    'unit', 'verbose', 'wrap'
 ];
 
 export const directives_pat: any = null;  // Set below.
@@ -6553,7 +6553,7 @@ export const cmd_instance_dict: { [key: string]: string[] } = {
     'RstCommands': ['c', 'rstCommands'],
     'SpellCommandsClass': ['c', 'spellCommands'],
     'Undoer': ['c', 'undoer'],
-    'VimCommands': ['c', 'vimCommands'],
+    'VimCommands': ['c', 'vimCommands']
 };
 
 </t>
@@ -12459,7 +12459,7 @@ public topPosition():Position | undefined {
 }
 
 /** 
- * Set the root positioin.
+ * Set the root position.
  */
 public setTopPosition(p:Position):void {
     const c:Commander = this;
