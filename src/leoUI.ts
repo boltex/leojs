@@ -21,6 +21,8 @@ import { LeoButtonsProvider } from "./leoButtons";
 import { LeoDocumentNode } from "./leoDocumentNode";
 import { LeoDocumentsProvider } from "./leoDocuments";
 import { LeoStates } from "./leoStates";
+import * as g from './core/leoGlobals';
+
 
 /**
  * Creates and manages instances of the UI elements along with their events
@@ -130,6 +132,10 @@ export class LeoUI {
 
         // * Create leo core class
         this._leo = new Leojs();
+        
+        console.log("this._leo", this._leo.positions);
+        
+        console.log(g.app.delegate_language_dict);
 
         // * Create file browser instance
         // this._leoFilesBrowser = new LeoFilesBrowser(_context);

@@ -1,3 +1,4 @@
+import { FileCommands } from "./leoFileCommands";
 import { Position, VNode, StackEntry } from "./leoNodes";
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
@@ -13,6 +14,8 @@ export class Commander {
     private _currentPosition: Position | undefined;
     
     public hiddenRootNode: VNode | undefined;
+    
+    public fileCommands: FileCommands;
     
     public mFileName: string;
     public mRelativeFileName = null;
@@ -36,8 +39,9 @@ export class Commander {
         previousSettings?:any,
         relativeFileName?:any
     ) {
+        this.fileCommands = new FileCommands();
         this.mFileName = fileName;
-        this.gui = gui || g.app.gui;
+        this.gui = gui || g.app.gui!;
     }
 
     public recolor():void {

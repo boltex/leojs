@@ -19,7 +19,6 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<PNode> {
     ) {
     }
 
-
     /**
      * * Refresh the whole outline
      */
@@ -53,7 +52,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<PNode> {
         if (element) {
             return Promise.resolve(element.children);
         } else {
-            return Promise.resolve(this._leo.positions);
+            return Promise.resolve(this._leo.positions); // From tree root or hoisted node
         }
     }
 
@@ -66,3 +65,5 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<PNode> {
     }
 
 }
+
+

@@ -96,9 +96,7 @@ export class LeoApp {
     public diff: boolean = false; // True: run Leo in diff mode.
     public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
-    // public gui:LeoUI; // The gui class.
-    // TODO
-    public gui: any;
+    public gui:LeoUI|undefined; // The gui class.
     public guiArgName = null; // The gui name given in --gui option.
     public ipython_inited: boolean = false; // True if leoIpython.py imports succeeded.
     public isTheme: boolean = false; // True: load files as theme files (ignore myLeoSettings.leo).
@@ -145,7 +143,7 @@ export class LeoApp {
 
     public globalKillBuffer: any[] = []; // The global kill buffer.
     public globalRegisters: any = {}; // The global register list.
-    public leoID: string = ''; // The id part of gnx's, using empty for falsy.
+    public leoID: string = 'filtest'; // The id part of gnx's, using empty for falsy.
     public loadedThemes: any[] = []; // List of loaded theme.leo files.
     public lossage: any[] = []; // List of last 100 keystrokes.
     public paste_c: any = null; // The commander that pasted the last outline.
@@ -169,7 +167,7 @@ export class LeoApp {
     // The singleton LogManager instance.
     // public openWithManager: any = null;
     // The singleton OpenWithManager instance.
-    public nodeIndices: NodeIndices; // The singleton nodeIndices instance.
+    public nodeIndices: NodeIndices|undefined; // The singleton nodeIndices instance.
     public pluginsController: any = null; // The singleton PluginsManager instance. public sessionManager: any = null; // The singleton SessionManager instance. // The Commands class...
     public commandName: any = null; // The name of the command being executed.
     public commandInterruptFlag: boolean = false; // True: command within a command.
@@ -265,7 +263,7 @@ export class LeoApp {
         this.define_language_extension_dict();
         this.define_extension_dict();
         // this.gui = p_gui;
-        this.nodeIndices = new NodeIndices(g.app.leoID);
+        // this.nodeIndices = new NodeIndices(g.app.leoID);
     }
 
     public define_delegate_language_dict(): void {
@@ -931,7 +929,7 @@ export class LoadManager {
                 for (let n = 0; n < lm.files.length; n++) {
                     const fn = lm.files[n];
                     lm.more_cmdline_files = n < (lm.files.length - 1);
-                    c = lm.loadLocalFile(fn, g.app.gui);
+                    c = lm.loadLocalFile(fn, g.app.gui!);
                         // Returns None if the file is open in another instance of Leo.
                     if (c && !c1){  // #1416:
                         c1 = c;
@@ -974,7 +972,7 @@ export class LoadManager {
                 c1 = lm.openEmptyWorkBook();
                     // Calls LM.loadLocalFile.
             }
-            catch( Exception){
+            catch(exception){
                 g.es_print('Can not create empty workbook');
                 g.es_exception();
             }
@@ -1058,7 +1056,7 @@ export class LoadManager {
         return c
         */
         const fn:string = "";
-        const c = lm.loadLocalFile(fn,g.app.gui);
+        const c = lm.loadLocalFile(fn,g.app.gui!);
         if (!c){
             return undefined;
         }

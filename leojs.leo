@@ -138,7 +138,6 @@
 <v t="felix.20201209011931.4"><vh>getTreeItem</vh></v>
 <v t="felix.20201209011931.5"><vh>getChildren</vh></v>
 <v t="felix.20201209011931.6"><vh>getParent</vh></v>
-<v t="felix.20201209011931.8"><vh>_LeoNodeArray</vh></v>
 </v>
 </v>
 <v t="felix.20201208223554.1"><vh>@clean src/leoOutlineNode.ts</vh>
@@ -403,6 +402,7 @@
 </v>
 </v>
 <v t="felix.20210110222544.1"><vh>@clean src/core/leoCommander.ts</vh>
+<v t="felix.20210220194059.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
 <v t="felix.20210110223514.1"><vh>class Commander</vh>
 <v t="felix.20210110223547.1"><vh>constructor</vh></v>
 <v t="felix.20210112001859.1"><vh>c.Drawing &amp; coloring</vh></v>
@@ -457,6 +457,12 @@
 </v>
 </v>
 </v>
+<v t="felix.20210220181245.1"><vh>@clean src/core/leoFileCommands.ts</vh>
+<v t="felix.20210220195150.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
+<v t="felix.20210220190156.1"><vh>class FileCommands</vh>
+<v t="felix.20210220200109.1"><vh>constructor</vh></v>
+</v>
+</v>
 <v t="felix.20210102012410.1"><vh>@clean src/core/leoGlobals.ts</vh>
 <v t="felix.20210102180352.1"><vh> &lt;&lt; global switches &gt;&gt; (leoGlobals.py)</vh></v>
 <v t="felix.20210102181122.1"><vh>&lt;&lt; imports &gt;&gt; (leoGlobals)</vh></v>
@@ -505,9 +511,12 @@
 <v t="felix.20210127001502.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
 <v t="felix.20210102014453.1"><vh>class NodeIndices</vh>
 <v t="felix.20210102014804.1"><vh>ni.constructor</vh></v>
-<v t="felix.20210110183334.1"><vh>ni._get_time</vh></v>
 <v t="felix.20210110213751.1"><vh>ni.check_gnx</vh></v>
 <v t="felix.20210102024358.1"><vh>ni.setTimeStamp</vh></v>
+<v t="felix.20210218214329.6"><vh>ni.get/setDefaultId</vh></v>
+<v t="felix.20210218214329.7"><vh>ni.getNewIndex</vh></v>
+<v t="felix.20210218214329.8"><vh>ni.new_vnode_helper</vh></v>
+<v t="felix.20210218214329.12"><vh>ni.update</vh></v>
 </v>
 <v t="felix.20210102015005.1"><vh>class Position</vh>
 <v t="felix.20210126210412.1"><vh>p.ctor &amp; other special methods...</vh>
@@ -651,11 +660,6 @@
 <v t="felix.20210208001026.3"><vh>p.is_at_ignore &amp; in_at_ignore_tree</vh></v>
 </v>
 </v>
-<v t="felix.20210102015005.3"><vh>class PosList</vh>
-<v t="felix.20210102021644.1"><vh>children</vh></v>
-<v t="felix.20210102021646.1"><vh>filter_h</vh></v>
-<v t="felix.20210102021651.1"><vh>filter_b</vh></v>
-</v>
 <v t="felix.20210102150654.1"><vh>Enum StatusFlags</vh></v>
 <v t="felix.20210102015917.1"><vh>class VNode</vh>
 <v t="felix.20210130233340.1"><vh>v.Birth &amp; death</vh>
@@ -752,6 +756,7 @@
 </v>
 </v>
 </v>
+<v t="felix.20201214194144.2"></v>
 </vnodes>
 <tnodes>
 <t tx="ekr.20201209145256.1"></t>
@@ -795,6 +800,7 @@ import { LeoUI } from './leoUI';
 @language typescript
 @tabwidth -4
 @others
+
 </t>
 <t tx="felix.20201208223554.1">import * as vscode from "vscode";
 import { Constants } from "./constants";
@@ -1222,6 +1228,7 @@ public setRoot(): void {
 
     @others
 }
+
 </t>
 <t tx="felix.20201209011931.2">constructor(
     private _icons: Icon[],
@@ -1229,7 +1236,6 @@ public setRoot(): void {
     private _leo: Leojs
 ) {
 }
-
 
 </t>
 <t tx="felix.20201209011931.3">/**
@@ -1267,7 +1273,7 @@ public refreshTreeRoot(): void {
     if (element) {
         return Promise.resolve(element.children);
     } else {
-        return Promise.resolve(this._leo.positions);
+        return Promise.resolve(this._leo.positions); // From tree root or hoisted node
     }
 }
 
@@ -1276,8 +1282,7 @@ public refreshTreeRoot(): void {
     // Buttons are just a list, as such, entries are always child of root so return null
     if (element) {
         return element.parent;
-</t>
-<t tx="felix.20201209011931.8">    }
+    }
     return undefined;
 }
 
@@ -2722,6 +2727,8 @@ import { LeoButtonsProvider } from "./leoButtons";
 import { LeoDocumentNode } from "./leoDocumentNode";
 import { LeoDocumentsProvider } from "./leoDocuments";
 import { LeoStates } from "./leoStates";
+import * as g from './core/leoGlobals';
+
 @language typescript
 
 @tabwidth -4
@@ -2740,6 +2747,10 @@ import { LeoStates } from "./leoStates";
 
     // * Create leo core class
     this._leo = new Leojs();
+    
+    console.log("this._leo", this._leo.positions);
+    
+    console.log(g.app.delegate_language_dict);
 
     // * Create file browser instance
     // this._leoFilesBrowser = new LeoFilesBrowser(_context);
@@ -6165,7 +6176,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
 import { Commander } from './leoCommander';
-import { Position } from "./leoNodes";
+import { Position } from './leoNodes';
 
 export const isMac: boolean = process.platform.startsWith('darwin');
 export const isWindows: boolean = process.platform.startsWith('win');
@@ -6234,10 +6245,8 @@ export class NodeIndices {
  * parents.
  *
  * The p.moveToX methods may return a null (invalid) position p with p.v = None.
- * 
  * No operator overload in js/ts, so "strict-comparisons" is set in tslint.json
  * to force usage of special methods to compare &amp; evaluate equalities.
- *
  */
 
 export type StackEntry = [VNode, number];
@@ -6311,16 +6320,6 @@ Position.prototype.simpleLevel = Position.prototype.level;
 Position.prototype.initBodyString = Position.prototype.setBodyString;
 Position.prototype.setTnodeText = Position.prototype.setBodyString;
 Position.prototype.scriptSetBodyString = Position.prototype.setBodyString;
-
-</t>
-<t tx="felix.20210102015005.3">/**
- * PosList extends a regular array by adding helper methods
- */
-export class PosList extends Array {
-
-    @others
-
-}
 
 </t>
 <t tx="felix.20210102015917.1">/**
@@ -6401,40 +6400,7 @@ VNode.prototype.__str__ = VNode.prototype.__repr__;
     this.scrollBarSpot = 0;
     this.selectionLength = 0;
     this.selectionStart = 0;
-    g.app.nodeIndices.new_vnode_helper(context, gnx, this);
-}
-
-</t>
-<t tx="felix.20210102021644.1">/**
- * Return a PosList instance containing pointers to
- * all the immediate children of nodes in PosList self.
- */
-public children(): Position[] {
-    const res: PosList = new PosList;
-    this.forEach((p: Position) =&gt; {
-        for(let child_p of p.children()){
-            res.push(child_p.copy());
-        }
-    });
-    return res;
-}
-
-</t>
-<t tx="felix.20210102021646.1">/**
- * Find all the nodes in PosList self where zero or more characters at
- * the beginning of the headline match regex
- */
-public filter_h() {
-    //
-}
-
-</t>
-<t tx="felix.20210102021651.1">/**
- * Find all the nodes in PosList self where body matches regex
- * one or more times.
- */
-public filter_b() {
-    //
+    g.app.nodeIndices!.new_vnode_helper(context, gnx, this);
 }
 
 </t>
@@ -6442,7 +6408,9 @@ public filter_b() {
  * Set the timestamp string to be used by getNewIndex until further notice
  */
 public setTimeStamp(): void {
-    this.timeString = this._get_time();
+    // GNX example: felix.20210110163753.1
+    // using https://www.npmjs.com/package/date-format-lite#syntax
+    this.timeString = new Date().format("YYYYMMDDhhmmss");
 }
 
 </t>
@@ -6748,7 +6716,7 @@ public language_extension_dict: { [key: string]: string } = {};
     this.define_language_extension_dict();
     this.define_extension_dict();
     // this.gui = p_gui;
-    this.nodeIndices = new NodeIndices(g.app.leoID);
+    // this.nodeIndices = new NodeIndices(g.app.leoID);
 }
 
 </t>
@@ -7468,9 +7436,7 @@ public debug = []; // A list of switches to be enabled.
 public diff: boolean = false; // True: run Leo in diff mode.
 public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
 public failFast: boolean = false; // True: Use the failfast option in unit tests.
-// public gui:LeoUI; // The gui class.
-// TODO
-public gui: any;
+public gui:LeoUI|undefined; // The gui class.
 public guiArgName = null; // The gui name given in --gui option.
 public ipython_inited: boolean = false; // True if leoIpython.py imports succeeded.
 public isTheme: boolean = false; // True: load files as theme files (ignore myLeoSettings.leo).
@@ -7710,7 +7676,7 @@ public atFileNames: string[] = []; // The set of all built -in @&lt;file&gt;spel
 
 public globalKillBuffer: any[] = []; // The global kill buffer.
 public globalRegisters: any = {}; // The global register list.
-public leoID: string = ''; // The id part of gnx's, using empty for falsy.
+public leoID: string = 'filtest'; // The id part of gnx's, using empty for falsy.
 public loadedThemes: any[] = []; // List of loaded theme.leo files.
 public lossage: any[] = []; // List of last 100 keystrokes.
 public paste_c: any = null; // The commander that pasted the last outline.
@@ -7735,7 +7701,7 @@ public loadManager: any = null; // The singleton LoadManager instance.
 // The singleton LogManager instance.
 // public openWithManager: any = null;
 // The singleton OpenWithManager instance.
-public nodeIndices: NodeIndices; // The singleton nodeIndices instance.
+public nodeIndices: NodeIndices|undefined; // The singleton nodeIndices instance.
 public pluginsController: any = null; // The singleton PluginsManager instance. public sessionManager: any = null; // The singleton SessionManager instance. // The Commands class...
 public commandName: any = null; // The name of the command being executed.
 public commandInterruptFlag: boolean = false; // True: command within a command.
@@ -8247,14 +8213,6 @@ export const trace = console.log;
 // TODO : Replace with output to proper 'Leo terminal output'  The string is: pythön!
 
 </t>
-<t tx="felix.20210110183334.1">private _get_time(): string {
-    const now = new Date();
-    // GNX example: felix.20210110163753.1
-    // using https://www.npmjs.com/package/date-format-lite#syntax
-    return now.format("YYYYMMDDhhmmss");
-}
-
-</t>
 <t tx="felix.20210110210346.1">@language typescript
 @tabwidth -4
 
@@ -8293,16 +8251,13 @@ public check_gnx(c: Commander, gnx: string, v: VNode): void {
 }
 
 </t>
-<t tx="felix.20210110222544.1">@others
+<t tx="felix.20210110222544.1">&lt;&lt; imports &gt;&gt;
+@others
 @language typescript
 @tabwidth -4
 
 </t>
-<t tx="felix.20210110223514.1">import { Position, VNode, StackEntry } from "./leoNodes";
-import * as g from './leoGlobals';
-import { LeoUI } from '../leoUI';
-
-/**
+<t tx="felix.20210110223514.1">/**
  * A per-outline class. Called 'class Commands' in Leo's python source
  * The "c" predefined object is an instance of this class.
  */
@@ -8313,6 +8268,8 @@ export class Commander {
     private _currentPosition: Position | undefined;
     
     public hiddenRootNode: VNode | undefined;
+    
+    public fileCommands: FileCommands;
     
     public mFileName: string;
     public mRelativeFileName = null;
@@ -8341,8 +8298,9 @@ export class Commander {
     previousSettings?:any,
     relativeFileName?:any
 ) {
+    this.fileCommands = new FileCommands();
     this.mFileName = fileName;
-    this.gui = gui || g.app.gui;
+    this.gui = gui || g.app.gui!;
 }
 
 </t>
@@ -8735,7 +8693,7 @@ public saveCursorAndScroll(): void {
     try {
         v._bodyString = g.toUnicode(s, null, true);
     }
-    catch (Exception) {
+    catch(exception) {
         if (!this.unicode_warning_given) {
             this.unicode_warning_given = true;
             g.error(s);
@@ -9167,7 +9125,7 @@ public doPostPluginsInit():boolean {
             for (let n = 0; n &lt; lm.files.length; n++) {
                 const fn = lm.files[n];
                 lm.more_cmdline_files = n &lt; (lm.files.length - 1);
-                c = lm.loadLocalFile(fn, g.app.gui);
+                c = lm.loadLocalFile(fn, g.app.gui!);
                     // Returns None if the file is open in another instance of Leo.
                 if (c &amp;&amp; !c1){  // #1416:
                     c1 = c;
@@ -9210,7 +9168,7 @@ public doPostPluginsInit():boolean {
             c1 = lm.openEmptyWorkBook();
                 // Calls LM.loadLocalFile.
         }
-        catch( Exception){
+        catch(exception){
             g.es_print('Can not create empty workbook');
             g.es_exception();
         }
@@ -9399,7 +9357,7 @@ public openEmptyWorkBook(): Commander| undefined {
     return c
     */
     const fn:string = "";
-    const c = lm.loadLocalFile(fn,g.app.gui);
+    const c = lm.loadLocalFile(fn,g.app.gui!);
     if (!c){
         return undefined;
     }
@@ -9688,7 +9646,7 @@ public safeMoveToThreadNext(): Position {
                     g.error(
                         `duplicate gnx: ${child_v.fileIndex} ` +
                         `v: ${child_v} parent: ${parent.v}`);
-                    child_v.fileIndex = g.app.nodeIndices.getNewIndex(child_v);
+                    child_v.fileIndex = g.app.nodeIndices!.getNewIndex(child_v);
                     console.assert(child_v.gnx !== parent.v.gnx);
                     // Should be ok to continue.
                     p.moveToFirstChild();
@@ -9737,7 +9695,7 @@ public moveToBack():Position {
         p.v = parent_v.children[n - 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9755,7 +9713,7 @@ public moveToFirstChild():Position{
         p._childIndex = 0;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9775,7 +9733,7 @@ public moveToLastChild():Position{
         p._childIndex = n - 1;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9812,7 +9770,7 @@ public moveToNext():Position{
         p.v = parent_v.children[n + 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9846,7 +9804,7 @@ public moveToNthChild(n:number):Position {
         p._childIndex = n;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9864,7 +9822,7 @@ public moveToParent():Position {
         p._childIndex = item[1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -11321,7 +11279,7 @@ public hasNext():boolean|undefined{
             // Returns None if p.v is None.
         return p.v &amp;&amp; parent_v &amp;&amp; p._childIndex + 1 &lt; parent_v.children.length;
     }
-    catch (Exception){
+    catch(Exception){
         g.trace('*** Unexpected exception');
         g.es_exception();
         return undefined;
@@ -12475,6 +12433,100 @@ public setTopPosition(p:Position):void {
 
 // topVnode = topPosition
 // setTopVnode = setTopPosition
+
+</t>
+<t tx="felix.20210218214329.12">/**
+ * Update self.timeString and self.lastIndex
+ */
+public update():string {
+    const t_s:string = new Date().format("YYYYMMDDhhmmss");
+    if(this.timeString === t_s){
+        this.lastIndex += 1;
+    }else{
+        this.lastIndex = 1;
+        this.timeString = t_s;
+    }
+    return t_s;
+}
+
+</t>
+<t tx="felix.20210218214329.6">// These are used by the FileCommands read/write code.
+
+/**
+ * Return the id to be used by default in all gnx's
+ */
+public getDefaultId():string {
+    return this.defaultId;
+}
+
+/**
+ * Set the id to be used by default in all gnx's
+ */
+public setDefaultId(theId: string): void {
+    this.defaultId = theId;
+}
+</t>
+<t tx="felix.20210218214329.7">/**
+ * Create a new gnx for v or an empty string if the hold flag is set.
+ * **Important**: the method must allocate a new gnx even if v.fileIndex exists.
+ */
+public getNewIndex(v:VNode|undefined, cached:Boolean=false):string {
+    if(!v){
+        console.log('getNewIndex: v is None');
+        return '';
+    }
+    const c:Commander = v.context;
+    const fc:any = c.fileCommands;
+    const t_s:string = this.update();
+        // Updates self.lastTime and self.lastIndex.
+    const gnx:string = g.toUnicode(`${this.userId}.${t_s}.${this.lastIndex}`);
+    v.fileIndex = gnx;
+    this.check_gnx(c, gnx, v);
+    fc.gnxDict[gnx] = v;
+    return gnx;
+}
+
+</t>
+<t tx="felix.20210218214329.8">/**
+ * Handle all gnx-related tasks for VNode.__init__.
+ */
+public new_vnode_helper(c:Commander, gnx:string|undefined, v:VNode):void {
+    const ni:NodeIndices = this;
+    if(gnx){
+        v.fileIndex = gnx;
+        ni.check_gnx(c, gnx, v);
+        c.fileCommands.gnxDict[gnx] = v;
+    } else {
+        v.fileIndex = ni.getNewIndex(v);
+    }
+}
+
+</t>
+<t tx="felix.20210220181245.1">&lt;&lt; imports &gt;&gt;
+@others
+@language typescript
+@tabwidth -4
+
+</t>
+<t tx="felix.20210220190156.1">export class FileCommands {
+
+    public gnxDict: { [key: string]: VNode; } = {};
+
+    @others
+
+}
+
+</t>
+<t tx="felix.20210220194059.1">import { FileCommands } from "./leoFileCommands";
+import { Position, VNode, StackEntry } from "./leoNodes";
+import * as g from './leoGlobals';
+import { LeoUI } from '../leoUI';
+
+</t>
+<t tx="felix.20210220195150.1">import { VNode } from "./leoNodes";
+
+</t>
+<t tx="felix.20210220200109.1">constructor() { }
 
 </t>
 </tnodes>

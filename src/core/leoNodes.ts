@@ -26,13 +26,6 @@ export class NodeIndices {
         this.setTimeStamp();
     }
 
-    private _get_time(): string {
-        const now = new Date();
-        // GNX example: felix.20210110163753.1
-        // using https://www.npmjs.com/package/date-format-lite#syntax
-        return now.format("YYYYMMDDhhmmss");
-    }
-
     /**
      * Check that no vnode exists with the given gnx in fc.gnxDict.
      */
@@ -61,7 +54,72 @@ export class NodeIndices {
      * Set the timestamp string to be used by getNewIndex until further notice
      */
     public setTimeStamp(): void {
-        this.timeString = this._get_time();
+        // GNX example: felix.20210110163753.1
+        // using https://www.npmjs.com/package/date-format-lite#syntax
+        this.timeString = new Date().format("YYYYMMDDhhmmss");
+    }
+
+    // These are used by the FileCommands read/write code.
+
+    /**
+     * Return the id to be used by default in all gnx's
+     */
+    public getDefaultId():string {
+        return this.defaultId;
+    }
+
+    /**
+     * Set the id to be used by default in all gnx's
+     */
+    public setDefaultId(theId: string): void {
+        this.defaultId = theId;
+    }
+    /**
+     * Create a new gnx for v or an empty string if the hold flag is set.
+     * **Important**: the method must allocate a new gnx even if v.fileIndex exists.
+     */
+    public getNewIndex(v:VNode|undefined, cached:Boolean=false):string {
+        if(!v){
+            console.log('getNewIndex: v is None');
+            return '';
+        }
+        const c:Commander = v.context;
+        const fc:any = c.fileCommands;
+        const t_s:string = this.update();
+            // Updates self.lastTime and self.lastIndex.
+        const gnx:string = g.toUnicode(`${this.userId}.${t_s}.${this.lastIndex}`);
+        v.fileIndex = gnx;
+        this.check_gnx(c, gnx, v);
+        fc.gnxDict[gnx] = v;
+        return gnx;
+    }
+
+    /**
+     * Handle all gnx-related tasks for VNode.__init__.
+     */
+    public new_vnode_helper(c:Commander, gnx:string|undefined, v:VNode):void {
+        const ni:NodeIndices = this;
+        if(gnx){
+            v.fileIndex = gnx;
+            ni.check_gnx(c, gnx, v);
+            c.fileCommands.gnxDict[gnx] = v;
+        } else {
+            v.fileIndex = ni.getNewIndex(v);
+        }
+    }
+
+    /**
+     * Update self.timeString and self.lastIndex
+     */
+    public update():string {
+        const t_s:string = new Date().format("YYYYMMDDhhmmss");
+        if(this.timeString === t_s){
+            this.lastIndex += 1;
+        }else{
+            this.lastIndex = 1;
+            this.timeString = t_s;
+        }
+        return t_s;
     }
 
 
@@ -74,10 +132,8 @@ export class NodeIndices {
  * parents.
  *
  * The p.moveToX methods may return a null (invalid) position p with p.v = None.
- * 
  * No operator overload in js/ts, so "strict-comparisons" is set in tslint.json
  * to force usage of special methods to compare & evaluate equalities.
- *
  */
 
 export type StackEntry = [VNode, number];
@@ -821,7 +877,7 @@ export class Position {
                 // Returns None if p.v is None.
             return p.v && parent_v && p._childIndex + 1 < parent_v.children.length;
         }
-        catch (Exception){
+        catch(Exception){
             g.trace('*** Unexpected exception');
             g.es_exception();
             return undefined;
@@ -1271,7 +1327,7 @@ export class Position {
             p.v = parent_v.children[n - 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                                    //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1288,7 +1344,7 @@ export class Position {
             p._childIndex = 0;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                                    //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1307,7 +1363,7 @@ export class Position {
             p._childIndex = n - 1;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                                    //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1342,7 +1398,7 @@ export class Position {
             p.v = parent_v.children[n + 1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                                    //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1374,7 +1430,7 @@ export class Position {
             p._childIndex = n;
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                                    //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1391,7 +1447,7 @@ export class Position {
             p._childIndex = item[1];
         }else{
             // * For now, use undefined p.v to signal null/invalid positions
-                                    //@ts-ignore
+                                                    //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1567,7 +1623,7 @@ export class Position {
                         g.error(
                             `duplicate gnx: ${child_v.fileIndex} ` +
                             `v: ${child_v} parent: ${parent.v}`);
-                        child_v.fileIndex = g.app.nodeIndices.getNewIndex(child_v);
+                        child_v.fileIndex = g.app.nodeIndices!.getNewIndex(child_v);
                         console.assert(child_v.gnx !== parent.v.gnx);
                         // Should be ok to continue.
                         p.moveToFirstChild();
@@ -2196,44 +2252,6 @@ Position.prototype.initBodyString = Position.prototype.setBodyString;
 Position.prototype.setTnodeText = Position.prototype.setBodyString;
 Position.prototype.scriptSetBodyString = Position.prototype.setBodyString;
 
-/**
- * PosList extends a regular array by adding helper methods
- */
-export class PosList extends Array {
-
-    /**
-     * Return a PosList instance containing pointers to
-     * all the immediate children of nodes in PosList self.
-     */
-    public children(): Position[] {
-        const res: PosList = new PosList;
-        this.forEach((p: Position) => {
-            for(let child_p of p.children()){
-                res.push(child_p.copy());
-            }
-        });
-        return res;
-    }
-
-    /**
-     * Find all the nodes in PosList self where zero or more characters at
-     * the beginning of the headline match regex
-     */
-    public filter_h() {
-        //
-    }
-
-    /**
-     * Find all the nodes in PosList self where body matches regex
-     * one or more times.
-     */
-    public filter_b() {
-        //
-    }
-
-
-}
-
 enum StatusFlags {
     // Define the meaning of status bits in new vnodes.
     // Archived...
@@ -2300,7 +2318,7 @@ export class VNode {
         this.scrollBarSpot = 0;
         this.selectionLength = 0;
         this.selectionStart = 0;
-        g.app.nodeIndices.new_vnode_helper(context, gnx, this);
+        g.app.nodeIndices!.new_vnode_helper(context, gnx, this);
     }
 
     public __repr__():string{
@@ -2878,7 +2896,7 @@ export class VNode {
         try {
             v._bodyString = g.toUnicode(s, null, true);
         }
-        catch (Exception) {
+        catch(exception) {
             if (!this.unicode_warning_given) {
                 this.unicode_warning_given = true;
                 g.error(s);
