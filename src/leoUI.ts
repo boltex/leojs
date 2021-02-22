@@ -22,6 +22,8 @@ import { LeoDocumentNode } from "./leoDocumentNode";
 import { LeoDocumentsProvider } from "./leoDocuments";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
+import { LoadManager } from "./core/leoApp";
+import { NodeIndices } from "./core/leoNodes";
 
 
 /**
@@ -132,11 +134,17 @@ export class LeoUI {
 
         // * Create leo core class
         this._leo = new Leojs();
-        
-        console.log("this._leo", this._leo.positions);
-        
-        console.log(g.app.delegate_language_dict);
 
+        g.app.gui = this;
+        g.app.loadManager = new LoadManager();
+        // g.app.loadManager.computeStandardDirectories()
+        if (!g.app.setLeoID(false, true)) {
+            throw new Error("unable to set LeoID.");
+        }
+        g.app.inBridge = true;  // Added 2007/10/21: support for g.getScript.
+        g.app.nodeIndices = new NodeIndices(g.app.leoID);
+
+        console.log('Leo started, LeoId:', g.app.leoID);
         // * Create file browser instance
         // this._leoFilesBrowser = new LeoFilesBrowser(_context);
 

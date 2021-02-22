@@ -382,6 +382,9 @@
 <v t="felix.20210103024632.21"><vh>app.init_at_auto_names</vh></v>
 <v t="felix.20210103024632.22"><vh>app.init_at_file_names</vh></v>
 </v>
+<v t="felix.20210221010822.1"><vh>app.setLeoID &amp; helpers</vh>
+<v t="felix.20210221010822.2"><vh>app.cleanLeoID</vh></v>
+</v>
 <v t="felix.20210123212411.1"><vh>app.newCommander</vh></v>
 </v>
 <v t="felix.20210118015431.1"><vh>class LoadManager</vh>
@@ -756,7 +759,6 @@
 </v>
 </v>
 </v>
-<v t="felix.20201214194144.2"></v>
 </vnodes>
 <tnodes>
 <t tx="ekr.20201209145256.1"></t>
@@ -2728,6 +2730,8 @@ import { LeoDocumentNode } from "./leoDocumentNode";
 import { LeoDocumentsProvider } from "./leoDocuments";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
+import { LoadManager } from "./core/leoApp";
+import { NodeIndices } from "./core/leoNodes";
 
 @language typescript
 
@@ -2747,11 +2751,17 @@ import * as g from './core/leoGlobals';
 
     // * Create leo core class
     this._leo = new Leojs();
-    
-    console.log("this._leo", this._leo.positions);
-    
-    console.log(g.app.delegate_language_dict);
 
+    g.app.gui = this;
+    g.app.loadManager = new LoadManager();
+    // g.app.loadManager.computeStandardDirectories()
+    if (!g.app.setLeoID(false, true)) {
+        throw new Error("unable to set LeoID.");
+    }
+    g.app.inBridge = true;  // Added 2007/10/21: support for g.getScript.
+    g.app.nodeIndices = new NodeIndices(g.app.leoID);
+
+    console.log('Leo started, LeoId:', g.app.leoID);
     // * Create file browser instance
     // this._leoFilesBrowser = new LeoFilesBrowser(_context);
 
@@ -6592,7 +6602,7 @@ export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
     import platform
     import sqlite3
 */
-
+import * as os from "os";
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
 import { NodeIndices } from './leoNodes';
@@ -7696,7 +7706,7 @@ public externalFilesController: any = null; // The singleton ExternalFilesContro
 public global_cacher: any = null; // The singleton leoCacher.GlobalCacher instance.
 public idleTimeManager: any = null; // The singleton IdleTimeManager instance.
 public ipk: any = null; // python kernel instance
-public loadManager: any = null; // The singleton LoadManager instance.
+public loadManager: LoadManager|undefined; // The singleton LoadManager instance.
 // public logManager: any = null;
 // The singleton LogManager instance.
 // public openWithManager: any = null;
@@ -7940,6 +7950,7 @@ export const es = console.log;
 
 </t>
 <t tx="felix.20210104210248.1">export function es_exception(): string {
+    console.log('es_exception called')
     return '&lt;no file&gt;';
 }
 
@@ -9695,7 +9706,7 @@ public moveToBack():Position {
         p.v = parent_v.children[n - 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                                //@ts-ignore
+                                                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9713,7 +9724,7 @@ public moveToFirstChild():Position{
         p._childIndex = 0;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                                //@ts-ignore
+                                                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9733,7 +9744,7 @@ public moveToLastChild():Position{
         p._childIndex = n - 1;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                                //@ts-ignore
+                                                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9770,7 +9781,7 @@ public moveToNext():Position{
         p.v = parent_v.children[n + 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                                //@ts-ignore
+                                                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9804,7 +9815,7 @@ public moveToNthChild(n:number):Position {
         p._childIndex = n;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                                //@ts-ignore
+                                                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9822,7 +9833,7 @@ public moveToParent():Position {
         p._childIndex = item[1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                                //@ts-ignore
+                                                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -12527,6 +12538,61 @@ import { LeoUI } from '../leoUI';
 
 </t>
 <t tx="felix.20210220200109.1">constructor() { }
+
+</t>
+<t tx="felix.20210221010822.1">/**
+ * Get g.app.leoID from various sources.
+ */
+public setLeoID(useDialog:boolean=true, verbose:boolean=true):string{
+    this.leoID = "";
+    
+    // tslint:disable-next-line: strict-comparisons
+    console.assert(this === g.app);
+    
+    verbose = verbose &amp;&amp; !g.unitTesting &amp;&amp; !this.silentMode;
+    
+    this.leoID = this.cleanLeoID(os.userInfo().username, 'os.userInfo().username');
+    
+    return this.leoID;
+    // table = (self.setIDFromSys, self.setIDFromFile, self.setIDFromEnv,)
+    // for func in table:
+        // func(verbose)
+        // if self.leoID:
+            // return self.leoID
+    // if useDialog:
+        // self.setIdFromDialog()
+        // if self.leoID:
+            // self.setIDFile()
+    // return self.leoID
+}
+
+</t>
+<t tx="felix.20210221010822.2">/**
+ * #1404: Make sure that the given Leo ID will not corrupt a .leo file.
+ */
+public cleanLeoID(id_:string, tag:string):string {
+    const old_id:string = id_.toString();
+    try{
+        id_ = id_.replace(/\./g, "").replace(/\,/g, "").replace(/\"/g, "").replace(/\'/g, "");
+        //  Remove *all* whitespace: https://stackoverflow.com/questions/3739909
+        id_ = id_.split(' ').join('');
+    }
+    catch(exception){
+        g.es_exception();
+        id_ = '';
+    }
+    if (id_.length &lt; 3){
+        throw new Error("unknownAttributes ValueError");
+        // TODO: Show Leo Id syntax error message
+        // g.EmergencyDialog(
+        //   title=f"Invalid Leo ID: {tag}",
+        //    message=(
+        //        f"Invalid Leo ID: {old_id!r}\n\n"
+        //       "Your id should contain only letters and numbers\n"
+        //        "and must be at least 3 characters in length."))
+    }
+    return id_;
+}
 
 </t>
 </tnodes>

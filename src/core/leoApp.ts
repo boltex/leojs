@@ -15,7 +15,7 @@
     import platform
     import sqlite3
 */
-
+import * as os from "os";
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
 import { NodeIndices } from './leoNodes';
@@ -162,7 +162,7 @@ export class LeoApp {
     public global_cacher: any = null; // The singleton leoCacher.GlobalCacher instance.
     public idleTimeManager: any = null; // The singleton IdleTimeManager instance.
     public ipk: any = null; // python kernel instance
-    public loadManager: any = null; // The singleton LoadManager instance.
+    public loadManager: LoadManager|undefined; // The singleton LoadManager instance.
     // public logManager: any = null;
     // The singleton LogManager instance.
     // public openWithManager: any = null;
@@ -842,6 +842,59 @@ export class LeoApp {
         ];
     }
 
+
+    /**
+     * Get g.app.leoID from various sources.
+     */
+    public setLeoID(useDialog:boolean=true, verbose:boolean=true):string{
+        this.leoID = "";
+        
+        // tslint:disable-next-line: strict-comparisons
+        console.assert(this === g.app);
+        
+        verbose = verbose && !g.unitTesting && !this.silentMode;
+        
+        this.leoID = this.cleanLeoID(os.userInfo().username, 'os.userInfo().username');
+        
+        return this.leoID;
+        // table = (self.setIDFromSys, self.setIDFromFile, self.setIDFromEnv,)
+        // for func in table:
+            // func(verbose)
+            // if self.leoID:
+                // return self.leoID
+        // if useDialog:
+            // self.setIdFromDialog()
+            // if self.leoID:
+                // self.setIDFile()
+        // return self.leoID
+    }
+
+    /**
+     * #1404: Make sure that the given Leo ID will not corrupt a .leo file.
+     */
+    public cleanLeoID(id_:string, tag:string):string {
+        const old_id:string = id_.toString();
+        try{
+            id_ = id_.replace(/\./g, "").replace(/\,/g, "").replace(/\"/g, "").replace(/\'/g, "");
+            //  Remove *all* whitespace: https://stackoverflow.com/questions/3739909
+            id_ = id_.split(' ').join('');
+        }
+        catch(exception){
+            g.es_exception();
+            id_ = '';
+        }
+        if (id_.length < 3){
+            throw new Error("unknownAttributes ValueError");
+            // TODO: Show Leo Id syntax error message
+            // g.EmergencyDialog(
+            //   title=f"Invalid Leo ID: {tag}",
+            //    message=(
+            //        f"Invalid Leo ID: {old_id!r}\n\n"
+            //       "Your id should contain only letters and numbers\n"
+            //        "and must be at least 3 characters in length."))
+        }
+        return id_;
+    }
 
     /**
      * Create a commander and its view frame for the Leo main window.
