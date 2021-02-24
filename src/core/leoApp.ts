@@ -1287,6 +1287,84 @@ export class LoadManager {
     }
 
     /**
+     * Create an empty file if the external fn is empty.
+     *
+     * Otherwise, create an @edit or @file node for the external file.
+     */
+    public initWrapperLeoFile(c:Commander, fn:string):Commander {
+        // lm = self
+        // Use the config params to set the size and location of the window.
+        
+        // frame = c.frame
+        // frame.setInitialWindowGeometry()
+        // frame.deiconify()
+        // frame.lift()
+        
+        // #1570: Resize the _new_ frame.
+        // frame.splitVerticalFlag, r1, r2 = frame.initialRatios()
+        // frame.resizePanesToRatio(r1, r2)
+        
+        /*
+        if not g.os_path_exists(fn):
+            p = c.rootPosition()
+            // Create an empty @edit node unless fn is an .leo file.
+            // Fix #1070: Use "newHeadline", not fn.
+            p.h = "newHeadline" if fn.endswith('.leo') else f"@edit {fn}"
+            c.selectPosition(p)
+        elif c.looksLikeDerivedFile(fn):
+            // 2011/10/10: Create an @file node.
+            p = c.importCommands.importDerivedFiles(parent=c.rootPosition(),
+                paths=[fn], command=None)  # Not undoable.
+            if p and p.hasBack():
+                p.back().doDelete()
+                p = c.rootPosition()
+            if not p: return None
+        else:
+            // Create an @<file> node.
+            p = c.rootPosition()
+            if p:
+                load_type = self.options['load_type']
+                p.setHeadString(f"{load_type} {fn}")
+                c.refreshFromDisk()
+                c.selectPosition(p)
+
+        // Fix critical bug 1184855: data loss with command line 'leo somefile.ext'
+        // Fix smallish bug 1226816 Command line "leo xxx.leo" creates file xxx.leo.leo.
+        c.mFileName = fn if fn.endswith('.leo') else f"{fn}.leo"
+        c.wrappedFileName = fn
+        c.frame.title = c.computeWindowTitle(c.mFileName)
+        c.frame.setTitle(c.frame.title)
+        // chapterController.finishCreate must be called after the first real redraw
+        // because it requires a valid value for c.rootPosition().
+        if c.config.getBool('use-chapters') and c.chapterController:
+            c.chapterController.finishCreate()
+        frame.c.clearChanged()
+            // Mark the outline clean.
+            // This makes it easy to open non-Leo files for quick study.
+        return c;
+        */
+        return c;
+    }
+
+    public openLeoOrZipFile(fn:string):any {
+        const lm:LoadManager = this;
+        if( fn.endsWith('.db')){
+            // return sqlite3.connect(fn)
+            return undefined;
+        }
+        let theFile:any;
+        // zipped = lm.isZippedFile(fn)
+        
+        // TODO 
+        // if(!!fn && fn.endsWith('.leo') && g.os_path_exists(fn)){
+            // theFile = lm.openLeoFile(fn);
+        // }else{
+            // theFile = undefined;
+        // }
+        return theFile;
+    }
+
+    /**
      * Returns the commander of already opened Leo file
      * returns undefined otherwise
      */

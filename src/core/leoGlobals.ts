@@ -368,7 +368,7 @@ export const error = console.error;
 export const es = console.log;
 
 export function es_exception(): string {
-    console.log('es_exception called')
+    console.log('es_exception called');
     return '<no file>';
 }
 

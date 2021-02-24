@@ -398,7 +398,10 @@
 <v t="felix.20210120004121.16"><vh>LM.initApp</vh></v>
 </v>
 <v t="felix.20210120004121.31"><vh>LM.loadLocalFile &amp; helper</vh>
-<v t="felix.20210120004121.32"><vh>LM.openFileByName &amp; helpers</vh></v>
+<v t="felix.20210120004121.32"><vh>LM.openFileByName &amp; helpers</vh>
+<v t="felix.20210222013344.1"><vh>LM.initWrapperLeoFile</vh></v>
+<v t="felix.20210222013445.1"><vh>LM.openLeoOrZipFile</vh></v>
+</v>
 </v>
 <v t="felix.20210124192005.1"><vh>LM.findOpenFile</vh></v>
 </v>
@@ -406,8 +409,20 @@
 </v>
 <v t="felix.20210110222544.1"><vh>@clean src/core/leoCommander.ts</vh>
 <v t="felix.20210220194059.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
+<v t="felix.20210224000242.1"><vh>interface hoistStack</vh></v>
 <v t="felix.20210110223514.1"><vh>class Commander</vh>
-<v t="felix.20210110223547.1"><vh>constructor</vh></v>
+<v t="felix.20210223220756.1"><vh>Commander IVars</vh>
+<v t="felix.20210223220814.2"><vh>c.initCommandIvars</vh></v>
+<v t="felix.20210223220814.3"><vh>c.initDebugIvars</vh></v>
+<v t="felix.20210223220814.4"><vh>c.initDocumentIvars</vh></v>
+<v t="felix.20210223220814.5"><vh>c.initEventIvars</vh></v>
+<v t="felix.20210223220814.6"><vh>c.initFileIvars</vh></v>
+<v t="felix.20210223220814.7"><vh>c.initOptionsIvars</vh></v>
+<v t="felix.20210223220814.8"><vh>c.initObjectIvars</vh></v>
+<v t="felix.20210223220814.9"><vh>c.initObjects</vh></v>
+<v t="felix.20210223220814.10"><vh>c.initSettings</vh></v>
+</v>
+<v t="felix.20210223002937.1"><vh>constructor</vh></v>
 <v t="felix.20210112001859.1"><vh>c.Drawing &amp; coloring</vh></v>
 <v t="felix.20210215185050.1"><vh>c.API</vh>
 <v t="felix.20210131011508.1"><vh>c.Generators</vh>
@@ -2760,8 +2775,10 @@ import { NodeIndices } from "./core/leoNodes";
     }
     g.app.inBridge = true;  // Added 2007/10/21: support for g.getScript.
     g.app.nodeIndices = new NodeIndices(g.app.leoID);
-
+    
+    // g.app.loadManager.load(fileName, pymacs)
     console.log('Leo started, LeoId:', g.app.leoID);
+    
     // * Create file browser instance
     // this._leoFilesBrowser = new LeoFilesBrowser(_context);
 
@@ -2997,6 +3014,7 @@ public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
         } else {
             w_docView = this._leoDocumentsExplorer;
         }
+        // tslint:disable-next-line: strict-comparisons
         if (w_docView.selection.length &amp;&amp; w_docView.selection[0] === p_documentNode) {
             console.log('setDocumentSelection: already selected!');
 
@@ -7950,7 +7968,7 @@ export const es = console.log;
 
 </t>
 <t tx="felix.20210104210248.1">export function es_exception(): string {
-    console.log('es_exception called')
+    console.log('es_exception called');
     return '&lt;no file&gt;';
 }
 
@@ -8275,43 +8293,20 @@ public check_gnx(c: Commander, gnx: string, v: VNode): void {
 export class Commander {
 
     // Official ivars.
-    private _topPosition : Position | undefined;
     private _currentPosition: Position | undefined;
-    
-    public hiddenRootNode: VNode | undefined;
-    
+    private _topPosition : Position | undefined;
+
+    public hiddenRootNode: VNode;
     public fileCommands: FileCommands;
-    
-    public mFileName: string;
-    public mRelativeFileName = null;
+
     public gui:LeoUI;
+    
     public frame: any; // TODO : fake frame needed?
-    public hoistStack:any[] = []; // Stack of nodes to be root of drawn tree.
     
-    
-    public expansionLevel:number = 0;
-    public expansionNode: Position|undefined; // The last node we expanded or contracted.
-    public nodeConflictFileName:string ="";
-    
-    // File Ivars
-    public changed: boolean = false;
-    
-    // _currentCount = 0
+       // _currentCount = 0
 
     @others
 
-}
-
-</t>
-<t tx="felix.20210110223547.1">constructor(
-    fileName: string,
-    gui?:LeoUI,
-    previousSettings?:any,
-    relativeFileName?:any
-) {
-    this.fileCommands = new FileCommands();
-    this.mFileName = fileName;
-    this.gui = gui || g.app.gui!;
 }
 
 </t>
@@ -9706,7 +9701,7 @@ public moveToBack():Position {
         p.v = parent_v.children[n - 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                                    //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9724,7 +9719,7 @@ public moveToFirstChild():Position{
         p._childIndex = 0;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                                    //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9744,7 +9739,7 @@ public moveToLastChild():Position{
         p._childIndex = n - 1;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                                    //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9781,7 +9776,7 @@ public moveToNext():Position{
         p.v = parent_v.children[n + 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                                    //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9815,7 +9810,7 @@ public moveToNthChild(n:number):Position {
         p._childIndex = n;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                                    //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9833,7 +9828,7 @@ public moveToParent():Position {
         p._childIndex = item[1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                                                    //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -12593,6 +12588,386 @@ public cleanLeoID(id_:string, tag:string):string {
     }
     return id_;
 }
+
+</t>
+<t tx="felix.20210222013344.1">/**
+ * Create an empty file if the external fn is empty.
+ *
+ * Otherwise, create an @edit or @file node for the external file.
+ */
+public initWrapperLeoFile(c:Commander, fn:string):Commander {
+    // lm = self
+    // Use the config params to set the size and location of the window.
+    
+    // frame = c.frame
+    // frame.setInitialWindowGeometry()
+    // frame.deiconify()
+    // frame.lift()
+    
+    // #1570: Resize the _new_ frame.
+    // frame.splitVerticalFlag, r1, r2 = frame.initialRatios()
+    // frame.resizePanesToRatio(r1, r2)
+    
+    /*
+    if not g.os_path_exists(fn):
+        p = c.rootPosition()
+        // Create an empty @edit node unless fn is an .leo file.
+        // Fix #1070: Use "newHeadline", not fn.
+        p.h = "newHeadline" if fn.endswith('.leo') else f"@edit {fn}"
+        c.selectPosition(p)
+    elif c.looksLikeDerivedFile(fn):
+        // 2011/10/10: Create an @file node.
+        p = c.importCommands.importDerivedFiles(parent=c.rootPosition(),
+            paths=[fn], command=None)  # Not undoable.
+        if p and p.hasBack():
+            p.back().doDelete()
+            p = c.rootPosition()
+        if not p: return None
+    else:
+        // Create an @&lt;file&gt; node.
+        p = c.rootPosition()
+        if p:
+            load_type = self.options['load_type']
+            p.setHeadString(f"{load_type} {fn}")
+            c.refreshFromDisk()
+            c.selectPosition(p)
+
+    // Fix critical bug 1184855: data loss with command line 'leo somefile.ext'
+    // Fix smallish bug 1226816 Command line "leo xxx.leo" creates file xxx.leo.leo.
+    c.mFileName = fn if fn.endswith('.leo') else f"{fn}.leo"
+    c.wrappedFileName = fn
+    c.frame.title = c.computeWindowTitle(c.mFileName)
+    c.frame.setTitle(c.frame.title)
+    // chapterController.finishCreate must be called after the first real redraw
+    // because it requires a valid value for c.rootPosition().
+    if c.config.getBool('use-chapters') and c.chapterController:
+        c.chapterController.finishCreate()
+    frame.c.clearChanged()
+        // Mark the outline clean.
+        // This makes it easy to open non-Leo files for quick study.
+    return c;
+    */
+    return c;
+}
+
+</t>
+<t tx="felix.20210222013445.1">public openLeoOrZipFile(fn:string):any {
+    const lm:LoadManager = this;
+    if( fn.endsWith('.db')){
+        // return sqlite3.connect(fn)
+        return undefined;
+    }
+    let theFile:any;
+    // zipped = lm.isZippedFile(fn)
+    
+    // TODO 
+    // if(!!fn &amp;&amp; fn.endsWith('.leo') &amp;&amp; g.os_path_exists(fn)){
+        // theFile = lm.openLeoFile(fn);
+    // }else{
+        // theFile = undefined;
+    // }
+    return theFile;
+}
+
+</t>
+<t tx="felix.20210223002937.1">constructor(
+    fileName: string,
+    gui?:LeoUI,
+    previousSettings?:any,
+    relativeFileName?:any
+) {
+    this.mFileName = fileName;
+    this.gui = gui || g.app.gui!;
+    this.fileCommands = new FileCommands(); // c.fileCommands = DummyFileCommands()
+    this.hiddenRootNode = new VNode(this, 'hidden-root-vnode-gnx');
+    this.hiddenRootNode.h = '&lt;hidden root vnode&gt;';
+    this.fileCommands.gnxDict = {}; // RESET gnxDict 
+}
+
+</t>
+<t tx="felix.20210223220756.1"></t>
+<t tx="felix.20210223220814.10">//Init the settings *before* initing the objects.
+// c = self
+// from leo.core import leoConfig
+public config:any = {}; // TODO
+// c.config = leoConfig.LocalConfigManager(c, previousSettings)
+// g.app.config.setIvarsFromSettings(c)
+
+</t>
+<t tx="felix.20210223220814.2">// Init ivars used while executing a command.
+public commandsDict: {[key:string]:(p:any) =&gt; any } = {}; // Keys are command names, values are functions.
+public disableCommandsMessage:string = ''; // The presence of this message disables all commands.
+public hookFunction:any = undefined; // One of three places that g.doHook looks for hook functions.
+
+public ignoreChangedPaths= false; // True: disable path changed message in at.WriteAllHelper.
+public inCommand:boolean = false; // Interlocks to prevent premature closing of a window.
+public isZipped:boolean = false; // Set by g.openWithFileName.
+public outlineToNowebDefaultFileName:string = "noweb.nw"; // For Outline To Noweb dialog.
+    
+// For tangle/untangle
+public tangle_errors:number = 0;
+// Default Tangle options
+public use_header_flag:boolean = false;
+public output_doc_flag:boolean = false;
+// For hoist/dehoist commands.
+public hoistStack:hoistStackEntry[] = []; // Stack of nodes to be root of drawn tree.
+// For outline navigation.
+public navPrefix:string = ''; // Must always be a string.
+public navTime:any = undefined;
+
+public sqlite_connection:any = undefined;
+
+</t>
+<t tx="felix.20210223220814.3">// Init Commander debugging ivars.
+public command_count:number = 0;
+public scanAtPathDirectivesCount:number = 0;
+public trace_focus_count:number = 0;
+
+</t>
+<t tx="felix.20210223220814.4">// Init per-document ivars.
+public expansionLevel:number = 0; // The expansion level of this outline.
+public expansionNode:Position|undefined = undefined; // The last node we expanded or contracted.
+public nodeConflictList:VNode[] = []; // List of nodes with conflicting read-time data.
+public nodeConflictFileName:string | undefined = undefined; // The fileName for c.nodeConflictList.
+public user_dict = {}; // Non-persistent dictionary for free use by scripts and plugins.
+
+</t>
+<t tx="felix.20210223220814.5">// Init ivars relating to gui events.
+public configInited = false;
+public doubleClickFlag = false;
+public exists = true; // Indicate that this class exists and has not been destroyed.
+        
+public in_qt_dialog = false; // True: in a qt dialog.
+public loading = false; // True: we are loading a file: disables c.setChanged()
+public promptingForClose = false; // True: lock out additional closing dialogs.
+public suppressHeadChanged = false; // True: prevent setting c.changed when switching chapters.
+// Flags for c.outerUpdate...
+public enableRedrawFlag = true;
+public requestCloseWindow = false;
+public requestedFocusWidget = undefined;
+public requestLaterRedraw = false;
+
+</t>
+<t tx="felix.20210223220814.6">// Init file-related ivars of the commander.
+public changed = false; // True: the ouline has changed since the last save.
+public ignored_at_file_nodes:string[] = []; // (headers)
+public import_error_nodes:string[] = []; // List of nodes for c.raise_error_dialogs. (headers)
+public last_dir:string|undefined = undefined; // The last used directory.
+public mFileName:string =''; // Do _not_ use os_path_norm: it converts an empty path to '.' (!!)
+public mRelativeFileName:string =  '';
+public openDirectory:string|undefined  = undefined;
+public orphan_at_file_nodes:string[] = []; // List of orphaned nodes for c.raise_error_dialogs. (headers)
+public wrappedFileName:string|undefined = undefined; // The name of the wrapped file, for wrapper commanders, set by LM.initWrapperLeoFile
+
+</t>
+<t tx="felix.20210223220814.7">// Init Commander ivars corresponding to user options.
+public fixed:boolean = false;
+public fixedWindowPosition = [];
+public forceExecuteEntireBody:boolean = false;
+public focus_border_color:string = 'white';
+public focus_border_width:number = 1;  // pixels;
+public outlineHasInitialFocus:boolean=false;
+public page_width:number = 132;
+public sparse_find:boolean = true;
+public sparse_move:boolean = true;
+public sparse_spell:boolean = true;
+public stayInTreeAfterSelect:boolean = false;
+public tab_width:number = -4;
+public tangle_batch_flag:boolean = false;
+public target_language:string = "python"; // TODO : switch to js for Leojs?
+public untangle_batch_flag:boolean = false;
+    // # self.use_body_focus_border = True
+    // # self.use_focus_border = False
+    // # Replaced by style-sheet entries.
+public vim_mode:boolean = false;
+
+</t>
+<t tx="felix.20210223220814.8">// These ivars are set later by leoEditCommands.createEditCommanders
+public abbrevCommands:any = undefined;
+public editCommands:any = undefined;
+public db:any = {};  // May be set to a PickleShare instance later.
+public bufferCommands:any = undefined;
+public chapterCommands:any = undefined;
+public controlCommands:any = undefined;
+public convertCommands:any = undefined;
+public debugCommands:any = undefined;
+public editFileCommands:any = undefined;
+public evalController:any = undefined;
+public gotoCommands:any = undefined;
+public helpCommands:any = undefined;
+public keyHandler:any = undefined; // TODO same as k
+public k:any = undefined; // TODO same as keyHandler
+public keyHandlerCommands:any = undefined;
+public killBufferCommands:any = undefined;
+public leoCommands:any = undefined;
+public macroCommands:any = undefined;
+public miniBufferWidget:any = undefined;
+public printingController:any = undefined;
+public queryReplaceCommands:any = undefined;
+public rectangleCommands:any = undefined;
+public searchCommands:any = undefined;
+public spellCommands:any = undefined;
+public leoTestManager:any = undefined;
+public vimCommands:any = undefined;
+
+</t>
+<t tx="felix.20210223220814.9">// * initObjects done in constructor.
+// * Kept here as comments for reference
+
+// c = self
+// gnx = 'hidden-root-vnode-gnx'
+// assert not hasattr(c, 'fileCommands'), c.fileCommands
+
+// class DummyFileCommands:
+    // def __init__(self):
+        // self.gnxDict = {}
+
+// c.fileCommands = DummyFileCommands()
+// self.hiddenRootNode = leoNodes.VNode(context=c, gnx=gnx)
+// self.hiddenRootNode.h = '&lt;hidden root vnode&gt;'
+// c.fileCommands = None
+// # Create the gui frame.
+// title = c.computeWindowTitle(c.mFileName)
+// if not g.app.initing:
+    // g.doHook("before-create-leo-frame", c=c)
+// self.frame = gui.createLeoFrame(c, title)
+// assert self.frame
+// assert self.frame.c == c
+// from leo.core import leoHistory
+// self.nodeHistory = leoHistory.NodeHistory(c)
+// self.initConfigSettings()
+// c.setWindowPosition() # Do this after initing settings.
+// # Break circular import dependencies by doing imports here.
+// # These imports take almost 3/4 sec in the leoBridge.
+// from leo.core import leoAtFile
+// from leo.core import leoBeautify  # So decorators are executed.
+// assert leoBeautify  # for pyflakes.
+// from leo.core import leoChapters
+// # from leo.core import leoTest2  # So decorators are executed.
+// # assert leoTest2  # For pyflakes.
+// # User commands...
+// from leo.commands import abbrevCommands
+// from leo.commands import bufferCommands
+// from leo.commands import checkerCommands
+// assert checkerCommands
+    // # To suppress a pyflakes warning.
+    // # The import *is* required to define commands.
+// from leo.commands import controlCommands
+// from leo.commands import convertCommands
+// from leo.commands import debugCommands
+// from leo.commands import editCommands
+// from leo.commands import editFileCommands
+// from leo.commands import gotoCommands
+// from leo.commands import helpCommands
+// from leo.commands import keyCommands
+// from leo.commands import killBufferCommands
+// from leo.commands import rectangleCommands
+// from leo.commands import spellCommands
+// # Import files to execute @g.commander_command decorators
+// from leo.core import leoCompare
+// assert leoCompare
+// from leo.core import leoDebugger
+// assert leoDebugger
+// from leo.commands import commanderEditCommands
+// assert commanderEditCommands
+// from leo.commands import commanderFileCommands
+// assert commanderFileCommands
+// from leo.commands import commanderFindCommands
+// assert commanderFindCommands
+// from leo.commands import commanderHelpCommands
+// assert commanderHelpCommands
+// from leo.commands import commanderOutlineCommands
+// assert commanderOutlineCommands
+// # Other subcommanders.
+// from leo.core import leoFind # Leo 4.11.1
+// from leo.core import leoKeys
+// from leo.core import leoFileCommands
+// from leo.core import leoImport
+// from leo.core import leoMarkup
+// from leo.core import leoPersistence
+// from leo.core import leoPrinting
+// from leo.core import leoRst
+// from leo.core import leoShadow
+// from leo.core import leoTangle
+// from leo.core import leoTest
+// from leo.core import leoUndo
+// from leo.core import leoVim
+// # Define the subcommanders.
+// self.keyHandler = self.k    = leoKeys.KeyHandlerClass(c)
+// self.chapterController      = leoChapters.ChapterController(c)
+// self.shadowController       = leoShadow.ShadowController(c)
+// self.fileCommands           = leoFileCommands.FileCommands(c)
+// self.findCommands           = leoFind.LeoFind(c)
+// self.atFileCommands         = leoAtFile.AtFile(c)
+// self.importCommands         = leoImport.LeoImportCommands(c)
+// self.markupCommands         = leoMarkup.MarkupCommands(c)
+// self.persistenceController  = leoPersistence.PersistenceDataController(c)
+// self.printingController     = leoPrinting.PrintingController(c)
+// self.rstCommands            = leoRst.RstCommands(c)
+// self.tangleCommands         = leoTangle.TangleCommands(c)
+// self.testManager            = leoTest.TestManager(c)
+// self.vimCommands            = leoVim.VimCommands(c)
+// # User commands
+// self.abbrevCommands     = abbrevCommands.AbbrevCommandsClass(c)
+// self.bufferCommands     = bufferCommands.BufferCommandsClass(c)
+// self.controlCommands    = controlCommands.ControlCommandsClass(c)
+// self.convertCommands    = convertCommands.ConvertCommandsClass(c)
+// self.debugCommands      = debugCommands.DebugCommandsClass(c)
+// self.editCommands       = editCommands.EditCommandsClass(c)
+// self.editFileCommands   = editFileCommands.EditFileCommandsClass(c)
+// self.gotoCommands       = gotoCommands.GoToCommands(c)
+// self.helpCommands       = helpCommands.HelpCommandsClass(c)
+// self.keyHandlerCommands = keyCommands.KeyHandlerCommandsClass(c)
+// self.killBufferCommands = killBufferCommands.KillBufferCommandsClass(c)
+// self.rectangleCommands  = rectangleCommands.RectangleCommandsClass(c)
+// self.spellCommands      = spellCommands.SpellCommandsClass(c)
+// self.undoer             = leoUndo.Undoer(c)
+// # Create the list of subcommanders.
+// self.subCommanders = [
+    // self.abbrevCommands,
+    // self.atFileCommands,
+    // self.bufferCommands,
+    // self.chapterController,
+    // self.controlCommands,
+    // self.convertCommands,
+    // self.debugCommands,
+    // self.editCommands,
+    // self.editFileCommands,
+    // self.fileCommands,
+    // self.findCommands,
+    // self.gotoCommands,
+    // self.helpCommands,
+    // self.importCommands,
+    // self.keyHandler,
+    // self.keyHandlerCommands,
+    // self.killBufferCommands,
+    // self.persistenceController,
+    // self.printingController,
+    // self.rectangleCommands,
+    // self.rstCommands,
+    // self.shadowController,
+    // self.spellCommands,
+    // self.tangleCommands,
+    // self.testManager,
+    // self.vimCommands,
+    // self.undoer,
+// ]
+// # Other objects
+// c.configurables = c.subCommanders[:]
+    // # A list of other classes that have a reloadSettings method
+// c.db = g.app.commander_cacher.get_wrapper(c)
+// from leo.plugins import free_layout
+// self.free_layout = free_layout.FreeLayoutController(c)
+// if hasattr(g.app.gui, 'styleSheetManagerClass'):
+    // self.styleSheetManager = g.app.gui.styleSheetManagerClass(c)
+    // self.subCommanders.append(self.styleSheetManager)
+// else:
+    // self.styleSheetManager = None
+</t>
+<t tx="felix.20210224000242.1">export interface hoistStackEntry {
+    p:Position;
+    expanded:boolean
+};
 
 </t>
 </tnodes>

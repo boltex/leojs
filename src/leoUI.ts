@@ -143,8 +143,10 @@ export class LeoUI {
         }
         g.app.inBridge = true;  // Added 2007/10/21: support for g.getScript.
         g.app.nodeIndices = new NodeIndices(g.app.leoID);
-
+        
+        // g.app.loadManager.load(fileName, pymacs)
         console.log('Leo started, LeoId:', g.app.leoID);
+        
         // * Create file browser instance
         // this._leoFilesBrowser = new LeoFilesBrowser(_context);
 
@@ -406,6 +408,7 @@ export class LeoUI {
             } else {
                 w_docView = this._leoDocumentsExplorer;
             }
+            // tslint:disable-next-line: strict-comparisons
             if (w_docView.selection.length && w_docView.selection[0] === p_documentNode) {
                 console.log('setDocumentSelection: already selected!');
 
