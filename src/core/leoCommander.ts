@@ -28,7 +28,7 @@ export class Commander {
         tree: {
             generation: 0
         }
-    }
+    };
 
     // Init ivars used while executing a command.
     public commandsDict: {[key:string]:(p:any) => any } = {}; // Keys are command names, values are functions.
@@ -509,6 +509,18 @@ export class Commander {
         while (p && p.__bool__()){
             yield (copy ? p.copy() : p);
             p.safeMoveToThreadNext();
+        }
+    }
+
+    /**
+     * Return all root children P nodes
+     */
+    public *all_Root_Children(copy=true): Generator<Position> {
+        const c:Commander = this;
+        const p:Position|undefined = c.rootPosition(); // Make one copy.
+        while (p && p.__bool__()){
+            yield (copy ? p.copy() : p);
+            p.moveToNext();
         }
     }
 

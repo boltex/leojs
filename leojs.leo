@@ -434,6 +434,7 @@
 <v t="felix.20210131011508.6"><vh>c.all_unique_positions</vh></v>
 <v t="felix.20210131011508.7"><vh>c.all_unique_roots</vh></v>
 <v t="felix.20210131011508.8"><vh>c.safe_all_positions</vh></v>
+<v t="felix.20210228004000.1"><vh>c.all_Root_Children</vh></v>
 </v>
 <v t="felix.20210131011420.1"><vh>c.Getters</vh>
 <v t="felix.20210131011420.2"><vh>c.currentPosition</vh></v>
@@ -2810,9 +2811,19 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     w_p._linkAsRoot();
 
     this._commandersList.push(w_c);
+    this._activeCommander = 0;
 
     // test
-    console.log('TEST:');
+    const testC = this._commandersList[this._activeCommander];
+    let testPList: Position[];
+    if (testC.hoistStack.length) {
+        // topmost hoisted starts the outline as single root 'child'
+        testPList = [testC.hoistStack[testC.hoistStack.length - 1].p];
+    } else {
+        // true list of root nodes
+        testPList = [...testC.all_Root_Children()];
+    }
+    console.log('TEST testPList:', testPList.map(i_p =&gt; i_p.h));
 
     // * Create file browser instance
     this._leoFilesBrowser = new LeoFilesBrowser(_context);
@@ -2925,7 +2936,8 @@ export class LeoUI {
     private _bodyTextDocument: vscode.TextDocument | undefined; // Set when selected in tree by user, or opening a Leo file in showBody. and by _locateOpenedBody.
 
     // * Opened Leo File Commanders
-    private _commandersList: Commander[];
+    public _commandersList: Commander[]; // TODO : maybe place in g.app.windowList
+    public _activeCommander: number; // TODO : maybe place in g.app
 
     // * Outline Pane
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
@@ -8331,7 +8343,7 @@ export class Commander {
         tree: {
             generation: 0
         }
-    }
+    };
 
     @others
 
@@ -9729,7 +9741,7 @@ public moveToBack():Position {
         p.v = parent_v.children[n - 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9747,7 +9759,7 @@ public moveToFirstChild():Position{
         p._childIndex = 0;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9767,7 +9779,7 @@ public moveToLastChild():Position{
         p._childIndex = n - 1;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9804,7 +9816,7 @@ public moveToNext():Position{
         p.v = parent_v.children[n + 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9838,7 +9850,7 @@ public moveToNthChild(n:number):Position {
         p._childIndex = n;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9856,7 +9868,7 @@ public moveToParent():Position {
         p._childIndex = item[1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -13178,5 +13190,18 @@ public readExternalFiles(fileName):Position {
 
 </t>
 <t tx="felix.20210226224644.1"></t>
+<t tx="felix.20210228004000.1">/**
+ * Return all root children P nodes
+ */
+public *all_Root_Children(copy=true): Generator&lt;Position&gt; {
+    const c:Commander = this;
+    const p:Position|undefined = c.rootPosition(); // Make one copy.
+    while (p &amp;&amp; p.__bool__()){
+        yield (copy ? p.copy() : p);
+        p.moveToNext();
+    }
+}
+
+</t>
 </tnodes>
 </leo_file>

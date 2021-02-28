@@ -65,7 +65,8 @@ export class LeoUI {
     private _bodyTextDocument: vscode.TextDocument | undefined; // Set when selected in tree by user, or opening a Leo file in showBody. and by _locateOpenedBody.
 
     // * Opened Leo File Commanders
-    private _commandersList: Commander[];
+    public _commandersList: Commander[]; // TODO : maybe place in g.app.windowList
+    public _activeCommander: number; // TODO : maybe place in g.app
 
     // * Outline Pane
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
@@ -174,9 +175,19 @@ export class LeoUI {
         w_p._linkAsRoot();
 
         this._commandersList.push(w_c);
+        this._activeCommander = 0;
 
         // test
-        console.log('TEST:');
+        const testC = this._commandersList[this._activeCommander];
+        let testPList: Position[];
+        if (testC.hoistStack.length) {
+            // topmost hoisted starts the outline as single root 'child'
+            testPList = [testC.hoistStack[testC.hoistStack.length - 1].p];
+        } else {
+            // true list of root nodes
+            testPList = [...testC.all_Root_Children()];
+        }
+        console.log('TEST testPList:', testPList.map(i_p => i_p.h));
 
         // * Create file browser instance
         this._leoFilesBrowser = new LeoFilesBrowser(_context);
