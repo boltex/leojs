@@ -3,10 +3,10 @@ import { Position, VNode, StackEntry } from "./leoNodes";
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
 
-export interface hoistStackEntry {
+export interface HoistStackEntry {
     p:Position;
-    expanded:boolean
-};
+    expanded:boolean;
+}
 
 /**
  * A per-outline class. Called 'class Commands' in Leo's python source
@@ -22,10 +22,13 @@ export class Commander {
     public fileCommands: FileCommands;
 
     public gui:LeoUI;
-    
-    public frame: any; // TODO : fake frame needed?
-    
-       // _currentCount = 0
+
+    // TODO : fake frame needed?
+    public frame: { tree: { generation: number; } } = {
+        tree: {
+            generation: 0
+        }
+    }
 
     // Init ivars used while executing a command.
     public commandsDict: {[key:string]:(p:any) => any } = {}; // Keys are command names, values are functions.
@@ -43,7 +46,7 @@ export class Commander {
     public use_header_flag:boolean = false;
     public output_doc_flag:boolean = false;
     // For hoist/dehoist commands.
-    public hoistStack:hoistStackEntry[] = []; // Stack of nodes to be root of drawn tree.
+    public hoistStack:HoistStackEntry[] = []; // Stack of nodes to be root of drawn tree.
     // For outline navigation.
     public navPrefix:string = ''; // Must always be a string.
     public navTime:any = undefined;
@@ -304,7 +307,7 @@ export class Commander {
     ) {
         this.mFileName = fileName;
         this.gui = gui || g.app.gui!;
-        this.fileCommands = new FileCommands(); // c.fileCommands = DummyFileCommands()
+        this.fileCommands = new FileCommands(this); // c.fileCommands = DummyFileCommands()
         this.hiddenRootNode = new VNode(this, 'hidden-root-vnode-gnx');
         this.hiddenRootNode.h = '<hidden root vnode>';
         this.fileCommands.gnxDict = {}; // RESET gnxDict 
@@ -779,7 +782,7 @@ export class Commander {
         const c:Commander = this;
         const cc:any = false;// c.chapterController
         if(c.hoistStack.length){
-            const bunch:any = c.hoistStack[c.hoistStack.length-1];
+            const bunch:HoistStackEntry = c.hoistStack[c.hoistStack.length-1];
             const p:Position = bunch.p;
             const limitIsVisible:boolean = !cc || !p.h.startsWith('@chapter');
             return [p, limitIsVisible];
@@ -1002,7 +1005,9 @@ export class Commander {
         p.setDirty();
         // Change the actual tree widget so
         // A later call to c.endEditing or c.redraw will use s.
-        c.frame.tree.setHeadline(p, s);
+        
+        // TODO: needed? 
+        // c.frame.tree.setHeadline(p, s);
     }
 
     public setMarked(p:Position):void {

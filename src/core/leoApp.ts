@@ -1,25 +1,9 @@
-/*
-    import leo.core.leoGlobals as g
-    import leo.core.leoExternalFiles as leoExternalFiles
-    import importlib
-    import io
-    StringIO = io.StringIO
-    import os
-    import optparse
-    import subprocess
-    import string
-    import sys
-    import time
-    import traceback
-    import zipfile
-    import platform
-    import sqlite3
-*/
 import * as os from "os";
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
 import { NodeIndices } from './leoNodes';
 import { Commander } from './leoCommander';
+
 /**
  *  A singleton class to manage idle-time handling. This class handles all
  *  details of running code at idle time, including running 'idle' hooks.

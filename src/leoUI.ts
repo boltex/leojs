@@ -20,10 +20,12 @@ import { LeoButtonNode } from "./leoButtonNode";
 import { LeoButtonsProvider } from "./leoButtons";
 import { LeoDocumentNode } from "./leoDocumentNode";
 import { LeoDocumentsProvider } from "./leoDocuments";
+import { LeoFilesBrowser } from "./leoFileBrowser";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
+import { Commander } from "./core/leoCommander";
 import { LoadManager } from "./core/leoApp";
-import { NodeIndices } from "./core/leoNodes";
+import { NodeIndices, Position, VNode } from "./core/leoNodes";
 
 
 /**
@@ -49,6 +51,9 @@ export class LeoUI {
     public documentIcons: Icon[] = [];
     public buttonIcons: Icon[] = [];
 
+    // * File Browser
+    private _leoFilesBrowser: LeoFilesBrowser; // Browsing dialog service singleton used in the openLeoFile and save-as methods
+
     private _leo: Leojs;
 
     private _refreshType: ReqRefresh = {}; // Flags for commands to require parts of UI to refresh
@@ -58,6 +63,9 @@ export class LeoUI {
     private _bodyMainSelectionColumn: vscode.ViewColumn | undefined; // Column of last body 'textEditor' found, set to 1
 
     private _bodyTextDocument: vscode.TextDocument | undefined; // Set when selected in tree by user, or opening a Leo file in showBody. and by _locateOpenedBody.
+
+    // * Opened Leo File Commanders
+    private _commandersList: Commander[];
 
     // * Outline Pane
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
@@ -143,12 +151,35 @@ export class LeoUI {
         }
         g.app.inBridge = true;  // Added 2007/10/21: support for g.getScript.
         g.app.nodeIndices = new NodeIndices(g.app.leoID);
-        
-        // g.app.loadManager.load(fileName, pymacs)
+
         console.log('Leo started, LeoId:', g.app.leoID);
-        
+
+        this._commandersList = [];
+
+        // IF RECENT FILES LIST :
+        // TODO: Check Recent Leo File List and open them
+        // g.app.loadManager.load(fileName, pymacs)
+        // ELSE :
+        const w_c = new Commander("", this);
+
+        // Equivalent to leoBridge 'createFrame' method
+        const w_v = new VNode(w_c);
+        const w_p = new Position(w_v);
+        w_v.initHeadString("NewHeadline");
+
+        // #1631: Initialize here, not in p._linkAsRoot.
+        w_c.hiddenRootNode.children = [];
+
+        // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
+        w_p._linkAsRoot();
+
+        this._commandersList.push(w_c);
+
+        // test
+        console.log('TEST:');
+
         // * Create file browser instance
-        // this._leoFilesBrowser = new LeoFilesBrowser(_context);
+        this._leoFilesBrowser = new LeoFilesBrowser(_context);
 
         // * Create a single data provider for both outline trees, Leo view and Explorer view
         this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this, this._leo);

@@ -234,7 +234,7 @@ export function callers(n: number = 4, count: number = 0, excludeCaller: boolean
     let result: string[] = [];
     let i: number = excludeCaller ? 3 : 2;
     while (1) {
-        let s: string = _callerName(n = i, verbose = verbose);
+        let s: string = _callerName(i, verbose);
         if (s) {
             result.push(s);
         }
@@ -248,9 +248,9 @@ export function callers(n: number = 4, count: number = 0, excludeCaller: boolean
     if (count > 0) {
         result = result.slice(0, count);
     }
-    if (verbose) {
-        return ''; //''.join([f"\n  {z}" for z in result]);
-    }
+    // if (verbose) {
+        // return ''; //''.join([f"\n  {z}" for z in result]);
+    // }
     return result.join(',');
 }
 
@@ -690,6 +690,6 @@ export function toUnicode(s: any, encoding: string | null = null, reportErrors =
  * Print a tracing message
  */
 export const trace = console.log;
-// TODO : Replace with output to proper 'Leo terminal output'  The string is: pythön!
+// TODO : Replace with output to proper 'Leo terminal output'
 
 

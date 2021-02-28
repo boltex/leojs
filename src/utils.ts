@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { Icon } from "./types";
 import { LeoOutlineNode } from "./leoOutlineNode";
+import * as fs from 'fs';
 
 // String and other types/structures helper functions, along with common vscode API calls
 
@@ -173,3 +174,10 @@ export function setContext(p_key: string, p_value: any): Thenable<unknown> {
     return vscode.commands.executeCommand(Constants.VSCODE_COMMANDS.SET_CONTEXT, p_key, p_value);
 }
 
+/**
+ * * experiment
+ */
+export function experiment(): void {
+    // fs.readFileSync('foo.txt','utf8');
+    console.log("test");
+}
