@@ -2791,8 +2791,6 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
 
     console.log('Leo started, LeoId:', g.app.leoID);
 
-    this._commandersList = [];
-
     // IF RECENT FILES LIST :
     // TODO: Check Recent Leo File List and open them
     // g.app.loadManager.load(fileName, pymacs)
@@ -2810,11 +2808,25 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
     w_p._linkAsRoot();
 
-    this._commandersList.push(w_c);
-    this._activeCommander = 0;
+    g.app.commandersList.push(w_c);
+    g.app.leo_c = g.app.commandersList[0];
 
-    // test
-    const testC = this._commandersList[this._activeCommander];
+    // ************************************************************
+    // * test: BUILD SOME OUTLINE
+    // ************************************************************
+    g.app.leo_c.p.initHeadString("node1");
+
+    g.app.leo_c.p.insertAsLastChild().initHeadString("nodeInside1");
+    g.app.leo_c.p.insertAsLastChild().initHeadString("nodeInside2");
+
+    // const w_rootP: Position = g.app.leo_c.rootPosition()!;
+    // w_rootP.insertAsLastChild().initHeadString("node2selected");
+    // w_rootP.insertAsLastChild().initHeadString("@file node3");
+
+    // ************************************************************
+    // * test: LOG OUTLINE STRUCTURE
+    // ************************************************************
+    const testC = g.app.leo_c;
     let testPList: Position[];
     if (testC.hoistStack.length) {
         // topmost hoisted starts the outline as single root 'child'
@@ -2823,7 +2835,8 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
         // true list of root nodes
         testPList = [...testC.all_Root_Children()];
     }
-    console.log('TEST testPList:', testPList.map(i_p =&gt; i_p.h));
+
+    console.log('TEST testPList total: ' + testPList.length, testPList.map(i_p =&gt; i_p.h));
 
     // * Create file browser instance
     this._leoFilesBrowser = new LeoFilesBrowser(_context);
@@ -2935,16 +2948,13 @@ export class LeoUI {
 
     private _bodyTextDocument: vscode.TextDocument | undefined; // Set when selected in tree by user, or opening a Leo file in showBody. and by _locateOpenedBody.
 
-    // * Opened Leo File Commanders
-    public _commandersList: Commander[]; // TODO : maybe place in g.app.windowList
-    public _activeCommander: number; // TODO : maybe place in g.app
-
     // * Outline Pane
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
     private _leoTreeView: vscode.TreeView&lt;PNode&gt;; // Outline tree view added to the Tree View Container with an Activity Bar icon
     private _leoTreeExView: vscode.TreeView&lt;PNode&gt;; // Outline tree view added to the Explorer Sidebar
     private _lastTreeView: vscode.TreeView&lt;PNode&gt;; // Last visible treeview
-    private _treeId: number = 0; // Starting salt for tree node murmurhash generated Ids // unused so far in leojs
+    // TODO: Merge with c.frame.
+    private _treeId: number = 0; // Starting salt for tree node murmurhash generated Ids
 
     private _lastSelectedNode: LeoOutlineNode | undefined; // Last selected node we got a hold of; leoTreeView.selection maybe newer and unprocessed
     get lastSelectedNode(): LeoOutlineNode | undefined {
@@ -7747,9 +7757,12 @@ public lossage: any[] = []; // List of last 100 keystrokes.
 public paste_c: any = null; // The commander that pasted the last outline.
 public spellDict: any = null; // The singleton PyEnchant spell dict.
 public numberOfUntitledWindows: number = 0; // Number of opened untitled windows.
-public windowList: any[] = []; // Global list of all frames.
+public windowList: any[] = []; // * Global list of all frames. USE _commandersList instead
 public realMenuNameDict = {}; // Translations of menu names.
 
+// * Opened Leo File Commanders
+public commandersList: Commander[] = [];
+public leo_c:Commander|undefined;
 </t>
 <t tx="felix.20210103024632.7">// Most of these are defined in initApp.
 public backgroundProcessManager: any = null; // The singleton BackgroundProcessManager instance.
@@ -8339,6 +8352,7 @@ export class Commander {
     public gui:LeoUI;
 
     // TODO : fake frame needed?
+    // TODO : maybe MERGE frame.tree.generation WITH _treeId?
     public frame: { tree: { generation: number; } } = {
         tree: {
             generation: 0

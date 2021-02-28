@@ -133,9 +133,12 @@ export class LeoApp {
     public paste_c: any = null; // The commander that pasted the last outline.
     public spellDict: any = null; // The singleton PyEnchant spell dict.
     public numberOfUntitledWindows: number = 0; // Number of opened untitled windows.
-    public windowList: any[] = []; // Global list of all frames.
+    public windowList: any[] = []; // * Global list of all frames. USE _commandersList instead
     public realMenuNameDict = {}; // Translations of menu names.
 
+    // * Opened Leo File Commanders
+    public commandersList: Commander[] = [];
+    public leo_c:Commander|undefined;
     // Most of these are defined in initApp.
     public backgroundProcessManager: any = null; // The singleton BackgroundProcessManager instance.
     public commander_cacher: any = null; // The singleton leoCacher.CommanderCacher instance.

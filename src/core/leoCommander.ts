@@ -24,6 +24,7 @@ export class Commander {
     public gui:LeoUI;
 
     // TODO : fake frame needed?
+    // TODO : maybe MERGE frame.tree.generation WITH _treeId?
     public frame: { tree: { generation: number; } } = {
         tree: {
             generation: 0

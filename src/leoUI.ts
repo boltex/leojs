@@ -64,16 +64,13 @@ export class LeoUI {
 
     private _bodyTextDocument: vscode.TextDocument | undefined; // Set when selected in tree by user, or opening a Leo file in showBody. and by _locateOpenedBody.
 
-    // * Opened Leo File Commanders
-    public _commandersList: Commander[]; // TODO : maybe place in g.app.windowList
-    public _activeCommander: number; // TODO : maybe place in g.app
-
     // * Outline Pane
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
     private _leoTreeView: vscode.TreeView<PNode>; // Outline tree view added to the Tree View Container with an Activity Bar icon
     private _leoTreeExView: vscode.TreeView<PNode>; // Outline tree view added to the Explorer Sidebar
     private _lastTreeView: vscode.TreeView<PNode>; // Last visible treeview
-    private _treeId: number = 0; // Starting salt for tree node murmurhash generated Ids // unused so far in leojs
+    // TODO: Merge with c.frame.
+    private _treeId: number = 0; // Starting salt for tree node murmurhash generated Ids
 
     private _lastSelectedNode: LeoOutlineNode | undefined; // Last selected node we got a hold of; leoTreeView.selection maybe newer and unprocessed
     get lastSelectedNode(): LeoOutlineNode | undefined {
@@ -155,8 +152,6 @@ export class LeoUI {
 
         console.log('Leo started, LeoId:', g.app.leoID);
 
-        this._commandersList = [];
-
         // IF RECENT FILES LIST :
         // TODO: Check Recent Leo File List and open them
         // g.app.loadManager.load(fileName, pymacs)
@@ -174,11 +169,28 @@ export class LeoUI {
         // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
         w_p._linkAsRoot();
 
-        this._commandersList.push(w_c);
-        this._activeCommander = 0;
+        g.app.commandersList.push(w_c);
+        g.app.leo_c = g.app.commandersList[0];
 
-        // test
-        const testC = this._commandersList[this._activeCommander];
+        // ************************************************************
+        // * test: BUILD SOME OUTLINE
+        // ************************************************************
+        g.app.leo_c.p.initHeadString("node1");
+
+        g.app.leo_c.p.insertAsLastChild().initHeadString("nodeInside1");
+        g.app.leo_c.p.insertAsLastChild().initHeadString("nodeInside2");
+
+        g.app.leo_c.p.insertAfter().initHeadString("node2selected");
+        g.app.leo_c.p.insertAfter().initHeadString("@file node3");
+
+        // const w_rootP: Position = g.app.leo_c.rootPosition()!;
+        // w_rootP.insertAsLastChild().initHeadString("node2selected");
+        // w_rootP.insertAsLastChild().initHeadString("@file node3");
+
+        // ************************************************************
+        // * test: LOG OUTLINE ROOT CHILDREN
+        // ************************************************************
+        const testC = g.app.leo_c;
         let testPList: Position[];
         if (testC.hoistStack.length) {
             // topmost hoisted starts the outline as single root 'child'
@@ -187,7 +199,15 @@ export class LeoUI {
             // true list of root nodes
             testPList = [...testC.all_Root_Children()];
         }
-        console.log('TEST testPList:', testPList.map(i_p => i_p.h));
+        console.log('TEST ROOT testPList total: ' + testPList.length, testPList.map(i_p => i_p.h));
+
+        // ************************************************************
+        // * test: LOG OUTLINE FIRST NODE CHILDREN
+        // ************************************************************
+        testPList = [...testC.p.children()];
+        console.log('TEST FIRST CHILD testPList total: ' + testPList.length, testPList.map(i_p => i_p.h));
+
+
 
         // * Create file browser instance
         this._leoFilesBrowser = new LeoFilesBrowser(_context);
