@@ -464,6 +464,7 @@ export function match(s: string, i: number, pattern: string): boolean {
 }
 
 export function match_word(s: string, i: number, pattern: string): boolean {
+    // TODO : This is weak lacks performance. Solidify this method!
     const pat = new RegExp(pattern + "\\b");
     return s.substring(i).search(pat) === 0;
 }

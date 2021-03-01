@@ -8138,6 +8138,7 @@ export function isWordChar1(ch: string): boolean {
 
 </t>
 <t tx="felix.20210108011201.1">export function match_word(s: string, i: number, pattern: string): boolean {
+    // TODO : This is weak lacks performance. Solidify this method!
     const pat = new RegExp(pattern + "\\b");
     return s.substring(i).search(pat) === 0;
 }

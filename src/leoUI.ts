@@ -181,21 +181,21 @@ export class LeoUI {
         w_node.expand();
 
         w_node = g.app.leo_c.p.insertAsLastChild();
-        w_node.initHeadString("nodeInside1");
+        w_node.initHeadString("node Inside1");
         w_node.setBodyString('nodeInside1 body');
         w_node.setMarked();
 
         w_node = g.app.leo_c.p.insertAsLastChild();
-        w_node.initHeadString("nodeInside2");
-        w_node.setBodyString('nodeInside2 body');
+        w_node.initHeadString("node with UserData Inside2");
+        w_node.setBodyString('node Inside2 body');
         w_node.u = { a: 'user content string a', b: "user content also" };
 
         w_node = g.app.leo_c.p.insertAfter();
         w_node.initHeadString("@file node3");
-        w_node.setBodyString('nodeInside2 body');
+        w_node.setBodyString('node 3 body');
 
         w_node = g.app.leo_c.p.insertAfter();
-        w_node.initHeadString("node2selected");
+        w_node.initHeadString("node 2 selected but empty");
         w_node.setSelected();
 
         // ************************************************************
