@@ -1,21 +1,23 @@
 import * as vscode from 'vscode';
 import { LeoOutlineNode } from './leoOutlineNode';
 import { ProviderResult } from "vscode";
-import { Icon, PNode } from './types';
-import { Leojs } from './leojs';
+import { Icon } from './types';
 import { LeoUI } from './leoUI';
+import * as g from './core/leoGlobals';
+import { Position } from './core/leoNodes';
 
-export class LeoOutlineProvider implements vscode.TreeDataProvider<PNode> {
-    private _onDidChangeTreeData: vscode.EventEmitter<PNode | undefined> = new vscode.EventEmitter<PNode | undefined>();
 
-    readonly onDidChangeTreeData: vscode.Event<PNode | undefined> = this._onDidChangeTreeData.event;
+export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
+    private _onDidChangeTreeData: vscode.EventEmitter<Position | undefined> = new vscode.EventEmitter<Position | undefined>();
+
+    readonly onDidChangeTreeData: vscode.Event<Position | undefined> = this._onDidChangeTreeData.event;
 
     private _uniqueId: number = 0;
 
     constructor(
         private _icons: Icon[],
-        private _leoUI: LeoUI,
-        private _leo: Leojs
+        private _leoUI: LeoUI
+        // private _leo: Leojs
     ) {
     }
 
@@ -26,40 +28,55 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<PNode> {
         this._onDidChangeTreeData.fire(undefined);
     }
 
-    public getTreeItem(element: PNode): Thenable<LeoOutlineNode> | LeoOutlineNode {
-        const w_leoNode = new LeoOutlineNode(element.header,
-            element.children.length ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
+    public getTreeItem(element: Position): Thenable<LeoOutlineNode> | LeoOutlineNode {
+        let w_collapse: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.None;
+        if (element.hasChildren()) {
+            w_collapse = element.isExpanded() ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
+        }
+        const w_leoNode = new LeoOutlineNode(
+            element.h,
+            w_collapse, // element.hasChildren() ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
             element, // ap
-            !!element.cloned, // cloned
-            !!element.dirty, // dirty
-            !!element.marked, // marked
-            !!element.atFile, // atFile
-            !!element.body && !!element.body.length,
-            false, // 'u' - user defined data
+            element.isCloned(), // cloned
+            element.isDirty(), // dirty
+            element.isMarked(), // marked
+            element.isAtFileNode(), // atFile
+            element.v.hasBody(),
+            Object.keys(element.v.u).length ? element.v.u : false, // 'u' - user defined data
             this._icons,
             "id" + this._uniqueId++
         );
 
-        if (element.selected) {
+        if (element.isSelected()) {
             this._leoUI.gotSelectedNode(element);
         }
 
-        // Build a LeoNode (a vscode tree node) from the PNode
+        if (element.isAtFileNode()) {
+            console.log('IS AT FILE', element.h);
+
+        }
+        // Build a LeoNode (a vscode tree node) from the Position
         return w_leoNode;
     }
 
-    public getChildren(element?: PNode): Thenable<PNode[]> {
+    public getChildren(element?: Position): Position[] {
         if (element) {
-            return Promise.resolve(element.children);
+            return [...element.children()];
         } else {
-            return Promise.resolve(this._leo.positions); // From tree root or hoisted node
+            const w_c = g.app.leo_c!;
+            if (w_c.hoistStack.length) {
+                // topmost hoisted starts the outline as single root 'child'
+                return [w_c.hoistStack[w_c.hoistStack.length - 1].p];
+            } else {
+                // true list of root nodes
+                return [...w_c.all_Root_Children()];
+            }
         }
     }
 
-    public getParent(element: PNode): ProviderResult<PNode> {
-        // Buttons are just a list, as such, entries are always child of root so return null
+    public getParent(element: Position): ProviderResult<Position> {
         if (element) {
-            return element.parent;
+            return element.parent();
         }
         return undefined;
     }

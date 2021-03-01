@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { Constants } from "./constants";
-import { Icon, PNode } from "./types"; // ArchivedPosition included to help debug
+import { Position } from "./core/leoNodes";
+import { Icon } from "./types"; // ArchivedPosition included to help debug
 
 /**
  * * Implementation of tree nodes for usage in a TreeDataProvider
@@ -15,7 +16,7 @@ export class LeoOutlineNode extends vscode.TreeItem {
     constructor(
         public label: string, // Node headline
         public collapsibleState: vscode.TreeItemCollapsibleState, // Computed in receiver/creator
-        public ap: PNode, // Pointer/reference for leo's node position
+        public ap: Position, // Pointer/reference for leo's node position
         public cloned: boolean,
         public dirty: boolean,
         public marked: boolean,

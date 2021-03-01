@@ -66,9 +66,9 @@ export class LeoUI {
 
     // * Outline Pane
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
-    private _leoTreeView: vscode.TreeView<PNode>; // Outline tree view added to the Tree View Container with an Activity Bar icon
-    private _leoTreeExView: vscode.TreeView<PNode>; // Outline tree view added to the Explorer Sidebar
-    private _lastTreeView: vscode.TreeView<PNode>; // Last visible treeview
+    private _leoTreeView: vscode.TreeView<Position>; // Outline tree view added to the Tree View Container with an Activity Bar icon
+    private _leoTreeExView: vscode.TreeView<Position>; // Outline tree view added to the Explorer Sidebar
+    private _lastTreeView: vscode.TreeView<Position>; // Last visible treeview
     // TODO: Merge with c.frame.
     private _treeId: number = 0; // Starting salt for tree node murmurhash generated Ids
 
@@ -175,17 +175,28 @@ export class LeoUI {
         // ************************************************************
         // * test: BUILD SOME OUTLINE
         // ************************************************************
-        g.app.leo_c.p.initHeadString("node1");
+        let w_node = g.app.leo_c.p;
+        w_node.initHeadString("node1");
+        w_node.setBodyString('node1 body');
+        w_node.expand();
 
-        g.app.leo_c.p.insertAsLastChild().initHeadString("nodeInside1");
-        g.app.leo_c.p.insertAsLastChild().initHeadString("nodeInside2");
+        w_node = g.app.leo_c.p.insertAsLastChild();
+        w_node.initHeadString("nodeInside1");
+        w_node.setBodyString('nodeInside1 body');
+        w_node.setMarked();
 
-        g.app.leo_c.p.insertAfter().initHeadString("node2selected");
-        g.app.leo_c.p.insertAfter().initHeadString("@file node3");
+        w_node = g.app.leo_c.p.insertAsLastChild();
+        w_node.initHeadString("nodeInside2");
+        w_node.setBodyString('nodeInside2 body');
+        w_node.u = { a: 'user content string a', b: "user content also" };
 
-        // const w_rootP: Position = g.app.leo_c.rootPosition()!;
-        // w_rootP.insertAsLastChild().initHeadString("node2selected");
-        // w_rootP.insertAsLastChild().initHeadString("@file node3");
+        w_node = g.app.leo_c.p.insertAfter();
+        w_node.initHeadString("@file node3");
+        w_node.setBodyString('nodeInside2 body');
+
+        w_node = g.app.leo_c.p.insertAfter();
+        w_node.initHeadString("node2selected");
+        w_node.setSelected();
 
         // ************************************************************
         // * test: LOG OUTLINE ROOT CHILDREN
@@ -213,7 +224,7 @@ export class LeoUI {
         this._leoFilesBrowser = new LeoFilesBrowser(_context);
 
         // * Create a single data provider for both outline trees, Leo view and Explorer view
-        this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this, this._leo);
+        this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);
         this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
         this._leoTreeView.onDidExpandElement((p_event => this._onChangeCollapsedState(p_event, true, this._leoTreeView)));
         this._leoTreeView.onDidCollapseElement((p_event => this._onChangeCollapsedState(p_event, false, this._leoTreeView)));
@@ -347,9 +358,9 @@ export class LeoUI {
      * * Handle selected node being created for the outline
      * @param p_element PNode that was just created and detected as selected node
      */
-    public gotSelectedNode(p_element: PNode): void {
+    public gotSelectedNode(p_element: Position): void {
 
-        console.log('Got selected node:', p_element.header);
+        console.log('Got selected node:', p_element.h);
 
         // set context flags
         this.leoStates.setSelectedNodeFlags(p_element);
@@ -489,7 +500,7 @@ export class LeoUI {
      * @param p_expand True if it was an expand, false if it was a collapse event
      * @param p_treeView Pointer to the treeview itself, either the standalone treeview or the one under the explorer
      */
-    private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent<PNode>, p_expand: boolean, p_treeView: vscode.TreeView<PNode>): void {
+    private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent<Position>, p_expand: boolean, p_treeView: vscode.TreeView<Position>): void {
         // * Expanding or collapsing via the treeview interface selects the node to mimic Leo
         // this.triggerBodySave(true);
         // if (p_treeView.selection[0] && p_treeView.selection[0] === p_event.element) {

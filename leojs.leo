@@ -791,7 +791,9 @@
 <t tx="felix.20201208214250.2"></t>
 <t tx="felix.20201208214319.1"># leojs
 
-Literate Editor with Outline _in Typescript_ version 0.1.00
+## Literate Editor with Outline _in Typescript_
+
+Inspired by &lt;https://github.com/leo-editor/leo-editor/issues/1025&gt;
 
 **Enjoy!**
 </t>
@@ -820,9 +822,11 @@ export function deactivate() { }
 <t tx="felix.20201208223553.1">import * as vscode from 'vscode';
 import { LeoOutlineNode } from './leoOutlineNode';
 import { ProviderResult } from "vscode";
-import { Icon, PNode } from './types';
-import { Leojs } from './leojs';
+import { Icon } from './types';
 import { LeoUI } from './leoUI';
+import * as g from './core/leoGlobals';
+import { Position } from './core/leoNodes';
+
 
 @language typescript
 @tabwidth -4
@@ -831,7 +835,8 @@ import { LeoUI } from './leoUI';
 </t>
 <t tx="felix.20201208223554.1">import * as vscode from "vscode";
 import { Constants } from "./constants";
-import { Icon, PNode } from "./types"; // ArchivedPosition included to help debug
+import { Position } from "./core/leoNodes";
+import { Icon } from "./types"; // ArchivedPosition included to help debug
 
 /**
  * * Implementation of tree nodes for usage in a TreeDataProvider
@@ -1158,7 +1163,7 @@ If you're having problems, try [running this sample extension](https://github.co
     constructor(
         public label: string, // Node headline
         public collapsibleState: vscode.TreeItemCollapsibleState, // Computed in receiver/creator
-        public ap: PNode, // Pointer/reference for leo's node position
+        public ap: Position, // Pointer/reference for leo's node position
         public cloned: boolean,
         public dirty: boolean,
         public marked: boolean,
@@ -1247,10 +1252,10 @@ public setRoot(): void {
 }
 
 </t>
-<t tx="felix.20201209011931.1">export class LeoOutlineProvider implements vscode.TreeDataProvider&lt;PNode&gt; {
-    private _onDidChangeTreeData: vscode.EventEmitter&lt;PNode | undefined&gt; = new vscode.EventEmitter&lt;PNode | undefined&gt;();
+<t tx="felix.20201209011931.1">export class LeoOutlineProvider implements vscode.TreeDataProvider&lt;Position&gt; {
+    private _onDidChangeTreeData: vscode.EventEmitter&lt;Position | undefined&gt; = new vscode.EventEmitter&lt;Position | undefined&gt;();
 
-    readonly onDidChangeTreeData: vscode.Event&lt;PNode | undefined&gt; = this._onDidChangeTreeData.event;
+    readonly onDidChangeTreeData: vscode.Event&lt;Position | undefined&gt; = this._onDidChangeTreeData.event;
 
     private _uniqueId: number = 0;
 
@@ -1260,8 +1265,8 @@ public setRoot(): void {
 </t>
 <t tx="felix.20201209011931.2">constructor(
     private _icons: Icon[],
-    private _leoUI: LeoUI,
-    private _leo: Leojs
+    private _leoUI: LeoUI
+    // private _leo: Leojs
 ) {
 }
 
@@ -1274,42 +1279,57 @@ public refreshTreeRoot(): void {
 }
 
 </t>
-<t tx="felix.20201209011931.4">public getTreeItem(element: PNode): Thenable&lt;LeoOutlineNode&gt; | LeoOutlineNode {
-    const w_leoNode = new LeoOutlineNode(element.header,
-        element.children.length ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
+<t tx="felix.20201209011931.4">public getTreeItem(element: Position): Thenable&lt;LeoOutlineNode&gt; | LeoOutlineNode {
+    let w_collapse: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.None;
+    if (element.hasChildren()) {
+        w_collapse = element.isExpanded() ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
+    }
+    const w_leoNode = new LeoOutlineNode(
+        element.h,
+        w_collapse, // element.hasChildren() ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
         element, // ap
-        !!element.cloned, // cloned
-        !!element.dirty, // dirty
-        !!element.marked, // marked
-        !!element.atFile, // atFile
-        !!element.body &amp;&amp; !!element.body.length,
-        false, // 'u' - user defined data
+        element.isCloned(), // cloned
+        element.isDirty(), // dirty
+        element.isMarked(), // marked
+        element.isAtFileNode(), // atFile
+        element.v.hasBody(),
+        Object.keys(element.v.u).length ? element.v.u : false, // 'u' - user defined data
         this._icons,
         "id" + this._uniqueId++
     );
 
-    if (element.selected) {
+    if (element.isSelected()) {
         this._leoUI.gotSelectedNode(element);
     }
 
-    // Build a LeoNode (a vscode tree node) from the PNode
+    if (element.isAtFileNode()) {
+        console.log('IS AT FILE', element.h);
+
+    }
+    // Build a LeoNode (a vscode tree node) from the Position
     return w_leoNode;
 }
 
 </t>
-<t tx="felix.20201209011931.5">public getChildren(element?: PNode): Thenable&lt;PNode[]&gt; {
+<t tx="felix.20201209011931.5">public getChildren(element?: Position): Position[] {
     if (element) {
-        return Promise.resolve(element.children);
+        return [...element.children()];
     } else {
-        return Promise.resolve(this._leo.positions); // From tree root or hoisted node
+        const w_c = g.app.leo_c!;
+        if (w_c.hoistStack.length) {
+            // topmost hoisted starts the outline as single root 'child'
+            return [w_c.hoistStack[w_c.hoistStack.length - 1].p];
+        } else {
+            // true list of root nodes
+            return [...w_c.all_Root_Children()];
+        }
     }
 }
 
 </t>
-<t tx="felix.20201209011931.6">public getParent(element: PNode): ProviderResult&lt;PNode&gt; {
-    // Buttons are just a list, as such, entries are always child of root so return null
+<t tx="felix.20201209011931.6">public getParent(element: Position): ProviderResult&lt;Position&gt; {
     if (element) {
-        return element.parent;
+        return element.parent();
     }
     return undefined;
 }
@@ -2171,7 +2191,8 @@ public get id(): string {
 import * as utils from "./utils";
 import { LeoUI } from "./leoUI";
 import { Constants } from "./constants";
-import { LeoPackageStates, PNode } from "./types";
+import { LeoPackageStates } from "./types";
+import { Position } from "./core/leoNodes";
 
 @language typescript
 @tabwidth -4
@@ -2286,14 +2307,14 @@ export class LeoStates {
 ) { }
 
 </t>
-<t tx="felix.20201214151447.21">public setSelectedNodeFlags(p_node: PNode): void {
+<t tx="felix.20201214151447.21">public setSelectedNodeFlags(p_node: Position): void {
     this.leoRoot = false; // * RESET the root flag : It is set by vscode instead right after getting list of children for root of outline
-    this.leoMarked = !!p_node.marked;
-    this.leoCloned = !!p_node.cloned;
-    this.leoDirty = !!p_node.dirty;
-    this.leoEmpty = !p_node.body.length;
-    this.leoChild = !!p_node.children.length;
-    this.leoAtFile = !!p_node.atFile;
+    this.leoMarked = p_node.isMarked();
+    this.leoCloned = p_node.isCloned();
+    this.leoDirty = p_node.isDirty();
+    this.leoEmpty = !p_node.v.hasBody();
+    this.leoChild = p_node.hasChildren();
+    this.leoAtFile = p_node.isAtFileNode();
 }
 
 </t>
@@ -2814,17 +2835,31 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     // ************************************************************
     // * test: BUILD SOME OUTLINE
     // ************************************************************
-    g.app.leo_c.p.initHeadString("node1");
+    let w_node = g.app.leo_c.p;
+    w_node.initHeadString("node1");
+    w_node.setBodyString('node1 body');
+    w_node.expand();
 
-    g.app.leo_c.p.insertAsLastChild().initHeadString("nodeInside1");
-    g.app.leo_c.p.insertAsLastChild().initHeadString("nodeInside2");
+    w_node = g.app.leo_c.p.insertAsLastChild();
+    w_node.initHeadString("nodeInside1");
+    w_node.setBodyString('nodeInside1 body');
+    w_node.setMarked();
 
-    // const w_rootP: Position = g.app.leo_c.rootPosition()!;
-    // w_rootP.insertAsLastChild().initHeadString("node2selected");
-    // w_rootP.insertAsLastChild().initHeadString("@file node3");
+    w_node = g.app.leo_c.p.insertAsLastChild();
+    w_node.initHeadString("nodeInside2");
+    w_node.setBodyString('nodeInside2 body');
+    w_node.u = { a: 'user content string a', b: "user content also" };
+
+    w_node = g.app.leo_c.p.insertAfter();
+    w_node.initHeadString("@file node3");
+    w_node.setBodyString('nodeInside2 body');
+
+    w_node = g.app.leo_c.p.insertAfter();
+    w_node.initHeadString("node2selected");
+    w_node.setSelected();
 
     // ************************************************************
-    // * test: LOG OUTLINE STRUCTURE
+    // * test: LOG OUTLINE ROOT CHILDREN
     // ************************************************************
     const testC = g.app.leo_c;
     let testPList: Position[];
@@ -2835,14 +2870,21 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
         // true list of root nodes
         testPList = [...testC.all_Root_Children()];
     }
+    console.log('TEST ROOT testPList total: ' + testPList.length, testPList.map(i_p =&gt; i_p.h));
 
-    console.log('TEST testPList total: ' + testPList.length, testPList.map(i_p =&gt; i_p.h));
+    // ************************************************************
+    // * test: LOG OUTLINE FIRST NODE CHILDREN
+    // ************************************************************
+    testPList = [...testC.p.children()];
+    console.log('TEST FIRST CHILD testPList total: ' + testPList.length, testPList.map(i_p =&gt; i_p.h));
+
+
 
     // * Create file browser instance
     this._leoFilesBrowser = new LeoFilesBrowser(_context);
 
     // * Create a single data provider for both outline trees, Leo view and Explorer view
-    this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this, this._leo);
+    this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);
     this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
     this._leoTreeView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeView)));
     this._leoTreeView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeView)));
@@ -2897,16 +2939,6 @@ import { LeoButton, LeoDocument, PNode } from './types';
 
 // https://github.com/leo-editor/leo-editor/issues/1025
 
-/* 
-  TODO : Replace this file (leojs.ts) by 
-
-    g.app = leoApp.LeoApp()
-    g.app.loadManager = leoApp.LoadManager()
-    g.app.loadManager.load(fileName, pymacs)
-
-
-
-*/
 
 // For now give results to tree view panels (outline, documents and at-buttons)
 
@@ -2950,9 +2982,9 @@ export class LeoUI {
 
     // * Outline Pane
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
-    private _leoTreeView: vscode.TreeView&lt;PNode&gt;; // Outline tree view added to the Tree View Container with an Activity Bar icon
-    private _leoTreeExView: vscode.TreeView&lt;PNode&gt;; // Outline tree view added to the Explorer Sidebar
-    private _lastTreeView: vscode.TreeView&lt;PNode&gt;; // Last visible treeview
+    private _leoTreeView: vscode.TreeView&lt;Position&gt;; // Outline tree view added to the Tree View Container with an Activity Bar icon
+    private _leoTreeExView: vscode.TreeView&lt;Position&gt;; // Outline tree view added to the Explorer Sidebar
+    private _lastTreeView: vscode.TreeView&lt;Position&gt;; // Last visible treeview
     // TODO: Merge with c.frame.
     private _treeId: number = 0; // Starting salt for tree node murmurhash generated Ids
 
@@ -3097,7 +3129,7 @@ public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
  * @param p_expand True if it was an expand, false if it was a collapse event
  * @param p_treeView Pointer to the treeview itself, either the standalone treeview or the one under the explorer
  */
-private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;PNode&gt;, p_expand: boolean, p_treeView: vscode.TreeView&lt;PNode&gt;): void {
+private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Position&gt;, p_expand: boolean, p_treeView: vscode.TreeView&lt;Position&gt;): void {
     // * Expanding or collapsing via the treeview interface selects the node to mimic Leo
     // this.triggerBodySave(true);
     // if (p_treeView.selection[0] &amp;&amp; p_treeView.selection[0] === p_event.element) {
@@ -6238,9 +6270,9 @@ public closeBody(): void {
  * * Handle selected node being created for the outline
  * @param p_element PNode that was just created and detected as selected node
  */
-public gotSelectedNode(p_element: PNode): void {
+public gotSelectedNode(p_element: Position): void {
 
-    console.log('Got selected node:', p_element.header);
+    console.log('Got selected node:', p_element.h);
 
     // set context flags
     this.leoStates.setSelectedNodeFlags(p_element);
@@ -8106,8 +8138,8 @@ export function isWordChar1(ch: string): boolean {
 
 </t>
 <t tx="felix.20210108011201.1">export function match_word(s: string, i: number, pattern: string): boolean {
-    const pat = new RegExp("\\b" + pattern + "\\b");
-    return s.substring(i).search(pat) &gt;= 0;
+    const pat = new RegExp(pattern + "\\b");
+    return s.substring(i).search(pat) === 0;
 }
 
 </t>
