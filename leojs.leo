@@ -2841,21 +2841,21 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     w_node.expand();
 
     w_node = g.app.leo_c.p.insertAsLastChild();
-    w_node.initHeadString("nodeInside1");
+    w_node.initHeadString("node Inside1");
     w_node.setBodyString('nodeInside1 body');
     w_node.setMarked();
 
     w_node = g.app.leo_c.p.insertAsLastChild();
-    w_node.initHeadString("nodeInside2");
-    w_node.setBodyString('nodeInside2 body');
+    w_node.initHeadString("node with UserData Inside2");
+    w_node.setBodyString('node Inside2 body');
     w_node.u = { a: 'user content string a', b: "user content also" };
 
     w_node = g.app.leo_c.p.insertAfter();
     w_node.initHeadString("@file node3");
-    w_node.setBodyString('nodeInside2 body');
+    w_node.setBodyString('node 3 body');
 
     w_node = g.app.leo_c.p.insertAfter();
-    w_node.initHeadString("node2selected");
+    w_node.initHeadString("node 2 selected but empty");
     w_node.setSelected();
 
     // ************************************************************
@@ -3131,7 +3131,7 @@ public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
  */
 private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Position&gt;, p_expand: boolean, p_treeView: vscode.TreeView&lt;Position&gt;): void {
     // * Expanding or collapsing via the treeview interface selects the node to mimic Leo
-    // this.triggerBodySave(true);
+    //this.triggerBodySave(true);
     // if (p_treeView.selection[0] &amp;&amp; p_treeView.selection[0] === p_event.element) {
     //     // * This happens if the tree selection is the same as the expanded/collapsed node: Just have Leo do the same
     //     // Pass
@@ -3147,12 +3147,14 @@ private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Positi
     //         }
     //     });
 
-    console.log("Set Expand/Collapse in leojs");
+    if (p_expand) {
+        p_event.element.expand();
+    } else {
+        p_event.element.contract();
+    }
     if (this.config.leoTreeBrowse) {
         this._refreshOutline(true, RevealType.RevealSelect);
     }
-
-
 }
 
 </t>
@@ -9788,7 +9790,7 @@ public moveToBack():Position {
         p.v = parent_v.children[n - 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9806,7 +9808,7 @@ public moveToFirstChild():Position{
         p._childIndex = 0;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9826,7 +9828,7 @@ public moveToLastChild():Position{
         p._childIndex = n - 1;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9863,7 +9865,7 @@ public moveToNext():Position{
         p.v = parent_v.children[n + 1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9897,7 +9899,7 @@ public moveToNthChild(n:number):Position {
         p._childIndex = n;
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                    //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9915,7 +9917,7 @@ public moveToParent():Position {
         p._childIndex = item[1];
     }else{
         // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+                    //@ts-ignore
         p.v = undefined;
     }
     return p;

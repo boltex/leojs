@@ -502,7 +502,7 @@ export class LeoUI {
      */
     private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent<Position>, p_expand: boolean, p_treeView: vscode.TreeView<Position>): void {
         // * Expanding or collapsing via the treeview interface selects the node to mimic Leo
-        // this.triggerBodySave(true);
+        //this.triggerBodySave(true);
         // if (p_treeView.selection[0] && p_treeView.selection[0] === p_event.element) {
         //     // * This happens if the tree selection is the same as the expanded/collapsed node: Just have Leo do the same
         //     // Pass
@@ -518,12 +518,14 @@ export class LeoUI {
         //         }
         //     });
 
-        console.log("Set Expand/Collapse in leojs");
+        if (p_expand) {
+            p_event.element.expand();
+        } else {
+            p_event.element.contract();
+        }
         if (this.config.leoTreeBrowse) {
             this._refreshOutline(true, RevealType.RevealSelect);
         }
-
-
     }
 
     /**
