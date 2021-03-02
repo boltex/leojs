@@ -156,11 +156,11 @@ export class LeoUI {
         // TODO: Check Recent Leo File List and open them
         // g.app.loadManager.load(fileName, pymacs)
         // ELSE :
-        const w_c = new Commander("", this);
+        let w_c = new Commander("", this);
 
         // Equivalent to leoBridge 'createFrame' method
-        const w_v = new VNode(w_c);
-        const w_p = new Position(w_v);
+        let w_v = new VNode(w_c);
+        let w_p = new Position(w_v);
         w_v.initHeadString("NewHeadline");
 
         // #1631: Initialize here, not in p._linkAsRoot.
@@ -170,6 +170,17 @@ export class LeoUI {
         w_p._linkAsRoot();
 
         g.app.commandersList.push(w_c);
+
+        // second test commander
+        w_c = new Commander("", this);
+        w_v = new VNode(w_c);
+        w_p = new Position(w_v);
+        w_v.initHeadString("NewHeadline");
+        w_c.hiddenRootNode.children = [];
+        w_p._linkAsRoot();
+        g.app.commandersList.push(w_c);
+
+        // select first test commander
         g.app.leo_c = g.app.commandersList[0];
 
         // ************************************************************
@@ -470,7 +481,7 @@ export class LeoUI {
      */
     public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
         this._currentDocumentChanged = p_documentNode.documentEntry.changed;
-        this.leoStates.leoOpenedFileName = p_documentNode.documentEntry.name;
+        this.leoStates.leoOpenedFileName = p_documentNode.documentEntry.fileName();
         setTimeout(() => {
             if (!this._leoDocuments.visible && !this._leoDocumentsExplorer.visible) {
                 return;

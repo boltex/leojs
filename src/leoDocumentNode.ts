@@ -1,8 +1,10 @@
 import * as vscode from "vscode";
 import { Constants } from "./constants";
-import { LeoDocument, Icon } from "./types";
+import { Icon } from "./types";
 import * as utils from "./utils";
 import { LeoUI } from "./leoUI";
+import * as g from './core/leoGlobals';
+import { Commander } from "./core/leoCommander";
 
 
 /**
@@ -14,21 +16,22 @@ export class LeoDocumentNode extends vscode.TreeItem {
     public contextValue: string;
 
     constructor(
-        public documentEntry: LeoDocument,
+        public documentEntry: Commander,
         private _leoJs: LeoUI
     ) {
-        super(documentEntry.name);
+        super(documentEntry.fileName());
         // Setup this instance
-        const w_isNamed: boolean = !!this.documentEntry.name;
-        this.label = w_isNamed ? utils.getFileFromPath(this.documentEntry.name) : Constants.UNTITLED_FILE_NAME;
-        this.tooltip = w_isNamed ? this.documentEntry.name : Constants.UNTITLED_FILE_NAME;
+        const w_isNamed: boolean = !!this.documentEntry.fileName();
+        this.label = w_isNamed ? utils.getFileFromPath(this.documentEntry.fileName()) : Constants.UNTITLED_FILE_NAME;
+        this.tooltip = w_isNamed ? this.documentEntry.fileName() : Constants.UNTITLED_FILE_NAME;
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
-            arguments: [this.documentEntry.index]
+            arguments: [this.documentEntry]
         };
         // If this was created as a selected node, make sure it's selected as we may have opened/closed document
-        if (this.documentEntry.selected) {
+        // tslint:disable-next-line: strict-comparisons
+        if (this.documentEntry === g.app.leo_c) {
             this._leoJs.setDocumentSelection(this);
             this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
         } else {
@@ -44,7 +47,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
     // @ts-ignore
     public get id(): string {
         // Add prefix and suffix salt to numeric index to prevent accidental duplicates
-        return "p" + this.documentEntry.index + "s" + this.documentEntry.name;
+        return "p" + g.app.commandersList.indexOf(this.documentEntry) + "s" + this.documentEntry.fileName();
     }
 
 }

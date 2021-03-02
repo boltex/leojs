@@ -2070,10 +2070,10 @@ public get description(): string | boolean {
 </t>
 <t tx="felix.20201214151429.1">import * as vscode from "vscode";
 import { LeoUI } from './leoUI';
-
 import { LeoDocumentNode } from "./leoDocumentNode";
 import { ProviderResult } from "vscode";
 import { LeoStates } from "./leoStates";
+import * as g from './core/leoGlobals';
 import { Leojs } from "./leojs";
 
 @language typescript
@@ -2111,15 +2111,18 @@ public refreshTreeRoot(): void {
 }
 
 </t>
-<t tx="felix.20201214151429.5">public getChildren(element?: LeoDocumentNode): Thenable&lt;LeoDocumentNode[]&gt; {
+<t tx="felix.20201214151429.5">public getChildren(element?: LeoDocumentNode): LeoDocumentNode[] {
     const w_children: LeoDocumentNode[] = [];
     // if called with element, or not ready, give back empty array as there won't be any children
     if (this._leoStates.fileOpenedReady &amp;&amp; !element) {
-        this._leojs.documents.forEach(p_doc =&gt; {
+        g.app.commandersList.forEach(p_doc =&gt; {
             w_children.push(new LeoDocumentNode(p_doc, this._leoUI));
         });
+        // this._leojs.documents.forEach(p_doc =&gt; {
+        //     w_children.push(new LeoDocumentNode(p_doc, this._leoUI));
+        // });
     }
-    return Promise.resolve(w_children); // Defaults to an empty list of children
+    return w_children; // Defaults to an empty list of children
 }
 
 </t>
@@ -2131,9 +2134,11 @@ public refreshTreeRoot(): void {
 </t>
 <t tx="felix.20201214151434.1">import * as vscode from "vscode";
 import { Constants } from "./constants";
-import { LeoDocument, Icon } from "./types";
+import { Icon } from "./types";
 import * as utils from "./utils";
 import { LeoUI } from "./leoUI";
+import * as g from './core/leoGlobals';
+import { Commander } from "./core/leoCommander";
 
 
 @language typescript
@@ -2149,21 +2154,22 @@ export class LeoDocumentNode extends vscode.TreeItem {
     public contextValue: string;
 
     constructor(
-        public documentEntry: LeoDocument,
+        public documentEntry: Commander,
         private _leoJs: LeoUI
     ) {
-        super(documentEntry.name);
+        super(documentEntry.fileName());
         // Setup this instance
-        const w_isNamed: boolean = !!this.documentEntry.name;
-        this.label = w_isNamed ? utils.getFileFromPath(this.documentEntry.name) : Constants.UNTITLED_FILE_NAME;
-        this.tooltip = w_isNamed ? this.documentEntry.name : Constants.UNTITLED_FILE_NAME;
+        const w_isNamed: boolean = !!this.documentEntry.fileName();
+        this.label = w_isNamed ? utils.getFileFromPath(this.documentEntry.fileName()) : Constants.UNTITLED_FILE_NAME;
+        this.tooltip = w_isNamed ? this.documentEntry.fileName() : Constants.UNTITLED_FILE_NAME;
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
-            arguments: [this.documentEntry.index]
+            arguments: [this.documentEntry]
         };
         // If this was created as a selected node, make sure it's selected as we may have opened/closed document
-        if (this.documentEntry.selected) {
+        // tslint:disable-next-line: strict-comparisons
+        if (this.documentEntry === g.app.leo_c) {
             this._leoJs.setDocumentSelection(this);
             this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
         } else {
@@ -2183,7 +2189,7 @@ public get iconPath(): Icon {
 <t tx="felix.20201214151434.4">// @ts-ignore
 public get id(): string {
     // Add prefix and suffix salt to numeric index to prevent accidental duplicates
-    return "p" + this.documentEntry.index + "s" + this.documentEntry.name;
+    return "p" + g.app.commandersList.indexOf(this.documentEntry) + "s" + this.documentEntry.fileName();
 }
 
 </t>
@@ -2816,11 +2822,11 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     // TODO: Check Recent Leo File List and open them
     // g.app.loadManager.load(fileName, pymacs)
     // ELSE :
-    const w_c = new Commander("", this);
+    let w_c = new Commander("", this);
 
     // Equivalent to leoBridge 'createFrame' method
-    const w_v = new VNode(w_c);
-    const w_p = new Position(w_v);
+    let w_v = new VNode(w_c);
+    let w_p = new Position(w_v);
     w_v.initHeadString("NewHeadline");
 
     // #1631: Initialize here, not in p._linkAsRoot.
@@ -2830,6 +2836,17 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     w_p._linkAsRoot();
 
     g.app.commandersList.push(w_c);
+
+    // second test commander
+    w_c = new Commander("", this);
+    w_v = new VNode(w_c);
+    w_p = new Position(w_v);
+    w_v.initHeadString("NewHeadline");
+    w_c.hiddenRootNode.children = [];
+    w_p._linkAsRoot();
+    g.app.commandersList.push(w_c);
+
+    // select first test commander
     g.app.leo_c = g.app.commandersList[0];
 
     // ************************************************************
@@ -3098,7 +3115,7 @@ private _refreshDocumentsPane(): void {
  */
 public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
     this._currentDocumentChanged = p_documentNode.documentEntry.changed;
-    this.leoStates.leoOpenedFileName = p_documentNode.documentEntry.name;
+    this.leoStates.leoOpenedFileName = p_documentNode.documentEntry.fileName();
     setTimeout(() =&gt; {
         if (!this._leoDocuments.visible &amp;&amp; !this._leoDocumentsExplorer.visible) {
             return;
