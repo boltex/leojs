@@ -1291,7 +1291,7 @@ public refreshTreeRoot(): void {
         element.isCloned(), // cloned
         element.isDirty(), // dirty
         element.isMarked(), // marked
-        element.isAtFileNode(), // atFile
+        element.isAnyAtFileNode(), // atFile
         element.v.hasBody(),
         Object.keys(element.v.u).length ? element.v.u : false, // 'u' - user defined data
         this._icons,
@@ -3132,11 +3132,9 @@ public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
         }
         // tslint:disable-next-line: strict-comparisons
         if (w_docView.selection.length &amp;&amp; w_docView.selection[0] === p_documentNode) {
-            console.log('setDocumentSelection: already selected!');
-
+            // console.log('setDocumentSelection: already selected!');
         } else {
-            console.log('setDocumentSelection: selecting in tree');
-
+            // console.log('setDocumentSelection: selecting in tree');
             w_docView.reveal(p_documentNode, { select: true, focus: false });
         }
 

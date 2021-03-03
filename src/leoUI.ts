@@ -496,11 +496,9 @@ export class LeoUI {
             }
             // tslint:disable-next-line: strict-comparisons
             if (w_docView.selection.length && w_docView.selection[0] === p_documentNode) {
-                console.log('setDocumentSelection: already selected!');
-
+                // console.log('setDocumentSelection: already selected!');
             } else {
-                console.log('setDocumentSelection: selecting in tree');
-
+                // console.log('setDocumentSelection: selecting in tree');
                 w_docView.reveal(p_documentNode, { select: true, focus: false });
             }
 

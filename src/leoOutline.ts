@@ -40,7 +40,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             element.isCloned(), // cloned
             element.isDirty(), // dirty
             element.isMarked(), // marked
-            element.isAtFileNode(), // atFile
+            element.isAnyAtFileNode(), // atFile
             element.v.hasBody(),
             Object.keys(element.v.u).length ? element.v.u : false, // 'u' - user defined data
             this._icons,
