@@ -51,10 +51,6 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             this._leoUI.gotSelectedNode(element);
         }
 
-        if (element.isAtFileNode()) {
-            console.log('IS AT FILE', element.h);
-
-        }
         // Build a LeoNode (a vscode tree node) from the Position
         return w_leoNode;
     }

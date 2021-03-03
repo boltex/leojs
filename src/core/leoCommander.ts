@@ -692,8 +692,8 @@ export class Commander {
             return false;
         }
 
-        const rstack:StackEntry[] = (root && root.__bool__())?root.stack.concat([root.v, root._childIndex]):[];
-        const pstack:StackEntry[] = p.stack.concat([p.v, p._childIndex]);
+        const rstack:StackEntry[] = (root && root.__bool__())?root.stack.concat([[root.v, root._childIndex]]):[];
+        const pstack:StackEntry[] = p.stack.concat([[p.v, p._childIndex]]);
 
         if(rstack.length > pstack.length){
             return false;

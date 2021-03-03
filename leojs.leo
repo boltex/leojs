@@ -1302,10 +1302,6 @@ public refreshTreeRoot(): void {
         this._leoUI.gotSelectedNode(element);
     }
 
-    if (element.isAtFileNode()) {
-        console.log('IS AT FILE', element.h);
-
-    }
     // Build a LeoNode (a vscode tree node) from the Position
     return w_leoNode;
 }
@@ -2843,20 +2839,11 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
 
     g.app.commandersList.push(w_c);
 
-    // second test commander
-    w_c = new Commander("", this);
-    w_v = new VNode(w_c);
-    w_p = new Position(w_v);
-    w_v.initHeadString("NewHeadline");
-    w_c.hiddenRootNode.children = [];
-    w_p._linkAsRoot();
-    g.app.commandersList.push(w_c);
-
     // select first test commander
     g.app.leo_c = g.app.commandersList[0];
 
     // ************************************************************
-    // * test: BUILD SOME OUTLINE
+    // * test: BUILD SOME TEST OUTLINE
     // ************************************************************
     let w_node = g.app.leo_c.p;
     w_node.initHeadString("node1");
@@ -2879,28 +2866,39 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
 
     w_node = g.app.leo_c.p.insertAfter();
     w_node.initHeadString("node 2 selected but empty");
-    w_node.setSelected();
+    w_c.setCurrentPosition(w_node);
 
     // ************************************************************
-    // * test: LOG OUTLINE ROOT CHILDREN
+    // * test: SOME OTHER COMMANDER AND OUTLINE
     // ************************************************************
-    const testC = g.app.leo_c;
-    let testPList: Position[];
-    if (testC.hoistStack.length) {
-        // topmost hoisted starts the outline as single root 'child'
-        testPList = [testC.hoistStack[testC.hoistStack.length - 1].p];
-    } else {
-        // true list of root nodes
-        testPList = [...testC.all_Root_Children()];
-    }
-    console.log('TEST ROOT testPList total: ' + testPList.length, testPList.map(i_p =&gt; i_p.h));
+    w_c = new Commander("", this);
+    w_v = new VNode(w_c);
+    w_p = new Position(w_v);
+    w_v.initHeadString("NewHeadline");
+    w_c.hiddenRootNode.children = [];
+    w_p._linkAsRoot();
+    g.app.commandersList.push(w_c);
+    g.app.leo_c = w_c;
 
-    // ************************************************************
-    // * test: LOG OUTLINE FIRST NODE CHILDREN
-    // ************************************************************
-    testPList = [...testC.p.children()];
-    console.log('TEST FIRST CHILD testPList total: ' + testPList.length, testPList.map(i_p =&gt; i_p.h));
+    w_node = g.app.leo_c.p;
+    w_node.initHeadString("some other title");
+    w_node.setBodyString('body text');
 
+    w_node = g.app.leo_c.p.insertAsLastChild();
+    w_node.initHeadString("yet another node");
+    w_node.setBodyString('more body text\nwith a second line');
+
+    w_node = g.app.leo_c.p.insertAfter();
+    w_node.initHeadString("@clean my-file.txt");
+    w_node.setBodyString('again some body text');
+    w_c.setCurrentPosition(w_node);
+
+    w_node = g.app.leo_c.p.insertAsLastChild();
+    w_node.initHeadString("sample node omega");
+    w_node.setBodyString('some other body');
+    w_node = g.app.leo_c.p.insertAfter();
+    w_node.setMarked();
+    w_node.initHeadString("a different headline");
 
 
     // * Create file browser instance
@@ -10748,8 +10746,8 @@ public positionExists(p:Position, root?:Position, trace?:boolean):boolean {
         return false;
     }
 
-    const rstack:StackEntry[] = (root &amp;&amp; root.__bool__())?root.stack.concat([root.v, root._childIndex]):[];
-    const pstack:StackEntry[] = p.stack.concat([p.v, p._childIndex]);
+    const rstack:StackEntry[] = (root &amp;&amp; root.__bool__())?root.stack.concat([[root.v, root._childIndex]]):[];
+    const pstack:StackEntry[] = p.stack.concat([[p.v, p._childIndex]]);
 
     if(rstack.length &gt; pstack.length){
         return false;
