@@ -2821,9 +2821,14 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     console.log('Leo started, LeoId:', g.app.leoID);
 
     // IF RECENT FILES LIST :
-    // TODO: Check Recent Leo File List and open them
-    // g.app.loadManager.load(fileName, pymacs)
+    //      TODO: CHECK RECENT LEO FILE LIST AND OPEN THEM
+    //      g.app.loadManager.load(fileName, pymacs)
     // ELSE :
+    //      TODO: CREATE NEW LEO OUTLINE (demo below)
+
+    // ************************************************************
+    // * demo test: CREATE NEW LEO OUTLINE: NEW COMMANDER
+    // ************************************************************
     let w_c = new Commander("", this);
 
     // Equivalent to leoBridge 'createFrame' method
@@ -2843,7 +2848,7 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     g.app.leo_c = g.app.commandersList[0];
 
     // ************************************************************
-    // * test: BUILD SOME TEST OUTLINE
+    // * demo test: BUILD SOME TEST OUTLINE
     // ************************************************************
     let w_node = g.app.leo_c.p;
     w_node.initHeadString("node1");
@@ -2869,7 +2874,7 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     w_c.setCurrentPosition(w_node);
 
     // ************************************************************
-    // * test: SOME OTHER COMMANDER AND OUTLINE
+    // * demo test: SOME OTHER COMMANDER AND OUTLINE
     // ************************************************************
     w_c = new Commander("", this);
     w_v = new VNode(w_c);
@@ -2894,12 +2899,18 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     w_c.setCurrentPosition(w_node);
 
     w_node = g.app.leo_c.p.insertAsLastChild();
-    w_node.initHeadString("sample node omega");
+    w_node.initHeadString("sample cloned node");
     w_node.setBodyString('some other body');
+    w_node.clone();
+
     w_node = g.app.leo_c.p.insertAfter();
     w_node.setMarked();
     w_node.initHeadString("a different headline");
-
+    // back to first test commander after creating this second one
+    g.app.leo_c = g.app.commandersList[0];
+    // ************************************************************
+    // * demo test end
+    // ************************************************************
 
     // * Create file browser instance
     this._leoFilesBrowser = new LeoFilesBrowser(_context);
