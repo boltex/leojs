@@ -27,7 +27,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
-            arguments: [this.documentEntry]
+            arguments: [g.app.commandersList.indexOf(this.documentEntry)]
         };
         // If this was created as a selected node, make sure it's selected as we may have opened/closed document
         // tslint:disable-next-line: strict-comparisons

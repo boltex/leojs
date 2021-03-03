@@ -63,13 +63,19 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
         if (element) {
             return [...element.children()];
         } else {
-            const w_c = g.app.leo_c!;
-            if (w_c.hoistStack.length) {
-                // topmost hoisted starts the outline as single root 'child'
-                return [w_c.hoistStack[w_c.hoistStack.length - 1].p];
+            if (g.app.leo_c) {
+
+                const w_c = g.app.leo_c!; // Currently Selected Document's Commander
+                if (w_c.hoistStack.length) {
+                    // topmost hoisted starts the outline as single root 'child'
+                    return [w_c.hoistStack[w_c.hoistStack.length - 1].p];
+                } else {
+                    // true list of root nodes
+                    return [...w_c.all_Root_Children()];
+                }
             } else {
-                // true list of root nodes
-                return [...w_c.all_Root_Children()];
+                console.error('Commander not found in commanderList');
+                return [];
             }
         }
     }

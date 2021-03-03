@@ -829,9 +829,13 @@ export class LeoUI {
 
     public selectOpenedLeoDocument(p_index: number): Thenable<unknown> {
 
-        vscode.window.showInformationMessage('TODO: Implement selectOpenedLeoDocument' +
-            " index: " + p_index);
+        // vscode.window.showInformationMessage('TODO: Implement selectOpenedLeoDocument' +
+        //     " index: " + p_index);
 
+        g.app.leo_c = g.app.commandersList[p_index];
+        this._refreshOutline(true, RevealType.RevealSelect);
+
+        // TODO : maybe use _setupOpenedLeoDocument
         const w_fakeOpenedFileInfo: any = undefined;
         this._setupOpenedLeoDocument(w_fakeOpenedFileInfo);
 

@@ -1315,13 +1315,19 @@ public refreshTreeRoot(): void {
     if (element) {
         return [...element.children()];
     } else {
-        const w_c = g.app.leo_c!;
-        if (w_c.hoistStack.length) {
-            // topmost hoisted starts the outline as single root 'child'
-            return [w_c.hoistStack[w_c.hoistStack.length - 1].p];
+        if (g.app.leo_c) {
+
+            const w_c = g.app.leo_c!; // Currently Selected Document's Commander
+            if (w_c.hoistStack.length) {
+                // topmost hoisted starts the outline as single root 'child'
+                return [w_c.hoistStack[w_c.hoistStack.length - 1].p];
+            } else {
+                // true list of root nodes
+                return [...w_c.all_Root_Children()];
+            }
         } else {
-            // true list of root nodes
-            return [...w_c.all_Root_Children()];
+            console.error('Commander not found in commanderList');
+            return [];
         }
     }
 }
@@ -2165,7 +2171,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
-            arguments: [this.documentEntry]
+            arguments: [g.app.commandersList.indexOf(this.documentEntry)]
         };
         // If this was created as a selected node, make sure it's selected as we may have opened/closed document
         // tslint:disable-next-line: strict-comparisons
@@ -5609,9 +5615,13 @@ public test(): Thenable&lt;unknown&gt; {
 </t>
 <t tx="felix.20201214211839.1">public selectOpenedLeoDocument(p_index: number): Thenable&lt;unknown&gt; {
 
-    vscode.window.showInformationMessage('TODO: Implement selectOpenedLeoDocument' +
-        " index: " + p_index);
+    // vscode.window.showInformationMessage('TODO: Implement selectOpenedLeoDocument' +
+    //     " index: " + p_index);
 
+    g.app.leo_c = g.app.commandersList[p_index];
+    this._refreshOutline(true, RevealType.RevealSelect);
+
+    // TODO : maybe use _setupOpenedLeoDocument
     const w_fakeOpenedFileInfo: any = undefined;
     this._setupOpenedLeoDocument(w_fakeOpenedFileInfo);
 
