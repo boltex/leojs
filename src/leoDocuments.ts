@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import { LeoUI } from './leoUI';
-
 import { LeoDocumentNode } from "./leoDocumentNode";
 import { ProviderResult } from "vscode";
 import { LeoStates } from "./leoStates";
+import * as g from './core/leoGlobals';
 import { Leojs } from "./leojs";
 
 /**
@@ -32,15 +32,18 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoDocument
         return element;
     }
 
-    public getChildren(element?: LeoDocumentNode): Thenable<LeoDocumentNode[]> {
+    public getChildren(element?: LeoDocumentNode): LeoDocumentNode[] {
         const w_children: LeoDocumentNode[] = [];
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoStates.fileOpenedReady && !element) {
-            this._leojs.documents.forEach(p_doc => {
+            g.app.commandersList.forEach(p_doc => {
                 w_children.push(new LeoDocumentNode(p_doc, this._leoUI));
             });
+            // this._leojs.documents.forEach(p_doc => {
+            //     w_children.push(new LeoDocumentNode(p_doc, this._leoUI));
+            // });
         }
-        return Promise.resolve(w_children); // Defaults to an empty list of children
+        return w_children; // Defaults to an empty list of children
     }
 
     public getParent(element: LeoDocumentNode): ProviderResult<LeoDocumentNode> {

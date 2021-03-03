@@ -3,16 +3,6 @@ import { LeoButton, LeoDocument, PNode } from './types';
 
 // https://github.com/leo-editor/leo-editor/issues/1025
 
-/* 
-  TODO : Replace this file (leojs.ts) by 
-
-    g.app = leoApp.LeoApp()
-    g.app.loadManager = leoApp.LoadManager()
-    g.app.loadManager.load(fileName, pymacs)
-
-
-
-*/
 
 // For now give results to tree view panels (outline, documents and at-buttons)
 

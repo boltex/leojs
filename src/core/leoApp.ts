@@ -1,25 +1,9 @@
-/*
-    import leo.core.leoGlobals as g
-    import leo.core.leoExternalFiles as leoExternalFiles
-    import importlib
-    import io
-    StringIO = io.StringIO
-    import os
-    import optparse
-    import subprocess
-    import string
-    import sys
-    import time
-    import traceback
-    import zipfile
-    import platform
-    import sqlite3
-*/
-
+import * as os from "os";
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
 import { NodeIndices } from './leoNodes';
 import { Commander } from './leoCommander';
+
 /**
  *  A singleton class to manage idle-time handling. This class handles all
  *  details of running code at idle time, including running 'idle' hooks.
@@ -96,9 +80,7 @@ export class LeoApp {
     public diff: boolean = false; // True: run Leo in diff mode.
     public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
-    // public gui:LeoUI; // The gui class.
-    // TODO
-    public gui: any;
+    public gui:LeoUI|undefined; // The gui class.
     public guiArgName = null; // The gui name given in --gui option.
     public ipython_inited: boolean = false; // True if leoIpython.py imports succeeded.
     public isTheme: boolean = false; // True: load files as theme files (ignore myLeoSettings.leo).
@@ -145,15 +127,18 @@ export class LeoApp {
 
     public globalKillBuffer: any[] = []; // The global kill buffer.
     public globalRegisters: any = {}; // The global register list.
-    public leoID: string = ''; // The id part of gnx's, using empty for falsy.
+    public leoID: string = 'filtest'; // The id part of gnx's, using empty for falsy.
     public loadedThemes: any[] = []; // List of loaded theme.leo files.
     public lossage: any[] = []; // List of last 100 keystrokes.
     public paste_c: any = null; // The commander that pasted the last outline.
     public spellDict: any = null; // The singleton PyEnchant spell dict.
     public numberOfUntitledWindows: number = 0; // Number of opened untitled windows.
-    public windowList: any[] = []; // Global list of all frames.
+    public windowList: any[] = []; // * Global list of all frames. USE _commandersList instead
     public realMenuNameDict = {}; // Translations of menu names.
 
+    // * Opened Leo File Commanders
+    public commandersList: Commander[] = [];
+    public leo_c:Commander|undefined;
     // Most of these are defined in initApp.
     public backgroundProcessManager: any = null; // The singleton BackgroundProcessManager instance.
     public commander_cacher: any = null; // The singleton leoCacher.CommanderCacher instance.
@@ -164,12 +149,12 @@ export class LeoApp {
     public global_cacher: any = null; // The singleton leoCacher.GlobalCacher instance.
     public idleTimeManager: any = null; // The singleton IdleTimeManager instance.
     public ipk: any = null; // python kernel instance
-    public loadManager: any = null; // The singleton LoadManager instance.
+    public loadManager: LoadManager|undefined; // The singleton LoadManager instance.
     // public logManager: any = null;
     // The singleton LogManager instance.
     // public openWithManager: any = null;
     // The singleton OpenWithManager instance.
-    public nodeIndices: NodeIndices; // The singleton nodeIndices instance.
+    public nodeIndices: NodeIndices|undefined; // The singleton nodeIndices instance.
     public pluginsController: any = null; // The singleton PluginsManager instance. public sessionManager: any = null; // The singleton SessionManager instance. // The Commands class...
     public commandName: any = null; // The name of the command being executed.
     public commandInterruptFlag: boolean = false; // True: command within a command.
@@ -265,7 +250,7 @@ export class LeoApp {
         this.define_language_extension_dict();
         this.define_extension_dict();
         // this.gui = p_gui;
-        this.nodeIndices = new NodeIndices(g.app.leoID);
+        // this.nodeIndices = new NodeIndices(g.app.leoID);
     }
 
     public define_delegate_language_dict(): void {
@@ -846,6 +831,59 @@ export class LeoApp {
 
 
     /**
+     * Get g.app.leoID from various sources.
+     */
+    public setLeoID(useDialog:boolean=true, verbose:boolean=true):string{
+        this.leoID = "";
+        
+        // tslint:disable-next-line: strict-comparisons
+        console.assert(this === g.app);
+        
+        verbose = verbose && !g.unitTesting && !this.silentMode;
+        
+        this.leoID = this.cleanLeoID(os.userInfo().username, 'os.userInfo().username');
+        
+        return this.leoID;
+        // table = (self.setIDFromSys, self.setIDFromFile, self.setIDFromEnv,)
+        // for func in table:
+            // func(verbose)
+            // if self.leoID:
+                // return self.leoID
+        // if useDialog:
+            // self.setIdFromDialog()
+            // if self.leoID:
+                // self.setIDFile()
+        // return self.leoID
+    }
+
+    /**
+     * #1404: Make sure that the given Leo ID will not corrupt a .leo file.
+     */
+    public cleanLeoID(id_:string, tag:string):string {
+        const old_id:string = id_.toString();
+        try{
+            id_ = id_.replace(/\./g, "").replace(/\,/g, "").replace(/\"/g, "").replace(/\'/g, "");
+            //  Remove *all* whitespace: https://stackoverflow.com/questions/3739909
+            id_ = id_.split(' ').join('');
+        }
+        catch(exception){
+            g.es_exception();
+            id_ = '';
+        }
+        if (id_.length < 3){
+            throw new Error("unknownAttributes ValueError");
+            // TODO: Show Leo Id syntax error message
+            // g.EmergencyDialog(
+            //   title=f"Invalid Leo ID: {tag}",
+            //    message=(
+            //        f"Invalid Leo ID: {old_id!r}\n\n"
+            //       "Your id should contain only letters and numbers\n"
+            //        "and must be at least 3 characters in length."))
+        }
+        return id_;
+    }
+
+    /**
      * Create a commander and its view frame for the Leo main window.
      */
     public newCommander(
@@ -931,7 +969,7 @@ export class LoadManager {
                 for (let n = 0; n < lm.files.length; n++) {
                     const fn = lm.files[n];
                     lm.more_cmdline_files = n < (lm.files.length - 1);
-                    c = lm.loadLocalFile(fn, g.app.gui);
+                    c = lm.loadLocalFile(fn, g.app.gui!);
                         // Returns None if the file is open in another instance of Leo.
                     if (c && !c1){  // #1416:
                         c1 = c;
@@ -974,7 +1012,7 @@ export class LoadManager {
                 c1 = lm.openEmptyWorkBook();
                     // Calls LM.loadLocalFile.
             }
-            catch( Exception){
+            catch(exception){
                 g.es_print('Can not create empty workbook');
                 g.es_exception();
             }
@@ -1058,7 +1096,7 @@ export class LoadManager {
         return c
         */
         const fn:string = "";
-        const c = lm.loadLocalFile(fn,g.app.gui);
+        const c = lm.loadLocalFile(fn,g.app.gui!);
         if (!c){
             return undefined;
         }
@@ -1233,6 +1271,84 @@ export class LoadManager {
         // TODO : OPEN LEO FILE
         const ok: boolean = true; // c.fileCommands.openLeoFile(fn);
         return c;
+    }
+
+    /**
+     * Create an empty file if the external fn is empty.
+     *
+     * Otherwise, create an @edit or @file node for the external file.
+     */
+    public initWrapperLeoFile(c:Commander, fn:string):Commander {
+        // lm = self
+        // Use the config params to set the size and location of the window.
+        
+        // frame = c.frame
+        // frame.setInitialWindowGeometry()
+        // frame.deiconify()
+        // frame.lift()
+        
+        // #1570: Resize the _new_ frame.
+        // frame.splitVerticalFlag, r1, r2 = frame.initialRatios()
+        // frame.resizePanesToRatio(r1, r2)
+        
+        /*
+        if not g.os_path_exists(fn):
+            p = c.rootPosition()
+            // Create an empty @edit node unless fn is an .leo file.
+            // Fix #1070: Use "newHeadline", not fn.
+            p.h = "newHeadline" if fn.endswith('.leo') else f"@edit {fn}"
+            c.selectPosition(p)
+        elif c.looksLikeDerivedFile(fn):
+            // 2011/10/10: Create an @file node.
+            p = c.importCommands.importDerivedFiles(parent=c.rootPosition(),
+                paths=[fn], command=None)  # Not undoable.
+            if p and p.hasBack():
+                p.back().doDelete()
+                p = c.rootPosition()
+            if not p: return None
+        else:
+            // Create an @<file> node.
+            p = c.rootPosition()
+            if p:
+                load_type = self.options['load_type']
+                p.setHeadString(f"{load_type} {fn}")
+                c.refreshFromDisk()
+                c.selectPosition(p)
+
+        // Fix critical bug 1184855: data loss with command line 'leo somefile.ext'
+        // Fix smallish bug 1226816 Command line "leo xxx.leo" creates file xxx.leo.leo.
+        c.mFileName = fn if fn.endswith('.leo') else f"{fn}.leo"
+        c.wrappedFileName = fn
+        c.frame.title = c.computeWindowTitle(c.mFileName)
+        c.frame.setTitle(c.frame.title)
+        // chapterController.finishCreate must be called after the first real redraw
+        // because it requires a valid value for c.rootPosition().
+        if c.config.getBool('use-chapters') and c.chapterController:
+            c.chapterController.finishCreate()
+        frame.c.clearChanged()
+            // Mark the outline clean.
+            // This makes it easy to open non-Leo files for quick study.
+        return c;
+        */
+        return c;
+    }
+
+    public openLeoOrZipFile(fn:string):any {
+        const lm:LoadManager = this;
+        if( fn.endsWith('.db')){
+            // return sqlite3.connect(fn)
+            return undefined;
+        }
+        let theFile:any;
+        // zipped = lm.isZippedFile(fn)
+        
+        // TODO 
+        // if(!!fn && fn.endsWith('.leo') && g.os_path_exists(fn)){
+            // theFile = lm.openLeoFile(fn);
+        // }else{
+            // theFile = undefined;
+        // }
+        return theFile;
     }
 
     /**

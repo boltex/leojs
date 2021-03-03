@@ -1,35 +1,15 @@
-/*
-    import binascii
-    from collections import defaultdict
-    from contextlib import contextmanager
-    import difflib
-    import hashlib
-    import io
-    import os
-    import pickle
-    import sqlite3
-    import tempfile
-    import time
-    import zipfile
-    import xml.etree.ElementTree as ElementTree
-    import xml.sax
-    import xml.sax.saxutils
-    from leo.core import leoGlobals as g
-    from leo.core import leoNodes
-    # Abbreviations
-    StringIO = io.StringIO
-    BytesIO = io.BytesIO
-*/
+import { VNode } from "./leoNodes";
+import { Commander } from "./leoCommander";
+import * as fs from 'fs';
 
-import * as g from './leoGlobals';
-
-/**
- *
- */
 export class FileCommands {
+    
+    public c: Commander;
+    public gnxDict: { [key: string]: VNode; };
 
-    constructor(){
-
+    constructor(c:Commander) {
+        this.c = c;
+        this.gnxDict = {};
     }
 
 

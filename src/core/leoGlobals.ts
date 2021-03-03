@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
 import { Commander } from './leoCommander';
-import { Position } from "./leoNodes";
+import { Position } from './leoNodes';
 
 export const isMac: boolean = process.platform.startsWith('darwin');
 export const isWindows: boolean = process.platform.startsWith('win');
@@ -71,7 +71,7 @@ export const globalDirectiveList: string[] = [
     'others', 'pagewidth', 'path', 'quiet',
     'raw', 'root-code', 'root-doc', 'root', 'silent',
     'tabwidth', 'terse',
-    'unit', 'verbose', 'wrap',
+    'unit', 'verbose', 'wrap'
 ];
 
 export const directives_pat: any = null;  // Set below.
@@ -114,7 +114,7 @@ export const cmd_instance_dict: { [key: string]: string[] } = {
     'RstCommands': ['c', 'rstCommands'],
     'SpellCommandsClass': ['c', 'spellCommands'],
     'Undoer': ['c', 'undoer'],
-    'VimCommands': ['c', 'vimCommands'],
+    'VimCommands': ['c', 'vimCommands']
 };
 
 export const g_language_pat = new RegExp(/^@language\s+(\w+)+/, 'm');
@@ -234,7 +234,7 @@ export function callers(n: number = 4, count: number = 0, excludeCaller: boolean
     let result: string[] = [];
     let i: number = excludeCaller ? 3 : 2;
     while (1) {
-        let s: string = _callerName(n = i, verbose = verbose);
+        let s: string = _callerName(i, verbose);
         if (s) {
             result.push(s);
         }
@@ -248,9 +248,9 @@ export function callers(n: number = 4, count: number = 0, excludeCaller: boolean
     if (count > 0) {
         result = result.slice(0, count);
     }
-    if (verbose) {
-        return ''; //''.join([f"\n  {z}" for z in result]);
-    }
+    // if (verbose) {
+        // return ''; //''.join([f"\n  {z}" for z in result]);
+    // }
     return result.join(',');
 }
 
@@ -368,6 +368,7 @@ export const error = console.error;
 export const es = console.log;
 
 export function es_exception(): string {
+    console.log('es_exception called');
     return '<no file>';
 }
 
@@ -463,8 +464,9 @@ export function match(s: string, i: number, pattern: string): boolean {
 }
 
 export function match_word(s: string, i: number, pattern: string): boolean {
-    const pat = new RegExp("\\b" + pattern + "\\b");
-    return s.substring(i).search(pat) >= 0;
+    // TODO : This is weak lacks performance. Solidify this method!
+    const pat = new RegExp(pattern + "\\b");
+    return s.substring(i).search(pat) === 0;
 }
 
 /**
@@ -689,6 +691,6 @@ export function toUnicode(s: any, encoding: string | null = null, reportErrors =
  * Print a tracing message
  */
 export const trace = console.log;
-// TODO : Replace with output to proper 'Leo terminal output'  The string is: pythön!
+// TODO : Replace with output to proper 'Leo terminal output'
 
 
