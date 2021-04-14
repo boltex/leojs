@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { LeoUI } from './leoUI';
 import { LeoDocumentNode } from "./leoDocumentNode";
-import { ProviderResult } from "vscode";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
 import { Leojs } from "./leojs";
@@ -46,7 +45,7 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoDocument
         return w_children; // Defaults to an empty list of children
     }
 
-    public getParent(element: LeoDocumentNode): ProviderResult<LeoDocumentNode> {
+    public getParent(element: LeoDocumentNode): vscode.ProviderResult<LeoDocumentNode> {
         // Leo documents are just a list, as such, entries are always child of root, so return null
         return undefined;
     }
