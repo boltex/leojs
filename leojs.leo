@@ -3436,7 +3436,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
     "url": "https://github.com/boltex/leointeg"
   },
   "engines": {
-    "vscode": "^1.52.0"
+    "vscode": "^1.60.0"
   },
   "keywords": [
     "leo",
@@ -5459,7 +5459,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "title": "Remove Button"
 },
 </t>
-<t tx="felix.20201214205159.80">"@types/vscode": "^1.52.0",
+<t tx="felix.20201214205159.80">"@types/vscode": "^1.60.0",
 "@types/glob": "^7.1.3",
 "@types/mocha": "^8.0.0",
 "@types/node": "^12.11.7",

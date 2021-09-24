@@ -10,7 +10,7 @@
     "url": "https://github.com/boltex/leointeg"
   },
   "engines": {
-    "vscode": "^1.52.0"
+    "vscode": "^1.60.0"
   },
   "keywords": [
     "leo",
@@ -2081,7 +2081,7 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/vscode": "^1.52.0",
+    "@types/vscode": "^1.60.0",
     "@types/glob": "^7.1.3",
     "@types/mocha": "^8.0.0",
     "@types/node": "^12.11.7",
