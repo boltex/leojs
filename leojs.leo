@@ -2144,7 +2144,6 @@ public get description(): string | boolean {
 <t tx="felix.20201214151429.1">import * as vscode from "vscode";
 import { LeoUI } from './leoUI';
 import { LeoDocumentNode } from "./leoDocumentNode";
-import { ProviderResult } from "vscode";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
 import { Leojs } from "./leojs";
@@ -2199,7 +2198,7 @@ public refreshTreeRoot(): void {
 }
 
 </t>
-<t tx="felix.20201214151429.6">public getParent(element: LeoDocumentNode): ProviderResult&lt;LeoDocumentNode&gt; {
+<t tx="felix.20201214151429.6">public getParent(element: LeoDocumentNode): vscode.ProviderResult&lt;LeoDocumentNode&gt; {
     // Leo documents are just a list, as such, entries are always child of root, so return null
     return undefined;
 }
@@ -3431,7 +3430,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "description": "Leo, the literate editor with outline extension for Visual Studio Code.",
   "version": "0.1.0",
   "publisher": "boltex",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
     "url": "https://github.com/boltex/leointeg"
