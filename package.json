@@ -49,12 +49,12 @@
           "contextualTitle": "Leo"
         },
         {
-          "id": "leoDocumentsExplorer",
+          "id": "leojsDocumentsExplorer",
           "name": "Leo Documents",
           "contextualTitle": "Leo"
         },
         {
-          "id": "leoButtonsExplorer",
+          "id": "leojsButtonsExplorer",
           "name": "Leo Buttons",
           "contextualTitle": "Leo"
         }
@@ -66,12 +66,12 @@
           "name": "Outline"
         },
         {
-          "id": "leoDocuments",
+          "id": "leojsDocuments",
           "contextualTitle": "Leo",
           "name": "Documents"
         },
         {
-          "id": "leoButtons",
+          "id": "leojsButtons",
           "contextualTitle": "Leo",
           "name": "Buttons"
         }
@@ -94,7 +94,7 @@
         "when": "leoReady && !leoTreeOpened"
       },
       {
-        "view": "leoDocumentsExplorer",
+        "view": "leojsDocumentsExplorer",
         "contents": "There are no Leo files currently opened",
         "when": "leoReady && !leoTreeOpened"
       },

@@ -10,11 +10,11 @@ export class Constants {
     public static TREEVIEW_ID: string = "leojs";
     public static TREEVIEW_EXPLORER_ID: string = "leojsExplorer";
 
-    public static DOCUMENTS_ID: string = "leoDocuments";
-    public static DOCUMENTS_EXPLORER_ID: string = "leoDocumentsExplorer";
+    public static DOCUMENTS_ID: string = "leojsDocuments";
+    public static DOCUMENTS_EXPLORER_ID: string = "leojsDocumentsExplorer";
 
-    public static BUTTONS_ID: string = "leoButtons";
-    public static BUTTONS_EXPLORER_ID: string = "leoButtonsExplorer";
+    public static BUTTONS_ID: string = "leojsButtons";
+    public static BUTTONS_EXPLORER_ID: string = "leojsButtonsExplorer";
 
     public static FILE_EXTENSION: string = "leo";
     public static URI_LEO_SCHEME: string = "leo";

@@ -1831,11 +1831,11 @@ export class Constants {
 public static TREEVIEW_ID: string = "leojs";
 public static TREEVIEW_EXPLORER_ID: string = "leojsExplorer";
 
-public static DOCUMENTS_ID: string = "leoDocuments";
-public static DOCUMENTS_EXPLORER_ID: string = "leoDocumentsExplorer";
+public static DOCUMENTS_ID: string = "leojsDocuments";
+public static DOCUMENTS_EXPLORER_ID: string = "leojsDocumentsExplorer";
 
-public static BUTTONS_ID: string = "leoButtons";
-public static BUTTONS_EXPLORER_ID: string = "leoButtonsExplorer";
+public static BUTTONS_ID: string = "leojsButtons";
+public static BUTTONS_EXPLORER_ID: string = "leojsButtonsExplorer";
 
 public static FILE_EXTENSION: string = "leo";
 public static URI_LEO_SCHEME: string = "leo";
@@ -4366,12 +4366,12 @@ public minibuffer(): Thenable&lt;unknown&gt; {
       "contextualTitle": "Leo"
     },
     {
-      "id": "leoDocumentsExplorer",
+      "id": "leojsDocumentsExplorer",
       "name": "Leo Documents",
       "contextualTitle": "Leo"
     },
     {
-      "id": "leoButtonsExplorer",
+      "id": "leojsButtonsExplorer",
       "name": "Leo Buttons",
       "contextualTitle": "Leo"
     }
@@ -4383,12 +4383,12 @@ public minibuffer(): Thenable&lt;unknown&gt; {
       "name": "Outline"
     },
     {
-      "id": "leoDocuments",
+      "id": "leojsDocuments",
       "contextualTitle": "Leo",
       "name": "Documents"
     },
     {
-      "id": "leoButtons",
+      "id": "leojsButtons",
       "contextualTitle": "Leo",
       "name": "Buttons"
     }
@@ -4551,7 +4551,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
     "when": "leoReady &amp;&amp; !leoTreeOpened"
   },
   {
-    "view": "leoDocumentsExplorer",
+    "view": "leojsDocumentsExplorer",
     "contents": "There are no Leo files currently opened",
     "when": "leoReady &amp;&amp; !leoTreeOpened"
   },
