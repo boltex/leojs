@@ -4,6 +4,9 @@
   "description": "Leo, the literate editor with outline extension for Visual Studio Code.",
   "version": "0.1.0",
   "publisher": "boltex",
+  "author": {
+    "name": "Félix"
+  },
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
@@ -15,7 +18,7 @@
   "keywords": [
     "leo",
     "literate",
-    "editor",
+    "tree",
     "outline",
     "programming"
   ],
@@ -28,8 +31,9 @@
     "theme": "light"
   },
   "activationEvents": [
-    "*"
+    "onStartupFinished"
   ],
+  "qna": false,
   "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {
@@ -81,42 +85,42 @@
       {
         "view": "leojs",
         "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.openLeoFile)",
-        "when": "leoReady && !leoTreeOpened"
+        "when": "leojsReady && !leojsTreeOpened"
       },
       {
         "view": "leojsExplorer",
         "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.openLeoFile)",
-        "when": "leoReady && !leoTreeOpened"
+        "when": "leojsReady && !leojsTreeOpened"
       },
       {
-        "view": "leoDocuments",
+        "view": "leojsDocuments",
         "contents": "There are no Leo files currently opened",
-        "when": "leoReady && !leoTreeOpened"
+        "when": "leojsReady && !leojsTreeOpened"
       },
       {
         "view": "leojsDocumentsExplorer",
         "contents": "There are no Leo files currently opened",
-        "when": "leoReady && !leoTreeOpened"
+        "when": "leojsReady && !leojsTreeOpened"
       },
       {
-        "view": "leoButtons",
+        "view": "leojsButtons",
         "contents": "There are no Leo files currently opened",
-        "when": "leoReady && !leoTreeOpened"
+        "when": "leojsReady && !leojsTreeOpened"
       },
       {
-        "view": "leoButtonsExplorer",
+        "view": "leojsButtonsExplorer",
         "contents": "There are no Leo files currently opened",
-        "when": "leoReady && !leoTreeOpened"
+        "when": "leojsReady && !leojsTreeOpened"
       },
       {
-        "view": "leoButtons",
+        "view": "leojsButtons",
         "contents": "There are no @buttons in this outline",
-        "when": "leoReady && leoTreeOpened"
+        "when": "leojsReady && leojsTreeOpened"
       },
       {
-        "view": "leoButtonsExplorer",
+        "view": "leojsButtonsExplorer",
         "contents": "There are no @buttons in this outline",
-        "when": "leoReady && leoTreeOpened"
+        "when": "leojsReady && leojsTreeOpened"
       }
     ],
     "commands": [
@@ -917,211 +921,211 @@
       "commandPalette": [
         {
           "command": "leojs.executeScript",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.minibuffer",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.showLogPane",
-          "when": "leoReady"
+          "when": "leojsReady"
         },
         {
           "command": "leojs.openLeoFile",
-          "when": "leoReady"
+          "when": "leojsReady"
         },
         {
           "command": "leojs.recentLeoFiles",
-          "when": "leoReady"
+          "when": "leojsReady"
         },
         {
           "command": "leojs.switchLeoFile",
-          "when": "leoReady && leoTreeOpened"
+          "when": "leojsReady && leojsTreeOpened"
         },
         {
           "command": "leojs.newLeoFile",
-          "when": "leoReady"
+          "when": "leojsReady"
         },
         {
           "command": "leojs.closeLeoFile",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.saveLeoFile",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.saveAsLeoFile",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.refreshFromDiskSelection",
-          "when": "leoTreeOpened && leoAtFile"
+          "when": "leojsTreeOpened && leoAtFile"
         },
         {
           "command": "leojs.gitDiff",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.contractAll",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.editSelectedHeadline",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.markSelection",
-          "when": "leoTreeOpened && !leoMarked"
+          "when": "leojsTreeOpened && !leojsMarked"
         },
         {
           "command": "leojs.unmarkSelection",
-          "when": "leoTreeOpened && leoMarked"
+          "when": "leojsTreeOpened && leojsMarked"
         },
         {
           "command": "leojs.unmarkAll",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.copyNodeSelection",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.cutNodeSelection",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.pasteNodeAtSelection",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.pasteNodeAsCloneAtSelection",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.deleteSelection",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.extract",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.extractNames",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.moveOutlineDownSelection",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.moveOutlineLeftSelection",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.moveOutlineRightSelection",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.moveOutlineUpSelection",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.insertNodeSelection",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.cloneNodeSelection",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.promoteSelection",
-          "when": "leoTreeOpened && leoCanPromote"
+          "when": "leojsTreeOpened && leojsCanPromote"
         },
         {
           "command": "leojs.demoteSelection",
-          "when": "leoTreeOpened && leoCanDemote"
+          "when": "leojsTreeOpened && leojsCanDemote"
         },
         {
           "command": "leojs.sortChildrenSelection",
-          "when": "leoTreeOpened && leoChild"
+          "when": "leojsTreeOpened && leojsChild"
         },
         {
           "command": "leojs.sortChildrenSelectionFromOutline",
-          "when": "leoTreeOpened && leoChild"
+          "when": "leojsTreeOpened && leojsChild"
         },
         {
           "command": "leojs.sortSiblingsSelection",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.gotoNextMarked",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.gotoNextCloneSelection",
-          "when": "leoTreeOpened && leoCloned"
+          "when": "leojsTreeOpened && leojsCloned"
         },
         {
           "command": "leojs.hoistSelection",
-          "when": "leoTreeOpened && !leoRoot"
+          "when": "leojsTreeOpened && !leojsRoot"
         },
         {
           "command": "leojs.deHoist",
-          "when": "leoTreeOpened && leoCanDehoist"
+          "when": "leojsTreeOpened && leojsCanDehoist"
         },
         {
           "command": "leojs.undo",
-          "when": "leoTreeOpened && leoCanUndo"
+          "when": "leojsTreeOpened && leojsCanUndo"
         },
         {
           "command": "leojs.redo",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.cloneFindAll",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.cloneFindAllFlattened",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.cloneFindMarked",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.cloneFindFlattenedMarked",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.copyMarked",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.diffMarkedNodes",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.markChangedItems",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.markSubheads",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.cloneMarkedNodes",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.deleteMarkedNodes",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.moveMarkedNodes",
-          "when": "leoTreeOpened"
+          "when": "leojsTreeOpened"
         },
         {
           "command": "leojs.test",
@@ -1366,231 +1370,231 @@
       "view/title": [
         {
           "command": "leojs.openLeoFile",
-          "when": "view =~ /leoDocuments/ && leoReady",
+          "when": "view =~ /leojsDocuments/ && leojsReady",
           "group": "navigation@1"
         },
         {
           "command": "leojs.newLeoFile",
-          "when": "view =~ /leoDocuments/ && leoReady",
+          "when": "view =~ /leojsDocuments/ && leojsReady",
           "group": "navigation@1"
         },
         {
           "command": "leojs.openLeoFile",
-          "when": "view =~ /leojs/ && leoReady",
+          "when": "view =~ /leojs/ && leojsReady",
           "group": "navigation@1"
         },
         {
           "command": "leojs.newLeoFile",
-          "when": "view =~ /leojs/ && leoReady",
+          "when": "view =~ /leojs/ && leojsReady",
           "group": "navigation@1"
         },
         {
           "command": "leojs.saveLeoFileFromOutline",
-          "when": "view =~ /leojs/ && leoTreeOpened && leoTreeTitled && leoChanged",
+          "when": "view =~ /leojs/ && leojsTreeOpened && leoTreeTitled && leoChanged",
           "group": "navigation@2"
         },
         {
           "command": "leojs.saveAsLeoFile",
-          "when": "view =~ /leojs/ && leoTreeOpened && !leoTreeTitled",
+          "when": "view =~ /leojs/ && leojsTreeOpened && !leoTreeTitled",
           "group": "navigation@2"
         },
         {
           "command": "leojs.undoFromOutline",
-          "when": "view =~ /leojs/ && leoTreeOpened && leoCanUndo",
+          "when": "view =~ /leojs/ && leojsTreeOpened && leoCanUndo",
           "group": "navigation@3"
         },
         {
           "command": "leojs.redoFromOutline",
-          "when": "view =~ /leojs/ && leoTreeOpened && leoCanRedo",
+          "when": "view =~ /leojs/ && leojsTreeOpened && leoCanRedo",
           "group": "navigation@4"
         },
         {
           "command": "leojs.deHoistFromOutline",
-          "when": "view =~ /leojs/ && leoTreeOpened && leoCanDehoist",
+          "when": "view =~ /leojs/ && leojsTreeOpened && leoCanDehoist",
           "group": "navigation@5"
         },
         {
           "command": "leojs.contractAllFromOutline",
-          "when": "view =~ /leojs/ && leoTreeOpened",
+          "when": "view =~ /leojs/ && leojsTreeOpened",
           "group": "navigation@6"
         },
         {
           "command": "leojs.disableLeoTreeNav",
-          "when": "view =~ /leojs/ && leoTreeBrowse"
+          "when": "view =~ /leojs/ && leojsTreeBrowse"
         },
         {
           "command": "leojs.hideEditOnNodes",
-          "when": "view =~ /leojs/ && showEditOnNodes"
+          "when": "view =~ /leojs/ && leojsShowEditOnNodes"
         },
         {
           "command": "leojs.hideAddOnNodes",
-          "when": "view =~ /leojs/ && showAddOnNodes"
+          "when": "view =~ /leojs/ && leojsShowAddOnNodes"
         },
         {
           "command": "leojs.hideArrowsOnNodes",
-          "when": "view =~ /leojs/ && showArrowsOnNodes"
+          "when": "view =~ /leojs/ && leojsShowArrowsOnNodes"
         },
         {
           "command": "leojs.hideCopyOnNodes",
-          "when": "view =~ /leojs/ && showCopyOnNodes"
+          "when": "view =~ /leojs/ && leojsShowCopyOnNodes"
         },
         {
           "command": "leojs.hideCloneOnNodes",
-          "when": "view =~ /leojs/ && showCloneOnNodes"
+          "when": "view =~ /leojs/ && leojsShowCloneOnNodes"
         },
         {
           "command": "leojs.hideMarkOnNodes",
-          "when": "view =~ /leojs/ && showMarkOnNodes"
+          "when": "view =~ /leojs/ && leojsShowMarkOnNodes"
         },
         {
           "command": "leojs.enableLeoTreeNav",
-          "when": "view =~ /leojs/ && !leoTreeBrowse"
+          "when": "view =~ /leojs/ && !leojsTreeBrowse"
         },
         {
           "command": "leojs.showEditOnNodes",
-          "when": "view =~ /leojs/ && !showEditOnNodes"
+          "when": "view =~ /leojs/ && !leojsShowEditOnNodes"
         },
         {
           "command": "leojs.showAddOnNodes",
-          "when": "view =~ /leojs/ && !showAddOnNodes"
+          "when": "view =~ /leojs/ && !leojsShowAddOnNodes"
         },
         {
           "command": "leojs.showArrowsOnNodes",
-          "when": "view =~ /leojs/ && !showArrowsOnNodes"
+          "when": "view =~ /leojs/ && !leojsShowArrowsOnNodes"
         },
         {
           "command": "leojs.showCopyOnNodes",
-          "when": "view =~ /leojs/ && !showCopyOnNodes"
+          "when": "view =~ /leojs/ && !leojsShowCopyOnNodes"
         },
         {
           "command": "leojs.showCloneOnNodes",
-          "when": "view =~ /leojs/ && !showCloneOnNodes"
+          "when": "view =~ /leojs/ && !leojsShowCloneOnNodes"
         },
         {
           "command": "leojs.showMarkOnNodes",
-          "when": "view =~ /leojs/ && !showMarkOnNodes"
+          "when": "view =~ /leojs/ && !leojsShowMarkOnNodes"
         }
       ],
       "view/item/context": [
         {
           "command": "leojs.editHeadline",
-          "when": "showEditOnNodes && viewItem =~ /leoNode/",
+          "when": "leojsShowEditOnNodes && viewItem =~ /leojsNode/",
           "group": "inline@1"
         },
         {
           "command": "leojs.insertNode",
-          "when": "showAddOnNodes && viewItem =~ /leoNode/",
+          "when": "leojsShowAddOnNodes && viewItem =~ /leojsNode/",
           "group": "inline@2"
         },
         {
           "command": "leojs.moveOutlineDown",
-          "when": "showArrowsOnNodes && viewItem =~ /leoNode/",
+          "when": "leojsShowArrowsOnNodes && viewItem =~ /leojsNode/",
           "group": "inline@3"
         },
         {
           "command": "leojs.moveOutlineLeft",
-          "when": "showArrowsOnNodes && viewItem =~ /leoNode/",
+          "when": "leojsShowArrowsOnNodes && viewItem =~ /leojsNode/",
           "group": "inline@3"
         },
         {
           "command": "leojs.moveOutlineRight",
-          "when": "showArrowsOnNodes && viewItem =~ /leoNode/",
+          "when": "leojsShowArrowsOnNodes && viewItem =~ /leojsNode/",
           "group": "inline@3"
         },
         {
           "command": "leojs.moveOutlineUp",
-          "when": "showArrowsOnNodes && viewItem =~ /leoNode/",
+          "when": "leojsShowArrowsOnNodes && viewItem =~ /leojsNode/",
           "group": "inline@3"
         },
         {
           "command": "leojs.copyNode",
-          "when": "showCopyOnNodes && viewItem =~ /leoNode/",
+          "when": "leojsShowCopyOnNodes && viewItem =~ /leojsNode/",
           "group": "inline@4"
         },
         {
           "command": "leojs.cloneNode",
-          "when": "showCloneOnNodes && viewItem =~ /leoNode/",
+          "when": "leojsShowCloneOnNodes && viewItem =~ /leojsNode/",
           "group": "inline@4"
         },
         {
           "command": "leojs.mark",
-          "when": "showMarkOnNodes && viewItem =~ /leoNodeUnmarked/",
+          "when": "leojsShowMarkOnNodes && viewItem =~ /leojsNodeUnmarked/",
           "group": "inline@5"
         },
         {
           "command": "leojs.unmark",
-          "when": "showMarkOnNodes && viewItem =~ /leoNodeMarked/",
+          "when": "leojsShowMarkOnNodes && viewItem =~ /leojsNodeMarked/",
           "group": "inline@5"
         },
         {
           "command": "leojs.openAside",
-          "when": "showOpenAside && viewItem =~ /leoNode/",
-          "group": "leoNodeContext1@1"
+          "when": "leojsShowOpenAside && viewItem =~ /leojsNode/",
+          "group": "leojsNodeContext1@1"
         },
         {
           "command": "leojs.hoistNode",
-          "when": "viewItem =~ /leoNodeNotRoot/",
-          "group": "leoNodeContext1@2"
+          "when": "viewItem =~ /leojsNodeNotRoot/",
+          "group": "leojsNodeContext1@2"
         },
         {
           "command": "leojs.deHoist",
-          "when": "leoCanDehoist && viewItem =~ /leoNodeRoot/",
-          "group": "leoNodeContext1@2"
+          "when": "leoCanDehoist && viewItem =~ /leojsNodeRoot/",
+          "group": "leojsNodeContext1@2"
         },
         {
           "command": "leojs.refreshFromDisk",
-          "when": "viewItem =~ /leoNodeAtFile/",
-          "group": "leoNodeContext1@3"
+          "when": "viewItem =~ /leojsNodeAtFile/",
+          "group": "leojsNodeContext1@3"
         },
         {
           "command": "leojs.mark",
-          "when": "viewItem =~ /leoNodeUnmarked/",
-          "group": "leoNodeContext2@1"
+          "when": "viewItem =~ /leojsNodeUnmarked/",
+          "group": "leojsNodeContext2@1"
         },
         {
           "command": "leojs.unmark",
-          "when": "viewItem =~ /leoNodeMarked/",
-          "group": "leoNodeContext2@2"
+          "when": "viewItem =~ /leojsNodeMarked/",
+          "group": "leojsNodeContext2@2"
         },
         {
           "command": "leojs.copyNode",
-          "when": "viewItem =~ /leoNode/",
-          "group": "leoNodeContext2@3"
+          "when": "viewItem =~ /leojsNode/",
+          "group": "leojsNodeContext2@3"
         },
         {
           "command": "leojs.cutNode",
-          "when": "viewItem =~ /leoNode/",
-          "group": "leoNodeContext2@4"
+          "when": "viewItem =~ /leojsNode/",
+          "group": "leojsNodeContext2@4"
         },
         {
           "command": "leojs.pasteNode",
-          "when": "viewItem =~ /leoNode/",
-          "group": "leoNodeContext2@5"
+          "when": "viewItem =~ /leojsNode/",
+          "group": "leojsNodeContext2@5"
         },
         {
           "command": "leojs.pasteNodeAsClone",
-          "when": "viewItem =~ /leoNode/",
-          "group": "leoNodeContext2@6"
+          "when": "viewItem =~ /leojsNode/",
+          "group": "leojsNodeContext2@6"
         },
         {
           "command": "leojs.delete",
-          "when": "viewItem =~ /leoNode/",
-          "group": "leoNodeContext2@7"
+          "when": "viewItem =~ /leojsNode/",
+          "group": "leojsNodeContext2@7"
         },
         {
           "command": "leojs.insertNode",
-          "when": "leoTreeOpened && viewItem =~ /leoNode/",
-          "group": "leoNodeContext3@1"
+          "when": "leojsTreeOpened && viewItem =~ /leojsNode/",
+          "group": "leojsNodeContext3@1"
         },
         {
           "command": "leojs.cloneNode",
-          "when": "leoTreeOpened && viewItem =~ /leoNode/",
-          "group": "leoNodeContext3@2"
+          "when": "leojsTreeOpened && viewItem =~ /leojsNode/",
+          "group": "leojsNodeContext3@2"
         },
         {
           "command": "leojs.gotoNextClone",
-          "when": "leoTreeOpened && viewItem =~ /leoNodeCloned/",
-          "group": "leoNodeContext3@3"
+          "when": "leojsTreeOpened && viewItem =~ /leojsNodeCloned/",
+          "group": "leojsNodeContext3@3"
         }
       ]
     },
@@ -1599,258 +1603,258 @@
         "command": "leojs.executeScript",
         "key": "ctrl+b",
         "mac": "cmd+b",
-        "when": "leoTreeOpened && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.executeScript",
         "key": "ctrl+b",
         "mac": "cmd+b",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.minibuffer",
         "key": "alt+x",
-        "when": "leoTreeOpened"
+        "when": "leojsTreeOpened"
       },
       {
         "command": "leojs.showOutline",
         "key": "alt+t",
-        "when": "leoTreeOpened && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.showOutline",
         "key": "ctrl+t",
         "mac": "cmd+t",
-        "when": "leoTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.showBody",
         "key": "ctrl+t",
         "mac": "cmd+t",
-        "when": "leoTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs|leoDocuments|leoButtons/"
+        "when": "leojsTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs|leojsDocuments|leojsButtons/"
       },
       {
         "command": "leojs.showBody",
         "key": "alt+d",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs|leoDocuments|leoButtons/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs|leojsDocuments|leojsButtons/"
       },
       {
         "command": "leojs.showBody",
         "key": "tab",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs|leoDocuments|leoButtons/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs|leojsDocuments|leojsButtons/"
       },
       {
         "command": "leojs.showBody",
         "key": "enter",
-        "when": "leoTreeBrowse && leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.saveLeoFileFromOutline",
         "key": "ctrl+s",
         "mac": "cmd+s",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs|leoDocuments/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs|leojsDocuments/"
       },
       {
         "command": "leojs.saveLeoFile",
         "key": "ctrl+s",
         "mac": "cmd+s",
-        "when": "leoTreeOpened && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.contractAll",
         "key": "alt+-",
-        "when": "leoTreeOpened && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.contractAllFromOutline",
         "key": "alt+-",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs|leoDocuments|leoButtons/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs|leojsDocuments|leojsButtons/"
       },
       {
         "command": "leojs.editSelectedHeadline",
         "key": "ctrl+h",
         "mac": "cmd+h",
-        "when": "leoTreeOpened && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.editSelectedHeadlineFromOutline",
         "key": "ctrl+h",
         "mac": "cmd+h",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.markSelection",
         "key": "ctrl+m",
         "mac": "cmd+m",
-        "when": "leoTreeOpened && !leoMarked && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && !leojsMarked && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.markSelectionFromOutline",
         "key": "ctrl+m",
         "mac": "cmd+m",
-        "when": "leoTreeOpened && !leoMarked && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && !leojsMarked && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.unmarkSelection",
         "key": "ctrl+m",
         "mac": "cmd+m",
-        "when": "leoTreeOpened && leoMarked && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && leojsMarked && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.unmarkSelectionFromOutline",
         "key": "ctrl+m",
         "mac": "cmd+m",
-        "when": "leoTreeOpened && leoMarked && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && leojsMarked && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.extract",
         "key": "ctrl+shift+d",
         "mac": "cmd+shift+d",
-        "when": "leoTreeOpened && editorTextFocus && editorHasSelection && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && editorHasSelection && resourceScheme == leojs"
       },
       {
         "command": "leojs.extract",
         "key": "ctrl+shift+d",
         "mac": "cmd+shift+d",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.extractNames",
         "key": "ctrl+shift+n",
         "mac": "cmd++shift+n",
-        "when": "leoTreeOpened && editorTextFocus && editorHasSelection && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && editorHasSelection && resourceScheme == leojs"
       },
       {
         "command": "leojs.extractNames",
         "key": "ctrl+shift+n",
         "mac": "cmd+shift+n",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.moveOutlineDownSelection",
         "key": "ctrl+d",
         "mac": "cmd+d",
-        "when": "leoTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.moveOutlineDownSelection",
         "key": "shift+alt+down",
         "mac": "shift+alt+down",
-        "when": "leoTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.moveOutlineDownSelectionFromOutline",
         "key": "ctrl+d",
         "mac": "cmd+d",
-        "when": "leoTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.moveOutlineDownSelectionFromOutline",
         "key": "shift+down",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.moveOutlineDownSelectionFromOutline",
         "key": "shift+alt+down",
         "mac": "shift+alt+down",
-        "when": "leoTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.moveOutlineLeftSelection",
         "key": "ctrl+l",
         "mac": "cmd+l",
-        "when": "leoTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.moveOutlineLeftSelection",
         "key": "shift+alt+left",
         "mac": "shift+alt+left",
-        "when": "leoTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.moveOutlineLeftSelectionFromOutline",
         "key": "ctrl+l",
         "mac": "cmd+l",
-        "when": "leoTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.moveOutlineLeftSelectionFromOutline",
         "key": "shift+left",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.moveOutlineLeftSelectionFromOutline",
         "key": "shift+alt+left",
         "mac": "shift+alt+left",
-        "when": "leoTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.moveOutlineRightSelection",
         "key": "ctrl+r",
         "mac": "cmd+r",
-        "when": "leoTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.moveOutlineRightSelection",
         "key": "shift+alt+right",
         "mac": "shift+alt+right",
-        "when": "leoTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.moveOutlineRightSelectionFromOutline",
         "key": "ctrl+r",
         "mac": "cmd+r",
-        "when": "leoTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.moveOutlineRightSelectionFromOutline",
         "key": "shift+right",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.moveOutlineRightSelectionFromOutline",
         "key": "shift+alt+right",
         "mac": "shift+alt+right",
-        "when": "leoTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.moveOutlineUpSelection",
         "key": "ctrl+u",
         "mac": "cmd+u",
-        "when": "leoTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.moveOutlineUpSelection",
         "key": "shift+alt+up",
         "mac": "shift+alt+up",
-        "when": "leoTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.moveOutlineUpSelectionFromOutline",
         "key": "ctrl+u",
         "mac": "cmd+u",
-        "when": "leoTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.moveOutlineUpSelectionFromOutline",
         "key": "shift+up",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.moveOutlineUpSelectionFromOutline",
         "key": "shift+alt+up",
         "mac": "shift+alt+up",
-        "when": "leoTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && !editorHasSelection && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.sortSiblingsSelection",
         "key": "alt+a",
-        "when": "leoTreeOpened && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.sortSiblingsSelectionFromOutline",
         "key": "alt+a",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.promoteSelection",
@@ -1858,7 +1862,7 @@
         "win": "ctrl+oem_4",
         "linux": "ctrl+[",
         "mac": "cmd+[BracketLeft]",
-        "when": "leoTreeOpened && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.promoteSelectionFromOutline",
@@ -1866,7 +1870,7 @@
         "win": "ctrl+oem_4",
         "linux": "ctrl+[",
         "mac": "cmd+[BracketLeft]",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.demoteSelection",
@@ -1874,7 +1878,7 @@
         "win": "ctrl+oem_6",
         "linux": "ctrl+]",
         "mac": "cmd+[BracketRight]",
-        "when": "leoTreeOpened && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.demoteSelectionFromOutline",
@@ -1882,25 +1886,25 @@
         "win": "ctrl+oem_6",
         "linux": "ctrl+]",
         "mac": "cmd+[BracketRight]",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.insertNodeSelection",
         "key": "ctrl+i",
         "mac": "cmd+i",
-        "when": "leoTreeOpened && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.insertNodeSelectionFromOutline",
         "key": "ctrl+i",
         "mac": "cmd+i",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.insertNodeSelectionInterrupt",
         "key": "ctrl+i",
         "mac": "cmd+i",
-        "when": "leoTreeOpened && !sideBarFocus && !editorTextFocus"
+        "when": "leojsTreeOpened && !sideBarFocus && !editorTextFocus"
       },
       {
         "command": "leojs.cloneNodeSelection",
@@ -1908,7 +1912,7 @@
         "win": "ctrl+oem_7",
         "linux": "ctrl+'",
         "mac": "cmd+[Backquote]",
-        "when": "leoTreeOpened && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.cloneNodeSelectionFromOutline",
@@ -1916,155 +1920,155 @@
         "win": "ctrl+oem_7",
         "linux": "ctrl+'",
         "mac": "cmd+[Backquote]",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.cutNodeSelection",
         "key": "ctrl+shift+x",
         "mac": "cmd+shift+x",
-        "when": "leoTreeOpened && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.cutNodeSelectionFromOutline",
         "key": "ctrl+shift+x",
         "mac": "cmd+shift+x",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.copyNodeSelection",
         "key": "ctrl+shift+c",
         "mac": "cmd+shift+c",
-        "when": "leoTreeOpened && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.copyNodeSelection",
         "key": "ctrl+shift+c",
         "mac": "cmd+shift+c",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.pasteNodeAtSelection",
         "key": "ctrl+shift+v",
         "mac": "cmd+shift+v",
-        "when": "leoTreeOpened && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.pasteNodeAtSelectionFromOutline",
         "key": "ctrl+shift+v",
         "mac": "cmd+shift+v",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.deleteSelection",
         "key": "ctrl+shift+backspace",
         "mac": "cmd+shift+backspace",
-        "when": "leoTreeOpened && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.deleteSelectionFromOutline",
         "key": "ctrl+shift+backspace",
         "mac": "cmd+shift+backspace",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.gotoFirstVisible",
         "key": "alt+home",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.gotoLastSibling",
         "key": "alt+end",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.gotoFirstVisible",
         "key": "home",
-        "when": "leoTreeBrowse && leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.gotoLastVisible",
         "key": "end",
-        "when": "leoTreeBrowse && leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.pageUp",
         "key": "pageup",
-        "when": "leoTreeBrowse && leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.pageDown",
         "key": "pagedown",
-        "when": "leoTreeBrowse && leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.gotoNextCloneSelectionFromOutline",
         "key": "alt+n",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.gotoNextCloneSelection",
         "key": "alt+n",
-        "when": "leoTreeOpened && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.gotoNextVisible",
         "key": "down",
-        "when": "leoTreeBrowse && leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.gotoNextVisible",
         "key": "alt+down",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs|leoDocuments|leoButtons/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs|leojsDocuments|leojsButtons/"
       },
       {
         "command": "leojs.gotoNextVisible",
         "key": "alt+down",
-        "when": "leoTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.gotoPrevVisible",
         "key": "up",
-        "when": "leoTreeBrowse && leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.gotoPrevVisible",
         "key": "alt+up",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs|leoDocuments|leoButtons/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs|leojsDocuments|leojsButtons/"
       },
       {
         "command": "leojs.gotoPrevVisible",
         "key": "alt+up",
-        "when": "leoTreeOpened && !editorHasSelection  && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && !editorHasSelection  && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.contractOrGoLeft",
         "key": "left",
-        "when": "leoTreeBrowse && leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.contractOrGoLeft",
         "key": "alt+left",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs|leoDocuments|leoButtons/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs|leojsDocuments|leojsButtons/"
       },
       {
         "command": "leojs.contractOrGoLeft",
         "key": "alt+left",
-        "when": "leoTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.expandAndGoRight",
         "key": "right",
-        "when": "leoTreeBrowse && leoTreeOpened && sideBarFocus && focusedView =~ /leojs/"
+        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /leojs/"
       },
       {
         "command": "leojs.expandAndGoRight",
         "key": "alt+right",
-        "when": "leoTreeOpened && sideBarFocus && focusedView =~ /leojs|leoDocuments|leoButtons/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /leojs|leojsDocuments|leojsButtons/"
       },
       {
         "command": "leojs.expandAndGoRight",
         "key": "alt+right",
-        "when": "leoTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leo"
+        "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       }
     ]
   },

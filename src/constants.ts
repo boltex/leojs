@@ -16,14 +16,14 @@ export class Constants {
     public static BUTTONS_ID: string = "leojsButtons";
     public static BUTTONS_EXPLORER_ID: string = "leojsButtonsExplorer";
 
-    public static FILE_EXTENSION: string = "leo";
-    public static URI_LEO_SCHEME: string = "leo";
+    public static FILE_EXTENSION: string = "leojs";
+    public static URI_LEO_SCHEME: string = "leojs";
     public static URI_FILE_SCHEME: string = "file";
-    public static URI_SCHEME_HEADER: string = "leo:/";
-    public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files";
+    public static URI_SCHEME_HEADER: string = "leojs:/";
+    public static FILE_OPEN_FILTER_MESSAGE: string = "Leojs Files";
     public static UNTITLED_FILE_NAME: string = "untitled";
-    public static RECENT_FILES_KEY: string = "leoRecentFiles";
-    public static LAST_FILES_KEY: string = "leoLastFiles";
+    public static RECENT_FILES_KEY: string = "leojsRecentFiles";
+    public static LAST_FILES_KEY: string = "leojsLastFiles";
 
     public static REFRESH_DEBOUNCE_DELAY: number = 50;
     public static STATES_DEBOUNCE_DELAY: number = 100;
@@ -46,11 +46,11 @@ export class Constants {
         ICON_FILE_EXT: ".svg",
         STATUSBAR_INDICATOR: "$(keyboard) ",
         STATUSBAR_COLOR: "fb7c47",
-        QUICK_OPEN_LEO_COMMANDS: ">leo: ",
+        QUICK_OPEN_LEO_COMMANDS: ">leojs: ",
         EXPLORER_TREEVIEW_PREFIX: "LEO ",
         TREEVIEW_TITLE: "OUTLINE",
         BODY_TITLE: "LEO BODY",
-        LOG_PANE_TITLE: "Leo Log Window",
+        LOG_PANE_TITLE: "Leojs Log Window",
         THEME_STATUSBAR: "statusBar.foreground"
     };
 
@@ -73,11 +73,11 @@ export class Constants {
         SAVE_CHANGES: "Save changes to",
         BEFORE_CLOSING: "before closing?",
         CANCEL: "Cancel",
-        OPEN_WITH_LEOJS: "Open this Leo file with leojs?",
-        OPEN_RECENT_FILE: "Open Recent Leo File",
-        RIGHT_CLICK_TO_OPEN: "Right-click Leo files to open with leojs",
-        FILE_ALREADY_OPENED: "Leo file already opened",
-        CHOOSE_OPENED_FILE: "Select an opened Leo File",
+        OPEN_WITH_LEOJS: "Open this Leojs file?",
+        OPEN_RECENT_FILE: "Open Recent Leojs File",
+        RIGHT_CLICK_TO_OPEN: "Right-click to open with leojs",
+        FILE_ALREADY_OPENED: "Leojs file already opened",
+        CHOOSE_OPENED_FILE: "Select an opened Leojs File",
         FILE_NOT_OPENED: "No files opened.",
         PROMPT_EDIT_HEADLINE: "Edit Headline",
         PROMPT_INSERT_NODE: "Insert Node",
@@ -92,8 +92,8 @@ export class Constants {
         REFRESHED: " Nodes refreshed.", // with voluntary leading space
         IGNORED: " They were ignored.", // with voluntary leading space
         TOO_FAST: "Leo is busy! ", // with voluntary trailing space
-        STATUSBAR_TOOLTIP_ON: "Leo Key Bindings are in effect",
-        STATUSBAR_TOOLTIP_OFF: "Leo Key Bindings off",
+        STATUSBAR_TOOLTIP_ON: "Leojs Key Bindings are in effect",
+        STATUSBAR_TOOLTIP_OFF: "Leojs Key Bindings off",
     };
 
     /**
@@ -129,47 +129,47 @@ export class Constants {
      */
     public static CONTEXT_FLAGS = {
         // Main flags for connection and opened file
-        LEO_READY: "leoReady", // Extension activated and classes created and ready
-        TREE_OPENED: "leoTreeOpened", // At least one Leo file opened
-        TREE_TITLED: "leoTreeTitled", // Tree is a Leo file and not a new untitled document
-        SERVER_STARTED: "leoServerStarted", // Auto-start or manually started
+        LEO_READY: "leojsReady", // Extension activated and classes created and ready
+        TREE_OPENED: "leojsTreeOpened", // At least one Leo file opened
+        TREE_TITLED: "leojsTreeTitled", // Tree is a Leo file and not a new untitled document
+        SERVER_STARTED: "leojsServerStarted", // Auto-start or manually started
         // 'states' flags for currently opened tree view
-        LEO_CHANGED: "leoChanged",
-        LEO_CAN_UNDO: "leoCanUndo",
-        LEO_CAN_REDO: "leoCanRedo",
-        LEO_CAN_DEMOTE: "leoCanDemote",
-        LEO_CAN_PROMOTE: "leoCanPromote",
-        LEO_CAN_DEHOIST: "leoCanDehoist",
+        LEO_CHANGED: "leojsChanged",
+        LEO_CAN_UNDO: "leojsCanUndo",
+        LEO_CAN_REDO: "leojsCanRedo",
+        LEO_CAN_DEMOTE: "leojsCanDemote",
+        LEO_CAN_PROMOTE: "leojsCanPromote",
+        LEO_CAN_DEHOIST: "leojsCanDehoist",
         // 'states' flags about current selection, for visibility and commands availability
-        SELECTED_MARKED: "leoMarked", // no need for unmarked here, use !leoMarked
-        SELECTED_CLONE: "leoCloned",
-        SELECTED_DIRTY: "leoDirty",
-        SELECTED_EMPTY: "leoEmpty",
-        SELECTED_CHILD: "leoChild", // Has children
-        SELECTED_ATFILE: "LeoAtFile", // Can be refreshed
-        SELECTED_ROOT: "leoRoot", // ! Computed by hand
+        SELECTED_MARKED: "leojsMarked", // no need for unmarked here, use !leojsMarked
+        SELECTED_CLONE: "leojsCloned",
+        SELECTED_DIRTY: "leojsDirty",
+        SELECTED_EMPTY: "leojsEmpty",
+        SELECTED_CHILD: "leojsChild", // Has children
+        SELECTED_ATFILE: "LeojsAtFile", // Can be refreshed
+        SELECTED_ROOT: "leojsRoot", // ! Computed by hand
         // Statusbar Flag 'keybindings in effect'
-        LEO_SELECTED: "leoObjectSelected", // keybindings "On": Outline or body has focus
+        LEO_SELECTED: "leojsObjectSelected", // keybindings "On": Outline or body has focus
         // Context Flags for 'when' clauses, used concatenated, for each outline node
-        NODE_MARKED: "leoNodeMarked",  // Selected node is marked
-        NODE_UNMARKED: "leoNodeUnmarked", // Selected node is unmarked (Needed for regexp)
-        NODE_ATFILE: "leoNodeAtFile", // Selected node is an @file or @clean, etc...
-        NODE_CLONED: "leoNodeCloned",
-        NODE_ROOT: "leoNodeRoot",
-        NODE_NOT_ROOT: "leoNodeNotRoot",
+        NODE_MARKED: "leojsNodeMarked",  // Selected node is marked
+        NODE_UNMARKED: "leojsNodeUnmarked", // Selected node is unmarked (Needed for regexp)
+        NODE_ATFILE: "leojsNodeAtFile", // Selected node is an @file or @clean, etc...
+        NODE_CLONED: "leojsNodeCloned",
+        NODE_ROOT: "leojsNodeRoot",
+        NODE_NOT_ROOT: "leojsNodeNotRoot",
         // Flags for Leo documents tree view icons and hover node command buttons
-        DOCUMENT_SELECTED_TITLED: "leoDocumentSelectedTitled",
-        DOCUMENT_TITLED: "leoDocumentTitled",
-        DOCUMENT_SELECTED_UNTITLED: "leoDocumentSelectedUntitled",
-        DOCUMENT_UNTITLED: "leoDocumentUntitled",
+        DOCUMENT_SELECTED_TITLED: "leojsDocumentSelectedTitled",
+        DOCUMENT_TITLED: "leojsDocumentTitled",
+        DOCUMENT_SELECTED_UNTITLED: "leojsDocumentSelectedUntitled",
+        DOCUMENT_UNTITLED: "leojsDocumentUntitled",
         // UI
-        LEO_TREE_BROWSE: "leoTreeBrowse", // Override vscode's tree behavior with Leo's own
-        SHOW_EDIT: "showEditOnNodes",
-        SHOW_ARROWS: "showArrowsOnNodes",
-        SHOW_ADD: "showAddOnNodes",
-        SHOW_MARK: "showMarkOnNodes",
-        SHOW_CLONE: "showCloneOnNodes",
-        SHOW_COPY: "showCopyOnNodes",
+        LEO_TREE_BROWSE: "leojsTreeBrowse", // Override vscode's tree behavior with Leo's own
+        SHOW_EDIT: "leojsShowEditOnNodes",
+        SHOW_ARROWS: "leojsShowArrowsOnNodes",
+        SHOW_ADD: "leojsShowAddOnNodes",
+        SHOW_MARK: "leojsShowMarkOnNodes",
+        SHOW_CLONE: "leojsShowCloneOnNodes",
+        SHOW_COPY: "leojsShowCopyOnNodes",
     };
 
     /**
