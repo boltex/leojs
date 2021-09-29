@@ -40,7 +40,7 @@
       "activitybar": [
         {
           "id": "leojsView",
-          "title": "Leo",
+          "title": "Leojs",
           "icon": "resources/icon.svg"
         }
       ]
@@ -49,34 +49,34 @@
       "explorer": [
         {
           "id": "leojsExplorer",
-          "name": "Leo Outline",
-          "contextualTitle": "Leo"
+          "name": "Leojs Outline",
+          "contextualTitle": "Leojs"
         },
         {
           "id": "leojsDocumentsExplorer",
-          "name": "Leo Documents",
-          "contextualTitle": "Leo"
+          "name": "Leojs Documents",
+          "contextualTitle": "Leojs"
         },
         {
           "id": "leojsButtonsExplorer",
-          "name": "Leo Buttons",
-          "contextualTitle": "Leo"
+          "name": "Leojs Buttons",
+          "contextualTitle": "Leojs"
         }
       ],
       "leojsView": [
         {
           "id": "leojs",
-          "contextualTitle": "Leo",
+          "contextualTitle": "Leojs",
           "name": "Outline"
         },
         {
           "id": "leojsDocuments",
-          "contextualTitle": "Leo",
+          "contextualTitle": "Leojs",
           "name": "Documents"
         },
         {
           "id": "leojsButtons",
-          "contextualTitle": "Leo",
+          "contextualTitle": "Leojs",
           "name": "Buttons"
         }
       ]
@@ -126,43 +126,43 @@
     "commands": [
       {
         "command": "leojs.test",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Test leojs"
       },
       {
         "command": "leojs.executeScript",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Execute Script"
       },
       {
         "command": "leojs.minibuffer",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Minibuffer"
       },
       {
         "command": "leojs.removeButton",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Remove Button"
       },
       {
         "command": "leojs.showBody",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Focus to Body"
       },
       {
         "command": "leojs.showOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Focus to Tree"
       },
       {
         "command": "leojs.showLogPane",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Show Log Pane"
       },
       {
         "command": "leojs.openLeoFile",
         "title": "Open Leo File",
-        "category": "Leo",
+        "category": "Leojs",
         "icon": {
           "light": "resources/light/folder.svg",
           "dark": "resources/dark/folder.svg"
@@ -170,13 +170,13 @@
       },
       {
         "command": "leojs.recentLeoFiles",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Recent Files"
       },
       {
         "command": "leojs.switchLeoFile",
         "title": "Switch Leo File",
-        "category": "Leo",
+        "category": "Leojs",
         "icon": {
           "light": "resources/light/switch.svg",
           "dark": "resources/dark/switch.svg"
@@ -185,7 +185,7 @@
       {
         "command": "leojs.newLeoFile",
         "title": "New Leo File",
-        "category": "Leo",
+        "category": "Leojs",
         "icon": {
           "light": "resources/light/new-file.svg",
           "dark": "resources/dark/new-file.svg"
@@ -194,7 +194,7 @@
       {
         "command": "leojs.closeLeoFile",
         "title": "Close Leo File",
-        "category": "Leo",
+        "category": "Leojs",
         "icon": {
           "light": "resources/light/close.svg",
           "dark": "resources/dark/close.svg"
@@ -202,7 +202,7 @@
       },
       {
         "command": "leojs.saveLeoFile",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Save Leo File",
         "icon": {
           "light": "resources/light/save.svg",
@@ -211,7 +211,7 @@
       },
       {
         "command": "leojs.saveLeoFileFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Save Leo File",
         "icon": {
           "light": "resources/light/save.svg",
@@ -220,7 +220,7 @@
       },
       {
         "command": "leojs.saveAsLeoFile",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Save Leo File as...",
         "icon": {
           "light": "resources/light/save-as.svg",
@@ -229,32 +229,32 @@
       },
       {
         "command": "leojs.refreshFromDisk",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Refresh from Disk"
       },
       {
         "command": "leojs.refreshFromDiskSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Refresh from Disk"
       },
       {
         "command": "leojs.refreshFromDiskSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Refresh from Disk"
       },
       {
         "command": "leojs.gitDiff",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Git Diff"
       },
       {
         "command": "leojs.openAside",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Open to the Side"
       },
       {
         "command": "leojs.contractAll",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Contract All",
         "icon": {
           "light": "resources/light/collapse.svg",
@@ -263,7 +263,7 @@
       },
       {
         "command": "leojs.contractAllFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Contract All",
         "icon": {
           "light": "resources/light/collapse.svg",
@@ -272,7 +272,7 @@
       },
       {
         "command": "leojs.editHeadline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Edit Headline",
         "icon": {
           "light": "resources/light/edit.svg",
@@ -281,17 +281,17 @@
       },
       {
         "command": "leojs.editSelectedHeadline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Edit Headline"
       },
       {
         "command": "leojs.editSelectedHeadlineFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Edit Headline"
       },
       {
         "command": "leojs.mark",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Mark",
         "icon": {
           "light": "resources/light/mark.svg",
@@ -300,17 +300,17 @@
       },
       {
         "command": "leojs.markSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Mark"
       },
       {
         "command": "leojs.markSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Mark"
       },
       {
         "command": "leojs.unmark",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Unmark",
         "icon": {
           "light": "resources/light/unmark.svg",
@@ -319,22 +319,22 @@
       },
       {
         "command": "leojs.unmarkSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Unmark"
       },
       {
         "command": "leojs.unmarkSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Unmark"
       },
       {
         "command": "leojs.unmarkAll",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Unmark All"
       },
       {
         "command": "leojs.copyNode",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Copy Node",
         "icon": {
           "light": "resources/light/clipboard.svg",
@@ -343,57 +343,57 @@
       },
       {
         "command": "leojs.copyNodeSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Copy Node"
       },
       {
         "command": "leojs.cutNode",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Cut Node"
       },
       {
         "command": "leojs.cutNodeSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Cut Node"
       },
       {
         "command": "leojs.cutNodeSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Cut Node"
       },
       {
         "command": "leojs.pasteNode",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Paste Node"
       },
       {
         "command": "leojs.pasteNodeAtSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Paste Node"
       },
       {
         "command": "leojs.pasteNodeAtSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Paste Node"
       },
       {
         "command": "leojs.pasteNodeAsClone",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Paste Node as Clone"
       },
       {
         "command": "leojs.pasteNodeAsCloneAtSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Paste Node as Clone"
       },
       {
         "command": "leojs.pasteNodeAsCloneAtSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Paste Node as Clone"
       },
       {
         "command": "leojs.delete",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Delete",
         "icon": {
           "light": "resources/light/close.svg",
@@ -402,27 +402,27 @@
       },
       {
         "command": "leojs.deleteSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Delete Node"
       },
       {
         "command": "leojs.deleteSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Delete Node"
       },
       {
         "command": "leojs.extract",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Extract"
       },
       {
         "command": "leojs.extractNames",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Extract Names"
       },
       {
         "command": "leojs.moveOutlineDown",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Move Outline Down",
         "icon": {
           "light": "resources/light/arrow-down.svg",
@@ -431,17 +431,17 @@
       },
       {
         "command": "leojs.moveOutlineDownSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Move Outline Down"
       },
       {
         "command": "leojs.moveOutlineDownSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Move Outline Down"
       },
       {
         "command": "leojs.moveOutlineLeft",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Move Outline Left",
         "icon": {
           "light": "resources/light/arrow-left.svg",
@@ -450,17 +450,17 @@
       },
       {
         "command": "leojs.moveOutlineLeftSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Move Outline Left"
       },
       {
         "command": "leojs.moveOutlineLeftSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Move Outline Left"
       },
       {
         "command": "leojs.moveOutlineRight",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Move Outline Right",
         "icon": {
           "light": "resources/light/arrow-right.svg",
@@ -469,17 +469,17 @@
       },
       {
         "command": "leojs.moveOutlineRightSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Move Outline Right"
       },
       {
         "command": "leojs.moveOutlineRightSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Move Outline Right"
       },
       {
         "command": "leojs.moveOutlineUp",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Move Outline Up",
         "icon": {
           "light": "resources/light/arrow-up.svg",
@@ -488,17 +488,17 @@
       },
       {
         "command": "leojs.moveOutlineUpSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Move Outline Up"
       },
       {
         "command": "leojs.moveOutlineUpSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Move Outline Up"
       },
       {
         "command": "leojs.insertNode",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Insert Node",
         "icon": {
           "light": "resources/light/plus.svg",
@@ -507,7 +507,7 @@
       },
       {
         "command": "leojs.insertNodeSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Insert Node",
         "icon": {
           "light": "resources/light/plus.svg",
@@ -516,7 +516,7 @@
       },
       {
         "command": "leojs.insertNodeSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Insert Node",
         "icon": {
           "light": "resources/light/plus.svg",
@@ -525,7 +525,7 @@
       },
       {
         "command": "leojs.insertNodeSelectionInterrupt",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Insert Node",
         "icon": {
           "light": "resources/light/plus.svg",
@@ -534,7 +534,7 @@
       },
       {
         "command": "leojs.cloneNode",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Clone Node",
         "icon": {
           "light": "resources/light/link.svg",
@@ -543,147 +543,147 @@
       },
       {
         "command": "leojs.cloneNodeSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Clone Node"
       },
       {
         "command": "leojs.cloneNodeSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Clone Node"
       },
       {
         "command": "leojs.promote",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Promote Children"
       },
       {
         "command": "leojs.promoteSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Promote Children"
       },
       {
         "command": "leojs.promoteSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Promote Children"
       },
       {
         "command": "leojs.demote",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Demote Siblings"
       },
       {
         "command": "leojs.demoteSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Demote Siblings"
       },
       {
         "command": "leojs.demoteSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Demote Siblings"
       },
       {
         "command": "leojs.sortChildrenSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Sort Children"
       },
       {
         "command": "leojs.sortChildrenSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Sort Children"
       },
       {
         "command": "leojs.sortSiblingsSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Sort Siblings"
       },
       {
         "command": "leojs.sortSiblingsSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Sort Siblings"
       },
       {
         "command": "leojs.gotoFirstVisible",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Goto First Visible"
       },
       {
         "command": "leojs.gotoLastVisible",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Goto Last Visible"
       },
       {
         "command": "leojs.pageUp",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Page Up"
       },
       {
         "command": "leojs.pageDown",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Page Down"
       },
       {
         "command": "leojs.gotoLastSibling",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Goto Last Sibling"
       },
       {
         "command": "leojs.gotoNextVisible",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Goto Next Visible"
       },
       {
         "command": "leojs.gotoPrevVisible",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Goto Prev Visible"
       },
       {
         "command": "leojs.contractOrGoLeft",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Contract Or Go Left"
       },
       {
         "command": "leojs.expandAndGoRight",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Expand And Go Right"
       },
       {
         "command": "leojs.gotoNextMarked",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Goto Next Marked"
       },
       {
         "command": "leojs.gotoNextClone",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Goto Next Clone"
       },
       {
         "command": "leojs.gotoNextCloneSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Goto Next Clone"
       },
       {
         "command": "leojs.gotoNextCloneSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Goto Next Clone"
       },
       {
         "command": "leojs.hoistNode",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Hoist"
       },
       {
         "command": "leojs.hoistSelection",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Hoist"
       },
       {
         "command": "leojs.hoistSelectionFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Hoist"
       },
       {
         "command": "leojs.deHoist",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "De-Hoist",
         "icon": {
           "light": "resources/light/dehoist.svg",
@@ -692,7 +692,7 @@
       },
       {
         "command": "leojs.deHoistFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "De-Hoist",
         "icon": {
           "light": "resources/light/dehoist.svg",
@@ -701,7 +701,7 @@
       },
       {
         "command": "leojs.undo",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Undo",
         "icon": {
           "light": "resources/light/undo.svg",
@@ -710,7 +710,7 @@
       },
       {
         "command": "leojs.undoFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Undo",
         "icon": {
           "light": "resources/light/undo.svg",
@@ -719,7 +719,7 @@
       },
       {
         "command": "leojs.redo",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Redo",
         "icon": {
           "light": "resources/light/redo.svg",
@@ -728,7 +728,7 @@
       },
       {
         "command": "leojs.redoFromOutline",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Redo",
         "icon": {
           "light": "resources/light/redo.svg",
@@ -737,62 +737,62 @@
       },
       {
         "command": "leojs.cloneFindAll",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Clone Find All"
       },
       {
         "command": "leojs.cloneFindAllFlattened",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Clone Find All Flattened"
       },
       {
         "command": "leojs.cloneFindMarked",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Clone Find Marked"
       },
       {
         "command": "leojs.cloneFindFlattenedMarked",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "cffm - Clone Find Flattened Marked"
       },
       {
         "command": "leojs.copyMarked",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Copy Marked"
       },
       {
         "command": "leojs.diffMarkedNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Diff Marked Nodes"
       },
       {
         "command": "leojs.markChangedItems",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Mark Changed Items"
       },
       {
         "command": "leojs.markSubheads",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Mark Subheads"
       },
       {
         "command": "leojs.cloneMarkedNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Clone Marked Nodes"
       },
       {
         "command": "leojs.deleteMarkedNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Delete Marked Nodes"
       },
       {
         "command": "leojs.moveMarkedNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Move Marked Nodes"
       },
       {
         "command": "leojs.enableLeoTreeNav",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Enable Leo Tree Navigation",
         "icon": {
           "light": "resources/light/no-check.svg",
@@ -801,7 +801,7 @@
       },
       {
         "command": "leojs.showEditOnNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Show edit-headline",
         "icon": {
           "light": "resources/light/no-check.svg",
@@ -810,7 +810,7 @@
       },
       {
         "command": "leojs.showAddOnNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Show Add Node",
         "icon": {
           "light": "resources/light/no-check.svg",
@@ -819,7 +819,7 @@
       },
       {
         "command": "leojs.showArrowsOnNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Show move-commands",
         "icon": {
           "light": "resources/light/no-check.svg",
@@ -828,7 +828,7 @@
       },
       {
         "command": "leojs.showCopyOnNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Show Copy Node",
         "icon": {
           "light": "resources/light/no-check.svg",
@@ -837,7 +837,7 @@
       },
       {
         "command": "leojs.showCloneOnNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Show Clone Node",
         "icon": {
           "light": "resources/light/no-check.svg",
@@ -846,7 +846,7 @@
       },
       {
         "command": "leojs.showMarkOnNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Show Mark/Unmark Node",
         "icon": {
           "light": "resources/light/no-check.svg",
@@ -855,7 +855,7 @@
       },
       {
         "command": "leojs.disableLeoTreeNav",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Disable Leo Tree Navigation",
         "icon": {
           "light": "resources/light/check.svg",
@@ -864,7 +864,7 @@
       },
       {
         "command": "leojs.hideEditOnNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Hide edit-headline",
         "icon": {
           "light": "resources/light/check.svg",
@@ -873,7 +873,7 @@
       },
       {
         "command": "leojs.hideAddOnNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Hide Add Node",
         "icon": {
           "light": "resources/light/check.svg",
@@ -882,7 +882,7 @@
       },
       {
         "command": "leojs.hideArrowsOnNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Hide move-commands",
         "icon": {
           "light": "resources/light/check.svg",
@@ -891,7 +891,7 @@
       },
       {
         "command": "leojs.hideCopyOnNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Hide Copy Node",
         "icon": {
           "light": "resources/light/check.svg",
@@ -900,7 +900,7 @@
       },
       {
         "command": "leojs.hideCloneOnNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Hide Clone Node",
         "icon": {
           "light": "resources/light/check.svg",
@@ -909,7 +909,7 @@
       },
       {
         "command": "leojs.hideMarkOnNodes",
-        "category": "Leo",
+        "category": "Leojs",
         "title": "Hide Mark/Unmark Node",
         "icon": {
           "light": "resources/light/check.svg",

@@ -1869,9 +1869,9 @@ public static GUI = {
     STATUSBAR_INDICATOR: "$(keyboard) ",
     STATUSBAR_COLOR: "fb7c47",
     QUICK_OPEN_LEO_COMMANDS: "&gt;leojs: ",
-    EXPLORER_TREEVIEW_PREFIX: "LEO ",
+    EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
     TREEVIEW_TITLE: "OUTLINE",
-    BODY_TITLE: "LEO BODY",
+    BODY_TITLE: "LEOJS BODY",
     LOG_PANE_TITLE: "Leojs Log Window",
     THEME_STATUSBAR: "statusBar.foreground"
 };
@@ -3478,7 +3478,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 <t tx="felix.20201214205159.10">{
   "command": "leojs.openLeoFile",
   "title": "Open Leo File",
-  "category": "Leo",
+  "category": "Leojs",
   "icon": {
     "light": "resources/light/folder.svg",
     "dark": "resources/dark/folder.svg"
@@ -3486,13 +3486,13 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.recentLeoFiles",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Recent Files"
 },
 {
   "command": "leojs.switchLeoFile",
   "title": "Switch Leo File",
-  "category": "Leo",
+  "category": "Leojs",
   "icon": {
     "light": "resources/light/switch.svg",
     "dark": "resources/dark/switch.svg"
@@ -3501,7 +3501,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 {
   "command": "leojs.newLeoFile",
   "title": "New Leo File",
-  "category": "Leo",
+  "category": "Leojs",
   "icon": {
     "light": "resources/light/new-file.svg",
     "dark": "resources/dark/new-file.svg"
@@ -3510,7 +3510,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 {
   "command": "leojs.closeLeoFile",
   "title": "Close Leo File",
-  "category": "Leo",
+  "category": "Leojs",
   "icon": {
     "light": "resources/light/close.svg",
     "dark": "resources/dark/close.svg"
@@ -3518,7 +3518,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.saveLeoFile",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Save Leo File",
   "icon": {
     "light": "resources/light/save.svg",
@@ -3527,7 +3527,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.saveLeoFileFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Save Leo File",
   "icon": {
     "light": "resources/light/save.svg",
@@ -3536,7 +3536,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.saveAsLeoFile",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Save Leo File as...",
   "icon": {
     "light": "resources/light/save-as.svg",
@@ -3545,33 +3545,33 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.refreshFromDisk",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Refresh from Disk"
 },
 {
   "command": "leojs.refreshFromDiskSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Refresh from Disk"
 },
 {
   "command": "leojs.refreshFromDiskSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Refresh from Disk"
 },
 {
   "command": "leojs.gitDiff",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Git Diff"
 },
 </t>
 <t tx="felix.20201214205159.11">{
   "command": "leojs.openAside",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Open to the Side"
 },
 {
   "command": "leojs.contractAll",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Contract All",
   "icon": {
     "light": "resources/light/collapse.svg",
@@ -3580,7 +3580,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.contractAllFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Contract All",
   "icon": {
     "light": "resources/light/collapse.svg",
@@ -3590,7 +3590,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 </t>
 <t tx="felix.20201214205159.12">{
   "command": "leojs.editHeadline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Edit Headline",
   "icon": {
     "light": "resources/light/edit.svg",
@@ -3599,18 +3599,18 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.editSelectedHeadline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Edit Headline"
 },
 {
   "command": "leojs.editSelectedHeadlineFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Edit Headline"
 },
 </t>
 <t tx="felix.20201214205159.13">{
   "command": "leojs.mark",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Mark",
   "icon": {
     "light": "resources/light/mark.svg",
@@ -3619,17 +3619,17 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.markSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Mark"
 },
 {
   "command": "leojs.markSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Mark"
 },
 {
   "command": "leojs.unmark",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Unmark",
   "icon": {
     "light": "resources/light/unmark.svg",
@@ -3638,23 +3638,23 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.unmarkSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Unmark"
 },
 {
   "command": "leojs.unmarkSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Unmark"
 },
 {
   "command": "leojs.unmarkAll",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Unmark All"
 },
 </t>
 <t tx="felix.20201214205159.14">{
   "command": "leojs.copyNode",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Copy Node",
   "icon": {
     "light": "resources/light/clipboard.svg",
@@ -3663,57 +3663,57 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.copyNodeSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Copy Node"
 },
 {
   "command": "leojs.cutNode",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Cut Node"
 },
 {
   "command": "leojs.cutNodeSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Cut Node"
 },
 {
   "command": "leojs.cutNodeSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Cut Node"
 },
 {
   "command": "leojs.pasteNode",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Paste Node"
 },
 {
   "command": "leojs.pasteNodeAtSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Paste Node"
 },
 {
   "command": "leojs.pasteNodeAtSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Paste Node"
 },
 {
   "command": "leojs.pasteNodeAsClone",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Paste Node as Clone"
 },
 {
   "command": "leojs.pasteNodeAsCloneAtSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Paste Node as Clone"
 },
 {
   "command": "leojs.pasteNodeAsCloneAtSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Paste Node as Clone"
 },
 {
   "command": "leojs.delete",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Delete",
   "icon": {
     "light": "resources/light/close.svg",
@@ -3722,29 +3722,29 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.deleteSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Delete Node"
 },
 {
   "command": "leojs.deleteSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Delete Node"
 },
 </t>
 <t tx="felix.20201214205159.15">{
   "command": "leojs.extract",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Extract"
 },
 {
   "command": "leojs.extractNames",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Extract Names"
 },
 </t>
 <t tx="felix.20201214205159.16">{
   "command": "leojs.moveOutlineDown",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Move Outline Down",
   "icon": {
     "light": "resources/light/arrow-down.svg",
@@ -3753,17 +3753,17 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.moveOutlineDownSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Move Outline Down"
 },
 {
   "command": "leojs.moveOutlineDownSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Move Outline Down"
 },
 {
   "command": "leojs.moveOutlineLeft",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Move Outline Left",
   "icon": {
     "light": "resources/light/arrow-left.svg",
@@ -3772,17 +3772,17 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.moveOutlineLeftSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Move Outline Left"
 },
 {
   "command": "leojs.moveOutlineLeftSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Move Outline Left"
 },
 {
   "command": "leojs.moveOutlineRight",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Move Outline Right",
   "icon": {
     "light": "resources/light/arrow-right.svg",
@@ -3791,17 +3791,17 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.moveOutlineRightSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Move Outline Right"
 },
 {
   "command": "leojs.moveOutlineRightSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Move Outline Right"
 },
 {
   "command": "leojs.moveOutlineUp",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Move Outline Up",
   "icon": {
     "light": "resources/light/arrow-up.svg",
@@ -3810,18 +3810,18 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.moveOutlineUpSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Move Outline Up"
 },
 {
   "command": "leojs.moveOutlineUpSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Move Outline Up"
 },
 </t>
 <t tx="felix.20201214205159.17">{
   "command": "leojs.insertNode",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Insert Node",
   "icon": {
     "light": "resources/light/plus.svg",
@@ -3830,7 +3830,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.insertNodeSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Insert Node",
   "icon": {
     "light": "resources/light/plus.svg",
@@ -3839,7 +3839,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.insertNodeSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Insert Node",
   "icon": {
     "light": "resources/light/plus.svg",
@@ -3848,7 +3848,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.insertNodeSelectionInterrupt",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Insert Node",
   "icon": {
     "light": "resources/light/plus.svg",
@@ -3857,7 +3857,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.cloneNode",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Clone Node",
   "icon": {
     "light": "resources/light/link.svg",
@@ -3866,149 +3866,149 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.cloneNodeSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Clone Node"
 },
 {
   "command": "leojs.cloneNodeSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Clone Node"
 },
 {
   "command": "leojs.promote",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Promote Children"
 },
 {
   "command": "leojs.promoteSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Promote Children"
 },
 {
   "command": "leojs.promoteSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Promote Children"
 },
 {
   "command": "leojs.demote",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Demote Siblings"
 },
 {
   "command": "leojs.demoteSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Demote Siblings"
 },
 {
   "command": "leojs.demoteSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Demote Siblings"
 },
 {
   "command": "leojs.sortChildrenSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Sort Children"
 },
 {
   "command": "leojs.sortChildrenSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Sort Children"
 },
 {
   "command": "leojs.sortSiblingsSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Sort Siblings"
 },
 {
   "command": "leojs.sortSiblingsSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Sort Siblings"
 },
 </t>
 <t tx="felix.20201214205159.18">{
   "command": "leojs.gotoFirstVisible",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Goto First Visible"
 },
 {
   "command": "leojs.gotoLastVisible",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Goto Last Visible"
 },
 {
   "command": "leojs.pageUp",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Page Up"
 },
 {
   "command": "leojs.pageDown",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Page Down"
 },
 {
   "command": "leojs.gotoLastSibling",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Goto Last Sibling"
 },
 {
   "command": "leojs.gotoNextVisible",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Goto Next Visible"
 },
 {
   "command": "leojs.gotoPrevVisible",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Goto Prev Visible"
 },
 {
   "command": "leojs.contractOrGoLeft",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Contract Or Go Left"
 },
 {
   "command": "leojs.expandAndGoRight",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Expand And Go Right"
 },
 {
   "command": "leojs.gotoNextMarked",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Goto Next Marked"
 },
 {
   "command": "leojs.gotoNextClone",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Goto Next Clone"
 },
 {
   "command": "leojs.gotoNextCloneSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Goto Next Clone"
 },
 {
   "command": "leojs.gotoNextCloneSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Goto Next Clone"
 },
 </t>
 <t tx="felix.20201214205159.19">{
   "command": "leojs.hoistNode",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Hoist"
 },
 {
   "command": "leojs.hoistSelection",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Hoist"
 },
 {
   "command": "leojs.hoistSelectionFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Hoist"
 },
 {
   "command": "leojs.deHoist",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "De-Hoist",
   "icon": {
     "light": "resources/light/dehoist.svg",
@@ -4017,7 +4017,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.deHoistFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "De-Hoist",
   "icon": {
     "light": "resources/light/dehoist.svg",
@@ -4029,7 +4029,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 </t>
 <t tx="felix.20201214205159.20">{
   "command": "leojs.undo",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Undo",
   "icon": {
     "light": "resources/light/undo.svg",
@@ -4038,7 +4038,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.undoFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Undo",
   "icon": {
     "light": "resources/light/undo.svg",
@@ -4047,7 +4047,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.redo",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Redo",
   "icon": {
     "light": "resources/light/redo.svg",
@@ -4056,7 +4056,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 },
 {
   "command": "leojs.redoFromOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Redo",
   "icon": {
     "light": "resources/light/redo.svg",
@@ -4066,58 +4066,58 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 </t>
 <t tx="felix.20201214205159.21">{
   "command": "leojs.cloneFindAll",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Clone Find All"
 },
 {
   "command": "leojs.cloneFindAllFlattened",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Clone Find All Flattened"
 },
 {
   "command": "leojs.cloneFindMarked",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Clone Find Marked"
 },
 {
   "command": "leojs.cloneFindFlattenedMarked",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "cffm - Clone Find Flattened Marked"
 },
 </t>
 <t tx="felix.20201214205159.22">{
   "command": "leojs.copyMarked",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Copy Marked"
 },
 {
   "command": "leojs.diffMarkedNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Diff Marked Nodes"
 },
 {
   "command": "leojs.markChangedItems",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Mark Changed Items"
 },
 {
   "command": "leojs.markSubheads",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Mark Subheads"
 },
 {
   "command": "leojs.cloneMarkedNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Clone Marked Nodes"
 },
 {
   "command": "leojs.deleteMarkedNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Delete Marked Nodes"
 },
 {
   "command": "leojs.moveMarkedNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Move Marked Nodes"
 },
 </t>
@@ -4194,7 +4194,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "activitybar": [
     {
       "id": "leojsView",
-      "title": "Leo",
+      "title": "Leojs",
       "icon": "resources/icon.svg"
     }
   ]
@@ -4366,34 +4366,34 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "explorer": [
     {
       "id": "leojsExplorer",
-      "name": "Leo Outline",
-      "contextualTitle": "Leo"
+      "name": "Leojs Outline",
+      "contextualTitle": "Leojs"
     },
     {
       "id": "leojsDocumentsExplorer",
-      "name": "Leo Documents",
-      "contextualTitle": "Leo"
+      "name": "Leojs Documents",
+      "contextualTitle": "Leojs"
     },
     {
       "id": "leojsButtonsExplorer",
-      "name": "Leo Buttons",
-      "contextualTitle": "Leo"
+      "name": "Leojs Buttons",
+      "contextualTitle": "Leojs"
     }
   ],
   "leojsView": [
     {
       "id": "leojs",
-      "contextualTitle": "Leo",
+      "contextualTitle": "Leojs",
       "name": "Outline"
     },
     {
       "id": "leojsDocuments",
-      "contextualTitle": "Leo",
+      "contextualTitle": "Leojs",
       "name": "Documents"
     },
     {
       "id": "leojsButtons",
-      "contextualTitle": "Leo",
+      "contextualTitle": "Leojs",
       "name": "Buttons"
     }
   ]
@@ -5001,7 +5001,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 </t>
 <t tx="felix.20201214205159.7">{
   "command": "leojs.test",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Test leojs"
 },
 </t>
@@ -5449,17 +5449,17 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 </t>
 <t tx="felix.20201214205159.8">{
   "command": "leojs.executeScript",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Execute Script"
 },
 {
   "command": "leojs.minibuffer",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Minibuffer"
 },
 {
   "command": "leojs.removeButton",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Remove Button"
 },
 </t>
@@ -5487,17 +5487,17 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 </t>
 <t tx="felix.20201214205159.9">{
   "command": "leojs.showBody",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Focus to Body"
 },
 {
   "command": "leojs.showOutline",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Focus to Tree"
 },
 {
   "command": "leojs.showLogPane",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Show Log Pane"
 },
 </t>
@@ -6043,7 +6043,7 @@ const xslTemplate = `
 </t>
 <t tx="felix.20201218000931.1">{
   "command": "leojs.enableLeoTreeNav",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Enable Leo Tree Navigation",
   "icon": {
     "light": "resources/light/no-check.svg",
@@ -6052,7 +6052,7 @@ const xslTemplate = `
 },
 {
   "command": "leojs.showEditOnNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Show edit-headline",
   "icon": {
     "light": "resources/light/no-check.svg",
@@ -6061,7 +6061,7 @@ const xslTemplate = `
 },
 {
   "command": "leojs.showAddOnNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Show Add Node",
   "icon": {
     "light": "resources/light/no-check.svg",
@@ -6070,7 +6070,7 @@ const xslTemplate = `
 },
 {
   "command": "leojs.showArrowsOnNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Show move-commands",
   "icon": {
     "light": "resources/light/no-check.svg",
@@ -6079,7 +6079,7 @@ const xslTemplate = `
 },
 {
   "command": "leojs.showCopyOnNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Show Copy Node",
   "icon": {
     "light": "resources/light/no-check.svg",
@@ -6088,7 +6088,7 @@ const xslTemplate = `
 },
 {
   "command": "leojs.showCloneOnNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Show Clone Node",
   "icon": {
     "light": "resources/light/no-check.svg",
@@ -6097,7 +6097,7 @@ const xslTemplate = `
 },
 {
   "command": "leojs.showMarkOnNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Show Mark/Unmark Node",
   "icon": {
     "light": "resources/light/no-check.svg",
@@ -6106,7 +6106,7 @@ const xslTemplate = `
 },
 {
   "command": "leojs.disableLeoTreeNav",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Disable Leo Tree Navigation",
   "icon": {
     "light": "resources/light/check.svg",
@@ -6115,7 +6115,7 @@ const xslTemplate = `
 },
 {
   "command": "leojs.hideEditOnNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Hide edit-headline",
   "icon": {
     "light": "resources/light/check.svg",
@@ -6124,7 +6124,7 @@ const xslTemplate = `
 },
 {
   "command": "leojs.hideAddOnNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Hide Add Node",
   "icon": {
     "light": "resources/light/check.svg",
@@ -6133,7 +6133,7 @@ const xslTemplate = `
 },
 {
   "command": "leojs.hideArrowsOnNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Hide move-commands",
   "icon": {
     "light": "resources/light/check.svg",
@@ -6142,7 +6142,7 @@ const xslTemplate = `
 },
 {
   "command": "leojs.hideCopyOnNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Hide Copy Node",
   "icon": {
     "light": "resources/light/check.svg",
@@ -6151,7 +6151,7 @@ const xslTemplate = `
 },
 {
   "command": "leojs.hideCloneOnNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Hide Clone Node",
   "icon": {
     "light": "resources/light/check.svg",
@@ -6160,7 +6160,7 @@ const xslTemplate = `
 },
 {
   "command": "leojs.hideMarkOnNodes",
-  "category": "Leo",
+  "category": "Leojs",
   "title": "Hide Mark/Unmark Node",
   "icon": {
     "light": "resources/light/check.svg",
