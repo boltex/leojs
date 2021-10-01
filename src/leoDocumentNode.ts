@@ -4,7 +4,7 @@ import { Icon } from "./types";
 import * as utils from "./utils";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
-import { Commander } from "./core/leoCommander";
+import { Commands } from "./core/leoCommander";
 
 
 /**
@@ -16,7 +16,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
     public contextValue: string;
 
     constructor(
-        public documentEntry: Commander,
+        public documentEntry: Commands,
         private _leoJs: LeoUI
     ) {
         super(documentEntry.fileName());

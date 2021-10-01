@@ -1,13 +1,13 @@
 import { VNode } from "./leoNodes";
-import { Commander } from "./leoCommander";
+import { Commands } from "./leoCommander";
 import * as fs from 'fs';
 
 export class FileCommands {
-    
-    public c: Commander;
+
+    public c: Commands;
     public gnxDict: { [key: string]: VNode; };
 
-    constructor(c:Commander) {
+    constructor(c: Commands) {
         this.c = c;
         this.gnxDict = {};
     }

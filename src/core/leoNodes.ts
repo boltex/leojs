@@ -2,7 +2,7 @@
 
 import "date-format-lite";
 import * as g from './leoGlobals';
-import { Commander } from './leoCommander';
+import { Commands } from './leoCommander';
 
 
 /**
@@ -29,7 +29,7 @@ export class NodeIndices {
     /**
      * Check that no vnode exists with the given gnx in fc.gnxDict.
      */
-    public check_gnx(c: Commander, gnx: string, v: VNode): void {
+    public check_gnx(c: Commands, gnx: string, v: VNode): void {
         // TODO : Type 'c' as Commands class
 
         if (gnx === 'hidden-root-vnode-gnx') {
@@ -64,7 +64,7 @@ export class NodeIndices {
     /**
      * Return the id to be used by default in all gnx's
      */
-    public getDefaultId():string {
+    public getDefaultId(): string {
         return this.defaultId;
     }
 
@@ -78,16 +78,16 @@ export class NodeIndices {
      * Create a new gnx for v or an empty string if the hold flag is set.
      * **Important**: the method must allocate a new gnx even if v.fileIndex exists.
      */
-    public getNewIndex(v:VNode|undefined, cached:Boolean=false):string {
-        if(!v){
+    public getNewIndex(v: VNode | undefined, cached: Boolean = false): string {
+        if (!v) {
             console.log('getNewIndex: v is None');
             return '';
         }
-        const c:Commander = v.context;
-        const fc:any = c.fileCommands;
-        const t_s:string = this.update();
-            // Updates self.lastTime and self.lastIndex.
-        const gnx:string = g.toUnicode(`${this.userId}.${t_s}.${this.lastIndex}`);
+        const c: Commands = v.context;
+        const fc: any = c.fileCommands;
+        const t_s: string = this.update();
+        // Updates self.lastTime and self.lastIndex.
+        const gnx: string = g.toUnicode(`${this.userId}.${t_s}.${this.lastIndex}`);
         v.fileIndex = gnx;
         this.check_gnx(c, gnx, v);
         fc.gnxDict[gnx] = v;
@@ -97,9 +97,9 @@ export class NodeIndices {
     /**
      * Handle all gnx-related tasks for VNode.__init__.
      */
-    public new_vnode_helper(c:Commander, gnx:string|undefined, v:VNode):void {
-        const ni:NodeIndices = this;
-        if(gnx){
+    public new_vnode_helper(c: Commands, gnx: string | undefined, v: VNode): void {
+        const ni: NodeIndices = this;
+        if (gnx) {
             v.fileIndex = gnx;
             ni.check_gnx(c, gnx, v);
             c.fileCommands.gnxDict[gnx] = v;
@@ -111,11 +111,11 @@ export class NodeIndices {
     /**
      * Update self.timeString and self.lastIndex
      */
-    public update():string {
-        const t_s:string = new Date().format("YYYYMMDDhhmmss");
-        if(this.timeString === t_s){
+    public update(): string {
+        const t_s: string = new Date().format("YYYYMMDDhhmmss");
+        if (this.timeString === t_s) {
             this.lastIndex += 1;
-        }else{
+        } else {
             this.lastIndex = 1;
             this.timeString = t_s;
         }
@@ -153,110 +153,110 @@ export class Position {
         if (stack) {
             this.stack = [...stack]; // Creating a copy here is safest and best.
         } else {
-            this.stack = []; 
+            this.stack = [];
         }
     }
 
-    /** 
+    /**
      * Return True if two positions are equivalent.
-     */ 
-    public __eq__(p2:Position):boolean {
-        const p1:Position = this;
+     */
+    public __eq__(p2: Position): boolean {
+        const p1: Position = this;
         // Don't use g.trace: it might call p.__eq__ or p.__ne__.
-        if (!(p2 instanceof Position)){
+        if (!(p2 instanceof Position)) {
             return false;
         }
-        if (!p2.__bool__() || !p2.v){
+        if (!p2.__bool__() || !p2.v) {
             return !p1.v;
         }
         // Modified by Félix to prevent object direct comparison (p1.v === p2.v)
         return !!(p1.v && p2.v &&
-                p1.v.fileIndex === p2.v.fileIndex && 
-                p1._childIndex === p2._childIndex &&
-                p1.stack.length === p2.stack.length && 
-                p1.stack.every(
-                    (p_value, p_index) => {
-                        return p_value[1] === p2.stack[p_index][1] &&
+            p1.v.fileIndex === p2.v.fileIndex &&
+            p1._childIndex === p2._childIndex &&
+            p1.stack.length === p2.stack.length &&
+            p1.stack.every(
+                (p_value, p_index) => {
+                    return p_value[1] === p2.stack[p_index][1] &&
                         p_value[0].fileIndex === p2.stack[p_index][0].fileIndex;
-                    }
-                )
-            );
+                }
+            )
+        );
     }
 
     /**
      * Return True if two positions are not equivalent.
      */
-    public __ne__(p2:Position):boolean{
+    public __ne__(p2: Position): boolean {
         return !this.__eq__(p2);
     }
 
-    public __ge__( other:Position):boolean {
+    public __ge__(other: Position): boolean {
         return this.__eq__(other) || this.__gt__(other);
     }
 
 
-    public __le__( other:Position):boolean{
+    public __le__(other: Position): boolean {
         return this.__eq__(other) || this.__lt__(other);
     }
 
 
-    public __lt__( other:Position):boolean{
+    public __lt__(other: Position): boolean {
         return !this.__eq__(other) && !this.__gt__(other);
     }
 
     /**
      * Return True if self appears after other in outline order.
      */
-    public __gt__(other:Position):boolean{
-        const stack1:StackEntry[] = this.stack;
-        const stack2:StackEntry[] = other.stack;
-        const n1:number = stack1.length; 
-        const n2:number = stack2.length; 
-        const n:number = n1<n2?n1:n2;
+    public __gt__(other: Position): boolean {
+        const stack1: StackEntry[] = this.stack;
+        const stack2: StackEntry[] = other.stack;
+        const n1: number = stack1.length;
+        const n2: number = stack2.length;
+        const n: number = n1 < n2 ? n1 : n2;
         // Compare the common part of the stacks.
-        for (let nx=0; nx<n; nx++){
-            if(stack1[nx][1]>stack2[nx][1]){
+        for (let nx = 0; nx < n; nx++) {
+            if (stack1[nx][1] > stack2[nx][1]) {
                 return true;
             }
-            if(stack1[nx][1]<stack2[nx][1]){
+            if (stack1[nx][1] < stack2[nx][1]) {
                 return false;
             }
         }
         // Finish the comparison.
-        let x1:number;
-        let x2:number;
-        if (n1 === n2){
+        let x1: number;
+        let x2: number;
+        if (n1 === n2) {
             x1 = this._childIndex;
             x2 = other._childIndex;
             return x1 > x2;
         }
-        if (n1 < n2){
-            x1 = this._childIndex; 
+        if (n1 < n2) {
+            x1 = this._childIndex;
             x2 = other.stack[n][1];
             return x1 > x2;
         }
         // n1 > n2
         // 2011/07/28: Bug fix suggested by SegundoBob.
-        x1 = other._childIndex; 
+        x1 = other._childIndex;
         x2 = this.stack[n][1];
         return x2 >= x1;
     }
 
     /**
      * Return True if a position is valid.
-     *  
+     *
      * The tests 'if p' or 'if not p' are the _only_ correct ways to test
      * whether a position p is valid.
-     *  
+     *
      * Tests like 'if p is None' or 'if p is not None' will not work properly.
      */
-    public __bool__():boolean {
+    public __bool__(): boolean {
         return !!this.v;
     }
 
-    public __str__():string{
-        const p:Position = this;
-        if (p.v){
+    public __str__(): string {
+        const p: Position = this;
+        if (p.v) {
             return (
                 "<pos " +
                 `childIndex: ${p._childIndex} ` +
@@ -272,20 +272,20 @@ export class Position {
     /**
      * Return a representation of a position suitable for use in .leo files.
      */
-    public archivedPosition(root_p?:Position):number[]{
-        const p:Position = this;
-        const aList:number[] = [];
-        if (!root_p){
-            for (let z of p.self_and_parents()){
-               aList.push(z._childIndex); 
+    public archivedPosition(root_p?: Position): number[] {
+        const p: Position = this;
+        const aList: number[] = [];
+        if (!root_p) {
+            for (let z of p.self_and_parents()) {
+                aList.push(z._childIndex);
             }
-        }else{
-            for (let z of p.self_and_parents(false)){
-               aList.push(z._childIndex); 
-              if (z.__eq__(root_p)){
-                    aList.push(0); 
+        } else {
+            for (let z of p.self_and_parents(false)) {
+                aList.push(z._childIndex);
+                if (z.__eq__(root_p)) {
+                    aList.push(0);
                     break;
-                }else{
+                } else {
                     aList.push(z._childIndex);
                 }
             }
@@ -294,24 +294,24 @@ export class Position {
         return aList;
     }
 
-    public dumpLink(link:string):string {
-        return link?link:"<none>";
+    public dumpLink(link: string): string {
+        return link ? link : "<none>";
     }
 
-    public dump(label?:string):void {
-        const p:Position = this;
-        if (p.v){
+    public dump(label?: string): void {
+        const p: Position = this;
+        if (p.v) {
             p.v.dump();  // Don't print a label
         }
     }
 
-    public key():string {
-        const p:Position = this;
+    public key(): string {
+        const p: Position = this;
         // For unified nodes we must include a complete key,
         // so we can distinguish between clones.
-        const result:string[] = [];
-        for (let z of p.stack){
-            const v:VNode = z[0];
+        const result: string[] = [];
+        for (let z of p.stack) {
+            const v: VNode = z[0];
             const childIndex: number = z[1];
             result.push(`${v.fileIndex}:${childIndex}`);
         }
@@ -319,10 +319,10 @@ export class Position {
         return result.join('.');
     }
 
-    public sort_key(p:Position):number[]{
-        const result :number[] = [];
-        for(let s of p.key().split('.')) {
-          result.push(Number(s.split(':')[1]));
+    public sort_key(p: Position): number[] {
+        const result: number[] = [];
+        for (let s of p.key().split('.')) {
+            result.push(Number(s.split(':')[1]));
         }
         return result;
     }
@@ -348,14 +348,14 @@ export class Position {
     /**
      * Convert a positions  suboutline to a string in MORE format.
      */
-    public convertTreeToString():string {
-        const p1:Position = this;
+    public convertTreeToString(): string {
+        const p1: Position = this;
         const level1 = p1.level();
-        const array:string[] = [];
-        for(let p of p1.self_and_subtree(false)){
+        const array: string[] = [];
+        for (let p of p1.self_and_subtree(false)) {
             array.push(p.moreHead(level1) + '\n');
-            const body:string = p.moreBody();
-            if(body){
+            const body: string = p.moreBody();
+            if (body) {
                 array.push(body + '\n');
             }
         }
@@ -365,11 +365,11 @@ export class Position {
     /**
      * Return the headline string in MORE format.
      */
-    public moreHead(firstLevel:number, useVerticalBar?:boolean):string {
+    public moreHead(firstLevel: number, useVerticalBar?: boolean): string {
         // useVerticalBar is unused, but it would be useful in over-ridden methods.
-        const p:Position = this;
-        const level:number = this.level() - firstLevel;
-        const plusMinus:string = p.hasChildren()?"+":"-";
+        const p: Position = this;
+        const level: number = this.level() - firstLevel;
+        const plusMinus: string = p.hasChildren() ? "+" : "-";
         const pad: string = '\t'.repeat(level);
         return `${pad}${plusMinus} ${p.h}`;
     }
@@ -388,14 +388,14 @@ export class Position {
      * Returns the body string in MORE format.
      * Inserts a backslash before any leading plus, minus or backslash.
      */
-    public moreBody():string {
-        const p:Position = this;
-        const array:string[] = [];
-        const lines:string[] = p.b.split('\n');
-        for(let s of lines){
-            const i:number = g.skip_ws(s, 0);
-            if(i < s.length && ['+', '-', '\\'].includes(s[i])){
-                s = s.slice(0,i) + '\\' + s.slice(i);
+    public moreBody(): string {
+        const p: Position = this;
+        const array: string[] = [];
+        const lines: string[] = p.b.split('\n');
+        for (let s of lines) {
+            const i: number = g.skip_ws(s, 0);
+            if (i < s.length && ['+', '-', '\\'].includes(s[i])) {
+                s = s.slice(0, i) + '\\' + s.slice(i);
             }
             array.push(s);
         }
@@ -420,9 +420,9 @@ export class Position {
      * Yield all siblings positions that follow p, not including p.
      */
     public *following_siblings(copy: boolean = true): Generator<Position> {
-        let p:Position = this;
+        let p: Position = this;
         p = p.next();
-        while(p.__bool__()){
+        while (p.__bool__()) {
             yield (copy ? p.copy() : p);
             p.moveToNext();
         }
@@ -442,31 +442,31 @@ export class Position {
         Otherwise, the generator yields all nodes in p.subtree() that satisfy
         the predicate. Once a root is found, the generator skips its subtree.
      */
-    public *nearest_roots(copy=true, predicate?: (p:Position) => boolean ): Generator<Position> {
-        if(!predicate){
+    public *nearest_roots(copy = true, predicate?: (p: Position) => boolean): Generator<Position> {
+        if (!predicate) {
             // pylint: disable=function-redefined
-            predicate = function(p:Position):boolean {
+            predicate = function (p: Position): boolean {
                 return p.isAnyAtFileNode();
             };
         }
 
         // First, look up the tree.
-        let p1:Position =  this;
-        for(let p of p1.self_and_parents(false)){
-            if(predicate(p)){
+        let p1: Position = this;
+        for (let p of p1.self_and_parents(false)) {
+            if (predicate(p)) {
                 yield (copy ? p.copy() : p);
                 return;
             }
         }
-        
+
         // Next, look for all .md files in the tree.
-        const after:Position = p1.nodeAfterTree();
-        const p:Position = p1;
-        while(p.__bool__() && !p.__eq__(after)){
-            if (predicate(p)){
+        const after: Position = p1.nodeAfterTree();
+        const p: Position = p1;
+        while (p.__bool__() && !p.__eq__(after)) {
+            if (predicate(p)) {
                 yield (copy ? p.copy() : p);
                 p.moveToNodeAfterTree();
-            }else{
+            } else {
                 p.moveToThreadNext();
             }
         }
@@ -484,35 +484,35 @@ export class Position {
         satisfy the predicate. Once a root is found, the generator skips its
         subtree.
      */
-    public *nearest_unique_roots(copy=true, predicate?: (p:Position) => boolean): Generator<Position> {
-        if(!predicate){
+    public *nearest_unique_roots(copy = true, predicate?: (p: Position) => boolean): Generator<Position> {
+        if (!predicate) {
             // pylint: disable=function-redefined
-            predicate = function(p:Position):boolean {
+            predicate = function (p: Position): boolean {
                 return p.isAnyAtFileNode();
             };
         }
-        
+
         // First, look up the tree.
-        let p1:Position =  this;
-        for(let p of p1.self_and_parents(false)){
-            if(predicate(p)){
+        let p1: Position = this;
+        for (let p of p1.self_and_parents(false)) {
+            if (predicate(p)) {
                 yield (copy ? p.copy() : p);
                 return;
             }
         }
-        
+
         // Next, look for all unique .md files in the tree.
         const seen: VNode[] = [];
-        const after:Position = p1.nodeAfterTree();
-        const p:Position = p1;
-        while(p.__bool__() && !p.__eq__(after)){
-            if (predicate(p)){
-                if (!seen.includes(p.v)){
+        const after: Position = p1.nodeAfterTree();
+        const p: Position = p1;
+        while (p.__bool__() && !p.__eq__(after)) {
+            if (predicate(p)) {
+                if (!seen.includes(p.v)) {
                     seen.push(p.v);
                     yield (copy ? p.copy() : p);
                 }
                 p.moveToNodeAfterTree();
-            }else{
+            } else {
                 p.moveToThreadNext();
             }
         }
@@ -525,10 +525,10 @@ export class Position {
      * Yield p.v and all vnodes in p's subtree.
      */
     public *nodes(): Generator<VNode> {
-        let p:Position =  this;
+        let p: Position = this;
         p = p.copy();
-        const after:Position = p.nodeAfterTree();
-        while(p.__bool__() && !p.__eq__(after)){  // bug fix: 2013/10/12
+        const after: Position = p.nodeAfterTree();
+        while (p.__bool__() && !p.__eq__(after)) {  // bug fix: 2013/10/12
             yield p.v;
             p.moveToThreadNext();
         }
@@ -541,10 +541,10 @@ export class Position {
     /**
      * Yield all parent positions of p.
      */
-    public *parents(copy:boolean=true): Generator<Position> {
-        let p:Position =  this;
+    public *parents(copy: boolean = true): Generator<Position> {
+        let p: Position = this;
         p = p.parent();
-        while(p.__bool__()){
+        while (p.__bool__()) {
             yield (copy ? p.copy() : p);
             p.moveToParent();
         }
@@ -556,10 +556,10 @@ export class Position {
     /**
      * Yield p and all parent positions of p.
      */
-    public *self_and_parents(copy:boolean=true): Generator<Position> {
-        let p:Position =  this;
+    public *self_and_parents(copy: boolean = true): Generator<Position> {
+        let p: Position = this;
         p = p.copy();
-        while(p.__bool__()){
+        while (p.__bool__()) {
             yield (copy ? p.copy() : p);
             p.moveToParent();
         }
@@ -571,13 +571,13 @@ export class Position {
     /**
      * Yield all sibling positions of p including p.
      */
-    public *self_and_siblings(copy:boolean=true): Generator<Position> {
-        let p:Position =  this;
+    public *self_and_siblings(copy: boolean = true): Generator<Position> {
+        let p: Position = this;
         p = p.copy();
-        while (p.hasBack()){
+        while (p.hasBack()) {
             p.moveToBack();
         }
-        while(p.__bool__()){
+        while (p.__bool__()) {
             yield (copy ? p.copy() : p);
             p.moveToNext();
         }
@@ -589,11 +589,11 @@ export class Position {
     /**
      * Yield p and all positions in p's subtree.
      */
-    public *self_and_subtree(copy:boolean=true): Generator<Position> {
-        let p:Position =  this;
+    public *self_and_subtree(copy: boolean = true): Generator<Position> {
+        let p: Position = this;
         p = p.copy();
-        const after:Position  = p.nodeAfterTree();
-        while(p.__bool__() && !p.__eq__(after)){
+        const after: Position = p.nodeAfterTree();
+        while (p.__bool__() && !p.__eq__(after)) {
             yield (copy ? p.copy() : p);
             p.moveToThreadNext();
         }
@@ -605,12 +605,12 @@ export class Position {
     /**
      * Yield all positions in p's subtree, but not p.
      */
-    public *subtree(copy:boolean=true): Generator<Position> {
-        let p:Position =  this;
+    public *subtree(copy: boolean = true): Generator<Position> {
+        let p: Position = this;
         p = p.copy();
-        const after:Position  = p.nodeAfterTree();
+        const after: Position = p.nodeAfterTree();
         p.moveToThreadNext();
-        while(p.__bool__() && !p.__eq__(after)){
+        while (p.__bool__() && !p.__eq__(after)) {
             yield (copy ? p.copy() : p);
             p.moveToThreadNext();
         }
@@ -623,10 +623,10 @@ export class Position {
      * Yield p.v and all unique vnodes in p's subtree.
      */
     public *unique_nodes(): Generator<VNode> {
-        const p1:Position =  this;
+        const p1: Position = this;
         const seen: VNode[] = [];
-        for(let p of p1.self_and_subtree(false)){
-            if (!seen.includes(p.v)){
+        for (let p of p1.self_and_subtree(false)) {
+            if (!seen.includes(p.v)) {
                 seen.push(p.v);
                 yield p.v;
             }
@@ -640,11 +640,11 @@ export class Position {
     /**
      * Yield p and all other unique positions in p's subtree.
      */
-    public *unique_subtree(copy:boolean=true): Generator<Position> {
-        const p1:Position =  this;
+    public *unique_subtree(copy: boolean = true): Generator<Position> {
+        const p1: Position = this;
         const seen: VNode[] = [];
-        for(let p of p1.subtree()){
-            if (!seen.includes(p.v)){
+        for (let p of p1.subtree()) {
+            if (!seen.includes(p.v)) {
                 seen.push(p.v);
                 // Fixed bug 1255208: p.unique_subtree returns vnodes, not positions.
                 yield (copy ? p.copy() : p);
@@ -796,31 +796,31 @@ export class Position {
     // These methods are useful abbreviations.
     // Warning: they make copies of positions, so they should be used _sparingly_
 
-    public getBack():Position {return this.copy().moveToBack();}
+    public getBack(): Position { return this.copy().moveToBack(); }
 
-    public getFirstChild():Position {return this.copy().moveToFirstChild();}
+    public getFirstChild(): Position { return this.copy().moveToFirstChild(); }
 
-    public getLastChild():Position {return this.copy().moveToLastChild();}
+    public getLastChild(): Position { return this.copy().moveToLastChild(); }
 
-    public getLastNode():Position {return this.copy().moveToLastNode();}
+    public getLastNode(): Position { return this.copy().moveToLastNode(); }
     // def getLastVisible   (): return this.copy().moveToLastVisible();
 
-    public getNext():Position {return this.copy().moveToNext();}
+    public getNext(): Position { return this.copy().moveToNext(); }
 
-    public getNodeAfterTree():Position {return this.copy().moveToNodeAfterTree();}
+    public getNodeAfterTree(): Position { return this.copy().moveToNodeAfterTree(); }
 
-    public getNthChild(n:number):Position {return this.copy().moveToNthChild(n);}
+    public getNthChild(n: number): Position { return this.copy().moveToNthChild(n); }
 
-    public getParent():Position {return this.copy().moveToParent();}
+    public getParent(): Position { return this.copy().moveToParent(); }
 
-    public getThreadBack():Position {return this.copy().moveToThreadBack();}
+    public getThreadBack(): Position { return this.copy().moveToThreadBack(); }
 
-    public getThreadNext():Position {return this.copy().moveToThreadNext();}
+    public getThreadNext(): Position { return this.copy().moveToThreadNext(); }
     // New in Leo 4.4.3 b2: add c args.
 
-    public getVisBack(c:Commander):Position {return this.copy().moveToVisBack(c)!;}
+    public getVisBack(c: Commands): Position { return this.copy().moveToVisBack(c)!; }
 
-    public getVisNext(c:Commander):Position {return this.copy().moveToVisNext(c)!;}
+    public getVisNext(c: Commands): Position { return this.copy().moveToVisNext(c)!; }
 
     /**
      * with_file = True - include path to Leo file
@@ -828,94 +828,94 @@ export class Position {
      * with_index - include ',x' at end where x is child index in parent
      * with_count - include ',x,y' at end where y zero based count of same headlines
      */
-    public get_UNL(with_file=true, with_proto=false, with_index=true, with_count=false):string {
-        const aList:string[] = [];
-        for(let i of this.self_and_parents(false)){
-            if( with_index || with_count){
-                let count:number = 0;
-                let ind:number = 0;
-                const p:Position = i.copy();
-                while( p.hasBack()){
+    public get_UNL(with_file = true, with_proto = false, with_index = true, with_count = false): string {
+        const aList: string[] = [];
+        for (let i of this.self_and_parents(false)) {
+            if (with_index || with_count) {
+                let count: number = 0;
+                let ind: number = 0;
+                const p: Position = i.copy();
+                while (p.hasBack()) {
                     ind = ind + 1;
                     p.moveToBack();
-                    if(i.h === p.h){
+                    if (i.h === p.h) {
                         count = count + 1;
                     }
                 }
                 aList.push(i.h.replace('-->', '--%3E') + ":" + ind.toString());
-                    // g.recursiveUNLFind and sf.copy_to_my_settings undo this replacement.
-                if( count || with_count){
+                // g.recursiveUNLFind and sf.copy_to_my_settings undo this replacement.
+                if (count || with_count) {
                     aList[-1] = aList[-1] + "," + count.toString();
                 }
-            }else{
+            } else {
                 aList.push(i.h.replace('-->', '--%3E'));
-                    // g.recursiveUNLFind  and sf.copy_to_my_settings undo this replacement.
+                // g.recursiveUNLFind  and sf.copy_to_my_settings undo this replacement.
             }
         }
 
-        const UNL:string = aList.reverse().join('-->');
-        if (with_proto){
+        const UNL: string = aList.reverse().join('-->');
+        if (with_proto) {
             // return ("file://%s#%s" % (self.v.context.fileName(), UNL)).replace(' ', '%20')
-            const s:string = "unl:" + `//${this.v.context.fileName()}#${UNL}`;
+            const s: string = "unl:" + `//${this.v.context.fileName()}#${UNL}`;
             return s.replace(' ', '%20');
         }
-        if(with_file){
+        if (with_file) {
             return `${this.v.context.fileName()}#${UNL}`;
         }
         return UNL;
     }
 
-    public hasBack():boolean{
-        const p:Position = this;
+    public hasBack(): boolean {
+        const p: Position = this;
         return p.v && p._childIndex > 0;
     }
 
-    public hasNext():boolean|undefined{
-        const p:Position = this;
-        try{
-            const parent_v:VNode = p._parentVnode()!;
-                // Returns None if p.v is None.
+    public hasNext(): boolean | undefined {
+        const p: Position = this;
+        try {
+            const parent_v: VNode = p._parentVnode()!;
+            // Returns None if p.v is None.
             return p.v && parent_v && p._childIndex + 1 < parent_v.children.length;
         }
-        catch(Exception){
+        catch (Exception) {
             g.trace('*** Unexpected exception');
             g.es_exception();
             return undefined;
         }
     }
 
-    public hasParent():boolean{
-        const p:Position = this;
+    public hasParent(): boolean {
+        const p: Position = this;
         return p.v && !!p.stack.length;
     }
 
-    public hasThreadBack():boolean{
-        const p:Position = this;
+    public hasThreadBack(): boolean {
+        const p: Position = this;
         return p.hasParent() || p.hasBack();
-            // Much cheaper than computing the actual value.
+        // Much cheaper than computing the actual value.
     }
 
-    public hasThreadNext():boolean{
-        const p:Position = this;
-        if(!p.v){
+    public hasThreadNext(): boolean {
+        const p: Position = this;
+        if (!p.v) {
             return false;
         }
-        if( p.hasChildren() || p.hasNext()){
+        if (p.hasChildren() || p.hasNext()) {
             return true;
         }
-        let n:number = p.stack.length - 1;
-        while( n >= 0){
-            let v:VNode;
-            let childIndex:number;
-            let parent_v:VNode;
+        let n: number = p.stack.length - 1;
+        while (n >= 0) {
+            let v: VNode;
+            let childIndex: number;
+            let parent_v: VNode;
             [v, childIndex] = p.stack[n];
             // See how many children v's parent has.
-            if (n === 0){
+            if (n === 0) {
                 parent_v = v.context.hiddenRootNode!;
-            }else{
-                parent_v= p.stack[n - 1][0];
+            } else {
+                parent_v = p.stack[n - 1][0];
             }
-            if (parent_v.children.length > childIndex + 1){
+            if (parent_v.children.length > childIndex + 1) {
                 // v has a next sibling.
                 return true;
             }
@@ -924,77 +924,77 @@ export class Position {
         return false;
     }
 
-    public findRootPosition():Position{
+    public findRootPosition(): Position {
         // 2011/02/25: always use c.rootPosition
-        const p:Position = this;
-        const c:Commander = p.v.context;
+        const p: Position = this;
+        const c: Commands = p.v.context;
         return c.rootPosition()!;
     }
 
     /**
      * Return True if p is one of the direct ancestors of p2.
      */
-    public isAncestorOf(p2:Position):boolean{
-        const p:Position = this;
-        const c:Commander = p.v.context;
-        if(!c.positionExists(p2)){
+    public isAncestorOf(p2: Position): boolean {
+        const p: Position = this;
+        const c: Commands = p.v.context;
+        if (!c.positionExists(p2)) {
             return false;
         }
-        for(let z of p2.stack){
+        for (let z of p2.stack) {
             // 2013/12/25: bug fix: test childIndices.
             // This is required for the new per-position expansion scheme.
-            let parent_v:VNode;
-            let parent_childIndex:number;
+            let parent_v: VNode;
+            let parent_childIndex: number;
             [parent_v, parent_childIndex] = z;
-            if(
+            if (
                 parent_v.fileIndex === p.v.fileIndex &&
                 parent_childIndex === p._childIndex
-            ){
+            ) {
                 return true;
             }
         }
         return false;
     }
 
-    public isCloned():boolean{
-        const p:Position = this;
+    public isCloned(): boolean {
+        const p: Position = this;
         return p.v.isCloned();
     }
 
-    public isRoot():boolean {
-        const p:Position = this;
+    public isRoot(): boolean {
+        const p: Position = this;
         return !p.hasParent() && !p.hasBack();
     }
 
     /**
      * Return True if p is visible in c's outline.
      */
-    public isVisible(c:Commander):boolean {
-        const p:Position = this;
+    public isVisible(c: Commands): boolean {
+        const p: Position = this;
 
-        function visible(p:Position, root?:Position){
-            for (let parent of p.parents(false)){
-                if (parent.__bool__() && parent.__eq__(root!)){
+        function visible(p: Position, root?: Position) {
+            for (let parent of p.parents(false)) {
+                if (parent.__bool__() && parent.__eq__(root!)) {
                     // #12.
                     return true;
                 }
-                if(!c.shouldBeExpanded(parent)){
+                if (!c.shouldBeExpanded(parent)) {
                     return false;
                 }
             }
             return true;
         }
 
-        if(c.hoistStack.length){
-            const root:Position = c.hoistStack[-1].p;
-            if(p.__eq__(root)){
+        if (c.hoistStack.length) {
+            const root: Position = c.hoistStack[-1].p;
+            if (p.__eq__(root)) {
                 // #12.
                 return true;
             }
             return root.isAncestorOf(p) && visible(p, root);
         }
-        for(let root of c.rootPosition()!.self_and_siblings(false)){
-            if( root.__eq__(p) || root.isAncestorOf(p)){
+        for (let root of c.rootPosition()!.self_and_siblings(false)) {
+            if (root.__eq__(p) || root.isAncestorOf(p)) {
                 return visible(p);
             }
         }
@@ -1004,9 +1004,9 @@ export class Position {
     /**
      * Return the number of p's parents.
      */
-    public level():number {
-        const p:Position = this;
-        return p.v?p.stack.length:0;
+    public level(): number {
+        const p: Position = this;
+        return p.v ? p.stack.length : 0;
     }
 
     /**
@@ -1037,10 +1037,10 @@ export class Position {
         nodes, but the pattern above handles this complication cleanly.
      * * * * * * * * * * * * * * * * * * * * * * * * * * *
      */
-    public positionAfterDeletedTree():Position {
-        let p:Position = this;
-        const next:Position = p.next();
-        if(next.__bool__()){
+    public positionAfterDeletedTree(): Position {
+        let p: Position = this;
+        const next: Position = p.next();
+        if (next.__bool__()) {
             // The new position will be the same as p, except for p.v.
             p = p.copy();
             p.v = next.v;
@@ -1056,35 +1056,35 @@ export class Position {
         http://tinyurl.com/5nescw
         """
      */
-    public textOffset():number|undefined {
-        const p1:Position = this;
-        let found:boolean =false;
-        let offset:number= 0;
-        for(let p of p1.self_and_parents(false)){
-            if (p.isAnyAtFileNode()){
+    public textOffset(): number | undefined {
+        const p1: Position = this;
+        let found: boolean = false;
+        let offset: number = 0;
+        for (let p of p1.self_and_parents(false)) {
+            if (p.isAnyAtFileNode()) {
                 // Ignore parent of @<file> node.
                 found = true;
                 break;
             }
-            const parent:Position = p.parent();
-            if (!parent.__bool__()){
+            const parent: Position = p.parent();
+            if (!parent.__bool__()) {
                 break;
             }
             // If p is a section definition, search the parent for the reference.
             // Otherwise, search the parent for @others.
-            const h:string = p.h.trim();
-            const i:number = h.indexOf('<<');
-            const j:number = h.indexOf('>>');
+            const h: string = p.h.trim();
+            const i: number = h.indexOf('<<');
+            const j: number = h.indexOf('>>');
             // const target:string = h[i : j + 2] if -1 < i < j else '@others'
-            const target:string = (-1 < i && i < j)?h.slice(i, j+2):'@others';
-            for (let s of parent.b.split('\n')){
-                if (s.indexOf(target) > -1){
+            const target: string = (-1 < i && i < j) ? h.slice(i, j + 2) : '@others';
+            for (let s of parent.b.split('\n')) {
+                if (s.indexOf(target) > -1) {
                     offset += g.skip_ws(s, 0);
                     break;
                 }
             }
         }
-        return found?offset:undefined;
+        return found ? offset : undefined;
     }
 
     /*
@@ -1095,31 +1095,31 @@ export class Position {
     /**
      * Adjust position p before unlinking p2.
      */
-    public _adjustPositionBeforeUnlink(p2:Position): void {
+    public _adjustPositionBeforeUnlink(p2: Position): void {
         // p will change if p2 is a previous sibling of p or
         // p2 is a previous sibling of any ancestor of p.
-        const p:Position = this;
-        const sib:Position = p.copy();
+        const p: Position = this;
+        const sib: Position = p.copy();
         // A special case for previous siblings.
         // Adjust p._childIndex, not the stack's childIndex.
-        while(sib.hasBack()){
+        while (sib.hasBack()) {
             sib.moveToBack();
-            if (sib.__eq__(p2)){
+            if (sib.__eq__(p2)) {
                 p._childIndex -= 1;
                 return;
             }
         }
 
         // Adjust p's stack.
-        const stack:StackEntry[] = []; 
-        let changed:boolean = false;
-        let i:number = 0;
-        while (i < p.stack.length){
-            const v:VNode = p.stack[i][0];
-            const childIndex:number = p.stack[i][1];
-            const p3 = new Position(v, childIndex, stack.slice(0,i)); // stack[:i]
-            while (p3.__bool__()){
-                if (p2.__eq__(p3)){
+        const stack: StackEntry[] = [];
+        let changed: boolean = false;
+        let i: number = 0;
+        while (i < p.stack.length) {
+            const v: VNode = p.stack[i][0];
+            const childIndex: number = p.stack[i][1];
+            const p3 = new Position(v, childIndex, stack.slice(0, i)); // stack[:i]
+            while (p3.__bool__()) {
+                if (p2.__eq__(p3)) {
                     // 2011/02/25: compare full positions, not just vnodes.
                     // A match with the to-be-moved node.
                     stack.push([v, childIndex - 1]);
@@ -1127,13 +1127,13 @@ export class Position {
                     break;  // terminate only the inner loop.
                 }
                 p3.moveToBack();
-                if(!p3.__bool__()){
+                if (!p3.__bool__()) {
                     stack.push([v, childIndex]);
                 }
             }
             i += 1;
         }
-        if (changed){
+        if (changed) {
             p.stack = stack;
         }
     }
@@ -1141,52 +1141,52 @@ export class Position {
     /**
      * Link self after p_after.
      */
-    public _linkAfter(p_after:Position): void {
-        const p:Position = this;
+    public _linkAfter(p_after: Position): void {
+        const p: Position = this;
         const parent_v = p_after._parentVnode()!;
         p.stack = [...p_after.stack];
         p._childIndex = p_after._childIndex + 1;
-        const child:VNode = p.v;
-        const n:number = p_after._childIndex + 1;
+        const child: VNode = p.v;
+        const n: number = p_after._childIndex + 1;
         child._addLink(n, parent_v);
     }
 
     /**
      * Link self, a newly copied tree, after p_after.
      */
-    public _linkCopiedAfter(p_after:Position): void {
-        const p:Position = this;
-        const parent_v:VNode = p_after._parentVnode()!;
+    public _linkCopiedAfter(p_after: Position): void {
+        const p: Position = this;
+        const parent_v: VNode = p_after._parentVnode()!;
         p.stack = [...p_after.stack];
         p._childIndex = p_after._childIndex + 1;
-        const child:VNode = p.v;
-        const n:number = p_after._childIndex + 1;
+        const child: VNode = p.v;
+        const n: number = p_after._childIndex + 1;
         child._addCopiedLink(n, parent_v);
     }
 
     /**
      * Link self as the n'th child of the parent.
      */
-    public _linkAsNthChild(parent:Position, n:number): void {
-        const p:Position = this;
-        const parent_v:VNode = parent.v;
+    public _linkAsNthChild(parent: Position, n: number): void {
+        const p: Position = this;
+        const parent_v: VNode = parent.v;
         p.stack = [...parent.stack];
         p.stack.push([parent_v, parent._childIndex]);
         p._childIndex = n;
-        const child:VNode = p.v;
+        const child: VNode = p.v;
         child._addLink(n, parent_v);
     }
 
     /**
      * Link a copied self as the n'th child of the parent.
      */
-    public _linkCopiedAsNthChild(parent:Position, n:number): void {
-        const p:Position = this;
-        const parent_v:VNode = parent.v;
+    public _linkCopiedAsNthChild(parent: Position, n: number): void {
+        const p: Position = this;
+        const parent_v: VNode = parent.v;
         p.stack = [...parent.stack];
         p.stack.push([parent_v, parent._childIndex]);
         p._childIndex = n;
-        const child:VNode = p.v;
+        const child: VNode = p.v;
         child._addCopiedLink(n, parent_v);
     }
 
@@ -1194,15 +1194,15 @@ export class Position {
      * Link self as the root node.
      */
     public _linkAsRoot(): Position {
-        const p:Position = this; 
+        const p: Position = this;
         console.assert(p.v);
-        const parent_v:VNode = p.v.context.hiddenRootNode!;
+        const parent_v: VNode = p.v.context.hiddenRootNode!;
         console.assert(parent_v, g.callers());
-        
+
         // Make p the root position.
         p.stack = [];
         p._childIndex = 0;
-        
+
         // Make p.v the first child of parent_v.
         p.v._addLink(0, parent_v);
         return p;
@@ -1213,11 +1213,11 @@ export class Position {
      * Return the hiddenRootNode if there is no other parent.
      */
     public _parentVnode(): VNode | undefined {
-        const p:Position = this; 
-        if (p.v){
-            const data = !!p.stack.length && p.stack[p.stack.length-1];
-            if (data){
-                const v:VNode = data[0];
+        const p: Position = this;
+        if (p.v) {
+            const data = !!p.stack.length && p.stack[p.stack.length - 1];
+            if (data) {
+                const v: VNode = data[0];
                 return v;
             }
             return p.v.context.hiddenRootNode;
@@ -1228,22 +1228,22 @@ export class Position {
     /**
      * A low-level method to replace p.v by a p2.v.
      */
-    public _relinkAsCloneOf(p2:Position): void {
-        const p:Position = this;
-        const v:VNode = p.v;
-        const v2:VNode = p2.v;
-        const parent_v:VNode|undefined = p._parentVnode();
-        if(!parent_v){
+    public _relinkAsCloneOf(p2: Position): void {
+        const p: Position = this;
+        const v: VNode = p.v;
+        const v2: VNode = p2.v;
+        const parent_v: VNode | undefined = p._parentVnode();
+        if (!parent_v) {
             g.error('no parent_v', p);
             return;
         }
         // Compare fileIndex instead of v directly
-        if( parent_v.children[p._childIndex].fileIndex === v.fileIndex){
+        if (parent_v.children[p._childIndex].fileIndex === v.fileIndex) {
             parent_v.children[p._childIndex] = v2;
             v2.parents.push(parent_v);
             // p.v no longer truly exists.
             // p.v = p2.v
-        }else{
+        } else {
             g.error(
                 'parent_v.children[childIndex] != v',
                 p, parent_v.children, p._childIndex, v);
@@ -1254,21 +1254,21 @@ export class Position {
      * Unlink the receiver p from the tree.
      */
     public _unlink(): void {
-        const p:Position = this;
-        const n:number = p._childIndex;
-        const parent_v:VNode = p._parentVnode()!;
-            // returns None if p.v is None
-        const child:VNode = p.v;
+        const p: Position = this;
+        const n: number = p._childIndex;
+        const parent_v: VNode = p._parentVnode()!;
+        // returns None if p.v is None
+        const child: VNode = p.v;
         console.assert(p.v);
         console.assert(parent_v);
         // Delete the child.
-        if( (0 <= n && 
+        if ((0 <= n &&
             n < parent_v.children.length &&
             parent_v.children[n].fileIndex === child.fileIndex
-        )){
+        )) {
             // This is the only call to v._cutlink.
             child._cutLink(n, parent_v);
-        }else{
+        } else {
             this.badUnlink(parent_v, n, child);
         }
     }
@@ -1276,9 +1276,9 @@ export class Position {
     /**
      * badUnlink error trace output
      */
-    public badUnlink(parent_v:VNode, n:number, child:VNode): void {
+    public badUnlink(parent_v: VNode, n: number, child: VNode): void {
 
-        if( 0 <= n && n< parent_v.children.length){
+        if (0 <= n && n < parent_v.children.length) {
             g.trace(`**can not happen: children[{n}] != p.v`);
             g.trace('parent_v.children...\n',
                 g.listToString(parent_v.children));
@@ -1286,7 +1286,7 @@ export class Position {
             g.trace('parent_v.children[n]', parent_v.children[n]);
             g.trace('child', child);
             g.trace('** callers:', g.callers());
-        }else{
+        } else {
             g.trace(
                 `**can not happen: bad child index: ${n}, `,
                 `children.length: ${parent_v.children.length}`);
@@ -1311,23 +1311,23 @@ export class Position {
     /**
      * Move self to its previous sibling.
      */
-    public moveToBack():Position {
-        const p:Position = this;
-        const n:number = p._childIndex;
-        const parent_v:VNode = p._parentVnode()!; // Returns None if p.v is None.
-            
+    public moveToBack(): Position {
+        const p: Position = this;
+        const n: number = p._childIndex;
+        const parent_v: VNode = p._parentVnode()!; // Returns None if p.v is None.
+
         // Do not assume n is in range: this is used by positionExists.
         if (
-            parent_v && 
+            parent_v &&
             p.v &&
             0 < n &&
             n <= parent_v.children.length
-        ){
+        ) {
             p._childIndex -= 1;
             p.v = parent_v.children[n - 1];
-        }else{
+        } else {
             // * For now, use undefined p.v to signal null/invalid positions
-                    //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1336,15 +1336,15 @@ export class Position {
     /**
      * Move a position to it's first child's position.
      */
-    public moveToFirstChild():Position{
-        const p:Position = this;
-        if (p.v && p.v.children){
+    public moveToFirstChild(): Position {
+        const p: Position = this;
+        if (p.v && p.v.children) {
             p.stack.push([p.v, p._childIndex]);
             p.v = p.v.children[0];
             p._childIndex = 0;
-        }else{
+        } else {
             // * For now, use undefined p.v to signal null/invalid positions
-                    //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1353,17 +1353,17 @@ export class Position {
     /**
      * Move a position to it's last child's position.
      */
-    public moveToLastChild():Position{
-        const p:Position = this;
-        let n:number;
-        if (p.v && p.v.children.length){
+    public moveToLastChild(): Position {
+        const p: Position = this;
+        let n: number;
+        if (p.v && p.v.children.length) {
             p.stack.push([p.v, p._childIndex]);
             n = p.v.children.length;
             p.v = p.v.children[n - 1];
             p._childIndex = n - 1;
-        }else{
+        } else {
             // * For now, use undefined p.v to signal null/invalid positions
-                    //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1373,10 +1373,10 @@ export class Position {
      * Move a position to last node of its tree.
      *  N.B. Returns p if p has no children.
      */
-    public moveToLastNode():Position{
-        const p:Position = this;
+    public moveToLastNode(): Position {
+        const p: Position = this;
         // Huge improvement for 4.2.
-        while (p.hasChildren()){
+        while (p.hasChildren()) {
             p.moveToLastChild();
         }
         return p;
@@ -1385,20 +1385,20 @@ export class Position {
     /**
      * Move a position to its next sibling.
      */
-    public moveToNext():Position{
-        const p:Position = this;    
-        const n:number = p._childIndex;
-        const parent_v:VNode = p._parentVnode()!;
-            // Returns None if p.v is None.
-        if (!p.v){
+    public moveToNext(): Position {
+        const p: Position = this;
+        const n: number = p._childIndex;
+        const parent_v: VNode = p._parentVnode()!;
+        // Returns None if p.v is None.
+        if (!p.v) {
             g.trace('no p.v:', p, g.callers());
         }
-        if (p.v && parent_v && parent_v.children.length > (n + 1)){
+        if (p.v && parent_v && parent_v.children.length > (n + 1)) {
             p._childIndex = n + 1;
             p.v = parent_v.children[n + 1];
-        }else{
+        } else {
             // * For now, use undefined p.v to signal null/invalid positions
-                    //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1407,10 +1407,10 @@ export class Position {
     /**
      * Move a position to the node after the position's tree.
      */
-    public moveToNodeAfterTree():Position {
-        const p:Position = this;
-        while( p.__bool__()){
-            if( p.hasNext()){
+    public moveToNodeAfterTree(): Position {
+        const p: Position = this;
+        while (p.__bool__()) {
+            if (p.hasNext()) {
                 p.moveToNext();
                 break;
             }
@@ -1422,15 +1422,15 @@ export class Position {
     /**
      * Move to Nth child
      */
-    public moveToNthChild(n:number):Position {
-        const p:Position = this;
-        if (p.v && p.v.children.length > n){
+    public moveToNthChild(n: number): Position {
+        const p: Position = this;
+        if (p.v && p.v.children.length > n) {
             p.stack.push([p.v, p._childIndex]);
             p.v = p.v.children[n];
             p._childIndex = n;
-        }else{
+        } else {
             // * For now, use undefined p.v to signal null/invalid positions
-                    //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1439,15 +1439,15 @@ export class Position {
     /**
      * Move a position to its parent position.
      */
-    public moveToParent():Position {
-        const p:Position = this;
-        if (p.v && p.stack.length){
-            const item:StackEntry = p.stack.pop()!;
+    public moveToParent(): Position {
+        const p: Position = this;
+        if (p.v && p.stack.length) {
+            const item: StackEntry = p.stack.pop()!;
             p.v = item[0];
             p._childIndex = item[1];
-        }else{
+        } else {
             // * For now, use undefined p.v to signal null/invalid positions
-                    //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1457,11 +1457,11 @@ export class Position {
      * Move a position to it's threadBack position.
      */
     public moveToThreadBack(): Position {
-        const p:Position = this;
-        if (p.hasBack()){
+        const p: Position = this;
+        if (p.hasBack()) {
             p.moveToBack();
             p.moveToLastNode();
-        }else{
+        } else {
             p.moveToParent();
         }
         return p;
@@ -1471,21 +1471,21 @@ export class Position {
      * Move a position to threadNext position.
      */
     public moveToThreadNext(): Position {
-        const p:Position = this;
-        if(p.v){
-            if(p.v.children.length){
+        const p: Position = this;
+        if (p.v) {
+            if (p.v.children.length) {
                 p.moveToFirstChild();
-            }else if(p.hasNext()){
+            } else if (p.hasNext()) {
                 p.moveToNext();
-            }else{
+            } else {
                 p.moveToParent();
-                while(p.__bool__()){
-                    if(p.hasNext()){
+                while (p.__bool__()) {
+                    if (p.hasNext()) {
                         p.moveToNext();
                         break;  //found
                     }
                     p.moveToParent();
-                // not found.
+                    // not found.
                 }
             }
         }
@@ -1495,33 +1495,33 @@ export class Position {
     /**
      * Move a position to the position of the previous visible node.
      */
-    public moveToVisBack(c:Commander): Position|undefined {
-        const p:Position = this;
+    public moveToVisBack(c: Commands): Position | undefined {
+        const p: Position = this;
         const visLimit: [Position, boolean] | undefined = c.visLimit();
-        if(visLimit){
-            const limit:Position = visLimit[0];
-            const limitIsVisible:boolean = visLimit[1];
-            while  (visLimit && p.__bool__()){
+        if (visLimit) {
+            const limit: Position = visLimit[0];
+            const limitIsVisible: boolean = visLimit[1];
+            while (visLimit && p.__bool__()) {
                 // Short-circuit if possible.
-                const back:Position = p.back();
-                if( back.__bool__() && back.hasChildren() && back.isExpanded()){
+                const back: Position = p.back();
+                if (back.__bool__() && back.hasChildren() && back.isExpanded()) {
                     p.moveToThreadBack();
                 }
-                else if(back.__bool__()){
+                else if (back.__bool__()) {
                     p.moveToBack();
-                } else{
+                } else {
                     p.moveToParent();  // Same as p.moveToThreadBack()
                 }
-                if (p.__bool__()){
-                    if(limit){
-                        let done:boolean;
-                        let val:Position|undefined;
+                if (p.__bool__()) {
+                    if (limit) {
+                        let done: boolean;
+                        let val: Position | undefined;
                         [done, val] = this.checkVisBackLimit(limit, limitIsVisible, p);
-                        if (done){
+                        if (done) {
                             return val;  // A position or None
                         }
                     }
-                    if( p.isVisible(c)){
+                    if (p.isVisible(c)) {
                         return p;
                     }
                 }
@@ -1533,45 +1533,45 @@ export class Position {
     /**
      * Return done, p or None
      */
-    public checkVisBackLimit(limit:Position, limitIsVisible:boolean, p:Position): [ boolean, Position|undefined] {
-        const c:Commander = p.v.context;
-        if (limit.__eq__(p)){
-            if (limitIsVisible && p.isVisible(c)){
+    public checkVisBackLimit(limit: Position, limitIsVisible: boolean, p: Position): [boolean, Position | undefined] {
+        const c: Commands = p.v.context;
+        if (limit.__eq__(p)) {
+            if (limitIsVisible && p.isVisible(c)) {
                 return [true, p];
             }
             return [true, undefined];
         }
-        if (limit.isAncestorOf(p)){
-            return  [false, undefined];
+        if (limit.isAncestorOf(p)) {
+            return [false, undefined];
         }
-        return  [true, undefined];
+        return [true, undefined];
     }
 
     /**
      * Move a position to the position of the next visible node.
      */
-    public moveToVisNext(c:Commander):Position|undefined {
-        const p:Position = this;
-        const visLimit:[Position, boolean]|undefined = c.visLimit();
-        if(visLimit){
-            const limit:Position = visLimit[0];
-            while (p.__bool__()){
-                if(p.hasChildren()){
-                    if(p.isExpanded()){
+    public moveToVisNext(c: Commands): Position | undefined {
+        const p: Position = this;
+        const visLimit: [Position, boolean] | undefined = c.visLimit();
+        if (visLimit) {
+            const limit: Position = visLimit[0];
+            while (p.__bool__()) {
+                if (p.hasChildren()) {
+                    if (p.isExpanded()) {
                         p.moveToFirstChild();
-                    }else{
+                    } else {
                         p.moveToNodeAfterTree();
                     }
-                }else if(p.hasNext()){
+                } else if (p.hasNext()) {
                     p.moveToNext();
-                }else{
+                } else {
                     p.moveToThreadNext();
                 }
-                if(p.__bool__()){
-                    if (limit && this.checkVisNextLimit(limit, p)){
+                if (p.__bool__()) {
+                    if (limit && this.checkVisNextLimit(limit, p)) {
                         return undefined;
                     }
-                    if( p.isVisible(c)){
+                    if (p.isVisible(c)) {
                         return p;
                     }
                 }
@@ -1583,7 +1583,7 @@ export class Position {
     /**
      * Return True is p is outside limit of visible nodes.
      */
-    public checkVisNextLimit(limit:Position , p:Position):boolean {
+    public checkVisNextLimit(limit: Position, p: Position): boolean {
         return !limit.__eq__(p) && !limit.isAncestorOf(p);
     }
 
@@ -1592,23 +1592,23 @@ export class Position {
      * Issue an error if any vnode is an ancestor of itself.
      */
     public safeMoveToThreadNext(): Position {
-        const p:Position = this;
-        if(p.v){
-            const child_v:VNode| false = !!p.v.children.length && p.v.children[0];
-            if(child_v){
-                let brokeFor:boolean= false;
-                for(let parent of p.self_and_parents(false)){
-                    if(child_v.fileIndex === parent.v.fileIndex){
+        const p: Position = this;
+        if (p.v) {
+            const child_v: VNode | false = !!p.v.children.length && p.v.children[0];
+            if (child_v) {
+                let brokeFor: boolean = false;
+                for (let parent of p.self_and_parents(false)) {
+                    if (child_v.fileIndex === parent.v.fileIndex) {
                         g.error(`vnode: ${child_v} is its own parent`);
                         // Allocating a new vnode would be difficult.
                         // Just remove child_v from parent.v.children.
                         parent.v.children = [];
-                        for(let v2 of parent.v.children){
-                            if(v2.fileIndex !== child_v.fileIndex){
-                                parent.v.children .push(v2);
+                        for (let v2 of parent.v.children) {
+                            if (v2.fileIndex !== child_v.fileIndex) {
+                                parent.v.children.push(v2);
                             }
                         }
-                        if(child_v.parents.includes(parent.v)){
+                        if (child_v.parents.includes(parent.v)) {
                             // child_v.parents.remove(parent.v);
                             const index = child_v.parents.indexOf(parent.v);
                             if (index > -1) {
@@ -1617,9 +1617,9 @@ export class Position {
                         }
                         // Try not to hang.
                         p.moveToParent();
-                        brokeFor= true;
+                        brokeFor = true;
                         break;
-                    }else if( child_v.fileIndex === parent.v.fileIndex){
+                    } else if (child_v.fileIndex === parent.v.fileIndex) {
                         g.error(
                             `duplicate gnx: ${child_v.fileIndex} ` +
                             `v: ${child_v} parent: ${parent.v}`);
@@ -1627,25 +1627,25 @@ export class Position {
                         console.assert(child_v.gnx !== parent.v.gnx);
                         // Should be ok to continue.
                         p.moveToFirstChild();
-                        brokeFor= true;
+                        brokeFor = true;
                         break;
                     }
                 }
-                if(!brokeFor){
+                if (!brokeFor) {
                     //  for else
                     p.moveToFirstChild();
                 }
-            }else if(p.hasNext()){
+            } else if (p.hasNext()) {
                 p.moveToNext();
-            }else{
+            } else {
                 p.moveToParent();
-                while (p.__bool__()){
-                    if(p.hasNext()){
+                while (p.__bool__()) {
+                    if (p.hasNext()) {
                         p.moveToNext();
                         break;  // found
                     }
                     p.moveToParent();
-                // not found.
+                    // not found.
                 }
             }
         }
@@ -1657,8 +1657,8 @@ export class Position {
      * Returns the newly created position.
      */
     public clone(): Position {
-        const p:Position = this;
-        const p2:Position  = p.copy();  // Do *not* copy the VNode!
+        const p: Position = this;
+        const p2: Position = p.copy();  // Do *not* copy the VNode!
         p2._linkAfter(p); // This should "just work"
         return p2;
     }
@@ -1671,27 +1671,27 @@ export class Position {
      * Delete all children of the receiver and set p.dirty().
      */
     public deleteAllChildren(): void {
-        const p:Position = this;
+        const p: Position = this;
         p.setDirty();  // Mark @file nodes dirty!
-        while (p.hasChildren()){
+        while (p.hasChildren()) {
             p.firstChild().doDelete();
         }
     }
 
-    /** 
+    /**
      * Deletes position p from the outline.
-     *    
+     *
      * This is the main delete routine.
      * It deletes the receiver's entire tree from the screen.
      * Because of the undo command we never actually delete vnodes.
      */
-    public doDelete(newNode?:Position): void {
-        const p:Position = this;
+    public doDelete(newNode?: Position): void {
+        const p: Position = this;
         p.setDirty(); // Mark @file nodes dirty!
         const sib = p.copy();
-        while (sib.hasNext()){
+        while (sib.hasNext()) {
             sib.moveToNext();
-            if (!!newNode && sib.__eq__(newNode)){
+            if (!!newNode && sib.__eq__(newNode)) {
                 // Adjust newNode._childIndex if newNode is a following sibling of p.
                 newNode._childIndex -= 1;
                 break;
@@ -1705,9 +1705,9 @@ export class Position {
      * Returns the newly created position.
      */
     public insertAfter(): Position {
-        const p:Position = this;
-        const context:Commander = p.v.context;
-        const p2:Position  = this.copy();
+        const p: Position = this;
+        const context: Commands = p.v.context;
+        const p2: Position = this.copy();
         p2.v = new VNode(context);
         p2.v.iconVal = 0;
         p2._linkAfter(p);
@@ -1718,9 +1718,9 @@ export class Position {
      * Inserts a new VNode as the last child of self.
      * Returns the newly created position.
      */
-    public insertAsLastChild():Position {
-        const p:Position = this;
-        const n:number = p.numberOfChildren();
+    public insertAsLastChild(): Position {
+        const p: Position = this;
+        const n: number = p.numberOfChildren();
         return p.insertAsNthChild(n);
     }
 
@@ -1729,10 +1729,10 @@ export class Position {
      * self must have at least n-1 children.
      * Returns the newly created position.
      */
-    public  insertAsNthChild(n:number): Position {
-        const p:Position = this;
-        const context:Commander = p.v.context;
-        const p2:Position = this.copy();
+    public insertAsNthChild(n: number): Position {
+        const p: Position = this;
+        const context: Commands = p.v.context;
+        const p2: Position = this.copy();
         p2.v = new VNode(context);
         p2.v.iconVal = 0;
         p2._linkAsNthChild(p, n);
@@ -1744,15 +1744,15 @@ export class Position {
      * Returns the newly created position.
      */
     public insertBefore(): Position {
-        let p:Position = this;
-        const parent:Position = p.parent();
-        let back:Position;
-        if (p.hasBack()){
+        let p: Position = this;
+        const parent: Position = p.parent();
+        let back: Position;
+        if (p.hasBack()) {
             back = p.getBack();
             p = back.insertAfter();
-        }else if( parent.__bool__()){
+        } else if (parent.__bool__()) {
             p = parent.insertAsNthChild(0);
-        }else{
+        } else {
             p = p.insertAfter();
             p.moveToRoot();
         }
@@ -1762,12 +1762,12 @@ export class Position {
     /**
      * Prints out error message about invalid outline
      */
-    public invalidOutline(message:string): void {
-        const p:Position = this;
-        let node:Position;
-        if (p.hasParent()){
+    public invalidOutline(message: string): void {
+        const p: Position = this;
+        let node: Position;
+        if (p.hasParent()) {
             node = p.parent();
-        }   else{
+        } else {
             node = p;
         }
         p.v.context.alert(`invalid outline: ${message}\n${node}`);
@@ -1776,8 +1776,8 @@ export class Position {
     /**
      * Move a position after position a.
      */
-    public moveAfter(a:Position): Position {
-        const p:Position = this;  // Do NOT copy the position!
+    public moveAfter(a: Position): Position {
+        const p: Position = this;  // Do NOT copy the position!
         a._adjustPositionBeforeUnlink(p);
         p._unlink();
         p._linkAfter(a);
@@ -1787,18 +1787,18 @@ export class Position {
     /**
      * Move a position to the first child of parent.
      */
-    public  moveToFirstChildOf(parent:Position): Position {
-        const p:Position = this; // Do NOT copy the position!
+    public moveToFirstChildOf(parent: Position): Position {
+        const p: Position = this; // Do NOT copy the position!
         return p.moveToNthChildOf(parent, 0);  // Major bug fix: 2011/12/04
     }
 
     /**
      * Move a position to the last child of parent.
      */
-    public moveToLastChildOf(parent:Position): Position{
-        const p:Position = this;  // Do NOT copy the position!
-        let n:number = parent.numberOfChildren();
-        if( p.parent().__eq__(parent)){
+    public moveToLastChildOf(parent: Position): Position {
+        const p: Position = this;  // Do NOT copy the position!
+        let n: number = parent.numberOfChildren();
+        if (p.parent().__eq__(parent)) {
             n -= 1;  // 2011/12/10: Another bug fix.
         }
         return p.moveToNthChildOf(parent, n);  // Major bug fix: 2011/12/04
@@ -1807,8 +1807,8 @@ export class Position {
     /**
      * Move a position to the nth child of parent.
      */
-    public moveToNthChildOf(parent:Position, n:number):Position {
-        const p:Position = this;  // Do NOT copy the position!
+    public moveToNthChildOf(parent: Position, n: number): Position {
+        const p: Position = this;  // Do NOT copy the position!
         parent._adjustPositionBeforeUnlink(p);
         p._unlink();
         p._linkAsNthChild(parent, n);
@@ -1818,8 +1818,8 @@ export class Position {
     /**
      * Move self to the root position.
      */
-    public moveToRoot():Position{
-        const p:Position = this;  //  Do NOT copy the position!
+    public moveToRoot(): Position {
+        const p: Position = this;  //  Do NOT copy the position!
         // #1631. The old root can not possibly be affected by unlinking p.
         p._unlink();
         p._linkAsRoot();
@@ -1829,21 +1829,21 @@ export class Position {
     /**
      * A low-level promote helper.
      */
-    public promote():void {
-        const p:Position = this; //  Do NOT copy the position.
-        const parent_v:VNode = p._parentVnode()!;
+    public promote(): void {
+        const p: Position = this; //  Do NOT copy the position.
+        const parent_v: VNode = p._parentVnode()!;
         const children: VNode[] = p.v.children;
         // Add the children to parent_v's children.
-        const n:number = p.childIndex() + 1;
-        const z:VNode[] = [... parent_v.children];
-        parent_v.children = z.slice(0,n);
+        const n: number = p.childIndex() + 1;
+        const z: VNode[] = [...parent_v.children];
+        parent_v.children = z.slice(0, n);
         parent_v.children.push(...children);
         parent_v.children.push(...z.slice(n));
         // Remove v's children.
         p.v.children = [];
         // Adjust the parent links in the moved children.
         // There is no need to adjust descendant links.
-        for (let child of children){
+        for (let child of children) {
             // child.parents.remove(p.v);
             const index = child.parents.indexOf(p.v);
             if (index > -1) {
@@ -1856,30 +1856,30 @@ export class Position {
     /**
      * This routine checks the structure of the receiver's tree.
      */
-    public validateOutlineWithParent(pv:Position):boolean{
-        const p:Position = this;
-        let result:boolean = true;  // optimists get only unpleasant surprises.
-        const parent:Position = p.getParent();
-        const childIndex:number = p._childIndex;
-        if (!parent.__eq__(pv)){
-            p.invalidOutline("Invalid parent link: " + JSON. stringify(parent));
+    public validateOutlineWithParent(pv: Position): boolean {
+        const p: Position = this;
+        let result: boolean = true;  // optimists get only unpleasant surprises.
+        const parent: Position = p.getParent();
+        const childIndex: number = p._childIndex;
+        if (!parent.__eq__(pv)) {
+            p.invalidOutline("Invalid parent link: " + JSON.stringify(parent));
         }
-        if( pv.__bool__()){
-            if(childIndex < 0){
+        if (pv.__bool__()) {
+            if (childIndex < 0) {
                 p.invalidOutline("missing childIndex" + childIndex);
-            }else if(childIndex >= pv.numberOfChildren()){
+            } else if (childIndex >= pv.numberOfChildren()) {
                 p.invalidOutline("missing children entry for index: " + childIndex);
             }
-        }else if(childIndex < 0){
+        } else if (childIndex < 0) {
             p.invalidOutline("negative childIndex" + childIndex);
         }
-        if( !p.v && pv.__bool__()){
+        if (!p.v && pv.__bool__()) {
             this.invalidOutline("Empty t");
         }
         // Recursively validate all the children.
-        for(let child of p.children()){
-            const r:boolean = child.validateOutlineWithParent(p);
-            if(!r){
+        for (let child of p.children()) {
+            const r: boolean = child.validateOutlineWithParent(p);
+            if (!r) {
                 result = false;
             }
         }
@@ -1889,8 +1889,8 @@ export class Position {
     /**
      * position body string property
      */
-    public get b():string{
-        const p:Position =  this;
+    public get b(): string {
+        const p: Position = this;
         return p.bodyString();
     }
 
@@ -1908,10 +1908,10 @@ export class Position {
      *  cff, replace-all and recursive import. In such situations, code should
      *  use p.v.b instead of p.b.
      */
-    public set b(val:string) {
-        const p:Position =  this;
-        const c:Commander|false = !!p.v && p.v.context;
-        if (c){
+    public set b(val: string) {
+        const p: Position = this;
+        const c: Commands | false = !!p.v && p.v.context;
+        if (c) {
             c.setBodyString(p, val);
             // Warning: c.setBodyString is *expensive*.
         }
@@ -1920,8 +1920,8 @@ export class Position {
     /**
      * position property returning the headline string
      */
-    public get h():string {
-        const p:Position =  this;
+    public get h(): string {
+        const p: Position = this;
         return p.headString();
     }
 
@@ -1939,10 +1939,10 @@ export class Position {
      *  cff, replace-all and recursive import. In such situations, code should
      *  use p.v.h instead of p.h.
      */
-    public set h(val:string) {
-        const p:Position =  this;
-        const c:Commander|false = !!p.v && p.v.context;
-        if (c){
+    public set h(val: string) {
+        const p: Position = this;
+        const c: Commands | false = !!p.v && p.v.context;
+        if (c) {
             c.setHeadString(p, val);
             // Warning: c.setHeadString is *expensive*.
         }
@@ -1951,74 +1951,74 @@ export class Position {
     /**
      * position gnx property
      */
-    public get gnx():string{
-        const p:Position =  this;
+    public get gnx(): string {
+        const p: Position = this;
         return p.v.fileIndex;
     }
 
     /**
      * position property returning the script formed by p and its descendants
      */
-    public get script():string {
-        const p:Position =  this;
+    public get script(): string {
+        const p: Position = this;
         return g.getScript(p.v.context, p,
             false,  //  Always return the entire expansion.
             true, // forcePythonSentinels
             false); // useSentinels
     }
 
-    /** 
+    /**
      * position property returning the body text without sentinels
      */
-    public get nosentinels():string {
-        const p:Position =  this;
-        return g.splitLines(p.b).filter(z=>!g.isDirective(z)).join('');
+    public get nosentinels(): string {
+        const p: Position = this;
+        return g.splitLines(p.b).filter(z => !g.isDirective(z)).join('');
     }
 
     /**
      * p.u property
      */
-    public get u():any {
-        const p:Position =  this;
+    public get u(): any {
+        const p: Position = this;
         return p.v.u;
     }
 
-    public set u(val:any) {
-        const p:Position =  this;
+    public set u(val: any) {
+        const p: Position = this;
         p.v.u = val;
     }
 
     /**
      * Contract p.v and clear p.v.expandedPositions list.
      */
-    public contract():void {
-        const p:Position =  this;
-        const v:VNode = this.v;
-        v.expandedPositions = v.expandedPositions.filter(z=>!z.__eq__(p));
+    public contract(): void {
+        const p: Position = this;
+        const v: VNode = this.v;
+        v.expandedPositions = v.expandedPositions.filter(z => !z.__eq__(p));
         v.contract();
     }
 
-    public expand():void {
-        const p:Position =  this;
-        const v:VNode = this.v;
-        v.expandedPositions = v.expandedPositions.filter(z=>!z.__eq__(p));
-        let isBreak:boolean=false;
-        for(let p2 of v.expandedPositions){
-            if(p.__eq__(p2)){
+    public expand(): void {
+        const p: Position = this;
+        const v: VNode = this.v;
+        v.expandedPositions = v.expandedPositions.filter(z => !z.__eq__(p));
+        let isBreak: boolean = false;
+        for (let p2 of v.expandedPositions) {
+            if (p.__eq__(p2)) {
                 isBreak = true;
                 break;
             }
         }
-        if(!isBreak){
+        if (!isBreak) {
             v.expandedPositions.push(p.copy());
         }
         v.expand();
     }
 
-    public isExpanded():boolean {
-        const p:Position =  this;
-        if(p.isCloned()){
-            const c:Commander = p.v.context;
+    public isExpanded(): boolean {
+        const p: Position = this;
+        if (p.isCloned()) {
+            const c: Commands = p.v.context;
             return c.shouldBeExpanded(p);
         }
         return p.v.isExpanded();
@@ -2027,35 +2027,35 @@ export class Position {
     // Clone bits are no longer used.
     // Dirty bits are handled carefully by the position class.
 
-    public clearMarked():void { return this.v.clearMarked(); }
+    public clearMarked(): void { return this.v.clearMarked(); }
 
-    public clearOrphan():void { return this.v.clearOrphan(); }
+    public clearOrphan(): void { return this.v.clearOrphan(); }
 
-    public clearVisited():void { return this.v.clearVisited(); }
+    public clearVisited(): void { return this.v.clearVisited(); }
 
-    public initExpandedBit():void { return this.v.initExpandedBit(); }
+    public initExpandedBit(): void { return this.v.initExpandedBit(); }
 
-    public initMarkedBit():void { return this.v.initMarkedBit(); }
+    public initMarkedBit(): void { return this.v.initMarkedBit(); }
 
-    public initStatus(status:number):void { return this.v.initStatus(status); }
+    public initStatus(status: number): void { return this.v.initStatus(status); }
 
-    public setMarked():void { return this.v.setMarked(); }
+    public setMarked(): void { return this.v.setMarked(); }
 
-    public setOrphan():void { return this.v.setOrphan(); }
+    public setOrphan(): void { return this.v.setOrphan(); }
 
-    public setSelected():void { return this.v.setSelected(); }
+    public setSelected(): void { return this.v.setSelected(); }
 
-    public setVisited():void { return this.v.setVisited(); }
+    public setVisited(): void { return this.v.setVisited(); }
 
-    public computeIcon():number {
+    public computeIcon(): number {
         return this.v.computeIcon();
     }
 
-    public setIcon():void {
+    public setIcon(): void {
         // Compatibility routine for old scripts
     }
 
-    public setSelection(start:number, length:number):void {
+    public setSelection(start: number, length: number): void {
         return this.v.setSelection(start, length);
     }
 
@@ -2063,36 +2063,36 @@ export class Position {
         this.v.restoreCursorAndScroll();
     }
 
-    public saveCursorAndScroll():void {
+    public saveCursorAndScroll(): void {
         this.v.saveCursorAndScroll();
     }
 
-    public setBodyString(s:string):void{
-        const p:Position =  this;
+    public setBodyString(s: string): void {
+        const p: Position = this;
         return p.v.setBodyString(s);
     }
 
-    public initHeadString(s:string):void{
-        const p:Position =  this;
+    public initHeadString(s: string): void {
+        const p: Position = this;
         p.v.initHeadString(s);
     }
 
-    public setHeadString(s:string):void{
-        const p:Position =  this;
+    public setHeadString(s: string): void {
+        const p: Position = this;
         p.v.initHeadString(s);
         p.setDirty();
     }
 
     // Compatibility routine for scripts.
 
-    public clearVisitedInTree():void {
-        for(let p of this.self_and_subtree(false)){
+    public clearVisitedInTree(): void {
+        for (let p of this.self_and_subtree(false)) {
             p.clearVisited();
         }
     }
 
-    public clearAllVisitedInTree():void {
-        for(let p of this.self_and_subtree(false)){
+    public clearAllVisitedInTree(): void {
+        for (let p of this.self_and_subtree(false)) {
             p.v.clearVisited();
             p.v.clearWriteBit();
         }
@@ -2101,18 +2101,18 @@ export class Position {
     /**
      * (p) Set p.v dirty.
      */
-    public clearDirty():void {
-        const p:Position =  this;
+    public clearDirty(): void {
+        const p: Position = this;
         p.v.clearDirty();
     }
 
     /**
      * Returns True if position p or one of p's parents is an @ignore node.
      */
-    public inAtIgnoreRange():boolean {
-        const p1:Position =  this;
-        for(let p of p1.self_and_parents(false)){
-            if(p.isAtIgnoreNode()){
+    public inAtIgnoreRange(): boolean {
+        const p1: Position = this;
+        for (let p of p1.self_and_parents(false)) {
+            if (p.isAtIgnoreNode()) {
                 return true;
             }
         }
@@ -2122,17 +2122,17 @@ export class Position {
     /**
      * Set all ancestor @<file> nodes dirty, including ancestors of all clones of p.
      */
-    public setAllAncestorAtFileNodesDirty():void {
-        const p:Position =  this;
+    public setAllAncestorAtFileNodesDirty(): void {
+        const p: Position = this;
         p.v.setAllAncestorAtFileNodesDirty();
     }
 
-    /** 
+    /**
      * Mark a node and all ancestor @file nodes dirty.
      * p.setDirty() is no longer expensive.
      */
     public setDirty(): void {
-        const p:Position =  this;
+        const p: Position = this;
         p.v.setAllAncestorAtFileNodesDirty();
         p.v.setDirty();
     }
@@ -2141,13 +2141,13 @@ export class Position {
      * Return True if p.b contains an @all directive.
      */
     public is_at_all(): boolean {
-        const p:Position =  this;
+        const p: Position = this;
         return (
             p.isAnyAtFileNode() &&
-            !!g.splitLines(p.b).reduce((acc, s):boolean=>{
-                if(g.match_word(s, 0, '@all')){
+            !!g.splitLines(p.b).reduce((acc, s): boolean => {
+                if (g.match_word(s, 0, '@all')) {
                     return true;
-                }else {
+                } else {
                     return !!acc;
                 }
             }, false)
@@ -2158,10 +2158,10 @@ export class Position {
     /**
      * Return True if p or one of p's ancestors is an @all node.
      */
-    public in_at_all_tree():boolean {
-        const p1:Position =  this;
-        for(let p of p1.self_and_parents(false)){
-            if(p.is_at_all()){
+    public in_at_all_tree(): boolean {
+        const p1: Position = this;
+        for (let p of p1.self_and_parents(false)) {
+            if (p.is_at_all()) {
                 return true;
             }
         }
@@ -2171,18 +2171,18 @@ export class Position {
     /**
      * Return True if p is an @ignore node.
      */
-    public is_at_ignore():boolean {
-        const p:Position =  this;
+    public is_at_ignore(): boolean {
+        const p: Position = this;
         return g.match_word(p.h, 0, '@ignore');
     }
 
     /**
      * Return True if p or one of p's ancestors is an @ignore node
-     */ 
-    public in_at_ignore_tree():boolean {
-        const p1:Position =  this;
-        for(let p of p1.self_and_parents(false)){
-            if(g.match_word(p.h, 0, '@ignore')){
+     */
+    public in_at_ignore_tree(): boolean {
+        const p1: Position = this;
+        for (let p of p1.self_and_parents(false)) {
+            if (g.match_word(p.h, 0, '@ignore')) {
                 return true;
             }
         }
@@ -2200,25 +2200,25 @@ export interface Position {
     lastNode: () => Position;
     next: () => Position;
     nodeAfterTree: () => Position;
-    nthChild: (n:number) => Position;
+    nthChild: (n: number) => Position;
     parent: () => Position;
     threadBack: () => Position;
     threadNext: () => Position;
-    visBack: (c:Commander) => Position;
-    visNext: (c:Commander) => Position;
-    hasVisBack: (c:Commander) => Position;
-    hasVisNext: (c:Commander) => Position;
+    visBack: (c: Commands) => Position;
+    visNext: (c: Commands) => Position;
+    hasVisBack: (c: Commands) => Position;
+    hasVisNext: (c: Commands) => Position;
     hasFirstChild: () => boolean;
     atNoSentFileNodeName: () => string;
     atAsisFileNodeName: () => string;
     isAtNoSentFileNode: () => boolean;
     isAtAsisFileNode: () => boolean;
     __repr__: () => string;
-    simpleLevel: ()=>number;
+    simpleLevel: () => number;
 
-    initBodyString : (s:string)=>void;
-    setTnodeText: (s:string)=>void;
-    scriptSetBodyString : (s:string)=>void;
+    initBodyString: (s: string) => void;
+    setTnodeText: (s: string) => void;
+    scriptSetBodyString: (s: string) => void;
 }
 
 Position.prototype.back = Position.prototype.getBack;
@@ -2292,7 +2292,7 @@ export class VNode {
     // The context containing context.hiddenRootNode.
     // Required so we can compute top-level siblings.
     // It is named .context rather than .c to emphasize its limited usage.
-    context: Commander;
+    context: Commands;
     expandedPositions: Position[]; // Positions that should be expanded.
 
     // * Cursor location, text selection and scrolling information
@@ -2301,7 +2301,7 @@ export class VNode {
     selectionLength: number; // The length of the selected body text.
     selectionStart: number; // The start of the selected body text.
 
-    private unknownAttributes: undefined | {[key:string]:any};
+    private unknownAttributes: undefined | { [key: string]: any };
     unicode_warning_given: boolean = false;
 
     constructor(context: any, gnx?: string) {
@@ -2321,17 +2321,17 @@ export class VNode {
         g.app.nodeIndices!.new_vnode_helper(context, gnx, this);
     }
 
-    public __repr__():string{
+    public __repr__(): string {
         return `<VNode ${this.gnx} ${this.headString()}>`;
     }
 
-    public dumpLink(link:string):string{
-        return link?link:"<none>";
+    public dumpLink(link: string): string {
+        return link ? link : "<none>";
     }
 
-    public dump(label=""):void {
+    public dump(label = ""): void {
         const v: VNode = this;
-        const s:string = '-'.repeat(10);
+        const s: string = '-'.repeat(10);
         console.log(`${s} ${label} ${v}`);
         // console.log(`gnx: ${v.gnx}`);
         console.log(`parents.length: ${v.parents.length}`);
@@ -2542,22 +2542,22 @@ export class VNode {
      * **Important**: the v.parents ivar must be [] for all nodes.
      * v._addParentLinks will set all parents.
      */
-    public copyTree(copyMarked?:boolean):VNode {
-        const v:VNode = this;
+    public copyTree(copyMarked?: boolean): VNode {
+        const v: VNode = this;
         // Allocate a new vnode and gnx with empty children & parents.
-        const v2:VNode = new VNode(v.context);
-        console.assert(v2.parents.length===0, v2.parents.length.toString());
+        const v2: VNode = new VNode(v.context);
+        console.assert(v2.parents.length === 0, v2.parents.length.toString());
         console.assert(v2.gnx);
         console.assert(v.gnx !== v2.gnx);
         // Copy vnode fields. Do **not** set v2.parents.
         v2._headString = g.toUnicode(v._headString, null, true);
         v2._bodyString = g.toUnicode(v._bodyString, null, true);
-        v2.u = JSON.parse(JSON.stringify(v.u)); // Deep Copy 
-        if(copyMarked && v.isMarked()){
+        v2.u = JSON.parse(JSON.stringify(v.u)); // Deep Copy
+        if (copyMarked && v.isMarked()) {
             v2.setMarked();
         }
         // Recursively copy all descendant vnodes.
-        for(let child of v.children){
+        for (let child of v.children) {
             v2.children.push(child.copyTree(copyMarked));
         }
         return v2;
@@ -2794,7 +2794,7 @@ export class VNode {
         this.statusBits |= StatusFlags.writeBit;
     }
 
-    public childrenModified():void {
+    public childrenModified(): void {
         // TODO: needed?
         // g.childrenModifiedSet.add(this);
     }
@@ -2813,7 +2813,7 @@ export class VNode {
         //  pass # Compatibility routine for old scripts
     }
 
-    public contentModified():void {
+    public contentModified(): void {
         // TODO: needed?
         // g.contentModifiedSet.add(this);
     }
@@ -2896,7 +2896,7 @@ export class VNode {
         try {
             v._bodyString = g.toUnicode(s, null, true);
         }
-        catch(exception) {
+        catch (exception) {
             if (!this.unicode_warning_given) {
                 this.unicode_warning_given = true;
                 g.error(s);
@@ -2991,16 +2991,16 @@ export class VNode {
     /**
      * Adjust links after adding a link to v.
      */
-    public _addLink(childIndex:number, parent_v: VNode):void{
+    public _addLink(childIndex: number, parent_v: VNode): void {
         const v: VNode = this;
         v.context.frame.tree.generation += 1;
         // Update parent_v.children & v.parents.
         parent_v.children.splice(childIndex, 0, v);
         v.parents.push(parent_v);
-        if (v.parents.length === 1){
+        if (v.parents.length === 1) {
             // Adjust the parents links in the descendant tree.
             // This handles clones properly when undoing a delete.
-            for (let child of v.children){
+            for (let child of v.children) {
                 child._addParentLinks(v);
             }
         }
@@ -3009,11 +3009,11 @@ export class VNode {
     /**
      * Used by addLink to adjust parent links in the descendant tree
      */
-    public _addParentLinks(parent:VNode):void{
+    public _addParentLinks(parent: VNode): void {
         const v: VNode = this;
         v.parents.push(parent);
-        if (v.parents.length  === 1){
-            for (let child of v.children){
+        if (v.parents.length === 1) {
+            for (let child of v.children) {
                 child._addParentLinks(v);
             }
         }
@@ -3022,33 +3022,33 @@ export class VNode {
     /**
      * Adjust links after cutting a link to v.
      */
-    public _cutLink(childIndex:number, parent_v:VNode):void{
+    public _cutLink(childIndex: number, parent_v: VNode): void {
         const v: VNode = this;
         v.context.frame.tree.generation += 1;
         console.assert(parent_v.children[childIndex].fileIndex === v.fileIndex);
         parent_v.children.splice(childIndex, 1);
-        if( v.parents.includes(parent_v)){
-            try{
-                for(let i = 0; i < v.parents.length; i++){
+        if (v.parents.includes(parent_v)) {
+            try {
+                for (let i = 0; i < v.parents.length; i++) {
                     if (v.parents[i].fileIndex === parent_v.fileIndex) {
                         v.parents.splice(i, 1);
                         break;
                     }
                 }
             }
-            catch(ValueError){
-                g.error(parent_v + " not in parents of "+v);
+            catch (ValueError) {
+                g.error(parent_v + " not in parents of " + v);
                 g.trace('v.parents:');
                 g.printObj(v.parents);
             }
         }
-        
-        
-        
-        if (!v.parents.length){
+
+
+
+        if (!v.parents.length) {
             // Adjust the parents links in the descendant tree.
             // This handles clones properly when deleting a tree.
-            for(let child of v.children){
+            for (let child of v.children) {
                 child._cutParentLinks(v);
             }
         }
@@ -3057,24 +3057,24 @@ export class VNode {
     /**
      * Used by cutLink to adjust parent links in the descendant tree
      */
-    public _cutParentLinks(parent: VNode){
+    public _cutParentLinks(parent: VNode) {
         const v: VNode = this;
-        
-        for(let i = 0; i < v.parents.length; i++){ 
+
+        for (let i = 0; i < v.parents.length; i++) {
             if (v.parents[i].fileIndex === parent.fileIndex) {
                 v.parents.splice(i, 1);
                 break;
             }
         }
-            
-        if (!v.parents.length){
+
+        if (!v.parents.length) {
             // Adjust the parents links in the descendant tree.
             // This handles clones properly when deleting a tree.
-            for(let child of v.children){
+            for (let child of v.children) {
                 child._cutParentLinks(v);
             }
-        }            
-                
+        }
+
     }
 
     /**
@@ -3082,19 +3082,19 @@ export class VNode {
      * This is a low-level method, used by the read code.
      * It is not intended as a general replacement for p.doDelete().
      */
-    public _deleteAllChildren():void {
+    public _deleteAllChildren(): void {
         const v: VNode = this;
-        for (let v2 of v.children){
-            try{
-                for(let i = 0; i < v2.parents.length; i++){ 
+        for (let v2 of v.children) {
+            try {
+                for (let i = 0; i < v2.parents.length; i++) {
                     if (v2.parents[i].fileIndex === v.fileIndex) {
                         v2.parents.splice(i, 1);
                         break;
                     }
                 }
             }
-            catch(ValueError){
-                g.error(v+ " not in parents of "+v2);
+            catch (ValueError) {
+                g.error(v + " not in parents of " + v2);
                 g.trace('v2.parents:');
                 g.printObj(v2.parents);
             }
@@ -3105,7 +3105,7 @@ export class VNode {
     /**
      * Links self as the n'th child of VNode pv
      */
-    public _linkAsNthChild(parent_v:VNode, n:number):void {
+    public _linkAsNthChild(parent_v: VNode, n: number): void {
         const v: VNode = this; // The child node.
         v._addLink(n, parent_v);
     }
@@ -3113,12 +3113,12 @@ export class VNode {
     /**
      * VNode body string property
      */
-    public get b():string{
+    public get b(): string {
         const v: VNode = this;
         return v.bodyString();
     }
 
-    public set b(val:string){
+    public set b(val: string) {
         const v: VNode = this;
         v.setBodyString(val);
     }
@@ -3126,12 +3126,12 @@ export class VNode {
     /**
      * VNode headline string property
      */
-    public get h():string{
+    public get h(): string {
         const v: VNode = this;
         return v.headString();
     }
 
-    public set h(val:string){
+    public set h(val: string) {
         const v: VNode = this;
         v.setHeadString(val);
     }
@@ -3139,22 +3139,22 @@ export class VNode {
     /**
      * VNode u property
      */
-    public get u():any{
+    public get u(): any {
         const v: VNode = this;
-        if(!v.unknownAttributes){
+        if (!v.unknownAttributes) {
             v.unknownAttributes = {};
         }
         return v.unknownAttributes;
     }
 
-    public set u(val:any){
+    public set u(val: any) {
         const v: VNode = this;
-        if(val===null){
+        if (val === null) {
             v.unknownAttributes = undefined;
         }
-        else if((typeof val)=== 'object'){
+        else if ((typeof val) === 'object') {
             v.unknownAttributes = val;
-        }else {
+        } else {
             throw new Error("unknownAttributes ValueError");
         }
     }
@@ -3162,7 +3162,7 @@ export class VNode {
     /**
      * VNode gnx property
      */
-    public get gnx(){
+    public get gnx() {
         const v: VNode = this;
         return v.fileIndex;
     }
@@ -3176,11 +3176,11 @@ export interface VNode {
     atAsisFileNodeName: () => string;
     isAtNoSentFileNode: () => boolean;
     isAtAsisFileNode: () => boolean;
-    initBodyString: (s:string) => void;
-    initHeadString: (s:string) => void;
-    setHeadText: (s:string) => void;
-    setTnodeText: (s:string) => void;
-    __str__:() => string;
+    initBodyString: (s: string) => void;
+    initHeadString: (s: string) => void;
+    setHeadText: (s: string) => void;
+    setTnodeText: (s: string) => void;
+    __str__: () => string;
 }
 
 // New names, less confusing

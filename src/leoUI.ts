@@ -6,11 +6,6 @@ import {
     RevealType,
     Icon,
     ReqRefresh,
-    ChooseDocumentItem,
-    MinibufferCommand,
-    UserCommand,
-    ShowBodyParam,
-    PNode
 } from "./types";
 import { Leojs } from "./leojs";
 
@@ -23,7 +18,6 @@ import { LeoDocumentsProvider } from "./leoDocuments";
 import { LeoFilesBrowser } from "./leoFileBrowser";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
-import { Commander } from "./core/leoCommander";
 import { LoadManager } from "./core/leoApp";
 import { NodeIndices, Position, VNode } from "./core/leoNodes";
 
@@ -161,7 +155,7 @@ export class LeoUI {
         // ************************************************************
         // * demo test: CREATE NEW LEO OUTLINE: NEW COMMANDER
         // ************************************************************
-        let w_c = new Commander("", this);
+        let w_c = g.app.newCommander("", this);
 
         // Equivalent to leoBridge 'createFrame' method
         let w_v = new VNode(w_c);
@@ -208,7 +202,7 @@ export class LeoUI {
         // ************************************************************
         // * demo test: SOME OTHER COMMANDER AND OUTLINE
         // ************************************************************
-        w_c = new Commander("", this);
+        w_c = g.app.newCommander("", this);
         w_v = new VNode(w_c);
         w_p = new Position(w_v);
         w_v.initHeadString("NewHeadline");

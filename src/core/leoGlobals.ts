@@ -6,7 +6,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
-import { Commander } from './leoCommander';
+import { Commands } from './leoCommander';
 import { Position } from './leoNodes';
 
 export const isMac: boolean = process.platform.startsWith('darwin');
@@ -249,7 +249,7 @@ export function callers(n: number = 4, count: number = 0, excludeCaller: boolean
         result = result.slice(0, count);
     }
     // if (verbose) {
-        // return ''; //''.join([f"\n  {z}" for z in result]);
+    // return ''; //''.join([f"\n  {z}" for z in result]);
     // }
     return result.join(',');
 }
@@ -333,33 +333,33 @@ export function doKeywordArgs(keys: { [key: string]: any }, d: { [key: string]: 
     Set app.hookError on all exceptions.
     Scripts may reset app.hookError to try again.
  */
-export function doHook(tag:string, ...args: any[]):any {
-/*
-    if g.app.killed or g.app.hookError:
-        return None
-    if args:
-        # A minor error in Leo's core.
-        g.pr(f"***ignoring args param.  tag = {tag}")
-    if not g.app.config.use_plugins:
-        if tag in ('open0', 'start1'):
-            g.warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.")
-        return None
-    # Get the hook handler function.  Usually this is doPlugins.
-    c = keywords.get("c")
-    # pylint: disable=consider-using-ternary
-    f = (c and c.hookFunction) or g.app.hookFunction
-    if not f:
-        g.app.hookFunction = f = g.app.pluginsController.doPlugins
-    try:
-        # Pass the hook to the hook handler.
-        # g.pr('doHook',f.__name__,keywords.get('c'))
-        return f(tag, keywords)
-    except Exception:
-        g.es_exception()
-        g.app.hookError = True  # Supress this function.
-        g.app.idle_time_hooks_enabled = False
-        return None
-*/
+export function doHook(tag: string, ...args: any[]): any {
+    /*
+        if g.app.killed or g.app.hookError:
+            return None
+        if args:
+            # A minor error in Leo's core.
+            g.pr(f"***ignoring args param.  tag = {tag}")
+        if not g.app.config.use_plugins:
+            if tag in ('open0', 'start1'):
+                g.warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.")
+            return None
+        # Get the hook handler function.  Usually this is doPlugins.
+        c = keywords.get("c")
+        # pylint: disable=consider-using-ternary
+        f = (c and c.hookFunction) or g.app.hookFunction
+        if not f:
+            g.app.hookFunction = f = g.app.pluginsController.doPlugins
+        try:
+            # Pass the hook to the hook handler.
+            # g.pr('doHook',f.__name__,keywords.get('c'))
+            return f(tag, keywords)
+        except Exception:
+            g.es_exception()
+            g.app.hookError = True  # Supress this function.
+            g.app.idle_time_hooks_enabled = False
+            return None
+    */
 }
 
 export const error = console.error;
@@ -400,11 +400,11 @@ export const es_print = console.log;
  * Return the expansion of all of node p's body text if
  * p is not the current node or if there is no text selection.
  */
-export function getScript(c:Commander, p:Position,
-    useSelectedText:boolean=true,
-    forcePythonSentinels:boolean=true,
-    useSentinels:boolean=true
-):string  {
+export function getScript(c: Commands, p: Position,
+    useSelectedText: boolean = true,
+    forcePythonSentinels: boolean = true,
+    useSentinels: boolean = true
+): string {
     console.log("get script called");
     return "";
 }
@@ -431,16 +431,16 @@ export function isDirective(s: string): boolean {
  * Return non-negative number if the body text contains the @ directive.
  */
 export function is_special(s: string, directive: string): number {
-    console.assert(directive && directive.substring(0,1)==='@');
+    console.assert(directive && directive.substring(0, 1) === '@');
     // Most directives must start the line.
     const lws: boolean = ["@others", "@all"].includes(directive);
-    const pattern = lws?new RegExp("^\\s*("+directive+"\\b)", 'm'):new RegExp("^("+directive+"\\b)", 'm');
+    const pattern = lws ? new RegExp("^\\s*(" + directive + "\\b)", 'm') : new RegExp("^(" + directive + "\\b)", 'm');
 
     const m = pattern.exec(s);
 
-    if(m){
+    if (m) {
         // javascript returns index including spaces before the match after newline
-        return m.index+m[0].length-m[1].length;
+        return m.index + m[0].length - m[1].length;
     }
     return -1;
 }
