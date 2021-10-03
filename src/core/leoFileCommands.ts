@@ -1,5 +1,5 @@
 import { VNode } from "./leoNodes";
-import { Commands } from "./leoCommander";
+import { Commands } from "./leoCommands";
 import * as fs from 'fs';
 
 export class FileCommands {

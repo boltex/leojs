@@ -6,7 +6,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
-import { Commands } from './leoCommander';
+import { Commands } from './leoCommands';
 import { Position } from './leoNodes';
 
 export const isMac: boolean = process.platform.startsWith('darwin');

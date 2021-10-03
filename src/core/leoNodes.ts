@@ -2,7 +2,7 @@
 
 import "date-format-lite";
 import * as g from './leoGlobals';
-import { Commands } from './leoCommander';
+import { Commands } from './leoCommands';
 
 
 /**

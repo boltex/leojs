@@ -197,8 +197,6 @@ export function activate(p_context: vscode.ExtensionContext) {
         p_context.subscriptions.push(vscode.commands.registerCommand(...p_command));
     });
 
-
-
 }
 
 // this method is called when your extension is deactivated

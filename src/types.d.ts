@@ -1,18 +1,18 @@
 import * as vscode from "vscode";
 import { LeoOutlineNode } from "./leoOutlineNode";
 
-export interface PNode {
-    // Fake structure. Use Position.v.isCloned(), etc. instead
-    header: string;
-    children: PNode[];
-    parent?: PNode;
-    body: string;
-    selected?: boolean;
-    marked?: boolean;
-    cloned?: boolean;
-    dirty?: boolean;
-    atFile?: boolean;
-}
+// export interface PNode {
+//     // Fake structure. Use Position.v.isCloned(), etc. instead
+//     header: string;
+//     children: PNode[];
+//     parent?: PNode;
+//     body: string;
+//     selected?: boolean;
+//     marked?: boolean;
+//     cloned?: boolean;
+//     dirty?: boolean;
+//     atFile?: boolean;
+// }
 
 /**
  * * When refreshing the outline and getting to Leo's selected node

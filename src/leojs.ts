@@ -1,5 +1,6 @@
 
-import { LeoButton, LeoDocument, PNode } from './types';
+//import { LeoButton, LeoDocument, PNode } from './types';
+import { LeoButton, LeoDocument } from './types';
 
 // https://github.com/leo-editor/leo-editor/issues/1025
 
@@ -9,38 +10,38 @@ import { LeoButton, LeoDocument, PNode } from './types';
 export class Leojs {
     // FAKE model of the outline (PNodes are temporary replacement of positions + vnodes)
     // simulates _yieldAllRootChildren from leoInteg's leobridgeserver.py
-    public positions: PNode[] = [
-        {
-            header: 'node1',
-            body: 'node1 body',
-            children: [
-                {
-                    header: 'nodeInside1',
-                    body: 'nodeInside1 body',
-                    marked: true,
-                    children: [],
-                },
-                {
-                    header: 'nodeInside2',
-                    body: 'nodeInside2 body',
-                    children: [],
-                },
-            ],
-        },
-        {
-            header: 'node2selected',
-            selected: true,
-            body: '', // Empty body should display icon without blue square
-            children: [],
-        },
+    // public positions: PNode[] = [
+    //     {
+    //         header: 'node1',
+    //         body: 'node1 body',
+    //         children: [
+    //             {
+    //                 header: 'nodeInside1',
+    //                 body: 'nodeInside1 body',
+    //                 marked: true,
+    //                 children: [],
+    //             },
+    //             {
+    //                 header: 'nodeInside2',
+    //                 body: 'nodeInside2 body',
+    //                 children: [],
+    //             },
+    //         ],
+    //     },
+    //     {
+    //         header: 'node2selected',
+    //         selected: true,
+    //         body: '', // Empty body should display icon without blue square
+    //         children: [],
+    //     },
 
-        {
-            header: '@file node3',
-            atFile: true,
-            body: 'node3 body',
-            children: [],
-        },
-    ];
+    //     {
+    //         header: '@file node3',
+    //         atFile: true,
+    //         body: 'node3 body',
+    //         children: [],
+    //     },
+    // ];
 
     // Fake documents array (rendered in tree view but is just a list - no node relationships)
     public documents: LeoDocument[] = [
@@ -67,22 +68,22 @@ export class Leojs {
     ];
 
     constructor() {
-        // insert parent properties in fake positions
-        this.positions.forEach((p_position) => {
-            // set to undefined at first for root nodes
-            this._setPNodeParents(p_position, undefined);
-        });
+        // // insert parent properties in fake positions
+        // this.positions.forEach((p_position) => {
+        //     // set to undefined at first for root nodes
+        //     this._setPNodeParents(p_position, undefined);
+        // });
     }
 
-    /**
-     * Recursive method to fill the parent properties of fake position-structure
-     * @param p_position
-     * @param p_parent
-     */
-    private _setPNodeParents(p_position: PNode, p_parent?: PNode): void {
-        p_position.parent = p_parent; // set its parent
-        p_position.children.forEach((p_child) => {
-            this._setPNodeParents(p_child, p_position);
-        });
-    }
+    // /**
+    //  * Recursive method to fill the parent properties of fake position-structure
+    //  * @param p_position
+    //  * @param p_parent
+    //  */
+    // private _setPNodeParents(p_position: PNode, p_parent?: PNode): void {
+    //     p_position.parent = p_parent; // set its parent
+    //     p_position.children.forEach((p_child) => {
+    //         this._setPNodeParents(p_child, p_position);
+    //     });
+    // }
 }

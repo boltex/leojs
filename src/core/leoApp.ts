@@ -2,7 +2,7 @@ import * as os from "os";
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
 import { NodeIndices } from './leoNodes';
-import { Commands } from './leoCommander';
+import { Commands } from './leoCommands';
 
 /**
  *  A singleton class to manage idle-time handling. This class handles all

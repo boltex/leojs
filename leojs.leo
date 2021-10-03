@@ -14,7 +14,7 @@
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh></v>
 <v t="felix.20201208224703.1"><vh>@clean CONTRIBUTING.md</vh></v>
 </v>
-<v t="ekr.20201209145358.1"><vh>VSCode Extension</vh>
+<v t="ekr.20201209145358.1"><vh>VSCode extension</vh>
 <v t="felix.20201215231023.1"><vh>@clean src/leoFiles.js</vh>
 <v t="felix.20210124225736.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
 <v t="felix.20201215231023.2"><vh>&lt;&lt; xslTemplate &gt;&gt;</vh></v>
@@ -350,7 +350,7 @@
 </v>
 </v>
 <v t="felix.20210102000055.1"><vh>Leo</vh>
-<v t="felix.20210102000100.1"><vh>Core Classes</vh>
+<v t="felix.20210102000100.1"><vh>Core classes</vh>
 <v t="felix.20210102012334.1"><vh>@clean src/core/leoApp.ts</vh>
 <v t="felix.20210102211149.1"><vh>&lt;&lt; imports &gt;&gt; (leoApp)</vh></v>
 <v t="felix.20210102213337.1"><vh>class IdleTimeManager</vh>
@@ -408,7 +408,7 @@
 </v>
 </v>
 </v>
-<v t="felix.20210110222544.1"><vh>@clean src/core/leoCommander.ts</vh>
+<v t="felix.20210110222544.1"><vh>@clean src/core/leoCommands.ts</vh>
 <v t="felix.20210220194059.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
 <v t="felix.20210224000242.1"><vh>interface hoistStack</vh></v>
 <v t="felix.20210110223514.1"><vh>class Commander</vh>
@@ -775,6 +775,8 @@
 </v>
 </v>
 </v>
+<v t="felix.20211002194716.1"><vh>Command classes</vh></v>
+<v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
 </v>
 <v t="felix.20210226224644.1"><vh>TO DO / TO FINISH</vh>
 <v t="felix.20210226224637.1"><vh>fc.getLeoFile &amp; helpers (read main line)</vh>
@@ -1445,8 +1447,6 @@ public refreshTreeRoot(): void {
     w_commands.map(function (p_command) {
         p_context.subscriptions.push(vscode.commands.registerCommand(...p_command));
     });
-
-
 
 }
 
@@ -2210,8 +2210,7 @@ import { Icon } from "./types";
 import * as utils from "./utils";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
-import { Commands } from "./core/leoCommander";
-
+import { Commands } from "./core/leoCommands";
 
 @language typescript
 @tabwidth -4
@@ -2733,18 +2732,18 @@ export interface MinibufferCommand extends vscode.QuickPickItem {
     func: string;
 }
 </t>
-<t tx="felix.20201214154816.2">export interface PNode {
-    // Fake structure. Use Position.v.isCloned(), etc. instead
-    header: string;
-    children: PNode[];
-    parent?: PNode;
-    body: string;
-    selected?: boolean;
-    marked?: boolean;
-    cloned?: boolean;
-    dirty?: boolean;
-    atFile?: boolean;
-}
+<t tx="felix.20201214154816.2">// export interface PNode {
+//     // Fake structure. Use Position.v.isCloned(), etc. instead
+//     header: string;
+//     children: PNode[];
+//     parent?: PNode;
+//     body: string;
+//     selected?: boolean;
+//     marked?: boolean;
+//     cloned?: boolean;
+//     dirty?: boolean;
+//     atFile?: boolean;
+// }
 
 </t>
 <t tx="felix.20201214154816.3">/**
@@ -3029,7 +3028,8 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
 <t tx="felix.20201214194144.8"></t>
 <t tx="felix.20201214194144.9"></t>
 <t tx="felix.20201214194412.1">
-import { LeoButton, LeoDocument, PNode } from './types';
+//import { LeoButton, LeoDocument, PNode } from './types';
+import { LeoButton, LeoDocument } from './types';
 @language typescript
 @tabwidth -4
 
@@ -5475,7 +5475,6 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 </t>
 <t tx="felix.20201214205159.81">"@types/debounce": "^1.2.0",
 "axios": "^0.19.0",
-"@types/date-format-lite": "^17.7.0",
 "date-format-lite": "^17.7.0",
 "debounce": "^1.2.0"
 </t>
@@ -5721,38 +5720,38 @@ set leoReady(p_value: boolean) {
 <t tx="felix.20201215224237.1">export class Leojs {
     // FAKE model of the outline (PNodes are temporary replacement of positions + vnodes)
     // simulates _yieldAllRootChildren from leoInteg's leobridgeserver.py
-    public positions: PNode[] = [
-        {
-            header: 'node1',
-            body: 'node1 body',
-            children: [
-                {
-                    header: 'nodeInside1',
-                    body: 'nodeInside1 body',
-                    marked: true,
-                    children: [],
-                },
-                {
-                    header: 'nodeInside2',
-                    body: 'nodeInside2 body',
-                    children: [],
-                },
-            ],
-        },
-        {
-            header: 'node2selected',
-            selected: true,
-            body: '', // Empty body should display icon without blue square
-            children: [],
-        },
+    // public positions: PNode[] = [
+    //     {
+    //         header: 'node1',
+    //         body: 'node1 body',
+    //         children: [
+    //             {
+    //                 header: 'nodeInside1',
+    //                 body: 'nodeInside1 body',
+    //                 marked: true,
+    //                 children: [],
+    //             },
+    //             {
+    //                 header: 'nodeInside2',
+    //                 body: 'nodeInside2 body',
+    //                 children: [],
+    //             },
+    //         ],
+    //     },
+    //     {
+    //         header: 'node2selected',
+    //         selected: true,
+    //         body: '', // Empty body should display icon without blue square
+    //         children: [],
+    //     },
 
-        {
-            header: '@file node3',
-            atFile: true,
-            body: 'node3 body',
-            children: [],
-        },
-    ];
+    //     {
+    //         header: '@file node3',
+    //         atFile: true,
+    //         body: 'node3 body',
+    //         children: [],
+    //     },
+    // ];
 
     // Fake documents array (rendered in tree view but is just a list - no node relationships)
     public documents: LeoDocument[] = [
@@ -5779,24 +5778,24 @@ set leoReady(p_value: boolean) {
     ];
 
     constructor() {
-        // insert parent properties in fake positions
-        this.positions.forEach((p_position) =&gt; {
-            // set to undefined at first for root nodes
-            this._setPNodeParents(p_position, undefined);
-        });
+        // // insert parent properties in fake positions
+        // this.positions.forEach((p_position) =&gt; {
+        //     // set to undefined at first for root nodes
+        //     this._setPNodeParents(p_position, undefined);
+        // });
     }
 
-    /**
-     * Recursive method to fill the parent properties of fake position-structure
-     * @param p_position
-     * @param p_parent
-     */
-    private _setPNodeParents(p_position: PNode, p_parent?: PNode): void {
-        p_position.parent = p_parent; // set its parent
-        p_position.children.forEach((p_child) =&gt; {
-            this._setPNodeParents(p_child, p_position);
-        });
-    }
+    // /**
+    //  * Recursive method to fill the parent properties of fake position-structure
+    //  * @param p_position
+    //  * @param p_parent
+    //  */
+    // private _setPNodeParents(p_position: PNode, p_parent?: PNode): void {
+    //     p_position.parent = p_parent; // set its parent
+    //     p_position.children.forEach((p_child) =&gt; {
+    //         this._setPNodeParents(p_child, p_position);
+    //     });
+    // }
 }
 </t>
 <t tx="felix.20201215231023.1">&lt;&lt; imports &gt;&gt;
@@ -6402,7 +6401,7 @@ public gotSelectedNode(p_element: Position): void {
 import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
-import { Commands } from './leoCommander';
+import { Commands } from './leoCommands';
 import { Position } from './leoNodes';
 
 export const isMac: boolean = process.platform.startsWith('darwin');
@@ -6806,7 +6805,7 @@ export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
 import { NodeIndices } from './leoNodes';
-import { Commands } from './leoCommander';
+import { Commands } from './leoCommands';
 
 </t>
 <t tx="felix.20210102213337.1">/**
@@ -10489,7 +10488,7 @@ constructor(v: VNode, childIndex: number = 0, stack?: StackEntry[]) {
 </t>
 <t tx="felix.20210127001502.1">import "date-format-lite";
 import * as g from './leoGlobals';
-import { Commands } from './leoCommander';
+import { Commands } from './leoCommands';
 
 </t>
 <t tx="felix.20210127234205.1">/*
@@ -12728,7 +12727,7 @@ import { LeoUI } from '../leoUI';
 
 </t>
 <t tx="felix.20210220195150.1">import { VNode } from "./leoNodes";
-import { Commands } from "./leoCommander";
+import { Commands } from "./leoCommands";
 import * as fs from 'fs';
 
 </t>
@@ -13358,5 +13357,6 @@ public *all_Root_Children(copy = true): Generator&lt;Position&gt; {
 }
 
 </t>
+<t tx="felix.20211002194716.1"></t>
 </tnodes>
 </leo_file>

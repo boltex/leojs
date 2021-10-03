@@ -4,8 +4,7 @@ import { Icon } from "./types";
 import * as utils from "./utils";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
-import { Commands } from "./core/leoCommander";
-
+import { Commands } from "./core/leoCommands";
 
 /**
  * * Opened Leo documents tree view node item implementation for usage in a TreeDataProvider
