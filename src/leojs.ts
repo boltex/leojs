@@ -4,7 +4,7 @@ import { LeoButton, LeoDocument } from './types';
 
 // https://github.com/leo-editor/leo-editor/issues/1025
 
-
+// * THIS IS A TEMPORARY FILE TO FAKE DATA FOR DEVELOPMENT *
 // For now give results to tree view panels (outline, documents and at-buttons)
 
 export class Leojs {

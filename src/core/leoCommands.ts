@@ -318,6 +318,13 @@ export class Commands {
         this.fileCommands.gnxDict = {}; // RESET gnxDict
     }
 
+    private initObject(){
+
+        const c:Commands = this;
+        const gnx:string ='hidden-root-vnode-gnx';
+
+    }
+
     public recolor(): void {
         console.log("recolor");
     }

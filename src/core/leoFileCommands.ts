@@ -12,6 +12,14 @@ export class FileCommands {
         this.gnxDict = {};
     }
 
+    /**
+     * File Commands Test
+     */
+    public fileCommandsTest(): void {
+        // Test command
+        console.log('fileCommandsTest');
+    }
+
 
 }
 

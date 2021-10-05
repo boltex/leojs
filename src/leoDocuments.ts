@@ -38,9 +38,6 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoDocument
             g.app.commandersList.forEach(p_doc => {
                 w_children.push(new LeoDocumentNode(p_doc, this._leoUI));
             });
-            // this._leojs.documents.forEach(p_doc => {
-            //     w_children.push(new LeoDocumentNode(p_doc, this._leoUI));
-            // });
         }
         return w_children; // Defaults to an empty list of children
     }

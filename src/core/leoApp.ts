@@ -5,6 +5,23 @@ import { NodeIndices } from './leoNodes';
 import { Commands } from './leoCommands';
 
 /**
+ * Global
+ * Apply the mixins into the base class via JS at runtime
+ */
+function applyMixins(derivedCtor: any, constructors: any[]) {
+    constructors.forEach((baseCtor) => {
+        Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
+            Object.defineProperty(
+                derivedCtor.prototype,
+                name,
+                Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
+                Object.create(null)
+            );
+        });
+    });
+}
+
+/**
  *  A singleton class to manage idle-time handling. This class handles all
  *  details of running code at idle time, including running 'idle' hooks.
  *
@@ -127,7 +144,7 @@ export class LeoApp {
 
     public globalKillBuffer: any[] = []; // The global kill buffer.
     public globalRegisters: any = {}; // The global register list.
-    public leoID: string = 'filtest'; // The id part of gnx's, using empty for falsy.
+    public leoID: string = 'test'; // The id part of gnx's, using empty for falsy.
     public loadedThemes: any[] = []; // List of loaded theme.leo files.
     public lossage: any[] = []; // List of last 100 keystrokes.
     public paste_c: any = null; // The commander that pasted the last outline.
@@ -138,7 +155,6 @@ export class LeoApp {
 
     // * Opened Leo File Commanders
     public commandersList: Commands[] = [];
-    public leo_c: Commands | undefined;
     // Most of these are defined in initApp.
     public backgroundProcessManager: any = null; // The singleton BackgroundProcessManager instance.
     public commander_cacher: any = null; // The singleton leoCacher.CommanderCacher instance.

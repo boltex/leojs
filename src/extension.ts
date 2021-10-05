@@ -34,7 +34,7 @@ export function activate(p_context: vscode.ExtensionContext) {
     const w_commands: [string, (...args: any[]) => any][] = [
 
         // ! REMOVE TESTS ENTRIES FROM PACKAGE.JSON FOR MASTER BRANCH RELEASES !
-        ["leointeg.test", () => w_leoUI.test()], // Test function useful when debugging
+        ["leojs.test", () => w_leoUI.test()], // Test function useful when debugging
 
         [CMD.ENABLE_LEO_TREE_NAV, () => w_leoUI.toggleSetting(CTX.LEO_TREE_BROWSE, true)],
         [CMD.SHOW_EDIT_ON_NODES, () => w_leoUI.toggleSetting(CTX.SHOW_EDIT, true)],
