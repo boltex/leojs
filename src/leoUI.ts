@@ -608,6 +608,12 @@ export class LeoUI {
 
         console.log('selectTreeNode called so Refresh Body' + (p_aside ? ' but opened aside' : ''));
 
+        if (this.leo_c.positionExists(p_node.position)) {
+            this.leo_c.selectPosition(p_node.position);
+        } else {
+            console.error('Selected a non-existent position', p_node.label);
+        }
+
         // this.lastSelectedNode = p_node;
 
         return Promise.resolve(true);

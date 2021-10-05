@@ -1070,6 +1070,125 @@ export class Commands {
     // topVnode = topPosition
     // setTopVnode = setTopPosition
 
+    /**
+     * Contract all nodes in the outline.
+     */
+    public contractAllHeadlines(): void {
+        //
+
+        /*
+            c = self
+        for p in c.all_positions():
+            p.contract()
+        # Select the topmost ancestor of the presently selected node.
+        p = c.p
+        while p and p.hasParent():
+            p.moveToParent()
+        if redrawFlag:
+            # Do a *full* redraw.
+            # c.redraw_after_contract(p) only contracts a single position.
+            c.redraw(p)
+        c.expansionLevel = 1  # Reset expansion level.
+    */
+    }
+
+    /*
+    def contractSubtree(self, p):
+        for p in p.subtree():
+            p.contract()
+    */
+
+    /*
+    def expandSubtree(self, v, redraw=True):
+        c = self
+        last = v.lastNode()
+        while v and v != last:
+            v.expand()
+            v = v.threadNext()
+        if redraw:
+            c.redraw()
+
+    */
+
+    /*
+    def expandToLevel(self, level):
+
+        c = self
+        n = c.p.level()
+        old_expansion_level = c.expansionLevel
+        max_level = 0
+        for p in c.p.self_and_subtree(copy=False):
+            if p.level() - n + 1 < level:
+                p.expand()
+                max_level = max(max_level, p.level() - n + 1)
+            else:
+                p.contract()
+        c.expansionNode = c.p.copy()
+        c.expansionLevel = max_level + 1
+        if c.expansionLevel != old_expansion_level:
+            c.redraw()
+        # It's always useful to announce the level.
+        # c.k.setLabelBlue('level: %s' % (max_level+1))
+        # g.es('level', max_level + 1)
+        c.frame.putStatusLine(f"level: {max_level + 1}")
+            # bg='red', fg='red')
+
+    */
+
+    /**
+     * Select a new position, redrawing the screen *only* if we must
+     * change chapters.
+     */
+    public selectPosition(p:Position): void {
+        // * -
+
+        /*
+        """
+        Select a new position, redrawing the screen *only* if we must
+        change chapters.
+        """
+        trace = True  # For # 2167.
+        if kwargs:
+            print('c.selectPosition: all keyword args are ignored', g.callers())
+        c = self
+        cc = c.chapterController
+        if not p:
+            if not g.app.batchMode:  # A serious error.
+                g.trace('Warning: no p', g.callers())
+            return
+        if cc and not cc.selectChapterLockout:
+            cc.selectChapterForPosition(p)
+                # Calls c.redraw only if the chapter changes.
+        # De-hoist as necessary to make p visible.
+        if c.hoistStack:
+            while c.hoistStack:
+                bunch = c.hoistStack[-1]
+                if c.positionExists(p, bunch.p):
+                    break
+                else:
+                    if trace:
+                        command_name = c.command_name if c.inCommand else 'None'
+                        print('')
+                        print('pop hoist stack! callers:', g.callers())
+                        g.printObj(c.hoistStack, tag='c.hoistStack before pop')
+                        print(f"c.command_name: {command_name}")
+                        print('lossage')
+                        for i, data in enumerate(reversed(g.app.lossage)):
+                            print(f"{i:>2} {data!r}")
+                    bunch = c.hoistStack.pop()
+        c.frame.tree.select(p)
+        c.setCurrentPosition(p)
+            # Do *not* test whether the position exists!
+            # We may be in the midst of an undo.
+
+    # Compatibility, but confusing.
+
+    selectVnode = selectPosition
+
+
+        */
+    }
+
 
 }
 

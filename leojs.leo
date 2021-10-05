@@ -414,7 +414,7 @@
 <v t="felix.20210110222544.1"><vh>@clean src/core/leoCommands.ts</vh>
 <v t="felix.20210220194059.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
 <v t="felix.20210224000242.1"><vh>interface hoistStack</vh></v>
-<v t="felix.20210110223514.1"><vh>class Commander</vh>
+<v t="felix.20210110223514.1"><vh>class Commands</vh>
 <v t="felix.20210223220756.1"><vh>Commander IVars</vh>
 <v t="felix.20210223220814.2"><vh>c.initCommandIvars</vh></v>
 <v t="felix.20210223220814.3"><vh>c.initDebugIvars</vh></v>
@@ -478,6 +478,17 @@
 <v t="felix.20210211234142.1"><vh>c.setHeadString</vh></v>
 <v t="felix.20210215204844.1"><vh>c.setMarked (calls hook)</vh></v>
 <v t="felix.20210215204937.1"><vh>c.topPosition &amp; c.setTopPosition</vh></v>
+</v>
+</v>
+<v t="felix.20211005023225.1"><vh>c.Gui</vh>
+<v t="felix.20211005023800.1"><vh>c.Expand/contract</vh>
+<v t="felix.20211005023821.1"><vh>c.contractAllHeadlines</vh></v>
+<v t="felix.20211005023931.1"><vh>c.contractSubtree</vh></v>
+<v t="felix.20211005024008.1"><vh>c.expandSubtree</vh></v>
+<v t="felix.20211005024009.1"><vh>c.expandToLevel</vh></v>
+</v>
+<v t="felix.20211005023421.1"><vh>c.Selecting</vh>
+<v t="felix.20211005023456.1"><vh>c.selectPosition</vh></v>
 </v>
 </v>
 </v>
@@ -1358,7 +1369,7 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201209011931.4">public getTreeItem(element: Position): Thenable&lt;LeoOutlineNode&gt; | LeoOutlineNode {
-    console.log('called getTreeItem');
+    console.log('called getTreeItem', element.h, element.v.gnx);
 
     let w_collapse: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.None;
     if (element.hasChildren()) {
@@ -3314,6 +3325,12 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
     console.log('set flags for ', p_node);
 
     console.log('selectTreeNode called so Refresh Body' + (p_aside ? ' but opened aside' : ''));
+
+    if (this.leo_c.positionExists(p_node.position)) {
+        this.leo_c.selectPosition(p_node.position);
+    } else {
+        console.error('Selected a non-existent position', p_node.label);
+    }
 
     // this.lastSelectedNode = p_node;
 
@@ -13440,9 +13457,9 @@ public buildId(p_position: Position, p_collapsed: number): string {
     // concatenate gnx, stacks gnx's, and collapsible state number.
     // (vscode uses id for collapsible state)
     let w_stringId = this._treeId.toString() +
-        p_position.v.gnx +
-        p_position.stack.map(p_stackEntry =&gt; p_stackEntry[0].gnx + p_stackEntry[0].status()).join("") +
-        p_collapsed.toString();
+        p_position.v.gnx + p_position.childIndex().toString() +
+        p_position.stack.map(p_stackEntry =&gt; p_stackEntry[0].gnx + p_stackEntry[1].toString()).join("") +
+        p_collapsed.toString(); // Added Uniqueness:  VSCode's collapsible state linked to id
 
     return w_stringId;
 }
@@ -13451,6 +13468,133 @@ public buildId(p_position: Position, p_collapsed: number): string {
 <t tx="felix.20211003233639.1">public incTreeId(): void {
     this._treeId++;
 }
+
+</t>
+<t tx="felix.20211005023225.1"></t>
+<t tx="felix.20211005023421.1"></t>
+<t tx="felix.20211005023456.1">/**
+ * Select a new position, redrawing the screen *only* if we must
+ * change chapters.
+ */
+public selectPosition(p:Position): void {
+    // * -
+
+    /*
+    """
+    Select a new position, redrawing the screen *only* if we must
+    change chapters.
+    """
+    trace = True  # For # 2167.
+    if kwargs:
+        print('c.selectPosition: all keyword args are ignored', g.callers())
+    c = self
+    cc = c.chapterController
+    if not p:
+        if not g.app.batchMode:  # A serious error.
+            g.trace('Warning: no p', g.callers())
+        return
+    if cc and not cc.selectChapterLockout:
+        cc.selectChapterForPosition(p)
+            # Calls c.redraw only if the chapter changes.
+    # De-hoist as necessary to make p visible.
+    if c.hoistStack:
+        while c.hoistStack:
+            bunch = c.hoistStack[-1]
+            if c.positionExists(p, bunch.p):
+                break
+            else:
+                if trace:
+                    command_name = c.command_name if c.inCommand else 'None'
+                    print('')
+                    print('pop hoist stack! callers:', g.callers())
+                    g.printObj(c.hoistStack, tag='c.hoistStack before pop')
+                    print(f"c.command_name: {command_name}")
+                    print('lossage')
+                    for i, data in enumerate(reversed(g.app.lossage)):
+                        print(f"{i:&gt;2} {data!r}")
+                bunch = c.hoistStack.pop()
+    c.frame.tree.select(p)
+    c.setCurrentPosition(p)
+        # Do *not* test whether the position exists!
+        # We may be in the midst of an undo.
+
+# Compatibility, but confusing.
+
+selectVnode = selectPosition
+
+
+    */
+}
+
+</t>
+<t tx="felix.20211005023800.1"></t>
+<t tx="felix.20211005023821.1">/**
+ * Contract all nodes in the outline.
+ */
+public contractAllHeadlines(): void {
+    //
+
+    /*
+        c = self
+    for p in c.all_positions():
+        p.contract()
+    # Select the topmost ancestor of the presently selected node.
+    p = c.p
+    while p and p.hasParent():
+        p.moveToParent()
+    if redrawFlag:
+        # Do a *full* redraw.
+        # c.redraw_after_contract(p) only contracts a single position.
+        c.redraw(p)
+    c.expansionLevel = 1  # Reset expansion level.
+*/
+}
+
+</t>
+<t tx="felix.20211005023931.1">/*
+def contractSubtree(self, p):
+    for p in p.subtree():
+        p.contract()
+*/
+
+</t>
+<t tx="felix.20211005024008.1">/*
+def expandSubtree(self, v, redraw=True):
+    c = self
+    last = v.lastNode()
+    while v and v != last:
+        v.expand()
+        v = v.threadNext()
+    if redraw:
+        c.redraw()
+
+*/
+
+</t>
+<t tx="felix.20211005024009.1">/*
+def expandToLevel(self, level):
+
+    c = self
+    n = c.p.level()
+    old_expansion_level = c.expansionLevel
+    max_level = 0
+    for p in c.p.self_and_subtree(copy=False):
+        if p.level() - n + 1 &lt; level:
+            p.expand()
+            max_level = max(max_level, p.level() - n + 1)
+        else:
+            p.contract()
+    c.expansionNode = c.p.copy()
+    c.expansionLevel = max_level + 1
+    if c.expansionLevel != old_expansion_level:
+        c.redraw()
+    # It's always useful to announce the level.
+    # c.k.setLabelBlue('level: %s' % (max_level+1))
+    # g.es('level', max_level + 1)
+    c.frame.putStatusLine(f"level: {max_level + 1}")
+        # bg='red', fg='red')
+
+*/
 
 </t>
 </tnodes>
