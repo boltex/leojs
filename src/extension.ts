@@ -99,8 +99,8 @@ export function activate(p_context: vscode.ExtensionContext) {
         [CMD.PASTE_SELECTION, () => w_leoUI.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, false)],
         [CMD.PASTE_SELECTION_FO, () => w_leoUI.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, true)],
         // Called by nodes in the tree when selected either by mouse, or with enter
-        [CMD.SELECT_NODE, (p_node: LeoOutlineNode) => w_leoUI.selectTreeNode(p_node, false, false)],
-        [CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) => w_leoUI.selectTreeNode(p_node, false, true)],
+        [CMD.SELECT_NODE, (p_node: LeoOutlineNode) => w_leoUI.selectTreeNode(p_node.position, false, false)],
+        [CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) => w_leoUI.selectTreeNode(p_node.position, false, true)],
 
         [CMD.CONTRACT_ALL, () => w_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, false)],
         [CMD.CONTRACT_ALL_FO, () => w_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, true)],

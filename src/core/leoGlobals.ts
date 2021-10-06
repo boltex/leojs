@@ -254,36 +254,11 @@ export function callers(n: number = 4, count: number = 0, excludeCaller: boolean
     return result.join(',');
 }
 
-// TODO : see Error().stack to access names from the call stack
 export function _callerName(n: number, verbose: boolean = false): string {
+    // TODO : see Error().stack to access names from the call stack
+    // return Error.stack.split()[n]; // or something close to that
     return "<_callerName>";
 }
-
-/*
-    About _callerName: see https://nodejs.org/api/errors.html#errors_error_stack
-
-    ### This won't work in JavaScript.
-        # try:
-            # # get the function name from the call stack.
-            # f1 = sys._getframe(n)  # The stack frame, n levels up.
-            # code1 = f1.f_code  # The code object
-            # sfn = shortFilename(code1.co_filename)  # The file name.
-            # locals_ = f1.f_locals  # The local namespace.
-            # name = code1.co_name
-            # line = code1.co_firstlineno
-            # if verbose:
-                # obj = locals_.get('self')
-                # full_name = f"{obj.__class__.__name__}.{name}" if obj else name
-                # return f"line {line:4} {sfn:>30} {full_name}"
-            # return name
-        # except ValueError:
-            # return ''
-                # # The stack is not deep enough OR
-                # # sys._getframe does not exist on this platform.
-        # except Exception:
-            # es_exception()
-            # return ''  # "<no caller name>"
-*/
 
 /**
  * Return a result dict that is a copy of the keys dict

@@ -532,34 +532,29 @@ export class LeoUI {
     private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent<Position>, p_expand: boolean, p_treeView: vscode.TreeView<Position>): void {
 
         // * Expanding or collapsing via the treeview interface selects the node to mimic Leo
+
         // this.triggerBodySave(true);
-        // if (p_treeView.selection[0] && p_treeView.selection[0] === p_event.element) {
-        //     // * This happens if the tree selection is the same as the expanded/collapsed node: Just have Leo do the same
-        //     // Pass
-        // } else {
-        //     // * This part only happens if the user clicked on the arrow without trying to select the node
-        //     this._revealTreeViewNode(p_event.element, { select: true, focus: false }); // No force focus : it breaks collapse/expand when direct parent
-        //     this.selectTreeNode(p_event.element, true);  // not waiting for a .then(...) so not to add any lag
-        // }
-        // this.sendAction(p_expand ? Constants.LEOBRIDGE.EXPAND_NODE : Constants.LEOBRIDGE.COLLAPSE_NODE, p_event.element.apJson)
-        //     .then(() => {
-        //         if (this.config.leoTreeBrowse) {
-        //             this._refreshOutline(true, RevealType.RevealSelect);
-        //         }
-        //     });
+        if (p_treeView.selection[0] && p_treeView.selection[0].__eq__(p_event.element)) {
+            // * This happens if the tree selection is the same as the expanded/collapsed node: Just have Leo do the same
+            console.log('selection is the same as the expanded/collapsed node');
+            // Pass
+        } else {
+            // * This part only happens if the user clicked on the arrow without trying to select the node
+            this._lastTreeView.reveal(this.leo_c.p, { select: true, focus: false });
+            this.selectTreeNode(p_event.element, true);  // not waiting for a .then(...) so not to add any lag
+        }
+
+        console.log('change collapse:  p_event', p_event);
+
 
         if (p_expand) {
             p_event.element.expand();
         } else {
             p_event.element.contract();
         }
+
         if (this.config.leoTreeBrowse) {
-            console.log('leoTreeBrowse');
-
             this._refreshOutline(true, RevealType.RevealSelect);
-        } else {
-            console.log('no tree browse');
-
         }
     }
 
@@ -602,16 +597,15 @@ export class LeoUI {
         }
     }
 
-    public selectTreeNode(p_node: LeoOutlineNode, p_internalCall?: boolean, p_aside?: boolean): Thenable<unknown> {
-        vscode.window.showInformationMessage('TODO: Implement selectTreeNode');
-        console.log('set flags for ', p_node);
+    public selectTreeNode(p_node: Position, p_internalCall?: boolean, p_aside?: boolean): Thenable<unknown> {
 
-        console.log('selectTreeNode called so Refresh Body' + (p_aside ? ' but opened aside' : ''));
+        // Note: set context flags for current selection when capturing and revealing the selected node
+        // when the tree refreshes and the selected node is processed by getTreeItem & gotSelectedNode
 
-        if (this.leo_c.positionExists(p_node.position)) {
-            this.leo_c.selectPosition(p_node.position);
+        if (this.leo_c.positionExists(p_node)) {
+            this.leo_c.selectPosition(p_node);
         } else {
-            console.error('Selected a non-existent position', p_node.label);
+            console.error('Selected a non-existent position', p_node.h);
         }
 
         // this.lastSelectedNode = p_node;

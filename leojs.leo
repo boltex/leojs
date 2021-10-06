@@ -1295,7 +1295,6 @@ If you're having problems, try [running this sample extension](https://github.co
 </t>
 <t tx="felix.20201209004316.2">public copyProperties(p_node: LeoOutlineNode): LeoOutlineNode {
     this.label = p_node.label;
-
     this.collapsibleState = p_node.collapsibleState;
     this.position = p_node.position;
     this.cloned = p_node.cloned;
@@ -1609,8 +1608,8 @@ public refreshTreeRoot(): void {
 [CMD.PASTE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, true)],
 </t>
 <t tx="felix.20201214150149.7">// Called by nodes in the tree when selected either by mouse, or with enter
-[CMD.SELECT_NODE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node, false, false)],
-[CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node, false, true)],
+[CMD.SELECT_NODE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node.position, false, false)],
+[CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node.position, false, true)],
 
 [CMD.CONTRACT_ALL, () =&gt; w_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, false)],
 [CMD.CONTRACT_ALL_FO, () =&gt; w_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, true)],
@@ -3246,34 +3245,29 @@ public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
 private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Position&gt;, p_expand: boolean, p_treeView: vscode.TreeView&lt;Position&gt;): void {
 
     // * Expanding or collapsing via the treeview interface selects the node to mimic Leo
+
     // this.triggerBodySave(true);
-    // if (p_treeView.selection[0] &amp;&amp; p_treeView.selection[0] === p_event.element) {
-    //     // * This happens if the tree selection is the same as the expanded/collapsed node: Just have Leo do the same
-    //     // Pass
-    // } else {
-    //     // * This part only happens if the user clicked on the arrow without trying to select the node
-    //     this._revealTreeViewNode(p_event.element, { select: true, focus: false }); // No force focus : it breaks collapse/expand when direct parent
-    //     this.selectTreeNode(p_event.element, true);  // not waiting for a .then(...) so not to add any lag
-    // }
-    // this.sendAction(p_expand ? Constants.LEOBRIDGE.EXPAND_NODE : Constants.LEOBRIDGE.COLLAPSE_NODE, p_event.element.apJson)
-    //     .then(() =&gt; {
-    //         if (this.config.leoTreeBrowse) {
-    //             this._refreshOutline(true, RevealType.RevealSelect);
-    //         }
-    //     });
+    if (p_treeView.selection[0] &amp;&amp; p_treeView.selection[0].__eq__(p_event.element)) {
+        // * This happens if the tree selection is the same as the expanded/collapsed node: Just have Leo do the same
+        console.log('selection is the same as the expanded/collapsed node');
+        // Pass
+    } else {
+        // * This part only happens if the user clicked on the arrow without trying to select the node
+        this._lastTreeView.reveal(this.leo_c.p, { select: true, focus: false });
+        this.selectTreeNode(p_event.element, true);  // not waiting for a .then(...) so not to add any lag
+    }
+
+    console.log('change collapse:  p_event', p_event);
+
 
     if (p_expand) {
         p_event.element.expand();
     } else {
         p_event.element.contract();
     }
+
     if (this.config.leoTreeBrowse) {
-        console.log('leoTreeBrowse');
-
         this._refreshOutline(true, RevealType.RevealSelect);
-    } else {
-        console.log('no tree browse');
-
     }
 }
 
@@ -3320,16 +3314,15 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
 }
 
 </t>
-<t tx="felix.20201214202749.1">public selectTreeNode(p_node: LeoOutlineNode, p_internalCall?: boolean, p_aside?: boolean): Thenable&lt;unknown&gt; {
-    vscode.window.showInformationMessage('TODO: Implement selectTreeNode');
-    console.log('set flags for ', p_node);
+<t tx="felix.20201214202749.1">public selectTreeNode(p_node: Position, p_internalCall?: boolean, p_aside?: boolean): Thenable&lt;unknown&gt; {
 
-    console.log('selectTreeNode called so Refresh Body' + (p_aside ? ' but opened aside' : ''));
+    // Note: set context flags for current selection when capturing and revealing the selected node
+    // when the tree refreshes and the selected node is processed by getTreeItem &amp; gotSelectedNode
 
-    if (this.leo_c.positionExists(p_node.position)) {
-        this.leo_c.selectPosition(p_node.position);
+    if (this.leo_c.positionExists(p_node)) {
+        this.leo_c.selectPosition(p_node);
     } else {
-        console.error('Selected a non-existent position', p_node.label);
+        console.error('Selected a non-existent position', p_node.h);
     }
 
     // this.lastSelectedNode = p_node;
@@ -8136,36 +8129,11 @@ export function splitLines(s?: string): string[] {
 }
 
 </t>
-<t tx="felix.20210104010331.1">// TODO : see Error().stack to access names from the call stack
-export function _callerName(n: number, verbose: boolean = false): string {
+<t tx="felix.20210104010331.1">export function _callerName(n: number, verbose: boolean = false): string {
+    // TODO : see Error().stack to access names from the call stack
+    // return Error.stack.split()[n]; // or something close to that
     return "&lt;_callerName&gt;";
 }
-
-/*
-    About _callerName: see https://nodejs.org/api/errors.html#errors_error_stack
-
-    ### This won't work in JavaScript.
-        # try:
-            # # get the function name from the call stack.
-            # f1 = sys._getframe(n)  # The stack frame, n levels up.
-            # code1 = f1.f_code  # The code object
-            # sfn = shortFilename(code1.co_filename)  # The file name.
-            # locals_ = f1.f_locals  # The local namespace.
-            # name = code1.co_name
-            # line = code1.co_firstlineno
-            # if verbose:
-                # obj = locals_.get('self')
-                # full_name = f"{obj.__class__.__name__}.{name}" if obj else name
-                # return f"line {line:4} {sfn:&gt;30} {full_name}"
-            # return name
-        # except ValueError:
-            # return ''
-                # # The stack is not deep enough OR
-                # # sys._getframe does not exist on this platform.
-        # except Exception:
-            # es_exception()
-            # return ''  # "&lt;no caller name&gt;"
-*/
 
 </t>
 <t tx="felix.20210104194650.1">/**
@@ -11757,7 +11725,7 @@ public textOffset(): number | undefined {
 </t>
 <t tx="felix.20210204224730.1">/*
     - convertTreeToString and moreHead can't be VNode methods because they use level().
-    - moreBody could be anywhere: it may as well be a postion method.
+    - moreBody could be anywhere: it may as well be a position method.
 */
 
 </t>
@@ -13441,10 +13409,10 @@ public fileCommandsTest(): void {
 }
 
 </t>
-<t tx="felix.20211003013517.1">private initObject(){
+<t tx="felix.20211003013517.1">private initObject() {
 
-    const c:Commands = this;
-    const gnx:string ='hidden-root-vnode-gnx';
+    const c: Commands = this;
+    const gnx: string = 'hidden-root-vnode-gnx';
 
 }
 
@@ -13476,54 +13444,54 @@ public buildId(p_position: Position, p_collapsed: number): string {
  * Select a new position, redrawing the screen *only* if we must
  * change chapters.
  */
-public selectPosition(p:Position): void {
-    // * -
+public selectPosition(p: Position): void {
 
-    /*
-    """
-    Select a new position, redrawing the screen *only* if we must
-    change chapters.
-    """
-    trace = True  # For # 2167.
-    if kwargs:
-        print('c.selectPosition: all keyword args are ignored', g.callers())
-    c = self
-    cc = c.chapterController
-    if not p:
-        if not g.app.batchMode:  # A serious error.
-            g.trace('Warning: no p', g.callers())
-        return
-    if cc and not cc.selectChapterLockout:
-        cc.selectChapterForPosition(p)
-            # Calls c.redraw only if the chapter changes.
-    # De-hoist as necessary to make p visible.
-    if c.hoistStack:
-        while c.hoistStack:
-            bunch = c.hoistStack[-1]
-            if c.positionExists(p, bunch.p):
-                break
-            else:
-                if trace:
-                    command_name = c.command_name if c.inCommand else 'None'
-                    print('')
-                    print('pop hoist stack! callers:', g.callers())
-                    g.printObj(c.hoistStack, tag='c.hoistStack before pop')
-                    print(f"c.command_name: {command_name}")
-                    print('lossage')
-                    for i, data in enumerate(reversed(g.app.lossage)):
-                        print(f"{i:&gt;2} {data!r}")
-                bunch = c.hoistStack.pop()
-    c.frame.tree.select(p)
-    c.setCurrentPosition(p)
-        # Do *not* test whether the position exists!
-        # We may be in the midst of an undo.
+    const trace = true; // For # 2167.
+    const c: Commands = this;
+    // const cc = c.chapterController;
 
-# Compatibility, but confusing.
+    if (!p || !p.__bool__()) {
+        if (!g.app.batchMode) { // A serious error.
+            g.trace('Warning: no p', g.callers());
+        }
+    }
 
-selectVnode = selectPosition
+    // if(cc &amp;&amp; !cc.selectChapterLockout){
+    //     cc.selectChapterForPosition(p)
+    //     // Calls c.redraw only if the chapter changes.
+    // }
 
+    // De-hoist as necessary to make p visible.
+    if (c.hoistStack) {
+        while (c.hoistStack.length) {
+            let bunch = c.hoistStack[c.hoistStack.length - 1];
+            if (c.positionExists(p, bunch.p)) {
+                break;
+            } else {
+                if (trace) {
+                    console.log('trace in selectPosition');
 
-    */
+                    // TODO
+                    // command_name = c.command_name if c.inCommand else 'None'
+                    // print('')
+                    // print('pop hoist stack! callers:', g.callers())
+                    // g.printObj(c.hoistStack, tag='c.hoistStack before pop')
+                    // print(f"c.command_name: {command_name}")
+                    // print('lossage')
+                    // for i, data in enumerate(reversed(g.app.lossage)):
+                    //     print(f"{i:&gt;2} {data!r}")
+                }
+                bunch = c.hoistStack.pop()!;
+            }
+        }
+    }
+
+    c.setCurrentPosition(p);
+
+    // Compatibility, but confusing.
+    // TODO : Is this needed?
+    // selectVnode = selectPosition
+
 }
 
 </t>

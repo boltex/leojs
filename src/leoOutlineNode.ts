@@ -55,7 +55,6 @@ export class LeoOutlineNode extends vscode.TreeItem {
      */
     public copyProperties(p_node: LeoOutlineNode): LeoOutlineNode {
         this.label = p_node.label;
-
         this.collapsibleState = p_node.collapsibleState;
         this.position = p_node.position;
         this.cloned = p_node.cloned;

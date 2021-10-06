@@ -318,10 +318,10 @@ export class Commands {
         this.fileCommands.gnxDict = {}; // RESET gnxDict
     }
 
-    private initObject(){
+    private initObject() {
 
-        const c:Commands = this;
-        const gnx:string ='hidden-root-vnode-gnx';
+        const c: Commands = this;
+        const gnx: string = 'hidden-root-vnode-gnx';
 
     }
 
@@ -1139,54 +1139,54 @@ export class Commands {
      * Select a new position, redrawing the screen *only* if we must
      * change chapters.
      */
-    public selectPosition(p:Position): void {
-        // * -
+    public selectPosition(p: Position): void {
 
-        /*
-        """
-        Select a new position, redrawing the screen *only* if we must
-        change chapters.
-        """
-        trace = True  # For # 2167.
-        if kwargs:
-            print('c.selectPosition: all keyword args are ignored', g.callers())
-        c = self
-        cc = c.chapterController
-        if not p:
-            if not g.app.batchMode:  # A serious error.
-                g.trace('Warning: no p', g.callers())
-            return
-        if cc and not cc.selectChapterLockout:
-            cc.selectChapterForPosition(p)
-                # Calls c.redraw only if the chapter changes.
-        # De-hoist as necessary to make p visible.
-        if c.hoistStack:
-            while c.hoistStack:
-                bunch = c.hoistStack[-1]
-                if c.positionExists(p, bunch.p):
-                    break
-                else:
-                    if trace:
-                        command_name = c.command_name if c.inCommand else 'None'
-                        print('')
-                        print('pop hoist stack! callers:', g.callers())
-                        g.printObj(c.hoistStack, tag='c.hoistStack before pop')
-                        print(f"c.command_name: {command_name}")
-                        print('lossage')
-                        for i, data in enumerate(reversed(g.app.lossage)):
-                            print(f"{i:>2} {data!r}")
-                    bunch = c.hoistStack.pop()
-        c.frame.tree.select(p)
-        c.setCurrentPosition(p)
-            # Do *not* test whether the position exists!
-            # We may be in the midst of an undo.
+        const trace = true; // For # 2167.
+        const c: Commands = this;
+        // const cc = c.chapterController;
 
-    # Compatibility, but confusing.
+        if (!p || !p.__bool__()) {
+            if (!g.app.batchMode) { // A serious error.
+                g.trace('Warning: no p', g.callers());
+            }
+        }
 
-    selectVnode = selectPosition
+        // if(cc && !cc.selectChapterLockout){
+        //     cc.selectChapterForPosition(p)
+        //     // Calls c.redraw only if the chapter changes.
+        // }
 
+        // De-hoist as necessary to make p visible.
+        if (c.hoistStack) {
+            while (c.hoistStack.length) {
+                let bunch = c.hoistStack[c.hoistStack.length - 1];
+                if (c.positionExists(p, bunch.p)) {
+                    break;
+                } else {
+                    if (trace) {
+                        console.log('trace in selectPosition');
 
-        */
+                        // TODO
+                        // command_name = c.command_name if c.inCommand else 'None'
+                        // print('')
+                        // print('pop hoist stack! callers:', g.callers())
+                        // g.printObj(c.hoistStack, tag='c.hoistStack before pop')
+                        // print(f"c.command_name: {command_name}")
+                        // print('lossage')
+                        // for i, data in enumerate(reversed(g.app.lossage)):
+                        //     print(f"{i:>2} {data!r}")
+                    }
+                    bunch = c.hoistStack.pop()!;
+                }
+            }
+        }
+
+        c.setCurrentPosition(p);
+
+        // Compatibility, but confusing.
+        // TODO : Is this needed?
+        // selectVnode = selectPosition
+
     }
 
 

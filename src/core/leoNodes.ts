@@ -342,7 +342,7 @@ export class Position {
 
     /*
         - convertTreeToString and moreHead can't be VNode methods because they use level().
-        - moreBody could be anywhere: it may as well be a postion method.
+        - moreBody could be anywhere: it may as well be a position method.
     */
 
     /**
