@@ -603,6 +603,8 @@ export class LeoUI {
         // when the tree refreshes and the selected node is processed by getTreeItem & gotSelectedNode
 
         if (this.leo_c.positionExists(p_node)) {
+            console.log('select node');
+
             this.leo_c.selectPosition(p_node);
         } else {
             console.error('Selected a non-existent position', p_node.h);

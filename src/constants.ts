@@ -7,8 +7,8 @@ export class Constants {
 
     public static NAME: string = "leojs";
 
-    public static TREEVIEW_ID: string = "leojs";
-    public static TREEVIEW_EXPLORER_ID: string = "leojsExplorer";
+    public static TREEVIEW_ID: string = "leojsOutline";
+    public static TREEVIEW_EXPLORER_ID: string = "leojsOutlineExplorer";
 
     public static DOCUMENTS_ID: string = "leojsDocuments";
     public static DOCUMENTS_EXPLORER_ID: string = "leojsDocumentsExplorer";
