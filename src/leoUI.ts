@@ -364,6 +364,16 @@ export class LeoUI {
     }
 
     /**
+     * * Refresh tree for 'node hover icons' to show up properly after changing their settings
+     */
+    public configTreeRefresh(): void {
+        if (this.leoStates.fileOpenedReady) {
+            // this._preventShowBody = true;
+            this._refreshOutline(true, RevealType.RevealSelect);
+        }
+    }
+
+    /**
      * * Handle selected node being created for the outline
      * @param p_element PNode that was just created and detected as selected node
      */

@@ -15,6 +15,21 @@
 <v t="felix.20201208224703.1"><vh>@clean CONTRIBUTING.md</vh></v>
 </v>
 <v t="ekr.20201209145358.1"><vh>VSCode extension</vh>
+<v t="felix.20211007213344.1"><vh>@clean src/config.ts</vh>
+<v t="felix.20211007213344.2"><vh>class Config</vh>
+<v t="felix.20211007213344.3"><vh>getConfig</vh></v>
+<v t="felix.20211007213344.4"><vh>getFontConfig</vh></v>
+<v t="felix.20211007213344.5"><vh>setLeoIntegSettings</vh></v>
+<v t="felix.20211007213344.6"><vh>setFontConfig</vh></v>
+<v t="felix.20211007213344.7"><vh>setEnablePreview</vh></v>
+<v t="felix.20211007213344.8"><vh>clearCloseEmptyGroups</vh></v>
+<v t="felix.20211007213344.9"><vh>setCloseOnFileDelete</vh></v>
+<v t="felix.20211007213344.10"><vh>checkEnablePreview</vh></v>
+<v t="felix.20211007213344.11"><vh>checkCloseEmptyGroups</vh></v>
+<v t="felix.20211007213344.12"><vh>checkCloseOnFileDelete</vh></v>
+<v t="felix.20211007213344.13"><vh>buildFromSavedSettings</vh></v>
+</v>
+</v>
 <v t="felix.20201215231023.1"><vh>@clean src/leoFiles.js</vh>
 <v t="felix.20210124225736.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
 <v t="felix.20201215231023.2"><vh>&lt;&lt; xslTemplate &gt;&gt;</vh></v>
@@ -40,6 +55,8 @@
 <v t="felix.20201214151326.4"><vh>workbench interface panels</vh></v>
 <v t="felix.20201214151326.5"><vh>user messages</vh></v>
 <v t="felix.20201214151326.6"><vh>at-buttons strings</vh></v>
+<v t="felix.20211007214102.1"><vh>configuration keys</vh></v>
+<v t="felix.20211007214110.1"><vh>config defaults</vh></v>
 <v t="felix.20201214151326.7"><vh>ask/save buttons</vh></v>
 <v t="felix.20201214151326.8"><vh>context flags</vh></v>
 <v t="felix.20201214151326.9"><vh>vscode commands</vh></v>
@@ -83,6 +100,7 @@
 </v>
 <v t="felix.20201214194144.4"><vh>Refresh UI</vh>
 <v t="felix.20201214202118.1"><vh>showOutline</vh></v>
+<v t="felix.20211007232334.1"><vh>configTreeRefresh</vh></v>
 <v t="felix.20201229025520.1"><vh>gotSelectedNode</vh></v>
 <v t="felix.20201227155008.1"><vh>_setupRefresh</vh></v>
 <v t="felix.20201227014627.1"><vh>_launchRefresh</vh></v>
@@ -227,6 +245,9 @@
 </v>
 </v>
 <v t="felix.20201214154816.1"><vh>@clean src/types.d.ts</vh>
+<v t="felix.20211007213900.1"><vh>ConfigMembers</vh></v>
+<v t="felix.20211007213909.1"><vh>ConfigSetting</vh></v>
+<v t="felix.20211007213915.1"><vh>FontSettings</vh></v>
 <v t="felix.20201214154816.2"><vh>PNode</vh></v>
 <v t="felix.20201214154816.3"><vh>RevealType</vh></v>
 <v t="felix.20201214154816.4"><vh>RefreshType</vh></v>
@@ -255,6 +276,7 @@
 <v t="felix.20201208224407.10"><vh>getDurationMilliseconds</vh></v>
 <v t="felix.20201208224407.11"><vh>getFileFromPath</vh></v>
 <v t="felix.20201208224407.12"><vh>isIconChangedByEdit</vh></v>
+<v t="felix.20211007214455.1"><vh>isHexColor</vh></v>
 <v t="felix.20201208224407.14"><vh>strToLeoUri</vh></v>
 <v t="felix.20201208224407.15"><vh>leoUriToStr</vh></v>
 <v t="felix.20201208224407.16"><vh>setContext</vh></v>
@@ -1783,6 +1805,22 @@ public static COMMANDS = {
     CLONE_FIND_ALL_FLATTENED: Constants.NAME + ".cloneFindAllFlattened",
     CLONE_FIND_MARKED: Constants.NAME + ".cloneFindMarked",
     CLONE_FIND_FLATTENED_MARKED: Constants.NAME + ".cloneFindFlattenedMarked",
+    // TODO
+    GOTO_GLOBAL_LINE: Constants.NAME + ".gotoGlobalLine",
+    TAG_CHILDREN: Constants.NAME + ".tagChildren",
+    SET_FIND_EVERYWHERE_OPTION: Constants.NAME + ".setFindEverywhereOption",
+    SET_FIND_NODE_ONLY_OPTION: Constants.NAME + ".setFindNodeOnlyOption",
+    SET_FIND_SUBOUTLINE_ONLY_OPTION: Constants.NAME + ".setFindSuboutlineOnlyOption",
+    TOGGLE_FIND_IGNORE_CASE_OPTION: Constants.NAME + ".toggleFindIgnoreCaseOption",
+    TOGGLE_FIND_MARK_CHANGES_OPTION: Constants.NAME + ".toggleFindMarkChangesOption",
+    TOGGLE_FIND_MARK_FINDS_OPTION: Constants.NAME + ".toggleFindMarkFindsOption",
+    TOGGLE_FIND_REGEXP_OPTION: Constants.NAME + ".toggleFindRegexpOption",
+    TOGGLE_FIND_WORD_OPTION: Constants.NAME + ".toggleFindWordOption",
+    TOGGLE_FIND_SEARCH_BODY_OPTION: Constants.NAME + ".toggleFindSearchBodyOption",
+    TOGGLE_FIND_SEARCH_HEADLINE_OPTION: Constants.NAME + ".toggleFindSearchHeadlineOption",
+    SET_ENABLE_PREVIEW: Constants.NAME + ".setEnablePreview",
+    CLEAR_CLOSE_EMPTY_GROUPS: Constants.NAME + ".clearCloseEmptyGroups",
+    SET_CLOSE_ON_FILE_DELETE: Constants.NAME + ".setCloseOnFileDelete"
 };
 
 </t>
@@ -1881,6 +1919,9 @@ public static REFRESH_DEBOUNCE_DELAY: number = 50;
 public static STATES_DEBOUNCE_DELAY: number = 100;
 public static DOCUMENTS_DEBOUNCE_DELAY: number = 100;
 
+public static CONFIG_NAME: string = "leojs";
+public static CONFIG_WORKBENCH_ENABLED_PREVIEW: string = "workbench.editor.enablePreview";
+public static CONFIG_REFRESH_MATCH: string = "OnNodes"; // substring to distinguish 'on-hover' icon commands
 </t>
 <t tx="felix.20201214151326.4">/**
  * Strings used in the workbench interface panels (not for messages or dialogs)
@@ -2020,13 +2061,36 @@ public static CONTEXT_FLAGS = {
     DOCUMENT_SELECTED_UNTITLED: "leojsDocumentSelectedUntitled",
     DOCUMENT_UNTITLED: "leojsDocumentUntitled",
     // UI
-    LEO_TREE_BROWSE: "leojsTreeBrowse", // Override vscode's tree behavior with Leo's own
-    SHOW_EDIT: "leojsShowEditOnNodes",
-    SHOW_ARROWS: "leojsShowArrowsOnNodes",
-    SHOW_ADD: "leojsShowAddOnNodes",
-    SHOW_MARK: "leojsShowMarkOnNodes",
-    SHOW_CLONE: "leojsShowCloneOnNodes",
-    SHOW_COPY: "leojsShowCopyOnNodes",
+    //LEO_TREE_BROWSE: "leojsTreeBrowse", // Override vscode's tree behavior with Leo's own
+    //TREE_IN_EXPLORER: Constants.CONFIG_NAMES.TREE_IN_EXPLORER, // Leo outline also in the explorer view
+
+    // SHOW_EDIT: "leojsShowEditOnNodes",
+    // SHOW_ARROWS: "leojsShowArrowsOnNodes",
+    // SHOW_ADD: "leojsShowAddOnNodes",
+    // SHOW_MARK: "leojsShowMarkOnNodes",
+    // SHOW_CLONE: "leojsShowCloneOnNodes",
+    // SHOW_COPY: "leojsShowCopyOnNodes",
+
+    LEO_TREE_BROWSE: Constants.name + Constants.CONFIG_NAMES.LEO_TREE_BROWSE[0].toUpperCase() + Constants.CONFIG_NAMES.LEO_TREE_BROWSE.slice(1), // Force ar'jan's suggestion of Leo's tree behavior override
+    TREE_IN_EXPLORER: Constants.name + Constants.CONFIG_NAMES.TREE_IN_EXPLORER[0].toUpperCase() + Constants.CONFIG_NAMES.TREE_IN_EXPLORER.slice(1), // Leo outline also in the explorer view
+    SHOW_OPEN_ASIDE: Constants.name + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE.slice(1),   // Show 'open aside' in context menu
+    SHOW_EDIT: Constants.name + Constants.CONFIG_NAMES.SHOW_EDIT[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDIT.slice(1),              // Hover Icons on outline nodes
+    SHOW_ARROWS: Constants.name + Constants.CONFIG_NAMES.SHOW_ARROWS[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ARROWS.slice(1),           // Hover Icons on outline nodes
+    SHOW_ADD: Constants.name + Constants.CONFIG_NAMES.SHOW_ADD[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ADD.slice(1),                 // Hover Icons on outline nodes
+    SHOW_MARK: Constants.name + Constants.CONFIG_NAMES.SHOW_MARK[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK.slice(1),               // Hover Icons on outline nodes
+    SHOW_CLONE: Constants.name + Constants.CONFIG_NAMES.SHOW_CLONE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLONE.slice(1),             // Hover Icons on outline nodes
+    SHOW_COPY: Constants.name + Constants.CONFIG_NAMES.SHOW_COPY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_COPY.slice(1),               // Hover Icons on outline nodes
+
+    SHOW_EDITION_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_EDITION_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDITION_BODY.slice(1),
+    SHOW_CLIPBOARD_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY.slice(1),
+    SHOW_PROMOTE_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY.slice(1),
+    SHOW_EXECUTE_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY.slice(1),
+    SHOW_EXTRACT_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY.slice(1),
+    SHOW_IMPORT_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY.slice(1),
+    SHOW_REFRESH_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY.slice(1),
+    SHOW_HOIST_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_HOIST_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_HOIST_BODY.slice(1),
+    SHOW_MARK_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_MARK_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK_BODY.slice(1),
+    SHOW_SORT_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_SORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_SORT_BODY.slice(1)
 };
 
 </t>
@@ -13693,6 +13757,526 @@ def expandToLevel(self, level):
     }
   }
 },
+</t>
+<t tx="felix.20211007213344.1">import * as vscode from "vscode";
+import * as utils from "./utils";
+import { ConfigMembers, ConfigSetting, FontSettings } from "./types";
+import { Constants } from "./constants";
+import { LeoUI } from "./leoUI";
+
+@language typescript
+@tabwidth -4
+@others
+</t>
+<t tx="felix.20211007213344.10">/**
+ * * Check if the workbench.editor.enablePreview flag is set
+ * @param p_forced Forces the setting instead of just suggesting with a message
+ */
+public checkEnablePreview(p_forced?: boolean): void {
+    let w_result: any = true;
+    const w_setting = vscode.workspace.getConfiguration("workbench.editor");
+    if (w_setting.inspect("enablePreview")!.globalValue === undefined) {
+        w_result = w_setting.inspect("enablePreview")!.defaultValue;
+    } else {
+        w_result = w_setting.inspect("enablePreview")!.globalValue;
+    }
+    if (w_result === false) {
+        if (p_forced) {
+            this.setEnablePreview();
+            vscode.window.showInformationMessage("'Enable Preview' setting was set");
+        } else {
+            // if (!this._leoUI.finishedStartup) {
+            //     return;
+            // }
+            vscode.window.showWarningMessage("'Enable Preview' setting is recommended (currently disabled)", "Fix it")
+                .then(p_chosenButton =&gt; {
+                    if (p_chosenButton === "Fix it") {
+                        vscode.commands.executeCommand(Constants.COMMANDS.SET_ENABLE_PREVIEW);
+                    }
+                });
+        }
+    }
+}
+
+</t>
+<t tx="felix.20211007213344.11">/**
+ * * Check if the 'workbench.editor.closeEmptyGroups' setting is false
+ * @param p_forced Forces the setting instead of just suggesting with a message
+ */
+public checkCloseEmptyGroups(p_forced?: boolean): void {
+    let w_result: any = false;
+    const w_setting = vscode.workspace.getConfiguration("workbench.editor");
+    if (w_setting.inspect("closeEmptyGroups")!.globalValue === undefined) {
+        w_result = w_setting.inspect("closeEmptyGroups")!.defaultValue;
+    } else {
+        w_result = w_setting.inspect("closeEmptyGroups")!.globalValue;
+    }
+    if (w_result === true) {
+        if (p_forced) {
+            this.clearCloseEmptyGroups();
+            vscode.window.showInformationMessage("'Close Empty Groups' setting was cleared");
+        } else {
+            // if (!this._leoUI.finishedStartup) {
+            //     return;
+            // }
+            vscode.window.showWarningMessage("'Close Empty Groups' setting is NOT recommended!", "Fix it")
+                .then(p_chosenButton =&gt; {
+                    if (p_chosenButton === "Fix it") {
+                        vscode.commands.executeCommand(Constants.COMMANDS.CLEAR_CLOSE_EMPTY_GROUPS);
+                    }
+                });
+        }
+    }
+}
+
+</t>
+<t tx="felix.20211007213344.12">/**
+ * * Check if the workbench.editor.closeOnFileDelete flag is set
+ * @param p_forced Forces the setting instead of just suggesting with a message
+ */
+public checkCloseOnFileDelete(p_forced?: boolean): void {
+    let w_result: any = true;
+    const w_setting = vscode.workspace.getConfiguration("workbench.editor");
+    if (w_setting.inspect("closeOnFileDelete")!.globalValue === undefined) {
+        w_result = w_setting.inspect("closeOnFileDelete")!.defaultValue;
+    } else {
+        w_result = w_setting.inspect("closeOnFileDelete")!.globalValue;
+    }
+    if (w_result === false) {
+        if (p_forced) {
+            this.setCloseOnFileDelete();
+            vscode.window.showInformationMessage("'Close on File Delete' setting was set");
+
+        } else {
+            // if (!this._leoUI.finishedStartup) {
+            //     return;
+            // }
+            vscode.window.showWarningMessage("'Close on File Delete' setting is recommended (currently disabled)", "Fix it")
+                .then(p_chosenButton =&gt; {
+                    if (p_chosenButton === "Fix it") {
+                        vscode.commands.executeCommand(Constants.COMMANDS.SET_CLOSE_ON_FILE_DELETE);
+                    }
+                });
+        }
+    }
+}
+
+</t>
+<t tx="felix.20211007213344.13">/**
+ * * Build config from settings from vscode's saved config settings
+ */
+public buildFromSavedSettings(): void {
+    // Shorthand pointers for readability
+    const GET = vscode.workspace.getConfiguration;
+    const NAME = Constants.CONFIG_NAME;
+    const NAMES = Constants.CONFIG_NAMES;
+    const DEFAULTS = Constants.CONFIG_DEFAULTS;
+    const FLAGS = Constants.CONTEXT_FLAGS;
+
+    if (this._isBusySettingConfig) {
+        // * Currently setting config, wait until its done all, and this will be called automatically
+        return;
+    } else {
+        this.checkForChangeExternalFiles = GET(NAME).get(NAMES.CHECK_FOR_CHANGE_EXTERNAL_FILES, DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES);
+        this.defaultReloadIgnore = GET(NAME).get(NAMES.DEFAULT_RELOAD_IGNORE, DEFAULTS.DEFAULT_RELOAD_IGNORE);
+        this.leoTreeBrowse = GET(NAME).get(NAMES.LEO_TREE_BROWSE, DEFAULTS.LEO_TREE_BROWSE);
+        this.treeKeepFocus = GET(NAME).get(NAMES.TREE_KEEP_FOCUS, DEFAULTS.TREE_KEEP_FOCUS);
+        this.treeKeepFocusWhenAside = GET(NAME).get(NAMES.TREE_KEEP_FOCUS_WHEN_ASIDE, DEFAULTS.TREE_KEEP_FOCUS_WHEN_ASIDE);
+        this.statusBarString = GET(NAME).get(NAMES.STATUSBAR_STRING, DEFAULTS.STATUSBAR_STRING);
+        if (this.statusBarString.length &gt; 8) {
+            this.statusBarString = DEFAULTS.STATUSBAR_STRING;
+        }
+        this.statusBarColor = GET(NAME).get(NAMES.STATUSBAR_COLOR, DEFAULTS.STATUSBAR_COLOR);
+        if (!utils.isHexColor(this.statusBarColor)) {
+            this.statusBarColor = DEFAULTS.STATUSBAR_COLOR;
+        }
+        this.treeInExplorer = GET(NAME).get(NAMES.TREE_IN_EXPLORER, DEFAULTS.TREE_IN_EXPLORER);
+        this.showOpenAside = GET(NAME).get(NAMES.SHOW_OPEN_ASIDE, DEFAULTS.SHOW_OPEN_ASIDE);
+        this.showEditOnNodes = GET(NAME).get(NAMES.SHOW_EDIT, DEFAULTS.SHOW_EDIT);
+        this.showArrowsOnNodes = GET(NAME).get(NAMES.SHOW_ARROWS, DEFAULTS.SHOW_ARROWS);
+        this.showAddOnNodes = GET(NAME).get(NAMES.SHOW_ADD, DEFAULTS.SHOW_ADD);
+        this.showMarkOnNodes = GET(NAME).get(NAMES.SHOW_MARK, DEFAULTS.SHOW_MARK);
+        this.showCloneOnNodes = GET(NAME).get(NAMES.SHOW_CLONE, DEFAULTS.SHOW_CLONE);
+        this.showCopyOnNodes = GET(NAME).get(NAMES.SHOW_COPY, DEFAULTS.SHOW_COPY);
+
+        this.showEditionOnBody = GET(NAME).get(NAMES.SHOW_EDITION_BODY, DEFAULTS.SHOW_EDITION_BODY);
+        this.showClipboardOnBody = GET(NAME).get(NAMES.SHOW_CLIPBOARD_BODY, DEFAULTS.SHOW_CLIPBOARD_BODY);
+        this.showPromoteOnBody = GET(NAME).get(NAMES.SHOW_PROMOTE_BODY, DEFAULTS.SHOW_PROMOTE_BODY);
+        this.showExecuteOnBody = GET(NAME).get(NAMES.SHOW_EXECUTE_BODY, DEFAULTS.SHOW_EXECUTE_BODY);
+        this.showExtractOnBody = GET(NAME).get(NAMES.SHOW_EXTRACT_BODY, DEFAULTS.SHOW_EXTRACT_BODY);
+        this.showImportOnBody = GET(NAME).get(NAMES.SHOW_IMPORT_BODY, DEFAULTS.SHOW_IMPORT_BODY);
+        this.showRefreshOnBody = GET(NAME).get(NAMES.SHOW_REFRESH_BODY, DEFAULTS.SHOW_REFRESH_BODY);
+        this.showHoistOnBody = GET(NAME).get(NAMES.SHOW_HOIST_BODY, DEFAULTS.SHOW_HOIST_BODY);
+        this.showMarkOnBody = GET(NAME).get(NAMES.SHOW_MARK_BODY, DEFAULTS.SHOW_MARK_BODY);
+        this.showSortOnBody = GET(NAME).get(NAMES.SHOW_SORT_BODY, DEFAULTS.SHOW_SORT_BODY);
+        this.invertNodeContrast = GET(NAME).get(NAMES.INVERT_NODES, DEFAULTS.INVERT_NODES);
+
+        // * Set context for tree items visibility that are based on config options
+
+        utils.setContext(FLAGS.LEO_TREE_BROWSE, this.leoTreeBrowse);
+        utils.setContext(FLAGS.TREE_IN_EXPLORER, this.treeInExplorer);
+        utils.setContext(FLAGS.SHOW_OPEN_ASIDE, this.showOpenAside);
+        utils.setContext(FLAGS.SHOW_EDIT, this.showEditOnNodes);
+        utils.setContext(FLAGS.SHOW_ARROWS, this.showArrowsOnNodes);
+        utils.setContext(FLAGS.SHOW_ADD, this.showAddOnNodes);
+        utils.setContext(FLAGS.SHOW_MARK, this.showMarkOnNodes);
+        utils.setContext(FLAGS.SHOW_CLONE, this.showCloneOnNodes);
+        utils.setContext(FLAGS.SHOW_COPY, this.showCopyOnNodes);
+
+        utils.setContext(FLAGS.SHOW_EDITION_BODY, this.showEditionOnBody);
+        utils.setContext(FLAGS.SHOW_CLIPBOARD_BODY, this.showClipboardOnBody);
+        utils.setContext(FLAGS.SHOW_PROMOTE_BODY, this.showPromoteOnBody);
+        utils.setContext(FLAGS.SHOW_EXECUTE_BODY, this.showExecuteOnBody);
+        utils.setContext(FLAGS.SHOW_EXTRACT_BODY, this.showExtractOnBody);
+        utils.setContext(FLAGS.SHOW_IMPORT_BODY, this.showImportOnBody);
+        utils.setContext(FLAGS.SHOW_REFRESH_BODY, this.showRefreshOnBody);
+        utils.setContext(FLAGS.SHOW_HOIST_BODY, this.showHoistOnBody);
+        utils.setContext(FLAGS.SHOW_MARK_BODY, this.showMarkOnBody);
+        utils.setContext(FLAGS.SHOW_SORT_BODY, this.showSortOnBody);
+
+    }
+}
+
+</t>
+<t tx="felix.20211007213344.2">/**
+ * * Configuration Settings Service
+ */
+export class Config implements ConfigMembers {
+
+    // Config settings used in leobridgeserver.py, on Leo's side
+    public checkForChangeExternalFiles: string = Constants.CONFIG_DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES;
+    public defaultReloadIgnore: string = Constants.CONFIG_DEFAULTS.DEFAULT_RELOAD_IGNORE;
+    // Config settings used in leoInteg/vscode's side
+    public leoTreeBrowse: boolean = Constants.CONFIG_DEFAULTS.LEO_TREE_BROWSE;
+    public treeKeepFocus: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS;
+    public treeKeepFocusWhenAside: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS_WHEN_ASIDE;
+    public statusBarString: string = Constants.CONFIG_DEFAULTS.STATUSBAR_STRING;
+    public statusBarColor: string = Constants.CONFIG_DEFAULTS.STATUSBAR_COLOR;
+    public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER;
+    public showOpenAside: boolean = Constants.CONFIG_DEFAULTS.SHOW_OPEN_ASIDE;
+    public showEditOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDIT;
+    public showArrowsOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ARROWS;
+    public showAddOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ADD;
+    public showMarkOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK;
+    public showCloneOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLONE;
+    public showCopyOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_COPY;
+
+    public showEditionOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDITION_BODY;
+    public showClipboardOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLIPBOARD_BODY;
+    public showPromoteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_PROMOTE_BODY;
+    public showExecuteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXECUTE_BODY;
+    public showExtractOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXTRACT_BODY;
+    public showImportOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_IMPORT_BODY;
+    public showRefreshOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_REFRESH_BODY;
+    public showHoistOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_HOIST_BODY;
+    public showMarkOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK_BODY;
+    public showSortOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_SORT_BODY;
+
+    public invertNodeContrast: boolean = Constants.CONFIG_DEFAULTS.INVERT_NODES;
+
+    private _isBusySettingConfig: boolean = false;
+    private _needsTreeRefresh: boolean = false;
+
+    constructor(
+        private _context: vscode.ExtensionContext,
+        private _leoUI: LeoUI
+    ) { }
+
+    @others
+}
+</t>
+<t tx="felix.20211007213344.3">/**
+ * * Get actual 'live' Leointeg configuration
+ * @returns An object with config settings members such as treeKeepFocus, defaultReloadIgnore, etc.
+ */
+public getConfig(): ConfigMembers {
+    return {
+        checkForChangeExternalFiles: this.checkForChangeExternalFiles,  // Used in leoBridge script
+        defaultReloadIgnore: this.defaultReloadIgnore,  // Used in leoBridge script
+        leoTreeBrowse: this.leoTreeBrowse,
+        treeKeepFocus: this.treeKeepFocus,
+        treeKeepFocusWhenAside: this.treeKeepFocusWhenAside,
+        statusBarString: this.statusBarString,
+        statusBarColor: this.statusBarColor,
+        treeInExplorer: this.treeInExplorer,
+        showOpenAside: this.showOpenAside,
+        showEditOnNodes: this.showEditOnNodes,
+        showArrowsOnNodes: this.showArrowsOnNodes,
+        showAddOnNodes: this.showAddOnNodes,
+        showMarkOnNodes: this.showMarkOnNodes,
+        showCloneOnNodes: this.showCloneOnNodes,
+        showCopyOnNodes: this.showCopyOnNodes,
+
+        showEditionOnBody: this.showEditionOnBody,
+        showClipboardOnBody: this.showClipboardOnBody,
+        showPromoteOnBody: this.showPromoteOnBody,
+        showExecuteOnBody: this.showExecuteOnBody,
+        showExtractOnBody: this.showExtractOnBody,
+        showImportOnBody: this.showImportOnBody,
+        showRefreshOnBody: this.showRefreshOnBody,
+        showHoistOnBody: this.showHoistOnBody,
+        showMarkOnBody: this.showMarkOnBody,
+        showSortOnBody: this.showSortOnBody,
+
+        invertNodeContrast: this.invertNodeContrast,
+    };
+}
+
+</t>
+<t tx="felix.20211007213344.4">/**
+ * * Get config from vscode for the UI font sizes
+ * @returns the font settings object (zoom level and editor font size)
+ */
+public getFontConfig(): FontSettings {
+    let w_zoomLevel = vscode.workspace.getConfiguration(
+        "window"
+    ).get("zoomLevel");
+    let w_fontSize = vscode.workspace.getConfiguration(
+        "editor"
+    ).get("fontSize");
+
+    const w_config: FontSettings = {
+        zoomLevel: Number(w_zoomLevel),
+        fontSize: Number(w_fontSize)
+    };
+    return w_config;
+}
+
+</t>
+<t tx="felix.20211007213344.5">/**
+ * * Apply changes to the expansion config settings and save them in user settings.
+ * @param p_changes is an array of codes and values to be changed
+ * @returns a promise that resolves upon completion
+ */
+public setLeoIntegSettings(p_changes: ConfigSetting[]): Promise&lt;void&gt; {
+    this._isBusySettingConfig = true;
+    const w_promises: Thenable&lt;void&gt;[] = [];
+    const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
+    p_changes.forEach(i_change =&gt; {
+        if (i_change &amp;&amp; i_change.code.includes(Constants.CONFIG_REFRESH_MATCH)) {
+            // Check if tree refresh is required for hover-icons to be displayed or hidden accordingly
+            this._needsTreeRefresh = true;
+        }
+        // tslint:disable-next-line: strict-comparisons
+        if (w_vscodeConfig.inspect(i_change.code)!.defaultValue === i_change.value) {
+            // Set as undefined - same as default
+            w_promises.push(w_vscodeConfig.update(i_change.code, undefined, true));
+        } else {
+            // Set as value which is not default
+            w_promises.push(w_vscodeConfig.update(i_change.code, i_change.value, true));
+        }
+    });
+    return Promise.all(w_promises).then(() =&gt; {
+        if (this._needsTreeRefresh) {
+            this._needsTreeRefresh = false;
+            setTimeout(() =&gt; {
+                this._leoUI.configTreeRefresh();
+            }, 200);
+        }
+        this._isBusySettingConfig = false;
+        this.buildFromSavedSettings();
+        return Promise.resolve();
+    });
+}
+
+</t>
+<t tx="felix.20211007213344.6">/**
+ * * Apply changes in font size settings and save them in user settings.
+ */
+public setFontConfig(p_settings: FontSettings): void {
+    if (p_settings.zoomLevel || p_settings.zoomLevel === 0) {
+        if (!isNaN(p_settings.zoomLevel) &amp;&amp; p_settings.zoomLevel &lt;= 12 &amp;&amp; p_settings.zoomLevel &gt;= -12) {
+            vscode.workspace.getConfiguration("window")
+                .update("zoomLevel", p_settings.zoomLevel, true);
+        } else {
+            vscode.window.showInformationMessage(
+                "Value for zoom level should be between -12 and 12"
+            );
+        }
+    }
+    if (p_settings.fontSize) {
+        if (!isNaN(p_settings.fontSize) &amp;&amp; p_settings.fontSize &lt;= 30 &amp;&amp; p_settings.fontSize &gt;= 6) {
+            vscode.workspace.getConfiguration("editor")
+                .update("fontSize", p_settings.fontSize, true);
+        } else {
+            vscode.window.showInformationMessage(
+                "Value for font size should be between 6 and 30"
+            );
+        }
+    }
+}
+
+</t>
+<t tx="felix.20211007213344.7">/**
+ * * Set the workbench.editor.enablePreview vscode setting
+ */
+public setEnablePreview(): Thenable&lt;void&gt; {
+    return vscode.workspace.getConfiguration("workbench.editor")
+        .update("enablePreview", true, true);
+}
+
+</t>
+<t tx="felix.20211007213344.8">/**
+ * * Clears the workbench.editor.closeEmptyGroups vscode setting
+ */
+public clearCloseEmptyGroups(): Thenable&lt;void&gt; {
+    return vscode.workspace.getConfiguration("workbench.editor")
+        .update("closeEmptyGroups", false, true);
+}
+
+</t>
+<t tx="felix.20211007213344.9">/**
+ * * Set the "workbench.editor.closeOnFileDelete" vscode setting
+ */
+public setCloseOnFileDelete(): Thenable&lt;void&gt; {
+    return vscode.workspace.getConfiguration("workbench.editor")
+        .update("closeOnFileDelete", true, true);
+}
+
+</t>
+<t tx="felix.20211007213900.1">/**
+ * * Types of the various JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
+ */
+export interface ConfigMembers {
+    checkForChangeExternalFiles: string;
+    defaultReloadIgnore: string;
+    leoTreeBrowse: boolean;
+    treeKeepFocus: boolean;
+    treeKeepFocusWhenAside: boolean;
+    statusBarString: string;
+    statusBarColor: string;
+    treeInExplorer: boolean;
+    showOpenAside: boolean;
+    showEditOnNodes: boolean;
+    showArrowsOnNodes: boolean;
+    showAddOnNodes: boolean;
+    showMarkOnNodes: boolean;
+    showCloneOnNodes: boolean;
+    showCopyOnNodes: boolean;
+
+    showEditionOnBody: boolean; // clone delete insert(s)
+    showClipboardOnBody: boolean; // cut copy paste(s)
+    showPromoteOnBody: boolean; // promote demote
+    showExecuteOnBody: boolean; // extract(s)
+    showExtractOnBody: boolean;
+    showImportOnBody: boolean;
+    showRefreshOnBody: boolean;
+    showHoistOnBody: boolean;
+    showMarkOnBody: boolean;
+    showSortOnBody: boolean;
+
+    invertNodeContrast: boolean;
+}
+
+</t>
+<t tx="felix.20211007213909.1">/**
+ * * Structure for configuration settings changes used along with welcome/settings webview.
+ */
+export interface ConfigSetting {
+    code: string;
+    value: any;
+}
+
+</t>
+<t tx="felix.20211007213915.1">export interface FontSettings {
+    zoomLevel: number;
+    fontSize: number;
+}
+
+</t>
+<t tx="felix.20211007214102.1">/**
+ * * String for JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
+ */
+public static CONFIG_NAMES = {
+    CHECK_FOR_CHANGE_EXTERNAL_FILES: "checkForChangeExternalFiles",
+    DEFAULT_RELOAD_IGNORE: "defaultReloadIgnore",
+    LEO_TREE_BROWSE: "leoTreeBrowse",
+    TREE_KEEP_FOCUS: "treeKeepFocus",
+    TREE_KEEP_FOCUS_WHEN_ASIDE: "treeKeepFocusWhenAside",
+    STATUSBAR_STRING: "statusBarString",
+    STATUSBAR_COLOR: "statusBarColor",
+    TREE_IN_EXPLORER: "treeInExplorer",
+    SHOW_OPEN_ASIDE: "showOpenAside",
+    SHOW_EDIT: "showEditOnNodes",
+    SHOW_ARROWS: "showArrowsOnNodes",
+    SHOW_ADD: "showAddOnNodes",
+    SHOW_MARK: "showMarkOnNodes",
+    SHOW_CLONE: "showCloneOnNodes",
+    SHOW_COPY: "showCopyOnNodes",
+
+    SHOW_EDITION_BODY: "showEditionOnBody",
+    SHOW_CLIPBOARD_BODY: "showClipboardOnBody",
+    SHOW_PROMOTE_BODY: "showPromoteOnBody",
+    SHOW_EXECUTE_BODY: "showExecuteOnBody",
+    SHOW_EXTRACT_BODY: "showExtractOnBody",
+    SHOW_IMPORT_BODY: "showImportOnBody",
+    SHOW_REFRESH_BODY: "showRefreshOnBody",
+    SHOW_HOIST_BODY: "showHoistOnBody",
+    SHOW_MARK_BODY: "showMarkOnBody",
+    SHOW_SORT_BODY: "showSortOnBody",
+
+    INVERT_NODES: "invertNodeContrast",
+};
+
+</t>
+<t tx="felix.20211007214110.1">/**
+ * * Configuration Defaults used in config.ts
+ * Used when setting itself and getting parameters from vscode
+ */
+public static CONFIG_DEFAULTS = {
+    CHECK_FOR_CHANGE_EXTERNAL_FILES: "none",  // Used in leoBridge scrip,
+    DEFAULT_RELOAD_IGNORE: "none", // Used in leoBridge scrip,
+    LEO_TREE_BROWSE: true,
+    TREE_KEEP_FOCUS: true,
+    TREE_KEEP_FOCUS_WHEN_ASIDE: false,
+    STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
+    STATUSBAR_COLOR: "fb7c47",
+    TREE_IN_EXPLORER: true,
+    SHOW_OPEN_ASIDE: true,
+    SHOW_EDIT: true,
+    SHOW_ARROWS: false,
+    SHOW_ADD: false,
+    SHOW_MARK: false,
+    SHOW_CLONE: false,
+    SHOW_COPY: false,
+
+    SHOW_EDITION_BODY: true,
+    SHOW_CLIPBOARD_BODY: true,
+    SHOW_PROMOTE_BODY: true,
+    SHOW_EXECUTE_BODY: true,
+    SHOW_EXTRACT_BODY: true,
+    SHOW_IMPORT_BODY: true,
+    SHOW_REFRESH_BODY: true,
+    SHOW_HOIST_BODY: true,
+    SHOW_MARK_BODY: true,
+    SHOW_SORT_BODY: true,
+
+    INVERT_NODES: false
+};
+
+</t>
+<t tx="felix.20211007214455.1">/**
+ * * Checks if a string is formatted as a valid rrggbb color code.
+ * @param p_hexString hexadecimal 6 digits string, without leading '0x'
+ * @returns True if the string is a valid representation of an hexadecimal 6 digit number
+ */
+export function isHexColor(p_hexString: string): boolean {
+    return typeof p_hexString === 'string'
+        &amp;&amp; p_hexString.length === 6
+        &amp;&amp; !isNaN(Number('0x' + p_hexString));
+}
+
+</t>
+<t tx="felix.20211007232334.1">/**
+ * * Refresh tree for 'node hover icons' to show up properly after changing their settings
+ */
+public configTreeRefresh(): void {
+    if (this.leoStates.fileOpenedReady) {
+        // this._preventShowBody = true;
+        this._refreshOutline(true, RevealType.RevealSelect);
+    }
+}
+
 </t>
 </tnodes>
 </leo_file>

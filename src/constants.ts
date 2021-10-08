@@ -29,6 +29,9 @@ export class Constants {
     public static STATES_DEBOUNCE_DELAY: number = 100;
     public static DOCUMENTS_DEBOUNCE_DELAY: number = 100;
 
+    public static CONFIG_NAME: string = "leojs";
+    public static CONFIG_WORKBENCH_ENABLED_PREVIEW: string = "workbench.editor.enablePreview";
+    public static CONFIG_REFRESH_MATCH: string = "OnNodes"; // substring to distinguish 'on-hover' icon commands
     /**
      * Strings used in the workbench interface panels (not for messages or dialogs)
      */
@@ -107,6 +110,75 @@ export class Constants {
     };
 
     /**
+     * * String for JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
+     */
+    public static CONFIG_NAMES = {
+        CHECK_FOR_CHANGE_EXTERNAL_FILES: "checkForChangeExternalFiles",
+        DEFAULT_RELOAD_IGNORE: "defaultReloadIgnore",
+        LEO_TREE_BROWSE: "leoTreeBrowse",
+        TREE_KEEP_FOCUS: "treeKeepFocus",
+        TREE_KEEP_FOCUS_WHEN_ASIDE: "treeKeepFocusWhenAside",
+        STATUSBAR_STRING: "statusBarString",
+        STATUSBAR_COLOR: "statusBarColor",
+        TREE_IN_EXPLORER: "treeInExplorer",
+        SHOW_OPEN_ASIDE: "showOpenAside",
+        SHOW_EDIT: "showEditOnNodes",
+        SHOW_ARROWS: "showArrowsOnNodes",
+        SHOW_ADD: "showAddOnNodes",
+        SHOW_MARK: "showMarkOnNodes",
+        SHOW_CLONE: "showCloneOnNodes",
+        SHOW_COPY: "showCopyOnNodes",
+
+        SHOW_EDITION_BODY: "showEditionOnBody",
+        SHOW_CLIPBOARD_BODY: "showClipboardOnBody",
+        SHOW_PROMOTE_BODY: "showPromoteOnBody",
+        SHOW_EXECUTE_BODY: "showExecuteOnBody",
+        SHOW_EXTRACT_BODY: "showExtractOnBody",
+        SHOW_IMPORT_BODY: "showImportOnBody",
+        SHOW_REFRESH_BODY: "showRefreshOnBody",
+        SHOW_HOIST_BODY: "showHoistOnBody",
+        SHOW_MARK_BODY: "showMarkOnBody",
+        SHOW_SORT_BODY: "showSortOnBody",
+
+        INVERT_NODES: "invertNodeContrast",
+    };
+
+    /**
+     * * Configuration Defaults used in config.ts
+     * Used when setting itself and getting parameters from vscode
+     */
+    public static CONFIG_DEFAULTS = {
+        CHECK_FOR_CHANGE_EXTERNAL_FILES: "none",  // Used in leoBridge scrip,
+        DEFAULT_RELOAD_IGNORE: "none", // Used in leoBridge scrip,
+        LEO_TREE_BROWSE: true,
+        TREE_KEEP_FOCUS: true,
+        TREE_KEEP_FOCUS_WHEN_ASIDE: false,
+        STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
+        STATUSBAR_COLOR: "fb7c47",
+        TREE_IN_EXPLORER: true,
+        SHOW_OPEN_ASIDE: true,
+        SHOW_EDIT: true,
+        SHOW_ARROWS: false,
+        SHOW_ADD: false,
+        SHOW_MARK: false,
+        SHOW_CLONE: false,
+        SHOW_COPY: false,
+
+        SHOW_EDITION_BODY: true,
+        SHOW_CLIPBOARD_BODY: true,
+        SHOW_PROMOTE_BODY: true,
+        SHOW_EXECUTE_BODY: true,
+        SHOW_EXTRACT_BODY: true,
+        SHOW_IMPORT_BODY: true,
+        SHOW_REFRESH_BODY: true,
+        SHOW_HOIST_BODY: true,
+        SHOW_MARK_BODY: true,
+        SHOW_SORT_BODY: true,
+
+        INVERT_NODES: false
+    };
+
+    /**
      * Choices offered when about to lose current changes to a Leo Document
      */
     public static ASK_SAVE_CHANGES_BUTTONS: vscode.MessageItem[] = [
@@ -163,13 +235,36 @@ export class Constants {
         DOCUMENT_SELECTED_UNTITLED: "leojsDocumentSelectedUntitled",
         DOCUMENT_UNTITLED: "leojsDocumentUntitled",
         // UI
-        LEO_TREE_BROWSE: "leojsTreeBrowse", // Override vscode's tree behavior with Leo's own
-        SHOW_EDIT: "leojsShowEditOnNodes",
-        SHOW_ARROWS: "leojsShowArrowsOnNodes",
-        SHOW_ADD: "leojsShowAddOnNodes",
-        SHOW_MARK: "leojsShowMarkOnNodes",
-        SHOW_CLONE: "leojsShowCloneOnNodes",
-        SHOW_COPY: "leojsShowCopyOnNodes",
+        //LEO_TREE_BROWSE: "leojsTreeBrowse", // Override vscode's tree behavior with Leo's own
+        //TREE_IN_EXPLORER: Constants.CONFIG_NAMES.TREE_IN_EXPLORER, // Leo outline also in the explorer view
+
+        // SHOW_EDIT: "leojsShowEditOnNodes",
+        // SHOW_ARROWS: "leojsShowArrowsOnNodes",
+        // SHOW_ADD: "leojsShowAddOnNodes",
+        // SHOW_MARK: "leojsShowMarkOnNodes",
+        // SHOW_CLONE: "leojsShowCloneOnNodes",
+        // SHOW_COPY: "leojsShowCopyOnNodes",
+
+        LEO_TREE_BROWSE: Constants.name + Constants.CONFIG_NAMES.LEO_TREE_BROWSE[0].toUpperCase() + Constants.CONFIG_NAMES.LEO_TREE_BROWSE.slice(1), // Force ar'jan's suggestion of Leo's tree behavior override
+        TREE_IN_EXPLORER: Constants.name + Constants.CONFIG_NAMES.TREE_IN_EXPLORER[0].toUpperCase() + Constants.CONFIG_NAMES.TREE_IN_EXPLORER.slice(1), // Leo outline also in the explorer view
+        SHOW_OPEN_ASIDE: Constants.name + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE.slice(1),   // Show 'open aside' in context menu
+        SHOW_EDIT: Constants.name + Constants.CONFIG_NAMES.SHOW_EDIT[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDIT.slice(1),              // Hover Icons on outline nodes
+        SHOW_ARROWS: Constants.name + Constants.CONFIG_NAMES.SHOW_ARROWS[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ARROWS.slice(1),           // Hover Icons on outline nodes
+        SHOW_ADD: Constants.name + Constants.CONFIG_NAMES.SHOW_ADD[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ADD.slice(1),                 // Hover Icons on outline nodes
+        SHOW_MARK: Constants.name + Constants.CONFIG_NAMES.SHOW_MARK[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK.slice(1),               // Hover Icons on outline nodes
+        SHOW_CLONE: Constants.name + Constants.CONFIG_NAMES.SHOW_CLONE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLONE.slice(1),             // Hover Icons on outline nodes
+        SHOW_COPY: Constants.name + Constants.CONFIG_NAMES.SHOW_COPY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_COPY.slice(1),               // Hover Icons on outline nodes
+
+        SHOW_EDITION_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_EDITION_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDITION_BODY.slice(1),
+        SHOW_CLIPBOARD_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY.slice(1),
+        SHOW_PROMOTE_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY.slice(1),
+        SHOW_EXECUTE_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY.slice(1),
+        SHOW_EXTRACT_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY.slice(1),
+        SHOW_IMPORT_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY.slice(1),
+        SHOW_REFRESH_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY.slice(1),
+        SHOW_HOIST_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_HOIST_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_HOIST_BODY.slice(1),
+        SHOW_MARK_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_MARK_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK_BODY.slice(1),
+        SHOW_SORT_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_SORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_SORT_BODY.slice(1)
     };
 
     /**
@@ -321,6 +416,22 @@ export class Constants {
         CLONE_FIND_ALL_FLATTENED: Constants.NAME + ".cloneFindAllFlattened",
         CLONE_FIND_MARKED: Constants.NAME + ".cloneFindMarked",
         CLONE_FIND_FLATTENED_MARKED: Constants.NAME + ".cloneFindFlattenedMarked",
+        // TODO
+        GOTO_GLOBAL_LINE: Constants.NAME + ".gotoGlobalLine",
+        TAG_CHILDREN: Constants.NAME + ".tagChildren",
+        SET_FIND_EVERYWHERE_OPTION: Constants.NAME + ".setFindEverywhereOption",
+        SET_FIND_NODE_ONLY_OPTION: Constants.NAME + ".setFindNodeOnlyOption",
+        SET_FIND_SUBOUTLINE_ONLY_OPTION: Constants.NAME + ".setFindSuboutlineOnlyOption",
+        TOGGLE_FIND_IGNORE_CASE_OPTION: Constants.NAME + ".toggleFindIgnoreCaseOption",
+        TOGGLE_FIND_MARK_CHANGES_OPTION: Constants.NAME + ".toggleFindMarkChangesOption",
+        TOGGLE_FIND_MARK_FINDS_OPTION: Constants.NAME + ".toggleFindMarkFindsOption",
+        TOGGLE_FIND_REGEXP_OPTION: Constants.NAME + ".toggleFindRegexpOption",
+        TOGGLE_FIND_WORD_OPTION: Constants.NAME + ".toggleFindWordOption",
+        TOGGLE_FIND_SEARCH_BODY_OPTION: Constants.NAME + ".toggleFindSearchBodyOption",
+        TOGGLE_FIND_SEARCH_HEADLINE_OPTION: Constants.NAME + ".toggleFindSearchHeadlineOption",
+        SET_ENABLE_PREVIEW: Constants.NAME + ".setEnablePreview",
+        CLEAR_CLOSE_EMPTY_GROUPS: Constants.NAME + ".clearCloseEmptyGroups",
+        SET_CLOSE_ON_FILE_DELETE: Constants.NAME + ".setCloseOnFileDelete"
     };
 
     /**
