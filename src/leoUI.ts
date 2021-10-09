@@ -7,8 +7,8 @@ import {
     Icon,
     ReqRefresh,
 } from "./types";
-import { Leojs } from "./leojs";
 
+import { Config } from "./config";
 import { LeoOutlineNode } from "./leoOutlineNode";
 import { LeoOutlineProvider } from './leoOutline';
 import { LeoButtonNode } from "./leoButtonNode";
@@ -29,16 +29,19 @@ export class LeoUI {
     // * State flags
     public leoStates: LeoStates;
 
+    // * Configuration Settings Service
+    public config: Config; // Public configuration service singleton, used in leoSettingsWebview, leoBridge, and leoNode for inverted contrast
+
     // * temporary / fake config
-    public config: { [key: string]: boolean } = {
-        leoTreeBrowse: true,
-        showEditOnNodes: false,
-        showArrowsOnNodes: false,
-        showAddOnNodes: false,
-        showMarkOnNodes: false,
-        showCloneOnNodes: false,
-        showCopyOnNodes: false,
-    };
+    // public config: { [key: string]: boolean } = {
+    //     leoTreeBrowse: true,
+    //     showEditOnNodes: false,
+    //     showArrowsOnNodes: false,
+    //     showAddOnNodes: false,
+    //     showMarkOnNodes: false,
+    //     showCloneOnNodes: false,
+    //     showCopyOnNodes: false,
+    // };
 
     // * Icon Paths (Singleton static arrays)
     public nodeIcons: Icon[] = [];
@@ -48,7 +51,6 @@ export class LeoUI {
     // * File Browser
     private _leoFilesBrowser: LeoFilesBrowser; // Browsing dialog service singleton used in the openLeoFile and save-as methods
 
-    private _leo: Leojs;
     public leo_c: Commands;
 
     private _refreshType: ReqRefresh = {}; // Flags for commands to require parts of UI to refresh
@@ -115,13 +117,14 @@ export class LeoUI {
         // * Setup States
         this.leoStates = new LeoStates(_context, this);
 
+        // * Get configuration settings
+        this.config = new Config(_context, this);
+
+
         // * Build Icon filename paths
         this.nodeIcons = utils.buildNodeIconPaths(_context);
         this.documentIcons = utils.buildDocumentIconPaths(_context);
         this.buttonIcons = utils.buildButtonsIconPaths(_context);
-
-        // * Create leo core class
-        this._leo = new Leojs();
 
         g.app.gui = this;
         g.app.loadManager = new LoadManager();
@@ -248,14 +251,14 @@ export class LeoUI {
         this._lastTreeView = this._leoTreeExView;
 
         // * Create Leo Opened Documents Treeview Providers and tree views
-        this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this, this._leo);
+        this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);
         this._leoDocuments = vscode.window.createTreeView(Constants.DOCUMENTS_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
         this._leoDocuments.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, false)));
         this._leoDocumentsExplorer = vscode.window.createTreeView(Constants.DOCUMENTS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
         this._leoDocumentsExplorer.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, true)));
 
         // * Create '@buttons' Treeview Providers and tree views
-        this._leoButtonsProvider = new LeoButtonsProvider(this.leoStates, this.buttonIcons, this._leo);
+        this._leoButtonsProvider = new LeoButtonsProvider(this.leoStates, this.buttonIcons);
         this._leoButtons = vscode.window.createTreeView(Constants.BUTTONS_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
         this._leoButtons.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, false)));
         this._leoButtonsExplorer = vscode.window.createTreeView(Constants.BUTTONS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
@@ -946,7 +949,9 @@ export class LeoUI {
      * @param p_value Its value to be set
      */
     public toggleSetting(p_param: string, p_value: boolean): void {
+
         utils.setContext(p_param, p_value);
+        // Refresh to show changes for icons in outline
         if (
             (p_param.startsWith("show") || p_param.startsWith("hide")) &&
             this.leoStates.fileOpenedReady
@@ -954,7 +959,8 @@ export class LeoUI {
             this._refreshOutline(true, RevealType.RevealSelect);
         }
         // keep a copy in fake config until a real config setting class is implemented
-        this.config[p_param] = p_value;
+        //TODO
+        // this.config[p_param] = p_value;
 
     }
 

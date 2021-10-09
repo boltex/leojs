@@ -3,7 +3,6 @@ import { LeoUI } from './leoUI';
 import { LeoDocumentNode } from "./leoDocumentNode";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
-import { Leojs } from "./leojs";
 
 /**
  * * Opened Leo documents shown as a list with this TreeDataProvider implementation
@@ -17,7 +16,6 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoDocument
     constructor(
         private _leoStates: LeoStates,
         private _leoUI: LeoUI,
-        private _leojs: Leojs
     ) { }
 
     /**

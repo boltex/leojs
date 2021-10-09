@@ -27,7 +27,7 @@
   ],
   "icon": "resources/leoapp128px.png",
   "galleryBanner": {
-    "color": "#dfd8a2",
+    "color": "#f1af88",
     "theme": "light"
   },
   "activationEvents": [

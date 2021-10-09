@@ -12,31 +12,31 @@ export class Config implements ConfigMembers {
     // Config settings used in leobridgeserver.py, on Leo's side
     public checkForChangeExternalFiles: string = Constants.CONFIG_DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES;
     public defaultReloadIgnore: string = Constants.CONFIG_DEFAULTS.DEFAULT_RELOAD_IGNORE;
-    // Config settings used in leoInteg/vscode's side
-    public leoTreeBrowse: boolean = Constants.CONFIG_DEFAULTS.LEO_TREE_BROWSE;
+    // Config settings used in Leojs-vscode's side
+    public leoTreeBrowse: boolean = Constants.CONFIG_DEFAULTS.LEO_TREE_BROWSE; // Used as Context Flag
     public treeKeepFocus: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS;
     public treeKeepFocusWhenAside: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS_WHEN_ASIDE;
     public statusBarString: string = Constants.CONFIG_DEFAULTS.STATUSBAR_STRING;
     public statusBarColor: string = Constants.CONFIG_DEFAULTS.STATUSBAR_COLOR;
-    public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER;
-    public showOpenAside: boolean = Constants.CONFIG_DEFAULTS.SHOW_OPEN_ASIDE;
-    public showEditOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDIT;
-    public showArrowsOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ARROWS;
-    public showAddOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ADD;
-    public showMarkOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK;
-    public showCloneOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLONE;
-    public showCopyOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_COPY;
+    public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER; // Used as Context Flag
+    public showOpenAside: boolean = Constants.CONFIG_DEFAULTS.SHOW_OPEN_ASIDE; // Used as Context Flag
+    public showEditOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDIT; // Used as Context Flag
+    public showArrowsOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ARROWS; // Used as Context Flag
+    public showAddOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ADD; // Used as Context Flag
+    public showMarkOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK; // Used as Context Flag
+    public showCloneOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLONE; // Used as Context Flag
+    public showCopyOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_COPY; // Used as Context Flag
 
-    public showEditionOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDITION_BODY;
-    public showClipboardOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLIPBOARD_BODY;
-    public showPromoteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_PROMOTE_BODY;
-    public showExecuteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXECUTE_BODY;
-    public showExtractOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXTRACT_BODY;
-    public showImportOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_IMPORT_BODY;
-    public showRefreshOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_REFRESH_BODY;
-    public showHoistOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_HOIST_BODY;
-    public showMarkOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK_BODY;
-    public showSortOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_SORT_BODY;
+    public showEditionOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDITION_BODY; // Used as Context Flag
+    public showClipboardOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLIPBOARD_BODY; // Used as Context Flag
+    public showPromoteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_PROMOTE_BODY; // Used as Context Flag
+    public showExecuteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXECUTE_BODY; // Used as Context Flag
+    public showExtractOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXTRACT_BODY; // Used as Context Flag
+    public showImportOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_IMPORT_BODY; // Used as Context Flag
+    public showRefreshOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_REFRESH_BODY; // Used as Context Flag
+    public showHoistOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_HOIST_BODY; // Used as Context Flag
+    public showMarkOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK_BODY; // Used as Context Flag
+    public showSortOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_SORT_BODY; // Used as Context Flag
 
     public invertNodeContrast: boolean = Constants.CONFIG_DEFAULTS.INVERT_NODES;
 
@@ -49,37 +49,37 @@ export class Config implements ConfigMembers {
     ) { }
 
     /**
-     * * Get actual 'live' Leointeg configuration
+     * * Get actual 'live' Leojs configuration
      * @returns An object with config settings members such as treeKeepFocus, defaultReloadIgnore, etc.
      */
     public getConfig(): ConfigMembers {
         return {
-            checkForChangeExternalFiles: this.checkForChangeExternalFiles,  // Used in leoBridge script
-            defaultReloadIgnore: this.defaultReloadIgnore,  // Used in leoBridge script
-            leoTreeBrowse: this.leoTreeBrowse,
+            checkForChangeExternalFiles: this.checkForChangeExternalFiles,
+            defaultReloadIgnore: this.defaultReloadIgnore,
+            leoTreeBrowse: this.leoTreeBrowse, // Used as Context Flag
             treeKeepFocus: this.treeKeepFocus,
             treeKeepFocusWhenAside: this.treeKeepFocusWhenAside,
             statusBarString: this.statusBarString,
             statusBarColor: this.statusBarColor,
-            treeInExplorer: this.treeInExplorer,
-            showOpenAside: this.showOpenAside,
-            showEditOnNodes: this.showEditOnNodes,
-            showArrowsOnNodes: this.showArrowsOnNodes,
-            showAddOnNodes: this.showAddOnNodes,
-            showMarkOnNodes: this.showMarkOnNodes,
-            showCloneOnNodes: this.showCloneOnNodes,
-            showCopyOnNodes: this.showCopyOnNodes,
+            treeInExplorer: this.treeInExplorer, // Used as Context Flag
+            showOpenAside: this.showOpenAside,  // Used as Context Flag
+            showEditOnNodes: this.showEditOnNodes, // Used as Context Flag
+            showArrowsOnNodes: this.showArrowsOnNodes, // Used as Context Flag
+            showAddOnNodes: this.showAddOnNodes, // Used as Context Flag
+            showMarkOnNodes: this.showMarkOnNodes, // Used as Context Flag
+            showCloneOnNodes: this.showCloneOnNodes, // Used as Context Flag
+            showCopyOnNodes: this.showCopyOnNodes, // Used as Context Flag
 
-            showEditionOnBody: this.showEditionOnBody,
-            showClipboardOnBody: this.showClipboardOnBody,
-            showPromoteOnBody: this.showPromoteOnBody,
-            showExecuteOnBody: this.showExecuteOnBody,
-            showExtractOnBody: this.showExtractOnBody,
-            showImportOnBody: this.showImportOnBody,
-            showRefreshOnBody: this.showRefreshOnBody,
-            showHoistOnBody: this.showHoistOnBody,
-            showMarkOnBody: this.showMarkOnBody,
-            showSortOnBody: this.showSortOnBody,
+            showEditionOnBody: this.showEditionOnBody, // Used as Context Flag
+            showClipboardOnBody: this.showClipboardOnBody, // Used as Context Flag
+            showPromoteOnBody: this.showPromoteOnBody, // Used as Context Flag
+            showExecuteOnBody: this.showExecuteOnBody, // Used as Context Flag
+            showExtractOnBody: this.showExtractOnBody, // Used as Context Flag
+            showImportOnBody: this.showImportOnBody, // Used as Context Flag
+            showRefreshOnBody: this.showRefreshOnBody, // Used as Context Flag
+            showHoistOnBody: this.showHoistOnBody, // Used as Context Flag
+            showMarkOnBody: this.showMarkOnBody, // Used as Context Flag
+            showSortOnBody: this.showSortOnBody, // Used as Context Flag
 
             invertNodeContrast: this.invertNodeContrast,
         };
@@ -109,7 +109,7 @@ export class Config implements ConfigMembers {
      * @param p_changes is an array of codes and values to be changed
      * @returns a promise that resolves upon completion
      */
-    public setLeoIntegSettings(p_changes: ConfigSetting[]): Promise<void> {
+    public setLeojsSettings(p_changes: ConfigSetting[]): Promise<void> {
         this._isBusySettingConfig = true;
         const w_promises: Thenable<void>[] = [];
         const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);

@@ -19,7 +19,7 @@
 <v t="felix.20211007213344.2"><vh>class Config</vh>
 <v t="felix.20211007213344.3"><vh>getConfig</vh></v>
 <v t="felix.20211007213344.4"><vh>getFontConfig</vh></v>
-<v t="felix.20211007213344.5"><vh>setLeoIntegSettings</vh></v>
+<v t="felix.20211007213344.5"><vh>setLeojsSettings</vh></v>
 <v t="felix.20211007213344.6"><vh>setFontConfig</vh></v>
 <v t="felix.20211007213344.7"><vh>setEnablePreview</vh></v>
 <v t="felix.20211007213344.8"><vh>clearCloseEmptyGroups</vh></v>
@@ -54,6 +54,7 @@
 <v t="felix.20201214151326.3"><vh>general constants</vh></v>
 <v t="felix.20201214151326.4"><vh>workbench interface panels</vh></v>
 <v t="felix.20201214151326.5"><vh>user messages</vh></v>
+<v t="felix.20211008004139.1"><vh>find panel ids</vh></v>
 <v t="felix.20201214151326.6"><vh>at-buttons strings</vh></v>
 <v t="felix.20211007214102.1"><vh>configuration keys</vh></v>
 <v t="felix.20211007214110.1"><vh>config defaults</vh></v>
@@ -86,9 +87,6 @@
 </v>
 </v>
 <v t="felix.20201208215619.1"><vh>deactivate</vh></v>
-</v>
-<v t="felix.20201214194412.1"><vh>@clean src/leojs.ts</vh>
-<v t="felix.20201215224237.1"><vh>class leojs</vh></v>
 </v>
 <v t="felix.20201214194144.1"><vh>@clean src/leoUI.ts</vh>
 <v t="felix.20201214195752.1"><vh>class LeoUI</vh>
@@ -1256,7 +1254,7 @@ public getLeoFileUrl(p_saveAsFlag?: boolean): Promise&lt;string&gt; {
 
 # How to install and run the development version
 
-Thanks for trying out the development version of LeoInteg! :sunglasses: Contributions and pull requests are more than welcome!
+Thanks for trying out the development version of Leojs! :sunglasses: Contributions and pull requests are more than welcome!
 
 ## Introduction
 
@@ -1526,6 +1524,7 @@ public refreshTreeRoot(): void {
 [CMD.SORT_CHILDREN, () =&gt; w_leoUI.command(LEOCMD.SORT_CHILDREN, U, REFRESH_TREE, false, true)],
 [CMD.SORT_SIBLING, () =&gt; w_leoUI.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, false, true)],
 [CMD.SORT_SIBLING_FO, () =&gt; w_leoUI.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, true, true)],
+
 </t>
 <t tx="felix.20201214150149.11">[CMD.MARK, (p_node: LeoOutlineNode) =&gt; w_leoUI.changeMark(true, p_node, true)],
 [CMD.MARK_SELECTION, () =&gt; w_leoUI.changeMark(true, U, false)],
@@ -1539,6 +1538,7 @@ public refreshTreeRoot(): void {
 </t>
 <t tx="felix.20201214150149.12">[CMD.EXTRACT, () =&gt; w_leoUI.command(LEOCMD.EXTRACT, U, REFRESH_TREE_BODY, false)],
 [CMD.EXTRACT_NAMES, () =&gt; w_leoUI.command(LEOCMD.EXTRACT_NAMES, U, REFRESH_TREE_BODY, false)],
+
 </t>
 <t tx="felix.20201214150149.13">[CMD.MOVE_DOWN, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.MOVE_DOWN_SELECTION, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, false)],
@@ -1555,6 +1555,7 @@ public refreshTreeRoot(): void {
 [CMD.MOVE_UP, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_UP, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.MOVE_UP_SELECTION, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, false)],
 [CMD.MOVE_UP_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, true)],
+
 </t>
 <t tx="felix.20201214150149.14">[CMD.REDO, () =&gt; w_leoUI.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, false)],
 [CMD.REDO_FO, () =&gt; w_leoUI.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, true)],
@@ -1572,11 +1573,27 @@ public refreshTreeRoot(): void {
 [CMD.CLONE_MARKED_NODES, () =&gt; w_leoUI.command(LEOCMD.CLONE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
 [CMD.DELETE_MARKED_NODES, () =&gt; w_leoUI.command(LEOCMD.DELETE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
 [CMD.MOVE_MARKED_NODES, () =&gt; w_leoUI.command(LEOCMD.MOVE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
+
 </t>
 <t tx="felix.20201214150149.17">[CMD.CLONE_FIND_ALL, () =&gt; w_leoUI.command(LEOCMD.CLONE_FIND_ALL, U, REFRESH_TREE_BODY, true)],
 [CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; w_leoUI.command(LEOCMD.CLONE_FIND_ALL_FLATTENED, U, REFRESH_TREE_BODY, true)],
 [CMD.CLONE_FIND_MARKED, () =&gt; w_leoUI.command(LEOCMD.CLONE_FIND_MARKED, U, REFRESH_TREE_BODY, true)],
-[CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; w_leoUI.command(LEOCMD.CLONE_FIND_FLATTENED_MARKED, U, REFRESH_TREE_BODY, true)]
+[CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; w_leoUI.command(LEOCMD.CLONE_FIND_FLATTENED_MARKED, U, REFRESH_TREE_BODY, true)],
+
+// [CMD.SET_FIND_EVERYWHERE_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.ENTIRE_OUTLINE)],
+// [CMD.SET_FIND_NODE_ONLY_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.NODE_ONLY)],
+// [CMD.SET_FIND_SUBOUTLINE_ONLY_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SUBOUTLINE_ONLY)],
+// [CMD.TOGGLE_FIND_IGNORE_CASE_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.IGNORE_CASE)],
+// [CMD.TOGGLE_FIND_MARK_CHANGES_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_CHANGES)],
+// [CMD.TOGGLE_FIND_MARK_FINDS_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_FINDS)],
+// [CMD.TOGGLE_FIND_REGEXP_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.REG_EXP)],
+// [CMD.TOGGLE_FIND_WORD_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.WHOLE_WORD)],
+// [CMD.TOGGLE_FIND_SEARCH_BODY_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SEARCH_BODY)],
+// [CMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SEARCH_HEADLINE)],
+
+[CMD.SET_ENABLE_PREVIEW, () =&gt; w_leoUI.config.setEnablePreview()],
+[CMD.CLEAR_CLOSE_EMPTY_GROUPS, () =&gt; w_leoUI.config.clearCloseEmptyGroups()],
+[CMD.SET_CLOSE_ON_FILE_DELETE, () =&gt; w_leoUI.config.setCloseOnFileDelete()],
 </t>
 <t tx="felix.20201214150149.2">@others
 </t>
@@ -1826,6 +1843,7 @@ public static COMMANDS = {
 </t>
 <t tx="felix.20201214151326.11">/**
  * Leo command names that are called from vscode's gui/menu/buttons/keybindings triggers
+ * TODO : CALL DIRECT LEO CORE METHODS (DELETE LEO_COMMANDS WHEN DONE)
  */
 public static LEO_COMMANDS = {
     EXECUTE_SCRIPT: "executeScript",
@@ -2108,9 +2126,9 @@ public static VSCODE_COMMANDS = {
 <t tx="felix.20201214151419.1">import * as vscode from "vscode";
 import { LeoButtonNode } from "./leoButtonNode";
 import { ProviderResult } from "vscode";
-import { Icon } from "./types";
+import { Icon, LeoButton } from "./types";
 import { LeoStates } from "./leoStates";
-import { Leojs } from "./leojs";
+
 
 @language typescript
 @tabwidth -4
@@ -2121,6 +2139,12 @@ import { Leojs } from "./leojs";
  */
 export class LeoButtonsProvider implements vscode.TreeDataProvider&lt;LeoButtonNode&gt; {
 
+    private fakeAtButtons: LeoButton[] = [
+        { name: 'script-button', index: 'nullButtonWidget' },
+        { name: 'button name 2', index: 'key2' },
+        { name: 'button name 3', index: 'key3' },
+    ];
+
     private _onDidChangeTreeData: vscode.EventEmitter&lt;LeoButtonNode | undefined&gt; = new vscode.EventEmitter&lt;LeoButtonNode | undefined&gt;();
 
     readonly onDidChangeTreeData: vscode.Event&lt;LeoButtonNode | undefined&gt; = this._onDidChangeTreeData.event;
@@ -2128,7 +2152,6 @@ export class LeoButtonsProvider implements vscode.TreeDataProvider&lt;LeoButtonN
     constructor(
         private _leoStates: LeoStates,
         private _icons: Icon[],
-        private _leojs: Leojs
     ) { }
 
     @others
@@ -2151,7 +2174,7 @@ public refreshTreeRoot(): void {
     const w_children: LeoButtonNode[] = [];
     // if called with element, or not ready, give back empty array as there won't be any children
     if (this._leoStates.fileOpenedReady &amp;&amp; !element) {
-        this._leojs.atButtons.forEach(p_button =&gt; {
+        this.fakeAtButtons.forEach(p_button =&gt; {
             w_children.push(new LeoButtonNode(p_button, this._icons));
         });
     }
@@ -2241,7 +2264,6 @@ import { LeoUI } from './leoUI';
 import { LeoDocumentNode } from "./leoDocumentNode";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
-import { Leojs } from "./leojs";
 
 @language typescript
 @tabwidth -4
@@ -2259,7 +2281,6 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider&lt;LeoDocum
     constructor(
         private _leoStates: LeoStates,
         private _leoUI: LeoUI,
-        private _leojs: Leojs
     ) { }
 
     @others
@@ -2931,8 +2952,8 @@ import {
     Icon,
     ReqRefresh,
 } from "./types";
-import { Leojs } from "./leojs";
 
+import { Config } from "./config";
 import { LeoOutlineNode } from "./leoOutlineNode";
 import { LeoOutlineProvider } from './leoOutline';
 import { LeoButtonNode } from "./leoButtonNode";
@@ -2956,13 +2977,14 @@ import { Commands } from "./core/leoCommands";
     // * Setup States
     this.leoStates = new LeoStates(_context, this);
 
+    // * Get configuration settings
+    this.config = new Config(_context, this);
+
+
     // * Build Icon filename paths
     this.nodeIcons = utils.buildNodeIconPaths(_context);
     this.documentIcons = utils.buildDocumentIconPaths(_context);
     this.buttonIcons = utils.buildButtonsIconPaths(_context);
-
-    // * Create leo core class
-    this._leo = new Leojs();
 
     g.app.gui = this;
     g.app.loadManager = new LoadManager();
@@ -3089,14 +3111,14 @@ import { Commands } from "./core/leoCommands";
     this._lastTreeView = this._leoTreeExView;
 
     // * Create Leo Opened Documents Treeview Providers and tree views
-    this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this, this._leo);
+    this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);
     this._leoDocuments = vscode.window.createTreeView(Constants.DOCUMENTS_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
     this._leoDocuments.onDidChangeVisibility((p_event =&gt; this._onDocTreeViewVisibilityChanged(p_event, false)));
     this._leoDocumentsExplorer = vscode.window.createTreeView(Constants.DOCUMENTS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
     this._leoDocumentsExplorer.onDidChangeVisibility((p_event =&gt; this._onDocTreeViewVisibilityChanged(p_event, true)));
 
     // * Create '@buttons' Treeview Providers and tree views
-    this._leoButtonsProvider = new LeoButtonsProvider(this.leoStates, this.buttonIcons, this._leo);
+    this._leoButtonsProvider = new LeoButtonsProvider(this.leoStates, this.buttonIcons);
     this._leoButtons = vscode.window.createTreeView(Constants.BUTTONS_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
     this._leoButtons.onDidChangeVisibility((p_event =&gt; this._onButtonsTreeViewVisibilityChanged(p_event, false)));
     this._leoButtonsExplorer = vscode.window.createTreeView(Constants.BUTTONS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
@@ -3125,19 +3147,6 @@ import { Commands } from "./core/leoCommands";
 <t tx="felix.20201214194144.7"></t>
 <t tx="felix.20201214194144.8"></t>
 <t tx="felix.20201214194144.9"></t>
-<t tx="felix.20201214194412.1">
-//import { LeoButton, LeoDocument, PNode } from './types';
-import { LeoButton, LeoDocument } from './types';
-@language typescript
-@tabwidth -4
-
-// https://github.com/leo-editor/leo-editor/issues/1025
-
-// * THIS IS A TEMPORARY FILE TO FAKE DATA FOR DEVELOPMENT *
-// For now give results to tree view panels (outline, documents and at-buttons)
-
-@others
-</t>
 <t tx="felix.20201214195752.1">/**
  * Creates and manages instances of the UI elements along with their events
  */
@@ -3145,16 +3154,19 @@ export class LeoUI {
     // * State flags
     public leoStates: LeoStates;
 
+    // * Configuration Settings Service
+    public config: Config; // Public configuration service singleton, used in leoSettingsWebview, leoBridge, and leoNode for inverted contrast
+
     // * temporary / fake config
-    public config: { [key: string]: boolean } = {
-        leoTreeBrowse: true,
-        showEditOnNodes: false,
-        showArrowsOnNodes: false,
-        showAddOnNodes: false,
-        showMarkOnNodes: false,
-        showCloneOnNodes: false,
-        showCopyOnNodes: false,
-    };
+    // public config: { [key: string]: boolean } = {
+    //     leoTreeBrowse: true,
+    //     showEditOnNodes: false,
+    //     showArrowsOnNodes: false,
+    //     showAddOnNodes: false,
+    //     showMarkOnNodes: false,
+    //     showCloneOnNodes: false,
+    //     showCopyOnNodes: false,
+    // };
 
     // * Icon Paths (Singleton static arrays)
     public nodeIcons: Icon[] = [];
@@ -3164,7 +3176,6 @@ export class LeoUI {
     // * File Browser
     private _leoFilesBrowser: LeoFilesBrowser; // Browsing dialog service singleton used in the openLeoFile and save-as methods
 
-    private _leo: Leojs;
     public leo_c: Commands;
 
     private _refreshType: ReqRefresh = {}; // Flags for commands to require parts of UI to refresh
@@ -3542,7 +3553,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   ],
   "icon": "resources/leoapp128px.png",
   "galleryBanner": {
-    "color": "#dfd8a2",
+    "color": "#f1af88",
     "theme": "light"
   },
   "activationEvents": [
@@ -5757,87 +5768,6 @@ set leoReady(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20201215224237.1">export class Leojs {
-    // FAKE model of the outline (PNodes are temporary replacement of positions + vnodes)
-    // simulates _yieldAllRootChildren from leoInteg's leobridgeserver.py
-    // public positions: PNode[] = [
-    //     {
-    //         header: 'node1',
-    //         body: 'node1 body',
-    //         children: [
-    //             {
-    //                 header: 'nodeInside1',
-    //                 body: 'nodeInside1 body',
-    //                 marked: true,
-    //                 children: [],
-    //             },
-    //             {
-    //                 header: 'nodeInside2',
-    //                 body: 'nodeInside2 body',
-    //                 children: [],
-    //             },
-    //         ],
-    //     },
-    //     {
-    //         header: 'node2selected',
-    //         selected: true,
-    //         body: '', // Empty body should display icon without blue square
-    //         children: [],
-    //     },
-
-    //     {
-    //         header: '@file node3',
-    //         atFile: true,
-    //         body: 'node3 body',
-    //         children: [],
-    //     },
-    // ];
-
-    // Fake documents array (rendered in tree view but is just a list - no node relationships)
-    public documents: LeoDocument[] = [
-        {
-            name: 'fakeSelectedDoc1.leo',
-            index: 0,
-            changed: false,
-            selected: true,
-        },
-        {
-            name: 'fakeChangedDoc2.leo',
-            index: 1,
-            changed: true,
-            selected: false,
-        },
-        { name: 'fakeDoc3.leo', index: 2, changed: false, selected: false },
-    ];
-
-    // Fake @ buttons array (rendered in tree view but is just a list - no node relationships)
-    public atButtons: LeoButton[] = [
-        { name: 'script-button', index: 'nullButtonWidget' },
-        { name: 'button name 2', index: 'key2' },
-        { name: 'button name 3', index: 'key3' },
-    ];
-
-    constructor() {
-        // // insert parent properties in fake positions
-        // this.positions.forEach((p_position) =&gt; {
-        //     // set to undefined at first for root nodes
-        //     this._setPNodeParents(p_position, undefined);
-        // });
-    }
-
-    // /**
-    //  * Recursive method to fill the parent properties of fake position-structure
-    //  * @param p_position
-    //  * @param p_parent
-    //  */
-    // private _setPNodeParents(p_position: PNode, p_parent?: PNode): void {
-    //     p_position.parent = p_parent; // set its parent
-    //     p_position.children.forEach((p_child) =&gt; {
-    //         this._setPNodeParents(p_child, p_position);
-    //     });
-    // }
-}
-</t>
 <t tx="felix.20201215231023.1">&lt;&lt; imports &gt;&gt;
 &lt;&lt; xslTemplate &gt;&gt;
 @language javascript
@@ -6224,7 +6154,9 @@ const xslTemplate = `
  * @param p_value Its value to be set
  */
 public toggleSetting(p_param: string, p_value: boolean): void {
+
     utils.setContext(p_param, p_value);
+    // Refresh to show changes for icons in outline
     if (
         (p_param.startsWith("show") || p_param.startsWith("hide")) &amp;&amp;
         this.leoStates.fileOpenedReady
@@ -6232,7 +6164,8 @@ public toggleSetting(p_param: string, p_value: boolean): void {
         this._refreshOutline(true, RevealType.RevealSelect);
     }
     // keep a copy in fake config until a real config setting class is implemented
-    this.config[p_param] = p_value;
+    //TODO
+    // this.config[p_param] = p_value;
 
 }
 
@@ -13946,31 +13879,31 @@ export class Config implements ConfigMembers {
     // Config settings used in leobridgeserver.py, on Leo's side
     public checkForChangeExternalFiles: string = Constants.CONFIG_DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES;
     public defaultReloadIgnore: string = Constants.CONFIG_DEFAULTS.DEFAULT_RELOAD_IGNORE;
-    // Config settings used in leoInteg/vscode's side
-    public leoTreeBrowse: boolean = Constants.CONFIG_DEFAULTS.LEO_TREE_BROWSE;
+    // Config settings used in Leojs-vscode's side
+    public leoTreeBrowse: boolean = Constants.CONFIG_DEFAULTS.LEO_TREE_BROWSE; // Used as Context Flag
     public treeKeepFocus: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS;
     public treeKeepFocusWhenAside: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS_WHEN_ASIDE;
     public statusBarString: string = Constants.CONFIG_DEFAULTS.STATUSBAR_STRING;
     public statusBarColor: string = Constants.CONFIG_DEFAULTS.STATUSBAR_COLOR;
-    public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER;
-    public showOpenAside: boolean = Constants.CONFIG_DEFAULTS.SHOW_OPEN_ASIDE;
-    public showEditOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDIT;
-    public showArrowsOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ARROWS;
-    public showAddOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ADD;
-    public showMarkOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK;
-    public showCloneOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLONE;
-    public showCopyOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_COPY;
+    public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER; // Used as Context Flag
+    public showOpenAside: boolean = Constants.CONFIG_DEFAULTS.SHOW_OPEN_ASIDE; // Used as Context Flag
+    public showEditOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDIT; // Used as Context Flag
+    public showArrowsOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ARROWS; // Used as Context Flag
+    public showAddOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ADD; // Used as Context Flag
+    public showMarkOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK; // Used as Context Flag
+    public showCloneOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLONE; // Used as Context Flag
+    public showCopyOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_COPY; // Used as Context Flag
 
-    public showEditionOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDITION_BODY;
-    public showClipboardOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLIPBOARD_BODY;
-    public showPromoteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_PROMOTE_BODY;
-    public showExecuteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXECUTE_BODY;
-    public showExtractOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXTRACT_BODY;
-    public showImportOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_IMPORT_BODY;
-    public showRefreshOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_REFRESH_BODY;
-    public showHoistOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_HOIST_BODY;
-    public showMarkOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK_BODY;
-    public showSortOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_SORT_BODY;
+    public showEditionOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDITION_BODY; // Used as Context Flag
+    public showClipboardOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLIPBOARD_BODY; // Used as Context Flag
+    public showPromoteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_PROMOTE_BODY; // Used as Context Flag
+    public showExecuteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXECUTE_BODY; // Used as Context Flag
+    public showExtractOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXTRACT_BODY; // Used as Context Flag
+    public showImportOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_IMPORT_BODY; // Used as Context Flag
+    public showRefreshOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_REFRESH_BODY; // Used as Context Flag
+    public showHoistOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_HOIST_BODY; // Used as Context Flag
+    public showMarkOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK_BODY; // Used as Context Flag
+    public showSortOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_SORT_BODY; // Used as Context Flag
 
     public invertNodeContrast: boolean = Constants.CONFIG_DEFAULTS.INVERT_NODES;
 
@@ -13986,37 +13919,37 @@ export class Config implements ConfigMembers {
 }
 </t>
 <t tx="felix.20211007213344.3">/**
- * * Get actual 'live' Leointeg configuration
+ * * Get actual 'live' Leojs configuration
  * @returns An object with config settings members such as treeKeepFocus, defaultReloadIgnore, etc.
  */
 public getConfig(): ConfigMembers {
     return {
-        checkForChangeExternalFiles: this.checkForChangeExternalFiles,  // Used in leoBridge script
-        defaultReloadIgnore: this.defaultReloadIgnore,  // Used in leoBridge script
-        leoTreeBrowse: this.leoTreeBrowse,
+        checkForChangeExternalFiles: this.checkForChangeExternalFiles,
+        defaultReloadIgnore: this.defaultReloadIgnore,
+        leoTreeBrowse: this.leoTreeBrowse, // Used as Context Flag
         treeKeepFocus: this.treeKeepFocus,
         treeKeepFocusWhenAside: this.treeKeepFocusWhenAside,
         statusBarString: this.statusBarString,
         statusBarColor: this.statusBarColor,
-        treeInExplorer: this.treeInExplorer,
-        showOpenAside: this.showOpenAside,
-        showEditOnNodes: this.showEditOnNodes,
-        showArrowsOnNodes: this.showArrowsOnNodes,
-        showAddOnNodes: this.showAddOnNodes,
-        showMarkOnNodes: this.showMarkOnNodes,
-        showCloneOnNodes: this.showCloneOnNodes,
-        showCopyOnNodes: this.showCopyOnNodes,
+        treeInExplorer: this.treeInExplorer, // Used as Context Flag
+        showOpenAside: this.showOpenAside,  // Used as Context Flag
+        showEditOnNodes: this.showEditOnNodes, // Used as Context Flag
+        showArrowsOnNodes: this.showArrowsOnNodes, // Used as Context Flag
+        showAddOnNodes: this.showAddOnNodes, // Used as Context Flag
+        showMarkOnNodes: this.showMarkOnNodes, // Used as Context Flag
+        showCloneOnNodes: this.showCloneOnNodes, // Used as Context Flag
+        showCopyOnNodes: this.showCopyOnNodes, // Used as Context Flag
 
-        showEditionOnBody: this.showEditionOnBody,
-        showClipboardOnBody: this.showClipboardOnBody,
-        showPromoteOnBody: this.showPromoteOnBody,
-        showExecuteOnBody: this.showExecuteOnBody,
-        showExtractOnBody: this.showExtractOnBody,
-        showImportOnBody: this.showImportOnBody,
-        showRefreshOnBody: this.showRefreshOnBody,
-        showHoistOnBody: this.showHoistOnBody,
-        showMarkOnBody: this.showMarkOnBody,
-        showSortOnBody: this.showSortOnBody,
+        showEditionOnBody: this.showEditionOnBody, // Used as Context Flag
+        showClipboardOnBody: this.showClipboardOnBody, // Used as Context Flag
+        showPromoteOnBody: this.showPromoteOnBody, // Used as Context Flag
+        showExecuteOnBody: this.showExecuteOnBody, // Used as Context Flag
+        showExtractOnBody: this.showExtractOnBody, // Used as Context Flag
+        showImportOnBody: this.showImportOnBody, // Used as Context Flag
+        showRefreshOnBody: this.showRefreshOnBody, // Used as Context Flag
+        showHoistOnBody: this.showHoistOnBody, // Used as Context Flag
+        showMarkOnBody: this.showMarkOnBody, // Used as Context Flag
+        showSortOnBody: this.showSortOnBody, // Used as Context Flag
 
         invertNodeContrast: this.invertNodeContrast,
     };
@@ -14048,7 +13981,7 @@ public getFontConfig(): FontSettings {
  * @param p_changes is an array of codes and values to be changed
  * @returns a promise that resolves upon completion
  */
-public setLeoIntegSettings(p_changes: ConfigSetting[]): Promise&lt;void&gt; {
+public setLeojsSettings(p_changes: ConfigSetting[]): Promise&lt;void&gt; {
     this._isBusySettingConfig = true;
     const w_promises: Thenable&lt;void&gt;[] = [];
     const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
@@ -14276,6 +14209,25 @@ public configTreeRefresh(): void {
         this._refreshOutline(true, RevealType.RevealSelect);
     }
 }
+
+</t>
+<t tx="felix.20211008004139.1">/**
+ * * Find panel controls ids
+ */
+public static FIND_INPUTS_IDS = {
+    FIND_TEXT: "findText",
+    REPLACE_TEXT: "replaceText",
+    ENTIRE_OUTLINE: "entireOutline",
+    NODE_ONLY: "nodeOnly",
+    SUBOUTLINE_ONLY: "subOutlineOnly",
+    IGNORE_CASE: "ignoreCase",
+    MARK_CHANGES: "markChanges",
+    MARK_FINDS: "markFinds",
+    REG_EXP: "regExp",
+    WHOLE_WORD: "wholeWord",
+    SEARCH_BODY: "searchBody",
+    SEARCH_HEADLINE: "searchHeadline"
+};
 
 </t>
 </tnodes>

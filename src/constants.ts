@@ -100,6 +100,24 @@ export class Constants {
     };
 
     /**
+     * * Find panel controls ids
+     */
+    public static FIND_INPUTS_IDS = {
+        FIND_TEXT: "findText",
+        REPLACE_TEXT: "replaceText",
+        ENTIRE_OUTLINE: "entireOutline",
+        NODE_ONLY: "nodeOnly",
+        SUBOUTLINE_ONLY: "subOutlineOnly",
+        IGNORE_CASE: "ignoreCase",
+        MARK_CHANGES: "markChanges",
+        MARK_FINDS: "markFinds",
+        REG_EXP: "regExp",
+        WHOLE_WORD: "wholeWord",
+        SEARCH_BODY: "searchBody",
+        SEARCH_HEADLINE: "searchHeadline"
+    };
+
+    /**
      * * Strings used in 'at-button' panel display in LeoButtonNode
      */
     public static BUTTON_STRINGS = {
@@ -436,6 +454,7 @@ export class Constants {
 
     /**
      * Leo command names that are called from vscode's gui/menu/buttons/keybindings triggers
+     * TODO : CALL DIRECT LEO CORE METHODS (DELETE LEO_COMMANDS WHEN DONE)
      */
     public static LEO_COMMANDS = {
         EXECUTE_SCRIPT: "executeScript",
