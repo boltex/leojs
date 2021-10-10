@@ -141,10 +141,7 @@
 <v t="felix.20201214194144.10"><vh>Log &amp; Terminal Panes</vh>
 <v t="felix.20201214211655.1"><vh>showLogPane</vh></v>
 </v>
-<v t="felix.20201214194144.11"><vh>Other</vh>
-<v t="felix.20201221234735.1"><vh>toggleSetting</vh></v>
 <v t="felix.20201214211706.1"><vh>test</vh></v>
-</v>
 </v>
 </v>
 <v t="felix.20201208223553.1"><vh>@clean src/leoOutline.ts</vh>
@@ -303,7 +300,6 @@
 <v t="felix.20201214205159.20"><vh>Undo</vh></v>
 <v t="felix.20201214205159.21"><vh>Clone Find Commands</vh></v>
 <v t="felix.20201214205159.22"><vh>Marked Nodes Commands</vh></v>
-<v t="felix.20201218000931.1"><vh>show/hide UI elements</vh></v>
 </v>
 <v t="felix.20201214205159.23"><vh>menus</vh>
 <v t="felix.20201214205159.24"><vh>commandPalette</vh>
@@ -1687,21 +1683,6 @@ public refreshTreeRoot(): void {
  * All commands this expansion exposes to the user via GUI/keybindings in package.json
  */
 public static COMMANDS = {
-    // Toggle UI Settings
-    ENABLE_LEO_TREE_NAV: Constants.NAME + ".enableLeoTreeNav",
-    SHOW_EDIT_ON_NODES: Constants.NAME + ".showEditOnNodes",
-    SHOW_ADD_ON_NODES: Constants.NAME + ".showAddOnNodes",
-    SHOW_ARROWS_ON_NODES: Constants.NAME + ".showArrowsOnNodes",
-    SHOW_COPY_ON_NODES: Constants.NAME + ".showCopyOnNodes",
-    SHOW_CLONE_ON_NODES: Constants.NAME + ".showCloneOnNodes",
-    SHOW_MARK_ON_NODES: Constants.NAME + ".showMarkOnNodes",
-    DISABLE_LEO_TREE_NAV: Constants.NAME + ".disableLeoTreeNav",
-    HIDE_EDIT_ON_NODES: Constants.NAME + ".hideEditOnNodes",
-    HIDE_ADD_ON_NODES: Constants.NAME + ".hideAddOnNodes",
-    HIDE_ARROWS_ON_NODES: Constants.NAME + ".hideArrowsOnNodes",
-    HIDE_COPY_ON_NODES: Constants.NAME + ".hideCopyOnNodes",
-    HIDE_CLONE_ON_NODES: Constants.NAME + ".hideCloneOnNodes",
-    HIDE_MARK_ON_NODES: Constants.NAME + ".hideMarkOnNodes",
     // Leo Documents
     SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
     OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
@@ -2972,7 +2953,6 @@ import { Commands } from "./core/leoCommands";
 @others
 </t>
 <t tx="felix.20201214194144.10"></t>
-<t tx="felix.20201214194144.11"></t>
 <t tx="felix.20201214194144.2">constructor(private _context: vscode.ExtensionContext) {
     // * Setup States
     this.leoStates = new LeoStates(_context, this);
@@ -4219,7 +4199,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.moveMarkedNodes",
   "category": "Leojs",
   "title": "Move Marked Nodes"
-},
+}
 </t>
 <t tx="felix.20201214205159.23">"menus": {
   @others
@@ -6004,172 +5984,7 @@ const xslTemplate = `
 }
 
 </t>
-<t tx="felix.20201218000931.1">{
-  "command": "leojs.enableLeoTreeNav",
-  "category": "Leojs",
-  "title": "Enable Leo Tree Navigation",
-  "icon": {
-    "light": "resources/light/no-check.svg",
-    "dark": "resources/dark/no-check.svg"
-  }
-},
-{
-  "command": "leojs.showEditOnNodes",
-  "category": "Leojs",
-  "title": "Show edit-headline",
-  "icon": {
-    "light": "resources/light/no-check.svg",
-    "dark": "resources/dark/no-check.svg"
-  }
-},
-{
-  "command": "leojs.showAddOnNodes",
-  "category": "Leojs",
-  "title": "Show Add Node",
-  "icon": {
-    "light": "resources/light/no-check.svg",
-    "dark": "resources/dark/no-check.svg"
-  }
-},
-{
-  "command": "leojs.showArrowsOnNodes",
-  "category": "Leojs",
-  "title": "Show move-commands",
-  "icon": {
-    "light": "resources/light/no-check.svg",
-    "dark": "resources/dark/no-check.svg"
-  }
-},
-{
-  "command": "leojs.showCopyOnNodes",
-  "category": "Leojs",
-  "title": "Show Copy Node",
-  "icon": {
-    "light": "resources/light/no-check.svg",
-    "dark": "resources/dark/no-check.svg"
-  }
-},
-{
-  "command": "leojs.showCloneOnNodes",
-  "category": "Leojs",
-  "title": "Show Clone Node",
-  "icon": {
-    "light": "resources/light/no-check.svg",
-    "dark": "resources/dark/no-check.svg"
-  }
-},
-{
-  "command": "leojs.showMarkOnNodes",
-  "category": "Leojs",
-  "title": "Show Mark/Unmark Node",
-  "icon": {
-    "light": "resources/light/no-check.svg",
-    "dark": "resources/dark/no-check.svg"
-  }
-},
-{
-  "command": "leojs.disableLeoTreeNav",
-  "category": "Leojs",
-  "title": "Disable Leo Tree Navigation",
-  "icon": {
-    "light": "resources/light/check.svg",
-    "dark": "resources/dark/check.svg"
-  }
-},
-{
-  "command": "leojs.hideEditOnNodes",
-  "category": "Leojs",
-  "title": "Hide edit-headline",
-  "icon": {
-    "light": "resources/light/check.svg",
-    "dark": "resources/dark/check.svg"
-  }
-},
-{
-  "command": "leojs.hideAddOnNodes",
-  "category": "Leojs",
-  "title": "Hide Add Node",
-  "icon": {
-    "light": "resources/light/check.svg",
-    "dark": "resources/dark/check.svg"
-  }
-},
-{
-  "command": "leojs.hideArrowsOnNodes",
-  "category": "Leojs",
-  "title": "Hide move-commands",
-  "icon": {
-    "light": "resources/light/check.svg",
-    "dark": "resources/dark/check.svg"
-  }
-},
-{
-  "command": "leojs.hideCopyOnNodes",
-  "category": "Leojs",
-  "title": "Hide Copy Node",
-  "icon": {
-    "light": "resources/light/check.svg",
-    "dark": "resources/dark/check.svg"
-  }
-},
-{
-  "command": "leojs.hideCloneOnNodes",
-  "category": "Leojs",
-  "title": "Hide Clone Node",
-  "icon": {
-    "light": "resources/light/check.svg",
-    "dark": "resources/dark/check.svg"
-  }
-},
-{
-  "command": "leojs.hideMarkOnNodes",
-  "category": "Leojs",
-  "title": "Hide Mark/Unmark Node",
-  "icon": {
-    "light": "resources/light/check.svg",
-    "dark": "resources/dark/check.svg"
-  }
-}
-</t>
-<t tx="felix.20201221015535.1">[CMD.ENABLE_LEO_TREE_NAV, () =&gt; w_leoUI.toggleSetting(CTX.LEO_TREE_BROWSE, true)],
-[CMD.SHOW_EDIT_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_EDIT, true)],
-[CMD.SHOW_ADD_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_ADD, true)],
-[CMD.SHOW_ARROWS_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_ARROWS, true)],
-[CMD.SHOW_COPY_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_COPY, true)],
-[CMD.SHOW_CLONE_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_CLONE, true)],
-[CMD.SHOW_MARK_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_MARK, true)],
-
-[CMD.DISABLE_LEO_TREE_NAV, () =&gt; w_leoUI.toggleSetting(CTX.LEO_TREE_BROWSE, false)],
-[CMD.HIDE_EDIT_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_EDIT, false)],
-[CMD.HIDE_ADD_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_ADD, false)],
-[CMD.HIDE_ARROWS_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_ARROWS, false)],
-[CMD.HIDE_COPY_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_COPY, false)],
-[CMD.HIDE_CLONE_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_CLONE, false)],
-[CMD.HIDE_MARK_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_MARK, false)],
-
-</t>
-<t tx="felix.20201221234735.1">/**
- * Toggles a context value for the 'when' clauses of the available commands in package.json
- * @param p_param String name of the context variable
- * @param p_value Its value to be set
- */
-public toggleSetting(p_param: string, p_value: boolean): void {
-
-    utils.setContext(p_param, p_value);
-    // Refresh to show changes for icons in outline
-    if (
-        (p_param.startsWith("show") || p_param.startsWith("hide")) &amp;&amp;
-        this.leoStates.fileOpenedReady
-    ) {
-        this._refreshOutline(true, RevealType.RevealSelect);
-    }
-    // keep a copy in fake config until a real config setting class is implemented
-    //TODO
-    // this.config[p_param] = p_value;
-
-}
-
-</t>
+<t tx="felix.20201221015535.1"></t>
 <t tx="felix.20201222013904.1">/**
  * * Refreshes the outline. A reveal type can be passed along to specify the reveal type for the selected node
  * @param p_revealType Facultative reveal type to specify type of reveal when the 'selected node' is encountered

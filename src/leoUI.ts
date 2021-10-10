@@ -944,27 +944,6 @@ export class LeoUI {
     }
 
     /**
-     * Toggles a context value for the 'when' clauses of the available commands in package.json
-     * @param p_param String name of the context variable
-     * @param p_value Its value to be set
-     */
-    public toggleSetting(p_param: string, p_value: boolean): void {
-
-        utils.setContext(p_param, p_value);
-        // Refresh to show changes for icons in outline
-        if (
-            (p_param.startsWith("show") || p_param.startsWith("hide")) &&
-            this.leoStates.fileOpenedReady
-        ) {
-            this._refreshOutline(true, RevealType.RevealSelect);
-        }
-        // keep a copy in fake config until a real config setting class is implemented
-        //TODO
-        // this.config[p_param] = p_value;
-
-    }
-
-    /**
      * Test/Dummy command
      * @returns Thenable from the tested functionality
      */
