@@ -331,6 +331,9 @@ export class Config implements ConfigMembers {
             this.showSortOnBody = GET(NAME).get(NAMES.SHOW_SORT_BODY, DEFAULTS.SHOW_SORT_BODY);
             this.invertNodeContrast = GET(NAME).get(NAMES.INVERT_NODES, DEFAULTS.INVERT_NODES);
 
+            console.log('gonna set the context flags (check they begin with leojs', FLAGS);
+
+
             // * Set context for tree items visibility that are based on config options
             return Promise.all([
                 utils.setContext(FLAGS.LEO_TREE_BROWSE, this.leoTreeBrowse),

@@ -327,9 +327,9 @@ export class LeoUI {
         // );
 
         // * React to configuration settings events
-        // vscode.workspace.onDidChangeConfiguration((p_configChange) =>
-        //     this._onChangeConfiguration(p_configChange)
-        // );
+        vscode.workspace.onDidChangeConfiguration((p_configChange) =>
+            this._onChangeConfiguration(p_configChange)
+        );
 
         // * React to opening of any file in vscode
         // vscode.workspace.onDidOpenTextDocument((p_document) =>
@@ -611,6 +611,28 @@ export class LeoUI {
     }
 
     /**
+     * * Handles the change of vscode config: a onDidChangeConfiguration event triggered
+     * @param p_event The configuration-change event passed by vscode
+     */
+    private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
+        console.log('changed config !!');
+
+        if (p_event.affectsConfiguration(Constants.CONFIG_NAME)) {
+            this.config.buildFromSavedSettings(); // If the config setting started with 'leojs'
+        }
+
+        // also check if workbench.editor.enablePreview
+        this._bodyEnablePreview = !!vscode.workspace
+            .getConfiguration('workbench.editor')
+            .get('enablePreview');
+
+        // Check For "workbench.editor.enablePreview" to be true.
+        this.config.checkEnablePreview();
+        this.config.checkCloseEmptyGroups();
+        this.config.checkCloseOnFileDelete();
+    }
+
+    /**
      * * Handles the node expanding and collapsing interactions by the user in the treeview
      * @param p_event The event passed by vscode
      * @param p_expand True if it was an expand, false if it was a collapse event
@@ -684,7 +706,12 @@ export class LeoUI {
         }
     }
 
-    public selectTreeNode(p_node: Position, p_internalCall?: boolean, p_aside?: boolean): Thenable<unknown> {
+    /**
+     * * Called by UI when the user selects in the tree (click or 'open aside' through context menu)
+     * @param p_node is the position node selected in the tree
+     * @param p_aside flag meaning it's body should be shown in a new editor column
+     */
+    public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable<unknown> {
 
         // Note: set context flags for current selection when capturing and revealing the selected node
         // when the tree refreshes and the selected node is processed by getTreeItem & gotSelectedNode

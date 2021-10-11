@@ -124,6 +124,7 @@
 <v t="felix.20201214202128.1"><vh>setDocumentSelection</vh></v>
 </v>
 <v t="felix.20201214194144.5"><vh>UI Change Events</vh>
+<v t="felix.20200719025231.24"><vh>_onChangeConfiguration</vh></v>
 <v t="felix.20201214202625.1"><vh>_onChangeCollapsedState</vh></v>
 <v t="felix.20201214202627.1"><vh>_onTreeViewVisibilityChanged</vh></v>
 <v t="felix.20201214202631.1"><vh>_onDocTreeViewVisibilityChanged</vh></v>
@@ -842,6 +843,29 @@
 <tnodes>
 <t tx="ekr.20201209145256.1"></t>
 <t tx="ekr.20201209145358.1"></t>
+<t tx="felix.20200719025231.24">/**
+ * * Handles the change of vscode config: a onDidChangeConfiguration event triggered
+ * @param p_event The configuration-change event passed by vscode
+ */
+private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
+    console.log('changed config !!');
+
+    if (p_event.affectsConfiguration(Constants.CONFIG_NAME)) {
+        this.config.buildFromSavedSettings(); // If the config setting started with 'leojs'
+    }
+
+    // also check if workbench.editor.enablePreview
+    this._bodyEnablePreview = !!vscode.workspace
+        .getConfiguration('workbench.editor')
+        .get('enablePreview');
+
+    // Check For "workbench.editor.enablePreview" to be true.
+    this.config.checkEnablePreview();
+    this.config.checkCloseEmptyGroups();
+    this.config.checkCloseOnFileDelete();
+}
+
+</t>
 <t tx="felix.20201208214250.2"></t>
 <t tx="felix.20201208214319.1"># leojs
 
@@ -1661,8 +1685,8 @@ public refreshTreeRoot(): void {
 [CMD.PASTE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, true)],
 </t>
 <t tx="felix.20201214150149.7">// Called by nodes in the tree when selected either by mouse, or with enter
-[CMD.SELECT_NODE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node.position, false, false)],
-[CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node.position, false, true)],
+[CMD.SELECT_NODE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node.position, false)],
+[CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node.position, true)],
 
 [CMD.CONTRACT_ALL, () =&gt; w_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, false)],
 [CMD.CONTRACT_ALL_FO, () =&gt; w_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, true)],
@@ -2087,26 +2111,26 @@ public static CONTEXT_FLAGS = {
     // SHOW_CLONE: "leojsShowCloneOnNodes",
     // SHOW_COPY: "leojsShowCopyOnNodes",
 
-    LEO_TREE_BROWSE: Constants.name + Constants.CONFIG_NAMES.LEO_TREE_BROWSE[0].toUpperCase() + Constants.CONFIG_NAMES.LEO_TREE_BROWSE.slice(1), // Force ar'jan's suggestion of Leo's tree behavior override
-    TREE_IN_EXPLORER: Constants.name + Constants.CONFIG_NAMES.TREE_IN_EXPLORER[0].toUpperCase() + Constants.CONFIG_NAMES.TREE_IN_EXPLORER.slice(1), // Leo outline also in the explorer view
-    SHOW_OPEN_ASIDE: Constants.name + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE.slice(1),   // Show 'open aside' in context menu
-    SHOW_EDIT: Constants.name + Constants.CONFIG_NAMES.SHOW_EDIT[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDIT.slice(1),              // Hover Icons on outline nodes
-    SHOW_ARROWS: Constants.name + Constants.CONFIG_NAMES.SHOW_ARROWS[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ARROWS.slice(1),           // Hover Icons on outline nodes
-    SHOW_ADD: Constants.name + Constants.CONFIG_NAMES.SHOW_ADD[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ADD.slice(1),                 // Hover Icons on outline nodes
-    SHOW_MARK: Constants.name + Constants.CONFIG_NAMES.SHOW_MARK[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK.slice(1),               // Hover Icons on outline nodes
-    SHOW_CLONE: Constants.name + Constants.CONFIG_NAMES.SHOW_CLONE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLONE.slice(1),             // Hover Icons on outline nodes
-    SHOW_COPY: Constants.name + Constants.CONFIG_NAMES.SHOW_COPY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_COPY.slice(1),               // Hover Icons on outline nodes
+    LEO_TREE_BROWSE: Constants.NAME + Constants.CONFIG_NAMES.LEO_TREE_BROWSE[0].toUpperCase() + Constants.CONFIG_NAMES.LEO_TREE_BROWSE.slice(1), // Force ar'jan's suggestion of Leo's tree behavior override
+    TREE_IN_EXPLORER: Constants.NAME + Constants.CONFIG_NAMES.TREE_IN_EXPLORER[0].toUpperCase() + Constants.CONFIG_NAMES.TREE_IN_EXPLORER.slice(1), // Leo outline also in the explorer view
+    SHOW_OPEN_ASIDE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE.slice(1),   // Show 'open aside' in context menu
+    SHOW_EDIT: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDIT[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDIT.slice(1),              // Hover Icons on outline nodes
+    SHOW_ARROWS: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ARROWS[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ARROWS.slice(1),           // Hover Icons on outline nodes
+    SHOW_ADD: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ADD[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ADD.slice(1),                 // Hover Icons on outline nodes
+    SHOW_MARK: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK.slice(1),               // Hover Icons on outline nodes
+    SHOW_CLONE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLONE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLONE.slice(1),             // Hover Icons on outline nodes
+    SHOW_COPY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_COPY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_COPY.slice(1),               // Hover Icons on outline nodes
 
-    SHOW_EDITION_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_EDITION_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDITION_BODY.slice(1),
-    SHOW_CLIPBOARD_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY.slice(1),
-    SHOW_PROMOTE_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY.slice(1),
-    SHOW_EXECUTE_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY.slice(1),
-    SHOW_EXTRACT_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY.slice(1),
-    SHOW_IMPORT_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY.slice(1),
-    SHOW_REFRESH_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY.slice(1),
-    SHOW_HOIST_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_HOIST_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_HOIST_BODY.slice(1),
-    SHOW_MARK_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_MARK_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK_BODY.slice(1),
-    SHOW_SORT_BODY: Constants.name + Constants.CONFIG_NAMES.SHOW_SORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_SORT_BODY.slice(1)
+    SHOW_EDITION_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDITION_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDITION_BODY.slice(1),
+    SHOW_CLIPBOARD_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY.slice(1),
+    SHOW_PROMOTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY.slice(1),
+    SHOW_EXECUTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY.slice(1),
+    SHOW_EXTRACT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY.slice(1),
+    SHOW_IMPORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY.slice(1),
+    SHOW_REFRESH_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY.slice(1),
+    SHOW_HOIST_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_HOIST_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_HOIST_BODY.slice(1),
+    SHOW_MARK_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK_BODY.slice(1),
+    SHOW_SORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_SORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_SORT_BODY.slice(1)
 };
 
 </t>
@@ -3177,9 +3201,9 @@ import { LeoBodyProvider } from "./leoBody";
     // );
 
     // * React to configuration settings events
-    // vscode.workspace.onDidChangeConfiguration((p_configChange) =&gt;
-    //     this._onChangeConfiguration(p_configChange)
-    // );
+    vscode.workspace.onDidChangeConfiguration((p_configChange) =&gt;
+        this._onChangeConfiguration(p_configChange)
+    );
 
     // * React to opening of any file in vscode
     // vscode.workspace.onDidOpenTextDocument((p_document) =&gt;
@@ -3448,7 +3472,12 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
 }
 
 </t>
-<t tx="felix.20201214202749.1">public selectTreeNode(p_node: Position, p_internalCall?: boolean, p_aside?: boolean): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214202749.1">/**
+ * * Called by UI when the user selects in the tree (click or 'open aside' through context menu)
+ * @param p_node is the position node selected in the tree
+ * @param p_aside flag meaning it's body should be shown in a new editor column
+ */
+public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable&lt;unknown&gt; {
 
     // Note: set context flags for current selection when capturing and revealing the selected node
     // when the tree refreshes and the selected node is processed by getTreeItem &amp; gotSelectedNode
@@ -13736,6 +13765,9 @@ public buildFromSavedSettings(): Promise&lt;unknown&gt; {
         this.showMarkOnBody = GET(NAME).get(NAMES.SHOW_MARK_BODY, DEFAULTS.SHOW_MARK_BODY);
         this.showSortOnBody = GET(NAME).get(NAMES.SHOW_SORT_BODY, DEFAULTS.SHOW_SORT_BODY);
         this.invertNodeContrast = GET(NAME).get(NAMES.INVERT_NODES, DEFAULTS.INVERT_NODES);
+
+        console.log('gonna set the context flags (check they begin with leojs', FLAGS);
+
 
         // * Set context for tree items visibility that are based on config options
         return Promise.all([
