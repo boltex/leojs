@@ -252,17 +252,8 @@ export class Constants {
         DOCUMENT_TITLED: "leojsDocumentTitled",
         DOCUMENT_SELECTED_UNTITLED: "leojsDocumentSelectedUntitled",
         DOCUMENT_UNTITLED: "leojsDocumentUntitled",
-        // UI
-        //LEO_TREE_BROWSE: "leojsTreeBrowse", // Override vscode's tree behavior with Leo's own
-        //TREE_IN_EXPLORER: Constants.CONFIG_NAMES.TREE_IN_EXPLORER, // Leo outline also in the explorer view
 
-        // SHOW_EDIT: "leojsShowEditOnNodes",
-        // SHOW_ARROWS: "leojsShowArrowsOnNodes",
-        // SHOW_ADD: "leojsShowAddOnNodes",
-        // SHOW_MARK: "leojsShowMarkOnNodes",
-        // SHOW_CLONE: "leojsShowCloneOnNodes",
-        // SHOW_COPY: "leojsShowCopyOnNodes",
-
+        // Context flags that are mapped 'directly' onto leojs config settings
         LEO_TREE_BROWSE: Constants.NAME + Constants.CONFIG_NAMES.LEO_TREE_BROWSE[0].toUpperCase() + Constants.CONFIG_NAMES.LEO_TREE_BROWSE.slice(1), // Force ar'jan's suggestion of Leo's tree behavior override
         TREE_IN_EXPLORER: Constants.NAME + Constants.CONFIG_NAMES.TREE_IN_EXPLORER[0].toUpperCase() + Constants.CONFIG_NAMES.TREE_IN_EXPLORER.slice(1), // Leo outline also in the explorer view
         SHOW_OPEN_ASIDE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE.slice(1),   // Show 'open aside' in context menu
