@@ -43,23 +43,13 @@ export interface ConfigSetting {
     value: any;
 }
 
+/**
+ * * Structure for the two vscode font settings
+ */
 export interface FontSettings {
     zoomLevel: number;
     fontSize: number;
 }
-
-// export interface PNode {
-//     // Fake structure. Use Position.v.isCloned(), etc. instead
-//     header: string;
-//     children: PNode[];
-//     parent?: PNode;
-//     body: string;
-//     selected?: boolean;
-//     marked?: boolean;
-//     cloned?: boolean;
-//     dirty?: boolean;
-//     atFile?: boolean;
-// }
 
 /**
  * * When refreshing the outline and getting to Leo's selected node
@@ -90,13 +80,21 @@ export interface ReqRefresh {
  */
 export interface UserCommand {
     action: string;
-    node?: LeoOutlineNode | undefined;  // We can START a stack with a targeted command
+    node?: LeoOutlineNode | undefined; // We can START a stack with a targeted command
     text?: string | undefined; // If a string is required, for headline, etc.
     refreshType: ReqRefresh; // Minimal refresh level required by this command
     fromOutline: boolean; // Focus back on outline instead of body
     keepSelection?: boolean; // Should bring back selection on node prior to command
     resolveFn?: (result: any) => void; // call that with an answer from python's (or other) side
     rejectFn?: (reason: any) => void; // call if problem is encountered
+}
+
+/**
+ * * LeoBody virtual file time information object
+ */
+export interface BodyTimeInfo {
+    ctime: number;
+    mtime: number;
 }
 
 /**
@@ -108,6 +106,7 @@ export interface ShowBodyParam {
     showBodyKeepFocus: boolean,
     force_open?: boolean
 }
+
 /**
  * * Object sent back from leoInteg's 'getStates' command
  */

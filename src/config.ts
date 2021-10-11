@@ -9,10 +9,10 @@ import { LeoUI } from "./leoUI";
  */
 export class Config implements ConfigMembers {
 
-    // Config settings used in leobridgeserver.py, on Leo's side
+    // Config settings used on Leo's side
     public checkForChangeExternalFiles: string = Constants.CONFIG_DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES;
     public defaultReloadIgnore: string = Constants.CONFIG_DEFAULTS.DEFAULT_RELOAD_IGNORE;
-    // Config settings used in Leojs-vscode's side
+    // Config settings used on vscode's side
     public leoTreeBrowse: boolean = Constants.CONFIG_DEFAULTS.LEO_TREE_BROWSE; // Used as Context Flag
     public treeKeepFocus: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS;
     public treeKeepFocusWhenAside: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS_WHEN_ASIDE;
@@ -93,6 +93,7 @@ export class Config implements ConfigMembers {
         let w_zoomLevel = vscode.workspace.getConfiguration(
             "window"
         ).get("zoomLevel");
+
         let w_fontSize = vscode.workspace.getConfiguration(
             "editor"
         ).get("fontSize");
@@ -101,6 +102,7 @@ export class Config implements ConfigMembers {
             zoomLevel: Number(w_zoomLevel),
             fontSize: Number(w_fontSize)
         };
+
         return w_config;
     }
 
@@ -109,7 +111,7 @@ export class Config implements ConfigMembers {
      * @param p_changes is an array of codes and values to be changed
      * @returns a promise that resolves upon completion
      */
-    public setLeojsSettings(p_changes: ConfigSetting[]): Promise<void> {
+    public setLeojsSettings(p_changes: ConfigSetting[]): Promise<unknown> {
         this._isBusySettingConfig = true;
         const w_promises: Thenable<void>[] = [];
         const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
@@ -135,8 +137,7 @@ export class Config implements ConfigMembers {
                 }, 200);
             }
             this._isBusySettingConfig = false;
-            this.buildFromSavedSettings();
-            return Promise.resolve();
+            return this.buildFromSavedSettings(); // Refresh config from settings from vscode's saved config
         });
     }
 
@@ -284,7 +285,7 @@ export class Config implements ConfigMembers {
     /**
      * * Build config from settings from vscode's saved config settings
      */
-    public buildFromSavedSettings(): void {
+    public buildFromSavedSettings(): Promise<unknown> {
         // Shorthand pointers for readability
         const GET = vscode.workspace.getConfiguration;
         const NAME = Constants.CONFIG_NAME;
@@ -294,7 +295,7 @@ export class Config implements ConfigMembers {
 
         if (this._isBusySettingConfig) {
             // * Currently setting config, wait until its done all, and this will be called automatically
-            return;
+            return Promise.resolve();
         } else {
             this.checkForChangeExternalFiles = GET(NAME).get(NAMES.CHECK_FOR_CHANGE_EXTERNAL_FILES, DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES);
             this.defaultReloadIgnore = GET(NAME).get(NAMES.DEFAULT_RELOAD_IGNORE, DEFAULTS.DEFAULT_RELOAD_IGNORE);
@@ -331,28 +332,28 @@ export class Config implements ConfigMembers {
             this.invertNodeContrast = GET(NAME).get(NAMES.INVERT_NODES, DEFAULTS.INVERT_NODES);
 
             // * Set context for tree items visibility that are based on config options
+            return Promise.all([
+                utils.setContext(FLAGS.LEO_TREE_BROWSE, this.leoTreeBrowse),
+                utils.setContext(FLAGS.TREE_IN_EXPLORER, this.treeInExplorer),
+                utils.setContext(FLAGS.SHOW_OPEN_ASIDE, this.showOpenAside),
+                utils.setContext(FLAGS.SHOW_EDIT, this.showEditOnNodes),
+                utils.setContext(FLAGS.SHOW_ARROWS, this.showArrowsOnNodes),
+                utils.setContext(FLAGS.SHOW_ADD, this.showAddOnNodes),
+                utils.setContext(FLAGS.SHOW_MARK, this.showMarkOnNodes),
+                utils.setContext(FLAGS.SHOW_CLONE, this.showCloneOnNodes),
+                utils.setContext(FLAGS.SHOW_COPY, this.showCopyOnNodes),
 
-            utils.setContext(FLAGS.LEO_TREE_BROWSE, this.leoTreeBrowse);
-            utils.setContext(FLAGS.TREE_IN_EXPLORER, this.treeInExplorer);
-            utils.setContext(FLAGS.SHOW_OPEN_ASIDE, this.showOpenAside);
-            utils.setContext(FLAGS.SHOW_EDIT, this.showEditOnNodes);
-            utils.setContext(FLAGS.SHOW_ARROWS, this.showArrowsOnNodes);
-            utils.setContext(FLAGS.SHOW_ADD, this.showAddOnNodes);
-            utils.setContext(FLAGS.SHOW_MARK, this.showMarkOnNodes);
-            utils.setContext(FLAGS.SHOW_CLONE, this.showCloneOnNodes);
-            utils.setContext(FLAGS.SHOW_COPY, this.showCopyOnNodes);
-
-            utils.setContext(FLAGS.SHOW_EDITION_BODY, this.showEditionOnBody);
-            utils.setContext(FLAGS.SHOW_CLIPBOARD_BODY, this.showClipboardOnBody);
-            utils.setContext(FLAGS.SHOW_PROMOTE_BODY, this.showPromoteOnBody);
-            utils.setContext(FLAGS.SHOW_EXECUTE_BODY, this.showExecuteOnBody);
-            utils.setContext(FLAGS.SHOW_EXTRACT_BODY, this.showExtractOnBody);
-            utils.setContext(FLAGS.SHOW_IMPORT_BODY, this.showImportOnBody);
-            utils.setContext(FLAGS.SHOW_REFRESH_BODY, this.showRefreshOnBody);
-            utils.setContext(FLAGS.SHOW_HOIST_BODY, this.showHoistOnBody);
-            utils.setContext(FLAGS.SHOW_MARK_BODY, this.showMarkOnBody);
-            utils.setContext(FLAGS.SHOW_SORT_BODY, this.showSortOnBody);
-
+                utils.setContext(FLAGS.SHOW_EDITION_BODY, this.showEditionOnBody),
+                utils.setContext(FLAGS.SHOW_CLIPBOARD_BODY, this.showClipboardOnBody),
+                utils.setContext(FLAGS.SHOW_PROMOTE_BODY, this.showPromoteOnBody),
+                utils.setContext(FLAGS.SHOW_EXECUTE_BODY, this.showExecuteOnBody),
+                utils.setContext(FLAGS.SHOW_EXTRACT_BODY, this.showExtractOnBody),
+                utils.setContext(FLAGS.SHOW_IMPORT_BODY, this.showImportOnBody),
+                utils.setContext(FLAGS.SHOW_REFRESH_BODY, this.showRefreshOnBody),
+                utils.setContext(FLAGS.SHOW_HOIST_BODY, this.showHoistOnBody),
+                utils.setContext(FLAGS.SHOW_MARK_BODY, this.showMarkOnBody),
+                utils.setContext(FLAGS.SHOW_SORT_BODY, this.showSortOnBody)
+            ]);
         }
     }
 

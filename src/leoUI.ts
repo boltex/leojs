@@ -21,6 +21,7 @@ import * as g from './core/leoGlobals';
 import { LoadManager } from "./core/leoApp";
 import { NodeIndices, Position, VNode } from "./core/leoNodes";
 import { Commands } from "./core/leoCommands";
+import { LeoBodyProvider } from "./leoBody";
 
 /**
  * Creates and manages instances of the UI elements along with their events
@@ -28,20 +29,11 @@ import { Commands } from "./core/leoCommands";
 export class LeoUI {
     // * State flags
     public leoStates: LeoStates;
+    public verbose: boolean = false;
+    public trace: boolean = false;
 
     // * Configuration Settings Service
     public config: Config; // Public configuration service singleton, used in leoSettingsWebview, leoBridge, and leoNode for inverted contrast
-
-    // * temporary / fake config
-    // public config: { [key: string]: boolean } = {
-    //     leoTreeBrowse: true,
-    //     showEditOnNodes: false,
-    //     showArrowsOnNodes: false,
-    //     showAddOnNodes: false,
-    //     showMarkOnNodes: false,
-    //     showCloneOnNodes: false,
-    //     showCopyOnNodes: false,
-    // };
 
     // * Icon Paths (Singleton static arrays)
     public nodeIcons: Icon[] = [];
@@ -55,11 +47,8 @@ export class LeoUI {
 
     private _refreshType: ReqRefresh = {}; // Flags for commands to require parts of UI to refresh
     private _revealType: RevealType = RevealType.NoReveal; // Type of reveal for the selected node (when refreshing outline)
+    private _preventShowBody = false; // Used when refreshing treeview from config: It requires not to open the body pane when refreshing.
     private _fromOutline: boolean = false; // flag to leave focus on outline instead of body when finished refreshing
-
-    private _bodyMainSelectionColumn: vscode.ViewColumn | undefined; // Column of last body 'textEditor' found, set to 1
-
-    private _bodyTextDocument: vscode.TextDocument | undefined; // Set when selected in tree by user, or opening a Leo file in showBody. and by _locateOpenedBody.
 
     // * Outline Pane
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
@@ -68,12 +57,18 @@ export class LeoUI {
     private _lastTreeView: vscode.TreeView<Position>; // Last visible treeview
 
     // * Body pane
+    private _bodyFileSystemStarted: boolean = false;
+    private _bodyEnablePreview: boolean = true;
+    private _leoFileSystem: LeoBodyProvider; // as per https://code.visualstudio.com/api/extension-guides/virtual-documents#file-system-api
+    private _bodyTextDocument: vscode.TextDocument | undefined; // Set when selected in tree by user, or opening a Leo file in showBody. and by _locateOpenedBody.
+    private _bodyMainSelectionColumn: vscode.ViewColumn | undefined; // Column of last body 'textEditor' found, set to 1
+
     private _bodyUri: vscode.Uri = utils.strToLeoUri("");
     get bodyUri(): vscode.Uri {
         return this._bodyUri;
     }
     set bodyUri(p_uri: vscode.Uri) {
-        // this._leoFileSystem.setBodyTime(p_uri);
+        this._leoFileSystem.setBodyTime(p_uri);
         this._bodyUri = p_uri;
     }
 
@@ -119,7 +114,11 @@ export class LeoUI {
 
         // * Get configuration settings
         this.config = new Config(_context, this);
-
+        // * also check workbench.editor.enablePreview
+        this.config.buildFromSavedSettings();
+        this._bodyEnablePreview = !!vscode.workspace
+            .getConfiguration('workbench.editor')
+            .get('enablePreview');
 
         // * Build Icon filename paths
         this.nodeIcons = utils.buildNodeIconPaths(_context);
@@ -264,6 +263,82 @@ export class LeoUI {
         this._leoButtonsExplorer = vscode.window.createTreeView(Constants.BUTTONS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
         this._leoButtonsExplorer.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, true)));
 
+        // * Create Body Pane
+        this._leoFileSystem = new LeoBodyProvider(this);
+        this._bodyMainSelectionColumn = 1;
+
+        // * Create Status bar Entry
+        // this._leoStatusBar = new LeoStatusBar(_context, this);
+
+        // * Leo Find Panel
+        // this._leoFindPanelProvider = new LeoFindPanelProvider(
+        //     _context.extensionUri,
+        //     _context,
+        //     this
+        // );
+        // this._context.subscriptions.push(
+        //     vscode.window.registerWebviewViewProvider(
+        //         Constants.FIND_ID,
+        //         this._leoFindPanelProvider,
+        //         { webviewOptions: { retainContextWhenHidden: true } }
+        //     )
+        // );
+        // this._context.subscriptions.push(
+        //     vscode.window.registerWebviewViewProvider(
+        //         Constants.FIND_EXPLORER_ID,
+        //         this._leoFindPanelProvider,
+        //         { webviewOptions: { retainContextWhenHidden: true } }
+        //     )
+        // );
+
+        // * Configuration / Welcome webview
+        // this.leoSettingsWebview = new LeoSettingsProvider(_context, this);
+
+
+
+        // * React to change in active panel/text editor (window.activeTextEditor) - also fires when the active editor becomes undefined
+        // vscode.window.onDidChangeActiveTextEditor((p_editor) =>
+        //     this._onActiveEditorChanged(p_editor)
+        // );
+
+        // * React to change in selection, cursor position and scroll position
+        // vscode.window.onDidChangeTextEditorSelection((p_event) =>
+        //     this._onChangeEditorSelection(p_event)
+        // );
+        // vscode.window.onDidChangeTextEditorVisibleRanges((p_event) =>
+        //     this._onChangeEditorScroll(p_event)
+        // );
+
+        // * Triggers when a different text editor/vscode window changed focus or visibility, or dragged
+        // This is also what triggers after drag and drop, see '_onChangeEditorViewColumn'
+        // vscode.window.onDidChangeTextEditorViewColumn((p_columnChangeEvent) =>
+        //     this._changedTextEditorViewColumn(p_columnChangeEvent)
+        // ); // Also triggers after drag and drop
+        // vscode.window.onDidChangeVisibleTextEditors((p_editors) =>
+        //     this._changedVisibleTextEditors(p_editors)
+        // ); // Window.visibleTextEditors changed
+        // vscode.window.onDidChangeWindowState((p_windowState) =>
+        //     this._changedWindowState(p_windowState)
+        // ); // Focus state of the current window changes
+
+        // * React when typing and changing body pane
+        // vscode.workspace.onDidChangeTextDocument((p_textDocumentChange) =>
+        //     this._onDocumentChanged(p_textDocumentChange)
+        // );
+
+        // * React to configuration settings events
+        // vscode.workspace.onDidChangeConfiguration((p_configChange) =>
+        //     this._onChangeConfiguration(p_configChange)
+        // );
+
+        // * React to opening of any file in vscode
+        // vscode.workspace.onDidOpenTextDocument((p_document) =>
+        //     this._onDidOpenTextDocument(p_document)
+        // );
+
+
+
+
         // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
         this.getStates = debounce(this._triggerGetStates, Constants.STATES_DEBOUNCE_DELAY);
         this.refreshDocumentsPane = debounce(this._refreshDocumentsPane, Constants.DOCUMENTS_DEBOUNCE_DELAY);
@@ -272,7 +347,6 @@ export class LeoUI {
         // Reset Extension context flags (used in 'when' clauses in package.json)
         this.leoStates.leoReady = true;
         this.leoStates.fileOpenedReady = true;  // TODO : IMPLEMENT
-
 
         // Set some context flags already 'true' at startup - NO CONFIG SETTINGS FOR NOW IN LEOJS
         utils.setContext(Constants.CONTEXT_FLAGS.LEO_TREE_BROWSE, true); // force 'Leo's editing tree behavior
@@ -371,14 +445,14 @@ export class LeoUI {
      */
     public configTreeRefresh(): void {
         if (this.leoStates.fileOpenedReady) {
-            // this._preventShowBody = true;
+            this._preventShowBody = true;
             this._refreshOutline(true, RevealType.RevealSelect);
         }
     }
 
     /**
      * * Handle selected node being created for the outline
-     * @param p_element PNode that was just created and detected as selected node
+     * @param p_element Position that was just created and detected as selected node
      */
     public gotSelectedNode(p_element: Position): void {
 
@@ -428,7 +502,6 @@ export class LeoUI {
 
         }
 
-
         // this._refreshType = Object.assign({}, p_refreshType);
         // let w_revealType: RevealType;
         // if (p_fromOutline) {
@@ -465,6 +538,7 @@ export class LeoUI {
         //         this._tryApplyNodeToBody(w_node, false, true); // ! NEEDS STACK AND THROTTLE!
         //     }
         // }
+
         this.getStates();
     }
 
