@@ -720,6 +720,9 @@ export class LeoUI {
             console.log('select node');
 
             this.leo_c.selectPosition(p_node);
+            // Set flags here - not only when 'got selection' is reached.
+            this.leoStates.setSelectedNodeFlags(p_node);
+
         } else {
             console.error('Selected a non-existent position', p_node.h);
         }
