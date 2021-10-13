@@ -4,6 +4,7 @@ import { LeoUI } from './leoUI';
 import { Constants } from './constants';
 import { LeoButtonNode } from './leoButtonNode';
 import { LeoOutlineNode } from './leoOutlineNode';
+import { Position } from './core/leoNodes';
 
 export function activate(p_context: vscode.ExtensionContext) {
 
@@ -83,8 +84,10 @@ export function activate(p_context: vscode.ExtensionContext) {
         [CMD.PASTE_SELECTION, () => w_leoUI.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, false)],
         [CMD.PASTE_SELECTION_FO, () => w_leoUI.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, true)],
         // Called by nodes in the tree when selected either by mouse, or with enter
-        [CMD.SELECT_NODE, (p_node: LeoOutlineNode) => w_leoUI.selectTreeNode(p_node.position, false)],
-        [CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) => w_leoUI.selectTreeNode(p_node.position, true)],
+        //[CMD.SELECT_NODE, (p_node: LeoOutlineNode) => w_leoUI.selectTreeNode(p_node.position, false)],
+        [CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) => w_leoUI.selectTreeNode(p_outlineNode.position, false)],
+        //[CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) => w_leoUI.selectTreeNode(p_node.position, true)],
+        [CMD.OPEN_ASIDE, (p_position: Position) => w_leoUI.selectTreeNode(p_position, true)],
 
         [CMD.CONTRACT_ALL, () => w_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, false)],
         [CMD.CONTRACT_ALL_FO, () => w_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, true)],

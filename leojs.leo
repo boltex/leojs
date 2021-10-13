@@ -148,6 +148,7 @@
 <v t="felix.20201214211832.1"><vh>openLeoFile</vh></v>
 <v t="felix.20201214211834.1"><vh>showRecentLeoFiles</vh></v>
 <v t="felix.20201214211835.1"><vh>saveAsLeoFile</vh></v>
+<v t="felix.20211012233514.1"><vh>saveAsLeoFile</vh></v>
 <v t="felix.20201214211836.1"><vh>saveLeoFile</vh></v>
 <v t="felix.20201214211837.1"><vh>switchLeoFile</vh></v>
 <v t="felix.20201214211839.1"><vh>selectOpenedLeoDocument</vh></v>
@@ -952,6 +953,7 @@ import { LeoUI } from './leoUI';
 import { Constants } from './constants';
 import { LeoButtonNode } from './leoButtonNode';
 import { LeoOutlineNode } from './leoOutlineNode';
+import { Position } from './core/leoNodes';
 
 @language typescript
 @tabwidth -4
@@ -1685,8 +1687,10 @@ public refreshTreeRoot(): void {
 [CMD.PASTE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, true)],
 </t>
 <t tx="felix.20201214150149.7">// Called by nodes in the tree when selected either by mouse, or with enter
-[CMD.SELECT_NODE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node.position, false)],
-[CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node.position, true)],
+//[CMD.SELECT_NODE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node.position, false)],
+[CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_outlineNode.position, false)],
+//[CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node.position, true)],
+[CMD.OPEN_ASIDE, (p_position: Position) =&gt; w_leoUI.selectTreeNode(p_position, true)],
 
 [CMD.CONTRACT_ALL, () =&gt; w_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, false)],
 [CMD.CONTRACT_ALL_FO, () =&gt; w_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, true)],
@@ -3313,7 +3317,6 @@ export class LeoUI {
 
     @others
 
-
 }
 </t>
 <t tx="felix.20201214202058.1">/**
@@ -3474,8 +3477,10 @@ public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable&lt;unknown&
     // when the tree refreshes and the selected node is processed by getTreeItem &amp; gotSelectedNode
 
     if (this.leo_c.positionExists(p_node)) {
-        console.log('select node');
 
+        if (p_aside) {
+            this._lastTreeView.reveal(p_node, { select: true, focus: false });
+        }
         this.leo_c.selectPosition(p_node);
         // Set flags here - not only when 'got selection' is reached.
         this.leoStates.setSelectedNodeFlags(p_node);
@@ -3505,6 +3510,8 @@ public command(
     p_fromOutline: boolean,
     p_keepSelection?: boolean
 ): Thenable&lt;unknown&gt; {
+
+    console.log('p_node', p_node);
 
     this._setupRefresh(p_fromOutline, p_refreshType);
 
@@ -3543,7 +3550,13 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214202759.1">public editHeadline(p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214202759.1">/**
+ * * Asks for a new headline label, and replaces the current label with this new one one the specified, or currently selected node
+ * @param p_node Specifies which node to rename, or leave undefined to rename the currently selected node
+ * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
+ * @returns Thenable that resolves when done
+ */
+public editHeadline(p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
@@ -3563,7 +3576,14 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214202800.1">public insertNode(p_node?: LeoOutlineNode, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214202800.1">/**
+ * * Asks for a headline label to be entered and creates (inserts) a new node under the current, or specified, node
+ * @param p_node specified under which node to insert, or leave undefined to use whichever is currently selected
+ * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
+ * @param p_interrupt Signifies the insert action is actually interrupting itself (e.g. rapid CTRL+I actions by the user)
+ * @returns Thenable that resolves when done
+ */
+public insertNode(p_node?: LeoOutlineNode, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
@@ -3584,7 +3604,14 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214202802.1">public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214202802.1">/**
+ * * Changes the marked state of a specified, or currently selected node
+ * @param p_isMark Set 'True' to mark, otherwise unmarks the node
+ * @param p_node Specifies which node use, or leave undefined to mark or unmark the currently selected node
+ * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
+ * @returns Thenable that resolves when done
+ */
+public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true });
 
@@ -5655,7 +5682,10 @@ public showBody(p_aside: boolean, p_preserveFocus?: boolean): Thenable&lt;vscode
 }
 
 </t>
-<t tx="felix.20201214211655.1">public showLogPane(): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211655.1">/**
+ * * Reveals the log pane if not already visible
+ */
+public showLogPane(): Thenable&lt;unknown&gt; {
     vscode.window.showInformationMessage('TODO: Implement showLogPane');
 
     // if shown
@@ -5666,7 +5696,7 @@ public showBody(p_aside: boolean, p_preserveFocus?: boolean): Thenable&lt;vscode
 
 </t>
 <t tx="felix.20201214211706.1">/**
- * Test/Dummy command
+ * * Test/Dummy command
  * @returns Thenable from the tested functionality
  */
 public test(): Thenable&lt;unknown&gt; {
@@ -5675,9 +5705,13 @@ public test(): Thenable&lt;unknown&gt; {
     console.log("this.leo_c.p.isSelected()", this.leo_c.p.isSelected());
     return Promise.resolve(true);
 }
-
 </t>
-<t tx="felix.20201214211742.1">public clickAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211742.1">/**
+ * * Invoke an '@button' click directly by index string. Used by '@buttons' treeview.
+ * @param p_node the node of the at-buttons panel that was clicked
+ * @returns Promises that resolves when done
+ */
+public clickAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
 
@@ -5693,7 +5727,12 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211744.1">public removeAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211744.1">/**
+ * * Removes an '@button' from Leo's button dict, directly by index string. Used by '@buttons' treeview.
+ * @param p_node the node of the at-buttons panel that was chosen to remove
+ * @returns Thenable that resolves when done
+ */
+public removeAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(false, { buttons: true });
 
@@ -5709,7 +5748,11 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211830.1">public closeLeoFile(): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211830.1">/**
+ * * Close an opened Leo file
+ * @returns the launchRefresh promise started after it's done closing the Leo document
+ */
+public closeLeoFile(): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
 
@@ -5730,7 +5773,12 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211831.1">public newLeoFile(): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211831.1">/**
+ * * Creates a new untitled Leo document
+ * * If not shown already, it also shows the outline, body and log panes along with leaving focus in the outline
+ * @returns A promise that resolves with a textEditor of the new file
+ */
+public newLeoFile(): Thenable&lt;unknown&gt; {
 
     vscode.window.showInformationMessage('TODO: Implement newLeoFile');
 
@@ -5744,7 +5792,13 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211832.1">public openLeoFile(p_uri?: vscode.Uri): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211832.1">/**
+ * * Shows an 'Open Leo File' dialog window and opens the chosen file
+ * * If not shown already, it also shows the outline, body and log panes along with leaving focus in the outline
+ * @param p_leoFileUri optional uri for specifying a file, if missing, a dialog will open
+ * @returns A promise that resolves with a textEditor of the chosen file
+ */
+public openLeoFile(p_uri?: vscode.Uri): Thenable&lt;unknown&gt; {
 
     vscode.window.showInformationMessage('TODO: Implement openLeoFile' +
         (p_uri ? " path: " + p_uri.fsPath : ""));
@@ -5759,7 +5813,11 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211834.1">public showRecentLeoFiles(): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211834.1">/**
+ * * Shows the recent Leo files list, choosing one will open it
+ * @returns A promise that resolves when the a file is finally opened, rejected otherwise
+ */
+public showRecentLeoFiles(): Thenable&lt;unknown&gt; {
     vscode.window.showInformationMessage('TODO: Implement showRecentLeoFiles');
 
     // if shown, chosen and opened
@@ -5769,7 +5827,12 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211835.1">public saveAsLeoFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211835.1">/**
+ * * Asks for file name and path, then saves the Leo file
+ * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
+ * @returns a promise from saving the file results, or that will resolve to undefined if cancelled
+ */
+public saveAsLeoFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
 
@@ -5787,7 +5850,12 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211836.1">public saveLeoFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211836.1">/**
+ * * Invokes the self.commander.save() Leo command
+ * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
+ * @returns Promise that resolves when the save command is placed on the front-end command stack
+ */
+public saveLeoFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
 
@@ -5805,7 +5873,11 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211837.1">public switchLeoFile(): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211837.1">/**
+ * * Show switch document 'QuickPick' dialog and switch file if selection is made, or just return if no files are opened.
+ * @returns A promise that resolves with a textEditor of the selected node's body from the newly selected document
+ */
+public switchLeoFile(): Thenable&lt;unknown&gt; {
 
     vscode.window.showInformationMessage('TODO: Implement switchLeoFile');
 
@@ -5819,7 +5891,12 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211839.1">public selectOpenedLeoDocument(p_index: number): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211839.1">/**
+ * * Switches Leo document directly by index number. Used by document treeview and switchLeoFile command.
+ * @param p_index position of the opened Leo document in the document array
+ * @returns A promise that resolves with a textEditor of the selected node's body from the newly opened document
+ */
+public selectOpenedLeoDocument(p_index: number): Thenable&lt;unknown&gt; {
 
     // vscode.window.showInformationMessage('TODO: Implement selectOpenedLeoDocument' +
     //     " index: " + p_index);
@@ -6269,16 +6346,15 @@ public closeBody(): void {
 </t>
 <t tx="felix.20201229025520.1">/**
  * * Handle selected node being created for the outline
- * @param p_element Position that was just created and detected as selected node
+ * @param p_node Position that was just created and detected as selected node
  */
-public gotSelectedNode(p_element: Position): void {
+public gotSelectedNode(p_node: Position): void {
 
-    console.log('Got selected node:', p_element.h);
+    console.log('Got selected node:', p_node.h);
 
     if (this._revealType) {
-
         setTimeout(() =&gt; {
-            this._lastTreeView.reveal(p_element, {
+            this._lastTreeView.reveal(p_node, {
                 select: true,
                 focus: (this._revealType.valueOf() &gt;= RevealType.RevealSelectFocus.valueOf())
             });
@@ -6286,10 +6362,8 @@ public gotSelectedNode(p_element: Position): void {
             this._revealType = RevealType.NoReveal;
         }, 0);
     }
-
     // set context flags
-    this.leoStates.setSelectedNodeFlags(p_element);
-
+    this.leoStates.setSelectedNodeFlags(p_node);
 }
 
 </t>
@@ -14452,6 +14526,29 @@ public refreshPossibleGnxList(): Thenable&lt;string[]&gt; {
 export interface BodyTimeInfo {
     ctime: number;
     mtime: number;
+}
+
+</t>
+<t tx="felix.20211012233514.1">/**
+ * * Asks for .leojs file name and path, then saves the JSON Leo file
+ * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
+ * @returns a promise from saving the file results, or that will resolve to undefined if cancelled
+ */
+public saveAsLeojsFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+
+    this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
+
+    vscode.window.showInformationMessage('TODO: Implement saveAsLeojsFile' +
+        " called from " +
+        (p_fromOutline ? "outline" : "body")
+    );
+
+    this.launchRefresh();
+
+    // if saved
+    return Promise.resolve(true);
+
+    // return Promise.resolve(undefined); // if cancelled
 }
 
 </t>

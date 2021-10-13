@@ -452,16 +452,15 @@ export class LeoUI {
 
     /**
      * * Handle selected node being created for the outline
-     * @param p_element Position that was just created and detected as selected node
+     * @param p_node Position that was just created and detected as selected node
      */
-    public gotSelectedNode(p_element: Position): void {
+    public gotSelectedNode(p_node: Position): void {
 
-        console.log('Got selected node:', p_element.h);
+        console.log('Got selected node:', p_node.h);
 
         if (this._revealType) {
-
             setTimeout(() => {
-                this._lastTreeView.reveal(p_element, {
+                this._lastTreeView.reveal(p_node, {
                     select: true,
                     focus: (this._revealType.valueOf() >= RevealType.RevealSelectFocus.valueOf())
                 });
@@ -469,10 +468,8 @@ export class LeoUI {
                 this._revealType = RevealType.NoReveal;
             }, 0);
         }
-
         // set context flags
-        this.leoStates.setSelectedNodeFlags(p_element);
-
+        this.leoStates.setSelectedNodeFlags(p_node);
     }
 
     /**
@@ -717,8 +714,10 @@ export class LeoUI {
         // when the tree refreshes and the selected node is processed by getTreeItem & gotSelectedNode
 
         if (this.leo_c.positionExists(p_node)) {
-            console.log('select node');
 
+            if (p_aside) {
+                this._lastTreeView.reveal(p_node, { select: true, focus: false });
+            }
             this.leo_c.selectPosition(p_node);
             // Set flags here - not only when 'got selection' is reached.
             this.leoStates.setSelectedNodeFlags(p_node);
@@ -747,6 +746,8 @@ export class LeoUI {
         p_fromOutline: boolean,
         p_keepSelection?: boolean
     ): Thenable<unknown> {
+
+        console.log('p_node', p_node);
 
         this._setupRefresh(p_fromOutline, p_refreshType);
 
@@ -783,6 +784,12 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
+    /**
+     * * Asks for a new headline label, and replaces the current label with this new one one the specified, or currently selected node
+     * @param p_node Specifies which node to rename, or leave undefined to rename the currently selected node
+     * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
+     * @returns Thenable that resolves when done
+     */
     public editHeadline(p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable<unknown> {
 
         this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
@@ -802,6 +809,13 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
+    /**
+     * * Asks for a headline label to be entered and creates (inserts) a new node under the current, or specified, node
+     * @param p_node specified under which node to insert, or leave undefined to use whichever is currently selected
+     * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
+     * @param p_interrupt Signifies the insert action is actually interrupting itself (e.g. rapid CTRL+I actions by the user)
+     * @returns Thenable that resolves when done
+     */
     public insertNode(p_node?: LeoOutlineNode, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable<unknown> {
 
         this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
@@ -822,6 +836,13 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
+    /**
+     * * Changes the marked state of a specified, or currently selected node
+     * @param p_isMark Set 'True' to mark, otherwise unmarks the node
+     * @param p_node Specifies which node use, or leave undefined to mark or unmark the currently selected node
+     * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
+     * @returns Thenable that resolves when done
+     */
     public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable<unknown> {
 
         this._setupRefresh(!!p_fromOutline, { tree: true });
@@ -840,6 +861,11 @@ export class LeoUI {
 
     }
 
+    /**
+     * * Invoke an '@button' click directly by index string. Used by '@buttons' treeview.
+     * @param p_node the node of the at-buttons panel that was clicked
+     * @returns Promises that resolves when done
+     */
     public clickAtButton(p_node: LeoButtonNode): Thenable<unknown> {
 
         this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
@@ -855,6 +881,11 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
+    /**
+     * * Removes an '@button' from Leo's button dict, directly by index string. Used by '@buttons' treeview.
+     * @param p_node the node of the at-buttons panel that was chosen to remove
+     * @returns Thenable that resolves when done
+     */
     public removeAtButton(p_node: LeoButtonNode): Thenable<unknown> {
 
         this._setupRefresh(false, { buttons: true });
@@ -870,6 +901,10 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
+    /**
+     * * Close an opened Leo file
+     * @returns the launchRefresh promise started after it's done closing the Leo document
+     */
     public closeLeoFile(): Thenable<unknown> {
 
         this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
@@ -890,6 +925,11 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if problem
     }
 
+    /**
+     * * Creates a new untitled Leo document
+     * * If not shown already, it also shows the outline, body and log panes along with leaving focus in the outline
+     * @returns A promise that resolves with a textEditor of the new file
+     */
     public newLeoFile(): Thenable<unknown> {
 
         vscode.window.showInformationMessage('TODO: Implement newLeoFile');
@@ -903,6 +943,12 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
+    /**
+     * * Shows an 'Open Leo File' dialog window and opens the chosen file
+     * * If not shown already, it also shows the outline, body and log panes along with leaving focus in the outline
+     * @param p_leoFileUri optional uri for specifying a file, if missing, a dialog will open
+     * @returns A promise that resolves with a textEditor of the chosen file
+     */
     public openLeoFile(p_uri?: vscode.Uri): Thenable<unknown> {
 
         vscode.window.showInformationMessage('TODO: Implement openLeoFile' +
@@ -917,6 +963,10 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
+    /**
+     * * Shows the recent Leo files list, choosing one will open it
+     * @returns A promise that resolves when the a file is finally opened, rejected otherwise
+     */
     public showRecentLeoFiles(): Thenable<unknown> {
         vscode.window.showInformationMessage('TODO: Implement showRecentLeoFiles');
 
@@ -926,6 +976,11 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
+    /**
+     * * Asks for file name and path, then saves the Leo file
+     * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
+     * @returns a promise from saving the file results, or that will resolve to undefined if cancelled
+     */
     public saveAsLeoFile(p_fromOutline?: boolean): Thenable<unknown> {
 
         this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
@@ -943,6 +998,33 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
+    /**
+     * * Asks for .leojs file name and path, then saves the JSON Leo file
+     * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
+     * @returns a promise from saving the file results, or that will resolve to undefined if cancelled
+     */
+    public saveAsLeojsFile(p_fromOutline?: boolean): Thenable<unknown> {
+
+        this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
+
+        vscode.window.showInformationMessage('TODO: Implement saveAsLeojsFile' +
+            " called from " +
+            (p_fromOutline ? "outline" : "body")
+        );
+
+        this.launchRefresh();
+
+        // if saved
+        return Promise.resolve(true);
+
+        // return Promise.resolve(undefined); // if cancelled
+    }
+
+    /**
+     * * Invokes the self.commander.save() Leo command
+     * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
+     * @returns Promise that resolves when the save command is placed on the front-end command stack
+     */
     public saveLeoFile(p_fromOutline?: boolean): Thenable<unknown> {
 
         this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
@@ -960,6 +1042,10 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
+    /**
+     * * Show switch document 'QuickPick' dialog and switch file if selection is made, or just return if no files are opened.
+     * @returns A promise that resolves with a textEditor of the selected node's body from the newly selected document
+     */
     public switchLeoFile(): Thenable<unknown> {
 
         vscode.window.showInformationMessage('TODO: Implement switchLeoFile');
@@ -973,6 +1059,11 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
+    /**
+     * * Switches Leo document directly by index number. Used by document treeview and switchLeoFile command.
+     * @param p_index position of the opened Leo document in the document array
+     * @returns A promise that resolves with a textEditor of the selected node's body from the newly opened document
+     */
     public selectOpenedLeoDocument(p_index: number): Thenable<unknown> {
 
         // vscode.window.showInformationMessage('TODO: Implement selectOpenedLeoDocument' +
@@ -1038,6 +1129,9 @@ export class LeoUI {
         });
     }
 
+    /**
+     * * Reveals the log pane if not already visible
+     */
     public showLogPane(): Thenable<unknown> {
         vscode.window.showInformationMessage('TODO: Implement showLogPane');
 
@@ -1048,7 +1142,7 @@ export class LeoUI {
     }
 
     /**
-     * Test/Dummy command
+     * * Test/Dummy command
      * @returns Thenable from the tested functionality
      */
     public test(): Thenable<unknown> {
@@ -1057,7 +1151,5 @@ export class LeoUI {
         console.log("this.leo_c.p.isSelected()", this.leo_c.p.isSelected());
         return Promise.resolve(true);
     }
-
-
 
 }
