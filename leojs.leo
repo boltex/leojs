@@ -3213,12 +3213,16 @@ import { LeoBodyProvider } from "./leoBody";
     this.refreshDocumentsPane = debounce(this._refreshDocumentsPane, Constants.DOCUMENTS_DEBOUNCE_DELAY);
     this.launchRefresh = debounce(this._launchRefresh, Constants.REFRESH_DEBOUNCE_DELAY);
 
+    // ! FAKE DEVELOPMENT STARTUP END ( TODO: finish _setupOpenedLeoDocument )
     // Reset Extension context flags (used in 'when' clauses in package.json)
     this.leoStates.leoReady = true;
     this.leoStates.fileOpenedReady = true;  // TODO : IMPLEMENT
 
-    // Set some context flags already 'true' at startup - NO CONFIG SETTINGS FOR NOW IN LEOJS
-    utils.setContext(Constants.CONTEXT_FLAGS.LEO_TREE_BROWSE, true); // force 'Leo's editing tree behavior
+    this.refreshDocumentsPane();
+    // ! VSCODE BUG : natural refresh from visibility change do not support 'getParent'!
+    setTimeout(() =&gt; {
+        this._refreshOutline(true, RevealType.RevealSelect);
+    }, 0);
 
 }
 
@@ -6165,10 +6169,11 @@ const xslTemplate = `
 <t tx="felix.20201221015535.1"></t>
 <t tx="felix.20201222013904.1">/**
  * * Refreshes the outline. A reveal type can be passed along to specify the reveal type for the selected node
+ * @param p_incrementTreeId Make all node id's be 'new' by incrementing the treeId prefix of the id's.
  * @param p_revealType Facultative reveal type to specify type of reveal when the 'selected node' is encountered
  */
-private _refreshOutline(p_incrementTreeID: boolean, p_revealType?: RevealType): void {
-    if (p_incrementTreeID) {
+private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): void {
+    if (p_incrementTreeId) {
         this._leoTreeProvider.incTreeId();
     }
     if (p_revealType !== undefined &amp;&amp; p_revealType.valueOf() &gt;= this._revealType.valueOf()) { // To check if selected node should self-select while redrawing whole tree
