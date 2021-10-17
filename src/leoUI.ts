@@ -435,8 +435,13 @@ export class LeoUI {
     public showOutline(p_focusOutline?: boolean): void {
         this._lastTreeView.reveal(this.leo_c.p, {
             select: true,
-            focus: p_focusOutline
-        });
+            focus: !!p_focusOutline
+        }).then(
+            () => { }, // Ok 
+            (p_error) => {
+                console.error('ERROR showOutline could not reveal: tree was refreshed!');
+            }
+        );
     }
 
     /**
@@ -462,7 +467,12 @@ export class LeoUI {
                 this._lastTreeView.reveal(p_node, {
                     select: true,
                     focus: (this._revealType.valueOf() >= RevealType.RevealSelectFocus.valueOf())
-                });
+                }).then(
+                    () => { }, // Ok 
+                    (p_error) => {
+                        console.error('ERROR gotSelectedNode could not reveal: tree was refreshed!');
+                    }
+                );
                 // Done so reset
                 this._revealType = RevealType.NoReveal;
             }, 0);
@@ -554,20 +564,6 @@ export class LeoUI {
         console.log('refreshing');
 
         this._leoTreeProvider.refreshTreeRoot();
-
-        // this._lastTreeView.reveal(this.leo_c.p).then(() => {
-
-        // });
-
-        // Force showing last used Leo outline first
-        // if (this.lastSelectedNode && !(this._leoTreeExView.visible || this._leoTreeView.visible)) {
-        //     this._lastTreeView.reveal(this.lastSelectedNode.position)
-        //         .then(() => {
-        //             this._leoTreeProvider.refreshTreeRoot();
-        //         });
-        // } else {
-        //     this._leoTreeProvider.refreshTreeRoot();
-        // }
     }
 
     /**
@@ -600,7 +596,12 @@ export class LeoUI {
                 console.log('setDocumentSelection: already selected!');
             } else {
                 console.log('setDocumentSelection: selecting in tree');
-                w_docView.reveal(p_documentNode, { select: true, focus: false });
+                w_docView.reveal(p_documentNode, { select: true, focus: false }).then(
+                    () => { }, // Ok 
+                    (p_error) => {
+                        console.error('ERROR setDocumentSelection could not reveal: tree was refreshed!');
+                    }
+                );
             }
 
         }, 0);
@@ -645,7 +646,12 @@ export class LeoUI {
             // pass
         } else {
             // * This part only happens if the user clicked on the arrow without trying to select the node
-            this._lastTreeView.reveal(p_event.element, { select: true, focus: false });
+            this._lastTreeView.reveal(p_event.element).then(
+                () => { }, // Ok 
+                (p_error) => {
+                    console.error('ERROR _onChangeCollapsedState could not reveal: tree was refreshed!');
+                }
+            );
             this.selectTreeNode(p_event.element, true);
         }
 
@@ -709,7 +715,12 @@ export class LeoUI {
         if (this.leo_c.positionExists(p_node)) {
 
             if (p_aside) {
-                q_reveal = this._lastTreeView.reveal(p_node, { select: true, focus: false });
+                q_reveal = this._lastTreeView.reveal(p_node).then(
+                    () => { }, // Ok 
+                    (p_error) => {
+                        console.error('ERROR selectTreeNode could not reveal: tree was refreshed!');
+                    }
+                );
             }
             this.leo_c.selectPosition(p_node);
             // Set flags here - not only when 'got selection' is reached.

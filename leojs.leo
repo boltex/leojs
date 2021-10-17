@@ -3350,8 +3350,13 @@ private _triggerGetStates(): void {
 public showOutline(p_focusOutline?: boolean): void {
     this._lastTreeView.reveal(this.leo_c.p, {
         select: true,
-        focus: p_focusOutline
-    });
+        focus: !!p_focusOutline
+    }).then(
+        () =&gt; { }, // Ok 
+        (p_error) =&gt; {
+            console.error('ERROR showOutline could not reveal: tree was refreshed!');
+        }
+    );
 }
 
 </t>
@@ -3386,7 +3391,12 @@ public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
             console.log('setDocumentSelection: already selected!');
         } else {
             console.log('setDocumentSelection: selecting in tree');
-            w_docView.reveal(p_documentNode, { select: true, focus: false });
+            w_docView.reveal(p_documentNode, { select: true, focus: false }).then(
+                () =&gt; { }, // Ok 
+                (p_error) =&gt; {
+                    console.error('ERROR setDocumentSelection could not reveal: tree was refreshed!');
+                }
+            );
         }
 
     }, 0);
@@ -3410,7 +3420,12 @@ private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Positi
         // pass
     } else {
         // * This part only happens if the user clicked on the arrow without trying to select the node
-        this._lastTreeView.reveal(p_event.element, { select: true, focus: false });
+        this._lastTreeView.reveal(p_event.element).then(
+            () =&gt; { }, // Ok 
+            (p_error) =&gt; {
+                console.error('ERROR _onChangeCollapsedState could not reveal: tree was refreshed!');
+            }
+        );
         this.selectTreeNode(p_event.element, true);
     }
 
@@ -3478,7 +3493,12 @@ public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable&lt;unknown&
     if (this.leo_c.positionExists(p_node)) {
 
         if (p_aside) {
-            q_reveal = this._lastTreeView.reveal(p_node, { select: true, focus: false });
+            q_reveal = this._lastTreeView.reveal(p_node).then(
+                () =&gt; { }, // Ok 
+                (p_error) =&gt; {
+                    console.error('ERROR selectTreeNode could not reveal: tree was refreshed!');
+                }
+            );
         }
         this.leo_c.selectPosition(p_node);
         // Set flags here - not only when 'got selection' is reached.
@@ -5147,7 +5167,7 @@ public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: bool
 {
   "command": "leojs.showBody",
   "key": "enter",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 </t>
 <t tx="felix.20201214205159.7">{
@@ -5499,22 +5519,22 @@ public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: bool
 {
   "command": "leojs.gotoFirstVisible",
   "key": "home",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoLastVisible",
   "key": "end",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.pageUp",
   "key": "pageup",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.pageDown",
   "key": "pagedown",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoNextCloneSelectionFromOutline",
@@ -5529,7 +5549,7 @@ public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: bool
 {
   "command": "leojs.gotoNextVisible",
   "key": "down",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoNextVisible",
@@ -5544,7 +5564,7 @@ public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: bool
 {
   "command": "leojs.gotoPrevVisible",
   "key": "up",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoPrevVisible",
@@ -5559,7 +5579,7 @@ public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: bool
 {
   "command": "leojs.contractOrGoLeft",
   "key": "left",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.contractOrGoLeft",
@@ -5574,7 +5594,7 @@ public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: bool
 {
   "command": "leojs.expandAndGoRight",
   "key": "right",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.expandAndGoRight",
@@ -6178,20 +6198,6 @@ private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): 
     console.log('refreshing');
 
     this._leoTreeProvider.refreshTreeRoot();
-
-    // this._lastTreeView.reveal(this.leo_c.p).then(() =&gt; {
-
-    // });
-
-    // Force showing last used Leo outline first
-    // if (this.lastSelectedNode &amp;&amp; !(this._leoTreeExView.visible || this._leoTreeView.visible)) {
-    //     this._lastTreeView.reveal(this.lastSelectedNode.position)
-    //         .then(() =&gt; {
-    //             this._leoTreeProvider.refreshTreeRoot();
-    //         });
-    // } else {
-    //     this._leoTreeProvider.refreshTreeRoot();
-    // }
 }
 
 </t>
@@ -6356,7 +6362,12 @@ public gotSelectedNode(p_node: Position): void {
             this._lastTreeView.reveal(p_node, {
                 select: true,
                 focus: (this._revealType.valueOf() &gt;= RevealType.RevealSelectFocus.valueOf())
-            });
+            }).then(
+                () =&gt; { }, // Ok 
+                (p_error) =&gt; {
+                    console.error('ERROR gotSelectedNode could not reveal: tree was refreshed!');
+                }
+            );
             // Done so reset
             this._revealType = RevealType.NoReveal;
         }, 0);

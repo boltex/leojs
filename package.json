@@ -1645,7 +1645,7 @@
       {
         "command": "leojs.showBody",
         "key": "enter",
-        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+        "when": "leojsLeoTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
         "command": "leojs.saveLeoFileFromOutline",
@@ -1982,22 +1982,22 @@
       {
         "command": "leojs.gotoFirstVisible",
         "key": "home",
-        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+        "when": "leojsLeoTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
         "command": "leojs.gotoLastVisible",
         "key": "end",
-        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+        "when": "leojsLeoTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
         "command": "leojs.pageUp",
         "key": "pageup",
-        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+        "when": "leojsLeoTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
         "command": "leojs.pageDown",
         "key": "pagedown",
-        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+        "when": "leojsLeoTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
         "command": "leojs.gotoNextCloneSelectionFromOutline",
@@ -2012,7 +2012,7 @@
       {
         "command": "leojs.gotoNextVisible",
         "key": "down",
-        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+        "when": "leojsLeoTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
         "command": "leojs.gotoNextVisible",
@@ -2027,7 +2027,7 @@
       {
         "command": "leojs.gotoPrevVisible",
         "key": "up",
-        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+        "when": "leojsLeoTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
         "command": "leojs.gotoPrevVisible",
@@ -2042,7 +2042,7 @@
       {
         "command": "leojs.contractOrGoLeft",
         "key": "left",
-        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+        "when": "leojsLeoTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
         "command": "leojs.contractOrGoLeft",
@@ -2057,7 +2057,7 @@
       {
         "command": "leojs.expandAndGoRight",
         "key": "right",
-        "when": "leojsTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+        "when": "leojsLeoTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
         "command": "leojs.expandAndGoRight",
