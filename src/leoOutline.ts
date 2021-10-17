@@ -11,7 +11,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
 
     readonly onDidChangeTreeData: vscode.Event<Position | undefined> = this._onDidChangeTreeData.event;
 
-    private _treeId: number = 0; // Starting salt for tree node murmurhash generated Ids
+    public treeId: number = 0; // Starting salt for tree node murmurhash generated Ids
 
     constructor(
         private _icons: Icon[],
@@ -33,16 +33,16 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
     public buildId(p_position: Position, p_collapsed: number): string {
         // concatenate gnx, stacks gnx's, and collapsible state number.
         // (vscode uses id for collapsible state)
-        let w_stringId = this._treeId.toString() +
+        let w_stringId = this.treeId.toString() +
             p_position.v.gnx + p_position.childIndex().toString() +
-            p_position.stack.map(p_stackEntry => p_stackEntry[0].gnx + p_stackEntry[1].toString()).join("") +
-            p_collapsed.toString(); // Added Uniqueness:  VSCode's collapsible state linked to id
+            p_position.stack.map(p_stackEntry => p_stackEntry[0].gnx + p_stackEntry[1].toString()).join("");
+            // p_collapsed.toString(); // Added Uniqueness:  VSCode's collapsible state linked to id
 
         return w_stringId;
     }
 
     public incTreeId(): void {
-        this._treeId++;
+        this.treeId++;
     }
 
     public getTreeItem(element: Position): Thenable<LeoOutlineNode> | LeoOutlineNode {
