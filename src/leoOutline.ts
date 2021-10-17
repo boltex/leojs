@@ -46,7 +46,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
     }
 
     public getTreeItem(element: Position): Thenable<LeoOutlineNode> | LeoOutlineNode {
-        console.log('called getTreeItem', element.h, element.v.gnx);
+        console.log('called getTreeItem', element.h);
 
         let w_collapse: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.None;
         if (element.hasChildren()) {
@@ -75,7 +75,12 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
     }
 
     public getChildren(element?: Position): Position[] {
-        console.log('called get children on', element);
+        if(element){
+            console.log('called get children on', element.h);
+        }else{
+            console.log('called get children on root');
+
+        }
 
         if (element) {
             return [...element.children()];
@@ -98,7 +103,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
     }
 
     public getParent(element: Position): ProviderResult<Position> {
-        console.log('called get parent on', element);
+        console.log('called get parent on', element.h);
 
         if (element) {
             const p_parent = element.parent();

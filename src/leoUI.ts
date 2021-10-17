@@ -2,12 +2,7 @@ import * as vscode from "vscode";
 import { debounce } from "debounce";
 import * as utils from "./utils";
 import { Constants } from "./constants";
-import {
-    RevealType,
-    Icon,
-    ReqRefresh,
-    LeojsTreeView,
-} from "./types";
+import { RevealType, Icon, ReqRefresh } from "./types";
 
 import { Config } from "./config";
 import { LeoOutlineNode } from "./leoOutlineNode";
@@ -55,7 +50,7 @@ export class LeoUI {
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
     private _leoTreeView: vscode.TreeView<Position>; // Outline tree view added to the Tree View Container with an Activity Bar icon
     private _leoTreeExView: vscode.TreeView<Position>; // Outline tree view added to the Explorer Sidebar
-    private _lastTreeView: LeojsTreeView; // Last visible treeview
+    private _lastTreeView: vscode.TreeView<Position>; // Last visible treeview
 
     // * Body pane
     private _bodyFileSystemStarted: boolean = false;
@@ -132,10 +127,9 @@ export class LeoUI {
         if (!g.app.setLeoID(false, true)) {
             throw new Error("unable to set LeoID.");
         }
-        g.app.inBridge = true;  // Added 2007/10/21: support for g.getScript.
+        g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
         g.app.nodeIndices = new NodeIndices(g.app.leoID);
 
-        console.log('Leo started, LeoId:', g.app.leoID);
 
         // IF RECENT FILES LIST :
         //      TODO: CHECK RECENT LEO FILE LIST AND OPEN THEM
@@ -463,8 +457,6 @@ export class LeoUI {
 
         console.log('Got selected node:', p_node.h);
 
-        this._lastTreeView.treeId = this._leoTreeProvider.treeId;
-
         if (this._revealType) {
             setTimeout(() => {
                 this._lastTreeView.reveal(p_node, {
@@ -656,7 +648,7 @@ export class LeoUI {
             this._lastTreeView.reveal(p_event.element, { select: true, focus: false });
             this.selectTreeNode(p_event.element, true);
         }
-        
+
         // *  vscode will update its tree by itself, but we need to change Leo's model of its outline
         if (p_expand) {
             p_event.element.expand();
@@ -685,8 +677,7 @@ export class LeoUI {
     private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
         if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
         if (p_event.visible) {
-            // ? needed ?
-            // this.refreshDocumentsPane();
+            this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
         }
     }
 
@@ -698,8 +689,8 @@ export class LeoUI {
     private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
         if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
         if (p_event.visible) {
-            // ? needed ?
-            // this._leoButtonsProvider.refreshTreeRoot();
+            // TODO: Check if needed
+            // this._leoButtonsProvider.refreshTreeRoot(); // May not need to set selection...?
         }
     }
 
@@ -749,7 +740,7 @@ export class LeoUI {
         p_keepSelection?: boolean
     ): Thenable<unknown> {
 
-        console.log('p_node', p_node);
+        console.log('command: ' + p_cmd + ', p_node:', p_node);
 
         this._setupRefresh(p_fromOutline, p_refreshType);
 
@@ -1070,7 +1061,7 @@ export class LeoUI {
 
         // vscode.window.showInformationMessage('TODO: Implement selectOpenedLeoDocument' +
         //     " index: " + p_index);
-        console.log('select opened commander!');
+        console.log('select opened commander index: ' + p_index);
 
         this.leo_c = g.app.commandersList[p_index];
         this._refreshOutline(true, RevealType.RevealSelect);

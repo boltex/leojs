@@ -3,13 +3,6 @@ import { Position } from "./core/leoNodes";
 import { LeoOutlineNode } from "./leoOutlineNode";
 
 /**
- * * Treeview with treeId member to save last effective treeId from last refresh
- */
-export interface LeojsTreeView extends vscode.TreeView<Position> {
-    treeId?: number;
-}
-
-/**
  * * Types of the various JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
  */
 export interface ConfigMembers {

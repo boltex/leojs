@@ -259,7 +259,6 @@
 </v>
 </v>
 <v t="felix.20201214154816.1"><vh>@clean src/types.d.ts</vh>
-<v t="felix.20211014222259.1"><vh>LeojsTreeView</vh></v>
 <v t="felix.20211007213900.1"><vh>ConfigMembers</vh></v>
 <v t="felix.20211007213909.1"><vh>ConfigSetting</vh></v>
 <v t="felix.20211007213915.1"><vh>FontSettings</vh></v>
@@ -1429,7 +1428,7 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201209011931.4">public getTreeItem(element: Position): Thenable&lt;LeoOutlineNode&gt; | LeoOutlineNode {
-    console.log('called getTreeItem', element.h, element.v.gnx);
+    console.log('called getTreeItem', element.h);
 
     let w_collapse: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.None;
     if (element.hasChildren()) {
@@ -1459,7 +1458,12 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201209011931.5">public getChildren(element?: Position): Position[] {
-    console.log('called get children on', element);
+    if(element){
+        console.log('called get children on', element.h);
+    }else{
+        console.log('called get children on root');
+
+    }
 
     if (element) {
         return [...element.children()];
@@ -1483,7 +1487,7 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201209011931.6">public getParent(element: Position): ProviderResult&lt;Position&gt; {
-    console.log('called get parent on', element);
+    console.log('called get parent on', element.h);
 
     if (element) {
         const p_parent = element.parent();
@@ -2953,12 +2957,7 @@ export interface LeoButton {
 import { debounce } from "debounce";
 import * as utils from "./utils";
 import { Constants } from "./constants";
-import {
-    RevealType,
-    Icon,
-    ReqRefresh,
-    LeojsTreeView,
-} from "./types";
+import { RevealType, Icon, ReqRefresh } from "./types";
 
 import { Config } from "./config";
 import { LeoOutlineNode } from "./leoOutlineNode";
@@ -3003,10 +3002,9 @@ import { LeoBodyProvider } from "./leoBody";
     if (!g.app.setLeoID(false, true)) {
         throw new Error("unable to set LeoID.");
     }
-    g.app.inBridge = true;  // Added 2007/10/21: support for g.getScript.
+    g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
     g.app.nodeIndices = new NodeIndices(g.app.leoID);
 
-    console.log('Leo started, LeoId:', g.app.leoID);
 
     // IF RECENT FILES LIST :
     //      TODO: CHECK RECENT LEO FILE LIST AND OPEN THEM
@@ -3268,7 +3266,7 @@ export class LeoUI {
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
     private _leoTreeView: vscode.TreeView&lt;Position&gt;; // Outline tree view added to the Tree View Container with an Activity Bar icon
     private _leoTreeExView: vscode.TreeView&lt;Position&gt;; // Outline tree view added to the Explorer Sidebar
-    private _lastTreeView: LeojsTreeView; // Last visible treeview
+    private _lastTreeView: vscode.TreeView&lt;Position&gt;; // Last visible treeview
 
     // * Body pane
     private _bodyFileSystemStarted: boolean = false;
@@ -3415,7 +3413,7 @@ private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Positi
         this._lastTreeView.reveal(p_event.element, { select: true, focus: false });
         this.selectTreeNode(p_event.element, true);
     }
-    
+
     // *  vscode will update its tree by itself, but we need to change Leo's model of its outline
     if (p_expand) {
         p_event.element.expand();
@@ -3446,8 +3444,7 @@ private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEve
 private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
     if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
     if (p_event.visible) {
-        // ? needed ?
-        // this.refreshDocumentsPane();
+        this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
     }
 }
 
@@ -3460,8 +3457,8 @@ private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChange
 private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
     if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
     if (p_event.visible) {
-        // ? needed ?
-        // this._leoButtonsProvider.refreshTreeRoot();
+        // TODO: Check if needed
+        // this._leoButtonsProvider.refreshTreeRoot(); // May not need to set selection...?
     }
 }
 
@@ -3513,7 +3510,7 @@ public command(
     p_keepSelection?: boolean
 ): Thenable&lt;unknown&gt; {
 
-    console.log('p_node', p_node);
+    console.log('command: ' + p_cmd + ', p_node:', p_node);
 
     this._setupRefresh(p_fromOutline, p_refreshType);
 
@@ -5902,7 +5899,7 @@ public selectOpenedLeoDocument(p_index: number): Thenable&lt;unknown&gt; {
 
     // vscode.window.showInformationMessage('TODO: Implement selectOpenedLeoDocument' +
     //     " index: " + p_index);
-    console.log('select opened commander!');
+    console.log('select opened commander index: ' + p_index);
 
     this.leo_c = g.app.commandersList[p_index];
     this._refreshOutline(true, RevealType.RevealSelect);
@@ -6353,8 +6350,6 @@ public closeBody(): void {
 public gotSelectedNode(p_node: Position): void {
 
     console.log('Got selected node:', p_node.h);
-
-    this._lastTreeView.treeId = this._leoTreeProvider.treeId;
 
     if (this._revealType) {
         setTimeout(() =&gt; {
@@ -14553,14 +14548,6 @@ public saveAsLeojsFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
     return Promise.resolve(true);
 
     // return Promise.resolve(undefined); // if cancelled
-}
-
-</t>
-<t tx="felix.20211014222259.1">/**
- * * Treeview with treeId member to save last effective treeId from last refresh
- */
-export interface LeojsTreeView extends vscode.TreeView&lt;Position&gt; {
-    treeId?: number;
 }
 
 </t>
