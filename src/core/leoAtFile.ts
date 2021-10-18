@@ -1,16 +1,16 @@
 /**
  * Classes to read and write @file nodes.
  */
-import io;
-import os;
-import re;
-import sys;
-import tabnanny;
-import time;
-import tokenize;
-from typing import List;
-from leo.core import leoGlobals as g;
-from leo.core import leoNodes;
+import "io"
+import "os"
+import "re"
+import "sys"
+import "tabnanny"
+import "time"
+import "tokenize"
+from "typing" import List
+from "leo.core" import leoGlobals as g
+from "leo.core" import leoNodes
 /**
  * Command decorator for the AtFileCommands class.
  */
@@ -39,7 +39,7 @@ class AtFile {
     /**
      * ctor for atFile class.
      */
-    public constructor(c: Commands): void {
+    public constructor(c: Commands) {
         // **Warning**: all these ivars must **also** be inited in initCommonIvars.
         this.c = c;
         this.encoding = 'utf-8';  // 2014/08/13
@@ -67,7 +67,7 @@ class AtFile {
         this.runPyFlakesOnWrite = c.config.getBool(
             'run-pyflakes-on-write', default=False);
         this.underindentEscapeString = c.config.getString(
-            'underindent-escape-string') or '\\-';
+            'underindent-escape-string') || '\\-';
     }
     /**
      * Init ivars common to both reading and writing.
@@ -89,7 +89,7 @@ class AtFile {
         this.root = None;  // The root (a position) of tree being read or written.
         this.startSentinelComment = "";
         this.startSentinelComment = "";
-        this.tab_width = c.tab_width or -4;
+        this.tab_width = c.tab_width || -4;
         this.writing_to_shadow_directory = False;
     }
     public initReadIvars(root, fileName): void {
@@ -215,7 +215,7 @@ class AtFile {
     public checkExternalFile(event=None): void {
         c, p = this.c, this.c.p;
         if (not p.isAtFileNode() and not p.isAtThinFileNode()) {
-            g.red('Please select an @thin or @file node');
+            g.red('Please select an @thin || @file node');
             return;
         }
         fn = g.fullPath(c, p);  // #1910.
@@ -287,7 +287,7 @@ class AtFile {
         x = this.c.shadowController;
         // readOneAtShadowNode should already have checked these.
         shadow_fn = x.shadowPathName(fn);
-        shadow_exists = (g.os_path_exists(shadow_fn) and g.os_path_isfile(shadow_fn));
+        shadow_exists = (g.os_path_exists(shadow_fn) && g.os_path_isfile(shadow_fn));
         if (not shadow_exists) {
             g.trace('can not happen: no private file',;
                 shadow_fn, g.callers());
@@ -338,7 +338,7 @@ class AtFile {
                 // this.page_width
                 // this.tab_width
         gnx2vnode = c.fileCommands.gnxDict;
-        contents = fromString or file_s;
+        contents = fromString || file_s;
         FastAtRead(c, gnx2vnode).read_into_root(contents, fileName, root);
         root.clearDirty();
         return True;
@@ -504,7 +504,7 @@ class AtFile {
                 p.isAtShadowFileNode() or;
                 p.isAtFileNode() or;
                 p.isAtCleanNode();  // 1134.
-            ):;
+            ):
                 files.append(p.copy());
                 p.moveToNodeAfterTree();
             else if (p.isAtAsisFileNode() or p.isAtNoSentFileNode()) {
@@ -754,7 +754,7 @@ class AtFile {
         // #889175: Remember the full fileName.
         this.rememberReadPath(fn, p);
         shadow_fn = x.shadowPathName(fn);
-        shadow_exists = g.os_path_exists(shadow_fn) and g.os_path_isfile(shadow_fn);
+        shadow_exists = g.os_path_exists(shadow_fn) && g.os_path_isfile(shadow_fn);
         // Delete all children.
         while (p.hasChildren()) {
             p.firstChild().doDelete();
@@ -960,7 +960,7 @@ class AtFile {
             this.encoding = None;
             // Execute scanHeader merely to set this.encoding.
             this.scanHeader(fileName, giveErrors=False);
-            e = this.encoding or old_encoding;
+            e = this.encoding || old_encoding;
         }
         assert e;
         return e;
@@ -1069,9 +1069,9 @@ class AtFile {
         found = False;
         while (p and p != after) {
             if (
-                p.isAtAutoNode() and not p.isAtIgnoreNode() and
-                (p.isDirty() or not writeDirtyOnly);
-            ):;
+                p.isAtAutoNode() && not p.isAtIgnoreNode() &&
+                (p.isDirty() || not writeDirtyOnly);
+            ):
                 ok = this.writeOneAtAutoNode(p);
                 if (ok) {
                     found = True;
@@ -1130,9 +1130,9 @@ class AtFile {
         found = False;
         while (p and p != after) {
             if (
-                p.atShadowFileNodeName() and not p.isAtIgnoreNode();
-                and (p.isDirty() or not writeDirtyOnly);
-            ):;
+                p.atShadowFileNodeName() && not p.isAtIgnoreNode();
+                && (p.isDirty() || not writeDirtyOnly);
+            ):
                 ok = this.writeOneAtShadowNode(p);
                 if (ok) {
                     found = True;
@@ -1211,7 +1211,7 @@ class AtFile {
      * We must do this in a prepass, so as to avoid errors later.
      */
     public findFilesToWrite(force): void {
-        trace = 'save' in g.app.debug and not g.unitTesting;
+        trace = 'save' in g.app.debug && not g.unitTesting;
         if (trace) {
             g.trace(f"writing *{'selected' if force else 'all'}* files");
         }
@@ -1371,7 +1371,7 @@ class AtFile {
         oldPath = g.os_path_normcase(this.getPathUa(p));
         newPath = g.os_path_normcase(g.fullPath(c, p));
         try { // # #1367: samefile can throw an exception.
-            changed = oldPath and not os.path.samefile(oldPath, newPath);
+            changed = oldPath && not os.path.samefile(oldPath, newPath);
         }
         except (Exception) {
             changed = True;
@@ -1494,8 +1494,8 @@ class AtFile {
         after = p.nodeAfterTree();
         while (p and p != after) { // # Don't use iterator.
             if (
-                p.isAtAsisFileNode() or (p.isAnyAtFileNode() and not p.isAtIgnoreNode());
-            ):;
+                p.isAtAsisFileNode() || (p.isAnyAtFileNode() && not p.isAtIgnoreNode());
+            ):
                 fileName = p.anyAtFileNodeName();
                 if (fileName) {
                     fileName = g.fullPath(c, p);  // #1914.
@@ -1586,7 +1586,7 @@ class AtFile {
      */
     public dispatch(ext, p: Position): void {
         // Match @auto type before matching extension.
-        return this.writer_for_at_auto(p) or this.writer_for_ext(ext);
+        return this.writer_for_at_auto(p) || this.writer_for_ext(ext);
     }
     /**
      * A factory returning a writer function for the given kind of @auto directive.
@@ -1684,7 +1684,7 @@ class AtFile {
             }
             if (p.hasChildren()) {
                 g.error('@edit nodes must not have children');
-                g.es('To save your work, convert @edit to @auto, @file or @clean');
+                g.es('To save your work, convert @edit to @auto, @file || @clean');
                 return False;
             }
             fileName = this.initWriteIvars(root);
@@ -1906,7 +1906,7 @@ class AtFile {
                 this.addToOrphanList(root);
                 return '';
             }
-            return this.writeAtAutoContents(fileName, root) or '';
+            return this.writeAtAutoContents(fileName, root) || '';
         }
         except (Exception) {
             this.writeException(fileName, root);
@@ -1922,7 +1922,7 @@ class AtFile {
             c.endEditing();
             if (root.hasChildren()) {
                 g.error('@edit nodes must not have children');
-                g.es('To save your work, convert @edit to @auto, @file or @clean');
+                g.es('To save your work, convert @edit to @auto, @file || @clean');
                 return False;
             }
             fileName = this.initWriteIvars(root);
@@ -2141,11 +2141,11 @@ class AtFile {
                 status.at_delims_seen = True;
             if (
                 status.at_comment_seen and;
-                status.at_delims_seen and not;
+                status.at_delims_seen && not;
                 status.at_warning_given;
-            ):;
+            ):
                 status.at_warning_given = True;
-                this.error(f"@comment and @delims in node {p.h}");
+                this.error(f"@comment && @delims in node {p.h}");
             this.putDirective(s, i, p);
         else {
             this.error(f"putBody: can not happen: unknown directive kind: {kind}");
@@ -2649,9 +2649,9 @@ class AtFile {
      */
     public checkPythonCode(contents, fileName, root, pyflakes_errors_only=False): void {
         if (
-            contents and fileName and fileName.endswith('.py');
-            and this.checkPythonCodeOnWrite;
-        ):;
+            contents && fileName && fileName.endswith('.py');
+            && this.checkPythonCodeOnWrite;
+        ):
             // It's too slow to check each node separately.
             if (pyflakes_errors_only) {
                 ok = True;
@@ -2695,7 +2695,7 @@ class AtFile {
     public syntaxError(p: Position, body): void {
         g.error(f"Syntax error in: {p.h}");
         typ, val, tb = sys.exc_info();
-        message = hasattr(val, 'message') and val.message;
+        message = hasattr(val, 'message') && val.message;
         if (message) {
             g.es_print(message);
         }
@@ -2704,7 +2704,7 @@ class AtFile {
         }
         lines = g.splitLines(body);
         n = val.lineno;
-        offset = val.offset or 0;
+        offset = val.offset || 0;
         if (n is None) {
             return;
         }
@@ -2726,7 +2726,7 @@ class AtFile {
      */
     public runPyflakes(root, pyflakes_errors_only): void {
         try {
-            from leo.commands import checkerCommands;
+            from "leo.commands" import checkerCommands
             if (checkerCommands.pyflakes) {
                 x = checkerCommands.PyflakesCommand(this.c);
                 ok = x.run(p=root, pyflakes_errors_only=pyflakes_errors_only);
@@ -3132,7 +3132,7 @@ class AtFile {
 
         // Create the timestamp (only for messages).
         if (c.config.getBool('log-show-save-time', default=False)) {
-            format = c.config.getString('log-timestamp-format') or "%H:%M:%S";
+            format = c.config.getString('log-timestamp-format') || "%H:%M:%S";
             timestamp = time.strftime(format) + ' ';
         }
         else {
@@ -3176,12 +3176,12 @@ class AtFile {
         }
         unchanged = (
             contents == old_contents;
-            or (not this.explicitLineEnding and this.compareIgnoringLineEndings(old_contents, contents));
-            or ignoreBlankLines and this.compareIgnoringBlankLines(old_contents, contents));
+            || (not this.explicitLineEnding && this.compareIgnoringLineEndings(old_contents, contents));
+            || ignoreBlankLines && this.compareIgnoringBlankLines(old_contents, contents));
         if (unchanged) {
             this.unchangedFiles += 1;
-            if not g.unitTesting and c.config.getBool(
-                'report-unchanged-files', default=True):;
+            if not g.unitTesting && c.config.getBool(
+                'report-unchanged-files', default=True):
                 g.es(f"{timestamp}unchanged: {sfn}");
             // Leo 5.6: Check unchanged files.
             this.checkPythonCode(contents, fileName, root, pyflakes_errors_only=True);
@@ -3192,7 +3192,7 @@ class AtFile {
         if (this.explicitLineEnding) {
             ok = (
                 this.compareIgnoringLineEndings(old_contents, contents) or;
-                ignoreBlankLines and this.compareIgnoringLineEndings(
+                ignoreBlankLines && this.compareIgnoringLineEndings(
                 old_contents, contents));
             if (not ok) {
                 g.warning("correcting line endings in:", fileName);
@@ -3284,7 +3284,7 @@ class AtFile {
      */
     public writeError(message): void {
         if (this.errors == 0) {
-            fn = this.targetFileName or 'unnamed file';
+            fn = this.targetFileName || 'unnamed file';
             g.es_error(f"errors writing: {fn}");
         }
         this.error(message);
@@ -3479,7 +3479,7 @@ class AtFile {
         d = c.scanAllDirectives(p);
 
         // Language & delims: Tricky.
-        lang_dict = d.get('lang-dict') or {};
+        lang_dict = d.get('lang-dict') || {};
         delims, language = None, None;
         if (lang_dict) {
             // There was an @delims or @language directive.
@@ -3489,7 +3489,7 @@ class AtFile {
         if (not language) {
             // No language directive.  Look for @<file> nodes.
             // Do *not* used.get('language')!
-            language = g.getLanguageFromAncestorAtFileNode(p) or 'python';
+            language = g.getLanguageFromAncestorAtFileNode(p) || 'python';
         }
         this.language = language;
         if (not delims) {
@@ -3521,12 +3521,12 @@ class AtFile {
         }
 
         // Easy cases
-        this.encoding = d.get('encoding') or c.config.default_derived_file_encoding;
+        this.encoding = d.get('encoding') || c.config.default_derived_file_encoding;
         lineending = d.get('lineending');
         this.explicitLineEnding = bool(lineending);
-        this.output_newline = lineending or g.getOutputNewline(c=c);
-        this.page_width = d.get('pagewidth') or c.page_width;
-        this.tab_width = d.get('tabwidth') or c.tab_width;
+        this.output_newline = lineending || g.getOutputNewline(c=c);
+        this.page_width = d.get('pagewidth') || c.page_width;
+        this.tab_width = d.get('tabwidth') || c.tab_width;
         return {
             "encoding": this.encoding,;
             "language": this.language,;
@@ -3580,9 +3580,9 @@ class AtFile {
             for (k in d) {
                 // Fix bug # #1469: make sure k still exists.
                 if (
-                    os.path.exists(k) and os.path.samefile(k, fn);
-                    and p.h in d.get(k, set());
-                ):;
+                    os.path.exists(k) && os.path.samefile(k, fn);
+                    && p.h in d.get(k, set());
+                ):
                     d[fn] = d[k];
                     if (trace) {
                         g.trace('Return False: in p.v.at_read:', sfn);
@@ -3620,7 +3620,7 @@ atFile = AtFile;  // compatibility
  */
 class FastAtRead {
 
-    public constructor(c: Commands, gnx2vnode, test=False, TestVNode=None): void {
+    public constructor(c: Commands, gnx2vnode, test=False, TestVNode=None) {
         this.c = c;
         assert gnx2vnode is not None;
         this.gnx2vnode = gnx2vnode;
@@ -3637,7 +3637,7 @@ class FastAtRead {
     public get_patterns(delims): void {
         // This must be a function, because of @comments & @delims.
         delim_start, delim_end = delims;
-        delims = re.escape(delim_start), re.escape(delim_end or '');
+        delims = re.escape(delim_start), re.escape(delim_end || '');
         delim1, delim2 = delims;
         ref = g.angleBrackets(r'(.*)');
         patterns = (
@@ -3716,7 +3716,7 @@ class FastAtRead {
         for (i, line in enumerate(lines)) {
             m = this.header_pattern.match(line);
             if (m) {
-                delims = m.group(1), m.group(8) or '';
+                delims = m.group(1), m.group(8) || '';
                 return delims, first_lines, i + 1;
             }
             first_lines.append(line);
@@ -3864,7 +3864,7 @@ class FastAtRead {
             if (m) {
                 in_doc = False;
                 if (m.group(2) == '+') { // # opening sentinel
-                    body.append(f"{m.group(1)}@others{m.group(3) or ''}\n");
+                    body.append(f"{m.group(1)}@others{m.group(3) || ''}\n");
                     stack.append((gnx, indent, body));
                     indent += m.end(1);  // adjust current identation
                 }
@@ -4008,7 +4008,7 @@ class FastAtRead {
                 // Here, in the read code, we merely need to add it to the body.
                 // Pushing and popping the stack may not be necessary, but it can't hurt.
                 if (m.group(2) == '+') { // # opening sentinel
-                    body.append(f"{m.group(1)}@all{m.group(3) or ''}\n");
+                    body.append(f"{m.group(1)}@all{m.group(3) || ''}\n");
                     stack.append((gnx, indent, body));
                 }
                 else { // # closing sentinel.
@@ -4067,7 +4067,7 @@ class FastAtRead {
                 delim_end = delim_end.replace('__', '\n').replace('_', ' ');
                 // Recalculate all delim-related values
                 doc_skip = (delim_start + '\n', delim_end + '\n');
-                is_cweb = delim_start == '@q@' and delim_end == '@>';
+                is_cweb = delim_start == '@q@' && delim_end == '@>';
                 sentinel = delim_start + '@';
 
                 // Recalculate the patterns.
@@ -4094,7 +4094,7 @@ class FastAtRead {
                     continue;
                 }
                 delim_start = m2.group(1);
-                delim_end = m2.group(2) or '';
+                delim_end = m2.group(2) || '';
 
                 // Within these delimiters:
                 // - double underscores represent a newline.
@@ -4103,7 +4103,7 @@ class FastAtRead {
                 delim_end = delim_end.replace('__', '\n').replace('_', ' ');
                 // Recalculate all delim-related values
                 doc_skip = (delim_start + '\n', delim_end + '\n');
-                is_cweb = delim_start == '@q@' and delim_end == '@>';
+                is_cweb = delim_start == '@q@' && delim_end == '@>';
                 sentinel = delim_start + '@';
 
                 // Recalculate the patterns
