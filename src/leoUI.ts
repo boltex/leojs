@@ -1189,9 +1189,7 @@ export class LeoUI {
             console.error('Leo command not found');
         } else {
             console.log('HAS FUNC!');
-
-            const w_binded = func.bind(this.leo_c);
-            w_binded(this.leo_c);
+            func.bind(this.leo_c)();
         }
 
         // * Example from leoserver "LEO COMMAND BY NAME" method
