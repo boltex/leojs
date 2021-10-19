@@ -1,7 +1,23 @@
-import { FileCommands } from "./leoFileCommands";
-import { Position, VNode, StackEntry } from "./leoNodes";
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
+import { FileCommands } from "./leoFileCommands";
+import { CommanderOutlineCommands } from "../commands/commanderOutlineCommands";
+import { CommanderFileCommands } from "../commands/commanderFileCommands";
+
+import { Position, VNode, StackEntry } from "./leoNodes";
+
+function applyMixins(derivedCtor: any, constructors: any[]) {
+    constructors.forEach((baseCtor) => {
+        Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
+            Object.defineProperty(
+                derivedCtor.prototype,
+                name,
+                Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
+                Object.create(null)
+            );
+        });
+    });
+}
 
 export interface HoistStackEntry {
     p: Position;
@@ -36,7 +52,7 @@ export class Commands {
     };
 
     // Init ivars used while executing a command.
-    public commandsDict: { [key: string]: (p: any) => any } = {}; // Keys are command names, values are functions.
+    public commandsDict: { [key: string]: (p?: any) => any } = {}; // Keys are command names, values are functions.
     public disableCommandsMessage: string = ''; // The presence of this message disables all commands.
     public hookFunction: any = undefined; // One of three places that g.doHook looks for hook functions.
 
@@ -144,6 +160,40 @@ export class Commands {
     public spellCommands: any = undefined;
     public leoTestManager: any = undefined;
     public vimCommands: any = undefined;
+
+    //Init the settings *before* initing the objects.
+    // c = self
+    // from leo.core import leoConfig
+    public config: any = {}; // TODO
+    // c.config = leoConfig.LocalConfigManager(c, previousSettings)
+    // g.app.config.setIvarsFromSettings(c)
+
+    constructor(
+        fileName: string,
+        gui?: LeoUI,
+        previousSettings?: any,
+        relativeFileName?: any
+    ) {
+        const c: Commands = this;
+
+        // From Official Ivars
+        this.gui = gui || g.app.gui!;
+
+        // From initFileIvars
+        this.mFileName = fileName || '';
+        this.mRelativeFileName = relativeFileName || '';
+
+        // From initObjects
+        const gnx: string = 'hidden-root-vnode-gnx';
+        this.fileCommands = new FileCommands(this); // c.fileCommands = DummyFileCommands()
+        this.hiddenRootNode = new VNode(this, 'hidden-root-vnode-gnx');
+        this.hiddenRootNode.h = '<hidden root vnode>';
+        this.fileCommands.gnxDict = {}; // RESET gnxDict
+
+        // From finishCreate
+        c.createCommandNames();
+
+    }
 
     // * initObjects done in constructor.
     // * Kept here as comments for reference
@@ -297,32 +347,16 @@ export class Commands {
     // self.subCommanders.append(self.styleSheetManager)
     // else:
     // self.styleSheetManager = None
-    //Init the settings *before* initing the objects.
-    // c = self
-    // from leo.core import leoConfig
-    public config: any = {}; // TODO
-    // c.config = leoConfig.LocalConfigManager(c, previousSettings)
-    // g.app.config.setIvarsFromSettings(c)
 
-    constructor(
-        fileName: string,
-        gui?: LeoUI,
-        previousSettings?: any,
-        relativeFileName?: any
-    ) {
-        this.mFileName = fileName;
-        this.gui = gui || g.app.gui!;
-        this.fileCommands = new FileCommands(this); // c.fileCommands = DummyFileCommands()
-        this.hiddenRootNode = new VNode(this, 'hidden-root-vnode-gnx');
-        this.hiddenRootNode.h = '<hidden root vnode>';
-        this.fileCommands.gnxDict = {}; // RESET gnxDict
-    }
-
-    private initObject() {
-
+    /**
+     * Create all entries in c.commandsDict.
+     * Do *not* clear c.commandsDict here.
+     */
+    private createCommandNames(): void {
         const c: Commands = this;
-        const gnx: string = 'hidden-root-vnode-gnx';
-
+        for (let commandName in g.global_commands_dict) {
+            c.commandsDict[commandName] = g.global_commands_dict[commandName];
+        }
     }
 
     public recolor(): void {
@@ -1193,3 +1227,11 @@ export class Commands {
 }
 
 
+// Then you create an interface which merges
+// the expected mixins with the same name as your base
+export interface Commands extends CommanderOutlineCommands, CommanderFileCommands { }
+// Apply the mixins into the base class via
+// the JS at runtime
+console.log('Applying mixins');
+
+applyMixins(Commands, [CommanderOutlineCommands, CommanderFileCommands]);

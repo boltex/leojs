@@ -755,6 +755,31 @@ export class LeoUI {
 
         this._setupRefresh(p_fromOutline, p_refreshType);
 
+
+
+        //if (this.leo_c.hasOwnProperty(p_cmd)) {
+        //@ts-expect-error
+        if ((typeof this.leo_c[p_cmd]) === 'function') {
+            console.log('HAS PROPERTY' + p_cmd + " so were doing it!");
+            //@ts-expect-error
+            this.leo_c[p_cmd]();
+
+        } else {
+            console.log('NO PROPERTY' + p_cmd);
+
+            console.log(this.leo_c);
+
+        }
+
+
+        // if (p_cmd === "selectVisNext") {
+        //     console.log('cmd was selectVisNext');
+        //     // this.leo_c.selectVisNext();
+        //     console.log((typeof this.leo_c[p_cmd]) === 'function');
+        //     this.leo_c[p_cmd]
+
+        // }
+
         vscode.window.showInformationMessage(
             'TODO: Implement ' +
             p_cmd +
@@ -1152,7 +1177,40 @@ export class LeoUI {
     public test(): Thenable<unknown> {
         vscode.window.showInformationMessage("Test called!");
         console.log("Test called!");
-        console.log("this.leo_c.p.isSelected()", this.leo_c.p.isSelected());
+        // console.log("this.leo_c.p.isSelected()", this.leo_c);
+
+        // * DO LEO COMMAND BY NAME
+        // keepSelection = False  # Set default, optional component of param
+        // if "keep" in param:
+        //     keepSelection = param["keep"]
+
+        const func = this.leo_c.commandsDict['goto-next-visible'];
+        if (!func) {
+            console.error('Leo command not found');
+        } else {
+            console.log('HAS FUNC!');
+
+            const w_binded = func.bind(this.leo_c);
+            w_binded(this.leo_c);
+        }
+
+        // * Example from leoserver "LEO COMMAND BY NAME" method
+        // func = c.commandsDict.get(command_name) # Getting from kebab-cased 'Command Name'
+        // if not func:  # pragma: no cover
+        //     raise ServerError(f"{tag}: Leo command not found: {command_name!r}")
+
+        // p = self._get_p(param)
+        // try:
+        //     if p == c.p:
+        //         value = func(event={"c":c})  # no need for re-selection
+        //     else:
+        //         old_p = c.p  # preserve old position
+        //         c.selectPosition(p)  # set position upon which to perform the command
+        //         value = func(event={"c":c})
+        //         if keepSelection and c.positionExists(old_p):
+        //             # Only if 'keep' old position was set, and old_p still exists
+        //             c.selectPosition(old_p)
+
         return Promise.resolve(true);
     }
 

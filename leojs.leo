@@ -389,9 +389,9 @@
 </v>
 <v t="felix.20210102000055.1"><vh>Leo</vh>
 <v t="felix.20210102000100.1"><vh>Core classes</vh>
+<v t="felix.20211018202009.1"><vh>@clean src/core/decorators.ts</vh></v>
 <v t="felix.20210102012334.1"><vh>@clean src/core/leoApp.ts</vh>
 <v t="felix.20210102211149.1"><vh>&lt;&lt; imports &gt;&gt; (leoApp)</vh></v>
-<v t="felix.20211002234840.1"><vh>ApplyMixins</vh></v>
 <v t="felix.20210102213337.1"><vh>class IdleTimeManager</vh>
 <v t="felix.20210102213337.2"><vh>itm.add_callback</vh></v>
 <v t="felix.20210102213337.3"><vh>itm.on_idle</vh></v>
@@ -449,6 +449,7 @@
 </v>
 <v t="felix.20210110222544.1"><vh>@clean src/core/leoCommands.ts</vh>
 <v t="felix.20210220194059.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
+<v t="felix.20211017232128.1"><vh>applyMixins</vh></v>
 <v t="felix.20210224000242.1"><vh>interface hoistStack</vh></v>
 <v t="felix.20210110223514.1"><vh>class Commands</vh>
 <v t="felix.20210223220756.1"><vh>Commander IVars</vh>
@@ -459,11 +460,11 @@
 <v t="felix.20210223220814.6"><vh>c.initFileIvars</vh></v>
 <v t="felix.20210223220814.7"><vh>c.initOptionsIvars</vh></v>
 <v t="felix.20210223220814.8"><vh>c.initObjectIvars</vh></v>
-<v t="felix.20210223220814.9"><vh>c.initObjects</vh></v>
 <v t="felix.20210223220814.10"><vh>c.initSettings</vh></v>
 </v>
 <v t="felix.20210223002937.1"><vh>constructor &amp; helpers</vh>
-<v t="felix.20211003013517.1"><vh>c.initObject</vh></v>
+<v t="felix.20210223220814.9"><vh>c.initObjects</vh></v>
+<v t="felix.20211018215401.1"><vh>c.createCommandNames</vh></v>
 </v>
 <v t="felix.20210112001859.1"><vh>c.Drawing &amp; coloring</vh></v>
 <v t="felix.20210215185050.1"><vh>c.API</vh>
@@ -830,6 +831,119 @@
 </v>
 <v t="felix.20211002194716.1"><vh>Command classes</vh>
 <v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
+<v t="felix.20211017230407.1"><vh>@file src/commands/commanderFileCommands.ts</vh></v>
+<v t="felix.20211017220236.1"><vh>BACKUP src/commands/commanderOutlineCommands.ts</vh>
+<v t="felix.20211017220236.2"><vh>c_oc.Cut &amp; Paste Outlines</vh>
+<v t="felix.20211017220236.3"><vh>c_oc.copyOutline</vh></v>
+<v t="felix.20211017220236.4"><vh>c_oc.cutOutline</vh></v>
+<v t="felix.20211017220236.5"><vh>c_oc.pasteOutline</vh></v>
+<v t="felix.20211017220236.6"><vh>c_oc.pasteOutlineRetainingClones &amp; helpers</vh>
+<v t="felix.20211017220236.7"><vh>def computeCopiedBunchList</vh></v>
+<v t="felix.20211017220236.8"><vh>def computeVnodeInfoDict</vh></v>
+</v>
+<v t="felix.20211017220236.9"><vh>c_oc.pasteAsTemplate</vh>
+<v t="felix.20211017220236.10"><vh>skip_root</vh></v>
+<v t="felix.20211017220236.11"><vh>translate_gnx</vh></v>
+<v t="felix.20211017220236.12"><vh>viter</vh></v>
+<v t="felix.20211017220236.13"><vh>getv</vh></v>
+<v t="felix.20211017220236.14"><vh>do_paste</vh></v>
+<v t="felix.20211017220236.15"><vh>undoHelper</vh></v>
+<v t="felix.20211017220236.16"><vh>redoHelper</vh></v>
+<v t="felix.20211017220236.17"><vh>&lt;&lt; prepare destination data &gt;&gt;</vh></v>
+</v>
+</v>
+<v t="felix.20211017220236.18"><vh>c_oc.dumpOutline</vh></v>
+<v t="felix.20211017220236.19"><vh>c_oc.Expand &amp; contract commands</vh>
+<v t="felix.20211017220236.20"><vh>c_oc.contract-all</vh></v>
+<v t="felix.20211017220236.21"><vh>c_oc.contractAllOtherNodes &amp; helper</vh>
+<v t="felix.20211017220236.22"><vh>def contractIfNotCurrent</vh></v>
+</v>
+<v t="felix.20211017220236.23"><vh>c_oc.contractAllSubheads (new)</vh></v>
+<v t="felix.20211017220236.24"><vh>c_oc.contractNode</vh></v>
+<v t="felix.20211017220236.25"><vh>c_oc.contractNodeOrGoToParent</vh></v>
+<v t="felix.20211017220236.26"><vh>c_oc.contractParent</vh></v>
+<v t="felix.20211017220236.27"><vh>c_oc.expandAllHeadlines</vh></v>
+<v t="felix.20211017220236.28"><vh>c_oc.expandAllSubheads</vh></v>
+<v t="felix.20211017220236.29"><vh>c_oc.expandLevel1..9</vh></v>
+<v t="felix.20211017220236.30"><vh>c_oc.expandNextLevel</vh></v>
+<v t="felix.20211017220236.31"><vh>c_oc.expandNode</vh></v>
+<v t="felix.20211017220236.32"><vh>c_oc.expandNodeAndGoToFirstChild</vh></v>
+<v t="felix.20211017220236.33"><vh>c_oc.expandNodeOrGoToFirstChild</vh></v>
+<v t="felix.20211017220236.34"><vh>c_oc.expandOnlyAncestorsOfNode</vh></v>
+<v t="felix.20211017220236.35"><vh>c_oc.expandPrevLevel</vh></v>
+</v>
+<v t="felix.20211017220236.36"><vh>c_oc.fullCheckOutline</vh></v>
+<v t="felix.20211017220236.37"><vh>c_oc.Goto commands</vh>
+<v t="felix.20211017220236.38"><vh>c_oc.findNextClone</vh></v>
+<v t="felix.20211017220236.39"><vh>c_oc.goNextVisitedNode</vh></v>
+<v t="felix.20211017220236.40"><vh>c_oc.goPrevVisitedNode</vh></v>
+<v t="felix.20211017220236.41"><vh>c_oc.goToFirstNode</vh></v>
+<v t="felix.20211017220236.42"><vh>c_oc.goToFirstSibling</vh></v>
+<v t="felix.20211017220236.43"><vh>c_oc.goToFirstVisibleNode</vh></v>
+<v t="felix.20211017220236.44"><vh>c_oc.goToLastNode</vh></v>
+<v t="felix.20211017220236.45"><vh>c_oc.goToLastSibling</vh></v>
+<v t="felix.20211017220236.46"><vh>c_oc.goToLastVisibleNode</vh></v>
+<v t="felix.20211017220236.47"><vh>c_oc.goToNextClone</vh></v>
+<v t="felix.20211017220236.48"><vh>c_oc.goToNextDirtyHeadline</vh></v>
+<v t="felix.20211017220236.49"><vh>c_oc.goToNextMarkedHeadline</vh></v>
+<v t="felix.20211017220236.50"><vh>c_oc.goToNextSibling</vh></v>
+<v t="felix.20211017220236.51"><vh>c_oc.goToParent</vh></v>
+<v t="felix.20211017220236.52"><vh>c_oc.goToPrevMarkedHeadline</vh></v>
+<v t="felix.20211017220236.53"><vh>c_oc.goToPrevSibling</vh></v>
+<v t="felix.20211017220236.54"><vh>c_oc.selectThreadBack</vh></v>
+<v t="felix.20211017220236.55"><vh>c_oc.selectThreadNext</vh></v>
+<v t="felix.20211017220236.56"><vh>c_oc.selectVisBack</vh></v>
+<v t="felix.20211017220236.57"><vh>c_oc.selectVisNext</vh></v>
+</v>
+<v t="felix.20211017220236.58"><vh>c_oc.hoist/dehoist/clearAllHoists</vh>
+<v t="felix.20211017220236.59"><vh>c_oc.deHoist</vh></v>
+<v t="felix.20211017220236.60"><vh>c_oc.clearAllHoists</vh></v>
+<v t="felix.20211017220236.61"><vh>c_oc.hoist</vh></v>
+</v>
+<v t="felix.20211017220236.62"><vh>c_oc.Insert, Delete &amp; Clone commands</vh>
+<v t="felix.20211017220236.63"><vh>c_oc.clone</vh></v>
+<v t="felix.20211017220236.64"><vh>c_oc.cloneToAtSpot</vh></v>
+<v t="felix.20211017220236.65"><vh>c_oc.cloneToLastNode</vh></v>
+<v t="felix.20211017220236.66"><vh>c_oc.deleteOutline</vh></v>
+<v t="felix.20211017220236.67"><vh>c_oc.insertChild</vh></v>
+<v t="felix.20211017220236.68"><vh>c_oc.insertHeadline (insert-*)</vh>
+<v t="felix.20211017220236.69"><vh>def insertHeadlineHelper</vh></v>
+</v>
+<v t="felix.20211017220236.70"><vh>c_oc.insertHeadlineBefore</vh></v>
+</v>
+<v t="felix.20211017220236.71"><vh>c_oc.Mark commands</vh>
+<v t="felix.20211017220236.72"><vh>c_oc.cloneMarked</vh></v>
+<v t="felix.20211017220236.73"><vh>c_oc.copyMarked</vh></v>
+<v t="felix.20211017220236.74"><vh>c_oc.deleteMarked</vh></v>
+<v t="felix.20211017220236.75"><vh>c_oc.moveMarked &amp; helper</vh>
+<v t="felix.20211017220236.76"><vh>def createMoveMarkedNode</vh></v>
+</v>
+<v t="felix.20211017220236.77"><vh>c_oc.markChangedHeadlines</vh></v>
+<v t="felix.20211017220236.78"><vh>c_oc.markChangedRoots</vh></v>
+<v t="felix.20211017220236.79"><vh>c_oc.markHeadline</vh></v>
+<v t="felix.20211017220236.80"><vh>c_oc.markSubheads</vh></v>
+<v t="felix.20211017220236.81"><vh>c_oc.unmarkAll</vh></v>
+</v>
+<v t="felix.20211017220236.82"><vh>c_oc.Move commands</vh>
+<v t="felix.20211017220236.83"><vh>c_oc.demote</vh></v>
+<v t="felix.20211017220236.84"><vh>c_oc.moveOutlineDown</vh>
+<v t="felix.20211017220236.85"><vh>&lt;&lt; Move p down &amp; set moved if successful &gt;&gt;</vh></v>
+</v>
+<v t="felix.20211017220236.86"><vh>c_oc.moveOutlineLeft</vh></v>
+<v t="felix.20211017220236.87"><vh>c_oc.moveOutlineRight</vh></v>
+<v t="felix.20211017220236.88"><vh>c_oc.moveOutlineUp</vh>
+<v t="felix.20211017220236.89"><vh>&lt;&lt; Move p up &gt;&gt;</vh></v>
+</v>
+<v t="felix.20211017220236.90"><vh>c_oc.promote</vh></v>
+<v t="felix.20211017220236.91"><vh>c_oc.toggleSparseMove</vh></v>
+</v>
+<v t="felix.20211017220236.92"><vh>c_oc.Sort commands</vh>
+<v t="felix.20211017220236.93"><vh>c_oc.sortChildren</vh></v>
+<v t="felix.20211017220236.94"><vh>c_oc.sortSiblings</vh></v>
+</v>
+<v t="felix.20211017220236.95"><vh>def cantMoveMessage</vh></v>
+<v t="felix.20211017220236.96"><vh>count-children</vh></v>
+</v>
 </v>
 </v>
 <v t="felix.20210226224644.1"><vh>TO DO / TO FINISH</vh>
@@ -3534,6 +3648,31 @@ public command(
 
     this._setupRefresh(p_fromOutline, p_refreshType);
 
+
+
+    //if (this.leo_c.hasOwnProperty(p_cmd)) {
+        //@ts-expect-error
+    if ((typeof this.leo_c[p_cmd]) === 'function') {
+        console.log('HAS PROPERTY' + p_cmd + " so were doing it!");
+            //@ts-expect-error
+        this.leo_c[p_cmd]();
+
+    } else {
+        console.log('NO PROPERTY' + p_cmd);
+
+        console.log(this.leo_c);
+
+    }
+
+
+    // if (p_cmd === "selectVisNext") {
+    //     console.log('cmd was selectVisNext');
+    //     // this.leo_c.selectVisNext();
+    //     console.log((typeof this.leo_c[p_cmd]) === 'function');
+    //     this.leo_c[p_cmd]
+
+    // }
+
     vscode.window.showInformationMessage(
         'TODO: Implement ' +
         p_cmd +
@@ -5721,7 +5860,40 @@ public showLogPane(): Thenable&lt;unknown&gt; {
 public test(): Thenable&lt;unknown&gt; {
     vscode.window.showInformationMessage("Test called!");
     console.log("Test called!");
-    console.log("this.leo_c.p.isSelected()", this.leo_c.p.isSelected());
+    // console.log("this.leo_c.p.isSelected()", this.leo_c);
+
+    // * DO LEO COMMAND BY NAME
+    // keepSelection = False  # Set default, optional component of param
+    // if "keep" in param:
+    //     keepSelection = param["keep"]
+
+    const func = this.leo_c.commandsDict['goto-next-visible'];
+    if (!func) {
+        console.error('Leo command not found');
+    } else {
+        console.log('HAS FUNC!');
+
+        const w_binded = func.bind(this.leo_c);
+        w_binded(this.leo_c);
+    }
+
+    // * Example from leoserver "LEO COMMAND BY NAME" method
+    // func = c.commandsDict.get(command_name) # Getting from kebab-cased 'Command Name'
+    // if not func:  # pragma: no cover
+    //     raise ServerError(f"{tag}: Leo command not found: {command_name!r}")
+
+    // p = self._get_p(param)
+    // try:
+    //     if p == c.p:
+    //         value = func(event={"c":c})  # no need for re-selection
+    //     else:
+    //         old_p = c.p  # preserve old position
+    //         c.selectPosition(p)  # set position upon which to perform the command
+    //         value = func(event={"c":c})
+    //         if keepSelection and c.positionExists(old_p):
+    //             # Only if 'keep' old position was set, and old_p still exists
+    //             c.selectPosition(old_p)
+
     return Promise.resolve(true);
 }
 </t>
@@ -6714,7 +6886,7 @@ export const directives_pat: any = null;  // Set below.
   For commands based on functions, use the @g.command decorator.
 */
 
-export const global_commands_dict: { [key: string]: (...args: any[]) =&gt; any } = {};
+export let global_commands_dict: { [key: string]: (...args: any[]) =&gt; any };
 
 export const cmd_instance_dict: { [key: string]: string[] } = {
     // Keys are class names, values are attribute chains.
@@ -8439,6 +8611,14 @@ public check_gnx(c: Commands, gnx: string, v: VNode): void {
 @language typescript
 @tabwidth -4
 
+// Then you create an interface which merges
+// the expected mixins with the same name as your base
+export interface Commands extends CommanderOutlineCommands, CommanderFileCommands { }
+// Apply the mixins into the base class via
+// the JS at runtime
+console.log('Applying mixins');
+
+applyMixins(Commands, [CommanderOutlineCommands, CommanderFileCommands]);
 </t>
 <t tx="felix.20210110223514.1">/**
  * A per-outline class that implements most of Leo's commands. The
@@ -12688,10 +12868,13 @@ public new_vnode_helper(c: Commands, gnx: string | undefined, v: VNode): void {
 }
 
 </t>
-<t tx="felix.20210220194059.1">import { FileCommands } from "./leoFileCommands";
-import { Position, VNode, StackEntry } from "./leoNodes";
-import * as g from './leoGlobals';
+<t tx="felix.20210220194059.1">import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
+import { FileCommands } from "./leoFileCommands";
+import { CommanderOutlineCommands } from "../commands/commanderOutlineCommands";
+import { CommanderFileCommands } from "../commands/commanderFileCommands";
+
+import { Position, VNode, StackEntry } from "./leoNodes";
 
 </t>
 <t tx="felix.20210220195150.1">import { VNode } from "./leoNodes";
@@ -12846,12 +13029,25 @@ public initWrapperLeoFile(c: Commands, fn: string): Commands {
     previousSettings?: any,
     relativeFileName?: any
 ) {
-    this.mFileName = fileName;
+    const c: Commands = this;
+
+    // From Official Ivars
     this.gui = gui || g.app.gui!;
+
+    // From initFileIvars
+    this.mFileName = fileName || '';
+    this.mRelativeFileName = relativeFileName || '';
+
+    // From initObjects
+    const gnx: string = 'hidden-root-vnode-gnx';
     this.fileCommands = new FileCommands(this); // c.fileCommands = DummyFileCommands()
     this.hiddenRootNode = new VNode(this, 'hidden-root-vnode-gnx');
     this.hiddenRootNode.h = '&lt;hidden root vnode&gt;';
     this.fileCommands.gnxDict = {}; // RESET gnxDict
+
+    // From finishCreate
+    c.createCommandNames();
+
 }
 
 </t>
@@ -12865,7 +13061,7 @@ public config: any = {}; // TODO
 
 </t>
 <t tx="felix.20210223220814.2">// Init ivars used while executing a command.
-public commandsDict: { [key: string]: (p: any) =&gt; any } = {}; // Keys are command names, values are functions.
+public commandsDict: { [key: string]: (p?: any) =&gt; any } = {}; // Keys are command names, values are functions.
 public disableCommandsMessage: string = ''; // The presence of this message disables all commands.
 public hookFunction: any = undefined; // One of three places that g.doHook looks for hook functions.
 
@@ -13133,6 +13329,7 @@ public vimCommands: any = undefined;
 // self.subCommanders.append(self.styleSheetManager)
 // else:
 // self.styleSheetManager = None
+
 </t>
 <t tx="felix.20210224000242.1">export interface HoistStackEntry {
     p: Position;
@@ -13326,38 +13523,12 @@ public *all_Root_Children(copy = true): Generator&lt;Position&gt; {
 
 </t>
 <t tx="felix.20211002194716.1"></t>
-<t tx="felix.20211002234840.1">/**
- * Global
- * Apply the mixins into the base class via JS at runtime
- */
-function applyMixins(derivedCtor: any, constructors: any[]) {
-    constructors.forEach((baseCtor) =&gt; {
-        Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) =&gt; {
-            Object.defineProperty(
-                derivedCtor.prototype,
-                name,
-                Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
-                Object.create(null)
-            );
-        });
-    });
-}
-
-</t>
 <t tx="felix.20211003011145.1">/**
  * File Commands Test
  */
 public fileCommandsTest(): void {
     // Test command
-    console.log('fileCommandsTest');
-}
-
-</t>
-<t tx="felix.20211003013517.1">private initObject() {
-
-    const c: Commands = this;
-    const gnx: string = 'hidden-root-vnode-gnx';
-
+    console.log('fileCommandsTest Called !!');
 }
 
 </t>
@@ -14559,6 +14730,1755 @@ public saveAsLeojsFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
     return Promise.resolve(true);
 
     // return Promise.resolve(undefined); // if cancelled
+}
+
+</t>
+<t tx="felix.20211017220236.1">// * Outline commands that used to be defined in leoCommands.py
+// import xml.etree.ElementTree as ElementTree
+// from leo.core import leoGlobals as g
+// from leo.core import leoNodes
+// from leo.core import leoFileCommands
+@others
+</t>
+<t tx="felix.20211017220236.10">def skip_root(v):
+    """
+    generates v nodes in the outline order
+    but skips a subtree of the node with root_gnx
+    """
+    if v.gnx != root_gnx:
+        yield v
+        for ch in v.children:
+            yield from skip_root(ch)
+</t>
+<t tx="felix.20211017220236.11">def translate_gnx(gnx):
+    """
+    allocates a new gnx for all nodes that
+    are not found outside copied tree
+    """
+    if gnx in outside:
+        return gnx
+    return g.app.nodeIndices.computeNewIndex()
+</t>
+<t tx="felix.20211017220236.12">def viter(parent_gnx, xv):
+    """
+    iterates &lt;v&gt; nodes generating tuples:
+
+        (parent_gnx, child_gnx, headline, body)
+
+    skipping the descendants of already seen nodes.
+    """
+    chgnx = xv.attrib.get('t')
+    b = bodies[chgnx]
+    gnx = translation.get(chgnx)
+    if gnx in seen:
+        yield parent_gnx, gnx, heads.get(gnx), b
+    else:
+        seen.add(gnx)
+        h = xv[0].text
+        heads[gnx] = h
+        yield parent_gnx, gnx, h, b
+        for xch in xv[1:]:
+            yield from viter(gnx, xch)
+</t>
+<t tx="felix.20211017220236.13">gnx2v = c.fileCommands.gnxDict
+def getv(gnx):
+    """
+    returns a pair (vnode, is_new) for the given gnx.
+    if node doesn't exist, creates a new one.
+    """
+    v = gnx2v.get(gnx)
+    if v is None:
+        return leoNodes.VNode(c, gnx), True
+    return v, False
+</t>
+<t tx="felix.20211017220236.14">def do_paste(vpar, index):
+    """
+    pastes a new node as a child of vpar at given index
+    """
+    vpargnx = vpar.gnx
+    # the first node is inserted at the given index
+    # and the rest are just appended at parents children
+    # to achieve this we first create a generator object
+    rows = viter(vpargnx, xvnodes[0])
+
+    # then we just take first tuple
+    pgnx, gnx, h, b = next(rows)
+
+    # create vnode
+    v, _ = getv(gnx)
+    v.h = h
+    v.b = b
+
+    # and finally insert it at the given index
+    vpar.children.insert(index, v)
+    v.parents.append(vpar)
+
+    pasted = v  # remember the first node as a return value
+
+    # now we iterate the rest of tuples
+    for pgnx, gnx, h, b in rows:
+
+        # get or create a child `v`
+        v, isNew = getv(gnx)
+        if isNew:
+            v.h = h
+            v.b = b
+            ua = uas.get(gnx)
+            if ua:
+                v.unknownAttributes = ua
+        # get parent node `vpar`
+        vpar = getv(pgnx)[0]
+
+        # and link them
+        vpar.children.append(v)
+        v.parents.append(vpar)
+
+    return pasted
+</t>
+<t tx="felix.20211017220236.15">def undoHelper():
+    v = vpar.children.pop(index)
+    v.parents.remove(vpar)
+    c.redraw(bunch.p)
+</t>
+<t tx="felix.20211017220236.16">def redoHelper():
+    vpar.children.insert(index, pasted)
+    pasted.parents.append(vpar)
+    c.redraw(newp)
+</t>
+<t tx="felix.20211017220236.17"># destination data consists of
+#    1. vpar --- parent v node that should receive pasted child
+#    2. index --- at which pasted child will be
+#    3. parStack --- a stack for creating new position of the pasted node
+#
+# the new position will be:  Position(vpar.children[index], index, parStack)
+# but it can't be calculated yet, before actual paste is done
+if p.isExpanded():
+    # paste as a first child of current position
+    vpar = p.v
+    index = 0
+    parStack = p.stack + [(p.v, p._childIndex)]
+else:
+    # paste after the current position
+    parStack = p.stack
+    vpar = p.stack[-1][0] if p.stack else c.hiddenRootNode
+    index = p._childIndex + 1
+
+</t>
+<t tx="felix.20211017220236.18">@g.commander_command('dump-outline')
+def dumpOutline(self, event=None):
+    """ Dump all nodes in the outline."""
+    c = self
+    seen = {}
+    print('')
+    print('=' * 40)
+    v = c.hiddenRootNode
+    v.dump()
+    seen[v] = True
+    for p in c.all_positions():
+        if p.v not in seen:
+            seen[p.v] = True
+            p.v.dump()
+</t>
+<t tx="felix.20211017220236.19"></t>
+<t tx="felix.20211017220236.2"></t>
+<t tx="felix.20211017220236.20">@g.commander_command('contract-all')
+def contractAllHeadlinesCommand(self, event=None, redrawFlag=True):
+    """Contract all nodes in the outline."""
+    # The helper does all the work.
+    c = self
+    c.contractAllHeadlines(event=event, redrawFlag=redrawFlag)
+</t>
+<t tx="felix.20211017220236.21">@g.commander_command('contract-all-other-nodes')
+def contractAllOtherNodes(self, event=None):
+    """
+    Contract all nodes except those needed to make the
+    presently selected node visible.
+    """
+    c = self
+    leaveOpen = c.p
+    for p in c.rootPosition().self_and_siblings():
+        contractIfNotCurrent(c, p, leaveOpen)
+    c.redraw()
+</t>
+<t tx="felix.20211017220236.22">def contractIfNotCurrent(c, p, leaveOpen):
+    if p == leaveOpen or not p.isAncestorOf(leaveOpen):
+        p.contract()
+    for child in p.children():
+        if child != leaveOpen and child.isAncestorOf(leaveOpen):
+            contractIfNotCurrent(c, child, leaveOpen)
+        else:
+            for p2 in child.self_and_subtree():
+                p2.contract()
+</t>
+<t tx="felix.20211017220236.23">@g.commander_command('contract-all-subheads')
+def contractAllSubheads(self, event=None):
+    """Contract all children of the presently selected node."""
+    c, p = self, self.p
+    if not p:
+        return
+    child = p.firstChild()
+    c.contractSubtree(p)
+    while child:
+        c.contractSubtree(child)
+        child = child.next()
+    c.redraw(p)
+</t>
+<t tx="felix.20211017220236.24">@g.commander_command('contract-node')
+def contractNode(self, event=None):
+    """Contract the presently selected node."""
+    c = self
+    p = c.p
+    c.endEditing()
+    p.contract()
+    c.redraw_after_contract(p)
+    c.selectPosition(p)
+</t>
+<t tx="felix.20211017220236.25">@g.commander_command('contract-or-go-left')
+def contractNodeOrGoToParent(self, event=None):
+    """Simulate the left Arrow Key in folder of Windows Explorer."""
+    c, cc, p = self, self.chapterController, self.p
+    parent = p.parent()
+    redraw = False
+    # Bug fix: 2016/04/19: test p.v.isExpanded().
+    if p.hasChildren() and (p.v.isExpanded() or p.isExpanded()):
+        c.contractNode()
+    elif parent and parent.isVisible(c):
+        # Contract all children first.
+        if c.collapse_on_lt_arrow:
+            for child in parent.children():
+                if child.isExpanded():
+                    child.contract()
+                    if child.hasChildren():
+                        redraw = True
+        if cc and cc.inChapter and parent.h.startswith('@chapter '):
+            pass
+        else:
+            c.goToParent()
+    if redraw:
+        # A *child* should be collapsed.  Do a *full* redraw.
+        c.redraw()
+</t>
+<t tx="felix.20211017220236.26">@g.commander_command('contract-parent')
+def contractParent(self, event=None):
+    """Contract the parent of the presently selected node."""
+    c = self
+    c.endEditing()
+    p = c.p
+    parent = p.parent()
+    if not parent:
+        return
+    parent.contract()
+    c.redraw_after_contract(p=parent)
+</t>
+<t tx="felix.20211017220236.27">@g.commander_command('expand-all')
+def expandAllHeadlines(self, event=None):
+    """Expand all headlines.
+    Warning: this can take a long time for large outlines."""
+    c = self
+    c.endEditing()
+    p = c.rootPosition()
+    while p:
+        c.expandSubtree(p, redraw=False)
+        p.moveToNext()
+    c.redraw_after_expand(p=c.rootPosition())
+    c.expansionLevel = 0  # Reset expansion level.
+</t>
+<t tx="felix.20211017220236.28">@g.commander_command('expand-all-subheads')
+def expandAllSubheads(self, event=None):
+    """Expand all children of the presently selected node."""
+    c, p = self, self.p
+    if not p:
+        return
+    child = p.firstChild()
+    c.expandSubtree(p)
+    while child:
+        c.expandSubtree(child)
+        child = child.next()
+    c.redraw(p)
+</t>
+<t tx="felix.20211017220236.29">@g.commander_command('expand-to-level-1')
+def expandLevel1(self, event=None):
+    """Expand the outline to level 1"""
+    self.expandToLevel(1)
+
+@g.commander_command('expand-to-level-2')
+def expandLevel2(self, event=None):
+    """Expand the outline to level 2"""
+    self.expandToLevel(2)
+
+@g.commander_command('expand-to-level-3')
+def expandLevel3(self, event=None):
+    """Expand the outline to level 3"""
+    self.expandToLevel(3)
+
+@g.commander_command('expand-to-level-4')
+def expandLevel4(self, event=None):
+    """Expand the outline to level 4"""
+    self.expandToLevel(4)
+
+@g.commander_command('expand-to-level-5')
+def expandLevel5(self, event=None):
+    """Expand the outline to level 5"""
+    self.expandToLevel(5)
+
+@g.commander_command('expand-to-level-6')
+def expandLevel6(self, event=None):
+    """Expand the outline to level 6"""
+    self.expandToLevel(6)
+
+@g.commander_command('expand-to-level-7')
+def expandLevel7(self, event=None):
+    """Expand the outline to level 7"""
+    self.expandToLevel(7)
+
+@g.commander_command('expand-to-level-8')
+def expandLevel8(self, event=None):
+    """Expand the outline to level 8"""
+    self.expandToLevel(8)
+
+@g.commander_command('expand-to-level-9')
+def expandLevel9(self, event=None):
+    """Expand the outline to level 9"""
+    self.expandToLevel(9)
+</t>
+<t tx="felix.20211017220236.3">// @g.commander_command('copy-node')
+// def copyOutline(self, event=None):
+//     """Copy the selected outline to the clipboard."""
+//     # Copying an outline has no undo consequences.
+//     c = self
+//     c.endEditing()
+//     s = c.fileCommands.outline_to_clipboard_string()
+//     g.app.paste_c = c
+//     g.app.gui.replaceClipboardWith(s)
+
+</t>
+<t tx="felix.20211017220236.30">@g.commander_command('expand-next-level')
+def expandNextLevel(self, event=None):
+    """
+    Increase the expansion level of the outline and
+    Expand all nodes at that level or lower.
+    """
+    c = self
+    # Expansion levels are now local to a particular tree.
+    if c.expansionNode != c.p:
+        c.expansionLevel = 1
+        c.expansionNode = c.p.copy()
+    self.expandToLevel(c.expansionLevel + 1)
+</t>
+<t tx="felix.20211017220236.31">@g.commander_command('expand-node')
+def expandNode(self, event=None):
+    """Expand the presently selected node."""
+    c = self
+    p = c.p
+    c.endEditing()
+    p.expand()
+    c.redraw_after_expand(p)
+    c.selectPosition(p)
+</t>
+<t tx="felix.20211017220236.32">@g.commander_command('expand-and-go-right')
+def expandNodeAndGoToFirstChild(self, event=None):
+    """If a node has children, expand it if needed and go to the first child."""
+    c, p = self, self.p
+    c.endEditing()
+    if p.hasChildren():
+        if not p.isExpanded():
+            c.expandNode()
+        c.selectPosition(p.firstChild())
+    c.treeFocusHelper()
+</t>
+<t tx="felix.20211017220236.33">@g.commander_command('expand-or-go-right')
+def expandNodeOrGoToFirstChild(self, event=None):
+    """
+    Simulate the Right Arrow Key in folder of Windows Explorer.
+    if c.p has no children, do nothing.
+    Otherwise, if c.p is expanded, select the first child.
+    Otherwise, expand c.p.
+    """
+    c, p = self, self.p
+    c.endEditing()
+    if p.hasChildren():
+        if p.isExpanded():
+            c.redraw_after_expand(p.firstChild())
+        else:
+            c.expandNode()
+</t>
+<t tx="felix.20211017220236.34">@g.commander_command('expand-ancestors-only')
+def expandOnlyAncestorsOfNode(self, event=None, p=None):
+    """Contract all nodes in the outline."""
+    c = self
+    level = 1
+    if p:
+        c.selectPosition(p)  # 2013/12/25
+    root = c.p
+    for p in c.all_unique_positions():
+        p.v.expandedPositions = []
+        p.v.contract()
+    for p in root.parents():
+        p.expand()
+        level += 1
+    c.expansionLevel = level  # Reset expansion level.
+</t>
+<t tx="felix.20211017220236.35">@g.commander_command('expand-prev-level')
+def expandPrevLevel(self, event=None):
+    """Decrease the expansion level of the outline and
+    Expand all nodes at that level or lower."""
+    c = self
+    # Expansion levels are now local to a particular tree.
+    if c.expansionNode != c.p:
+        c.expansionLevel = 1
+        c.expansionNode = c.p.copy()
+    self.expandToLevel(max(1, c.expansionLevel - 1))
+</t>
+<t tx="felix.20211017220236.36">@g.commander_command('check-outline')
+def fullCheckOutline(self, event=None):
+    """
+    Performs a full check of the consistency of a .leo file.
+
+    As of Leo 5.1, Leo performs checks of gnx's and outline structure
+    before writes and after reads, pastes and undo/redo.
+    """
+    c = self
+    return c.checkOutline(check_links=True)
+</t>
+<t tx="felix.20211017220236.37"></t>
+<t tx="felix.20211017220236.38">@g.commander_command('find-next-clone')
+def findNextClone(self, event=None):
+    """Select the next cloned node."""
+    c, p = self, self.p
+    cc = c.chapterController
+    if not p:
+        return
+    if p.isCloned():
+        p.moveToThreadNext()
+    flag = False
+    while p:
+        if p.isCloned():
+            flag = True
+            break
+        else:
+            p.moveToThreadNext()
+    if flag:
+        if cc:
+            # name = cc.findChapterNameForPosition(p)
+            cc.selectChapterByName('main')
+        c.selectPosition(p)
+        c.redraw_after_select(p)
+    else:
+        g.blue('no more clones')
+</t>
+<t tx="felix.20211017220236.39">@g.commander_command('go-forward')
+def goNextVisitedNode(self, event=None):
+    """Select the next visited node."""
+    c = self
+    p = c.nodeHistory.goNext()
+    if p:
+        c.nodeHistory.skipBeadUpdate = True
+        try:
+            c.selectPosition(p)
+        finally:
+            c.nodeHistory.skipBeadUpdate = False
+            c.redraw_after_select(p)
+</t>
+<t tx="felix.20211017220236.4">// @g.commander_command('cut-node')
+// def cutOutline(self, event=None):
+//     """Delete the selected outline and send it to the clipboard."""
+//     c = self
+//     if c.canDeleteHeadline():
+//         c.copyOutline()
+//         c.deleteOutline(op_name="Cut Node")
+//         c.recolor()
+
+</t>
+<t tx="felix.20211017220236.40">@g.commander_command('go-back')
+def goPrevVisitedNode(self, event=None):
+    """Select the previously visited node."""
+    c = self
+    p = c.nodeHistory.goPrev()
+    if p:
+        c.nodeHistory.skipBeadUpdate = True
+        try:
+            c.selectPosition(p)
+        finally:
+            c.nodeHistory.skipBeadUpdate = False
+            c.redraw_after_select(p)
+</t>
+<t tx="felix.20211017220236.41">@g.commander_command('goto-first-node')
+def goToFirstNode(self, event=None):
+    """
+    Select the first node of the entire outline.
+    
+    But (#2167), go to the first node of a chapter or hoist
+    if Leo is hoisted or within a chapter.
+    """
+    c = self
+    p = c.rootPosition()
+    c.expandOnlyAncestorsOfNode(p=p)
+    c.redraw()
+</t>
+<t tx="felix.20211017220236.42">@g.commander_command('goto-first-sibling')
+def goToFirstSibling(self, event=None):
+    """Select the first sibling of the selected node."""
+    c, p = self, self.p
+    if p.hasBack():
+        while p.hasBack():
+            p.moveToBack()
+    c.treeSelectHelper(p)
+</t>
+<t tx="felix.20211017220236.43">@g.commander_command('goto-first-visible-node')
+def goToFirstVisibleNode(self, event=None):
+    """Select the first visible node of the selected chapter or hoist."""
+    c = self
+    p = c.firstVisible()
+    if p:
+        c.expandOnlyAncestorsOfNode(p=p)
+        c.redraw()
+</t>
+<t tx="felix.20211017220236.44">@g.commander_command('goto-last-node')
+def goToLastNode(self, event=None):
+    """Select the last node in the entire tree."""
+    c = self
+    p = c.rootPosition()
+    while p and p.hasThreadNext():
+        p.moveToThreadNext()
+    c.expandOnlyAncestorsOfNode(p=p)
+    c.redraw()
+</t>
+<t tx="felix.20211017220236.45">@g.commander_command('goto-last-sibling')
+def goToLastSibling(self, event=None):
+    """Select the last sibling of the selected node."""
+    c, p = self, self.p
+    if p.hasNext():
+        while p.hasNext():
+            p.moveToNext()
+    c.treeSelectHelper(p)
+</t>
+<t tx="felix.20211017220236.46">@g.commander_command('goto-last-visible-node')
+def goToLastVisibleNode(self, event=None):
+    """Select the last visible node of selected chapter or hoist."""
+    c = self
+    p = c.lastVisible()
+    if p:
+        c.expandOnlyAncestorsOfNode(p=p)
+        c.redraw()
+</t>
+<t tx="felix.20211017220236.47">@g.commander_command('goto-next-clone')
+def goToNextClone(self, event=None):
+    """
+    Select the next node that is a clone of the selected node.
+    If the selected node is not a clone, do find-next-clone.
+    """
+    c, p = self, self.p
+    cc = c.chapterController
+    if not p:
+        return
+    if not p.isCloned():
+        c.findNextClone()
+        return
+    v = p.v
+    p.moveToThreadNext()
+    wrapped = False
+    while 1:
+        if p and p.v == v:
+            break
+        elif p:
+            p.moveToThreadNext()
+        elif wrapped:
+            break
+        else:
+            wrapped = True
+            p = c.rootPosition()
+    if p:
+        c.expandAllAncestors(p)
+        if cc:
+            # #252: goto-next clone activate chapter.
+            chapter = cc.getSelectedChapter()
+            old_name = chapter and chapter.name
+            new_name = cc.findChapterNameForPosition(p)
+            if new_name == old_name:
+                # Always do a full redraw.
+                c.redraw(p)
+            else:
+                if 1:
+                    cc.selectChapterByName(new_name)
+                    c.redraw(p)
+                else:  # Old code.
+                    c.selectPosition(p)
+                    cc.selectChapterByName(new_name)
+        else:
+            # Always do a full redraw.
+            c.redraw(p)
+    else:
+        g.blue('done')
+</t>
+<t tx="felix.20211017220236.48">@g.commander_command('goto-next-changed')
+def goToNextDirtyHeadline(self, event=None):
+    """Select the node that is marked as changed."""
+    c, p = self, self.p
+    if not p:
+        return
+    p.moveToThreadNext()
+    wrapped = False
+    while 1:
+        if p and p.isDirty():
+            break
+        elif p:
+            p.moveToThreadNext()
+        elif wrapped:
+            break
+        else:
+            wrapped = True
+            p = c.rootPosition()
+    if not p:
+        g.blue('done')
+    c.treeSelectHelper(p)  # Sets focus.
+</t>
+<t tx="felix.20211017220236.49">@g.commander_command('goto-next-marked')
+def goToNextMarkedHeadline(self, event=None):
+    """Select the next marked node."""
+    c, p = self, self.p
+    if not p:
+        return
+    p.moveToThreadNext()
+    wrapped = False
+    while 1:
+        if p and p.isMarked():
+            break
+        elif p:
+            p.moveToThreadNext()
+        elif wrapped:
+            break
+        else:
+            wrapped = True
+            p = c.rootPosition()
+    if not p:
+        g.blue('done')
+    c.treeSelectHelper(p)  # Sets focus.
+</t>
+<t tx="felix.20211017220236.5">// @g.commander_command('paste-node')
+// def pasteOutline(self,
+//     event=None,
+//     redrawFlag=True,
+//     s=None,
+//     undoFlag=True
+// ):
+//     """
+//     Paste an outline into the present outline from the clipboard.
+//     Nodes do *not* retain their original identify.
+//     """
+//     c = self
+//     if s is None:
+//         s = g.app.gui.getTextFromClipboard()
+//     c.endEditing()
+//     if not s or not c.canPasteOutline(s):
+//         return None  # This should never happen.
+//     isLeo = g.match(s, 0, g.app.prolog_prefix_string)
+//     if not isLeo:
+//         return None
+//     # Get *position* to be pasted.
+//     pasted = c.fileCommands.getLeoOutlineFromClipboard(s)
+//     if not pasted:
+//         # Leo no longer supports MORE outlines. Use import-MORE-files instead.
+//         return None
+//     # Validate.
+//     c.validateOutline()
+//     c.checkOutline()
+//     # Handle the "before" data for undo.
+//     if undoFlag:
+//         undoData = c.undoer.beforeInsertNode(c.p,
+//             pasteAsClone=False,
+//             copiedBunchList=[],
+//         )
+//     # Paste the node into the outline.
+//     c.selectPosition(pasted)
+//     pasted.setDirty()
+//     c.setChanged(redrawFlag=redrawFlag)
+//         # Prevent flash when fixing #387.
+//     back = pasted.back()
+//     if back and back.hasChildren() and back.isExpanded():
+//         pasted.moveToNthChildOf(back, 0)
+//     # Finish the command.
+//     if undoFlag:
+//         c.undoer.afterInsertNode(pasted, 'Paste Node', undoData)
+//     if redrawFlag:
+//         c.redraw(pasted)
+//         c.recolor()
+//     return pasted
+
+</t>
+<t tx="felix.20211017220236.50">@g.commander_command('goto-next-sibling')
+def goToNextSibling(self, event=None):
+    """Select the next sibling of the selected node."""
+    c, p = self, self.p
+    c.treeSelectHelper(p and p.next())
+</t>
+<t tx="felix.20211017220236.51">@g.commander_command('goto-parent')
+def goToParent(self, event=None):
+    """Select the parent of the selected node."""
+    c, p = self, self.p
+    c.treeSelectHelper(p and p.parent())
+</t>
+<t tx="felix.20211017220236.52">@g.commander_command('goto-prev-marked')
+def goToPrevMarkedHeadline(self, event=None):
+    """Select the next marked node."""
+    c, p = self, self.p
+    if not p:
+        return
+    p.moveToThreadBack()
+    wrapped = False
+    while 1:
+        if p and p.isMarked():
+            break
+        elif p:
+            p.moveToThreadBack()
+        elif wrapped:
+            break
+        else:
+            wrapped = True
+            p = c.rootPosition()
+    if not p:
+        g.blue('done')
+    c.treeSelectHelper(p)  # Sets focus.
+</t>
+<t tx="felix.20211017220236.53">@g.commander_command('goto-prev-sibling')
+def goToPrevSibling(self, event=None):
+    """Select the previous sibling of the selected node."""
+    c, p = self, self.p
+    c.treeSelectHelper(p and p.back())
+</t>
+<t tx="felix.20211017220236.54">@g.commander_command('goto-prev-node')
+def selectThreadBack(self, event=None):
+    """Select the node preceding the selected node in outline order."""
+    c, p = self, self.p
+    if not p:
+        return
+    p.moveToThreadBack()
+    c.treeSelectHelper(p)
+</t>
+<t tx="felix.20211017220236.55">@g.commander_command('goto-next-node')
+def selectThreadNext(self, event=None):
+    """Select the node following the selected node in outline order."""
+    c, p = self, self.p
+    if not p:
+        return
+    p.moveToThreadNext()
+    c.treeSelectHelper(p)
+</t>
+<t tx="felix.20211017220236.56">@g.commander_command('goto-prev-visible')
+def selectVisBack(self, event=None):
+    """Select the visible node preceding the presently selected node."""
+    # This has an up arrow for a control key.
+    c, p = self, self.p
+    if not p:
+        return
+    if c.canSelectVisBack():
+        p.moveToVisBack(c)
+        c.treeSelectHelper(p)
+    else:
+        c.endEditing()  # 2011/05/28: A special case.
+</t>
+<t tx="felix.20211017220236.57">@g.commander_command('goto-next-visible')
+def selectVisNext(self, event=None):
+    """Select the visible node following the presently selected node."""
+    c, p = self, self.p
+    if not p:
+        return
+    if c.canSelectVisNext():
+        p.moveToVisNext(c)
+        c.treeSelectHelper(p)
+    else:
+        c.endEditing()  # 2011/05/28: A special case.
+</t>
+<t tx="felix.20211017220236.58"></t>
+<t tx="felix.20211017220236.59">@g.commander_command('de-hoist')
+@g.commander_command('dehoist')
+def dehoist(self, event=None):
+    """Undo a previous hoist of an outline."""
+    c = self
+    if not c.p or not c.hoistStack:
+        return
+    # Don't de-hoist an @chapter node.
+    if c.chapterController and c.p.h.startswith('@chapter '):
+        if not g.unitTesting:
+            g.es('can not de-hoist an @chapter node.', color='blue')
+        return
+    bunch = c.hoistStack.pop()
+    p = bunch.p
+    if not p:
+        p.expand()
+    else:
+        p.contract()
+    c.setCurrentPosition(p)
+    c.redraw()
+    c.frame.clearStatusLine()
+    c.frame.putStatusLine("De-Hoist: " + p.h)
+    c.undoer.afterDehoist(p, 'DeHoist')
+    g.doHook('hoist-changed', c=c)
+</t>
+<t tx="felix.20211017220236.6">@g.commander_command('paste-retaining-clones')
+def pasteOutlineRetainingClones(self,
+    event=None,
+    redrawFlag=True,
+    s=None,
+    undoFlag=True,
+):
+    """
+    Paste an outline into the present outline from the clipboard.
+    Nodes *retain* their original identify.
+    """
+    c = self
+    if s is None:
+        s = g.app.gui.getTextFromClipboard()
+    c.endEditing()
+    if not s or not c.canPasteOutline(s):
+        return None  # This should never happen.
+    isLeo = g.match(s, 0, g.app.prolog_prefix_string)
+    if not isLeo:
+        return None
+    # Get *position* to be pasted.
+    pasted = c.fileCommands.getLeoOutlineFromClipboardRetainingClones(s)
+    if not pasted:
+        # Leo no longer supports MORE outlines. Use import-MORE-files instead.
+        return None
+    # Validate.
+    c.validateOutline()
+    c.checkOutline()
+    # Handle the "before" data for undo.
+    if undoFlag:
+        vnodeInfoDict = computeVnodeInfoDict(c)
+        undoData = c.undoer.beforeInsertNode(c.p,
+            pasteAsClone=True,
+            copiedBunchList=computeCopiedBunchList(c, pasted, vnodeInfoDict),
+        )
+    # Paste the node into the outline.
+    c.selectPosition(pasted)
+    pasted.setDirty()
+    c.setChanged(redrawFlag=redrawFlag)
+        # Prevent flash when fixing #387.
+    back = pasted.back()
+    if back and back.hasChildren() and back.isExpanded():
+        pasted.moveToNthChildOf(back, 0)
+        pasted.setDirty()
+    # Set dirty bits for ancestors of *all* pasted nodes.
+    for p in pasted.self_and_subtree():
+        p.setAllAncestorAtFileNodesDirty()
+    # Finish the command.
+    if undoFlag:
+        c.undoer.afterInsertNode(pasted, 'Paste As Clone', undoData)
+    if redrawFlag:
+        c.redraw(pasted)
+        c.recolor()
+    return pasted
+</t>
+<t tx="felix.20211017220236.60">@g.commander_command('clear-all-hoists')
+def clearAllHoists(self, event=None):
+    """Undo a previous hoist of an outline."""
+    c = self
+    c.hoistStack = []
+    c.frame.putStatusLine("Hoists cleared")
+    g.doHook('hoist-changed', c=c)
+</t>
+<t tx="felix.20211017220236.61">@g.commander_command('hoist')
+def hoist(self, event=None):
+    """Make only the selected outline visible."""
+    c = self
+    p = c.p
+    if not p:
+        return
+    # Don't hoist an @chapter node.
+    if c.chapterController and p.h.startswith('@chapter '):
+        if not g.unitTesting:
+            g.es('can not hoist an @chapter node.', color='blue')
+        return
+    # Remember the expansion state.
+    bunch = g.Bunch(p=p.copy(), expanded=p.isExpanded())
+    c.hoistStack.append(bunch)
+    p.expand()
+    c.redraw(p)
+    c.frame.clearStatusLine()
+    c.frame.putStatusLine("Hoist: " + p.h)
+    c.undoer.afterHoist(p, 'Hoist')
+    g.doHook('hoist-changed', c=c)
+</t>
+<t tx="felix.20211017220236.62"></t>
+<t tx="felix.20211017220236.63">@g.commander_command('clone-node')
+def clone(self, event=None):
+    """Create a clone of the selected outline."""
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return None
+    undoData = c.undoer.beforeCloneNode(p)
+    c.endEditing()  # Capture any changes to the headline.
+    clone = p.clone()
+    clone.setDirty()
+    c.setChanged()
+    if c.validateOutline():
+        u.afterCloneNode(clone, 'Clone Node', undoData)
+        c.redraw(clone)
+        c.treeWantsFocus()
+        return clone  # For mod_labels and chapters plugins.
+    clone.doDelete()
+    c.setCurrentPosition(p)
+    return None
+</t>
+<t tx="felix.20211017220236.64">@g.commander_command('clone-to-at-spot')
+def cloneToAtSpot(self, event=None):
+    """
+    Create a clone of the selected node and move it to the last @spot node
+    of the outline. Create the @spot node if necessary.
+    """
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return
+    # 2015/12/27: fix bug 220: do not allow clone-to-at-spot on @spot node.
+    if p.h.startswith('@spot'):
+        g.es("can not clone @spot node", color='red')
+        return
+    last_spot = None
+    for p2 in c.all_positions():
+        if g.match_word(p2.h, 0, '@spot'):
+            last_spot = p2.copy()
+    if not last_spot:
+        last = c.lastTopLevel()
+        last_spot = last.insertAfter()
+        last_spot.h = '@spot'
+    undoData = c.undoer.beforeCloneNode(p)
+    c.endEditing()  # Capture any changes to the headline.
+    clone = p.copy()
+    clone._linkAsNthChild(last_spot, n=last_spot.numberOfChildren())
+    clone.setDirty()
+    c.setChanged()
+    if c.validateOutline():
+        u.afterCloneNode(clone, 'Clone Node', undoData)
+        c.contractAllHeadlines()
+        c.redraw()
+        c.selectPosition(clone)
+    else:
+        clone.doDelete()
+        c.setCurrentPosition(p)
+</t>
+<t tx="felix.20211017220236.65">@g.commander_command('clone-node-to-last-node')
+def cloneToLastNode(self, event=None):
+    """
+    Clone the selected node and move it to the last node.
+    Do *not* change the selected node.
+    """
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return
+    prev = p.copy()
+    undoData = c.undoer.beforeCloneNode(p)
+    c.endEditing()  # Capture any changes to the headline.
+    clone = p.clone()
+    last = c.rootPosition()
+    while last and last.hasNext():
+        last.moveToNext()
+    clone.moveAfter(last)
+    clone.setDirty()
+    c.setChanged()
+    u.afterCloneNode(clone, 'Clone Node To Last', undoData)
+    c.redraw(prev)
+    # return clone # For mod_labels and chapters plugins.
+</t>
+<t tx="felix.20211017220236.66">@g.commander_command('delete-node')
+def deleteOutline(self, event=None, op_name="Delete Node"):
+    """Deletes the selected outline."""
+    c, u = self, self.undoer
+    p = c.p
+    if not p:
+        return
+    c.endEditing()  # Make sure we capture the headline for Undo.
+    if False:  # c.config.getBool('select-next-after-delete'):
+        # #721: Optionally select next node after delete.
+        if p.hasVisNext(c):
+            newNode = p.visNext(c)
+        elif p.hasParent():
+            newNode = p.parent()
+        else:
+            newNode = p.back()  # _not_ p.visBack(): we are at the top level.
+    else:
+        # Legacy: select previous node if possible.
+        if p.hasVisBack(c):
+            newNode = p.visBack(c)
+        else:
+            newNode = p.next()  # _not_ p.visNext(): we are at the top level.
+    if not newNode:
+        return
+    undoData = u.beforeDeleteNode(p)
+    p.setDirty()
+    p.doDelete(newNode)
+    c.setChanged()
+    u.afterDeleteNode(newNode, op_name, undoData)
+    c.redraw(newNode)
+    c.validateOutline()
+</t>
+<t tx="felix.20211017220236.67">@g.commander_command('insert-child')
+def insertChild(self, event=None):
+    """Insert a node after the presently selected node."""
+    c = self
+    return c.insertHeadline(event=event, op_name='Insert Child', as_child=True)
+</t>
+<t tx="felix.20211017220236.68">@g.commander_command('insert-node')
+def insertHeadline(self, event=None, op_name="Insert Node", as_child=False):
+    """Insert a node after the presently selected node."""
+    c = self
+    # Fix #600.
+    return insertHeadlineHelper(c, event=event, as_child=as_child)
+
+@g.commander_command('insert-as-first-child')
+def insertNodeAsFirstChild(self, event=None):
+    """Insert a node as the last child of the previous node."""
+    c = self
+    return insertHeadlineHelper(c, event=event, as_first_child=True)
+
+@g.commander_command('insert-as-last-child')
+def insertNodeAsLastChild(self, event=None):
+    """Insert a node as the last child of the previous node."""
+    c = self
+    return insertHeadlineHelper(c, event=event, as_last_child=True)
+</t>
+<t tx="felix.20211017220236.69">def insertHeadlineHelper(c,
+    event=None,
+    op_name="Insert Node",
+    as_child=False,
+    as_first_child=False,
+    as_last_child=False,
+):
+    """Insert a node after the presently selected node."""
+    u = c.undoer
+    current = c.p
+    if not current:
+        return None
+    c.endEditing()
+    undoData = c.undoer.beforeInsertNode(current)
+    if as_first_child:
+        p = current.insertAsNthChild(0)
+    elif as_last_child:
+        p = current.insertAsLastChild()
+    elif (
+        as_child or
+        (current.hasChildren() and current.isExpanded()) or
+        (c.hoistStack and current == c.hoistStack[-1].p)
+    ):
+        # Make sure the new node is visible when hoisting.
+        if c.config.getBool('insert-new-nodes-at-end'):
+            p = current.insertAsLastChild()
+        else:
+            p = current.insertAsNthChild(0)
+    else:
+        p = current.insertAfter()
+    g.doHook('create-node', c=c, p=p)
+    p.setDirty()
+    c.setChanged()
+    u.afterInsertNode(p, op_name, undoData)
+    c.redrawAndEdit(p, selectAll=True)
+    return p
+</t>
+<t tx="felix.20211017220236.7">def computeCopiedBunchList(c, pasted, vnodeInfoDict):
+    """Create a dict containing only copied vnodes."""
+    d = {}
+    for p in pasted.self_and_subtree(copy=False):
+        d[p.v] = p.v
+    aList = []
+    for v in vnodeInfoDict:
+        if d.get(v):
+            bunch = vnodeInfoDict.get(v)
+            aList.append(bunch)
+    return aList
+</t>
+<t tx="felix.20211017220236.70">@g.commander_command('insert-node-before')
+def insertHeadlineBefore(self, event=None):
+    """Insert a node before the presently selected node."""
+    c, current, u = self, self.p, self.undoer
+    op_name = 'Insert Node Before'
+    if not current:
+        return None
+    # Can not insert before the base of a hoist.
+    if c.hoistStack and current == c.hoistStack[-1].p:
+        g.warning('can not insert a node before the base of a hoist')
+        return None
+    c.endEditing()
+    undoData = u.beforeInsertNode(current)
+    p = current.insertBefore()
+    g.doHook('create-node', c=c, p=p)
+    p.setDirty()
+    c.setChanged()
+    u.afterInsertNode(p, op_name, undoData)
+    c.redrawAndEdit(p, selectAll=True)
+    return p
+</t>
+<t tx="felix.20211017220236.71"></t>
+<t tx="felix.20211017220236.72">@g.commander_command('clone-marked-nodes')
+def cloneMarked(self, event=None):
+    """Clone all marked nodes as children of a new node."""
+    c, u = self, self.undoer
+    p1 = c.p.copy()
+    # Create a new node to hold clones.
+    parent = p1.insertAfter()
+    parent.h = 'Clones of marked nodes'
+    cloned, n, p = [], 0, c.rootPosition()
+    while p:
+        # Careful: don't clone already-cloned nodes.
+        if p == parent:
+            p.moveToNodeAfterTree()
+        elif p.isMarked() and p.v not in cloned:
+            cloned.append(p.v)
+            if 0:  # old code
+                # Calling p.clone would cause problems
+                p.clone().moveToLastChildOf(parent)
+            else:  # New code.
+                # Create the clone directly as a child of parent.
+                p2 = p.copy()
+                n = parent.numberOfChildren()
+                p2._linkAsNthChild(parent, n)
+            p.moveToNodeAfterTree()
+            n += 1
+        else:
+            p.moveToThreadNext()
+    if n:
+        c.setChanged()
+        parent.expand()
+        c.selectPosition(parent)
+        u.afterCloneMarkedNodes(p1)
+    else:
+        parent.doDelete()
+        c.selectPosition(p1)
+    if not g.unitTesting:
+        g.blue(f"cloned {n} nodes")
+    c.redraw()
+</t>
+<t tx="felix.20211017220236.73">@g.commander_command('copy-marked-nodes')
+def copyMarked(self, event=None):
+    """Copy all marked nodes as children of a new node."""
+    c, u = self, self.undoer
+    p1 = c.p.copy()
+    # Create a new node to hold clones.
+    parent = p1.insertAfter()
+    parent.h = 'Copies of marked nodes'
+    copied, n, p = [], 0, c.rootPosition()
+    while p:
+        # Careful: don't clone already-cloned nodes.
+        if p == parent:
+            p.moveToNodeAfterTree()
+        elif p.isMarked() and p.v not in copied:
+            copied.append(p.v)
+            p2 = p.copyWithNewVnodes(copyMarked=True)
+            p2._linkAsNthChild(parent, n)
+            p.moveToNodeAfterTree()
+            n += 1
+        else:
+            p.moveToThreadNext()
+    if n:
+        c.setChanged()
+        parent.expand()
+        c.selectPosition(parent)
+        u.afterCopyMarkedNodes(p1)
+    else:
+        parent.doDelete()
+        c.selectPosition(p1)
+    if not g.unitTesting:
+        g.blue(f"copied {n} nodes")
+    c.redraw()
+</t>
+<t tx="felix.20211017220236.74">@g.commander_command('delete-marked-nodes')
+def deleteMarked(self, event=None):
+    """Delete all marked nodes."""
+    c, u = self, self.undoer
+    p1 = c.p.copy()
+    undo_data, p = [], c.rootPosition()
+    while p:
+        if p.isMarked():
+            undo_data.append(p.copy())
+            next = p.positionAfterDeletedTree()
+            p.doDelete()
+            p = next
+        else:
+            p.moveToThreadNext()
+    if undo_data:
+        u.afterDeleteMarkedNodes(undo_data, p1)
+        if not g.unitTesting:
+            g.blue(f"deleted {len(undo_data)} nodes")
+        c.setChanged()
+    # Don't even *think* about restoring the old position.
+    c.contractAllHeadlines()
+    c.selectPosition(c.rootPosition())
+    c.redraw()
+</t>
+<t tx="felix.20211017220236.75">@g.commander_command('move-marked-nodes')
+def moveMarked(self, event=None):
+    """
+    Move all marked nodes as children of a new node.
+    This command is not undoable.
+    Consider using clone-marked-nodes, followed by copy/paste instead.
+    """
+    c = self
+    p1 = c.p.copy()
+    # Check for marks.
+    for v in c.all_unique_nodes():
+        if v.isMarked():
+            break
+    else:
+        g.warning('no marked nodes')
+        return
+    result = g.app.gui.runAskYesNoDialog(c,
+        'Move Marked Nodes?',
+        message='move-marked-nodes is not undoable\nProceed?',
+    )
+    if result == 'no':
+        return
+    # Create a new *root* node to hold the moved nodes.
+    # This node's position remains stable while other nodes move.
+    parent = createMoveMarkedNode(c)
+    assert not parent.isMarked()
+    moved = []
+    p = c.rootPosition()
+    while p:
+        assert parent == c.rootPosition()
+        # Careful: don't move already-moved nodes.
+        if p.isMarked() and not parent.isAncestorOf(p):
+            moved.append(p.copy())
+            next = p.positionAfterDeletedTree()
+            p.moveToLastChildOf(parent)
+                # This does not change parent's position.
+            p = next
+        else:
+            p.moveToThreadNext()
+    if moved:
+        # Find a position p2 outside of parent's tree with p2.v == p1.v.
+        # Such a position may not exist.
+        p2 = c.rootPosition()
+        while p2:
+            if p2 == parent:
+                p2.moveToNodeAfterTree()
+            elif p2.v == p1.v:
+                break
+            else:
+                p2.moveToThreadNext()
+        else:
+            # Not found.  Move to last top-level.
+            p2 = c.lastTopLevel()
+        parent.moveAfter(p2)
+        # u.afterMoveMarkedNodes(moved, p1)
+        if not g.unitTesting:
+            g.blue(f"moved {len(moved)} nodes")
+        c.setChanged()
+    # c.contractAllHeadlines()
+        # Causes problems when in a chapter.
+    c.selectPosition(parent)
+    c.redraw()
+</t>
+<t tx="felix.20211017220236.76">def createMoveMarkedNode(c):
+    oldRoot = c.rootPosition()
+    p = oldRoot.insertAfter()
+    p.h = 'Moved marked nodes'
+    p.moveToRoot()
+    return p
+</t>
+<t tx="felix.20211017220236.77">@g.commander_command('mark-changed-items')
+def markChangedHeadlines(self, event=None):
+    """Mark all nodes that have been changed."""
+    c, current, u = self, self.p, self.undoer
+    undoType = 'Mark Changed'
+    c.endEditing()
+    u.beforeChangeGroup(current, undoType)
+    for p in c.all_unique_positions():
+        if p.isDirty() and not p.isMarked():
+            bunch = u.beforeMark(p, undoType)
+            # c.setMarked calls a hook.
+            c.setMarked(p)
+            p.setDirty()
+            c.setChanged()
+            u.afterMark(p, undoType, bunch)
+    u.afterChangeGroup(current, undoType)
+    if not g.unitTesting:
+        g.blue('done')
+    c.redraw_after_icons_changed()
+</t>
+<t tx="felix.20211017220236.78">def markChangedRoots(self, event=None):
+    """Mark all changed @root nodes."""
+    c, current, u = self, self.p, self.undoer
+    undoType = 'Mark Changed'
+    c.endEditing()
+    u.beforeChangeGroup(current, undoType)
+    for p in c.all_unique_positions():
+        if p.isDirty() and not p.isMarked():
+            s = p.b
+            flag, i = g.is_special(s, "@root")
+            if flag:
+                bunch = u.beforeMark(p, undoType)
+                c.setMarked(p)  # Calls a hook.
+                p.setDirty()
+                c.setChanged()
+                u.afterMark(p, undoType, bunch)
+    u.afterChangeGroup(current, undoType)
+    if not g.unitTesting:
+        g.blue('done')
+    c.redraw_after_icons_changed()
+</t>
+<t tx="felix.20211017220236.79">@g.commander_command('mark')  # Compatibility
+@g.commander_command('toggle-mark')
+def markHeadline(self, event=None):
+    """Toggle the mark of the selected node."""
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return
+    c.endEditing()
+    undoType = 'Unmark' if p.isMarked() else 'Mark'
+    bunch = u.beforeMark(p, undoType)
+    # c.set/clearMarked call a hook.
+    if p.isMarked():
+        c.clearMarked(p)
+    else:
+        c.setMarked(p)
+    p.setDirty()
+    c.setChanged()
+    u.afterMark(p, undoType, bunch)
+    c.redraw_after_icons_changed()
+</t>
+<t tx="felix.20211017220236.8">def computeVnodeInfoDict(c):
+    """
+    We don't know yet which nodes will be affected by the paste, so we remember
+    everything. This is expensive, but foolproof.
+
+    The alternative is to try to remember the 'before' values of nodes in the
+    FileCommands read logic. Several experiments failed, and the code is very ugly.
+    In short, it seems wise to do things the foolproof way.
+    """
+    d = {}
+    for v in c.all_unique_nodes():
+        if v not in d:
+            d[v] = g.Bunch(v=v, head=v.h, body=v.b)
+    return d
+</t>
+<t tx="felix.20211017220236.80">@g.commander_command('mark-subheads')
+def markSubheads(self, event=None):
+    """Mark all children of the selected node as changed."""
+    c, current, u = self, self.p, self.undoer
+    undoType = 'Mark Subheads'
+    if not current:
+        return
+    c.endEditing()
+    u.beforeChangeGroup(current, undoType)
+    for p in current.children():
+        if not p.isMarked():
+            bunch = u.beforeMark(p, undoType)
+            c.setMarked(p)  # Calls a hook.
+            p.setDirty()
+            c.setChanged()
+            u.afterMark(p, undoType, bunch)
+    u.afterChangeGroup(current, undoType)
+    c.redraw_after_icons_changed()
+</t>
+<t tx="felix.20211017220236.81">@g.commander_command('unmark-all')
+def unmarkAll(self, event=None):
+    """Unmark all nodes in the entire outline."""
+    c, current, u = self, self.p, self.undoer
+    undoType = 'Unmark All'
+    if not current:
+        return
+    c.endEditing()
+    u.beforeChangeGroup(current, undoType)
+    changed = False
+    p = None  # To keep pylint happy.
+    for p in c.all_unique_positions():
+        if p.isMarked():
+            bunch = u.beforeMark(p, undoType)
+            # c.clearMarked(p) # Very slow: calls a hook.
+            p.v.clearMarked()
+            p.setDirty()
+            u.afterMark(p, undoType, bunch)
+            changed = True
+    if changed:
+        g.doHook("clear-all-marks", c=c, p=p)
+        c.setChanged()
+    u.afterChangeGroup(current, undoType)
+    c.redraw_after_icons_changed()
+</t>
+<t tx="felix.20211017220236.82"></t>
+<t tx="felix.20211017220236.83">@g.commander_command('demote')
+def demote(self, event=None):
+    """Make all following siblings children of the selected node."""
+    c, p, u = self, self.p, self.undoer
+    if not p or not p.hasNext():
+        c.treeFocusHelper()
+        return
+    # Make sure all the moves will be valid.
+    next = p.next()
+    while next:
+        if not c.checkMoveWithParentWithWarning(next, p, True):
+            c.treeFocusHelper()
+            return
+        next.moveToNext()
+    c.endEditing()
+    parent_v = p._parentVnode()
+    n = p.childIndex()
+    followingSibs = parent_v.children[n + 1 :]
+    # Remove the moved nodes from the parent's children.
+    parent_v.children = parent_v.children[: n + 1]
+    # Add the moved nodes to p's children
+    p.v.children.extend(followingSibs)
+    # Adjust the parent links in the moved nodes.
+    # There is no need to adjust descendant links.
+    for child in followingSibs:
+        child.parents.remove(parent_v)
+        child.parents.append(p.v)
+    p.expand()
+    p.setDirty()
+    c.setChanged()
+    u.afterDemote(p, followingSibs)
+    c.redraw(p)
+    c.updateSyntaxColorer(p)  # Moving can change syntax coloring.
+</t>
+<t tx="felix.20211017220236.84">@g.commander_command('move-outline-down')
+def moveOutlineDown(self, event=None):
+    """Move the selected node down."""
+    # Moving down is more tricky than moving up because we can't
+    # move p to be a child of itself.
+    #
+    # An important optimization:
+    # we don't have to call checkMoveWithParentWithWarning() if the parent of
+    # the moved node remains the same.
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return
+    if not c.canMoveOutlineDown():
+        if c.hoistStack:
+            cantMoveMessage(c)
+        c.treeFocusHelper()
+        return
+    parent = p.parent()
+    next = p.visNext(c)
+    while next and p.isAncestorOf(next):
+        next = next.visNext(c)
+    if not next:
+        if c.hoistStack:
+            cantMoveMessage(c)
+        c.treeFocusHelper()
+        return
+    c.endEditing()
+    undoData = u.beforeMoveNode(p)
+    &lt;&lt; Move p down &amp; set moved if successful &gt;&gt;
+    if moved:
+        p.setDirty()
+        c.setChanged()
+        u.afterMoveNode(p, 'Move Down', undoData)
+    c.redraw(p)
+    c.updateSyntaxColorer(p)  # Moving can change syntax coloring.
+</t>
+<t tx="felix.20211017220236.85">if next.hasChildren() and next.isExpanded():
+    # Attempt to move p to the first child of next.
+    moved = c.checkMoveWithParentWithWarning(p, next, True)
+    if moved:
+        p.setDirty()
+        p.moveToNthChildOf(next, 0)
+else:
+    # Attempt to move p after next.
+    moved = c.checkMoveWithParentWithWarning(p, next.parent(), True)
+    if moved:
+        p.setDirty()
+        p.moveAfter(next)
+# Patch by nh2: 0004-Add-bool-collapse_nodes_after_move-option.patch
+if (
+    c.collapse_nodes_after_move
+    and moved and c.sparse_move
+    and parent and not parent.isAncestorOf(p)
+):
+    # New in Leo 4.4.2: contract the old parent if it is no longer the parent of p.
+    parent.contract()
+</t>
+<t tx="felix.20211017220236.86">@g.commander_command('move-outline-left')
+def moveOutlineLeft(self, event=None):
+    """Move the selected node left if possible."""
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return
+    if not c.canMoveOutlineLeft():
+        if c.hoistStack:
+            cantMoveMessage(c)
+        c.treeFocusHelper()
+        return
+    if not p.hasParent():
+        c.treeFocusHelper()
+        return
+    parent = p.parent()
+    c.endEditing()
+    undoData = u.beforeMoveNode(p)
+    p.setDirty()
+    p.moveAfter(parent)
+    p.setDirty()
+    c.setChanged()
+    u.afterMoveNode(p, 'Move Left', undoData)
+    # Patch by nh2: 0004-Add-bool-collapse_nodes_after_move-option.patch
+    if c.collapse_nodes_after_move and c.sparse_move:  # New in Leo 4.4.2
+        parent.contract()
+    c.redraw(p)
+    c.recolor()  # Moving can change syntax coloring.
+</t>
+<t tx="felix.20211017220236.87">@g.commander_command('move-outline-right')
+def moveOutlineRight(self, event=None):
+    """Move the selected node right if possible."""
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return
+    if not c.canMoveOutlineRight():  # 11/4/03: Support for hoist.
+        if c.hoistStack:
+            cantMoveMessage(c)
+        c.treeFocusHelper()
+        return
+    back = p.back()
+    if not back:
+        c.treeFocusHelper()
+        return
+    if not c.checkMoveWithParentWithWarning(p, back, True):
+        c.treeFocusHelper()
+        return
+    c.endEditing()
+    undoData = u.beforeMoveNode(p)
+    p.setDirty()
+    n = back.numberOfChildren()
+    p.moveToNthChildOf(back, n)
+    p.setDirty()
+    c.setChanged()  # #2036.
+    u.afterMoveNode(p, 'Move Right', undoData)
+    c.redraw(p)
+    c.recolor()
+</t>
+<t tx="felix.20211017220236.88">@g.commander_command('move-outline-up')
+def moveOutlineUp(self, event=None):
+    """Move the selected node up if possible."""
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return
+    if not c.canMoveOutlineUp():  # Support for hoist.
+        if c.hoistStack:
+            cantMoveMessage(c)
+        c.treeFocusHelper()
+        return
+    back = p.visBack(c)
+    if not back:
+        return
+    back2 = back.visBack(c)
+    c.endEditing()
+    undoData = u.beforeMoveNode(p)
+    moved = False
+    &lt;&lt; Move p up &gt;&gt;
+    if moved:
+        p.setDirty()
+        c.setChanged()
+        u.afterMoveNode(p, 'Move Right', undoData)
+    c.redraw(p)
+    c.updateSyntaxColorer(p)  # Moving can change syntax coloring.
+</t>
+<t tx="felix.20211017220236.89">parent = p.parent()
+if not back2:
+    if c.hoistStack:  # hoist or chapter.
+        limit, limitIsVisible = c.visLimit()
+        assert limit
+        if limitIsVisible:
+            # canMoveOutlineUp should have caught this.
+            g.trace('can not happen. In hoist')
+        else:
+            moved = True
+            p.setDirty()
+            p.moveToFirstChildOf(limit)
+    else:
+        # p will be the new root node
+        p.setDirty()
+        p.moveToRoot()
+        moved = True
+elif back2.hasChildren() and back2.isExpanded():
+    if c.checkMoveWithParentWithWarning(p, back2, True):
+        moved = True
+        p.setDirty()
+        p.moveToNthChildOf(back2, 0)
+else:
+    if c.checkMoveWithParentWithWarning(p, back2.parent(), True):
+        moved = True
+        p.setDirty()
+        p.moveAfter(back2)
+# Patch by nh2: 0004-Add-bool-collapse_nodes_after_move-option.patch
+if (
+    c.collapse_nodes_after_move
+    and moved and c.sparse_move
+    and parent and not parent.isAncestorOf(p)
+):
+    # New in Leo 4.4.2: contract the old parent if it is no longer the parent of p.
+    parent.contract()
+</t>
+<t tx="felix.20211017220236.9">@g.commander_command('paste-as-template')
+def pasteAsTemplate(self, event=None):
+    c = self
+    p = c.p
+    @others
+    xroot = ElementTree.fromstring(g.app.gui.getTextFromClipboard())
+    xvnodes = xroot.find('vnodes')
+    xtnodes = xroot.find('tnodes')
+
+    bodies, uas = leoFileCommands.FastRead(c, {}).scanTnodes(xtnodes)
+
+    root_gnx = xvnodes[0].attrib.get('t')  # the gnx of copied node
+    outside = {x.gnx for x in skip_root(c.hiddenRootNode)}
+        # outside will contain gnxes of nodes that are outside the copied tree
+
+    translation = {x: translate_gnx(x) for x in bodies}
+        # we generate new gnx for each node in the copied tree
+
+    seen = set(outside)  # required for the treatment of local clones inside the copied tree
+
+    heads = {}
+
+    bunch = c.undoer.createCommonBunch(p)
+    &lt;&lt; prepare destination data &gt;&gt;
+
+    pasted = do_paste(vpar, index)
+
+    newp = leoNodes.Position(pasted, index, parStack)
+
+    bunch.undoHelper = undoHelper
+    bunch.redoHelper = redoHelper
+    bunch.undoType = 'paste-retaining-outside-clones'
+
+    newp.setDirty()
+    c.undoer.pushBead(bunch)
+    c.redraw(newp)
+</t>
+<t tx="felix.20211017220236.90">@g.commander_command('promote')
+def promote(self, event=None, undoFlag=True, redrawFlag=True):
+    """Make all children of the selected nodes siblings of the selected node."""
+    c, p, u = self, self.p, self.undoer
+    if not p or not p.hasChildren():
+        c.treeFocusHelper()
+        return
+    c.endEditing()
+    children = p.v.children  # First, for undo.
+    p.promote()
+    c.setChanged()
+    if undoFlag:
+        p.setDirty()
+        u.afterPromote(p, children)
+    if redrawFlag:
+        c.redraw(p)
+        c.updateSyntaxColorer(p)  # Moving can change syntax coloring.
+</t>
+<t tx="felix.20211017220236.91">@g.commander_command('toggle-sparse-move')
+def toggleSparseMove(self, event=None):
+    """Toggle whether moves collapse the outline."""
+    c = self
+    c.sparse_move = not c.sparse_move
+    if not g.unitTesting:
+        g.blue(f"sparse-move: {c.sparse_move}")
+</t>
+<t tx="felix.20211017220236.92"></t>
+<t tx="felix.20211017220236.93">@g.commander_command('sort-children')
+def sortChildren(self, event=None, key=None, reverse=False):
+    """Sort the children of a node."""
+    # This method no longer supports the 'cmp' keyword arg.
+    c, p = self, self.p
+    if p and p.hasChildren():
+        c.sortSiblings(p=p.firstChild(), sortChildren=True, key=key, reverse=reverse)
+</t>
+<t tx="felix.20211017220236.94">@g.commander_command('sort-siblings')
+def sortSiblings(self, event=None,
+    # cmp keyword is no longer supported.
+    key=None,
+    p=None,
+    sortChildren=False,
+    reverse=False
+):
+    """Sort the siblings of a node."""
+    c, u = self, self.undoer
+    if not p:
+        p = c.p
+    if not p:
+        return
+    c.endEditing()
+    undoType = 'Sort Children' if sortChildren else 'Sort Siblings'
+    parent_v = p._parentVnode()
+    oldChildren = parent_v.children[:]
+    newChildren = parent_v.children[:]
+    if key is None:
+
+        def lowerKey(self):
+            return self.h.lower()
+
+        key = lowerKey
+    newChildren.sort(key=key, reverse=reverse)
+    if oldChildren == newChildren:
+        return
+    # 2010/01/20. Fix bug 510148.
+    c.setChanged()
+    bunch = u.beforeSort(p, undoType, oldChildren, newChildren, sortChildren)
+    parent_v.children = newChildren
+    u.afterSort(p, bunch)
+    # Sorting destroys position p, and possibly the root position.
+    p = c.setPositionAfterSort(sortChildren)
+    if p.parent():
+        p.parent().setDirty()
+    c.redraw(p)
+</t>
+<t tx="felix.20211017220236.95">// def cantMoveMessage(c):
+//     h = c.rootPosition().h
+//     kind = 'chapter' if h.startswith('@chapter') else 'hoist'
+//     g.warning("can't move node out of", kind)
+
+</t>
+<t tx="felix.20211017220236.96">// @g.command('count-children')
+// def count_children(event=None):
+//     c = event and event.get('c')
+//     if c:
+//         g.es_print(f"{c.p.numberOfChildren()} children")
+
+</t>
+<t tx="felix.20211017232128.1">function applyMixins(derivedCtor: any, constructors: any[]) {
+    constructors.forEach((baseCtor) =&gt; {
+        Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) =&gt; {
+            Object.defineProperty(
+                derivedCtor.prototype,
+                name,
+                Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
+                Object.create(null)
+            );
+        });
+    });
+}
+
+</t>
+<t tx="felix.20211018202009.1">import * as g from './leoGlobals';
+
+
+/**
+ * * Add to the commandsDict
+ */
+export function commander_command(p_name: string) {
+    return function (
+        target: any,
+        propertyKey: string,
+        descriptor: PropertyDescriptor
+    ) {
+        console.log('ran inside decorator, NAME WAS ----&gt; ' + p_name);
+        // console.log('target ', target);
+        // console.log('propertyKey ', propertyKey);
+        // console.log('descriptor ', descriptor);
+
+        console.log(g.global_commands_dict);
+        if (!g.global_commands_dict) {
+            //@ts-expect-error
+            g.global_commands_dict = {};
+        }
+        g.global_commands_dict[p_name] = descriptor.value;
+
+    };
+}
+
+</t>
+<t tx="felix.20211018215401.1">/**
+ * Create all entries in c.commandsDict.
+ * Do *not* clear c.commandsDict here.
+ */
+private createCommandNames(): void {
+    const c: Commands = this;
+    for (let commandName in g.global_commands_dict) {
+        c.commandsDict[commandName] = g.global_commands_dict[commandName];
+    }
 }
 
 </t>
