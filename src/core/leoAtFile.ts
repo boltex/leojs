@@ -273,7 +273,7 @@ class AtFile {
             }
             this.warnOnReadOnlyFile(fn);
         }
-        except (Exception) {
+        catch (Exception) {
             this.error("unexpected exception opening: '@file {fn}'");
             this._file_bytes = g.toEncodedString('');
             fn, s = none, none;
@@ -588,7 +588,7 @@ class AtFile {
             // That would improperly expand nodes.
                 // c.selectPosition(p)
         }
-        except (Exception) {
+        catch (Exception) {
             p = old_p;
             ic.errors += 1;
             g.es_print('Unexpected exception importing', fileName);
@@ -944,10 +944,10 @@ class AtFile {
                 s = f.read();
             }
         }
-        except (IOError) {
+        catch (IOError) {
             this.error("can ! open {fileName}");
         }
-        except (Exception) {
+        catch (Exception) {
             this.error("Exception reading {fileName}");
             g.es_exception();
         }
@@ -1208,7 +1208,7 @@ class AtFile {
             try {
                 this.writeAllHelper(p, root);
             }
-            except (Exception) {
+            catch (Exception) {
                 this.internalWriteError(p);
             }
         }
@@ -1348,7 +1348,7 @@ class AtFile {
         try {
             this.writePathChanged(p);
         }
-        except (IOError) {
+        catch (IOError) {
             return;
         }
         table = (
@@ -1393,7 +1393,7 @@ class AtFile {
         try { // # #1367: samefile can throw an exception.
             changed = oldPath && ! os.path.samefile(oldPath, newPath);
         }
-        except (Exception) {
+        catch (Exception) {
             changed = true;
         }
         if (! changed) {
@@ -1439,7 +1439,7 @@ class AtFile {
             this.putFile(root, sentinels=false);
             return '' if this.errors else ''.join(this.outputList);
         }
-        except (Exception) {
+        catch (Exception) {
             return none;
         }
         finally {
@@ -1468,7 +1468,7 @@ class AtFile {
                 this.replaceFile(contents, this.encoding, fileName, root);
             }
         }
-        except (Exception) {
+        catch (Exception) {
             this.writeException(fileName, root);
         }
     }
@@ -1598,7 +1598,7 @@ class AtFile {
                 ignoreBlankLines=root.isAtAutoRstNode());
             return true;
         }
-        except (Exception) {
+        catch (Exception) {
             this.writeException(fileName, root);
             return false;
         }
@@ -1626,7 +1626,7 @@ class AtFile {
                         s = writer.write(root);
                         return s;
                     }
-                    except (Exception) {
+                    catch (Exception) {
                         g.es_exception();
                         return none;
                     }
@@ -1649,7 +1649,7 @@ class AtFile {
                 try {
                     return aClass(this.c).write(root);
                 }
-                except (Exception) {
+                catch (Exception) {
                     g.es_exception();
                     return none;
                 }
@@ -1685,7 +1685,7 @@ class AtFile {
                 this.replaceFile(contents, this.encoding, fileName, root);
             }
         }
-        except (Exception) {
+        catch (Exception) {
             if (hasattr(this.root.v, 'tnodeList')) {
                 delattr(this.root.v, 'tnodeList');
             }
@@ -1722,7 +1722,7 @@ class AtFile {
             c.raise_error_dialogs(kind='write');
             return true;
         }
-        except (Exception) {
+        catch (Exception) {
             this.writeException(fileName, root);
             return false;
         }
@@ -1753,7 +1753,7 @@ class AtFile {
                 this.replaceFile(contents, this.encoding, fileName, root);
             }
         }
-        except (Exception) {
+        catch (Exception) {
             if (hasattr(this.root.v, 'tnodeList')) {
                 delattr(this.root.v, 'tnodeList');
             }
@@ -1786,7 +1786,7 @@ class AtFile {
                 this.replaceFile(contents, this.encoding, fileName, root);
             }
         }
-        except (Exception) {
+        catch (Exception) {
             if (hasattr(this.root.v, 'tnodeList')) {
                 delattr(this.root.v, 'tnodeList');
             }
@@ -1868,7 +1868,7 @@ class AtFile {
             }
             return ! this.errors;
         }
-        except (Exception) {
+        catch (Exception) {
             this.writeException(full_path, root);
             return false;
         }
@@ -1909,7 +1909,7 @@ class AtFile {
             }
             return '' if this.errors else ''.join(this.outputList);
         }
-        except (Exception) {
+        catch (Exception) {
             this.writeException(fileName, root);
             return '';
         }
@@ -1930,7 +1930,7 @@ class AtFile {
             }
             return this.writeAtAutoContents(fileName, root) || '';
         }
-        except (Exception) {
+        catch (Exception) {
             this.writeException(fileName, root);
             return '';
         }
@@ -1959,7 +1959,7 @@ class AtFile {
                     if this.directiveKind4(s, 0) == this.noDirective]);
             return contents;
         }
-        except (Exception) {
+        catch (Exception) {
             this.writeException(fileName, root);
             return '';
         }
@@ -1985,7 +1985,7 @@ class AtFile {
             }
             return contents;
         }
-        except (Exception) {
+        catch (Exception) {
             if (hasattr(this.root.v, 'tnodeList')) {
                 delattr(this.root.v, 'tnodeList');
             }
@@ -2023,7 +2023,7 @@ class AtFile {
             }
             return contents;
         }
-        except (Exception) {
+        catch (Exception) {
             this.exception("exception preprocessing script");
             return '';
         }
@@ -2671,7 +2671,7 @@ class AtFile {
             // os.access() may not exist on all platforms.
             ok = os.access(path, os.W_OK);
         }
-        except (AttributeError) {
+        catch (AttributeError) {
             return true;
         }
         if (! ok) {
@@ -2714,12 +2714,12 @@ class AtFile {
             compile(body + '\n', fn, 'exec');
             return true;
         }
-        except (SyntaxError) {
+        catch (SyntaxError) {
             if (! supress) {
                 this.syntaxError(p, body);
             }
         }
-        except (Exception) {
+        catch (Exception) {
             g.trace("unexpected exception");
             g.es_exception();
         }
@@ -2770,7 +2770,7 @@ class AtFile {
             }
             return True;  // Suppress error if pyflakes can not be imported.
         }
-        except (Exception) {
+        catch (Exception) {
             g.es_exception();
             return false;
         }
@@ -2780,7 +2780,7 @@ class AtFile {
             readline = g.ReadLinesClass(body).next;
             tabnanny.process_tokens(tokenize.generate_tokens(readline));
         }
-        except (IndentationError) {
+        catch (IndentationError) {
             if (g.unitTesting) {
                 raise;
             }
@@ -2788,7 +2788,7 @@ class AtFile {
             g.error("IndentationError in", p.h);
             g.es('', str(msg));
         }
-        except (tokenize.TokenError) {
+        catch (tokenize.TokenError) {
             if (g.unitTesting) {
                 raise;
             }
@@ -2796,7 +2796,7 @@ class AtFile {
             g.error("TokenError in", p.h);
             g.es('', str(msg));
         }
-        except (tabnanny.NannyNag) {
+        catch (tabnanny.NannyNag) {
             if (g.unitTesting) {
                 raise;
             }
@@ -2809,7 +2809,7 @@ class AtFile {
             line2 = repr(str(line))[1:-1];
             g.es("offending line:\n", line2);
         }
-        except (Exception) {
+        catch (Exception) {
             g.trace("unexpected exception");
             g.es_exception();
             raise;
@@ -2934,7 +2934,7 @@ class AtFile {
             try {
                 junk, s = this.parseUnderindentTag(s);
             }
-            except (Exception) {
+            catch (Exception) {
                 this.exception("exception writing:" + s);
                 return;
             }
@@ -3373,7 +3373,7 @@ class AtFile {
         try {
             os.chmod(fileName, mode);
         }
-        except (Exception) {
+        catch (Exception) {
             g.es("exception in os.chmod", fileName);
             g.es_exception();
         }
@@ -3388,7 +3388,7 @@ class AtFile {
             os.remove(fileName);
             return true;
         }
-        except (Exception) {
+        catch (Exception) {
             if (! g.unitTesting) {
                 this.error("exception removing: {fileName}");
                 g.es_exception();
@@ -3404,7 +3404,7 @@ class AtFile {
         try {
             mode = (os.stat(fileName))[0] & (7 * 8 * 8 + 7 * 8 + 7);  // 0777
         }
-        except (Exception) {
+        catch (Exception) {
             mode = none;
         }
         return mode;
@@ -3652,7 +3652,7 @@ class AtFile {
         try {
             read_only = ! os.access(fn, os.W_OK);
         }
-        except (AttributeError) {
+        catch (AttributeError) {
             read_only = false;
         }
         if (read_only) {

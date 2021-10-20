@@ -263,10 +263,7 @@ var AtFile = /** @class */ (function () {
             }
             this.warnOnReadOnlyFile(fn);
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             this.error("unexpected exception opening: '@file {fn}'");
             this._file_bytes = g.toEncodedString('');
             fn, s = none, none;
@@ -591,10 +588,7 @@ var AtFile = /** @class */ (function () {
             // That would improperly expand nodes.
             // c.selectPosition(p)
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             p = old_p;
             ic.errors += 1;
             g.es_print('Unexpected exception importing', fileName);
@@ -954,14 +948,12 @@ var AtFile = /** @class */ (function () {
                 s = f.read();
             }
         }
-        finally {
-        }
-        except(IOError);
-        {
+        catch (IOError) {
             this.error("can ! open {fileName}");
         }
-        except(Exception);
-        {
+        try {
+        }
+        catch (Exception) {
             this.error("Exception reading {fileName}");
             g.es_exception();
         }
@@ -1227,10 +1219,7 @@ var AtFile = /** @class */ (function () {
             try {
                 this.writeAllHelper(p, root);
             }
-            finally {
-            }
-            except(Exception);
-            {
+            catch (Exception) {
                 this.internalWriteError(p);
             }
         }
@@ -1385,10 +1374,7 @@ var AtFile = /** @class */ (function () {
         try {
             this.writePathChanged(p);
         }
-        finally {
-        }
-        except(IOError);
-        {
+        catch (IOError) {
             return;
         }
         table = ((p.isAtAsisFileNode, this.asisWrite),
@@ -1430,10 +1416,7 @@ var AtFile = /** @class */ (function () {
         try { // # #1367: samefile can throw an exception.
             changed = oldPath && !os.path.samefile(oldPath, newPath);
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             changed = true;
         }
         if (!changed) {
@@ -1488,13 +1471,8 @@ var AtFile = /** @class */ (function () {
             else
                 ''.join(this.outputList);
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             return none;
-        }
-        try {
         }
         finally {
             if (hasattr(this, ivar)) {
@@ -1522,10 +1500,7 @@ var AtFile = /** @class */ (function () {
                 this.replaceFile(contents, this.encoding, fileName, root);
             }
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             this.writeException(fileName, root);
         }
     };
@@ -1648,10 +1623,7 @@ var AtFile = /** @class */ (function () {
             this.replaceFile(contents, this.encoding, fileName, root, ignoreBlankLines = root.isAtAutoRstNode());
             return true;
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             this.writeException(fileName, root);
             return false;
         }
@@ -1678,10 +1650,7 @@ var AtFile = /** @class */ (function () {
                         s = writer.write(root);
                         return s;
                     }
-                    finally {
-                    }
-                    except(Exception);
-                    {
+                    catch (Exception) {
                         g.es_exception();
                         return none;
                     }
@@ -1702,10 +1671,7 @@ var AtFile = /** @class */ (function () {
                 try {
                     return aClass(this.c).write(root);
                 }
-                finally {
-                }
-                except(Exception);
-                {
+                catch (Exception) {
                     g.es_exception();
                     return none;
                 }
@@ -1739,10 +1705,7 @@ var AtFile = /** @class */ (function () {
                 this.replaceFile(contents, this.encoding, fileName, root);
             }
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             if (hasattr(this.root.v, 'tnodeList')) {
                 delattr(this.root.v, 'tnodeList');
             }
@@ -1783,10 +1746,7 @@ var AtFile = /** @class */ (function () {
             c.raise_error_dialogs(kind = 'write');
             return true;
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             this.writeException(fileName, root);
             return false;
         }
@@ -1817,10 +1777,7 @@ var AtFile = /** @class */ (function () {
                 this.replaceFile(contents, this.encoding, fileName, root);
             }
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             if (hasattr(this.root.v, 'tnodeList')) {
                 delattr(this.root.v, 'tnodeList');
             }
@@ -1853,10 +1810,7 @@ var AtFile = /** @class */ (function () {
                 this.replaceFile(contents, this.encoding, fileName, root);
             }
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             if (hasattr(this.root.v, 'tnodeList')) {
                 delattr(this.root.v, 'tnodeList');
             }
@@ -1940,10 +1894,7 @@ var AtFile = /** @class */ (function () {
             }
             return !this.errors;
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             this.writeException(full_path, root);
             return false;
         }
@@ -1989,10 +1940,7 @@ var AtFile = /** @class */ (function () {
             else
                 ''.join(this.outputList);
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             this.writeException(fileName, root);
             return '';
         }
@@ -2013,10 +1961,7 @@ var AtFile = /** @class */ (function () {
             }
             return this.writeAtAutoContents(fileName, root) || '';
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             this.writeException(fileName, root);
             return '';
         }
@@ -2050,10 +1995,7 @@ var AtFile = /** @class */ (function () {
             ;
             return contents;
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             this.writeException(fileName, root);
             return '';
         }
@@ -2084,10 +2026,7 @@ var AtFile = /** @class */ (function () {
             }
             return contents;
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             if (hasattr(this.root.v, 'tnodeList')) {
                 delattr(this.root.v, 'tnodeList');
             }
@@ -2131,10 +2070,7 @@ var AtFile = /** @class */ (function () {
             }
             return contents;
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             this.exception("exception preprocessing script");
             return '';
         }
@@ -2799,10 +2735,7 @@ var AtFile = /** @class */ (function () {
             // os.access() may not exist on all platforms.
             ok = os.access(path, os.W_OK);
         }
-        finally {
-        }
-        except(AttributeError);
-        {
+        catch (AttributeError) {
             return true;
         }
         if (!ok) {
@@ -2845,16 +2778,14 @@ var AtFile = /** @class */ (function () {
             compile(body + '\n', fn, 'exec');
             return true;
         }
-        finally {
-        }
-        except(SyntaxError);
-        {
+        catch (SyntaxError) {
             if (!supress) {
                 this.syntaxError(p, body);
             }
         }
-        except(Exception);
-        {
+        try {
+        }
+        catch (Exception) {
             g.trace("unexpected exception");
             g.es_exception();
         }
@@ -2905,10 +2836,7 @@ var AtFile = /** @class */ (function () {
             }
             return True; // Suppress error if pyflakes can not be imported.
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             g.es_exception();
             return false;
         }
@@ -2918,10 +2846,7 @@ var AtFile = /** @class */ (function () {
             readline = g.ReadLinesClass(body).next;
             tabnanny.process_tokens(tokenize.generate_tokens(readline));
         }
-        finally {
-        }
-        except(IndentationError);
-        {
+        catch (IndentationError) {
             if (g.unitTesting) {
                 raise;
             }
@@ -2929,7 +2854,10 @@ var AtFile = /** @class */ (function () {
             g.error("IndentationError in", p.h);
             g.es('', str(msg));
         }
-        except(tokenize.TokenError);
+        try {
+        }
+        catch (tokenize) { }
+        TokenError;
         {
             if (g.unitTesting) {
                 raise;
@@ -2938,7 +2866,10 @@ var AtFile = /** @class */ (function () {
             g.error("TokenError in", p.h);
             g.es('', str(msg));
         }
-        except(tabnanny.NannyNag);
+        try {
+        }
+        catch (tabnanny) { }
+        NannyNag;
         {
             if (g.unitTesting) {
                 raise;
@@ -2954,8 +2885,9 @@ var AtFile = /** @class */ (function () {
             ;
             g.es("offending line:\n", line2);
         }
-        except(Exception);
-        {
+        try {
+        }
+        catch (Exception) {
             g.trace("unexpected exception");
             g.es_exception();
             raise;
@@ -3076,10 +3008,7 @@ var AtFile = /** @class */ (function () {
             try {
                 junk, s = this.parseUnderindentTag(s);
             }
-            finally {
-            }
-            except(Exception);
-            {
+            catch (Exception) {
                 this.exception("exception writing:" + s);
                 return;
             }
@@ -3515,10 +3444,7 @@ var AtFile = /** @class */ (function () {
         try {
             os.chmod(fileName, mode);
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             g.es("exception in os.chmod", fileName);
             g.es_exception();
         }
@@ -3532,10 +3458,7 @@ var AtFile = /** @class */ (function () {
             os.remove(fileName);
             return true;
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             if (!g.unitTesting) {
                 this.error("exception removing: {fileName}");
                 g.es_exception();
@@ -3551,10 +3474,7 @@ var AtFile = /** @class */ (function () {
         try {
             mode = (os.stat(fileName))[0] & (7 * 8 * 8 + 7 * 8 + 7); // 0777
         }
-        finally {
-        }
-        except(Exception);
-        {
+        catch (Exception) {
             mode = none;
         }
         return mode;
@@ -3800,10 +3720,7 @@ var AtFile = /** @class */ (function () {
         try {
             read_only = !os.access(fn, os.W_OK);
         }
-        finally {
-        }
-        except(AttributeError);
-        {
+        catch (AttributeError) {
             read_only = false;
         }
         if (read_only) {
