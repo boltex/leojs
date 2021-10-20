@@ -751,44 +751,49 @@ export class LeoUI {
         p_keepSelection?: boolean
     ): Thenable<unknown> {
 
-        console.log('command: ' + p_cmd + ', p_node:', p_node);
-
         this._setupRefresh(p_fromOutline, p_refreshType);
 
+        const c: Commands = this.leo_c;
+        let value: any = undefined;
 
+        // Getting from kebab-cased 'Command Name'
+        const func = this.leo_c.commandsDict[p_cmd];
+        if (!func) {
+            vscode.window.showInformationMessage(
+                'TODO: Implement ' +
+                p_cmd +
+                " called from " +
+                (p_fromOutline ? "outline" : "body") +
+                " operate on " +
+                (p_node ? p_node!.label : "the selected node") +
+                (p_keepSelection ? " and bring selection back on currently selected node" : "")
+            );
+        } else {
+            const p = p_node ? p_node.position : c.p;
+            if (p.__eq__(c.p)) {
+                value = func.bind(c)(); // no need for re-selection
+            } else {
+                const old_p = c.p;
+                c.selectPosition(p)
+                value = func.bind(c)();
+                if (p_keepSelection && c.positionExists(old_p)) {
+                    // Only if 'keep' old position was set, and old_p still exists
+                    c.selectPosition(old_p)
+                }
+            }
+        }
 
-        //if (this.leo_c.hasOwnProperty(p_cmd)) {
+        /* EXAMPLE CALL BY METHOD
         //@ts-expect-error
         if ((typeof this.leo_c[p_cmd]) === 'function') {
             console.log('HAS PROPERTY' + p_cmd + " so were doing it!");
             //@ts-expect-error
             this.leo_c[p_cmd]();
-
         } else {
             console.log('NO PROPERTY' + p_cmd);
-
             console.log(this.leo_c);
-
         }
-
-
-        // if (p_cmd === "selectVisNext") {
-        //     console.log('cmd was selectVisNext');
-        //     // this.leo_c.selectVisNext();
-        //     console.log((typeof this.leo_c[p_cmd]) === 'function');
-        //     this.leo_c[p_cmd]
-
-        // }
-
-        vscode.window.showInformationMessage(
-            'TODO: Implement ' +
-            p_cmd +
-            " called from " +
-            (p_fromOutline ? "outline" : "body") +
-            " operate on " +
-            (p_node ? p_node!.label : "the selected node") +
-            (p_keepSelection ? " and bring selection back on currently selected node" : "")
-        );
+        */
 
         this.launchRefresh();
 

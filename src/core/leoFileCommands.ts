@@ -15,9 +15,9 @@ export class FileCommands {
     /**
      * File Commands Test
      */
-    public fileCommandsTest(): void {
+    public leoFileCommandsTest(): void {
         // Test command
-        console.log('fileCommandsTest Called !!');
+        console.log('CORE leo fileCommandsTest Called !!');
     }
 
 

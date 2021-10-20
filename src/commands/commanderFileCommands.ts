@@ -9,9 +9,9 @@
 export class CommanderFileCommands {
  
     //@+others
-    //@+node:felix.20211017230407.2: ** fileCommandsTest
-    public fileCommandsTest(): void {
-        console.log('fileCommandsTest Called!!');
+    //@+node:felix.20211017230407.2: ** commanderFileCommandsTest
+    public commanderFileCommandsTest(): void {
+        console.log('CommanderFileCommands TEST Called!!');
         // 
     }
 

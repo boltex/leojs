@@ -534,7 +534,7 @@
 <v t="felix.20210220195150.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
 <v t="felix.20210220190156.1"><vh>class FileCommands</vh>
 <v t="felix.20210220200109.1"><vh>constructor</vh></v>
-<v t="felix.20211003011145.1"><vh>fileCommandsTest</vh></v>
+<v t="felix.20211003011145.1"><vh>leoFileCommandsTest</vh></v>
 </v>
 </v>
 <v t="felix.20210102012410.1"><vh>@clean src/core/leoGlobals.ts</vh>
@@ -1988,65 +1988,64 @@ public static COMMANDS = {
 </t>
 <t tx="felix.20201214151326.11">/**
  * Leo command names that are called from vscode's gui/menu/buttons/keybindings triggers
- * TODO : CALL DIRECT LEO CORE METHODS (DELETE LEO_COMMANDS WHEN DONE)
  */
 public static LEO_COMMANDS = {
-    EXECUTE_SCRIPT: "executeScript",
-    REFRESH_FROM_DISK: "refreshFromDisk",
-    GIT_DIFF: "gitDiff",
-    // Goto operations
-    PAGE_UP: "pageUp",
-    PAGE_DOWN: "pageDown",
-    GOTO_FIRST_VISIBLE: "goToFirstVisibleNode",
-    GOTO_LAST_VISIBLE: "goToLastVisibleNode",
-    GOTO_LAST_SIBLING: "goToLastSibling",
-    GOTO_NEXT_VISIBLE: "selectVisNext",
-    GOTO_PREV_VISIBLE: "selectVisBack",
-    GOTO_NEXT_MARKED: "goToNextMarkedHeadline",
-    GOTO_NEXT_CLONE: "goToNextClone",
-    CONTRACT_OR_GO_LEFT: "contractNodeOrGoToParent",
-    EXPAND_AND_GO_RIGHT: "expandNodeAndGoToFirstChild",
-    CONTRACT_ALL: "contractAllHeadlines",
-    // Leo Operations
-    MARK_PNODE: "markPNode",
-    UNMARK_PNODE: "unmarkPNode",
-    COPY_PNODE: "copyOutline",
-    CUT_PNODE: "cutPNode",
-    PASTE_PNODE: "pasteOutline",
-    PASTE_CLONE_PNODE: "pasteOutlineRetainingClones",
-    DELETE_PNODE: "deletePNode",
-    MOVE_PNODE_DOWN: "moveOutlineDown",
-    MOVE_PNODE_LEFT: "moveOutlineLeft",
-    MOVE_PNODE_RIGHT: "moveOutlineRight",
-    MOVE_PNODE_UP: "moveOutlineUp",
-    INSERT_PNODE: "insertPNode",
-    INSERT_NAMED_PNODE: "insertNamedPNode",
-    CLONE_PNODE: "clonePNode",
-    PROMOTE_PNODE: "promote",
-    DEMOTE_PNODE: "demote",
-    REFRESH_FROM_DISK_PNODE: "refreshFromDisk",
-    SORT_CHILDREN: "sortChildren",
-    SORT_SIBLINGS: "sortSiblings",
-    UNDO: "undo",
-    REDO: "redo",
-    GET_STATES: "getStates",
-    HOIST_PNODE: "hoist",
-    DEHOIST: "dehoist",
-    EXTRACT: "extract",
-    EXTRACT_NAMES: "extractNames",
-    COPY_MARKED: "copyMarked",
-    DIFF_MARKED_NODES: "deleteMarked",
-    MARK_CHANGED_ITEMS: "markChangedHeadlines",
-    MARK_SUBHEADS: "markSubheads",
-    UNMARK_ALL: "unmarkAll",
-    CLONE_MARKED_NODES: "cloneMarked",
-    DELETE_MARKED_NODES: "deleteMarked",
-    MOVE_MARKED_NODES: "moveMarked",
-    // Clone-find functionality
-    CLONE_FIND_ALL: "cloneFindAll",
-    CLONE_FIND_ALL_FLATTENED: "cloneFindAllFlattened",
-    CLONE_FIND_MARKED: "cloneFindMarked",
-    CLONE_FIND_FLATTENED_MARKED: "cloneFindFlattenedMarked",
+    EXECUTE_SCRIPT: "TODO", // "executeScript",
+    REFRESH_FROM_DISK: "TODO", //  "refreshFromDisk",
+    GIT_DIFF: "TODO", //  "gitDiff",
+    // * Goto operations
+    PAGE_UP: "TODO pageUp", //  "pageUp",
+    PAGE_DOWN: "TODO pageDown", //  "pageDown",
+    GOTO_FIRST_VISIBLE: "TODO goToFirstVisibleNode", //  "goToFirstVisibleNode",
+    GOTO_LAST_VISIBLE: "TODO goToLastVisibleNode", //  "goToLastVisibleNode",
+    GOTO_LAST_SIBLING: "TODO goToLastSibling", //  "goToLastSibling",
+    GOTO_NEXT_VISIBLE: "goto-next-visible", //  "selectVisNext",
+    GOTO_PREV_VISIBLE: "TODO selectVisBack", //  "selectVisBack",
+    GOTO_NEXT_MARKED: "TODO goToNextMarkedHeadline", //  "goToNextMarkedHeadline",
+    GOTO_NEXT_CLONE: "TODO goToNextClone", //  "goToNextClone",
+    CONTRACT_OR_GO_LEFT: "TODO contractNodeOrGoToParent", //  "contractNodeOrGoToParent",
+    EXPAND_AND_GO_RIGHT: "TODO expandNodeAndGoToFirstChild", //  "expandNodeAndGoToFirstChild",
+    CONTRACT_ALL: "TODO contractAllHeadlines", //  "contractAllHeadlines",
+    // * Leo Operations
+    MARK_PNODE: "TODO", //  "markPNode",
+    UNMARK_PNODE: "TODO", //  "unmarkPNode",
+    COPY_PNODE: "TODO", //  "copyOutline",
+    CUT_PNODE: "TODO", //  "cutPNode",
+    PASTE_PNODE: "TODO", //  "pasteOutline",
+    PASTE_CLONE_PNODE: "TODO", //  "pasteOutlineRetainingClones",
+    DELETE_PNODE: "TODO", //  "deletePNode",
+    MOVE_PNODE_DOWN: "TODO", //  "moveOutlineDown",
+    MOVE_PNODE_LEFT: "TODO", //  "moveOutlineLeft",
+    MOVE_PNODE_RIGHT: "TODO", //  "moveOutlineRight",
+    MOVE_PNODE_UP: "TODO", //  "moveOutlineUp",
+    INSERT_PNODE: "TODO", //  "insertPNode",
+    INSERT_NAMED_PNODE: "TODO", //  "insertNamedPNode",
+    CLONE_PNODE: "TODO", //  "clonePNode",
+    PROMOTE_PNODE: "TODO", //  "promote",
+    DEMOTE_PNODE: "TODO", //  "demote",
+    REFRESH_FROM_DISK_PNODE: "TODO", //  "refreshFromDisk",
+    SORT_CHILDREN: "TODO", //  "sortChildren",
+    SORT_SIBLINGS: "TODO", //  "sortSiblings",
+    UNDO: "TODO", //  "undo",
+    REDO: "TODO", //  "redo",
+    GET_STATES: "TODO", //  "getStates",
+    HOIST_PNODE: "TODO", //  "hoist",
+    DEHOIST: "TODO", //  "dehoist",
+    EXTRACT: "TODO", //  "extract",
+    EXTRACT_NAMES: "TODO", //  "extractNames",
+    COPY_MARKED: "TODO", //  "copyMarked",
+    DIFF_MARKED_NODES: "TODO", //  "deleteMarked",
+    MARK_CHANGED_ITEMS: "TODO", //  "markChangedHeadlines",
+    MARK_SUBHEADS: "TODO", //  "markSubheads",
+    UNMARK_ALL: "TODO", //  "unmarkAll",
+    CLONE_MARKED_NODES: "TODO", //  "cloneMarked",
+    DELETE_MARKED_NODES: "TODO", //  "deleteMarked",
+    MOVE_MARKED_NODES: "TODO", //  "moveMarked",
+    // * Clone-find functionality
+    CLONE_FIND_ALL: "TODO", //  "cloneFindAll",
+    CLONE_FIND_ALL_FLATTENED: "TODO", //  "cloneFindAllFlattened",
+    CLONE_FIND_MARKED: "TODO", //  "cloneFindMarked",
+    CLONE_FIND_FLATTENED_MARKED: "TODO", //  "cloneFindFlattenedMarked",
 };
 
 </t>
@@ -3644,44 +3643,49 @@ public command(
     p_keepSelection?: boolean
 ): Thenable&lt;unknown&gt; {
 
-    console.log('command: ' + p_cmd + ', p_node:', p_node);
-
     this._setupRefresh(p_fromOutline, p_refreshType);
 
+    const c: Commands = this.leo_c;
+    let value: any = undefined;
 
+    // Getting from kebab-cased 'Command Name'
+    const func = this.leo_c.commandsDict[p_cmd];
+    if (!func) {
+        vscode.window.showInformationMessage(
+            'TODO: Implement ' +
+            p_cmd +
+            " called from " +
+            (p_fromOutline ? "outline" : "body") +
+            " operate on " +
+            (p_node ? p_node!.label : "the selected node") +
+            (p_keepSelection ? " and bring selection back on currently selected node" : "")
+        );
+    } else {
+        const p = p_node ? p_node.position : c.p;
+        if (p.__eq__(c.p)) {
+            value = func.bind(c)(); // no need for re-selection
+        } else {
+            const old_p = c.p;
+            c.selectPosition(p)
+            value = func.bind(c)();
+            if (p_keepSelection &amp;&amp; c.positionExists(old_p)) {
+                // Only if 'keep' old position was set, and old_p still exists
+                c.selectPosition(old_p)
+            }
+        }
+    }
 
-    //if (this.leo_c.hasOwnProperty(p_cmd)) {
+    /* EXAMPLE CALL BY METHOD
         //@ts-expect-error
     if ((typeof this.leo_c[p_cmd]) === 'function') {
         console.log('HAS PROPERTY' + p_cmd + " so were doing it!");
             //@ts-expect-error
         this.leo_c[p_cmd]();
-
     } else {
         console.log('NO PROPERTY' + p_cmd);
-
         console.log(this.leo_c);
-
     }
-
-
-    // if (p_cmd === "selectVisNext") {
-    //     console.log('cmd was selectVisNext');
-    //     // this.leo_c.selectVisNext();
-    //     console.log((typeof this.leo_c[p_cmd]) === 'function');
-    //     this.leo_c[p_cmd]
-
-    // }
-
-    vscode.window.showInformationMessage(
-        'TODO: Implement ' +
-        p_cmd +
-        " called from " +
-        (p_fromOutline ? "outline" : "body") +
-        " operate on " +
-        (p_node ? p_node!.label : "the selected node") +
-        (p_keepSelection ? " and bring selection back on currently selected node" : "")
-    );
+    */
 
     this.launchRefresh();
 
@@ -13524,9 +13528,9 @@ public *all_Root_Children(copy = true): Generator&lt;Position&gt; {
 <t tx="felix.20211003011145.1">/**
  * File Commands Test
  */
-public fileCommandsTest(): void {
+public leoFileCommandsTest(): void {
     // Test command
-    console.log('fileCommandsTest Called !!');
+    console.log('CORE leo fileCommandsTest Called !!');
 }
 
 </t>
