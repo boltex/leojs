@@ -41,7 +41,7 @@ var AtFile = /** @class */ (function () {
         this.silentWrite = asisWrite; // Compatibility with old scripts.
         // These patterns exclude constructs such as @encoding.setter or @encoding(whatever)
         // However, they must allow @language typescript, @nocolor-node, etc.
-        this.at_directive_kind_pattern = re.compile(r, '\s*@([\w-]+)\s*');
+        this.at_directive_kind_pattern = re.compile('\s*@([\w-]+)\s*'); // EKR: remove r
         // **Warning**: all these ivars must **also** be inited in initCommonIvars.
         this.c = c;
         this.encoding = 'utf-8'; // 2014/08/13
@@ -81,11 +81,11 @@ var AtFile = /** @class */ (function () {
         this.errors = 0;
         this.inCode = true;
         this.indent = 0; // The unit of indentation is spaces, not tabs.
-        this.language = none;
+        this.language = null;
         this.output_newline = g.getOutputNewline(c = c);
-        this.page_width = none;
+        this.page_width = null;
         this.raw = False; // True: in @raw mode
-        this.root = None; // The root (a position) of tree being read or written.
+        this.root = null; // The root (a position) of tree being read or written.
         this.startSentinelComment = "";
         this.startSentinelComment = "";
         this.tab_width = c.tab_width || -4;
@@ -93,7 +93,7 @@ var AtFile = /** @class */ (function () {
     };
     AtFile.prototype.initReadIvars = function (root, fileName) {
         this.initCommonIvars();
-        this.bom_encoding = None; // The encoding implied by any BOM (set by g.stripBOM)
+        this.bom_encoding = null; // The encoding implied by any BOM (set by g.stripBOM)
         this.cloneSibCount = 0; // n > 1: Make sure n cloned sibs exists at next @+node sentinel
         this.correctedLines = 0; // For perfect import.
         this.docOut = []; // The doc part being accumulated.
@@ -104,7 +104,7 @@ var AtFile = /** @class */ (function () {
         this.lastLines = []; // The lines after @-leo
         this.leadingWs = "";
         this.lineNumber = 0; // New in Leo 4.4.8.
-        this.out = none;
+        this.out = null;
         this.outStack = [];
         this.read_i = 0;
         this.read_lines = [];
@@ -115,7 +115,7 @@ var AtFile = /** @class */ (function () {
         this.targetFileName = fileName; // For this.writeError only.
         this.tnodeList = []; // Needed until old-style @file nodes are no longer supported.
         this.tnodeListIndex = 0;
-        this.v = none;
+        this.v = null;
         this.vStack = []; // Stack of this.v values.
         this.thinChildIndexStack = []; // number of siblings at this level.
         this.thinNodeStack = []; // Entries are vnodes.
@@ -128,13 +128,13 @@ var AtFile = /** @class */ (function () {
     AtFile.prototype.initWriteIvars = function (root) {
         var c = this.c;
         if (!c && c.config) {
-            return none;
+            return null;
         }
         make_dirs = c.config.create_nonexistent_directories;
         // assert root;
         this.initCommonIvars();
-        // assert this.checkPythonCodeOnWrite != none;
-        // assert this.underindentEscapeString != none;
+        // assert this.checkPythonCodeOnWrite != null;
+        // assert this.underindentEscapeString != null;
         // Copy args
         this.root = root;
         this.sentinels = true;
@@ -179,7 +179,7 @@ var AtFile = /** @class */ (function () {
             if (g.unitTesting)
                 ;
             else
-                none;
+                null;
             this.targetFileName = targetFileName; // For this.writeError only.
             return targetFileName;
         }
@@ -193,7 +193,7 @@ var AtFile = /** @class */ (function () {
             ok = g.makeAllNonExistentDirectories(root_dir);
             if (!ok) {
                 g.error("Error creating directories: {root_dir}");
-                return none;
+                return null;
             }
         }
         // Return the target file name, regardless of future problems.
@@ -238,7 +238,7 @@ var AtFile = /** @class */ (function () {
                 return this.error('can ! call this.read from string for @shadow files');
             }
             this.initReadLine(fromString);
-            return none, none;
+            return null, null;
         }
         // Not from a string. Carefully read the file.
         fn = g.fullPath(c, this.root);
@@ -248,7 +248,7 @@ var AtFile = /** @class */ (function () {
         if (is_at_shadow) {
             fn = this.openAtShadowFileForReading(fn);
             if (!fn) {
-                return none, none;
+                return null, null;
             }
         }
         // assert fn;
@@ -259,14 +259,14 @@ var AtFile = /** @class */ (function () {
             if (s == none) {
                 // The error has been given.
                 this._file_bytes = g.toEncodedString('');
-                return none, none;
+                return none, null;
             }
             this.warnOnReadOnlyFile(fn);
         }
         catch (Exception) {
             this.error("unexpected exception opening: '@file {fn}'");
             this._file_bytes = g.toEncodedString('');
-            fn, s = none, none;
+            fn, s = none, null;
         }
         return fn, s;
     };
@@ -281,7 +281,7 @@ var AtFile = /** @class */ (function () {
         if (!shadow_exists) {
             g.trace('can ! happen: no private file', shadow_fn, g.callers());
             this.error("can ! happen: private file does ! exist: {shadow_fn}");
-            return none;
+            return null;
         }
         // This method is the gateway to the shadow algorithm.
         x.updatePublicAndPrivateFiles(this.root, fn, shadow_fn);
@@ -482,7 +482,7 @@ var AtFile = /** @class */ (function () {
         if (force)
             ;
         else
-            none;
+            null;
         while (p && p != after) {
             data = (p.gnx, g.fullPath(c, p));
             // skip clones referring to exactly the same paths.
@@ -505,13 +505,12 @@ var AtFile = /** @class */ (function () {
                 p.isAtEditNode() ||
                 p.isAtShadowFileNode() ||
                 p.isAtFileNode() ||
-                p.isAtCleanNode())
-                ; // 1134.
-            {
+                p.isAtCleanNode() // 1134.
+            ) {
                 files.append(p.copy());
                 p.moveToNodeAfterTree();
             }
-            if (p.isAtAsisFileNode() || p.isAtNoSentFileNode()) {
+            else if (p.isAtAsisFileNode() || p.isAtNoSentFileNode()) {
                 // Note (see #1081): @asis and @nosent can *not* be updated automatically.
                 // Doing so using refresh-from-disk will delete all child nodes.
                 p.moveToNodeAfterTree();
@@ -760,9 +759,9 @@ var AtFile = /** @class */ (function () {
         var c = this.c;
         x = c.shadowController;
         if (!fn == p.atShadowFileNodeName()) {
-            this.error("can ! happen: fn: {fn} != atShadowNodeName: ");
-            "{p.atShadowFileNodeName()}";
-            ;
+            this.error("can not happen: fn: {fn} != atShadowNodeName: " // del ';' ! => not
+            , // del ';' ! => not
+            "{p.atShadowFileNodeName()}");
             return;
         }
         fn = g.fullPath(c, p); // #1521 & #1341.
@@ -841,10 +840,10 @@ var AtFile = /** @class */ (function () {
         var c = this.c;
         // Set defaults.
         encoding = c.config.default_derived_file_encoding;
-        readVersion, readVersion5 = none, none;
+        readVersion, readVersion5 = none, null;
         new_df, start, end, isThin = false, '', '', false;
         // Example: \*@+leo-ver=5-thin-encoding=utf-8,.*/
-        pattern = re.compile(r, '(.+)@\+leo(-ver=([0123456789]+))?(-thin)?(-encoding=(.*)(\.))?(.*)');
+        pattern = re.compile('(.+)@\+leo(-ver=([0123456789]+))?(-thin)?(-encoding=(.*)(\.))?(.*)'); // remove r
         // The old code weirdly allowed '.' in version numbers.
         // group 1: opening delim
         // group 2: -ver=
@@ -919,7 +918,7 @@ var AtFile = /** @class */ (function () {
         // Catches all exceptions.
         // #1798.
         if (s == none) {
-            return none;
+            return null;
         }
         e, s = g.stripBOM(s);
         if (e) {
@@ -942,7 +941,7 @@ var AtFile = /** @class */ (function () {
      */
     AtFile.prototype.openFileHelper = function (fileName) {
         // #1798: return None as a flag on any error.
-        s = none;
+        s = null;
         try {
             with (open(fileName, 'rb')) {
                 s = f.read();
@@ -975,7 +974,7 @@ var AtFile = /** @class */ (function () {
             this.initReadLine(s);
             old_encoding = this.encoding;
             // assert old_encoding;
-            this.encoding = none;
+            this.encoding = null;
             // Execute scanHeader merely to set this.encoding.
             this.scanHeader(fileName, giveErrors = false);
             e = this.encoding || old_encoding;
@@ -1255,7 +1254,7 @@ var AtFile = /** @class */ (function () {
             // Write dirty nodes in the entire outline.
             root = c.rootPosition();
             p = c.rootPosition();
-            after = none;
+            after = null;
         }
         seen = set();
         files = [];
@@ -1457,7 +1456,7 @@ var AtFile = /** @class */ (function () {
             if (ok)
                 ;
             else
-                none;
+                null;
         }
         // leo 5.6: allow undefined section references in all @auto files.
         ivar = 'allow_undefined_refs';
@@ -1472,7 +1471,7 @@ var AtFile = /** @class */ (function () {
                 ''.join(this.outputList);
         }
         catch (Exception) {
-            return none;
+            return null;
         }
         finally {
             if (hasattr(this, ivar)) {
@@ -1652,13 +1651,13 @@ var AtFile = /** @class */ (function () {
                     }
                     catch (Exception) {
                         g.es_exception();
-                        return none;
+                        return null;
                     }
                 }
                 return writer_for_at_auto_cb;
             }
         }
-        return none;
+        return null;
     };
     /**
      * A factory returning a writer function for the given file extension.
@@ -1673,12 +1672,12 @@ var AtFile = /** @class */ (function () {
                 }
                 catch (Exception) {
                     g.es_exception();
-                    return none;
+                    return null;
                 }
             }
             return writer_for_ext_cb;
         }
-        return none;
+        return null;
     };
     /**
      * Write one @clean file..
@@ -1839,7 +1838,7 @@ var AtFile = /** @class */ (function () {
             this.initWriteIvars(root);
             // Force python sentinels to suppress an error message.
             // The actual sentinels will be set below.
-            this.endSentinelComment = none;
+            this.endSentinelComment = null;
             this.startSentinelComment = ";  // ";
             // Make sure we can compute the shadow directory.
             private_fn = x.shadowPathName(full_path);
@@ -2048,7 +2047,7 @@ var AtFile = /** @class */ (function () {
             c.endEditing();
             this.initWriteIvars(root);
             if (forcePythonSentinels) {
-                this.endSentinelComment = none;
+                this.endSentinelComment = null;
                 this.startSentinelComment = ";  // ";
                 this.language = "python";
             }
@@ -3411,7 +3410,7 @@ var AtFile = /** @class */ (function () {
         if (getattr(this, 'outputFile', none)) {
             this.outputFile.flush();
             this.outputFile.close();
-            this.outputFile = none;
+            this.outputFile = null;
         }
         this.remove(fileName);
         this.addToOrphanList(root);
@@ -3475,7 +3474,7 @@ var AtFile = /** @class */ (function () {
             mode = (os.stat(fileName))[0] & (7 * 8 * 8 + 7 * 8 + 7); // 0777
         }
         catch (Exception) {
-            mode = none;
+            mode = null;
         }
         return mode;
     };
@@ -3592,7 +3591,7 @@ var AtFile = /** @class */ (function () {
         d = c.scanAllDirectives(p);
         // Language & delims: Tricky.
         lang_dict = d.get('lang-dict') || {};
-        delims, language = none, none;
+        delims, language = none, null;
         if (lang_dict) {
             // There was an @delims or @language directive.
             language = lang_dict.get('language');
@@ -3738,6 +3737,7 @@ var FastAtRead = /** @class */ (function () {
     function FastAtRead(c, gnx2vnode, test, TestVNode) {
         if (test === void 0) { test = False; }
         if (TestVNode === void 0) { TestVNode = None; }
+        // EKR: This string looked like a docstring!
         this.header_pattern = re.compile(
         /**
          * ^(.+)@\+leo
@@ -3748,11 +3748,11 @@ var FastAtRead = /** @class */ (function () {
          */
         re.VERBOSE);
         this.c = c;
-        // assert gnx2vnode != none;
+        // assert gnx2vnode != null;
         this.gnx2vnode = gnx2vnode;
         // The global fc.gnxDict. Keys are gnx's, values are vnodes.
-        this.path = none;
-        this.root = none;
+        this.path = null;
+        this.root = null;
         this.VNode = TestVNode;
         if (test)
             ;
@@ -3854,7 +3854,7 @@ var FastAtRead = /** @class */ (function () {
             }
             first_lines.append(line);
         }
-        return none;
+        return null;
     };
     /**
      * Scan all lines of the file, creating vnodes.
@@ -3862,7 +3862,7 @@ var FastAtRead = /** @class */ (function () {
     FastAtRead.prototype.scan_lines = function (delims, first_lines, lines, path, start) {
         // Simple vars...
         afterref = False; // A special verbatim line follows @afterref.
-        clone_v = None; // The root of the clone tree.
+        clone_v = null; // The root of the clone tree.
         delim_start, delim_end = delims; // The start/end delims.
         doc_skip = (delim_start + '\n', delim_end + '\n'); // To handle doc parts.
         first_i = 0; // Index into first array.
@@ -3887,7 +3887,7 @@ var FastAtRead = /** @class */ (function () {
             // Start with the gnx for the @file node.
             root_gnx = gnx = 'root-gnx'; // The node that we are reading.
             gnx_head = '<hidden top vnode>'; // The headline of the root node.
-            context = none;
+            context = null;
             parent_v = this.VNode(context = context, gnx = gnx);
             parent_v._headString = gnx_head; // Corresponds to the @files node itself.
         }
@@ -4047,7 +4047,7 @@ var FastAtRead = /** @class */ (function () {
                 if (!root_seen) {
                     // Fix #1064: The node represents the root, regardless of the gnx!
                     root_seen = true;
-                    clone_v = none;
+                    clone_v = null;
                     gnx2body[gnx] = body = [];
                     if (!v) {
                         // Fix #1064.
@@ -4228,10 +4228,11 @@ var FastAtRead = /** @class */ (function () {
                 delims = m.group(1).strip();
                 body.append("@delims {delims}\n");
                 // Parse the delims.
-                delims_pat = re.compile(r, '^([^ ]+)\s*([^ ]+)?');
+                delims_pat = re.compile('^([^ ]+)\s*([^ ]+)?'); // EKR: remove r
                 m2 = delims_pat.match(delims);
                 if (!m2) {
-                    g.trace("Ignoring invalid @comment: {line!r}");
+                    // EKR: some syntax problem.
+                    // g.trace("Ignoring invalid @comment: {line!r}");
                     continue;
                 }
                 delim_start = m2.group(1);
@@ -4299,9 +4300,11 @@ var FastAtRead = /** @class */ (function () {
             // This assert verifies the short-circuit test.
             // assert strip_line.startswith(sentinel), (repr(sentinel), repr(line));
             // #2213: *Do* insert the line, with a warning.
-            g.trace("{g.shortFileName(this.path)}: ");
-            "warning: inserting unexpected line: {line.rstrip()!r}";
-            ;
+            g.trace(
+            // EKR: f-string problem.
+            // "{g.shortFileName(this.path)}: ";
+            // "warning: inserting unexpected line: {line.rstrip()!r}";
+            );
             body.append(line);
         }
         {
@@ -4335,7 +4338,8 @@ var FastAtRead = /** @class */ (function () {
         lines = g.splitLines(contents);
         data = this.scan_header(lines);
         if (!data) {
-            g.trace("Invalid external file: {sfn}");
+            // EKR: f-string problem
+            // g.trace("Invalid external file: {sfn}");
             return false;
         }
         // Clear all children.
