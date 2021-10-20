@@ -1,7 +1,7 @@
 
 # How to install and run the development version
 
-Thanks for trying out the development version of LeoInteg! :sunglasses: Contributions and pull requests are more than welcome!
+Thanks for trying out the development version of Leojs! :sunglasses: Contributions and pull requests are more than welcome!
 
 ## Introduction
 

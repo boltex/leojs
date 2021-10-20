@@ -4,8 +4,7 @@ import { Icon } from "./types";
 import * as utils from "./utils";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
-import { Commander } from "./core/leoCommander";
-
+import { Commands } from "./core/leoCommands";
 
 /**
  * * Opened Leo documents tree view node item implementation for usage in a TreeDataProvider
@@ -16,7 +15,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
     public contextValue: string;
 
     constructor(
-        public documentEntry: Commander,
+        public documentEntry: Commands,
         private _leoJs: LeoUI
     ) {
         super(documentEntry.fileName());
@@ -31,7 +30,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
         };
         // If this was created as a selected node, make sure it's selected as we may have opened/closed document
         // tslint:disable-next-line: strict-comparisons
-        if (this.documentEntry === g.app.leo_c) {
+        if (this.documentEntry === this._leoJs.leo_c) {
             this._leoJs.setDocumentSelection(this);
             this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
         } else {

@@ -14,7 +14,22 @@
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh></v>
 <v t="felix.20201208224703.1"><vh>@clean CONTRIBUTING.md</vh></v>
 </v>
-<v t="ekr.20201209145358.1"><vh>VSCode Extension</vh>
+<v t="ekr.20201209145358.1"><vh>VSCode extension</vh>
+<v t="felix.20211007213344.1"><vh>@clean src/config.ts</vh>
+<v t="felix.20211007213344.2"><vh>class Config</vh>
+<v t="felix.20211007213344.3"><vh>getConfig</vh></v>
+<v t="felix.20211007213344.4"><vh>getFontConfig</vh></v>
+<v t="felix.20211007213344.5"><vh>setLeojsSettings</vh></v>
+<v t="felix.20211007213344.6"><vh>setFontConfig</vh></v>
+<v t="felix.20211007213344.7"><vh>setEnablePreview</vh></v>
+<v t="felix.20211007213344.8"><vh>clearCloseEmptyGroups</vh></v>
+<v t="felix.20211007213344.9"><vh>setCloseOnFileDelete</vh></v>
+<v t="felix.20211007213344.10"><vh>checkEnablePreview</vh></v>
+<v t="felix.20211007213344.11"><vh>checkCloseEmptyGroups</vh></v>
+<v t="felix.20211007213344.12"><vh>checkCloseOnFileDelete</vh></v>
+<v t="felix.20211007213344.13"><vh>buildFromSavedSettings</vh></v>
+</v>
+</v>
 <v t="felix.20201215231023.1"><vh>@clean src/leoFiles.js</vh>
 <v t="felix.20210124225736.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
 <v t="felix.20201215231023.2"><vh>&lt;&lt; xslTemplate &gt;&gt;</vh></v>
@@ -39,7 +54,10 @@
 <v t="felix.20201214151326.3"><vh>general constants</vh></v>
 <v t="felix.20201214151326.4"><vh>workbench interface panels</vh></v>
 <v t="felix.20201214151326.5"><vh>user messages</vh></v>
+<v t="felix.20211008004139.1"><vh>find panel ids</vh></v>
 <v t="felix.20201214151326.6"><vh>at-buttons strings</vh></v>
+<v t="felix.20211007214102.1"><vh>configuration keys</vh></v>
+<v t="felix.20211007214110.1"><vh>config defaults</vh></v>
 <v t="felix.20201214151326.7"><vh>ask/save buttons</vh></v>
 <v t="felix.20201214151326.8"><vh>context flags</vh></v>
 <v t="felix.20201214151326.9"><vh>vscode commands</vh></v>
@@ -70,8 +88,22 @@
 </v>
 <v t="felix.20201208215619.1"><vh>deactivate</vh></v>
 </v>
-<v t="felix.20201214194412.1"><vh>@clean src/leojs.ts</vh>
-<v t="felix.20201215224237.1"><vh>class leojs</vh></v>
+<v t="felix.20211010192923.1"><vh>@clean src/leoBody.ts</vh>
+<v t="felix.20211010192923.2"><vh>class LeoBodyProvider</vh>
+<v t="felix.20211010192923.3"><vh>setBodyTime</vh></v>
+<v t="felix.20211010192923.4"><vh>fireRefreshFile</vh></v>
+<v t="felix.20211010192923.5"><vh>refreshPossibleGnxList</vh></v>
+<v t="felix.20211010192923.6"><vh>watch</vh></v>
+<v t="felix.20211010192923.7"><vh>stat</vh></v>
+<v t="felix.20211010192923.8"><vh>readFile</vh></v>
+<v t="felix.20211010192923.9"><vh>readDirectory</vh></v>
+<v t="felix.20211010192923.10"><vh>createDirectory</vh></v>
+<v t="felix.20211010192923.11"><vh>writeFile</vh></v>
+<v t="felix.20211010192923.12"><vh>rename</vh></v>
+<v t="felix.20211010192923.13"><vh>delete</vh></v>
+<v t="felix.20211010192923.14"><vh>copy</vh></v>
+<v t="felix.20211010192923.15"><vh>_fireSoon</vh></v>
+</v>
 </v>
 <v t="felix.20201214194144.1"><vh>@clean src/leoUI.ts</vh>
 <v t="felix.20201214195752.1"><vh>class LeoUI</vh>
@@ -83,6 +115,7 @@
 </v>
 <v t="felix.20201214194144.4"><vh>Refresh UI</vh>
 <v t="felix.20201214202118.1"><vh>showOutline</vh></v>
+<v t="felix.20211007232334.1"><vh>configTreeRefresh</vh></v>
 <v t="felix.20201229025520.1"><vh>gotSelectedNode</vh></v>
 <v t="felix.20201227155008.1"><vh>_setupRefresh</vh></v>
 <v t="felix.20201227014627.1"><vh>_launchRefresh</vh></v>
@@ -91,6 +124,7 @@
 <v t="felix.20201214202128.1"><vh>setDocumentSelection</vh></v>
 </v>
 <v t="felix.20201214194144.5"><vh>UI Change Events</vh>
+<v t="felix.20200719025231.24"><vh>_onChangeConfiguration</vh></v>
 <v t="felix.20201214202625.1"><vh>_onChangeCollapsedState</vh></v>
 <v t="felix.20201214202627.1"><vh>_onTreeViewVisibilityChanged</vh></v>
 <v t="felix.20201214202631.1"><vh>_onDocTreeViewVisibilityChanged</vh></v>
@@ -114,6 +148,7 @@
 <v t="felix.20201214211832.1"><vh>openLeoFile</vh></v>
 <v t="felix.20201214211834.1"><vh>showRecentLeoFiles</vh></v>
 <v t="felix.20201214211835.1"><vh>saveAsLeoFile</vh></v>
+<v t="felix.20211012233514.1"><vh>saveAsLeoFile</vh></v>
 <v t="felix.20201214211836.1"><vh>saveLeoFile</vh></v>
 <v t="felix.20201214211837.1"><vh>switchLeoFile</vh></v>
 <v t="felix.20201214211839.1"><vh>selectOpenedLeoDocument</vh></v>
@@ -125,16 +160,15 @@
 <v t="felix.20201214194144.10"><vh>Log &amp; Terminal Panes</vh>
 <v t="felix.20201214211655.1"><vh>showLogPane</vh></v>
 </v>
-<v t="felix.20201214194144.11"><vh>Other</vh>
-<v t="felix.20201221234735.1"><vh>toggleSetting</vh></v>
 <v t="felix.20201214211706.1"><vh>test</vh></v>
-</v>
 </v>
 </v>
 <v t="felix.20201208223553.1"><vh>@clean src/leoOutline.ts</vh>
 <v t="felix.20201209011931.1"><vh>class JsOutlineProvider</vh>
 <v t="felix.20201209011931.2"><vh>constructor</vh></v>
 <v t="felix.20201209011931.3"><vh>refreshTreeRoot</vh></v>
+<v t="felix.20211003223641.1"><vh>buildId</vh></v>
+<v t="felix.20211003233639.1"><vh>incTreeId</vh></v>
 <v t="felix.20201209011931.4"><vh>getTreeItem</vh></v>
 <v t="felix.20201209011931.5"><vh>getChildren</vh></v>
 <v t="felix.20201209011931.6"><vh>getParent</vh></v>
@@ -225,10 +259,13 @@
 </v>
 </v>
 <v t="felix.20201214154816.1"><vh>@clean src/types.d.ts</vh>
-<v t="felix.20201214154816.2"><vh>PNode</vh></v>
+<v t="felix.20211007213900.1"><vh>ConfigMembers</vh></v>
+<v t="felix.20211007213909.1"><vh>ConfigSetting</vh></v>
+<v t="felix.20211007213915.1"><vh>FontSettings</vh></v>
 <v t="felix.20201214154816.3"><vh>RevealType</vh></v>
 <v t="felix.20201214154816.4"><vh>RefreshType</vh></v>
 <v t="felix.20201214154816.5"><vh>UserCommand</vh></v>
+<v t="felix.20211010221959.1"><vh>BodyTimeInfo</vh></v>
 <v t="felix.20201214154816.6"><vh>ShowBodyParam</vh></v>
 <v t="felix.20201214154816.7"><vh>LeoPackageStates</vh></v>
 <v t="felix.20201214154816.8"><vh>LeoDocument</vh></v>
@@ -253,6 +290,7 @@
 <v t="felix.20201208224407.10"><vh>getDurationMilliseconds</vh></v>
 <v t="felix.20201208224407.11"><vh>getFileFromPath</vh></v>
 <v t="felix.20201208224407.12"><vh>isIconChangedByEdit</vh></v>
+<v t="felix.20211007214455.1"><vh>isHexColor</vh></v>
 <v t="felix.20201208224407.14"><vh>strToLeoUri</vh></v>
 <v t="felix.20201208224407.15"><vh>leoUriToStr</vh></v>
 <v t="felix.20201208224407.16"><vh>setContext</vh></v>
@@ -260,6 +298,7 @@
 </v>
 <v t="felix.20201214205159.1"><vh>@clean package.json</vh>
 <v t="felix.20201214205159.2"><vh>&lt;&lt; contributes &gt;&gt;</vh>
+<v t="felix.20211006225245.1"><vh>configuration</vh></v>
 <v t="felix.20201214205159.3"><vh>viewsContainers</vh></v>
 <v t="felix.20201214205159.4"><vh>views</vh></v>
 <v t="felix.20201214205159.5"><vh>viewsWelcome</vh></v>
@@ -280,7 +319,6 @@
 <v t="felix.20201214205159.20"><vh>Undo</vh></v>
 <v t="felix.20201214205159.21"><vh>Clone Find Commands</vh></v>
 <v t="felix.20201214205159.22"><vh>Marked Nodes Commands</vh></v>
-<v t="felix.20201218000931.1"><vh>show/hide UI elements</vh></v>
 </v>
 <v t="felix.20201214205159.23"><vh>menus</vh>
 <v t="felix.20201214205159.24"><vh>commandPalette</vh>
@@ -350,7 +388,8 @@
 </v>
 </v>
 <v t="felix.20210102000055.1"><vh>Leo</vh>
-<v t="felix.20210102000100.1"><vh>Core Classes</vh>
+<v t="felix.20210102000100.1"><vh>Core classes</vh>
+<v t="felix.20211018202009.1"><vh>@clean src/core/decorators.ts</vh></v>
 <v t="felix.20210102012334.1"><vh>@clean src/core/leoApp.ts</vh>
 <v t="felix.20210102211149.1"><vh>&lt;&lt; imports &gt;&gt; (leoApp)</vh></v>
 <v t="felix.20210102213337.1"><vh>class IdleTimeManager</vh>
@@ -408,10 +447,11 @@
 </v>
 </v>
 </v>
-<v t="felix.20210110222544.1"><vh>@clean src/core/leoCommander.ts</vh>
+<v t="felix.20210110222544.1"><vh>@clean src/core/leoCommands.ts</vh>
 <v t="felix.20210220194059.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
+<v t="felix.20211017232128.1"><vh>applyMixins</vh></v>
 <v t="felix.20210224000242.1"><vh>interface hoistStack</vh></v>
-<v t="felix.20210110223514.1"><vh>class Commander</vh>
+<v t="felix.20210110223514.1"><vh>class Commands</vh>
 <v t="felix.20210223220756.1"><vh>Commander IVars</vh>
 <v t="felix.20210223220814.2"><vh>c.initCommandIvars</vh></v>
 <v t="felix.20210223220814.3"><vh>c.initDebugIvars</vh></v>
@@ -420,10 +460,12 @@
 <v t="felix.20210223220814.6"><vh>c.initFileIvars</vh></v>
 <v t="felix.20210223220814.7"><vh>c.initOptionsIvars</vh></v>
 <v t="felix.20210223220814.8"><vh>c.initObjectIvars</vh></v>
-<v t="felix.20210223220814.9"><vh>c.initObjects</vh></v>
 <v t="felix.20210223220814.10"><vh>c.initSettings</vh></v>
 </v>
-<v t="felix.20210223002937.1"><vh>constructor</vh></v>
+<v t="felix.20210223002937.1"><vh>constructor &amp; helpers</vh>
+<v t="felix.20210223220814.9"><vh>c.initObjects</vh></v>
+<v t="felix.20211018215401.1"><vh>c.createCommandNames</vh></v>
+</v>
 <v t="felix.20210112001859.1"><vh>c.Drawing &amp; coloring</vh></v>
 <v t="felix.20210215185050.1"><vh>c.API</vh>
 <v t="felix.20210131011508.1"><vh>c.Generators</vh>
@@ -475,12 +517,24 @@
 <v t="felix.20210215204937.1"><vh>c.topPosition &amp; c.setTopPosition</vh></v>
 </v>
 </v>
+<v t="felix.20211005023225.1"><vh>c.Gui</vh>
+<v t="felix.20211005023800.1"><vh>c.Expand/contract</vh>
+<v t="felix.20211005023821.1"><vh>c.contractAllHeadlines</vh></v>
+<v t="felix.20211005023931.1"><vh>c.contractSubtree</vh></v>
+<v t="felix.20211005024008.1"><vh>c.expandSubtree</vh></v>
+<v t="felix.20211005024009.1"><vh>c.expandToLevel</vh></v>
+</v>
+<v t="felix.20211005023421.1"><vh>c.Selecting</vh>
+<v t="felix.20211005023456.1"><vh>c.selectPosition</vh></v>
+</v>
+</v>
 </v>
 </v>
 <v t="felix.20210220181245.1"><vh>@clean src/core/leoFileCommands.ts</vh>
 <v t="felix.20210220195150.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
 <v t="felix.20210220190156.1"><vh>class FileCommands</vh>
 <v t="felix.20210220200109.1"><vh>constructor</vh></v>
+<v t="felix.20211003011145.1"><vh>leoFileCommandsTest</vh></v>
 </v>
 </v>
 <v t="felix.20210102012410.1"><vh>@clean src/core/leoGlobals.ts</vh>
@@ -775,6 +829,122 @@
 </v>
 </v>
 </v>
+<v t="felix.20211002194716.1"><vh>Command classes</vh>
+<v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
+<v t="felix.20211017230407.1"><vh>@file src/commands/commanderFileCommands.ts</vh></v>
+<v t="felix.20211017220236.1"><vh>BACKUP src/commands/commanderOutlineCommands.ts</vh>
+<v t="felix.20211017220236.2"><vh>c_oc.Cut &amp; Paste Outlines</vh>
+<v t="felix.20211017220236.3"><vh>c_oc.copyOutline</vh></v>
+<v t="felix.20211017220236.4"><vh>c_oc.cutOutline</vh></v>
+<v t="felix.20211017220236.5"><vh>c_oc.pasteOutline</vh></v>
+<v t="felix.20211017220236.6"><vh>c_oc.pasteOutlineRetainingClones &amp; helpers</vh>
+<v t="felix.20211017220236.7"><vh>def computeCopiedBunchList</vh></v>
+<v t="felix.20211017220236.8"><vh>def computeVnodeInfoDict</vh></v>
+</v>
+<v t="felix.20211017220236.9"><vh>c_oc.pasteAsTemplate</vh>
+<v t="felix.20211017220236.10"><vh>skip_root</vh></v>
+<v t="felix.20211017220236.11"><vh>translate_gnx</vh></v>
+<v t="felix.20211017220236.12"><vh>viter</vh></v>
+<v t="felix.20211017220236.13"><vh>getv</vh></v>
+<v t="felix.20211017220236.14"><vh>do_paste</vh></v>
+<v t="felix.20211017220236.15"><vh>undoHelper</vh></v>
+<v t="felix.20211017220236.16"><vh>redoHelper</vh></v>
+<v t="felix.20211017220236.17"><vh>&lt;&lt; prepare destination data &gt;&gt;</vh></v>
+</v>
+</v>
+<v t="felix.20211017220236.18"><vh>c_oc.dumpOutline</vh></v>
+<v t="felix.20211017220236.19"><vh>c_oc.Expand &amp; contract commands</vh>
+<v t="felix.20211017220236.20"><vh>c_oc.contract-all</vh></v>
+<v t="felix.20211017220236.21"><vh>c_oc.contractAllOtherNodes &amp; helper</vh>
+<v t="felix.20211017220236.22"><vh>def contractIfNotCurrent</vh></v>
+</v>
+<v t="felix.20211017220236.23"><vh>c_oc.contractAllSubheads (new)</vh></v>
+<v t="felix.20211017220236.24"><vh>c_oc.contractNode</vh></v>
+<v t="felix.20211017220236.25"><vh>c_oc.contractNodeOrGoToParent</vh></v>
+<v t="felix.20211017220236.26"><vh>c_oc.contractParent</vh></v>
+<v t="felix.20211017220236.27"><vh>c_oc.expandAllHeadlines</vh></v>
+<v t="felix.20211017220236.28"><vh>c_oc.expandAllSubheads</vh></v>
+<v t="felix.20211017220236.29"><vh>c_oc.expandLevel1..9</vh></v>
+<v t="felix.20211017220236.30"><vh>c_oc.expandNextLevel</vh></v>
+<v t="felix.20211017220236.31"><vh>c_oc.expandNode</vh></v>
+<v t="felix.20211017220236.32"><vh>c_oc.expandNodeAndGoToFirstChild</vh></v>
+<v t="felix.20211017220236.33"><vh>c_oc.expandNodeOrGoToFirstChild</vh></v>
+<v t="felix.20211017220236.34"><vh>c_oc.expandOnlyAncestorsOfNode</vh></v>
+<v t="felix.20211017220236.35"><vh>c_oc.expandPrevLevel</vh></v>
+</v>
+<v t="felix.20211017220236.36"><vh>c_oc.fullCheckOutline</vh></v>
+<v t="felix.20211017220236.37"><vh>c_oc.Goto commands</vh>
+<v t="felix.20211017220236.38"><vh>c_oc.findNextClone</vh></v>
+<v t="felix.20211017220236.39"><vh>c_oc.goNextVisitedNode</vh></v>
+<v t="felix.20211017220236.40"><vh>c_oc.goPrevVisitedNode</vh></v>
+<v t="felix.20211017220236.41"><vh>c_oc.goToFirstNode</vh></v>
+<v t="felix.20211017220236.42"><vh>c_oc.goToFirstSibling</vh></v>
+<v t="felix.20211017220236.43"><vh>c_oc.goToFirstVisibleNode</vh></v>
+<v t="felix.20211017220236.44"><vh>c_oc.goToLastNode</vh></v>
+<v t="felix.20211017220236.45"><vh>c_oc.goToLastSibling</vh></v>
+<v t="felix.20211017220236.46"><vh>c_oc.goToLastVisibleNode</vh></v>
+<v t="felix.20211017220236.47"><vh>c_oc.goToNextClone</vh></v>
+<v t="felix.20211017220236.48"><vh>c_oc.goToNextDirtyHeadline</vh></v>
+<v t="felix.20211017220236.49"><vh>c_oc.goToNextMarkedHeadline</vh></v>
+<v t="felix.20211017220236.50"><vh>c_oc.goToNextSibling</vh></v>
+<v t="felix.20211017220236.51"><vh>c_oc.goToParent</vh></v>
+<v t="felix.20211017220236.52"><vh>c_oc.goToPrevMarkedHeadline</vh></v>
+<v t="felix.20211017220236.53"><vh>c_oc.goToPrevSibling</vh></v>
+<v t="felix.20211017220236.54"><vh>c_oc.selectThreadBack</vh></v>
+<v t="felix.20211017220236.55"><vh>c_oc.selectThreadNext</vh></v>
+<v t="felix.20211017220236.56"><vh>c_oc.selectVisBack</vh></v>
+<v t="felix.20211017220236.57"><vh>c_oc.selectVisNext</vh></v>
+</v>
+<v t="felix.20211017220236.58"><vh>c_oc.hoist/dehoist/clearAllHoists</vh>
+<v t="felix.20211017220236.59"><vh>c_oc.deHoist</vh></v>
+<v t="felix.20211017220236.60"><vh>c_oc.clearAllHoists</vh></v>
+<v t="felix.20211017220236.61"><vh>c_oc.hoist</vh></v>
+</v>
+<v t="felix.20211017220236.62"><vh>c_oc.Insert, Delete &amp; Clone commands</vh>
+<v t="felix.20211017220236.63"><vh>c_oc.clone</vh></v>
+<v t="felix.20211017220236.64"><vh>c_oc.cloneToAtSpot</vh></v>
+<v t="felix.20211017220236.65"><vh>c_oc.cloneToLastNode</vh></v>
+<v t="felix.20211017220236.66"><vh>c_oc.deleteOutline</vh></v>
+<v t="felix.20211017220236.67"><vh>c_oc.insertChild</vh></v>
+<v t="felix.20211017220236.68"><vh>c_oc.insertHeadline (insert-*)</vh>
+<v t="felix.20211017220236.69"><vh>def insertHeadlineHelper</vh></v>
+</v>
+<v t="felix.20211017220236.70"><vh>c_oc.insertHeadlineBefore</vh></v>
+</v>
+<v t="felix.20211017220236.71"><vh>c_oc.Mark commands</vh>
+<v t="felix.20211017220236.72"><vh>c_oc.cloneMarked</vh></v>
+<v t="felix.20211017220236.73"><vh>c_oc.copyMarked</vh></v>
+<v t="felix.20211017220236.74"><vh>c_oc.deleteMarked</vh></v>
+<v t="felix.20211017220236.75"><vh>c_oc.moveMarked &amp; helper</vh>
+<v t="felix.20211017220236.76"><vh>def createMoveMarkedNode</vh></v>
+</v>
+<v t="felix.20211017220236.77"><vh>c_oc.markChangedHeadlines</vh></v>
+<v t="felix.20211017220236.78"><vh>c_oc.markChangedRoots</vh></v>
+<v t="felix.20211017220236.79"><vh>c_oc.markHeadline</vh></v>
+<v t="felix.20211017220236.80"><vh>c_oc.markSubheads</vh></v>
+<v t="felix.20211017220236.81"><vh>c_oc.unmarkAll</vh></v>
+</v>
+<v t="felix.20211017220236.82"><vh>c_oc.Move commands</vh>
+<v t="felix.20211017220236.83"><vh>c_oc.demote</vh></v>
+<v t="felix.20211017220236.84"><vh>c_oc.moveOutlineDown</vh>
+<v t="felix.20211017220236.85"><vh>&lt;&lt; Move p down &amp; set moved if successful &gt;&gt;</vh></v>
+</v>
+<v t="felix.20211017220236.86"><vh>c_oc.moveOutlineLeft</vh></v>
+<v t="felix.20211017220236.87"><vh>c_oc.moveOutlineRight</vh></v>
+<v t="felix.20211017220236.88"><vh>c_oc.moveOutlineUp</vh>
+<v t="felix.20211017220236.89"><vh>&lt;&lt; Move p up &gt;&gt;</vh></v>
+</v>
+<v t="felix.20211017220236.90"><vh>c_oc.promote</vh></v>
+<v t="felix.20211017220236.91"><vh>c_oc.toggleSparseMove</vh></v>
+</v>
+<v t="felix.20211017220236.92"><vh>c_oc.Sort commands</vh>
+<v t="felix.20211017220236.93"><vh>c_oc.sortChildren</vh></v>
+<v t="felix.20211017220236.94"><vh>c_oc.sortSiblings</vh></v>
+</v>
+<v t="felix.20211017220236.95"><vh>def cantMoveMessage</vh></v>
+<v t="felix.20211017220236.96"><vh>count-children</vh></v>
+</v>
+</v>
 </v>
 <v t="felix.20210226224644.1"><vh>TO DO / TO FINISH</vh>
 <v t="felix.20210226224637.1"><vh>fc.getLeoFile &amp; helpers (read main line)</vh>
@@ -788,6 +958,29 @@
 <tnodes>
 <t tx="ekr.20201209145256.1"></t>
 <t tx="ekr.20201209145358.1"></t>
+<t tx="felix.20200719025231.24">/**
+ * * Handles the change of vscode config: a onDidChangeConfiguration event triggered
+ * @param p_event The configuration-change event passed by vscode
+ */
+private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
+    console.log('changed config !!');
+
+    if (p_event.affectsConfiguration(Constants.CONFIG_NAME)) {
+        this.config.buildFromSavedSettings(); // If the config setting started with 'leojs'
+    }
+
+    // also check if workbench.editor.enablePreview
+    this._bodyEnablePreview = !!vscode.workspace
+        .getConfiguration('workbench.editor')
+        .get('enablePreview');
+
+    // Check For "workbench.editor.enablePreview" to be true.
+    this.config.checkEnablePreview();
+    this.config.checkCloseEmptyGroups();
+    this.config.checkCloseOnFileDelete();
+}
+
+</t>
 <t tx="felix.20201208214250.2"></t>
 <t tx="felix.20201208214319.1"># leojs
 
@@ -874,6 +1067,7 @@ import { LeoUI } from './leoUI';
 import { Constants } from './constants';
 import { LeoButtonNode } from './leoButtonNode';
 import { LeoOutlineNode } from './leoOutlineNode';
+import { Position } from './core/leoNodes';
 
 @language typescript
 @tabwidth -4
@@ -895,7 +1089,6 @@ import { LeoOutlineNode } from './leoOutlineNode';
 import { ProviderResult } from "vscode";
 import { Icon } from './types';
 import { LeoUI } from './leoUI';
-import * as g from './core/leoGlobals';
 import { Position } from './core/leoNodes';
 
 
@@ -1214,7 +1407,7 @@ public getLeoFileUrl(p_saveAsFlag?: boolean): Promise&lt;string&gt; {
 
 # How to install and run the development version
 
-Thanks for trying out the development version of LeoInteg! :sunglasses: Contributions and pull requests are more than welcome!
+Thanks for trying out the development version of Leojs! :sunglasses: Contributions and pull requests are more than welcome!
 
 ## Introduction
 
@@ -1234,7 +1427,7 @@ If you're having problems, try [running this sample extension](https://github.co
     constructor(
         public label: string, // Node headline
         public collapsibleState: vscode.TreeItemCollapsibleState, // Computed in receiver/creator
-        public ap: Position, // Pointer/reference for leo's node position
+        public position: Position, // Pointer/reference for leo's node position
         public cloned: boolean,
         public dirty: boolean,
         public marked: boolean,
@@ -1276,9 +1469,8 @@ If you're having problems, try [running this sample extension](https://github.co
 </t>
 <t tx="felix.20201209004316.2">public copyProperties(p_node: LeoOutlineNode): LeoOutlineNode {
     this.label = p_node.label;
-
     this.collapsibleState = p_node.collapsibleState;
-    this.ap = p_node.ap;
+    this.position = p_node.position;
     this.cloned = p_node.cloned;
     this.dirty = p_node.dirty;
     this.marked = p_node.marked;
@@ -1328,7 +1520,7 @@ public setRoot(): void {
 
     readonly onDidChangeTreeData: vscode.Event&lt;Position | undefined&gt; = this._onDidChangeTreeData.event;
 
-    private _uniqueId: number = 0;
+    public treeId: number = 0; // Starting salt for tree node murmurhash generated Ids
 
     @others
 }
@@ -1337,7 +1529,6 @@ public setRoot(): void {
 <t tx="felix.20201209011931.2">constructor(
     private _icons: Icon[],
     private _leoUI: LeoUI
-    // private _leo: Leojs
 ) {
 }
 
@@ -1351,6 +1542,8 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201209011931.4">public getTreeItem(element: Position): Thenable&lt;LeoOutlineNode&gt; | LeoOutlineNode {
+    console.log('called getTreeItem', element.h);
+
     let w_collapse: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.None;
     if (element.hasChildren()) {
         w_collapse = element.isExpanded() ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
@@ -1366,10 +1559,10 @@ public refreshTreeRoot(): void {
         element.v.hasBody(),
         Object.keys(element.v.u).length ? element.v.u : false, // 'u' - user defined data
         this._icons,
-        "id" + this._uniqueId++
+        this.buildId(element, w_collapse)
     );
 
-    if (element.isSelected()) {
+    if (element.__eq__(this._leoUI.leo_c.p)) {
         this._leoUI.gotSelectedNode(element);
     }
 
@@ -1379,12 +1572,19 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201209011931.5">public getChildren(element?: Position): Position[] {
+    if(element){
+        console.log('called get children on', element.h);
+    }else{
+        console.log('called get children on root');
+
+    }
+
     if (element) {
         return [...element.children()];
     } else {
-        if (g.app.leo_c) {
+        if (this._leoUI.leo_c) {
 
-            const w_c = g.app.leo_c!; // Currently Selected Document's Commander
+            const w_c = this._leoUI.leo_c!; // Currently Selected Document's Commander
             if (w_c.hoistStack.length) {
                 // topmost hoisted starts the outline as single root 'child'
                 return [w_c.hoistStack[w_c.hoistStack.length - 1].p];
@@ -1401,8 +1601,19 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201209011931.6">public getParent(element: Position): ProviderResult&lt;Position&gt; {
+    console.log('called get parent on', element.h);
+
     if (element) {
-        return element.parent();
+        const p_parent = element.parent();
+        if (p_parent.v) {
+            console.log('had parent');
+
+            return p_parent;
+        } else {
+            console.log('was root');
+
+            return undefined;
+        }
     }
     return undefined;
 }
@@ -1437,7 +1648,7 @@ public refreshTreeRoot(): void {
     const w_commands: [string, (...args: any[]) =&gt; any][] = [
 
         // ! REMOVE TESTS ENTRIES FROM PACKAGE.JSON FOR MASTER BRANCH RELEASES !
-        ["leointeg.test", () =&gt; w_leoUI.test()], // Test function useful when debugging
+        ["leojs.test", () =&gt; w_leoUI.test()], // Test function useful when debugging
 
         &lt;&lt; Define entries for all commands &gt;&gt;
     ];
@@ -1445,8 +1656,6 @@ public refreshTreeRoot(): void {
     w_commands.map(function (p_command) {
         p_context.subscriptions.push(vscode.commands.registerCommand(...p_command));
     });
-
-
 
 }
 
@@ -1473,6 +1682,7 @@ public refreshTreeRoot(): void {
 [CMD.SORT_CHILDREN, () =&gt; w_leoUI.command(LEOCMD.SORT_CHILDREN, U, REFRESH_TREE, false, true)],
 [CMD.SORT_SIBLING, () =&gt; w_leoUI.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, false, true)],
 [CMD.SORT_SIBLING_FO, () =&gt; w_leoUI.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, true, true)],
+
 </t>
 <t tx="felix.20201214150149.11">[CMD.MARK, (p_node: LeoOutlineNode) =&gt; w_leoUI.changeMark(true, p_node, true)],
 [CMD.MARK_SELECTION, () =&gt; w_leoUI.changeMark(true, U, false)],
@@ -1486,6 +1696,7 @@ public refreshTreeRoot(): void {
 </t>
 <t tx="felix.20201214150149.12">[CMD.EXTRACT, () =&gt; w_leoUI.command(LEOCMD.EXTRACT, U, REFRESH_TREE_BODY, false)],
 [CMD.EXTRACT_NAMES, () =&gt; w_leoUI.command(LEOCMD.EXTRACT_NAMES, U, REFRESH_TREE_BODY, false)],
+
 </t>
 <t tx="felix.20201214150149.13">[CMD.MOVE_DOWN, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.MOVE_DOWN_SELECTION, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, false)],
@@ -1502,6 +1713,7 @@ public refreshTreeRoot(): void {
 [CMD.MOVE_UP, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_UP, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.MOVE_UP_SELECTION, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, false)],
 [CMD.MOVE_UP_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, true)],
+
 </t>
 <t tx="felix.20201214150149.14">[CMD.REDO, () =&gt; w_leoUI.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, false)],
 [CMD.REDO_FO, () =&gt; w_leoUI.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, true)],
@@ -1519,11 +1731,27 @@ public refreshTreeRoot(): void {
 [CMD.CLONE_MARKED_NODES, () =&gt; w_leoUI.command(LEOCMD.CLONE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
 [CMD.DELETE_MARKED_NODES, () =&gt; w_leoUI.command(LEOCMD.DELETE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
 [CMD.MOVE_MARKED_NODES, () =&gt; w_leoUI.command(LEOCMD.MOVE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
+
 </t>
 <t tx="felix.20201214150149.17">[CMD.CLONE_FIND_ALL, () =&gt; w_leoUI.command(LEOCMD.CLONE_FIND_ALL, U, REFRESH_TREE_BODY, true)],
 [CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; w_leoUI.command(LEOCMD.CLONE_FIND_ALL_FLATTENED, U, REFRESH_TREE_BODY, true)],
 [CMD.CLONE_FIND_MARKED, () =&gt; w_leoUI.command(LEOCMD.CLONE_FIND_MARKED, U, REFRESH_TREE_BODY, true)],
-[CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; w_leoUI.command(LEOCMD.CLONE_FIND_FLATTENED_MARKED, U, REFRESH_TREE_BODY, true)]
+[CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; w_leoUI.command(LEOCMD.CLONE_FIND_FLATTENED_MARKED, U, REFRESH_TREE_BODY, true)],
+
+// [CMD.SET_FIND_EVERYWHERE_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.ENTIRE_OUTLINE)],
+// [CMD.SET_FIND_NODE_ONLY_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.NODE_ONLY)],
+// [CMD.SET_FIND_SUBOUTLINE_ONLY_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SUBOUTLINE_ONLY)],
+// [CMD.TOGGLE_FIND_IGNORE_CASE_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.IGNORE_CASE)],
+// [CMD.TOGGLE_FIND_MARK_CHANGES_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_CHANGES)],
+// [CMD.TOGGLE_FIND_MARK_FINDS_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_FINDS)],
+// [CMD.TOGGLE_FIND_REGEXP_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.REG_EXP)],
+// [CMD.TOGGLE_FIND_WORD_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.WHOLE_WORD)],
+// [CMD.TOGGLE_FIND_SEARCH_BODY_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SEARCH_BODY)],
+// [CMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SEARCH_HEADLINE)],
+
+[CMD.SET_ENABLE_PREVIEW, () =&gt; w_leoUI.config.setEnablePreview()],
+[CMD.CLEAR_CLOSE_EMPTY_GROUPS, () =&gt; w_leoUI.config.clearCloseEmptyGroups()],
+[CMD.SET_CLOSE_ON_FILE_DELETE, () =&gt; w_leoUI.config.setCloseOnFileDelete()],
 </t>
 <t tx="felix.20201214150149.2">@others
 </t>
@@ -1578,8 +1806,10 @@ public refreshTreeRoot(): void {
 [CMD.PASTE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, true)],
 </t>
 <t tx="felix.20201214150149.7">// Called by nodes in the tree when selected either by mouse, or with enter
-[CMD.SELECT_NODE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node, false, false)],
-[CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node, false, true)],
+//[CMD.SELECT_NODE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node.position, false)],
+[CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_outlineNode.position, false)],
+//[CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node.position, true)],
+[CMD.OPEN_ASIDE, (p_position: Position) =&gt; w_leoUI.selectTreeNode(p_position, true)],
 
 [CMD.CONTRACT_ALL, () =&gt; w_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, false)],
 [CMD.CONTRACT_ALL_FO, () =&gt; w_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, true)],
@@ -1617,21 +1847,6 @@ public refreshTreeRoot(): void {
  * All commands this expansion exposes to the user via GUI/keybindings in package.json
  */
 public static COMMANDS = {
-    // Toggle UI Settings
-    ENABLE_LEO_TREE_NAV: Constants.NAME + ".enableLeoTreeNav",
-    SHOW_EDIT_ON_NODES: Constants.NAME + ".showEditOnNodes",
-    SHOW_ADD_ON_NODES: Constants.NAME + ".showAddOnNodes",
-    SHOW_ARROWS_ON_NODES: Constants.NAME + ".showArrowsOnNodes",
-    SHOW_COPY_ON_NODES: Constants.NAME + ".showCopyOnNodes",
-    SHOW_CLONE_ON_NODES: Constants.NAME + ".showCloneOnNodes",
-    SHOW_MARK_ON_NODES: Constants.NAME + ".showMarkOnNodes",
-    DISABLE_LEO_TREE_NAV: Constants.NAME + ".disableLeoTreeNav",
-    HIDE_EDIT_ON_NODES: Constants.NAME + ".hideEditOnNodes",
-    HIDE_ADD_ON_NODES: Constants.NAME + ".hideAddOnNodes",
-    HIDE_ARROWS_ON_NODES: Constants.NAME + ".hideArrowsOnNodes",
-    HIDE_COPY_ON_NODES: Constants.NAME + ".hideCopyOnNodes",
-    HIDE_CLONE_ON_NODES: Constants.NAME + ".hideCloneOnNodes",
-    HIDE_MARK_ON_NODES: Constants.NAME + ".hideMarkOnNodes",
     // Leo Documents
     SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
     OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
@@ -1752,6 +1967,22 @@ public static COMMANDS = {
     CLONE_FIND_ALL_FLATTENED: Constants.NAME + ".cloneFindAllFlattened",
     CLONE_FIND_MARKED: Constants.NAME + ".cloneFindMarked",
     CLONE_FIND_FLATTENED_MARKED: Constants.NAME + ".cloneFindFlattenedMarked",
+    // TODO
+    GOTO_GLOBAL_LINE: Constants.NAME + ".gotoGlobalLine",
+    TAG_CHILDREN: Constants.NAME + ".tagChildren",
+    SET_FIND_EVERYWHERE_OPTION: Constants.NAME + ".setFindEverywhereOption",
+    SET_FIND_NODE_ONLY_OPTION: Constants.NAME + ".setFindNodeOnlyOption",
+    SET_FIND_SUBOUTLINE_ONLY_OPTION: Constants.NAME + ".setFindSuboutlineOnlyOption",
+    TOGGLE_FIND_IGNORE_CASE_OPTION: Constants.NAME + ".toggleFindIgnoreCaseOption",
+    TOGGLE_FIND_MARK_CHANGES_OPTION: Constants.NAME + ".toggleFindMarkChangesOption",
+    TOGGLE_FIND_MARK_FINDS_OPTION: Constants.NAME + ".toggleFindMarkFindsOption",
+    TOGGLE_FIND_REGEXP_OPTION: Constants.NAME + ".toggleFindRegexpOption",
+    TOGGLE_FIND_WORD_OPTION: Constants.NAME + ".toggleFindWordOption",
+    TOGGLE_FIND_SEARCH_BODY_OPTION: Constants.NAME + ".toggleFindSearchBodyOption",
+    TOGGLE_FIND_SEARCH_HEADLINE_OPTION: Constants.NAME + ".toggleFindSearchHeadlineOption",
+    SET_ENABLE_PREVIEW: Constants.NAME + ".setEnablePreview",
+    CLEAR_CLOSE_EMPTY_GROUPS: Constants.NAME + ".clearCloseEmptyGroups",
+    SET_CLOSE_ON_FILE_DELETE: Constants.NAME + ".setCloseOnFileDelete"
 };
 
 </t>
@@ -1759,62 +1990,62 @@ public static COMMANDS = {
  * Leo command names that are called from vscode's gui/menu/buttons/keybindings triggers
  */
 public static LEO_COMMANDS = {
-    EXECUTE_SCRIPT: "executeScript",
-    REFRESH_FROM_DISK: "refreshFromDisk",
-    GIT_DIFF: "gitDiff",
-    // Goto operations
-    PAGE_UP: "pageUp",
-    PAGE_DOWN: "pageDown",
-    GOTO_FIRST_VISIBLE: "goToFirstVisibleNode",
-    GOTO_LAST_VISIBLE: "goToLastVisibleNode",
-    GOTO_LAST_SIBLING: "goToLastSibling",
-    GOTO_NEXT_VISIBLE: "selectVisNext",
-    GOTO_PREV_VISIBLE: "selectVisBack",
-    GOTO_NEXT_MARKED: "goToNextMarkedHeadline",
-    GOTO_NEXT_CLONE: "goToNextClone",
-    CONTRACT_OR_GO_LEFT: "contractNodeOrGoToParent",
-    EXPAND_AND_GO_RIGHT: "expandNodeAndGoToFirstChild",
-    CONTRACT_ALL: "contractAllHeadlines",
-    // Leo Operations
-    MARK_PNODE: "markPNode",
-    UNMARK_PNODE: "unmarkPNode",
-    COPY_PNODE: "copyOutline",
-    CUT_PNODE: "cutPNode",
-    PASTE_PNODE: "pasteOutline",
-    PASTE_CLONE_PNODE: "pasteOutlineRetainingClones",
-    DELETE_PNODE: "deletePNode",
-    MOVE_PNODE_DOWN: "moveOutlineDown",
-    MOVE_PNODE_LEFT: "moveOutlineLeft",
-    MOVE_PNODE_RIGHT: "moveOutlineRight",
-    MOVE_PNODE_UP: "moveOutlineUp",
-    INSERT_PNODE: "insertPNode",
-    INSERT_NAMED_PNODE: "insertNamedPNode",
-    CLONE_PNODE: "clonePNode",
-    PROMOTE_PNODE: "promote",
-    DEMOTE_PNODE: "demote",
-    REFRESH_FROM_DISK_PNODE: "refreshFromDisk",
-    SORT_CHILDREN: "sortChildren",
-    SORT_SIBLINGS: "sortSiblings",
-    UNDO: "undo",
-    REDO: "redo",
-    GET_STATES: "getStates",
-    HOIST_PNODE: "hoist",
-    DEHOIST: "dehoist",
-    EXTRACT: "extract",
-    EXTRACT_NAMES: "extractNames",
-    COPY_MARKED: "copyMarked",
-    DIFF_MARKED_NODES: "deleteMarked",
-    MARK_CHANGED_ITEMS: "markChangedHeadlines",
-    MARK_SUBHEADS: "markSubheads",
-    UNMARK_ALL: "unmarkAll",
-    CLONE_MARKED_NODES: "cloneMarked",
-    DELETE_MARKED_NODES: "deleteMarked",
-    MOVE_MARKED_NODES: "moveMarked",
-    // Clone-find functionality
-    CLONE_FIND_ALL: "cloneFindAll",
-    CLONE_FIND_ALL_FLATTENED: "cloneFindAllFlattened",
-    CLONE_FIND_MARKED: "cloneFindMarked",
-    CLONE_FIND_FLATTENED_MARKED: "cloneFindFlattenedMarked",
+    EXECUTE_SCRIPT: "TODO", // "executeScript",
+    REFRESH_FROM_DISK: "TODO", //  "refreshFromDisk",
+    GIT_DIFF: "TODO", //  "gitDiff",
+    // * Goto operations
+    PAGE_UP: "TODO pageUp", //  "pageUp",
+    PAGE_DOWN: "TODO pageDown", //  "pageDown",
+    GOTO_FIRST_VISIBLE: "TODO goToFirstVisibleNode", //  "goToFirstVisibleNode",
+    GOTO_LAST_VISIBLE: "TODO goToLastVisibleNode", //  "goToLastVisibleNode",
+    GOTO_LAST_SIBLING: "TODO goToLastSibling", //  "goToLastSibling",
+    GOTO_NEXT_VISIBLE: "goto-next-visible", //  "selectVisNext",
+    GOTO_PREV_VISIBLE: "TODO selectVisBack", //  "selectVisBack",
+    GOTO_NEXT_MARKED: "TODO goToNextMarkedHeadline", //  "goToNextMarkedHeadline",
+    GOTO_NEXT_CLONE: "TODO goToNextClone", //  "goToNextClone",
+    CONTRACT_OR_GO_LEFT: "TODO contractNodeOrGoToParent", //  "contractNodeOrGoToParent",
+    EXPAND_AND_GO_RIGHT: "TODO expandNodeAndGoToFirstChild", //  "expandNodeAndGoToFirstChild",
+    CONTRACT_ALL: "TODO contractAllHeadlines", //  "contractAllHeadlines",
+    // * Leo Operations
+    MARK_PNODE: "TODO", //  "markPNode",
+    UNMARK_PNODE: "TODO", //  "unmarkPNode",
+    COPY_PNODE: "TODO", //  "copyOutline",
+    CUT_PNODE: "TODO", //  "cutPNode",
+    PASTE_PNODE: "TODO", //  "pasteOutline",
+    PASTE_CLONE_PNODE: "TODO", //  "pasteOutlineRetainingClones",
+    DELETE_PNODE: "TODO", //  "deletePNode",
+    MOVE_PNODE_DOWN: "TODO", //  "moveOutlineDown",
+    MOVE_PNODE_LEFT: "TODO", //  "moveOutlineLeft",
+    MOVE_PNODE_RIGHT: "TODO", //  "moveOutlineRight",
+    MOVE_PNODE_UP: "TODO", //  "moveOutlineUp",
+    INSERT_PNODE: "TODO", //  "insertPNode",
+    INSERT_NAMED_PNODE: "TODO", //  "insertNamedPNode",
+    CLONE_PNODE: "TODO", //  "clonePNode",
+    PROMOTE_PNODE: "TODO", //  "promote",
+    DEMOTE_PNODE: "TODO", //  "demote",
+    REFRESH_FROM_DISK_PNODE: "TODO", //  "refreshFromDisk",
+    SORT_CHILDREN: "TODO", //  "sortChildren",
+    SORT_SIBLINGS: "TODO", //  "sortSiblings",
+    UNDO: "TODO", //  "undo",
+    REDO: "TODO", //  "redo",
+    GET_STATES: "TODO", //  "getStates",
+    HOIST_PNODE: "TODO", //  "hoist",
+    DEHOIST: "TODO", //  "dehoist",
+    EXTRACT: "TODO", //  "extract",
+    EXTRACT_NAMES: "TODO", //  "extractNames",
+    COPY_MARKED: "TODO", //  "copyMarked",
+    DIFF_MARKED_NODES: "TODO", //  "deleteMarked",
+    MARK_CHANGED_ITEMS: "TODO", //  "markChangedHeadlines",
+    MARK_SUBHEADS: "TODO", //  "markSubheads",
+    UNMARK_ALL: "TODO", //  "unmarkAll",
+    CLONE_MARKED_NODES: "TODO", //  "cloneMarked",
+    DELETE_MARKED_NODES: "TODO", //  "deleteMarked",
+    MOVE_MARKED_NODES: "TODO", //  "moveMarked",
+    // * Clone-find functionality
+    CLONE_FIND_ALL: "TODO", //  "cloneFindAll",
+    CLONE_FIND_ALL_FLATTENED: "TODO", //  "cloneFindAllFlattened",
+    CLONE_FIND_MARKED: "TODO", //  "cloneFindMarked",
+    CLONE_FIND_FLATTENED_MARKED: "TODO", //  "cloneFindFlattenedMarked",
 };
 
 </t>
@@ -1828,8 +2059,8 @@ export class Constants {
 </t>
 <t tx="felix.20201214151326.3">public static NAME: string = "leojs";
 
-public static TREEVIEW_ID: string = "leojs";
-public static TREEVIEW_EXPLORER_ID: string = "leojsExplorer";
+public static TREEVIEW_ID: string = "leojsOutline";
+public static TREEVIEW_EXPLORER_ID: string = "leojsOutlineExplorer";
 
 public static DOCUMENTS_ID: string = "leojsDocuments";
 public static DOCUMENTS_EXPLORER_ID: string = "leojsDocumentsExplorer";
@@ -1850,6 +2081,9 @@ public static REFRESH_DEBOUNCE_DELAY: number = 50;
 public static STATES_DEBOUNCE_DELAY: number = 100;
 public static DOCUMENTS_DEBOUNCE_DELAY: number = 100;
 
+public static CONFIG_NAME: string = "leojs";
+public static CONFIG_WORKBENCH_ENABLED_PREVIEW: string = "workbench.editor.enablePreview";
+public static CONFIG_REFRESH_MATCH: string = "OnNodes"; // substring to distinguish 'on-hover' icon commands
 </t>
 <t tx="felix.20201214151326.4">/**
  * Strings used in the workbench interface panels (not for messages or dialogs)
@@ -1988,14 +2222,28 @@ public static CONTEXT_FLAGS = {
     DOCUMENT_TITLED: "leojsDocumentTitled",
     DOCUMENT_SELECTED_UNTITLED: "leojsDocumentSelectedUntitled",
     DOCUMENT_UNTITLED: "leojsDocumentUntitled",
-    // UI
-    LEO_TREE_BROWSE: "leojsTreeBrowse", // Override vscode's tree behavior with Leo's own
-    SHOW_EDIT: "leojsShowEditOnNodes",
-    SHOW_ARROWS: "leojsShowArrowsOnNodes",
-    SHOW_ADD: "leojsShowAddOnNodes",
-    SHOW_MARK: "leojsShowMarkOnNodes",
-    SHOW_CLONE: "leojsShowCloneOnNodes",
-    SHOW_COPY: "leojsShowCopyOnNodes",
+
+    // Context flags that are mapped 'directly' onto leojs config settings
+    LEO_TREE_BROWSE: Constants.NAME + Constants.CONFIG_NAMES.LEO_TREE_BROWSE[0].toUpperCase() + Constants.CONFIG_NAMES.LEO_TREE_BROWSE.slice(1), // Force ar'jan's suggestion of Leo's tree behavior override
+    TREE_IN_EXPLORER: Constants.NAME + Constants.CONFIG_NAMES.TREE_IN_EXPLORER[0].toUpperCase() + Constants.CONFIG_NAMES.TREE_IN_EXPLORER.slice(1), // Leo outline also in the explorer view
+    SHOW_OPEN_ASIDE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE.slice(1),   // Show 'open aside' in context menu
+    SHOW_EDIT: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDIT[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDIT.slice(1),              // Hover Icons on outline nodes
+    SHOW_ARROWS: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ARROWS[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ARROWS.slice(1),           // Hover Icons on outline nodes
+    SHOW_ADD: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ADD[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ADD.slice(1),                 // Hover Icons on outline nodes
+    SHOW_MARK: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK.slice(1),               // Hover Icons on outline nodes
+    SHOW_CLONE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLONE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLONE.slice(1),             // Hover Icons on outline nodes
+    SHOW_COPY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_COPY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_COPY.slice(1),               // Hover Icons on outline nodes
+
+    SHOW_EDITION_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDITION_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDITION_BODY.slice(1),
+    SHOW_CLIPBOARD_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY.slice(1),
+    SHOW_PROMOTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY.slice(1),
+    SHOW_EXECUTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY.slice(1),
+    SHOW_EXTRACT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY.slice(1),
+    SHOW_IMPORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY.slice(1),
+    SHOW_REFRESH_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY.slice(1),
+    SHOW_HOIST_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_HOIST_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_HOIST_BODY.slice(1),
+    SHOW_MARK_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK_BODY.slice(1),
+    SHOW_SORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_SORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_SORT_BODY.slice(1)
 };
 
 </t>
@@ -2013,9 +2261,9 @@ public static VSCODE_COMMANDS = {
 <t tx="felix.20201214151419.1">import * as vscode from "vscode";
 import { LeoButtonNode } from "./leoButtonNode";
 import { ProviderResult } from "vscode";
-import { Icon } from "./types";
+import { Icon, LeoButton } from "./types";
 import { LeoStates } from "./leoStates";
-import { Leojs } from "./leojs";
+
 
 @language typescript
 @tabwidth -4
@@ -2026,6 +2274,12 @@ import { Leojs } from "./leojs";
  */
 export class LeoButtonsProvider implements vscode.TreeDataProvider&lt;LeoButtonNode&gt; {
 
+    private fakeAtButtons: LeoButton[] = [
+        { name: 'script-button', index: 'nullButtonWidget' },
+        { name: 'button name 2', index: 'key2' },
+        { name: 'button name 3', index: 'key3' },
+    ];
+
     private _onDidChangeTreeData: vscode.EventEmitter&lt;LeoButtonNode | undefined&gt; = new vscode.EventEmitter&lt;LeoButtonNode | undefined&gt;();
 
     readonly onDidChangeTreeData: vscode.Event&lt;LeoButtonNode | undefined&gt; = this._onDidChangeTreeData.event;
@@ -2033,7 +2287,6 @@ export class LeoButtonsProvider implements vscode.TreeDataProvider&lt;LeoButtonN
     constructor(
         private _leoStates: LeoStates,
         private _icons: Icon[],
-        private _leojs: Leojs
     ) { }
 
     @others
@@ -2056,7 +2309,7 @@ public refreshTreeRoot(): void {
     const w_children: LeoButtonNode[] = [];
     // if called with element, or not ready, give back empty array as there won't be any children
     if (this._leoStates.fileOpenedReady &amp;&amp; !element) {
-        this._leojs.atButtons.forEach(p_button =&gt; {
+        this.fakeAtButtons.forEach(p_button =&gt; {
             w_children.push(new LeoButtonNode(p_button, this._icons));
         });
     }
@@ -2146,7 +2399,6 @@ import { LeoUI } from './leoUI';
 import { LeoDocumentNode } from "./leoDocumentNode";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
-import { Leojs } from "./leojs";
 
 @language typescript
 @tabwidth -4
@@ -2164,7 +2416,6 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider&lt;LeoDocum
     constructor(
         private _leoStates: LeoStates,
         private _leoUI: LeoUI,
-        private _leojs: Leojs
     ) { }
 
     @others
@@ -2190,9 +2441,6 @@ public refreshTreeRoot(): void {
         g.app.commandersList.forEach(p_doc =&gt; {
             w_children.push(new LeoDocumentNode(p_doc, this._leoUI));
         });
-        // this._leojs.documents.forEach(p_doc =&gt; {
-        //     w_children.push(new LeoDocumentNode(p_doc, this._leoUI));
-        // });
     }
     return w_children; // Defaults to an empty list of children
 }
@@ -2210,8 +2458,7 @@ import { Icon } from "./types";
 import * as utils from "./utils";
 import { LeoUI } from "./leoUI";
 import * as g from './core/leoGlobals';
-import { Commander } from "./core/leoCommander";
-
+import { Commands } from "./core/leoCommands";
 
 @language typescript
 @tabwidth -4
@@ -2226,7 +2473,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
     public contextValue: string;
 
     constructor(
-        public documentEntry: Commander,
+        public documentEntry: Commands,
         private _leoJs: LeoUI
     ) {
         super(documentEntry.fileName());
@@ -2241,7 +2488,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
         };
         // If this was created as a selected node, make sure it's selected as we may have opened/closed document
         // tslint:disable-next-line: strict-comparisons
-        if (this.documentEntry === g.app.leo_c) {
+        if (this.documentEntry === this._leoJs.leo_c) {
             this._leoJs.setDocumentSelection(this);
             this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
         } else {
@@ -2654,6 +2901,7 @@ public get tooltip(): string {
 
 </t>
 <t tx="felix.20201214154816.1">import * as vscode from "vscode";
+import { Position } from "./core/leoNodes";
 import { LeoOutlineNode } from "./leoOutlineNode";
 
 @language typescript
@@ -2733,20 +2981,6 @@ export interface MinibufferCommand extends vscode.QuickPickItem {
     func: string;
 }
 </t>
-<t tx="felix.20201214154816.2">export interface PNode {
-    // Fake structure. Use Position.v.isCloned(), etc. instead
-    header: string;
-    children: PNode[];
-    parent?: PNode;
-    body: string;
-    selected?: boolean;
-    marked?: boolean;
-    cloned?: boolean;
-    dirty?: boolean;
-    atFile?: boolean;
-}
-
-</t>
 <t tx="felix.20201214154816.3">/**
  * * When refreshing the outline and getting to Leo's selected node
  */
@@ -2778,7 +3012,7 @@ export interface ReqRefresh {
  */
 export interface UserCommand {
     action: string;
-    node?: LeoOutlineNode | undefined;  // We can START a stack with a targeted command
+    node?: LeoOutlineNode | undefined; // We can START a stack with a targeted command
     text?: string | undefined; // If a string is required, for headline, etc.
     refreshType: ReqRefresh; // Minimal refresh level required by this command
     fromOutline: boolean; // Focus back on outline instead of body
@@ -2797,6 +3031,7 @@ export interface ShowBodyParam {
     showBodyKeepFocus: boolean,
     force_open?: boolean
 }
+
 </t>
 <t tx="felix.20201214154816.7">/**
  * * Object sent back from leoInteg's 'getStates' command
@@ -2835,18 +3070,9 @@ export interface LeoButton {
 import { debounce } from "debounce";
 import * as utils from "./utils";
 import { Constants } from "./constants";
-import {
-    RevealType,
-    Icon,
-    ReqRefresh,
-    ChooseDocumentItem,
-    MinibufferCommand,
-    UserCommand,
-    ShowBodyParam,
-    PNode
-} from "./types";
-import { Leojs } from "./leojs";
+import { RevealType, Icon, ReqRefresh } from "./types";
 
+import { Config } from "./config";
 import { LeoOutlineNode } from "./leoOutlineNode";
 import { LeoOutlineProvider } from './leoOutline';
 import { LeoButtonNode } from "./leoButtonNode";
@@ -2856,28 +3082,32 @@ import { LeoDocumentsProvider } from "./leoDocuments";
 import { LeoFilesBrowser } from "./leoFileBrowser";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
-import { Commander } from "./core/leoCommander";
 import { LoadManager } from "./core/leoApp";
 import { NodeIndices, Position, VNode } from "./core/leoNodes";
+import { Commands } from "./core/leoCommands";
+import { LeoBodyProvider } from "./leoBody";
 
 @language typescript
-
 @tabwidth -4
 @others
 </t>
 <t tx="felix.20201214194144.10"></t>
-<t tx="felix.20201214194144.11"></t>
 <t tx="felix.20201214194144.2">constructor(private _context: vscode.ExtensionContext) {
     // * Setup States
     this.leoStates = new LeoStates(_context, this);
+
+    // * Get configuration settings
+    this.config = new Config(_context, this);
+    // * also check workbench.editor.enablePreview
+    this.config.buildFromSavedSettings();
+    this._bodyEnablePreview = !!vscode.workspace
+        .getConfiguration('workbench.editor')
+        .get('enablePreview');
 
     // * Build Icon filename paths
     this.nodeIcons = utils.buildNodeIconPaths(_context);
     this.documentIcons = utils.buildDocumentIconPaths(_context);
     this.buttonIcons = utils.buildButtonsIconPaths(_context);
-
-    // * Create leo core class
-    this._leo = new Leojs();
 
     g.app.gui = this;
     g.app.loadManager = new LoadManager();
@@ -2885,10 +3115,9 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     if (!g.app.setLeoID(false, true)) {
         throw new Error("unable to set LeoID.");
     }
-    g.app.inBridge = true;  // Added 2007/10/21: support for g.getScript.
+    g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
     g.app.nodeIndices = new NodeIndices(g.app.leoID);
 
-    console.log('Leo started, LeoId:', g.app.leoID);
 
     // IF RECENT FILES LIST :
     //      TODO: CHECK RECENT LEO FILE LIST AND OPEN THEM
@@ -2899,7 +3128,7 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     // ************************************************************
     // * demo test: CREATE NEW LEO OUTLINE: NEW COMMANDER
     // ************************************************************
-    let w_c = new Commander("", this);
+    let w_c = g.app.newCommander("", this);
 
     // Equivalent to leoBridge 'createFrame' method
     let w_v = new VNode(w_c);
@@ -2915,69 +3144,75 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     g.app.commandersList.push(w_c);
 
     // select first test commander
-    g.app.leo_c = g.app.commandersList[0];
+    this.leo_c = g.app.commandersList[0];
 
     // ************************************************************
     // * demo test: BUILD SOME TEST OUTLINE
     // ************************************************************
-    let w_node = g.app.leo_c.p;
+    let w_node = this.leo_c.p;
     w_node.initHeadString("node1");
     w_node.setBodyString('node1 body');
     w_node.expand();
 
-    w_node = g.app.leo_c.p.insertAsLastChild();
+    w_node = this.leo_c.p.insertAsLastChild();
     w_node.initHeadString("node Inside1");
     w_node.setBodyString('nodeInside1 body');
     w_node.setMarked();
 
-    w_node = g.app.leo_c.p.insertAsLastChild();
+    w_node = this.leo_c.p.insertAsLastChild();
     w_node.initHeadString("node with UserData Inside2");
     w_node.setBodyString('node Inside2 body');
     w_node.u = { a: 'user content string a', b: "user content also" };
 
-    w_node = g.app.leo_c.p.insertAfter();
+    w_node = this.leo_c.p.insertAfter();
     w_node.initHeadString("@file node3");
     w_node.setBodyString('node 3 body');
 
-    w_node = g.app.leo_c.p.insertAfter();
+    w_node = this.leo_c.p.insertAfter();
     w_node.initHeadString("node 2 selected but empty");
     w_c.setCurrentPosition(w_node);
 
     // ************************************************************
-    // * demo test: SOME OTHER COMMANDER AND OUTLINE
+    // * demo test: SOME OTHER COMMANDER
     // ************************************************************
-    w_c = new Commander("", this);
+    w_c = g.app.newCommander("", this);
     w_v = new VNode(w_c);
     w_p = new Position(w_v);
     w_v.initHeadString("NewHeadline");
     w_c.hiddenRootNode.children = [];
     w_p._linkAsRoot();
     g.app.commandersList.push(w_c);
-    g.app.leo_c = w_c;
 
-    w_node = g.app.leo_c.p;
+    // select second test commander
+    this.leo_c = w_c;
+
+    // ************************************************************
+    // * demo test: BUILD SOME OTHER TEST OUTLINE
+    // ************************************************************
+    w_node = this.leo_c.p;
     w_node.initHeadString("some other title");
     w_node.setBodyString('body text');
 
-    w_node = g.app.leo_c.p.insertAsLastChild();
+    w_node = this.leo_c.p.insertAsLastChild();
     w_node.initHeadString("yet another node");
     w_node.setBodyString('more body text\nwith a second line');
 
-    w_node = g.app.leo_c.p.insertAfter();
+    w_node = this.leo_c.p.insertAfter();
     w_node.initHeadString("@clean my-file.txt");
     w_node.setBodyString('again some body text');
     w_c.setCurrentPosition(w_node);
 
-    w_node = g.app.leo_c.p.insertAsLastChild();
+    w_node = this.leo_c.p.insertAsLastChild();
     w_node.initHeadString("sample cloned node");
     w_node.setBodyString('some other body');
     w_node.clone();
 
-    w_node = g.app.leo_c.p.insertAfter();
+    w_node = this.leo_c.p.insertAfter();
     w_node.setMarked();
     w_node.initHeadString("a different headline");
+
     // back to first test commander after creating this second one
-    g.app.leo_c = g.app.commandersList[0];
+    this.leo_c = g.app.commandersList[0];
     // ************************************************************
     // * demo test end
     // ************************************************************
@@ -2998,31 +3233,110 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     this._lastTreeView = this._leoTreeExView;
 
     // * Create Leo Opened Documents Treeview Providers and tree views
-    this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this, this._leo);
+    this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);
     this._leoDocuments = vscode.window.createTreeView(Constants.DOCUMENTS_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
     this._leoDocuments.onDidChangeVisibility((p_event =&gt; this._onDocTreeViewVisibilityChanged(p_event, false)));
     this._leoDocumentsExplorer = vscode.window.createTreeView(Constants.DOCUMENTS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
     this._leoDocumentsExplorer.onDidChangeVisibility((p_event =&gt; this._onDocTreeViewVisibilityChanged(p_event, true)));
 
     // * Create '@buttons' Treeview Providers and tree views
-    this._leoButtonsProvider = new LeoButtonsProvider(this.leoStates, this.buttonIcons, this._leo);
+    this._leoButtonsProvider = new LeoButtonsProvider(this.leoStates, this.buttonIcons);
     this._leoButtons = vscode.window.createTreeView(Constants.BUTTONS_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
     this._leoButtons.onDidChangeVisibility((p_event =&gt; this._onButtonsTreeViewVisibilityChanged(p_event, false)));
     this._leoButtonsExplorer = vscode.window.createTreeView(Constants.BUTTONS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
     this._leoButtonsExplorer.onDidChangeVisibility((p_event =&gt; this._onButtonsTreeViewVisibilityChanged(p_event, true)));
+
+    // * Create Body Pane
+    this._leoFileSystem = new LeoBodyProvider(this);
+    this._bodyMainSelectionColumn = 1;
+
+    // * Create Status bar Entry
+    // this._leoStatusBar = new LeoStatusBar(_context, this);
+
+    // * Leo Find Panel
+    // this._leoFindPanelProvider = new LeoFindPanelProvider(
+    //     _context.extensionUri,
+    //     _context,
+    //     this
+    // );
+    // this._context.subscriptions.push(
+    //     vscode.window.registerWebviewViewProvider(
+    //         Constants.FIND_ID,
+    //         this._leoFindPanelProvider,
+    //         { webviewOptions: { retainContextWhenHidden: true } }
+    //     )
+    // );
+    // this._context.subscriptions.push(
+    //     vscode.window.registerWebviewViewProvider(
+    //         Constants.FIND_EXPLORER_ID,
+    //         this._leoFindPanelProvider,
+    //         { webviewOptions: { retainContextWhenHidden: true } }
+    //     )
+    // );
+
+    // * Configuration / Welcome webview
+    // this.leoSettingsWebview = new LeoSettingsProvider(_context, this);
+
+
+
+    // * React to change in active panel/text editor (window.activeTextEditor) - also fires when the active editor becomes undefined
+    // vscode.window.onDidChangeActiveTextEditor((p_editor) =&gt;
+    //     this._onActiveEditorChanged(p_editor)
+    // );
+
+    // * React to change in selection, cursor position and scroll position
+    // vscode.window.onDidChangeTextEditorSelection((p_event) =&gt;
+    //     this._onChangeEditorSelection(p_event)
+    // );
+    // vscode.window.onDidChangeTextEditorVisibleRanges((p_event) =&gt;
+    //     this._onChangeEditorScroll(p_event)
+    // );
+
+    // * Triggers when a different text editor/vscode window changed focus or visibility, or dragged
+    // This is also what triggers after drag and drop, see '_onChangeEditorViewColumn'
+    // vscode.window.onDidChangeTextEditorViewColumn((p_columnChangeEvent) =&gt;
+    //     this._changedTextEditorViewColumn(p_columnChangeEvent)
+    // ); // Also triggers after drag and drop
+    // vscode.window.onDidChangeVisibleTextEditors((p_editors) =&gt;
+    //     this._changedVisibleTextEditors(p_editors)
+    // ); // Window.visibleTextEditors changed
+    // vscode.window.onDidChangeWindowState((p_windowState) =&gt;
+    //     this._changedWindowState(p_windowState)
+    // ); // Focus state of the current window changes
+
+    // * React when typing and changing body pane
+    // vscode.workspace.onDidChangeTextDocument((p_textDocumentChange) =&gt;
+    //     this._onDocumentChanged(p_textDocumentChange)
+    // );
+
+    // * React to configuration settings events
+    vscode.workspace.onDidChangeConfiguration((p_configChange) =&gt;
+        this._onChangeConfiguration(p_configChange)
+    );
+
+    // * React to opening of any file in vscode
+    // vscode.workspace.onDidOpenTextDocument((p_document) =&gt;
+    //     this._onDidOpenTextDocument(p_document)
+    // );
+
+
+
 
     // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
     this.getStates = debounce(this._triggerGetStates, Constants.STATES_DEBOUNCE_DELAY);
     this.refreshDocumentsPane = debounce(this._refreshDocumentsPane, Constants.DOCUMENTS_DEBOUNCE_DELAY);
     this.launchRefresh = debounce(this._launchRefresh, Constants.REFRESH_DEBOUNCE_DELAY);
 
+    // ! FAKE DEVELOPMENT STARTUP END ( TODO: finish _setupOpenedLeoDocument )
     // Reset Extension context flags (used in 'when' clauses in package.json)
     this.leoStates.leoReady = true;
     this.leoStates.fileOpenedReady = true;  // TODO : IMPLEMENT
 
-
-    // Set some context flags already 'true' at startup - NO CONFIG SETTINGS FOR NOW IN LEOJS
-    utils.setContext(Constants.CONTEXT_FLAGS.LEO_TREE_BROWSE, true); // force 'Leo's editing tree behavior
+    this.refreshDocumentsPane();
+    // ! VSCODE BUG : natural refresh from visibility change do not support 'getParent'!
+    setTimeout(() =&gt; {
+        this._refreshOutline(true, RevealType.RevealSelectFocus);
+    }, 0);
 
 }
 
@@ -3034,35 +3348,17 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
 <t tx="felix.20201214194144.7"></t>
 <t tx="felix.20201214194144.8"></t>
 <t tx="felix.20201214194144.9"></t>
-<t tx="felix.20201214194412.1">
-import { LeoButton, LeoDocument, PNode } from './types';
-@language typescript
-@tabwidth -4
-
-// https://github.com/leo-editor/leo-editor/issues/1025
-
-
-// For now give results to tree view panels (outline, documents and at-buttons)
-
-@others
-</t>
 <t tx="felix.20201214195752.1">/**
  * Creates and manages instances of the UI elements along with their events
  */
 export class LeoUI {
     // * State flags
     public leoStates: LeoStates;
+    public verbose: boolean = false;
+    public trace: boolean = false;
 
-    // * temporary / fake config
-    public config: { [key: string]: boolean } = {
-        leoTreeBrowse: true,
-        showEditOnNodes: false,
-        showArrowsOnNodes: false,
-        showAddOnNodes: false,
-        showMarkOnNodes: false,
-        showCloneOnNodes: false,
-        showCopyOnNodes: false,
-    };
+    // * Configuration Settings Service
+    public config: Config; // Public configuration service singleton, used in leoSettingsWebview, leoBridge, and leoNode for inverted contrast
 
     // * Icon Paths (Singleton static arrays)
     public nodeIcons: Icon[] = [];
@@ -3072,42 +3368,32 @@ export class LeoUI {
     // * File Browser
     private _leoFilesBrowser: LeoFilesBrowser; // Browsing dialog service singleton used in the openLeoFile and save-as methods
 
-    private _leo: Leojs;
+    public leo_c: Commands;
 
     private _refreshType: ReqRefresh = {}; // Flags for commands to require parts of UI to refresh
     private _revealType: RevealType = RevealType.NoReveal; // Type of reveal for the selected node (when refreshing outline)
+    private _preventShowBody = false; // Used when refreshing treeview from config: It requires not to open the body pane when refreshing.
     private _fromOutline: boolean = false; // flag to leave focus on outline instead of body when finished refreshing
-
-    private _bodyMainSelectionColumn: vscode.ViewColumn | undefined; // Column of last body 'textEditor' found, set to 1
-
-    private _bodyTextDocument: vscode.TextDocument | undefined; // Set when selected in tree by user, or opening a Leo file in showBody. and by _locateOpenedBody.
 
     // * Outline Pane
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
     private _leoTreeView: vscode.TreeView&lt;Position&gt;; // Outline tree view added to the Tree View Container with an Activity Bar icon
     private _leoTreeExView: vscode.TreeView&lt;Position&gt;; // Outline tree view added to the Explorer Sidebar
     private _lastTreeView: vscode.TreeView&lt;Position&gt;; // Last visible treeview
-    // TODO: Merge with c.frame.
-    private _treeId: number = 0; // Starting salt for tree node murmurhash generated Ids
-
-    private _lastSelectedNode: LeoOutlineNode | undefined; // Last selected node we got a hold of; leoTreeView.selection maybe newer and unprocessed
-    get lastSelectedNode(): LeoOutlineNode | undefined {
-        return this._lastSelectedNode;
-    }
-    set lastSelectedNode(p_leoNode: LeoOutlineNode | undefined) { // Needs undefined: cannot be set in the constructor
-        this._lastSelectedNode = p_leoNode;
-        if (p_leoNode) {
-            utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_MARKED, p_leoNode.marked); // Global context to 'flag' the selected node's marked state
-        }
-    }
 
     // * Body pane
+    private _bodyFileSystemStarted: boolean = false;
+    private _bodyEnablePreview: boolean = true;
+    private _leoFileSystem: LeoBodyProvider; // as per https://code.visualstudio.com/api/extension-guides/virtual-documents#file-system-api
+    private _bodyTextDocument: vscode.TextDocument | undefined; // Set when selected in tree by user, or opening a Leo file in showBody. and by _locateOpenedBody.
+    private _bodyMainSelectionColumn: vscode.ViewColumn | undefined; // Column of last body 'textEditor' found, set to 1
+
     private _bodyUri: vscode.Uri = utils.strToLeoUri("");
     get bodyUri(): vscode.Uri {
         return this._bodyUri;
     }
     set bodyUri(p_uri: vscode.Uri) {
-        // this._leoFileSystem.setBodyTime(p_uri);
+        this._leoFileSystem.setBodyTime(p_uri);
         this._bodyUri = p_uri;
     }
 
@@ -3149,7 +3435,6 @@ export class LeoUI {
 
     @others
 
-
 }
 </t>
 <t tx="felix.20201214202058.1">/**
@@ -3176,12 +3461,15 @@ private _triggerGetStates(): void {
  * @param p_focusOutline Flag for focus to be placed in outline
  */
 public showOutline(p_focusOutline?: boolean): void {
-    if (this.lastSelectedNode) {
-        this._lastTreeView.reveal(this.lastSelectedNode.ap, {
-            select: true,
-            focus: p_focusOutline
-        });
-    }
+    this._lastTreeView.reveal(this.leo_c.p, {
+        select: true,
+        focus: !!p_focusOutline
+    }).then(
+        () =&gt; { }, // Ok 
+        (p_error) =&gt; {
+            console.error('ERROR showOutline could not reveal: tree was refreshed!');
+        }
+    );
 }
 
 </t>
@@ -3213,10 +3501,15 @@ public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
         }
         // tslint:disable-next-line: strict-comparisons
         if (w_docView.selection.length &amp;&amp; w_docView.selection[0] === p_documentNode) {
-            // console.log('setDocumentSelection: already selected!');
+            console.log('setDocumentSelection: already selected!');
         } else {
-            // console.log('setDocumentSelection: selecting in tree');
-            w_docView.reveal(p_documentNode, { select: true, focus: false });
+            console.log('setDocumentSelection: selecting in tree');
+            w_docView.reveal(p_documentNode, { select: true, focus: false }).then(
+                () =&gt; { }, // Ok 
+                (p_error) =&gt; {
+                    console.error('ERROR setDocumentSelection could not reveal: tree was refreshed!');
+                }
+            );
         }
 
     }, 0);
@@ -3230,30 +3523,30 @@ public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
  * @param p_treeView Pointer to the treeview itself, either the standalone treeview or the one under the explorer
  */
 private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Position&gt;, p_expand: boolean, p_treeView: vscode.TreeView&lt;Position&gt;): void {
-    // * Expanding or collapsing via the treeview interface selects the node to mimic Leo
-    //this.triggerBodySave(true);
-    // if (p_treeView.selection[0] &amp;&amp; p_treeView.selection[0] === p_event.element) {
-    //     // * This happens if the tree selection is the same as the expanded/collapsed node: Just have Leo do the same
-    //     // Pass
-    // } else {
-    //     // * This part only happens if the user clicked on the arrow without trying to select the node
-    //     this._revealTreeViewNode(p_event.element, { select: true, focus: false }); // No force focus : it breaks collapse/expand when direct parent
-    //     this.selectTreeNode(p_event.element, true);  // not waiting for a .then(...) so not to add any lag
-    // }
-    // this.sendAction(p_expand ? Constants.LEOBRIDGE.EXPAND_NODE : Constants.LEOBRIDGE.COLLAPSE_NODE, p_event.element.apJson)
-    //     .then(() =&gt; {
-    //         if (this.config.leoTreeBrowse) {
-    //             this._refreshOutline(true, RevealType.RevealSelect);
-    //         }
-    //     });
 
+    // * Expanding or collapsing via the treeview interface selects the node to mimic Leo.
+
+    // this.triggerBodySave(true); // Get any modifications from the editor into the Leo's body model
+
+    if (p_treeView.selection[0] &amp;&amp; p_treeView.selection[0].__eq__(p_event.element)) {
+        // * This happens if the tree selection is the same as the expanded/collapsed node: Just have Leo do the same
+        // pass
+    } else {
+        // * This part only happens if the user clicked on the arrow without trying to select the node
+        this._lastTreeView.reveal(p_event.element).then(
+            () =&gt; { }, // Ok 
+            (p_error) =&gt; {
+                console.error('ERROR _onChangeCollapsedState could not reveal: tree was refreshed!');
+            }
+        );
+        this.selectTreeNode(p_event.element, true);
+    }
+
+    // *  vscode will update its tree by itself, but we need to change Leo's model of its outline
     if (p_expand) {
         p_event.element.expand();
     } else {
         p_event.element.contract();
-    }
-    if (this.config.leoTreeBrowse) {
-        this._refreshOutline(true, RevealType.RevealSelect);
     }
 }
 
@@ -3279,7 +3572,7 @@ private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEve
 private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
     if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
     if (p_event.visible) {
-        this.refreshDocumentsPane();
+        this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
     }
 }
 
@@ -3292,20 +3585,45 @@ private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChange
 private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
     if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
     if (p_event.visible) {
-        this._leoButtonsProvider.refreshTreeRoot();
+        // TODO: Check if needed
+        // this._leoButtonsProvider.refreshTreeRoot(); // May not need to set selection...?
     }
 }
 
 </t>
-<t tx="felix.20201214202749.1">public selectTreeNode(p_node: LeoOutlineNode, p_internalCall?: boolean, p_aside?: boolean): Thenable&lt;unknown&gt; {
-    vscode.window.showInformationMessage('TODO: Implement selectTreeNode');
-    console.log('set flags for ', p_node);
+<t tx="felix.20201214202749.1">/**
+ * * Called by UI when the user selects in the tree (click or 'open aside' through context menu)
+ * @param p_node is the position node selected in the tree
+ * @param p_aside flag meaning it's body should be shown in a new editor column
+ * @returns thenable for reveal to finish or select position to finish
+ */
+public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable&lt;unknown&gt; {
 
-    console.log('selectTreeNode called so Refresh Body' + (p_aside ? ' but opened aside' : ''));
+    // Note: set context flags for current selection when capturing and revealing the selected node
+    // when the tree refreshes and the selected node is processed by getTreeItem &amp; gotSelectedNode
+    let q_reveal: Thenable&lt;void&gt; | undefined;
 
-    this.lastSelectedNode = p_node;
+    if (this.leo_c.positionExists(p_node)) {
 
-    return Promise.resolve(true);
+        if (p_aside) {
+            q_reveal = this._lastTreeView.reveal(p_node).then(
+                () =&gt; { }, // Ok 
+                (p_error) =&gt; {
+                    console.error('ERROR selectTreeNode could not reveal: tree was refreshed!');
+                }
+            );
+        }
+        this.leo_c.selectPosition(p_node);
+        // Set flags here - not only when 'got selection' is reached.
+        this.leoStates.setSelectedNodeFlags(p_node);
+
+    } else {
+        console.error('Selected a non-existent position', p_node.h);
+    }
+
+    // this.lastSelectedNode = p_node;
+
+    return q_reveal ? q_reveal : Promise.resolve(true);
 }
 
 </t>
@@ -3327,15 +3645,47 @@ public command(
 
     this._setupRefresh(p_fromOutline, p_refreshType);
 
-    vscode.window.showInformationMessage(
-        'TODO: Implement ' +
-        p_cmd +
-        " called from " +
-        (p_fromOutline ? "outline" : "body") +
-        " operate on " +
-        (p_node ? p_node!.label : "the selected node") +
-        (p_keepSelection ? " and bring selection back on currently selected node" : "")
-    );
+    const c: Commands = this.leo_c;
+    let value: any = undefined;
+
+    // Getting from kebab-cased 'Command Name'
+    const func = this.leo_c.commandsDict[p_cmd];
+    if (!func) {
+        vscode.window.showInformationMessage(
+            'TODO: Implement ' +
+            p_cmd +
+            " called from " +
+            (p_fromOutline ? "outline" : "body") +
+            " operate on " +
+            (p_node ? p_node!.label : "the selected node") +
+            (p_keepSelection ? " and bring selection back on currently selected node" : "")
+        );
+    } else {
+        const p = p_node ? p_node.position : c.p;
+        if (p.__eq__(c.p)) {
+            value = func.bind(c)(); // no need for re-selection
+        } else {
+            const old_p = c.p;
+            c.selectPosition(p)
+            value = func.bind(c)();
+            if (p_keepSelection &amp;&amp; c.positionExists(old_p)) {
+                // Only if 'keep' old position was set, and old_p still exists
+                c.selectPosition(old_p)
+            }
+        }
+    }
+
+    /* EXAMPLE CALL BY METHOD
+        //@ts-expect-error
+    if ((typeof this.leo_c[p_cmd]) === 'function') {
+        console.log('HAS PROPERTY' + p_cmd + " so were doing it!");
+            //@ts-expect-error
+        this.leo_c[p_cmd]();
+    } else {
+        console.log('NO PROPERTY' + p_cmd);
+        console.log(this.leo_c);
+    }
+    */
 
     this.launchRefresh();
 
@@ -3362,7 +3712,13 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214202759.1">public editHeadline(p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214202759.1">/**
+ * * Asks for a new headline label, and replaces the current label with this new one one the specified, or currently selected node
+ * @param p_node Specifies which node to rename, or leave undefined to rename the currently selected node
+ * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
+ * @returns Thenable that resolves when done
+ */
+public editHeadline(p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
@@ -3382,7 +3738,14 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214202800.1">public insertNode(p_node?: LeoOutlineNode, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214202800.1">/**
+ * * Asks for a headline label to be entered and creates (inserts) a new node under the current, or specified, node
+ * @param p_node specified under which node to insert, or leave undefined to use whichever is currently selected
+ * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
+ * @param p_interrupt Signifies the insert action is actually interrupting itself (e.g. rapid CTRL+I actions by the user)
+ * @returns Thenable that resolves when done
+ */
+public insertNode(p_node?: LeoOutlineNode, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
@@ -3403,7 +3766,14 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214202802.1">public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214202802.1">/**
+ * * Changes the marked state of a specified, or currently selected node
+ * @param p_isMark Set 'True' to mark, otherwise unmarks the node
+ * @param p_node Specifies which node use, or leave undefined to mark or unmark the currently selected node
+ * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
+ * @returns Thenable that resolves when done
+ */
+public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true });
 
@@ -3453,7 +3823,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   ],
   "icon": "resources/leoapp128px.png",
   "galleryBanner": {
-    "color": "#fffbdc",
+    "color": "#f1af88",
     "theme": "light"
   },
   "activationEvents": [
@@ -4119,76 +4489,76 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.moveMarkedNodes",
   "category": "Leojs",
   "title": "Move Marked Nodes"
-},
+}
 </t>
 <t tx="felix.20201214205159.23">"menus": {
   @others
 },
 </t>
 <t tx="felix.20201214205159.24">"commandPalette": [
- @others
+  @others
 ],
 </t>
-<t tx="felix.20201214205159.25"> {
-   "command": "leojs.executeScript",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.minibuffer",
-   "when": "leojsTreeOpened"
- },
+<t tx="felix.20201214205159.25">{
+  "command": "leojs.executeScript",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.minibuffer",
+  "when": "leojsTreeOpened"
+},
 </t>
-<t tx="felix.20201214205159.26"> {
-   "command": "leojs.showLogPane",
-   "when": "leojsReady"
- },
+<t tx="felix.20201214205159.26">{
+  "command": "leojs.showLogPane",
+  "when": "leojsReady"
+},
 </t>
-<t tx="felix.20201214205159.27"> {
-   "command": "leojs.openLeoFile",
-   "when": "leojsReady"
- },
- {
-   "command": "leojs.recentLeoFiles",
-   "when": "leojsReady"
- },
- {
-   "command": "leojs.switchLeoFile",
-   "when": "leojsReady &amp;&amp; leojsTreeOpened"
- },
- {
-   "command": "leojs.newLeoFile",
-   "when": "leojsReady"
- },
- {
-   "command": "leojs.closeLeoFile",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.saveLeoFile",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.saveAsLeoFile",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.refreshFromDiskSelection",
-   "when": "leojsTreeOpened &amp;&amp; leoAtFile"
- },
- {
-   "command": "leojs.gitDiff",
-   "when": "leojsTreeOpened"
- },
+<t tx="felix.20201214205159.27">{
+  "command": "leojs.openLeoFile",
+  "when": "leojsReady"
+},
+{
+  "command": "leojs.recentLeoFiles",
+  "when": "leojsReady"
+},
+{
+  "command": "leojs.switchLeoFile",
+  "when": "leojsReady &amp;&amp; leojsTreeOpened"
+},
+{
+  "command": "leojs.newLeoFile",
+  "when": "leojsReady"
+},
+{
+  "command": "leojs.closeLeoFile",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.saveLeoFile",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.saveAsLeoFile",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.refreshFromDiskSelection",
+  "when": "leojsTreeOpened &amp;&amp; leoAtFile"
+},
+{
+  "command": "leojs.gitDiff",
+  "when": "leojsTreeOpened"
+},
 </t>
-<t tx="felix.20201214205159.28"> {
-   "command": "leojs.contractAll",
-   "when": "leojsTreeOpened"
- },
+<t tx="felix.20201214205159.28">{
+  "command": "leojs.contractAll",
+  "when": "leojsTreeOpened"
+},
 </t>
-<t tx="felix.20201214205159.29"> {
-   "command": "leojs.editSelectedHeadline",
-   "when": "leojsTreeOpened"
- },
+<t tx="felix.20201214205159.29">{
+  "command": "leojs.editSelectedHeadline",
+  "when": "leojsTreeOpened"
+},
 </t>
 <t tx="felix.20201214205159.3">"viewsContainers": {
   "activitybar": [
@@ -4200,172 +4570,172 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   ]
 },
 </t>
-<t tx="felix.20201214205159.30"> {
-   "command": "leojs.markSelection",
-   "when": "leojsTreeOpened &amp;&amp; !leojsMarked"
- },
- {
-   "command": "leojs.unmarkSelection",
-   "when": "leojsTreeOpened &amp;&amp; leojsMarked"
- },
- {
-   "command": "leojs.unmarkAll",
-   "when": "leojsTreeOpened"
- },
+<t tx="felix.20201214205159.30">{
+  "command": "leojs.markSelection",
+  "when": "leojsTreeOpened &amp;&amp; !leojsMarked"
+},
+{
+  "command": "leojs.unmarkSelection",
+  "when": "leojsTreeOpened &amp;&amp; leojsMarked"
+},
+{
+  "command": "leojs.unmarkAll",
+  "when": "leojsTreeOpened"
+},
 </t>
-<t tx="felix.20201214205159.31"> {
-   "command": "leojs.copyNodeSelection",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.cutNodeSelection",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.pasteNodeAtSelection",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.pasteNodeAsCloneAtSelection",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.deleteSelection",
-   "when": "leojsTreeOpened"
- },
+<t tx="felix.20201214205159.31">{
+  "command": "leojs.copyNodeSelection",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.cutNodeSelection",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.pasteNodeAtSelection",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.pasteNodeAsCloneAtSelection",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.deleteSelection",
+  "when": "leojsTreeOpened"
+},
 </t>
-<t tx="felix.20201214205159.32"> {
-   "command": "leojs.extract",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.extractNames",
-   "when": "leojsTreeOpened"
- },
+<t tx="felix.20201214205159.32">{
+  "command": "leojs.extract",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.extractNames",
+  "when": "leojsTreeOpened"
+},
 </t>
-<t tx="felix.20201214205159.33"> {
-   "command": "leojs.moveOutlineDownSelection",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.moveOutlineLeftSelection",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.moveOutlineRightSelection",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.moveOutlineUpSelection",
-   "when": "leojsTreeOpened"
- },
+<t tx="felix.20201214205159.33">{
+  "command": "leojs.moveOutlineDownSelection",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.moveOutlineLeftSelection",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.moveOutlineRightSelection",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.moveOutlineUpSelection",
+  "when": "leojsTreeOpened"
+},
 </t>
-<t tx="felix.20201214205159.34"> {
-   "command": "leojs.insertNodeSelection",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.cloneNodeSelection",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.promoteSelection",
-   "when": "leojsTreeOpened &amp;&amp; leojsCanPromote"
- },
- {
-   "command": "leojs.demoteSelection",
-   "when": "leojsTreeOpened &amp;&amp; leojsCanDemote"
- },
- {
-   "command": "leojs.sortChildrenSelection",
-   "when": "leojsTreeOpened &amp;&amp; leojsChild"
- },
- {
-   "command": "leojs.sortChildrenSelectionFromOutline",
-   "when": "leojsTreeOpened &amp;&amp; leojsChild"
- },
- {
-   "command": "leojs.sortSiblingsSelection",
-   "when": "leojsTreeOpened"
- },
+<t tx="felix.20201214205159.34">{
+  "command": "leojs.insertNodeSelection",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.cloneNodeSelection",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.promoteSelection",
+  "when": "leojsTreeOpened &amp;&amp; leojsCanPromote"
+},
+{
+  "command": "leojs.demoteSelection",
+  "when": "leojsTreeOpened &amp;&amp; leojsCanDemote"
+},
+{
+  "command": "leojs.sortChildrenSelection",
+  "when": "leojsTreeOpened &amp;&amp; leojsChild"
+},
+{
+  "command": "leojs.sortChildrenSelectionFromOutline",
+  "when": "leojsTreeOpened &amp;&amp; leojsChild"
+},
+{
+  "command": "leojs.sortSiblingsSelection",
+  "when": "leojsTreeOpened"
+},
 </t>
-<t tx="felix.20201214205159.35"> {
-   "command": "leojs.gotoNextMarked",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.gotoNextCloneSelection",
-   "when": "leojsTreeOpened &amp;&amp; leojsCloned"
- },
+<t tx="felix.20201214205159.35">{
+  "command": "leojs.gotoNextMarked",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.gotoNextCloneSelection",
+  "when": "leojsTreeOpened &amp;&amp; leojsCloned"
+},
 </t>
-<t tx="felix.20201214205159.36"> {
-   "command": "leojs.hoistSelection",
-   "when": "leojsTreeOpened &amp;&amp; !leojsRoot"
- },
- {
-   "command": "leojs.deHoist",
-   "when": "leojsTreeOpened &amp;&amp; leojsCanDehoist"
- },
+<t tx="felix.20201214205159.36">{
+  "command": "leojs.hoistSelection",
+  "when": "leojsTreeOpened &amp;&amp; !leojsRoot"
+},
+{
+  "command": "leojs.deHoist",
+  "when": "leojsTreeOpened &amp;&amp; leojsCanDehoist"
+},
 </t>
-<t tx="felix.20201214205159.37"> {
-   "command": "leojs.undo",
-   "when": "leojsTreeOpened &amp;&amp; leojsCanUndo"
- },
- {
-   "command": "leojs.redo",
-   "when": "leojsTreeOpened"
- },
+<t tx="felix.20201214205159.37">{
+  "command": "leojs.undo",
+  "when": "leojsTreeOpened &amp;&amp; leojsCanUndo"
+},
+{
+  "command": "leojs.redo",
+  "when": "leojsTreeOpened"
+},
 </t>
-<t tx="felix.20201214205159.38"> {
-   "command": "leojs.cloneFindAll",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.cloneFindAllFlattened",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.cloneFindMarked",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.cloneFindFlattenedMarked",
-   "when": "leojsTreeOpened"
- },
+<t tx="felix.20201214205159.38">{
+  "command": "leojs.cloneFindAll",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.cloneFindAllFlattened",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.cloneFindMarked",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.cloneFindFlattenedMarked",
+  "when": "leojsTreeOpened"
+},
 </t>
-<t tx="felix.20201214205159.39"> {
-   "command": "leojs.copyMarked",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.diffMarkedNodes",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.markChangedItems",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.markSubheads",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.cloneMarkedNodes",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.deleteMarkedNodes",
-   "when": "leojsTreeOpened"
- },
- {
-   "command": "leojs.moveMarkedNodes",
-   "when": "leojsTreeOpened"
- },
+<t tx="felix.20201214205159.39">{
+  "command": "leojs.copyMarked",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.diffMarkedNodes",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.markChangedItems",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.markSubheads",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.cloneMarkedNodes",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.deleteMarkedNodes",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.moveMarkedNodes",
+  "when": "leojsTreeOpened"
+},
 </t>
 <t tx="felix.20201214205159.4">"views": {
   "explorer": [
     {
-      "id": "leojsExplorer",
+      "id": "leojsOutlineExplorer",
       "name": "Leojs Outline",
       "contextualTitle": "Leojs"
     },
@@ -4382,7 +4752,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   ],
   "leojsView": [
     {
-      "id": "leojs",
+      "id": "leojsOutline",
       "contextualTitle": "Leojs",
       "name": "Outline"
     },
@@ -4401,151 +4771,151 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 </t>
 <t tx="felix.20201214205159.40">@others
 </t>
-<t tx="felix.20201214205159.41"> {
-   "command": "leojs.test",
-   "when": "false"
- },
+<t tx="felix.20201214205159.41">{
+  "command": "leojs.test",
+  "when": "true"
+},
 </t>
-<t tx="felix.20201214205159.42"> {
-   "command": "leojs.removeButton",
-   "when": "false"
- },
+<t tx="felix.20201214205159.42">{
+  "command": "leojs.removeButton",
+  "when": "false"
+},
 </t>
-<t tx="felix.20201214205159.43"> {
-   "command": "leojs.showBody",
-   "when": "false"
- },
- {
-   "command": "leojs.showOutline",
-   "when": "false"
- },
+<t tx="felix.20201214205159.43">{
+  "command": "leojs.showBody",
+  "when": "false"
+},
+{
+  "command": "leojs.showOutline",
+  "when": "leojsTreeOpened"
+},
 </t>
-<t tx="felix.20201214205159.44"> {
-   "command": "leojs.saveLeoFileFromOutline",
-   "when": "false"
- },
- {
-   "command": "leojs.refreshFromDisk",
-   "when": "false"
- },
- {
-   "command": "leojs.refreshFromDiskSelectionFromOutline",
-   "when": "false"
- },
+<t tx="felix.20201214205159.44">{
+  "command": "leojs.saveLeoFileFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.refreshFromDisk",
+  "when": "false"
+},
+{
+  "command": "leojs.refreshFromDiskSelectionFromOutline",
+  "when": "false"
+},
 </t>
-<t tx="felix.20201214205159.45"> {
-   "command": "leojs.openAside",
-   "when": "false"
- },
- {
-   "command": "leojs.contractAllFromOutline",
-   "when": "false"
- },
+<t tx="felix.20201214205159.45">{
+  "command": "leojs.openAside",
+  "when": "false"
+},
+{
+  "command": "leojs.contractAllFromOutline",
+  "when": "false"
+},
 </t>
-<t tx="felix.20201214205159.46"> {
-   "command": "leojs.editHeadline",
-   "when": "false"
- },
- {
-   "command": "leojs.editSelectedHeadlineFromOutline",
-   "when": "false"
- },
+<t tx="felix.20201214205159.46">{
+  "command": "leojs.editHeadline",
+  "when": "false"
+},
+{
+  "command": "leojs.editSelectedHeadlineFromOutline",
+  "when": "false"
+},
 </t>
-<t tx="felix.20201214205159.47"> {
-   "command": "leojs.mark",
-   "when": "false"
- },
- {
-   "command": "leojs.markSelectionFromOutline",
-   "when": "false"
- },
- {
-   "command": "leojs.unmark",
-   "when": "false"
- },
- {
-   "command": "leojs.unmarkSelectionFromOutline",
-   "when": "false"
- },
+<t tx="felix.20201214205159.47">{
+  "command": "leojs.mark",
+  "when": "false"
+},
+{
+  "command": "leojs.markSelectionFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.unmark",
+  "when": "false"
+},
+{
+  "command": "leojs.unmarkSelectionFromOutline",
+  "when": "false"
+},
 </t>
-<t tx="felix.20201214205159.48"> {
-   "command": "leojs.copyNode",
-   "when": "false"
- },
- {
-   "command": "leojs.cutNode",
-   "when": "false"
- },
- {
-   "command": "leojs.cutNodeSelectionFromOutline",
-   "when": "false"
- },
- {
-   "command": "leojs.pasteNode",
-   "when": "false"
- },
- {
-   "command": "leojs.pasteNodeAtSelectionFromOutline",
-   "when": "false"
- },
- {
-   "command": "leojs.pasteNodeAsClone",
-   "when": "false"
- },
- {
-   "command": "leojs.pasteNodeAsCloneAtSelectionFromOutline",
-   "when": "false"
- },
- {
-   "command": "leojs.delete",
-   "when": "false"
- },
- {
-   "command": "leojs.deleteSelectionFromOutline",
-   "when": "false"
- },
+<t tx="felix.20201214205159.48">{
+  "command": "leojs.copyNode",
+  "when": "false"
+},
+{
+  "command": "leojs.cutNode",
+  "when": "false"
+},
+{
+  "command": "leojs.cutNodeSelectionFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.pasteNode",
+  "when": "false"
+},
+{
+  "command": "leojs.pasteNodeAtSelectionFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.pasteNodeAsClone",
+  "when": "false"
+},
+{
+  "command": "leojs.pasteNodeAsCloneAtSelectionFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.delete",
+  "when": "false"
+},
+{
+  "command": "leojs.deleteSelectionFromOutline",
+  "when": "false"
+},
 </t>
-<t tx="felix.20201214205159.49"> {
-   "command": "leojs.moveOutlineDown",
-   "when": "false"
- },
- {
-   "command": "leojs.moveOutlineDownSelectionFromOutline",
-   "when": "false"
- },
- {
-   "command": "leojs.moveOutlineLeft",
-   "when": "false"
- },
- {
-   "command": "leojs.moveOutlineLeftSelectionFromOutline",
-   "when": "false"
- },
- {
-   "command": "leojs.moveOutlineRight",
-   "when": "false"
- },
- {
-   "command": "leojs.moveOutlineRightSelectionFromOutline",
-   "when": "false"
- },
- {
-   "command": "leojs.moveOutlineUp",
-   "when": "false"
- },
- {
-   "command": "leojs.moveOutlineUpSelectionFromOutline",
-   "when": "false"
- },
+<t tx="felix.20201214205159.49">{
+  "command": "leojs.moveOutlineDown",
+  "when": "false"
+},
+{
+  "command": "leojs.moveOutlineDownSelectionFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.moveOutlineLeft",
+  "when": "false"
+},
+{
+  "command": "leojs.moveOutlineLeftSelectionFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.moveOutlineRight",
+  "when": "false"
+},
+{
+  "command": "leojs.moveOutlineRightSelectionFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.moveOutlineUp",
+  "when": "false"
+},
+{
+  "command": "leojs.moveOutlineUpSelectionFromOutline",
+  "when": "false"
+},
 </t>
 <t tx="felix.20201214205159.5">"viewsWelcome": [
   {
-    "view": "leojs",
+    "view": "leojsOutline",
     "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.openLeoFile)",
     "when": "leojsReady &amp;&amp; !leojsTreeOpened"
   },
   {
-    "view": "leojsExplorer",
+    "view": "leojsOutlineExplorer",
     "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.openLeoFile)",
     "when": "leojsReady &amp;&amp; !leojsTreeOpened"
   },
@@ -4581,113 +4951,113 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   }
 ],
 </t>
-<t tx="felix.20201214205159.50"> {
-   "command": "leojs.insertNode",
-   "when": "false"
- },
- {
-   "command": "leojs.insertNodeSelectionFromOutline",
-   "when": "false"
- },
- {
-   "command": "leojs.insertNodeSelectionInterrupt",
-   "when": "false"
- },
- {
-   "command": "leojs.cloneNode",
-   "when": "false"
- },
- {
-   "command": "leojs.cloneNodeSelectionFromOutline",
-   "when": "false"
- },
- {
-   "command": "leojs.promote",
-   "when": "false"
- },
- {
-   "command": "leojs.promoteSelectionFromOutline",
-   "when": "false"
- },
- {
-   "command": "leojs.demote",
-   "when": "false"
- },
- {
-   "command": "leojs.demoteSelectionFromOutline",
-   "when": "false"
- },
- {
-   "command": "leojs.sortSiblingsSelectionFromOutline",
-   "when": "false"
- },
+<t tx="felix.20201214205159.50">{
+  "command": "leojs.insertNode",
+  "when": "false"
+},
+{
+  "command": "leojs.insertNodeSelectionFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.insertNodeSelectionInterrupt",
+  "when": "false"
+},
+{
+  "command": "leojs.cloneNode",
+  "when": "false"
+},
+{
+  "command": "leojs.cloneNodeSelectionFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.promote",
+  "when": "false"
+},
+{
+  "command": "leojs.promoteSelectionFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.demote",
+  "when": "false"
+},
+{
+  "command": "leojs.demoteSelectionFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.sortSiblingsSelectionFromOutline",
+  "when": "false"
+},
 </t>
-<t tx="felix.20201214205159.51"> {
-   "command": "leojs.gotoNextClone",
-   "when": "false"
- },
- {
-   "command": "leojs.gotoNextCloneSelectionFromOutline",
-   "when": "false"
- },
- {
-   "command": "leojs.gotoFirstVisible",
-   "when": "false"
- },
- {
-   "command": "leojs.gotoLastVisible",
-   "when": "false"
- },
- {
-   "command": "leojs.gotoLastSibling",
-   "when": "false"
- },
- {
-   "command": "leojs.gotoNextVisible",
-   "when": "false"
- },
- {
-   "command": "leojs.gotoPrevVisible",
-   "when": "false"
- },
- {
-   "command": "leojs.contractOrGoLeft",
-   "when": "false"
- },
- {
-   "command": "leojs.expandAndGoRight",
-   "when": "false"
- },
- {
-   "command": "leojs.pageUp",
-   "when": "false"
- },
- {
-   "command": "leojs.pageDown",
-   "when": "false"
- },
+<t tx="felix.20201214205159.51">{
+  "command": "leojs.gotoNextClone",
+  "when": "false"
+},
+{
+  "command": "leojs.gotoNextCloneSelectionFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.gotoFirstVisible",
+  "when": "false"
+},
+{
+  "command": "leojs.gotoLastVisible",
+  "when": "false"
+},
+{
+  "command": "leojs.gotoLastSibling",
+  "when": "false"
+},
+{
+  "command": "leojs.gotoNextVisible",
+  "when": "false"
+},
+{
+  "command": "leojs.gotoPrevVisible",
+  "when": "false"
+},
+{
+  "command": "leojs.contractOrGoLeft",
+  "when": "false"
+},
+{
+  "command": "leojs.expandAndGoRight",
+  "when": "false"
+},
+{
+  "command": "leojs.pageUp",
+  "when": "false"
+},
+{
+  "command": "leojs.pageDown",
+  "when": "false"
+},
 </t>
-<t tx="felix.20201214205159.52"> {
-   "command": "leojs.hoistNode",
-   "when": "false"
- },
- {
-   "command": "leojs.hoistSelectionFromOutline",
-   "when": "false"
- },
- {
-   "command": "leojs.deHoistFromOutline",
-   "when": "false"
- },
+<t tx="felix.20201214205159.52">{
+  "command": "leojs.hoistNode",
+  "when": "false"
+},
+{
+  "command": "leojs.hoistSelectionFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.deHoistFromOutline",
+  "when": "false"
+},
 </t>
-<t tx="felix.20201214205159.53"> {
-   "command": "leojs.undoFromOutline",
-   "when": "false"
- },
- {
-   "command": "leojs.redoFromOutline",
-   "when": "false"
- }
+<t tx="felix.20201214205159.53">{
+  "command": "leojs.undoFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.redoFromOutline",
+  "when": "false"
+}
 </t>
 <t tx="felix.20201214205159.54">"explorer/context": [
   {
@@ -4700,109 +5070,53 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 <t tx="felix.20201214205159.55">"view/title": [
   {
     "command": "leojs.openLeoFile",
-    "when": "view =~ /leojsDocuments/ &amp;&amp; leojsReady",
+    "when": "view =~ /^leojsDocuments/ &amp;&amp; leojsReady",
     "group": "navigation@1"
   },
   {
     "command": "leojs.newLeoFile",
-    "when": "view =~ /leojsDocuments/ &amp;&amp; leojsReady",
+    "when": "view =~ /^leojsDocuments/ &amp;&amp; leojsReady",
     "group": "navigation@1"
   },
   {
     "command": "leojs.openLeoFile",
-    "when": "view =~ /leojs/ &amp;&amp; leojsReady",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsReady",
     "group": "navigation@1"
   },
   {
     "command": "leojs.newLeoFile",
-    "when": "view =~ /leojs/ &amp;&amp; leojsReady",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsReady",
     "group": "navigation@1"
   },
   {
     "command": "leojs.saveLeoFileFromOutline",
-    "when": "view =~ /leojs/ &amp;&amp; leojsTreeOpened &amp;&amp; leoTreeTitled &amp;&amp; leoChanged",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leoTreeTitled &amp;&amp; leoChanged",
     "group": "navigation@2"
   },
   {
     "command": "leojs.saveAsLeoFile",
-    "when": "view =~ /leojs/ &amp;&amp; leojsTreeOpened &amp;&amp; !leoTreeTitled",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leoTreeTitled",
     "group": "navigation@2"
   },
   {
     "command": "leojs.undoFromOutline",
-    "when": "view =~ /leojs/ &amp;&amp; leojsTreeOpened &amp;&amp; leoCanUndo",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leoCanUndo",
     "group": "navigation@3"
   },
   {
     "command": "leojs.redoFromOutline",
-    "when": "view =~ /leojs/ &amp;&amp; leojsTreeOpened &amp;&amp; leoCanRedo",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leoCanRedo",
     "group": "navigation@4"
   },
   {
     "command": "leojs.deHoistFromOutline",
-    "when": "view =~ /leojs/ &amp;&amp; leojsTreeOpened &amp;&amp; leoCanDehoist",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leoCanDehoist",
     "group": "navigation@5"
   },
   {
     "command": "leojs.contractAllFromOutline",
-    "when": "view =~ /leojs/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@6"
-  },
-  {
-    "command": "leojs.disableLeoTreeNav",
-    "when": "view =~ /leojs/ &amp;&amp; leojsTreeBrowse"
-  },
-  {
-    "command": "leojs.hideEditOnNodes",
-    "when": "view =~ /leojs/ &amp;&amp; leojsShowEditOnNodes"
-  },
-  {
-    "command": "leojs.hideAddOnNodes",
-    "when": "view =~ /leojs/ &amp;&amp; leojsShowAddOnNodes"
-  },
-  {
-    "command": "leojs.hideArrowsOnNodes",
-    "when": "view =~ /leojs/ &amp;&amp; leojsShowArrowsOnNodes"
-  },
-  {
-    "command": "leojs.hideCopyOnNodes",
-    "when": "view =~ /leojs/ &amp;&amp; leojsShowCopyOnNodes"
-  },
-  {
-    "command": "leojs.hideCloneOnNodes",
-    "when": "view =~ /leojs/ &amp;&amp; leojsShowCloneOnNodes"
-  },
-  {
-    "command": "leojs.hideMarkOnNodes",
-    "when": "view =~ /leojs/ &amp;&amp; leojsShowMarkOnNodes"
-  },
-  {
-    "command": "leojs.enableLeoTreeNav",
-    "when": "view =~ /leojs/ &amp;&amp; !leojsTreeBrowse"
-  },
-  {
-    "command": "leojs.showEditOnNodes",
-    "when": "view =~ /leojs/ &amp;&amp; !leojsShowEditOnNodes"
-  },
-  {
-    "command": "leojs.showAddOnNodes",
-    "when": "view =~ /leojs/ &amp;&amp; !leojsShowAddOnNodes"
-  },
-  {
-    "command": "leojs.showArrowsOnNodes",
-    "when": "view =~ /leojs/ &amp;&amp; !leojsShowArrowsOnNodes"
-  },
-  {
-    "command": "leojs.showCopyOnNodes",
-    "when": "view =~ /leojs/ &amp;&amp; !leojsShowCopyOnNodes"
-  },
-  {
-    "command": "leojs.showCloneOnNodes",
-    "when": "view =~ /leojs/ &amp;&amp; !leojsShowCloneOnNodes"
-  },
-  {
-    "command": "leojs.showMarkOnNodes",
-    "when": "view =~ /leojs/ &amp;&amp; !leojsShowMarkOnNodes"
   }
 ],
 </t>
@@ -4812,34 +5126,34 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 </t>
 <t tx="felix.20201214205159.57">{
   "command": "leojs.editHeadline",
-  "when": "leojsShowEditOnNodes &amp;&amp; viewItem =~ /leojsNode/",
+  "when": "leojsShowEditOnNodes &amp;&amp; viewItem =~ /^leojsNode/",
   "group": "inline@1"
 },
 </t>
 <t tx="felix.20201214205159.58">{
   "command": "leojs.insertNode",
-  "when": "leojsShowAddOnNodes &amp;&amp; viewItem =~ /leojsNode/",
+  "when": "leojsShowAddOnNodes &amp;&amp; viewItem =~ /^leojsNode/",
   "group": "inline@2"
 },
 </t>
 <t tx="felix.20201214205159.59">{
   "command": "leojs.moveOutlineDown",
-  "when": "leojsShowArrowsOnNodes &amp;&amp; viewItem =~ /leojsNode/",
+  "when": "leojsShowArrowsOnNodes &amp;&amp; viewItem =~ /^leojsNode/",
   "group": "inline@3"
 },
 {
   "command": "leojs.moveOutlineLeft",
-  "when": "leojsShowArrowsOnNodes &amp;&amp; viewItem =~ /leojsNode/",
+  "when": "leojsShowArrowsOnNodes &amp;&amp; viewItem =~ /^leojsNode/",
   "group": "inline@3"
 },
 {
   "command": "leojs.moveOutlineRight",
-  "when": "leojsShowArrowsOnNodes &amp;&amp; viewItem =~ /leojsNode/",
+  "when": "leojsShowArrowsOnNodes &amp;&amp; viewItem =~ /^leojsNode/",
   "group": "inline@3"
 },
 {
   "command": "leojs.moveOutlineUp",
-  "when": "leojsShowArrowsOnNodes &amp;&amp; viewItem =~ /leojsNode/",
+  "when": "leojsShowArrowsOnNodes &amp;&amp; viewItem =~ /^leojsNode/",
   "group": "inline@3"
 },
 </t>
@@ -4849,98 +5163,98 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 </t>
 <t tx="felix.20201214205159.60">{
   "command": "leojs.copyNode",
-  "when": "leojsShowCopyOnNodes &amp;&amp; viewItem =~ /leojsNode/",
+  "when": "leojsShowCopyOnNodes &amp;&amp; viewItem =~ /^leojsNode/",
   "group": "inline@4"
 },
 {
   "command": "leojs.cloneNode",
-  "when": "leojsShowCloneOnNodes &amp;&amp; viewItem =~ /leojsNode/",
+  "when": "leojsShowCloneOnNodes &amp;&amp; viewItem =~ /^leojsNode/",
   "group": "inline@4"
 },
 </t>
 <t tx="felix.20201214205159.61">{
   "command": "leojs.mark",
-  "when": "leojsShowMarkOnNodes &amp;&amp; viewItem =~ /leojsNodeUnmarked/",
+  "when": "leojsShowMarkOnNodes &amp;&amp; viewItem =~ /^leojsNodeUnmarked/",
   "group": "inline@5"
 },
 {
   "command": "leojs.unmark",
-  "when": "leojsShowMarkOnNodes &amp;&amp; viewItem =~ /leojsNodeMarked/",
+  "when": "leojsShowMarkOnNodes &amp;&amp; viewItem =~ /^leojsNodeMarked/",
   "group": "inline@5"
 },
 </t>
 <t tx="felix.20201214205159.62">{
   "command": "leojs.openAside",
-  "when": "leojsShowOpenAside &amp;&amp; viewItem =~ /leojsNode/",
+  "when": "leojsShowOpenAside &amp;&amp; viewItem =~ /^leojsNode/",
   "group": "leojsNodeContext1@1"
 },
 </t>
 <t tx="felix.20201214205159.63">{
   "command": "leojs.hoistNode",
-  "when": "viewItem =~ /leojsNodeNotRoot/",
+  "when": "viewItem =~ /^leojsNodeNotRoot/",
   "group": "leojsNodeContext1@2"
 },
 {
   "command": "leojs.deHoist",
-  "when": "leoCanDehoist &amp;&amp; viewItem =~ /leojsNodeRoot/",
+  "when": "leoCanDehoist &amp;&amp; viewItem =~ /^leojsNodeRoot/",
   "group": "leojsNodeContext1@2"
 },
 </t>
 <t tx="felix.20201214205159.64">{
   "command": "leojs.refreshFromDisk",
-  "when": "viewItem =~ /leojsNodeAtFile/",
+  "when": "viewItem =~ /^leojsNodeAtFile/",
   "group": "leojsNodeContext1@3"
 },
 </t>
 <t tx="felix.20201214205159.65">{
   "command": "leojs.mark",
-  "when": "viewItem =~ /leojsNodeUnmarked/",
+  "when": "viewItem =~ /^leojsNodeUnmarked/",
   "group": "leojsNodeContext2@1"
 },
 {
   "command": "leojs.unmark",
-  "when": "viewItem =~ /leojsNodeMarked/",
+  "when": "viewItem =~ /^leojsNodeMarked/",
   "group": "leojsNodeContext2@2"
 },
 </t>
 <t tx="felix.20201214205159.66">{
   "command": "leojs.copyNode",
-  "when": "viewItem =~ /leojsNode/",
+  "when": "viewItem =~ /^leojsNode/",
   "group": "leojsNodeContext2@3"
 },
 {
   "command": "leojs.cutNode",
-  "when": "viewItem =~ /leojsNode/",
+  "when": "viewItem =~ /^leojsNode/",
   "group": "leojsNodeContext2@4"
 },
 {
   "command": "leojs.pasteNode",
-  "when": "viewItem =~ /leojsNode/",
+  "when": "viewItem =~ /^leojsNode/",
   "group": "leojsNodeContext2@5"
 },
 {
   "command": "leojs.pasteNodeAsClone",
-  "when": "viewItem =~ /leojsNode/",
+  "when": "viewItem =~ /^leojsNode/",
   "group": "leojsNodeContext2@6"
 },
 {
   "command": "leojs.delete",
-  "when": "viewItem =~ /leojsNode/",
+  "when": "viewItem =~ /^leojsNode/",
   "group": "leojsNodeContext2@7"
 },
 {
   "command": "leojs.insertNode",
-  "when": "leojsTreeOpened &amp;&amp; viewItem =~ /leojsNode/",
+  "when": "leojsTreeOpened &amp;&amp; viewItem =~ /^leojsNode/",
   "group": "leojsNodeContext3@1"
 },
 {
   "command": "leojs.cloneNode",
-  "when": "leojsTreeOpened &amp;&amp; viewItem =~ /leojsNode/",
+  "when": "leojsTreeOpened &amp;&amp; viewItem =~ /^leojsNode/",
   "group": "leojsNodeContext3@2"
 },
 {
   "command": "leojs.gotoNextClone",
-  "when": "leojsTreeOpened &amp;&amp; viewItem =~ /leojsNodeCloned/",
+  "when": "leojsTreeOpened &amp;&amp; viewItem =~ /^leojsNodeCloned/",
   "group": "leojsNodeContext3@3"
 }
 </t>
@@ -4958,7 +5272,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.executeScript",
   "key": "ctrl+b",
   "mac": "cmd+b",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.minibuffer",
@@ -4981,22 +5295,22 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.showBody",
   "key": "ctrl+t",
   "mac": "cmd+t",
-  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leojsDocuments|leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
 },
 {
   "command": "leojs.showBody",
   "key": "alt+d",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leojsDocuments|leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
 },
 {
   "command": "leojs.showBody",
   "key": "tab",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leojsDocuments|leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
 },
 {
   "command": "leojs.showBody",
   "key": "enter",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 </t>
 <t tx="felix.20201214205159.7">{
@@ -5009,7 +5323,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.saveLeoFileFromOutline",
   "key": "ctrl+s",
   "mac": "cmd+s",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leojsDocuments/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
 },
 {
   "command": "leojs.saveLeoFile",
@@ -5026,7 +5340,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 {
   "command": "leojs.contractAllFromOutline",
   "key": "alt+-",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leojsDocuments|leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
 },
 </t>
 <t tx="felix.20201214205159.72">{
@@ -5039,7 +5353,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.editSelectedHeadlineFromOutline",
   "key": "ctrl+h",
   "mac": "cmd+h",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 </t>
 <t tx="felix.20201214205159.73">{
@@ -5052,7 +5366,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.markSelectionFromOutline",
   "key": "ctrl+m",
   "mac": "cmd+m",
-  "when": "leojsTreeOpened &amp;&amp; !leojsMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; !leojsMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.unmarkSelection",
@@ -5064,7 +5378,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.unmarkSelectionFromOutline",
   "key": "ctrl+m",
   "mac": "cmd+m",
-  "when": "leojsTreeOpened &amp;&amp; leojsMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; leojsMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 </t>
 <t tx="felix.20201214205159.74">{
@@ -5077,7 +5391,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.extract",
   "key": "ctrl+shift+d",
   "mac": "cmd+shift+d",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.extractNames",
@@ -5089,7 +5403,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.extractNames",
   "key": "ctrl+shift+n",
   "mac": "cmd+shift+n",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 </t>
 <t tx="felix.20201214205159.75">{
@@ -5108,18 +5422,18 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.moveOutlineDownSelectionFromOutline",
   "key": "ctrl+d",
   "mac": "cmd+d",
-  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.moveOutlineDownSelectionFromOutline",
   "key": "shift+down",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.moveOutlineDownSelectionFromOutline",
   "key": "shift+alt+down",
   "mac": "shift+alt+down",
-  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.moveOutlineLeftSelection",
@@ -5137,18 +5451,18 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.moveOutlineLeftSelectionFromOutline",
   "key": "ctrl+l",
   "mac": "cmd+l",
-  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.moveOutlineLeftSelectionFromOutline",
   "key": "shift+left",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.moveOutlineLeftSelectionFromOutline",
   "key": "shift+alt+left",
   "mac": "shift+alt+left",
-  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.moveOutlineRightSelection",
@@ -5166,18 +5480,18 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.moveOutlineRightSelectionFromOutline",
   "key": "ctrl+r",
   "mac": "cmd+r",
-  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.moveOutlineRightSelectionFromOutline",
   "key": "shift+right",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.moveOutlineRightSelectionFromOutline",
   "key": "shift+alt+right",
   "mac": "shift+alt+right",
-  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.moveOutlineUpSelection",
@@ -5195,18 +5509,18 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.moveOutlineUpSelectionFromOutline",
   "key": "ctrl+u",
   "mac": "cmd+u",
-  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.moveOutlineUpSelectionFromOutline",
   "key": "shift+up",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.moveOutlineUpSelectionFromOutline",
   "key": "shift+alt+up",
   "mac": "shift+alt+up",
-  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 </t>
 <t tx="felix.20201214205159.76">{
@@ -5217,7 +5531,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 {
   "command": "leojs.sortSiblingsSelectionFromOutline",
   "key": "alt+a",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.promoteSelection",
@@ -5233,7 +5547,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "win": "ctrl+oem_4",
   "linux": "ctrl+[",
   "mac": "cmd+[BracketLeft]",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.demoteSelection",
@@ -5249,7 +5563,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "win": "ctrl+oem_6",
   "linux": "ctrl+]",
   "mac": "cmd+[BracketRight]",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.insertNodeSelection",
@@ -5261,7 +5575,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.insertNodeSelectionFromOutline",
   "key": "ctrl+i",
   "mac": "cmd+i",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.insertNodeSelectionInterrupt",
@@ -5283,7 +5597,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "win": "ctrl+oem_7",
   "linux": "ctrl+'",
   "mac": "cmd+[Backquote]",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 </t>
 <t tx="felix.20201214205159.77">{
@@ -5296,7 +5610,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.cutNodeSelectionFromOutline",
   "key": "ctrl+shift+x",
   "mac": "cmd+shift+x",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.copyNodeSelection",
@@ -5308,7 +5622,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.copyNodeSelection",
   "key": "ctrl+shift+c",
   "mac": "cmd+shift+c",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.pasteNodeAtSelection",
@@ -5320,7 +5634,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.pasteNodeAtSelectionFromOutline",
   "key": "ctrl+shift+v",
   "mac": "cmd+shift+v",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.deleteSelection",
@@ -5332,43 +5646,43 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "command": "leojs.deleteSelectionFromOutline",
   "key": "ctrl+shift+backspace",
   "mac": "cmd+shift+backspace",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 </t>
 <t tx="felix.20201214205159.78">{
   "command": "leojs.gotoFirstVisible",
   "key": "alt+home",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoLastSibling",
   "key": "alt+end",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoFirstVisible",
   "key": "home",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoLastVisible",
   "key": "end",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.pageUp",
   "key": "pageup",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.pageDown",
   "key": "pagedown",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoNextCloneSelectionFromOutline",
   "key": "alt+n",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoNextCloneSelection",
@@ -5378,12 +5692,12 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 {
   "command": "leojs.gotoNextVisible",
   "key": "down",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoNextVisible",
   "key": "alt+down",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leojsDocuments|leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
 },
 {
   "command": "leojs.gotoNextVisible",
@@ -5393,12 +5707,12 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 {
   "command": "leojs.gotoPrevVisible",
   "key": "up",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.gotoPrevVisible",
   "key": "alt+up",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leojsDocuments|leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
 },
 {
   "command": "leojs.gotoPrevVisible",
@@ -5408,12 +5722,12 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 {
   "command": "leojs.contractOrGoLeft",
   "key": "left",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.contractOrGoLeft",
   "key": "alt+left",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leojsDocuments|leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
 },
 {
   "command": "leojs.contractOrGoLeft",
@@ -5423,12 +5737,12 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 {
   "command": "leojs.expandAndGoRight",
   "key": "right",
-  "when": "leojsTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs/"
+  "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.expandAndGoRight",
   "key": "alt+right",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /leojs|leojsDocuments|leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
 },
 {
   "command": "leojs.expandAndGoRight",
@@ -5463,25 +5777,24 @@ public minibuffer(): Thenable&lt;unknown&gt; {
   "title": "Remove Button"
 },
 </t>
-<t tx="felix.20201214205159.80">"@types/vscode": "^1.60.0",
-"@types/glob": "^7.1.3",
+<t tx="felix.20201214205159.80">"@types/glob": "^7.1.3",
 "@types/mocha": "^8.0.0",
 "@types/node": "^12.11.7",
-"eslint": "^7.9.0",
+"@types/vscode": "^1.60.0",
 "@typescript-eslint/eslint-plugin": "^4.1.1",
 "@typescript-eslint/parser": "^4.1.1",
+"eslint": "^7.9.0",
 "glob": "^7.1.6",
 "mocha": "^8.1.3",
-"typescript": "^4.0.2",
-"vscode-test": "^1.4.0",
 "ts-loader": "^8.0.3",
 "tslint": "^6.1.3",
+"typescript": "^4.0.2",
+"vscode-test": "^1.4.0",
 "webpack": "^4.44.1",
 "webpack-cli": "^3.3.12"
 </t>
 <t tx="felix.20201214205159.81">"@types/debounce": "^1.2.0",
-"axios": "^0.19.0",
-"@types/date-format-lite": "^17.7.0",
+"axios": "^0.22.0",
 "date-format-lite": "^17.7.0",
 "debounce": "^1.2.0"
 </t>
@@ -5531,7 +5844,10 @@ public showBody(p_aside: boolean, p_preserveFocus?: boolean): Thenable&lt;vscode
 }
 
 </t>
-<t tx="felix.20201214211655.1">public showLogPane(): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211655.1">/**
+ * * Reveals the log pane if not already visible
+ */
+public showLogPane(): Thenable&lt;unknown&gt; {
     vscode.window.showInformationMessage('TODO: Implement showLogPane');
 
     // if shown
@@ -5542,17 +5858,53 @@ public showBody(p_aside: boolean, p_preserveFocus?: boolean): Thenable&lt;vscode
 
 </t>
 <t tx="felix.20201214211706.1">/**
- * Test/Dummy command
+ * * Test/Dummy command
  * @returns Thenable from the tested functionality
  */
 public test(): Thenable&lt;unknown&gt; {
     vscode.window.showInformationMessage("Test called!");
     console.log("Test called!");
+    // console.log("this.leo_c.p.isSelected()", this.leo_c);
+
+    // * DO LEO COMMAND BY NAME
+    // keepSelection = False  # Set default, optional component of param
+    // if "keep" in param:
+    //     keepSelection = param["keep"]
+
+    const func = this.leo_c.commandsDict['goto-next-visible'];
+    if (!func) {
+        console.error('Leo command not found');
+    } else {
+        console.log('HAS FUNC!');
+        func.bind(this.leo_c)();
+    }
+
+    // * Example from leoserver "LEO COMMAND BY NAME" method
+    // func = c.commandsDict.get(command_name) # Getting from kebab-cased 'Command Name'
+    // if not func:  # pragma: no cover
+    //     raise ServerError(f"{tag}: Leo command not found: {command_name!r}")
+
+    // p = self._get_p(param)
+    // try:
+    //     if p == c.p:
+    //         value = func(event={"c":c})  # no need for re-selection
+    //     else:
+    //         old_p = c.p  # preserve old position
+    //         c.selectPosition(p)  # set position upon which to perform the command
+    //         value = func(event={"c":c})
+    //         if keepSelection and c.positionExists(old_p):
+    //             # Only if 'keep' old position was set, and old_p still exists
+    //             c.selectPosition(old_p)
+
     return Promise.resolve(true);
 }
-
 </t>
-<t tx="felix.20201214211742.1">public clickAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211742.1">/**
+ * * Invoke an '@button' click directly by index string. Used by '@buttons' treeview.
+ * @param p_node the node of the at-buttons panel that was clicked
+ * @returns Promises that resolves when done
+ */
+public clickAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
 
@@ -5568,7 +5920,12 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211744.1">public removeAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211744.1">/**
+ * * Removes an '@button' from Leo's button dict, directly by index string. Used by '@buttons' treeview.
+ * @param p_node the node of the at-buttons panel that was chosen to remove
+ * @returns Thenable that resolves when done
+ */
+public removeAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(false, { buttons: true });
 
@@ -5584,7 +5941,11 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211830.1">public closeLeoFile(): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211830.1">/**
+ * * Close an opened Leo file
+ * @returns the launchRefresh promise started after it's done closing the Leo document
+ */
+public closeLeoFile(): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
 
@@ -5605,7 +5966,12 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211831.1">public newLeoFile(): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211831.1">/**
+ * * Creates a new untitled Leo document
+ * * If not shown already, it also shows the outline, body and log panes along with leaving focus in the outline
+ * @returns A promise that resolves with a textEditor of the new file
+ */
+public newLeoFile(): Thenable&lt;unknown&gt; {
 
     vscode.window.showInformationMessage('TODO: Implement newLeoFile');
 
@@ -5619,7 +5985,13 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211832.1">public openLeoFile(p_uri?: vscode.Uri): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211832.1">/**
+ * * Shows an 'Open Leo File' dialog window and opens the chosen file
+ * * If not shown already, it also shows the outline, body and log panes along with leaving focus in the outline
+ * @param p_leoFileUri optional uri for specifying a file, if missing, a dialog will open
+ * @returns A promise that resolves with a textEditor of the chosen file
+ */
+public openLeoFile(p_uri?: vscode.Uri): Thenable&lt;unknown&gt; {
 
     vscode.window.showInformationMessage('TODO: Implement openLeoFile' +
         (p_uri ? " path: " + p_uri.fsPath : ""));
@@ -5634,7 +6006,11 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211834.1">public showRecentLeoFiles(): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211834.1">/**
+ * * Shows the recent Leo files list, choosing one will open it
+ * @returns A promise that resolves when the a file is finally opened, rejected otherwise
+ */
+public showRecentLeoFiles(): Thenable&lt;unknown&gt; {
     vscode.window.showInformationMessage('TODO: Implement showRecentLeoFiles');
 
     // if shown, chosen and opened
@@ -5644,7 +6020,12 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211835.1">public saveAsLeoFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211835.1">/**
+ * * Asks for file name and path, then saves the Leo file
+ * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
+ * @returns a promise from saving the file results, or that will resolve to undefined if cancelled
+ */
+public saveAsLeoFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
 
@@ -5662,7 +6043,12 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211836.1">public saveLeoFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211836.1">/**
+ * * Invokes the self.commander.save() Leo command
+ * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
+ * @returns Promise that resolves when the save command is placed on the front-end command stack
+ */
+public saveLeoFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
 
@@ -5680,7 +6066,11 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211837.1">public switchLeoFile(): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211837.1">/**
+ * * Show switch document 'QuickPick' dialog and switch file if selection is made, or just return if no files are opened.
+ * @returns A promise that resolves with a textEditor of the selected node's body from the newly selected document
+ */
+public switchLeoFile(): Thenable&lt;unknown&gt; {
 
     vscode.window.showInformationMessage('TODO: Implement switchLeoFile');
 
@@ -5694,15 +6084,20 @@ public test(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211839.1">public selectOpenedLeoDocument(p_index: number): Thenable&lt;unknown&gt; {
+<t tx="felix.20201214211839.1">/**
+ * * Switches Leo document directly by index number. Used by document treeview and switchLeoFile command.
+ * @param p_index position of the opened Leo document in the document array
+ * @returns A promise that resolves with a textEditor of the selected node's body from the newly opened document
+ */
+public selectOpenedLeoDocument(p_index: number): Thenable&lt;unknown&gt; {
 
     // vscode.window.showInformationMessage('TODO: Implement selectOpenedLeoDocument' +
     //     " index: " + p_index);
+    console.log('select opened commander index: ' + p_index);
 
-    g.app.leo_c = g.app.commandersList[p_index];
+    this.leo_c = g.app.commandersList[p_index];
     this._refreshOutline(true, RevealType.RevealSelect);
 
-    // TODO : maybe use _setupOpenedLeoDocument
     const w_fakeOpenedFileInfo: any = undefined;
     this._setupOpenedLeoDocument(w_fakeOpenedFileInfo);
 
@@ -5723,87 +6118,6 @@ set leoReady(p_value: boolean) {
     utils.setContext(Constants.CONTEXT_FLAGS.LEO_READY, p_value);
 }
 
-</t>
-<t tx="felix.20201215224237.1">export class Leojs {
-    // FAKE model of the outline (PNodes are temporary replacement of positions + vnodes)
-    // simulates _yieldAllRootChildren from leoInteg's leobridgeserver.py
-    public positions: PNode[] = [
-        {
-            header: 'node1',
-            body: 'node1 body',
-            children: [
-                {
-                    header: 'nodeInside1',
-                    body: 'nodeInside1 body',
-                    marked: true,
-                    children: [],
-                },
-                {
-                    header: 'nodeInside2',
-                    body: 'nodeInside2 body',
-                    children: [],
-                },
-            ],
-        },
-        {
-            header: 'node2selected',
-            selected: true,
-            body: '', // Empty body should display icon without blue square
-            children: [],
-        },
-
-        {
-            header: '@file node3',
-            atFile: true,
-            body: 'node3 body',
-            children: [],
-        },
-    ];
-
-    // Fake documents array (rendered in tree view but is just a list - no node relationships)
-    public documents: LeoDocument[] = [
-        {
-            name: 'fakeSelectedDoc1.leo',
-            index: 0,
-            changed: false,
-            selected: true,
-        },
-        {
-            name: 'fakeChangedDoc2.leo',
-            index: 1,
-            changed: true,
-            selected: false,
-        },
-        { name: 'fakeDoc3.leo', index: 2, changed: false, selected: false },
-    ];
-
-    // Fake @ buttons array (rendered in tree view but is just a list - no node relationships)
-    public atButtons: LeoButton[] = [
-        { name: 'script-button', index: 'nullButtonWidget' },
-        { name: 'button name 2', index: 'key2' },
-        { name: 'button name 3', index: 'key3' },
-    ];
-
-    constructor() {
-        // insert parent properties in fake positions
-        this.positions.forEach((p_position) =&gt; {
-            // set to undefined at first for root nodes
-            this._setPNodeParents(p_position, undefined);
-        });
-    }
-
-    /**
-     * Recursive method to fill the parent properties of fake position-structure
-     * @param p_position
-     * @param p_parent
-     */
-    private _setPNodeParents(p_position: PNode, p_parent?: PNode): void {
-        p_position.parent = p_parent; // set its parent
-        p_position.children.forEach((p_child) =&gt; {
-            this._setPNodeParents(p_child, p_position);
-        });
-    }
-}
 </t>
 <t tx="felix.20201215231023.1">&lt;&lt; imports &gt;&gt;
 &lt;&lt; xslTemplate &gt;&gt;
@@ -6041,189 +6355,23 @@ const xslTemplate = `
 }
 
 </t>
-<t tx="felix.20201218000931.1">{
-  "command": "leojs.enableLeoTreeNav",
-  "category": "Leojs",
-  "title": "Enable Leo Tree Navigation",
-  "icon": {
-    "light": "resources/light/no-check.svg",
-    "dark": "resources/dark/no-check.svg"
-  }
-},
-{
-  "command": "leojs.showEditOnNodes",
-  "category": "Leojs",
-  "title": "Show edit-headline",
-  "icon": {
-    "light": "resources/light/no-check.svg",
-    "dark": "resources/dark/no-check.svg"
-  }
-},
-{
-  "command": "leojs.showAddOnNodes",
-  "category": "Leojs",
-  "title": "Show Add Node",
-  "icon": {
-    "light": "resources/light/no-check.svg",
-    "dark": "resources/dark/no-check.svg"
-  }
-},
-{
-  "command": "leojs.showArrowsOnNodes",
-  "category": "Leojs",
-  "title": "Show move-commands",
-  "icon": {
-    "light": "resources/light/no-check.svg",
-    "dark": "resources/dark/no-check.svg"
-  }
-},
-{
-  "command": "leojs.showCopyOnNodes",
-  "category": "Leojs",
-  "title": "Show Copy Node",
-  "icon": {
-    "light": "resources/light/no-check.svg",
-    "dark": "resources/dark/no-check.svg"
-  }
-},
-{
-  "command": "leojs.showCloneOnNodes",
-  "category": "Leojs",
-  "title": "Show Clone Node",
-  "icon": {
-    "light": "resources/light/no-check.svg",
-    "dark": "resources/dark/no-check.svg"
-  }
-},
-{
-  "command": "leojs.showMarkOnNodes",
-  "category": "Leojs",
-  "title": "Show Mark/Unmark Node",
-  "icon": {
-    "light": "resources/light/no-check.svg",
-    "dark": "resources/dark/no-check.svg"
-  }
-},
-{
-  "command": "leojs.disableLeoTreeNav",
-  "category": "Leojs",
-  "title": "Disable Leo Tree Navigation",
-  "icon": {
-    "light": "resources/light/check.svg",
-    "dark": "resources/dark/check.svg"
-  }
-},
-{
-  "command": "leojs.hideEditOnNodes",
-  "category": "Leojs",
-  "title": "Hide edit-headline",
-  "icon": {
-    "light": "resources/light/check.svg",
-    "dark": "resources/dark/check.svg"
-  }
-},
-{
-  "command": "leojs.hideAddOnNodes",
-  "category": "Leojs",
-  "title": "Hide Add Node",
-  "icon": {
-    "light": "resources/light/check.svg",
-    "dark": "resources/dark/check.svg"
-  }
-},
-{
-  "command": "leojs.hideArrowsOnNodes",
-  "category": "Leojs",
-  "title": "Hide move-commands",
-  "icon": {
-    "light": "resources/light/check.svg",
-    "dark": "resources/dark/check.svg"
-  }
-},
-{
-  "command": "leojs.hideCopyOnNodes",
-  "category": "Leojs",
-  "title": "Hide Copy Node",
-  "icon": {
-    "light": "resources/light/check.svg",
-    "dark": "resources/dark/check.svg"
-  }
-},
-{
-  "command": "leojs.hideCloneOnNodes",
-  "category": "Leojs",
-  "title": "Hide Clone Node",
-  "icon": {
-    "light": "resources/light/check.svg",
-    "dark": "resources/dark/check.svg"
-  }
-},
-{
-  "command": "leojs.hideMarkOnNodes",
-  "category": "Leojs",
-  "title": "Hide Mark/Unmark Node",
-  "icon": {
-    "light": "resources/light/check.svg",
-    "dark": "resources/dark/check.svg"
-  }
-}
-</t>
-<t tx="felix.20201221015535.1">[CMD.ENABLE_LEO_TREE_NAV, () =&gt; w_leoUI.toggleSetting(CTX.LEO_TREE_BROWSE, true)],
-[CMD.SHOW_EDIT_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_EDIT, true)],
-[CMD.SHOW_ADD_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_ADD, true)],
-[CMD.SHOW_ARROWS_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_ARROWS, true)],
-[CMD.SHOW_COPY_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_COPY, true)],
-[CMD.SHOW_CLONE_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_CLONE, true)],
-[CMD.SHOW_MARK_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_MARK, true)],
-
-[CMD.DISABLE_LEO_TREE_NAV, () =&gt; w_leoUI.toggleSetting(CTX.LEO_TREE_BROWSE, false)],
-[CMD.HIDE_EDIT_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_EDIT, false)],
-[CMD.HIDE_ADD_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_ADD, false)],
-[CMD.HIDE_ARROWS_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_ARROWS, false)],
-[CMD.HIDE_COPY_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_COPY, false)],
-[CMD.HIDE_CLONE_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_CLONE, false)],
-[CMD.HIDE_MARK_ON_NODES, () =&gt; w_leoUI.toggleSetting(CTX.SHOW_MARK, false)],
-
-</t>
-<t tx="felix.20201221234735.1">/**
- * Toggles a context value for the 'when' clauses of the available commands in package.json
- * @param p_param String name of the context variable
- * @param p_value Its value to be set
- */
-public toggleSetting(p_param: string, p_value: boolean): void {
-    utils.setContext(p_param, p_value);
-    if (
-        (p_param.startsWith("show") || p_param.startsWith("hide")) &amp;&amp;
-        this.leoStates.fileOpenedReady
-    ) {
-        this._refreshOutline(true, RevealType.RevealSelect);
-    }
-    // keep a copy in fake config until a real config setting class is implemented
-    this.config[p_param] = p_value;
-
-}
-
-</t>
+<t tx="felix.20201221015535.1"></t>
 <t tx="felix.20201222013904.1">/**
  * * Refreshes the outline. A reveal type can be passed along to specify the reveal type for the selected node
+ * @param p_incrementTreeId Make all node id's be 'new' by incrementing the treeId prefix of the id's.
  * @param p_revealType Facultative reveal type to specify type of reveal when the 'selected node' is encountered
  */
-private _refreshOutline(p_incrementTreeID: boolean, p_revealType?: RevealType): void {
-    if (p_incrementTreeID) {
-        this._treeId++; // unused so far in leojs
+private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): void {
+    if (p_incrementTreeId) {
+        this._leoTreeProvider.incTreeId();
     }
-    if (p_revealType !== undefined) { // To check if selected node should self-select while redrawing whole tree
+    if (p_revealType !== undefined &amp;&amp; p_revealType.valueOf() &gt;= this._revealType.valueOf()) { // To check if selected node should self-select while redrawing whole tree
         this._revealType = p_revealType; // To be read/cleared (in arrayToLeoNodesArray instead of directly by nodes)
     }
-    // Force showing last used Leo outline first
-    if (this.lastSelectedNode &amp;&amp; !(this._leoTreeExView.visible || this._leoTreeView.visible)) {
-        this._lastTreeView.reveal(this.lastSelectedNode.ap)
-            .then(() =&gt; {
-                this._leoTreeProvider.refreshTreeRoot();
-            });
-    } else {
-        this._leoTreeProvider.refreshTreeRoot();
-    }
+
+    console.log('refreshing');
+
+    this._leoTreeProvider.refreshTreeRoot();
 }
 
 </t>
@@ -6242,7 +6390,6 @@ public _launchRefresh(): void {
         console.log('Has UI to REFRESH!', this._refreshType);
 
     }
-
 
     // this._refreshType = Object.assign({}, p_refreshType);
     // let w_revealType: RevealType;
@@ -6280,6 +6427,7 @@ public _launchRefresh(): void {
     //         this._tryApplyNodeToBody(w_node, false, true); // ! NEEDS STACK AND THROTTLE!
     //     }
     // }
+
     this.getStates();
 }
 
@@ -6302,7 +6450,6 @@ public _setupRefresh(p_focusOutline: boolean, p_refreshType: ReqRefresh): void {
 private _setupNoOpenedLeoDocument(): void {
     this.leoStates.fileOpenedReady = false;
     this._bodyTextDocument = undefined;
-    this.lastSelectedNode = undefined;
     this._refreshOutline(false, RevealType.NoReveal);
     this.refreshDocumentsPane();
     this._leoButtonsProvider.refreshTreeRoot();
@@ -6378,15 +6525,29 @@ public closeBody(): void {
 </t>
 <t tx="felix.20201229025520.1">/**
  * * Handle selected node being created for the outline
- * @param p_element PNode that was just created and detected as selected node
+ * @param p_node Position that was just created and detected as selected node
  */
-public gotSelectedNode(p_element: Position): void {
+public gotSelectedNode(p_node: Position): void {
 
-    console.log('Got selected node:', p_element.h);
+    console.log('Got selected node:', p_node.h);
 
+    if (this._revealType) {
+        setTimeout(() =&gt; {
+            this._lastTreeView.reveal(p_node, {
+                select: true,
+                focus: (this._revealType.valueOf() &gt;= RevealType.RevealSelectFocus.valueOf())
+            }).then(
+                () =&gt; { }, // Ok 
+                (p_error) =&gt; {
+                    console.error('ERROR gotSelectedNode could not reveal: tree was refreshed!');
+                }
+            );
+            // Done so reset
+            this._revealType = RevealType.NoReveal;
+        }, 0);
+    }
     // set context flags
-    this.leoStates.setSelectedNodeFlags(p_element);
-
+    this.leoStates.setSelectedNodeFlags(p_node);
 }
 
 </t>
@@ -6408,7 +6569,7 @@ public gotSelectedNode(p_element: Position): void {
 import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
-import { Commander } from './leoCommander';
+import { Commands } from './leoCommands';
 import { Position } from './leoNodes';
 
 export const isMac: boolean = process.platform.startsWith('darwin');
@@ -6502,25 +6663,25 @@ export interface Position {
     lastNode: () =&gt; Position;
     next: () =&gt; Position;
     nodeAfterTree: () =&gt; Position;
-    nthChild: (n:number) =&gt; Position;
+    nthChild: (n: number) =&gt; Position;
     parent: () =&gt; Position;
     threadBack: () =&gt; Position;
     threadNext: () =&gt; Position;
-    visBack: (c:Commander) =&gt; Position;
-    visNext: (c:Commander) =&gt; Position;
-    hasVisBack: (c:Commander) =&gt; Position;
-    hasVisNext: (c:Commander) =&gt; Position;
+    visBack: (c: Commands) =&gt; Position;
+    visNext: (c: Commands) =&gt; Position;
+    hasVisBack: (c: Commands) =&gt; Position;
+    hasVisNext: (c: Commands) =&gt; Position;
     hasFirstChild: () =&gt; boolean;
     atNoSentFileNodeName: () =&gt; string;
     atAsisFileNodeName: () =&gt; string;
     isAtNoSentFileNode: () =&gt; boolean;
     isAtAsisFileNode: () =&gt; boolean;
     __repr__: () =&gt; string;
-    simpleLevel: ()=&gt;number;
+    simpleLevel: () =&gt; number;
 
-    initBodyString : (s:string)=&gt;void;
-    setTnodeText: (s:string)=&gt;void;
-    scriptSetBodyString : (s:string)=&gt;void;
+    initBodyString: (s: string) =&gt; void;
+    setTnodeText: (s: string) =&gt; void;
+    scriptSetBodyString: (s: string) =&gt; void;
 }
 
 Position.prototype.back = Position.prototype.getBack;
@@ -6577,7 +6738,7 @@ export class VNode {
     // The context containing context.hiddenRootNode.
     // Required so we can compute top-level siblings.
     // It is named .context rather than .c to emphasize its limited usage.
-    context: Commander;
+    context: Commands;
     expandedPositions: Position[]; // Positions that should be expanded.
 
     // * Cursor location, text selection and scrolling information
@@ -6586,7 +6747,7 @@ export class VNode {
     selectionLength: number; // The length of the selected body text.
     selectionStart: number; // The start of the selected body text.
 
-    private unknownAttributes: undefined | {[key:string]:any};
+    private unknownAttributes: undefined | { [key: string]: any };
     unicode_warning_given: boolean = false;
 
     @others
@@ -6599,11 +6760,11 @@ export interface VNode {
     atAsisFileNodeName: () =&gt; string;
     isAtNoSentFileNode: () =&gt; boolean;
     isAtAsisFileNode: () =&gt; boolean;
-    initBodyString: (s:string) =&gt; void;
-    initHeadString: (s:string) =&gt; void;
-    setHeadText: (s:string) =&gt; void;
-    setTnodeText: (s:string) =&gt; void;
-    __str__:() =&gt; string;
+    initBodyString: (s: string) =&gt; void;
+    initHeadString: (s: string) =&gt; void;
+    setHeadText: (s: string) =&gt; void;
+    setTnodeText: (s: string) =&gt; void;
+    __str__: () =&gt; string;
 }
 
 // New names, less confusing
@@ -6727,7 +6888,7 @@ export const directives_pat: any = null;  // Set below.
   For commands based on functions, use the @g.command decorator.
 */
 
-export const global_commands_dict: { [key: string]: (...args: any[]) =&gt; any } = {};
+export let global_commands_dict: { [key: string]: (...args: any[]) =&gt; any };
 
 export const cmd_instance_dict: { [key: string]: string[] } = {
     // Keys are class names, values are attribute chains.
@@ -6812,7 +6973,7 @@ export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
 import { NodeIndices } from './leoNodes';
-import { Commander } from './leoCommander';
+import { Commands } from './leoCommands';
 
 </t>
 <t tx="felix.20210102213337.1">/**
@@ -7653,7 +7814,7 @@ public debug = []; // A list of switches to be enabled.
 public diff: boolean = false; // True: run Leo in diff mode.
 public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
 public failFast: boolean = false; // True: Use the failfast option in unit tests.
-public gui:LeoUI|undefined; // The gui class.
+public gui: LeoUI | undefined; // The gui class.
 public guiArgName = null; // The gui name given in --gui option.
 public ipython_inited: boolean = false; // True if leoIpython.py imports succeeded.
 public isTheme: boolean = false; // True: load files as theme files (ignore myLeoSettings.leo).
@@ -7893,7 +8054,7 @@ public atFileNames: string[] = []; // The set of all built -in @&lt;file&gt;spel
 
 public globalKillBuffer: any[] = []; // The global kill buffer.
 public globalRegisters: any = {}; // The global register list.
-public leoID: string = 'filtest'; // The id part of gnx's, using empty for falsy.
+public leoID: string = 'test'; // The id part of gnx's, using empty for falsy.
 public loadedThemes: any[] = []; // List of loaded theme.leo files.
 public lossage: any[] = []; // List of last 100 keystrokes.
 public paste_c: any = null; // The commander that pasted the last outline.
@@ -7903,8 +8064,7 @@ public windowList: any[] = []; // * Global list of all frames. USE _commandersLi
 public realMenuNameDict = {}; // Translations of menu names.
 
 // * Opened Leo File Commanders
-public commandersList: Commander[] = [];
-public leo_c:Commander|undefined;
+public commandersList: Commands[] = [];
 </t>
 <t tx="felix.20210103024632.7">// Most of these are defined in initApp.
 public backgroundProcessManager: any = null; // The singleton BackgroundProcessManager instance.
@@ -7916,12 +8076,12 @@ public externalFilesController: any = null; // The singleton ExternalFilesContro
 public global_cacher: any = null; // The singleton leoCacher.GlobalCacher instance.
 public idleTimeManager: any = null; // The singleton IdleTimeManager instance.
 public ipk: any = null; // python kernel instance
-public loadManager: LoadManager|undefined; // The singleton LoadManager instance.
+public loadManager: LoadManager | undefined; // The singleton LoadManager instance.
 // public logManager: any = null;
 // The singleton LogManager instance.
 // public openWithManager: any = null;
 // The singleton OpenWithManager instance.
-public nodeIndices: NodeIndices|undefined; // The singleton nodeIndices instance.
+public nodeIndices: NodeIndices | undefined; // The singleton nodeIndices instance.
 public pluginsController: any = null; // The singleton PluginsManager instance. public sessionManager: any = null; // The singleton SessionManager instance. // The Commands class...
 public commandName: any = null; // The name of the command being executed.
 public commandInterruptFlag: boolean = false; // True: command within a command.
@@ -8068,7 +8228,7 @@ export function callers(n: number = 4, count: number = 0, excludeCaller: boolean
         result = result.slice(0, count);
     }
     // if (verbose) {
-        // return ''; //''.join([f"\n  {z}" for z in result]);
+    // return ''; //''.join([f"\n  {z}" for z in result]);
     // }
     return result.join(',');
 }
@@ -8087,36 +8247,11 @@ export function splitLines(s?: string): string[] {
 }
 
 </t>
-<t tx="felix.20210104010331.1">// TODO : see Error().stack to access names from the call stack
-export function _callerName(n: number, verbose: boolean = false): string {
+<t tx="felix.20210104010331.1">export function _callerName(n: number, verbose: boolean = false): string {
+    // TODO : see Error().stack to access names from the call stack
+    // return Error.stack.split()[n]; // or something close to that
     return "&lt;_callerName&gt;";
 }
-
-/*
-    About _callerName: see https://nodejs.org/api/errors.html#errors_error_stack
-
-    ### This won't work in JavaScript.
-        # try:
-            # # get the function name from the call stack.
-            # f1 = sys._getframe(n)  # The stack frame, n levels up.
-            # code1 = f1.f_code  # The code object
-            # sfn = shortFilename(code1.co_filename)  # The file name.
-            # locals_ = f1.f_locals  # The local namespace.
-            # name = code1.co_name
-            # line = code1.co_firstlineno
-            # if verbose:
-                # obj = locals_.get('self')
-                # full_name = f"{obj.__class__.__name__}.{name}" if obj else name
-                # return f"line {line:4} {sfn:&gt;30} {full_name}"
-            # return name
-        # except ValueError:
-            # return ''
-                # # The stack is not deep enough OR
-                # # sys._getframe does not exist on this platform.
-        # except Exception:
-            # es_exception()
-            # return ''  # "&lt;no caller name&gt;"
-*/
 
 </t>
 <t tx="felix.20210104194650.1">/**
@@ -8212,16 +8347,16 @@ export function isDirective(s: string): boolean {
  * Return non-negative number if the body text contains the @ directive.
  */
 export function is_special(s: string, directive: string): number {
-    console.assert(directive &amp;&amp; directive.substring(0,1)==='@');
+    console.assert(directive &amp;&amp; directive.substring(0, 1) === '@');
     // Most directives must start the line.
     const lws: boolean = ["@others", "@all"].includes(directive);
-    const pattern = lws?new RegExp("^\\s*("+directive+"\\b)", 'm'):new RegExp("^("+directive+"\\b)", 'm');
+    const pattern = lws ? new RegExp("^\\s*(" + directive + "\\b)", 'm') : new RegExp("^(" + directive + "\\b)", 'm');
 
     const m = pattern.exec(s);
 
-    if(m){
+    if (m) {
         // javascript returns index including spaces before the match after newline
-        return m.index+m[0].length-m[1].length;
+        return m.index + m[0].length - m[1].length;
     }
     return -1;
 }
@@ -8451,7 +8586,7 @@ interface Date {
 <t tx="felix.20210110213751.1">/**
  * Check that no vnode exists with the given gnx in fc.gnxDict.
  */
-public check_gnx(c: Commander, gnx: string, v: VNode): void {
+public check_gnx(c: Commands, gnx: string, v: VNode): void {
     // TODO : Type 'c' as Commands class
 
     if (gnx === 'hidden-root-vnode-gnx') {
@@ -8478,21 +8613,33 @@ public check_gnx(c: Commander, gnx: string, v: VNode): void {
 @language typescript
 @tabwidth -4
 
+// Then you create an interface which merges
+// the expected mixins with the same name as your base
+export interface Commands extends CommanderOutlineCommands, CommanderFileCommands { }
+// Apply the mixins into the base class via
+// the JS at runtime
+console.log('Applying mixins');
+
+applyMixins(Commands, [CommanderOutlineCommands, CommanderFileCommands]);
 </t>
 <t tx="felix.20210110223514.1">/**
- * A per-outline class. Called 'class Commands' in Leo's python source
- * The "c" predefined object is an instance of this class.
+ * A per-outline class that implements most of Leo's commands. The
+ * "c" predefined object is an instance of this class.
+ *
+ * c.initObjects() creates subcommanders corresponding to files in the
+ * leo/core and leo/commands. All of Leo's core code is accessible
+ * via this class and its subcommanders.
  */
-export class Commander {
+export class Commands {
 
     // Official ivars.
     private _currentPosition: Position | undefined;
-    private _topPosition : Position | undefined;
+    private _topPosition: Position | undefined;
 
     public hiddenRootNode: VNode;
     public fileCommands: FileCommands;
 
-    public gui:LeoUI;
+    public gui: LeoUI;
 
     // TODO : fake frame needed?
     // TODO : maybe MERGE frame.tree.generation WITH _treeId?
@@ -8507,19 +8654,19 @@ export class Commander {
 }
 
 </t>
-<t tx="felix.20210112001859.1">public recolor():void {
+<t tx="felix.20210112001859.1">public recolor(): void {
     console.log("recolor");
 }
 
-public redraw():void {
+public redraw(): void {
     console.log("redraw");
 }
 
-public redraw_after_icons_changed():void {
+public redraw_after_icons_changed(): void {
     console.log("redraw_after_icons_changed");
 }
 
-public alert(...arg:any[]):void {
+public alert(...arg: any[]): void {
     console.log(...arg);
 }
 
@@ -8896,7 +9043,7 @@ public saveCursorAndScroll(): void {
     try {
         v._bodyString = g.toUnicode(s, null, true);
     }
-    catch(exception) {
+    catch (exception) {
         if (!this.unicode_warning_given) {
             this.unicode_warning_given = true;
             g.error(s);
@@ -9036,16 +9183,16 @@ public _addCopiedLink(childIndex: number, parent_v: VNode): void {
 <t tx="felix.20210117025748.3">/**
  * Adjust links after adding a link to v.
  */
-public _addLink(childIndex:number, parent_v: VNode):void{
+public _addLink(childIndex: number, parent_v: VNode): void {
     const v: VNode = this;
     v.context.frame.tree.generation += 1;
     // Update parent_v.children &amp; v.parents.
     parent_v.children.splice(childIndex, 0, v);
     v.parents.push(parent_v);
-    if (v.parents.length === 1){
+    if (v.parents.length === 1) {
         // Adjust the parents links in the descendant tree.
         // This handles clones properly when undoing a delete.
-        for (let child of v.children){
+        for (let child of v.children) {
             child._addParentLinks(v);
         }
     }
@@ -9055,11 +9202,11 @@ public _addLink(childIndex:number, parent_v: VNode):void{
 <t tx="felix.20210117025748.4">/**
  * Used by addLink to adjust parent links in the descendant tree
  */
-public _addParentLinks(parent:VNode):void{
+public _addParentLinks(parent: VNode): void {
     const v: VNode = this;
     v.parents.push(parent);
-    if (v.parents.length  === 1){
-        for (let child of v.children){
+    if (v.parents.length === 1) {
+        for (let child of v.children) {
             child._addParentLinks(v);
         }
     }
@@ -9069,33 +9216,33 @@ public _addParentLinks(parent:VNode):void{
 <t tx="felix.20210117025748.5">/**
  * Adjust links after cutting a link to v.
  */
-public _cutLink(childIndex:number, parent_v:VNode):void{
+public _cutLink(childIndex: number, parent_v: VNode): void {
     const v: VNode = this;
     v.context.frame.tree.generation += 1;
     console.assert(parent_v.children[childIndex].fileIndex === v.fileIndex);
     parent_v.children.splice(childIndex, 1);
-    if( v.parents.includes(parent_v)){
-        try{
-            for(let i = 0; i &lt; v.parents.length; i++){
+    if (v.parents.includes(parent_v)) {
+        try {
+            for (let i = 0; i &lt; v.parents.length; i++) {
                 if (v.parents[i].fileIndex === parent_v.fileIndex) {
                     v.parents.splice(i, 1);
                     break;
                 }
             }
         }
-        catch(ValueError){
-            g.error(parent_v + " not in parents of "+v);
+        catch (ValueError) {
+            g.error(parent_v + " not in parents of " + v);
             g.trace('v.parents:');
             g.printObj(v.parents);
         }
     }
-    
-    
-    
-    if (!v.parents.length){
+
+
+
+    if (!v.parents.length) {
         // Adjust the parents links in the descendant tree.
         // This handles clones properly when deleting a tree.
-        for(let child of v.children){
+        for (let child of v.children) {
             child._cutParentLinks(v);
         }
     }
@@ -9105,24 +9252,24 @@ public _cutLink(childIndex:number, parent_v:VNode):void{
 <t tx="felix.20210117025748.6">/**
  * Used by cutLink to adjust parent links in the descendant tree
  */
-public _cutParentLinks(parent: VNode){
+public _cutParentLinks(parent: VNode) {
     const v: VNode = this;
-    
-    for(let i = 0; i &lt; v.parents.length; i++){ 
+
+    for (let i = 0; i &lt; v.parents.length; i++) {
         if (v.parents[i].fileIndex === parent.fileIndex) {
             v.parents.splice(i, 1);
             break;
         }
     }
-        
-    if (!v.parents.length){
+
+    if (!v.parents.length) {
         // Adjust the parents links in the descendant tree.
         // This handles clones properly when deleting a tree.
-        for(let child of v.children){
+        for (let child of v.children) {
             child._cutParentLinks(v);
         }
-    }            
-            
+    }
+
 }
 
 </t>
@@ -9131,19 +9278,19 @@ public _cutParentLinks(parent: VNode){
  * This is a low-level method, used by the read code.
  * It is not intended as a general replacement for p.doDelete().
  */
-public _deleteAllChildren():void {
+public _deleteAllChildren(): void {
     const v: VNode = this;
-    for (let v2 of v.children){
-        try{
-            for(let i = 0; i &lt; v2.parents.length; i++){ 
+    for (let v2 of v.children) {
+        try {
+            for (let i = 0; i &lt; v2.parents.length; i++) {
                 if (v2.parents[i].fileIndex === v.fileIndex) {
                     v2.parents.splice(i, 1);
                     break;
                 }
             }
         }
-        catch(ValueError){
-            g.error(v+ " not in parents of "+v2);
+        catch (ValueError) {
+            g.error(v + " not in parents of " + v2);
             g.trace('v2.parents:');
             g.printObj(v2.parents);
         }
@@ -9155,7 +9302,7 @@ public _deleteAllChildren():void {
 <t tx="felix.20210117025748.8">/**
  * Links self as the n'th child of VNode pv
  */
-public _linkAsNthChild(parent_v:VNode, n:number):void {
+public _linkAsNthChild(parent_v: VNode, n: number): void {
     const v: VNode = this; // The child node.
     v._addLink(n, parent_v);
 }
@@ -9165,12 +9312,12 @@ public _linkAsNthChild(parent_v:VNode, n:number):void {
 <t tx="felix.20210117160548.2">/**
  * VNode body string property
  */
-public get b():string{
+public get b(): string {
     const v: VNode = this;
     return v.bodyString();
 }
 
-public set b(val:string){
+public set b(val: string) {
     const v: VNode = this;
     v.setBodyString(val);
 }
@@ -9179,12 +9326,12 @@ public set b(val:string){
 <t tx="felix.20210117160548.3">/**
  * VNode headline string property
  */
-public get h():string{
+public get h(): string {
     const v: VNode = this;
     return v.headString();
 }
 
-public set h(val:string){
+public set h(val: string) {
     const v: VNode = this;
     v.setHeadString(val);
 }
@@ -9193,22 +9340,22 @@ public set h(val:string){
 <t tx="felix.20210117160548.4">/**
  * VNode u property
  */
-public get u():any{
+public get u(): any {
     const v: VNode = this;
-    if(!v.unknownAttributes){
+    if (!v.unknownAttributes) {
         v.unknownAttributes = {};
     }
     return v.unknownAttributes;
 }
 
-public set u(val:any){
+public set u(val: any) {
     const v: VNode = this;
-    if(val===null){
+    if (val === null) {
         v.unknownAttributes = undefined;
     }
-    else if((typeof val)=== 'object'){
+    else if ((typeof val) === 'object') {
         v.unknownAttributes = val;
-    }else {
+    } else {
         throw new Error("unknownAttributes ValueError");
     }
 }
@@ -9217,7 +9364,7 @@ public set u(val:any){
 <t tx="felix.20210117160548.5">/**
  * VNode gnx property
  */
-public get gnx(){
+public get gnx() {
     const v: VNode = this;
     return v.fileIndex;
 }
@@ -9230,17 +9377,17 @@ export class LoadManager {
 
     // Global settings &amp; shortcuts dicts...
     // The are the defaults for computing settings and shortcuts for all loaded files.
-    
+
     // A g.TypedDict: the join of settings in leoSettings.leo &amp; myLeoSettings.leo.
-    public globalSettingsDict: {[key:string]:any}|undefined; 
+    public globalSettingsDict: { [key: string]: any } | undefined;
     // A g.TypedDict: the join of shortcuts in leoSettings.leo &amp; myLeoSettings.leo
-    public globalBindingsDict: {[key:string]:any}|undefined; 
-    
-    public files: string []; // List of files to be loaded.
-    public options: {[key:string]:any}; // Dictionary of user options. Keys are option names.
-    public old_argv: string []; // A copy of sys.argv for debugging.
+    public globalBindingsDict: { [key: string]: any } | undefined;
+
+    public files: string[]; // List of files to be loaded.
+    public options: { [key: string]: any }; // Dictionary of user options. Keys are option names.
+    public old_argv: string[]; // A copy of sys.argv for debugging.
     public more_cmdline_files: boolean; // True when more files remain on the command line to be loaded.
-    
+
     @others
 }
 </t>
@@ -9257,15 +9404,15 @@ export class LoadManager {
 <t tx="felix.20210120004121.1">/**
  * This is Leo's main startup method.
  */
-public load(fileName?:string): void {
-    // SIMPLIFIED JS VERSION 
-    const lm:LoadManager = this;
+public load(fileName?: string): void {
+    // SIMPLIFIED JS VERSION
+    const lm: LoadManager = this;
 
     const t1 = process.hrtime();
-    
+
     lm.doPrePluginsInit(fileName); // sets lm.options and lm.files
-    const t2 = process.hrtime();    
-    
+    const t2 = process.hrtime();
+
     lm.doPostPluginsInit();
     const t3 = process.hrtime();
 
@@ -9275,73 +9422,73 @@ public load(fileName?:string): void {
 }
 
 </t>
-<t tx="felix.20210120004121.16">public initApp(verbose?:boolean): void {
+<t tx="felix.20210120004121.16">public initApp(verbose?: boolean): void {
 
 
-/*
-    self.createAllImporterData()
-        # Can be done early. Uses only g.app.loadDir
-    assert g.app.loadManager
-    from leo.core import leoBackground
-    from leo.core import leoConfig
-    from leo.core import leoNodes
-    from leo.core import leoPlugins
-    from leo.core import leoSessions
-    # Import leoIPython only if requested.  The import is quite slow.
-    self.setStdStreams()
-    if g.app.useIpython:
-        from leo.core import leoIPython
-            # This launches the IPython Qt Console.  It *is* required.
-        assert leoIPython  # suppress pyflakes/flake8 warning.
-    # Make sure we call the new leoPlugins.init top-level function.
-    leoPlugins.init()
-    # Force the user to set g.app.leoID.
-    g.app.setLeoID(verbose=verbose)
-    # Create early classes *after* doing plugins.init()
-    g.app.idleTimeManager = IdleTimeManager()
-    g.app.backgroundProcessManager = leoBackground.BackgroundProcessManager()
-    g.app.externalFilesController = leoExternalFiles.ExternalFilesController()
-    g.app.recentFilesManager = RecentFilesManager()
-    g.app.config = leoConfig.GlobalConfigManager()
-    g.app.nodeIndices = leoNodes.NodeIndices(g.app.leoID)
-    g.app.sessionManager = leoSessions.SessionManager()
-    # Complete the plugins class last.
-    g.app.pluginsController.finishCreate()
-*/
+    /*
+        self.createAllImporterData()
+            # Can be done early. Uses only g.app.loadDir
+        assert g.app.loadManager
+        from leo.core import leoBackground
+        from leo.core import leoConfig
+        from leo.core import leoNodes
+        from leo.core import leoPlugins
+        from leo.core import leoSessions
+        # Import leoIPython only if requested.  The import is quite slow.
+        self.setStdStreams()
+        if g.app.useIpython:
+            from leo.core import leoIPython
+                # This launches the IPython Qt Console.  It *is* required.
+            assert leoIPython  # suppress pyflakes/flake8 warning.
+        # Make sure we call the new leoPlugins.init top-level function.
+        leoPlugins.init()
+        # Force the user to set g.app.leoID.
+        g.app.setLeoID(verbose=verbose)
+        # Create early classes *after* doing plugins.init()
+        g.app.idleTimeManager = IdleTimeManager()
+        g.app.backgroundProcessManager = leoBackground.BackgroundProcessManager()
+        g.app.externalFilesController = leoExternalFiles.ExternalFilesController()
+        g.app.recentFilesManager = RecentFilesManager()
+        g.app.config = leoConfig.GlobalConfigManager()
+        g.app.nodeIndices = leoNodes.NodeIndices(g.app.leoID)
+        g.app.sessionManager = leoSessions.SessionManager()
+        # Complete the plugins class last.
+        g.app.pluginsController.finishCreate()
+    */
 
 }
 
 </t>
 <t tx="felix.20210120004121.3">/**
  * Create a Leo window for each file in the lm.files list.
- */ 
-public doPostPluginsInit():boolean {
+ */
+public doPostPluginsInit(): boolean {
     // Clear g.app.initing _before_ creating commanders.
-    const lm:LoadManager = this;
+    const lm: LoadManager = this;
     g.app.initing = false;  // "idle" hooks may now call g.app.forceShutdown.
     // Create the main frame.Show it and all queued messages.
-    let c:Commander|undefined;
-    let c1:Commander|undefined;
-    let fn:string = "";
-    if (lm.files.length){
-        try{  // #1403.
+    let c: Commands | undefined;
+    let c1: Commands | undefined;
+    let fn: string = "";
+    if (lm.files.length) {
+        try {  // #1403.
             for (let n = 0; n &lt; lm.files.length; n++) {
                 const fn = lm.files[n];
                 lm.more_cmdline_files = n &lt; (lm.files.length - 1);
                 c = lm.loadLocalFile(fn, g.app.gui!);
-                    // Returns None if the file is open in another instance of Leo.
-                if (c &amp;&amp; !c1){  // #1416:
+                // Returns None if the file is open in another instance of Leo.
+                if (c &amp;&amp; !c1) {  // #1416:
                     c1 = c;
                 }
             }
         }
-        catch(exception){
+        catch (exception) {
             g.es_print(`Unexpected exception reading ${fn}`);
             g.es_exception();
             c = undefined;
         }
     }
-    
+
     // Load (and save later) a session *only* if the command line contains no files.
     /*
     g.app.loaded_session = !lm.files.length;
@@ -9356,7 +9503,7 @@ public doPostPluginsInit():boolean {
                 else:
                     c = c1 = None;
         }
-        
+
         catch( Exception){
             g.es_print('Can not load session');
             g.es_exception();
@@ -9365,19 +9512,19 @@ public doPostPluginsInit():boolean {
     */
     // Enable redraws.
     g.app.disable_redraw = false;
-    
-    if (!c1){
-        try{ // #1403.
+
+    if (!c1) {
+        try { // #1403.
             c1 = lm.openEmptyWorkBook();
-                // Calls LM.loadLocalFile.
+            // Calls LM.loadLocalFile.
         }
-        catch(exception){
+        catch (exception) {
             g.es_print('Can not create empty workbook');
             g.es_exception();
         }
     }
     c = c1;
-    if (!c){
+    if (!c) {
         // Leo is out of options: Force an immediate exit.
         return false;
     }
@@ -9392,8 +9539,8 @@ public doPostPluginsInit():boolean {
     // c.redraw();
     // g.doHook("start2", c=c, p=c.p, fileName=c.fileName());
     // c.initialFocusHelper();
-    const screenshot_fn:string = lm.options['screenshot_fn'];
-    if (screenshot_fn){
+    const screenshot_fn: string = lm.options['screenshot_fn'];
+    if (screenshot_fn) {
         lm.make_screen_shot(screenshot_fn);
         return false;  // Force an immediate exit.
     }
@@ -9401,7 +9548,7 @@ public doPostPluginsInit():boolean {
 }
 
 </t>
-<t tx="felix.20210120004121.31">public loadLocalFile(fn:string, gui:LeoUI, old_c?:Commander):Commander{
+<t tx="felix.20210120004121.31">public loadLocalFile(fn: string, gui: LeoUI, old_c?: Commands): Commands {
     /*Completely read a file, creating the corresonding outline.
 
     1. If fn is an existing .leo file (possibly zipped), read it twice:
@@ -9416,23 +9563,23 @@ public doPostPluginsInit():boolean {
     get settings from the leoSettings.leo and myLeoSetting.leo or default settings,
     or open an empty outline.
     */
-    const lm:LoadManager = this;
-    let c:Commander| undefined;
-    
+    const lm: LoadManager = this;
+    let c: Commands | undefined;
+
     // Step 0: Return if the file is already open.
     // fn = g.os_path_finalize(fn);
-    
-    if (fn){
+
+    if (fn) {
         c = lm.findOpenFile(fn);
-        if (c){
+        if (c) {
             return c;
         }
     }
     // Step 1: get the previous settings.
     // For .leo files (and zipped .leo files) this pre-reads the file in a null gui.
     // Otherwise, get settings from leoSettings.leo, myLeoSettings.leo, or default settings.
-    const previousSettings:any = undefined; // lm.getPreviousSettings(fn);
-    
+    const previousSettings: any = undefined; // lm.getPreviousSettings(fn);
+
     // Step 2: open the outline in the requested gui.
     // For .leo files (and zipped .leo file) this opens the file a second time.
     c = lm.openFileByName(fn, gui, old_c, previousSettings)!;
@@ -9444,36 +9591,36 @@ public doPostPluginsInit():boolean {
  * fn may be a Leo file (including .leo or zipped file) or an external file.
  *
  * This is not a pre-read: the previousSettings always exist and
- * the commander created here persists until the user closes the outline. 
+ * the commander created here persists until the user closes the outline.
  *
  * Reads the entire outline if fn exists and is a .leo file or zipped file.
  * Creates an empty outline if fn is a non-existent Leo file.
  * Creates an wrapper outline if fn is an external file, existing or not.
  */
-public openFileByName(fn:string, gui:LeoUI, old_c?:Commander, previousSettings?:any): Commander| undefined{
-    const lm:LoadManager = this;
+public openFileByName(fn: string, gui: LeoUI, old_c?: Commands, previousSettings?: any): Commands | undefined {
+    const lm: LoadManager = this;
     // Disable the log.
     // g.app.setLog(None);
     // g.app.lockLog();
-    
+
     // Create the a commander for the .leo file.
     // Important.  The settings don't matter for pre-reads!
     // For second read, the settings for the file are *exactly* previousSettings.
-    const c:Commander = g.app.newCommander(fn, gui, previousSettings);
+    const c: Commands = g.app.newCommander(fn, gui, previousSettings);
     // Open the file, if possible.
     // g.doHook('open0');
-    
+
     /*
     theFile = lm.openLeoOrZipFile(fn);
     if isinstance(theFile, sqlite3.Connection):
         // this commander is associated with sqlite db
         c.sqlite_connection = theFile
-    */    
-        
+    */
+
     // Enable the log.
     // g.app.unlockLog();
     // c.frame.log.enable(true);
-    
+
     // Phase 2: Create the outline.
     // g.doHook("open1", old_c=None, c=c, new_c=c, fileName=fn)
     /*
@@ -9488,10 +9635,10 @@ public openFileByName(fn:string, gui:LeoUI, old_c?:Commander, previousSettings?:
         // a) fn is a .leo file that does not exist or
         // b) fn is an external file, existing or not.
         lm.initWrapperLeoFile(c, fn)
-      
-    */  
+
+    */
     // g.doHook("open2", old_c=None, c=c, new_c=c, fileName=fn)
-    
+
     // Phase 3: Complete the initialization.
     // g.app.writeWaitingLog(c)
     // c.setLog()
@@ -9504,7 +9651,7 @@ public openFileByName(fn:string, gui:LeoUI, old_c?:Commander, previousSettings?:
 }
 
 </t>
-<t tx="felix.20210120004121.4">public make_screen_shot(fn:string): void {
+<t tx="felix.20210120004121.4">public make_screen_shot(fn: string): void {
     // TODO
     console.log('TODO: make_screen_shot');
     /*
@@ -9519,10 +9666,10 @@ public openFileByName(fn:string, gui:LeoUI, old_c?:Commander, previousSettings?:
 <t tx="felix.20210120004121.5">/**
  * Open an empty frame and paste the contents of CheatSheet.leo into it.
  */
-public openEmptyWorkBook(): Commander| undefined {
+public openEmptyWorkBook(): Commands | undefined {
     // TODO
-    const lm:LoadManager = this;
-    
+    const lm: LoadManager = this;
+
     /*
     // Create an empty frame.
     const fn:string = lm.computeWorkbookFileName();
@@ -9559,9 +9706,9 @@ public openEmptyWorkBook(): Commander| undefined {
         g.app.gui.replaceClipboardWith(old_clipboard)
     return c
     */
-    const fn:string = "";
-    const c = lm.loadLocalFile(fn,g.app.gui!);
-    if (!c){
+    const fn: string = "";
+    const c = lm.loadLocalFile(fn, g.app.gui!);
+    if (!c) {
         return undefined;
     }
     return c;
@@ -9571,11 +9718,11 @@ public openEmptyWorkBook(): Commander| undefined {
 <t tx="felix.20210120004121.6">/**
  * Scan options, set directories and read settings.
  */
-public doPrePluginsInit(fileName?:string):void {
-    const lm:LoadManager = this;
+public doPrePluginsInit(fileName?: string): void {
+    const lm: LoadManager = this;
     // lm.computeStandardDirectories();
     // lm.adjustSysPath();
-        // A do-nothing.
+    // A do-nothing.
     // Scan the options as early as possible.
     const options = {}; // lm.scanOptions(fileName);
     lm.options = options;
@@ -9589,9 +9736,9 @@ public doPrePluginsInit(fileName?:string):void {
     // Read settings *after* setting g.app.config and *before* opening plugins.
     // This means if-gui has effect only in per-file settings.
     // lm.readGlobalSettingsFiles()
-        // reads only standard settings files, using a null gui.
-        // uses lm.files[0] to compute the local directory
-        // that might contain myLeoSettings.leo.
+    // reads only standard settings files, using a null gui.
+    // uses lm.files[0] to compute the local directory
+    // that might contain myLeoSettings.leo.
     // Read the recent files file.
     // localConfigFile = lm.files[0] if lm.files else None
     // g.app.recentFilesManager.readRecentFiles(localConfigFile)
@@ -9606,15 +9753,15 @@ public doPrePluginsInit(fileName?:string):void {
  * Create a commander and its view frame for the Leo main window.
  */
 public newCommander(
-    fileName:string,
-    gui:LeoUI,
-    previousSettings?:any,
-    relativeFileName?:any,
-): Commander{
+    fileName: string,
+    gui: LeoUI,
+    previousSettings?: any,
+    relativeFileName?: any,
+): Commands {
     // Create the commander and its subcommanders.
     // This takes about 3/4 sec when called by the leoBridge module.
     // Timeit reports 0.0175 sec when using a nullGui.
-    const c = new Commander(
+    const c = new Commands(
         fileName,
         gui,
         previousSettings,
@@ -9627,7 +9774,7 @@ public newCommander(
  * Returns the commander of already opened Leo file
  * returns undefined otherwise
  */
-public findOpenFile(fn:string):Commander | undefined{
+public findOpenFile(fn: string): Commands | undefined {
     // TODO: check in opened commanders array (g.app.windowList or other as needed)
     /*
     def munge(name):
@@ -9677,11 +9824,11 @@ These routines all return self on exit so the following kind of code will work:
  * Move a position to it's threadBack position.
  */
 public moveToThreadBack(): Position {
-    const p:Position = this;
-    if (p.hasBack()){
+    const p: Position = this;
+    if (p.hasBack()) {
         p.moveToBack();
         p.moveToLastNode();
-    }else{
+    } else {
         p.moveToParent();
     }
     return p;
@@ -9692,21 +9839,21 @@ public moveToThreadBack(): Position {
  * Move a position to threadNext position.
  */
 public moveToThreadNext(): Position {
-    const p:Position = this;
-    if(p.v){
-        if(p.v.children.length){
+    const p: Position = this;
+    if (p.v) {
+        if (p.v.children.length) {
             p.moveToFirstChild();
-        }else if(p.hasNext()){
+        } else if (p.hasNext()) {
             p.moveToNext();
-        }else{
+        } else {
             p.moveToParent();
-            while(p.__bool__()){
-                if(p.hasNext()){
+            while (p.__bool__()) {
+                if (p.hasNext()) {
                     p.moveToNext();
                     break;  //found
                 }
                 p.moveToParent();
-            // not found.
+                // not found.
             }
         }
     }
@@ -9717,33 +9864,33 @@ public moveToThreadNext(): Position {
 <t tx="felix.20210125233441.12">/**
  * Move a position to the position of the previous visible node.
  */
-public moveToVisBack(c:Commander): Position|undefined {
-    const p:Position = this;
+public moveToVisBack(c: Commands): Position | undefined {
+    const p: Position = this;
     const visLimit: [Position, boolean] | undefined = c.visLimit();
-    if(visLimit){
-        const limit:Position = visLimit[0];
-        const limitIsVisible:boolean = visLimit[1];
-        while  (visLimit &amp;&amp; p.__bool__()){
+    if (visLimit) {
+        const limit: Position = visLimit[0];
+        const limitIsVisible: boolean = visLimit[1];
+        while (visLimit &amp;&amp; p.__bool__()) {
             // Short-circuit if possible.
-            const back:Position = p.back();
-            if( back.__bool__() &amp;&amp; back.hasChildren() &amp;&amp; back.isExpanded()){
+            const back: Position = p.back();
+            if (back.__bool__() &amp;&amp; back.hasChildren() &amp;&amp; back.isExpanded()) {
                 p.moveToThreadBack();
             }
-            else if(back.__bool__()){
+            else if (back.__bool__()) {
                 p.moveToBack();
-            } else{
+            } else {
                 p.moveToParent();  // Same as p.moveToThreadBack()
             }
-            if (p.__bool__()){
-                if(limit){
-                    let done:boolean;
-                    let val:Position|undefined;
+            if (p.__bool__()) {
+                if (limit) {
+                    let done: boolean;
+                    let val: Position | undefined;
                     [done, val] = this.checkVisBackLimit(limit, limitIsVisible, p);
-                    if (done){
+                    if (done) {
                         return val;  // A position or None
                     }
                 }
-                if( p.isVisible(c)){
+                if (p.isVisible(c)) {
                     return p;
                 }
             }
@@ -9756,46 +9903,46 @@ public moveToVisBack(c:Commander): Position|undefined {
 <t tx="felix.20210125233441.13">/**
  * Return done, p or None
  */
-public checkVisBackLimit(limit:Position, limitIsVisible:boolean, p:Position): [ boolean, Position|undefined] {
-    const c:Commander = p.v.context;
-    if (limit.__eq__(p)){
-        if (limitIsVisible &amp;&amp; p.isVisible(c)){
+public checkVisBackLimit(limit: Position, limitIsVisible: boolean, p: Position): [boolean, Position | undefined] {
+    const c: Commands = p.v.context;
+    if (limit.__eq__(p)) {
+        if (limitIsVisible &amp;&amp; p.isVisible(c)) {
             return [true, p];
         }
         return [true, undefined];
     }
-    if (limit.isAncestorOf(p)){
-        return  [false, undefined];
+    if (limit.isAncestorOf(p)) {
+        return [false, undefined];
     }
-    return  [true, undefined];
+    return [true, undefined];
 }
 
 </t>
 <t tx="felix.20210125233441.14">/**
  * Move a position to the position of the next visible node.
  */
-public moveToVisNext(c:Commander):Position|undefined {
-    const p:Position = this;
-    const visLimit:[Position, boolean]|undefined = c.visLimit();
-    if(visLimit){
-        const limit:Position = visLimit[0];
-        while (p.__bool__()){
-            if(p.hasChildren()){
-                if(p.isExpanded()){
+public moveToVisNext(c: Commands): Position | undefined {
+    const p: Position = this;
+    const visLimit: [Position, boolean] | undefined = c.visLimit();
+    if (visLimit) {
+        const limit: Position = visLimit[0];
+        while (p.__bool__()) {
+            if (p.hasChildren()) {
+                if (p.isExpanded()) {
                     p.moveToFirstChild();
-                }else{
+                } else {
                     p.moveToNodeAfterTree();
                 }
-            }else if(p.hasNext()){
+            } else if (p.hasNext()) {
                 p.moveToNext();
-            }else{
+            } else {
                 p.moveToThreadNext();
             }
-            if(p.__bool__()){
-                if (limit &amp;&amp; this.checkVisNextLimit(limit, p)){
+            if (p.__bool__()) {
+                if (limit &amp;&amp; this.checkVisNextLimit(limit, p)) {
                     return undefined;
                 }
-                if( p.isVisible(c)){
+                if (p.isVisible(c)) {
                     return p;
                 }
             }
@@ -9808,7 +9955,7 @@ public moveToVisNext(c:Commander):Position|undefined {
 <t tx="felix.20210125233441.15">/**
  * Return True is p is outside limit of visible nodes.
  */
-public checkVisNextLimit(limit:Position , p:Position):boolean {
+public checkVisNextLimit(limit: Position, p: Position): boolean {
     return !limit.__eq__(p) &amp;&amp; !limit.isAncestorOf(p);
 }
 
@@ -9818,23 +9965,23 @@ public checkVisNextLimit(limit:Position , p:Position):boolean {
  * Issue an error if any vnode is an ancestor of itself.
  */
 public safeMoveToThreadNext(): Position {
-    const p:Position = this;
-    if(p.v){
-        const child_v:VNode| false = !!p.v.children.length &amp;&amp; p.v.children[0];
-        if(child_v){
-            let brokeFor:boolean= false;
-            for(let parent of p.self_and_parents(false)){
-                if(child_v.fileIndex === parent.v.fileIndex){
+    const p: Position = this;
+    if (p.v) {
+        const child_v: VNode | false = !!p.v.children.length &amp;&amp; p.v.children[0];
+        if (child_v) {
+            let brokeFor: boolean = false;
+            for (let parent of p.self_and_parents(false)) {
+                if (child_v.fileIndex === parent.v.fileIndex) {
                     g.error(`vnode: ${child_v} is its own parent`);
                     // Allocating a new vnode would be difficult.
                     // Just remove child_v from parent.v.children.
                     parent.v.children = [];
-                    for(let v2 of parent.v.children){
-                        if(v2.fileIndex !== child_v.fileIndex){
-                            parent.v.children .push(v2);
+                    for (let v2 of parent.v.children) {
+                        if (v2.fileIndex !== child_v.fileIndex) {
+                            parent.v.children.push(v2);
                         }
                     }
-                    if(child_v.parents.includes(parent.v)){
+                    if (child_v.parents.includes(parent.v)) {
                         // child_v.parents.remove(parent.v);
                         const index = child_v.parents.indexOf(parent.v);
                         if (index &gt; -1) {
@@ -9843,9 +9990,9 @@ public safeMoveToThreadNext(): Position {
                     }
                     // Try not to hang.
                     p.moveToParent();
-                    brokeFor= true;
+                    brokeFor = true;
                     break;
-                }else if( child_v.fileIndex === parent.v.fileIndex){
+                } else if (child_v.fileIndex === parent.v.fileIndex) {
                     g.error(
                         `duplicate gnx: ${child_v.fileIndex} ` +
                         `v: ${child_v} parent: ${parent.v}`);
@@ -9853,25 +10000,25 @@ public safeMoveToThreadNext(): Position {
                     console.assert(child_v.gnx !== parent.v.gnx);
                     // Should be ok to continue.
                     p.moveToFirstChild();
-                    brokeFor= true;
+                    brokeFor = true;
                     break;
                 }
             }
-            if(!brokeFor){
+            if (!brokeFor) {
                 //  for else
                 p.moveToFirstChild();
             }
-        }else if(p.hasNext()){
+        } else if (p.hasNext()) {
             p.moveToNext();
-        }else{
+        } else {
             p.moveToParent();
-            while (p.__bool__()){
-                if(p.hasNext()){
+            while (p.__bool__()) {
+                if (p.hasNext()) {
                     p.moveToNext();
                     break;  // found
                 }
                 p.moveToParent();
-            // not found.
+                // not found.
             }
         }
     }
@@ -9882,23 +10029,23 @@ public safeMoveToThreadNext(): Position {
 <t tx="felix.20210125233441.2">/**
  * Move self to its previous sibling.
  */
-public moveToBack():Position {
-    const p:Position = this;
-    const n:number = p._childIndex;
-    const parent_v:VNode = p._parentVnode()!; // Returns None if p.v is None.
-        
+public moveToBack(): Position {
+    const p: Position = this;
+    const n: number = p._childIndex;
+    const parent_v: VNode = p._parentVnode()!; // Returns None if p.v is None.
+
     // Do not assume n is in range: this is used by positionExists.
     if (
-        parent_v &amp;&amp; 
+        parent_v &amp;&amp;
         p.v &amp;&amp;
         0 &lt; n &amp;&amp;
         n &lt;= parent_v.children.length
-    ){
+    ) {
         p._childIndex -= 1;
         p.v = parent_v.children[n - 1];
-    }else{
+    } else {
         // * For now, use undefined p.v to signal null/invalid positions
-                    //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9908,15 +10055,15 @@ public moveToBack():Position {
 <t tx="felix.20210125233441.3">/**
  * Move a position to it's first child's position.
  */
-public moveToFirstChild():Position{
-    const p:Position = this;
-    if (p.v &amp;&amp; p.v.children){
+public moveToFirstChild(): Position {
+    const p: Position = this;
+    if (p.v &amp;&amp; p.v.children) {
         p.stack.push([p.v, p._childIndex]);
         p.v = p.v.children[0];
         p._childIndex = 0;
-    }else{
+    } else {
         // * For now, use undefined p.v to signal null/invalid positions
-                    //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9926,17 +10073,17 @@ public moveToFirstChild():Position{
 <t tx="felix.20210125233441.4">/**
  * Move a position to it's last child's position.
  */
-public moveToLastChild():Position{
-    const p:Position = this;
-    let n:number;
-    if (p.v &amp;&amp; p.v.children.length){
+public moveToLastChild(): Position {
+    const p: Position = this;
+    let n: number;
+    if (p.v &amp;&amp; p.v.children.length) {
         p.stack.push([p.v, p._childIndex]);
         n = p.v.children.length;
         p.v = p.v.children[n - 1];
         p._childIndex = n - 1;
-    }else{
+    } else {
         // * For now, use undefined p.v to signal null/invalid positions
-                    //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9947,10 +10094,10 @@ public moveToLastChild():Position{
  * Move a position to last node of its tree.
  *  N.B. Returns p if p has no children.
  */
-public moveToLastNode():Position{
-    const p:Position = this;
+public moveToLastNode(): Position {
+    const p: Position = this;
     // Huge improvement for 4.2.
-    while (p.hasChildren()){
+    while (p.hasChildren()) {
         p.moveToLastChild();
     }
     return p;
@@ -9960,20 +10107,20 @@ public moveToLastNode():Position{
 <t tx="felix.20210125233441.6">/**
  * Move a position to its next sibling.
  */
-public moveToNext():Position{
-    const p:Position = this;    
-    const n:number = p._childIndex;
-    const parent_v:VNode = p._parentVnode()!;
-        // Returns None if p.v is None.
-    if (!p.v){
+public moveToNext(): Position {
+    const p: Position = this;
+    const n: number = p._childIndex;
+    const parent_v: VNode = p._parentVnode()!;
+    // Returns None if p.v is None.
+    if (!p.v) {
         g.trace('no p.v:', p, g.callers());
     }
-    if (p.v &amp;&amp; parent_v &amp;&amp; parent_v.children.length &gt; (n + 1)){
+    if (p.v &amp;&amp; parent_v &amp;&amp; parent_v.children.length &gt; (n + 1)) {
         p._childIndex = n + 1;
         p.v = parent_v.children[n + 1];
-    }else{
+    } else {
         // * For now, use undefined p.v to signal null/invalid positions
-                    //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9983,10 +10130,10 @@ public moveToNext():Position{
 <t tx="felix.20210125233441.7">/**
  * Move a position to the node after the position's tree.
  */
-public moveToNodeAfterTree():Position {
-    const p:Position = this;
-    while( p.__bool__()){
-        if( p.hasNext()){
+public moveToNodeAfterTree(): Position {
+    const p: Position = this;
+    while (p.__bool__()) {
+        if (p.hasNext()) {
             p.moveToNext();
             break;
         }
@@ -9999,15 +10146,15 @@ public moveToNodeAfterTree():Position {
 <t tx="felix.20210125233441.8">/**
  * Move to Nth child
  */
-public moveToNthChild(n:number):Position {
-    const p:Position = this;
-    if (p.v &amp;&amp; p.v.children.length &gt; n){
+public moveToNthChild(n: number): Position {
+    const p: Position = this;
+    if (p.v &amp;&amp; p.v.children.length &gt; n) {
         p.stack.push([p.v, p._childIndex]);
         p.v = p.v.children[n];
         p._childIndex = n;
-    }else{
+    } else {
         // * For now, use undefined p.v to signal null/invalid positions
-                    //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -10017,15 +10164,15 @@ public moveToNthChild(n:number):Position {
 <t tx="felix.20210125233441.9">/**
  * Move a position to its parent position.
  */
-public moveToParent():Position {
-    const p:Position = this;
-    if (p.v &amp;&amp; p.stack.length){
-        const item:StackEntry = p.stack.pop()!;
+public moveToParent(): Position {
+    const p: Position = this;
+    if (p.v &amp;&amp; p.stack.length) {
+        const item: StackEntry = p.stack.pop()!;
         p.v = item[0];
         p._childIndex = item[1];
-    }else{
+    } else {
         // * For now, use undefined p.v to signal null/invalid positions
-                    //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -10036,12 +10183,12 @@ public moveToParent():Position {
 <t tx="felix.20210126001920.10">/**
  * Prints out error message about invalid outline
  */
-public invalidOutline(message:string): void {
-    const p:Position = this;
-    let node:Position;
-    if (p.hasParent()){
+public invalidOutline(message: string): void {
+    const p: Position = this;
+    let node: Position;
+    if (p.hasParent()) {
         node = p.parent();
-    }   else{
+    } else {
         node = p;
     }
     p.v.context.alert(`invalid outline: ${message}\n${node}`);
@@ -10051,8 +10198,8 @@ public invalidOutline(message:string): void {
 <t tx="felix.20210126001920.11">/**
  * Move a position after position a.
  */
-public moveAfter(a:Position): Position {
-    const p:Position = this;  // Do NOT copy the position!
+public moveAfter(a: Position): Position {
+    const p: Position = this;  // Do NOT copy the position!
     a._adjustPositionBeforeUnlink(p);
     p._unlink();
     p._linkAfter(a);
@@ -10063,18 +10210,18 @@ public moveAfter(a:Position): Position {
 <t tx="felix.20210126001920.12">/**
  * Move a position to the first child of parent.
  */
-public  moveToFirstChildOf(parent:Position): Position {
-    const p:Position = this; // Do NOT copy the position!
+public moveToFirstChildOf(parent: Position): Position {
+    const p: Position = this; // Do NOT copy the position!
     return p.moveToNthChildOf(parent, 0);  // Major bug fix: 2011/12/04
 }
 
 /**
  * Move a position to the last child of parent.
  */
-public moveToLastChildOf(parent:Position): Position{
-    const p:Position = this;  // Do NOT copy the position!
-    let n:number = parent.numberOfChildren();
-    if( p.parent().__eq__(parent)){
+public moveToLastChildOf(parent: Position): Position {
+    const p: Position = this;  // Do NOT copy the position!
+    let n: number = parent.numberOfChildren();
+    if (p.parent().__eq__(parent)) {
         n -= 1;  // 2011/12/10: Another bug fix.
     }
     return p.moveToNthChildOf(parent, n);  // Major bug fix: 2011/12/04
@@ -10084,8 +10231,8 @@ public moveToLastChildOf(parent:Position): Position{
 <t tx="felix.20210126001920.13">/**
  * Move a position to the nth child of parent.
  */
-public moveToNthChildOf(parent:Position, n:number):Position {
-    const p:Position = this;  // Do NOT copy the position!
+public moveToNthChildOf(parent: Position, n: number): Position {
+    const p: Position = this;  // Do NOT copy the position!
     parent._adjustPositionBeforeUnlink(p);
     p._unlink();
     p._linkAsNthChild(parent, n);
@@ -10096,8 +10243,8 @@ public moveToNthChildOf(parent:Position, n:number):Position {
 <t tx="felix.20210126001920.14">/**
  * Move self to the root position.
  */
-public moveToRoot():Position{
-    const p:Position = this;  //  Do NOT copy the position!
+public moveToRoot(): Position {
+    const p: Position = this;  //  Do NOT copy the position!
     // #1631. The old root can not possibly be affected by unlinking p.
     p._unlink();
     p._linkAsRoot();
@@ -10108,21 +10255,21 @@ public moveToRoot():Position{
 <t tx="felix.20210126001920.15">/**
  * A low-level promote helper.
  */
-public promote():void {
-    const p:Position = this; //  Do NOT copy the position.
-    const parent_v:VNode = p._parentVnode()!;
+public promote(): void {
+    const p: Position = this; //  Do NOT copy the position.
+    const parent_v: VNode = p._parentVnode()!;
     const children: VNode[] = p.v.children;
     // Add the children to parent_v's children.
-    const n:number = p.childIndex() + 1;
-    const z:VNode[] = [... parent_v.children];
-    parent_v.children = z.slice(0,n);
+    const n: number = p.childIndex() + 1;
+    const z: VNode[] = [...parent_v.children];
+    parent_v.children = z.slice(0, n);
     parent_v.children.push(...children);
     parent_v.children.push(...z.slice(n));
     // Remove v's children.
     p.v.children = [];
     // Adjust the parent links in the moved children.
     // There is no need to adjust descendant links.
-    for (let child of children){
+    for (let child of children) {
         // child.parents.remove(p.v);
         const index = child.parents.indexOf(p.v);
         if (index &gt; -1) {
@@ -10136,18 +10283,18 @@ public promote():void {
 <t tx="felix.20210126001920.16">/**
  * This routine checks the structure of the receiver's tree.
  */
-public validateOutlineWithParent(pv:Position):boolean{
-    const p:Position = this;
-    let result:boolean = true;  // optimists get only unpleasant surprises.
-    const parent:Position = p.getParent();
-    const childIndex:number = p._childIndex;
+public validateOutlineWithParent(pv: Position): boolean {
+    const p: Position = this;
+    let result: boolean = true;  // optimists get only unpleasant surprises.
+    const parent: Position = p.getParent();
+    const childIndex: number = p._childIndex;
     &lt;&lt; validate parent ivar &gt;&gt;
     &lt;&lt; validate childIndex ivar &gt;&gt;
     &lt;&lt; validate x ivar &gt;&gt;
     // Recursively validate all the children.
-    for(let child of p.children()){
-        const r:boolean = child.validateOutlineWithParent(p);
-        if(!r){
+    for (let child of p.children()) {
+        const r: boolean = child.validateOutlineWithParent(p);
+        if (!r) {
             result = false;
         }
     }
@@ -10155,21 +10302,21 @@ public validateOutlineWithParent(pv:Position):boolean{
 }
 
 </t>
-<t tx="felix.20210126001920.17">if (!parent.__eq__(pv)){
-    p.invalidOutline("Invalid parent link: " + JSON. stringify(parent));
+<t tx="felix.20210126001920.17">if (!parent.__eq__(pv)) {
+    p.invalidOutline("Invalid parent link: " + JSON.stringify(parent));
 }
 </t>
-<t tx="felix.20210126001920.18">if( pv.__bool__()){
-    if(childIndex &lt; 0){
+<t tx="felix.20210126001920.18">if (pv.__bool__()) {
+    if (childIndex &lt; 0) {
         p.invalidOutline("missing childIndex" + childIndex);
-    }else if(childIndex &gt;= pv.numberOfChildren()){
+    } else if (childIndex &gt;= pv.numberOfChildren()) {
         p.invalidOutline("missing children entry for index: " + childIndex);
     }
-}else if(childIndex &lt; 0){
+} else if (childIndex &lt; 0) {
     p.invalidOutline("negative childIndex" + childIndex);
 }
 </t>
-<t tx="felix.20210126001920.19">if( !p.v &amp;&amp; pv.__bool__()){
+<t tx="felix.20210126001920.19">if (!p.v &amp;&amp; pv.__bool__()) {
     this.invalidOutline("Empty t");
 }
 </t>
@@ -10178,8 +10325,8 @@ public validateOutlineWithParent(pv:Position):boolean{
  * Returns the newly created position.
  */
 public clone(): Position {
-    const p:Position = this;
-    const p2:Position  = p.copy();  // Do *not* copy the VNode!
+    const p: Position = this;
+    const p2: Position = p.copy();  // Do *not* copy the VNode!
     p2._linkAfter(p); // This should "just work"
     return p2;
 }
@@ -10189,28 +10336,28 @@ public clone(): Position {
  * Delete all children of the receiver and set p.dirty().
  */
 public deleteAllChildren(): void {
-    const p:Position = this;
+    const p: Position = this;
     p.setDirty();  // Mark @file nodes dirty!
-    while (p.hasChildren()){
+    while (p.hasChildren()) {
         p.firstChild().doDelete();
     }
 }
 
 </t>
-<t tx="felix.20210126001920.5">/** 
+<t tx="felix.20210126001920.5">/**
  * Deletes position p from the outline.
- *    
+ *
  * This is the main delete routine.
  * It deletes the receiver's entire tree from the screen.
  * Because of the undo command we never actually delete vnodes.
  */
-public doDelete(newNode?:Position): void {
-    const p:Position = this;
+public doDelete(newNode?: Position): void {
+    const p: Position = this;
     p.setDirty(); // Mark @file nodes dirty!
     const sib = p.copy();
-    while (sib.hasNext()){
+    while (sib.hasNext()) {
         sib.moveToNext();
-        if (!!newNode &amp;&amp; sib.__eq__(newNode)){
+        if (!!newNode &amp;&amp; sib.__eq__(newNode)) {
             // Adjust newNode._childIndex if newNode is a following sibling of p.
             newNode._childIndex -= 1;
             break;
@@ -10225,9 +10372,9 @@ public doDelete(newNode?:Position): void {
  * Returns the newly created position.
  */
 public insertAfter(): Position {
-    const p:Position = this;
-    const context:Commander = p.v.context;
-    const p2:Position  = this.copy();
+    const p: Position = this;
+    const context: Commands = p.v.context;
+    const p2: Position = this.copy();
     p2.v = new VNode(context);
     p2.v.iconVal = 0;
     p2._linkAfter(p);
@@ -10239,9 +10386,9 @@ public insertAfter(): Position {
  * Inserts a new VNode as the last child of self.
  * Returns the newly created position.
  */
-public insertAsLastChild():Position {
-    const p:Position = this;
-    const n:number = p.numberOfChildren();
+public insertAsLastChild(): Position {
+    const p: Position = this;
+    const n: number = p.numberOfChildren();
     return p.insertAsNthChild(n);
 }
 
@@ -10251,10 +10398,10 @@ public insertAsLastChild():Position {
  * self must have at least n-1 children.
  * Returns the newly created position.
  */
-public  insertAsNthChild(n:number): Position {
-    const p:Position = this;
-    const context:Commander = p.v.context;
-    const p2:Position = this.copy();
+public insertAsNthChild(n: number): Position {
+    const p: Position = this;
+    const context: Commands = p.v.context;
+    const p2: Position = this.copy();
     p2.v = new VNode(context);
     p2.v.iconVal = 0;
     p2._linkAsNthChild(p, n);
@@ -10267,15 +10414,15 @@ public  insertAsNthChild(n:number): Position {
  * Returns the newly created position.
  */
 public insertBefore(): Position {
-    let p:Position = this;
-    const parent:Position = p.parent();
-    let back:Position;
-    if (p.hasBack()){
+    let p: Position = this;
+    const parent: Position = p.parent();
+    let back: Position;
+    if (p.hasBack()) {
         back = p.getBack();
         p = back.insertAfter();
-    }else if( parent.__bool__()){
+    } else if (parent.__bool__()) {
         p = parent.insertAsNthChild(0);
-    }else{
+    } else {
         p = p.insertAfter();
         p.moveToRoot();
     }
@@ -10284,13 +10431,13 @@ public insertBefore(): Position {
 
 </t>
 <t tx="felix.20210126210412.1"></t>
-<t tx="felix.20210126210412.10">public key():string {
-    const p:Position = this;
+<t tx="felix.20210126210412.10">public key(): string {
+    const p: Position = this;
     // For unified nodes we must include a complete key,
     // so we can distinguish between clones.
-    const result:string[] = [];
-    for (let z of p.stack){
-        const v:VNode = z[0];
+    const result: string[] = [];
+    for (let z of p.stack) {
+        const v: VNode = z[0];
         const childIndex: number = z[1];
         result.push(`${v.fileIndex}:${childIndex}`);
     }
@@ -10298,10 +10445,10 @@ public insertBefore(): Position {
     return result.join('.');
 }
 
-public sort_key(p:Position):number[]{
-    const result :number[] = [];
-    for(let s of p.key().split('.')) {
-      result.push(Number(s.split(':')[1]));
+public sort_key(p: Position): number[] {
+    const result: number[] = [];
+    for (let s of p.key().split('.')) {
+        result.push(Number(s.split(':')[1]));
     }
     return result;
 }
@@ -10320,51 +10467,51 @@ public sort_key(p:Position):number[]{
 // __hash__ = None
 
 </t>
-<t tx="felix.20210126210412.3">/** 
+<t tx="felix.20210126210412.3">/**
  * Return True if two positions are equivalent.
- */ 
-public __eq__(p2:Position):boolean {
-    const p1:Position = this;
+ */
+public __eq__(p2: Position): boolean {
+    const p1: Position = this;
     // Don't use g.trace: it might call p.__eq__ or p.__ne__.
-    if (!(p2 instanceof Position)){
+    if (!(p2 instanceof Position)) {
         return false;
     }
-    if (!p2.__bool__() || !p2.v){
+    if (!p2.__bool__() || !p2.v) {
         return !p1.v;
     }
     // Modified by Félix to prevent object direct comparison (p1.v === p2.v)
     return !!(p1.v &amp;&amp; p2.v &amp;&amp;
-            p1.v.fileIndex === p2.v.fileIndex &amp;&amp; 
-            p1._childIndex === p2._childIndex &amp;&amp;
-            p1.stack.length === p2.stack.length &amp;&amp; 
-            p1.stack.every(
-                (p_value, p_index) =&gt; {
-                    return p_value[1] === p2.stack[p_index][1] &amp;&amp;
+        p1.v.fileIndex === p2.v.fileIndex &amp;&amp;
+        p1._childIndex === p2._childIndex &amp;&amp;
+        p1.stack.length === p2.stack.length &amp;&amp;
+        p1.stack.every(
+            (p_value, p_index) =&gt; {
+                return p_value[1] === p2.stack[p_index][1] &amp;&amp;
                     p_value[0].fileIndex === p2.stack[p_index][0].fileIndex;
-                }
-            )
-        );
+            }
+        )
+    );
 }
 
 /**
  * Return True if two positions are not equivalent.
  */
-public __ne__(p2:Position):boolean{
+public __ne__(p2: Position): boolean {
     return !this.__eq__(p2);
 }
 
 </t>
-<t tx="felix.20210126210412.4">public __ge__( other:Position):boolean {
+<t tx="felix.20210126210412.4">public __ge__(other: Position): boolean {
     return this.__eq__(other) || this.__gt__(other);
 }
 
 
-public __le__( other:Position):boolean{
+public __le__(other: Position): boolean {
     return this.__eq__(other) || this.__lt__(other);
 }
 
 
-public __lt__( other:Position):boolean{
+public __lt__(other: Position): boolean {
     return !this.__eq__(other) &amp;&amp; !this.__gt__(other);
 }
 
@@ -10372,37 +10519,37 @@ public __lt__( other:Position):boolean{
 <t tx="felix.20210126210412.5">/**
  * Return True if self appears after other in outline order.
  */
-public __gt__(other:Position):boolean{
-    const stack1:StackEntry[] = this.stack;
-    const stack2:StackEntry[] = other.stack;
-    const n1:number = stack1.length; 
-    const n2:number = stack2.length; 
-    const n:number = n1&lt;n2?n1:n2;
+public __gt__(other: Position): boolean {
+    const stack1: StackEntry[] = this.stack;
+    const stack2: StackEntry[] = other.stack;
+    const n1: number = stack1.length;
+    const n2: number = stack2.length;
+    const n: number = n1 &lt; n2 ? n1 : n2;
     // Compare the common part of the stacks.
-    for (let nx=0; nx&lt;n; nx++){
-        if(stack1[nx][1]&gt;stack2[nx][1]){
+    for (let nx = 0; nx &lt; n; nx++) {
+        if (stack1[nx][1] &gt; stack2[nx][1]) {
             return true;
         }
-        if(stack1[nx][1]&lt;stack2[nx][1]){
+        if (stack1[nx][1] &lt; stack2[nx][1]) {
             return false;
         }
     }
     // Finish the comparison.
-    let x1:number;
-    let x2:number;
-    if (n1 === n2){
+    let x1: number;
+    let x2: number;
+    if (n1 === n2) {
         x1 = this._childIndex;
         x2 = other._childIndex;
         return x1 &gt; x2;
     }
-    if (n1 &lt; n2){
-        x1 = this._childIndex; 
+    if (n1 &lt; n2) {
+        x1 = this._childIndex;
         x2 = other.stack[n][1];
         return x1 &gt; x2;
     }
     // n1 &gt; n2
     // 2011/07/28: Bug fix suggested by SegundoBob.
-    x1 = other._childIndex; 
+    x1 = other._childIndex;
     x2 = this.stack[n][1];
     return x2 &gt;= x1;
 }
@@ -10410,20 +10557,20 @@ public __gt__(other:Position):boolean{
 </t>
 <t tx="felix.20210126210412.6">/**
  * Return True if a position is valid.
- *  
+ *
  * The tests 'if p' or 'if not p' are the _only_ correct ways to test
  * whether a position p is valid.
- *  
+ *
  * Tests like 'if p is None' or 'if p is not None' will not work properly.
  */
-public __bool__():boolean {
+public __bool__(): boolean {
     return !!this.v;
 }
 
 </t>
-<t tx="felix.20210126210412.7">public __str__():string{
-    const p:Position = this;
-    if (p.v){
+<t tx="felix.20210126210412.7">public __str__(): string {
+    const p: Position = this;
+    if (p.v) {
         return (
             "&lt;pos " +
             `childIndex: ${p._childIndex} ` +
@@ -10440,20 +10587,20 @@ public __bool__():boolean {
 <t tx="felix.20210126210412.8">/**
  * Return a representation of a position suitable for use in .leo files.
  */
-public archivedPosition(root_p?:Position):number[]{
-    const p:Position = this;
-    const aList:number[] = [];
-    if (!root_p){
-        for (let z of p.self_and_parents()){
-           aList.push(z._childIndex); 
+public archivedPosition(root_p?: Position): number[] {
+    const p: Position = this;
+    const aList: number[] = [];
+    if (!root_p) {
+        for (let z of p.self_and_parents()) {
+            aList.push(z._childIndex);
         }
-    }else{
-        for (let z of p.self_and_parents(false)){
-           aList.push(z._childIndex); 
-          if (z.__eq__(root_p)){
-                aList.push(0); 
+    } else {
+        for (let z of p.self_and_parents(false)) {
+            aList.push(z._childIndex);
+            if (z.__eq__(root_p)) {
+                aList.push(0);
                 break;
-            }else{
+            } else {
                 aList.push(z._childIndex);
             }
         }
@@ -10463,13 +10610,13 @@ public archivedPosition(root_p?:Position):number[]{
 }
 
 </t>
-<t tx="felix.20210126210412.9">public dumpLink(link:string):string {
-    return link?link:"&lt;none&gt;";
+<t tx="felix.20210126210412.9">public dumpLink(link: string): string {
+    return link ? link : "&lt;none&gt;";
 }
 
-public dump(label?:string):void {
-    const p:Position = this;
-    if (p.v){
+public dump(label?: string): void {
+    const p: Position = this;
+    if (p.v) {
         p.v.dump();  // Don't print a label
     }
 }
@@ -10484,14 +10631,14 @@ constructor(v: VNode, childIndex: number = 0, stack?: StackEntry[]) {
     if (stack) {
         this.stack = [...stack]; // Creating a copy here is safest and best.
     } else {
-        this.stack = []; 
+        this.stack = [];
     }
 }
 
 </t>
 <t tx="felix.20210127001502.1">import "date-format-lite";
 import * as g from './leoGlobals';
-import { Commander } from './leoCommander';
+import { Commands } from './leoCommands';
 
 </t>
 <t tx="felix.20210127234205.1">/*
@@ -10504,21 +10651,21 @@ import { Commander } from './leoCommander';
  * Unlink the receiver p from the tree.
  */
 public _unlink(): void {
-    const p:Position = this;
-    const n:number = p._childIndex;
-    const parent_v:VNode = p._parentVnode()!;
-        // returns None if p.v is None
-    const child:VNode = p.v;
+    const p: Position = this;
+    const n: number = p._childIndex;
+    const parent_v: VNode = p._parentVnode()!;
+    // returns None if p.v is None
+    const child: VNode = p.v;
     console.assert(p.v);
     console.assert(parent_v);
     // Delete the child.
-    if( (0 &lt;= n &amp;&amp; 
+    if ((0 &lt;= n &amp;&amp;
         n &lt; parent_v.children.length &amp;&amp;
         parent_v.children[n].fileIndex === child.fileIndex
-    )){
+    )) {
         // This is the only call to v._cutlink.
         child._cutLink(n, parent_v);
-    }else{
+    } else {
         this.badUnlink(parent_v, n, child);
     }
 }
@@ -10527,9 +10674,9 @@ public _unlink(): void {
 <t tx="felix.20210127234205.11">/**
  * badUnlink error trace output
  */
-public badUnlink(parent_v:VNode, n:number, child:VNode): void {
+public badUnlink(parent_v: VNode, n: number, child: VNode): void {
 
-    if( 0 &lt;= n &amp;&amp; n&lt; parent_v.children.length){
+    if (0 &lt;= n &amp;&amp; n &lt; parent_v.children.length) {
         g.trace(`**can not happen: children[{n}] != p.v`);
         g.trace('parent_v.children...\n',
             g.listToString(parent_v.children));
@@ -10537,7 +10684,7 @@ public badUnlink(parent_v:VNode, n:number, child:VNode): void {
         g.trace('parent_v.children[n]', parent_v.children[n]);
         g.trace('child', child);
         g.trace('** callers:', g.callers());
-    }else{
+    } else {
         g.trace(
             `**can not happen: bad child index: ${n}, `,
             `children.length: ${parent_v.children.length}`);
@@ -10552,31 +10699,31 @@ public badUnlink(parent_v:VNode, n:number, child:VNode): void {
 <t tx="felix.20210127234205.2">/**
  * Adjust position p before unlinking p2.
  */
-public _adjustPositionBeforeUnlink(p2:Position): void {
+public _adjustPositionBeforeUnlink(p2: Position): void {
     // p will change if p2 is a previous sibling of p or
     // p2 is a previous sibling of any ancestor of p.
-    const p:Position = this;
-    const sib:Position = p.copy();
+    const p: Position = this;
+    const sib: Position = p.copy();
     // A special case for previous siblings.
     // Adjust p._childIndex, not the stack's childIndex.
-    while(sib.hasBack()){
+    while (sib.hasBack()) {
         sib.moveToBack();
-        if (sib.__eq__(p2)){
+        if (sib.__eq__(p2)) {
             p._childIndex -= 1;
             return;
         }
     }
 
     // Adjust p's stack.
-    const stack:StackEntry[] = []; 
-    let changed:boolean = false;
-    let i:number = 0;
-    while (i &lt; p.stack.length){
-        const v:VNode = p.stack[i][0];
-        const childIndex:number = p.stack[i][1];
-        const p3 = new Position(v, childIndex, stack.slice(0,i)); // stack[:i]
-        while (p3.__bool__()){
-            if (p2.__eq__(p3)){
+    const stack: StackEntry[] = [];
+    let changed: boolean = false;
+    let i: number = 0;
+    while (i &lt; p.stack.length) {
+        const v: VNode = p.stack[i][0];
+        const childIndex: number = p.stack[i][1];
+        const p3 = new Position(v, childIndex, stack.slice(0, i)); // stack[:i]
+        while (p3.__bool__()) {
+            if (p2.__eq__(p3)) {
                 // 2011/02/25: compare full positions, not just vnodes.
                 // A match with the to-be-moved node.
                 stack.push([v, childIndex - 1]);
@@ -10584,13 +10731,13 @@ public _adjustPositionBeforeUnlink(p2:Position): void {
                 break;  // terminate only the inner loop.
             }
             p3.moveToBack();
-            if(!p3.__bool__()){
+            if (!p3.__bool__()) {
                 stack.push([v, childIndex]);
             }
         }
         i += 1;
     }
-    if (changed){
+    if (changed) {
         p.stack = stack;
     }
 }
@@ -10599,13 +10746,13 @@ public _adjustPositionBeforeUnlink(p2:Position): void {
 <t tx="felix.20210127234205.3">/**
  * Link self after p_after.
  */
-public _linkAfter(p_after:Position): void {
-    const p:Position = this;
+public _linkAfter(p_after: Position): void {
+    const p: Position = this;
     const parent_v = p_after._parentVnode()!;
     p.stack = [...p_after.stack];
     p._childIndex = p_after._childIndex + 1;
-    const child:VNode = p.v;
-    const n:number = p_after._childIndex + 1;
+    const child: VNode = p.v;
+    const n: number = p_after._childIndex + 1;
     child._addLink(n, parent_v);
 }
 
@@ -10613,13 +10760,13 @@ public _linkAfter(p_after:Position): void {
 <t tx="felix.20210127234205.4">/**
  * Link self, a newly copied tree, after p_after.
  */
-public _linkCopiedAfter(p_after:Position): void {
-    const p:Position = this;
-    const parent_v:VNode = p_after._parentVnode()!;
+public _linkCopiedAfter(p_after: Position): void {
+    const p: Position = this;
+    const parent_v: VNode = p_after._parentVnode()!;
     p.stack = [...p_after.stack];
     p._childIndex = p_after._childIndex + 1;
-    const child:VNode = p.v;
-    const n:number = p_after._childIndex + 1;
+    const child: VNode = p.v;
+    const n: number = p_after._childIndex + 1;
     child._addCopiedLink(n, parent_v);
 }
 
@@ -10627,13 +10774,13 @@ public _linkCopiedAfter(p_after:Position): void {
 <t tx="felix.20210127234205.5">/**
  * Link self as the n'th child of the parent.
  */
-public _linkAsNthChild(parent:Position, n:number): void {
-    const p:Position = this;
-    const parent_v:VNode = parent.v;
+public _linkAsNthChild(parent: Position, n: number): void {
+    const p: Position = this;
+    const parent_v: VNode = parent.v;
     p.stack = [...parent.stack];
     p.stack.push([parent_v, parent._childIndex]);
     p._childIndex = n;
-    const child:VNode = p.v;
+    const child: VNode = p.v;
     child._addLink(n, parent_v);
 }
 
@@ -10641,13 +10788,13 @@ public _linkAsNthChild(parent:Position, n:number): void {
 <t tx="felix.20210127234205.6">/**
  * Link a copied self as the n'th child of the parent.
  */
-public _linkCopiedAsNthChild(parent:Position, n:number): void {
-    const p:Position = this;
-    const parent_v:VNode = parent.v;
+public _linkCopiedAsNthChild(parent: Position, n: number): void {
+    const p: Position = this;
+    const parent_v: VNode = parent.v;
     p.stack = [...parent.stack];
     p.stack.push([parent_v, parent._childIndex]);
     p._childIndex = n;
-    const child:VNode = p.v;
+    const child: VNode = p.v;
     child._addCopiedLink(n, parent_v);
 }
 
@@ -10656,15 +10803,15 @@ public _linkCopiedAsNthChild(parent:Position, n:number): void {
  * Link self as the root node.
  */
 public _linkAsRoot(): Position {
-    const p:Position = this; 
+    const p: Position = this;
     console.assert(p.v);
-    const parent_v:VNode = p.v.context.hiddenRootNode!;
+    const parent_v: VNode = p.v.context.hiddenRootNode!;
     console.assert(parent_v, g.callers());
-    
+
     // Make p the root position.
     p.stack = [];
     p._childIndex = 0;
-    
+
     // Make p.v the first child of parent_v.
     p.v._addLink(0, parent_v);
     return p;
@@ -10676,11 +10823,11 @@ public _linkAsRoot(): Position {
  * Return the hiddenRootNode if there is no other parent.
  */
 public _parentVnode(): VNode | undefined {
-    const p:Position = this; 
-    if (p.v){
-        const data = !!p.stack.length &amp;&amp; p.stack[p.stack.length-1];
-        if (data){
-            const v:VNode = data[0];
+    const p: Position = this;
+    if (p.v) {
+        const data = !!p.stack.length &amp;&amp; p.stack[p.stack.length - 1];
+        if (data) {
+            const v: VNode = data[0];
             return v;
         }
         return p.v.context.hiddenRootNode;
@@ -10692,22 +10839,22 @@ public _parentVnode(): VNode | undefined {
 <t tx="felix.20210127234205.9">/**
  * A low-level method to replace p.v by a p2.v.
  */
-public _relinkAsCloneOf(p2:Position): void {
-    const p:Position = this;
-    const v:VNode = p.v;
-    const v2:VNode = p2.v;
-    const parent_v:VNode|undefined = p._parentVnode();
-    if(!parent_v){
+public _relinkAsCloneOf(p2: Position): void {
+    const p: Position = this;
+    const v: VNode = p.v;
+    const v2: VNode = p2.v;
+    const parent_v: VNode | undefined = p._parentVnode();
+    if (!parent_v) {
         g.error('no parent_v', p);
         return;
     }
     // Compare fileIndex instead of v directly
-    if( parent_v.children[p._childIndex].fileIndex === v.fileIndex){
+    if (parent_v.children[p._childIndex].fileIndex === v.fileIndex) {
         parent_v.children[p._childIndex] = v2;
         v2.parents.push(parent_v);
         // p.v no longer truly exists.
         // p.v = p2.v
-    }else{
+    } else {
         g.error(
             'parent_v.children[childIndex] != v',
             p, parent_v.children, p._childIndex, v);
@@ -10716,18 +10863,18 @@ public _relinkAsCloneOf(p2:Position): void {
 
 </t>
 <t tx="felix.20210130233340.1"></t>
-<t tx="felix.20210130233340.3">public __repr__():string{
+<t tx="felix.20210130233340.3">public __repr__(): string {
     return `&lt;VNode ${this.gnx} ${this.headString()}&gt;`;
 }
 
 </t>
-<t tx="felix.20210130233340.4">public dumpLink(link:string):string{
-    return link?link:"&lt;none&gt;";
+<t tx="felix.20210130233340.4">public dumpLink(link: string): string {
+    return link ? link : "&lt;none&gt;";
 }
 
-public dump(label=""):void {
+public dump(label = ""): void {
     const v: VNode = this;
-    const s:string = '-'.repeat(10);
+    const s: string = '-'.repeat(10);
     console.log(`${s} ${label} ${v}`);
     // console.log(`gnx: ${v.gnx}`);
     console.log(`parents.length: ${v.parents.length}`);
@@ -10781,17 +10928,17 @@ export function objToString(obj: any, indent = '', printCaller = false, tag = nu
 
 </t>
 <t tx="felix.20210131011420.1"></t>
-<t tx="felix.20210131011420.10">public isRootPosition(p:Position):boolean {
-    const c:Commander = this;
-    const root:Position|undefined = c.rootPosition();
+<t tx="felix.20210131011420.10">public isRootPosition(p: Position): boolean {
+    const c: Commands = this;
+    const root: Position | undefined = c.rootPosition();
     return !!p &amp;&amp;
-            !!root &amp;&amp;
-            p.__bool__() &amp;&amp;
-            root.__bool__() &amp;&amp; p.__eq__(root);
+        !!root &amp;&amp;
+        p.__bool__() &amp;&amp;
+        root.__bool__() &amp;&amp; p.__eq__(root);
 }
 
 </t>
-<t tx="felix.20210131011420.11">public isChanged():boolean {
+<t tx="felix.20210131011420.11">public isChanged(): boolean {
     return this.changed;
 }
 
@@ -10799,10 +10946,10 @@ export function objToString(obj: any, indent = '', printCaller = false, tag = nu
 <t tx="felix.20210131011420.12">/**
  * Return the last top-level position in the outline.
  */
-public lastTopLevel():Position {
-    const c:Commander = this;
-    const p:Position|undefined = c.rootPosition();
-    while(p &amp;&amp; p.hasNext()){
+public lastTopLevel(): Position {
+    const c: Commands = this;
+    const p: Position | undefined = c.rootPosition();
+    while (p &amp;&amp; p.hasNext()) {
         p.moveToNext();
     }
     return p!;
@@ -10814,7 +10961,7 @@ public lastTopLevel():Position {
  * Using empty positions masks problems in program logic.
  * In fact, there are no longer any calls to this method in Leo's core.
  */
-public nullPosition():void {
+public nullPosition(): void {
     g.trace('This method is deprecated. Instead, just use None.');
     // pylint complains if we return None.
 }
@@ -10823,38 +10970,38 @@ public nullPosition():void {
 <t tx="felix.20210131011420.14">/**
  * Return True if a position exists in c's tree
  */
-public positionExists(p:Position, root?:Position, trace?:boolean):boolean {
+public positionExists(p: Position, root?: Position, trace?: boolean): boolean {
 
-    if(!p || !p.__bool__() || !p.v){
+    if (!p || !p.__bool__() || !p.v) {
         return false;
     }
 
-    const rstack:StackEntry[] = (root &amp;&amp; root.__bool__())?root.stack.concat([[root.v, root._childIndex]]):[];
-    const pstack:StackEntry[] = p.stack.concat([[p.v, p._childIndex]]);
+    const rstack: StackEntry[] = (root &amp;&amp; root.__bool__()) ? root.stack.concat([[root.v, root._childIndex]]) : [];
+    const pstack: StackEntry[] = p.stack.concat([[p.v, p._childIndex]]);
 
-    if(rstack.length &gt; pstack.length){
+    if (rstack.length &gt; pstack.length) {
         return false;
     }
 
-    let par:VNode = this.hiddenRootNode!;
-    
-    let arrayLength:number = pstack.length;
+    let par: VNode = this.hiddenRootNode!;
 
-    for(let j=0; j&lt;arrayLength; j++){
-        const x:StackEntry = pstack[j];
-    
-        if (j &lt; rstack.length &amp;&amp; (x[0].gnx !== rstack[j][0].gnx || x[1] !== rstack[j][1])){
+    let arrayLength: number = pstack.length;
+
+    for (let j = 0; j &lt; arrayLength; j++) {
+        const x: StackEntry = pstack[j];
+
+        if (j &lt; rstack.length &amp;&amp; (x[0].gnx !== rstack[j][0].gnx || x[1] !== rstack[j][1])) {
             return false;
         }
-        
-        let v:VNode;
-        let i:number;
+
+        let v: VNode;
+        let i: number;
         [v, i] = x;
-        
-        if( i &gt;= par.children.length || v.gnx !== par.children[i].gnx ){
+
+        if (i &gt;= par.children.length || v.gnx !== par.children[i].gnx) {
             return false;
         }
-            
+
         par = v;
     }
     return true;
@@ -10864,14 +11011,14 @@ public positionExists(p:Position, root?:Position, trace?:boolean):boolean {
 <t tx="felix.20210131011420.15">/**
  * Dump position p and it's ancestors.
  */
-public dumpPosition(p:Position):void {
+public dumpPosition(p: Position): void {
     g.trace('=====', p.h, p._childIndex);
-    
-    let arrayLength:number = p.stack.length;
-    for(let i=0; i&lt;arrayLength; i++){
+
+    let arrayLength: number = p.stack.length;
+    for (let i = 0; i &lt; arrayLength; i++) {
         const data = p.stack[i];
-        let v:VNode;
-        let childIndex:number;
+        let v: VNode;
+        let childIndex: number;
         [v, childIndex] = data;
         console.log(`${i} ${childIndex} ${v._headString}`);
     }
@@ -10884,11 +11031,11 @@ public dumpPosition(p:Position):void {
  * Root position is the first position in the document. Other
  * top level positions are siblings of this node.
  */
-public rootPosition():Position|undefined {
-    const c:Commander = this;
+public rootPosition(): Position | undefined {
+    const c: Commands = this;
     // 2011/02/25: Compute the position directly.
-    if(!!c.hiddenRootNode &amp;&amp; c.hiddenRootNode.children.length){
-        const v:VNode = c.hiddenRootNode.children[0];
+    if (!!c.hiddenRootNode &amp;&amp; c.hiddenRootNode.children.length) {
+        const v: VNode = c.hiddenRootNode.children[0];
         return new Position(v, 0, undefined);
     }
     return undefined;
@@ -10902,25 +11049,25 @@ public rootPosition():Position|undefined {
 <t tx="felix.20210131011420.17">/**
  * Return True if the node at position p should be expanded.
  */
-public shouldBeExpanded(p:Position):boolean {
-    const c:Commander = this;
-    const v:VNode = p.v;
-    if (!p.hasChildren()){
+public shouldBeExpanded(p: Position): boolean {
+    const c: Commands = this;
+    const v: VNode = p.v;
+    if (!p.hasChildren()) {
         return false;
     }
     // Always clear non-existent positions.
     // v.expandedPositions: Position[] = [z for z in v.expandedPositions if c.positionExists(z)]
-    v.expandedPositions = v.expandedPositions.filter(z=&gt;c.positionExists(z));
-    
-    if (!p.isCloned()){
+    v.expandedPositions = v.expandedPositions.filter(z =&gt; c.positionExists(z));
+
+    if (!p.isCloned()) {
         // Do not call p.isExpanded here! It calls this method.
         return p.v.isExpanded();
     }
-    if(p.isAncestorOf(c.p)){
+    if (p.isAncestorOf(c.p)) {
         return true;
     }
-    for(let p2 of v.expandedPositions){
-        if(p.__eq__(p2)){
+    for (let p2 of v.expandedPositions) {
+        if (p.__eq__(p2)) {
             return true;
         }
     }
@@ -10932,9 +11079,9 @@ public shouldBeExpanded(p:Position):boolean {
  * Return a copy of the presently selected position or a new null
  * position. So c.p.copy() is never necessary.
  */
-public currentPosition(): Position|undefined {
-    const c:Commander = this;
-    if (c._currentPosition){
+public currentPosition(): Position | undefined {
+    const c: Commands = this;
+    if (c._currentPosition) {
         // *Always* return a copy.
         return c._currentPosition.copy();
     }
@@ -10947,19 +11094,19 @@ public currentPosition(): Position|undefined {
 </t>
 <t tx="felix.20210131011420.3">// Compatibility with scripts
 
-public fileName():string {
-    let s:string = this.mFileName || "";
-    if (g.isWindows){
+public fileName(): string {
+    let s: string = this.mFileName || "";
+    if (g.isWindows) {
         s = s.replace('\\', '/');
     }
     return s;
 }
 
-public relativeFileName():string {
+public relativeFileName(): string {
     return this.mRelativeFileName || this.mFileName;
 }
 
-public shortFileName():string {
+public shortFileName(): string {
     return g.shortFileName(this.mFileName);
 }
 
@@ -10970,14 +11117,14 @@ public shortFileName():string {
 <t tx="felix.20210131011420.4">/**
  * Move to the first visible node of the present chapter or hoist.
  */
-public firstVisible():Position {
-    const c:Commander = this;
-    let p:Position = c.p;
-    while( 1){
-        let back:Position = p.visBack(c);
-        if( back.__bool__() &amp;&amp; back.isVisible(c)){
+public firstVisible(): Position {
+    const c: Commands = this;
+    let p: Position = c.p;
+    while (1) {
+        let back: Position = p.visBack(c);
+        if (back.__bool__() &amp;&amp; back.isVisible(c)) {
             p = back;
-        }else{
+        } else {
             break;
         }
     }
@@ -10988,11 +11135,11 @@ public firstVisible():Position {
 <t tx="felix.20210131011420.5">/**
  * Return the tab width in effect at p.
  */
-public getTabWidth(p:Position):number {
-    const c:Commander = this;
+public getTabWidth(p: Position): number {
+    const c: Commands = this;
     // const val:number = g.scanAllAtTabWidthDirectives(c, p);
     // TODO: NEEDED?
-    const val:number = 10;
+    const val: number = 10;
     return val;
 }
 
@@ -11004,18 +11151,18 @@ public getTabWidth(p:Position):number {
  * This method is called during idle time, so not generating positions
  * here fixes a major leak.
  */
-public currentPositionIsRootPosition():boolean {
-    const c:Commander = this;
-    const root:Position|undefined = c.rootPosition();
+public currentPositionIsRootPosition(): boolean {
+    const c: Commands = this;
+    const root: Position | undefined = c.rootPosition();
     return !!c._currentPosition &amp;&amp;
-            !!root &amp;&amp;
-            c._currentPosition.__bool__() &amp;&amp;
-            root.__bool__() &amp;&amp; c._currentPosition.__eq__(root);
+        !!root &amp;&amp;
+        c._currentPosition.__bool__() &amp;&amp;
+        root.__bool__() &amp;&amp; c._currentPosition.__eq__(root);
 }
 
-    // return (
-        // c._currentPosition and c._rootPosition and
-        // c._currentPosition == c._rootPosition)
+// return (
+// c._currentPosition and c._rootPosition and
+// c._currentPosition == c._rootPosition)
 
 </t>
 <t tx="felix.20210131011420.8">/**
@@ -11024,18 +11171,18 @@ public currentPositionIsRootPosition():boolean {
     This method is called during idle time, so not generating positions
     here fixes a major leak.
  */
-public currentPositionHasNext():boolean {
-    const c:Commander = this;
-    const current:Position = c._currentPosition!;
+public currentPositionHasNext(): boolean {
+    const c: Commands = this;
+    const current: Position = c._currentPosition!;
     return current &amp;&amp; current.__bool__() &amp;&amp; current.hasNext()!;
     return false;
 }
 
 </t>
-<t tx="felix.20210131011420.9">public isCurrentPosition(p:Position):boolean {
-    const c:Commander = this;
-    if(!p || !c._currentPosition ||
-        !p.__bool__() || !!c._currentPosition.__bool__()){
+<t tx="felix.20210131011420.9">public isCurrentPosition(p: Position): boolean {
+    const c: Commands = this;
+    if (!p || !c._currentPosition ||
+        !p.__bool__() || !!c._currentPosition.__bool__()) {
         return false;
     }
     return p.__eq__(c._currentPosition);
@@ -11046,13 +11193,13 @@ public currentPositionHasNext():boolean {
  * Return the topmost visible node.
  * This is affected by chapters and hoists.
  */
-public visLimit(): [Position, boolean]|undefined {
-    const c:Commander = this;
-    const cc:any = false;// c.chapterController
-    if(c.hoistStack.length){
-        const bunch:HoistStackEntry = c.hoistStack[c.hoistStack.length-1];
-        const p:Position = bunch.p;
-        const limitIsVisible:boolean = !cc || !p.h.startsWith('@chapter');
+public visLimit(): [Position, boolean] | undefined {
+    const c: Commands = this;
+    const cc: any = false;// c.chapterController
+    if (c.hoistStack.length) {
+        const bunch: HoistStackEntry = c.hoistStack[c.hoistStack.length - 1];
+        const p: Position = bunch.p;
+        const limitIsVisible: boolean = !cc || !p.h.startsWith('@chapter');
         return [p, limitIsVisible];
     }
     return undefined;
@@ -11064,8 +11211,8 @@ public visLimit(): [Position, boolean]|undefined {
  * A generator returning all vnodes in the outline, in outline order.
  */
 public *all_nodes(): Generator&lt;VNode&gt; {
-    const c:Commander = this;
-    for(let p of c.all_positions()){
+    const c: Commands = this;
+    for (let p of c.all_positions()) {
         yield p.v;
     }
 }
@@ -11075,8 +11222,8 @@ public *all_nodes(): Generator&lt;VNode&gt; {
  * A generator returning each vnode of the outline.
  */
 public *all_unique_nodes(): Generator&lt;VNode&gt; {
-    const c:Commander = this;
-    for(let p of c.all_unique_positions(false)){
+    const c: Commands = this;
+    for (let p of c.all_unique_positions(false)) {
         yield p.v;
     }
 }
@@ -11085,10 +11232,10 @@ public *all_unique_nodes(): Generator&lt;VNode&gt; {
 <t tx="felix.20210131011508.3">/**
  * A generator return all positions of the outline, in outline order.
  */
-public *all_positions(copy=true):Generator&lt;Position&gt; {
-    const c:Commander = this;
-    const p:Position|undefined = c.rootPosition();
-    while(p &amp;&amp; p.__bool__()){
+public *all_positions(copy = true): Generator&lt;Position&gt; {
+    const c: Commands = this;
+    const p: Position | undefined = c.rootPosition();
+    while (p &amp;&amp; p.__bool__()) {
         yield (copy ? p.copy() : p);
         p.moveToThreadNext();
     }
@@ -11097,54 +11244,54 @@ public *all_positions(copy=true):Generator&lt;Position&gt; {
 </t>
 <t tx="felix.20210131011508.4">/**
  * Generates all positions p in this outline where p.v is v.
- *  
+ *
  *  Should be called with stack=None.
- *  
+ *
  *  The generated positions are not necessarily in outline order.
- *  
+ *
  *  By Виталије Милошевић (Vitalije Milosevic).
  */
-public *all_positions_for_v(v:VNode, stack?:StackEntry[]):Generator&lt;Position&gt; {
+public *all_positions_for_v(v: VNode, stack?: StackEntry[]): Generator&lt;Position&gt; {
 
-    const c:Commander = this;
+    const c: Commands = this;
 
-    if (!stack){
+    if (!stack) {
         stack = [];
     }
-    
+
     if (!(v instanceof VNode)) {
         g.es_print(`not a VNode: ${JSON.stringify(v)}`);
         return;  // Stop the generator.
     }
 
-    /** 
+    /**
      * Yield all indices i such that v.children[i] == target_v.
      */
-    function *allinds(v:VNode, target_v:VNode): Generator&lt;number&gt;{
-        const arrayLength=v.children.length;
+    function* allinds(v: VNode, target_v: VNode): Generator&lt;number&gt; {
+        const arrayLength = v.children.length;
         for (var i = 0; i &lt; arrayLength; i++) {
-            if(v.children[i].gnx === target_v.gnx){
+            if (v.children[i].gnx === target_v.gnx) {
                 yield i;
             }
         }
     }
 
-    /** 
+    /**
      * Convert the stack to a position.
      */
-    function stack2pos(stack:StackEntry[]): Position{
-        let v:VNode;
-        let i:number;
+    function stack2pos(stack: StackEntry[]): Position {
+        let v: VNode;
+        let i: number;
         [v, i] = stack[stack.length - 1];
-        return new Position(v, i, stack.slice(0,-1));
+        return new Position(v, i, stack.slice(0, -1));
     }
 
-    for(let v2 of v.parents){
-        for(let i of allinds(v2, v)){
+    for (let v2 of v.parents) {
+        for (let i of allinds(v2, v)) {
             stack.unshift([v, i]);
-            if(v2.gnx === c.hiddenRootNode!.gnx){
+            if (v2.gnx === c.hiddenRootNode!.gnx) {
                 yield stack2pos(stack);
-            }else{
+            } else {
                 yield* c.all_positions_for_v(v2, stack);
             }
             stack.shift();
@@ -11161,22 +11308,22 @@ public *all_positions_for_v(v:VNode, stack?:StackEntry[]):Generator&lt;Position&
  * The generator yields all **root** anywhere in the outline that satisfy
  * the predicate. Once a root is found, the generator skips its subtree.
  */
-public *all_roots(copy=true, predicate?: (p:Position) =&gt; boolean):Generator&lt;Position&gt; {
-    const c:Commander = this;
-    
-    if(!predicate){
+public *all_roots(copy = true, predicate?: (p: Position) =&gt; boolean): Generator&lt;Position&gt; {
+    const c: Commands = this;
+
+    if (!predicate) {
         // pylint: disable=function-redefined
-        predicate = function(p:Position):boolean {
+        predicate = function (p: Position): boolean {
             return p.isAnyAtFileNode();
         };
     }
 
-    const p:Position|undefined = c.rootPosition();
-    while(p &amp;&amp; p.__bool__()){
-        if (predicate(p)){
+    const p: Position | undefined = c.rootPosition();
+    while (p &amp;&amp; p.__bool__()) {
+        if (predicate(p)) {
             yield p.copy();  // 2017/02/19
             p.moveToNodeAfterTree();
-        }else{
+        } else {
             p.moveToThreadNext();
         }
     }
@@ -11187,14 +11334,14 @@ public *all_roots(copy=true, predicate?: (p:Position) =&gt; boolean):Generator&l
  * A generator return all positions of the outline, in outline order.
  * Returns only the first position for each vnode.
  */
-public *all_unique_positions(copy=true):Generator&lt;Position&gt; {
-    const c:Commander = this;
-    const p:Position|undefined = c.rootPosition();
-    const seen:VNode[] = [];
-    while (p &amp;&amp; p.__bool__()){
-        if(seen.includes(p.v)){
+public *all_unique_positions(copy = true): Generator&lt;Position&gt; {
+    const c: Commands = this;
+    const p: Position | undefined = c.rootPosition();
+    const seen: VNode[] = [];
+    while (p &amp;&amp; p.__bool__()) {
+        if (seen.includes(p.v)) {
             p.moveToNodeAfterTree();
-        }else{
+        } else {
             seen.push(p.v);
             yield (copy ? p.copy() : p);
             p.moveToThreadNext();
@@ -11211,24 +11358,24 @@ public *all_unique_positions(copy=true):Generator&lt;Position&gt; {
  * The generator yields all **root** anywhere in the outline that satisfy
  * the predicate. Once a root is found, the generator skips its subtree.
  */
-public *all_unique_roots(copy=true, predicate?: (p:Position) =&gt; boolean):Generator&lt;Position&gt; {
-    const c:Commander = this;
-    
-    if(!predicate){
+public *all_unique_roots(copy = true, predicate?: (p: Position) =&gt; boolean): Generator&lt;Position&gt; {
+    const c: Commands = this;
+
+    if (!predicate) {
         // pylint: disable=function-redefined
-        predicate = function(p:Position):boolean {
+        predicate = function (p: Position): boolean {
             return p.isAnyAtFileNode();
         };
     }
 
-    const seen:VNode[] = [];
-    const p:Position| undefined = c.rootPosition();
-    while (p &amp;&amp; p.__bool__()){
-        if(!seen.includes(p.v) &amp;&amp; predicate(p)){
+    const seen: VNode[] = [];
+    const p: Position | undefined = c.rootPosition();
+    while (p &amp;&amp; p.__bool__()) {
+        if (!seen.includes(p.v) &amp;&amp; predicate(p)) {
             seen.push(p.v);
             yield (copy ? p.copy() : p);
             p.moveToNodeAfterTree();
-        }else{
+        } else {
             p.moveToThreadNext();
         }
     }
@@ -11238,10 +11385,10 @@ public *all_unique_roots(copy=true, predicate?: (p:Position) =&gt; boolean):Gene
  * A generator returning all positions of the outline. This generator does
  * *not* assume that vnodes are never their own ancestors.
  */
-public *safe_all_positions(copy=true): Generator&lt;Position&gt; {
-    const c:Commander = this;
-    const p:Position|undefined = c.rootPosition(); // Make one copy.
-    while (p &amp;&amp; p.__bool__()){
+public *safe_all_positions(copy = true): Generator&lt;Position&gt; {
+    const c: Commands = this;
+    const p: Position | undefined = c.rootPosition(); // Make one copy.
+    while (p &amp;&amp; p.__bool__()) {
         yield (copy ? p.copy() : p);
         p.safeMoveToThreadNext();
     }
@@ -11251,31 +11398,31 @@ public *safe_all_positions(copy=true): Generator&lt;Position&gt; {
 <t tx="felix.20210131011549.1">/**
  * commander current position property
  */
-public get p():Position {
-    const c:Commander = this;
+public get p(): Position {
+    const c: Commands = this;
     return c.currentPosition()!;
 }
 
 </t>
 <t tx="felix.20210131011607.1"></t>
-<t tx="felix.20210131011607.2">public appendStringToBody(p:Position, s:string): void {
-    if (s){
+<t tx="felix.20210131011607.2">public appendStringToBody(p: Position, s: string): void {
+    if (s) {
         p.b = p.b + g.toUnicode(s);
     }
 }
 
 </t>
 <t tx="felix.20210131011607.3">public clearAllMarked(): void {
-    const c:Commander = this;
-    for(let p of c.all_unique_positions(false)){
+    const c: Commands = this;
+    for (let p of c.all_unique_positions(false)) {
         p.v.clearMarked();
     }
 }
 
 </t>
 <t tx="felix.20210131011607.4">public clearAllVisited(): void {
-    const c:Commander = this;
-    for(let p of c.all_unique_positions(false)){
+    const c: Commands = this;
+    for (let p of c.all_unique_positions(false)) {
         p.v.clearVisited();
         p.v.clearWriteBit();
     }
@@ -11286,26 +11433,26 @@ public get p():Position {
  * clear the marker that indicates that the .leo file has been changed.
  */
 public clearChanged(): void {
-    const c:Commander = this;
+    const c: Commands = this;
     c.changed = false;
     // Clear all dirty bits _before_ setting the caption.
-    for(let v of c.all_unique_nodes()){
+    for (let v of c.all_unique_nodes()) {
         v.clearDirty();
     }
     c.changed = false;
     // * Old code.
-        // master = getattr(c.frame.top, 'leo_master', None)
-        // if master:
-            // master.setChanged(c, False)
-                // // LeoTabbedTopLevel.setChanged.
-        // s = c.frame.getTitle()
-        // if len(s) &gt; 2 and s[0:2] == "* ":
-            // c.frame.setTitle(s[2:])
+    // master = getattr(c.frame.top, 'leo_master', None)
+    // if master:
+    // master.setChanged(c, False)
+    // // LeoTabbedTopLevel.setChanged.
+    // s = c.frame.getTitle()
+    // if len(s) &gt; 2 and s[0:2] == "* ":
+    // c.frame.setTitle(s[2:])
 }
 
 </t>
-<t tx="felix.20210131011607.6">public clearMarked(p:Position):void {
-    const c:Commander = this;
+<t tx="felix.20210131011607.6">public clearMarked(p: Position): void {
+    const c: Commands = this;
     p.v.clearMarked();
     g.doHook("clear-mark", c, p);
 }
@@ -11315,30 +11462,30 @@ public clearChanged(): void {
  * This is equivalent to p.b = s.
  * Warning: This method may call c.recolor() or c.redraw().
  */
-public setBodyString(p:Position, s:string): void {
-    const c:Commander = this;
-    const v:VNode = p.v;
-    if(!c || !v){
+public setBodyString(p: Position, s: string): void {
+    const c: Commands = this;
+    const v: VNode = p.v;
+    if (!c || !v) {
         return;
     }
     s = g.toUnicode(s);
-    const current:Position = c.p;
+    const current: Position = c.p;
     // 1/22/05: Major change: the previous test was: 'if p == current:'
     // This worked because commands work on the presently selected node.
     // But setRecentFiles may change a _clone_ of the selected node!
-    if(current &amp;&amp; current.__bool__() &amp;&amp; p.v.gnx === current.v.gnx){
+    if (current &amp;&amp; current.__bool__() &amp;&amp; p.v.gnx === current.v.gnx) {
         // * Leo used to send it to gui
         // const w:any = c.frame.body.wrapper;
         // w.setAllText(s);
-        v.setSelection(0,0);
+        v.setSelection(0, 0);
         c.recolor();
     }
     // Keep the body text in the VNode up-to-date.
-    if (v.b !== s){
+    if (v.b !== s) {
         v.setBodyString(s);
         v.setSelection(0, 0);
         p.setDirty();
-        if(!c.isChanged()){
+        if (!c.isChanged()) {
             c.setChanged();
         }
         c.redraw_after_icons_changed();
@@ -11349,20 +11496,20 @@ public setBodyString(p:Position, s:string): void {
 <t tx="felix.20210131011607.8">/**
  * Set the marker that indicates that the .leo file has been changed.
  */
-public setChanged(redrawFlag:boolean=true): void {
-    const c:Commander = this;
+public setChanged(redrawFlag: boolean = true): void {
+    const c: Commands = this;
     c.changed = true;
     // Do nothing for null frames.
     //if !redrawFlag:  // Prevent flash when fixing #387.
     //    return
     // * Old code.
-        // master = getattr(c.frame.top, 'leo_master', None)
-        // if master:
-            // master.setChanged(c, True)
-                // // LeoTabbedTopLevel.setChanged.
-        // s = c.frame.getTitle()
-        // if len(s) &gt; 2 and s[0] != '*':
-            // c.frame.setTitle("* " + s)
+    // master = getattr(c.frame.top, 'leo_master', None)
+    // if master:
+    // master.setChanged(c, True)
+    // // LeoTabbedTopLevel.setChanged.
+    // s = c.frame.getTitle()
+    // if len(s) &gt; 2 and s[0] != '*':
+    // c.frame.setTitle("* " + s)
 }
 
 </t>
@@ -11370,20 +11517,20 @@ public setChanged(redrawFlag:boolean=true): void {
  * Set the presently selected position. For internal use only.
  * Client code should use c.selectPosition instead.
  */
-public setCurrentPosition(p:Position):void {
-    const c:Commander = this;
-    if(!(p &amp;&amp; p.__bool__())){
+public setCurrentPosition(p: Position): void {
+    const c: Commands = this;
+    if (!(p &amp;&amp; p.__bool__())) {
         g.trace('===== no p', g.callers());
         return;
     }
-    if(c.positionExists(p)){
-        if(c._currentPosition &amp;&amp; p.__eq__(c._currentPosition)){
+    if (c.positionExists(p)) {
+        if (c._currentPosition &amp;&amp; p.__eq__(c._currentPosition)) {
             // We have already made a copy.
-            // pass;  
+            // pass;
         } else { // Make a copy _now_
             c._currentPosition = p.copy();
         }
-    } else{ // 2011/02/25:
+    } else { // 2011/02/25:
         c._currentPosition = c.rootPosition();
         g.trace(`Invalid position: ${p.h}`);
         g.trace(g.callers());
@@ -11399,31 +11546,31 @@ public setCurrentPosition(p:Position):void {
 <t tx="felix.20210202235315.10">// These methods are useful abbreviations.
 // Warning: they make copies of positions, so they should be used _sparingly_
 
-public getBack():Position {return this.copy().moveToBack();}
+public getBack(): Position { return this.copy().moveToBack(); }
 
-public getFirstChild():Position {return this.copy().moveToFirstChild();}
+public getFirstChild(): Position { return this.copy().moveToFirstChild(); }
 
-public getLastChild():Position {return this.copy().moveToLastChild();}
+public getLastChild(): Position { return this.copy().moveToLastChild(); }
 
-public getLastNode():Position {return this.copy().moveToLastNode();}
+public getLastNode(): Position { return this.copy().moveToLastNode(); }
 // def getLastVisible   (): return this.copy().moveToLastVisible();
 
-public getNext():Position {return this.copy().moveToNext();}
+public getNext(): Position { return this.copy().moveToNext(); }
 
-public getNodeAfterTree():Position {return this.copy().moveToNodeAfterTree();}
+public getNodeAfterTree(): Position { return this.copy().moveToNodeAfterTree(); }
 
-public getNthChild(n:number):Position {return this.copy().moveToNthChild(n);}
+public getNthChild(n: number): Position { return this.copy().moveToNthChild(n); }
 
-public getParent():Position {return this.copy().moveToParent();}
+public getParent(): Position { return this.copy().moveToParent(); }
 
-public getThreadBack():Position {return this.copy().moveToThreadBack();}
+public getThreadBack(): Position { return this.copy().moveToThreadBack(); }
 
-public getThreadNext():Position {return this.copy().moveToThreadNext();}
+public getThreadNext(): Position { return this.copy().moveToThreadNext(); }
 // New in Leo 4.4.3 b2: add c args.
 
-public getVisBack(c:Commander):Position {return this.copy().moveToVisBack(c)!;}
+public getVisBack(c: Commands): Position { return this.copy().moveToVisBack(c)!; }
 
-public getVisNext(c:Commander):Position {return this.copy().moveToVisNext(c)!;}
+public getVisNext(c: Commands): Position { return this.copy().moveToVisNext(c)!; }
 
 </t>
 <t tx="felix.20210202235315.11">/**
@@ -11432,96 +11579,96 @@ public getVisNext(c:Commander):Position {return this.copy().moveToVisNext(c)!;}
  * with_index - include ',x' at end where x is child index in parent
  * with_count - include ',x,y' at end where y zero based count of same headlines
  */
-public get_UNL(with_file=true, with_proto=false, with_index=true, with_count=false):string {
-    const aList:string[] = [];
-    for(let i of this.self_and_parents(false)){
-        if( with_index || with_count){
-            let count:number = 0;
-            let ind:number = 0;
-            const p:Position = i.copy();
-            while( p.hasBack()){
+public get_UNL(with_file = true, with_proto = false, with_index = true, with_count = false): string {
+    const aList: string[] = [];
+    for (let i of this.self_and_parents(false)) {
+        if (with_index || with_count) {
+            let count: number = 0;
+            let ind: number = 0;
+            const p: Position = i.copy();
+            while (p.hasBack()) {
                 ind = ind + 1;
                 p.moveToBack();
-                if(i.h === p.h){
+                if (i.h === p.h) {
                     count = count + 1;
                 }
             }
             aList.push(i.h.replace('--&gt;', '--%3E') + ":" + ind.toString());
-                // g.recursiveUNLFind and sf.copy_to_my_settings undo this replacement.
-            if( count || with_count){
+            // g.recursiveUNLFind and sf.copy_to_my_settings undo this replacement.
+            if (count || with_count) {
                 aList[-1] = aList[-1] + "," + count.toString();
             }
-        }else{
+        } else {
             aList.push(i.h.replace('--&gt;', '--%3E'));
-                // g.recursiveUNLFind  and sf.copy_to_my_settings undo this replacement.
+            // g.recursiveUNLFind  and sf.copy_to_my_settings undo this replacement.
         }
     }
 
-    const UNL:string = aList.reverse().join('--&gt;');
-    if (with_proto){
+    const UNL: string = aList.reverse().join('--&gt;');
+    if (with_proto) {
         // return ("file://%s#%s" % (self.v.context.fileName(), UNL)).replace(' ', '%20')
-        const s:string = "unl:" + `//${this.v.context.fileName()}#${UNL}`;
+        const s: string = "unl:" + `//${this.v.context.fileName()}#${UNL}`;
         return s.replace(' ', '%20');
     }
-    if(with_file){
+    if (with_file) {
         return `${this.v.context.fileName()}#${UNL}`;
     }
     return UNL;
 }
 
 </t>
-<t tx="felix.20210202235315.12">public hasBack():boolean{
-    const p:Position = this;
+<t tx="felix.20210202235315.12">public hasBack(): boolean {
+    const p: Position = this;
     return p.v &amp;&amp; p._childIndex &gt; 0;
 }
 
-public hasNext():boolean|undefined{
-    const p:Position = this;
-    try{
-        const parent_v:VNode = p._parentVnode()!;
-            // Returns None if p.v is None.
+public hasNext(): boolean | undefined {
+    const p: Position = this;
+    try {
+        const parent_v: VNode = p._parentVnode()!;
+        // Returns None if p.v is None.
         return p.v &amp;&amp; parent_v &amp;&amp; p._childIndex + 1 &lt; parent_v.children.length;
     }
-    catch(Exception){
+    catch (Exception) {
         g.trace('*** Unexpected exception');
         g.es_exception();
         return undefined;
     }
 }
 
-public hasParent():boolean{
-    const p:Position = this;
+public hasParent(): boolean {
+    const p: Position = this;
     return p.v &amp;&amp; !!p.stack.length;
 }
 
-public hasThreadBack():boolean{
-    const p:Position = this;
+public hasThreadBack(): boolean {
+    const p: Position = this;
     return p.hasParent() || p.hasBack();
-        // Much cheaper than computing the actual value.
+    // Much cheaper than computing the actual value.
 }
 
 </t>
-<t tx="felix.20210202235315.13">public hasThreadNext():boolean{
-    const p:Position = this;
-    if(!p.v){
+<t tx="felix.20210202235315.13">public hasThreadNext(): boolean {
+    const p: Position = this;
+    if (!p.v) {
         return false;
     }
-    if( p.hasChildren() || p.hasNext()){
+    if (p.hasChildren() || p.hasNext()) {
         return true;
     }
-    let n:number = p.stack.length - 1;
-    while( n &gt;= 0){
-        let v:VNode;
-        let childIndex:number;
-        let parent_v:VNode;
+    let n: number = p.stack.length - 1;
+    while (n &gt;= 0) {
+        let v: VNode;
+        let childIndex: number;
+        let parent_v: VNode;
         [v, childIndex] = p.stack[n];
         // See how many children v's parent has.
-        if (n === 0){
+        if (n === 0) {
             parent_v = v.context.hiddenRootNode!;
-        }else{
-            parent_v= p.stack[n - 1][0];
+        } else {
+            parent_v = p.stack[n - 1][0];
         }
-        if (parent_v.children.length &gt; childIndex + 1){
+        if (parent_v.children.length &gt; childIndex + 1) {
             // v has a next sibling.
             return true;
         }
@@ -11531,10 +11678,10 @@ public hasThreadBack():boolean{
 }
 
 </t>
-<t tx="felix.20210202235315.14">public findRootPosition():Position{
+<t tx="felix.20210202235315.14">public findRootPosition(): Position {
     // 2011/02/25: always use c.rootPosition
-    const p:Position = this;
-    const c:Commander = p.v.context;
+    const p: Position = this;
+    const c: Commands = p.v.context;
     return c.rootPosition()!;
 }
 
@@ -11542,22 +11689,22 @@ public hasThreadBack():boolean{
 <t tx="felix.20210202235315.15">/**
  * Return True if p is one of the direct ancestors of p2.
  */
-public isAncestorOf(p2:Position):boolean{
-    const p:Position = this;
-    const c:Commander = p.v.context;
-    if(!c.positionExists(p2)){
+public isAncestorOf(p2: Position): boolean {
+    const p: Position = this;
+    const c: Commands = p.v.context;
+    if (!c.positionExists(p2)) {
         return false;
     }
-    for(let z of p2.stack){
+    for (let z of p2.stack) {
         // 2013/12/25: bug fix: test childIndices.
         // This is required for the new per-position expansion scheme.
-        let parent_v:VNode;
-        let parent_childIndex:number;
+        let parent_v: VNode;
+        let parent_childIndex: number;
         [parent_v, parent_childIndex] = z;
-        if(
+        if (
             parent_v.fileIndex === p.v.fileIndex &amp;&amp;
             parent_childIndex === p._childIndex
-        ){
+        ) {
             return true;
         }
     }
@@ -11565,14 +11712,14 @@ public isAncestorOf(p2:Position):boolean{
 }
 
 </t>
-<t tx="felix.20210202235315.16">public isCloned():boolean{
-    const p:Position = this;
+<t tx="felix.20210202235315.16">public isCloned(): boolean {
+    const p: Position = this;
     return p.v.isCloned();
 }
 
 </t>
-<t tx="felix.20210202235315.17">public isRoot():boolean {
-    const p:Position = this;
+<t tx="felix.20210202235315.17">public isRoot(): boolean {
+    const p: Position = this;
     return !p.hasParent() &amp;&amp; !p.hasBack();
 }
 
@@ -11580,32 +11727,32 @@ public isAncestorOf(p2:Position):boolean{
 <t tx="felix.20210202235315.18">/**
  * Return True if p is visible in c's outline.
  */
-public isVisible(c:Commander):boolean {
-    const p:Position = this;
+public isVisible(c: Commands): boolean {
+    const p: Position = this;
 
-    function visible(p:Position, root?:Position){
-        for (let parent of p.parents(false)){
-            if (parent.__bool__() &amp;&amp; parent.__eq__(root!)){
+    function visible(p: Position, root?: Position) {
+        for (let parent of p.parents(false)) {
+            if (parent.__bool__() &amp;&amp; parent.__eq__(root!)) {
                 // #12.
                 return true;
             }
-            if(!c.shouldBeExpanded(parent)){
+            if (!c.shouldBeExpanded(parent)) {
                 return false;
             }
         }
         return true;
     }
 
-    if(c.hoistStack.length){
-        const root:Position = c.hoistStack[-1].p;
-        if(p.__eq__(root)){
+    if (c.hoistStack.length) {
+        const root: Position = c.hoistStack[-1].p;
+        if (p.__eq__(root)) {
             // #12.
             return true;
         }
         return root.isAncestorOf(p) &amp;&amp; visible(p, root);
     }
-    for(let root of c.rootPosition()!.self_and_siblings(false)){
-        if( root.__eq__(p) || root.isAncestorOf(p)){
+    for (let root of c.rootPosition()!.self_and_siblings(false)) {
+        if (root.__eq__(p) || root.isAncestorOf(p)) {
             return visible(p);
         }
     }
@@ -11616,9 +11763,9 @@ public isVisible(c:Commander):boolean {
 <t tx="felix.20210202235315.19">/**
  * Return the number of p's parents.
  */
-public level():number {
-    const p:Position = this;
-    return p.v?p.stack.length:0;
+public level(): number {
+    const p: Position = this;
+    return p.v ? p.stack.length : 0;
 }
 
 </t>
@@ -11650,10 +11797,10 @@ public level():number {
     nodes, but the pattern above handles this complication cleanly.
  * * * * * * * * * * * * * * * * * * * * * * * * * * *
  */
-public positionAfterDeletedTree():Position {
-    let p:Position = this;
-    const next:Position = p.next();
-    if(next.__bool__()){
+public positionAfterDeletedTree(): Position {
+    let p: Position = this;
+    const next: Position = p.next();
+    if (next.__bool__()) {
         // The new position will be the same as p, except for p.v.
         p = p.copy();
         p.v = next.v;
@@ -11670,55 +11817,55 @@ public positionAfterDeletedTree():Position {
     http://tinyurl.com/5nescw
     """
  */
-public textOffset():number|undefined {
-    const p1:Position = this;
-    let found:boolean =false;
-    let offset:number= 0;
-    for(let p of p1.self_and_parents(false)){
-        if (p.isAnyAtFileNode()){
+public textOffset(): number | undefined {
+    const p1: Position = this;
+    let found: boolean = false;
+    let offset: number = 0;
+    for (let p of p1.self_and_parents(false)) {
+        if (p.isAnyAtFileNode()) {
             // Ignore parent of @&lt;file&gt; node.
             found = true;
             break;
         }
-        const parent:Position = p.parent();
-        if (!parent.__bool__()){
+        const parent: Position = p.parent();
+        if (!parent.__bool__()) {
             break;
         }
         // If p is a section definition, search the parent for the reference.
         // Otherwise, search the parent for @others.
-        const h:string = p.h.trim();
-        const i:number = h.indexOf('&lt;&lt;');
-        const j:number = h.indexOf('&gt;&gt;');
+        const h: string = p.h.trim();
+        const i: number = h.indexOf('&lt;&lt;');
+        const j: number = h.indexOf('&gt;&gt;');
         // const target:string = h[i : j + 2] if -1 &lt; i &lt; j else '@others'
-        const target:string = (-1 &lt; i &amp;&amp; i &lt; j)?h.slice(i, j+2):'@others';
-        for (let s of parent.b.split('\n')){
-            if (s.indexOf(target) &gt; -1){
+        const target: string = (-1 &lt; i &amp;&amp; i &lt; j) ? h.slice(i, j + 2) : '@others';
+        for (let s of parent.b.split('\n')) {
+            if (s.indexOf(target) &gt; -1) {
                 offset += g.skip_ws(s, 0);
                 break;
             }
         }
     }
-    return found?offset:undefined;
+    return found ? offset : undefined;
 }
 
 </t>
 <t tx="felix.20210204224730.1">/*
     - convertTreeToString and moreHead can't be VNode methods because they use level().
-    - moreBody could be anywhere: it may as well be a postion method.
+    - moreBody could be anywhere: it may as well be a position method.
 */
 
 </t>
 <t tx="felix.20210204224730.2">/**
  * Convert a positions  suboutline to a string in MORE format.
  */
-public convertTreeToString():string {
-    const p1:Position = this;
+public convertTreeToString(): string {
+    const p1: Position = this;
     const level1 = p1.level();
-    const array:string[] = [];
-    for(let p of p1.self_and_subtree(false)){
+    const array: string[] = [];
+    for (let p of p1.self_and_subtree(false)) {
         array.push(p.moreHead(level1) + '\n');
-        const body:string = p.moreBody();
-        if(body){
+        const body: string = p.moreBody();
+        if (body) {
             array.push(body + '\n');
         }
     }
@@ -11729,11 +11876,11 @@ public convertTreeToString():string {
 <t tx="felix.20210204224730.3">/**
  * Return the headline string in MORE format.
  */
-public moreHead(firstLevel:number, useVerticalBar?:boolean):string {
+public moreHead(firstLevel: number, useVerticalBar?: boolean): string {
     // useVerticalBar is unused, but it would be useful in over-ridden methods.
-    const p:Position = this;
-    const level:number = this.level() - firstLevel;
-    const plusMinus:string = p.hasChildren()?"+":"-";
+    const p: Position = this;
+    const level: number = this.level() - firstLevel;
+    const plusMinus: string = p.hasChildren() ? "+" : "-";
     const pad: string = '\t'.repeat(level);
     return `${pad}${plusMinus} ${p.h}`;
 }
@@ -11753,14 +11900,14 @@ public moreHead(firstLevel:number, useVerticalBar?:boolean):string {
  * Returns the body string in MORE format.
  * Inserts a backslash before any leading plus, minus or backslash.
  */
-public moreBody():string {
-    const p:Position = this;
-    const array:string[] = [];
-    const lines:string[] = p.b.split('\n');
-    for(let s of lines){
-        const i:number = g.skip_ws(s, 0);
-        if(i &lt; s.length &amp;&amp; ['+', '-', '\\'].includes(s[i])){
-            s = s.slice(0,i) + '\\' + s.slice(i);
+public moreBody(): string {
+    const p: Position = this;
+    const array: string[] = [];
+    const lines: string[] = p.b.split('\n');
+    for (let s of lines) {
+        const i: number = g.skip_ws(s, 0);
+        if (i &lt; s.length &amp;&amp; ['+', '-', '\\'].includes(s[i])) {
+            s = s.slice(0, i) + '\\' + s.slice(i);
         }
         array.push(s);
     }
@@ -11772,11 +11919,11 @@ public moreBody():string {
 <t tx="felix.20210204235058.10">/**
  * Yield p and all positions in p's subtree.
  */
-public *self_and_subtree(copy:boolean=true): Generator&lt;Position&gt; {
-    let p:Position =  this;
+public *self_and_subtree(copy: boolean = true): Generator&lt;Position&gt; {
+    let p: Position = this;
     p = p.copy();
-    const after:Position  = p.nodeAfterTree();
-    while(p.__bool__() &amp;&amp; !p.__eq__(after)){
+    const after: Position = p.nodeAfterTree();
+    while (p.__bool__() &amp;&amp; !p.__eq__(after)) {
         yield (copy ? p.copy() : p);
         p.moveToThreadNext();
     }
@@ -11789,12 +11936,12 @@ public *self_and_subtree(copy:boolean=true): Generator&lt;Position&gt; {
 <t tx="felix.20210204235058.11">/**
  * Yield all positions in p's subtree, but not p.
  */
-public *subtree(copy:boolean=true): Generator&lt;Position&gt; {
-    let p:Position =  this;
+public *subtree(copy: boolean = true): Generator&lt;Position&gt; {
+    let p: Position = this;
     p = p.copy();
-    const after:Position  = p.nodeAfterTree();
+    const after: Position = p.nodeAfterTree();
     p.moveToThreadNext();
-    while(p.__bool__() &amp;&amp; !p.__eq__(after)){
+    while (p.__bool__() &amp;&amp; !p.__eq__(after)) {
         yield (copy ? p.copy() : p);
         p.moveToThreadNext();
     }
@@ -11808,10 +11955,10 @@ public *subtree(copy:boolean=true): Generator&lt;Position&gt; {
  * Yield p.v and all unique vnodes in p's subtree.
  */
 public *unique_nodes(): Generator&lt;VNode&gt; {
-    const p1:Position =  this;
+    const p1: Position = this;
     const seen: VNode[] = [];
-    for(let p of p1.self_and_subtree(false)){
-        if (!seen.includes(p.v)){
+    for (let p of p1.self_and_subtree(false)) {
+        if (!seen.includes(p.v)) {
             seen.push(p.v);
             yield p.v;
         }
@@ -11826,11 +11973,11 @@ public *unique_nodes(): Generator&lt;VNode&gt; {
 <t tx="felix.20210204235058.13">/**
  * Yield p and all other unique positions in p's subtree.
  */
-public *unique_subtree(copy:boolean=true): Generator&lt;Position&gt; {
-    const p1:Position =  this;
+public *unique_subtree(copy: boolean = true): Generator&lt;Position&gt; {
+    const p1: Position = this;
     const seen: VNode[] = [];
-    for(let p of p1.subtree()){
-        if (!seen.includes(p.v)){
+    for (let p of p1.subtree()) {
+        if (!seen.includes(p.v)) {
             seen.push(p.v);
             // Fixed bug 1255208: p.unique_subtree returns vnodes, not positions.
             yield (copy ? p.copy() : p);
@@ -11847,9 +11994,9 @@ public *unique_subtree(copy:boolean=true): Generator&lt;Position&gt; {
  * Yield all siblings positions that follow p, not including p.
  */
 public *following_siblings(copy: boolean = true): Generator&lt;Position&gt; {
-    let p:Position = this;
+    let p: Position = this;
     p = p.next();
-    while(p.__bool__()){
+    while (p.__bool__()) {
         yield (copy ? p.copy() : p);
         p.moveToNext();
     }
@@ -11870,31 +12017,31 @@ public *following_siblings(copy: boolean = true): Generator&lt;Position&gt; {
     Otherwise, the generator yields all nodes in p.subtree() that satisfy
     the predicate. Once a root is found, the generator skips its subtree.
  */
-public *nearest_roots(copy=true, predicate?: (p:Position) =&gt; boolean ): Generator&lt;Position&gt; {
-    if(!predicate){
+public *nearest_roots(copy = true, predicate?: (p: Position) =&gt; boolean): Generator&lt;Position&gt; {
+    if (!predicate) {
         // pylint: disable=function-redefined
-        predicate = function(p:Position):boolean {
+        predicate = function (p: Position): boolean {
             return p.isAnyAtFileNode();
         };
     }
 
     // First, look up the tree.
-    let p1:Position =  this;
-    for(let p of p1.self_and_parents(false)){
-        if(predicate(p)){
+    let p1: Position = this;
+    for (let p of p1.self_and_parents(false)) {
+        if (predicate(p)) {
             yield (copy ? p.copy() : p);
             return;
         }
     }
-    
+
     // Next, look for all .md files in the tree.
-    const after:Position = p1.nodeAfterTree();
-    const p:Position = p1;
-    while(p.__bool__() &amp;&amp; !p.__eq__(after)){
-        if (predicate(p)){
+    const after: Position = p1.nodeAfterTree();
+    const p: Position = p1;
+    while (p.__bool__() &amp;&amp; !p.__eq__(after)) {
+        if (predicate(p)) {
             yield (copy ? p.copy() : p);
             p.moveToNodeAfterTree();
-        }else{
+        } else {
             p.moveToThreadNext();
         }
     }
@@ -11913,35 +12060,35 @@ public *nearest_roots(copy=true, predicate?: (p:Position) =&gt; boolean ): Gener
     satisfy the predicate. Once a root is found, the generator skips its
     subtree.
  */
-public *nearest_unique_roots(copy=true, predicate?: (p:Position) =&gt; boolean): Generator&lt;Position&gt; {
-    if(!predicate){
+public *nearest_unique_roots(copy = true, predicate?: (p: Position) =&gt; boolean): Generator&lt;Position&gt; {
+    if (!predicate) {
         // pylint: disable=function-redefined
-        predicate = function(p:Position):boolean {
+        predicate = function (p: Position): boolean {
             return p.isAnyAtFileNode();
         };
     }
-    
+
     // First, look up the tree.
-    let p1:Position =  this;
-    for(let p of p1.self_and_parents(false)){
-        if(predicate(p)){
+    let p1: Position = this;
+    for (let p of p1.self_and_parents(false)) {
+        if (predicate(p)) {
             yield (copy ? p.copy() : p);
             return;
         }
     }
-    
+
     // Next, look for all unique .md files in the tree.
     const seen: VNode[] = [];
-    const after:Position = p1.nodeAfterTree();
-    const p:Position = p1;
-    while(p.__bool__() &amp;&amp; !p.__eq__(after)){
-        if (predicate(p)){
-            if (!seen.includes(p.v)){
+    const after: Position = p1.nodeAfterTree();
+    const p: Position = p1;
+    while (p.__bool__() &amp;&amp; !p.__eq__(after)) {
+        if (predicate(p)) {
+            if (!seen.includes(p.v)) {
                 seen.push(p.v);
                 yield (copy ? p.copy() : p);
             }
             p.moveToNodeAfterTree();
-        }else{
+        } else {
             p.moveToThreadNext();
         }
     }
@@ -11955,10 +12102,10 @@ public *nearest_unique_roots(copy=true, predicate?: (p:Position) =&gt; boolean):
  * Yield p.v and all vnodes in p's subtree.
  */
 public *nodes(): Generator&lt;VNode&gt; {
-    let p:Position =  this;
+    let p: Position = this;
     p = p.copy();
-    const after:Position = p.nodeAfterTree();
-    while(p.__bool__() &amp;&amp; !p.__eq__(after)){  // bug fix: 2013/10/12
+    const after: Position = p.nodeAfterTree();
+    while (p.__bool__() &amp;&amp; !p.__eq__(after)) {  // bug fix: 2013/10/12
         yield p.v;
         p.moveToThreadNext();
     }
@@ -11972,10 +12119,10 @@ public *nodes(): Generator&lt;VNode&gt; {
 <t tx="felix.20210204235058.7">/**
  * Yield all parent positions of p.
  */
-public *parents(copy:boolean=true): Generator&lt;Position&gt; {
-    let p:Position =  this;
+public *parents(copy: boolean = true): Generator&lt;Position&gt; {
+    let p: Position = this;
     p = p.parent();
-    while(p.__bool__()){
+    while (p.__bool__()) {
         yield (copy ? p.copy() : p);
         p.moveToParent();
     }
@@ -11988,10 +12135,10 @@ public *parents(copy:boolean=true): Generator&lt;Position&gt; {
 <t tx="felix.20210204235058.8">/**
  * Yield p and all parent positions of p.
  */
-public *self_and_parents(copy:boolean=true): Generator&lt;Position&gt; {
-    let p:Position =  this;
+public *self_and_parents(copy: boolean = true): Generator&lt;Position&gt; {
+    let p: Position = this;
     p = p.copy();
-    while(p.__bool__()){
+    while (p.__bool__()) {
         yield (copy ? p.copy() : p);
         p.moveToParent();
     }
@@ -12004,13 +12151,13 @@ public *self_and_parents(copy:boolean=true): Generator&lt;Position&gt; {
 <t tx="felix.20210204235058.9">/**
  * Yield all sibling positions of p including p.
  */
-public *self_and_siblings(copy:boolean=true): Generator&lt;Position&gt; {
-    let p:Position =  this;
+public *self_and_siblings(copy: boolean = true): Generator&lt;Position&gt; {
+    let p: Position = this;
     p = p.copy();
-    while (p.hasBack()){
+    while (p.hasBack()) {
         p.moveToBack();
     }
-    while(p.__bool__()){
+    while (p.__bool__()) {
         yield (copy ? p.copy() : p);
         p.moveToNext();
     }
@@ -12024,8 +12171,8 @@ public *self_and_siblings(copy:boolean=true): Generator&lt;Position&gt; {
 <t tx="felix.20210206014421.2">/**
  * position body string property
  */
-public get b():string{
-    const p:Position =  this;
+public get b(): string {
+    const p: Position = this;
     return p.bodyString();
 }
 
@@ -12043,10 +12190,10 @@ public get b():string{
  *  cff, replace-all and recursive import. In such situations, code should
  *  use p.v.b instead of p.b.
  */
-public set b(val:string) {
-    const p:Position =  this;
-    const c:Commander|false = !!p.v &amp;&amp; p.v.context;
-    if (c){
+public set b(val: string) {
+    const p: Position = this;
+    const c: Commands | false = !!p.v &amp;&amp; p.v.context;
+    if (c) {
         c.setBodyString(p, val);
         // Warning: c.setBodyString is *expensive*.
     }
@@ -12056,8 +12203,8 @@ public set b(val:string) {
 <t tx="felix.20210206014421.3">/**
  * position property returning the headline string
  */
-public get h():string {
-    const p:Position =  this;
+public get h(): string {
+    const p: Position = this;
     return p.headString();
 }
 
@@ -12075,10 +12222,10 @@ public get h():string {
  *  cff, replace-all and recursive import. In such situations, code should
  *  use p.v.h instead of p.h.
  */
-public set h(val:string) {
-    const p:Position =  this;
-    const c:Commander|false = !!p.v &amp;&amp; p.v.context;
-    if (c){
+public set h(val: string) {
+    const p: Position = this;
+    const c: Commands | false = !!p.v &amp;&amp; p.v.context;
+    if (c) {
         c.setHeadString(p, val);
         // Warning: c.setHeadString is *expensive*.
     }
@@ -12088,8 +12235,8 @@ public set h(val:string) {
 <t tx="felix.20210206014421.4">/**
  * position gnx property
  */
-public get gnx():string{
-    const p:Position =  this;
+public get gnx(): string {
+    const p: Position = this;
     return p.v.fileIndex;
 }
 
@@ -12097,8 +12244,8 @@ public get gnx():string{
 <t tx="felix.20210206014421.5">/**
  * position property returning the script formed by p and its descendants
  */
-public get script():string {
-    const p:Position =  this;
+public get script(): string {
+    const p: Position = this;
     return g.getScript(p.v.context, p,
         false,  //  Always return the entire expansion.
         true, // forcePythonSentinels
@@ -12106,25 +12253,25 @@ public get script():string {
 }
 
 </t>
-<t tx="felix.20210206014421.6">/** 
+<t tx="felix.20210206014421.6">/**
  * position property returning the body text without sentinels
  */
-public get nosentinels():string {
-    const p:Position =  this;
-    return g.splitLines(p.b).filter(z=&gt;!g.isDirective(z)).join('');
+public get nosentinels(): string {
+    const p: Position = this;
+    return g.splitLines(p.b).filter(z =&gt; !g.isDirective(z)).join('');
 }
 
 </t>
 <t tx="felix.20210206014421.7">/**
  * p.u property
  */
-public get u():any {
-    const p:Position =  this;
+public get u(): any {
+    const p: Position = this;
     return p.v.u;
 }
 
-public set u(val:any) {
-    const p:Position =  this;
+public set u(val: any) {
+    const p: Position = this;
     p.v.u = val;
 }
 
@@ -12132,15 +12279,15 @@ public set u(val:any) {
 <t tx="felix.20210207005040.1"></t>
 <t tx="felix.20210207005040.10">// Compatibility routine for scripts.
 
-public clearVisitedInTree():void {
-    for(let p of this.self_and_subtree(false)){
+public clearVisitedInTree(): void {
+    for (let p of this.self_and_subtree(false)) {
         p.clearVisited();
     }
 }
 
 </t>
-<t tx="felix.20210207005040.11">public clearAllVisitedInTree():void {
-    for(let p of this.self_and_subtree(false)){
+<t tx="felix.20210207005040.11">public clearAllVisitedInTree(): void {
+    for (let p of this.self_and_subtree(false)) {
         p.v.clearVisited();
         p.v.clearWriteBit();
     }
@@ -12151,8 +12298,8 @@ public clearVisitedInTree():void {
 <t tx="felix.20210207005040.13">/**
  * (p) Set p.v dirty.
  */
-public clearDirty():void {
-    const p:Position =  this;
+public clearDirty(): void {
+    const p: Position = this;
     p.v.clearDirty();
 }
 
@@ -12160,10 +12307,10 @@ public clearDirty():void {
 <t tx="felix.20210207005040.14">/**
  * Returns True if position p or one of p's parents is an @ignore node.
  */
-public inAtIgnoreRange():boolean {
-    const p1:Position =  this;
-    for(let p of p1.self_and_parents(false)){
-        if(p.isAtIgnoreNode()){
+public inAtIgnoreRange(): boolean {
+    const p1: Position = this;
+    for (let p of p1.self_and_parents(false)) {
+        if (p.isAtIgnoreNode()) {
             return true;
         }
     }
@@ -12174,18 +12321,18 @@ public inAtIgnoreRange():boolean {
 <t tx="felix.20210207005040.15">/**
  * Set all ancestor @&lt;file&gt; nodes dirty, including ancestors of all clones of p.
  */
-public setAllAncestorAtFileNodesDirty():void {
-    const p:Position =  this;
+public setAllAncestorAtFileNodesDirty(): void {
+    const p: Position = this;
     p.v.setAllAncestorAtFileNodesDirty();
 }
 
 </t>
-<t tx="felix.20210207005040.16">/** 
+<t tx="felix.20210207005040.16">/**
  * Mark a node and all ancestor @file nodes dirty.
  * p.setDirty() is no longer expensive.
  */
 public setDirty(): void {
-    const p:Position =  this;
+    const p: Position = this;
     p.v.setAllAncestorAtFileNodesDirty();
     p.v.setDirty();
 }
@@ -12195,34 +12342,34 @@ public setDirty(): void {
 <t tx="felix.20210207005040.3">/**
  * Contract p.v and clear p.v.expandedPositions list.
  */
-public contract():void {
-    const p:Position =  this;
-    const v:VNode = this.v;
-    v.expandedPositions = v.expandedPositions.filter(z=&gt;!z.__eq__(p));
+public contract(): void {
+    const p: Position = this;
+    const v: VNode = this.v;
+    v.expandedPositions = v.expandedPositions.filter(z =&gt; !z.__eq__(p));
     v.contract();
 }
 
-public expand():void {
-    const p:Position =  this;
-    const v:VNode = this.v;
-    v.expandedPositions = v.expandedPositions.filter(z=&gt;!z.__eq__(p));
-    let isBreak:boolean=false;
-    for(let p2 of v.expandedPositions){
-        if(p.__eq__(p2)){
+public expand(): void {
+    const p: Position = this;
+    const v: VNode = this.v;
+    v.expandedPositions = v.expandedPositions.filter(z =&gt; !z.__eq__(p));
+    let isBreak: boolean = false;
+    for (let p2 of v.expandedPositions) {
+        if (p.__eq__(p2)) {
             isBreak = true;
             break;
         }
     }
-    if(!isBreak){
+    if (!isBreak) {
         v.expandedPositions.push(p.copy());
     }
     v.expand();
 }
 
-public isExpanded():boolean {
-    const p:Position =  this;
-    if(p.isCloned()){
-        const c:Commander = p.v.context;
+public isExpanded(): boolean {
+    const p: Position = this;
+    if (p.isCloned()) {
+        const c: Commands = p.v.context;
         return c.shouldBeExpanded(p);
     }
     return p.v.isExpanded();
@@ -12232,37 +12379,37 @@ public isExpanded():boolean {
 <t tx="felix.20210207005040.4">// Clone bits are no longer used.
 // Dirty bits are handled carefully by the position class.
 
-public clearMarked():void { return this.v.clearMarked(); }
+public clearMarked(): void { return this.v.clearMarked(); }
 
-public clearOrphan():void { return this.v.clearOrphan(); }
+public clearOrphan(): void { return this.v.clearOrphan(); }
 
-public clearVisited():void { return this.v.clearVisited(); }
+public clearVisited(): void { return this.v.clearVisited(); }
 
-public initExpandedBit():void { return this.v.initExpandedBit(); }
+public initExpandedBit(): void { return this.v.initExpandedBit(); }
 
-public initMarkedBit():void { return this.v.initMarkedBit(); }
+public initMarkedBit(): void { return this.v.initMarkedBit(); }
 
-public initStatus(status:number):void { return this.v.initStatus(status); }
+public initStatus(status: number): void { return this.v.initStatus(status); }
 
-public setMarked():void { return this.v.setMarked(); }
+public setMarked(): void { return this.v.setMarked(); }
 
-public setOrphan():void { return this.v.setOrphan(); }
+public setOrphan(): void { return this.v.setOrphan(); }
 
-public setSelected():void { return this.v.setSelected(); }
+public setSelected(): void { return this.v.setSelected(); }
 
-public setVisited():void { return this.v.setVisited(); }
+public setVisited(): void { return this.v.setVisited(); }
 
 </t>
-<t tx="felix.20210207005040.5">public computeIcon():number {
+<t tx="felix.20210207005040.5">public computeIcon(): number {
     return this.v.computeIcon();
 }
 
-public setIcon():void {
+public setIcon(): void {
     // Compatibility routine for old scripts
 }
 
 </t>
-<t tx="felix.20210207005040.6">public setSelection(start:number, length:number):void {
+<t tx="felix.20210207005040.6">public setSelection(start: number, length: number): void {
     return this.v.setSelection(start, length);
 }
 
@@ -12271,23 +12418,23 @@ public setIcon():void {
     this.v.restoreCursorAndScroll();
 }
 
-public saveCursorAndScroll():void {
+public saveCursorAndScroll(): void {
     this.v.saveCursorAndScroll();
 }
 
 </t>
-<t tx="felix.20210207005040.8">public setBodyString(s:string):void{
-    const p:Position =  this;
+<t tx="felix.20210207005040.8">public setBodyString(s: string): void {
+    const p: Position = this;
     return p.v.setBodyString(s);
 }
 
-public initHeadString(s:string):void{
-    const p:Position =  this;
+public initHeadString(s: string): void {
+    const p: Position = this;
     p.v.initHeadString(s);
 }
 
-public setHeadString(s:string):void{
-    const p:Position =  this;
+public setHeadString(s: string): void {
+    const p: Position = this;
     p.v.initHeadString(s);
     p.setDirty();
 }
@@ -12301,35 +12448,35 @@ public setHeadString(s:string):void{
  * **Important**: the v.parents ivar must be [] for all nodes.
  * v._addParentLinks will set all parents.
  */
-public copyTree(copyMarked?:boolean):VNode {
-    const v:VNode = this;
+public copyTree(copyMarked?: boolean): VNode {
+    const v: VNode = this;
     // Allocate a new vnode and gnx with empty children &amp; parents.
-    const v2:VNode = new VNode(v.context);
-    console.assert(v2.parents.length===0, v2.parents.length.toString());
+    const v2: VNode = new VNode(v.context);
+    console.assert(v2.parents.length === 0, v2.parents.length.toString());
     console.assert(v2.gnx);
     console.assert(v.gnx !== v2.gnx);
     // Copy vnode fields. Do **not** set v2.parents.
     v2._headString = g.toUnicode(v._headString, null, true);
     v2._bodyString = g.toUnicode(v._bodyString, null, true);
-    v2.u = JSON.parse(JSON.stringify(v.u)); // Deep Copy 
-    if(copyMarked &amp;&amp; v.isMarked()){
+    v2.u = JSON.parse(JSON.stringify(v.u)); // Deep Copy
+    if (copyMarked &amp;&amp; v.isMarked()) {
         v2.setMarked();
     }
     // Recursively copy all descendant vnodes.
-    for(let child of v.children){
+    for (let child of v.children) {
         v2.children.push(child.copyTree(copyMarked));
     }
     return v2;
 }
 
 </t>
-<t tx="felix.20210207213301.1">public childrenModified():void {
+<t tx="felix.20210207213301.1">public childrenModified(): void {
     // TODO: needed?
     // g.childrenModifiedSet.add(this);
 }
 
 </t>
-<t tx="felix.20210207213314.1">public contentModified():void {
+<t tx="felix.20210207213314.1">public contentModified(): void {
     // TODO: needed?
     // g.contentModifiedSet.add(this);
 }
@@ -12384,13 +12531,13 @@ public restoreCursorAndScroll(): void {
  * Return True if p.b contains an @all directive.
  */
 public is_at_all(): boolean {
-    const p:Position =  this;
+    const p: Position = this;
     return (
         p.isAnyAtFileNode() &amp;&amp;
-        !!g.splitLines(p.b).reduce((acc, s):boolean=&gt;{
-            if(g.match_word(s, 0, '@all')){
+        !!g.splitLines(p.b).reduce((acc, s): boolean =&gt; {
+            if (g.match_word(s, 0, '@all')) {
                 return true;
-            }else {
+            } else {
                 return !!acc;
             }
         }, false)
@@ -12401,10 +12548,10 @@ public is_at_all(): boolean {
 /**
  * Return True if p or one of p's ancestors is an @all node.
  */
-public in_at_all_tree():boolean {
-    const p1:Position =  this;
-    for(let p of p1.self_and_parents(false)){
-        if(p.is_at_all()){
+public in_at_all_tree(): boolean {
+    const p1: Position = this;
+    for (let p of p1.self_and_parents(false)) {
+        if (p.is_at_all()) {
             return true;
         }
     }
@@ -12415,18 +12562,18 @@ public in_at_all_tree():boolean {
 <t tx="felix.20210208001026.3">/**
  * Return True if p is an @ignore node.
  */
-public is_at_ignore():boolean {
-    const p:Position =  this;
+public is_at_ignore(): boolean {
+    const p: Position = this;
     return g.match_word(p.h, 0, '@ignore');
 }
 
 /**
  * Return True if p or one of p's ancestors is an @ignore node
- */ 
-public in_at_ignore_tree():boolean {
-    const p1:Position =  this;
-    for(let p of p1.self_and_parents(false)){
-        if(g.match_word(p.h, 0, '@ignore')){
+ */
+public in_at_ignore_tree(): boolean {
+    const p1: Position = this;
+    for (let p of p1.self_and_parents(false)) {
+        if (g.match_word(p.h, 0, '@ignore')) {
             return true;
         }
     }
@@ -12450,33 +12597,33 @@ public in_at_ignore_tree():boolean {
     Set app.hookError on all exceptions.
     Scripts may reset app.hookError to try again.
  */
-export function doHook(tag:string, ...args: any[]):any {
-/*
-    if g.app.killed or g.app.hookError:
-        return None
-    if args:
-        # A minor error in Leo's core.
-        g.pr(f"***ignoring args param.  tag = {tag}")
-    if not g.app.config.use_plugins:
-        if tag in ('open0', 'start1'):
-            g.warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.")
-        return None
-    # Get the hook handler function.  Usually this is doPlugins.
-    c = keywords.get("c")
-    # pylint: disable=consider-using-ternary
-    f = (c and c.hookFunction) or g.app.hookFunction
-    if not f:
-        g.app.hookFunction = f = g.app.pluginsController.doPlugins
-    try:
-        # Pass the hook to the hook handler.
-        # g.pr('doHook',f.__name__,keywords.get('c'))
-        return f(tag, keywords)
-    except Exception:
-        g.es_exception()
-        g.app.hookError = True  # Supress this function.
-        g.app.idle_time_hooks_enabled = False
-        return None
-*/
+export function doHook(tag: string, ...args: any[]): any {
+    /*
+        if g.app.killed or g.app.hookError:
+            return None
+        if args:
+            # A minor error in Leo's core.
+            g.pr(f"***ignoring args param.  tag = {tag}")
+        if not g.app.config.use_plugins:
+            if tag in ('open0', 'start1'):
+                g.warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.")
+            return None
+        # Get the hook handler function.  Usually this is doPlugins.
+        c = keywords.get("c")
+        # pylint: disable=consider-using-ternary
+        f = (c and c.hookFunction) or g.app.hookFunction
+        if not f:
+            g.app.hookFunction = f = g.app.pluginsController.doPlugins
+        try:
+            # Pass the hook to the hook handler.
+            # g.pr('doHook',f.__name__,keywords.get('c'))
+            return f(tag, keywords)
+        except Exception:
+            g.es_exception()
+            g.app.hookError = True  # Supress this function.
+            g.app.idle_time_hooks_enabled = False
+            return None
+    */
 }
 
 </t>
@@ -12484,14 +12631,14 @@ export function doHook(tag:string, ...args: any[]):any {
  * Set the p's headline and the corresponding tree widget to s.
  * This is used in by unit tests to restore the outline.
  */
-public setHeadString(p:Position, s:string):void {
-    const c:Commander = this;
+public setHeadString(p: Position, s: string): void {
+    const c: Commands = this;
     p.initHeadString(s);
     p.setDirty();
     // Change the actual tree widget so
     // A later call to c.endEditing or c.redraw will use s.
-    
-    // TODO: needed? 
+
+    // TODO: needed?
     // c.frame.tree.setHeadline(p, s);
 }
 
@@ -12501,11 +12648,11 @@ public setHeadString(p:Position, s:string):void {
  * Return the expansion of all of node p's body text if
  * p is not the current node or if there is no text selection.
  */
-export function getScript(c:Commander, p:Position,
-    useSelectedText:boolean=true,
-    forcePythonSentinels:boolean=true,
-    useSentinels:boolean=true
-):string  {
+export function getScript(c: Commands, p: Position,
+    useSelectedText: boolean = true,
+    forcePythonSentinels: boolean = true,
+    useSentinels: boolean = true
+): string {
     console.log("get script called");
     return "";
 }
@@ -12517,14 +12664,14 @@ export function getScript(c:Commander, p:Position,
 <t tx="felix.20210215204131.1">/**
   *Move to the last visible node of the present chapter or hoist.
  */
-public lastVisible():Position {
-    const c:Commander = this;
-    let p:Position = c.p;
-    while(1){
-        const next:Position = p.visNext(c);
-        if (next &amp;&amp; next.__bool__() &amp;&amp; next.isVisible(c)){
+public lastVisible(): Position {
+    const c: Commands = this;
+    let p: Position = c.p;
+    while (1) {
+        const next: Position = p.visNext(c);
+        if (next &amp;&amp; next.__bool__() &amp;&amp; next.isVisible(c)) {
             p = next;
-        } else{
+        } else {
             break;
         }
     }
@@ -12536,34 +12683,34 @@ public lastVisible():Position {
  * Given a VNode v, find all valid positions p such that p.v = v.
  * Not really all, just all for each of v's distinct immediate parents.
  */
-public vnode2allPositions(v:VNode):Position[]{
-    const c:Commander = this;
-    const context:Commander = v.context;  // v's commander.
+public vnode2allPositions(v: VNode): Position[] {
+    const c: Commands = this;
+    const context: Commands = v.context;  // v's commander.
     // console.assert(c.fileName === context.fileName);
-    const positions:Position[] = [];
-    let n:number;
-    for(let immediate of v.parents){
-        if(immediate.children.includes(v)){
+    const positions: Position[] = [];
+    let n: number;
+    for (let immediate of v.parents) {
+        if (immediate.children.includes(v)) {
             n = immediate.children.indexOf(v);
-        }else{
+        } else {
             continue;
         }
-        const stack:StackEntry[] =[[v, n]];
-        let isBreak:boolean= false;
-        while(immediate.parents.length){
-            const parent:VNode = immediate.parents[0];
-            if(parent.children.includes(immediate)){
+        const stack: StackEntry[] = [[v, n]];
+        let isBreak: boolean = false;
+        while (immediate.parents.length) {
+            const parent: VNode = immediate.parents[0];
+            if (parent.children.includes(immediate)) {
                 n = parent.children.indexOf(immediate);
-            }else{
-                isBreak=true;
+            } else {
+                isBreak = true;
                 break;
             }
             stack.unshift([immediate, n]);
             immediate = parent;
         }
-        if(!immediate.parents.length &amp;&amp; !isBreak){
+        if (!immediate.parents.length &amp;&amp; !isBreak) {
             [v, n] = stack.pop()!;
-            const p:Position = new Position(v, n, stack);
+            const p: Position = new Position(v, n, stack);
             positions.push(p);
         }
     }
@@ -12574,62 +12721,62 @@ public vnode2allPositions(v:VNode):Position[]{
 <t tx="felix.20210215204322.1">/**
  * Given a VNode v, construct a valid position p such that p.v = v.
  */
-public vnode2position(v:VNode):Position|undefined {
-    const c:Commander = this;
-    const context:Commander = v.context;  // v's commander.
+public vnode2position(v: VNode): Position | undefined {
+    const c: Commands = this;
+    const context: Commands = v.context;  // v's commander.
     // console.assert(c.fileName === context.fileName);
-    const stack:StackEntry[] = [];
-    let n:number;
-    while(v.parents.length){
-        const parent:VNode = v.parents[0];
+    const stack: StackEntry[] = [];
+    let n: number;
+    while (v.parents.length) {
+        const parent: VNode = v.parents[0];
 
-        if(parent.children.includes(v)){
+        if (parent.children.includes(v)) {
             n = parent.children.indexOf(v);
-        }else{
+        } else {
             return undefined;
         }
         stack.unshift([v, n]);
         v = parent;
     }
     // v.parents includes the hidden root node.
-    if(!stack.length){
+    if (!stack.length) {
         // a VNode not in the tree
         return undefined;
     }
     [v, n] = stack.pop()!;
-    const p:Position = new Position(v, n, stack);
+    const p: Position = new Position(v, n, stack);
     return p;
 }
 
 </t>
-<t tx="felix.20210215204844.1">public setMarked(p:Position):void {
-    const c:Commander= this;
+<t tx="felix.20210215204844.1">public setMarked(p: Position): void {
+    const c: Commands = this;
     p.setMarked();
     p.setDirty();  // Defensive programming.
     g.doHook("set-mark", c, p);
 }
 
 </t>
-<t tx="felix.20210215204937.1">/** 
+<t tx="felix.20210215204937.1">/**
  * Return the root position.
  */
-public topPosition():Position | undefined {
-    const c:Commander = this;
-    if (c._topPosition &amp;&amp; c._topPosition.__bool__()){
+public topPosition(): Position | undefined {
+    const c: Commands = this;
+    if (c._topPosition &amp;&amp; c._topPosition.__bool__()) {
         return c._topPosition.copy();
     }
     return undefined;
 }
 
-/** 
+/**
  * Set the root position.
  */
-public setTopPosition(p:Position):void {
-    const c:Commander = this;
-    if (p &amp;&amp; p.__bool__()){
+public setTopPosition(p: Position): void {
+    const c: Commands = this;
+    if (p &amp;&amp; p.__bool__()) {
         c._topPosition = p.copy();
     }
-    else{
+    else {
         c._topPosition = undefined;
     }
 }
@@ -12643,11 +12790,11 @@ public setTopPosition(p:Position):void {
 <t tx="felix.20210218214329.12">/**
  * Update self.timeString and self.lastIndex
  */
-public update():string {
-    const t_s:string = new Date().format("YYYYMMDDhhmmss");
-    if(this.timeString === t_s){
+public update(): string {
+    const t_s: string = new Date().format("YYYYMMDDhhmmss");
+    if (this.timeString === t_s) {
         this.lastIndex += 1;
-    }else{
+    } else {
         this.lastIndex = 1;
         this.timeString = t_s;
     }
@@ -12660,7 +12807,7 @@ public update():string {
 /**
  * Return the id to be used by default in all gnx's
  */
-public getDefaultId():string {
+public getDefaultId(): string {
     return this.defaultId;
 }
 
@@ -12675,16 +12822,16 @@ public setDefaultId(theId: string): void {
  * Create a new gnx for v or an empty string if the hold flag is set.
  * **Important**: the method must allocate a new gnx even if v.fileIndex exists.
  */
-public getNewIndex(v:VNode|undefined, cached:Boolean=false):string {
-    if(!v){
+public getNewIndex(v: VNode | undefined, cached: Boolean = false): string {
+    if (!v) {
         console.log('getNewIndex: v is None');
         return '';
     }
-    const c:Commander = v.context;
-    const fc:any = c.fileCommands;
-    const t_s:string = this.update();
-        // Updates self.lastTime and self.lastIndex.
-    const gnx:string = g.toUnicode(`${this.userId}.${t_s}.${this.lastIndex}`);
+    const c: Commands = v.context;
+    const fc: any = c.fileCommands;
+    const t_s: string = this.update();
+    // Updates self.lastTime and self.lastIndex.
+    const gnx: string = g.toUnicode(`${this.userId}.${t_s}.${this.lastIndex}`);
     v.fileIndex = gnx;
     this.check_gnx(c, gnx, v);
     fc.gnxDict[gnx] = v;
@@ -12695,9 +12842,9 @@ public getNewIndex(v:VNode|undefined, cached:Boolean=false):string {
 <t tx="felix.20210218214329.8">/**
  * Handle all gnx-related tasks for VNode.__init__.
  */
-public new_vnode_helper(c:Commander, gnx:string|undefined, v:VNode):void {
-    const ni:NodeIndices = this;
-    if(gnx){
+public new_vnode_helper(c: Commands, gnx: string | undefined, v: VNode): void {
+    const ni: NodeIndices = this;
+    if (gnx) {
         v.fileIndex = gnx;
         ni.check_gnx(c, gnx, v);
         c.fileCommands.gnxDict[gnx] = v;
@@ -12714,8 +12861,8 @@ public new_vnode_helper(c:Commander, gnx:string|undefined, v:VNode):void {
 
 </t>
 <t tx="felix.20210220190156.1">export class FileCommands {
-    
-    public c: Commander;
+
+    public c: Commands;
     public gnxDict: { [key: string]: VNode; };
 
     @others
@@ -12723,18 +12870,21 @@ public new_vnode_helper(c:Commander, gnx:string|undefined, v:VNode):void {
 }
 
 </t>
-<t tx="felix.20210220194059.1">import { FileCommands } from "./leoFileCommands";
-import { Position, VNode, StackEntry } from "./leoNodes";
-import * as g from './leoGlobals';
+<t tx="felix.20210220194059.1">import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
+import { FileCommands } from "./leoFileCommands";
+import { CommanderOutlineCommands } from "../commands/commanderOutlineCommands";
+import { CommanderFileCommands } from "../commands/commanderFileCommands";
+
+import { Position, VNode, StackEntry } from "./leoNodes";
 
 </t>
 <t tx="felix.20210220195150.1">import { VNode } from "./leoNodes";
-import { Commander } from "./leoCommander";
+import { Commands } from "./leoCommands";
 import * as fs from 'fs';
 
 </t>
-<t tx="felix.20210220200109.1">constructor(c:Commander) {
+<t tx="felix.20210220200109.1">constructor(c: Commands) {
     this.c = c;
     this.gnxDict = {};
 }
@@ -12743,26 +12893,26 @@ import * as fs from 'fs';
 <t tx="felix.20210221010822.1">/**
  * Get g.app.leoID from various sources.
  */
-public setLeoID(useDialog:boolean=true, verbose:boolean=true):string{
+public setLeoID(useDialog: boolean = true, verbose: boolean = true): string {
     this.leoID = "";
-    
+
     // tslint:disable-next-line: strict-comparisons
     console.assert(this === g.app);
-    
+
     verbose = verbose &amp;&amp; !g.unitTesting &amp;&amp; !this.silentMode;
-    
+
     this.leoID = this.cleanLeoID(os.userInfo().username, 'os.userInfo().username');
-    
+
     return this.leoID;
     // table = (self.setIDFromSys, self.setIDFromFile, self.setIDFromEnv,)
     // for func in table:
-        // func(verbose)
-        // if self.leoID:
-            // return self.leoID
+    // func(verbose)
+    // if self.leoID:
+    // return self.leoID
     // if useDialog:
-        // self.setIdFromDialog()
-        // if self.leoID:
-            // self.setIDFile()
+    // self.setIdFromDialog()
+    // if self.leoID:
+    // self.setIDFile()
     // return self.leoID
 }
 
@@ -12770,18 +12920,18 @@ public setLeoID(useDialog:boolean=true, verbose:boolean=true):string{
 <t tx="felix.20210221010822.2">/**
  * #1404: Make sure that the given Leo ID will not corrupt a .leo file.
  */
-public cleanLeoID(id_:string, tag:string):string {
-    const old_id:string = id_.toString();
-    try{
+public cleanLeoID(id_: string, tag: string): string {
+    const old_id: string = id_.toString();
+    try {
         id_ = id_.replace(/\./g, "").replace(/\,/g, "").replace(/\"/g, "").replace(/\'/g, "");
         //  Remove *all* whitespace: https://stackoverflow.com/questions/3739909
         id_ = id_.split(' ').join('');
     }
-    catch(exception){
+    catch (exception) {
         g.es_exception();
         id_ = '';
     }
-    if (id_.length &lt; 3){
+    if (id_.length &lt; 3) {
         throw new Error("unknownAttributes ValueError");
         // TODO: Show Leo Id syntax error message
         // g.EmergencyDialog(
@@ -12800,19 +12950,19 @@ public cleanLeoID(id_:string, tag:string):string {
  *
  * Otherwise, create an @edit or @file node for the external file.
  */
-public initWrapperLeoFile(c:Commander, fn:string):Commander {
+public initWrapperLeoFile(c: Commands, fn: string): Commands {
     // lm = self
     // Use the config params to set the size and location of the window.
-    
+
     // frame = c.frame
     // frame.setInitialWindowGeometry()
     // frame.deiconify()
     // frame.lift()
-    
+
     // #1570: Resize the _new_ frame.
     // frame.splitVerticalFlag, r1, r2 = frame.initialRatios()
     // frame.resizePanesToRatio(r1, r2)
-    
+
     /*
     if not g.os_path_exists(fn):
         p = c.rootPosition()
@@ -12856,20 +13006,20 @@ public initWrapperLeoFile(c:Commander, fn:string):Commander {
 }
 
 </t>
-<t tx="felix.20210222013445.1">public openLeoOrZipFile(fn:string):any {
-    const lm:LoadManager = this;
-    if( fn.endsWith('.db')){
+<t tx="felix.20210222013445.1">public openLeoOrZipFile(fn: string): any {
+    const lm: LoadManager = this;
+    if (fn.endsWith('.db')) {
         // return sqlite3.connect(fn)
         return undefined;
     }
-    let theFile:any;
+    let theFile: any;
     // zipped = lm.isZippedFile(fn)
-    
-    // TODO 
+
+    // TODO
     // if(!!fn &amp;&amp; fn.endsWith('.leo') &amp;&amp; g.os_path_exists(fn)){
-        // theFile = lm.openLeoFile(fn);
+    // theFile = lm.openLeoFile(fn);
     // }else{
-        // theFile = undefined;
+    // theFile = undefined;
     // }
     return theFile;
 }
@@ -12877,16 +13027,29 @@ public initWrapperLeoFile(c:Commander, fn:string):Commander {
 </t>
 <t tx="felix.20210223002937.1">constructor(
     fileName: string,
-    gui?:LeoUI,
-    previousSettings?:any,
-    relativeFileName?:any
+    gui?: LeoUI,
+    previousSettings?: any,
+    relativeFileName?: any
 ) {
-    this.mFileName = fileName;
+    const c: Commands = this;
+
+    // From Official Ivars
     this.gui = gui || g.app.gui!;
+
+    // From initFileIvars
+    this.mFileName = fileName || '';
+    this.mRelativeFileName = relativeFileName || '';
+
+    // From initObjects
+    const gnx: string = 'hidden-root-vnode-gnx';
     this.fileCommands = new FileCommands(this); // c.fileCommands = DummyFileCommands()
     this.hiddenRootNode = new VNode(this, 'hidden-root-vnode-gnx');
     this.hiddenRootNode.h = '&lt;hidden root vnode&gt;';
-    this.fileCommands.gnxDict = {}; // RESET gnxDict 
+    this.fileCommands.gnxDict = {}; // RESET gnxDict
+
+    // From finishCreate
+    c.createCommandNames();
+
 }
 
 </t>
@@ -12894,46 +13057,46 @@ public initWrapperLeoFile(c:Commander, fn:string):Commander {
 <t tx="felix.20210223220814.10">//Init the settings *before* initing the objects.
 // c = self
 // from leo.core import leoConfig
-public config:any = {}; // TODO
+public config: any = {}; // TODO
 // c.config = leoConfig.LocalConfigManager(c, previousSettings)
 // g.app.config.setIvarsFromSettings(c)
 
 </t>
 <t tx="felix.20210223220814.2">// Init ivars used while executing a command.
-public commandsDict: {[key:string]:(p:any) =&gt; any } = {}; // Keys are command names, values are functions.
-public disableCommandsMessage:string = ''; // The presence of this message disables all commands.
-public hookFunction:any = undefined; // One of three places that g.doHook looks for hook functions.
+public commandsDict: { [key: string]: (p?: any) =&gt; any } = {}; // Keys are command names, values are functions.
+public disableCommandsMessage: string = ''; // The presence of this message disables all commands.
+public hookFunction: any = undefined; // One of three places that g.doHook looks for hook functions.
 
-public ignoreChangedPaths= false; // True: disable path changed message in at.WriteAllHelper.
-public inCommand:boolean = false; // Interlocks to prevent premature closing of a window.
-public isZipped:boolean = false; // Set by g.openWithFileName.
-public outlineToNowebDefaultFileName:string = "noweb.nw"; // For Outline To Noweb dialog.
-    
+public ignoreChangedPaths = false; // True: disable path changed message in at.WriteAllHelper.
+public inCommand: boolean = false; // Interlocks to prevent premature closing of a window.
+public isZipped: boolean = false; // Set by g.openWithFileName.
+public outlineToNowebDefaultFileName: string = "noweb.nw"; // For Outline To Noweb dialog.
+
 // For tangle/untangle
-public tangle_errors:number = 0;
+public tangle_errors: number = 0;
 // Default Tangle options
-public use_header_flag:boolean = false;
-public output_doc_flag:boolean = false;
+public use_header_flag: boolean = false;
+public output_doc_flag: boolean = false;
 // For hoist/dehoist commands.
-public hoistStack:HoistStackEntry[] = []; // Stack of nodes to be root of drawn tree.
+public hoistStack: HoistStackEntry[] = []; // Stack of nodes to be root of drawn tree.
 // For outline navigation.
-public navPrefix:string = ''; // Must always be a string.
-public navTime:any = undefined;
+public navPrefix: string = ''; // Must always be a string.
+public navTime: any = undefined;
 
-public sqlite_connection:any = undefined;
+public sqlite_connection: any = undefined;
 
 </t>
 <t tx="felix.20210223220814.3">// Init Commander debugging ivars.
-public command_count:number = 0;
-public scanAtPathDirectivesCount:number = 0;
-public trace_focus_count:number = 0;
+public command_count: number = 0;
+public scanAtPathDirectivesCount: number = 0;
+public trace_focus_count: number = 0;
 
 </t>
 <t tx="felix.20210223220814.4">// Init per-document ivars.
-public expansionLevel:number = 0; // The expansion level of this outline.
-public expansionNode:Position|undefined = undefined; // The last node we expanded or contracted.
-public nodeConflictList:VNode[] = []; // List of nodes with conflicting read-time data.
-public nodeConflictFileName:string | undefined = undefined; // The fileName for c.nodeConflictList.
+public expansionLevel: number = 0; // The expansion level of this outline.
+public expansionNode: Position | undefined = undefined; // The last node we expanded or contracted.
+public nodeConflictList: VNode[] = []; // List of nodes with conflicting read-time data.
+public nodeConflictFileName: string | undefined = undefined; // The fileName for c.nodeConflictList.
 public user_dict = {}; // Non-persistent dictionary for free use by scripts and plugins.
 
 </t>
@@ -12941,7 +13104,7 @@ public user_dict = {}; // Non-persistent dictionary for free use by scripts and 
 public configInited = false;
 public doubleClickFlag = false;
 public exists = true; // Indicate that this class exists and has not been destroyed.
-        
+
 public in_qt_dialog = false; // True: in a qt dialog.
 public loading = false; // True: we are loading a file: disables c.setChanged()
 public promptingForClose = false; // True: lock out additional closing dialogs.
@@ -12955,65 +13118,65 @@ public requestLaterRedraw = false;
 </t>
 <t tx="felix.20210223220814.6">// Init file-related ivars of the commander.
 public changed = false; // True: the ouline has changed since the last save.
-public ignored_at_file_nodes:string[] = []; // (headers)
-public import_error_nodes:string[] = []; // List of nodes for c.raise_error_dialogs. (headers)
-public last_dir:string|undefined = undefined; // The last used directory.
-public mFileName:string =''; // Do _not_ use os_path_norm: it converts an empty path to '.' (!!)
-public mRelativeFileName:string =  '';
-public openDirectory:string|undefined  = undefined;
-public orphan_at_file_nodes:string[] = []; // List of orphaned nodes for c.raise_error_dialogs. (headers)
-public wrappedFileName:string|undefined = undefined; // The name of the wrapped file, for wrapper commanders, set by LM.initWrapperLeoFile
+public ignored_at_file_nodes: string[] = []; // (headers)
+public import_error_nodes: string[] = []; // List of nodes for c.raise_error_dialogs. (headers)
+public last_dir: string | undefined = undefined; // The last used directory.
+public mFileName: string = ''; // Do _not_ use os_path_norm: it converts an empty path to '.' (!!)
+public mRelativeFileName: string = '';
+public openDirectory: string | undefined = undefined;
+public orphan_at_file_nodes: string[] = []; // List of orphaned nodes for c.raise_error_dialogs. (headers)
+public wrappedFileName: string | undefined = undefined; // The name of the wrapped file, for wrapper commanders, set by LM.initWrapperLeoFile
 
 </t>
 <t tx="felix.20210223220814.7">// Init Commander ivars corresponding to user options.
-public fixed:boolean = false;
+public fixed: boolean = false;
 public fixedWindowPosition = [];
-public forceExecuteEntireBody:boolean = false;
-public focus_border_color:string = 'white';
-public focus_border_width:number = 1;  // pixels;
-public outlineHasInitialFocus:boolean=false;
-public page_width:number = 132;
-public sparse_find:boolean = true;
-public sparse_move:boolean = true;
-public sparse_spell:boolean = true;
-public stayInTreeAfterSelect:boolean = false;
-public tab_width:number = -4;
-public tangle_batch_flag:boolean = false;
-public target_language:string = "python"; // TODO : switch to js for Leojs?
-public untangle_batch_flag:boolean = false;
-    // # self.use_body_focus_border = True
-    // # self.use_focus_border = False
-    // # Replaced by style-sheet entries.
-public vim_mode:boolean = false;
+public forceExecuteEntireBody: boolean = false;
+public focus_border_color: string = 'white';
+public focus_border_width: number = 1;  // pixels;
+public outlineHasInitialFocus: boolean = false;
+public page_width: number = 132;
+public sparse_find: boolean = true;
+public sparse_move: boolean = true;
+public sparse_spell: boolean = true;
+public stayInTreeAfterSelect: boolean = false;
+public tab_width: number = -4;
+public tangle_batch_flag: boolean = false;
+public target_language: string = "python"; // TODO : switch to js for Leojs?
+public untangle_batch_flag: boolean = false;
+// # self.use_body_focus_border = True
+// # self.use_focus_border = False
+// # Replaced by style-sheet entries.
+public vim_mode: boolean = false;
 
 </t>
 <t tx="felix.20210223220814.8">// These ivars are set later by leoEditCommands.createEditCommanders
-public abbrevCommands:any = undefined;
-public editCommands:any = undefined;
-public db:any = {};  // May be set to a PickleShare instance later.
-public bufferCommands:any = undefined;
-public chapterCommands:any = undefined;
-public controlCommands:any = undefined;
-public convertCommands:any = undefined;
-public debugCommands:any = undefined;
-public editFileCommands:any = undefined;
-public evalController:any = undefined;
-public gotoCommands:any = undefined;
-public helpCommands:any = undefined;
-public keyHandler:any = undefined; // TODO same as k
-public k:any = undefined; // TODO same as keyHandler
-public keyHandlerCommands:any = undefined;
-public killBufferCommands:any = undefined;
-public leoCommands:any = undefined;
-public macroCommands:any = undefined;
-public miniBufferWidget:any = undefined;
-public printingController:any = undefined;
-public queryReplaceCommands:any = undefined;
-public rectangleCommands:any = undefined;
-public searchCommands:any = undefined;
-public spellCommands:any = undefined;
-public leoTestManager:any = undefined;
-public vimCommands:any = undefined;
+public abbrevCommands: any = undefined;
+public editCommands: any = undefined;
+public db: any = {};  // May be set to a PickleShare instance later.
+public bufferCommands: any = undefined;
+public chapterCommands: any = undefined;
+public controlCommands: any = undefined;
+public convertCommands: any = undefined;
+public debugCommands: any = undefined;
+public editFileCommands: any = undefined;
+public evalController: any = undefined;
+public gotoCommands: any = undefined;
+public helpCommands: any = undefined;
+public keyHandler: any = undefined; // TODO same as k
+public k: any = undefined; // TODO same as keyHandler
+public keyHandlerCommands: any = undefined;
+public killBufferCommands: any = undefined;
+public leoCommands: any = undefined;
+public macroCommands: any = undefined;
+public miniBufferWidget: any = undefined;
+public printingController: any = undefined;
+public queryReplaceCommands: any = undefined;
+public rectangleCommands: any = undefined;
+public searchCommands: any = undefined;
+public spellCommands: any = undefined;
+public leoTestManager: any = undefined;
+public vimCommands: any = undefined;
 
 </t>
 <t tx="felix.20210223220814.9">// * initObjects done in constructor.
@@ -13024,8 +13187,8 @@ public vimCommands:any = undefined;
 // assert not hasattr(c, 'fileCommands'), c.fileCommands
 
 // class DummyFileCommands:
-    // def __init__(self):
-        // self.gnxDict = {}
+// def __init__(self):
+// self.gnxDict = {}
 
 // c.fileCommands = DummyFileCommands()
 // self.hiddenRootNode = leoNodes.VNode(context=c, gnx=gnx)
@@ -13034,7 +13197,7 @@ public vimCommands:any = undefined;
 // # Create the gui frame.
 // title = c.computeWindowTitle(c.mFileName)
 // if not g.app.initing:
-    // g.doHook("before-create-leo-frame", c=c)
+// g.doHook("before-create-leo-frame", c=c)
 // self.frame = gui.createLeoFrame(c, title)
 // assert self.frame
 // assert self.frame.c == c
@@ -13055,8 +13218,8 @@ public vimCommands:any = undefined;
 // from leo.commands import bufferCommands
 // from leo.commands import checkerCommands
 // assert checkerCommands
-    // # To suppress a pyflakes warning.
-    // # The import *is* required to define commands.
+// # To suppress a pyflakes warning.
+// # The import *is* required to define commands.
 // from leo.commands import controlCommands
 // from leo.commands import convertCommands
 // from leo.commands import debugCommands
@@ -13129,49 +13292,50 @@ public vimCommands:any = undefined;
 // self.undoer             = leoUndo.Undoer(c)
 // # Create the list of subcommanders.
 // self.subCommanders = [
-    // self.abbrevCommands,
-    // self.atFileCommands,
-    // self.bufferCommands,
-    // self.chapterController,
-    // self.controlCommands,
-    // self.convertCommands,
-    // self.debugCommands,
-    // self.editCommands,
-    // self.editFileCommands,
-    // self.fileCommands,
-    // self.findCommands,
-    // self.gotoCommands,
-    // self.helpCommands,
-    // self.importCommands,
-    // self.keyHandler,
-    // self.keyHandlerCommands,
-    // self.killBufferCommands,
-    // self.persistenceController,
-    // self.printingController,
-    // self.rectangleCommands,
-    // self.rstCommands,
-    // self.shadowController,
-    // self.spellCommands,
-    // self.tangleCommands,
-    // self.testManager,
-    // self.vimCommands,
-    // self.undoer,
+// self.abbrevCommands,
+// self.atFileCommands,
+// self.bufferCommands,
+// self.chapterController,
+// self.controlCommands,
+// self.convertCommands,
+// self.debugCommands,
+// self.editCommands,
+// self.editFileCommands,
+// self.fileCommands,
+// self.findCommands,
+// self.gotoCommands,
+// self.helpCommands,
+// self.importCommands,
+// self.keyHandler,
+// self.keyHandlerCommands,
+// self.killBufferCommands,
+// self.persistenceController,
+// self.printingController,
+// self.rectangleCommands,
+// self.rstCommands,
+// self.shadowController,
+// self.spellCommands,
+// self.tangleCommands,
+// self.testManager,
+// self.vimCommands,
+// self.undoer,
 // ]
 // # Other objects
 // c.configurables = c.subCommanders[:]
-    // # A list of other classes that have a reloadSettings method
+// # A list of other classes that have a reloadSettings method
 // c.db = g.app.commander_cacher.get_wrapper(c)
 // from leo.plugins import free_layout
 // self.free_layout = free_layout.FreeLayoutController(c)
 // if hasattr(g.app.gui, 'styleSheetManagerClass'):
-    // self.styleSheetManager = g.app.gui.styleSheetManagerClass(c)
-    // self.subCommanders.append(self.styleSheetManager)
+// self.styleSheetManager = g.app.gui.styleSheetManagerClass(c)
+// self.subCommanders.append(self.styleSheetManager)
 // else:
-    // self.styleSheetManager = None
+// self.styleSheetManager = None
+
 </t>
 <t tx="felix.20210224000242.1">export interface HoistStackEntry {
-    p:Position;
-    expanded:boolean;
+    p: Position;
+    expanded: boolean;
 }
 
 </t>
@@ -13350,12 +13514,2972 @@ public readExternalFiles(fileName):Position {
 <t tx="felix.20210228004000.1">/**
  * Return all root children P nodes
  */
-public *all_Root_Children(copy=true): Generator&lt;Position&gt; {
-    const c:Commander = this;
-    const p:Position|undefined = c.rootPosition(); // Make one copy.
-    while (p &amp;&amp; p.__bool__()){
+public *all_Root_Children(copy = true): Generator&lt;Position&gt; {
+    const c: Commands = this;
+    const p: Position | undefined = c.rootPosition(); // Make one copy.
+    while (p &amp;&amp; p.__bool__()) {
         yield (copy ? p.copy() : p);
         p.moveToNext();
+    }
+}
+
+</t>
+<t tx="felix.20211002194716.1"></t>
+<t tx="felix.20211003011145.1">/**
+ * File Commands Test
+ */
+public leoFileCommandsTest(): void {
+    // Test command
+    console.log('CORE leo fileCommandsTest Called !!');
+}
+
+</t>
+<t tx="felix.20211003223641.1">/**
+ * * Builds a unique Id from gnx and stack, plus collapsed state,
+ * for vscode to distinguish the collapsed state.
+ */
+public buildId(p_position: Position, p_collapsed: number): string {
+    // concatenate gnx, stacks gnx's, and collapsible state number.
+    // (vscode uses id for collapsible state)
+    let w_stringId = this.treeId.toString() +
+        p_position.v.gnx + p_position.childIndex().toString() +
+        p_position.stack.map(p_stackEntry =&gt; p_stackEntry[0].gnx + p_stackEntry[1].toString()).join("");
+        // p_collapsed.toString(); // Added Uniqueness:  VSCode's collapsible state linked to id
+
+    return w_stringId;
+}
+
+</t>
+<t tx="felix.20211003233639.1">public incTreeId(): void {
+    this.treeId++;
+}
+
+</t>
+<t tx="felix.20211005023225.1"></t>
+<t tx="felix.20211005023421.1"></t>
+<t tx="felix.20211005023456.1">/**
+ * Select a new position, redrawing the screen *only* if we must
+ * change chapters.
+ */
+public selectPosition(p: Position): void {
+
+    const trace = true; // For # 2167.
+    const c: Commands = this;
+    // const cc = c.chapterController;
+
+    if (!p || !p.__bool__()) {
+        if (!g.app.batchMode) { // A serious error.
+            g.trace('Warning: no p', g.callers());
+        }
+    }
+
+    // if(cc &amp;&amp; !cc.selectChapterLockout){
+    //     cc.selectChapterForPosition(p)
+    //     // Calls c.redraw only if the chapter changes.
+    // }
+
+    // De-hoist as necessary to make p visible.
+    if (c.hoistStack) {
+        while (c.hoistStack.length) {
+            let bunch = c.hoistStack[c.hoistStack.length - 1];
+            if (c.positionExists(p, bunch.p)) {
+                break;
+            } else {
+                if (trace) {
+                    console.log('trace in selectPosition');
+
+                    // TODO
+                    // command_name = c.command_name if c.inCommand else 'None'
+                    // print('')
+                    // print('pop hoist stack! callers:', g.callers())
+                    // g.printObj(c.hoistStack, tag='c.hoistStack before pop')
+                    // print(f"c.command_name: {command_name}")
+                    // print('lossage')
+                    // for i, data in enumerate(reversed(g.app.lossage)):
+                    //     print(f"{i:&gt;2} {data!r}")
+                }
+                bunch = c.hoistStack.pop()!;
+            }
+        }
+    }
+
+    c.setCurrentPosition(p);
+
+    // Compatibility, but confusing.
+    // TODO : Is this needed?
+    // selectVnode = selectPosition
+
+}
+
+</t>
+<t tx="felix.20211005023800.1"></t>
+<t tx="felix.20211005023821.1">/**
+ * Contract all nodes in the outline.
+ */
+public contractAllHeadlines(): void {
+    //
+
+    /*
+        c = self
+    for p in c.all_positions():
+        p.contract()
+    # Select the topmost ancestor of the presently selected node.
+    p = c.p
+    while p and p.hasParent():
+        p.moveToParent()
+    if redrawFlag:
+        # Do a *full* redraw.
+        # c.redraw_after_contract(p) only contracts a single position.
+        c.redraw(p)
+    c.expansionLevel = 1  # Reset expansion level.
+*/
+}
+
+</t>
+<t tx="felix.20211005023931.1">/*
+def contractSubtree(self, p):
+    for p in p.subtree():
+        p.contract()
+*/
+
+</t>
+<t tx="felix.20211005024008.1">/*
+def expandSubtree(self, v, redraw=True):
+    c = self
+    last = v.lastNode()
+    while v and v != last:
+        v.expand()
+        v = v.threadNext()
+    if redraw:
+        c.redraw()
+
+*/
+
+</t>
+<t tx="felix.20211005024009.1">/*
+def expandToLevel(self, level):
+
+    c = self
+    n = c.p.level()
+    old_expansion_level = c.expansionLevel
+    max_level = 0
+    for p in c.p.self_and_subtree(copy=False):
+        if p.level() - n + 1 &lt; level:
+            p.expand()
+            max_level = max(max_level, p.level() - n + 1)
+        else:
+            p.contract()
+    c.expansionNode = c.p.copy()
+    c.expansionLevel = max_level + 1
+    if c.expansionLevel != old_expansion_level:
+        c.redraw()
+    # It's always useful to announce the level.
+    # c.k.setLabelBlue('level: %s' % (max_level+1))
+    # g.es('level', max_level + 1)
+    c.frame.putStatusLine(f"level: {max_level + 1}")
+        # bg='red', fg='red')
+
+*/
+
+</t>
+<t tx="felix.20211006225245.1">"configuration": {
+  "title": "Leojs",
+  "properties": {
+    "leojs.checkForChangeExternalFiles": {
+      "scope": "application",
+      "default": "none",
+      "type": "string",
+      "description": "Set default for checking changes to external files",
+      "enum": [
+        "none",
+        "force-check",
+        "force-ignore"
+      ],
+      "enumDescriptions": [
+        "Default from Leo's config",
+        "Check for changes",
+        "Ignore all changes"
+      ]
+    },
+    "leojs.defaultReloadIgnore": {
+      "scope": "application",
+      "default": "none",
+      "type": "string",
+      "description": "Set default for derived files to always reload, or always ignore, when changes are detected",
+      "enum": [
+        "none",
+        "yes-all",
+        "no-all"
+      ],
+      "enumDescriptions": [
+        "Choose each time",
+        "Reload All",
+        "Ignore All"
+      ]
+    },
+    "leojs.leoTreeBrowse": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Specifies whether to use Leo's style of tree browsing with the arrow keys"
+    },
+    "leojs.treeKeepFocus": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Specifies whether to keep focus in the outline when selecting a node - overridden by \"leoTreeBrowse\""
+    },
+    "leojs.treeKeepFocusWhenAside": {
+      "scope": "application",
+      "default": false,
+      "type": "boolean",
+      "description": "Specifies whether to keep focus in the outline when opening a body pane on the side"
+    },
+    "leojs.statusBarString": {
+      "scope": "application",
+      "default": "",
+      "type": "string",
+      "description": "Sets the message string of the Status Bar Indicator"
+    },
+    "leojs.statusBarColor": {
+      "scope": "application",
+      "default": "fb7c47",
+      "type": "string",
+      "description": "Specifies the hexadecimal color string for the Status Bar Indicator"
+    },
+    "leojs.treeInExplorer": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Show the outline tree in the explorer view"
+    },
+    "leojs.showOpenAside": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Offer 'Open to the Side' in nodes context menu"
+    },
+    "leojs.showEditOnNodes": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows 'Edit Headline' button on tree nodes"
+    },
+    "leojs.showArrowsOnNodes": {
+      "scope": "application",
+      "default": false,
+      "type": "boolean",
+      "description": "Shows 'Move Node' arrow buttons on tree nodes"
+    },
+    "leojs.showAddOnNodes": {
+      "scope": "application",
+      "default": false,
+      "type": "boolean",
+      "description": "Shows 'Insert' button on tree nodes"
+    },
+    "leojs.showMarkOnNodes": {
+      "scope": "application",
+      "default": false,
+      "type": "boolean",
+      "description": "Shows 'Mark/Unmark' buttons on tree nodes"
+    },
+    "leojs.showCloneOnNodes": {
+      "scope": "application",
+      "default": false,
+      "type": "boolean",
+      "description": "Shows 'Clone' button on tree nodes"
+    },
+    "leojs.showCopyOnNodes": {
+      "scope": "application",
+      "default": false,
+      "type": "boolean",
+      "description": "Shows 'Copy' button on tree nodes"
+    },
+    "leojs.invertNodeContrast": {
+      "scope": "application",
+      "default": false,
+      "type": "boolean",
+      "description": "Inverts the contrast of the dirty/clean border aspect of tree nodes"
+    },
+    "leojs.showEditionOnBody": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows clone, delete and insert nodes above the body pane"
+    },
+    "leojs.showClipboardOnBody": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows cut, copy &amp; paste nodes above the body pane"
+    },
+    "leojs.showPromoteOnBody": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows promote and demote above the body pane"
+    },
+    "leojs.showExecuteOnBody": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows 'Execute Script' above the body pane"
+    },
+    "leojs.showExtractOnBody": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows extract commands above the body pane"
+    },
+    "leojs.showImportOnBody": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows 'Import File' above the body pane"
+    },
+    "leojs.showRefreshOnBody": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows 'Refresh from disk' above the body pane"
+    },
+    "leojs.showHoistOnBody": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows Hoist commands above the body pane"
+    },
+    "leojs.showMarkOnBody": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows Mark commands above the body pane"
+    },
+    "leojs.showSortOnBody": {
+      "scope": "application",
+      "default": true,
+      "type": "boolean",
+      "description": "Shows 'Sort Siblings' above the body pane"
+    }
+  }
+},
+</t>
+<t tx="felix.20211007213344.1">import * as vscode from "vscode";
+import * as utils from "./utils";
+import { ConfigMembers, ConfigSetting, FontSettings } from "./types";
+import { Constants } from "./constants";
+import { LeoUI } from "./leoUI";
+
+@language typescript
+@tabwidth -4
+@others
+</t>
+<t tx="felix.20211007213344.10">/**
+ * * Check if the workbench.editor.enablePreview flag is set
+ * @param p_forced Forces the setting instead of just suggesting with a message
+ */
+public checkEnablePreview(p_forced?: boolean): void {
+    let w_result: any = true;
+    const w_setting = vscode.workspace.getConfiguration("workbench.editor");
+    if (w_setting.inspect("enablePreview")!.globalValue === undefined) {
+        w_result = w_setting.inspect("enablePreview")!.defaultValue;
+    } else {
+        w_result = w_setting.inspect("enablePreview")!.globalValue;
+    }
+    if (w_result === false) {
+        if (p_forced) {
+            this.setEnablePreview();
+            vscode.window.showInformationMessage("'Enable Preview' setting was set");
+        } else {
+            // if (!this._leoUI.finishedStartup) {
+            //     return;
+            // }
+            vscode.window.showWarningMessage("'Enable Preview' setting is recommended (currently disabled)", "Fix it")
+                .then(p_chosenButton =&gt; {
+                    if (p_chosenButton === "Fix it") {
+                        vscode.commands.executeCommand(Constants.COMMANDS.SET_ENABLE_PREVIEW);
+                    }
+                });
+        }
+    }
+}
+
+</t>
+<t tx="felix.20211007213344.11">/**
+ * * Check if the 'workbench.editor.closeEmptyGroups' setting is false
+ * @param p_forced Forces the setting instead of just suggesting with a message
+ */
+public checkCloseEmptyGroups(p_forced?: boolean): void {
+    let w_result: any = false;
+    const w_setting = vscode.workspace.getConfiguration("workbench.editor");
+    if (w_setting.inspect("closeEmptyGroups")!.globalValue === undefined) {
+        w_result = w_setting.inspect("closeEmptyGroups")!.defaultValue;
+    } else {
+        w_result = w_setting.inspect("closeEmptyGroups")!.globalValue;
+    }
+    if (w_result === true) {
+        if (p_forced) {
+            this.clearCloseEmptyGroups();
+            vscode.window.showInformationMessage("'Close Empty Groups' setting was cleared");
+        } else {
+            // if (!this._leoUI.finishedStartup) {
+            //     return;
+            // }
+            vscode.window.showWarningMessage("'Close Empty Groups' setting is NOT recommended!", "Fix it")
+                .then(p_chosenButton =&gt; {
+                    if (p_chosenButton === "Fix it") {
+                        vscode.commands.executeCommand(Constants.COMMANDS.CLEAR_CLOSE_EMPTY_GROUPS);
+                    }
+                });
+        }
+    }
+}
+
+</t>
+<t tx="felix.20211007213344.12">/**
+ * * Check if the workbench.editor.closeOnFileDelete flag is set
+ * @param p_forced Forces the setting instead of just suggesting with a message
+ */
+public checkCloseOnFileDelete(p_forced?: boolean): void {
+    let w_result: any = true;
+    const w_setting = vscode.workspace.getConfiguration("workbench.editor");
+    if (w_setting.inspect("closeOnFileDelete")!.globalValue === undefined) {
+        w_result = w_setting.inspect("closeOnFileDelete")!.defaultValue;
+    } else {
+        w_result = w_setting.inspect("closeOnFileDelete")!.globalValue;
+    }
+    if (w_result === false) {
+        if (p_forced) {
+            this.setCloseOnFileDelete();
+            vscode.window.showInformationMessage("'Close on File Delete' setting was set");
+
+        } else {
+            // if (!this._leoUI.finishedStartup) {
+            //     return;
+            // }
+            vscode.window.showWarningMessage("'Close on File Delete' setting is recommended (currently disabled)", "Fix it")
+                .then(p_chosenButton =&gt; {
+                    if (p_chosenButton === "Fix it") {
+                        vscode.commands.executeCommand(Constants.COMMANDS.SET_CLOSE_ON_FILE_DELETE);
+                    }
+                });
+        }
+    }
+}
+
+</t>
+<t tx="felix.20211007213344.13">/**
+ * * Build config from settings from vscode's saved config settings
+ */
+public buildFromSavedSettings(): Promise&lt;unknown&gt; {
+    // Shorthand pointers for readability
+    const GET = vscode.workspace.getConfiguration;
+    const NAME = Constants.CONFIG_NAME;
+    const NAMES = Constants.CONFIG_NAMES;
+    const DEFAULTS = Constants.CONFIG_DEFAULTS;
+    const FLAGS = Constants.CONTEXT_FLAGS;
+
+    if (this._isBusySettingConfig) {
+        // * Currently setting config, wait until its done all, and this will be called automatically
+        return Promise.resolve();
+    } else {
+        this.checkForChangeExternalFiles = GET(NAME).get(NAMES.CHECK_FOR_CHANGE_EXTERNAL_FILES, DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES);
+        this.defaultReloadIgnore = GET(NAME).get(NAMES.DEFAULT_RELOAD_IGNORE, DEFAULTS.DEFAULT_RELOAD_IGNORE);
+        this.leoTreeBrowse = GET(NAME).get(NAMES.LEO_TREE_BROWSE, DEFAULTS.LEO_TREE_BROWSE);
+        this.treeKeepFocus = GET(NAME).get(NAMES.TREE_KEEP_FOCUS, DEFAULTS.TREE_KEEP_FOCUS);
+        this.treeKeepFocusWhenAside = GET(NAME).get(NAMES.TREE_KEEP_FOCUS_WHEN_ASIDE, DEFAULTS.TREE_KEEP_FOCUS_WHEN_ASIDE);
+        this.statusBarString = GET(NAME).get(NAMES.STATUSBAR_STRING, DEFAULTS.STATUSBAR_STRING);
+        if (this.statusBarString.length &gt; 8) {
+            this.statusBarString = DEFAULTS.STATUSBAR_STRING;
+        }
+        this.statusBarColor = GET(NAME).get(NAMES.STATUSBAR_COLOR, DEFAULTS.STATUSBAR_COLOR);
+        if (!utils.isHexColor(this.statusBarColor)) {
+            this.statusBarColor = DEFAULTS.STATUSBAR_COLOR;
+        }
+        this.treeInExplorer = GET(NAME).get(NAMES.TREE_IN_EXPLORER, DEFAULTS.TREE_IN_EXPLORER);
+        this.showOpenAside = GET(NAME).get(NAMES.SHOW_OPEN_ASIDE, DEFAULTS.SHOW_OPEN_ASIDE);
+        this.showEditOnNodes = GET(NAME).get(NAMES.SHOW_EDIT, DEFAULTS.SHOW_EDIT);
+        this.showArrowsOnNodes = GET(NAME).get(NAMES.SHOW_ARROWS, DEFAULTS.SHOW_ARROWS);
+        this.showAddOnNodes = GET(NAME).get(NAMES.SHOW_ADD, DEFAULTS.SHOW_ADD);
+        this.showMarkOnNodes = GET(NAME).get(NAMES.SHOW_MARK, DEFAULTS.SHOW_MARK);
+        this.showCloneOnNodes = GET(NAME).get(NAMES.SHOW_CLONE, DEFAULTS.SHOW_CLONE);
+        this.showCopyOnNodes = GET(NAME).get(NAMES.SHOW_COPY, DEFAULTS.SHOW_COPY);
+
+        this.showEditionOnBody = GET(NAME).get(NAMES.SHOW_EDITION_BODY, DEFAULTS.SHOW_EDITION_BODY);
+        this.showClipboardOnBody = GET(NAME).get(NAMES.SHOW_CLIPBOARD_BODY, DEFAULTS.SHOW_CLIPBOARD_BODY);
+        this.showPromoteOnBody = GET(NAME).get(NAMES.SHOW_PROMOTE_BODY, DEFAULTS.SHOW_PROMOTE_BODY);
+        this.showExecuteOnBody = GET(NAME).get(NAMES.SHOW_EXECUTE_BODY, DEFAULTS.SHOW_EXECUTE_BODY);
+        this.showExtractOnBody = GET(NAME).get(NAMES.SHOW_EXTRACT_BODY, DEFAULTS.SHOW_EXTRACT_BODY);
+        this.showImportOnBody = GET(NAME).get(NAMES.SHOW_IMPORT_BODY, DEFAULTS.SHOW_IMPORT_BODY);
+        this.showRefreshOnBody = GET(NAME).get(NAMES.SHOW_REFRESH_BODY, DEFAULTS.SHOW_REFRESH_BODY);
+        this.showHoistOnBody = GET(NAME).get(NAMES.SHOW_HOIST_BODY, DEFAULTS.SHOW_HOIST_BODY);
+        this.showMarkOnBody = GET(NAME).get(NAMES.SHOW_MARK_BODY, DEFAULTS.SHOW_MARK_BODY);
+        this.showSortOnBody = GET(NAME).get(NAMES.SHOW_SORT_BODY, DEFAULTS.SHOW_SORT_BODY);
+        this.invertNodeContrast = GET(NAME).get(NAMES.INVERT_NODES, DEFAULTS.INVERT_NODES);
+
+        console.log('gonna set the context flags (check they begin with leojs', FLAGS);
+
+
+        // * Set context for tree items visibility that are based on config options
+        return Promise.all([
+            utils.setContext(FLAGS.LEO_TREE_BROWSE, this.leoTreeBrowse),
+            utils.setContext(FLAGS.TREE_IN_EXPLORER, this.treeInExplorer),
+            utils.setContext(FLAGS.SHOW_OPEN_ASIDE, this.showOpenAside),
+            utils.setContext(FLAGS.SHOW_EDIT, this.showEditOnNodes),
+            utils.setContext(FLAGS.SHOW_ARROWS, this.showArrowsOnNodes),
+            utils.setContext(FLAGS.SHOW_ADD, this.showAddOnNodes),
+            utils.setContext(FLAGS.SHOW_MARK, this.showMarkOnNodes),
+            utils.setContext(FLAGS.SHOW_CLONE, this.showCloneOnNodes),
+            utils.setContext(FLAGS.SHOW_COPY, this.showCopyOnNodes),
+
+            utils.setContext(FLAGS.SHOW_EDITION_BODY, this.showEditionOnBody),
+            utils.setContext(FLAGS.SHOW_CLIPBOARD_BODY, this.showClipboardOnBody),
+            utils.setContext(FLAGS.SHOW_PROMOTE_BODY, this.showPromoteOnBody),
+            utils.setContext(FLAGS.SHOW_EXECUTE_BODY, this.showExecuteOnBody),
+            utils.setContext(FLAGS.SHOW_EXTRACT_BODY, this.showExtractOnBody),
+            utils.setContext(FLAGS.SHOW_IMPORT_BODY, this.showImportOnBody),
+            utils.setContext(FLAGS.SHOW_REFRESH_BODY, this.showRefreshOnBody),
+            utils.setContext(FLAGS.SHOW_HOIST_BODY, this.showHoistOnBody),
+            utils.setContext(FLAGS.SHOW_MARK_BODY, this.showMarkOnBody),
+            utils.setContext(FLAGS.SHOW_SORT_BODY, this.showSortOnBody)
+        ]);
+    }
+}
+
+</t>
+<t tx="felix.20211007213344.2">/**
+ * * Configuration Settings Service
+ */
+export class Config implements ConfigMembers {
+
+    // Config settings used on Leo's side
+    public checkForChangeExternalFiles: string = Constants.CONFIG_DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES;
+    public defaultReloadIgnore: string = Constants.CONFIG_DEFAULTS.DEFAULT_RELOAD_IGNORE;
+    // Config settings used on vscode's side
+    public leoTreeBrowse: boolean = Constants.CONFIG_DEFAULTS.LEO_TREE_BROWSE; // Used as Context Flag
+    public treeKeepFocus: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS;
+    public treeKeepFocusWhenAside: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS_WHEN_ASIDE;
+    public statusBarString: string = Constants.CONFIG_DEFAULTS.STATUSBAR_STRING;
+    public statusBarColor: string = Constants.CONFIG_DEFAULTS.STATUSBAR_COLOR;
+    public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER; // Used as Context Flag
+    public showOpenAside: boolean = Constants.CONFIG_DEFAULTS.SHOW_OPEN_ASIDE; // Used as Context Flag
+    public showEditOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDIT; // Used as Context Flag
+    public showArrowsOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ARROWS; // Used as Context Flag
+    public showAddOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ADD; // Used as Context Flag
+    public showMarkOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK; // Used as Context Flag
+    public showCloneOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLONE; // Used as Context Flag
+    public showCopyOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_COPY; // Used as Context Flag
+
+    public showEditionOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDITION_BODY; // Used as Context Flag
+    public showClipboardOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLIPBOARD_BODY; // Used as Context Flag
+    public showPromoteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_PROMOTE_BODY; // Used as Context Flag
+    public showExecuteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXECUTE_BODY; // Used as Context Flag
+    public showExtractOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXTRACT_BODY; // Used as Context Flag
+    public showImportOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_IMPORT_BODY; // Used as Context Flag
+    public showRefreshOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_REFRESH_BODY; // Used as Context Flag
+    public showHoistOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_HOIST_BODY; // Used as Context Flag
+    public showMarkOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK_BODY; // Used as Context Flag
+    public showSortOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_SORT_BODY; // Used as Context Flag
+
+    public invertNodeContrast: boolean = Constants.CONFIG_DEFAULTS.INVERT_NODES;
+
+    private _isBusySettingConfig: boolean = false;
+    private _needsTreeRefresh: boolean = false;
+
+    constructor(
+        private _context: vscode.ExtensionContext,
+        private _leoUI: LeoUI
+    ) { }
+
+    @others
+}
+</t>
+<t tx="felix.20211007213344.3">/**
+ * * Get actual 'live' Leojs configuration
+ * @returns An object with config settings members such as treeKeepFocus, defaultReloadIgnore, etc.
+ */
+public getConfig(): ConfigMembers {
+    return {
+        checkForChangeExternalFiles: this.checkForChangeExternalFiles,
+        defaultReloadIgnore: this.defaultReloadIgnore,
+        leoTreeBrowse: this.leoTreeBrowse, // Used as Context Flag
+        treeKeepFocus: this.treeKeepFocus,
+        treeKeepFocusWhenAside: this.treeKeepFocusWhenAside,
+        statusBarString: this.statusBarString,
+        statusBarColor: this.statusBarColor,
+        treeInExplorer: this.treeInExplorer, // Used as Context Flag
+        showOpenAside: this.showOpenAside,  // Used as Context Flag
+        showEditOnNodes: this.showEditOnNodes, // Used as Context Flag
+        showArrowsOnNodes: this.showArrowsOnNodes, // Used as Context Flag
+        showAddOnNodes: this.showAddOnNodes, // Used as Context Flag
+        showMarkOnNodes: this.showMarkOnNodes, // Used as Context Flag
+        showCloneOnNodes: this.showCloneOnNodes, // Used as Context Flag
+        showCopyOnNodes: this.showCopyOnNodes, // Used as Context Flag
+
+        showEditionOnBody: this.showEditionOnBody, // Used as Context Flag
+        showClipboardOnBody: this.showClipboardOnBody, // Used as Context Flag
+        showPromoteOnBody: this.showPromoteOnBody, // Used as Context Flag
+        showExecuteOnBody: this.showExecuteOnBody, // Used as Context Flag
+        showExtractOnBody: this.showExtractOnBody, // Used as Context Flag
+        showImportOnBody: this.showImportOnBody, // Used as Context Flag
+        showRefreshOnBody: this.showRefreshOnBody, // Used as Context Flag
+        showHoistOnBody: this.showHoistOnBody, // Used as Context Flag
+        showMarkOnBody: this.showMarkOnBody, // Used as Context Flag
+        showSortOnBody: this.showSortOnBody, // Used as Context Flag
+
+        invertNodeContrast: this.invertNodeContrast,
+    };
+}
+
+</t>
+<t tx="felix.20211007213344.4">/**
+ * * Get config from vscode for the UI font sizes
+ * @returns the font settings object (zoom level and editor font size)
+ */
+public getFontConfig(): FontSettings {
+    let w_zoomLevel = vscode.workspace.getConfiguration(
+        "window"
+    ).get("zoomLevel");
+
+    let w_fontSize = vscode.workspace.getConfiguration(
+        "editor"
+    ).get("fontSize");
+
+    const w_config: FontSettings = {
+        zoomLevel: Number(w_zoomLevel),
+        fontSize: Number(w_fontSize)
+    };
+
+    return w_config;
+}
+
+</t>
+<t tx="felix.20211007213344.5">/**
+ * * Apply changes to the expansion config settings and save them in user settings.
+ * @param p_changes is an array of codes and values to be changed
+ * @returns a promise that resolves upon completion
+ */
+public setLeojsSettings(p_changes: ConfigSetting[]): Promise&lt;unknown&gt; {
+    this._isBusySettingConfig = true;
+    const w_promises: Thenable&lt;void&gt;[] = [];
+    const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
+    p_changes.forEach(i_change =&gt; {
+        if (i_change &amp;&amp; i_change.code.includes(Constants.CONFIG_REFRESH_MATCH)) {
+            // Check if tree refresh is required for hover-icons to be displayed or hidden accordingly
+            this._needsTreeRefresh = true;
+        }
+        // tslint:disable-next-line: strict-comparisons
+        if (w_vscodeConfig.inspect(i_change.code)!.defaultValue === i_change.value) {
+            // Set as undefined - same as default
+            w_promises.push(w_vscodeConfig.update(i_change.code, undefined, true));
+        } else {
+            // Set as value which is not default
+            w_promises.push(w_vscodeConfig.update(i_change.code, i_change.value, true));
+        }
+    });
+    return Promise.all(w_promises).then(() =&gt; {
+        if (this._needsTreeRefresh) {
+            this._needsTreeRefresh = false;
+            setTimeout(() =&gt; {
+                this._leoUI.configTreeRefresh();
+            }, 200);
+        }
+        this._isBusySettingConfig = false;
+        return this.buildFromSavedSettings(); // Refresh config from settings from vscode's saved config
+    });
+}
+
+</t>
+<t tx="felix.20211007213344.6">/**
+ * * Apply changes in font size settings and save them in user settings.
+ */
+public setFontConfig(p_settings: FontSettings): void {
+    if (p_settings.zoomLevel || p_settings.zoomLevel === 0) {
+        if (!isNaN(p_settings.zoomLevel) &amp;&amp; p_settings.zoomLevel &lt;= 12 &amp;&amp; p_settings.zoomLevel &gt;= -12) {
+            vscode.workspace.getConfiguration("window")
+                .update("zoomLevel", p_settings.zoomLevel, true);
+        } else {
+            vscode.window.showInformationMessage(
+                "Value for zoom level should be between -12 and 12"
+            );
+        }
+    }
+    if (p_settings.fontSize) {
+        if (!isNaN(p_settings.fontSize) &amp;&amp; p_settings.fontSize &lt;= 30 &amp;&amp; p_settings.fontSize &gt;= 6) {
+            vscode.workspace.getConfiguration("editor")
+                .update("fontSize", p_settings.fontSize, true);
+        } else {
+            vscode.window.showInformationMessage(
+                "Value for font size should be between 6 and 30"
+            );
+        }
+    }
+}
+
+</t>
+<t tx="felix.20211007213344.7">/**
+ * * Set the workbench.editor.enablePreview vscode setting
+ */
+public setEnablePreview(): Thenable&lt;void&gt; {
+    return vscode.workspace.getConfiguration("workbench.editor")
+        .update("enablePreview", true, true);
+}
+
+</t>
+<t tx="felix.20211007213344.8">/**
+ * * Clears the workbench.editor.closeEmptyGroups vscode setting
+ */
+public clearCloseEmptyGroups(): Thenable&lt;void&gt; {
+    return vscode.workspace.getConfiguration("workbench.editor")
+        .update("closeEmptyGroups", false, true);
+}
+
+</t>
+<t tx="felix.20211007213344.9">/**
+ * * Set the "workbench.editor.closeOnFileDelete" vscode setting
+ */
+public setCloseOnFileDelete(): Thenable&lt;void&gt; {
+    return vscode.workspace.getConfiguration("workbench.editor")
+        .update("closeOnFileDelete", true, true);
+}
+
+</t>
+<t tx="felix.20211007213900.1">/**
+ * * Types of the various JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
+ */
+export interface ConfigMembers {
+    checkForChangeExternalFiles: string;
+    defaultReloadIgnore: string;
+    leoTreeBrowse: boolean;
+    treeKeepFocus: boolean;
+    treeKeepFocusWhenAside: boolean;
+    statusBarString: string;
+    statusBarColor: string;
+    treeInExplorer: boolean;
+    showOpenAside: boolean;
+    showEditOnNodes: boolean;
+    showArrowsOnNodes: boolean;
+    showAddOnNodes: boolean;
+    showMarkOnNodes: boolean;
+    showCloneOnNodes: boolean;
+    showCopyOnNodes: boolean;
+
+    showEditionOnBody: boolean; // clone delete insert(s)
+    showClipboardOnBody: boolean; // cut copy paste(s)
+    showPromoteOnBody: boolean; // promote demote
+    showExecuteOnBody: boolean; // extract(s)
+    showExtractOnBody: boolean;
+    showImportOnBody: boolean;
+    showRefreshOnBody: boolean;
+    showHoistOnBody: boolean;
+    showMarkOnBody: boolean;
+    showSortOnBody: boolean;
+
+    invertNodeContrast: boolean;
+}
+
+</t>
+<t tx="felix.20211007213909.1">/**
+ * * Structure for configuration settings changes used along with welcome/settings webview.
+ */
+export interface ConfigSetting {
+    code: string;
+    value: any;
+}
+
+</t>
+<t tx="felix.20211007213915.1">/**
+ * * Structure for the two vscode font settings
+ */
+export interface FontSettings {
+    zoomLevel: number;
+    fontSize: number;
+}
+
+</t>
+<t tx="felix.20211007214102.1">/**
+ * * String for JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
+ */
+public static CONFIG_NAMES = {
+    CHECK_FOR_CHANGE_EXTERNAL_FILES: "checkForChangeExternalFiles",
+    DEFAULT_RELOAD_IGNORE: "defaultReloadIgnore",
+    LEO_TREE_BROWSE: "leoTreeBrowse",
+    TREE_KEEP_FOCUS: "treeKeepFocus",
+    TREE_KEEP_FOCUS_WHEN_ASIDE: "treeKeepFocusWhenAside",
+    STATUSBAR_STRING: "statusBarString",
+    STATUSBAR_COLOR: "statusBarColor",
+    TREE_IN_EXPLORER: "treeInExplorer",
+    SHOW_OPEN_ASIDE: "showOpenAside",
+    SHOW_EDIT: "showEditOnNodes",
+    SHOW_ARROWS: "showArrowsOnNodes",
+    SHOW_ADD: "showAddOnNodes",
+    SHOW_MARK: "showMarkOnNodes",
+    SHOW_CLONE: "showCloneOnNodes",
+    SHOW_COPY: "showCopyOnNodes",
+
+    SHOW_EDITION_BODY: "showEditionOnBody",
+    SHOW_CLIPBOARD_BODY: "showClipboardOnBody",
+    SHOW_PROMOTE_BODY: "showPromoteOnBody",
+    SHOW_EXECUTE_BODY: "showExecuteOnBody",
+    SHOW_EXTRACT_BODY: "showExtractOnBody",
+    SHOW_IMPORT_BODY: "showImportOnBody",
+    SHOW_REFRESH_BODY: "showRefreshOnBody",
+    SHOW_HOIST_BODY: "showHoistOnBody",
+    SHOW_MARK_BODY: "showMarkOnBody",
+    SHOW_SORT_BODY: "showSortOnBody",
+
+    INVERT_NODES: "invertNodeContrast",
+};
+
+</t>
+<t tx="felix.20211007214110.1">/**
+ * * Configuration Defaults used in config.ts
+ * Used when setting itself and getting parameters from vscode
+ */
+public static CONFIG_DEFAULTS = {
+    CHECK_FOR_CHANGE_EXTERNAL_FILES: "none",  // Used in leoBridge scrip,
+    DEFAULT_RELOAD_IGNORE: "none", // Used in leoBridge scrip,
+    LEO_TREE_BROWSE: true,
+    TREE_KEEP_FOCUS: true,
+    TREE_KEEP_FOCUS_WHEN_ASIDE: false,
+    STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
+    STATUSBAR_COLOR: "fb7c47",
+    TREE_IN_EXPLORER: true,
+    SHOW_OPEN_ASIDE: true,
+    SHOW_EDIT: true,
+    SHOW_ARROWS: false,
+    SHOW_ADD: false,
+    SHOW_MARK: false,
+    SHOW_CLONE: false,
+    SHOW_COPY: false,
+
+    SHOW_EDITION_BODY: true,
+    SHOW_CLIPBOARD_BODY: true,
+    SHOW_PROMOTE_BODY: true,
+    SHOW_EXECUTE_BODY: true,
+    SHOW_EXTRACT_BODY: true,
+    SHOW_IMPORT_BODY: true,
+    SHOW_REFRESH_BODY: true,
+    SHOW_HOIST_BODY: true,
+    SHOW_MARK_BODY: true,
+    SHOW_SORT_BODY: true,
+
+    INVERT_NODES: false
+};
+
+</t>
+<t tx="felix.20211007214455.1">/**
+ * * Checks if a string is formatted as a valid rrggbb color code.
+ * @param p_hexString hexadecimal 6 digits string, without leading '0x'
+ * @returns True if the string is a valid representation of an hexadecimal 6 digit number
+ */
+export function isHexColor(p_hexString: string): boolean {
+    return typeof p_hexString === 'string'
+        &amp;&amp; p_hexString.length === 6
+        &amp;&amp; !isNaN(Number('0x' + p_hexString));
+}
+
+</t>
+<t tx="felix.20211007232334.1">/**
+ * * Refresh tree for 'node hover icons' to show up properly after changing their settings
+ */
+public configTreeRefresh(): void {
+    if (this.leoStates.fileOpenedReady) {
+        this._preventShowBody = true;
+        this._refreshOutline(true, RevealType.RevealSelect);
+    }
+}
+
+</t>
+<t tx="felix.20211008004139.1">/**
+ * * Find panel controls ids
+ */
+public static FIND_INPUTS_IDS = {
+    FIND_TEXT: "findText",
+    REPLACE_TEXT: "replaceText",
+    ENTIRE_OUTLINE: "entireOutline",
+    NODE_ONLY: "nodeOnly",
+    SUBOUTLINE_ONLY: "subOutlineOnly",
+    IGNORE_CASE: "ignoreCase",
+    MARK_CHANGES: "markChanges",
+    MARK_FINDS: "markFinds",
+    REG_EXP: "regExp",
+    WHOLE_WORD: "wholeWord",
+    SEARCH_BODY: "searchBody",
+    SEARCH_HEADLINE: "searchHeadline"
+};
+
+</t>
+<t tx="felix.20211010192923.1">import * as vscode from "vscode";
+import * as utils from "./utils";
+import * as path from 'path';
+import { Constants } from "./constants";
+
+import { BodyTimeInfo } from "./types";
+import { LeoUI } from "./leoUI";
+
+@language typescript
+@tabwidth -4
+@others
+</t>
+<t tx="felix.20211010192923.10">public createDirectory(p_uri: vscode.Uri): void {
+    console.warn('Called createDirectory with ', p_uri.fsPath); // should not happen
+    throw vscode.FileSystemError.NoPermissions();
+}
+
+</t>
+<t tx="felix.20211010192923.11">public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
+    if (!this.preventSaveToLeo) {
+        // TODO :
+        // this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
+    } else {
+        this.preventSaveToLeo = false;
+    }
+    const w_gnx = utils.leoUriToStr(p_uri);
+    if (!this._openedBodiesGnx.includes(w_gnx)) {
+        console.error("Leointeg: Tried to save body other than selected node's body", w_gnx);
+        this._openedBodiesGnx.push(w_gnx);
+    }
+    const w_now = new Date().getTime();
+    this._openedBodiesInfo[w_gnx] = {
+        ctime: w_now,
+        mtime: w_now
+    };
+    this._fireSoon({ type: vscode.FileChangeType.Changed, uri: p_uri });
+}
+
+</t>
+<t tx="felix.20211010192923.12">public rename(p_oldUri: vscode.Uri, p_newUri: vscode.Uri, p_options: { overwrite: boolean }): void {
+    console.warn('Called rename on ', p_oldUri.fsPath, p_newUri.fsPath); // should not happen
+    this._fireSoon(
+        { type: vscode.FileChangeType.Deleted, uri: p_oldUri },
+        { type: vscode.FileChangeType.Created, uri: p_newUri }
+    );
+}
+
+</t>
+<t tx="felix.20211010192923.13">public delete(p_uri: vscode.Uri): void {
+    // console.log("delete", p_uri.fsPath);
+    const w_gnx = utils.leoUriToStr(p_uri);
+    if (this._openedBodiesGnx.includes(w_gnx)) {
+        this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
+        delete this._openedBodiesInfo[w_gnx];
+    } else {
+        // console.log("not deleted");
+    }
+
+    // dirname is just a slash "/"
+    let w_dirname = p_uri.with({ path: path.posix.dirname(p_uri.path) });
+
+    this._fireSoon(
+        { type: vscode.FileChangeType.Changed, uri: w_dirname },
+        { uri: p_uri, type: vscode.FileChangeType.Deleted }
+    );
+}
+
+</t>
+<t tx="felix.20211010192923.14">public copy(p_uri: vscode.Uri): void {
+    console.warn('Called copy on ', p_uri.fsPath); // should not happen
+    throw vscode.FileSystemError.NoPermissions();
+}
+
+</t>
+<t tx="felix.20211010192923.15">private _fireSoon(...p_events: vscode.FileChangeEvent[]): void {
+    this._bufferedEvents.push(...p_events);
+    if (this._fireSoonHandle) {
+        clearTimeout(this._fireSoonHandle);
+    }
+    this._fireSoonHandle = setTimeout(() =&gt; {
+        this._onDidChangeFileEmitter.fire(this._bufferedEvents);
+        this._bufferedEvents.length = 0; // clearing events array
+    }, 5);
+}
+
+</t>
+<t tx="felix.20211010192923.2">/**
+ * * Body panes implementation as a file system using "leo" as a scheme identifier
+ * Saving and renaming prevents flickering and prevents undos to 'traverse through' different gnx
+ */
+export class LeoBodyProvider implements vscode.FileSystemProvider {
+
+    // * Flag normally false
+    public preventSaveToLeo: boolean = false;
+
+    // * Last file read data with the readFile method
+    private _lastGnx: string = ""; // gnx of last file read
+    private _lastBodyData: string = ""; // body content of last file read
+    private _lastBodyLength: number = 0; // length of last file read
+
+    // * List of currently opened body panes gnx (from 'watch' &amp; 'dispose' methods)
+    private _watchedBodiesGnx: string[] = [];
+
+    // * List of gnx that should be available (from more.selectNode and fs.delete)
+    private _openedBodiesGnx: string[] = [];
+    private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
+
+    // * List of all possible vNodes gnx in the currently opened leo file (since last refresh/tree operation)
+    private _possibleGnxList: string[] = []; // Maybe deprecated
+
+    private _lastBodyTimeGnx: string = "";
+
+    // * An event to signal that a resource has been changed
+    // * It should fire for resources that are being [watched](#FileSystemProvider.watch) by clients of this provider
+    private _onDidChangeFileEmitter = new vscode.EventEmitter&lt;vscode.FileChangeEvent[]&gt;();
+    readonly onDidChangeFile: vscode.Event&lt;vscode.FileChangeEvent[]&gt; = this._onDidChangeFileEmitter.event;
+    private _bufferedEvents: vscode.FileChangeEvent[] = [];
+    private _fireSoonHandle?: NodeJS.Timer;
+
+    constructor(private _leoUi: LeoUI) { }
+
+    @others
+}
+</t>
+<t tx="felix.20211010192923.3">/**
+ * * Sets selected node body's modified time for this gnx virtual file
+ * @param p_uri URI of file for which to set made-up modified time
+ */
+public setBodyTime(p_uri: vscode.Uri): void {
+    const w_gnx = utils.leoUriToStr(p_uri);
+    this._lastBodyTimeGnx = w_gnx;
+    if (!this._openedBodiesGnx.includes(w_gnx)) {
+        this._openedBodiesGnx.push(w_gnx);
+    }
+    const w_now = new Date().getTime();
+    this._openedBodiesInfo[w_gnx] = {
+        ctime: w_now,
+        mtime: w_now
+    };
+}
+
+</t>
+<t tx="felix.20211010192923.4">/**
+ * * Refresh the body pane for a particular gnx by telling vscode that the file from the Leo file provider has changed
+ * @param p_gnx Gnx of body associated with this virtual file, mostly Leo's selected node
+ */
+public fireRefreshFile(p_gnx: string): void {
+    if (!this._openedBodiesGnx.includes(p_gnx)) {
+        console.error("ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
+        this._openedBodiesGnx.push(p_gnx);
+    }
+    const w_now = new Date().getTime();
+    this._openedBodiesInfo[p_gnx] = {
+        ctime: w_now,
+        mtime: w_now
+    };
+    this._onDidChangeFileEmitter.fire([{
+        type: vscode.FileChangeType.Changed,
+        uri: utils.strToLeoUri(p_gnx)
+    } as vscode.FileChangeEvent]);
+}
+
+</t>
+<t tx="felix.20211010192923.5">/**
+ * Maybe deprecated
+ * * Refreshes the '_possibleGnxList' list of all unique gnx from Leo
+ * @returns a promise that resolves to the fresh gnx string array
+ */
+public refreshPossibleGnxList(): Thenable&lt;string[]&gt; {
+    // * Get updated list of possible gnx
+    // return this._leoUi.sendAction(
+    //     Constants.LEOBRIDGE.GET_ALL_GNX
+    // ).then((p_result) =&gt; {
+    //     this._possibleGnxList = p_result.gnx || [];
+    //     return Promise.resolve(this._possibleGnxList);
+    // });
+    return Promise.resolve([]);
+}
+
+</t>
+<t tx="felix.20211010192923.6">public watch(p_resource: vscode.Uri): vscode.Disposable {
+    const w_gnx = utils.leoUriToStr(p_resource);
+    if (!this._watchedBodiesGnx.includes(w_gnx)) {
+        this._watchedBodiesGnx.push(w_gnx); // add gnx
+    } else {
+    }
+    return new vscode.Disposable(() =&gt; {
+        const w_position = this._watchedBodiesGnx.indexOf(w_gnx); // find and remove it
+        if (w_position &gt; -1) {
+            this._watchedBodiesGnx.splice(w_position, 1);
+        }
+    });
+}
+
+</t>
+<t tx="felix.20211010192923.7">public stat(p_uri: vscode.Uri): vscode.FileStat | Thenable&lt;vscode.FileStat&gt; {
+    // TODO : Fix/Check extraneous stat(...) call(s)
+    if (this._leoUi.leoStates.fileOpenedReady) {
+        const w_gnx = utils.leoUriToStr(p_uri);
+        if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
+            return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
+        } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesGnx.includes(this._lastGnx)) {
+            return {
+                type: vscode.FileType.File,
+                ctime: this._openedBodiesInfo[this._lastGnx].ctime,
+                mtime: this._openedBodiesInfo[this._lastGnx].mtime,
+                size: this._lastBodyLength
+            };
+        } else if (this._openedBodiesGnx.includes(w_gnx)) {
+            // return this._leoUi.sendAction(
+            //     Constants.LEOBRIDGE.GET_BODY_LENGTH,
+            //     JSON.stringify({ "gnx": w_gnx })
+            // ).then((p_result) =&gt; {
+            return Promise.resolve(
+                {
+                    type: vscode.FileType.File,
+                    ctime: this._openedBodiesInfo[w_gnx].ctime,
+                    mtime: this._openedBodiesInfo[w_gnx].mtime,
+                    size: 0
+                    // size: p_result.len ? p_result.len : 0
+                }
+            );
+
+        }
+    }
+    // throw vscode.FileSystemError.FileNotFound();
+    // (Instead of FileNotFound) should be caught by _onActiveEditorChanged or _changedVisibleTextEditors
+    return { type: vscode.FileType.File, ctime: 0, mtime: 0, size: 0 };
+}
+
+</t>
+<t tx="felix.20211010192923.8">public readFile(p_uri: vscode.Uri): Thenable&lt;Uint8Array&gt; {
+    if (this._leoUi.leoStates.fileOpenedReady) {
+        if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
+            throw vscode.FileSystemError.FileIsADirectory();
+        } else {
+            const w_gnx = utils.leoUriToStr(p_uri);
+            // if (!this._possibleGnxList.includes(w_gnx)) {
+            if (!this._openedBodiesGnx.includes(w_gnx)) {
+                console.error("readFile: ERROR File not in _openedBodiesGnx! readFile missing refreshes?");
+                // throw vscode.FileSystemError.FileNotFound();
+                // (Instead of FileNotFound) should be caught by _onActiveEditorChanged or _changedVisibleTextEditors
+                return Promise.resolve(Buffer.from(""));
+            } else {
+                // return this._leoUi.sendAction(
+                //     Constants.LEOBRIDGE.GET_BODY,
+                //     JSON.stringify({ "gnx": w_gnx })
+                // ).then((p_result) =&gt; {
+                // if (p_result.body) {
+                //     this._lastGnx = w_gnx;
+                //     this._lastBodyData = p_result.body;
+                //     const w_buffer: Uint8Array = Buffer.from(p_result.body);
+                //     this._lastBodyLength = w_buffer.byteLength;
+                //     return Promise.resolve(w_buffer);
+                // } else if (p_result.body === "") {
+                //     this._lastGnx = w_gnx;
+                //     this._lastBodyLength = 0;
+                //     this._lastBodyData = "";
+                //     return Promise.resolve(Buffer.from(""));
+                // } else {
+                //     if (this._lastGnx === w_gnx) {
+                //         // was last gnx of closed file about to be switched to new document selected
+                //         console.log('Passed in not found: ' + w_gnx);
+
+                //         return Promise.resolve(Buffer.from(this._lastBodyData));
+                //     }
+                //     console.error("ERROR =&gt; readFile of unknown GNX"); // is possibleGnxList updated correctly?
+                //     //  throw vscode.FileSystemError.FileNotFound();
+                //     // (Instead of FileNotFound) should be caught by _onActiveEditorChanged or _changedVisibleTextEditors
+                //     return Promise.resolve(Buffer.from(""));
+                // }
+                // });
+                // FAKE
+                return Promise.resolve(Buffer.from(""));
+            }
+        }
+    } else {
+        throw vscode.FileSystemError.FileNotFound();
+    }
+}
+
+</t>
+<t tx="felix.20211010192923.9">public readDirectory(p_uri: vscode.Uri): Thenable&lt;[string, vscode.FileType][]&gt; {
+    if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
+        const w_directory: [string, vscode.FileType][] = [];
+        w_directory.push([this._lastBodyTimeGnx, vscode.FileType.File]);
+        return Promise.resolve(w_directory);
+    } else {
+        throw vscode.FileSystemError.FileNotFound();
+    }
+}
+
+</t>
+<t tx="felix.20211010221959.1">/**
+ * * LeoBody virtual file time information object
+ */
+export interface BodyTimeInfo {
+    ctime: number;
+    mtime: number;
+}
+
+</t>
+<t tx="felix.20211012233514.1">/**
+ * * Asks for .leojs file name and path, then saves the JSON Leo file
+ * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
+ * @returns a promise from saving the file results, or that will resolve to undefined if cancelled
+ */
+public saveAsLeojsFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+
+    this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
+
+    vscode.window.showInformationMessage('TODO: Implement saveAsLeojsFile' +
+        " called from " +
+        (p_fromOutline ? "outline" : "body")
+    );
+
+    this.launchRefresh();
+
+    // if saved
+    return Promise.resolve(true);
+
+    // return Promise.resolve(undefined); // if cancelled
+}
+
+</t>
+<t tx="felix.20211017220236.1">// * Outline commands that used to be defined in leoCommands.py
+// import xml.etree.ElementTree as ElementTree
+// from leo.core import leoGlobals as g
+// from leo.core import leoNodes
+// from leo.core import leoFileCommands
+@others
+</t>
+<t tx="felix.20211017220236.10">def skip_root(v):
+    """
+    generates v nodes in the outline order
+    but skips a subtree of the node with root_gnx
+    """
+    if v.gnx != root_gnx:
+        yield v
+        for ch in v.children:
+            yield from skip_root(ch)
+</t>
+<t tx="felix.20211017220236.11">def translate_gnx(gnx):
+    """
+    allocates a new gnx for all nodes that
+    are not found outside copied tree
+    """
+    if gnx in outside:
+        return gnx
+    return g.app.nodeIndices.computeNewIndex()
+</t>
+<t tx="felix.20211017220236.12">def viter(parent_gnx, xv):
+    """
+    iterates &lt;v&gt; nodes generating tuples:
+
+        (parent_gnx, child_gnx, headline, body)
+
+    skipping the descendants of already seen nodes.
+    """
+    chgnx = xv.attrib.get('t')
+    b = bodies[chgnx]
+    gnx = translation.get(chgnx)
+    if gnx in seen:
+        yield parent_gnx, gnx, heads.get(gnx), b
+    else:
+        seen.add(gnx)
+        h = xv[0].text
+        heads[gnx] = h
+        yield parent_gnx, gnx, h, b
+        for xch in xv[1:]:
+            yield from viter(gnx, xch)
+</t>
+<t tx="felix.20211017220236.13">gnx2v = c.fileCommands.gnxDict
+def getv(gnx):
+    """
+    returns a pair (vnode, is_new) for the given gnx.
+    if node doesn't exist, creates a new one.
+    """
+    v = gnx2v.get(gnx)
+    if v is None:
+        return leoNodes.VNode(c, gnx), True
+    return v, False
+</t>
+<t tx="felix.20211017220236.14">def do_paste(vpar, index):
+    """
+    pastes a new node as a child of vpar at given index
+    """
+    vpargnx = vpar.gnx
+    # the first node is inserted at the given index
+    # and the rest are just appended at parents children
+    # to achieve this we first create a generator object
+    rows = viter(vpargnx, xvnodes[0])
+
+    # then we just take first tuple
+    pgnx, gnx, h, b = next(rows)
+
+    # create vnode
+    v, _ = getv(gnx)
+    v.h = h
+    v.b = b
+
+    # and finally insert it at the given index
+    vpar.children.insert(index, v)
+    v.parents.append(vpar)
+
+    pasted = v  # remember the first node as a return value
+
+    # now we iterate the rest of tuples
+    for pgnx, gnx, h, b in rows:
+
+        # get or create a child `v`
+        v, isNew = getv(gnx)
+        if isNew:
+            v.h = h
+            v.b = b
+            ua = uas.get(gnx)
+            if ua:
+                v.unknownAttributes = ua
+        # get parent node `vpar`
+        vpar = getv(pgnx)[0]
+
+        # and link them
+        vpar.children.append(v)
+        v.parents.append(vpar)
+
+    return pasted
+</t>
+<t tx="felix.20211017220236.15">def undoHelper():
+    v = vpar.children.pop(index)
+    v.parents.remove(vpar)
+    c.redraw(bunch.p)
+</t>
+<t tx="felix.20211017220236.16">def redoHelper():
+    vpar.children.insert(index, pasted)
+    pasted.parents.append(vpar)
+    c.redraw(newp)
+</t>
+<t tx="felix.20211017220236.17"># destination data consists of
+#    1. vpar --- parent v node that should receive pasted child
+#    2. index --- at which pasted child will be
+#    3. parStack --- a stack for creating new position of the pasted node
+#
+# the new position will be:  Position(vpar.children[index], index, parStack)
+# but it can't be calculated yet, before actual paste is done
+if p.isExpanded():
+    # paste as a first child of current position
+    vpar = p.v
+    index = 0
+    parStack = p.stack + [(p.v, p._childIndex)]
+else:
+    # paste after the current position
+    parStack = p.stack
+    vpar = p.stack[-1][0] if p.stack else c.hiddenRootNode
+    index = p._childIndex + 1
+
+</t>
+<t tx="felix.20211017220236.18">@g.commander_command('dump-outline')
+def dumpOutline(self, event=None):
+    """ Dump all nodes in the outline."""
+    c = self
+    seen = {}
+    print('')
+    print('=' * 40)
+    v = c.hiddenRootNode
+    v.dump()
+    seen[v] = True
+    for p in c.all_positions():
+        if p.v not in seen:
+            seen[p.v] = True
+            p.v.dump()
+</t>
+<t tx="felix.20211017220236.19"></t>
+<t tx="felix.20211017220236.2"></t>
+<t tx="felix.20211017220236.20">@g.commander_command('contract-all')
+def contractAllHeadlinesCommand(self, event=None, redrawFlag=True):
+    """Contract all nodes in the outline."""
+    # The helper does all the work.
+    c = self
+    c.contractAllHeadlines(event=event, redrawFlag=redrawFlag)
+</t>
+<t tx="felix.20211017220236.21">@g.commander_command('contract-all-other-nodes')
+def contractAllOtherNodes(self, event=None):
+    """
+    Contract all nodes except those needed to make the
+    presently selected node visible.
+    """
+    c = self
+    leaveOpen = c.p
+    for p in c.rootPosition().self_and_siblings():
+        contractIfNotCurrent(c, p, leaveOpen)
+    c.redraw()
+</t>
+<t tx="felix.20211017220236.22">def contractIfNotCurrent(c, p, leaveOpen):
+    if p == leaveOpen or not p.isAncestorOf(leaveOpen):
+        p.contract()
+    for child in p.children():
+        if child != leaveOpen and child.isAncestorOf(leaveOpen):
+            contractIfNotCurrent(c, child, leaveOpen)
+        else:
+            for p2 in child.self_and_subtree():
+                p2.contract()
+</t>
+<t tx="felix.20211017220236.23">@g.commander_command('contract-all-subheads')
+def contractAllSubheads(self, event=None):
+    """Contract all children of the presently selected node."""
+    c, p = self, self.p
+    if not p:
+        return
+    child = p.firstChild()
+    c.contractSubtree(p)
+    while child:
+        c.contractSubtree(child)
+        child = child.next()
+    c.redraw(p)
+</t>
+<t tx="felix.20211017220236.24">@g.commander_command('contract-node')
+def contractNode(self, event=None):
+    """Contract the presently selected node."""
+    c = self
+    p = c.p
+    c.endEditing()
+    p.contract()
+    c.redraw_after_contract(p)
+    c.selectPosition(p)
+</t>
+<t tx="felix.20211017220236.25">@g.commander_command('contract-or-go-left')
+def contractNodeOrGoToParent(self, event=None):
+    """Simulate the left Arrow Key in folder of Windows Explorer."""
+    c, cc, p = self, self.chapterController, self.p
+    parent = p.parent()
+    redraw = False
+    # Bug fix: 2016/04/19: test p.v.isExpanded().
+    if p.hasChildren() and (p.v.isExpanded() or p.isExpanded()):
+        c.contractNode()
+    elif parent and parent.isVisible(c):
+        # Contract all children first.
+        if c.collapse_on_lt_arrow:
+            for child in parent.children():
+                if child.isExpanded():
+                    child.contract()
+                    if child.hasChildren():
+                        redraw = True
+        if cc and cc.inChapter and parent.h.startswith('@chapter '):
+            pass
+        else:
+            c.goToParent()
+    if redraw:
+        # A *child* should be collapsed.  Do a *full* redraw.
+        c.redraw()
+</t>
+<t tx="felix.20211017220236.26">@g.commander_command('contract-parent')
+def contractParent(self, event=None):
+    """Contract the parent of the presently selected node."""
+    c = self
+    c.endEditing()
+    p = c.p
+    parent = p.parent()
+    if not parent:
+        return
+    parent.contract()
+    c.redraw_after_contract(p=parent)
+</t>
+<t tx="felix.20211017220236.27">@g.commander_command('expand-all')
+def expandAllHeadlines(self, event=None):
+    """Expand all headlines.
+    Warning: this can take a long time for large outlines."""
+    c = self
+    c.endEditing()
+    p = c.rootPosition()
+    while p:
+        c.expandSubtree(p, redraw=False)
+        p.moveToNext()
+    c.redraw_after_expand(p=c.rootPosition())
+    c.expansionLevel = 0  # Reset expansion level.
+</t>
+<t tx="felix.20211017220236.28">@g.commander_command('expand-all-subheads')
+def expandAllSubheads(self, event=None):
+    """Expand all children of the presently selected node."""
+    c, p = self, self.p
+    if not p:
+        return
+    child = p.firstChild()
+    c.expandSubtree(p)
+    while child:
+        c.expandSubtree(child)
+        child = child.next()
+    c.redraw(p)
+</t>
+<t tx="felix.20211017220236.29">@g.commander_command('expand-to-level-1')
+def expandLevel1(self, event=None):
+    """Expand the outline to level 1"""
+    self.expandToLevel(1)
+
+@g.commander_command('expand-to-level-2')
+def expandLevel2(self, event=None):
+    """Expand the outline to level 2"""
+    self.expandToLevel(2)
+
+@g.commander_command('expand-to-level-3')
+def expandLevel3(self, event=None):
+    """Expand the outline to level 3"""
+    self.expandToLevel(3)
+
+@g.commander_command('expand-to-level-4')
+def expandLevel4(self, event=None):
+    """Expand the outline to level 4"""
+    self.expandToLevel(4)
+
+@g.commander_command('expand-to-level-5')
+def expandLevel5(self, event=None):
+    """Expand the outline to level 5"""
+    self.expandToLevel(5)
+
+@g.commander_command('expand-to-level-6')
+def expandLevel6(self, event=None):
+    """Expand the outline to level 6"""
+    self.expandToLevel(6)
+
+@g.commander_command('expand-to-level-7')
+def expandLevel7(self, event=None):
+    """Expand the outline to level 7"""
+    self.expandToLevel(7)
+
+@g.commander_command('expand-to-level-8')
+def expandLevel8(self, event=None):
+    """Expand the outline to level 8"""
+    self.expandToLevel(8)
+
+@g.commander_command('expand-to-level-9')
+def expandLevel9(self, event=None):
+    """Expand the outline to level 9"""
+    self.expandToLevel(9)
+</t>
+<t tx="felix.20211017220236.3">// @g.commander_command('copy-node')
+// def copyOutline(self, event=None):
+//     """Copy the selected outline to the clipboard."""
+//     # Copying an outline has no undo consequences.
+//     c = self
+//     c.endEditing()
+//     s = c.fileCommands.outline_to_clipboard_string()
+//     g.app.paste_c = c
+//     g.app.gui.replaceClipboardWith(s)
+
+</t>
+<t tx="felix.20211017220236.30">@g.commander_command('expand-next-level')
+def expandNextLevel(self, event=None):
+    """
+    Increase the expansion level of the outline and
+    Expand all nodes at that level or lower.
+    """
+    c = self
+    # Expansion levels are now local to a particular tree.
+    if c.expansionNode != c.p:
+        c.expansionLevel = 1
+        c.expansionNode = c.p.copy()
+    self.expandToLevel(c.expansionLevel + 1)
+</t>
+<t tx="felix.20211017220236.31">@g.commander_command('expand-node')
+def expandNode(self, event=None):
+    """Expand the presently selected node."""
+    c = self
+    p = c.p
+    c.endEditing()
+    p.expand()
+    c.redraw_after_expand(p)
+    c.selectPosition(p)
+</t>
+<t tx="felix.20211017220236.32">@g.commander_command('expand-and-go-right')
+def expandNodeAndGoToFirstChild(self, event=None):
+    """If a node has children, expand it if needed and go to the first child."""
+    c, p = self, self.p
+    c.endEditing()
+    if p.hasChildren():
+        if not p.isExpanded():
+            c.expandNode()
+        c.selectPosition(p.firstChild())
+    c.treeFocusHelper()
+</t>
+<t tx="felix.20211017220236.33">@g.commander_command('expand-or-go-right')
+def expandNodeOrGoToFirstChild(self, event=None):
+    """
+    Simulate the Right Arrow Key in folder of Windows Explorer.
+    if c.p has no children, do nothing.
+    Otherwise, if c.p is expanded, select the first child.
+    Otherwise, expand c.p.
+    """
+    c, p = self, self.p
+    c.endEditing()
+    if p.hasChildren():
+        if p.isExpanded():
+            c.redraw_after_expand(p.firstChild())
+        else:
+            c.expandNode()
+</t>
+<t tx="felix.20211017220236.34">@g.commander_command('expand-ancestors-only')
+def expandOnlyAncestorsOfNode(self, event=None, p=None):
+    """Contract all nodes in the outline."""
+    c = self
+    level = 1
+    if p:
+        c.selectPosition(p)  # 2013/12/25
+    root = c.p
+    for p in c.all_unique_positions():
+        p.v.expandedPositions = []
+        p.v.contract()
+    for p in root.parents():
+        p.expand()
+        level += 1
+    c.expansionLevel = level  # Reset expansion level.
+</t>
+<t tx="felix.20211017220236.35">@g.commander_command('expand-prev-level')
+def expandPrevLevel(self, event=None):
+    """Decrease the expansion level of the outline and
+    Expand all nodes at that level or lower."""
+    c = self
+    # Expansion levels are now local to a particular tree.
+    if c.expansionNode != c.p:
+        c.expansionLevel = 1
+        c.expansionNode = c.p.copy()
+    self.expandToLevel(max(1, c.expansionLevel - 1))
+</t>
+<t tx="felix.20211017220236.36">@g.commander_command('check-outline')
+def fullCheckOutline(self, event=None):
+    """
+    Performs a full check of the consistency of a .leo file.
+
+    As of Leo 5.1, Leo performs checks of gnx's and outline structure
+    before writes and after reads, pastes and undo/redo.
+    """
+    c = self
+    return c.checkOutline(check_links=True)
+</t>
+<t tx="felix.20211017220236.37"></t>
+<t tx="felix.20211017220236.38">@g.commander_command('find-next-clone')
+def findNextClone(self, event=None):
+    """Select the next cloned node."""
+    c, p = self, self.p
+    cc = c.chapterController
+    if not p:
+        return
+    if p.isCloned():
+        p.moveToThreadNext()
+    flag = False
+    while p:
+        if p.isCloned():
+            flag = True
+            break
+        else:
+            p.moveToThreadNext()
+    if flag:
+        if cc:
+            # name = cc.findChapterNameForPosition(p)
+            cc.selectChapterByName('main')
+        c.selectPosition(p)
+        c.redraw_after_select(p)
+    else:
+        g.blue('no more clones')
+</t>
+<t tx="felix.20211017220236.39">@g.commander_command('go-forward')
+def goNextVisitedNode(self, event=None):
+    """Select the next visited node."""
+    c = self
+    p = c.nodeHistory.goNext()
+    if p:
+        c.nodeHistory.skipBeadUpdate = True
+        try:
+            c.selectPosition(p)
+        finally:
+            c.nodeHistory.skipBeadUpdate = False
+            c.redraw_after_select(p)
+</t>
+<t tx="felix.20211017220236.4">// @g.commander_command('cut-node')
+// def cutOutline(self, event=None):
+//     """Delete the selected outline and send it to the clipboard."""
+//     c = self
+//     if c.canDeleteHeadline():
+//         c.copyOutline()
+//         c.deleteOutline(op_name="Cut Node")
+//         c.recolor()
+
+</t>
+<t tx="felix.20211017220236.40">@g.commander_command('go-back')
+def goPrevVisitedNode(self, event=None):
+    """Select the previously visited node."""
+    c = self
+    p = c.nodeHistory.goPrev()
+    if p:
+        c.nodeHistory.skipBeadUpdate = True
+        try:
+            c.selectPosition(p)
+        finally:
+            c.nodeHistory.skipBeadUpdate = False
+            c.redraw_after_select(p)
+</t>
+<t tx="felix.20211017220236.41">@g.commander_command('goto-first-node')
+def goToFirstNode(self, event=None):
+    """
+    Select the first node of the entire outline.
+    
+    But (#2167), go to the first node of a chapter or hoist
+    if Leo is hoisted or within a chapter.
+    """
+    c = self
+    p = c.rootPosition()
+    c.expandOnlyAncestorsOfNode(p=p)
+    c.redraw()
+</t>
+<t tx="felix.20211017220236.42">@g.commander_command('goto-first-sibling')
+def goToFirstSibling(self, event=None):
+    """Select the first sibling of the selected node."""
+    c, p = self, self.p
+    if p.hasBack():
+        while p.hasBack():
+            p.moveToBack()
+    c.treeSelectHelper(p)
+</t>
+<t tx="felix.20211017220236.43">@g.commander_command('goto-first-visible-node')
+def goToFirstVisibleNode(self, event=None):
+    """Select the first visible node of the selected chapter or hoist."""
+    c = self
+    p = c.firstVisible()
+    if p:
+        c.expandOnlyAncestorsOfNode(p=p)
+        c.redraw()
+</t>
+<t tx="felix.20211017220236.44">@g.commander_command('goto-last-node')
+def goToLastNode(self, event=None):
+    """Select the last node in the entire tree."""
+    c = self
+    p = c.rootPosition()
+    while p and p.hasThreadNext():
+        p.moveToThreadNext()
+    c.expandOnlyAncestorsOfNode(p=p)
+    c.redraw()
+</t>
+<t tx="felix.20211017220236.45">@g.commander_command('goto-last-sibling')
+def goToLastSibling(self, event=None):
+    """Select the last sibling of the selected node."""
+    c, p = self, self.p
+    if p.hasNext():
+        while p.hasNext():
+            p.moveToNext()
+    c.treeSelectHelper(p)
+</t>
+<t tx="felix.20211017220236.46">@g.commander_command('goto-last-visible-node')
+def goToLastVisibleNode(self, event=None):
+    """Select the last visible node of selected chapter or hoist."""
+    c = self
+    p = c.lastVisible()
+    if p:
+        c.expandOnlyAncestorsOfNode(p=p)
+        c.redraw()
+</t>
+<t tx="felix.20211017220236.47">@g.commander_command('goto-next-clone')
+def goToNextClone(self, event=None):
+    """
+    Select the next node that is a clone of the selected node.
+    If the selected node is not a clone, do find-next-clone.
+    """
+    c, p = self, self.p
+    cc = c.chapterController
+    if not p:
+        return
+    if not p.isCloned():
+        c.findNextClone()
+        return
+    v = p.v
+    p.moveToThreadNext()
+    wrapped = False
+    while 1:
+        if p and p.v == v:
+            break
+        elif p:
+            p.moveToThreadNext()
+        elif wrapped:
+            break
+        else:
+            wrapped = True
+            p = c.rootPosition()
+    if p:
+        c.expandAllAncestors(p)
+        if cc:
+            # #252: goto-next clone activate chapter.
+            chapter = cc.getSelectedChapter()
+            old_name = chapter and chapter.name
+            new_name = cc.findChapterNameForPosition(p)
+            if new_name == old_name:
+                # Always do a full redraw.
+                c.redraw(p)
+            else:
+                if 1:
+                    cc.selectChapterByName(new_name)
+                    c.redraw(p)
+                else:  # Old code.
+                    c.selectPosition(p)
+                    cc.selectChapterByName(new_name)
+        else:
+            # Always do a full redraw.
+            c.redraw(p)
+    else:
+        g.blue('done')
+</t>
+<t tx="felix.20211017220236.48">@g.commander_command('goto-next-changed')
+def goToNextDirtyHeadline(self, event=None):
+    """Select the node that is marked as changed."""
+    c, p = self, self.p
+    if not p:
+        return
+    p.moveToThreadNext()
+    wrapped = False
+    while 1:
+        if p and p.isDirty():
+            break
+        elif p:
+            p.moveToThreadNext()
+        elif wrapped:
+            break
+        else:
+            wrapped = True
+            p = c.rootPosition()
+    if not p:
+        g.blue('done')
+    c.treeSelectHelper(p)  # Sets focus.
+</t>
+<t tx="felix.20211017220236.49">@g.commander_command('goto-next-marked')
+def goToNextMarkedHeadline(self, event=None):
+    """Select the next marked node."""
+    c, p = self, self.p
+    if not p:
+        return
+    p.moveToThreadNext()
+    wrapped = False
+    while 1:
+        if p and p.isMarked():
+            break
+        elif p:
+            p.moveToThreadNext()
+        elif wrapped:
+            break
+        else:
+            wrapped = True
+            p = c.rootPosition()
+    if not p:
+        g.blue('done')
+    c.treeSelectHelper(p)  # Sets focus.
+</t>
+<t tx="felix.20211017220236.5">// @g.commander_command('paste-node')
+// def pasteOutline(self,
+//     event=None,
+//     redrawFlag=True,
+//     s=None,
+//     undoFlag=True
+// ):
+//     """
+//     Paste an outline into the present outline from the clipboard.
+//     Nodes do *not* retain their original identify.
+//     """
+//     c = self
+//     if s is None:
+//         s = g.app.gui.getTextFromClipboard()
+//     c.endEditing()
+//     if not s or not c.canPasteOutline(s):
+//         return None  # This should never happen.
+//     isLeo = g.match(s, 0, g.app.prolog_prefix_string)
+//     if not isLeo:
+//         return None
+//     # Get *position* to be pasted.
+//     pasted = c.fileCommands.getLeoOutlineFromClipboard(s)
+//     if not pasted:
+//         # Leo no longer supports MORE outlines. Use import-MORE-files instead.
+//         return None
+//     # Validate.
+//     c.validateOutline()
+//     c.checkOutline()
+//     # Handle the "before" data for undo.
+//     if undoFlag:
+//         undoData = c.undoer.beforeInsertNode(c.p,
+//             pasteAsClone=False,
+//             copiedBunchList=[],
+//         )
+//     # Paste the node into the outline.
+//     c.selectPosition(pasted)
+//     pasted.setDirty()
+//     c.setChanged(redrawFlag=redrawFlag)
+//         # Prevent flash when fixing #387.
+//     back = pasted.back()
+//     if back and back.hasChildren() and back.isExpanded():
+//         pasted.moveToNthChildOf(back, 0)
+//     # Finish the command.
+//     if undoFlag:
+//         c.undoer.afterInsertNode(pasted, 'Paste Node', undoData)
+//     if redrawFlag:
+//         c.redraw(pasted)
+//         c.recolor()
+//     return pasted
+
+</t>
+<t tx="felix.20211017220236.50">@g.commander_command('goto-next-sibling')
+def goToNextSibling(self, event=None):
+    """Select the next sibling of the selected node."""
+    c, p = self, self.p
+    c.treeSelectHelper(p and p.next())
+</t>
+<t tx="felix.20211017220236.51">@g.commander_command('goto-parent')
+def goToParent(self, event=None):
+    """Select the parent of the selected node."""
+    c, p = self, self.p
+    c.treeSelectHelper(p and p.parent())
+</t>
+<t tx="felix.20211017220236.52">@g.commander_command('goto-prev-marked')
+def goToPrevMarkedHeadline(self, event=None):
+    """Select the next marked node."""
+    c, p = self, self.p
+    if not p:
+        return
+    p.moveToThreadBack()
+    wrapped = False
+    while 1:
+        if p and p.isMarked():
+            break
+        elif p:
+            p.moveToThreadBack()
+        elif wrapped:
+            break
+        else:
+            wrapped = True
+            p = c.rootPosition()
+    if not p:
+        g.blue('done')
+    c.treeSelectHelper(p)  # Sets focus.
+</t>
+<t tx="felix.20211017220236.53">@g.commander_command('goto-prev-sibling')
+def goToPrevSibling(self, event=None):
+    """Select the previous sibling of the selected node."""
+    c, p = self, self.p
+    c.treeSelectHelper(p and p.back())
+</t>
+<t tx="felix.20211017220236.54">@g.commander_command('goto-prev-node')
+def selectThreadBack(self, event=None):
+    """Select the node preceding the selected node in outline order."""
+    c, p = self, self.p
+    if not p:
+        return
+    p.moveToThreadBack()
+    c.treeSelectHelper(p)
+</t>
+<t tx="felix.20211017220236.55">@g.commander_command('goto-next-node')
+def selectThreadNext(self, event=None):
+    """Select the node following the selected node in outline order."""
+    c, p = self, self.p
+    if not p:
+        return
+    p.moveToThreadNext()
+    c.treeSelectHelper(p)
+</t>
+<t tx="felix.20211017220236.56">@g.commander_command('goto-prev-visible')
+def selectVisBack(self, event=None):
+    """Select the visible node preceding the presently selected node."""
+    # This has an up arrow for a control key.
+    c, p = self, self.p
+    if not p:
+        return
+    if c.canSelectVisBack():
+        p.moveToVisBack(c)
+        c.treeSelectHelper(p)
+    else:
+        c.endEditing()  # 2011/05/28: A special case.
+</t>
+<t tx="felix.20211017220236.57">@g.commander_command('goto-next-visible')
+def selectVisNext(self, event=None):
+    """Select the visible node following the presently selected node."""
+    c, p = self, self.p
+    if not p:
+        return
+    if c.canSelectVisNext():
+        p.moveToVisNext(c)
+        c.treeSelectHelper(p)
+    else:
+        c.endEditing()  # 2011/05/28: A special case.
+</t>
+<t tx="felix.20211017220236.58"></t>
+<t tx="felix.20211017220236.59">@g.commander_command('de-hoist')
+@g.commander_command('dehoist')
+def dehoist(self, event=None):
+    """Undo a previous hoist of an outline."""
+    c = self
+    if not c.p or not c.hoistStack:
+        return
+    # Don't de-hoist an @chapter node.
+    if c.chapterController and c.p.h.startswith('@chapter '):
+        if not g.unitTesting:
+            g.es('can not de-hoist an @chapter node.', color='blue')
+        return
+    bunch = c.hoistStack.pop()
+    p = bunch.p
+    if not p:
+        p.expand()
+    else:
+        p.contract()
+    c.setCurrentPosition(p)
+    c.redraw()
+    c.frame.clearStatusLine()
+    c.frame.putStatusLine("De-Hoist: " + p.h)
+    c.undoer.afterDehoist(p, 'DeHoist')
+    g.doHook('hoist-changed', c=c)
+</t>
+<t tx="felix.20211017220236.6">@g.commander_command('paste-retaining-clones')
+def pasteOutlineRetainingClones(self,
+    event=None,
+    redrawFlag=True,
+    s=None,
+    undoFlag=True,
+):
+    """
+    Paste an outline into the present outline from the clipboard.
+    Nodes *retain* their original identify.
+    """
+    c = self
+    if s is None:
+        s = g.app.gui.getTextFromClipboard()
+    c.endEditing()
+    if not s or not c.canPasteOutline(s):
+        return None  # This should never happen.
+    isLeo = g.match(s, 0, g.app.prolog_prefix_string)
+    if not isLeo:
+        return None
+    # Get *position* to be pasted.
+    pasted = c.fileCommands.getLeoOutlineFromClipboardRetainingClones(s)
+    if not pasted:
+        # Leo no longer supports MORE outlines. Use import-MORE-files instead.
+        return None
+    # Validate.
+    c.validateOutline()
+    c.checkOutline()
+    # Handle the "before" data for undo.
+    if undoFlag:
+        vnodeInfoDict = computeVnodeInfoDict(c)
+        undoData = c.undoer.beforeInsertNode(c.p,
+            pasteAsClone=True,
+            copiedBunchList=computeCopiedBunchList(c, pasted, vnodeInfoDict),
+        )
+    # Paste the node into the outline.
+    c.selectPosition(pasted)
+    pasted.setDirty()
+    c.setChanged(redrawFlag=redrawFlag)
+        # Prevent flash when fixing #387.
+    back = pasted.back()
+    if back and back.hasChildren() and back.isExpanded():
+        pasted.moveToNthChildOf(back, 0)
+        pasted.setDirty()
+    # Set dirty bits for ancestors of *all* pasted nodes.
+    for p in pasted.self_and_subtree():
+        p.setAllAncestorAtFileNodesDirty()
+    # Finish the command.
+    if undoFlag:
+        c.undoer.afterInsertNode(pasted, 'Paste As Clone', undoData)
+    if redrawFlag:
+        c.redraw(pasted)
+        c.recolor()
+    return pasted
+</t>
+<t tx="felix.20211017220236.60">@g.commander_command('clear-all-hoists')
+def clearAllHoists(self, event=None):
+    """Undo a previous hoist of an outline."""
+    c = self
+    c.hoistStack = []
+    c.frame.putStatusLine("Hoists cleared")
+    g.doHook('hoist-changed', c=c)
+</t>
+<t tx="felix.20211017220236.61">@g.commander_command('hoist')
+def hoist(self, event=None):
+    """Make only the selected outline visible."""
+    c = self
+    p = c.p
+    if not p:
+        return
+    # Don't hoist an @chapter node.
+    if c.chapterController and p.h.startswith('@chapter '):
+        if not g.unitTesting:
+            g.es('can not hoist an @chapter node.', color='blue')
+        return
+    # Remember the expansion state.
+    bunch = g.Bunch(p=p.copy(), expanded=p.isExpanded())
+    c.hoistStack.append(bunch)
+    p.expand()
+    c.redraw(p)
+    c.frame.clearStatusLine()
+    c.frame.putStatusLine("Hoist: " + p.h)
+    c.undoer.afterHoist(p, 'Hoist')
+    g.doHook('hoist-changed', c=c)
+</t>
+<t tx="felix.20211017220236.62"></t>
+<t tx="felix.20211017220236.63">@g.commander_command('clone-node')
+def clone(self, event=None):
+    """Create a clone of the selected outline."""
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return None
+    undoData = c.undoer.beforeCloneNode(p)
+    c.endEditing()  # Capture any changes to the headline.
+    clone = p.clone()
+    clone.setDirty()
+    c.setChanged()
+    if c.validateOutline():
+        u.afterCloneNode(clone, 'Clone Node', undoData)
+        c.redraw(clone)
+        c.treeWantsFocus()
+        return clone  # For mod_labels and chapters plugins.
+    clone.doDelete()
+    c.setCurrentPosition(p)
+    return None
+</t>
+<t tx="felix.20211017220236.64">@g.commander_command('clone-to-at-spot')
+def cloneToAtSpot(self, event=None):
+    """
+    Create a clone of the selected node and move it to the last @spot node
+    of the outline. Create the @spot node if necessary.
+    """
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return
+    # 2015/12/27: fix bug 220: do not allow clone-to-at-spot on @spot node.
+    if p.h.startswith('@spot'):
+        g.es("can not clone @spot node", color='red')
+        return
+    last_spot = None
+    for p2 in c.all_positions():
+        if g.match_word(p2.h, 0, '@spot'):
+            last_spot = p2.copy()
+    if not last_spot:
+        last = c.lastTopLevel()
+        last_spot = last.insertAfter()
+        last_spot.h = '@spot'
+    undoData = c.undoer.beforeCloneNode(p)
+    c.endEditing()  # Capture any changes to the headline.
+    clone = p.copy()
+    clone._linkAsNthChild(last_spot, n=last_spot.numberOfChildren())
+    clone.setDirty()
+    c.setChanged()
+    if c.validateOutline():
+        u.afterCloneNode(clone, 'Clone Node', undoData)
+        c.contractAllHeadlines()
+        c.redraw()
+        c.selectPosition(clone)
+    else:
+        clone.doDelete()
+        c.setCurrentPosition(p)
+</t>
+<t tx="felix.20211017220236.65">@g.commander_command('clone-node-to-last-node')
+def cloneToLastNode(self, event=None):
+    """
+    Clone the selected node and move it to the last node.
+    Do *not* change the selected node.
+    """
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return
+    prev = p.copy()
+    undoData = c.undoer.beforeCloneNode(p)
+    c.endEditing()  # Capture any changes to the headline.
+    clone = p.clone()
+    last = c.rootPosition()
+    while last and last.hasNext():
+        last.moveToNext()
+    clone.moveAfter(last)
+    clone.setDirty()
+    c.setChanged()
+    u.afterCloneNode(clone, 'Clone Node To Last', undoData)
+    c.redraw(prev)
+    # return clone # For mod_labels and chapters plugins.
+</t>
+<t tx="felix.20211017220236.66">@g.commander_command('delete-node')
+def deleteOutline(self, event=None, op_name="Delete Node"):
+    """Deletes the selected outline."""
+    c, u = self, self.undoer
+    p = c.p
+    if not p:
+        return
+    c.endEditing()  # Make sure we capture the headline for Undo.
+    if False:  # c.config.getBool('select-next-after-delete'):
+        # #721: Optionally select next node after delete.
+        if p.hasVisNext(c):
+            newNode = p.visNext(c)
+        elif p.hasParent():
+            newNode = p.parent()
+        else:
+            newNode = p.back()  # _not_ p.visBack(): we are at the top level.
+    else:
+        # Legacy: select previous node if possible.
+        if p.hasVisBack(c):
+            newNode = p.visBack(c)
+        else:
+            newNode = p.next()  # _not_ p.visNext(): we are at the top level.
+    if not newNode:
+        return
+    undoData = u.beforeDeleteNode(p)
+    p.setDirty()
+    p.doDelete(newNode)
+    c.setChanged()
+    u.afterDeleteNode(newNode, op_name, undoData)
+    c.redraw(newNode)
+    c.validateOutline()
+</t>
+<t tx="felix.20211017220236.67">@g.commander_command('insert-child')
+def insertChild(self, event=None):
+    """Insert a node after the presently selected node."""
+    c = self
+    return c.insertHeadline(event=event, op_name='Insert Child', as_child=True)
+</t>
+<t tx="felix.20211017220236.68">@g.commander_command('insert-node')
+def insertHeadline(self, event=None, op_name="Insert Node", as_child=False):
+    """Insert a node after the presently selected node."""
+    c = self
+    # Fix #600.
+    return insertHeadlineHelper(c, event=event, as_child=as_child)
+
+@g.commander_command('insert-as-first-child')
+def insertNodeAsFirstChild(self, event=None):
+    """Insert a node as the last child of the previous node."""
+    c = self
+    return insertHeadlineHelper(c, event=event, as_first_child=True)
+
+@g.commander_command('insert-as-last-child')
+def insertNodeAsLastChild(self, event=None):
+    """Insert a node as the last child of the previous node."""
+    c = self
+    return insertHeadlineHelper(c, event=event, as_last_child=True)
+</t>
+<t tx="felix.20211017220236.69">def insertHeadlineHelper(c,
+    event=None,
+    op_name="Insert Node",
+    as_child=False,
+    as_first_child=False,
+    as_last_child=False,
+):
+    """Insert a node after the presently selected node."""
+    u = c.undoer
+    current = c.p
+    if not current:
+        return None
+    c.endEditing()
+    undoData = c.undoer.beforeInsertNode(current)
+    if as_first_child:
+        p = current.insertAsNthChild(0)
+    elif as_last_child:
+        p = current.insertAsLastChild()
+    elif (
+        as_child or
+        (current.hasChildren() and current.isExpanded()) or
+        (c.hoistStack and current == c.hoistStack[-1].p)
+    ):
+        # Make sure the new node is visible when hoisting.
+        if c.config.getBool('insert-new-nodes-at-end'):
+            p = current.insertAsLastChild()
+        else:
+            p = current.insertAsNthChild(0)
+    else:
+        p = current.insertAfter()
+    g.doHook('create-node', c=c, p=p)
+    p.setDirty()
+    c.setChanged()
+    u.afterInsertNode(p, op_name, undoData)
+    c.redrawAndEdit(p, selectAll=True)
+    return p
+</t>
+<t tx="felix.20211017220236.7">def computeCopiedBunchList(c, pasted, vnodeInfoDict):
+    """Create a dict containing only copied vnodes."""
+    d = {}
+    for p in pasted.self_and_subtree(copy=False):
+        d[p.v] = p.v
+    aList = []
+    for v in vnodeInfoDict:
+        if d.get(v):
+            bunch = vnodeInfoDict.get(v)
+            aList.append(bunch)
+    return aList
+</t>
+<t tx="felix.20211017220236.70">@g.commander_command('insert-node-before')
+def insertHeadlineBefore(self, event=None):
+    """Insert a node before the presently selected node."""
+    c, current, u = self, self.p, self.undoer
+    op_name = 'Insert Node Before'
+    if not current:
+        return None
+    # Can not insert before the base of a hoist.
+    if c.hoistStack and current == c.hoistStack[-1].p:
+        g.warning('can not insert a node before the base of a hoist')
+        return None
+    c.endEditing()
+    undoData = u.beforeInsertNode(current)
+    p = current.insertBefore()
+    g.doHook('create-node', c=c, p=p)
+    p.setDirty()
+    c.setChanged()
+    u.afterInsertNode(p, op_name, undoData)
+    c.redrawAndEdit(p, selectAll=True)
+    return p
+</t>
+<t tx="felix.20211017220236.71"></t>
+<t tx="felix.20211017220236.72">@g.commander_command('clone-marked-nodes')
+def cloneMarked(self, event=None):
+    """Clone all marked nodes as children of a new node."""
+    c, u = self, self.undoer
+    p1 = c.p.copy()
+    # Create a new node to hold clones.
+    parent = p1.insertAfter()
+    parent.h = 'Clones of marked nodes'
+    cloned, n, p = [], 0, c.rootPosition()
+    while p:
+        # Careful: don't clone already-cloned nodes.
+        if p == parent:
+            p.moveToNodeAfterTree()
+        elif p.isMarked() and p.v not in cloned:
+            cloned.append(p.v)
+            if 0:  # old code
+                # Calling p.clone would cause problems
+                p.clone().moveToLastChildOf(parent)
+            else:  # New code.
+                # Create the clone directly as a child of parent.
+                p2 = p.copy()
+                n = parent.numberOfChildren()
+                p2._linkAsNthChild(parent, n)
+            p.moveToNodeAfterTree()
+            n += 1
+        else:
+            p.moveToThreadNext()
+    if n:
+        c.setChanged()
+        parent.expand()
+        c.selectPosition(parent)
+        u.afterCloneMarkedNodes(p1)
+    else:
+        parent.doDelete()
+        c.selectPosition(p1)
+    if not g.unitTesting:
+        g.blue(f"cloned {n} nodes")
+    c.redraw()
+</t>
+<t tx="felix.20211017220236.73">@g.commander_command('copy-marked-nodes')
+def copyMarked(self, event=None):
+    """Copy all marked nodes as children of a new node."""
+    c, u = self, self.undoer
+    p1 = c.p.copy()
+    # Create a new node to hold clones.
+    parent = p1.insertAfter()
+    parent.h = 'Copies of marked nodes'
+    copied, n, p = [], 0, c.rootPosition()
+    while p:
+        # Careful: don't clone already-cloned nodes.
+        if p == parent:
+            p.moveToNodeAfterTree()
+        elif p.isMarked() and p.v not in copied:
+            copied.append(p.v)
+            p2 = p.copyWithNewVnodes(copyMarked=True)
+            p2._linkAsNthChild(parent, n)
+            p.moveToNodeAfterTree()
+            n += 1
+        else:
+            p.moveToThreadNext()
+    if n:
+        c.setChanged()
+        parent.expand()
+        c.selectPosition(parent)
+        u.afterCopyMarkedNodes(p1)
+    else:
+        parent.doDelete()
+        c.selectPosition(p1)
+    if not g.unitTesting:
+        g.blue(f"copied {n} nodes")
+    c.redraw()
+</t>
+<t tx="felix.20211017220236.74">@g.commander_command('delete-marked-nodes')
+def deleteMarked(self, event=None):
+    """Delete all marked nodes."""
+    c, u = self, self.undoer
+    p1 = c.p.copy()
+    undo_data, p = [], c.rootPosition()
+    while p:
+        if p.isMarked():
+            undo_data.append(p.copy())
+            next = p.positionAfterDeletedTree()
+            p.doDelete()
+            p = next
+        else:
+            p.moveToThreadNext()
+    if undo_data:
+        u.afterDeleteMarkedNodes(undo_data, p1)
+        if not g.unitTesting:
+            g.blue(f"deleted {len(undo_data)} nodes")
+        c.setChanged()
+    # Don't even *think* about restoring the old position.
+    c.contractAllHeadlines()
+    c.selectPosition(c.rootPosition())
+    c.redraw()
+</t>
+<t tx="felix.20211017220236.75">@g.commander_command('move-marked-nodes')
+def moveMarked(self, event=None):
+    """
+    Move all marked nodes as children of a new node.
+    This command is not undoable.
+    Consider using clone-marked-nodes, followed by copy/paste instead.
+    """
+    c = self
+    p1 = c.p.copy()
+    # Check for marks.
+    for v in c.all_unique_nodes():
+        if v.isMarked():
+            break
+    else:
+        g.warning('no marked nodes')
+        return
+    result = g.app.gui.runAskYesNoDialog(c,
+        'Move Marked Nodes?',
+        message='move-marked-nodes is not undoable\nProceed?',
+    )
+    if result == 'no':
+        return
+    # Create a new *root* node to hold the moved nodes.
+    # This node's position remains stable while other nodes move.
+    parent = createMoveMarkedNode(c)
+    assert not parent.isMarked()
+    moved = []
+    p = c.rootPosition()
+    while p:
+        assert parent == c.rootPosition()
+        # Careful: don't move already-moved nodes.
+        if p.isMarked() and not parent.isAncestorOf(p):
+            moved.append(p.copy())
+            next = p.positionAfterDeletedTree()
+            p.moveToLastChildOf(parent)
+                # This does not change parent's position.
+            p = next
+        else:
+            p.moveToThreadNext()
+    if moved:
+        # Find a position p2 outside of parent's tree with p2.v == p1.v.
+        # Such a position may not exist.
+        p2 = c.rootPosition()
+        while p2:
+            if p2 == parent:
+                p2.moveToNodeAfterTree()
+            elif p2.v == p1.v:
+                break
+            else:
+                p2.moveToThreadNext()
+        else:
+            # Not found.  Move to last top-level.
+            p2 = c.lastTopLevel()
+        parent.moveAfter(p2)
+        # u.afterMoveMarkedNodes(moved, p1)
+        if not g.unitTesting:
+            g.blue(f"moved {len(moved)} nodes")
+        c.setChanged()
+    # c.contractAllHeadlines()
+        # Causes problems when in a chapter.
+    c.selectPosition(parent)
+    c.redraw()
+</t>
+<t tx="felix.20211017220236.76">def createMoveMarkedNode(c):
+    oldRoot = c.rootPosition()
+    p = oldRoot.insertAfter()
+    p.h = 'Moved marked nodes'
+    p.moveToRoot()
+    return p
+</t>
+<t tx="felix.20211017220236.77">@g.commander_command('mark-changed-items')
+def markChangedHeadlines(self, event=None):
+    """Mark all nodes that have been changed."""
+    c, current, u = self, self.p, self.undoer
+    undoType = 'Mark Changed'
+    c.endEditing()
+    u.beforeChangeGroup(current, undoType)
+    for p in c.all_unique_positions():
+        if p.isDirty() and not p.isMarked():
+            bunch = u.beforeMark(p, undoType)
+            # c.setMarked calls a hook.
+            c.setMarked(p)
+            p.setDirty()
+            c.setChanged()
+            u.afterMark(p, undoType, bunch)
+    u.afterChangeGroup(current, undoType)
+    if not g.unitTesting:
+        g.blue('done')
+    c.redraw_after_icons_changed()
+</t>
+<t tx="felix.20211017220236.78">def markChangedRoots(self, event=None):
+    """Mark all changed @root nodes."""
+    c, current, u = self, self.p, self.undoer
+    undoType = 'Mark Changed'
+    c.endEditing()
+    u.beforeChangeGroup(current, undoType)
+    for p in c.all_unique_positions():
+        if p.isDirty() and not p.isMarked():
+            s = p.b
+            flag, i = g.is_special(s, "@root")
+            if flag:
+                bunch = u.beforeMark(p, undoType)
+                c.setMarked(p)  # Calls a hook.
+                p.setDirty()
+                c.setChanged()
+                u.afterMark(p, undoType, bunch)
+    u.afterChangeGroup(current, undoType)
+    if not g.unitTesting:
+        g.blue('done')
+    c.redraw_after_icons_changed()
+</t>
+<t tx="felix.20211017220236.79">@g.commander_command('mark')  # Compatibility
+@g.commander_command('toggle-mark')
+def markHeadline(self, event=None):
+    """Toggle the mark of the selected node."""
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return
+    c.endEditing()
+    undoType = 'Unmark' if p.isMarked() else 'Mark'
+    bunch = u.beforeMark(p, undoType)
+    # c.set/clearMarked call a hook.
+    if p.isMarked():
+        c.clearMarked(p)
+    else:
+        c.setMarked(p)
+    p.setDirty()
+    c.setChanged()
+    u.afterMark(p, undoType, bunch)
+    c.redraw_after_icons_changed()
+</t>
+<t tx="felix.20211017220236.8">def computeVnodeInfoDict(c):
+    """
+    We don't know yet which nodes will be affected by the paste, so we remember
+    everything. This is expensive, but foolproof.
+
+    The alternative is to try to remember the 'before' values of nodes in the
+    FileCommands read logic. Several experiments failed, and the code is very ugly.
+    In short, it seems wise to do things the foolproof way.
+    """
+    d = {}
+    for v in c.all_unique_nodes():
+        if v not in d:
+            d[v] = g.Bunch(v=v, head=v.h, body=v.b)
+    return d
+</t>
+<t tx="felix.20211017220236.80">@g.commander_command('mark-subheads')
+def markSubheads(self, event=None):
+    """Mark all children of the selected node as changed."""
+    c, current, u = self, self.p, self.undoer
+    undoType = 'Mark Subheads'
+    if not current:
+        return
+    c.endEditing()
+    u.beforeChangeGroup(current, undoType)
+    for p in current.children():
+        if not p.isMarked():
+            bunch = u.beforeMark(p, undoType)
+            c.setMarked(p)  # Calls a hook.
+            p.setDirty()
+            c.setChanged()
+            u.afterMark(p, undoType, bunch)
+    u.afterChangeGroup(current, undoType)
+    c.redraw_after_icons_changed()
+</t>
+<t tx="felix.20211017220236.81">@g.commander_command('unmark-all')
+def unmarkAll(self, event=None):
+    """Unmark all nodes in the entire outline."""
+    c, current, u = self, self.p, self.undoer
+    undoType = 'Unmark All'
+    if not current:
+        return
+    c.endEditing()
+    u.beforeChangeGroup(current, undoType)
+    changed = False
+    p = None  # To keep pylint happy.
+    for p in c.all_unique_positions():
+        if p.isMarked():
+            bunch = u.beforeMark(p, undoType)
+            # c.clearMarked(p) # Very slow: calls a hook.
+            p.v.clearMarked()
+            p.setDirty()
+            u.afterMark(p, undoType, bunch)
+            changed = True
+    if changed:
+        g.doHook("clear-all-marks", c=c, p=p)
+        c.setChanged()
+    u.afterChangeGroup(current, undoType)
+    c.redraw_after_icons_changed()
+</t>
+<t tx="felix.20211017220236.82"></t>
+<t tx="felix.20211017220236.83">@g.commander_command('demote')
+def demote(self, event=None):
+    """Make all following siblings children of the selected node."""
+    c, p, u = self, self.p, self.undoer
+    if not p or not p.hasNext():
+        c.treeFocusHelper()
+        return
+    # Make sure all the moves will be valid.
+    next = p.next()
+    while next:
+        if not c.checkMoveWithParentWithWarning(next, p, True):
+            c.treeFocusHelper()
+            return
+        next.moveToNext()
+    c.endEditing()
+    parent_v = p._parentVnode()
+    n = p.childIndex()
+    followingSibs = parent_v.children[n + 1 :]
+    # Remove the moved nodes from the parent's children.
+    parent_v.children = parent_v.children[: n + 1]
+    # Add the moved nodes to p's children
+    p.v.children.extend(followingSibs)
+    # Adjust the parent links in the moved nodes.
+    # There is no need to adjust descendant links.
+    for child in followingSibs:
+        child.parents.remove(parent_v)
+        child.parents.append(p.v)
+    p.expand()
+    p.setDirty()
+    c.setChanged()
+    u.afterDemote(p, followingSibs)
+    c.redraw(p)
+    c.updateSyntaxColorer(p)  # Moving can change syntax coloring.
+</t>
+<t tx="felix.20211017220236.84">@g.commander_command('move-outline-down')
+def moveOutlineDown(self, event=None):
+    """Move the selected node down."""
+    # Moving down is more tricky than moving up because we can't
+    # move p to be a child of itself.
+    #
+    # An important optimization:
+    # we don't have to call checkMoveWithParentWithWarning() if the parent of
+    # the moved node remains the same.
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return
+    if not c.canMoveOutlineDown():
+        if c.hoistStack:
+            cantMoveMessage(c)
+        c.treeFocusHelper()
+        return
+    parent = p.parent()
+    next = p.visNext(c)
+    while next and p.isAncestorOf(next):
+        next = next.visNext(c)
+    if not next:
+        if c.hoistStack:
+            cantMoveMessage(c)
+        c.treeFocusHelper()
+        return
+    c.endEditing()
+    undoData = u.beforeMoveNode(p)
+    &lt;&lt; Move p down &amp; set moved if successful &gt;&gt;
+    if moved:
+        p.setDirty()
+        c.setChanged()
+        u.afterMoveNode(p, 'Move Down', undoData)
+    c.redraw(p)
+    c.updateSyntaxColorer(p)  # Moving can change syntax coloring.
+</t>
+<t tx="felix.20211017220236.85">if next.hasChildren() and next.isExpanded():
+    # Attempt to move p to the first child of next.
+    moved = c.checkMoveWithParentWithWarning(p, next, True)
+    if moved:
+        p.setDirty()
+        p.moveToNthChildOf(next, 0)
+else:
+    # Attempt to move p after next.
+    moved = c.checkMoveWithParentWithWarning(p, next.parent(), True)
+    if moved:
+        p.setDirty()
+        p.moveAfter(next)
+# Patch by nh2: 0004-Add-bool-collapse_nodes_after_move-option.patch
+if (
+    c.collapse_nodes_after_move
+    and moved and c.sparse_move
+    and parent and not parent.isAncestorOf(p)
+):
+    # New in Leo 4.4.2: contract the old parent if it is no longer the parent of p.
+    parent.contract()
+</t>
+<t tx="felix.20211017220236.86">@g.commander_command('move-outline-left')
+def moveOutlineLeft(self, event=None):
+    """Move the selected node left if possible."""
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return
+    if not c.canMoveOutlineLeft():
+        if c.hoistStack:
+            cantMoveMessage(c)
+        c.treeFocusHelper()
+        return
+    if not p.hasParent():
+        c.treeFocusHelper()
+        return
+    parent = p.parent()
+    c.endEditing()
+    undoData = u.beforeMoveNode(p)
+    p.setDirty()
+    p.moveAfter(parent)
+    p.setDirty()
+    c.setChanged()
+    u.afterMoveNode(p, 'Move Left', undoData)
+    # Patch by nh2: 0004-Add-bool-collapse_nodes_after_move-option.patch
+    if c.collapse_nodes_after_move and c.sparse_move:  # New in Leo 4.4.2
+        parent.contract()
+    c.redraw(p)
+    c.recolor()  # Moving can change syntax coloring.
+</t>
+<t tx="felix.20211017220236.87">@g.commander_command('move-outline-right')
+def moveOutlineRight(self, event=None):
+    """Move the selected node right if possible."""
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return
+    if not c.canMoveOutlineRight():  # 11/4/03: Support for hoist.
+        if c.hoistStack:
+            cantMoveMessage(c)
+        c.treeFocusHelper()
+        return
+    back = p.back()
+    if not back:
+        c.treeFocusHelper()
+        return
+    if not c.checkMoveWithParentWithWarning(p, back, True):
+        c.treeFocusHelper()
+        return
+    c.endEditing()
+    undoData = u.beforeMoveNode(p)
+    p.setDirty()
+    n = back.numberOfChildren()
+    p.moveToNthChildOf(back, n)
+    p.setDirty()
+    c.setChanged()  # #2036.
+    u.afterMoveNode(p, 'Move Right', undoData)
+    c.redraw(p)
+    c.recolor()
+</t>
+<t tx="felix.20211017220236.88">@g.commander_command('move-outline-up')
+def moveOutlineUp(self, event=None):
+    """Move the selected node up if possible."""
+    c, p, u = self, self.p, self.undoer
+    if not p:
+        return
+    if not c.canMoveOutlineUp():  # Support for hoist.
+        if c.hoistStack:
+            cantMoveMessage(c)
+        c.treeFocusHelper()
+        return
+    back = p.visBack(c)
+    if not back:
+        return
+    back2 = back.visBack(c)
+    c.endEditing()
+    undoData = u.beforeMoveNode(p)
+    moved = False
+    &lt;&lt; Move p up &gt;&gt;
+    if moved:
+        p.setDirty()
+        c.setChanged()
+        u.afterMoveNode(p, 'Move Right', undoData)
+    c.redraw(p)
+    c.updateSyntaxColorer(p)  # Moving can change syntax coloring.
+</t>
+<t tx="felix.20211017220236.89">parent = p.parent()
+if not back2:
+    if c.hoistStack:  # hoist or chapter.
+        limit, limitIsVisible = c.visLimit()
+        assert limit
+        if limitIsVisible:
+            # canMoveOutlineUp should have caught this.
+            g.trace('can not happen. In hoist')
+        else:
+            moved = True
+            p.setDirty()
+            p.moveToFirstChildOf(limit)
+    else:
+        # p will be the new root node
+        p.setDirty()
+        p.moveToRoot()
+        moved = True
+elif back2.hasChildren() and back2.isExpanded():
+    if c.checkMoveWithParentWithWarning(p, back2, True):
+        moved = True
+        p.setDirty()
+        p.moveToNthChildOf(back2, 0)
+else:
+    if c.checkMoveWithParentWithWarning(p, back2.parent(), True):
+        moved = True
+        p.setDirty()
+        p.moveAfter(back2)
+# Patch by nh2: 0004-Add-bool-collapse_nodes_after_move-option.patch
+if (
+    c.collapse_nodes_after_move
+    and moved and c.sparse_move
+    and parent and not parent.isAncestorOf(p)
+):
+    # New in Leo 4.4.2: contract the old parent if it is no longer the parent of p.
+    parent.contract()
+</t>
+<t tx="felix.20211017220236.9">@g.commander_command('paste-as-template')
+def pasteAsTemplate(self, event=None):
+    c = self
+    p = c.p
+    @others
+    xroot = ElementTree.fromstring(g.app.gui.getTextFromClipboard())
+    xvnodes = xroot.find('vnodes')
+    xtnodes = xroot.find('tnodes')
+
+    bodies, uas = leoFileCommands.FastRead(c, {}).scanTnodes(xtnodes)
+
+    root_gnx = xvnodes[0].attrib.get('t')  # the gnx of copied node
+    outside = {x.gnx for x in skip_root(c.hiddenRootNode)}
+        # outside will contain gnxes of nodes that are outside the copied tree
+
+    translation = {x: translate_gnx(x) for x in bodies}
+        # we generate new gnx for each node in the copied tree
+
+    seen = set(outside)  # required for the treatment of local clones inside the copied tree
+
+    heads = {}
+
+    bunch = c.undoer.createCommonBunch(p)
+    &lt;&lt; prepare destination data &gt;&gt;
+
+    pasted = do_paste(vpar, index)
+
+    newp = leoNodes.Position(pasted, index, parStack)
+
+    bunch.undoHelper = undoHelper
+    bunch.redoHelper = redoHelper
+    bunch.undoType = 'paste-retaining-outside-clones'
+
+    newp.setDirty()
+    c.undoer.pushBead(bunch)
+    c.redraw(newp)
+</t>
+<t tx="felix.20211017220236.90">@g.commander_command('promote')
+def promote(self, event=None, undoFlag=True, redrawFlag=True):
+    """Make all children of the selected nodes siblings of the selected node."""
+    c, p, u = self, self.p, self.undoer
+    if not p or not p.hasChildren():
+        c.treeFocusHelper()
+        return
+    c.endEditing()
+    children = p.v.children  # First, for undo.
+    p.promote()
+    c.setChanged()
+    if undoFlag:
+        p.setDirty()
+        u.afterPromote(p, children)
+    if redrawFlag:
+        c.redraw(p)
+        c.updateSyntaxColorer(p)  # Moving can change syntax coloring.
+</t>
+<t tx="felix.20211017220236.91">@g.commander_command('toggle-sparse-move')
+def toggleSparseMove(self, event=None):
+    """Toggle whether moves collapse the outline."""
+    c = self
+    c.sparse_move = not c.sparse_move
+    if not g.unitTesting:
+        g.blue(f"sparse-move: {c.sparse_move}")
+</t>
+<t tx="felix.20211017220236.92"></t>
+<t tx="felix.20211017220236.93">@g.commander_command('sort-children')
+def sortChildren(self, event=None, key=None, reverse=False):
+    """Sort the children of a node."""
+    # This method no longer supports the 'cmp' keyword arg.
+    c, p = self, self.p
+    if p and p.hasChildren():
+        c.sortSiblings(p=p.firstChild(), sortChildren=True, key=key, reverse=reverse)
+</t>
+<t tx="felix.20211017220236.94">@g.commander_command('sort-siblings')
+def sortSiblings(self, event=None,
+    # cmp keyword is no longer supported.
+    key=None,
+    p=None,
+    sortChildren=False,
+    reverse=False
+):
+    """Sort the siblings of a node."""
+    c, u = self, self.undoer
+    if not p:
+        p = c.p
+    if not p:
+        return
+    c.endEditing()
+    undoType = 'Sort Children' if sortChildren else 'Sort Siblings'
+    parent_v = p._parentVnode()
+    oldChildren = parent_v.children[:]
+    newChildren = parent_v.children[:]
+    if key is None:
+
+        def lowerKey(self):
+            return self.h.lower()
+
+        key = lowerKey
+    newChildren.sort(key=key, reverse=reverse)
+    if oldChildren == newChildren:
+        return
+    # 2010/01/20. Fix bug 510148.
+    c.setChanged()
+    bunch = u.beforeSort(p, undoType, oldChildren, newChildren, sortChildren)
+    parent_v.children = newChildren
+    u.afterSort(p, bunch)
+    # Sorting destroys position p, and possibly the root position.
+    p = c.setPositionAfterSort(sortChildren)
+    if p.parent():
+        p.parent().setDirty()
+    c.redraw(p)
+</t>
+<t tx="felix.20211017220236.95">// def cantMoveMessage(c):
+//     h = c.rootPosition().h
+//     kind = 'chapter' if h.startswith('@chapter') else 'hoist'
+//     g.warning("can't move node out of", kind)
+
+</t>
+<t tx="felix.20211017220236.96">// @g.command('count-children')
+// def count_children(event=None):
+//     c = event and event.get('c')
+//     if c:
+//         g.es_print(f"{c.p.numberOfChildren()} children")
+
+</t>
+<t tx="felix.20211017232128.1">function applyMixins(derivedCtor: any, constructors: any[]) {
+    constructors.forEach((baseCtor) =&gt; {
+        Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) =&gt; {
+            Object.defineProperty(
+                derivedCtor.prototype,
+                name,
+                Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
+                Object.create(null)
+            );
+        });
+    });
+}
+
+</t>
+<t tx="felix.20211018202009.1">import * as g from './leoGlobals';
+
+
+/**
+ * * Add to the commandsDict
+ */
+export function commander_command(p_name: string) {
+    return function (
+        target: any,
+        propertyKey: string,
+        descriptor: PropertyDescriptor
+    ) {
+        console.log('ran inside decorator, NAME WAS ----&gt; ' + p_name);
+        // console.log('target ', target);
+        // console.log('propertyKey ', propertyKey);
+        // console.log('descriptor ', descriptor);
+
+        console.log(g.global_commands_dict);
+        if (!g.global_commands_dict) {
+            //@ts-expect-error
+            g.global_commands_dict = {};
+        }
+        g.global_commands_dict[p_name] = descriptor.value;
+
+    };
+}
+
+</t>
+<t tx="felix.20211018215401.1">/**
+ * Create all entries in c.commandsDict.
+ * Do *not* clear c.commandsDict here.
+ */
+private createCommandNames(): void {
+    const c: Commands = this;
+    for (let commandName in g.global_commands_dict) {
+        c.commandsDict[commandName] = g.global_commands_dict[commandName];
     }
 }
 

@@ -1,17 +1,55 @@
 import * as vscode from "vscode";
+import { Position } from "./core/leoNodes";
 import { LeoOutlineNode } from "./leoOutlineNode";
 
-export interface PNode {
-    // Fake structure. Use Position.v.isCloned(), etc. instead
-    header: string;
-    children: PNode[];
-    parent?: PNode;
-    body: string;
-    selected?: boolean;
-    marked?: boolean;
-    cloned?: boolean;
-    dirty?: boolean;
-    atFile?: boolean;
+/**
+ * * Types of the various JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
+ */
+export interface ConfigMembers {
+    checkForChangeExternalFiles: string;
+    defaultReloadIgnore: string;
+    leoTreeBrowse: boolean;
+    treeKeepFocus: boolean;
+    treeKeepFocusWhenAside: boolean;
+    statusBarString: string;
+    statusBarColor: string;
+    treeInExplorer: boolean;
+    showOpenAside: boolean;
+    showEditOnNodes: boolean;
+    showArrowsOnNodes: boolean;
+    showAddOnNodes: boolean;
+    showMarkOnNodes: boolean;
+    showCloneOnNodes: boolean;
+    showCopyOnNodes: boolean;
+
+    showEditionOnBody: boolean; // clone delete insert(s)
+    showClipboardOnBody: boolean; // cut copy paste(s)
+    showPromoteOnBody: boolean; // promote demote
+    showExecuteOnBody: boolean; // extract(s)
+    showExtractOnBody: boolean;
+    showImportOnBody: boolean;
+    showRefreshOnBody: boolean;
+    showHoistOnBody: boolean;
+    showMarkOnBody: boolean;
+    showSortOnBody: boolean;
+
+    invertNodeContrast: boolean;
+}
+
+/**
+ * * Structure for configuration settings changes used along with welcome/settings webview.
+ */
+export interface ConfigSetting {
+    code: string;
+    value: any;
+}
+
+/**
+ * * Structure for the two vscode font settings
+ */
+export interface FontSettings {
+    zoomLevel: number;
+    fontSize: number;
 }
 
 /**
@@ -43,13 +81,21 @@ export interface ReqRefresh {
  */
 export interface UserCommand {
     action: string;
-    node?: LeoOutlineNode | undefined;  // We can START a stack with a targeted command
+    node?: LeoOutlineNode | undefined; // We can START a stack with a targeted command
     text?: string | undefined; // If a string is required, for headline, etc.
     refreshType: ReqRefresh; // Minimal refresh level required by this command
     fromOutline: boolean; // Focus back on outline instead of body
     keepSelection?: boolean; // Should bring back selection on node prior to command
     resolveFn?: (result: any) => void; // call that with an answer from python's (or other) side
     rejectFn?: (reason: any) => void; // call if problem is encountered
+}
+
+/**
+ * * LeoBody virtual file time information object
+ */
+export interface BodyTimeInfo {
+    ctime: number;
+    mtime: number;
 }
 
 /**
@@ -61,6 +107,7 @@ export interface ShowBodyParam {
     showBodyKeepFocus: boolean,
     force_open?: boolean
 }
+
 /**
  * * Object sent back from leoInteg's 'getStates' command
  */

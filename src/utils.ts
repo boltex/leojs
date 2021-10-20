@@ -145,6 +145,17 @@ export function isIconChangedByEdit(p_node: LeoOutlineNode, p_newHasBody: boolea
 }
 
 /**
+ * * Checks if a string is formatted as a valid rrggbb color code.
+ * @param p_hexString hexadecimal 6 digits string, without leading '0x'
+ * @returns True if the string is a valid representation of an hexadecimal 6 digit number
+ */
+export function isHexColor(p_hexString: string): boolean {
+    return typeof p_hexString === 'string'
+        && p_hexString.length === 6
+        && !isNaN(Number('0x' + p_hexString));
+}
+
+/**
 * Builds a 'Leo Scheme' vscode.Uri from a gnx (or strings like 'LEO BODY' or empty strings to decorate breadcrumbs)
 * @param p_str leo node gnx strings are used to build Uri
 * @returns A vscode 'Uri' object
