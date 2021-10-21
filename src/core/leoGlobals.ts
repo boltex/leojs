@@ -87,7 +87,12 @@ export const directives_pat: any = null;  // Set below.
   For commands based on functions, use the @g.command decorator.
 */
 
-export let global_commands_dict: { [key: string]: (...args: any[]) => any };
+export let global_commands_dict: {
+    [key: string]: (...args: any[]) => any &
+    { __doc__: string } &
+    { __func_name__: string } &
+    { __name__: string }
+};
 
 export const cmd_instance_dict: { [key: string]: string[] } = {
     // Keys are class names, values are attribute chains.

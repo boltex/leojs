@@ -40,6 +40,7 @@ export class Commands {
 
     public hiddenRootNode: VNode;
     public fileCommands: FileCommands;
+    public chapterController: any; // TODO : leoChapters.ChapterController(c)
 
     public gui: LeoUI;
 
@@ -51,6 +52,7 @@ export class Commands {
         }
     };
 
+    public collapse_on_lt_arrow: boolean = true; // getBool('collapse-on-lt-arrow', default=True)
     // Init ivars used while executing a command.
     public commandsDict: { [key: string]: (p?: any) => any } = {}; // Keys are command names, values are functions.
     public disableCommandsMessage: string = ''; // The presence of this message disables all commands.
@@ -189,6 +191,10 @@ export class Commands {
         this.hiddenRootNode = new VNode(this, 'hidden-root-vnode-gnx');
         this.hiddenRootNode.h = '<hidden root vnode>';
         this.fileCommands.gnxDict = {}; // RESET gnxDict
+        this.chapterController = {}; // TODO self.chapterController = leoChapters.ChapterController(c)
+
+        // From initConfigSettings 
+        this.collapse_on_lt_arrow = true; // getBool('collapse-on-lt-arrow', default=True)
 
         // From finishCreate
         c.createCommandNames();
@@ -1108,66 +1114,59 @@ export class Commands {
      * Contract all nodes in the outline.
      */
     public contractAllHeadlines(): void {
-        //
-
-        /*
-            c = self
-        for p in c.all_positions():
-            p.contract()
-        # Select the topmost ancestor of the presently selected node.
-        p = c.p
-        while p and p.hasParent():
-            p.moveToParent()
-        if redrawFlag:
-            # Do a *full* redraw.
-            # c.redraw_after_contract(p) only contracts a single position.
-            c.redraw(p)
-        c.expansionLevel = 1  # Reset expansion level.
-    */
+        const c: Commands = this;
+        for (let p of c.all_positions()) {
+            p.contract();
+        }
+        // Select the topmost ancestor of the presently selected node.
+        const p = c.p;
+        while (p.__bool__() && p.hasParent()) {
+            p.moveToParent();
+        }
+        c.expansionLevel = 1;  // Reset expansion level.
     }
 
-    /*
-    def contractSubtree(self, p):
-        for p in p.subtree():
-            p.contract()
-    */
+    public contractSubtree(p: Position): void {
+        for (let p_p of p.subtree()) {
+            p_p.contract();
+        }
+    }
 
-    /*
-    def expandSubtree(self, v, redraw=True):
-        c = self
-        last = v.lastNode()
-        while v and v != last:
-            v.expand()
-            v = v.threadNext()
-        if redraw:
-            c.redraw()
+    public expandSubtree(p: Position): void {
+        const last = p.lastNode();
+        while (p.__bool__() && !p.__eq__(last)) {
+            p.expand();
+            p = p.threadNext();
+        }
+    }
 
-    */
+    public expandToLevel(level: number): void {
+        const c: Commands = this;
+        const n: number = c.p.level();
+        // let old_expansion_level = c.expansionLevel;
+        let max_level = 0;
+        for (let p of c.p.self_and_subtree(false)) {
+            if (p.level() - n + 1 < level) {
+                p.expand();
+                max_level = Math.max(max_level, p.level() - n + 1);
+            } else {
+                p.contract();
+            }
+        }
+        c.expansionNode = c.p.copy();
+        c.expansionLevel = max_level + 1;
 
-    /*
-    def expandToLevel(self, level):
-
-        c = self
-        n = c.p.level()
-        old_expansion_level = c.expansionLevel
-        max_level = 0
-        for p in c.p.self_and_subtree(copy=False):
-            if p.level() - n + 1 < level:
-                p.expand()
-                max_level = max(max_level, p.level() - n + 1)
-            else:
-                p.contract()
-        c.expansionNode = c.p.copy()
-        c.expansionLevel = max_level + 1
+        /*
         if c.expansionLevel != old_expansion_level:
             c.redraw()
-        # It's always useful to announce the level.
-        # c.k.setLabelBlue('level: %s' % (max_level+1))
-        # g.es('level', max_level + 1)
+        // It's always useful to announce the level.
+        // c.k.setLabelBlue('level: %s' % (max_level+1))
+        // g.es('level', max_level + 1)
         c.frame.putStatusLine(f"level: {max_level + 1}")
-            # bg='red', fg='red')
+            // bg='red', fg='red'
+        */
 
-    */
+    }
 
     /**
      * Select a new position, redrawing the screen *only* if we must
@@ -1218,7 +1217,7 @@ export class Commands {
         c.setCurrentPosition(p);
 
         // Compatibility, but confusing.
-        // TODO : Is this needed?
+        // TODO : Is this needed? (not used in Leos codebase)
         // selectVnode = selectPosition
 
     }

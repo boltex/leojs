@@ -453,6 +453,7 @@
 <v t="felix.20210224000242.1"><vh>interface hoistStack</vh></v>
 <v t="felix.20210110223514.1"><vh>class Commands</vh>
 <v t="felix.20210223220756.1"><vh>Commander IVars</vh>
+<v t="felix.20211021003423.1"><vh>c.initConfigSettings</vh></v>
 <v t="felix.20210223220814.2"><vh>c.initCommandIvars</vh></v>
 <v t="felix.20210223220814.3"><vh>c.initDebugIvars</vh></v>
 <v t="felix.20210223220814.4"><vh>c.initDocumentIvars</vh></v>
@@ -1999,13 +2000,13 @@ public static LEO_COMMANDS = {
     GOTO_FIRST_VISIBLE: "TODO goToFirstVisibleNode", //  "goToFirstVisibleNode",
     GOTO_LAST_VISIBLE: "TODO goToLastVisibleNode", //  "goToLastVisibleNode",
     GOTO_LAST_SIBLING: "TODO goToLastSibling", //  "goToLastSibling",
-    GOTO_NEXT_VISIBLE: "goto-next-visible", //  "selectVisNext",
+    GOTO_NEXT_VISIBLE: "goto-next-visible", // * "selectVisNext",
     GOTO_PREV_VISIBLE: "TODO selectVisBack", //  "selectVisBack",
     GOTO_NEXT_MARKED: "TODO goToNextMarkedHeadline", //  "goToNextMarkedHeadline",
     GOTO_NEXT_CLONE: "TODO goToNextClone", //  "goToNextClone",
     CONTRACT_OR_GO_LEFT: "TODO contractNodeOrGoToParent", //  "contractNodeOrGoToParent",
     EXPAND_AND_GO_RIGHT: "TODO expandNodeAndGoToFirstChild", //  "expandNodeAndGoToFirstChild",
-    CONTRACT_ALL: "TODO contractAllHeadlines", //  "contractAllHeadlines",
+    CONTRACT_ALL: "contract-all", // * "contractAllHeadlines",
     // * Leo Operations
     MARK_PNODE: "TODO", //  "markPNode",
     UNMARK_PNODE: "TODO", //  "unmarkPNode",
@@ -6888,7 +6889,12 @@ export const directives_pat: any = null;  // Set below.
   For commands based on functions, use the @g.command decorator.
 */
 
-export let global_commands_dict: { [key: string]: (...args: any[]) =&gt; any };
+export let global_commands_dict: {
+    [key: string]: (...args: any[]) =&gt; any &amp;
+    { __doc__: string } &amp;
+    { __func_name__: string } &amp;
+    { __name__: string }
+};
 
 export const cmd_instance_dict: { [key: string]: string[] } = {
     // Keys are class names, values are attribute chains.
@@ -8638,6 +8644,7 @@ export class Commands {
 
     public hiddenRootNode: VNode;
     public fileCommands: FileCommands;
+    public chapterController: any; // TODO : leoChapters.ChapterController(c)
 
     public gui: LeoUI;
 
@@ -13046,6 +13053,10 @@ public initWrapperLeoFile(c: Commands, fn: string): Commands {
     this.hiddenRootNode = new VNode(this, 'hidden-root-vnode-gnx');
     this.hiddenRootNode.h = '&lt;hidden root vnode&gt;';
     this.fileCommands.gnxDict = {}; // RESET gnxDict
+    this.chapterController = {}; // TODO self.chapterController = leoChapters.ChapterController(c)
+
+    // From initConfigSettings 
+    this.collapse_on_lt_arrow = true; // getBool('collapse-on-lt-arrow', default=True)
 
     // From finishCreate
     c.createCommandNames();
@@ -13606,7 +13617,7 @@ public selectPosition(p: Position): void {
     c.setCurrentPosition(p);
 
     // Compatibility, but confusing.
-    // TODO : Is this needed?
+    // TODO : Is this needed? (not used in Leos codebase)
     // selectVnode = selectPosition
 
 }
@@ -13617,69 +13628,62 @@ public selectPosition(p: Position): void {
  * Contract all nodes in the outline.
  */
 public contractAllHeadlines(): void {
-    //
-
-    /*
-        c = self
-    for p in c.all_positions():
-        p.contract()
-    # Select the topmost ancestor of the presently selected node.
-    p = c.p
-    while p and p.hasParent():
-        p.moveToParent()
-    if redrawFlag:
-        # Do a *full* redraw.
-        # c.redraw_after_contract(p) only contracts a single position.
-        c.redraw(p)
-    c.expansionLevel = 1  # Reset expansion level.
-*/
+    const c: Commands = this;
+    for (let p of c.all_positions()) {
+        p.contract();
+    }
+    // Select the topmost ancestor of the presently selected node.
+    const p = c.p;
+    while (p.__bool__() &amp;&amp; p.hasParent()) {
+        p.moveToParent();
+    }
+    c.expansionLevel = 1;  // Reset expansion level.
 }
 
 </t>
-<t tx="felix.20211005023931.1">/*
-def contractSubtree(self, p):
-    for p in p.subtree():
-        p.contract()
-*/
+<t tx="felix.20211005023931.1">public contractSubtree(p: Position): void {
+    for (let p_p of p.subtree()) {
+        p_p.contract();
+    }
+}
 
 </t>
-<t tx="felix.20211005024008.1">/*
-def expandSubtree(self, v, redraw=True):
-    c = self
-    last = v.lastNode()
-    while v and v != last:
-        v.expand()
-        v = v.threadNext()
-    if redraw:
-        c.redraw()
-
-*/
+<t tx="felix.20211005024008.1">public expandSubtree(p: Position): void {
+    const last = p.lastNode();
+    while (p.__bool__() &amp;&amp; !p.__eq__(last)) {
+        p.expand();
+        p = p.threadNext();
+    }
+}
 
 </t>
-<t tx="felix.20211005024009.1">/*
-def expandToLevel(self, level):
+<t tx="felix.20211005024009.1">public expandToLevel(level: number): void {
+    const c: Commands = this;
+    const n: number = c.p.level();
+    // let old_expansion_level = c.expansionLevel;
+    let max_level = 0;
+    for (let p of c.p.self_and_subtree(false)) {
+        if (p.level() - n + 1 &lt; level) {
+            p.expand();
+            max_level = Math.max(max_level, p.level() - n + 1);
+        } else {
+            p.contract();
+        }
+    }
+    c.expansionNode = c.p.copy();
+    c.expansionLevel = max_level + 1;
 
-    c = self
-    n = c.p.level()
-    old_expansion_level = c.expansionLevel
-    max_level = 0
-    for p in c.p.self_and_subtree(copy=False):
-        if p.level() - n + 1 &lt; level:
-            p.expand()
-            max_level = max(max_level, p.level() - n + 1)
-        else:
-            p.contract()
-    c.expansionNode = c.p.copy()
-    c.expansionLevel = max_level + 1
+    /*
     if c.expansionLevel != old_expansion_level:
         c.redraw()
-    # It's always useful to announce the level.
-    # c.k.setLabelBlue('level: %s' % (max_level+1))
-    # g.es('level', max_level + 1)
+    // It's always useful to announce the level.
+    // c.k.setLabelBlue('level: %s' % (max_level+1))
+    // g.es('level', max_level + 1)
     c.frame.putStatusLine(f"level: {max_level + 1}")
-        # bg='red', fg='red')
+        // bg='red', fg='red'
+    */
 
-*/
+}
 
 </t>
 <t tx="felix.20211006225245.1">"configuration": {
@@ -16446,27 +16450,30 @@ def sortSiblings(self, event=None,
 </t>
 <t tx="felix.20211018202009.1">import * as g from './leoGlobals';
 
-
 /**
  * * Add to the commandsDict
  */
-export function commander_command(p_name: string) {
+export function commander_command(p_name: string, p_doc: string) {
     return function (
         target: any,
         propertyKey: string,
         descriptor: PropertyDescriptor
     ) {
-        console.log('ran inside decorator, NAME WAS ----&gt; ' + p_name);
-        // console.log('target ', target);
-        // console.log('propertyKey ', propertyKey);
-        // console.log('descriptor ', descriptor);
+        // Just injecting doc, func_name and name in the dict object to build menus, 
+        // but leojs does NOT need injection of ivars in the func itself
+        // like leo does for it's for plugins_menu.py.
+        const commander_command_wrapper = Object.assign(
+            descriptor.value,
+            { __doc__: p_doc },
+            { __func_name__: propertyKey },
+            { __name__: p_name },
+        );
 
-        console.log(g.global_commands_dict);
         if (!g.global_commands_dict) {
             //@ts-expect-error
             g.global_commands_dict = {};
         }
-        g.global_commands_dict[p_name] = descriptor.value;
+        g.global_commands_dict[p_name] = commander_command_wrapper;
 
     };
 }
@@ -16483,6 +16490,8 @@ private createCommandNames(): void {
     }
 }
 
+</t>
+<t tx="felix.20211021003423.1">public collapse_on_lt_arrow: boolean = true; // getBool('collapse-on-lt-arrow', default=True)
 </t>
 </tnodes>
 </leo_file>
