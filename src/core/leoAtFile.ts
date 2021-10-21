@@ -23,17 +23,17 @@ public function cmd(name): void {
 class AtFile {
 
     // directives...
-    noDirective     =  1;  // not an at-directive.
-    allDirective    =  2;  // at-all (4.2)
-    docDirective    =  3;  // @doc.
-    atDirective     =  4;  // @<space> or @<newline>
-    codeDirective   =  5;  // @code
-    cDirective      =  6;  // @c<space> or @c<newline>
-    othersDirective =  7;  // at-others
-    miscDirective   =  8;  // All other directives
-    rawDirective    =  9;  // @raw
-    endRawDirective = 10;  // @end_raw
-    startVerbatim   = 11;  // @verbatim  Not a real directive. Used to issue warnings.
+    const noDirective = 1;  // not an at-directive.
+    const allDirective = 2;  // at-all (4.2)
+    const docDirective = 3;  // @doc.
+    const atDirective = 4;  // @<space> or @<newline>
+    const codeDirective = 5;  // @code
+    const cDirective = 6;  // @c<space> or @c<newline>
+    const othersDirective = 7;  // at-others
+    const miscDirective = 8;  // All other directives
+    const rawDirective = 9;  // @raw
+    const endRawDirective = 10;  // @end_raw
+    const startVerbatim = 11;  // @verbatim  Not a real directive. Used to issue warnings.
     // Note: g.getScript also call the this.__init__ and this.finishCreate().
 
     /**
@@ -41,32 +41,32 @@ class AtFile {
      */
     public constructor(c: Commands) {
         // **Warning**: all these ivars must **also** be inited in initCommonIvars.
-        this.c = c;
-        this.encoding = 'utf-8';  // 2014/08/13
-        this.fileCommands = c.fileCommands;
-        this.errors = 0;  // Make sure this.error() works even when not inited.
+        const this.c = c;
+        const this.encoding = 'utf-8';  // 2014/08/13
+        const this.fileCommands = c.fileCommands;
+        const this.errors = 0;  // Make sure this.error() works even when not inited.
         // **Only** this.writeAll manages these flags.
-        this.unchangedFiles = 0;
+        const this.unchangedFiles = 0;
         // promptForDangerousWrite sets cancelFlag and yesToAll only if canCancelFlag is True.
-        this.canCancelFlag = false;
-        this.cancelFlag = false;
-        this.yesToAll = false;
+        const this.canCancelFlag = false;
+        const this.cancelFlag = false;
+        const this.yesToAll = false;
         // User options: set in reloadSettings.
-        this.checkPythonCodeOnWrite = false;
-        this.runPyFlakesOnWrite = false;
-        this.underindentEscapeString = '\\-';
+        const this.checkPythonCodeOnWrite = false;
+        const this.runPyFlakesOnWrite = false;
+        const this.underindentEscapeString = '\\-';
         this.reloadSettings();
     }
     /**
      * AtFile.reloadSettings
      */
     public reloadSettings(): void {
-        c = this.c;
-        this.checkPythonCodeOnWrite = c.config.getBool(
+        const c = this.c;
+        const this.checkPythonCodeOnWrite = c.config.getBool(
             'check-python-code-on-write', default_val=true);
-        this.runPyFlakesOnWrite = c.config.getBool(
+        const this.runPyFlakesOnWrite = c.config.getBool(
             'run-pyflakes-on-write', default_val=false);
-        this.underindentEscapeString = c.config.getString(
+        const this.underindentEscapeString = c.config.getString(
             'underindent-escape-string') || '\\-';
     }
     /**
@@ -75,52 +75,52 @@ class AtFile {
      * The defaults set here may be changed later.
      */
     public initCommonIvars(): void {
-        c = this.c;
-        this.at_auto_encoding = c.config.default_at_auto_file_encoding;
-        this.encoding = c.config.default_derived_file_encoding;
-        this.endSentinelComment = "";
-        this.errors = 0;
-        this.inCode = true;
-        this.indent = 0;  // The unit of indentation is spaces, not tabs.
-        this.language = null;
-        this.output_newline = g.getOutputNewline(c=c);
-        this.page_width = null;
-        this.raw = False;  // True: in @raw mode
-        this.root = null;  // The root (a position) of tree being read or written.
-        this.startSentinelComment = "";
-        this.startSentinelComment = "";
-        this.tab_width = c.tab_width || -4;
-        this.writing_to_shadow_directory = false;
+        const c = this.c;
+        const this.at_auto_encoding = c.config.default_at_auto_file_encoding;
+        const this.encoding = c.config.default_derived_file_encoding;
+        const this.endSentinelComment = "";
+        const this.errors = 0;
+        const this.inCode = true;
+        const this.indent = 0;  // The unit of indentation is spaces, not tabs.
+        const this.language = null;
+        const this.output_newline = g.getOutputNewline(c=c);
+        const this.page_width = null;
+        const this.raw = False;  // True: in @raw mode
+        const this.root = null;  // The root (a position) of tree being read or written.
+        const this.startSentinelComment = "";
+        const this.startSentinelComment = "";
+        const this.tab_width = c.tab_width || -4;
+        const this.writing_to_shadow_directory = false;
     }
     public initReadIvars(root, fileName): void {
         this.initCommonIvars();
-        this.bom_encoding = null;  // The encoding implied by any BOM (set by g.stripBOM)
-        this.cloneSibCount = 0;  // n > 1: Make sure n cloned sibs exists at next @+node sentinel
-        this.correctedLines = 0;  // For perfect import.
-        this.docOut = [];  // The doc part being accumulated.
-        this.done = False;  // True when @-leo seen.
-        this.fromString = false;
-        this.importRootSeen = false;
-        this.indentStack = [];
-        this.lastLines = [];  // The lines after @-leo
-        this.leadingWs = "";
-        this.lineNumber = 0;  // New in Leo 4.4.8.
-        this.out = null;
-        this.outStack = [];
-        this.read_i = 0;
-        this.read_lines = [];
-        this.readVersion = '';  // "5" for new-style thin files.
-        this.readVersion5 = False;  // Synonym for this.readVersion >= '5'
-        this.root = root;
-        this.rootSeen = false;
-        this.targetFileName = fileName;  // For this.writeError only.
-        this.tnodeList = [];  // Needed until old-style @file nodes are no longer supported.
-        this.tnodeListIndex = 0;
-        this.v = null;
-        this.vStack = [];  // Stack of this.v values.
-        this.thinChildIndexStack = [];  // number of siblings at this level.
-        this.thinNodeStack = [];  // Entries are vnodes.
-        this.updateWarningGiven = false;
+        const this.bom_encoding = null;  // The encoding implied by any BOM (set by g.stripBOM)
+        const this.cloneSibCount = 0;  // n > 1: Make sure n cloned sibs exists at next @+node sentinel
+        const this.correctedLines = 0;  // For perfect import.
+        const this.docOut = [];  // The doc part being accumulated.
+        const this.done = False;  // True when @-leo seen.
+        const this.fromString = false;
+        const this.importRootSeen = false;
+        const this.indentStack = [];
+        const this.lastLines = [];  // The lines after @-leo
+        const this.leadingWs = "";
+        const this.lineNumber = 0;  // New in Leo 4.4.8.
+        const this.out = null;
+        const this.outStack = [];
+        const this.read_i = 0;
+        const this.read_lines = [];
+        const this.readVersion = '';  // "5" for new-style thin files.
+        const this.readVersion5 = False;  // Synonym for this.readVersion >= '5'
+        const this.root = root;
+        const this.rootSeen = false;
+        const this.targetFileName = fileName;  // For this.writeError only.
+        const this.tnodeList = [];  // Needed until old-style @file nodes are no longer supported.
+        const this.tnodeListIndex = 0;
+        const this.v = null;
+        const this.vStack = [];  // Stack of this.v values.
+        const this.thinChildIndexStack = [];  // number of siblings at this level.
+        const this.thinNodeStack = [];  // Entries are vnodes.
+        const this.updateWarningGiven = false;
     }
     /**
      * Compute default values of all write-related ivars.
@@ -131,26 +131,26 @@ class AtFile {
         if (! c && c.config) {
             return null;
         }
-        make_dirs = c.config.create_nonexistent_directories;
+        const make_dirs = c.config.create_nonexistent_directories;
         // assert root;
         this.initCommonIvars();
         // assert this.checkPythonCodeOnWrite != null;
         // assert this.underindentEscapeString != null;
 
         // Copy args
-        this.root = root;
-        this.sentinels = true;
+        const this.root = root;
+        const this.sentinels = true;
 
         // Override initCommonIvars.
         if (g.unitTesting) {
-            this.output_newline = '\n';
+            const this.output_newline = '\n';
         }
 
         // Set other ivars.
         this.force_newlines_in_at_nosent_bodies = c.config.getBool(
             'force-newlines-in-at-nosent-bodies');
             // For this.putBody only.
-        this.outputList = [];
+        const this.outputList = [];
             // For stream output.
         this.scanAllDirectives(root);
             // Sets the following ivars:
@@ -164,9 +164,9 @@ class AtFile {
         // Overrides of this.scanAllDirectives...
         if (this.language == 'python') {
             // Encoding directive overrides everything else.
-            encoding = g.getPythonEncodingFromString(root.b);
+            const encoding = g.getPythonEncodingFromString(root.b);
             if (encoding) {
-                this.encoding = encoding;
+                const this.encoding = encoding;
             }
         }
 
@@ -175,17 +175,18 @@ class AtFile {
             if (hasattr(this.root.v, 'tnodeList')) {
                 delattr(this.root.v, 'tnodeList');
             }
-            this.root.v._p_changed = true;
+            const this.root.v._p_changed = true;
         }
 
         // #1907: Compute the file name and create directories as needed.
-        targetFileName = g.os_path_realpath(g.fullPath(c, root));
-        this.targetFileName = targetFileName;  // For this.writeError only.
+        const targetFileName = g.os_path_realpath(g.fullPath(c, root));
+        const this.targetFileName = targetFileName;  // For this.writeError only.
 
         // targetFileName can be empty for unit tests & @command nodes.
         if (! targetFileName) {
-            targetFileName = root.h if g.unitTesting else null;
-            this.targetFileName = targetFileName;  // For this.writeError only.
+            // targetFileName = root.h if g.unitTesting else null;
+            const targetFileName = g.unitTesting ? root.h : null;
+            const this.targetFileName = targetFileName;  // For this.writeError only.
             return targetFileName;
         }
 
@@ -195,11 +196,12 @@ class AtFile {
         }
 
         // Create directories if enabled.
-        root_dir = g.os_path_dirname(targetFileName);
+        const root_dir = g.os_path_dirname(targetFileName);
         if (make_dirs && root_dir) {
-            ok = g.makeAllNonExistentDirectories(root_dir);
+            const ok = g.makeAllNonExistentDirectories(root_dir);
             if (! ok) {
-                g.error("Error creating directories: {root_dir}");
+                // g.error(f"Error creating directories: {root_dir}");
+                g.error(`Error creating directories: ${root_dir}`);
                 return null;
             }
         }
@@ -212,26 +214,28 @@ class AtFile {
     /**
      * Make sure an external file written by Leo may be read properly.
      */
-    public checkExternalFile(event=None): void {
+    public checkExternalFile(event=null): void {
         c, p = this.c, this.c.p;
         if (! p.isAtFileNode() && ! p.isAtThinFileNode()) {
             g.red('Please select an @thin || @file node');
             return;
         }
-        fn = g.fullPath(c, p);  // #1910.
+        const fn = g.fullPath(c, p);  // #1910.
         if (! g.os_path_exists(fn)) {
-            g.red("file ! found: {fn}");
+            // g.red(f"file ! found: {fn}");
+            g.red(`file not found: ${fn}`);
             return;
         }
         s, e = g.readFileIntoString(fn);
-        if (s == none) {
-            g.red("empty file: {fn}");
+        if (s == null) {
+            // g.red(f"empty file: {fn}");
+            g.red(`empty file: ${fn}`);
             return;
         }
 
         // Create a dummy, unconnected, VNode as the root.
-        root_v = leoNodes.VNode(context=c);
-        root = leoNodes.Position(root_v);
+        const root_v = leoNodes.VNode(context=c);
+        const root = leoNodes.Position(root_v);
         FastAtRead(c, gnx2vnode={}).read_into_root(s, fn, root);
     }
     /**
@@ -240,7 +244,7 @@ class AtFile {
      */
     public openFileForReading(fromString=False): void {
         const c = this.c;
-        is_at_shadow = this.root.isAtShadowFileNode();
+        const is_at_shadow = this.root.isAtShadowFileNode();
         if (fromString) {
             if (is_at_shadow) {
                 return this.error(
@@ -251,32 +255,33 @@ class AtFile {
         }
 
         // Not from a string. Carefully read the file.
-        fn = g.fullPath(c, this.root);
+        const fn = g.fullPath(c, this.root);
             // Returns full path, including file name.
         this.setPathUa(this.root, fn);
             // Remember the full path to this node.
         if (is_at_shadow) {
-            fn = this.openAtShadowFileForReading(fn);
+            const fn = this.openAtShadowFileForReading(fn);
             if (! fn) {
                 return null, null;
             }
         }
         // assert fn;
         try {
-            s = this.readFileToUnicode(fn);
+            const s = this.readFileToUnicode(fn);
                 // Sets this.encoding, regularizes whitespace and calls this.initReadLines.
             // #1466.
-            if (s == none) {
+            if (s == null) {
                 // The error has been given.
-                this._file_bytes = g.toEncodedString('');
-                return none, null;
+                const this._file_bytes = g.toEncodedString('');
+                return null, null;
             }
             this.warnOnReadOnlyFile(fn);
         }
         catch (Exception) {
-            this.error("unexpected exception opening: '@file {fn}'");
-            this._file_bytes = g.toEncodedString('');
-            fn, s = none, null;
+            // this.error(f"unexpected exception opening: '@file {fn}'");
+            this.error(`unexpected exception opening: '@file ${fn}'`);
+            const this._file_bytes = g.toEncodedString('');
+            fn, s = null, null;
         }
         return fn, s;
     }
@@ -284,14 +289,15 @@ class AtFile {
      * Open an @shadow for reading and return shadow_fn.
      */
     public openAtShadowFileForReading(fn): void {
-        x = this.c.shadowController;
+        const x = this.c.shadowController;
         // readOneAtShadowNode should already have checked these.
-        shadow_fn = x.shadowPathName(fn);
-        shadow_exists = (g.os_path_exists(shadow_fn) && g.os_path_isfile(shadow_fn));
+        const shadow_fn = x.shadowPathName(fn);
+        const shadow_exists = (g.os_path_exists(shadow_fn) && g.os_path_isfile(shadow_fn));
         if (! shadow_exists) {
             g.trace('can ! happen: no private file',
                 shadow_fn, g.callers());
-            this.error("can ! happen: private file does ! exist: {shadow_fn}");
+            // this.error(f"can ! happen: private file does ! exist: {shadow_fn}");
+            this.error(`can not happen: private file does not exist: ${shadow_fn}`);
             return null;
         }
         // This method is the gateway to the shadow algorithm.
@@ -301,9 +307,9 @@ class AtFile {
     /**
      * Read an @thin or @file tree.
      */
-    public read(root, fromString=None): void {
+    public read(root, fromString=null): void {
         const c = this.c;
-        fileName = g.fullPath(c, root);  // #1341. #1889.
+        const fileName = g.fullPath(c, root);  // #1341. #1889.
         if (! fileName) {
             this.error("Missing file name. Restoring @file tree from .leo file.");
             return false;
@@ -312,13 +318,13 @@ class AtFile {
             // Fix bug 760531: always mark the root as read, even if there was an error.
             // Fix bug 889175: Remember the full fileName.
         this.initReadIvars(root, fileName);
-        this.fromString = fromString;
+        const this.fromString = fromString;
         if (this.errors) {
             return false;
         }
         fileName, file_s = this.openFileForReading(fromString=fromString);
         // #1798:
-        if (file_s == none) {
+        if (file_s == null) {
             return false;
         }
 
@@ -338,8 +344,8 @@ class AtFile {
                 // this.output_newline
                 // this.page_width
                 // this.tab_width
-        gnx2vnode = c.fileCommands.gnxDict;
-        contents = fromString || file_s;
+        const gnx2vnode = c.fileCommands.gnxDict;
+        const contents = fromString || file_s;
         FastAtRead(c, gnx2vnode).read_into_root(contents, fileName, root);
         root.clearDirty();
         return true;
@@ -348,12 +354,12 @@ class AtFile {
      * Remove p's tnodeList.
      */
     public deleteTnodeList(p: Position): void { // # AtFile method.
-        v = p.v;
+        const v = p.v;
         if (hasattr(v, "tnodeList")) {
             // Not an error, but a useful trace.
                 // g.blue("deleting tnodeList for " + repr(v))
             delattr(v, "tnodeList");
-            v._p_changed = true;
+            const v._p_changed = true;
         }
     }
     /**
@@ -364,7 +370,7 @@ class AtFile {
      */
     public deleteUnvisitedNodes(root, redraw=True): void {
         // Find the unvisited nodes.
-        aList = [z for z in root.subtree() if ! z.isVisited()];
+        const aList = [z for z in root.subtree() if ! z.isVisited()];
         if (aList) {
             // new-read: Never create resurrected nodes.
                 // r = this.createResurrectedNodesNode()
@@ -378,19 +384,19 @@ class AtFile {
      * Create a 'Resurrected Nodes' node as the last top-level node.
      */
     public createResurrectedNodesNode(): void {
-        c = this.c;
-        tag = 'Resurrected Nodes';
+        const c = this.c;
+        const tag = 'Resurrected Nodes';
         // Find the last top-level node.
-        last = c.rootPosition();
+        const last = c.rootPosition();
         while (last.hasNext()) {
             last.moveToNext();
         }
         // Create the node after last if it doesn't exist.
         if (last.h == tag) {
-            p = last;
+            const p = last;
         }
         else {
-            p = last.insertAfter();
+            const p = last.insertAfter();
             p.setHeadString(tag);
         }
         p.expand();
@@ -405,14 +411,15 @@ class AtFile {
          * The resurrected nodes callback.
          */
         public function callback(p: Position, r=r.copy(), root=root): void {
-            child = r.insertAsLastChild();
-            child.h = "From {root.h}";
-            v = p.v;
+            const child = r.insertAsLastChild();
+            // child.h = f"From {root.h}";
+            const child.h = `From ${root.h}`;
+            const v = p.v;
             // new code: based on vnodes.
             for (parent_v in v.parents) {
                 // assert isinstance(parent_v, leoNodes.VNode), parent_v;
                 if (v in parent_v.children) {
-                    childIndex = parent_v.children.index(v);
+                    const childIndex = parent_v.children.index(v);
                     v._cutLink(childIndex, parent_v);
                     v._addLink(len(child.v.children), child.v);
                 }
@@ -433,14 +440,14 @@ class AtFile {
      * Return True if s has file-like sentinels.
      */
     public isFileLike(s: string): void {
-        tag = "@+leo";
-        s = g.checkUnicode(s);
-        i = s.find(tag);
+        const tag = "@+leo";
+        const s = g.checkUnicode(s);
+        const i = s.find(tag);
         if (i == -1) {
             return True;  // Don't use the cache.
         }
         j, k = g.getLine(s, i);
-        line = s[j:k];
+        const line = s[j:k];
         valid, new_df, start, end, isThin = this.parseLeoSentinel(line);
         return ! isThin;
     }
@@ -449,15 +456,15 @@ class AtFile {
      */
     public readAll(root, force=False): void {
         const c = this.c;
-        old_changed = c.changed;
+        const old_changed = c.changed;
         if (force) {
             // Capture the current headline only if
             // we aren't doing the initial read.
             c.endEditing();
         }
-        t1 = time.time();
+        const t1 = time.time();
         c.init_error_dialogs();
-        files = this.findFilesToRead(force, root);
+        const files = this.findFilesToRead(force, root);
         for (p in files) {
             this.readFileAtPosition(force, p);
         }
@@ -466,25 +473,28 @@ class AtFile {
         }
         if (! g.unitTesting) {
             if (files) {
-                t2 = time.time();
-                g.es("read {len(files)} files in {t2 - t1:2.2f} seconds");
+                const t2 = time.time();
+                // g.es(f"read {len(files)} files in {t2 - t1:2.2f} seconds");
+                t3 = t2 - t1
+                g.es(`read ${len(files)} files in ${t3} seconds`);
             }
             else if (force) {
                 g.es("no @<file> nodes in the selected tree");
             }
         }
-        c.changed = old_changed;
+        const c.changed = old_changed;
         c.raise_error_dialogs();
     }
     public findFilesToRead(force, root): void {
 
-        c = this.c;
-        p = root.copy();
-        scanned_tnodes = set();
-        files = [];
-        after = p.nodeAfterTree() if force else null;
+        const c = this.c;
+        const p = root.copy();
+        const scanned_tnodes = set();
+        const files = [];
+        // after = p.nodeAfterTree() if force else null;
+        const after = force ? p.nodeAfterTree() : null;
         while (p && p != after) {
-            data = (p.gnx, g.fullPath(c, p));
+            const data = (p.gnx, g.fullPath(c, p));
             // skip clones referring to exactly the same paths.
             if (data in scanned_tnodes) {
                 p.moveToNodeAfterTree();
@@ -506,7 +516,7 @@ class AtFile {
                 p.isAtEditNode() ||
                 p.isAtShadowFileNode() ||
                 p.isAtFileNode() ||
-                p.isAtCleanNode()  // 1134.
+                p.isAtCleanNode();  // 1134.
             ) {
                 files.append(p.copy());
                 p.moveToNodeAfterTree();
@@ -550,11 +560,11 @@ class AtFile {
      * Read all @shadow nodes in the p's tree.
      */
     public readAtShadowNodes(p: Position): void {
-        after = p.nodeAfterTree();
-        p = p.copy();  // Don't change p in the caller.
+        const after = p.nodeAfterTree();
+        const p = p.copy();  // Don't change p in the caller.
         while (p && p != after) { // # Don't use iterator.
             if (p.isAtShadowFileNode()) {
-                fileName = p.atShadowFileNodeName();
+                const fileName = p.atShadowFileNodeName();
                 this.readOneAtShadowNode(fileName, p);
                 p.moveToNodeAfterTree();
             }
@@ -568,9 +578,10 @@ class AtFile {
      */
     public readOneAtAutoNode(p: Position): void {
         this, c, ic = this, this.c, this.c.importCommands;
-        fileName = g.fullPath(c, p);  // #1521, #1341, #1914.
+        const fileName = g.fullPath(c, p);  // #1521, #1341, #1914.
         if (! g.os_path_exists(fileName)) {
-            g.error("! found: {p.h!r}", nodeLink=p.get_UNL(with_proto=true));
+            // g.error(f"! found: {p.h!r}", nodeLink=p.get_UNL(with_proto=true));
+            g.error(`not found: ${p.h}`, nodeLink=p.get_UNL(with_proto=true));
             return p;
         }
         // Remember that we have seen the @auto node.
@@ -579,23 +590,24 @@ class AtFile {
         // if not g.unitTesting: g.es("reading:", p.h)
         try {
             // For #451: return p.
-            old_p = p.copy();
+            const old_p = p.copy();
             this.scanAllDirectives(p);
-            p.v.b = '';  // Required for @auto API checks.
+            const p.v.b = '';  // Required for @auto API checks.
             p.v._deleteAllChildren();
-            p = ic.createOutline(parent=p.copy());
+            const p = ic.createOutline(parent=p.copy());
             // Do *not* select a position here.
             // That would improperly expand nodes.
                 // c.selectPosition(p)
         }
         catch (Exception) {
-            p = old_p;
+            const p = old_p;
             ic.errors += 1;
             g.es_print('Unexpected exception importing', fileName);
             g.es_exception();
         }
         if (ic.errors) {
-            g.error("errors inhibited read @auto {fileName}");
+            // g.error(f"errors inhibited read @auto {fileName}");
+            g.error(`errors inhibited read @auto ${fileName}`);
         }
         else if (c.persistenceController) {
             c.persistenceController.update_after_read_foreign_file(p);
@@ -610,41 +622,43 @@ class AtFile {
         return p;
     }
     public readOneAtEditNode(fn, p: Position): void {
-        c = this.c;
-        ic = c.importCommands;
+        const c = this.c;
+        const ic = c.importCommands;
         // #1521
-        fn = g.fullPath(c, p);
+        const fn = g.fullPath(c, p);
         junk, ext = g.os_path_splitext(fn);
         // Fix bug 889175: Remember the full fileName.
         this.rememberReadPath(fn, p);
         // if not g.unitTesting: g.es("reading: @edit %s" % (g.shortFileName(fn)))
         s, e = g.readFileIntoString(fn, kind='@edit');
-        if (s == none) {
+        if (s == null) {
             return;
         }
-        encoding = 'utf-8' if e == none else e;
+        // encoding = 'utf-8' if e == null else e;
+        const encoding = e == null ? 'utf-8' : e;
         // Delete all children.
         while (p.hasChildren()) {
             p.firstChild().doDelete();
         }
-        head = '';
-        ext = ext.lower();
+        const head = '';
+        const ext = ext.lower();
         if (ext in ('.html', '.htm')) {
-            head = '@language html\n';
+            const head = '@language html\n';
         }
         else if (ext in ('.txt', '.text')) {
-            head = '@nocolor\n';
+            const head = '@nocolor\n';
         }
         else {
-            language = ic.languageForExtension(ext);
+            const language = ic.languageForExtension(ext);
             if (language && language != 'unknown_language') {
-                head = "@language {language}\n";
+                // head = f"@language {language}\n";
+                const head = `@language ${language}\n`;
             }
             else {
-                head = '@nocolor\n';
+                const head = '@nocolor\n';
             }
         }
-        p.b = head + g.toUnicode(s, encoding=encoding, reportErrors=true);
+        const p.b = head + g.toUnicode(s, encoding=encoding, reportErrors=true);
         g.doHook('after-edit', p=p);
     }
     /**
@@ -653,22 +667,23 @@ class AtFile {
     public readOneAtAsisNode(fn, p: Position): void {
         const c = this.c;
         // #1521 & #1341.
-        fn = g.fullPath(c, p);
+        const fn = g.fullPath(c, p);
         junk, ext = g.os_path_splitext(fn);
         // Remember the full fileName.
         this.rememberReadPath(fn, p);
         // if not g.unitTesting: g.es("reading: @asis %s" % (g.shortFileName(fn)))
         s, e = g.readFileIntoString(fn, kind='@edit');
-        if (s == none) {
+        if (s == null) {
             return;
         }
-        encoding = 'utf-8' if e == none else e;
+        // encoding = 'utf-8' if e == null else e;
+        const encoding = e == null ? 'utf-8' : e;
         // Delete all children.
         while (p.hasChildren()) {
             p.firstChild().doDelete();
         }
-        old_body = p.b;
-        p.b = g.toUnicode(s, encoding=encoding, reportErrors=true);
+        const old_body = p.b;
+        const p.b = g.toUnicode(s, encoding=encoding, reportErrors=true);
         if (! c.isChanged() && p.b != old_body) {
             c.setChanged();
         }
@@ -678,10 +693,11 @@ class AtFile {
      */
     public readOneAtCleanNode(root): void {
         this, c, x = this, this.c, this.c.shadowController;
-        fileName = g.fullPath(c, root);
+        const fileName = g.fullPath(c, root);
         if (! g.os_path_exists(fileName)) {
             g.es_print(
-                "! found: {fileName}",
+                // f"! found: {fileName}",
+                `not found: ${fileName}`,
                 color='red',
                 nodeLink=root.get_UNL(with_proto=true));
             return false;
@@ -692,16 +708,16 @@ class AtFile {
         this.scanAllDirectives(root);
             // Sets this.startSentinelComment/endSentinelComment.
         new_public_lines = this.read_at_clean_lines(fileName);
-        old_private_lines = this.write_at_clean_sentinels(root);
-        marker = x.markerFromFileLines(old_private_lines, fileName);
+        const old_private_lines = this.write_at_clean_sentinels(root);
+        const marker = x.markerFromFileLines(old_private_lines, fileName);
         old_public_lines, junk = x.separate_sentinels(old_private_lines, marker);
         if (old_public_lines) {
-            new_private_lines = x.propagate_changed_lines(
+            const new_private_lines = x.propagate_changed_lines(
                 new_public_lines, old_private_lines, marker, p=root);
         }
         else {
-            new_private_lines = [];
-            root.b = ''.join(new_public_lines);
+            const new_private_lines = [];
+            const root.b = ''.join(new_public_lines);
             return true;
         }
         if (new_private_lines == old_private_lines) {
@@ -711,8 +727,8 @@ class AtFile {
             g.es("updating:", root.h);
         }
         root.clearVisitedInTree();
-        gnx2vnode = this.fileCommands.gnxDict;
-        contents = ''.join(new_private_lines);
+        const gnx2vnode = this.fileCommands.gnxDict;
+        const contents = ''.join(new_private_lines);
         FastAtRead(c, gnx2vnode).read_into_root(contents, fileName, root);
         return True;  // Errors not detected.
     }
@@ -720,7 +736,8 @@ class AtFile {
      * Dump all lines.
      */
     public dump(lines, tag): void {
-        print("***** {tag} lines...\n");
+        // print(f"***** {tag} lines...\n");
+        print(`***** ${tag} lines...\n`);
         for (s in lines) {
             print(s.rstrip());
         }
@@ -729,16 +746,16 @@ class AtFile {
      * Return all lines of the @clean/@nosent file at fn.
      */
     public read_at_clean_lines(fn): void {
-        s = this.openFileHelper(fn);
+        const s = this.openFileHelper(fn);
             // Use the standard helper. Better error reporting.
             // Important: uses 'rb' to open the file.
         // #1798.
-        if (s == none) {
-            s = '';
+        if (s == null) {
+            const s = '';
         }
         else {
-            s = g.toUnicode(s, encoding=this.encoding);
-            s = s.replace('\r\n', '\n');
+            const s = g.toUnicode(s, encoding=this.encoding);
+            const s = s.replace('\r\n', '\n');
                 // Suppress meaningless "node changed" messages.
         }
         return g.splitLines(s);
@@ -748,25 +765,27 @@ class AtFile {
      * written as an @file node.
      */
     public write_at_clean_sentinels(root): void {
-        result = this.atFileToString(root, sentinels=true);
-        s = g.toUnicode(result, encoding=this.encoding);
+        const result = this.atFileToString(root, sentinels=true);
+        const s = g.toUnicode(result, encoding=this.encoding);
         return g.splitLines(s);
     }
     public readOneAtShadowNode(fn, p: Position): void {
 
         const c = this.c;
-        x = c.shadowController;
+        const x = c.shadowController;
         if (! fn == p.atShadowFileNodeName()) {
             this.error(
-                "can not happen: fn: {fn} != atShadowNodeName: " // del ';' ! => not
-                "{p.atShadowFileNodeName()}");
+                // f"can ! happen: fn: {fn} != atShadowNodeName: ";
+                `can not happen: fn: ${fn} != atShadowNodeName: `;
+                // f"{p.atShadowFileNodeName()}");
+                `${p.atShadowFileNodeName()}`);
             return;
         }
-        fn = g.fullPath(c, p);  // #1521 & #1341.
+        const fn = g.fullPath(c, p);  // #1521 & #1341.
         // #889175: Remember the full fileName.
         this.rememberReadPath(fn, p);
-        shadow_fn = x.shadowPathName(fn);
-        shadow_exists = g.os_path_exists(shadow_fn) && g.os_path_isfile(shadow_fn);
+        const shadow_fn = x.shadowPathName(fn);
+        const shadow_exists = g.os_path_exists(shadow_fn) && g.os_path_isfile(shadow_fn);
         // Delete all children.
         while (p.hasChildren()) {
             p.firstChild().doDelete();
@@ -775,7 +794,7 @@ class AtFile {
             this.read(p);
         }
         else {
-            ok = this.importAtShadowNode(p);
+            const ok = this.importAtShadowNode(p);
             if (ok) {
                 // Create the private file automatically.
                 this.writeOneAtShadowNode(p);
@@ -784,9 +803,10 @@ class AtFile {
     }
     public importAtShadowNode(p: Position): void {
         c, ic = this.c, this.c.importCommands;
-        fn = g.fullPath(c, p);  // #1521, #1341, #1914.
+        const fn = g.fullPath(c, p);  // #1521, #1341, #1914.
         if (! g.os_path_exists(fn)) {
-            g.error("! found: {p.h!r}", nodeLink=p.get_UNL(with_proto=true));
+            // g.error(f"! found: {p.h!r}", nodeLink=p.get_UNL(with_proto=true));
+            g.error(`not found: ${p.h}`, nodeLink=p.get_UNL(with_proto=true));
             return p;
         }
         // Delete all the child nodes.
@@ -811,13 +831,13 @@ class AtFile {
     }
     public createImportedNode(root, headline): void {
         if (this.importRootSeen) {
-            p = root.insertAsLastChild();
+            const p = root.insertAsLastChild();
             p.initHeadString(headline);
         }
         else {
             // Put the text into the already-existing root node.
-            p = root;
-            this.importRootSeen = true;
+            const p = root;
+            const this.importRootSeen = true;
         }
         p.v.setVisited();  // Suppress warning about unvisited node.
         return p;
@@ -826,9 +846,9 @@ class AtFile {
      * Init the ivars so that this.readLine will read all of s.
      */
     public initReadLine(s: string): void {
-        this.read_i = 0;
-        this.read_lines = g.splitLines(s);
-        this._file_bytes = g.toEncodedString(s);
+        const this.read_i = 0;
+        const this.read_lines = g.splitLines(s);
+        const this._file_bytes = g.toEncodedString(s);
     }
     /**
      * Parse the sentinel line s.
@@ -837,12 +857,12 @@ class AtFile {
     public parseLeoSentinel(s: string): void {
         const c = this.c;
         // Set defaults.
-        encoding = c.config.default_derived_file_encoding;
-        readVersion, readVersion5 = none, null;
+        const encoding = c.config.default_derived_file_encoding;
+        readVersion, readVersion5 = null, null;
         new_df, start, end, isThin = false, '', '', false;
         // Example: \*@+leo-ver=5-thin-encoding=utf-8,.*/
-        pattern = re.compile(
-            '(.+)@\+leo(-ver=([0123456789]+))?(-thin)?(-encoding=(.*)(\.))?(.*)');  // remove r
+        const pattern = re.compile(
+            r'(.+)@\+leo(-ver=([0123456789]+))?(-thin)?(-encoding=(.*)(\.))?(.*)');
             // The old code weirdly allowed '.' in version numbers.
             // group 1: opening delim
             // group 2: -ver=
@@ -852,48 +872,48 @@ class AtFile {
             // group(6): utf-8,
             // group(7): .
             // group(8): closing delim.
-        m = pattern.match(s);
-        valid = bool(m);
+        const m = pattern.match(s);
+        const valid = bool(m);
         if (valid) {
-            start = m.group(1);  // start delim
-            valid = bool(start);
+            const start = m.group(1);  // start delim
+            const valid = bool(start);
         }
         if (valid) {
-            new_df = bool(m.group(2));  // -ver=
+            const new_df = bool(m.group(2));  // -ver=
             if (new_df) {
                 // Set the version number.
                 if (m.group(3)) {
-                    readVersion = m.group(3);
-                    readVersion5 = readVersion >= '5';
+                    const readVersion = m.group(3);
+                    const readVersion5 = readVersion >= '5';
                 }
                 else {
-                    valid = false;
+                    const valid = false;
                 }
             }
         }
         if (valid) {
             // set isThin
-            isThin = bool(m.group(4));
+            const isThin = bool(m.group(4));
         }
         if (valid && m.group(5)) {
             // set encoding.
-            encoding = m.group(6);
+            const encoding = m.group(6);
             if (encoding && encoding.endswith(',')) {
                 // Leo 4.2 or after.
-                encoding = encoding[:-1];
+                const encoding = encoding[:-1];
             }
             if (! g.isValidEncoding(encoding)) {
                 g.es_print("bad encoding in derived file:", encoding);
-                valid = false;
+                const valid = false;
             }
         }
         if (valid) {
-            end = m.group(8);  // closing delim
+            const end = m.group(8);  // closing delim
         }
         if (valid) {
-            this.encoding = encoding;
-            this.readVersion = readVersion;
-            this.readVersion5 = readVersion5;
+            const this.encoding = encoding;
+            const this.readVersion = readVersion;
+            const this.readVersion5 = readVersion5;
         }
         return valid, new_df, start, end, isThin;
     }
@@ -908,28 +928,28 @@ class AtFile {
      * A. An @encoding directive, found by this.scanAllDirectives.
      * B. The value of c.config.default_derived_file_encoding.
      *
-     * Returns the string, or None on failure.
+     * Returns the string, or null on failure.
      */
     public readFileToUnicode(fileName): void {
-        s = this.openFileHelper(fileName);
+        const s = this.openFileHelper(fileName);
             // Catches all exceptions.
         // #1798.
-        if (s == none) {
+        if (s == null) {
             return null;
         }
         e, s = g.stripBOM(s);
         if (e) {
             // The BOM determines the encoding unambiguously.
-            s = g.toUnicode(s, encoding=e);
+            const s = g.toUnicode(s, encoding=e);
         }
         else {
             // Get the encoding from the header, or the default encoding.
-            s_temp = g.toUnicode(s, 'ascii', reportErrors=false);
-            e = this.getEncodingFromHeader(fileName, s_temp);
-            s = g.toUnicode(s, encoding=e);
+            const s_temp = g.toUnicode(s, 'ascii', reportErrors=false);
+            const e = this.getEncodingFromHeader(fileName, s_temp);
+            const s = g.toUnicode(s, encoding=e);
         }
-        s = s.replace('\r\n', '\n');
-        this.encoding = e;
+        const s = s.replace('\r\n', '\n');
+        const this.encoding = e;
         this.initReadLine(s);
         return s;
     }
@@ -937,18 +957,20 @@ class AtFile {
      * Open a file, reporting all exceptions.
      */
     public openFileHelper(fileName): void {
-        // #1798: return None as a flag on any error.
-        s = null;
+        // #1798: return null as a flag on any error.
+        const s = null;
         try {
             with (open(fileName, 'rb') as f) {
-                s = f.read();
+                const s = f.read();
             }
         }
         catch (IOError) {
-            this.error("can ! open {fileName}");
+            // this.error(f"can ! open {fileName}");
+            this.error(`can not open ${fileName}`);
         }
         catch (Exception) {
-            this.error("Exception reading {fileName}");
+            // this.error(f"Exception reading {fileName}");
+            this.error(`Exception reading ${fileName}`);
             g.es_exception();
         }
         return s;
@@ -960,19 +982,19 @@ class AtFile {
     public getEncodingFromHeader(fileName, s: string): void {
         if (this.errors) {
             g.trace('can ! happen: this.errors > 0', g.callers());
-            e = this.encoding;
+            const e = this.encoding;
             if (g.unitTesting) {
                 // assert false, g.callers();
             }
         }
         else {
             this.initReadLine(s);
-            old_encoding = this.encoding;
+            const old_encoding = this.encoding;
             // assert old_encoding;
-            this.encoding = null;
+            const this.encoding = null;
             // Execute scanHeader merely to set this.encoding.
             this.scanHeader(fileName, giveErrors=false);
-            e = this.encoding || old_encoding;
+            const e = this.encoding || old_encoding;
         }
         // assert e;
         return e;
@@ -985,7 +1007,7 @@ class AtFile {
         // This is an old interface, now used only by this.scanHeader.
         // For now, it's not worth replacing.
         if (this.read_i < len(this.read_lines)) {
-            s = this.read_lines[this.read_i];
+            const s = this.read_lines[this.read_i];
             this.read_i += 1;
             return s;
         }
@@ -1003,18 +1025,19 @@ class AtFile {
      */
     public scanHeader(fileName, giveErrors=True): void {
         new_df, isThinDerivedFile = false, false;
-        firstLines: List[str] = [];  // The lines before @+leo.
-        s = this.scanFirstLines(firstLines);
-        valid = len(s) > 0;
+        const firstLines: List[str] = [];  // The lines before @+leo.
+        const s = this.scanFirstLines(firstLines);
+        const valid = len(s) > 0;
         if (valid) {
             valid, new_df, start, end, isThinDerivedFile = this.parseLeoSentinel(s);
         }
         if (valid) {
-            this.startSentinelComment = start;
-            this.endSentinelComment = end;
+            const this.startSentinelComment = start;
+            const this.endSentinelComment = end;
         }
         else if (giveErrors) {
-            this.error("No @+leo sentinel in: {fileName}");
+            // this.error(f"No @+leo sentinel in: {fileName}");
+            this.error(`No @+leo sentinel in: ${fileName}`);
             g.trace(g.callers());
         }
         return firstLines, new_df, isThinDerivedFile;
@@ -1029,10 +1052,10 @@ class AtFile {
      * delimiters we set here.
      */
     public scanFirstLines(firstLines): void {
-        s = this.readLine();
+        const s = this.readLine();
         while (s && s.find("@+leo") == -1) {
             firstLines.append(s);
-            s = this.readLine();
+            const s = this.readLine();
         }
         return s;
     }
@@ -1044,7 +1067,7 @@ class AtFile {
     public scanHeaderForThin(fileName): void {
         this.readFileToUnicode(fileName);
             // Sets this.encoding, regularizes whitespace and calls this.initReadLines.
-        junk, junk, isThin = this.scanHeader(none);
+        junk, junk, isThin = this.scanHeader(null);
             // scanHeader uses this.readline instead of its args.
             // scanHeader also sets this.encoding.
         return isThin;
@@ -1054,7 +1077,7 @@ class AtFile {
     /**
      * Write all @auto nodes in the selected outline.
      */
-    public writeAtAutoNodes(event=None): void {
+    public writeAtAutoNodes(event=null): void {
         const c = this.c;
         c.init_error_dialogs();
         this.writeAtAutoNodesHelper(writeDirtyOnly=false);
@@ -1066,7 +1089,7 @@ class AtFile {
     /**
      * Write all dirty @auto nodes in the selected outline.
      */
-    public writeDirtyAtAutoNodes(event=None): void {
+    public writeDirtyAtAutoNodes(event=null): void {
         const c = this.c;
         c.init_error_dialogs();
         this.writeAtAutoNodesHelper(writeDirtyOnly=true);
@@ -1077,17 +1100,17 @@ class AtFile {
      */
     public writeAtAutoNodesHelper(writeDirtyOnly=True): void {
         const c = this.c;
-        p = c.p;
-        after = p.nodeAfterTree();
-        found = false;
+        const p = c.p;
+        const after = p.nodeAfterTree();
+        const found = false;
         while (p && p != after) {
             if (
                 p.isAtAutoNode() && ! p.isAtIgnoreNode() &&
                 (p.isDirty() || ! writeDirtyOnly)
             ) {
-                ok = this.writeOneAtAutoNode(p);
+                const ok = this.writeOneAtAutoNode(p);
                 if (ok) {
-                    found = true;
+                    const found = true;
                     p.moveToNodeAfterTree();
                 }
                 else {
@@ -1115,10 +1138,10 @@ class AtFile {
     /**
      * Write all @shadow nodes in the selected outline.
      */
-    public writeAtShadowNodes(event=None): void {
+    public writeAtShadowNodes(event=null): void {
         const c = this.c;
         c.init_error_dialogs();
-        val = this.writeAtShadowNodesHelper(writeDirtyOnly=false);
+        const val = this.writeAtShadowNodesHelper(writeDirtyOnly=false);
         c.raise_error_dialogs(kind='write');
         return val;
     }
@@ -1128,10 +1151,10 @@ class AtFile {
     /**
      * Write all dirty @shadow nodes in the selected outline.
      */
-    public writeDirtyAtShadowNodes(event=None): void {
+    public writeDirtyAtShadowNodes(event=null): void {
         const c = this.c;
         c.init_error_dialogs();
-        val = this.writeAtShadowNodesHelper(writeDirtyOnly=true);
+        const val = this.writeAtShadowNodesHelper(writeDirtyOnly=true);
         c.raise_error_dialogs(kind='write');
         return val;
     }
@@ -1140,18 +1163,19 @@ class AtFile {
      */
     public writeAtShadowNodesHelper(writeDirtyOnly=True): void {
         const c = this.c;
-        p = c.p;
-        after = p.nodeAfterTree();
-        found = false;
+        const p = c.p;
+        const after = p.nodeAfterTree();
+        const found = false;
         while (p && p != after) {
             if (
                 p.atShadowFileNodeName() && ! p.isAtIgnoreNode()
                 && (p.isDirty() || ! writeDirtyOnly)
             ) {
-                ok = this.writeOneAtShadowNode(p);
+                const ok = this.writeOneAtShadowNode(p);
                 if (ok) {
-                    found = true;
-                    g.blue("wrote {p.atShadowFileNodeName()}");
+                    const found = true;
+                    // g.blue(f"wrote {p.atShadowFileNodeName()}");
+                    g.blue(`wrote ${p.atShadowFileNodeName()}`);
                     p.moveToNodeAfterTree();
                 }
                 else {
@@ -1179,7 +1203,8 @@ class AtFile {
      * Write the contents of the file to the output stream.
      */
     public putFile(root, fromString='', sentinels=True): void {
-        s = fromString if fromString else root.v.b;
+        // s = fromString if fromString else root.v.b;
+        const s = fromString ? fromString : root.v.b;
         root.clearAllVisitedInTree();
         this.putAtFirstLines(s);
         this.putOpenLeoSentinel("@+leo-ver=5");
@@ -1199,10 +1224,10 @@ class AtFile {
         const c = this.c;
         // This is the *only* place where these are set.
         // promptForDangerousWrite sets cancelFlag only if canCancelFlag is True.
-        this.unchangedFiles = 0;
-        this.canCancelFlag = true;
-        this.cancelFlag = false;
-        this.yesToAll = false;
+        const this.unchangedFiles = 0;
+        const this.canCancelFlag = true;
+        const this.cancelFlag = false;
+        const this.yesToAll = false;
         files, root = this.findFilesToWrite(all);
         for (p in files) {
             try {
@@ -1213,9 +1238,9 @@ class AtFile {
             }
         }
         // Make *sure* these flags are cleared for other commands.
-        this.canCancelFlag = false;
-        this.cancelFlag = false;
-        this.yesToAll = false;
+        const this.canCancelFlag = false;
+        const this.cancelFlag = false;
+        const this.yesToAll = false;
         // Say the command is finished.
         this.reportEndOfWrite(files, all, dirty);
         if (c.isChanged()) {
@@ -1228,26 +1253,27 @@ class AtFile {
      * We must do this in a prepass, so as to avoid errors later.
      */
     public findFilesToWrite(force): void {
-        trace = 'save' in g.app.debug && ! g.unitTesting;
+        const trace = 'save' in g.app.debug && ! g.unitTesting;
         if (trace) {
-            g.trace("writing *{'selected' if force else 'all'}* files");
+            // g.trace(f"writing *{'selected' if force else 'all'}* files");
+            g.trace(`writing *${'selected' if force else 'all'}* files`);
         }
-        c = this.c;
+        const c = this.c;
         if (force) {
             // The Write @<file> Nodes command.
             // Write all nodes in the selected tree.
-            root = c.p;
-            p = c.p;
-            after = p.nodeAfterTree();
+            const root = c.p;
+            const p = c.p;
+            const after = p.nodeAfterTree();
         }
         else {
             // Write dirty nodes in the entire outline.
-            root = c.rootPosition();
-            p = c.rootPosition();
-            after = null;
+            const root = c.rootPosition();
+            const p = c.rootPosition();
+            const after = null;
         }
-        seen = set();
-        files = [];
+        const seen = set();
+        const files = [];
         while (p && p != after) {
             if (p.isAtIgnoreNode() && ! p.isAtAsisFileNode()) {
                 // Honor @ignore in *body* text, but *not* in @asis nodes.
@@ -1257,7 +1283,7 @@ class AtFile {
                 p.moveToNodeAfterTree();
             }
             else if (p.isAnyAtFileNode()) {
-                data = p.v, g.fullPath(c, p);
+                const data = p.v, g.fullPath(c, p);
                 if (data in seen) {
                     if (trace && force) {
                         g.trace('Already seen', p.h);
@@ -1276,7 +1302,7 @@ class AtFile {
         }
         // When scanning *all* nodes, we only actually write dirty nodes.
         if (! force) {
-            files = [z for z in files if z.isDirty()];
+            const files = [z for z in files if z.isDirty()];
         }
         if (trace) {
             g.printObj([z.h for z in files], tag='Files to be saved');
@@ -1289,7 +1315,8 @@ class AtFile {
      */
     public internalWriteError(p: Position): void {
         g.es_exception();
-        g.es("Internal error writing: {p.h}", color='red');
+        // g.es(f"Internal error writing: {p.h}", color='red');
+        g.es(`Internal error writing: ${p.h}`, color='red');
         g.es('Please report this error to:', color='blue');
         g.es('https://groups.google.com/forum/;  // !forum/leo-editor', color='blue')
         g.es('Warning: changes to this file will be lost', color='red');
@@ -1300,8 +1327,9 @@ class AtFile {
             return;
         }
         if (files) {
-            n = this.unchangedFiles;
-            g.es("finished: {n} unchanged file{g.plural(n)}");
+            const n = this.unchangedFiles;
+            // g.es(f"finished: {n} unchanged file{g.plural(n)}");
+            g.es(`finished: ${n} unchanged file${g.plural(n)}`);
         }
         else if (all) {
             g.warning("no @<file> nodes in the selected tree");
@@ -1314,14 +1342,14 @@ class AtFile {
      * Save the outline if only persistence data nodes are dirty.
      */
     public saveOutlineIfPossible(): void {
-        c = this.c;
-        changed_positions = [p for p in c.all_unique_positions() if p.v.isDirty()];
-        at_persistence = (
+        const c = this.c;
+        const changed_positions = [p for p in c.all_unique_positions() if p.v.isDirty()];
+        const at_persistence = (
             c.persistenceController &&
             c.persistenceController.has_at_persistence_node();
         );
         if (at_persistence) {
-            changed_positions = [p for p in changed_positions;
+            const changed_positions = [p for p in changed_positions;
                 if ! at_persistence.isAncestorOf(p)];
         }
         if (! changed_positions) {
@@ -1339,10 +1367,11 @@ class AtFile {
      * the @persistence data, thereby annoyingly changing the .leo file.
      */
     public writeAllHelper(p: Position, root): void {
-        this.root = root;
+        const this.root = root;
         if (p.isAtIgnoreNode()) {
             // Should have been handled in findFilesToWrite.
-            g.trace("Can ! happen: {p.h} == an @ignore node");
+            // g.trace(f"Can ! happen: {p.h} == an @ignore node");
+            g.trace(`Can not happen: ${p.h} == an @ignore node`);
             return;
         }
         try {
@@ -1351,7 +1380,7 @@ class AtFile {
         catch (IOError) {
             return;
         }
-        table = (
+        const table = (
             (p.isAtAsisFileNode, this.asisWrite),
             (p.isAtAutoNode, this.writeOneAtAutoNode),
             (p.isAtCleanNode, this.writeOneAtCleanNode),
@@ -1368,7 +1397,8 @@ class AtFile {
             }
         }
         else {
-            g.trace("Can ! happen: {p.h}");
+            // g.trace(f"Can ! happen: {p.h}");
+            g.trace(`Can not happen: ${p.h}`);
             return;
         }
 
@@ -1388,22 +1418,24 @@ class AtFile {
         if (c.ignoreChangedPaths) {
             return;
         }
-        oldPath = g.os_path_normcase(this.getPathUa(p));
-        newPath = g.os_path_normcase(g.fullPath(c, p));
+        const oldPath = g.os_path_normcase(this.getPathUa(p));
+        const newPath = g.os_path_normcase(g.fullPath(c, p));
         try { // # #1367: samefile can throw an exception.
-            changed = oldPath && ! os.path.samefile(oldPath, newPath);
+            const changed = oldPath && ! os.path.samefile(oldPath, newPath);
         }
         catch (Exception) {
-            changed = true;
+            const changed = true;
         }
         if (! changed) {
             return;
         }
-        ok = this.promptForDangerousWrite(
-            fileName=none,
+        const ok = this.promptForDangerousWrite(
+            fileName=null,
             message=(
-                "{g.tr('path changed for %s' % (p.h))}\n";
-                "{g.tr('write this file anyway?')}";
+                // f"{g.tr('path changed for %s' % (p.h))}\n";
+                `${g.tr('path changed for %s' % (p.h))}\n`;
+                // f"{g.tr('write this file anyway?')}";
+                `${g.tr('write this file anyway?')}`;
             ),
         );
         if (! ok) {
@@ -1418,26 +1450,29 @@ class AtFile {
         const c = this.c;
         // Dispatch the proper writer.
         junk, ext = g.os_path_splitext(fileName);
-        writer = this.dispatch(ext, root);
+        const writer = this.dispatch(ext, root);
         if (writer) {
-            this.outputList = [];
+            const this.outputList = [];
             writer(root);
-            return '' if this.errors else ''.join(this.outputList);
+            // return '' if this.errors else ''.join(this.outputList);
+            return this.errors ? '' : ''.join(this.outputList);
         }
         if (root.isAtAutoRstNode()) {
             // An escape hatch: fall back to the theRst writer
             // if there is no rst writer plugin.
-            this.outputFile = outputFile = io.StringIO();
-            ok = c.rstCommands.writeAtAutoFile(root, fileName, outputFile);
-            return outputFile.close() if ok else null;
+            const this.outputFile = outputFile = io.StringIO();
+            const ok = c.rstCommands.writeAtAutoFile(root, fileName, outputFile);
+            // return outputFile.close() if ok else null;
+            return ok ? outputFile.close() : null;
         }
         // leo 5.6: allow undefined section references in all @auto files.
-        ivar = 'allow_undefined_refs';
+        const ivar = 'allow_undefined_refs';
         try {
             setattr(this, ivar, true);
-            this.outputList = [];
+            const this.outputList = [];
             this.putFile(root, sentinels=false);
-            return '' if this.errors else ''.join(this.outputList);
+            // return '' if this.errors else ''.join(this.outputList);
+            return this.errors ? '' : ''.join(this.outputList);
         }
         catch (Exception) {
             return null;
@@ -1453,18 +1488,18 @@ class AtFile {
         try {
             c.endEditing();
             c.init_error_dialogs();
-            fileName = this.initWriteIvars(root);
+            const fileName = this.initWriteIvars(root);
             // #1450.
             if (! fileName || ! this.precheck(fileName, root)) {
                 this.addToOrphanList(root);
                 return;
             }
-            this.outputList = [];
+            const this.outputList = [];
             for (p in root.self_and_subtree(copy=false)) {
                 this.writeAsisNode(p);
             }
             if (! this.errors) {
-                contents = ''.join(this.outputList);
+                const contents = ''.join(this.outputList);
                 this.replaceFile(contents, this.encoding, fileName, root);
             }
         }
@@ -1473,7 +1508,7 @@ class AtFile {
         }
     }
 
-    silentWrite = asisWrite;  // Compatibility with old scripts.
+    const silentWrite = asisWrite;  // Compatibility with old scripts.
     /**
      * Write the p's node to an @asis file.
      */
@@ -1483,15 +1518,15 @@ class AtFile {
          */
         public function put(s: string): void {
             // #1480: Avoid calling this.os().
-            s = g.toUnicode(s, this.encoding, reportErrors=true);
+            const s = g.toUnicode(s, this.encoding, reportErrors=true);
             this.outputList.append(s);
         }
 
         // Write the headline only if it starts with '@@'.
 
-        s = p.h;
+        const s = p.h;
         if (g.match(s, 0, "@@")) {
-            s = s[2:];
+            const s = s[2:];
             if (s) {
                 put('\n');  // Experimental.
                 put(s);
@@ -1499,29 +1534,29 @@ class AtFile {
             }
         }
         // Write the body.
-        s = p.b;
+        const s = p.b;
         if (s) {
             put(s);
         }
     }
     public writeMissing(p: Position): void {
         const c = this.c;
-        writtenFiles = false;
+        const writtenFiles = false;
         c.init_error_dialogs();
         // #1450.
         this.initWriteIvars(root=p.copy());
-        p = p.copy();
-        after = p.nodeAfterTree();
+        const p = p.copy();
+        const after = p.nodeAfterTree();
         while (p && p != after) { // # Don't use iterator.
             if (
                 p.isAtAsisFileNode() || (p.isAnyAtFileNode() && ! p.isAtIgnoreNode())
             ) {
-                fileName = p.anyAtFileNodeName();
+                const fileName = p.anyAtFileNodeName();
                 if (fileName) {
-                    fileName = g.fullPath(c, p);  // #1914.
+                    const fileName = g.fullPath(c, p);  // #1914.
                     if (this.precheck(fileName, p)) {
                         this.writeMissingNode(p);
-                        writtenFiles = true;
+                        const writtenFiles = true;
                     }
                     else {
                         this.addToOrphanList(p);
@@ -1547,7 +1582,7 @@ class AtFile {
         c.raise_error_dialogs(kind='write');
     }
     public writeMissingNode(p: Position): void {
-        table = (
+        const table = (
             (p.isAtAsisFileNode, this.asisWrite),
             (p.isAtAutoNode, this.writeOneAtAutoNode),
             (p.isAtCleanNode, this.writeOneAtCleanNode),
@@ -1563,7 +1598,8 @@ class AtFile {
                 return;
             }
         }
-        g.trace("Can ! happen unknown @<file> kind: {p.h}");
+        // g.trace(f"Can ! happen unknown @<file> kind: {p.h}");
+        g.trace(`Can not happen unknown @<file> kind: ${p.h}`);
     }
     /**
      * Write p, an @auto node.
@@ -1572,14 +1608,14 @@ class AtFile {
      */
     public writeOneAtAutoNode(p: Position): void {
         const c = this.c;
-        root = p.copy();
+        const root = p.copy();
         try {
             c.endEditing();
             if (! p.atAutoNodeName()) {
                 return false;
             }
-            fileName = this.initWriteIvars(root);
-            this.sentinels = false;
+            const fileName = this.initWriteIvars(root);
+            const this.sentinels = false;
             // #1450.
             if (! fileName || ! this.precheck(fileName, root)) {
                 this.addToOrphanList(root);
@@ -1588,8 +1624,8 @@ class AtFile {
             if (c.persistenceController) {
                 c.persistenceController.update_before_write_foreign_file(root);
             }
-            contents = this.writeAtAutoContents(fileName, root);
-            if (contents == none) {
+            const contents = this.writeAtAutoContents(fileName, root);
+            if (contents == null) {
                 g.es("! written:", fileName);
                 this.addToOrphanList(root);
                 return false;
@@ -1614,16 +1650,16 @@ class AtFile {
      * A factory returning a writer function for the given kind of @auto directive.
      */
     public writer_for_at_auto(root): void {
-        d = g.app.atAutoWritersDict;
+        const d = g.app.atAutoWritersDict;
         for (key in d) {
-            aClass = d.get(key);
+            const aClass = d.get(key);
             if (aClass && g.match_word(root.h, 0, key)) {
 
                 public function writer_for_at_auto_cb(root): void {
                     // pylint: disable=cell-var-from-loop
                     try {
-                        writer = aClass(this.c);
-                        s = writer.write(root);
+                        const writer = aClass(this.c);
+                        const s = writer.write(root);
                         return s;
                     }
                     catch (Exception) {
@@ -1641,8 +1677,8 @@ class AtFile {
      * A factory returning a writer function for the given file extension.
      */
     public writer_for_ext(ext): void {
-        d = g.app.writersDispatchDict;
-        aClass = d.get(ext);
+        const d = g.app.writersDispatchDict;
+        const aClass = d.get(ext);
         if (aClass) {
 
             public function writer_for_ext_cb(root): void {
@@ -1668,12 +1704,12 @@ class AtFile {
         const c = this.c;
         try {
             c.endEditing();
-            fileName = this.initWriteIvars(root);
-            this.sentinels = false;
+            const fileName = this.initWriteIvars(root);
+            const this.sentinels = false;
             if (! fileName || ! this.precheck(fileName, root)) {
                 return;
             }
-            this.outputList = [];
+            const this.outputList = [];
             this.putFile(root, sentinels=false);
             this.warnAboutOrphandAndIgnoredNodes();
             if (this.errors) {
@@ -1681,7 +1717,7 @@ class AtFile {
                 this.addToOrphanList(root);
             }
             else {
-                contents = ''.join(this.outputList);
+                const contents = ''.join(this.outputList);
                 this.replaceFile(contents, this.encoding, fileName, root);
             }
         }
@@ -1697,7 +1733,7 @@ class AtFile {
      */
     public writeOneAtEditNode(p: Position): void {
         const c = this.c;
-        root = p.copy();
+        const root = p.copy();
         try {
             c.endEditing();
             c.init_error_dialogs();
@@ -1709,14 +1745,14 @@ class AtFile {
                 g.es('To save your work, convert @edit to @auto, @file || @clean');
                 return false;
             }
-            fileName = this.initWriteIvars(root);
-            this.sentinels = false;
+            const fileName = this.initWriteIvars(root);
+            const this.sentinels = false;
             // #1450.
             if (! fileName || ! this.precheck(fileName, root)) {
                 this.addToOrphanList(root);
                 return false;
             }
-            contents = ''.join([s for s in g.splitLines(p.b);
+            const contents = ''.join([s for s in g.splitLines(p.b);
                 if this.directiveKind4(s, 0) == this.noDirective]);
             this.replaceFile(contents, this.encoding, fileName, root);
             c.raise_error_dialogs(kind='write');
@@ -1734,14 +1770,14 @@ class AtFile {
         const c = this.c;
         try {
             c.endEditing();
-            fileName = this.initWriteIvars(root);
-            this.sentinels = true;
+            const fileName = this.initWriteIvars(root);
+            const this.sentinels = true;
             if (! fileName || ! this.precheck(fileName, root)) {
                 // Raise dialog warning of data loss.
                 this.addToOrphanList(root);
                 return;
             }
-            this.outputList = [];
+            const this.outputList = [];
             this.putFile(root, sentinels=true);
             this.warnAboutOrphandAndIgnoredNodes();
             if (this.errors) {
@@ -1749,7 +1785,7 @@ class AtFile {
                 this.addToOrphanList(root);
             }
             else {
-                contents = ''.join(this.outputList);
+                const contents = ''.join(this.outputList);
                 this.replaceFile(contents, this.encoding, fileName, root);
             }
         }
@@ -1769,12 +1805,12 @@ class AtFile {
         const c = this.c;
         try {
             c.endEditing();
-            fileName = this.initWriteIvars(root);
-            this.sentinels = false;
+            const fileName = this.initWriteIvars(root);
+            const this.sentinels = false;
             if (! fileName || ! this.precheck(fileName, root)) {
                 return;
             }
-            this.outputList = [];
+            const this.outputList = [];
             this.putFile(root, sentinels=false);
             this.warnAboutOrphandAndIgnoredNodes();
             if (this.errors) {
@@ -1782,7 +1818,7 @@ class AtFile {
                 this.addToOrphanList(root);
             }
             else {
-                contents = ''.join(this.outputList);
+                const contents = ''.join(this.outputList);
                 this.replaceFile(contents, this.encoding, fileName, root);
             }
         }
@@ -1802,22 +1838,22 @@ class AtFile {
      */
     public writeOneAtShadowNode(p: Position, testing=False): void {
         const c = this.c;
-        root = p.copy();
-        x = c.shadowController;
+        const root = p.copy();
+        const x = c.shadowController;
         try {
             c.endEditing();  // Capture the current headline.
-            fn = p.atShadowFileNodeName();
+            const fn = p.atShadowFileNodeName();
             // assert fn, p.h;
             this.adjustTargetLanguage(fn);
                 // A hack to support unknown extensions. May set c.target_language.
-            full_path = g.fullPath(c, p);
+            const full_path = g.fullPath(c, p);
             this.initWriteIvars(root);
             // Force python sentinels to suppress an error message.
             // The actual sentinels will be set below.
-            this.endSentinelComment = null;
-            this.startSentinelComment = ";  // "
+            const this.endSentinelComment = null;
+            const this.startSentinelComment = ";  // "
             // Make sure we can compute the shadow directory.
-            private_fn = x.shadowPathName(full_path);
+            const private_fn = x.shadowPathName(full_path);
             if (! private_fn) {
                 return false;
             }
@@ -1828,26 +1864,27 @@ class AtFile {
             // Bug fix: Leo 4.5.1:
             // use x.markerFromFileName to force the delim to match
             // what is used in x.propegate changes.
-            marker = x.markerFromFileName(full_path);
+            const marker = x.markerFromFileName(full_path);
             this.startSentinelComment, this.endSentinelComment = marker.getDelims();
             if (g.unitTesting) {
-                ivars_dict = g.getIvarsDict(at);
+                const ivars_dict = g.getIvarsDict(at);
             }
 
             // Write the public and private files to strings.
 
             public function put(sentinels): void {
-                this.outputList = [];
-                this.sentinels = sentinels;
+                const this.outputList = [];
+                const this.sentinels = sentinels;
                 this.putFile(root, sentinels=sentinels);
-                return '' if this.errors else ''.join(this.outputList);
+                // return '' if this.errors else ''.join(this.outputList);
+                return this.errors ? '' : ''.join(this.outputList);
             }
 
             this.public_s = put(false);
-            this.private_s = put(true);
+            const this.private_s = put(true);
             this.warnAboutOrphandAndIgnoredNodes();
             if (g.unitTesting) {
-                exceptions = ('public_s', 'private_s', 'sentinels', 'outputList');
+                const exceptions = ('public_s', 'private_s', 'sentinels', 'outputList');
                 // assert g.checkUnchangedIvars(
                     this, ivars_dict, exceptions), 'writeOneAtShadowNode';
             }
@@ -1878,15 +1915,15 @@ class AtFile {
      * there is a conflict between it and c.target_language.
      */
     public adjustTargetLanguage(fn): void {
-        c = this.c;
+        const c = this.c;
         junk, ext = g.os_path_splitext(fn);
         if (ext) {
             if (ext.startswith('.')) {
-                ext = ext[1:];
+                const ext = ext[1:];
             }
-            language = g.app.extension_dict.get(ext);
+            const language = g.app.extension_dict.get(ext);
             if (language) {
-                c.target_language = language;
+                const c.target_language = language;
             }
             else {
                 // An unknown language.
@@ -1902,12 +1939,13 @@ class AtFile {
         const c = this.c;
         try {
             c.endEditing();
-            fileName = this.initWriteIvars(root);
-            this.outputList = [];
+            const fileName = this.initWriteIvars(root);
+            const this.outputList = [];
             for (p in root.self_and_subtree(copy=false)) {
                 this.writeAsisNode(p);
             }
-            return '' if this.errors else ''.join(this.outputList);
+            // return '' if this.errors else ''.join(this.outputList);
+            return this.errors ? '' : ''.join(this.outputList);
         }
         catch (Exception) {
             this.writeException(fileName, root);
@@ -1921,8 +1959,8 @@ class AtFile {
         const c = this.c;
         try {
             c.endEditing();
-            fileName = this.initWriteIvars(root);
-            this.sentinels = false;
+            const fileName = this.initWriteIvars(root);
+            const this.sentinels = false;
             // #1450.
             if (! fileName) {
                 this.addToOrphanList(root);
@@ -1947,14 +1985,14 @@ class AtFile {
                 g.es('To save your work, convert @edit to @auto, @file || @clean');
                 return false;
             }
-            fileName = this.initWriteIvars(root);
-            this.sentinels = false;
+            const fileName = this.initWriteIvars(root);
+            const this.sentinels = false;
             // #1450.
             if (! fileName) {
                 this.addToOrphanList(root);
                 return '';
             }
-            contents = ''.join([
+            const contents = ''.join([
                 s for s in g.splitLines(root.b);
                     if this.directiveKind4(s, 0) == this.noDirective]);
             return contents;
@@ -1972,16 +2010,17 @@ class AtFile {
         try {
             c.endEditing();
             this.initWriteIvars(root);
-            this.sentinels = sentinels;
-            this.outputList = [];
+            const this.sentinels = sentinels;
+            const this.outputList = [];
             this.putFile(root, sentinels=sentinels);
             // assert root == this.root, 'write';
-            contents = '' if this.errors else ''.join(this.outputList);
+            // contents = '' if this.errors else ''.join(this.outputList);
+            const contents = this.errors ? '' : ''.join(this.outputList);
             // Major bug: failure to clear this wipes out headlines!
             // Sometimes this causes slight problems...
             if (hasattr(this.root.v, 'tnodeList')) {
                 delattr(this.root.v, 'tnodeList');
-                root.v._p_changed = true;
+                const root.v._p_changed = true;
             }
             return contents;
         }
@@ -1990,7 +2029,7 @@ class AtFile {
                 delattr(this.root.v, 'tnodeList');
             }
             this.exception("exception preprocessing script");
-            root.v._p_changed = true;
+            const root.v._p_changed = true;
             return '';
         }
     }
@@ -2005,21 +2044,22 @@ class AtFile {
             c.endEditing();
             this.initWriteIvars(root);
             if (forcePythonSentinels) {
-                this.endSentinelComment = null;
-                this.startSentinelComment = ";  // "
-                this.language = "python";
+                const this.endSentinelComment = null;
+                const this.startSentinelComment = ";  // "
+                const this.language = "python";
             }
-            this.sentinels = sentinels;
-            this.outputList = [];
+            const this.sentinels = sentinels;
+            const this.outputList = [];
             this.putFile(root, fromString=s, sentinels=sentinels);
-            contents = '' if this.errors else ''.join(this.outputList);
+            // contents = '' if this.errors else ''.join(this.outputList);
+            const contents = this.errors ? '' : ''.join(this.outputList);
             // Major bug: failure to clear this wipes out headlines!
             // Sometimes this causes slight problems...
             if (root) {
                 if (hasattr(this.root.v, 'tnodeList')) {
                     delattr(this.root.v, 'tnodeList');
                 }
-                root.v._p_changed = true;
+                const root.v._p_changed = true;
             }
             return contents;
         }
@@ -2035,7 +2075,8 @@ class AtFile {
     public putBody(p: Position, fromString=''): void {
 
         // New in 4.3 b2: get s from fromString if possible.
-        s = fromString if fromString else p.b;
+        // s = fromString if fromString else p.b;
+        const s = fromString ? fromString : p.b;
         p.v.setVisited();
             // Make sure v is never expanded again.
             // Suppress orphans check.
@@ -2043,12 +2084,12 @@ class AtFile {
         // Fix #1048 & #1037: regularize most trailing whitespace.
         if (s && (this.sentinels || this.force_newlines_in_at_nosent_bodies)) {
             if (! s.endswith('\n')) {
-                s = s + '\n';
+                const s = s + '\n';
             }
         }
-        this.raw = False;  // Bug fix.
-        i = 0;
-        status = g.Bunch(
+        const this.raw = False;  // Bug fix.
+        const i = 0;
+        const status = g.Bunch(
             at_comment_seen=false,
             at_delims_seen=false,
             at_warning_given=false,
@@ -2056,11 +2097,11 @@ class AtFile {
             in_code=true,
         );
         while (i < len(s)) {
-            next_i = g.skip_line(s, i);
+            const next_i = g.skip_line(s, i);
             // assert next_i > i, 'putBody';
-            kind = this.directiveKind4(s, i);
+            const kind = this.directiveKind4(s, i);
             this.putLine(i, kind, p, s, status);
-            i = next_i;
+            const i = next_i;
         }
         // pylint: disable=no-member
             // g.bunch *does* have .in_code and has_at_others members.
@@ -2094,7 +2135,7 @@ class AtFile {
         }
         else if (this.raw) {
             if (kind == this.endRawDirective) {
-                this.raw = false;
+                const this.raw = false;
                 this.putSentinel("@@end_raw");
             }
             else {
@@ -2108,7 +2149,7 @@ class AtFile {
                 this.putEndDocLine();
             }
             this.putStartDocLine(s, i, kind);
-            status.in_code = false;
+            const status.in_code = false;
         }
         else if (kind in (this.cDirective, this.codeDirective)) {
             // Only @c and @code end a doc part.
@@ -2116,7 +2157,7 @@ class AtFile {
                 this.putEndDocLine();
             }
             this.putDirective(s, i, p);
-            status.in_code = true;
+            const status.in_code = true;
         }
         else if (kind == this.allDirective) {
             if (status.in_code) {
@@ -2124,7 +2165,8 @@ class AtFile {
                     this.putAtAllLine(s, i, p);
                 }
                 else {
-                    this.error("@all ! valid in: {p.h}");
+                    // this.error(f"@all ! valid in: {p.h}");
+                    this.error(`@all not valid in: ${p.h}`);
                 }
             }
             else { // this.putDocLine(s, i)
@@ -2133,11 +2175,12 @@ class AtFile {
         else if (kind == this.othersDirective) {
             if (status.in_code) {
                 if (status.has_at_others) {
-                    this.error("multiple @others in: {p.h}");
+                    // this.error(f"multiple @others in: {p.h}");
+                    this.error(`multiple @others in: ${p.h}`);
                 }
                 else {
                     this.putAtOthersLine(s, i, p);
-                    status.has_at_others = true;
+                    const status.has_at_others = true;
                 }
             }
             else {
@@ -2145,12 +2188,13 @@ class AtFile {
             }
         }
         else if (kind == this.rawDirective) {
-            this.raw = true;
+            const this.raw = true;
             this.putSentinel("@@raw");
         }
         else if (kind == this.endRawDirective) {
             // Fix bug 784920: @raw mode does not ignore directives
-            this.error("unmatched @end_raw directive: {p.h}");
+            // this.error(f"unmatched @end_raw directive: {p.h}");
+            this.error(`unmatched @end_raw directive: ${p.h}`);
         }
         else if (kind == this.startVerbatim) {
             // Fix bug 778204: @verbatim not a valid Leo directive.
@@ -2159,29 +2203,32 @@ class AtFile {
                 pass;
             }
             else {
-                this.error("@verbatim != a Leo directive: {p.h}");
+                // this.error(f"@verbatim != a Leo directive: {p.h}");
+                this.error(`@verbatim != a Leo directive: ${p.h}`);
             }
         }
         else if (kind == this.miscDirective) {
             // Fix bug 583878: Leo should warn about @comment/@delims clashes.
             if (g.match_word(s, i, '@comment')) {
-                status.at_comment_seen = true;
+                const status.at_comment_seen = true;
             }
             else if (g.match_word(s, i, '@delims')) {
-                status.at_delims_seen = true;
+                const status.at_delims_seen = true;
             }
             if (
                 status.at_comment_seen &&
                 status.at_delims_seen && !
                 status.at_warning_given
             ) {
-                status.at_warning_given = true;
-                this.error("@comment && @delims in node {p.h}");
+                const status.at_warning_given = true;
+                // this.error(f"@comment && @delims in node {p.h}");
+                this.error(`@comment && @delims in node ${p.h}`);
             }
             this.putDirective(s, i, p);
         }
         else {
-            this.error("putBody: can ! happen: unknown directive kind: {kind}");
+            // this.error(f"putBody: can ! happen: unknown directive kind: {kind}");
+            this.error(`putBody: can not happen: unknown directive kind: ${kind}`);
         }
     }
     /**
@@ -2189,7 +2236,7 @@ class AtFile {
      */
     public putAtAllLine(s: string, i: number, p: Position): void {
         j, delta = g.skip_leading_ws_with_indent(s, i, this.tab_width);
-        k = g.skip_to_end_of_line(s, i);
+        const k = g.skip_to_end_of_line(s, i);
         this.putLeadInSentinel(s, i, j, delta);
         this.indent += delta;
         this.putSentinel("@+" + s[j + 1 : k].strip());
@@ -2204,16 +2251,16 @@ class AtFile {
      * Generate the body enclosed in sentinel lines.
      */
     public putAtAllBody(p: Position): void {
-        s = p.b;
+        const s = p.b;
         p.v.setVisited();
             // Make sure v is never expanded again.
             // Suppress orphans check.
         if (this.sentinels && s && s[-1] != '\n') {
-            s = s + '\n';
+            const s = s + '\n';
         }
         i, inCode = 0, true;
         while (i < len(s)) {
-            next_i = g.skip_line(s, i);
+            const next_i = g.skip_line(s, i);
             // assert next_i > i;
             if (inCode) {
                 // Use verbatim sentinels to write all directives.
@@ -2222,7 +2269,7 @@ class AtFile {
             else {
                 this.putDocLine(s, i);
             }
-            i = next_i;
+            const i = next_i;
         }
         if (! inCode) {
             this.putEndDocLine();
@@ -2251,19 +2298,19 @@ class AtFile {
      */
     public putAtOthersLine(s: string, i: number, p: Position): void {
         j, delta = g.skip_leading_ws_with_indent(s, i, this.tab_width);
-        k = g.skip_to_end_of_line(s, i);
+        const k = g.skip_to_end_of_line(s, i);
         this.putLeadInSentinel(s, i, j, delta);
         this.indent += delta;
         this.putSentinel("@+" + s[j + 1 : k].strip());
             // s[j:k] starts with '@others'
             // Never write lws in new sentinels.
         for (child in p.children()) {
-            p = child.copy();
-            after = p.nodeAfterTree();
+            const p = child.copy();
+            const after = p.nodeAfterTree();
             while (p && p != after) {
                 if (this.validInAtOthers(p)) {
                     this.putOpenNodeSentinel(p);
-                    at_others_flag = this.putBody(p);
+                    const at_others_flag = this.putBody(p);
                     this.putCloseNodeSentinel(p);
                     if (at_others_flag) {
                         p.moveToNodeAfterTree();
@@ -2291,7 +2338,7 @@ class AtFile {
      * directive in the body text of p's parent.
      */
     public validInAtOthers(p: Position): void {
-        i = g.skip_ws(p.h, 0);
+        const i = g.skip_ws(p.h, 0);
         isSection, junk = this.isSectionName(p.h, i);
         if (isSection) {
             return False;  // A section definition node.
@@ -2311,12 +2358,12 @@ class AtFile {
      */
     public putCodeLine(s: string, i: number): void {
         // Put @verbatim sentinel if required.
-        k = g.skip_ws(s, i);
+        const k = g.skip_ws(s, i);
         if (g.match(s, k, this.startSentinelComment + '@')) {
             this.putSentinel('@verbatim');
         }
-        j = g.skip_line(s, i);
-        line = s[i:j];
+        const j = g.skip_line(s, i);
+        const line = s[i:j];
         // Don't put any whitespace in otherwise blank lines.
         if (len(line) > 1) { // # Preserve *anything* the user puts on the line!!!
             if (! this.raw) {
@@ -2344,8 +2391,8 @@ class AtFile {
      * Put a line containing one or more references.
      */
     public putRefLine(s: string, i: number, n1, n2, name, p: Position): void {
-        ref = this.findReference(name, p);
-        is_clean = this.root.h.startswith('@clean');
+        const ref = this.findReference(name, p);
+        const is_clean = this.root.h.startswith('@clean');
         if (! ref) {
             if (hasattr(this, 'allow_undefined_refs')) {
                 // Allow apparent section reference: just write the line.
@@ -2358,24 +2405,25 @@ class AtFile {
         // Write the lead-in sentinel only once.
         this.putLeadInSentinel(s, i, n1, delta);
         this.putRefAt(name, ref, delta);
-        n_refs = 0;
+        const n_refs = 0;
         while (1) {
-            progress = i;
-            i = n2;
+            const progress = i;
+            const i = n2;
             n_refs += 1;
             name, n1, n2 = this.findSectionName(s, i);
             if (is_clean && n_refs > 1) {
                 // #1232: allow only one section reference per line in @clean.
                 i1, i2 = g.getLine(s, i);
-                line = s[i1:i2].rstrip();
-                this.writeError("Too many section references:\n{line!s}");
+                const line = s[i1:i2].rstrip();
+                // this.writeError(f"Too many section references:\n{line!s}");
+                this.writeError(`Too many section references:\n${line}`);
                 break;
             }
             if (name) {
-                ref = this.findReference(name, p);
+                const ref = this.findReference(name, p);
                     // Issues error if not found.
                 if (ref) {
-                    middle_s = s[i:n1];
+                    const middle_s = s[i:n1];
                     this.putAfterMiddleRef(middle_s, delta);
                     this.putRefAt(name, ref, delta);
                 }
@@ -2391,12 +2439,14 @@ class AtFile {
      * Find a reference to name.  Raise an error if not found.
      */
     public findReference(name, p: Position): void {
-        ref = g.findReference(name, p);
+        const ref = g.findReference(name, p);
         if (! ref && ! hasattr(this, 'allow_undefined_refs')) {
             // Do give this error even if unit testing.
             this.writeError(
-                "undefined section: {g.truncate(name, 60)}\n";
-                "  referenced from: {g.truncate(p.h, 60)}");
+                // f"undefined section: {g.truncate(name, 60)}\n";
+                `undefined section: ${g.truncate(name, 60)}\n`;
+                // f"  referenced from: {g.truncate(p.h, 60)}");
+                `  referenced from: ${g.truncate(p.h, 60)}`);
         }
         return ref;
     }
@@ -2405,41 +2455,41 @@ class AtFile {
      * The section name, *including* brackes is s[n1:n2]
      */
     public findSectionName(s: string, i: number): void {
-        end = s.find('\n', i);
+        const end = s.find('\n', i);
         if (end == -1) {
-            n1 = s.find("<<", i);
-            n2 = s.find(">>", i);
+            const n1 = s.find("<<", i);
+            const n2 = s.find(">>", i);
         }
         else {
-            n1 = s.find("<<", i, end);
-            n2 = s.find(">>", i, end);
+            const n1 = s.find("<<", i, end);
+            const n2 = s.find(">>", i, end);
         }
-        ok = -1 < n1 < n2;
+        const ok = -1 < n1 < n2;
         if (ok) {
             // Warn on extra brackets.
             for (ch, j in (('<', n1 + 2), ('>', n2 + 2))) {
                 if (g.match(s, j, ch)) {
-                    line = g.get_line(s, i);
+                    const line = g.get_line(s, i);
                     g.es('dubious brackets in', line);
                     break;
                 }
             }
-            name = s[n1 : n2 + 2];
+            const name = s[n1 : n2 + 2];
             return name, n1, n2 + 2;
         }
-        return none, n1, len(s);
+        return null, n1, len(s);
     }
     /**
      * Handle whatever follows the last ref of a line.
      */
     public putAfterLastRef(s: string, start, delta): void {
-        j = g.skip_ws(s, start);
+        const j = g.skip_ws(s, start);
         if (j < len(s) && s[j] != '\n') {
             // Temporarily readjust delta to make @afterref look better.
             this.indent += delta;
-            this.putSentinel("@afterre");
-            end = g.skip_line(s, start);
-            after = s[start:end];
+            this.putSentinel("@afterref");
+            const end = g.skip_line(s, start);
+            const after = s[start:end];
             this.os(after);
             if (this.sentinels && after && after[-1] != '\n') {
                 this.onl();  // Add a newline if the line didn't end with one.
@@ -2453,7 +2503,7 @@ class AtFile {
     public putAfterMiddleRef(s: string, delta): void {
         if (s) {
             this.indent += delta;
-            this.putSentinel("@afterre");
+            this.putSentinel("@afterref");
             this.os(s);
             this.onl_sent();  // Not a real newline.
             this.indent -= delta;
@@ -2485,8 +2535,8 @@ class AtFile {
      * Handle one line of a doc part.
      */
     public putDocLine(s: string, i: number): void {
-        j = g.skip_line(s, i);
-        s = s[i:j];
+        const j = g.skip_line(s, i);
+        const s = s[i:j];
 
         // #1496: Retire the @doc convention:
         // Strip all trailing ws here.
@@ -2523,13 +2573,15 @@ class AtFile {
      * Write the start of a doc part.
      */
     public putStartDocLine(s: string, i: number, kind): void {
-        sentinel = "@+doc" if kind == this.docDirective else "@+at";
-        directive = "@doc" if kind == this.docDirective else "@";
+        // sentinel = "@+doc" if kind == this.docDirective else "@+at";
+        const sentinel = kind == this.docDirective ? "@+doc" : "@+at";
+        // directive = "@doc" if kind == this.docDirective else "@";
+        const directive = kind == this.docDirective ? "@doc" : "@";
         // Put whatever follows the directive in the sentinel.
         // Skip past the directive.
         i += len(directive);
-        j = g.skip_to_end_of_line(s, i);
-        follow = s[i:j];
+        const j = g.skip_to_end_of_line(s, i);
+        const follow = s[i:j];
         // Put the opening @+doc or @-doc sentinel, including whatever follows the directive.
         this.putSentinel(sentinel + follow);
         // Put the opening comment if we are using block comments.
@@ -2543,18 +2595,20 @@ class AtFile {
      * Return the text of a @+node or @-node sentinel for p.
      */
     public nodeSentinelText(p: Position): void {
-        h = this.removeCommentDelims(p);
+        const h = this.removeCommentDelims(p);
         if (getattr(this, 'at_shadow_test_hack', false)) {
             // A hack for @shadow unit testing.
             // see AtShadowTestCase.makePrivateLines.
             return h;
         }
-        gnx = p.v.fileIndex;
-        level = 1 + p.level() - this.root.level();
+        const gnx = p.v.fileIndex;
+        const level = 1 + p.level() - this.root.level();
         if (level > 2) {
-            return "{gnx}: *{level}* {h}";
+            // return f"{gnx}: *{level}* {h}";
+            return `${gnx}: *${level}* ${h}`;
         }
-        return "{gnx}: {'*' * level} {h}";
+        // return f"{gnx}: {'*' * level} {h}";
+        return `${gnx}: ${'*' * level} ${h}`;
     }
     /**
      * If the present @language/@comment settings do not specify a single-line comment
@@ -2562,12 +2616,12 @@ class AtFile {
      * interfering with the parsing of node sentinels.
      */
     public removeCommentDelims(p: Position): void {
-        start = this.startSentinelComment;
-        end = this.endSentinelComment;
-        h = p.h;
+        const start = this.startSentinelComment;
+        const end = this.endSentinelComment;
+        const h = p.h;
         if (end) {
-            h = h.replace(start, "");
-            h = h.replace(end, "");
+            const h = h.replace(start, "");
+            const h = h.replace(end, "");
         }
         return h;
     }
@@ -2579,14 +2633,14 @@ class AtFile {
      * delta is the change in this.indent that is about to happen and hasn't happened yet.
      */
     public putLeadInSentinel(s: string, i: number, j: number, delta): void {
-        this.leadingWs = "";  // Set the default.
+        const this.leadingWs = "";  // Set the default.
         if (i == j) {
             return;  // The @others or ref starts a line.
         }
-        k = g.skip_ws(s, i);
+        const k = g.skip_ws(s, i);
         if (j == k) {
             // Only whitespace before the @others or ref.
-            this.leadingWs = s[
+            const this.leadingWs = s[
                 i:j];  // Remember the leading whitespace, including its spelling.
         }
         else {
@@ -2599,18 +2653,19 @@ class AtFile {
      * End a node.
      */
     public putCloseNodeSentinel(p: Position): void {
-        this.raw = False;  // Bug fix: 2010/07/04
+        const this.raw = False;  // Bug fix: 2010/07/04
     }
     /**
      * Write @+leo sentinel.
      */
     public putOpenLeoSentinel(s: string): void {
         if (this.sentinels || hasattr(this, 'force_sentinels')) {
-            s = s + "-thin";
-            encoding = this.encoding.lower();
+            const s = s + "-thin";
+            const encoding = this.encoding.lower();
             if (encoding != "utf-8") {
                 // New in 4.2: encoding fields end in ",."
-                s = s + "-encoding={encoding},.";
+                // s = s + f"-encoding={encoding},.";
+                const s = s + `-encoding=${encoding},.`;
             }
             this.putSentinel(s);
         }
@@ -2624,7 +2679,7 @@ class AtFile {
             this.writeError("@file ! valid in: " + p.h);
             return;
         }
-        s = this.nodeSentinelText(p);
+        const s = this.nodeSentinelText(p);
         this.putSentinel("@+node:" + s);
         // Leo 4.7 b2: we never write tnodeLists.
     }
@@ -2643,9 +2698,9 @@ class AtFile {
             // Apply the cweb hack to s:
             // If the opening comment delim ends in '@',
             // double all '@' signs except the first.
-            start = this.startSentinelComment;
+            const start = this.startSentinelComment;
             if (start && start[-1] == '@') {
-                s = s.replace('@', '@@')[1:];
+                const s = s.replace('@', '@@')[1:];
             }
             this.os(s);
             if (this.endSentinelComment) {
@@ -2658,7 +2713,7 @@ class AtFile {
      * Mark the root as erroneous for c.raise_error_dialogs().
      */
     public addToOrphanList(root): void {
-        c = this.c;
+        const c = this.c;
         // Fix #1050:
         root.setOrphan();
         c.orphan_at_file_nodes.append(root.h);
@@ -2669,7 +2724,7 @@ class AtFile {
     public isWritable(path): void {
         try {
             // os.access() may not exist on all platforms.
-            ok = os.access(path, os.W_OK);
+            const ok = os.access(path, os.W_OK);
         }
         catch (AttributeError) {
             return true;
@@ -2689,33 +2744,34 @@ class AtFile {
         ) {
             // It's too slow to check each node separately.
             if (pyflakes_errors_only) {
-                ok = true;
+                const ok = true;
             }
             else {
-                ok = this.checkPythonSyntax(root, contents);
+                const ok = this.checkPythonSyntax(root, contents);
             }
             // Syntax checking catches most indentation problems.
                 // if ok: this.tabNannyNode(root,s)
             if (ok && this.runPyFlakesOnWrite && ! g.unitTesting) {
-                ok2 = this.runPyflakes(root, pyflakes_errors_only=pyflakes_errors_only);
+                const ok2 = this.runPyflakes(root, pyflakes_errors_only=pyflakes_errors_only);
             }
             else {
-                ok2 = true;
+                const ok2 = true;
             }
             if (! ok || ! ok2) {
                 g.app.syntax_error_files.append(g.shortFileName(fileName));
             }
         }
     }
-    public checkPythonSyntax(p: Position, body, supress=False): void {
+    public checkPythonSyntax(p: Position, body, suppress=False): void {
         try {
-            body = body.replace('\r', '');
-            fn = "<node: {p.h}>";
+            const body = body.replace('\r', '');
+            // fn = f"<node: {p.h}>";
+            const fn = `<node: ${p.h}>`;
             compile(body + '\n', fn, 'exec');
             return true;
         }
         catch (SyntaxError) {
-            if (! supress) {
+            if (! suppress) {
                 this.syntaxError(p, body);
             }
         }
@@ -2729,31 +2785,34 @@ class AtFile {
      * Report a syntax error.
      */
     public syntaxError(p: Position, body): void {
-        g.error("Syntax error in: {p.h}");
+        // g.error(f"Syntax error in: {p.h}");
+        g.error(`Syntax error in: ${p.h}`);
         typ, val, tb = sys.exc_info();
-        message = hasattr(val, 'message') && val.message;
+        const message = hasattr(val, 'message') && val.message;
         if (message) {
             g.es_print(message);
         }
-        if (val == none) {
+        if (val == null) {
             return;
         }
-        lines = g.splitLines(body);
-        n = val.lineno;
-        offset = val.offset || 0;
-        if (n == none) {
+        const lines = g.splitLines(body);
+        const n = val.lineno;
+        const offset = val.offset || 0;
+        if (n == null) {
             return;
         }
-        i = val.lineno - 1;
+        const i = val.lineno - 1;
         for (j in range(max(0, i - 2), min(i + 2, len(lines) - 1))) {
-            line = lines[j].rstrip();
+            const line = lines[j].rstrip();
             if (j == i) {
-                unl = p.get_UNL(with_proto=true, with_count=true);
-                g.es_print(f"{j+1:5}:* {line}", nodeLink=f"{unl},-{j+1:d}");  // Global line.
+                const unl = p.get_UNL(with_proto=true, with_count=true);
+                // g.es_print(f"{j+1:5}:* {line}", nodeLink=f"{unl},-{j+1:d}");  // Global line.
+                g.es_print(`${j+1:5}:* ${line}`, nodeLink=f"{unl},-{j+1:d}");  // Global line.
                 g.es_print(' ' * (7 + offset) + '^');
             }
             else {
-                g.es_print("{j+1:5}: {line}");
+                // g.es_print(f"{j+1:5}: {line}");
+                g.es_print(`${j+1:5}: ${line}`);
             }
         }
     }
@@ -2764,8 +2823,8 @@ class AtFile {
         try {
             // from "leo.commands" import checkerCommands
             if (checkerCommands.pyflakes) {
-                x = checkerCommands.PyflakesCommand(this.c);
-                ok = x.run(p=root, pyflakes_errors_only=pyflakes_errors_only);
+                const x = checkerCommands.PyflakesCommand(this.c);
+                const ok = x.run(p=root, pyflakes_errors_only=pyflakes_errors_only);
                 return ok;
             }
             return True;  // Suppress error if pyflakes can not be imported.
@@ -2777,7 +2836,7 @@ class AtFile {
     }
     public tabNannyNode(p: Position, body): void {
         try {
-            readline = g.ReadLinesClass(body).next;
+            const readline = g.ReadLinesClass(body).next;
             tabnanny.process_tokens(tokenize.generate_tokens(readline));
         }
         catch (IndentationError) {
@@ -2801,12 +2860,12 @@ class AtFile {
                 raise;
             }
             junk4, nag, junk = sys.exc_info();
-            badline = nag.get_lineno();
-            line = nag.get_line();
-            message = nag.get_msg();
+            const badline = nag.get_lineno();
+            const line = nag.get_line();
+            const message = nag.get_msg();
             g.error("indentation error in", p.h, "line", badline);
             g.es(message);
-            line2 = repr(str(line))[1:-1];
+            const line2 = repr(str(line))[1:-1];
             g.es("offending line:\n", line2);
         }
         catch (Exception) {
@@ -2818,7 +2877,7 @@ class AtFile {
     // These patterns exclude constructs such as @encoding.setter or @encoding(whatever)
     // However, they must allow @language typescript, @nocolor-node, etc.
 
-    at_directive_kind_pattern = re.compile('\s*@([\w-]+)\s*');  // EKR: remove r
+    const at_directive_kind_pattern = re.compile(r'\s*@([\w-]+)\s*');
 
     /**
      * Return the kind of at-directive or noDirective.
@@ -2828,9 +2887,9 @@ class AtFile {
      * - Using additional regex's to recognize directives.
      */
     public directiveKind4(s: string, i: number): void {
-        n = len(s);
+        const n = len(s);
         if (i >= n || s[i] != '@') {
-            j = g.skip_ws(s, i);
+            const j = g.skip_ws(s, i);
             if (g.match_word(s, j, "@others")) {
                 return this.othersDirective;
             }
@@ -2839,7 +2898,7 @@ class AtFile {
             }
             return this.noDirective;
         }
-        table = (
+        const table = (
             ("@all", this.allDirective),
             ("@c", this.cDirective),
             ("@code", this.codeDirective),
@@ -2851,7 +2910,8 @@ class AtFile {
         // Rewritten 6/8/2005.
         if (i + 1 >= n || s[i + 1] in (' ', '\t', '\n')) {
             // Bare '@' not recognized in cweb mode.
-            return this.noDirective if this.language == "cweb" else this.atDirective;
+            // return this.noDirective if this.language == "cweb" else this.atDirective;
+            return this.language == "cweb" ? this.noDirective : this.atDirective;
         }
         if (! s[i + 1].isalpha()) {
             return this.noDirective  // Bug fix: do NOT return miscDirective here!
@@ -2867,14 +2927,14 @@ class AtFile {
         // Support for add_directives plugin.
         // Use regex to properly distinguish between Leo directives
         // and python decorators.
-        s2 = s[i:];
-        m = this.at_directive_kind_pattern.match(s2);
+        const s2 = s[i:];
+        const m = this.at_directive_kind_pattern.match(s2);
         if (m) {
-            word = m.group(1);
+            const word = m.group(1);
             if (word ! in g.globalDirectiveList) {
                 return this.noDirective;
             }
-            s3 = s2[m.end(1) :];
+            const s3 = s2[m.end(1) :];
             if (s3 && s3[0] in ".(") {
                 return this.noDirective;
             }
@@ -2892,7 +2952,7 @@ class AtFile {
         if (! g.match(s, i, "<<")) {
             return false, -1;
         }
-        i = g.find_on_line(s, i, ">>");
+        const i = g.find_on_line(s, i, ">>");
         if (i > -1) {
             return true, i + 2;
         }
@@ -2939,7 +2999,7 @@ class AtFile {
                 return;
             }
         }
-        s = g.toUnicode(s, this.encoding);
+        const s = g.toUnicode(s, this.encoding);
         this.outputList.append(s);
     }
     /**
@@ -2948,8 +3008,8 @@ class AtFile {
      * Calling this.onl() runs afoul of queued newlines.
      */
     public outputStringWithLineEndings(s: string): void {
-        s = g.toUnicode(s, this.encoding);
-        s = s.replace('\n', this.output_newline);
+        const s = g.toUnicode(s, this.encoding);
+        const s = s.replace('\n', this.output_newline);
         this.os(s);
     }
     /**
@@ -2960,9 +3020,10 @@ class AtFile {
     public precheck(fileName, root): void {
 
         // #1450: First, check that the directory exists.
-        theDir = g.os_path_dirname(fileName);
+        const theDir = g.os_path_dirname(fileName);
         if (theDir && ! g.os_path_exists(theDir)) {
-            this.error("Directory ! found:\n{theDir}");
+            // this.error(f"Directory ! found:\n{theDir}");
+            this.error(`Directory not found:\n${theDir}`);
             return false;
         }
 
@@ -2974,7 +3035,7 @@ class AtFile {
         }
 
         // Prompt if the write would overwrite the existing file.
-        ok = this.promptForDangerousWrite(fileName);
+        const ok = this.promptForDangerousWrite(fileName);
         if (ok) {
             // Fix bug 889175: Remember the full fileName.
             this.rememberReadPath(fileName, root);
@@ -2991,18 +3052,18 @@ class AtFile {
      * so the read logic simply ignores lines preceding the @+leo sentinel.
      */
     public putAtFirstLines(s: string): void {
-        tag = "@first";
-        i = 0;
+        const tag = "@first";
+        const i = 0;
         while (g.match(s, i, tag)) {
             i += len(tag);
-            i = g.skip_ws(s, i);
-            j = i;
-            i = g.skip_to_end_of_line(s, i);
+            const i = g.skip_ws(s, i);
+            const j = i;
+            const i = g.skip_to_end_of_line(s, i);
             // Write @first line, whether empty or not
-            line = s[j:i];
+            const line = s[j:i];
             this.os(line);
             this.onl();
-            i = g.skip_nl(s, i);
+            const i = g.skip_nl(s, i);
         }
     }
     /**
@@ -3011,14 +3072,14 @@ class AtFile {
      * so the read logic simply ignores lines following the @-leo sentinel.
      */
     public putAtLastLines(s: string): void {
-        tag = "@last";
+        const tag = "@last";
         // Use g.splitLines to preserve trailing newlines.
-        lines = g.splitLines(s);
-        n = len(lines);
-        j = k = n - 1;
+        const lines = g.splitLines(s);
+        const n = len(lines);
+        const j = k = n - 1;
         // Scan backwards for @last directives.
         while (j >= 0) {
-            line = lines[j];
+            const line = lines[j];
             if (g.match(line, 0, tag)) {
                 j -= 1;
             }
@@ -3031,8 +3092,8 @@ class AtFile {
         // Write the @last lines.
         for (line in lines[j + 1) { // k + 1]:
             if (g.match(line, 0, tag)) {
-                i = len(tag);
-                i = g.skip_ws(line, i);
+                const i = len(tag);
+                const i = g.skip_ws(line, i);
                 this.os(line[i:]);
             }
         }
@@ -3045,9 +3106,9 @@ class AtFile {
      * follows the @first & @last directives.
      */
     public putDirective(s: string, i: number, p: Position): void {
-        k = i;
-        j = g.skip_to_end_of_line(s, i);
-        directive = s[i:j];
+        const k = i;
+        const j = g.skip_to_end_of_line(s, i);
+        const directive = s[i:j];
         if (g.match_word(s, k, "@delims")) {
             this.putDelims(directive, s, k);
         }
@@ -3060,7 +3121,8 @@ class AtFile {
         else if (g.match_word(s, k, "@last")) {
             // #1307.
             if (p.isAtCleanNode()) {
-                this.error("ignoring @last directive in {p.h!r}");
+                // this.error(f"ignoring @last directive in {p.h!r}");
+                this.error(`ignoring @last directive in ${p.h}`);
                 g.es_print('@last != valid in @clean nodes');
             }
             // #1297.
@@ -3069,13 +3131,15 @@ class AtFile {
                     // Convert to an verbatim line _without_ anything else.
             }
             else {
-                this.error("ignoring @last directive in {p.h!r}");
+                // this.error(f"ignoring @last directive in {p.h!r}");
+                this.error(`ignoring @last directive in ${p.h}`);
             }
         }
         else if (g.match_word(s, k, "@first")) {
             // #1307.
             if (p.isAtCleanNode()) {
-                this.error("ignoring @first directive in {p.h!r}");
+                // this.error(f"ignoring @first directive in {p.h!r}");
+                this.error(`ignoring @first directive in ${p.h}`);
                 g.es_print('@first != valid in @clean nodes');
             }
             // #1297.
@@ -3084,13 +3148,14 @@ class AtFile {
                     // Convert to an verbatim line _without_ anything else.
             }
             else {
-                this.error("ignoring @first directive in {p.h!r}");
+                // this.error(f"ignoring @first directive in {p.h!r}");
+                this.error(`ignoring @first directive in ${p.h}`);
             }
         }
         else {
             this.putSentinel("@" + directive);
         }
-        i = g.skip_line(s, k);
+        const i = g.skip_line(s, k);
         return i;
     }
     /**
@@ -3100,19 +3165,20 @@ class AtFile {
         // Put a space to protect the last delim.
         this.putSentinel(directive + " ");  // 10/23/02: put @delims, not @@delims
         // Skip the keyword and whitespace.
-        j = i = g.skip_ws(s, k + len("@delims"));
+        const j = i = g.skip_ws(s, k + len("@delims"));
         // Get the first delim.
         while (i < len(s) && ! g.is_ws(s[i]) && ! g.is_nl(s, i)) {
             i += 1;
         }
         if (j < i) {
-            this.startSentinelComment = s[j:i];
+            const this.startSentinelComment = s[j:i];
             // Get the optional second delim.
-            j = i = g.skip_ws(s, i);
+            const j = i = g.skip_ws(s, i);
             while (i < len(s) && ! g.is_ws(s[i]) && ! g.is_nl(s, i)) {
                 i += 1;
             }
-            this.endSentinelComment = s[j:i] if j < i else "";
+            // this.endSentinelComment = s[j:i] if j < i else "";
+            const this.endSentinelComment = j < i ? s[j:i] : "";
         }
         else {
             this.writeError("Bad @delims directive");
@@ -3125,7 +3191,7 @@ class AtFile {
      * Remove extra blanks if the line starts with the underindentEscapeString
      */
     public putIndent(n: number, s=''): void {
-        tag = this.underindentEscapeString;
+        const tag = this.underindentEscapeString;
         if (s.startswith(tag)) {
             n2, s2 = this.parseUnderindentTag(s);
             if (n2 >= n) {
@@ -3139,7 +3205,7 @@ class AtFile {
             }
         }
         if (n > 0) {
-            w = this.tab_width;
+            const w = this.tab_width;
             if (w > 1) {
                 q, r = divmod(n, w);
                 this.otabs(q);
@@ -3151,12 +3217,12 @@ class AtFile {
         }
     }
     public putInitialComment(): void {
-        c = this.c;
-        s2 = c.config.output_initial_comment;
+        const c = this.c;
+        const s2 = c.config.output_initial_comment;
         if (s2) {
-            lines = s2.split("\\n");
+            const lines = s2.split("\\n");
             for (line in lines) {
-                line = line.replace("@date", time.asctime());
+                const line = line.replace("@date", time.asctime());
                 if (line) {
                     this.putSentinel("@comment " + line);
                 }
@@ -3176,27 +3242,28 @@ class AtFile {
         // Create the timestamp (only for messages).
         if (c.config.getBool('log-show-save-time', default_val=false)) {
             format = c.config.getString('log-timestamp-format') || "%H:%M:%S";
-            timestamp = time.strftime(format) + ' ';
+            const timestamp = time.strftime(format) + ' ';
         }
         else {
-            timestamp = '';
+            const timestamp = '';
         }
 
         // Adjust the contents.
         // assert isinstance(contents, str), g.callers();
         if (this.output_newline != '\n') {
-            contents = contents.replace('\r', '').replace('\n', this.output_newline);
+            const contents = contents.replace('\r', '').replace('\n', this.output_newline);
         }
 
         // If file does not exist, create it from the contents.
-        fileName = g.os_path_realpath(fileName);
-        sfn = g.shortFileName(fileName);
+        const fileName = g.os_path_realpath(fileName);
+        const sfn = g.shortFileName(fileName);
         if (! g.os_path_exists(fileName)) {
-            ok = g.writeFile(contents, encoding, fileName);
+            const ok = g.writeFile(contents, encoding, fileName);
             if (ok) {
                 c.setFileTimeStamp(fileName);
                 if (! g.unitTesting) {
-                    g.es("{timestamp}created: {fileName}");
+                    // g.es(f"{timestamp}created: {fileName}");
+                    g.es(`${timestamp}created: ${fileName}`);
                 }
                 if (root) {
                     // Fix bug 889175: Remember the full fileName.
@@ -3212,12 +3279,12 @@ class AtFile {
         }
 
         // Compare the old and new contents.
-        old_contents = g.readFileIntoUnicodeString(fileName,
+        const old_contents = g.readFileIntoUnicodeString(fileName,
             encoding=this.encoding, silent=true);
         if (! old_contents) {
-            old_contents = '';
+            const old_contents = '';
         }
-        unchanged = (
+        const unchanged = (
             contents == old_contents;
             || (! this.explicitLineEnding && this.compareIgnoringLineEndings(old_contents, contents));
             || ignoreBlankLines && this.compareIgnoringBlankLines(old_contents, contents));
@@ -3225,7 +3292,8 @@ class AtFile {
             this.unchangedFiles += 1;
             if ! g.unitTesting && c.config.getBool(
                 'report-unchanged-files', default_val=true):
-                g.es("{timestamp}unchanged: {sfn}");
+                // g.es(f"{timestamp}unchanged: {sfn}");
+                g.es(`${timestamp}unchanged: ${sfn}`);
             // Leo 5.6: Check unchanged files.
             this.checkPythonCode(contents, fileName, root, pyflakes_errors_only=true);
             return False;  // No change to original file.
@@ -3233,7 +3301,7 @@ class AtFile {
 
         // Warn if we are only adjusting the line endings.
         if (this.explicitLineEnding) {
-            ok = (
+            const ok = (
                 this.compareIgnoringLineEndings(old_contents, contents) ||
                 ignoreBlankLines && this.compareIgnoringLineEndings(
                 old_contents, contents));
@@ -3243,11 +3311,12 @@ class AtFile {
         }
 
         // Write a changed file.
-        ok = g.writeFile(contents, encoding, fileName);
+        const ok = g.writeFile(contents, encoding, fileName);
         if (ok) {
             c.setFileTimeStamp(fileName);
             if (! g.unitTesting) {
-                g.es("{timestamp}wrote: {sfn}");
+                // g.es(f"{timestamp}wrote: {sfn}");
+                g.es(`${timestamp}wrote: ${sfn}`);
             }
         }
         else {
@@ -3268,8 +3337,8 @@ class AtFile {
         if (s1 == s2) {
             return true;
         }
-        s1 = g.removeBlankLines(s1);
-        s2 = g.removeBlankLines(s2);
+        const s1 = g.removeBlankLines(s1);
+        const s2 = g.removeBlankLines(s2);
         return s1 == s2;
     }
     /**
@@ -3284,8 +3353,8 @@ class AtFile {
         // Wrong: equivalent to ignoreBlankLines!
             // s1 = s1.replace('\n','').replace('\r','')
             // s2 = s2.replace('\n','').replace('\r','')
-        s1 = s1.replace('\r', '');
-        s2 = s2.replace('\r', '');
+        const s1 = s1.replace('\r', '');
+        const s2 = s2.replace('\r', '');
         return s1 == s2;
     }
     // Called from putFile.
@@ -3304,8 +3373,8 @@ class AtFile {
                 }
             }
         }
-        p = root.copy();
-        after = p.nodeAfterTree();
+        const p = root.copy();
+        const after = p.nodeAfterTree();
         while (p && p != after) {
             if (p.isAtAllNode()) {
                 p.moveToNodeAfterTree();
@@ -3327,8 +3396,9 @@ class AtFile {
      */
     public writeError(message): void {
         if (this.errors == 0) {
-            fn = this.targetFileName || 'unnamed file';
-            g.es_error("errors writing: {fn}");
+            const fn = this.targetFileName || 'unnamed file';
+            // g.es_error(f"errors writing: {fn}");
+            g.es_error(`errors writing: ${fn}`);
         }
         this.error(message);
         this.addToOrphanList(this.root);
@@ -3336,10 +3406,10 @@ class AtFile {
     public writeException(fileName, root): void {
         g.error("exception writing:", fileName);
         g.es_exception();
-        if (getattr(this, 'outputFile', none)) {
+        if (getattr(this, 'outputFile', null)) {
             this.outputFile.flush();
             this.outputFile.close();
-            this.outputFile = null;
+            const this.outputFile = null;
         }
         this.remove(fileName);
         this.addToOrphanList(root);
@@ -3367,7 +3437,7 @@ class AtFile {
     // Error checking versions of corresponding functions in Python's os module.
     public chmod(fileName, mode): void {
         // Do _not_ call this.error here.
-        if (mode == none) {
+        if (mode == null) {
             return;
         }
         try {
@@ -3390,7 +3460,8 @@ class AtFile {
         }
         catch (Exception) {
             if (! g.unitTesting) {
-                this.error("exception removing: {fileName}");
+                // this.error(f"exception removing: {fileName}");
+                this.error(`exception removing: ${fileName}`);
                 g.es_exception();
             }
             return false;
@@ -3402,17 +3473,17 @@ class AtFile {
     public stat(fileName): void {
         // Do _not_ call this.error here.
         try {
-            mode = (os.stat(fileName))[0] & (7 * 8 * 8 + 7 * 8 + 7);  // 0777
+            const mode = (os.stat(fileName))[0] & (7 * 8 * 8 + 7 * 8 + 7);  // 0777
         }
         catch (Exception) {
-            mode = null;
+            const mode = null;
         }
         return mode;
 
     }
     public getPathUa(p: Position): void {
         if (hasattr(p.v, 'tempAttributes')) {
-            d = p.v.tempAttributes.get('read-path', {});
+            const d = p.v.tempAttributes.get('read-path', {});
             return d.get('path');
         }
         return '';
@@ -3420,25 +3491,25 @@ class AtFile {
 
     public setPathUa(p: Position, path): void {
         if (! hasattr(p.v, 'tempAttributes')) {
-            p.v.tempAttributes = {};
+            const p.v.tempAttributes = {};
         }
-        d = p.v.tempAttributes.get('read-path', {});
-        d['path'] = path;
-        p.v.tempAttributes['read-path'] = d;
+        const d = p.v.tempAttributes.get('read-path', {});
+        const d['path'] = path;
+        const p.v.tempAttributes['read-path'] = d;
     }
     // Important: this is part of the *write* logic.
     // It is called from this.os and this.putIndent.
 
     public parseUnderindentTag(s: string): void {
-        tag = this.underindentEscapeString;
-        s2 = s[len(tag) :];
+        const tag = this.underindentEscapeString;
+        const s2 = s[len(tag) :];
         // To be valid, the escape must be followed by at least one digit.
-        i = 0;
+        const i = 0;
         while (i < len(s2) && s2[i].isdigit()) {
             i += 1;
         }
         if (i > 0) {
-            n = int(s2[:i]);
+            const n = int(s2[:i]);
             // Bug fix: 2012/06/05: remove any period following the count.
             // This is a new convention.
             if (i < len(s2) && s2[i] == '.') {
@@ -3451,7 +3522,7 @@ class AtFile {
     /**
      * Raise a dialog asking the user whether to overwrite an existing file.
      */
-    public promptForDangerousWrite(fileName, message=None): void {
+    public promptForDangerousWrite(fileName, message=null): void {
         this, c, root = this, this.c, this.root;
         if (this.cancelFlag) {
             // assert this.canCancelFlag;
@@ -3464,25 +3535,29 @@ class AtFile {
         if (root && root.h.startswith('@auto-rst')) {
             // Fix bug 50: body text lost switching @file to @auto-rst
             // Refuse to convert any @<file> node to @auto-rst.
-            d = root.v.at_read if hasattr(root.v, 'at_read') else {};
-            aList = sorted(d.get(fileName, []));
+            // d = root.v.at_read if hasattr(root.v, 'at_read') else {};
+            const d = hasattr(root.v, 'at_read') ? root.v.at_read : {};
+            const aList = sorted(d.get(fileName, []));
             for (h in aList) {
                 if (! h.startswith('@auto-rst')) {
                     g.es('can ! convert @file to @auto-rst!', color='red');
                     g.es('reverting to:', h);
-                    root.h = h;
+                    const root.h = h;
                     c.redraw();
                     return false;
                 }
             }
         }
-        if (message == none) {
-            message = (
-                "{g.splitLongFileName(fileName)}\n";
-                "{g.tr('already exists.')}\n";
-                "{g.tr('Overwrite this file?')}");
+        if (message == null) {
+            const message = (
+                // f"{g.splitLongFileName(fileName)}\n";
+                `${g.splitLongFileName(fileName)}\n`;
+                // f"{g.tr('already exists.')}\n";
+                `${g.tr('already exists.')}\n`;
+                // f"{g.tr('Overwrite this file?')}");
+                `${g.tr('Overwrite this file?')}`);
         }
-        result = g.app.gui.runAskYesNoCancelDialog(c,
+        const result = g.app.gui.runAskYesNoCancelDialog(c,
             title='Overwrite existing file?',
             yesToAllMessage="Yes To &All",
             message=message,
@@ -3491,10 +3566,10 @@ class AtFile {
         if (this.canCancelFlag) {
             // We are in the writeAll logic so these flags can be set.
             if (result == 'cancel') {
-                this.cancelFlag = true;
+                const this.cancelFlag = true;
             }
             else if (result == 'yes-to-all') {
-                this.yesToAll = true;
+                const this.yesToAll = true;
             }
         }
         return result in ('yes', 'yes-to-all');
@@ -3504,15 +3579,15 @@ class AtFile {
      * the full headline (@<file> type) that caused the read.
      */
     public rememberReadPath(fn, p: Position): void {
-        v = p.v;
+        const v = p.v;
         // Fix bug #50: body text lost switching @file to @auto-rst
         if (! hasattr(v, 'at_read')) {
-            v.at_read = {};
+            const v.at_read = {};
         }
-        d = v.at_read;
-        aSet = d.get(fn, set());
+        const d = v.at_read;
+        const aSet = d.get(fn, set());
         aSet.add(p.h);
-        d[fn] = aSet;
+        const d[fn] = aSet;
     }
     /**
      * Scan p and p's ancestors looking for directives,
@@ -3520,24 +3595,24 @@ class AtFile {
      */
     public scanAllDirectives(p: Position): void {
         const c = this.c;
-        d = c.scanAllDirectives(p);
+        const d = c.scanAllDirectives(p);
 
         // Language & delims: Tricky.
-        lang_dict = d.get('lang-dict') || {};
-        delims, language = none, null;
+        const lang_dict = d.get('lang-dict') || {};
+        delims, language = null, null;
         if (lang_dict) {
             // There was an @delims or @language directive.
-            language = lang_dict.get('language');
-            delims = lang_dict.get('delims');
+            const language = lang_dict.get('language');
+            const delims = lang_dict.get('delims');
         }
         if (! language) {
             // No language directive.  Look for @<file> nodes.
             // Do *not* used.get('language')!
-            language = g.getLanguageFromAncestorAtFileNode(p) || 'python';
+            const language = g.getLanguageFromAncestorAtFileNode(p) || 'python';
         }
-        this.language = language;
+        const this.language = language;
         if (! delims) {
-            delims = g.set_delims_from_language(language);
+            const delims = g.set_delims_from_language(language);
         }
 
         // Previously, setting delims was sometimes skipped, depending on kwargs.
@@ -3545,12 +3620,12 @@ class AtFile {
         // Use single-line comments if we have a choice.
         // delim1,delim2,delim3 now correspond to line,start,end
         if (delim1) {
-            this.startSentinelComment = delim1;
-            this.endSentinelComment = "";  // Must not be None.
+            const this.startSentinelComment = delim1;
+            const this.endSentinelComment = "";  // Must not be null.
         }
         else if (delim2 && delim3) {
-            this.startSentinelComment = delim2;
-            this.endSentinelComment = delim3;
+            const this.startSentinelComment = delim2;
+            const this.endSentinelComment = delim3;
         }
         else { // # Emergency!
 
@@ -3561,17 +3636,17 @@ class AtFile {
                 g.es_print("unknown language: using Python comment delimiters");
                 g.es_print("c.target_language:", c.target_language);
             }
-            this.startSentinelComment = "  // "  # This should never happen!
-            this.endSentinelComment = "";
+            const this.startSentinelComment = "  // "  # This should never happen!
+            const this.endSentinelComment = "";
         }
 
         // Easy cases
-        this.encoding = d.get('encoding') || c.config.default_derived_file_encoding;
-        lineending = d.get('lineending');
-        this.explicitLineEnding = bool(lineending);
-        this.output_newline = lineending || g.getOutputNewline(c=c);
-        this.page_width = d.get('pagewidth') || c.page_width;
-        this.tab_width = d.get('tabwidth') || c.tab_width;
+        const this.encoding = d.get('encoding') || c.config.default_derived_file_encoding;
+        const lineending = d.get('lineending');
+        const this.explicitLineEnding = bool(lineending);
+        const this.output_newline = lineending || g.getOutputNewline(c=c);
+        const this.page_width = d.get('pagewidth') || c.page_width;
+        const this.tab_width = d.get('tabwidth') || c.tab_width;
         return {
             "encoding": this.encoding,
             "language": this.language,
@@ -3588,10 +3663,10 @@ class AtFile {
      * See #50: https://github.com/leo-editor/leo-editor/issues/50
      */
     public shouldPromptForDangerousWrite(fn, p: Position): void {
-        trace = 'save' in g.app.debug;
-        sfn = g.shortFileName(fn);
-        c = this.c;
-        efc = g.app.externalFilesController;
+        const trace = 'save' in g.app.debug;
+        const sfn = g.shortFileName(fn);
+        const c = this.c;
+        const efc = g.app.externalFilesController;
         if (p.isAtNoSentFileNode()) {
             // #1450.
             // No danger of overwriting a file.
@@ -3622,23 +3697,24 @@ class AtFile {
         }
         if (hasattr(p.v, 'at_read')) {
             // Fix bug #50: body text lost switching @file to @auto-rst
-            d = p.v.at_read;
+            const d = p.v.at_read;
             for (k in d) {
                 // Fix bug # #1469: make sure k still exists.
                 if (
                     os.path.exists(k) && os.path.samefile(k, fn)
                     && p.h in d.get(k, set())
                 ) {
-                    d[fn] = d[k];
+                    const d[fn] = d[k];
                     if (trace) {
                         g.trace('Return false: in p.v.at_read:', sfn);
                     }
                     return false;
                 }
             }
-            aSet = d.get(fn, set());
+            const aSet = d.get(fn, set());
             if (trace) {
-                g.trace("Return {p.h ! in aSet()}: p.h ! in aSet(): {sfn}");
+                // g.trace(f"Return {p.h ! in aSet()}: p.h ! in aSet(): {sfn}");
+                g.trace(`Return ${p.h not in aSet()}: p.h not in aSet(): ${sfn}`);
             }
             return p.h ! in aSet;
         }
@@ -3650,32 +3726,33 @@ class AtFile {
     public warnOnReadOnlyFile(fn): void {
         // os.access() may not exist on all platforms.
         try {
-            read_only = ! os.access(fn, os.W_OK);
+            const read_only = ! os.access(fn, os.W_OK);
         }
         catch (AttributeError) {
-            read_only = false;
+            const read_only = false;
         }
         if (read_only) {
             g.error("read only:", fn);
         }
     }
 }
-atFile = AtFile;  // compatibility
+const atFile = AtFile;  // compatibility
 /**
  * Read an exteral file, created from an @file tree.
  * This is Vitalije's code, edited by EKR.
  */
 class FastAtRead {
 
-    public constructor(c: Commands, gnx2vnode, test=False, TestVNode=None) {
-        this.c = c;
+    public constructor(c: Commands, gnx2vnode, test=False, TestVNode=null) {
+        const this.c = c;
         // assert gnx2vnode != null;
-        this.gnx2vnode = gnx2vnode;
+        const this.gnx2vnode = gnx2vnode;
             // The global fc.gnxDict. Keys are gnx's, values are vnodes.
-        this.path = null;
-        this.root = null;
-        this.VNode = TestVNode if test else leoNodes.VNode;
-        this.test = test;
+        const this.path = null;
+        const this.root = null;
+        // this.VNode = TestVNode if test else leoNodes.VNode;
+        const this.VNode = test ? TestVNode : leoNodes.VNode;
+        const this.test = test;
     }
 
     /**
@@ -3684,10 +3761,10 @@ class FastAtRead {
     public get_patterns(delims): void {
         // This must be a function, because of @comments & @delims.
         delim_start, delim_end = delims;
-        delims = re.escape(delim_start), re.escape(delim_end || '');
+        const delims = re.escape(delim_start), re.escape(delim_end || '');
         delim1, delim2 = delims;
-        ref = g.angleBrackets(r'(.*)');
-        patterns = (
+        const ref = g.angleBrackets(r'(.*)');
+        const patterns = (
             // The list of patterns, in alphabetical order.
             // These patterns must be mutually exclusive.
             fr'^\s*{delim1}@afterref{delim2}$',;  // @afterref
@@ -3714,8 +3791,8 @@ class FastAtRead {
         // Set the body text.
         if (this.test) {
             // Check the keys.
-            bkeys = sorted(gnx2body.keys());
-            vkeys = sorted(gnx2vnode.keys());
+            const bkeys = sorted(gnx2body.keys());
+            const vkeys = sorted(gnx2vnode.keys());
             if (bkeys != vkeys) {
                 g.trace('KEYS MISMATCH');
                 g.printObj(bkeys);
@@ -3726,24 +3803,23 @@ class FastAtRead {
             }
             // Set the body text.
             for (key in vkeys) {
-                v = gnx2vnode.get(key);
-                body = gnx2body.get(key);
-                v._bodyString = ''.join(body);
+                const v = gnx2vnode.get(key);
+                const body = gnx2body.get(key);
+                const v._bodyString = ''.join(body);
             }
         }
         else {
             // assert root_v.gnx in gnx2vnode, root_v;
             // assert root_v.gnx in gnx2body, root_v;
             for (key in gnx2body) {
-                body = gnx2body.get(key);
-                v = gnx2vnode.get(key);
+                const body = gnx2body.get(key);
+                const v = gnx2vnode.get(key);
                 // assert v, (key, v);
-                v._bodyString = g.toUnicode(''.join(body));
+                const v._bodyString = g.toUnicode(''.join(body));
             }
         }
     }
-    // EKR: This string looked like a docstring!
-    header_pattern = re.compile(
+    const header_pattern = re.compile(
         /**
          * ^(.+)@\+leo
          * (-ver=(\d+))?
@@ -3756,15 +3832,15 @@ class FastAtRead {
 
     /**
      * Scan for the header line, which follows any @first lines.
-     * Return (delims, first_lines, i+1) or None
+     * Return (delims, first_lines, i+1) or null
      */
     public scan_header(lines): void {
-        first_lines: List[str] = [];
-        i = 0;  // To keep some versions of pylint happy.
+        const first_lines: List[str] = [];
+        const i = 0;  // To keep some versions of pylint happy.
         for (i, line in enumerate(lines)) {
-            m = this.header_pattern.match(line);
+            const m = this.header_pattern.match(line);
             if (m) {
-                delims = m.group(1), m.group(8) || '';
+                const delims = m.group(1), m.group(8) || '';
                 return delims, first_lines, i + 1;
             }
             first_lines.append(line);
@@ -3777,24 +3853,24 @@ class FastAtRead {
     public scan_lines(delims, first_lines, lines, path, start): void {
 
         // Simple vars...
-        afterref = False;  // A special verbatim line follows @afterref.
-        clone_v = null;  // The root of the clone tree.
+        const afterref = False;  // A special verbatim line follows @afterref.
+        const clone_v = null;  // The root of the clone tree.
         delim_start, delim_end = delims;  // The start/end delims.
-        doc_skip = (delim_start + '\n', delim_end + '\n');  // To handle doc parts.
-        first_i = 0;  // Index into first array.
-        in_doc = False;  // True: in @doc parts.
-        in_raw = False;  // True: @raw seen.
-        is_cweb = delim_start == '@q@' and delim_end == '@>';  // True: cweb hack in effect.
-        indent = 0;  // The current indentation.
-        level_stack = [];  // Entries are (vnode, in_clone_tree)
-        n_last_lines = 0;  // The number of @@last directives seen.
+        const doc_skip = (delim_start + '\n', delim_end + '\n');  // To handle doc parts.
+        const first_i = 0;  // Index into first array.
+        const in_doc = False;  // True: in @doc parts.
+        const in_raw = False;  // True: @raw seen.
+        const is_cweb = delim_start == '@q@' and delim_end == '@>';  // True: cweb hack in effect.
+        const indent = 0;  // The current indentation.
+        const level_stack = [];  // Entries are (vnode, in_clone_tree)
+        const n_last_lines = 0;  // The number of @@last directives seen.
         // #1065 so reads will not create spurious child nodes.
-        root_seen = False;  // False: The next +@node sentinel denotes the root, regardless of gnx.
-        sentinel = delim_start + '@'  // Faster than a regex!
+        const root_seen = False;  // False: The next +@node sentinel denotes the root, regardless of gnx.
+        const sentinel = delim_start + '@'  // Faster than a regex!
         // The stack is updated when at+others, at+<section>, or at+all is seen.
-        stack = [];  // Entries are (gnx, indent, body)
-        verbline = delim_start + '@verbatim' + delim_end + '\n';  // The spelling of at-verbatim sentinel
-        verbatim = False;  // True: the next line must be added without change.
+        const stack = [];  // Entries are (gnx, indent, body)
+        const verbline = delim_start + '@verbatim' + delim_end + '\n';  // The spelling of at-verbatim sentinel
+        const verbatim = False;  // True: the next line must be added without change.
 
         // Init the data for the root node.
 
@@ -3804,32 +3880,32 @@ class FastAtRead {
 
         if (this.test) {
             // Start with the gnx for the @file node.
-            root_gnx = gnx = 'root-gnx';  // The node that we are reading.
-            gnx_head = '<hidden top vnode>';  // The headline of the root node.
-            context = null;
-            parent_v = this.VNode(context=context, gnx=gnx);
-            parent_v._headString = gnx_head;  // Corresponds to the @files node itself.
+            const root_gnx = gnx = 'root-gnx';  // The node that we are reading.
+            const gnx_head = '<hidden top vnode>';  // The headline of the root node.
+            const context = null;
+            const parent_v = this.VNode(context=context, gnx=gnx);
+            const parent_v._headString = gnx_head;  // Corresponds to the @files node itself.
         }
         else {
             // Production.
-            root_gnx = gnx = this.root.gnx;
-            context = this.c;
-            parent_v = this.root.v;
+            const root_gnx = gnx = this.root.gnx;
+            const context = this.c;
+            const parent_v = this.root.v;
         }
-        root_v = parent_v;  // Does not change.
+        const root_v = parent_v;  // Does not change.
         level_stack.append((root_v, false),);
 
         // Init the gnx dict last.
 
-        gnx2vnode = this.gnx2vnode;  // Keys are gnx's, values are vnodes.
-        gnx2body = {};  // Keys are gnxs, values are list of body lines.
-        gnx2vnode[gnx] = parent_v;  // Add gnx to the keys
+        const gnx2vnode = this.gnx2vnode;  // Keys are gnx's, values are vnodes.
+        const gnx2body = {};  // Keys are gnxs, values are list of body lines.
+        const gnx2vnode[gnx] = parent_v;  // Add gnx to the keys
         // Add gnx to the keys.
         // Body is the list of lines presently being accumulated.
-        gnx2body[gnx] = body = first_lines;
+        const gnx2body[gnx] = body = first_lines;
 
         // get the patterns.
-        data = this.get_patterns(delims);
+        const data = this.get_patterns(delims);
         // pylint: disable=line-too-long
         after_pat, all_pat, code_pat, comment_pat, delims_pat, doc_pat, end_raw_pat, first_pat, last_pat, node_start_pat, others_pat, raw_pat, ref_pat = data;
         /**
@@ -3841,7 +3917,8 @@ class FastAtRead {
             print('[');
             for (i, data in enumerate(level_stack)) {
                 v2, in_tree = data;
-                print("{i+1:2} {in_tree:5} {v2.h}");
+                // print(f"{i+1:2} {in_tree:5} {v2.h}");
+                print(`${i+1:2} ${in_tree:5} ${v2.h}`);
             }
             print(']');
             print('PARENT.CHILDREN...');
@@ -3851,27 +3928,27 @@ class FastAtRead {
 
         }
 
-        i = 0;  // To keep pylint happy.
+        const i = 0;  // To keep pylint happy.
         for (i, line in enumerate(lines[start) { // ]):
             // Order matters.
             if (verbatim) {
                 // We are in raw mode, or other special situation.
                 // Previous line was verbatim sentinel. Append this line as it is.
                 if (afterref) {
-                    afterref = false;
+                    const afterref = false;
                     if (body) { // # a List of lines.
-                        body[-1] = body[-1].rstrip() + line;
+                        const body[-1] = body[-1].rstrip() + line;
                     }
                     else {
-                        body = [line];
+                        const body = [line];
                     }
-                    verbatim = false;
+                    const verbatim = false;
                 }
                 else if (in_raw) {
-                    m = end_raw_pat.match(line);
+                    const m = end_raw_pat.match(line);
                     if (m) {
-                        in_raw = false;
-                        verbatim = false;
+                        const in_raw = false;
+                        const verbatim = false;
                     }
                     else {
                         // Continue verbatim/raw mode.
@@ -3880,25 +3957,25 @@ class FastAtRead {
                 }
                 else {
                     body.append(line);
-                    verbatim = false;
+                    const verbatim = false;
                 }
                 continue;
             }
             if (line == verbline) { // # <delim>@verbatim.
-                verbatim = true;
+                const verbatim = true;
                 continue;
             }
 
             // Strip the line only once.
-            strip_line = line.strip();
+            const strip_line = line.strip();
 
             // Undo the cweb hack.
             if (is_cweb && line.startswith(sentinel)) {
-                line = line[: len(sentinel)] + line[len(sentinel) :].replace('@@', '@');
+                const line = line[: len(sentinel)] + line[len(sentinel) :].replace('@@', '@');
             }
             // Adjust indentation.
             if (indent && line[) { // indent].isspace() && len(line) > indent:
-                line = line[indent:];
+                const line = line[indent:];
             }
             // This is valid because all following sections are either:
             // 1. guarded by 'if in_doc' or
@@ -3909,11 +3986,12 @@ class FastAtRead {
                 body.append(line);
                 continue;
             }
-            m = others_pat.match(line);
+            const m = others_pat.match(line);
             if (m) {
-                in_doc = false;
+                const in_doc = false;
                 if (m.group(2) == '+') { // # opening sentinel
-                    body.append("{m.group(1)}@others{m.group(3) || ''}\n");
+                    // body.append(f"{m.group(1)}@others{m.group(3) || ''}\n");
+                    body.append(`${m.group(1)}@others${m.group(3) || ''}\n`);
                     stack.append((gnx, indent, body));
                     indent += m.end(1);  // adjust current identation
                 }
@@ -3924,9 +4002,9 @@ class FastAtRead {
                 continue;
             }
  # clears in_doc
-            m = ref_pat.match(line);
+            const m = ref_pat.match(line);
             if (m) {
-                in_doc = false;
+                const in_doc = false;
                 if (m.group(2) == '+') {
                     // open sentinel.
                     body.append(m.group(1) + g.angleBrackets(m.group(3)) + '\n');
@@ -3944,30 +4022,31 @@ class FastAtRead {
             }
  # clears in_doc.
             // Order doesn't matter, but match more common sentinels first.
-            m = node_start_pat.match(line);
+            const m = node_start_pat.match(line);
             if (m) {
                 in_doc, in_raw = false, false;
                 gnx, head = m.group(2), m.group(5);
-                level = int(m.group(3)) if m.group(3) else 1 + len(m.group(4));
+                // level = int(m.group(3)) if m.group(3) else 1 + len(m.group(4));
+                const level = m.group(3) ? int(m.group(3)) : 1 + len(m.group(4));
                     // m.group(3) is the level number, m.group(4) is the number of stars.
-                v = gnx2vnode.get(gnx);
+                const v = gnx2vnode.get(gnx);
 
                 // Case 1: The root @file node. Don't change the headline.
                 if (! root_seen) {
                     // Fix #1064: The node represents the root, regardless of the gnx!
-                    root_seen = true;
-                    clone_v = null;
-                    gnx2body[gnx] = body = [];
+                    const root_seen = true;
+                    const clone_v = null;
+                    const gnx2body[gnx] = body = [];
                     if (! v) {
                         // Fix #1064.
-                        v = root_v;
+                        const v = root_v;
                         // This message is annoying when using git-diff.
                             // if gnx != root_gnx:
                                 // g.es_print("using gnx from external file: %s" % (v.h), color='blue')
-                        gnx2vnode[gnx] = v;
-                        v.fileIndex = gnx;
+                        const gnx2vnode[gnx] = v;
+                        const v.fileIndex = gnx;
                     }
-                    v.children = [];
+                    const v.children = [];
                     continue;
                 }
 
@@ -3975,13 +4054,13 @@ class FastAtRead {
                 parent_v, clone_v = level_stack[level - 2];
                 if (v && clone_v) {
                     // The last version of the body and headline wins..
-                    gnx2body[gnx] = body = [];
-                    v._headString = head;
+                    const gnx2body[gnx] = body = [];
+                    const v._headString = head;
                     // Update the level_stack.
-                    level_stack = level_stack[: level - 1];
+                    const level_stack = level_stack[: level - 1];
                     level_stack.append((v, clone_v),);
                     // Always clear the children!
-                    v.children = [];
+                    const v.children = [];
                     parent_v.children.append(v);
                     continue;
                 }
@@ -3989,21 +4068,21 @@ class FastAtRead {
                 // Case 3: we are not already scanning the descendants of a clone.
                 if (v) {
                     // The *start* of a clone tree. Reset the children.
-                    clone_v = v;
-                    v.children = [];
+                    const clone_v = v;
+                    const v.children = [];
                 }
                 else {
                     // Make a new vnode.
-                    v = this.VNode(context=context, gnx=gnx);
+                    const v = this.VNode(context=context, gnx=gnx);
                 }
 
                 // The last version of the body and headline wins.
-                gnx2vnode[gnx] = v;
-                gnx2body[gnx] = body = [];
-                v._headString = head;
+                const gnx2vnode[gnx] = v;
+                const gnx2body[gnx] = body = [];
+                const v._headString = head;
 
                 // Update the stack.
-                level_stack = level_stack[: level - 1];
+                const level_stack = level_stack[: level - 1];
                 level_stack.append((v, clone_v),);
 
                 // Update the links.
@@ -4027,79 +4106,84 @@ class FastAtRead {
                 }
 
                 // Check for @c or @code.
-                m = code_pat.match(line);
+                const m = code_pat.match(line);
                 if (m) {
-                    in_doc = false;
+                    const in_doc = false;
                     body.append('@code\n' if m.group(1) else '@c\n');
                     continue;
                 }
             }
             else {
-                m = doc_pat.match(line);
+                const m = doc_pat.match(line);
                 if (m) {
                     // @+at or @+doc?
-                    doc = '@doc' if m.group(1) == 'doc' else '@';
-                    doc2 = m.group(2) or '';  // Trailing text.
+                    // doc = '@doc' if m.group(1) == 'doc' else '@';
+                    const doc = m.group(1) == 'doc' ? '@doc' : '@';
+                    const doc2 = m.group(2) or '';  // Trailing text.
                     if (doc2) {
-                        body.append("{doc}{doc2}\n");
+                        // body.append(f"{doc}{doc2}\n");
+                        body.append(`${doc}${doc2}\n`);
                     }
                     else {
                         body.append(doc + '\n');
                     }
                     // Enter @doc mode.
-                    in_doc = true;
+                    const in_doc = true;
                     continue;
                 }
             }
-            m = all_pat.match(line);
+            const m = all_pat.match(line);
             if (m) {
                 // @all tells Leo's *write* code not to check for undefined sections.
                 // Here, in the read code, we merely need to add it to the body.
                 // Pushing and popping the stack may not be necessary, but it can't hurt.
                 if (m.group(2) == '+') { // # opening sentinel
-                    body.append("{m.group(1)}@all{m.group(3) || ''}\n");
+                    // body.append(f"{m.group(1)}@all{m.group(3) || ''}\n");
+                    body.append(`${m.group(1)}@all${m.group(3) || ''}\n`);
                     stack.append((gnx, indent, body));
                 }
                 else { // # closing sentinel.
                     // m.group(2) is '-' because the pattern matched.
                     gnx, indent, body = stack.pop();
-                    gnx2body[gnx] = body;
+                    const gnx2body[gnx] = body;
                 }
                 continue;
             }
-            m = after_pat.match(line);
+            const m = after_pat.match(line);
             if (m) {
-                afterref = true;
-                verbatim = true;
+                const afterref = true;
+                const verbatim = true;
                     // Avoid an extra test in the main loop.
                 continue;
             }
-            m = first_pat.match(line);
+            const m = first_pat.match(line);
             if (m) {
                 if (0 <= first_i < len(first_lines)) {
                     body.append('@first ' + first_lines[first_i]);
                     first_i += 1;
                 }
                 else {
-                    g.trace("\ntoo many @first lines: {path}");
+                    // g.trace(f"\ntoo many @first lines: {path}");
+                    g.trace(`\ntoo many @first lines: ${path}`);
                     print('@first == valid only at the start of @<file> nodes\n');
                     g.printObj(first_lines, tag='first_lines');
                     g.printObj(lines[start : i + 2], tag='lines[start:i+2]');
                 }
                 continue;
             }
-            m = last_pat.match(line);
+            const m = last_pat.match(line);
             if (m) {
                 n_last_lines += 1;
                 continue;
             }
             // http://leoeditor.com/directives.html#part-4-dangerous-directives
-            m = comment_pat.match(line);
+            const m = comment_pat.match(line);
             if (m) {
                 // <1, 2 or 3 comment delims>
-                delims = m.group(1).strip();
+                const delims = m.group(1).strip();
                 // Whatever happens, retain the @delims line.
-                body.append("@comment {delims}\n");
+                // body.append(f"@comment {delims}\n");
+                body.append(`@comment ${delims}\n`);
                 delim1, delim2, delim3 = g.set_delims_from_string(delims);
                     // delim1 is always the single-line delimiter.
                 if (delim1) {
@@ -4112,64 +4196,65 @@ class FastAtRead {
                 // Within these delimiters:
                 // - double underscores represent a newline.
                 // - underscores represent a significant space,
-                delim_start = delim_start.replace('__', '\n').replace('_', ' ');
-                delim_end = delim_end.replace('__', '\n').replace('_', ' ');
+                const delim_start = delim_start.replace('__', '\n').replace('_', ' ');
+                const delim_end = delim_end.replace('__', '\n').replace('_', ' ');
                 // Recalculate all delim-related values
-                doc_skip = (delim_start + '\n', delim_end + '\n');
-                is_cweb = delim_start == '@q@' && delim_end == '@>';
-                sentinel = delim_start + '@';
+                const doc_skip = (delim_start + '\n', delim_end + '\n');
+                const is_cweb = delim_start == '@q@' && delim_end == '@>';
+                const sentinel = delim_start + '@';
 
                 // Recalculate the patterns.
-                delims = delim_start, delim_end
+                const delims = delim_start, delim_end
                 (
                     after_pat, all_pat, code_pat, comment_pat, delims_pat,
                     doc_pat, end_raw_pat, first_pat, last_pat,
                     node_start_pat, others_pat, raw_pat, ref_pat;
-                ) = this.get_patterns(delims);
+                const ) = this.get_patterns(delims);
                 continue;
             }
-            m = delims_pat.match(line);
+            const m = delims_pat.match(line);
             if (m) {
                 // Get 1 or 2 comment delims
                 // Whatever happens, retain the original @delims line.
-                delims = m.group(1).strip();
-                body.append("@delims {delims}\n");
+                const delims = m.group(1).strip();
+                // body.append(f"@delims {delims}\n");
+                body.append(`@delims ${delims}\n`);
 
                 // Parse the delims.
-                delims_pat = re.compile('^([^ ]+)\s*([^ ]+)?');  // EKR: remove r
-                m2 = delims_pat.match(delims);
+                const delims_pat = re.compile(r'^([^ ]+)\s*([^ ]+)?');
+                const m2 = delims_pat.match(delims);
                 if (! m2) {
-                    // EKR: some syntax problem.
-                    // g.trace("Ignoring invalid @comment: {line!r}");
+                    // g.trace(f"Ignoring invalid @comment: {line!r}");
+                    g.trace(`Ignoring invalid @comment: ${line}`);
                     continue;
                 }
-                delim_start = m2.group(1);
-                delim_end = m2.group(2) || '';
+                const delim_start = m2.group(1);
+                const delim_end = m2.group(2) || '';
 
                 // Within these delimiters:
                 // - double underscores represent a newline.
                 // - underscores represent a significant space,
-                delim_start = delim_start.replace('__', '\n').replace('_', ' ');
-                delim_end = delim_end.replace('__', '\n').replace('_', ' ');
+                const delim_start = delim_start.replace('__', '\n').replace('_', ' ');
+                const delim_end = delim_end.replace('__', '\n').replace('_', ' ');
                 // Recalculate all delim-related values
-                doc_skip = (delim_start + '\n', delim_end + '\n');
-                is_cweb = delim_start == '@q@' && delim_end == '@>';
-                sentinel = delim_start + '@';
+                const doc_skip = (delim_start + '\n', delim_end + '\n');
+                const is_cweb = delim_start == '@q@' && delim_end == '@>';
+                const sentinel = delim_start + '@';
 
                 // Recalculate the patterns
-                delims = delim_start, delim_end
+                const delims = delim_start, delim_end
                 (
                     after_pat, all_pat, code_pat, comment_pat, delims_pat,
                     doc_pat, end_raw_pat, first_pat, last_pat,
                     node_start_pat, others_pat, raw_pat, ref_pat;
-                ) = this.get_patterns(delims);
+                const ) = this.get_patterns(delims);
                 continue;
             }
             // http://leoeditor.com/directives.html#part-4-dangerous-directives
-            m = raw_pat.match(line);
+            const m = raw_pat.match(line);
             if (m) {
-                in_raw = true;
-                verbatim = true;
+                const in_raw = true;
+                const verbatim = true;
                     // Avoid an extra test in the main loop.
                 continue;
             }
@@ -4181,8 +4266,9 @@ class FastAtRead {
             // @first, @last, @delims and @comment generate @@ sentinels,
             // So this must follow all of those.
             if (line.startswith(delim_start + '@@')) {
-                ii = len(delim_start) + 1;  // on second '@'
-                jj = line.rfind(delim_end) if delim_end else -1;
+                const ii = len(delim_start) + 1;  // on second '@'
+                // jj = line.rfind(delim_end) if delim_end else -1;
+                const jj = delim_end ? line.rfind(delim_end) : -1;
                 body.append(line[ii:jj] + '\n');
                 continue;
             }
@@ -4195,7 +4281,7 @@ class FastAtRead {
                 // Doc lines start with start_delim + one blank.
                 // #1496: Retire the @doc convention.
                 // #2194: Strip lws.
-                tail = line.lstrip()[len(delim_start) + 1 :];
+                const tail = line.lstrip()[len(delim_start) + 1 :];
                 if (tail.strip()) {
                     body.append(tail);
                 }
@@ -4212,21 +4298,22 @@ class FastAtRead {
 
             // #2213: *Do* insert the line, with a warning.
             g.trace(
-                // EKR: f-string problem.
-                // "{g.shortFileName(this.path)}: ";
-                // "warning: inserting unexpected line: {line.rstrip()!r}";
+                // f"{g.shortFileName(this.path)}: ";
+                `${g.shortFileName(this.path)}: `;
+                // f"warning: inserting unexpected line: {line.rstrip()!r}";
+                `warning: inserting unexpected line: ${line.rstrip()}`;
             );
             body.append(line);
         }
         else {
             // No @-leo sentinel
-            return none, [];
+            return null, [];
         }
         // Handle @last lines.
-        last_lines = lines[start + i :];
+        const last_lines = lines[start + i :];
         if (last_lines) {
-            last_lines = ['@last ' + z for z in last_lines];
-            gnx2body[root_gnx] = gnx2body[root_gnx] + last_lines;
+            const last_lines = ['@last ' + z for z in last_lines];
+            const gnx2body[root_gnx] = gnx2body[root_gnx] + last_lines;
         }
         this.post_pass(gnx2body, gnx2vnode, root_v);
         return root_v, last_lines;
@@ -4236,17 +4323,17 @@ class FastAtRead {
      * anchored in root.v.
      */
     public read_into_root(contents, path, root): void {
-        trace = false;
-        t1 = time.process_time();
-        this.path = path;
-        this.root = root;
-        sfn = g.shortFileName(path);
-        contents = contents.replace('\r', '');
-        lines = g.splitLines(contents);
-        data = this.scan_header(lines);
+        const trace = false;
+        const t1 = time.process_time();
+        const this.path = path;
+        const this.root = root;
+        const sfn = g.shortFileName(path);
+        const contents = contents.replace('\r', '');
+        const lines = g.splitLines(contents);
+        const data = this.scan_header(lines);
         if (! data) {
-            // EKR: f-string problem
-            // g.trace("Invalid external file: {sfn}");
+            // g.trace(f"Invalid external file: {sfn}");
+            g.trace(`Invalid external file: ${sfn}`);
             return false;
         }
         // Clear all children.
@@ -4255,8 +4342,9 @@ class FastAtRead {
         delims, first_lines, start_i = data;
         this.scan_lines(delims, first_lines, lines, path, start_i);
         if (trace) {
-            t2 = time.process_time();
-            g.trace("{t2 - t1:5.2f} sec. {path}");
+            const t2 = time.process_time();
+            // g.trace(f"{t2 - t1:5.2f} sec. {path}");
+            g.trace(`${t2 - t1} sec. ${path}`);
         }
         return true;
     }
