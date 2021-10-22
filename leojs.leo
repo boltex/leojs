@@ -527,6 +527,7 @@
 </v>
 <v t="felix.20211005023421.1"><vh>c.Selecting</vh>
 <v t="felix.20211005023456.1"><vh>c.selectPosition</vh></v>
+<v t="felix.20211022013445.1"><vh>c.treeSelectHelper</vh></v>
 </v>
 </v>
 </v>
@@ -558,7 +559,7 @@
 <v t="felix.20210104010331.1"><vh>g._callerName     (coreGlobals.py)</vh></v>
 <v t="felix.20210104194650.1"><vh>g.doKeywordArgs   (coreGlobals.py)</vh></v>
 <v t="felix.20210211222711.1"><vh>g.doHook</vh></v>
-<v t="felix.20210104210231.1"><vh>g.error           (coreGlobals.py)</vh></v>
+<v t="felix.20211021224204.1"><vh>g.error, g.note, g.warning, g.red, g.blue</vh></v>
 <v t="felix.20210104210234.1"><vh>g.es              (coreGlobals.py)</vh></v>
 <v t="felix.20210104210248.1"><vh>g.es_exception    (coreGlobals.py)</vh></v>
 <v t="felix.20210104210254.1"><vh>g.es_print        (coreGlobals.py)</vh></v>
@@ -581,6 +582,16 @@
 <v t="felix.20210109224332.1"><vh>g.toEncodedString (coreGlobals.py)</vh></v>
 <v t="felix.20210110163748.1"><vh>g.toUnicode       (coreGlobals.py)</vh></v>
 <v t="felix.20210110163753.1"><vh>g.trace           (coreGlobals.py)</vh></v>
+</v>
+<v t="felix.20211021231651.1"><vh>@clean src/core/leoHistory.ts</vh>
+<v t="felix.20211021231651.2"><vh>class NodeHistory</vh>
+<v t="felix.20211021231651.3"><vh>NodeHistory.ctor</vh></v>
+<v t="felix.20211021231651.4"><vh>NodeHistory.dump</vh></v>
+<v t="felix.20211021231651.5"><vh>NodeHistory.goNext</vh></v>
+<v t="felix.20211021231651.6"><vh>NodeHistory.goPrev</vh></v>
+<v t="felix.20211021231651.7"><vh>NodeHistory.select</vh></v>
+<v t="felix.20211021231651.8"><vh>NodeHistory.update</vh></v>
+</v>
 </v>
 <v t="felix.20210102012632.1"><vh>@clean src/core/leoNodes.ts</vh>
 <v t="felix.20210127001502.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
@@ -8293,9 +8304,6 @@ export function doKeywordArgs(keys: { [key: string]: any }, d: { [key: string]: 
 }
 
 </t>
-<t tx="felix.20210104210231.1">export const error = console.error;
-
-</t>
 <t tx="felix.20210104210234.1">// TODO : Replace with output to proper 'Leo log pane'
 export const es = console.log;
 
@@ -8645,6 +8653,7 @@ export class Commands {
     public hiddenRootNode: VNode;
     public fileCommands: FileCommands;
     public chapterController: any; // TODO : leoChapters.ChapterController(c)
+    public nodeHistory: NodeHistory;
 
     public gui: LeoUI;
 
@@ -12884,6 +12893,7 @@ import { CommanderOutlineCommands } from "../commands/commanderOutlineCommands";
 import { CommanderFileCommands } from "../commands/commanderFileCommands";
 
 import { Position, VNode, StackEntry } from "./leoNodes";
+import { NodeHistory } from './leoHistory';
 
 </t>
 <t tx="felix.20210220195150.1">import { VNode } from "./leoNodes";
@@ -13054,6 +13064,7 @@ public initWrapperLeoFile(c: Commands, fn: string): Commands {
     this.hiddenRootNode.h = '&lt;hidden root vnode&gt;';
     this.fileCommands.gnxDict = {}; // RESET gnxDict
     this.chapterController = {}; // TODO self.chapterController = leoChapters.ChapterController(c)
+    this.nodeHistory = new NodeHistory(c);
 
     // From initConfigSettings 
     this.collapse_on_lt_arrow = true; // getBool('collapse-on-lt-arrow', default=True)
@@ -13214,6 +13225,7 @@ public vimCommands: any = undefined;
 // assert self.frame.c == c
 // from leo.core import leoHistory
 // self.nodeHistory = leoHistory.NodeHistory(c)
+
 // self.initConfigSettings()
 // c.setWindowPosition() # Do this after initing settings.
 // # Break circular import dependencies by doing imports here.
@@ -16492,6 +16504,179 @@ private createCommandNames(): void {
 
 </t>
 <t tx="felix.20211021003423.1">public collapse_on_lt_arrow: boolean = true; // getBool('collapse-on-lt-arrow', default=True)
+</t>
+<t tx="felix.20211021224204.1">// TODO : Replace with proper method
+export const blue = console.log;
+export const error = console.log;
+export const note = console.log;
+export const red = console.log;
+export const warning = console.warn;
+
+</t>
+<t tx="felix.20211021231651.1">import { Commands } from './leoCommands';
+import * as g from './leoGlobals';
+import { Position } from './leoNodes';
+@others
+@language typescript
+@tabwidth -4
+</t>
+<t tx="felix.20211021231651.2">/**
+ * * A class encapsulating knowledge of visited nodes.
+ */
+export class NodeHistory {
+
+    public c: Commands;
+    public beadList: [Position, any][]; // a list of (position,chapter) tuples.
+    public beadPointer: number;
+    public skipBeadUpdate: boolean;
+
+    @others
+
+}
+</t>
+<t tx="felix.20211021231651.3">constructor(c: Commands) {
+    this.c = c;
+    this.beadList = []; // a list of (position,chapter) tuples.
+    this.beadPointer = -1;
+    this.skipBeadUpdate = false;
+}
+
+</t>
+<t tx="felix.20211021231651.4">/**
+ * * Dump the beadList
+ */
+public dump(): void {
+    this.beadList.forEach((data, i) =&gt; {
+        let p: Position | string = data[0];
+        let chapter: any | string = data[1];
+        if (p &amp;&amp; p.__bool__()) {
+            p = p.h;
+        } else {
+            p = 'no p';
+        }
+        if (chapter) {
+            chapter = chapter.name;
+        } else {
+            chapter = 'main';
+        }
+        const mark: string = i === this.beadPointer ? '**' : '  '; // used in string
+        console.log("${mark} ${i} ${chapter} ${p}");
+    });
+}
+
+</t>
+<t tx="felix.20211021231651.5">/**
+ * * Select the next node, if possible.
+ */
+public goNext() {
+    if (this.beadPointer + 1 &lt; this.beadList.length) {
+        this.beadPointer += 1;
+        const p = this.beadList[this.beadPointer][0];
+        const chapter = this.beadList[this.beadPointer][1];
+        this.select(p, chapter);
+    }
+}
+
+</t>
+<t tx="felix.20211021231651.6">/**
+ * * Select the previously visited node, if possible.
+ */
+public goPrev(): void {
+    if (this.beadPointer &gt; 0) {
+        this.beadPointer -= 1;
+        const p = this.beadList[this.beadPointer][0];
+        const chapter = this.beadList[this.beadPointer][1];
+        this.select(p, chapter);
+    }
+}
+
+</t>
+<t tx="felix.20211021231651.7">/**
+ * Update the history list when selecting p.
+ * Called only from self.goToNext/PrevHistory
+ */
+public select(p: Position, chapter: any): void {
+    const c: Commands = this.c;
+    const cc = this.c.chapterController;
+    if (c.positionExists(p)) {
+        this.skipBeadUpdate = true;
+        try {
+            const oldChapter = cc.getSelectedChapter();
+            if (oldChapter != chapter) {
+                cc.selectChapterForPosition(p, chapter);
+            }
+            c.selectPosition(p);  // Calls cc.selectChapterForPosition
+        }
+        finally {
+            this.skipBeadUpdate = false;
+        }
+    }
+    // Fix bug #180: Always call this.update here.
+    this.update(p, false);
+}
+
+</t>
+<t tx="felix.20211021231651.8">/**
+ * Update the beadList while p is being selected.
+ * Called *only* from c.frame.tree.selectHelper.
+ */
+public update(p: Position, change: boolean = true): void {
+    const c: Commands = this.c;
+    const cc = this.c.chapterController;
+    if (!p.__bool__() || !c.positionExists(p) || this.skipBeadUpdate) {
+        return;
+    }
+    // A hack: don't add @chapter nodes.
+    // These are selected during the transitions to a new chapter.
+    if (p.h.startsWith('@chapter ')) {
+        return;
+    }
+    // Fix bug #180: handle the change flag.
+    const aList: [Position, any][] = [];
+    let found: number = -1;
+
+    this.beadList.forEach((data, i) =&gt; {
+        const p2: Position | string = data[0];
+        const junk_chapter: any | string = data[1];
+
+        if (c.positionExists(p2)) {
+            if (p.__eq__(p2)) {
+                if (change) {
+                    //pass  // We'll append later.
+                } else if (found === -1) {
+                    found = i;
+                    aList.push(data);
+                } else {
+                    // pass  // Remove any duplicate.
+                }
+            } else {
+                aList.push(data);
+            }
+        }
+    });
+
+    if (change || found === -1) {
+        const data: [Position, any] = [p.copy(), cc.getSelectedChapter()];
+        aList.push(data);
+        this.beadPointer = aList.length - 1;
+    } else {
+        this.beadPointer = found;
+    }
+    this.beadList = aList;
+}
+
+</t>
+<t tx="felix.20211022013445.1">public treeSelectHelper(p: Position): void {
+    const c: Commands = this;
+    if (!p || !p.__bool__()) {
+        p = c.p;
+    }
+    if (p &amp;&amp; p.__bool__()) {
+        // Do not call expandAllAncestors here.
+        c.selectPosition(p);
+    }
+}
+
 </t>
 </tnodes>
 </leo_file>

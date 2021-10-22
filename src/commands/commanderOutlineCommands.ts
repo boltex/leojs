@@ -379,127 +379,172 @@ export class CommanderOutlineCommands {
             c.expansionLevel = 1;
             c.expansionNode = c.p.copy();
         }
-        this.expandToLevel(Math.max(1, c.expansionLevel - 1))
-    }
+        this.expandToLevel(Math.max(1, c.expansionLevel - 1));
+    } 
 
     //@+node:felix.20211021013709.1: ** c_oc.Goto commands
     //@+node:felix.20211021013709.2: *3* c_oc.findNextClone
-    @g.commander_command('find-next-clone')
-    def findNextClone(self, event=None):
-        """Select the next cloned node."""
-        c, p = self, self.p
-        cc = c.chapterController
-        if not p:
-            return
-        if p.isCloned():
-            p.moveToThreadNext()
-        flag = False
-        while p:
-            if p.isCloned():
-                flag = True
-                break
-            else:
-                p.moveToThreadNext()
-        if flag:
-            if cc:
-                # name = cc.findChapterNameForPosition(p)
+    @commander_command(
+        'find-next-clone',
+        'Select the next cloned node.'
+    )
+    public findNextClone(this: Commands): void {
+        const c: Commands = this;
+        const p = this.p;
+        const cc = c.chapterController;
+        if(!p || !p.__bool__()){
+            return;
+        }
+        if(p.isCloned()){
+            p.moveToThreadNext();
+        }    
+        let flag = false;
+        while( p && p.__bool__()){
+            if(p.isCloned()){
+                flag = true;
+                break;
+            }else{
+                p.moveToThreadNext();
+            }
+        }
+        if( flag){
+            if( cc){
+                // name = cc.findChapterNameForPosition(p)
                 cc.selectChapterByName('main')
-            c.selectPosition(p)
-            c.redraw_after_select(p)
-        else:
-            g.blue('no more clones')
+            }
+            c.selectPosition(p);
+            //c.redraw_after_select(p);
+        }else{
+            g.blue('no more clones');
+        }
+     }
     //@+node:felix.20211021013709.3: *3* c_oc.goNextVisitedNode
-    @g.commander_command('go-forward')
-    def goNextVisitedNode(self, event=None):
-        """Select the next visited node."""
-        c = self
-        p = c.nodeHistory.goNext()
-        if p:
-            c.nodeHistory.skipBeadUpdate = True
-            try:
+    @commander_command(
+        'go-forward',
+        'Select the next visited node.'
+    )
+    public goNextVisitedNode(this: Commands): void {
+        const c: Commands = this;
+        c.nodeHistory.goNext();
+        // unused
+        /*
+        const p = c.nodeHistory.goNext();
+        if(p && p.__bool__()) {
+            c.nodeHistory.skipBeadUpdate = true;
+            try {
                 c.selectPosition(p)
-            finally:
-                c.nodeHistory.skipBeadUpdate = False
-                c.redraw_after_select(p)
+            }
+            finally {   
+                c.nodeHistory.skipBeadUpdate = false;
+                // c.redraw_after_select(p)
+            }
+        }
+        */
+     }
     //@+node:felix.20211021013709.4: *3* c_oc.goPrevVisitedNode
-    @g.commander_command('go-back')
-    def goPrevVisitedNode(self, event=None):
-        """Select the previously visited node."""
-        c = self
+    @commander_command(
+        'go-back',
+        'Select the previously visited node.'
+    )
+    public goPrevVisitedNode(this: Commands): void {
+        const c: Commands = this;
+        c.nodeHistory.goPrev();
+        // unused
+        /*
         p = c.nodeHistory.goPrev()
         if p:
-            c.nodeHistory.skipBeadUpdate = True
+            c.nodeHistory.skipBeadUpdate = true;
             try:
                 c.selectPosition(p)
             finally:
                 c.nodeHistory.skipBeadUpdate = False
-                c.redraw_after_select(p)
+                // c.redraw_after_select(p)
+        */
+    }
     //@+node:felix.20211021013709.5: *3* c_oc.goToFirstNode
-    @g.commander_command('goto-first-node')
-    def goToFirstNode(self, event=None):
-        """
-        Select the first node of the entire outline.
-        
-        But (#2167), go to the first node of a chapter or hoist
-        if Leo is hoisted or within a chapter.
-        """
-        c = self
-        p = c.rootPosition()
-        c.expandOnlyAncestorsOfNode(p=p)
-        c.redraw()
+    @commander_command(
+        'goto-first-node',
+        'Select the first node of the entire outline\n'+
+        'But (#2167), go to the first node of a chapter or hoist\n' + 
+        'if Leo is hoisted or within a chapter.'
+    )
+    public goToFirstNode(this: Commands): void {
+        const c: Commands = this;
+        const p:Position = c.rootPosition()!;
+        c.expandOnlyAncestorsOfNode(p);
+        // c.redraw();
+    }
     //@+node:felix.20211021013709.6: *3* c_oc.goToFirstSibling
-    @g.commander_command('goto-first-sibling')
-    def goToFirstSibling(self, event=None):
-        """Select the first sibling of the selected node."""
-        c, p = self, self.p
-        if p.hasBack():
-            while p.hasBack():
-                p.moveToBack()
-        c.treeSelectHelper(p)
+    @commander_command(
+        'goto-first-sibling',
+        'Select the first sibling of the selected node.'
+    )
+    public goToFirstSibling(this: Commands): void {
+        const c: Commands = this;
+        const p = this.p;
+        if (p.hasBack()){
+            while(p.hasBack()){
+                p.moveToBack();
+            }
+        }
+        c.treeSelectHelper(p);
+    }
     //@+node:felix.20211021013709.7: *3* c_oc.goToFirstVisibleNode
-    @g.commander_command('goto-first-visible-node')
-    def goToFirstVisibleNode(self, event=None):
-        """Select the first visible node of the selected chapter or hoist."""
-        c = self
-        p = c.firstVisible()
-        if p:
-            c.expandOnlyAncestorsOfNode(p=p)
-            c.redraw()
+    @commander_command(
+        'goto-first-visible-node',
+        'Select the first visible node of the selected chapter or hoist.'
+    )
+    public goToFirstVisibleNode(this: Commands): void {
+        const c: Commands = this;
+        const p:Position = c.firstVisible()
+        if  (p && p.__bool__()) {
+            c.expandOnlyAncestorsOfNode(p);
+        }
+    }
     //@+node:felix.20211021013709.8: *3* c_oc.goToLastNode
-    @g.commander_command('goto-last-node')
-    def goToLastNode(self, event=None):
-        """Select the last node in the entire tree."""
-        c = self
-        p = c.rootPosition()
-        while p and p.hasThreadNext():
-            p.moveToThreadNext()
-        c.expandOnlyAncestorsOfNode(p=p)
-        c.redraw()
+    @commander_command(
+        'goto-last-node',
+        'Select the last node in the entire tree.'
+    )
+    public goToLastNode(this: Commands): void {
+        const c: Commands = this;
+        const p:Position = c.rootPosition()!;
+        while( p && p.__bool__() && p.hasThreadNext()){
+            p.moveToThreadNext();
+        }
+        c.expandOnlyAncestorsOfNode(p)
+    }
     //@+node:felix.20211021013709.9: *3* c_oc.goToLastSibling
-    @g.commander_command('goto-last-sibling')
-    def goToLastSibling(self, event=None):
-        """Select the last sibling of the selected node."""
+    @commander_command(
+        'goto-last-sibling',
+        'Select the last sibling of the selected node.'
+    )
+    public goToLastSibling(this: Commands): void {
         c, p = self, self.p
         if p.hasNext():
             while p.hasNext():
                 p.moveToNext()
         c.treeSelectHelper(p)
+    }
     //@+node:felix.20211021013709.10: *3* c_oc.goToLastVisibleNode
-    @g.commander_command('goto-last-visible-node')
-    def goToLastVisibleNode(self, event=None):
-        """Select the last visible node of selected chapter or hoist."""
-        c = self
+    @commander_command(
+        'goto-last-visible-node',
+        'Select the last visible node of selected chapter or hoist.'
+    )
+    public goToLastVisibleNode(this: Commands): void {
+      const c: Commands = this;
         p = c.lastVisible()
         if p:
             c.expandOnlyAncestorsOfNode(p=p)
             c.redraw()
+    }
     //@+node:felix.20211021013709.11: *3* c_oc.goToNextClone
-    @g.commander_command('goto-next-clone')
-    def goToNextClone(self, event=None):
-        """
-        Select the next node that is a clone of the selected node.
-        If the selected node is not a clone, do find-next-clone.
-        """
+    @commander_command(
+        'goto-next-clone',
+        'Select the next node that is a clone of the selected node.\n' +
+        'If the selected node is not a clone, do find-next-clone.'
+    )
+    public goToNextClone(this: Commands): void {
         c, p = self, self.p
         cc = c.chapterController
         if not p:
@@ -523,29 +568,32 @@ export class CommanderOutlineCommands {
         if p:
             c.expandAllAncestors(p)
             if cc:
-                # #252: goto-next clone activate chapter.
+                // #252: goto-next clone activate chapter.
                 chapter = cc.getSelectedChapter()
                 old_name = chapter and chapter.name
                 new_name = cc.findChapterNameForPosition(p)
                 if new_name == old_name:
-                    # Always do a full redraw.
+                    // Always do a full redraw.
                     c.redraw(p)
                 else:
                     if 1:
                         cc.selectChapterByName(new_name)
                         c.redraw(p)
-                    else:  # Old code.
+                    else:  // Old code.
                         c.selectPosition(p)
                         cc.selectChapterByName(new_name)
             else:
-                # Always do a full redraw.
+                // Always do a full redraw.
                 c.redraw(p)
         else:
             g.blue('done')
+    }
     //@+node:felix.20211021013709.12: *3* c_oc.goToNextDirtyHeadline
-    @g.commander_command('goto-next-changed')
-    def goToNextDirtyHeadline(self, event=None):
-        """Select the node that is marked as changed."""
+    @commander_command(
+        'goto-next-changed',
+        'Select the node that is marked as changed.'
+    )
+    public goToNextDirtyHeadline(this: Commands): void {
         c, p = self, self.p
         if not p:
             return
@@ -563,11 +611,14 @@ export class CommanderOutlineCommands {
                 p = c.rootPosition()
         if not p:
             g.blue('done')
-        c.treeSelectHelper(p)  # Sets focus.
+        c.treeSelectHelper(p)  // Sets focus.
+    }
     //@+node:felix.20211021013709.13: *3* c_oc.goToNextMarkedHeadline
-    @g.commander_command('goto-next-marked')
-    def goToNextMarkedHeadline(self, event=None):
-        """Select the next marked node."""
+    @commander_command(
+        'goto-next-marked',
+        'Select the next marked node.'
+    )
+    public goToNextMarkedHeadline(this: Commands): void {
         c, p = self, self.p
         if not p:
             return
@@ -585,23 +636,32 @@ export class CommanderOutlineCommands {
                 p = c.rootPosition()
         if not p:
             g.blue('done')
-        c.treeSelectHelper(p)  # Sets focus.
+        c.treeSelectHelper(p)  // Sets focus.
+    }
     //@+node:felix.20211021013709.14: *3* c_oc.goToNextSibling
-    @g.commander_command('goto-next-sibling')
-    def goToNextSibling(self, event=None):
-        """Select the next sibling of the selected node."""
+    @commander_command(
+        'goto-next-sibling',
+        'Select the next sibling of the selected node.'
+    )
+    public goToNextSibling(this: Commands): void {
         c, p = self, self.p
         c.treeSelectHelper(p and p.next())
+    }
     //@+node:felix.20211021013709.15: *3* c_oc.goToParent
-    @g.commander_command('goto-parent')
-    def goToParent(self, event=None):
-        """Select the parent of the selected node."""
+    @commander_command(
+        'goto-parent',
+        'Select the parent of the selected node.'
+    )
+    public goToParent(this: Commands): void {
         c, p = self, self.p
         c.treeSelectHelper(p and p.parent())
+    }
     //@+node:felix.20211021013709.16: *3* c_oc.goToPrevMarkedHeadline
-    @g.commander_command('goto-prev-marked')
-    def goToPrevMarkedHeadline(self, event=None):
-        """Select the next marked node."""
+    @commander_command(
+        'goto-prev-marked',
+        'Select the next marked node.'
+    )
+    public goToPrevMarkedHeadline(this: Commands): void {
         c, p = self, self.p
         if not p:
             return
@@ -619,36 +679,48 @@ export class CommanderOutlineCommands {
                 p = c.rootPosition()
         if not p:
             g.blue('done')
-        c.treeSelectHelper(p)  # Sets focus.
+        c.treeSelectHelper(p)  // Sets focus.
+    }
     //@+node:felix.20211021013709.17: *3* c_oc.goToPrevSibling
-    @g.commander_command('goto-prev-sibling')
-    def goToPrevSibling(self, event=None):
-        """Select the previous sibling of the selected node."""
+    @commander_command(
+        'goto-prev-sibling',
+        'Select the previous sibling of the selected node.'
+    )
+    public goToPrevSibling(this: Commands): void {
         c, p = self, self.p
         c.treeSelectHelper(p and p.back())
+}
     //@+node:felix.20211021013709.18: *3* c_oc.selectThreadBack
-    @g.commander_command('goto-prev-node')
-    def selectThreadBack(self, event=None):
-        """Select the node preceding the selected node in outline order."""
+    @commander_command(
+        'goto-prev-node',
+        'Select the node preceding the selected node in outline order.'
+    )
+    public selectThreadBack(this: Commands): void {
         c, p = self, self.p
         if not p:
             return
         p.moveToThreadBack()
         c.treeSelectHelper(p)
+}
     //@+node:felix.20211021013709.19: *3* c_oc.selectThreadNext
-    @g.commander_command('goto-next-node')
-    def selectThreadNext(self, event=None):
-        """Select the node following the selected node in outline order."""
+    @commander_command(
+        'goto-next-node',
+        'Select the node following the selected node in outline order.'
+    )
+    public selectThreadNext(this: Commands): void {
         c, p = self, self.p
         if not p:
             return
         p.moveToThreadNext()
         c.treeSelectHelper(p)
+    }
     //@+node:felix.20211021013709.20: *3* c_oc.selectVisBack
-    @g.commander_command('goto-prev-visible')
-    def selectVisBack(self, event=None):
-        """Select the visible node preceding the presently selected node."""
-        # This has an up arrow for a control key.
+    @commander_command(
+        'goto-prev-visible',
+        'Select the visible node preceding the presently selected node.'
+    )
+    public selectVisBack(this: Commands): void {
+        // This has an up arrow for a control key.
         c, p = self, self.p
         if not p:
             return
@@ -656,11 +728,14 @@ export class CommanderOutlineCommands {
             p.moveToVisBack(c)
             c.treeSelectHelper(p)
         else:
-            c.endEditing()  # 2011/05/28: A special case.
+            c.endEditing()  // 2011/05/28: A special case.
+    }
     //@+node:felix.20211021013709.21: *3* c_oc.selectVisNext
-    @g.commander_command('goto-next-visible')
-    def selectVisNext(self, event=None):
-        """Select the visible node following the presently selected node."""
+    @commander_command(
+        'goto-next-visible',
+        'Select the visible node following the presently selected node.'
+    )
+    public selectVisNext(this: Commands): void {
         c, p = self, self.p
         if not p:
             return
@@ -668,7 +743,8 @@ export class CommanderOutlineCommands {
             p.moveToVisNext(c)
             c.treeSelectHelper(p)
         else:
-            c.endEditing()  # 2011/05/28: A special case.
+            c.endEditing()  // 2011/05/28: A special case.
+    }
     //@-others
 
 }

@@ -5,6 +5,7 @@ import { CommanderOutlineCommands } from "../commands/commanderOutlineCommands";
 import { CommanderFileCommands } from "../commands/commanderFileCommands";
 
 import { Position, VNode, StackEntry } from "./leoNodes";
+import { NodeHistory } from './leoHistory';
 
 function applyMixins(derivedCtor: any, constructors: any[]) {
     constructors.forEach((baseCtor) => {
@@ -41,6 +42,7 @@ export class Commands {
     public hiddenRootNode: VNode;
     public fileCommands: FileCommands;
     public chapterController: any; // TODO : leoChapters.ChapterController(c)
+    public nodeHistory: NodeHistory;
 
     public gui: LeoUI;
 
@@ -192,6 +194,7 @@ export class Commands {
         this.hiddenRootNode.h = '<hidden root vnode>';
         this.fileCommands.gnxDict = {}; // RESET gnxDict
         this.chapterController = {}; // TODO self.chapterController = leoChapters.ChapterController(c)
+        this.nodeHistory = new NodeHistory(c);
 
         // From initConfigSettings 
         this.collapse_on_lt_arrow = true; // getBool('collapse-on-lt-arrow', default=True)
@@ -225,6 +228,7 @@ export class Commands {
     // assert self.frame.c == c
     // from leo.core import leoHistory
     // self.nodeHistory = leoHistory.NodeHistory(c)
+
     // self.initConfigSettings()
     // c.setWindowPosition() # Do this after initing settings.
     // # Break circular import dependencies by doing imports here.
@@ -1220,6 +1224,17 @@ export class Commands {
         // TODO : Is this needed? (not used in Leos codebase)
         // selectVnode = selectPosition
 
+    }
+
+    public treeSelectHelper(p: Position): void {
+        const c: Commands = this;
+        if (!p || !p.__bool__()) {
+            p = c.p;
+        }
+        if (p && p.__bool__()) {
+            // Do not call expandAllAncestors here.
+            c.selectPosition(p);
+        }
     }
 
 

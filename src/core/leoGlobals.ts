@@ -342,7 +342,12 @@ export function doHook(tag: string, ...args: any[]): any {
     */
 }
 
-export const error = console.error;
+// TODO : Replace with proper method
+export const blue = console.log;
+export const error = console.log;
+export const note = console.log;
+export const red = console.log;
+export const warning = console.warn;
 
 // TODO : Replace with output to proper 'Leo log pane'
 export const es = console.log;
