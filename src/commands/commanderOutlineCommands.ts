@@ -90,7 +90,7 @@ export class CommanderOutlineCommands {
     )
     public contractAllOtherNodes(this: Commands): void {
         const c: Commands = this;
-        const leaveOpen = c.p;
+        const leaveOpen:Position = c.p;
         for (let p of c.rootPosition()!.self_and_siblings()) {
             contractIfNotCurrent(c, p, leaveOpen);
         }
@@ -102,7 +102,7 @@ export class CommanderOutlineCommands {
     )
     public contractAllSubheads(this: Commands): void {
         const c: Commands = this;
-        const p = this.p;
+        const p: Position = this.p;
         if (!p || !p.__bool__()) {
             return;
         }
@@ -133,8 +133,8 @@ export class CommanderOutlineCommands {
     )
     public contractNodeOrGoToParent(this: Commands): void {
         const c: Commands = this;
-        const cc = this.chapterController;
         const p: Position = this.p;
+        const cc = this.chapterController;
 
         const parent: Position = p.parent();
 
@@ -164,7 +164,7 @@ export class CommanderOutlineCommands {
     )
     public contractParent(this: Commands): void {
         const c: Commands = this;
-        const p = c.p;
+        const p: Position = c.p;
         const parent = p.parent();
         if (!parent || !parent.__bool__()) {
             return;
@@ -180,8 +180,8 @@ export class CommanderOutlineCommands {
     )
     public expandAllHeadlines(this: Commands): void {
         const c: Commands = this;
-        const p = c.rootPosition();
-        while (p?.__bool__()) {
+        const p: Position = c.rootPosition()!;
+        while (p && p.__bool__()) {
             c.expandSubtree(p);
             p.moveToNext();
         }
@@ -194,7 +194,7 @@ export class CommanderOutlineCommands {
     )
     public expandAllSubheads(this: Commands): void {
         const c: Commands = this;
-        const p = this.p;
+        const p: Position = this.p;
         if (!p || !p.__bool__()) {
             return;
         }
@@ -299,7 +299,7 @@ export class CommanderOutlineCommands {
     )
     public expandNode(this: Commands): void {
         const c: Commands = this;
-        const p = c.p;
+        const p: Position = c.p;
         // c.endEditing();
         p.expand();
         // c.redraw_after_expand(p);
@@ -312,7 +312,7 @@ export class CommanderOutlineCommands {
     )
     public expandNodeAndGoToFirstChild(this: Commands): void {
         const c: Commands = this;
-        const p = this.p;
+        const p: Position = this.p;
         // c.endEditing()
         if (p.hasChildren()) {
             if (!p.isExpanded()) {
@@ -332,7 +332,7 @@ export class CommanderOutlineCommands {
     )
     public expandNodeOrGoToFirstChild(this: Commands): void {
         const c: Commands = this;
-        const p = this.p;
+        const p: Position = this.p;
         // c.endEditing()
         if (p.hasChildren()) {
             if (p.isExpanded()) {
@@ -390,7 +390,7 @@ export class CommanderOutlineCommands {
     )
     public findNextClone(this: Commands): void {
         const c: Commands = this;
-        const p = this.p;
+        const p: Position = this.p;
         const cc = c.chapterController;
         if(!p || !p.__bool__()){
             return;
@@ -428,7 +428,7 @@ export class CommanderOutlineCommands {
         c.nodeHistory.goNext();
         // unused
         /*
-        const p = c.nodeHistory.goNext();
+        const p: Position = c.nodeHistory.goNext();
         if(p && p.__bool__()) {
             c.nodeHistory.skipBeadUpdate = true;
             try {
@@ -481,7 +481,7 @@ export class CommanderOutlineCommands {
     )
     public goToFirstSibling(this: Commands): void {
         const c: Commands = this;
-        const p = this.p;
+        const p: Position = this.p;
         if (p.hasBack()){
             while(p.hasBack()){
                 p.moveToBack();
@@ -520,11 +520,14 @@ export class CommanderOutlineCommands {
         'Select the last sibling of the selected node.'
     )
     public goToLastSibling(this: Commands): void {
-        c, p = self, self.p
-        if p.hasNext():
-            while p.hasNext():
-                p.moveToNext()
-        c.treeSelectHelper(p)
+        const c: Commands = this;
+        const p: Position = this.p;
+        if (p.hasNext()){
+            while( p.hasNext()){
+                p.moveToNext();
+            }    
+        }
+        c.treeSelectHelper(p);
     }
     //@+node:felix.20211021013709.10: *3* c_oc.goToLastVisibleNode
     @commander_command(
@@ -532,11 +535,11 @@ export class CommanderOutlineCommands {
         'Select the last visible node of selected chapter or hoist.'
     )
     public goToLastVisibleNode(this: Commands): void {
-      const c: Commands = this;
-        p = c.lastVisible()
-        if p:
-            c.expandOnlyAncestorsOfNode(p=p)
-            c.redraw()
+        const c: Commands = this;
+        const p: Position = c.lastVisible();
+        if( p && p.__bool__()){
+            c.expandOnlyAncestorsOfNode(p);
+        }    
     }
     //@+node:felix.20211021013709.11: *3* c_oc.goToNextClone
     @commander_command(
@@ -545,48 +548,51 @@ export class CommanderOutlineCommands {
         'If the selected node is not a clone, do find-next-clone.'
     )
     public goToNextClone(this: Commands): void {
-        c, p = self, self.p
-        cc = c.chapterController
-        if not p:
-            return
-        if not p.isCloned():
-            c.findNextClone()
-            return
-        v = p.v
-        p.moveToThreadNext()
-        wrapped = False
-        while 1:
-            if p and p.v == v:
-                break
-            elif p:
-                p.moveToThreadNext()
-            elif wrapped:
-                break
-            else:
-                wrapped = True
-                p = c.rootPosition()
-        if p:
-            c.expandAllAncestors(p)
-            if cc:
+        const c: Commands = this;
+        let p: Position = this.p;
+        const cc = c.chapterController;
+        if(!p || !p.__bool__()){
+            return;
+        }
+        if( !p.isCloned()){
+            c.findNextClone();
+            return;
+        }
+        const v:VNode = p.v;
+        p.moveToThreadNext();
+        let wrapped:boolean = false;
+        while(1){
+            if( p && p.__bool__() && p.v.gnx===v.gnx){
+                break;
+            }else if (p && p.__bool__()){
+                p.moveToThreadNext();
+            }else if (wrapped){
+                break;
+            }else{
+                wrapped = true;
+                p = c.rootPosition()!;
+            }
+        }        
+        if (p && p.__bool__()){
+            c.expandAllAncestors(p);
+            if (cc){
                 // #252: goto-next clone activate chapter.
-                chapter = cc.getSelectedChapter()
-                old_name = chapter and chapter.name
-                new_name = cc.findChapterNameForPosition(p)
-                if new_name == old_name:
+                const chapter = cc.getSelectedChapter();
+                const old_name: string|boolean = chapter && chapter.name;
+                const new_name:string = cc.findChapterNameForPosition(p);
+                if (new_name === old_name){
                     // Always do a full redraw.
-                    c.redraw(p)
-                else:
-                    if 1:
-                        cc.selectChapterByName(new_name)
-                        c.redraw(p)
-                    else:  // Old code.
-                        c.selectPosition(p)
-                        cc.selectChapterByName(new_name)
-            else:
+                    //c.redraw(p);
+                }else{   
+                    cc.selectChapterByName(new_name);
+                }
+            }else{
                 // Always do a full redraw.
-                c.redraw(p)
-        else:
-            g.blue('done')
+                //c.redraw(p);
+            }
+        }else{
+            g.blue('done');
+        }
     }
     //@+node:felix.20211021013709.12: *3* c_oc.goToNextDirtyHeadline
     @commander_command(
@@ -594,7 +600,8 @@ export class CommanderOutlineCommands {
         'Select the node that is marked as changed.'
     )
     public goToNextDirtyHeadline(this: Commands): void {
-        c, p = self, self.p
+        const c: Commands = this;
+        const p: Position = this.p;
         if not p:
             return
         p.moveToThreadNext()
@@ -619,7 +626,8 @@ export class CommanderOutlineCommands {
         'Select the next marked node.'
     )
     public goToNextMarkedHeadline(this: Commands): void {
-        c, p = self, self.p
+        const c: Commands = this;
+        const p: Position = this.p;
         if not p:
             return
         p.moveToThreadNext()
@@ -644,7 +652,8 @@ export class CommanderOutlineCommands {
         'Select the next sibling of the selected node.'
     )
     public goToNextSibling(this: Commands): void {
-        c, p = self, self.p
+        const c: Commands = this;
+        const p: Position = this.p;
         c.treeSelectHelper(p and p.next())
     }
     //@+node:felix.20211021013709.15: *3* c_oc.goToParent
@@ -653,8 +662,9 @@ export class CommanderOutlineCommands {
         'Select the parent of the selected node.'
     )
     public goToParent(this: Commands): void {
-        c, p = self, self.p
-        c.treeSelectHelper(p and p.parent())
+        const c: Commands = this;
+        const p: Position = this.p;
+        c.treeSelectHelper(p && p.__bool__() && p.parent())
     }
     //@+node:felix.20211021013709.16: *3* c_oc.goToPrevMarkedHeadline
     @commander_command(
@@ -662,7 +672,8 @@ export class CommanderOutlineCommands {
         'Select the next marked node.'
     )
     public goToPrevMarkedHeadline(this: Commands): void {
-        c, p = self, self.p
+        const c: Commands = this;
+        const p: Position = this.p;
         if not p:
             return
         p.moveToThreadBack()
@@ -687,7 +698,8 @@ export class CommanderOutlineCommands {
         'Select the previous sibling of the selected node.'
     )
     public goToPrevSibling(this: Commands): void {
-        c, p = self, self.p
+        const c: Commands = this;
+        const p: Position = this.p;
         c.treeSelectHelper(p and p.back())
 }
     //@+node:felix.20211021013709.18: *3* c_oc.selectThreadBack
@@ -696,7 +708,8 @@ export class CommanderOutlineCommands {
         'Select the node preceding the selected node in outline order.'
     )
     public selectThreadBack(this: Commands): void {
-        c, p = self, self.p
+        const c: Commands = this;
+        const p: Position = this.p;
         if not p:
             return
         p.moveToThreadBack()
@@ -708,7 +721,8 @@ export class CommanderOutlineCommands {
         'Select the node following the selected node in outline order.'
     )
     public selectThreadNext(this: Commands): void {
-        c, p = self, self.p
+        const c: Commands = this;
+        const p: Position = this.p;
         if not p:
             return
         p.moveToThreadNext()
@@ -721,7 +735,8 @@ export class CommanderOutlineCommands {
     )
     public selectVisBack(this: Commands): void {
         // This has an up arrow for a control key.
-        c, p = self, self.p
+        const c: Commands = this;
+        const p: Position = this.p;
         if not p:
             return
         if c.canSelectVisBack():
@@ -736,7 +751,8 @@ export class CommanderOutlineCommands {
         'Select the visible node following the presently selected node.'
     )
     public selectVisNext(this: Commands): void {
-        c, p = self, self.p
+        const c: Commands = this;
+        const p: Position = this.p;
         if not p:
             return
         if c.canSelectVisNext():

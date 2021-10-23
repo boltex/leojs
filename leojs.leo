@@ -519,6 +519,9 @@
 </v>
 </v>
 <v t="felix.20211005023225.1"><vh>c.Gui</vh>
+<v t="felix.20211022202201.1"><vh>c.drawing</vh>
+<v t="felix.20211022202634.1"><vh>c.expandAllAncestors</vh></v>
+</v>
 <v t="felix.20211005023800.1"><vh>c.Expand/contract</vh>
 <v t="felix.20211005023821.1"><vh>c.contractAllHeadlines</vh></v>
 <v t="felix.20211005023931.1"><vh>c.contractSubtree</vh></v>
@@ -16675,6 +16678,29 @@ public update(p: Position, change: boolean = true): void {
         // Do not call expandAllAncestors here.
         c.selectPosition(p);
     }
+}
+
+</t>
+<t tx="felix.20211022202201.1"></t>
+<t tx="felix.20211022202634.1">/**
+ * Expand all ancestors without redrawing.
+ * Return a flag telling whether a redraw is needed.
+ */
+public expandAllAncestors(p_p: Position): boolean {
+    let redraw_flag = false;
+    for (let p of p_p.parents()) {
+        if (!p.v.isExpanded()) {
+            p.v.expand();
+            p.expand();
+            redraw_flag = true;
+        } else if (p.isExpanded()) {
+            p.v.expand();
+        } else {
+            p.expand();
+            redraw_flag = true;
+        }
+    }
+    return redraw_flag;
 }
 
 </t>

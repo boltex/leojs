@@ -1115,6 +1115,27 @@ export class Commands {
     // setTopVnode = setTopPosition
 
     /**
+     * Expand all ancestors without redrawing.
+     * Return a flag telling whether a redraw is needed.
+     */
+    public expandAllAncestors(p_p: Position): boolean {
+        let redraw_flag = false;
+        for (let p of p_p.parents()) {
+            if (!p.v.isExpanded()) {
+                p.v.expand();
+                p.expand();
+                redraw_flag = true;
+            } else if (p.isExpanded()) {
+                p.v.expand();
+            } else {
+                p.expand();
+                redraw_flag = true;
+            }
+        }
+        return redraw_flag;
+    }
+
+    /**
      * Contract all nodes in the outline.
      */
     public contractAllHeadlines(): void {
