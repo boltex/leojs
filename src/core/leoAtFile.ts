@@ -200,7 +200,6 @@ class AtFile {
         if (make_dirs && root_dir) {
             const ok = g.makeAllNonExistentDirectories(root_dir);
             if (! ok) {
-                // g.error(f"Error creating directories: {root_dir}");
                 g.error(`Error creating directories: ${root_dir}`);
                 return null;
             }
@@ -220,15 +219,13 @@ class AtFile {
             g.red('Please select an @thin || @file node');
             return;
         }
-        const fn = g.fullPath(c, p);  // #1910.
+        const fn = g.fullPath(c, p)  #;  // 1910.
         if (! g.os_path_exists(fn)) {
-            // g.red(f"file ! found: {fn}");
             g.red(`file not found: ${fn}`);
             return;
         }
         s, e = g.readFileIntoString(fn);
         if (s == null) {
-            // g.red(f"empty file: {fn}");
             g.red(`empty file: ${fn}`);
             return;
         }
@@ -278,7 +275,6 @@ class AtFile {
             this.warnOnReadOnlyFile(fn);
         }
         catch (Exception) {
-            // this.error(f"unexpected exception opening: '@file {fn}'");
             this.error(`unexpected exception opening: '@file ${fn}'`);
             const this._file_bytes = g.toEncodedString('');
             fn, s = null, null;
@@ -296,7 +292,6 @@ class AtFile {
         if (! shadow_exists) {
             g.trace('can ! happen: no private file',
                 shadow_fn, g.callers());
-            // this.error(f"can ! happen: private file does ! exist: {shadow_fn}");
             this.error(`can not happen: private file does not exist: ${shadow_fn}`);
             return null;
         }
@@ -309,7 +304,7 @@ class AtFile {
      */
     public read(root, fromString=null): void {
         const c = this.c;
-        const fileName = g.fullPath(c, root);  // #1341. #1889.
+        const fileName = g.fullPath(c, root)  # #1341.;  // 1889.
         if (! fileName) {
             this.error("Missing file name. Restoring @file tree from .leo file.");
             return false;
@@ -412,7 +407,6 @@ class AtFile {
          */
         public function callback(p: Position, r=r.copy(), root=root): void {
             const child = r.insertAsLastChild();
-            // child.h = f"From {root.h}";
             const child.h = `From ${root.h}`;
             const v = p.v;
             // new code: based on vnodes.
@@ -474,9 +468,7 @@ class AtFile {
         if (! g.unitTesting) {
             if (files) {
                 const t2 = time.time();
-                // g.es(f"read {len(files)} files in {t2 - t1:2.2f} seconds");
-                t3 = t2 - t1
-                g.es(`read ${len(files)} files in ${t3} seconds`);
+                g.es(`read ${len(files)} files in ${t2 - t1} seconds`);
             }
             else if (force) {
                 g.es("no @<file> nodes in the selected tree");
@@ -578,9 +570,8 @@ class AtFile {
      */
     public readOneAtAutoNode(p: Position): void {
         this, c, ic = this, this.c, this.c.importCommands;
-        const fileName = g.fullPath(c, p);  // #1521, #1341, #1914.
+        const fileName = g.fullPath(c, p)  # #1521, #1341,;  // 1914.
         if (! g.os_path_exists(fileName)) {
-            // g.error(f"! found: {p.h!r}", nodeLink=p.get_UNL(with_proto=true));
             g.error(`not found: ${p.h}`, nodeLink=p.get_UNL(with_proto=true));
             return p;
         }
@@ -606,7 +597,6 @@ class AtFile {
             g.es_exception();
         }
         if (ic.errors) {
-            // g.error(f"errors inhibited read @auto {fileName}");
             g.error(`errors inhibited read @auto ${fileName}`);
         }
         else if (c.persistenceController) {
@@ -651,7 +641,6 @@ class AtFile {
         else {
             const language = ic.languageForExtension(ext);
             if (language && language != 'unknown_language') {
-                // head = f"@language {language}\n";
                 const head = `@language ${language}\n`;
             }
             else {
@@ -696,7 +685,6 @@ class AtFile {
         const fileName = g.fullPath(c, root);
         if (! g.os_path_exists(fileName)) {
             g.es_print(
-                // f"! found: {fileName}",
                 `not found: ${fileName}`,
                 color='red',
                 nodeLink=root.get_UNL(with_proto=true));
@@ -736,7 +724,6 @@ class AtFile {
      * Dump all lines.
      */
     public dump(lines, tag): void {
-        // print(f"***** {tag} lines...\n");
         print(`***** ${tag} lines...\n`);
         for (s in lines) {
             print(s.rstrip());
@@ -775,13 +762,11 @@ class AtFile {
         const x = c.shadowController;
         if (! fn == p.atShadowFileNodeName()) {
             this.error(
-                // f"can ! happen: fn: {fn} != atShadowNodeName: ";
-                `can not happen: fn: ${fn} != atShadowNodeName: `;
-                // f"{p.atShadowFileNodeName()}");
-                `${p.atShadowFileNodeName()}`);
+                `can not happen: fn: ${fn} != atShadowNodeName: `
+                `${p.atShadowFileNodeName()}`)
             return;
         }
-        const fn = g.fullPath(c, p);  // #1521 & #1341.
+        const fn = g.fullPath(c, p)  # #1521 &;  // 1341.
         // #889175: Remember the full fileName.
         this.rememberReadPath(fn, p);
         const shadow_fn = x.shadowPathName(fn);
@@ -803,9 +788,8 @@ class AtFile {
     }
     public importAtShadowNode(p: Position): void {
         c, ic = this.c, this.c.importCommands;
-        const fn = g.fullPath(c, p);  // #1521, #1341, #1914.
+        const fn = g.fullPath(c, p)  # #1521, #1341,;  // 1914.
         if (! g.os_path_exists(fn)) {
-            // g.error(f"! found: {p.h!r}", nodeLink=p.get_UNL(with_proto=true));
             g.error(`not found: ${p.h}`, nodeLink=p.get_UNL(with_proto=true));
             return p;
         }
@@ -965,11 +949,9 @@ class AtFile {
             }
         }
         catch (IOError) {
-            // this.error(f"can ! open {fileName}");
             this.error(`can not open ${fileName}`);
         }
         catch (Exception) {
-            // this.error(f"Exception reading {fileName}");
             this.error(`Exception reading ${fileName}`);
             g.es_exception();
         }
@@ -1036,7 +1018,6 @@ class AtFile {
             const this.endSentinelComment = end;
         }
         else if (giveErrors) {
-            // this.error(f"No @+leo sentinel in: {fileName}");
             this.error(`No @+leo sentinel in: ${fileName}`);
             g.trace(g.callers());
         }
@@ -1174,7 +1155,6 @@ class AtFile {
                 const ok = this.writeOneAtShadowNode(p);
                 if (ok) {
                     const found = true;
-                    // g.blue(f"wrote {p.atShadowFileNodeName()}");
                     g.blue(`wrote ${p.atShadowFileNodeName()}`);
                     p.moveToNodeAfterTree();
                 }
@@ -1255,7 +1235,6 @@ class AtFile {
     public findFilesToWrite(force): void {
         const trace = 'save' in g.app.debug && ! g.unitTesting;
         if (trace) {
-            // g.trace(f"writing *{'selected' if force else 'all'}* files");
             g.trace(`writing *${'selected' if force else 'all'}* files`);
         }
         const c = this.c;
@@ -1315,7 +1294,6 @@ class AtFile {
      */
     public internalWriteError(p: Position): void {
         g.es_exception();
-        // g.es(f"Internal error writing: {p.h}", color='red');
         g.es(`Internal error writing: ${p.h}`, color='red');
         g.es('Please report this error to:', color='blue');
         g.es('https://groups.google.com/forum/;  // !forum/leo-editor', color='blue')
@@ -1328,7 +1306,6 @@ class AtFile {
         }
         if (files) {
             const n = this.unchangedFiles;
-            // g.es(f"finished: {n} unchanged file{g.plural(n)}");
             g.es(`finished: ${n} unchanged file${g.plural(n)}`);
         }
         else if (all) {
@@ -1370,7 +1347,6 @@ class AtFile {
         const this.root = root;
         if (p.isAtIgnoreNode()) {
             // Should have been handled in findFilesToWrite.
-            // g.trace(f"Can ! happen: {p.h} == an @ignore node");
             g.trace(`Can not happen: ${p.h} == an @ignore node`);
             return;
         }
@@ -1397,7 +1373,6 @@ class AtFile {
             }
         }
         else {
-            // g.trace(f"Can ! happen: {p.h}");
             g.trace(`Can not happen: ${p.h}`);
             return;
         }
@@ -1432,10 +1407,8 @@ class AtFile {
         const ok = this.promptForDangerousWrite(
             fileName=null,
             message=(
-                // f"{g.tr('path changed for %s' % (p.h))}\n";
-                `${g.tr('path changed for %s' % (p.h))}\n`;
-                // f"{g.tr('write this file anyway?')}";
-                `${g.tr('write this file anyway?')}`;
+                `${g.tr('path changed for %s' % (p.h))}\n`
+                `${g.tr('write this file anyway?')}`
             ),
         );
         if (! ok) {
@@ -1553,7 +1526,7 @@ class AtFile {
             ) {
                 const fileName = p.anyAtFileNodeName();
                 if (fileName) {
-                    const fileName = g.fullPath(c, p);  // #1914.
+                    const fileName = g.fullPath(c, p)  #;  // 1914.
                     if (this.precheck(fileName, p)) {
                         this.writeMissingNode(p);
                         const writtenFiles = true;
@@ -1598,7 +1571,6 @@ class AtFile {
                 return;
             }
         }
-        // g.trace(f"Can ! happen unknown @<file> kind: {p.h}");
         g.trace(`Can not happen unknown @<file> kind: ${p.h}`);
     }
     /**
@@ -2165,7 +2137,6 @@ class AtFile {
                     this.putAtAllLine(s, i, p);
                 }
                 else {
-                    // this.error(f"@all ! valid in: {p.h}");
                     this.error(`@all not valid in: ${p.h}`);
                 }
             }
@@ -2175,7 +2146,6 @@ class AtFile {
         else if (kind == this.othersDirective) {
             if (status.in_code) {
                 if (status.has_at_others) {
-                    // this.error(f"multiple @others in: {p.h}");
                     this.error(`multiple @others in: ${p.h}`);
                 }
                 else {
@@ -2193,7 +2163,6 @@ class AtFile {
         }
         else if (kind == this.endRawDirective) {
             // Fix bug 784920: @raw mode does not ignore directives
-            // this.error(f"unmatched @end_raw directive: {p.h}");
             this.error(`unmatched @end_raw directive: ${p.h}`);
         }
         else if (kind == this.startVerbatim) {
@@ -2203,7 +2172,6 @@ class AtFile {
                 pass;
             }
             else {
-                // this.error(f"@verbatim != a Leo directive: {p.h}");
                 this.error(`@verbatim != a Leo directive: ${p.h}`);
             }
         }
@@ -2221,13 +2189,11 @@ class AtFile {
                 status.at_warning_given
             ) {
                 const status.at_warning_given = true;
-                // this.error(f"@comment && @delims in node {p.h}");
                 this.error(`@comment && @delims in node ${p.h}`);
             }
             this.putDirective(s, i, p);
         }
         else {
-            // this.error(f"putBody: can ! happen: unknown directive kind: {kind}");
             this.error(`putBody: can not happen: unknown directive kind: ${kind}`);
         }
     }
@@ -2369,7 +2335,7 @@ class AtFile {
             if (! this.raw) {
                 this.putIndent(this.indent, line);
             }
-            if (line[-1) { // ] == '\n':
+            if (line[-1:] == '\n') {
                 this.os(line[:-1]);
                 this.onl();
             }
@@ -2415,7 +2381,6 @@ class AtFile {
                 // #1232: allow only one section reference per line in @clean.
                 i1, i2 = g.getLine(s, i);
                 const line = s[i1:i2].rstrip();
-                // this.writeError(f"Too many section references:\n{line!s}");
                 this.writeError(`Too many section references:\n${line}`);
                 break;
             }
@@ -2443,10 +2408,8 @@ class AtFile {
         if (! ref && ! hasattr(this, 'allow_undefined_refs')) {
             // Do give this error even if unit testing.
             this.writeError(
-                // f"undefined section: {g.truncate(name, 60)}\n";
-                `undefined section: ${g.truncate(name, 60)}\n`;
-                // f"  referenced from: {g.truncate(p.h, 60)}");
-                `  referenced from: ${g.truncate(p.h, 60)}`);
+                `undefined section: ${g.truncate(name, 60)}\n`
+                `  referenced from: ${g.truncate(p.h, 60)}`)
         }
         return ref;
     }
@@ -2604,10 +2567,8 @@ class AtFile {
         const gnx = p.v.fileIndex;
         const level = 1 + p.level() - this.root.level();
         if (level > 2) {
-            // return f"{gnx}: *{level}* {h}";
             return `${gnx}: *${level}* ${h}`;
         }
-        // return f"{gnx}: {'*' * level} {h}";
         return `${gnx}: ${'*' * level} ${h}`;
     }
     /**
@@ -2664,7 +2625,6 @@ class AtFile {
             const encoding = this.encoding.lower();
             if (encoding != "utf-8") {
                 // New in 4.2: encoding fields end in ",."
-                // s = s + f"-encoding={encoding},.";
                 const s = s + `-encoding=${encoding},.`;
             }
             this.putSentinel(s);
@@ -2762,16 +2722,15 @@ class AtFile {
             }
         }
     }
-    public checkPythonSyntax(p: Position, body, suppress=False): void {
+    public checkPythonSyntax(p: Position, body, supress=False): void {
         try {
             const body = body.replace('\r', '');
-            // fn = f"<node: {p.h}>";
             const fn = `<node: ${p.h}>`;
             compile(body + '\n', fn, 'exec');
             return true;
         }
         catch (SyntaxError) {
-            if (! suppress) {
+            if (! supress) {
                 this.syntaxError(p, body);
             }
         }
@@ -2785,7 +2744,6 @@ class AtFile {
      * Report a syntax error.
      */
     public syntaxError(p: Position, body): void {
-        // g.error(f"Syntax error in: {p.h}");
         g.error(`Syntax error in: ${p.h}`);
         typ, val, tb = sys.exc_info();
         const message = hasattr(val, 'message') && val.message;
@@ -2806,12 +2764,10 @@ class AtFile {
             const line = lines[j].rstrip();
             if (j == i) {
                 const unl = p.get_UNL(with_proto=true, with_count=true);
-                // g.es_print(f"{j+1:5}:* {line}", nodeLink=f"{unl},-{j+1:d}");  // Global line.
                 g.es_print(`${j+1:5}:* ${line}`, nodeLink=f"{unl},-{j+1:d}");  // Global line.
                 g.es_print(' ' * (7 + offset) + '^');
             }
             else {
-                // g.es_print(f"{j+1:5}: {line}");
                 g.es_print(`${j+1:5}: ${line}`);
             }
         }
@@ -3022,7 +2978,6 @@ class AtFile {
         // #1450: First, check that the directory exists.
         const theDir = g.os_path_dirname(fileName);
         if (theDir && ! g.os_path_exists(theDir)) {
-            // this.error(f"Directory ! found:\n{theDir}");
             this.error(`Directory not found:\n${theDir}`);
             return false;
         }
@@ -3090,7 +3045,7 @@ class AtFile {
             }
         }
         // Write the @last lines.
-        for (line in lines[j + 1) { // k + 1]:
+        for (line in lines[j + 1 : k + 1]) {
             if (g.match(line, 0, tag)) {
                 const i = len(tag);
                 const i = g.skip_ws(line, i);
@@ -3121,7 +3076,6 @@ class AtFile {
         else if (g.match_word(s, k, "@last")) {
             // #1307.
             if (p.isAtCleanNode()) {
-                // this.error(f"ignoring @last directive in {p.h!r}");
                 this.error(`ignoring @last directive in ${p.h}`);
                 g.es_print('@last != valid in @clean nodes');
             }
@@ -3131,14 +3085,12 @@ class AtFile {
                     // Convert to an verbatim line _without_ anything else.
             }
             else {
-                // this.error(f"ignoring @last directive in {p.h!r}");
                 this.error(`ignoring @last directive in ${p.h}`);
             }
         }
         else if (g.match_word(s, k, "@first")) {
             // #1307.
             if (p.isAtCleanNode()) {
-                // this.error(f"ignoring @first directive in {p.h!r}");
                 this.error(`ignoring @first directive in ${p.h}`);
                 g.es_print('@first != valid in @clean nodes');
             }
@@ -3148,7 +3100,6 @@ class AtFile {
                     // Convert to an verbatim line _without_ anything else.
             }
             else {
-                // this.error(f"ignoring @first directive in {p.h!r}");
                 this.error(`ignoring @first directive in ${p.h}`);
             }
         }
@@ -3262,7 +3213,6 @@ class AtFile {
             if (ok) {
                 c.setFileTimeStamp(fileName);
                 if (! g.unitTesting) {
-                    // g.es(f"{timestamp}created: {fileName}");
                     g.es(`${timestamp}created: ${fileName}`);
                 }
                 if (root) {
@@ -3292,7 +3242,6 @@ class AtFile {
             this.unchangedFiles += 1;
             if ! g.unitTesting && c.config.getBool(
                 'report-unchanged-files', default_val=true):
-                // g.es(f"{timestamp}unchanged: {sfn}");
                 g.es(`${timestamp}unchanged: ${sfn}`);
             // Leo 5.6: Check unchanged files.
             this.checkPythonCode(contents, fileName, root, pyflakes_errors_only=true);
@@ -3315,7 +3264,6 @@ class AtFile {
         if (ok) {
             c.setFileTimeStamp(fileName);
             if (! g.unitTesting) {
-                // g.es(f"{timestamp}wrote: {sfn}");
                 g.es(`${timestamp}wrote: ${sfn}`);
             }
         }
@@ -3397,7 +3345,6 @@ class AtFile {
     public writeError(message): void {
         if (this.errors == 0) {
             const fn = this.targetFileName || 'unnamed file';
-            // g.es_error(f"errors writing: {fn}");
             g.es_error(`errors writing: ${fn}`);
         }
         this.error(message);
@@ -3460,7 +3407,6 @@ class AtFile {
         }
         catch (Exception) {
             if (! g.unitTesting) {
-                // this.error(f"exception removing: {fileName}");
                 this.error(`exception removing: ${fileName}`);
                 g.es_exception();
             }
@@ -3550,12 +3496,9 @@ class AtFile {
         }
         if (message == null) {
             const message = (
-                // f"{g.splitLongFileName(fileName)}\n";
-                `${g.splitLongFileName(fileName)}\n`;
-                // f"{g.tr('already exists.')}\n";
-                `${g.tr('already exists.')}\n`;
-                // f"{g.tr('Overwrite this file?')}");
-                `${g.tr('Overwrite this file?')}`);
+                `${g.splitLongFileName(fileName)}\n`
+                `${g.tr('already exists.')}\n`
+                `${g.tr('Overwrite this file?')}`)
         }
         const result = g.app.gui.runAskYesNoCancelDialog(c,
             title='Overwrite existing file?',
@@ -3636,7 +3579,7 @@ class AtFile {
                 g.es_print("unknown language: using Python comment delimiters");
                 g.es_print("c.target_language:", c.target_language);
             }
-            const this.startSentinelComment = "  // "  # This should never happen!
+            const this.startSentinelComment = "#"  // This should never happen!
             const this.endSentinelComment = "";
         }
 
@@ -3713,7 +3656,6 @@ class AtFile {
             }
             const aSet = d.get(fn, set());
             if (trace) {
-                // g.trace(f"Return {p.h ! in aSet()}: p.h ! in aSet(): {sfn}");
                 g.trace(`Return ${p.h not in aSet()}: p.h not in aSet(): ${sfn}`);
             }
             return p.h ! in aSet;
@@ -3917,7 +3859,6 @@ class FastAtRead {
             print('[');
             for (i, data in enumerate(level_stack)) {
                 v2, in_tree = data;
-                // print(f"{i+1:2} {in_tree:5} {v2.h}");
                 print(`${i+1:2} ${in_tree:5} ${v2.h}`);
             }
             print(']');
@@ -3929,7 +3870,7 @@ class FastAtRead {
         }
 
         const i = 0;  // To keep pylint happy.
-        for (i, line in enumerate(lines[start) { // ]):
+        for (i, line in enumerate(lines[start:])) {
             // Order matters.
             if (verbatim) {
                 // We are in raw mode, or other special situation.
@@ -3974,7 +3915,7 @@ class FastAtRead {
                 const line = line[: len(sentinel)] + line[len(sentinel) :].replace('@@', '@');
             }
             // Adjust indentation.
-            if (indent && line[) { // indent].isspace() && len(line) > indent:
+            if (indent && line[:indent].isspace() && len(line) > indent) {
                 const line = line[indent:];
             }
             // This is valid because all following sections are either:
@@ -3990,7 +3931,6 @@ class FastAtRead {
             if (m) {
                 const in_doc = false;
                 if (m.group(2) == '+') { // # opening sentinel
-                    // body.append(f"{m.group(1)}@others{m.group(3) || ''}\n");
                     body.append(`${m.group(1)}@others${m.group(3) || ''}\n`);
                     stack.append((gnx, indent, body));
                     indent += m.end(1);  // adjust current identation
@@ -4001,7 +3941,7 @@ class FastAtRead {
                 }
                 continue;
             }
- # clears in_doc
+  //  clears in_doc
             const m = ref_pat.match(line);
             if (m) {
                 const in_doc = false;
@@ -4020,7 +3960,7 @@ class FastAtRead {
                     continue;
                 }
             }
- # clears in_doc.
+  //  clears in_doc.
             // Order doesn't matter, but match more common sentinels first.
             const m = node_start_pat.match(line);
             if (m) {
@@ -4121,7 +4061,6 @@ class FastAtRead {
                     const doc = m.group(1) == 'doc' ? '@doc' : '@';
                     const doc2 = m.group(2) or '';  // Trailing text.
                     if (doc2) {
-                        // body.append(f"{doc}{doc2}\n");
                         body.append(`${doc}${doc2}\n`);
                     }
                     else {
@@ -4138,7 +4077,6 @@ class FastAtRead {
                 // Here, in the read code, we merely need to add it to the body.
                 // Pushing and popping the stack may not be necessary, but it can't hurt.
                 if (m.group(2) == '+') { // # opening sentinel
-                    // body.append(f"{m.group(1)}@all{m.group(3) || ''}\n");
                     body.append(`${m.group(1)}@all${m.group(3) || ''}\n`);
                     stack.append((gnx, indent, body));
                 }
@@ -4163,7 +4101,6 @@ class FastAtRead {
                     first_i += 1;
                 }
                 else {
-                    // g.trace(f"\ntoo many @first lines: {path}");
                     g.trace(`\ntoo many @first lines: ${path}`);
                     print('@first == valid only at the start of @<file> nodes\n');
                     g.printObj(first_lines, tag='first_lines');
@@ -4182,7 +4119,6 @@ class FastAtRead {
                 // <1, 2 or 3 comment delims>
                 const delims = m.group(1).strip();
                 // Whatever happens, retain the @delims line.
-                // body.append(f"@comment {delims}\n");
                 body.append(`@comment ${delims}\n`);
                 delim1, delim2, delim3 = g.set_delims_from_string(delims);
                     // delim1 is always the single-line delimiter.
@@ -4217,14 +4153,12 @@ class FastAtRead {
                 // Get 1 or 2 comment delims
                 // Whatever happens, retain the original @delims line.
                 const delims = m.group(1).strip();
-                // body.append(f"@delims {delims}\n");
                 body.append(`@delims ${delims}\n`);
 
                 // Parse the delims.
                 const delims_pat = re.compile(r'^([^ ]+)\s*([^ ]+)?');
                 const m2 = delims_pat.match(delims);
                 if (! m2) {
-                    // g.trace(f"Ignoring invalid @comment: {line!r}");
                     g.trace(`Ignoring invalid @comment: ${line}`);
                     continue;
                 }
@@ -4298,10 +4232,8 @@ class FastAtRead {
 
             // #2213: *Do* insert the line, with a warning.
             g.trace(
-                // f"{g.shortFileName(this.path)}: ";
-                `${g.shortFileName(this.path)}: `;
-                // f"warning: inserting unexpected line: {line.rstrip()!r}";
-                `warning: inserting unexpected line: ${line.rstrip()}`;
+                `${g.shortFileName(this.path)}: `
+                `warning: inserting unexpected line: ${line.rstrip()}`
             );
             body.append(line);
         }
@@ -4332,7 +4264,6 @@ class FastAtRead {
         const lines = g.splitLines(contents);
         const data = this.scan_header(lines);
         if (! data) {
-            // g.trace(f"Invalid external file: {sfn}");
             g.trace(`Invalid external file: ${sfn}`);
             return false;
         }
@@ -4343,7 +4274,6 @@ class FastAtRead {
         this.scan_lines(delims, first_lines, lines, path, start_i);
         if (trace) {
             const t2 = time.process_time();
-            // g.trace(f"{t2 - t1:5.2f} sec. {path}");
             g.trace(`${t2 - t1} sec. ${path}`);
         }
         return true;
