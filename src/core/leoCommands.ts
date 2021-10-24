@@ -1,3 +1,7 @@
+//@+leo-ver=5-thin
+//@+node:felix.20210110222544.1: * @file src/core/leoCommands.ts
+//@+<< imports >>
+//@+node:felix.20210220194059.1: ** << imports >>
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
 import { FileCommands } from "./leoFileCommands";
@@ -7,6 +11,9 @@ import { CommanderFileCommands } from "../commands/commanderFileCommands";
 import { Position, VNode, StackEntry } from "./leoNodes";
 import { NodeHistory } from './leoHistory';
 
+//@-<< imports >>
+//@+others
+//@+node:felix.20211017232128.1: ** applyMixins
 function applyMixins(derivedCtor: any, constructors: any[]) {
     constructors.forEach((baseCtor) => {
         Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
@@ -20,11 +27,13 @@ function applyMixins(derivedCtor: any, constructors: any[]) {
     });
 }
 
+//@+node:felix.20210224000242.1: ** interface hoistStack
 export interface HoistStackEntry {
     p: Position;
     expanded: boolean;
 }
 
+//@+node:felix.20210110223514.1: ** class Commands
 /**
  * A per-outline class that implements most of Leo's commands. The
  * "c" predefined object is an instance of this class.
@@ -42,19 +51,25 @@ export class Commands {
     public hiddenRootNode: VNode;
     public fileCommands: FileCommands;
     public chapterController: any; // TODO : leoChapters.ChapterController(c)
+    public undoer: any; // TODO : leoUndo.Undoer(c)
     public nodeHistory: NodeHistory;
 
     public gui: LeoUI;
 
-    // TODO : fake frame needed?
+    // TODO fake frame needed FOR wrapper and hasSelection 
     // TODO : maybe MERGE frame.tree.generation WITH _treeId?
-    public frame: { tree: { generation: number; } } = {
+    public frame: { tree: { generation: number; }, body: any } = {
         tree: {
             generation: 0
-        }
+        },
+        body: {}
     };
 
+    //@+others
+    //@+node:felix.20210223220756.1: *3* Commander IVars
+    //@+node:felix.20211021003423.1: *4* c.initConfigSettings
     public collapse_on_lt_arrow: boolean = true; // getBool('collapse-on-lt-arrow', default=True)
+    //@+node:felix.20210223220814.2: *4* c.initCommandIvars
     // Init ivars used while executing a command.
     public commandsDict: { [key: string]: (p?: any) => any } = {}; // Keys are command names, values are functions.
     public disableCommandsMessage: string = ''; // The presence of this message disables all commands.
@@ -78,11 +93,13 @@ export class Commands {
 
     public sqlite_connection: any = undefined;
 
+    //@+node:felix.20210223220814.3: *4* c.initDebugIvars
     // Init Commander debugging ivars.
     public command_count: number = 0;
     public scanAtPathDirectivesCount: number = 0;
     public trace_focus_count: number = 0;
 
+    //@+node:felix.20210223220814.4: *4* c.initDocumentIvars
     // Init per-document ivars.
     public expansionLevel: number = 0; // The expansion level of this outline.
     public expansionNode: Position | undefined = undefined; // The last node we expanded or contracted.
@@ -90,6 +107,7 @@ export class Commands {
     public nodeConflictFileName: string | undefined = undefined; // The fileName for c.nodeConflictList.
     public user_dict = {}; // Non-persistent dictionary for free use by scripts and plugins.
 
+    //@+node:felix.20210223220814.5: *4* c.initEventIvars
     // Init ivars relating to gui events.
     public configInited = false;
     public doubleClickFlag = false;
@@ -105,6 +123,7 @@ export class Commands {
     public requestedFocusWidget = undefined;
     public requestLaterRedraw = false;
 
+    //@+node:felix.20210223220814.6: *4* c.initFileIvars
     // Init file-related ivars of the commander.
     public changed = false; // True: the ouline has changed since the last save.
     public ignored_at_file_nodes: string[] = []; // (headers)
@@ -116,6 +135,7 @@ export class Commands {
     public orphan_at_file_nodes: string[] = []; // List of orphaned nodes for c.raise_error_dialogs. (headers)
     public wrappedFileName: string | undefined = undefined; // The name of the wrapped file, for wrapper commanders, set by LM.initWrapperLeoFile
 
+    //@+node:felix.20210223220814.7: *4* c.initOptionsIvars
     // Init Commander ivars corresponding to user options.
     public fixed: boolean = false;
     public fixedWindowPosition = [];
@@ -137,6 +157,7 @@ export class Commands {
     // # Replaced by style-sheet entries.
     public vim_mode: boolean = false;
 
+    //@+node:felix.20210223220814.8: *4* c.initObjectIvars
     // These ivars are set later by leoEditCommands.createEditCommanders
     public abbrevCommands: any = undefined;
     public editCommands: any = undefined;
@@ -165,6 +186,7 @@ export class Commands {
     public leoTestManager: any = undefined;
     public vimCommands: any = undefined;
 
+    //@+node:felix.20210223220814.10: *4* c.initSettings
     //Init the settings *before* initing the objects.
     // c = self
     // from leo.core import leoConfig
@@ -172,6 +194,7 @@ export class Commands {
     // c.config = leoConfig.LocalConfigManager(c, previousSettings)
     // g.app.config.setIvarsFromSettings(c)
 
+    //@+node:felix.20210223002937.1: *3* constructor & helpers
     constructor(
         fileName: string,
         gui?: LeoUI,
@@ -204,6 +227,7 @@ export class Commands {
 
     }
 
+    //@+node:felix.20210223220814.9: *4* c.initObjects
     // * initObjects done in constructor.
     // * Kept here as comments for reference
 
@@ -358,6 +382,7 @@ export class Commands {
     // else:
     // self.styleSheetManager = None
 
+    //@+node:felix.20211018215401.1: *4* c.createCommandNames
     /**
      * Create all entries in c.commandsDict.
      * Do *not* clear c.commandsDict here.
@@ -369,6 +394,7 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20210112001859.1: *3* c.Drawing & coloring
     public recolor(): void {
         console.log("recolor");
     }
@@ -385,8 +411,11 @@ export class Commands {
         console.log(...arg);
     }
 
+    //@+node:felix.20210215185050.1: *3* c.API
     // These methods are a fundamental, unchanging, part of Leo's API.
 
+    //@+node:felix.20210131011508.1: *4* c.Generators
+    //@+node:felix.20210131011508.2: *5* c.all_nodes & all_unique_nodes
     /**
      * A generator returning all vnodes in the outline, in outline order.
      */
@@ -408,6 +437,7 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20210131011508.3: *5* c.all_positions
     /**
      * A generator return all positions of the outline, in outline order.
      */
@@ -420,6 +450,7 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20210131011508.4: *5* c.all_positions_for_v
     /**
      * Generates all positions p in this outline where p.v is v.
      *
@@ -477,6 +508,7 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20210131011508.5: *5* c.all_roots
     /**
      * A generator yielding *all* the root positions in the outline that
      * satisfy the given predicate. p.isAnyAtFileNode is the default
@@ -506,6 +538,7 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20210131011508.6: *5* c.all_unique_positions
     /**
      * A generator return all positions of the outline, in outline order.
      * Returns only the first position for each vnode.
@@ -525,6 +558,7 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20210131011508.7: *5* c.all_unique_roots
     /**
      * A generator yielding all unique root positions in the outline that
      * satisfy the given predicate. p.isAnyAtFileNode is the default
@@ -555,6 +589,7 @@ export class Commands {
             }
         }
     }
+    //@+node:felix.20210131011508.8: *5* c.safe_all_positions
     /**
      * A generator returning all positions of the outline. This generator does
      * *not* assume that vnodes are never their own ancestors.
@@ -568,6 +603,7 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20210228004000.1: *5* c.all_Root_Children
     /**
      * Return all root children P nodes
      */
@@ -580,6 +616,8 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20210131011420.1: *4* c.Getters
+    //@+node:felix.20210131011420.2: *5* c.currentPosition
     /**
      * Return a copy of the presently selected position or a new null
      * position. So c.p.copy() is never necessary.
@@ -596,6 +634,7 @@ export class Commands {
     // For compatibility with old scripts...
     // currentVnode = currentPosition
 
+    //@+node:felix.20210131011420.3: *5* c.fileName & relativeFileName & shortFileName
     // Compatibility with scripts
 
     public fileName(): string {
@@ -617,6 +656,7 @@ export class Commands {
     // * Alternative Naming
     // shortFilename = shortFileName
 
+    //@+node:felix.20210131011420.4: *5* c.firstVisible
     /**
      * Move to the first visible node of the present chapter or hoist.
      */
@@ -634,6 +674,7 @@ export class Commands {
         return p;
     }
 
+    //@+node:felix.20210131011420.5: *5* c.getTabWidth
     /**
      * Return the tab width in effect at p.
      */
@@ -645,8 +686,10 @@ export class Commands {
         return val;
     }
 
+    //@+node:felix.20210131011420.6: *5* c.is...Position
+    //@+node:felix.20210131011420.7: *6* c.currentPositionIsRootPosition
     /**
-     * Return True if the current position is the root position.
+     * Return true if the current position is the root position.
      *
      * This method is called during idle time, so not generating positions
      * here fixes a major leak.
@@ -664,8 +707,9 @@ export class Commands {
     // c._currentPosition and c._rootPosition and
     // c._currentPosition == c._rootPosition)
 
+    //@+node:felix.20210131011420.8: *6* c.currentPositionHasNext
     /**
-     * Return True if the current position is the root position.
+     * Return true if the current position is the root position.
 
         This method is called during idle time, so not generating positions
         here fixes a major leak.
@@ -677,6 +721,7 @@ export class Commands {
         return false;
     }
 
+    //@+node:felix.20210131011420.9: *6* c.isCurrentPosition
     public isCurrentPosition(p: Position): boolean {
         const c: Commands = this;
         if (!p || !c._currentPosition ||
@@ -686,6 +731,7 @@ export class Commands {
         return p.__eq__(c._currentPosition);
     }
 
+    //@+node:felix.20210131011420.10: *6* c.isRootPosition
     public isRootPosition(p: Position): boolean {
         const c: Commands = this;
         const root: Position | undefined = c.rootPosition();
@@ -695,10 +741,12 @@ export class Commands {
             root.__bool__() && p.__eq__(root);
     }
 
+    //@+node:felix.20210131011420.11: *5* c.isChanged
     public isChanged(): boolean {
         return this.changed;
     }
 
+    //@+node:felix.20210131011420.12: *5* c.lastTopLevel
     /**
      * Return the last top-level position in the outline.
      */
@@ -711,6 +759,7 @@ export class Commands {
         return p!;
     }
 
+    //@+node:felix.20210215204131.1: *5* c.lastVisible
     /**
       *Move to the last visible node of the present chapter or hoist.
      */
@@ -728,6 +777,7 @@ export class Commands {
         return p;
     }
 
+    //@+node:felix.20210131011420.13: *5* c.nullPosition
     /**
      * New in Leo 5.5: Return None.
      * Using empty positions masks problems in program logic.
@@ -738,8 +788,9 @@ export class Commands {
         // pylint complains if we return None.
     }
 
+    //@+node:felix.20210131011420.14: *5* c.positionExists
     /**
-     * Return True if a position exists in c's tree
+     * Return true if a position exists in c's tree
      */
     public positionExists(p: Position, root?: Position, trace?: boolean): boolean {
 
@@ -778,6 +829,7 @@ export class Commands {
         return true;
     }
 
+    //@+node:felix.20210131011420.15: *6* c.dumpPosition
     /**
      * Dump position p and it's ancestors.
      */
@@ -794,6 +846,7 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20210131011420.16: *5* c.rootPosition
     /**
      * Return the root position.
      *
@@ -814,8 +867,9 @@ export class Commands {
     // rootVnode = rootPosition
     // findRootPosition = rootPosition
 
+    //@+node:felix.20210131011420.17: *5* c.shouldBeExpanded
     /**
-     * Return True if the node at position p should be expanded.
+     * Return true if the node at position p should be expanded.
      */
     public shouldBeExpanded(p: Position): boolean {
         const c: Commands = this;
@@ -842,6 +896,7 @@ export class Commands {
         return false;
     }
 
+    //@+node:felix.20210131011440.1: *5* c.visLimit
     /**
      * Return the topmost visible node.
      * This is affected by chapters and hoists.
@@ -858,6 +913,7 @@ export class Commands {
         return undefined;
     }
 
+    //@+node:felix.20210215204308.1: *5* c.vnode2allPositions
     /**
      * Given a VNode v, find all valid positions p such that p.v = v.
      * Not really all, just all for each of v's distinct immediate parents.
@@ -896,6 +952,7 @@ export class Commands {
         return positions;
     }
 
+    //@+node:felix.20210215204322.1: *5* c.vnode2position
     /**
      * Given a VNode v, construct a valid position p such that p.v = v.
      */
@@ -926,6 +983,7 @@ export class Commands {
         return p;
     }
 
+    //@+node:felix.20210131011549.1: *4* c.Properties
     /**
      * commander current position property
      */
@@ -934,12 +992,15 @@ export class Commands {
         return c.currentPosition()!;
     }
 
+    //@+node:felix.20210131011607.1: *4* c.Setters
+    //@+node:felix.20210131011607.2: *5* c.appendStringToBody
     public appendStringToBody(p: Position, s: string): void {
         if (s) {
             p.b = p.b + g.toUnicode(s);
         }
     }
 
+    //@+node:felix.20210131011607.3: *5* c.clearAllMarked
     public clearAllMarked(): void {
         const c: Commands = this;
         for (let p of c.all_unique_positions(false)) {
@@ -947,6 +1008,7 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20210131011607.4: *5* c.clearAllVisited
     public clearAllVisited(): void {
         const c: Commands = this;
         for (let p of c.all_unique_positions(false)) {
@@ -955,6 +1017,7 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20210131011607.5: *5* c.clearChanged
     /**
      * clear the marker that indicates that the .leo file has been changed.
      */
@@ -976,12 +1039,14 @@ export class Commands {
         // c.frame.setTitle(s[2:])
     }
 
+    //@+node:felix.20210131011607.6: *5* c.clearMarked
     public clearMarked(p: Position): void {
         const c: Commands = this;
         p.v.clearMarked();
         g.doHook("clear-mark", c, p);
     }
 
+    //@+node:felix.20210131011607.7: *5* c.setBodyString
     /**
      * This is equivalent to p.b = s.
      * Warning: This method may call c.recolor() or c.redraw().
@@ -1016,6 +1081,7 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20210131011607.8: *5* c.setChanged
     /**
      * Set the marker that indicates that the .leo file has been changed.
      */
@@ -1035,6 +1101,7 @@ export class Commands {
         // c.frame.setTitle("* " + s)
     }
 
+    //@+node:felix.20210131011607.9: *5* c.setCurrentPosition
     /**
      * Set the presently selected position. For internal use only.
      * Client code should use c.selectPosition instead.
@@ -1063,6 +1130,7 @@ export class Commands {
     // * For compatibility with old scripts.
     //setCurrentVnode = setCurrentPosition
 
+    //@+node:felix.20210211234142.1: *5* c.setHeadString
     /**
      * Set the p's headline and the corresponding tree widget to s.
      * This is used in by unit tests to restore the outline.
@@ -1078,6 +1146,7 @@ export class Commands {
         // c.frame.tree.setHeadline(p, s);
     }
 
+    //@+node:felix.20210215204844.1: *5* c.setMarked (calls hook)
     public setMarked(p: Position): void {
         const c: Commands = this;
         p.setMarked();
@@ -1085,6 +1154,7 @@ export class Commands {
         g.doHook("set-mark", c, p);
     }
 
+    //@+node:felix.20210215204937.1: *5* c.topPosition & c.setTopPosition
     /**
      * Return the root position.
      */
@@ -1114,6 +1184,9 @@ export class Commands {
     // topVnode = topPosition
     // setTopVnode = setTopPosition
 
+    //@+node:felix.20211005023225.1: *3* c.Gui
+    //@+node:felix.20211022202201.1: *4* c.drawing
+    //@+node:felix.20211022202634.1: *5* c.expandAllAncestors
     /**
      * Expand all ancestors without redrawing.
      * Return a flag telling whether a redraw is needed.
@@ -1135,6 +1208,8 @@ export class Commands {
         return redraw_flag;
     }
 
+    //@+node:felix.20211005023800.1: *4* c.Expand/contract
+    //@+node:felix.20211005023821.1: *5* c.contractAllHeadlines
     /**
      * Contract all nodes in the outline.
      */
@@ -1151,12 +1226,14 @@ export class Commands {
         c.expansionLevel = 1;  // Reset expansion level.
     }
 
+    //@+node:felix.20211005023931.1: *5* c.contractSubtree
     public contractSubtree(p: Position): void {
         for (let p_p of p.subtree()) {
             p_p.contract();
         }
     }
 
+    //@+node:felix.20211005024008.1: *5* c.expandSubtree
     public expandSubtree(p: Position): void {
         const last = p.lastNode();
         while (p.__bool__() && !p.__eq__(last)) {
@@ -1165,6 +1242,7 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20211005024009.1: *5* c.expandToLevel
     public expandToLevel(level: number): void {
         const c: Commands = this;
         const n: number = c.p.level();
@@ -1193,6 +1271,350 @@ export class Commands {
 
     }
 
+    //@+node:felix.20211023195447.1: *4* c.Menus
+    //@+node:felix.20211023195447.3: *5* c.Menu Enablers
+    //@+node:felix.20211023195447.4: *6* c.canClone
+    public canClone(): boolean {
+        const c: Commands = this;
+        if (c.hoistStack.length) {
+            const current: Position = c.p;
+            const bunch = c.hoistStack[-1]
+            return current !== bunch.p;
+        }
+        return true;
+    }
+    //@+node:felix.20211023195447.5: *6* c.canContractAllHeadlines
+    /**
+     * Contract all nodes in the tree.
+     */
+    public canContractAllHeadlines(): boolean {
+        const c: Commands = this;
+        for (let p of c.all_positions()) {  // was c.all_unique_positions()
+            if (p.isExpanded()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //@+node:felix.20211023195447.6: *6* c.canContractAllSubheads
+    public canContractAllSubheads(): boolean {
+        const current: Position = this.p;
+        for (let p of current.subtree()) {
+            if (p !== current && p.isExpanded()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    //@+node:felix.20211023195447.7: *6* c.canContractParent
+    public canContractParent(): boolean {
+        const c: Commands = this;
+        return c.p.parent().__bool__();
+    }
+    //@+node:felix.20211023195447.8: *6* c.canContractSubheads
+    public canContractSubheads(): boolean {
+        const current: Position = this.p;
+        for (let child of current.children()) {
+            if (child.isExpanded()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    //@+node:felix.20211023195447.9: *6* c.canCutOutline & canDeleteHeadline
+    public canDeleteHeadline(): boolean {
+        const c: Commands = this;
+        let p: Position = c.p;
+        if (c.hoistStack.length) {
+            const bunch = c.hoistStack[0];
+            if (p && p.__bool__() && p.__eq__(bunch.p)) {
+                return false;
+            }
+        }
+        return p.hasParent() || p.hasThreadBack() || !!p.hasNext();
+    }
+    // canCutOutline = canDeleteHeadline
+
+
+    //@+node:felix.20211023195447.10: *6* c.canDemote
+    public canDemote(): boolean {
+        const c: Commands = this;
+        return !!c.p.hasNext();
+    }
+    //@+node:felix.20211023195447.11: *6* c.canExpandAllHeadlines
+    /**
+     * Return true if the Expand All Nodes menu item should be enabled.
+     */
+    public canExpandAllHeadlines(): boolean {
+        const c: Commands = this;
+        for (let p of c.all_positions()) {  // was c.all_unique_positions()
+            if (!p.isExpanded()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    //@+node:felix.20211023195447.12: *6* c.canExpandAllSubheads
+    public canExpandAllSubheads(): boolean {
+        const c: Commands = this;
+        for (let p of c.p.subtree()) {
+            if (!p.isExpanded()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    //@+node:felix.20211023195447.13: *6* c.canExpandSubheads
+    public canExpandSubheads(): boolean {
+        const current: Position = this.p;
+        for (let p of current.children()) {
+            if (p != current && !p.isExpanded()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    //@+node:felix.20211023195447.14: *6* c.canExtract, canExtractSection & canExtractSectionNames
+    public canExtract(): boolean {
+        const c: Commands = this;
+        const w = c.frame.body.wrapper; // TODO 
+        return w && w.hasSelection();
+    }
+    public canExtractSection(): boolean {
+        const c: Commands = this;
+        const w = c.frame.body.wrapper; // TODO 
+        if (!w) {
+            return false;
+        }
+        const s: string = w.getSelectedText();
+        if (!s) {
+            return false;
+        }
+        const line: string = g.get_line(s, 0);
+        const i1 = line.indexOf("<<");
+        const j1 = line.indexOf(">>");
+        const i2 = line.indexOf("@<");
+        const j2 = line.indexOf("@>");
+        return ((-1 < i1) && (i1 < j1)) || ((-1 < i2) && (i2 < j2));
+    }
+    //@+node:felix.20211023195447.15: *6* c.canFindMatchingBracket
+    //@@nobeautify
+
+    public canFindMatchingBracket(): boolean {
+        const c: Commands = this;
+        const brackets: string = "()[]{}"
+        const w = c.frame.body.wrapper; // TODO 
+        const s = w.getAllText();
+        const ins: number = w.getInsertPoint();
+
+        const c1 = ins < s.length ? s[ins] : '';
+
+        const c2 = ((0 <= ins - 1) && (ins - 1 < s.length)) ? s[ins - 1] : '';
+
+        const val = (c1 && brackets.includes(c1)) || (c2 && brackets.includes(c2));
+        return !!val;
+    }
+    //@+node:felix.20211023195447.16: *6* c.canHoist & canDehoist
+    /**
+     * Return true if do-hoist should be enabled in a menu.
+     * Should not be used in any other context.
+     */
+    public canDehoist(): boolean {
+        const c: Commands = this;
+        return !!c.hoistStack.length;
+    }
+    /**
+     * Return true if hoist should be enabled in a menu.
+     * Should not be used in any other context.
+     */
+    public canHoist(): boolean {
+        // This is called at idle time, so minimizing positions is crucial!
+        return true;
+
+        // c = self
+        // if c.hoistStack.length:
+        // p = c.hoistStack[-1].p
+        // return p and not c.isCurrentPosition(p)
+        // elif c.currentPositionIsRootPosition():
+        // return c.currentPositionHasNext()
+        // else:
+        // return true
+    }
+
+    //@+node:felix.20211023195447.17: *6* c.canMoveOutlineDown
+    public canMoveOutlineDown(): boolean {
+        const c: Commands = this;
+        const p: Position = this.p;
+        return p && p.__bool__() && p.visNext(c).__bool__();
+    }
+    //@+node:felix.20211023195447.18: *6* c.canMoveOutlineLeft
+    public canMoveOutlineLeft(): boolean {
+        const c: Commands = this;
+        const p: Position = this.p;
+        if (c.hoistStack.length) {
+            const bunch = c.hoistStack[-1];
+            if (p && p.__bool__() && p.hasParent()) {
+                p.moveToParent();
+                return !p.__eq__(bunch.p) && bunch.p.isAncestorOf(p);
+            }
+            return false;
+        }
+        return p && p.__bool__() && p.hasParent();
+    }
+    //@+node:felix.20211023195447.19: *6* c.canMoveOutlineRight
+    public canMoveOutlineRight(): boolean {
+        const c: Commands = this;
+        const p: Position = this.p;
+        if (c.hoistStack.length) {
+            const bunch = c.hoistStack[-1];
+            return p && p.hasBack() && p !== bunch.p
+        }
+        return p && p.__bool__() && p.hasBack();
+    }
+    //@+node:felix.20211023195447.20: *6* c.canMoveOutlineUp
+    public canMoveOutlineUp(): boolean {
+        const c: Commands = this;
+        const current: Position = this.p;
+        const visBack: Position | false = (current && current.__bool__()) && current.visBack(c);
+        if (!visBack || !visBack.__bool__()) {
+            return false;
+        }
+        if (visBack.visBack(c).__bool__()) {
+            return true;
+        }
+        if (c.hoistStack.length) {
+            let w_vis: [Position, boolean] | undefined = c.visLimit();
+            let limitIsVisible: boolean;
+            let limit: Position | undefined;
+            if (w_vis) {
+                limit = w_vis[0];
+                limitIsVisible = w_vis[1];
+            } else {
+                limitIsVisible = false;
+            }
+            if (limitIsVisible && limit) {  // A hoist
+                return !current.__eq__(limit);
+            }
+            // A chapter.
+            return !!limit && !current.__eq__(limit.firstChild());
+
+        }
+        return (!!c.rootPosition() && c.rootPosition()!.__bool__()) && !current.__eq__(c.rootPosition()!);
+    }
+    //@+node:felix.20211023195447.21: *6* c.canPasteOutline
+    public canPasteOutline(s?: string): boolean {
+        if (!s) {
+            s = g.app.gui!.getTextFromClipboard(); // ! HAS TO BE IMPLEMENTED IN GUI
+        }
+        if (s && g.match(s, 0, g.app.prolog_prefix_string)) {
+            return true;
+        }
+        return false;
+    }
+    //@+node:felix.20211023195447.22: *6* c.canPromote
+    public canPromote(): boolean {
+        const p: Position = this.p;
+        return p && p.__bool__() && p.hasChildren()
+    }
+    //@+node:felix.20211023195447.23: *6* c.canSelect....
+    public canSelectThreadBack(): boolean {
+        const p: Position = this.p;
+        return p.hasThreadBack()
+    }
+    public canSelectThreadNext(): boolean {
+        const p: Position = this.p;
+        return p.hasThreadNext()
+    }
+    public canSelectVisBack(): boolean {
+        const c: Commands = this;
+        const p: Position = this.p;
+        return p.visBack(c).__bool__();
+    }
+    public canSelectVisNext(): boolean {
+        const c: Commands = this;
+        const p: Position = this.p;
+        return p.visNext(c).__bool__();
+    }
+    //@+node:felix.20211023195447.24: *6* c.canShiftBodyLeft/Right
+    public canShiftBodyLeft(): boolean {
+        const c: Commands = this;
+        const w = c.frame.body.wrapper;
+        return w && w.getAllText();
+    }
+    //@+node:felix.20211023195447.25: *6* c.canSortChildren, canSortSiblings
+    public canSortChildren(): boolean {
+        const p: Position = this.p;
+        return p && p.__bool__() && p.hasChildren();
+    }
+    public canSortSiblings(): boolean {
+        const p: Position = this.p;
+        return p && p.__bool__() && (p.hasNext() || p.hasBack());
+    }
+    //@+node:felix.20211023195447.26: *6* c.canUndo & canRedo
+    public canUndo(): boolean {
+        const c: Commands = this;
+        return c.undoer.canUndo()
+    }
+    public canRedo(): boolean {
+        const c: Commands = this;
+        return c.undoer.canRedo()
+    }
+    //@+node:felix.20211023195447.27: *6* c.canUnmarkAll
+    public canUnmarkAll(): boolean {
+        const c: Commands = this;
+        for (let p of c.all_unique_positions()) {
+            if (p.isMarked()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    //@+node:felix.20211023195447.28: *6* Slow routines: no longer used
+    //@+node:felix.20211023195447.29: *7* c.canGoToNextDirtyHeadline (slow)
+    public canGoToNextDirtyHeadline(): boolean {
+        const c: Commands = this;
+        const current: Position = this.p;
+        for (let p of c.all_unique_positions()) {
+            if (!p.__eq__(current) && p.isDirty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    //@+node:felix.20211023195447.30: *7* c.canGoToNextMarkedHeadline (slow)
+    public canGoToNextMarkedHeadline(): boolean {
+        const c: Commands = this;
+        const current: Position = this.p;
+        for (let p of c.all_unique_positions()) {
+            if (!p.__eq__(current) && p.isMarked()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    //@+node:felix.20211023195447.31: *7* c.canMarkChangedHeadline (slow)
+    public canMarkChangedHeadlines(): boolean {
+        const c: Commands = this;
+        for (let p of c.all_unique_positions()) {
+            if (p.isDirty()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    //@+node:felix.20211023195447.32: *7* c.canMarkChangedRoots (slow)
+    public canMarkChangedRoots(): boolean {
+        const c: Commands = this;
+        for (let p of c.all_unique_positions()) {
+            if (p.isDirty() && p.isAnyAtFileNode()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    //@+node:felix.20211005023421.1: *4* c.Selecting
+    //@+node:felix.20211005023456.1: *5* c.selectPosition
     /**
      * Select a new position, redrawing the screen *only* if we must
      * change chapters.
@@ -1247,7 +1669,8 @@ export class Commands {
 
     }
 
-    public treeSelectHelper(p: Position): void {
+    //@+node:felix.20211022013445.1: *5* c.treeSelectHelper
+    public treeSelectHelper(p: Position | false): void {
         const c: Commands = this;
         if (!p || !p.__bool__()) {
             p = c.p;
@@ -1258,15 +1681,27 @@ export class Commands {
         }
     }
 
+    //@-others
 
 }
 
+//@-others
+//@@language typescript
+//@@tabwidth -4
 
-// Then you create an interface which merges
-// the expected mixins with the same name as your base
-export interface Commands extends CommanderOutlineCommands, CommanderFileCommands { }
+export interface Commands extends CommanderOutlineCommands, CommanderFileCommands {
+    canCutOutline: () => boolean;
+    canShiftBodyRight: () => boolean;
+    canExtractSectionNames: () => boolean;
+}
+
 // Apply the mixins into the base class via
-// the JS at runtime
-console.log('Applying mixins');
+// the JS at runtime & aliases for VNode members
 
 applyMixins(Commands, [CommanderOutlineCommands, CommanderFileCommands]);
+Commands.prototype.canCutOutline = Commands.prototype.canDeleteHeadline;
+Commands.prototype.canShiftBodyRight = Commands.prototype.canShiftBodyLeft;
+Commands.prototype.canExtractSectionNames = Commands.prototype.canExtract;
+
+
+//@-leo

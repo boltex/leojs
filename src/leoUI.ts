@@ -28,6 +28,9 @@ export class LeoUI {
     public verbose: boolean = false;
     public trace: boolean = false;
 
+    // * Clipboard
+    public clipboardContent: string = "";
+
     // * Configuration Settings Service
     public config: Config; // Public configuration service singleton, used in leoSettingsWebview, leoBridge, and leoNode for inverted contrast
 
@@ -784,10 +787,10 @@ export class LeoUI {
         }
 
         /* EXAMPLE CALL BY METHOD
-        //@ts-expect-error
+            //@ts-expect-error
         if ((typeof this.leo_c[p_cmd]) === 'function') {
             console.log('HAS PROPERTY' + p_cmd + " so were doing it!");
-            //@ts-expect-error
+                //@ts-expect-error
             this.leo_c[p_cmd]();
         } else {
             console.log('NO PROPERTY' + p_cmd);
@@ -933,6 +936,13 @@ export class LeoUI {
         return Promise.resolve(true);
 
         // return Promise.resolve(undefined); // if cancelled
+    }
+
+    /**
+     * Returns clipboard content
+    */
+    public getTextFromClipboard(): string {
+        return this.clipboardContent; //vscode.env.clipboard.readText(); // TODO
     }
 
     /**

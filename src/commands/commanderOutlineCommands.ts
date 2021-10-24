@@ -37,21 +37,6 @@ function contractIfNotCurrent(c: Commands, p: Position, leaveOpen: Position): vo
 export class CommanderOutlineCommands {
 
     //@+others
-    //@+node:felix.20211017224825.1: ** TEST  selectVisNext
-    @commander_command(
-        'goto-next-visible',
-        'Select the visible node following the presently selected node.'
-    )
-    public selectVisNext(this: Commands): void {
-
-        console.log(this.gui.leo_c.p.h);
-
-        console.log('selectVisNext Called!!');
-
-        console.log(g.global_commands_dict);
-
-
-    }
     //@+node:felix.20211020000219.1: ** c_oc.dumpOutline
     @commander_command(
         'dump-outline',
@@ -90,7 +75,7 @@ export class CommanderOutlineCommands {
     )
     public contractAllOtherNodes(this: Commands): void {
         const c: Commands = this;
-        const leaveOpen:Position = c.p;
+        const leaveOpen: Position = c.p;
         for (let p of c.rootPosition()!.self_and_siblings()) {
             contractIfNotCurrent(c, p, leaveOpen);
         }
@@ -380,7 +365,7 @@ export class CommanderOutlineCommands {
             c.expansionNode = c.p.copy();
         }
         this.expandToLevel(Math.max(1, c.expansionLevel - 1));
-    } 
+    }
 
     //@+node:felix.20211021013709.1: ** c_oc.Goto commands
     //@+node:felix.20211021013709.2: *3* c_oc.findNextClone
@@ -392,32 +377,32 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         const p: Position = this.p;
         const cc = c.chapterController;
-        if(!p || !p.__bool__()){
+        if (!p || !p.__bool__()) {
             return;
         }
-        if(p.isCloned()){
+        if (p.isCloned()) {
             p.moveToThreadNext();
-        }    
+        }
         let flag = false;
-        while( p && p.__bool__()){
-            if(p.isCloned()){
+        while (p && p.__bool__()) {
+            if (p.isCloned()) {
                 flag = true;
                 break;
-            }else{
+            } else {
                 p.moveToThreadNext();
             }
         }
-        if( flag){
-            if( cc){
+        if (flag) {
+            if (cc) {
                 // name = cc.findChapterNameForPosition(p)
                 cc.selectChapterByName('main')
             }
             c.selectPosition(p);
             //c.redraw_after_select(p);
-        }else{
+        } else {
             g.blue('no more clones');
         }
-     }
+    }
     //@+node:felix.20211021013709.3: *3* c_oc.goNextVisitedNode
     @commander_command(
         'go-forward',
@@ -440,7 +425,7 @@ export class CommanderOutlineCommands {
             }
         }
         */
-     }
+    }
     //@+node:felix.20211021013709.4: *3* c_oc.goPrevVisitedNode
     @commander_command(
         'go-back',
@@ -457,20 +442,20 @@ export class CommanderOutlineCommands {
             try:
                 c.selectPosition(p)
             finally:
-                c.nodeHistory.skipBeadUpdate = False
+                c.nodeHistory.skipBeadUpdate = false
                 // c.redraw_after_select(p)
         */
     }
     //@+node:felix.20211021013709.5: *3* c_oc.goToFirstNode
     @commander_command(
         'goto-first-node',
-        'Select the first node of the entire outline\n'+
-        'But (#2167), go to the first node of a chapter or hoist\n' + 
+        'Select the first node of the entire outline\n' +
+        'But (#2167), go to the first node of a chapter or hoist\n' +
         'if Leo is hoisted or within a chapter.'
     )
     public goToFirstNode(this: Commands): void {
         const c: Commands = this;
-        const p:Position = c.rootPosition()!;
+        const p: Position = c.rootPosition()!;
         c.expandOnlyAncestorsOfNode(p);
         // c.redraw();
     }
@@ -482,8 +467,8 @@ export class CommanderOutlineCommands {
     public goToFirstSibling(this: Commands): void {
         const c: Commands = this;
         const p: Position = this.p;
-        if (p.hasBack()){
-            while(p.hasBack()){
+        if (p.hasBack()) {
+            while (p.hasBack()) {
                 p.moveToBack();
             }
         }
@@ -496,8 +481,8 @@ export class CommanderOutlineCommands {
     )
     public goToFirstVisibleNode(this: Commands): void {
         const c: Commands = this;
-        const p:Position = c.firstVisible()
-        if  (p && p.__bool__()) {
+        const p: Position = c.firstVisible()
+        if (p && p.__bool__()) {
             c.expandOnlyAncestorsOfNode(p);
         }
     }
@@ -508,8 +493,8 @@ export class CommanderOutlineCommands {
     )
     public goToLastNode(this: Commands): void {
         const c: Commands = this;
-        const p:Position = c.rootPosition()!;
-        while( p && p.__bool__() && p.hasThreadNext()){
+        const p: Position = c.rootPosition()!;
+        while (p && p.__bool__() && p.hasThreadNext()) {
             p.moveToThreadNext();
         }
         c.expandOnlyAncestorsOfNode(p)
@@ -522,10 +507,10 @@ export class CommanderOutlineCommands {
     public goToLastSibling(this: Commands): void {
         const c: Commands = this;
         const p: Position = this.p;
-        if (p.hasNext()){
-            while( p.hasNext()){
+        if (p.hasNext()) {
+            while (p.hasNext()) {
                 p.moveToNext();
-            }    
+            }
         }
         c.treeSelectHelper(p);
     }
@@ -537,9 +522,9 @@ export class CommanderOutlineCommands {
     public goToLastVisibleNode(this: Commands): void {
         const c: Commands = this;
         const p: Position = c.lastVisible();
-        if( p && p.__bool__()){
+        if (p && p.__bool__()) {
             c.expandOnlyAncestorsOfNode(p);
-        }    
+        }
     }
     //@+node:felix.20211021013709.11: *3* c_oc.goToNextClone
     @commander_command(
@@ -551,46 +536,46 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         let p: Position = this.p;
         const cc = c.chapterController;
-        if(!p || !p.__bool__()){
+        if (!p || !p.__bool__()) {
             return;
         }
-        if( !p.isCloned()){
+        if (!p.isCloned()) {
             c.findNextClone();
             return;
         }
-        const v:VNode = p.v;
+        const v: VNode = p.v;
         p.moveToThreadNext();
-        let wrapped:boolean = false;
-        while(1){
-            if( p && p.__bool__() && p.v.gnx===v.gnx){
+        let wrapped: boolean = false;
+        while (1) {
+            if (p && p.__bool__() && p.v.gnx === v.gnx) {
                 break;
-            }else if (p && p.__bool__()){
+            } else if (p && p.__bool__()) {
                 p.moveToThreadNext();
-            }else if (wrapped){
+            } else if (wrapped) {
                 break;
-            }else{
+            } else {
                 wrapped = true;
                 p = c.rootPosition()!;
             }
-        }        
-        if (p && p.__bool__()){
+        }
+        if (p && p.__bool__()) {
             c.expandAllAncestors(p);
-            if (cc){
+            if (cc) {
                 // #252: goto-next clone activate chapter.
                 const chapter = cc.getSelectedChapter();
-                const old_name: string|boolean = chapter && chapter.name;
-                const new_name:string = cc.findChapterNameForPosition(p);
-                if (new_name === old_name){
+                const old_name: string | boolean = chapter && chapter.name;
+                const new_name: string = cc.findChapterNameForPosition(p);
+                if (new_name === old_name) {
                     // Always do a full redraw.
                     //c.redraw(p);
-                }else{   
+                } else {
                     cc.selectChapterByName(new_name);
                 }
-            }else{
+            } else {
                 // Always do a full redraw.
                 //c.redraw(p);
             }
-        }else{
+        } else {
             g.blue('done');
         }
     }
@@ -601,22 +586,24 @@ export class CommanderOutlineCommands {
     )
     public goToNextDirtyHeadline(this: Commands): void {
         const c: Commands = this;
-        const p: Position = this.p;
-        if not p:
-            return
-        p.moveToThreadNext()
-        wrapped = False
-        while 1:
-            if p and p.isDirty():
-                break
-            elif p:
-                p.moveToThreadNext()
-            elif wrapped:
-                break
-            else:
-                wrapped = True
-                p = c.rootPosition()
-        if not p:
+        let p: Position = this.p;
+        if (!p || !p.__bool__()) {
+            return;
+        }
+        p.moveToThreadNext();
+        let wrapped = false;
+        while (1)
+            if (p && p.__bool__() && p.isDirty()) {
+                break;
+            } else if (p) {
+                p.moveToThreadNext();
+            } else if (wrapped) {
+                break;
+            } else {
+                wrapped = true;
+                p = c.rootPosition()!;
+            }
+        if (!p || !p.__bool__())
             g.blue('done')
         c.treeSelectHelper(p)  // Sets focus.
     }
@@ -627,22 +614,25 @@ export class CommanderOutlineCommands {
     )
     public goToNextMarkedHeadline(this: Commands): void {
         const c: Commands = this;
-        const p: Position = this.p;
-        if not p:
-            return
-        p.moveToThreadNext()
-        wrapped = False
-        while 1:
-            if p and p.isMarked():
-                break
-            elif p:
+        let p: Position = this.p;
+        if (!p || !p.__bool__()) {
+            return;
+        }
+        p.moveToThreadNext();
+        let wrapped = false;
+        while (1) {
+            if (p && p.__bool__() && p.isMarked()) {
+                break;
+            } else if (p) {
                 p.moveToThreadNext()
-            elif wrapped:
-                break
-            else:
-                wrapped = True
-                p = c.rootPosition()
-        if not p:
+            } else if (wrapped) {
+                break;
+            } else {
+                wrapped = true;
+                p = c.rootPosition()!;
+            }
+        }
+        if (!p || !p.__bool__())
             g.blue('done')
         c.treeSelectHelper(p)  // Sets focus.
     }
@@ -654,7 +644,7 @@ export class CommanderOutlineCommands {
     public goToNextSibling(this: Commands): void {
         const c: Commands = this;
         const p: Position = this.p;
-        c.treeSelectHelper(p and p.next())
+        c.treeSelectHelper(p && p.__bool__() && p.next());
     }
     //@+node:felix.20211021013709.15: *3* c_oc.goToParent
     @commander_command(
@@ -673,22 +663,24 @@ export class CommanderOutlineCommands {
     )
     public goToPrevMarkedHeadline(this: Commands): void {
         const c: Commands = this;
-        const p: Position = this.p;
-        if not p:
-            return
-        p.moveToThreadBack()
-        wrapped = False
-        while 1:
-            if p and p.isMarked():
-                break
-            elif p:
-                p.moveToThreadBack()
-            elif wrapped:
-                break
-            else:
-                wrapped = True
-                p = c.rootPosition()
-        if not p:
+        let p: Position = this.p;
+        if (!p || !p.__bool__())
+            return;
+        p.moveToThreadBack();
+        let wrapped = false;
+        while (1) {
+            if (p && p.__bool__() && p.isMarked()) {
+                break;
+            } else if (p) {
+                p.moveToThreadBack();
+            } else if (wrapped) {
+                break;
+            } else {
+                wrapped = true;
+                p = c.rootPosition()!;
+            }
+        }
+        if (!p || !p.__bool__())
             g.blue('done')
         c.treeSelectHelper(p)  // Sets focus.
     }
@@ -700,8 +692,8 @@ export class CommanderOutlineCommands {
     public goToPrevSibling(this: Commands): void {
         const c: Commands = this;
         const p: Position = this.p;
-        c.treeSelectHelper(p and p.back())
-}
+        c.treeSelectHelper(p && p.__bool__() && p.back());
+    }
     //@+node:felix.20211021013709.18: *3* c_oc.selectThreadBack
     @commander_command(
         'goto-prev-node',
@@ -710,11 +702,11 @@ export class CommanderOutlineCommands {
     public selectThreadBack(this: Commands): void {
         const c: Commands = this;
         const p: Position = this.p;
-        if not p:
-            return
+        if (!p || !p.__bool__())
+            return;
         p.moveToThreadBack()
         c.treeSelectHelper(p)
-}
+    }
     //@+node:felix.20211021013709.19: *3* c_oc.selectThreadNext
     @commander_command(
         'goto-next-node',
@@ -723,8 +715,8 @@ export class CommanderOutlineCommands {
     public selectThreadNext(this: Commands): void {
         const c: Commands = this;
         const p: Position = this.p;
-        if not p:
-            return
+        if (!p || !p.__bool__())
+            return;
         p.moveToThreadNext()
         c.treeSelectHelper(p)
     }
@@ -737,13 +729,15 @@ export class CommanderOutlineCommands {
         // This has an up arrow for a control key.
         const c: Commands = this;
         const p: Position = this.p;
-        if not p:
-            return
-        if c.canSelectVisBack():
-            p.moveToVisBack(c)
-            c.treeSelectHelper(p)
-        else:
-            c.endEditing()  // 2011/05/28: A special case.
+        if (!p || !p.__bool__())
+            return;
+        if (c.canSelectVisBack()) {
+            p.moveToVisBack(c);
+            c.treeSelectHelper(p);
+        }
+        // else:
+        // c.endEditing()  // 2011/05/28: A special case.
+
     }
     //@+node:felix.20211021013709.21: *3* c_oc.selectVisNext
     @commander_command(
@@ -753,13 +747,15 @@ export class CommanderOutlineCommands {
     public selectVisNext(this: Commands): void {
         const c: Commands = this;
         const p: Position = this.p;
-        if not p:
-            return
-        if c.canSelectVisNext():
-            p.moveToVisNext(c)
-            c.treeSelectHelper(p)
-        else:
-            c.endEditing()  // 2011/05/28: A special case.
+        if (!p || !p.__bool__())
+            return;
+        if (c.canSelectVisNext()) {
+            p.moveToVisNext(c);
+            c.treeSelectHelper(p);
+        }
+        // else:
+        // c.endEditing()  // 2011/05/28: A special case.
+
     }
     //@-others
 

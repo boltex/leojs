@@ -142,6 +142,9 @@
 <v t="felix.20201214211742.1"><vh>clickAtButton</vh></v>
 <v t="felix.20201214211744.1"><vh>removeAtButton</vh></v>
 </v>
+<v t="felix.20211024012536.1"><vh>Clipboard</vh>
+<v t="felix.20211024012523.1"><vh>getTextFromClipboard</vh></v>
+</v>
 <v t="felix.20201214194144.8"><vh>Leo Documents</vh>
 <v t="felix.20201214211830.1"><vh>closeLeoFile</vh></v>
 <v t="felix.20201214211831.1"><vh>newLeoFile</vh></v>
@@ -447,94 +450,7 @@
 </v>
 </v>
 </v>
-<v t="felix.20210110222544.1"><vh>@clean src/core/leoCommands.ts</vh>
-<v t="felix.20210220194059.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
-<v t="felix.20211017232128.1"><vh>applyMixins</vh></v>
-<v t="felix.20210224000242.1"><vh>interface hoistStack</vh></v>
-<v t="felix.20210110223514.1"><vh>class Commands</vh>
-<v t="felix.20210223220756.1"><vh>Commander IVars</vh>
-<v t="felix.20211021003423.1"><vh>c.initConfigSettings</vh></v>
-<v t="felix.20210223220814.2"><vh>c.initCommandIvars</vh></v>
-<v t="felix.20210223220814.3"><vh>c.initDebugIvars</vh></v>
-<v t="felix.20210223220814.4"><vh>c.initDocumentIvars</vh></v>
-<v t="felix.20210223220814.5"><vh>c.initEventIvars</vh></v>
-<v t="felix.20210223220814.6"><vh>c.initFileIvars</vh></v>
-<v t="felix.20210223220814.7"><vh>c.initOptionsIvars</vh></v>
-<v t="felix.20210223220814.8"><vh>c.initObjectIvars</vh></v>
-<v t="felix.20210223220814.10"><vh>c.initSettings</vh></v>
-</v>
-<v t="felix.20210223002937.1"><vh>constructor &amp; helpers</vh>
-<v t="felix.20210223220814.9"><vh>c.initObjects</vh></v>
-<v t="felix.20211018215401.1"><vh>c.createCommandNames</vh></v>
-</v>
-<v t="felix.20210112001859.1"><vh>c.Drawing &amp; coloring</vh></v>
-<v t="felix.20210215185050.1"><vh>c.API</vh>
-<v t="felix.20210131011508.1"><vh>c.Generators</vh>
-<v t="felix.20210131011508.2"><vh>c.all_nodes &amp; all_unique_nodes</vh></v>
-<v t="felix.20210131011508.3"><vh>c.all_positions</vh></v>
-<v t="felix.20210131011508.4"><vh>c.all_positions_for_v</vh></v>
-<v t="felix.20210131011508.5"><vh>c.all_roots</vh></v>
-<v t="felix.20210131011508.6"><vh>c.all_unique_positions</vh></v>
-<v t="felix.20210131011508.7"><vh>c.all_unique_roots</vh></v>
-<v t="felix.20210131011508.8"><vh>c.safe_all_positions</vh></v>
-<v t="felix.20210228004000.1"><vh>c.all_Root_Children</vh></v>
-</v>
-<v t="felix.20210131011420.1"><vh>c.Getters</vh>
-<v t="felix.20210131011420.2"><vh>c.currentPosition</vh></v>
-<v t="felix.20210131011420.3"><vh>c.fileName &amp; relativeFileName &amp; shortFileName</vh></v>
-<v t="felix.20210131011420.4"><vh>c.firstVisible</vh></v>
-<v t="felix.20210131011420.5"><vh>c.getTabWidth</vh></v>
-<v t="felix.20210131011420.6"><vh>c.is...Position</vh>
-<v t="felix.20210131011420.7"><vh>c.currentPositionIsRootPosition</vh></v>
-<v t="felix.20210131011420.8"><vh>c.currentPositionHasNext</vh></v>
-<v t="felix.20210131011420.9"><vh>c.isCurrentPosition</vh></v>
-<v t="felix.20210131011420.10"><vh>c.isRootPosition</vh></v>
-</v>
-<v t="felix.20210131011420.11"><vh>c.isChanged</vh></v>
-<v t="felix.20210131011420.12"><vh>c.lastTopLevel</vh></v>
-<v t="felix.20210215204131.1"><vh>c.lastVisible</vh></v>
-<v t="felix.20210131011420.13"><vh>c.nullPosition</vh></v>
-<v t="felix.20210131011420.14"><vh>c.positionExists</vh>
-<v t="felix.20210131011420.15"><vh>c.dumpPosition</vh></v>
-</v>
-<v t="felix.20210131011420.16"><vh>c.rootPosition</vh></v>
-<v t="felix.20210131011420.17"><vh>c.shouldBeExpanded</vh></v>
-<v t="felix.20210131011440.1"><vh>c.visLimit</vh></v>
-<v t="felix.20210215204308.1"><vh>c.vnode2allPositions</vh></v>
-<v t="felix.20210215204322.1"><vh>c.vnode2position</vh></v>
-</v>
-<v t="felix.20210131011549.1"><vh>c.Properties</vh></v>
-<v t="felix.20210131011607.1"><vh>c.Setters</vh>
-<v t="felix.20210131011607.2"><vh>c.appendStringToBody</vh></v>
-<v t="felix.20210131011607.3"><vh>c.clearAllMarked</vh></v>
-<v t="felix.20210131011607.4"><vh>c.clearAllVisited</vh></v>
-<v t="felix.20210131011607.5"><vh>c.clearChanged</vh></v>
-<v t="felix.20210131011607.6"><vh>c.clearMarked</vh></v>
-<v t="felix.20210131011607.7"><vh>c.setBodyString</vh></v>
-<v t="felix.20210131011607.8"><vh>c.setChanged</vh></v>
-<v t="felix.20210131011607.9"><vh>c.setCurrentPosition</vh></v>
-<v t="felix.20210211234142.1"><vh>c.setHeadString</vh></v>
-<v t="felix.20210215204844.1"><vh>c.setMarked (calls hook)</vh></v>
-<v t="felix.20210215204937.1"><vh>c.topPosition &amp; c.setTopPosition</vh></v>
-</v>
-</v>
-<v t="felix.20211005023225.1"><vh>c.Gui</vh>
-<v t="felix.20211022202201.1"><vh>c.drawing</vh>
-<v t="felix.20211022202634.1"><vh>c.expandAllAncestors</vh></v>
-</v>
-<v t="felix.20211005023800.1"><vh>c.Expand/contract</vh>
-<v t="felix.20211005023821.1"><vh>c.contractAllHeadlines</vh></v>
-<v t="felix.20211005023931.1"><vh>c.contractSubtree</vh></v>
-<v t="felix.20211005024008.1"><vh>c.expandSubtree</vh></v>
-<v t="felix.20211005024009.1"><vh>c.expandToLevel</vh></v>
-</v>
-<v t="felix.20211005023421.1"><vh>c.Selecting</vh>
-<v t="felix.20211005023456.1"><vh>c.selectPosition</vh></v>
-<v t="felix.20211022013445.1"><vh>c.treeSelectHelper</vh></v>
-</v>
-</v>
-</v>
-</v>
+<v t="felix.20210110222544.1"><vh>@file src/core/leoCommands.ts</vh></v>
 <v t="felix.20210220181245.1"><vh>@clean src/core/leoFileCommands.ts</vh>
 <v t="felix.20210220195150.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
 <v t="felix.20210220190156.1"><vh>class FileCommands</vh>
@@ -566,7 +482,12 @@
 <v t="felix.20210104210234.1"><vh>g.es              (coreGlobals.py)</vh></v>
 <v t="felix.20210104210248.1"><vh>g.es_exception    (coreGlobals.py)</vh></v>
 <v t="felix.20210104210254.1"><vh>g.es_print        (coreGlobals.py)</vh></v>
+<v t="felix.20211023233357.1"><vh>g.find_line_start</vh></v>
+<v t="felix.20211023223505.1"><vh>g.get_line &amp; get_line__after</vh></v>
+<v t="felix.20211023234908.1"><vh>g.skip_line, skip_to_start/end_of_line</vh></v>
 <v t="felix.20210211234504.1"><vh>g.getScript</vh></v>
+<v t="felix.20211023224502.1"><vh>g.is_nl</vh></v>
+<v t="felix.20211023224519.1"><vh>g.skip_nl</vh></v>
 <v t="felix.20210104210259.1"><vh>g.isDirective     (coreGlobals.py)</vh></v>
 <v t="felix.20210104210307.1"><vh>g.is_special      (coreGlobals.py)</vh></v>
 <v t="felix.20210104210316.1"><vh>g.isWordChar*     (coreGlobals.py)</vh></v>
@@ -3372,6 +3293,9 @@ export class LeoUI {
     public verbose: boolean = false;
     public trace: boolean = false;
 
+    // * Clipboard
+    public clipboardContent: string = "";
+
     // * Configuration Settings Service
     public config: Config; // Public configuration service singleton, used in leoSettingsWebview, leoBridge, and leoNode for inverted contrast
 
@@ -3691,10 +3615,10 @@ public command(
     }
 
     /* EXAMPLE CALL BY METHOD
-        //@ts-expect-error
+            //@ts-expect-error
     if ((typeof this.leo_c[p_cmd]) === 'function') {
         console.log('HAS PROPERTY' + p_cmd + " so were doing it!");
-            //@ts-expect-error
+                //@ts-expect-error
         this.leo_c[p_cmd]();
     } else {
         console.log('NO PROPERTY' + p_cmd);
@@ -8625,71 +8549,6 @@ public check_gnx(c: Commands, gnx: string, v: VNode): void {
 }
 
 </t>
-<t tx="felix.20210110222544.1">&lt;&lt; imports &gt;&gt;
-@others
-@language typescript
-@tabwidth -4
-
-// Then you create an interface which merges
-// the expected mixins with the same name as your base
-export interface Commands extends CommanderOutlineCommands, CommanderFileCommands { }
-// Apply the mixins into the base class via
-// the JS at runtime
-console.log('Applying mixins');
-
-applyMixins(Commands, [CommanderOutlineCommands, CommanderFileCommands]);
-</t>
-<t tx="felix.20210110223514.1">/**
- * A per-outline class that implements most of Leo's commands. The
- * "c" predefined object is an instance of this class.
- *
- * c.initObjects() creates subcommanders corresponding to files in the
- * leo/core and leo/commands. All of Leo's core code is accessible
- * via this class and its subcommanders.
- */
-export class Commands {
-
-    // Official ivars.
-    private _currentPosition: Position | undefined;
-    private _topPosition: Position | undefined;
-
-    public hiddenRootNode: VNode;
-    public fileCommands: FileCommands;
-    public chapterController: any; // TODO : leoChapters.ChapterController(c)
-    public nodeHistory: NodeHistory;
-
-    public gui: LeoUI;
-
-    // TODO : fake frame needed?
-    // TODO : maybe MERGE frame.tree.generation WITH _treeId?
-    public frame: { tree: { generation: number; } } = {
-        tree: {
-            generation: 0
-        }
-    };
-
-    @others
-
-}
-
-</t>
-<t tx="felix.20210112001859.1">public recolor(): void {
-    console.log("recolor");
-}
-
-public redraw(): void {
-    console.log("redraw");
-}
-
-public redraw_after_icons_changed(): void {
-    console.log("redraw_after_icons_changed");
-}
-
-public alert(...arg: any[]): void {
-    console.log(...arg);
-}
-
-</t>
 <t tx="felix.20210112010737.1"></t>
 <t tx="felix.20210112010737.2">// This used to be time-critical code.
 public childIndex(): number {
@@ -10946,621 +10805,6 @@ export function objToString(obj: any, indent = '', printCaller = false, tag = nu
 }
 
 </t>
-<t tx="felix.20210131011420.1"></t>
-<t tx="felix.20210131011420.10">public isRootPosition(p: Position): boolean {
-    const c: Commands = this;
-    const root: Position | undefined = c.rootPosition();
-    return !!p &amp;&amp;
-        !!root &amp;&amp;
-        p.__bool__() &amp;&amp;
-        root.__bool__() &amp;&amp; p.__eq__(root);
-}
-
-</t>
-<t tx="felix.20210131011420.11">public isChanged(): boolean {
-    return this.changed;
-}
-
-</t>
-<t tx="felix.20210131011420.12">/**
- * Return the last top-level position in the outline.
- */
-public lastTopLevel(): Position {
-    const c: Commands = this;
-    const p: Position | undefined = c.rootPosition();
-    while (p &amp;&amp; p.hasNext()) {
-        p.moveToNext();
-    }
-    return p!;
-}
-
-</t>
-<t tx="felix.20210131011420.13">/**
- * New in Leo 5.5: Return None.
- * Using empty positions masks problems in program logic.
- * In fact, there are no longer any calls to this method in Leo's core.
- */
-public nullPosition(): void {
-    g.trace('This method is deprecated. Instead, just use None.');
-    // pylint complains if we return None.
-}
-
-</t>
-<t tx="felix.20210131011420.14">/**
- * Return True if a position exists in c's tree
- */
-public positionExists(p: Position, root?: Position, trace?: boolean): boolean {
-
-    if (!p || !p.__bool__() || !p.v) {
-        return false;
-    }
-
-    const rstack: StackEntry[] = (root &amp;&amp; root.__bool__()) ? root.stack.concat([[root.v, root._childIndex]]) : [];
-    const pstack: StackEntry[] = p.stack.concat([[p.v, p._childIndex]]);
-
-    if (rstack.length &gt; pstack.length) {
-        return false;
-    }
-
-    let par: VNode = this.hiddenRootNode!;
-
-    let arrayLength: number = pstack.length;
-
-    for (let j = 0; j &lt; arrayLength; j++) {
-        const x: StackEntry = pstack[j];
-
-        if (j &lt; rstack.length &amp;&amp; (x[0].gnx !== rstack[j][0].gnx || x[1] !== rstack[j][1])) {
-            return false;
-        }
-
-        let v: VNode;
-        let i: number;
-        [v, i] = x;
-
-        if (i &gt;= par.children.length || v.gnx !== par.children[i].gnx) {
-            return false;
-        }
-
-        par = v;
-    }
-    return true;
-}
-
-</t>
-<t tx="felix.20210131011420.15">/**
- * Dump position p and it's ancestors.
- */
-public dumpPosition(p: Position): void {
-    g.trace('=====', p.h, p._childIndex);
-
-    let arrayLength: number = p.stack.length;
-    for (let i = 0; i &lt; arrayLength; i++) {
-        const data = p.stack[i];
-        let v: VNode;
-        let childIndex: number;
-        [v, childIndex] = data;
-        console.log(`${i} ${childIndex} ${v._headString}`);
-    }
-}
-
-</t>
-<t tx="felix.20210131011420.16">/**
- * Return the root position.
- *
- * Root position is the first position in the document. Other
- * top level positions are siblings of this node.
- */
-public rootPosition(): Position | undefined {
-    const c: Commands = this;
-    // 2011/02/25: Compute the position directly.
-    if (!!c.hiddenRootNode &amp;&amp; c.hiddenRootNode.children.length) {
-        const v: VNode = c.hiddenRootNode.children[0];
-        return new Position(v, 0, undefined);
-    }
-    return undefined;
-}
-
-// * For compatibility with old scripts...
-// rootVnode = rootPosition
-// findRootPosition = rootPosition
-
-</t>
-<t tx="felix.20210131011420.17">/**
- * Return True if the node at position p should be expanded.
- */
-public shouldBeExpanded(p: Position): boolean {
-    const c: Commands = this;
-    const v: VNode = p.v;
-    if (!p.hasChildren()) {
-        return false;
-    }
-    // Always clear non-existent positions.
-    // v.expandedPositions: Position[] = [z for z in v.expandedPositions if c.positionExists(z)]
-    v.expandedPositions = v.expandedPositions.filter(z =&gt; c.positionExists(z));
-
-    if (!p.isCloned()) {
-        // Do not call p.isExpanded here! It calls this method.
-        return p.v.isExpanded();
-    }
-    if (p.isAncestorOf(c.p)) {
-        return true;
-    }
-    for (let p2 of v.expandedPositions) {
-        if (p.__eq__(p2)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-</t>
-<t tx="felix.20210131011420.2">/**
- * Return a copy of the presently selected position or a new null
- * position. So c.p.copy() is never necessary.
- */
-public currentPosition(): Position | undefined {
-    const c: Commands = this;
-    if (c._currentPosition) {
-        // *Always* return a copy.
-        return c._currentPosition.copy();
-    }
-    return c.rootPosition();
-}
-
-// For compatibility with old scripts...
-// currentVnode = currentPosition
-
-</t>
-<t tx="felix.20210131011420.3">// Compatibility with scripts
-
-public fileName(): string {
-    let s: string = this.mFileName || "";
-    if (g.isWindows) {
-        s = s.replace('\\', '/');
-    }
-    return s;
-}
-
-public relativeFileName(): string {
-    return this.mRelativeFileName || this.mFileName;
-}
-
-public shortFileName(): string {
-    return g.shortFileName(this.mFileName);
-}
-
-// * Alternative Naming
-// shortFilename = shortFileName
-
-</t>
-<t tx="felix.20210131011420.4">/**
- * Move to the first visible node of the present chapter or hoist.
- */
-public firstVisible(): Position {
-    const c: Commands = this;
-    let p: Position = c.p;
-    while (1) {
-        let back: Position = p.visBack(c);
-        if (back.__bool__() &amp;&amp; back.isVisible(c)) {
-            p = back;
-        } else {
-            break;
-        }
-    }
-    return p;
-}
-
-</t>
-<t tx="felix.20210131011420.5">/**
- * Return the tab width in effect at p.
- */
-public getTabWidth(p: Position): number {
-    const c: Commands = this;
-    // const val:number = g.scanAllAtTabWidthDirectives(c, p);
-    // TODO: NEEDED?
-    const val: number = 10;
-    return val;
-}
-
-</t>
-<t tx="felix.20210131011420.6"></t>
-<t tx="felix.20210131011420.7">/**
- * Return True if the current position is the root position.
- *
- * This method is called during idle time, so not generating positions
- * here fixes a major leak.
- */
-public currentPositionIsRootPosition(): boolean {
-    const c: Commands = this;
-    const root: Position | undefined = c.rootPosition();
-    return !!c._currentPosition &amp;&amp;
-        !!root &amp;&amp;
-        c._currentPosition.__bool__() &amp;&amp;
-        root.__bool__() &amp;&amp; c._currentPosition.__eq__(root);
-}
-
-// return (
-// c._currentPosition and c._rootPosition and
-// c._currentPosition == c._rootPosition)
-
-</t>
-<t tx="felix.20210131011420.8">/**
- * Return True if the current position is the root position.
-
-    This method is called during idle time, so not generating positions
-    here fixes a major leak.
- */
-public currentPositionHasNext(): boolean {
-    const c: Commands = this;
-    const current: Position = c._currentPosition!;
-    return current &amp;&amp; current.__bool__() &amp;&amp; current.hasNext()!;
-    return false;
-}
-
-</t>
-<t tx="felix.20210131011420.9">public isCurrentPosition(p: Position): boolean {
-    const c: Commands = this;
-    if (!p || !c._currentPosition ||
-        !p.__bool__() || !!c._currentPosition.__bool__()) {
-        return false;
-    }
-    return p.__eq__(c._currentPosition);
-}
-
-</t>
-<t tx="felix.20210131011440.1">/**
- * Return the topmost visible node.
- * This is affected by chapters and hoists.
- */
-public visLimit(): [Position, boolean] | undefined {
-    const c: Commands = this;
-    const cc: any = false;// c.chapterController
-    if (c.hoistStack.length) {
-        const bunch: HoistStackEntry = c.hoistStack[c.hoistStack.length - 1];
-        const p: Position = bunch.p;
-        const limitIsVisible: boolean = !cc || !p.h.startsWith('@chapter');
-        return [p, limitIsVisible];
-    }
-    return undefined;
-}
-
-</t>
-<t tx="felix.20210131011508.1"></t>
-<t tx="felix.20210131011508.2">/**
- * A generator returning all vnodes in the outline, in outline order.
- */
-public *all_nodes(): Generator&lt;VNode&gt; {
-    const c: Commands = this;
-    for (let p of c.all_positions()) {
-        yield p.v;
-    }
-}
-
-
-/**
- * A generator returning each vnode of the outline.
- */
-public *all_unique_nodes(): Generator&lt;VNode&gt; {
-    const c: Commands = this;
-    for (let p of c.all_unique_positions(false)) {
-        yield p.v;
-    }
-}
-
-</t>
-<t tx="felix.20210131011508.3">/**
- * A generator return all positions of the outline, in outline order.
- */
-public *all_positions(copy = true): Generator&lt;Position&gt; {
-    const c: Commands = this;
-    const p: Position | undefined = c.rootPosition();
-    while (p &amp;&amp; p.__bool__()) {
-        yield (copy ? p.copy() : p);
-        p.moveToThreadNext();
-    }
-}
-
-</t>
-<t tx="felix.20210131011508.4">/**
- * Generates all positions p in this outline where p.v is v.
- *
- *  Should be called with stack=None.
- *
- *  The generated positions are not necessarily in outline order.
- *
- *  By Виталије Милошевић (Vitalije Milosevic).
- */
-public *all_positions_for_v(v: VNode, stack?: StackEntry[]): Generator&lt;Position&gt; {
-
-    const c: Commands = this;
-
-    if (!stack) {
-        stack = [];
-    }
-
-    if (!(v instanceof VNode)) {
-        g.es_print(`not a VNode: ${JSON.stringify(v)}`);
-        return;  // Stop the generator.
-    }
-
-    /**
-     * Yield all indices i such that v.children[i] == target_v.
-     */
-    function* allinds(v: VNode, target_v: VNode): Generator&lt;number&gt; {
-        const arrayLength = v.children.length;
-        for (var i = 0; i &lt; arrayLength; i++) {
-            if (v.children[i].gnx === target_v.gnx) {
-                yield i;
-            }
-        }
-    }
-
-    /**
-     * Convert the stack to a position.
-     */
-    function stack2pos(stack: StackEntry[]): Position {
-        let v: VNode;
-        let i: number;
-        [v, i] = stack[stack.length - 1];
-        return new Position(v, i, stack.slice(0, -1));
-    }
-
-    for (let v2 of v.parents) {
-        for (let i of allinds(v2, v)) {
-            stack.unshift([v, i]);
-            if (v2.gnx === c.hiddenRootNode!.gnx) {
-                yield stack2pos(stack);
-            } else {
-                yield* c.all_positions_for_v(v2, stack);
-            }
-            stack.shift();
-        }
-    }
-}
-
-</t>
-<t tx="felix.20210131011508.5">/**
- * A generator yielding *all* the root positions in the outline that
- * satisfy the given predicate. p.isAnyAtFileNode is the default
- * predicate.
- *
- * The generator yields all **root** anywhere in the outline that satisfy
- * the predicate. Once a root is found, the generator skips its subtree.
- */
-public *all_roots(copy = true, predicate?: (p: Position) =&gt; boolean): Generator&lt;Position&gt; {
-    const c: Commands = this;
-
-    if (!predicate) {
-        // pylint: disable=function-redefined
-        predicate = function (p: Position): boolean {
-            return p.isAnyAtFileNode();
-        };
-    }
-
-    const p: Position | undefined = c.rootPosition();
-    while (p &amp;&amp; p.__bool__()) {
-        if (predicate(p)) {
-            yield p.copy();  // 2017/02/19
-            p.moveToNodeAfterTree();
-        } else {
-            p.moveToThreadNext();
-        }
-    }
-}
-
-</t>
-<t tx="felix.20210131011508.6">/**
- * A generator return all positions of the outline, in outline order.
- * Returns only the first position for each vnode.
- */
-public *all_unique_positions(copy = true): Generator&lt;Position&gt; {
-    const c: Commands = this;
-    const p: Position | undefined = c.rootPosition();
-    const seen: VNode[] = [];
-    while (p &amp;&amp; p.__bool__()) {
-        if (seen.includes(p.v)) {
-            p.moveToNodeAfterTree();
-        } else {
-            seen.push(p.v);
-            yield (copy ? p.copy() : p);
-            p.moveToThreadNext();
-        }
-    }
-}
-
-</t>
-<t tx="felix.20210131011508.7">/**
- * A generator yielding all unique root positions in the outline that
- * satisfy the given predicate. p.isAnyAtFileNode is the default
- * predicate.
- *
- * The generator yields all **root** anywhere in the outline that satisfy
- * the predicate. Once a root is found, the generator skips its subtree.
- */
-public *all_unique_roots(copy = true, predicate?: (p: Position) =&gt; boolean): Generator&lt;Position&gt; {
-    const c: Commands = this;
-
-    if (!predicate) {
-        // pylint: disable=function-redefined
-        predicate = function (p: Position): boolean {
-            return p.isAnyAtFileNode();
-        };
-    }
-
-    const seen: VNode[] = [];
-    const p: Position | undefined = c.rootPosition();
-    while (p &amp;&amp; p.__bool__()) {
-        if (!seen.includes(p.v) &amp;&amp; predicate(p)) {
-            seen.push(p.v);
-            yield (copy ? p.copy() : p);
-            p.moveToNodeAfterTree();
-        } else {
-            p.moveToThreadNext();
-        }
-    }
-}
-</t>
-<t tx="felix.20210131011508.8">/**
- * A generator returning all positions of the outline. This generator does
- * *not* assume that vnodes are never their own ancestors.
- */
-public *safe_all_positions(copy = true): Generator&lt;Position&gt; {
-    const c: Commands = this;
-    const p: Position | undefined = c.rootPosition(); // Make one copy.
-    while (p &amp;&amp; p.__bool__()) {
-        yield (copy ? p.copy() : p);
-        p.safeMoveToThreadNext();
-    }
-}
-
-</t>
-<t tx="felix.20210131011549.1">/**
- * commander current position property
- */
-public get p(): Position {
-    const c: Commands = this;
-    return c.currentPosition()!;
-}
-
-</t>
-<t tx="felix.20210131011607.1"></t>
-<t tx="felix.20210131011607.2">public appendStringToBody(p: Position, s: string): void {
-    if (s) {
-        p.b = p.b + g.toUnicode(s);
-    }
-}
-
-</t>
-<t tx="felix.20210131011607.3">public clearAllMarked(): void {
-    const c: Commands = this;
-    for (let p of c.all_unique_positions(false)) {
-        p.v.clearMarked();
-    }
-}
-
-</t>
-<t tx="felix.20210131011607.4">public clearAllVisited(): void {
-    const c: Commands = this;
-    for (let p of c.all_unique_positions(false)) {
-        p.v.clearVisited();
-        p.v.clearWriteBit();
-    }
-}
-
-</t>
-<t tx="felix.20210131011607.5">/**
- * clear the marker that indicates that the .leo file has been changed.
- */
-public clearChanged(): void {
-    const c: Commands = this;
-    c.changed = false;
-    // Clear all dirty bits _before_ setting the caption.
-    for (let v of c.all_unique_nodes()) {
-        v.clearDirty();
-    }
-    c.changed = false;
-    // * Old code.
-    // master = getattr(c.frame.top, 'leo_master', None)
-    // if master:
-    // master.setChanged(c, False)
-    // // LeoTabbedTopLevel.setChanged.
-    // s = c.frame.getTitle()
-    // if len(s) &gt; 2 and s[0:2] == "* ":
-    // c.frame.setTitle(s[2:])
-}
-
-</t>
-<t tx="felix.20210131011607.6">public clearMarked(p: Position): void {
-    const c: Commands = this;
-    p.v.clearMarked();
-    g.doHook("clear-mark", c, p);
-}
-
-</t>
-<t tx="felix.20210131011607.7">/**
- * This is equivalent to p.b = s.
- * Warning: This method may call c.recolor() or c.redraw().
- */
-public setBodyString(p: Position, s: string): void {
-    const c: Commands = this;
-    const v: VNode = p.v;
-    if (!c || !v) {
-        return;
-    }
-    s = g.toUnicode(s);
-    const current: Position = c.p;
-    // 1/22/05: Major change: the previous test was: 'if p == current:'
-    // This worked because commands work on the presently selected node.
-    // But setRecentFiles may change a _clone_ of the selected node!
-    if (current &amp;&amp; current.__bool__() &amp;&amp; p.v.gnx === current.v.gnx) {
-        // * Leo used to send it to gui
-        // const w:any = c.frame.body.wrapper;
-        // w.setAllText(s);
-        v.setSelection(0, 0);
-        c.recolor();
-    }
-    // Keep the body text in the VNode up-to-date.
-    if (v.b !== s) {
-        v.setBodyString(s);
-        v.setSelection(0, 0);
-        p.setDirty();
-        if (!c.isChanged()) {
-            c.setChanged();
-        }
-        c.redraw_after_icons_changed();
-    }
-}
-
-</t>
-<t tx="felix.20210131011607.8">/**
- * Set the marker that indicates that the .leo file has been changed.
- */
-public setChanged(redrawFlag: boolean = true): void {
-    const c: Commands = this;
-    c.changed = true;
-    // Do nothing for null frames.
-    //if !redrawFlag:  // Prevent flash when fixing #387.
-    //    return
-    // * Old code.
-    // master = getattr(c.frame.top, 'leo_master', None)
-    // if master:
-    // master.setChanged(c, True)
-    // // LeoTabbedTopLevel.setChanged.
-    // s = c.frame.getTitle()
-    // if len(s) &gt; 2 and s[0] != '*':
-    // c.frame.setTitle("* " + s)
-}
-
-</t>
-<t tx="felix.20210131011607.9">/**
- * Set the presently selected position. For internal use only.
- * Client code should use c.selectPosition instead.
- */
-public setCurrentPosition(p: Position): void {
-    const c: Commands = this;
-    if (!(p &amp;&amp; p.__bool__())) {
-        g.trace('===== no p', g.callers());
-        return;
-    }
-    if (c.positionExists(p)) {
-        if (c._currentPosition &amp;&amp; p.__eq__(c._currentPosition)) {
-            // We have already made a copy.
-            // pass;
-        } else { // Make a copy _now_
-            c._currentPosition = p.copy();
-        }
-    } else { // 2011/02/25:
-        c._currentPosition = c.rootPosition();
-        g.trace(`Invalid position: ${p.h}`);
-        g.trace(g.callers());
-        // Don't kill unit tests for this kind of problem.
-    }
-}
-
-// * For compatibility with old scripts.
-//setCurrentVnode = setCurrentPosition
-
-</t>
 <t tx="felix.20210202235315.1"></t>
 <t tx="felix.20210202235315.10">// These methods are useful abbreviations.
 // Warning: they make copies of positions, so they should be used _sparingly_
@@ -12646,22 +11890,6 @@ export function doHook(tag: string, ...args: any[]): any {
 }
 
 </t>
-<t tx="felix.20210211234142.1">/**
- * Set the p's headline and the corresponding tree widget to s.
- * This is used in by unit tests to restore the outline.
- */
-public setHeadString(p: Position, s: string): void {
-    const c: Commands = this;
-    p.initHeadString(s);
-    p.setDirty();
-    // Change the actual tree widget so
-    // A later call to c.endEditing or c.redraw will use s.
-
-    // TODO: needed?
-    // c.frame.tree.setHeadline(p, s);
-}
-
-</t>
 <t tx="felix.20210211234504.1">/**
  * Return the expansion of the selected text of node p.
  * Return the expansion of all of node p's body text if
@@ -12675,135 +11903,6 @@ export function getScript(c: Commands, p: Position,
     console.log("get script called");
     return "";
 }
-
-</t>
-<t tx="felix.20210215185050.1">// These methods are a fundamental, unchanging, part of Leo's API.
-
-</t>
-<t tx="felix.20210215204131.1">/**
-  *Move to the last visible node of the present chapter or hoist.
- */
-public lastVisible(): Position {
-    const c: Commands = this;
-    let p: Position = c.p;
-    while (1) {
-        const next: Position = p.visNext(c);
-        if (next &amp;&amp; next.__bool__() &amp;&amp; next.isVisible(c)) {
-            p = next;
-        } else {
-            break;
-        }
-    }
-    return p;
-}
-
-</t>
-<t tx="felix.20210215204308.1">/**
- * Given a VNode v, find all valid positions p such that p.v = v.
- * Not really all, just all for each of v's distinct immediate parents.
- */
-public vnode2allPositions(v: VNode): Position[] {
-    const c: Commands = this;
-    const context: Commands = v.context;  // v's commander.
-    // console.assert(c.fileName === context.fileName);
-    const positions: Position[] = [];
-    let n: number;
-    for (let immediate of v.parents) {
-        if (immediate.children.includes(v)) {
-            n = immediate.children.indexOf(v);
-        } else {
-            continue;
-        }
-        const stack: StackEntry[] = [[v, n]];
-        let isBreak: boolean = false;
-        while (immediate.parents.length) {
-            const parent: VNode = immediate.parents[0];
-            if (parent.children.includes(immediate)) {
-                n = parent.children.indexOf(immediate);
-            } else {
-                isBreak = true;
-                break;
-            }
-            stack.unshift([immediate, n]);
-            immediate = parent;
-        }
-        if (!immediate.parents.length &amp;&amp; !isBreak) {
-            [v, n] = stack.pop()!;
-            const p: Position = new Position(v, n, stack);
-            positions.push(p);
-        }
-    }
-    return positions;
-}
-
-</t>
-<t tx="felix.20210215204322.1">/**
- * Given a VNode v, construct a valid position p such that p.v = v.
- */
-public vnode2position(v: VNode): Position | undefined {
-    const c: Commands = this;
-    const context: Commands = v.context;  // v's commander.
-    // console.assert(c.fileName === context.fileName);
-    const stack: StackEntry[] = [];
-    let n: number;
-    while (v.parents.length) {
-        const parent: VNode = v.parents[0];
-
-        if (parent.children.includes(v)) {
-            n = parent.children.indexOf(v);
-        } else {
-            return undefined;
-        }
-        stack.unshift([v, n]);
-        v = parent;
-    }
-    // v.parents includes the hidden root node.
-    if (!stack.length) {
-        // a VNode not in the tree
-        return undefined;
-    }
-    [v, n] = stack.pop()!;
-    const p: Position = new Position(v, n, stack);
-    return p;
-}
-
-</t>
-<t tx="felix.20210215204844.1">public setMarked(p: Position): void {
-    const c: Commands = this;
-    p.setMarked();
-    p.setDirty();  // Defensive programming.
-    g.doHook("set-mark", c, p);
-}
-
-</t>
-<t tx="felix.20210215204937.1">/**
- * Return the root position.
- */
-public topPosition(): Position | undefined {
-    const c: Commands = this;
-    if (c._topPosition &amp;&amp; c._topPosition.__bool__()) {
-        return c._topPosition.copy();
-    }
-    return undefined;
-}
-
-/**
- * Set the root position.
- */
-public setTopPosition(p: Position): void {
-    const c: Commands = this;
-    if (p &amp;&amp; p.__bool__()) {
-        c._topPosition = p.copy();
-    }
-    else {
-        c._topPosition = undefined;
-    }
-}
-
-// Define these for compatibility with old scripts...
-
-// topVnode = topPosition
-// setTopVnode = setTopPosition
 
 </t>
 <t tx="felix.20210218214329.12">/**
@@ -12887,16 +11986,6 @@ public new_vnode_helper(c: Commands, gnx: string | undefined, v: VNode): void {
     @others
 
 }
-
-</t>
-<t tx="felix.20210220194059.1">import * as g from './leoGlobals';
-import { LeoUI } from '../leoUI';
-import { FileCommands } from "./leoFileCommands";
-import { CommanderOutlineCommands } from "../commands/commanderOutlineCommands";
-import { CommanderFileCommands } from "../commands/commanderFileCommands";
-
-import { Position, VNode, StackEntry } from "./leoNodes";
-import { NodeHistory } from './leoHistory';
 
 </t>
 <t tx="felix.20210220195150.1">import { VNode } from "./leoNodes";
@@ -13042,326 +12131,6 @@ public initWrapperLeoFile(c: Commands, fn: string): Commands {
     // theFile = undefined;
     // }
     return theFile;
-}
-
-</t>
-<t tx="felix.20210223002937.1">constructor(
-    fileName: string,
-    gui?: LeoUI,
-    previousSettings?: any,
-    relativeFileName?: any
-) {
-    const c: Commands = this;
-
-    // From Official Ivars
-    this.gui = gui || g.app.gui!;
-
-    // From initFileIvars
-    this.mFileName = fileName || '';
-    this.mRelativeFileName = relativeFileName || '';
-
-    // From initObjects
-    const gnx: string = 'hidden-root-vnode-gnx';
-    this.fileCommands = new FileCommands(this); // c.fileCommands = DummyFileCommands()
-    this.hiddenRootNode = new VNode(this, 'hidden-root-vnode-gnx');
-    this.hiddenRootNode.h = '&lt;hidden root vnode&gt;';
-    this.fileCommands.gnxDict = {}; // RESET gnxDict
-    this.chapterController = {}; // TODO self.chapterController = leoChapters.ChapterController(c)
-    this.nodeHistory = new NodeHistory(c);
-
-    // From initConfigSettings 
-    this.collapse_on_lt_arrow = true; // getBool('collapse-on-lt-arrow', default=True)
-
-    // From finishCreate
-    c.createCommandNames();
-
-}
-
-</t>
-<t tx="felix.20210223220756.1"></t>
-<t tx="felix.20210223220814.10">//Init the settings *before* initing the objects.
-// c = self
-// from leo.core import leoConfig
-public config: any = {}; // TODO
-// c.config = leoConfig.LocalConfigManager(c, previousSettings)
-// g.app.config.setIvarsFromSettings(c)
-
-</t>
-<t tx="felix.20210223220814.2">// Init ivars used while executing a command.
-public commandsDict: { [key: string]: (p?: any) =&gt; any } = {}; // Keys are command names, values are functions.
-public disableCommandsMessage: string = ''; // The presence of this message disables all commands.
-public hookFunction: any = undefined; // One of three places that g.doHook looks for hook functions.
-
-public ignoreChangedPaths = false; // True: disable path changed message in at.WriteAllHelper.
-public inCommand: boolean = false; // Interlocks to prevent premature closing of a window.
-public isZipped: boolean = false; // Set by g.openWithFileName.
-public outlineToNowebDefaultFileName: string = "noweb.nw"; // For Outline To Noweb dialog.
-
-// For tangle/untangle
-public tangle_errors: number = 0;
-// Default Tangle options
-public use_header_flag: boolean = false;
-public output_doc_flag: boolean = false;
-// For hoist/dehoist commands.
-public hoistStack: HoistStackEntry[] = []; // Stack of nodes to be root of drawn tree.
-// For outline navigation.
-public navPrefix: string = ''; // Must always be a string.
-public navTime: any = undefined;
-
-public sqlite_connection: any = undefined;
-
-</t>
-<t tx="felix.20210223220814.3">// Init Commander debugging ivars.
-public command_count: number = 0;
-public scanAtPathDirectivesCount: number = 0;
-public trace_focus_count: number = 0;
-
-</t>
-<t tx="felix.20210223220814.4">// Init per-document ivars.
-public expansionLevel: number = 0; // The expansion level of this outline.
-public expansionNode: Position | undefined = undefined; // The last node we expanded or contracted.
-public nodeConflictList: VNode[] = []; // List of nodes with conflicting read-time data.
-public nodeConflictFileName: string | undefined = undefined; // The fileName for c.nodeConflictList.
-public user_dict = {}; // Non-persistent dictionary for free use by scripts and plugins.
-
-</t>
-<t tx="felix.20210223220814.5">// Init ivars relating to gui events.
-public configInited = false;
-public doubleClickFlag = false;
-public exists = true; // Indicate that this class exists and has not been destroyed.
-
-public in_qt_dialog = false; // True: in a qt dialog.
-public loading = false; // True: we are loading a file: disables c.setChanged()
-public promptingForClose = false; // True: lock out additional closing dialogs.
-public suppressHeadChanged = false; // True: prevent setting c.changed when switching chapters.
-// Flags for c.outerUpdate...
-public enableRedrawFlag = true;
-public requestCloseWindow = false;
-public requestedFocusWidget = undefined;
-public requestLaterRedraw = false;
-
-</t>
-<t tx="felix.20210223220814.6">// Init file-related ivars of the commander.
-public changed = false; // True: the ouline has changed since the last save.
-public ignored_at_file_nodes: string[] = []; // (headers)
-public import_error_nodes: string[] = []; // List of nodes for c.raise_error_dialogs. (headers)
-public last_dir: string | undefined = undefined; // The last used directory.
-public mFileName: string = ''; // Do _not_ use os_path_norm: it converts an empty path to '.' (!!)
-public mRelativeFileName: string = '';
-public openDirectory: string | undefined = undefined;
-public orphan_at_file_nodes: string[] = []; // List of orphaned nodes for c.raise_error_dialogs. (headers)
-public wrappedFileName: string | undefined = undefined; // The name of the wrapped file, for wrapper commanders, set by LM.initWrapperLeoFile
-
-</t>
-<t tx="felix.20210223220814.7">// Init Commander ivars corresponding to user options.
-public fixed: boolean = false;
-public fixedWindowPosition = [];
-public forceExecuteEntireBody: boolean = false;
-public focus_border_color: string = 'white';
-public focus_border_width: number = 1;  // pixels;
-public outlineHasInitialFocus: boolean = false;
-public page_width: number = 132;
-public sparse_find: boolean = true;
-public sparse_move: boolean = true;
-public sparse_spell: boolean = true;
-public stayInTreeAfterSelect: boolean = false;
-public tab_width: number = -4;
-public tangle_batch_flag: boolean = false;
-public target_language: string = "python"; // TODO : switch to js for Leojs?
-public untangle_batch_flag: boolean = false;
-// # self.use_body_focus_border = True
-// # self.use_focus_border = False
-// # Replaced by style-sheet entries.
-public vim_mode: boolean = false;
-
-</t>
-<t tx="felix.20210223220814.8">// These ivars are set later by leoEditCommands.createEditCommanders
-public abbrevCommands: any = undefined;
-public editCommands: any = undefined;
-public db: any = {};  // May be set to a PickleShare instance later.
-public bufferCommands: any = undefined;
-public chapterCommands: any = undefined;
-public controlCommands: any = undefined;
-public convertCommands: any = undefined;
-public debugCommands: any = undefined;
-public editFileCommands: any = undefined;
-public evalController: any = undefined;
-public gotoCommands: any = undefined;
-public helpCommands: any = undefined;
-public keyHandler: any = undefined; // TODO same as k
-public k: any = undefined; // TODO same as keyHandler
-public keyHandlerCommands: any = undefined;
-public killBufferCommands: any = undefined;
-public leoCommands: any = undefined;
-public macroCommands: any = undefined;
-public miniBufferWidget: any = undefined;
-public printingController: any = undefined;
-public queryReplaceCommands: any = undefined;
-public rectangleCommands: any = undefined;
-public searchCommands: any = undefined;
-public spellCommands: any = undefined;
-public leoTestManager: any = undefined;
-public vimCommands: any = undefined;
-
-</t>
-<t tx="felix.20210223220814.9">// * initObjects done in constructor.
-// * Kept here as comments for reference
-
-// c = self
-// gnx = 'hidden-root-vnode-gnx'
-// assert not hasattr(c, 'fileCommands'), c.fileCommands
-
-// class DummyFileCommands:
-// def __init__(self):
-// self.gnxDict = {}
-
-// c.fileCommands = DummyFileCommands()
-// self.hiddenRootNode = leoNodes.VNode(context=c, gnx=gnx)
-// self.hiddenRootNode.h = '&lt;hidden root vnode&gt;'
-// c.fileCommands = None
-// # Create the gui frame.
-// title = c.computeWindowTitle(c.mFileName)
-// if not g.app.initing:
-// g.doHook("before-create-leo-frame", c=c)
-// self.frame = gui.createLeoFrame(c, title)
-// assert self.frame
-// assert self.frame.c == c
-// from leo.core import leoHistory
-// self.nodeHistory = leoHistory.NodeHistory(c)
-
-// self.initConfigSettings()
-// c.setWindowPosition() # Do this after initing settings.
-// # Break circular import dependencies by doing imports here.
-// # These imports take almost 3/4 sec in the leoBridge.
-// from leo.core import leoAtFile
-// from leo.core import leoBeautify  # So decorators are executed.
-// assert leoBeautify  # for pyflakes.
-// from leo.core import leoChapters
-// # from leo.core import leoTest2  # So decorators are executed.
-// # assert leoTest2  # For pyflakes.
-// # User commands...
-// from leo.commands import abbrevCommands
-// from leo.commands import bufferCommands
-// from leo.commands import checkerCommands
-// assert checkerCommands
-// # To suppress a pyflakes warning.
-// # The import *is* required to define commands.
-// from leo.commands import controlCommands
-// from leo.commands import convertCommands
-// from leo.commands import debugCommands
-// from leo.commands import editCommands
-// from leo.commands import editFileCommands
-// from leo.commands import gotoCommands
-// from leo.commands import helpCommands
-// from leo.commands import keyCommands
-// from leo.commands import killBufferCommands
-// from leo.commands import rectangleCommands
-// from leo.commands import spellCommands
-// # Import files to execute @g.commander_command decorators
-// from leo.core import leoCompare
-// assert leoCompare
-// from leo.core import leoDebugger
-// assert leoDebugger
-// from leo.commands import commanderEditCommands
-// assert commanderEditCommands
-// from leo.commands import commanderFileCommands
-// assert commanderFileCommands
-// from leo.commands import commanderFindCommands
-// assert commanderFindCommands
-// from leo.commands import commanderHelpCommands
-// assert commanderHelpCommands
-// from leo.commands import commanderOutlineCommands
-// assert commanderOutlineCommands
-// # Other subcommanders.
-// from leo.core import leoFind # Leo 4.11.1
-// from leo.core import leoKeys
-// from leo.core import leoFileCommands
-// from leo.core import leoImport
-// from leo.core import leoMarkup
-// from leo.core import leoPersistence
-// from leo.core import leoPrinting
-// from leo.core import leoRst
-// from leo.core import leoShadow
-// from leo.core import leoTangle
-// from leo.core import leoTest
-// from leo.core import leoUndo
-// from leo.core import leoVim
-// # Define the subcommanders.
-// self.keyHandler = self.k    = leoKeys.KeyHandlerClass(c)
-// self.chapterController      = leoChapters.ChapterController(c)
-// self.shadowController       = leoShadow.ShadowController(c)
-// self.fileCommands           = leoFileCommands.FileCommands(c)
-// self.findCommands           = leoFind.LeoFind(c)
-// self.atFileCommands         = leoAtFile.AtFile(c)
-// self.importCommands         = leoImport.LeoImportCommands(c)
-// self.markupCommands         = leoMarkup.MarkupCommands(c)
-// self.persistenceController  = leoPersistence.PersistenceDataController(c)
-// self.printingController     = leoPrinting.PrintingController(c)
-// self.rstCommands            = leoRst.RstCommands(c)
-// self.tangleCommands         = leoTangle.TangleCommands(c)
-// self.testManager            = leoTest.TestManager(c)
-// self.vimCommands            = leoVim.VimCommands(c)
-// # User commands
-// self.abbrevCommands     = abbrevCommands.AbbrevCommandsClass(c)
-// self.bufferCommands     = bufferCommands.BufferCommandsClass(c)
-// self.controlCommands    = controlCommands.ControlCommandsClass(c)
-// self.convertCommands    = convertCommands.ConvertCommandsClass(c)
-// self.debugCommands      = debugCommands.DebugCommandsClass(c)
-// self.editCommands       = editCommands.EditCommandsClass(c)
-// self.editFileCommands   = editFileCommands.EditFileCommandsClass(c)
-// self.gotoCommands       = gotoCommands.GoToCommands(c)
-// self.helpCommands       = helpCommands.HelpCommandsClass(c)
-// self.keyHandlerCommands = keyCommands.KeyHandlerCommandsClass(c)
-// self.killBufferCommands = killBufferCommands.KillBufferCommandsClass(c)
-// self.rectangleCommands  = rectangleCommands.RectangleCommandsClass(c)
-// self.spellCommands      = spellCommands.SpellCommandsClass(c)
-// self.undoer             = leoUndo.Undoer(c)
-// # Create the list of subcommanders.
-// self.subCommanders = [
-// self.abbrevCommands,
-// self.atFileCommands,
-// self.bufferCommands,
-// self.chapterController,
-// self.controlCommands,
-// self.convertCommands,
-// self.debugCommands,
-// self.editCommands,
-// self.editFileCommands,
-// self.fileCommands,
-// self.findCommands,
-// self.gotoCommands,
-// self.helpCommands,
-// self.importCommands,
-// self.keyHandler,
-// self.keyHandlerCommands,
-// self.killBufferCommands,
-// self.persistenceController,
-// self.printingController,
-// self.rectangleCommands,
-// self.rstCommands,
-// self.shadowController,
-// self.spellCommands,
-// self.tangleCommands,
-// self.testManager,
-// self.vimCommands,
-// self.undoer,
-// ]
-// # Other objects
-// c.configurables = c.subCommanders[:]
-// # A list of other classes that have a reloadSettings method
-// c.db = g.app.commander_cacher.get_wrapper(c)
-// from leo.plugins import free_layout
-// self.free_layout = free_layout.FreeLayoutController(c)
-// if hasattr(g.app.gui, 'styleSheetManagerClass'):
-// self.styleSheetManager = g.app.gui.styleSheetManagerClass(c)
-// self.subCommanders.append(self.styleSheetManager)
-// else:
-// self.styleSheetManager = None
-
-</t>
-<t tx="felix.20210224000242.1">export interface HoistStackEntry {
-    p: Position;
-    expanded: boolean;
 }
 
 </t>
@@ -13537,19 +12306,6 @@ public readExternalFiles(fileName):Position {
 
 </t>
 <t tx="felix.20210226224644.1"></t>
-<t tx="felix.20210228004000.1">/**
- * Return all root children P nodes
- */
-public *all_Root_Children(copy = true): Generator&lt;Position&gt; {
-    const c: Commands = this;
-    const p: Position | undefined = c.rootPosition(); // Make one copy.
-    while (p &amp;&amp; p.__bool__()) {
-        yield (copy ? p.copy() : p);
-        p.moveToNext();
-    }
-}
-
-</t>
 <t tx="felix.20211002194716.1"></t>
 <t tx="felix.20211003011145.1">/**
  * File Commands Test
@@ -13578,126 +12334,6 @@ public buildId(p_position: Position, p_collapsed: number): string {
 </t>
 <t tx="felix.20211003233639.1">public incTreeId(): void {
     this.treeId++;
-}
-
-</t>
-<t tx="felix.20211005023225.1"></t>
-<t tx="felix.20211005023421.1"></t>
-<t tx="felix.20211005023456.1">/**
- * Select a new position, redrawing the screen *only* if we must
- * change chapters.
- */
-public selectPosition(p: Position): void {
-
-    const trace = true; // For # 2167.
-    const c: Commands = this;
-    // const cc = c.chapterController;
-
-    if (!p || !p.__bool__()) {
-        if (!g.app.batchMode) { // A serious error.
-            g.trace('Warning: no p', g.callers());
-        }
-    }
-
-    // if(cc &amp;&amp; !cc.selectChapterLockout){
-    //     cc.selectChapterForPosition(p)
-    //     // Calls c.redraw only if the chapter changes.
-    // }
-
-    // De-hoist as necessary to make p visible.
-    if (c.hoistStack) {
-        while (c.hoistStack.length) {
-            let bunch = c.hoistStack[c.hoistStack.length - 1];
-            if (c.positionExists(p, bunch.p)) {
-                break;
-            } else {
-                if (trace) {
-                    console.log('trace in selectPosition');
-
-                    // TODO
-                    // command_name = c.command_name if c.inCommand else 'None'
-                    // print('')
-                    // print('pop hoist stack! callers:', g.callers())
-                    // g.printObj(c.hoistStack, tag='c.hoistStack before pop')
-                    // print(f"c.command_name: {command_name}")
-                    // print('lossage')
-                    // for i, data in enumerate(reversed(g.app.lossage)):
-                    //     print(f"{i:&gt;2} {data!r}")
-                }
-                bunch = c.hoistStack.pop()!;
-            }
-        }
-    }
-
-    c.setCurrentPosition(p);
-
-    // Compatibility, but confusing.
-    // TODO : Is this needed? (not used in Leos codebase)
-    // selectVnode = selectPosition
-
-}
-
-</t>
-<t tx="felix.20211005023800.1"></t>
-<t tx="felix.20211005023821.1">/**
- * Contract all nodes in the outline.
- */
-public contractAllHeadlines(): void {
-    const c: Commands = this;
-    for (let p of c.all_positions()) {
-        p.contract();
-    }
-    // Select the topmost ancestor of the presently selected node.
-    const p = c.p;
-    while (p.__bool__() &amp;&amp; p.hasParent()) {
-        p.moveToParent();
-    }
-    c.expansionLevel = 1;  // Reset expansion level.
-}
-
-</t>
-<t tx="felix.20211005023931.1">public contractSubtree(p: Position): void {
-    for (let p_p of p.subtree()) {
-        p_p.contract();
-    }
-}
-
-</t>
-<t tx="felix.20211005024008.1">public expandSubtree(p: Position): void {
-    const last = p.lastNode();
-    while (p.__bool__() &amp;&amp; !p.__eq__(last)) {
-        p.expand();
-        p = p.threadNext();
-    }
-}
-
-</t>
-<t tx="felix.20211005024009.1">public expandToLevel(level: number): void {
-    const c: Commands = this;
-    const n: number = c.p.level();
-    // let old_expansion_level = c.expansionLevel;
-    let max_level = 0;
-    for (let p of c.p.self_and_subtree(false)) {
-        if (p.level() - n + 1 &lt; level) {
-            p.expand();
-            max_level = Math.max(max_level, p.level() - n + 1);
-        } else {
-            p.contract();
-        }
-    }
-    c.expansionNode = c.p.copy();
-    c.expansionLevel = max_level + 1;
-
-    /*
-    if c.expansionLevel != old_expansion_level:
-        c.redraw()
-    // It's always useful to announce the level.
-    // c.k.setLabelBlue('level: %s' % (max_level+1))
-    // g.es('level', max_level + 1)
-    c.frame.putStatusLine(f"level: {max_level + 1}")
-        // bg='red', fg='red'
-    */
-
 }
 
 </t>
@@ -16449,20 +15085,6 @@ def sortSiblings(self, event=None,
 //         g.es_print(f"{c.p.numberOfChildren()} children")
 
 </t>
-<t tx="felix.20211017232128.1">function applyMixins(derivedCtor: any, constructors: any[]) {
-    constructors.forEach((baseCtor) =&gt; {
-        Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) =&gt; {
-            Object.defineProperty(
-                derivedCtor.prototype,
-                name,
-                Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
-                Object.create(null)
-            );
-        });
-    });
-}
-
-</t>
 <t tx="felix.20211018202009.1">import * as g from './leoGlobals';
 
 /**
@@ -16493,20 +15115,6 @@ export function commander_command(p_name: string, p_doc: string) {
     };
 }
 
-</t>
-<t tx="felix.20211018215401.1">/**
- * Create all entries in c.commandsDict.
- * Do *not* clear c.commandsDict here.
- */
-private createCommandNames(): void {
-    const c: Commands = this;
-    for (let commandName in g.global_commands_dict) {
-        c.commandsDict[commandName] = g.global_commands_dict[commandName];
-    }
-}
-
-</t>
-<t tx="felix.20211021003423.1">public collapse_on_lt_arrow: boolean = true; // getBool('collapse-on-lt-arrow', default=True)
 </t>
 <t tx="felix.20211021224204.1">// TODO : Replace with proper method
 export const blue = console.log;
@@ -16669,40 +15277,133 @@ public update(p: Position, change: boolean = true): void {
 }
 
 </t>
-<t tx="felix.20211022013445.1">public treeSelectHelper(p: Position): void {
-    const c: Commands = this;
-    if (!p || !p.__bool__()) {
-        p = c.p;
+<t tx="felix.20211023223505.1">// Very useful for tracing.
+
+export function get_line(s: string, i: number): string {
+    let nl = "";
+    if (is_nl(s, i)) {
+        i = skip_nl(s, i);
+        nl = "[nl]";
     }
-    if (p &amp;&amp; p.__bool__()) {
-        // Do not call expandAllAncestors here.
-        c.selectPosition(p);
+    const j: number = find_line_start(s, i);
+    const k: number = skip_to_end_of_line(s, i);
+    return nl + s.substring(j, k)
+}
+
+// Important: getLine is a completely different function.
+// getLine = get_line
+export const getLine = get_line;
+
+export function get_line_after(s: string, i: number): string {
+    let nl = "";
+    if (is_nl(s, i)) {
+        i = skip_nl(s, i);
+        nl = "[nl]";
     }
+    const k: number = skip_to_end_of_line(s, i);
+    return nl + s.substring(i, k);
+}
+
+// getLineAfter = get_line_after
+export const getLineAfter = get_line_after;
+
+</t>
+<t tx="felix.20211023224502.1">export function is_nl(s: string, i: number): boolean {
+    return (i &lt; s.length) &amp;&amp; (s.charAt(i) === '\n' || s.charAt(i) === '\r');
 }
 
 </t>
-<t tx="felix.20211022202201.1"></t>
-<t tx="felix.20211022202634.1">/**
- * Expand all ancestors without redrawing.
- * Return a flag telling whether a redraw is needed.
+<t tx="felix.20211023224519.1">/**
+ * We need this function because different systems have different end-of-line conventions.
+ * Skips a single "logical" end-of-line character.
  */
-public expandAllAncestors(p_p: Position): boolean {
-    let redraw_flag = false;
-    for (let p of p_p.parents()) {
-        if (!p.v.isExpanded()) {
-            p.v.expand();
-            p.expand();
-            redraw_flag = true;
-        } else if (p.isExpanded()) {
-            p.v.expand();
-        } else {
-            p.expand();
-            redraw_flag = true;
-        }
+export function skip_nl(s: string, i: number): number {
+    if (match(s, i, "\r\n")) {
+        return i + 2;
     }
-    return redraw_flag;
+    if (match(s, i, '\n') || match(s, i, '\r')) {
+        return i + 1;
+    }
+    return i;
 }
 
 </t>
+<t tx="felix.20211023233357.1">/**
+  * Return the index in s of the start of the line containing s[i].
+ */
+export function find_line_start(s: string, p_i: number): number {
+    if (p_i &lt; 0) {
+        return 0;  // New in Leo 4.4.5: add this defensive code.
+    }
+    // bug fix: 11/2/02: change i to i+1 in rfind
+    const i: number = s.lastIndexOf('\n', p_i + 1);  // Finds the highest index in the range.
+    if (i === -1) {
+        return 0;
+    } else {
+        return i + 1;
+    }
+    //# if i == -1: return 0
+    //# else: return i + 1
+}
+</t>
+<t tx="felix.20211023234908.1">/* These methods skip to the next newline, regardless of whether the
+newline may be preceeded by a backslash. Consequently, they should be
+used only when we know that we are not in a preprocessor directive or
+string.
+*/
+
+export function skip_line(s: string, i: number): number {
+    if (i &gt;= s.length) {
+        return s.length;
+    }
+    if (i &lt; 0) {
+        i = 0;
+    }
+    i = s.indexOf('\n', i)
+    if (i === -1) {
+        return s.length;
+    }
+    return i + 1;
+}
+
+export function skip_to_end_of_line(s: string, i: number): number {
+    if (i &gt;= s.length) {
+        return s.length;
+    }
+    if (i &lt; 0) {
+        i = 0;
+    }
+    i = s.indexOf('\n', i)
+    if (i === -1) {
+        return s.length;
+    }
+    return i;
+}
+
+export function skip_to_start_of_line(s: string, i: number): number {
+    if (i &gt;= s.length) {
+        return s.length;
+    }
+    if (i &lt;= 0) {
+        return 0;
+    }
+    // Don't find s[i], so it doesn't matter if s[i] is a newline.
+    i = s.lastIndexOf('\n', i)
+    if (i === -1) {
+        return 0;
+    }
+    return i + 1;
+}
+
+</t>
+<t tx="felix.20211024012523.1">/**
+ * Returns clipboard content
+*/
+public getTextFromClipboard(): string {
+    return this.clipboardContent; //vscode.env.clipboard.readText(); // TODO
+}
+
+</t>
+<t tx="felix.20211024012536.1"></t>
 </tnodes>
 </leo_file>

@@ -381,6 +381,102 @@ export function es_exception(): string {
 export const es_print = console.log;
 
 /**
+  * Return the index in s of the start of the line containing s[i].
+ */
+export function find_line_start(s: string, p_i: number): number {
+    if (p_i < 0) {
+        return 0;  // New in Leo 4.4.5: add this defensive code.
+    }
+    // bug fix: 11/2/02: change i to i+1 in rfind
+    const i: number = s.lastIndexOf('\n', p_i + 1);  // Finds the highest index in the range.
+    if (i === -1) {
+        return 0;
+    } else {
+        return i + 1;
+    }
+    //# if i == -1: return 0
+    //# else: return i + 1
+}
+// Very useful for tracing.
+
+export function get_line(s: string, i: number): string {
+    let nl = "";
+    if (is_nl(s, i)) {
+        i = skip_nl(s, i);
+        nl = "[nl]";
+    }
+    const j: number = find_line_start(s, i);
+    const k: number = skip_to_end_of_line(s, i);
+    return nl + s.substring(j, k)
+}
+
+// Important: getLine is a completely different function.
+// getLine = get_line
+export const getLine = get_line;
+
+export function get_line_after(s: string, i: number): string {
+    let nl = "";
+    if (is_nl(s, i)) {
+        i = skip_nl(s, i);
+        nl = "[nl]";
+    }
+    const k: number = skip_to_end_of_line(s, i);
+    return nl + s.substring(i, k);
+}
+
+// getLineAfter = get_line_after
+export const getLineAfter = get_line_after;
+
+/* These methods skip to the next newline, regardless of whether the
+newline may be preceeded by a backslash. Consequently, they should be
+used only when we know that we are not in a preprocessor directive or
+string.
+*/
+
+export function skip_line(s: string, i: number): number {
+    if (i >= s.length) {
+        return s.length;
+    }
+    if (i < 0) {
+        i = 0;
+    }
+    i = s.indexOf('\n', i)
+    if (i === -1) {
+        return s.length;
+    }
+    return i + 1;
+}
+
+export function skip_to_end_of_line(s: string, i: number): number {
+    if (i >= s.length) {
+        return s.length;
+    }
+    if (i < 0) {
+        i = 0;
+    }
+    i = s.indexOf('\n', i)
+    if (i === -1) {
+        return s.length;
+    }
+    return i;
+}
+
+export function skip_to_start_of_line(s: string, i: number): number {
+    if (i >= s.length) {
+        return s.length;
+    }
+    if (i <= 0) {
+        return 0;
+    }
+    // Don't find s[i], so it doesn't matter if s[i] is a newline.
+    i = s.lastIndexOf('\n', i)
+    if (i === -1) {
+        return 0;
+    }
+    return i + 1;
+}
+
+/**
  * Return the expansion of the selected text of node p.
  * Return the expansion of all of node p's body text if
  * p is not the current node or if there is no text selection.
@@ -392,6 +488,24 @@ export function getScript(c: Commands, p: Position,
 ): string {
     console.log("get script called");
     return "";
+}
+
+export function is_nl(s: string, i: number): boolean {
+    return (i < s.length) && (s.charAt(i) === '\n' || s.charAt(i) === '\r');
+}
+
+/**
+ * We need this function because different systems have different end-of-line conventions.
+ * Skips a single "logical" end-of-line character.
+ */
+export function skip_nl(s: string, i: number): number {
+    if (match(s, i, "\r\n")) {
+        return i + 2;
+    }
+    if (match(s, i, '\n') || match(s, i, '\r')) {
+        return i + 1;
+    }
+    return i;
 }
 
 /**
