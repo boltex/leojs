@@ -105,6 +105,17 @@
 <v t="felix.20211010192923.15"><vh>_fireSoon</vh></v>
 </v>
 </v>
+<v t="felix.20201208223553.1"><vh>@clean src/leoOutline.ts</vh>
+<v t="felix.20201209011931.1"><vh>class JsOutlineProvider</vh>
+<v t="felix.20201209011931.2"><vh>constructor</vh></v>
+<v t="felix.20201209011931.3"><vh>refreshTreeRoot</vh></v>
+<v t="felix.20211003223641.1"><vh>buildId</vh></v>
+<v t="felix.20211003233639.1"><vh>incTreeId</vh></v>
+<v t="felix.20201209011931.4"><vh>getTreeItem</vh></v>
+<v t="felix.20201209011931.5"><vh>getChildren</vh></v>
+<v t="felix.20201209011931.6"><vh>getParent</vh></v>
+</v>
+</v>
 <v t="felix.20201214194144.1"><vh>@clean src/leoUI.ts</vh>
 <v t="felix.20201214195752.1"><vh>class LeoUI</vh>
 <v t="felix.20201214194144.2"><vh>Constructor</vh></v>
@@ -120,6 +131,7 @@
 <v t="felix.20201227155008.1"><vh>_setupRefresh</vh></v>
 <v t="felix.20201227014627.1"><vh>_launchRefresh</vh></v>
 <v t="felix.20201222013904.1"><vh>_refreshOutline</vh></v>
+<v t="felix.20211024203649.1"><vh>_revealTreeViewNode</vh></v>
 <v t="felix.20201214202123.1"><vh>_refreshDocumentsPane</vh></v>
 <v t="felix.20201214202128.1"><vh>setDocumentSelection</vh></v>
 </v>
@@ -157,6 +169,7 @@
 <v t="felix.20201214211839.1"><vh>selectOpenedLeoDocument</vh></v>
 </v>
 <v t="felix.20201214194144.9"><vh>Body Pane</vh>
+<v t="felix.20211024203725.1"><vh>_tryApplyNodeToBody</vh></v>
 <v t="felix.20201214211645.1"><vh>showBody</vh></v>
 <v t="felix.20201228164116.1"><vh>closeBody</vh></v>
 </v>
@@ -164,17 +177,6 @@
 <v t="felix.20201214211655.1"><vh>showLogPane</vh></v>
 </v>
 <v t="felix.20201214211706.1"><vh>test</vh></v>
-</v>
-</v>
-<v t="felix.20201208223553.1"><vh>@clean src/leoOutline.ts</vh>
-<v t="felix.20201209011931.1"><vh>class JsOutlineProvider</vh>
-<v t="felix.20201209011931.2"><vh>constructor</vh></v>
-<v t="felix.20201209011931.3"><vh>refreshTreeRoot</vh></v>
-<v t="felix.20211003223641.1"><vh>buildId</vh></v>
-<v t="felix.20211003233639.1"><vh>incTreeId</vh></v>
-<v t="felix.20201209011931.4"><vh>getTreeItem</vh></v>
-<v t="felix.20201209011931.5"><vh>getChildren</vh></v>
-<v t="felix.20201209011931.6"><vh>getParent</vh></v>
 </v>
 </v>
 <v t="felix.20201208223554.1"><vh>@clean src/leoOutlineNode.ts</vh>
@@ -2013,9 +2015,9 @@ public static UNTITLED_FILE_NAME: string = "untitled";
 public static RECENT_FILES_KEY: string = "leojsRecentFiles";
 public static LAST_FILES_KEY: string = "leojsLastFiles";
 
-public static REFRESH_DEBOUNCE_DELAY: number = 50;
-public static STATES_DEBOUNCE_DELAY: number = 100;
-public static DOCUMENTS_DEBOUNCE_DELAY: number = 100;
+public static REFRESH_DEBOUNCE_DELAY: number = 40;
+public static STATES_DEBOUNCE_DELAY: number = 60;
+public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
 
 public static CONFIG_NAME: string = "leojs";
 public static CONFIG_WORKBENCH_ENABLED_PREVIEW: string = "workbench.editor.enablePreview";
@@ -3352,7 +3354,7 @@ export class LeoUI {
     private _leoTerminalPane: vscode.OutputChannel | undefined;
 
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
-    public launchRefresh: (() =&gt; void) &amp; {
+    public launchRefresh: ((p_node?: Position) =&gt; void) &amp; {
         clear(): void;
     } &amp; {
         flush(): void;
@@ -3615,10 +3617,10 @@ public command(
     }
 
     /* EXAMPLE CALL BY METHOD
-            //@ts-expect-error
+                //@ts-expect-error
     if ((typeof this.leo_c[p_cmd]) === 'function') {
         console.log('HAS PROPERTY' + p_cmd + " so were doing it!");
-                //@ts-expect-error
+                    //@ts-expect-error
         this.leo_c[p_cmd]();
     } else {
         console.log('NO PROPERTY' + p_cmd);
@@ -3638,7 +3640,7 @@ public command(
  */
 public minibuffer(): Thenable&lt;unknown&gt; {
 
-    this._setupRefresh(false, { tree: true, body: true, states: true });
+    this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
 
     vscode.window.showInformationMessage('TODO: Implement minibuffer');
 
@@ -6316,57 +6318,60 @@ private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): 
 </t>
 <t tx="felix.20201227014627.1">/**
  * * Launches refresh for UI components and states (Debounced)
- * @param p_refreshType choose to refresh the outline, or the outline and body pane along with it
- * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
  */
-public _launchRefresh(): void {
+public _launchRefresh(p_node?: Position): void {
     // Set w_revealType, it will ultimately set this._revealType.
     // Used when finding the OUTLINE's selected node and setting or preventing focus into it
     // Set this._fromOutline. Used when finding the selected node and showing the BODY to set or prevent focus in it
 
     if (Object.keys(this._refreshType).length) {
-        //
         console.log('Has UI to REFRESH!', this._refreshType);
-
     }
 
-    // this._refreshType = Object.assign({}, p_refreshType);
-    // let w_revealType: RevealType;
-    // if (p_fromOutline) {
-    //     this._fromOutline = true;
-    //     w_revealType = RevealType.RevealSelectFocus;
-    // } else {
-    //     this._fromOutline = false;
-    //     w_revealType = RevealType.RevealSelect;
-    // }
+    // this._refreshType = Object.assign({}, p_refreshType); // USE _setupRefresh INSTEAD
+
+    let w_revealType: RevealType;
+
+    if (this._fromOutline) {
+        w_revealType = RevealType.RevealSelectFocus;
+    } else {
+        w_revealType = RevealType.RevealSelect;
+    }
+
     // if (this._refreshType.body &amp;&amp;
     //     this._bodyLastChangedDocument &amp;&amp; this._bodyLastChangedDocument.isDirty) {
     //     // When this refresh is launched with 'refresh body' requested, we need to lose any pending edits and save on vscode's side.
     //     this._bodyLastChangedDocument.save(); // Voluntarily save to 'clean' any pending body
     // }
+
     // // * _focusInterrupt insertNode Override
     // if (this._focusInterrupt) {
     //     // this._focusInterrupt = false; // TODO : Test if reverting this in _gotSelection is 'ok'
     //     w_revealType = RevealType.RevealSelect;
     // }
-    // // * Either the whole tree refreshes, or a single tree node is revealed when just navigating
-    // if (this._refreshType.tree) {
-    //     this._refreshType.tree = false;
-    //     this._refreshOutline(true, w_revealType);
-    // } else if (this._refreshType.node &amp;&amp; p_ap) {
-    //     // * Force single node "refresh" by revealing it, instead of "refreshing" it
-    //     this._refreshType.node = false;
-    //     const w_node = this.apToLeoNode(p_ap);
-    //     this.leoStates.setSelectedNodeFlags(w_node);
-    //     this._revealTreeViewNode(w_node, {
-    //         select: true, focus: true // FOCUS FORCED TO TRUE always leave focus on tree when navigating
-    //     });
-    //     if (this._refreshType.body) {
-    //         this._refreshType.body = false;
-    //         this._tryApplyNodeToBody(w_node, false, true); // ! NEEDS STACK AND THROTTLE!
-    //     }
-    // }
 
+    // * Either the whole tree refreshes, or a single tree node is revealed when just navigating
+    if (this._refreshType.tree) {
+        this._refreshType.tree = false;
+        this._refreshOutline(true, w_revealType);
+    } else if (this._refreshType.node &amp;&amp; p_node) {
+
+        // * Force single node "refresh" by revealing it, instead of "refreshing" it
+        this._refreshType.node = false;
+
+        this.leoStates.setSelectedNodeFlags(p_node);
+        this._revealTreeViewNode(p_node, {
+            select: true, focus: true // FOCUS FORCED TO TRUE always leave focus on tree when navigating
+        });
+
+        if (this._refreshType.body) {
+            this._refreshType.body = false;
+            this._tryApplyNodeToBody(p_node, false, true); // ! NEEDS STACK AND THROTTLE!
+        }
+
+    }
+
+    // getStates will check if documents, buttons and states flags are set and refresh accordingly
     this.getStates();
 }
 
@@ -15405,5 +15410,68 @@ public getTextFromClipboard(): string {
 
 </t>
 <t tx="felix.20211024012536.1"></t>
+<t tx="felix.20211024203649.1">/**
+ * * 'TreeView.reveal' for any opened leo outline that is currently visible
+ * @param p_leoNode The node to be revealed
+ * @param p_options Options object for the revealed node to either also select it, focus it, and expand it
+ * @returns Thenable from the reveal tree node action, resolves directly if no tree visible
+ */
+private _revealTreeViewNode(
+    p_leoNode: Position,
+    p_options?: { select?: boolean; focus?: boolean; expand?: boolean | number }
+): Thenable&lt;void&gt; {
+    if (this._leoTreeView.visible) {
+        return this._leoTreeView.reveal(p_leoNode, p_options);
+    }
+    if (this._leoTreeExView.visible &amp;&amp; this.config.treeInExplorer) {
+        return this._leoTreeExView.reveal(p_leoNode, p_options);
+    }
+    return Promise.resolve(); // Defaults to resolving even if both are hidden
+}
+
+</t>
+<t tx="felix.20211024203725.1">/**
+ * * Makes sure the body now reflects the selected node.
+ * This is called after 'selectTreeNode', or after '_gotSelection' when refreshing.
+ * @param p_node Node that was just selected
+ * @param p_aside Flag to indicate opening 'Aside' was required
+ * @param p_showBodyKeepFocus Flag used to keep focus where it was instead of forcing in body
+ * @param p_force_open Flag to force opening the body pane editor
+ * @returns a text editor of the p_node parameter's gnx (As 'leo' file scheme)
+ */
+private _tryApplyNodeToBody(
+    p_node: Position,
+    p_aside: boolean,
+    p_showBodyKeepFocus: boolean,
+    p_force_open?: boolean
+): Thenable&lt;vscode.TextEditor&gt; {
+    // console.log('try to apply node -&gt; ', p_node.gnx);
+
+    // this.lastSelectedNode = p_node; // Set the 'lastSelectedNode' this will also set the 'marked' node context
+    // this._commandStack.newSelection(); // Signal that a new selected node was reached and to stop using the received selection as target for next command
+
+    // if (this._bodyTextDocument) {
+    //     // if not first time and still opened - also not somewhat exactly opened somewhere.
+    //     if (
+    //         !this._bodyTextDocument.isClosed &amp;&amp;
+    //         !this._locateOpenedBody(p_node.gnx) // LOCATE NEW GNX
+    //     ) {
+    //         // if needs switching by actually having different gnx
+    //         if (utils.leoUriToStr(this.bodyUri) !== p_node.gnx) {
+    //             this._locateOpenedBody(utils.leoUriToStr(this.bodyUri)); // * LOCATE OLD GNX FOR PROPER COLUMN*
+    //             return this._bodyTextDocument.save().then(() =&gt; {
+    //                 return this._switchBody(p_node.gnx, p_aside, p_showBodyKeepFocus);
+    //             });
+    //         }
+    //     }
+    // } else {
+    //     // first time?
+    //     this.bodyUri = utils.strToLeoUri(p_node.gnx);
+    // }
+    // return this.showBody(p_aside, p_showBodyKeepFocus);
+    return Promise.resolve(vscode.window.activeTextEditor!); // TODO : TEMP
+}
+
+</t>
 </tnodes>
 </leo_file>

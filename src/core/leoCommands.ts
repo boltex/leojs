@@ -1213,7 +1213,7 @@ export class Commands {
     /**
      * Contract all nodes in the outline.
      */
-    public contractAllHeadlines(): void {
+    public contractAllHeadlines(redrawFlag: boolean = true): void {
         const c: Commands = this;
         for (let p of c.all_positions()) {
             p.contract();
@@ -1222,6 +1222,9 @@ export class Commands {
         const p = c.p;
         while (p.__bool__() && p.hasParent()) {
             p.moveToParent();
+        }
+        if (redrawFlag) {
+            c.selectPosition(p);
         }
         c.expansionLevel = 1;  // Reset expansion level.
     }

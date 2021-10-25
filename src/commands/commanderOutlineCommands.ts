@@ -155,6 +155,7 @@ export class CommanderOutlineCommands {
             return;
         }
         parent.contract();
+        c.selectPosition(parent)
     }
 
     //@+node:felix.20211020002058.9: *3* c_oc.expandAllHeadlines
@@ -170,6 +171,7 @@ export class CommanderOutlineCommands {
             c.expandSubtree(p);
             p.moveToNext();
         }
+        c.selectPosition(c.rootPosition()!);
         c.expansionLevel = 0;  // Reset expansion level.
     }
     //@+node:felix.20211020002058.10: *3* c_oc.expandAllSubheads
@@ -189,6 +191,7 @@ export class CommanderOutlineCommands {
             c.expandSubtree(child);
             child = child.next();
         }
+        c.selectPosition(p)
     }
     //@+node:felix.20211020002058.11: *3* c_oc.expandLevel1..9
     @commander_command(
@@ -568,12 +571,15 @@ export class CommanderOutlineCommands {
                 if (new_name === old_name) {
                     // Always do a full redraw.
                     //c.redraw(p);
+                    c.selectPosition(p)
                 } else {
+                    c.selectPosition(p)
                     cc.selectChapterByName(new_name);
                 }
             } else {
                 // Always do a full redraw.
                 //c.redraw(p);
+                c.selectPosition(p)
             }
         } else {
             g.blue('done');
