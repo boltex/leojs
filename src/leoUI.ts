@@ -548,6 +548,16 @@ export class LeoUI {
                 this._tryApplyNodeToBody(p_node, false, true); // ! NEEDS STACK AND THROTTLE!
             }
 
+        } else if (this._refreshType.node) {
+            console.log('node only no parameter');
+
+            this._refreshType.node = false;
+
+            this.leoStates.setSelectedNodeFlags(this.leo_c.p);
+            this._revealTreeViewNode(this.leo_c.p, {
+                select: true, focus: true // FOCUS FORCED TO TRUE always leave focus on tree when navigating
+            });
+
         }
 
         // getStates will check if documents, buttons and states flags are set and refresh accordingly
@@ -801,6 +811,7 @@ export class LeoUI {
                 const old_p = c.p;
                 c.selectPosition(p)
                 value = func.bind(c)();
+
                 if (p_keepSelection && c.positionExists(old_p)) {
                     // Only if 'keep' old position was set, and old_p still exists
                     c.selectPosition(old_p)

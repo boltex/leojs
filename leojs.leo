@@ -3609,6 +3609,7 @@ public command(
             const old_p = c.p;
             c.selectPosition(p)
             value = func.bind(c)();
+
             if (p_keepSelection &amp;&amp; c.positionExists(old_p)) {
                 // Only if 'keep' old position was set, and old_p still exists
                 c.selectPosition(old_p)
@@ -6368,6 +6369,16 @@ public _launchRefresh(p_node?: Position): void {
             this._refreshType.body = false;
             this._tryApplyNodeToBody(p_node, false, true); // ! NEEDS STACK AND THROTTLE!
         }
+
+    } else if (this._refreshType.node) {
+        console.log('node only no parameter');
+
+        this._refreshType.node = false;
+
+        this.leoStates.setSelectedNodeFlags(this.leo_c.p);
+        this._revealTreeViewNode(this.leo_c.p, {
+            select: true, focus: true // FOCUS FORCED TO TRUE always leave focus on tree when navigating
+        });
 
     }
 
