@@ -1763,8 +1763,8 @@ public refreshTreeRoot(): void {
 [CMD.GOTO_FIRST_VISIBLE, () =&gt; w_leoUI.command(LEOCMD.GOTO_FIRST_VISIBLE, U, REFRESH_NODE_BODY, true)],
 [CMD.GOTO_LAST_SIBLING, () =&gt; w_leoUI.command(LEOCMD.GOTO_LAST_SIBLING, U, REFRESH_NODE_BODY, true)],
 [CMD.GOTO_LAST_VISIBLE, () =&gt; w_leoUI.command(LEOCMD.GOTO_LAST_VISIBLE, U, REFRESH_NODE_BODY, true)],
-[CMD.GOTO_NEXT_VISIBLE, () =&gt; w_leoUI.command(LEOCMD.GOTO_NEXT_VISIBLE, U, REFRESH_TREE_BODY, true)],
-[CMD.GOTO_PREV_VISIBLE, () =&gt; w_leoUI.command(LEOCMD.GOTO_PREV_VISIBLE, U, REFRESH_TREE_BODY, true)],
+[CMD.GOTO_NEXT_VISIBLE, () =&gt; w_leoUI.command(LEOCMD.GOTO_NEXT_VISIBLE, U, REFRESH_NODE_BODY, true)],
+[CMD.GOTO_PREV_VISIBLE, () =&gt; w_leoUI.command(LEOCMD.GOTO_PREV_VISIBLE, U, REFRESH_NODE_BODY, true)],
 
 [CMD.PAGE_UP, () =&gt; w_leoUI.command(LEOCMD.PAGE_UP, U, REFRESH_NODE_BODY, true)],
 [CMD.PAGE_DOWN, () =&gt; w_leoUI.command(LEOCMD.PAGE_DOWN, U, REFRESH_NODE_BODY, true)],
@@ -9750,32 +9750,31 @@ public moveToThreadNext(): Position {
 public moveToVisBack(c: Commands): Position | undefined {
     const p: Position = this;
     const visLimit: [Position, boolean] | undefined = c.visLimit();
-    if (visLimit) {
-        const limit: Position = visLimit[0];
-        const limitIsVisible: boolean = visLimit[1];
-        while (visLimit &amp;&amp; p.__bool__()) {
-            // Short-circuit if possible.
-            const back: Position = p.back();
-            if (back.__bool__() &amp;&amp; back.hasChildren() &amp;&amp; back.isExpanded()) {
-                p.moveToThreadBack();
-            }
-            else if (back.__bool__()) {
-                p.moveToBack();
-            } else {
-                p.moveToParent();  // Same as p.moveToThreadBack()
-            }
-            if (p.__bool__()) {
-                if (limit) {
-                    let done: boolean;
-                    let val: Position | undefined;
-                    [done, val] = this.checkVisBackLimit(limit, limitIsVisible, p);
-                    if (done) {
-                        return val;  // A position or None
-                    }
+    const limit: Position | undefined = visLimit ? visLimit[0] : undefined;
+    const limitIsVisible: boolean = visLimit ? visLimit[1] : false;
+
+    while (p.__bool__()) {
+        // Short-circuit if possible.
+        const back: Position = p.back();
+        if (back.__bool__() &amp;&amp; back.hasChildren() &amp;&amp; back.isExpanded()) {
+            p.moveToThreadBack();
+        }
+        else if (back.__bool__()) {
+            p.moveToBack();
+        } else {
+            p.moveToParent();  // Same as p.moveToThreadBack()
+        }
+        if (p.__bool__()) {
+            if (limit) {
+                let done: boolean;
+                let val: Position | undefined;
+                [done, val] = this.checkVisBackLimit(limit, limitIsVisible, p);
+                if (done) {
+                    return val;  // A position or None
                 }
-                if (p.isVisible(c)) {
-                    return p;
-                }
+            }
+            if (p.isVisible(c)) {
+                return p;
             }
         }
     }
@@ -9807,27 +9806,26 @@ public checkVisBackLimit(limit: Position, limitIsVisible: boolean, p: Position):
 public moveToVisNext(c: Commands): Position | undefined {
     const p: Position = this;
     const visLimit: [Position, boolean] | undefined = c.visLimit();
-    if (visLimit) {
-        const limit: Position = visLimit[0];
-        while (p.__bool__()) {
-            if (p.hasChildren()) {
-                if (p.isExpanded()) {
-                    p.moveToFirstChild();
-                } else {
-                    p.moveToNodeAfterTree();
-                }
-            } else if (p.hasNext()) {
-                p.moveToNext();
+    const limit: Position | undefined = visLimit ? visLimit[0] : undefined;
+
+    while (p.__bool__()) {
+        if (p.hasChildren()) {
+            if (p.isExpanded()) {
+                p.moveToFirstChild();
             } else {
-                p.moveToThreadNext();
+                p.moveToNodeAfterTree();
             }
-            if (p.__bool__()) {
-                if (limit &amp;&amp; this.checkVisNextLimit(limit, p)) {
-                    return undefined;
-                }
-                if (p.isVisible(c)) {
-                    return p;
-                }
+        } else if (p.hasNext()) {
+            p.moveToNext();
+        } else {
+            p.moveToThreadNext();
+        }
+        if (p.__bool__()) {
+            if (limit &amp;&amp; this.checkVisNextLimit(limit, p)) {
+                return undefined;
+            }
+            if (p.isVisible(c)) {
+                return p;
             }
         }
     }

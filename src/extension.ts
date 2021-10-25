@@ -102,8 +102,8 @@ export function activate(p_context: vscode.ExtensionContext) {
         [CMD.GOTO_FIRST_VISIBLE, () => w_leoUI.command(LEOCMD.GOTO_FIRST_VISIBLE, U, REFRESH_NODE_BODY, true)],
         [CMD.GOTO_LAST_SIBLING, () => w_leoUI.command(LEOCMD.GOTO_LAST_SIBLING, U, REFRESH_NODE_BODY, true)],
         [CMD.GOTO_LAST_VISIBLE, () => w_leoUI.command(LEOCMD.GOTO_LAST_VISIBLE, U, REFRESH_NODE_BODY, true)],
-        [CMD.GOTO_NEXT_VISIBLE, () => w_leoUI.command(LEOCMD.GOTO_NEXT_VISIBLE, U, REFRESH_TREE_BODY, true)],
-        [CMD.GOTO_PREV_VISIBLE, () => w_leoUI.command(LEOCMD.GOTO_PREV_VISIBLE, U, REFRESH_TREE_BODY, true)],
+        [CMD.GOTO_NEXT_VISIBLE, () => w_leoUI.command(LEOCMD.GOTO_NEXT_VISIBLE, U, REFRESH_NODE_BODY, true)],
+        [CMD.GOTO_PREV_VISIBLE, () => w_leoUI.command(LEOCMD.GOTO_PREV_VISIBLE, U, REFRESH_NODE_BODY, true)],
 
         [CMD.PAGE_UP, () => w_leoUI.command(LEOCMD.PAGE_UP, U, REFRESH_NODE_BODY, true)],
         [CMD.PAGE_DOWN, () => w_leoUI.command(LEOCMD.PAGE_DOWN, U, REFRESH_NODE_BODY, true)],
