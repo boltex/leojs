@@ -1498,32 +1498,31 @@ export class Position {
     public moveToVisBack(c: Commands): Position | undefined {
         const p: Position = this;
         const visLimit: [Position, boolean] | undefined = c.visLimit();
-        if (visLimit) {
-            const limit: Position = visLimit[0];
-            const limitIsVisible: boolean = visLimit[1];
-            while (visLimit && p.__bool__()) {
-                // Short-circuit if possible.
-                const back: Position = p.back();
-                if (back.__bool__() && back.hasChildren() && back.isExpanded()) {
-                    p.moveToThreadBack();
-                }
-                else if (back.__bool__()) {
-                    p.moveToBack();
-                } else {
-                    p.moveToParent();  // Same as p.moveToThreadBack()
-                }
-                if (p.__bool__()) {
-                    if (limit) {
-                        let done: boolean;
-                        let val: Position | undefined;
-                        [done, val] = this.checkVisBackLimit(limit, limitIsVisible, p);
-                        if (done) {
-                            return val;  // A position or None
-                        }
+        const limit: Position | undefined = visLimit ? visLimit[0] : undefined;
+        const limitIsVisible: boolean = visLimit ? visLimit[1] : false;
+
+        while (p.__bool__()) {
+            // Short-circuit if possible.
+            const back: Position = p.back();
+            if (back.__bool__() && back.hasChildren() && back.isExpanded()) {
+                p.moveToThreadBack();
+            }
+            else if (back.__bool__()) {
+                p.moveToBack();
+            } else {
+                p.moveToParent();  // Same as p.moveToThreadBack()
+            }
+            if (p.__bool__()) {
+                if (limit) {
+                    let done: boolean;
+                    let val: Position | undefined;
+                    [done, val] = this.checkVisBackLimit(limit, limitIsVisible, p);
+                    if (done) {
+                        return val;  // A position or None
                     }
-                    if (p.isVisible(c)) {
-                        return p;
-                    }
+                }
+                if (p.isVisible(c)) {
+                    return p;
                 }
             }
         }
@@ -1553,27 +1552,26 @@ export class Position {
     public moveToVisNext(c: Commands): Position | undefined {
         const p: Position = this;
         const visLimit: [Position, boolean] | undefined = c.visLimit();
-        if (visLimit) {
-            const limit: Position = visLimit[0];
-            while (p.__bool__()) {
-                if (p.hasChildren()) {
-                    if (p.isExpanded()) {
-                        p.moveToFirstChild();
-                    } else {
-                        p.moveToNodeAfterTree();
-                    }
-                } else if (p.hasNext()) {
-                    p.moveToNext();
+        const limit: Position | undefined = visLimit ? visLimit[0] : undefined;
+
+        while (p.__bool__()) {
+            if (p.hasChildren()) {
+                if (p.isExpanded()) {
+                    p.moveToFirstChild();
                 } else {
-                    p.moveToThreadNext();
+                    p.moveToNodeAfterTree();
                 }
-                if (p.__bool__()) {
-                    if (limit && this.checkVisNextLimit(limit, p)) {
-                        return undefined;
-                    }
-                    if (p.isVisible(c)) {
-                        return p;
-                    }
+            } else if (p.hasNext()) {
+                p.moveToNext();
+            } else {
+                p.moveToThreadNext();
+            }
+            if (p.__bool__()) {
+                if (limit && this.checkVisNextLimit(limit, p)) {
+                    return undefined;
+                }
+                if (p.isVisible(c)) {
+                    return p;
                 }
             }
         }
