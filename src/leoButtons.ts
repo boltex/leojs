@@ -1,14 +1,20 @@
 import * as vscode from "vscode";
 import { LeoButtonNode } from "./leoButtonNode";
 import { ProviderResult } from "vscode";
-import { Icon } from "./types";
+import { Icon, LeoButton } from "./types";
 import { LeoStates } from "./leoStates";
-import { Leojs } from "./leojs";
+
 
 /**
  * * '@buttons' shown as a list with this TreeDataProvider implementation
  */
 export class LeoButtonsProvider implements vscode.TreeDataProvider<LeoButtonNode> {
+
+    private fakeAtButtons: LeoButton[] = [
+        { name: 'script-button', index: 'nullButtonWidget' },
+        { name: 'button name 2', index: 'key2' },
+        { name: 'button name 3', index: 'key3' },
+    ];
 
     private _onDidChangeTreeData: vscode.EventEmitter<LeoButtonNode | undefined> = new vscode.EventEmitter<LeoButtonNode | undefined>();
 
@@ -17,7 +23,6 @@ export class LeoButtonsProvider implements vscode.TreeDataProvider<LeoButtonNode
     constructor(
         private _leoStates: LeoStates,
         private _icons: Icon[],
-        private _leojs: Leojs
     ) { }
 
     /**
@@ -35,7 +40,7 @@ export class LeoButtonsProvider implements vscode.TreeDataProvider<LeoButtonNode
         const w_children: LeoButtonNode[] = [];
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoStates.fileOpenedReady && !element) {
-            this._leojs.atButtons.forEach(p_button => {
+            this.fakeAtButtons.forEach(p_button => {
                 w_children.push(new LeoButtonNode(p_button, this._icons));
             });
         }

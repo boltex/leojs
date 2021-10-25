@@ -2,7 +2,7 @@ import * as os from "os";
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
 import { NodeIndices } from './leoNodes';
-import { Commander } from './leoCommander';
+import { Commands } from './leoCommands';
 
 /**
  *  A singleton class to manage idle-time handling. This class handles all
@@ -80,7 +80,7 @@ export class LeoApp {
     public diff: boolean = false; // True: run Leo in diff mode.
     public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
-    public gui:LeoUI|undefined; // The gui class.
+    public gui: LeoUI | undefined; // The gui class.
     public guiArgName = null; // The gui name given in --gui option.
     public ipython_inited: boolean = false; // True if leoIpython.py imports succeeded.
     public isTheme: boolean = false; // True: load files as theme files (ignore myLeoSettings.leo).
@@ -127,7 +127,7 @@ export class LeoApp {
 
     public globalKillBuffer: any[] = []; // The global kill buffer.
     public globalRegisters: any = {}; // The global register list.
-    public leoID: string = 'filtest'; // The id part of gnx's, using empty for falsy.
+    public leoID: string = 'test'; // The id part of gnx's, using empty for falsy.
     public loadedThemes: any[] = []; // List of loaded theme.leo files.
     public lossage: any[] = []; // List of last 100 keystrokes.
     public paste_c: any = null; // The commander that pasted the last outline.
@@ -137,8 +137,7 @@ export class LeoApp {
     public realMenuNameDict = {}; // Translations of menu names.
 
     // * Opened Leo File Commanders
-    public commandersList: Commander[] = [];
-    public leo_c:Commander|undefined;
+    public commandersList: Commands[] = [];
     // Most of these are defined in initApp.
     public backgroundProcessManager: any = null; // The singleton BackgroundProcessManager instance.
     public commander_cacher: any = null; // The singleton leoCacher.CommanderCacher instance.
@@ -149,12 +148,12 @@ export class LeoApp {
     public global_cacher: any = null; // The singleton leoCacher.GlobalCacher instance.
     public idleTimeManager: any = null; // The singleton IdleTimeManager instance.
     public ipk: any = null; // python kernel instance
-    public loadManager: LoadManager|undefined; // The singleton LoadManager instance.
+    public loadManager: LoadManager | undefined; // The singleton LoadManager instance.
     // public logManager: any = null;
     // The singleton LogManager instance.
     // public openWithManager: any = null;
     // The singleton OpenWithManager instance.
-    public nodeIndices: NodeIndices|undefined; // The singleton nodeIndices instance.
+    public nodeIndices: NodeIndices | undefined; // The singleton nodeIndices instance.
     public pluginsController: any = null; // The singleton PluginsManager instance. public sessionManager: any = null; // The singleton SessionManager instance. // The Commands class...
     public commandName: any = null; // The name of the command being executed.
     public commandInterruptFlag: boolean = false; // True: command within a command.
@@ -833,44 +832,44 @@ export class LeoApp {
     /**
      * Get g.app.leoID from various sources.
      */
-    public setLeoID(useDialog:boolean=true, verbose:boolean=true):string{
+    public setLeoID(useDialog: boolean = true, verbose: boolean = true): string {
         this.leoID = "";
-        
+
         // tslint:disable-next-line: strict-comparisons
         console.assert(this === g.app);
-        
+
         verbose = verbose && !g.unitTesting && !this.silentMode;
-        
+
         this.leoID = this.cleanLeoID(os.userInfo().username, 'os.userInfo().username');
-        
+
         return this.leoID;
         // table = (self.setIDFromSys, self.setIDFromFile, self.setIDFromEnv,)
         // for func in table:
-            // func(verbose)
-            // if self.leoID:
-                // return self.leoID
+        // func(verbose)
+        // if self.leoID:
+        // return self.leoID
         // if useDialog:
-            // self.setIdFromDialog()
-            // if self.leoID:
-                // self.setIDFile()
+        // self.setIdFromDialog()
+        // if self.leoID:
+        // self.setIDFile()
         // return self.leoID
     }
 
     /**
      * #1404: Make sure that the given Leo ID will not corrupt a .leo file.
      */
-    public cleanLeoID(id_:string, tag:string):string {
-        const old_id:string = id_.toString();
-        try{
+    public cleanLeoID(id_: string, tag: string): string {
+        const old_id: string = id_.toString();
+        try {
             id_ = id_.replace(/\./g, "").replace(/\,/g, "").replace(/\"/g, "").replace(/\'/g, "");
             //  Remove *all* whitespace: https://stackoverflow.com/questions/3739909
             id_ = id_.split(' ').join('');
         }
-        catch(exception){
+        catch (exception) {
             g.es_exception();
             id_ = '';
         }
-        if (id_.length < 3){
+        if (id_.length < 3) {
             throw new Error("unknownAttributes ValueError");
             // TODO: Show Leo Id syntax error message
             // g.EmergencyDialog(
@@ -887,15 +886,15 @@ export class LeoApp {
      * Create a commander and its view frame for the Leo main window.
      */
     public newCommander(
-        fileName:string,
-        gui:LeoUI,
-        previousSettings?:any,
-        relativeFileName?:any,
-    ): Commander{
+        fileName: string,
+        gui: LeoUI,
+        previousSettings?: any,
+        relativeFileName?: any,
+    ): Commands {
         // Create the commander and its subcommanders.
         // This takes about 3/4 sec when called by the leoBridge module.
         // Timeit reports 0.0175 sec when using a nullGui.
-        const c = new Commander(
+        const c = new Commands(
             fileName,
             gui,
             previousSettings,
@@ -913,17 +912,17 @@ export class LoadManager {
 
     // Global settings & shortcuts dicts...
     // The are the defaults for computing settings and shortcuts for all loaded files.
-    
+
     // A g.TypedDict: the join of settings in leoSettings.leo & myLeoSettings.leo.
-    public globalSettingsDict: {[key:string]:any}|undefined; 
+    public globalSettingsDict: { [key: string]: any } | undefined;
     // A g.TypedDict: the join of shortcuts in leoSettings.leo & myLeoSettings.leo
-    public globalBindingsDict: {[key:string]:any}|undefined; 
-    
-    public files: string []; // List of files to be loaded.
-    public options: {[key:string]:any}; // Dictionary of user options. Keys are option names.
-    public old_argv: string []; // A copy of sys.argv for debugging.
+    public globalBindingsDict: { [key: string]: any } | undefined;
+
+    public files: string[]; // List of files to be loaded.
+    public options: { [key: string]: any }; // Dictionary of user options. Keys are option names.
+    public old_argv: string[]; // A copy of sys.argv for debugging.
     public more_cmdline_files: boolean; // True when more files remain on the command line to be loaded.
-    
+
     constructor() {
         this.globalSettingsDict = undefined;
         this.globalBindingsDict = undefined;
@@ -936,15 +935,15 @@ export class LoadManager {
     /**
      * This is Leo's main startup method.
      */
-    public load(fileName?:string): void {
-        // SIMPLIFIED JS VERSION 
-        const lm:LoadManager = this;
+    public load(fileName?: string): void {
+        // SIMPLIFIED JS VERSION
+        const lm: LoadManager = this;
 
         const t1 = process.hrtime();
-        
+
         lm.doPrePluginsInit(fileName); // sets lm.options and lm.files
-        const t2 = process.hrtime();    
-        
+        const t2 = process.hrtime();
+
         lm.doPostPluginsInit();
         const t3 = process.hrtime();
 
@@ -955,34 +954,34 @@ export class LoadManager {
 
     /**
      * Create a Leo window for each file in the lm.files list.
-     */ 
-    public doPostPluginsInit():boolean {
+     */
+    public doPostPluginsInit(): boolean {
         // Clear g.app.initing _before_ creating commanders.
-        const lm:LoadManager = this;
+        const lm: LoadManager = this;
         g.app.initing = false;  // "idle" hooks may now call g.app.forceShutdown.
         // Create the main frame.Show it and all queued messages.
-        let c:Commander|undefined;
-        let c1:Commander|undefined;
-        let fn:string = "";
-        if (lm.files.length){
-            try{  // #1403.
+        let c: Commands | undefined;
+        let c1: Commands | undefined;
+        let fn: string = "";
+        if (lm.files.length) {
+            try {  // #1403.
                 for (let n = 0; n < lm.files.length; n++) {
                     const fn = lm.files[n];
                     lm.more_cmdline_files = n < (lm.files.length - 1);
                     c = lm.loadLocalFile(fn, g.app.gui!);
-                        // Returns None if the file is open in another instance of Leo.
-                    if (c && !c1){  // #1416:
+                    // Returns None if the file is open in another instance of Leo.
+                    if (c && !c1) {  // #1416:
                         c1 = c;
                     }
                 }
             }
-            catch(exception){
+            catch (exception) {
                 g.es_print(`Unexpected exception reading ${fn}`);
                 g.es_exception();
                 c = undefined;
             }
         }
-        
+
         // Load (and save later) a session *only* if the command line contains no files.
         /*
         g.app.loaded_session = !lm.files.length;
@@ -997,7 +996,7 @@ export class LoadManager {
                     else:
                         c = c1 = None;
             }
-            
+
             catch( Exception){
                 g.es_print('Can not load session');
                 g.es_exception();
@@ -1006,19 +1005,19 @@ export class LoadManager {
         */
         // Enable redraws.
         g.app.disable_redraw = false;
-        
-        if (!c1){
-            try{ // #1403.
+
+        if (!c1) {
+            try { // #1403.
                 c1 = lm.openEmptyWorkBook();
-                    // Calls LM.loadLocalFile.
+                // Calls LM.loadLocalFile.
             }
-            catch(exception){
+            catch (exception) {
                 g.es_print('Can not create empty workbook');
                 g.es_exception();
             }
         }
         c = c1;
-        if (!c){
+        if (!c) {
             // Leo is out of options: Force an immediate exit.
             return false;
         }
@@ -1033,15 +1032,15 @@ export class LoadManager {
         // c.redraw();
         // g.doHook("start2", c=c, p=c.p, fileName=c.fileName());
         // c.initialFocusHelper();
-        const screenshot_fn:string = lm.options['screenshot_fn'];
-        if (screenshot_fn){
+        const screenshot_fn: string = lm.options['screenshot_fn'];
+        if (screenshot_fn) {
             lm.make_screen_shot(screenshot_fn);
             return false;  // Force an immediate exit.
         }
         return true;
     }
 
-    public make_screen_shot(fn:string): void {
+    public make_screen_shot(fn: string): void {
         // TODO
         console.log('TODO: make_screen_shot');
         /*
@@ -1055,10 +1054,10 @@ export class LoadManager {
     /**
      * Open an empty frame and paste the contents of CheatSheet.leo into it.
      */
-    public openEmptyWorkBook(): Commander| undefined {
+    public openEmptyWorkBook(): Commands | undefined {
         // TODO
-        const lm:LoadManager = this;
-        
+        const lm: LoadManager = this;
+
         /*
         // Create an empty frame.
         const fn:string = lm.computeWorkbookFileName();
@@ -1095,9 +1094,9 @@ export class LoadManager {
             g.app.gui.replaceClipboardWith(old_clipboard)
         return c
         */
-        const fn:string = "";
-        const c = lm.loadLocalFile(fn,g.app.gui!);
-        if (!c){
+        const fn: string = "";
+        const c = lm.loadLocalFile(fn, g.app.gui!);
+        if (!c) {
             return undefined;
         }
         return c;
@@ -1106,11 +1105,11 @@ export class LoadManager {
     /**
      * Scan options, set directories and read settings.
      */
-    public doPrePluginsInit(fileName?:string):void {
-        const lm:LoadManager = this;
+    public doPrePluginsInit(fileName?: string): void {
+        const lm: LoadManager = this;
         // lm.computeStandardDirectories();
         // lm.adjustSysPath();
-            // A do-nothing.
+        // A do-nothing.
         // Scan the options as early as possible.
         const options = {}; // lm.scanOptions(fileName);
         lm.options = options;
@@ -1124,9 +1123,9 @@ export class LoadManager {
         // Read settings *after* setting g.app.config and *before* opening plugins.
         // This means if-gui has effect only in per-file settings.
         // lm.readGlobalSettingsFiles()
-            // reads only standard settings files, using a null gui.
-            // uses lm.files[0] to compute the local directory
-            // that might contain myLeoSettings.leo.
+        // reads only standard settings files, using a null gui.
+        // uses lm.files[0] to compute the local directory
+        // that might contain myLeoSettings.leo.
         // Read the recent files file.
         // localConfigFile = lm.files[0] if lm.files else None
         // g.app.recentFilesManager.readRecentFiles(localConfigFile)
@@ -1136,43 +1135,43 @@ export class LoadManager {
         // g.app.computeSignon()  // Set app.signon/signon1 for commanders.
     }
 
-    public initApp(verbose?:boolean): void {
+    public initApp(verbose?: boolean): void {
 
 
-    /*
-        self.createAllImporterData()
-            # Can be done early. Uses only g.app.loadDir
-        assert g.app.loadManager
-        from leo.core import leoBackground
-        from leo.core import leoConfig
-        from leo.core import leoNodes
-        from leo.core import leoPlugins
-        from leo.core import leoSessions
-        # Import leoIPython only if requested.  The import is quite slow.
-        self.setStdStreams()
-        if g.app.useIpython:
-            from leo.core import leoIPython
-                # This launches the IPython Qt Console.  It *is* required.
-            assert leoIPython  # suppress pyflakes/flake8 warning.
-        # Make sure we call the new leoPlugins.init top-level function.
-        leoPlugins.init()
-        # Force the user to set g.app.leoID.
-        g.app.setLeoID(verbose=verbose)
-        # Create early classes *after* doing plugins.init()
-        g.app.idleTimeManager = IdleTimeManager()
-        g.app.backgroundProcessManager = leoBackground.BackgroundProcessManager()
-        g.app.externalFilesController = leoExternalFiles.ExternalFilesController()
-        g.app.recentFilesManager = RecentFilesManager()
-        g.app.config = leoConfig.GlobalConfigManager()
-        g.app.nodeIndices = leoNodes.NodeIndices(g.app.leoID)
-        g.app.sessionManager = leoSessions.SessionManager()
-        # Complete the plugins class last.
-        g.app.pluginsController.finishCreate()
-    */
+        /*
+            self.createAllImporterData()
+                # Can be done early. Uses only g.app.loadDir
+            assert g.app.loadManager
+            from leo.core import leoBackground
+            from leo.core import leoConfig
+            from leo.core import leoNodes
+            from leo.core import leoPlugins
+            from leo.core import leoSessions
+            # Import leoIPython only if requested.  The import is quite slow.
+            self.setStdStreams()
+            if g.app.useIpython:
+                from leo.core import leoIPython
+                    # This launches the IPython Qt Console.  It *is* required.
+                assert leoIPython  # suppress pyflakes/flake8 warning.
+            # Make sure we call the new leoPlugins.init top-level function.
+            leoPlugins.init()
+            # Force the user to set g.app.leoID.
+            g.app.setLeoID(verbose=verbose)
+            # Create early classes *after* doing plugins.init()
+            g.app.idleTimeManager = IdleTimeManager()
+            g.app.backgroundProcessManager = leoBackground.BackgroundProcessManager()
+            g.app.externalFilesController = leoExternalFiles.ExternalFilesController()
+            g.app.recentFilesManager = RecentFilesManager()
+            g.app.config = leoConfig.GlobalConfigManager()
+            g.app.nodeIndices = leoNodes.NodeIndices(g.app.leoID)
+            g.app.sessionManager = leoSessions.SessionManager()
+            # Complete the plugins class last.
+            g.app.pluginsController.finishCreate()
+        */
 
     }
 
-    public loadLocalFile(fn:string, gui:LeoUI, old_c?:Commander):Commander{
+    public loadLocalFile(fn: string, gui: LeoUI, old_c?: Commands): Commands {
         /*Completely read a file, creating the corresonding outline.
 
         1. If fn is an existing .leo file (possibly zipped), read it twice:
@@ -1187,23 +1186,23 @@ export class LoadManager {
         get settings from the leoSettings.leo and myLeoSetting.leo or default settings,
         or open an empty outline.
         */
-        const lm:LoadManager = this;
-        let c:Commander| undefined;
-        
+        const lm: LoadManager = this;
+        let c: Commands | undefined;
+
         // Step 0: Return if the file is already open.
         // fn = g.os_path_finalize(fn);
-        
-        if (fn){
+
+        if (fn) {
             c = lm.findOpenFile(fn);
-            if (c){
+            if (c) {
                 return c;
             }
         }
         // Step 1: get the previous settings.
         // For .leo files (and zipped .leo files) this pre-reads the file in a null gui.
         // Otherwise, get settings from leoSettings.leo, myLeoSettings.leo, or default settings.
-        const previousSettings:any = undefined; // lm.getPreviousSettings(fn);
-        
+        const previousSettings: any = undefined; // lm.getPreviousSettings(fn);
+
         // Step 2: open the outline in the requested gui.
         // For .leo files (and zipped .leo file) this opens the file a second time.
         c = lm.openFileByName(fn, gui, old_c, previousSettings)!;
@@ -1214,36 +1213,36 @@ export class LoadManager {
      * fn may be a Leo file (including .leo or zipped file) or an external file.
      *
      * This is not a pre-read: the previousSettings always exist and
-     * the commander created here persists until the user closes the outline. 
+     * the commander created here persists until the user closes the outline.
      *
      * Reads the entire outline if fn exists and is a .leo file or zipped file.
      * Creates an empty outline if fn is a non-existent Leo file.
      * Creates an wrapper outline if fn is an external file, existing or not.
      */
-    public openFileByName(fn:string, gui:LeoUI, old_c?:Commander, previousSettings?:any): Commander| undefined{
-        const lm:LoadManager = this;
+    public openFileByName(fn: string, gui: LeoUI, old_c?: Commands, previousSettings?: any): Commands | undefined {
+        const lm: LoadManager = this;
         // Disable the log.
         // g.app.setLog(None);
         // g.app.lockLog();
-        
+
         // Create the a commander for the .leo file.
         // Important.  The settings don't matter for pre-reads!
         // For second read, the settings for the file are *exactly* previousSettings.
-        const c:Commander = g.app.newCommander(fn, gui, previousSettings);
+        const c: Commands = g.app.newCommander(fn, gui, previousSettings);
         // Open the file, if possible.
         // g.doHook('open0');
-        
+
         /*
         theFile = lm.openLeoOrZipFile(fn);
         if isinstance(theFile, sqlite3.Connection):
             // this commander is associated with sqlite db
             c.sqlite_connection = theFile
-        */    
-            
+        */
+
         // Enable the log.
         // g.app.unlockLog();
         // c.frame.log.enable(true);
-        
+
         // Phase 2: Create the outline.
         // g.doHook("open1", old_c=None, c=c, new_c=c, fileName=fn)
         /*
@@ -1258,10 +1257,10 @@ export class LoadManager {
             // a) fn is a .leo file that does not exist or
             // b) fn is an external file, existing or not.
             lm.initWrapperLeoFile(c, fn)
-          
-        */  
+
+        */
         // g.doHook("open2", old_c=None, c=c, new_c=c, fileName=fn)
-        
+
         // Phase 3: Complete the initialization.
         // g.app.writeWaitingLog(c)
         // c.setLog()
@@ -1278,19 +1277,19 @@ export class LoadManager {
      *
      * Otherwise, create an @edit or @file node for the external file.
      */
-    public initWrapperLeoFile(c:Commander, fn:string):Commander {
+    public initWrapperLeoFile(c: Commands, fn: string): Commands {
         // lm = self
         // Use the config params to set the size and location of the window.
-        
+
         // frame = c.frame
         // frame.setInitialWindowGeometry()
         // frame.deiconify()
         // frame.lift()
-        
+
         // #1570: Resize the _new_ frame.
         // frame.splitVerticalFlag, r1, r2 = frame.initialRatios()
         // frame.resizePanesToRatio(r1, r2)
-        
+
         /*
         if not g.os_path_exists(fn):
             p = c.rootPosition()
@@ -1333,20 +1332,20 @@ export class LoadManager {
         return c;
     }
 
-    public openLeoOrZipFile(fn:string):any {
-        const lm:LoadManager = this;
-        if( fn.endsWith('.db')){
+    public openLeoOrZipFile(fn: string): any {
+        const lm: LoadManager = this;
+        if (fn.endsWith('.db')) {
             // return sqlite3.connect(fn)
             return undefined;
         }
-        let theFile:any;
+        let theFile: any;
         // zipped = lm.isZippedFile(fn)
-        
-        // TODO 
+
+        // TODO
         // if(!!fn && fn.endsWith('.leo') && g.os_path_exists(fn)){
-            // theFile = lm.openLeoFile(fn);
+        // theFile = lm.openLeoFile(fn);
         // }else{
-            // theFile = undefined;
+        // theFile = undefined;
         // }
         return theFile;
     }
@@ -1355,7 +1354,7 @@ export class LoadManager {
      * Returns the commander of already opened Leo file
      * returns undefined otherwise
      */
-    public findOpenFile(fn:string):Commander | undefined{
+    public findOpenFile(fn: string): Commands | undefined {
         // TODO: check in opened commanders array (g.app.windowList or other as needed)
         /*
         def munge(name):

@@ -7,8 +7,8 @@ export class Constants {
 
     public static NAME: string = "leojs";
 
-    public static TREEVIEW_ID: string = "leojs";
-    public static TREEVIEW_EXPLORER_ID: string = "leojsExplorer";
+    public static TREEVIEW_ID: string = "leojsOutline";
+    public static TREEVIEW_EXPLORER_ID: string = "leojsOutlineExplorer";
 
     public static DOCUMENTS_ID: string = "leojsDocuments";
     public static DOCUMENTS_EXPLORER_ID: string = "leojsDocumentsExplorer";
@@ -25,10 +25,13 @@ export class Constants {
     public static RECENT_FILES_KEY: string = "leojsRecentFiles";
     public static LAST_FILES_KEY: string = "leojsLastFiles";
 
-    public static REFRESH_DEBOUNCE_DELAY: number = 50;
-    public static STATES_DEBOUNCE_DELAY: number = 100;
-    public static DOCUMENTS_DEBOUNCE_DELAY: number = 100;
+    public static REFRESH_DEBOUNCE_DELAY: number = 40;
+    public static STATES_DEBOUNCE_DELAY: number = 60;
+    public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
 
+    public static CONFIG_NAME: string = "leojs";
+    public static CONFIG_WORKBENCH_ENABLED_PREVIEW: string = "workbench.editor.enablePreview";
+    public static CONFIG_REFRESH_MATCH: string = "OnNodes"; // substring to distinguish 'on-hover' icon commands
     /**
      * Strings used in the workbench interface panels (not for messages or dialogs)
      */
@@ -97,6 +100,24 @@ export class Constants {
     };
 
     /**
+     * * Find panel controls ids
+     */
+    public static FIND_INPUTS_IDS = {
+        FIND_TEXT: "findText",
+        REPLACE_TEXT: "replaceText",
+        ENTIRE_OUTLINE: "entireOutline",
+        NODE_ONLY: "nodeOnly",
+        SUBOUTLINE_ONLY: "subOutlineOnly",
+        IGNORE_CASE: "ignoreCase",
+        MARK_CHANGES: "markChanges",
+        MARK_FINDS: "markFinds",
+        REG_EXP: "regExp",
+        WHOLE_WORD: "wholeWord",
+        SEARCH_BODY: "searchBody",
+        SEARCH_HEADLINE: "searchHeadline"
+    };
+
+    /**
      * * Strings used in 'at-button' panel display in LeoButtonNode
      */
     public static BUTTON_STRINGS = {
@@ -104,6 +125,75 @@ export class Constants {
         SCRIPT_BUTTON: "script-button",
         ADD_BUTTON: "leoButtonAdd",
         NORMAL_BUTTON: "leoButtonNode"
+    };
+
+    /**
+     * * String for JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.
+     */
+    public static CONFIG_NAMES = {
+        CHECK_FOR_CHANGE_EXTERNAL_FILES: "checkForChangeExternalFiles",
+        DEFAULT_RELOAD_IGNORE: "defaultReloadIgnore",
+        LEO_TREE_BROWSE: "leoTreeBrowse",
+        TREE_KEEP_FOCUS: "treeKeepFocus",
+        TREE_KEEP_FOCUS_WHEN_ASIDE: "treeKeepFocusWhenAside",
+        STATUSBAR_STRING: "statusBarString",
+        STATUSBAR_COLOR: "statusBarColor",
+        TREE_IN_EXPLORER: "treeInExplorer",
+        SHOW_OPEN_ASIDE: "showOpenAside",
+        SHOW_EDIT: "showEditOnNodes",
+        SHOW_ARROWS: "showArrowsOnNodes",
+        SHOW_ADD: "showAddOnNodes",
+        SHOW_MARK: "showMarkOnNodes",
+        SHOW_CLONE: "showCloneOnNodes",
+        SHOW_COPY: "showCopyOnNodes",
+
+        SHOW_EDITION_BODY: "showEditionOnBody",
+        SHOW_CLIPBOARD_BODY: "showClipboardOnBody",
+        SHOW_PROMOTE_BODY: "showPromoteOnBody",
+        SHOW_EXECUTE_BODY: "showExecuteOnBody",
+        SHOW_EXTRACT_BODY: "showExtractOnBody",
+        SHOW_IMPORT_BODY: "showImportOnBody",
+        SHOW_REFRESH_BODY: "showRefreshOnBody",
+        SHOW_HOIST_BODY: "showHoistOnBody",
+        SHOW_MARK_BODY: "showMarkOnBody",
+        SHOW_SORT_BODY: "showSortOnBody",
+
+        INVERT_NODES: "invertNodeContrast",
+    };
+
+    /**
+     * * Configuration Defaults used in config.ts
+     * Used when setting itself and getting parameters from vscode
+     */
+    public static CONFIG_DEFAULTS = {
+        CHECK_FOR_CHANGE_EXTERNAL_FILES: "none",  // Used in leoBridge scrip,
+        DEFAULT_RELOAD_IGNORE: "none", // Used in leoBridge scrip,
+        LEO_TREE_BROWSE: true,
+        TREE_KEEP_FOCUS: true,
+        TREE_KEEP_FOCUS_WHEN_ASIDE: false,
+        STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
+        STATUSBAR_COLOR: "fb7c47",
+        TREE_IN_EXPLORER: true,
+        SHOW_OPEN_ASIDE: true,
+        SHOW_EDIT: true,
+        SHOW_ARROWS: false,
+        SHOW_ADD: false,
+        SHOW_MARK: false,
+        SHOW_CLONE: false,
+        SHOW_COPY: false,
+
+        SHOW_EDITION_BODY: true,
+        SHOW_CLIPBOARD_BODY: true,
+        SHOW_PROMOTE_BODY: true,
+        SHOW_EXECUTE_BODY: true,
+        SHOW_EXTRACT_BODY: true,
+        SHOW_IMPORT_BODY: true,
+        SHOW_REFRESH_BODY: true,
+        SHOW_HOIST_BODY: true,
+        SHOW_MARK_BODY: true,
+        SHOW_SORT_BODY: true,
+
+        INVERT_NODES: false
     };
 
     /**
@@ -162,14 +252,28 @@ export class Constants {
         DOCUMENT_TITLED: "leojsDocumentTitled",
         DOCUMENT_SELECTED_UNTITLED: "leojsDocumentSelectedUntitled",
         DOCUMENT_UNTITLED: "leojsDocumentUntitled",
-        // UI
-        LEO_TREE_BROWSE: "leojsTreeBrowse", // Override vscode's tree behavior with Leo's own
-        SHOW_EDIT: "leojsShowEditOnNodes",
-        SHOW_ARROWS: "leojsShowArrowsOnNodes",
-        SHOW_ADD: "leojsShowAddOnNodes",
-        SHOW_MARK: "leojsShowMarkOnNodes",
-        SHOW_CLONE: "leojsShowCloneOnNodes",
-        SHOW_COPY: "leojsShowCopyOnNodes",
+
+        // Context flags that are mapped 'directly' onto leojs config settings
+        LEO_TREE_BROWSE: Constants.NAME + Constants.CONFIG_NAMES.LEO_TREE_BROWSE[0].toUpperCase() + Constants.CONFIG_NAMES.LEO_TREE_BROWSE.slice(1), // Force ar'jan's suggestion of Leo's tree behavior override
+        TREE_IN_EXPLORER: Constants.NAME + Constants.CONFIG_NAMES.TREE_IN_EXPLORER[0].toUpperCase() + Constants.CONFIG_NAMES.TREE_IN_EXPLORER.slice(1), // Leo outline also in the explorer view
+        SHOW_OPEN_ASIDE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE.slice(1),   // Show 'open aside' in context menu
+        SHOW_EDIT: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDIT[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDIT.slice(1),              // Hover Icons on outline nodes
+        SHOW_ARROWS: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ARROWS[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ARROWS.slice(1),           // Hover Icons on outline nodes
+        SHOW_ADD: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ADD[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ADD.slice(1),                 // Hover Icons on outline nodes
+        SHOW_MARK: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK.slice(1),               // Hover Icons on outline nodes
+        SHOW_CLONE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLONE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLONE.slice(1),             // Hover Icons on outline nodes
+        SHOW_COPY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_COPY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_COPY.slice(1),               // Hover Icons on outline nodes
+
+        SHOW_EDITION_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDITION_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDITION_BODY.slice(1),
+        SHOW_CLIPBOARD_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY.slice(1),
+        SHOW_PROMOTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY.slice(1),
+        SHOW_EXECUTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY.slice(1),
+        SHOW_EXTRACT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY.slice(1),
+        SHOW_IMPORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY.slice(1),
+        SHOW_REFRESH_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY.slice(1),
+        SHOW_HOIST_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_HOIST_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_HOIST_BODY.slice(1),
+        SHOW_MARK_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK_BODY.slice(1),
+        SHOW_SORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_SORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_SORT_BODY.slice(1)
     };
 
     /**
@@ -186,21 +290,6 @@ export class Constants {
      * All commands this expansion exposes to the user via GUI/keybindings in package.json
      */
     public static COMMANDS = {
-        // Toggle UI Settings
-        ENABLE_LEO_TREE_NAV: Constants.NAME + ".enableLeoTreeNav",
-        SHOW_EDIT_ON_NODES: Constants.NAME + ".showEditOnNodes",
-        SHOW_ADD_ON_NODES: Constants.NAME + ".showAddOnNodes",
-        SHOW_ARROWS_ON_NODES: Constants.NAME + ".showArrowsOnNodes",
-        SHOW_COPY_ON_NODES: Constants.NAME + ".showCopyOnNodes",
-        SHOW_CLONE_ON_NODES: Constants.NAME + ".showCloneOnNodes",
-        SHOW_MARK_ON_NODES: Constants.NAME + ".showMarkOnNodes",
-        DISABLE_LEO_TREE_NAV: Constants.NAME + ".disableLeoTreeNav",
-        HIDE_EDIT_ON_NODES: Constants.NAME + ".hideEditOnNodes",
-        HIDE_ADD_ON_NODES: Constants.NAME + ".hideAddOnNodes",
-        HIDE_ARROWS_ON_NODES: Constants.NAME + ".hideArrowsOnNodes",
-        HIDE_COPY_ON_NODES: Constants.NAME + ".hideCopyOnNodes",
-        HIDE_CLONE_ON_NODES: Constants.NAME + ".hideCloneOnNodes",
-        HIDE_MARK_ON_NODES: Constants.NAME + ".hideMarkOnNodes",
         // Leo Documents
         SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
         OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
@@ -321,68 +410,84 @@ export class Constants {
         CLONE_FIND_ALL_FLATTENED: Constants.NAME + ".cloneFindAllFlattened",
         CLONE_FIND_MARKED: Constants.NAME + ".cloneFindMarked",
         CLONE_FIND_FLATTENED_MARKED: Constants.NAME + ".cloneFindFlattenedMarked",
+        // TODO
+        GOTO_GLOBAL_LINE: Constants.NAME + ".gotoGlobalLine",
+        TAG_CHILDREN: Constants.NAME + ".tagChildren",
+        SET_FIND_EVERYWHERE_OPTION: Constants.NAME + ".setFindEverywhereOption",
+        SET_FIND_NODE_ONLY_OPTION: Constants.NAME + ".setFindNodeOnlyOption",
+        SET_FIND_SUBOUTLINE_ONLY_OPTION: Constants.NAME + ".setFindSuboutlineOnlyOption",
+        TOGGLE_FIND_IGNORE_CASE_OPTION: Constants.NAME + ".toggleFindIgnoreCaseOption",
+        TOGGLE_FIND_MARK_CHANGES_OPTION: Constants.NAME + ".toggleFindMarkChangesOption",
+        TOGGLE_FIND_MARK_FINDS_OPTION: Constants.NAME + ".toggleFindMarkFindsOption",
+        TOGGLE_FIND_REGEXP_OPTION: Constants.NAME + ".toggleFindRegexpOption",
+        TOGGLE_FIND_WORD_OPTION: Constants.NAME + ".toggleFindWordOption",
+        TOGGLE_FIND_SEARCH_BODY_OPTION: Constants.NAME + ".toggleFindSearchBodyOption",
+        TOGGLE_FIND_SEARCH_HEADLINE_OPTION: Constants.NAME + ".toggleFindSearchHeadlineOption",
+        SET_ENABLE_PREVIEW: Constants.NAME + ".setEnablePreview",
+        CLEAR_CLOSE_EMPTY_GROUPS: Constants.NAME + ".clearCloseEmptyGroups",
+        SET_CLOSE_ON_FILE_DELETE: Constants.NAME + ".setCloseOnFileDelete"
     };
 
     /**
      * Leo command names that are called from vscode's gui/menu/buttons/keybindings triggers
      */
     public static LEO_COMMANDS = {
-        EXECUTE_SCRIPT: "executeScript",
-        REFRESH_FROM_DISK: "refreshFromDisk",
-        GIT_DIFF: "gitDiff",
-        // Goto operations
-        PAGE_UP: "pageUp",
-        PAGE_DOWN: "pageDown",
-        GOTO_FIRST_VISIBLE: "goToFirstVisibleNode",
-        GOTO_LAST_VISIBLE: "goToLastVisibleNode",
-        GOTO_LAST_SIBLING: "goToLastSibling",
-        GOTO_NEXT_VISIBLE: "selectVisNext",
-        GOTO_PREV_VISIBLE: "selectVisBack",
-        GOTO_NEXT_MARKED: "goToNextMarkedHeadline",
-        GOTO_NEXT_CLONE: "goToNextClone",
-        CONTRACT_OR_GO_LEFT: "contractNodeOrGoToParent",
-        EXPAND_AND_GO_RIGHT: "expandNodeAndGoToFirstChild",
-        CONTRACT_ALL: "contractAllHeadlines",
-        // Leo Operations
-        MARK_PNODE: "markPNode",
-        UNMARK_PNODE: "unmarkPNode",
-        COPY_PNODE: "copyOutline",
-        CUT_PNODE: "cutPNode",
-        PASTE_PNODE: "pasteOutline",
-        PASTE_CLONE_PNODE: "pasteOutlineRetainingClones",
-        DELETE_PNODE: "deletePNode",
-        MOVE_PNODE_DOWN: "moveOutlineDown",
-        MOVE_PNODE_LEFT: "moveOutlineLeft",
-        MOVE_PNODE_RIGHT: "moveOutlineRight",
-        MOVE_PNODE_UP: "moveOutlineUp",
-        INSERT_PNODE: "insertPNode",
-        INSERT_NAMED_PNODE: "insertNamedPNode",
-        CLONE_PNODE: "clonePNode",
-        PROMOTE_PNODE: "promote",
-        DEMOTE_PNODE: "demote",
-        REFRESH_FROM_DISK_PNODE: "refreshFromDisk",
-        SORT_CHILDREN: "sortChildren",
-        SORT_SIBLINGS: "sortSiblings",
-        UNDO: "undo",
-        REDO: "redo",
-        GET_STATES: "getStates",
-        HOIST_PNODE: "hoist",
-        DEHOIST: "dehoist",
-        EXTRACT: "extract",
-        EXTRACT_NAMES: "extractNames",
-        COPY_MARKED: "copyMarked",
-        DIFF_MARKED_NODES: "deleteMarked",
-        MARK_CHANGED_ITEMS: "markChangedHeadlines",
-        MARK_SUBHEADS: "markSubheads",
-        UNMARK_ALL: "unmarkAll",
-        CLONE_MARKED_NODES: "cloneMarked",
-        DELETE_MARKED_NODES: "deleteMarked",
-        MOVE_MARKED_NODES: "moveMarked",
-        // Clone-find functionality
-        CLONE_FIND_ALL: "cloneFindAll",
-        CLONE_FIND_ALL_FLATTENED: "cloneFindAllFlattened",
-        CLONE_FIND_MARKED: "cloneFindMarked",
-        CLONE_FIND_FLATTENED_MARKED: "cloneFindFlattenedMarked",
+        EXECUTE_SCRIPT: "TODO", // "executeScript",
+        REFRESH_FROM_DISK: "TODO", //  "refreshFromDisk",
+        GIT_DIFF: "TODO", //  "gitDiff",
+        // * Goto operations
+        PAGE_UP: "TODO pageUp", //  "pageUp",
+        PAGE_DOWN: "TODO pageDown", //  "pageDown",
+        GOTO_FIRST_VISIBLE: "goto-first-visible-node", //  "goToFirstVisibleNode",
+        GOTO_LAST_VISIBLE: "goto-last-visible-node", //  "goToLastVisibleNode",
+        GOTO_LAST_SIBLING: "goto-last-sibling", //  "goToLastSibling",
+        GOTO_NEXT_VISIBLE: "goto-next-visible", // * "selectVisNext",
+        GOTO_PREV_VISIBLE: "goto-prev-visible", //  "selectVisBack",
+        GOTO_NEXT_MARKED: "goto-next-marked", //  "goToNextMarkedHeadline",
+        GOTO_NEXT_CLONE: "goto-next-clone", //  "goToNextClone",
+        CONTRACT_OR_GO_LEFT: "contract-or-go-left", //  "contractNodeOrGoToParent",
+        EXPAND_AND_GO_RIGHT: "expand-and-go-right", //  "expandNodeAndGoToFirstChild",
+        CONTRACT_ALL: "contract-all", // * "contractAllHeadlines",
+        // * Leo Operations
+        MARK_PNODE: "TODO", //  "markPNode",
+        UNMARK_PNODE: "TODO", //  "unmarkPNode",
+        COPY_PNODE: "TODO", //  "copyOutline",
+        CUT_PNODE: "TODO", //  "cutPNode",
+        PASTE_PNODE: "TODO", //  "pasteOutline",
+        PASTE_CLONE_PNODE: "TODO", //  "pasteOutlineRetainingClones",
+        DELETE_PNODE: "TODO", //  "deletePNode",
+        MOVE_PNODE_DOWN: "TODO", //  "moveOutlineDown",
+        MOVE_PNODE_LEFT: "TODO", //  "moveOutlineLeft",
+        MOVE_PNODE_RIGHT: "TODO", //  "moveOutlineRight",
+        MOVE_PNODE_UP: "TODO", //  "moveOutlineUp",
+        INSERT_PNODE: "TODO", //  "insertPNode",
+        INSERT_NAMED_PNODE: "TODO", //  "insertNamedPNode",
+        CLONE_PNODE: "TODO", //  "clonePNode",
+        PROMOTE_PNODE: "TODO", //  "promote",
+        DEMOTE_PNODE: "TODO", //  "demote",
+        REFRESH_FROM_DISK_PNODE: "TODO", //  "refreshFromDisk",
+        SORT_CHILDREN: "TODO", //  "sortChildren",
+        SORT_SIBLINGS: "TODO", //  "sortSiblings",
+        UNDO: "TODO", //  "undo",
+        REDO: "TODO", //  "redo",
+        GET_STATES: "TODO", //  "getStates",
+        HOIST_PNODE: "TODO", //  "hoist",
+        DEHOIST: "TODO", //  "dehoist",
+        EXTRACT: "TODO", //  "extract",
+        EXTRACT_NAMES: "TODO", //  "extractNames",
+        COPY_MARKED: "TODO", //  "copyMarked",
+        DIFF_MARKED_NODES: "TODO", //  "deleteMarked",
+        MARK_CHANGED_ITEMS: "TODO", //  "markChangedHeadlines",
+        MARK_SUBHEADS: "TODO", //  "markSubheads",
+        UNMARK_ALL: "TODO", //  "unmarkAll",
+        CLONE_MARKED_NODES: "TODO", //  "cloneMarked",
+        DELETE_MARKED_NODES: "TODO", //  "deleteMarked",
+        MOVE_MARKED_NODES: "TODO", //  "moveMarked",
+        // * Clone-find functionality
+        CLONE_FIND_ALL: "TODO", //  "cloneFindAll",
+        CLONE_FIND_ALL_FLATTENED: "TODO", //  "cloneFindAllFlattened",
+        CLONE_FIND_MARKED: "TODO", //  "cloneFindMarked",
+        CLONE_FIND_FLATTENED_MARKED: "TODO", //  "cloneFindFlattenedMarked",
     };
 
 }
