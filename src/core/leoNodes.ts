@@ -1327,7 +1327,7 @@ export class Position {
             p.v = parent_v.children[n - 1];
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1344,7 +1344,7 @@ export class Position {
             p._childIndex = 0;
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1363,7 +1363,7 @@ export class Position {
             p._childIndex = n - 1;
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1398,7 +1398,7 @@ export class Position {
             p.v = parent_v.children[n + 1];
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1430,7 +1430,7 @@ export class Position {
             p._childIndex = n;
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1447,7 +1447,7 @@ export class Position {
             p._childIndex = item[1];
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+                //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1663,6 +1663,15 @@ export class Position {
 
     public copy(): Position {
         return new Position(this.v, this._childIndex, this.stack);
+    }
+
+    /**
+     * Return an **unlinked** copy of p with a new vnode v.
+     * The new vnode is complete copy of v and all its descendants.
+     */
+    public copyWithNewVnodes(copyMarked?:boolean): Position{
+        const p: Position = this;
+        return new Position(p.v.copyTree(!!copyMarked));
     }
 
     /**

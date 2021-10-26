@@ -621,6 +621,7 @@
 <v t="felix.20210126001920.1"><vh>p.Moving, Inserting, Deleting, Cloning, Sorting</vh>
 <v t="felix.20210126001920.2"><vh>p.clone</vh></v>
 <v t="felix.20210102035859.1"><vh>p.copy</vh></v>
+<v t="felix.20211026001924.1"><vh>p.copyWithNewVnodes</vh></v>
 <v t="felix.20210126001920.4"><vh>p.deleteAllChildren</vh></v>
 <v t="felix.20210126001920.5"><vh>p.doDelete</vh></v>
 <v t="felix.20210126001920.6"><vh>p.insertAfter</vh></v>
@@ -1932,18 +1933,18 @@ public static LEO_COMMANDS = {
     REFRESH_FROM_DISK: "TODO", //  "refreshFromDisk",
     GIT_DIFF: "TODO", //  "gitDiff",
     // * Goto operations
-    PAGE_UP: "TODO pageUp", //  "pageUp",
-    PAGE_DOWN: "TODO pageDown", //  "pageDown",
+    PAGE_UP: "tree-page-up", //  "pageUp",
+    PAGE_DOWN: "tree-page-down", //  "pageDown",
     GOTO_FIRST_VISIBLE: "goto-first-visible-node", //  "goToFirstVisibleNode",
     GOTO_LAST_VISIBLE: "goto-last-visible-node", //  "goToLastVisibleNode",
     GOTO_LAST_SIBLING: "goto-last-sibling", //  "goToLastSibling",
-    GOTO_NEXT_VISIBLE: "goto-next-visible", // * "selectVisNext",
+    GOTO_NEXT_VISIBLE: "goto-next-visible", // "selectVisNext",
     GOTO_PREV_VISIBLE: "goto-prev-visible", //  "selectVisBack",
     GOTO_NEXT_MARKED: "goto-next-marked", //  "goToNextMarkedHeadline",
     GOTO_NEXT_CLONE: "goto-next-clone", //  "goToNextClone",
     CONTRACT_OR_GO_LEFT: "contract-or-go-left", //  "contractNodeOrGoToParent",
     EXPAND_AND_GO_RIGHT: "expand-and-go-right", //  "expandNodeAndGoToFirstChild",
-    CONTRACT_ALL: "contract-all", // * "contractAllHeadlines",
+    CONTRACT_ALL: "contract-all", // "contractAllHeadlines",
     // * Leo Operations
     MARK_PNODE: "TODO", //  "markPNode",
     UNMARK_PNODE: "TODO", //  "unmarkPNode",
@@ -15479,6 +15480,16 @@ private _tryApplyNodeToBody(
     // }
     // return this.showBody(p_aside, p_showBodyKeepFocus);
     return Promise.resolve(vscode.window.activeTextEditor!); // TODO : TEMP
+}
+
+</t>
+<t tx="felix.20211026001924.1">/**
+ * Return an **unlinked** copy of p with a new vnode v.
+ * The new vnode is complete copy of v and all its descendants.
+ */
+public copyWithNewVnodes(copyMarked?:boolean): Position{
+    const p: Position = this;
+    return new Position(p.v.copyTree(!!copyMarked));
 }
 
 </t>

@@ -15,25 +15,6 @@ import { NodeIndices, Position, VNode } from "../core/leoNodes";
 import { FileCommands } from "../core/leoFileCommands";
 import { Commands } from "../core/leoCommands";
 
-//@+<< def contractIfNotCurrent >>
-//@+node:felix.20211020004249.1: ** << def contractIfNotCurrent >>
-function contractIfNotCurrent(c: Commands, p: Position, leaveOpen: Position): void {
-    if (p.__eq__(leaveOpen) || !p.isAncestorOf(leaveOpen)) {
-        p.contract();
-    }
-    for (let child of p.children()) {
-        if (!child.__eq__(leaveOpen) && child.isAncestorOf(leaveOpen)) {
-            contractIfNotCurrent(c, child, leaveOpen);
-        } else {
-            for (let p2 of child.self_and_subtree()) {
-                p2.contract();
-            }
-        }
-    }
-}
-
-//@-<< def contractIfNotCurrent >>
-
 export class CommanderOutlineCommands {
 
     //@+others
@@ -67,7 +48,7 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         c.contractAllHeadlines();
     }
-    //@+node:felix.20211020002058.3: *3* c_oc.contractAllOtherNodes
+    //@+node:felix.20211020002058.3: *3* c_oc.contractAllOtherNodes & helper
     @commander_command(
         'contract-all-other-nodes',
         'Contract all nodes except those needed to make the\n' +
@@ -77,9 +58,25 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         const leaveOpen: Position = c.p;
         for (let p of c.rootPosition()!.self_and_siblings()) {
-            contractIfNotCurrent(c, p, leaveOpen);
+            this.contractIfNotCurrent(p, leaveOpen);
         }
     }
+
+    private contractIfNotCurrent(this: Commands, p: Position, leaveOpen: Position): void {
+        if (p.__eq__(leaveOpen) || !p.isAncestorOf(leaveOpen)) {
+            p.contract();
+        }
+        for (let child of p.children()) {
+            if (!child.__eq__(leaveOpen) && child.isAncestorOf(leaveOpen)) {
+                this.contractIfNotCurrent(child, leaveOpen);
+            } else {
+                for (let p2 of child.self_and_subtree()) {
+                    p2.contract();
+                }
+            }
+        }
+    }
+
     //@+node:felix.20211020002058.5: *3* c_oc.contractAllSubheads (new)
     @commander_command(
         'contract-all-subheads',
@@ -761,6 +758,374 @@ export class CommanderOutlineCommands {
         }
         // else:
         // c.endEditing()  // 2011/05/28: A special case.
+
+    }
+    //@+node:felix.20211025221132.1: *3* c_oc.treePageUp
+    @commander_command(
+        'tree-page-up',
+        'Outline Page Up.'
+    )
+    public treePageUp(this: Commands, n = 3): void {
+        // This has an up arrow for a control key.
+        for (let i = 0; i < n; i++) {
+            this.selectVisBack();
+        }
+    }
+    //@+node:felix.20211025221156.1: *3* c_oc.treePageDown
+    @commander_command(
+        'tree-page-down',
+        'Outline Page Down.'
+    )
+    public treePageDown(this: Commands, n = 3): void {
+        // This has an up arrow for a control key.
+        for (let i = 0; i < n; i++) {
+            this.selectVisNext();
+        }
+    }
+    //@+node:felix.20211025223803.1: ** c_oc.Mark commands
+    //@+node:felix.20211025223803.2: *3* c_oc.cloneMarked
+    @commander_command(
+        'clone-marked-nodes',
+        'Clone all marked nodes as children of a new node.'
+    )
+    public cloneMarked(this: Commands): void {
+        const c: Commands = this;
+        const u = c.undoer; // TODO : Undoer
+        const p1: Position = c.p.copy();
+        // Create a new node to hold clones.
+        const parent: Position = p1.insertAfter();
+        parent.h = 'Clones of marked nodes';
+
+        const cloned: string[] = []; // GNX instead of direct 'v' to ease comparison
+        let n: number = 0;
+        let p: Position = c.rootPosition()!;
+
+        while (p && p.__bool__()) {
+            // Careful: don't clone already-cloned nodes.
+            if (p.__eq__(parent)) {
+                p.moveToNodeAfterTree();
+                // }else if( p.isMarked() && (p.v.gnx not in cloned) ){
+            } else if (p.isMarked() && (!cloned.includes(p.v.gnx))) {
+                cloned.push(p.v.gnx);
+                const p2 = p.copy();
+
+                // Create the clone directly as a child of parent.
+                n = parent.numberOfChildren();
+                p2._linkAsNthChild(parent, n);
+
+                p.moveToNodeAfterTree();
+                n += 1;
+            } else {
+                p.moveToThreadNext();
+            }
+        }
+
+        if (n) {
+            c.setChanged();
+            parent.expand();
+            c.selectPosition(parent);
+            u.afterCloneMarkedNodes(p1);
+        } else {
+            parent.doDelete();
+            c.selectPosition(p1);
+        }
+        if (!g.unitTesting) {
+            g.blue("cloned ${n} nodes");
+        }
+
+    }
+
+    //@+node:felix.20211025223803.3: *3* c_oc.copyMarked
+    @commander_command(
+        'copy-marked-nodes',
+        'Copy all marked nodes as children of a new node.'
+    )
+    public copyMarked(this: Commands): void {
+        const c: Commands = this;
+        const u = c.undoer; // TODO : Undoer
+        const p1: Position = c.p.copy();
+        // Create a new node to hold clones.
+        const parent: Position = p1.insertAfter();
+        parent.h = 'Copies of marked nodes';
+
+        const copied: string[] = []; // GNX instead of direct 'v' to ease comparison
+        let n: number = 0;
+        let p: Position = c.rootPosition()!;
+
+        while (p && p.__bool__()) {
+            // Careful: don't clone already-cloned nodes.
+            if (p.__eq__(parent)) {
+                p.moveToNodeAfterTree();
+            } else if (p.isMarked() && (!copied.includes(p.v.gnx))) {
+                copied.push(p.v.gnx);
+                const p2 = p.copyWithNewVnodes(true);
+                p2._linkAsNthChild(parent, n);
+                p.moveToNodeAfterTree();
+                n += 1;
+            } else {
+                p.moveToThreadNext();
+            }
+        }
+
+        if (n) {
+            c.setChanged();
+            parent.expand();
+            c.selectPosition(parent);
+            u.afterCopyMarkedNodes(p1);
+        } else {
+            parent.doDelete();
+            c.selectPosition(p1);
+        }
+
+        if (!g.unitTesting) {
+            g.blue("copied ${n} nodes");
+        }
+
+    }
+
+    //@+node:felix.20211025223803.4: *3* c_oc.deleteMarked
+    @commander_command(
+        'delete-marked-nodes',
+        'Delete all marked nodes.'
+    )
+    public deleteMarked(this: Commands): void {
+        const c: Commands = this;
+        const u = c.undoer; // TODO : Undoer
+        const p1 = c.p.copy();
+        const undo_data: any[] = [];
+        let p: Position = c.rootPosition()!;
+
+        while (p && p.__bool__()) {
+            if (p.isMarked()) {
+                undo_data.push(p.copy());
+                const next = p.positionAfterDeletedTree();
+                p.doDelete();
+                p = next;
+            } else {
+                p.moveToThreadNext();
+            }
+        }
+        if (undo_data.length) {
+            u.afterDeleteMarkedNodes(undo_data, p1);
+            if (!g.unitTesting) {
+                g.blue("deleted ${undo_data.length} nodes");
+            }
+            c.setChanged();
+        }
+        // Don't even *think* about restoring the old position.
+        c.contractAllHeadlines();
+        c.selectPosition(c.rootPosition()!);
+    }
+
+    //@+node:felix.20211025223803.5: *3* c_oc.moveMarked & helper
+    @commander_command(
+        'move-marked-nodes',
+        'Move all marked nodes as children of a new node.\n' +
+        'This command is not undoable.\n' +
+        'Consider using clone-marked-nodes, followed by copy/paste instead.'
+    )
+    public moveMarked(this: Commands): void {
+
+        const c: Commands = this;
+        const p1 = c.p.copy();
+
+        // Check for marks.
+        let someMarked: boolean = false;
+        for (let v of c.all_unique_nodes()){
+            if (v.isMarked()){
+                someMarked = true;
+                break;
+            }
+        }
+        if(!someMarked){
+            g.warning('no marked nodes');
+            return;
+        }
+        // TODO : Replace external check with prior check? or promise+".then" the rest.
+        // result = g.app.gui.runAskYesNoDialog(c,
+        //     'Move Marked Nodes?',
+        //     message = 'move-marked-nodes is not undoable\nProceed?',
+        // )
+
+        // if result == 'no':
+        //     return
+
+
+        // Create a new *root* node to hold the moved nodes.
+        // This node's position remains stable while other nodes move.
+
+        const parent = this.createMoveMarkedNode(c);
+        // assert not parent.isMarked() // TODO 'assert' 
+        const moved:Position[] = [];
+        let p = c.rootPosition()!;
+        while( p && p.__bool__()){
+            // TODO : assert parent == c.rootPosition()
+            // Careful: don't move already-moved nodes.
+            if (p.isMarked() && !parent.isAncestorOf(p)){
+                moved.push(p.copy());
+                const next = p.positionAfterDeletedTree();
+                p.moveToLastChildOf(parent);
+                    // This does not change parent's position.
+                p = next;
+            }else{
+                p.moveToThreadNext();
+            }   
+        }
+        if (moved.length){
+            // Find a position p2 outside of parent's tree with p2.v == p1.v.
+            // Such a position may not exist.
+            let p2:Position = c.rootPosition()!
+            let found:boolean = false;
+            while (p2 && p2.__bool__()){
+                if( p2.__eq__(parent)){
+                    p2.moveToNodeAfterTree();
+                }else if( p2.v.gnx === p1.v.gnx){
+                    found = true;
+                    break;
+                }else{
+                    p2.moveToThreadNext();
+                }
+            }
+            if(!found){
+                // Not found.  Move to last top-level.
+                p2 = c.lastTopLevel()
+            }
+            parent.moveAfter(p2);
+            // u.afterMoveMarkedNodes(moved, p1)
+            if(!g.unitTesting){
+                g.blue("moved ${moved.length} nodes");
+            }
+            c.setChanged();
+        }
+        // c.contractAllHeadlines()
+            // Causes problems when in a chapter.
+        c.selectPosition(parent);
+    }
+
+    //@+node:felix.20211025223803.6: *4* def createMoveMarkedNode
+    private createMoveMarkedNode(this: Commands, c: Commands): Position {
+        const oldRoot = c.rootPosition()!;
+        const p = oldRoot.insertAfter();
+        p.h = 'Moved marked nodes';
+        p.moveToRoot();
+        return p;
+    }
+
+    //@+node:felix.20211025223803.7: *3* c_oc.markChangedHeadlines
+    @commander_command(
+    'mark-changed-items',
+    'Mark all nodes that have been changed.'
+    )
+    public markChangedHeadlines(this: Commands): void {
+        const c: Commands = this;
+        const current:Position = this.p;
+        const u = c.undoer; // TODO : Undoer
+        const undoType = 'Mark Changed';
+        // c.endEditing()
+        u.beforeChangeGroup(current, undoType);
+
+        for (let p of c.all_unique_positions()){
+            if (p.isDirty() && !p.isMarked()){
+                const bunch = u.beforeMark(p, undoType);
+                // c.setMarked calls a hook.
+                c.setMarked(p);
+                p.setDirty();
+                c.setChanged();
+                u.afterMark(p, undoType, bunch);
+            }
+        }
+        u.afterChangeGroup(current, undoType)
+        if (!g.unitTesting){
+            g.blue('done');
+        }
+    }
+
+    //@+node:felix.20211025223803.9: *3* c_oc.markHeadline
+    @commander_command(
+    'mark',
+    'Toggle the mark of the selected node.'
+    )  //  Compatibility
+    @commander_command(
+    'toggle-mark',
+    'Toggle the mark of the selected node.'
+    )
+    public markHeadline(this: Commands): void {
+        const c: Commands = this;
+        const p:Position = this.p;
+        const u = c.undoer; // TODO : Undoer
+        
+        if not p:
+            return
+        c.endEditing()
+        undoType = 'Unmark' if p.isMarked() else 'Mark'
+        bunch = u.beforeMark(p, undoType)
+        // c.set/clearMarked call a hook.
+        if p.isMarked():
+            c.clearMarked(p)
+        else:
+            c.setMarked(p)
+            p.setDirty()
+            c.setChanged()
+            u.afterMark(p, undoType, bunch)
+            c.redraw_after_icons_changed()
+
+    }
+    //@+node:felix.20211025223803.10: *3* c_oc.markSubheads
+    @commander_command(
+    'mark-subheads',
+    'Mark all children of the selected node as changed.'
+    )
+    public markSubheads(this: Commands): void {
+        const c: Commands = this;
+        const current:Position = this.p;
+        const u = c.undoer; // TODO : Undoer
+        
+        undoType = 'Mark Subheads'
+        if not current:
+            return
+        c.endEditing()
+        u.beforeChangeGroup(current, undoType)
+        for p in current.children():
+        if not p.isMarked():
+        bunch = u.beforeMark(p, undoType)
+                    c.setMarked(p)  // Calls a hook.
+                    p.setDirty()
+                    c.setChanged()
+                    u.afterMark(p, undoType, bunch)
+            u.afterChangeGroup(current, undoType)
+            c.redraw_after_icons_changed()
+
+    }
+    //@+node:felix.20211025223803.11: *3* c_oc.unmarkAll
+    @commander_command(
+    'unmark-all',
+    'Unmark all nodes in the entire outline.'
+    )
+    public unmarkAll(this: Commands): void {
+
+        const c: Commands = this;
+        const current:Position = this.p;
+        const u = c.undoer; // TODO : Undoer
+
+        undoType = 'Unmark All'
+        if not current:
+            return
+        c.endEditing()
+        u.beforeChangeGroup(current, undoType)
+        changed = False
+        p = None  // To keep pylint happy.
+        for p in c.all_unique_positions():
+        if p.isMarked():
+        bunch = u.beforeMark(p, undoType)
+                    // c.clearMarked(p) # Very slow: calls a hook.
+                    p.v.clearMarked()
+                    p.setDirty()
+                    u.afterMark(p, undoType, bunch)
+                    changed = True
+            if changed:
+        g.doHook("clear-all-marks", c = c, p = p)
+                c.setChanged()
+        u.afterChangeGroup(current, undoType)
 
     }
     //@-others
