@@ -931,13 +931,13 @@ export class CommanderOutlineCommands {
 
         // Check for marks.
         let someMarked: boolean = false;
-        for (let v of c.all_unique_nodes()){
-            if (v.isMarked()){
+        for (let v of c.all_unique_nodes()) {
+            if (v.isMarked()) {
                 someMarked = true;
                 break;
             }
         }
-        if(!someMarked){
+        if (!someMarked) {
             g.warning('no marked nodes');
             return;
         }
@@ -956,49 +956,49 @@ export class CommanderOutlineCommands {
 
         const parent = this.createMoveMarkedNode(c);
         // assert not parent.isMarked() // TODO 'assert' 
-        const moved:Position[] = [];
+        const moved: Position[] = [];
         let p = c.rootPosition()!;
-        while( p && p.__bool__()){
+        while (p && p.__bool__()) {
             // TODO : assert parent == c.rootPosition()
             // Careful: don't move already-moved nodes.
-            if (p.isMarked() && !parent.isAncestorOf(p)){
+            if (p.isMarked() && !parent.isAncestorOf(p)) {
                 moved.push(p.copy());
                 const next = p.positionAfterDeletedTree();
                 p.moveToLastChildOf(parent);
-                    // This does not change parent's position.
+                // This does not change parent's position.
                 p = next;
-            }else{
+            } else {
                 p.moveToThreadNext();
-            }   
+            }
         }
-        if (moved.length){
+        if (moved.length) {
             // Find a position p2 outside of parent's tree with p2.v == p1.v.
             // Such a position may not exist.
-            let p2:Position = c.rootPosition()!
-            let found:boolean = false;
-            while (p2 && p2.__bool__()){
-                if( p2.__eq__(parent)){
+            let p2: Position = c.rootPosition()!
+            let found: boolean = false;
+            while (p2 && p2.__bool__()) {
+                if (p2.__eq__(parent)) {
                     p2.moveToNodeAfterTree();
-                }else if( p2.v.gnx === p1.v.gnx){
+                } else if (p2.v.gnx === p1.v.gnx) {
                     found = true;
                     break;
-                }else{
+                } else {
                     p2.moveToThreadNext();
                 }
             }
-            if(!found){
+            if (!found) {
                 // Not found.  Move to last top-level.
                 p2 = c.lastTopLevel()
             }
             parent.moveAfter(p2);
             // u.afterMoveMarkedNodes(moved, p1)
-            if(!g.unitTesting){
+            if (!g.unitTesting) {
                 g.blue("moved ${moved.length} nodes");
             }
             c.setChanged();
         }
         // c.contractAllHeadlines()
-            // Causes problems when in a chapter.
+        // Causes problems when in a chapter.
         c.selectPosition(parent);
     }
 
@@ -1013,19 +1013,19 @@ export class CommanderOutlineCommands {
 
     //@+node:felix.20211025223803.7: *3* c_oc.markChangedHeadlines
     @commander_command(
-    'mark-changed-items',
-    'Mark all nodes that have been changed.'
+        'mark-changed-items',
+        'Mark all nodes that have been changed.'
     )
     public markChangedHeadlines(this: Commands): void {
         const c: Commands = this;
-        const current:Position = this.p;
+        const current: Position = this.p;
         const u = c.undoer; // TODO : Undoer
         const undoType = 'Mark Changed';
         // c.endEditing()
         u.beforeChangeGroup(current, undoType);
 
-        for (let p of c.all_unique_positions()){
-            if (p.isDirty() && !p.isMarked()){
+        for (let p of c.all_unique_positions()) {
+            if (p.isDirty() && !p.isMarked()) {
                 const bunch = u.beforeMark(p, undoType);
                 // c.setMarked calls a hook.
                 c.setMarked(p);
@@ -1035,98 +1035,102 @@ export class CommanderOutlineCommands {
             }
         }
         u.afterChangeGroup(current, undoType)
-        if (!g.unitTesting){
+        if (!g.unitTesting) {
             g.blue('done');
         }
     }
 
     //@+node:felix.20211025223803.9: *3* c_oc.markHeadline
     @commander_command(
-    'mark',
-    'Toggle the mark of the selected node.'
+        'mark',
+        'Toggle the mark of the selected node.'
     )  //  Compatibility
     @commander_command(
-    'toggle-mark',
-    'Toggle the mark of the selected node.'
+        'toggle-mark',
+        'Toggle the mark of the selected node.'
     )
     public markHeadline(this: Commands): void {
         const c: Commands = this;
-        const p:Position = this.p;
+        const p: Position = this.p;
         const u = c.undoer; // TODO : Undoer
-        
-        if not p:
-            return
-        c.endEditing()
-        undoType = 'Unmark' if p.isMarked() else 'Mark'
-        bunch = u.beforeMark(p, undoType)
-        // c.set/clearMarked call a hook.
-        if p.isMarked():
-            c.clearMarked(p)
-        else:
-            c.setMarked(p)
-            p.setDirty()
-            c.setChanged()
-            u.afterMark(p, undoType, bunch)
-            c.redraw_after_icons_changed()
 
+        if (!p || !p.__bool__()) {
+            return;
+        }
+
+        const undoType = p.isMarked() ? 'Unmark' : 'Mark';
+
+        const bunch = u.beforeMark(p, undoType);
+        // c.set/clearMarked call a hook.
+
+        if (p.isMarked()) {
+            c.clearMarked(p);
+        } else {
+            c.setMarked(p);
+        }
+        p.setDirty();
+        c.setChanged();
+        u.afterMark(p, undoType, bunch);
     }
     //@+node:felix.20211025223803.10: *3* c_oc.markSubheads
     @commander_command(
-    'mark-subheads',
-    'Mark all children of the selected node as changed.'
+        'mark-subheads',
+        'Mark all children of the selected node as changed.'
     )
     public markSubheads(this: Commands): void {
         const c: Commands = this;
-        const current:Position = this.p;
+        const current: Position = this.p;
         const u = c.undoer; // TODO : Undoer
-        
-        undoType = 'Mark Subheads'
-        if not current:
-            return
-        c.endEditing()
-        u.beforeChangeGroup(current, undoType)
-        for p in current.children():
-        if not p.isMarked():
-        bunch = u.beforeMark(p, undoType)
-                    c.setMarked(p)  // Calls a hook.
-                    p.setDirty()
-                    c.setChanged()
-                    u.afterMark(p, undoType, bunch)
-            u.afterChangeGroup(current, undoType)
-            c.redraw_after_icons_changed()
-
+        const undoType = 'Mark Subheads'
+        if (!current || !current.__bool__()) {
+            return;
+        }
+        u.beforeChangeGroup(current, undoType);
+        for (let p of current.children()) {
+            if (!p.isMarked()) {
+                const bunch = u.beforeMark(p, undoType);
+                c.setMarked(p);  // Calls a hook.
+                p.setDirty();
+                c.setChanged();
+                u.afterMark(p, undoType, bunch);
+            }
+        }
+        u.afterChangeGroup(current, undoType);
     }
     //@+node:felix.20211025223803.11: *3* c_oc.unmarkAll
     @commander_command(
-    'unmark-all',
-    'Unmark all nodes in the entire outline.'
+        'unmark-all',
+        'Unmark all nodes in the entire outline.'
     )
     public unmarkAll(this: Commands): void {
-
         const c: Commands = this;
-        const current:Position = this.p;
+        const current: Position = this.p;
         const u = c.undoer; // TODO : Undoer
+        const undoType = 'Unmark All';
+        if (!current || !current.__bool__()) {
+            return;
+        }
+        u.beforeChangeGroup(current, undoType);
+        let changed = false;
+        let w_p: Position | undefined;  //  To keep pylint happy.
 
-        undoType = 'Unmark All'
-        if not current:
-            return
-        c.endEditing()
-        u.beforeChangeGroup(current, undoType)
-        changed = False
-        p = None  // To keep pylint happy.
-        for p in c.all_unique_positions():
-        if p.isMarked():
-        bunch = u.beforeMark(p, undoType)
-                    // c.clearMarked(p) # Very slow: calls a hook.
-                    p.v.clearMarked()
-                    p.setDirty()
-                    u.afterMark(p, undoType, bunch)
-                    changed = True
-            if changed:
-        g.doHook("clear-all-marks", c = c, p = p)
-                c.setChanged()
-        u.afterChangeGroup(current, undoType)
+        for (let p of c.all_unique_positions()) {
+            if (p.isMarked()) {
+                const bunch = u.beforeMark(p, undoType);
+                // c.clearMarked(p) // Very slow: calls a hook.
+                p.v.clearMarked();
+                p.setDirty();
+                u.afterMark(p, undoType, bunch);
+                changed = true;
+            }
+            w_p = p;
+        }
+        if (changed) {
+            g.doHook("clear-all-marks", c, w_p);
+            c.setChanged();
+        }
 
+        u.afterChangeGroup(current, undoType);
     }
     //@-others
 
