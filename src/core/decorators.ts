@@ -28,3 +28,13 @@ export function commander_command(p_name: string, p_doc: string) {
     };
 }
 
+export function new_cmd_decorator(p_name: string, p_doc: string, ivars: string[]) {
+    return function (
+        target: any,
+        propertyKey: string,
+        descriptor: PropertyDescriptor
+    ) {
+        // TODO
+
+    };
+}

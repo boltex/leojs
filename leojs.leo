@@ -767,6 +767,7 @@
 </v>
 </v>
 </v>
+<v t="felix.20211026230613.1"><vh>@file src/core/leoUndo.ts</vh></v>
 </v>
 <v t="felix.20211002194716.1"><vh>Command classes</vh>
 <v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
@@ -15130,6 +15131,16 @@ export function commander_command(p_name: string, p_doc: string) {
     };
 }
 
+export function new_cmd_decorator(p_name: string, p_doc: string, ivars: string[]) {
+    return function (
+        target: any,
+        propertyKey: string,
+        descriptor: PropertyDescriptor
+    ) {
+        // TODO
+
+    };
+}
 </t>
 <t tx="felix.20211021224204.1">// TODO : Replace with proper method
 export const blue = console.log;
