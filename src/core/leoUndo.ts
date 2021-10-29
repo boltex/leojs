@@ -44,12 +44,15 @@
 
 import * as g from './leoGlobals';
 import { new_cmd_decorator } from "../core/decorators";
+import { Position, VNode } from './leoNodes';
 
 //@+others
-//@+node:felix.20211028004540.1: ** Bead
-export interface Bead {
+//@+node:felix.20211028004540.1: ** Interfaces
+interface Bead {
     [key:string]:any;
 }
+
+interface TreeData extends Array<VNode|any| any>{0:VNode;1:any;2:any;};
 //@+node:felix.20211026230613.3: ** u.cmd (decorator)
 /**
  * Command decorator for the Undoer class.
@@ -301,13 +304,14 @@ export class Undoer {
     public setRedoType(theType:string): void{
         const u:Undoer = this;
         // frame = u.c.frame;
-        if not isinstance(theType, str):
-            g.trace(f"oops: expected string for command, got {theType!r}")
-            g.trace(g.callers())
-            theType = '<unknown>'
+        if( !(typeof theType === 'string' || theType instanceof String) ){
+            g.trace("oops: expected string for command, got ${theType}");
+            g.trace(g.callers());
+            theType = '<unknown>';
+        }
         // menu = frame.menu.getMenu("Edit")
-        name = u.redoMenuName(theType)
-        if name !== u.redoMenuLabel:
+        const name:string = u.redoMenuName(theType);
+        if (name !== u.redoMenuLabel){
             // Update menu using old name.
             // realLabel = frame.menu.getRealMenuName(name)
             // if realLabel == name:
@@ -317,86 +321,102 @@ export class Undoer {
             // realLabel = realLabel.replace("&", "")
             // frame.menu.setMenuLabel(
             //     menu, u.realRedoMenuLabel, realLabel, underline=underline)
-            u.redoMenuLabel = name
-            u.realRedoMenuLabel = name
-
+            u.redoMenuLabel = name;
+            u.realRedoMenuLabel = name;
+        }
     }
     //@+node:felix.20211026230613.18: *4* u.setUndoType
-    public setUndoType(self, theType):
+    public setUndoType(theType: string){
         const u:Undoer = this;
-        frame = u.c.frame
-        if not isinstance(theType, str):
-            g.trace(f"oops: expected string for command, got {repr(theType)}")
-            g.trace(g.callers())
-            theType = '<unknown>'
-        menu = frame.menu.getMenu("Edit")
-        name = u.undoMenuName(theType)
-        if name != u.undoMenuLabel:
+        // frame = u.c.frame
+
+        if( !(typeof theType === 'string' || theType instanceof String) ){
+            g.trace("oops: expected string for command, got ${theType}");
+            g.trace(g.callers());
+            theType = '<unknown>';
+        }
+
+        //menu = frame.menu.getMenu("Edit")
+        const name:string = u.undoMenuName(theType);
+        if (name !== u.undoMenuLabel){
             // Update menu using old name.
-            realLabel = frame.menu.getRealMenuName(name)
-            if realLabel == name:
-                underline = -1 if g.match(name, 0, "Can't") else 0
-            else:
-                underline = realLabel.find("&")
-            realLabel = realLabel.replace("&", "")
-            frame.menu.setMenuLabel(
-                menu, u.realUndoMenuLabel, realLabel, underline=underline)
-            u.undoType = theType
-            u.undoMenuLabel = name
-            u.realUndoMenuLabel = realLabel
+            // realLabel = frame.menu.getRealMenuName(name)
+            // if realLabel == name:
+            //     underline = -1 if g.match(name, 0, "Can't") else 0
+            // else:
+            //     underline = realLabel.find("&")
+            // realLabel = realLabel.replace("&", "")
+            // frame.menu.setMenuLabel(
+            //     menu, u.realUndoMenuLabel, realLabel, underline=underline)
+            u.undoType = theType;
+            u.undoMenuLabel = name;
+            u.realUndoMenuLabel = realLabel;
+        }
+    }
     //@+node:felix.20211026230613.19: *4* u.setUndoTypes
-    public setUndoTypes()
+    public setUndoTypes(): void {
         const u:Undoer = this;
         // Set the undo type and undo menu label.
-        bunch = u.peekBead(u.bead)
-        if bunch:
-            u.setUndoType(bunch.undoType)
-        else:
-            u.setUndoType("Can't Undo")
+        bunch = u.peekBead(u.bead);
+        if (bunch){
+            u.setUndoType(bunch.undoType);
+        }else{
+            u.setUndoType("Can't Undo");
+        }
         // Set only the redo menu label.
         bunch = u.peekBead(u.bead + 1)
-        if bunch:
-            u.setRedoType(bunch.undoType)
-        else:
-            u.setRedoType("Can't Redo")
-        u.cutStack()
+        if (bunch){
+            u.setRedoType(bunch.undoType);
+        }else{
+            u.setRedoType("Can't Redo");
+        }
+        u.cutStack();
+    }
     //@+node:felix.20211026230613.20: *4* u.restoreTree & helpers
-    public restoreTree(self, treeInfo):
-        """Use the tree info to restore all VNode data,
-        including all links."""
+    /**
+     * Use the tree info to restore all VNode data, including all links.
+     */
+    public restoreTree( treeInfo: any[]): void {
         const u:Undoer = this;
         // This effectively relinks all vnodes.
-        for v, vInfo, tInfo in treeInfo:
-            u.restoreVnodeUndoInfo(vInfo)
-            u.restoreTnodeUndoInfo(tInfo)
+        for (let p_tree of treeInfo){
+            u.restoreVnodeUndoInfo(p_tree[1]);
+            u.restoreTnodeUndoInfo(p_tree[2]);
+        }
+    }
     //@+node:felix.20211026230613.21: *5* u.restoreVnodeUndoInfo
     /**
      * Restore all ivars saved in the bunch.
      */
-    public restoreVnodeUndoInfo(self, bunch):
-        v = bunch.v
-        v.statusBits = bunch.statusBits
-        v.children = bunch.children
-        v.parents = bunch.parents
-        uA = bunch.get('unknownAttributes')
-        if uA is not None:
-            v.unknownAttributes = uA
-            v._p_changed = True
+    public restoreVnodeUndoInfo(bunch: any): void {
+        v = bunch.v;
+        v.statusBits = bunch.statusBits;
+        v.children = bunch.children;
+        v.parents = bunch.parents;
+        uA = bunch.unknownAttributes;
+        if (uA){
+            v.unknownAttributes = uA;
+            v._p_changed = true;
+        }
+    }
     //@+node:felix.20211026230613.22: *5* u.restoreTnodeUndoInfo
-    public restoreTnodeUndoInfo(self, bunch):
-        v = bunch.v
-        v.h = bunch.headString
-        v.b = bunch.bodyString
-        v.statusBits = bunch.statusBits
-        uA = bunch.get('unknownAttributes')
-        if uA is not None:
-            v.unknownAttributes = uA
-            v._p_changed = True
+    public restoreTnodeUndoInfo(bunch:any){
+        v = bunch.v;
+        v.h = bunch.headString;
+        v.b = bunch.bodyString;
+        v.statusBits = bunch.statusBits;
+        uA = bunch.unknownAttributes;
+        if (uA){
+            v.unknownAttributes = uA;
+            v._p_changed = true;
+        }
+    }
     //@+node:felix.20211026230613.23: *4* u.saveTree & helpers
     /**
      * Return a list of tuples with all info needed to handle a general undo operation.
      */
-    public saveTree(self, p, treeInfo=None):
+    public saveTree(p:Position, treeInfo?:TreeData[]): TreeData[]{
+
         // WARNING: read this before doing anything "clever"
         //@+<< about u.saveTree >>
         //@+node:felix.20211026230613.24: *5* << about u.saveTree >>
@@ -421,206 +441,246 @@ export class Undoer {
         // Aside: Prior to 4.2 Leo used a scheme that was equivalent to the
         // createUndoInfoDict info, but quite a bit uglier.
         //@-<< about u.saveTree >>
+
         const u:Undoer = this;
-        topLevel = (treeInfo is None)
-        if topLevel:
-            treeInfo = []
+        const topLevel:boolean =!treeInfo;
+        if(topLevel){
+            treeInfo = [];
+        }
         // Add info for p.v.  Duplicate tnode info is harmless.
-        data = (p.v, u.createVnodeUndoInfo(p.v), u.createTnodeUndoInfo(p.v))
-        treeInfo.append(data)
+        data: TreeData = [p.v, u.createVnodeUndoInfo(p.v), u.createTnodeUndoInfo(p.v)];
+        treeInfo.push(data)
         // Recursively add info for the subtree.
-        child = p.firstChild()
-        while child:
-            u.saveTree(child, treeInfo)
-            child = child.next()
-        return treeInfo
+        const child:Position = p.firstChild();
+        while (child && child.__bool__()){
+            u.saveTree(child, treeInfo);
+            child = child.next();
+        }
+        return treeInfo;
+    }
     //@+node:felix.20211026230613.25: *5* u.createVnodeUndoInfo
     /**
      * Create a bunch containing all info needed to recreate a VNode for undo.
      */
-    public createVnodeUndoInfo(self, v):
-        bunch = g.Bunch(
-            v=v,
-            statusBits=v.statusBits,
-            parents=v.parents[:],
-            children=v.children[:],
-        )
-        if hasattr(v, 'unknownAttributes'):
-            bunch.unknownAttributes = v.unknownAttributes
-        return bunch
+    public createVnodeUndoInfo(v:VNode): any{
+        const bunch:any = {
+            v:v,
+            statusBits:v.statusBits,
+            parents:[...v.parents],
+            children:[...v.children],
+        };
+
+        if (v.unknownAttributes){
+            bunch.unknownAttributes = v.unknownAttributes;
+        }
+        return bunch;
+    }
     //@+node:felix.20211026230613.26: *5* u.createTnodeUndoInfo
     /**
      * Create a bunch containing all info needed to recreate a VNode.
      */
-    public createTnodeUndoInfo(self, v):
-        bunch = g.Bunch(v=v, headString=v.h, bodyString=v.b, statusBits=v.statusBits,)
-        if hasattr(v, 'unknownAttributes'):
-            bunch.unknownAttributes = v.unknownAttributes
-        return bunch
+    public createTnodeUndoInfo(v:VNode): any{
+        const bunch:any = {
+            v:v,
+            headString:v.h,
+            bodyString:v.b,
+            statusBits:v.statusBits,
+        };
+        if (v.unknownAttributes){
+            bunch.unknownAttributes = v.unknownAttributes;
+        }
+        return bunch;
+    }
     //@+node:felix.20211026230613.27: *4* u.trace
-    public trace()
-        ivars = ('kind', 'undoType')
-        for ivar in ivars:
-            g.pr(ivar, getattr(self, ivar))
+    public trace(): void {
+        const ivars:string[] = ['kind', 'undoType'];
+        for( let ivar of ivars){
+            g.pr(ivar, this[ivar]);
+        }
+    }
     //@+node:felix.20211026230613.28: *4* u.updateMarks
     /**
      * Update dirty and marked bits.
      */
-    public updateMarks(self, oldOrNew):
+    public updateMarks(oldOrNew:string): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        if oldOrNew not in ('new', 'old'):
+        if (!['new', 'old'].includes(oldOrNew)){
             g.trace("can't happen")
-            return
-        isOld = oldOrNew == 'old'
-        marked = u.oldMarked if isOld else u.newMarked
+            return;
+        }
+        const isOld:boolean = oldOrNew === 'old';
+        const marked: boolean = isOld?u.oldMarked:u.newMarked;
         // Note: c.set/clearMarked call a hook.
-        if marked:
-            c.setMarked(u.p)
-        else:
-            c.clearMarked(u.p)
+        if (marked){
+            c.setMarked(u.p);
+        }else{
+            c.clearMarked(u.p);
+        }
         // Undo/redo always set changed/dirty bits because the file may have been saved.
-        u.p.setDirty()
-        u.c.setChanged()
+        u.p.setDirty();
+        u.c.setChanged();
+    }
     //@+node:felix.20211026230613.29: *3* u.Externally visible entries
     //@+node:felix.20211026230613.30: *4* u.afterX...
     //@+node:felix.20211026230613.31: *5* u.afterChangeBody
-    public afterChangeBody(self, p, command, bunch):
-        """
-        Create an undo node using d created by beforeChangeNode.
-
-        *Important*: Before calling this method, caller must:
-        - Set p.v.b. (Setting p.b would cause a redraw).
-        - Set the desired selection range and insert point.
-        - Set the y-scroll position, if desired.
-        """
+    /**
+     * Create an undo node using d created by beforeChangeNode.
+     * *Important*: Before calling this method, caller must:
+     * - Set p.v.b. (Setting p.b would cause a redraw).
+     * - Set the desired selection range and insert point.
+     * - Set the y-scroll position, if desired.
+     */
+    public afterChangeBody(p:Position, command:string, bunch:any): void {
         const c:Commands = this.c;
-        u, w = self, c.frame.body.wrapper
-        if u.redoing or u.undoing:
-            return
+        const u:Undoer = this;
+        const w = c.frame.body.wrapper;
+
+        if(u.redoing || u.undoing){
+            return;
+        }
+
         // Set the type & helpers.
-        bunch.kind = 'body'
-        bunch.undoType = command
-        bunch.undoHelper = u.undoChangeBody
-        bunch.redoHelper = u.redoChangeBody
-        bunch.newBody = p.b
-        bunch.newHead = p.h
-        bunch.newIns = w.getInsertPoint()
-        bunch.newMarked = p.isMarked()
+        bunch.kind = 'body';
+        bunch.undoType = command;
+        bunch.undoHelper = u.undoChangeBody;
+        bunch.redoHelper = u.redoChangeBody;
+        bunch.newBody = p.b;
+        bunch.newHead = p.h;
+        bunch.newIns = w.getInsertPoint();
+        bunch.newMarked = p.isMarked();
+
         // Careful: don't use ternary operator.
-        if w:
-            bunch.newSel = w.getSelectionRange()
-        else:
-            bunch.newSel = 0, 0
-        bunch.newYScroll = w.getYScrollPosition() if w else 0
-        u.pushBead(bunch)
+        if (w){
+            bunch.newSel = w.getSelectionRange();
+        }else{
+            bunch.newSel = [0, 0];
+        }
+
+        // bunch.newYScroll = w.getYScrollPosition() if w else 0
+        u.pushBead(bunch);
         //
-        if g.unitTesting:
-            assert command.lower() != 'typing', g.callers()
-        elif command.lower() == 'typing':
+        if( g.unitTesting){
+            // assert command.lower() !== 'typing', g.callers()
+        }else if(command.lower() === 'typing'){
             g.trace(
-                'Error: undoType should not be "Typing"\n'
-                'Call u.doTyping instead')
-        u.updateAfterTyping(p, w)
+                'Error: undoType should not be "Typing"\n' +
+                'Call u.doTyping instead');
+        }
+        u.updateAfterTyping(p, w);
+    }
     //@+node:felix.20211026230613.32: *5* u.afterChangeGroup
-    public afterChangeGroup(self, p, undoType, reportFlag=False):
-        """
-        Create an undo node for general tree operations using d created by
-        beforeChangeGroup
-        """
+    /**
+     * Create an undo node for general tree operations using d created by
+     * beforeChangeGroup
+     */
+    public afterChangeGroup(p:Position, undoType:string, reportFlag?:boolean): void {
         const u:Undoer = this;
         const c:Commands = this.c;
         const w:any = c.frame.body.wrapper;
-        if u.redoing or u.undoing:
-            return
-        bunch = u.beads[u.bead]
-        if not u.beads:
-            g.trace('oops: empty undo stack.')
-            return
-        if bunch.kind == 'beforeGroup':
-            bunch.kind = 'afterGroup'
-        else:
-            g.trace(f"oops: expecting beforeGroup, got {bunch.kind}")
+        if(u.redoing || u.undoing){
+            return;
+        }
+
+        const bunch = u.beads[u.bead];
+        if (!u.beads.length){
+            g.trace('oops: empty undo stack.');
+            return;
+        }
+
+        if( bunch.kind === 'beforeGroup'){
+            bunch.kind = 'afterGroup';
+        }else{
+            g.trace("oops: expecting beforeGroup, got ${bunch.kind}");
+        }
         // Set the types & helpers.
-        bunch.kind = 'afterGroup'
-        bunch.undoType = undoType
+        bunch.kind = 'afterGroup';
+        bunch.undoType = undoType;
         // Set helper only for undo:
         // The bead pointer will point to an 'beforeGroup' bead for redo.
-        bunch.undoHelper = u.undoGroup
-        bunch.redoHelper = u.redoGroup
-        bunch.newP = p.copy()
-        bunch.newSel = w.getSelectionRange()
+        bunch.undoHelper = u.undoGroup;
+        bunch.redoHelper = u.redoGroup;
+        bunch.newP = p.copy();
+        bunch.newSel = w.getSelectionRange();
         // Tells whether to report the number of separate changes undone/redone.
-        bunch.reportFlag = reportFlag
-        if 0:
-            // Push the bunch.
-            u.bead += 1
-            u.beads[u.bead:] = [bunch]
+        bunch.reportFlag = reportFlag;
+        
+        // if 0:
+        //     // Push the bunch.
+        //     u.bead += 1
+        //     u.beads[u.bead:] = [bunch]
+
         // Recalculate the menu labels.
-        u.setUndoTypes()
+        u.setUndoTypes();
+    }
     //@+node:felix.20211026230613.33: *5* u.afterChangeNodeContents
     /**
      * Create an undo node using d created by beforeChangeNode.
      */
-    public afterChangeNodeContents(self, p, command, bunch):
+    public afterChangeNodeContents(p:Position, command:string, bunch:any): void {
         const u:Undoer = this;
         const c:Commands = this.c;
         const w:any = c.frame.body.wrapper;
-        if u.redoing or u.undoing:
-            return
-        // Set the type & helpers.
-        bunch.kind = 'node'
-        bunch.undoType = command
-        bunch.undoHelper = u.undoNodeContents
-        bunch.redoHelper = u.redoNodeContents
-        bunch.inHead = False  # 2013/08/26
-        bunch.newBody = p.b
-        bunch.newHead = p.h
-        bunch.newMarked = p.isMarked()
+        if(u.redoing || u.undoing){
+            return;
+        }        // Set the type & helpers.
+        bunch.kind = 'node';
+        bunch.undoType = command;
+        bunch.undoHelper = u.undoNodeContents;
+        bunch.redoHelper = u.redoNodeContents;
+        bunch.inHead = false;  // 2013/08/26
+        bunch.newBody = p.b;
+        bunch.newHead = p.h;
+        bunch.newMarked = p.isMarked();
         // Bug fix 2017/11/12: don't use ternary operator.
-        if w:
-            bunch.newSel = w.getSelectionRange()
-        else:
-            bunch.newSel = 0, 0
-        bunch.newYScroll = w.getYScrollPosition() if w else 0
-        u.pushBead(bunch)
+        if (w){
+            bunch.newSel = w.getSelectionRange();
+        }else{
+            bunch.newSel = [0, 0];
+        }
+        //bunch.newYScroll = w.getYScrollPosition() if w else 0
+        u.pushBead(bunch);
+    }
     //@+node:felix.20211026230613.34: *5* u.afterChangeHeadline
     /**
      * Create an undo node using d created by beforeChangeHeadline.
      */
-    public afterChangeHeadline(self, p, command, bunch):
+    public afterChangeHeadline(p:Position, command:string, bunch:any): void {
         const u:Undoer = this;
-        if u.redoing or u.undoing:
-            return
-        // Set the type & helpers.
-        bunch.kind = 'headline'
-        bunch.undoType = command
-        bunch.undoHelper = u.undoChangeHeadline
-        bunch.redoHelper = u.redoChangeHeadline
-        bunch.newHead = p.h
-        u.pushBead(bunch)
+        if(u.redoing || u.undoing){
+            return;
+        }        // Set the type & helpers.
+        bunch.kind = 'headline';
+        bunch.undoType = command;
+        bunch.undoHelper = u.undoChangeHeadline;
+        bunch.redoHelper = u.redoChangeHeadline;
+        bunch.newHead = p.h;
+        u.pushBead(bunch);
+    }
 
-    afterChangeHead = afterChangeHeadline
+    // afterChangeHead = afterChangeHeadline // TODO (not used) ! 
+
     //@+node:felix.20211026230613.35: *5* u.afterChangeTree
     /**
      * Create an undo node for general tree operations using d created by beforeChangeTree
      */
-    public afterChangeTree(self, p, command, bunch):
+    public afterChangeTree(p:Position, command:string, bunch:any): void {
         const u:Undoer = this;
         const c:Commands = this.c;
         const w:any = c.frame.body.wrapper;
-        if u.redoing or u.undoing:
-            return
-        // Set the types & helpers.
-        bunch.kind = 'tree'
-        bunch.undoType = command
-        bunch.undoHelper = u.undoTree
-        bunch.redoHelper = u.redoTree
+        if(u.redoing || u.undoing){
+            return;
+        }        // Set the types & helpers.
+        bunch.kind = 'tree';
+        bunch.undoType = command;
+        bunch.undoHelper = u.undoTree;
+        bunch.redoHelper = u.redoTree;
         // Set by beforeChangeTree: changed, oldSel, oldText, oldTree, p
-        bunch.newSel = w.getSelectionRange()
-        bunch.newText = w.getAllText()
-        bunch.newTree = u.saveTree(p)
-        u.pushBead(bunch)
+        bunch.newSel = w.getSelectionRange();
+        bunch.newText = w.getAllText();
+        bunch.newTree = u.saveTree(p);
+        u.pushBead(bunch);
+    }
     //@+node:felix.20211026230613.36: *5* u.afterClearRecentFiles
     public afterClearRecentFiles(self, bunch):
         const u:Undoer = this;
@@ -633,9 +693,9 @@ export class Undoer {
     //@+node:felix.20211026230613.37: *5* u.afterCloneMarkedNodes
     public afterCloneMarkedNodes(self, p):
         const u:Undoer = this;
-        if u.redoing or u.undoing:
-            return
-        bunch = u.createCommonBunch(p)
+        if(u.redoing || u.undoing){
+            return;
+        }        bunch = u.createCommonBunch(p)
             // Sets
             // oldDirty = p.isDirty(),
             // oldMarked = p.isMarked(),
@@ -653,9 +713,9 @@ export class Undoer {
     //@+node:felix.20211026230613.38: *5* u.afterCopyMarkedNodes
     public afterCopyMarkedNodes(self, p):
         const u:Undoer = this;
-        if u.redoing or u.undoing:
-            return
-        bunch = u.createCommonBunch(p)
+        if(u.redoing || u.undoing){
+            return;
+        }        bunch = u.createCommonBunch(p)
             // Sets
             // oldDirty = p.isDirty(),
             // oldMarked = p.isMarked(),
@@ -673,9 +733,9 @@ export class Undoer {
     //@+node:felix.20211026230613.39: *5* u.afterCloneNode
     public afterCloneNode(self, p, command, bunch):
         const u:Undoer = this;
-        if u.redoing or u.undoing:
-            return
-        // Set types & helpers
+        if(u.redoing || u.undoing){
+            return;
+        }        // Set types & helpers
         bunch.kind = 'clone'
         bunch.undoType = command
         // Set helpers
@@ -689,9 +749,9 @@ export class Undoer {
     //@+node:felix.20211026230613.40: *5* u.afterDehoist
     public afterDehoist(self, p, command):
         const u:Undoer = this;
-        if u.redoing or u.undoing:
-            return
-        bunch = u.createCommonBunch(p)
+        if(u.redoing || u.undoing){
+            return;
+        }        bunch = u.createCommonBunch(p)
         // Set types & helpers
         bunch.kind = 'dehoist'
         bunch.undoType = command
@@ -702,9 +762,9 @@ export class Undoer {
     //@+node:felix.20211026230613.41: *5* u.afterDeleteNode
     public afterDeleteNode(self, p, command, bunch):
         const u:Undoer = this;
-        if u.redoing or u.undoing:
-            return
-        // Set types & helpers
+        if(u.redoing || u.undoing){
+            return;
+        }        // Set types & helpers
         bunch.kind = 'delete'
         bunch.undoType = command
         // Set helpers
@@ -716,9 +776,9 @@ export class Undoer {
     //@+node:felix.20211026230613.42: *5* u.afterDeleteMarkedNodes
     public afterDeleteMarkedNodes(self, data, p):
         const u:Undoer = this;
-        if u.redoing or u.undoing:
-            return
-        bunch = u.createCommonBunch(p)
+        if(u.redoing || u.undoing){
+            return;
+        }        bunch = u.createCommonBunch(p)
         // Set types & helpers
         bunch.kind = 'delete-marked-nodes'
         bunch.undoType = 'delete-marked-nodes'
@@ -750,9 +810,9 @@ export class Undoer {
     //@+node:felix.20211026230613.44: *5* u.afterHoist
     public afterHoist(self, p, command):
         const u:Undoer = this;
-        if u.redoing or u.undoing:
-            return
-        bunch = u.createCommonBunch(p)
+        if(u.redoing || u.undoing){
+            return;
+        }        bunch = u.createCommonBunch(p)
         // Set types & helpers
         bunch.kind = 'hoist'
         bunch.undoType = command
@@ -763,9 +823,9 @@ export class Undoer {
     //@+node:felix.20211026230613.45: *5* u.afterInsertNode
     public afterInsertNode(self, p, command, bunch):
         const u:Undoer = this;
-        if u.redoing or u.undoing:
-            return
-        // Set types & helpers
+        if(u.redoing || u.undoing){
+            return;
+        }        // Set types & helpers
         bunch.kind = 'insert'
         bunch.undoType = command
         // Set helpers
@@ -790,9 +850,9 @@ export class Undoer {
     public afterMark(self, p, command, bunch):
         // 'command' unused, but present for compatibility with similar methods.
         const u:Undoer = this;
-        if u.redoing or u.undoing:
-            return
-        // Set the type & helpers.
+        if(u.redoing || u.undoing){
+            return;
+        }        // Set the type & helpers.
         bunch.undoHelper = u.undoMark
         bunch.redoHelper = u.redoMark
         bunch.newMarked = p.isMarked()
@@ -800,9 +860,9 @@ export class Undoer {
     //@+node:felix.20211026230613.47: *5* u.afterMoveNode
     public afterMoveNode(self, p, command, bunch):
         const u:Undoer = this;
-        if u.redoing or u.undoing:
-            return
-        // Set the types & helpers.
+        if(u.redoing || u.undoing){
+            return;
+        }        // Set the types & helpers.
         bunch.kind = 'move'
         bunch.undoType = command
         // Set helper only for undo:
@@ -839,9 +899,9 @@ export class Undoer {
     public afterSort(self, p, bunch):
         const u:Undoer = this;
         // c = self.c
-        if u.redoing or u.undoing:
-            return
-        // Recalculate the menu labels.
+        if(u.redoing || u.undoing){
+            return;
+        }        // Recalculate the menu labels.
         u.setUndoTypes()
     //@+node:felix.20211026230613.50: *4* u.beforeX...
     //@+node:felix.20211026230613.51: *5* u.beforeChangeBody
