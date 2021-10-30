@@ -6681,6 +6681,7 @@ export class VNode {
     // * The primary data: headline and body text.
     _headString: string;
     _bodyString: string;
+    _p_changed: boolean;
 
     // * Structure data...
     children: VNode[]; // Ordered list of all children of this node.
@@ -6704,7 +6705,7 @@ export class VNode {
     selectionLength: number; // The length of the selected body text.
     selectionStart: number; // The start of the selected body text.
 
-    private unknownAttributes: undefined | { [key: string]: any };
+    public unknownAttributes: undefined | { [key: string]: any };
     unicode_warning_given: boolean = false;
 
     @others
@@ -6740,6 +6741,7 @@ VNode.prototype.__str__ = VNode.prototype.__repr__;
 <t tx="felix.20210102015917.2">constructor(context: any, gnx?: string) {
     this._headString = 'newHeadline';
     this._bodyString = '';
+    this._p_changed = false;
     this.children = [];
     this.parents = [];
     this.fileIndex = '';
@@ -7772,7 +7774,7 @@ public unitTestMenusDict = {};   // Created in LeoMenu.createMenuEntries for a u
 
 </t>
 <t tx="felix.20210103024632.2">public batchMode: boolean = false; // True: run in batch mode.
-public debug = []; // A list of switches to be enabled.
+public debug: string[] = []; // A list of switches to be enabled.
 public diff: boolean = false; // True: run Leo in diff mode.
 public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
 public failFast: boolean = false; // True: Use the failfast option in unit tests.

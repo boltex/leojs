@@ -76,7 +76,7 @@ export class IdleTimeManager {
 export class LeoApp {
 
     public batchMode: boolean = false; // True: run in batch mode.
-    public debug = []; // A list of switches to be enabled.
+    public debug: string[] = []; // A list of switches to be enabled.
     public diff: boolean = false; // True: run Leo in diff mode.
     public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.

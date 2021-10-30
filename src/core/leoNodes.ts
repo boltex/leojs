@@ -2285,6 +2285,7 @@ export class VNode {
     // * The primary data: headline and body text.
     _headString: string;
     _bodyString: string;
+    _p_changed: boolean;
 
     // * Structure data...
     children: VNode[]; // Ordered list of all children of this node.
@@ -2308,12 +2309,13 @@ export class VNode {
     selectionLength: number; // The length of the selected body text.
     selectionStart: number; // The start of the selected body text.
 
-    private unknownAttributes: undefined | { [key: string]: any };
+    public unknownAttributes: undefined | { [key: string]: any };
     unicode_warning_given: boolean = false;
 
     constructor(context: any, gnx?: string) {
         this._headString = 'newHeadline';
         this._bodyString = '';
+        this._p_changed = false;
         this.children = [];
         this.parents = [];
         this.fileIndex = '';
