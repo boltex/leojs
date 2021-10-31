@@ -49,7 +49,7 @@ import { Commands } from './leoCommands';
 
 //@+others
 //@+node:felix.20211028004540.1: ** Interfaces
-interface Bead {
+export interface Bead {
     [key:string]:any;
 }
 
@@ -76,6 +76,7 @@ export class Undoer {
     public beads:Bead = []; // List of undo nodes.
     public bead:number = -1; // Index of the present bead: -1:len(beads)
     public undoType:any = "Can't Undo";
+    public groupCount: number = 0;
     // These must be set here, _not_ in clearUndoState.
     public redoMenuLabel:any = "Can't Redo";
     public undoMenuLabel:any = "Can't Undo";
@@ -85,7 +86,7 @@ export class Undoer {
     public redoing:boolean = false; // True if executing a Redo command.
     public per_node_undo:boolean = false; // True: v may contain undo_info ivar.
     // New in 4.2...
-    public optionalIvars:any[] = [];
+    public optionalIvars:string[] = [];
     // Set the following ivars to keep pylint happy.
     public afterTree:any;
     public beforeTree:any;
@@ -155,9 +156,12 @@ export class Undoer {
     public clearOptionalIvars(): void {
         const u:Undoer = this;
         u.p = undefined;  // The position/node being operated upon for undo and redo.
-        for(let ivar of u.optionalIvars){
-            ivar = undefined;
-        }
+
+        // for(let ivar in u.optionalIvars){
+            //     delete u.optionalIvars[ivar];
+            //     // ivar = undefined;
+        // }
+        u.optionalIvars.splice(0, u.optionalIvars.length);
     }
     //@+node:felix.20211026230613.10: *4* u.cutStack
     public cutStack(): void {
@@ -851,13 +855,14 @@ export class Undoer {
         bunch.newBack = p.back();
         bunch.newParent = p.parent();
         bunch.newMarked = p.isMarked();
+        let beforeTree: Bead[];
         if (bunch.pasteAsClone){
             beforeTree = bunch.beforeTree;
-            afterTree = [];
+            const afterTree: {v:VNode; head:string; body:string; }[] = [];
             for (let bunch2 of beforeTree){
-                v = bunch2.v;
-                afterTree.append(
-                    {v:v, head:[...v.h], body:[...v.b]}
+                const v:VNode = bunch2.v;
+                afterTree.push(
+                    {v:v, head:v.h.slice(0), body:v.b.slice(0)}
                 );
             }    
             bunch.afterTree = afterTree;
@@ -1027,7 +1032,7 @@ export class Undoer {
         return bunch;
     }
     //@+node:felix.20211026230613.59: *5* u.beforeInsertNode
-    public beforeInsertNode(self, p, pasteAsClone=False, copiedBunchList=None): Bead {
+    public beforeInsertNode(p: Position, pasteAsClone:boolean=false, copiedBunchList?:Bead[]): Bead {
         const u:Undoer = this;
         if (!copiedBunchList){
             copiedBunchList = [];
@@ -1041,7 +1046,7 @@ export class Undoer {
         return bunch;
     }
     //@+node:felix.20211026230613.60: *5* u.beforeMark
-    public beforeMark(p:Position, command:string): void {
+    public beforeMark(p:Position, command:string): Bead {
         const u:Undoer = this;
         const bunch:Bead = u.createCommonBunch(p);
         bunch.kind = 'mark';
@@ -1049,7 +1054,7 @@ export class Undoer {
         return bunch;
     }
     //@+node:felix.20211026230613.61: *5* u.beforeMoveNode
-    public beforeMoveNode(p: Position): void {
+    public beforeMoveNode(p: Position): Bead {
         const u:Undoer = this;
         const bunch:Bead = u.createCommonBunch(p);
         bunch.oldN = p.childIndex();
@@ -1147,18 +1152,19 @@ export class Undoer {
         // assert this.per_node_undo
         const bunch: Bead = {};
         for (let key of this.optionalIvars){
-            bunch[key] = u[key];
+            bunch[key] = (u as any)[key];
         }
         // Put these ivars by hand.
         for (let key of ['bead', 'beads', 'undoType']){
-            bunch[key] = u[key];
+            bunch[key] = (u as any)[key];
         }
         v.undo_info = bunch;
     }
     //@+node:felix.20211026230613.79: *5* u.setIvarsFromVnode
     public setIvarsFromVnode(p: Position): void {
         const u:Undoer = this;
-        v = p.v;
+        const v: VNode = p.v;
+
         // assert this.per_node_undo
         u.clearUndoState();
         if (v['undo_info']){
@@ -1174,7 +1180,7 @@ export class Undoer {
         const c:Commands = this.c;
         if (g.isTextWrapper(w)){
             // An important, ever-present unit test.
-            all = w.getAllText();
+            const all:string = w.getAllText();
             if (g.unitTesting){
                 // assert p.b == all, (w, g.callers())
             }else if( p.b !== all){
@@ -1188,9 +1194,10 @@ export class Undoer {
             p.v.insertSpot = w.getInsertPoint();
             const ins: number = p.v.insertSpot;
             // From u.doTyping.
-            const newSel: number = w.getSelectionRange();
+            const newSel: number[] = w.getSelectionRange();
             if (newSel === undefined){
-                p.v.selectionStart, p.v.selectionLength = (ins, 0)
+                p.v.selectionStart = ins;
+                p.v.selectionLength = 0;
             }else{
                 // i, j = newSel
                 p.v.selectionStart = newSel[0];
@@ -1206,6 +1213,7 @@ export class Undoer {
         }
         //
         // #1749.
+        let redraw_flag: boolean;
         if( p.isDirty()){
             redraw_flag = false;
         }else{
@@ -1215,17 +1223,20 @@ export class Undoer {
         if (!c.isChanged()){
             c.setChanged();
         }
+
         // Update editors.
-        c.frame.body.updateEditors();
+        // c.frame.body.updateEditors(); // TODO : test if needed 
+
         // Update icons.
-        val = p.computeIcon();
+        const val:number = p.computeIcon();
         if( p.v["iconVal"]===0 || !p.v["iconVal"] || val !== p.v.iconVal){
             p.v.iconVal = val;
             redraw_flag = true;
         }
         //
-        // Recolor the body.
-        c.frame.scanForTabWidth(p);  // Calls frame.setTabWidth()
+        // Recolor the body. // TODO : test if needed 
+        // c.frame.scanForTabWidth(p);  // Calls frame.setTabWidth()
+
         c.recolor();
         if (redraw_flag){
             c.redraw_after_icons_changed();
@@ -1278,51 +1289,55 @@ export class Undoer {
     public redoChangeBody(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        const w:any = sc.frame.body.wrapper;
+        const w:any = c.frame.body.wrapper;
         // selectPosition causes recoloring, so don't do this unless needed.
-        if(!c.p.__eq__(u.p)) { // #1333.
-            c.selectPosition(u.p);
+        if(!c.p.__eq__(u.p!)) { // #1333.
+            c.selectPosition(u.p!);
         }
-        u.p.setDirty();
-        u.p.b = u.newBody;
-        u.p.h = u.newHead;
+        u.p!.setDirty();
+        u.p!.b = u.newBody;
+        u.p!.h = u.newHead;
+
         // This is required so. Otherwise redraw will revert the change!
-        c.frame.tree.setHeadline(u.p, u.newHead);
+        // c.frame.tree.setHeadline(u.p, u.newHead);
+
         if (u.newMarked){
-            u.p.setMarked();
+            u.p!.setMarked();
         }else{
-            u.p.clearMarked();
+            u.p!.clearMarked();
         }
         if (u.groupCount === 0){
             w.setAllText(u.newBody);
             // i, j = u.newSel
             w.setSelectionRange(u.newSel[0], u.newSel[1], u.newIns);
             w.setYScrollPosition(u.newYScroll);
-            c.frame.body.recolor(u.p);
+            // c.frame.body.recolor(u.p);
         }    
         u.updateMarks('new');
-        u.p.setDirty();
+        u.p!.setDirty();
     }
     //@+node:felix.20211026230613.85: *4* u.redoChangeHeadline
     public redoChangeHeadline(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
         // selectPosition causes recoloring, so don't do this unless needed.
-        if (!c.p.__bool__(u.p)){  // #1333.
-            c.selectPosition(u.p);
+        if (!c.p.__eq__(u.p!)){  // #1333.
+            c.selectPosition(u.p!);
         }    
-        u.p.setDirty();
-        c.frame.body.recolor(u.p);
+        u.p!.setDirty();
+        // c.frame.body.recolor(u.p!);
         // Restore the headline.
-        u.p.initHeadString(u.newHead);
+        u.p!.initHeadString(u.newHead);
+
         // This is required so.  Otherwise redraw will revert the change!
-        c.frame.tree.setHeadline(u.p, u.newHead);
+        // c.frame.tree.setHeadline(u.p, u.newHead);
+
     }
     //@+node:felix.20211026230613.87: *4* u.redoCloneMarkedNodes
     public redoCloneMarkedNodes(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        c.selectPosition(u.p);
+        c.selectPosition(u.p!);
         c.cloneMarked();
         u.newP = c.p;
     }
@@ -1330,7 +1345,7 @@ export class Undoer {
     public redoCopyMarkedNodes(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        c.selectPosition(u.p);
+        c.selectPosition(u.p!);
         c.copyMarked();
         u.newP = c.p;
     }    
@@ -1356,7 +1371,7 @@ export class Undoer {
     public redoDeleteMarkedNodes(): void{
         const u:Undoer = this;
         const c:Commands = u.c;
-        c.selectPosition(u.p);
+        c.selectPosition(u.p!);
         c.deleteMarked();
         c.selectPosition(u.newP);
     }    
@@ -1364,7 +1379,7 @@ export class Undoer {
     public redoDeleteNode(): void{
         const u:Undoer = this;
         const c:Commands = u.c;
-        c.selectPosition(u.p);
+        c.selectPosition(u.p!);
         c.deleteOutline();
         c.selectPosition(u.newP);
     }    
@@ -1372,13 +1387,13 @@ export class Undoer {
     public redoDemote(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        const parent_v:VNode = u.p._parentVnode();
-        const n:number = u.p.childIndex();
+        const parent_v:VNode|undefined = u.p!._parentVnode();
+        const n:number = u.p!.childIndex();
 
         // Move the demoted nodes from the old parent to the new parent.
-        parent_v.children = parent_v.children.slice(0, n + 1);
+        parent_v!.children = parent_v!.children.slice(0, n + 1);
 
-        u.p.v.children.push(...u.followingSibs);
+        u.p!.v.children.push(...u.followingSibs);
         // Adjust the parent links of the moved nodes.
         // There is no need to adjust descendant links.
         for( let v of u.followingSibs){
@@ -1388,10 +1403,10 @@ export class Undoer {
                 v.parents.splice(index, 1);
             }
             
-            v.parents.push(u.p.v);
+            v.parents.push(u.p!.v);
         }    
-        u.p.setDirty();
-        c.setCurrentPosition(u.p);
+        u.p!.setDirty();
+        c.setCurrentPosition(u.p!);
     }
     //@+node:felix.20211026230613.93: *4* u.redoGroup
     /**
@@ -1402,10 +1417,10 @@ export class Undoer {
         // Remember these values.
         const c:Commands = u.c;
         const newSel: number[] = u.newSel;
-        p = u.p.copy();
+        const p:Position = u.p!.copy();
         u.groupCount += 1;
         const bunch: Bead = u.beads[u.bead + 1];
-        count = 0;
+        let count:number = 0;
         if (!bunch['items']){
             g.trace("oops: expecting bunch.items. got bunch.kind = ${bunch.kind}")
             g.trace(bunch);
@@ -1436,15 +1451,15 @@ export class Undoer {
     public redoHoistNode(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        u.p.setDirty();
-        c.selectPosition(u.p);
+        u.p!.setDirty();
+        c.selectPosition(u.p!);
         c.hoist();
     }
     public redoDehoistNode(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        u.p.setDirty();
-        c.selectPosition(u.p);
+        u.p!.setDirty();
+        c.selectPosition(u.p!);
         c.dehoist();
     }
     //@+node:felix.20211026230613.95: *4* u.redoInsertNode
@@ -1481,36 +1496,49 @@ export class Undoer {
     public redoMark(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        u.updateMarks('new')
-        if u.groupCount == 0:
-            u.p.setDirty()
-            c.selectPosition(u.p)
+        u.updateMarks('new');
+        if(u.groupCount === 0){
+            u.p!.setDirty();
+            c.selectPosition(u.p!);
+        }
     }
     //@+node:felix.20211026230613.97: *4* u.redoMove
     public redoMove(): void {
-        const u:Undoer = this;
-        const c:Commands = u.c;
-        cc = c.chapterController
-        v = u.p.v
-        assert u.oldParent_v
-        assert u.newParent_v
-        assert v
-        if cc:
-            cc.selectChapterByName('main')
+        const u: Undoer = this;
+        const c: Commands = u.c;
+        const cc:any = c.chapterController;
+        const v:VNode = u.p!.v;
+        //assert u.oldParent_v
+        //assert u.newParent_v
+        //assert v
+        if(cc){
+            cc.selectChapterByName('main');
+        }
         // Adjust the children arrays of the old parent.
-        assert u.oldParent_v.children[u.oldN] == v
-        del u.oldParent_v.children[u.oldN]
-        u.oldParent_v.setDirty()
+        // assert u.oldParent_v.children[u.oldN] == v
+
+        // del u.oldParent_v.children[u.oldN]
+        u.oldParent_v.children.splice(u.oldN, 1);
+        u.oldParent_v.setDirty();
         // Adjust the children array of the new parent.
-        parent_v = u.newParent_v
-        parent_v.children.insert(u.newN, v)
-        v.parents.append(u.newParent_v)
-        v.parents.remove(u.oldParent_v)
-        u.newParent_v.setDirty()
+        const parent_v:VNode = u.newParent_v;
+
+        // parent_v.children.insert(u.newN, v)
+        parent_v.children.splice(u.newN, 0, v);
+
+        v.parents.push(u.newParent_v);
+
+        // v.parents.remove(u.oldParent_v)
+        const index = v.parents.indexOf(u.oldParent_v);
+        if (index > -1) {
+            v.parents.splice(index, 1);
+        }
+
+        u.newParent_v.setDirty();
         //
-        u.updateMarks('new')
-        u.newP.setDirty()
-        c.selectPosition(u.newP)
+        u.updateMarks('new');
+        u.newP.setDirty();
+        c.selectPosition(u.newP);
     }
     //@+node:felix.20211026230613.98: *4* u.redoNodeContents
     public redoNodeContents(): void {
@@ -1518,56 +1546,68 @@ export class Undoer {
         const c:Commands = u.c;
         const w:any = c.frame.body.wrapper;
         // selectPosition causes recoloring, so don't do this unless needed.
-        if c.p != u.p:  // #1333.
-            c.selectPosition(u.p)
-        u.p.setDirty()
+        if(!c.p.__eq__(u.p!)) { // #1333.
+            c.selectPosition(u.p!);
+        }
+        u.p!.setDirty();
         // Restore the body.
-        u.p.setBodyString(u.newBody)
-        w.setAllText(u.newBody)
-        c.frame.body.recolor(u.p)
+        u.p!.setBodyString(u.newBody);
+        w.setAllText(u.newBody);
+
+        // c.frame.body.recolor(u.p!);
+
         // Restore the headline.
-        u.p.initHeadString(u.newHead)
+        u.p!.initHeadString(u.newHead);
+
         // This is required so.  Otherwise redraw will revert the change!
-        c.frame.tree.setHeadline(u.p, u.newHead)  // New in 4.4b2.
-        if u.groupCount == 0 and u.newSel:
-            i, j = u.newSel
-            w.setSelectionRange(i, j)
-        if u.groupCount == 0 and u.newYScroll is not None:
-            w.setYScrollPosition(u.newYScroll)
-        u.updateMarks('new')
-        u.p.setDirty()
+        // c.frame.tree.setHeadline(u.p, u.newHead)  // New in 4.4b2.
+
+        if (u.groupCount === 0 && u.newSel && u.newSel.length){
+            // i, j = u.newSel
+            w.setSelectionRange(u.newSel[0], u.newSel[1]);
+        }
+        if( u.groupCount === 0 && (u.newYScroll || u.newYScroll===0)){
+            w.setYScrollPosition(u.newYScroll);
+        }
+        u.updateMarks('new');
+        u.p!.setDirty();
     }
     //@+node:felix.20211026230613.99: *4* u.redoPromote
     public redoPromote(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        parent_v = u.p._parentVnode()
+        const parent_v: VNode = u.p!._parentVnode()!;
         // Add the children to parent_v's children.
-        n = u.p.childIndex() + 1
-        old_children = parent_v.children[:]
-        parent_v.children = old_children[:n]
+        let n:number = u.p!.childIndex() + 1;
+        const old_children:VNode[] = [...parent_v.children];
+        parent_v.children = old_children.slice(0,n);
             // Add children up to the promoted nodes.
-        parent_v.children.extend(u.children)
+        parent_v.children.push(...u.children);
             // Add the promoted nodes.
-        parent_v.children.extend(old_children[n:])
+        parent_v.children.push(...old_children.slice(n));
             // Add the children up to the promoted nodes.
         // Remove the old children.
-        u.p.v.children = []
+        u.p!.v.children = [];
         // Adjust the parent links in the moved children.
         // There is no need to adjust descendant links.
-        for child in u.children:
-            child.parents.remove(u.p.v)
-            child.parents.append(parent_v)
-        u.p.setDirty()
-        c.setCurrentPosition(u.p)
+        for (let child of u.children){
+            // child.parents.remove(u.p.v);
+            const index = child.parents.indexOf(u.p!.v);
+            if (index > -1) {
+                child.parents.splice(index, 1);
+            }
+            child.parents.push(parent_v);
+        }    
+        u.p!.setDirty();
+        c.setCurrentPosition(u.p!);
     }
     //@+node:felix.20211026230613.100: *4* u.redoSort
     public redoSort(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        const parent_v:VNode = u.p._parentVnode();
+        const parent_v:VNode = u.p!._parentVnode()!;
         parent_v.children = u.newChildren;
-        p = c.setPositionAfterSort(u.sortChildren);
+        const p:Position = c.setPositionAfterSort(u.sortChildren);
         p.setAllAncestorAtFileNodesDirty();
         c.setCurrentPosition(p);
     }
@@ -1578,357 +1618,398 @@ export class Undoer {
     public redoTree(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        u.p = this.undoRedoTree(u.p, u.oldTree, u.newTree)
-        u.p.setDirty()
-        c.selectPosition(u.p)  // Does full recolor.
-        if u.newSel:
-            i, j = u.newSel
-            c.frame.body.wrapper.setSelectionRange(i, j)
-    }
-    //@+node:felix.20211026230613.102: *4* u.redoTyping
-    public redoTyping(): void {
-        const u:Undoer = this;
-        const c:Commands = u.c;
-        const current:Position = c.p;
-        const w:any = c.frame.body.wrapper;
-        // selectPosition causes recoloring, so avoid if possible.
-        if current != u.p:
-            c.selectPosition(u.p);
-        u.p.setDirty();
-        u.undoRedoText(
-            u.p, u.leading, u.trailing,
-            u.newMiddleLines, u.oldMiddleLines,
-            u.newNewlines, u.oldNewlines,
-            tag="redo", undoType=u.undoType)
-        u.updateMarks('new');
-        if u.newSel:
-            c.bodyWantsFocus();
-            i, j = u.newSel
-            w.setSelectionRange(i, j, insert=j)
-        if u.yview:
-            c.bodyWantsFocus();
-            w.setYScrollPosition(u.yview);
+        u.p = this.undoRedoTree(u.p!, u.oldTree, u.newTree);
+        u.p!.setDirty();
+        c.selectPosition(u.p!);  // Does full recolor.
+        if (u.newSel && u.newSel.length){
+            // i, j = u.newSel
+            c.frame.body.wrapper.setSelectionRange(u.newSel[0], u.newSel[1]);
+        }
     }
     //@+node:felix.20211026230613.103: *3* u.undo
-    @cmd('undo')
-    public undo(self, event=None):
-        """Undo the operation described by the undo parameters."""
+    @cmd('undo', 'Undo the operation described by the undo parameters.')
+    public undo(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        if not c.p:
-            g.trace('no current position')
-            return
+        if(!c.p || !c.p.__bool__()){
+            g.trace('no current position');
+            return;
+        }
         // End editing *before* getting state.
-        c.endEditing()
-        if u.per_node_undo:  // 2011/05/19
-            u.setIvarsFromVnode(c.p)
-        if not u.canUndo():
-            return
-        if not u.getBead(u.bead):
-            return
-        //
+        // c.endEditing()
+
+        if (u.per_node_undo){  // 2011/05/19
+            u.setIvarsFromVnode(c.p);
+        }
+        if (!u.canUndo()){
+            return;
+        }
+        if (!u.getBead(u.bead)){
+            return;
+        }
+        
+
         // Init status.
-        u.undoing = True
-        u.groupCount = 0
+        u.undoing = true;
+        u.groupCount = 0;
         //
         // Dispatch.
-        if u.undoHelper:
-            u.undoHelper()
-        else:
-            g.trace(f"no undo helper for {u.kind} {u.undoType}")
+        if (u.undoHelper){
+            u.undoHelper();
+        }else{
+            g.trace("no undo helper for ${u.kind} ${u.undoType}");
+        }
         //
         // Finish.
-        c.checkOutline()
-        u.update_status()
-        u.undoing = false
-        u.bead -= 1
+        c.checkOutline();
+        u.update_status();
+        u.undoing = false;
+        u.bead -= 1;
         u.setUndoTypes();
+    }
     //@+node:felix.20211026230613.104: *3* u.undo helpers
-    //@+node:felix.20211026230613.105: *4*  u.undoHeoper
+    //@+node:felix.20211026230613.105: *4*  u.undoHelper
     /**
      * The default do-nothing undo helper.
      */
-    public undoHelper()
-        pass
+    public undoHelper(): void {
+        // pass
+    }
     //@+node:felix.20211026230613.106: *4* u.undoChangeBody
-    public undoChangeBody()
-        """
-        Undo all changes to the contents of a node,
-        including headline and body text, and marked bits.
-        """
-        c, u, w = this.c, self, this.c.frame.body.wrapper
+    /**
+     * Undo all changes to the contents of a node,
+     * including headline and body text, and marked bits.
+     */
+    public undoChangeBody(): void {
+
+        const u:Undoer = this;
+        const c:Commands = u.c;
+        const w:any = c.frame.body.wrapper;
         // selectPosition causes recoloring, so don't do this unless needed.
-        if c.p != u.p:
-            c.selectPosition(u.p)
-        u.p.setDirty()
-        u.p.b = u.oldBody
-        u.p.h = u.oldHead
+        if (!c.p.__eq__(u.p!)){
+            c.selectPosition(u.p!);
+        }    
+        u.p!.setDirty();
+        u.p!.b = u.oldBody;
+        u.p!.h = u.oldHead;
         // This is required.  Otherwise c.redraw will revert the change!
-        c.frame.tree.setHeadline(u.p, u.oldHead)
-        if u.oldMarked:
-            u.p.setMarked()
-        else:
-            u.p.clearMarked()
-        if u.groupCount == 0:
-            w.setAllText(u.oldBody)
-            i, j = u.oldSel
-            w.setSelectionRange(i, j, insert=u.oldIns)
-            w.setYScrollPosition(u.oldYScroll)
-            c.frame.body.recolor(u.p)
-        u.updateMarks('old')
+        // c.frame.tree.setHeadline(u.p, u.oldHead);
+
+        if (u.oldMarked){
+            u.p!.setMarked();
+        }else{
+            u.p!.clearMarked();
+        }
+        if (u.groupCount === 0){
+            w.setAllText(u.oldBody);
+            // i, j = u.oldSel;
+            w.setSelectionRange(u.oldSel[0], u.oldSel[1], u.oldIns);
+            w.setYScrollPosition(u.oldYScroll);
+            //c.frame.body.recolor(u.p);
+        }
+        u.updateMarks('old');
+    }
     //@+node:felix.20211026230613.107: *4* u.undoChangeHeadline
     /**
      * Undo a change to a node's headline.
      */
-    public undoChangeHeadline()
+    public undoChangeHeadline(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
         // selectPosition causes recoloring, so don't do this unless needed.
-        if c.p != u.p:  // #1333.
-            c.selectPosition(u.p)
-        u.p.setDirty()
+        if (!c.p.__eq__(u.p!)){
+            c.selectPosition(u.p!);
+        }    
+        u.p!.setDirty();
         c.frame.body.recolor(u.p)
-        u.p.initHeadString(u.oldHead)
+        u.p!.initHeadString(u.oldHead)
+
         // This is required.  Otherwise c.redraw will revert the change!
-        c.frame.tree.setHeadline(u.p, u.oldHead)
-    //@+node:felix.20211026230613.108: *4* u.undoClearRecentFiles
-    public undoClearRecentFiles()
-        const u:Undoer = this;
-        const c:Commands = u.c;
-        rf = g.app.recentFilesManager
-        rf.setRecentFiles(u.oldRecentFiles[:])
-        rf.createRecentFilesMenuItems(c)
+        //c.frame.tree.setHeadline(u.p, u.oldHead)
+    }
     //@+node:felix.20211026230613.109: *4* u.undoCloneMarkedNodes
-    public undoCloneMarkedNodes()
+    public undoCloneMarkedNodes(): void {
         const u:Undoer = this;
-        next = u.p.next()
-        assert next.h == 'Clones of marked nodes', (u.p, next.h)
-        next.doDelete()
-        u.p.setAllAncestorAtFileNodesDirty()
-        u.c.selectPosition(u.p)
+        const next:Position = u.p!.next();
+        // assert next.h == 'Clones of marked nodes', (u.p, next.h);
+        next.doDelete();
+        u.p!.setAllAncestorAtFileNodesDirty();
+        u.c.selectPosition(u.p!);
+    }
     //@+node:felix.20211026230613.110: *4* u.undoCloneNode
-    public undoCloneNode()
+    public undoCloneNode(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        cc = c.chapterController
-        if cc:
-            cc.selectChapterByName('main')
-        c.selectPosition(u.newP)
-        c.deleteOutline()
-        u.p.setDirty()
-        c.selectPosition(u.p)
+        const cc: any = c.chapterController;
+        if (cc){
+            cc.selectChapterByName('main');
+        }
+        c.selectPosition(u.newP);
+        c.deleteOutline();
+        u.p!.setDirty();
+        c.selectPosition(u.p!);
+    }
     //@+node:felix.20211026230613.111: *4* u.undoCopyMarkedNodes
-    public undoCopyMarkedNodes()
+    public undoCopyMarkedNodes(): void {
         const u:Undoer = this;
-        next = u.p.next()
-        assert next.h == 'Copies of marked nodes', (u.p.h, next.h)
-        next.doDelete()
-        u.p.setAllAncestorAtFileNodesDirty()
-        u.c.selectPosition(u.p)
+        const next:Position = u.p!.next();
+        // assert next.h == 'Copies of marked nodes', (u.p.h, next.h)
+        next.doDelete();
+        u.p!.setAllAncestorAtFileNodesDirty();
+        u.c.selectPosition(u.p!);
+    }
     //@+node:felix.20211026230613.112: *4* u.undoDeleteMarkedNodes
-    public undoDeleteMarkedNodes()
+    public undoDeleteMarkedNodes(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
         // Undo the deletes in reverse order
-        aList = u.deleteMarkedNodesData[:]
-        aList.reverse()
-        for p in aList:
-            if p.stack:
-                parent_v, junk = p.stack[-1]
-            else:
-                parent_v = c.hiddenRootNode
-            p.v._addLink(p._childIndex, parent_v)
-            p.v.setDirty()
-        u.p.setAllAncestorAtFileNodesDirty()
-        c.selectPosition(u.p)
+        const aList: Position[] = [...u.deleteMarkedNodesData];
+        aList.reverse();
+        let parent_v:VNode;
+        for (let p of aList){
+            if (p.stack.length){
+                parent_v = p.stack[-1][0];
+            }else{
+                parent_v = c.hiddenRootNode;
+            }
+            p.v._addLink(p._childIndex, parent_v);
+            p.v.setDirty();
+    }
+        u.p!.setAllAncestorAtFileNodesDirty();
+        c.selectPosition(u.p!);
+    }
     //@+node:felix.20211026230613.113: *4* u.undoDeleteNode
-    public undoDeleteNode()
+    public undoDeleteNode(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        if u.oldBack:
-            u.p._linkAfter(u.oldBack)
-        elif u.oldParent:
-            u.p._linkAsNthChild(u.oldParent, 0)
-        else:
-            u.p._linkAsRoot()
-        u.p.setDirty()
-        c.selectPosition(u.p)
+        if( u.oldBack){
+            u.p!._linkAfter(u.oldBack);
+        }else if (u.oldParent){
+            u.p!._linkAsNthChild(u.oldParent, 0);
+        }else{
+            u.p!._linkAsRoot();
+        }
+        u.p!.setDirty();
+        c.selectPosition(u.p!);
+    }
     //@+node:felix.20211026230613.114: *4* u.undoDemote
-    public undoDemote()
+    public undoDemote(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        parent_v = u.p._parentVnode()
-        n = len(u.followingSibs)
+        const parent_v:VNode = u.p!._parentVnode()!;
+        let n:number = u.followingSibs.length;
         // Remove the demoted nodes from p's children.
-        u.p.v.children = u.p.v.children[: -n]
+        u.p!.v.children = u.p!.v.children.slice(0, -n);
         // Add the demoted nodes to the parent's children.
-        parent_v.children.extend(u.followingSibs)
+        parent_v.children.push(...u.followingSibs);
         // Adjust the parent links.
         // There is no need to adjust descendant links.
-        parent_v.setDirty()
-        for sib in u.followingSibs:
-            sib.parents.remove(u.p.v)
-            sib.parents.append(parent_v)
-        u.p.setAllAncestorAtFileNodesDirty()
-        c.setCurrentPosition(u.p)
+        parent_v.setDirty();
+        for (let sib of u.followingSibs){
+            sib.parents.remove(u.p!.v);
+            sib.parents.append(parent_v);
+        }    
+        u.p!.setAllAncestorAtFileNodesDirty();
+        c.setCurrentPosition(u.p!);
+    }
     //@+node:felix.20211026230613.115: *4* u.undoGroup
     /**
      * Process beads until the matching 'beforeGroup' bead is seen.
      */
-    public undoGroup()
+    public undoGroup(): void {
         const u:Undoer = this;
         // Remember these values.
         const c:Commands = u.c;
-        oldSel = u.oldSel;
-        p = u.p.copy();
+        const oldSel: any = u.oldSel;
+        const p:Position = u.p!.copy();
         u.groupCount += 1;
-        bunch = u.beads[u.bead];
-        count = 0;
-        if not hasattr(bunch, 'items'):
-            g.trace(f"oops: expecting bunch.items. got bunch.kind = {bunch.kind}")
-            g.trace(bunch)
-        else:
+        const bunch: Bead = u.beads[u.bead];
+        let count: number = 0;
+        if (!bunch['items']){
+            g.trace("oops: expecting bunch.items. got bunch.kind = ${bunch.kind}");
+            g.trace(bunch);
+        }else{
             // Important bug fix: 9/8/06: reverse the items first.
-            reversedItems = bunch.items[:]
-            reversedItems.reverse()
-            for z in reversedItems:
-                u.setIvarsFromBunch(z)
-                if z.undoHelper:
-                    z.undoHelper()
+            const reversedItems:any[] = [...bunch.items];
+            reversedItems.reverse();
+            for (let z of reversedItems){
+                u.setIvarsFromBunch(z);
+                if (z.undoHelper){
+                    z.undoHelper();
                     count += 1;
-                else:
-                    g.trace(f"oops: no undo helper for {u.undoType} {p.v}")
-        u.groupCount -= 1
-        u.updateMarks('old')  // Bug fix: Leo 4.4.6.
-        if not g.unitTesting and u.verboseUndoGroup:
-            g.es("undo", count, "instances")
-        p.setDirty()
-        c.selectPosition(p)
-        if oldSel:
-            i, j = oldSel
-            c.frame.body.wrapper.setSelectionRange(i, j)
+                }else{
+                    g.trace("oops: no undo helper for ${u.undoType} ${p.v}");
+                }
+            }
+        }
+        u.groupCount -= 1;
+        u.updateMarks('old');  // Bug fix: Leo 4.4.6.
+        if (!g.unitTesting && u.verboseUndoGroup){
+            g.es("undo", count, "instances");
+        }
+        p.setDirty();
+        c.selectPosition(p);
+        if (oldSel && oldSel.length){
+            // i, j = oldSel
+            c.frame.body.wrapper.setSelectionRange(oldSel[0], oldSel[1]);
+        }
+    }
     //@+node:felix.20211026230613.116: *4* u.undoHoistNode & undoDehoistNode
-    public undoHoistNode()
+    public undoHoistNode(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        u.p.setDirty()
-        c.selectPosition(u.p)
-        c.dehoist()
-
-    public undoDehoistNode()
+        u.p!.setDirty();
+        c.selectPosition(u.p!);
+        c.dehoist();
+    }
+    public undoDehoistNode(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        u.p.setDirty();
-        c.selectPosition(u.p);
+        u.p!.setDirty();
+        c.selectPosition(u.p!);
         c.hoist();
+    }
     //@+node:felix.20211026230613.117: *4* u.undoInsertNode
-    public undoInsertNode()
+    public undoInsertNode(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        cc = c.chapterController
-        if cc:
-            cc.selectChapterByName('main')
-        u.newP.setAllAncestorAtFileNodesDirty()
-        c.selectPosition(u.newP)
-        c.deleteOutline()
+        const cc:any = c.chapterController;
+        if (cc){
+            cc.selectChapterByName('main');
+        }
+        u.newP.setAllAncestorAtFileNodesDirty();
+        c.selectPosition(u.newP);
+        c.deleteOutline();
             // Bug fix: 2016/03/30.
             // This always selects the proper new position.
             // c.selectPosition(u.p)
-        if u.pasteAsClone:
-            for bunch in u.beforeTree:
-                v = bunch.v
-                if u.p.v == v:
-                    u.p.b = bunch.body
-                    u.p.h = bunch.head
-                else:
-                    v.setBodyString(bunch.body)
-                    v.setHeadString(bunch.head)
+        if (u.pasteAsClone){
+            for (let bunch of u.beforeTree){
+                const v:VNode = bunch.v;
+                if (u.p!.v == v){
+                    u.p!.b = bunch.body;
+                    u.p!.h = bunch.head;
+                }else{
+                    v.setBodyString(bunch.body);
+                    v.setHeadString(bunch.head);
+                }
+            }
+        }
+    }
     //@+node:felix.20211026230613.118: *4* u.undoMark
-    public undoMark()
+    public undoMark(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
         u.updateMarks('old');
-        if u.groupCount == 0:
-            u.p.setDirty();
-            c.selectPosition(u.p);
+        if (u.groupCount === 0){
+            u.p!.setDirty();
+            c.selectPosition(u.p!);
+        }    
+    }
     //@+node:felix.20211026230613.119: *4* u.undoMove
-    public undoMove()
+    public undoMove(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        cc = c.chapterController
-        if cc:
-            cc.selectChapterByName('main')
-        v = u.p.v
-        assert u.oldParent_v
-        assert u.newParent_v
-        assert v
+        const cc:any = c.chapterController;
+        if (cc){
+            cc.selectChapterByName('main');
+        }
+        const v:VNode = u.p!.v; 
+        //assert u.oldParent_v
+        //assert u.newParent_v
+        //assert v
         // Adjust the children arrays.
-        assert u.newParent_v.children[u.newN] == v
-        del u.newParent_v.children[u.newN]
-        u.oldParent_v.children.insert(u.oldN, v)
+        // assert u.newParent_v.children[u.newN] == v
+
+        // del u.newParent_v.children[u.newN]
+        u.newParent_v.children.splice(u.newN, 1);
+
+        u.oldParent_v.children.splice(u.oldN, 0, v);
+
         // Recompute the parent links.
-        v.parents.append(u.oldParent_v)
-        v.parents.remove(u.newParent_v)
-        u.updateMarks('old')
-        u.p.setDirty()
-        c.selectPosition(u.p)
+        v.parents.push(u.oldParent_v);
+
+        // v.parents.remove(u.newParent_v)
+        const index = v.parents.indexOf(u.newParent_v);
+        if (index > -1) {
+            v.parents.splice(index, 1);
+        }
+
+        u.updateMarks('old');
+        u.p!.setDirty();
+        c.selectPosition(u.p!);
+    }
     //@+node:felix.20211026230613.120: *4* u.undoNodeContents
-    public undoNodeContents()
-        """
-        Undo all changes to the contents of a node,
-        including headline and body text, and marked bits.
-        """
+    /**
+     * Undo all changes to the contents of a node,
+     * including headline and body text, and marked bits.
+     */
+    public undoNodeContents(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
         const w:any = c.frame.body.wrapper;
         // selectPosition causes recoloring, so don't do this unless needed.
-        if c.p != u.p:  // #1333.
-            c.selectPosition(u.p)
-        u.p.setDirty()
-        u.p.b = u.oldBody
-        w.setAllText(u.oldBody)
-        c.frame.body.recolor(u.p)
-        u.p.h = u.oldHead
+        if (!c.p.__eq__(u.p!)){
+            c.selectPosition(u.p!);
+        }    
+        u.p!.setDirty();
+        u.p!.b = u.oldBody
+        w.setAllText(u.oldBody);
+        // c.frame.body.recolor(u.p)
+        u.p!.h = u.oldHead;
+
         // This is required.  Otherwise c.redraw will revert the change!
-        c.frame.tree.setHeadline(u.p, u.oldHead)
-        if u.groupCount == 0 and u.oldSel:
-            i, j = u.oldSel
-            w.setSelectionRange(i, j)
-        if u.groupCount == 0 and u.oldYScroll is not None:
-            w.setYScrollPosition(u.oldYScroll)
-        u.updateMarks('old')
+        // c.frame.tree.setHeadline(u.p, u.oldHead)
+
+        if (u.groupCount === 0 && u.oldSel && u.oldSel.length){
+            // i, j = u.oldSel
+            w.setSelectionRange( u.oldSel[0],  u.oldSel[1]);
+        }
+        if (u.groupCount === 0 && (u.oldYScroll ||u.oldYScroll ===0)){
+            w.setYScrollPosition(u.oldYScroll);
+        }
+        u.updateMarks('old');
+    }
     //@+node:felix.20211026230613.121: *4* u.undoPromote
-    public undoPromote()
+    public undoPromote(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        parent_v = u.p._parentVnode()  // The parent of the all the *promoted* nodes.
+        const parent_v:VNode = u.p!._parentVnode()!;  // The parent of the all the *promoted* nodes.
         // Remove the promoted nodes from parent_v's children.
-        n = u.p.childIndex() + 1
+        let n:number = u.p!.childIndex() + 1;
         // Adjust the old parents children
-        old_children = parent_v.children
-        parent_v.children = old_children[:n]
+        const old_children: VNode[] = parent_v.children;
+
+        parent_v.children = old_children.slice(0, n);
             // Add the nodes before the promoted nodes.
-        parent_v.children.extend(old_children[n + len(u.children) :])
+
+        parent_v.children.push(...old_children.slice(n + u.children.length));
             // Add the nodes after the promoted nodes.
+
         // Add the demoted nodes to v's children.
-        u.p.v.children = u.children[:]
+        u.p!.v.children = [...u.children];
+
         // Adjust the parent links.
         // There is no need to adjust descendant links.
-        parent_v.setDirty()
-        for child in u.children:
-            child.parents.remove(parent_v)
-            child.parents.append(u.p.v)
-        u.p.setAllAncestorAtFileNodesDirty()
-        c.setCurrentPosition(u.p)
+        parent_v.setDirty();
+        for( let child of u.children){
+            child.parents.remove(parent_v);
+            child.parents.append(u.p!.v);
+        }
+        u.p!.setAllAncestorAtFileNodesDirty();
+        c.setCurrentPosition(u.p!);
+    }
     //@+node:felix.20211026230613.122: *4* u.undoRedoText
-    public undoRedoText(self, p,
-        leading, trailing,  // Number of matching leading & trailing lines.
-        oldMidLines, newMidLines,  // Lists of unmatched lines.
-        oldNewlines, newNewlines,  // Number of trailing newlines.
-        tag="undo",  // "undo" or "redo"
-        undoType=None
-    ):
-        """Handle text undo and redo: converts _new_ text into _old_ text."""
+    /**
+     * Handle text undo and redo: converts _new_ text into _old_ text.
+     */
+    public undoRedoText(p: Position,
+        leading:number, trailing:number,  // Number of matching leading & trailing lines.
+        oldMidLines:string[], newMidLines:string[],  // Lists of unmatched lines.
+        oldNewlines:number, newNewlines:number,  // Number of trailing newlines.
+        tag:string="undo",  // "undo" or "redo"
+        undoType?: string
+    ): void {
         // newNewlines is unused, but it has symmetry.
         const u:Undoer = this;
         const c:Commands = u.c;
@@ -1936,34 +2017,46 @@ export class Undoer {
         //@+<< Compute the result using p's body text >>
         //@+node:felix.20211026230613.123: *5* << Compute the result using p's body text >>
         // Recreate the text using the present body text.
-        body = p.b
-        body = g.checkUnicode(body)
-        body_lines = body.split('\n')
-        s = []
-        if leading > 0:
-            s.extend(body_lines[:leading])
-        if oldMidLines:
-            s.extend(oldMidLines)
-        if trailing > 0:
-            s.extend(body_lines[-trailing :])
-        s = '\n'.join(s)
+        let body:string = p.b;
+        // body = g.checkUnicode(body);
+
+        const body_lines:string[] = body.split('\n');
+        let s:string[]|string = [];
+
+        if (leading > 0){
+            s.push(...body_lines.slice(0, leading));
+        }
+        if (oldMidLines.length)
+            s.push(...oldMidLines);
+
+        if (trailing > 0){
+            s.push(...body_lines.slice(-trailing));
+        }
+        // s = '\n'.join(s);
+        s = s.join('\n');
+
         // Remove trailing newlines in s.
-        while s and s[-1] == '\n':
-            s = s[:-1]
+        while(s && s[-1] === '\n'){
+            s = s.slice(0, -1);
+        }
         // Add oldNewlines newlines.
-        if oldNewlines > 0:
-            s = s + '\n' * oldNewlines
-        result = s
+        if (oldNewlines > 0){
+            s = s + '\n'.repeat(oldNewlines);
+        }
+        const result:string = s;
         //@-<< Compute the result using p's body text >>
-        p.setBodyString(result)
-        p.setDirty()
-        w.setAllText(result)
-        sel = u.oldSel if tag == 'undo' else u.newSel
-        if sel:
-            i, j = sel
-            w.setSelectionRange(i, j, insert=j)
-        c.frame.body.recolor(p)
-        w.seeInsertPoint()  // 2009/12/21
+        p.setBodyString(result);
+        p.setDirty();
+        w.setAllText(result);
+        const sel:number[]= tag === 'undo'? u.oldSel : u.newSel;
+        if(sel && sel.length){
+            // i, j = sel
+            w.setSelectionRange(sel[0], sel[1], sel[1]);
+        }
+        
+        // c.frame.body.recolor(p);
+        w.seeInsertPoint() ; // 2009/12/21
+    }
     //@+node:felix.20211026230613.124: *4* u.undoRedoTree
     /**
      * Replace p and its subtree using old_data during undo.
@@ -1988,9 +2081,9 @@ export class Undoer {
     public undoSort(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        parent_v = u.p._parentVnode();
+        const parent_v:VNode = u.p!._parentVnode()!;
         parent_v.children = u.oldChildren;
-        p = c.setPositionAfterSort(u.sortChildren);
+        const p:Position = c.setPositionAfterSort(u.sortChildren);
         p.setAllAncestorAtFileNodesDirty();
         c.setCurrentPosition(p);
     }    
@@ -2001,39 +2094,13 @@ export class Undoer {
     public undoTree(): void {
         const u:Undoer = this;
         const c:Commands = u.c;
-        u.p = u.undoRedoTree(u.p, u.newTree, u.oldTree);
+        u.p = u.undoRedoTree(u.p!, u.newTree, u.oldTree);
         u.p.setAllAncestorAtFileNodesDirty();
         c.selectPosition(u.p);  // Does full recolor.
         if (u.oldSel){
             //i, j = u.oldSel
             c.frame.body.wrapper.setSelectionRange(u.oldSel[0], u.oldSel[1]);
         }
-    }
-    //@+node:felix.20211026230613.127: *4* u.undoTyping
-    public undoTyping(): void {
-        const u:Undoer = this;
-        const c:Commands = u.c;
-        const w:any = c.frame.body.wrapper;
-        // selectPosition causes recoloring, so don't do this unless needed.
-        if( !c.p.__eq__(u.p)){
-            c.selectPosition(u.p);
-        }
-        u.p.setDirty();
-        u.undoRedoText(
-            u.p, u.leading, u.trailing,
-            u.oldMiddleLines, u.newMiddleLines,
-            u.oldNewlines, u.newNewlines,
-            "undo", u.undoType);
-        u.updateMarks('old');
-        if (u.oldSel){
-            c.bodyWantsFocus();
-            // i, j = u.oldSel;
-            w.setSelectionRange(u.oldSel[0], u.oldSel[1], u.oldSel[1]);
-        }    
-        if (u.yview){
-            c.bodyWantsFocus();
-            w.setYScrollPosition(u.yview);
-        }    
     }
     //@+node:felix.20211026230613.128: *3* u.update_status
     /**
@@ -2043,8 +2110,10 @@ export class Undoer {
         const u:Undoer = this;
         const c:Commands = u.c;
         const w:any = c.frame.body.wrapper;
+
         // Redraw and recolor.
-        c.frame.body.updateEditors();  // New in Leo 4.4.8.
+        // c.frame.body.updateEditors();  // New in Leo 4.4.8.
+
         //
         // Set the new position.
         if(0){  // Don't do this: it interferes with selection ranges.
@@ -2057,15 +2126,17 @@ export class Undoer {
         // # 1451. *Always* set the changed bit.
         // Redrawing *must* be done here before setting u.undoing to false.
         // i, j = w.getSelectionRange()
-        w_selRange = w.getSelectionRange();
-        ins = w.getInsertPoint();
+        const w_selRange:number[] = w.getSelectionRange();
+        const ins:number = w.getInsertPoint();
+
         // c.redraw();
-        c.recolor();
+        // c.recolor();
+
         if (u.inHead){
-            c.editHeadline();
+            // c.editHeadline();
             u.inHead = false;
         }else{
-            c.bodyWantsFocus();
+            // c.bodyWantsFocus();
             w.setSelectionRange(w_selRange[0], w_selRange[1], ins);
             w.seeInsertPoint();
         }

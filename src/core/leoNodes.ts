@@ -3,6 +3,7 @@
 import "date-format-lite";
 import * as g from './leoGlobals';
 import { Commands } from './leoCommands';
+import { Bead } from "./leoUndo";
 
 
 /**
@@ -2285,7 +2286,10 @@ export class VNode {
     // * The primary data: headline and body text.
     _headString: string;
     _bodyString: string;
+
+    // * used by undoer
     _p_changed: boolean;
+    undo_info: Bead | undefined;
 
     // * Structure data...
     children: VNode[]; // Ordered list of all children of this node.

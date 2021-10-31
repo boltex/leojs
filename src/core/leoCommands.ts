@@ -1184,6 +1184,88 @@ export class Commands {
     // topVnode = topPosition
     // setTopVnode = setTopPosition
 
+    //@+node:felix.20211030170417.1: *3* c.Check Outline
+    //@+node:felix.20211030170815.1: *4* checkGnxs
+    /**
+     * Check the consistency of all gnx's and remove any tnodeLists.
+     * Reallocate gnx's for duplicates or empty gnx's.
+     * Return the number of structure_errors found.
+     */
+    public checkGnxs(): number {
+        // TODO !
+        return 0;
+
+        /*
+        c = self
+        d: Dict[str, Set["leoNodes.VNode"]] = {}  // Keys are gnx's; values are sets of vnodes with that gnx.
+        ni = g.app.nodeIndices
+        t1 = time.time()
+
+        def new_gnx(v):
+            """Set v.fileIndex."""
+            v.fileIndex = ni.getNewIndex(v)
+
+        count, gnx_errors = 0, 0
+        for p in c.safe_all_positions(copy=False):
+            count += 1
+            v = p.v
+            if hasattr(v, "tnodeList"):
+                delattr(v, "tnodeList")
+                v._p_changed = True
+            gnx = v.fileIndex
+            if gnx:  # gnx must be a string.
+                aSet: Set["leoNodes.VNode"] = d.get(gnx, set())
+                aSet.add(v)
+                d[gnx] = aSet
+            else:
+                gnx_errors += 1
+                new_gnx(v)
+                g.es_print(f"empty v.fileIndex: {v} new: {p.v.gnx!r}", color='red')
+        for gnx in sorted(d.keys()):
+            aList = list(d.get(gnx))
+            if len(aList) != 1:
+                print('\nc.checkGnxs...')
+                g.es_print(f"multiple vnodes with gnx: {gnx!r}", color='red')
+                for v in aList:
+                    gnx_errors += 1
+                    g.es_print(f"id(v): {id(v)} gnx: {v.fileIndex} {v.h}", color='red')
+                    new_gnx(v)
+        ok = not gnx_errors and not g.app.structure_errors
+        t2 = time.time()
+        if not ok:
+            g.es_print(
+                f"check-outline ERROR! {c.shortFileName()} "
+                f"{count} nodes, "
+                f"{gnx_errors} gnx errors, "
+                f"{g.app.structure_errors} "
+                f"structure errors",
+                color='red'
+            )
+        elif c.verbose_check_outline and not g.unitTesting:
+            print(
+                f"check-outline OK: {t2 - t1:4.2f} sec. "
+                f"{c.shortFileName()} {count} nodes")
+        return g.app.structure_errors
+        */
+
+
+    }
+    //@+node:felix.20211030170430.1: *4* checkOutline
+    /**
+     * Check for errors in the outline.
+     * Return the count of serious structure errors.
+     */
+    public checkOutline(check_links?:boolean): number {
+        // The check-outline command sets check_links = True
+        const c: Commands = this;
+        g.app.structure_errors = 0;
+        let structure_errors:number = c.checkGnxs();
+        if(check_links && !structure_errors){
+            structure_errors += c.checkLinks();
+        }
+        return structure_errors;
+
+    }
     //@+node:felix.20211005023225.1: *3* c.Gui
     //@+node:felix.20211022202201.1: *4* c.drawing
     //@+node:felix.20211022202634.1: *5* c.expandAllAncestors

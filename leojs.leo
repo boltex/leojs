@@ -176,6 +176,9 @@
 <v t="felix.20201214194144.10"><vh>Log &amp; Terminal Panes</vh>
 <v t="felix.20201214211655.1"><vh>showLogPane</vh></v>
 </v>
+<v t="felix.20211030165058.1"><vh>Wrapper Helpers</vh>
+<v t="felix.20211030165111.1"><vh>isTextWidget &amp; isTextWrapper</vh></v>
+</v>
 <v t="felix.20201214211706.1"><vh>test</vh></v>
 </v>
 </v>
@@ -491,6 +494,7 @@
 <v t="felix.20211023224502.1"><vh>g.is_nl</vh></v>
 <v t="felix.20211023224519.1"><vh>g.skip_nl</vh></v>
 <v t="felix.20210104210259.1"><vh>g.isDirective     (coreGlobals.py)</vh></v>
+<v t="felix.20211030164613.1"><vh>g.isTextWrapper &amp; isTextWidget</vh></v>
 <v t="felix.20210104210307.1"><vh>g.is_special      (coreGlobals.py)</vh></v>
 <v t="felix.20210104210316.1"><vh>g.isWordChar*     (coreGlobals.py)</vh></v>
 <v t="felix.20210108005428.1"><vh>g.match           (coreGlobals.py)</vh></v>
@@ -6681,7 +6685,10 @@ export class VNode {
     // * The primary data: headline and body text.
     _headString: string;
     _bodyString: string;
+
+    // * used by undoer
     _p_changed: boolean;
+    undo_info: Bead | undefined;
 
     // * Structure data...
     children: VNode[]; // Ordered list of all children of this node.
@@ -10535,6 +10542,7 @@ constructor(v: VNode, childIndex: number = 0, stack?: StackEntry[]) {
 <t tx="felix.20210127001502.1">import "date-format-lite";
 import * as g from './leoGlobals';
 import { Commands } from './leoCommands';
+import { Bead } from "./leoUndo";
 
 </t>
 <t tx="felix.20210127234205.1">/*
@@ -15505,6 +15513,22 @@ public copyWithNewVnodes(copyMarked?:boolean): Position{
     return new Position(p.v.copyTree(!!copyMarked));
 }
 
+</t>
+<t tx="felix.20211030164613.1">export function isTextWidget(w: any): boolean { 
+    return !!app &amp;&amp; !!app.gui &amp;&amp; app.gui.isTextWidget &amp;&amp; app.gui.isTextWidget(w);
+}
+export function isTextWrapper(w: any): boolean { 
+    return !!app &amp;&amp; !!app.gui &amp;&amp; app.gui.isTextWrapper &amp;&amp; app.gui.isTextWrapper(w);
+}
+</t>
+<t tx="felix.20211030165058.1"></t>
+<t tx="felix.20211030165111.1">public isTextWidget(w:any):boolean {
+    return false;
+}
+
+public isTextWrapper(w:any):boolean {
+    return false;
+}
 </t>
 </tnodes>
 </leo_file>

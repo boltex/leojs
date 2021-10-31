@@ -526,6 +526,12 @@ export function isDirective(s: string): boolean {
     return false;
 }
 
+export function isTextWidget(w: any): boolean { 
+    return !!app && !!app.gui && app.gui.isTextWidget && app.gui.isTextWidget(w);
+}
+export function isTextWrapper(w: any): boolean { 
+    return !!app && !!app.gui && app.gui.isTextWrapper && app.gui.isTextWrapper(w);
+}
 /**
  * Return non-negative number if the body text contains the @ directive.
  */

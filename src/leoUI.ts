@@ -820,10 +820,10 @@ export class LeoUI {
         }
 
         /* EXAMPLE CALL BY METHOD
-                //@ts-expect-error
+                    //@ts-expect-error
         if ((typeof this.leo_c[p_cmd]) === 'function') {
             console.log('HAS PROPERTY' + p_cmd + " so were doing it!");
-                    //@ts-expect-error
+                        //@ts-expect-error
             this.leo_c[p_cmd]();
         } else {
             console.log('NO PROPERTY' + p_cmd);
@@ -1260,6 +1260,13 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
+    public isTextWidget(w:any):boolean {
+        return false;
+    }
+
+    public isTextWrapper(w:any):boolean {
+        return false;
+    }
     /**
      * * Test/Dummy command
      * @returns Thenable from the tested functionality
