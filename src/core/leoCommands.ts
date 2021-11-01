@@ -10,6 +10,7 @@ import { CommanderFileCommands } from "../commands/commanderFileCommands";
 
 import { Position, VNode, StackEntry } from "./leoNodes";
 import { NodeHistory } from './leoHistory';
+import { Undoer } from './leoUndo';
 
 //@-<< imports >>
 //@+others
@@ -51,16 +52,22 @@ export class Commands {
     public hiddenRootNode: VNode;
     public fileCommands: FileCommands;
     public chapterController: any; // TODO : leoChapters.ChapterController(c)
-    public undoer: any; // TODO : leoUndo.Undoer(c)
+    public undoer: Undoer;
     public nodeHistory: NodeHistory;
 
     public gui: LeoUI;
 
     // TODO fake frame needed FOR wrapper and hasSelection 
     // TODO : maybe MERGE frame.tree.generation WITH _treeId?
-    public frame: { tree: { generation: number; }, body: any } = {
+    public frame: { tree: {
+        generation: number; 
+        editLabel: (p:Position, selectAll:boolean, selection:any) => void
+    }, body: any } = {
         tree: {
-            generation: 0
+            generation: 0,
+            editLabel: (p:Position, selectAll:boolean, selection:any ) => {
+                console.log("EDIT LABEL");
+            }
         },
         body: {}
     };
@@ -218,6 +225,7 @@ export class Commands {
         this.fileCommands.gnxDict = {}; // RESET gnxDict
         this.chapterController = {}; // TODO self.chapterController = leoChapters.ChapterController(c)
         this.nodeHistory = new NodeHistory(c);
+        this.undoer = new Undoer(c);
 
         // From initConfigSettings 
         this.collapse_on_lt_arrow = true; // getBool('collapse-on-lt-arrow', default=True)
@@ -1255,16 +1263,69 @@ export class Commands {
      * Check for errors in the outline.
      * Return the count of serious structure errors.
      */
-    public checkOutline(check_links?:boolean): number {
+    public checkOutline(check_links?: boolean): number {
         // The check-outline command sets check_links = True
         const c: Commands = this;
         g.app.structure_errors = 0;
-        let structure_errors:number = c.checkGnxs();
-        if(check_links && !structure_errors){
+        let structure_errors: number = c.checkGnxs();
+        if (check_links && !structure_errors) {
             structure_errors += c.checkLinks();
         }
         return structure_errors;
 
+    }
+    //@+node:felix.20211031161240.1: *4* checkLinks
+    /**
+     * Check the consistency of all links in the outline.
+     */
+    public checkLinks(): number {
+
+        const c: Commands = this;
+
+        // t1 = time.time()
+        let count: number = 0;
+        let errors: number = 0;
+
+        // TODO !
+        // for p in c.safe_all_positions():
+        //     count += 1
+        //     // try:
+        //     if not c.checkThreadLinks(p):
+        //         errors += 1
+        //         break
+        //     if not c.checkSiblings(p):
+        //         errors += 1
+        //         break
+        //     if not c.checkParentAndChildren(p):
+        //         errors += 1
+        //         break
+
+        // except AssertionError:
+        // errors += 1
+        // junk, value, junk = sys.exc_info()
+        // g.error("test failed at position %s\n%s" % (repr(p), value))
+        // t2 = time.time()
+        // g.es_print(
+        //     f"check-links: {t2 - t1:4.2f} sec. "
+        //     f"{c.shortFileName()} {count} nodes", color='blue')
+
+        return errors;
+    }
+    //@+node:felix.20211031193257.1: *4* validateOutline
+    /**
+     * Makes sure all nodes are valid.
+     */
+    public validateOutline(): boolean {
+        const c: Commands = this;
+        if (!g.app.validate_outline) {
+            return true;
+        }
+        const root: Position | undefined = c.rootPosition();
+        const parent: Position | undefined = undefined;
+        if (root && root.__bool__()) {
+            return root.validateOutlineWithParent(parent);
+        }
+        return true;
     }
     //@+node:felix.20211005023225.1: *3* c.Gui
     //@+node:felix.20211022202201.1: *4* c.drawing
@@ -1699,6 +1760,47 @@ export class Commands {
         return false;
     }
     //@+node:felix.20211005023421.1: *4* c.Selecting
+    //@+node:felix.20211031215315.1: *5* c.redrawAndEdit
+    /** 
+     * Redraw the screen and edit p's headline.
+     */
+    public redrawAndEdit(
+        p: Position,
+        selectAll:boolean=false,
+        selection:any=undefined,
+        keepMinibuffer:boolean=false
+    ): void {
+        const c: Commands = this;
+        const k: any = this.k;
+
+        // c.redraw(p);  // This *must* be done now.
+        c.selectPosition(p);
+
+        if (p && p.__bool__()){
+            // TODO : allow headline rename ?
+            // This should request focus.
+            c.frame.tree.editLabel(p, selectAll, selection);
+
+            if( k && !keepMinibuffer){
+                // Setting the input state has no effect on focus.
+                if (selectAll){
+                    k.setInputState('insert');
+                }else{
+                    k.setDefaultInputState();
+                }
+                // This *does* affect focus.
+                k.showStateAndMode();
+            }
+        }else{
+            g.trace('** no p');
+        }
+
+
+        // Update the focus immediately.
+        if (!keepMinibuffer){
+           //  c.outerUpdate(); // TODO : Not needed ?
+        }
+    }
     //@+node:felix.20211005023456.1: *5* c.selectPosition
     /**
      * Select a new position, redrawing the screen *only* if we must
@@ -1754,6 +1856,36 @@ export class Commands {
 
     }
 
+    //@+node:felix.20211031220906.1: *5* c.setPositionAfterSort
+    /**
+     * Return the position to be selected after a sort.
+     */
+    public setPositionAfterSort(sortChildren: boolean): Position {
+        
+        const c: Commands = this;
+        let p: Position = c.p;
+        const p_v: VNode = p.v;
+
+        const parent: Position = p.parent();
+        const parent_v: VNode = p._parentVnode()!;
+        if (sortChildren){
+            return parent || c.rootPosition();
+        }
+        if (parent && parent.__bool__()){
+            p = parent.firstChild();
+        }else{
+            p = new Position(parent_v.children[0]);
+        }
+        while( p && p.__bool__() && p.v.gnx !== p_v.gnx){
+            p.moveToNext();
+        }
+
+        if(!p || !p.__bool__()){
+            p = parent;
+        }
+
+        return p;
+    }
     //@+node:felix.20211022013445.1: *5* c.treeSelectHelper
     public treeSelectHelper(p: Position | false): void {
         const c: Commands = this;

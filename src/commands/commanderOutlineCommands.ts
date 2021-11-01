@@ -13,7 +13,8 @@ import { NodeIndices, Position, VNode } from "../core/leoNodes";
 
 // from leo.core import leoFileCommands
 import { FileCommands } from "../core/leoFileCommands";
-import { Commands } from "../core/leoCommands";
+import { Commands, HoistStackEntry } from "../core/leoCommands";
+import { Bead, Undoer } from '../core/leoUndo';
 
 export class CommanderOutlineCommands {
 
@@ -782,6 +783,356 @@ export class CommanderOutlineCommands {
             this.selectVisNext();
         }
     }
+    //@+node:felix.20211031143537.1: ** c_oc.hoist/dehoist/clearAllHoists
+    //@+node:felix.20211031143537.2: *3* c_oc.deHoist
+    @commander_command('de-hoist', 'Undo a previous hoist of an outline.')
+    @commander_command('dehoist', 'Undo a previous hoist of an outline.')
+    public dehoist(this: Commands): void {
+        
+        const c: Commands = this;
+
+        if (!c.p || !c.p.__bool__() || !c.hoistStack || !c.hoistStack.length){
+            return;
+        }
+        // Don't de-hoist an @chapter node.
+        if (c.chapterController && c.p.h.startsWith('@chapter ')){
+            if (!g.unitTesting){
+                g.es('can not de-hoist an @chapter node.');
+            }
+            return;
+        }
+
+        const bunch:HoistStackEntry = c.hoistStack.pop()!;
+        const p:Position = bunch.p;
+
+        // ! Check if exist BUT FALSE
+        if (p && !p.__bool__()){
+            p.expand();
+        }else{
+            p.contract();
+        }
+        c.setCurrentPosition(p);
+
+        // TODO : Needed?
+        // c.redraw()
+        // c.frame.clearStatusLine()
+        // c.frame.putStatusLine("De-Hoist: " + p.h)
+
+        c.undoer.afterDehoist(p, 'DeHoist');
+
+        // TODO : Needed?
+        // g.doHook('hoist-changed', c=c)
+    }
+    //@+node:felix.20211031143537.3: *3* c_oc.clearAllHoists
+    @commander_command('clear-all-hoists', 'Undo a previous hoist of an outline.')
+    public clearAllHoists(this: Commands): void {
+        const c: Commands = this;
+        c.hoistStack = [];
+
+        // TODO : Needed?
+        // c.frame.putStatusLine("Hoists cleared")
+        // g.doHook('hoist-changed', c=c)
+    }
+    //@+node:felix.20211031143537.4: *3* c_oc.hoist
+    @commander_command('hoist', 'Make only the selected outline visible.')
+    public hoist(this: Commands): void {
+        const c: Commands = this;
+        const p: Position = c.p;
+        if (!p || !p.__bool__()){
+            return;
+        }
+        // Don't hoist an @chapter node.
+        if(c.chapterController && p.h.startsWith('@chapter ')){
+            if(!g.unitTesting){
+                g.es('can not hoist an @chapter node.');
+            }
+            return
+        }
+
+        // Remember the expansion state.
+        const bunch:HoistStackEntry = {
+            p:p.copy(),
+            expanded:p.isExpanded()
+        };
+        
+        c.hoistStack.push(bunch);
+        p.expand();
+
+        // TODO : Needed?
+        // c.redraw(p);
+        // c.frame.clearStatusLine();
+        // c.frame.putStatusLine("Hoist: " + p.h);
+
+        c.undoer.afterHoist(p, 'Hoist');
+
+        // TODO : Needed?
+        // g.doHook('hoist-changed', c=c);
+    }
+    //@+node:felix.20211031143555.1: ** c_oc.Insert, Delete & Clone commands
+    //@+node:felix.20211031143555.2: *3* c_oc.clone
+    @commander_command('clone-node', 'Create a clone of the selected outline.')
+    public clone(this: Commands): Position | undefined {
+        const c: Commands = this;
+        const p: Position = c.p;
+        const u: Undoer = c.undoer;
+
+        if (!p || !p.__bool__()){
+            return undefined;
+        }    
+
+        const undoData: Bead = c.undoer.beforeCloneNode(p);
+
+        // c.endEditing();  // Capture any changes to the headline.
+        const clone: Position = p.clone();
+        clone.setDirty();
+        c.setChanged();
+        if(c.validateOutline()){
+            u.afterCloneNode(clone, 'Clone Node', undoData);
+
+            // TODO : Needed ?
+            // c.redraw(clone);
+            // c.treeWantsFocus();
+
+            return clone;  // For mod_labels and chapters plugins.
+        }
+        clone.doDelete();
+        c.setCurrentPosition(p);
+        return undefined;
+    }
+    //@+node:felix.20211031143555.3: *3* c_oc.cloneToAtSpot
+    @commander_command('clone-to-at-spot',
+        'Create a clone of the selected node and move it to the last @spot node\n'+
+        'of the outline. Create the @spot node if necessary.'
+    )
+    public cloneToAtSpot(this: Commands): void {
+        const c: Commands = this;
+        const p: Position = c.p;
+        const u: Undoer = c.undoer;
+
+        if (!p || !p.__bool__()){
+            return undefined;
+        }    
+
+        // 2015/12/27: fix bug 220: do not allow clone-to-at-spot on @spot node.
+        if(p.h.startsWith('@spot')){
+            g.es("can not clone @spot node");
+            return;
+        }
+        let last_spot:Position|undefined;
+
+        for (let p2 of c.all_positions()){
+            if (g.match_word(p2.h, 0, '@spot')){
+                last_spot = p2.copy();
+            }
+        }
+        if (!last_spot || !last_spot.__bool__()){
+            const last:Position = c.lastTopLevel();
+            last_spot = last.insertAfter();
+            last_spot.h = '@spot';
+        }
+
+        const undoData = c.undoer.beforeCloneNode(p);
+
+        // c.endEditing()  // Capture any changes to the headline.
+
+        const clone:Position = p.copy();
+        clone._linkAsNthChild(last_spot, last_spot.numberOfChildren());
+        clone.setDirty();
+        c.setChanged();
+
+        if (c.validateOutline()){
+            u.afterCloneNode(clone, 'Clone Node', undoData);
+            c.contractAllHeadlines();
+            // c.redraw();
+            c.selectPosition(clone);
+        }else{
+            clone.doDelete();
+            c.setCurrentPosition(p);
+        }
+    }
+    //@+node:felix.20211031143555.4: *3* c_oc.cloneToLastNode
+    @commander_command(
+        'clone-node-to-last-node',
+        'Clone the selected node and move it to the last node.\n'+
+        'Do *not* change the selected node.'
+    )
+    public cloneToLastNode(this: Commands): void {
+        const c: Commands = this;
+        const p: Position = c.p;
+        const u: Undoer = c.undoer;
+
+        if (!p || !p.__bool__()){
+            return undefined;
+        }    
+
+        const prev: Position = p.copy();
+        const undoData: Bead = c.undoer.beforeCloneNode(p);
+
+        // c.endEditing()  // Capture any changes to the headline.
+
+        const clone: Position = p.clone();
+        const last: Position = c.rootPosition()!;
+
+        while(last && last.__bool__() && last.hasNext()){
+            last.moveToNext();
+        }
+        clone.moveAfter(last);
+        clone.setDirty();
+        c.setChanged();
+        u.afterCloneNode(clone, 'Clone Node To Last', undoData);
+
+        // c.redraw(prev)
+        // return clone // For mod_labels and chapters plugins.
+    }
+    //@+node:felix.20211031143555.5: *3* c_oc.deleteOutline
+    @commander_command('delete-node', 'Deletes the selected outline.')
+    public deleteOutline(this: Commands, op_name:string="Delete Node"): void {
+        const c: Commands = this;
+        const p: Position = c.p;
+        const u: Undoer = c.undoer;
+        if (!p || !p.__bool__()){
+            return undefined;
+        }   
+        let newNode:Position;
+        // c.endEditing()  // Make sure we capture the headline for Undo.
+        if (false){ // c.config.getBool('select-next-after-delete'):
+            // #721: Optionally select next node after delete.
+            if (p.hasVisNext(c)){
+                newNode = p.visNext(c);
+            }else if( p.hasParent()){
+                newNode = p.parent();
+            }else{
+                newNode = p.back();  // _not_ p.visBack(): we are at the top level.
+            }
+        }else{
+            // Legacy: select previous node if possible.
+            if( p.hasVisBack(c)){
+                newNode = p.visBack(c);
+            }else{
+                newNode = p.next();  // _not_ p.visNext(): we are at the top level.
+            }
+        }
+
+        if (!newNode || !newNode.__bool__() ){
+            return;
+        }
+        const undoData: Bead = u.beforeDeleteNode(p);
+        p.setDirty();
+        p.doDelete(newNode);
+        c.setChanged();
+        u.afterDeleteNode(newNode, op_name, undoData);
+        // c.redraw(newNode); 
+        c.validateOutline();
+    }
+    //@+node:felix.20211031143555.6: *3* c_oc.insertChild
+    @commander_command(
+        'insert-child',
+        'Insert a node after the presently selected node.'
+    )
+    public insertChild(this: Commands): Position | undefined {
+        const c: Commands = this;
+        return c.insertHeadline('Insert Child', true);
+    }
+    //@+node:felix.20211031143555.7: *3* c_oc.insertHeadline (insert-*)
+    @commander_command('insert-node', 'Insert a node after the presently selected node.')
+    public insertHeadline(this: Commands, op_name:string="Insert Node", as_child:Boolean=false): Position | undefined {
+        const c: Commands = this;
+        // Fix #600.
+        return this.insertHeadlineHelper(c, as_child, false, false);
+    }
+    @commander_command('insert-as-first-child', 'Insert a node as the last child of the previous node.')
+    public insertNodeAsFirstChild(this: Commands): Position | undefined {
+        const c: Commands = this;
+        return this.insertHeadlineHelper(c, false, true, false);
+    }
+    @commander_command('insert-as-last-child', 'Insert a node as the last child of the previous node.')
+    public insertNodeAsLastChild(this: Commands): Position | undefined {
+        const c: Commands = this;
+        return this.insertHeadlineHelper(c, false, false, true);
+    }
+    //@+node:felix.20211031143555.8: *4* private insertHeadlineHelper
+    /**
+     * Insert a node after the presently selected node.
+     */
+    private insertHeadlineHelper(
+        c: Commands,
+        as_child:Boolean=false,
+        as_first_child:Boolean=false,
+        as_last_child:Boolean=false
+    ): Position | undefined {
+
+        const current: Position = c.p;
+        const u: Undoer = c.undoer;
+
+        const op_name:string = "Insert Node";
+        if (!current || !current.__bool__()){
+            return undefined;
+        }
+        // c.endEditing()
+
+        const undoData: Bead = c.undoer.beforeInsertNode(current);
+         
+        let p:Position;
+        if (as_first_child)
+            p = current.insertAsNthChild(0);
+        else if (as_last_child)
+            p = current.insertAsLastChild();
+        else if (
+            as_child ||
+            (current.hasChildren() && current.isExpanded()) ||
+            (c.hoistStack && c.hoistStack.length && current.__eq__(c.hoistStack[-1].p))
+        ){   
+            // Make sure the new node is visible when hoisting.
+            if(c.config.getBool('insert-new-nodes-at-end')){
+                p = current.insertAsLastChild();
+            }else{
+                p = current.insertAsNthChild(0);
+            }
+        }else{
+            p = current.insertAfter();
+        }
+        // g.doHook('create-node', c=c, p=p);
+
+        p.setDirty();
+        c.setChanged();
+        u.afterInsertNode(p, op_name, undoData);
+
+        c.redrawAndEdit(p, true);
+
+        return p;
+    }
+    //@+node:felix.20211031143555.9: *3* c_oc.insertHeadlineBefore
+    @commander_command('insert-node-before', 'Insert a node before the presently selected node.')
+    public insertHeadlineBefore(this: Commands): Position | undefined {
+        const c: Commands = this;
+        const current: Position = c.p;
+        const u: Undoer = c.undoer;
+        
+        const op_name:string = 'Insert Node Before';
+        if (!current || !current.__bool__()){
+            return undefined;
+        }
+        // Can not insert before the base of a hoist.
+        if (c.hoistStack && c.hoistStack.length && current.__eq__(c.hoistStack[-1].p)){
+            g.warning('can not insert a node before the base of a hoist');
+            return undefined;
+        }
+        // c.endEditing()
+
+        const undoData: Bead = u.beforeInsertNode(current);
+        const p:Position = current.insertBefore();
+
+        // g.doHook('create-node', c, p);
+
+        p.setDirty();
+        c.setChanged();
+        u.afterInsertNode(p, op_name, undoData);
+
+        // TODO : Implement ? Editing Headline ?
+        // c.redrawAndEdit(p, selectAll=True);
+
+        return p
+    }
     //@+node:felix.20211025223803.1: ** c_oc.Mark commands
     //@+node:felix.20211025223803.2: *3* c_oc.cloneMarked
     @commander_command(
@@ -790,7 +1141,7 @@ export class CommanderOutlineCommands {
     )
     public cloneMarked(this: Commands): void {
         const c: Commands = this;
-        const u = c.undoer; // TODO : Undoer
+        const u: Undoer = c.undoer;
         const p1: Position = c.p.copy();
         // Create a new node to hold clones.
         const parent: Position = p1.insertAfter();
@@ -842,7 +1193,7 @@ export class CommanderOutlineCommands {
     )
     public copyMarked(this: Commands): void {
         const c: Commands = this;
-        const u = c.undoer; // TODO : Undoer
+        const u: Undoer = c.undoer;
         const p1: Position = c.p.copy();
         // Create a new node to hold clones.
         const parent: Position = p1.insertAfter();
@@ -890,9 +1241,9 @@ export class CommanderOutlineCommands {
     )
     public deleteMarked(this: Commands): void {
         const c: Commands = this;
-        const u = c.undoer; // TODO : Undoer
-        const p1 = c.p.copy();
-        const undo_data: any[] = [];
+        const u: Undoer = c.undoer;
+        const p1: Position = c.p.copy();
+        const undo_data: Position[] = [];
         let p: Position = c.rootPosition()!;
 
         while (p && p.__bool__()) {
@@ -1019,8 +1370,8 @@ export class CommanderOutlineCommands {
     public markChangedHeadlines(this: Commands): void {
         const c: Commands = this;
         const current: Position = this.p;
-        const u = c.undoer; // TODO : Undoer
-        const undoType = 'Mark Changed';
+        const u: Undoer = c.undoer;
+        const undoType: string = 'Mark Changed';
         // c.endEditing()
         u.beforeChangeGroup(current, undoType);
 
@@ -1052,13 +1403,13 @@ export class CommanderOutlineCommands {
     public markHeadline(this: Commands): void {
         const c: Commands = this;
         const p: Position = this.p;
-        const u = c.undoer; // TODO : Undoer
+        const u: Undoer = c.undoer;
 
         if (!p || !p.__bool__()) {
             return;
         }
 
-        const undoType = p.isMarked() ? 'Unmark' : 'Mark';
+        const undoType: string = p.isMarked() ? 'Unmark' : 'Mark';
 
         const bunch = u.beforeMark(p, undoType);
         // c.set/clearMarked call a hook.
@@ -1080,8 +1431,8 @@ export class CommanderOutlineCommands {
     public markSubheads(this: Commands): void {
         const c: Commands = this;
         const current: Position = this.p;
-        const u = c.undoer; // TODO : Undoer
-        const undoType = 'Mark Subheads'
+        const u: Undoer = c.undoer;
+        const undoType: string = 'Mark Subheads'
         if (!current || !current.__bool__()) {
             return;
         }
@@ -1105,8 +1456,8 @@ export class CommanderOutlineCommands {
     public unmarkAll(this: Commands): void {
         const c: Commands = this;
         const current: Position = this.p;
-        const u = c.undoer; // TODO : Undoer
-        const undoType = 'Unmark All';
+        const u: Undoer = c.undoer;
+        const undoType: string = 'Unmark All';
         if (!current || !current.__bool__()) {
             return;
         }

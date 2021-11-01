@@ -3624,10 +3624,10 @@ public command(
     }
 
     /* EXAMPLE CALL BY METHOD
-                //@ts-expect-error
+                    //@ts-expect-error
     if ((typeof this.leo_c[p_cmd]) === 'function') {
         console.log('HAS PROPERTY' + p_cmd + " so were doing it!");
-                    //@ts-expect-error
+                        //@ts-expect-error
         this.leo_c[p_cmd]();
     } else {
         console.log('NO PROPERTY' + p_cmd);
@@ -9948,7 +9948,7 @@ public moveToBack(): Position {
         p.v = parent_v.children[n - 1];
     } else {
         // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9966,7 +9966,7 @@ public moveToFirstChild(): Position {
         p._childIndex = 0;
     } else {
         // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9986,7 +9986,7 @@ public moveToLastChild(): Position {
         p._childIndex = n - 1;
     } else {
         // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -10023,7 +10023,7 @@ public moveToNext(): Position {
         p.v = parent_v.children[n + 1];
     } else {
         // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -10057,7 +10057,7 @@ public moveToNthChild(n: number): Position {
         p._childIndex = n;
     } else {
         // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -10075,7 +10075,7 @@ public moveToParent(): Position {
         p._childIndex = item[1];
     } else {
         // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+            //@ts-ignore
         p.v = undefined;
     }
     return p;
@@ -10186,7 +10186,7 @@ public promote(): void {
 <t tx="felix.20210126001920.16">/**
  * This routine checks the structure of the receiver's tree.
  */
-public validateOutlineWithParent(pv: Position): boolean {
+public validateOutlineWithParent(pv: Position | undefined): boolean {
     const p: Position = this;
     let result: boolean = true;  // optimists get only unpleasant surprises.
     const parent: Position = p.getParent();
@@ -10205,11 +10205,11 @@ public validateOutlineWithParent(pv: Position): boolean {
 }
 
 </t>
-<t tx="felix.20210126001920.17">if (!parent.__eq__(pv)) {
+<t tx="felix.20210126001920.17">if (pv &amp;&amp; !parent.__eq__(pv)) {
     p.invalidOutline("Invalid parent link: " + JSON.stringify(parent));
 }
 </t>
-<t tx="felix.20210126001920.18">if (pv.__bool__()) {
+<t tx="felix.20210126001920.18">if (pv &amp;&amp; pv.__bool__()) {
     if (childIndex &lt; 0) {
         p.invalidOutline("missing childIndex" + childIndex);
     } else if (childIndex &gt;= pv.numberOfChildren()) {
@@ -10219,7 +10219,7 @@ public validateOutlineWithParent(pv: Position): boolean {
     p.invalidOutline("negative childIndex" + childIndex);
 }
 </t>
-<t tx="felix.20210126001920.19">if (!p.v &amp;&amp; pv.__bool__()) {
+<t tx="felix.20210126001920.19">if (!p.v &amp;&amp; pv &amp;&amp; pv.__bool__()) {
     this.invalidOutline("Empty t");
 }
 </t>
@@ -15508,7 +15508,7 @@ private _tryApplyNodeToBody(
  * Return an **unlinked** copy of p with a new vnode v.
  * The new vnode is complete copy of v and all its descendants.
  */
-public copyWithNewVnodes(copyMarked?:boolean): Position{
+public copyWithNewVnodes(copyMarked?: boolean): Position {
     const p: Position = this;
     return new Position(p.v.copyTree(!!copyMarked));
 }

@@ -1328,7 +1328,7 @@ export class Position {
             p.v = parent_v.children[n - 1];
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1345,7 +1345,7 @@ export class Position {
             p._childIndex = 0;
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1364,7 +1364,7 @@ export class Position {
             p._childIndex = n - 1;
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1399,7 +1399,7 @@ export class Position {
             p.v = parent_v.children[n + 1];
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1431,7 +1431,7 @@ export class Position {
             p._childIndex = n;
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1448,7 +1448,7 @@ export class Position {
             p._childIndex = item[1];
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-                //@ts-ignore
+            //@ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1670,7 +1670,7 @@ export class Position {
      * Return an **unlinked** copy of p with a new vnode v.
      * The new vnode is complete copy of v and all its descendants.
      */
-    public copyWithNewVnodes(copyMarked?:boolean): Position{
+    public copyWithNewVnodes(copyMarked?: boolean): Position {
         const p: Position = this;
         return new Position(p.v.copyTree(!!copyMarked));
     }
@@ -1864,15 +1864,15 @@ export class Position {
     /**
      * This routine checks the structure of the receiver's tree.
      */
-    public validateOutlineWithParent(pv: Position): boolean {
+    public validateOutlineWithParent(pv: Position | undefined): boolean {
         const p: Position = this;
         let result: boolean = true;  // optimists get only unpleasant surprises.
         const parent: Position = p.getParent();
         const childIndex: number = p._childIndex;
-        if (!parent.__eq__(pv)) {
+        if (pv && !parent.__eq__(pv)) {
             p.invalidOutline("Invalid parent link: " + JSON.stringify(parent));
         }
-        if (pv.__bool__()) {
+        if (pv && pv.__bool__()) {
             if (childIndex < 0) {
                 p.invalidOutline("missing childIndex" + childIndex);
             } else if (childIndex >= pv.numberOfChildren()) {
@@ -1881,7 +1881,7 @@ export class Position {
         } else if (childIndex < 0) {
             p.invalidOutline("negative childIndex" + childIndex);
         }
-        if (!p.v && pv.__bool__()) {
+        if (!p.v && pv && pv.__bool__()) {
             this.invalidOutline("Empty t");
         }
         // Recursively validate all the children.
