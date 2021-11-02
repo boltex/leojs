@@ -11,6 +11,7 @@ import { CommanderFileCommands } from "../commands/commanderFileCommands";
 import { Position, VNode, StackEntry } from "./leoNodes";
 import { NodeHistory } from './leoHistory';
 import { Undoer } from './leoUndo';
+import { LocalConfigManager } from './leoConfig';
 
 //@-<< imports >>
 //@+others
@@ -54,28 +55,30 @@ export class Commands {
     public chapterController: any; // TODO : leoChapters.ChapterController(c)
     public undoer: Undoer;
     public nodeHistory: NodeHistory;
-
     public gui: LeoUI;
 
     // TODO fake frame needed FOR wrapper and hasSelection 
     // TODO : maybe MERGE frame.tree.generation WITH _treeId?
-    public frame: { tree: {
-        generation: number; 
-        editLabel: (p:Position, selectAll:boolean, selection:any) => void
-    }, body: any } = {
+    public frame: {
         tree: {
-            generation: 0,
-            editLabel: (p:Position, selectAll:boolean, selection:any ) => {
-                console.log("EDIT LABEL");
-            }
-        },
-        body: {}
-    };
+            generation: number;
+            editLabel: (p: Position, selectAll: boolean, selection: any) => void
+        }, body: any
+    } = {
+            tree: {
+                generation: 0,
+                editLabel: (p: Position, selectAll: boolean, selection: any) => {
+                    console.log("EDIT LABEL");
+                }
+            },
+            body: {}
+        };
 
     //@+others
     //@+node:felix.20210223220756.1: *3* Commander IVars
     //@+node:felix.20211021003423.1: *4* c.initConfigSettings
     public collapse_on_lt_arrow: boolean = true; // getBool('collapse-on-lt-arrow', default=True)
+    public collapse_nodes_after_move: boolean = false;
     //@+node:felix.20210223220814.2: *4* c.initCommandIvars
     // Init ivars used while executing a command.
     public commandsDict: { [key: string]: (p?: any) => any } = {}; // Keys are command names, values are functions.
@@ -197,7 +200,7 @@ export class Commands {
     //Init the settings *before* initing the objects.
     // c = self
     // from leo.core import leoConfig
-    public config: any = {}; // TODO
+    public config: LocalConfigManager;
     // c.config = leoConfig.LocalConfigManager(c, previousSettings)
     // g.app.config.setIvarsFromSettings(c)
 
@@ -220,6 +223,7 @@ export class Commands {
         // From initObjects
         const gnx: string = 'hidden-root-vnode-gnx';
         this.fileCommands = new FileCommands(this); // c.fileCommands = DummyFileCommands()
+        this.config = new LocalConfigManager(c); // Config before most other subcommanders
         this.hiddenRootNode = new VNode(this, 'hidden-root-vnode-gnx');
         this.hiddenRootNode.h = '<hidden root vnode>';
         this.fileCommands.gnxDict = {}; // RESET gnxDict
@@ -909,7 +913,7 @@ export class Commands {
      * Return the topmost visible node.
      * This is affected by chapters and hoists.
      */
-    public visLimit(): [Position, boolean] | undefined {
+    public visLimit(): [Position | undefined, boolean | undefined] {
         const c: Commands = this;
         const cc: any = false;// c.chapterController
         if (c.hoistStack.length) {
@@ -918,7 +922,7 @@ export class Commands {
             const limitIsVisible: boolean = !cc || !p.h.startsWith('@chapter');
             return [p, limitIsVisible];
         }
-        return undefined;
+        return [undefined, undefined];
     }
 
     //@+node:felix.20210215204308.1: *5* c.vnode2allPositions
@@ -1258,22 +1262,46 @@ export class Commands {
 
 
     }
-    //@+node:felix.20211030170430.1: *4* checkOutline
+    //@+node:felix.20211101013238.1: *4* c.checkMoveWithParentWithWarning & c.checkDrag
+    //@+node:felix.20211101013241.1: *5* c.checkMoveWithParentWithWarning
     /**
-     * Check for errors in the outline.
-     * Return the count of serious structure errors.
+     * Return False if root or any of root's descendents is a clone of parent
+     * or any of parents ancestors.
      */
-    public checkOutline(check_links?: boolean): number {
-        // The check-outline command sets check_links = True
+    public checkMoveWithParentWithWarning(root: Position, parent: Position, warningFlag: boolean): boolean {
         const c: Commands = this;
-        g.app.structure_errors = 0;
-        let structure_errors: number = c.checkGnxs();
-        if (check_links && !structure_errors) {
-            structure_errors += c.checkLinks();
+        const message: string = "Illegal move or drag: no clone may contain a clone of itself";
+        const clonedVnodes: { [key: string]: VNode } = {};
+        for (let ancestor of parent.self_and_parents(false)) {
+            if (ancestor.isCloned()) {
+                const v: VNode = ancestor.v;
+                clonedVnodes[v.gnx] = v;
+            }
         }
-        return structure_errors;
-
+        if (!Object.keys(clonedVnodes).length) {
+            return true;
+        }
+        for (let p of root.self_and_subtree(false)) {
+            if (p.isCloned() && clonedVnodes[p.v.gnx]) {
+                if (!g.unitTesting && warningFlag) {
+                    c.alert(message);
+                }
+                return false;
+            }
+        }
+        return true;
     }
+    //@+node:felix.20211101013309.1: *5* c.checkDrag
+    // def checkDrag(self, root, target):
+    //     """Return False if target is any descendant of root."""
+    //     c = self
+    //     message = "Can not drag a node into its descendant tree."
+    //     for z in root.subtree():
+    //         if z == target:
+    //             if not g.unitTesting:
+    //                 c.alert(message)
+    //             return False
+    //     return True
     //@+node:felix.20211031161240.1: *4* checkLinks
     /**
      * Check the consistency of all links in the outline.
@@ -1310,6 +1338,22 @@ export class Commands {
         //     f"{c.shortFileName()} {count} nodes", color='blue')
 
         return errors;
+    }
+    //@+node:felix.20211030170430.1: *4* checkOutline
+    /**
+     * Check for errors in the outline.
+     * Return the count of serious structure errors.
+     */
+    public checkOutline(check_links?: boolean): number {
+        // The check-outline command sets check_links = True
+        const c: Commands = this;
+        g.app.structure_errors = 0;
+        let structure_errors: number = c.checkGnxs();
+        if (check_links && !structure_errors) {
+            structure_errors += c.checkLinks();
+        }
+        return structure_errors;
+
     }
     //@+node:felix.20211031193257.1: *4* validateOutline
     /**
@@ -1630,12 +1674,12 @@ export class Commands {
             return true;
         }
         if (c.hoistStack.length) {
-            let w_vis: [Position, boolean] | undefined = c.visLimit();
+            let w_vis: [Position | undefined, boolean | undefined] = c.visLimit();
             let limitIsVisible: boolean;
             let limit: Position | undefined;
             if (w_vis) {
                 limit = w_vis[0];
-                limitIsVisible = w_vis[1];
+                limitIsVisible = !!w_vis[1];
             } else {
                 limitIsVisible = false;
             }
@@ -1766,9 +1810,9 @@ export class Commands {
      */
     public redrawAndEdit(
         p: Position,
-        selectAll:boolean=false,
-        selection:any=undefined,
-        keepMinibuffer:boolean=false
+        selectAll: boolean = false,
+        selection: any = undefined,
+        keepMinibuffer: boolean = false
     ): void {
         const c: Commands = this;
         const k: any = this.k;
@@ -1776,29 +1820,29 @@ export class Commands {
         // c.redraw(p);  // This *must* be done now.
         c.selectPosition(p);
 
-        if (p && p.__bool__()){
+        if (p && p.__bool__()) {
             // TODO : allow headline rename ?
             // This should request focus.
             c.frame.tree.editLabel(p, selectAll, selection);
 
-            if( k && !keepMinibuffer){
+            if (k && !keepMinibuffer) {
                 // Setting the input state has no effect on focus.
-                if (selectAll){
+                if (selectAll) {
                     k.setInputState('insert');
-                }else{
+                } else {
                     k.setDefaultInputState();
                 }
                 // This *does* affect focus.
                 k.showStateAndMode();
             }
-        }else{
+        } else {
             g.trace('** no p');
         }
 
 
         // Update the focus immediately.
-        if (!keepMinibuffer){
-           //  c.outerUpdate(); // TODO : Not needed ?
+        if (!keepMinibuffer) {
+            //  c.outerUpdate(); // TODO : Not needed ?
         }
     }
     //@+node:felix.20211005023456.1: *5* c.selectPosition
@@ -1861,26 +1905,26 @@ export class Commands {
      * Return the position to be selected after a sort.
      */
     public setPositionAfterSort(sortChildren: boolean): Position {
-        
+
         const c: Commands = this;
         let p: Position = c.p;
         const p_v: VNode = p.v;
 
         const parent: Position = p.parent();
         const parent_v: VNode = p._parentVnode()!;
-        if (sortChildren){
+        if (sortChildren) {
             return parent || c.rootPosition();
         }
-        if (parent && parent.__bool__()){
+        if (parent && parent.__bool__()) {
             p = parent.firstChild();
-        }else{
+        } else {
             p = new Position(parent_v.children[0]);
         }
-        while( p && p.__bool__() && p.v.gnx !== p_v.gnx){
+        while (p && p.__bool__() && p.v.gnx !== p_v.gnx) {
             p.moveToNext();
         }
 
-        if(!p || !p.__bool__()){
+        if (!p || !p.__bool__()) {
             p = parent;
         }
 

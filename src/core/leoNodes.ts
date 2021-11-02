@@ -1498,9 +1498,9 @@ export class Position {
      */
     public moveToVisBack(c: Commands): Position | undefined {
         const p: Position = this;
-        const visLimit: [Position, boolean] | undefined = c.visLimit();
-        const limit: Position | undefined = visLimit ? visLimit[0] : undefined;
-        const limitIsVisible: boolean = visLimit ? visLimit[1] : false;
+        const visLimit: [Position | undefined, boolean | undefined] = c.visLimit();
+        const limit: Position | undefined = visLimit[0];
+        const limitIsVisible: boolean = !!visLimit[1];
 
         while (p.__bool__()) {
             // Short-circuit if possible.
@@ -1552,8 +1552,8 @@ export class Position {
      */
     public moveToVisNext(c: Commands): Position | undefined {
         const p: Position = this;
-        const visLimit: [Position, boolean] | undefined = c.visLimit();
-        const limit: Position | undefined = visLimit ? visLimit[0] : undefined;
+        const visLimit: [Position | undefined, boolean | undefined] = c.visLimit();
+        const limit: Position | undefined = visLimit[0];
 
         while (p.__bool__()) {
             if (p.hasChildren()) {
