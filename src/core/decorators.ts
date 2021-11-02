@@ -13,7 +13,7 @@ export function commander_command(p_name: string, p_doc: string) {
         // but leojs does NOT need injection of ivars in the func itself
         // like leo does for it's for plugins_menu.py.
         const commander_command_wrapper = Object.assign(
-            descriptor.value,
+            descriptor.value, // the "func itself"
             { __doc__: p_doc },
             { __func_name__: propertyKey },
             { __name__: p_name },
