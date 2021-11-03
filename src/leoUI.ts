@@ -792,7 +792,7 @@ export class LeoUI {
         let value: any = undefined;
 
         // Getting from kebab-cased 'Command Name'
-        const func = this.leo_c.commandsDict[p_cmd];
+        let func: (p?: any) => any = this.leo_c.commandsDict[p_cmd];
         if (!func) {
             vscode.window.showInformationMessage(
                 'TODO: Implement ' +
@@ -804,13 +804,21 @@ export class LeoUI {
                 (p_keepSelection ? " and bring selection back on currently selected node" : "")
             );
         } else {
+            // * Here the original new_cmd_decorator decorator is implemented 'run-time'
+            if ((func as any)["__ivars__"]) {
+                const w_baseObject: any = g.ivars2instance(this.leo_c, g, (func as any)["__ivars__"]);
+                func = func.bind(w_baseObject)
+            } else {
+                func = func.bind(c);
+            }
+
             const p = p_node ? p_node.position : c.p;
             if (p.__eq__(c.p)) {
-                value = func.bind(c)(); // no need for re-selection
+                value = func(); // no need for re-selection
             } else {
                 const old_p = c.p;
                 c.selectPosition(p)
-                value = func.bind(c)();
+                value = func();
 
                 if (p_keepSelection && c.positionExists(old_p)) {
                     // Only if 'keep' old position was set, and old_p still exists
@@ -1260,11 +1268,11 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
-    public isTextWidget(w:any):boolean {
+    public isTextWidget(w: any): boolean {
         return false;
     }
 
-    public isTextWrapper(w:any):boolean {
+    public isTextWrapper(w: any): boolean {
         return false;
     }
     /**
@@ -1281,6 +1289,15 @@ export class LeoUI {
         // if "keep" in param:
         //     keepSelection = param["keep"]
 
+        // * test @cmd decorator and undoer
+        this.command("undo", undefined, {
+            node: true, // Reveal the returned 'selected position' without changes to the tree
+            body: true, // Goto/select another node needs the body pane refreshed
+            states: true
+        }, false);
+
+        // * test @commander_command decorator and general commands
+        /*
         const func = this.leo_c.commandsDict['goto-next-visible'];
         if (!func) {
             console.error('Leo command not found');
@@ -1288,6 +1305,7 @@ export class LeoUI {
             console.log('HAS FUNC!');
             func.bind(this.leo_c)();
         }
+        */
 
         // * Example from leoserver "LEO COMMAND BY NAME" method
         // func = c.commandsDict.get(command_name) # Getting from kebab-cased 'Command Name'

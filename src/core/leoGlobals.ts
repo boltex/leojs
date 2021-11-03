@@ -122,6 +122,39 @@ export const cmd_instance_dict: { [key: string]: string[] } = {
     'VimCommands': ['c', 'vimCommands']
 };
 
+// * Other Decorators used in leojs are in /src/core/decorators.ts
+
+/**
+ * Return the instance of c given by ivars.
+ * ivars is a list of strings.
+ * A special case: ivars may be 'g', indicating the leoGlobals module.
+ */
+export function ivars2instance(c: Commands, g: any, ivars: string[]): any {
+
+    if (!ivars || !ivars.length) {
+        g.trace('can not happen: no ivars');
+        return undefined;
+    }
+
+    let ivar: string = ivars[0]; // first
+
+    if (!['c', 'g'].includes(ivar)) {
+        g.trace('can not happen: unknown base', ivar)
+        return undefined;
+    }
+
+    let obj: any = ivar === 'c' ? c : g;
+
+    // Dig in object 
+    for (let ivar of ivars.slice(1)) {
+        obj = obj[ivar];
+        if (!obj) {
+            g.trace('can not happen: unknown attribute', obj, ivar, ivars);
+            break;
+        }
+    }
+    return obj;
+}
 export const g_language_pat = new RegExp(/^@language\s+(\w+)+/, 'm');
 // Regex used by this module, and in leoColorizer.py.
 
@@ -526,10 +559,10 @@ export function isDirective(s: string): boolean {
     return false;
 }
 
-export function isTextWidget(w: any): boolean { 
+export function isTextWidget(w: any): boolean {
     return !!app && !!app.gui && app.gui.isTextWidget && app.gui.isTextWidget(w);
 }
-export function isTextWrapper(w: any): boolean { 
+export function isTextWrapper(w: any): boolean {
     return !!app && !!app.gui && app.gui.isTextWrapper && app.gui.isTextWrapper(w);
 }
 /**

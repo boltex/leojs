@@ -469,6 +469,7 @@
 <v t="felix.20210102181122.1"><vh>&lt;&lt; imports &gt;&gt; (leoGlobals)</vh></v>
 <v t="felix.20210102180402.1"><vh>&lt;&lt; define g.globalDirectiveList &gt;&gt;</vh></v>
 <v t="felix.20210102180405.1"><vh>&lt;&lt; define global decorator dicts &gt;&gt; (leoGlobals.py)</vh></v>
+<v t="felix.20211102223300.1"><vh>&lt;&lt; define g.Decorators &gt;&gt;</vh></v>
 <v t="felix.20210102180413.1"><vh>&lt;&lt; define regex's &gt;&gt;</vh></v>
 <v t="felix.20210103231554.1"><vh>class g.FileLikeObject (coreGlobals.py)</vh>
 <v t="felix.20210103231554.2"><vh>FileLikeObject.clear (coreGlobals.py)</vh></v>
@@ -1917,6 +1918,7 @@ public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
 public static CONFIG_NAME: string = "leojs";
 public static CONFIG_WORKBENCH_ENABLED_PREVIEW: string = "workbench.editor.enablePreview";
 public static CONFIG_REFRESH_MATCH: string = "OnNodes"; // substring to distinguish 'on-hover' icon commands
+
 </t>
 <t tx="felix.20201214151326.4">/**
  * Strings used in the workbench interface panels (not for messages or dialogs)
@@ -3485,7 +3487,7 @@ public command(
     let value: any = undefined;
 
     // Getting from kebab-cased 'Command Name'
-    const func = this.leo_c.commandsDict[p_cmd];
+    let func: (p?: any) =&gt; any = this.leo_c.commandsDict[p_cmd];
     if (!func) {
         vscode.window.showInformationMessage(
             'TODO: Implement ' +
@@ -3497,13 +3499,21 @@ public command(
             (p_keepSelection ? " and bring selection back on currently selected node" : "")
         );
     } else {
+        // * Here the original new_cmd_decorator decorator is implemented 'run-time'
+        if ((func as any)["__ivars__"]) {
+            const w_baseObject: any = g.ivars2instance(this.leo_c, g, (func as any)["__ivars__"]);
+            func = func.bind(w_baseObject)
+        } else {
+            func = func.bind(c);
+        }
+
         const p = p_node ? p_node.position : c.p;
         if (p.__eq__(c.p)) {
-            value = func.bind(c)(); // no need for re-selection
+            value = func(); // no need for re-selection
         } else {
             const old_p = c.p;
             c.selectPosition(p)
-            value = func.bind(c)();
+            value = func();
 
             if (p_keepSelection &amp;&amp; c.positionExists(old_p)) {
                 // Only if 'keep' old position was set, and old_p still exists
@@ -5708,6 +5718,15 @@ public test(): Thenable&lt;unknown&gt; {
     // if "keep" in param:
     //     keepSelection = param["keep"]
 
+    // * test @cmd decorator and undoer
+    this.command("undo", undefined, {
+        node: true, // Reveal the returned 'selected position' without changes to the tree
+        body: true, // Goto/select another node needs the body pane refreshed
+        states: true
+    }, false);
+
+    // * test @commander_command decorator and general commands
+    /*
     const func = this.leo_c.commandsDict['goto-next-visible'];
     if (!func) {
         console.error('Leo command not found');
@@ -5715,6 +5734,7 @@ public test(): Thenable&lt;unknown&gt; {
         console.log('HAS FUNC!');
         func.bind(this.leo_c)();
     }
+    */
 
     // * Example from leoserver "LEO COMMAND BY NAME" method
     // func = c.commandsDict.get(command_name) # Getting from kebab-cased 'Command Name'
@@ -6429,6 +6449,7 @@ export const isWindows: boolean = process.platform.startsWith('win');
 &lt;&lt; imports &gt;&gt;
 &lt;&lt; define g.globalDirectiveList &gt;&gt;
 &lt;&lt; define global decorator dicts &gt;&gt;
+&lt;&lt; define g.Decorators &gt;&gt;
 &lt;&lt; define regex's &gt;&gt;
 
 export const tree_popup_handlers: ((...args: any[]) =&gt; any)[] = [];  // Set later.
@@ -13317,7 +13338,6 @@ export function commander_command(p_name: string, p_doc: string) {
         descriptor: PropertyDescriptor
     ) {
         // Just injecting doc, func_name and name in the dict object to build menus, 
-        // but leojs does NOT need injection of ivars in the func itself
         // like leo does for it's for plugins_menu.py.
         const commander_command_wrapper = Object.assign(
             descriptor.value, // the "func itself"
@@ -13341,7 +13361,23 @@ export function new_cmd_decorator(p_name: string, p_doc: string, ivars: string[]
         propertyKey: string,
         descriptor: PropertyDescriptor
     ) {
-        // TODO
+        // Like commander_command but the ivars array (base object and sub object/subcommander)
+        // are also added to the func itself. So this original 'new_cmd_decorator' is implemented 
+        // at run time with c.commandsDict. 
+        // (For an example, see leojs source code in the 'command' method of leoUI.ts )
+        const commander_command_wrapper = Object.assign(
+            descriptor.value, // the "func itself"
+            { __doc__: p_doc },
+            { __func_name__: propertyKey },
+            { __name__: p_name },
+            {__ivars__: ivars}
+        );
+
+        if (!g.global_commands_dict) {
+            //@ts-expect-error
+            g.global_commands_dict = {};
+        }
+        g.global_commands_dict[p_name] = commander_command_wrapper;
 
     };
 }
@@ -13708,20 +13744,54 @@ public copyWithNewVnodes(copyMarked?: boolean): Position {
 }
 
 </t>
-<t tx="felix.20211030164613.1">export function isTextWidget(w: any): boolean { 
+<t tx="felix.20211030164613.1">export function isTextWidget(w: any): boolean {
     return !!app &amp;&amp; !!app.gui &amp;&amp; app.gui.isTextWidget &amp;&amp; app.gui.isTextWidget(w);
 }
-export function isTextWrapper(w: any): boolean { 
+export function isTextWrapper(w: any): boolean {
     return !!app &amp;&amp; !!app.gui &amp;&amp; app.gui.isTextWrapper &amp;&amp; app.gui.isTextWrapper(w);
 }
 </t>
 <t tx="felix.20211030165058.1"></t>
-<t tx="felix.20211030165111.1">public isTextWidget(w:any):boolean {
+<t tx="felix.20211030165111.1">public isTextWidget(w: any): boolean {
     return false;
 }
 
-public isTextWrapper(w:any):boolean {
+public isTextWrapper(w: any): boolean {
     return false;
+}
+</t>
+<t tx="felix.20211102223300.1">// * Other Decorators used in leojs are in /src/core/decorators.ts
+
+/**
+ * Return the instance of c given by ivars.
+ * ivars is a list of strings.
+ * A special case: ivars may be 'g', indicating the leoGlobals module.
+ */
+export function ivars2instance(c: Commands, g: any, ivars: string[]): any {
+
+    if (!ivars || !ivars.length) {
+        g.trace('can not happen: no ivars');
+        return undefined;
+    }
+
+    let ivar: string = ivars[0]; // first
+
+    if (!['c', 'g'].includes(ivar)) {
+        g.trace('can not happen: unknown base', ivar)
+        return undefined;
+    }
+
+    let obj: any = ivar === 'c' ? c : g;
+
+    // Dig in object 
+    for (let ivar of ivars.slice(1)) {
+        obj = obj[ivar];
+        if (!obj) {
+            g.trace('can not happen: unknown attribute', obj, ivar, ivars);
+            break;
+        }
+    }
+    return obj;
 }
 </t>
 </tnodes>
