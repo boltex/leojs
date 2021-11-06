@@ -1484,7 +1484,7 @@ export class CommanderOutlineCommands {
             w_p = p;
         }
         if (changed) {
-            g.doHook("clear-all-marks", c, w_p);
+            // g.doHook("clear-all-marks", c, w_p);
             c.setChanged();
         }
 

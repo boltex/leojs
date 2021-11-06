@@ -81,7 +81,13 @@ export class Commands {
     public collapse_nodes_after_move: boolean = false;
     //@+node:felix.20210223220814.2: *4* c.initCommandIvars
     // Init ivars used while executing a command.
-    public commandsDict: { [key: string]: (p?: any) => any } = {}; // Keys are command names, values are functions.
+    public commandsDict: {
+        [key: string]: (...args: any[]) => any &
+        { __doc__: string } &
+        { __func_name__: string } &
+        { __name__: string } &
+        { __ivars__: string[] }
+    } = {}; // Keys are command names, values are functions.
     public disableCommandsMessage: string = ''; // The presence of this message disables all commands.
     public hookFunction: any = undefined; // One of three places that g.doHook looks for hook functions.
 
@@ -524,12 +530,11 @@ export class Commands {
     /**
      * A generator yielding *all* the root positions in the outline that
      * satisfy the given predicate. p.isAnyAtFileNode is the default
-     * predicate.
-     *
-     * The generator yields all **root** anywhere in the outline that satisfy
-     * the predicate. Once a root is found, the generator skips its subtree.
+     * predicate. 
+     * 
+     * Once a root is found, the generator skips its subtree.
      */
-    public *all_roots(copy = true, predicate?: (p: Position) => boolean): Generator<Position> {
+    public *all_roots(predicate?: (p: Position) => boolean): Generator<Position> {
         const c: Commands = this;
 
         if (!predicate) {
@@ -576,8 +581,7 @@ export class Commands {
      * satisfy the given predicate. p.isAnyAtFileNode is the default
      * predicate.
      *
-     * The generator yields all **root** anywhere in the outline that satisfy
-     * the predicate. Once a root is found, the generator skips its subtree.
+     * Once a root is found, the generator skips its subtree.
      */
     public *all_unique_roots(copy = true, predicate?: (p: Position) => boolean): Generator<Position> {
         const c: Commands = this;
@@ -690,11 +694,9 @@ export class Commands {
     /**
      * Return the tab width in effect at p.
      */
-    public getTabWidth(p: Position): number {
+    public getTabWidth(p: Position): number | undefined {
         const c: Commands = this;
-        // const val:number = g.scanAllAtTabWidthDirectives(c, p);
-        // TODO: NEEDED?
-        const val: number = 10;
+        const val: number | undefined = g.scanAllAtTabWidthDirectives(c, p);
         return val;
     }
 
@@ -1055,7 +1057,7 @@ export class Commands {
     public clearMarked(p: Position): void {
         const c: Commands = this;
         p.v.clearMarked();
-        g.doHook("clear-mark", c, p);
+        // g.doHook("clear-mark", c, p);
     }
 
     //@+node:felix.20210131011607.7: *5* c.setBodyString
@@ -1163,7 +1165,7 @@ export class Commands {
         const c: Commands = this;
         p.setMarked();
         p.setDirty();  // Defensive programming.
-        g.doHook("set-mark", c, p);
+        // g.doHook("set-mark", c, p);
     }
 
     //@+node:felix.20210215204937.1: *5* c.topPosition & c.setTopPosition
@@ -1475,7 +1477,7 @@ export class Commands {
     }
     //@+node:felix.20211023195447.5: *6* c.canContractAllHeadlines
     /**
-     * Contract all nodes in the tree.
+     * Returns true if any node is not contracted
      */
     public canContractAllHeadlines(): boolean {
         const c: Commands = this;
