@@ -165,13 +165,13 @@ export class LeoUI {
         // * demo test: BUILD SOME TEST OUTLINE
         // ************************************************************
         let w_node = this.leo_c.p;
-        w_node.initHeadString("node1");
-        w_node.setBodyString('node1 body');
+        w_node.initHeadString("@file node1");
+        w_node.setBodyString('@tabwidth 8\nnode1 body');
         w_node.expand();
 
         w_node = this.leo_c.p.insertAsLastChild();
         w_node.initHeadString("node Inside1");
-        w_node.setBodyString('nodeInside1 body');
+        w_node.setBodyString('  @others \nnodeInside1 body\n@language c\nprint()');
         w_node.setMarked();
 
         w_node = this.leo_c.p.insertAsLastChild();
@@ -790,70 +790,21 @@ export class LeoUI {
 
         const c: Commands = this.leo_c;
         let value: any = undefined;
-        /*
-        // Getting from kebab-cased 'Command Name'
-        let func: (p?: any) => any = this.leo_c.commandsDict[p_cmd];
-        if (!func) {
-            vscode.window.showInformationMessage(
-                'TODO: Implement ' +
-                p_cmd +
-                " called from " +
-                (p_fromOutline ? "outline" : "body") +
-                " operate on " +
-                (p_node ? p_node!.label : "the selected node") +
-                (p_keepSelection ? " and bring selection back on currently selected node" : "")
-            );
-        } else {
-            // * Here the original new_cmd_decorator decorator is implemented 'run-time'
-            if ((func as any)["__ivars__"]) {
-                const w_baseObject: any = g.ivars2instance(this.leo_c, g, (func as any)["__ivars__"]);
-                func = func.bind(w_baseObject)
-            } else {
-                func = func.bind(c);
-            }
-
-            const p = p_node ? p_node.position : c.p;
-            if (p.__eq__(c.p)) {
-                value = func(); // no need for re-selection
-            } else {
-                const old_p = c.p;
-                c.selectPosition(p)
-                value = func();
-
-                if (p_keepSelection && c.positionExists(old_p)) {
-                    // Only if 'keep' old position was set, and old_p still exists
-                    c.selectPosition(old_p)
-                }
-            }
-        }
-        */
         const p = p_node ? p_node.position : c.p;
+
         if (p.__eq__(c.p)) {
             value = this.leo_c.doCommandByName(p_cmd); // no need for re-selection
         } else {
             const old_p = c.p;
-            c.selectPosition(p)
+            c.selectPosition(p);
             value = this.leo_c.doCommandByName(p_cmd);
             if (p_keepSelection && c.positionExists(old_p)) {
                 // Only if 'keep' old position was set, and old_p still exists
-                c.selectPosition(old_p)
+                c.selectPosition(old_p);
             }
         }
 
-        /* EXAMPLE CALL BY METHOD
-                        //@ts-expect-error
-        if ((typeof this.leo_c[p_cmd]) === 'function') {
-            console.log('HAS PROPERTY' + p_cmd + " so were doing it!");
-                            //@ts-expect-error
-            this.leo_c[p_cmd]();
-        } else {
-            console.log('NO PROPERTY' + p_cmd);
-            console.log(this.leo_c);
-        }
-        */
-
         this.launchRefresh();
-
         return Promise.resolve(value);
     }
 
@@ -1302,12 +1253,20 @@ export class LeoUI {
         // if "keep" in param:
         //     keepSelection = param["keep"]
 
+        // * Test directives_dict & directives_pat
+        // console.log('test get_directives_dict_list ');
+        // console.log(g.get_directives_dict_list(this.leo_c.p));
+
+        // * Test getTabWidth
+        console.log(this.leo_c.getTabWidth(this.leo_c.p));
+
         // * test @cmd decorator and undoer
-        this.command("undo", undefined, {
-            node: true, // Reveal the returned 'selected position' without changes to the tree
-            body: true, // Goto/select another node needs the body pane refreshed
-            states: true
-        }, false);
+        // console.log('test @cmd decorator and undoer');
+        // this.command("undo", undefined, {
+        //     node: true, // Reveal the returned 'selected position' without changes to the tree
+        //     body: true, // Goto/select another node needs the body pane refreshed
+        //     states: true
+        // }, false);
 
         // * test @commander_command decorator and general commands
         /*

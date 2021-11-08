@@ -326,7 +326,7 @@ export function printObj(obj: any, indent = '', printCaller = false, tag = null)
  * Returns a dict containing the stripped remainder of the line
  * following the first occurrence of each recognized directive
  */
-export function get_directives_dict(p: Position, root: Position[] | undefined): any {
+export function get_directives_dict(p: Position, root?: Position[]): any {
 
     let d: any = {};
     // #1688:    legacy: Always compute the pattern.
@@ -335,8 +335,6 @@ export function get_directives_dict(p: Position, root: Position[] | undefined): 
     // The headline has higher precedence because it is more visible.
     let m: any;
     for (let s of [p.h, p.b]) {
-        //const anIter = directives_pat.exec(s);
-        //for (let m of anIter){
 
         while ((m = directives_pat.exec(s)) !== null) {
             const word: string = m[1].trim();
@@ -349,12 +347,12 @@ export function get_directives_dict(p: Position, root: Position[] | undefined): 
             if (j < s.length && !(' \t\n'.includes(s.charAt(j)))) {
                 continue;
             }
+
             // Not a valid directive: just ignore it.
             // A unit test tests that @path:any is invalid.
             const k: number = skip_line(s, j);
             const val: string = s.slice(j, k).trim();
             d[word] = val;
-
         }
     }
 
@@ -463,7 +461,7 @@ export function update_directives_pat(): void {
     // It matches at “word boundary” positions. This match is zero-length.
     for (let z of globalDirectiveList) {
         if (z !== 'others') {
-            aList.push("\\b{" + z + "}\\b");
+            aList.push("\\b" + z + "\\b");
         }
     }
 
@@ -471,7 +469,7 @@ export function update_directives_pat(): void {
     const pat: string = "^@(" + aList.join("|") + ")";
 
     // directives_pat = re.compile(pat, re.MULTILINE)
-    directives_pat = new RegExp(pat, 'm');
+    directives_pat = new RegExp(pat, 'mdg');
 }
 // #1688: Initialize g.directives_pat
 update_directives_pat();
@@ -669,7 +667,7 @@ export function skip_long(s: string, i: number): [number, number | undefined] {
 }
 export function skip_ws(s: string, i: number): number {
     const n: number = s.length;
-    while (i < n && ('\t '.indexOf(s.charAt(i)))) {
+    while (i < n && ('\t '.indexOf(s.charAt(i)) >= 0)) {
         i += 1;
     }
     return i;
