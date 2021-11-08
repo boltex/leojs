@@ -29,12 +29,11 @@ function applyMixins(derivedCtor: any, constructors: any[]) {
     });
 }
 
-//@+node:felix.20210224000242.1: ** interface hoistStack
+//@+node:felix.20210224000242.1: ** interface HoistStackEntry
 export interface HoistStackEntry {
     p: Position;
     expanded: boolean;
 }
-
 //@+node:felix.20210110223514.1: ** class Commands
 /**
  * A per-outline class that implements most of Leo's commands. The
@@ -106,6 +105,9 @@ export class Commands {
     // For outline navigation.
     public navPrefix: string = ''; // Must always be a string.
     public navTime: any = undefined;
+
+    public command_name: string = '';
+    public recent_commands_list: string[] = [];
 
     public sqlite_connection: any = undefined;
 
@@ -1372,6 +1374,358 @@ export class Commands {
             return root.validateOutlineWithParent(parent);
         }
         return true;
+    }
+    //@+node:felix.20211106224948.1: *3* c.Executing commands & scripts
+    //@+node:felix.20211106224948.3: *4* c.doCommand
+    /**
+     * Execute the given command function, invoking hooks and catching exceptions.
+     *
+     * The code assumes that the "command1" hook has completely handled the
+     * command func if g.doHook("command1") returns false. This provides a
+     * simple mechanism for overriding commands.
+     */
+    public doCommand(command_func: () => any, command_name: string): any {
+        const c: Commands = this;
+        let p: Position = c.p;
+        let return_value: any;
+        // c.setLog();
+        this.command_count += 1;
+        // New in Leo 6.2. Set command_function and command_name ivars.
+        // this.command_function = command_func; // !unused
+        this.command_name = command_name;
+        // The presence of this message disables all commands.
+        if (c.disableCommandsMessage) {
+            g.blue(c.disableCommandsMessage);
+            return undefined;
+        }
+
+        if (c.exists && c.inCommand && !g.unitTesting) {
+            g.app.commandInterruptFlag = true;  // For sc.make_slide_show_command.
+            // 1912: This message is annoying and unhelpful.
+            // g.error('ignoring command: already executing a command.')
+            return undefined;
+        }
+
+        g.app.commandInterruptFlag = false;
+        // #2256: Update the list of recent commands.
+        if (c.recent_commands_list.length > 99) {
+            c.recent_commands_list.pop();
+        }
+        c.recent_commands_list.unshift(command_name);
+        if (!g.doHook("command1", { c: c, p: p, label: command_name })) {
+            try {
+                c.inCommand = true;
+                try {
+                    return_value = command_func();
+                }
+                catch (e) {
+                    g.es_exception();
+                    return_value = undefined;
+                }
+                if (c && c.exists) {  // Be careful: the command could destroy c.
+                    c.inCommand = false;
+                    //# c.k.funcReturn = return_value
+                }
+            }
+            catch (e) {
+                c.inCommand = false;
+                if (g.unitTesting) {
+                    throw "exception executing command";
+                }
+                g.es_print("exception executing command");
+                g.es_exception(c);
+            }
+            if (c && c.exists) {
+                if (c.requestCloseWindow) {
+                    c.requestCloseWindow = false;
+                    // g.app.closeLeoWindow(c.frame);
+                    console.log("g.app.closeLeoWindow was called!");
+                } else {
+                    // c.outerUpdate();
+                }
+            }
+        }
+        // Be careful: the command could destroy c.
+        if (c && c.exists) {
+            p = c.p;
+            g.doHook("command2", { c: c, p: p, label: command_name });
+        }
+        return return_value;
+    }
+    //@+node:felix.20211106224948.4: *4* c.doCommandByName
+    /**
+     * Execute one command, given the name of the command.
+     *
+     * The caller must do any required keystroke-only tasks.
+     *
+     * Return the result, if any, of the command.
+     */
+    public doCommandByName(command_name: string): any {
+        const c: Commands = this;
+
+        // Get the command's function.
+        let command_func: (p?: any) => any = c.commandsDict[command_name.replace(/\&/g, '')];
+
+        if (!command_func) {
+            const message = "no command function for ${command_name}";
+            if (g.unitTesting || g.app.inBridge) {
+                throw message;
+            }
+            g.es_print(message, 'red');
+            g.trace(g.callers());
+            return undefined;
+        }
+
+        // * Here the original new_cmd_decorator decorator is implemented 'run-time'
+        let ivars: string[] | undefined = (command_func as any)["__ivars__"];
+
+        if (ivars && ivars.length) {
+            const w_baseObject: any = g.ivars2instance(c, g, ivars);
+            command_func = command_func.bind(w_baseObject)
+        } else {
+            command_func = command_func.bind(c);
+        }
+
+        // Invoke the function.
+        const val: any = c.doCommand(command_func, command_name);
+        if (c.exists) {
+            // c.frame.updateStatusLine();
+        }
+        return val;
+
+    }
+    //@+node:felix.20211106224948.5: *4* c.executeMinibufferCommand
+    /**
+     * Call c.doCommandByName, creating the required event.
+     */
+    public executeMinibufferCommand(commandName: string): any {
+        const c: Commands = this;
+        return c.doCommandByName(commandName);
+    }
+    //@+node:felix.20211106224948.6: *4* c.general_script_helper & helpers
+    /**
+     *  The official helper for the execute-general-script command.
+
+        c:          The Commander of the outline.
+        command:    The os command to execute the script.
+        directory:  Optional: Change to this directory before executing command.
+        ext:        The file extention for the tempory file.
+        language:   The language name.
+        regex:      Optional regular expression describing error messages.
+                    If present, group(1) should evaluate to a line number.
+                    May be a compiled regex expression or a string.
+        root:       The root of the tree containing the script,
+                    The script may contain section references and @others.
+
+        Other features:
+
+        - Create a temporary external file if `not root.isAnyAtFileNode()`.
+        - Compute the final command as follows.
+          1. If command contains <FILE>, replace <FILE> with the full path.
+          2. If command contains <NO-FILE>, just remove <NO-FILE>.
+             This allows, for example, `go run .` to work as expected.
+          3. Append the full path to the command.
+     */
+    public general_script_helper(command: string, ext: string, language: string, root: any, directory: string | undefined, regex?: any): void {
+        const c: Commands = this;
+
+        // log = self.frame.log
+
+        // Define helper functions
+
+        //@+others
+        //@+node:felix.20211106224948.7: *5* function: put_line
+        /**
+         * Put the line, creating a clickable link if the regex matches.
+         */
+
+        /*
+        public put_line(s): void{
+            // TODO
+            if not regex:
+                g.es_print(s)
+                return
+            // Get the line number.
+            m = regex.match(s)
+            if not m:
+                g.es_print(s)
+                return
+            // If present, the regex should define two groups.
+            try:
+                s1 = m.group(1)
+                s2 = m.group(2)
+            except IndexError:
+                g.es_print(f"Regex {regex.pattern()} must define two groups")
+                return
+            if s1.isdigit():
+                n = int(s1)
+                fn = s2
+            elif s2.isdigit():
+                n = int(s2)
+                fn = s1
+            else:
+                // No line number.
+                g.es_print(s)
+                return
+            s = s.replace(root_path, root.h)
+            // Print to the console.
+            print(s)
+            // Find the node and offset corresponding to line n.
+            p, n2 = find_line(fn, n)
+            // Create the link.
+            unl = p.get_UNL(with_proto=True, with_count=True)
+            if unl:
+                log.put(s + '\n', nodeLink=f"{unl},{n2}")
+            else:
+                log.put(s + '\n')
+        }
+        */
+        //@+node:felix.20211106224948.8: *5* function: find_line
+        /**
+         * Return the node corresponding to line n of external file given by path.
+         */
+        // TODO !
+        /*
+       public find_line(path, n): [] {
+
+           
+           if path == root_path:
+               p, offset, found = c.gotoCommands.find_file_line(n, root)
+           else:
+               // Find an @<file> node with the given path.
+               found = False
+               for p in c.all_positions():
+                   if p.isAnyAtFileNode():
+                       norm_path = os.path.normpath(g.fullPath(c, p))
+                       if path == norm_path:
+                           p, offset, found = c.gotoCommands.find_file_line(n, p)
+                           break
+           if found:
+               return [p, offset];
+               
+           return [root, n];
+
+       }
+       */
+        //@-others
+
+        // Compile and check the regex.
+
+        /*
+        if regex:
+            if isinstance(regex, str):
+                try:
+                    regex = re.compile(regex)
+                except Exception:
+                    g.trace(f"Bad regex: {regex!s}")
+                    return None
+
+
+        // Get the script.
+        script = g.getScript(c, root,
+            useSelectedText=False,
+            forcePythonSentinels=False,  // language=='python',
+            useSentinels=True,
+        )
+        // Create a temp file if root is not an @<file> node.
+        use_temp = not root.isAnyAtFileNode()
+        if use_temp:
+            fd, root_path = tempfile.mkstemp(suffix=ext, prefix="")
+            with os.fdopen(fd, 'w') as f:
+                f.write(script)
+        else:
+            root_path = g.fullPath(c, root)
+
+
+        // Compute the final command.
+        if '<FILE>' in command:
+            final_command = command.replace('<FILE>', root_path)
+        elif '<NO-FILE>' in command:
+            final_command = command.replace('<NO-FILE>', '').replace(root_path, '')
+        else:
+            final_command = f"{command} {root_path}"
+
+
+        // Change directory.
+        old_dir = os.path.abspath(os.path.curdir)
+        if not directory:
+            directory = os.path.dirname(root_path)
+
+        os.chdir(directory)
+        // Execute the final command.
+        try:
+            proc = subprocess.Popen(final_command,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+            out, err = proc.communicate()
+            for s in g.splitLines(g.toUnicode(out)):
+                print(s.rstrip())
+
+
+            print('')
+            for s in g.splitLines(g.toUnicode(err)):
+                put_line(s.rstrip())
+
+
+        finally:
+            if use_temp:
+                os.remove(root_path)
+
+            os.chdir(old_dir)
+
+        */
+
+    }
+    //@+node:felix.20211106224948.10: *4* c.setComplexCommand
+    /**
+     * Make commandName the command to be executed by repeat-complex-command.
+     */
+    public setComplexCommand(commandName: string): void {
+        const c: Commands = this;
+        c.k.mb_history.unshift(commandName);
+    }
+    //@+node:felix.20211106224948.12: *4* c.writeScriptFile (changed: does not expand expressions)
+    public writeScriptFile(script: string): string | undefined {
+
+        // Get the path to the file.
+        const c: Commands = this;
+
+        // TODO !
+        /*
+        let path:string = c.config.getString('script-file-path');
+        if (path){
+            isAbsPath = os.path.isabs(path)
+            driveSpec, path = os.path.splitdrive(path)
+            parts = path.split('/')
+            // xxx bad idea, loadDir is often read only!
+            path = g.app.loadDir
+            if isAbsPath:
+                // make the first element absolute
+                parts[0] = driveSpec + os.sep + parts[0]
+            allParts = [path] + parts
+            path = g.os_path_finalize_join(*allParts)  // #1431
+
+        }else{
+            path = g.os_path_finalize_join(g.app.homeLeoDir, 'scriptFile.py');  // #1431
+        }
+        //
+        // Write the file.
+        try{
+            with open(path, encoding='utf-8', mode='w') as f:
+                f.write(script)
+        }
+        except Exception:
+            g.es_exception()
+            g.es(f"Failed to write script to {path}")
+            // g.es("Check your configuration of script_file_path, currently %s" %
+                // c.config.getString('script-file-path'))
+            path = undefined
+
+
+        return path;
+        */
+        return undefined;
     }
     //@+node:felix.20211005023225.1: *3* c.Gui
     //@+node:felix.20211022202201.1: *4* c.drawing

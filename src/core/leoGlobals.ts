@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
-import { Position } from './leoNodes';
+import { Position, VNode } from './leoNodes';
 
 export const isMac: boolean = process.platform.startsWith('darwin');
 export const isWindows: boolean = process.platform.startsWith('win');
@@ -337,32 +337,32 @@ export function get_directives_dict(p: Position, root: Position[] | undefined): 
     for (let s of [p.h, p.b]) {
         //const anIter = directives_pat.exec(s);
         //for (let m of anIter){
-        
-        while((m = directives_pat.exec(s)) !== null) {
-            const word:string = m[1].trim();
 
-            const i:number = m.indices[1][0];
-            if(d[word]){
-                continue; 
+        while ((m = directives_pat.exec(s)) !== null) {
+            const word: string = m[1].trim();
+
+            const i: number = m.indices[1][0];
+            if (d[word]) {
+                continue;
             }
-            const j:number = i + word.length;
-            if(j < s.length && !(' \t\n'.includes(s.charAt(j)))){
+            const j: number = i + word.length;
+            if (j < s.length && !(' \t\n'.includes(s.charAt(j)))) {
                 continue;
             }
             // Not a valid directive: just ignore it.
             // A unit test tests that @path:any is invalid.
-            const k:number = skip_line(s, j);
-            const val:string = s.slice(j,k).trim();
+            const k: number = skip_line(s, j);
+            const val: string = s.slice(j, k).trim();
             d[word] = val;
 
         }
     }
-    
+
     if (root && root.length) {
-        const root_node:Position = root[0];
+        const root_node: Position = root[0];
         //anIter = g_noweb_root.exec(p.b);
         // for (let m of anIter) {
-        while((m = g_noweb_root.exec(p.b)) !== null) {
+        while ((m = g_noweb_root.exec(p.b)) !== null) {
             if (root_node && root_node.__bool__()) {
                 d["root"] = 0;  // value not important
             } else {
@@ -730,6 +730,107 @@ export function toUnicode(s: any, encoding: string | null = null, reportErrors =
     return s; // Skip for now
 }
 
+export function dummy_act_on_node(c: Commands, p: Position): any {
+    // pass
+}
+// This dummy definition keeps pylint happy.
+//# Plugins can change this.
+
+export let act_on_node = dummy_act_on_node;
+
+export const childrenModifiedSet: VNode[] = [];
+export const contentModifiedSet: VNode[] = [];
+/**
+ * This global function calls a hook routine. Hooks are identified by the
+ * tag param.
+ * 
+ * Returns the value returned by the hook routine, or None if the there is
+ * an exception.
+ * 
+ * We look for a hook routine in three places:
+ * 1. c.hookFunction
+ * 2. app.hookFunction
+ * 3. leoPlugins.doPlugins()
+ * 
+ * Set app.hookError on all exceptions.
+ * Scripts may reset app.hookError to try again.
+ */
+export function doHook(tag: string, paramDict?: any): any {
+    // TODO !
+    /*
+    if g.app.killed or g.app.hookError:
+        return None
+    if args:
+        # A minor error in Leo's core.
+        g.pr(f"***ignoring args param.  tag = {tag}")
+    if not g.app.config.use_plugins:
+        if tag in ('open0', 'start1'):
+            g.warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.")
+        return None
+    # Get the hook handler function.  Usually this is doPlugins.
+    c = keywords.get("c")
+    # pylint: disable=consider-using-ternary
+    f = (c and c.hookFunction) or g.app.hookFunction
+    if not f:
+        g.app.hookFunction = f = g.app.pluginsController.doPlugins
+    try:
+        # Pass the hook to the hook handler.
+        # g.pr('doHook',f.__name__,keywords.get('c'))
+        return f(tag, keywords)
+    except Exception:
+        g.es_exception()
+        g.app.hookError = True  # Supress this function.
+        g.app.idle_time_hooks_enabled = False
+        return None
+    */
+    return undefined;
+}
+// Important: we can not define g.pc here!
+
+/*
+def loadOnePlugin(pluginName, verbose=False):
+    pc = g.app.pluginsController
+    return pc.loadOnePlugin(pluginName, verbose=verbose)
+
+def registerExclusiveHandler(tags, fn):
+    pc = g.app.pluginsController
+    return pc.registerExclusiveHandler(tags, fn)
+
+def registerHandler(tags, fn):
+    pc = g.app.pluginsController
+    return pc.registerHandler(tags, fn)
+
+def plugin_signon(module_name, verbose=False):
+    pc = g.app.pluginsController
+    return pc.plugin_signon(module_name, verbose)
+
+def unloadOnePlugin(moduleOrFileName, verbose=False):
+    pc = g.app.pluginsController
+    return pc.unloadOnePlugin(moduleOrFileName, verbose)
+
+def unregisterHandler(tags, fn):
+    pc = g.app.pluginsController
+    return pc.unregisterHandler(tags, fn)
+
+*/
+/*
+def getHandlersForTag(tags):
+    pc = g.app.pluginsController
+    return pc.getHandlersForTag(tags)
+
+def getLoadedPlugins():
+    pc = g.app.pluginsController
+    return pc.getLoadedPlugins()
+
+def getPluginModule(moduleName):
+    pc = g.app.pluginsController
+    return pc.getPluginModule(moduleName)
+
+def pluginIsLoaded(fn):
+    pc = g.app.pluginsController
+    return pc.isLoaded(fn)
+*/
+
 /**
  * Return < < s > >
  */
@@ -771,7 +872,7 @@ export function toEncodedString(s: any, encoding = 'utf-8', reportErrors = false
 // TODO : Replace with output to proper 'Leo log pane'
 export const es = console.log;
 
-export function es_exception(): string {
+export function es_exception(c?: Commands): string {
     console.log('es_exception called');
     return '<no file>';
 }

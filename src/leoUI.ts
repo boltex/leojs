@@ -790,7 +790,7 @@ export class LeoUI {
 
         const c: Commands = this.leo_c;
         let value: any = undefined;
-
+        /*
         // Getting from kebab-cased 'Command Name'
         let func: (p?: any) => any = this.leo_c.commandsDict[p_cmd];
         if (!func) {
@@ -826,12 +826,25 @@ export class LeoUI {
                 }
             }
         }
+        */
+        const p = p_node ? p_node.position : c.p;
+        if (p.__eq__(c.p)) {
+            value = this.leo_c.doCommandByName(p_cmd); // no need for re-selection
+        } else {
+            const old_p = c.p;
+            c.selectPosition(p)
+            value = this.leo_c.doCommandByName(p_cmd);
+            if (p_keepSelection && c.positionExists(old_p)) {
+                // Only if 'keep' old position was set, and old_p still exists
+                c.selectPosition(old_p)
+            }
+        }
 
         /* EXAMPLE CALL BY METHOD
-                    //@ts-expect-error
+                        //@ts-expect-error
         if ((typeof this.leo_c[p_cmd]) === 'function') {
             console.log('HAS PROPERTY' + p_cmd + " so were doing it!");
-                        //@ts-expect-error
+                            //@ts-expect-error
             this.leo_c[p_cmd]();
         } else {
             console.log('NO PROPERTY' + p_cmd);
@@ -841,7 +854,7 @@ export class LeoUI {
 
         this.launchRefresh();
 
-        return Promise.resolve(true);
+        return Promise.resolve(value);
     }
 
     /**

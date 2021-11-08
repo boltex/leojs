@@ -507,6 +507,15 @@
 <v t="felix.20211104230121.1"><vh>g.splitLines      (coreGlobals.py)</vh></v>
 <v t="felix.20211104230217.1"><vh>g.toUnicode       (coreGlobals.py)</vh></v>
 </v>
+<v t="felix.20211106230549.1"><vh>g.Hooks &amp; Plugins</vh>
+<v t="felix.20211106230549.2"><vh>g.act_on_node</vh></v>
+<v t="felix.20211106230549.3"><vh>g.childrenModifiedSet, g.contentModifiedSet</vh></v>
+<v t="felix.20211106230549.4"><vh>g.doHook</vh></v>
+<v t="felix.20211106230549.5"><vh>g.Wrappers for g.app.pluginController methods</vh>
+<v t="felix.20211106230549.6"><vh>g.Loading &amp; registration</vh></v>
+<v t="felix.20211106230549.7"><vh>g.Information</vh></v>
+</v>
+</v>
 <v t="felix.20211104210935.1"><vh>g.Importing</vh></v>
 <v t="felix.20211104210938.1"><vh>g.Indices, Strings, Unicode &amp; Whitespace</vh>
 <v t="felix.20211104212212.1"><vh>g.angleBrackets</vh></v>
@@ -3511,7 +3520,7 @@ public command(
 
     const c: Commands = this.leo_c;
     let value: any = undefined;
-
+    /*
     // Getting from kebab-cased 'Command Name'
     let func: (p?: any) =&gt; any = this.leo_c.commandsDict[p_cmd];
     if (!func) {
@@ -3547,6 +3556,19 @@ public command(
             }
         }
     }
+    */
+    const p = p_node ? p_node.position : c.p;
+    if (p.__eq__(c.p)) {
+        value = this.leo_c.doCommandByName(p_cmd); // no need for re-selection
+    } else {
+        const old_p = c.p;
+        c.selectPosition(p)
+        value = this.leo_c.doCommandByName(p_cmd);
+        if (p_keepSelection &amp;&amp; c.positionExists(old_p)) {
+            // Only if 'keep' old position was set, and old_p still exists
+            c.selectPosition(old_p)
+        }
+    }
 
     /* EXAMPLE CALL BY METHOD
                     //@ts-expect-error
@@ -3562,7 +3584,7 @@ public command(
 
     this.launchRefresh();
 
-    return Promise.resolve(true);
+    return Promise.resolve(value);
 }
 
 </t>
@@ -6466,7 +6488,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
-import { Position } from './leoNodes';
+import { Position, VNode } from './leoNodes';
 
 export const isMac: boolean = process.platform.startsWith('darwin');
 export const isWindows: boolean = process.platform.startsWith('win');
@@ -13314,7 +13336,7 @@ export function doKeywordArgs(keys: { [key: string]: any }, d: { [key: string]: 
 export const es = console.log;
 
 </t>
-<t tx="felix.20211104212802.1">export function es_exception(): string {
+<t tx="felix.20211104212802.1">export function es_exception(c?: Commands): string {
     console.log('es_exception called');
     return '&lt;no file&gt;';
 }
@@ -13390,32 +13412,32 @@ export function get_directives_dict(p: Position, root: Position[] | undefined): 
     for (let s of [p.h, p.b]) {
         //const anIter = directives_pat.exec(s);
         //for (let m of anIter){
-        
-        while((m = directives_pat.exec(s)) !== null) {
-            const word:string = m[1].trim();
 
-            const i:number = m.indices[1][0];
-            if(d[word]){
-                continue; 
+        while ((m = directives_pat.exec(s)) !== null) {
+            const word: string = m[1].trim();
+
+            const i: number = m.indices[1][0];
+            if (d[word]) {
+                continue;
             }
-            const j:number = i + word.length;
-            if(j &lt; s.length &amp;&amp; !(' \t\n'.includes(s.charAt(j)))){
+            const j: number = i + word.length;
+            if (j &lt; s.length &amp;&amp; !(' \t\n'.includes(s.charAt(j)))) {
                 continue;
             }
             // Not a valid directive: just ignore it.
             // A unit test tests that @path:any is invalid.
-            const k:number = skip_line(s, j);
-            const val:string = s.slice(j,k).trim();
+            const k: number = skip_line(s, j);
+            const val: string = s.slice(j, k).trim();
             d[word] = val;
 
         }
     }
-    
+
     if (root &amp;&amp; root.length) {
-        const root_node:Position = root[0];
+        const root_node: Position = root[0];
         //anIter = g_noweb_root.exec(p.b);
         // for (let m of anIter) {
-        while((m = g_noweb_root.exec(p.b)) !== null) {
+        while ((m = g_noweb_root.exec(p.b)) !== null) {
             if (root_node &amp;&amp; root_node.__bool__()) {
                 d["root"] = 0;  // value not important
             } else {
@@ -13962,6 +13984,114 @@ export function update_directives_pat(): void {
 }
 // #1688: Initialize g.directives_pat
 update_directives_pat();
+</t>
+<t tx="felix.20211106230549.1"></t>
+<t tx="felix.20211106230549.2">export function dummy_act_on_node(c: Commands, p: Position): any {
+    // pass
+}
+// This dummy definition keeps pylint happy.
+//# Plugins can change this.
+
+export let act_on_node = dummy_act_on_node;
+
+</t>
+<t tx="felix.20211106230549.3">export const childrenModifiedSet: VNode[] = [];
+export const contentModifiedSet: VNode[] = [];
+</t>
+<t tx="felix.20211106230549.4">/**
+ * This global function calls a hook routine. Hooks are identified by the
+ * tag param.
+ * 
+ * Returns the value returned by the hook routine, or None if the there is
+ * an exception.
+ * 
+ * We look for a hook routine in three places:
+ * 1. c.hookFunction
+ * 2. app.hookFunction
+ * 3. leoPlugins.doPlugins()
+ * 
+ * Set app.hookError on all exceptions.
+ * Scripts may reset app.hookError to try again.
+ */
+export function doHook(tag: string, paramDict?: any): any {
+    // TODO !
+    /*
+    if g.app.killed or g.app.hookError:
+        return None
+    if args:
+        # A minor error in Leo's core.
+        g.pr(f"***ignoring args param.  tag = {tag}")
+    if not g.app.config.use_plugins:
+        if tag in ('open0', 'start1'):
+            g.warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.")
+        return None
+    # Get the hook handler function.  Usually this is doPlugins.
+    c = keywords.get("c")
+    # pylint: disable=consider-using-ternary
+    f = (c and c.hookFunction) or g.app.hookFunction
+    if not f:
+        g.app.hookFunction = f = g.app.pluginsController.doPlugins
+    try:
+        # Pass the hook to the hook handler.
+        # g.pr('doHook',f.__name__,keywords.get('c'))
+        return f(tag, keywords)
+    except Exception:
+        g.es_exception()
+        g.app.hookError = True  # Supress this function.
+        g.app.idle_time_hooks_enabled = False
+        return None
+    */
+    return undefined;
+}
+</t>
+<t tx="felix.20211106230549.5">// Important: we can not define g.pc here!
+</t>
+<t tx="felix.20211106230549.6">
+/*
+def loadOnePlugin(pluginName, verbose=False):
+    pc = g.app.pluginsController
+    return pc.loadOnePlugin(pluginName, verbose=verbose)
+
+def registerExclusiveHandler(tags, fn):
+    pc = g.app.pluginsController
+    return pc.registerExclusiveHandler(tags, fn)
+
+def registerHandler(tags, fn):
+    pc = g.app.pluginsController
+    return pc.registerHandler(tags, fn)
+
+def plugin_signon(module_name, verbose=False):
+    pc = g.app.pluginsController
+    return pc.plugin_signon(module_name, verbose)
+
+def unloadOnePlugin(moduleOrFileName, verbose=False):
+    pc = g.app.pluginsController
+    return pc.unloadOnePlugin(moduleOrFileName, verbose)
+
+def unregisterHandler(tags, fn):
+    pc = g.app.pluginsController
+    return pc.unregisterHandler(tags, fn)
+
+*/
+</t>
+<t tx="felix.20211106230549.7">/*
+def getHandlersForTag(tags):
+    pc = g.app.pluginsController
+    return pc.getHandlersForTag(tags)
+
+def getLoadedPlugins():
+    pc = g.app.pluginsController
+    return pc.getLoadedPlugins()
+
+def getPluginModule(moduleName):
+    pc = g.app.pluginsController
+    return pc.getPluginModule(moduleName)
+
+def pluginIsLoaded(fn):
+    pc = g.app.pluginsController
+    return pc.isLoaded(fn)
+*/
+
 </t>
 </tnodes>
 </leo_file>
