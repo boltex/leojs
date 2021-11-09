@@ -364,7 +364,7 @@ export function get_directives_dict(p: Position, root?: Position[]): any {
             if (root_node && root_node.__bool__()) {
                 d["root"] = 0;  // value not important
             } else {
-                es('${angleBrackets("*")} may only occur in a topmost node (i.e., without a parent)');
+                es(`${angleBrackets("*")} may only occur in a topmost node (i.e., without a parent)`);
             }
             break;
         }

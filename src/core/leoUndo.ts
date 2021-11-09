@@ -184,7 +184,7 @@ export class Undoer {
         }
 
         if (g.app.debug.includes('undo') && g.app.debug.includes('verbose')) {
-            console.log("u.cutStack: ${u.beads.length}");
+            console.log(`u.cutStack: ${u.beads.length}`);
         }
     }
     //@+node:felix.20211026230613.11: *4* u.dumpBead
@@ -197,10 +197,11 @@ export class Undoer {
         // bunch = u.beads[n]
         const result: string[] = [];
         result.push('-'.repeat(10));
-        result.push("u.beads.length: ${u.beads.length}, n: ${n}");
+        result.push(`u.beads.length: ${u.beads.length}, n: ${n}`);
 
         for (let ivar of ['kind', 'newP', 'newN', 'p', 'oldN', 'undoHelper']) {
-            result.push("${ivar} = ${u[ivar]}");
+            //@ts-expect-error
+            result.push(`${ivar} = ${u[ivar]}`);
         }
         return result.join('\n');
     }
@@ -226,7 +227,7 @@ export class Undoer {
         const bunch = u.beads[n];
         u.setIvarsFromBunch(bunch);
         if (g.app.debug.includes('undo')) {
-            console.log(" u.getBead: ${n} of ${u.beads.length}");
+            console.log(` u.getBead: ${n} of ${u.beads.length}`);
         }
         return bunch;
     }
@@ -260,7 +261,7 @@ export class Undoer {
             u.setUndoTypes();
         }
         if (g.app.debug.includes('undo')) {
-            console.log("u.pushBead: ${u.beads.length:3} ${bunch.undoType}");
+            console.log(`u.pushBead: ${u.beads.length} ${bunch.undoType}`);
         }
     }
     //@+node:felix.20211026230613.15: *4* u.redoMenuName, undoMenuName
@@ -311,7 +312,7 @@ export class Undoer {
         const u: Undoer = this;
         // frame = u.c.frame;
         if (!(typeof theType === 'string' || theType instanceof String)) {
-            g.trace("oops: expected string for command, got ${theType}");
+            g.trace(`oops: expected string for command, got ${theType}`);
             g.trace(g.callers());
             theType = '<unknown>';
         }
@@ -337,7 +338,7 @@ export class Undoer {
         // frame = u.c.frame
 
         if (!(typeof theType === 'string' || theType instanceof String)) {
-            g.trace("oops: expected string for command, got ${theType}");
+            g.trace(`oops: expected string for command, got ${theType}`);
             g.trace(g.callers());
             theType = '<unknown>';
         }
@@ -1185,8 +1186,8 @@ export class Undoer {
                 // assert p.b == all, (w, g.callers())
             } else if (p.b !== all) {
                 g.trace(
-                    "\np.b != w.getAllText() p: ${p.h} \n" +
-                    "w: ${w} \n${g.callers()}\n");
+                    `\np.b != w.getAllText() p: ${p.h} \n` +
+                    `w: ${w} \n${g.callers()}\n`);
                 // g.printObj(g.splitLines(p.b), tag='p.b')
                 // g.printObj(g.splitLines(all), tag='getAllText')
             }
@@ -1270,7 +1271,8 @@ export class Undoer {
         if (u.redoHelper) {
             u.redoHelper();
         } else {
-            g.trace("no redo helper for ${u.kind} ${u.undoType}");
+            u.redoHelper();
+            g.trace(`no redo helper for ${u.kind} ${u.undoType}`);
         }
         //
         // Finish.
@@ -1425,7 +1427,7 @@ export class Undoer {
         const bunch: Bead = u.beads[u.bead + 1];
         let count: number = 0;
         if (!bunch['items']) {
-            g.trace("oops: expecting bunch.items. got bunch.kind = ${bunch.kind}")
+            g.trace(`oops: expecting bunch.items. got bunch.kind = ${bunch.kind}`)
             g.trace(bunch);
         } else {
             for (let z of bunch.items) {
@@ -1434,7 +1436,7 @@ export class Undoer {
                     z.redoHelper();
                     count += 1;
                 } else {
-                    g.trace("oops: no redo helper for ${u.undoType} ${p.h}");
+                    g.trace(`oops: no redo helper for ${u.undoType} ${p.h}`);
                 }
             }
         }
@@ -1635,6 +1637,7 @@ export class Undoer {
         "Undo the operation described by the undo parameters."
     )
     public undo(): void {
+        console.log('undo!')
         const u: Undoer = this;
         const c: Commands = u.c;
         if (!c.p || !c.p.__bool__()) {
@@ -1663,7 +1666,7 @@ export class Undoer {
         if (u.undoHelper) {
             u.undoHelper();
         } else {
-            g.trace("no undo helper for ${u.kind} ${u.undoType}");
+            g.trace(`no undo helper for ${u.kind} ${u.undoType}`);
         }
         //
         // Finish.
@@ -1832,7 +1835,7 @@ export class Undoer {
         const bunch: Bead = u.beads[u.bead];
         let count: number = 0;
         if (!bunch['items']) {
-            g.trace("oops: expecting bunch.items. got bunch.kind = ${bunch.kind}");
+            g.trace(`oops: expecting bunch.items. got bunch.kind = ${bunch.kind}`);
             g.trace(bunch);
         } else {
             // Important bug fix: 9/8/06: reverse the items first.
@@ -1844,7 +1847,7 @@ export class Undoer {
                     z.undoHelper();
                     count += 1;
                 } else {
-                    g.trace("oops: no undo helper for ${u.undoType} ${p.v}");
+                    g.trace(`oops: no undo helper for ${u.undoType} ${p.v}`);
                 }
             }
         }

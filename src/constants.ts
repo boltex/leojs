@@ -450,8 +450,7 @@ export class Constants {
         EXPAND_AND_GO_RIGHT: "expand-and-go-right", //  "expandNodeAndGoToFirstChild",
         CONTRACT_ALL: "contract-all", // "contractAllHeadlines",
         // * Leo Operations
-        MARK_PNODE: "TODO", //  "markPNode",
-        UNMARK_PNODE: "TODO", //  "unmarkPNode",
+        TOGGLE_MARK: "toggle-mark", //  mark / unmark
         COPY_PNODE: "TODO", //  "copyOutline",
         CUT_PNODE: "TODO", //  "cutPNode",
         PASTE_PNODE: "TODO", //  "pasteOutline",
@@ -469,8 +468,8 @@ export class Constants {
         REFRESH_FROM_DISK_PNODE: "TODO", //  "refreshFromDisk",
         SORT_CHILDREN: "TODO", //  "sortChildren",
         SORT_SIBLINGS: "TODO", //  "sortSiblings",
-        UNDO: "TODO", //  "undo",
-        REDO: "TODO", //  "redo",
+        UNDO: "undo", //  "undo",
+        REDO: "redo", //  "redo",
         GET_STATES: "TODO", //  "getStates",
         HOIST_PNODE: "TODO", //  "hoist",
         DEHOIST: "TODO", //  "dehoist",

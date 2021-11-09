@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { debounce } from "debounce";
 import * as utils from "./utils";
 import { Constants } from "./constants";
-import { RevealType, Icon, ReqRefresh } from "./types";
+import { RevealType, Icon, ReqRefresh, LeoPackageStates } from "./types";
 
 import { Config } from "./config";
 import { LeoOutlineNode } from "./leoOutlineNode";
@@ -369,7 +369,16 @@ export class LeoUI {
         }
         if (this._refreshType.states) {
             this._refreshType.states = false;
-            // this.leoStates.setLeoStateFlags(this._leo.getLeoStates);
+            const c = g.app.commandersList[this.commanderIndex];
+            const w_states: LeoPackageStates = {
+                changed: c.changed, // Document has changed (is dirty)
+                canUndo: c.canUndo(), // Document can undo the last operation done
+                canRedo: c.canRedo(), // Document can redo the last operation 'undone'
+                canDemote: c.canDemote(), // Selected node can have its siblings demoted
+                canPromote: c.canPromote(), // Selected node can have its children promoted
+                canDehoist: c.canDehoist() // Document is currently hoisted and can be de-hoisted
+            };
+            this.leoStates.setLeoStateFlags(w_states);
         }
     }
 
@@ -631,7 +640,7 @@ export class LeoUI {
             }
             // tslint:disable-next-line: strict-comparisons
             if (w_docView.selection.length && w_docView.selection[0] === p_documentNode) {
-                console.log('setDocumentSelection: already selected!');
+                // console.log('setDocumentSelection: already selected!');
             } else {
                 console.log('setDocumentSelection: selecting in tree');
                 w_docView.reveal(p_documentNode, { select: true, focus: false }).then(
@@ -783,7 +792,7 @@ export class LeoUI {
      */
     public command(
         p_cmd: string,
-        p_node: LeoOutlineNode | undefined,
+        p_node: Position | undefined,
         p_refreshType: ReqRefresh,
         p_fromOutline: boolean,
         p_keepSelection?: boolean
@@ -792,7 +801,7 @@ export class LeoUI {
         this._setupRefresh(p_fromOutline, p_refreshType);
 
         let value: any = undefined;
-        const p = p_node ? p_node.position : c.p;
+        const p = p_node ? p_node : c.p;
 
         if (p.__eq__(c.p)) {
             value = c.doCommandByName(p_cmd); // no need for re-selection
@@ -834,7 +843,7 @@ export class LeoUI {
      * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
      * @returns Thenable that resolves when done
      */
-    public editHeadline(p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable<unknown> {
+    public editHeadline(p_node?: Position, p_fromOutline?: boolean): Thenable<unknown> {
 
         this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
@@ -842,7 +851,7 @@ export class LeoUI {
             " called from " +
             (p_fromOutline ? "outline" : "body") +
             " operate on " +
-            (p_node ? p_node!.label : "the selected node")
+            (p_node ? p_node!.h : "the selected node")
         );
 
         this.launchRefresh();
@@ -860,7 +869,7 @@ export class LeoUI {
      * @param p_interrupt Signifies the insert action is actually interrupting itself (e.g. rapid CTRL+I actions by the user)
      * @returns Thenable that resolves when done
      */
-    public insertNode(p_node?: LeoOutlineNode, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable<unknown> {
+    public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable<unknown> {
 
         this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
@@ -869,7 +878,7 @@ export class LeoUI {
             (p_fromOutline ? "outline" : "body") +
             (p_interrupt ? " as interrupt " : "") +
             " operate on " +
-            (p_node ? p_node!.label : "the selected node")
+            (p_node ? p_node!.h : "the selected node")
         );
 
         this.launchRefresh();
@@ -887,7 +896,7 @@ export class LeoUI {
      * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
      * @returns Thenable that resolves when done
      */
-    public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable<unknown> {
+    public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): Thenable<unknown> {
 
         this._setupRefresh(!!p_fromOutline, { tree: true });
 
@@ -896,7 +905,7 @@ export class LeoUI {
             (p_fromOutline ? "outline" : "body") +
             (p_mark ? " as mark " : "as unmark") +
             " operate on " +
-            (p_node ? p_node!.label : "the selected node")
+            (p_node ? p_node!.h : "the selected node")
         );
 
         this.launchRefresh();

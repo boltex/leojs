@@ -36,7 +36,7 @@ export class NodeHistory {
                 chapter = 'main';
             }
             const mark: string = i === this.beadPointer ? '**' : '  '; // used in string
-            console.log("${mark} ${i} ${chapter} ${p}");
+            console.log(`${mark} ${i} ${chapter} ${p}`);
         });
     }
 

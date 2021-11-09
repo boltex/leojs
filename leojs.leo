@@ -1521,22 +1521,22 @@ public refreshTreeRoot(): void {
 }
 
 </t>
-<t tx="felix.20201214150149.10">[CMD.INSERT, (p_node: LeoOutlineNode) =&gt; w_leoUI.insertNode(p_node, true)],
+<t tx="felix.20201214150149.10">[CMD.INSERT, (p_node: Position) =&gt; w_leoUI.insertNode(p_node, true)],
 [CMD.INSERT_SELECTION, () =&gt; w_leoUI.insertNode(U, false)],
 [CMD.INSERT_SELECTION_FO, () =&gt; w_leoUI.insertNode(U, true)],
 // Special command for when inserting rapidly more than one node without
 // even specifying a headline label, e.g. spamming CTRL+I rapidly.
 [CMD.INSERT_SELECTION_INTERRUPT, () =&gt; w_leoUI.insertNode(U, false, true)],
 
-[CMD.CLONE, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.CLONE_PNODE, p_node, REFRESH_TREE_BODY, true)],
+[CMD.CLONE, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.CLONE_PNODE, p_node, REFRESH_TREE_BODY, true)],
 [CMD.CLONE_SELECTION, () =&gt; w_leoUI.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, false)],
 [CMD.CLONE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, true)],
 
-[CMD.PROMOTE, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.PROMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.PROMOTE, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.PROMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.PROMOTE_SELECTION, () =&gt; w_leoUI.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, false)],
 [CMD.PROMOTE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, true)],
 
-[CMD.DEMOTE, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.DEMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.DEMOTE, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.DEMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.DEMOTE_SELECTION, () =&gt; w_leoUI.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, false)],
 [CMD.DEMOTE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, true)],
 
@@ -1545,13 +1545,21 @@ public refreshTreeRoot(): void {
 [CMD.SORT_SIBLING_FO, () =&gt; w_leoUI.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, true, true)],
 
 </t>
-<t tx="felix.20201214150149.11">[CMD.MARK, (p_node: LeoOutlineNode) =&gt; w_leoUI.changeMark(true, p_node, true)],
-[CMD.MARK_SELECTION, () =&gt; w_leoUI.changeMark(true, U, false)],
-[CMD.MARK_SELECTION_FO, () =&gt; w_leoUI.changeMark(true, U, true)],
+<t tx="felix.20201214150149.11">// [CMD.MARK, (p_node: Position) =&gt; w_leoUI.changeMark(true, p_node, true)],
+// [CMD.MARK_SELECTION, () =&gt; w_leoUI.changeMark(true, U, false)],
+// [CMD.MARK_SELECTION_FO, () =&gt; w_leoUI.changeMark(true, U, true)],
 
-[CMD.UNMARK, (p_node: LeoOutlineNode) =&gt; w_leoUI.changeMark(false, p_node, true)],
-[CMD.UNMARK_SELECTION, () =&gt; w_leoUI.changeMark(false, U, false)],
-[CMD.UNMARK_SELECTION_FO, () =&gt; w_leoUI.changeMark(false, U, true)],
+// [CMD.UNMARK, (p_node: Position) =&gt; w_leoUI.changeMark(false, p_node, true)],
+// [CMD.UNMARK_SELECTION, () =&gt; w_leoUI.changeMark(false, U, false)],
+// [CMD.UNMARK_SELECTION_FO, () =&gt; w_leoUI.changeMark(false, U, true)],
+
+[CMD.MARK, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.TOGGLE_MARK, p_node, REFRESH_TREE, true, true)],
+[CMD.MARK_SELECTION, () =&gt; w_leoUI.command(LEOCMD.TOGGLE_MARK, U, REFRESH_TREE, false)],
+[CMD.MARK_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.TOGGLE_MARK, U, REFRESH_TREE, true)],
+
+[CMD.UNMARK, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.TOGGLE_MARK, p_node, REFRESH_TREE, true, true)],
+[CMD.UNMARK_SELECTION, () =&gt; w_leoUI.command(LEOCMD.TOGGLE_MARK, U, REFRESH_TREE, false)],
+[CMD.UNMARK_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.TOGGLE_MARK, U, REFRESH_TREE, true)],
 
 [CMD.UNMARK_ALL, () =&gt; w_leoUI.command(LEOCMD.UNMARK_ALL, U, REFRESH_TREE_BODY, true)],
 </t>
@@ -1559,19 +1567,19 @@ public refreshTreeRoot(): void {
 [CMD.EXTRACT_NAMES, () =&gt; w_leoUI.command(LEOCMD.EXTRACT_NAMES, U, REFRESH_TREE_BODY, false)],
 
 </t>
-<t tx="felix.20201214150149.13">[CMD.MOVE_DOWN, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, p_node, REFRESH_TREE_BODY, true, true)],
+<t tx="felix.20201214150149.13">[CMD.MOVE_DOWN, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.MOVE_DOWN_SELECTION, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, false)],
 [CMD.MOVE_DOWN_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, true)],
 
-[CMD.MOVE_LEFT, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_LEFT, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_LEFT, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_LEFT, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.MOVE_LEFT_SELECTION, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, false)],
 [CMD.MOVE_LEFT_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, true)],
 
-[CMD.MOVE_RIGHT, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_RIGHT, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_RIGHT, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_RIGHT, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.MOVE_RIGHT_SELECTION, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, false)],
 [CMD.MOVE_RIGHT_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, true)],
 
-[CMD.MOVE_UP, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_UP, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.MOVE_UP, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_UP, p_node, REFRESH_TREE_BODY, true, true)],
 [CMD.MOVE_UP_SELECTION, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, false)],
 [CMD.MOVE_UP_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, true)],
 
@@ -1636,7 +1644,7 @@ public refreshTreeRoot(): void {
 
 [CMD.SET_OPENED_FILE, (p_index: number) =&gt; w_leoUI.selectOpenedLeoDocument(p_index)],
 
-[CMD.REFRESH_FROM_DISK, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.REFRESH_FROM_DISK, p_node, REFRESH_TREE_BODY, false)],
+[CMD.REFRESH_FROM_DISK, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.REFRESH_FROM_DISK, p_node, REFRESH_TREE_BODY, false)],
 
 [CMD.REFRESH_FROM_DISK_SELECTION, () =&gt; w_leoUI.command(LEOCMD.REFRESH_FROM_DISK, U, REFRESH_TREE_BODY, false)],
 
@@ -1644,16 +1652,16 @@ public refreshTreeRoot(): void {
 
 [CMD.GIT_DIFF, () =&gt; w_leoUI.command(LEOCMD.GIT_DIFF, U, REFRESH_TREE_BODY, false)],
 </t>
-<t tx="felix.20201214150149.5">[CMD.HEADLINE, (p_node: LeoOutlineNode) =&gt; w_leoUI.editHeadline(p_node, true)],
+<t tx="felix.20201214150149.5">[CMD.HEADLINE, (p_node: Position) =&gt; w_leoUI.editHeadline(p_node, true)],
 [CMD.HEADLINE_SELECTION, () =&gt; w_leoUI.editHeadline(U, false)],
 [CMD.HEADLINE_SELECTION_FO, () =&gt; w_leoUI.editHeadline(U, true)],
 </t>
 <t tx="felix.20201214150149.6">// cut/copy/paste/delete given node.
-[CMD.COPY, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.COPY_PNODE, p_node, NO_REFRESH, true, true)],
-[CMD.CUT, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.CUT_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.DELETE, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.DELETE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
-[CMD.PASTE, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.PASTE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
-[CMD.PASTE_CLONE, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
+[CMD.COPY, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.COPY_PNODE, p_node, NO_REFRESH, true, true)],
+[CMD.CUT, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.CUT_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.DELETE, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.DELETE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.PASTE, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.PASTE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
+[CMD.PASTE_CLONE, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, p_node, REFRESH_TREE_BODY, true, false)],
 
 // cut/copy/paste/delete current selection (self.commander.p)
 [CMD.COPY_SELECTION, () =&gt; w_leoUI.command(LEOCMD.COPY_PNODE, U, NO_REFRESH, false)],
@@ -1667,9 +1675,9 @@ public refreshTreeRoot(): void {
 [CMD.PASTE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, true)],
 </t>
 <t tx="felix.20201214150149.7">// Called by nodes in the tree when selected either by mouse, or with enter
-//[CMD.SELECT_NODE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node.position, false)],
-[CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_outlineNode.position, false)],
-//[CMD.OPEN_ASIDE, (p_node: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_node.position, true)],
+//[CMD.SELECT_NODE, (p_node: Position) =&gt; w_leoUI.selectTreeNode(p_node.position, false)],
+[CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) =&gt; w_leoUI.selectTreeNode(p_outlineNode.position, false)], // Select is NOT a Position!
+//[CMD.OPEN_ASIDE, (p_node: Position) =&gt; w_leoUI.selectTreeNode(p_node.position, true)],
 [CMD.OPEN_ASIDE, (p_position: Position) =&gt; w_leoUI.selectTreeNode(p_position, true)],
 
 [CMD.CONTRACT_ALL, () =&gt; w_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, false)],
@@ -1678,7 +1686,7 @@ public refreshTreeRoot(): void {
 [CMD.CONTRACT_OR_GO_LEFT, () =&gt; w_leoUI.command(LEOCMD.CONTRACT_OR_GO_LEFT, U, REFRESH_TREE_BODY, true)],
 [CMD.EXPAND_AND_GO_RIGHT, () =&gt; w_leoUI.command(LEOCMD.EXPAND_AND_GO_RIGHT, U, REFRESH_TREE_BODY, true)],
 </t>
-<t tx="felix.20201214150149.8">[CMD.GOTO_NEXT_CLONE, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, p_node, REFRESH_NODE_BODY, true)],
+<t tx="felix.20201214150149.8">[CMD.GOTO_NEXT_CLONE, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, p_node, REFRESH_NODE_BODY, true)],
 [CMD.GOTO_NEXT_CLONE_SELECTION, () =&gt; w_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, false)],
 [CMD.GOTO_NEXT_CLONE_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, true)],
 
@@ -1694,7 +1702,7 @@ public refreshTreeRoot(): void {
 </t>
 <t tx="felix.20201214150149.9">[CMD.DEHOIST, () =&gt; w_leoUI.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, false)],
 [CMD.DEHOIST_FO, () =&gt; w_leoUI.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, true)],
-[CMD.HOIST, (p_node: LeoOutlineNode) =&gt; w_leoUI.command(LEOCMD.HOIST_PNODE, p_node, REFRESH_TREE_BODY, true)],
+[CMD.HOIST, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.HOIST_PNODE, p_node, REFRESH_TREE_BODY, true)],
 [CMD.HOIST_SELECTION, () =&gt; w_leoUI.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, false)],
 [CMD.HOIST_SELECTION_FO, () =&gt; w_leoUI.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, true)],
 </t>
@@ -1868,8 +1876,7 @@ public static LEO_COMMANDS = {
     EXPAND_AND_GO_RIGHT: "expand-and-go-right", //  "expandNodeAndGoToFirstChild",
     CONTRACT_ALL: "contract-all", // "contractAllHeadlines",
     // * Leo Operations
-    MARK_PNODE: "TODO", //  "markPNode",
-    UNMARK_PNODE: "TODO", //  "unmarkPNode",
+    TOGGLE_MARK: "toggle-mark", //  mark / unmark
     COPY_PNODE: "TODO", //  "copyOutline",
     CUT_PNODE: "TODO", //  "cutPNode",
     PASTE_PNODE: "TODO", //  "pasteOutline",
@@ -1887,8 +1894,8 @@ public static LEO_COMMANDS = {
     REFRESH_FROM_DISK_PNODE: "TODO", //  "refreshFromDisk",
     SORT_CHILDREN: "TODO", //  "sortChildren",
     SORT_SIBLINGS: "TODO", //  "sortSiblings",
-    UNDO: "TODO", //  "undo",
-    REDO: "TODO", //  "redo",
+    UNDO: "undo", //  "undo",
+    REDO: "redo", //  "redo",
     GET_STATES: "TODO", //  "getStates",
     HOIST_PNODE: "TODO", //  "hoist",
     DEHOIST: "TODO", //  "dehoist",
@@ -2933,7 +2940,7 @@ export interface LeoButton {
 import { debounce } from "debounce";
 import * as utils from "./utils";
 import { Constants } from "./constants";
-import { RevealType, Icon, ReqRefresh } from "./types";
+import { RevealType, Icon, ReqRefresh, LeoPackageStates } from "./types";
 
 import { Config } from "./config";
 import { LeoOutlineNode } from "./leoOutlineNode";
@@ -3317,7 +3324,16 @@ private _triggerGetStates(): void {
     }
     if (this._refreshType.states) {
         this._refreshType.states = false;
-        // this.leoStates.setLeoStateFlags(this._leo.getLeoStates);
+        const c = g.app.commandersList[this.commanderIndex];
+        const w_states: LeoPackageStates = {
+            changed: c.changed, // Document has changed (is dirty)
+            canUndo: c.canUndo(), // Document can undo the last operation done
+            canRedo: c.canRedo(), // Document can redo the last operation 'undone'
+            canDemote: c.canDemote(), // Selected node can have its siblings demoted
+            canPromote: c.canPromote(), // Selected node can have its children promoted
+            canDehoist: c.canDehoist() // Document is currently hoisted and can be de-hoisted
+        };
+        this.leoStates.setLeoStateFlags(w_states);
     }
 }
 
@@ -3368,7 +3384,7 @@ public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
         }
         // tslint:disable-next-line: strict-comparisons
         if (w_docView.selection.length &amp;&amp; w_docView.selection[0] === p_documentNode) {
-            console.log('setDocumentSelection: already selected!');
+            // console.log('setDocumentSelection: already selected!');
         } else {
             console.log('setDocumentSelection: selecting in tree');
             w_docView.reveal(p_documentNode, { select: true, focus: false }).then(
@@ -3504,7 +3520,7 @@ public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable&lt;unknown&
  */
 public command(
     p_cmd: string,
-    p_node: LeoOutlineNode | undefined,
+    p_node: Position | undefined,
     p_refreshType: ReqRefresh,
     p_fromOutline: boolean,
     p_keepSelection?: boolean
@@ -3513,7 +3529,7 @@ public command(
     this._setupRefresh(p_fromOutline, p_refreshType);
 
     let value: any = undefined;
-    const p = p_node ? p_node.position : c.p;
+    const p = p_node ? p_node : c.p;
 
     if (p.__eq__(c.p)) {
         value = c.doCommandByName(p_cmd); // no need for re-selection
@@ -3557,7 +3573,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
  * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
  * @returns Thenable that resolves when done
  */
-public editHeadline(p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+public editHeadline(p_node?: Position, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
@@ -3565,7 +3581,7 @@ public editHeadline(p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable&
         " called from " +
         (p_fromOutline ? "outline" : "body") +
         " operate on " +
-        (p_node ? p_node!.label : "the selected node")
+        (p_node ? p_node!.h : "the selected node")
     );
 
     this.launchRefresh();
@@ -3584,7 +3600,7 @@ public editHeadline(p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable&
  * @param p_interrupt Signifies the insert action is actually interrupting itself (e.g. rapid CTRL+I actions by the user)
  * @returns Thenable that resolves when done
  */
-public insertNode(p_node?: LeoOutlineNode, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable&lt;unknown&gt; {
+public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
@@ -3593,7 +3609,7 @@ public insertNode(p_node?: LeoOutlineNode, p_fromOutline?: boolean, p_interrupt?
         (p_fromOutline ? "outline" : "body") +
         (p_interrupt ? " as interrupt " : "") +
         " operate on " +
-        (p_node ? p_node!.label : "the selected node")
+        (p_node ? p_node!.h : "the selected node")
     );
 
     this.launchRefresh();
@@ -3612,7 +3628,7 @@ public insertNode(p_node?: LeoOutlineNode, p_fromOutline?: boolean, p_interrupt?
  * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
  * @returns Thenable that resolves when done
  */
-public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(!!p_fromOutline, { tree: true });
 
@@ -3621,7 +3637,7 @@ public changeMark(p_mark: boolean, p_node?: LeoOutlineNode, p_fromOutline?: bool
         (p_fromOutline ? "outline" : "body") +
         (p_mark ? " as mark " : "as unmark") +
         " operate on " +
-        (p_node ? p_node!.label : "the selected node")
+        (p_node ? p_node!.h : "the selected node")
     );
 
     this.launchRefresh();
@@ -12939,7 +12955,7 @@ public dump(): void {
             chapter = 'main';
         }
         const mark: string = i === this.beadPointer ? '**' : '  '; // used in string
-        console.log("${mark} ${i} ${chapter} ${p}");
+        console.log(`${mark} ${i} ${chapter} ${p}`);
     });
 }
 
@@ -13390,7 +13406,7 @@ export function get_directives_dict(p: Position, root?: Position[]): any {
             if (root_node &amp;&amp; root_node.__bool__()) {
                 d["root"] = 0;  // value not important
             } else {
-                es('${angleBrackets("*")} may only occur in a topmost node (i.e., without a parent)');
+                es(`${angleBrackets("*")} may only occur in a topmost node (i.e., without a parent)`);
             }
             break;
         }

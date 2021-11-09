@@ -24,7 +24,7 @@ function cantMoveMessage(c: Commands): void {
     g.warning("can't move node out of", kind);
 }
 //@+node:felix.20211101230134.1: ** function createMoveMarkedNode
-function createMoveMarkedNode(c:Commands): Position {
+function createMoveMarkedNode(c: Commands): Position {
     const oldRoot = c.rootPosition()!;
     const p = oldRoot.insertAfter();
     p.h = 'Moved marked nodes';
@@ -1197,7 +1197,7 @@ export class CommanderOutlineCommands {
             c.selectPosition(p1);
         }
         if (!g.unitTesting) {
-            g.blue("cloned ${n} nodes");
+            g.blue(`cloned ${n} nodes`);
         }
 
     }
@@ -1245,7 +1245,7 @@ export class CommanderOutlineCommands {
         }
 
         if (!g.unitTesting) {
-            g.blue("copied ${n} nodes");
+            g.blue(`copied ${n} nodes`);
         }
 
     }
@@ -1275,7 +1275,7 @@ export class CommanderOutlineCommands {
         if (undo_data.length) {
             u.afterDeleteMarkedNodes(undo_data, p1);
             if (!g.unitTesting) {
-                g.blue("deleted ${undo_data.length} nodes");
+                g.blue(`deleted ${undo_data.length} nodes`);
             }
             c.setChanged();
         }
@@ -1360,7 +1360,7 @@ export class CommanderOutlineCommands {
             parent.moveAfter(p2);
             // u.afterMoveMarkedNodes(moved, p1)
             if (!g.unitTesting) {
-                g.blue("moved ${moved.length} nodes");
+                g.blue(`moved ${moved.length} nodes`);
             }
             c.setChanged();
         }
@@ -1742,11 +1742,11 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         const p: Position = this.p;
         const u: Undoer = c.undoer;
-        if(!p || !p.__bool__()) {
+        if (!p || !p.__bool__()) {
             return;
         }
-        if (!c.canMoveOutlineUp()){  // Support for hoist.
-            if(c.hoistStack && c.hoistStack.length){
+        if (!c.canMoveOutlineUp()) {  // Support for hoist.
+            if (c.hoistStack && c.hoistStack.length) {
                 cantMoveMessage(c);
             }
             // c.treeFocusHelper();
@@ -1768,35 +1768,35 @@ export class CommanderOutlineCommands {
         //@+<< Move p up >>
         //@+node:felix.20211031235049.8: *5* << Move p up >>
         const parent: Position = p.parent();
-        if(!back2 || !back2.__bool__()){
-            if (c.hoistStack){  // hoist or chapter.
-                const w_vislimit:[Position|undefined, boolean|undefined] =  c.visLimit();
-                const limit:Position|undefined = w_vislimit[0];
-                const limitIsVisible:boolean = !!w_vislimit[1];
+        if (!back2 || !back2.__bool__()) {
+            if (c.hoistStack) {  // hoist or chapter.
+                const w_vislimit: [Position | undefined, boolean | undefined] = c.visLimit();
+                const limit: Position | undefined = w_vislimit[0];
+                const limitIsVisible: boolean = !!w_vislimit[1];
                 // assert limit
-                if (limitIsVisible){
+                if (limitIsVisible) {
                     // canMoveOutlineUp should have caught this.
                     g.trace('can not happen. In hoist');
-                }else{
+                } else {
                     moved = true;
                     p.setDirty();
                     p.moveToFirstChildOf(limit!);
                 }
-            }else{
+            } else {
                 // p will be the new root node;
                 p.setDirty();
                 p.moveToRoot();
                 moved = true;
             }
 
-        }else if(back2.hasChildren() && back2.isExpanded()){
-            if (c.checkMoveWithParentWithWarning(p, back2, true)){
+        } else if (back2.hasChildren() && back2.isExpanded()) {
+            if (c.checkMoveWithParentWithWarning(p, back2, true)) {
                 moved = true;
                 p.setDirty();
                 p.moveToNthChildOf(back2, 0);
             }
-        }else{
-            if (c.checkMoveWithParentWithWarning(p, back2.parent(), true)){
+        } else {
+            if (c.checkMoveWithParentWithWarning(p, back2.parent(), true)) {
                 moved = true;
                 p.setDirty();
                 p.moveAfter(back2);
@@ -1807,13 +1807,13 @@ export class CommanderOutlineCommands {
             c.collapse_nodes_after_move &&
             moved && c.sparse_move &&
             parent && parent.__bool__() && !parent.isAncestorOf(p)
-        ){
+        ) {
             // New in Leo 4.4.2: contract the old parent if it is no longer the parent of p.
             parent.contract();
         }
         //@-<< Move p up >>
 
-        if (moved){
+        if (moved) {
             p.setDirty();
             c.setChanged();
             u.afterMoveNode(p, 'Move Right', undoData);
@@ -1833,7 +1833,7 @@ export class CommanderOutlineCommands {
         const p: Position = this.p;
         const u: Undoer = c.undoer;
 
-        if(!p || !p.__bool__() || !p.hasChildren()) {
+        if (!p || !p.__bool__() || !p.hasChildren()) {
             // c.treeFocusHelper()
             return;
         }
@@ -1861,12 +1861,12 @@ export class CommanderOutlineCommands {
     )
     public toggleSparseMove(this: Commands): void {
         const c: Commands = this;
-        
+
         c.sparse_move = !c.sparse_move;
 
-        if (!g.unitTesting){
-            g.blue("sparse-move: ${c.sparse_move}");
-        }   
+        if (!g.unitTesting) {
+            g.blue(`sparse-move: ${c.sparse_move}`);
+        }
     }
     //@+node:felix.20211031235022.1: *3* c_oc.Sort commands
     //@+node:felix.20211031235022.2: *4* c_oc.sortChildren
@@ -1875,11 +1875,11 @@ export class CommanderOutlineCommands {
         'Sort the children of a node.'
     )
     public sortChildren(this: Commands, key = undefined, reverse = false): void {
-    // This method no longer supports the 'cmp' keyword arg.
+        // This method no longer supports the 'cmp' keyword arg.
         const c: Commands = this;
         const p: Position = c.p;
 
-        if(p && p.__bool__() && p.hasChildren()) {
+        if (p && p.__bool__() && p.hasChildren()) {
             c.sortSiblings(
                 p.firstChild(),
                 true,
@@ -1898,18 +1898,18 @@ export class CommanderOutlineCommands {
         // cmp keyword is no longer supported.
         p: Position | undefined = undefined,
         sortChildren: boolean = false,
-        key: undefined | ((a:VNode, b:VNode)=>number) = undefined,
+        key: undefined | ((a: VNode, b: VNode) => number) = undefined,
         reverse: boolean = false
     ): void {
 
         const c: Commands = this;
         const u: Undoer = c.undoer;
 
-        if(!p || !p.__bool__()) {
-        p = c.p; // in parameter is undefined
+        if (!p || !p.__bool__()) {
+            p = c.p; // in parameter is undefined
         }
         if (!p || !p.__bool__()) {
-        return;
+            return;
         }
 
         // c.endEditing()
@@ -1939,16 +1939,16 @@ export class CommanderOutlineCommands {
         }
 
         // Compare those arrays to see if sort was needed
-        let same:boolean = true;
+        let same: boolean = true;
         for (var _i = 0; _i < oldChildren.length; _i++) {
-            if(oldChildren[_i].gnx!==newChildren[_i].gnx){
+            if (oldChildren[_i].gnx !== newChildren[_i].gnx) {
                 same = false;
             }
         }
-        if(same){
+        if (same) {
             return; // Not even needed!
         }
-        
+
         // 2010/01/20. Fix bug 510148.
         c.setChanged();
         const bunch: Bead = u.beforeSort(p, undoType, oldChildren, newChildren, sortChildren);

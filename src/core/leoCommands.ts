@@ -1467,7 +1467,7 @@ export class Commands {
         let command_func: (p?: any) => any = c.commandsDict[command_name.replace(/\&/g, '')];
 
         if (!command_func) {
-            const message = "no command function for ${command_name}";
+            const message = `no command function for ${command_name}`;
             if (g.unitTesting || g.app.inBridge) {
                 throw message;
             }
