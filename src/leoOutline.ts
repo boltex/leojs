@@ -3,6 +3,7 @@ import { LeoOutlineNode } from './leoOutlineNode';
 import { ProviderResult } from "vscode";
 import { Icon } from './types';
 import { LeoUI } from './leoUI';
+import * as g from './core/leoGlobals';
 import { Position } from './core/leoNodes';
 
 
@@ -36,8 +37,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
         let w_stringId = this.treeId.toString() +
             p_position.v.gnx + p_position.childIndex().toString() +
             p_position.stack.map(p_stackEntry => p_stackEntry[0].gnx + p_stackEntry[1].toString()).join("");
-            // p_collapsed.toString(); // Added Uniqueness:  VSCode's collapsible state linked to id
-
+        // p_collapsed.toString(); // Added Uniqueness:  VSCode's collapsible state linked to id
         return w_stringId;
     }
 
@@ -46,8 +46,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
     }
 
     public getTreeItem(element: Position): Thenable<LeoOutlineNode> | LeoOutlineNode {
-        console.log('called getTreeItem', element.h);
-
+        //console.log('called getTreeItem', element.h);
         let w_collapse: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.None;
         if (element.hasChildren()) {
             w_collapse = element.isExpanded() ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
@@ -65,29 +64,24 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             this._icons,
             this.buildId(element, w_collapse)
         );
-
-        if (element.__eq__(this._leoUI.leo_c.p)) {
+        if (element.__eq__(g.app.commandersList[this._leoUI.commanderIndex].p)) {
             this._leoUI.gotSelectedNode(element);
         }
-
         // Build a LeoNode (a vscode tree node) from the Position
         return w_leoNode;
     }
 
     public getChildren(element?: Position): Position[] {
-        if(element){
-            console.log('called get children on', element.h);
-        }else{
-            console.log('called get children on root');
-
-        }
-
+        // if(element){
+        //     console.log('called get children on', element.h);
+        // }else{
+        //     console.log('called get children on root');
+        // }
         if (element) {
             return [...element.children()];
         } else {
-            if (this._leoUI.leo_c) {
-
-                const w_c = this._leoUI.leo_c!; // Currently Selected Document's Commander
+            if (g.app.commandersList[this._leoUI.commanderIndex]) {
+                const w_c = g.app.commandersList[this._leoUI.commanderIndex]!; // Currently Selected Document's Commander
                 if (w_c.hoistStack.length) {
                     // topmost hoisted starts the outline as single root 'child'
                     return [w_c.hoistStack[w_c.hoistStack.length - 1].p];
@@ -103,17 +97,14 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
     }
 
     public getParent(element: Position): ProviderResult<Position> {
-        console.log('called get parent on', element.h);
-
+        // console.log('called get parent on', element.h);
         if (element) {
             const p_parent = element.parent();
             if (p_parent.v) {
-                console.log('had parent');
-
+                // console.log('had parent');
                 return p_parent;
             } else {
-                console.log('was root');
-
+                // console.log('was root');
                 return undefined;
             }
         }

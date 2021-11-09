@@ -27,6 +27,7 @@ export class LeoUI {
     public leoStates: LeoStates;
     public verbose: boolean = false;
     public trace: boolean = false;
+    public commanderIndex: number = 0;
 
     // * Clipboard
     public clipboardContent: string = "";
@@ -42,8 +43,7 @@ export class LeoUI {
     // * File Browser
     private _leoFilesBrowser: LeoFilesBrowser; // Browsing dialog service singleton used in the openLeoFile and save-as methods
 
-    public leo_c: Commands;
-
+    // * Refresh Cycle
     private _refreshType: ReqRefresh = {}; // Flags for commands to require parts of UI to refresh
     private _revealType: RevealType = RevealType.NoReveal; // Type of reveal for the selected node (when refreshing outline)
     private _preventShowBody = false; // Used when refreshing treeview from config: It requires not to open the body pane when refreshing.
@@ -159,31 +159,31 @@ export class LeoUI {
         g.app.commandersList.push(w_c);
 
         // select first test commander
-        this.leo_c = g.app.commandersList[0];
+        let c = g.app.commandersList[this.commanderIndex];
 
         // ************************************************************
         // * demo test: BUILD SOME TEST OUTLINE
         // ************************************************************
-        let w_node = this.leo_c.p;
+        let w_node = c.p;
         w_node.initHeadString("@file node1");
         w_node.setBodyString('@tabwidth 8\nnode1 body');
         w_node.expand();
 
-        w_node = this.leo_c.p.insertAsLastChild();
+        w_node = c.p.insertAsLastChild();
         w_node.initHeadString("node Inside1");
         w_node.setBodyString('  @others \nnodeInside1 body\n@language c\nprint()');
         w_node.setMarked();
 
-        w_node = this.leo_c.p.insertAsLastChild();
+        w_node = c.p.insertAsLastChild();
         w_node.initHeadString("node with UserData Inside2");
         w_node.setBodyString('node Inside2 body');
         w_node.u = { a: 'user content string a', b: "user content also" };
 
-        w_node = this.leo_c.p.insertAfter();
+        w_node = c.p.insertAfter();
         w_node.initHeadString("@file node3");
         w_node.setBodyString('node 3 body');
 
-        w_node = this.leo_c.p.insertAfter();
+        w_node = c.p.insertAfter();
         w_node.initHeadString("node 2 selected but empty");
         w_c.setCurrentPosition(w_node);
 
@@ -199,35 +199,35 @@ export class LeoUI {
         g.app.commandersList.push(w_c);
 
         // select second test commander
-        this.leo_c = w_c;
+        c = w_c;
 
         // ************************************************************
         // * demo test: BUILD SOME OTHER TEST OUTLINE
         // ************************************************************
-        w_node = this.leo_c.p;
+        w_node = c.p;
         w_node.initHeadString("some other title");
         w_node.setBodyString('body text');
 
-        w_node = this.leo_c.p.insertAsLastChild();
+        w_node = c.p.insertAsLastChild();
         w_node.initHeadString("yet another node");
         w_node.setBodyString('more body text\nwith a second line');
 
-        w_node = this.leo_c.p.insertAfter();
+        w_node = c.p.insertAfter();
         w_node.initHeadString("@clean my-file.txt");
         w_node.setBodyString('again some body text');
         w_c.setCurrentPosition(w_node);
 
-        w_node = this.leo_c.p.insertAsLastChild();
+        w_node = c.p.insertAsLastChild();
         w_node.initHeadString("sample cloned node");
         w_node.setBodyString('some other body');
         w_node.clone();
 
-        w_node = this.leo_c.p.insertAfter();
+        w_node = c.p.insertAfter();
         w_node.setMarked();
         w_node.initHeadString("a different headline");
 
         // back to first test commander after creating this second one
-        this.leo_c = g.app.commandersList[0];
+        c = g.app.commandersList[this.commanderIndex];
         // ************************************************************
         // * demo test end
         // ************************************************************
@@ -436,7 +436,8 @@ export class LeoUI {
      * @param p_focusOutline Flag for focus to be placed in outline
      */
     public showOutline(p_focusOutline?: boolean): void {
-        this._lastTreeView.reveal(this.leo_c.p, {
+        const c = g.app.commandersList[this.commanderIndex];
+        this._lastTreeView.reveal(c.p, {
             select: true,
             focus: !!p_focusOutline
         }).then(
@@ -499,6 +500,8 @@ export class LeoUI {
      * * Launches refresh for UI components and states (Debounced)
      */
     public _launchRefresh(p_node?: Position): void {
+        const c = g.app.commandersList[this.commanderIndex];
+
         // Set w_revealType, it will ultimately set this._revealType.
         // Used when finding the OUTLINE's selected node and setting or preventing focus into it
         // Set this._fromOutline. Used when finding the selected node and showing the BODY to set or prevent focus in it
@@ -553,8 +556,8 @@ export class LeoUI {
 
             this._refreshType.node = false;
 
-            this.leoStates.setSelectedNodeFlags(this.leo_c.p);
-            this._revealTreeViewNode(this.leo_c.p, {
+            this.leoStates.setSelectedNodeFlags(c.p);
+            this._revealTreeViewNode(c.p, {
                 select: true, focus: true // FOCUS FORCED TO TRUE always leave focus on tree when navigating
             });
 
@@ -742,12 +745,12 @@ export class LeoUI {
      * @returns thenable for reveal to finish or select position to finish
      */
     public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable<unknown> {
-
+        const c = g.app.commandersList[this.commanderIndex];
         // Note: set context flags for current selection when capturing and revealing the selected node
         // when the tree refreshes and the selected node is processed by getTreeItem & gotSelectedNode
         let q_reveal: Thenable<void> | undefined;
 
-        if (this.leo_c.positionExists(p_node)) {
+        if (c.positionExists(p_node)) {
 
             if (p_aside) {
                 q_reveal = this._lastTreeView.reveal(p_node).then(
@@ -757,7 +760,7 @@ export class LeoUI {
                     }
                 );
             }
-            this.leo_c.selectPosition(p_node);
+            c.selectPosition(p_node);
             // Set flags here - not only when 'got selection' is reached.
             this.leoStates.setSelectedNodeFlags(p_node);
 
@@ -785,19 +788,18 @@ export class LeoUI {
         p_fromOutline: boolean,
         p_keepSelection?: boolean
     ): Thenable<unknown> {
-
+        const c = g.app.commandersList[this.commanderIndex];
         this._setupRefresh(p_fromOutline, p_refreshType);
 
-        const c: Commands = this.leo_c;
         let value: any = undefined;
         const p = p_node ? p_node.position : c.p;
 
         if (p.__eq__(c.p)) {
-            value = this.leo_c.doCommandByName(p_cmd); // no need for re-selection
+            value = c.doCommandByName(p_cmd); // no need for re-selection
         } else {
             const old_p = c.p;
             c.selectPosition(p);
-            value = this.leo_c.doCommandByName(p_cmd);
+            value = c.doCommandByName(p_cmd);
             if (p_keepSelection && c.positionExists(old_p)) {
                 // Only if 'keep' old position was set, and old_p still exists
                 c.selectPosition(old_p);
@@ -1114,12 +1116,8 @@ export class LeoUI {
      * @returns A promise that resolves with a textEditor of the selected node's body from the newly opened document
      */
     public selectOpenedLeoDocument(p_index: number): Thenable<unknown> {
+        this.commanderIndex = p_index;
 
-        // vscode.window.showInformationMessage('TODO: Implement selectOpenedLeoDocument' +
-        //     " index: " + p_index);
-        console.log('select opened commander index: ' + p_index);
-
-        this.leo_c = g.app.commandersList[p_index];
         this._refreshOutline(true, RevealType.RevealSelect);
 
         const w_fakeOpenedFileInfo: any = undefined;
@@ -1244,9 +1242,11 @@ export class LeoUI {
      * @returns Thenable from the tested functionality
      */
     public test(): Thenable<unknown> {
+        const c = g.app.commandersList[this.commanderIndex];
+
         vscode.window.showInformationMessage("Test called!");
         console.log("Test called!");
-        // console.log("this.leo_c.p.isSelected()", this.leo_c);
+        // console.log("c.p.isSelected()", c);
 
         // * DO LEO COMMAND BY NAME
         // keepSelection = False  # Set default, optional component of param
@@ -1255,10 +1255,10 @@ export class LeoUI {
 
         // * Test directives_dict & directives_pat
         // console.log('test get_directives_dict_list ');
-        // console.log(g.get_directives_dict_list(this.leo_c.p));
+        // console.log(g.get_directives_dict_list(c.p));
 
         // * Test getTabWidth
-        console.log(this.leo_c.getTabWidth(this.leo_c.p));
+        console.log(c.getTabWidth(c.p));
 
         // * test @cmd decorator and undoer
         // console.log('test @cmd decorator and undoer');
@@ -1270,12 +1270,12 @@ export class LeoUI {
 
         // * test @commander_command decorator and general commands
         /*
-        const func = this.leo_c.commandsDict['goto-next-visible'];
+        const func = c.commandsDict['goto-next-visible'];
         if (!func) {
             console.error('Leo command not found');
         } else {
             console.log('HAS FUNC!');
-            func.bind(this.leo_c)();
+            func.bind(c)();
         }
         */
 
