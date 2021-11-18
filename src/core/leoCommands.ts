@@ -1419,7 +1419,7 @@ export class Commands {
                     return_value = command_func();
                 }
                 catch (e) {
-                    g.es_exception();
+                    g.es_exception(e);
                     return_value = undefined;
                 }
                 if (c && c.exists) {  // Be careful: the command could destroy c.

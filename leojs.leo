@@ -5735,6 +5735,12 @@ public test(): Thenable&lt;unknown&gt; {
     // * Test getTabWidth
     console.log(c.getTabWidth(c.p));
 
+    // * Test undoredo
+    console.log('can undo', c.undoer.canUndo());
+    console.log('can redo', c.undoer.canRedo());
+
+
+
     // * test @cmd decorator and undoer
     // console.log('test @cmd decorator and undoer');
     // this.command("undo", undefined, {
@@ -13303,8 +13309,8 @@ export function doKeywordArgs(keys: { [key: string]: any }, d: { [key: string]: 
 export const es = console.log;
 
 </t>
-<t tx="felix.20211104212802.1">export function es_exception(c?: Commands): string {
-    console.log('es_exception called');
+<t tx="felix.20211104212802.1">export function es_exception(p_error: any, c?: Commands): string {
+    console.log('es_exception called with error: ', p_error);
     return '&lt;no file&gt;';
 }
 

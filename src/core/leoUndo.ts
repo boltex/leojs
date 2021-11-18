@@ -297,7 +297,7 @@ export class Undoer {
 
         // bunch is not a dict, so bunch.keys() is required.
         for (let key of Object.keys(bunch)) {
-            const val: any = bunch.key;
+            const val: any = bunch[key];
             // TODO test this!
             (u as any)[key] = val;
             if (!u.optionalIvars.includes(key)) {
@@ -1657,7 +1657,6 @@ export class Undoer {
             return;
         }
 
-
         // Init status.
         u.undoing = true;
         u.groupCount = 0;
@@ -1668,6 +1667,8 @@ export class Undoer {
         } else {
             g.trace(`no undo helper for ${u.kind} ${u.undoType}`);
         }
+        console.log('almost done undo!')
+
         //
         // Finish.
         c.checkOutline();
@@ -1675,6 +1676,12 @@ export class Undoer {
         u.undoing = false;
         u.bead -= 1;
         u.setUndoTypes();
+        console.log('done undo!')
+
+        console.log("canredo", u.canRedo());
+        console.log("canundo", u.canUndo());
+
+
     }
     //@+node:felix.20211026230613.104: *3* u.undo helpers
     //@+node:felix.20211026230613.105: *4*  u.undoHelper
@@ -2135,8 +2142,8 @@ export class Undoer {
         // # 1451. *Always* set the changed bit.
         // Redrawing *must* be done here before setting u.undoing to false.
         // i, j = w.getSelectionRange()
-        const w_selRange: number[] = w.getSelectionRange();
-        const ins: number = w.getInsertPoint();
+        const w_selRange: number[] = [0, 0]; // TODO : GET BODY SELECTION RANGE FROM VSCODE w.getSelectionRange();
+        const ins: number = 0; // TODO : GET BODY CURSOR INSERT POSITION FROM VSCODE w.getInsertPoint();
 
         // c.redraw();
         // c.recolor();
@@ -2146,8 +2153,10 @@ export class Undoer {
             u.inHead = false;
         } else {
             // c.bodyWantsFocus();
-            w.setSelectionRange(w_selRange[0], w_selRange[1], ins);
-            w.seeInsertPoint();
+            // TODO 
+            // w.setSelectionRange(w_selRange[0], w_selRange[1], ins);
+            // TODO 
+            // w.seeInsertPoint();
         }
     }
     //@-others

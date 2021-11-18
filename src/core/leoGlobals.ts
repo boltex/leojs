@@ -870,8 +870,8 @@ export function toEncodedString(s: any, encoding = 'utf-8', reportErrors = false
 // TODO : Replace with output to proper 'Leo log pane'
 export const es = console.log;
 
-export function es_exception(c?: Commands): string {
-    console.log('es_exception called');
+export function es_exception(p_error: any, c?: Commands): string {
+    console.log('es_exception called with error: ', p_error);
     return '<no file>';
 }
 

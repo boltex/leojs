@@ -1269,6 +1269,12 @@ export class LeoUI {
         // * Test getTabWidth
         console.log(c.getTabWidth(c.p));
 
+        // * Test undoredo
+        console.log('can undo', c.undoer.canUndo());
+        console.log('can redo', c.undoer.canRedo());
+
+
+
         // * test @cmd decorator and undoer
         // console.log('test @cmd decorator and undoer');
         // this.command("undo", undefined, {
