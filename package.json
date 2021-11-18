@@ -1970,6 +1970,18 @@
         "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
+        "command": "leojs.undoFromOutline",
+        "key": "ctrl+z",
+        "mac": "cmd+z",
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+      },
+      {
+        "command": "leojs.redoFromOutline",
+        "key": "ctrl+shift+z",
+        "mac": "cmd+shift+z",
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+      },
+      {
         "command": "leojs.gotoFirstVisible",
         "key": "alt+home",
         "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"

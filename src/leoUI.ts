@@ -16,7 +16,6 @@ import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
 import { LoadManager } from "./core/leoApp";
 import { NodeIndices, Position, VNode } from "./core/leoNodes";
-import { Commands } from "./core/leoCommands";
 import { LeoBodyProvider } from "./leoBody";
 
 /**

@@ -1029,6 +1029,8 @@ export class Undoer {
         const u: Undoer = this;
         const bunch: Bead = u.createCommonBunch(p);
         bunch.oldBack = p.back();
+        console.log("bunch.oldBack", bunch.oldBack);
+        bunch.oldBack
         bunch.oldParent = p.parent();
         return bunch;
     }
@@ -1360,7 +1362,8 @@ export class Undoer {
         const c: Commands = u.c;
         const cc: any = c.chapterController;
         if (cc) {
-            cc.selectChapterByName('main');
+            // TODO cc chapter controler
+            // cc.selectChapterByName('main');
         }
         if (u.newBack) {
             u.newP._linkAfter(u.newBack);
@@ -1473,7 +1476,8 @@ export class Undoer {
         const c: Commands = u.c;
         const cc: any = c.chapterController;
         if (cc) {
-            cc.selectChapterByName('main');
+            // TODO cc chapter controler
+            // cc.selectChapterByName('main');
         }
         if (u.newBack) {
             u.newP._linkAfter(u.newBack);
@@ -1517,7 +1521,8 @@ export class Undoer {
         //assert u.newParent_v
         //assert v
         if (cc) {
-            cc.selectChapterByName('main');
+            // TODO cc chapter controler
+            // cc.selectChapterByName('main');
         }
         // Adjust the children arrays of the old parent.
         // assert u.oldParent_v.children[u.oldN] == v
@@ -1758,7 +1763,8 @@ export class Undoer {
         const c: Commands = u.c;
         const cc: any = c.chapterController;
         if (cc) {
-            cc.selectChapterByName('main');
+            // TODO cc chapter controler
+            // cc.selectChapterByName('main');
         }
         c.selectPosition(u.newP);
         c.deleteOutline();
@@ -1891,7 +1897,8 @@ export class Undoer {
         const c: Commands = u.c;
         const cc: any = c.chapterController;
         if (cc) {
-            cc.selectChapterByName('main');
+            // TODO cc chapter controler
+            // cc.selectChapterByName('main');
         }
         u.newP.setAllAncestorAtFileNodesDirty();
         c.selectPosition(u.newP);
@@ -1928,7 +1935,8 @@ export class Undoer {
         const c: Commands = u.c;
         const cc: any = c.chapterController;
         if (cc) {
-            cc.selectChapterByName('main');
+            // TODO cc chapter controler
+            // cc.selectChapterByName('main');
         }
         const v: VNode = u.p!.v;
         //assert u.oldParent_v

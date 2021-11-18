@@ -387,6 +387,7 @@
 <v t="felix.20201214205159.75"><vh>Move Nodes</vh></v>
 <v t="felix.20201214205159.76"><vh>Outline Editing</vh></v>
 <v t="felix.20201214205159.77"><vh>Node Editing</vh></v>
+<v t="felix.20211117232843.1"><vh>Undo/Redo</vh></v>
 <v t="felix.20201214205159.78"><vh>Goto Nodes</vh></v>
 </v>
 </v>
@@ -1859,61 +1860,92 @@ public static COMMANDS = {
  * Leo command names that are called from vscode's gui/menu/buttons/keybindings triggers
  */
 public static LEO_COMMANDS = {
-    EXECUTE_SCRIPT: "TODO", // "executeScript",
-    REFRESH_FROM_DISK: "TODO", //  "refreshFromDisk",
-    GIT_DIFF: "TODO", //  "gitDiff",
-    // * Goto operations
-    PAGE_UP: "tree-page-up", //  "pageUp",
-    PAGE_DOWN: "tree-page-down", //  "pageDown",
-    GOTO_FIRST_VISIBLE: "goto-first-visible-node", //  "goToFirstVisibleNode",
-    GOTO_LAST_VISIBLE: "goto-last-visible-node", //  "goToLastVisibleNode",
-    GOTO_LAST_SIBLING: "goto-last-sibling", //  "goToLastSibling",
-    GOTO_NEXT_VISIBLE: "goto-next-visible", // "selectVisNext",
-    GOTO_PREV_VISIBLE: "goto-prev-visible", //  "selectVisBack",
-    GOTO_NEXT_MARKED: "goto-next-marked", //  "goToNextMarkedHeadline",
-    GOTO_NEXT_CLONE: "goto-next-clone", //  "goToNextClone",
-    CONTRACT_OR_GO_LEFT: "contract-or-go-left", //  "contractNodeOrGoToParent",
-    EXPAND_AND_GO_RIGHT: "expand-and-go-right", //  "expandNodeAndGoToFirstChild",
-    CONTRACT_ALL: "contract-all", // "contractAllHeadlines",
-    // * Leo Operations
-    TOGGLE_MARK: "toggle-mark", //  mark / unmark
-    COPY_PNODE: "TODO", //  "copyOutline",
-    CUT_PNODE: "TODO", //  "cutPNode",
-    PASTE_PNODE: "TODO", //  "pasteOutline",
-    PASTE_CLONE_PNODE: "TODO", //  "pasteOutlineRetainingClones",
-    DELETE_PNODE: "TODO", //  "deletePNode",
-    MOVE_PNODE_DOWN: "TODO", //  "moveOutlineDown",
-    MOVE_PNODE_LEFT: "TODO", //  "moveOutlineLeft",
-    MOVE_PNODE_RIGHT: "TODO", //  "moveOutlineRight",
-    MOVE_PNODE_UP: "TODO", //  "moveOutlineUp",
-    INSERT_PNODE: "TODO", //  "insertPNode",
-    INSERT_NAMED_PNODE: "TODO", //  "insertNamedPNode",
-    CLONE_PNODE: "TODO", //  "clonePNode",
-    PROMOTE_PNODE: "TODO", //  "promote",
-    DEMOTE_PNODE: "TODO", //  "demote",
-    REFRESH_FROM_DISK_PNODE: "TODO", //  "refreshFromDisk",
-    SORT_CHILDREN: "TODO", //  "sortChildren",
-    SORT_SIBLINGS: "TODO", //  "sortSiblings",
-    UNDO: "undo", //  "undo",
-    REDO: "redo", //  "redo",
-    GET_STATES: "TODO", //  "getStates",
-    HOIST_PNODE: "TODO", //  "hoist",
-    DEHOIST: "TODO", //  "dehoist",
-    EXTRACT: "TODO", //  "extract",
-    EXTRACT_NAMES: "TODO", //  "extractNames",
-    COPY_MARKED: "TODO", //  "copyMarked",
-    DIFF_MARKED_NODES: "TODO", //  "deleteMarked",
-    MARK_CHANGED_ITEMS: "TODO", //  "markChangedHeadlines",
-    MARK_SUBHEADS: "TODO", //  "markSubheads",
-    UNMARK_ALL: "TODO", //  "unmarkAll",
-    CLONE_MARKED_NODES: "TODO", //  "cloneMarked",
-    DELETE_MARKED_NODES: "TODO", //  "deleteMarked",
-    MOVE_MARKED_NODES: "TODO", //  "moveMarked",
+
+    // * File Commands
+    // TODO
+
+    // * More Commands
+    //  TODO  
+    // GOTO_GLOBAL_LINE: "!goto_global_line",
+    // TAG_CHILDREN: "!tag_children",
+    // START_SEARCH: "!start_search",
+    // FIND_ALL: "!find_all",
+    // FIND_NEXT: "!find_next",
+    // FIND_PREVIOUS: "!find_previous",
+    // FIND_VAR: "!find_var",
+    // FIND_DEF: "!find_def",
+    // REPLACE: "!replace",
+    // REPLACE_THEN_FIND: "!replace_then_find",
+    // REPLACE_ALL: "!replace_all",
+    // WRITE_AT_FILE_NODES: '-write-at-file-nodes',
+    // WRITE_DIRTY_AT_FILE_NODES: '-write-dirty-at-file-nodes',
+
+    // * Undo Operations
+    UNDO: "undo",
+    REDO: "redo",
+    // * Tree Building
+    EXECUTE_SCRIPT: "TODO", // TODO
+    REFRESH_FROM_DISK: "TODO", // TODO
+    REFRESH_FROM_DISK_PNODE: "TODO", // TODO
+    GIT_DIFF: "TODO", // TODO
+    // * Outline from body text
+    EXTRACT: "TODO", // TODO
+    EXTRACT_NAMES: "TODO", // TODO
+    // * Hoist Operations
+    HOIST_PNODE: "hoist",
+    DEHOIST: "de-hoist",
+    // * History Navigation
+    GOTO_PREV_HISTORY: "goToPrevHistory",
+    GOTO_NEXT_HISTORY: "goToNextHistory",
+    // * Goto &amp; Folding
+    PAGE_UP: "tree-page-up",
+    PAGE_DOWN: "tree-page-down",
+    GOTO_FIRST_VISIBLE: "goto-first-visible-node",
+    GOTO_LAST_VISIBLE: "goto-last-visible-node",
+    GOTO_LAST_SIBLING: "goto-last-sibling",
+    GOTO_NEXT_VISIBLE: "goto-next-visible",
+    GOTO_PREV_VISIBLE: "goto-prev-visible",
+    GOTO_NEXT_MARKED: "goto-next-marked",
+    GOTO_NEXT_CLONE: "goto-next-clone",
+    CONTRACT_OR_GO_LEFT: "contract-or-go-left",
+    EXPAND_AND_GO_RIGHT: "expand-and-go-right",
+    CONTRACT_ALL: "contract-all",
+    // * Mark Operations
+    TOGGLE_MARK: "toggle-mark",
+    COPY_MARKED: "copy-marked-nodes",
+    DIFF_MARKED_NODES: "diff-marked-nodes", // TODO from leoCompare.py
+    MARK_CHANGED_ITEMS: "mark-changed-items",
+    MARK_SUBHEADS: "mark-subheads",
+    UNMARK_ALL: "unmark-all",
+    CLONE_MARKED_NODES: "clone-marked-nodes",
+    DELETE_MARKED_NODES: "delete-marked-nodes",
+    MOVE_MARKED_NODES: "move-marked-nodes",
+    // * Clipboard Operations
+    COPY_PNODE: "TODO", // TODO
+    CUT_PNODE: "TODO", // TODO
+    PASTE_PNODE: "TODO", // TODO
+    PASTE_CLONE_PNODE: "TODO", // TODO
+    // * Outline Editing
+    DELETE_PNODE: "delete-node",
+    MOVE_PNODE_DOWN: "move-outline-down",
+    MOVE_PNODE_LEFT: "move-outline-left",
+    MOVE_PNODE_RIGHT: "move-outline-right",
+    MOVE_PNODE_UP: "move-outline-up",
+    INSERT_PNODE: "TODO", // TODO
+    INSERT_NAMED_PNODE: "TODO", // TODO
+    INSERT_CHILD_PNODE: "insert-child",
+    INSERT_CHILD_NAMED_PNODE: "TODO",
+    CLONE_PNODE: "clone-node",
+    // * Marshalling Operations
+    PROMOTE_PNODE: "promote",
+    DEMOTE_PNODE: "demote",
+    SORT_CHILDREN: "sort-children",
+    SORT_SIBLINGS: "sort-siblings",
     // * Clone-find functionality
-    CLONE_FIND_ALL: "TODO", //  "cloneFindAll",
-    CLONE_FIND_ALL_FLATTENED: "TODO", //  "cloneFindAllFlattened",
-    CLONE_FIND_MARKED: "TODO", //  "cloneFindMarked",
-    CLONE_FIND_FLATTENED_MARKED: "TODO", //  "cloneFindFlattenedMarked",
+    CLONE_FIND_ALL: "TODO", // TODO
+    CLONE_FIND_ALL_FLATTENED: "TODO", // TODO
+    CLONE_FIND_MARKED: "TODO", // TODO
+    CLONE_FIND_FLATTENED_MARKED: "TODO", // TODO
 };
 
 </t>
@@ -2954,7 +2986,6 @@ import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
 import { LoadManager } from "./core/leoApp";
 import { NodeIndices, Position, VNode } from "./core/leoNodes";
-import { Commands } from "./core/leoCommands";
 import { LeoBodyProvider } from "./leoBody";
 
 @language typescript
@@ -8499,7 +8530,7 @@ public saveCursorAndScroll(): void {
         if (!this.unicode_warning_given) {
             this.unicode_warning_given = true;
             g.error(s);
-            g.es_exception();
+            g.es_exception(exception);
         }
     }
     // self.contentModified()  # #1413.
@@ -10424,7 +10455,7 @@ public hasNext(): boolean | undefined {
     }
     catch (Exception) {
         g.trace('*** Unexpected exception');
-        g.es_exception();
+        g.es_exception(Exception);
         return undefined;
     }
 }
@@ -14063,6 +14094,19 @@ def pluginIsLoaded(fn):
     return pc.isLoaded(fn)
 */
 
+</t>
+<t tx="felix.20211117232843.1">{
+  "command": "leojs.undoFromOutline",
+  "key": "ctrl+z",
+  "mac": "cmd+z",
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+},
+{
+  "command": "leojs.redoFromOutline",
+  "key": "ctrl+shift+z",
+  "mac": "cmd+shift+z",
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+},
 </t>
 </tnodes>
 </leo_file>

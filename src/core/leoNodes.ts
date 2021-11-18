@@ -880,7 +880,7 @@ export class Position {
         }
         catch (Exception) {
             g.trace('*** Unexpected exception');
-            g.es_exception();
+            g.es_exception(Exception);
             return undefined;
         }
     }
@@ -2913,7 +2913,7 @@ export class VNode {
             if (!this.unicode_warning_given) {
                 this.unicode_warning_given = true;
                 g.error(s);
-                g.es_exception();
+                g.es_exception(exception);
             }
         }
         // self.contentModified()  # #1413.
