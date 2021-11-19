@@ -6658,7 +6658,7 @@ export class VNode {
     parents: VNode[]; // Unordered list of all parents of this node.
 
     // * Other essential data...
-    fileIndex: string; // The immutable fileIndex (gnx) for this node. Set below.wwwwwwwwwwwww
+    fileIndex: string; // The immutable fileIndex (gnx) for this node. Set below.
     iconVal: number; // The present value of the node's icon.
     statusBits: number; // status bits
 
@@ -8672,6 +8672,11 @@ public _addLink(childIndex: number, parent_v: VNode): void {
     // Update parent_v.children &amp; v.parents.
     parent_v.children.splice(childIndex, 0, v);
     v.parents.push(parent_v);
+
+    // Set zodb changed flags.
+    v._p_changed = true;
+    parent_v._p_changed = true;
+
     if (v.parents.length === 1) {
         // Adjust the parents links in the descendant tree.
         // This handles clones properly when undoing a delete.
@@ -10143,7 +10148,7 @@ public _unlink(): void {
     // Delete the child.
     if ((0 &lt;= n &amp;&amp;
         n &lt; parent_v.children.length &amp;&amp;
-        parent_v.children[n].fileIndex === child.fileIndex
+        parent_v.children[n] === child // Can compare objects if same instance
     )) {
         // This is the only call to v._cutlink.
         child._cutLink(n, parent_v);
@@ -10420,7 +10425,7 @@ public get_UNL(with_file = true, with_proto = false, with_index = true, with_cou
             aList.push(i.h.replace('--&gt;', '--%3E') + ":" + ind.toString());
             // g.recursiveUNLFind and sf.copy_to_my_settings undo this replacement.
             if (count || with_count) {
-                aList[-1] = aList[-1] + "," + count.toString();
+                aList[aList.length - 1] = aList[aList.length - 1] + "," + count.toString();
             }
         } else {
             aList.push(i.h.replace('--&gt;', '--%3E'));
@@ -10568,7 +10573,7 @@ public isVisible(c: Commands): boolean {
     }
 
     if (c.hoistStack.length) {
-        const root: Position = c.hoistStack[-1].p;
+        const root: Position = c.hoistStack[c.hoistStack.length - 1].p;
         if (p.__eq__(root)) {
             // #12.
             return true;

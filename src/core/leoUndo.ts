@@ -1029,8 +1029,6 @@ export class Undoer {
         const u: Undoer = this;
         const bunch: Bead = u.createCommonBunch(p);
         bunch.oldBack = p.back();
-        console.log("bunch.oldBack", bunch.oldBack);
-        bunch.oldBack
         bunch.oldParent = p.parent();
         return bunch;
     }
@@ -1790,7 +1788,7 @@ export class Undoer {
         let parent_v: VNode;
         for (let p of aList) {
             if (p.stack.length) {
-                parent_v = p.stack[-1][0];
+                parent_v = p.stack[p.stack.length - 1][0];
             } else {
                 parent_v = c.hiddenRootNode;
             }
@@ -2060,7 +2058,7 @@ export class Undoer {
         s = s.join('\n');
 
         // Remove trailing newlines in s.
-        while (s && s[-1] === '\n') {
+        while (s && s[s.length - 1] === '\n') {
             s = s.slice(0, -1);
         }
         // Add oldNewlines newlines.

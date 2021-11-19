@@ -1096,7 +1096,7 @@ export class CommanderOutlineCommands {
         else if (
             as_child ||
             (current.hasChildren() && current.isExpanded()) ||
-            (c.hoistStack && c.hoistStack.length && current.__eq__(c.hoistStack[-1].p))
+            (c.hoistStack && c.hoistStack.length && current.__eq__(c.hoistStack[c.hoistStack.length - 1].p))
         ) {
             // Make sure the new node is visible when hoisting.
             if (c.config.getBool('insert-new-nodes-at-end')) {
@@ -1129,7 +1129,7 @@ export class CommanderOutlineCommands {
             return undefined;
         }
         // Can not insert before the base of a hoist.
-        if (c.hoistStack && c.hoistStack.length && current.__eq__(c.hoistStack[-1].p)) {
+        if (c.hoistStack && c.hoistStack.length && current.__eq__(c.hoistStack[c.hoistStack.length - 1].p)) {
             g.warning('can not insert a node before the base of a hoist');
             return undefined;
         }

@@ -1824,7 +1824,7 @@ export class Commands {
         const c: Commands = this;
         if (c.hoistStack.length) {
             const current: Position = c.p;
-            const bunch = c.hoistStack[-1]
+            const bunch = c.hoistStack[c.hoistStack.length - 1]
             return current !== bunch.p;
         }
         return true;
@@ -1980,7 +1980,7 @@ export class Commands {
 
         // c = self
         // if c.hoistStack.length:
-        // p = c.hoistStack[-1].p
+        // p = c.hoistStack[c.hoistStack.length-1].p
         // return p and not c.isCurrentPosition(p)
         // elif c.currentPositionIsRootPosition():
         // return c.currentPositionHasNext()
@@ -1999,7 +1999,7 @@ export class Commands {
         const c: Commands = this;
         const p: Position = this.p;
         if (c.hoistStack.length) {
-            const bunch = c.hoistStack[-1];
+            const bunch = c.hoistStack[c.hoistStack.length - 1];
             if (p && p.__bool__() && p.hasParent()) {
                 p.moveToParent();
                 return !p.__eq__(bunch.p) && bunch.p.isAncestorOf(p);
@@ -2013,7 +2013,7 @@ export class Commands {
         const c: Commands = this;
         const p: Position = this.p;
         if (c.hoistStack.length) {
-            const bunch = c.hoistStack[-1];
+            const bunch = c.hoistStack[c.hoistStack.length - 1];
             return p && p.hasBack() && p !== bunch.p
         }
         return p && p.__bool__() && p.hasBack();
