@@ -200,6 +200,7 @@ export class Undoer {
         result.push(`u.beads.length: ${u.beads.length}, n: ${n}`);
 
         for (let ivar of ['kind', 'newP', 'newN', 'p', 'oldN', 'undoHelper']) {
+            //@verbatim
             //@ts-expect-error
             result.push(`${ivar} = ${u[ivar]}`);
         }
@@ -1802,6 +1803,8 @@ export class Undoer {
     public undoDeleteNode(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
+        console.log('undo delete oldBack: ', u.oldBack);
+
         if (u.oldBack) {
             u.p!._linkAfter(u.oldBack);
         } else if (u.oldParent) {
@@ -2151,7 +2154,7 @@ export class Undoer {
         const w_selRange: number[] = [0, 0]; // TODO : GET BODY SELECTION RANGE FROM VSCODE w.getSelectionRange();
         const ins: number = 0; // TODO : GET BODY CURSOR INSERT POSITION FROM VSCODE w.getInsertPoint();
 
-        // c.redraw();
+        c.redraw();
         // c.recolor();
 
         if (u.inHead) {

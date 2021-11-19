@@ -419,8 +419,12 @@ export class Commands {
         console.log("recolor");
     }
 
-    public redraw(): void {
-        console.log("redraw");
+    public redraw(p?: Position): void {
+        const c: Commands = this;
+        if (p && p.__bool__()) {
+            c.selectPosition(p);
+        }
+        // console.log("redraw");
     }
 
     public redraw_after_icons_changed(): void {
@@ -2173,8 +2177,7 @@ export class Commands {
         const c: Commands = this;
         const k: any = this.k;
 
-        // c.redraw(p);  // This *must* be done now.
-        c.selectPosition(p);
+        c.redraw(p);  // This *must* be done now. 
 
         if (p && p.__bool__()) {
             // TODO : allow headline rename ?

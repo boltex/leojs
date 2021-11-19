@@ -866,7 +866,7 @@ export class LeoApp {
             id_ = id_.split(' ').join('');
         }
         catch (exception) {
-            g.es_exception();
+            g.es_exception(exception);
             id_ = '';
         }
         if (id_.length < 3) {
@@ -977,7 +977,7 @@ export class LoadManager {
             }
             catch (exception) {
                 g.es_print(`Unexpected exception reading ${fn}`);
-                g.es_exception();
+                g.es_exception(exception);
                 c = undefined;
             }
         }
@@ -1013,7 +1013,7 @@ export class LoadManager {
             }
             catch (exception) {
                 g.es_print('Can not create empty workbook');
-                g.es_exception();
+                g.es_exception(exception);
             }
         }
         c = c1;

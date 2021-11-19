@@ -584,16 +584,14 @@ export class CommanderOutlineCommands {
                 const new_name: string = cc.findChapterNameForPosition(p);
                 if (new_name === old_name) {
                     // Always do a full redraw.
-                    //c.redraw(p);
-                    c.selectPosition(p)
+                    c.redraw(p); // redraw selects p
                 } else {
-                    c.selectPosition(p)
-                    cc.selectChapterByName(new_name);
+                    c.selectPosition(p);
+                    // cc.selectChapterByName(new_name); // TODO 
                 }
             } else {
                 // Always do a full redraw.
-                //c.redraw(p);
-                c.selectPosition(p)
+                c.redraw(p); // redraw selects p
             }
         } else {
             g.blue('done');
@@ -829,8 +827,9 @@ export class CommanderOutlineCommands {
         }
         c.setCurrentPosition(p);
 
-        // TODO : Needed?
-        // c.redraw()
+
+        c.redraw(); // redraw selects p
+
         // c.frame.clearStatusLine()
         // c.frame.putStatusLine("De-Hoist: " + p.h)
 
@@ -874,8 +873,8 @@ export class CommanderOutlineCommands {
         c.hoistStack.push(bunch);
         p.expand();
 
-        // TODO : Needed?
-        // c.redraw(p);
+        c.redraw(p); // redraw selects p
+
         // c.frame.clearStatusLine();
         // c.frame.putStatusLine("Hoist: " + p.h);
 
@@ -905,9 +904,8 @@ export class CommanderOutlineCommands {
         if (c.validateOutline()) {
             u.afterCloneNode(clone, 'Clone Node', undoData);
 
-            // TODO : Needed ?
-            // c.redraw(clone);
-            // c.treeWantsFocus();
+            c.redraw(clone); // redraw selects p
+            // c.treeWantsFocus(); // ? needed ?
 
             return clone;  // For mod_labels and chapters plugins.
         }
@@ -959,7 +957,7 @@ export class CommanderOutlineCommands {
         if (c.validateOutline()) {
             u.afterCloneNode(clone, 'Clone Node', undoData);
             c.contractAllHeadlines();
-            // c.redraw();
+            c.redraw();
             c.selectPosition(clone);
         } else {
             clone.doDelete();
@@ -997,7 +995,7 @@ export class CommanderOutlineCommands {
         c.setChanged();
         u.afterCloneNode(clone, 'Clone Node To Last', undoData);
 
-        // c.redraw(prev)
+        c.redraw(prev); // redraw selects p
         // return clone // For mod_labels and chapters plugins.
     }
     //@+node:felix.20211031143555.5: *4* c_oc.deleteOutline
@@ -1037,7 +1035,7 @@ export class CommanderOutlineCommands {
         p.doDelete(newNode);
         c.setChanged();
         u.afterDeleteNode(newNode, op_name, undoData);
-        // c.redraw(newNode); 
+        c.redraw(newNode); // redraw selects p
         c.validateOutline();
     }
     //@+node:felix.20211031143555.6: *4* c_oc.insertChild
@@ -1544,8 +1542,7 @@ export class CommanderOutlineCommands {
         c.setChanged();
         u.afterDemote(p, followingSibs);
 
-        // c.redraw(p)
-        c.selectPosition(p);
+        c.redraw(p); // redraw selects p
 
         // c.updateSyntaxColorer(p); // Moving can change syntax coloring.
     }
@@ -1636,8 +1633,7 @@ export class CommanderOutlineCommands {
             u.afterMoveNode(p, 'Move Down', undoData);
         }
 
-        // c.redraw(p)
-        c.selectPosition(p);
+        c.redraw(p); // redraw selects p
 
         // c.updateSyntaxColorer(p) // Moving can change syntax coloring.
     }
@@ -1683,8 +1679,7 @@ export class CommanderOutlineCommands {
         if (c.collapse_nodes_after_move && c.sparse_move) { // New in Leo 4.4.2
             parent.contract();
         }
-        // c.redraw(p)
-        c.selectPosition(p);
+        c.redraw(p); // redraw selects p
 
         // c.recolor()  // Moving can change syntax coloring.
     }
@@ -1728,9 +1723,7 @@ export class CommanderOutlineCommands {
         c.setChanged();  // #2036.
         u.afterMoveNode(p, 'Move Right', undoData);
 
-        c.selectPosition(p);
-
-        // c.redraw(p)
+        c.redraw(p); // redraw selects p
         // c.recolor()
     }
     //@+node:felix.20211031235049.7: *4* c_oc.moveOutlineUp
@@ -1818,8 +1811,7 @@ export class CommanderOutlineCommands {
             c.setChanged();
             u.afterMoveNode(p, 'Move Right', undoData);
         }
-        // c.redraw(p)
-        c.selectPosition(p);
+        c.redraw(p); // redraw selects p
 
         // c.updateSyntaxColorer(p);  // Moving can change syntax coloring.
     }
@@ -1848,9 +1840,7 @@ export class CommanderOutlineCommands {
             u.afterPromote(p, children);
         }
         if (redrawFlag) {
-            // c.redraw(p)
-            c.selectPosition(p);
-
+            c.redraw(p); // redraw selects p
             // c.updateSyntaxColorer(p); // Moving can change syntax coloring.
         }
     }
@@ -1960,8 +1950,7 @@ export class CommanderOutlineCommands {
         if (p.parent().__bool__()) {
             p.parent().setDirty();
         }
-        // c.redraw(p);
-        c.selectPosition(p);
+        c.redraw(p); // redraw selects p
     }
     //@-others
 

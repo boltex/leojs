@@ -5620,7 +5620,6 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
 </t>
 <t tx="felix.20201214205159.79">"vscode:prepublish": "npm run package",
 "compile": "webpack --devtool nosources-source-map --config ./build/node-extension.webpack.config.js",
-"watch": "webpack --watch --devtool nosources-source-map --info-verbosity verbose --config ./build/node-extension.webpack.config.js",
 "package": "webpack --mode production --config ./build/node-extension.webpack.config.js",
 "test-compile": "tsc -p ./",
 "test-watch": "tsc -watch -p ./",
@@ -8954,7 +8953,7 @@ public doPostPluginsInit(): boolean {
         }
         catch (exception) {
             g.es_print(`Unexpected exception reading ${fn}`);
-            g.es_exception();
+            g.es_exception(exception);
             c = undefined;
         }
     }
@@ -8990,7 +8989,7 @@ public doPostPluginsInit(): boolean {
         }
         catch (exception) {
             g.es_print('Can not create empty workbook');
-            g.es_exception();
+            g.es_exception(exception);
         }
     }
     c = c1;
@@ -9500,7 +9499,7 @@ public safeMoveToThreadNext(): Position {
 public moveToBack(): Position {
     const p: Position = this;
     const n: number = p._childIndex;
-    const parent_v: VNode = p._parentVnode()!; // Returns None if p.v is None.
+    const parent_v: VNode | undefined = p._parentVnode(); // Returns None if p.v is None.
 
     // Do not assume n is in range: this is used by positionExists.
     if (
@@ -9512,6 +9511,9 @@ public moveToBack(): Position {
         p._childIndex -= 1;
         p.v = parent_v.children[n - 1];
     } else {
+        console.log('Deleting a node??', p.h);
+        console.log('parent_v', parent_v?.h);
+
         // * For now, use undefined p.v to signal null/invalid positions
             //@ts-ignore
         p.v = undefined;
@@ -10135,6 +10137,13 @@ public _unlink(): void {
         // This is the only call to v._cutlink.
         child._cutLink(n, parent_v);
     } else {
+        console.log('n', n);
+        console.log('parent_v.children.length', parent_v.children.length);
+        console.log('parent_v.children[n]', parent_v.children[n].fileIndex);
+        console.log('child', child.fileIndex);
+
+
+
         this.badUnlink(parent_v, n, child);
     }
 }
@@ -10301,6 +10310,8 @@ public _parentVnode(): VNode | undefined {
         }
         return p.v.context.hiddenRootNode;
     }
+    console.log('no parent!');
+
     return undefined;
 }
 
@@ -11524,7 +11535,7 @@ public cleanLeoID(id_: string, tag: string): string {
         id_ = id_.split(' ').join('');
     }
     catch (exception) {
-        g.es_exception();
+        g.es_exception(exception);
         id_ = '';
     }
     if (id_.length &lt; 3) {
@@ -13328,6 +13339,20 @@ export const es = console.log;
 
 </t>
 <t tx="felix.20211104212802.1">export function es_exception(p_error: any, c?: Commands): string {
+    const getCircularReplacer = () =&gt; {
+        const seen = new WeakSet();
+        return (key: string, value: any) =&gt; {
+            if (typeof value === "object" &amp;&amp; value !== null) {
+                if (seen.has(value)) {
+                    return;
+                }
+                seen.add(value);
+            }
+            return value;
+        };
+    };
+
+    // p_error = JSON.stringify(p_error, getCircularReplacer());
     console.log('es_exception called with error: ', p_error);
     return '&lt;no file&gt;';
 }

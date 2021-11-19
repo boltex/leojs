@@ -871,6 +871,20 @@ export function toEncodedString(s: any, encoding = 'utf-8', reportErrors = false
 export const es = console.log;
 
 export function es_exception(p_error: any, c?: Commands): string {
+    const getCircularReplacer = () => {
+        const seen = new WeakSet();
+        return (key: string, value: any) => {
+            if (typeof value === "object" && value !== null) {
+                if (seen.has(value)) {
+                    return;
+                }
+                seen.add(value);
+            }
+            return value;
+        };
+    };
+
+    // p_error = JSON.stringify(p_error, getCircularReplacer());
     console.log('es_exception called with error: ', p_error);
     return '<no file>';
 }

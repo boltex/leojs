@@ -1223,6 +1223,8 @@ export class Position {
             }
             return p.v.context.hiddenRootNode;
         }
+        console.log('no parent!');
+
         return undefined;
     }
 
@@ -1270,6 +1272,13 @@ export class Position {
             // This is the only call to v._cutlink.
             child._cutLink(n, parent_v);
         } else {
+            console.log('n', n);
+            console.log('parent_v.children.length', parent_v.children.length);
+            console.log('parent_v.children[n]', parent_v.children[n].fileIndex);
+            console.log('child', child.fileIndex);
+
+
+
             this.badUnlink(parent_v, n, child);
         }
     }
@@ -1315,7 +1324,7 @@ export class Position {
     public moveToBack(): Position {
         const p: Position = this;
         const n: number = p._childIndex;
-        const parent_v: VNode = p._parentVnode()!; // Returns None if p.v is None.
+        const parent_v: VNode | undefined = p._parentVnode(); // Returns None if p.v is None.
 
         // Do not assume n is in range: this is used by positionExists.
         if (
@@ -1327,6 +1336,12 @@ export class Position {
             p._childIndex -= 1;
             p.v = parent_v.children[n - 1];
         } else {
+            console.log('Deleting a node??', p.h);
+            console.log('parent_v', parent_v?.h);
+            console.log('n', n);
+            console.log('parent_v.children.length', parent_v?.children.length);
+
+
             // * For now, use undefined p.v to signal null/invalid positions
             //@ts-ignore
             p.v = undefined;
