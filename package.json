@@ -13,7 +13,7 @@
     "url": "https://github.com/boltex/leointeg"
   },
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.62.0"
   },
   "keywords": [
     "leo",
@@ -1602,13 +1602,7 @@
         "command": "leojs.executeScript",
         "key": "ctrl+b",
         "mac": "cmd+b",
-        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
-      },
-      {
-        "command": "leojs.executeScript",
-        "key": "ctrl+b",
-        "mac": "cmd+b",
-        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
         "command": "leojs.minibuffer",
@@ -1709,25 +1703,13 @@
         "command": "leojs.extract",
         "key": "ctrl+shift+d",
         "mac": "cmd+shift+d",
-        "when": "leojsTreeOpened && editorTextFocus && editorHasSelection && resourceScheme == leojs"
-      },
-      {
-        "command": "leojs.extract",
-        "key": "ctrl+shift+d",
-        "mac": "cmd+shift+d",
-        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
-      },
-      {
-        "command": "leojs.extractNames",
-        "key": "ctrl+shift+n",
-        "mac": "cmd++shift+n",
-        "when": "leojsTreeOpened && editorTextFocus && editorHasSelection && resourceScheme == leojs"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/ || leojsTreeOpened && editorTextFocus && editorHasSelection && resourceScheme == leojs"
       },
       {
         "command": "leojs.extractNames",
         "key": "ctrl+shift+n",
         "mac": "cmd+shift+n",
-        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/ || leojsTreeOpened && editorTextFocus && editorHasSelection && resourceScheme == leojs"
       },
       {
         "command": "leojs.moveOutlineDownSelection",
@@ -1937,13 +1919,7 @@
         "command": "leojs.copyNodeSelection",
         "key": "ctrl+shift+c",
         "mac": "cmd+shift+c",
-        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
-      },
-      {
-        "command": "leojs.copyNodeSelection",
-        "key": "ctrl+shift+c",
-        "mac": "cmd+shift+c",
-        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.pasteNodeAtSelection",
@@ -1967,6 +1943,11 @@
         "command": "leojs.deleteSelectionFromOutline",
         "key": "ctrl+shift+backspace",
         "mac": "cmd+shift+backspace",
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+      },
+      {
+        "command": "leojs.deleteSelectionFromOutline",
+        "key": "delete",
         "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
@@ -2081,6 +2062,16 @@
         "key": "alt+right",
         "when": "leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
       }
+    ],
+    "resourceLabelFormatters": [
+      {
+        "scheme": "leojs",
+        "formatting": {
+          "label": "LEOJS: BODY",
+          "separator": "/",
+          "workspaceSuffix": ""
+        }
+      }
     ]
   },
   "scripts": {
@@ -2099,7 +2090,7 @@
     "@types/glob": "^7.1.3",
     "@types/mocha": "^8.0.0",
     "@types/node": "^12.11.7",
-    "@types/vscode": "^1.60.0",
+    "@types/vscode": "^1.62.0",
     "@typescript-eslint/eslint-plugin": "^4.1.1",
     "@typescript-eslint/parser": "^4.1.1",
     "eslint": "^7.9.0",

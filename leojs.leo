@@ -390,6 +390,7 @@
 <v t="felix.20211117232843.1"><vh>Undo/Redo</vh></v>
 <v t="felix.20201214205159.78"><vh>Goto Nodes</vh></v>
 </v>
+<v t="felix.20211119001637.1"><vh>resourceLabelFormatters</vh></v>
 </v>
 <v t="felix.20201214205159.79"><vh>&lt;&lt; scripts &gt;&gt;</vh></v>
 <v t="felix.20201214205159.80"><vh>&lt;&lt; devDependencies &gt;&gt;</vh></v>
@@ -3695,7 +3696,7 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
     "url": "https://github.com/boltex/leointeg"
   },
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.62.0"
   },
   "keywords": [
     "leo",
@@ -5146,19 +5147,13 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
 </t>
 <t tx="felix.20201214205159.67">"keybindings": [
   @others
-]
+],
 </t>
 <t tx="felix.20201214205159.68">{
   "command": "leojs.executeScript",
   "key": "ctrl+b",
   "mac": "cmd+b",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
-},
-{
-  "command": "leojs.executeScript",
-  "key": "ctrl+b",
-  "mac": "cmd+b",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
   "command": "leojs.minibuffer",
@@ -5271,25 +5266,13 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
   "command": "leojs.extract",
   "key": "ctrl+shift+d",
   "mac": "cmd+shift+d",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leojs"
-},
-{
-  "command": "leojs.extract",
-  "key": "ctrl+shift+d",
-  "mac": "cmd+shift+d",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
-},
-{
-  "command": "leojs.extractNames",
-  "key": "ctrl+shift+n",
-  "mac": "cmd++shift+n",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.extractNames",
   "key": "ctrl+shift+n",
   "mac": "cmd+shift+n",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leojs"
 },
 </t>
 <t tx="felix.20201214205159.75">{
@@ -5502,13 +5485,7 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
   "command": "leojs.copyNodeSelection",
   "key": "ctrl+shift+c",
   "mac": "cmd+shift+c",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
-},
-{
-  "command": "leojs.copyNodeSelection",
-  "key": "ctrl+shift+c",
-  "mac": "cmd+shift+c",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.pasteNodeAtSelection",
@@ -5532,6 +5509,11 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
   "command": "leojs.deleteSelectionFromOutline",
   "key": "ctrl+shift+backspace",
   "mac": "cmd+shift+backspace",
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+},
+{
+  "command": "leojs.deleteSelectionFromOutline",
+  "key": "delete",
   "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 </t>
@@ -5666,7 +5648,7 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
 <t tx="felix.20201214205159.80">"@types/glob": "^7.1.3",
 "@types/mocha": "^8.0.0",
 "@types/node": "^12.11.7",
-"@types/vscode": "^1.60.0",
+"@types/vscode": "^1.62.0",
 "@typescript-eslint/eslint-plugin": "^4.1.1",
 "@typescript-eslint/parser": "^4.1.1",
 "eslint": "^7.9.0",
@@ -14112,6 +14094,17 @@ def pluginIsLoaded(fn):
   "mac": "cmd+shift+z",
   "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
+</t>
+<t tx="felix.20211119001637.1">"resourceLabelFormatters": [
+  {
+    "scheme": "leojs",
+    "formatting": {
+      "label": "LEOJS: BODY",
+      "separator": "/",
+      "workspaceSuffix": ""
+    }
+  }
+]
 </t>
 </tnodes>
 </leo_file>
