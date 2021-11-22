@@ -43,7 +43,7 @@ export class NodeHistory {
     /**
      * * Select the next node, if possible.
      */
-    public goNext() {
+    public goNext(): void {
         if (this.beadPointer + 1 < this.beadList.length) {
             this.beadPointer += 1;
             const p = this.beadList[this.beadPointer][0];

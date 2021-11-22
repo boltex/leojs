@@ -4,6 +4,7 @@ import "date-format-lite";
 import * as g from './leoGlobals';
 import { Commands } from './leoCommands';
 import { Bead } from "./leoUndo";
+import { DummyFileCommands, FileCommands } from "./leoFileCommands";
 
 
 /**
@@ -31,24 +32,20 @@ export class NodeIndices {
      * Check that no vnode exists with the given gnx in fc.gnxDict.
      */
     public check_gnx(c: Commands, gnx: string, v: VNode): void {
-        // TODO : Type 'c' as Commands class
 
         if (gnx === 'hidden-root-vnode-gnx') {
             // No longer an error.
             // fast.readWithElementTree always generates a nominal hidden vnode.
             return;
         }
-
-        // TODO : Check in "gnxDict" from passed commander parameter
-
-        // fc = c.fileCommands
-        // v2 = fc.gnxDict.get(gnx)
-        // if v2 and v2 != v:
-        //     g.error(
-        //         f"getNewIndex: gnx clash {gnx}\n"
-        //         f"          v: {v}\n"
-        //         f"         v2: {v2}")
-
+        const fc: FileCommands | DummyFileCommands = c.fileCommands;
+        const v2: VNode = fc.gnxDict[gnx];
+        if (v2 && v2 !== v) {
+            g.error(
+                `getNewIndex: gnx clash ${gnx}\n` +
+                `          v: ${v}\n` +
+                `         v2: ${v2}`);
+        }
     }
 
     /**
@@ -79,13 +76,13 @@ export class NodeIndices {
      * Create a new gnx for v or an empty string if the hold flag is set.
      * **Important**: the method must allocate a new gnx even if v.fileIndex exists.
      */
-    public getNewIndex(v: VNode | undefined, cached: Boolean = false): string {
+    public getNewIndex(v: VNode | undefined, cached: boolean = false): string {
         if (!v) {
             console.log('getNewIndex: v is None');
             return '';
         }
         const c: Commands = v.context;
-        const fc: any = c.fileCommands;
+        const fc: FileCommands | DummyFileCommands = c.fileCommands;
         const t_s: string = this.update();
         // Updates self.lastTime and self.lastIndex.
         const gnx: string = g.toUnicode(`${this.userId}.${t_s}.${this.lastIndex}`);
@@ -252,7 +249,9 @@ export class Position {
      * Tests like 'if p is None' or 'if p is not None' will not work properly.
      */
     public __bool__(): boolean {
+        return (typeof this.v !== 'undefined')
         return !!this.v;
+        return !this.v === undefined;
     }
 
     public __str__(): string {
@@ -1197,7 +1196,7 @@ export class Position {
     public _linkAsRoot(): Position {
         const p: Position = this;
         console.assert(p.v);
-        const parent_v: VNode = p.v.context.hiddenRootNode!;
+        const parent_v: VNode = p.v.context.hiddenRootNode;
         console.assert(parent_v, g.callers());
 
         // Make p the root position.
@@ -1216,15 +1215,13 @@ export class Position {
     public _parentVnode(): VNode | undefined {
         const p: Position = this;
         if (p.v) {
-            const data = !!p.stack.length && p.stack[p.stack.length - 1];
+            const data: false | StackEntry = !!p.stack.length && p.stack[p.stack.length - 1];
             if (data) {
                 const v: VNode = data[0];
                 return v;
             }
             return p.v.context.hiddenRootNode;
         }
-        console.log('no parent!');
-
         return undefined;
     }
 
@@ -1272,13 +1269,10 @@ export class Position {
             // This is the only call to v._cutlink.
             child._cutLink(n, parent_v);
         } else {
-            console.log('n', n);
-            console.log('parent_v.children.length', parent_v.children.length);
-            console.log('parent_v.children[n]', parent_v.children[n].fileIndex);
-            console.log('child', child.fileIndex);
-
-
-
+            // console.log('n', n);
+            // console.log('parent_v.children.length', parent_v.children.length);
+            // console.log('parent_v.children[n]', parent_v.children[n].fileIndex);
+            // console.log('child', child.fileIndex);
             this.badUnlink(parent_v, n, child);
         }
     }
@@ -1336,12 +1330,10 @@ export class Position {
             p._childIndex -= 1;
             p.v = parent_v.children[n - 1];
         } else {
-            console.log('Deleting a node??', p.h);
-            console.log('parent_v', parent_v?.h);
-            console.log('n', n);
-            console.log('parent_v.children.length', parent_v?.children.length);
-
-
+            // console.log('Deleting a node??', p.h);
+            // console.log('parent_v', parent_v?.h);
+            // console.log('n', n);
+            // console.log('parent_v.children.length', parent_v?.children.length);
             // * For now, use undefined p.v to signal null/invalid positions
             //@ts-ignore
             p.v = undefined;
@@ -1354,7 +1346,7 @@ export class Position {
      */
     public moveToFirstChild(): Position {
         const p: Position = this;
-        if (p.v && p.v.children) {
+        if (p.v && p.v.children.length) {
             p.stack.push([p.v, p._childIndex]);
             p.v = p.v.children[0];
             p._childIndex = 0;
@@ -1529,7 +1521,7 @@ export class Position {
                 p.moveToParent();  // Same as p.moveToThreadBack()
             }
             if (p.__bool__()) {
-                if (limit) {
+                if (limit && limit.__bool__()) {
                     let done: boolean;
                     let val: Position | undefined;
                     [done, val] = this.checkVisBackLimit(limit, limitIsVisible, p);
@@ -1583,7 +1575,7 @@ export class Position {
                 p.moveToThreadNext();
             }
             if (p.__bool__()) {
-                if (limit && this.checkVisNextLimit(limit, p)) {
+                if (limit && limit.__bool__() && this.checkVisNextLimit(limit, p)) {
                     return undefined;
                 }
                 if (p.isVisible(c)) {
@@ -1677,6 +1669,9 @@ export class Position {
         return p2;
     }
 
+    /**
+     * Return an independent copy of a position.
+     */
     public copy(): Position {
         return new Position(this.v, this._childIndex, this.stack);
     }
@@ -2331,7 +2326,7 @@ export class VNode {
     public unknownAttributes: undefined | { [key: string]: any };
     unicode_warning_given: boolean = false;
 
-    constructor(context: any, gnx?: string) {
+    constructor(context: Commands, gnx?: string) {
         this._headString = 'newHeadline';
         this._bodyString = '';
         this._p_changed = false;
@@ -2823,8 +2818,7 @@ export class VNode {
     }
 
     public childrenModified(): void {
-        // TODO: needed?
-        // g.childrenModifiedSet.add(this);
+        g.childrenModifiedSet.push(this);
     }
 
     public computeIcon(): number {
@@ -2842,8 +2836,7 @@ export class VNode {
     }
 
     public contentModified(): void {
-        // TODO: needed?
-        // g.contentModifiedSet.add(this);
+        g.contentModifiedSet.push(this);
     }
 
     // Called only by LeoTree.selectHelper.
@@ -3058,7 +3051,11 @@ export class VNode {
     public _cutLink(childIndex: number, parent_v: VNode): void {
         const v: VNode = this;
         v.context.frame.tree.generation += 1;
-        console.assert(parent_v.children[childIndex].fileIndex === v.fileIndex);
+        parent_v.childrenModified();
+        console.assert(
+            parent_v.children[childIndex].fileIndex === v.fileIndex
+        );
+
         parent_v.children.splice(childIndex, 1);
         if (v.parents.includes(parent_v)) {
             try {
@@ -3076,7 +3073,8 @@ export class VNode {
             }
         }
 
-
+        v._p_changed = true;
+        parent_v._p_changed = true;
 
         if (!v.parents.length) {
             // Adjust the parents links in the descendant tree.

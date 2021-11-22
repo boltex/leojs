@@ -238,7 +238,7 @@ export function get_line(s: string, i: number): string {
     }
     const j: number = find_line_start(s, i);
     const k: number = skip_to_end_of_line(s, i);
-    return nl + s.substring(j, k)
+    return nl + s.substring(j, k);
 }
 
 // Important: getLine is a completely different function.
@@ -577,7 +577,7 @@ export function skip_line(s: string, i: number): number {
     if (i < 0) {
         i = 0;
     }
-    i = s.indexOf('\n', i)
+    i = s.indexOf('\n', i);
     if (i === -1) {
         return s.length;
     }
@@ -591,7 +591,7 @@ export function skip_to_end_of_line(s: string, i: number): number {
     if (i < 0) {
         i = 0;
     }
-    i = s.indexOf('\n', i)
+    i = s.indexOf('\n', i);
     if (i === -1) {
         return s.length;
     }
@@ -606,7 +606,7 @@ export function skip_to_start_of_line(s: string, i: number): number {
         return 0;
     }
     // Don't find s[i], so it doesn't matter if s[i] is a newline.
-    i = s.lastIndexOf('\n', i)
+    i = s.lastIndexOf('\n', i);
     if (i === -1) {
         return 0;
     }

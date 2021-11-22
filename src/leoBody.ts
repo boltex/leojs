@@ -255,6 +255,9 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         );
     }
 
+    /**
+     * * // 
+     */
     public copy(p_uri: vscode.Uri): void {
         console.warn('Called copy on ', p_uri.fsPath); // should not happen
         throw vscode.FileSystemError.NoPermissions();

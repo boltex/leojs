@@ -142,6 +142,9 @@
 <v t="felix.20201214202631.1"><vh>_onDocTreeViewVisibilityChanged</vh></v>
 <v t="felix.20201214202634.1"><vh>_onButtonsTreeViewVisibilityChanged</vh></v>
 </v>
+<v t="felix.20211120230057.1"><vh>Leo GUI Handlers</vh>
+<v t="felix.20211120230107.1"><vh>LeoGui.ensure_commander_visible</vh></v>
+</v>
 <v t="felix.20201214194144.6"><vh>Commands</vh>
 <v t="felix.20201214202749.1"><vh>selectTreeNode</vh></v>
 <v t="felix.20201214202755.1"><vh>command</vh></v>
@@ -461,6 +464,9 @@
 <v t="felix.20211031230132.1"><vh>@file src/core/leoConfig.ts</vh></v>
 <v t="felix.20210220181245.1"><vh>@clean src/core/leoFileCommands.ts</vh>
 <v t="felix.20210220195150.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
+<v t="felix.20211121025828.1"><vh>class DummyFileCommands</vh>
+<v t="felix.20211121025828.2"><vh>constructor</vh></v>
+</v>
 <v t="felix.20210220190156.1"><vh>class FileCommands</vh>
 <v t="felix.20210220200109.1"><vh>constructor</vh></v>
 <v t="felix.20211003011145.1"><vh>leoFileCommandsTest</vh></v>
@@ -2976,7 +2982,6 @@ import { Constants } from "./constants";
 import { RevealType, Icon, ReqRefresh, LeoPackageStates } from "./types";
 
 import { Config } from "./config";
-import { LeoOutlineNode } from "./leoOutlineNode";
 import { LeoOutlineProvider } from './leoOutline';
 import { LeoButtonNode } from "./leoButtonNode";
 import { LeoButtonsProvider } from "./leoButtons";
@@ -2988,6 +2993,7 @@ import * as g from './core/leoGlobals';
 import { LoadManager } from "./core/leoApp";
 import { NodeIndices, Position, VNode } from "./core/leoNodes";
 import { LeoBodyProvider } from "./leoBody";
+import { Commands } from "./core/leoCommands";
 
 @language typescript
 @tabwidth -4
@@ -3053,7 +3059,7 @@ import { LeoBodyProvider } from "./leoBody";
     // ************************************************************
     let w_node = c.p;
     w_node.initHeadString("@file node1");
-    w_node.setBodyString('@tabwidth 8\nnode1 body');
+    w_node.setBodyString('@tabwidth 8\nnode1 body\n@others');
     w_node.expand();
 
     w_node = c.p.insertAsLastChild();
@@ -3443,7 +3449,7 @@ private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Positi
 
     // this.triggerBodySave(true); // Get any modifications from the editor into the Leo's body model
 
-    if (p_treeView.selection[0] &amp;&amp; p_treeView.selection[0].__eq__(p_event.element)) {
+    if (p_treeView.selection.length &amp;&amp; p_treeView.selection[0] &amp;&amp; p_treeView.selection[0].__eq__(p_event.element)) {
         // * This happens if the tree selection is the same as the expanded/collapsed node: Just have Leo do the same
         // pass
     } else {
@@ -3474,6 +3480,8 @@ private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Positi
 private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
     if (p_event.visible) {
         this._lastTreeView = p_explorerView ? this._leoTreeExView : this._leoTreeView;
+        console.log('_onTreeViewVisibilityChanged so refresh outline');
+
         this._refreshOutline(true, RevealType.RevealSelect);
     }
 }
@@ -5620,6 +5628,7 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
 </t>
 <t tx="felix.20201214205159.79">"vscode:prepublish": "npm run package",
 "compile": "webpack --devtool nosources-source-map --config ./build/node-extension.webpack.config.js",
+"watch": "webpack --watch --devtool nosources-source-map --info-verbosity verbose --config ./build/node-extension.webpack.config.js",
 "package": "webpack --mode production --config ./build/node-extension.webpack.config.js",
 "test-compile": "tsc -p ./",
 "test-watch": "tsc -watch -p ./",
@@ -5751,6 +5760,8 @@ public test(): Thenable&lt;unknown&gt; {
     console.log('can undo', c.undoer.canUndo());
     console.log('can redo', c.undoer.canRedo());
 
+    // * Test hasParent
+    console.log('p has parent: ', c.p.hasParent());
 
 
     // * test @cmd decorator and undoer
@@ -5984,6 +5995,7 @@ public switchLeoFile(): Thenable&lt;unknown&gt; {
  */
 public selectOpenedLeoDocument(p_index: number): Thenable&lt;unknown&gt; {
     this.commanderIndex = p_index;
+    console.log('selectOpenedLeoDocument so _refreshOutline !');
 
     this._refreshOutline(true, RevealType.RevealSelect);
 
@@ -6303,6 +6315,8 @@ public _launchRefresh(p_node?: Position): void {
     // * Either the whole tree refreshes, or a single tree node is revealed when just navigating
     if (this._refreshType.tree) {
         this._refreshType.tree = false;
+        console.log('in _launchRefresh tree was true so _refreshOutline ! ');
+
         this._refreshOutline(true, w_revealType);
     } else if (this._refreshType.node &amp;&amp; p_node) {
 
@@ -6689,7 +6703,7 @@ VNode.prototype.setTnodeText = VNode.prototype.setBodyString;
 VNode.prototype.__str__ = VNode.prototype.__repr__;
 
 </t>
-<t tx="felix.20210102015917.2">constructor(context: any, gnx?: string) {
+<t tx="felix.20210102015917.2">constructor(context: Commands, gnx?: string) {
     this._headString = 'newHeadline';
     this._bodyString = '';
     this._p_changed = false;
@@ -6733,7 +6747,10 @@ public *children(copy: boolean = true): Generator&lt;Position&gt; {
 // children_iter = children
 
 </t>
-<t tx="felix.20210102035859.1">public copy(): Position {
+<t tx="felix.20210102035859.1">/**
+ * Return an independent copy of a position.
+ */
+public copy(): Position {
     return new Position(this.v, this._childIndex, this.stack);
 }
 
@@ -8114,24 +8131,20 @@ interface Date {
  * Check that no vnode exists with the given gnx in fc.gnxDict.
  */
 public check_gnx(c: Commands, gnx: string, v: VNode): void {
-    // TODO : Type 'c' as Commands class
 
     if (gnx === 'hidden-root-vnode-gnx') {
         // No longer an error.
         // fast.readWithElementTree always generates a nominal hidden vnode.
         return;
     }
-
-    // TODO : Check in "gnxDict" from passed commander parameter
-
-    // fc = c.fileCommands
-    // v2 = fc.gnxDict.get(gnx)
-    // if v2 and v2 != v:
-    //     g.error(
-    //         f"getNewIndex: gnx clash {gnx}\n"
-    //         f"          v: {v}\n"
-    //         f"         v2: {v2}")
-
+    const fc: FileCommands | DummyFileCommands = c.fileCommands;
+    const v2: VNode = fc.gnxDict[gnx];
+    if (v2 &amp;&amp; v2 !== v) {
+        g.error(
+            `getNewIndex: gnx clash ${gnx}\n` +
+            `          v: ${v}\n` +
+            `         v2: ${v2}`);
+    }
 }
 
 </t>
@@ -8688,7 +8701,11 @@ public _addParentLinks(parent: VNode): void {
 public _cutLink(childIndex: number, parent_v: VNode): void {
     const v: VNode = this;
     v.context.frame.tree.generation += 1;
-    console.assert(parent_v.children[childIndex].fileIndex === v.fileIndex);
+    parent_v.childrenModified();
+    console.assert(
+        parent_v.children[childIndex].fileIndex === v.fileIndex
+    );
+
     parent_v.children.splice(childIndex, 1);
     if (v.parents.includes(parent_v)) {
         try {
@@ -8706,7 +8723,8 @@ public _cutLink(childIndex: number, parent_v: VNode): void {
         }
     }
 
-
+    v._p_changed = true;
+    parent_v._p_changed = true;
 
     if (!v.parents.length) {
         // Adjust the parents links in the descendant tree.
@@ -9351,7 +9369,7 @@ public moveToVisBack(c: Commands): Position | undefined {
             p.moveToParent();  // Same as p.moveToThreadBack()
         }
         if (p.__bool__()) {
-            if (limit) {
+            if (limit &amp;&amp; limit.__bool__()) {
                 let done: boolean;
                 let val: Position | undefined;
                 [done, val] = this.checkVisBackLimit(limit, limitIsVisible, p);
@@ -9407,7 +9425,7 @@ public moveToVisNext(c: Commands): Position | undefined {
             p.moveToThreadNext();
         }
         if (p.__bool__()) {
-            if (limit &amp;&amp; this.checkVisNextLimit(limit, p)) {
+            if (limit &amp;&amp; limit.__bool__() &amp;&amp; this.checkVisNextLimit(limit, p)) {
                 return undefined;
             }
             if (p.isVisible(c)) {
@@ -9511,9 +9529,10 @@ public moveToBack(): Position {
         p._childIndex -= 1;
         p.v = parent_v.children[n - 1];
     } else {
-        console.log('Deleting a node??', p.h);
-        console.log('parent_v', parent_v?.h);
-
+        // console.log('Deleting a node??', p.h);
+        // console.log('parent_v', parent_v?.h);
+        // console.log('n', n);
+        // console.log('parent_v.children.length', parent_v?.children.length);
         // * For now, use undefined p.v to signal null/invalid positions
             //@ts-ignore
         p.v = undefined;
@@ -9527,7 +9546,7 @@ public moveToBack(): Position {
  */
 public moveToFirstChild(): Position {
     const p: Position = this;
-    if (p.v &amp;&amp; p.v.children) {
+    if (p.v &amp;&amp; p.v.children.length) {
         p.stack.push([p.v, p._childIndex]);
         p.v = p.v.children[0];
         p._childIndex = 0;
@@ -10034,7 +10053,9 @@ public __gt__(other: Position): boolean {
  * Tests like 'if p is None' or 'if p is not None' will not work properly.
  */
 public __bool__(): boolean {
+    return (typeof this.v !== 'undefined')
     return !!this.v;
+    return !this.v === undefined;
 }
 
 </t>
@@ -10110,6 +10131,7 @@ constructor(v: VNode, childIndex: number = 0, stack?: StackEntry[]) {
 import * as g from './leoGlobals';
 import { Commands } from './leoCommands';
 import { Bead } from "./leoUndo";
+import { DummyFileCommands, FileCommands } from "./leoFileCommands";
 
 </t>
 <t tx="felix.20210127234205.1">/*
@@ -10137,13 +10159,10 @@ public _unlink(): void {
         // This is the only call to v._cutlink.
         child._cutLink(n, parent_v);
     } else {
-        console.log('n', n);
-        console.log('parent_v.children.length', parent_v.children.length);
-        console.log('parent_v.children[n]', parent_v.children[n].fileIndex);
-        console.log('child', child.fileIndex);
-
-
-
+        // console.log('n', n);
+        // console.log('parent_v.children.length', parent_v.children.length);
+        // console.log('parent_v.children[n]', parent_v.children[n].fileIndex);
+        // console.log('child', child.fileIndex);
         this.badUnlink(parent_v, n, child);
     }
 }
@@ -10283,7 +10302,7 @@ public _linkCopiedAsNthChild(parent: Position, n: number): void {
 public _linkAsRoot(): Position {
     const p: Position = this;
     console.assert(p.v);
-    const parent_v: VNode = p.v.context.hiddenRootNode!;
+    const parent_v: VNode = p.v.context.hiddenRootNode;
     console.assert(parent_v, g.callers());
 
     // Make p the root position.
@@ -10303,15 +10322,13 @@ public _linkAsRoot(): Position {
 public _parentVnode(): VNode | undefined {
     const p: Position = this;
     if (p.v) {
-        const data = !!p.stack.length &amp;&amp; p.stack[p.stack.length - 1];
+        const data: false | StackEntry = !!p.stack.length &amp;&amp; p.stack[p.stack.length - 1];
         if (data) {
             const v: VNode = data[0];
             return v;
         }
         return p.v.context.hiddenRootNode;
     }
-    console.log('no parent!');
-
     return undefined;
 }
 
@@ -11293,14 +11310,12 @@ public copyTree(copyMarked?: boolean): VNode {
 
 </t>
 <t tx="felix.20210207213301.1">public childrenModified(): void {
-    // TODO: needed?
-    // g.childrenModifiedSet.add(this);
+    g.childrenModifiedSet.push(this);
 }
 
 </t>
 <t tx="felix.20210207213314.1">public contentModified(): void {
-    // TODO: needed?
-    // g.contentModifiedSet.add(this);
+    g.contentModifiedSet.push(this);
 }
 
 </t>
@@ -11438,13 +11453,13 @@ public setDefaultId(theId: string): void {
  * Create a new gnx for v or an empty string if the hold flag is set.
  * **Important**: the method must allocate a new gnx even if v.fileIndex exists.
  */
-public getNewIndex(v: VNode | undefined, cached: Boolean = false): string {
+public getNewIndex(v: VNode | undefined, cached: boolean = false): string {
     if (!v) {
         console.log('getNewIndex: v is None');
         return '';
     }
     const c: Commands = v.context;
-    const fc: any = c.fileCommands;
+    const fc: FileCommands | DummyFileCommands = c.fileCommands;
     const t_s: string = this.update();
     // Updates self.lastTime and self.lastIndex.
     const gnx: string = g.toUnicode(`${this.userId}.${t_s}.${this.lastIndex}`);
@@ -11476,7 +11491,7 @@ public new_vnode_helper(c: Commands, gnx: string | undefined, v: VNode): void {
 @tabwidth -4
 
 </t>
-<t tx="felix.20210220190156.1">export class FileCommands {
+<t tx="felix.20210220190156.1">export class FileCommands extends DummyFileCommands {
 
     public c: Commands;
     public gnxDict: { [key: string]: VNode; };
@@ -11492,6 +11507,7 @@ import * as fs from 'fs';
 
 </t>
 <t tx="felix.20210220200109.1">constructor(c: Commands) {
+    super();
     this.c = c;
     this.gnxDict = {};
 }
@@ -12316,7 +12332,7 @@ public setLeojsSettings(p_changes: ConfigSetting[]): Promise&lt;unknown&gt; {
     const w_promises: Thenable&lt;void&gt;[] = [];
     const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
     p_changes.forEach(i_change =&gt; {
-        if (i_change &amp;&amp; i_change.code.includes(Constants.CONFIG_REFRESH_MATCH)) {
+        if (i_change.code.includes(Constants.CONFIG_REFRESH_MATCH)) {
             // Check if tree refresh is required for hover-icons to be displayed or hidden accordingly
             this._needsTreeRefresh = true;
         }
@@ -12537,6 +12553,8 @@ export function isHexColor(p_hexString: string): boolean {
  */
 public configTreeRefresh(): void {
     if (this.leoStates.fileOpenedReady) {
+        console.log('config tree Refresh');
+
         this._preventShowBody = true;
         this._refreshOutline(true, RevealType.RevealSelect);
     }
@@ -12630,7 +12648,10 @@ import { LeoUI } from "./leoUI";
 }
 
 </t>
-<t tx="felix.20211010192923.14">public copy(p_uri: vscode.Uri): void {
+<t tx="felix.20211010192923.14">/**
+ * * // 
+ */
+public copy(p_uri: vscode.Uri): void {
     console.warn('Called copy on ', p_uri.fsPath); // should not happen
     throw vscode.FileSystemError.NoPermissions();
 }
@@ -12998,7 +13019,7 @@ public dump(): void {
 <t tx="felix.20211021231651.5">/**
  * * Select the next node, if possible.
  */
-public goNext() {
+public goNext(): void {
     if (this.beadPointer + 1 &lt; this.beadList.length) {
         this.beadPointer += 1;
         const p = this.beadList[this.beadPointer][0];
@@ -13510,7 +13531,7 @@ export function get_line(s: string, i: number): string {
     }
     const j: number = find_line_start(s, i);
     const k: number = skip_to_end_of_line(s, i);
-    return nl + s.substring(j, k)
+    return nl + s.substring(j, k);
 }
 
 // Important: getLine is a completely different function.
@@ -13544,7 +13565,7 @@ export function skip_line(s: string, i: number): number {
     if (i &lt; 0) {
         i = 0;
     }
-    i = s.indexOf('\n', i)
+    i = s.indexOf('\n', i);
     if (i === -1) {
         return s.length;
     }
@@ -13558,7 +13579,7 @@ export function skip_to_end_of_line(s: string, i: number): number {
     if (i &lt; 0) {
         i = 0;
     }
-    i = s.indexOf('\n', i)
+    i = s.indexOf('\n', i);
     if (i === -1) {
         return s.length;
     }
@@ -13573,7 +13594,7 @@ export function skip_to_start_of_line(s: string, i: number): number {
         return 0;
     }
     // Don't find s[i], so it doesn't matter if s[i] is a newline.
-    i = s.lastIndexOf('\n', i)
+    i = s.lastIndexOf('\n', i);
     if (i === -1) {
         return 0;
     }
@@ -14130,6 +14151,26 @@ def pluginIsLoaded(fn):
     }
   }
 ]
+</t>
+<t tx="felix.20211120230057.1"></t>
+<t tx="felix.20211120230107.1">public ensure_commander_visible(c: Commands): void {
+    // TODO !
+    console.log("TODO ensure_commander_visible");
+}
+</t>
+<t tx="felix.20211121025828.1">export class DummyFileCommands {
+
+    public gnxDict: { [key: string]: VNode; };
+
+    @others
+
+}
+
+</t>
+<t tx="felix.20211121025828.2">constructor() {
+    this.gnxDict = {};
+}
+
 </t>
 </tnodes>
 </leo_file>

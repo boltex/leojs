@@ -53,7 +53,7 @@ export interface Bead {
     [key: string]: any;
 }
 
-interface TreeData extends Array<VNode | any | any> { 0: VNode; 1: any; 2: any; };
+interface TreeData extends Array<VNode | any | any> { 0: VNode; 1: any; 2: any; }
 //@+node:felix.20211026230613.3: ** u.cmd (decorator)
 /**
  * Command decorator for the Undoer class.
@@ -73,7 +73,7 @@ export class Undoer {
     public max_undo_stack_size: number;
 
     // State ivars...
-    public beads: Bead = []; // List of undo nodes.
+    public beads: Bead[] = []; // List of undo nodes.
     public bead: number = -1; // Index of the present bead: -1:len(beads)
     public undoType: any = "Can't Undo";
     public groupCount: number = 0;
@@ -451,13 +451,13 @@ export class Undoer {
         //@-<< about u.saveTree >>
 
         const u: Undoer = this;
-        const topLevel: boolean = !treeInfo;
+        const topLevel: boolean = !treeInfo; // don't check length intended
         if (topLevel) {
             treeInfo = [];
         }
         // Add info for p.v.  Duplicate tnode info is harmless.
         const data: TreeData = [p.v, u.createVnodeUndoInfo(p.v), u.createTnodeUndoInfo(p.v)];
-        treeInfo!.push(data)
+        treeInfo!.push(data);
         // Recursively add info for the subtree.
         let child: Position = p.firstChild();
         while (child && child.__bool__()) {
@@ -749,8 +749,8 @@ export class Undoer {
         // Set helpers
         bunch.undoHelper = u.undoCloneNode;
         bunch.redoHelper = u.redoCloneNode;
-        bunch.newBack = p.back()  // 6/15/05;
-        bunch.newParent = p.parent()  // 6/15/05;
+        bunch.newBack = p.back();  // 6/15/05;
+        bunch.newParent = p.parent();  // 6/15/05;
         bunch.newP = p.copy();
         bunch.newMarked = p.isMarked();
         u.pushBead(bunch);
@@ -1140,7 +1140,7 @@ export class Undoer {
     public onSelect(old_p: Position, p: Position): void {
         const u: Undoer = this;
         if (u.per_node_undo) {
-            if (old_p && u.beads) {
+            if (old_p && old_p.__bool__() && u.beads.length) {
                 u.putIvarsToVnode(old_p);
             }
             u.setIvarsFromVnode(p);
@@ -1167,9 +1167,9 @@ export class Undoer {
         const u: Undoer = this;
         const v: VNode = p.v;
 
-        // assert this.per_node_undo
+        console.assert(this.per_node_undo);
         u.clearUndoState();
-        if (v['undo_info']) {
+        if (v['undo_info'] || v['undo_info'] === 0) {
             u.setIvarsFromBunch(v.undo_info);
         }
     }
@@ -1208,8 +1208,8 @@ export class Undoer {
         } else {
             // if g.unitTesting:
             //     assert False, f"Not a text wrapper: {g.callers()}"
-            g.trace('Not a text wrapper')
-            p.v.insertSpot = 0
+            g.trace('Not a text wrapper');
+            p.v.insertSpot = 0;
             p.v.selectionStart = 0;
             p.v.selectionLength = 0;
         }
@@ -1219,7 +1219,7 @@ export class Undoer {
         if (p.isDirty()) {
             redraw_flag = false;
         } else {
-            p.setDirty()  // Do not call p.v.setDirty!
+            p.setDirty(); // Do not call p.v.setDirty!
             redraw_flag = true;
         }
         if (!c.isChanged()) {
@@ -1429,7 +1429,7 @@ export class Undoer {
         const bunch: Bead = u.beads[u.bead + 1];
         let count: number = 0;
         if (!bunch['items']) {
-            g.trace(`oops: expecting bunch.items. got bunch.kind = ${bunch.kind}`)
+            g.trace(`oops: expecting bunch.items. got bunch.kind = ${bunch.kind}`);
             g.trace(bunch);
         } else {
             for (let z of bunch.items) {
@@ -1641,7 +1641,6 @@ export class Undoer {
         "Undo the operation described by the undo parameters."
     )
     public undo(): void {
-        console.log('undo!')
         const u: Undoer = this;
         const c: Commands = u.c;
         if (!c.p || !c.p.__bool__()) {
@@ -1741,8 +1740,8 @@ export class Undoer {
             c.selectPosition(u.p!);
         }
         u.p!.setDirty();
-        c.frame.body.recolor(u.p)
-        u.p!.initHeadString(u.oldHead)
+        c.frame.body.recolor(u.p);
+        u.p!.initHeadString(u.oldHead);
 
         // This is required.  Otherwise c.redraw will revert the change!
         //c.frame.tree.setHeadline(u.p, u.oldHead)
@@ -1910,7 +1909,7 @@ export class Undoer {
         if (u.pasteAsClone) {
             for (let bunch of u.beforeTree) {
                 const v: VNode = bunch.v;
-                if (u.p!.v == v) {
+                if (u.p!.v === v) {
                     u.p!.b = bunch.body;
                     u.p!.h = bunch.head;
                 } else {
@@ -1978,7 +1977,7 @@ export class Undoer {
             c.selectPosition(u.p!);
         }
         u.p!.setDirty();
-        u.p!.b = u.oldBody
+        u.p!.b = u.oldBody;
         w.setAllText(u.oldBody);
         // c.frame.body.recolor(u.p)
         u.p!.h = u.oldHead;
@@ -2051,9 +2050,9 @@ export class Undoer {
         if (leading > 0) {
             s.push(...body_lines.slice(0, leading));
         }
-        if (oldMidLines.length)
+        if (oldMidLines.length) {
             s.push(...oldMidLines);
-
+        }
         if (trailing > 0) {
             s.push(...body_lines.slice(-trailing));
         }

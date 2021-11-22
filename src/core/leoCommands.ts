@@ -4,7 +4,7 @@
 //@+node:felix.20210220194059.1: ** << imports >>
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
-import { FileCommands } from "./leoFileCommands";
+import { DummyFileCommands, FileCommands } from "./leoFileCommands";
 import { CommanderOutlineCommands } from "../commands/commanderOutlineCommands";
 import { CommanderFileCommands } from "../commands/commanderFileCommands";
 
@@ -50,7 +50,7 @@ export class Commands {
     private _topPosition: Position | undefined;
 
     public hiddenRootNode: VNode;
-    public fileCommands: FileCommands;
+    public fileCommands: FileCommands | DummyFileCommands;
     public chapterController: any; // TODO : leoChapters.ChapterController(c)
     public undoer: Undoer;
     public nodeHistory: NodeHistory;
@@ -230,13 +230,27 @@ export class Commands {
 
         // From initObjects
         const gnx: string = 'hidden-root-vnode-gnx';
-        this.fileCommands = new FileCommands(this); // c.fileCommands = DummyFileCommands()
+        this.fileCommands = new DummyFileCommands();
         this.config = new LocalConfigManager(c); // Config before most other subcommanders
-        this.hiddenRootNode = new VNode(this, 'hidden-root-vnode-gnx');
+        this.hiddenRootNode = new VNode(this, gnx);
         this.hiddenRootNode.h = '<hidden root vnode>';
-        this.fileCommands.gnxDict = {}; // RESET gnxDict
+        //@verbatim
+        //@verbatim
+        //@verbatim
+        //@ts-expect-error
+        c.fileCommands = null; // type:ignore
+
+
+        // Define the subcommanders.
         this.chapterController = {}; // TODO self.chapterController = leoChapters.ChapterController(c)
+        // this.shadowController       = leoShadow.ShadowController(c)
+        this.fileCommands = new FileCommands(c);
+        // this.findCommands           = new LeoFind(c);
+        // this.atFileCommands         = new AtFile(c);
+        // this.importCommands         = new LeoImportCommands(c);
+
         this.nodeHistory = new NodeHistory(c);
+
         this.undoer = new Undoer(c);
 
         // From initConfigSettings 
@@ -414,27 +428,6 @@ export class Commands {
         }
     }
 
-    //@+node:felix.20210112001859.1: *3* c.Drawing & coloring
-    public recolor(): void {
-        console.log("recolor");
-    }
-
-    public redraw(p?: Position): void {
-        const c: Commands = this;
-        if (p && p.__bool__()) {
-            c.selectPosition(p);
-        }
-        // console.log("redraw");
-    }
-
-    public redraw_after_icons_changed(): void {
-        console.log("redraw_after_icons_changed");
-    }
-
-    public alert(...arg: any[]): void {
-        console.log(...arg);
-    }
-
     //@+node:felix.20210215185050.1: *3* c.API
     // These methods are a fundamental, unchanging, part of Leo's API.
 
@@ -542,14 +535,12 @@ export class Commands {
      */
     public *all_roots(predicate?: (p: Position) => boolean): Generator<Position> {
         const c: Commands = this;
-
         if (!predicate) {
             // pylint: disable=function-redefined
             predicate = function (p: Position): boolean {
                 return p.isAnyAtFileNode();
             };
         }
-
         const p: Position | undefined = c.rootPosition();
         while (p && p.__bool__()) {
             if (predicate(p)) {
@@ -591,14 +582,12 @@ export class Commands {
      */
     public *all_unique_roots(copy = true, predicate?: (p: Position) => boolean): Generator<Position> {
         const c: Commands = this;
-
         if (!predicate) {
             // pylint: disable=function-redefined
             predicate = function (p: Position): boolean {
                 return p.isAnyAtFileNode();
             };
         }
-
         const seen: VNode[] = [];
         const p: Position | undefined = c.rootPosition();
         while (p && p.__bool__()) {
@@ -646,7 +635,7 @@ export class Commands {
      */
     public currentPosition(): Position | undefined {
         const c: Commands = this;
-        if (c._currentPosition) {
+        if (c._currentPosition) { // no __bool__() check intended
             // *Always* return a copy.
             return c._currentPosition.copy();
         }
@@ -745,7 +734,7 @@ export class Commands {
     public isCurrentPosition(p: Position): boolean {
         const c: Commands = this;
         if (!p || !c._currentPosition ||
-            !p.__bool__() || !!c._currentPosition.__bool__()) {
+            !p.__bool__() || !c._currentPosition.__bool__()) {
             return false;
         }
         return p.__eq__(c._currentPosition);
@@ -754,11 +743,8 @@ export class Commands {
     //@+node:felix.20210131011420.10: *6* c.isRootPosition
     public isRootPosition(p: Position): boolean {
         const c: Commands = this;
-        const root: Position | undefined = c.rootPosition();
-        return !!p &&
-            !!root &&
-            p.__bool__() &&
-            root.__bool__() && p.__eq__(root);
+        const root: Position = c.rootPosition()!;
+        return p.__bool__() && root.__bool__() && p.__eq__(root);
     }
 
     //@+node:felix.20210131011420.11: *5* c.isChanged
@@ -766,17 +752,29 @@ export class Commands {
         return this.changed;
     }
 
+    //@+node:felix.20211121222033.1: *5* c.lastPosition
+    public lastPosition(): Position {
+        const c: Commands = this;
+        const p: Position = c.rootPosition()!;
+        while (p.hasNext()) {
+            p.moveToNext();
+        }
+        while (p.hasThreadNext()) {
+            p.moveToThreadNext();
+        }
+        return p;
+    }
     //@+node:felix.20210131011420.12: *5* c.lastTopLevel
     /**
      * Return the last top-level position in the outline.
      */
     public lastTopLevel(): Position {
         const c: Commands = this;
-        const p: Position | undefined = c.rootPosition();
-        while (p && p.hasNext()) {
+        const p: Position = c.rootPosition()!;
+        while (p.hasNext()) {
             p.moveToNext();
         }
-        return p!;
+        return p;
     }
 
     //@+node:felix.20210215204131.1: *5* c.lastVisible
@@ -813,37 +811,28 @@ export class Commands {
      * Return true if a position exists in c's tree
      */
     public positionExists(p: Position, root?: Position, trace?: boolean): boolean {
-
         if (!p || !p.__bool__() || !p.v) {
             return false;
         }
-
         const rstack: StackEntry[] = (root && root.__bool__()) ? root.stack.concat([[root.v, root._childIndex]]) : [];
         const pstack: StackEntry[] = p.stack.concat([[p.v, p._childIndex]]);
-
         if (rstack.length > pstack.length) {
             return false;
         }
-
         let par: VNode = this.hiddenRootNode!;
 
         let arrayLength: number = pstack.length;
-
         for (let j = 0; j < arrayLength; j++) {
             const x: StackEntry = pstack[j];
-
             if (j < rstack.length && (x[0].gnx !== rstack[j][0].gnx || x[1] !== rstack[j][1])) {
                 return false;
             }
-
             let v: VNode;
             let i: number;
             [v, i] = x;
-
             if (i >= par.children.length || v.gnx !== par.children[i].gnx) {
                 return false;
             }
-
             par = v;
         }
         return true;
@@ -941,7 +930,7 @@ export class Commands {
     public vnode2allPositions(v: VNode): Position[] {
         const c: Commands = this;
         const context: Commands = v.context;  // v's commander.
-        // console.assert(c.fileName === context.fileName);
+        console.assert(c === context);
         const positions: Position[] = [];
         let n: number;
         for (let immediate of v.parents) {
@@ -979,12 +968,11 @@ export class Commands {
     public vnode2position(v: VNode): Position | undefined {
         const c: Commands = this;
         const context: Commands = v.context;  // v's commander.
-        // console.assert(c.fileName === context.fileName);
+        console.assert(c === context);
         const stack: StackEntry[] = [];
         let n: number;
         while (v.parents.length) {
             const parent: VNode = v.parents[0];
-
             if (parent.children.includes(v)) {
                 n = parent.children.indexOf(v);
             } else {
@@ -1128,12 +1116,12 @@ export class Commands {
      */
     public setCurrentPosition(p: Position): void {
         const c: Commands = this;
-        if (!(p && p.__bool__())) {
+        if (!p || !p.__bool__()) {
             g.trace('===== no p', g.callers());
             return;
         }
         if (c.positionExists(p)) {
-            if (c._currentPosition && p.__eq__(c._currentPosition)) {
+            if (c._currentPosition && c._currentPosition.__bool__() && p.__eq__(c._currentPosition)) {
                 // We have already made a copy.
                 // pass;
             } else { // Make a copy _now_
@@ -1434,7 +1422,7 @@ export class Commands {
             catch (e) {
                 c.inCommand = false;
                 if (g.unitTesting) {
-                    throw "exception executing command";
+                    throw new Error("exception executing command");
                 }
                 g.es_print("exception executing command");
                 g.es_exception(c);
@@ -1445,7 +1433,7 @@ export class Commands {
                     // g.app.closeLeoWindow(c.frame);
                     console.log("g.app.closeLeoWindow was called!");
                 } else {
-                    // c.outerUpdate();
+                    c.outerUpdate();
                 }
             }
         }
@@ -1590,7 +1578,7 @@ export class Commands {
          */
         // TODO !
         /*
-       public find_line(path, n): [] {
+               public find_line(path, n): [] {
 
            
            if path == root_path:
@@ -1609,8 +1597,8 @@ export class Commands {
                
            return [root, n];
 
-       }
-       */
+               }
+               */
         //@-others
 
         // Compile and check the regex.
@@ -1732,7 +1720,31 @@ export class Commands {
         return undefined;
     }
     //@+node:felix.20211005023225.1: *3* c.Gui
-    //@+node:felix.20211022202201.1: *4* c.drawing
+    //@+node:felix.20211122010629.1: *4* c.Dialogs & messages
+    //@+node:felix.20211120224234.1: *5* c.alert
+    public alert(...arg: any[]): void {
+        // TODO !
+        console.log(...arg);
+    }
+    //@+node:felix.20211022202201.1: *4* c.Drawing
+
+
+
+
+    //@+node:felix.20211120225325.1: *5* c.bringToFront
+    public bringToFront(c2?: Commands, set_focus: boolean = true): void {
+        const c: Commands = this;
+        c2 = c2 || c;
+        if (!!g.app.gui && !!g.app.gui.ensure_commander_visible) {
+            g.app.gui.ensure_commander_visible(c2);
+        } else {
+            // TODO
+            console.log("missing g.app.gui.ensure_commander_visible");
+        }
+    }
+
+    // TODO shortcuts / alternative names
+    // BringToFront = bringToFront  // Compatibility with old scripts
     //@+node:felix.20211022202634.1: *5* c.expandAllAncestors
     /**
      * Expand all ancestors without redrawing.
@@ -1753,6 +1765,175 @@ export class Commands {
             }
         }
         return redraw_flag;
+    }
+
+    //@+node:felix.20211121013921.1: *5* c.outerUpdate
+    /**
+     * Handle delayed focus requests and modified events.
+     */
+    public outerUpdate(): void {
+        const c: Commands = this;
+        if (!c.exists || !c.k) {
+            return;
+        }
+        // New in Leo 5.6: Delayed redraws are useful in utility methods.
+        if (c.requestLaterRedraw) {
+            if (c.enableRedrawFlag) {
+                c.requestLaterRedraw = false;
+                // if ('drawing' in g.app.debug and not g.unitTesting) {
+                //     g.trace('\nDELAYED REDRAW')
+                //     time.sleep(1.0)
+                // }
+            }
+            c.redraw();
+        }
+        // ? useful ? 
+        // # Delayed focus requests will always be useful.
+        // if c.requestedFocusWidget:
+        //     w = c.requestedFocusWidget
+        //     if 'focus' in g.app.debug and not g.unitTesting:
+        //         if hasattr(w, 'objectName'):
+        //             name = w.objectName()
+        //         else:
+        //             name = w.__class__.__name__
+        //         g.trace('DELAYED FOCUS', name)
+        //     c.set_focus(w)
+        //     c.requestedFocusWidget = None
+        // table = (
+        //     ("childrenModified", g.childrenModifiedSet),
+        //     ("contentModified", g.contentModifiedSet),
+        // )
+        // for kind, mods in table:
+        //     if mods:
+        //         g.doHook(kind, c=c, nodes=mods)
+        //         mods.clear()
+
+    }
+
+    //@+node:felix.20211120224224.1: *5* c.recolor
+    public recolor(): void {
+        console.log("recolor");
+    }
+    //@+node:felix.20211120231934.1: *5* c.redrawing...
+    //@+node:felix.20211120224229.1: *6* c.redraw
+    public redraw(p?: Position): void {
+        const c: Commands = this;
+
+        if (!p || !p.__bool__()) {
+            p = c.p;
+        }
+        if (!p || !p.__bool__()) {
+            p = c.rootPosition();
+        }
+        if (!p || !p.__bool__()) {
+            return;
+        }
+        c.expandAllAncestors(p);
+
+        if (p && p.__bool__()) {
+            c.selectPosition(p);
+        }
+    }
+
+    // TODO : Compatibility 
+    // force_redraw = redraw
+    // redraw_now = redraw
+
+    //@+node:felix.20211120224231.1: *6* c.redraw_after_icons_changed
+    /**
+     * Update the icon for the presently selected node
+     */
+    public redraw_after_icons_changed(): void {
+        const c: Commands = this;
+        if (c.enableRedrawFlag) {
+            // c.frame.tree.redraw_after_icons_changed();
+            c.redraw();
+            // Do not call treeFocusHelper here.
+            // c.treeFocusHelper()
+        } else {
+            c.requestLaterRedraw = true;
+        }
+    }
+    //@+node:felix.20211122010434.5: *6* c.redraw_after_contract
+    public redraw_after_contract(p?: Position): void {
+        const c: Commands = this;
+        if (c.enableRedrawFlag) {
+            if (p && p.__bool__()) {
+                c.setCurrentPosition(p);
+            } else {
+                p = c.currentPosition();
+            }
+            //c.frame.tree.redraw_after_contract(p);
+            c.redraw(p);
+            //c.treeFocusHelper();
+        } else {
+            c.requestLaterRedraw = true;
+        }
+    }
+    //@+node:felix.20211122010434.6: *6* c.redraw_after_expand
+    public redraw_after_expand(p?: Position): void {
+        const c: Commands = this;
+        if (c.enableRedrawFlag) {
+            if (p && p.__bool__()) {
+                c.setCurrentPosition(p);
+            } else {
+                p = c.currentPosition();
+            }
+            //c.frame.tree.redraw_after_expand(p);
+            c.redraw(p);
+            //c.treeFocusHelper();
+        } else {
+            c.requestLaterRedraw = true;
+        }
+    }
+
+    //@+node:felix.20211122010434.7: *6* c.redraw_after_head_changed
+    /**
+     *   Redraw the screen (if needed) when editing ends.
+     *   This may be a do-nothing for some gui's.
+     */
+    public redraw_after_head_changed(): void {
+        const c: Commands = this;
+        if (c.enableRedrawFlag) {
+            // this.frame.tree.redraw_after_head_changed();
+            c.redraw();
+        } else {
+            c.requestLaterRedraw = true;
+        }
+    }
+
+    //@+node:felix.20211122010434.8: *6* c.redraw_after_select
+    /**
+     * Redraw the screen after node p has been selected.
+     */
+    public redraw_after_select(p: Position): void {
+        const c: Commands = this;
+        let flag: boolean;
+        if (c.enableRedrawFlag) {
+            flag = c.expandAllAncestors(p);
+            if (flag) {
+                //c.frame.tree.redraw_after_select(p);
+                c.redraw();
+                // This is the same as c.frame.tree.full_redraw().
+            }
+        } else {
+            c.requestLaterRedraw = true;
+        }
+    }
+
+    //@+node:felix.20211122010434.9: *6* c.redraw_later
+    /**
+     * 
+     * Ensure that c.redraw() will be called eventually.
+     * c.outerUpdate will call c.redraw() only if no other code calls c.redraw().
+     */
+    public redraw_later(): void {
+        const c: Commands = this;
+        c.requestLaterRedraw = true;
+        if (g.app.debug.length && g.app.debug.includes('drawing')) {
+            // g.trace('\n' + g.callers(8))
+            g.trace(g.callers());
+        }
     }
 
     //@+node:felix.20211005023800.1: *4* c.Expand/contract
@@ -1796,7 +1977,7 @@ export class Commands {
     public expandToLevel(level: number): void {
         const c: Commands = this;
         const n: number = c.p.level();
-        // let old_expansion_level = c.expansionLevel;
+        const old_expansion_level = c.expansionLevel;
         let max_level = 0;
         for (let p of c.p.self_and_subtree(false)) {
             if (p.level() - n + 1 < level) {
@@ -1808,17 +1989,17 @@ export class Commands {
         }
         c.expansionNode = c.p.copy();
         c.expansionLevel = max_level + 1;
+        if (c.expansionLevel !== old_expansion_level) {
+            c.redraw();
+        }
 
-        /*
-        if c.expansionLevel != old_expansion_level:
-            c.redraw()
+        /*            
         // It's always useful to announce the level.
         // c.k.setLabelBlue('level: %s' % (max_level+1))
         // g.es('level', max_level + 1)
         c.frame.putStatusLine(f"level: {max_level + 1}")
             // bg='red', fg='red'
         */
-
     }
 
     //@+node:felix.20211023195447.1: *4* c.Menus
@@ -1828,8 +2009,8 @@ export class Commands {
         const c: Commands = this;
         if (c.hoistStack.length) {
             const current: Position = c.p;
-            const bunch = c.hoistStack[c.hoistStack.length - 1]
-            return current !== bunch.p;
+            const bunch = c.hoistStack[c.hoistStack.length - 1];
+            return !current.__eq__(bunch.p);
         }
         return true;
     }
@@ -1851,7 +2032,7 @@ export class Commands {
     public canContractAllSubheads(): boolean {
         const current: Position = this.p;
         for (let p of current.subtree()) {
-            if (p !== current && p.isExpanded()) {
+            if (!p.__eq__(current) && p.isExpanded()) {
                 return true;
             }
         }
@@ -1919,7 +2100,7 @@ export class Commands {
     public canExpandSubheads(): boolean {
         const current: Position = this.p;
         for (let p of current.children()) {
-            if (p != current && !p.isExpanded()) {
+            if (!p.__eq__(current) && !p.isExpanded()) {
                 return true;
             }
         }
@@ -1953,7 +2134,7 @@ export class Commands {
 
     public canFindMatchingBracket(): boolean {
         const c: Commands = this;
-        const brackets: string = "()[]{}"
+        const brackets: string = "()[]{}";
         const w = c.frame.body.wrapper; // TODO 
         const s = w.getAllText();
         const ins: number = w.getInsertPoint();
@@ -2018,7 +2199,7 @@ export class Commands {
         const p: Position = this.p;
         if (c.hoistStack.length) {
             const bunch = c.hoistStack[c.hoistStack.length - 1];
-            return p && p.hasBack() && p !== bunch.p
+            return p && p.hasBack() && !p.__eq__(bunch.p);
         }
         return p && p.__bool__() && p.hasBack();
     }
@@ -2026,14 +2207,16 @@ export class Commands {
     public canMoveOutlineUp(): boolean {
         const c: Commands = this;
         const current: Position = this.p;
-        const visBack: Position | false = (current && current.__bool__()) && current.visBack(c);
+        const visBack: Position | false = (!!current && !!current.__bool__()) && current.visBack(c);
         if (!visBack || !visBack.__bool__()) {
             return false;
         }
-        if (visBack.visBack(c).__bool__()) {
+        if (visBack.visBack(c)?.__bool__()) {
             return true;
         }
         if (c.hoistStack.length) {
+
+            // limit, limitIsVisible = c.visLimit()
             let w_vis: [Position | undefined, boolean | undefined] = c.visLimit();
             let limitIsVisible: boolean;
             let limit: Position | undefined;
@@ -2043,14 +2226,15 @@ export class Commands {
             } else {
                 limitIsVisible = false;
             }
+
             if (limitIsVisible && limit) {  // A hoist
                 return !current.__eq__(limit);
             }
             // A chapter.
             return !!limit && !current.__eq__(limit.firstChild());
-
         }
-        return (!!c.rootPosition() && c.rootPosition()!.__bool__()) && !current.__eq__(c.rootPosition()!);
+        const w_root: Position | undefined = c.rootPosition();
+        return (!!w_root && w_root!.__bool__()) && !current.__eq__(w_root!);
     }
     //@+node:felix.20211023195447.21: *6* c.canPasteOutline
     public canPasteOutline(s?: string): boolean {
@@ -2065,16 +2249,16 @@ export class Commands {
     //@+node:felix.20211023195447.22: *6* c.canPromote
     public canPromote(): boolean {
         const p: Position = this.p;
-        return p && p.__bool__() && p.hasChildren()
+        return p && p.__bool__() && p.hasChildren();
     }
     //@+node:felix.20211023195447.23: *6* c.canSelect....
     public canSelectThreadBack(): boolean {
         const p: Position = this.p;
-        return p.hasThreadBack()
+        return p.hasThreadBack();
     }
     public canSelectThreadNext(): boolean {
         const p: Position = this.p;
-        return p.hasThreadNext()
+        return p.hasThreadNext();
     }
     public canSelectVisBack(): boolean {
         const c: Commands = this;
@@ -2104,11 +2288,11 @@ export class Commands {
     //@+node:felix.20211023195447.26: *6* c.canUndo & canRedo
     public canUndo(): boolean {
         const c: Commands = this;
-        return c.undoer.canUndo()
+        return c.undoer.canUndo();
     }
     public canRedo(): boolean {
         const c: Commands = this;
-        return c.undoer.canRedo()
+        return c.undoer.canRedo();
     }
     //@+node:felix.20211023195447.27: *6* c.canUnmarkAll
     public canUnmarkAll(): boolean {
@@ -2176,14 +2360,11 @@ export class Commands {
     ): void {
         const c: Commands = this;
         const k: any = this.k;
-
         c.redraw(p);  // This *must* be done now. 
-
         if (p && p.__bool__()) {
             // TODO : allow headline rename ?
             // This should request focus.
-            c.frame.tree.editLabel(p, selectAll, selection);
-
+            c.frame.tree.editLabel(p, selectAll, selection); // TODO 
             if (k && !keepMinibuffer) {
                 // Setting the input state has no effect on focus.
                 if (selectAll) {
@@ -2197,11 +2378,9 @@ export class Commands {
         } else {
             g.trace('** no p');
         }
-
-
         // Update the focus immediately.
         if (!keepMinibuffer) {
-            //  c.outerUpdate(); // TODO : Not needed ?
+            c.outerUpdate();
         }
     }
     //@+node:felix.20211005023456.1: *5* c.selectPosition
@@ -2227,7 +2406,7 @@ export class Commands {
         // }
 
         // De-hoist as necessary to make p visible.
-        if (c.hoistStack) {
+        if (c.hoistStack.length) {
             while (c.hoistStack.length) {
                 let bunch = c.hoistStack[c.hoistStack.length - 1];
                 if (c.positionExists(p, bunch.p)) {
@@ -2254,7 +2433,7 @@ export class Commands {
         c.setCurrentPosition(p);
 
         // Compatibility, but confusing.
-        // TODO : Is this needed? (not used in Leos codebase)
+        // TODO : Is this needed? (not used in Leo's codebase)
         // selectVnode = selectPosition
 
     }
@@ -2264,11 +2443,9 @@ export class Commands {
      * Return the position to be selected after a sort.
      */
     public setPositionAfterSort(sortChildren: boolean): Position {
-
         const c: Commands = this;
         let p: Position = c.p;
         const p_v: VNode = p.v;
-
         const parent: Position = p.parent();
         const parent_v: VNode = p._parentVnode()!;
         if (sortChildren) {
@@ -2282,11 +2459,9 @@ export class Commands {
         while (p && p.__bool__() && p.v.gnx !== p_v.gnx) {
             p.moveToNext();
         }
-
         if (!p || !p.__bool__()) {
             p = parent;
         }
-
         return p;
     }
     //@+node:felix.20211022013445.1: *5* c.treeSelectHelper

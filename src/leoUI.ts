@@ -5,7 +5,6 @@ import { Constants } from "./constants";
 import { RevealType, Icon, ReqRefresh, LeoPackageStates } from "./types";
 
 import { Config } from "./config";
-import { LeoOutlineNode } from "./leoOutlineNode";
 import { LeoOutlineProvider } from './leoOutline';
 import { LeoButtonNode } from "./leoButtonNode";
 import { LeoButtonsProvider } from "./leoButtons";
@@ -17,6 +16,7 @@ import * as g from './core/leoGlobals';
 import { LoadManager } from "./core/leoApp";
 import { NodeIndices, Position, VNode } from "./core/leoNodes";
 import { LeoBodyProvider } from "./leoBody";
+import { Commands } from "./core/leoCommands";
 
 /**
  * Creates and manages instances of the UI elements along with their events
@@ -165,7 +165,7 @@ export class LeoUI {
         // ************************************************************
         let w_node = c.p;
         w_node.initHeadString("@file node1");
-        w_node.setBodyString('@tabwidth 8\nnode1 body');
+        w_node.setBodyString('@tabwidth 8\nnode1 body\n@others');
         w_node.expand();
 
         w_node = c.p.insertAsLastChild();
@@ -461,6 +461,8 @@ export class LeoUI {
      */
     public configTreeRefresh(): void {
         if (this.leoStates.fileOpenedReady) {
+            console.log('config tree Refresh');
+
             this._preventShowBody = true;
             this._refreshOutline(true, RevealType.RevealSelect);
         }
@@ -543,6 +545,8 @@ export class LeoUI {
         // * Either the whole tree refreshes, or a single tree node is revealed when just navigating
         if (this._refreshType.tree) {
             this._refreshType.tree = false;
+            console.log('in _launchRefresh tree was true so _refreshOutline ! ');
+
             this._refreshOutline(true, w_revealType);
         } else if (this._refreshType.node && p_node) {
 
@@ -687,7 +691,7 @@ export class LeoUI {
 
         // this.triggerBodySave(true); // Get any modifications from the editor into the Leo's body model
 
-        if (p_treeView.selection[0] && p_treeView.selection[0].__eq__(p_event.element)) {
+        if (p_treeView.selection.length && p_treeView.selection[0] && p_treeView.selection[0].__eq__(p_event.element)) {
             // * This happens if the tree selection is the same as the expanded/collapsed node: Just have Leo do the same
             // pass
         } else {
@@ -717,6 +721,8 @@ export class LeoUI {
     private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
         if (p_event.visible) {
             this._lastTreeView = p_explorerView ? this._leoTreeExView : this._leoTreeView;
+            console.log('_onTreeViewVisibilityChanged so refresh outline');
+
             this._refreshOutline(true, RevealType.RevealSelect);
         }
     }
@@ -746,6 +752,10 @@ export class LeoUI {
         }
     }
 
+    public ensure_commander_visible(c: Commands): void {
+        // TODO !
+        console.log("TODO ensure_commander_visible");
+    }
     /**
      * * Called by UI when the user selects in the tree (click or 'open aside' through context menu)
      * @param p_node is the position node selected in the tree
@@ -1125,6 +1135,7 @@ export class LeoUI {
      */
     public selectOpenedLeoDocument(p_index: number): Thenable<unknown> {
         this.commanderIndex = p_index;
+        console.log('selectOpenedLeoDocument so _refreshOutline !');
 
         this._refreshOutline(true, RevealType.RevealSelect);
 
@@ -1272,6 +1283,8 @@ export class LeoUI {
         console.log('can undo', c.undoer.canUndo());
         console.log('can redo', c.undoer.canRedo());
 
+        // * Test hasParent
+        console.log('p has parent: ', c.p.hasParent());
 
 
         // * test @cmd decorator and undoer
