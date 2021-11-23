@@ -242,6 +242,11 @@
           "id": "leojsButtonsExplorer",
           "name": "Leojs Buttons",
           "contextualTitle": "Leojs"
+        },
+        {
+          "id": "leojsUndoExplorer",
+          "name": "Leojs Undos",
+          "contextualTitle": "Leojs"
         }
       ],
       "leojsView": [
@@ -259,6 +264,11 @@
           "id": "leojsButtons",
           "contextualTitle": "Leojs",
           "name": "Buttons"
+        },
+        {
+          "id": "leojsUndos",
+          "contextualTitle": "Leojs",
+          "name": "Undos"
         }
       ]
     },
@@ -301,6 +311,26 @@
       {
         "view": "leojsButtonsExplorer",
         "contents": "There are no @buttons in this outline",
+        "when": "leojsReady && leojsTreeOpened"
+      },
+      {
+        "view": "leojsUndos",
+        "contents": "There are no Leo files currently opened",
+        "when": "leojsReady && !leojsTreeOpened"
+      },
+      {
+        "view": "leojsUndosExplorer",
+        "contents": "There are no Leo files currently opened",
+        "when": "leojsReady && !leojsTreeOpened"
+      },
+      {
+        "view": "leojsUndos",
+        "contents": "Can't undo",
+        "when": "leojsReady && leojsTreeOpened"
+      },
+      {
+        "view": "leojsUndosExplorer",
+        "contents": "Can't undo",
         "when": "leojsReady && leojsTreeOpened"
       }
     ],

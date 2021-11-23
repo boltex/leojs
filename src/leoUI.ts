@@ -6,10 +6,8 @@ import { RevealType, Icon, ReqRefresh, LeoPackageStates } from "./types";
 
 import { Config } from "./config";
 import { LeoOutlineProvider } from './leoOutline';
-import { LeoButtonNode } from "./leoButtonNode";
-import { LeoButtonsProvider } from "./leoButtons";
-import { LeoDocumentNode } from "./leoDocumentNode";
-import { LeoDocumentsProvider } from "./leoDocuments";
+import { LeoButtonNode, LeoButtonsProvider } from "./leoButtons";
+import { LeoDocumentNode, LeoDocumentsProvider } from "./leoDocuments";
 import { LeoFilesBrowser } from "./leoFileBrowser";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
@@ -17,6 +15,7 @@ import { LoadManager } from "./core/leoApp";
 import { NodeIndices, Position, VNode } from "./core/leoNodes";
 import { LeoBodyProvider } from "./leoBody";
 import { Commands } from "./core/leoCommands";
+import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
 
 /**
  * Creates and manages instances of the UI elements along with their events
@@ -80,6 +79,11 @@ export class LeoUI {
     private _leoButtonsProvider: LeoButtonsProvider;
     private _leoButtons: vscode.TreeView<LeoButtonNode>;
     private _leoButtonsExplorer: vscode.TreeView<LeoButtonNode>;
+
+    // * Undos pane
+    private _leoUndosProvider: LeoUndosProvider;
+    private _leoUndos: vscode.TreeView<LeoUndoNode>;
+    private _leoUndosExplorer: vscode.TreeView<LeoUndoNode>;
 
     // * Log and terminal Panes
     private _leoLogPane: vscode.OutputChannel = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
@@ -259,6 +263,13 @@ export class LeoUI {
         this._leoButtons.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, false)));
         this._leoButtonsExplorer = vscode.window.createTreeView(Constants.BUTTONS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
         this._leoButtonsExplorer.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, true)));
+
+        // * Create Undos Treeview Providers and tree views
+        this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this);
+        this._leoUndos = vscode.window.createTreeView(Constants.UNDOS_ID, { showCollapseAll: false, treeDataProvider: this._leoUndosProvider });
+        this._leoUndos.onDidChangeVisibility((p_event => this._onUndosTreeViewVisibilityChanged(p_event, false)));
+        this._leoUndosExplorer = vscode.window.createTreeView(Constants.UNDOS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoUndosProvider });
+        this._leoUndosExplorer.onDidChangeVisibility((p_event => this._onUndosTreeViewVisibilityChanged(p_event, true)));
 
         // * Create Body Pane
         this._leoFileSystem = new LeoBodyProvider(this);
@@ -749,6 +760,19 @@ export class LeoUI {
         if (p_event.visible) {
             // TODO: Check if needed
             // this._leoButtonsProvider.refreshTreeRoot(); // May not need to set selection...?
+        }
+    }
+
+    /**
+     * * Handle the change of visibility of either outline treeview and refresh it if its visible
+     * @param p_event The treeview-visibility-changed event passed by vscode
+     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
+     */
+    private _onUndosTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
+        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
+        if (p_event.visible) {
+            // TODO: Check if needed
+            this._leoUndosProvider.refreshTreeRoot(); // May not need to set selection...?
         }
     }
 

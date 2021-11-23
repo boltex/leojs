@@ -234,9 +234,13 @@ export class Commands {
         this.config = new LocalConfigManager(c); // Config before most other subcommanders
         this.hiddenRootNode = new VNode(this, gnx);
         this.hiddenRootNode.h = '<hidden root vnode>';
+    //@verbatim
         //@verbatim
+    //@verbatim
         //@verbatim
+    //@verbatim
         //@verbatim
+    //@verbatim
         //@ts-expect-error
         c.fileCommands = null; // type:ignore
 
@@ -2497,6 +2501,5 @@ applyMixins(Commands, [CommanderOutlineCommands, CommanderFileCommands]);
 Commands.prototype.canCutOutline = Commands.prototype.canDeleteHeadline;
 Commands.prototype.canShiftBodyRight = Commands.prototype.canShiftBodyLeft;
 Commands.prototype.canExtractSectionNames = Commands.prototype.canExtract;
-
 
 //@-leo

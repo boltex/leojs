@@ -16,6 +16,9 @@ export class Constants {
     public static BUTTONS_ID: string = "leojsButtons";
     public static BUTTONS_EXPLORER_ID: string = "leojsButtonsExplorer";
 
+    public static UNDOS_ID: string = "leojsUndos";
+    public static UNDOS_EXPLORER_ID: string = "leojsUndoExplorer";
+
     public static FILE_EXTENSION: string = "leojs";
     public static URI_LEO_SCHEME: string = "leojs";
     public static URI_FILE_SCHEME: string = "file";

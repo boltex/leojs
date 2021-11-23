@@ -141,6 +141,7 @@
 <v t="felix.20201214202627.1"><vh>_onTreeViewVisibilityChanged</vh></v>
 <v t="felix.20201214202631.1"><vh>_onDocTreeViewVisibilityChanged</vh></v>
 <v t="felix.20201214202634.1"><vh>_onButtonsTreeViewVisibilityChanged</vh></v>
+<v t="felix.20211122230343.1"><vh>_onUndosTreeViewVisibilityChanged</vh></v>
 </v>
 <v t="felix.20211120230057.1"><vh>Leo GUI Handlers</vh>
 <v t="felix.20211120230107.1"><vh>LeoGui.ensure_commander_visible</vh></v>
@@ -203,8 +204,6 @@
 <v t="felix.20201214151419.5"><vh>getChildren</vh></v>
 <v t="felix.20201214151419.6"><vh>getParent</vh></v>
 </v>
-</v>
-<v t="felix.20201214151425.1"><vh>@clean src/leoButtonNode.ts</vh>
 <v t="felix.20201214151425.2"><vh>class LeoButtonNode</vh>
 <v t="felix.20201214151425.3"><vh>iconPath</vh></v>
 <v t="felix.20201214151425.4"><vh>id</vh></v>
@@ -219,11 +218,22 @@
 <v t="felix.20201214151429.5"><vh>getChildren</vh></v>
 <v t="felix.20201214151429.6"><vh>getParent</vh></v>
 </v>
-</v>
-<v t="felix.20201214151434.1"><vh>@clean src/leoDocumentNode.ts</vh>
 <v t="felix.20201214151434.2"><vh>class LeoDocumentNode</vh>
 <v t="felix.20201214151434.3"><vh>iconPath</vh></v>
 <v t="felix.20201214151434.4"><vh>id</vh></v>
+</v>
+</v>
+<v t="felix.20211122205011.1"><vh>@clean src/leoUndos.ts</vh>
+<v t="felix.20211122205031.1"><vh>class LeoUndosProvider</vh>
+<v t="felix.20211122213012.1"><vh>refreshTreeRoot</vh></v>
+<v t="felix.20211122213023.1"><vh>getTreeItem</vh></v>
+<v t="felix.20211122214230.1"><vh>getChildren</vh></v>
+<v t="felix.20211122213037.1"><vh>getParent</vh></v>
+</v>
+<v t="felix.20211122212823.1"><vh>class LeoUndoNode</vh>
+<v t="felix.20211122214005.1"><vh>iconPath</vh></v>
+<v t="felix.20211122214009.1"><vh>id</vh></v>
+<v t="felix.20211122214039.1"><vh>tooltip</vh></v>
 </v>
 </v>
 <v t="felix.20201208224441.1"><vh>@clean src/leoFileBrowser.ts</vh>
@@ -1975,6 +1985,9 @@ public static DOCUMENTS_EXPLORER_ID: string = "leojsDocumentsExplorer";
 public static BUTTONS_ID: string = "leojsButtons";
 public static BUTTONS_EXPLORER_ID: string = "leojsButtonsExplorer";
 
+public static UNDOS_ID: string = "leojsUndos";
+public static UNDOS_EXPLORER_ID: string = "leojsUndoExplorer";
+
 public static FILE_EXTENSION: string = "leojs";
 public static URI_LEO_SCHEME: string = "leojs";
 public static URI_FILE_SCHEME: string = "file";
@@ -2167,15 +2180,14 @@ public static VSCODE_COMMANDS = {
 
 </t>
 <t tx="felix.20201214151419.1">import * as vscode from "vscode";
-import { LeoButtonNode } from "./leoButtonNode";
-import { ProviderResult } from "vscode";
 import { Icon, LeoButton } from "./types";
+import { Constants } from "./constants";
 import { LeoStates } from "./leoStates";
-
 
 @language typescript
 @tabwidth -4
 @others
+
 </t>
 <t tx="felix.20201214151419.2">/**
  * * '@buttons' shown as a list with this TreeDataProvider implementation
@@ -2199,6 +2211,7 @@ export class LeoButtonsProvider implements vscode.TreeDataProvider&lt;LeoButtonN
 
     @others
 }
+
 </t>
 <t tx="felix.20201214151419.3">/**
  * * Refresh the whole outline
@@ -2225,19 +2238,11 @@ public refreshTreeRoot(): void {
 }
 
 </t>
-<t tx="felix.20201214151419.6">public getParent(element: LeoButtonNode): ProviderResult&lt;LeoButtonNode&gt; | null {
+<t tx="felix.20201214151419.6">public getParent(element: LeoButtonNode): vscode.ProviderResult&lt;LeoButtonNode&gt; | null {
     // Buttons are just a list, as such, entries are always child of root so return null
     return null;
 }
 
-</t>
-<t tx="felix.20201214151425.1">import * as vscode from "vscode";
-import { Constants } from "./constants";
-import { LeoButton, Icon } from "./types";
-
-@language typescript
-@tabwidth -4
-@others
 </t>
 <t tx="felix.20201214151425.2">/**
  * * Leo @buttons tree view node item implementation, for usage in a TreeDataProvider.
@@ -2268,6 +2273,7 @@ export class LeoButtonNode extends vscode.TreeItem {
 
     @others
 }
+
 </t>
 <t tx="felix.20201214151425.3">// @ts-ignore
 public get iconPath(): Icon {
@@ -2304,13 +2310,17 @@ public get description(): string | boolean {
 </t>
 <t tx="felix.20201214151429.1">import * as vscode from "vscode";
 import { LeoUI } from './leoUI';
-import { LeoDocumentNode } from "./leoDocumentNode";
 import { LeoStates } from "./leoStates";
+import { Constants } from "./constants";
+import { Icon } from "./types";
+import * as utils from "./utils";
 import * as g from './core/leoGlobals';
+import { Commands } from "./core/leoCommands";
 
 @language typescript
 @tabwidth -4
 @others
+
 </t>
 <t tx="felix.20201214151429.2">/**
  * * Opened Leo documents shown as a list with this TreeDataProvider implementation
@@ -2328,6 +2338,7 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider&lt;LeoDocum
 
     @others
 }
+
 </t>
 <t tx="felix.20201214151429.3">/**
  * * Refresh the whole outline
@@ -2359,18 +2370,6 @@ public refreshTreeRoot(): void {
     return undefined;
 }
 
-</t>
-<t tx="felix.20201214151434.1">import * as vscode from "vscode";
-import { Constants } from "./constants";
-import { Icon } from "./types";
-import * as utils from "./utils";
-import { LeoUI } from "./leoUI";
-import * as g from './core/leoGlobals';
-import { Commands } from "./core/leoCommands";
-
-@language typescript
-@tabwidth -4
-@others
 </t>
 <t tx="felix.20201214151434.2">/**
  * * Opened Leo documents tree view node item implementation for usage in a TreeDataProvider
@@ -2407,6 +2406,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
 
     @others
 }
+
 </t>
 <t tx="felix.20201214151434.3">// @ts-ignore
 public get iconPath(): Icon {
@@ -2983,10 +2983,8 @@ import { RevealType, Icon, ReqRefresh, LeoPackageStates } from "./types";
 
 import { Config } from "./config";
 import { LeoOutlineProvider } from './leoOutline';
-import { LeoButtonNode } from "./leoButtonNode";
-import { LeoButtonsProvider } from "./leoButtons";
-import { LeoDocumentNode } from "./leoDocumentNode";
-import { LeoDocumentsProvider } from "./leoDocuments";
+import { LeoButtonNode, LeoButtonsProvider } from "./leoButtons";
+import { LeoDocumentNode, LeoDocumentsProvider } from "./leoDocuments";
 import { LeoFilesBrowser } from "./leoFileBrowser";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
@@ -2994,6 +2992,7 @@ import { LoadManager } from "./core/leoApp";
 import { NodeIndices, Position, VNode } from "./core/leoNodes";
 import { LeoBodyProvider } from "./leoBody";
 import { Commands } from "./core/leoCommands";
+import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
 
 @language typescript
 @tabwidth -4
@@ -3153,6 +3152,13 @@ import { Commands } from "./core/leoCommands";
     this._leoButtons.onDidChangeVisibility((p_event =&gt; this._onButtonsTreeViewVisibilityChanged(p_event, false)));
     this._leoButtonsExplorer = vscode.window.createTreeView(Constants.BUTTONS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
     this._leoButtonsExplorer.onDidChangeVisibility((p_event =&gt; this._onButtonsTreeViewVisibilityChanged(p_event, true)));
+
+    // * Create Undos Treeview Providers and tree views
+    this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this);
+    this._leoUndos = vscode.window.createTreeView(Constants.UNDOS_ID, { showCollapseAll: false, treeDataProvider: this._leoUndosProvider });
+    this._leoUndos.onDidChangeVisibility((p_event =&gt; this._onUndosTreeViewVisibilityChanged(p_event, false)));
+    this._leoUndosExplorer = vscode.window.createTreeView(Constants.UNDOS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoUndosProvider });
+    this._leoUndosExplorer.onDidChangeVisibility((p_event =&gt; this._onUndosTreeViewVisibilityChanged(p_event, true)));
 
     // * Create Body Pane
     this._leoFileSystem = new LeoBodyProvider(this);
@@ -3318,6 +3324,11 @@ export class LeoUI {
     private _leoButtonsProvider: LeoButtonsProvider;
     private _leoButtons: vscode.TreeView&lt;LeoButtonNode&gt;;
     private _leoButtonsExplorer: vscode.TreeView&lt;LeoButtonNode&gt;;
+
+    // * Undos pane
+    private _leoUndosProvider: LeoUndosProvider;
+    private _leoUndos: vscode.TreeView&lt;LeoUndoNode&gt;;
+    private _leoUndosExplorer: vscode.TreeView&lt;LeoUndoNode&gt;;
 
     // * Log and terminal Panes
     private _leoLogPane: vscode.OutputChannel = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
@@ -4643,6 +4654,11 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
       "id": "leojsButtonsExplorer",
       "name": "Leojs Buttons",
       "contextualTitle": "Leojs"
+    },
+    {
+      "id": "leojsUndoExplorer",
+      "name": "Leojs Undos",
+      "contextualTitle": "Leojs"
     }
   ],
   "leojsView": [
@@ -4660,6 +4676,11 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
       "id": "leojsButtons",
       "contextualTitle": "Leojs",
       "name": "Buttons"
+    },
+    {
+      "id": "leojsUndos",
+      "contextualTitle": "Leojs",
+      "name": "Undos"
     }
   ]
 },
@@ -4842,6 +4863,26 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
   {
     "view": "leojsButtonsExplorer",
     "contents": "There are no @buttons in this outline",
+    "when": "leojsReady &amp;&amp; leojsTreeOpened"
+  },
+  {
+    "view": "leojsUndos",
+    "contents": "There are no Leo files currently opened",
+    "when": "leojsReady &amp;&amp; !leojsTreeOpened"
+  },
+  {
+    "view": "leojsUndosExplorer",
+    "contents": "There are no Leo files currently opened",
+    "when": "leojsReady &amp;&amp; !leojsTreeOpened"
+  },
+  {
+    "view": "leojsUndos",
+    "contents": "Can't undo",
+    "when": "leojsReady &amp;&amp; leojsTreeOpened"
+  },
+  {
+    "view": "leojsUndosExplorer",
+    "contents": "Can't undo",
     "when": "leojsReady &amp;&amp; leojsTreeOpened"
   }
 ],
@@ -14169,6 +14210,137 @@ def pluginIsLoaded(fn):
 </t>
 <t tx="felix.20211121025828.2">constructor() {
     this.gnxDict = {};
+}
+
+</t>
+<t tx="felix.20211122205011.1">import * as vscode from "vscode";
+import { LeoUI } from './leoUI';
+import { LeoStates } from "./leoStates";
+import * as g from './core/leoGlobals';
+import { Commands } from "./core/leoCommands";
+import { Bead } from "./core/leoUndo";
+
+@language typescript
+@tabwidth -4
+@others
+
+</t>
+<t tx="felix.20211122205031.1">/**
+ * * Undo beads shown as a list with this TreeDataProvider implementation
+ */
+export class LeoUndosProvider implements vscode.TreeDataProvider&lt;LeoUndoNode&gt; {
+
+    private _beadId = 0;
+
+    private _onDidChangeTreeData: vscode.EventEmitter&lt;LeoUndoNode | undefined&gt; = new vscode.EventEmitter&lt;LeoUndoNode | undefined&gt;();
+
+    readonly onDidChangeTreeData: vscode.Event&lt;LeoUndoNode | undefined&gt; = this._onDidChangeTreeData.event;
+
+    constructor(
+        private _leoStates: LeoStates,
+        private _leoUI: LeoUI,
+    ) { }
+
+    @others
+}
+
+</t>
+<t tx="felix.20211122212823.1">/**
+ * * Opened Leo documents tree view node item implementation for usage in a TreeDataProvider
+ */
+export class LeoUndoNode extends vscode.TreeItem {
+
+    // Context string is checked in package.json with 'when' clauses
+    public contextValue: string;
+
+    constructor(
+        bead: Bead,
+        private _beadId: number,
+        private _leoUI: LeoUI
+    ) {
+        super(bead.undoType || "unkown undo");
+        // Setup this instance (just differentiate 'script-button' for now)
+        // this.command = {
+        //     command: Constants.COMMANDS.CLICK_BUTTON,
+        //     title: '',
+        //     arguments: [this]
+        // };
+        this.contextValue = "leojsUndoNode";
+    }
+
+    @others
+}
+
+</t>
+<t tx="felix.20211122213012.1">/**
+ * * Refresh the whole outline
+ */
+public refreshTreeRoot(): void {
+    this._onDidChangeTreeData.fire(undefined);
+}
+
+</t>
+<t tx="felix.20211122213023.1">public getTreeItem(element: LeoUndoNode): Thenable&lt;LeoUndoNode&gt; | LeoUndoNode {
+    return element;
+}
+
+</t>
+<t tx="felix.20211122213037.1">public getParent(element: LeoUndoNode): vscode.ProviderResult&lt;LeoUndoNode&gt; {
+    // Leo documents are just a list, as such, entries are always child of root, so return null
+    return undefined;
+}
+
+</t>
+<t tx="felix.20211122214005.1">// @ts-ignore
+public get iconPath(): Icon {
+    return this._leoUI.documentIcons[0];
+}
+
+</t>
+<t tx="felix.20211122214009.1">// @ts-ignore
+public get id(): string {
+    // Add prefix and suffix salt to numeric index to prevent accidental duplicates
+    return "b" + this._beadId;
+}
+
+</t>
+<t tx="felix.20211122214039.1">// @ts-ignore
+public get tooltip(): string {
+    return "TODO leojsUndo Tooltip";
+}
+
+</t>
+<t tx="felix.20211122214230.1">public getChildren(element?: LeoUndoNode): LeoUndoNode[] {
+    const w_children: LeoUndoNode[] = [];
+    // if called with element, or not ready, give back empty array as there won't be any children
+    if (this._leoStates.fileOpenedReady &amp;&amp; !element) {
+        const c = g.app.commandersList[this._leoUI.commanderIndex];
+        const undoer = c.undoer;
+        let i: number = 0;
+        undoer.beads.forEach(p_bead =&gt; {
+            w_children.push(new LeoUndoNode(p_bead, this._beadId++, this._leoUI));
+            if (i === undoer.bead) {
+                console.log('Select Current Undo # : ' + undoer.bead);
+            }
+            i++;
+        });
+
+    }
+    return w_children; // Defaults to an empty list of children
+}
+
+</t>
+<t tx="felix.20211122230343.1">/**
+ * * Handle the change of visibility of either outline treeview and refresh it if its visible
+ * @param p_event The treeview-visibility-changed event passed by vscode
+ * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
+ */
+private _onUndosTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
+    if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
+    if (p_event.visible) {
+        // TODO: Check if needed
+        this._leoUndosProvider.refreshTreeRoot(); // May not need to set selection...?
+    }
 }
 
 </t>
