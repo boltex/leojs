@@ -28,9 +28,13 @@ export class Constants {
     public static RECENT_FILES_KEY: string = "leojsRecentFiles";
     public static LAST_FILES_KEY: string = "leojsLastFiles";
 
-    public static REFRESH_DEBOUNCE_DELAY: number = 40;
+    public static STATUSBAR_DEBOUNCE_DELAY: number = 70;
+    public static REFRESH_DEBOUNCE_DELAY: number = 50;
     public static STATES_DEBOUNCE_DELAY: number = 60;
+    public static BUTTONS_DEBOUNCE_DELAY: number = 90;
     public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
+    public static UNDOS_DEBOUNCE_DELAY: number = 100;
+    public static BODY_STATES_DEBOUNCE_DELAY: number = 200;
 
     public static CONFIG_NAME: string = "leojs";
     public static CONFIG_WORKBENCH_ENABLED_PREVIEW: string = "workbench.editor.enablePreview";

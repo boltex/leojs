@@ -1,5 +1,6 @@
 // import escape from 'escape-html'
-import axios from 'axios';
+// import axios from 'axios';
+import * as vscode from 'vscode';
 
 const xslTemplate = `
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
@@ -69,15 +70,25 @@ function transform(xml, xslString, transformer, serializer) {
 function loadDoc(filename) {
     console.log('loading file:', filename);
     var p = new Promise((resolve, reject) => {
-        axios
-            .get(filename)
-            .then(function (response) {
-                resolve(response.data);
-            })
-            .catch(function (error) {
-                console.log(error);
-                reject();
-            });
+
+        // * had line in package.json -> "axios": "^0.22.0",
+        // axios
+        //     .get(filename)
+        //     .then(function (response) {
+        //         resolve(response.data);
+        //     })
+        //     .catch(function (error) {
+        //         console.log(error);
+        //         reject();
+        //     });
+
+        // * New code
+        vscode.workspace.fs.readFile(filename, function (err, data) {
+            if (err) {
+                reject(err);
+            }
+            resolve(data.toString());
+        });
     });
     return p;
 }

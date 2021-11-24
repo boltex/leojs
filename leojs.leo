@@ -37,10 +37,7 @@
 <v t="felix.20201215231023.4"><vh>function serverTransform(resolve, reject)</vh></v>
 <v t="felix.20201215231023.5"><vh>function clientTransform(resolve, reject)</vh></v>
 </v>
-<v t="felix.20201215231023.6"><vh>function loadDoc </vh>
-<v t="felix.20201215231023.7"><vh>.then(function (response)</vh></v>
-<v t="felix.20201215231023.8"><vh>.catch(function (error)</vh></v>
-</v>
+<v t="felix.20201215231023.6"><vh>function loadDoc </vh></v>
 <v t="felix.20201215231023.9"><vh>function cleanText</vh></v>
 <v t="felix.20201215231023.10"><vh>function isRelative</vh></v>
 <v t="felix.20201215231023.11"><vh>function getLeoJSON</vh></v>
@@ -952,7 +949,7 @@ Feel free to explore and ask about it! 😜
 import { ReqRefresh } from "./types";
 import { LeoUI } from './leoUI';
 import { Constants } from './constants';
-import { LeoButtonNode } from './leoButtonNode';
+import { LeoButtonNode } from './leoButtons';
 import { LeoOutlineNode } from './leoOutlineNode';
 import { Position } from './core/leoNodes';
 
@@ -1011,12 +1008,16 @@ import * as fs from 'fs';
 @others
 </t>
 <t tx="felix.20201208224407.10">/**
- * * Returns the milliseconds between a given starting process.hrtime tuple and the current call to process.hrtime
- * @param p_start starting process.hrtime to subtract from current immediate time
+ * * Returns milliseconds between the p_start process.hrtime tuple and p_end (or current call to process.hrtime)
+ * @param p_start starting process.hrtime to subtract from p_end or current immediate time
+ * @param p_end optional end process.hrtime (or immediate time)
  * @returns number of milliseconds passed since the given start hrtime
  */
-export function getDurationMs(p_start: [number, number]): number {
-    const [w_secs, w_nanosecs] = process.hrtime(p_start);
+export function getDurationMs(p_start: [number, number], p_end?: [number, number]): number {
+    if (!p_end) {
+        p_end = process.hrtime(p_start);
+    }
+    const [w_secs, w_nanosecs] = p_end;
     return w_secs * 1000 + Math.floor(w_nanosecs / 1000000);
 }
 
@@ -1500,6 +1501,8 @@ public refreshTreeRoot(): void {
 </t>
 <t tx="felix.20201214150149.1">export function activate(p_context: vscode.ExtensionContext) {
 
+    const w_start = process.hrtime(); // For calculating total startup time duration
+
     const w_leoUI: LeoUI = new LeoUI(p_context);
 
     // Shortcut pointers for readability
@@ -1535,6 +1538,10 @@ public refreshTreeRoot(): void {
     w_commands.map(function (p_command) {
         p_context.subscriptions.push(vscode.commands.registerCommand(...p_command));
     });
+
+    // * Log time taken for startup
+    console.log('leojs startup launched in ', utils.getDurationMs(w_start), 'ms');
+
 
 }
 
@@ -1997,9 +2004,13 @@ public static UNTITLED_FILE_NAME: string = "untitled";
 public static RECENT_FILES_KEY: string = "leojsRecentFiles";
 public static LAST_FILES_KEY: string = "leojsLastFiles";
 
-public static REFRESH_DEBOUNCE_DELAY: number = 40;
+public static STATUSBAR_DEBOUNCE_DELAY: number = 70;
+public static REFRESH_DEBOUNCE_DELAY: number = 50;
 public static STATES_DEBOUNCE_DELAY: number = 60;
+public static BUTTONS_DEBOUNCE_DELAY: number = 90;
 public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
+public static UNDOS_DEBOUNCE_DELAY: number = 100;
+public static BODY_STATES_DEBOUNCE_DELAY: number = 200;
 
 public static CONFIG_NAME: string = "leojs";
 public static CONFIG_WORKBENCH_ENABLED_PREVIEW: string = "workbench.editor.enablePreview";
@@ -5698,6 +5709,7 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
 "@types/mocha": "^8.0.0",
 "@types/node": "^12.11.7",
 "@types/vscode": "^1.62.0",
+"@types/debounce": "^1.2.0",
 "@typescript-eslint/eslint-plugin": "^4.1.1",
 "@typescript-eslint/parser": "^4.1.1",
 "eslint": "^7.9.0",
@@ -5710,9 +5722,7 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
 "webpack": "^4.44.1",
 "webpack-cli": "^3.3.12"
 </t>
-<t tx="felix.20201214205159.81">"@types/debounce": "^1.2.0",
-"axios": "^0.22.0",
-"date-format-lite": "^17.7.0",
+<t tx="felix.20201214205159.81">"date-format-lite": "^17.7.0",
 "debounce": "^1.2.0"
 </t>
 <t tx="felix.20201214205159.9">{
@@ -6258,22 +6268,29 @@ const xslTemplate = `
 <t tx="felix.20201215231023.6">function loadDoc(filename) {
     console.log('loading file:', filename);
     var p = new Promise((resolve, reject) =&gt; {
-        axios
-            .get(filename)
-            @others
+
+        // * had line in package.json -&gt; "axios": "^0.22.0",
+        // axios
+        //     .get(filename)
+        //     .then(function (response) {
+        //         resolve(response.data);
+        //     })
+        //     .catch(function (error) {
+        //         console.log(error);
+        //         reject();
+        //     });
+
+        // * New code
+        vscode.workspace.fs.readFile(filename, function (err, data) {
+            if (err) {
+                reject(err);
+            }
+            resolve(data.toString());
+        });
     });
     return p;
 }
 
-</t>
-<t tx="felix.20201215231023.7">.then(function (response) {
-    resolve(response.data);
-})
-</t>
-<t tx="felix.20201215231023.8">.catch(function (error) {
-    console.log(error);
-    reject();
-});
 </t>
 <t tx="felix.20201215231023.9">function cleanText(data, startId) {
     data.name = data.name.replace(/&lt;&lt;/g, '\u00AB');
@@ -9333,7 +9350,8 @@ var testVar = "some String";
 
 </t>
 <t tx="felix.20210124225736.1">// import escape from 'escape-html'
-import axios from 'axios';
+// import axios from 'axios';
+import * as vscode from 'vscode';
 
 </t>
 <t tx="felix.20210125233441.1">/* These routines change self to a new position "in place".

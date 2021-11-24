@@ -2,11 +2,13 @@ import * as vscode from 'vscode';
 import { ReqRefresh } from "./types";
 import { LeoUI } from './leoUI';
 import { Constants } from './constants';
-import { LeoButtonNode } from './leoButtonNode';
+import { LeoButtonNode } from './leoButtons';
 import { LeoOutlineNode } from './leoOutlineNode';
 import { Position } from './core/leoNodes';
 
 export function activate(p_context: vscode.ExtensionContext) {
+
+    const w_start = process.hrtime(); // For calculating total startup time duration
 
     const w_leoUI: LeoUI = new LeoUI(p_context);
 
@@ -210,6 +212,10 @@ export function activate(p_context: vscode.ExtensionContext) {
     w_commands.map(function (p_command) {
         p_context.subscriptions.push(vscode.commands.registerCommand(...p_command));
     });
+
+    // * Log time taken for startup
+    console.log('leojs startup launched in ', utils.getDurationMs(w_start), 'ms');
+
 
 }
 

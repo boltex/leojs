@@ -113,12 +113,16 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
 }
 
 /**
- * * Returns the milliseconds between a given starting process.hrtime tuple and the current call to process.hrtime
- * @param p_start starting process.hrtime to subtract from current immediate time
+ * * Returns milliseconds between the p_start process.hrtime tuple and p_end (or current call to process.hrtime)
+ * @param p_start starting process.hrtime to subtract from p_end or current immediate time
+ * @param p_end optional end process.hrtime (or immediate time)
  * @returns number of milliseconds passed since the given start hrtime
  */
-export function getDurationMs(p_start: [number, number]): number {
-    const [w_secs, w_nanosecs] = process.hrtime(p_start);
+export function getDurationMs(p_start: [number, number], p_end?: [number, number]): number {
+    if (!p_end) {
+        p_end = process.hrtime(p_start);
+    }
+    const [w_secs, w_nanosecs] = p_end;
     return w_secs * 1000 + Math.floor(w_nanosecs / 1000000);
 }
 
