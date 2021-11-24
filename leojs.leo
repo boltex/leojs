@@ -946,6 +946,7 @@ Feel free to explore and ask about it! 😜
 **Enjoy!**
 </t>
 <t tx="felix.20201208214322.1">import * as vscode from 'vscode';
+import * as utils from "./utils";
 import { ReqRefresh } from "./types";
 import { LeoUI } from './leoUI';
 import { Constants } from './constants';
