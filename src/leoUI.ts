@@ -350,7 +350,9 @@ export class LeoUI {
         // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
         this.getStates = debounce(this._triggerGetStates, Constants.STATES_DEBOUNCE_DELAY);
         this.refreshDocumentsPane = debounce(this._refreshDocumentsPane, Constants.DOCUMENTS_DEBOUNCE_DELAY);
-        this.launchRefresh = debounce(this._launchRefresh, Constants.REFRESH_DEBOUNCE_DELAY);
+        // Immediate 'throttled' instead of debounced
+        this.launchRefresh = debounce(this._launchRefresh, Constants.REFRESH_DEBOUNCE_DELAY, true);
+
 
         // ! FAKE DEVELOPMENT STARTUP END ( TODO: finish _setupOpenedLeoDocument )
         // Reset Extension context flags (used in 'when' clauses in package.json)
@@ -633,6 +635,13 @@ export class LeoUI {
      */
     private _refreshDocumentsPane(): void {
         this._leoDocumentsProvider.refreshTreeRoot();
+    }
+
+    /**
+     * * Redreshes the undo pane
+     */
+    public refreshUndoPane(): void {
+        //  
     }
 
     /**
@@ -1004,9 +1013,9 @@ export class LeoUI {
 
         vscode.window.showInformationMessage('TODO: Implement closeLeoFile');
 
-        const w_fakeTotalOpened = 1;
+        const w_fakeTotalOpened = 1; // TODO 
 
-        if (w_fakeTotalOpened) {
+        if (w_fakeTotalOpened > 0) {
             this.launchRefresh();
         } else {
             this._setupNoOpenedLeoDocument();

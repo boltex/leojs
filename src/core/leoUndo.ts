@@ -69,63 +69,61 @@ export class Undoer {
 
     public c: Commands;
     public p: Position | undefined;
-    public granularity: string = ""; // Set in reloadSettings.
+    public granularity!: string; // Set in reloadSettings.
     public max_undo_stack_size: number;
 
     // State ivars...
     public beads: Bead[] = []; // List of undo nodes.
     public bead: number = -1; // Index of the present bead: -1:len(beads)
-    public undoType: any = "Can't Undo";
+    public undoType: string = "Can't Undo";
     public groupCount: number = 0;
     // These must be set here, _not_ in clearUndoState.
-    public redoMenuLabel: any = "Can't Redo";
-    public undoMenuLabel: any = "Can't Undo";
-    public realRedoMenuLabel: any = "Can't Redo";
-    public realUndoMenuLabel: any = "Can't Undo";
+    public redoMenuLabel: string = "Can't Redo";
+    public undoMenuLabel: string = "Can't Undo";
+    public realRedoMenuLabel: string = "Can't Redo";
+    public realUndoMenuLabel: string = "Can't Undo";
     public undoing: boolean = false; // True if executing an Undo command.
     public redoing: boolean = false; // True if executing a Redo command.
     public per_node_undo: boolean = false; // True: v may contain undo_info ivar.
     // New in 4.2...
     public optionalIvars: string[] = [];
     // Set the following ivars to keep pylint happy.
-    public afterTree: any;
-    public beforeTree: any;
-    public children: any;
-    public deleteMarkedNodesData: any;
-    public followingSibs: any;
-    public inHead: any;
-    public kind: any;
-    public newBack: any;
-    public newBody: any;
-    public newChildren: any;
-    public newHead: any;
-    public newIns: any;
-    public newMarked: any;
-    public newN: any;
-    public newP: any;
-    public newParent: any;
-    public newParent_v: any;
-    public newRecentFiles: any;
-    public newSel: any;
-    public newTree: any;
-    public newYScroll: any;
-    public oldBack: any;
-    public oldBody: any;
-    public oldChildren: any;
-    public oldHead: any;
-    public oldIns: any;
-    public oldMarked: any;
-    public oldN: any;
-    public oldParent: any;
-    public oldParent_v: any;
-    public oldRecentFiles: any;
-    public oldSel: any;
-    public oldTree: any;
-    public oldYScroll: any;
-    public pasteAsClone: any;
-    public prevSel: any;
-    public sortChildren: any;
-    public verboseUndoGroup: any;
+    public afterTree!: { v: VNode; head: string; body: string; }[];
+    public beforeTree!: { v: VNode; head: string; body: string; }[];
+    public children!: VNode[];
+    public deleteMarkedNodesData!: Position[];
+    public followingSibs!: VNode[];
+    public inHead!: boolean;
+    public kind!: string;
+    public newBack!: Position;
+    public newBody!: string;
+    public newChildren!: VNode[];
+    public newHead!: string;
+    public newIns!: number;
+    public newMarked!: boolean;
+    public newN!: number;
+    public newP!: Position;
+    public newParent!: Position;
+    public newParent_v!: VNode;
+    public newSel!: number[];
+    public newTree!: TreeData[];
+    public newYScroll!: number;
+    public oldBack!: Position;
+    public oldBody!: string;
+    public oldChildren!: VNode[];
+    public oldHead!: string;
+    public oldIns!: number;
+    public oldMarked!: boolean;
+    public oldN!: number;
+    public oldParent!: Position;
+    public oldParent_v!: VNode;
+    public oldSel!: number[];
+    public oldTree!: TreeData[];
+    public oldYScroll!: number;
+    public pasteAsClone!: boolean;
+    public prevSel!: number[];
+    public sortChildren!: boolean;
+    public verboseUndoGroup!: boolean;
 
     //@+others
     //@+node:felix.20211026230613.5: *3* u.Birth
@@ -299,7 +297,6 @@ export class Undoer {
         // bunch is not a dict, so bunch.keys() is required.
         for (let key of Object.keys(bunch)) {
             const val: any = bunch[key];
-            // TODO test this!
             (u as any)[key] = val;
             if (!u.optionalIvars.includes(key)) {
                 u.optionalIvars.push(key);
@@ -372,7 +369,7 @@ export class Undoer {
             u.setUndoType("Can't Undo");
         }
         // Set only the redo menu label.
-        bunch = u.peekBead(u.bead + 1)
+        bunch = u.peekBead(u.bead + 1);
         if (bunch) {
             u.setRedoType(bunch.undoType);
         } else {
@@ -515,7 +512,7 @@ export class Undoer {
         const u: Undoer = this;
         const c: Commands = u.c;
         if (!['new', 'old'].includes(oldOrNew)) {
-            g.trace("can't happen")
+            g.trace("can't happen");
             return;
         }
         const isOld: boolean = oldOrNew === 'old';
@@ -1098,7 +1095,7 @@ export class Undoer {
         return {
             oldMarked: p && p.__bool__() && p.isMarked(),
             oldSel: w && w.getSelectionRange() || undefined,
-            p: p && p.__bool__() && p.copy()
+            p: p && p.__bool__() && p.copy() // && makes sure the copy ends up in p.
         };
     }
     //@+node:felix.20211026230613.64: *4* u.canRedo & canUndo
@@ -1364,9 +1361,9 @@ export class Undoer {
             // TODO cc chapter controler
             // cc.selectChapterByName('main');
         }
-        if (u.newBack) {
+        if (u.newBack.__bool__()) {
             u.newP._linkAfter(u.newBack);
-        } else if (u.newParent) {
+        } else if (u.newParent.__bool__()) {
             u.newP._linkAsNthChild(u.newParent, 0);
         } else {
             u.newP._linkAsRoot();
@@ -1394,22 +1391,21 @@ export class Undoer {
     public redoDemote(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const parent_v: VNode | undefined = u.p!._parentVnode();
+        const parent_v: VNode = u.p!._parentVnode()!;
         const n: number = u.p!.childIndex();
 
         // Move the demoted nodes from the old parent to the new parent.
-        parent_v!.children = parent_v!.children.slice(0, n + 1);
+        parent_v.children = parent_v.children.slice(0, n + 1);
 
         u.p!.v.children.push(...u.followingSibs);
         // Adjust the parent links of the moved nodes.
         // There is no need to adjust descendant links.
         for (let v of u.followingSibs) {
             // v.parents.remove(parent_v);
-            const index: number = v.parents.indexOf(parent_v);
-            if (index > -1) {
-                v.parents.splice(index, 1);
+            const i_parent_v: number = v.parents.indexOf(parent_v);
+            if (i_parent_v > -1) {
+                v.parents.splice(i_parent_v, 1);
             }
-
             v.parents.push(u.p!.v);
         }
         u.p!.setDirty();
@@ -1478,9 +1474,9 @@ export class Undoer {
             // TODO cc chapter controler
             // cc.selectChapterByName('main');
         }
-        if (u.newBack) {
+        if (u.newBack.__bool__()) {
             u.newP._linkAfter(u.newBack);
-        } else if (u.newParent) {
+        } else if (u.newParent.__bool__()) {
             u.newP._linkAsNthChild(u.newParent, 0);
         } else {
             u.newP._linkAsRoot();
@@ -1670,8 +1666,6 @@ export class Undoer {
         } else {
             g.trace(`no undo helper for ${u.kind} ${u.undoType}`);
         }
-        console.log('almost done undo!')
-
         //
         // Finish.
         c.checkOutline();
@@ -1679,12 +1673,6 @@ export class Undoer {
         u.undoing = false;
         u.bead -= 1;
         u.setUndoTypes();
-        console.log('done undo!')
-
-        console.log("canredo", u.canRedo());
-        console.log("canundo", u.canUndo());
-
-
     }
     //@+node:felix.20211026230613.104: *3* u.undo helpers
     //@+node:felix.20211026230613.105: *4*  u.undoHelper
@@ -1700,7 +1688,6 @@ export class Undoer {
      * including headline and body text, and marked bits.
      */
     public undoChangeBody(): void {
-
         const u: Undoer = this;
         const c: Commands = u.c;
         const w: any = c.frame.body.wrapper;
@@ -1804,9 +1791,9 @@ export class Undoer {
         const c: Commands = u.c;
         console.log('undo delete oldBack: ', u.oldBack);
 
-        if (u.oldBack) {
+        if (u.oldBack.__bool__()) {
             u.p!._linkAfter(u.oldBack);
-        } else if (u.oldParent) {
+        } else if (u.oldParent.__bool__()) {
             u.p!._linkAsNthChild(u.oldParent, 0);
         } else {
             u.p!._linkAsRoot();
@@ -1828,8 +1815,13 @@ export class Undoer {
         // There is no need to adjust descendant links.
         parent_v.setDirty();
         for (let sib of u.followingSibs) {
-            sib.parents.remove(u.p!.v);
-            sib.parents.append(parent_v);
+
+            //sib.parents.remove(u.p!.v);
+            const i_upv: number = sib.parents.indexOf(u.p!.v);
+            if (i_upv > -1) {
+                sib.parents.splice(i_upv, 1);
+            }
+            sib.parents.push(parent_v);
         }
         u.p!.setAllAncestorAtFileNodesDirty();
         c.setCurrentPosition(u.p!);
@@ -2017,8 +2009,12 @@ export class Undoer {
         // There is no need to adjust descendant links.
         parent_v.setDirty();
         for (let child of u.children) {
-            child.parents.remove(parent_v);
-            child.parents.append(u.p!.v);
+            let i_parent_v = child.parents.indexOf(parent_v);
+            if (i_parent_v > -1) {
+                child.parents.splice(i_parent_v, 1);
+            }
+            //child.parents.remove(parent_v);
+            child.parents.push(u.p!.v);
         }
         u.p!.setAllAncestorAtFileNodesDirty();
         c.setCurrentPosition(u.p!);
@@ -2121,7 +2117,7 @@ export class Undoer {
         u.p = u.undoRedoTree(u.p!, u.newTree, u.oldTree);
         u.p.setAllAncestorAtFileNodesDirty();
         c.selectPosition(u.p);  // Does full recolor.
-        if (u.oldSel) {
+        if (u.oldSel && u.oldSel.length) {
             //i, j = u.oldSel
             c.frame.body.wrapper.setSelectionRange(u.oldSel[0], u.oldSel[1]);
         }

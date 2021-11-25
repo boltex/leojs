@@ -130,6 +130,7 @@
 <v t="felix.20201222013904.1"><vh>_refreshOutline</vh></v>
 <v t="felix.20211024203649.1"><vh>_revealTreeViewNode</vh></v>
 <v t="felix.20201214202123.1"><vh>_refreshDocumentsPane</vh></v>
+<v t="felix.20211124223735.1"><vh>_refreshUndoPane</vh></v>
 <v t="felix.20201214202128.1"><vh>setDocumentSelection</vh></v>
 </v>
 <v t="felix.20201214194144.5"><vh>UI Change Events</vh>
@@ -3251,7 +3252,9 @@ import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
     // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
     this.getStates = debounce(this._triggerGetStates, Constants.STATES_DEBOUNCE_DELAY);
     this.refreshDocumentsPane = debounce(this._refreshDocumentsPane, Constants.DOCUMENTS_DEBOUNCE_DELAY);
-    this.launchRefresh = debounce(this._launchRefresh, Constants.REFRESH_DEBOUNCE_DELAY);
+    // Immediate 'throttled' instead of debounced
+    this.launchRefresh = debounce(this._launchRefresh, Constants.REFRESH_DEBOUNCE_DELAY, true);
+
 
     // ! FAKE DEVELOPMENT STARTUP END ( TODO: finish _setupOpenedLeoDocument )
     // Reset Extension context flags (used in 'when' clauses in package.json)
@@ -5907,9 +5910,9 @@ public closeLeoFile(): Thenable&lt;unknown&gt; {
 
     vscode.window.showInformationMessage('TODO: Implement closeLeoFile');
 
-    const w_fakeTotalOpened = 1;
+    const w_fakeTotalOpened = 1; // TODO 
 
-    if (w_fakeTotalOpened) {
+    if (w_fakeTotalOpened &gt; 0) {
         this.launchRefresh();
     } else {
         this._setupNoOpenedLeoDocument();
@@ -14360,6 +14363,14 @@ private _onUndosTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChan
         // TODO: Check if needed
         this._leoUndosProvider.refreshTreeRoot(); // May not need to set selection...?
     }
+}
+
+</t>
+<t tx="felix.20211124223735.1">/**
+ * * Redreshes the undo pane
+ */
+public refreshUndoPane(): void {
+    //  
 }
 
 </t>
