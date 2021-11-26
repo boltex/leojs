@@ -4672,7 +4672,7 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
     },
     {
       "id": "leojsUndoExplorer",
-      "name": "Leojs Undos",
+      "name": "Leojs History",
       "contextualTitle": "Leojs"
     }
   ],
@@ -4695,7 +4695,7 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
     {
       "id": "leojsUndos",
       "contextualTitle": "Leojs",
-      "name": "Undos"
+      "name": "History"
     }
   ]
 },

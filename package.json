@@ -245,7 +245,7 @@
         },
         {
           "id": "leojsUndoExplorer",
-          "name": "Leojs Undos",
+          "name": "Leojs History",
           "contextualTitle": "Leojs"
         }
       ],
@@ -268,7 +268,7 @@
         {
           "id": "leojsUndos",
           "contextualTitle": "Leojs",
-          "name": "Undos"
+          "name": "History"
         }
       ]
     },
