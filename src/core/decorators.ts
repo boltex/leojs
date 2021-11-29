@@ -19,7 +19,7 @@ export function commander_command(p_name: string, p_doc: string) {
         );
 
         if (!g.global_commands_dict) {
-            //@ts-expect-error
+            // @ts-expect-error
             g.global_commands_dict = {};
         }
         g.global_commands_dict[p_name] = commander_command_wrapper;
@@ -46,7 +46,7 @@ export function new_cmd_decorator(p_name: string, p_doc: string, ivars: string[]
         );
 
         if (!g.global_commands_dict) {
-            //@ts-expect-error
+            // @ts-expect-error
             g.global_commands_dict = {};
         }
         g.global_commands_dict[p_name] = commander_command_wrapper;

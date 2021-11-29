@@ -2009,9 +2009,9 @@ public static LAST_FILES_KEY: string = "leojsLastFiles";
 public static STATUSBAR_DEBOUNCE_DELAY: number = 70;
 public static REFRESH_DEBOUNCE_DELAY: number = 50;
 public static STATES_DEBOUNCE_DELAY: number = 60;
-public static BUTTONS_DEBOUNCE_DELAY: number = 90;
+public static BUTTONS_DEBOUNCE_DELAY: number = 150;
 public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
-public static UNDOS_DEBOUNCE_DELAY: number = 100;
+public static UNDOS_DEBOUNCE_DELAY: number = 180;
 public static BODY_STATES_DEBOUNCE_DELAY: number = 200;
 
 public static CONFIG_NAME: string = "leojs";
@@ -2989,7 +2989,7 @@ export interface LeoButton {
 
 </t>
 <t tx="felix.20201214194144.1">import * as vscode from "vscode";
-import { debounce } from "debounce";
+import { debounce } from "lodash";
 import * as utils from "./utils";
 import { Constants } from "./constants";
 import { RevealType, Icon, ReqRefresh, LeoPackageStates } from "./types";
@@ -3246,15 +3246,23 @@ import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
     //     this._onDidOpenTextDocument(p_document)
     // );
 
-
-
-
     // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
-    this.getStates = debounce(this._triggerGetStates, Constants.STATES_DEBOUNCE_DELAY);
-    this.refreshDocumentsPane = debounce(this._refreshDocumentsPane, Constants.DOCUMENTS_DEBOUNCE_DELAY);
-    // Immediate 'throttled' instead of debounced
-    this.launchRefresh = debounce(this._launchRefresh, Constants.REFRESH_DEBOUNCE_DELAY, true);
-
+    this.getStates = debounce(
+        this._triggerGetStates,
+        Constants.STATES_DEBOUNCE_DELAY,
+        { leading: false, trailing: true }
+    );
+    this.refreshDocumentsPane = debounce(
+        this._refreshDocumentsPane,
+        Constants.DOCUMENTS_DEBOUNCE_DELAY,
+        { leading: false, trailing: true }
+    );
+    // Immediate 'throttled' and debounced
+    this.launchRefresh = debounce(
+        this._launchRefresh,
+        Constants.REFRESH_DEBOUNCE_DELAY,
+        { leading: true, trailing: true }
+    );
 
     // ! FAKE DEVELOPMENT STARTUP END ( TODO: finish _setupOpenedLeoDocument )
     // Reset Extension context flags (used in 'when' clauses in package.json)
@@ -3350,25 +3358,13 @@ export class LeoUI {
     private _leoTerminalPane: vscode.OutputChannel | undefined;
 
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
-    public launchRefresh: ((p_node?: Position) =&gt; void) &amp; {
-        clear(): void;
-    } &amp; {
-        flush(): void;
-    };
+    public launchRefresh: ((p_node?: Position) =&gt; void);
 
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
-    public getStates: (() =&gt; void) &amp; {
-        clear(): void;
-    } &amp; {
-        flush(): void;
-    };
+    public getStates: (() =&gt; void);
 
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
-    public refreshDocumentsPane: (() =&gt; void) &amp; {
-        clear(): void;
-    } &amp; {
-        flush(): void;
-    };
+    public refreshDocumentsPane: (() =&gt; void);
 
     @others
 
@@ -3759,6 +3755,7 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
     &lt;&lt; scripts &gt;&gt;
   },
   "devDependencies": {
+    "@types/debounce": "^1.2.0",
     &lt;&lt; devDependencies &gt;&gt;
   },
   "dependencies": {
@@ -5710,10 +5707,10 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
 },
 </t>
 <t tx="felix.20201214205159.80">"@types/glob": "^7.1.3",
+"@types/lodash": "^4.14.177",
 "@types/mocha": "^8.0.0",
 "@types/node": "^12.11.7",
 "@types/vscode": "^1.62.0",
-"@types/debounce": "^1.2.0",
 "@typescript-eslint/eslint-plugin": "^4.1.1",
 "@typescript-eslint/parser": "^4.1.1",
 "eslint": "^7.9.0",
@@ -5727,7 +5724,7 @@ public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): 
 "webpack-cli": "^3.3.12"
 </t>
 <t tx="felix.20201214205159.81">"date-format-lite": "^17.7.0",
-"debounce": "^1.2.0"
+"lodash": "^4.17.21"
 </t>
 <t tx="felix.20201214205159.9">{
   "command": "leojs.showBody",
@@ -9597,7 +9594,7 @@ public moveToBack(): Position {
         // console.log('n', n);
         // console.log('parent_v.children.length', parent_v?.children.length);
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+        // @ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9615,7 +9612,7 @@ public moveToFirstChild(): Position {
         p._childIndex = 0;
     } else {
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+        // @ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9635,7 +9632,7 @@ public moveToLastChild(): Position {
         p._childIndex = n - 1;
     } else {
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+        // @ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9672,7 +9669,7 @@ public moveToNext(): Position {
         p.v = parent_v.children[n + 1];
     } else {
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+        // @ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9706,7 +9703,7 @@ public moveToNthChild(n: number): Position {
         p._childIndex = n;
     } else {
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+        // @ts-ignore
         p.v = undefined;
     }
     return p;
@@ -9724,7 +9721,7 @@ public moveToParent(): Position {
         p._childIndex = item[1];
     } else {
         // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+        // @ts-ignore
         p.v = undefined;
     }
     return p;
@@ -12992,7 +12989,7 @@ export function commander_command(p_name: string, p_doc: string) {
         );
 
         if (!g.global_commands_dict) {
-            //@ts-expect-error
+            // @ts-expect-error
             g.global_commands_dict = {};
         }
         g.global_commands_dict[p_name] = commander_command_wrapper;
@@ -13019,7 +13016,7 @@ export function new_cmd_decorator(p_name: string, p_doc: string, ivars: string[]
         );
 
         if (!g.global_commands_dict) {
-            //@ts-expect-error
+            // @ts-expect-error
             g.global_commands_dict = {};
         }
         g.global_commands_dict[p_name] = commander_command_wrapper;

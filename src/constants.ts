@@ -31,9 +31,9 @@ export class Constants {
     public static STATUSBAR_DEBOUNCE_DELAY: number = 70;
     public static REFRESH_DEBOUNCE_DELAY: number = 50;
     public static STATES_DEBOUNCE_DELAY: number = 60;
-    public static BUTTONS_DEBOUNCE_DELAY: number = 90;
+    public static BUTTONS_DEBOUNCE_DELAY: number = 150;
     public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
-    public static UNDOS_DEBOUNCE_DELAY: number = 100;
+    public static UNDOS_DEBOUNCE_DELAY: number = 180;
     public static BODY_STATES_DEBOUNCE_DELAY: number = 200;
 
     public static CONFIG_NAME: string = "leojs";

@@ -198,8 +198,7 @@ export class Undoer {
         result.push(`u.beads.length: ${u.beads.length}, n: ${n}`);
 
         for (let ivar of ['kind', 'newP', 'newN', 'p', 'oldN', 'undoHelper']) {
-            //@verbatim
-            //@ts-expect-error
+            // @ts-expect-error
             result.push(`${ivar} = ${u[ivar]}`);
         }
         return result.join('\n');

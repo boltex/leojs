@@ -1335,7 +1335,7 @@ export class Position {
             // console.log('n', n);
             // console.log('parent_v.children.length', parent_v?.children.length);
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+            // @ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1352,7 +1352,7 @@ export class Position {
             p._childIndex = 0;
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+            // @ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1371,7 +1371,7 @@ export class Position {
             p._childIndex = n - 1;
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+            // @ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1406,7 +1406,7 @@ export class Position {
             p.v = parent_v.children[n + 1];
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+            // @ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1438,7 +1438,7 @@ export class Position {
             p._childIndex = n;
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+            // @ts-ignore
             p.v = undefined;
         }
         return p;
@@ -1455,7 +1455,7 @@ export class Position {
             p._childIndex = item[1];
         } else {
             // * For now, use undefined p.v to signal null/invalid positions
-            //@ts-ignore
+            // @ts-ignore
             p.v = undefined;
         }
         return p;

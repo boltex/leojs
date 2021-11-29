@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { debounce } from "debounce";
+import { debounce } from "lodash";
 import * as utils from "./utils";
 import { Constants } from "./constants";
 import { RevealType, Icon, ReqRefresh, LeoPackageStates } from "./types";
@@ -90,25 +90,13 @@ export class LeoUI {
     private _leoTerminalPane: vscode.OutputChannel | undefined;
 
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
-    public launchRefresh: ((p_node?: Position) => void) & {
-        clear(): void;
-    } & {
-        flush(): void;
-    };
+    public launchRefresh: ((p_node?: Position) => void);
 
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
-    public getStates: (() => void) & {
-        clear(): void;
-    } & {
-        flush(): void;
-    };
+    public getStates: (() => void);
 
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
-    public refreshDocumentsPane: (() => void) & {
-        clear(): void;
-    } & {
-        flush(): void;
-    };
+    public refreshDocumentsPane: (() => void);
 
     constructor(private _context: vscode.ExtensionContext) {
         // * Setup States
@@ -344,15 +332,23 @@ export class LeoUI {
         //     this._onDidOpenTextDocument(p_document)
         // );
 
-
-
-
         // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
-        this.getStates = debounce(this._triggerGetStates, Constants.STATES_DEBOUNCE_DELAY);
-        this.refreshDocumentsPane = debounce(this._refreshDocumentsPane, Constants.DOCUMENTS_DEBOUNCE_DELAY);
-        // Immediate 'throttled' instead of debounced
-        this.launchRefresh = debounce(this._launchRefresh, Constants.REFRESH_DEBOUNCE_DELAY, true);
-
+        this.getStates = debounce(
+            this._triggerGetStates,
+            Constants.STATES_DEBOUNCE_DELAY,
+            { leading: false, trailing: true }
+        );
+        this.refreshDocumentsPane = debounce(
+            this._refreshDocumentsPane,
+            Constants.DOCUMENTS_DEBOUNCE_DELAY,
+            { leading: false, trailing: true }
+        );
+        // Immediate 'throttled' and debounced
+        this.launchRefresh = debounce(
+            this._launchRefresh,
+            Constants.REFRESH_DEBOUNCE_DELAY,
+            { leading: true, trailing: true }
+        );
 
         // ! FAKE DEVELOPMENT STARTUP END ( TODO: finish _setupOpenedLeoDocument )
         // Reset Extension context flags (used in 'when' clauses in package.json)
