@@ -39,10 +39,16 @@ export class LeoUndosProvider implements vscode.TreeDataProvider<LeoUndoNode> {
             const c = g.app.commandersList[this._leoUI.commanderIndex];
             const undoer = c.undoer;
             let i: number = 0;
+
+            // console.log('undoer.bead', undoer.bead);
+
             undoer.beads.forEach(p_bead => {
-                w_children.push(new LeoUndoNode(p_bead, this._beadId++, this._leoUI));
+                const w_node = new LeoUndoNode(p_bead, this._beadId++, this._leoUI);
+                w_children.push(w_node);
                 if (i === undoer.bead) {
-                    console.log('Select Current Undo # : ' + undoer.bead);
+                    this._leoUI.setUndoSelection(w_node);
+                    console.log('Select Current Undo # : ' + undoer.bead, p_bead.kind, p_bead.undoType);
+
                 }
                 i++;
             });

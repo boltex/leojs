@@ -17,7 +17,7 @@ export class Constants {
     public static BUTTONS_EXPLORER_ID: string = "leojsButtonsExplorer";
 
     public static UNDOS_ID: string = "leojsUndos";
-    public static UNDOS_EXPLORER_ID: string = "leojsUndoExplorer";
+    public static UNDOS_EXPLORER_ID: string = "leojsUndosExplorer";
 
     public static FILE_EXTENSION: string = "leojs";
     public static URI_LEO_SCHEME: string = "leojs";
@@ -33,7 +33,7 @@ export class Constants {
     public static STATES_DEBOUNCE_DELAY: number = 60;
     public static BUTTONS_DEBOUNCE_DELAY: number = 150;
     public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
-    public static UNDOS_DEBOUNCE_DELAY: number = 180;
+    public static UNDOS_DEBOUNCE_DELAY: number = 250;
     public static BODY_STATES_DEBOUNCE_DELAY: number = 200;
 
     public static CONFIG_NAME: string = "leojs";

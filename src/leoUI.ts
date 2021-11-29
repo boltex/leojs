@@ -73,30 +73,37 @@ export class LeoUI {
     private _leoDocumentsProvider: LeoDocumentsProvider;
     private _leoDocuments: vscode.TreeView<LeoDocumentNode>;
     private _leoDocumentsExplorer: vscode.TreeView<LeoDocumentNode>;
+    private _lastLeoDocuments: vscode.TreeView<LeoDocumentNode> | undefined;
+
     private _currentDocumentChanged: boolean = false; // if clean and an edit is done: refresh opened documents view
 
     // * '@button' pane
     private _leoButtonsProvider: LeoButtonsProvider;
     private _leoButtons: vscode.TreeView<LeoButtonNode>;
     private _leoButtonsExplorer: vscode.TreeView<LeoButtonNode>;
+    private _lastLeoButtons: vscode.TreeView<LeoButtonNode> | undefined;
 
     // * Undos pane
     private _leoUndosProvider: LeoUndosProvider;
     private _leoUndos: vscode.TreeView<LeoUndoNode>;
     private _leoUndosExplorer: vscode.TreeView<LeoUndoNode>;
+    private _lastLeoUndos: vscode.TreeView<LeoUndoNode> | undefined;
 
     // * Log and terminal Panes
     private _leoLogPane: vscode.OutputChannel = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
     private _leoTerminalPane: vscode.OutputChannel | undefined;
 
-    // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
+    // * Debounced method 
     public launchRefresh: ((p_node?: Position) => void);
 
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
     public getStates: (() => void);
 
-    // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
+    // * Debounced method 
     public refreshDocumentsPane: (() => void);
+
+    // * Debounced method 
+    public refreshUndoPane: (() => void);
 
     constructor(private _context: vscode.ExtensionContext) {
         // * Setup States
@@ -244,6 +251,7 @@ export class LeoUI {
         this._leoDocuments.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, false)));
         this._leoDocumentsExplorer = vscode.window.createTreeView(Constants.DOCUMENTS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
         this._leoDocumentsExplorer.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, true)));
+        this._lastLeoDocuments = this._leoDocumentsExplorer;
 
         // * Create '@buttons' Treeview Providers and tree views
         this._leoButtonsProvider = new LeoButtonsProvider(this.leoStates, this.buttonIcons);
@@ -251,6 +259,7 @@ export class LeoUI {
         this._leoButtons.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, false)));
         this._leoButtonsExplorer = vscode.window.createTreeView(Constants.BUTTONS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
         this._leoButtonsExplorer.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, true)));
+        this._lastLeoButtons = this._leoButtonsExplorer;
 
         // * Create Undos Treeview Providers and tree views
         this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this);
@@ -258,6 +267,7 @@ export class LeoUI {
         this._leoUndos.onDidChangeVisibility((p_event => this._onUndosTreeViewVisibilityChanged(p_event, false)));
         this._leoUndosExplorer = vscode.window.createTreeView(Constants.UNDOS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoUndosProvider });
         this._leoUndosExplorer.onDidChangeVisibility((p_event => this._onUndosTreeViewVisibilityChanged(p_event, true)));
+        this._lastLeoUndos = this._leoUndosExplorer;
 
         // * Create Body Pane
         this._leoFileSystem = new LeoBodyProvider(this);
@@ -341,6 +351,11 @@ export class LeoUI {
         this.refreshDocumentsPane = debounce(
             this._refreshDocumentsPane,
             Constants.DOCUMENTS_DEBOUNCE_DELAY,
+            { leading: false, trailing: true }
+        );
+        this.refreshUndoPane = debounce(
+            this._refreshUndoPane,
+            Constants.UNDOS_DEBOUNCE_DELAY,
             { leading: false, trailing: true }
         );
         // Immediate 'throttled' and debounced
@@ -550,6 +565,9 @@ export class LeoUI {
         //     // this._focusInterrupt = false; // TODO : Test if reverting this in _gotSelection is 'ok'
         //     w_revealType = RevealType.RevealSelect;
         // }
+        if (this._refreshType.tree || this._refreshType.body || this._refreshType.node || this._refreshType.states) {
+            this.refreshUndoPane(); // with largish debounce.
+        }
 
         // * Either the whole tree refreshes, or a single tree node is revealed when just navigating
         if (this._refreshType.tree) {
@@ -634,13 +652,6 @@ export class LeoUI {
     }
 
     /**
-     * * Redreshes the undo pane
-     */
-    public refreshUndoPane(): void {
-        //  
-    }
-
-    /**
      * * Places selection on the required node with a 'timeout'. Used after refreshing the opened Leo documents view.
      * @param p_documentNode Document node instance in the Leo document view to be the 'selected' one.
      */
@@ -648,9 +659,6 @@ export class LeoUI {
         this._currentDocumentChanged = p_documentNode.documentEntry.changed;
         this.leoStates.leoOpenedFileName = p_documentNode.documentEntry.fileName();
         setTimeout(() => {
-            if (!this._leoDocuments.visible && !this._leoDocumentsExplorer.visible) {
-                return;
-            }
             let w_docView: vscode.TreeView<LeoDocumentNode>;
             if (this._leoDocuments.visible) {
                 w_docView = this._leoDocuments;
@@ -660,9 +668,9 @@ export class LeoUI {
             // tslint:disable-next-line: strict-comparisons
             if (w_docView.selection.length && w_docView.selection[0] === p_documentNode) {
                 // console.log('setDocumentSelection: already selected!');
-            } else {
+            } else if (this._lastLeoDocuments) {
                 console.log('setDocumentSelection: selecting in tree');
-                w_docView.reveal(p_documentNode, { select: true, focus: false }).then(
+                this._lastLeoDocuments.reveal(p_documentNode, { select: true, focus: false }).then(
                     () => { }, // Ok 
                     (p_error) => {
                         console.error('ERROR setDocumentSelection could not reveal: tree was refreshed!');
@@ -670,6 +678,32 @@ export class LeoUI {
                 );
             }
 
+        }, 0);
+    }
+
+    /**
+     * * Redreshes the undo pane
+     */
+    private _refreshUndoPane(): void {
+        this._leoUndosProvider.refreshTreeRoot();
+    }
+
+    /**
+     * * Places selection on the required node with a 'timeout'. Used after refreshing the opened Leo documents view.
+     * @param p_undoNode Node instance in the Leo History view to be the 'selected' one.
+     */
+    public setUndoSelection(p_undoNode: LeoUndoNode): void {
+        setTimeout(() => {
+            if (this._lastLeoUndos) {
+                console.log('rtevral!!');
+
+                this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
+                    () => { }, // Ok 
+                    (p_error) => {
+                        console.error('ERROR setUndoSelection could not reveal: tree was refreshed!');
+                    }
+                );
+            }
         }, 0);
     }
 
@@ -751,7 +785,10 @@ export class LeoUI {
     private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
         if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
         if (p_event.visible) {
-            this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
+            this._lastLeoDocuments = p_explorerView ? this._leoDocuments : this._leoDocumentsExplorer;
+
+            // TODO: Check if needed
+            // this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
         }
     }
 
@@ -763,6 +800,9 @@ export class LeoUI {
     private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
         if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
         if (p_event.visible) {
+            this._lastLeoButtons = p_explorerView ? this._leoButtons : this._leoButtonsExplorer;
+
+
             // TODO: Check if needed
             // this._leoButtonsProvider.refreshTreeRoot(); // May not need to set selection...?
         }
@@ -777,7 +817,7 @@ export class LeoUI {
         if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
         if (p_event.visible) {
             // TODO: Check if needed
-            this._leoUndosProvider.refreshTreeRoot(); // May not need to set selection...?
+            // this._leoUndosProvider.refreshTreeRoot(); // May not need to set selection...?
         }
     }
 
