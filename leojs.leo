@@ -3538,7 +3538,7 @@ private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEve
 private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
     if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
     if (p_event.visible) {
-        this._lastLeoDocuments = p_explorerView ? this._leoDocuments : this._leoDocumentsExplorer;
+        this._lastLeoDocuments = p_explorerView ? this._leoDocumentsExplorer : this._leoDocuments;
 
         // TODO: Check if needed
         // this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
@@ -3554,7 +3554,7 @@ private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChange
 private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
     if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
     if (p_event.visible) {
-        this._lastLeoButtons = p_explorerView ? this._leoButtons : this._leoButtonsExplorer;
+        this._lastLeoButtons = p_explorerView ? this._leoButtonsExplorer : this._leoButtons;
 
 
         // TODO: Check if needed
@@ -14435,6 +14435,7 @@ public get tooltip(): string {
 private _onUndosTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
     if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
     if (p_event.visible) {
+        this._lastLeoUndos = p_explorerView ? this._leoUndosExplorer : this._leoUndos;
         // TODO: Check if needed
         // this._leoUndosProvider.refreshTreeRoot(); // May not need to set selection...?
     }
@@ -14456,7 +14457,7 @@ private _refreshUndoPane(): void {
 public setUndoSelection(p_undoNode: LeoUndoNode): void {
     setTimeout(() =&gt; {
         if (this._lastLeoUndos) {
-            console.log('rtevral!!');
+            console.log('undo reveal!!');
 
             this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
                 () =&gt; { }, // Ok 
