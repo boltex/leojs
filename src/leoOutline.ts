@@ -46,7 +46,6 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
     }
 
     public getTreeItem(element: Position): Thenable<LeoOutlineNode> | LeoOutlineNode {
-        //console.log('called getTreeItem', element.h);
         let w_collapse: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.None;
         if (element.hasChildren()) {
             w_collapse = element.isExpanded() ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
@@ -64,6 +63,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             this._icons,
             this.buildId(element, w_collapse)
         );
+        // Check if its the selected node and call signal it to the UI
         if (element.__eq__(g.app.commandersList[this._leoUI.commanderIndex].p)) {
             this._leoUI.gotSelectedNode(element);
         }

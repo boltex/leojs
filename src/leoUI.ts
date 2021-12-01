@@ -27,6 +27,14 @@ export class LeoUI {
     public trace: boolean = false;
     public commanderIndex: number = 0;
 
+    // * Timers
+    public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already startd refresh
+    public lastRefreshTimer: [number, number] | undefined; // until the selected node is found - refreshed even if not found
+    public commandRefreshTimer: [number, number] | undefined; // until the selected node is found -  keep if starting a new command already pending
+    public lastCommandRefreshTimer: [number, number] | undefined; // until the selected node is found - refreshed if starting a new command
+    public commandTimer: [number, number] | undefined; // until the command done - keep if starting a new one already pending
+    public lastCommandTimer: [number, number] | undefined; // until the command done - refreshed if starting a new one
+
     // * Clipboard
     public clipboardContent: string = "";
 
@@ -498,20 +506,38 @@ export class LeoUI {
      */
     public gotSelectedNode(p_node: Position): void {
 
-        console.log('Got selected node:', p_node.h);
-
         if (this._revealType) {
             setTimeout(() => {
                 this._lastTreeView.reveal(p_node, {
                     select: true,
                     focus: (this._revealType.valueOf() >= RevealType.RevealSelectFocus.valueOf())
                 }).then(
-                    () => { }, // Ok 
+                    () => {
+                        // Ok - so reset timers
+                        if (this.trace) {
+                            if (this.refreshTimer) {
+                                console.log('refreshTimer', utils.getDurationMs(this.refreshTimer));
+                            }
+                            if (this.lastRefreshTimer) {
+                                console.log('lastRefreshTimer', utils.getDurationMs(this.lastRefreshTimer));
+                            }
+                            if (this.commandRefreshTimer) {
+                                console.log('commandRefreshTimer', utils.getDurationMs(this.commandRefreshTimer));
+                            }
+                            if (this.lastCommandRefreshTimer) {
+                                console.log('lastCommandRefreshTimer', utils.getDurationMs(this.lastCommandRefreshTimer));
+                            }
+                        }
+                        this.refreshTimer = undefined;
+                        this.lastRefreshTimer = undefined;
+                        this.commandRefreshTimer = undefined;
+                        this.lastCommandRefreshTimer = undefined;
+                    },
                     (p_error) => {
                         console.error('ERROR gotSelectedNode could not reveal: tree was refreshed!');
                     }
                 );
-                // Done so reset
+                // Done, so reset reveal type 'flag' 
                 this._revealType = RevealType.NoReveal;
             }, 0);
         }
@@ -534,6 +560,20 @@ export class LeoUI {
      * * Launches refresh for UI components and states (Debounced)
      */
     public _launchRefresh(p_node?: Position): void {
+        // Consider command finished
+        if (this.trace) {
+            if (this.commandTimer) {
+                console.log('commandTimer', utils.getDurationMs(this.commandTimer));
+            }
+        }
+        this.commandTimer = undefined;
+
+        // Start reset-timer capture, if has been reset.
+        this.lastRefreshTimer = process.hrtime();
+        if (this.refreshTimer === undefined) {
+            this.refreshTimer = this.lastRefreshTimer;
+        }
+
         const c = g.app.commandersList[this.commanderIndex];
 
         // Set w_revealType, it will ultimately set this._revealType.
@@ -875,6 +915,11 @@ export class LeoUI {
         p_fromOutline: boolean,
         p_keepSelection?: boolean
     ): Thenable<unknown> {
+        this.lastCommandTimer = process.hrtime();
+        if (this.commandTimer === undefined) {
+            this.commandTimer = this.lastCommandTimer;
+        }
+
         const c = g.app.commandersList[this.commanderIndex];
         this._setupRefresh(p_fromOutline, p_refreshType);
 
@@ -892,7 +937,12 @@ export class LeoUI {
                 c.selectPosition(old_p);
             }
         }
-
+        if (this.trace) {
+            if (this.lastCommandTimer) {
+                console.log('lastCommandTimer', utils.getDurationMs(this.lastCommandTimer));
+            }
+        }
+        this.lastCommandTimer = undefined;
         this.launchRefresh();
         return Promise.resolve(value);
     }

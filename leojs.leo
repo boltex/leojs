@@ -1434,7 +1434,6 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201209011931.4">public getTreeItem(element: Position): Thenable&lt;LeoOutlineNode&gt; | LeoOutlineNode {
-    //console.log('called getTreeItem', element.h);
     let w_collapse: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.None;
     if (element.hasChildren()) {
         w_collapse = element.isExpanded() ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
@@ -1452,6 +1451,7 @@ public refreshTreeRoot(): void {
         this._icons,
         this.buildId(element, w_collapse)
     );
+    // Check if its the selected node and call signal it to the UI
     if (element.__eq__(g.app.commandersList[this._leoUI.commanderIndex].p)) {
         this._leoUI.gotSelectedNode(element);
     }
@@ -3304,6 +3304,14 @@ export class LeoUI {
     public trace: boolean = false;
     public commanderIndex: number = 0;
 
+    // * Timers
+    public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already startd refresh
+    public lastRefreshTimer: [number, number] | undefined; // until the selected node is found - refreshed even if not found
+    public commandRefreshTimer: [number, number] | undefined; // until the selected node is found -  keep if starting a new command already pending
+    public lastCommandRefreshTimer: [number, number] | undefined; // until the selected node is found - refreshed if starting a new command
+    public commandTimer: [number, number] | undefined; // until the command done - keep if starting a new one already pending
+    public lastCommandTimer: [number, number] | undefined; // until the command done - refreshed if starting a new one
+
     // * Clipboard
     public clipboardContent: string = "";
 
@@ -3606,6 +3614,11 @@ public command(
     p_fromOutline: boolean,
     p_keepSelection?: boolean
 ): Thenable&lt;unknown&gt; {
+    this.lastCommandTimer = process.hrtime();
+    if (this.commandTimer === undefined) {
+        this.commandTimer = this.lastCommandTimer;
+    }
+
     const c = g.app.commandersList[this.commanderIndex];
     this._setupRefresh(p_fromOutline, p_refreshType);
 
@@ -3623,7 +3636,12 @@ public command(
             c.selectPosition(old_p);
         }
     }
-
+    if (this.trace) {
+        if (this.lastCommandTimer) {
+            console.log('lastCommandTimer', utils.getDurationMs(this.lastCommandTimer));
+        }
+    }
+    this.lastCommandTimer = undefined;
     this.launchRefresh();
     return Promise.resolve(value);
 }
@@ -6358,6 +6376,20 @@ private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): 
  * * Launches refresh for UI components and states (Debounced)
  */
 public _launchRefresh(p_node?: Position): void {
+    // Consider command finished
+    if (this.trace) {
+        if (this.commandTimer) {
+            console.log('commandTimer', utils.getDurationMs(this.commandTimer));
+        }
+    }
+    this.commandTimer = undefined;
+
+    // Start reset-timer capture, if has been reset.
+    this.lastRefreshTimer = process.hrtime();
+    if (this.refreshTimer === undefined) {
+        this.refreshTimer = this.lastRefreshTimer;
+    }
+
     const c = g.app.commandersList[this.commanderIndex];
 
     // Set w_revealType, it will ultimately set this._revealType.
@@ -6528,20 +6560,38 @@ public closeBody(): void {
  */
 public gotSelectedNode(p_node: Position): void {
 
-    console.log('Got selected node:', p_node.h);
-
     if (this._revealType) {
         setTimeout(() =&gt; {
             this._lastTreeView.reveal(p_node, {
                 select: true,
                 focus: (this._revealType.valueOf() &gt;= RevealType.RevealSelectFocus.valueOf())
             }).then(
-                () =&gt; { }, // Ok 
+                () =&gt; {
+                    // Ok - so reset timers
+                    if (this.trace) {
+                        if (this.refreshTimer) {
+                            console.log('refreshTimer', utils.getDurationMs(this.refreshTimer));
+                        }
+                        if (this.lastRefreshTimer) {
+                            console.log('lastRefreshTimer', utils.getDurationMs(this.lastRefreshTimer));
+                        }
+                        if (this.commandRefreshTimer) {
+                            console.log('commandRefreshTimer', utils.getDurationMs(this.commandRefreshTimer));
+                        }
+                        if (this.lastCommandRefreshTimer) {
+                            console.log('lastCommandRefreshTimer', utils.getDurationMs(this.lastCommandRefreshTimer));
+                        }
+                    }
+                    this.refreshTimer = undefined;
+                    this.lastRefreshTimer = undefined;
+                    this.commandRefreshTimer = undefined;
+                    this.lastCommandRefreshTimer = undefined;
+                },
                 (p_error) =&gt; {
                     console.error('ERROR gotSelectedNode could not reveal: tree was refreshed!');
                 }
             );
-            // Done so reset
+            // Done, so reset reveal type 'flag' 
             this._revealType = RevealType.NoReveal;
         }, 0);
     }
