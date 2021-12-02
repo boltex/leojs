@@ -67,7 +67,7 @@ export class Commands {
             tree: {
                 generation: 0,
                 editLabel: (p: Position, selectAll: boolean, selection: any) => {
-                    console.log("EDIT LABEL");
+                    console.log("'EDIT LABEL!' from c.frame.tree.editLabel");
                 }
             },
             body: {}

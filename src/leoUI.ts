@@ -1010,14 +1010,12 @@ export class LeoUI {
                     if (w_truncated) {
                         vscode.window.showInformationMessage("Truncating headline");
                     }
+
                     const undoData = u.beforeChangeHeadline(p_node);
-
                     c.setHeadString(p_node, p_newHeadline);  // Set v.h *after* calling the undoer's before method.
-
                     if (!c.changed) {
                         c.setChanged();
                     }
-
                     u.afterChangeHeadline(p_node, 'Edit Headline', undoData);
                     this.launchRefresh();
                     // if edited and accepted
@@ -1025,11 +1023,6 @@ export class LeoUI {
                 } else {
                     return Promise.resolve(undefined); // if cancelled or irrelevant
                 }
-
-
-
-
-
 
             } else {
                 return Promise.resolve(undefined); // if cancelled
@@ -1048,22 +1041,17 @@ export class LeoUI {
      */
     public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable<unknown> {
 
-        this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
+        //this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
-        vscode.window.showInformationMessage('TODO: Implement insertNode' +
-            " called from " +
-            (p_fromOutline ? "outline" : "body") +
-            (p_interrupt ? " as interrupt " : "") +
-            " operate on " +
-            (p_node ? p_node!.h : "the selected node")
-        );
+        const c = g.app.commandersList[this.commanderIndex];
 
-        this.launchRefresh();
+        // insert new node under specified node (or c.p) and select this new mode
+        // c.insertHeadline();
 
-        // if typed, accepted and inserted
-        return Promise.resolve(true);
+        this.command('insert-node', p_node, { tree: true, states: true }, !!p_fromOutline);
 
-        // return Promise.resolve(undefined); // if cancelled
+        // Call 'Edit Headline' on this newly made and selected node 
+        return this.editHeadline(c.p, p_fromOutline);
     }
 
     /**
