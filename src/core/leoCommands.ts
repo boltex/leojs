@@ -2361,7 +2361,10 @@ export class Commands {
         if (p && p.__bool__()) {
             // TODO : allow headline rename ?
             // This should request focus.
-            c.frame.tree.editLabel(p, selectAll, selection); // TODO 
+
+            // TODO : On init UI should use this to flag 'edit headline'
+            c.frame.tree.editLabel(p, selectAll, selection);
+
             if (k && !keepMinibuffer) {
                 // Setting the input state has no effect on focus.
                 if (selectAll) {

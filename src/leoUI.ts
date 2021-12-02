@@ -23,8 +23,8 @@ import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
 export class LeoUI {
     // * State flags
     public leoStates: LeoStates;
-    public verbose: boolean = false;
-    public trace: boolean = false;
+    public verbose: boolean = true;
+    public trace: boolean = true;
     public commanderIndex: number = 0;
 
     // * Timers
@@ -100,6 +100,14 @@ export class LeoUI {
     // * Log and terminal Panes
     private _leoLogPane: vscode.OutputChannel = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
     private _leoTerminalPane: vscode.OutputChannel | undefined;
+
+    // * Edit/Insert Headline Input Box options instance, setup so clicking outside cancels the headline change
+    private _headlineInputOptions: vscode.InputBoxOptions = {
+        ignoreFocusOut: false,
+        value: '',
+        valueSelection: undefined,
+        prompt: '',
+    };
 
     // * Debounced method 
     public launchRefresh: ((p_node?: Position) => void);
@@ -920,6 +928,10 @@ export class LeoUI {
         if (this.commandTimer === undefined) {
             this.commandTimer = this.lastCommandTimer;
         }
+        this.lastCommandRefreshTimer = this.lastCommandTimer;
+        if (this.commandRefreshTimer === undefined) {
+            this.commandRefreshTimer = this.lastCommandTimer;
+        }
 
         const c = g.app.commandersList[this.commanderIndex];
         this._setupRefresh(p_fromOutline, p_refreshType);
@@ -976,19 +988,55 @@ export class LeoUI {
 
         this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
-        vscode.window.showInformationMessage('TODO: Implement editHeadline' +
-            " called from " +
-            (p_fromOutline ? "outline" : "body") +
-            " operate on " +
-            (p_node ? p_node!.h : "the selected node")
-        );
+        const c = g.app.commandersList[this.commanderIndex];
+        const u = c.undoer;
+        if (!p_node) {
+            p_node = c.p; // Current selection
+        }
 
-        this.launchRefresh();
+        return vscode.window.showInputBox(this._headlineInputOptions).then((p_newHeadline) => {
+            if (p_newHeadline && p_newHeadline !== "\n") {
+                let w_truncated = false;
+                if (p_newHeadline.indexOf("\n") >= 0) {
+                    p_newHeadline = p_newHeadline.split("\n")[0];
+                    w_truncated = true;
+                }
+                if (p_newHeadline.length > 1000) {
+                    p_newHeadline = p_newHeadline.substring(0, 1000);
+                    w_truncated = true;
+                }
 
-        // if edited and accepted
-        return Promise.resolve(true);
+                if (p_newHeadline && p_node && p_node.h !== p_newHeadline) {
+                    if (w_truncated) {
+                        vscode.window.showInformationMessage("Truncating headline");
+                    }
+                    const undoData = u.beforeChangeHeadline(p_node);
 
-        // return Promise.resolve(undefined); // if cancelled
+                    c.setHeadString(p_node, p_newHeadline);  // Set v.h *after* calling the undoer's before method.
+
+                    if (!c.changed) {
+                        c.setChanged();
+                    }
+
+                    u.afterChangeHeadline(p_node, 'Edit Headline', undoData);
+                    this.launchRefresh();
+                    // if edited and accepted
+                    return Promise.resolve(true);
+                } else {
+                    return Promise.resolve(undefined); // if cancelled or irrelevant
+                }
+
+
+
+
+
+
+            } else {
+                return Promise.resolve(undefined); // if cancelled
+            }
+        });
+
+
     }
 
     /**
@@ -1016,31 +1064,6 @@ export class LeoUI {
         return Promise.resolve(true);
 
         // return Promise.resolve(undefined); // if cancelled
-    }
-
-    /**
-     * * Changes the marked state of a specified, or currently selected node
-     * @param p_isMark Set 'True' to mark, otherwise unmarks the node
-     * @param p_node Specifies which node use, or leave undefined to mark or unmark the currently selected node
-     * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
-     * @returns Thenable that resolves when done
-     */
-    public changeMark(p_mark: boolean, p_node?: Position, p_fromOutline?: boolean): Thenable<unknown> {
-
-        this._setupRefresh(!!p_fromOutline, { tree: true });
-
-        vscode.window.showInformationMessage('TODO: Implement changeMark' +
-            " called from " +
-            (p_fromOutline ? "outline" : "body") +
-            (p_mark ? " as mark " : "as unmark") +
-            " operate on " +
-            (p_node ? p_node!.h : "the selected node")
-        );
-
-        this.launchRefresh();
-
-        return Promise.resolve(true);
-
     }
 
     /**

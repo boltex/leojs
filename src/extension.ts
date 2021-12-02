@@ -4,7 +4,7 @@ import { ReqRefresh } from "./types";
 import { LeoUI } from './leoUI';
 import { Constants } from './constants';
 import { LeoButtonNode } from './leoButtons';
-import { LeoOutlineNode } from './leoOutlineNode';
+import { LeoOutlineNode } from './leoOutline';
 import { Position } from './core/leoNodes';
 
 export function activate(p_context: vscode.ExtensionContext) {
@@ -137,14 +137,6 @@ export function activate(p_context: vscode.ExtensionContext) {
         [CMD.SORT_CHILDREN, () => w_leoUI.command(LEOCMD.SORT_CHILDREN, U, REFRESH_TREE, false, true)],
         [CMD.SORT_SIBLING, () => w_leoUI.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, false, true)],
         [CMD.SORT_SIBLING_FO, () => w_leoUI.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, true, true)],
-
-        // [CMD.MARK, (p_node: Position) => w_leoUI.changeMark(true, p_node, true)],
-        // [CMD.MARK_SELECTION, () => w_leoUI.changeMark(true, U, false)],
-        // [CMD.MARK_SELECTION_FO, () => w_leoUI.changeMark(true, U, true)],
-
-        // [CMD.UNMARK, (p_node: Position) => w_leoUI.changeMark(false, p_node, true)],
-        // [CMD.UNMARK_SELECTION, () => w_leoUI.changeMark(false, U, false)],
-        // [CMD.UNMARK_SELECTION_FO, () => w_leoUI.changeMark(false, U, true)],
 
         [CMD.MARK, (p_node: Position) => w_leoUI.command(LEOCMD.TOGGLE_MARK, p_node, REFRESH_TREE, true, true)],
         [CMD.MARK_SELECTION, () => w_leoUI.command(LEOCMD.TOGGLE_MARK, U, REFRESH_TREE, false)],

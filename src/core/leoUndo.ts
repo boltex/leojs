@@ -1726,7 +1726,7 @@ export class Undoer {
             c.selectPosition(u.p!);
         }
         u.p!.setDirty();
-        c.frame.body.recolor(u.p);
+        // c.frame.body.recolor(u.p);
         u.p!.initHeadString(u.oldHead);
 
         // This is required.  Otherwise c.redraw will revert the change!
