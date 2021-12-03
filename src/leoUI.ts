@@ -985,7 +985,6 @@ export class LeoUI {
      * @returns Thenable that resolves when done
      */
     public editHeadline(p_node?: Position, p_fromOutline?: boolean): Thenable<unknown> {
-
         this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
         const c = g.app.commandersList[this.commanderIndex];
@@ -1020,16 +1019,15 @@ export class LeoUI {
                     this.launchRefresh();
                     // if edited and accepted
                     return Promise.resolve(true);
-                } else {
-                    return Promise.resolve(undefined); // if cancelled or irrelevant
                 }
 
             } else {
-                return Promise.resolve(undefined); // if cancelled
+                if (p_fromOutline) {
+                    this.showOutline(true);
+                }
+                return Promise.resolve(undefined); // if cancelled or unchanged
             }
         });
-
-
     }
 
     /**
@@ -1040,18 +1038,10 @@ export class LeoUI {
      * @returns Thenable that resolves when done
      */
     public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable<unknown> {
-
-        //this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
-
-        const c = g.app.commandersList[this.commanderIndex];
-
-        // insert new node under specified node (or c.p) and select this new mode
-        // c.insertHeadline();
-
-        this.command('insert-node', p_node, { tree: true, states: true }, !!p_fromOutline);
-
-        // Call 'Edit Headline' on this newly made and selected node 
-        return this.editHeadline(c.p, p_fromOutline);
+        // Ignore p_fromOutline so as to not focus on tree to keep edit headline input open
+        this.command('insert-node', p_node, { tree: true, states: true }, false);
+        // Call 'Edit Headline' on this newly made and selected node PASSING ORIGINAL p_fromOutline
+        return this.editHeadline(g.app.commandersList[this.commanderIndex].p, p_fromOutline);
     }
 
     /**
