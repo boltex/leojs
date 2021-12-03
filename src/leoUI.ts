@@ -743,8 +743,6 @@ export class LeoUI {
     public setUndoSelection(p_undoNode: LeoUndoNode): void {
         setTimeout(() => {
             if (this._lastLeoUndos) {
-                console.log('undo reveal!!');
-
                 this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
                     () => { }, // Ok 
                     (p_error) => {

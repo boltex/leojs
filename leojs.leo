@@ -2657,8 +2657,7 @@ private _updateLeoObjectIndicator(): void {
 
 </t>
 <t tx="felix.20201214154816.1">import * as vscode from "vscode";
-import { Position } from "./core/leoNodes";
-import { LeoOutlineNode } from "./leoOutlineNode";
+import { LeoOutlineNode } from "./leoOutline";
 
 @language typescript
 @tabwidth -4
@@ -8552,9 +8551,9 @@ public setDirty(): void {
 
 </t>
 <t tx="felix.20210116003530.1">/**
- * Original idea by Виталије Милошевић (Vitalije Milosevic).
+ * Original idea by Bитaлиje Mилoшeвић (Vitalije Milosevic).
  * Modified by EKR.
- * Translated by Félix
+ * Translated by Félix Malboeuf
  */
 public setAllAncestorAtFileNodesDirty(): void {
     const v: VNode = this;
@@ -9914,7 +9913,7 @@ public sort_key(p: Position): number[] {
 
  If a class defines mutable objects and implements an __eq__() method, it
  should not implement __hash__(), since the implementation of hashable
- collections requires that a key’s hash value is immutable (if the object’s
+ collections requires that a key's hash value is immutable (if the object's
  hash value changes, it will be in the wrong hash bucket).
 */
 
@@ -9933,9 +9932,8 @@ public __eq__(p2: Position): boolean {
     if (!p2.__bool__() || !p2.v) {
         return !p1.v;
     }
-    // Modified by Félix to prevent object direct comparison (p1.v === p2.v)
-    return !!(p1.v &amp;&amp; p2.v &amp;&amp;
-        p1.v.fileIndex === p2.v.fileIndex &amp;&amp;
+
+    return !!(p1.v === p2.v &amp;&amp;
         p1._childIndex === p2._childIndex &amp;&amp;
         p1.stack.length === p2.stack.length &amp;&amp;
         p1.stack.every(
@@ -10018,9 +10016,7 @@ public __gt__(other: Position): boolean {
  * Tests like 'if p is None' or 'if p is not None' will not work properly.
  */
 public __bool__(): boolean {
-    return (typeof this.v !== 'undefined')
-    return !!this.v;
-    return !this.v === undefined;
+    return (typeof this.v !== 'undefined');
 }
 
 </t>
@@ -13018,7 +13014,7 @@ public select(p: Position, chapter: any): void {
         this.skipBeadUpdate = true;
         try {
             const oldChapter = cc.getSelectedChapter();
-            if (oldChapter != chapter) {
+            if (oldChapter !== chapter) {
                 cc.selectChapterForPosition(p, chapter);
             }
             c.selectPosition(p);  // Calls cc.selectChapterForPosition
@@ -14290,8 +14286,6 @@ private _refreshUndoPane(): void {
 public setUndoSelection(p_undoNode: LeoUndoNode): void {
     setTimeout(() =&gt; {
         if (this._lastLeoUndos) {
-            console.log('undo reveal!!');
-
             this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
                 () =&gt; { }, // Ok 
                 (p_error) =&gt; {

@@ -75,7 +75,7 @@ export class NodeHistory {
             this.skipBeadUpdate = true;
             try {
                 const oldChapter = cc.getSelectedChapter();
-                if (oldChapter != chapter) {
+                if (oldChapter !== chapter) {
                     cc.selectChapterForPosition(p, chapter);
                 }
                 c.selectPosition(p);  // Calls cc.selectChapterForPosition

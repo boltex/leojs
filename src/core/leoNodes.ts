@@ -167,9 +167,8 @@ export class Position {
         if (!p2.__bool__() || !p2.v) {
             return !p1.v;
         }
-        // Modified by Félix to prevent object direct comparison (p1.v === p2.v)
-        return !!(p1.v && p2.v &&
-            p1.v.fileIndex === p2.v.fileIndex &&
+
+        return !!(p1.v === p2.v &&
             p1._childIndex === p2._childIndex &&
             p1.stack.length === p2.stack.length &&
             p1.stack.every(
@@ -249,9 +248,7 @@ export class Position {
      * Tests like 'if p is None' or 'if p is not None' will not work properly.
      */
     public __bool__(): boolean {
-        return (typeof this.v !== 'undefined')
-        return !!this.v;
-        return !this.v === undefined;
+        return (typeof this.v !== 'undefined');
     }
 
     public __str__(): string {
@@ -334,7 +331,7 @@ export class Position {
 
      If a class defines mutable objects and implements an __eq__() method, it
      should not implement __hash__(), since the implementation of hashable
-     collections requires that a key’s hash value is immutable (if the object’s
+     collections requires that a key's hash value is immutable (if the object's
      hash value changes, it will be in the wrong hash bucket).
     */
 
@@ -2944,9 +2941,9 @@ export class VNode {
     }
 
     /**
-     * Original idea by Виталије Милошевић (Vitalije Milosevic).
+     * Original idea by Bитaлиje Mилoшeвић (Vitalije Milosevic).
      * Modified by EKR.
-     * Translated by Félix
+     * Translated by Félix Malboeuf
      */
     public setAllAncestorAtFileNodesDirty(): void {
         const v: VNode = this;
