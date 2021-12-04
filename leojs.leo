@@ -227,7 +227,6 @@
 <v t="felix.20211122213037.1"><vh>getParent</vh></v>
 </v>
 <v t="felix.20211122212823.1"><vh>class LeoUndoNode</vh>
-<v t="felix.20211122214005.1"><vh>iconPath</vh></v>
 <v t="felix.20211122214009.1"><vh>id</vh></v>
 <v t="felix.20211122214039.1"><vh>tooltip</vh></v>
 </v>
@@ -1549,7 +1548,7 @@ public refreshTreeRoot(): void {
 [CMD.SAVE_FILE_FO, () =&gt; w_leoUI.saveLeoFile(true)],
 [CMD.SWITCH_FILE, () =&gt; w_leoUI.switchLeoFile()],
 
-[CMD.SET_OPENED_FILE, (p_index: number) =&gt; w_leoUI.selectOpenedLeoDocument(p_index)],
+[CMD.SET_OPENED_FILE, (p_index: number) =&gt; w_leoUI.selectOpenedLeoDocument(p_index, true)],
 
 [CMD.REFRESH_FROM_DISK, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.REFRESH_FROM_DISK, p_node, REFRESH_TREE_BODY, false)],
 
@@ -1889,10 +1888,10 @@ public static LAST_FILES_KEY: string = "leojsLastFiles";
 public static STATUSBAR_DEBOUNCE_DELAY: number = 70;
 public static REFRESH_DEBOUNCE_DELAY: number = 50;
 public static STATES_DEBOUNCE_DELAY: number = 60;
-public static BUTTONS_DEBOUNCE_DELAY: number = 150;
+public static BUTTONS_DEBOUNCE_DELAY: number = 160;
 public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
-public static UNDOS_DEBOUNCE_DELAY: number = 250;
-public static BODY_STATES_DEBOUNCE_DELAY: number = 200;
+public static UNDOS_DEBOUNCE_DELAY: number = 140;
+public static BODY_STATES_DEBOUNCE_DELAY: number = 120;
 
 public static CONFIG_NAME: string = "leojs";
 public static CONFIG_WORKBENCH_ENABLED_PREVIEW: string = "workbench.editor.enablePreview";
@@ -3524,7 +3523,9 @@ public editHeadline(p_node?: Position, p_fromOutline?: boolean): Thenable&lt;unk
     if (!p_node) {
         p_node = c.p; // Current selection
     }
-
+    this._headlineInputOptions.prompt =
+        Constants.USER_MESSAGES.PROMPT_EDIT_HEADLINE;
+    this._headlineInputOptions.value = p_node.h; // preset input pop up
     return vscode.window.showInputBox(this._headlineInputOptions).then((p_newHeadline) =&gt; {
         if (p_newHeadline &amp;&amp; p_newHeadline !== "\n") {
             let w_truncated = false;
@@ -5798,11 +5799,30 @@ public closeLeoFile(): Thenable&lt;unknown&gt; {
  */
 public newLeoFile(): Thenable&lt;unknown&gt; {
 
-    vscode.window.showInformationMessage('TODO: Implement newLeoFile');
+    this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
+
+    let w_c = g.app.newCommander("", this);
+
+    // Equivalent to leoBridge 'createFrame' method
+    let w_v = new VNode(w_c);
+    let w_p = new Position(w_v);
+    w_v.initHeadString("NewHeadline");
+
+    // #1631: Initialize here, not in p._linkAsRoot.
+    w_c.hiddenRootNode.children = [];
+
+    // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
+    w_p._linkAsRoot();
+
+    g.app.commandersList.push(w_c);
+
+    // select last, that was just created
+    this.commanderIndex = g.app.commandersList.length - 1;
 
     const w_fakeOpenedFileInfo: any = undefined;
     this._setupOpenedLeoDocument(w_fakeOpenedFileInfo);
 
+    this.launchRefresh();
     // if created
     return Promise.resolve(true);
 
@@ -5914,19 +5934,22 @@ public switchLeoFile(): Thenable&lt;unknown&gt; {
  * @param p_index position of the opened Leo document in the document array
  * @returns A promise that resolves with a textEditor of the selected node's body from the newly opened document
  */
-public selectOpenedLeoDocument(p_index: number): Thenable&lt;unknown&gt; {
-    this.commanderIndex = p_index;
-    console.log('selectOpenedLeoDocument so _refreshOutline !');
+public selectOpenedLeoDocument(p_index: number, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 
+    this._setupRefresh(!!p_fromOutline, { tree: true, body: true, buttons: true, states: true, documents: true });
+
+    this.commanderIndex = p_index;
     this._refreshOutline(true, RevealType.RevealSelect);
 
     const w_fakeOpenedFileInfo: any = undefined;
     this._setupOpenedLeoDocument(w_fakeOpenedFileInfo);
 
+    this.refreshUndoPane(); // with largish debounce.
+
+    this.launchRefresh();
+
     // if selected and opened
     return Promise.resolve(true);
-
-    // return Promise.resolve(undefined); // if cancelled
 }
 
 </t>
@@ -6253,7 +6276,12 @@ public _launchRefresh(p_node?: Position): void {
     //     // this._focusInterrupt = false; // TODO : Test if reverting this in _gotSelection is 'ok'
     //     w_revealType = RevealType.RevealSelect;
     // }
-    if (this._refreshType.tree || this._refreshType.body || this._refreshType.node || this._refreshType.states) {
+    if (
+        this._refreshType.tree ||
+        this._refreshType.body ||
+        this._refreshType.node ||
+        this._refreshType.states
+    ) {
         this.refreshUndoPane(); // with largish debounce.
     }
 
@@ -14175,10 +14203,11 @@ export class LeoUndoNode extends vscode.TreeItem {
 
     constructor(
         bead: Bead,
+        public description: string,
         private _beadId: number,
-        private _leoUI: LeoUI
+
     ) {
-        super(bead.undoType || "unkown undo");
+        super(bead.undoType || "unknown");
         // Setup this instance (just differentiate 'script-button' for now)
         // this.command = {
         //     command: Constants.COMMANDS.CLICK_BUTTON,
@@ -14211,12 +14240,6 @@ public refreshTreeRoot(): void {
 }
 
 </t>
-<t tx="felix.20211122214005.1">// @ts-ignore
-public get iconPath(): Icon {
-    return this._leoUI.documentIcons[0];
-}
-
-</t>
 <t tx="felix.20211122214009.1">// @ts-ignore
 public get id(): string {
     // Add prefix and suffix salt to numeric index to prevent accidental duplicates
@@ -14226,7 +14249,7 @@ public get id(): string {
 </t>
 <t tx="felix.20211122214039.1">// @ts-ignore
 public get tooltip(): string {
-    return "TODO leojsUndo Tooltip";
+    return "TODO leojs Undo Tooltip";
 }
 
 </t>
@@ -14236,20 +14259,29 @@ public get tooltip(): string {
     if (this._leoStates.fileOpenedReady &amp;&amp; !element) {
         const c = g.app.commandersList[this._leoUI.commanderIndex];
         const undoer = c.undoer;
+
         let i: number = 0;
-
-        // console.log('undoer.bead', undoer.bead);
-
         undoer.beads.forEach(p_bead =&gt; {
-            const w_node = new LeoUndoNode(p_bead, this._beadId++, this._leoUI);
-            w_children.push(w_node);
+            let w_description: string = "";
+            let w_undoFlag: boolean = false;
             if (i === undoer.bead) {
+                w_description = "Undo";
+                w_undoFlag = true;
+            }
+            if (i === undoer.bead + 1) {
+                w_description = "Redo";
+            }
+            const w_node = new LeoUndoNode(p_bead, w_description, this._beadId++);
+            w_children.push(w_node);
+            if (w_undoFlag) {
                 this._leoUI.setUndoSelection(w_node);
-                console.log('Select Current Undo # : ' + undoer.bead, p_bead.kind, p_bead.undoType);
-
             }
             i++;
         });
+        if (!undoer.beads.length) {
+            const w_node = new LeoUndoNode({ undoType: "Unchanged" }, "", this._beadId++);
+            w_children.push(w_node);
+        }
 
     }
     return w_children; // Defaults to an empty list of children

@@ -38,20 +38,29 @@ export class LeoUndosProvider implements vscode.TreeDataProvider<LeoUndoNode> {
         if (this._leoStates.fileOpenedReady && !element) {
             const c = g.app.commandersList[this._leoUI.commanderIndex];
             const undoer = c.undoer;
+
             let i: number = 0;
-
-            // console.log('undoer.bead', undoer.bead);
-
             undoer.beads.forEach(p_bead => {
-                const w_node = new LeoUndoNode(p_bead, this._beadId++, this._leoUI);
-                w_children.push(w_node);
+                let w_description: string = "";
+                let w_undoFlag: boolean = false;
                 if (i === undoer.bead) {
+                    w_description = "Undo";
+                    w_undoFlag = true;
+                }
+                if (i === undoer.bead + 1) {
+                    w_description = "Redo";
+                }
+                const w_node = new LeoUndoNode(p_bead, w_description, this._beadId++);
+                w_children.push(w_node);
+                if (w_undoFlag) {
                     this._leoUI.setUndoSelection(w_node);
-                    console.log('Select Current Undo # : ' + undoer.bead, p_bead.kind, p_bead.undoType);
-
                 }
                 i++;
             });
+            if (!undoer.beads.length) {
+                const w_node = new LeoUndoNode({ undoType: "Unchanged" }, "", this._beadId++);
+                w_children.push(w_node);
+            }
 
         }
         return w_children; // Defaults to an empty list of children
@@ -74,10 +83,11 @@ export class LeoUndoNode extends vscode.TreeItem {
 
     constructor(
         bead: Bead,
+        public description: string,
         private _beadId: number,
-        private _leoUI: LeoUI
+
     ) {
-        super(bead.undoType || "unkown undo");
+        super(bead.undoType || "unknown");
         // Setup this instance (just differentiate 'script-button' for now)
         // this.command = {
         //     command: Constants.COMMANDS.CLICK_BUTTON,
@@ -88,11 +98,6 @@ export class LeoUndoNode extends vscode.TreeItem {
     }
 
     // @ts-ignore
-    public get iconPath(): Icon {
-        return this._leoUI.documentIcons[0];
-    }
-
-    // @ts-ignore
     public get id(): string {
         // Add prefix and suffix salt to numeric index to prevent accidental duplicates
         return "b" + this._beadId;
@@ -100,7 +105,7 @@ export class LeoUndoNode extends vscode.TreeItem {
 
     // @ts-ignore
     public get tooltip(): string {
-        return "TODO leojsUndo Tooltip";
+        return "TODO leojs Undo Tooltip";
     }
 
 }

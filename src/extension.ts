@@ -57,7 +57,7 @@ export function activate(p_context: vscode.ExtensionContext) {
         [CMD.SAVE_FILE_FO, () => w_leoUI.saveLeoFile(true)],
         [CMD.SWITCH_FILE, () => w_leoUI.switchLeoFile()],
 
-        [CMD.SET_OPENED_FILE, (p_index: number) => w_leoUI.selectOpenedLeoDocument(p_index)],
+        [CMD.SET_OPENED_FILE, (p_index: number) => w_leoUI.selectOpenedLeoDocument(p_index, true)],
 
         [CMD.REFRESH_FROM_DISK, (p_node: Position) => w_leoUI.command(LEOCMD.REFRESH_FROM_DISK, p_node, REFRESH_TREE_BODY, false)],
 

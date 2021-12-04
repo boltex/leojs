@@ -613,7 +613,12 @@ export class LeoUI {
         //     // this._focusInterrupt = false; // TODO : Test if reverting this in _gotSelection is 'ok'
         //     w_revealType = RevealType.RevealSelect;
         // }
-        if (this._refreshType.tree || this._refreshType.body || this._refreshType.node || this._refreshType.states) {
+        if (
+            this._refreshType.tree ||
+            this._refreshType.body ||
+            this._refreshType.node ||
+            this._refreshType.states
+        ) {
             this.refreshUndoPane(); // with largish debounce.
         }
 
@@ -990,7 +995,9 @@ export class LeoUI {
         if (!p_node) {
             p_node = c.p; // Current selection
         }
-
+        this._headlineInputOptions.prompt =
+            Constants.USER_MESSAGES.PROMPT_EDIT_HEADLINE;
+        this._headlineInputOptions.value = p_node.h; // preset input pop up
         return vscode.window.showInputBox(this._headlineInputOptions).then((p_newHeadline) => {
             if (p_newHeadline && p_newHeadline !== "\n") {
                 let w_truncated = false;
@@ -1120,11 +1127,30 @@ export class LeoUI {
      */
     public newLeoFile(): Thenable<unknown> {
 
-        vscode.window.showInformationMessage('TODO: Implement newLeoFile');
+        this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
+
+        let w_c = g.app.newCommander("", this);
+
+        // Equivalent to leoBridge 'createFrame' method
+        let w_v = new VNode(w_c);
+        let w_p = new Position(w_v);
+        w_v.initHeadString("NewHeadline");
+
+        // #1631: Initialize here, not in p._linkAsRoot.
+        w_c.hiddenRootNode.children = [];
+
+        // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
+        w_p._linkAsRoot();
+
+        g.app.commandersList.push(w_c);
+
+        // select last, that was just created
+        this.commanderIndex = g.app.commandersList.length - 1;
 
         const w_fakeOpenedFileInfo: any = undefined;
         this._setupOpenedLeoDocument(w_fakeOpenedFileInfo);
 
+        this.launchRefresh();
         // if created
         return Promise.resolve(true);
 
@@ -1252,19 +1278,22 @@ export class LeoUI {
      * @param p_index position of the opened Leo document in the document array
      * @returns A promise that resolves with a textEditor of the selected node's body from the newly opened document
      */
-    public selectOpenedLeoDocument(p_index: number): Thenable<unknown> {
-        this.commanderIndex = p_index;
-        console.log('selectOpenedLeoDocument so _refreshOutline !');
+    public selectOpenedLeoDocument(p_index: number, p_fromOutline?: boolean): Thenable<unknown> {
 
+        this._setupRefresh(!!p_fromOutline, { tree: true, body: true, buttons: true, states: true, documents: true });
+
+        this.commanderIndex = p_index;
         this._refreshOutline(true, RevealType.RevealSelect);
 
         const w_fakeOpenedFileInfo: any = undefined;
         this._setupOpenedLeoDocument(w_fakeOpenedFileInfo);
 
+        this.refreshUndoPane(); // with largish debounce.
+
+        this.launchRefresh();
+
         // if selected and opened
         return Promise.resolve(true);
-
-        // return Promise.resolve(undefined); // if cancelled
     }
 
     /**
