@@ -54,6 +54,8 @@ export class LeoUI {
     private _revealType: RevealType = RevealType.NoReveal; // Type of reveal for the selected node (when refreshing outline)
     private _preventShowBody = false; // Used when refreshing treeview from config: It requires not to open the body pane when refreshing.
     private _fromOutline: boolean = false; // flag to leave focus on outline instead of body when finished refreshing
+    private _focusInterrupt: boolean = false; // Flag for preventing setting focus when interrupting (canceling) an 'insert node' text input dialog with another one
+
 
     // * Outline Pane
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
@@ -608,11 +610,11 @@ export class LeoUI {
         //     this._bodyLastChangedDocument.save(); // Voluntarily save to 'clean' any pending body
         // }
 
-        // // * _focusInterrupt insertNode Override
-        // if (this._focusInterrupt) {
-        //     // this._focusInterrupt = false; // TODO : Test if reverting this in _gotSelection is 'ok'
-        //     w_revealType = RevealType.RevealSelect;
-        // }
+        // * _focusInterrupt insertNode Override
+        if (this._focusInterrupt) {
+            // this._focusInterrupt = false; // TODO : Test if reverting this in _gotSelection is 'ok'
+            w_revealType = RevealType.RevealSelect;
+        }
         if (
             this._refreshType.tree ||
             this._refreshType.body ||
@@ -878,6 +880,139 @@ export class LeoUI {
         console.log("TODO ensure_commander_visible");
     }
     /**
+     * * Save body to Leo if its dirty. That is, only if a change has been made to the body 'document' so far
+     * @param p_forcedVsCodeSave Flag to also have vscode 'save' the content of this editor through the filesystem
+     * @returns a promise that resolves when the possible saving process is finished
+     */
+    public triggerBodySave(p_forcedVsCodeSave?: boolean): Thenable<unknown> {
+        // * Save body to Leo if a change has been made to the body 'document' so far
+        // let q_savePromise: Promise<boolean>;
+        // if (
+        //     this._bodyLastChangedDocument &&
+        //     (this._bodyLastChangedDocument.isDirty || this._editorTouched) &&
+        //     !this._bodyLastChangedDocumentSaved
+        // ) {
+        //     // * Is dirty and unsaved, so proper save is in order
+        //     const w_document = this._bodyLastChangedDocument; // backup for bodySaveDocument before reset
+        //     this._bodyLastChangedDocumentSaved = true;
+        //     this._editorTouched = false;
+        //     q_savePromise = this._bodySaveDocument(w_document, p_forcedVsCodeSave);
+        // } else if (
+        //     p_forcedVsCodeSave &&
+        //     this._bodyLastChangedDocument &&
+        //     this._bodyLastChangedDocument.isDirty &&
+        //     this._bodyLastChangedDocumentSaved
+        // ) {
+        //     // * Had 'forcedVsCodeSave' and isDirty only, so just clean up dirty VSCODE document flag.
+        //     this._bodyLastChangedDocument.save(); // ! USED INTENTIONALLY: This trims trailing spaces
+        //     q_savePromise = this._bodySaveSelection(); // just save selection if it's changed
+        // } else {
+        //     this._bodyLastChangedDocumentSaved = true;
+        //     q_savePromise = this._bodySaveSelection();  // just save selection if it's changed
+        // }
+        // return q_savePromise.then((p_result) => {
+        //     return p_result;
+        // }, (p_reason) => {
+        //     console.log('BodySave rejected :', p_reason);
+        //     return false;
+        // });
+        return Promise.resolve(true);
+    }
+
+    /**
+     * * Saves the cursor position along with the text selection range and scroll position
+     * @returns Promise that resolves when the "setSelection" action returns from Leo's side
+     */
+    private _bodySaveSelection(): Thenable<unknown> {
+        // if (this._selectionDirty && this._selection) {
+        //     // Prepare scroll data separately
+        //     // ! TEST NEW SCROLL WITH SINGLE LINE NUMBER
+        //     let w_scroll: number;
+        //     if (this._selectionGnx === this._scrollGnx && this._scrollDirty) {
+        //         w_scroll = this._scroll?.start.line || 0;
+        //     } else {
+        //         w_scroll = 0;
+        //     }
+        //     const w_param: BodySelectionInfo = {
+        //         gnx: this._selectionGnx,
+        //         scroll: w_scroll,
+        //         insert: {
+        //             line: this._selection.active.line || 0,
+        //             col: this._selection.active.character || 0,
+        //         },
+        //         start: {
+        //             line: this._selection.start.line || 0,
+        //             col: this._selection.start.character || 0,
+        //         },
+        //         end: {
+        //             line: this._selection.end.line || 0,
+        //             col: this._selection.end.character || 0,
+        //         },
+        //     };
+        //     // console.log("set scroll to leo: " + w_scroll + " start:" + this._selection.start.line);
+
+        //     this._scrollDirty = false;
+        //     this._selectionDirty = false; // don't wait for return of this call
+        //     return this.sendAction(Constants.LEOBRIDGE.SET_SELECTION, JSON.stringify(w_param)).then(
+        //         (p_result) => {
+        //             return Promise.resolve(true);
+        //         }
+        //     );
+        // } else {
+        //     return Promise.resolve(true);
+        // }
+        return Promise.resolve(true);
+    }
+
+    /**
+     * * Sets new body text on leo's side, and may optionally save vsCode's body editor (which will trim spaces)
+     * @param p_document Vscode's text document which content will be used to be the new node's body text in Leo
+     * @param p_forcedVsCodeSave Flag to also have vscode 'save' the content of this editor through the filesystem
+     * @returns a promise that resolves when the complete saving process is finished
+     */
+    private _bodySaveDocument(
+        p_document: vscode.TextDocument,
+        p_forcedVsCodeSave?: boolean
+    ): Thenable<unknown> {
+        // if (p_document) {
+        //     // * Fetch gnx and document's body text first, to be reused more than once in this method
+        //     const w_param = {
+        //         gnx: utils.leoUriToStr(p_document.uri),
+        //         body: p_document.getText(),
+        //     };
+        //     this.sendAction(Constants.LEOBRIDGE.SET_BODY, JSON.stringify(w_param)); // Don't wait for promise
+        //     // This bodySaveSelection is placed on the stack right after saving body, returns promise either way
+        //     return this._bodySaveSelection().then(() => {
+        //         this._refreshType.states = true;
+        //         this.getStates();
+        //         if (p_forcedVsCodeSave) {
+        //             return p_document.save(); // ! USED INTENTIONALLY: This trims trailing spaces
+        //         }
+        //         return Promise.resolve(p_document.isDirty);
+        //     });
+        // } else {
+        //     return Promise.resolve(false);
+        // }
+        return Promise.resolve(true);
+    }
+
+    /**
+     * * Sets new body text on leo's side before vscode closes itself if body is dirty
+     * @param p_document Vscode's text document which content will be used to be the new node's body text in Leo
+     * @returns a promise that resolves when the complete saving process is finished
+     */
+    private _bodySaveDeactivate(
+        p_document: vscode.TextDocument
+    ): Thenable<unknown> {
+        // const w_param = {
+        //     gnx: utils.leoUriToStr(p_document.uri),
+        //     body: p_document.getText(),
+        // };
+        // return this.sendAction(Constants.LEOBRIDGE.SET_BODY, JSON.stringify(w_param));
+        return Promise.resolve(true);
+    }
+
+    /**
      * * Called by UI when the user selects in the tree (click or 'open aside' through context menu)
      * @param p_node is the position node selected in the tree
      * @param p_aside flag meaning it's body should be shown in a new editor column
@@ -1044,9 +1179,83 @@ export class LeoUI {
      */
     public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable<unknown> {
         // Ignore p_fromOutline so as to not focus on tree to keep edit headline input open
-        this.command('insert-node', p_node, { tree: true, states: true }, false);
+        // this.command('insert-node', p_node, { tree: true, states: true }, false);
         // Call 'Edit Headline' on this newly made and selected node PASSING ORIGINAL p_fromOutline
-        return this.editHeadline(g.app.commandersList[this.commanderIndex].p, p_fromOutline);
+        // return this.editHeadline(g.app.commandersList[this.commanderIndex].p, p_fromOutline);
+
+        let w_fromOutline: boolean = !!p_fromOutline; // Use w_fromOutline for where we intend to leave focus when done with the insert
+
+        if (p_interrupt) {
+            this._focusInterrupt = true;
+            w_fromOutline = this._fromOutline; // Going to use last state
+        }
+        this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
+        this._headlineInputOptions.prompt = Constants.USER_MESSAGES.PROMPT_INSERT_NODE;
+        this._headlineInputOptions.value = Constants.USER_MESSAGES.DEFAULT_HEADLINE;
+
+
+        return vscode.window.showInputBox(this._headlineInputOptions).then((p_newHeadline) => {
+            // * if node has child and is expanded: turn p_asChild to true!
+
+            this.lastCommandTimer = process.hrtime();
+            if (this.commandTimer === undefined) {
+                this.commandTimer = this.lastCommandTimer;
+            }
+            this.lastCommandRefreshTimer = this.lastCommandTimer;
+            if (this.commandRefreshTimer === undefined) {
+                this.commandRefreshTimer = this.lastCommandTimer;
+            }
+
+            const c = g.app.commandersList[this.commanderIndex];
+
+            let value: any = undefined;
+            const p = p_node ? p_node : c.p;
+
+            if (p.__eq__(c.p)) {
+                this._setupRefresh(w_fromOutline, { tree: true, body: true, documents: true, buttons: true, states: true });
+                this._insertAndSetHeadline(p_newHeadline); // no need for re-selection
+            } else {
+                const old_p = c.p;  // c.p is old already selected
+                c.selectPosition(p); // p is now the new one to be operated on
+                this._insertAndSetHeadline(p_newHeadline);
+                // Only if 'keep' old position was needed (specified with a p_node parameter), and old_p still exists
+                if (!!p_node && c.positionExists(old_p)) {
+                    // no need to refresh body
+                    this._setupRefresh(w_fromOutline, { tree: true, documents: true, buttons: true, states: true });
+                    c.selectPosition(old_p);
+                } else {
+                    this._setupRefresh(w_fromOutline, { tree: true, body: true, documents: true, buttons: true, states: true });
+                }
+            }
+            if (this.trace) {
+                if (this.lastCommandTimer) {
+                    console.log('lastCommandTimer', utils.getDurationMs(this.lastCommandTimer));
+                }
+            }
+            this.lastCommandTimer = undefined;
+            this.launchRefresh();
+            return Promise.resolve(value);
+        });
+
+    }
+
+    /**
+     * * Perform insert and rename commands
+     */
+    private _insertAndSetHeadline(p_name?: string): any {
+        const c = g.app.commandersList[this.commanderIndex];
+        const u = c.undoer;
+        let value: any = c.doCommandByName('insert-node');
+        if (!p_name) {
+            return value;
+        }
+        const undoData = u.beforeChangeHeadline(c.p);
+        c.setHeadString(c.p, p_name);  // Set v.h *after* calling the undoer's before method.
+        if (!c.changed) {
+            c.setChanged();
+        }
+        u.afterChangeHeadline(c.p, 'Edit Headline', undoData);
+        return value;
     }
 
     /**
