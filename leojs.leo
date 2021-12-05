@@ -65,7 +65,6 @@
 <v t="felix.20201208214322.1"><vh>@clean src/extension.ts</vh>
 <v t="felix.20201214150149.1"><vh>activate</vh>
 <v t="felix.20201214150149.2"><vh>&lt;&lt; Define entries for all commands &gt;&gt;</vh>
-<v t="felix.20201221015535.1"><vh>Toggle UI Settings</vh></v>
 <v t="felix.20201214150149.3"><vh>Scripting &amp; @buttons</vh></v>
 <v t="felix.20201214150149.4"><vh>Leo File Documents</vh></v>
 <v t="felix.20201214150149.5"><vh>Headline Editing</vh></v>
@@ -1442,12 +1441,19 @@ public refreshTreeRoot(): void {
 }
 
 </t>
-<t tx="felix.20201214150149.10">[CMD.INSERT, (p_node: Position) =&gt; w_leoUI.insertNode(p_node, true)],
-[CMD.INSERT_SELECTION, () =&gt; w_leoUI.insertNode(U, false)],
-[CMD.INSERT_SELECTION_FO, () =&gt; w_leoUI.insertNode(U, true)],
+<t tx="felix.20201214150149.10">[CMD.INSERT, (p_node: Position) =&gt; w_leoUI.insertNode(p_node, true, false, false)],
+[CMD.INSERT_SELECTION, () =&gt; w_leoUI.insertNode(U, false, false, false)],
+[CMD.INSERT_SELECTION_FO, () =&gt; w_leoUI.insertNode(U, true, false, false)],
 // Special command for when inserting rapidly more than one node without
 // even specifying a headline label, e.g. spamming CTRL+I rapidly.
-[CMD.INSERT_SELECTION_INTERRUPT, () =&gt; w_leoUI.insertNode(U, false, true)],
+[CMD.INSERT_SELECTION_INTERRUPT, () =&gt; w_leoUI.insertNode(U, false, true, false)],
+
+[CMD.INSERT_CHILD, (p_node: Position) =&gt; w_leoUI.insertNode(p_node, true, false, true)],
+[CMD.INSERT_CHILD_SELECTION, () =&gt; w_leoUI.insertNode(U, false, false, true)],
+[CMD.INSERT_CHILD_SELECTION_FO, () =&gt; w_leoUI.insertNode(U, true, false, true)],
+// Special command for when inserting rapidly more than one node without
+// even specifying a headline label, e.g. spamming CTRL+I rapidly.
+[CMD.INSERT_CHILD_SELECTION_INTERRUPT, () =&gt; w_leoUI.insertNode(U, false, true, true)],
 
 [CMD.CLONE, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.CLONE_PNODE, p_node, REFRESH_TREE_BODY, true)],
 [CMD.CLONE_SELECTION, () =&gt; w_leoUI.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, false)],
@@ -1555,6 +1561,11 @@ public refreshTreeRoot(): void {
 [CMD.SAVE_FILE_FO, () =&gt; w_leoUI.saveLeoFile(true)],
 [CMD.SWITCH_FILE, () =&gt; w_leoUI.switchLeoFile()],
 
+[CMD.WRITE_AT_FILE_NODES, () =&gt; w_leoUI.command(LEOCMD.WRITE_AT_FILE_NODES, U, REFRESH_TREE, false, false)],
+[CMD.WRITE_AT_FILE_NODES_FO, () =&gt; w_leoUI.command(LEOCMD.WRITE_AT_FILE_NODES, U, REFRESH_TREE, true, false)],
+[CMD.WRITE_DIRTY_AT_FILE_NODES, () =&gt; w_leoUI.command(LEOCMD.WRITE_DIRTY_AT_FILE_NODES, U, REFRESH_TREE, false, false)],
+[CMD.WRITE_DIRTY_AT_FILE_NODES_FO, () =&gt; w_leoUI.command(LEOCMD.WRITE_DIRTY_AT_FILE_NODES, U, REFRESH_TREE, true, false)],
+
 [CMD.SET_OPENED_FILE, (p_index: number) =&gt; w_leoUI.selectOpenedLeoDocument(p_index, true)],
 
 [CMD.REFRESH_FROM_DISK, (p_node: Position) =&gt; w_leoUI.command(LEOCMD.REFRESH_FROM_DISK, p_node, REFRESH_TREE_BODY, false)],
@@ -1641,6 +1652,10 @@ public static COMMANDS = {
     CLOSE_FILE: Constants.NAME + ".closeLeoFile",
     MINIBUFFER: Constants.NAME + ".minibuffer",
     GIT_DIFF: Constants.NAME + ".gitDiff",
+    WRITE_AT_FILE_NODES: Constants.NAME + ".writeAtFileNodes",
+    WRITE_AT_FILE_NODES_FO: Constants.NAME + ".writeAtFileNodesFromOutline",
+    WRITE_DIRTY_AT_FILE_NODES: Constants.NAME + ".writeDirtyAtFileNodes",
+    WRITE_DIRTY_AT_FILE_NODES_FO: Constants.NAME + ".writeDirtyAtFileNodesFromOutline",
     // At-buttons
     CLICK_BUTTON: Constants.NAME + ".clickButton",
     REMOVE_BUTTON: Constants.NAME + ".removeButton",
@@ -1690,6 +1705,7 @@ public static COMMANDS = {
     MOVE_RIGHT: Constants.NAME + ".moveOutlineRight",
     MOVE_UP: Constants.NAME + ".moveOutlineUp",
     INSERT: Constants.NAME + ".insertNode",
+    INSERT_CHILD: Constants.NAME + ".insertChildNode",
     CLONE: Constants.NAME + ".cloneNode",
     PROMOTE: Constants.NAME + ".promote",
     DEMOTE: Constants.NAME + ".demote",
@@ -1709,6 +1725,8 @@ public static COMMANDS = {
     MOVE_UP_SELECTION: Constants.NAME + ".moveOutlineUpSelection",
     INSERT_SELECTION: Constants.NAME + ".insertNodeSelection", // Can be interrupted
     INSERT_SELECTION_INTERRUPT: Constants.NAME + ".insertNodeSelectionInterrupt", // Interrupted version
+    INSERT_CHILD_SELECTION: Constants.NAME + ".insertChildNodeSelection", // Can be interrupted
+    INSERT_CHILD_SELECTION_INTERRUPT: Constants.NAME + ".insertChildNodeSelectionInterrupt", // Can be interrupted
     CLONE_SELECTION: Constants.NAME + ".cloneNodeSelection",
     PROMOTE_SELECTION: Constants.NAME + ".promoteSelection",
     DEMOTE_SELECTION: Constants.NAME + ".demoteSelection",
@@ -1726,6 +1744,7 @@ public static COMMANDS = {
     MOVE_RIGHT_SELECTION_FO: Constants.NAME + ".moveOutlineRightSelectionFromOutline",
     MOVE_UP_SELECTION_FO: Constants.NAME + ".moveOutlineUpSelectionFromOutline",
     INSERT_SELECTION_FO: Constants.NAME + ".insertNodeSelectionFromOutline",
+    INSERT_CHILD_SELECTION_FO: Constants.NAME + ".insertChildNodeSelectionFromOutline",
     CLONE_SELECTION_FO: Constants.NAME + ".cloneNodeSelectionFromOutline",
     PROMOTE_SELECTION_FO: Constants.NAME + ".promoteSelectionFromOutline",
     DEMOTE_SELECTION_FO: Constants.NAME + ".demoteSelectionFromOutline",
@@ -1774,7 +1793,8 @@ public static COMMANDS = {
 public static LEO_COMMANDS = {
 
     // * File Commands
-    // TODO
+    WRITE_AT_FILE_NODES: 'write-at-file-nodes',
+    WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
 
     // * More Commands
     //  TODO  
@@ -1789,8 +1809,6 @@ public static LEO_COMMANDS = {
     // REPLACE: "!replace",
     // REPLACE_THEN_FIND: "!replace_then_find",
     // REPLACE_ALL: "!replace_all",
-    // WRITE_AT_FILE_NODES: '-write-at-file-nodes',
-    // WRITE_DIRTY_AT_FILE_NODES: '-write-dirty-at-file-nodes',
 
     // * Undo Operations
     UNDO: "undo",
@@ -1843,10 +1861,8 @@ public static LEO_COMMANDS = {
     MOVE_PNODE_LEFT: "move-outline-left",
     MOVE_PNODE_RIGHT: "move-outline-right",
     MOVE_PNODE_UP: "move-outline-up",
-    INSERT_PNODE: "TODO", // TODO
-    INSERT_NAMED_PNODE: "TODO", // TODO
+    INSERT_PNODE: "insert-node",
     INSERT_CHILD_PNODE: "insert-child",
-    INSERT_CHILD_NAMED_PNODE: "TODO",
     CLONE_PNODE: "clone-node",
     // * Marshalling Operations
     PROMOTE_PNODE: "promote",
@@ -3580,7 +3596,7 @@ public editHeadline(p_node?: Position, p_fromOutline?: boolean): Thenable&lt;unk
  * @param p_interrupt Signifies the insert action is actually interrupting itself (e.g. rapid CTRL+I actions by the user)
  * @returns Thenable that resolves when done
  */
-public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable&lt;unknown&gt; {
+public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interrupt: boolean, p_asChild: boolean): Thenable&lt;unknown&gt; {
     // Ignore p_fromOutline so as to not focus on tree to keep edit headline input open
     // this.command('insert-node', p_node, { tree: true, states: true }, false);
     // Call 'Edit Headline' on this newly made and selected node PASSING ORIGINAL p_fromOutline
@@ -3616,11 +3632,11 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
 
         if (p.__eq__(c.p)) {
             this._setupRefresh(w_fromOutline, { tree: true, body: true, documents: true, buttons: true, states: true });
-            this._insertAndSetHeadline(p_newHeadline); // no need for re-selection
+            this._insertAndSetHeadline(p_newHeadline, p_asChild); // no need for re-selection
         } else {
             const old_p = c.p;  // c.p is old already selected
             c.selectPosition(p); // p is now the new one to be operated on
-            this._insertAndSetHeadline(p_newHeadline);
+            this._insertAndSetHeadline(p_newHeadline, p_asChild);
             // Only if 'keep' old position was needed (specified with a p_node parameter), and old_p still exists
             if (!!p_node &amp;&amp; c.positionExists(old_p)) {
                 // no need to refresh body
@@ -3657,7 +3673,7 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
-    "url": "https://github.com/boltex/leointeg"
+    "url": "https://github.com/boltex/leojs"
   },
   "engines": {
     "vscode": "^1.62.0"
@@ -3768,17 +3784,49 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
 {
   "command": "leojs.refreshFromDisk",
   "category": "Leojs",
-  "title": "Refresh from Disk"
+  "title": "Refresh from Disk",
+  "icon": {
+    "light": "resources/light/refresh.svg",
+    "dark": "resources/dark/refresh.svg"
+  }
 },
 {
   "command": "leojs.refreshFromDiskSelection",
   "category": "Leojs",
-  "title": "Refresh from Disk"
+  "title": "Refresh from Disk",
+  "icon": {
+    "light": "resources/light/refresh.svg",
+    "dark": "resources/dark/refresh.svg"
+  }
 },
 {
   "command": "leojs.refreshFromDiskSelectionFromOutline",
   "category": "Leojs",
-  "title": "Refresh from Disk"
+  "title": "Refresh from Disk",
+  "icon": {
+    "light": "resources/light/refresh.svg",
+    "dark": "resources/dark/refresh.svg"
+  }
+},
+{
+  "command": "leojs.writeAtFileNodes",
+  "category": "Leojs",
+  "title": "Write @&lt;file&gt; Nodes"
+},
+{
+  "command": "leojs.writeAtFileNodesFromOutline",
+  "category": "Leojs",
+  "title": "Write @&lt;file&gt; Nodes"
+},
+{
+  "command": "leojs.writeDirtyAtFileNodes",
+  "category": "Leojs",
+  "title": "Write Dirty @&lt;file&gt; Nodes"
+},
+{
+  "command": "leojs.writeDirtyAtFileNodesFromOutline",
+  "category": "Leojs",
+  "title": "Write Dirty @&lt;file&gt; Nodes"
 },
 {
   "command": "leojs.gitDiff",
@@ -4051,12 +4099,30 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
   }
 },
 {
+  "command": "leojs.insertChildNode",
+  "category": "Leojs",
+  "title": "Insert Child",
+  "icon": {
+    "light": "resources/light/insert-child.svg",
+    "dark": "resources/dark/insert-child.svg"
+  }
+},
+{
   "command": "leojs.insertNodeSelection",
   "category": "Leojs",
   "title": "Insert Node",
   "icon": {
     "light": "resources/light/plus.svg",
     "dark": "resources/dark/plus.svg"
+  }
+},
+{
+  "command": "leojs.insertChildNodeSelection",
+  "category": "Leojs",
+  "title": "Insert Child",
+  "icon": {
+    "light": "resources/light/insert-child.svg",
+    "dark": "resources/dark/insert-child.svg"
   }
 },
 {
@@ -4069,12 +4135,30 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
   }
 },
 {
+  "command": "leojs.insertChildNodeSelectionFromOutline",
+  "category": "Leojs",
+  "title": "Insert Child",
+  "icon": {
+    "light": "resources/light/insert-child.svg",
+    "dark": "resources/dark/insert-child.svg"
+  }
+},
+{
   "command": "leojs.insertNodeSelectionInterrupt",
   "category": "Leojs",
   "title": "Insert Node",
   "icon": {
     "light": "resources/light/plus.svg",
     "dark": "resources/dark/plus.svg"
+  }
+},
+{
+  "command": "leojs.insertChildNodeSelectionInterrupt",
+  "category": "Leojs",
+  "title": "Insert Child",
+  "icon": {
+    "light": "resources/light/insert-child.svg",
+    "dark": "resources/dark/insert-child.svg"
   }
 },
 {
@@ -4398,6 +4482,14 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
   "when": "leojsTreeOpened &amp;&amp; leoAtFile"
 },
 {
+  "command": "leojs.writeAtFileNodes",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.writeDirtyAtFileNodes",
+  "when": "leojsTreeOpened"
+},
+{
   "command": "leojs.gitDiff",
   "when": "leojsTreeOpened"
 },
@@ -4484,6 +4576,10 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
 </t>
 <t tx="felix.20201214205159.34">{
   "command": "leojs.insertNodeSelection",
+  "when": "leojsTreeOpened"
+},
+{
+  "command": "leojs.insertChildNodeSelection",
   "when": "leojsTreeOpened"
 },
 {
@@ -4662,6 +4758,14 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
 },
 {
   "command": "leojs.refreshFromDiskSelectionFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.writeAtFileNodesFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.writeDirtyAtFileNodesFromOutline",
   "when": "false"
 },
 </t>
@@ -4843,6 +4947,18 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
 },
 {
   "command": "leojs.insertNodeSelectionInterrupt",
+  "when": "false"
+},
+{
+  "command": "leojs.insertChildNode",
+  "when": "false"
+},
+{
+  "command": "leojs.insertChildNodeSelectionFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.insertChildNodeSelectionInterrupt",
   "when": "false"
 },
 {
@@ -5161,17 +5277,23 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
   "command": "leojs.showBody",
   "key": "ctrl+t",
   "mac": "cmd+t",
-  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons|^leojsUndos/"
 },
 {
   "command": "leojs.showBody",
   "key": "alt+d",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons|^leojsUndos/"
+},
+{
+  "command": "leojs.showBody",
+  "key": "ctrl+g",
+  "mac": "cmd+g",
+  "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons|^leojsUndos/"
 },
 {
   "command": "leojs.showBody",
   "key": "tab",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons|^leojsUndos/"
 },
 {
   "command": "leojs.showBody",
@@ -5189,7 +5311,7 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
   "command": "leojs.saveLeoFileFromOutline",
   "key": "ctrl+s",
   "mac": "cmd+s",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons|^leojsUndos/"
 },
 {
   "command": "leojs.saveLeoFile",
@@ -5201,13 +5323,37 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
   "command": "leojs.newLeoFile",
   "key": "ctrl+n",
   "mac": "cmd+n",
-  "when": "leojsReady &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
+  "when": "leojsReady &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons|^leojsUndos/"
 },
 {
   "command": "leojs.openLeoFile",
   "key": "ctrl+o",
   "mac": "cmd+o",
-  "when": "leojsReady &amp;&amp;  sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
+  "when": "leojsReady &amp;&amp;  sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons|^leojsUndos/"
+},
+{
+  "command": "leojs.writeAtFileNodes",
+  "key": "ctrl+shift+w",
+  "mac": "cmd+shift+w",
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.writeAtFileNodesFromOutline",
+  "key": "ctrl+shift+w",
+  "mac": "cmd+shift+w",
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons|^leojsUndos/"
+},
+{
+  "command": "leojs.writeDirtyAtFileNodes",
+  "key": "ctrl+shift+q",
+  "mac": "cmd+shift+q",
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.writeDirtyAtFileNodesFromOutline",
+  "key": "ctrl+shift+q",
+  "mac": "cmd+shift+q",
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons|^leojsUndos/"
 },
 </t>
 <t tx="felix.20201214205159.71">{
@@ -5218,7 +5364,7 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
 {
   "command": "leojs.contractAllFromOutline",
   "key": "alt+-",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons|^leojsUndos/"
 },
 </t>
 <t tx="felix.20201214205159.72">{
@@ -5231,7 +5377,7 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
   "command": "leojs.editSelectedHeadlineFromOutline",
   "key": "ctrl+h",
   "mac": "cmd+h",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons|^leojsUndos/"
 },
 </t>
 <t tx="felix.20201214205159.73">{
@@ -5244,7 +5390,7 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
   "command": "leojs.markSelectionFromOutline",
   "key": "ctrl+m",
   "mac": "cmd+m",
-  "when": "leojsTreeOpened &amp;&amp; !leojsMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsTreeOpened &amp;&amp; !leojsMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons|^leojsUndos/"
 },
 {
   "command": "leojs.unmarkSelection",
@@ -5256,7 +5402,7 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
   "command": "leojs.unmarkSelectionFromOutline",
   "key": "ctrl+m",
   "mac": "cmd+m",
-  "when": "leojsTreeOpened &amp;&amp; leojsMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsTreeOpened &amp;&amp; leojsMarked &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons|^leojsUndos/"
 },
 </t>
 <t tx="felix.20201214205159.74">{
@@ -5447,7 +5593,49 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
   "command": "leojs.insertNodeSelectionInterrupt",
   "key": "ctrl+i",
   "mac": "cmd+i",
-  "when": "leojsTreeOpened &amp;&amp; !sideBarFocus &amp;&amp; !editorTextFocus"
+  "when": "!terminalFocus &amp;&amp; !panelFocus &amp;&amp; leojsTreeOpened &amp;&amp; !sideBarFocus &amp;&amp; !editorTextFocus"
+},
+{
+  "command": "leojs.insertNodeSelection",
+  "key": "shift+insert",
+  "mac": "shift+insert",
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.insertNodeSelectionFromOutline",
+  "key": "shift+insert",
+  "mac": "shift+insert",
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+},
+{
+  "command": "leojs.insertNodeSelectionFromOutline",
+  "key": "insert",
+  "mac": "insert",
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+},
+{
+  "command": "leojs.insertNodeSelectionInterrupt",
+  "key": "shift+insert",
+  "mac": "shift+insert",
+  "when": "!terminalFocus &amp;&amp; !panelFocus &amp;&amp; leojsTreeOpened &amp;&amp; !sideBarFocus &amp;&amp; !editorTextFocus"
+},
+{
+  "command": "leojs.insertChildNodeSelection",
+  "key": "ctrl+insert",
+  "mac": "cmd+insert",
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.insertChildNodeSelectionFromOutline",
+  "key": "ctrl+insert",
+  "mac": "cmd+insert",
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+},
+{
+  "command": "leojs.insertChildNodeSelectionInterrupt",
+  "key": "ctrl+insert",
+  "mac": "cmd+insert",
+  "when": "!terminalFocus &amp;&amp; !panelFocus &amp;&amp; leojsTreeOpened &amp;&amp; !sideBarFocus &amp;&amp; !editorTextFocus"
 },
 {
   "command": "leojs.cloneNodeSelection",
@@ -5463,7 +5651,7 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
   "win": "ctrl+oem_7",
   "linux": "ctrl+'",
   "mac": "cmd+[Backquote]",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
 },
 </t>
 <t tx="felix.20201214205159.77">{
@@ -5476,7 +5664,7 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
   "command": "leojs.cutNodeSelectionFromOutline",
   "key": "ctrl+shift+x",
   "mac": "cmd+shift+x",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
 },
 {
   "command": "leojs.copyNodeSelection",
@@ -5494,7 +5682,7 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
   "command": "leojs.pasteNodeAtSelectionFromOutline",
   "key": "ctrl+shift+v",
   "mac": "cmd+shift+v",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
 },
 {
   "command": "leojs.deleteSelection",
@@ -5562,7 +5750,7 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
 {
   "command": "leojs.gotoNextVisible",
   "key": "alt+down",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
 },
 {
   "command": "leojs.gotoNextVisible",
@@ -5577,7 +5765,7 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
 {
   "command": "leojs.gotoPrevVisible",
   "key": "alt+up",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
 },
 {
   "command": "leojs.gotoPrevVisible",
@@ -5592,7 +5780,7 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
 {
   "command": "leojs.contractOrGoLeft",
   "key": "alt+left",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
 },
 {
   "command": "leojs.contractOrGoLeft",
@@ -5607,7 +5795,7 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
 {
   "command": "leojs.expandAndGoRight",
   "key": "alt+right",
-  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsButtons/"
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
 },
 {
   "command": "leojs.expandAndGoRight",
@@ -5675,7 +5863,11 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
 {
   "command": "leojs.showLogPane",
   "category": "Leojs",
-  "title": "Show Log Pane"
+  "title": "Show Log Pane",
+  "icon": {
+    "light": "resources/light/show-log.svg",
+    "dark": "resources/dark/show-log.svg"
+  }
 },
 </t>
 <t tx="felix.20201214211645.1">/**
@@ -6273,7 +6465,6 @@ const xslTemplate = `
 }
 
 </t>
-<t tx="felix.20201221015535.1"></t>
 <t tx="felix.20201222013904.1">/**
  * * Refreshes the outline. A reveal type can be passed along to specify the reveal type for the selected node
  * @param p_incrementTreeId Make all node id's be 'new' by incrementing the treeId prefix of the id's.
@@ -14187,13 +14378,13 @@ def pluginIsLoaded(fn):
   "command": "leojs.undoFromOutline",
   "key": "ctrl+z",
   "mac": "cmd+z",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsUndos/"
 },
 {
   "command": "leojs.redoFromOutline",
   "key": "ctrl+shift+z",
   "mac": "cmd+shift+z",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsUndos/"
 },
 </t>
 <t tx="felix.20211119001637.1">"resourceLabelFormatters": [
@@ -14679,10 +14870,12 @@ private _bodySaveDeactivate(
 <t tx="felix.20211204181418.1">/**
  * * Perform insert and rename commands
  */
-private _insertAndSetHeadline(p_name?: string): any {
+private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
+    const LEOCMD = Constants.LEO_COMMANDS;
+    const w_command = p_asChild ? LEOCMD.INSERT_CHILD_PNODE : LEOCMD.INSERT_PNODE;
     const c = g.app.commandersList[this.commanderIndex];
     const u = c.undoer;
-    let value: any = c.doCommandByName('insert-node');
+    let value: any = c.doCommandByName(w_command);
     if (!p_name) {
         return value;
     }

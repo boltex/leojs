@@ -310,6 +310,10 @@ export class Constants {
         CLOSE_FILE: Constants.NAME + ".closeLeoFile",
         MINIBUFFER: Constants.NAME + ".minibuffer",
         GIT_DIFF: Constants.NAME + ".gitDiff",
+        WRITE_AT_FILE_NODES: Constants.NAME + ".writeAtFileNodes",
+        WRITE_AT_FILE_NODES_FO: Constants.NAME + ".writeAtFileNodesFromOutline",
+        WRITE_DIRTY_AT_FILE_NODES: Constants.NAME + ".writeDirtyAtFileNodes",
+        WRITE_DIRTY_AT_FILE_NODES_FO: Constants.NAME + ".writeDirtyAtFileNodesFromOutline",
         // At-buttons
         CLICK_BUTTON: Constants.NAME + ".clickButton",
         REMOVE_BUTTON: Constants.NAME + ".removeButton",
@@ -359,6 +363,7 @@ export class Constants {
         MOVE_RIGHT: Constants.NAME + ".moveOutlineRight",
         MOVE_UP: Constants.NAME + ".moveOutlineUp",
         INSERT: Constants.NAME + ".insertNode",
+        INSERT_CHILD: Constants.NAME + ".insertChildNode",
         CLONE: Constants.NAME + ".cloneNode",
         PROMOTE: Constants.NAME + ".promote",
         DEMOTE: Constants.NAME + ".demote",
@@ -378,6 +383,8 @@ export class Constants {
         MOVE_UP_SELECTION: Constants.NAME + ".moveOutlineUpSelection",
         INSERT_SELECTION: Constants.NAME + ".insertNodeSelection", // Can be interrupted
         INSERT_SELECTION_INTERRUPT: Constants.NAME + ".insertNodeSelectionInterrupt", // Interrupted version
+        INSERT_CHILD_SELECTION: Constants.NAME + ".insertChildNodeSelection", // Can be interrupted
+        INSERT_CHILD_SELECTION_INTERRUPT: Constants.NAME + ".insertChildNodeSelectionInterrupt", // Can be interrupted
         CLONE_SELECTION: Constants.NAME + ".cloneNodeSelection",
         PROMOTE_SELECTION: Constants.NAME + ".promoteSelection",
         DEMOTE_SELECTION: Constants.NAME + ".demoteSelection",
@@ -395,6 +402,7 @@ export class Constants {
         MOVE_RIGHT_SELECTION_FO: Constants.NAME + ".moveOutlineRightSelectionFromOutline",
         MOVE_UP_SELECTION_FO: Constants.NAME + ".moveOutlineUpSelectionFromOutline",
         INSERT_SELECTION_FO: Constants.NAME + ".insertNodeSelectionFromOutline",
+        INSERT_CHILD_SELECTION_FO: Constants.NAME + ".insertChildNodeSelectionFromOutline",
         CLONE_SELECTION_FO: Constants.NAME + ".cloneNodeSelectionFromOutline",
         PROMOTE_SELECTION_FO: Constants.NAME + ".promoteSelectionFromOutline",
         DEMOTE_SELECTION_FO: Constants.NAME + ".demoteSelectionFromOutline",
@@ -442,7 +450,8 @@ export class Constants {
     public static LEO_COMMANDS = {
 
         // * File Commands
-        // TODO
+        WRITE_AT_FILE_NODES: 'write-at-file-nodes',
+        WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
 
         // * More Commands
         //  TODO  
@@ -457,8 +466,6 @@ export class Constants {
         // REPLACE: "!replace",
         // REPLACE_THEN_FIND: "!replace_then_find",
         // REPLACE_ALL: "!replace_all",
-        // WRITE_AT_FILE_NODES: '-write-at-file-nodes',
-        // WRITE_DIRTY_AT_FILE_NODES: '-write-dirty-at-file-nodes',
 
         // * Undo Operations
         UNDO: "undo",
@@ -511,10 +518,8 @@ export class Constants {
         MOVE_PNODE_LEFT: "move-outline-left",
         MOVE_PNODE_RIGHT: "move-outline-right",
         MOVE_PNODE_UP: "move-outline-up",
-        INSERT_PNODE: "TODO", // TODO
-        INSERT_NAMED_PNODE: "TODO", // TODO
+        INSERT_PNODE: "insert-node",
         INSERT_CHILD_PNODE: "insert-child",
-        INSERT_CHILD_NAMED_PNODE: "TODO",
         CLONE_PNODE: "clone-node",
         // * Marshalling Operations
         PROMOTE_PNODE: "promote",

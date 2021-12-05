@@ -57,6 +57,11 @@ export function activate(p_context: vscode.ExtensionContext) {
         [CMD.SAVE_FILE_FO, () => w_leoUI.saveLeoFile(true)],
         [CMD.SWITCH_FILE, () => w_leoUI.switchLeoFile()],
 
+        [CMD.WRITE_AT_FILE_NODES, () => w_leoUI.command(LEOCMD.WRITE_AT_FILE_NODES, U, REFRESH_TREE, false, false)],
+        [CMD.WRITE_AT_FILE_NODES_FO, () => w_leoUI.command(LEOCMD.WRITE_AT_FILE_NODES, U, REFRESH_TREE, true, false)],
+        [CMD.WRITE_DIRTY_AT_FILE_NODES, () => w_leoUI.command(LEOCMD.WRITE_DIRTY_AT_FILE_NODES, U, REFRESH_TREE, false, false)],
+        [CMD.WRITE_DIRTY_AT_FILE_NODES_FO, () => w_leoUI.command(LEOCMD.WRITE_DIRTY_AT_FILE_NODES, U, REFRESH_TREE, true, false)],
+
         [CMD.SET_OPENED_FILE, (p_index: number) => w_leoUI.selectOpenedLeoDocument(p_index, true)],
 
         [CMD.REFRESH_FROM_DISK, (p_node: Position) => w_leoUI.command(LEOCMD.REFRESH_FROM_DISK, p_node, REFRESH_TREE_BODY, false)],
@@ -115,12 +120,19 @@ export function activate(p_context: vscode.ExtensionContext) {
         [CMD.HOIST, (p_node: Position) => w_leoUI.command(LEOCMD.HOIST_PNODE, p_node, REFRESH_TREE_BODY, true)],
         [CMD.HOIST_SELECTION, () => w_leoUI.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, false)],
         [CMD.HOIST_SELECTION_FO, () => w_leoUI.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, true)],
-        [CMD.INSERT, (p_node: Position) => w_leoUI.insertNode(p_node, true)],
-        [CMD.INSERT_SELECTION, () => w_leoUI.insertNode(U, false)],
-        [CMD.INSERT_SELECTION_FO, () => w_leoUI.insertNode(U, true)],
+        [CMD.INSERT, (p_node: Position) => w_leoUI.insertNode(p_node, true, false, false)],
+        [CMD.INSERT_SELECTION, () => w_leoUI.insertNode(U, false, false, false)],
+        [CMD.INSERT_SELECTION_FO, () => w_leoUI.insertNode(U, true, false, false)],
         // Special command for when inserting rapidly more than one node without
         // even specifying a headline label, e.g. spamming CTRL+I rapidly.
-        [CMD.INSERT_SELECTION_INTERRUPT, () => w_leoUI.insertNode(U, false, true)],
+        [CMD.INSERT_SELECTION_INTERRUPT, () => w_leoUI.insertNode(U, false, true, false)],
+
+        [CMD.INSERT_CHILD, (p_node: Position) => w_leoUI.insertNode(p_node, true, false, true)],
+        [CMD.INSERT_CHILD_SELECTION, () => w_leoUI.insertNode(U, false, false, true)],
+        [CMD.INSERT_CHILD_SELECTION_FO, () => w_leoUI.insertNode(U, true, false, true)],
+        // Special command for when inserting rapidly more than one node without
+        // even specifying a headline label, e.g. spamming CTRL+I rapidly.
+        [CMD.INSERT_CHILD_SELECTION_INTERRUPT, () => w_leoUI.insertNode(U, false, true, true)],
 
         [CMD.CLONE, (p_node: Position) => w_leoUI.command(LEOCMD.CLONE_PNODE, p_node, REFRESH_TREE_BODY, true)],
         [CMD.CLONE_SELECTION, () => w_leoUI.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, false)],

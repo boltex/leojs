@@ -1177,7 +1177,7 @@ export class LeoUI {
      * @param p_interrupt Signifies the insert action is actually interrupting itself (e.g. rapid CTRL+I actions by the user)
      * @returns Thenable that resolves when done
      */
-    public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: boolean): Thenable<unknown> {
+    public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interrupt: boolean, p_asChild: boolean): Thenable<unknown> {
         // Ignore p_fromOutline so as to not focus on tree to keep edit headline input open
         // this.command('insert-node', p_node, { tree: true, states: true }, false);
         // Call 'Edit Headline' on this newly made and selected node PASSING ORIGINAL p_fromOutline
@@ -1213,11 +1213,11 @@ export class LeoUI {
 
             if (p.__eq__(c.p)) {
                 this._setupRefresh(w_fromOutline, { tree: true, body: true, documents: true, buttons: true, states: true });
-                this._insertAndSetHeadline(p_newHeadline); // no need for re-selection
+                this._insertAndSetHeadline(p_newHeadline, p_asChild); // no need for re-selection
             } else {
                 const old_p = c.p;  // c.p is old already selected
                 c.selectPosition(p); // p is now the new one to be operated on
-                this._insertAndSetHeadline(p_newHeadline);
+                this._insertAndSetHeadline(p_newHeadline, p_asChild);
                 // Only if 'keep' old position was needed (specified with a p_node parameter), and old_p still exists
                 if (!!p_node && c.positionExists(old_p)) {
                     // no need to refresh body
@@ -1242,10 +1242,12 @@ export class LeoUI {
     /**
      * * Perform insert and rename commands
      */
-    private _insertAndSetHeadline(p_name?: string): any {
+    private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
+        const LEOCMD = Constants.LEO_COMMANDS;
+        const w_command = p_asChild ? LEOCMD.INSERT_CHILD_PNODE : LEOCMD.INSERT_PNODE;
         const c = g.app.commandersList[this.commanderIndex];
         const u = c.undoer;
-        let value: any = c.doCommandByName('insert-node');
+        let value: any = c.doCommandByName(w_command);
         if (!p_name) {
             return value;
         }
