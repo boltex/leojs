@@ -4952,22 +4952,12 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
 <t tx="felix.20201214205159.55">"view/title": [
   {
     "command": "leojs.openLeoFile",
-    "when": "view =~ /^leojsDocuments/ &amp;&amp; leojsReady",
+    "when": "view =~ /^leojsOutline|^leojsDocuments/ &amp;&amp; leojsReady",
     "group": "navigation@1"
   },
   {
     "command": "leojs.newLeoFile",
-    "when": "view =~ /^leojsDocuments/ &amp;&amp; leojsReady",
-    "group": "navigation@1"
-  },
-  {
-    "command": "leojs.openLeoFile",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsReady",
-    "group": "navigation@1"
-  },
-  {
-    "command": "leojs.newLeoFile",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsReady",
+    "when": "view =~ /^leojsOutline|^leojsDocuments/ &amp;&amp; leojsReady",
     "group": "navigation@1"
   },
   {
@@ -5208,10 +5198,16 @@ public insertNode(p_node?: Position, p_fromOutline?: boolean, p_interrupt?: bool
   "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
-  "command": "leojs.leojs.newLeoFile",
+  "command": "leojs.newLeoFile",
   "key": "ctrl+n",
   "mac": "cmd+n",
-  "when": "sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
+  "when": "leojsReady &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
+},
+{
+  "command": "leojs.openLeoFile",
+  "key": "ctrl+o",
+  "mac": "cmd+o",
+  "when": "leojsReady &amp;&amp;  sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
 },
 </t>
 <t tx="felix.20201214205159.71">{

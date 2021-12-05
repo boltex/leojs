@@ -1455,22 +1455,12 @@
       "view/title": [
         {
           "command": "leojs.openLeoFile",
-          "when": "view =~ /^leojsDocuments/ && leojsReady",
+          "when": "view =~ /^leojsOutline|^leojsDocuments/ && leojsReady",
           "group": "navigation@1"
         },
         {
           "command": "leojs.newLeoFile",
-          "when": "view =~ /^leojsDocuments/ && leojsReady",
-          "group": "navigation@1"
-        },
-        {
-          "command": "leojs.openLeoFile",
-          "when": "view =~ /^leojsOutline/ && leojsReady",
-          "group": "navigation@1"
-        },
-        {
-          "command": "leojs.newLeoFile",
-          "when": "view =~ /^leojsOutline/ && leojsReady",
+          "when": "view =~ /^leojsOutline|^leojsDocuments/ && leojsReady",
           "group": "navigation@1"
         },
         {
@@ -1684,10 +1674,16 @@
         "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
-        "command": "leojs.leojs.newLeoFile",
+        "command": "leojs.newLeoFile",
         "key": "ctrl+n",
         "mac": "cmd+n",
-        "when": "sideBarFocus && focusedView =~ /^leojsOutline|^leojsDocuments/"
+        "when": "leojsReady && sideBarFocus && focusedView =~ /^leojsOutline|^leojsDocuments/"
+      },
+      {
+        "command": "leojs.openLeoFile",
+        "key": "ctrl+o",
+        "mac": "cmd+o",
+        "when": "leojsReady &&  sideBarFocus && focusedView =~ /^leojsOutline|^leojsDocuments/"
       },
       {
         "command": "leojs.contractAll",
