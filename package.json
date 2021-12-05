@@ -1632,7 +1632,7 @@
         "command": "leojs.executeScript",
         "key": "ctrl+b",
         "mac": "cmd+b",
-        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
         "command": "leojs.minibuffer",
@@ -1684,6 +1684,12 @@
         "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
+        "command": "leojs.leojs.newLeoFile",
+        "key": "ctrl+n",
+        "mac": "cmd+n",
+        "when": "sideBarFocus && focusedView =~ /^leojsOutline|^leojsDocuments/"
+      },
+      {
         "command": "leojs.contractAll",
         "key": "alt+-",
         "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
@@ -1733,13 +1739,13 @@
         "command": "leojs.extract",
         "key": "ctrl+shift+d",
         "mac": "cmd+shift+d",
-        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/ || leojsTreeOpened && editorTextFocus && editorHasSelection && resourceScheme == leojs"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/ || leojsTreeOpened && editorTextFocus && editorHasSelection && resourceScheme == leojs"
       },
       {
         "command": "leojs.extractNames",
         "key": "ctrl+shift+n",
         "mac": "cmd+shift+n",
-        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/ || leojsTreeOpened && editorTextFocus && editorHasSelection && resourceScheme == leojs"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/ || leojsTreeOpened && editorTextFocus && editorHasSelection && resourceScheme == leojs"
       },
       {
         "command": "leojs.moveOutlineDownSelection",
@@ -1949,7 +1955,7 @@
         "command": "leojs.copyNodeSelection",
         "key": "ctrl+shift+c",
         "mac": "cmd+shift+c",
-        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.pasteNodeAtSelection",
