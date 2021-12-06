@@ -491,6 +491,7 @@
 <v t="felix.20211102223300.1"><vh>&lt;&lt; define g.Decorators &gt;&gt;</vh></v>
 <v t="felix.20210102180413.1"><vh>&lt;&lt; define regex's &gt;&gt;</vh></v>
 <v t="felix.20211104210703.1"><vh>g.Debugging, GC, Stats &amp; Timing</vh>
+<v t="felix.20211205233429.1"><vh>g._assert</vh></v>
 <v t="felix.20211104212328.1"><vh>g.caller</vh></v>
 <v t="felix.20211104212426.1"><vh>g.callers</vh></v>
 <v t="felix.20211104212435.1"><vh>g._callerName</vh></v>
@@ -14888,6 +14889,25 @@ private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
     return value;
 }
 
+</t>
+<t tx="felix.20211205233429.1">/**
+ * * A safer alternative to a bare assert.
+ */
+export function _assert(condition: any, show_callers: boolean = true): boolean {
+    if (unitTesting) {
+        console.assert(condition);
+        return true;
+    }
+    const ok: boolean = Boolean(condition);
+    if (ok) {
+        return true;
+    }
+    es_print('\n===== g._assert failed =====\n');
+    if (show_callers) {
+        es_print(callers());
+    }
+    return false;
+}
 </t>
 </tnodes>
 </leo_file>

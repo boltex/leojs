@@ -1255,6 +1255,171 @@ export class Commands {
 
 
     }
+    //@+node:felix.20211205223924.1: *4* c.checkLinks & helpers
+    /**
+     * Check the consistency of all links in the outline.
+     */
+    public checkLinks(): number {
+
+        const c: Commands = this;
+
+        // t1 = time.time()
+        let count: number = 0;
+        let errors: number = 0;
+
+        // TODO !
+        // for p in c.safe_all_positions():
+        //     count += 1
+        //     // try:
+        //     if not c.checkThreadLinks(p):
+        //         errors += 1
+        //         break
+        //     if not c.checkSiblings(p):
+        //         errors += 1
+        //         break
+        //     if not c.checkParentAndChildren(p):
+        //         errors += 1
+        //         break
+
+        // except AssertionError:
+        // errors += 1
+        // junk, value, junk = sys.exc_info()
+        // g.error("test failed at position %s\n%s" % (repr(p), value))
+        // t2 = time.time()
+        // g.es_print(
+        //     f"check-links: {t2 - t1:4.2f} sec. "
+        //     f"{c.shortFileName()} {count} nodes", color='blue')
+
+        return errors;
+    }
+    //@+node:felix.20211205223924.2: *5* c.checkParentAndChildren
+    /**
+     * Check consistency of parent and child data structures.
+     */
+    public checkParentAndChildren(p: Position): boolean {
+        const c: Commands = this;
+
+        const _assert = function (condition: any) {
+            return g._assert(condition, false);
+        };
+
+        const dump = function (p: Position) {
+            if (p && p.__bool__() && p.v) {
+                p.v.dump();
+            } else if (p && p.__bool__()) {
+                console.log('<no p.v>');
+            } else {
+                console.log('<no p>');
+            }
+            if (g.unitTesting) {
+                console.assert(false, g.callers());
+            }
+        };
+
+        if (p.hasParent()) {
+            const n: number = p.childIndex();
+            if (!_assert(p.__eq__(p.parent().moveToNthChild(n)))) {
+                g.trace(`p != parent().moveToNthChild(${n})`);
+                dump(p);
+                dump(p.parent());
+                return false;
+            }
+        }
+
+        if (p.level() > 0 && !_assert(p.v.parents)) {
+            g.trace("no parents");
+            dump(p);
+            return false;
+        }
+
+        for (let child of p.children()) {
+            if (!c.checkParentAndChildren(child)) {
+                return false;
+            }
+            if (!_assert(p.__eq__(child.parent()))) {
+                g.trace("p != child.parent()");
+                dump(p);
+                dump(child.parent());
+                return false;
+            }
+        }
+        if (p.hasNext()) {
+            if (!_assert(p.next().parent().__eq__(p.parent()))) {
+                g.trace("p.next().parent() != p.parent()");
+                dump(p.next().parent());
+                dump(p.parent());
+                return false;
+            }
+        }
+        if (p.hasBack()) {
+            if (!_assert(p.back().parent().__eq__(p.parent()))) {
+                g.trace("p.back().parent() != parent()");
+                dump(p.back().parent());
+                dump(p.parent());
+                return false;
+            }
+        }
+        // Check consistency of parent and children arrays.
+        // very nodes gets visited, so a strong test need only check consistency
+        // between p and its parent, not between p and its children.
+        const parent_v: VNode = p._parentVnode()!;
+        const n: number = p.childIndex();
+        if (!_assert(parent_v.children[n] === p.v)) {
+            g.trace("parent_v.children[n] != p.v");
+            parent_v.dump();
+            p.v.dump();
+            return false;
+        }
+        return true;
+    }
+    //@+node:felix.20211205223924.3: *5* c.checkSiblings
+    /**
+     * * Check the consistency of next and back links.
+     */
+    public checkSiblings(p: Position): boolean {
+        const back: Position = p.back();
+        const next: Position = p.next();
+        if (back && back.__bool__()) {
+            if (!g._assert(p.__eq__(back.next()))) {
+                g.trace(
+                    `p!=p.back().next()\n`,
+                    `     back: ${back}\n`,
+                    `back.next: ${back.next()}`);
+                return false;
+            }
+        }
+        if (next && next.__bool__()) {
+            if (!g._assert(p.__eq__(next.back()))) {
+                g.trace(
+                    `p!=p.next().back\n`,
+                    `     next: ${next}\n`,
+                    `next.back: ${next.back()}`);
+                return false;
+            }
+        }
+        return true;
+    }
+    //@+node:felix.20211205223924.4: *5* c.checkThreadLinks
+    /**
+     * * Check consistency of threadNext & threadBack links.
+     */
+    public checkThreadLinks(p: Position): boolean {
+        const threadBack: Position = p.threadBack();
+        const threadNext: Position = p.threadNext();
+        if (threadBack) {
+            if (!g._assert(p.__eq__(threadBack.threadNext()))) {
+                g.trace("p!=p.threadBack().threadNext()");
+                return false;
+            }
+        }
+        if (threadNext) {
+            if (!g._assert(p.__eq__(threadNext.threadBack()))) {
+                g.trace("p!=p.threadNext().threadBack()");
+                return false;
+            }
+        }
+        return true;
+    }
     //@+node:felix.20211101013238.1: *4* c.checkMoveWithParentWithWarning & c.checkDrag
     //@+node:felix.20211101013241.1: *5* c.checkMoveWithParentWithWarning
     /**
@@ -1295,43 +1460,6 @@ export class Commands {
     //                 c.alert(message)
     //             return False
     //     return True
-    //@+node:felix.20211031161240.1: *4* checkLinks
-    /**
-     * Check the consistency of all links in the outline.
-     */
-    public checkLinks(): number {
-
-        const c: Commands = this;
-
-        // t1 = time.time()
-        let count: number = 0;
-        let errors: number = 0;
-
-        // TODO !
-        // for p in c.safe_all_positions():
-        //     count += 1
-        //     // try:
-        //     if not c.checkThreadLinks(p):
-        //         errors += 1
-        //         break
-        //     if not c.checkSiblings(p):
-        //         errors += 1
-        //         break
-        //     if not c.checkParentAndChildren(p):
-        //         errors += 1
-        //         break
-
-        // except AssertionError:
-        // errors += 1
-        // junk, value, junk = sys.exc_info()
-        // g.error("test failed at position %s\n%s" % (repr(p), value))
-        // t2 = time.time()
-        // g.es_print(
-        //     f"check-links: {t2 - t1:4.2f} sec. "
-        //     f"{c.shortFileName()} {count} nodes", color='blue')
-
-        return errors;
-    }
     //@+node:felix.20211030170430.1: *4* checkOutline
     /**
      * Check for errors in the outline.
@@ -1470,7 +1598,7 @@ export class Commands {
 
         if (ivars && ivars.length) {
             const w_baseObject: any = g.ivars2instance(c, g, ivars);
-            command_func = command_func.bind(w_baseObject)
+            command_func = command_func.bind(w_baseObject);
         } else {
             command_func = command_func.bind(c);
         }

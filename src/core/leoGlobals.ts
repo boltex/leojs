@@ -182,6 +182,24 @@ export let unitTesting: boolean = false; // A synonym for app.unitTesting.
 export let unicode_warnings: { [key: string]: any } = {};  // Keys are callers.
 
 /**
+ * * A safer alternative to a bare assert.
+ */
+export function _assert(condition: any, show_callers: boolean = true): boolean {
+    if (unitTesting) {
+        console.assert(condition);
+        return true;
+    }
+    const ok: boolean = Boolean(condition);
+    if (ok) {
+        return true;
+    }
+    es_print('\n===== g._assert failed =====\n');
+    if (show_callers) {
+        es_print(callers());
+    }
+    return false;
+}
+/**
  * Return the caller name i levels up the stack.
  */
 export function caller(i: number = 1): string {
