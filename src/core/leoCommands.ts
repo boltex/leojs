@@ -8,7 +8,7 @@ import { DummyFileCommands, FileCommands } from "./leoFileCommands";
 import { CommanderOutlineCommands } from "../commands/commanderOutlineCommands";
 import { CommanderFileCommands } from "../commands/commanderFileCommands";
 
-import { Position, VNode, StackEntry } from "./leoNodes";
+import { Position, VNode, StackEntry, NodeIndices } from "./leoNodes";
 import { NodeHistory } from './leoHistory';
 import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
@@ -78,6 +78,7 @@ export class Commands {
     //@+node:felix.20211021003423.1: *4* c.initConfigSettings
     public collapse_on_lt_arrow: boolean = true; // getBool('collapse-on-lt-arrow', default=True)
     public collapse_nodes_after_move: boolean = false;
+    public verbose_check_outline: boolean = false;
     //@+node:felix.20210223220814.2: *4* c.initCommandIvars
     // Init ivars used while executing a command.
     public commandsDict: {
@@ -1197,63 +1198,68 @@ export class Commands {
      * Return the number of structure_errors found.
      */
     public checkGnxs(): number {
-        // TODO !
-        return 0;
+        const c: Commands = this;
 
-        /*
-        c = self
-        d: Dict[str, Set["leoNodes.VNode"]] = {}  // Keys are gnx's; values are sets of vnodes with that gnx.
-        ni = g.app.nodeIndices
-        t1 = time.time()
+        const d: { [key: string]: VNode[] } = {}; // Keys are gnx's; values are sets of vnodes with that gnx.
 
-        def new_gnx(v):
-            """Set v.fileIndex."""
-            v.fileIndex = ni.getNewIndex(v)
+        const ni: NodeIndices = g.app.nodeIndices!;
+        const t1: [number, number] = process.hrtime();
 
-        count, gnx_errors = 0, 0
-        for p in c.safe_all_positions(copy=False):
-            count += 1
-            v = p.v
-            if hasattr(v, "tnodeList"):
-                delattr(v, "tnodeList")
-                v._p_changed = True
-            gnx = v.fileIndex
-            if gnx:  # gnx must be a string.
-                aSet: Set["leoNodes.VNode"] = d.get(gnx, set())
-                aSet.add(v)
-                d[gnx] = aSet
-            else:
-                gnx_errors += 1
-                new_gnx(v)
-                g.es_print(f"empty v.fileIndex: {v} new: {p.v.gnx!r}", color='red')
-        for gnx in sorted(d.keys()):
-            aList = list(d.get(gnx))
-            if len(aList) != 1:
-                print('\nc.checkGnxs...')
-                g.es_print(f"multiple vnodes with gnx: {gnx!r}", color='red')
-                for v in aList:
-                    gnx_errors += 1
-                    g.es_print(f"id(v): {id(v)} gnx: {v.fileIndex} {v.h}", color='red')
-                    new_gnx(v)
-        ok = not gnx_errors and not g.app.structure_errors
-        t2 = time.time()
-        if not ok:
+        let count: number = 0;
+        let gnx_errors: number = 0;
+
+
+        for (let p of c.safe_all_positions(false)) {
+            count += 1;
+            const v: VNode = p.v;
+            if (v["tnodeList"] !== undefined) {
+                delete v.tnodeList;
+                v._p_changed = true;
+            }
+            let gnx: string = v.fileIndex;
+            if (gnx) {  // gnx must be a string.
+                const aSet: VNode[] = d[gnx] || []; // new if none yet
+                if (aSet.indexOf(v) === -1) { // Fake a set by checking before pushing
+                    aSet.push(v);
+                }
+                d[gnx] = aSet;
+            } else {
+                gnx_errors += 1;
+                v.fileIndex = ni.getNewIndex(v); // expanded newGnx(v)
+                g.es_print(`empty v.fileIndex: ${v} new: ${p.v.gnx}`, 'red');
+            }
+        }
+
+        for (let gnx in Object.keys(d).sort()) {
+            const aList: VNode[] = d[gnx];
+            if (aList.length !== 1) {
+                console.log('\nc.checkGnxs...');
+                g.es_print(`multiple vnodes with gnx: ${gnx}`, 'red');
+                for (let v of aList) {
+                    gnx_errors += 1;
+                    g.es_print(`id(v): {id(v)} gnx: ${v.fileIndex} ${v.h}`, 'red');
+                    v.fileIndex = ni.getNewIndex(v); // expanded newGnx(v)
+                }
+            }
+        }
+        const ok: boolean = !gnx_errors && !g.app.structure_errors;
+        const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1 
+        const t2 = (t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000); // in ms
+        if (!ok) {
             g.es_print(
-                f"check-outline ERROR! {c.shortFileName()} "
-                f"{count} nodes, "
-                f"{gnx_errors} gnx errors, "
-                f"{g.app.structure_errors} "
-                f"structure errors",
-                color='red'
-            )
-        elif c.verbose_check_outline and not g.unitTesting:
-            print(
-                f"check-outline OK: {t2 - t1:4.2f} sec. "
-                f"{c.shortFileName()} {count} nodes")
+                `check-outline ERROR! ${c.shortFileName()} ` +
+                `${count} nodes, ` +
+                `${gnx_errors} gnx errors, ` +
+                `${g.app.structure_errors} ` +
+                `structure errors`,
+                'red'
+            );
+        } else if (c.verbose_check_outline && !g.unitTesting) {
+            console.log(
+                `check-outline OK: ${t2} ms. ` +
+                `${c.shortFileName()} ${count} nodes`);
+        }
         return g.app.structure_errors
-        */
-
-
     }
     //@+node:felix.20211205223924.1: *4* c.checkLinks & helpers
     /**

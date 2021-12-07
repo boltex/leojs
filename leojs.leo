@@ -6889,6 +6889,11 @@ Position.prototype.scriptSetBodyString = Position.prototype.setBodyString;
  */
 export class VNode {
 
+    // ? OVERLAP WITH &lt;v&gt; ELEMENTS
+    // The native attributes of &lt;v&gt; elements are a, t, vtag, tnodeList,
+    // marks, expanded, and descendentTnode/VnodeUnknownAttributes.
+    tnodeList?: any[];
+
     // * The primary data: headline and body text.
     _headString: string;
     _bodyString: string;

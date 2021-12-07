@@ -2290,6 +2290,11 @@ enum StatusFlags {
  */
 export class VNode {
 
+    // ? OVERLAP WITH <v> ELEMENTS
+    // The native attributes of <v> elements are a, t, vtag, tnodeList,
+    // marks, expanded, and descendentTnode/VnodeUnknownAttributes.
+    tnodeList?: any[];
+
     // * The primary data: headline and body text.
     _headString: string;
     _bodyString: string;
