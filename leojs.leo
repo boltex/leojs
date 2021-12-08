@@ -5937,6 +5937,8 @@ public test(): Thenable&lt;unknown&gt; {
     // * Test getTabWidth
     console.log(c.getTabWidth(c.p));
 
+    console.log(c.doCommandByName('check-outline'));
+
     // * Test undoredo
     console.log('can undo', c.undoer.canUndo());
     console.log('can redo', c.undoer.canRedo());

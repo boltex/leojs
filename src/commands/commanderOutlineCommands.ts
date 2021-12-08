@@ -392,6 +392,17 @@ export class CommanderOutlineCommands {
         this.expandToLevel(Math.max(1, c.expansionLevel - 1));
     }
 
+    //@+node:felix.20211207224420.1: *3* c_oc.fullCheckOutline
+    @commander_command(
+        'check-outline',
+        "Performs a full check of the consistency of a .leo file.\n" +
+        "As of Leo 5.1, Leo performs checks of gnx's and outline structure\n" +
+        "before writes and after reads, pastes and undo/redo."
+    )
+    public fullCheckOutline(this: Commands): number {
+        const c: Commands = this;
+        return c.checkOutline(true);
+    }
     //@+node:felix.20211021013709.1: *3* c_oc.Goto commands
     //@+node:felix.20211021013709.2: *4* c_oc.findNextClone
     @commander_command(

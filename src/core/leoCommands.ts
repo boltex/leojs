@@ -1199,16 +1199,12 @@ export class Commands {
      */
     public checkGnxs(): number {
         const c: Commands = this;
-
         const d: { [key: string]: VNode[] } = {}; // Keys are gnx's; values are sets of vnodes with that gnx.
-
         const ni: NodeIndices = g.app.nodeIndices!;
         const t1: [number, number] = process.hrtime();
 
         let count: number = 0;
         let gnx_errors: number = 0;
-
-
         for (let p of c.safe_all_positions(false)) {
             count += 1;
             const v: VNode = p.v;
@@ -1229,8 +1225,7 @@ export class Commands {
                 g.es_print(`empty v.fileIndex: ${v} new: ${p.v.gnx}`, 'red');
             }
         }
-
-        for (let gnx in Object.keys(d).sort()) {
+        for (let gnx of Object.keys(d).sort()) {
             const aList: VNode[] = d[gnx];
             if (aList.length !== 1) {
                 console.log('\nc.checkGnxs...');
@@ -1255,46 +1250,49 @@ export class Commands {
                 'red'
             );
         } else if (c.verbose_check_outline && !g.unitTesting) {
-            console.log(
+            g.es_print(
                 `check-outline OK: ${t2} ms. ` +
                 `${c.shortFileName()} ${count} nodes`);
         }
-        return g.app.structure_errors
+        return g.app.structure_errors;
     }
     //@+node:felix.20211205223924.1: *4* c.checkLinks & helpers
     /**
      * Check the consistency of all links in the outline.
      */
     public checkLinks(): number {
-
         const c: Commands = this;
-
-        // t1 = time.time()
+        const t1: [number, number] = process.hrtime();
         let count: number = 0;
         let errors: number = 0;
 
-        // TODO !
-        // for p in c.safe_all_positions():
-        //     count += 1
-        //     // try:
-        //     if not c.checkThreadLinks(p):
-        //         errors += 1
-        //         break
-        //     if not c.checkSiblings(p):
-        //         errors += 1
-        //         break
-        //     if not c.checkParentAndChildren(p):
-        //         errors += 1
-        //         break
-
+        for (let p of c.safe_all_positions()) {
+            count += 1;
+            // try:
+            if (!c.checkThreadLinks(p)) {
+                errors += 1;
+                break;
+            }
+            if (!c.checkSiblings(p)) {
+                errors += 1;
+                break;
+            }
+            if (!c.checkParentAndChildren(p)) {
+                errors += 1;
+                break;
+            }
+        }
         // except AssertionError:
-        // errors += 1
-        // junk, value, junk = sys.exc_info()
-        // g.error("test failed at position %s\n%s" % (repr(p), value))
-        // t2 = time.time()
-        // g.es_print(
-        //     f"check-links: {t2 - t1:4.2f} sec. "
-        //     f"{c.shortFileName()} {count} nodes", color='blue')
+        //     errors += 1
+        //     junk, value, junk = sys.exc_info()
+        //     g.error("test failed at position %s\n%s" % (repr(p), value))
+
+        const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1 
+        const t2 = (t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000); // in ms
+
+        g.es_print(
+            `check-links: ${t2} ms. ` +
+            `${c.shortFileName()} ${count} nodes`, 'blue');
 
         return errors;
     }
@@ -1412,13 +1410,13 @@ export class Commands {
     public checkThreadLinks(p: Position): boolean {
         const threadBack: Position = p.threadBack();
         const threadNext: Position = p.threadNext();
-        if (threadBack) {
+        if (threadBack.__bool__()) {
             if (!g._assert(p.__eq__(threadBack.threadNext()))) {
                 g.trace("p!=p.threadBack().threadNext()");
                 return false;
             }
         }
-        if (threadNext) {
+        if (threadNext.__bool__()) {
             if (!g._assert(p.__eq__(threadNext.threadBack()))) {
                 g.trace("p!=p.threadNext().threadBack()");
                 return false;
@@ -2330,9 +2328,9 @@ export class Commands {
         const p: Position = this.p;
         if (c.hoistStack.length) {
             const bunch = c.hoistStack[c.hoistStack.length - 1];
-            return p && p.hasBack() && !p.__eq__(bunch.p);
+            return p.__bool__() && p.hasBack() && !p.__eq__(bunch.p);
         }
-        return p && p.__bool__() && p.hasBack();
+        return p.__bool__() && p.__bool__() && p.hasBack();
     }
     //@+node:felix.20211023195447.20: *6* c.canMoveOutlineUp
     public canMoveOutlineUp(): boolean {
