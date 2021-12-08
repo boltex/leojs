@@ -1103,17 +1103,44 @@ export class LeoUI {
      * @returns Thenable from the command resolving - or resolve with undefined if cancelled
      */
     public minibuffer(): Thenable<unknown> {
-
         this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
 
-        vscode.window.showInformationMessage('TODO: Implement minibuffer');
-
-        this.launchRefresh();
-
-        // if choice made and command executes, replace 'true' with command output if any
-        return Promise.resolve(true);
-
-        // return Promise.resolve(undefined); // if cancelled
+        return this.triggerBodySave(false)
+            .then((p_saveResults) => {
+                const c = g.app.commandersList[this.commanderIndex];
+                const commands: vscode.QuickPickItem[] = [];
+                for (let key in c.commandsDict) {
+                    const command = c.commandsDict[key];
+                    commands.push({
+                        label: (command as any).__name__,
+                        description: (command as any).__doc__
+                    });
+                }
+                const w_options: vscode.QuickPickOptions = {
+                    placeHolder: Constants.USER_MESSAGES.MINIBUFFER_PROMPT,
+                    matchOnDetail: true,
+                };
+                return vscode.window.showQuickPick(commands, w_options);
+            }).then((p_picked) => {
+                if (
+                    p_picked &&
+                    p_picked.label &&
+                    Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
+                ) {
+                    return vscode.commands.executeCommand(
+                        Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
+                    );
+                }
+                if (p_picked && p_picked.label) {
+                    const c = g.app.commandersList[this.commanderIndex];
+                    const w_commandResult = c.doCommandByName(p_picked.label);
+                    this.launchRefresh();
+                    return Promise.resolve(w_commandResult);
+                } else {
+                    // Canceled
+                    return Promise.resolve(undefined);
+                }
+            });
     }
 
     /**

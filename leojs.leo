@@ -60,6 +60,7 @@
 <v t="felix.20201214151326.9"><vh>vscode commands</vh></v>
 <v t="felix.20201214151326.10"><vh>commands strings</vh></v>
 <v t="felix.20201214151326.11"><vh>leo commands</vh></v>
+<v t="felix.20211208011642.1"><vh>minibuffer overridden commands</vh></v>
 </v>
 </v>
 <v t="felix.20201208214322.1"><vh>@clean src/extension.ts</vh>
@@ -3521,17 +3522,44 @@ public command(
  * @returns Thenable from the command resolving - or resolve with undefined if cancelled
  */
 public minibuffer(): Thenable&lt;unknown&gt; {
-
     this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
 
-    vscode.window.showInformationMessage('TODO: Implement minibuffer');
-
-    this.launchRefresh();
-
-    // if choice made and command executes, replace 'true' with command output if any
-    return Promise.resolve(true);
-
-    // return Promise.resolve(undefined); // if cancelled
+    return this.triggerBodySave(false)
+        .then((p_saveResults) =&gt; {
+            const c = g.app.commandersList[this.commanderIndex];
+            const commands: vscode.QuickPickItem[] = [];
+            for (let key in c.commandsDict) {
+                const command = c.commandsDict[key];
+                commands.push({
+                    label: (command as any).__name__,
+                    description: (command as any).__doc__
+                });
+            }
+            const w_options: vscode.QuickPickOptions = {
+                placeHolder: Constants.USER_MESSAGES.MINIBUFFER_PROMPT,
+                matchOnDetail: true,
+            };
+            return vscode.window.showQuickPick(commands, w_options);
+        }).then((p_picked) =&gt; {
+            if (
+                p_picked &amp;&amp;
+                p_picked.label &amp;&amp;
+                Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
+            ) {
+                return vscode.commands.executeCommand(
+                    Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
+                );
+            }
+            if (p_picked &amp;&amp; p_picked.label) {
+                const c = g.app.commandersList[this.commanderIndex];
+                const w_commandResult = c.doCommandByName(p_picked.label);
+                this.launchRefresh();
+                return Promise.resolve(w_commandResult);
+            } else {
+                // Canceled
+                return Promise.resolve(undefined);
+            }
+        });
 }
 
 </t>
@@ -14718,7 +14746,7 @@ public get description(): string {
     if (this.u) {
         return "\u{1F4CE} (" + Object.keys(this.u).length + ")";
     } else {
-        return "id:" + this.id; // ! debug test
+        // return "id:" + this.id; // ! debug test
         // return "gnx:" + this.gnx; // ! debug test
         return ""; // Falsy will not be shown
     }
@@ -14915,6 +14943,94 @@ export function _assert(condition: any, show_callers: boolean = true): boolean {
     }
     return false;
 }
+</t>
+<t tx="felix.20211208011642.1">/**
+ * * Overridden 'good' minibuffer commands
+ */
+public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
+    // "tag-children": Constants.COMMANDS.TAG_CHILDREN,
+    // "clone-find-tag": Constants.COMMANDS.CLONE_FIND_TAG,
+    // "import-file": Constants.COMMANDS.IMPORT_ANY_FILE,
+    // "redo": Constants.COMMANDS.REDO,
+    // "undo": Constants.COMMANDS.UNDO,
+    // "clone-find-all": Constants.COMMANDS.CLONE_FIND_ALL,
+    // "clone-find-all-flattened": Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
+
+    // 'import-MORE-files': Constants.COMMANDS.IMPORT_ANY_FILE,
+    // 'import-free-mind-files': Constants.COMMANDS.IMPORT_ANY_FILE,
+    // 'import-jupyter-notebook': Constants.COMMANDS.IMPORT_ANY_FILE,
+    // 'import-legacy-external-files': Constants.COMMANDS.IMPORT_ANY_FILE,
+    // 'import-mind-jet-files': Constants.COMMANDS.IMPORT_ANY_FILE,
+    // 'import-tabbed-files': Constants.COMMANDS.IMPORT_ANY_FILE,
+    // 'import-todo-text-files': Constants.COMMANDS.IMPORT_ANY_FILE,
+    // 'import-zim-folder': Constants.COMMANDS.IMPORT_ANY_FILE,
+
+    // 'file-new': Constants.COMMANDS.NEW_FILE,
+    // 'file-open-by-name': Constants.COMMANDS.OPEN_FILE,
+    // 'new': Constants.COMMANDS.NEW_FILE,
+    // 'open-outline': Constants.COMMANDS.OPEN_FILE,
+    // 'file-save': Constants.COMMANDS.SAVE_FILE,
+    // 'file-save-as': Constants.COMMANDS.SAVE_AS_FILE,
+    // 'file-save-as-leojs': Constants.COMMANDS.SAVE_AS_LEOJS,
+    // 'file-save-as-unzipped': Constants.COMMANDS.SAVE_AS_FILE,
+    // 'file-save-by-name': Constants.COMMANDS.SAVE_AS_FILE,
+    // 'file-save-to': Constants.COMMANDS.SAVE_AS_FILE,
+    // 'save': Constants.COMMANDS.SAVE_FILE,
+    // 'save-as': Constants.COMMANDS.SAVE_AS_FILE,
+    // 'save-file': Constants.COMMANDS.SAVE_FILE,
+    // 'save-file-as': Constants.COMMANDS.SAVE_AS_FILE,
+    // 'save-file-as-leojs': Constants.COMMANDS.SAVE_AS_LEOJS,
+    // 'save-file-as-unzipped': Constants.COMMANDS.SAVE_AS_FILE,
+    // 'save-file-by-name': Constants.COMMANDS.SAVE_AS_FILE,
+    // 'save-file-to': Constants.COMMANDS.SAVE_AS_FILE,
+    // 'save-to': Constants.COMMANDS.SAVE_AS_FILE,
+
+    // 'clone-find-all-flattened-marked': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED,
+    // 'clone-find-all-marked': Constants.COMMANDS.CLONE_FIND_MARKED,
+
+    // 'clone-marked-nodes': Constants.COMMANDS.CLONE_MARKED_NODES,
+
+    // 'cfa': Constants.COMMANDS.CLONE_FIND_ALL,
+    // 'cfam': Constants.COMMANDS.CLONE_FIND_MARKED,
+    // 'cff': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
+    // 'cffm': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED,
+    // 'cft': Constants.COMMANDS.CLONE_FIND_TAG,
+
+    // 'git-diff': Constants.COMMANDS.GIT_DIFF,
+    // 'gd': Constants.COMMANDS.GIT_DIFF,
+
+    // 'find-tab-open': Constants.COMMANDS.START_SEARCH,
+    // 'find-clone-all': Constants.COMMANDS.CLONE_FIND_ALL,
+    // 'find-clone-all-flattened': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
+    // 'find-clone-tag': Constants.COMMANDS.CLONE_FIND_TAG,
+    // 'find-all': Constants.COMMANDS.FIND_ALL,
+    // 'start-search': Constants.COMMANDS.START_SEARCH,
+    // 'find-next': Constants.COMMANDS.FIND_NEXT,
+    // 'find-prev': Constants.COMMANDS.FIND_PREVIOUS,
+    // 'search-backward': Constants.COMMANDS.FIND_NEXT,
+    // 'search-forward': Constants.COMMANDS.FIND_PREVIOUS,
+    // 'find-var': Constants.COMMANDS.FIND_VAR,
+    // 'find-def': Constants.COMMANDS.FIND_DEF,
+    // 'replace': Constants.COMMANDS.REPLACE,
+    // 'replace-all': Constants.COMMANDS.REPLACE_ALL,
+    // 'change-all': Constants.COMMANDS.REPLACE_ALL,
+    // 'change-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
+    // 'replace-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
+    // 'show-find-options': Constants.COMMANDS.START_SEARCH,
+    // 'toggle-find-ignore-case-option': Constants.COMMANDS.TOGGLE_FIND_IGNORE_CASE_OPTION,
+    // 'toggle-find-in-body-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_BODY_OPTION,
+    // 'toggle-find-in-headline-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_HEADLINE_OPTION,
+    // 'toggle-find-mark-changes-option': Constants.COMMANDS.TOGGLE_FIND_MARK_CHANGES_OPTION,
+    // 'toggle-find-mark-finds-option': Constants.COMMANDS.TOGGLE_FIND_MARK_FINDS_OPTION,
+    // 'toggle-find-regex-option': Constants.COMMANDS.TOGGLE_FIND_REGEXP_OPTION,
+    // 'toggle-find-word-option': Constants.COMMANDS.TOGGLE_FIND_WORD_OPTION,
+
+    // 'goto-next-history-node': Constants.COMMANDS.PREV_NODE,
+    // 'goto-prev-history-node': Constants.COMMANDS.NEXT_NODE,
+
+
+};
+
 </t>
 </tnodes>
 </leo_file>

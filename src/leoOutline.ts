@@ -229,7 +229,7 @@ export class LeoOutlineNode extends vscode.TreeItem {
         if (this.u) {
             return "\u{1F4CE} (" + Object.keys(this.u).length + ")";
         } else {
-            return "id:" + this.id; // ! debug test
+            // return "id:" + this.id; // ! debug test
             // return "gnx:" + this.gnx; // ! debug test
             return ""; // Falsy will not be shown
         }
