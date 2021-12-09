@@ -3323,17 +3323,9 @@ public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
     this._currentDocumentChanged = p_documentNode.documentEntry.changed;
     this.leoStates.leoOpenedFileName = p_documentNode.documentEntry.fileName();
     setTimeout(() =&gt; {
-        let w_docView: vscode.TreeView&lt;LeoDocumentNode&gt;;
-        if (this._leoDocuments.visible) {
-            w_docView = this._leoDocuments;
-        } else {
-            w_docView = this._leoDocumentsExplorer;
-        }
-        // tslint:disable-next-line: strict-comparisons
-        if (w_docView.selection.length &amp;&amp; w_docView.selection[0] === p_documentNode) {
+        if (this._lastLeoDocuments &amp;&amp; this._lastLeoDocuments.selection.length &amp;&amp; this._lastLeoDocuments.selection[0] === p_documentNode) {
             // console.log('setDocumentSelection: already selected!');
-        } else if (this._lastLeoDocuments) {
-            console.log('setDocumentSelection: selecting in tree');
+        } else if (this._lastLeoDocuments &amp;&amp; this._lastLeoDocuments.visible) {
             this._lastLeoDocuments.reveal(p_documentNode, { select: true, focus: false }).then(
                 () =&gt; { }, // Ok 
                 (p_error) =&gt; {
@@ -3341,7 +3333,6 @@ public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
                 }
             );
         }
-
     }, 0);
 }
 
@@ -14597,7 +14588,7 @@ private _onUndosTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChan
 
 </t>
 <t tx="felix.20211124223735.1">/**
- * * Redreshes the undo pane
+ * * Refreshes the undo pane
  */
 private _refreshUndoPane(): void {
     this._leoUndosProvider.refreshTreeRoot();
@@ -14610,9 +14601,9 @@ private _refreshUndoPane(): void {
  */
 public setUndoSelection(p_undoNode: LeoUndoNode): void {
     setTimeout(() =&gt; {
-        if (this._lastLeoUndos) {
+        if (this._lastLeoUndos &amp;&amp; this._lastLeoUndos.visible) {
             this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
-                () =&gt; { }, // Ok 
+                () =&gt; { }, // Ok - do nothing
                 (p_error) =&gt; {
                     console.error('ERROR setUndoSelection could not reveal: tree was refreshed!');
                 }

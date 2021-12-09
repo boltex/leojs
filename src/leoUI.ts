@@ -714,17 +714,9 @@ export class LeoUI {
         this._currentDocumentChanged = p_documentNode.documentEntry.changed;
         this.leoStates.leoOpenedFileName = p_documentNode.documentEntry.fileName();
         setTimeout(() => {
-            let w_docView: vscode.TreeView<LeoDocumentNode>;
-            if (this._leoDocuments.visible) {
-                w_docView = this._leoDocuments;
-            } else {
-                w_docView = this._leoDocumentsExplorer;
-            }
-            // tslint:disable-next-line: strict-comparisons
-            if (w_docView.selection.length && w_docView.selection[0] === p_documentNode) {
+            if (this._lastLeoDocuments && this._lastLeoDocuments.selection.length && this._lastLeoDocuments.selection[0] === p_documentNode) {
                 // console.log('setDocumentSelection: already selected!');
-            } else if (this._lastLeoDocuments) {
-                console.log('setDocumentSelection: selecting in tree');
+            } else if (this._lastLeoDocuments && this._lastLeoDocuments.visible) {
                 this._lastLeoDocuments.reveal(p_documentNode, { select: true, focus: false }).then(
                     () => { }, // Ok 
                     (p_error) => {
@@ -732,12 +724,11 @@ export class LeoUI {
                     }
                 );
             }
-
         }, 0);
     }
 
     /**
-     * * Redreshes the undo pane
+     * * Refreshes the undo pane
      */
     private _refreshUndoPane(): void {
         this._leoUndosProvider.refreshTreeRoot();
@@ -749,9 +740,9 @@ export class LeoUI {
      */
     public setUndoSelection(p_undoNode: LeoUndoNode): void {
         setTimeout(() => {
-            if (this._lastLeoUndos) {
+            if (this._lastLeoUndos && this._lastLeoUndos.visible) {
                 this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
-                    () => { }, // Ok 
+                    () => { }, // Ok - do nothing
                     (p_error) => {
                         console.error('ERROR setUndoSelection could not reveal: tree was refreshed!');
                     }
