@@ -116,7 +116,7 @@ export class Config implements ConfigMembers {
         const w_promises: Thenable<void>[] = [];
         const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
         p_changes.forEach(i_change => {
-            if (i_change && i_change.code.includes(Constants.CONFIG_REFRESH_MATCH)) {
+            if (i_change.code.includes(Constants.CONFIG_REFRESH_MATCH)) {
                 // Check if tree refresh is required for hover-icons to be displayed or hidden accordingly
                 this._needsTreeRefresh = true;
             }

@@ -10,7 +10,14 @@
 			"always"
 		],
 		"triple-equals": true,
-		"strict-comparisons": true
+		"strict-comparisons": true,
+		"strict-boolean-expressions": [
+			true,
+			"allow-string",
+			"allow-enum",
+			"allow-number",
+			"allow-boolean-or-undefined"
+		]
 	},
 	"defaultSeverity": "warning"
 }

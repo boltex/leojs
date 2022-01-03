@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
-import { Position } from "./core/leoNodes";
-import { LeoOutlineNode } from "./leoOutlineNode";
+import { LeoOutlineNode } from "./leoOutline";
 
 /**
  * * Types of the various JSON configuration keys such as treeKeepFocus, defaultReloadIgnore, etc.

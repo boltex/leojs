@@ -1,6 +1,10 @@
+//@+leo-ver=5-thin
+//@+node:felix.20211021231651.1: * @file src/core/leoHistory.ts
 import { Commands } from './leoCommands';
 import * as g from './leoGlobals';
 import { Position } from './leoNodes';
+//@+others
+//@+node:felix.20211021231651.2: ** class NodeHistory
 /**
  * * A class encapsulating knowledge of visited nodes.
  */
@@ -11,6 +15,8 @@ export class NodeHistory {
     public beadPointer: number;
     public skipBeadUpdate: boolean;
 
+    //@+others
+    //@+node:felix.20211021231651.3: *3* NodeHistory.ctor
     constructor(c: Commands) {
         this.c = c;
         this.beadList = []; // a list of (position,chapter) tuples.
@@ -18,6 +24,7 @@ export class NodeHistory {
         this.skipBeadUpdate = false;
     }
 
+    //@+node:felix.20211021231651.4: *3* NodeHistory.dump
     /**
      * * Dump the beadList
      */
@@ -36,14 +43,15 @@ export class NodeHistory {
                 chapter = 'main';
             }
             const mark: string = i === this.beadPointer ? '**' : '  '; // used in string
-            console.log("${mark} ${i} ${chapter} ${p}");
+            console.log(`${mark} ${i} ${chapter} ${p}`);
         });
     }
 
+    //@+node:felix.20211021231651.5: *3* NodeHistory.goNext
     /**
      * * Select the next node, if possible.
      */
-    public goNext() {
+    public goNext(): void {
         if (this.beadPointer + 1 < this.beadList.length) {
             this.beadPointer += 1;
             const p = this.beadList[this.beadPointer][0];
@@ -52,6 +60,7 @@ export class NodeHistory {
         }
     }
 
+    //@+node:felix.20211021231651.6: *3* NodeHistory.goPrev
     /**
      * * Select the previously visited node, if possible.
      */
@@ -64,6 +73,7 @@ export class NodeHistory {
         }
     }
 
+    //@+node:felix.20211021231651.7: *3* NodeHistory.select
     /**
      * Update the history list when selecting p.
      * Called only from self.goToNext/PrevHistory
@@ -75,7 +85,7 @@ export class NodeHistory {
             this.skipBeadUpdate = true;
             try {
                 const oldChapter = cc.getSelectedChapter();
-                if (oldChapter != chapter) {
+                if (oldChapter !== chapter) {
                     cc.selectChapterForPosition(p, chapter);
                 }
                 c.selectPosition(p);  // Calls cc.selectChapterForPosition
@@ -88,6 +98,7 @@ export class NodeHistory {
         this.update(p, false);
     }
 
+    //@+node:felix.20211021231651.8: *3* NodeHistory.update
     /**
      * Update the beadList while p is being selected.
      * Called *only* from c.frame.tree.selectHelper.
@@ -137,5 +148,10 @@ export class NodeHistory {
         this.beadList = aList;
     }
 
+    //@-others
 
 }
+//@-others
+//@@language typescript
+//@@tabwidth -4
+//@-leo

@@ -16,6 +16,9 @@ export class Constants {
     public static BUTTONS_ID: string = "leojsButtons";
     public static BUTTONS_EXPLORER_ID: string = "leojsButtonsExplorer";
 
+    public static UNDOS_ID: string = "leojsUndos";
+    public static UNDOS_EXPLORER_ID: string = "leojsUndosExplorer";
+
     public static FILE_EXTENSION: string = "leojs";
     public static URI_LEO_SCHEME: string = "leojs";
     public static URI_FILE_SCHEME: string = "file";
@@ -25,13 +28,18 @@ export class Constants {
     public static RECENT_FILES_KEY: string = "leojsRecentFiles";
     public static LAST_FILES_KEY: string = "leojsLastFiles";
 
-    public static REFRESH_DEBOUNCE_DELAY: number = 40;
+    public static STATUSBAR_DEBOUNCE_DELAY: number = 70;
+    public static REFRESH_DEBOUNCE_DELAY: number = 50;
     public static STATES_DEBOUNCE_DELAY: number = 60;
+    public static BUTTONS_DEBOUNCE_DELAY: number = 160;
     public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
+    public static UNDOS_DEBOUNCE_DELAY: number = 140;
+    public static BODY_STATES_DEBOUNCE_DELAY: number = 120;
 
     public static CONFIG_NAME: string = "leojs";
     public static CONFIG_WORKBENCH_ENABLED_PREVIEW: string = "workbench.editor.enablePreview";
     public static CONFIG_REFRESH_MATCH: string = "OnNodes"; // substring to distinguish 'on-hover' icon commands
+
     /**
      * Strings used in the workbench interface panels (not for messages or dialogs)
      */
@@ -302,6 +310,10 @@ export class Constants {
         CLOSE_FILE: Constants.NAME + ".closeLeoFile",
         MINIBUFFER: Constants.NAME + ".minibuffer",
         GIT_DIFF: Constants.NAME + ".gitDiff",
+        WRITE_AT_FILE_NODES: Constants.NAME + ".writeAtFileNodes",
+        WRITE_AT_FILE_NODES_FO: Constants.NAME + ".writeAtFileNodesFromOutline",
+        WRITE_DIRTY_AT_FILE_NODES: Constants.NAME + ".writeDirtyAtFileNodes",
+        WRITE_DIRTY_AT_FILE_NODES_FO: Constants.NAME + ".writeDirtyAtFileNodesFromOutline",
         // At-buttons
         CLICK_BUTTON: Constants.NAME + ".clickButton",
         REMOVE_BUTTON: Constants.NAME + ".removeButton",
@@ -351,6 +363,7 @@ export class Constants {
         MOVE_RIGHT: Constants.NAME + ".moveOutlineRight",
         MOVE_UP: Constants.NAME + ".moveOutlineUp",
         INSERT: Constants.NAME + ".insertNode",
+        INSERT_CHILD: Constants.NAME + ".insertChildNode",
         CLONE: Constants.NAME + ".cloneNode",
         PROMOTE: Constants.NAME + ".promote",
         DEMOTE: Constants.NAME + ".demote",
@@ -370,6 +383,8 @@ export class Constants {
         MOVE_UP_SELECTION: Constants.NAME + ".moveOutlineUpSelection",
         INSERT_SELECTION: Constants.NAME + ".insertNodeSelection", // Can be interrupted
         INSERT_SELECTION_INTERRUPT: Constants.NAME + ".insertNodeSelectionInterrupt", // Interrupted version
+        INSERT_CHILD_SELECTION: Constants.NAME + ".insertChildNodeSelection", // Can be interrupted
+        INSERT_CHILD_SELECTION_INTERRUPT: Constants.NAME + ".insertChildNodeSelectionInterrupt", // Can be interrupted
         CLONE_SELECTION: Constants.NAME + ".cloneNodeSelection",
         PROMOTE_SELECTION: Constants.NAME + ".promoteSelection",
         DEMOTE_SELECTION: Constants.NAME + ".demoteSelection",
@@ -387,6 +402,7 @@ export class Constants {
         MOVE_RIGHT_SELECTION_FO: Constants.NAME + ".moveOutlineRightSelectionFromOutline",
         MOVE_UP_SELECTION_FO: Constants.NAME + ".moveOutlineUpSelectionFromOutline",
         INSERT_SELECTION_FO: Constants.NAME + ".insertNodeSelectionFromOutline",
+        INSERT_CHILD_SELECTION_FO: Constants.NAME + ".insertChildNodeSelectionFromOutline",
         CLONE_SELECTION_FO: Constants.NAME + ".cloneNodeSelectionFromOutline",
         PROMOTE_SELECTION_FO: Constants.NAME + ".promoteSelectionFromOutline",
         DEMOTE_SELECTION_FO: Constants.NAME + ".demoteSelectionFromOutline",
@@ -432,62 +448,176 @@ export class Constants {
      * Leo command names that are called from vscode's gui/menu/buttons/keybindings triggers
      */
     public static LEO_COMMANDS = {
-        EXECUTE_SCRIPT: "TODO", // "executeScript",
-        REFRESH_FROM_DISK: "TODO", //  "refreshFromDisk",
-        GIT_DIFF: "TODO", //  "gitDiff",
-        // * Goto operations
-        PAGE_UP: "TODO pageUp", //  "pageUp",
-        PAGE_DOWN: "TODO pageDown", //  "pageDown",
-        GOTO_FIRST_VISIBLE: "goto-first-visible-node", //  "goToFirstVisibleNode",
-        GOTO_LAST_VISIBLE: "goto-last-visible-node", //  "goToLastVisibleNode",
-        GOTO_LAST_SIBLING: "goto-last-sibling", //  "goToLastSibling",
-        GOTO_NEXT_VISIBLE: "goto-next-visible", // * "selectVisNext",
-        GOTO_PREV_VISIBLE: "goto-prev-visible", //  "selectVisBack",
-        GOTO_NEXT_MARKED: "goto-next-marked", //  "goToNextMarkedHeadline",
-        GOTO_NEXT_CLONE: "goto-next-clone", //  "goToNextClone",
-        CONTRACT_OR_GO_LEFT: "contract-or-go-left", //  "contractNodeOrGoToParent",
-        EXPAND_AND_GO_RIGHT: "expand-and-go-right", //  "expandNodeAndGoToFirstChild",
-        CONTRACT_ALL: "contract-all", // * "contractAllHeadlines",
-        // * Leo Operations
-        MARK_PNODE: "TODO", //  "markPNode",
-        UNMARK_PNODE: "TODO", //  "unmarkPNode",
-        COPY_PNODE: "TODO", //  "copyOutline",
-        CUT_PNODE: "TODO", //  "cutPNode",
-        PASTE_PNODE: "TODO", //  "pasteOutline",
-        PASTE_CLONE_PNODE: "TODO", //  "pasteOutlineRetainingClones",
-        DELETE_PNODE: "TODO", //  "deletePNode",
-        MOVE_PNODE_DOWN: "TODO", //  "moveOutlineDown",
-        MOVE_PNODE_LEFT: "TODO", //  "moveOutlineLeft",
-        MOVE_PNODE_RIGHT: "TODO", //  "moveOutlineRight",
-        MOVE_PNODE_UP: "TODO", //  "moveOutlineUp",
-        INSERT_PNODE: "TODO", //  "insertPNode",
-        INSERT_NAMED_PNODE: "TODO", //  "insertNamedPNode",
-        CLONE_PNODE: "TODO", //  "clonePNode",
-        PROMOTE_PNODE: "TODO", //  "promote",
-        DEMOTE_PNODE: "TODO", //  "demote",
-        REFRESH_FROM_DISK_PNODE: "TODO", //  "refreshFromDisk",
-        SORT_CHILDREN: "TODO", //  "sortChildren",
-        SORT_SIBLINGS: "TODO", //  "sortSiblings",
-        UNDO: "TODO", //  "undo",
-        REDO: "TODO", //  "redo",
-        GET_STATES: "TODO", //  "getStates",
-        HOIST_PNODE: "TODO", //  "hoist",
-        DEHOIST: "TODO", //  "dehoist",
-        EXTRACT: "TODO", //  "extract",
-        EXTRACT_NAMES: "TODO", //  "extractNames",
-        COPY_MARKED: "TODO", //  "copyMarked",
-        DIFF_MARKED_NODES: "TODO", //  "deleteMarked",
-        MARK_CHANGED_ITEMS: "TODO", //  "markChangedHeadlines",
-        MARK_SUBHEADS: "TODO", //  "markSubheads",
-        UNMARK_ALL: "TODO", //  "unmarkAll",
-        CLONE_MARKED_NODES: "TODO", //  "cloneMarked",
-        DELETE_MARKED_NODES: "TODO", //  "deleteMarked",
-        MOVE_MARKED_NODES: "TODO", //  "moveMarked",
+
+        // * File Commands
+        WRITE_AT_FILE_NODES: 'write-at-file-nodes',
+        WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
+
+        // * More Commands
+        //  TODO  
+        // GOTO_GLOBAL_LINE: "!goto_global_line",
+        // TAG_CHILDREN: "!tag_children",
+        // START_SEARCH: "!start_search",
+        // FIND_ALL: "!find_all",
+        // FIND_NEXT: "!find_next",
+        // FIND_PREVIOUS: "!find_previous",
+        // FIND_VAR: "!find_var",
+        // FIND_DEF: "!find_def",
+        // REPLACE: "!replace",
+        // REPLACE_THEN_FIND: "!replace_then_find",
+        // REPLACE_ALL: "!replace_all",
+
+        // * Undo Operations
+        UNDO: "undo",
+        REDO: "redo",
+        // * Tree Building
+        EXECUTE_SCRIPT: "TODO", // TODO
+        REFRESH_FROM_DISK: "TODO", // TODO
+        REFRESH_FROM_DISK_PNODE: "TODO", // TODO
+        GIT_DIFF: "TODO", // TODO
+        // * Outline from body text
+        EXTRACT: "TODO", // TODO
+        EXTRACT_NAMES: "TODO", // TODO
+        // * Hoist Operations
+        HOIST_PNODE: "hoist",
+        DEHOIST: "de-hoist",
+        // * History Navigation
+        GOTO_PREV_HISTORY: "goToPrevHistory",
+        GOTO_NEXT_HISTORY: "goToNextHistory",
+        // * Goto & Folding
+        PAGE_UP: "tree-page-up",
+        PAGE_DOWN: "tree-page-down",
+        GOTO_FIRST_VISIBLE: "goto-first-visible-node",
+        GOTO_LAST_VISIBLE: "goto-last-visible-node",
+        GOTO_LAST_SIBLING: "goto-last-sibling",
+        GOTO_NEXT_VISIBLE: "goto-next-visible",
+        GOTO_PREV_VISIBLE: "goto-prev-visible",
+        GOTO_NEXT_MARKED: "goto-next-marked",
+        GOTO_NEXT_CLONE: "goto-next-clone",
+        CONTRACT_OR_GO_LEFT: "contract-or-go-left",
+        EXPAND_AND_GO_RIGHT: "expand-and-go-right",
+        CONTRACT_ALL: "contract-all",
+        // * Mark Operations
+        TOGGLE_MARK: "toggle-mark",
+        COPY_MARKED: "copy-marked-nodes",
+        DIFF_MARKED_NODES: "diff-marked-nodes", // TODO from leoCompare.py
+        MARK_CHANGED_ITEMS: "mark-changed-items",
+        MARK_SUBHEADS: "mark-subheads",
+        UNMARK_ALL: "unmark-all",
+        CLONE_MARKED_NODES: "clone-marked-nodes",
+        DELETE_MARKED_NODES: "delete-marked-nodes",
+        MOVE_MARKED_NODES: "move-marked-nodes",
+        // * Clipboard Operations
+        COPY_PNODE: "copy-node",
+        CUT_PNODE: "cut-node",
+        PASTE_PNODE: "paste-node",
+        PASTE_CLONE_PNODE: "paste-retaining-clones",
+        // * Outline Editing
+        DELETE_PNODE: "delete-node",
+        MOVE_PNODE_DOWN: "move-outline-down",
+        MOVE_PNODE_LEFT: "move-outline-left",
+        MOVE_PNODE_RIGHT: "move-outline-right",
+        MOVE_PNODE_UP: "move-outline-up",
+        INSERT_PNODE: "insert-node",
+        INSERT_CHILD_PNODE: "insert-child",
+        CLONE_PNODE: "clone-node",
+        // * Marshalling Operations
+        PROMOTE_PNODE: "promote",
+        DEMOTE_PNODE: "demote",
+        SORT_CHILDREN: "sort-children",
+        SORT_SIBLINGS: "sort-siblings",
         // * Clone-find functionality
-        CLONE_FIND_ALL: "TODO", //  "cloneFindAll",
-        CLONE_FIND_ALL_FLATTENED: "TODO", //  "cloneFindAllFlattened",
-        CLONE_FIND_MARKED: "TODO", //  "cloneFindMarked",
-        CLONE_FIND_FLATTENED_MARKED: "TODO", //  "cloneFindFlattenedMarked",
+        CLONE_FIND_ALL: "TODO", // TODO
+        CLONE_FIND_ALL_FLATTENED: "TODO", // TODO
+        CLONE_FIND_MARKED: "TODO", // TODO
+        CLONE_FIND_FLATTENED_MARKED: "TODO", // TODO
+    };
+
+    /**
+     * * Overridden 'good' minibuffer commands
+     */
+    public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
+        // "tag-children": Constants.COMMANDS.TAG_CHILDREN,
+        // "clone-find-tag": Constants.COMMANDS.CLONE_FIND_TAG,
+        // "import-file": Constants.COMMANDS.IMPORT_ANY_FILE,
+        // "redo": Constants.COMMANDS.REDO,
+        // "undo": Constants.COMMANDS.UNDO,
+        // "clone-find-all": Constants.COMMANDS.CLONE_FIND_ALL,
+        // "clone-find-all-flattened": Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
+
+        // 'import-MORE-files': Constants.COMMANDS.IMPORT_ANY_FILE,
+        // 'import-free-mind-files': Constants.COMMANDS.IMPORT_ANY_FILE,
+        // 'import-jupyter-notebook': Constants.COMMANDS.IMPORT_ANY_FILE,
+        // 'import-legacy-external-files': Constants.COMMANDS.IMPORT_ANY_FILE,
+        // 'import-mind-jet-files': Constants.COMMANDS.IMPORT_ANY_FILE,
+        // 'import-tabbed-files': Constants.COMMANDS.IMPORT_ANY_FILE,
+        // 'import-todo-text-files': Constants.COMMANDS.IMPORT_ANY_FILE,
+        // 'import-zim-folder': Constants.COMMANDS.IMPORT_ANY_FILE,
+
+        // 'file-new': Constants.COMMANDS.NEW_FILE,
+        // 'file-open-by-name': Constants.COMMANDS.OPEN_FILE,
+        // 'new': Constants.COMMANDS.NEW_FILE,
+        // 'open-outline': Constants.COMMANDS.OPEN_FILE,
+        // 'file-save': Constants.COMMANDS.SAVE_FILE,
+        // 'file-save-as': Constants.COMMANDS.SAVE_AS_FILE,
+        // 'file-save-as-leojs': Constants.COMMANDS.SAVE_AS_LEOJS,
+        // 'file-save-as-unzipped': Constants.COMMANDS.SAVE_AS_FILE,
+        // 'file-save-by-name': Constants.COMMANDS.SAVE_AS_FILE,
+        // 'file-save-to': Constants.COMMANDS.SAVE_AS_FILE,
+        // 'save': Constants.COMMANDS.SAVE_FILE,
+        // 'save-as': Constants.COMMANDS.SAVE_AS_FILE,
+        // 'save-file': Constants.COMMANDS.SAVE_FILE,
+        // 'save-file-as': Constants.COMMANDS.SAVE_AS_FILE,
+        // 'save-file-as-leojs': Constants.COMMANDS.SAVE_AS_LEOJS,
+        // 'save-file-as-unzipped': Constants.COMMANDS.SAVE_AS_FILE,
+        // 'save-file-by-name': Constants.COMMANDS.SAVE_AS_FILE,
+        // 'save-file-to': Constants.COMMANDS.SAVE_AS_FILE,
+        // 'save-to': Constants.COMMANDS.SAVE_AS_FILE,
+
+        // 'clone-find-all-flattened-marked': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED,
+        // 'clone-find-all-marked': Constants.COMMANDS.CLONE_FIND_MARKED,
+
+        // 'clone-marked-nodes': Constants.COMMANDS.CLONE_MARKED_NODES,
+
+        // 'cfa': Constants.COMMANDS.CLONE_FIND_ALL,
+        // 'cfam': Constants.COMMANDS.CLONE_FIND_MARKED,
+        // 'cff': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
+        // 'cffm': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED,
+        // 'cft': Constants.COMMANDS.CLONE_FIND_TAG,
+
+        // 'git-diff': Constants.COMMANDS.GIT_DIFF,
+        // 'gd': Constants.COMMANDS.GIT_DIFF,
+
+        // 'find-tab-open': Constants.COMMANDS.START_SEARCH,
+        // 'find-clone-all': Constants.COMMANDS.CLONE_FIND_ALL,
+        // 'find-clone-all-flattened': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
+        // 'find-clone-tag': Constants.COMMANDS.CLONE_FIND_TAG,
+        // 'find-all': Constants.COMMANDS.FIND_ALL,
+        // 'start-search': Constants.COMMANDS.START_SEARCH,
+        // 'find-next': Constants.COMMANDS.FIND_NEXT,
+        // 'find-prev': Constants.COMMANDS.FIND_PREVIOUS,
+        // 'search-backward': Constants.COMMANDS.FIND_NEXT,
+        // 'search-forward': Constants.COMMANDS.FIND_PREVIOUS,
+        // 'find-var': Constants.COMMANDS.FIND_VAR,
+        // 'find-def': Constants.COMMANDS.FIND_DEF,
+        // 'replace': Constants.COMMANDS.REPLACE,
+        // 'replace-all': Constants.COMMANDS.REPLACE_ALL,
+        // 'change-all': Constants.COMMANDS.REPLACE_ALL,
+        // 'change-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
+        // 'replace-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
+        // 'show-find-options': Constants.COMMANDS.START_SEARCH,
+        // 'toggle-find-ignore-case-option': Constants.COMMANDS.TOGGLE_FIND_IGNORE_CASE_OPTION,
+        // 'toggle-find-in-body-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_BODY_OPTION,
+        // 'toggle-find-in-headline-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_HEADLINE_OPTION,
+        // 'toggle-find-mark-changes-option': Constants.COMMANDS.TOGGLE_FIND_MARK_CHANGES_OPTION,
+        // 'toggle-find-mark-finds-option': Constants.COMMANDS.TOGGLE_FIND_MARK_FINDS_OPTION,
+        // 'toggle-find-regex-option': Constants.COMMANDS.TOGGLE_FIND_REGEXP_OPTION,
+        // 'toggle-find-word-option': Constants.COMMANDS.TOGGLE_FIND_WORD_OPTION,
+
+        // 'goto-next-history-node': Constants.COMMANDS.PREV_NODE,
+        // 'goto-prev-history-node': Constants.COMMANDS.NEXT_NODE,
+
+
     };
 
 }

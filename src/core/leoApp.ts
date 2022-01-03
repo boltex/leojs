@@ -1,9 +1,19 @@
+//@+leo-ver=5-thin
+//@+node:felix.20210102012334.1: * @file src/core/leoApp.ts
+//@+<< imports >>
+//@+node:felix.20210102211149.1: ** << imports >> (leoApp)
 import * as os from "os";
+import * as fs from 'fs';
+import * as path from 'path';
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
 import { NodeIndices } from './leoNodes';
 import { Commands } from './leoCommands';
+import { fstat } from "fs";
 
+//@-<< imports >>
+//@+others
+//@+node:felix.20210102213337.1: ** class IdleTimeManager
 /**
  *  A singleton class to manage idle-time handling. This class handles all
  *  details of running code at idle time, including running 'idle' hooks.
@@ -24,12 +34,15 @@ export class IdleTimeManager {
         this.timer = null;
     }
 
+    //@+others
+    //@+node:felix.20210102213337.2: *3* itm.add_callback
     /*
     def add_callback(self, callback):
         """Add a callback to be called at every idle time."""
         self.callback_list.append(callback)
     */
 
+    //@+node:felix.20210102213337.3: *3* itm.on_idle
     /*
     on_idle_count = 0
 
@@ -55,6 +68,7 @@ export class IdleTimeManager {
 
     */
 
+    //@+node:felix.20210102213337.4: *3* itm.start
     /*
     def start(self):
         """Start the idle-time timer."""
@@ -66,17 +80,23 @@ export class IdleTimeManager {
             self.timer.start()
     */
 
+    //@-others
 
 }
 
+//@+node:felix.20210102214000.1: ** class LeoApp
 /**
  * A class representing the Leo application itself.
  * instance variables of this class are Leo's global variables.
  */
 export class LeoApp {
 
+    //@+others
+    //@+node:felix.20210102214029.1: *3* app.Birth & startup
+    //@+<< LeoApp: command-line arguments >>
+    //@+node:felix.20210103024632.2: *4* << LeoApp: command-line arguments >>
     public batchMode: boolean = false; // True: run in batch mode.
-    public debug = []; // A list of switches to be enabled.
+    public debug: string[] = []; // A list of switches to be enabled.
     public diff: boolean = false; // True: run Leo in diff mode.
     public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
@@ -98,6 +118,9 @@ export class LeoApp {
     public use_psyco: boolean = false; // True: use psyco optimization.
     public use_splash_screen: boolean = true; // True: put up a splash screen.
 
+    //@-<< LeoApp: command-line arguments >>
+    //@+<< LeoApp: Debugging & statistics >>
+    //@+node:felix.20210103024632.3: *4* << LeoApp: Debugging & statistics >>
     public count: number = 0; // General purpose debugging count.
     public debug_dict: any = {}; // For general use.
     public disable_redraw: boolean = false; // True: disable all redraws.
@@ -111,17 +134,26 @@ export class LeoApp {
     public statsLockout: boolean = false; // A lockout to prevent unbound recursion while gathering stats.
     public validate_outline: boolean = false; // True: enables c.validate_outline. (slow)
 
+    //@-<< LeoApp: Debugging & statistics >>
+    //@+<< LeoApp: error messages >>
+    //@+node:felix.20210103024632.4: *4* << LeoApp: error messages >>
     public menuWarningsGiven: boolean = false; // True: suppress warnings in menu code.
     public unicodeErrorGiven: boolean = true; // True: suppress unicode trace-backs.
 
+    //@-<< LeoApp: error messages >>
+    //@+<< LeoApp: global directories >>
+    //@+node:felix.20210103024632.5: *4* << LeoApp: global directories >>
     public extensionsDir = null; // The leo / extensions directory
     public globalConfigDir = null; // leo / config directory
     public globalOpenDir = null; // The directory last used to open a file.
     public homeDir = null; // The user's home directory.
     public homeLeoDir = null; // The user's home/.leo directory.
-    public loadDir = null; // The leo / core directory.
+    public loadDir: string|undefined; // The leo / core directory.
     public machineDir = null; // The machine - specific directory.
 
+    //@-<< LeoApp: global directories >>
+    //@+<< LeoApp: global data >>
+    //@+node:felix.20210103024632.6: *4* << LeoApp: global data >>
     public atAutoNames: string[] = []; // The set of all @auto spellings.
     public atFileNames: string[] = []; // The set of all built -in @<file>spellings.
 
@@ -138,6 +170,9 @@ export class LeoApp {
 
     // * Opened Leo File Commanders
     public commandersList: Commands[] = [];
+    //@-<< LeoApp: global data >>
+    //@+<< LeoApp: global controller/manager objects >>
+    //@+node:felix.20210103024632.7: *4* << LeoApp: global controller/manager objects >>
     // Most of these are defined in initApp.
     public backgroundProcessManager: any = null; // The singleton BackgroundProcessManager instance.
     public commander_cacher: any = null; // The singleton leoCacher.CommanderCacher instance.
@@ -158,6 +193,9 @@ export class LeoApp {
     public commandName: any = null; // The name of the command being executed.
     public commandInterruptFlag: boolean = false; // True: command within a command.
 
+    //@-<< LeoApp: global controller/manager objects >>
+    //@+<< LeoApp: global reader/writer data >>
+    //@+node:felix.20210103024632.8: *4* << LeoApp: global reader/writer data >>
     // From leoAtFile.py.
     public atAutoWritersDict: any = {};
     public writersDispatchDict: any = {};
@@ -166,6 +204,9 @@ export class LeoApp {
     // Keys are @auto names, values are scanner classes.
     public classDispatchDict: any = {};
 
+    //@-<< LeoApp: global reader/writer data >>
+    //@+<< LeoApp: global status vars >>
+    //@+node:felix.20210103024632.9: *4* << LeoApp: global status vars >>
     public already_open_files: any[] = []; // A list of file names that * might * be open in another copy of Leo.
     public dragging: boolean = false; // True: dragging.
     public inBridge: boolean = false; // True: running from leoBridge module.
@@ -180,6 +221,9 @@ export class LeoApp {
     public reverting: boolean = false; // True: executing the revert command.
     public syntax_error_files: any[] = [];
 
+    //@-<< LeoApp: global status vars >>
+    //@+<< LeoApp: the global log >>
+    //@+node:felix.20210103024632.10: *4* << LeoApp: the global log >>
     // To be moved to the LogManager.
     public log = null; // The LeoFrame containing the present log.
     public logInited: boolean = false; // False: all log message go to logWaiting list.
@@ -190,11 +234,17 @@ export class LeoApp {
     public signon1: string = '';
     public signon2: string = '';
 
+    //@-<< LeoApp: the global log >>
+    //@+<< LeoApp: global theme data >>
+    //@+node:felix.20210103024632.11: *4* << LeoApp: global theme data >>
     public theme_directory = null;
     // The directory from which the theme file was loaded, if any.
     // Set only by LM.readGlobalSettingsFiles.
     // Used by the StyleSheetManager class.
 
+    //@-<< LeoApp: global theme data >>
+    //@+<< LeoApp: global types >>
+    //@+node:felix.20210103024632.12: *4* << LeoApp: global types >>
     /*
     from leo.core import leoFrame
     from leo.core import leoGui
@@ -203,6 +253,9 @@ export class LeoApp {
     public nullLog = leoFrame.NullLog()
     */
 
+    //@-<< LeoApp: global types >>
+    //@+<< LeoApp: plugins and event handlers >>
+    //@+node:felix.20210103024632.13: *4* << LeoApp: plugins and event handlers >>
     public hookError: boolean = false; // True: suppress further calls to hooks.
     // g.doHook sets g.app.hookError on all exceptions.
     // Scripts may reset g.app.hookError to try again.
@@ -211,6 +264,9 @@ export class LeoApp {
     public idle_time_hooks_enabled: boolean = true;
     // True: idle - time hooks are enabled.
 
+    //@-<< LeoApp: plugins and event handlers >>
+    //@+<< LeoApp: scripting ivars >>
+    //@+node:felix.20210103024632.14: *4* << LeoApp: scripting ivars >>
     public searchDict: any = {};
     // For communication between find / change scripts.
     public scriptDict: any = {};
@@ -221,6 +277,9 @@ export class LeoApp {
     public isExternalUnitTest: boolean = false; // True: we are running a unit test externally.
     public runningAllUnitTests: boolean = false; // True: we are running all unit tests(Only for local tests).
 
+    //@-<< LeoApp: scripting ivars >>
+    //@+<< LeoApp: unit testing ivars >>
+    //@+node:felix.20210103024632.15: *4* << LeoApp: unit testing ivars >>
     public suppressImportChecks: boolean = false;
     // Used only in basescanner.py ;
     // True: suppress importCommands.check
@@ -229,6 +288,7 @@ export class LeoApp {
     public unitTesting = false;   // True if unit testing.
     public unitTestMenusDict = {};   // Created in LeoMenu.createMenuEntries for a unit test. ;   // keys are command names.values are sets of strokes.
 
+    //@-<< LeoApp: unit testing ivars >>
 
     public delegate_language_dict: { [key: string]: string } = {};
     public extension_dict: { [key: string]: string } = {};
@@ -239,6 +299,8 @@ export class LeoApp {
     public language_delims_dict: { [key: string]: string } = {};
     public language_extension_dict: { [key: string]: string } = {};
 
+    //@+others
+    //@+node:felix.20210102214102.1: *4* constructor
     constructor() {
         // Define all global data.
         this.define_delegate_language_dict();
@@ -252,6 +314,7 @@ export class LeoApp {
         // this.nodeIndices = new NodeIndices(g.app.leoID);
     }
 
+    //@+node:felix.20210103024632.16: *4* app.define_delegate_language_dict
     public define_delegate_language_dict(): void {
         this.delegate_language_dict = {
             // Keys are new language names.
@@ -264,6 +327,7 @@ export class LeoApp {
         };
     }
 
+    //@+node:felix.20210103024632.17: *4* app.define_extension_dict
     public define_extension_dict(): void {
 
         // Keys are extensions, values are languages
@@ -446,6 +510,7 @@ export class LeoApp {
         };
     }
 
+    //@+node:felix.20210103024632.18: *4* app.define_global_constants
     public define_global_constants(): void {
         // this.prolog_string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
         this.prolog_prefix_string = "<?xml version=\"1.0\" encoding=";
@@ -453,6 +518,7 @@ export class LeoApp {
         this.prolog_namespace_string = 'xmlns:leo="http://edreamleo.org/namespaces/leo-python-editor/1.1"';
     }
 
+    //@+node:felix.20210103024632.19: *4* app.define_language_delims_dict
     public define_language_delims_dict(): void {
 
         this.language_delims_dict = {
@@ -642,6 +708,7 @@ export class LeoApp {
 
     }
 
+    //@+node:felix.20210103024632.20: *4* app.define_language_extension_dict
     public define_language_extension_dict(): void {
 
         // Used only by g.app.externalFilesController.get_ext.
@@ -807,6 +874,7 @@ export class LeoApp {
 
     }
 
+    //@+node:felix.20210103024632.21: *4* app.init_at_auto_names
     /**
      * Init the app.atAutoNames set.
      */
@@ -814,6 +882,7 @@ export class LeoApp {
         this.atAutoNames = ["@auto-rst", "@auto"];
     }
 
+    //@+node:felix.20210103024632.22: *4* app.init_at_file_names
     /**
      * Init the app.atFileNames set.
      */
@@ -828,7 +897,107 @@ export class LeoApp {
         ];
     }
 
+    //@-others
 
+    //@+node:felix.20211226221235.1: *3* app.Detecting already-open files
+    //@+node:felix.20211226221235.2: *4* app.checkForOpenFile
+    /**
+     * Warn if fn is already open and add fn to already_open_files list.
+     */
+    public checkForOpenFile(c: Commands, fn: string): void {
+        const d: any = g.app.db;
+        const tag: string = 'open-leo-files';
+        if (g.app.reverting) {
+            // #302: revert to saved doesn't reset external file change monitoring
+            g.app.already_open_files = [];
+        }
+        if (d === undefined ||
+            g.unitTesting ||
+            g.app.batchMode ||
+            g.app.reverting ||
+            g.app.inBridge
+        ) {
+            return;
+        }
+        // #1519: check os.path.exists.
+        const aList: string[] = g.app.db[tag] || [];  // A list of normalized file names.
+        let w_any: boolean = false;
+        for (let z of aList) {
+            if (fs.existsSync(z) && z.toString().trim() === fn.toString().trim()) {
+                w_any = true;
+            }
+        }
+        // any(os.path.exists(z) and os.path.samefile(z, fn) for z in aList)
+        if (w_any) {
+            // The file may be open in another copy of Leo, or not:
+            // another Leo may have been killed prematurely.
+            // Put the file on the global list.
+            // A dialog will warn the user such files later.
+            fn = path.normalize(fn);
+            if (!g.app.already_open_files.includes(fn)) {
+                g.es('may be open in another Leo:', 'red');
+                g.es(fn);
+                g.app.already_open_files.push(fn);
+            }
+
+        } else {
+            g.app.rememberOpenFile(fn);
+        }
+
+    }
+    //@+node:felix.20211226221235.3: *4* app.forgetOpenFile
+    // def forgetOpenFile(self, fn, force=False):
+    //     """Forget the open file, so that is no longer considered open."""
+    //     trace = 'shutdown' in g.app.debug
+    //     d, tag = g.app.db, 'open-leo-files'
+    //     if not d or not fn:
+    //         # #69.
+    //         return
+    //     if not force and (
+    //         d is None or g.unitTesting or g.app.batchMode or g.app.reverting):
+    //         return
+    //     aList = d.get(tag) or []
+    //     fn = os.path.normpath(fn)
+    //     if fn in aList:
+    //         aList.remove(fn)
+    //         if trace:
+    //             g.pr(f"forgetOpenFile: {g.shortFileName(fn)}")
+    //         d[tag] = aList
+    //     # elif trace: g.pr(f"forgetOpenFile: did not remove: {fn}")
+    //@+node:felix.20211226221235.4: *4* app.rememberOpenFile
+    public rememberOpenFile(fn: string): void {
+
+        // Do not call g.trace, etc. here.
+        const d = g.app.db;
+        const tag = 'open-leo-files';
+
+        if (d === undefined || g.unitTesting || g.app.batchMode || g.app.reverting) {
+            // pass
+        } else if (g.app.preReadFlag) {
+            // pass
+        } else {
+            const aList: string[] = d[tag] || [];
+            // It's proper to add duplicates to this list.
+            aList.push(path.normalize(fn));
+            d[tag] = aList;
+        }
+    }
+    //@+node:felix.20211226221235.5: *4* app.runAlreadyOpenDialog
+    // def runAlreadyOpenDialog(self, c):
+    //     """Warn about possibly already-open files."""
+    //     if g.app.already_open_files:
+    //         aList = sorted(set(g.app.already_open_files))
+    //         g.app.already_open_files = []
+    //         g.app.gui.dismiss_splash_screen()
+    //         message = (
+    //             'The following files may already be open\n'
+    //             'in another copy of Leo:\n\n' +
+    //             '\n'.join(aList))
+    //         g.app.gui.runAskOkDialog(c,
+    //             title='Already Open Files',
+    //             message=message,
+    //             text="Ok")
+    //@+node:felix.20210221010822.1: *3* app.setLeoID & helpers
     /**
      * Get g.app.leoID from various sources.
      */
@@ -855,6 +1024,7 @@ export class LeoApp {
         // return self.leoID
     }
 
+    //@+node:felix.20210221010822.2: *4* app.cleanLeoID
     /**
      * #1404: Make sure that the given Leo ID will not corrupt a .leo file.
      */
@@ -866,7 +1036,7 @@ export class LeoApp {
             id_ = id_.split(' ').join('');
         }
         catch (exception) {
-            g.es_exception();
+            g.es_exception(exception);
             id_ = '';
         }
         if (id_.length < 3) {
@@ -882,6 +1052,7 @@ export class LeoApp {
         return id_;
     }
 
+    //@+node:felix.20210123212411.1: *3* app.newCommander
     /**
      * Create a commander and its view frame for the Leo main window.
      */
@@ -902,9 +1073,11 @@ export class LeoApp {
         );
         return c;
     }
+    //@-others
 
 }
 
+//@+node:felix.20210118015431.1: ** class LoadManager
 /**
  * A class to manage loading .leo files, including configuration files.
  */
@@ -923,6 +1096,8 @@ export class LoadManager {
     public old_argv: string[]; // A copy of sys.argv for debugging.
     public more_cmdline_files: boolean; // True when more files remain on the command line to be loaded.
 
+    //@+others
+    //@+node:felix.20210119234943.1: *3*  LM.ctor
     constructor() {
         this.globalSettingsDict = undefined;
         this.globalBindingsDict = undefined;
@@ -932,6 +1107,7 @@ export class LoadManager {
         this.more_cmdline_files = false;
     }
 
+    //@+node:felix.20210120004121.1: *3* LM.load & helpers
     /**
      * This is Leo's main startup method.
      */
@@ -952,6 +1128,7 @@ export class LoadManager {
 
     }
 
+    //@+node:felix.20210120004121.3: *4* LM.doPostPluginsInit & helpers
     /**
      * Create a Leo window for each file in the lm.files list.
      */
@@ -977,7 +1154,7 @@ export class LoadManager {
             }
             catch (exception) {
                 g.es_print(`Unexpected exception reading ${fn}`);
-                g.es_exception();
+                g.es_exception(exception);
                 c = undefined;
             }
         }
@@ -1013,7 +1190,7 @@ export class LoadManager {
             }
             catch (exception) {
                 g.es_print('Can not create empty workbook');
-                g.es_exception();
+                g.es_exception(exception);
             }
         }
         c = c1;
@@ -1040,6 +1217,7 @@ export class LoadManager {
         return true;
     }
 
+    //@+node:felix.20210120004121.4: *5* LM.make_screen_shot
     public make_screen_shot(fn: string): void {
         // TODO
         console.log('TODO: make_screen_shot');
@@ -1051,6 +1229,7 @@ export class LoadManager {
         */
     }
 
+    //@+node:felix.20210120004121.5: *5* LM.openEmptyWorkBook
     /**
      * Open an empty frame and paste the contents of CheatSheet.leo into it.
      */
@@ -1102,6 +1281,7 @@ export class LoadManager {
         return c;
     }
 
+    //@+node:felix.20210120004121.6: *4* LM.doPrePluginsInit & helpers
     /**
      * Scan options, set directories and read settings.
      */
@@ -1135,6 +1315,7 @@ export class LoadManager {
         // g.app.computeSignon()  // Set app.signon/signon1 for commanders.
     }
 
+    //@+node:felix.20210120004121.16: *5* LM.initApp
     public initApp(verbose?: boolean): void {
 
 
@@ -1171,6 +1352,7 @@ export class LoadManager {
 
     }
 
+    //@+node:felix.20210120004121.31: *4* LM.loadLocalFile & helper
     public loadLocalFile(fn: string, gui: LeoUI, old_c?: Commands): Commands {
         /*Completely read a file, creating the corresonding outline.
 
@@ -1208,6 +1390,7 @@ export class LoadManager {
         c = lm.openFileByName(fn, gui, old_c, previousSettings)!;
         return c;
     }
+    //@+node:felix.20210120004121.32: *5* LM.openFileByName & helpers
     /**
      * Read the local file whose full path is fn using the given gui.
      * fn may be a Leo file (including .leo or zipped file) or an external file.
@@ -1272,6 +1455,7 @@ export class LoadManager {
         return c;
     }
 
+    //@+node:felix.20210222013344.1: *6* LM.initWrapperLeoFile
     /**
      * Create an empty file if the external fn is empty.
      *
@@ -1332,6 +1516,7 @@ export class LoadManager {
         return c;
     }
 
+    //@+node:felix.20210222013445.1: *6* LM.openLeoOrZipFile
     public openLeoOrZipFile(fn: string): any {
         const lm: LoadManager = this;
         if (fn.endsWith('.db')) {
@@ -1350,6 +1535,7 @@ export class LoadManager {
         return theFile;
     }
 
+    //@+node:felix.20210124192005.1: *4* LM.findOpenFile
     /**
      * Returns the commander of already opened Leo file
      * returns undefined otherwise
@@ -1376,5 +1562,10 @@ export class LoadManager {
         return undefined;
     }
 
+    //@-others
 }
+//@-others
+//@@language typescript
+//@@tabwidth -4
 
+//@-leo
