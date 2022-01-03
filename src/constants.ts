@@ -508,10 +508,10 @@ export class Constants {
         DELETE_MARKED_NODES: "delete-marked-nodes",
         MOVE_MARKED_NODES: "move-marked-nodes",
         // * Clipboard Operations
-        COPY_PNODE: "TODO", // TODO
-        CUT_PNODE: "TODO", // TODO
-        PASTE_PNODE: "TODO", // TODO
-        PASTE_CLONE_PNODE: "TODO", // TODO
+        COPY_PNODE: "copy-node",
+        CUT_PNODE: "cut-node",
+        PASTE_PNODE: "paste-node",
+        PASTE_CLONE_PNODE: "paste-retaining-clones",
         // * Outline Editing
         DELETE_PNODE: "delete-node",
         MOVE_PNODE_DOWN: "move-outline-down",

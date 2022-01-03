@@ -53,7 +53,7 @@ export interface Bead {
     [key: string]: any;
 }
 
-interface TreeData extends Array<VNode | any | any> { 0: VNode; 1: any; 2: any; }
+interface TreeData extends Array<VNode | any | any> { 0: VNode; 1: any; }
 //@+node:felix.20211026230613.3: ** u.cmd (decorator)
 /**
  * Command decorator for the Undoer class.
@@ -385,7 +385,6 @@ export class Undoer {
         // This effectively relinks all vnodes.
         for (let p_tree of treeInfo) {
             u.restoreVnodeUndoInfo(p_tree[1]);
-            u.restoreTnodeUndoInfo(p_tree[2]);
         }
     }
     //@+node:felix.20211026230613.21: *5* u.restoreVnodeUndoInfo
@@ -451,8 +450,8 @@ export class Undoer {
         if (topLevel) {
             treeInfo = [];
         }
-        // Add info for p.v.  Duplicate tnode info is harmless.
-        const data: TreeData = [p.v, u.createVnodeUndoInfo(p.v), u.createTnodeUndoInfo(p.v)];
+        // Add info for p.v.  Duplicate info is harmless.
+        const data: TreeData = [p.v, u.createVnodeUndoInfo(p.v)];
         treeInfo!.push(data);
         // Recursively add info for the subtree.
         let child: Position = p.firstChild();
@@ -474,22 +473,6 @@ export class Undoer {
             children: [...v.children],
         };
 
-        if (v.unknownAttributes) {
-            bunch.unknownAttributes = v.unknownAttributes;
-        }
-        return bunch;
-    }
-    //@+node:felix.20211026230613.26: *5* u.createTnodeUndoInfo
-    /**
-     * Create a bunch containing all info needed to recreate a VNode.
-     */
-    public createTnodeUndoInfo(v: VNode): any {
-        const bunch: Bead = {
-            v: v,
-            headString: v.h,
-            bodyString: v.b,
-            statusBits: v.statusBits,
-        };
         if (v.unknownAttributes) {
             bunch.unknownAttributes = v.unknownAttributes;
         }
@@ -665,7 +648,7 @@ export class Undoer {
         u.pushBead(bunch);
     }
 
-    // afterChangeHead = afterChangeHeadline // TODO (not used) ! 
+    // afterChangeHead = afterChangeHeadline // TODO (not used) !
 
     //@+node:felix.20211026230613.35: *5* u.afterChangeTree
     /**
@@ -1223,7 +1206,7 @@ export class Undoer {
         }
 
         // Update editors.
-        // c.frame.body.updateEditors(); // TODO : test if needed 
+        // c.frame.body.updateEditors(); // TODO : test if needed
 
         // Update icons.
         const val: number = p.computeIcon();
@@ -1232,7 +1215,7 @@ export class Undoer {
             redraw_flag = true;
         }
         //
-        // Recolor the body. // TODO : test if needed 
+        // Recolor the body. // TODO : test if needed
         // c.frame.scanForTabWidth(p);  // Calls frame.setTabWidth()
 
         c.recolor();
@@ -1357,7 +1340,7 @@ export class Undoer {
         const c: Commands = u.c;
         const cc: any = c.chapterController;
         if (cc) {
-            // TODO cc chapter controler
+            // TODO cc chapter controller
             // cc.selectChapterByName('main');
         }
         if (u.newBack.__bool__()) {
@@ -1470,7 +1453,7 @@ export class Undoer {
         const c: Commands = u.c;
         const cc: any = c.chapterController;
         if (cc) {
-            // TODO cc chapter controler
+            // TODO cc chapter controller
             // cc.selectChapterByName('main');
         }
         if (u.newBack.__bool__()) {
@@ -1515,7 +1498,7 @@ export class Undoer {
         //assert u.newParent_v
         //assert v
         if (cc) {
-            // TODO cc chapter controler
+            // TODO cc chapter controller
             // cc.selectChapterByName('main');
         }
         // Adjust the children arrays of the old parent.
@@ -1747,7 +1730,7 @@ export class Undoer {
         const c: Commands = u.c;
         const cc: any = c.chapterController;
         if (cc) {
-            // TODO cc chapter controler
+            // TODO cc chapter controller
             // cc.selectChapterByName('main');
         }
         c.selectPosition(u.newP);
@@ -1888,7 +1871,7 @@ export class Undoer {
         const c: Commands = u.c;
         const cc: any = c.chapterController;
         if (cc) {
-            // TODO cc chapter controler
+            // TODO cc chapter controller
             // cc.selectChapterByName('main');
         }
         u.newP.setAllAncestorAtFileNodesDirty();
@@ -1926,7 +1909,7 @@ export class Undoer {
         const c: Commands = u.c;
         const cc: any = c.chapterController;
         if (cc) {
-            // TODO cc chapter controler
+            // TODO cc chapter controller
             // cc.selectChapterByName('main');
         }
         const v: VNode = u.p!.v;
@@ -2156,9 +2139,9 @@ export class Undoer {
             u.inHead = false;
         } else {
             // c.bodyWantsFocus();
-            // TODO 
+            // TODO
             // w.setSelectionRange(w_selRange[0], w_selRange[1], ins);
-            // TODO 
+            // TODO
             // w.seeInsertPoint();
         }
     }

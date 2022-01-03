@@ -1,20 +1,17 @@
-
+//@+leo-ver=5-thin
+//@+node:felix.20210102012410.1: * @file src/core/leoGlobals.ts
 /**
  * Global constants, variables and utility functions used throughout Leo.
  * Important: This module imports no other Leo module.
  */
+//@+<< imports >>
+//@+node:felix.20210102181122.1: ** << imports >> (leoGlobals)
+import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
-
-export const isMac: boolean = process.platform.startsWith('darwin');
-export const isWindows: boolean = process.platform.startsWith('win');
-
-export const in_bridge: boolean = false; // May be unused as a vscode extension.
-// Set to True in leoBridge.py just before importing leo.core.leoApp.
-// This tells leoApp to load a null Gui.
 
 /*
     import binascii
@@ -52,6 +49,13 @@ export const in_bridge: boolean = false; // May be unused as a vscode extension.
     import urllib.parse as urlparse
 */
 
+//@-<< imports >>
+
+export const isMac: boolean = process.platform.startsWith('darwin');
+export const isWindows: boolean = process.platform.startsWith('win');
+
+//@+<< define g.globalDirectiveList >>
+//@+node:felix.20210102180402.1: ** << define g.globalDirectiveList >>
 // Visible externally so plugins may add to the list of directives.
 export const globalDirectiveList: string[] = [
     // Order does not matter.
@@ -76,6 +80,9 @@ export const globalDirectiveList: string[] = [
 
 export let directives_pat: any = null;  // Set below.
 
+//@-<< define g.globalDirectiveList >>
+//@+<< define global decorator dicts >>
+//@+node:felix.20210102180405.1: ** << define global decorator dicts >> (leoGlobals.py)
 /*
   The cmd_instance_dict supports per-class @cmd decorators. For example, the
   following appears in leo.commands.
@@ -123,6 +130,9 @@ export const cmd_instance_dict: { [key: string]: string[] } = {
     'VimCommands': ['c', 'vimCommands']
 };
 
+//@-<< define global decorator dicts >>
+//@+<< define g.Decorators >>
+//@+node:felix.20211102223300.1: ** << define g.Decorators >>
 // * Other Decorators used in leojs are in /src/core/decorators.ts
 
 /**
@@ -140,13 +150,13 @@ export function ivars2instance(c: Commands, g: any, ivars: string[]): any {
     let ivar: string = ivars[0]; // first
 
     if (!['c', 'g'].includes(ivar)) {
-        g.trace('can not happen: unknown base', ivar)
+        g.trace('can not happen: unknown base', ivar);
         return undefined;
     }
 
     let obj: any = ivar === 'c' ? c : g;
 
-    // Dig in object 
+    // Dig in object
     for (let ivar of ivars.slice(1)) {
         obj = obj[ivar];
         if (!obj) {
@@ -156,6 +166,9 @@ export function ivars2instance(c: Commands, g: any, ivars: string[]): any {
     }
     return obj;
 }
+//@-<< define g.Decorators >>
+//@+<< define regex's >>
+//@+node:felix.20210102180413.1: ** << define regex's >>
 export const g_language_pat = new RegExp(/^@language\s+(\w+)+/, 'm');
 // Regex used by this module, and in leoColorizer.py.
 
@@ -168,6 +181,7 @@ export const g_noweb_root = new RegExp('<' + '<' + '*' + '>' + '>' + '=', 'm');
 export const g_pos_pattern = new RegExp(/:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$/);
 export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
 
+//@-<< define regex's >>
 
 export const tree_popup_handlers: ((...args: any[]) => any)[] = [];  // Set later.
 export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionary for free use
@@ -181,6 +195,9 @@ export let unitTesting: boolean = false; // A synonym for app.unitTesting.
 
 export let unicode_warnings: { [key: string]: any } = {};  // Keys are callers.
 
+//@+others
+//@+node:felix.20211104210703.1: ** g.Debugging, GC, Stats & Timing
+//@+node:felix.20211205233429.1: *3* g._assert
 /**
  * * A safer alternative to a bare assert.
  */
@@ -199,6 +216,7 @@ export function _assert(condition: any, show_callers: boolean = true): boolean {
     }
     return false;
 }
+//@+node:felix.20211104212328.1: *3* g.caller
 /**
  * Return the caller name i levels up the stack.
  */
@@ -206,6 +224,7 @@ export function caller(i: number = 1): string {
     return callers(i + 1).split(',')[0];
 }
 
+//@+node:felix.20211104212426.1: *3* g.callers
 /**
  * Return a string containing a comma-separated list of the callers
  * of the function that called callerList.
@@ -240,12 +259,14 @@ export function callers(n: number = 4, count: number = 0, excludeCaller: boolean
     return result.join(',');
 }
 
+//@+node:felix.20211104212435.1: *3* g._callerName
 export function _callerName(n: number, verbose: boolean = false): string {
     // TODO : see Error().stack to access names from the call stack
     // return Error.stack.split()[n]; // or something close to that
     return "<_callerName>";
 }
 
+//@+node:felix.20211104220458.1: *3* g.get_line & get_line__after
 // Very useful for tracing.
 
 export function get_line(s: string, i: number): string {
@@ -276,6 +297,7 @@ export function get_line_after(s: string, i: number): string {
 // getLineAfter = get_line_after
 export const getLineAfter = get_line_after;
 
+//@+node:felix.20211104221354.1: *3* g.listToString     (coreGlobals.py)
 /**
  * Pretty print any array / python list to string
  * TODO : Temporary json stringify
@@ -284,13 +306,29 @@ export function listToString(obj: any): string {
     return JSON.stringify(obj, undefined, 4);
 }
 
+//@+node:felix.20211104221420.1: *3* g.objToSTring     (coreGlobals.py)
 /**
  * Pretty print any Python object to a string.
  * TODO : Temporary json stringify
  */
 export function objToString(obj: any, indent = '', printCaller = false, tag = null): string {
-    return JSON.stringify(obj);
 
+    let result: string = "";
+    result = obj.toString();
+    // let cache: any[] = [];
+    // result = JSON.stringify(obj, function (key, value) {
+    //     if (typeof value === 'object' && value !== null) {
+    //         if (cache!.indexOf(value) !== -1) {
+    //             // Circular reference found, discard key
+    //             return;
+    //         }
+    //         // Store value in our collection
+    //         cache!.push(value);
+    //     }
+    //     return value;
+    // });
+    // cache = null; // Enable garbage collection
+    return result;
     // # pylint: disable=undefined-loop-variable
     //     # Looks like a a pylint bug.
     // #
@@ -326,6 +364,7 @@ export function objToString(obj: any, indent = '', printCaller = false, tag = nu
 
 }
 
+//@+node:felix.20211104221444.1: *3* g.printObj        (coreGlobals.py)
 /**
  * Pretty print any Python object using pr.
  */
@@ -335,6 +374,8 @@ export function printObj(obj: any, indent = '', printCaller = false, tag = null)
     pr(obj);
 }
 
+//@+node:felix.20211104210724.1: ** g.Directives
+//@+node:felix.20211104213229.1: *3* g.get_directives_dict (must be fast)
 // The caller passes [root_node] or None as the second arg.
 // This allows us to distinguish between None and [None].
 
@@ -390,6 +431,7 @@ export function get_directives_dict(p: Position, root?: Position[]): any {
 
     return d;
 }
+//@+node:felix.20211104213315.1: *3* g.get_directives_dict_list (must be fast)
 /**
  * Scans p and all its ancestors for directives.
  *
@@ -406,6 +448,7 @@ export function get_directives_dict_list(p: Position): any[] {
     }
     return result;
 }
+//@+node:felix.20211104213330.1: *3* g.isDirective
 /**
  * Return True if s starts with a directive.
  */
@@ -424,6 +467,7 @@ export function isDirective(s: string): boolean {
     return false;
 }
 
+//@+node:felix.20211104225158.1: *3* g.scanAtTabwidthDirectives & scanAllTabWidthDirectives
 /**
  * Scan aList for '@tabwidth' directives.
  */
@@ -460,6 +504,26 @@ export function scanAllAtTabWidthDirectives(c: Commands, p: Position): number | 
     }
     return ret;
 }
+//@+node:felix.20220102155326.1: *3* g.stripPathCruft
+/**
+ * Strip cruft from a path name.
+ */
+export function stripPathCruft(p_path: string): string {
+
+    if (!p_path) {
+        return p_path;   // Retain empty paths for warnings.
+    }
+    if (p_path.length > 2 && (
+        (p_path[0] === '<' && p_path[p_path.length - 1] === '>') ||
+        (p_path[0] === '"' && p_path[p_path.length - 1] === '"') ||
+        (p_path[0] === "'" && p_path[p_path.length - 1] === "'")
+    )) {
+        p_path = p_path.substring(1, p_path.length - 1).trim();
+    }
+    // We want a *relative* path, not an absolute path.
+    return p_path;
+}
+//@+node:felix.20211104233842.1: *3* g.update_directives_pat (new)
 /**
  * Init/update g.directives_pat
  */
@@ -491,6 +555,67 @@ export function update_directives_pat(): void {
 }
 // #1688: Initialize g.directives_pat
 update_directives_pat();
+//@+node:felix.20211104210746.1: ** g.Files & Directories
+//@+node:felix.20211228213652.1: *3* g.fullPath
+/**
+ * Return the full path (including fileName) in effect at p. Neither the
+ * path nor the fileName will be created if it does not exist.
+ */
+export function fullPath(c: Commands, p_p: Position, simulate: boolean = false): string {
+    // Search p and p's parents.
+    for (let p of p_p.self_and_parents(false)) {
+        const aList: any[] = get_directives_dict_list(p);
+        const w_path: string = c.scanAtPathDirectives(aList);
+        let fn: string = simulate ? p.h : p.anyAtFileNodeName();
+        //fn = p.h if simulate else p.anyAtFileNodeName()
+        // Use p.h for unit tests.
+        if (fn) {
+            // Fix #102: expand path expressions.
+            fn = c.expand_path_expression(fn);  // #1341.
+            // fn = os.path.expanduser(fn);  // 1900.
+
+            if (fn[0] === '~') {
+                fn = path.join(os.homedir(), fn.slice(1));
+            }
+
+            return os_path_finalize_join(undefined, w_path, fn);  // #1341.
+        }
+
+    }
+    return '';
+}
+//@+node:felix.20220102154348.1: *3* g.getBaseDirectory
+/**
+ * Handles the conventions applying to the "relative_path_base_directory" configuration option.
+ *
+ * Convert '!' or '.' to proper directory references.
+ */
+export function getBaseDirectory(c: Commands): string {
+
+    let base: string = app.config.relative_path_base_directory;
+
+    if (base && base === "!") {
+        base = app.loadDir!;
+    } else if (base && base === ".") {
+        base = c.openDirectory!;
+    }
+
+    if (base && os_path_isabs(base)) {
+        // Set c.chdir_to_relative_path as needed.
+        if (!(c as any)['chdir_to_relative_path']) {
+            (c as any)['chdir_to_relative_path'] = c.config.getBool('chdir-to-relative-path');
+        }
+        // Call os.chdir if requested.
+        if ((c as any).chdir_to_relative_path) {
+            // os.chdir(base);
+            process.chdir(base);
+        }
+        return base;  // base need not exist yet.
+    }
+
+    return "";  // No relative base given.
+}
+//@+node:felix.20211104230025.1: *3* g.shortFileName   (coreGlobals.py)
 /**
  * Return the base name of a path.
  */
@@ -502,6 +627,8 @@ export function shortFileName(fileName: string): string {
 
 export const shortFilename = shortFileName;
 
+//@+node:felix.20211104210802.1: ** g.Finding & Scanning
+//@+node:felix.20211104213154.1: *3* g.find_line_start
 /**
   * Return the index in s of the start of the line containing s[i].
  */
@@ -519,13 +646,16 @@ export function find_line_start(s: string, p_i: number): number {
     //# if i == -1: return 0
     //# else: return i + 1
 }
+//@+node:felix.20211104220753.1: *3* g.is_nl
 export function is_nl(s: string, i: number): boolean {
     return (i < s.length) && (s.charAt(i) === '\n' || s.charAt(i) === '\r');
 }
 
+//@+node:felix.20211104220826.1: *3* g.isDigit
 export function isDigit(s: string): boolean {
     return (s >= '0' && s <= '9');
 };
+//@+node:felix.20211104221002.1: *3* g.is_special      (coreGlobals.py)
 /**
  * Return non-negative number if the body text contains the @ directive.
  */
@@ -544,6 +674,7 @@ export function is_special(s: string, directive: string): number {
     return -1;
 }
 
+//@+node:felix.20211104221014.1: *3* g.isWordChar*     (coreGlobals.py)
 /**
  * Return True if ch should be considered a letter.
  */
@@ -555,19 +686,24 @@ export function isWordChar1(ch: string): boolean {
     return !!ch && (/^[a-zA-Z]$/.test(ch) || ch === '_');
 }
 
+//@+node:felix.20211104221259.1: *3* g.match           (coreGlobals.py)
 export function match(s: string, i: number, pattern: string): boolean {
     // Warning: this code makes no assumptions about what follows pattern.
     // Equivalent to original in python (only looks in specific substring)
     // return s and pattern and s.find(pattern, i, i + len(pattern)) == i
-    return !!s && !!pattern && s.substring(i, i + pattern.length + 1).search(pattern) === 0;
+    // didnt work with xml expression
+    // return !!s && !!pattern && s.substring(i, i + pattern.length + 1).search(pattern) === 0;
+    return !!s && !!pattern && s.substring(i, i + pattern.length + 1).startsWith(pattern);
 }
 
+//@+node:felix.20211104221309.1: *3* g.match_word      (coreGlobals.py)
 export function match_word(s: string, i: number, pattern: string): boolean {
     // TODO : This is weak lacks performance. Solidify this method!
     const pat = new RegExp(pattern + "\\b");
     return s.substring(i).search(pat) === 0;
 }
 
+//@+node:felix.20211104220814.1: *3* g.skip_nl
 /**
  * We need this function because different systems have different end-of-line conventions.
  * Skips a single "logical" end-of-line character.
@@ -582,8 +718,9 @@ export function skip_nl(s: string, i: number): number {
     return i;
 }
 
+//@+node:felix.20211104220540.1: *3* g.skip_line, skip_to_start/end_of_line
 /* These methods skip to the next newline, regardless of whether the
-newline may be preceeded by a backslash. Consequently, they should be
+newline may be preceded by a backslash. Consequently, they should be
 used only when we know that we are not in a preprocessor directive or
 string.
 */
@@ -631,23 +768,27 @@ export function skip_to_start_of_line(s: string, i: number): number {
     return i + 1;
 }
 
+//@+node:felix.20211104220609.1: *3* g.skip_to_char    (coreGlobals.py)
 /**
  * Returns object instead of original python tuple
  */
-export function skip_to_char(s: string, i: number, ch: string): { position: number; result: string; } {
+export function skip_to_char(s: string, i: number, ch: string): [number, string] {
     const j: number = s.indexOf(ch, i);
     if (j === -1) {
-        return {
-            position: s.length,
-            result: s.substring(i)
-        };
+        // return {
+        //     position: s.length,
+        //     result: s.substring(i)
+        // };
+        return [s.length, s.substring(i)];
     }
-    return {
-        position: j,
-        result: s.substring(i, j)
-    };
+    // return {
+    //     position: j,
+    //     result: s.substring(i, j)
+    // };
+    return [j, s.substring(i, j)];
 }
 
+//@+node:felix.20211104220621.1: *3* g.skip_id         (coreGlobals.py)
 export function skip_id(s: string, i: number, chars: string | null = null): number {
     chars = chars ? chars.toString() : '';
     const n = s.length;
@@ -657,6 +798,7 @@ export function skip_id(s: string, i: number, chars: string | null = null): numb
     return i;
 }
 
+//@+node:felix.20211104220631.1: *3* g.skip_long
 /**
  * Scan s[i:] for a valid int.
  * Return (i, val) or (i, None) if s[i] does not point at a number.
@@ -683,6 +825,7 @@ export function skip_long(s: string, i: number): [number, number | undefined] {
         return [i, undefined];
     }
 }
+//@+node:felix.20211104220639.1: *3* g.skip_ws*        (coreGlobals.py)
 export function skip_ws(s: string, i: number): number {
     const n: number = s.length;
     while (i < n && ('\t '.indexOf(s.charAt(i)) >= 0)) {
@@ -699,6 +842,7 @@ export function skip_ws_and_nl(s: string, i: number): number {
     return i;
 }
 
+//@+node:felix.20211104230121.1: *3* g.splitLines      (coreGlobals.py)
 /**
  * Split s into lines, preserving the number of lines and the endings
  * of all lines, including the last line.
@@ -711,6 +855,7 @@ export function splitLines(s?: string): string[] {
     }
 }
 
+//@+node:felix.20211104230217.1: *3* g.toUnicode       (coreGlobals.py)
 /**
  * Convert bytes to unicode if necessary.
  */
@@ -743,9 +888,11 @@ export function toUnicode(s: any, encoding: string | null = null, reportErrors =
     //     trace(callers())
     // return s
 
-    return s; // Skip for now
+    return s.toString(); // Skip for now
 }
 
+//@+node:felix.20211106230549.1: ** g.Hooks & Plugins
+//@+node:felix.20211106230549.2: *3* g.act_on_node
 export function dummy_act_on_node(c: Commands, p: Position): any {
     // pass
 }
@@ -754,24 +901,26 @@ export function dummy_act_on_node(c: Commands, p: Position): any {
 
 export let act_on_node = dummy_act_on_node;
 
+//@+node:felix.20211106230549.3: *3* g.childrenModifiedSet, g.contentModifiedSet
 export const childrenModifiedSet: VNode[] = [];
 export const contentModifiedSet: VNode[] = [];
+//@+node:felix.20211106230549.4: *3* g.doHook
 /**
  * This global function calls a hook routine. Hooks are identified by the
  * tag param.
- * 
+ *
  * Returns the value returned by the hook routine, or None if the there is
  * an exception.
- * 
+ *
  * We look for a hook routine in three places:
  * 1. c.hookFunction
  * 2. app.hookFunction
  * 3. leoPlugins.doPlugins()
- * 
+ *
  * Set app.hookError on all exceptions.
  * Scripts may reset app.hookError to try again.
  */
-export function doHook(tag: string, paramDict?: any): any {
+export function doHook(tag: string, ...args: any[]): any {
     // TODO !
     /*
     if g.app.killed or g.app.hookError:
@@ -795,13 +944,15 @@ export function doHook(tag: string, paramDict?: any): any {
         return f(tag, keywords)
     except Exception:
         g.es_exception()
-        g.app.hookError = True  # Supress this function.
+        g.app.hookError = True  # Suppress this function.
         g.app.idle_time_hooks_enabled = False
         return None
     */
     return undefined;
 }
+//@+node:felix.20211106230549.5: *3* g.Wrappers for g.app.pluginController methods
 // Important: we can not define g.pc here!
+//@+node:felix.20211106230549.6: *4* g.Loading & registration
 
 /*
 def loadOnePlugin(pluginName, verbose=False):
@@ -829,6 +980,7 @@ def unregisterHandler(tags, fn):
     return pc.unregisterHandler(tags, fn)
 
 */
+//@+node:felix.20211106230549.7: *4* g.Information
 /*
 def getHandlersForTag(tags):
     pc = g.app.pluginsController
@@ -847,6 +999,9 @@ def pluginIsLoaded(fn):
     return pc.isLoaded(fn)
 */
 
+//@+node:felix.20211104210935.1: ** g.Importing
+//@+node:felix.20211104210938.1: ** g.Indices, Strings, Unicode & Whitespace
+//@+node:felix.20211104212212.1: *3* g.angleBrackets
 /**
  * Return < < s > >
  */
@@ -856,6 +1011,7 @@ export function angleBrackets(s: string): string {
     return lt + s + rt;
 }
 
+//@+node:felix.20211104230158.1: *3* g.toEncodedString (coreGlobals.py)
 /**
  * Convert unicode string to an encoded string.
  */
@@ -885,58 +1041,8 @@ export function toEncodedString(s: any, encoding = 'utf-8', reportErrors = false
     return s; // skip for now
 }
 
-// TODO : Replace with output to proper 'Leo log pane'
-export const es = console.log;
-
-export function es_exception(p_error: any, c?: Commands): string {
-    const getCircularReplacer = () => {
-        const seen = new WeakSet();
-        return (key: string, value: any) => {
-            if (typeof value === "object" && value !== null) {
-                if (seen.has(value)) {
-                    return;
-                }
-                seen.add(value);
-            }
-            return value;
-        };
-    };
-
-    // p_error = JSON.stringify(p_error, getCircularReplacer());
-    console.log('es_exception called with error: ', p_error);
-    return '<no file>';
-}
-
-/*
-    ### es_exception Old code
-        # typ, val, tb = sys.exc_info()
-        # # val is the second argument to the raise statement.
-        # if full:
-            # lines = traceback.format_exception(typ, val, tb)
-        # else:
-            # lines = traceback.format_exception_only(typ, val)
-        # for line in lines:
-            # g.es_print_error(line, color=color)
-        # fileName, n = g.getLastTracebackFileAndLineNumber()
-        # return fileName, n
-*/
-
-/**
- * TODO : This is a temporary console output
- * Print all non-keyword args, and put them to the log pane.
- * Python code was:
- *     pr(*args, **keys)
- *     es(*args, **keys)
- */
-export const es_print = console.log;
-
-// TODO : Replace with proper method
-export const blue = console.log;
-export const error = console.log;
-export const note = console.log;
-export const red = console.log;
-export const warning = console.warn;
-
+//@+node:felix.20211104210858.1: ** g.Logging & Printing
+//@+node:felix.20211104212644.1: *3* g.doKeywordArgs
 /**
  * Return a result dict that is a copy of the keys dict
  * with missing items replaced by defaults in d dict.
@@ -969,6 +1075,75 @@ export function doKeywordArgs(keys: { [key: string]: any }, d: { [key: string]: 
     return result;
 }
 
+//@+node:felix.20211104212741.1: *3* g.es
+// TODO : Replace with output to proper 'Leo log pane'
+export const es = console.log;
+
+//@+node:felix.20211104212802.1: *3* g.es_exception
+export function es_exception(p_error?: any, c?: Commands): string {
+    const getCircularReplacer = () => {
+        const seen = new WeakSet();
+        return (key: string, value: any) => {
+            if (typeof value === "object" && value !== null) {
+                if (seen.has(value)) {
+                    return;
+                }
+                seen.add(value);
+            }
+            return value;
+        };
+    };
+
+    // p_error = JSON.stringify(p_error, getCircularReplacer());
+    console.log('es_exception called with error: ', p_error);
+    return '<no file>';
+}
+
+/*
+    ### es_exception Old code
+        # typ, val, tb = sys.exc_info()
+        # # val is the second argument to the raise statement.
+        # if full:
+            # lines = traceback.format_exception(typ, val, tb)
+        # else:
+            # lines = traceback.format_exception_only(typ, val)
+        # for line in lines:
+            # g.es_print_error(line, color=color)
+        # fileName, n = g.getLastTracebackFileAndLineNumber()
+        # return fileName, n
+*/
+
+//@+node:felix.20211104212809.1: *3* g.es_print
+/**
+ * TODO : This is a temporary console output
+ * Print all non-keyword args, and put them to the log pane.
+ * Python code was:
+ *     pr(*args, **keys)
+ *     es(*args, **keys)
+ */
+export const es_print = console.log;
+
+//@+node:felix.20211104212837.1: *3* g.error, g.note, g.warning, g.red, g.blue
+// TODO : Replace with proper method
+export const blue = console.log;
+export const error = console.log;
+export const note = console.log;
+export const red = console.log;
+export const warning = console.warn;
+
+//@+node:felix.20211227232452.1: *3* g.internalError
+/**
+ * Report a serious internal error in Leo.
+ */
+export function internalError(...args: any[]): void {
+    const w_callers: any = callers(20).split(',');
+    const caller: string = w_callers[w_callers.length - 1];
+    console.error('\nInternal Leo error in', caller);
+    es_print(...args);
+    // es_print('Called from', ', '.join(callers[:-1]))
+    es_print('Please report this error to Leo\'s developers', 'red');
+}
+//@+node:felix.20211104222740.1: *3* g.pr              (coreGlobals.py)
 /**
  * Print all non-keyword args.
  */
@@ -984,12 +1159,15 @@ export const pr = console.log;
 //             result.append(repr(arg))
 //     print(','.join(result))
 
+//@+node:felix.20211104230337.1: *3* g.trace           (coreGlobals.py)
 /**
  * Print a tracing message
  */
 export const trace = console.log;
 // TODO : Replace with output to proper 'Leo terminal output'
 
+//@+node:felix.20211104211115.1: ** g.Miscellaneous
+//@+node:felix.20211104222646.1: *3* g.plural          (coreGlobals.py)
 /**
  * Return "s" or "" depending on n.
  */
@@ -1005,6 +1183,374 @@ export function plural(obj: any): string {
     return n === 1 ? '' : "s";
 }
 
+//@+node:felix.20211227182611.1: ** g.os_path_ Wrappers
+//@+at Note: all these methods return Unicode strings. It is up to the user to
+// convert to an encoded string as needed, say when opening a file.
+//@+node:felix.20211227182611.2: *3* g.glob_glob
+// def glob_glob(pattern):
+//     """Return the regularized glob.glob(pattern)"""
+//     aList = glob.glob(pattern)
+//     # os.path.normpath does the *reverse* of what we want.
+//     if g.isWindows:
+//         aList = [z.replace('\\', '/') for z in aList]
+//     return aList
+//@+node:felix.20211227182611.3: *3* g.os_path_abspath
+// def os_path_abspath(path: str):
+//     """Convert a path to an absolute path."""
+//     if not path:
+//         return ''
+//     if '\x00' in path:
+//         g.trace('NULL in', repr(path), g.callers())
+//         path = path.replace('\x00', '')  # Fix Python 3 bug on Windows 10.
+//     path = os.path.abspath(path)
+//     # os.path.normpath does the *reverse* of what we want.
+//     if g.isWindows:
+//         path = path.replace('\\', '/')
+//     return path
+//@+node:felix.20211227182611.4: *3* g.os_path_basename
+// def os_path_basename(path: str):
+//     """Return the second half of the pair returned by split(path)."""
+//     if not path:
+//         return ''
+//     path = os.path.basename(path)
+//     # os.path.normpath does the *reverse* of what we want.
+//     if g.isWindows:
+//         path = path.replace('\\', '/')
+//     return path
+//@+node:felix.20211227205112.1: *3* g.os_path_dirname
+/**
+ * Return the first half of the pair returned by split(path).
+ */
+export function os_path_dirname(p_path: string): string {
+
+    if (!p_path) {
+        return '';
+    }
+
+    p_path = path.dirname(p_path);
+    // os.path.normpath does the *reverse* of what we want.
+
+    if (isWindows) {
+        p_path = p_path.split('\\').join('/');
+    }
+
+    return p_path;
+}
+//@+node:felix.20211227205124.1: *3* g.os_path_exists
+/**
+ * Return True if path exists.
+ */
+export function os_path_exists(p_path: string): boolean {
+
+    if (!p_path) {
+        return false;
+    }
+
+    if (p_path.includes('\x00')) {
+        trace('NULL in', p_path.toString(), callers());
+        p_path = p_path.split('\x00').join(''); // Fix Python 3 bug on Windows 10.
+    }
+    return fs.existsSync(p_path);
+
+}
+//@+node:felix.20211227182611.7: *3* g.os_path_expanduser
+/**
+ * wrap os.path.expanduser
+ */
+export function os_path_expanduser(p_path: string): string {
+
+    p_path = p_path.trim();
+    if (!p_path) {
+        return '';
+    }
+
+    // os.path.expanduser(p_path)
+    if (p_path[0] === '~') {
+        p_path = path.join(os.homedir(), p_path.slice(1));
+    }
+    let result: string = path.normalize(p_path);
+
+    // os.path.normpath does the *reverse* of what we want.
+    if (isWindows) {
+        result = result.split('\\').join('/');
+    }
+    return result;
+}
+//@+node:felix.20211227182611.8: *3* g.os_path_finalize
+/**
+ * Expand '~', then return os.path.normpath, os.path.abspath of the path.
+ * There is no corresponding os.path method
+ */
+export function os_path_finalize(p_path: string): string {
+
+    if (p_path.includes('\x00')) {
+        trace('NULL in', p_path.toString(), callers());
+        p_path = p_path.split('\x00').join(''); // Fix Python 3 bug on Windows 10.
+    }
+
+    // p_path = path.expanduser(p_path);  // #1383.
+    if (p_path[0] === '~') {
+        p_path = path.join(os.homedir(), p_path.slice(1));
+    }
+
+    p_path = path.resolve(p_path);
+    p_path = path.normalize(p_path);
+    // path.normpath does the *reverse* of what we want.
+
+    if (isWindows) {
+        p_path = p_path.split('\\').join('/');
+    }
+
+    // calling os.path.realpath here would cause problems in some situations.
+    return p_path;
+}
+//@+node:felix.20211227182611.9: *3* g.os_path_finalize_join
+/**
+ * Join and finalize.
+
+ * *keys may contain a 'c' kwarg, used by g.os_path_join.
+ */
+export function os_path_finalize_join(c: Commands | undefined, ...args: any[]): string {
+
+    let w_path: string = os_path_join(c, ...args);
+
+    w_path = os_path_finalize(w_path);
+    return w_path;
+}
+//@+node:felix.20211227182611.10: *3* g.os_path_getmtime
+// def os_path_getmtime(path: str):
+//     """Return the modification time of path."""
+//     if not path:
+//         return 0
+//     try:
+//         return os.path.getmtime(path)
+//     except Exception:
+//         return 0
+//@+node:felix.20211227182611.11: *3* g.os_path_getsize
+// def os_path_getsize(path: str):
+//     """Return the size of path."""
+//     return os.path.getsize(path) if path else 0
+//@+node:felix.20211227205142.1: *3* g.os_path_isabs
+/**
+ * Return True if path is an absolute path.
+ */
+export function os_path_isabs(p_path: string): boolean {
+
+    if (p_path) {
+        return path.isAbsolute(p_path);
+    } else {
+        return false;
+    }
+
+}
+//@+node:felix.20211227182611.13: *3* g.os_path_isdir
+// def os_path_isdir(path: str):
+//     """Return True if the path is a directory."""
+//     return os.path.isdir(path) if path else False
+//@+node:felix.20211227182611.14: *3* g.os_path_isfile
+// def os_path_isfile(path: str):
+//     """Return True if path is a file."""
+//     return os.path.isfile(path) if path else False
+//@+node:felix.20211227182611.15: *3* g.os_path_join
+/**
+ * Join paths, like os.path.join, with enhancements:
+ *
+ * A '!!' arg prepends g.app.loadDir to the list of paths.
+ * A '.'  arg prepends c.openDirectory to the list of paths,
+ * provided there is a 'c' kwarg.
+ */
+export function os_path_join(c: Commands | undefined, ...args: any[]): string {
+
+    // c = keys.get('c')
+
+    const uargs: string[] = [];
+    for (let z of args) {
+        if (z) {
+            uargs.push(z);
+        }
+    }
+    // uargs = [z for z in args if z]
+
+    if (!uargs.length) {
+        return '';
+    }
+    // Note:  This is exactly the same convention as used by getBaseDirectory.
+    if (uargs[0] === '!!') {
+        uargs[0] = app.loadDir || '';
+    } else if (uargs[0] === '.') {
+        if (c && c.openDirectory) {
+            uargs[0] = c.openDirectory;
+        }
+    }
+    let w_path: string;
+
+    try {
+        w_path = path.join(...uargs);
+    }
+    catch (typeError) {
+        trace(uargs, callers());
+        throw (typeError);
+    }
+    // May not be needed on some Pythons.
+    if (w_path.includes('\x00')) {
+        trace('NULL in', w_path.toString(), callers());
+        w_path = w_path.split('\x00').join(''); // Fix Python 3 bug on Windows 10.
+    }
+
+
+    // os.path.normpath does the *reverse* of what we want.
+    if (isWindows) {
+        w_path = w_path.split('\\').join('/');
+    }
+
+
+
+    return w_path;
+}
+//@+node:felix.20211227182611.16: *3* g.os_path_normcase
+// def os_path_normcase(path: str):
+//     """Normalize the path's case."""
+//     if not path:
+//         return ''
+//     path = os.path.normcase(path)
+//     if g.isWindows:
+//         path = path.replace('\\', '/')
+//     return path
+//@+node:felix.20211227182611.17: *3* g.os_path_normpath
+// def os_path_normpath(path: str):
+//     """Normalize the path."""
+//     if not path:
+//         return ''
+//     path = os.path.normpath(path)
+//     # os.path.normpath does the *reverse* of what we want.
+//     if g.isWindows:
+//         path = path.replace('\\', '/').lower()  # #2049: ignore case!
+//     return path
+//@+node:felix.20211227182611.18: *3* g.os_path_normslashes
+// def os_path_normslashes(path: str):
+
+//     # os.path.normpath does the *reverse* of what we want.
+//     if g.isWindows and path:
+//         path = path.replace('\\', '/')
+//     return path
+//@+node:felix.20211227182611.19: *3* g.os_path_realpath
+// def os_path_realpath(path: str):
+//     """Return the canonical path of the specified filename, eliminating any
+//     symbolic links encountered in the path (if they are supported by the
+//     operating system).
+//     """
+//     if not path:
+//         return ''
+//     path = os.path.realpath(path)
+//     # os.path.normpath does the *reverse* of what we want.
+//     if g.isWindows:
+//         path = path.replace('\\', '/')
+//     return path
+//@+node:felix.20211227182611.20: *3* g.os_path_split
+// def os_path_split(path: str):
+//     if not path:
+//         return '', ''
+//     head, tail = os.path.split(path)
+//     return head, tail
+//@+node:felix.20211227182611.21: *3* g.os_path_splitext
+// def os_path_splitext(path: str):
+
+//     if not path:
+//         return ''
+//     head, tail = os.path.splitext(path)
+//     return head, tail
+//@+node:felix.20211227182611.22: *3* g.os_startfile
+// def os_startfile(fname):
+//     @others
+//     if fname.find('"') > -1:
+//         quoted_fname = f"'{fname}'"
+//     else:
+//         quoted_fname = f'"{fname}"'
+//     if sys.platform.startswith('win'):
+//         # pylint: disable=no-member
+//         os.startfile(quoted_fname)
+//             # Exists only on Windows.
+//     elif sys.platform == 'darwin':
+//         # From Marc-Antoine Parent.
+//         try:
+//             # Fix bug 1226358: File URL's are broken on MacOS:
+//             # use fname, not quoted_fname, as the argument to subprocess.call.
+//             subprocess.call(['open', fname])
+//         except OSError:
+//             pass  # There may be a spurious "Interrupted system call"
+//         except ImportError:
+//             os.system(f"open {quoted_fname}")
+//     else:
+//         try:
+//             ree = None
+//             wre = tempfile.NamedTemporaryFile()
+//             ree = io.open(wre.name, 'rb', buffering=0)
+//         except IOError:
+//             g.trace(f"error opening temp file for {fname!r}")
+//             if ree:
+//                 ree.close()
+//             return
+//         try:
+//             subPopen = subprocess.Popen(['xdg-open', fname], stderr=wre, shell=False)
+//         except Exception:
+//             g.es_print(f"error opening {fname!r}")
+//             g.es_exception()
+//         try:
+//             itoPoll = g.IdleTime(
+//                 (lambda ito: itPoll(fname, ree, subPopen, g, ito)),
+//                 delay=1000,
+//             )
+//             itoPoll.start()
+//             # Let the Leo-Editor process run
+//             # so that Leo-Editor is usable while the file is open.
+//         except Exception:
+//             g.es_exception(f"exception executing g.startfile for {fname!r}")
+//@+node:felix.20211227182611.23: *4* stderr2log()
+// def stderr2log(g, ree, fname):
+//     """ Display stderr output in the Leo-Editor log pane
+
+//     Arguments:
+//         g:  Leo-Editor globals
+//         ree:  Read file descriptor for stderr
+//         fname:  file pathname
+
+//     Returns:
+//         None
+//     """
+
+//     while True:
+//         emsg = ree.read().decode('utf-8')
+//         if emsg:
+//             g.es_print_error(f"xdg-open {fname} caused output to stderr:\n{emsg}")
+//         else:
+//             break
+//@+node:felix.20211227182611.24: *4* itPoll()
+// def itPoll(fname, ree, subPopen, g, ito):
+//     """ Poll for subprocess done
+
+//     Arguments:
+//         fname:  File name
+//         ree:  stderr read file descriptor
+//         subPopen:  URL open subprocess object
+//         g: Leo-Editor globals
+//         ito: Idle time object for itPoll()
+
+//     Returns:
+//         None
+//     """
+
+//     stderr2log(g, ree, fname)
+//     rc = subPopen.poll()
+//     if not rc is None:
+//         ito.stop()
+//         ito.destroy_self()
+//         if rc != 0:
+//             g.es_print(f"xdg-open {fname} failed with exit code {rc}")
+//         stderr2log(g, ree, fname)
+//         ree.close()
+//@+node:felix.20211104211222.1: ** g.Parsing & Tokenizing
+//@+node:felix.20211104211229.1: ** g.Scripting
+//@+node:felix.20211104220723.1: *3* g.getScript
 /**
  * Return the expansion of the selected text of node p.
  * Return the expansion of all of node p's body text if
@@ -1019,6 +1565,9 @@ export function getScript(c: Commands, p: Position,
     return "";
 }
 
+//@+node:felix.20211104211349.1: ** g.Unit Tests
+//@+node:felix.20211104211355.1: ** g.Urls
+//@+node:felix.20210103231554.1: ** class g.FileLikeObject (coreGlobals.py)
 /**
  * Define a file-like object for redirecting writes to a string.
  * The caller is responsible for handling newlines correctly.
@@ -1035,18 +1584,23 @@ export class FileLikeObject {
         this.ptr = 0;
     }
 
+    //@+others
+    //@+node:felix.20210103231554.2: *3* FileLikeObject.clear (coreGlobals.py)
     public clear(): void {
         this._list = [];
     }
 
+    //@+node:felix.20210103231554.3: *3* FileLikeObject.close (coreGlobals.py)
     public close(): void {
         // pass
     }
 
+    //@+node:felix.20210103231554.4: *3* FileLikeObject.flush (coreGlobals.py)
     public flush(): void {
         // pass
     }
 
+    //@+node:felix.20210103231554.5: *3* FileLikeObject.get & getvalue & read (coreGlobals.py)
     public get(): string {
         return this._list.join();
     }
@@ -1060,6 +1614,7 @@ export class FileLikeObject {
         return this.get();
     }
 
+    //@+node:felix.20210103231554.6: *3* FileLikeObject.readline (coreGlobals.py)
     /**
      * Read the next line using at.list and at.ptr.
      */
@@ -1072,19 +1627,26 @@ export class FileLikeObject {
         return '';
     }
 
+    //@+node:felix.20210103231554.7: *3* FileLikeObject.write  (coreGlobals.py)
     public write(s: string): void {
         if (s) {
             this._list.push(s);
         }
     }
 
+    //@-others
 
 }
 
+//@+node:felix.20211030164613.1: ** g.isTextWrapper & isTextWidget
 export function isTextWidget(w: any): boolean {
     return !!app && !!app.gui && app.gui.isTextWidget && app.gui.isTextWidget(w);
 }
 export function isTextWrapper(w: any): boolean {
     return !!app && !!app.gui && app.gui.isTextWrapper && app.gui.isTextWrapper(w);
 }
+//@-others
 
+//@@language typescript
+//@@tabwidth -4
+//@-leo

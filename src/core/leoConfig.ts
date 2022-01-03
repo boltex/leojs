@@ -24,6 +24,12 @@ export class LocalConfigManager {
     public c: Commands;
     public settingsDict: { [key: string]: any };
 
+    // TODO : REPLACE WITH REAL TRANSLATION FROM LEO
+    public default_derived_file_encoding: string = "utf-8";
+    public default_at_auto_file_encoding: string = "utf-8";
+    public new_leo_file_encoding: string = "UTF-8";
+    public save_clears_undo_buffer: boolean = false;
+
     //@+others
     //@+node:felix.20211031231935.1: *3* constructor
 
@@ -31,7 +37,7 @@ export class LocalConfigManager {
         this.c = c;
         this.settingsDict = {};
 
-        // TODO : TEMP stub settings 
+        // TODO : TEMP stub settings
 
         this.settingsDict['insert-new-nodes-at-end'] = false;
         this.settingsDict['max-undo-stack-size'] = 0;

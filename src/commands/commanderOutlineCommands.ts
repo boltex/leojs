@@ -2,6 +2,9 @@
 //@+node:felix.20211002221425.1: * @file src/commands/commanderOutlineCommands.ts
 // * Outline commands that used to be defined in leoCommands.py
 // import xml.etree.ElementTree as ElementTree
+//import { ElementTree } from "elementtree";
+import * as et from 'elementtree';
+
 // from leo.core import leoGlobals as g
 import * as g from '../core/leoGlobals';
 
@@ -9,10 +12,10 @@ import * as g from '../core/leoGlobals';
 import { commander_command } from "../core/decorators";
 
 // from leo.core import leoNodes
-import { NodeIndices, Position, VNode } from "../core/leoNodes";
+import { StackEntry, Position, VNode } from "../core/leoNodes";
 
 // from leo.core import leoFileCommands
-import { FileCommands } from "../core/leoFileCommands";
+import { FastRead, FileCommands } from "../core/leoFileCommands";
 import { Commands, HoistStackEntry } from "../core/leoCommands";
 import { Bead, Undoer } from '../core/leoUndo';
 
@@ -31,10 +34,463 @@ function createMoveMarkedNode(c: Commands): Position {
     p.moveToRoot();
     return p;
 }
+//@+node:felix.20211209005212.1: ** function computeVnodeInfoDict
+/**
+ * We don't know yet which nodes will be affected by the paste, so we remember
+ * everything. This is expensive, but foolproof.
+ *
+ * The alternative is to try to remember the 'before' values of nodes in the
+ * FileCommands read logic. Several experiments failed, and the code is very ugly.
+ * In short, it seems wise to do things the foolproof way.
+ */
+function computeVnodeInfoDict(c: Commands): any {
+    const d: any = {};
+    for (let v of c.all_unique_nodes()) {
+        if (!d[v.toString()]) {
+            d[v.toString()] = { v: v, head: v.h, body: v.b };
+        }
+    }
+    return d;
+}
+//@+node:felix.20211209005216.1: ** function computeCopiedBunchList
+/**
+ * * Create a dict containing only copied vnodes.
+ */
+function computeCopiedBunchList(c: Commands, pasted: Position, vnodeInfoDict: { [key: string]: Bead }): Bead[] {
+    const d: { [key: string]: VNode } = {};
+    for (let p of pasted.self_and_subtree(false)) {
+        d[p.v.toString()] = p.v;
+    }
+    const aList: Bead[] = [];
+    for (let v in vnodeInfoDict) {
+        if (d[v.toString()]) {
+            const bunch: Bead = vnodeInfoDict[v.toString()];
+            aList.push(bunch);
+        }
+    }
+    return aList;
+}
 //@+node:felix.20211101020440.1: ** Class CommanderOutlineCommands
 export class CommanderOutlineCommands {
 
     //@+others
+    //@+node:felix.20211208235043.1: *3* c_oc.Cut & Paste Outlines
+    //@+node:felix.20211208235043.2: *4* c_oc.copyOutline
+
+    @commander_command(
+        'copy-node',
+        'Copy the selected outline to the clipboard.'
+    )
+    public copyOutline(this: Commands) {
+        // Copying an outline has no undo consequences.
+        const c: Commands = this;
+        // c.endEditing();
+        const s: string = (c.fileCommands as FileCommands).outline_to_clipboard_string()!;
+        g.app.paste_c = c;
+        g.app.gui!.replaceClipboardWith(s);
+    }
+    //@+node:felix.20211208235043.3: *4* c_oc.cutOutline
+    @commander_command(
+        'cut-node',
+        'Delete the selected outline and send it to the clipboard.'
+    )
+    public cutOutline(this: Commands): void {
+        const c: Commands = this;
+        if (c.canDeleteHeadline()) {
+            c.copyOutline();
+            c.deleteOutline("Cut Node");
+            // c.recolor();
+        }
+    }
+    //@+node:felix.20211208235043.4: *4* c_oc.pasteOutline
+    @commander_command(
+        'paste-node',
+        'Paste an outline into the present outline from the clipboard.\n' +
+        'Nodes do *not* retain their original identify.'
+    )
+    public pasteOutline(
+        this: Commands,
+        redrawFlag: boolean = true,
+        s: string | undefined = undefined,
+        undoFlag: boolean = true
+    ): Position | undefined {
+        if (s === undefined) {
+            // s = g.app.gui!.getTextFromClipboard();
+            g.app.gui!.preventRefresh = true;
+            g.app.gui!.getTextFromClipboard().then((clipboard) => {
+                this.pasteOutline(true, clipboard);
+                g.app.gui!.launchRefresh();
+            });
+            return undefined;
+        }
+        const c: Commands = this;
+        // c.endEditing()
+        if (!s || !c.canPasteOutline(s)) {
+            return undefined;  // This should never happen.
+        }
+        const isLeo = g.match(s, 0, g.app.prolog_prefix_string);
+        if (!isLeo) {
+            return undefined;
+        }
+        // Get *position* to be pasted.
+        const pasted: Position = (c.fileCommands as FileCommands).getLeoOutlineFromClipboard(s)!;
+        if (!pasted) {
+            // Leo no longer supports MORE outlines. Use import-MORE-files instead.
+            return undefined;
+        }
+        // Validate.
+        c.validateOutline();
+        c.checkOutline();
+        // Handle the "before" data for undo.
+        let undoData: any;
+        if (undoFlag) {
+            undoData = c.undoer.beforeInsertNode(
+                c.p,
+                false,
+                []
+            );
+        }
+        // Paste the node into the outline.
+        c.selectPosition(pasted);
+        pasted.setDirty();
+        c.setChanged(redrawFlag);
+        // Prevent flash when fixing #387.
+        const back: Position = pasted.back();
+        if (back && back.__bool__() && back.hasChildren() && back.isExpanded()) {
+            pasted.moveToNthChildOf(back, 0);
+        }
+        // Finish the command.
+        if (undoFlag) {
+            c.undoer.afterInsertNode(pasted, 'Paste Node', undoData);
+        }
+        if (redrawFlag) {
+            c.redraw(pasted);
+            // c.recolor()
+        }
+
+        return pasted;
+    }
+    //@+node:felix.20211208235043.5: *4* c_oc.pasteOutlineRetainingClones
+    @commander_command('paste-retaining-clones',
+        'Paste an outline into the present outline from the clipboard.\n' +
+        'Nodes *retain* their original identify.'
+    )
+    public pasteOutlineRetainingClones(
+        this: Commands,
+        redrawFlag: boolean = true,
+        s: string | undefined = undefined,
+        undoFlag: boolean = true
+    ): Position | undefined {
+        if (s === undefined) {
+            // s = g.app.gui!.getTextFromClipboard();
+            g.app.gui!.preventRefresh = true;
+            g.app.gui!.getTextFromClipboard().then((clipboard) => {
+                this.pasteOutlineRetainingClones(true, clipboard);
+                g.app.gui!.launchRefresh();
+            });
+            return undefined;
+        }
+        const c: Commands = this;
+        //c.endEditing()
+        if (!s || !c.canPasteOutline(s)) {
+            return undefined;  // This should never happen.
+        }
+        const isLeo = g.match(s, 0, g.app.prolog_prefix_string);
+        if (!isLeo) {
+            return undefined;
+        }
+        // Get *position* to be pasted.
+        const pasted: Position = (c.fileCommands as FileCommands).getLeoOutlineFromClipboardRetainingClones(s)!;
+        if (!pasted) {
+            // Leo no longer supports MORE outlines. Use import-MORE-files instead.
+            return undefined;
+        }
+        // Validate.
+        c.validateOutline();
+        c.checkOutline();
+        // Handle the "before" data for undo.
+        let vnodeInfoDict: any;
+        let undoData: any;
+        if (undoFlag) {
+            vnodeInfoDict = computeVnodeInfoDict(c);
+            undoData = c.undoer.beforeInsertNode(
+                c.p,
+                true,
+                computeCopiedBunchList(c, pasted, vnodeInfoDict)
+            );
+        }
+        // Paste the node into the outline.
+        c.selectPosition(pasted);
+        pasted.setDirty();
+        c.setChanged(redrawFlag);
+        // Prevent flash when fixing #387.
+        const back: Position = pasted.back();
+        if (back && back.__bool__() && back.hasChildren() && back.isExpanded()) {
+            pasted.moveToNthChildOf(back, 0);
+            pasted.setDirty();
+        }
+        // Set dirty bits for ancestors of *all* pasted nodes.
+        for (let p of pasted.self_and_subtree()) {
+            p.setAllAncestorAtFileNodesDirty();
+        }
+        // Finish the command.
+        if (undoFlag) {
+            c.undoer.afterInsertNode(pasted, 'Paste As Clone', undoData);
+        }
+        if (redrawFlag) {
+            c.redraw(pasted);
+            // c.recolor();
+        }
+        return pasted;
+    }
+    //@+node:felix.20211208235043.8: *4* c_oc.pasteAsTemplate
+    @commander_command(
+        'paste-as-template',
+        'Paste as template clones only nodes that were already clones'
+    )
+    public pasteAsTemplate(this: Commands, s?: string): any {
+        if (s === undefined) {
+            // s = g.app.gui!.getTextFromClipboard();
+            g.app.gui!.preventRefresh = true;
+            g.app.gui!.getTextFromClipboard().then((clipboard) => {
+                this.pasteAsTemplate(clipboard);
+                g.app.gui!.launchRefresh();
+            });
+            return undefined;
+        }
+        const c: Commands = this;
+        const p: Position = c.p;
+
+        // * Variables local to pasteAsTemplate
+        let root_gnx: string;
+        let outside: string[] = [];
+        let heads: { [key: string]: string; } = {};
+        let bodies: { [key: string]: string; } = {};
+        let uas: { [key: string]: any; } = {};
+        let translation: { [key: string]: string; } = {};
+        let seen: string[] = [];
+        let bunch: Bead;
+
+        let vpar: VNode;
+        let pasted: VNode;
+        let index: number;
+        let parStack: StackEntry[];
+        let xroot: et.ElementTree;
+        let xvelements: et.Element[];
+        let xtelements: et.Element[];
+        const gnx2v = c.fileCommands.gnxDict;
+
+
+        //@+others
+        //@+node:felix.20211208235043.9: *5* skip_root
+        function* skip_root(v: VNode): Generator<VNode> {
+            // generates v nodes in the outline order
+            // but skips a subtree of the node with root_gnx
+            if (v.gnx !== root_gnx) {
+                yield v;
+                for (let ch of v.children) {
+                    yield* skip_root(ch);
+                }
+            }
+        }
+        //@+node:felix.20211208235043.10: *5* translate_gnx
+        /**
+         * allocates a new gnx for all nodes that
+         * are not found outside copied tree
+         */
+        function translate_gnx(gnx: string): string {
+            if (outside.includes(gnx)) {
+                return gnx;
+            }
+            return g.app.nodeIndices!.computeNewIndex();
+        }
+        //@+node:felix.20211208235043.11: *5* viter
+        /**
+         * iterates <v> nodes generating array:
+         *
+         *  [parent_gnx, child_gnx, headline, body]
+         *
+         * skipping the descendants of already seen nodes.
+         */
+        function* viter(parent_gnx: string, xv: et.Element): Generator<[string, string, string, string]> {
+
+            const chgnx: string = xv.attrib['t']!;
+
+            const b: string = bodies[chgnx]!;
+
+            const gnx: string = translation[chgnx];
+
+            if (seen.includes(gnx)) {
+                yield [parent_gnx, gnx, heads[gnx], b];
+            } else {
+
+                seen.push(gnx);
+                const h: string = xv.getchildren()[0].text!.toString();
+                heads[gnx] = h;
+                yield [parent_gnx, gnx, h, b];
+
+                for (let xch of xv.getchildren().slice(1)) {
+                    yield* viter(gnx, xch);
+                }
+            }
+        }
+        //@+node:felix.20211208235043.12: *5* getv
+        /**
+         * returns a pair (vnode, is_new) for the given gnx.
+         * if node doesn't exist, creates a new one.
+         */
+        function getv(gnx: string): [VNode, boolean] {
+
+            const v: VNode | undefined = gnx2v[gnx];
+            if (!v) {
+                return [new VNode(c, gnx), true];
+            }
+            return [v, false];
+
+        }
+        //@+node:felix.20211208235043.13: *5* do_paste
+        /**
+         * pastes a new node as a child of vpar at given index
+         */
+        function do_paste(vpar: VNode, index: number): VNode {
+
+            const vpargnx: string = vpar.gnx;
+
+            // the first node is inserted at the given index
+            // and the rest are just appended at parents children
+            // to achieve this we first create a generator object
+
+            const rows: Generator<[string, string, string, string]> = viter(vpargnx, xvelements[0]);
+
+            // then we just take first tuple
+            let pgnx: string;
+            let gnx: string;
+            let h: string;
+            let b: string;
+            [pgnx, gnx, h, b] = rows.next().value;
+
+            // create vnode
+            let v: VNode;
+            let isNew: boolean; // Reuses v and isNew (as '_' in original Leo)
+            [v, isNew] = getv(gnx);
+            v.h = h;
+            v.b = b;
+
+            // and finally insert it at the given index
+            vpar.children.splice(index, 0, v);
+            v.parents.push(vpar);
+
+            // this 'pasted' variable is local to do_paste
+            const pasted: VNode = v;  // remember the first node as a return value
+
+            // now we iterate the rest of tuples
+            for (let row of rows) {
+                [pgnx, gnx, h, b] = row;
+                // get or create a child `v`
+                [v, isNew] = getv(gnx);
+
+                if (isNew) {
+                    v.h = h;
+                    v.b = b;
+                    let ua: any = uas[gnx];
+                    if (ua) {
+                        v.unknownAttributes = ua;
+                    }
+                }
+                // get parent node `vpar`
+                const vpar: VNode = getv(pgnx)[0];
+
+                // and link them
+                vpar.children.push(v);
+                v.parents.push(vpar);
+
+            }
+
+            return pasted;
+        }
+        //@+node:felix.20211208235043.14: *5* undoHelper
+        function undoHelper(): void {
+
+            const v: VNode = vpar.children.splice(index, 1)[0];
+
+            const i_vpar = v.parents.indexOf(vpar);
+            if (i_vpar > -1) {
+                v.parents.splice(i_vpar, 1);
+            }
+            c.redraw(bunch.p);
+        }
+        //@+node:felix.20211208235043.15: *5* redoHelper
+        function redoHelper(): void {
+            vpar.children.splice(index, 0, pasted);
+            pasted.parents.push(vpar);
+            c.redraw(newp);
+        }
+        //@-others
+
+        xroot = et.parse(s);
+        xvelements = xroot.find('vnodes')!.getchildren();
+        xtelements = xroot.find('tnodes')!.getchildren();
+
+        [bodies, uas] = new FastRead(c, {}).scanTnodes(xtelements);
+
+        root_gnx = xvelements[0].attrib['t']!;  // the gnx of copied node
+
+        for (let x of skip_root(c.hiddenRootNode)) {
+            outside.push(x.gnx);
+        }
+        // outside will contain gnxes of nodes that are outside the copied tree
+
+        for (let x in bodies) { // Voluntary use of 'in' for keys
+            translation[x] = translate_gnx(x);
+        }
+        // we generate new gnx for each node in the copied tree
+
+        seen = [...outside];  // required for the treatment of local clones inside the copied tree
+
+        heads = {};
+
+        bunch = c.undoer.createCommonBunch(p);
+
+        //@+<< prepare destination data >>
+        //@+node:felix.20211208235043.16: *5* << prepare destination data >>
+        // destination data consists of
+        //    1. vpar --- parent v node that should receive pasted child
+        //    2. index --- at which pasted child will be
+        //    3. parStack --- a stack for creating new position of the pasted node
+        //
+        // the new position will be:  Position(vpar.children[index], index, parStack)
+        // but it can't be calculated yet, before actual paste is done
+
+        if (p.isExpanded()) {
+            // paste as a first child of current position
+            vpar = p.v;
+            index = 0;
+            parStack = [...p.stack];
+            parStack.push([p.v, p._childIndex]);
+        } else {
+            // paste after the current position
+            parStack = p.stack;
+            if (p.stack && p.stack.length) {
+                vpar = p.stack[p.stack.length - 1][0];
+            } else {
+                vpar = c.hiddenRootNode;
+            }
+            index = p._childIndex + 1;
+        }
+        //@-<< prepare destination data >>
+
+        pasted = do_paste(vpar, index); // Local 'pasted' variable
+
+        const newp = new Position(pasted, index, parStack);
+
+        bunch.undoHelper = undoHelper;
+        bunch.redoHelper = redoHelper;
+        bunch.undoType = 'paste-retaining-outside-clones';
+
+        newp.setDirty();
+        c.undoer.pushBead(bunch);
+        c.redraw(newp);
+    }
     //@+node:felix.20211020000219.1: *3* c_oc.dumpOutline
     @commander_command(
         'dump-outline',
@@ -455,7 +911,7 @@ export class CommanderOutlineCommands {
             try {
                 c.selectPosition(p)
             }
-            finally {   
+            finally {
                 c.nodeHistory.skipBeadUpdate = false;
                 // c.redraw_after_select(p)
             }
@@ -609,7 +1065,7 @@ export class CommanderOutlineCommands {
                     c.redraw(p); // redraw selects p
                 } else {
                     c.selectPosition(p);
-                    // cc.selectChapterByName(new_name); // TODO 
+                    // cc.selectChapterByName(new_name); // TODO
                 }
             } else {
                 // Always do a full redraw.
@@ -1166,7 +1622,7 @@ export class CommanderOutlineCommands {
             // Careful: don't clone already-cloned nodes.
             if (p.__eq__(parent)) {
                 p.moveToNodeAfterTree();
-                // }else if( p.isMarked() && (p.v.gnx not in cloned) ){
+                // }else if(p.isMarked() && (p.v.gnx not in cloned) ){
             } else if (p.isMarked() && (!cloned.includes(p.v.gnx))) {
                 cloned.push(p.v.gnx);
                 // Create the clone directly as a child of parent.
@@ -1325,7 +1781,7 @@ export class CommanderOutlineCommands {
         if (moved.length) {
             // Find a position p2 outside of parent's tree with p2.v == p1.v.
             // Such a position may not exist.
-            let p2: Position = c.rootPosition()!
+            let p2: Position = c.rootPosition()!;
             let found: boolean = false;
             while (p2 && p2.__bool__()) {
                 if (p2.__eq__(parent)) {
@@ -1376,7 +1832,7 @@ export class CommanderOutlineCommands {
                 u.afterMark(p, undoType, bunch);
             }
         }
-        u.afterChangeGroup(current, undoType)
+        u.afterChangeGroup(current, undoType);
         if (!g.unitTesting) {
             g.blue('done');
         }
@@ -1466,7 +1922,7 @@ export class CommanderOutlineCommands {
             w_p = p;
         }
         if (changed) {
-            // g.doHook("clear-all-marks", c, w_p); // w_p was p 
+            // g.doHook("clear-all-marks", c, w_p); // w_p was p
             c.setChanged();
         }
         u.afterChangeGroup(current, undoType);
@@ -1713,9 +2169,9 @@ export class CommanderOutlineCommands {
         const parent: Position = p.parent();
         if (!back2 || !back2.__bool__()) {
             if (c.hoistStack.length) {  // hoist or chapter.
-                const w_vislimit: [Position | undefined, boolean | undefined] = c.visLimit();
-                const limit: Position | undefined = w_vislimit[0];
-                const limitIsVisible: boolean | undefined = w_vislimit[1];
+                const w_visLimit: [Position | undefined, boolean | undefined] = c.visLimit();
+                const limit: Position | undefined = w_visLimit[0];
+                const limitIsVisible: boolean | undefined = w_visLimit[1];
                 // assert limit
                 if (limitIsVisible) {
                     // canMoveOutlineUp should have caught this.

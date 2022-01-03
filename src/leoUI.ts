@@ -3,6 +3,8 @@ import { debounce } from "lodash";
 import * as utils from "./utils";
 import { Constants } from "./constants";
 import { RevealType, Icon, ReqRefresh, LeoPackageStates } from "./types";
+// import clipboard from 'clipboardy';
+// import * as clipboard from "clipboardy";
 
 import { Config } from "./config";
 import { LeoOutlineProvider } from './leoOutline';
@@ -28,15 +30,13 @@ export class LeoUI {
     public commanderIndex: number = 0;
 
     // * Timers
-    public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already startd refresh
+    public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already started refresh
     public lastRefreshTimer: [number, number] | undefined; // until the selected node is found - refreshed even if not found
     public commandRefreshTimer: [number, number] | undefined; // until the selected node is found -  keep if starting a new command already pending
     public lastCommandRefreshTimer: [number, number] | undefined; // until the selected node is found - refreshed if starting a new command
     public commandTimer: [number, number] | undefined; // until the command done - keep if starting a new one already pending
     public lastCommandTimer: [number, number] | undefined; // until the command done - refreshed if starting a new one
-
-    // * Clipboard
-    public clipboardContent: string = "";
+    public preventRefresh: boolean = false;
 
     // * Configuration Settings Service
     public config: Config; // Public configuration service singleton, used in leoSettingsWebview, leoBridge, and leoNode for inverted contrast
@@ -111,16 +111,16 @@ export class LeoUI {
         prompt: '',
     };
 
-    // * Debounced method 
+    // * Debounced method
     public launchRefresh: ((p_node?: Position) => void);
 
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
     public getStates: (() => void);
 
-    // * Debounced method 
+    // * Debounced method
     public refreshDocumentsPane: (() => void);
 
-    // * Debounced method 
+    // * Debounced method
     public refreshUndoPane: (() => void);
 
     constructor(private _context: vscode.ExtensionContext) {
@@ -491,7 +491,7 @@ export class LeoUI {
             select: true,
             focus: !!p_focusOutline
         }).then(
-            () => { }, // Ok 
+            () => { }, // Ok
             (p_error) => {
                 console.error('ERROR showOutline could not reveal: tree was refreshed!');
             }
@@ -547,7 +547,7 @@ export class LeoUI {
                         console.error('ERROR gotSelectedNode could not reveal: tree was refreshed!');
                     }
                 );
-                // Done, so reset reveal type 'flag' 
+                // Done, so reset reveal type 'flag'
                 this._revealType = RevealType.NoReveal;
             }, 0);
         }
@@ -718,7 +718,7 @@ export class LeoUI {
                 // console.log('setDocumentSelection: already selected!');
             } else if (this._lastLeoDocuments && this._lastLeoDocuments.visible) {
                 this._lastLeoDocuments.reveal(p_documentNode, { select: true, focus: false }).then(
-                    () => { }, // Ok 
+                    () => { }, // Ok
                     (p_error) => {
                         console.error('ERROR setDocumentSelection could not reveal: tree was refreshed!');
                     }
@@ -791,7 +791,7 @@ export class LeoUI {
         } else {
             // * This part only happens if the user clicked on the arrow without trying to select the node
             this._lastTreeView.reveal(p_event.element).then(
-                () => { }, // Ok 
+                () => { }, // Ok
                 (p_error) => {
                     console.error('ERROR _onChangeCollapsedState could not reveal: tree was refreshed!');
                 }
@@ -1019,7 +1019,7 @@ export class LeoUI {
 
             if (p_aside) {
                 q_reveal = this._lastTreeView.reveal(p_node).then(
-                    () => { }, // Ok 
+                    () => { }, // Ok
                     (p_error) => {
                         console.error('ERROR selectTreeNode could not reveal: tree was refreshed!');
                     }
@@ -1085,7 +1085,12 @@ export class LeoUI {
             }
         }
         this.lastCommandTimer = undefined;
-        this.launchRefresh();
+        if (!this.preventRefresh) {
+            this.launchRefresh();
+        } else {
+            this.preventRefresh = false;
+        }
+
         return Promise.resolve(value);
     }
 
@@ -1318,11 +1323,20 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
+    public replaceClipboardWith(s: string): void {
+        // this.clipboardContent = s;
+        // clipboard.writeSync(s);
+        vscode.env.clipboard.writeText(s);
+    }
+
     /**
      * Returns clipboard content
     */
-    public getTextFromClipboard(): string {
-        return this.clipboardContent; //vscode.env.clipboard.readText(); // TODO
+    public getTextFromClipboard(): Thenable<string> {
+        // return this.clipboardContent; //vscode.env.clipboard.readText(); TODO
+        // return clipboard.readSync();
+
+        return vscode.env.clipboard.readText();
     }
 
     /**
@@ -1335,7 +1349,7 @@ export class LeoUI {
 
         vscode.window.showInformationMessage('TODO: Implement closeLeoFile');
 
-        const w_fakeTotalOpened = 1; // TODO 
+        const w_fakeTotalOpened = 1; // TODO
 
         if (w_fakeTotalOpened > 0) {
             this.launchRefresh();
@@ -1658,7 +1672,7 @@ export class LeoUI {
 
         console.log(c.doCommandByName('check-outline'));
 
-        // * Test undoredo
+        // * Test undo/redo
         console.log('can undo', c.undoer.canUndo());
         console.log('can redo', c.undoer.canRedo());
 

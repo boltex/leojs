@@ -1,12 +1,21 @@
+//@+leo-ver=5-thin
+//@+node:felix.20210102012632.1: * @file src/core/leoNodes.ts
+//@@language typescript
+//@@tabwidth -4
 // Leo's fundamental data classes.
 
+//@+<< imports >>
+//@+node:felix.20210127001502.1: ** << imports >>
 import "date-format-lite";
 import * as g from './leoGlobals';
 import { Commands } from './leoCommands';
 import { Bead } from "./leoUndo";
 import { DummyFileCommands, FileCommands } from "./leoFileCommands";
 
+//@-<< imports >>
 
+//@+others
+//@+node:felix.20210102014453.1: ** class NodeIndices
 /**
  * A class managing global node indices (gnx's).
  */
@@ -18,6 +27,8 @@ export class NodeIndices {
     timeString: string; //  Set by setTimeStamp.
     userId: string;
 
+    //@+others
+    //@+node:felix.20210102014804.1: *3* ni.constructor
     constructor(id_: string) {
         // Ctor for NodeIndices class.
         this.defaultId = id_;
@@ -28,6 +39,7 @@ export class NodeIndices {
         this.setTimeStamp();
     }
 
+    //@+node:felix.20210110213751.1: *3* ni.check_gnx
     /**
      * Check that no vnode exists with the given gnx in fc.gnxDict.
      */
@@ -48,6 +60,16 @@ export class NodeIndices {
         }
     }
 
+    //@+node:felix.20220101212728.1: *3* ni.computeNewIndex
+    /**
+     * Return a new gnx.
+     */
+    public computeNewIndex(): string {
+        const t_s: string = this.update(); // Updates self.lastTime and self.lastIndex.
+        const gnx: string = g.toUnicode(`${this.userId}.${t_s}.${this.lastIndex}`);
+        return gnx;
+    }
+    //@+node:felix.20210102024358.1: *3* ni.setTimeStamp
     /**
      * Set the timestamp string to be used by getNewIndex until further notice
      */
@@ -57,6 +79,7 @@ export class NodeIndices {
         this.timeString = new Date().format("YYYYMMDDhhmmss");
     }
 
+    //@+node:felix.20210218214329.6: *3* ni.get/setDefaultId
     // These are used by the FileCommands read/write code.
 
     /**
@@ -72,6 +95,7 @@ export class NodeIndices {
     public setDefaultId(theId: string): void {
         this.defaultId = theId;
     }
+    //@+node:felix.20210218214329.7: *3* ni.getNewIndex
     /**
      * Create a new gnx for v or an empty string if the hold flag is set.
      * **Important**: the method must allocate a new gnx even if v.fileIndex exists.
@@ -92,6 +116,7 @@ export class NodeIndices {
         return gnx;
     }
 
+    //@+node:felix.20210218214329.8: *3* ni.new_vnode_helper
     /**
      * Handle all gnx-related tasks for VNode.__init__.
      */
@@ -106,6 +131,39 @@ export class NodeIndices {
         }
     }
 
+    //@+node:felix.20211223233708.1: *3* ni.scanGnx
+    /**
+     * Create a gnx from its string representation.
+     */
+    public scanGnx(s: string): [string | undefined, string | undefined, string | undefined] {
+        if (!(typeof s === 'string')) {
+            g.error("scanGnx: unexpected index type:" + (typeof s));
+            return [undefined, undefined, undefined];
+        }
+
+        s = s.trim();
+
+        let i: number = 0;
+        let theId: string | undefined;
+        let t: string | undefined;
+        let n: string | undefined;
+        [theId, t, n] = [undefined, undefined, undefined];
+
+        [i, theId] = g.skip_to_char(s, i, '.');
+
+        if (g.match(s, i, '.')) {
+            [i, t] = g.skip_to_char(s, i + 1, '.');
+            if (g.match(s, i, '.')) {
+                [i, n] = g.skip_to_char(s, i + 1, '.');
+            }
+        }
+        // Use this.defaultId for missing id entries.
+        if (!theId) {
+            theId = this.defaultId;
+        }
+        return [theId, t, n];
+    }
+    //@+node:felix.20210218214329.12: *3* ni.update
     /**
      * Update self.timeString and self.lastIndex
      */
@@ -120,9 +178,11 @@ export class NodeIndices {
         return t_s;
     }
 
+    //@-others
 
 }
 
+//@+node:felix.20210102015005.1: ** class Position
 /**
  * A position marks the spot in a tree traversal. A position p consists of a VNode
  * p.v, a child index p._childIndex, and a stack of tuples (v,childIndex), one for
@@ -142,6 +202,9 @@ export class Position {
     _childIndex: number;
     stack: StackEntry[];
 
+    //@+others
+    //@+node:felix.20210126210412.1: *3* p.ctor & other special methods...
+    //@+node:felix.20210126210419.1: *4* p.constructor
     /**
      * Create a new position with the given childIndex and parent stack.
      */
@@ -155,6 +218,7 @@ export class Position {
         }
     }
 
+    //@+node:felix.20210126210412.3: *4* p.__eq__ & __ne__
     /**
      * Return True if two positions are equivalent.
      */
@@ -187,6 +251,7 @@ export class Position {
         return !this.__eq__(p2);
     }
 
+    //@+node:felix.20210126210412.4: *4* p.__ge__ & __le__& __lt__
     public __ge__(other: Position): boolean {
         return this.__eq__(other) || this.__gt__(other);
     }
@@ -201,6 +266,7 @@ export class Position {
         return !this.__eq__(other) && !this.__gt__(other);
     }
 
+    //@+node:felix.20210126210412.5: *4* p.__gt__
     /**
      * Return True if self appears after other in outline order.
      */
@@ -239,6 +305,7 @@ export class Position {
         return x2 >= x1;
     }
 
+    //@+node:felix.20210126210412.6: *4* p.__nonzero__ & __bool__
     /**
      * Return True if a position is valid.
      *
@@ -251,6 +318,7 @@ export class Position {
         return (typeof this.v !== 'undefined');
     }
 
+    //@+node:felix.20210126210412.7: *4* p.__str__ and p.__repr__
     public __str__(): string {
         const p: Position = this;
         if (p.v) {
@@ -266,6 +334,7 @@ export class Position {
         return `<pos [${p.stack.length}] None>`;
     }
 
+    //@+node:felix.20210126210412.8: *4* p.archivedPosition
     /**
      * Return a representation of a position suitable for use in .leo files.
      */
@@ -291,6 +360,7 @@ export class Position {
         return aList;
     }
 
+    //@+node:felix.20210126210412.9: *4* p.dump
     public dumpLink(link: string): string {
         return link ? link : "<none>";
     }
@@ -302,6 +372,7 @@ export class Position {
         }
     }
 
+    //@+node:felix.20210126210412.10: *4* p.key & p.sort_key & __hash__
     public key(): string {
         const p: Position = this;
         // For unified nodes we must include a complete key,
@@ -337,11 +408,13 @@ export class Position {
 
     // __hash__ = None
 
+    //@+node:felix.20210204224730.1: *3* p.File Conversion
     /*
         - convertTreeToString and moreHead can't be VNode methods because they use level().
         - moreBody could be anywhere: it may as well be a position method.
     */
 
+    //@+node:felix.20210204224730.2: *4* p.convertTreeToString
     /**
      * Convert a positions  suboutline to a string in MORE format.
      */
@@ -359,6 +432,7 @@ export class Position {
         return array.join('');
     }
 
+    //@+node:felix.20210204224730.3: *4* p.moreHead
     /**
      * Return the headline string in MORE format.
      */
@@ -371,6 +445,7 @@ export class Position {
         return `${pad}${plusMinus} ${p.h}`;
     }
 
+    //@+node:felix.20210204224730.4: *4* p.moreBody
     /*
         + test line
         - test line
@@ -399,6 +474,8 @@ export class Position {
         return array.join('\n');
     }
 
+    //@+node:felix.20210204235058.1: *3* p.generators
+    //@+node:felix.20210102031240.1: *4* p.children
     /**
      * Yield all child positions of p.
      */
@@ -413,6 +490,7 @@ export class Position {
     // * Compatibility with old code...
     // children_iter = children
 
+    //@+node:felix.20210204235058.3: *4* p.following_siblings
     /**
      * Yield all siblings positions that follow p, not including p.
      */
@@ -428,6 +506,7 @@ export class Position {
     // * Compatibility with old code...
     // following_siblings_iter = following_siblings
 
+    //@+node:felix.20210204235058.4: *4* p.nearest_roots
     /**
      * A generator yielding all the root positions "near" p1 = self that
         satisfy the given predicate. p.isAnyAtFileNode is the default
@@ -469,6 +548,7 @@ export class Position {
         }
     }
 
+    //@+node:felix.20210204235058.5: *4* p.nearest_unique_roots (aka p.nearest)
     /**
      *  A generator yielding all unique root positions "near" p1 = self that
         satisfy the given predicate. p.isAnyAtFileNode is the default
@@ -518,6 +598,7 @@ export class Position {
     // * Compatibility with old code...
     // nearest = nearest_unique_roots
 
+    //@+node:felix.20210204235058.6: *4* p.nodes
     /**
      * Yield p.v and all vnodes in p's subtree.
      */
@@ -532,9 +613,9 @@ export class Position {
     }
 
     // * Compatibility with old code.
-    // tnodes_iter = nodes
     // vnodes_iter = nodes
 
+    //@+node:felix.20210204235058.7: *4* p.parents
     /**
      * Yield all parent positions of p.
      */
@@ -550,6 +631,7 @@ export class Position {
     // * Compatibility with old code...
     // parents_iter = parents
 
+    //@+node:felix.20210204235058.8: *4* p.self_and_parents
     /**
      * Yield p and all parent positions of p.
      */
@@ -565,6 +647,7 @@ export class Position {
     // * Compatibility with old code...
     // self_and_parents_iter = self_and_parents
 
+    //@+node:felix.20210204235058.9: *4* p.self_and_siblings
     /**
      * Yield all sibling positions of p including p.
      */
@@ -583,6 +666,7 @@ export class Position {
     // * Compatibility with old code...
     // self_and_siblings_iter = self_and_siblings
 
+    //@+node:felix.20210204235058.10: *4* p.self_and_subtree
     /**
      * Yield p and all positions in p's subtree.
      */
@@ -599,6 +683,7 @@ export class Position {
     // * Compatibility with old code...
     // self_and_subtree_iter = self_and_subtree
 
+    //@+node:felix.20210204235058.11: *4* p.subtree
     /**
      * Yield all positions in p's subtree, but not p.
      */
@@ -616,6 +701,7 @@ export class Position {
     //* Compatibility with old code...
     // subtree_iter = subtree
 
+    //@+node:felix.20210204235058.12: *4* p.unique_nodes
     /**
      * Yield p.v and all unique vnodes in p's subtree.
      */
@@ -631,9 +717,9 @@ export class Position {
     }
 
     // * Compatibility with old code.
-    // unique_tnodes_iter = unique_nodes
     // unique_vnodes_iter = unique_nodes
 
+    //@+node:felix.20210204235058.13: *4* p.unique_subtree
     /**
      * Yield p and all other unique positions in p's subtree.
      */
@@ -650,9 +736,11 @@ export class Position {
     }
 
     // * Compatibility with old code...
-    // subtree_with_unique_tnodes_iter = unique_subtree
     // subtree_with_unique_vnodes_iter = unique_subtree
 
+    //@+node:felix.20210202235315.1: *3* p.Getters
+    //@+node:felix.20210102233013.1: *4* p.VNode proxies
+    //@+node:felix.20210102233013.2: *5* p.Comparisons
     public anyAtFileNodeName(): string {
         return this.v.anyAtFileNodeName();
     }
@@ -749,6 +837,7 @@ export class Position {
         return this.v.matchHeadline(pattern);
     }
 
+    //@+node:felix.20210102233013.3: *5* p.Headline & body strings
     public bodyString(): string { return this.v.bodyString(); }
 
     public headString(): string {
@@ -759,6 +848,7 @@ export class Position {
         return this.v.cleanHeadString();
     }
 
+    //@+node:felix.20210102233013.4: *5* p.Status bits
     public isDirty(): boolean { return this.v.isDirty(); }
 
     public isMarked(): boolean { return this.v.isMarked(); }
@@ -773,15 +863,19 @@ export class Position {
 
     public status(): number { return this.v.status(); }
 
+    //@+node:felix.20210112010737.1: *4* p.children & parents
+    //@+node:felix.20210112010737.2: *5* p.childIndex
     // This used to be time-critical code.
     public childIndex(): number {
         return this._childIndex;
     }
 
+    //@+node:felix.20210112010737.3: *5* p.directParents
     public directParents(): any {
         return this.v.directParents();
     }
 
+    //@+node:felix.20210112010737.4: *5* p.hasChildren & p.numberOfChildren
     public hasChildren(): boolean {
         return this.v.children.length > 0;
     }
@@ -790,6 +884,7 @@ export class Position {
         return this.v.children.length;
     }
 
+    //@+node:felix.20210202235315.10: *4* p.getX & VNode compatibility traversal routines
     // These methods are useful abbreviations.
     // Warning: they make copies of positions, so they should be used _sparingly_
 
@@ -819,6 +914,7 @@ export class Position {
 
     public getVisNext(c: Commands): Position { return this.copy().moveToVisNext(c)!; }
 
+    //@+node:felix.20210202235315.11: *4* p.get_UNL
     /**
      * with_file = True - include path to Leo file
      * with_proto = False - include 'file://'
@@ -862,6 +958,7 @@ export class Position {
         return UNL;
     }
 
+    //@+node:felix.20210202235315.12: *4* p.hasBack/Next/Parent/ThreadBack
     public hasBack(): boolean {
         const p: Position = this;
         return p.v && p._childIndex > 0;
@@ -892,6 +989,7 @@ export class Position {
         // Much cheaper than computing the actual value.
     }
 
+    //@+node:felix.20210202235315.13: *5* hasThreadNext (the only complex hasX method)
     public hasThreadNext(): boolean {
         const p: Position = this;
         if (!p.v) {
@@ -921,6 +1019,7 @@ export class Position {
         return false;
     }
 
+    //@+node:felix.20210202235315.14: *4* p.findRootPosition
     public findRootPosition(): Position {
         // 2011/02/25: always use c.rootPosition
         const p: Position = this;
@@ -928,6 +1027,7 @@ export class Position {
         return c.rootPosition()!;
     }
 
+    //@+node:felix.20210202235315.15: *4* p.isAncestorOf
     /**
      * Return True if p is one of the direct ancestors of p2.
      */
@@ -953,16 +1053,19 @@ export class Position {
         return false;
     }
 
+    //@+node:felix.20210202235315.16: *4* p.isCloned
     public isCloned(): boolean {
         const p: Position = this;
         return p.v.isCloned();
     }
 
+    //@+node:felix.20210202235315.17: *4* p.isRoot
     public isRoot(): boolean {
         const p: Position = this;
         return !p.hasParent() && !p.hasBack();
     }
 
+    //@+node:felix.20210202235315.18: *4* p.isVisible (slow)
     /**
      * Return True if p is visible in c's outline.
      */
@@ -998,6 +1101,7 @@ export class Position {
         return false;
     }
 
+    //@+node:felix.20210202235315.19: *4* p.level & simpleLevel
     /**
      * Return the number of p's parents.
      */
@@ -1006,6 +1110,7 @@ export class Position {
         return p.v ? p.stack.length : 0;
     }
 
+    //@+node:felix.20210202235315.20: *4* p.positionAfterDeletedTree
     /**
      * * * * * * * * * * * * * * * * * * * * * * * * * * *
         Return the position corresponding to p.nodeAfterTree() after this node is
@@ -1046,12 +1151,11 @@ export class Position {
         return p.nodeAfterTree();
     }
 
+    //@+node:felix.20210202235315.21: *4* p.textOffset
     /**
-     * """
-        Return the fcol offset of self.
-        Return None if p is has no ancestor @<file> node.
-        http://tinyurl.com/5nescw
-        """
+     *  Return the fcol offset of self.
+     *   Return None if p is has no ancestor @<file> node.
+     *   http://tinyurl.com/5nescw
      */
     public textOffset(): number | undefined {
         const p1: Position = this;
@@ -1084,11 +1188,13 @@ export class Position {
         return found ? offset : undefined;
     }
 
+    //@+node:felix.20210127234205.1: *3* p.Low level methods
     /*
-       These methods are only for the use of low-level code
-       in leoNodes.py, leoFileCommands.py and leoUndo.py.
+     * These methods are only for the use of low-level code
+     * in leoNodes.py, leoFileCommands.py and leoUndo.py.
     */
 
+    //@+node:felix.20210127234205.2: *4* p._adjustPositionBeforeUnlink
     /**
      * Adjust position p before unlinking p2.
      */
@@ -1135,6 +1241,7 @@ export class Position {
         }
     }
 
+    //@+node:felix.20210127234205.3: *4* p._linkAfter
     /**
      * Link self after p_after.
      */
@@ -1148,6 +1255,7 @@ export class Position {
         child._addLink(n, parent_v);
     }
 
+    //@+node:felix.20210127234205.4: *4* p._linkCopiedAfter
     /**
      * Link self, a newly copied tree, after p_after.
      */
@@ -1161,6 +1269,7 @@ export class Position {
         child._addCopiedLink(n, parent_v);
     }
 
+    //@+node:felix.20210127234205.5: *4* p._linkAsNthChild
     /**
      * Link self as the n'th child of the parent.
      */
@@ -1174,6 +1283,7 @@ export class Position {
         child._addLink(n, parent_v);
     }
 
+    //@+node:felix.20210127234205.6: *4* p._linkCopiedAsNthChild
     /**
      * Link a copied self as the n'th child of the parent.
      */
@@ -1187,6 +1297,7 @@ export class Position {
         child._addCopiedLink(n, parent_v);
     }
 
+    //@+node:felix.20210127234205.7: *4* p._linkAsRoot (changed)
     /**
      * Link self as the root node.
      */
@@ -1205,6 +1316,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210127234205.8: *4* p._parentVnode
     /**
      * Return the parent VNode.
      * Return the hiddenRootNode if there is no other parent.
@@ -1222,6 +1334,7 @@ export class Position {
         return undefined;
     }
 
+    //@+node:felix.20210127234205.9: *4* p._relinkAsCloneOf
     /**
      * A low-level method to replace p.v by a p2.v.
      */
@@ -1247,6 +1360,7 @@ export class Position {
         }
     }
 
+    //@+node:felix.20210127234205.10: *4* p._unlink
     /**
      * Unlink the receiver p from the tree.
      */
@@ -1274,6 +1388,7 @@ export class Position {
         }
     }
 
+    //@+node:felix.20210127234205.11: *5* p.badUnlink
     /**
      * badUnlink error trace output
      */
@@ -1298,17 +1413,20 @@ export class Position {
         }
     }
 
-    /* These routines change self to a new position "in place".
-    That is, these methods must _never_ call p.copy().
-
-    When moving to a nonexistent position, these routines simply set p.v = None,
-    leaving the p.stack unchanged. This allows the caller to "undo" the effect of
-    the invalid move by simply restoring the previous value of p.v.
-
-    These routines all return self on exit so the following kind of code will work:
-        after = p.copy().moveToNodeAfterTree()
+    //@+node:felix.20210125233441.1: *3* p.moveToX
+    /**
+     * These routines change self to a new position "in place".
+     * That is, these methods must _never_ call p.copy().
+     *
+     * When moving to a nonexistent position, these routines simply set p.v = None,
+     * leaving the p.stack unchanged. This allows the caller to "undo" the effect of
+     * the invalid move by simply restoring the previous value of p.v.
+     *
+     * These routines all return self on exit so the following kind of code will work:
+     * after = p.copy().moveToNodeAfterTree()
     */
 
+    //@+node:felix.20210125233441.2: *4* p.moveToBack
     /**
      * Move self to its previous sibling.
      */
@@ -1338,6 +1456,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210125233441.3: *4* p.moveToFirstChild
     /**
      * Move a position to it's first child's position.
      */
@@ -1355,6 +1474,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210125233441.4: *4* p.moveToLastChild
     /**
      * Move a position to it's last child's position.
      */
@@ -1374,6 +1494,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210125233441.5: *4* p.moveToLastNode
     /**
      * Move a position to last node of its tree.
      *  N.B. Returns p if p has no children.
@@ -1387,6 +1508,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210125233441.6: *4* p.moveToNext
     /**
      * Move a position to its next sibling.
      */
@@ -1409,6 +1531,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210125233441.7: *4* p.moveToNodeAfterTree
     /**
      * Move a position to the node after the position's tree.
      */
@@ -1424,6 +1547,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210125233441.8: *4* p.moveToNthChild
     /**
      * Move to Nth child
      */
@@ -1441,6 +1565,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210125233441.9: *4* p.moveToParent
     /**
      * Move a position to its parent position.
      */
@@ -1458,6 +1583,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210125233441.10: *4* p.moveToThreadBack
     /**
      * Move a position to it's threadBack position.
      */
@@ -1472,6 +1598,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210125233441.11: *4* p.moveToThreadNext
     /**
      * Move a position to threadNext position.
      */
@@ -1497,6 +1624,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210125233441.12: *4* p.moveToVisBack & helper
     /**
      * Move a position to the position of the previous visible node.
      */
@@ -1534,6 +1662,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210125233441.13: *5* checkVisBackLimit
     /**
      * Return done, p or None
      */
@@ -1551,6 +1680,7 @@ export class Position {
         return [true, undefined];
     }
 
+    //@+node:felix.20210125233441.14: *4* p.moveToVisNext & helper
     /**
      * Move a position to the position of the next visible node.
      */
@@ -1583,6 +1713,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210125233441.15: *5* checkVisNextLimit
     /**
      * Return True is p is outside limit of visible nodes.
      */
@@ -1590,6 +1721,7 @@ export class Position {
         return !limit.__eq__(p) && !limit.isAncestorOf(p);
     }
 
+    //@+node:felix.20210125233441.16: *4* p.safeMoveToThreadNext
     /**
      * Move a position to threadNext position.
      * Issue an error if any vnode is an ancestor of itself.
@@ -1655,6 +1787,8 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210126001920.1: *3* p.Moving, Inserting, Deleting, Cloning, Sorting
+    //@+node:felix.20210126001920.2: *4* p.clone
     /**
      * Create a clone of back.
      * Returns the newly created position.
@@ -1666,6 +1800,7 @@ export class Position {
         return p2;
     }
 
+    //@+node:felix.20210102035859.1: *4* p.copy
     /**
      * Return an independent copy of a position.
      */
@@ -1673,6 +1808,7 @@ export class Position {
         return new Position(this.v, this._childIndex, this.stack);
     }
 
+    //@+node:felix.20211026001924.1: *4* p.copyWithNewVnodes
     /**
      * Return an **unlinked** copy of p with a new vnode v.
      * The new vnode is complete copy of v and all its descendants.
@@ -1682,6 +1818,7 @@ export class Position {
         return new Position(p.v.copyTree(!!copyMarked));
     }
 
+    //@+node:felix.20210126001920.4: *4* p.deleteAllChildren
     /**
      * Delete all children of the receiver and set p.dirty().
      */
@@ -1693,6 +1830,7 @@ export class Position {
         }
     }
 
+    //@+node:felix.20210126001920.5: *4* p.doDelete
     /**
      * Deletes position p from the outline.
      *
@@ -1715,6 +1853,7 @@ export class Position {
         p._unlink();
     }
 
+    //@+node:felix.20210126001920.6: *4* p.insertAfter
     /**
      * Inserts a new position after self.
      * Returns the newly created position.
@@ -1729,6 +1868,7 @@ export class Position {
         return p2;
     }
 
+    //@+node:felix.20210126001920.7: *4* p.insertAsLastChild
     /**
      * Inserts a new VNode as the last child of self.
      * Returns the newly created position.
@@ -1739,6 +1879,7 @@ export class Position {
         return p.insertAsNthChild(n);
     }
 
+    //@+node:felix.20210126001920.8: *4* p.insertAsNthChild
     /**
      * Inserts a new node as the the nth child of self.
      * self must have at least n-1 children.
@@ -1754,6 +1895,7 @@ export class Position {
         return p2;
     }
 
+    //@+node:felix.20210126001920.9: *4* p.insertBefore
     /**
      * Inserts a new position before self.
      * Returns the newly created position.
@@ -1774,6 +1916,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210126001920.10: *4* p.invalidOutline
     /**
      * Prints out error message about invalid outline
      */
@@ -1788,6 +1931,7 @@ export class Position {
         p.v.context.alert(`invalid outline: ${message}\n${node}`);
     }
 
+    //@+node:felix.20210126001920.11: *4* p.moveAfter
     /**
      * Move a position after position a.
      */
@@ -1799,6 +1943,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210126001920.12: *4* p.moveToFirst/LastChildOf
     /**
      * Move a position to the first child of parent.
      */
@@ -1819,6 +1964,7 @@ export class Position {
         return p.moveToNthChildOf(parent, n);  // Major bug fix: 2011/12/04
     }
 
+    //@+node:felix.20210126001920.13: *4* p.moveToNthChildOf
     /**
      * Move a position to the nth child of parent.
      */
@@ -1830,6 +1976,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210126001920.14: *4* p.moveToRoot (changed)
     /**
      * Move self to the root position.
      */
@@ -1841,6 +1988,7 @@ export class Position {
         return p;
     }
 
+    //@+node:felix.20210126001920.15: *4* p.promote
     /**
      * A low-level promote helper.
      */
@@ -1868,6 +2016,7 @@ export class Position {
         }
     }
 
+    //@+node:felix.20210126001920.16: *4* p.validateOutlineWithParent
     /**
      * This routine checks the structure of the receiver's tree.
      */
@@ -1876,9 +2025,14 @@ export class Position {
         let result: boolean = true;  // optimists get only unpleasant surprises.
         const parent: Position = p.getParent();
         const childIndex: number = p._childIndex;
+        //@+<< validate parent ivar >>
+        //@+node:felix.20210126001920.17: *5* << validate parent ivar >>
         if (pv && !parent.__eq__(pv)) {
             p.invalidOutline("Invalid parent link: " + JSON.stringify(parent));
         }
+        //@-<< validate parent ivar >>
+        //@+<< validate childIndex ivar >>
+        //@+node:felix.20210126001920.18: *5* << validate childIndex ivar >>
         if (pv && pv.__bool__()) {
             if (childIndex < 0) {
                 p.invalidOutline("missing childIndex" + childIndex);
@@ -1888,9 +2042,13 @@ export class Position {
         } else if (childIndex < 0) {
             p.invalidOutline("negative childIndex" + childIndex);
         }
+        //@-<< validate childIndex ivar >>
+        //@+<< validate x ivar >>
+        //@+node:felix.20210126001920.19: *5* << validate x ivar >>
         if (!p.v && pv && pv.__bool__()) {
             this.invalidOutline("Empty t");
         }
+        //@-<< validate x ivar >>
         // Recursively validate all the children.
         for (let child of p.children()) {
             const r: boolean = child.validateOutlineWithParent(p);
@@ -1901,6 +2059,8 @@ export class Position {
         return result;
     }
 
+    //@+node:felix.20210206014421.1: *3* p.Properties
+    //@+node:felix.20210206014421.2: *4* p.b property
     /**
      * position body string property
      */
@@ -1910,18 +2070,18 @@ export class Position {
     }
 
     /**
-     *  Set the body text of a position.
+     * Set the body text of a position.
      *
-     *  **Warning: the p.b = whatever is *expensive* because it calls
-     *  c.setBodyString().
+     * **Warning: the p.b = whatever is *expensive* because it calls
+     * c.setBodyString().
      *
-     *  Usually, code *should* use this setter, despite its cost, because it
-     *  update's Leo's outline pane properly. Calling c.redraw() is *not*
-     *  enough.
+     * Usually, code *should* use this setter, despite its cost, because it
+     * update's Leo's outline pane properly. Calling c.redraw() is *not*
+     * enough.
      *
-     *  This performance gotcha becomes important for repetitive commands, like
-     *  cff, replace-all and recursive import. In such situations, code should
-     *  use p.v.b instead of p.b.
+     * This performance gotcha becomes important for repetitive commands, like
+     * cff, replace-all and recursive import. In such situations, code should
+     * use p.v.b instead of p.b.
      */
     public set b(val: string) {
         const p: Position = this;
@@ -1932,6 +2092,7 @@ export class Position {
         }
     }
 
+    //@+node:felix.20210206014421.3: *4* p.h property
     /**
      * position property returning the headline string
      */
@@ -1941,18 +2102,18 @@ export class Position {
     }
 
     /**
-     *  Set the headline text of a position.
+     * Set the headline text of a position.
      *
-     *  **Warning: the p.h = whatever is *expensive* because it calls
-     *  c.setHeadString().
+     * **Warning: the p.h = whatever is *expensive* because it calls
+     * c.setHeadString().
      *
-     *  Usually, code *should* use this setter, despite its cost, because it
-     *  update's Leo's outline pane properly. Calling c.redraw() is *not*
-     *  enough.
+     * Usually, code *should* use this setter, despite its cost, because it
+     * update's Leo's outline pane properly. Calling c.redraw() is *not*
+     * enough.
      *
-     *  This performance gotcha becomes important for repetitive commands, like
-     *  cff, replace-all and recursive import. In such situations, code should
-     *  use p.v.h instead of p.h.
+     * This performance gotcha becomes important for repetitive commands, like
+     * cff, replace-all and recursive import. In such situations, code should
+     * use p.v.h instead of p.h.
      */
     public set h(val: string) {
         const p: Position = this;
@@ -1963,6 +2124,7 @@ export class Position {
         }
     }
 
+    //@+node:felix.20210206014421.4: *4* p.gnx property
     /**
      * position gnx property
      */
@@ -1971,6 +2133,7 @@ export class Position {
         return p.v.fileIndex;
     }
 
+    //@+node:felix.20210206014421.5: *4* p.script property
     /**
      * position property returning the script formed by p and its descendants
      */
@@ -1982,6 +2145,7 @@ export class Position {
             false); // useSentinels
     }
 
+    //@+node:felix.20210206014421.6: *4* p.nosentinels property
     /**
      * position property returning the body text without sentinels
      */
@@ -1990,6 +2154,7 @@ export class Position {
         return g.splitLines(p.b).filter(z => !g.isDirective(z)).join('');
     }
 
+    //@+node:felix.20210206014421.7: *4* p.u Property
     /**
      * p.u property
      */
@@ -2003,6 +2168,9 @@ export class Position {
         p.v.u = val;
     }
 
+    //@+node:felix.20210207005040.1: *3* p.Setters
+    //@+node:felix.20210207005040.2: *4* p.VNode proxies
+    //@+node:felix.20210207005040.3: *5* p.contract/expand/isExpanded
     /**
      * Contract p.v and clear p.v.expandedPositions list.
      */
@@ -2039,6 +2207,7 @@ export class Position {
         return p.v.isExpanded();
     }
 
+    //@+node:felix.20210207005040.4: *5* p.Status bits
     // Clone bits are no longer used.
     // Dirty bits are handled carefully by the position class.
 
@@ -2062,6 +2231,7 @@ export class Position {
 
     public setVisited(): void { return this.v.setVisited(); }
 
+    //@+node:felix.20210207005040.5: *5* p.computeIcon & p.setIcon
     public computeIcon(): number {
         return this.v.computeIcon();
     }
@@ -2070,10 +2240,12 @@ export class Position {
         // Compatibility routine for old scripts
     }
 
+    //@+node:felix.20210207005040.6: *5* p.setSelection
     public setSelection(start: number, length: number): void {
         return this.v.setSelection(start, length);
     }
 
+    //@+node:felix.20210207005040.7: *5* p.restore/saveCursorAndScroll
     public restoreCursorAndScroll(): void {
         this.v.restoreCursorAndScroll();
     }
@@ -2082,6 +2254,7 @@ export class Position {
         this.v.saveCursorAndScroll();
     }
 
+    //@+node:felix.20210207005040.8: *4* p.setBodyString & setHeadString
     public setBodyString(s: string): void {
         const p: Position = this;
         return p.v.setBodyString(s);
@@ -2098,6 +2271,8 @@ export class Position {
         p.setDirty();
     }
 
+    //@+node:felix.20210207005040.9: *4* p.Visited bits
+    //@+node:felix.20210207005040.10: *5* p.clearVisitedInTree
     // Compatibility routine for scripts.
 
     public clearVisitedInTree(): void {
@@ -2106,6 +2281,7 @@ export class Position {
         }
     }
 
+    //@+node:felix.20210207005040.11: *5* p.clearAllVisitedInTree
     public clearAllVisitedInTree(): void {
         for (let p of this.self_and_subtree(false)) {
             p.v.clearVisited();
@@ -2113,6 +2289,8 @@ export class Position {
         }
     }
 
+    //@+node:felix.20210207005040.12: *4* p.Dirty bits
+    //@+node:felix.20210207005040.13: *5* p.clearDirty
     /**
      * (p) Set p.v dirty.
      */
@@ -2121,6 +2299,7 @@ export class Position {
         p.v.clearDirty();
     }
 
+    //@+node:felix.20210207005040.14: *5* p.inAtIgnoreRange
     /**
      * Returns True if position p or one of p's parents is an @ignore node.
      */
@@ -2134,6 +2313,7 @@ export class Position {
         return false;
     }
 
+    //@+node:felix.20210207005040.15: *5* p.setAllAncestorAtFileNodesDirty
     /**
      * Set all ancestor @<file> nodes dirty, including ancestors of all clones of p.
      */
@@ -2142,6 +2322,7 @@ export class Position {
         p.v.setAllAncestorAtFileNodesDirty();
     }
 
+    //@+node:felix.20210207005040.16: *5* p.setDirty
     /**
      * Mark a node and all ancestor @file nodes dirty.
      * p.setDirty() is no longer expensive.
@@ -2152,6 +2333,8 @@ export class Position {
         p.v.setDirty();
     }
 
+    //@+node:felix.20210208001026.1: *3* p.Predicates
+    //@+node:felix.20210208001026.2: *4* p.is_at_all & is_at_all_tree
     /**
      * Return True if p.b contains an @all directive.
      */
@@ -2183,6 +2366,7 @@ export class Position {
         return false;
     }
 
+    //@+node:felix.20210208001026.3: *4* p.is_at_ignore & in_at_ignore_tree
     /**
      * Return True if p is an @ignore node.
      */
@@ -2204,6 +2388,7 @@ export class Position {
         return false;
     }
 
+    //@-others
 
 }
 
@@ -2267,6 +2452,7 @@ Position.prototype.initBodyString = Position.prototype.setBodyString;
 Position.prototype.setTnodeText = Position.prototype.setBodyString;
 Position.prototype.scriptSetBodyString = Position.prototype.setBodyString;
 
+//@+node:felix.20210102150654.1: ** Enum StatusFlags
 enum StatusFlags {
     // Define the meaning of status bits in new vnodes.
     // Archived...
@@ -2285,6 +2471,7 @@ enum StatusFlags {
     orphanBit = 0x800  // True: error in @<file> tree prevented it from being written.
 }
 
+//@+node:felix.20210102015917.1: ** class VNode
 /**
  * VNode class.
  */
@@ -2325,9 +2512,13 @@ export class VNode {
     selectionLength: number; // The length of the selected body text.
     selectionStart: number; // The start of the selected body text.
 
+    public tempTnodeList: undefined | string[]; // TODO : Type better than that!
     public unknownAttributes: undefined | { [key: string]: any };
     unicode_warning_given: boolean = false;
 
+    //@+others
+    //@+node:felix.20210130233340.1: *3* v.Birth & death
+    //@+node:felix.20210102015917.2: *4* constructor
     constructor(context: Commands, gnx?: string) {
         this._headString = 'newHeadline';
         this._bodyString = '';
@@ -2346,10 +2537,12 @@ export class VNode {
         g.app.nodeIndices!.new_vnode_helper(context, gnx, this);
     }
 
+    //@+node:felix.20210130233340.3: *4* v.__repr__ & v.__str__
     public __repr__(): string {
         return `<VNode ${this.gnx} ${this.headString()}>`;
     }
 
+    //@+node:felix.20210130233340.4: *4* v.dump
     public dumpLink(link: string): string {
         return link ? link : "<none>";
     }
@@ -2365,6 +2558,12 @@ export class VNode {
         console.log(`children: ${g.listToString(v.children)}`);
     }
 
+    //@+node:felix.20211209010457.1: *3* v.toString
+    public toString = (): string => {
+        return `VNode (gnx: ${this.gnx})`;
+    }
+    //@+node:felix.20210112210731.1: *3* v.Comparisons
+    //@+node:felix.20210112210731.2: *4* v.findAtFileName
     /**
      * Return the name following one of the names in nameList or "".
      */
@@ -2390,6 +2589,7 @@ export class VNode {
         return "";
     }
 
+    //@+node:felix.20210112210731.3: *4* v.anyAtFileNodeName
     /**
      * Return the file name following an @file node or an empty string.
      */
@@ -2404,6 +2604,7 @@ export class VNode {
         );
     }
 
+    //@+node:felix.20210112210731.4: *4* v.at...FileNodeName
     // These return the filename following @xxx, in v.headString.
     // Return the the empty string if v is not an @xxx node.
 
@@ -2462,6 +2663,7 @@ export class VNode {
         return this.findAtFileName(names);
     }
 
+    //@+node:felix.20210112210731.5: *4* v.isAtAllNode
     /**
      * Returns True if the receiver contains @others in its body at the start of a line.
      */
@@ -2470,6 +2672,7 @@ export class VNode {
         return flag;
     }
 
+    //@+node:felix.20210112210731.6: *4* v.isAnyAtFileNode
     /**
      * Return True if v is any kind of @file or related node.
      */
@@ -2480,6 +2683,7 @@ export class VNode {
         return !!h && h.substring(0, 1) === '@' && !!this.anyAtFileNodeName();
     }
 
+    //@+node:felix.20210112210731.7: *4* v.isAt...FileNode
     public isAtAutoNode(): boolean {
         return !!this.atAutoNodeName();
     }
@@ -2521,6 +2725,7 @@ export class VNode {
         return !!this.atThinFileNodeName();
     }
 
+    //@+node:felix.20210112210731.8: *4* v.isAtIgnoreNode
     /**
      * Returns True if:
      * - the vnode' body contains @ignore at the start of a line or
@@ -2534,6 +2739,7 @@ export class VNode {
         return flag;
     }
 
+    //@+node:felix.20210112210731.9: *4* v.isAtOthersNode
     /**
      * Returns True if the receiver contains @others in its body at the start of a line.
      */
@@ -2542,6 +2748,7 @@ export class VNode {
         return flag;
     }
 
+    //@+node:felix.20210112210731.10: *4* v.matchHeadline
     /**
      * Returns True if the headline matches the pattern ignoring whitespace and case.
      * The headline may contain characters following the successfully matched pattern.
@@ -2560,6 +2767,7 @@ export class VNode {
         return h.startsWith(pattern);
     }
 
+    //@+node:felix.20210207195152.1: *3* v.copyTree
     /**
      * Return an all-new tree of vnodes that are copies of self and all its
      * descendants.
@@ -2588,10 +2796,14 @@ export class VNode {
         return v2;
     }
 
+    //@+node:felix.20210102234910.1: *3* v.Getters
+    //@+node:felix.20210102234915.1: *4* v.bodyString
     public bodyString() {
         return this._bodyString;
     }
 
+    //@+node:felix.20210102235015.1: *4* v.Children
+    //@+node:felix.20210103000631.1: *5* v.firstChild
     /**
      * Returns the first child or undefined if no children
      */
@@ -2602,10 +2814,12 @@ export class VNode {
         return undefined;
     }
 
+    //@+node:felix.20210103003546.1: *5* v.hasChildren
     public hasChildren(): boolean {
         return !!this.children.length;
     }
 
+    //@+node:felix.20210103003705.1: *5* v.lastChild
     /**
      * Returns the last child or undefined if no children
      */
@@ -2616,6 +2830,7 @@ export class VNode {
         return undefined;
     }
 
+    //@+node:felix.20210103010323.1: *5* v.nthChild
     /**
      * childIndex and nthChild are zero-based.
      */
@@ -2626,10 +2841,12 @@ export class VNode {
         return undefined;
     }
 
+    //@+node:felix.20210103010327.1: *5* v.numberOfChildren
     public numberOfChildren(): number {
         return this.children.length;
     }
 
+    //@+node:felix.20210103011425.1: *4* v.directParents
     /**
      * (New in 4.2) Return a list of all direct parent vnodes of a VNode.
      * This is NOT the same as the list of ancestors of the VNode.
@@ -2638,6 +2855,7 @@ export class VNode {
         return this.parents;
     }
 
+    //@+node:felix.20210103011621.1: *4* v.hasBody
     /**
      * Return True if this VNode contains body text.
      */
@@ -2645,6 +2863,7 @@ export class VNode {
         return !!this._bodyString && this._bodyString.length > 0;
     }
 
+    //@+node:felix.20210103013608.1: *4* v.headString
     /**
      * Return the headline string.
      */
@@ -2652,6 +2871,7 @@ export class VNode {
         return this._headString;
     }
 
+    //@+node:felix.20210103023444.1: *4* v.cleanHeadString
     /**
      * Return the headline string. Same as headString.
      */
@@ -2659,6 +2879,7 @@ export class VNode {
         return this._headString;
     }
 
+    //@+node:felix.20210103013802.1: *4* v.isNthChildOf
     /**
      * Return True if v is the n'th child of parent_v.
      */
@@ -2667,42 +2888,55 @@ export class VNode {
         return !!children && 0 <= n && n < children.length && children[n].fileIndex === this.fileIndex;
     }
 
+    //@+node:felix.20210103013805.1: *4* v.Status Bits
+    //@+node:felix.20210103013805.2: *5* v.isCloned
     public isCloned(): boolean {
         return this.parents.length > 1;
     }
 
+    //@+node:felix.20210103013805.3: *5* v.isDirty
     public isDirty(): boolean {
         return (this.statusBits & StatusFlags.dirtyBit) !== 0;
     }
 
+    //@+node:felix.20210103013805.4: *5* v.isMarked
     public isMarked(): boolean {
         return (this.statusBits & StatusFlags.markedBit) !== 0;
     }
 
+    //@+node:felix.20210103013805.5: *5* v.isOrphan
     public isOrphan(): boolean {
         return (this.statusBits & StatusFlags.orphanBit) !== 0;
     }
 
+    //@+node:felix.20210103013805.6: *5* v.isSelected
     public isSelected(): boolean {
         return (this.statusBits & StatusFlags.selectedBit) !== 0;
     }
 
+    //@+node:felix.20210103013805.7: *5* v.isTopBitSet
     public isTopBitSet(): boolean {
         return (this.statusBits & StatusFlags.topBit) !== 0;
     }
 
+    //@+node:felix.20210103013805.8: *5* v.isVisited
     public isVisited(): boolean {
         return (this.statusBits & StatusFlags.visitedBit) !== 0;
     }
 
+    //@+node:felix.20210103013805.9: *5* v.isWriteBit
     public isWriteBit(): boolean {
         return (this.statusBits & StatusFlags.writeBit) !== 0;
     }
 
+    //@+node:felix.20210103013805.10: *5* v.status
     public status(): number {
         return this.statusBits;
     }
 
+    //@+node:felix.20210115195450.1: *3* v.Setters
+    //@+node:felix.20210115195450.2: *4*  v.Dirty bits
+    //@+node:felix.20210115195450.3: *5* v.clearDirty
     /**
      * Clear the vnode dirty bit.
      */
@@ -2710,6 +2944,7 @@ export class VNode {
         this.statusBits &= ~StatusFlags.dirtyBit;
     }
 
+    //@+node:felix.20210115195450.4: *5* v.setDirty
     /**
      * Set the vnode dirty bit.
      * This method is fast, but dangerous. Unlike p.setDirty, this method does
@@ -2719,26 +2954,33 @@ export class VNode {
         this.statusBits |= StatusFlags.dirtyBit;
     }
 
+    //@+node:felix.20210115195450.5: *4*  v.Status bits
+    //@+node:felix.20210115195450.6: *5* v.clearClonedBit
     public clearClonedBit(): void {
         this.statusBits &= ~StatusFlags.clonedBit;
     }
 
+    //@+node:felix.20210115195450.7: *5* v.clearMarked
     public clearMarked(): void {
         this.statusBits &= ~StatusFlags.markedBit;
     }
 
+    //@+node:felix.20210115195450.8: *5* v.clearWriteBit
     public clearWriteBit(): void {
         this.statusBits &= ~StatusFlags.writeBit;
     }
 
+    //@+node:felix.20210115195450.9: *5* v.clearOrphan
     public clearOrphan(): void {
         this.statusBits &= ~StatusFlags.orphanBit;
     }
 
+    //@+node:felix.20210115195450.10: *5* v.clearVisited
     public clearVisited(): void {
         this.statusBits &= ~StatusFlags.visitedBit;
     }
 
+    //@+node:felix.20210115195450.11: *5* v.contract/expand/initExpandedBit/isExpanded
     /**
      * Contract the node.
      */
@@ -2770,10 +3012,12 @@ export class VNode {
         return !!(this.statusBits & StatusFlags.expandedBit);
     }
 
+    //@+node:felix.20210115195450.12: *5* v.initStatus
     public initStatus(status: number): void {
         this.statusBits = status;
     }
 
+    //@+node:felix.20210115195450.13: *5* v.setClonedBit & initClonedBit
     public setClonedBit(): void {
         this.statusBits |= StatusFlags.clonedBit;
     }
@@ -2786,6 +3030,7 @@ export class VNode {
         }
     }
 
+    //@+node:felix.20210115195450.14: *5* v.setMarked & initMarkedBit
     public setMarked(): void {
         this.statusBits |= StatusFlags.markedBit;
     }
@@ -2794,6 +3039,7 @@ export class VNode {
         this.statusBits |= StatusFlags.markedBit;
     }
 
+    //@+node:felix.20210115195450.15: *5* v.setOrphan
     /**
      * Set the vnode's orphan bit.
      */
@@ -2801,6 +3047,7 @@ export class VNode {
         this.statusBits |= StatusFlags.orphanBit;
     }
 
+    //@+node:felix.20210115195450.16: *5* v.setSelected
     /**
      * This only sets the selected bit.
      */
@@ -2808,6 +3055,7 @@ export class VNode {
         this.statusBits |= StatusFlags.selectedBit;
     }
 
+    //@+node:felix.20210115195450.17: *5* v.setVisited
     /**
      * Compatibility routine for scripts
      */
@@ -2815,14 +3063,17 @@ export class VNode {
         this.statusBits |= StatusFlags.visitedBit;
     }
 
+    //@+node:felix.20210115195450.18: *5* v.setWriteBit
     public setWriteBit(): void {
         this.statusBits |= StatusFlags.writeBit;
     }
 
+    //@+node:felix.20210207213301.1: *4* v.childrenModified
     public childrenModified(): void {
         g.childrenModifiedSet.push(this);
     }
 
+    //@+node:felix.20210115195450.19: *4* v.computeIcon & setIcon
     public computeIcon(): number {
         let val: number = 0;
         const v: VNode = this;
@@ -2837,10 +3088,12 @@ export class VNode {
         //  pass # Compatibility routine for old scripts
     }
 
+    //@+node:felix.20210207213314.1: *4* v.contentModified
     public contentModified(): void {
         g.contentModifiedSet.push(this);
     }
 
+    //@+node:felix.20210207213328.1: *4* v.restoreCursorAndScroll
     // Called only by LeoTree.selectHelper.
 
     /**
@@ -2870,7 +3123,7 @@ export class VNode {
         }
         if (traceTime){
             const delta_t:number = time.time() - t1;
-            if( delta_t > 0.1){
+            if(delta_t > 0.1){
                 g.trace(`${delta_t} sec`);
             }
         }
@@ -2884,6 +3137,7 @@ export class VNode {
         */
     }
 
+    //@+node:felix.20210115195450.20: *4* v.saveCursorAndScroll
     /**
      * Conserve cursor and scroll positions
      * from the UI into this vnode's
@@ -2909,6 +3163,7 @@ export class VNode {
 
     }
 
+    //@+node:felix.20210115195450.21: *4* v.setBodyString & v.setHeadString
     public setBodyString(s: string): void {
         const v: VNode = this;
         if ((typeof s) === 'string') {
@@ -2939,12 +3194,14 @@ export class VNode {
         // self.contentModified()  # #1413.
     }
 
+    //@+node:felix.20210115195450.22: *4* v.setSelection
     public setSelection(start: number, length: number): void {
         const v: VNode = this;
         v.selectionStart = start;
         v.selectionLength = length;
     }
 
+    //@+node:felix.20210116003530.1: *3* v.setAllAncestorAtFileNodesDirty & helpers
     /**
      * Original idea by Bитaлиje Mилoшeвић (Vitalije Milosevic).
      * Modified by EKR.
@@ -2972,6 +3229,7 @@ export class VNode {
         }
     }
 
+    //@+node:felix.20210116003538.1: *3* v.Inserting & cloning
     /**
      * Does not check for illegal clones!
      */
@@ -3000,6 +3258,8 @@ export class VNode {
         return v2;
     }
 
+    //@+node:felix.20210117025748.1: *3* v.Low level methods
+    //@+node:felix.20210117025748.2: *4* v._addCopiedLink
     /**
      * Adjust links after adding a link to v.
      */
@@ -3011,6 +3271,7 @@ export class VNode {
         v.parents.push(parent_v);
     }
 
+    //@+node:felix.20210117025748.3: *4* v._addLink & _addParentLinks
     /**
      * Adjust links after adding a link to v.
      */
@@ -3034,6 +3295,7 @@ export class VNode {
         }
     }
 
+    //@+node:felix.20210117025748.4: *5* v._addParentLinks
     /**
      * Used by addLink to adjust parent links in the descendant tree
      */
@@ -3047,6 +3309,7 @@ export class VNode {
         }
     }
 
+    //@+node:felix.20210117025748.5: *4* v._cutLink & _cutParentLinks
     /**
      * Adjust links after cutting a link to v.
      */
@@ -3087,6 +3350,7 @@ export class VNode {
         }
     }
 
+    //@+node:felix.20210117025748.6: *5* v._cutParentLinks
     /**
      * Used by cutLink to adjust parent links in the descendant tree
      */
@@ -3110,6 +3374,7 @@ export class VNode {
 
     }
 
+    //@+node:felix.20210117025748.7: *4* v._deleteAllChildren
     /**
      * Delete all children of self.
      * This is a low-level method, used by the read code.
@@ -3135,6 +3400,7 @@ export class VNode {
         v.children = [];
     }
 
+    //@+node:felix.20210117025748.8: *4* v._linkAsNthChild
     /**
      * Links self as the n'th child of VNode pv
      */
@@ -3143,6 +3409,8 @@ export class VNode {
         v._addLink(n, parent_v);
     }
 
+    //@+node:felix.20210117160548.1: *3* v.Properties
+    //@+node:felix.20210117160548.2: *4* v.b Property
     /**
      * VNode body string property
      */
@@ -3156,6 +3424,7 @@ export class VNode {
         v.setBodyString(val);
     }
 
+    //@+node:felix.20210117160548.3: *4* v.h property
     /**
      * VNode headline string property
      */
@@ -3169,6 +3438,7 @@ export class VNode {
         v.setHeadString(val);
     }
 
+    //@+node:felix.20210117160548.4: *4* v.u Property
     /**
      * VNode u property
      */
@@ -3192,6 +3462,7 @@ export class VNode {
         }
     }
 
+    //@+node:felix.20210117160548.5: *4* v.gnx Property
     /**
      * VNode gnx property
      */
@@ -3200,6 +3471,7 @@ export class VNode {
         return v.fileIndex;
     }
 
+    //@-others
 
 }
 
@@ -3228,4 +3500,6 @@ VNode.prototype.initHeadString = VNode.prototype.setHeadString;
 VNode.prototype.setTnodeText = VNode.prototype.setBodyString;
 VNode.prototype.__str__ = VNode.prototype.__repr__;
 
+//@-others
 
+//@-leo

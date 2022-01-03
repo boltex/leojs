@@ -12,6 +12,10 @@ import { Position, VNode, StackEntry, NodeIndices } from "./leoNodes";
 import { NodeHistory } from './leoHistory';
 import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
+import { AtFile } from './leoAtFile';
+import * as path from 'path';
+import * as sqlite3 from 'sqlite3';
+
 
 //@-<< imports >>
 //@+others
@@ -51,12 +55,14 @@ export class Commands {
 
     public hiddenRootNode: VNode;
     public fileCommands: FileCommands | DummyFileCommands;
+    public atFileCommands: AtFile;
     public chapterController: any; // TODO : leoChapters.ChapterController(c)
     public undoer: Undoer;
     public nodeHistory: NodeHistory;
     public gui: LeoUI;
+    public replace_errors: string[] = [];
 
-    // TODO fake frame needed FOR wrapper and hasSelection 
+    // TODO fake frame needed FOR wrapper and hasSelection
     // TODO : maybe MERGE frame.tree.generation WITH _treeId?
     public frame: {
         tree: {
@@ -110,7 +116,7 @@ export class Commands {
     public command_name: string = '';
     public recent_commands_list: string[] = [];
 
-    public sqlite_connection: any = undefined;
+    public sqlite_connection: sqlite3.Database | undefined = undefined;
 
     //@+node:felix.20210223220814.3: *4* c.initDebugIvars
     // Init Commander debugging ivars.
@@ -122,7 +128,7 @@ export class Commands {
     // Init per-document ivars.
     public expansionLevel: number = 0; // The expansion level of this outline.
     public expansionNode: Position | undefined = undefined; // The last node we expanded or contracted.
-    public nodeConflictList: VNode[] = []; // List of nodes with conflicting read-time data.
+    public nodeConflictList: any[] = []; // List of nodes with conflicting read-time data.
     public nodeConflictFileName: string | undefined = undefined; // The fileName for c.nodeConflictList.
     public user_dict = {}; // Non-persistent dictionary for free use by scripts and plugins.
 
@@ -144,7 +150,7 @@ export class Commands {
 
     //@+node:felix.20210223220814.6: *4* c.initFileIvars
     // Init file-related ivars of the commander.
-    public changed = false; // True: the ouline has changed since the last save.
+    public changed = false; // True: the outline has changed since the last save.
     public ignored_at_file_nodes: string[] = []; // (headers)
     public import_error_nodes: string[] = []; // List of nodes for c.raise_error_dialogs. (headers)
     public last_dir: string | undefined = undefined; // The last used directory.
@@ -161,6 +167,7 @@ export class Commands {
     public forceExecuteEntireBody: boolean = false;
     public focus_border_color: string = 'white';
     public focus_border_width: number = 1;  // pixels;
+    public make_node_conflicts_node: boolean = true;
     public outlineHasInitialFocus: boolean = false;
     public page_width: number = 132;
     public sparse_find: boolean = true;
@@ -244,14 +251,14 @@ export class Commands {
         // this.shadowController       = leoShadow.ShadowController(c)
         this.fileCommands = new FileCommands(c);
         // this.findCommands           = new LeoFind(c);
-        // this.atFileCommands         = new AtFile(c);
+        this.atFileCommands = new AtFile(c);
         // this.importCommands         = new LeoImportCommands(c);
 
         this.nodeHistory = new NodeHistory(c);
 
         this.undoer = new Undoer(c);
 
-        // From initConfigSettings 
+        // From initConfigSettings
         this.collapse_on_lt_arrow = true; // getBool('collapse-on-lt-arrow', default=True)
 
         // From finishCreate
@@ -527,8 +534,8 @@ export class Commands {
     /**
      * A generator yielding *all* the root positions in the outline that
      * satisfy the given predicate. p.isAnyAtFileNode is the default
-     * predicate. 
-     * 
+     * predicate.
+     *
      * Once a root is found, the generator skips its subtree.
      */
     public *all_roots(predicate?: (p: Position) => boolean): Generator<Position> {
@@ -649,8 +656,9 @@ export class Commands {
     public fileName(): string {
         let s: string = this.mFileName || "";
         if (g.isWindows) {
-            s = s.replace('\\', '/');
+            s = s.split('\\').join('/');
         }
+
         return s;
     }
 
@@ -1193,13 +1201,14 @@ export class Commands {
     //@+node:felix.20211030170417.1: *3* c.Check Outline
     //@+node:felix.20211030170815.1: *4* checkGnxs
     /**
-     * Check the consistency of all gnx's and remove any tnodeLists.
+     * Check the consistency of all gnx's.
      * Reallocate gnx's for duplicates or empty gnx's.
      * Return the number of structure_errors found.
      */
     public checkGnxs(): number {
         const c: Commands = this;
-        const d: { [key: string]: VNode[] } = {}; // Keys are gnx's; values are sets of vnodes with that gnx.
+        const d: { [key: string]: VNode[] } = {};
+        // Keys are gnx's; values are sets of vnodes with that gnx.
         const ni: NodeIndices = g.app.nodeIndices!;
         const t1: [number, number] = process.hrtime();
 
@@ -1208,10 +1217,11 @@ export class Commands {
         for (let p of c.safe_all_positions(false)) {
             count += 1;
             const v: VNode = p.v;
-            if (v["tnodeList"] !== undefined) {
-                delete v.tnodeList;
-                v._p_changed = true;
-            }
+            // * removed https://github.com/leo-editor/leo-editor/pull/2363/files
+            // if (v["tnodeList"] !== undefined) {
+            //     delete v.tnodeList;
+            //     v._p_changed = true;
+            // }
             let gnx: string = v.fileIndex;
             if (gnx) {  // gnx must be a string.
                 const aSet: VNode[] = d[gnx] || []; // new if none yet
@@ -1238,7 +1248,7 @@ export class Commands {
             }
         }
         const ok: boolean = !gnx_errors && !g.app.structure_errors;
-        const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1 
+        const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1
         const t2 = (t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000); // in ms
         if (!ok) {
             g.es_print(
@@ -1287,7 +1297,7 @@ export class Commands {
         //     junk, value, junk = sys.exc_info()
         //     g.error("test failed at position %s\n%s" % (repr(p), value))
 
-        const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1 
+        const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1
         const t2 = (t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000); // in ms
 
         g.es_print(
@@ -1495,6 +1505,186 @@ export class Commands {
             return root.validateOutlineWithParent(parent);
         }
         return true;
+    }
+    //@+node:felix.20211226232321.1: *3* c.Convenience methods
+    //@+node:felix.20211226232349.1: *4* setFileTimeStamp
+    /**
+     * Update the timestamp for fn..
+     */
+    public setFileTimeStamp(fn: string): void {
+
+        // c = self
+        if (g.app.externalFilesController) {
+            g.app.externalFilesController.set_time(fn)
+        }
+
+    }
+    //@+node:felix.20211228212851.1: *3* c.Directive scanning
+    // These are all new in Leo 4.5.1.
+
+    //@+node:felix.20211228212851.2: *4* c.getLanguageAtCursor
+    // def getLanguageAtCursor(self, p, language):
+    //     """
+    //     Return the language in effect at the present insert point.
+    //     Use the language argument as a default if no @language directive seen.
+    //     """
+    //     c = self
+    //     tag = '@language'
+    //     w = c.frame.body.wrapper
+    //     ins = w.getInsertPoint()
+    //     n = 0
+    //     for s in g.splitLines(p.b):
+    //         if g.match_word(s, 0, tag):
+    //             i = g.skip_ws(s, len(tag))
+    //             j = g.skip_id(s, i)
+    //             language = s[i:j]
+    //         if n <= ins < n + len(s):
+    //             break
+    //         else:
+    //             n += len(s)
+    //     return language
+    //@+node:felix.20211228212851.3: *4* c.getNodePath & c.getNodeFileName
+    /**
+     * Return the path in effect at node p.
+     */
+    public getNodePath(p: Position): string {
+
+        const c: Commands = this;
+
+        const aList: any[] = g.get_directives_dict_list(p);
+        const w_path: string = c.scanAtPathDirectives(aList);
+        return w_path;
+
+    }
+
+    /**
+     * Return the full file name at node p,
+     * including effects of all @path directives.
+     * Return '' if p is no kind of @file node.
+     */
+    public getNodeFileName(p_p: Position): string {
+
+        const c: Commands = this;
+
+        for (let p of p_p.self_and_parents(false)) {
+            const name: string = p.anyAtFileNodeName();
+            if (name) {
+                return g.fullPath(c, p);  // #1914.
+            }
+        }
+        return '';
+    }
+    //@+node:felix.20211228212851.4: *4* c.hasAmbiguousLangauge
+    // def hasAmbiguousLanguage(self, p):
+    //     """Return True if p.b contains different @language directives."""
+    //     # c = self
+    //     languages, tag = set(), '@language'
+    //     for s in g.splitLines(p.b):
+    //         if g.match_word(s, 0, tag):
+    //             i = g.skip_ws(s, len(tag))
+    //             j = g.skip_id(s, i)
+    //             word = s[i:j]
+    //             languages.add(word)
+    //     return len(list(languages)) > 1
+    //@+node:felix.20211228212851.5: *4* c.scanAllDirectives
+    // @nobeautify
+
+    // def scanAllDirectives(self, p):
+    //     """
+    //     Scan p and ancestors for directives.
+
+    //     Returns a dict containing the results, including defaults.
+    //     """
+    //     c = self
+    //     p = p or c.p
+    //     # Defaults...
+    //     default_language = g.getLanguageFromAncestorAtFileNode(p) or c.target_language or 'python'
+    //     default_delims = g.set_delims_from_language(default_language)
+    //     wrap = c.config.getBool("body-pane-wraps")
+    //     table = (  # type:ignore
+    //         ('encoding',    None,           g.scanAtEncodingDirectives),
+    //         ('lang-dict',   {},             g.scanAtCommentAndAtLanguageDirectives),
+    //         ('lineending',  None,           g.scanAtLineendingDirectives),
+    //         ('pagewidth',   c.page_width,   g.scanAtPagewidthDirectives),
+    //         ('path',        None,           c.scanAtPathDirectives),
+    //         ('tabwidth',    c.tab_width,    g.scanAtTabwidthDirectives),
+    //         ('wrap',        wrap,           g.scanAtWrapDirectives),
+    //     )
+    //     # Set d by scanning all directives.
+    //     aList = g.get_directives_dict_list(p)
+    //     d = {}
+    //     for key, default, func in table:
+    //         val = func(aList)  # type:ignore
+    //         d[key] = default if val is None else val
+    //     # Post process: do *not* set commander ivars.
+    //     lang_dict = d.get('lang-dict')
+    //     d = {
+    //         "delims":       lang_dict.get('delims') or default_delims,
+    //         "comment":      lang_dict.get('comment'),  # Leo 6.4: New.
+    //         "encoding":     d.get('encoding'),
+    //         # Note: at.scanAllDirectives does not use the defaults for "language".
+    //         "language":     lang_dict.get('language') or default_language,
+    //         "lang-dict":    lang_dict,  # Leo 6.4: New.
+    //         "lineending":   d.get('lineending'),
+    //         "pagewidth":    d.get('pagewidth'),
+    //         "path":         d.get('path'), # Redundant: or g.getBaseDirectory(c),
+    //         "tabwidth":     d.get('tabwidth'),
+    //         "wrap":         d.get('wrap'),
+    //     }
+    //     return d
+    //@+node:felix.20211228212851.6: *4* c.scanAtPathDirectives
+    /**
+     * Scan aList for @path directives.
+     * Return a reasonable default if no @path directive is found.
+     */
+    public scanAtPathDirectives(aList: any[]): string {
+
+        const c: Commands = this;
+        c.scanAtPathDirectivesCount += 1;  // An important statistic.
+        // Step 1: Compute the starting path.
+        // The correct fallback directory is the absolute path to the base.
+        let base: string;
+        if (c.openDirectory) {  // Bug fix: 2008/9/18
+            base = c.openDirectory;
+        } else {
+            base = g.app.config.relative_path_base_directory;
+            if (base && base === "!") {
+                base = g.app.loadDir!;
+            } else if (base && base === ".") {
+                base = c.openDirectory!;
+            }
+        }
+        base = c.expand_path_expression(base);  // #1341.
+        base = g.os_path_expanduser(base);  // #1889.
+
+        const absbase: string = g.os_path_finalize_join(undefined, g.app.loadDir!, base);  // #1341.
+        // Step 2: look for @path directives.
+        const w_paths: string[] = [];
+
+        for (let d of aList) {
+            // Look for @path directives.
+            let w_path: string = d['path'];
+            const warning = d['@path_in_body'];
+            if (w_path !== undefined) {  // retain empty paths for warnings.
+                // Convert "path" or <path> to path.
+                w_path = g.stripPathCruft(w_path);
+                if (w_path && !warning) {
+                    w_path = c.expand_path_expression(w_path);  // #1341.
+                    w_path = g.os_path_expanduser(w_path);  // #1889.
+                    w_paths.push(w_path);
+                    // We will silently ignore empty @path directives.
+                }
+            }
+        }
+        // Add absbase and reverse the list.
+        w_paths.push(absbase);
+        w_paths.reverse();
+
+        // Step 3: Compute the full, effective, absolute path.
+        const w_path: string = g.os_path_finalize_join(undefined, ...w_paths); // #1341.
+
+        return w_path || g.getBaseDirectory(c);
+        // 2010/10/22: A useful default.
     }
     //@+node:felix.20211106224948.1: *3* c.Executing commands & scripts
     //@+node:felix.20211106224948.3: *4* c.doCommand
@@ -1709,7 +1899,7 @@ export class Commands {
         /*
                public find_line(path, n): [] {
 
-           
+
            if path == root_path:
                p, offset, found = c.gotoCommands.find_file_line(n, root)
            else:
@@ -1723,7 +1913,7 @@ export class Commands {
                            break
            if found:
                return [p, offset];
-               
+
            return [root, n];
 
                }
@@ -1848,12 +2038,416 @@ export class Commands {
         */
         return undefined;
     }
+    //@+node:felix.20220102021736.1: *3* c.expand_path_expression
+    /**
+     * Expand all {{anExpression}} in c's context.
+     */
+    public expand_path_expression(s: string): string {
+
+        const c: Commands = this;
+
+        if (!s) {
+            return '';
+        }
+        s = g.toUnicode(s);
+
+        // find and replace repeated path expressions
+        let previ: number = 0;
+        const aList: string[] = [];
+
+        while (previ < s.length) {
+            const i = s.indexOf('{{', previ);
+            const j = s.indexOf('}}', previ);
+            if ((-1 < i) && (i < j)) {
+                // Add anything from previous index up to '{{'
+                if (previ < i) {
+                    aList.push(s.substring(previ, i));
+                }
+                // Get expression and find substitute
+                const exp: string = s.substring(i + 2, j).trim();
+                if (exp) {
+                    try {
+                        const s2 = c.replace_path_expression(exp);
+                        aList.push(s2);
+                    }
+                    catch (exception) {
+                        g.es(`Exception evaluating {{ ${exp} }} in ${s.trim()}`);
+                        g.es_exception(true, c);
+                    }
+                }
+                // Prepare to search again after the last '}}'
+                previ = j + 2;
+            } else {
+                // Add trailing fragment (fragile in case of mismatched '{{'/'}}')
+                aList.push(s.substring(previ));
+                break;
+            }
+
+        }
+
+        let val: string = aList.join('');
+        if (g.isWindows) {
+            val = val.replace('\\', '/');
+        }
+
+        return val;
+    }
+    //@+node:felix.20220102021736.2: *4* c.replace_path_expression
+    /**
+     * local function to replace a single path expression.
+     */
+    public replace_path_expression(expr: string): string {
+        // TODO : TEST THIS METHOD !!
+        const c: Commands = this;
+        const p: Position = c.p;
+        // const d = {
+        //     'c': c,
+        //     'g': g,
+        //     // 'getString': c.config.getString,
+        //     'p': c.p,
+        //     'os': os,
+        //     'sep': os.sep,
+        //     'sys': sys,
+        // }
+        // #1338: Don't report errors when called by g.getUrlFromNode.
+        try {
+            // pylint: disable=eval-used
+            const w_path = eval(expr);
+            return g.toUnicode(w_path, 'utf-8');
+        }
+        catch (e) {
+            const message: string = (
+                `${c.shortFileName()}: ${c.p.h}\n` +
+                `expression: ${expr}\n` +
+                `     error: ${e}`);
+            if (!this.replace_errors.includes(message)) {
+                this.replace_errors.push(message);
+                g.trace(message);
+            }
+            return expr;
+        }
+    }
+    //@+node:felix.20211223223002.1: *3* c.File
+    //@+node:felix.20211223223002.2: *4* c.archivedPositionToPosition (new)
+    /**
+     * Convert an archived position (a string) to a position.
+     */
+    public archivedPositionToPosition(s: string): Position | undefined {
+
+        const c: Commands = this;
+
+        s = g.toUnicode(s);
+        let aList: undefined | string[] | number[] = s.split(',');
+
+        try {
+            aList = aList.map((z) => { return parseInt(z); });
+        }
+        catch (exception) {
+            aList = undefined;
+        }
+
+        if (!aList || !aList.length) {
+            return undefined;
+        }
+
+        const p: Position = c.rootPosition()!;
+        let level: number = 0;
+
+        while (level < aList.length) {
+            let i: number = aList[level];
+            while (i > 0) {
+                if (p.hasNext()) {
+                    p.moveToNext();
+                    i -= 1;
+                } else {
+                    return undefined;
+                }
+            }
+            level += 1;
+            if (level < aList.length) {
+                p.moveToFirstChild();
+            }
+        }
+        return p;
+    }
+    //@+node:felix.20211223223002.3: *4* c.backup
+    // def backup(self, fileName=None, prefix=None, silent=False, useTimeStamp=True):
+    //     """
+    //     Back up given fileName or c.fileName().
+    //     If useTimeStamp is True, append a timestamp to the filename.
+    //     """
+    //     c = self
+    //     fn = fileName or c.fileName()
+    //     if not fn:
+    //         return None
+    //     theDir, base = g.os_path_split(fn)
+    //     if useTimeStamp:
+    //         if base.endswith('.leo'):
+    //             base = base[:-4]
+    //         stamp = time.strftime("%Y%m%d-%H%M%S")
+    //         branch = prefix + '-' if prefix else ''
+    //         fn = f"{branch}{base}-{stamp}.leo"
+    //         path = g.os_path_finalize_join(theDir, fn)
+    //     else:
+    //         path = fn
+    //     if path:
+    //         # pylint: disable=no-member
+    //             # Defined in commanderFileCommands.py.
+    //         c.saveTo(fileName=path, silent=silent)
+    //             # Issues saved message.
+    //         # g.es('in', theDir)
+    //     return path
+    //@+node:felix.20211223223002.4: *4* c.backup_helper
+    // def backup_helper(self,
+    //     base_dir=None,
+    //     env_key='LEO_BACKUP',
+    //     sub_dir=None,
+    //     use_git_prefix=True,
+    // ):
+    //     """
+    //     A helper for scripts that back up a .leo file.
+    //     Use os.environ[env_key] as the base_dir only if base_dir is not given.
+    //     Backup to base_dir or join(base_dir, sub_dir).
+    //     """
+    //     c = self
+    //     old_cwd = os.getcwd()
+    //     join = g.os_path_finalize_join
+    //     if not base_dir:
+    //         if env_key:
+    //             try:
+    //                 base_dir = os.environ[env_key]
+    //             except KeyError:
+    //                 print(f"No environment var: {env_key}")
+    //                 base_dir = None
+    //     if base_dir and g.os_path_exists(base_dir):
+    //         if use_git_prefix:
+    //             git_branch, junk = g.gitInfo()
+    //         else:
+    //             git_branch = None
+    //         theDir, fn = g.os_path_split(c.fileName())
+    //         backup_dir = join(base_dir, sub_dir) if sub_dir else base_dir
+    //         path = join(backup_dir, fn)
+    //         if g.os_path_exists(backup_dir):
+    //             written_fn = c.backup(
+    //                 path,
+    //                 prefix=git_branch,
+    //                 silent=True,
+    //                 useTimeStamp=True,
+    //             )
+    //             g.es_print(f"wrote: {written_fn}")
+    //         else:
+    //             g.es_print(f"backup_dir not found: {backup_dir!r}")
+    //     else:
+    //         g.es_print(f"base_dir not found: {base_dir!r}")
+    //     os.chdir(old_cwd)
+    //@+node:felix.20211223223002.5: *4* c.checkFileTimeStamp
+    /**
+     * Return True if the file given by fn has not been changed
+     * since Leo read it or if the user agrees to overwrite it.
+     */
+    public checkFileTimeStamp(fn: string): boolean {
+
+        const c: Commands = this;
+
+        if (g.app.externalFilesController) {
+            return g.app.externalFilesController.check_overwrite(c, fn);
+        }
+        return true;
+    }
+    //@+node:felix.20211223223002.6: *4* c.createNodeFromExternalFile
+    // def createNodeFromExternalFile(self, fn):
+    //     """
+    //     Read the file into a node.
+    //     Return None, indicating that c.open should set focus.
+    //     """
+    //     c = self
+    //     s, e = g.readFileIntoString(fn)
+    //     if s is None:
+    //         return
+    //     head, ext = g.os_path_splitext(fn)
+    //     if ext.startswith('.'):
+    //         ext = ext[1:]
+    //     language = g.app.extension_dict.get(ext)
+    //     if language:
+    //         prefix = f"@color\n@language {language}\n\n"
+    //     else:
+    //         prefix = '@killcolor\n\n'
+    //     # pylint: disable=no-member
+    //     # Defined in commanderOutlineCommands.py
+    //     p2 = c.insertHeadline(op_name='Open File', as_child=False)
+    //     p2.h = f"@edit {fn}"
+    //     p2.b = prefix + s
+    //     w = c.frame.body.wrapper
+    //     if w:
+    //         w.setInsertPoint(0)
+    //     c.redraw()
+    //     c.recolor()
+    //@+node:felix.20211223223002.7: *4* c.looksLikeDerivedFile
+    // def looksLikeDerivedFile(self, fn):
+    //     """
+    //     Return True if fn names a file that looks like an
+    //     external file written by Leo.
+    //     """
+    //     # c = self
+    //     try:
+    //         with open(fn, 'rb') as f:  # 2020/11/14: Allow unicode characters!
+    //             b = f.read()
+    //             s = g.toUnicode(b)
+    //         return s.find('@+leo-ver=') > -1
+    //     except Exception:
+    //         g.es_exception()
+    //         return False
+    //@+node:felix.20211223223002.8: *4* c.markAllAtFileNodesDirty
+    // def markAllAtFileNodesDirty(self, event=None):
+    //     """Mark all @file nodes as changed."""
+    //     c = self
+    //     c.endEditing()
+    //     p = c.rootPosition()
+    //     while p:
+    //         if p.isAtFileNode():
+    //             p.setDirty()
+    //             c.setChanged()
+    //             p.moveToNodeAfterTree()
+    //         else:
+    //             p.moveToThreadNext()
+    //     c.redraw_after_icons_changed()
+    //@+node:felix.20211223223002.9: *4* c.markAtFileNodesDirty
+    // def markAtFileNodesDirty(self, event=None):
+    //     """Mark all @file nodes in the selected tree as changed."""
+    //     c = self
+    //     p = c.p
+    //     if not p:
+    //         return
+    //     c.endEditing()
+    //     after = p.nodeAfterTree()
+    //     while p and p != after:
+    //         if p.isAtFileNode():
+    //             p.setDirty()
+    //             c.setChanged()
+    //             p.moveToNodeAfterTree()
+    //         else:
+    //             p.moveToThreadNext()
+    //     c.redraw_after_icons_changed()
+    //@+node:felix.20211223223002.10: *4* c.openWith
+    // def openWith(self, event=None, d=None):
+    //     """
+    //     This is *not* a command.
+
+    //     Handles the items in the Open With... menu.
+
+    //     See ExternalFilesController.open_with for details about d.
+    //     """
+    //     c = self
+    //     if d and g.app.externalFilesController:
+    //         # Select an ancestor @<file> node if possible.
+    //         if not d.get('p'):
+    //             d['p'] = None
+    //             p = c.p
+    //             while p:
+    //                 if p.isAnyAtFileNode():
+    //                     d['p'] = p
+    //                     break
+    //                 p.moveToParent()
+    //         g.app.externalFilesController.open_with(c, d)
+    //     elif not d:
+    //         g.trace('can not happen: no d', g.callers())
+    //@+node:felix.20211223223002.11: *4* c.recreateGnxDict
+    // def recreateGnxDict(self):
+    //     """Recreate the gnx dict prior to refreshing nodes from disk."""
+    //     c, d = self, {}
+    //     for v in c.all_unique_nodes():
+    //         gnxString = v.fileIndex
+    //         if isinstance(gnxString, str):
+    //             d[gnxString] = v
+    //             if 'gnx' in g.app.debug:
+    //                 g.trace(c.shortFileName(), gnxString, v)
+    //         else:
+    //             g.internalError(f"no gnx for vnode: {v}")
+    //     c.fileCommands.gnxDict = d
     //@+node:felix.20211005023225.1: *3* c.Gui
     //@+node:felix.20211122010629.1: *4* c.Dialogs & messages
     //@+node:felix.20211120224234.1: *5* c.alert
     public alert(...arg: any[]): void {
         // TODO !
         console.log(...arg);
+    }
+    //@+node:felix.20211225212807.1: *5* c.init_error_dialogs
+    public init_error_dialogs(): void {
+        const c: Commands = this;
+        c.import_error_nodes = [];
+        c.ignored_at_file_nodes = [];
+        c.orphan_at_file_nodes = [];
+    }
+    //@+node:felix.20211225212946.1: *5* c.raise_error_dialogs
+    // warnings_dict = {}
+
+    public raise_error_dialogs(kind: string = 'read'): void {
+        /*
+        """Warn about read/write failures."""
+        c = self
+        use_dialogs = False
+        if g.unitTesting:
+            c.init_error_dialogs()
+            return
+        #
+        # Issue one or two dialogs or messages.
+        saved_body = c.rootPosition().b
+            # Save the root's body. Somehow the dialog destroys it!
+        if c.import_error_nodes or c.ignored_at_file_nodes or c.orphan_at_file_nodes:
+            g.app.gui.dismiss_splash_screen()
+        else:
+            # #1007: Exit now, so we don't have to restore c.rootPosition().b.
+            c.init_error_dialogs()
+            return
+        if c.import_error_nodes:
+            files = '\n'.join(sorted(set(c.import_error_nodes)))  # type:ignore
+            if files not in self.warnings_dict:
+                self.warnings_dict[files] = True
+                import_message1 = 'The following were not imported properly.'
+                import_message2 = f"Inserted @ignore in...\n{files}"
+                g.es_print(import_message1, color='red')
+                g.es_print(import_message2)
+                if use_dialogs:
+                    import_dialog_message = f"{import_message1}\n{import_message2}"
+                    g.app.gui.runAskOkDialog(c,
+                        message=import_dialog_message, title='Import errors')
+        if c.ignored_at_file_nodes:
+            files = '\n'.join(sorted(set(c.ignored_at_file_nodes)))  # type:ignore
+            if files not in self.warnings_dict:
+                self.warnings_dict[files] = True
+                kind_s = 'read' if kind == 'read' else 'written'
+                ignored_message = f"The following were not {kind_s} because they contain @ignore:"
+                kind = 'read' if kind.startswith('read') else 'written'
+                g.es_print(ignored_message, color='red')
+                g.es_print(files)
+                if use_dialogs:
+                    ignored_dialog_message = f"{ignored_message}\n{files}"
+                    g.app.gui.runAskOkDialog(c,
+                        message=ignored_dialog_message, title=f"Not {kind.capitalize()}")
+        #
+        # #1050: always raise a dialog for orphan @<file> nodes.
+        if c.orphan_at_file_nodes:
+            message = '\n'.join([
+                'The following were not written because of errors:\n',
+                '\n'.join(sorted(set(c.orphan_at_file_nodes))),  # type:ignore
+                '',
+                'Warning: changes to these files will be lost\n'
+                'unless you can save the files successfully.'
+            ])
+            g.app.gui.runAskOkDialog(c, message=message, title='Not Written')
+            # Mark all the nodes dirty.
+            for z in c.all_unique_positions():
+                if z.isOrphan():
+                    z.setDirty()
+                    z.clearOrphan()
+            c.setChanged()
+            c.redraw()
+        # Restore the root position's body.
+        c.rootPosition().v.b = saved_body
+            # #1007: just set v.b.
+        c.init_error_dialogs()
+
+        */
     }
     //@+node:felix.20211022202201.1: *4* c.Drawing
 
@@ -1916,7 +2510,7 @@ export class Commands {
             }
             c.redraw();
         }
-        // ? useful ? 
+        // ? useful ?
         // # Delayed focus requests will always be useful.
         // if c.requestedFocusWidget:
         //     w = c.requestedFocusWidget
@@ -1964,7 +2558,7 @@ export class Commands {
         }
     }
 
-    // TODO : Compatibility 
+    // TODO : Compatibility
     // force_redraw = redraw
     // redraw_now = redraw
 
@@ -2052,7 +2646,7 @@ export class Commands {
 
     //@+node:felix.20211122010434.9: *6* c.redraw_later
     /**
-     * 
+     *
      * Ensure that c.redraw() will be called eventually.
      * c.outerUpdate will call c.redraw() only if no other code calls c.redraw().
      */
@@ -2122,7 +2716,7 @@ export class Commands {
             c.redraw();
         }
 
-        /*            
+        /*
         // It's always useful to announce the level.
         // c.k.setLabelBlue('level: %s' % (max_level+1))
         // g.es('level', max_level + 1)
@@ -2238,12 +2832,12 @@ export class Commands {
     //@+node:felix.20211023195447.14: *6* c.canExtract, canExtractSection & canExtractSectionNames
     public canExtract(): boolean {
         const c: Commands = this;
-        const w = c.frame.body.wrapper; // TODO 
+        const w = c.frame.body.wrapper; // TODO
         return w && w.hasSelection();
     }
     public canExtractSection(): boolean {
         const c: Commands = this;
-        const w = c.frame.body.wrapper; // TODO 
+        const w = c.frame.body.wrapper; // TODO
         if (!w) {
             return false;
         }
@@ -2264,7 +2858,7 @@ export class Commands {
     public canFindMatchingBracket(): boolean {
         const c: Commands = this;
         const brackets: string = "()[]{}";
-        const w = c.frame.body.wrapper; // TODO 
+        const w = c.frame.body.wrapper; // TODO
         const s = w.getAllText();
         const ins: number = w.getInsertPoint();
 
@@ -2366,10 +2960,7 @@ export class Commands {
         return (!!w_root && w_root!.__bool__()) && !current.__eq__(w_root!);
     }
     //@+node:felix.20211023195447.21: *6* c.canPasteOutline
-    public canPasteOutline(s?: string): boolean {
-        if (!s) {
-            s = g.app.gui!.getTextFromClipboard(); // ! HAS TO BE IMPLEMENTED IN GUI
-        }
+    public canPasteOutline(s: string): boolean {
         if (s && g.match(s, 0, g.app.prolog_prefix_string)) {
             return true;
         }
@@ -2478,7 +3069,7 @@ export class Commands {
     }
     //@+node:felix.20211005023421.1: *4* c.Selecting
     //@+node:felix.20211031215315.1: *5* c.redrawAndEdit
-    /** 
+    /**
      * Redraw the screen and edit p's headline.
      */
     public redrawAndEdit(
@@ -2489,7 +3080,7 @@ export class Commands {
     ): void {
         const c: Commands = this;
         const k: any = this.k;
-        c.redraw(p);  // This *must* be done now. 
+        c.redraw(p);  // This *must* be done now.
         if (p && p.__bool__()) {
             // TODO : allow headline rename ?
             // This should request focus.

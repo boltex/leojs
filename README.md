@@ -25,13 +25,9 @@ You can then run the **Run Extension** target, as shown above, in the **Debug Vi
 
 The 'demo' built so far creates two test commanders at startup, (in leoUi constructor) with their respective outlines.
 
-No body pane but the tree browsing is working, expanding/collapsing nodes, context menu shows relevant commands.
+Also, you can turn on the 'leo tree browsing mode' (Leo/MORE outliner keybindings) on and off.
 
-The document switching works too, but anything else is just showing off that commands are all reliably mapped (to message popups).
 
-Also, you can turn on the 'leo tree browsing mode' (Leo/MORE outliner keybindings) on and off, from the outline title menu. You can then see that command mapped to message popups are behaving.
-
-Feel free to explore and ask about it! 😜
 
 ## Keybindings
 
