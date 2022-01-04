@@ -7,7 +7,7 @@
 // from leo.core import leoFileCommands
 
 export class CommanderFileCommands {
- 
+
     //@+others
     //@+node:felix.20211017230407.2: ** commanderFileCommandsTest
     public commanderFileCommandsTest(): void {

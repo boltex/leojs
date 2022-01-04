@@ -190,8 +190,6 @@ export class FastRead {
         let xroot: et.ElementTree;
 
         try {
-            console.log('TRY TO XML PARSE ', contents);
-
             xroot = et.parse(contents);
         } catch (e) {
             let message: string;
@@ -224,9 +222,6 @@ export class FastRead {
     public handleBits(): void {
         const c: Commands = this.c;
         const fc = this.c.fileCommands as FileCommands;
-
-        console.log('handle Bits c.db = ', c.db);
-
 
         const w_expanded: string = c.db['expanded'];
         const w_marked: string = c.db['marked'];
@@ -535,7 +530,6 @@ export class FastRead {
 
                     //for key, val in d.items():
                     for (let [key, val] of Object.entries(d)) {
-                        console.log('key of attrib: ', key);
 
                         if (!this.nativeVnodeAttributes.includes(key)) {
                             uaDict[key] = this.resolveUa(key, val);
@@ -3321,7 +3315,6 @@ export class FileCommands extends DummyFileCommands {
      * Puts all <v> elements in the order in which they appear in the outline.
      */
     public put_v_elements(p?: Position): void {
-        console.log('put_v_elements, this.usingClipboard: ', this.usingClipboard);
 
         const c: Commands = this.c;
 
@@ -3360,9 +3353,6 @@ export class FileCommands extends DummyFileCommands {
      * Also cache the current position.
      */
     public setCachedBits(): void {
-
-        console.log('setCachedBits!');
-
 
         const trace: boolean = true || !!g.app.debug.includes('cache');
 

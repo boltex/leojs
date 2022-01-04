@@ -454,7 +454,7 @@ export class Constants {
         WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
 
         // * More Commands
-        //  TODO  
+        //  TODO
         // GOTO_GLOBAL_LINE: "!goto_global_line",
         // TAG_CHILDREN: "!tag_children",
         // START_SEARCH: "!start_search",
@@ -510,8 +510,8 @@ export class Constants {
         // * Clipboard Operations
         COPY_PNODE: "copy-node",
         CUT_PNODE: "cut-node",
-        PASTE_PNODE: "paste-node",
-        PASTE_CLONE_PNODE: "paste-retaining-clones",
+        PASTE_PNODE: "async-paste-node",
+        PASTE_CLONE_PNODE: "async-paste-retaining-clones",
         // * Outline Editing
         DELETE_PNODE: "delete-node",
         MOVE_PNODE_DOWN: "move-outline-down",
@@ -533,6 +533,14 @@ export class Constants {
         CLONE_FIND_FLATTENED_MARKED: "TODO", // TODO
     };
 
+    /**
+        * * Overridden 'good' minibuffer command name strings
+        */
+    public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
+        'paste-node': 'async-paste-node',
+        'paste-retaining-clones': 'async-paste-retaining-clones',
+        'paste-as-template': 'async-paste-as-template'
+    };
     /**
      * * Overridden 'good' minibuffer commands
      */

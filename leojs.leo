@@ -62,6 +62,7 @@
 <v t="felix.20201214151326.9"><vh>vscode commands</vh></v>
 <v t="felix.20201214151326.10"><vh>commands strings</vh></v>
 <v t="felix.20201214151326.11"><vh>leo commands</vh></v>
+<v t="felix.20220103222715.1"><vh>minibuffer overridden names</vh></v>
 <v t="felix.20211208011642.1"><vh>minibuffer overridden commands</vh></v>
 </v>
 </v>
@@ -176,6 +177,7 @@
 </v>
 <v t="felix.20211024012536.1"><vh>Clipboard</vh>
 <v t="felix.20211212205241.1"><vh>replaceClipboardWith</vh></v>
+<v t="felix.20220103203600.1"><vh>asyncGetTextFromClipboard</vh></v>
 <v t="felix.20211024012523.1"><vh>getTextFromClipboard</vh></v>
 </v>
 <v t="felix.20201214194144.8"><vh>Leo Documents</vh>
@@ -779,7 +781,7 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
 </t>
 <t tx="felix.20201208224441.1">import * as vscode from "vscode";
 import { Constants } from "./constants";
-import * as path from "path"; // TODO : Use this to have reliable support for window-vs-linux file-paths
+import * as path from "path";
 
 @language typescript
 @tabwidth -4
@@ -1391,7 +1393,7 @@ public static LEO_COMMANDS = {
     WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
 
     // * More Commands
-    //  TODO  
+    //  TODO
     // GOTO_GLOBAL_LINE: "!goto_global_line",
     // TAG_CHILDREN: "!tag_children",
     // START_SEARCH: "!start_search",
@@ -1447,8 +1449,8 @@ public static LEO_COMMANDS = {
     // * Clipboard Operations
     COPY_PNODE: "copy-node",
     CUT_PNODE: "cut-node",
-    PASTE_PNODE: "paste-node",
-    PASTE_CLONE_PNODE: "paste-retaining-clones",
+    PASTE_PNODE: "async-paste-node",
+    PASTE_CLONE_PNODE: "async-paste-retaining-clones",
     // * Outline Editing
     DELETE_PNODE: "delete-node",
     MOVE_PNODE_DOWN: "move-outline-down",
@@ -2148,7 +2150,6 @@ import * as utils from "./utils";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
 
-
 @language typescript
 @tabwidth -4
 @others
@@ -2442,8 +2443,6 @@ import { debounce } from "lodash";
 import * as utils from "./utils";
 import { Constants } from "./constants";
 import { RevealType, Icon, ReqRefresh, LeoPackageStates } from "./types";
-// import clipboard from 'clipboardy';
-// import * as clipboard from "clipboardy";
 
 import { Config } from "./config";
 import { LeoOutlineProvider } from './leoOutline';
@@ -2753,6 +2752,7 @@ export class LeoUI {
     public verbose: boolean = true;
     public trace: boolean = true;
     public commanderIndex: number = 0;
+    public clipboardContent: string = "";
 
     // * Timers
     public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already started refresh
@@ -3095,6 +3095,7 @@ public command(
         }
     }
     this.lastCommandTimer = undefined;
+
     if (!this.preventRefresh) {
         this.launchRefresh();
     } else {
@@ -3118,10 +3119,13 @@ public minibuffer(): Thenable&lt;unknown&gt; {
             const commands: vscode.QuickPickItem[] = [];
             for (let key in c.commandsDict) {
                 const command = c.commandsDict[key];
-                commands.push({
-                    label: (command as any).__name__,
-                    description: (command as any).__doc__
-                });
+                // Going to get replaced
+                if (!(command as any).__name__.startsWith('async-')) {
+                    commands.push({
+                        label: (command as any).__name__,
+                        description: (command as any).__doc__
+                    });
+                }
             }
             const w_options: vscode.QuickPickOptions = {
                 placeHolder: Constants.USER_MESSAGES.MINIBUFFER_PROMPT,
@@ -3138,10 +3142,25 @@ public minibuffer(): Thenable&lt;unknown&gt; {
                     Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
                 );
             }
+            if (p_picked &amp;&amp;
+                p_picked.label &amp;&amp;
+                Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label]) {
+                p_picked.label = Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label];
+                console.log('REPLACED WITH ', p_picked.label);
+            } else {
+                console.log('ALL GOOD');
+
+            }
             if (p_picked &amp;&amp; p_picked.label) {
                 const c = g.app.commandersList[this.commanderIndex];
                 const w_commandResult = c.doCommandByName(p_picked.label);
-                this.launchRefresh();
+
+                if (!this.preventRefresh) {
+                    this.launchRefresh();
+                } else {
+                    this.preventRefresh = false;
+                }
+
                 return Promise.resolve(w_commandResult);
             } else {
                 // Canceled
@@ -6120,7 +6139,7 @@ private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): 
 public _launchRefresh(p_node?: Position): void {
     // Consider command finished
     if (this.trace) {
-        if (this.commandTimer) {
+        if (this.commandTimer !== undefined) {
             console.log('commandTimer', utils.getDurationMs(this.commandTimer));
         }
     }
@@ -6175,7 +6194,6 @@ public _launchRefresh(p_node?: Position): void {
     // * Either the whole tree refreshes, or a single tree node is revealed when just navigating
     if (this._refreshType.tree) {
         this._refreshType.tree = false;
-        console.log('in _launchRefresh tree was true so _refreshOutline ! ');
 
         this._refreshOutline(true, w_revealType);
     } else if (this._refreshType.node &amp;&amp; p_node) {
@@ -7464,11 +7482,8 @@ public saveAsLeojsFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 <t tx="felix.20211024012523.1">/**
  * Returns clipboard content
 */
-public getTextFromClipboard(): Thenable&lt;string&gt; {
-    // return this.clipboardContent; //vscode.env.clipboard.readText(); TODO
-    // return clipboard.readSync();
-
-    return vscode.env.clipboard.readText();
+public getTextFromClipboard(): string {
+    return this.clipboardContent;
 }
 
 </t>
@@ -8134,13 +8149,29 @@ public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
 };
 
 </t>
-<t tx="felix.20211212205241.1">public replaceClipboardWith(s: string): void {
-    // this.clipboardContent = s;
-    // clipboard.writeSync(s);
-    vscode.env.clipboard.writeText(s);
+<t tx="felix.20211212205241.1">public replaceClipboardWith(s: string): Thenable&lt;void&gt; {
+    this.clipboardContent = s; // also set immediate clipboard string
+    return vscode.env.clipboard.writeText(s);
 }
 
 </t>
 <t tx="felix.20220101161955.1"></t>
+<t tx="felix.20220103203600.1">public asyncGetTextFromClipboard(): Thenable&lt;string&gt; {
+    return vscode.env.clipboard.readText().then((s) =&gt; {
+        // also set immediate clipboard string for possible future read
+        this.clipboardContent = s;
+        return this.getTextFromClipboard();
+    });
+}
+
+</t>
+<t tx="felix.20220103222715.1">/**
+    * * Overridden 'good' minibuffer command name strings
+    */
+public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
+    'paste-node': 'async-paste-node',
+    'paste-retaining-clones': 'async-paste-retaining-clones',
+    'paste-as-template': 'async-paste-as-template'
+};</t>
 </tnodes>
 </leo_file>

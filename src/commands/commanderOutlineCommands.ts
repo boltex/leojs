@@ -115,13 +115,7 @@ export class CommanderOutlineCommands {
         undoFlag: boolean = true
     ): Position | undefined {
         if (s === undefined) {
-            // s = g.app.gui!.getTextFromClipboard();
-            g.app.gui!.preventRefresh = true;
-            g.app.gui!.getTextFromClipboard().then((clipboard) => {
-                this.pasteOutline(true, clipboard);
-                g.app.gui!.launchRefresh();
-            });
-            return undefined;
+            s = g.app.gui!.getTextFromClipboard();
         }
         const c: Commands = this;
         // c.endEditing()
@@ -170,6 +164,19 @@ export class CommanderOutlineCommands {
 
         return pasted;
     }
+    //@+node:felix.20220103211308.1: *4* c_oc.asyncPasteOutline
+    @commander_command(
+        'async-paste-node',
+        'Paste an outline into the present outline from the clipboard.\n' +
+        'Nodes do *not* retain their original identify.'
+    )
+    public asyncPasteOutline(this: Commands): void {
+        g.app.gui!.preventRefresh = true;
+        g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
+            this.pasteOutline(true, clipboard);
+            g.app.gui!.launchRefresh();
+        });
+    }
     //@+node:felix.20211208235043.5: *4* c_oc.pasteOutlineRetainingClones
     @commander_command('paste-retaining-clones',
         'Paste an outline into the present outline from the clipboard.\n' +
@@ -182,13 +189,7 @@ export class CommanderOutlineCommands {
         undoFlag: boolean = true
     ): Position | undefined {
         if (s === undefined) {
-            // s = g.app.gui!.getTextFromClipboard();
-            g.app.gui!.preventRefresh = true;
-            g.app.gui!.getTextFromClipboard().then((clipboard) => {
-                this.pasteOutlineRetainingClones(true, clipboard);
-                g.app.gui!.launchRefresh();
-            });
-            return undefined;
+            s = g.app.gui!.getTextFromClipboard();
         }
         const c: Commands = this;
         //c.endEditing()
@@ -243,6 +244,19 @@ export class CommanderOutlineCommands {
         }
         return pasted;
     }
+    //@+node:felix.20220103213833.1: *4* c_oc.asyncPasteOutlineRetainingClones
+    @commander_command('async-paste-retaining-clones',
+        'Paste an outline into the present outline from the clipboard.\n' +
+        'Nodes *retain* their original identify.'
+    )
+    public asyncPasteOutlineRetainingClones(this: Commands): void {
+        g.app.gui!.preventRefresh = true;
+        g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
+            this.pasteOutlineRetainingClones(true, clipboard);
+            g.app.gui!.launchRefresh();
+        });
+    }
+
     //@+node:felix.20211208235043.8: *4* c_oc.pasteAsTemplate
     @commander_command(
         'paste-as-template',
@@ -250,13 +264,7 @@ export class CommanderOutlineCommands {
     )
     public pasteAsTemplate(this: Commands, s?: string): any {
         if (s === undefined) {
-            // s = g.app.gui!.getTextFromClipboard();
-            g.app.gui!.preventRefresh = true;
-            g.app.gui!.getTextFromClipboard().then((clipboard) => {
-                this.pasteAsTemplate(clipboard);
-                g.app.gui!.launchRefresh();
-            });
-            return undefined;
+            s = g.app.gui!.getTextFromClipboard();
         }
         const c: Commands = this;
         const p: Position = c.p;
@@ -491,6 +499,19 @@ export class CommanderOutlineCommands {
         c.undoer.pushBead(bunch);
         c.redraw(newp);
     }
+    //@+node:felix.20220103214054.1: *4* c_oc.asyncPasteAsTemplate
+    @commander_command(
+        'async-paste-as-template',
+        'Paste as template clones only nodes that were already clones'
+    )
+    public asyncPasteAsTemplate(this: Commands): void {
+        g.app.gui!.preventRefresh = true;
+        g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
+            this.pasteAsTemplate(clipboard);
+            g.app.gui!.launchRefresh();
+        });
+    }
+
     //@+node:felix.20211020000219.1: *3* c_oc.dumpOutline
     @commander_command(
         'dump-outline',
