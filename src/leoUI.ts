@@ -55,7 +55,6 @@ export class LeoUI {
     private _fromOutline: boolean = false; // flag to leave focus on outline instead of body when finished refreshing
     private _focusInterrupt: boolean = false; // Flag for preventing setting focus when interrupting (canceling) an 'insert node' text input dialog with another one
 
-
     // * Outline Pane
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
     private _leoTreeView: vscode.TreeView<Position>; // Outline tree view added to the Tree View Container with an Activity Bar icon
@@ -590,7 +589,7 @@ export class LeoUI {
         // Set this._fromOutline. Used when finding the selected node and showing the BODY to set or prevent focus in it
 
         if (Object.keys(this._refreshType).length) {
-            console.log('Has UI to REFRESH!', this._refreshType);
+            // console.log('Has UI to REFRESH!', this._refreshType);
         }
 
         // this._refreshType = Object.assign({}, p_refreshType); // USE _setupRefresh INSTEAD
@@ -1668,6 +1667,36 @@ export class LeoUI {
     public isTextWrapper(w: any): boolean {
         return false;
     }
+
+    public runOpenFileDialog(
+        c: Commands,
+        title: string,
+        filetypes: [string, string][],
+        defaultExtension: string,
+        multiple: boolean
+    ): Thenable<string[]> {
+        // convert to { [name: string]: string[] } typing
+        const types: { [name: string]: string[] } = {};
+        filetypes.forEach(type => {
+            types[type[0]] = [type[1]];
+        });
+        return vscode.window.showOpenDialog(
+            {
+                title: title,
+                canSelectMany: multiple,
+                filters: types
+            }
+        ).then((p_names) => {
+            const names: string[] = [];
+            if (p_names && p_names.length) {
+                p_names.forEach(name => {
+                    names.push(name.fsPath);
+                });
+            }
+            return names;
+        });
+    }
+
     /**
      * * Test/Dummy command
      * @returns Thenable from the tested functionality

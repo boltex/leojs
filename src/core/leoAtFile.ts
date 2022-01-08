@@ -112,5 +112,5 @@ export class FastAtRead {
 //@-others
 //@@language typescript
 //@@tabwidth -4
-
+//@@pagewidth 60
 //@-leo

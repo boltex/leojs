@@ -7,10 +7,8 @@ import { VNode, Position } from './leoNodes';
 import { Commands } from './leoCommands';
 import { new_cmd_decorator } from './decorators';
 
-//import { ElementTree, Element } from 'elementtree';
-import * as et from 'elementtree';
-
 import "date-format-lite";
+import * as et from 'elementtree';
 import * as temp from 'temp';
 import * as md5 from 'md5';
 import * as fs from 'fs';

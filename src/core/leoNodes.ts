@@ -1,19 +1,14 @@
 //@+leo-ver=5-thin
 //@+node:felix.20210102012632.1: * @file src/core/leoNodes.ts
-//@@language typescript
-//@@tabwidth -4
 // Leo's fundamental data classes.
-
 //@+<< imports >>
 //@+node:felix.20210127001502.1: ** << imports >>
-import "date-format-lite";
 import * as g from './leoGlobals';
 import { Commands } from './leoCommands';
 import { Bead } from "./leoUndo";
 import { DummyFileCommands, FileCommands } from "./leoFileCommands";
-
+import "date-format-lite";
 //@-<< imports >>
-
 //@+others
 //@+node:felix.20210102014453.1: ** class NodeIndices
 /**
@@ -3501,5 +3496,7 @@ VNode.prototype.setTnodeText = VNode.prototype.setBodyString;
 VNode.prototype.__str__ = VNode.prototype.__repr__;
 
 //@-others
-
+//@@language typescript
+//@@tabwidth -4
+//@@pagewidth 70
 //@-leo

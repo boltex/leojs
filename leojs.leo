@@ -201,6 +201,7 @@
 </v>
 <v t="felix.20211030165058.1"><vh>Wrapper Helpers</vh>
 <v t="felix.20211030165111.1"><vh>isTextWidget &amp; isTextWrapper</vh></v>
+<v t="felix.20220107223824.1"><vh>runOpenFileDialog</vh></v>
 </v>
 <v t="felix.20201214211706.1"><vh>test</vh></v>
 </v>
@@ -429,13 +430,14 @@
 <v t="felix.20211212000140.1"><vh>@file src/core/leoFind.ts</vh></v>
 <v t="felix.20210102012410.1"><vh>@file src/core/leoGlobals.ts</vh></v>
 <v t="felix.20211021231651.1"><vh>@file src/core/leoHistory.ts</vh></v>
+<v t="felix.20220105221256.1"><vh>@file src/core/leoImport.ts</vh></v>
 <v t="felix.20210102012632.1"><vh>@file src/core/leoNodes.ts</vh></v>
 <v t="felix.20211212162359.1"><vh>@file src/core/leoShadow.ts</vh></v>
 <v t="felix.20211026230613.1"><vh>@file src/core/leoUndo.ts</vh></v>
 </v>
 <v t="felix.20211002194716.1"><vh>Command classes</vh>
-<v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
 <v t="felix.20211017230407.1"><vh>@file src/commands/commanderFileCommands.ts</vh></v>
+<v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
 <v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 </v>
 </v>
@@ -2780,7 +2782,6 @@ export class LeoUI {
     private _preventShowBody = false; // Used when refreshing treeview from config: It requires not to open the body pane when refreshing.
     private _fromOutline: boolean = false; // flag to leave focus on outline instead of body when finished refreshing
     private _focusInterrupt: boolean = false; // Flag for preventing setting focus when interrupting (canceling) an 'insert node' text input dialog with another one
-
 
     // * Outline Pane
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
@@ -6158,7 +6159,7 @@ public _launchRefresh(p_node?: Position): void {
     // Set this._fromOutline. Used when finding the selected node and showing the BODY to set or prevent focus in it
 
     if (Object.keys(this._refreshType).length) {
-        console.log('Has UI to REFRESH!', this._refreshType);
+        // console.log('Has UI to REFRESH!', this._refreshType);
     }
 
     // this._refreshType = Object.assign({}, p_refreshType); // USE _setupRefresh INSTEAD
@@ -7559,6 +7560,7 @@ private _tryApplyNodeToBody(
 public isTextWrapper(w: any): boolean {
     return false;
 }
+
 </t>
 <t tx="felix.20211117232843.1">{
   "command": "leojs.undoFromOutline",
@@ -8173,5 +8175,35 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     'paste-retaining-clones': 'async-paste-retaining-clones',
     'paste-as-template': 'async-paste-as-template'
 };</t>
+<t tx="felix.20220107223824.1">public runOpenFileDialog(
+    c: Commands,
+    title: string,
+    filetypes: [string, string][],
+    defaultExtension: string,
+    multiple: boolean
+): Thenable&lt;string[]&gt; {
+    // convert to { [name: string]: string[] } typing
+    const types: { [name: string]: string[] } = {};
+    filetypes.forEach(type =&gt; {
+        types[type[0]] = [type[1]];
+    });
+    return vscode.window.showOpenDialog(
+        {
+            title: title,
+            canSelectMany: multiple,
+            filters: types
+        }
+    ).then((p_names) =&gt; {
+        const names: string[] = [];
+        if (p_names &amp;&amp; p_names.length) {
+            p_names.forEach(name =&gt; {
+                names.push(name.fsPath);
+            });
+        }
+        return names;
+    });
+}
+
+</t>
 </tnodes>
 </leo_file>

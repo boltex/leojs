@@ -1,20 +1,10 @@
 //@+leo-ver=5-thin
 //@+node:felix.20211002221425.1: * @file src/commands/commanderOutlineCommands.ts
 // * Outline commands that used to be defined in leoCommands.py
-// import xml.etree.ElementTree as ElementTree
-//import { ElementTree } from "elementtree";
 import * as et from 'elementtree';
-
-// from leo.core import leoGlobals as g
 import * as g from '../core/leoGlobals';
-
-// import g = require("../core/leoGlobals");
 import { commander_command } from "../core/decorators";
-
-// from leo.core import leoNodes
 import { StackEntry, Position, VNode } from "../core/leoNodes";
-
-// from leo.core import leoFileCommands
 import { FastRead, FileCommands } from "../core/leoFileCommands";
 import { Commands, HoistStackEntry } from "../core/leoCommands";
 import { Bead, Undoer } from '../core/leoUndo';

@@ -615,6 +615,101 @@ export function getBaseDirectory(c: Commands): string {
 
     return "";  // No relative base given.
 }
+//@+node:felix.20220106231022.1: *3* g.readFileIntoString
+/**
+ *  Return the contents of the file whose full path is fileName.
+
+    Return (s,e)
+    s is the string, converted to unicode, or None if there was an error.
+    e is the encoding of s, computed in the following order:
+    - The BOM encoding if the file starts with a BOM mark.
+    - The encoding given in the // -*- coding: utf-8 -*- line for python files.
+    - The encoding given by the 'encoding' keyword arg.
+    - None, which typically means 'utf-8'.
+ */
+export function  readFileIntoString(fileName: string,
+    encoding:string='utf-8',  // BOM may override this.
+    kind:string|undefined=undefined,  // @file, @edit, ...
+    verbose:boolean=true,
+): [string|undefined, string|undefined] {
+
+    if (!fileName){
+        if (verbose){
+            trace('no fileName arg given');
+        }
+        return [undefined, undefined];
+    }
+    if (os_path_isdir(fileName)){
+        if (verbose){
+            trace('not a file:', fileName);
+        }
+        return [undefined, undefined];
+    }
+
+    if (!os_path_exists(fileName)){
+        if (verbose){
+            error('file not found:', fileName);
+        }
+        return [undefined, undefined];
+    }
+
+    let s: string|undefined;
+    let e:string|undefined;
+    let junk: string;
+
+    try {
+        e = undefined;
+        let buffer: any;
+
+        // ! SKIP FOR NOW
+        // TODO
+        /*
+        const f: number = fs.openSync(fileName, 'rb')
+        fs.readSync(f, buffer, );
+
+        // Fix #391.
+        if (!s){
+            return ['', undefined];
+        }
+        // New in Leo 4.11: check for unicode BOM first.
+        [e, s] = stripBOM(s)
+        if (!e){
+            // Python's encoding comments override everything else.
+            [junk, ext] = os_path_splitext(fileName);
+            if (ext === '.py'){
+                e = getPythonEncodingFromString(s);
+            }
+        }
+        s = toUnicode(s, e || encoding);
+        */
+        s =  fs.readFileSync(fileName, { encoding: 'utf8' });
+
+        return [s, e];
+    }
+    catch (iOError){
+        // Translate 'can not open' and kind, but not fileName.
+        if (verbose){
+            error('can not open', '', (kind || ''), fileName);
+        }
+    }
+
+    // ? needed ?
+    // catch (exception){
+    //     error(`readFileIntoString: unexpected exception reading ${fileName}`);
+    //     es_exception();
+    // }
+
+    return [undefined, undefined];
+
+}
+
+//@+node:felix.20220106230957.1: *3* g.setGlobalOpenDir
+export function setGlobalOpenDir(fileName: string): void {
+    if (fileName){
+        app.globalOpenDir = os_path_dirname(fileName);
+        // g.es('current directory:',g.app.globalOpenDir)
+    }
+}
 //@+node:felix.20211104230025.1: *3* g.shortFileName   (coreGlobals.py)
 /**
  * Return the base name of a path.
@@ -1344,9 +1439,17 @@ export function os_path_isabs(p_path: string): boolean {
 
 }
 //@+node:felix.20211227182611.13: *3* g.os_path_isdir
-// def os_path_isdir(path: str):
-//     """Return True if the path is a directory."""
-//     return os.path.isdir(path) if path else False
+/**
+ * Return True if the path is a directory.
+ */
+export function os_path_isdir(p_path: string): boolean {
+    if(path){
+        return fs.existsSync(p_path) && fs.lstatSync(p_path).isDirectory();
+    }else{
+        return false;
+    }
+}
+
 //@+node:felix.20211227182611.14: *3* g.os_path_isfile
 // def os_path_isfile(path: str):
 //     """Return True if path is a file."""
@@ -1447,18 +1550,136 @@ export function os_path_join(c: Commands | undefined, ...args: any[]): string {
 //         path = path.replace('\\', '/')
 //     return path
 //@+node:felix.20211227182611.20: *3* g.os_path_split
-// def os_path_split(path: str):
-//     if not path:
-//         return '', ''
-//     head, tail = os.path.split(path)
-//     return head, tail
-//@+node:felix.20211227182611.21: *3* g.os_path_splitext
-// def os_path_splitext(path: str):
+export function os_path_split(p_path: string) : [string, string] {
 
-//     if not path:
-//         return ''
-//     head, tail = os.path.splitext(path)
-//     return head, tail
+    /*
+     Mimics this behavior from
+     https://docs.python.org/3/library/os.path.html#os.path.split
+
+     Split the pathname path into a pair, (head, tail)
+     where tail is the last pathname component and head
+     is everything leading up to that. 
+     
+     The tail part will never contain a slash;
+     if path ends in a slash, tail will be empty.
+     If there is no slash in path, head will be empty.
+     
+     If path is empty, both head and tail are empty. 
+     
+     Trailing slashes are stripped from head unless
+     it is the root (one or more slashes only).
+
+     In all cases, join(head, tail) returns a path to the
+     same location as path (but the strings may differ).
+    */
+
+    if (!p_path || !p_path.trim()){
+        return ['', ''];
+    }
+
+    let testPath = p_path;
+    if (isWindows) {
+        testPath = testPath.split('\\').join('/');
+    }
+
+    if(testPath.includes('/')){
+        // at least a slash
+        if(testPath.endsWith('/')){
+            // return with empty tail
+            return [p_path, ''];
+        }
+
+        let w_parsed = path.parse(p_path);
+        return [w_parsed.dir, w_parsed.base];
+
+    }else{
+        // no slashes
+        return ['', p_path];
+    }
+
+}
+//@+node:felix.20211227182611.21: *3* g.os_path_splitext
+
+export function os_path_splitext(p_path: string) : [string, string] {
+
+    /*
+        reproduces os.path.splitext from: 
+        https://docs.python.org/3/library/os.path.html#os.path.splitext
+
+
+        Split the pathname path into a pair (root, ext)
+        such that root + ext == path,
+        and the extension, ext, is empty or begins with a period and
+        contains at most one period.
+
+        If the path contains no extension, ext will be '':
+
+        If the path contains an extension, then ext will be set 
+        to this extension, including the leading period. 
+        Note that previous periods will be ignored
+
+        Leading periods of the last component of the path
+        are considered to be part of the root
+    */
+
+    if (!p_path || !p_path.trim()){
+        return ['', ''];
+    }
+
+    let head: string;
+    let tail: string;
+
+    if(p_path.includes('.')){
+        const parts = p_path.split('.');
+
+        tail = parts.pop()!;
+
+        head = parts.join('.');
+
+        if(!head || head.endsWith('/') || head.endsWith('\\') ){
+            // leading period
+            return [p_path, ''];
+        }
+
+        // edge case
+        if(head.endsWith('.')){
+            try {
+                let w_parsed = path.parse(p_path);
+                if(w_parsed.ext && !w_parsed.dir.endsWith('.')){
+                    return [
+                         w_parsed.dir+
+                         (isWindows&&p_path.includes("\\")?"\\":"/") +
+                          w_parsed.name ,
+                          w_parsed.ext
+                        ];
+                }else{
+                    return [ p_path, ''];
+                }
+            } catch (error) {
+                trace('PATH SPLIT ERROR in g.os_path_splitext', callers());
+                return [ p_path, ''];
+            }
+        }
+
+        return [head, '.'+tail];
+
+    }else{
+        // no extension
+        return [ p_path, ''];
+    }
+
+
+
+
+    //     if not path:
+    //         return ''
+    //     head, tail = os.path.splitext(path)
+    //     return head, tail
+
+
+
+
+}
 //@+node:felix.20211227182611.22: *3* g.os_startfile
 // def os_startfile(fname):
 //     @others

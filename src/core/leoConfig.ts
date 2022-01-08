@@ -4,14 +4,6 @@
 //@+node:felix.20211031230614.1: ** << imports >>
 import { Commands } from './leoCommands';
 import * as g from './leoGlobals';
-// import { LeoUI } from '../leoUI';
-// import { FileCommands } from "./leoFileCommands";
-// import { CommanderOutlineCommands } from "../commands/commanderOutlineCommands";
-// import { CommanderFileCommands } from "../commands/commanderFileCommands";
-
-// import { Position, VNode, StackEntry } from "./leoNodes";
-// import { NodeHistory } from './leoHistory';
-// import { Undoer } from './leoUndo';
 
 //@-<< imports >>
 //@+others

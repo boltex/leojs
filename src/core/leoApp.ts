@@ -145,10 +145,10 @@ export class LeoApp {
     //@+node:felix.20210103024632.5: *4* << LeoApp: global directories >>
     public extensionsDir = null; // The leo / extensions directory
     public globalConfigDir = null; // leo / config directory
-    public globalOpenDir = null; // The directory last used to open a file.
+    public globalOpenDir: string | undefined; // The directory last used to open a file.
     public homeDir = null; // The user's home directory.
     public homeLeoDir = null; // The user's home/.leo directory.
-    public loadDir: string|undefined; // The leo / core directory.
+    public loadDir: string | undefined; // The leo / core directory.
     public machineDir = null; // The machine - specific directory.
 
     //@-<< LeoApp: global directories >>
@@ -899,6 +899,13 @@ export class LeoApp {
 
     //@-others
 
+    //@+node:felix.20220106225805.1: *3* app.commanders
+    /**
+     * Return list of currently active controllers
+     */
+    public commanders(): Commands[] {
+        return g.app.commandersList;
+    }
     //@+node:felix.20211226221235.1: *3* app.Detecting already-open files
     //@+node:felix.20211226221235.2: *4* app.checkForOpenFile
     /**
@@ -1567,5 +1574,5 @@ export class LoadManager {
 //@-others
 //@@language typescript
 //@@tabwidth -4
-
+//@@pagewidth 70
 //@-leo
