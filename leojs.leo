@@ -201,7 +201,10 @@
 </v>
 <v t="felix.20211030165058.1"><vh>Wrapper Helpers</vh>
 <v t="felix.20211030165111.1"><vh>isTextWidget &amp; isTextWrapper</vh></v>
+<v t="felix.20220108211750.1"><vh>runAskOkDialog</vh></v>
+<v t="felix.20220109220155.1"><vh>runAskYesNoDialog</vh></v>
 <v t="felix.20220107223824.1"><vh>runOpenFileDialog</vh></v>
+<v t="felix.20220108211806.1"><vh>runSaveFileDialog</vh></v>
 </v>
 <v t="felix.20201214211706.1"><vh>test</vh></v>
 </v>
@@ -316,6 +319,7 @@
 <v t="felix.20201208224407.6"><vh>buildNodeIconPaths</vh></v>
 <v t="felix.20201208224407.7"><vh>buildDocumentIconPaths</vh></v>
 <v t="felix.20201208224407.8"><vh>buildButtonsIconPaths</vh></v>
+<v t="felix.20220109180351.1"><vh>convertLeoFiletypes</vh></v>
 <v t="felix.20201208224407.10"><vh>getDurationMilliseconds</vh></v>
 <v t="felix.20201208224407.11"><vh>getFileFromPath</vh></v>
 <v t="felix.20201208224407.12"><vh>isIconChangedByEdit</vh></v>
@@ -8180,17 +8184,14 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     title: string,
     filetypes: [string, string][],
     defaultExtension: string,
-    multiple: boolean
+    multiple?: boolean
 ): Thenable&lt;string[]&gt; {
     // convert to { [name: string]: string[] } typing
-    const types: { [name: string]: string[] } = {};
-    filetypes.forEach(type =&gt; {
-        types[type[0]] = [type[1]];
-    });
+    const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
     return vscode.window.showOpenDialog(
         {
             title: title,
-            canSelectMany: multiple,
+            canSelectMany: !!multiple,
             filters: types
         }
     ).then((p_names) =&gt; {
@@ -8202,6 +8203,105 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
         }
         return names;
     });
+}
+
+</t>
+<t tx="felix.20220108211750.1">public runAskOkDialog(
+    c: Commands,
+    title: string,
+    message: string,
+    buttonText?: string
+): Thenable&lt;unknown&gt; {
+    return vscode.window.showInformationMessage(title, {
+        modal: true,
+        detail: message
+    });
+}
+
+</t>
+<t tx="felix.20220108211806.1">public runSaveFileDialog(
+    c: Commands,
+    unusedInitialFile: string,
+    title: string,
+    filetypes: [string, string][],
+    defaultExtension: string,
+    // c,
+    // c.mFileName,
+    // "Save",
+    // [["Leo files", "*.leo *.db"]], // Array of arrays (one in this case)
+    // g.defaultLeoFileExtension(c)
+): Thenable&lt;string&gt; {
+    // convert to { [name: string]: string[] } typing
+    const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
+    return vscode.window.showSaveDialog(
+        {
+            title: title,
+
+            filters: types
+        }
+    ).then((p_uri) =&gt; {
+        if (p_uri) {
+            return p_uri.fsPath;
+        } else {
+            return "";
+        }
+
+    });
+
+}
+
+</t>
+<t tx="felix.20220109180351.1">/**
+ * Convert Leo's internal filetype descriptions array
+ * to vscode's option format for open/save dialogs.
+ */
+export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: string]: string[] } {
+    /*
+        from :
+            [
+                ["", ""],
+                ["Leo files", "*.leo *.db"]
+            ],
+
+        to :
+        {
+            'Images': ['png', 'jpg']
+            'TypeScript': ['ts', 'tsx']
+        }
+
+    */
+        const w_types: { [name: string]: string[] } = {};
+        p_filetypes.forEach(type =&gt; {
+            w_types[type[0]] = type[1].split(" ").map((p_entry)=&gt;{
+
+                return p_entry.startWith("*.")?p_entry.substring(2):p_entry;
+            }) ;
+        });
+        return w_types;
+}
+</t>
+<t tx="felix.20220109220155.1">public runAskYesNoDialog(
+    c: Commands,
+    title: string,
+    message: string
+
+): Thenable&lt;string&gt; {
+    return vscode.window
+        .showInformationMessage(
+            title,
+            {
+                modal: true,
+                detail: message
+            },
+            ...["Yes", "No"]
+        )
+        .then((answer) =&gt; {
+            if (answer === "Yes") {
+                return 'yes';
+            } else {
+                return 'no';
+            }
+        });
 }
 
 </t>

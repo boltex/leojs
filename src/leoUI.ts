@@ -1668,22 +1668,55 @@ export class LeoUI {
         return false;
     }
 
+    public runAskOkDialog(
+        c: Commands,
+        title: string,
+        message: string,
+        buttonText?: string
+    ): Thenable<unknown> {
+        return vscode.window.showInformationMessage(title, {
+            modal: true,
+            detail: message
+        });
+    }
+
+    public runAskYesNoDialog(
+        c: Commands,
+        title: string,
+        message: string
+
+    ): Thenable<string> {
+        return vscode.window
+            .showInformationMessage(
+                title,
+                {
+                    modal: true,
+                    detail: message
+                },
+                ...["Yes", "No"]
+            )
+            .then((answer) => {
+                if (answer === "Yes") {
+                    return 'yes';
+                } else {
+                    return 'no';
+                }
+            });
+    }
+
     public runOpenFileDialog(
         c: Commands,
         title: string,
         filetypes: [string, string][],
         defaultExtension: string,
-        multiple: boolean
+        multiple?: boolean
     ): Thenable<string[]> {
         // convert to { [name: string]: string[] } typing
-        const types: { [name: string]: string[] } = {};
-        filetypes.forEach(type => {
-            types[type[0]] = [type[1]];
-        });
+        const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
         return vscode.window.showOpenDialog(
             {
                 title: title,
-                canSelectMany: multiple,
+                canSelectMany: !!multiple,
                 filters: types
             }
         ).then((p_names) => {
@@ -1695,6 +1728,37 @@ export class LeoUI {
             }
             return names;
         });
+    }
+
+    public runSaveFileDialog(
+        c: Commands,
+        unusedInitialFile: string,
+        title: string,
+        filetypes: [string, string][],
+        defaultExtension: string,
+        // c,
+        // c.mFileName,
+        // "Save",
+        // [["Leo files", "*.leo *.db"]], // Array of arrays (one in this case)
+        // g.defaultLeoFileExtension(c)
+    ): Thenable<string> {
+        // convert to { [name: string]: string[] } typing
+        const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
+        return vscode.window.showSaveDialog(
+            {
+                title: title,
+
+                filters: types
+            }
+        ).then((p_uri) => {
+            if (p_uri) {
+                return p_uri.fsPath;
+            } else {
+                return "";
+            }
+
+        });
+
     }
 
     /**

@@ -2053,7 +2053,7 @@ export class FileCommands extends DummyFileCommands {
     /**
      * fc.save: A helper for c.save.
      */
-    public save(fileName: string, silent: boolean): boolean {
+    public save(fileName: string, silent?: boolean): boolean {
 
         const c: Commands = this.c;
         const p: Position = c.p;

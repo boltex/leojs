@@ -91,6 +91,34 @@ export class AtFile {
     public writeMissing(p: Position): void {
 
     }
+    //@+node:felix.20220108204309.1: *3* writeOneAtEditNode
+    public writeOneAtEditNode(p: Position): void {
+        //
+    }
+    //@+node:felix.20220108170000.1: *3* read
+    public read(p: Position): void {
+
+    }
+    //@+node:felix.20220108165923.1: *3* readOneAtAutoNode
+    public readOneAtAutoNode(p: Position): Position {
+        return p;
+    }
+    //@+node:felix.20220108170029.1: *3* readOneAtCleanNode
+    public readOneAtCleanNode(p: Position): void {
+
+    }
+    //@+node:felix.20220108170054.1: *3* readOneAtEditNode
+    public readOneAtEditNode(fn: string, p: Position): void {
+
+    }
+    //@+node:felix.20220108170138.1: *3* readOneAtAsisNode
+    public readOneAtAsisNode(fn: string, p: Position): void {
+
+    }
+    //@+node:felix.20220111224436.1: *3* readAtShadowNodes
+    public readAtShadowNodes(p: Position): Position {
+        return p;
+    }
     //@-others
 
 }

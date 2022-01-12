@@ -70,11 +70,15 @@ export class Commands {
     // TODO fake frame needed FOR wrapper and hasSelection
     // TODO : maybe MERGE frame.tree.generation WITH _treeId?
     public frame: {
+        title: string;
+        openDirectory: string;
         tree: {
             generation: number;
             editLabel: (p: Position, selectAll: boolean, selection: any) => void
         }, body: any
     } = {
+            title: "",
+            openDirectory: "",
             tree: {
                 generation: 0,
                 editLabel: (p: Position, selectAll: boolean, selection: any) => {
@@ -2390,6 +2394,7 @@ export class Commands {
     public openWith(d?: any): void {
 
         const c: Commands = this;
+
         if (d && g.app.externalFilesController) {
             // Select an ancestor @<file> node if possible.
             if (!d['p'] || !d['p'].__bool__()) {
@@ -2410,18 +2415,27 @@ export class Commands {
 
     }
     //@+node:felix.20211223223002.11: *4* c.recreateGnxDict
-    // def recreateGnxDict(self):
-    //     """Recreate the gnx dict prior to refreshing nodes from disk."""
-    //     c, d = self, {}
-    //     for v in c.all_unique_nodes():
-    //         gnxString = v.fileIndex
-    //         if isinstance(gnxString, str):
-    //             d[gnxString] = v
-    //             if 'gnx' in g.app.debug:
-    //                 g.trace(c.shortFileName(), gnxString, v)
-    //         else:
-    //             g.internalError(f"no gnx for vnode: {v}")
-    //     c.fileCommands.gnxDict = d
+    /**
+     * Recreate the gnx dict prior to refreshing nodes from disk.
+     */
+    public recreateGnxDict(): void {
+
+        const c: Commands = this;
+        const d: { [key: string]: VNode } = {};
+
+        for (let v of c.all_unique_nodes()) {
+            const gnxString: string = v.fileIndex;
+            if (typeof gnxString === 'string') {
+                d[gnxString] = v;
+                if (g.app.debug.includes('gnx')) {
+                    g.trace(c.shortFileName(), gnxString, v);
+                }
+            } else {
+                g.internalError(`no gnx for vnode: ${v}`);
+            }
+        }
+        c.fileCommands.gnxDict = d;
+    }
     //@+node:felix.20211005023225.1: *3* c.Gui
     //@+node:felix.20211122010629.1: *4* c.Dialogs & messages
     //@+node:felix.20211120224234.1: *5* c.alert
@@ -2506,6 +2520,32 @@ export class Commands {
         c.init_error_dialogs()
 
         */
+    }
+    //@+node:felix.20220108205755.1: *5* c.syntaxErrorDialog
+    /**
+     * Warn about syntax errors in files.
+     */
+    public syntaxErrorDialog(): void {
+
+        const c: Commands = this;
+
+        if (
+            g.app.syntax_error_files &&
+            c.config.getBool('syntax-error-popup')
+        ) {
+            const aList: string[] = [...g.app.syntax_error_files].sort();
+
+            g.app.syntax_error_files = [];
+
+            const list_s: string = aList.join('\n');
+
+            g.app.gui!.runAskOkDialog(
+                c,
+                'Python Errors',
+                `Python errors in:\n\n${list_s}`,
+                "Ok"
+            );
+        }
     }
     //@+node:felix.20211022202201.1: *4* c.Drawing
 

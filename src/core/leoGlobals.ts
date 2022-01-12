@@ -375,6 +375,25 @@ export function printObj(obj: any, indent = '', printCaller = false, tag = null)
 }
 
 //@+node:felix.20211104210724.1: ** g.Directives
+//@+node:felix.20220111004937.1: *3* g.findAllValidLanguageDirectives
+/**
+ * Return list of all valid @language directives in p.b
+ */
+export function findAllValidLanguageDirectives(s: string): string[] {
+
+    if (!s.trim()){
+        return [];
+    }
+    const languages: string[] = [];
+    let m: any;
+    while (m = g_language_pat.exec(s)) {
+            const language: string = m[1];
+        if (isValidLanguage(language)){
+            languages.push(language);
+        }
+    }
+    return languages.sort();
+}
 //@+node:felix.20211104213229.1: *3* g.get_directives_dict (must be fast)
 // The caller passes [root_node] or None as the second arg.
 // This allows us to distinguish between None and [None].
@@ -448,6 +467,110 @@ export function get_directives_dict_list(p: Position): any[] {
     }
     return result;
 }
+//@+node:felix.20220110224107.1: *3* g.getLanguageFromAncestorAtFileNode
+/**
+ * Return the language in effect at node p.
+ *
+ * 1. Use an unambiguous @language directive in p itself.
+ * 2. Search p's "extended parents" for an @<file> node.
+ * 3. Search p's "extended parents" for an unambiguous @language directive.
+ */
+export function getLanguageFromAncestorAtFileNode(p: Position): string| undefined {
+
+    const v0: VNode = p.v;
+
+    // The same generator as in v.setAllAncestorAtFileNodesDirty.
+    // Original idea by Виталије Милошевић (Vitalije Milosevic).
+    // Modified by EKR.
+    let seen: VNode[] = [];
+
+    function* v_and_parents(v: VNode): Generator<VNode> {
+        if(seen.indexOf(v) < 0){
+            seen.push(v); // not found, add it
+        }else {
+            return;
+        }
+        yield v;
+        for (let parent_v of v.parents){
+            if (seen.indexOf(parent_v) < 0){
+                yield* v_and_parents(parent_v); // was  not found
+            }
+        }
+    }
+    /**
+     * A helper for all searches.
+     * Phase one searches only @<file> nodes.
+     */
+    function find_language(v: VNode, phase: number): string|undefined {
+
+        if (phase === 1 && !v.isAnyAtFileNode()){
+            return undefined;
+        }
+        let w_language: string;
+        // #1693: Scan v.b for an *unambiguous* @language directive.
+        const languages: string[] = findAllValidLanguageDirectives(v.b);
+        if (languages.length === 1){ // An unambiguous language
+            return languages[0];
+        }
+        let name: string;
+        let junk: string;
+        let ext: string;
+        if(v.isAnyAtFileNode()){
+            // Use the file's extension.
+            name = v.anyAtFileNodeName();
+            [junk, ext] = os_path_splitext(name);
+            ext = ext.slice(1);  // strip the leading period.
+            w_language = app.extension_dict[ext];
+
+            if (isValidLanguage(w_language)){
+                return w_language;
+            }
+        }
+        return undefined;
+    }
+
+    // First, see if p contains any @language directive.
+    let language = findFirstValidAtLanguageDirective(p.b);
+    if (language){
+        return language;
+    }
+    // Phase 1: search only @<file> nodes: #2308.
+    // Phase 2: search all nodes.
+    for (let phase of [1, 2]){
+        // Search direct parents.
+        for (let p2 of p.self_and_parents(false)){
+            language = find_language(p2.v, phase);
+            if (language){
+                return language;
+            }
+        }
+        // Search all extended parents.
+        seen = [v0.context.hiddenRootNode];
+        for (let v of v_and_parents(v0)){
+            language = find_language(v, phase);
+            if (language){
+                return language;
+            }
+        }
+    }
+    return undefined;
+}
+//@+node:felix.20220110224044.1: *3* g.getLanguageFromPosition
+/**
+ * Return the language in effect at position p.
+ * This is always a lowercase language name, never None.
+ */
+export function getLanguageAtPosition(c: Commands, p: Position): string {
+
+    const aList: string[] = get_directives_dict_list(p);
+    const d: {[key: string]: string} = scanAtCommentAndAtLanguageDirectives(aList);
+    let language: string = d && d['language'] ||
+        getLanguageFromAncestorAtFileNode(p) ||
+        c.config.getString('target-language') ||
+        'python';
+
+    return language.toLowerCase();
+}
 //@+node:felix.20211104213330.1: *3* g.isDirective
 /**
  * Return True if s starts with a directive.
@@ -467,6 +590,35 @@ export function isDirective(s: string): boolean {
     return false;
 }
 
+//@+node:felix.20220110224137.1: *3* g.scanAtCommentAndLanguageDirectives
+/**
+ * Scan aList for @comment and @language directives.
+ * @comment should follow @language if both appear in the same node.
+ */
+export function scanAtCommentAndAtLanguageDirectives(aList: any[]): any {
+
+    let lang: any = undefined;
+    for (let d of aList){
+        const comment = d['comment'];
+        const language = d['language'];
+        // Important: assume @comment follows @language.
+        let delim1: string|undefined;
+        let delim2: string|undefined;
+        let delim3: string|undefined;
+        if (language){
+            [lang, delim1, delim2, delim3] = set_language(language, 0);
+        }
+        if (comment){
+            [delim1, delim2, delim3] = set_delims_from_string(comment);
+        }
+        if (comment || language){
+            const delims: [string, string, string] = [delim1!, delim2!, delim3!];
+            const w_d = {'language': lang, 'comment': comment, 'delims': delims};
+            return w_d;
+        }
+    }
+    return undefined;
+}
 //@+node:felix.20211104225158.1: *3* g.scanAtTabwidthDirectives & scanAllTabWidthDirectives
 /**
  * Scan aList for '@tabwidth' directives.
@@ -503,6 +655,137 @@ export function scanAllAtTabWidthDirectives(c: Commands, p: Position): number | 
         ret = undefined;
     }
     return ret;
+}
+//@+node:felix.20220110202727.1: *3* g.set_delims_from_language
+/**
+ * Return a tuple (single,start,end) of comment delims.
+ */
+export function set_delims_from_language(language: string): [string, string, string]  {
+
+    const val = app.language_delims_dict[language];
+    let delim1: string|undefined;
+    let delim2: string|undefined;
+    let delim3: string|undefined;
+    if (val){
+        [delim1, delim2, delim3] = set_delims_from_string(val);
+        if (delim2 && !delim3){
+            return ['', delim1!, delim2];
+        // 0,1 or 3 params.
+        }
+        return [delim1!, delim2!, delim3!];
+    }
+    return ['', '', ''];
+        // Indicate that no change should be made
+}
+//@+node:felix.20220110202842.1: *3* g.set_delims_from_string
+/**
+ * Return (delim1, delim2, delim2), the delims following the @comment
+ * directive.
+ *
+ * This code can be called from @language logic, in which case s can
+ * point at @comment
+ */
+export function set_delims_from_string(s: string): [string, string, string]|[undefined, undefined, undefined] {
+
+    // Skip an optional @comment
+    const tag:string = "@comment";
+    let i: number = 0;
+    let j: number;
+
+    if( match_word(s, i, tag)){
+        i += tag.length;
+    }
+
+    let count: number = 0;
+    const delims: [string, string, string] = ['', '', ''];
+
+    while( count < 3 && i < s.length){
+        i = skip_ws(s, i);
+        j = i;
+        while (i < s.length && !is_ws(s[i]) && !is_nl(s, i)){
+            i += 1;
+        }
+        if (j === i){
+            break;
+        }
+        delims[count] = s.slice(j,i) || '';
+        count += 1;
+    }
+
+    // 'rr 09/25/02
+    if (count === 2) { // delims[0] is always the single-line delim.
+        delims[2] = delims[1];
+        delims[1] = delims[0];
+        delims[0] = '';
+    }
+
+    for (let i of [0, 1, 2]){
+        if (delims[i]){
+            if (delims[i].startsWith("@0x")){
+                // Allow delimiter definition as @0x + hexadecimal encoded delimiter
+                // to avoid problems with duplicate delimiters on the @comment line.
+                // If used, whole delimiter must be encoded.
+                if (delims[i].length === 3){
+                    warning(`'${delims[i]}' delimiter is invalid`);
+                    return [undefined, undefined, undefined];
+                }
+                try {
+                    // ! TEST THIS !
+                    // delims[i] = binascii.unhexlify(delims[i].splice(3)); // type:ignore
+                    delims[i] = String.fromCharCode( parseInt(delims[i].slice(3), 16) );
+                    delims[i] = toUnicode(delims[i]);
+                }
+                catch (e){
+                    warning(`'${delims[i]}' delimiter is invalid: ${e}`);
+                    return [undefined, undefined, undefined];
+                }
+            }else{
+                // 7/8/02: The "REM hack": replace underscores by blanks.
+                // 9/25/02: The "perlpod hack": replace double underscores by newlines.
+                delims[i] = delims[i].split("__").join('\n');
+                delims[i] = delims[i].split('_').join(' ');
+            }
+        }
+    }
+
+    return [delims[0], delims[1], delims[2]];
+}
+//@+node:felix.20220110231927.1: *3* g.set_language
+/**
+ * Scan the @language directive that appears at s[i:].
+ *
+ * The @language may have been stripped away.
+ *
+ * Returns (language, delim1, delim2, delim3)
+ */
+export function set_language(s: string, i: number, issue_errors_flag?:boolean):
+    [string, string, string, string] | [undefined, undefined, undefined, undefined] {
+    let j: number;
+    const tag: string = "@language";
+    console.assert( i !== undefined );
+
+    if (match_word(s, i, tag)){
+        i += tag.length;
+    }
+    // Get the argument.
+    i = skip_ws(s, i);
+    j = i;
+    i = skip_c_id(s, i);
+    // Allow tcl/tk.
+    const arg:string = s.slice(j,i).toLowerCase();
+
+    let delim1: string;
+    let delim2: string;
+    let delim3: string;
+    if (app.language_delims_dict[arg]){
+        let language = arg;
+        [delim1, delim2, delim3] = set_delims_from_language(language);
+        return [language, delim1, delim2, delim3];
+    }
+    if (issue_errors_flag){
+        es("ignoring:", get_line(s, i));
+    }
+    return [undefined, undefined, undefined, undefined];
 }
 //@+node:felix.20220102155326.1: *3* g.stripPathCruft
 /**
@@ -556,6 +839,39 @@ export function update_directives_pat(): void {
 // #1688: Initialize g.directives_pat
 update_directives_pat();
 //@+node:felix.20211104210746.1: ** g.Files & Directories
+//@+node:felix.20220108221428.1: *3* g.chdir
+export function chdir(p_path: string): void {
+    if (!os_path_isdir(p_path)){
+        p_path = os_path_dirname(p_path);
+    }
+    if( os_path_isdir(p_path) && os_path_exists(p_path)){
+        process.chdir(p_path);
+    }
+}
+//@+node:felix.20220108215158.1: *3* g.defaultLeoFileExtension
+export function defaultLeoFileExtension(c?: Commands): string {
+    const conf = c ? c.config : app.config;
+    return conf.getString('default-leo-extension') || '.leo';
+}
+//@+node:felix.20220108220012.1: *3* g.ensure_extension
+export function ensure_extension(name: string, ext: string): string {
+
+    let theFile: string;
+    let old_ext: string;
+
+    [theFile, old_ext] = os_path_splitext(name);
+    if (!name){
+        return name; // don't add to an empty name.
+    }
+    if(  ['.db', '.leo'].includes(old_ext)){
+        return name;
+    }
+    if (old_ext && old_ext === ext){
+        return name;
+    }
+
+    return name + ext;
+}
 //@+node:felix.20211228213652.1: *3* g.fullPath
 /**
  * Return the full path (including fileName) in effect at p. Neither the
@@ -627,34 +943,34 @@ export function getBaseDirectory(c: Commands): string {
     - The encoding given by the 'encoding' keyword arg.
     - None, which typically means 'utf-8'.
  */
-export function  readFileIntoString(fileName: string,
-    encoding:string='utf-8',  // BOM may override this.
-    kind:string|undefined=undefined,  // @file, @edit, ...
-    verbose:boolean=true,
-): [string|undefined, string|undefined] {
+export function readFileIntoString(fileName: string,
+    encoding: string = 'utf-8',  // BOM may override this.
+    kind: string | undefined = undefined,  // @file, @edit, ...
+    verbose: boolean = true,
+): [string | undefined, string | undefined] {
 
-    if (!fileName){
-        if (verbose){
+    if (!fileName) {
+        if (verbose) {
             trace('no fileName arg given');
         }
         return [undefined, undefined];
     }
-    if (os_path_isdir(fileName)){
-        if (verbose){
+    if (os_path_isdir(fileName)) {
+        if (verbose) {
             trace('not a file:', fileName);
         }
         return [undefined, undefined];
     }
 
-    if (!os_path_exists(fileName)){
-        if (verbose){
+    if (!os_path_exists(fileName)) {
+        if (verbose) {
             error('file not found:', fileName);
         }
         return [undefined, undefined];
     }
 
-    let s: string|undefined;
-    let e:string|undefined;
+    let s: string | undefined;
+    let e: string | undefined;
     let junk: string;
 
     try {
@@ -682,13 +998,13 @@ export function  readFileIntoString(fileName: string,
         }
         s = toUnicode(s, e || encoding);
         */
-        s =  fs.readFileSync(fileName, { encoding: 'utf8' });
+        s = fs.readFileSync(fileName, { encoding: 'utf8' });
 
         return [s, e];
     }
-    catch (iOError){
+    catch (iOError) {
         // Translate 'can not open' and kind, but not fileName.
-        if (verbose){
+        if (verbose) {
             error('can not open', '', (kind || ''), fileName);
         }
     }
@@ -705,7 +1021,7 @@ export function  readFileIntoString(fileName: string,
 
 //@+node:felix.20220106230957.1: *3* g.setGlobalOpenDir
 export function setGlobalOpenDir(fileName: string): void {
-    if (fileName){
+    if (fileName) {
         app.globalOpenDir = os_path_dirname(fileName);
         // g.es('current directory:',g.app.globalOpenDir)
     }
@@ -813,6 +1129,13 @@ export function skip_nl(s: string, i: number): number {
     return i;
 }
 
+//@+node:felix.20220110223811.1: *3* g.is_ws & is_ws_or_nl
+export function is_ws(ch: string): boolean {
+    return ch === '\t' || ch === ' ';
+}
+export function is_ws_or_nl(s: string, i: number): boolean {
+    return is_nl(s, i) || (i < s.length && is_ws(s[i]));
+}
 //@+node:felix.20211104220540.1: *3* g.skip_line, skip_to_start/end_of_line
 /* These methods skip to the next newline, regardless of whether the
 newline may be preceded by a backslash. Consequently, they should be
@@ -1443,9 +1766,9 @@ export function os_path_isabs(p_path: string): boolean {
  * Return True if the path is a directory.
  */
 export function os_path_isdir(p_path: string): boolean {
-    if(path){
+    if (path) {
         return fs.existsSync(p_path) && fs.lstatSync(p_path).isDirectory();
-    }else{
+    } else {
         return false;
     }
 }
@@ -1550,7 +1873,7 @@ export function os_path_join(c: Commands | undefined, ...args: any[]): string {
 //         path = path.replace('\\', '/')
 //     return path
 //@+node:felix.20211227182611.20: *3* g.os_path_split
-export function os_path_split(p_path: string) : [string, string] {
+export function os_path_split(p_path: string): [string, string] {
 
     /*
      Mimics this behavior from
@@ -1558,14 +1881,14 @@ export function os_path_split(p_path: string) : [string, string] {
 
      Split the pathname path into a pair, (head, tail)
      where tail is the last pathname component and head
-     is everything leading up to that. 
-     
+     is everything leading up to that.
+
      The tail part will never contain a slash;
      if path ends in a slash, tail will be empty.
      If there is no slash in path, head will be empty.
-     
-     If path is empty, both head and tail are empty. 
-     
+
+     If path is empty, both head and tail are empty.
+
      Trailing slashes are stripped from head unless
      it is the root (one or more slashes only).
 
@@ -1573,7 +1896,7 @@ export function os_path_split(p_path: string) : [string, string] {
      same location as path (but the strings may differ).
     */
 
-    if (!p_path || !p_path.trim()){
+    if (!p_path || !p_path.trim()) {
         return ['', ''];
     }
 
@@ -1582,9 +1905,9 @@ export function os_path_split(p_path: string) : [string, string] {
         testPath = testPath.split('\\').join('/');
     }
 
-    if(testPath.includes('/')){
+    if (testPath.includes('/')) {
         // at least a slash
-        if(testPath.endsWith('/')){
+        if (testPath.endsWith('/')) {
             // return with empty tail
             return [p_path, ''];
         }
@@ -1592,7 +1915,7 @@ export function os_path_split(p_path: string) : [string, string] {
         let w_parsed = path.parse(p_path);
         return [w_parsed.dir, w_parsed.base];
 
-    }else{
+    } else {
         // no slashes
         return ['', p_path];
     }
@@ -1600,10 +1923,10 @@ export function os_path_split(p_path: string) : [string, string] {
 }
 //@+node:felix.20211227182611.21: *3* g.os_path_splitext
 
-export function os_path_splitext(p_path: string) : [string, string] {
+export function os_path_splitext(p_path: string): [string, string] {
 
     /*
-        reproduces os.path.splitext from: 
+        reproduces os.path.splitext from:
         https://docs.python.org/3/library/os.path.html#os.path.splitext
 
 
@@ -1614,58 +1937,58 @@ export function os_path_splitext(p_path: string) : [string, string] {
 
         If the path contains no extension, ext will be '':
 
-        If the path contains an extension, then ext will be set 
-        to this extension, including the leading period. 
+        If the path contains an extension, then ext will be set
+        to this extension, including the leading period.
         Note that previous periods will be ignored
 
         Leading periods of the last component of the path
         are considered to be part of the root
     */
 
-    if (!p_path || !p_path.trim()){
+    if (!p_path || !p_path.trim()) {
         return ['', ''];
     }
 
     let head: string;
     let tail: string;
 
-    if(p_path.includes('.')){
+    if (p_path.includes('.')) {
         const parts = p_path.split('.');
 
         tail = parts.pop()!;
 
         head = parts.join('.');
 
-        if(!head || head.endsWith('/') || head.endsWith('\\') ){
+        if (!head || head.endsWith('/') || head.endsWith('\\')) {
             // leading period
             return [p_path, ''];
         }
 
         // edge case
-        if(head.endsWith('.')){
+        if (head.endsWith('.')) {
             try {
                 let w_parsed = path.parse(p_path);
-                if(w_parsed.ext && !w_parsed.dir.endsWith('.')){
+                if (w_parsed.ext && !w_parsed.dir.endsWith('.')) {
                     return [
-                         w_parsed.dir+
-                         (isWindows&&p_path.includes("\\")?"\\":"/") +
-                          w_parsed.name ,
-                          w_parsed.ext
-                        ];
-                }else{
-                    return [ p_path, ''];
+                        w_parsed.dir +
+                        (isWindows && p_path.includes("\\") ? "\\" : "/") +
+                        w_parsed.name,
+                        w_parsed.ext
+                    ];
+                } else {
+                    return [p_path, ''];
                 }
             } catch (error) {
                 trace('PATH SPLIT ERROR in g.os_path_splitext', callers());
-                return [ p_path, ''];
+                return [p_path, ''];
             }
         }
 
-        return [head, '.'+tail];
+        return [head, '.' + tail];
 
-    }else{
+    } else {
         // no extension
-        return [ p_path, ''];
+        return [p_path, ''];
     }
 
 
