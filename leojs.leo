@@ -8270,14 +8270,14 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
         }
 
     */
-        const w_types: { [name: string]: string[] } = {};
-        p_filetypes.forEach(type =&gt; {
-            w_types[type[0]] = type[1].split(" ").map((p_entry)=&gt;{
+    const w_types: { [name: string]: string[] } = {};
+    p_filetypes.forEach(type =&gt; {
+        w_types[type[0]] = type[1].split(" ").map((p_entry) =&gt; {
 
-                return p_entry.startWith("*.")?p_entry.substring(2):p_entry;
-            }) ;
+            return p_entry.startsWith("*.") ? p_entry.substring(2) : p_entry;
         });
-        return w_types;
+    });
+    return w_types;
 }
 </t>
 <t tx="felix.20220109220155.1">public runAskYesNoDialog(
