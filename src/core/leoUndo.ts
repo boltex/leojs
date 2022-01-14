@@ -238,7 +238,7 @@ export class Undoer {
         return u.beads[n];
     }
     //@+node:felix.20211026230613.14: *4* u.pushBead
-    public pushBead(bunch: Bead) {
+    public pushBead(bunch: Bead): void {
         const u: Undoer = this;
         // New in 4.4b2:  Add this to the group if it is being accumulated.
         let bunch2: Bead | boolean = u.bead >= 0 && u.bead < u.beads.length;
@@ -277,7 +277,7 @@ export class Undoer {
         return "Undo " + name;
     }
     //@+node:felix.20211026230613.16: *4* u.setIvarsFromBunch
-    public setIvarsFromBunch(bunch: Bead) {
+    public setIvarsFromBunch(bunch: Bead): void {
         const u: Undoer = this;
         u.clearOptionalIvars();
 
@@ -330,7 +330,7 @@ export class Undoer {
         }
     }
     //@+node:felix.20211026230613.18: *4* u.setUndoType
-    public setUndoType(theType: any) {
+    public setUndoType(theType: any): void {
         const u: Undoer = this;
         // frame = u.c.frame
 
@@ -403,7 +403,7 @@ export class Undoer {
         }
     }
     //@+node:felix.20211026230613.22: *5* u.restoreTnodeUndoInfo
-    public restoreTnodeUndoInfo(bunch: Bead) {
+    public restoreTnodeUndoInfo(bunch: Bead): void {
         const v: VNode = bunch.v;
         v.h = bunch.headString;
         v.b = bunch.bodyString;
@@ -465,7 +465,7 @@ export class Undoer {
     /**
      * Create a bunch containing all info needed to recreate a VNode for undo.
      */
-    public createVnodeUndoInfo(v: VNode): any {
+    public createVnodeUndoInfo(v: VNode): Bead {
         const bunch: Bead = {
             v: v,
             statusBits: v.statusBits,
@@ -1046,7 +1046,13 @@ export class Undoer {
     /**
      * Create an undo node for sort operations.
      */
-    public beforeSort(p: Position, undoType: string, oldChildren: any, newChildren: any, sortChildren: boolean): Bead {
+    public beforeSort(
+        p: Position,
+        undoType: string,
+        oldChildren: VNode[],
+        newChildren: VNode[],
+        sortChildren: boolean
+    ): Bead {
         const u: Undoer = this;
         const bunch: Bead = u.createCommonBunch(p);
         // Set types.

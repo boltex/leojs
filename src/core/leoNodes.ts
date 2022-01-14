@@ -18,7 +18,7 @@ export class NodeIndices {
 
     defaultId: string;
     lastIndex: number;
-    stack: any[]; // A stack of open commanders.
+    stack: Commands[]; // A stack of open commanders.
     timeString: string; //  Set by setTimeStamp.
     userId: string;
 
@@ -866,7 +866,7 @@ export class Position {
     }
 
     //@+node:felix.20210112010737.3: *5* p.directParents
-    public directParents(): any {
+    public directParents(): VNode[] {
         return this.v.directParents();
     }
 
@@ -2542,7 +2542,7 @@ export class VNode {
         return link ? link : "<none>";
     }
 
-    public dump(label = ""): void {
+    public dump(label: string = ""): void {
         const v: VNode = this;
         const s: string = '-'.repeat(10);
         console.log(`${s} ${label} ${v}`);

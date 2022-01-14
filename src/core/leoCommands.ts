@@ -13,6 +13,7 @@ import { NodeHistory } from './leoHistory';
 import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
 import { AtFile } from './leoAtFile';
+import * as fs from 'fs';
 import * as path from 'path';
 import * as sqlite3 from 'sqlite3';
 import { LeoFind } from './leoFind';
@@ -234,7 +235,7 @@ export class Commands {
         fileName: string,
         gui?: LeoUI,
         previousSettings?: any,
-        relativeFileName?: any
+        relativeFileName?: string
     ) {
         const c: Commands = this;
 
@@ -1446,7 +1447,7 @@ export class Commands {
     //@+node:felix.20211101013238.1: *4* c.checkMoveWithParentWithWarning & c.checkDrag
     //@+node:felix.20211101013241.1: *5* c.checkMoveWithParentWithWarning
     /**
-     * Return False if root or any of root's descendents is a clone of parent
+     * Return False if root or any of root's descendants is a clone of parent
      * or any of parents ancestors.
      */
     public checkMoveWithParentWithWarning(root: Position, parent: Position, warningFlag: boolean): boolean {
@@ -2292,48 +2293,63 @@ export class Commands {
         return true;
     }
     //@+node:felix.20211223223002.6: *4* c.createNodeFromExternalFile
-    // def createNodeFromExternalFile(self, fn):
-    //     """
-    //     Read the file into a node.
-    //     Return None, indicating that c.open should set focus.
-    //     """
-    //     c = self
-    //     s, e = g.readFileIntoString(fn)
-    //     if s is None:
-    //         return
-    //     head, ext = g.os_path_splitext(fn)
-    //     if ext.startswith('.'):
-    //         ext = ext[1:]
-    //     language = g.app.extension_dict.get(ext)
-    //     if language:
-    //         prefix = f"@color\n@language {language}\n\n"
-    //     else:
-    //         prefix = '@killcolor\n\n'
-    //     # pylint: disable=no-member
-    //     # Defined in commanderOutlineCommands.py
-    //     p2 = c.insertHeadline(op_name='Open File', as_child=False)
-    //     p2.h = f"@edit {fn}"
-    //     p2.b = prefix + s
-    //     w = c.frame.body.wrapper
-    //     if w:
-    //         w.setInsertPoint(0)
-    //     c.redraw()
-    //     c.recolor()
+    /**
+     * Read the file into a node.
+     * Return None, indicating that c.open should set focus.
+     */
+    public createNodeFromExternalFile(fn: string): void {
+
+        const c: Commands = this;
+        let s: string | undefined;
+        let e: string | undefined;
+        [s, e] = g.readFileIntoString(fn);
+
+        if (s === undefined) {
+            return;
+        }
+
+        let head: string;
+        let ext: string;
+        [head, ext] = g.os_path_splitext(fn);
+
+        if (ext.startsWith('.')) {
+            ext = ext.slice(1);
+        }
+        const language: string = g.app.extension_dict[ext];
+        let prefix: string;
+        if (language) {
+            prefix = `@color\n@language {language}\n\n`;
+        } else {
+            prefix = '@killcolor\n\n';
+        }
+        // pylint: disable=no-member
+        // Defined in commanderOutlineCommands.py
+        let p2: Position;
+        p2 = c.insertHeadline('Open File', false)!;
+        p2.h = `@edit ${fn}`;
+        p2.b = prefix + s;
+        const w: any = c.frame.body.wrapper;
+        if (w) {
+            w.setInsertPoint(0);
+        }
+        c.redraw();
+        c.recolor();
+    }
     //@+node:felix.20211223223002.7: *4* c.looksLikeDerivedFile
-    // def looksLikeDerivedFile(self, fn):
-    //     """
-    //     Return True if fn names a file that looks like an
-    //     external file written by Leo.
-    //     """
-    //     # c = self
-    //     try:
-    //         with open(fn, 'rb') as f:  # 2020/11/14: Allow unicode characters!
-    //             b = f.read()
-    //             s = g.toUnicode(b)
-    //         return s.find('@+leo-ver=') > -1
-    //     except Exception:
-    //         g.es_exception()
-    //         return False
+    /**
+     * Return True if fn names a file that looks like an
+     * external file written by Leo.
+     */
+    public looksLikeDerivedFile(fn: string): boolean {
+        try {
+            const s: string = fs.readFileSync('test.txt', 'utf8');
+            return s.indexOf('@+leo-ver=') > -1;
+        }
+        catch (exception) {
+            g.es_exception();
+            return false;
+        }
+    }
     //@+node:felix.20211223223002.8: *4* c.markAllAtFileNodesDirty
     /**
      * Mark all @file nodes as changed.

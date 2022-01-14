@@ -2005,7 +2005,7 @@ export class CommanderOutlineCommands {
         for (let child of followingSibs) {
             // child.parents.remove(parent_v);
             const index = child.parents.indexOf(parent_v);
-            if (index > -1) {
+            if (index >= 0) {
                 child.parents.splice(index, 1);
             }
             child.parents.push(p.v);
@@ -2017,7 +2017,6 @@ export class CommanderOutlineCommands {
         c.redraw(p); // redraw selects p
         // c.updateSyntaxColorer(p); // Moving can change syntax coloring.
     }
-    //@+node:felix.20211101012750.1: *5* // Remove the moved nodes from the parent's children.
     //@+node:felix.20211031235049.3: *4* c_oc.moveOutlineDown
     @commander_command(
         'move-outline-down',
