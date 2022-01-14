@@ -22,7 +22,7 @@ import { LeoImportCommands } from './leoImport';
 //@-<< imports >>
 //@+others
 //@+node:felix.20211017232128.1: ** applyMixins
-function applyMixins(derivedCtor: any, constructors: any[]) {
+function applyMixins(derivedCtor: any, constructors: any[]): void {
     constructors.forEach((baseCtor) => {
         Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
             Object.defineProperty(

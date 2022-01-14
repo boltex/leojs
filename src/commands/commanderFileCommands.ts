@@ -1498,7 +1498,7 @@ export class CommanderFileCommands {
     // def writeEditedRecentFiles(this: Commands)
     //     """
     //     Write content of "edit_headline" node as recentFiles and recreates
-    //     menues.
+    //     menus.
     //     """
     //     c = self
     //     g.app.recentFilesManager.writeEditedRecentFiles(c)
