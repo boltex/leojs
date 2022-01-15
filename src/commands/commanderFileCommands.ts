@@ -614,7 +614,6 @@ export class CommanderFileCommands {
                     // ! ASYNC SOLUTION !
                     g.app.gui!.runSaveFileDialog(
                         c,
-                        c.mFileName,
                         "Save",
                         [["Leo files", "*.leo *.db"]], // Array of arrays (one in this case)
                         g.defaultLeoFileExtension(c)
@@ -741,7 +740,6 @@ export class CommanderFileCommands {
 
             g.app.gui!.runSaveFileDialog(
                 c,
-                c.mFileName,
                 "Save As",
                 [["Leo files", "*.leo *.db"]], // Array of arrays (one in this case)
                 g.defaultLeoFileExtension(c)
@@ -841,7 +839,6 @@ export class CommanderFileCommands {
 
             g.app.gui!.runSaveFileDialog(
                 c,
-                c.mFileName,
                 "Save To",
                 [["Leo files", "*.leo *.db"]], // Array of arrays (one in this case)
                 g.defaultLeoFileExtension(c)
@@ -923,7 +920,6 @@ export class CommanderFileCommands {
 
         g.app.gui!.runSaveFileDialog(
             c,
-            c.mFileName,  // .leojs will be added if necessary.
             "Save As JSON (.leojs)",
             [["Leo files", "*.leojs"]],
             '.leojs'
@@ -954,7 +950,6 @@ export class CommanderFileCommands {
         const c: Commands = this;
         g.app.gui!.runSaveFileDialog(
             c,
-            c.mFileName,  // .db will be added if necessary.
             "Save As Zipped",
             [["Leo files", "*.db"]],
             '.db'
@@ -974,11 +969,13 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.21: *4* c_file.save-as-xml
     @commander_command(
         'file-save-as-xml',
-        'Save a Leo outline as a .leo file with a new file name.'
+        'Save a Leo outline as a .leo file with a new file name.\n' +
+        'Useful for converting a .leo.db file to a .leo file.'
     )
     @commander_command(
         'save-file-as-xml',
-        'Save a Leo outline as a .leo file with a new file name.'
+        'Save a Leo outline as a .leo file with a new file name.\n' +
+        'Useful for converting a .leo.db file to a .leo file.'
     )
     public save_as_xml(this: Commands): void {
 
@@ -986,7 +983,6 @@ export class CommanderFileCommands {
 
         g.app.gui!.runSaveFileDialog(
             c,
-            c.mFileName, // .leo will be added if necessary.
             "Save As XML",
             [["Leo files", "*.leo"]],
             g.defaultLeoFileExtension(c)
@@ -1017,7 +1013,6 @@ export class CommanderFileCommands {
 
         g.app.gui!.runSaveFileDialog(
             c,
-            "headlines.txt",
             "Export Headlines",
             filetypes,
             ".txt"
@@ -1044,7 +1039,6 @@ export class CommanderFileCommands {
 
         g.app.gui!.runSaveFileDialog(
             c,
-            "flat.txt",
             "Flatten Selected Outline",
             filetypes,
             ".txt"
@@ -1120,7 +1114,6 @@ export class CommanderFileCommands {
 
         g.app.gui!.runSaveFileDialog(
             c,
-            "cweb.w",
             "Outline To CWEB",
             filetypes,
             ".w"
@@ -1153,7 +1146,6 @@ export class CommanderFileCommands {
 
         g.app.gui!.runSaveFileDialog(
             c,
-            this.outlineToNowebDefaultFileName,
             "Outline To Noweb",
             filetypes,
             ".nw"
@@ -1212,13 +1204,10 @@ export class CommanderFileCommands {
 
         const c: Commands = this;
 
-        const filetypes: [string, string][] = [["Text files", "*.txt"], ["All files", "*"]];
-
         g.app.gui!.runSaveFileDialog(
             c,
-            "weave.txt",
             "Weave",
-            filetypes,
+            [["Text files", "*.txt"], ["All files", "*"]],
             ".txt"
         ).then((fileName) => {
             c.bringToFront();
@@ -1394,17 +1383,14 @@ export class CommanderFileCommands {
         let q_fileName: Thenable<string>;
 
         if (!fileName) {
-            const filetypes: [string, string][] = [
-                ["All files", "*"],
-                ["Python files", "*.py"],
-                ["Leo files", "*.leo"]
-            ];
-
             q_fileName = g.app.gui!.runSaveFileDialog(
                 c,
-                "",
                 'Write File From Node',
-                filetypes,
+                [
+                    ["All files", "*"],
+                    ["Python files", "*.py"],
+                    ["Leo files", "*.leo"]
+                ],
                 ""
             );
         } else {

@@ -8221,7 +8221,6 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
 </t>
 <t tx="felix.20220108211806.1">public runSaveFileDialog(
     c: Commands,
-    unusedInitialFile: string,
     title: string,
     filetypes: [string, string][],
     defaultExtension: string,

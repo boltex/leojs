@@ -2148,7 +2148,7 @@ export class FileCommands extends DummyFileCommands {
             //return [fname, fc.outputFile.getvalue()];
             return [fname, fc.outputFile]; // outputfile as string
         }
-        //@+node:felix.20211228224127.1: *6* function: put_tnodes
+        //@+node:felix.20211228224127.1: *6* function: put_t_elements
         /**
          * Write all <t> elements except those for vnodes appearing in @file, @edit or @auto nodes.
          */
@@ -2163,7 +2163,6 @@ export class FileCommands extends DummyFileCommands {
                 return false;
             }
 
-            // fc = c.fileCommands // ALREADY defined in save_ref, use it like in put_v_elements and getPublicLeoFile
             fc.put("<tnodes>\n");
 
             const suppress: { [key: string]: boolean } = {}; // USE v.gnx instead of v as KEY
@@ -2571,7 +2570,7 @@ export class FileCommands extends DummyFileCommands {
     }
     //@+node:felix.20211213224237.19: *5* fc.outline_to_xml_string
     /**
-     * Return the file xml format as a string.
+     * Write the outline in .leo (XML) format to a string.
      */
     public outline_to_xml_string(): string {
 
@@ -2615,6 +2614,9 @@ export class FileCommands extends DummyFileCommands {
     // TODO : Aliases
     // write_LEO_file = write_Leo_file  // For compatibility with old plugins.
     //@+node:felix.20211213224237.21: *5* fc.write_leojs & helpers
+    /**
+     * Write the outline in .leojs (JSON) format.
+     */
     public write_leojs(fileName: string): boolean {
 
         const c: Commands = this.c;
@@ -2741,7 +2743,7 @@ export class FileCommands extends DummyFileCommands {
     }
     //@+node:felix.20211213224237.25: *5* fc.write_xml_file
     /**
-     * Write the .leo file as xml.
+     * Write the outline in .leo (XML) format.
      */
     public write_xml_file(fileName: string): boolean {
 
@@ -3113,11 +3115,9 @@ export class FileCommands extends DummyFileCommands {
     }
     //@+node:felix.20211213224237.42: *5* fc.put_t_element
     public put_t_element(v: VNode): void {
-        // Call put just once.
-        const gnx: string = v.fileIndex;
-        // pylint: disable=consider-using-ternary
-        const ua = v['unknownAttributes'] && this.putUnknownAttributes(v) || '';
         const b: string = v.b;
+        const gnx: string = v.fileIndex;
+        const ua = this.putUnknownAttributes(v);
         const body: string = b.length ? this.xmlEscape(b) : '';
         this.put(`<t tx="${gnx}"${ua}>${body}</t>\n`);
     }
@@ -3202,11 +3202,11 @@ export class FileCommands extends DummyFileCommands {
     }
     //@+node:felix.20211213224237.46: *5* fc.putUnknownAttributes
     /**
-     * Put pickleable values for all keys in torv.unknownAttributes dictionary.
+     * Put pickleable values for all keys in v.unknownAttributes dictionary.
      */
-    public putUnknownAttributes(torv: any): string {
+    public putUnknownAttributes(v: VNode): string {
 
-        const attrDict = torv.unknownAttributes;
+        const attrDict = v.unknownAttributes;
 
         // if (isinstance(attrDict, dict)){
         if (
@@ -3217,7 +3217,7 @@ export class FileCommands extends DummyFileCommands {
 
             const valArray: string[] = [];
             for (let key in attrDict) {
-                valArray.push(this.putUaHelper(torv, key, attrDict[key]));
+                valArray.push(this.putUaHelper(v, key, attrDict[key]));
             }
 
             const val: string = valArray.join('');
@@ -3225,7 +3225,7 @@ export class FileCommands extends DummyFileCommands {
             return val;
         }
 
-        g.warning("ignoring non-dictionary unknownAttributes for", torv);
+        g.warning("ignoring non-dictionary unknownAttributes for", v);
         return '';
     }
     //@+node:felix.20211213224237.47: *5* fc.put_v_element & helper

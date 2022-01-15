@@ -1732,7 +1732,6 @@ export class LeoUI {
 
     public runSaveFileDialog(
         c: Commands,
-        unusedInitialFile: string,
         title: string,
         filetypes: [string, string][],
         defaultExtension: string,
