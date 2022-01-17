@@ -3128,10 +3128,13 @@ public minibuffer(): Thenable&lt;unknown&gt; {
                 if (!(command as any).__name__.startsWith('async-')) {
                     commands.push({
                         label: (command as any).__name__,
-                        description: (command as any).__doc__
+                        detail: (command as any).__doc__
                     });
                 }
             }
+            commands.sort((a, b) =&gt; {
+                return a.label === b.label ? 0 : (a.label &gt; b.label ? 1 : -1);
+            });
             const w_options: vscode.QuickPickOptions = {
                 placeHolder: Constants.USER_MESSAGES.MINIBUFFER_PROMPT,
                 matchOnDetail: true,
