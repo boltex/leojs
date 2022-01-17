@@ -10,6 +10,7 @@ import { LeoUI } from '../leoUI';
 import { NodeIndices } from './leoNodes';
 import { Commands } from './leoCommands';
 import { fstat } from "fs";
+import { FileCommands } from "./leoFileCommands";
 
 //@-<< imports >>
 //@+others
@@ -145,10 +146,10 @@ export class LeoApp {
     //@+node:felix.20210103024632.5: *4* << LeoApp: global directories >>
     public extensionsDir = null; // The leo / extensions directory
     public globalConfigDir = null; // leo / config directory
-    public globalOpenDir = null; // The directory last used to open a file.
+    public globalOpenDir: string | undefined; // The directory last used to open a file.
     public homeDir = null; // The user's home directory.
     public homeLeoDir = null; // The user's home/.leo directory.
-    public loadDir: string|undefined; // The leo / core directory.
+    public loadDir: string | undefined; // The leo / core directory.
     public machineDir = null; // The machine - specific directory.
 
     //@-<< LeoApp: global directories >>
@@ -219,7 +220,7 @@ export class LeoApp {
     public quitting: boolean = false; // True: quitting.Locks out some events.
     public restarting: boolean = false; // True: restarting all of Leo.#1240.
     public reverting: boolean = false; // True: executing the revert command.
-    public syntax_error_files: any[] = [];
+    public syntax_error_files: string[] = [];
 
     //@-<< LeoApp: global status vars >>
     //@+<< LeoApp: the global log >>
@@ -899,6 +900,13 @@ export class LeoApp {
 
     //@-others
 
+    //@+node:felix.20220106225805.1: *3* app.commanders
+    /**
+     * Return list of currently active controllers
+     */
+    public commanders(): Commands[] {
+        return g.app.commandersList;
+    }
     //@+node:felix.20211226221235.1: *3* app.Detecting already-open files
     //@+node:felix.20211226221235.2: *4* app.checkForOpenFile
     /**
@@ -946,24 +954,43 @@ export class LeoApp {
 
     }
     //@+node:felix.20211226221235.3: *4* app.forgetOpenFile
-    // def forgetOpenFile(self, fn, force=False):
-    //     """Forget the open file, so that is no longer considered open."""
-    //     trace = 'shutdown' in g.app.debug
-    //     d, tag = g.app.db, 'open-leo-files'
-    //     if not d or not fn:
-    //         # #69.
-    //         return
-    //     if not force and (
-    //         d is None or g.unitTesting or g.app.batchMode or g.app.reverting):
-    //         return
-    //     aList = d.get(tag) or []
-    //     fn = os.path.normpath(fn)
-    //     if fn in aList:
-    //         aList.remove(fn)
-    //         if trace:
-    //             g.pr(f"forgetOpenFile: {g.shortFileName(fn)}")
-    //         d[tag] = aList
-    //     # elif trace: g.pr(f"forgetOpenFile: did not remove: {fn}")
+    /**
+     * Forget the open file, so that is no longer considered open.
+     */
+    public forgetOpenFile(fn: string, force = false): void {
+        const trace: boolean = g.app.debug.includes('shutdown');
+        const d: any = g.app.db;
+        const tag: string = 'open-leo-files';
+
+        if (!d || !fn) {
+            // #69.
+            return;
+        }
+        if (!force && (
+            d === undefined || g.unitTesting || g.app.batchMode || g.app.reverting)) {
+            return;
+        }
+        const aList: string[] = d[tag] || [];
+
+        fn = path.normalize(fn);
+
+        if (aList.includes(fn)) {
+
+            // aList.remove(fn)
+            const index = aList.indexOf(fn);
+            if (index > -1) {
+                aList.splice(index, 1);
+            }
+
+            if (trace) {
+                g.pr(`forgetOpenFile: ${g.shortFileName(fn)}`);
+            }
+            d[tag] = aList;
+
+        }
+        // elif trace: g.pr(f"forgetOpenFile: did not remove: {fn}")
+
+    }
     //@+node:felix.20211226221235.4: *4* app.rememberOpenFile
     public rememberOpenFile(fn: string): void {
 
@@ -1058,13 +1085,16 @@ export class LeoApp {
      */
     public newCommander(
         fileName: string,
-        gui: LeoUI,
+        gui?: LeoUI,
         previousSettings?: any,
         relativeFileName?: any,
     ): Commands {
         // Create the commander and its subcommanders.
         // This takes about 3/4 sec when called by the leoBridge module.
         // Timeit reports 0.0175 sec when using a nullGui.
+        if (!gui) {
+            gui = g.app.gui!;
+        }
         const c = new Commands(
             fileName,
             gui,
@@ -1516,6 +1546,66 @@ export class LoadManager {
         return c;
     }
 
+    //@+node:felix.20220109233448.1: *6* LM.isLeoFile & LM.isZippedFile
+    public isLeoFile(fn: string): boolean {
+        if (!fn) {
+            return false;
+        }
+        // return zipfile.is_zipfile(fn) or fn.endswith(('.leo', 'db', '.leojs'))
+        return fn.endsWith('.leo') || fn.endsWith('db') || fn.endsWith('.leojs');
+    }
+    public isZippedFile(fn: string): boolean {
+        // ? NEEDED ?
+        // TODO : zip support ?
+        return false;
+        // return fn && zipfile.is_zipfile(fn);
+    }
+    //@+node:felix.20220109233001.1: *6* LM.openAnyLeoFile
+    /**
+     * Open a .leo, .leojs or .db file.
+     */
+    public openAnyLeoFile(fn: string): number | undefined {
+
+        const lm: LoadManager = this;
+
+        if (fn.endsWith('.db')) {
+            // TODO !
+            // return sqlite3.connect(fn);
+            return undefined;
+
+        }
+        let theFile: number | undefined;
+        if (lm.isLeoFile(fn) && g.os_path_exists(fn)) {
+            // ? NEEDED ZIP SUPPORT ?
+            // if (lm.isZippedFile(fn)){
+            //     theFile = lm.openZipFile(fn);
+            // }else{
+            //     theFile = lm.openLeoFile(fn);
+            // }
+            theFile = lm.openLeoFile(fn);
+        }
+        return theFile;
+    }
+    //@+node:felix.20220109233518.1: *6* LM.openLeoFile
+    public openLeoFile(fn: string): number | undefined {
+
+        // const lm: LoadManager = this;
+
+        try {
+            let theFile: number;
+
+            theFile = fs.openSync(fn, 'r');
+
+            return theFile;
+        }
+        catch (iOError) {
+            // Do not use string + here: it will fail for non-ascii strings!
+            if (!g.unitTesting) {
+                g.error("can not open:", fn);
+            }
+            return undefined;
+        }
+    }
     //@+node:felix.20210222013445.1: *6* LM.openLeoOrZipFile
     public openLeoOrZipFile(fn: string): any {
         const lm: LoadManager = this;
@@ -1562,10 +1652,25 @@ export class LoadManager {
         return undefined;
     }
 
+    //@+node:felix.20220109232545.1: *3* LM.revertCommander
+    /**
+     * Revert c to the previously saved contents.
+     */
+    public revertCommander(c: Commands): void {
+        const lm: LoadManager = this;
+        const fn: string = c.mFileName;
+        // Re-read the file.
+        const theFile = lm.openAnyLeoFile(fn);
+        if (theFile) {
+            (c.fileCommands as FileCommands).initIvars();
+            (c.fileCommands as FileCommands).getLeoFile(theFile, fn, false);
+            // Closes the file.
+        }
+    }
     //@-others
 }
 //@-others
 //@@language typescript
 //@@tabwidth -4
-
+//@@pagewidth 70
 //@-leo

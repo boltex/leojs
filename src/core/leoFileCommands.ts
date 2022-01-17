@@ -7,10 +7,8 @@ import { VNode, Position } from './leoNodes';
 import { Commands } from './leoCommands';
 import { new_cmd_decorator } from './decorators';
 
-//import { ElementTree, Element } from 'elementtree';
-import * as et from 'elementtree';
-
 import "date-format-lite";
+import * as et from 'elementtree';
 import * as temp from 'temp';
 import * as md5 from 'md5';
 import * as fs from 'fs';
@@ -190,8 +188,6 @@ export class FastRead {
         let xroot: et.ElementTree;
 
         try {
-            console.log('TRY TO XML PARSE ', contents);
-
             xroot = et.parse(contents);
         } catch (e) {
             let message: string;
@@ -224,9 +220,6 @@ export class FastRead {
     public handleBits(): void {
         const c: Commands = this.c;
         const fc = this.c.fileCommands as FileCommands;
-
-        console.log('handle Bits c.db = ', c.db);
-
 
         const w_expanded: string = c.db['expanded'];
         const w_marked: string = c.db['marked'];
@@ -535,7 +528,6 @@ export class FastRead {
 
                     //for key, val in d.items():
                     for (let [key, val] of Object.entries(d)) {
-                        console.log('key of attrib: ', key);
 
                         if (!this.nativeVnodeAttributes.includes(key)) {
                             uaDict[key] = this.resolveUa(key, val);
@@ -2061,7 +2053,7 @@ export class FileCommands extends DummyFileCommands {
     /**
      * fc.save: A helper for c.save.
      */
-    public save(fileName: string, silent: boolean): boolean {
+    public save(fileName: string, silent?: boolean): boolean {
 
         const c: Commands = this.c;
         const p: Position = c.p;
@@ -2156,7 +2148,7 @@ export class FileCommands extends DummyFileCommands {
             //return [fname, fc.outputFile.getvalue()];
             return [fname, fc.outputFile]; // outputfile as string
         }
-        //@+node:felix.20211228224127.1: *6* function: put_tnodes
+        //@+node:felix.20211228224127.1: *6* function: put_t_elements
         /**
          * Write all <t> elements except those for vnodes appearing in @file, @edit or @auto nodes.
          */
@@ -2171,7 +2163,6 @@ export class FileCommands extends DummyFileCommands {
                 return false;
             }
 
-            // fc = c.fileCommands // ALREADY defined in save_ref, use it like in put_v_elements and getPublicLeoFile
             fc.put("<tnodes>\n");
 
             const suppress: { [key: string]: boolean } = {}; // USE v.gnx instead of v as KEY
@@ -2579,7 +2570,7 @@ export class FileCommands extends DummyFileCommands {
     }
     //@+node:felix.20211213224237.19: *5* fc.outline_to_xml_string
     /**
-     * Return the file xml format as a string.
+     * Write the outline in .leo (XML) format to a string.
      */
     public outline_to_xml_string(): string {
 
@@ -2623,6 +2614,9 @@ export class FileCommands extends DummyFileCommands {
     // TODO : Aliases
     // write_LEO_file = write_Leo_file  // For compatibility with old plugins.
     //@+node:felix.20211213224237.21: *5* fc.write_leojs & helpers
+    /**
+     * Write the outline in .leojs (JSON) format.
+     */
     public write_leojs(fileName: string): boolean {
 
         const c: Commands = this.c;
@@ -2749,7 +2743,7 @@ export class FileCommands extends DummyFileCommands {
     }
     //@+node:felix.20211213224237.25: *5* fc.write_xml_file
     /**
-     * Write the .leo file as xml.
+     * Write the outline in .leo (XML) format.
      */
     public write_xml_file(fileName: string): boolean {
 
@@ -3121,11 +3115,9 @@ export class FileCommands extends DummyFileCommands {
     }
     //@+node:felix.20211213224237.42: *5* fc.put_t_element
     public put_t_element(v: VNode): void {
-        // Call put just once.
-        const gnx: string = v.fileIndex;
-        // pylint: disable=consider-using-ternary
-        const ua = v['unknownAttributes'] && this.putUnknownAttributes(v) || '';
         const b: string = v.b;
+        const gnx: string = v.fileIndex;
+        const ua = this.putUnknownAttributes(v);
         const body: string = b.length ? this.xmlEscape(b) : '';
         this.put(`<t tx="${gnx}"${ua}>${body}</t>\n`);
     }
@@ -3210,11 +3202,11 @@ export class FileCommands extends DummyFileCommands {
     }
     //@+node:felix.20211213224237.46: *5* fc.putUnknownAttributes
     /**
-     * Put pickleable values for all keys in torv.unknownAttributes dictionary.
+     * Put pickleable values for all keys in v.unknownAttributes dictionary.
      */
-    public putUnknownAttributes(torv: any): string {
+    public putUnknownAttributes(v: VNode): string {
 
-        const attrDict = torv.unknownAttributes;
+        const attrDict = v.unknownAttributes;
 
         // if (isinstance(attrDict, dict)){
         if (
@@ -3225,7 +3217,7 @@ export class FileCommands extends DummyFileCommands {
 
             const valArray: string[] = [];
             for (let key in attrDict) {
-                valArray.push(this.putUaHelper(torv, key, attrDict[key]));
+                valArray.push(this.putUaHelper(v, key, attrDict[key]));
             }
 
             const val: string = valArray.join('');
@@ -3233,7 +3225,7 @@ export class FileCommands extends DummyFileCommands {
             return val;
         }
 
-        g.warning("ignoring non-dictionary unknownAttributes for", torv);
+        g.warning("ignoring non-dictionary unknownAttributes for", v);
         return '';
     }
     //@+node:felix.20211213224237.47: *5* fc.put_v_element & helper
@@ -3321,7 +3313,6 @@ export class FileCommands extends DummyFileCommands {
      * Puts all <v> elements in the order in which they appear in the outline.
      */
     public put_v_elements(p?: Position): void {
-        console.log('put_v_elements, this.usingClipboard: ', this.usingClipboard);
 
         const c: Commands = this.c;
 
@@ -3360,9 +3351,6 @@ export class FileCommands extends DummyFileCommands {
      * Also cache the current position.
      */
     public setCachedBits(): void {
-
-        console.log('setCachedBits!');
-
 
         const trace: boolean = true || !!g.app.debug.includes('cache');
 

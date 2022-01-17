@@ -113,6 +113,34 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
 }
 
 /**
+ * Convert Leo's internal filetype descriptions array
+ * to vscode's option format for open/save dialogs.
+ */
+export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: string]: string[] } {
+    /*
+        from :
+            [
+                ["", ""],
+                ["Leo files", "*.leo *.db"]
+            ],
+
+        to :
+        {
+            'Images': ['png', 'jpg']
+            'TypeScript': ['ts', 'tsx']
+        }
+
+    */
+    const w_types: { [name: string]: string[] } = {};
+    p_filetypes.forEach(type => {
+        w_types[type[0]] = type[1].split(" ").map((p_entry) => {
+
+            return p_entry.startsWith("*.") ? p_entry.substring(2) : p_entry;
+        });
+    });
+    return w_types;
+}
+/**
  * * Returns milliseconds between the p_start process.hrtime tuple and p_end (or current call to process.hrtime)
  * @param p_start starting process.hrtime to subtract from p_end or current immediate time
  * @param p_end optional end process.hrtime (or immediate time)

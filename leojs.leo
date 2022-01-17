@@ -62,6 +62,7 @@
 <v t="felix.20201214151326.9"><vh>vscode commands</vh></v>
 <v t="felix.20201214151326.10"><vh>commands strings</vh></v>
 <v t="felix.20201214151326.11"><vh>leo commands</vh></v>
+<v t="felix.20220103222715.1"><vh>minibuffer overridden names</vh></v>
 <v t="felix.20211208011642.1"><vh>minibuffer overridden commands</vh></v>
 </v>
 </v>
@@ -176,6 +177,7 @@
 </v>
 <v t="felix.20211024012536.1"><vh>Clipboard</vh>
 <v t="felix.20211212205241.1"><vh>replaceClipboardWith</vh></v>
+<v t="felix.20220103203600.1"><vh>asyncGetTextFromClipboard</vh></v>
 <v t="felix.20211024012523.1"><vh>getTextFromClipboard</vh></v>
 </v>
 <v t="felix.20201214194144.8"><vh>Leo Documents</vh>
@@ -199,6 +201,10 @@
 </v>
 <v t="felix.20211030165058.1"><vh>Wrapper Helpers</vh>
 <v t="felix.20211030165111.1"><vh>isTextWidget &amp; isTextWrapper</vh></v>
+<v t="felix.20220108211750.1"><vh>runAskOkDialog</vh></v>
+<v t="felix.20220109220155.1"><vh>runAskYesNoDialog</vh></v>
+<v t="felix.20220107223824.1"><vh>runOpenFileDialog</vh></v>
+<v t="felix.20220108211806.1"><vh>runSaveFileDialog</vh></v>
 </v>
 <v t="felix.20201214211706.1"><vh>test</vh></v>
 </v>
@@ -313,6 +319,7 @@
 <v t="felix.20201208224407.6"><vh>buildNodeIconPaths</vh></v>
 <v t="felix.20201208224407.7"><vh>buildDocumentIconPaths</vh></v>
 <v t="felix.20201208224407.8"><vh>buildButtonsIconPaths</vh></v>
+<v t="felix.20220109180351.1"><vh>convertLeoFiletypes</vh></v>
 <v t="felix.20201208224407.10"><vh>getDurationMilliseconds</vh></v>
 <v t="felix.20201208224407.11"><vh>getFileFromPath</vh></v>
 <v t="felix.20201208224407.12"><vh>isIconChangedByEdit</vh></v>
@@ -427,13 +434,14 @@
 <v t="felix.20211212000140.1"><vh>@file src/core/leoFind.ts</vh></v>
 <v t="felix.20210102012410.1"><vh>@file src/core/leoGlobals.ts</vh></v>
 <v t="felix.20211021231651.1"><vh>@file src/core/leoHistory.ts</vh></v>
+<v t="felix.20220105221256.1"><vh>@file src/core/leoImport.ts</vh></v>
 <v t="felix.20210102012632.1"><vh>@file src/core/leoNodes.ts</vh></v>
 <v t="felix.20211212162359.1"><vh>@file src/core/leoShadow.ts</vh></v>
 <v t="felix.20211026230613.1"><vh>@file src/core/leoUndo.ts</vh></v>
 </v>
 <v t="felix.20211002194716.1"><vh>Command classes</vh>
-<v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
 <v t="felix.20211017230407.1"><vh>@file src/commands/commanderFileCommands.ts</vh></v>
+<v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
 <v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 </v>
 </v>
@@ -779,7 +787,7 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
 </t>
 <t tx="felix.20201208224441.1">import * as vscode from "vscode";
 import { Constants } from "./constants";
-import * as path from "path"; // TODO : Use this to have reliable support for window-vs-linux file-paths
+import * as path from "path";
 
 @language typescript
 @tabwidth -4
@@ -1391,7 +1399,7 @@ public static LEO_COMMANDS = {
     WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
 
     // * More Commands
-    //  TODO  
+    //  TODO
     // GOTO_GLOBAL_LINE: "!goto_global_line",
     // TAG_CHILDREN: "!tag_children",
     // START_SEARCH: "!start_search",
@@ -1447,8 +1455,8 @@ public static LEO_COMMANDS = {
     // * Clipboard Operations
     COPY_PNODE: "copy-node",
     CUT_PNODE: "cut-node",
-    PASTE_PNODE: "paste-node",
-    PASTE_CLONE_PNODE: "paste-retaining-clones",
+    PASTE_PNODE: "async-paste-node",
+    PASTE_CLONE_PNODE: "async-paste-retaining-clones",
     // * Outline Editing
     DELETE_PNODE: "delete-node",
     MOVE_PNODE_DOWN: "move-outline-down",
@@ -2148,7 +2156,6 @@ import * as utils from "./utils";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
 
-
 @language typescript
 @tabwidth -4
 @others
@@ -2442,8 +2449,6 @@ import { debounce } from "lodash";
 import * as utils from "./utils";
 import { Constants } from "./constants";
 import { RevealType, Icon, ReqRefresh, LeoPackageStates } from "./types";
-// import clipboard from 'clipboardy';
-// import * as clipboard from "clipboardy";
 
 import { Config } from "./config";
 import { LeoOutlineProvider } from './leoOutline';
@@ -2753,6 +2758,7 @@ export class LeoUI {
     public verbose: boolean = true;
     public trace: boolean = true;
     public commanderIndex: number = 0;
+    public clipboardContent: string = "";
 
     // * Timers
     public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already started refresh
@@ -2780,7 +2786,6 @@ export class LeoUI {
     private _preventShowBody = false; // Used when refreshing treeview from config: It requires not to open the body pane when refreshing.
     private _fromOutline: boolean = false; // flag to leave focus on outline instead of body when finished refreshing
     private _focusInterrupt: boolean = false; // Flag for preventing setting focus when interrupting (canceling) an 'insert node' text input dialog with another one
-
 
     // * Outline Pane
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
@@ -3095,6 +3100,7 @@ public command(
         }
     }
     this.lastCommandTimer = undefined;
+
     if (!this.preventRefresh) {
         this.launchRefresh();
     } else {
@@ -3118,11 +3124,17 @@ public minibuffer(): Thenable&lt;unknown&gt; {
             const commands: vscode.QuickPickItem[] = [];
             for (let key in c.commandsDict) {
                 const command = c.commandsDict[key];
-                commands.push({
-                    label: (command as any).__name__,
-                    description: (command as any).__doc__
-                });
+                // Going to get replaced
+                if (!(command as any).__name__.startsWith('async-')) {
+                    commands.push({
+                        label: (command as any).__name__,
+                        detail: (command as any).__doc__
+                    });
+                }
             }
+            commands.sort((a, b) =&gt; {
+                return a.label === b.label ? 0 : (a.label &gt; b.label ? 1 : -1);
+            });
             const w_options: vscode.QuickPickOptions = {
                 placeHolder: Constants.USER_MESSAGES.MINIBUFFER_PROMPT,
                 matchOnDetail: true,
@@ -3138,10 +3150,25 @@ public minibuffer(): Thenable&lt;unknown&gt; {
                     Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
                 );
             }
+            if (p_picked &amp;&amp;
+                p_picked.label &amp;&amp;
+                Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label]) {
+                p_picked.label = Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label];
+                console.log('REPLACED WITH ', p_picked.label);
+            } else {
+                console.log('ALL GOOD');
+
+            }
             if (p_picked &amp;&amp; p_picked.label) {
                 const c = g.app.commandersList[this.commanderIndex];
                 const w_commandResult = c.doCommandByName(p_picked.label);
-                this.launchRefresh();
+
+                if (!this.preventRefresh) {
+                    this.launchRefresh();
+                } else {
+                    this.preventRefresh = false;
+                }
+
                 return Promise.resolve(w_commandResult);
             } else {
                 // Canceled
@@ -6120,7 +6147,7 @@ private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): 
 public _launchRefresh(p_node?: Position): void {
     // Consider command finished
     if (this.trace) {
-        if (this.commandTimer) {
+        if (this.commandTimer !== undefined) {
             console.log('commandTimer', utils.getDurationMs(this.commandTimer));
         }
     }
@@ -6139,7 +6166,7 @@ public _launchRefresh(p_node?: Position): void {
     // Set this._fromOutline. Used when finding the selected node and showing the BODY to set or prevent focus in it
 
     if (Object.keys(this._refreshType).length) {
-        console.log('Has UI to REFRESH!', this._refreshType);
+        // console.log('Has UI to REFRESH!', this._refreshType);
     }
 
     // this._refreshType = Object.assign({}, p_refreshType); // USE _setupRefresh INSTEAD
@@ -6175,7 +6202,6 @@ public _launchRefresh(p_node?: Position): void {
     // * Either the whole tree refreshes, or a single tree node is revealed when just navigating
     if (this._refreshType.tree) {
         this._refreshType.tree = false;
-        console.log('in _launchRefresh tree was true so _refreshOutline ! ');
 
         this._refreshOutline(true, w_revealType);
     } else if (this._refreshType.node &amp;&amp; p_node) {
@@ -7464,11 +7490,8 @@ public saveAsLeojsFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 <t tx="felix.20211024012523.1">/**
  * Returns clipboard content
 */
-public getTextFromClipboard(): Thenable&lt;string&gt; {
-    // return this.clipboardContent; //vscode.env.clipboard.readText(); TODO
-    // return clipboard.readSync();
-
-    return vscode.env.clipboard.readText();
+public getTextFromClipboard(): string {
+    return this.clipboardContent;
 }
 
 </t>
@@ -7544,6 +7567,7 @@ private _tryApplyNodeToBody(
 public isTextWrapper(w: any): boolean {
     return false;
 }
+
 </t>
 <t tx="felix.20211117232843.1">{
   "command": "leojs.undoFromOutline",
@@ -8134,13 +8158,154 @@ public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
 };
 
 </t>
-<t tx="felix.20211212205241.1">public replaceClipboardWith(s: string): void {
-    // this.clipboardContent = s;
-    // clipboard.writeSync(s);
-    vscode.env.clipboard.writeText(s);
+<t tx="felix.20211212205241.1">public replaceClipboardWith(s: string): Thenable&lt;void&gt; {
+    this.clipboardContent = s; // also set immediate clipboard string
+    return vscode.env.clipboard.writeText(s);
 }
 
 </t>
 <t tx="felix.20220101161955.1"></t>
+<t tx="felix.20220103203600.1">public asyncGetTextFromClipboard(): Thenable&lt;string&gt; {
+    return vscode.env.clipboard.readText().then((s) =&gt; {
+        // also set immediate clipboard string for possible future read
+        this.clipboardContent = s;
+        return this.getTextFromClipboard();
+    });
+}
+
+</t>
+<t tx="felix.20220103222715.1">/**
+    * * Overridden 'good' minibuffer command name strings
+    */
+public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
+    'paste-node': 'async-paste-node',
+    'paste-retaining-clones': 'async-paste-retaining-clones',
+    'paste-as-template': 'async-paste-as-template'
+};</t>
+<t tx="felix.20220107223824.1">public runOpenFileDialog(
+    c: Commands,
+    title: string,
+    filetypes: [string, string][],
+    defaultExtension: string,
+    multiple?: boolean
+): Thenable&lt;string[]&gt; {
+    // convert to { [name: string]: string[] } typing
+    const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
+    return vscode.window.showOpenDialog(
+        {
+            title: title,
+            canSelectMany: !!multiple,
+            filters: types
+        }
+    ).then((p_names) =&gt; {
+        const names: string[] = [];
+        if (p_names &amp;&amp; p_names.length) {
+            p_names.forEach(name =&gt; {
+                names.push(name.fsPath);
+            });
+        }
+        return names;
+    });
+}
+
+</t>
+<t tx="felix.20220108211750.1">public runAskOkDialog(
+    c: Commands,
+    title: string,
+    message: string,
+    buttonText?: string
+): Thenable&lt;unknown&gt; {
+    return vscode.window.showInformationMessage(title, {
+        modal: true,
+        detail: message
+    });
+}
+
+</t>
+<t tx="felix.20220108211806.1">public runSaveFileDialog(
+    c: Commands,
+    title: string,
+    filetypes: [string, string][],
+    defaultExtension: string,
+    // c,
+    // c.mFileName,
+    // "Save",
+    // [["Leo files", "*.leo *.db"]], // Array of arrays (one in this case)
+    // g.defaultLeoFileExtension(c)
+): Thenable&lt;string&gt; {
+    // convert to { [name: string]: string[] } typing
+    const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
+    return vscode.window.showSaveDialog(
+        {
+            title: title,
+
+            filters: types
+        }
+    ).then((p_uri) =&gt; {
+        if (p_uri) {
+            return p_uri.fsPath;
+        } else {
+            return "";
+        }
+
+    });
+
+}
+
+</t>
+<t tx="felix.20220109180351.1">/**
+ * Convert Leo's internal filetype descriptions array
+ * to vscode's option format for open/save dialogs.
+ */
+export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: string]: string[] } {
+    /*
+        from :
+            [
+                ["", ""],
+                ["Leo files", "*.leo *.db"]
+            ],
+
+        to :
+        {
+            'Images': ['png', 'jpg']
+            'TypeScript': ['ts', 'tsx']
+        }
+
+    */
+    const w_types: { [name: string]: string[] } = {};
+    p_filetypes.forEach(type =&gt; {
+        w_types[type[0]] = type[1].split(" ").map((p_entry) =&gt; {
+
+            return p_entry.startsWith("*.") ? p_entry.substring(2) : p_entry;
+        });
+    });
+    return w_types;
+}
+</t>
+<t tx="felix.20220109220155.1">public runAskYesNoDialog(
+    c: Commands,
+    title: string,
+    message: string
+
+): Thenable&lt;string&gt; {
+    return vscode.window
+        .showInformationMessage(
+            title,
+            {
+                modal: true,
+                detail: message
+            },
+            ...["Yes", "No"]
+        )
+        .then((answer) =&gt; {
+            if (answer === "Yes") {
+                return 'yes';
+            } else {
+                return 'no';
+            }
+        });
+}
+
+</t>
 </tnodes>
 </leo_file>

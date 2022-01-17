@@ -3,8 +3,6 @@ import { debounce } from "lodash";
 import * as utils from "./utils";
 import { Constants } from "./constants";
 import { RevealType, Icon, ReqRefresh, LeoPackageStates } from "./types";
-// import clipboard from 'clipboardy';
-// import * as clipboard from "clipboardy";
 
 import { Config } from "./config";
 import { LeoOutlineProvider } from './leoOutline';
@@ -28,6 +26,7 @@ export class LeoUI {
     public verbose: boolean = true;
     public trace: boolean = true;
     public commanderIndex: number = 0;
+    public clipboardContent: string = "";
 
     // * Timers
     public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already started refresh
@@ -55,7 +54,6 @@ export class LeoUI {
     private _preventShowBody = false; // Used when refreshing treeview from config: It requires not to open the body pane when refreshing.
     private _fromOutline: boolean = false; // flag to leave focus on outline instead of body when finished refreshing
     private _focusInterrupt: boolean = false; // Flag for preventing setting focus when interrupting (canceling) an 'insert node' text input dialog with another one
-
 
     // * Outline Pane
     private _leoTreeProvider: LeoOutlineProvider; // TreeDataProvider single instance
@@ -572,7 +570,7 @@ export class LeoUI {
     public _launchRefresh(p_node?: Position): void {
         // Consider command finished
         if (this.trace) {
-            if (this.commandTimer) {
+            if (this.commandTimer !== undefined) {
                 console.log('commandTimer', utils.getDurationMs(this.commandTimer));
             }
         }
@@ -591,7 +589,7 @@ export class LeoUI {
         // Set this._fromOutline. Used when finding the selected node and showing the BODY to set or prevent focus in it
 
         if (Object.keys(this._refreshType).length) {
-            console.log('Has UI to REFRESH!', this._refreshType);
+            // console.log('Has UI to REFRESH!', this._refreshType);
         }
 
         // this._refreshType = Object.assign({}, p_refreshType); // USE _setupRefresh INSTEAD
@@ -627,7 +625,6 @@ export class LeoUI {
         // * Either the whole tree refreshes, or a single tree node is revealed when just navigating
         if (this._refreshType.tree) {
             this._refreshType.tree = false;
-            console.log('in _launchRefresh tree was true so _refreshOutline ! ');
 
             this._refreshOutline(true, w_revealType);
         } else if (this._refreshType.node && p_node) {
@@ -1085,6 +1082,7 @@ export class LeoUI {
             }
         }
         this.lastCommandTimer = undefined;
+
         if (!this.preventRefresh) {
             this.launchRefresh();
         } else {
@@ -1107,11 +1105,17 @@ export class LeoUI {
                 const commands: vscode.QuickPickItem[] = [];
                 for (let key in c.commandsDict) {
                     const command = c.commandsDict[key];
-                    commands.push({
-                        label: (command as any).__name__,
-                        description: (command as any).__doc__
-                    });
+                    // Going to get replaced
+                    if (!(command as any).__name__.startsWith('async-')) {
+                        commands.push({
+                            label: (command as any).__name__,
+                            detail: (command as any).__doc__
+                        });
+                    }
                 }
+                commands.sort((a, b) => {
+                    return a.label === b.label ? 0 : (a.label > b.label ? 1 : -1);
+                });
                 const w_options: vscode.QuickPickOptions = {
                     placeHolder: Constants.USER_MESSAGES.MINIBUFFER_PROMPT,
                     matchOnDetail: true,
@@ -1127,10 +1131,25 @@ export class LeoUI {
                         Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
                     );
                 }
+                if (p_picked &&
+                    p_picked.label &&
+                    Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label]) {
+                    p_picked.label = Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label];
+                    console.log('REPLACED WITH ', p_picked.label);
+                } else {
+                    console.log('ALL GOOD');
+
+                }
                 if (p_picked && p_picked.label) {
                     const c = g.app.commandersList[this.commanderIndex];
                     const w_commandResult = c.doCommandByName(p_picked.label);
-                    this.launchRefresh();
+
+                    if (!this.preventRefresh) {
+                        this.launchRefresh();
+                    } else {
+                        this.preventRefresh = false;
+                    }
+
                     return Promise.resolve(w_commandResult);
                 } else {
                     // Canceled
@@ -1323,20 +1342,24 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
-    public replaceClipboardWith(s: string): void {
-        // this.clipboardContent = s;
-        // clipboard.writeSync(s);
-        vscode.env.clipboard.writeText(s);
+    public replaceClipboardWith(s: string): Thenable<void> {
+        this.clipboardContent = s; // also set immediate clipboard string
+        return vscode.env.clipboard.writeText(s);
+    }
+
+    public asyncGetTextFromClipboard(): Thenable<string> {
+        return vscode.env.clipboard.readText().then((s) => {
+            // also set immediate clipboard string for possible future read
+            this.clipboardContent = s;
+            return this.getTextFromClipboard();
+        });
     }
 
     /**
      * Returns clipboard content
     */
-    public getTextFromClipboard(): Thenable<string> {
-        // return this.clipboardContent; //vscode.env.clipboard.readText(); TODO
-        // return clipboard.readSync();
-
-        return vscode.env.clipboard.readText();
+    public getTextFromClipboard(): string {
+        return this.clipboardContent;
     }
 
     /**
@@ -1647,6 +1670,99 @@ export class LeoUI {
     public isTextWrapper(w: any): boolean {
         return false;
     }
+
+    public runAskOkDialog(
+        c: Commands,
+        title: string,
+        message: string,
+        buttonText?: string
+    ): Thenable<unknown> {
+        return vscode.window.showInformationMessage(title, {
+            modal: true,
+            detail: message
+        });
+    }
+
+    public runAskYesNoDialog(
+        c: Commands,
+        title: string,
+        message: string
+
+    ): Thenable<string> {
+        return vscode.window
+            .showInformationMessage(
+                title,
+                {
+                    modal: true,
+                    detail: message
+                },
+                ...["Yes", "No"]
+            )
+            .then((answer) => {
+                if (answer === "Yes") {
+                    return 'yes';
+                } else {
+                    return 'no';
+                }
+            });
+    }
+
+    public runOpenFileDialog(
+        c: Commands,
+        title: string,
+        filetypes: [string, string][],
+        defaultExtension: string,
+        multiple?: boolean
+    ): Thenable<string[]> {
+        // convert to { [name: string]: string[] } typing
+        const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
+        return vscode.window.showOpenDialog(
+            {
+                title: title,
+                canSelectMany: !!multiple,
+                filters: types
+            }
+        ).then((p_names) => {
+            const names: string[] = [];
+            if (p_names && p_names.length) {
+                p_names.forEach(name => {
+                    names.push(name.fsPath);
+                });
+            }
+            return names;
+        });
+    }
+
+    public runSaveFileDialog(
+        c: Commands,
+        title: string,
+        filetypes: [string, string][],
+        defaultExtension: string,
+        // c,
+        // c.mFileName,
+        // "Save",
+        // [["Leo files", "*.leo *.db"]], // Array of arrays (one in this case)
+        // g.defaultLeoFileExtension(c)
+    ): Thenable<string> {
+        // convert to { [name: string]: string[] } typing
+        const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
+        return vscode.window.showSaveDialog(
+            {
+                title: title,
+
+                filters: types
+            }
+        ).then((p_uri) => {
+            if (p_uri) {
+                return p_uri.fsPath;
+            } else {
+                return "";
+            }
+
+        });
+
+    }
+
     /**
      * * Test/Dummy command
      * @returns Thenable from the tested functionality

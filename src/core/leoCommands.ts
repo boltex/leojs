@@ -13,14 +13,17 @@ import { NodeHistory } from './leoHistory';
 import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
 import { AtFile } from './leoAtFile';
+import * as fs from 'fs';
 import * as path from 'path';
 import * as sqlite3 from 'sqlite3';
+import { LeoFind } from './leoFind';
+import { LeoImportCommands } from './leoImport';
 
 
 //@-<< imports >>
 //@+others
 //@+node:felix.20211017232128.1: ** applyMixins
-function applyMixins(derivedCtor: any, constructors: any[]) {
+function applyMixins(derivedCtor: any, constructors: any[]): void {
     constructors.forEach((baseCtor) => {
         Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
             Object.defineProperty(
@@ -56,6 +59,9 @@ export class Commands {
     public hiddenRootNode: VNode;
     public fileCommands: FileCommands | DummyFileCommands;
     public atFileCommands: AtFile;
+    public findCommands: LeoFind;
+    public importCommands: LeoImportCommands;
+
     public chapterController: any; // TODO : leoChapters.ChapterController(c)
     public undoer: Undoer;
     public nodeHistory: NodeHistory;
@@ -65,11 +71,15 @@ export class Commands {
     // TODO fake frame needed FOR wrapper and hasSelection
     // TODO : maybe MERGE frame.tree.generation WITH _treeId?
     public frame: {
+        title: string;
+        openDirectory: string;
         tree: {
             generation: number;
             editLabel: (p: Position, selectAll: boolean, selection: any) => void
         }, body: any
     } = {
+            title: "",
+            openDirectory: "",
             tree: {
                 generation: 0,
                 editLabel: (p: Position, selectAll: boolean, selection: any) => {
@@ -225,7 +235,7 @@ export class Commands {
         fileName: string,
         gui?: LeoUI,
         previousSettings?: any,
-        relativeFileName?: any
+        relativeFileName?: string
     ) {
         const c: Commands = this;
 
@@ -250,9 +260,9 @@ export class Commands {
         this.chapterController = {}; // TODO self.chapterController = leoChapters.ChapterController(c)
         // this.shadowController       = leoShadow.ShadowController(c)
         this.fileCommands = new FileCommands(c);
-        // this.findCommands           = new LeoFind(c);
+        this.findCommands = new LeoFind(c);
         this.atFileCommands = new AtFile(c);
-        // this.importCommands         = new LeoImportCommands(c);
+        this.importCommands = new LeoImportCommands(c);
 
         this.nodeHistory = new NodeHistory(c);
 
@@ -732,8 +742,7 @@ export class Commands {
     public currentPositionHasNext(): boolean {
         const c: Commands = this;
         const current: Position = c._currentPosition!;
-        return current && current.__bool__() && current.hasNext()!;
-        return false;
+        return current && current.__bool__() && !!current.hasNext();
     }
 
     //@+node:felix.20210131011420.9: *6* c.isCurrentPosition
@@ -820,7 +829,8 @@ export class Commands {
         if (!p || !p.__bool__() || !p.v) {
             return false;
         }
-        const rstack: StackEntry[] = (root && root.__bool__()) ? root.stack.concat([[root.v, root._childIndex]]) : [];
+        const rstack: StackEntry[] =
+            (root && root.__bool__()) ? root.stack.concat([[root.v, root._childIndex]]) : [];
         const pstack: StackEntry[] = p.stack.concat([[p.v, p._childIndex]]);
         if (rstack.length > pstack.length) {
             return false;
@@ -1437,10 +1447,14 @@ export class Commands {
     //@+node:felix.20211101013238.1: *4* c.checkMoveWithParentWithWarning & c.checkDrag
     //@+node:felix.20211101013241.1: *5* c.checkMoveWithParentWithWarning
     /**
-     * Return False if root or any of root's descendents is a clone of parent
+     * Return False if root or any of root's descendants is a clone of parent
      * or any of parents ancestors.
      */
-    public checkMoveWithParentWithWarning(root: Position, parent: Position, warningFlag: boolean): boolean {
+    public checkMoveWithParentWithWarning(
+        root: Position,
+        parent: Position,
+        warningFlag: boolean
+    ): boolean {
         const c: Commands = this;
         const message: string = "Illegal move or drag: no clone may contain a clone of itself";
         const clonedVnodes: { [key: string]: VNode } = {};
@@ -1515,7 +1529,7 @@ export class Commands {
 
         // c = self
         if (g.app.externalFilesController) {
-            g.app.externalFilesController.set_time(fn)
+            g.app.externalFilesController.set_time(fn);
         }
 
     }
@@ -2171,32 +2185,60 @@ export class Commands {
         return p;
     }
     //@+node:felix.20211223223002.3: *4* c.backup
-    // def backup(self, fileName=None, prefix=None, silent=False, useTimeStamp=True):
-    //     """
-    //     Back up given fileName or c.fileName().
-    //     If useTimeStamp is True, append a timestamp to the filename.
-    //     """
-    //     c = self
-    //     fn = fileName or c.fileName()
-    //     if not fn:
-    //         return None
-    //     theDir, base = g.os_path_split(fn)
-    //     if useTimeStamp:
-    //         if base.endswith('.leo'):
-    //             base = base[:-4]
-    //         stamp = time.strftime("%Y%m%d-%H%M%S")
-    //         branch = prefix + '-' if prefix else ''
-    //         fn = f"{branch}{base}-{stamp}.leo"
-    //         path = g.os_path_finalize_join(theDir, fn)
-    //     else:
-    //         path = fn
-    //     if path:
-    //         # pylint: disable=no-member
-    //             # Defined in commanderFileCommands.py.
-    //         c.saveTo(fileName=path, silent=silent)
-    //             # Issues saved message.
-    //         # g.es('in', theDir)
-    //     return path
+    /**
+     * Back up given fileName or c.fileName().
+     * If useTimeStamp is True, append a timestamp to the filename.
+     */
+    public backup(
+        fileName: string | undefined = undefined,
+        prefix: string | undefined = undefined,
+        silent: boolean = false,
+        useTimeStamp: boolean = true
+    ): string | undefined {
+
+        const c: Commands = this;
+
+        let fn: string = fileName || c.fileName();
+
+        if (!fn) {
+            return undefined;
+        }
+
+        let theDir: string;
+        let base: string;
+        let w_path: string;
+
+        [theDir, base] = g.os_path_split(fn);
+
+        if (useTimeStamp) {
+            if (base.endsWith('.leo')) {
+                base = base.slice(0, -4);
+            }
+
+            // using https://www.npmjs.com/package/date-format-lite#syntax
+            // this.timeString = new Date().format("YYYYMMDD-hhmmss");
+
+            // time.strftime("%Y%m%d-%H%M%S")
+            const stamp: string = new Date().format("YYYYMMDD-hhmmss");
+
+            const branch: string = prefix ? prefix + '-' : '';
+
+            fn = `${branch}${base}-${stamp}.leo`;
+            w_path = g.os_path_finalize_join(undefined, theDir, fn);
+        } else {
+            w_path = fn;
+        }
+
+        if (w_path) {
+            // pylint: disable=no-member
+            // Defined in commanderFileCommands.py.
+            c.saveTo(w_path, silent);
+            // Issues saved message.
+            // g.es('in', theDir)
+        }
+        return w_path;
+
+    }
     //@+node:felix.20211223223002.4: *4* c.backup_helper
     // def backup_helper(self,
     //     base_dir=None,
@@ -2255,115 +2297,165 @@ export class Commands {
         return true;
     }
     //@+node:felix.20211223223002.6: *4* c.createNodeFromExternalFile
-    // def createNodeFromExternalFile(self, fn):
-    //     """
-    //     Read the file into a node.
-    //     Return None, indicating that c.open should set focus.
-    //     """
-    //     c = self
-    //     s, e = g.readFileIntoString(fn)
-    //     if s is None:
-    //         return
-    //     head, ext = g.os_path_splitext(fn)
-    //     if ext.startswith('.'):
-    //         ext = ext[1:]
-    //     language = g.app.extension_dict.get(ext)
-    //     if language:
-    //         prefix = f"@color\n@language {language}\n\n"
-    //     else:
-    //         prefix = '@killcolor\n\n'
-    //     # pylint: disable=no-member
-    //     # Defined in commanderOutlineCommands.py
-    //     p2 = c.insertHeadline(op_name='Open File', as_child=False)
-    //     p2.h = f"@edit {fn}"
-    //     p2.b = prefix + s
-    //     w = c.frame.body.wrapper
-    //     if w:
-    //         w.setInsertPoint(0)
-    //     c.redraw()
-    //     c.recolor()
+    /**
+     * Read the file into a node.
+     * Return None, indicating that c.open should set focus.
+     */
+    public createNodeFromExternalFile(fn: string): void {
+
+        const c: Commands = this;
+        let s: string | undefined;
+        let e: string | undefined;
+        [s, e] = g.readFileIntoString(fn);
+
+        if (s === undefined) {
+            return;
+        }
+
+        let head: string;
+        let ext: string;
+        [head, ext] = g.os_path_splitext(fn);
+
+        if (ext.startsWith('.')) {
+            ext = ext.slice(1);
+        }
+        const language: string = g.app.extension_dict[ext];
+        let prefix: string;
+        if (language) {
+            prefix = `@color\n@language {language}\n\n`;
+        } else {
+            prefix = '@killcolor\n\n';
+        }
+        // pylint: disable=no-member
+        // Defined in commanderOutlineCommands.py
+        let p2: Position;
+        p2 = c.insertHeadline('Open File', false)!;
+        p2.h = `@edit ${fn}`;
+        p2.b = prefix + s;
+        const w: any = c.frame.body.wrapper;
+        if (w) {
+            w.setInsertPoint(0);
+        }
+        c.redraw();
+        c.recolor();
+    }
     //@+node:felix.20211223223002.7: *4* c.looksLikeDerivedFile
-    // def looksLikeDerivedFile(self, fn):
-    //     """
-    //     Return True if fn names a file that looks like an
-    //     external file written by Leo.
-    //     """
-    //     # c = self
-    //     try:
-    //         with open(fn, 'rb') as f:  # 2020/11/14: Allow unicode characters!
-    //             b = f.read()
-    //             s = g.toUnicode(b)
-    //         return s.find('@+leo-ver=') > -1
-    //     except Exception:
-    //         g.es_exception()
-    //         return False
+    /**
+     * Return True if fn names a file that looks like an
+     * external file written by Leo.
+     */
+    public looksLikeDerivedFile(fn: string): boolean {
+        try {
+            const s: string = fs.readFileSync('test.txt', 'utf8');
+            return s.indexOf('@+leo-ver=') > -1;
+        }
+        catch (exception) {
+            g.es_exception();
+            return false;
+        }
+    }
     //@+node:felix.20211223223002.8: *4* c.markAllAtFileNodesDirty
-    // def markAllAtFileNodesDirty(self, event=None):
-    //     """Mark all @file nodes as changed."""
-    //     c = self
-    //     c.endEditing()
-    //     p = c.rootPosition()
-    //     while p:
-    //         if p.isAtFileNode():
-    //             p.setDirty()
-    //             c.setChanged()
-    //             p.moveToNodeAfterTree()
-    //         else:
-    //             p.moveToThreadNext()
-    //     c.redraw_after_icons_changed()
+    /**
+     * Mark all @file nodes as changed.
+     */
+    public markAllAtFileNodesDirty(): void {
+
+        const c: Commands = this;
+
+        // c.endEditing()
+        const p: Position = c.rootPosition()!;
+
+        while (p && p.__bool__()) {
+            if (p.isAtFileNode()) {
+                p.setDirty();
+                c.setChanged();
+                p.moveToNodeAfterTree();
+            } else {
+                p.moveToThreadNext();
+            }
+        }
+        c.redraw_after_icons_changed();
+    }
     //@+node:felix.20211223223002.9: *4* c.markAtFileNodesDirty
-    // def markAtFileNodesDirty(self, event=None):
-    //     """Mark all @file nodes in the selected tree as changed."""
-    //     c = self
-    //     p = c.p
-    //     if not p:
-    //         return
-    //     c.endEditing()
-    //     after = p.nodeAfterTree()
-    //     while p and p != after:
-    //         if p.isAtFileNode():
-    //             p.setDirty()
-    //             c.setChanged()
-    //             p.moveToNodeAfterTree()
-    //         else:
-    //             p.moveToThreadNext()
-    //     c.redraw_after_icons_changed()
+    /**
+     * Mark all @file nodes in the selected tree as changed.
+     */
+    public markAtFileNodesDirty(): void {
+
+        const c: Commands = this;
+        const p: Position = c.rootPosition()!;
+
+        if (!p || !p.__bool__()) {
+            return;
+        }
+        // c.endEditing()
+        const after: Position = p.nodeAfterTree();
+
+        while (p && p.__bool__() && !p.__eq__(after)) {
+            if (p.isAtFileNode()) {
+                p.setDirty();
+                c.setChanged();
+                p.moveToNodeAfterTree();
+            } else {
+                p.moveToThreadNext();
+            }
+        }
+        c.redraw_after_icons_changed();
+
+    }
     //@+node:felix.20211223223002.10: *4* c.openWith
-    // def openWith(self, event=None, d=None):
-    //     """
-    //     This is *not* a command.
+    /**
+     * This is *not* a command.
+     *
+     * Handles the items in the Open With... menu.
+     *
+     * See ExternalFilesController.open_with for details about d.
+     */
+    public openWith(d?: any): void {
 
-    //     Handles the items in the Open With... menu.
+        const c: Commands = this;
 
-    //     See ExternalFilesController.open_with for details about d.
-    //     """
-    //     c = self
-    //     if d and g.app.externalFilesController:
-    //         # Select an ancestor @<file> node if possible.
-    //         if not d.get('p'):
-    //             d['p'] = None
-    //             p = c.p
-    //             while p:
-    //                 if p.isAnyAtFileNode():
-    //                     d['p'] = p
-    //                     break
-    //                 p.moveToParent()
-    //         g.app.externalFilesController.open_with(c, d)
-    //     elif not d:
-    //         g.trace('can not happen: no d', g.callers())
+        if (d && g.app.externalFilesController) {
+            // Select an ancestor @<file> node if possible.
+            if (!d['p'] || !d['p'].__bool__()) {
+                d['p'] = undefined;
+                const p: Position = c.p;
+                while (p && p.__bool__()) {
+                    if (p.isAnyAtFileNode()) {
+                        d['p'] = p;
+                        break;
+                    }
+                    p.moveToParent();
+                }
+            }
+            g.app.externalFilesController.open_with(c, d);
+        } else if (!d) {
+            g.trace('can not happen: no d', g.callers());
+        }
+
+    }
     //@+node:felix.20211223223002.11: *4* c.recreateGnxDict
-    // def recreateGnxDict(self):
-    //     """Recreate the gnx dict prior to refreshing nodes from disk."""
-    //     c, d = self, {}
-    //     for v in c.all_unique_nodes():
-    //         gnxString = v.fileIndex
-    //         if isinstance(gnxString, str):
-    //             d[gnxString] = v
-    //             if 'gnx' in g.app.debug:
-    //                 g.trace(c.shortFileName(), gnxString, v)
-    //         else:
-    //             g.internalError(f"no gnx for vnode: {v}")
-    //     c.fileCommands.gnxDict = d
+    /**
+     * Recreate the gnx dict prior to refreshing nodes from disk.
+     */
+    public recreateGnxDict(): void {
+
+        const c: Commands = this;
+        const d: { [key: string]: VNode } = {};
+
+        for (let v of c.all_unique_nodes()) {
+            const gnxString: string = v.fileIndex;
+            if (typeof gnxString === 'string') {
+                d[gnxString] = v;
+                if (g.app.debug.includes('gnx')) {
+                    g.trace(c.shortFileName(), gnxString, v);
+                }
+            } else {
+                g.internalError(`no gnx for vnode: ${v}`);
+            }
+        }
+        c.fileCommands.gnxDict = d;
+    }
     //@+node:felix.20211005023225.1: *3* c.Gui
     //@+node:felix.20211122010629.1: *4* c.Dialogs & messages
     //@+node:felix.20211120224234.1: *5* c.alert
@@ -2448,6 +2540,32 @@ export class Commands {
         c.init_error_dialogs()
 
         */
+    }
+    //@+node:felix.20220108205755.1: *5* c.syntaxErrorDialog
+    /**
+     * Warn about syntax errors in files.
+     */
+    public syntaxErrorDialog(): void {
+
+        const c: Commands = this;
+
+        if (
+            g.app.syntax_error_files &&
+            c.config.getBool('syntax-error-popup')
+        ) {
+            const aList: string[] = [...g.app.syntax_error_files].sort();
+
+            g.app.syntax_error_files = [];
+
+            const list_s: string = aList.join('\n');
+
+            g.app.gui!.runAskOkDialog(
+                c,
+                'Python Errors',
+                `Python errors in:\n\n${list_s}`,
+                "Ok"
+            );
+        }
     }
     //@+node:felix.20211022202201.1: *4* c.Drawing
 
@@ -3206,6 +3324,7 @@ export class Commands {
 //@-others
 //@@language typescript
 //@@tabwidth -4
+//@@pagewidth 70
 
 export interface Commands extends CommanderOutlineCommands, CommanderFileCommands {
     canCutOutline: () => boolean;

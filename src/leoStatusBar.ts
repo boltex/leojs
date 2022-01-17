@@ -3,7 +3,6 @@ import * as utils from "./utils";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
 
-
 /**
  * * Statusbar indicator controller service
  */
