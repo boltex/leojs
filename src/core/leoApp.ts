@@ -1564,7 +1564,7 @@ export class LoadManager {
     /**
      * Open a .leo, .leojs or .db file.
      */
-    public openAnyLeoFile(fn: string): any {
+    public openAnyLeoFile(fn: string): number | undefined {
 
         const lm: LoadManager = this;
 
@@ -1574,7 +1574,7 @@ export class LoadManager {
             return undefined;
 
         }
-        let theFile: any;
+        let theFile: number | undefined;
         if (lm.isLeoFile(fn) && g.os_path_exists(fn)) {
             // ? NEEDED ZIP SUPPORT ?
             // if (lm.isZippedFile(fn)){
@@ -1583,10 +1583,7 @@ export class LoadManager {
             //     theFile = lm.openLeoFile(fn);
             // }
             theFile = lm.openLeoFile(fn);
-        } else {
-            theFile = undefined;
         }
-
         return theFile;
     }
     //@+node:felix.20220109233518.1: *6* LM.openLeoFile
@@ -1597,7 +1594,7 @@ export class LoadManager {
         try {
             let theFile: number;
 
-            theFile = fs.openSync(fn, 'r')
+            theFile = fs.openSync(fn, 'r');
 
             return theFile;
         }

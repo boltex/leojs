@@ -46,7 +46,11 @@ function computeVnodeInfoDict(c: Commands): any {
 /**
  * * Create a dict containing only copied vnodes.
  */
-function computeCopiedBunchList(c: Commands, pasted: Position, vnodeInfoDict: { [key: string]: Bead }): Bead[] {
+function computeCopiedBunchList(
+    c: Commands,
+    pasted: Position,
+    vnodeInfoDict: { [key: string]: Bead }
+): Bead[] {
     const d: { [key: string]: VNode } = {};
     for (let p of pasted.self_and_subtree(false)) {
         d[p.v.toString()] = p.v;
@@ -66,12 +70,11 @@ export class CommanderOutlineCommands {
     //@+others
     //@+node:felix.20211208235043.1: *3* c_oc.Cut & Paste Outlines
     //@+node:felix.20211208235043.2: *4* c_oc.copyOutline
-
     @commander_command(
         'copy-node',
         'Copy the selected outline to the clipboard.'
     )
-    public copyOutline(this: Commands) {
+    public copyOutline(this: Commands): void {
         // Copying an outline has no undo consequences.
         const c: Commands = this;
         // c.endEditing();
@@ -1791,8 +1794,8 @@ export class CommanderOutlineCommands {
             c,
             'Move Marked Nodes?',
             'move-marked-nodes is not undoable. Proceed?',
-        ).then((result)=>{
-            if(result === 'no'){
+        ).then((result) => {
+            if (result === 'no') {
                 return;
             }
 

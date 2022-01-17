@@ -1281,13 +1281,10 @@ export class CommanderFileCommands {
         'Read a file into a single node.'
     )
     public readFileIntoNode(this: Commands): void {
-
         const c: Commands = this;
-
         const undoType: string = 'Read File Into Node';
 
         // c.endEditing();
-
         const filetypes: [string, string][] = [["All files", "*"], ["Python files", "*.py"], ["Leo files", "*.leo"]];
 
         g.app.gui!.runOpenFileDialog(
@@ -1324,7 +1321,7 @@ export class CommanderFileCommands {
         'read-outline-only',
         'Open a Leo outline from a .leo file, but do not read any derived files.'
     )
-    public readOutlineOnly(this: Commands) {
+    public readOutlineOnly(this: Commands): void {
         const c: Commands = this;
 
         // c.endEditing();

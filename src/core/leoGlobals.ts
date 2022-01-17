@@ -371,7 +371,12 @@ export function caller(i: number = 1): string {
  *
  * If the `verbose` keyword is True, return a list separated by newlines.
  */
-export function callers(n: number = 4, count: number = 0, excludeCaller: boolean = true, verbose: boolean = false): string {
+export function callers(
+    n: number = 4,
+    count: number = 0,
+    excludeCaller: boolean = true,
+    verbose: boolean = false
+): string {
     // Be careful to call _callerName with smaller values of i first:
     // sys._getframe throws ValueError if there are less than i entries.
     let result: string[] = [];
@@ -720,7 +725,7 @@ export function getLanguageFromAncestorAtFileNode(p: Position): string | undefin
 export function getLanguageAtPosition(c: Commands, p: Position): string {
 
     const aList: string[] = get_directives_dict_list(p);
-    const d: { [key: string]: string } = scanAtCommentAndAtLanguageDirectives(aList);
+    const d: { [key: string]: any } | undefined = scanAtCommentAndAtLanguageDirectives(aList);
     let language: string = d && d['language'] ||
         getLanguageFromAncestorAtFileNode(p) ||
         c.config.getString('target-language') ||
@@ -768,12 +773,16 @@ export function isValidLanguage(language: string): boolean {
  * Scan aList for @comment and @language directives.
  * @comment should follow @language if both appear in the same node.
  */
-export function scanAtCommentAndAtLanguageDirectives(aList: any[]): any {
+export function scanAtCommentAndAtLanguageDirectives(aList: any[]): {
+    language: string;
+    comment: string;
+    delims: [string, string, string];
+} | undefined {
 
-    let lang: any = undefined;
+    let lang: string | undefined = undefined;
     for (let d of aList) {
-        const comment = d['comment'];
-        const language = d['language'];
+        const comment: string = d['comment'];
+        const language: string = d['language'];
         // Important: assume @comment follows @language.
         let delim1: string | undefined;
         let delim2: string | undefined;
@@ -786,7 +795,7 @@ export function scanAtCommentAndAtLanguageDirectives(aList: any[]): any {
         }
         if (comment || language) {
             const delims: [string, string, string] = [delim1!, delim2!, delim3!];
-            const w_d = { 'language': lang, 'comment': comment, 'delims': delims };
+            const w_d = { 'language': lang!, 'comment': comment, 'delims': delims };
             return w_d;
         }
     }

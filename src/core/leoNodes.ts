@@ -838,11 +838,6 @@ export class Position {
     public headString(): string {
         return this.v.headString();
     }
-
-    public cleanHeadString(): string {
-        return this.v.cleanHeadString();
-    }
-
     //@+node:felix.20210102233013.4: *5* p.Status bits
     public isDirty(): boolean { return this.v.isDirty(); }
 
@@ -966,9 +961,9 @@ export class Position {
             // Returns None if p.v is None.
             return p.v && parent_v && p._childIndex + 1 < parent_v.children.length;
         }
-        catch (Exception) {
+        catch (exception) {
             g.trace('*** Unexpected exception');
-            g.es_exception(Exception);
+            g.es_exception(exception);
             return undefined;
         }
     }
@@ -1661,7 +1656,11 @@ export class Position {
     /**
      * Return done, p or None
      */
-    public checkVisBackLimit(limit: Position, limitIsVisible: boolean, p: Position): [boolean, Position | undefined] {
+    public checkVisBackLimit(
+        limit: Position,
+        limitIsVisible: boolean,
+        p: Position
+    ): [boolean, Position | undefined] {
         const c: Commands = p.v.context;
         if (limit.__eq__(p)) {
             if (limitIsVisible && p.isVisible(c)) {
@@ -2603,7 +2602,7 @@ export class VNode {
     // These return the filename following @xxx, in v.headString.
     // Return the the empty string if v is not an @xxx node.
 
-    public atAutoNodeName(h?: string) {
+    public atAutoNodeName(h?: string): string {
         // return this.findAtFileName(this.atAutoNames, h);
         return this.findAtFileName(g.app.atAutoNames, h);
     }
@@ -2612,48 +2611,48 @@ export class VNode {
     // That is, we fall back on code in leoRst.py if no
     // importer or writer for reStructuredText exists.
 
-    public atAutoRstNodeName(h?: string) {
+    public atAutoRstNodeName(h?: string): string {
         const names: string[] = ["@auto-rst"];
         return this.findAtFileName(names, h);
     }
 
-    public atCleanNodeName() {
+    public atCleanNodeName(): string {
         const names: string[] = ["@clean"];
         return this.findAtFileName(names);
     }
 
-    public atEditNodeName() {
+    public atEditNodeName(): string {
         const names: string[] = ["@edit"];
         return this.findAtFileName(names);
     }
 
-    public atFileNodeName() {
+    public atFileNodeName(): string {
         const names: string[] = ["@file", "@thin"];
         // Fix #403.
         return this.findAtFileName(names);
     }
 
-    public atNoSentinelsFileNodeName() {
+    public atNoSentinelsFileNodeName(): string {
         const names: string[] = ["@nosent", "@file-nosent"];
         return this.findAtFileName(names);
     }
 
-    public atRstFileNodeName() {
+    public atRstFileNodeName(): string {
         const names: string[] = ["@rst"];
         return this.findAtFileName(names);
     }
 
-    public atShadowFileNodeName() {
+    public atShadowFileNodeName(): string {
         const names: string[] = ["@shadow"];
         return this.findAtFileName(names);
     }
 
-    public atSilentFileNodeName() {
+    public atSilentFileNodeName(): string {
         const names: string[] = ["@asis", "@file-asis"];
         return this.findAtFileName(names);
     }
 
-    public atThinFileNodeName() {
+    public atThinFileNodeName(): string {
         const names: string[] = ["@thin", "@file-thin"];
         return this.findAtFileName(names);
     }
@@ -2793,7 +2792,7 @@ export class VNode {
 
     //@+node:felix.20210102234910.1: *3* v.Getters
     //@+node:felix.20210102234915.1: *4* v.bodyString
-    public bodyString() {
+    public bodyString(): string {
         return this._bodyString;
     }
 
@@ -2862,7 +2861,7 @@ export class VNode {
     /**
      * Return the headline string.
      */
-    public headString() {
+    public headString(): string {
         return this._headString;
     }
 
@@ -2870,7 +2869,7 @@ export class VNode {
     /**
      * Return the headline string. Same as headString.
      */
-    public cleanHeadString() {
+    public cleanHeadString(): string {
         return this._headString;
     }
 
@@ -3349,7 +3348,7 @@ export class VNode {
     /**
      * Used by cutLink to adjust parent links in the descendant tree
      */
-    public _cutParentLinks(parent: VNode) {
+    public _cutParentLinks(parent: VNode): void {
         const v: VNode = this;
 
         for (let i = 0; i < v.parents.length; i++) {

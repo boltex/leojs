@@ -742,8 +742,7 @@ export class Commands {
     public currentPositionHasNext(): boolean {
         const c: Commands = this;
         const current: Position = c._currentPosition!;
-        return current && current.__bool__() && current.hasNext()!;
-        return false;
+        return current && current.__bool__() && !!current.hasNext();
     }
 
     //@+node:felix.20210131011420.9: *6* c.isCurrentPosition
@@ -830,7 +829,8 @@ export class Commands {
         if (!p || !p.__bool__() || !p.v) {
             return false;
         }
-        const rstack: StackEntry[] = (root && root.__bool__()) ? root.stack.concat([[root.v, root._childIndex]]) : [];
+        const rstack: StackEntry[] =
+            (root && root.__bool__()) ? root.stack.concat([[root.v, root._childIndex]]) : [];
         const pstack: StackEntry[] = p.stack.concat([[p.v, p._childIndex]]);
         if (rstack.length > pstack.length) {
             return false;
@@ -1450,7 +1450,11 @@ export class Commands {
      * Return False if root or any of root's descendants is a clone of parent
      * or any of parents ancestors.
      */
-    public checkMoveWithParentWithWarning(root: Position, parent: Position, warningFlag: boolean): boolean {
+    public checkMoveWithParentWithWarning(
+        root: Position,
+        parent: Position,
+        warningFlag: boolean
+    ): boolean {
         const c: Commands = this;
         const message: string = "Illegal move or drag: no clone may contain a clone of itself";
         const clonedVnodes: { [key: string]: VNode } = {};
@@ -1525,7 +1529,7 @@ export class Commands {
 
         // c = self
         if (g.app.externalFilesController) {
-            g.app.externalFilesController.set_time(fn)
+            g.app.externalFilesController.set_time(fn);
         }
 
     }
