@@ -2456,12 +2456,12 @@ import { LeoButtonNode, LeoButtonsProvider } from "./leoButtons";
 import { LeoDocumentNode, LeoDocumentsProvider } from "./leoDocuments";
 import { LeoFilesBrowser } from "./leoFileBrowser";
 import { LeoStates } from "./leoStates";
+import { LeoBodyProvider } from "./leoBody";
+import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
 import * as g from './core/leoGlobals';
 import { LoadManager } from "./core/leoApp";
-import { NodeIndices, Position, VNode } from "./core/leoNodes";
-import { LeoBodyProvider } from "./leoBody";
 import { Commands } from "./core/leoCommands";
-import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
+import { NodeIndices, Position, VNode } from "./core/leoNodes";
 
 @language typescript
 @tabwidth -4
@@ -2569,6 +2569,13 @@ import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
     w_node.initHeadString("some other title");
     w_node.setBodyString('body text');
 
+    let nodeCounter = 0;
+    while (nodeCounter &lt; 30) {
+        nodeCounter++;
+        w_node = c.p.insertAsLastChild();
+        w_node.initHeadString("top node numbered headline " + nodeCounter);
+    }
+
     w_node = c.p.insertAsLastChild();
     w_node.initHeadString("yet another node");
     w_node.setBodyString('more body text\nwith a second line');
@@ -2578,6 +2585,13 @@ import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
     w_node.setBodyString('again some body text');
     w_c.setCurrentPosition(w_node);
 
+    nodeCounter = 0;
+    while (nodeCounter &lt; 30) {
+        nodeCounter++;
+        w_node = c.p.insertAsLastChild();
+        w_node.initHeadString("middle node numbered headline " + nodeCounter);
+    }
+
     w_node = c.p.insertAsLastChild();
     w_node.initHeadString("sample cloned node");
     w_node.setBodyString('some other body');
@@ -2586,6 +2600,32 @@ import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
     w_node = c.p.insertAfter();
     w_node.setMarked();
     w_node.initHeadString("a different headline");
+
+    w_c.setCurrentPosition(w_node);
+
+    nodeCounter = 0;
+    while (nodeCounter &lt; 30) {
+        nodeCounter++;
+        w_node = c.p.insertAsLastChild();
+        w_node.initHeadString("a numbered headline " + nodeCounter);
+    }
+
+    w_node = c.p.insertAfter();
+    w_node.initHeadString("another different headline");
+
+    nodeCounter = 0;
+    while (nodeCounter &lt; 30) {
+        nodeCounter++;
+        w_node = c.p.insertAsLastChild();
+        w_node.initHeadString("more numbered headlines " + nodeCounter);
+    }
+    w_c.setCurrentPosition(w_node);
+    nodeCounter = 0;
+    while (nodeCounter &lt; 30) {
+        nodeCounter++;
+        w_node = c.p.insertAsLastChild();
+        w_node.initHeadString("inside numbered headlines " + nodeCounter);
+    }
 
     // back to first test commander after creating this second one
     c = g.app.commandersList[this.commanderIndex];
