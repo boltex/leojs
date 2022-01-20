@@ -1281,10 +1281,19 @@ export class CommanderOutlineCommands {
         'tree-page-up',
         'Outline Page Up.'
     )
-    public treePageUp(this: Commands, n = 3): void {
-        // This has an up arrow for a control key.
-        for (let i = 0; i < n; i++) {
-            this.selectVisBack();
+    public treePageUp(this: Commands): void {
+        const c: Commands = this;
+        const parent: Position = c.p.parent();
+        if (!parent.__bool__()) {
+            c.goToFirstSibling();
+            return;
+        }
+        const siblings: Position[] = [...parent.children()];
+        const firstSibling = siblings[0];
+        if (firstSibling.gnx === c.p.gnx) {
+            c.selectVisBack(); // already first sibling
+        } else {
+            c.goToFirstSibling();
         }
     }
     //@+node:felix.20211025221156.1: *4* c_oc.treePageDown
@@ -1292,10 +1301,19 @@ export class CommanderOutlineCommands {
         'tree-page-down',
         'Outline Page Down.'
     )
-    public treePageDown(this: Commands, n = 3): void {
-        // This has an up arrow for a control key.
-        for (let i = 0; i < n; i++) {
-            this.selectVisNext();
+    public treePageDown(this: Commands): void {
+        const c: Commands = this;
+        const parent: Position = c.p.parent();
+        if (!parent.__bool__()) {
+            c.goToLastSibling();
+            return;
+        }
+        const siblings: Position[] = [...parent.children()];
+        const lastSibling = siblings[siblings.length - 1];
+        if (lastSibling.gnx === c.p.gnx) {
+            c.selectVisNext(); // already last sibling
+        } else {
+            c.goToLastSibling();
         }
     }
     //@+node:felix.20211031143537.1: *3* c_oc.hoist/dehoist/clearAllHoists

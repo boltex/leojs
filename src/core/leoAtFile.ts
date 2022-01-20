@@ -24,7 +24,7 @@ import { Commands } from './leoCommands';
 
 //@-<< imports >>
 //@+others
-//@+node:felix.20211225220217.1: ** u.cmd (decorator)
+//@+node:felix.20211225220217.1: ** atFile.cmd
 /**
  * Command decorator for the AtFileCommands class.
  */
