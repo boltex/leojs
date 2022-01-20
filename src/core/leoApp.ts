@@ -99,30 +99,18 @@ export class LeoApp {
     public batchMode: boolean = false; // True: run in batch mode.
     public debug: string[] = []; // A list of switches to be enabled.
     public diff: boolean = false; // True: run Leo in diff mode.
-    public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
     public gui: LeoUI | undefined; // The gui class.
     public guiArgName = null; // The gui name given in --gui option.
-    public ipython_inited: boolean = false; // True if leoIpython.py imports succeeded.
-    public isTheme: boolean = false; // True: load files as theme files (ignore myLeoSettings.leo).
     public listen_to_log_flag: boolean = false; // True: execute listen-to-log command.
-    public qt_use_tabs: boolean = false; // True: using qt gui: allow tabbed main window.
     public loaded_session: boolean = false; // Set at startup if no files specified on command line.
     public silentMode: boolean = false; // True: no sign-on.
-    public start_fullscreen: boolean = false; // For qt_frame plugin.
-    public start_maximized: boolean = false; // For qt_frame plugin.
-    public start_minimized: boolean = false; // For qt_frame plugin.
     public trace_binding = null; // The name of a binding to trace, or None.
     public trace_setting = null; // The name of a setting to trace, or None.
-    public translateToUpperCase: boolean = false; // Never set to True.
-    public useIpython: boolean = false; // True: add support for IPython.
-    public use_psyco: boolean = false; // True: use psyco optimization.
-    public use_splash_screen: boolean = true; // True: put up a splash screen.
 
     //@-<< LeoApp: command-line arguments >>
     //@+<< LeoApp: Debugging & statistics >>
     //@+node:felix.20210103024632.3: *4* << LeoApp: Debugging & statistics >>
-    public count: number = 0; // General purpose debugging count.
     public debug_dict: any = {}; // For general use.
     public disable_redraw: boolean = false; // True: disable all redraws.
     public disableSave: boolean = false; // May be set by plugins.
@@ -209,7 +197,6 @@ export class LeoApp {
     //@+<< LeoApp: global status vars >>
     //@+node:felix.20210103024632.9: *4* << LeoApp: global status vars >>
     public already_open_files: any[] = []; // A list of file names that * might * be open in another copy of Leo.
-    public dragging: boolean = false; // True: dragging.
     public inBridge: boolean = false; // True: running from leoBridge module.
     public inScript: boolean = false; // True: executing a script.
     public initing: boolean = true; // True: we are initializing the app.
@@ -1251,12 +1238,7 @@ export class LoadManager {
     public make_screen_shot(fn: string): void {
         // TODO
         console.log('TODO: make_screen_shot');
-        /*
-        """Create a screenshot of the present Leo outline and save it to path."""
-        if g.app.gui.guiName() == 'qt':
-            m = g.loadOnePlugin('screenshots')
-            m.make_screen_shot(fn)
-        */
+
     }
 
     //@+node:felix.20210120004121.5: *5* LM.openEmptyWorkBook
