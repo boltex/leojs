@@ -473,8 +473,8 @@ export class FastRead {
                 let gnx: string | undefined;
                 let v: VNode | undefined;
                 try {
-                    gnx = e.attrib['t']!;
-                    v = gnx2vnode[gnx];
+                    gnx = e.attrib['t'];
+                    v = gnx2vnode[gnx!];
                 } catch (keyError) {
                     // g.trace('no "t" attrib');
                     gnx = undefined;
