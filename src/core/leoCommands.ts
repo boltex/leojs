@@ -2,6 +2,10 @@
 //@+node:felix.20210110222544.1: * @file src/core/leoCommands.ts
 //@+<< imports >>
 //@+node:felix.20210220194059.1: ** << imports >>
+import * as vscode from "vscode";
+// import 'browser-hrtime';
+// require('browser-hrtime');
+
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
 import { DummyFileCommands, FileCommands } from "./leoFileCommands";
@@ -13,9 +17,9 @@ import { NodeHistory } from './leoHistory';
 import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
 import { AtFile } from './leoAtFile';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as sqlite3 from 'sqlite3';
+// import * as fs from 'fs';
+// import * as path from 'path';
+// import * as sqlite3 from 'sqlite3';
 import { LeoFind } from './leoFind';
 import { LeoImportCommands } from './leoImport';
 
@@ -126,7 +130,7 @@ export class Commands {
     public command_name: string = '';
     public recent_commands_list: string[] = [];
 
-    public sqlite_connection: sqlite3.Database | undefined = undefined;
+    public sqlite_connection: any | undefined = undefined;
 
     //@+node:felix.20210223220814.3: *4* c.initDebugIvars
     // Init Commander debugging ivars.
@@ -2301,12 +2305,12 @@ export class Commands {
      * Read the file into a node.
      * Return None, indicating that c.open should set focus.
      */
-    public createNodeFromExternalFile(fn: string): void {
+    public async createNodeFromExternalFile(fn: string): Promise<void> {
 
         const c: Commands = this;
         let s: string | undefined;
         let e: string | undefined;
-        [s, e] = g.readFileIntoString(fn);
+        [s, e] = await g.readFileIntoString(fn);
 
         if (s === undefined) {
             return;
@@ -2344,9 +2348,11 @@ export class Commands {
      * Return True if fn names a file that looks like an
      * external file written by Leo.
      */
-    public looksLikeDerivedFile(fn: string): boolean {
+    public async looksLikeDerivedFile(fn: string): Promise<boolean> {
         try {
-            const s: string = fs.readFileSync('test.txt', 'utf8');
+            const w_uri = vscode.Uri.file(fn);
+            const readData = await vscode.workspace.fs.readFile(w_uri);
+            const s = Buffer.from(readData).toString('utf8');
             return s.indexOf('@+leo-ver=') > -1;
         }
         catch (exception) {
@@ -2573,7 +2579,7 @@ export class Commands {
 
 
     //@+node:felix.20211120225325.1: *5* c.bringToFront
-    public bringToFront(c2?: Commands, set_focus: boolean = true): void {
+    public bringToFront(c2?: Commands): void {
         const c: Commands = this;
         c2 = c2 || c;
         if (!!g.app.gui && !!g.app.gui.ensure_commander_visible) {
@@ -2808,11 +2814,13 @@ export class Commands {
     //@+node:felix.20211005024008.1: *5* c.expandSubtree
     public expandSubtree(p: Position): void {
         const last = p.lastNode();
+        p = p.copy();
         while (p.__bool__() && !p.__eq__(last)) {
             p.expand();
-            p = p.threadNext();
+            p = p.moveToThreadNext();
         }
     }
+
 
     //@+node:felix.20211005024009.1: *5* c.expandToLevel
     public expandToLevel(level: number): void {

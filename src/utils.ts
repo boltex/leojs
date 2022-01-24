@@ -2,7 +2,8 @@ import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { Icon } from "./types";
 import { LeoOutlineNode } from "./leoOutline";
-import * as fs from 'fs';
+// import 'browser-hrtime';
+// require('browser-hrtime');
 
 // String and other types/structures helper functions, along with common vscode API calls
 

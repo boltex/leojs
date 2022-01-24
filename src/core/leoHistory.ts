@@ -1,7 +1,6 @@
 //@+leo-ver=5-thin
 //@+node:felix.20211021231651.1: * @file src/core/leoHistory.ts
 import { Commands } from './leoCommands';
-import * as g from './leoGlobals';
 import { Position } from './leoNodes';
 //@+others
 //@+node:felix.20211021231651.2: ** class NodeHistory

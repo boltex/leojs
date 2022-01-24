@@ -2,14 +2,17 @@
 //@+node:felix.20210102012334.1: * @file src/core/leoApp.ts
 //@+<< imports >>
 //@+node:felix.20210102211149.1: ** << imports >> (leoApp)
+import * as vscode from "vscode";
+// import 'browser-hrtime';
+// require('browser-hrtime');
+
 import * as os from "os";
-import * as fs from 'fs';
+// import * as fs from 'fs';
 import * as path from 'path';
 import * as g from './leoGlobals';
 import { LeoUI } from '../leoUI';
 import { NodeIndices } from './leoNodes';
 import { Commands } from './leoCommands';
-import { fstat } from "fs";
 import { FileCommands } from "./leoFileCommands";
 
 //@-<< imports >>
@@ -915,6 +918,7 @@ export class LeoApp {
             return;
         }
         // #1519: check os.path.exists.
+        /*
         const aList: string[] = g.app.db[tag] || [];  // A list of normalized file names.
         let w_any: boolean = false;
         for (let z of aList) {
@@ -938,25 +942,26 @@ export class LeoApp {
         } else {
             g.app.rememberOpenFile(fn);
         }
+        */
+        // TODO maybe
+        // Temp fix
+        g.app.rememberOpenFile(fn);
 
     }
     //@+node:felix.20211226221235.3: *4* app.forgetOpenFile
     /**
      * Forget the open file, so that is no longer considered open.
      */
-    public forgetOpenFile(fn: string, force = false): void {
+    public forgetOpenFile(fn: string): void {
         const trace: boolean = g.app.debug.includes('shutdown');
         const d: any = g.app.db;
         const tag: string = 'open-leo-files';
 
         if (!d || !fn) {
-            // #69.
-            return;
+
+            return; // #69.
         }
-        if (!force && (
-            d === undefined || g.unitTesting || g.app.batchMode || g.app.reverting)) {
-            return;
-        }
+
         const aList: string[] = d[tag] || [];
 
         fn = path.normalize(fn);
@@ -975,7 +980,6 @@ export class LeoApp {
             d[tag] = aList;
 
         }
-        // elif trace: g.pr(f"forgetOpenFile: did not remove: {fn}")
 
     }
     //@+node:felix.20211226221235.4: *4* app.rememberOpenFile
@@ -1023,7 +1027,13 @@ export class LeoApp {
 
         verbose = verbose && !g.unitTesting && !this.silentMode;
 
-        this.leoID = this.cleanLeoID(os.userInfo().username, 'os.userInfo().username');
+        let w_userName = "TestUserName";
+
+        if (os && os.userInfo) {
+            w_userName = os.userInfo().username;
+        }
+
+        this.leoID = this.cleanLeoID(w_userName, 'os.userInfo().username');
 
         return this.leoID;
         // table = (self.setIDFromSys, self.setIDFromFile, self.setIDFromEnv,)
@@ -1251,38 +1261,39 @@ export class LoadManager {
 
         /*
         // Create an empty frame.
-        const fn:string = lm.computeWorkbookFileName();
+        fn = lm.computeWorkbookFileName()
         if not fn:
             return None  # #1415
         c = lm.loadLocalFile(fn, gui=g.app.gui, old_c=None)
         if not c:
             return None  # #1201: AttributeError below.
-        # Open the cheatsheet, but not in batch mode.
-        if not g.app.batchMode and not g.os_path_exists(fn):
-            # #933: Save clipboard.
-            old_clipboard = g.app.gui.getTextFromClipboard()
-            # Paste the contents of CheetSheet.leo into c.
-            c2 = c.openCheatSheet(redraw=False)
-            if c2:
-                for p2 in c2.rootPosition().self_and_siblings():
-                    c2.setCurrentPosition(p2)  # 1380
-                    c2.copyOutline()
-                    p = c.pasteOutline()
-                    # #1380 & #1381: Add guard & use vnode methods to prevent redraw.
-                    if p:
-                        c.setCurrentPosition(p)  # 1380
-                        p.v.contract()
-                        p.v.clearDirty()
-                c2.close(new_c=c)
-                # Delete the dummy first node.
-                root = c.rootPosition()
-                root.doDelete(newNode=root.next())
-                c.target_language = 'rest'
-                    # Settings not parsed the first time.
-                c.clearChanged()
-                c.redraw(c.rootPosition())  # # 1380: Select the root.
-            # #933: Restore clipboard
-            g.app.gui.replaceClipboardWith(old_clipboard)
+        if g.app.batchMode and g.os_path_exists(fn):
+            return c
+        # Open the cheatsheet.
+        fn = g.os_path_finalize_join(g.app.loadDir, '..', 'doc', 'CheatSheet.leo')
+        if not g.os_path_exists(fn):
+            g.es(f"file not found: {fn}")
+            return None
+        # Paste the contents of CheetSheet.leo into c.
+        old_clipboard = g.app.gui.getTextFromClipboard()  # #933: Save clipboard.
+        c2 = g.openWithFileName(fn, old_c=c)
+        for p2 in c2.rootPosition().self_and_siblings():
+            c2.setCurrentPosition(p2)  # 1380
+            c2.copyOutline()
+            # #1380 & #1381: Add guard & use vnode methods to prevent redraw.
+            p = c.pasteOutline()
+            if p:
+                c.setCurrentPosition(p)  # 1380
+                p.v.contract()
+                p.v.clearDirty()
+        c2.close(new_c=c)
+        # Delete the dummy first node.
+        root = c.rootPosition()
+        root.doDelete(newNode=root.next())
+        c.target_language = 'rest'
+        c.clearChanged()
+        c.redraw(c.rootPosition())  # # 1380: Select the root.
+        g.app.gui.replaceClipboardWith(old_clipboard)  # #933: Restore clipboard
         return c
         */
         const fn: string = "";
@@ -1544,7 +1555,10 @@ export class LoadManager {
     }
     //@+node:felix.20220109233001.1: *6* LM.openAnyLeoFile
     /**
+     * @deprecated Now using async vscode.workspace.fs functions
      * Open a .leo, .leojs or .db file.
+     * @param fn
+     * @returns number: file descriptor
      */
     public openAnyLeoFile(fn: string): number | undefined {
 
@@ -1557,6 +1571,9 @@ export class LoadManager {
 
         }
         let theFile: number | undefined;
+
+        // ! now use vscode.workspace.fs async functions
+        /*
         if (lm.isLeoFile(fn) && g.os_path_exists(fn)) {
             // ? NEEDED ZIP SUPPORT ?
             // if (lm.isZippedFile(fn)){
@@ -1566,13 +1583,21 @@ export class LoadManager {
             // }
             theFile = lm.openLeoFile(fn);
         }
+        */
         return theFile;
     }
     //@+node:felix.20220109233518.1: *6* LM.openLeoFile
+    /**
+     * @deprecated Now using async vscode.workspace.fs functions
+     * @param fn
+     * @returns number: file descriptor
+     */
     public openLeoFile(fn: string): number | undefined {
 
-        // const lm: LoadManager = this;
+        return undefined;
 
+        // const lm: LoadManager = this;
+        /*
         try {
             let theFile: number;
 
@@ -1587,8 +1612,14 @@ export class LoadManager {
             }
             return undefined;
         }
+        */
     }
     //@+node:felix.20210222013445.1: *6* LM.openLeoOrZipFile
+    /**
+     * @deprecated Now using async vscode.workspace.fs functions
+     * @param fn
+     * @returns number: file descriptor
+     */
     public openLeoOrZipFile(fn: string): any {
         const lm: LoadManager = this;
         if (fn.endsWith('.db')) {
@@ -1638,15 +1669,20 @@ export class LoadManager {
     /**
      * Revert c to the previously saved contents.
      */
-    public revertCommander(c: Commands): void {
+    public async revertCommander(c: Commands): Promise<void> {
         const lm: LoadManager = this;
         const fn: string = c.mFileName;
         // Re-read the file.
-        const theFile = lm.openAnyLeoFile(fn);
-        if (theFile) {
+        // const theFile = lm.openAnyLeoFile(fn);
+        const w_uri = vscode.Uri.file(fn);
+
+        try {
+            await vscode.workspace.fs.stat(w_uri);
+            // OK exists
             (c.fileCommands as FileCommands).initIvars();
-            (c.fileCommands as FileCommands).getLeoFile(theFile, fn, false);
-            // Closes the file.
+            (c.fileCommands as FileCommands).getLeoFile(fn, false);
+        } catch {
+            // Does not exist !
         }
     }
     //@-others

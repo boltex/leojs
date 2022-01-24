@@ -16,6 +16,8 @@ import * as g from './core/leoGlobals';
 import { LoadManager } from "./core/leoApp";
 import { Commands } from "./core/leoCommands";
 import { NodeIndices, Position, VNode } from "./core/leoNodes";
+// import 'browser-hrtime';
+// require('browser-hrtime');
 
 /**
  * Creates and manages instances of the UI elements along with their events

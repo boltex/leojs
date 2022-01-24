@@ -6,8 +6,10 @@
  */
 //@+<< imports >>
 //@+node:felix.20210102181122.1: ** << imports >> (leoGlobals)
+import * as vscode from "vscode";
+
 import * as os from 'os';
-import * as fs from 'fs';
+// import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
@@ -50,9 +52,11 @@ import { Position, VNode } from './leoNodes';
 */
 
 //@-<< imports >>
+console.log('process', process);
 
-export const isMac: boolean = process.platform.startsWith('darwin');
-export const isWindows: boolean = process.platform.startsWith('win');
+export const isBrowser: boolean = (process as any).browser;
+export const isMac: boolean = process.platform?.startsWith('darwin');
+export const isWindows: boolean = process.platform?.startsWith('win');
 
 //@+<< define g.globalDirectiveList >>
 //@+node:felix.20210102180402.1: ** << define g.globalDirectiveList >>
@@ -1022,13 +1026,20 @@ export function update_directives_pat(): void {
 update_directives_pat();
 //@+node:felix.20211104210746.1: ** g.Files & Directories
 //@+node:felix.20220108221428.1: *3* g.chdir
-export function chdir(p_path: string): void {
-    if (!os_path_isdir(p_path)) {
+export async function chdir(p_path: string): Promise<void> {
+
+    let w_isDir = await os_path_isdir(p_path);
+    if (w_isDir) {
         p_path = os_path_dirname(p_path);
     }
-    if (os_path_isdir(p_path) && os_path_exists(p_path)) {
+
+    w_isDir = await os_path_isdir(p_path);
+    const w_exist = await os_path_exists(p_path);
+
+    if (w_isDir && w_exist) {
         process.chdir(p_path);
     }
+
 }
 //@+node:felix.20220108215158.1: *3* g.defaultLeoFileExtension
 export function defaultLeoFileExtension(c?: Commands): string {
@@ -1125,11 +1136,11 @@ export function getBaseDirectory(c: Commands): string {
     - The encoding given by the 'encoding' keyword arg.
     - None, which typically means 'utf-8'.
  */
-export function readFileIntoString(fileName: string,
+export async function readFileIntoString(fileName: string,
     encoding: string = 'utf-8',  // BOM may override this.
     kind: string | undefined = undefined,  // @file, @edit, ...
     verbose: boolean = true,
-): [string | undefined, string | undefined] {
+): Promise<[string | undefined, string | undefined]> {
 
     if (!fileName) {
         if (verbose) {
@@ -1137,7 +1148,9 @@ export function readFileIntoString(fileName: string,
         }
         return [undefined, undefined];
     }
-    if (os_path_isdir(fileName)) {
+
+    const w_isDir = await os_path_isdir(fileName);
+    if (w_isDir) {
         if (verbose) {
             trace('not a file:', fileName);
         }
@@ -1180,7 +1193,12 @@ export function readFileIntoString(fileName: string,
         }
         s = toUnicode(s, e || encoding);
         */
-        s = fs.readFileSync(fileName, { encoding: 'utf8' });
+
+        const w_uri = vscode.Uri.file(fileName);
+        const readData = await vscode.workspace.fs.readFile(w_uri);
+        const s = Buffer.from(readData).toString('utf8');
+
+        // s = fs.readFile(fileName, { encoding: 'utf8' });
 
         return [s, e];
     }
@@ -1848,7 +1866,7 @@ export function os_path_dirname(p_path: string): string {
 /**
  * Return True if path exists.
  */
-export function os_path_exists(p_path: string): boolean {
+export async function os_path_exists(p_path: string): Promise<boolean> {
 
     if (!p_path) {
         return false;
@@ -1858,7 +1876,17 @@ export function os_path_exists(p_path: string): boolean {
         trace('NULL in', p_path.toString(), callers());
         p_path = p_path.split('\x00').join(''); // Fix Python 3 bug on Windows 10.
     }
-    return fs.existsSync(p_path);
+
+    const w_uri = vscode.Uri.file(p_path);
+
+    try {
+        await vscode.workspace.fs.stat(w_uri);
+        // OK exists
+        return true;
+    } catch {
+        // Does not exist !
+        return false;
+    }
 
 }
 //@+node:felix.20211227182611.7: *3* g.os_path_expanduser
@@ -1955,9 +1983,20 @@ export function os_path_isabs(p_path: string): boolean {
 /**
  * Return True if the path is a directory.
  */
-export function os_path_isdir(p_path: string): boolean {
+export async function os_path_isdir(p_path: string): Promise<boolean> {
     if (path) {
-        return fs.existsSync(p_path) && fs.lstatSync(p_path).isDirectory();
+
+        const w_uri = vscode.Uri.file(p_path);
+
+        try {
+            const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(w_uri);
+            // OK exists
+            return fileStat.type === vscode.FileType.Directory;
+        } catch {
+            // Does not exist !
+            return false;
+        }
+
     } else {
         return false;
     }

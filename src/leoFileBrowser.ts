@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { Constants } from "./constants";
-import * as path from "path";
 
 /**
  * * Handles opening of file browser when choosing which Leo file to open
@@ -31,8 +30,8 @@ export class LeoFilesBrowser {
         }
         if (!w_openedFileEnvUri) {
             w_openedFileEnvUri = vscode.Uri.file("~");
-                // TODO : set as home folder properly, this doesn't work
-                // ! EXAMPLE WITH os : const homedir = require('os').homedir();
+            // TODO : set as home folder properly, this doesn't work
+            // ! EXAMPLE WITH os : const homedir = require('os').homedir();
         }
         return w_openedFileEnvUri;
     }
@@ -63,7 +62,7 @@ export class LeoFilesBrowser {
                         if (p_chosenLeoFile) {
                             // single string
                             // Replace backslashes for windows support
-                            p_resolve(p_chosenLeoFile.fsPath.replace(/\\/g, "/")); 
+                            p_resolve(p_chosenLeoFile.fsPath.replace(/\\/g, "/"));
                         } else {
                             p_resolve(""); // not rejection - resolve empty string
                         }
@@ -79,7 +78,7 @@ export class LeoFilesBrowser {
                         this._fileBrowserActive = false;
                         if (p_chosenLeoFile) {
                             // array instead of single string
-                             // Replace backslashes for windows support
+                            // Replace backslashes for windows support
                             p_resolve(p_chosenLeoFile[0].fsPath.replace(/\\/g, "/"));
                         } else {
                             p_resolve("");

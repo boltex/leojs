@@ -1,7 +1,9 @@
 //@+leo-ver=5-thin
 //@+node:felix.20211017230407.1: * @file src/commands/commanderFileCommands.ts
 // File commands that used to be defined in leoCommands.py
-import * as fs from 'fs';
+// import * as fs from 'fs';
+import * as vscode from "vscode";
+
 import * as g from '../core/leoGlobals';
 import { commander_command } from "../core/decorators";
 import { StackEntry, Position, VNode } from "../core/leoNodes";
@@ -16,7 +18,7 @@ import { AtFile } from '../core/leoAtFile';
 /**
  * Import the .txt file into a new node.
  */
-function import_txt_file(c: Commands, fn: string): void {
+async function import_txt_file(c: Commands, fn: string): Promise<void> {
     const u = c.undoer;
     g.setGlobalOpenDir(fn);
     const undoData = u.beforeInsertNode(c.p);
@@ -25,7 +27,7 @@ function import_txt_file(c: Commands, fn: string): void {
     p.h = `@edit ${fn}`;
     let s: string | undefined;
     let e: any;
-    [s, e] = g.readFileIntoString(fn, undefined, '@edit');
+    [s, e] = await g.readFileIntoString(fn, undefined, '@edit');
     p.b = s!;
     u.afterInsertNode(p, 'Import', undoData);
     c.setChanged();
@@ -140,7 +142,7 @@ export class CommanderFileCommands {
                 g.app.windowList.remove(frame)
             else:
                 // #69.
-                g.app.forgetOpenFile(fn=c.fileName(), force=True)
+                g.app.forgetOpenFile(fn=c.fileName())
         // 6. Complete the shutdown.
         g.app.finishQuit()
         // 7. Restart, restoring the original command line.
@@ -271,7 +273,7 @@ export class CommanderFileCommands {
                                 // Experimental: attempt to use permissive section ref logic.
                         );
 
-
+                    c.redraw()
                 c.raise_error_dialogs('read')
                 */
             });
@@ -466,7 +468,7 @@ export class CommanderFileCommands {
         'refresh-from-disk',
         'Refresh an @<file> node from disk.'
     )
-    public refreshFromDisk(this: Commands): void {
+    public async refreshFromDisk(this: Commands): Promise<void> {
 
         const c: Commands = this;
         let p: Position = this.p;
@@ -483,7 +485,8 @@ export class CommanderFileCommands {
             return;
         }
         // #1603.
-        if (g.os_path_isdir(fn)) {
+        const w_isDir = await g.os_path_isdir(fn);
+        if (w_isDir) {
             g.warning(`not a file: ${fn}`);
             return;
         }
@@ -1250,13 +1253,15 @@ export class CommanderFileCommands {
         const u: Undoer = this.undoer;
 
         // c.endEditing();
-        // c.init_error_dialogs() # Done in at.readAll.
         const undoData: Bead = u.beforeChangeTree(p);
-        (c.fileCommands as FileCommands).readAtFileNodes();
+
+        c.atFileCommands.readAllSelected(p);
+        // Force an update of the body pane.
+        c.setBodyString(p, p.b)  // Not a do-nothing!
         u.afterChangeTree(p, 'Read @file Nodes', undoData);
         c.redraw();
     }
-    // c.raise_error_dialogs(kind='read') # Done in at.readAll.
+
     //@+node:felix.20220105210716.33: *4* c_file.readAtShadowNodes
     @commander_command(
         'read-at-shadow-nodes',
@@ -1280,26 +1285,25 @@ export class CommanderFileCommands {
         'read-file-into-node',
         'Read a file into a single node.'
     )
-    public readFileIntoNode(this: Commands): void {
+    public async readFileIntoNode(this: Commands): Promise<void> {
         const c: Commands = this;
         const undoType: string = 'Read File Into Node';
 
         // c.endEditing();
         const filetypes: [string, string][] = [["All files", "*"], ["Python files", "*.py"], ["Leo files", "*.leo"]];
 
-        g.app.gui!.runOpenFileDialog(
+        return g.app.gui!.runOpenFileDialog(
             c,
             "Read File Into Node",
             filetypes,
             ""
-        ).then((fileName) => {
-
+        ).then(async (fileName) => {
             if (!fileName.length) {
                 return;
             }
             let s: string | undefined;
             let e: string | undefined;
-            [s, e] = g.readFileIntoString(fileName[0]);
+            [s, e] = await g.readFileIntoString(fileName[0]);
             if (s === undefined) {
                 return;
             }
@@ -1312,7 +1316,6 @@ export class CommanderFileCommands {
             p.setBodyString(s);
             // w.setAllText(s);
             c.redraw(p);
-
         });
 
     }
@@ -1338,14 +1341,16 @@ export class CommanderFileCommands {
             try {
                 // pylint: disable=assignment-from-no-return
                 // Can't use 'with" because readOutlineOnly closes the file.
-                const theFile: number = fs.openSync(fileName[0], 'r');
+
+                // ! Replaced with vscode.workspace.fs !
+                // const theFile: number = openSync(fileName[0], 'r');
                 g.chdir(fileName[0]);
                 const c: Commands = g.app.newCommander(fileName[0]);
                 // ? needed ?
                 //frame = c.frame;
                 //frame.deiconify();
                 //frame.lift();
-                (c.fileCommands as FileCommands).readOutlineOnly(theFile, fileName[0]); // closes file.
+                (c.fileCommands as FileCommands).readOutlineOnly(fileName[0]); // closes file.
             }
             catch (exception) {
                 g.es("can not open:", fileName[0]);
@@ -1359,7 +1364,7 @@ export class CommanderFileCommands {
         'If node starts with @read-file-into-node, use the full path name ' +
         'in the headline.  Otherwise, prompt for a file name.'
     )
-    public writeFileFromNode(this: Commands): void {
+    public writeFileFromNode(this: Commands): Thenable<void> {
 
         const c: Commands = this;
         let p: Position = this.p;
@@ -1394,7 +1399,7 @@ export class CommanderFileCommands {
             q_fileName = Promise.resolve(fileName);
         }
 
-        q_fileName.then((p_fileName) => {
+        return q_fileName.then((p_fileName) => {
             if (p_fileName) {
                 try {
                     g.chdir(p_fileName);
@@ -1403,7 +1408,11 @@ export class CommanderFileCommands {
                         s = s.slice('@nocolor\n'.length);
                     }
 
-                    fs.writeFileSync(p_fileName, s);
+                    //fs.writeFileSync(p_fileName, s);
+                    const w_uri = vscode.Uri.file(p_fileName);
+                    const writeData = Buffer.from(s, 'utf8');
+                    return vscode.workspace.fs.writeFile(w_uri, writeData);
+
                     // with open(p_fileName, 'w') as f:
                     //f.write(s);
                     //f.flush();
@@ -1436,8 +1445,7 @@ export class CommanderFileCommands {
     // @commander_command('clear-recent-files')
     // def clearRecentFiles(this: Commands)
     //     """Clear the recent files list, then add the present file."""
-    //     c = self
-    //     g.app.recentFilesManager.clearRecentFiles(c)
+
     //@+node:felix.20220105210716.40: *4* c_file.editRecentFiles
     // ? unused ?
     // @commander_command('edit-recent-files')
