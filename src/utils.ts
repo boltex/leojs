@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { Constants } from "./constants";
+import { IconConstants } from "./iconConstants";
 import { Icon } from "./types";
 import { LeoOutlineNode } from "./leoOutline";
 // import 'browser-hrtime';
@@ -63,16 +64,34 @@ export function removeFileFromGlobal(p_context: vscode.ExtensionContext, p_file:
  * @returns An array of the 16 vscode node icons used in this vscode expansion
  */
 export function buildNodeIconPaths(p_context: vscode.ExtensionContext): Icon[] {
+
+    const testUri = vscode.Uri.from({
+        scheme: "data",
+        path: 'image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" height="16" width="16"><path fill="#4d4d4d" d="M0 4v9h15.15V4zm1 1h13.15v7H1z"/></svg>'
+    });
+
+    console.log(testUri.toString());
+
     return Array(16).fill("").map((p_val, p_index) => {
         return {
-            light: p_context.asAbsolutePath(
-                Constants.GUI.ICON_LIGHT_PATH +
-                padNumber2(p_index) +
-                Constants.GUI.ICON_FILE_EXT),
-            dark: p_context.asAbsolutePath(
-                Constants.GUI.ICON_DARK_PATH +
-                padNumber2(p_index) +
-                Constants.GUI.ICON_FILE_EXT)
+            light: vscode.Uri.from({
+                scheme: "data",
+                path: 'image/svg+xml;utf8,' + '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">' + IconConstants.nodeIcons[p_index < 8 ? p_index + 8 : p_index - 8] + '</svg>'
+            }),
+            dark: vscode.Uri.from({
+                scheme: "data",
+                path: 'image/svg+xml;utf8,' + '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">' + IconConstants.nodeIcons[p_index] + '</svg>'
+            }),
+
+            // * Old method using files in '/resources/
+            // light: p_context.asAbsolutePath(
+            //     Constants.GUI.ICON_LIGHT_PATH +
+            //     padNumber2(p_index) +
+            //     Constants.GUI.ICON_FILE_EXT),
+            // dark: p_context.asAbsolutePath(
+            //     Constants.GUI.ICON_DARK_PATH +
+            //     padNumber2(p_index) +
+            //     Constants.GUI.ICON_FILE_EXT)
         };
     });
 }
