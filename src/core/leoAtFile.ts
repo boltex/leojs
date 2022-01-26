@@ -99,6 +99,35 @@ export class AtFile {
     public read(p: Position): void {
 
     }
+    //@+node:felix.20220122224516.1: *3* at.readAllSelected
+    /**
+     * Read all @<file> nodes in root's tree.
+     */
+    public readAllSelected(root: Position): void {
+
+        const at = this;
+        const c = this.c;
+
+        // TODO !
+
+        // const old_changed = c.changed;
+
+        // t1 = time.time()
+        // c.init_error_dialogs()
+        // files = at.findFilesToRead(root, all=False)
+        // for p in files:
+        //     at.readFileAtPosition(p)
+        // for p in files:
+        //     p.v.clearDirty()
+        // if not g.unitTesting:  # pragma: no cover
+        //     if files:
+        //         t2 = time.time()
+        //         g.es(f"read {len(files)} files in {t2 - t1:2.2f} seconds")
+        //     else:
+        //         g.es("no @<file> nodes in the selected tree")
+        // c.changed = old_changed
+        // c.raise_error_dialogs()
+    }
     //@+node:felix.20220108165923.1: *3* readOneAtAutoNode
     public readOneAtAutoNode(p: Position): Position {
         return p;

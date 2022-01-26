@@ -22,17 +22,17 @@ export class ExternalFile {
     /**
      * Ctor for ExternalFile class.
      */
-    constructor (c: Commands, ext: string, p: Position, path: string, time: number){
+    constructor(c: Commands, ext: string, p: Position, path: string, time: number) {
         this.c = c;
         this.ext = ext;
         this.p = p && p.__bool__() && p.copy();
-            // The nearest @<file> node.
+        // The nearest @<file> node.
         this.path = path;
         this.time = time;  // Used to inhibit endless dialog loop.
-                          // See efc.idle_check_open_with_file.
+        // See efc.idle_check_open_with_file.
     }
 
-    public toString(){
+    public toString() {
         return `<ExternalFile: ${this.time} ${g.shortFilename(this.path)}>`;
     }
 
@@ -45,7 +45,7 @@ export class ExternalFile {
     /**
      * Return True if the external file still exists.
      */
-    public exists(): boolean {
+    public async exists(): Promise<boolean> {
         return g.os_path_exists(this.path);
     }
     //@-others

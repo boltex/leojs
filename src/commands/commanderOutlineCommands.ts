@@ -103,7 +103,6 @@ export class CommanderOutlineCommands {
     )
     public pasteOutline(
         this: Commands,
-        redrawFlag: boolean = true,
         s: string | undefined = undefined,
         undoFlag: boolean = true
     ): Position | undefined {
@@ -140,7 +139,7 @@ export class CommanderOutlineCommands {
         // Paste the node into the outline.
         c.selectPosition(pasted);
         pasted.setDirty();
-        c.setChanged(redrawFlag);
+        c.setChanged();
         // Prevent flash when fixing #387.
         const back: Position = pasted.back();
         if (back && back.__bool__() && back.hasChildren() && back.isExpanded()) {
@@ -150,11 +149,8 @@ export class CommanderOutlineCommands {
         if (undoFlag) {
             c.undoer.afterInsertNode(pasted, 'Paste Node', undoData);
         }
-        if (redrawFlag) {
-            c.redraw(pasted);
-            // c.recolor()
-        }
-
+        c.redraw(pasted);
+        // c.recolor()
         return pasted;
     }
     //@+node:felix.20220103211308.1: *4* c_oc.asyncPasteOutline
@@ -166,7 +162,7 @@ export class CommanderOutlineCommands {
     public asyncPasteOutline(this: Commands): void {
         g.app.gui!.preventRefresh = true;
         g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
-            this.pasteOutline(true, clipboard);
+            this.pasteOutline(clipboard);
             g.app.gui!.launchRefresh();
         });
     }
@@ -177,7 +173,6 @@ export class CommanderOutlineCommands {
     )
     public pasteOutlineRetainingClones(
         this: Commands,
-        redrawFlag: boolean = true,
         s: string | undefined = undefined,
         undoFlag: boolean = true
     ): Position | undefined {
@@ -216,7 +211,7 @@ export class CommanderOutlineCommands {
         // Paste the node into the outline.
         c.selectPosition(pasted);
         pasted.setDirty();
-        c.setChanged(redrawFlag);
+        c.setChanged();
         // Prevent flash when fixing #387.
         const back: Position = pasted.back();
         if (back && back.__bool__() && back.hasChildren() && back.isExpanded()) {
@@ -231,10 +226,8 @@ export class CommanderOutlineCommands {
         if (undoFlag) {
             c.undoer.afterInsertNode(pasted, 'Paste As Clone', undoData);
         }
-        if (redrawFlag) {
-            c.redraw(pasted);
-            // c.recolor();
-        }
+        c.redraw(pasted);
+        // c.recolor();
         return pasted;
     }
     //@+node:felix.20220103213833.1: *4* c_oc.asyncPasteOutlineRetainingClones
@@ -245,7 +238,7 @@ export class CommanderOutlineCommands {
     public asyncPasteOutlineRetainingClones(this: Commands): void {
         g.app.gui!.preventRefresh = true;
         g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
-            this.pasteOutlineRetainingClones(true, clipboard);
+            this.pasteOutlineRetainingClones(clipboard);
             g.app.gui!.launchRefresh();
         });
     }
@@ -900,7 +893,6 @@ export class CommanderOutlineCommands {
         }
         if (flag) {
             if (cc) {
-                // name = cc.findChapterNameForPosition(p)
                 cc.selectChapterByName('main');
             }
             c.selectPosition(p);
@@ -1074,17 +1066,12 @@ export class CommanderOutlineCommands {
                 const chapter = cc.getSelectedChapter();
                 const old_name: string | boolean = chapter && chapter.name;
                 const new_name: string = cc.findChapterNameForPosition(p);
-                if (new_name === old_name) {
-                    // Always do a full redraw.
-                    c.redraw(p); // redraw selects p
-                } else {
-                    c.selectPosition(p);
-                    // cc.selectChapterByName(new_name); // TODO
+                if (new_name !== old_name) {
+                    cc.selectChapterByName(new_name); // TODO
                 }
-            } else {
-                // Always do a full redraw.
-                c.redraw(p); // redraw selects p
             }
+            // Always do a full redraw.
+            c.redraw(p);
         } else {
             g.blue('done');
         }
@@ -2285,7 +2272,7 @@ export class CommanderOutlineCommands {
         'promote',
         'Make all children of the selected nodes siblings of the selected node.'
     )
-    public promote(this: Commands, undoFlag = true, redrawFlag = true): void {
+    public promote(this: Commands, undoFlag = true): void {
         const c: Commands = this;
         const p: Position = this.p;
         const u: Undoer = c.undoer;
@@ -2301,10 +2288,8 @@ export class CommanderOutlineCommands {
             p.setDirty();
             u.afterPromote(p, children);
         }
-        if (redrawFlag) {
-            c.redraw(p); // redraw selects p
-            // c.updateSyntaxColorer(p); // Moving can change syntax coloring.
-        }
+        c.redraw(p); // redraw selects p
+        // c.updateSyntaxColorer(p); // Moving can change syntax coloring.
     }
     //@+node:felix.20211031235049.10: *4* c_oc.toggleSparseMove
     @commander_command(

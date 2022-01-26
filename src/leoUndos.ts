@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import { LeoUI } from './leoUI';
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
-import { Commands } from "./core/leoCommands";
 import { Bead } from "./core/leoUndo";
 
 /**
