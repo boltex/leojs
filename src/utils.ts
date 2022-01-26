@@ -65,13 +65,6 @@ export function removeFileFromGlobal(p_context: vscode.ExtensionContext, p_file:
  */
 export function buildNodeIconPaths(p_context: vscode.ExtensionContext): Icon[] {
 
-    const testUri = vscode.Uri.from({
-        scheme: "data",
-        path: 'image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" height="16" width="16"><path fill="#4d4d4d" d="M0 4v9h15.15V4zm1 1h13.15v7H1z"/></svg>'
-    });
-
-    console.log(testUri.toString());
-
     return Array(16).fill("").map((p_val, p_index) => {
         return {
             light: vscode.Uri.from({

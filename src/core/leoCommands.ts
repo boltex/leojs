@@ -1592,7 +1592,7 @@ export class Commands {
         }
         return '';
     }
-    //@+node:felix.20211228212851.4: *4* c.hasAmbiguousLangauge
+    //@+node:felix.20211228212851.4: *4* c.hasAmbiguousLanguage
     // def hasAmbiguousLanguage(self, p):
     //     """Return True if p.b contains different @language directives."""
     //     # c = self

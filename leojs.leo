@@ -746,13 +746,6 @@ export function removeFileFromGlobal(p_context: vscode.ExtensionContext, p_file:
  */
 export function buildNodeIconPaths(p_context: vscode.ExtensionContext): Icon[] {
 
-    const testUri = vscode.Uri.from({
-        scheme: "data",
-        path: 'image/svg+xml;utf8,&lt;svg xmlns="http://www.w3.org/2000/svg" fill="none" height="16" width="16"&gt;&lt;path fill="#4d4d4d" d="M0 4v9h15.15V4zm1 1h13.15v7H1z"/&gt;&lt;/svg&gt;'
-    });
-
-    console.log(testUri.toString());
-
     return Array(16).fill("").map((p_val, p_index) =&gt; {
         return {
             light: vscode.Uri.from({
@@ -1065,9 +1058,6 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201214150149.1">export function activate(p_context: vscode.ExtensionContext) {
-
-    console.log('ACTIVATE LEO JS : !');
-
 
     const w_start = process.hrtime(); // For calculating total startup time duration
 
@@ -6882,9 +6872,6 @@ public buildFromSavedSettings(): Promise&lt;unknown&gt; {
         this.showMarkOnBody = GET(NAME).get(NAMES.SHOW_MARK_BODY, DEFAULTS.SHOW_MARK_BODY);
         this.showSortOnBody = GET(NAME).get(NAMES.SHOW_SORT_BODY, DEFAULTS.SHOW_SORT_BODY);
         this.invertNodeContrast = GET(NAME).get(NAMES.INVERT_NODES, DEFAULTS.INVERT_NODES);
-
-        console.log('gonna set the context flags (check they begin with leojs', FLAGS);
-
 
         // * Set context for tree items visibility that are based on config options
         return Promise.all([
