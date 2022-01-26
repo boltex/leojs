@@ -5396,18 +5396,18 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 },
 {
   "command": "leojs.cloneNodeSelection",
-  "key": "ctrl+[Backquote]",
-  "win": "ctrl+oem_7",
-  "linux": "ctrl+'",
-  "mac": "cmd+[Backquote]",
+  "key": "ctrl+`",
+  "win": "ctrl+oem_3",
+  "linux": "ctrl+`",
+  "mac": "cmd+`",
   "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.cloneNodeSelectionFromOutline",
-  "key": "ctrl+[Backquote]",
-  "win": "ctrl+oem_7",
-  "linux": "ctrl+'",
-  "mac": "cmd+[Backquote]",
+  "key": "ctrl+`",
+  "win": "ctrl+oem_3",
+  "linux": "ctrl+`",
+  "mac": "cmd+`",
   "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/"
 },
 </t>

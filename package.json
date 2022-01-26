@@ -2098,18 +2098,18 @@
       },
       {
         "command": "leojs.cloneNodeSelection",
-        "key": "ctrl+[Backquote]",
-        "win": "ctrl+oem_7",
-        "linux": "ctrl+'",
-        "mac": "cmd+[Backquote]",
+        "key": "ctrl+`",
+        "win": "ctrl+oem_3",
+        "linux": "ctrl+`",
+        "mac": "cmd+`",
         "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.cloneNodeSelectionFromOutline",
-        "key": "ctrl+[Backquote]",
-        "win": "ctrl+oem_7",
-        "linux": "ctrl+'",
-        "mac": "cmd+[Backquote]",
+        "key": "ctrl+`",
+        "win": "ctrl+oem_3",
+        "linux": "ctrl+`",
+        "mac": "cmd+`",
         "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline|^leojsDocuments/"
       },
       {
