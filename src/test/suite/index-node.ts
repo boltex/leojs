@@ -9,6 +9,8 @@ export function run(): Promise<void> {
 		color: true
 	});
 
+	console.log('Starting src/test/suite/index-node.ts');
+
 	const testsRoot = path.resolve(__dirname, '..');
 
 	return new Promise((c, e) => {

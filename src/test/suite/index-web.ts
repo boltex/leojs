@@ -2,6 +2,8 @@ require('mocha/mocha'); // import the mocha web build
 
 export function run(): Promise<void> {
 
+  console.log('Starting src/test/suite/index-web.ts');
+
   return new Promise((c, e) => {
     mocha.setup({
       ui: 'tdd',

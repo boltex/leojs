@@ -3,6 +3,7 @@ import * as path from 'path';
 import { runTests } from '@vscode/test-electron';
 
 async function main() {
+	console.log('Starting test/runTest.ts');
 	try {
 		// The folder containing the Extension Manifest package.json
 		// Passed to `--extensionDevelopmentPath`
