@@ -32,6 +32,21 @@
 			"preLaunchTask": "tasks: watch-tests"
 		},
 		{
+			"name": "Extension Tests Other Disabled",
+			"type": "extensionHost",
+			"request": "launch",
+			"args": [
+				"--disable-extensions",
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
+			],
+			"outFiles": [
+				"${workspaceFolder}/out/**/*.js",
+				"${workspaceFolder}/dist/**/*.js"
+			],
+			"preLaunchTask": "tasks: watch-tests"
+		},
+		{
 			"name": "Run Web Extension in VS Code",
 			"type": "pwa-extensionHost",
 			"debugWebWorkerHost": true,
