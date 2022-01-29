@@ -447,9 +447,20 @@
 <v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
 <v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 </v>
-<v t="felix.20220128232146.1"><vh>unittests</vh></v>
-<v t="felix.20220128232306.1"><vh>in unittests/commands</vh></v>
-<v t="felix.20220128232312.1"><vh>in unittests/core</vh></v>
+<v t="felix.20220128232146.1"><vh>unittests</vh>
+<v t="felix.20220129002501.1"><vh>@file src/unittests/leoApp.test.ts</vh></v>
+<v t="felix.20220129003133.1"><vh>@file src/unittests/leoAtFile.test.ts</vh></v>
+<v t="felix.20220129002752.1"><vh>@file src/unittests/leoCommands.test.ts</vh></v>
+<v t="felix.20220129003431.1"><vh>@file src/unittests/leoConfig.test.ts</vh></v>
+<v t="felix.20220129003154.1"><vh>@file src/unittests/leoExternalFiles.test.ts</vh></v>
+<v t="felix.20220129003044.1"><vh>@file src/unittests/leoFileCommands.test.ts</vh></v>
+<v t="felix.20220129003458.1"><vh>@file src/unittests/leoFind.test.ts</vh></v>
+<v t="felix.20220129002458.1"><vh>@file src/unittests/leoGlobals.test.ts</vh></v>
+<v t="felix.20220129003526.1"><vh>@file src/unittests/leoImport.test.ts</vh></v>
+<v t="felix.20220129002948.1"><vh>@file src/unittests/leoNodes.test.ts</vh></v>
+<v t="felix.20220129003553.1"><vh>@file src/unittests/leoShadow.test.ts</vh></v>
+<v t="felix.20220129003013.1"><vh>@file src/unittests/leoUndo.test.ts</vh></v>
+</v>
 </v>
 </vnodes>
 <tnodes>
@@ -8467,7 +8478,5 @@ export class IconConstants {
 }
 </t>
 <t tx="felix.20220128232146.1"></t>
-<t tx="felix.20220128232306.1"></t>
-<t tx="felix.20220128232312.1"></t>
 </tnodes>
 </leo_file>
