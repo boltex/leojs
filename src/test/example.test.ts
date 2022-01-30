@@ -1,22 +1,26 @@
+//@+leo-ver=5-thin
+//@+node:felix.20220129002501.1: * @file src/test/example.test.ts
 import * as assert from 'assert';
 
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
+// * You can import and use all API from the 'vscode' module
+// * as well as import your extension to test it
+
 import * as vscode from 'vscode';
 
-// import * as myExtension from '../../extension';
-import * as g from '../../core/leoGlobals';
-import { Commands } from "../../core/leoCommands";
-import { NodeIndices, VNode, Position } from '../../core/leoNodes';
+import * as g from '../core/leoGlobals';
+import { Commands } from "../core/leoCommands";
+import { NodeIndices, VNode, Position } from '../core/leoNodes';
 
-suite('Extension Test Suite', () => {
 
-	vscode.window.showInformationMessage('Start all leojs tests.');
+suite('Extension test examples', () => {
 
 	test('Sample test', () => {
 		assert.strictEqual([1, 2, 3].indexOf(5), -1);
 		assert.strictEqual([1, 2, 3].indexOf(0), -1);
 	});
+
+	// * Example tests for leojs
+	vscode.window.showInformationMessage('Starting leojs sample tests');
 
 	let commanderIndex: number = 0;
 	let w_c: Commands;
@@ -91,3 +95,4 @@ suite('Extension Test Suite', () => {
 
 
 });
+//@-leo

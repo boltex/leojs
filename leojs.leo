@@ -448,18 +448,19 @@
 <v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 </v>
 <v t="felix.20220128232146.1"><vh>unittests</vh>
-<v t="felix.20220129002501.1"><vh>@file src/unittests/leoApp.test.ts</vh></v>
-<v t="felix.20220129003133.1"><vh>@file src/unittests/leoAtFile.test.ts</vh></v>
-<v t="felix.20220129002752.1"><vh>@file src/unittests/leoCommands.test.ts</vh></v>
-<v t="felix.20220129003431.1"><vh>@file src/unittests/leoConfig.test.ts</vh></v>
-<v t="felix.20220129003154.1"><vh>@file src/unittests/leoExternalFiles.test.ts</vh></v>
-<v t="felix.20220129003044.1"><vh>@file src/unittests/leoFileCommands.test.ts</vh></v>
-<v t="felix.20220129003458.1"><vh>@file src/unittests/leoFind.test.ts</vh></v>
-<v t="felix.20220129002458.1"><vh>@file src/unittests/leoGlobals.test.ts</vh></v>
-<v t="felix.20220129003526.1"><vh>@file src/unittests/leoImport.test.ts</vh></v>
-<v t="felix.20220129002948.1"><vh>@file src/unittests/leoNodes.test.ts</vh></v>
-<v t="felix.20220129003553.1"><vh>@file src/unittests/leoShadow.test.ts</vh></v>
-<v t="felix.20220129003013.1"><vh>@file src/unittests/leoUndo.test.ts</vh></v>
+<v t="felix.20220129002501.1"><vh>@file src/test/example.test.ts</vh></v>
+<v t="felix.20220129200448.1"><vh>@file src/test/leoApp.test.ts</vh></v>
+<v t="felix.20220129003133.1"><vh>@file src/test/leoAtFile.test.ts</vh></v>
+<v t="felix.20220129002752.1"><vh>@file src/test/leoCommands.test.ts</vh></v>
+<v t="felix.20220129003431.1"><vh>@file src/test/leoConfig.test.ts</vh></v>
+<v t="felix.20220129003154.1"><vh>@file src/test/leoExternalFiles.test.ts</vh></v>
+<v t="felix.20220129003044.1"><vh>@file src/test/leoFileCommands.test.ts</vh></v>
+<v t="felix.20220129003458.1"><vh>@file src/test/leoFind.test.ts</vh></v>
+<v t="felix.20220129002458.1"><vh>@file src/test/leoGlobals.test.ts</vh></v>
+<v t="felix.20220129003526.1"><vh>@file src/test/leoImport.test.ts</vh></v>
+<v t="felix.20220129002948.1"><vh>@file src/test/leoNodes.test.ts</vh></v>
+<v t="felix.20220129003553.1"><vh>@file src/test/leoShadow.test.ts</vh></v>
+<v t="felix.20220129003013.1"><vh>@file src/test/leoUndo.test.ts</vh></v>
 </v>
 </v>
 </vnodes>
@@ -573,9 +574,7 @@ import { Constants } from './constants';
 import { LeoButtonNode } from './leoButtons';
 import { LeoOutlineNode } from './leoOutline';
 import { Position } from './core/leoNodes';
-// import 'browser-hrtime';
-// require('browser-hrtime');
-process.hrtime = require('browser-process-hrtime')
+process.hrtime = require('browser-process-hrtime');
 
 @language typescript
 @tabwidth -4

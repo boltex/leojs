@@ -6,9 +6,7 @@ import { Constants } from './constants';
 import { LeoButtonNode } from './leoButtons';
 import { LeoOutlineNode } from './leoOutline';
 import { Position } from './core/leoNodes';
-// import 'browser-hrtime';
-// require('browser-hrtime');
-process.hrtime = require('browser-process-hrtime')
+process.hrtime = require('browser-process-hrtime');
 
 export function activate(p_context: vscode.ExtensionContext) {
 

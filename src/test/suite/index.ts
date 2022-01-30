@@ -26,9 +26,16 @@ export function run(): Promise<void> {
 				// Run the mocha test
 				mocha.run(failures => {
 					if (failures > 0) {
-						e(new Error(`${failures} tests failed.`));
+						console.log('ERRORS 20 seconds timeout to view extension instance');
+						setTimeout(() => {
+							e(new Error(`${failures} tests failed.`));
+
+						}, 20000);
 					} else {
-						c();
+						console.log('SUCCESS 20 seconds timeout to view extension instance');
+						setTimeout(() => {
+							c();
+						}, 20000);
 					}
 				});
 			} catch (err) {

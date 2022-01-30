@@ -2262,7 +2262,7 @@ export class CommanderOutlineCommands {
         if (moved) {
             p.setDirty();
             c.setChanged();
-            u.afterMoveNode(p, 'Move Right', undoData);
+            u.afterMoveNode(p, 'Move Up', undoData);
         }
         c.redraw(p); // redraw selects p
         // c.updateSyntaxColorer(p);  // Moving can change syntax coloring.
