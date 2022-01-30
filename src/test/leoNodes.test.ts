@@ -11,7 +11,7 @@ import * as vscode from 'vscode';
 //@+node:felix.20220129225027.1: ** suite TestNodes(LeoUnitTest)
 suite('Unit tests for leo/core/leoNodes.ts.', () => {
 
-    let test_outline = undefined // Set by create_test_outline.
+    let test_outline = undefined; // Set by create_test_outline.
 
     //@+others
     //@+node:felix.20220129225027.2: *3* TestNodes.setUp
