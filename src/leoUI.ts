@@ -151,150 +151,165 @@ export class LeoUI {
         g.app.gui = this;
         g.app.loadManager = new LoadManager();
         // g.app.loadManager.computeStandardDirectories()
-        if (!g.app.setLeoID(false, true)) {
-            throw new Error("unable to set LeoID.");
-        }
-        g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
-        g.app.nodeIndices = new NodeIndices(g.app.leoID);
+        // if (!g.app.setLeoID(false, true)) {
+        //     throw new Error("unable to set LeoID.");
+        // }
+
+        // Force the user to set g.app.leoID.
+        g.app.setLeoID(true, this.verbose).then((p_leoId) => {
 
 
-        // IF RECENT FILES LIST :
-        //      TODO: CHECK RECENT LEO FILE LIST AND OPEN THEM
-        //      g.app.loadManager.load(fileName, pymacs)
-        // ELSE :
-        //      TODO: CREATE NEW LEO OUTLINE (demo below)
+            g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
+            g.app.nodeIndices = new NodeIndices(g.app.leoID);
 
-        // ************************************************************
-        // * demo test: CREATE NEW LEO OUTLINE: NEW COMMANDER
-        // ************************************************************
-        let w_c = g.app.newCommander("", this);
 
-        // Equivalent to leoBridge 'createFrame' method
-        let w_v = new VNode(w_c);
-        let w_p = new Position(w_v);
-        w_v.initHeadString("NewHeadline");
+            // IF RECENT FILES LIST :
+            //      TODO: CHECK RECENT LEO FILE LIST AND OPEN THEM
+            //      g.app.loadManager.load(fileName, pymacs)
+            // ELSE :
+            //      TODO: CREATE NEW LEO OUTLINE (demo below)
 
-        // #1631: Initialize here, not in p._linkAsRoot.
-        w_c.hiddenRootNode.children = [];
+            // ************************************************************
+            // * demo test: CREATE NEW LEO OUTLINE: NEW COMMANDER
+            // ************************************************************
+            let w_c = g.app.newCommander("", this);
 
-        // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
-        w_p._linkAsRoot();
+            // Equivalent to leoBridge 'createFrame' method
+            let w_v = new VNode(w_c);
+            let w_p = new Position(w_v);
+            w_v.initHeadString("NewHeadline");
 
-        g.app.commanders().push(w_c);
+            // #1631: Initialize here, not in p._linkAsRoot.
+            w_c.hiddenRootNode.children = [];
 
-        // select first test commander
-        let c = g.app.commanders()[this.commanderIndex];
+            // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
+            w_p._linkAsRoot();
 
-        // ************************************************************
-        // * demo test: BUILD SOME TEST OUTLINE
-        // ************************************************************
-        let w_node = c.p;
-        w_node.initHeadString("@file node1");
-        w_node.setBodyString('@tabwidth 8\nnode1 body\n@others');
-        w_node.expand();
+            g.app.commanders().push(w_c);
 
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("node Inside1");
-        w_node.setBodyString('  @others \nnodeInside1 body\n@language c\nprint()');
-        w_node.setMarked();
+            // select first test commander
+            let c = g.app.commanders()[this.commanderIndex];
 
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("node with UserData Inside2");
-        w_node.setBodyString('node Inside2 body');
-        w_node.u = { a: 'user content string a', b: "user content also" };
+            // ************************************************************
+            // * demo test: BUILD SOME TEST OUTLINE
+            // ************************************************************
+            let w_node = c.p;
+            w_node.initHeadString("@file node1");
+            w_node.setBodyString('@tabwidth 8\nnode1 body\n@others');
+            w_node.expand();
 
-        w_node = c.p.insertAfter();
-        w_node.initHeadString("@file node3");
-        w_node.setBodyString('node 3 body');
-
-        w_node = c.p.insertAfter();
-        w_node.initHeadString("node 2 selected but empty");
-        w_c.setCurrentPosition(w_node);
-
-        // ************************************************************
-        // * demo test: SOME OTHER COMMANDER
-        // ************************************************************
-        w_c = g.app.newCommander("", this);
-        w_v = new VNode(w_c);
-        w_p = new Position(w_v);
-        w_v.initHeadString("NewHeadline");
-        w_c.hiddenRootNode.children = [];
-        w_p._linkAsRoot();
-        g.app.commanders().push(w_c);
-
-        // select second test commander
-        c = w_c;
-
-        // ************************************************************
-        // * demo test: BUILD SOME OTHER TEST OUTLINE
-        // ************************************************************
-        w_node = c.p;
-        w_node.initHeadString("some other title");
-        w_node.setBodyString('body text');
-
-        let nodeCounter = 0;
-        while (nodeCounter < 30) {
-            nodeCounter++;
             w_node = c.p.insertAsLastChild();
-            w_node.initHeadString("top node numbered headline " + nodeCounter);
-        }
+            w_node.initHeadString("node Inside1");
+            w_node.setBodyString('  @others \nnodeInside1 body\n@language c\nprint()');
+            w_node.setMarked();
 
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("yet another node");
-        w_node.setBodyString('more body text\nwith a second line');
-
-        w_node = c.p.insertAfter();
-        w_node.initHeadString("@clean my-file.txt");
-        w_node.setBodyString('again some body text');
-        w_c.setCurrentPosition(w_node);
-
-        nodeCounter = 0;
-        while (nodeCounter < 30) {
-            nodeCounter++;
             w_node = c.p.insertAsLastChild();
-            w_node.initHeadString("middle node numbered headline " + nodeCounter);
-        }
+            w_node.initHeadString("node with UserData Inside2");
+            w_node.setBodyString('node Inside2 body');
+            w_node.u = { a: 'user content string a', b: "user content also" };
 
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("sample cloned node");
-        w_node.setBodyString('some other body');
-        w_node.clone();
+            w_node = c.p.insertAfter();
+            w_node.initHeadString("@file node3");
+            w_node.setBodyString('node 3 body');
 
-        w_node = c.p.insertAfter();
-        w_node.setMarked();
-        w_node.initHeadString("a different headline");
+            w_node = c.p.insertAfter();
+            w_node.initHeadString("node 2 selected but empty");
+            w_c.setCurrentPosition(w_node);
 
-        w_c.setCurrentPosition(w_node);
+            // ************************************************************
+            // * demo test: SOME OTHER COMMANDER
+            // ************************************************************
+            w_c = g.app.newCommander("", this);
+            w_v = new VNode(w_c);
+            w_p = new Position(w_v);
+            w_v.initHeadString("NewHeadline");
+            w_c.hiddenRootNode.children = [];
+            w_p._linkAsRoot();
+            g.app.commanders().push(w_c);
 
-        nodeCounter = 0;
-        while (nodeCounter < 30) {
-            nodeCounter++;
+            // select second test commander
+            c = w_c;
+
+            // ************************************************************
+            // * demo test: BUILD SOME OTHER TEST OUTLINE
+            // ************************************************************
+            w_node = c.p;
+            w_node.initHeadString("some other title");
+            w_node.setBodyString('body text');
+
+            let nodeCounter = 0;
+            while (nodeCounter < 30) {
+                nodeCounter++;
+                w_node = c.p.insertAsLastChild();
+                w_node.initHeadString("top node numbered headline " + nodeCounter);
+            }
+
             w_node = c.p.insertAsLastChild();
-            w_node.initHeadString("a numbered headline " + nodeCounter);
-        }
+            w_node.initHeadString("yet another node");
+            w_node.setBodyString('more body text\nwith a second line');
 
-        w_node = c.p.insertAfter();
-        w_node.initHeadString("another different headline");
+            w_node = c.p.insertAfter();
+            w_node.initHeadString("@clean my-file.txt");
+            w_node.setBodyString('again some body text');
+            w_c.setCurrentPosition(w_node);
 
-        nodeCounter = 0;
-        while (nodeCounter < 30) {
-            nodeCounter++;
+            nodeCounter = 0;
+            while (nodeCounter < 30) {
+                nodeCounter++;
+                w_node = c.p.insertAsLastChild();
+                w_node.initHeadString("middle node numbered headline " + nodeCounter);
+            }
+
             w_node = c.p.insertAsLastChild();
-            w_node.initHeadString("more numbered headlines " + nodeCounter);
-        }
-        w_c.setCurrentPosition(w_node);
-        nodeCounter = 0;
-        while (nodeCounter < 30) {
-            nodeCounter++;
-            w_node = c.p.insertAsLastChild();
-            w_node.initHeadString("inside numbered headlines " + nodeCounter);
-        }
+            w_node.initHeadString("sample cloned node");
+            w_node.setBodyString('some other body');
+            w_node.clone();
 
-        // back to first test commander after creating this second one
-        c = g.app.commanders()[this.commanderIndex];
-        // ************************************************************
-        // * demo test end
-        // ************************************************************
+            w_node = c.p.insertAfter();
+            w_node.setMarked();
+            w_node.initHeadString("a different headline");
+
+            w_c.setCurrentPosition(w_node);
+
+            nodeCounter = 0;
+            while (nodeCounter < 30) {
+                nodeCounter++;
+                w_node = c.p.insertAsLastChild();
+                w_node.initHeadString("a numbered headline " + nodeCounter);
+            }
+
+            w_node = c.p.insertAfter();
+            w_node.initHeadString("another different headline");
+
+            nodeCounter = 0;
+            while (nodeCounter < 30) {
+                nodeCounter++;
+                w_node = c.p.insertAsLastChild();
+                w_node.initHeadString("more numbered headlines " + nodeCounter);
+            }
+            w_c.setCurrentPosition(w_node);
+            nodeCounter = 0;
+            while (nodeCounter < 30) {
+                nodeCounter++;
+                w_node = c.p.insertAsLastChild();
+                w_node.initHeadString("inside numbered headlines " + nodeCounter);
+            }
+
+            // back to first test commander after creating this second one
+            c = g.app.commanders()[this.commanderIndex];
+            // ************************************************************
+            // * demo test end
+            // ************************************************************
+
+            setTimeout(() => {
+                this._setupRefresh(true,
+                    { tree: true, body: true, documents: true, buttons: true, states: true }
+                );
+                this.launchRefresh();
+            }, 10);
+
+        });
+
 
         // * Create file browser instance
         this._leoFilesBrowser = new LeoFilesBrowser(_context);
@@ -1721,6 +1736,28 @@ export class LeoUI {
         return false;
     }
 
+    public getIdFromDialog(): Thenable<string> {
+
+        // TODO : GET FROM WORKSPACE/USER SETTINGS AS 'leoID' FIRST!
+
+        return vscode.window.showInputBox({
+            title: "Enter Leo id",
+            prompt: "Please enter an id that identifies you uniquely.\n" +
+                "Your git/cvs/bzr login name is a good choice.\n\n" +
+                "Leo uses this id to uniquely identify nodes.\n\n" +
+                "Your id should contain only letters and numbers\n" +
+                "and must be at least 3 characters in length."
+
+        }).then((p_id) => {
+            if (p_id) {
+
+                // TODO : SET IN WORKSPACE/USER SETTINGS AS 'leoID' FIRST!
+
+                return p_id;
+            }
+            return '';
+        });
+    }
     public runAskOkDialog(
         c: Commands,
         title: string,

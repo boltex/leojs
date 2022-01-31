@@ -204,6 +204,7 @@
 </v>
 <v t="felix.20211030165058.1"><vh>Wrapper Helpers</vh>
 <v t="felix.20211030165111.1"><vh>isTextWidget &amp; isTextWrapper</vh></v>
+<v t="felix.20220131010929.1"><vh>getIdFromDialog</vh></v>
 <v t="felix.20220108211750.1"><vh>runAskOkDialog</vh></v>
 <v t="felix.20220109220155.1"><vh>runAskYesNoDialog</vh></v>
 <v t="felix.20220107223824.1"><vh>runOpenFileDialog</vh></v>
@@ -448,7 +449,14 @@
 <v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 </v>
 <v t="felix.20220128232146.1"><vh>unittests</vh>
-<v t="felix.20220129002501.1"><vh>@file src/test/example.test.ts</vh></v>
+<v t="felix.20220130224933.1"><vh>@@file leoTest2.py</vh>
+<v t="felix.20220130224933.2"><vh>function.create_app</vh></v>
+<v t="felix.20220130224933.3"><vh>class LeoUnitTest(unittest.TestCase)</vh>
+<v t="felix.20220130224933.4"><vh>LeoUnitTest.setUp, tearDown &amp; setUpClass</vh></v>
+<v t="felix.20220130224933.5"><vh>LeoUnitTest.create_test_outline</vh></v>
+</v>
+</v>
+<v t="felix.20220129002501.1"><vh>@file src/test/suite/extension.test.ts</vh></v>
 <v t="felix.20220129200448.1"><vh>@file src/test/leoApp.test.ts</vh></v>
 <v t="felix.20220129003133.1"><vh>@file src/test/leoAtFile.test.ts</vh></v>
 <v t="felix.20220129002752.1"><vh>@file src/test/leoCommands.test.ts</vh></v>
@@ -1049,7 +1057,7 @@ public refreshTreeRoot(): void {
                 return [...w_c.all_Root_Children()];
             }
         } else {
-            console.error('Commander not found in commanderList');
+            // console.error('Commander not found in commanderList');
             return [];
         }
     }
@@ -2575,150 +2583,158 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     g.app.gui = this;
     g.app.loadManager = new LoadManager();
     // g.app.loadManager.computeStandardDirectories()
-    if (!g.app.setLeoID(false, true)) {
-        throw new Error("unable to set LeoID.");
-    }
-    g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
-    g.app.nodeIndices = new NodeIndices(g.app.leoID);
+    // if (!g.app.setLeoID(false, true)) {
+    //     throw new Error("unable to set LeoID.");
+    // }
+
+    // Force the user to set g.app.leoID.
+    g.app.setLeoID(true, this.verbose).then((p_leoId) =&gt; {
 
 
-    // IF RECENT FILES LIST :
-    //      TODO: CHECK RECENT LEO FILE LIST AND OPEN THEM
-    //      g.app.loadManager.load(fileName, pymacs)
-    // ELSE :
-    //      TODO: CREATE NEW LEO OUTLINE (demo below)
+        g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
+        g.app.nodeIndices = new NodeIndices(g.app.leoID);
 
-    // ************************************************************
-    // * demo test: CREATE NEW LEO OUTLINE: NEW COMMANDER
-    // ************************************************************
-    let w_c = g.app.newCommander("", this);
 
-    // Equivalent to leoBridge 'createFrame' method
-    let w_v = new VNode(w_c);
-    let w_p = new Position(w_v);
-    w_v.initHeadString("NewHeadline");
+        // IF RECENT FILES LIST :
+        //      TODO: CHECK RECENT LEO FILE LIST AND OPEN THEM
+        //      g.app.loadManager.load(fileName, pymacs)
+        // ELSE :
+        //      TODO: CREATE NEW LEO OUTLINE (demo below)
 
-    // #1631: Initialize here, not in p._linkAsRoot.
-    w_c.hiddenRootNode.children = [];
+        // ************************************************************
+        // * demo test: CREATE NEW LEO OUTLINE: NEW COMMANDER
+        // ************************************************************
+        let w_c = g.app.newCommander("", this);
 
-    // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
-    w_p._linkAsRoot();
+        // Equivalent to leoBridge 'createFrame' method
+        let w_v = new VNode(w_c);
+        let w_p = new Position(w_v);
+        w_v.initHeadString("NewHeadline");
 
-    g.app.commandersList.push(w_c);
+        // #1631: Initialize here, not in p._linkAsRoot.
+        w_c.hiddenRootNode.children = [];
 
-    // select first test commander
-    let c = g.app.commandersList[this.commanderIndex];
+        // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
+        w_p._linkAsRoot();
 
-    // ************************************************************
-    // * demo test: BUILD SOME TEST OUTLINE
-    // ************************************************************
-    let w_node = c.p;
-    w_node.initHeadString("@file node1");
-    w_node.setBodyString('@tabwidth 8\nnode1 body\n@others');
-    w_node.expand();
+        g.app.commanders().push(w_c);
 
-    w_node = c.p.insertAsLastChild();
-    w_node.initHeadString("node Inside1");
-    w_node.setBodyString('  @others \nnodeInside1 body\n@language c\nprint()');
-    w_node.setMarked();
+        // select first test commander
+        let c = g.app.commanders()[this.commanderIndex];
 
-    w_node = c.p.insertAsLastChild();
-    w_node.initHeadString("node with UserData Inside2");
-    w_node.setBodyString('node Inside2 body');
-    w_node.u = { a: 'user content string a', b: "user content also" };
+        // ************************************************************
+        // * demo test: BUILD SOME TEST OUTLINE
+        // ************************************************************
+        let w_node = c.p;
+        w_node.initHeadString("@file node1");
+        w_node.setBodyString('@tabwidth 8\nnode1 body\n@others');
+        w_node.expand();
 
-    w_node = c.p.insertAfter();
-    w_node.initHeadString("@file node3");
-    w_node.setBodyString('node 3 body');
-
-    w_node = c.p.insertAfter();
-    w_node.initHeadString("node 2 selected but empty");
-    w_c.setCurrentPosition(w_node);
-
-    // ************************************************************
-    // * demo test: SOME OTHER COMMANDER
-    // ************************************************************
-    w_c = g.app.newCommander("", this);
-    w_v = new VNode(w_c);
-    w_p = new Position(w_v);
-    w_v.initHeadString("NewHeadline");
-    w_c.hiddenRootNode.children = [];
-    w_p._linkAsRoot();
-    g.app.commandersList.push(w_c);
-
-    // select second test commander
-    c = w_c;
-
-    // ************************************************************
-    // * demo test: BUILD SOME OTHER TEST OUTLINE
-    // ************************************************************
-    w_node = c.p;
-    w_node.initHeadString("some other title");
-    w_node.setBodyString('body text');
-
-    let nodeCounter = 0;
-    while (nodeCounter &lt; 30) {
-        nodeCounter++;
         w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("top node numbered headline " + nodeCounter);
-    }
+        w_node.initHeadString("node Inside1");
+        w_node.setBodyString('  @others \nnodeInside1 body\n@language c\nprint()');
+        w_node.setMarked();
 
-    w_node = c.p.insertAsLastChild();
-    w_node.initHeadString("yet another node");
-    w_node.setBodyString('more body text\nwith a second line');
-
-    w_node = c.p.insertAfter();
-    w_node.initHeadString("@clean my-file.txt");
-    w_node.setBodyString('again some body text');
-    w_c.setCurrentPosition(w_node);
-
-    nodeCounter = 0;
-    while (nodeCounter &lt; 30) {
-        nodeCounter++;
         w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("middle node numbered headline " + nodeCounter);
-    }
+        w_node.initHeadString("node with UserData Inside2");
+        w_node.setBodyString('node Inside2 body');
+        w_node.u = { a: 'user content string a', b: "user content also" };
 
-    w_node = c.p.insertAsLastChild();
-    w_node.initHeadString("sample cloned node");
-    w_node.setBodyString('some other body');
-    w_node.clone();
+        w_node = c.p.insertAfter();
+        w_node.initHeadString("@file node3");
+        w_node.setBodyString('node 3 body');
 
-    w_node = c.p.insertAfter();
-    w_node.setMarked();
-    w_node.initHeadString("a different headline");
+        w_node = c.p.insertAfter();
+        w_node.initHeadString("node 2 selected but empty");
+        w_c.setCurrentPosition(w_node);
 
-    w_c.setCurrentPosition(w_node);
+        // ************************************************************
+        // * demo test: SOME OTHER COMMANDER
+        // ************************************************************
+        w_c = g.app.newCommander("", this);
+        w_v = new VNode(w_c);
+        w_p = new Position(w_v);
+        w_v.initHeadString("NewHeadline");
+        w_c.hiddenRootNode.children = [];
+        w_p._linkAsRoot();
+        g.app.commanders().push(w_c);
 
-    nodeCounter = 0;
-    while (nodeCounter &lt; 30) {
-        nodeCounter++;
+        // select second test commander
+        c = w_c;
+
+        // ************************************************************
+        // * demo test: BUILD SOME OTHER TEST OUTLINE
+        // ************************************************************
+        w_node = c.p;
+        w_node.initHeadString("some other title");
+        w_node.setBodyString('body text');
+
+        let nodeCounter = 0;
+        while (nodeCounter &lt; 30) {
+            nodeCounter++;
+            w_node = c.p.insertAsLastChild();
+            w_node.initHeadString("top node numbered headline " + nodeCounter);
+        }
+
         w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("a numbered headline " + nodeCounter);
-    }
+        w_node.initHeadString("yet another node");
+        w_node.setBodyString('more body text\nwith a second line');
 
-    w_node = c.p.insertAfter();
-    w_node.initHeadString("another different headline");
+        w_node = c.p.insertAfter();
+        w_node.initHeadString("@clean my-file.txt");
+        w_node.setBodyString('again some body text');
+        w_c.setCurrentPosition(w_node);
 
-    nodeCounter = 0;
-    while (nodeCounter &lt; 30) {
-        nodeCounter++;
+        nodeCounter = 0;
+        while (nodeCounter &lt; 30) {
+            nodeCounter++;
+            w_node = c.p.insertAsLastChild();
+            w_node.initHeadString("middle node numbered headline " + nodeCounter);
+        }
+
         w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("more numbered headlines " + nodeCounter);
-    }
-    w_c.setCurrentPosition(w_node);
-    nodeCounter = 0;
-    while (nodeCounter &lt; 30) {
-        nodeCounter++;
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("inside numbered headlines " + nodeCounter);
-    }
+        w_node.initHeadString("sample cloned node");
+        w_node.setBodyString('some other body');
+        w_node.clone();
 
-    // back to first test commander after creating this second one
-    c = g.app.commandersList[this.commanderIndex];
-    // ************************************************************
-    // * demo test end
-    // ************************************************************
+        w_node = c.p.insertAfter();
+        w_node.setMarked();
+        w_node.initHeadString("a different headline");
+
+        w_c.setCurrentPosition(w_node);
+
+        nodeCounter = 0;
+        while (nodeCounter &lt; 30) {
+            nodeCounter++;
+            w_node = c.p.insertAsLastChild();
+            w_node.initHeadString("a numbered headline " + nodeCounter);
+        }
+
+        w_node = c.p.insertAfter();
+        w_node.initHeadString("another different headline");
+
+        nodeCounter = 0;
+        while (nodeCounter &lt; 30) {
+            nodeCounter++;
+            w_node = c.p.insertAsLastChild();
+            w_node.initHeadString("more numbered headlines " + nodeCounter);
+        }
+        w_c.setCurrentPosition(w_node);
+        nodeCounter = 0;
+        while (nodeCounter &lt; 30) {
+            nodeCounter++;
+            w_node = c.p.insertAsLastChild();
+            w_node.initHeadString("inside numbered headlines " + nodeCounter);
+        }
+
+        // back to first test commander after creating this second one
+        c = g.app.commanders()[this.commanderIndex];
+        // ************************************************************
+        // * demo test end
+        // ************************************************************
+
+    });
+
 
     // * Create file browser instance
     this._leoFilesBrowser = new LeoFilesBrowser(_context);
@@ -2998,7 +3014,7 @@ private _triggerGetStates(): void {
     }
     if (this._refreshType.states) {
         this._refreshType.states = false;
-        const c = g.app.commandersList[this.commanderIndex];
+        const c = g.app.commanders()[this.commanderIndex];
         const w_states: LeoPackageStates = {
             changed: c.changed, // Document has changed (is dirty)
             canUndo: c.canUndo(), // Document can undo the last operation done
@@ -3017,7 +3033,7 @@ private _triggerGetStates(): void {
  * @param p_focusOutline Flag for focus to be placed in outline
  */
 public showOutline(p_focusOutline?: boolean): void {
-    const c = g.app.commandersList[this.commanderIndex];
+    const c = g.app.commanders()[this.commanderIndex];
     this._lastTreeView.reveal(c.p, {
         select: true,
         focus: !!p_focusOutline
@@ -3151,7 +3167,7 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
  * @returns thenable for reveal to finish or select position to finish
  */
 public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable&lt;unknown&gt; {
-    const c = g.app.commandersList[this.commanderIndex];
+    const c = g.app.commanders()[this.commanderIndex];
     // Note: set context flags for current selection when capturing and revealing the selected node
     // when the tree refreshes and the selected node is processed by getTreeItem &amp; gotSelectedNode
     let q_reveal: Thenable&lt;void&gt; | undefined;
@@ -3204,7 +3220,7 @@ public command(
         this.commandRefreshTimer = this.lastCommandTimer;
     }
 
-    const c = g.app.commandersList[this.commanderIndex];
+    const c = g.app.commanders()[this.commanderIndex];
     this._setupRefresh(p_fromOutline, p_refreshType);
 
     let value: any = undefined;
@@ -3247,7 +3263,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 
     return this.triggerBodySave(false)
         .then((p_saveResults) =&gt; {
-            const c = g.app.commandersList[this.commanderIndex];
+            const c = g.app.commanders()[this.commanderIndex];
             const commands: vscode.QuickPickItem[] = [];
             for (let key in c.commandsDict) {
                 const command = c.commandsDict[key];
@@ -3287,7 +3303,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 
             }
             if (p_picked &amp;&amp; p_picked.label) {
-                const c = g.app.commandersList[this.commanderIndex];
+                const c = g.app.commanders()[this.commanderIndex];
                 const w_commandResult = c.doCommandByName(p_picked.label);
 
                 if (!this.preventRefresh) {
@@ -3314,7 +3330,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 public editHeadline(p_node?: Position, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
     this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
-    const c = g.app.commandersList[this.commanderIndex];
+    const c = g.app.commanders()[this.commanderIndex];
     const u = c.undoer;
     if (!p_node) {
         p_node = c.p; // Current selection
@@ -3396,7 +3412,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
             this.commandRefreshTimer = this.lastCommandTimer;
         }
 
-        const c = g.app.commandersList[this.commanderIndex];
+        const c = g.app.commanders()[this.commanderIndex];
 
         let value: any = undefined;
         const p = p_node ? p_node : c.p;
@@ -5636,7 +5652,8 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 "lodash": "^4.17.21",
 "md5": "^2.3.0",
 "os-browserify": "^0.3.0",
-"path-browserify": "^1.0.1"
+"path-browserify": "^1.0.1",
+"stream": "^0.0.2"
 </t>
 <t tx="felix.20201214205159.9">{
   "command": "leojs.showBody",
@@ -5706,7 +5723,7 @@ public showLogPane(): Thenable&lt;unknown&gt; {
  * @returns Thenable from the tested functionality
  */
 public test(): Thenable&lt;unknown&gt; {
-    const c = g.app.commandersList[this.commanderIndex];
+    const c = g.app.commanders()[this.commanderIndex];
 
     vscode.window.showInformationMessage("Test called!");
     console.log("Test called!");
@@ -5862,10 +5879,10 @@ public newLeoFile(): Thenable&lt;unknown&gt; {
     // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
     w_p._linkAsRoot();
 
-    g.app.commandersList.push(w_c);
+    g.app.commanders().push(w_c);
 
     // select last, that was just created
-    this.commanderIndex = g.app.commandersList.length - 1;
+    this.commanderIndex = g.app.commanders().length - 1;
 
     const w_fakeOpenedFileInfo: any = undefined;
     this._setupOpenedLeoDocument(w_fakeOpenedFileInfo);
@@ -6292,7 +6309,7 @@ public _launchRefresh(p_node?: Position): void {
         this.refreshTimer = this.lastRefreshTimer;
     }
 
-    const c = g.app.commandersList[this.commanderIndex];
+    const c = g.app.commanders()[this.commanderIndex];
 
     // Set w_revealType, it will ultimately set this._revealType.
     // Used when finding the OUTLINE's selected node and setting or preventing focus into it
@@ -7823,7 +7840,7 @@ public get tooltip(): string {
 <t tx="felix.20211122214230.1">public getChildren(element?: LeoUndoNode): LeoUndoNode[] {
     const w_children: LeoUndoNode[] = [];
     // if called with element, or not ready, give back empty array as there won't be any children
-    if (this._leoStates.fileOpenedReady &amp;&amp; !element) {
+    if (this._leoStates.fileOpenedReady &amp;&amp; !element &amp;&amp; g.app.commanders().length) {
         const c = g.app.commanders()[this._leoUI.commanderIndex];
         const undoer = c.undoer;
 
@@ -8183,7 +8200,7 @@ private _bodySaveDeactivate(
 private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
     const LEOCMD = Constants.LEO_COMMANDS;
     const w_command = p_asChild ? LEOCMD.INSERT_CHILD_PNODE : LEOCMD.INSERT_PNODE;
-    const c = g.app.commandersList[this.commanderIndex];
+    const c = g.app.commanders()[this.commanderIndex];
     const u = c.undoer;
     let value: any = c.doCommandByName(w_command);
     if (!p_name) {
@@ -8488,5 +8505,191 @@ export class IconConstants {
 }
 </t>
 <t tx="felix.20220128232146.1"></t>
+<t tx="felix.20220130224933.1">@first # -*- coding: utf-8 -*-
+"""
+Support for Leo's new unit tests, contained in leo/unittests/test_*.py.
+
+Run these tests using unittest or pytest from the command line.
+See g.run_unit_tests and g.run_coverage_tests.
+
+This file also contains classes that convert @test nodes in unitTest.leo to
+tests in leo/unittest. Eventually these classes will move to scripts.leo.
+"""
+import time
+import unittest
+import warnings
+from leo.core import leoGlobals as g
+from leo.core import leoApp
+
+@others
+</t>
+<t tx="felix.20220130224933.2">def create_app(gui_name='null'):
+    """
+    Create the Leo application, g.app, the Gui, g.app.gui, and a commander.
+
+    This method is expensive (0.5 sec) only the first time it is called.
+
+    Thereafter, recreating g.app, g.app.gui, and new commands is fast.
+    """
+    trace = False
+    t1 = time.process_time()
+    #
+    # Set g.unitTesting *early*, for guards, to suppress the splash screen, etc.
+    g.unitTesting = True
+    # Create g.app now, to avoid circular dependencies.
+    g.app = leoApp.LeoApp()
+    # Late imports.
+    warnings.simplefilter("ignore")
+    from leo.core import leoConfig
+    from leo.core import leoNodes
+    from leo.core import leoCommands
+    from leo.core.leoGui import NullGui
+    if gui_name == 'qt':
+        from leo.plugins.qt_gui import LeoQtGui
+    t2 = time.process_time()
+    g.app.recentFilesManager = leoApp.RecentFilesManager()
+    g.app.loadManager = lm = leoApp.LoadManager()
+    lm.computeStandardDirectories()
+    if not g.app.setLeoID(useDialog=False, verbose=True):
+        raise ValueError("unable to set LeoID.")
+    g.app.nodeIndices = leoNodes.NodeIndices(g.app.leoID)
+    g.app.config = leoConfig.GlobalConfigManager()
+    g.app.db = g.NullObject('g.app.db')
+    g.app.pluginsController = g.NullObject('g.app.pluginsController')
+    g.app.commander_cacher = g.NullObject('g.app.commander_cacher')
+    if gui_name == 'null':
+        g.app.gui = NullGui()
+    elif gui_name == 'qt':
+        g.app.gui = LeoQtGui()
+    else:
+        raise TypeError(f"create_gui: unknown gui_name: {gui_name!r}")
+    t3 = time.process_time()
+    # Create a dummy commander, to do the imports in c.initObjects.
+    # Always use a null gui to avoid screen flash.
+    # setUp will create another commander.
+    c = leoCommands.Commands(fileName=None, gui=g.app.gui)
+    # Create minimal config dictionaries.
+    settings_d, bindings_d = lm.createDefaultSettingsDicts()
+    lm.globalSettingsDict = settings_d
+    lm.globalBindingsDict = bindings_d
+    c.config.settingsDict = settings_d
+    c.config.bindingsDict = bindings_d
+    assert g.unitTesting is True  # Defensive.
+    t4 = time.process_time()
+    # Trace times. This trace happens only once:
+    #     imports: 0.016
+    #         gui: 0.000
+    #   commander: 0.469
+    #       total: 0.484
+    if trace and t4 - t3 &gt; 0.1:
+        print('create_app:\n'
+            f"  imports: {(t2-t1):.3f}\n"
+            f"      gui: {(t3-t2):.3f}\n"
+            f"commander: {(t4-t2):.3f}\n"
+            f"    total: {(t4-t1):.3f}\n")
+    return c
+</t>
+<t tx="felix.20220130224933.3">class LeoUnitTest(unittest.TestCase):
+    """
+    The base class for all unit tests in Leo.
+
+    Contains setUp/tearDown methods and various utilites.
+    """
+    @others
+</t>
+<t tx="felix.20220130224933.4">@classmethod
+def setUpClass(cls):
+    create_app(gui_name='null')
+
+def setUp(self):
+    """
+    Create a commander using a **null** gui, regardless of g.app.gui.
+    Create the nodes in the commander.
+    """
+    # Do the import here to avoid circular dependencies.
+    from leo.core import leoCommands
+    from leo.core.leoGui import NullGui
+    # Set g.unitTesting *early*, for guards.
+    g.unitTesting = True
+    # Create a new commander for each test.
+    # This is fast, because setUpClass has done all the imports.
+    self.c = c = leoCommands.Commands(fileName=None, gui=NullGui())
+    # Init the 'root' and '@settings' nodes.
+    self.root_p = c.rootPosition()
+    self.root_p.h = 'root'
+    self.settings_p = self.root_p.insertAfter()
+    self.settings_p.h = '@settings'
+    # Select the 'root' node.
+    c.selectPosition(self.root_p)
+
+def tearDown(self):
+    self.c = None
+</t>
+<t tx="felix.20220130224933.5">def create_test_outline(self):
+    p = self.c.p
+    # Create the following outline:
+    #
+    # root
+    #   child clone a
+    #     node clone 1
+    #   child b
+    #     child clone a
+    #       node clone 1
+    #   child c
+    #     node clone 1
+    #   child clone a
+    #     node clone 1
+    #   child b
+    #     child clone a
+    #       node clone 1
+    assert p == self.root_p
+    assert p.h == 'root'
+    # Child a
+    child_clone_a = p.insertAsLastChild()
+    child_clone_a.h = 'child clone a'
+    node_clone_1 = child_clone_a.insertAsLastChild()
+    node_clone_1.h = 'node clone 1'
+    # Child b
+    child_b = p.insertAsLastChild()
+    child_b.h = 'child b'
+    # Clone 'child clone a'
+    clone = child_clone_a.clone()
+    clone.moveToLastChildOf(child_b)
+    # Child c
+    child_c = p.insertAsLastChild()
+    child_c.h = 'child c'
+    # Clone 'node clone 1'
+    clone = node_clone_1.clone()
+    clone.moveToLastChildOf(child_c)
+    # Clone 'child clone a'
+    clone = child_clone_a.clone()
+    clone.moveToLastChildOf(p)
+    # Clone 'child b'
+    clone = child_b.clone()
+    clone.moveToLastChildOf(p)
+</t>
+<t tx="felix.20220131010929.1">public getIdFromDialog(): Thenable&lt;string&gt; {
+
+    // TODO : GET FROM WORKSPACE/USER SETTINGS AS 'leoID' FIRST!
+
+    return vscode.window.showInputBox({
+        title: "Enter Leo id",
+        prompt: "Please enter an id that identifies you uniquely.\n" +
+            "Your git/cvs/bzr login name is a good choice.\n\n" +
+            "Leo uses this id to uniquely identify nodes.\n\n" +
+            "Your id should contain only letters and numbers\n" +
+            "and must be at least 3 characters in length."
+
+    }).then((p_id) =&gt; {
+        if (p_id) {
+
+            // TODO : SET IN WORKSPACE/USER SETTINGS AS 'leoID' FIRST!
+
+            return p_id;
+        }
+        return '';
+    });
+}
+</t>
 </tnodes>
 </leo_file>

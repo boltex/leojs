@@ -21,12 +21,18 @@ suite('Test cases for leoApp.py', () => {
 
 
     before(() => {
-        vscode.window.showInformationMessage('before leoApp.test!');
+        return new Promise<void>((resolve) => {
+            setTimeout(() => {
+                resolve();
+            }, 10000);
+        });
     });
 
 
-    after(() => {
-        vscode.window.showInformationMessage('after leoApp.test!');
+    after(async () => {
+        console.log('after leoApp test');
+
+        // vscode.window.showInformationMessage('after leoApp.test!');
     });
 
     test('actual leoApp test', () => {

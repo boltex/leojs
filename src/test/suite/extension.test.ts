@@ -1,23 +1,23 @@
 //@+leo-ver=5-thin
-//@+node:felix.20220129002501.1: * @file src/test/example.test.ts
+//@+node:felix.20220129002501.1: * @file src/test/suite/extension.test.ts
 import * as assert from 'assert';
+import { after, before, beforeEach } from 'mocha';
 
 // * You can import and use all API from the 'vscode' module
 // * as well as import your extension to test it
 
 import * as vscode from 'vscode';
 
-import * as g from '../core/leoGlobals';
-import { Commands } from "../core/leoCommands";
-import { NodeIndices, VNode, Position } from '../core/leoNodes';
-
+import * as g from '../../core/leoGlobals';
+import { Commands } from "../../core/leoCommands";
+import { NodeIndices, VNode, Position } from '../../core/leoNodes';
 
 suite('Extension test examples', () => {
 
-	test('Sample test', () => {
-		assert.strictEqual([1, 2, 3].indexOf(5), -1);
-		assert.strictEqual([1, 2, 3].indexOf(0), -1);
-	});
+	// test('Sample test', async () => {
+	// 	assert.strictEqual([1, 2, 3].indexOf(5), -1);
+	// 	assert.strictEqual([1, 2, 3].indexOf(0), -1);
+	// });
 
 	// * Example tests for leojs
 	vscode.window.showInformationMessage('Starting leojs sample tests');
@@ -28,24 +28,34 @@ suite('Extension test examples', () => {
 	let w_p: Position;
 	let c: Commands;
 
+	before(() => {
+		return new Promise<void>((resolve) => {
+			setTimeout(() => {
+				console.log('Finished 5 seconds waiting period');
+				resolve();
+			}, 5000);
+		});
+	});
+
+
 	test('ASSERT g and g.app', () => {
 		assert.strictEqual(!!g, true, "g exists");
 		assert.strictEqual(!!g.app, true, "g.app exists");
 	});
 
 	test('SETUP LEO APP', () => {
-		console.log('in examples test before g.app.leoID is ', g.app.leoID);
+		console.log('XXX in examples test before g.app.leoID is ', g.app.leoID);
 
-		if (!g.app.setLeoID(false, true)) {
-			throw new Error("unable to set LeoID.");
-		}
+		// if (!g.app.setLeoID(false, true)) {
+		// 	throw new Error("unable to set LeoID.");
+		// }
 
 		assert.strictEqual(!!g.app.leoID, true, "leoID exists");
 
 		g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
 		g.app.nodeIndices = new NodeIndices(g.app.leoID);
 
-		console.log('in examples test after g.app.leoID is ', g.app.leoID);
+		console.log('XXX in examples test after g.app.leoID is ', g.app.leoID);
 
 	});
 
@@ -97,7 +107,6 @@ suite('Extension test examples', () => {
 		w_p.initHeadString("node 2 selected but empty");
 		w_c.setCurrentPosition(w_p);
 	});
-
 
 });
 //@-leo

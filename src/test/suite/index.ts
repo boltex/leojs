@@ -6,7 +6,8 @@ export function run(): Promise<void> {
 	// Create the mocha test
 	const mocha = new Mocha({
 		ui: 'tdd',
-		color: true
+		color: true,
+		timeout: 25000 // Lot of time for leojs ui and app to be created
 	});
 
 	console.log('Starting src/test/suite/index.ts');

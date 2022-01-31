@@ -92,7 +92,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
                     return [...w_c.all_Root_Children()];
                 }
             } else {
-                console.error('Commander not found in commanderList');
+                // console.error('Commander not found in commanderList');
                 return [];
             }
         }

@@ -1019,7 +1019,7 @@ export class LeoApp {
     /**
      * Get g.app.leoID from various sources.
      */
-    public setLeoID(useDialog: boolean = true, verbose: boolean = true): string {
+    public async setLeoID(useDialog: boolean = true, verbose: boolean = true): Promise<string> {
         this.leoID = "";
 
         // tslint:disable-next-line: strict-comparisons
@@ -1033,9 +1033,20 @@ export class LeoApp {
             w_userName = os.userInfo().username;
         }
 
-        this.leoID = this.cleanLeoID(w_userName, 'os.userInfo().username');
+        if (w_userName) {
+            this.leoID = this.cleanLeoID(w_userName, 'os.userInfo().username');
+            return this.leoID;
+        }
 
-        return this.leoID;
+        if (useDialog && g.app.gui) {
+            return g.app.gui!.getIdFromDialog().then((p_id) => {
+                this.leoID = this.cleanLeoID(p_id, 'os.userInfo().username');
+                return this.leoID;
+            });
+        }
+
+        throw new Error("unknownAttributes ValueError Invalid Leo ID");
+
         // table = (self.setIDFromSys, self.setIDFromFile, self.setIDFromEnv,)
         // for func in table:
         // func(verbose)
@@ -1064,7 +1075,7 @@ export class LeoApp {
             id_ = '';
         }
         if (id_.length < 3) {
-            throw new Error("unknownAttributes ValueError");
+            throw new Error("unknownAttributes ValueError Invalid Leo ID");
             // TODO: Show Leo Id syntax error message
             // g.EmergencyDialog(
             //   title=f"Invalid Leo ID: {tag}",
