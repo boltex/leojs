@@ -2733,6 +2733,13 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
         // * demo test end
         // ************************************************************
 
+        setTimeout(() =&gt; {
+            this._setupRefresh(true,
+                { tree: true, body: true, documents: true, buttons: true, states: true }
+            );
+            this.launchRefresh();
+        }, 10);
+
     });
 
 
