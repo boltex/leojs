@@ -4,6 +4,7 @@ import { Icon } from './types';
 import { LeoUI } from './leoUI';
 import * as g from './core/leoGlobals';
 import { Position } from './core/leoNodes';
+import { Commands } from './core/leoCommands';
 
 
 
@@ -64,7 +65,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             this.buildId(element, w_collapse)
         );
         // Check if its the selected node and call signal it to the UI
-        if (element.__eq__(g.app.commandersList[this._leoUI.commanderIndex].p)) {
+        if (element.__eq__(g.app.commanders()[this._leoUI.commanderIndex].p)) {
             this._leoUI.gotSelectedNode(element);
         }
         // Build a LeoNode (a vscode tree node) from the Position
@@ -80,8 +81,9 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
         if (element) {
             return [...element.children()];
         } else {
-            if (g.app.commandersList[this._leoUI.commanderIndex]) {
-                const w_c = g.app.commandersList[this._leoUI.commanderIndex]!; // Currently Selected Document's Commander
+            const w_commanders: Commands[] = g.app.commanders();
+            if (w_commanders[this._leoUI.commanderIndex]) {
+                const w_c = w_commanders[this._leoUI.commanderIndex]!; // Currently Selected Document's Commander
                 if (w_c.hoistStack.length) {
                     // topmost hoisted starts the outline as single root 'child'
                     return [w_c.hoistStack[w_c.hoistStack.length - 1].p];

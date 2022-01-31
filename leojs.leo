@@ -605,6 +605,7 @@ import { Icon } from './types';
 import { LeoUI } from './leoUI';
 import * as g from './core/leoGlobals';
 import { Position } from './core/leoNodes';
+import { Commands } from './core/leoCommands';
 
 
 
@@ -1020,7 +1021,7 @@ public refreshTreeRoot(): void {
         this.buildId(element, w_collapse)
     );
     // Check if its the selected node and call signal it to the UI
-    if (element.__eq__(g.app.commandersList[this._leoUI.commanderIndex].p)) {
+    if (element.__eq__(g.app.commanders()[this._leoUI.commanderIndex].p)) {
         this._leoUI.gotSelectedNode(element);
     }
     // Build a LeoNode (a vscode tree node) from the Position
@@ -1037,8 +1038,9 @@ public refreshTreeRoot(): void {
     if (element) {
         return [...element.children()];
     } else {
-        if (g.app.commandersList[this._leoUI.commanderIndex]) {
-            const w_c = g.app.commandersList[this._leoUI.commanderIndex]!; // Currently Selected Document's Commander
+        const w_commanders: Commands[] = g.app.commanders();
+        if (w_commanders[this._leoUI.commanderIndex]) {
+            const w_c = w_commanders[this._leoUI.commanderIndex]!; // Currently Selected Document's Commander
             if (w_c.hoistStack.length) {
                 // topmost hoisted starts the outline as single root 'child'
                 return [w_c.hoistStack[w_c.hoistStack.length - 1].p];
@@ -1948,7 +1950,7 @@ public refreshTreeRoot(): void {
     const w_children: LeoDocumentNode[] = [];
     // if called with element, or not ready, give back empty array as there won't be any children
     if (this._leoStates.fileOpenedReady &amp;&amp; !element) {
-        g.app.commandersList.forEach(p_doc =&gt; {
+        g.app.commanders().forEach(p_doc =&gt; {
             w_children.push(new LeoDocumentNode(p_doc, this._leoUI));
         });
     }
@@ -1977,17 +1979,18 @@ export class LeoDocumentNode extends vscode.TreeItem {
         super(documentEntry.fileName());
         // Setup this instance
         const w_isNamed: boolean = !!this.documentEntry.fileName();
+        const commanders: Commands[] = g.app.commanders();
         this.label = w_isNamed ? utils.getFileFromPath(this.documentEntry.fileName()) : Constants.UNTITLED_FILE_NAME;
         this.tooltip = w_isNamed ? this.documentEntry.fileName() : Constants.UNTITLED_FILE_NAME;
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
-            arguments: [g.app.commandersList.indexOf(this.documentEntry)]
+            arguments: [commanders.indexOf(this.documentEntry)]
         };
         // If this was created as a selected node, make sure it's selected as we may have opened/closed document
         // tslint:disable-next-line: strict-comparisons
 
-        if (this.documentEntry === g.app.commandersList[this._leoJs.commanderIndex]) {
+        if (this.documentEntry === commanders[this._leoJs.commanderIndex]) {
             this._leoJs.setDocumentSelection(this);
             this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
         } else {
@@ -2008,7 +2011,7 @@ public get iconPath(): Icon {
 <t tx="felix.20201214151434.4">// @ts-ignore
 public get id(): string {
     // Add prefix and suffix salt to numeric index to prevent accidental duplicates
-    return "p" + g.app.commandersList.indexOf(this.documentEntry) + "s" + this.documentEntry.fileName();
+    return "p" + g.app.commanders().indexOf(this.documentEntry) + "s" + this.documentEntry.fileName();
 }
 
 </t>
@@ -2532,7 +2535,9 @@ import { LeoFilesBrowser } from "./leoFileBrowser";
 import { LeoStates } from "./leoStates";
 import { LeoBodyProvider } from "./leoBody";
 import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
+
 import * as g from './core/leoGlobals';
+import { LeoApp } from './core/leoApp';
 import { LoadManager } from "./core/leoApp";
 import { Commands } from "./core/leoCommands";
 import { NodeIndices, Position, VNode } from "./core/leoNodes";
@@ -2560,6 +2565,12 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     this.nodeIcons = utils.buildNodeIconPaths(_context);
     this.documentIcons = utils.buildDocumentIconPaths(_context);
     this.buttonIcons = utils.buildButtonsIconPaths(_context);
+
+    if (!g.app) {
+        (g.app as LeoApp) = new LeoApp();
+    } else {
+        vscode.window.showWarningMessage("g.app leojs application instance already exists!");
+    }
 
     g.app.gui = this;
     g.app.loadManager = new LoadManager();
@@ -7813,7 +7824,7 @@ public get tooltip(): string {
     const w_children: LeoUndoNode[] = [];
     // if called with element, or not ready, give back empty array as there won't be any children
     if (this._leoStates.fileOpenedReady &amp;&amp; !element) {
-        const c = g.app.commandersList[this._leoUI.commanderIndex];
+        const c = g.app.commanders()[this._leoUI.commanderIndex];
         const undoer = c.undoer;
 
         let i: number = 0;

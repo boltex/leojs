@@ -12,7 +12,9 @@ import { LeoFilesBrowser } from "./leoFileBrowser";
 import { LeoStates } from "./leoStates";
 import { LeoBodyProvider } from "./leoBody";
 import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
+
 import * as g from './core/leoGlobals';
+import { LeoApp } from './core/leoApp';
 import { LoadManager } from "./core/leoApp";
 import { Commands } from "./core/leoCommands";
 import { NodeIndices, Position, VNode } from "./core/leoNodes";
@@ -140,6 +142,12 @@ export class LeoUI {
         this.documentIcons = utils.buildDocumentIconPaths(_context);
         this.buttonIcons = utils.buildButtonsIconPaths(_context);
 
+        if (!g.app) {
+            (g.app as LeoApp) = new LeoApp();
+        } else {
+            vscode.window.showWarningMessage("g.app leojs application instance already exists!");
+        }
+
         g.app.gui = this;
         g.app.loadManager = new LoadManager();
         // g.app.loadManager.computeStandardDirectories()
@@ -172,10 +180,10 @@ export class LeoUI {
         // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
         w_p._linkAsRoot();
 
-        g.app.commandersList.push(w_c);
+        g.app.commanders().push(w_c);
 
         // select first test commander
-        let c = g.app.commandersList[this.commanderIndex];
+        let c = g.app.commanders()[this.commanderIndex];
 
         // ************************************************************
         // * demo test: BUILD SOME TEST OUTLINE
@@ -212,7 +220,7 @@ export class LeoUI {
         w_v.initHeadString("NewHeadline");
         w_c.hiddenRootNode.children = [];
         w_p._linkAsRoot();
-        g.app.commandersList.push(w_c);
+        g.app.commanders().push(w_c);
 
         // select second test commander
         c = w_c;
@@ -283,7 +291,7 @@ export class LeoUI {
         }
 
         // back to first test commander after creating this second one
-        c = g.app.commandersList[this.commanderIndex];
+        c = g.app.commanders()[this.commanderIndex];
         // ************************************************************
         // * demo test end
         // ************************************************************
@@ -450,7 +458,7 @@ export class LeoUI {
         }
         if (this._refreshType.states) {
             this._refreshType.states = false;
-            const c = g.app.commandersList[this.commanderIndex];
+            const c = g.app.commanders()[this.commanderIndex];
             const w_states: LeoPackageStates = {
                 changed: c.changed, // Document has changed (is dirty)
                 canUndo: c.canUndo(), // Document can undo the last operation done
@@ -526,7 +534,7 @@ export class LeoUI {
      * @param p_focusOutline Flag for focus to be placed in outline
      */
     public showOutline(p_focusOutline?: boolean): void {
-        const c = g.app.commandersList[this.commanderIndex];
+        const c = g.app.commanders()[this.commanderIndex];
         this._lastTreeView.reveal(c.p, {
             select: true,
             focus: !!p_focusOutline
@@ -624,7 +632,7 @@ export class LeoUI {
             this.refreshTimer = this.lastRefreshTimer;
         }
 
-        const c = g.app.commandersList[this.commanderIndex];
+        const c = g.app.commanders()[this.commanderIndex];
 
         // Set w_revealType, it will ultimately set this._revealType.
         // Used when finding the OUTLINE's selected node and setting or preventing focus into it
@@ -1049,7 +1057,7 @@ export class LeoUI {
      * @returns thenable for reveal to finish or select position to finish
      */
     public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable<unknown> {
-        const c = g.app.commandersList[this.commanderIndex];
+        const c = g.app.commanders()[this.commanderIndex];
         // Note: set context flags for current selection when capturing and revealing the selected node
         // when the tree refreshes and the selected node is processed by getTreeItem & gotSelectedNode
         let q_reveal: Thenable<void> | undefined;
@@ -1101,7 +1109,7 @@ export class LeoUI {
             this.commandRefreshTimer = this.lastCommandTimer;
         }
 
-        const c = g.app.commandersList[this.commanderIndex];
+        const c = g.app.commanders()[this.commanderIndex];
         this._setupRefresh(p_fromOutline, p_refreshType);
 
         let value: any = undefined;
@@ -1143,7 +1151,7 @@ export class LeoUI {
 
         return this.triggerBodySave(false)
             .then((p_saveResults) => {
-                const c = g.app.commandersList[this.commanderIndex];
+                const c = g.app.commanders()[this.commanderIndex];
                 const commands: vscode.QuickPickItem[] = [];
                 for (let key in c.commandsDict) {
                     const command = c.commandsDict[key];
@@ -1183,7 +1191,7 @@ export class LeoUI {
 
                 }
                 if (p_picked && p_picked.label) {
-                    const c = g.app.commandersList[this.commanderIndex];
+                    const c = g.app.commanders()[this.commanderIndex];
                     const w_commandResult = c.doCommandByName(p_picked.label);
 
                     if (!this.preventRefresh) {
@@ -1209,7 +1217,7 @@ export class LeoUI {
     public editHeadline(p_node?: Position, p_fromOutline?: boolean): Thenable<unknown> {
         this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
-        const c = g.app.commandersList[this.commanderIndex];
+        const c = g.app.commanders()[this.commanderIndex];
         const u = c.undoer;
         if (!p_node) {
             p_node = c.p; // Current selection
@@ -1290,7 +1298,7 @@ export class LeoUI {
                 this.commandRefreshTimer = this.lastCommandTimer;
             }
 
-            const c = g.app.commandersList[this.commanderIndex];
+            const c = g.app.commanders()[this.commanderIndex];
 
             let value: any = undefined;
             const p = p_node ? p_node : c.p;
@@ -1329,7 +1337,7 @@ export class LeoUI {
     private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
         const LEOCMD = Constants.LEO_COMMANDS;
         const w_command = p_asChild ? LEOCMD.INSERT_CHILD_PNODE : LEOCMD.INSERT_PNODE;
-        const c = g.app.commandersList[this.commanderIndex];
+        const c = g.app.commanders()[this.commanderIndex];
         const u = c.undoer;
         let value: any = c.doCommandByName(w_command);
         if (!p_name) {
@@ -1450,10 +1458,10 @@ export class LeoUI {
         // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
         w_p._linkAsRoot();
 
-        g.app.commandersList.push(w_c);
+        g.app.commanders().push(w_c);
 
         // select last, that was just created
-        this.commanderIndex = g.app.commandersList.length - 1;
+        this.commanderIndex = g.app.commanders().length - 1;
 
         const w_fakeOpenedFileInfo: any = undefined;
         this._setupOpenedLeoDocument(w_fakeOpenedFileInfo);
@@ -1810,7 +1818,7 @@ export class LeoUI {
      * @returns Thenable from the tested functionality
      */
     public test(): Thenable<unknown> {
-        const c = g.app.commandersList[this.commanderIndex];
+        const c = g.app.commanders()[this.commanderIndex];
 
         vscode.window.showInformationMessage("Test called!");
         console.log("Test called!");

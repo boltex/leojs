@@ -34,6 +34,8 @@ suite('Extension test examples', () => {
 	});
 
 	test('SETUP LEO APP', () => {
+		console.log('in examples test before g.app.leoID is ', g.app.leoID);
+
 		if (!g.app.setLeoID(false, true)) {
 			throw new Error("unable to set LeoID.");
 		}
@@ -42,6 +44,9 @@ suite('Extension test examples', () => {
 
 		g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
 		g.app.nodeIndices = new NodeIndices(g.app.leoID);
+
+		console.log('in examples test after g.app.leoID is ', g.app.leoID);
+
 	});
 
 	test('CREATE NEW LEO OUTLINE: NEW COMMANDER', () => {
@@ -64,10 +69,10 @@ suite('Extension test examples', () => {
 		// New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
 		w_p._linkAsRoot();
 
-		g.app.commandersList.push(w_c);
+		g.app.commanders().push(w_c);
 
 		// select first test commander
-		c = g.app.commandersList[commanderIndex];
+		c = g.app.commanders()[commanderIndex];
 		assert.strictEqual(!!c, true, 'Global Test Commander Exists 1');
 
 	});

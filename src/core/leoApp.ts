@@ -151,7 +151,7 @@ export class LeoApp {
 
     public globalKillBuffer: any[] = []; // The global kill buffer.
     public globalRegisters: any = {}; // The global register list.
-    public leoID: string = 'test'; // The id part of gnx's, using empty for falsy.
+    public leoID: string = ''; // The id part of gnx's, using empty for falsy.
     public loadedThemes: any[] = []; // List of loaded theme.leo files.
     public lossage: any[] = []; // List of last 100 keystrokes.
     public paste_c: any = null; // The commander that pasted the last outline.
@@ -1027,7 +1027,7 @@ export class LeoApp {
 
         verbose = verbose && !g.unitTesting && !this.silentMode;
 
-        let w_userName = "TestUserName";
+        let w_userName = ""; // = "TestUserName";
 
         if (os && os.userInfo) {
             w_userName = os.userInfo().username;

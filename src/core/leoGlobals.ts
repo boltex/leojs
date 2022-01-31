@@ -328,8 +328,8 @@ const languagesList = [
 export const tree_popup_handlers: ((...args: any[]) => any)[] = [];  // Set later.
 export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionary for free use
 
-// Was set when creating leoGlobals instance in leoRun.py and in leoBridge.py
-export const app: LeoApp = new LeoApp();
+// The singleton app object. Originally was set by runLeo.py.
+export let app: LeoApp;
 
 // Global status vars.
 export let inScript: boolean = false; // A synonym for app.inScript

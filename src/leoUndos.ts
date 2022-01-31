@@ -35,7 +35,7 @@ export class LeoUndosProvider implements vscode.TreeDataProvider<LeoUndoNode> {
         const w_children: LeoUndoNode[] = [];
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoStates.fileOpenedReady && !element) {
-            const c = g.app.commandersList[this._leoUI.commanderIndex];
+            const c = g.app.commanders()[this._leoUI.commanderIndex];
             const undoer = c.undoer;
 
             let i: number = 0;

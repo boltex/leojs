@@ -682,7 +682,7 @@ export class CommanderFileCommands {
 
         c.save();  // Force a write of the present window.
 
-        for (let c2 of g.app.commandersList) {
+        for (let c2 of g.app.commanders()) {
             if (c2 !== c && c2.isChanged()) {
                 c2.save();
             }

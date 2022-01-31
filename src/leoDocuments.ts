@@ -36,7 +36,7 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoDocument
         const w_children: LeoDocumentNode[] = [];
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoStates.fileOpenedReady && !element) {
-            g.app.commandersList.forEach(p_doc => {
+            g.app.commanders().forEach(p_doc => {
                 w_children.push(new LeoDocumentNode(p_doc, this._leoUI));
             });
         }
@@ -65,17 +65,18 @@ export class LeoDocumentNode extends vscode.TreeItem {
         super(documentEntry.fileName());
         // Setup this instance
         const w_isNamed: boolean = !!this.documentEntry.fileName();
+        const commanders: Commands[] = g.app.commanders();
         this.label = w_isNamed ? utils.getFileFromPath(this.documentEntry.fileName()) : Constants.UNTITLED_FILE_NAME;
         this.tooltip = w_isNamed ? this.documentEntry.fileName() : Constants.UNTITLED_FILE_NAME;
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
-            arguments: [g.app.commandersList.indexOf(this.documentEntry)]
+            arguments: [commanders.indexOf(this.documentEntry)]
         };
         // If this was created as a selected node, make sure it's selected as we may have opened/closed document
         // tslint:disable-next-line: strict-comparisons
 
-        if (this.documentEntry === g.app.commandersList[this._leoJs.commanderIndex]) {
+        if (this.documentEntry === commanders[this._leoJs.commanderIndex]) {
             this._leoJs.setDocumentSelection(this);
             this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
         } else {
@@ -91,7 +92,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
     // @ts-ignore
     public get id(): string {
         // Add prefix and suffix salt to numeric index to prevent accidental duplicates
-        return "p" + g.app.commandersList.indexOf(this.documentEntry) + "s" + this.documentEntry.fileName();
+        return "p" + g.app.commanders().indexOf(this.documentEntry) + "s" + this.documentEntry.fileName();
     }
 
 }
