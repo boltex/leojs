@@ -33,6 +33,7 @@ export interface ConfigMembers {
     showSortOnBody: boolean;
 
     invertNodeContrast: boolean;
+    leoID: string;
 }
 
 /**

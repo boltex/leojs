@@ -38,7 +38,9 @@ export class Config implements ConfigMembers {
     public showMarkOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK_BODY; // Used as Context Flag
     public showSortOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_SORT_BODY; // Used as Context Flag
 
+
     public invertNodeContrast: boolean = Constants.CONFIG_DEFAULTS.INVERT_NODES;
+    public leoID: string = Constants.CONFIG_DEFAULTS.LEO_ID;
 
     private _isBusySettingConfig: boolean = false;
     private _needsTreeRefresh: boolean = false;
@@ -82,6 +84,7 @@ export class Config implements ConfigMembers {
             showSortOnBody: this.showSortOnBody, // Used as Context Flag
 
             invertNodeContrast: this.invertNodeContrast,
+            leoID: this.leoID
         };
     }
 
@@ -330,6 +333,7 @@ export class Config implements ConfigMembers {
             this.showMarkOnBody = GET(NAME).get(NAMES.SHOW_MARK_BODY, DEFAULTS.SHOW_MARK_BODY);
             this.showSortOnBody = GET(NAME).get(NAMES.SHOW_SORT_BODY, DEFAULTS.SHOW_SORT_BODY);
             this.invertNodeContrast = GET(NAME).get(NAMES.INVERT_NODES, DEFAULTS.INVERT_NODES);
+            this.leoID = GET(NAME).get(NAMES.LEO_ID, DEFAULTS.LEO_ID);
 
             // * Set context for tree items visibility that are based on config options
             return Promise.all([

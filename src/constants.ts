@@ -167,6 +167,7 @@ export class Constants {
         SHOW_SORT_BODY: "showSortOnBody",
 
         INVERT_NODES: "invertNodeContrast",
+        LEO_ID: "leoID"
     };
 
     /**
@@ -201,7 +202,8 @@ export class Constants {
         SHOW_MARK_BODY: true,
         SHOW_SORT_BODY: true,
 
-        INVERT_NODES: false
+        INVERT_NODES: false,
+        LEO_ID: ""
     };
 
     /**

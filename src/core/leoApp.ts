@@ -1029,34 +1029,39 @@ export class LeoApp {
 
         let w_userName = ""; // = "TestUserName";
 
-        if (os && os.userInfo) {
-            w_userName = os.userInfo().username;
+        // 1 - set leoID from configuration settings
+        if (g.app.gui) {
+            w_userName = g.app.gui.getIdFromSetting();
+            if (w_userName) {
+                this.leoID = this.cleanLeoID(w_userName, 'config.leoID');
+            }
         }
 
-        if (w_userName) {
-            this.leoID = this.cleanLeoID(w_userName, 'os.userInfo().username');
+        // 2 - Set leoID from environment
+        if (!this.leoID && os && os.userInfo) {
+            w_userName = os.userInfo().username;
+            if (w_userName) {
+                this.leoID = this.cleanLeoID(w_userName, 'os.userInfo().username');
+            }
+        }
+
+        // 3 - Set leoID from user dialog if allowed
+        if (!this.leoID && useDialog && g.app.gui) {
+            return g.app.gui!.getIdFromDialog().then((p_id) => {
+                this.leoID = this.cleanLeoID(p_id, 'os.userInfo().username');
+                if (this.leoID) {
+                    g.app.gui!.setIdSetting(this.leoID);
+                }
+                return this.leoID;
+            });
+        } else {
+            // Error: no leoID to be found
+            if (!this.leoID) {
+                throw new Error("Could not get Leo ID");
+            }
             return this.leoID;
         }
 
-        if (useDialog && g.app.gui) {
-            return g.app.gui!.getIdFromDialog().then((p_id) => {
-                this.leoID = this.cleanLeoID(p_id, 'os.userInfo().username');
-                return this.leoID;
-            });
-        }
-
-        throw new Error("unknownAttributes ValueError Invalid Leo ID");
-
-        // table = (self.setIDFromSys, self.setIDFromFile, self.setIDFromEnv,)
-        // for func in table:
-        // func(verbose)
-        // if self.leoID:
-        // return self.leoID
-        // if useDialog:
-        // self.setIdFromDialog()
-        // if self.leoID:
-        // self.setIDFile()
-        // return self.leoID
     }
 
     //@+node:felix.20210221010822.2: *4* app.cleanLeoID
@@ -1075,7 +1080,7 @@ export class LeoApp {
             id_ = '';
         }
         if (id_.length < 3) {
-            throw new Error("unknownAttributes ValueError Invalid Leo ID");
+            throw new Error("Invalid Leo ID");
             // TODO: Show Leo Id syntax error message
             // g.EmergencyDialog(
             //   title=f"Invalid Leo ID: {tag}",

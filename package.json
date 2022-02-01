@@ -215,6 +215,14 @@
           "default": true,
           "type": "boolean",
           "description": "Shows 'Sort Siblings' above the body pane"
+        },
+        "leojs.leoID": {
+          "scope": "application",
+          "default": "",
+          "type": "string",
+          "description": "Used to uniquely identify nodes - Defaults to the OS/Environment user name",
+          "pattern":"(^$|^[a-zA-Z0-9]*$)",
+          "patternErrorMessage" : "Your id should contain only letters and numbers, and must contain at least 3 characters."
         }
       }
     },
