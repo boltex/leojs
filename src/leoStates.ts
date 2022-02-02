@@ -55,6 +55,7 @@ export class LeoStates {
     set leoChanged(p_value: boolean) {
         if (this._leoChanged !== p_value) {
             // Refresh Documents Panel
+            // ? Needed?
             this._leoJs.refreshDocumentsPane();
         }
         this._leoChanged = p_value;

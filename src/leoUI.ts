@@ -143,6 +143,9 @@ export class LeoUI {
         this.documentIcons = utils.buildDocumentIconPaths(_context);
         this.buttonIcons = utils.buildButtonsIconPaths(_context);
 
+        // * Create file browser instance
+        this._leoFilesBrowser = new LeoFilesBrowser(_context);
+
         if (!g.app) {
             (g.app as LeoApp) = new LeoApp();
         } else {
@@ -163,314 +166,325 @@ export class LeoUI {
         });
 
         q_leoID.then((p_leoID) => {
-
-            g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
-            g.app.nodeIndices = new NodeIndices(g.app.leoID);
-
-
-            // IF RECENT FILES LIST :
-            //      TODO: CHECK RECENT LEO FILE LIST AND OPEN THEM
-            //      g.app.loadManager.load(fileName, pymacs)
-            // ELSE :
-            //      TODO: CREATE NEW LEO OUTLINE (demo below)
-
-            // ************************************************************
-            // * demo test: CREATE NEW LEO OUTLINE: NEW COMMANDER
-            // ************************************************************
-            let w_c = g.app.newCommander("", this);
-
-            // Equivalent to leoBridge 'createFrame' method
-            let w_v = new VNode(w_c);
-            let w_p = new Position(w_v);
-            w_v.initHeadString("NewHeadline");
-
-            // #1631: Initialize here, not in p._linkAsRoot.
-            w_c.hiddenRootNode.children = [];
-
-            // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
-            w_p._linkAsRoot();
-
-            g.app.commanders().push(w_c);
-
-            // select first test commander
-            let c = g.app.commanders()[this.commanderIndex];
-
-            // ************************************************************
-            // * demo test: BUILD SOME TEST OUTLINE
-            // ************************************************************
-            let w_node = c.p;
-            w_node.initHeadString("@file node1");
-            w_node.setBodyString('@tabwidth 8\nnode1 body\n@others');
-            w_node.expand();
-
-            w_node = c.p.insertAsLastChild();
-            w_node.initHeadString("node Inside1");
-            w_node.setBodyString('  @others \nnodeInside1 body\n@language c\nprint()');
-            w_node.setMarked();
-
-            w_node = c.p.insertAsLastChild();
-            w_node.initHeadString("node with UserData Inside2");
-            w_node.setBodyString('node Inside2 body');
-            w_node.u = { a: 'user content string a', b: "user content also" };
-
-            w_node = c.p.insertAfter();
-            w_node.initHeadString("@file node3");
-            w_node.setBodyString('node 3 body');
-
-            w_node = c.p.insertAfter();
-            w_node.initHeadString("node 2 selected but empty");
-            w_c.setCurrentPosition(w_node);
-
-            // ************************************************************
-            // * demo test: SOME OTHER COMMANDER
-            // ************************************************************
-            w_c = g.app.newCommander("", this);
-            w_v = new VNode(w_c);
-            w_p = new Position(w_v);
-            w_v.initHeadString("NewHeadline");
-            w_c.hiddenRootNode.children = [];
-            w_p._linkAsRoot();
-            g.app.commanders().push(w_c);
-
-            // select second test commander
-            c = w_c;
-
-            // ************************************************************
-            // * demo test: BUILD SOME OTHER TEST OUTLINE
-            // ************************************************************
-            w_node = c.p;
-            w_node.initHeadString("some other title");
-            w_node.setBodyString('body text');
-
-            let nodeCounter = 0;
-            while (nodeCounter < 30) {
-                nodeCounter++;
-                w_node = c.p.insertAsLastChild();
-                w_node.initHeadString("top node numbered headline " + nodeCounter);
-            }
-
-            w_node = c.p.insertAsLastChild();
-            w_node.initHeadString("yet another node");
-            w_node.setBodyString('more body text\nwith a second line');
-
-            w_node = c.p.insertAfter();
-            w_node.initHeadString("@clean my-file.txt");
-            w_node.setBodyString('again some body text');
-            w_c.setCurrentPosition(w_node);
-
-            nodeCounter = 0;
-            while (nodeCounter < 30) {
-                nodeCounter++;
-                w_node = c.p.insertAsLastChild();
-                w_node.initHeadString("middle node numbered headline " + nodeCounter);
-            }
-
-            w_node = c.p.insertAsLastChild();
-            w_node.initHeadString("sample cloned node");
-            w_node.setBodyString('some other body');
-            w_node.clone();
-
-            w_node = c.p.insertAfter();
-            w_node.setMarked();
-            w_node.initHeadString("a different headline");
-
-            w_c.setCurrentPosition(w_node);
-
-            nodeCounter = 0;
-            while (nodeCounter < 30) {
-                nodeCounter++;
-                w_node = c.p.insertAsLastChild();
-                w_node.initHeadString("a numbered headline " + nodeCounter);
-            }
-
-            w_node = c.p.insertAfter();
-            w_node.initHeadString("another different headline");
-
-            nodeCounter = 0;
-            while (nodeCounter < 30) {
-                nodeCounter++;
-                w_node = c.p.insertAsLastChild();
-                w_node.initHeadString("more numbered headlines " + nodeCounter);
-            }
-            w_c.setCurrentPosition(w_node);
-            nodeCounter = 0;
-            while (nodeCounter < 30) {
-                nodeCounter++;
-                w_node = c.p.insertAsLastChild();
-                w_node.initHeadString("inside numbered headlines " + nodeCounter);
-            }
-
-            // back to first test commander after creating this second one
-            c = g.app.commanders()[this.commanderIndex];
-            // ************************************************************
-            // * demo test end
-            // ************************************************************
-
-            // * Create file browser instance
-            this._leoFilesBrowser = new LeoFilesBrowser(_context);
-
-            // * Create a single data provider for both outline trees, Leo view and Explorer view
-            this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);
-            this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
-            this._leoTreeView.onDidExpandElement((p_event => this._onChangeCollapsedState(p_event, true, this._leoTreeView)));
-            this._leoTreeView.onDidCollapseElement((p_event => this._onChangeCollapsedState(p_event, false, this._leoTreeView)));
-            this._leoTreeView.onDidChangeVisibility((p_event => this._onTreeViewVisibilityChanged(p_event, false))); // * Trigger 'show tree in Leo's view'
-            this._leoTreeExView = vscode.window.createTreeView(Constants.TREEVIEW_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
-            this._leoTreeExView.onDidExpandElement((p_event => this._onChangeCollapsedState(p_event, true, this._leoTreeExView)));
-            this._leoTreeExView.onDidCollapseElement((p_event => this._onChangeCollapsedState(p_event, false, this._leoTreeExView)));
-            this._leoTreeExView.onDidChangeVisibility((p_event => this._onTreeViewVisibilityChanged(p_event, true))); // * Trigger 'show tree in explorer view'
-            this._lastTreeView = this._leoTreeExView;
-
-            // * Create Leo Opened Documents Treeview Providers and tree views
-            this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);
-            this._leoDocuments = vscode.window.createTreeView(Constants.DOCUMENTS_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
-            this._leoDocuments.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, false)));
-            this._leoDocumentsExplorer = vscode.window.createTreeView(Constants.DOCUMENTS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
-            this._leoDocumentsExplorer.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, true)));
-            this._lastLeoDocuments = this._leoDocumentsExplorer;
-
-            // * Create '@buttons' Treeview Providers and tree views
-            this._leoButtonsProvider = new LeoButtonsProvider(this.leoStates, this.buttonIcons);
-            this._leoButtons = vscode.window.createTreeView(Constants.BUTTONS_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
-            this._leoButtons.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, false)));
-            this._leoButtonsExplorer = vscode.window.createTreeView(Constants.BUTTONS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
-            this._leoButtonsExplorer.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, true)));
-            this._lastLeoButtons = this._leoButtonsExplorer;
-
-            // * Create Undos Treeview Providers and tree views
-            this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this);
-            this._leoUndos = vscode.window.createTreeView(Constants.UNDOS_ID, { showCollapseAll: false, treeDataProvider: this._leoUndosProvider });
-            this._leoUndos.onDidChangeVisibility((p_event => this._onUndosTreeViewVisibilityChanged(p_event, false)));
-            this._leoUndosExplorer = vscode.window.createTreeView(Constants.UNDOS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoUndosProvider });
-            this._leoUndosExplorer.onDidChangeVisibility((p_event => this._onUndosTreeViewVisibilityChanged(p_event, true)));
-            this._lastLeoUndos = this._leoUndosExplorer;
-
-            // * Create Body Pane
-            this._leoFileSystem = new LeoBodyProvider(this);
-            this._bodyMainSelectionColumn = 1;
-
-            // * Create Status bar Entry
-            // this._leoStatusBar = new LeoStatusBar(_context, this);
-
-            // * Leo Find Panel
-            // this._leoFindPanelProvider = new LeoFindPanelProvider(
-            //     _context.extensionUri,
-            //     _context,
-            //     this
-            // );
-            // this._context.subscriptions.push(
-            //     vscode.window.registerWebviewViewProvider(
-            //         Constants.FIND_ID,
-            //         this._leoFindPanelProvider,
-            //         { webviewOptions: { retainContextWhenHidden: true } }
-            //     )
-            // );
-            // this._context.subscriptions.push(
-            //     vscode.window.registerWebviewViewProvider(
-            //         Constants.FIND_EXPLORER_ID,
-            //         this._leoFindPanelProvider,
-            //         { webviewOptions: { retainContextWhenHidden: true } }
-            //     )
-            // );
-
-            // * Configuration / Welcome webview
-            // this.leoSettingsWebview = new LeoSettingsProvider(_context, this);
-
-
-
-            // * React to change in active panel/text editor (window.activeTextEditor) - also fires when the active editor becomes undefined
-            // vscode.window.onDidChangeActiveTextEditor((p_editor) =>
-            //     this._onActiveEditorChanged(p_editor)
-            // );
-
-            // * React to change in selection, cursor position and scroll position
-            // vscode.window.onDidChangeTextEditorSelection((p_event) =>
-            //     this._onChangeEditorSelection(p_event)
-            // );
-            // vscode.window.onDidChangeTextEditorVisibleRanges((p_event) =>
-            //     this._onChangeEditorScroll(p_event)
-            // );
-
-            // * Triggers when a different text editor/vscode window changed focus or visibility, or dragged
-            // This is also what triggers after drag and drop, see '_onChangeEditorViewColumn'
-            // vscode.window.onDidChangeTextEditorViewColumn((p_columnChangeEvent) =>
-            //     this._changedTextEditorViewColumn(p_columnChangeEvent)
-            // ); // Also triggers after drag and drop
-            // vscode.window.onDidChangeVisibleTextEditors((p_editors) =>
-            //     this._changedVisibleTextEditors(p_editors)
-            // ); // Window.visibleTextEditors changed
-            // vscode.window.onDidChangeWindowState((p_windowState) =>
-            //     this._changedWindowState(p_windowState)
-            // ); // Focus state of the current window changes
-
-            // * React when typing and changing body pane
-            // vscode.workspace.onDidChangeTextDocument((p_textDocumentChange) =>
-            //     this._onDocumentChanged(p_textDocumentChange)
-            // );
-
-            // * React to configuration settings events
-            vscode.workspace.onDidChangeConfiguration((p_configChange) =>
-                this._onChangeConfiguration(p_configChange)
-            );
-
-            // * React to opening of any file in vscode
-            // vscode.workspace.onDidOpenTextDocument((p_document) =>
-            //     this._onDidOpenTextDocument(p_document)
-            // );
-
-            // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
-            this.getStates = debounce(
-                this._triggerGetStates,
-                Constants.STATES_DEBOUNCE_DELAY,
-                { leading: false, trailing: true }
-            );
-            this.refreshDocumentsPane = debounce(
-                this._refreshDocumentsPane,
-                Constants.DOCUMENTS_DEBOUNCE_DELAY,
-                { leading: false, trailing: true }
-            );
-            this.refreshUndoPane = debounce(
-                this._refreshUndoPane,
-                Constants.UNDOS_DEBOUNCE_DELAY,
-                { leading: false, trailing: true }
-            );
-            // Immediate 'throttled' and debounced
-            this.launchRefresh = debounce(
-                this._launchRefresh,
-                Constants.REFRESH_DEBOUNCE_DELAY,
-                { leading: true, trailing: true }
-            );
-
-            // ! FAKE DEVELOPMENT STARTUP END ( TODO: finish _setupOpenedLeoDocument )
-            // Reset Extension context flags (used in 'when' clauses in package.json)
-            this.leoStates.leoReady = true;
-            this.leoStates.fileOpenedReady = true;  // TODO : IMPLEMENT
-
-            // this.refreshDocumentsPane();
-            // ! VSCODE BUG : natural refresh from visibility change do not support 'getParent'!
-            // setTimeout(() => {
-            //     this._refreshOutline(true, RevealType.RevealSelectFocus);
-            // }, 0);
-
-            setTimeout(() => {
-                this._setupRefresh(true,
-                    { tree: true, body: true, documents: true, buttons: true, states: true }
-                );
-                this.launchRefresh();
-            }, 10);
-
+            this._finishStartup(); // Start leojs. No use for p_leoID for now.
         });
 
+        this._start();
+    }
+
+    /**
+     * * Startup by checking for LeoID from os/env, settings, or input dialog
+     */
+    private _start(): void {
         g.app.setLeoID(true, this.verbose).then((p_id) => {
             if (p_id && p_id.length >= 3 && utils.isAlphaNumeric(p_id)) {
-                this._leoIDResolve(p_id);
+                if (!this.leoStates.leoReady) {
+                    // start leojs only if not already started!
+                    this._leoIDResolve(p_id);
+                }
             } else {
                 this.showLeoIDMessage();
             }
         }, (p_reason) => {
             this.showLeoIDMessage();
         });
+    }
 
+    /**
+     * * Set all remaining local objects, set ready flag(s) and refresh all panels
+     */
+    private _finishStartup(): void {
+
+        g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
+        g.app.nodeIndices = new NodeIndices(g.app.leoID);
+
+        // IF RECENT FILES LIST :
+        //      TODO: CHECK RECENT LEO FILE LIST AND OPEN THEM
+        //      g.app.loadManager.load(fileName, pymacs)
+        // ELSE :
+        //      TODO: CREATE NEW LEO OUTLINE (demo below)
+
+        // ************************************************************
+        // * demo test: CREATE NEW LEO OUTLINE: NEW COMMANDER
+        // ************************************************************
+        let w_c = g.app.newCommander("", this);
+
+        // Equivalent to leoBridge 'createFrame' method
+        let w_v = new VNode(w_c);
+        let w_p = new Position(w_v);
+        w_v.initHeadString("NewHeadline");
+
+        // #1631: Initialize here, not in p._linkAsRoot.
+        w_c.hiddenRootNode.children = [];
+
+        // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
+        w_p._linkAsRoot();
+
+        g.app.commanders().push(w_c);
+
+        // select first test commander
+        let c = g.app.commanders()[this.commanderIndex];
+
+        // ************************************************************
+        // * demo test: BUILD SOME TEST OUTLINE
+        // ************************************************************
+        let w_node = c.p;
+        w_node.initHeadString("@file node1");
+        w_node.setBodyString('@tabwidth 8\nnode1 body\n@others');
+        w_node.expand();
+
+        w_node = c.p.insertAsLastChild();
+        w_node.initHeadString("node Inside1");
+        w_node.setBodyString('  @others \nnodeInside1 body\n@language c\nprint()');
+        w_node.setMarked();
+
+        w_node = c.p.insertAsLastChild();
+        w_node.initHeadString("node with UserData Inside2");
+        w_node.setBodyString('node Inside2 body');
+        w_node.u = { a: 'user content string a', b: "user content also" };
+
+        w_node = c.p.insertAfter();
+        w_node.initHeadString("@file node3");
+        w_node.setBodyString('node 3 body');
+
+        w_node = c.p.insertAfter();
+        w_node.initHeadString("node 2 selected but empty");
+        w_c.setCurrentPosition(w_node);
+
+        // ************************************************************
+        // * demo test: SOME OTHER COMMANDER
+        // ************************************************************
+        w_c = g.app.newCommander("", this);
+        w_v = new VNode(w_c);
+        w_p = new Position(w_v);
+        w_v.initHeadString("NewHeadline");
+        w_c.hiddenRootNode.children = [];
+        w_p._linkAsRoot();
+        g.app.commanders().push(w_c);
+
+        // select second test commander
+        c = w_c;
+
+        // ************************************************************
+        // * demo test: BUILD SOME OTHER TEST OUTLINE
+        // ************************************************************
+        w_node = c.p;
+        w_node.initHeadString("some other title");
+        w_node.setBodyString('body text');
+
+        let nodeCounter = 0;
+        while (nodeCounter < 30) {
+            nodeCounter++;
+            w_node = c.p.insertAsLastChild();
+            w_node.initHeadString("top node numbered headline " + nodeCounter);
+        }
+
+        w_node = c.p.insertAsLastChild();
+        w_node.initHeadString("yet another node");
+        w_node.setBodyString('more body text\nwith a second line');
+
+        w_node = c.p.insertAfter();
+        w_node.initHeadString("@clean my-file.txt");
+        w_node.setBodyString('again some body text');
+        w_c.setCurrentPosition(w_node);
+
+        nodeCounter = 0;
+        while (nodeCounter < 30) {
+            nodeCounter++;
+            w_node = c.p.insertAsLastChild();
+            w_node.initHeadString("middle node numbered headline " + nodeCounter);
+        }
+
+        w_node = c.p.insertAsLastChild();
+        w_node.initHeadString("sample cloned node");
+        w_node.setBodyString('some other body');
+        w_node.clone();
+
+        w_node = c.p.insertAfter();
+        w_node.setMarked();
+        w_node.initHeadString("a different headline");
+
+        w_c.setCurrentPosition(w_node);
+
+        nodeCounter = 0;
+        while (nodeCounter < 30) {
+            nodeCounter++;
+            w_node = c.p.insertAsLastChild();
+            w_node.initHeadString("a numbered headline " + nodeCounter);
+        }
+
+        w_node = c.p.insertAfter();
+        w_node.initHeadString("another different headline");
+
+        nodeCounter = 0;
+        while (nodeCounter < 30) {
+            nodeCounter++;
+            w_node = c.p.insertAsLastChild();
+            w_node.initHeadString("more numbered headlines " + nodeCounter);
+        }
+        w_c.setCurrentPosition(w_node);
+        nodeCounter = 0;
+        while (nodeCounter < 30) {
+            nodeCounter++;
+            w_node = c.p.insertAsLastChild();
+            w_node.initHeadString("inside numbered headlines " + nodeCounter);
+        }
+
+        // back to first test commander after creating this second one
+        c = g.app.commanders()[this.commanderIndex];
+        // ************************************************************
+        // * demo test end
+        // ************************************************************
+
+        // * Create a single data provider for both outline trees, Leo view and Explorer view
+        this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);
+        this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
+        this._leoTreeView.onDidExpandElement((p_event => this._onChangeCollapsedState(p_event, true, this._leoTreeView)));
+        this._leoTreeView.onDidCollapseElement((p_event => this._onChangeCollapsedState(p_event, false, this._leoTreeView)));
+        this._leoTreeView.onDidChangeVisibility((p_event => this._onTreeViewVisibilityChanged(p_event, false))); // * Trigger 'show tree in Leo's view'
+        this._leoTreeExView = vscode.window.createTreeView(Constants.TREEVIEW_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
+        this._leoTreeExView.onDidExpandElement((p_event => this._onChangeCollapsedState(p_event, true, this._leoTreeExView)));
+        this._leoTreeExView.onDidCollapseElement((p_event => this._onChangeCollapsedState(p_event, false, this._leoTreeExView)));
+        this._leoTreeExView.onDidChangeVisibility((p_event => this._onTreeViewVisibilityChanged(p_event, true))); // * Trigger 'show tree in explorer view'
+        this._lastTreeView = this._leoTreeExView;
+
+        // * Create Leo Opened Documents Treeview Providers and tree views
+        this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);
+        this._leoDocuments = vscode.window.createTreeView(Constants.DOCUMENTS_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
+        this._leoDocuments.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, false)));
+        this._leoDocumentsExplorer = vscode.window.createTreeView(Constants.DOCUMENTS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
+        this._leoDocumentsExplorer.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, true)));
+        this._lastLeoDocuments = this._leoDocumentsExplorer;
+
+        // * Create '@buttons' Treeview Providers and tree views
+        this._leoButtonsProvider = new LeoButtonsProvider(this.leoStates, this.buttonIcons);
+        this._leoButtons = vscode.window.createTreeView(Constants.BUTTONS_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
+        this._leoButtons.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, false)));
+        this._leoButtonsExplorer = vscode.window.createTreeView(Constants.BUTTONS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
+        this._leoButtonsExplorer.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, true)));
+        this._lastLeoButtons = this._leoButtonsExplorer;
+
+        // * Create Undos Treeview Providers and tree views
+        this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this);
+        this._leoUndos = vscode.window.createTreeView(Constants.UNDOS_ID, { showCollapseAll: false, treeDataProvider: this._leoUndosProvider });
+        this._leoUndos.onDidChangeVisibility((p_event => this._onUndosTreeViewVisibilityChanged(p_event, false)));
+        this._leoUndosExplorer = vscode.window.createTreeView(Constants.UNDOS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoUndosProvider });
+        this._leoUndosExplorer.onDidChangeVisibility((p_event => this._onUndosTreeViewVisibilityChanged(p_event, true)));
+        this._lastLeoUndos = this._leoUndosExplorer;
+
+        // * Create Body Pane
+        this._leoFileSystem = new LeoBodyProvider(this);
+        this._bodyMainSelectionColumn = 1;
+
+        // * Create Status bar Entry
+        // this._leoStatusBar = new LeoStatusBar(_context, this);
+
+        // * Leo Find Panel
+        // this._leoFindPanelProvider = new LeoFindPanelProvider(
+        //     _context.extensionUri,
+        //     _context,
+        //     this
+        // );
+        // this._context.subscriptions.push(
+        //     vscode.window.registerWebviewViewProvider(
+        //         Constants.FIND_ID,
+        //         this._leoFindPanelProvider,
+        //         { webviewOptions: { retainContextWhenHidden: true } }
+        //     )
+        // );
+        // this._context.subscriptions.push(
+        //     vscode.window.registerWebviewViewProvider(
+        //         Constants.FIND_EXPLORER_ID,
+        //         this._leoFindPanelProvider,
+        //         { webviewOptions: { retainContextWhenHidden: true } }
+        //     )
+        // );
+
+        // * Configuration / Welcome webview
+        // this.leoSettingsWebview = new LeoSettingsProvider(_context, this);
+
+
+
+        // * React to change in active panel/text editor (window.activeTextEditor) - also fires when the active editor becomes undefined
+        // vscode.window.onDidChangeActiveTextEditor((p_editor) =>
+        //     this._onActiveEditorChanged(p_editor)
+        // );
+
+        // * React to change in selection, cursor position and scroll position
+        // vscode.window.onDidChangeTextEditorSelection((p_event) =>
+        //     this._onChangeEditorSelection(p_event)
+        // );
+        // vscode.window.onDidChangeTextEditorVisibleRanges((p_event) =>
+        //     this._onChangeEditorScroll(p_event)
+        // );
+
+        // * Triggers when a different text editor/vscode window changed focus or visibility, or dragged
+        // This is also what triggers after drag and drop, see '_onChangeEditorViewColumn'
+        // vscode.window.onDidChangeTextEditorViewColumn((p_columnChangeEvent) =>
+        //     this._changedTextEditorViewColumn(p_columnChangeEvent)
+        // ); // Also triggers after drag and drop
+        // vscode.window.onDidChangeVisibleTextEditors((p_editors) =>
+        //     this._changedVisibleTextEditors(p_editors)
+        // ); // Window.visibleTextEditors changed
+        // vscode.window.onDidChangeWindowState((p_windowState) =>
+        //     this._changedWindowState(p_windowState)
+        // ); // Focus state of the current window changes
+
+        // * React when typing and changing body pane
+        // vscode.workspace.onDidChangeTextDocument((p_textDocumentChange) =>
+        //     this._onDocumentChanged(p_textDocumentChange)
+        // );
+
+        // * React to configuration settings events
+        vscode.workspace.onDidChangeConfiguration((p_configChange) =>
+            this._onChangeConfiguration(p_configChange)
+        );
+
+        // * React to opening of any file in vscode
+        // vscode.workspace.onDidOpenTextDocument((p_document) =>
+        //     this._onDidOpenTextDocument(p_document)
+        // );
+
+        // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
+        this.getStates = debounce(
+            this._triggerGetStates,
+            Constants.STATES_DEBOUNCE_DELAY,
+            { leading: false, trailing: true }
+        );
+        this.refreshDocumentsPane = debounce(
+            this._refreshDocumentsPane,
+            Constants.DOCUMENTS_DEBOUNCE_DELAY,
+            { leading: false, trailing: true }
+        );
+        this.refreshUndoPane = debounce(
+            this._refreshUndoPane,
+            Constants.UNDOS_DEBOUNCE_DELAY,
+            { leading: false, trailing: true }
+        );
+        // Immediate 'throttled' and debounced
+        this.launchRefresh = debounce(
+            this._launchRefresh,
+            Constants.REFRESH_DEBOUNCE_DELAY,
+            { leading: true, trailing: true }
+        );
+
+        // ! FAKE DEVELOPMENT STARTUP END ( TODO: finish _setupOpenedLeoDocument )
+        // Reset Extension context flags (used in 'when' clauses in package.json)
+        this.leoStates.leoReady = true;
+        this.leoStates.fileOpenedReady = true;  // TODO : IMPLEMENT
+
+        // this.refreshDocumentsPane();
+        // ! VSCODE BUG : natural refresh from visibility change do not support 'getParent'!
+        // setTimeout(() => {
+        //     this._refreshOutline(true, RevealType.RevealSelectFocus);
+        // }, 0);
+
+        setTimeout(() => {
+            this._setupRefresh(true,
+                { tree: true, body: true, documents: true, buttons: true, states: true }
+            );
+            this.launchRefresh();
+        }, 10);
     }
 
     /**
@@ -1776,10 +1790,9 @@ export class LeoUI {
             p_id = g.app.cleanLeoID(p_id, '');
             if (p_id && p_id.length >= 3 && utils.isAlphaNumeric(p_id)) {
                 // * valid id
-                this.setIdSetting(p_id);
-                if (!this.leoStates.leoReady) {
-                    this._leoIDResolve(p_id); // start leojs !
-                }
+                this.setIdSetting(p_id).then(() => {
+                    this._start();// Will get it from config
+                });
             } else {
                 // * Canceled or invalid: (re)warn user.
                 this.showLeoIDMessage();
@@ -1812,12 +1825,12 @@ export class LeoUI {
     /**
      * * Sets the leoID setting for use as default in next activation
      */
-    public setIdSetting(p_leoID: string): void {
+    public setIdSetting(p_leoID: string): Promise<unknown> {
         const w_changes: ConfigSetting[] = [{
             code: "leoID",
             value: p_leoID
         }];
-        this.config.setLeojsSettings(w_changes);
+        return this.config.setLeojsSettings(w_changes);
     }
 
     public runAskOkDialog(

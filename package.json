@@ -240,48 +240,73 @@
         {
           "id": "leojsOutlineExplorer",
           "name": "Leojs Outline",
-          "contextualTitle": "Leojs"
+          "contextualTitle": "Leojs",
+          "when": "leojsTreeInExplorer",
+          "visibility": "visible"
         },
         {
           "id": "leojsDocumentsExplorer",
           "name": "Leojs Documents",
-          "contextualTitle": "Leojs"
+          "contextualTitle": "Leojs",
+          "when": "leojsTreeInExplorer && leojsTreeOpened",
+          "visibility": "collapsed"
         },
         {
           "id": "leojsButtonsExplorer",
           "name": "Leojs Buttons",
-          "contextualTitle": "Leojs"
+          "contextualTitle": "Leojs",
+          "when": "leojsTreeInExplorer && leojsTreeOpened",
+          "visibility": "collapsed"
         },
         {
           "id": "leojsUndosExplorer",
-          "name": "Leojs History",
-          "contextualTitle": "Leojs"
+          "name": "Leojs Undo History",
+          "contextualTitle": "Leojs",
+          "when": "leojsTreeInExplorer && leojsTreeOpened",
+          "visibility": "collapsed"
         }
       ],
       "leojsView": [
         {
           "id": "leojsOutline",
           "contextualTitle": "Leojs",
-          "name": "Outline"
+          "name": "Outline",
+          "visibility": "visible"
         },
         {
           "id": "leojsDocuments",
           "contextualTitle": "Leojs",
-          "name": "Documents"
+          "name": "Documents",
+          "when": "leojsTreeOpened",
+          "visibility": "collapsed"
         },
         {
           "id": "leojsButtons",
           "contextualTitle": "Leojs",
-          "name": "Buttons"
+          "name": "Buttons",
+          "when": "leojsTreeOpened",
+          "visibility": "collapsed"
         },
         {
           "id": "leojsUndos",
           "contextualTitle": "Leojs",
-          "name": "History"
+          "name": "Undo History",
+          "when": "leojsTreeOpened",
+          "visibility": "collapsed"
         }
       ]
     },
     "viewsWelcome": [
+      {
+        "view": "leojsOutline",
+        "contents": "Leo ID not found\n[Set Leo ID](command:leojs.setLeoID)\nPlease enter an id that identifies you uniquely",
+        "when": "!leojsReady"
+      },
+      {
+        "view": "leojsOutlineExplorer",
+        "contents": "Leo ID not found\n[Set Leo ID](command:leojs.setLeoID)\nPlease enter an id that identifies you uniquely",
+        "when": "!leojsReady"
+      },
       {
         "view": "leojsOutline",
         "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.openLeoFile)",

@@ -264,6 +264,7 @@ export class Constants {
         DOCUMENT_UNTITLED: "leojsDocumentUntitled",
 
         // Context flags that are mapped 'directly' onto leojs config settings
+        // * PREFIXED WITH 'leojs' *
         LEO_TREE_BROWSE: Constants.NAME + Constants.CONFIG_NAMES.LEO_TREE_BROWSE[0].toUpperCase() + Constants.CONFIG_NAMES.LEO_TREE_BROWSE.slice(1), // Force ar'jan's suggestion of Leo's tree behavior override
         TREE_IN_EXPLORER: Constants.NAME + Constants.CONFIG_NAMES.TREE_IN_EXPLORER[0].toUpperCase() + Constants.CONFIG_NAMES.TREE_IN_EXPLORER.slice(1), // Leo outline also in the explorer view
         SHOW_OPEN_ASIDE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE.slice(1),   // Show 'open aside' in context menu
