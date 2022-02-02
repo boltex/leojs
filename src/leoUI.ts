@@ -1743,6 +1743,26 @@ export class LeoUI {
     }
 
     /**
+     * Command to get the LeoID from dialog, save it to user settings
+     * and start leojs if the ID is valid, and not already started.
+     */
+    public setLeoIDCommand(): void {
+        this.getIdFromDialog().then((p_id) => {
+            p_id = p_id.trim();
+            p_id = g.app.cleanLeoID(p_id, '');
+            if (p_id && p_id.length >= 3 && utils.isAlphaNumeric(p_id)) {
+                // * valid id
+                this.setIdSetting(p_id);
+                if (!this.leoStates.leoReady) {
+                    this._leoIDResolve(p_id); // start leojs !
+                }
+            } else {
+                // * Canceled or invalid: (re)warn user.
+            }
+        });
+    }
+
+    /**
      * * Returns the leoID from the leojs settings
      */
     public getIdFromSetting(): string {
@@ -1751,16 +1771,10 @@ export class LeoUI {
 
 
     public getIdFromDialog(): Thenable<string> {
-
-        // TODO : GET FROM WORKSPACE/USER SETTINGS AS 'leoID' FIRST!
-
         return vscode.window.showInputBox({
             title: "Enter Leo id",
             prompt: "Please enter an id that identifies you uniquely.\n" +
-                "Your git/cvs/bzr login name is a good choice.\n\n" +
-                "Leo uses this id to uniquely identify nodes.\n\n" +
-                "Your id should contain only letters and numbers\n" +
-                "and must be at least 3 characters in length."
+                "(Letters and numbers only, and at least 3 characters in length)"
 
         }).then((p_id) => {
             if (p_id) {

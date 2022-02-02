@@ -1048,14 +1048,16 @@ export class LeoApp {
         // 3 - Set leoID from user dialog if allowed
         if (!this.leoID && useDialog && g.app.gui) {
             return g.app.gui!.getIdFromDialog().then((p_id) => {
-                this.leoID = this.cleanLeoID(p_id, 'os.userInfo().username');
+                this.leoID = this.cleanLeoID(p_id, '');
                 if (this.leoID) {
                     g.app.gui!.setIdSetting(this.leoID);
+                }
+                if (!this.leoID) {
+                    throw new Error("Invalid Leo ID");
                 }
                 return this.leoID;
             });
         } else {
-            // Error: no leoID to be found
             if (!this.leoID) {
                 throw new Error("Could not get Leo ID");
             }
@@ -1080,7 +1082,8 @@ export class LeoApp {
             id_ = '';
         }
         if (id_.length < 3) {
-            throw new Error("Invalid Leo ID");
+            id_ = "";
+            // throw new Error("Invalid Leo ID");
             // TODO: Show Leo Id syntax error message
             // g.EmergencyDialog(
             //   title=f"Invalid Leo ID: {tag}",

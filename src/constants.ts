@@ -311,6 +311,7 @@ export class Constants {
         SAVE_AS_FILE: Constants.NAME + ".saveAsLeoFile",
         CLOSE_FILE: Constants.NAME + ".closeLeoFile",
         MINIBUFFER: Constants.NAME + ".minibuffer",
+        SET_LEO_ID: Constants.NAME + ".setLeoID",
         GIT_DIFF: Constants.NAME + ".gitDiff",
         WRITE_AT_FILE_NODES: Constants.NAME + ".writeAtFileNodes",
         WRITE_AT_FILE_NODES_FO: Constants.NAME + ".writeAtFileNodesFromOutline",

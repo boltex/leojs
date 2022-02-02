@@ -44,6 +44,7 @@ export function activate(p_context: vscode.ExtensionContext) {
         [CMD.EXECUTE, () => w_leoUI.command(LEOCMD.EXECUTE_SCRIPT, U, REFRESH_TREE_BODY, false)],
 
         [CMD.MINIBUFFER, () => w_leoUI.minibuffer()], // Is referenced in package.json
+        [CMD.SET_LEO_ID, () => w_leoUI.setLeoIDCommand()],
 
         [CMD.CLICK_BUTTON, (p_node: LeoButtonNode) => w_leoUI.clickAtButton(p_node)], // Not referenced in package.json
         [CMD.REMOVE_BUTTON, (p_node: LeoButtonNode) => w_leoUI.removeAtButton(p_node)],

@@ -204,6 +204,7 @@
 </v>
 <v t="felix.20211030165058.1"><vh>Wrapper Helpers</vh>
 <v t="felix.20211030165111.1"><vh>isTextWidget &amp; isTextWrapper</vh></v>
+<v t="felix.20220201194319.1"><vh>setLeoIDCommand</vh></v>
 <v t="felix.20220131235418.1"><vh>getIdFromSetting</vh></v>
 <v t="felix.20220131010929.1"><vh>getIdFromDialog</vh></v>
 <v t="felix.20220131234257.1"><vh>setIdSetting</vh></v>
@@ -328,6 +329,7 @@
 <v t="felix.20220109180351.1"><vh>convertLeoFiletypes</vh></v>
 <v t="felix.20201208224407.10"><vh>getDurationMilliseconds</vh></v>
 <v t="felix.20201208224407.11"><vh>getFileFromPath</vh></v>
+<v t="felix.20220201195806.1"><vh>isAlphaNumeric</vh></v>
 <v t="felix.20201208224407.12"><vh>isIconChangedByEdit</vh></v>
 <v t="felix.20211007214455.1"><vh>isHexColor</vh></v>
 <v t="felix.20201208224407.14"><vh>strToLeoUri</vh></v>
@@ -1234,6 +1236,7 @@ public refreshTreeRoot(): void {
 <t tx="felix.20201214150149.3">[CMD.EXECUTE, () =&gt; w_leoUI.command(LEOCMD.EXECUTE_SCRIPT, U, REFRESH_TREE_BODY, false)],
 
 [CMD.MINIBUFFER, () =&gt; w_leoUI.minibuffer()], // Is referenced in package.json
+[CMD.SET_LEO_ID, () =&gt; w_leoUI.setLeoIDCommand()],
 
 [CMD.CLICK_BUTTON, (p_node: LeoButtonNode) =&gt; w_leoUI.clickAtButton(p_node)], // Not referenced in package.json
 [CMD.REMOVE_BUTTON, (p_node: LeoButtonNode) =&gt; w_leoUI.removeAtButton(p_node)],
@@ -1339,6 +1342,7 @@ public static COMMANDS = {
     SAVE_AS_FILE: Constants.NAME + ".saveAsLeoFile",
     CLOSE_FILE: Constants.NAME + ".closeLeoFile",
     MINIBUFFER: Constants.NAME + ".minibuffer",
+    SET_LEO_ID: Constants.NAME + ".setLeoID",
     GIT_DIFF: Constants.NAME + ".gitDiff",
     WRITE_AT_FILE_NODES: Constants.NAME + ".writeAtFileNodes",
     WRITE_AT_FILE_NODES_FO: Constants.NAME + ".writeAtFileNodesFromOutline",
@@ -4245,6 +4249,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "command": "leojs.minibuffer",
   "when": "leojsTreeOpened"
 },
+{
+  "command": "leojs.setLeoID",
+  "when": "!leojsReady"
+},
 </t>
 <t tx="felix.20201214205159.26">{
   "command": "leojs.showLogPane",
@@ -5633,6 +5641,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "command": "leojs.removeButton",
   "category": "Leojs",
   "title": "Remove Button"
+},
+{
+  "command": "leojs.setLeoID",
+  "category": "Leojs",
+  "title": "Set Leo ID"
 },
 </t>
 <t tx="felix.20201214205159.80">"@types/debounce": "^1.2.0",
@@ -8700,16 +8713,10 @@ def tearDown(self):
     clone.moveToLastChildOf(p)
 </t>
 <t tx="felix.20220131010929.1">public getIdFromDialog(): Thenable&lt;string&gt; {
-
-    // TODO : GET FROM WORKSPACE/USER SETTINGS AS 'leoID' FIRST!
-
     return vscode.window.showInputBox({
         title: "Enter Leo id",
         prompt: "Please enter an id that identifies you uniquely.\n" +
-            "Your git/cvs/bzr login name is a good choice.\n\n" +
-            "Leo uses this id to uniquely identify nodes.\n\n" +
-            "Your id should contain only letters and numbers\n" +
-            "and must be at least 3 characters in length."
+            "(Letters and numbers only, and at least 3 characters in length)"
 
     }).then((p_id) =&gt; {
         if (p_id) {
@@ -8740,6 +8747,43 @@ public getIdFromSetting(): string {
 }
 
 
+</t>
+<t tx="felix.20220201194319.1">/**
+ * Command to get the LeoID from dialog, save it to user settings
+ * and start leojs if the ID is valid, and not already started.
+ */
+public setLeoIDCommand(): void {
+    this.getIdFromDialog().then((p_id) =&gt; {
+        p_id = p_id.trim();
+        p_id = g.app.cleanLeoID(p_id, '');
+        if (p_id &amp;&amp; p_id.length &gt;= 3 &amp;&amp; utils.isAlphaNumeric(p_id)) {
+            // * valid id
+            this.setIdSetting(p_id);
+            if (!this.leoStates.leoReady) {
+                this._leoIDResolve(p_id); // start leojs !
+            }
+        } else {
+            // * Canceled or invalid: (re)warn user.
+        }
+    });
+}
+
+</t>
+<t tx="felix.20220201195806.1">export function isAlphaNumeric(str: string): boolean {
+    let code: number;
+    let i: number;
+    let len: number;
+    for (i = 0, len = str.length; i &lt; len; i++) {
+        code = str.charCodeAt(i);
+        if (!(code &gt; 47 &amp;&amp; code &lt; 58) &amp;&amp; // numeric (0-9)
+            !(code &gt; 64 &amp;&amp; code &lt; 91) &amp;&amp; // upper alpha (A-Z)
+            !(code &gt; 96 &amp;&amp; code &lt; 123) // lower alpha (a-z)
+        ) {
+            return false;
+        }
+    }
+    return true;
+};
 </t>
 </tnodes>
 </leo_file>

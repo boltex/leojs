@@ -365,6 +365,11 @@
         "title": "Remove Button"
       },
       {
+        "command": "leojs.setLeoID",
+        "category": "Leojs",
+        "title": "Set Leo ID"
+      },
+      {
         "command": "leojs.showBody",
         "category": "Leojs",
         "title": "Focus to Body"
@@ -1092,6 +1097,10 @@
         {
           "command": "leojs.minibuffer",
           "when": "leojsTreeOpened"
+        },
+        {
+          "command": "leojs.setLeoID",
+          "when": "!leojsReady"
         },
         {
           "command": "leojs.showLogPane",
