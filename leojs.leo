@@ -157,9 +157,6 @@
 <v t="felix.20201214202634.1"><vh>_onButtonsTreeViewVisibilityChanged</vh></v>
 <v t="felix.20211122230343.1"><vh>_onUndosTreeViewVisibilityChanged</vh></v>
 </v>
-<v t="felix.20211120230057.1"><vh>Leo GUI Handlers</vh>
-<v t="felix.20211120230107.1"><vh>LeoGui.ensure_commander_visible</vh></v>
-</v>
 <v t="felix.20211204144931.1"><vh>Body Editing</vh>
 <v t="felix.20211204144931.2"><vh>triggerBodySave</vh></v>
 <v t="felix.20211204144931.3"><vh>_bodySaveSelection</vh></v>
@@ -202,7 +199,9 @@
 <v t="felix.20201214194144.10"><vh>Log &amp; Terminal Panes</vh>
 <v t="felix.20201214211655.1"><vh>showLogPane</vh></v>
 </v>
-<v t="felix.20211030165058.1"><vh>Wrapper Helpers</vh>
+<v t="felix.20211030165058.1"><vh>Leo GUI Wrappers &amp; Helpers</vh>
+<v t="felix.20220201230041.1"><vh>showLeoIDMessage</vh></v>
+<v t="felix.20220201225503.1"><vh>LeoGui.ensure_commander_visible</vh></v>
 <v t="felix.20211030165111.1"><vh>isTextWidget &amp; isTextWrapper</vh></v>
 <v t="felix.20220201194319.1"><vh>setLeoIDCommand</vh></v>
 <v t="felix.20220131235418.1"><vh>getIdFromSetting</vh></v>
@@ -2896,7 +2895,15 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
 
     });
 
-    // g.app.setLeoID(true, this.verbose);
+    g.app.setLeoID(true, this.verbose).then((p_id) =&gt; {
+        if (p_id &amp;&amp; p_id.length &gt;= 3 &amp;&amp; utils.isAlphaNumeric(p_id)) {
+            this._leoIDResolve(p_id);
+        } else {
+            this.showLeoIDMessage();
+        }
+    }, (p_reason) =&gt; {
+        this.showLeoIDMessage();
+    });
 
 }
 
@@ -7783,12 +7790,6 @@ public isTextWrapper(w: any): boolean {
   }
 ]
 </t>
-<t tx="felix.20211120230057.1"></t>
-<t tx="felix.20211120230107.1">public ensure_commander_visible(c: Commands): void {
-    // TODO !
-    console.log("TODO ensure_commander_visible");
-}
-</t>
 <t tx="felix.20211122205011.1">import * as vscode from "vscode";
 import { LeoUI } from './leoUI';
 import { LeoStates } from "./leoStates";
@@ -8764,6 +8765,7 @@ public setLeoIDCommand(): void {
             }
         } else {
             // * Canceled or invalid: (re)warn user.
+            this.showLeoIDMessage();
         }
     });
 }
@@ -8784,6 +8786,28 @@ public setLeoIDCommand(): void {
     }
     return true;
 };
+</t>
+<t tx="felix.20220201225503.1">public ensure_commander_visible(c: Commands): void {
+    // TODO !
+    console.log("TODO ensure_commander_visible");
+}
+
+</t>
+<t tx="felix.20220201230041.1">/**
+ * Show info window about requiring leoID to start
+ * and a button to perform the 'set leoID' command.
+ */
+public showLeoIDMessage(): void {
+    vscode.window.showInformationMessage(
+        "Leo ID not found. Please enter an id that identifies you uniquely.",
+        "Set Leo ID"
+    ).then(p_chosenButton =&gt; {
+        if (p_chosenButton === "Set Leo ID") {
+            vscode.commands.executeCommand(Constants.COMMANDS.SET_LEO_ID);
+        }
+    });
+}
+
 </t>
 </tnodes>
 </leo_file>

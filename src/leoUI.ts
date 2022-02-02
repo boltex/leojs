@@ -461,7 +461,15 @@ export class LeoUI {
 
         });
 
-        // g.app.setLeoID(true, this.verbose);
+        g.app.setLeoID(true, this.verbose).then((p_id) => {
+            if (p_id && p_id.length >= 3 && utils.isAlphaNumeric(p_id)) {
+                this._leoIDResolve(p_id);
+            } else {
+                this.showLeoIDMessage();
+            }
+        }, (p_reason) => {
+            this.showLeoIDMessage();
+        });
 
     }
 
@@ -934,10 +942,6 @@ export class LeoUI {
         }
     }
 
-    public ensure_commander_visible(c: Commands): void {
-        // TODO !
-        console.log("TODO ensure_commander_visible");
-    }
     /**
      * * Save body to Leo if its dirty. That is, only if a change has been made to the body 'document' so far
      * @param p_forcedVsCodeSave Flag to also have vscode 'save' the content of this editor through the filesystem
@@ -1734,6 +1738,26 @@ export class LeoUI {
         // return Promise.resolve(undefined); // if cancelled
     }
 
+    /**
+     * Show info window about requiring leoID to start
+     * and a button to perform the 'set leoID' command.
+     */
+    public showLeoIDMessage(): void {
+        vscode.window.showInformationMessage(
+            "Leo ID not found. Please enter an id that identifies you uniquely.",
+            "Set Leo ID"
+        ).then(p_chosenButton => {
+            if (p_chosenButton === "Set Leo ID") {
+                vscode.commands.executeCommand(Constants.COMMANDS.SET_LEO_ID);
+            }
+        });
+    }
+
+    public ensure_commander_visible(c: Commands): void {
+        // TODO !
+        console.log("TODO ensure_commander_visible");
+    }
+
     public isTextWidget(w: any): boolean {
         return false;
     }
@@ -1758,6 +1782,7 @@ export class LeoUI {
                 }
             } else {
                 // * Canceled or invalid: (re)warn user.
+                this.showLeoIDMessage();
             }
         });
     }
