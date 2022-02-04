@@ -52,9 +52,9 @@ import { Position, VNode } from './leoNodes';
 */
 
 //@-<< imports >>
-console.log('process', process);
+console.log('leoGLobals startup');
 
-export const isBrowser: boolean = (process as any).browser;
+export const isBrowser: boolean = (process as any)?.browser;
 export const isMac: boolean = process.platform?.startsWith('darwin');
 export const isWindows: boolean = process.platform?.startsWith('win');
 

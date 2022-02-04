@@ -20,11 +20,14 @@ import { NodeIndices, VNode, Position } from '../core/leoNodes';
 suite('Test cases for leoApp.py', () => {
 
 
-    before(() => {
+    before(async () => {
+        console.log('STARTING 1000 ms waiting period in leoApp test');
+
         return new Promise<void>((resolve) => {
             setTimeout(() => {
+                console.log('Finished 1000 ms waiting period in leoApp test');
                 resolve();
-            }, 10000);
+            }, 1000);
         });
     });
 
@@ -35,11 +38,8 @@ suite('Test cases for leoApp.py', () => {
         // vscode.window.showInformationMessage('after leoApp.test!');
     });
 
-    test('actual leoApp test', () => {
+    test('actual leoApp test', async () => {
         console.log('starting actual leoApp test');
-
-        assert.strictEqual(-1, [1, 2, 3].indexOf(5));
-        assert.strictEqual(-1, [1, 2, 3].indexOf(0));
 
         assert.strictEqual(!!g, true, "g exists");
 

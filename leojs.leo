@@ -454,14 +454,14 @@
 <v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 </v>
 <v t="felix.20220128232146.1"><vh>unittests</vh>
-<v t="felix.20220130224933.1"><vh>@@file leoTest2.py</vh>
+<v t="felix.20220130224933.1"><vh>@@file src/test/leoTest2.ts</vh>
 <v t="felix.20220130224933.2"><vh>function.create_app</vh></v>
 <v t="felix.20220130224933.3"><vh>class LeoUnitTest(unittest.TestCase)</vh>
 <v t="felix.20220130224933.4"><vh>LeoUnitTest.setUp, tearDown &amp; setUpClass</vh></v>
 <v t="felix.20220130224933.5"><vh>LeoUnitTest.create_test_outline</vh></v>
 </v>
 </v>
-<v t="felix.20220129002501.1"><vh>@file src/test/suite/extension.test.ts</vh></v>
+<v t="felix.20220129002501.1"><vh>@file src/test/extension.test.ts</vh></v>
 <v t="felix.20220129200448.1"><vh>@file src/test/leoApp.test.ts</vh></v>
 <v t="felix.20220129003133.1"><vh>@file src/test/leoAtFile.test.ts</vh></v>
 <v t="felix.20220129002752.1"><vh>@file src/test/leoCommands.test.ts</vh></v>
@@ -2565,6 +2565,7 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
 </t>
 <t tx="felix.20201214194144.10"></t>
 <t tx="felix.20201214194144.2">constructor(private _context: vscode.ExtensionContext) {
+
     // * Setup States
     this.leoStates = new LeoStates(_context, this);
 
@@ -2589,6 +2590,9 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
     } else {
         vscode.window.showWarningMessage("g.app leojs application instance already exists!");
     }
+
+
+
 
     g.app.gui = this;
     g.app.loadManager = new LoadManager();
@@ -6048,7 +6052,7 @@ private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): 
         this._revealType = p_revealType; // To be read/cleared (in arrayToLeoNodesArray instead of directly by nodes)
     }
 
-    console.log('refreshing');
+    console.log('refreshing outline');
 
     this._leoTreeProvider.refreshTreeRoot();
 }
@@ -8278,40 +8282,45 @@ export class IconConstants {
 }
 </t>
 <t tx="felix.20220128232146.1"></t>
-<t tx="felix.20220130224933.1">@first # -*- coding: utf-8 -*-
-"""
-Support for Leo's new unit tests, contained in leo/unittests/test_*.py.
+<t tx="felix.20220130224933.1">
+@language typescript
+@tabwidth -4
 
-Run these tests using unittest or pytest from the command line.
-See g.run_unit_tests and g.run_coverage_tests.
+/**
+ * Support for LeoJS's new unit tests, contained in src/tests/.
+ */
 
-This file also contains classes that convert @test nodes in unitTest.leo to
-tests in leo/unittest. Eventually these classes will move to scripts.leo.
-"""
-import time
-import unittest
-import warnings
-from leo.core import leoGlobals as g
-from leo.core import leoApp
+// import time
+// import unittest
+// import warnings
+// from leo.core import leoGlobals as g
+// from leo.core import leoApp
+
+import * as g from '../core/leoGlobals';
+import { LeoApp } from '../core/leoApp';
+import { Commands } from "../core/leoCommands";
+import { NodeIndices, VNode, Position } from '../core/leoNodes';
+
 
 @others
 </t>
-<t tx="felix.20220130224933.2">def create_app(gui_name='null'):
-    """
-    Create the Leo application, g.app, the Gui, g.app.gui, and a commander.
+<t tx="felix.20220130224933.2">/**
+ * Create the Leo application, g.app, the Gui, g.app.gui, and a commander.
+ *
+ * This method is expensive (0.5 sec) only the first time it is called.
+ *
+ * Thereafter, recreating g.app, g.app.gui, and new commands is fast.
+ */
+export function create_app(gui_name: string='null'): void {
 
-    This method is expensive (0.5 sec) only the first time it is called.
-
-    Thereafter, recreating g.app, g.app.gui, and new commands is fast.
-    """
     trace = False
     t1 = time.process_time()
-    #
-    # Set g.unitTesting *early*, for guards, to suppress the splash screen, etc.
-    g.unitTesting = True
-    # Create g.app now, to avoid circular dependencies.
+    //
+    // Set g.unitTesting *early*, for guards, to suppress the splash screen, etc.
+    g.unitTesting = true;
+    // Create g.app now, to avoid circular dependencies.
     g.app = leoApp.LeoApp()
-    # Late imports.
+    // Late imports.
     warnings.simplefilter("ignore")
     from leo.core import leoConfig
     from leo.core import leoNodes
@@ -8337,23 +8346,23 @@ from leo.core import leoApp
     else:
         raise TypeError(f"create_gui: unknown gui_name: {gui_name!r}")
     t3 = time.process_time()
-    # Create a dummy commander, to do the imports in c.initObjects.
-    # Always use a null gui to avoid screen flash.
-    # setUp will create another commander.
+    // Create a dummy commander, to do the imports in c.initObjects.
+    // Always use a null gui to avoid screen flash.
+    // setUp will create another commander.
     c = leoCommands.Commands(fileName=None, gui=g.app.gui)
-    # Create minimal config dictionaries.
+    // Create minimal config dictionaries.
     settings_d, bindings_d = lm.createDefaultSettingsDicts()
     lm.globalSettingsDict = settings_d
     lm.globalBindingsDict = bindings_d
     c.config.settingsDict = settings_d
     c.config.bindingsDict = bindings_d
-    assert g.unitTesting is True  # Defensive.
+    assert g.unitTesting is True  // Defensive.
     t4 = time.process_time()
-    # Trace times. This trace happens only once:
-    #     imports: 0.016
-    #         gui: 0.000
-    #   commander: 0.469
-    #       total: 0.484
+    // Trace times. This trace happens only once:
+    //     imports: 0.016
+    //         gui: 0.000
+    //   commander: 0.469
+    //       total: 0.484
     if trace and t4 - t3 &gt; 0.1:
         print('create_app:\n'
             f"  imports: {(t2-t1):.3f}\n"
@@ -8361,85 +8370,91 @@ from leo.core import leoApp
             f"commander: {(t4-t2):.3f}\n"
             f"    total: {(t4-t1):.3f}\n")
     return c
-</t>
-<t tx="felix.20220130224933.3">class LeoUnitTest(unittest.TestCase):
-    """
-    The base class for all unit tests in Leo.
+}
 
-    Contains setUp/tearDown methods and various utilites.
-    """
+</t>
+<t tx="felix.20220130224933.3">/**
+ * The base class for all unit tests in Leo.
+ *
+ * Contains setUp/tearDown methods and various utilites.
+ */
+export class LeoUnitTest {
+
     @others
-</t>
-<t tx="felix.20220130224933.4">@classmethod
-def setUpClass(cls):
-    create_app(gui_name='null')
 
-def setUp(self):
-    """
-    Create a commander using a **null** gui, regardless of g.app.gui.
-    Create the nodes in the commander.
-    """
-    # Do the import here to avoid circular dependencies.
-    from leo.core import leoCommands
-    from leo.core.leoGui import NullGui
-    # Set g.unitTesting *early*, for guards.
-    g.unitTesting = True
-    # Create a new commander for each test.
-    # This is fast, because setUpClass has done all the imports.
-    self.c = c = leoCommands.Commands(fileName=None, gui=NullGui())
-    # Init the 'root' and '@settings' nodes.
-    self.root_p = c.rootPosition()
-    self.root_p.h = 'root'
-    self.settings_p = self.root_p.insertAfter()
-    self.settings_p.h = '@settings'
-    # Select the 'root' node.
-    c.selectPosition(self.root_p)
+}
 
-def tearDown(self):
-    self.c = None
 </t>
-<t tx="felix.20220130224933.5">def create_test_outline(self):
-    p = self.c.p
-    # Create the following outline:
-    #
-    # root
-    #   child clone a
-    #     node clone 1
-    #   child b
-    #     child clone a
-    #       node clone 1
-    #   child c
-    #     node clone 1
-    #   child clone a
-    #     node clone 1
-    #   child b
-    #     child clone a
-    #       node clone 1
-    assert p == self.root_p
+<t tx="felix.20220130224933.4">public setUpClass(): void {
+    create_app(gui_name='null');
+}
+
+/**
+ * Create a commander using a **null** gui, regardless of g.app.gui.
+ * Create the nodes in the commander.
+ */
+public setUp(): void {
+    // Set g.unitTesting *early*, for guards.
+    g.unitTesting = true;
+    // Create a new commander for each test.
+    // This is fast, because setUpClass has done all the imports.
+    const c = new Commands("" );
+    this.c = c;
+    // Init the 'root' and '@settings' nodes.
+    this.root_p = c.rootPosition()
+    this.root_p.h = 'root'
+    this.settings_p = this.root_p.insertAfter()
+    this.settings_p.h = '@settings'
+    // Select the 'root' node.
+    c.selectPosition(this.root_p)
+}
+public tearDown(): void {
+    delete this.c;
+}</t>
+<t tx="felix.20220130224933.5">public create_test_outline(): void {
+    const p: Position = this.c.p;
+    // Create the following outline:
+    //
+    // root
+    //   child clone a
+    //     node clone 1
+    //   child b
+    //     child clone a
+    //       node clone 1
+    //   child c
+    //     node clone 1
+    //   child clone a
+    //     node clone 1
+    //   child b
+    //     child clone a
+    //       node clone 1
+    assert p == this.root_p
     assert p.h == 'root'
-    # Child a
+    // Child a
     child_clone_a = p.insertAsLastChild()
     child_clone_a.h = 'child clone a'
     node_clone_1 = child_clone_a.insertAsLastChild()
     node_clone_1.h = 'node clone 1'
-    # Child b
+    // Child b
     child_b = p.insertAsLastChild()
     child_b.h = 'child b'
-    # Clone 'child clone a'
+    // Clone 'child clone a'
     clone = child_clone_a.clone()
     clone.moveToLastChildOf(child_b)
-    # Child c
+    // Child c
     child_c = p.insertAsLastChild()
     child_c.h = 'child c'
-    # Clone 'node clone 1'
+    // Clone 'node clone 1'
     clone = node_clone_1.clone()
     clone.moveToLastChildOf(child_c)
-    # Clone 'child clone a'
+    // Clone 'child clone a'
     clone = child_clone_a.clone()
     clone.moveToLastChildOf(p)
-    # Clone 'child b'
+    // Clone 'child b'
     clone = child_b.clone()
     clone.moveToLastChildOf(p)
+}
+
 </t>
 <t tx="felix.20220131010929.1">public getIdFromDialog(): Thenable&lt;string&gt; {
     return vscode.window.showInputBox({
@@ -8486,12 +8501,13 @@ public setLeoIDCommand(): void {
         p_id = p_id.trim();
         p_id = g.app.cleanLeoID(p_id, '');
         if (p_id &amp;&amp; p_id.length &gt;= 3 &amp;&amp; utils.isAlphaNumeric(p_id)) {
-            // * valid id
+            // valid id: set in config settings
             this.setIdSetting(p_id).then(() =&gt; {
-                this._start();// Will get it from config
+                // Will get it from config settings
+                this._start();
             });
         } else {
-            // * Canceled or invalid: (re)warn user.
+            // Canceled or invalid: (re)warn user.
             this.showLeoIDMessage();
         }
     });

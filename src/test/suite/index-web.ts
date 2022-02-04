@@ -13,6 +13,8 @@ export function run(): Promise<void> {
 
     // bundles all files in the current directory matching `*.test`
     const importAll = (r: __WebpackModuleApi.RequireContext) => r.keys().forEach(r);
+    // Sorted to make extension.test.ts first , alphabetically, before leo...test.ts
+
     importAll(require.context('.', true, /\.test$/));
 
     try {

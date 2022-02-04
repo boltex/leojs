@@ -1027,10 +1027,14 @@ export class LeoApp {
 
         verbose = verbose && !g.unitTesting && !this.silentMode;
 
+        if (g.unitTesting) {
+            this.leoID = "unittestid";
+        }
+
         let w_userName = ""; // = "TestUserName";
 
         // 1 - set leoID from configuration settings
-        if (g.app.gui) {
+        if (!this.leoID && g.app.gui) {
             w_userName = g.app.gui.getIdFromSetting();
             if (w_userName) {
                 this.leoID = this.cleanLeoID(w_userName, 'config.leoID');

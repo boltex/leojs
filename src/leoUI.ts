@@ -127,6 +127,7 @@ export class LeoUI {
     private _leoIDResolve!: (value: string | PromiseLike<string>) => void;
 
     constructor(private _context: vscode.ExtensionContext) {
+
         // * Setup States
         this.leoStates = new LeoStates(_context, this);
 
@@ -151,6 +152,9 @@ export class LeoUI {
         } else {
             vscode.window.showWarningMessage("g.app leojs application instance already exists!");
         }
+
+
+
 
         g.app.gui = this;
         g.app.loadManager = new LoadManager();
@@ -764,7 +768,7 @@ export class LeoUI {
             this._revealType = p_revealType; // To be read/cleared (in arrayToLeoNodesArray instead of directly by nodes)
         }
 
-        console.log('refreshing');
+        console.log('refreshing outline');
 
         this._leoTreeProvider.refreshTreeRoot();
     }
@@ -1789,12 +1793,13 @@ export class LeoUI {
             p_id = p_id.trim();
             p_id = g.app.cleanLeoID(p_id, '');
             if (p_id && p_id.length >= 3 && utils.isAlphaNumeric(p_id)) {
-                // * valid id
+                // valid id: set in config settings
                 this.setIdSetting(p_id).then(() => {
-                    this._start();// Will get it from config
+                    // Will get it from config settings
+                    this._start();
                 });
             } else {
-                // * Canceled or invalid: (re)warn user.
+                // Canceled or invalid: (re)warn user.
                 this.showLeoIDMessage();
             }
         });
