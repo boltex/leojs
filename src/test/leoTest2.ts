@@ -19,6 +19,7 @@ import { LeoApp, LoadManager } from '../core/leoApp';
 import { Commands } from "../core/leoCommands";
 import { NodeIndices, VNode, Position } from '../core/leoNodes';
 import { NullGui } from '../leoUI';
+import * as assert from 'assert';
 
 
 //@+others
@@ -82,14 +83,14 @@ export function create_app(gui_name: string = 'null'): Commands {
     const c = new Commands("", g.app.gui);
 
     // Create minimal config dictionaries.
-    settings_d, bindings_d = lm.createDefaultSettingsDicts()
+    // settings_d, bindings_d = lm.createDefaultSettingsDicts()
 
-    lm.globalSettingsDict = settings_d
-    lm.globalBindingsDict = bindings_d
-    c.config.settingsDict = settings_d
-    c.config.bindingsDict = bindings_d
+    // lm.globalSettingsDict = settings_d
+    // lm.globalBindingsDict = bindings_d
+    // c.config.settingsDict = settings_d
+    // c.config.bindingsDict = bindings_d
 
-    assert g.unitTesting is True  // Defensive.
+    assert.strictEqual(g.unitTesting, true, 'unit testing is set');  // Defensive.
 
     const t4 = process.hrtime();
 
@@ -117,8 +118,17 @@ export function create_app(gui_name: string = 'null'): Commands {
  */
 export class LeoUnitTest {
 
+    public c!: Commands | undefined;
+    public root_p!: Position;
+    public settings_p!: Position;
+
     //@+others
     //@+node:felix.20220130224933.4: *3* LeoUnitTest.setUp, tearDown & setUpClass
+
+    constructor() {
+        create_app('null');
+    }
+
     public setUpClass(): void {
         create_app('null');
     }
@@ -129,25 +139,28 @@ export class LeoUnitTest {
      */
     public setUp(): void {
         // Set g.unitTesting *early*, for guards.
-        g.unitTesting = true;
+        (g.unitTesting as boolean) = true;
+
         // Create a new commander for each test.
         // This is fast, because setUpClass has done all the imports.
         const c = new Commands("");
         this.c = c;
         // Init the 'root' and '@settings' nodes.
-        this.root_p = c.rootPosition()
-        this.root_p.h = 'root'
-        this.settings_p = this.root_p.insertAfter()
-        this.settings_p.h = '@settings'
+        this.root_p = c.rootPosition()!;
+        this.root_p.h = 'root';
+        this.settings_p = this.root_p.insertAfter();
+        this.settings_p.h = '@settings';
         // Select the 'root' node.
-        c.selectPosition(this.root_p)
+        c.selectPosition(this.root_p);
     }
+
     public tearDown(): void {
         delete this.c;
     }
+
     //@+node:felix.20220130224933.5: *3* LeoUnitTest.create_test_outline
     public create_test_outline(): void {
-        const p: Position = this.c.p;
+        const p: Position = this.c!.p;
         // Create the following outline:
         //
         // root
@@ -163,31 +176,31 @@ export class LeoUnitTest {
         //   child b
         //     child clone a
         //       node clone 1
-        assert p == this.root_p
-        assert p.h == 'root'
+        assert.strictEqual(p.__eq__(this.root_p), true, 'P is root');
+        assert.strictEqual(p.h, 'root', 'same headline: root');
         // Child a
-        child_clone_a = p.insertAsLastChild()
-        child_clone_a.h = 'child clone a'
-        node_clone_1 = child_clone_a.insertAsLastChild()
-        node_clone_1.h = 'node clone 1'
+        const child_clone_a = p.insertAsLastChild();
+        child_clone_a.h = 'child clone a';
+        const node_clone_1 = child_clone_a.insertAsLastChild();
+        node_clone_1.h = 'node clone 1';
         // Child b
-        child_b = p.insertAsLastChild()
-        child_b.h = 'child b'
+        const child_b = p.insertAsLastChild();
+        child_b.h = 'child b';
         // Clone 'child clone a'
-        clone = child_clone_a.clone()
-        clone.moveToLastChildOf(child_b)
+        let clone = child_clone_a.clone();
+        clone.moveToLastChildOf(child_b);
         // Child c
-        child_c = p.insertAsLastChild()
-        child_c.h = 'child c'
+        const child_c = p.insertAsLastChild();
+        child_c.h = 'child c';
         // Clone 'node clone 1'
-        clone = node_clone_1.clone()
-        clone.moveToLastChildOf(child_c)
+        clone = node_clone_1.clone();
+        clone.moveToLastChildOf(child_c);
         // Clone 'child clone a'
-        clone = child_clone_a.clone()
-        clone.moveToLastChildOf(p)
+        clone = child_clone_a.clone();
+        clone.moveToLastChildOf(p);
         // Clone 'child b'
-        clone = child_b.clone()
-        clone.moveToLastChildOf(p)
+        clone = child_b.clone();
+        clone.moveToLastChildOf(p);
     }
 
     //@-others
