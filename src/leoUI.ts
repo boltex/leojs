@@ -2003,3 +2003,95 @@ export class LeoUI {
     }
 
 }
+/**
+ * Null GUI for testing
+ */
+export class NullGui {
+
+    private clipboardContent: string = "";
+    public preventRefresh: boolean = false;
+
+    public launchRefresh(): void { }
+
+    public replaceClipboardWith(s: string): Thenable<void> {
+        this.clipboardContent = s; // also set immediate clipboard string
+        return Promise.resolve();
+    }
+
+    public asyncGetTextFromClipboard(): Thenable<string> {
+        return Promise.resolve(this.clipboardContent);
+    }
+
+    public getTextFromClipboard(): string {
+        return this.clipboardContent;
+    }
+
+    public runOpenFileDialog(
+        c: Commands,
+        title: string,
+        filetypes: [string, string][],
+        defaultExtension: string,
+        multiple?: boolean
+    ): Thenable<string[]> {
+        return Promise.resolve([]);
+    }
+
+    public runSaveFileDialog(
+        c: Commands,
+        title: string,
+        filetypes: [string, string][],
+        defaultExtension: string,
+    ): Thenable<string> {
+        return Promise.resolve("");
+    }
+
+    public runAskOkDialog(
+        c: Commands,
+        title: string,
+        message: string,
+        buttonText?: string
+    ): Thenable<unknown> {
+        return Promise.resolve("");
+    }
+
+    public runAskYesNoDialog(
+        c: Commands,
+        title: string,
+        message: string
+    ): Thenable<string> {
+        return Promise.resolve("");
+    }
+
+    public showLeoIDMessage(): void {
+        vscode.window.showInformationMessage(
+            "Leo ID not found. Please enter an id that identifies you uniquely.",
+            "Set Leo ID"
+        ).then(p_chosenButton => {
+            if (p_chosenButton === "Set Leo ID") {
+                vscode.commands.executeCommand(Constants.COMMANDS.SET_LEO_ID);
+            }
+        });
+    }
+
+    public setIdSetting(p_id: string): void { };
+
+    public getIdFromSetting(): string {
+        return "";
+    }
+
+    public getIdFromDialog(): Thenable<string> {
+        return Promise.resolve("");
+    }
+
+    public ensure_commander_visible(c: Commands): void {
+    }
+
+    public isTextWidget(w: any): boolean {
+        return false;
+    }
+
+    public isTextWrapper(w: any): boolean {
+        return false;
+    }
+}
+

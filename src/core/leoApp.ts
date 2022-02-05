@@ -10,7 +10,7 @@ import * as os from "os";
 // import * as fs from 'fs';
 import * as path from 'path';
 import * as g from './leoGlobals';
-import { LeoUI } from '../leoUI';
+import { LeoUI, NullGui } from '../leoUI';
 import { NodeIndices } from './leoNodes';
 import { Commands } from './leoCommands';
 import { FileCommands } from "./leoFileCommands";
@@ -103,7 +103,7 @@ export class LeoApp {
     public debug: string[] = []; // A list of switches to be enabled.
     public diff: boolean = false; // True: run Leo in diff mode.
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
-    public gui: LeoUI | undefined; // The gui class.
+    public gui: LeoUI | NullGui | undefined; // The gui class.
     public guiArgName = null; // The gui name given in --gui option.
     public listen_to_log_flag: boolean = false; // True: execute listen-to-log command.
     public loaded_session: boolean = false; // Set at startup if no files specified on command line.
@@ -1105,7 +1105,7 @@ export class LeoApp {
      */
     public newCommander(
         fileName: string,
-        gui?: LeoUI,
+        gui?: LeoUI | NullGui,
         previousSettings?: any,
         relativeFileName?: any,
     ): Commands {
@@ -1399,7 +1399,7 @@ export class LoadManager {
     }
 
     //@+node:felix.20210120004121.31: *4* LM.loadLocalFile & helper
-    public loadLocalFile(fn: string, gui: LeoUI, old_c?: Commands): Commands {
+    public loadLocalFile(fn: string, gui: LeoUI | NullGui, old_c?: Commands): Commands {
         /*Completely read a file, creating the corresonding outline.
 
         1. If fn is an existing .leo file (possibly zipped), read it twice:
@@ -1448,7 +1448,7 @@ export class LoadManager {
      * Creates an empty outline if fn is a non-existent Leo file.
      * Creates an wrapper outline if fn is an external file, existing or not.
      */
-    public openFileByName(fn: string, gui: LeoUI, old_c?: Commands, previousSettings?: any): Commands | undefined {
+    public openFileByName(fn: string, gui: LeoUI | NullGui, old_c?: Commands, previousSettings?: any): Commands | undefined {
         const lm: LoadManager = this;
         // Disable the log.
         // g.app.setLog(None);

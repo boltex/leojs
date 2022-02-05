@@ -7,7 +7,7 @@ import * as vscode from "vscode";
 // require('browser-hrtime');
 
 import * as g from './leoGlobals';
-import { LeoUI } from '../leoUI';
+import { LeoUI, NullGui } from '../leoUI';
 import { DummyFileCommands, FileCommands } from "./leoFileCommands";
 import { CommanderOutlineCommands } from "../commands/commanderOutlineCommands";
 import { CommanderFileCommands } from "../commands/commanderFileCommands";
@@ -69,7 +69,7 @@ export class Commands {
     public chapterController: any; // TODO : leoChapters.ChapterController(c)
     public undoer: Undoer;
     public nodeHistory: NodeHistory;
-    public gui: LeoUI;
+    public gui: LeoUI | NullGui;
     public replace_errors: string[] = [];
 
     // TODO fake frame needed FOR wrapper and hasSelection
@@ -237,7 +237,7 @@ export class Commands {
     //@+node:felix.20210223002937.1: *3* constructor & helpers
     constructor(
         fileName: string,
-        gui?: LeoUI,
+        gui?: LeoUI | NullGui,
         previousSettings?: any,
         relativeFileName?: string
     ) {

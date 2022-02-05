@@ -216,6 +216,7 @@
 </v>
 <v t="felix.20201214211706.1"><vh>test/dummy command</vh></v>
 </v>
+<v t="felix.20220204224240.1"><vh>class NullGui</vh></v>
 </v>
 <v t="felix.20201214151419.1"><vh>@clean src/leoButtons.ts</vh>
 <v t="felix.20201214151419.2"><vh>class LeoButtonsProvider</vh>
@@ -454,13 +455,7 @@
 <v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 </v>
 <v t="felix.20220128232146.1"><vh>unittests</vh>
-<v t="felix.20220130224933.1"><vh>@@file src/test/leoTest2.ts</vh>
-<v t="felix.20220130224933.2"><vh>function.create_app</vh></v>
-<v t="felix.20220130224933.3"><vh>class LeoUnitTest(unittest.TestCase)</vh>
-<v t="felix.20220130224933.4"><vh>LeoUnitTest.setUp, tearDown &amp; setUpClass</vh></v>
-<v t="felix.20220130224933.5"><vh>LeoUnitTest.create_test_outline</vh></v>
-</v>
-</v>
+<v t="felix.20220130224933.1"><vh>@file src/test/leoTest2.ts</vh></v>
 <v t="felix.20220129002501.1"><vh>@file src/test/extension.test.ts</vh></v>
 <v t="felix.20220129200448.1"><vh>@file src/test/leoApp.test.ts</vh></v>
 <v t="felix.20220129003133.1"><vh>@file src/test/leoAtFile.test.ts</vh></v>
@@ -8282,180 +8277,6 @@ export class IconConstants {
 }
 </t>
 <t tx="felix.20220128232146.1"></t>
-<t tx="felix.20220130224933.1">
-@language typescript
-@tabwidth -4
-
-/**
- * Support for LeoJS's new unit tests, contained in src/tests/.
- */
-
-// import time
-// import unittest
-// import warnings
-// from leo.core import leoGlobals as g
-// from leo.core import leoApp
-
-import * as g from '../core/leoGlobals';
-import { LeoApp } from '../core/leoApp';
-import { Commands } from "../core/leoCommands";
-import { NodeIndices, VNode, Position } from '../core/leoNodes';
-
-
-@others
-</t>
-<t tx="felix.20220130224933.2">/**
- * Create the Leo application, g.app, the Gui, g.app.gui, and a commander.
- *
- * This method is expensive (0.5 sec) only the first time it is called.
- *
- * Thereafter, recreating g.app, g.app.gui, and new commands is fast.
- */
-export function create_app(gui_name: string='null'): void {
-
-    trace = False
-    t1 = time.process_time()
-    //
-    // Set g.unitTesting *early*, for guards, to suppress the splash screen, etc.
-    g.unitTesting = true;
-    // Create g.app now, to avoid circular dependencies.
-    g.app = leoApp.LeoApp()
-    // Late imports.
-    warnings.simplefilter("ignore")
-    from leo.core import leoConfig
-    from leo.core import leoNodes
-    from leo.core import leoCommands
-    from leo.core.leoGui import NullGui
-    if gui_name == 'qt':
-        from leo.plugins.qt_gui import LeoQtGui
-    t2 = time.process_time()
-    g.app.recentFilesManager = leoApp.RecentFilesManager()
-    g.app.loadManager = lm = leoApp.LoadManager()
-    lm.computeStandardDirectories()
-    if not g.app.setLeoID(useDialog=False, verbose=True):
-        raise ValueError("unable to set LeoID.")
-    g.app.nodeIndices = leoNodes.NodeIndices(g.app.leoID)
-    g.app.config = leoConfig.GlobalConfigManager()
-    g.app.db = g.NullObject('g.app.db')
-    g.app.pluginsController = g.NullObject('g.app.pluginsController')
-    g.app.commander_cacher = g.NullObject('g.app.commander_cacher')
-    if gui_name == 'null':
-        g.app.gui = NullGui()
-    elif gui_name == 'qt':
-        g.app.gui = LeoQtGui()
-    else:
-        raise TypeError(f"create_gui: unknown gui_name: {gui_name!r}")
-    t3 = time.process_time()
-    // Create a dummy commander, to do the imports in c.initObjects.
-    // Always use a null gui to avoid screen flash.
-    // setUp will create another commander.
-    c = leoCommands.Commands(fileName=None, gui=g.app.gui)
-    // Create minimal config dictionaries.
-    settings_d, bindings_d = lm.createDefaultSettingsDicts()
-    lm.globalSettingsDict = settings_d
-    lm.globalBindingsDict = bindings_d
-    c.config.settingsDict = settings_d
-    c.config.bindingsDict = bindings_d
-    assert g.unitTesting is True  // Defensive.
-    t4 = time.process_time()
-    // Trace times. This trace happens only once:
-    //     imports: 0.016
-    //         gui: 0.000
-    //   commander: 0.469
-    //       total: 0.484
-    if trace and t4 - t3 &gt; 0.1:
-        print('create_app:\n'
-            f"  imports: {(t2-t1):.3f}\n"
-            f"      gui: {(t3-t2):.3f}\n"
-            f"commander: {(t4-t2):.3f}\n"
-            f"    total: {(t4-t1):.3f}\n")
-    return c
-}
-
-</t>
-<t tx="felix.20220130224933.3">/**
- * The base class for all unit tests in Leo.
- *
- * Contains setUp/tearDown methods and various utilites.
- */
-export class LeoUnitTest {
-
-    @others
-
-}
-
-</t>
-<t tx="felix.20220130224933.4">public setUpClass(): void {
-    create_app(gui_name='null');
-}
-
-/**
- * Create a commander using a **null** gui, regardless of g.app.gui.
- * Create the nodes in the commander.
- */
-public setUp(): void {
-    // Set g.unitTesting *early*, for guards.
-    g.unitTesting = true;
-    // Create a new commander for each test.
-    // This is fast, because setUpClass has done all the imports.
-    const c = new Commands("" );
-    this.c = c;
-    // Init the 'root' and '@settings' nodes.
-    this.root_p = c.rootPosition()
-    this.root_p.h = 'root'
-    this.settings_p = this.root_p.insertAfter()
-    this.settings_p.h = '@settings'
-    // Select the 'root' node.
-    c.selectPosition(this.root_p)
-}
-public tearDown(): void {
-    delete this.c;
-}</t>
-<t tx="felix.20220130224933.5">public create_test_outline(): void {
-    const p: Position = this.c.p;
-    // Create the following outline:
-    //
-    // root
-    //   child clone a
-    //     node clone 1
-    //   child b
-    //     child clone a
-    //       node clone 1
-    //   child c
-    //     node clone 1
-    //   child clone a
-    //     node clone 1
-    //   child b
-    //     child clone a
-    //       node clone 1
-    assert p == this.root_p
-    assert p.h == 'root'
-    // Child a
-    child_clone_a = p.insertAsLastChild()
-    child_clone_a.h = 'child clone a'
-    node_clone_1 = child_clone_a.insertAsLastChild()
-    node_clone_1.h = 'node clone 1'
-    // Child b
-    child_b = p.insertAsLastChild()
-    child_b.h = 'child b'
-    // Clone 'child clone a'
-    clone = child_clone_a.clone()
-    clone.moveToLastChildOf(child_b)
-    // Child c
-    child_c = p.insertAsLastChild()
-    child_c.h = 'child c'
-    // Clone 'node clone 1'
-    clone = node_clone_1.clone()
-    clone.moveToLastChildOf(child_c)
-    // Clone 'child clone a'
-    clone = child_clone_a.clone()
-    clone.moveToLastChildOf(p)
-    // Clone 'child b'
-    clone = child_b.clone()
-    clone.moveToLastChildOf(p)
-}
-
-</t>
 <t tx="felix.20220131010929.1">public getIdFromDialog(): Thenable&lt;string&gt; {
     return vscode.window.showInputBox({
         title: "Enter Leo id",
@@ -8866,6 +8687,99 @@ private _start(): void {
     }, (p_reason) =&gt; {
         this.showLeoIDMessage();
     });
+}
+
+</t>
+<t tx="felix.20220204224240.1">/**
+ * Null GUI for testing
+ */
+export class NullGui {
+
+    private clipboardContent: string = "";
+    public preventRefresh: boolean = false;
+
+    public launchRefresh(): void { }
+
+    public replaceClipboardWith(s: string): Thenable&lt;void&gt; {
+        this.clipboardContent = s; // also set immediate clipboard string
+        return Promise.resolve();
+    }
+
+    public asyncGetTextFromClipboard(): Thenable&lt;string&gt; {
+        return Promise.resolve(this.clipboardContent);
+    }
+
+    public getTextFromClipboard(): string {
+        return this.clipboardContent;
+    }
+
+    public runOpenFileDialog(
+        c: Commands,
+        title: string,
+        filetypes: [string, string][],
+        defaultExtension: string,
+        multiple?: boolean
+    ): Thenable&lt;string[]&gt; {
+        return Promise.resolve([]);
+    }
+
+    public runSaveFileDialog(
+        c: Commands,
+        title: string,
+        filetypes: [string, string][],
+        defaultExtension: string,
+    ): Thenable&lt;string&gt; {
+        return Promise.resolve("");
+    }
+
+    public runAskOkDialog(
+        c: Commands,
+        title: string,
+        message: string,
+        buttonText?: string
+    ): Thenable&lt;unknown&gt; {
+        return Promise.resolve("");
+    }
+
+    public runAskYesNoDialog(
+        c: Commands,
+        title: string,
+        message: string
+    ): Thenable&lt;string&gt; {
+        return Promise.resolve("");
+    }
+
+    public showLeoIDMessage(): void {
+        vscode.window.showInformationMessage(
+            "Leo ID not found. Please enter an id that identifies you uniquely.",
+            "Set Leo ID"
+        ).then(p_chosenButton =&gt; {
+            if (p_chosenButton === "Set Leo ID") {
+                vscode.commands.executeCommand(Constants.COMMANDS.SET_LEO_ID);
+            }
+        });
+    }
+
+    public setIdSetting(p_id: string): void { };
+
+    public getIdFromSetting(): string {
+        return "";
+    }
+
+    public getIdFromDialog(): Thenable&lt;string&gt; {
+        return Promise.resolve("");
+    }
+
+    public ensure_commander_visible(c: Commands): void {
+    }
+
+    public isTextWidget(w: any): boolean {
+        return false;
+    }
+
+    public isTextWrapper(w: any): boolean {
+        return false;
+    }
 }
 
 </t>
