@@ -67,7 +67,10 @@ suite('Test cases for leoApp.py', () => {
             // Global managers.
             'config',
             // 'externalFilesController',
-            'loadManager', 'pluginsController', 'recentFilesManager',
+            'loadManager', 'pluginsController',
+
+            // 'recentFilesManager', // ? UNUSED IN LEOJS ?
+
             // Official ivars.
             'gui',
             'initing', 'killed', 'quitting',
