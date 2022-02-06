@@ -2727,6 +2727,7 @@ export class LeoUI {
     @others
 
 }
+
 </t>
 <t tx="felix.20201214202058.1">/**
  * * 'getStates' action for use in debounced method call
@@ -8691,7 +8692,7 @@ private _start(): void {
 
 </t>
 <t tx="felix.20220204224240.1">/**
- * Null GUI for testing
+ * Null gui class.
  */
 export class NullGui {
 

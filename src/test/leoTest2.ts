@@ -31,7 +31,7 @@ import * as assert from 'assert';
  *
  * Thereafter, recreating g.app, g.app.gui, and new commands is fast.
  */
-export function create_app(gui_name: string = 'null'): Commands {
+export async function create_app(gui_name: string = 'null'): Promise<Commands> {
 
     let trace = false;
     const t1 = process.hrtime();
@@ -58,8 +58,10 @@ export function create_app(gui_name: string = 'null'): Commands {
 
     // lm.computeStandardDirectories()
 
-    if (!g.app.setLeoID(false, true)) {
-        throw ("unable to set LeoID.");
+    const leoID = await g.app.setLeoID(false, true);
+
+    if (!leoID) {
+        throw Error("unable to set LeoID.");
     }
 
     g.app.nodeIndices = new NodeIndices(g.app.leoID);
@@ -68,7 +70,7 @@ export function create_app(gui_name: string = 'null'): Commands {
     // g.app.pluginsController = g.NullObject('g.app.pluginsController')
     // g.app.commander_cacher = g.NullObject('g.app.commander_cacher')
 
-    if (gui_name == 'null') {
+    if (gui_name === 'null') {
         g.app.gui = new NullGui();
     }
     // else if gui_name == 'qt'
@@ -114,7 +116,7 @@ export function create_app(gui_name: string = 'null'): Commands {
 /**
  * The base class for all unit tests in Leo.
  *
- * Contains setUp/tearDown methods and various utilites.
+ * Contains setUp/tearDown methods and various utilities.
  */
 export class LeoUnitTest {
 
@@ -125,12 +127,10 @@ export class LeoUnitTest {
     //@+others
     //@+node:felix.20220130224933.4: *3* LeoUnitTest.setUp, tearDown & setUpClass
 
-    constructor() {
-        create_app('null');
-    }
+    constructor() { }
 
-    public setUpClass(): void {
-        create_app('null');
+    public async setUpClass(): Promise<Commands> {
+        return create_app('null');
     }
 
     /**

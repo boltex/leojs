@@ -2003,8 +2003,9 @@ export class LeoUI {
     }
 
 }
+
 /**
- * Null GUI for testing
+ * Null gui class.
  */
 export class NullGui {
 

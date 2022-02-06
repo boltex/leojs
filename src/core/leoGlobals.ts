@@ -1821,18 +1821,30 @@ export function plural(obj: any): string {
 //         aList = [z.replace('\\', '/') for z in aList]
 //     return aList
 //@+node:felix.20211227182611.3: *3* g.os_path_abspath
-// def os_path_abspath(path: str):
-//     """Convert a path to an absolute path."""
-//     if not path:
-//         return ''
-//     if '\x00' in path:
-//         g.trace('NULL in', repr(path), g.callers())
-//         path = path.replace('\x00', '')  # Fix Python 3 bug on Windows 10.
-//     path = os.path.abspath(path)
-//     # os.path.normpath does the *reverse* of what we want.
-//     if g.isWindows:
-//         path = path.replace('\\', '/')
-//     return path
+/**
+ * Convert a path to an absolute path.
+ */
+export function os_path_abspath(p_path: string): string {
+
+    if (!p_path) {
+        return '';
+    }
+
+    if (p_path.includes('\x00')) {
+        trace('NULL in', p_path.toString(), callers());
+        p_path = p_path.split('\x00').join(''); // Fix Python 3 bug on Windows 10.
+    }
+
+    p_path = path.resolve(p_path);
+
+    // os.path.normpath does the *reverse* of what we want.
+    if (isWindows) {
+        p_path = p_path.split('\\').join('/');
+    }
+    return p_path;
+
+}
+
 //@+node:felix.20211227182611.4: *3* g.os_path_basename
 // def os_path_basename(path: str):
 //     """Return the second half of the pair returned by split(path)."""

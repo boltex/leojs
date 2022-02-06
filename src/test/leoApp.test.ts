@@ -5,117 +5,113 @@
  */
 import * as assert from 'assert';
 import { after, before } from 'mocha';
-import * as vscode from 'vscode';
 
 import * as g from '../core/leoGlobals';
 import { LeoApp } from '../core/leoApp';
-import { Commands } from "../core/leoCommands";
-import { NodeIndices, VNode, Position } from '../core/leoNodes';
-
+import { LeoUnitTest } from './leoTest2';
 
 //@+others
 //@+node:felix.20220129221242.1: ** Suite TestApp(LeoUnitTest)
-
-
 suite('Test cases for leoApp.py', () => {
 
+    let self: LeoUnitTest;
 
     before(async () => {
-        console.log('STARTING 1000 ms waiting period in leoApp test');
-
-        return new Promise<void>((resolve) => {
-            setTimeout(() => {
-                console.log('Finished 1000 ms waiting period in leoApp test');
-                resolve();
-            }, 1000);
-        });
+        console.log('before leoApp test');
+        self = new LeoUnitTest();
+        return self.setUpClass();
     });
-
 
     after(async () => {
         console.log('after leoApp test');
-
-        // vscode.window.showInformationMessage('after leoApp.test!');
+        self.tearDown();
     });
 
-    test('actual leoApp test', async () => {
-        console.log('starting actual leoApp test');
+    test('g and g.app exist', async () => {
 
         assert.strictEqual(!!g, true, "g exists");
-
-        (g.app as LeoApp) = new LeoApp();
 
         assert.strictEqual(!!g.app, true, "g.app exists");
 
         console.log('in leoApp test g.app.leoID is ', g.app.leoID);
 
-
     });
 
     //@+others
     //@+node:felix.20220129221913.2: *3* TestApp.test_official_g_app_directories
+    test('test_official_g_app_directories', async () => {
 
+        console.log('test_official_g_app_directories skipped');
+        // ! Uncomment if those dir strings are ever needed in leojs !
 
-    /*
-    def test_official_g_app_directories(self):
-        ivars = ('extensionsDir', 'globalConfigDir', 'loadDir', 'testDir')
-        for ivar in ivars:
-            assert hasattr(g.app, ivar), 'missing g.app directory: %s' % ivar
-            val = getattr(g.app, ivar)
-            assert val is not None, 'null g.app directory: %s' % ivar
-            assert g.os_path_exists(g.os_path_abspath(val)), 'non-existent g.app directory: %s' % ivar
-        assert hasattr(g.app, 'homeDir')  # May well be None.
-    */
+        /*
+        const ivars = ['extensionsDir', 'globalConfigDir', 'loadDir', 'testDir'];
+        ivars.forEach(ivar => {
+
+            assert.ok(g.app.hasOwnProperty(ivar), `missing g.app directory: ${ivar}`);
+
+            let val = (g.app as any)[ivar];
+            assert.ok(val !== undefined);
+            // assert val is not None, 'null g.app directory: %s' % ivar
+            assert.ok(g.os_path_exists(g.os_path_abspath(val)), `non-existent g.app directory: ${ivar}`);
+        });
+        assert.ok(g.app['homeDir'], 'missing g.app directory: homeDir');  // May well be None.
+        */
+
+    });
+
     //@+node:felix.20220129221913.3: *3* TestApp.test_official_g_app_ivars
+    test('test_official_g_app_ivars', async () => {
 
-    /*
-    def test_official_g_app_ivars(self):
-        ivars = (
-            # Global managers.
+        const ivars = [
+            // Global managers.
             'config',
-            # 'externalFilesController',
+            // 'externalFilesController',
             'loadManager', 'pluginsController', 'recentFilesManager',
-            # Official ivars.
+            // Official ivars.
             'gui',
             'initing', 'killed', 'quitting',
             'leoID',
             'log', 'logIsLocked', 'logWaiting',
             'nodeIndices',
             'windowList',
-            # Less-official and might be removed...
+            // Less-official and might be removed...
             'batchMode',
-            # 'debugSwitch',
+            // 'debugSwitch',
             'disableSave',
             'hookError', 'hookFunction',
             'numberOfUntitledWindows',
             'realMenuNameDict',
-            # 'searchDict',
+            // 'searchDict',
             'scriptDict',
-        )
-        for ivar in ivars:
-            self.assertTrue(hasattr(g.app, ivar))
+        ];
 
-    */
+        ivars.forEach(ivar => {
+            assert.ok(g.app.hasOwnProperty(ivar), `missing g.app ivar: ${ivar}`);
+        });
+
+    });
+
     //@+node:felix.20220129221913.4: *3* TestApp.test_consistency_of_leoApp_tables
+    test('test_consistency_of_leoApp_tables', async () => {
+        const delims_d = g.app.language_delims_dict;
+        const lang_d = g.app.language_extension_dict;
+        const ext_d = g.app.extension_dict;
 
+        for (const lang in lang_d) {
+            const ext = lang_d[lang];
+            assert.ok(delims_d[lang], lang);
+            assert.ok(ext_d[ext]);
+        }
 
+        for (const ext in ext_d) {
+            const lang = ext_d[ext];
+            assert.ok(lang_d[lang], lang);
+        }
 
-    /*
-    def test_consistency_of_leoApp_tables(self):
-        delims_d = g.app.language_delims_dict
-        lang_d = g.app.language_extension_dict
-        ext_d = g.app.extension_dict
-        for lang in lang_d:
-            ext = lang_d.get(lang)
-            assert lang in delims_d, lang
-            assert ext in ext_d, ext
-        for ext in ext_d:
-            lang = ext_d.get(ext)
-            assert lang in lang_d, lang
-    */
+    });
+
     //@+node:felix.20220129221913.5: *3* TestApp.test_lm_openAnyLeoFile
-
-
     /*
     def test_lm_openAnyLeoFile(self):
         lm = g.app.loadManager
@@ -139,9 +135,8 @@ suite('Test cases for leoApp.py', () => {
             os.remove(path)
         self.assertEqual(s, s2)
     */
+
     //@+node:felix.20220129221913.6: *3* TestApp.test_rfm_writeRecentFilesFileHelper
-
-
     /*
     def test_rfm_writeRecentFilesFileHelper(self):
         fn = 'ффф.leo'
@@ -150,6 +145,7 @@ suite('Test cases for leoApp.py', () => {
         os.remove(fn)
         assert not g.os_path_exists(fn), fn
     */
+
     //@-others
 
 });
