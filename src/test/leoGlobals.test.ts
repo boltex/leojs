@@ -4,7 +4,7 @@
  * Tests of leo.core.leoGlobals
  */
 import * as assert from 'assert';
-import { after, before, beforeEach } from 'mocha';
+import { afterEach, before, beforeEach } from 'mocha';
 
 import * as g from '../core/leoGlobals';
 import { LeoUnitTest } from './leoTest2';
@@ -24,7 +24,7 @@ suite('Test Globals', () => {
         self.setUp();
     });
 
-    after(async () => {
+    afterEach(async () => {
         self.tearDown();
     });
 
@@ -212,7 +212,6 @@ suite('Test Globals', () => {
         assert path.endswith(end), repr(path)
      */
     //@+node:felix.20220129223719.13: *3* TestGlobals.test_g_get_directives_dict
-
     test('test_g_get_directives_dict', async () => {
         const c = self.c;
         const p = c.p;
@@ -223,7 +222,7 @@ suite('Test Globals', () => {
                 # @comment must follow @language.
             @tabwidth -8
             @pagewidth 72
-            @encoding utf - 8
+            @encoding utf-8
         `);
 
         const d = g.get_directives_dict(p);
@@ -235,7 +234,6 @@ suite('Test Globals', () => {
         assert.ok(!(d['path']), d['path']);
 
     });
-
 
     /* def test_g_get_directives_dict(self):
         c = self.c
@@ -335,21 +333,29 @@ suite('Test Globals', () => {
             # Top-level .py file.
      */
     //@+node:felix.20220129223719.20: *3* TestGlobals.test_g_isDirective
-    /* def test_g_isDirective(self):
-        table = (
-            (True, '@language python\n'),
-            (True, '@tabwidth -4 #test\n'),
-            (True, '@others\n'),
-            (True, '    @others\n'),
-            (True, '@encoding\n'),
-            (False, '@encoding.setter\n'),
-            (False, '@encoding("abc")\n'),
-            (False, 'encoding = "abc"\n'),
-        )
-        for expected, s in table:
-            result = g.isDirective(s)
-            self.assertEqual(expected, bool(result), msg=s)
-     */
+    test('test_g_isDirective', async () => {
+
+        const table: [boolean, string][] = [
+            [true, '@language python\n'],
+            [true, '@tabwidth -4 #test\n'],
+            [true, '@others\n'],
+            [true, '    @others\n'],
+            [true, '@encoding\n'],
+            [false, '@encoding.setter\n'],
+            [false, '@encoding("abc")\n'],
+            [false, 'encoding = "abc"\n'],
+        ];
+
+        table.forEach(element => {
+            let expected: boolean;
+            let s: string;
+            [expected, s] = element;
+            const result = g.isDirective(s);
+            assert.strictEqual(expected, !!result, s);
+        });
+
+    });
+
     //@+node:felix.20220129223719.21: *3* TestGlobals.test_g_match_word
     /* def test_g_match_word(self):
         table = (
@@ -507,22 +513,25 @@ suite('Test Globals', () => {
         self.assertEqual(n, 40)
      */
     //@+node:felix.20220129223719.36: *3* TestGlobals.test_g_scanAtTabwidthDirectives_6
-    // def test_g_scanAtTabwidthDirectives_6(self):
-    //     c = self.c
-    //     p = c.p
-    //     p.b = '@tabwidth 6\n'
-    //     aList = g.get_directives_dict_list(p)
-    //     n = g.scanAtTabwidthDirectives(aList)
-    //     self.assertEqual(n, 6)
+    test('test_g_scanAtTabwidthDirectives_6', async () => {
+        const c = self.c;
+        const p = c.p;
+        p.b = '@tabwidth 6\n';
+        const aList = g.get_directives_dict_list(p);
+        const n = g.scanAtTabwidthDirectives(aList);
+        assert.strictEqual(n, 6);
+    });
+
     //@+node:felix.20220129223719.37: *3* TestGlobals.test_g_scanAtTabwidthDirectives_minus_6
-    /* def test_g_scanAtTabwidthDirectives_minus_6(self):
-        c = self.c
-        p = c.p
-        p.b = '@tabwidth -6\n'
-        aList = g.get_directives_dict_list(p)
-        n = g.scanAtTabwidthDirectives(aList)
-        self.assertEqual(n, -6)
-     */
+    test('test_g_scanAtTabwidthDirectives_minus_6', async () => {
+        const c = self.c;
+        const p = c.p;
+        p.b = '@tabwidth -6\n';
+        const aList = g.get_directives_dict_list(p);
+        const n = g.scanAtTabwidthDirectives(aList);
+        assert.strictEqual(n, -6);
+    });
+
     //@+node:felix.20220129223719.38: *3* TestGlobals.test_g_scanAtWrapDirectives_nowrap
     /* def test_g_scanAtWrapDirectives_nowrap(self):
         c = self.c
@@ -549,15 +558,23 @@ suite('Test Globals', () => {
         assert s is None, repr(s)
      */
     //@+node:felix.20220129223719.41: *3* TestGlobals.test_g_set_delims_from_language
-    // def test_g_set_delims_from_language(self):
-    //     table = (
-    //         ('c', ('//', '/*', '*/')),
-    //         ('python', ('#', '', '')),
-    //         ('xxxyyy', ('', '', '')),
-    //     )
-    //     for language, expected in table:
-    //         result = g.set_delims_from_language(language)
-    //         self.assertEqual(result, expected, msg=language)
+    test('test_g_set_delims_from_language', async () => {
+        const table: [string, string[]][] = [
+            ['c', ['//', '/*', '*/']],
+            ['python', ['#', '', '']],
+            ['xxxyyy', ['', '', '']]
+        ];
+
+        table.forEach(element => {
+            let language: string;
+            let expected: string[];
+            [language, expected] = element;
+            const result = g.set_delims_from_language(language);
+            // * use deepStrictEqual for contents of array, (arrays are not same object)
+            assert.deepStrictEqual(result, expected, language);
+        });
+    });
+
     //@+node:felix.20220129223719.42: *3* TestGlobals.test_g_set_delims_from_string
     // def test_g_set_delims_from_string(self):
     //     table = (

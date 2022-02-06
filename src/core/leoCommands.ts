@@ -2664,7 +2664,8 @@ export class Commands {
 
     //@+node:felix.20211120224224.1: *5* c.recolor
     public recolor(): void {
-        console.log("recolor");
+        // TODO
+        console.log("TODO: recolor");
     }
     //@+node:felix.20211120231934.1: *5* c.redrawing...
     //@+node:felix.20211120224229.1: *6* c.redraw

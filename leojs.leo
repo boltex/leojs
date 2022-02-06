@@ -2586,17 +2586,8 @@ import { NodeIndices, Position, VNode } from "./core/leoNodes";
         vscode.window.showWarningMessage("g.app leojs application instance already exists!");
     }
 
-
-
-
     g.app.gui = this;
     g.app.loadManager = new LoadManager();
-    // g.app.loadManager.computeStandardDirectories()
-    // if (!g.app.setLeoID(false, true)) {
-    //     throw new Error("unable to set LeoID.");
-    // }
-
-    // Force the user to set g.app.leoID.
 
     const q_leoID = new Promise((resolve, reject) =&gt; {
         this._leoIDResolve = resolve;
