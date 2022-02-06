@@ -259,6 +259,12 @@ export class Commands {
         // @ts-expect-error
         c.fileCommands = null; // type:ignore
 
+        // ! Equivalent of frame.createFirstTreeNode
+        let v = new VNode(c);
+        let p = new Position(v);
+        v.initHeadString("NewHeadline");
+        c.hiddenRootNode.children = [];
+        p._linkAsRoot();
 
         // Define the subcommanders.
         this.chapterController = {}; // TODO self.chapterController = leoChapters.ChapterController(c)

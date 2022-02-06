@@ -1793,6 +1793,34 @@ export const trace = console.log;
 // TODO : Replace with output to proper 'Leo terminal output'
 
 //@+node:felix.20211104211115.1: ** g.Miscellaneous
+//@+node:felix.20220206010631.1: *3* dedent
+/**
+ * This is similar to Python's "textwrap.dedent" function
+ * from https://gist.github.com/malthe/02350255c759d5478e89
+ */
+export function dedent(text: string) {
+    const re_whitespace = /^([ \t]*)(.*)\n/gm;
+    let l;
+    let m;
+    let i;
+
+    while ((m = re_whitespace.exec(text)) !== null) { // assign in cond.
+        if (!m[2]) {
+            continue;
+        }
+
+        if (l = m[1].length) { // assign in cond.
+            i = (i !== undefined) ? Math.min(i, l) : l;
+        } else {
+            break;
+        }
+    }
+
+    if (i) {
+        text = text.replace(new RegExp('^[ \t]{' + i + '}(.*\n)', 'gm'), '$1');
+    }
+    return text;
+}
 //@+node:felix.20211104222646.1: *3* g.plural          (coreGlobals.py)
 /**
  * Return "s" or "" depending on n.

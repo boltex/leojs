@@ -211,23 +211,9 @@ export class LeoUI {
         // ************************************************************
         // * demo test: CREATE NEW LEO OUTLINE: NEW COMMANDER
         // ************************************************************
-        let w_c = g.app.newCommander("", this);
-
-        // Equivalent to leoBridge 'createFrame' method
-        let w_v = new VNode(w_c);
-        let w_p = new Position(w_v);
-        w_v.initHeadString("NewHeadline");
-
-        // #1631: Initialize here, not in p._linkAsRoot.
-        w_c.hiddenRootNode.children = [];
-
-        // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
-        w_p._linkAsRoot();
-
-        g.app.commanders().push(w_c);
-
-        // select first test commander
-        let c = g.app.commanders()[this.commanderIndex];
+        // First test commander
+        let c = g.app.newCommander("", this);
+        g.app.commanders().push(c);
 
         // ************************************************************
         // * demo test: BUILD SOME TEST OUTLINE
@@ -253,21 +239,13 @@ export class LeoUI {
 
         w_node = c.p.insertAfter();
         w_node.initHeadString("node 2 selected but empty");
-        w_c.setCurrentPosition(w_node);
+        c.setCurrentPosition(w_node);
 
         // ************************************************************
         // * demo test: SOME OTHER COMMANDER
         // ************************************************************
-        w_c = g.app.newCommander("", this);
-        w_v = new VNode(w_c);
-        w_p = new Position(w_v);
-        w_v.initHeadString("NewHeadline");
-        w_c.hiddenRootNode.children = [];
-        w_p._linkAsRoot();
-        g.app.commanders().push(w_c);
-
-        // select second test commander
-        c = w_c;
+        c = g.app.newCommander("", this);
+        g.app.commanders().push(c);
 
         // ************************************************************
         // * demo test: BUILD SOME OTHER TEST OUTLINE
@@ -290,7 +268,7 @@ export class LeoUI {
         w_node = c.p.insertAfter();
         w_node.initHeadString("@clean my-file.txt");
         w_node.setBodyString('again some body text');
-        w_c.setCurrentPosition(w_node);
+        c.setCurrentPosition(w_node);
 
         nodeCounter = 0;
         while (nodeCounter < 30) {
@@ -308,7 +286,7 @@ export class LeoUI {
         w_node.setMarked();
         w_node.initHeadString("a different headline");
 
-        w_c.setCurrentPosition(w_node);
+        c.setCurrentPosition(w_node);
 
         nodeCounter = 0;
         while (nodeCounter < 30) {
@@ -326,16 +304,13 @@ export class LeoUI {
             w_node = c.p.insertAsLastChild();
             w_node.initHeadString("more numbered headlines " + nodeCounter);
         }
-        w_c.setCurrentPosition(w_node);
+        c.setCurrentPosition(w_node);
         nodeCounter = 0;
         while (nodeCounter < 30) {
             nodeCounter++;
             w_node = c.p.insertAsLastChild();
             w_node.initHeadString("inside numbered headlines " + nodeCounter);
         }
-
-        // back to first test commander after creating this second one
-        c = g.app.commanders()[this.commanderIndex];
         // ************************************************************
         // * demo test end
         // ************************************************************

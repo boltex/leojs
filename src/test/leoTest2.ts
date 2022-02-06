@@ -120,7 +120,7 @@ export async function create_app(gui_name: string = 'null'): Promise<Commands> {
  */
 export class LeoUnitTest {
 
-    public c!: Commands | undefined;
+    public c!: Commands;
     public root_p!: Position;
     public settings_p!: Position;
 
@@ -143,7 +143,7 @@ export class LeoUnitTest {
 
         // Create a new commander for each test.
         // This is fast, because setUpClass has done all the imports.
-        const c = new Commands("");
+        const c = new Commands("", new NullGui());
         this.c = c;
         // Init the 'root' and '@settings' nodes.
         this.root_p = c.rootPosition()!;
@@ -155,7 +155,7 @@ export class LeoUnitTest {
     }
 
     public tearDown(): void {
-        delete this.c;
+        // unneeded ?
     }
 
     //@+node:felix.20220130224933.5: *3* LeoUnitTest.create_test_outline

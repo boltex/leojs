@@ -4,10 +4,9 @@
  * Tests of leoApp.ts
  */
 import * as assert from 'assert';
-import { after, before } from 'mocha';
+import { after, before, beforeEach } from 'mocha';
 
 import * as g from '../core/leoGlobals';
-import { LeoApp } from '../core/leoApp';
 import { LeoUnitTest } from './leoTest2';
 
 //@+others
@@ -17,13 +16,15 @@ suite('Test cases for leoApp.py', () => {
     let self: LeoUnitTest;
 
     before(async () => {
-        console.log('before leoApp test');
         self = new LeoUnitTest();
         return self.setUpClass();
     });
 
+    beforeEach(async () => {
+        self.setUp();
+    });
+
     after(async () => {
-        console.log('after leoApp test');
         self.tearDown();
     });
 
