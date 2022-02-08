@@ -28,16 +28,6 @@ suite('Test cases for leoApp.py', () => {
         self.tearDown();
     });
 
-    test('g and g.app exist', async () => {
-
-        assert.strictEqual(!!g, true, "g exists");
-
-        assert.strictEqual(!!g.app, true, "g.app exists");
-
-        console.log('in leoApp test g.app.leoID is ', g.app.leoID);
-
-    });
-
     //@+others
     //@+node:felix.20220129221913.2: *3* TestApp.test_official_g_app_directories
     test('test_official_g_app_directories', async () => {

@@ -28,16 +28,6 @@ suite('Test Globals', () => {
         self.tearDown();
     });
 
-    test('g and g.app exist', async () => {
-
-        assert.strictEqual(!!g, true, "g exists");
-
-        assert.strictEqual(!!g.app, true, "g.app exists");
-
-        console.log('in Globals test g.app.leoID is ', g.app.leoID);
-
-    });
-
     //@+others
     //@+node:felix.20220129223719.2: *3* TestGlobals.test_getLastTracebackFileAndLineNumber
     /* def test_getLastTracebackFileAndLineNumber(self):
@@ -195,22 +185,28 @@ suite('Test Globals', () => {
             ('abc a bc x', 'bc', 0, 6),
             ('abc a bc x', 'bc', 1, 6),
             ('abc a x', 'bc', 0, -1),
-        )
+        )6
         for s, word, i, expected in table:
             actual = g.find_word(s, word, i)
             self.assertEqual(actual, expected)
      */
     //@+node:felix.20220129223719.12: *3* TestGlobals.test_g_fullPath
-    /* def test_g_fullPath(self):
-        c = self.c
-        child = c.rootPosition().insertAfter()
-        child.h = '@path abc'
-        grand = child.insertAsLastChild()
-        grand.h = 'xyz'
-        path = g.fullPath(c, grand, simulate=True)
-        end = g.os_path_normpath('abc/xyz')
-        assert path.endswith(end), repr(path)
-     */
+    test('test_g_fullPath', async () => {
+        const c = self.c;
+
+        const child = c.rootPosition()!.insertAfter();
+        child.h = '@path abc';
+        const grand = child.insertAsLastChild();
+        grand.h = 'xyz';
+
+        const w_path = g.fullPath(c, grand, true);
+        const end = g.os_path_normpath('abc/xyz');
+
+        assert.ok(w_path.endsWith(end), w_path.toString());
+
+    });
+
+
     //@+node:felix.20220129223719.13: *3* TestGlobals.test_g_get_directives_dict
     test('test_g_get_directives_dict', async () => {
         const c = self.c;
@@ -576,18 +572,27 @@ suite('Test Globals', () => {
     });
 
     //@+node:felix.20220129223719.42: *3* TestGlobals.test_g_set_delims_from_string
-    // def test_g_set_delims_from_string(self):
-    //     table = (
-    //         ('c', '@comment // /* */', ('//', '/*', '*/')),
-    //         ('c', '// /* */', ('//', '/*', '*/')),
-    //         ('python', '@comment #', ('#', '', '')),
-    //         ('python', '#', ('#', '', '')),
-    //         ('xxxyyy', '@comment a b c', ('a', 'b', 'c')),
-    //         ('xxxyyy', 'a b c', ('a', 'b', 'c')),
-    //     )
-    //     for language, s, expected in table:
-    //         result = g.set_delims_from_string(s)
-    //         self.assertEqual(result, expected, msg=language)
+    test('test_g_set_delims_from_string', async () => {
+        const table: [string, string, string[]][] = [
+            ['c', '@comment // /* */', ['//', '/*', '*/']],
+            ['c', '// /* */', ['//', '/*', '*/']],
+            ['python', '@comment #', ['#', '', '']],
+            ['python', '#', ['#', '', '']],
+            ['xxxyyy', '@comment a b c', ['a', 'b', 'c']],
+            ['xxxyyy', 'a b c', ['a', 'b', 'c']]
+        ];
+
+        table.forEach(element => {
+            let language: string;
+            let s: string;
+            let expected: string[];
+            [language, s, expected] = element;
+            const result = g.set_delims_from_string(s);
+            // * use deepStrictEqual for contents of array, (arrays are not same object)
+            assert.deepStrictEqual(result, expected, language);
+        });
+    });
+
     //@+node:felix.20220129223719.43: *3* TestGlobals.test_g_skip_blank_lines
     /* def test_g_skip_blank_lines(self):
         end = g.skip_blank_lines("", 0)
@@ -658,19 +663,29 @@ suite('Test Globals', () => {
             g.splitLongFileName(s, limit=3)
      */
     //@+node:felix.20220129223719.48: *3* TestGlobals.test_g_stripPathCruft
-    /* def test_g_stripPathCruft(self):
-        table = (
-            (None, None),  # Retain empty paths for warnings.
-            ('', ''),
-            (g.app.loadDir, g.app.loadDir),
-            ('<abc>', 'abc'),
-            ('"abc"', 'abc'),
-            ("'abc'", 'abc'),
-        )
-        for path, expected in table:
-            result = g.stripPathCruft(path)
-            self.assertEqual(result, expected)
-     */
+    test('test_g_stripPathCruft', async () => {
+
+        const table: [string | undefined, string | undefined][] = [
+            [undefined, undefined],  // Retain empty paths for warning.
+            ['', ''],
+            [g.app.loadDir, g.app.loadDir],
+            ['<abc>', 'abc'],
+            ['"abc"', 'abc'],
+            ["'abc'", 'abc'],
+        ];
+
+        table.forEach(element => {
+            let p_path: string | undefined;
+            let expected: string | undefined;
+            [p_path, expected] = element;
+
+            const result = g.stripPathCruft(p_path!);
+
+            assert.strictEqual(expected, result);
+        });
+
+    });
+
     //@+node:felix.20220129223719.49: *3* TestGlobals.test_g_warnOnReadOnlyFile
     /* def test_g_warnOnReadOnlyFile(self):
         c = self.c

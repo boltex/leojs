@@ -18,6 +18,7 @@ import { LeoApp } from './core/leoApp';
 import { LoadManager } from "./core/leoApp";
 import { Commands } from "./core/leoCommands";
 import { NodeIndices, Position, VNode } from "./core/leoNodes";
+import { GlobalConfigManager } from "./core/leoConfig";
 
 /**
  * Creates and manages instances of the UI elements along with their events
@@ -191,7 +192,10 @@ export class LeoUI {
     private _finishStartup(): void {
 
         g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
+        g.app.config = new GlobalConfigManager();
         g.app.nodeIndices = new NodeIndices(g.app.leoID);
+
+        // TODO FAKE CONFIG
 
         // IF RECENT FILES LIST :
         //      TODO: CHECK RECENT LEO FILE LIST AND OPEN THEM

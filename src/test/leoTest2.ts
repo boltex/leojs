@@ -18,9 +18,9 @@ import * as g from '../core/leoGlobals';
 import { LeoApp, LoadManager } from '../core/leoApp';
 import { Commands } from "../core/leoCommands";
 import { NodeIndices, VNode, Position } from '../core/leoNodes';
+import { GlobalConfigManager } from '../core/leoConfig';
 import { NullGui } from '../leoUI';
 import * as assert from 'assert';
-
 
 //@+others
 //@+node:felix.20220130224933.2: ** function.create_app
@@ -65,7 +65,8 @@ export async function create_app(gui_name: string = 'null'): Promise<Commands> {
     }
 
     g.app.nodeIndices = new NodeIndices(g.app.leoID);
-    // g.app.config = leoConfig.GlobalConfigManager()
+    g.app.config = new GlobalConfigManager();
+
     // g.app.db = g.NullObject('g.app.db')
     // g.app.pluginsController = g.NullObject('g.app.pluginsController')
     // g.app.commander_cacher = g.NullObject('g.app.commander_cacher')

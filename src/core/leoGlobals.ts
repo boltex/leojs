@@ -2112,15 +2112,22 @@ export function os_path_join(c: Commands | undefined, ...args: any[]): string {
 //         path = path.replace('\\', '/')
 //     return path
 //@+node:felix.20211227182611.17: *3* g.os_path_normpath
-// def os_path_normpath(path: str):
-//     """Normalize the path."""
-//     if not path:
-//         return ''
-//     path = os.path.normpath(path)
-//     # os.path.normpath does the *reverse* of what we want.
-//     if g.isWindows:
-//         path = path.replace('\\', '/').lower()  # #2049: ignore case!
-//     return path
+/**
+ * * Normalize the path.
+ */
+export function os_path_normpath(p_path: string): string {
+    if (!p_path) {
+        return '';
+    }
+    p_path = path.normalize(p_path);
+    // os.path.normpath does the *reverse* of what we want.
+    if (isWindows) {
+        p_path = p_path.split('\\').join('/').toLowerCase();
+    }
+    return p_path;
+}
+
+
 //@+node:felix.20211227182611.18: *3* g.os_path_normslashes
 // def os_path_normslashes(path: str):
 
@@ -2447,6 +2454,139 @@ export class FileLikeObject {
         }
     }
 
+    //@-others
+
+}
+
+//@+node:felix.20220206220711.1: ** class g.TypedDict
+/**
+ * A class providing additional dictionary-related methods:
+ *
+ *   __init__:     Specifies types and the dict's name.
+ *   __repr__:     Compatible with g.printObj, based on g.objToString.
+ *   __setitem__:  Type checks its arguments.
+ *   __str__:      A concise summary of the inner dict.
+ *   add_to_list:  A convenience method that adds a value to its key's list.
+ *   name:         The dict's name.
+ *   setName:      Sets the dict's name, for use by __repr__.
+ *
+ * Overrides the following standard methods:
+ *
+ *   copy:         A thin wrapper for copy.deepcopy.
+ *   get:          Returns self.d.get
+ *   items:        Returns self.d.items
+ *   keys:         Returns self.d.keys
+ *   update:       Updates self.d from either a dict or a TypedDict.
+ */
+export class TypedDict {
+
+    public d: {[key:string]: any};
+    public keyType: any;
+    public valType: any;
+
+    private _name: string;
+
+    constructor ( name: string, keyType: any, valType: any) {
+        this.d = {};
+        this._name = name;  // For __repr__ only.
+        this.keyType = keyType;
+        this.valType = valType;
+    }
+
+    //@+others
+    //@+node:felix.20220206220711.2: *3* td.__repr__ & __str__
+    // def __str__(self) -> str:
+    //     """Concise: used by repr."""
+    //     return (
+    //         f"<TypedDict name:{self._name} "
+    //         f"keys:{self.keyType.__name__} "
+    //         f"values:{self.valType.__name__} "
+    //         f"len(keys): {len(list(self.keys()))}>"
+    //     )
+
+    // def __repr__(self) -> str:
+    //     """Suitable for g.printObj"""
+    //     return f"{g.dictToString(self.d)}\n{str(self)}\n"
+    //@+node:felix.20220206220711.3: *3* td.__setitem__
+    // def __setitem__(self, key: Any, val: Any) -> None:
+    //     """Allow d[key] = val"""
+    //     if key is None:
+    //         g.trace('TypeDict: None is not a valid key', g.callers())
+    //         return
+    //     self._checkKeyType(key)
+    //     self._checkKeyType(key)
+    //     try:
+    //         for z in val:
+    //             self._checkValType(z)
+    //     except TypeError:
+    //         self._checkValType(val)  # val is not iterable.
+    //     self.d[key] = val
+    //@+node:felix.20220206220711.4: *3* td.add_to_list
+    // def add_to_list(self, key: Any, val: Any) -> None:
+    //     """Update the *list*, self.d [key]"""
+    //     if key is None:
+    //         g.trace('TypeDict: None is not a valid key', g.callers())
+    //         return
+    //     self._checkKeyType(key)
+    //     self._checkValType(val)
+    //     aList = self.d.get(key, [])
+    //     if val not in aList:
+    //         aList.append(val)
+    //         self.d[key] = aList
+    //@+node:felix.20220206220711.5: *3* td.checking
+    // def _checkKeyType(self, key: str) -> None:
+    //     if key and key.__class__ != self.keyType:
+    //         self._reportTypeError(key, self.keyType)
+
+    // def _checkValType(self, val: Any) -> None:
+    //     if val.__class__ != self.valType:
+    //         self._reportTypeError(val, self.valType)
+
+    // def _reportTypeError(self, obj: Any, objType: Any) -> str:
+    //     return (
+    //         f"{self._name}\n"
+    //         f"expected: {obj.__class__.__name__}\n"
+    //         f"     got: {objType.__name__}")
+    //@+node:felix.20220206220711.6: *3* td.copy
+    // def copy(self, name: str=None) -> Any:
+    //     """Return a new dict with the same contents."""
+    //     import copy
+    //     return copy.deepcopy(self)
+    //@+node:felix.20220206220711.7: *3* td.get & keys & values
+    // def get(self, key: Any, default: Any=None) -> Any:
+    //     return self.d.get(key, default)
+
+    // def items(self) -> Any:
+    //     return self.d.items()
+
+    // def keys(self) -> Any:
+    //     return self.d.keys()
+
+    // def values(self) -> Any:
+    //     return self.d.values()
+    //@+node:felix.20220206220711.8: *3* td.get_getting & get_string_setting
+    // def get_setting(self, key: str) -> Any:
+    //     key = key.replace('-', '').replace('_', '')
+    //     gs = self.get(key)
+    //     val = gs and gs.val
+    //     return val
+
+    // def get_string_setting(self, key: str) -> Optional[str]:
+    //     val = self.get_setting(key)
+    //     return val if val and isinstance(val, str) else None
+    //@+node:felix.20220206220711.9: *3* td.name & setName
+    // def name(self) -> str:
+    //     return self._name
+
+    // def setName(self, name: str) -> None:
+    //     self._name = name
+    //@+node:felix.20220206220711.10: *3* td.update
+    // def update(self, d: Dict[Any, Any]) -> None:
+    //     """Update self.d from a the appropriate dict."""
+    //     if isinstance(d, TypedDict):
+    //         self.d.update(d.d)
+    //     else:
+    //         self.d.update(d)
     //@-others
 
 }
