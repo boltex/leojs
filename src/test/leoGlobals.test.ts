@@ -353,23 +353,32 @@ suite('Test Globals', () => {
     });
 
     //@+node:felix.20220129223719.21: *3* TestGlobals.test_g_match_word
-    /* def test_g_match_word(self):
-        table = (
-            (True, 0, 'a', 'a'),
-            (False, 0, 'a', 'b'),
-            (True, 0, 'a', 'a b'),
-            (False, 1, 'a', 'aa b'),  # Tests bug fixed 2017/06/01.
-            (False, 1, 'a', '_a b'),
-            (False, 0, 'a', 'aw b'),
-            (False, 0, 'a', 'a_'),
-            (True, 2, 'a', 'b a c'),
-            (False, 0, 'a', 'b a c'),
-        )
-        for data in table:
-            expected, i, word, line = data
-            got = g.match_word(line + '\n', i, word)
-            self.assertEqual(expected, got)
-     */
+    test('test_g_match_word', async () => {
+
+        const table: [boolean, number, string, string][] = [
+            [true, 0, 'a', 'a'],
+            [false, 0, 'a', 'b'],
+            [true, 0, 'a', 'a b'],
+            [false, 1, 'a', 'aa b'],  // Tests bug fixed 2017/06/01.
+            [false, 1, 'a', '_a b'],
+            [false, 0, 'a', 'aw b'],
+            [false, 0, 'a', 'a_'],
+            [true, 2, 'a', 'b a c'],
+            [false, 0, 'a', 'b a c'],
+        ];
+
+        table.forEach(element => {
+            let expected: boolean;
+            let i: number;
+            let word: string;
+            let line: string;
+            [expected, i, word, line] = element;
+            const got = g.match_word(line + '\n', i, word);
+            assert.strictEqual(expected, got);
+        });
+
+    });
+
     //@+node:felix.20220129223719.22: *3* TestGlobals.test_g_os_path_finalize_join_with_thumb_drive
     /* def test_g_os_path_finalize_join_with_thumb_drive(self):
         path1 = r'C:\Python32\Lib\site-packages\leo-editor\leo\core'
@@ -609,32 +618,101 @@ suite('Test Globals', () => {
         self.assertEqual(end, 2)
      */
     //@+node:felix.20220129223719.44: *3* TestGlobals.test_g_skip_line
-    /* def test_g_skip_line(self):
-        s = 'a\n\nc'
-        for i, result in (
-            (-1, 2),  # One too few.
-            (0, 2), (1, 2),
-            (2, 3),
-            (3, 4),
-            (4, 4),  # One too many.
-        ):
-            j = g.skip_line(s, i)
-            self.assertEqual(j, result, msg=i)
-     */
+    test('test_g_skip_line', async () => {
+
+        const s: string = 'a\n\nc';
+
+        const table: [number, number][] = [
+            [-1, 2],  // One too few.
+            [0, 2], [1, 2],
+            [2, 3],
+            [3, 4],
+            [4, 4],  // One too many.
+        ];
+
+        table.forEach(element => {
+            let i: number;
+            let result: number;
+            [i, result] = element;
+            const j = g.skip_line(s, i);
+
+            assert.strictEqual(j, result, i.toString());
+        });
+
+    });
+
     //@+node:felix.20220129223719.45: *3* TestGlobals.test_g_skip_to_end_of_line
-    /* def test_g_skip_to_end_of_line(self):
-        s = 'a\n\nc'
-        for i, result in (
-            (-1, 1),  # One too few.
-            (0, 1), (1, 1),
-            (2, 2),
-            (3, 4),
-            (4, 4),  # One too many.
-        ):
-            j = g.skip_to_end_of_line(s, i)
-            self.assertEqual(j, result, msg=i)
-     */
+    test('test_g_skip_to_end_of_line', async () => {
+
+        const s: string = 'a\n\nc';
+
+        const table: [number, number][] = [
+            [-1, 1],  // One too few.
+            [0, 1], [1, 1],
+            [2, 2],
+            [3, 4],
+            [4, 4],  // One too many.
+        ];
+
+        table.forEach(element => {
+            let i: number;
+            let result: number;
+            [i, result] = element;
+            const j = g.skip_to_end_of_line(s, i);
+
+            assert.strictEqual(j, result, i.toString());
+        });
+    });
+
     //@+node:felix.20220129223719.46: *3* TestGlobals.test_g_skip_to_start_of_line
+    test('test_g_skip_to_start_of_line', async () => {
+
+        const s1: string = 'a\n\nc';
+
+        const table1: [number, number][] = [
+            [-1, 0],  // One too few.
+            [0, 0], [1, 0],
+            [2, 2],
+            [3, 3],
+            [4, 4],
+            [5, 4],  // One too many.
+        ];
+
+        const s2: string = 'a\n';
+
+        const table2: [number, number][] = [
+            [1, 0],
+            [2, 2],
+        ]; // A special case at end.
+
+        const totalArrays: [string, [number, number][]][] = [[s1, table1], [s2, table2]];
+
+        totalArrays.forEach(p_tables => {
+            let s: string;
+            let table: [number, number][];
+            [s, table] = p_tables;
+
+            table.forEach(element => {
+                console.log('inner loop! ', s);
+
+                let i: number;
+                let result: number;
+                [i, result] = element;
+                console.log('before J');
+
+                const j = g.skip_to_start_of_line(s, i);
+                console.log('after J');
+
+
+                console.log("i " + i.toString() + " s " + s + " got " + j.toString() + " expected " + result.toString());
+
+                assert.strictEqual(j, result, "i " + i.toString() + " s " + s + " got " + j.toString() + " expected " + result.toString());
+            });
+
+
+        });
+
+    });
     /* def test_g_skip_to_start_of_line(self):
         s1 = 'a\n\nc'
         table1 = (

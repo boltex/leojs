@@ -1302,16 +1302,41 @@ export function match(s: string, i: number, pattern: string): boolean {
     // Warning: this code makes no assumptions about what follows pattern.
     // Equivalent to original in python (only looks in specific substring)
     // return s and pattern and s.find(pattern, i, i + len(pattern)) == i
-    // didnt work with xml expression
+    // didn't work with xml expression
     // return !!s && !!pattern && s.substring(i, i + pattern.length + 1).search(pattern) === 0;
     return !!s && !!pattern && s.substring(i, i + pattern.length + 1).startsWith(pattern);
 }
 
 //@+node:felix.20211104221309.1: *3* g.match_word      (coreGlobals.py)
 export function match_word(s: string, i: number, pattern: string): boolean {
-    // TODO : This is weak lacks performance. Solidify this method!
-    const pat = new RegExp(pattern + "\\b");
-    return s.substring(i).search(pat) === 0;
+    // Using a regex is surprisingly tricky.
+    if (!pattern) {
+        return false;
+    }
+    if (i > 0 && isWordChar(s.charAt(i - 1))) {   //  Bug fix: 2017/06/01.
+        return false;
+    }
+    const j = pattern.length;
+    if (j === 0) {
+        return false;
+    }
+    let found = s.indexOf(pattern);
+    if (found < i || found >= i + j) {
+        found = -1;
+    }
+    if (found !== i) {
+        return false;
+    }
+    if (i + j >= s.length) {
+        return true;
+    }
+
+    const ch = s.charAt(i + j);
+    return !isWordChar(ch);
+
+    // * OLD PLACEHOLDER
+    /*     const pat = new RegExp(pattern + "\\b");
+        return s.substring(i).search(pat) === 0; */
 }
 
 //@+node:felix.20211104220814.1: *3* g.skip_nl
@@ -1379,11 +1404,16 @@ export function skip_to_start_of_line(s: string, i: number): number {
         return 0;
     }
     // Don't find s[i], so it doesn't matter if s[i] is a newline.
-    i = s.lastIndexOf('\n', i);
-    if (i === -1) {
+    const w_s = s.substring(0, i);
+    let w_i = w_s.lastIndexOf('\n');
+    // if (w_i >= i) {
+    //     w_i = -1;
+    // }
+
+    if (w_i === -1) {
         return 0;
     }
-    return i + 1;
+    return w_i + 1;
 }
 
 //@+node:felix.20211104220609.1: *3* g.skip_to_char    (coreGlobals.py)
@@ -2480,13 +2510,13 @@ export class FileLikeObject {
  */
 export class TypedDict {
 
-    public d: {[key:string]: any};
+    public d: { [key: string]: any };
     public keyType: any;
     public valType: any;
 
     private _name: string;
 
-    constructor ( name: string, keyType: any, valType: any) {
+    constructor(name: string, keyType: any, valType: any) {
         this.d = {};
         this._name = name;  // For __repr__ only.
         this.keyType = keyType;
