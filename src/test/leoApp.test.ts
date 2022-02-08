@@ -11,7 +11,7 @@ import { LeoUnitTest } from './leoTest2';
 
 //@+others
 //@+node:felix.20220129221242.1: ** Suite TestApp(LeoUnitTest)
-suite('Test cases for leoApp.py', () => {
+suite('Test cases for leoApp.ts', () => {
 
     let self: LeoUnitTest;
 
@@ -30,12 +30,10 @@ suite('Test cases for leoApp.py', () => {
 
     //@+others
     //@+node:felix.20220129221913.2: *3* TestApp.test_official_g_app_directories
+    // ! Uncomment if those dir strings are ever needed in leojs !
+    /*
     test('test_official_g_app_directories', async () => {
 
-        console.log('test_official_g_app_directories skipped');
-        // ! Uncomment if those dir strings are ever needed in leojs !
-
-        /*
         const ivars = ['extensionsDir', 'globalConfigDir', 'loadDir', 'testDir'];
         ivars.forEach(ivar => {
 
@@ -47,10 +45,9 @@ suite('Test cases for leoApp.py', () => {
             assert.ok(g.os_path_exists(g.os_path_abspath(val)), `non-existent g.app directory: ${ivar}`);
         });
         assert.ok(g.app['homeDir'], 'missing g.app directory: homeDir');  // May well be None.
-        */
 
     });
-
+    */
     //@+node:felix.20220129221913.3: *3* TestApp.test_official_g_app_ivars
     test('test_official_g_app_ivars', async () => {
 

@@ -52,7 +52,6 @@ import { Position, VNode } from './leoNodes';
 */
 
 //@-<< imports >>
-console.log('leoGLobals startup');
 
 export const isBrowser: boolean = (process as any)?.browser;
 export const isMac: boolean = process.platform?.startsWith('darwin');
@@ -428,8 +427,7 @@ export function get_line(s: string, i: number): string {
 }
 
 // Important: getLine is a completely different function.
-// getLine = get_line
-export const getLine = get_line;
+// * getLine != get_line !!
 
 export function get_line_after(s: string, i: number): string {
     let nl = "";
@@ -1247,15 +1245,16 @@ export function find_line_start(s: string, p_i: number): number {
     if (p_i < 0) {
         return 0;  // New in Leo 4.4.5: add this defensive code.
     }
+
     // bug fix: 11/2/02: change i to i+1 in rfind
-    const i: number = s.lastIndexOf('\n', p_i + 1);  // Finds the highest index in the range.
+    const i: number = s.substring(0, p_i + 1).lastIndexOf('\n'); // Finds the highest index in the range.
+    // i = s.rfind('\n', 0, i + 1)
+
     if (i === -1) {
         return 0;
     } else {
         return i + 1;
     }
-    //# if i == -1: return 0
-    //# else: return i + 1
 }
 //@+node:felix.20211104220753.1: *3* g.is_nl
 export function is_nl(s: string, i: number): boolean {
@@ -1339,6 +1338,30 @@ export function match_word(s: string, i: number, pattern: string): boolean {
         return s.substring(i).search(pat) === 0; */
 }
 
+//@+node:felix.20220208154405.1: *3* g.skip_blank_lines
+/**
+ * This routine differs from skip_ws_and_nl in that
+ * it does not advance over whitespace at the start
+ * of a non-empty or non-nl terminated line
+ */
+export function skip_blank_lines(s: string, i: number): number {
+    while (i < s.length) {
+        if (is_nl(s, i)) {
+            i = skip_nl(s, i);
+        } else if (is_ws(s[i])) {
+            const j = skip_ws(s, i);
+            if (is_nl(s, j)) {
+                i = j;
+            } else {
+                break;
+            }
+        } else {
+            break;
+        }
+    }
+    return i;
+}
+
 //@+node:felix.20211104220814.1: *3* g.skip_nl
 /**
  * We need this function because different systems have different end-of-line conventions.
@@ -1404,11 +1427,7 @@ export function skip_to_start_of_line(s: string, i: number): number {
         return 0;
     }
     // Don't find s[i], so it doesn't matter if s[i] is a newline.
-    const w_s = s.substring(0, i);
-    let w_i = w_s.lastIndexOf('\n');
-    // if (w_i >= i) {
-    //     w_i = -1;
-    // }
+    let w_i = s.substring(0, i).lastIndexOf('\n');
 
     if (w_i === -1) {
         return 0;
@@ -1667,6 +1686,62 @@ export function angleBrackets(s: string): string {
     return lt + s + rt;
 }
 
+//@+node:felix.20220208171427.1: *3* g.getWord & getLine
+/**
+ *
+ */
+export function getWord(s: string, i: number): [number, number] {
+
+    if (i >= s.length) {
+        i = s.length - 1;
+    }
+    if (i < 0) {
+        i = 0;
+    }
+    // Scan backwards.
+    while (0 <= i && i < s.length && isWordChar(s.charAt(i))) {
+        i -= 1;
+    }
+    i += 1;
+    // Scan forwards.
+    let j = i;
+    while (0 <= j && j < s.length && isWordChar(s.charAt(j))) {
+        j += 1;
+    }
+    return [i, j];
+}
+
+/**
+ * Return i,j such that s[i:j] is the line surrounding s[i].
+ * s[i] is a newline only if the line is empty.
+ * s[j] is a newline unless there is no trailing newline.
+ */
+export function getLine(s: string, i: number): [number, number] {
+
+    if (i > s.length) {
+        i = s.length - 1;
+    }
+    if (i < 0) {
+        i = 0;
+    }
+    // A newline *ends* the line, so look to the left of a newline.
+    // CONVERTED FROM : j = s.rfind('\n', 0, i);
+    let j = s.substring(0, i).lastIndexOf('\n');
+
+    if (j === -1) {
+        j = 0;
+    } else {
+        j += 1;
+    }
+    let k = s.indexOf('\n', i);
+
+    if (k === -1) {
+        k = s.length;
+    } else {
+        k = k + 1;
+    }
+    return [j, k];
+}
 //@+node:felix.20211104230158.1: *3* g.toEncodedString (coreGlobals.py)
 /**
  * Convert unicode string to an encoded string.

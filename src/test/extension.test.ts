@@ -22,7 +22,7 @@ suite('Extension test examples', () => {
 		});
 	});
 
-	test('Test Extension with it\'s exposed commands', async () => {
+	test('Test leojs Extension with exposed commands', async () => {
 		vscode.window.showInformationMessage('TODO : Write tests with vscode!');
 
 		assert.strictEqual(-1, [1, 2, 3].indexOf(5));

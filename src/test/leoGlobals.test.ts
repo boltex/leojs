@@ -59,12 +59,10 @@ suite('Test Globals', () => {
         self.assertEqual(g.CheckVersionToInt('b2'), 0)
      */
     //@+node:felix.20220129223719.5: *3* TestGlobals.test_g_comment_delims_from_extension
+    // ! Uncomment if comment_delims_from_extension is ever needed in leojs !
+    /*
     test('test_g_comment_delims_from_extension', async () => {
 
-        console.log('test_g_comment_delims_from_extension skipped');
-        // ! Uncomment if comment_delims_from_extension is ever needed in leojs !
-
-        /*
         // New in Leo 4.6, set_delims_from_language returns '' instead of None.
         const table:[string, string[]][] = [
             ['.c', ['//', '/*', '*\/']], // escaped
@@ -81,10 +79,9 @@ suite('Test Globals', () => {
             const result = g.comment_delims_from_extension(ext);
             assert.strictEqual(result, expected, ext.toString());
         });
-        */
 
     });
-
+    */
 
     //@+node:felix.20220129223719.6: *3* TestGlobals.test_g_convertPythonIndexToRowCol
     /* def test_g_convertPythonIndexToRowCol(self):
@@ -231,27 +228,6 @@ suite('Test Globals', () => {
 
     });
 
-    /* def test_g_get_directives_dict(self):
-        c = self.c
-        p = c.p
-        p.b = textwrap.dedent("""\
-            @language python
-            @comment a b c
-                # @comment must follow @language.
-            @tabwidth -8
-            @pagewidth 72
-            @encoding utf-8
-    """)
-        d = g.get_directives_dict(p)
-        self.assertEqual(d.get('language'), 'python')
-        self.assertEqual(d.get('tabwidth'), '-8')
-        self.assertEqual(d.get('pagewidth'), '72')
-        self.assertEqual(d.get('encoding'), 'utf-8')
-        self.assertEqual(d.get('comment'), 'a b c')
-        assert not d.get('path'), d.get('path')
-     */
-
-
 
     //@+node:felix.20220129223719.14: *3* TestGlobals.test_g_getDocString
     /* def test_g_getDocString(self):
@@ -274,25 +250,38 @@ suite('Test Globals', () => {
             self.assertEqual(s2, result)
      */
     //@+node:felix.20220129223719.15: *3* TestGlobals.test_g_getLine
-    /* def test_g_getLine(self):
-        s = 'a\ncd\n\ne'
-        for i, result in (
-            (-1, (0, 2)),  # One too few.
-            (0, (0, 2)), (1, (0, 2)),
-            (2, (2, 5)), (3, (2, 5)), (4, (2, 5)),
-            (5, (5, 6)),
-            (6, (6, 7)),
-            (7, (6, 7)),  # One too many.
-        ):
-            j, k = g.getLine(s, i)
-            self.assertEqual((j, k), result, msg=f"i: {i}, j: {j}, k: {k}")
-     */
+    test('test_g_getLine', async () => {
+        const s: string = 'a\ncd\n\ne';
+        const table: [number, [number, number]][] = [
+            [-1, [0, 2]],  // One too few.
+            [0, [0, 2]], [1, [0, 2]],
+            [2, [2, 5]], [3, [2, 5]], [4, [2, 5]],
+            [5, [5, 6]],
+            [6, [6, 7]],
+            [7, [6, 7]],  // One too many.
+        ];
+
+        table.forEach(element => {
+            let i: number;
+            let result: [number, number];
+            [i, result] = element;
+            let j: number;
+            let k: number;
+            [j, k] = g.getLine(s, i);
+            assert.deepStrictEqual([j, k], result, `i: ${i}, j: ${j}, k: ${k}`);
+        });
+
+    });
+
     //@+node:felix.20220129223719.16: *3* TestGlobals.test_g_getWord
-    /* def test_g_getWord(self):
-        s = 'abc xy_z5 pdq'
-        i, j = g.getWord(s, 5)
-        self.assertEqual(s[i:j], 'xy_z5')
-     */
+    test('test_g_getWord', async () => {
+        const s = 'abc xy_z5 pdq';
+        let i: number;
+        let j: number;
+        [i, j] = g.getWord(s, 5);
+        assert.strictEqual(s.substring(i, j), 'xy_z5');
+    });
+
     //@+node:felix.20220129223719.17: *3* TestGlobals.test_g_guessExternalEditor
     /* def test_g_guessExternalEditor(self):
         c = self.c
@@ -603,20 +592,22 @@ suite('Test Globals', () => {
     });
 
     //@+node:felix.20220129223719.43: *3* TestGlobals.test_g_skip_blank_lines
-    /* def test_g_skip_blank_lines(self):
-        end = g.skip_blank_lines("", 0)
-        self.assertEqual(end, 0)
-        end = g.skip_blank_lines(" ", 0)
-        self.assertEqual(end, 0)
-        end = g.skip_blank_lines("\n", 0)
-        self.assertEqual(end, 1)
-        end = g.skip_blank_lines(" \n", 0)
-        self.assertEqual(end, 2)
-        end = g.skip_blank_lines("\n\na\n", 0)
-        self.assertEqual(end, 2)
-        end = g.skip_blank_lines("\n\n a\n", 0)
-        self.assertEqual(end, 2)
-     */
+    test('test_g_skip_blank_lines', async () => {
+        let end = g.skip_blank_lines("", 0);
+        assert.strictEqual(end, 0);
+        end = g.skip_blank_lines(" ", 0);
+        assert.strictEqual(end, 0);
+        end = g.skip_blank_lines("\n", 0);
+        assert.strictEqual(end, 1);
+        end = g.skip_blank_lines(" \n", 0);
+        assert.strictEqual(end, 2);
+        end = g.skip_blank_lines("\n\na\n", 0);
+        assert.strictEqual(end, 2);
+        end = g.skip_blank_lines("\n\n a\n", 0);
+        assert.strictEqual(end, 2);
+
+    });
+
     //@+node:felix.20220129223719.44: *3* TestGlobals.test_g_skip_line
     test('test_g_skip_line', async () => {
 
@@ -693,45 +684,17 @@ suite('Test Globals', () => {
             [s, table] = p_tables;
 
             table.forEach(element => {
-                console.log('inner loop! ', s);
-
                 let i: number;
                 let result: number;
                 [i, result] = element;
-                console.log('before J');
-
                 const j = g.skip_to_start_of_line(s, i);
-                console.log('after J');
-
-
-                console.log("i " + i.toString() + " s " + s + " got " + j.toString() + " expected " + result.toString());
-
                 assert.strictEqual(j, result, "i " + i.toString() + " s " + s + " got " + j.toString() + " expected " + result.toString());
             });
-
 
         });
 
     });
-    /* def test_g_skip_to_start_of_line(self):
-        s1 = 'a\n\nc'
-        table1 = (
-            (-1, 0),  # One too few.
-            (0, 0), (1, 0),
-            (2, 2),
-            (3, 3),
-            (4, 4),  # One too many.
-        )
-        s2 = 'a\n'
-        table2 = (
-            (1, 0),
-            (2, 2),
-        )  # A special case at end.
-        for s, table in ((s1, table1), (s2, table2)):
-            for i, result in table:
-                j = g.skip_to_start_of_line(s, i)
-                self.assertEqual(j, result, msg=i)
-     */
+
     //@+node:felix.20220129223719.47: *3* TestGlobals.test_g_splitLongFileName
     /* def test_g_splitLongFileName(self):
         table = (
