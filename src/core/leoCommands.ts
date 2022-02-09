@@ -478,6 +478,11 @@ export class Commands {
         }
     }
 
+    // Compatibility with old code...
+    // all_vnodes_iter = all_nodes
+    // all_unique_vnodes_iter = all_unique_nodes
+
+
     //@+node:felix.20210131011508.3: *5* c.all_positions
     /**
      * A generator return all positions of the outline, in outline order.
@@ -490,6 +495,11 @@ export class Commands {
             p.moveToThreadNext();
         }
     }
+
+    // Compatibility with old code...
+    // all_positions_iter = all_positions
+    // allNodes_iter = all_positions
+
 
     //@+node:felix.20210131011508.4: *5* c.all_positions_for_v
     /**
@@ -595,6 +605,10 @@ export class Commands {
             }
         }
     }
+
+    // Compatibility with old code...
+    // all_positions_with_unique_vnodes_iter = all_unique_positions
+
 
     //@+node:felix.20210131011508.7: *5* c.all_unique_roots
     /**
@@ -1161,7 +1175,7 @@ export class Commands {
     }
 
     // * For compatibility with old scripts.
-    //setCurrentVnode = setCurrentPosition
+    // setCurrentVnode = setCurrentPosition
 
     //@+node:felix.20210211234142.1: *5* c.setHeadString
     /**
@@ -1213,7 +1227,6 @@ export class Commands {
     }
 
     // Define these for compatibility with old scripts...
-
     // topVnode = topPosition
     // setTopVnode = setTopPosition
 
@@ -2595,7 +2608,6 @@ export class Commands {
         }
     }
 
-    // TODO shortcuts / alternative names
     // BringToFront = bringToFront  // Compatibility with old scripts
     //@+node:felix.20211022202634.1: *5* c.expandAllAncestors
     /**
@@ -3344,6 +3356,20 @@ export interface Commands extends CommanderOutlineCommands, CommanderFileCommand
     canCutOutline: () => boolean;
     canShiftBodyRight: () => boolean;
     canExtractSectionNames: () => boolean;
+    BringToFront: () => void;
+    currentVnode: () => Position | undefined;
+    rootVnode: () => Position | undefined;
+    findRootPosition: () => Position | undefined;
+    topVnode: () => void;
+    setTopVnode: (p: Position) => void;
+    all_vnodes_iter: () => Generator<VNode, any, unknown>;
+    all_unique_vnodes_iter: () => Generator<VNode, any, unknown>;
+    all_positions_iter: () => Generator<Position, any, unknown>;
+    allNodes_iter: () => Generator<Position, any, unknown>;
+    all_positions_with_unique_vnodes_iter: () => Generator<Position, any, unknown>;
+    setCurrentVnode: (p: Position) => void;
+    force_redraw: () => void;
+    redraw_now: () => void;
 }
 
 // Apply the mixins into the base class via
@@ -3353,5 +3379,20 @@ applyMixins(Commands, [CommanderOutlineCommands, CommanderFileCommands]);
 Commands.prototype.canCutOutline = Commands.prototype.canDeleteHeadline;
 Commands.prototype.canShiftBodyRight = Commands.prototype.canShiftBodyLeft;
 Commands.prototype.canExtractSectionNames = Commands.prototype.canExtract;
+Commands.prototype.BringToFront = Commands.prototype.bringToFront;
+Commands.prototype.currentVnode = Commands.prototype.currentPosition;
+Commands.prototype.rootVnode = Commands.prototype.rootPosition;
+Commands.prototype.findRootPosition = Commands.prototype.rootPosition;
+Commands.prototype.topVnode = Commands.prototype.topPosition;
+Commands.prototype.setTopVnode = Commands.prototype.setTopPosition;
+Commands.prototype.all_vnodes_iter = Commands.prototype.all_nodes;
+Commands.prototype.all_unique_vnodes_iter = Commands.prototype.all_unique_nodes;
+Commands.prototype.all_positions_iter = Commands.prototype.all_positions;
+Commands.prototype.allNodes_iter = Commands.prototype.all_positions;
+Commands.prototype.all_positions_with_unique_vnodes_iter = Commands.prototype.all_unique_positions;
+Commands.prototype.setCurrentVnode = Commands.prototype.setCurrentPosition;
+Commands.prototype.force_redraw = Commands.prototype.redraw;
+Commands.prototype.redraw_now = Commands.prototype.redraw;
+
 
 //@-leo

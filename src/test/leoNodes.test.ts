@@ -73,61 +73,57 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         });
 
     });
-    /* def test_all_generators_return_unique_positions(self):
-        # This tests a major bug in *all* generators returning positions.
-        c, p = self.c, self.c.p
-        root = p.next()
-        table = (
-            ('all_positions', c.all_positions),
-            ('all_unique_positions', c.all_unique_positions),
-            ('children', root.children),
-            ('self_and_siblings', root.self_and_siblings),
-            ('self_and_parents', root.firstChild().self_and_parents),
-            ('self_and_subtree', root.self_and_subtree),
-            ('following_siblings', root.following_siblings),
-            ('parents', root.firstChild().firstChild().parents),
-            ('unique_subtree', root.unique_subtree),
-        )
-        for kind, generator in table:
-            aList = []
-            for p in generator():
-                self.assertFalse(p in aList, msg=f"{kind} {p.gnx} {p.h}")
-                aList.append(p)
-     */
+
     //@+node:felix.20220129225027.5: *3* TestNodes.test_all_nodes_coverage
-    /* def test_all_nodes_coverage(self):
-        # @test c iters: <coverage tests>
-        c = self.c
-        v1 = [p.v for p in c.all_positions()]
-        v2 = [v for v in c.all_nodes()]
-        for v in v2:
-            self.assertTrue(v in v1)
-        for v in v1:
-            self.assertTrue(v in v2)
-     */
+    test('test_all_nodes_coverage', async () => {
+        // @test c iters: <coverage tests>
+        const c = self.c;
+
+        const v1: VNode[] = [...c.all_positions()].map(p => p.v);
+        const v2: VNode[] = [...c.all_nodes()];
+
+        v2.forEach(v => {
+            assert.ok(v1.includes(v));
+        });
+        v1.forEach(v => {
+            assert.ok(v2.includes(v));
+        });
+
+    });
+
     //@+node:felix.20220129225027.6: *3* TestNodes.test_at_most_one_VNode_has_str_leo_pos_attribute
-    /* def test_at_most_one_VNode_has_str_leo_pos_attribute(self):
-        c = self.c
-        n = 0
-        for v in c.all_unique_vnodes_iter():
-            if hasattr(v, 'unknownAttributes'):
-                d = v.unknownAttributes
-                if d.get('str_leo_pos'):
-                    n += 1
-        self.assertTrue(n == 0)
-     */
+    test('test_at_most_one_VNode_has_str_leo_pos_attribute', async () => {
+        const c = self.c;
+        let n = 0;
+
+        for (let v of c.all_unique_vnodes_iter()) {
+            if (v['unknownAttributes']) {
+                const d = v.unknownAttributes;
+                if (d['str_leo_pos']) {
+                    n += 1;
+                }
+            }
+        }
+        assert.ok(n === 0);
+
+    });
+
     //@+node:felix.20220129225027.7: *3* TestNodes.test_at_others_directive
-    /* def test_at_others_directive(self):
-        p = self.c.p
-        p1 = p.insertAsLastChild()
-        p1.setHeadString('@file zzz')
-        body = '''     %s
-        ''' % (chr(64) + 'others')  # ugly hack
-        p1.setBodyString(body)
-        p2 = p1.insertAsLastChild()
-        self.assertEqual(p1.textOffset(), 0)
-        self.assertEqual(p2.textOffset(), 5)
-     */
+    test('test_at_others_directive', async () => {
+        const p = self.c.p;
+        const p1 = p.insertAsLastChild();
+        p1.setHeadString('@file zzz');
+
+        const body = `     ${String.fromCharCode(64) + 'others'}
+        `; // ugly hack
+        p1.setBodyString(body);
+
+        const p2 = p1.insertAsLastChild();
+
+        assert.strictEqual(p1.textOffset(), 0);
+        assert.strictEqual(p2.textOffset(), 5);
+    });
+
     //@+node:felix.20220129225027.8: *3* TestNodes.test_c_positionExists
     /* def test_c_positionExists(self):
         c, p = self.c, self.c.p
@@ -135,7 +131,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         self.assertTrue(c.positionExists(child))
         child.doDelete()
         self.assertFalse(c.positionExists(child))
-        # also check the same on root level
+        // also check the same on root level
         child = c.rootPosition().insertAfter()
         self.assertTrue(c.positionExists(child))
         child.doDelete()
@@ -146,7 +142,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         c, p = self.c, self.c.p
         for p in c.all_positions():
             self.assertTrue(c.positionExists(p))
-                # 2012/03/08: If a root is given, the search is confined to that root only.
+                // 2012/03/08: If a root is given, the search is confined to that root only.
      */
     //@+node:felix.20220129225027.10: *3* TestNodes.test_c_safe_all_positions
     /* def test_c_safe_all_positions(self):
@@ -266,7 +262,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
      */
     //@+node:felix.20220129225027.19: *3* TestNodes.test_consistency_of_parent_child_links
     /* def test_consistency_of_parent_child_links(self):
-        # Test consistency of p.parent, p.next, p.back and p.firstChild.
+        // Test consistency of p.parent, p.next, p.back and p.firstChild.
         c, p = self.c, self.c.p
         for p in c.all_positions():
             if p.hasParent():
@@ -301,7 +297,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
      */
     //@+node:felix.20220129225027.22: *3* TestNodes.test_delete_node
     /* def test_delete_node(self):
-        # This test requires @bool select-next-after-delete = False
+        // This test requires @bool select-next-after-delete = False
         c, p = self.c, self.c.p
         p2 = p.insertAsNthChild(0)
         p2.setHeadString('A')
@@ -411,9 +407,9 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         self.assertTrue(p.back())
         self.assertEqual(p.back().h, 'A')
         self.assertEqual(p.next().h, 'B')
-        # With the new undo logic, it takes 2 undoes.
-        # The first undo undoes the headline changes,
-        # the second undo undoes the insert node.
+        // With the new undo logic, it takes 2 undoes.
+        // The first undo undoes the headline changes,
+        // the second undo undoes the insert node.
         c.undoer.undo()
         c.undoer.undo()
         p = c.p
@@ -566,7 +562,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
      */
     //@+node:felix.20220129225027.32: *3* TestNodes.test_newlines_in_headlines
     /* def test_newlines_in_headlines(self):
-        # Bug https://bugs.launchpad.net/leo-editor/+bug/1245535
+        // Bug https://bugs.launchpad.net/leo-editor/+bug/1245535
         p = self.c.p
         p.h = '\nab\nxy\n'
         self.assertEqual(p.h, 'abxy')
@@ -574,7 +570,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
      */
     //@+node:felix.20220129225027.33: *3* TestNodes.test_node_that_does_nott_belong_to_a_derived_file
     /* def test_node_that_does_not_belong_to_a_derived_file(self):
-        # Change @file activeUnitTests.txt to @@file activeUnitTests.txt
+        // Change @file activeUnitTests.txt to @@file activeUnitTests.txt
         p = self.c.p
         p1 = p.insertAsLastChild()
         self.assertFalse(p1.textOffset())
@@ -593,7 +589,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     //@+node:felix.20220129225027.35: *3* TestNodes.test_p__eq_
     /* def test_p__eq_(self):
         c, p = self.c, self.c.p
-        # These must not return NotImplemented!
+        // These must not return NotImplemented!
         root = c.rootPosition()
         self.assertFalse(p.__eq__(None))
         self.assertTrue(p.__ne__(None))
@@ -617,7 +613,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         c, p = self.c, self.c.p
         root = p.insertAsLastChild()
         root.h = 'root'
-        # Top level
+        // Top level
         a1 = root.insertAsLastChild()
         a1.h = 'a'
         a1.clone()
@@ -625,16 +621,16 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         d1.h = 'd'
         b1 = root.insertAsLastChild()
         b1.h = 'b'
-        # Children of a.
+        // Children of a.
         b11 = b1.clone()
         b11.moveToLastChildOf(a1)
         b11.clone()
         c2 = b11.insertAfter()
         c2.h = 'c'
-        # Children of d
+        // Children of d
         b11 = b1.clone()
         b11.moveToLastChildOf(d1)
-        # Count number of 'b' nodes.
+        // Count number of 'b' nodes.
         aList = []
         nodes = 0
         for p in root.subtree():
@@ -724,7 +720,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
      */
     //@+node:felix.20220129225027.45: *3* TestNodes.test_p_moveToVisBack_in_a_chapter
     /* def test_p_moveToVisBack_in_a_chapter(self):
-        # Verify a fix for bug https://bugs.launchpad.net/leo-editor/+bug/1264350
+        // Verify a fix for bug https://bugs.launchpad.net/leo-editor/+bug/1264350
         import leo.core.leoChapters as leoChapters
         c, p = self.c, self.c.p
         cc = c.chapterController
@@ -734,9 +730,9 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         chapter_p.h = '@chapter aaa'
         node_p = chapter_p.insertAsNthChild(0)
         node_p.h = 'aaa node 1'
-        # Hack the chaptersDict.
+        // Hack the chaptersDict.
         cc.chaptersDict['aaa'] = leoChapters.Chapter(c, cc, 'aaa')
-        # Select the chapter.
+        // Select the chapter.
         cc.selectChapterByName('aaa')
         self.assertEqual(c.p.h, 'aaa node 1')
         p2 = c.p.moveToVisBack(c)
@@ -761,44 +757,44 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     //@+node:felix.20220129225027.47: *3* TestNodes.test_p_relinkAsCloneOf
     /* def test_p_relinkAsCloneOf(self):
 
-        # test-outline: root
-        #   child clone a
-        #     node clone 1
-        #   child b
-        #     child clone a
-        #       node clone 1
-        #   child c
-        #     node clone 1
-        #   child clone a
-        #     node clone 1
-        #   child b
-        #     child clone a
-        #       node clone 1
+        // test-outline: root
+        //   child clone a
+        //     node clone 1
+        //   child b
+        //     child clone a
+        //       node clone 1
+        //   child c
+        //     node clone 1
+        //   child clone a
+        //     node clone 1
+        //   child b
+        //     child clone a
+        //       node clone 1
         c, u = self.c, self.c.undoer
         p = c.p.next()
         child_b = g.findNodeAnywhere(c, 'child b')
         self.assertTrue(child_b)
         self.assertTrue(child_b.isCloned())
         #
-        # child_c must *not* be a clone at first.
+        // child_c must *not* be a clone at first.
         child_c = g.findNodeAnywhere(c, 'child c')
         self.assertTrue(child_c)
         self.assertFalse(child_c.isCloned())
         #
-        # Change the tree.
+        // Change the tree.
         bunch = u.beforeChangeTree(p)
         child_c._relinkAsCloneOf(child_b)
         u.afterChangeTree(p, 'relink-clone', bunch)
-        # self.dump_tree('Before...')
+        // self.dump_tree('Before...')
         u.undo()
-        # self.dump_tree('After...')
+        // self.dump_tree('After...')
         self.assertTrue(child_b.isCloned())
         self.assertFalse(child_c.isCloned())
 
      */
     //@+node:felix.20220129225027.48: *3* TestNodes.test_p_setBodyString
     /* def test_p_setBodyString(self):
-        # Test that c.setBodyString works immediately.
+        // Test that c.setBodyString works immediately.
         c, w = self.c, self.c.frame.body.wrapper
         next = self.root_p.next()
         c.setBodyString(next, "after")
@@ -952,8 +948,8 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         p2.setHeadString(head)
         self.assertEqual(p1.textOffset(), 0)
         self.assertEqual(p2.textOffset(), 3)
-            # Section nodes can appear in with @others nodes,
-            # so they don't get special treatment.
+            // Section nodes can appear in with @others nodes,
+            // so they don't get special treatment.
      */
     //@+node:felix.20220129225027.57: *3* TestNodes.test_v_atAutoNodeName_and_v_atAutoRstNodeName
     /* def test_v_atAutoNodeName_and_v_atAutoRstNodeName(self):
