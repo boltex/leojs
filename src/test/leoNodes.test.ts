@@ -125,156 +125,223 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.8: *3* TestNodes.test_c_positionExists
-    /* def test_c_positionExists(self):
-        c, p = self.c, self.c.p
-        child = p.insertAsLastChild()
-        self.assertTrue(c.positionExists(child))
-        child.doDelete()
-        self.assertFalse(c.positionExists(child))
+    test('test_c_positionExists', async () => {
+        const c = self.c;
+        const p = self.c.p;
+
+        let child = p.insertAsLastChild();
+        assert.ok(c.positionExists(child));
+
+        child.doDelete();
+        assert.ok(!c.positionExists(child));
+
         // also check the same on root level
-        child = c.rootPosition().insertAfter()
-        self.assertTrue(c.positionExists(child))
-        child.doDelete()
-        self.assertFalse(c.positionExists(child))
-     */
+        child = c.rootPosition()!.insertAfter();
+        assert.ok(c.positionExists(child));
+
+        child.doDelete();
+        assert.ok(!c.positionExists(child));
+
+    });
+
     //@+node:felix.20220129225027.9: *3* TestNodes.test_c_positionExists_for_all_nodes
-    /* def test_c_positionExists_for_all_nodes(self):
-        c, p = self.c, self.c.p
-        for p in c.all_positions():
-            self.assertTrue(c.positionExists(p))
-                // 2012/03/08: If a root is given, the search is confined to that root only.
-     */
+    test('test_c_positionExists_for_all_nodes', async () => {
+        const c = self.c;
+        const p = self.c.p;
+
+        for (let p of c.all_positions()) {
+            assert.ok(c.positionExists(p));
+            // 2012/03/08: If a root is given, the search is confined to that root only.
+        }
+    });
+
     //@+node:felix.20220129225027.10: *3* TestNodes.test_c_safe_all_positions
-    /* def test_c_safe_all_positions(self):
-        c = self.c
-        aList1 = list(c.all_positions())
-        aList2 = list(c.safe_all_positions())
-        self.assertEqual(len(aList1), len(aList2))
-     */
+    test('test_c_safe_all_positions', async () => {
+        const c = self.c;
+
+        const aList1 = [...c.all_positions()];
+        const aList2 = [...c.safe_all_positions()];
+
+        assert.strictEqual(aList1.length, aList2.length);
+    });
+
     //@+node:felix.20220129225027.11: *3* TestNodes.test_check_all_gnx_s_exist_and_are_unique
-    /* def test_check_all_gnx_s_exist_and_are_unique(self):
-        c, p = self.c, self.c.p
-        d = {}  # Keys are gnx's, values are lists of vnodes with that gnx.
-        for p in c.all_positions():
-            gnx = p.v.fileIndex
-            self.assertTrue(gnx)
-            aSet = d.get(gnx, set())
-            aSet.add(p.v)
-            d[gnx] = aSet
-        for gnx in sorted(d.keys()):
-            aList = sorted(d.get(gnx))
-            self.assertTrue(len(aList) == 1)
-     */
+    test('test_check_all_gnx_s_exist_and_are_unique', async () => {
+        const c = self.c;
+
+        const d: { [key: string]: VNode[] } = {}; // Keys are gnx's, values are lists of vnodes with that gnx.
+        for (let p of c.all_positions()) {
+            const gnx = p.v.fileIndex;
+            assert.ok(gnx);
+            const aSet: VNode[] = d[gnx] || [];
+            if (!aSet.includes(p.v)) {
+                aSet.push(p.v);
+            }
+            d[gnx] = aSet;
+        }
+
+        for (let gnx of Object.keys(d).sort()) {
+            const aList = d[gnx]; // No need to sort this list for this test
+            assert.ok(aList.length === 1);
+        }
+
+    });
+
     //@+node:felix.20220129225027.12: *3* TestNodes.test_clone_and_move_the_clone_to_the_root
-    /* def test_clone_and_move_the_clone_to_the_root(self):
-        c, p = self.c, self.c.p
-        child = p.insertAsNthChild(0)
-        c.setHeadString(child, 'child')  # Force the headline to update.
-        self.assertTrue(child)
-        c.selectPosition(child)
-        clone = c.clone()
-        self.assertEqual(clone, c.p)
-        self.assertEqual(clone.h, 'child')
-        assert child.isCloned(), 'fail 1'
-        assert clone.isCloned(), 'fail 2'
-        assert child.isCloned(), 'fail 3'
-        assert clone.isCloned(), 'fail 4'
-        c.undoer.undo()
-        assert not child.isCloned(), 'fail 1-a'
-        c.undoer.redo()
-        assert child.isCloned(), 'fail 1-b'
-        c.undoer.undo()
-        assert not child.isCloned(), 'fail 1-c'
-        c.undoer.redo()
-        assert child.isCloned(), 'fail 1-d'
-        clone.moveToRoot()  # Does not change child position.
-        assert child.isCloned(), 'fail 3-2'
-        assert clone.isCloned(), 'fail 4-2'
-        assert not clone.parent(), 'fail 5'
-        assert not clone.back(), 'fail 6'
-        clone.doDelete()
-        assert not child.isCloned(), 'fail 7'
-     */
+    test('test_clone_and_move_the_clone_to_the_root', async () => {
+        const c = self.c;
+        const p = self.c.p;
+
+        const child = p.insertAsNthChild(0);
+        c.setHeadString(child, 'child');  // Force the headline to update.
+        assert.ok(child);
+        c.selectPosition(child);
+        const clone = c.clone()!;
+        assert.ok(clone.__eq__(c.p));
+        assert.strictEqual(clone.h, 'child');
+        assert.ok(child.isCloned(), 'fail 1');
+        assert.ok(clone.isCloned(), 'fail 2');
+        assert.ok(child.isCloned(), 'fail 3');
+        assert.ok(clone.isCloned(), 'fail 4');
+        c.undoer.undo();
+        assert.ok(!child.isCloned(), 'fail 1-a');
+        c.undoer.redo();
+        assert.ok(child.isCloned(), 'fail 1-b');
+        c.undoer.undo();
+        assert.ok(!child.isCloned(), 'fail 1-c');
+        c.undoer.redo();
+        assert.ok(child.isCloned(), 'fail 1-d');
+        clone.moveToRoot();  // Does not change child position.
+        assert.ok(child.isCloned(), 'fail 3-2');
+        assert.ok(clone.isCloned(), 'fail 4-2');
+        assert.ok(!clone.parent().__bool__(), 'fail 5');
+        assert.ok(!clone.back().__bool__(), 'fail 6');
+        clone.doDelete();
+        assert.ok(!child.isCloned(), 'fail 7');
+    });
+
     //@+node:felix.20220129225027.13: *3* TestNodes.test_consistency_between_parents_iter_and_v_parents
-    /* def test_consistency_between_parents_iter_and_v_parents(self):
-        c, p = self.c, self.c.p
-        for p in c.all_positions():
-            parents1 = p.v.parents
-            parents2 = p.v.directParents()
-            self.assertEqual(len(parents1), len(parents2), msg=p.h)
-            for parent in parents1:
-                self.assertTrue(parent in parents2)
-            for parent in parents2:
-                self.assertTrue(parent in parents1)
-     */
+    test('test_consistency_between_parents_iter_and_v_parents', async () => {
+        const c = self.c;
+
+        for (let p of c.all_positions()) {
+            const parents1 = p.v.parents;
+            const parents2 = p.v.directParents();
+
+            assert.strictEqual(parents1.length, parents2.length, p.h);
+
+            for (let parent of parents1) {
+                assert.ok(parents2.includes(parent));
+            }
+            for (let parent of parents2) {
+                assert.ok(parents1.includes(parent));
+            }
+        }
+    });
+
     //@+node:felix.20220129225027.14: *3* TestNodes.test_consistency_of_back_next_links
-    /* def test_consistency_of_back_next_links(self):
-        c, p = self.c, self.c.p
-        for p in c.all_positions():
-            back = p.back()
-            next = p.next()
-            if back:
-                self.assertEqual(back.getNext(), p)
-            if next:
-                self.assertEqual(next.getBack(), p)
-     */
+    test('test_consistency_of_back_next_links', async () => {
+        const c = self.c;
+
+        for (let p of c.all_positions()) {
+            const back = p.back();
+            const next = p.next();
+            if (back && back.__bool__()) {
+                assert.ok(back.getNext().__eq__(p));
+            }
+            if (next && next.__bool__()) {
+                assert.ok(next.getBack().__eq__(p));
+            }
+
+        }
+    });
+
     //@+node:felix.20220129225027.15: *3* TestNodes.test_consistency_of_c_all_positions__and_p_ThreadNext_
-    /* def test_consistency_of_c_all_positions__and_p_ThreadNext_(self):
-        c, p = self.c, self.c.p
-        p2 = c.rootPosition()
-        for p in c.all_positions():
-            self.assertEqual(p, p2)
-            p2.moveToThreadNext()
-        self.assertFalse(p2)
-     */
+    test('test_consistency_of_c_all_positions__and_p_ThreadNext_', async () => {
+        const c = self.c;
+
+        const p2 = c.rootPosition()!;
+        for (let p of c.all_positions()) {
+            assert.ok(p.__eq__(p2));
+            p2.moveToThreadNext();
+        }
+        assert.ok(!p2 || !p2.__bool__());
+    });
+
     //@+node:felix.20220129225027.16: *3* TestNodes.test_consistency_of_firstChild__children_iter_
-    /* def test_consistency_of_firstChild__children_iter_(self):
-        c, p = self.c, self.c.p
-        for p in c.all_positions():
-            p2 = p.firstChild()
-            for p3 in p.children_iter():
-                self.assertEqual(p3, p2)
-                p2.moveToNext()
-        self.assertFalse(p2)
-     */
+    test('test_consistency_of_firstChild__children_iter_', async () => {
+        const c = self.c;
+
+        let p2!: Position;
+        for (let p of c.all_positions()) {
+            p2 = p.firstChild();
+            for (let p3 of p.children_iter()) {
+                assert.ok(p3.__eq__(p2));
+                p2.moveToNext();
+            }
+
+        }
+
+        assert.ok(!p2 || !p2.__bool__());
+
+    });
+
     //@+node:felix.20220129225027.17: *3* TestNodes.test_consistency_of_level
-    /* def test_consistency_of_level(self):
-        c, p = self.c, self.c.p
-        for p in c.all_positions():
-            if p.hasParent():
-                self.assertEqual(p.parent().level(), p.level() - 1)
-            if p.hasChildren():
-                self.assertEqual(p.firstChild().level(), p.level() + 1)
-            if p.hasNext():
-                self.assertEqual(p.next().level(), p.level())
-            if p.hasBack():
-                self.assertEqual(p.back().level(), p.level())
-     */
+    test('test_consistency_of_level', async () => {
+        const c = self.c;
+
+        for (let p of c.all_positions()) {
+            if (p.hasParent()) {
+                assert.strictEqual(p.parent().level(), p.level() - 1);
+            }
+            if (p.hasChildren()) {
+                assert.strictEqual(p.firstChild().level(), p.level() + 1);
+            }
+            if (p.hasNext()) {
+                assert.strictEqual(p.next().level(), p.level());
+            }
+            if (p.hasBack()) {
+                assert.strictEqual(p.back().level(), p.level());
+            }
+        }
+    });
+
     //@+node:felix.20220129225027.18: *3* TestNodes.test_consistency_of_parent__parents_iter_
-    /* def test_consistency_of_parent__parents_iter_(self):
-        c, p = self.c, self.c.p
-        for p in c.all_positions():
-            p2 = p.parent()
-            for p3 in p.parents_iter():
-                self.assertEqual(p3, p2)
-                p2.moveToParent()
-            self.assertFalse(p2)
-     */
+    test('test_consistency_of_parent__parents_iter_', async () => {
+        const c = self.c;
+
+        let p2!: Position;
+        for (let p of c.all_positions()) {
+            p2 = p.parent();
+            for (let p3 of p.parents_iter()) {
+                assert.ok(p3.__eq__(p2));
+                p2.moveToParent();
+            }
+            assert.ok(!p2 || !p2.__bool__());
+        }
+    });
+
     //@+node:felix.20220129225027.19: *3* TestNodes.test_consistency_of_parent_child_links
-    /* def test_consistency_of_parent_child_links(self):
+    test('test_consistency_of_parent_child_links', async () => {
         // Test consistency of p.parent, p.next, p.back and p.firstChild.
-        c, p = self.c, self.c.p
-        for p in c.all_positions():
-            if p.hasParent():
-                n = p.childIndex()
-                self.assertEqual(p, p.parent().moveToNthChild(n))
-            for child in p.children_iter():
-                self.assertEqual(p, child.parent())
-            if p.hasNext():
-                self.assertEqual(p.next().parent(), p.parent())
-            if p.hasBack():
-                self.assertEqual(p.back().parent(), p.parent())
-     */
+        const c = self.c;
+        for (let p of c.all_positions()) {
+            if (p.hasParent()) {
+                const n = p.childIndex();
+                assert.ok(p.__eq__(p.parent().moveToNthChild(n)));
+            }
+            for (let child of p.children_iter()) {
+                assert.ok(p.__eq__(child.parent()));
+            }
+            if (p.hasNext()) {
+                assert.ok(p.next().parent().__eq__(p.parent()));
+            }
+            if (p.hasBack()) {
+                assert.ok(p.back().parent().__eq__(p.parent()));
+            }
+        }
+    });
+
     //@+node:felix.20220129225027.20: *3* TestNodes.test_consistency_of_threadBack_Next_links
     /* def test_consistency_of_threadBack_Next_links(self):
         c, p = self.c, self.c.p
@@ -286,6 +353,8 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
             if threadNext:
                 self.assertEqual(p, threadNext.getThreadBack())
      */
+
+
     //@+node:felix.20220129225027.21: *3* TestNodes.test_convertTreeToString_and_allies
     /* def test_convertTreeToString_and_allies(self):
         p = self.c.p
@@ -295,6 +364,8 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         for p2 in sib.self_and_subtree():
             self.assertTrue(p2.h in s)
      */
+
+
     //@+node:felix.20220129225027.22: *3* TestNodes.test_delete_node
     /* def test_delete_node(self):
         // This test requires @bool select-next-after-delete = False
@@ -333,6 +404,8 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         self.assertEqual(p.h, 'A')
         self.assertEqual(p.next().h, 'C')
      */
+
+
     //@+node:felix.20220129225027.23: *3* TestNodes.test_deleting_the_root_should_select_another_node
     /* def test_deleting_the_root_should_select_another_node(self):
         c, p = self.c, self.c.p
@@ -347,6 +420,8 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         c.rootPosition().doDelete(newNode=next)
         c.setRootPosition(next)
      */
+
+
     //@+node:felix.20220129225027.24: *3* TestNodes.test_demote
     /* def test_demote(self):
         c, p = self.c, self.c.p
@@ -389,6 +464,8 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         self.assertEqual(p.firstChild().h, 'C')
         self.assertEqual(p.firstChild().next().h, 'D')
      */
+
+
     //@+node:felix.20220129225027.25: *3* TestNodes.test_insert_node
     /* def test_insert_node(self):
         c, p = self.c, self.c.p
@@ -429,6 +506,8 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         self.assertEqual(p.back().h, 'A')
         self.assertEqual(p.next().h, 'B')
      */
+
+
     //@+node:felix.20220129225027.26: *3* TestNodes.test_leoNodes_properties
     /* def test_leoNodes_properties(self):
         c, p = self.c, self.c.p
@@ -449,6 +528,8 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
             self.assertEqual(p.h, p.headString())
             self.assertEqual(p.v.h, p.v.headString())
      */
+
+
     //@+node:felix.20220129225027.27: *3* TestNodes.test_move_outline_down__undo_redo
     /* def test_move_outline_down__undo_redo(self):
         c, p = self.c, self.c.p
