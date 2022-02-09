@@ -11,7 +11,7 @@ import { LeoUnitTest } from './leoTest2';
 
 //@+others
 //@+node:felix.20220129223719.1: ** suite TestGlobals(LeoUnitTest)
-suite('Test Globals', () => {
+suite('Tests for leo.core.leoGlobals', () => {
 
     let self: LeoUnitTest;
 

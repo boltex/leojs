@@ -475,6 +475,7 @@ export class Position {
      * Yield all child positions of p.
      */
     public *children(copy: boolean = true): Generator<Position> {
+        //
         const p = this.firstChild();
         while (p.__bool__()) {
             yield (copy ? p.copy() : p);
