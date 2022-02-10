@@ -3189,7 +3189,7 @@ export class VNode {
         // API allows headlines to contain newlines.
         const v: VNode = this;
         s = g.toUnicode(s, null, true);
-        v._headString = s.replace('\n', '');
+        v._headString = s.split('\n').join('');
         // self.contentModified()  # #1413.
     }
 
