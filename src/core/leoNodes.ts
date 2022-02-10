@@ -217,10 +217,10 @@ export class Position {
     /**
      * Return True if two positions are equivalent.
      */
-    public __eq__(p2: Position): boolean {
+    public __eq__(p2?: Position): boolean {
         const p1: Position = this;
         // Don't use g.trace: it might call p.__eq__ or p.__ne__.
-        if (!(p2 instanceof Position)) {
+        if (!p2 || !(p2 instanceof Position)) {
             return false;
         }
         if (!p2.__bool__() || !p2.v) {
@@ -242,7 +242,7 @@ export class Position {
     /**
      * Return True if two positions are not equivalent.
      */
-    public __ne__(p2: Position): boolean {
+    public __ne__(p2?: Position): boolean {
         return !this.__eq__(p2);
     }
 
