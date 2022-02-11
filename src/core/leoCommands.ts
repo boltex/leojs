@@ -3343,6 +3343,75 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20220210211453.1: *3* c.Scripting utils
+    //@+node:felix.20220210211517.1: *4* deletePositionsInList
+    /**
+     * Delete all vnodes corresponding to the positions in aList.
+     *
+     * Set c.p if the old position no longer exists.
+     *
+     * See "Theory of operation of c.deletePositionsInList" in LeoDocs.leo.
+     */
+    public deletePositionsInList(aList: Position[]): [string, number, string][] {
+
+        // New implementation by Vitalije 2020-03-17 17:29
+        const c: Commands = this;
+
+        // Ensure all positions are valid.
+        aList = aList.filter((p) => { return c.positionExists(p); });
+
+        if (!aList.length) {
+            return [];
+        }
+
+        function p2link(p: Position): [number, VNode] {
+            const parent_v: VNode = p.stack.length ? p.stack[p.stack.length - 1][0] : c.hiddenRootNode;
+            return [p._childIndex, parent_v];
+        }
+
+        let links_to_be_cut = [...aList.map(p2link, aList)];
+        let unique_links: [number, VNode][] = [];
+        // links_to_be_cut = [...new Set(links_to_be_cut)]; // Make unique
+        links_to_be_cut.forEach(fromElement => {
+            let i: number;
+            let v: VNode;
+            [i, v] = fromElement;
+            let found = false;
+            unique_links.forEach(toElement => {
+                let j: number;
+                let w: VNode;
+                [j, w] = toElement;
+                if (i === j && v === w) {
+                    found = true;
+                }
+            });
+            if (!found) {
+                unique_links.push(fromElement); // add if not found
+            }
+
+        });
+        links_to_be_cut = unique_links.sort((a, b): number => { return a[0] < b[0] ? 1 : -1; });
+
+        const undodata: [string, number, string][] = [];
+        links_to_be_cut.forEach(element => {
+            let i: number;
+            let v: VNode;
+            [i, v] = element;
+            const ch = v.children[i]; // get item
+            v.children.splice(i, 1); // remove it from children
+            const index = ch.parents.indexOf(v); // find index in parents
+            if (index >= 0) {
+                ch.parents.splice(index, 1); // remove it from parents
+            }
+            undodata.push([v.gnx, i, ch.gnx]);
+        });
+
+        if (!c.positionExists(c.p)) {
+            c.selectPosition(c.rootPosition()!);
+        }
+        return undodata;
+
+    }
     //@-others
 
 }

@@ -14,7 +14,6 @@ import { LeoUnitTest } from './leoTest2';
 //@+node:felix.20220129225027.1: ** suite TestNodes(LeoUnitTest)
 suite('Unit tests for leo/core/leoNodes.ts.', () => {
 
-    let test_outline = undefined; // Set by create_test_outline.
     let self: LeoUnitTest;
 
     before(async () => {
@@ -676,42 +675,39 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     test('test_p_deletePositionsInList', async () => {
         const c = self.c;
         let p = self.c.p;
-
-
-    });
-    /* def test_p_deletePositionsInList(self):
-        c, p = self.c, self.c.p
-        root = p.insertAsLastChild()
-        root.h = 'root'
-        // Top level
-        a1 = root.insertAsLastChild()
-        a1.h = 'a'
-        a1.clone()
-        d1 = a1.insertAfter()
-        d1.h = 'd'
-        b1 = root.insertAsLastChild()
-        b1.h = 'b'
+        const root = p.insertAsLastChild();
+        root.h = 'root';
+        // Top level;
+        const a1 = root.insertAsLastChild();
+        a1.h = 'a';
+        a1.clone();
+        const d1 = a1.insertAfter();
+        d1.h = 'd';
+        const b1 = root.insertAsLastChild();
+        b1.h = 'b';
         // Children of a.
-        b11 = b1.clone()
-        b11.moveToLastChildOf(a1)
-        b11.clone()
-        c2 = b11.insertAfter()
-        c2.h = 'c'
+        let b11 = b1.clone();
+        b11.moveToLastChildOf(a1);
+        b11.clone();
+        const c2 = b11.insertAfter();
+        c2.h = 'c';
         // Children of d
-        b11 = b1.clone()
-        b11.moveToLastChildOf(d1)
+        b11 = b1.clone();
+        b11.moveToLastChildOf(d1);
         // Count number of 'b' nodes.
-        aList = []
-        nodes = 0
-        for p in root.subtree():
-            nodes += 1
-            if p.h == 'b':
-                aList.append(p.copy())
-        self.assertEqual(len(aList), 6)
-        c.deletePositionsInList(aList)
-        c.redraw()
+        const aList: Position[] = [];
+        let nodes = 0;
+        for (let p of root.subtree()) {
+            nodes += 1;
+            if (p.h === 'b') {
+                aList.push(p.copy());
+            }
+        }
+        assert.strictEqual(aList.length, 6);
+        c.deletePositionsInList(aList);
+        c.redraw();
+    });
 
-     */
     //@+node:felix.20220129225027.38: *3* TestNodes.test_p_hasNextBack
     test('test_p_hasNextBack', async () => {
         const c = self.c;
