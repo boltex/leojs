@@ -711,129 +711,109 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     //@+node:felix.20220129225027.38: *3* TestNodes.test_p_hasNextBack
     test('test_p_hasNextBack', async () => {
         const c = self.c;
-        let p = self.c.p;
-
-
+        for (let p of c.all_positions()) {
+            const back = p.back();
+            const next = p.next();
+            assert.ok(
+                (back.__bool__() && p.hasBack()) ||
+                (!back.__bool__() && !p.hasBack()));
+            assert.ok(
+                (next.__bool__() && p.hasNext()) ||
+                (!next.__bool__() && !p.hasNext()));
+        }
     });
-    /* def test_p_hasNextBack(self):
-        c, p = self.c, self.c.p
-        for p in c.all_positions():
-            back = p.back()
-            next = p.next()
-            assert(
-                (back and p.hasBack()) or
-                (not back and not p.hasBack()))
-            assert(
-                (next and p.hasNext()) or
-                (not next and not p.hasNext()))
-     */
+
     //@+node:felix.20220129225027.39: *3* TestNodes.test_p_hasParentChild
     test('test_p_hasParentChild', async () => {
         const c = self.c;
-        let p = self.c.p;
+        for (let p of c.all_positions()) {
+            const child = p.firstChild();
+            const parent = p.parent();
+            assert.ok(
+                (child.__bool__() && p.hasFirstChild()) ||
+                (!child.__bool__() && !p.hasFirstChild()));
+            assert.ok(
+                (parent.__bool__() && p.hasParent()) ||
+                (!parent.__bool__() && !p.hasParent()));
 
-
+        }
     });
-    /* def test_p_hasParentChild(self):
-        c, p = self.c, self.c.p
-        for p in c.all_positions():
-            child = p.firstChild()
-            parent = p.parent()
-            assert(
-                (child and p.hasFirstChild()) or
-                (not child and not p.hasFirstChild()))
-            assert(
-                (parent and p.hasParent()) or
-                (not parent and not p.hasParent()))
-     */
+
     //@+node:felix.20220129225027.40: *3* TestNodes.test_p_hasThreadNextBack
     test('test_p_hasThreadNextBack', async () => {
         const c = self.c;
-        let p = self.c.p;
+        for (let p of c.all_positions()) {
 
+            const threadBack = p.getThreadBack();
+            const threadNext = p.getThreadNext();
+
+            assert.ok(
+                (threadBack.__bool__() && p.hasThreadBack()) ||
+                (!threadBack.__bool__() && !p.hasThreadBack()));
+            assert.ok(
+                (threadNext.__bool__() && p.hasThreadNext()) ||
+                (!threadNext.__bool__() && !p.hasThreadNext()));
+        }
 
     });
-    /* def test_p_hasThreadNextBack(self):
-        c, p = self.c, self.c.p
-        for p in c.all_positions():
-            threadBack = p.getThreadBack()
-            threadNext = p.getThreadNext()
-            assert(
-                (threadBack and p.hasThreadBack()) or
-                (not threadBack and not p.hasThreadBack()))
-            assert(
-                (threadNext and p.hasThreadNext()) or
-                (not threadNext and not p.hasThreadNext()))
-     */
+
     //@+node:felix.20220129225027.41: *3* TestNodes.test_p_isAncestorOf
     test('test_p_isAncestorOf', async () => {
         const c = self.c;
-        let p = self.c.p;
+        for (let p of c.all_positions()) {
+            const child = p.firstChild();
+            while (child.__bool__()) {
+                for (let parent of p.self_and_parents_iter()) {
+                    assert.ok(parent.isAncestorOf(child));
+                }
+                child.moveToNext();
+            }
+            const next = p.next();
+            assert.ok(!p.isAncestorOf(next));
 
-
+        }
     });
-    /* def test_p_isAncestorOf(self):
-        c, p = self.c, self.c.p
-        for p in c.all_positions():
-            child = p.firstChild()
-            while child:
-                for parent in p.self_and_parents_iter():
-                    assert parent.isAncestorOf(child)
-                child.moveToNext()
-            next = p.next()
-            self.assertFalse(p.isAncestorOf(next))
-     */
+
     //@+node:felix.20220129225027.42: *3* TestNodes.test_p_isCurrentPosition
     test('test_p_isCurrentPosition', async () => {
         const c = self.c;
         let p = self.c.p;
-
-
+        assert.ok(!c.isCurrentPosition(undefined));
+        assert.ok(c.isCurrentPosition(p));
     });
-    /* def test_p_isCurrentPosition(self):
-        c, p = self.c, self.c.p
-        self.assertFalse(c.isCurrentPosition(None))
-        self.assertTrue(c.isCurrentPosition(p))
-     */
+
     //@+node:felix.20220129225027.43: *3* TestNodes.test_p_isRootPosition
     test('test_p_isRootPosition', async () => {
         const c = self.c;
         let p = self.c.p;
-
-
+        assert.ok(!c.isRootPosition(undefined));
+        assert.ok(c.isRootPosition(p));
     });
-    /* def test_p_isRootPosition(self):
-        c, p = self.c, self.c.p
-        self.assertFalse(c.isRootPosition(None))
-        self.assertTrue(c.isRootPosition(p))
-     */
+
     //@+node:felix.20220129225027.44: *3* TestNodes.test_p_moveToFirst_LastChild
     test('test_p_moveToFirst_LastChild', async () => {
         const c = self.c;
         let p = self.c.p;
-
-
+        const root2 = p.next();
+        assert.ok(root2.__bool__());;
+        const p2 = root2.insertAfter();
+        p2.h = "test";
+        assert.ok(c.positionExists(p2));
+        p2.moveToFirstChildOf(root2);
+        assert.ok(c.positionExists(p2));
+        p2.moveToLastChildOf(root2);
+        assert.ok(c.positionExists(p2));
     });
-    /* def test_p_moveToFirst_LastChild(self):
-        c, p = self.c, self.c.p
-        root2 = p.next()
-        self.assertTrue(root2)
-        p2 = root2.insertAfter()
-        p2.h = "test"
-        self.assertTrue(c.positionExists(p2))
-        p2.moveToFirstChildOf(root2)
-        self.assertTrue(c.positionExists(p2))
-        p2.moveToLastChildOf(root2)
-        self.assertTrue(c.positionExists(p2))
-     */
+
     //@+node:felix.20220129225027.45: *3* TestNodes.test_p_moveToVisBack_in_a_chapter
+    // ! Uncomment when test_p_moveToVisBack_in_a_chapter is implemented !
+
+    /*
+
     test('test_p_moveToVisBack_in_a_chapter', async () => {
         const c = self.c;
         let p = self.c.p;
 
-
-    });
-    /* def test_p_moveToVisBack_in_a_chapter(self):
         // Verify a fix for bug https://bugs.launchpad.net/leo-editor/+bug/1264350
         import leo.core.leoChapters as leoChapters
         c, p = self.c, self.c.p
@@ -851,36 +831,57 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         self.assertEqual(c.p.h, 'aaa node 1')
         p2 = c.p.moveToVisBack(c)
         self.assertEqual(p2, None)
-     */
+    });
+
+    */
+
     //@+node:felix.20220129225027.46: *3* TestNodes.test_p_nosentinels
     test('test_p_nosentinels', async () => {
-        const c = self.c;
         let p = self.c.p;
-
-
+        // TODO
+        const s1 = g.splitLines(p.b.substring(2)).join(""); //  ''.join(g.splitLines(p.b)[2:]);
+        const s2 = p.nosentinels;
+        assert.strictEqual(s1, s2);
     });
-    /* def test_p_nosentinels(self):
 
-        p = self.c.p
-
-        def not_a_sentinel(x):
-            pass
-
-        @not_a_sentinel
-        def spam():
-            pass
-
-        s1 = ''.join(g.splitLines(p.b)[2:])
-        s2 = p.nosentinels
-        self.assertEqual(s1, s2)
-     */
     //@+node:felix.20220129225027.47: *3* TestNodes.test_p_relinkAsCloneOf
     test('test_p_relinkAsCloneOf', async () => {
         const c = self.c;
         const u = self.c.undoer;
         let p = self.c.p.next();
 
+        // test-outline: root
+        //   child clone a
+        //     node clone 1
+        //   child b
+        //     child clone a
+        //       node clone 1
+        //   child c
+        //     node clone 1
+        //   child clone a
+        //     node clone 1
+        //   child b
+        //     child clone a
+        //       node clone 1
 
+        const child_b = g.findNodeAnywhere(c, 'child b');
+        assert.ok(child_b && child_b.__bool__());
+        assert.ok(child_b.isCloned());
+        //
+        // child_c must *not* be a clone at first.
+        const child_c = g.findNodeAnywhere(c, 'child c');
+        assert.ok(child_c && child_c.__bool__());
+        assert.ok(!child_c.isCloned());
+        //
+        // Change the tree.
+        const bunch = u.beforeChangeTree(p);
+        child_c._relinkAsCloneOf(child_b);
+        u.afterChangeTree(p, 'relink-clone', bunch);
+        // self.dump_tree('Before...')
+        u.undo();
+        // self.dump_tree('After...')
+        assert.ok(child_b.isCloned());
+        assert.ok(!child_c.isCloned());
     });
     /* def test_p_relinkAsCloneOf(self):
 

@@ -769,7 +769,7 @@ export class Commands {
     }
 
     //@+node:felix.20210131011420.9: *6* c.isCurrentPosition
-    public isCurrentPosition(p: Position): boolean {
+    public isCurrentPosition(p?: Position): boolean {
         const c: Commands = this;
         if (!p || !c._currentPosition ||
             !p.__bool__() || !c._currentPosition.__bool__()) {
@@ -779,10 +779,10 @@ export class Commands {
     }
 
     //@+node:felix.20210131011420.10: *6* c.isRootPosition
-    public isRootPosition(p: Position): boolean {
+    public isRootPosition(p?: Position): boolean {
         const c: Commands = this;
         const root: Position = c.rootPosition()!;
-        return p.__bool__() && root.__bool__() && p.__eq__(root);
+        return !!p && p.__bool__() && root.__bool__() && p.__eq__(root);
     }
 
     //@+node:felix.20210131011420.11: *5* c.isChanged

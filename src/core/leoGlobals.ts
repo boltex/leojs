@@ -2490,6 +2490,26 @@ export function getScript(c: Commands, p: Position,
     return "";
 }
 
+//@+node:felix.20220211012808.1: *3* g.find*Node*
+//@+others
+//@+node:felix.20220211012829.1: *4* findNodeAnywhere
+export function findNodeAnywhere(c: Commands, headline: string, exact: boolean = true): Position | undefined {
+    const h = headline.trim();
+    for (let p of c.all_unique_positions(false)) {
+        if (p.h.trim() === h) {
+            return p.copy();
+        }
+    }
+    if (!exact) {
+        for (let p of c.all_unique_positions(false)) {
+            if (p.h.trim().startsWith(h)) {
+                return p.copy();
+            }
+        }
+    }
+    return undefined;
+}
+//@-others
 //@+node:felix.20211104211349.1: ** g.Unit Tests
 //@+node:felix.20211104211355.1: ** g.Urls
 //@+node:felix.20210103231554.1: ** class g.FileLikeObject (coreGlobals.py)

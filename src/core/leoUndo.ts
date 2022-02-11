@@ -667,8 +667,8 @@ export class Undoer {
         bunch.undoHelper = u.undoTree;
         bunch.redoHelper = u.redoTree;
         // Set by beforeChangeTree: changed, oldSel, oldText, oldTree, p
-        bunch.newSel = w.getSelectionRange();
-        bunch.newText = w.getAllText();
+        bunch.newSel = [0, 0]; // w.getSelectionRange(); // TODO !
+        bunch.newText = p.b; // w.getAllText(); // TODO !
         bunch.newTree = u.saveTree(p);
         u.pushBead(bunch);
     }
@@ -993,8 +993,8 @@ export class Undoer {
         const c: Commands = u.c;
         const w: any = c.frame.body.wrapper;
         const bunch: Bead = u.createCommonBunch(p);
-        bunch.oldSel = w.getSelectionRange();
-        bunch.oldText = w.getAllText();
+        bunch.oldSel = [0, 0]; // w.getSelectionRange(); // TODO !
+        bunch.oldText = p.b; //w.getAllText(); // TODO !
         bunch.oldTree = u.saveTree(p);
         return bunch;
     }
@@ -2107,7 +2107,7 @@ export class Undoer {
         c.selectPosition(u.p);  // Does full recolor.
         if (u.oldSel && u.oldSel.length) {
             //i, j = u.oldSel
-            c.frame.body.wrapper.setSelectionRange(u.oldSel[0], u.oldSel[1]);
+            // c.frame.body.wrapper.setSelectionRange(u.oldSel[0], u.oldSel[1]); // TODO !
         }
     }
     //@+node:felix.20211026230613.128: *3* u.update_status
