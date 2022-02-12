@@ -327,7 +327,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     test('test_convertTreeToString_and_allies', async () => {
         const p = self.c.p;
         const sib = p.next();
-        assert.ok(sib.__bool__());
+        assert.ok(sib && sib.__bool__());
         const s = sib.convertTreeToString();
         for (let p2 of sib.self_and_subtree()) {
             assert.ok(s.includes(p2.h));
@@ -762,7 +762,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const c = self.c;
         for (let p of c.all_positions()) {
             const child = p.firstChild();
-            while (child.__bool__()) {
+            while (child && child.__bool__()) {
                 for (let parent of p.self_and_parents_iter()) {
                     assert.ok(parent.isAncestorOf(child));
                 }
@@ -795,7 +795,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const c = self.c;
         let p = self.c.p;
         const root2 = p.next();
-        assert.ok(root2.__bool__());;
+        assert.ok(root2 && root2.__bool__());;
         const p2 = root2.insertAfter();
         p2.h = "test";
         assert.ok(c.positionExists(p2));
@@ -883,216 +883,212 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         assert.ok(child_b.isCloned());
         assert.ok(!child_c.isCloned());
     });
-    /* def test_p_relinkAsCloneOf(self):
 
-        // test-outline: root
-        //   child clone a
-        //     node clone 1
-        //   child b
-        //     child clone a
-        //       node clone 1
-        //   child c
-        //     node clone 1
-        //   child clone a
-        //     node clone 1
-        //   child b
-        //     child clone a
-        //       node clone 1
-        c, u = self.c, self.c.undoer
-        p = c.p.next()
-        child_b = g.findNodeAnywhere(c, 'child b')
-        self.assertTrue(child_b)
-        self.assertTrue(child_b.isCloned())
-        #
-        // child_c must *not* be a clone at first.
-        child_c = g.findNodeAnywhere(c, 'child c')
-        self.assertTrue(child_c)
-        self.assertFalse(child_c.isCloned())
-        #
-        // Change the tree.
-        bunch = u.beforeChangeTree(p)
-        child_c._relinkAsCloneOf(child_b)
-        u.afterChangeTree(p, 'relink-clone', bunch)
-        // self.dump_tree('Before...')
-        u.undo()
-        // self.dump_tree('After...')
-        self.assertTrue(child_b.isCloned())
-        self.assertFalse(child_c.isCloned())
-
-     */
     //@+node:felix.20220129225027.48: *3* TestNodes.test_p_setBodyString
-    /* def test_p_setBodyString(self):
+    test('test_p_setBodyString', async () => {
         // Test that c.setBodyString works immediately.
-        c, w = self.c, self.c.frame.body.wrapper
-        next = self.root_p.next()
-        c.setBodyString(next, "after")
-        c.selectPosition(next)
-        s = w.get("1.0", "end")
-        self.assertEqual(s.rstrip(), "after")
-     */
+        const c = self.c;
+        // w = self.c.frame.body.wrapper;
+
+        const next = self.root_p.next();
+        c.setBodyString(next, "after");
+        c.selectPosition(next);
+        const s = next.b; // w.get("1.0", "end");
+        assert.strictEqual(s.trimEnd(), "after");
+    });
+
     //@+node:felix.20220129225027.49: *3* TestNodes.test_p_u
-    /* def test_p_u(self):
-        p = self.c.p
-        self.assertEqual(p.u, p.v.u)
-        p.v.u = None
-        self.assertEqual(p.u, {})
-        self.assertEqual(p.v.u, {})
-        d = {'my_plugin': 'val'}
-        p.u = d
-        self.assertEqual(p.u, d)
-        self.assertEqual(p.v.u, d)
-     */
+    test('test_p_u', async () => {
+
+        const p = self.c.p;
+        assert.deepStrictEqual(p.u, p.v.u);
+        p.v.u = undefined;
+        assert.deepStrictEqual(p.u, {});
+        assert.deepStrictEqual(p.v.u, {});
+        const d = { 'my_plugin': 'val' };
+        p.u = d;
+        assert.deepStrictEqual(p.u, d);
+        assert.deepStrictEqual(p.v.u, d);
+    });
+
     //@+node:felix.20220129225027.50: *3* TestNodes.test_p_unique_nodes
+    test('test_p_unique_nodes', async () => {
+        assert.strictEqual([...self.root_p.unique_nodes()].length, 5);
+    });
     /* def test_p_unique_nodes(self):
 
         self.assertEqual(len(list(self.root_p.unique_nodes())), 5)
      */
     //@+node:felix.20220129225027.51: *3* TestNodes.test_paste_node
-    /* def test_paste_node(self):
-        c, p = self.c, self.c.p
-        child = p.insertAsNthChild(0)
-        child.setHeadString('child')
-        child2 = p.insertAsNthChild(1)
-        child2.setHeadString('child2')
-        grandChild = child.insertAsNthChild(0)
-        grandChild.setHeadString('grand child')
-        c.selectPosition(grandChild)
-        c.clone()
-        c.selectPosition(child)
-        p.expand()
-        c.selectPosition(child)
-        self.assertEqual(c.p.h, 'child')
-        c.copyOutline()
-        oldVnodes = [p2.v for p2 in child.self_and_subtree()]
-        c.selectPosition(child)
-        c.p.contract()  # Essential
-        c.pasteOutline()
-        assert c.p != child
-        self.assertEqual(c.p.h, 'child')
-        newVnodes = [p2.v for p2 in c.p.self_and_subtree()]
-        for v in newVnodes:
-            assert v not in oldVnodes
-        c.undoer.undo()
-        c.undoer.redo()
-        c.undoer.undo()
-        c.undoer.redo()
-     */
+    test('test_paste_node', async () => {
+        const c = self.c;
+        let p = self.c.p;
+        const child = p.insertAsNthChild(0);
+        child.setHeadString('child');
+        const child2 = p.insertAsNthChild(1);
+        child2.setHeadString('child2');
+        const grandChild = child.insertAsNthChild(0);
+        grandChild.setHeadString('grand child');
+        c.selectPosition(grandChild);
+        c.clone();
+        c.selectPosition(child);
+        p.expand();
+        c.selectPosition(child);
+        assert.strictEqual(c.p.h, 'child');
+        c.copyOutline();
+        const oldVnodes: VNode[] = [...child.self_and_subtree()].map(p2 => p2.v);
+        c.selectPosition(child);
+        c.p.contract();  // Essential
+        c.pasteOutline();
+        assert.ok(c.p.__ne__(child));
+        assert.strictEqual(c.p.h, 'child');
+        const newVnodes: VNode[] = [...c.p.self_and_subtree()].map(p2 => p2.v);
+        for (let v of newVnodes) {
+            assert.ok(!oldVnodes.includes(v));
+        }
+        c.undoer.undo();
+        c.undoer.redo();
+        c.undoer.undo();
+        c.undoer.redo();
+    });
+
     //@+node:felix.20220129225027.52: *3* TestNodes.test_paste_retaining_clones
-    /* def test_paste_retaining_clones(self):
-        c, p = self.c, self.c.p
-        child = p.insertAsNthChild(0)
-        child.setHeadString('child')
-        self.assertTrue(child)
-        grandChild = child.insertAsNthChild(0)
-        grandChild.setHeadString('grand child')
-        c.selectPosition(child)
-        c.copyOutline()
-        oldVnodes = [p2.v for p2 in child.self_and_subtree()]
-        c.p.contract()  # Essential
-        c.pasteOutlineRetainingClones()
-        self.assertNotEqual(c.p, child)
-        newVnodes = [p2.v for p2 in c.p.self_and_subtree()]
-        for v in newVnodes:
-            self.assertTrue(v in oldVnodes)
-     */
+    test('test_paste_retaining_clones', async () => {
+        const c = self.c;
+        let p = self.c.p;
+        const child = p.insertAsNthChild(0);
+        child.setHeadString('child');
+        assert.ok(child.__bool__());
+        const grandChild = child.insertAsNthChild(0);
+        grandChild.setHeadString('grand child');
+        c.selectPosition(child);
+        c.copyOutline();
+        const oldVnodes: VNode[] = [...child.self_and_subtree()].map(p2 => p2.v);
+        c.p.contract(); // Essential
+        c.pasteOutlineRetainingClones();
+        assert.ok(c.p.__ne__(child));
+        const newVnodes: VNode[] = [...c.p.self_and_subtree()].map(p2 => p2.v);
+        for (let v of newVnodes) {
+            assert.ok(oldVnodes.includes(v));
+        }
+    });
+
     //@+node:felix.20220129225027.53: *3* TestNodes.test_position_not_hashable
-    /* def test_position_not_hashable(self):
-        p = self.c.p
-        try:
-            a = set()
-            a.add(p)
-            assert False, 'Adding position to set should throw exception'
-        except TypeError:
-            pass
-     */
+    test('test_position_not_hashable', async () => {
+        let p = self.c.p;
+
+        try {
+            const a = JSON.stringify(p);
+            // a = set()
+            //  a.add(p)
+            assert.ok(false, 'Adding position to set should throw exception');
+        }
+        catch (typeError) {
+            // pass
+        }
+    });
+
     //@+node:felix.20220129225027.54: *3* TestNodes.test_promote
-    /* def test_promote(self):
-        c, p = self.c, self.c.p
-        p2 = p.insertAsNthChild(0)
-        p2.setHeadString('A')
-        p3 = p.insertAsNthChild(1)
-        p3.setHeadString('B')
-        p4 = p3.insertAsNthChild(0)
-        p4.setHeadString('child 1')
-        p5 = p3.insertAsNthChild(1)
-        p5.setHeadString('child 2')
-        p.expand()
-        p6 = p.insertAsNthChild(2)
-        p6.setHeadString('C')
-        c.setCurrentPosition(p3)
-        c.promote()
-        p = c.p
-        self.assertEqual(p, p3)
-        self.assertEqual(p.h, 'B')
-        self.assertEqual(p.next().h, 'child 1')
-        self.assertEqual(p.next().next().h, 'child 2')
-        self.assertEqual(p.next().next().next().h, 'C')
-        c.undoer.undo()
-        p = c.p
-        self.assertEqual(p, p3)
-        self.assertEqual(p.back(), p2)
-        self.assertEqual(p.next(), p6)
-        self.assertEqual(p.firstChild().h, 'child 1')
-        self.assertEqual(p.firstChild().next().h, 'child 2')
-        c.undoer.redo()
-        p = c.p
-        self.assertEqual(p, p3)
-        self.assertEqual(p.h, 'B')
-        self.assertEqual(p.next().h, 'child 1')
-        self.assertEqual(p.next().next().h, 'child 2')
-        self.assertEqual(p.next().next().next().h, 'C')
-        c.undoer.undo()
-        p = c.p
-        self.assertEqual(p, p3)
-        self.assertEqual(p.back(), p2)
-        self.assertEqual(p.next(), p6)
-        self.assertEqual(p.firstChild().h, 'child 1')
-        self.assertEqual(p.firstChild().next().h, 'child 2')
-        c.undoer.redo()
-        p = c.p
-        self.assertEqual(p, p3)
-        self.assertEqual(p.h, 'B')
-        self.assertEqual(p.next().h, 'child 1')
-        self.assertEqual(p.next().next().h, 'child 2')
-        self.assertEqual(p.next().next().next().h, 'C')
-     */
+    test('test_promote', async () => {
+        const c = self.c;
+        let p = self.c.p;
+        const p2 = p.insertAsNthChild(0);
+        p2.setHeadString('A');
+        const p3 = p.insertAsNthChild(1);
+        p3.setHeadString('B');
+        const p4 = p3.insertAsNthChild(0);
+        p4.setHeadString('child 1');
+        const p5 = p3.insertAsNthChild(1);
+        p5.setHeadString('child 2');
+        p.expand();
+        const p6 = p.insertAsNthChild(2);
+        p6.setHeadString('C');
+        c.setCurrentPosition(p3);
+        c.promote();
+        p = c.p;
+        assert.ok(p.__eq__(p3));
+        assert.strictEqual(p.h, 'B');
+        assert.strictEqual(p.next().h, 'child 1');
+        assert.strictEqual(p.next().next().h, 'child 2');
+        assert.strictEqual(p.next().next().next().h, 'C');
+        c.undoer.undo();
+        p = c.p;
+        assert.ok(p.__eq__(p3));
+        assert.ok(p.back().__eq__(p2));
+        assert.ok(p.next().__eq__(p6));
+        assert.strictEqual(p.firstChild().h, 'child 1');
+        assert.strictEqual(p.firstChild().next().h, 'child 2');
+        c.undoer.redo();
+        p = c.p;
+        assert.ok(p.__eq__(p3));
+        assert.strictEqual(p.h, 'B');
+        assert.strictEqual(p.next().h, 'child 1');
+        assert.strictEqual(p.next().next().h, 'child 2');
+        assert.strictEqual(p.next().next().next().h, 'C');
+        c.undoer.undo();
+        p = c.p;
+        assert.ok(p.__eq__(p3));
+        assert.ok(p.back().__eq__(p2));
+        assert.ok(p.next().__eq__(p6));
+        assert.strictEqual(p.firstChild().h, 'child 1');
+        assert.strictEqual(p.firstChild().next().h, 'child 2');
+        c.undoer.redo();
+        p = c.p;
+        assert.ok(p.__eq__(p3));
+        assert.strictEqual(p.h, 'B');
+        assert.strictEqual(p.next().h, 'child 1');
+        assert.strictEqual(p.next().next().h, 'child 2');
+        assert.strictEqual(p.next().next().next().h, 'C');
+    });
+
     //@+node:felix.20220129225027.55: *3* TestNodes.test_root_of_a_derived_file
-    /* def test_root_of_a_derived_file(self):
-        p = self.c.p
-        p1 = p.insertAsLastChild()
-        p1.setHeadString('@file zzz')
-        self.assertEqual(p1.textOffset(), 0)
-     */
+    test('test_root_of_a_derived_file', async () => {
+        const p = self.c.p;
+        const p1 = p.insertAsLastChild();
+        p1.setHeadString('@file zzz');
+        assert.strictEqual(p1.textOffset(), 0);
+    });
+
     //@+node:felix.20220129225027.56: *3* TestNodes.test_section_node
-    /* def test_section_node(self):
-        p = self.c.p
-        p1 = p.insertAsLastChild()
-        p1.setHeadString('@file zzz')
-        body = '''   %s
-        ''' % (g.angleBrackets(' section '))
-        p1.setBodyString(body)
-        p2 = p1.insertAsLastChild()
-        head = g.angleBrackets(' section ')
-        p2.setHeadString(head)
-        self.assertEqual(p1.textOffset(), 0)
-        self.assertEqual(p2.textOffset(), 3)
-            // Section nodes can appear in with @others nodes,
-            // so they don't get special treatment.
-     */
+    test('test_section_node', async () => {
+        const p = self.c.p;
+        const p1 = p.insertAsLastChild();
+        p1.setHeadString('@file zzz');
+        const body = `   ${(g.angleBrackets(' section '))}
+        `;
+        p1.setBodyString(body);
+        const p2 = p1.insertAsLastChild();
+        const head = g.angleBrackets(' section ');
+        p2.setHeadString(head);
+        assert.strictEqual(p1.textOffset(), 0);
+        assert.strictEqual(p2.textOffset(), 3);
+        // Section nodes can appear in with @others nodes,
+        // so they don't get special treatment.
+    });
+
     //@+node:felix.20220129225027.57: *3* TestNodes.test_v_atAutoNodeName_and_v_atAutoRstNodeName
-    /* def test_v_atAutoNodeName_and_v_atAutoRstNodeName(self):
-        p = self.c.p
-        table = (
-            ('@auto-rst rst-file', 'rst-file', 'rst-file'),
-            ('@auto x', 'x', ''),
-            ('xyz', '', ''),
-        )
-        for s, expected1, expected2 in table:
-            result1 = p.v.atAutoNodeName(h=s)
-            result2 = p.v.atAutoRstNodeName(h=s)
-            self.assertEqual(result1, expected1, msg=s)
-            self.assertEqual(result2, expected2, msg=s)
-     */
+    test('test_v_atAutoNodeName_and_v_atAutoRstNodeName', async () => {
+        const p = self.c.p;
+
+        const table: [string, string, string][] = [
+            ['@auto-rst rst-file', 'rst-file', 'rst-file'],
+            ['@auto x', 'x', ''],
+            ['xyz', '', ''],
+        ];
+
+        table.forEach(element => {
+            let s;
+            let expected1;
+            let expected2;
+            [s, expected1, expected2] = element;
+            const result1 = p.v.atAutoNodeName(s);
+            const result2 = p.v.atAutoRstNodeName(s);
+            assert.strictEqual(result1, expected1, s);
+            assert.strictEqual(result2, expected2, s);
+
+        });
+    });
+
     //@-others
 
 });

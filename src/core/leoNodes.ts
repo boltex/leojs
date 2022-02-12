@@ -3467,7 +3467,7 @@ export class VNode {
 
     public set u(val: any) {
         const v: VNode = this;
-        if (val === null) {
+        if (val === undefined || val === null) {
             v.unknownAttributes = undefined;
         }
         else if ((typeof val) === 'object') {
