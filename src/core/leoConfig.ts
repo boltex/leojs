@@ -209,7 +209,7 @@ export class GlobalConfigManager {
     public inited: boolean;
     public menusList: string[];
     public menusFileName: string;
-    public modeCommandsDict: { [key: string]: any };
+    public modeCommandsDict: g.TypedDict;// { [key: string]: any };
     public panes: any;
     public sc: any;
     public tree: any;
@@ -249,11 +249,11 @@ export class GlobalConfigManager {
         this.inited = false;
         this.menusList = [];
         this.menusFileName = '';
-        this.modeCommandsDict = {};
-        // this.modeCommandsDict = g.TypedDict(
-        //     name='modeCommandsDict',
-        //     keyType=str,
-        //     valType=g.TypedDict);  // was TypedDictOfLists.
+
+        this.modeCommandsDict = new g.TypedDict(
+            'modeCommandsDict',
+            'string',
+            'TypedDict');  // was TypedDictOfLists.
         // Inited later...
         this.panes = undefined;
         this.sc = undefined;
@@ -272,42 +272,67 @@ export class GlobalConfigManager {
         // Only the settings parser needs to search all dicts.
         this.dictList = [this.defaultsDict];
 
-        // TODO if needed
 
-        /*
         let key: string;
         let kind: string;
         let val: any;
 
         this.defaultsData.forEach(element => {
             [key, kind, val] = element;
-            this.defaultsDict[this.munge(key)] = g.GeneralSetting(
-                kind,
-                key,
-                val,
-                'defaults'
+            this.defaultsDict[this.munge(key)!] = new g.GeneralSetting(
+                kind,  // kind
+                undefined,  // encoding
+                undefined,  // ivar
+                undefined,  // setting
+                key,  // val
+                val,  // path
+                'defaults'  // tag
+                            // unl
             );
         });
 
         this.ivarsData.forEach(element => {
             [key, kind, val] = element;
-            this.ivarsDict[this.munge(key)] = g.GeneralSetting(
-                kind,
-                key,
-                val,
-                'ivars'
+            this.ivarsDict[this.munge(key)!] = new g.GeneralSetting(
+                kind,  // kind
+                key,  // encoding
+                val,  // ivar
+                'ivars'  // setting
+                        // val
+                        // path
+                        // tag
+                        // unl
+
             );
         });
 
         this.encodingIvarsData.forEach(element => {
             [key, kind, val] = element;
-            this.encodingIvarsDict[this.munge(key)] = g.GeneralSetting(
-                kind,
-                key,
-                val,
-                'encoding'
+            this.encodingIvarsDict[this.munge(key)!] = new g.GeneralSetting(
+                kind,  // kind
+                key,  // encoding
+                val,  // ivar
+                'encoding'  // setting
+                            // val
+                            // path
+                            // tag
+                            // unl
             );
         });
+
+
+        /*
+            self.dictList = [self.defaultsDict]
+            for key, kind, val in self.defaultsData:
+                self.defaultsDict[self.munge(key)] = g.GeneralSetting(
+                    kind, setting=key, val=val, tag='defaults')
+            for key, kind, val in self.ivarsData:
+                self.ivarsDict[self.munge(key)] = g.GeneralSetting(
+                    kind, ivar=key, val=val, tag='ivars')
+            for key, kind, val in self.encodingIvarsData:
+                self.encodingIvarsDict[self.munge(key)] = g.GeneralSetting(
+                    kind, encoding=val, ivar=key, tag='encoding')
+
         */
 
     }

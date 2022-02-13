@@ -337,6 +337,265 @@ export let unitTesting: boolean = false; // A synonym for app.unitTesting.
 export let unicode_warnings: { [key: string]: any } = {};  // Keys are callers.
 
 //@+others
+//@+node:felix.20220213000430.1: ** g.Classes & class accessors
+//@+node:felix.20220213000459.1: *3* class g.FileLikeObject (coreGlobals.py)
+/**
+ * Define a file-like object for redirecting writes to a string.
+ * The caller is responsible for handling newlines correctly.
+ */
+export class FileLikeObject {
+
+    public encoding: string;
+    public ptr: number;
+    private _list: string[];
+
+    constructor(encoding: string = 'utf-8', fromString?: string) {
+        this.encoding = encoding || 'utf-8';
+        this._list = splitLines(fromString);  // Must preserve newlines!
+        this.ptr = 0;
+    }
+
+    //@+others
+    //@+node:felix.20220213000459.2: *4* FileLikeObject.clear (coreGlobals.py)
+    public clear(): void {
+        this._list = [];
+    }
+
+    //@+node:felix.20220213000459.3: *4* FileLikeObject.close (coreGlobals.py)
+    public close(): void {
+        // pass
+    }
+
+    //@+node:felix.20220213000459.4: *4* FileLikeObject.flush (coreGlobals.py)
+    public flush(): void {
+        // pass
+    }
+
+    //@+node:felix.20220213000459.5: *4* FileLikeObject.get & getvalue & read (coreGlobals.py)
+    public get(): string {
+        return this._list.join();
+    }
+
+    // Todo : maybe add names to prototype instead
+    public getvalue(): string {
+        return this.get();
+    }
+
+    public read(): string {
+        return this.get();
+    }
+
+    //@+node:felix.20220213000459.6: *4* FileLikeObject.readline (coreGlobals.py)
+    /**
+     * Read the next line using at.list and at.ptr.
+     */
+    public readline(): string {
+        if (this.ptr < this._list.length) {
+            const line: string = this._list[this.ptr];
+            this.ptr++;
+            return line;
+        }
+        return '';
+    }
+
+    //@+node:felix.20220213000459.7: *4* FileLikeObject.write  (coreGlobals.py)
+    public write(s: string): void {
+        if (s) {
+            this._list.push(s);
+        }
+    }
+
+    //@-others
+
+}
+
+//@+node:felix.20220213000607.1: *3* class g.GeneralSetting
+// Important: The startup code uses this class,
+// so it is convenient to define it in leoGlobals.py.
+
+/**
+ * A class representing any kind of setting except shortcuts.
+ */
+export class GeneralSetting {
+
+    public kind: string;
+    public encoding: string | undefined = undefined;
+    public ivar: string | undefined = undefined;
+    public setting: string | undefined = undefined;
+    public val: any | undefined = undefined;
+    public path: string | undefined = undefined;
+    public tag: string | undefined = 'setting';
+    public unl: string | undefined = undefined;
+
+    constructor(
+        kind: string,
+        encoding = undefined,
+        ivar = undefined,
+        setting = undefined,
+        val = undefined,
+        path = undefined,
+        tag = 'setting',
+        unl = undefined,
+    ) {
+        this.encoding = encoding;
+        this.ivar = ivar;
+        this.kind = kind;
+        this.path = path;
+        this.unl = unl;
+        this.setting = setting;
+        this.val = val;
+        this.tag = tag;
+    }
+
+    public __repr__(): string {
+        // Better for g.printObj.
+        const val = this.val.toString().split("\n").join(" ");
+        return (
+            `GS: ${shortFileName(this.path)} ` +
+            `${this.kind} = ${val} `);
+    }
+    public dump(): string {
+        return this.__repr__();
+    }
+
+    public toString(): string {
+        return this.__repr__();
+    }
+
+}
+//@+node:felix.20220213000510.1: *3* class g.TypedDict
+/**
+ * A class providing additional dictionary-related methods:
+ *
+ *   __init__:     Specifies types and the dict's name.
+ *   __repr__:     Compatible with g.printObj, based on g.objToString.
+ *   __setitem__:  Type checks its arguments.
+ *   __str__:      A concise summary of the inner dict.
+ *   add_to_list:  A convenience method that adds a value to its key's list.
+ *   name:         The dict's name.
+ *   setName:      Sets the dict's name, for use by __repr__.
+ *
+ * Overrides the following standard methods:
+ *
+ *   copy:         A thin wrapper for copy.deepcopy.
+ *   get:          Returns self.d.get
+ *   items:        Returns self.d.items
+ *   keys:         Returns self.d.keys
+ *   update:       Updates self.d from either a dict or a TypedDict.
+ */
+export class TypedDict {
+
+    public d: { [key: string]: any };
+    public keyType: string;
+    public valType: string;
+
+    private _name: string;
+
+    constructor(name: string, keyType: string, valType: string) {
+        this.d = {};
+        this._name = name;  // For __repr__ only.
+        this.keyType = keyType;
+        this.valType = valType;
+    }
+
+    //@+others
+    //@+node:felix.20220213000510.2: *4* td.__repr__ & __str__
+    // def __str__(self) -> str:
+    //     """Concise: used by repr."""
+    //     return (
+    //         f"<TypedDict name:{self._name} "
+    //         f"keys:{self.keyType.__name__} "
+    //         f"values:{self.valType.__name__} "
+    //         f"len(keys): {len(list(self.keys()))}>"
+    //     )
+
+    // def __repr__(self) -> str:
+    //     """Suitable for g.printObj"""
+    //     return f"{g.dictToString(self.d)}\n{str(self)}\n"
+    //@+node:felix.20220213000510.3: *4* td.__setitem__
+    // def __setitem__(self, key: Any, val: Any) -> None:
+    //     """Allow d[key] = val"""
+    //     if key is None:
+    //         g.trace('TypeDict: None is not a valid key', g.callers())
+    //         return
+    //     self._checkKeyType(key)
+    //     self._checkKeyType(key)
+    //     try:
+    //         for z in val:
+    //             self._checkValType(z)
+    //     except TypeError:
+    //         self._checkValType(val)  # val is not iterable.
+    //     self.d[key] = val
+    //@+node:felix.20220213000510.4: *4* td.add_to_list
+    // def add_to_list(self, key: Any, val: Any) -> None:
+    //     """Update the *list*, self.d [key]"""
+    //     if key is None:
+    //         g.trace('TypeDict: None is not a valid key', g.callers())
+    //         return
+    //     self._checkKeyType(key)
+    //     self._checkValType(val)
+    //     aList = self.d.get(key, [])
+    //     if val not in aList:
+    //         aList.append(val)
+    //         self.d[key] = aList
+    //@+node:felix.20220213000510.5: *4* td.checking
+    // def _checkKeyType(self, key: str) -> None:
+    //     if key and key.__class__ != self.keyType:
+    //         self._reportTypeError(key, self.keyType)
+
+    // def _checkValType(self, val: Any) -> None:
+    //     if val.__class__ != self.valType:
+    //         self._reportTypeError(val, self.valType)
+
+    // def _reportTypeError(self, obj: Any, objType: Any) -> str:
+    //     return (
+    //         f"{self._name}\n"
+    //         f"expected: {obj.__class__.__name__}\n"
+    //         f"     got: {objType.__name__}")
+    //@+node:felix.20220213000510.6: *4* td.copy
+    // def copy(self, name: str=None) -> Any:
+    //     """Return a new dict with the same contents."""
+    //     import copy
+    //     return copy.deepcopy(self)
+    //@+node:felix.20220213000510.7: *4* td.get & keys & values
+    // def get(self, key: Any, default: Any=None) -> Any:
+    //     return self.d.get(key, default)
+
+    // def items(self) -> Any:
+    //     return self.d.items()
+
+    // def keys(self) -> Any:
+    //     return self.d.keys()
+
+    // def values(self) -> Any:
+    //     return self.d.values()
+    //@+node:felix.20220213000510.8: *4* td.get_getting & get_string_setting
+    // def get_setting(self, key: str) -> Any:
+    //     key = key.replace('-', '').replace('_', '')
+    //     gs = self.get(key)
+    //     val = gs and gs.val
+    //     return val
+
+    // def get_string_setting(self, key: str) -> Optional[str]:
+    //     val = self.get_setting(key)
+    //     return val if val and isinstance(val, str) else None
+    //@+node:felix.20220213000510.9: *4* td.name & setName
+    // def name(self) -> str:
+    //     return self._name
+
+    // def setName(self, name: str) -> None:
+    //     self._name = name
+    //@+node:felix.20220213000510.10: *4* td.update
+    // def update(self, d: Dict[Any, Any]) -> None:
+    //     """Update self.d from a the appropriate dict."""
+    //     if isinstance(d, TypedDict):
+    //         self.d.update(d.d)
+    //     else:
+    //         self.d.update(d)
+    //@-others
+
+}
+
 //@+node:felix.20211104210703.1: ** g.Debugging, GC, Stats & Timing
 //@+node:felix.20211205233429.1: *3* g._assert
 /**
@@ -606,7 +865,7 @@ export function get_directives_dict(p: Position, root?: Position[]): any {
             if (root_node && root_node.__bool__()) {
                 d["root"] = 0;  // value not important
             } else {
-                es(`${angleBrackets("*")} may only occur in a topmost node (i.e., without a parent)`);
+                es(`${angleBrackets("*")} may only occur in a topmost node(i.e., without a parent)`);
             }
             break;
         }
@@ -920,7 +1179,7 @@ export function set_delims_from_string(s: string): [string, string, string] | [u
                     delims[i] = toUnicode(delims[i]);
                 }
                 catch (e) {
-                    warning(`'${delims[i]}' delimiter is invalid: ${e}`);
+                    warning(`'${delims[i]}' delimiter is invalid: ${e} `);
                     return [undefined, undefined, undefined];
                 }
             } else {
@@ -1209,7 +1468,7 @@ export async function readFileIntoString(fileName: string,
 
     // ? needed ?
     // catch (exception){
-    //     error(`readFileIntoString: unexpected exception reading ${fileName}`);
+    //     error(`readFileIntoString: unexpected exception reading ${ fileName } `);
     //     es_exception();
     // }
 
@@ -1228,7 +1487,7 @@ export function setGlobalOpenDir(fileName: string): void {
 /**
  * Return the base name of a path.
  */
-export function shortFileName(fileName: string): string {
+export function shortFileName(fileName?: string): string {
     //  return os.path.basename(fileName) if fileName else ''
     return fileName ? path.basename(fileName) : '';
 
@@ -2512,210 +2771,6 @@ export function findNodeAnywhere(c: Commands, headline: string, exact: boolean =
 //@-others
 //@+node:felix.20211104211349.1: ** g.Unit Tests
 //@+node:felix.20211104211355.1: ** g.Urls
-//@+node:felix.20210103231554.1: ** class g.FileLikeObject (coreGlobals.py)
-/**
- * Define a file-like object for redirecting writes to a string.
- * The caller is responsible for handling newlines correctly.
- */
-export class FileLikeObject {
-
-    public encoding: string;
-    public ptr: number;
-    private _list: string[];
-
-    constructor(encoding: string = 'utf-8', fromString?: string) {
-        this.encoding = encoding || 'utf-8';
-        this._list = splitLines(fromString);  // Must preserve newlines!
-        this.ptr = 0;
-    }
-
-    //@+others
-    //@+node:felix.20210103231554.2: *3* FileLikeObject.clear (coreGlobals.py)
-    public clear(): void {
-        this._list = [];
-    }
-
-    //@+node:felix.20210103231554.3: *3* FileLikeObject.close (coreGlobals.py)
-    public close(): void {
-        // pass
-    }
-
-    //@+node:felix.20210103231554.4: *3* FileLikeObject.flush (coreGlobals.py)
-    public flush(): void {
-        // pass
-    }
-
-    //@+node:felix.20210103231554.5: *3* FileLikeObject.get & getvalue & read (coreGlobals.py)
-    public get(): string {
-        return this._list.join();
-    }
-
-    // Todo : maybe add names to prototype instead
-    public getvalue(): string {
-        return this.get();
-    }
-
-    public read(): string {
-        return this.get();
-    }
-
-    //@+node:felix.20210103231554.6: *3* FileLikeObject.readline (coreGlobals.py)
-    /**
-     * Read the next line using at.list and at.ptr.
-     */
-    public readline(): string {
-        if (this.ptr < this._list.length) {
-            const line: string = this._list[this.ptr];
-            this.ptr++;
-            return line;
-        }
-        return '';
-    }
-
-    //@+node:felix.20210103231554.7: *3* FileLikeObject.write  (coreGlobals.py)
-    public write(s: string): void {
-        if (s) {
-            this._list.push(s);
-        }
-    }
-
-    //@-others
-
-}
-
-//@+node:felix.20220206220711.1: ** class g.TypedDict
-/**
- * A class providing additional dictionary-related methods:
- *
- *   __init__:     Specifies types and the dict's name.
- *   __repr__:     Compatible with g.printObj, based on g.objToString.
- *   __setitem__:  Type checks its arguments.
- *   __str__:      A concise summary of the inner dict.
- *   add_to_list:  A convenience method that adds a value to its key's list.
- *   name:         The dict's name.
- *   setName:      Sets the dict's name, for use by __repr__.
- *
- * Overrides the following standard methods:
- *
- *   copy:         A thin wrapper for copy.deepcopy.
- *   get:          Returns self.d.get
- *   items:        Returns self.d.items
- *   keys:         Returns self.d.keys
- *   update:       Updates self.d from either a dict or a TypedDict.
- */
-export class TypedDict {
-
-    public d: { [key: string]: any };
-    public keyType: any;
-    public valType: any;
-
-    private _name: string;
-
-    constructor(name: string, keyType: any, valType: any) {
-        this.d = {};
-        this._name = name;  // For __repr__ only.
-        this.keyType = keyType;
-        this.valType = valType;
-    }
-
-    //@+others
-    //@+node:felix.20220206220711.2: *3* td.__repr__ & __str__
-    // def __str__(self) -> str:
-    //     """Concise: used by repr."""
-    //     return (
-    //         f"<TypedDict name:{self._name} "
-    //         f"keys:{self.keyType.__name__} "
-    //         f"values:{self.valType.__name__} "
-    //         f"len(keys): {len(list(self.keys()))}>"
-    //     )
-
-    // def __repr__(self) -> str:
-    //     """Suitable for g.printObj"""
-    //     return f"{g.dictToString(self.d)}\n{str(self)}\n"
-    //@+node:felix.20220206220711.3: *3* td.__setitem__
-    // def __setitem__(self, key: Any, val: Any) -> None:
-    //     """Allow d[key] = val"""
-    //     if key is None:
-    //         g.trace('TypeDict: None is not a valid key', g.callers())
-    //         return
-    //     self._checkKeyType(key)
-    //     self._checkKeyType(key)
-    //     try:
-    //         for z in val:
-    //             self._checkValType(z)
-    //     except TypeError:
-    //         self._checkValType(val)  # val is not iterable.
-    //     self.d[key] = val
-    //@+node:felix.20220206220711.4: *3* td.add_to_list
-    // def add_to_list(self, key: Any, val: Any) -> None:
-    //     """Update the *list*, self.d [key]"""
-    //     if key is None:
-    //         g.trace('TypeDict: None is not a valid key', g.callers())
-    //         return
-    //     self._checkKeyType(key)
-    //     self._checkValType(val)
-    //     aList = self.d.get(key, [])
-    //     if val not in aList:
-    //         aList.append(val)
-    //         self.d[key] = aList
-    //@+node:felix.20220206220711.5: *3* td.checking
-    // def _checkKeyType(self, key: str) -> None:
-    //     if key and key.__class__ != self.keyType:
-    //         self._reportTypeError(key, self.keyType)
-
-    // def _checkValType(self, val: Any) -> None:
-    //     if val.__class__ != self.valType:
-    //         self._reportTypeError(val, self.valType)
-
-    // def _reportTypeError(self, obj: Any, objType: Any) -> str:
-    //     return (
-    //         f"{self._name}\n"
-    //         f"expected: {obj.__class__.__name__}\n"
-    //         f"     got: {objType.__name__}")
-    //@+node:felix.20220206220711.6: *3* td.copy
-    // def copy(self, name: str=None) -> Any:
-    //     """Return a new dict with the same contents."""
-    //     import copy
-    //     return copy.deepcopy(self)
-    //@+node:felix.20220206220711.7: *3* td.get & keys & values
-    // def get(self, key: Any, default: Any=None) -> Any:
-    //     return self.d.get(key, default)
-
-    // def items(self) -> Any:
-    //     return self.d.items()
-
-    // def keys(self) -> Any:
-    //     return self.d.keys()
-
-    // def values(self) -> Any:
-    //     return self.d.values()
-    //@+node:felix.20220206220711.8: *3* td.get_getting & get_string_setting
-    // def get_setting(self, key: str) -> Any:
-    //     key = key.replace('-', '').replace('_', '')
-    //     gs = self.get(key)
-    //     val = gs and gs.val
-    //     return val
-
-    // def get_string_setting(self, key: str) -> Optional[str]:
-    //     val = self.get_setting(key)
-    //     return val if val and isinstance(val, str) else None
-    //@+node:felix.20220206220711.9: *3* td.name & setName
-    // def name(self) -> str:
-    //     return self._name
-
-    // def setName(self, name: str) -> None:
-    //     self._name = name
-    //@+node:felix.20220206220711.10: *3* td.update
-    // def update(self, d: Dict[Any, Any]) -> None:
-    //     """Update self.d from a the appropriate dict."""
-    //     if isinstance(d, TypedDict):
-    //         self.d.update(d.d)
-    //     else:
-    //         self.d.update(d)
-    //@-others
-
-}
-
 //@+node:felix.20211030164613.1: ** g.isTextWrapper & isTextWidget
 export function isTextWidget(w: any): boolean {
     return !!app && !!app.gui && app.gui.isTextWidget && app.gui.isTextWidget(w);

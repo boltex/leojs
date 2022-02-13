@@ -31,6 +31,7 @@ suite('Test cases for leoCommands.ts', () => {
 
     //@+others
     //@+node:felix.20220129224954.2: *3* TestCommands.test_add_comments_with_multiple_language_directives
+    // ! uncomment when setSelectionRange and body pane are implemented !
     /* def test_add_comments_with_multiple_language_directives(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
         p.b = textwrap.dedent("""\
@@ -56,6 +57,7 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(p.b, expected)
      */
     //@+node:felix.20220129224954.3: *3* TestCommands.test_add_html_comments
+    // ! uncomment when setSelectionRange and body pane are implemented !
     /* def test_add_html_comments(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
         p.b = textwrap.dedent("""\
@@ -76,6 +78,7 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(p.b, expected)
      */
     //@+node:felix.20220129224954.4: *3* TestCommands.test_add_python_comments
+    // ! uncomment when setSelectionRange and body pane are implemented !
     /* def test_add_python_comments(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
         p.b = textwrap.dedent("""\
@@ -96,6 +99,7 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(p.b, expected)
      */
     //@+node:felix.20220129224954.5: *3* TestCommands.test_all_commands_have_an_event_arg
+    // ! No 'event' argument in commands of leojs (so far) !
     /* def test_all_commands_have_an_event_arg(self):
         c = self.c
         d = c.commandsDict
@@ -124,22 +128,26 @@ suite('Test cases for leoCommands.ts', () => {
             assert arg0 in expected or arg1 in expected, message
      */
     //@+node:felix.20220129224954.6: *3* TestCommands.test_c_alert
-    /* def test_c_alert(self):
-        c = self.c
-        c.alert('test of c.alert')
-     */
+    test('test_c_alert', async () => {
+        const c = self.c;
+        c.alert('test of c.alert');
+    });
+
     //@+node:felix.20220129224954.7: *3* TestCommands.test_c_checkOutline
-    /* def test_c_checkOutline(self):
-        c = self.c
-        errors = c.checkOutline()
-        self.assertEqual(errors, 0)
-     */
+    test('test_c_checkOutline', async () => {
+        const c = self.c;
+        const errors = c.checkOutline();
+        assert.strictEqual(errors, 0);
+    });
+
     //@+node:felix.20220129224954.8: *3* TestCommands.test_c_checkPythonCode
+    // ! uncomment when checkPythonCode is implemented !
     /* def test_c_checkPythonCode(self):
         c = self.c
         c.checkPythonCode(event=None, ignoreAtIgnore=False, checkOnSave=False)
      */
     //@+node:felix.20220129224954.9: *3* TestCommands.test_c_checkPythonNode
+    // ! uncomment when checkPythonCode is implemented !
     /* def test_c_checkPythonNode(self):
         c, p = self.c, self.c.p
         p.b = textwrap.dedent("""\
@@ -152,6 +160,21 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(result, 'error')
      */
     //@+node:felix.20220129224954.10: *3* TestCommands.test_c_config_initIvar_sets_commander_ivars
+    test('test_c_config_initIvar_sets_commander_ivars', async () => {
+        const c = self.c;
+        g.app.config.ivarsData.forEach(element => {
+            let ivar;
+            let setting_type;
+            let defaultVal;
+            [ivar, setting_type, defaultVal] = element;
+            assert.ok(c.hasOwnProperty(ivar), ivar);
+            assert.ok(c.config.hasOwnProperty(ivar), ivar);
+            //@ts-expect-error
+            const val = c.config[ivar];
+            const val2 = c.config.get(ivar);
+            assert.strictEqual(val, val2);
+        });
+    });
     /* def test_c_config_initIvar_sets_commander_ivars(self):
         c = self.c
         for ivar, setting_type, default in g.app.config.ivarsData:
@@ -162,6 +185,10 @@ suite('Test cases for leoCommands.ts', () => {
             self.assertEqual(val, val2)
      */
     //@+node:felix.20220129224954.11: *3* TestCommands.test_c_contractAllHeadlines
+    test('test_c_contractAllHeadlines', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_contractAllHeadlines(self):
         c = self.c
         c.contractAllHeadlines()
@@ -171,6 +198,10 @@ suite('Test cases for leoCommands.ts', () => {
         c.redraw(p)
      */
     //@+node:felix.20220129224954.12: *3* TestCommands.test_c_demote_illegal_clone_demote
+    test('test_c_demote_illegal_clone_demote', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_demote_illegal_clone_demote(self):
         c, p = self.c, self.c.p
         # Create two cloned children.
@@ -189,6 +220,10 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(2, p.numberOfChildren())
      */
     //@+node:felix.20220129224954.13: *3* TestCommands.test_c_expand_path_expression
+    test('test_c_expand_path_expression', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_expand_path_expression(self):
         c = self.c
         import os
@@ -203,6 +238,10 @@ suite('Test cases for leoCommands.ts', () => {
             self.assertEqual(got, expected, msg=repr(s))
      */
     //@+node:felix.20220129224954.14: *3* TestCommands.test_c_findMatchingBracket
+    test('test_c_findMatchingBracket', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_findMatchingBracket(self):
         c, w = self.c, self.c.frame.body.wrapper
         s = '(abc)'
@@ -221,11 +260,19 @@ suite('Test cases for leoCommands.ts', () => {
 
      */
     //@+node:felix.20220129224954.15: *3* TestCommands.test_c_hiddenRootNode_fileIndex
+    test('test_c_hiddenRootNode_fileIndex', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_hiddenRootNode_fileIndex(self):
         c = self.c
         assert c.hiddenRootNode.fileIndex.startswith('hidden-root-vnode-gnx'), c.hiddenRootNode.fileIndex
      */
     //@+node:felix.20220129224954.16: *3* TestCommands.test_c_hoist_chapter_node
+    test('test_c_hoist_chapter_node', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_hoist_chapter_node(self):
         c = self.c
         # Create the @settings and @chapter nodes.
@@ -245,6 +292,10 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(c.hoistStack, [])
      */
     //@+node:felix.20220129224954.17: *3* TestCommands.test_c_hoist_followed_by_goto_first_node
+    test('test_c_hoist_followed_by_goto_first_node', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_hoist_followed_by_goto_first_node(self):
         c = self.c
         # Create the @settings and @chapter nodes.
@@ -272,12 +323,20 @@ suite('Test cases for leoCommands.ts', () => {
             assert c.p.isVisible(c)
      */
     //@+node:felix.20220129224954.18: *3* TestCommands.test_c_hoist_with_no_children
+    test('test_c_hoist_with_no_children', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_hoist_with_no_children(self):
         c = self.c
         c.hoist()
         c.dehoist()
      */
     //@+node:felix.20220129224954.19: *3* TestCommands.test_c_insertBodyTime
+    test('test_c_insertBodyTime', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_insertBodyTime(self):
         c = self.c
         # p = c.p
@@ -287,6 +346,10 @@ suite('Test cases for leoCommands.ts', () => {
         c.insertBodyTime()
      */
     //@+node:felix.20220129224954.20: *3* TestCommands.test_c_markAllAtFileNodesDirty
+    test('test_c_markAllAtFileNodesDirty', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_markAllAtFileNodesDirty(self):
         c = self.c
         marks = [p.v for p in c.all_positions() if p.isMarked()]
@@ -309,6 +372,10 @@ suite('Test cases for leoCommands.ts', () => {
         assert ok
      */
     //@+node:felix.20220129224954.21: *3* TestCommands.test_c_markSubheads
+    test('test_c_markSubheads', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_markSubheads(self):
         c = self.c
         child1 = c.rootPosition().insertAsLastChild()
@@ -317,6 +384,10 @@ suite('Test cases for leoCommands.ts', () => {
         c.markSubheads()
      */
     //@+node:felix.20220129224954.22: *3* TestCommands.test_c_pasteOutline_does_not_clone_top_node
+    test('test_c_pasteOutline_does_not_clone_top_node', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_pasteOutline_does_not_clone_top_node(self):
         c = self.c
         p = c.p
@@ -329,6 +400,10 @@ suite('Test cases for leoCommands.ts', () => {
         assert not p2.isCloned()
      */
     //@+node:felix.20220129224954.23: *3* TestCommands.test_c_scanAllDirectives
+    test('test_c_scanAllDirectives', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_scanAllDirectives(self):
         c = self.c
         d = c.scanAllDirectives(c.p)
@@ -338,6 +413,10 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(d.get('pagewidth'), 132)
      */
     //@+node:felix.20220129224954.24: *3* TestCommands.test_c_scanAtPathDirectives
+    test('test_c_scanAtPathDirectives', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_scanAtPathDirectives(self):
         c, p = self.c, self.c.p
         child = p.insertAfter()
@@ -352,6 +431,10 @@ suite('Test cases for leoCommands.ts', () => {
         assert path.endswith(endpath), f"expected '{endpath}' got '{path}'"
      */
     //@+node:felix.20220129224954.25: *3* TestCommands.test_c_scanAtPathDirectives_same_name_subdirs
+    test('test_c_scanAtPathDirectives_same_name_subdirs', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_scanAtPathDirectives_same_name_subdirs(self):
         c = self.c
         # p2 = p.firstChild().firstChild().firstChild()
@@ -368,6 +451,10 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertTrue(path and path.endswith(endpath))
      */
     //@+node:felix.20220129224954.26: *3* TestCommands.test_c_tabNannyNode
+    test('test_c_tabNannyNode', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_tabNannyNode(self):
         c, p = self.c, self.c.p
         # Test 1.
@@ -390,6 +477,10 @@ suite('Test cases for leoCommands.ts', () => {
             pass
      */
     //@+node:felix.20220129224954.27: *3* TestCommands.test_c_unmarkAll
+    test('test_c_unmarkAll', async () => {
+        const c = self.c;
+
+    });
     /* def test_c_unmarkAll(self):
         c = self.c
         c.unmarkAll()
@@ -397,6 +488,10 @@ suite('Test cases for leoCommands.ts', () => {
             assert not p.isMarked(), p.h
      */
     //@+node:felix.20220129224954.28: *3* TestCommands.test_class_StubConfig
+    test('test_class_StubConfig', async () => {
+        const c = self.c;
+
+    });
     /* def test_class_StubConfig(self):
         c = self.c
         class StubConfig(g.NullObject):
@@ -407,6 +502,10 @@ suite('Test cases for leoCommands.ts', () => {
         assert not x.enabledPluginsFileName
      */
     //@+node:felix.20220129224954.29: *3* TestCommands.test_delete_comments_with_multiple_at_language_directives
+    test('test_delete_comments_with_multiple_at_language_directives', async () => {
+        const c = self.c;
+
+    });
     /* def test_delete_comments_with_multiple_at_language_directives(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
         p.b = textwrap.dedent("""\
@@ -432,6 +531,10 @@ suite('Test cases for leoCommands.ts', () => {
 
      */
     //@+node:felix.20220129224954.30: *3* TestCommands.test_delete_html_comments
+    test('test_delete_html_comments', async () => {
+        const c = self.c;
+
+    });
     /* def test_delete_html_comments(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
         p.b = textwrap.dedent("""\
@@ -452,6 +555,10 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(p.b, expected)
      */
     //@+node:felix.20220129224954.31: *3* TestCommands.test_delete_python_comments
+    test('test_delete_python_comments', async () => {
+        const c = self.c;
+
+    });
     /* def test_delete_python_comments(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
         p.b = textwrap.dedent("""\
@@ -472,6 +579,10 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(p.b, expected)
      */
     //@+node:felix.20220129224954.32: *3* TestCommands.test_efc_ask
+    test('test_efc_ask', async () => {
+        const c = self.c;
+
+    });
     /* def test_efc_ask(self):
         c = self.c
         p = c.p
@@ -483,6 +594,10 @@ suite('Test cases for leoCommands.ts', () => {
         assert result in (True, False), result
      */
     //@+node:felix.20220129224954.33: *3* TestCommands.test_efc_compute_ext
+    test('test_efc_compute_ext', async () => {
+        const c = self.c;
+
+    });
     /* def test_efc_compute_ext(self):
         c, p = self.c, self.c.p
         efc = g.app.externalFilesController
@@ -499,6 +614,10 @@ suite('Test cases for leoCommands.ts', () => {
             self.assertEqual(result, result2, msg=repr(ext))
      */
     //@+node:felix.20220129224954.34: *3* TestCommands.test_efc_compute_temp_file_path
+    test('test_efc_compute_temp_file_path', async () => {
+        const c = self.c;
+
+    });
     /* def test_efc_compute_temp_file_path(self):
         c = self.c
         p = c.p
@@ -509,6 +628,10 @@ suite('Test cases for leoCommands.ts', () => {
         assert s.endswith('.py')
      */
     //@+node:felix.20220129224954.35: *3* TestCommands.test_koi8_r_encoding
+    test('test_koi8_r_encoding', async () => {
+        const c = self.c;
+
+    });
     /* def test_koi8_r_encoding(self):
         c, p = self.c, self.c.p
         p1 = p.insertAsLastChild()
@@ -523,6 +646,10 @@ suite('Test cases for leoCommands.ts', () => {
 
      */
     //@+node:felix.20220129224954.36: *3* TestCommands.test_official_commander_ivars
+    test('test_official_commander_ivars', async () => {
+        const c = self.c;
+
+    });
     /* def test_official_commander_ivars(self):
         c = self.c
         f = c.frame

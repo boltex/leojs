@@ -14,6 +14,7 @@ import { LeoUI, NullGui } from '../leoUI';
 import { NodeIndices } from './leoNodes';
 import { Commands } from './leoCommands';
 import { FileCommands } from "./leoFileCommands";
+import { GlobalConfigManager } from "./leoConfig";
 
 //@-<< imports >>
 //@+others
@@ -169,7 +170,7 @@ export class LeoApp {
     public backgroundProcessManager: any = null; // The singleton BackgroundProcessManager instance.
     public commander_cacher: any = null; // The singleton leoCacher.CommanderCacher instance.
     public commander_db: any = null; // The singleton db, managed by g.app.commander_cacher.
-    public config: any = null; // The singleton leoConfig instance.
+    public config!: GlobalConfigManager; // The singleton leoConfig instance.
     public db: any = null; // The singleton global db, managed by g.app.global_cacher.
     public externalFilesController: any = null; // The singleton ExternalFilesController instance.
     public global_cacher: any = null; // The singleton leoCacher.GlobalCacher instance.
