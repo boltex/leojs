@@ -1138,9 +1138,9 @@ export class LoadManager {
     // The are the defaults for computing settings and shortcuts for all loaded files.
 
     // A g.TypedDict: the join of settings in leoSettings.leo & myLeoSettings.leo.
-    public globalSettingsDict: { [key: string]: any } | undefined;
+    public globalSettingsDict: g.TypedDict | undefined;
     // A g.TypedDict: the join of shortcuts in leoSettings.leo & myLeoSettings.leo
-    public globalBindingsDict: { [key: string]: any } | undefined;
+    public globalBindingsDict: g.TypedDict | undefined;
 
     public files: string[]; // List of files to be loaded.
     public options: { [key: string]: any }; // Dictionary of user options. Keys are option names.

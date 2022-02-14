@@ -75,12 +75,11 @@ export class GlobalConfigManager {
     public defaultMenuFontSize = 12;  // 9 if sys.platform == "win32" else 12
     public defaultTreeFontSize = 12;  // 9 if sys.platform == "win32" else 12
 
-    defaultsDict: { [key: string]: any } = {};
-    // defaultsDict = g.TypedDict(
-    //     name='g.app.config.defaultsDict',
-    //     keyType=str,
-    //     valType=g.GeneralSetting,
-    // )
+    defaultsDict = new g.TypedDict(
+        'g.app.config.defaultsDict',
+        'string',
+        'GeneralSetting'
+    );
 
     public defaultsData: [string, string, any][] = [
         // compare options...
@@ -135,12 +134,12 @@ export class GlobalConfigManager {
     //@-<< gcm.defaultsDict >>
     //@+<< gcm.encodingIvarsDict >>
     //@+node:felix.20220206213914.3: *3* << gcm.encodingIvarsDict >>
-    public encodingIvarsDict: { [key: string]: any } = {};
-    // encodingIvarsDict = g.TypedDict(
-    //     name = 'g.app.config.encodingIvarsDict',
-    //     keyType = str,
-    //     valType = g.GeneralSetting,
-    // )
+    encodingIvarsDict = new g.TypedDict(
+        'g.app.config.encodingIvarsDict',
+        'string',
+        'GeneralSetting'
+    );
+
     public encodingIvarsData: [string, string, string][] = [
         ["default_at_auto_file_encoding", "string", "utf-8"],
         ["default_derived_file_encoding", "string", "utf-8"],
@@ -157,13 +156,13 @@ export class GlobalConfigManager {
     //@+node:felix.20220206213914.4: *3* << gcm.ivarsDict >>
     // Each of these settings sets the corresponding ivar.
     //  Also, the LocalConfigManager class inits the corresponding commander ivar.
-    public ivarsDict: { [key: string]: any } = {};
 
-    // ivarsDict = g.TypedDict(
-    //     name = 'g.app.config.ivarsDict',
-    //     keyType = str,
-    //     valType = g.GeneralSetting,
-    // )
+    public ivarsDict = new g.TypedDict(
+        'g.app.config.ivarsDict',
+        'string',
+        'GeneralSetting'
+    );
+
     public ivarsData: [string, string, any][] = [
         ["at_root_bodies_start_in_doc_mode", "bool", true],
         // For compatibility with previous versions.
@@ -279,138 +278,128 @@ export class GlobalConfigManager {
 
         this.defaultsData.forEach(element => {
             [key, kind, val] = element;
-            this.defaultsDict[this.munge(key)!] = new g.GeneralSetting(
-                kind,  // kind
-                undefined,  // encoding
-                undefined,  // ivar
-                undefined,  // setting
-                key,  // val
-                val,  // path
-                'defaults'  // tag
-                            // unl
+            this.defaultsDict.d[this.munge(key)!] = new g.GeneralSetting(
+                {
+                    kind: kind, setting: key, val: val, tag: 'defaults'
+                }
             );
         });
 
         this.ivarsData.forEach(element => {
             [key, kind, val] = element;
-            this.ivarsDict[this.munge(key)!] = new g.GeneralSetting(
-                kind,  // kind
-                key,  // encoding
-                val,  // ivar
-                'ivars'  // setting
-                        // val
-                        // path
-                        // tag
-                        // unl
+            this.ivarsDict.d[this.munge(key)!] = new g.GeneralSetting(
+                {
+                    kind: kind, ivar: key, val: val, tag: 'ivars'
+                }
 
             );
         });
 
         this.encodingIvarsData.forEach(element => {
             [key, kind, val] = element;
-            this.encodingIvarsDict[this.munge(key)!] = new g.GeneralSetting(
-                kind,  // kind
-                key,  // encoding
-                val,  // ivar
-                'encoding'  // setting
-                            // val
-                            // path
-                            // tag
-                            // unl
+            this.encodingIvarsDict.d[this.munge(key)!] = new g.GeneralSetting(
+                {
+                    kind: kind, encoding: val, ivar: key, tag: 'encoding'
+                }
             );
         });
-
-
-        /*
-            self.dictList = [self.defaultsDict]
-            for key, kind, val in self.defaultsData:
-                self.defaultsDict[self.munge(key)] = g.GeneralSetting(
-                    kind, setting=key, val=val, tag='defaults')
-            for key, kind, val in self.ivarsData:
-                self.ivarsDict[self.munge(key)] = g.GeneralSetting(
-                    kind, ivar=key, val=val, tag='ivars')
-            for key, kind, val in self.encodingIvarsData:
-                self.encodingIvarsDict[self.munge(key)] = g.GeneralSetting(
-                    kind, encoding=val, ivar=key, tag='encoding')
-
-        */
 
     }
 
     //@+node:felix.20220207005211.4: *4* gcm.initIvarsFromSettings & helpers
-    /*
+
     public initIvarsFromSettings(): void {
 
-        Object.keys(this.encodingIvarsDict).sort().forEach(ivar => {
-              this.initEncoding(ivar)
+        Object.keys(this.encodingIvarsDict.d).sort().forEach(ivar => {
+            this.initEncoding(ivar);
         });
 
-       Object.keys(this.ivarsDict).sort().forEach(ivar => {
-              this.initIvar(ivar)
+        Object.keys(this.ivarsDict.d).sort().forEach(ivar => {
+            this.initIvar(ivar);
         });
 
     }
 
-     */
+
     //@+node:felix.20220207005211.5: *5* initEncoding
-    /* def initEncoding(self, key):
-        """Init g.app.config encoding ivars during initialization."""
-        # Important: The key is munged.
-        gs = self.encodingIvarsDict.get(key)
-        setattr(self, gs.ivar, gs.encoding)
-        if gs.encoding and not g.isValidEncoding(gs.encoding):
-            g.es('g.app.config: bad encoding:', f"{gs.ivar}: {gs.encoding}")
+    /**
+     * Init g.app.config encoding ivars during initialization.
      */
+    public initEncoding(key: string): void {
+        // Important: The key is munged.
+        const gs = this.encodingIvarsDict.get(key);
+        (this as any)[gs.ivar] = gs.encoding;
+        if (gs.encoding && !g.isValidEncoding(gs.encoding)) {
+            g.es('g.app.config: bad encoding: ' + `${gs.ivar}: ${gs.encoding}`);
+        }
+    }
+
     //@+node:felix.20220207005211.6: *5* initIvar
-    /* def initIvar(self, key):
-        """
-        Init g.app.config ivars during initialization.
-
-        This does NOT init the corresponding commander ivars.
-
-        Such initing must be done in setIvarsFromSettings.
-        """
-        # Important: the key is munged.
-        d = self.ivarsDict
-        gs = d.get(key)
-        setattr(self, gs.ivar, gs.val)
+    /**
+     * Init g.app.config ivars during initialization.
+     *
+     * This does NOT init the corresponding commander ivars.
+     *
+     * Such initing must be done in setIvarsFromSettings.
      */
+    public initIvar(key: string): void {
+        // Important: the key is munged.
+        const d = this.ivarsDict;
+        const gs = d.get(key);
+
+        (this as any)[gs.ivar] = gs.val;
+        // setattr(self, gs.ivar, gs.val)
+
+    }
+
     //@+node:felix.20220207005211.7: *4* gcm.initRecentFiles
     public initRecentFiles(): void {
         this.recentFiles = [];
     }
 
     //@+node:felix.20220207005211.8: *4* gcm.setIvarsFromSettings
-    /* def setIvarsFromSettings(self, c):
-        """
-        Init g.app.config ivars or c's ivars from settings.
-
-        - Called from c.initSettings with c = None to init g.app.config ivars.
-        - Called from c.initSettings to init corresponding commmander ivars.
-        """
-        if g.app.loadedThemes:
-            return
-        if not self.inited:
-            return
-        # Ignore temporary commanders created by readSettingsFiles.
-        d = self.ivarsDict
-        keys = list(d.keys())
-        keys.sort()
-        for key in keys:
-            gs = d.get(key)
-            if gs:
-                assert isinstance(gs, g.GeneralSetting)
-                ivar = gs.ivar  # The actual name of the ivar.
-                kind = gs.kind
-                if c:
-                    val = c.config.get(key, kind)
-                else:
-                    val = self.get(key, kind)  # Don't use bunch.val!
-                if c:
-                    setattr(c, ivar, val)
-                if True:  # Always set the global ivars.
-                    setattr(self, ivar, val)
+    /**
+     * Init g.app.config ivars or c's ivars from settings.
+     *
+     * - Called from c.initSettings with c = None to init g.app.config ivars.
+     * - Called from c.initSettings to init corresponding commmander ivars.
      */
+    public setIvarsFromSettings(c?: Commands): void {
+
+        if (g.app.loadedThemes) {
+            return;
+        }
+        if (!this.inited) {
+            return;
+        }
+        // Ignore temporary commanders created by readSettingsFiles.
+        const d = this.ivarsDict;
+        const keys = d.keys().sort();
+
+        for (let key of keys) {
+            const gs = d.get(key);
+            if (gs) {
+                // ? needed ?
+                // assert isinstance(gs, g.GeneralSetting)
+                const ivar = gs.ivar;  // The actual name of the ivar.
+                const kind = gs.kind;
+                let val: any;
+                if (c) {
+                    val = c.config.get(key);
+                } else {
+                    val = this.get(key, kind);  // Don't use bunch.val!
+                }
+                if (c) {
+                    (c as any)[ivar] = val;
+                }
+                if (true) {  // Always set the global ivars.
+                    (this as any)[ivar] = val;
+                }
+            }
+
+        }
+    }
+
     //@+node:felix.20220207005224.1: *3* gcm.Getters...
     //@+node:felix.20220207005224.2: *4* gcm.canonicalizeSettingName (munge)
     public canonicalizeSettingName(name?: string): string | undefined {
@@ -434,89 +423,123 @@ export class GlobalConfigManager {
     // ! ALIAS !
     // munge = canonicalizeSettingName
     //@+node:felix.20220207005224.3: *4* gcm.exists
-    /* def exists(self, setting, kind):
-        """Return true if a setting of the given kind exists, even if it is None."""
-        lm = g.app.loadManager
-        d = lm.globalSettingsDict
-        if d:
-            junk, found = self.getValFromDict(d, setting, kind)
-            return found
-        return False
+    /**
+     * Return true if a setting of the given kind exists, even if it is None.
      */
+    public exists(setting: string, kind: string): boolean {
+        const lm = g.app.loadManager;
+        const d = lm!.globalSettingsDict;
+        if (d) {
+            let junk: any;
+            let found: boolean;
+            [junk, found] = this.getValFromDict(d, setting, kind);
+            return found;
+        }
+        return false;
+    }
+
     //@+node:felix.20220207005224.4: *4* gcm.get & allies
-    /* def get(self, setting, kind):
-        """Get the setting and make sure its type matches the expected type."""
-        lm = g.app.loadManager
-        #
-        # It *is* valid to call this method: it returns the global settings.
-        d = lm.globalSettingsDict
-        if d:
-            assert isinstance(d, g.TypedDict), repr(d)
-            val, junk = self.getValFromDict(d, setting, kind)
-            return val
-        return None
+    /**
+     * Get the setting and make sure its type matches the expected type.
      */
+    public get(setting: string, kind: string): any {
+
+        const lm = g.app.loadManager;
+
+        // It *is* valid to call this method: it returns the global settings.
+        const d = lm!.globalSettingsDict;
+        if (d) {
+            // ? needed ?
+            // assert isinstance(d, g.TypedDict), repr(d)
+            let val: any;
+            let junk: boolean;
+
+            [val, junk] = this.getValFromDict(d, setting, kind);
+            return val;
+        }
+        return undefined;
+
+    }
+
     //@+node:felix.20220207005224.5: *5* gcm.getValFromDict
-    /* def getValFromDict(self, d, setting, requestedType, warn=True):
-        """
-        Look up the setting in d. If warn is True, warn if the requested type
-        does not (loosely) match the actual type.
-        returns (val,exists)
-        """
-        tag = 'gcm.getValFromDict'
-        gs = d.get(self.munge(setting))
-        if not gs:
-            return None, False
-        assert isinstance(gs, g.GeneralSetting), repr(gs)
-        val = gs.val
-        isNone = val in ('None', 'none', '')
-        if not self.typesMatch(gs.kind, requestedType):
-            # New in 4.4: make sure the types match.
-            # A serious warning: one setting may have destroyed another!
-            # Important: this is not a complete test of conflicting settings:
-            # The warning is given only if the code tries to access the setting.
-            if warn:
+    /**
+     * Look up the setting in d. If warn is True, warn if the requested type
+     * does not (loosely) match the actual type.
+     * returns (val,exists)
+     */
+    public getValFromDict(d: g.TypedDict, setting: string, requestedType: string, warn: boolean = true): [any, boolean] {
+        let tag = 'gcm.getValFromDict';
+        const gs = d.get(this.munge(setting)!);
+        if (!gs) {
+            return [undefined, false];
+        }
+        // ? needed ?
+        // assert isinstance(gs, g.GeneralSetting), repr(gs)
+        const val = gs.val;
+        const isNone = ['Undefined', 'None', 'none', ''].includes(val);
+        if (!this.typesMatch(gs.kind, requestedType)) {
+            // New in 4.4: make sure the types match.
+            // A serious warning: one setting may have destroyed another!
+            // Important: this is not a complete test of conflicting settings:
+            // The warning is given only if the code tries to access the setting.
+            if (warn) {
                 g.error(
-                    f"{tag}: ignoring '{setting}' setting.\n"
-                    f"{tag}: '@{gs.kind}' is not '@{requestedType}'.\n"
-                    f"{tag}: there may be conflicting settings!")
-            return None, False
-        if isNone:
-            return '', True
-                # 2011/10/24: Exists, a *user-defined* empty value.
-        return val, True
-     */
+                    `${tag}: ignoring '${setting}' setting.\n` +
+                    `${tag}: '@${gs.kind}' is not '@${requestedType}'.\n` +
+                    `${tag}: there may be conflicting settings!`
+                );
+            }
+            return [undefined, false];
+        }
+
+        if (isNone) {
+            return ['', true];
+        }
+
+        // 2011/10/24: Exists, a *user-defined* empty value.
+        return [val, true];
+    }
+
+
+
+
     //@+node:felix.20220207005224.6: *5* gcm.typesMatch
-    /* def typesMatch(self, type1, type2):
-        """
-        Return True if type1, the actual type, matches type2, the requeseted type.
+    /**
+     * Return True if type1, the actual type, matches type2, the requeseted type.
+     *
+     * The following equivalences are allowed:
+     *
+     * - None matches anything.
+     * - An actual type of string or strings matches anything *except* shortcuts.
+     * - Shortcut matches shortcuts.
+     */
+    public typesMatch(type1: string, type2: string): boolean {
 
-        The following equivalences are allowed:
-
-        - None matches anything.
-        - An actual type of string or strings matches anything *except* shortcuts.
-        - Shortcut matches shortcuts.
-        """
-        # The shortcuts logic no longer uses the get/set code.
-        shortcuts = ('shortcut', 'shortcuts',)
-        if type1 in shortcuts or type2 in shortcuts:
-            g.trace('oops: type in shortcuts')
+        // The shortcuts logic no longer uses the get/set code.
+        const shortcuts = ['shortcut', 'shortcuts'];
+        if (shortcuts.includes(type1) || shortcuts.includes(type2)) {
+            g.trace('oops: type in shortcuts');
+        }
         return (
-            type1 is None
-            or type2 is None
-            or type1.startswith('string') and type2 not in shortcuts
-            or type1 == 'language' and type2 == 'string'
-            or type1 == 'int' and type2 == 'size'
-            or (type1 in shortcuts and type2 in shortcuts)
-            or type1 == type2
-        )
-     */
+            type1 === undefined
+            || type2 === undefined
+            || type1.startsWith('string') && !shortcuts.includes(type2)
+            || type1 === 'language' && type2 === 'string'
+            || type1 === 'int' && type2 === 'size'
+            || (shortcuts.includes(type1) && shortcuts.includes(type2))
+            || type1 === type2
+        );
+    }
+
     //@+node:felix.20220207005224.7: *4* gcm.getAbbrevDict
-    /* def getAbbrevDict(self):
-        """Search all dictionaries for the setting & check it's type"""
-        d = self.get('abbrev', 'abbrev')
-        return d or {}
+    /**
+     * Search all dictionaries for the setting & check it's type
      */
+    public getAbbrevDict(): { [key: string]: string } {
+        const d = this.get('abbrev', 'abbrev');
+        return d || {};
+    }
+
     //@+node:felix.20220207005224.8: *4* gcm.getBool
     /* def getBool(self, setting, default=None):
         """Return the value of @bool setting, or the default if the setting is not found."""
@@ -653,10 +676,12 @@ export class GlobalConfigManager {
         return self.recentFiles
      */
     //@+node:felix.20220207005224.23: *4* gcm.getString
-    /* def getString(self, setting):
-        """Return the value of @string setting."""
-        return self.get(setting, "string")
+    /**
+     * Return the value of @string setting.
      */
+    public getString(setting: string): string {
+        return this.get(setting, "string");
+    }
     //@+node:felix.20220206213914.36: *3* gcm.config_iter
     /* def config_iter(self, c):
         """Letters:

@@ -424,27 +424,32 @@ export class GeneralSetting {
     public setting: string | undefined = undefined;
     public val: any | undefined = undefined;
     public path: string | undefined = undefined;
-    public tag: string | undefined = 'setting';
+    public tag: string = 'setting';
     public unl: string | undefined = undefined;
 
     constructor(
-        kind: string,
-        encoding = undefined,
-        ivar = undefined,
-        setting = undefined,
-        val = undefined,
-        path = undefined,
-        tag = 'setting',
-        unl = undefined,
+        p_generalSetting: {
+            kind: string;
+            encoding?: string;
+            ivar?: string;
+            setting?: string;
+            val?: any;
+            path?: string;
+            tag?: string;
+            unl?: string;
+        }
+
     ) {
-        this.encoding = encoding;
-        this.ivar = ivar;
-        this.kind = kind;
-        this.path = path;
-        this.unl = unl;
-        this.setting = setting;
-        this.val = val;
-        this.tag = tag;
+        this.encoding = p_generalSetting.encoding;
+        this.ivar = p_generalSetting.ivar;
+        this.kind = p_generalSetting.kind;
+        this.path = p_generalSetting.path;
+        this.unl = p_generalSetting.unl;
+        this.setting = p_generalSetting.setting;
+        this.val = p_generalSetting.val;
+        if (p_generalSetting.tag) {
+            this.tag = p_generalSetting.tag;
+        }
     }
 
     public __repr__(): string {
@@ -512,6 +517,11 @@ export class TypedDict {
     // def __repr__(self) -> str:
     //     """Suitable for g.printObj"""
     //     return f"{g.dictToString(self.d)}\n{str(self)}\n"
+
+    public toString(): string {
+        return `${this.d.toString()}\nTypedDict name:${this._name}\n`;
+    }
+
     //@+node:felix.20220213000510.3: *4* td.__setitem__
     // def __setitem__(self, key: Any, val: Any) -> None:
     //     """Allow d[key] = val"""
@@ -526,72 +536,157 @@ export class TypedDict {
     //     except TypeError:
     //         self._checkValType(val)  # val is not iterable.
     //     self.d[key] = val
+
+    public set(key: string, val: any): void {
+        if (key === undefined) {
+            trace('TypeDict: None is not a valid key', callers());
+            return;
+        }
+        this._checkKeyType(key)
+
+        // try:
+        //     for z in val:
+        //         this._checkValType(z)
+        // except TypeError:
+        //     this._checkValType(val)  # val is not iterable.
+
+
+        this.d[key] = val;
+
+    }
+
     //@+node:felix.20220213000510.4: *4* td.add_to_list
-    // def add_to_list(self, key: Any, val: Any) -> None:
-    //     """Update the *list*, self.d [key]"""
-    //     if key is None:
-    //         g.trace('TypeDict: None is not a valid key', g.callers())
-    //         return
-    //     self._checkKeyType(key)
-    //     self._checkValType(val)
-    //     aList = self.d.get(key, [])
-    //     if val not in aList:
-    //         aList.append(val)
-    //         self.d[key] = aList
+    /**
+     * Update the *list*, self.d [key]
+     */
+    public add_to_list(key: string, val: any): void {
+
+        if (key === undefined) {
+            trace('TypeDict: None is not a valid key', callers());
+            return;
+        }
+
+        this._checkKeyType(key);
+        this._checkValType(val);
+
+        let aList;
+        if (this.d.hasOwnProperty(key)) {
+            aList = this.d[key];
+        } else {
+            aList = [];
+        }
+
+        if (!aList.includes(val)) {
+            aList.push(val);
+            this.d[key] = aList;
+        }
+
+    }
+
     //@+node:felix.20220213000510.5: *4* td.checking
-    // def _checkKeyType(self, key: str) -> None:
-    //     if key and key.__class__ != self.keyType:
-    //         self._reportTypeError(key, self.keyType)
+    public _checkKeyType(key: string): void {
+        if (key && typeof (key) !== this.keyType) {
+            // TODO ?
+            // this._reportTypeError(key, this.keyType);
+        }
+    }
 
-    // def _checkValType(self, val: Any) -> None:
-    //     if val.__class__ != self.valType:
-    //         self._reportTypeError(val, self.valType)
+    public _checkValType(val: any): void {
+        if (typeof (val) !== this.valType) {
+            // TODO ?
+            // this._reportTypeError(val, this.valType);
+        }
+    }
 
-    // def _reportTypeError(self, obj: Any, objType: Any) -> str:
+    // def _reportTypeError(obj: Any, objType: Any) -> str:
     //     return (
     //         f"{self._name}\n"
     //         f"expected: {obj.__class__.__name__}\n"
     //         f"     got: {objType.__name__}")
     //@+node:felix.20220213000510.6: *4* td.copy
-    // def copy(self, name: str=None) -> Any:
-    //     """Return a new dict with the same contents."""
-    //     import copy
-    //     return copy.deepcopy(self)
+    /**
+     * Return a new dict with the same contents.
+     */
+    public copy(name?: string): TypedDict {
+        const newDict = new TypedDict(
+            this._name,
+            this.keyType,
+            this.valType
+        );
+        newDict.d = JSON.parse(JSON.stringify(this.d));
+        return newDict;
+    }
+
     //@+node:felix.20220213000510.7: *4* td.get & keys & values
-    // def get(self, key: Any, default: Any=None) -> Any:
-    //     return self.d.get(key, default)
+    public get(key: string, p_default?: any): any {
+        if (this.d.hasOwnProperty(key)) {
+            return this.d[key];
+        } else {
+            return p_default;
+        }
+    }
 
-    // def items(self) -> Any:
-    //     return self.d.items()
+    public items(): any {
+        return Object.keys(this.d).map((key) => {
+            return [key, this.d[key]];
+        });
+    }
 
-    // def keys(self) -> Any:
-    //     return self.d.keys()
+    public keys(): any {
+        return Object.keys(this.d);
+    }
 
-    // def values(self) -> Any:
-    //     return self.d.values()
-    //@+node:felix.20220213000510.8: *4* td.get_getting & get_string_setting
-    // def get_setting(self, key: str) -> Any:
-    //     key = key.replace('-', '').replace('_', '')
-    //     gs = self.get(key)
-    //     val = gs and gs.val
-    //     return val
+    public values(): any {
+        return Object.keys(this.d).map((key) => {
+            return this.d[key];
+        });
+    }
 
-    // def get_string_setting(self, key: str) -> Optional[str]:
-    //     val = self.get_setting(key)
-    //     return val if val and isinstance(val, str) else None
+    //@+node:felix.20220213000510.8: *4* td.get_setting & get_string_setting
+    public get_setting(key: string): any {
+        key = key.split('-').join('');
+        key = key.split('_').join('');
+
+        const gs = this.get(key);
+        const val = gs && gs.val;
+        return val;
+    }
+
+    public get_string_setting(key: string): string|undefined {
+        const val = this.get_setting(key);
+        if( typeof(val)==='string' ){
+            return val;
+        }else{
+            return undefined;
+        }
+    }
+
     //@+node:felix.20220213000510.9: *4* td.name & setName
-    // def name(self) -> str:
-    //     return self._name
+    public name() :string {
+        return this._name;
+    }
 
-    // def setName(self, name: str) -> None:
-    //     self._name = name
+    public setName(name: string): void {
+        this._name = name;
+    }
+
     //@+node:felix.20220213000510.10: *4* td.update
-    // def update(self, d: Dict[Any, Any]) -> None:
-    //     """Update self.d from a the appropriate dict."""
-    //     if isinstance(d, TypedDict):
-    //         self.d.update(d.d)
-    //     else:
-    //         self.d.update(d)
+    /**
+     * Update self.d from a the appropriate dict.
+     */
+    public update(d: {[key: string]: any}) : void {
+        // if isinstance(d, TypedDict):
+        if (d.hasOwnProperty('d')){
+            this.d.update(d.d);
+        }else{
+            // this.d.update(d);
+            this.d = {
+            ...this.d,
+            ...d
+            };
+        }
+    }
+
     //@-others
 
 }
@@ -2001,6 +2096,31 @@ export function getLine(s: string, i: number): [number, number] {
     }
     return [j, k];
 }
+//@+node:felix.20220213223330.1: *3* g.isValidEncoding
+/**
+ * Return True if the encooding is valid.
+ */
+export function isValidEncoding(encoding: string) : boolean {
+    // ! TEMPORARY !
+    if (!encoding){
+        return false
+    }
+    return true;
+
+    // try:
+    //     codecs.lookup(encoding)
+    //     return True
+    // except LookupError:  # Windows
+    //     return false
+    // except AttributeError:  # Linux
+    //     return false
+    // except Exception:
+    //     // UnicodeEncodeError
+    //     g.es_print('Please report the following error')
+    //     g.es_exception()
+    //     return false
+}
+
 //@+node:felix.20211104230158.1: *3* g.toEncodedString (coreGlobals.py)
 /**
  * Convert unicode string to an encoded string.
