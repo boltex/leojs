@@ -652,17 +652,17 @@ export class TypedDict {
         return val;
     }
 
-    public get_string_setting(key: string): string|undefined {
+    public get_string_setting(key: string): string | undefined {
         const val = this.get_setting(key);
-        if( typeof(val)==='string' ){
+        if (typeof (val) === 'string') {
             return val;
-        }else{
+        } else {
             return undefined;
         }
     }
 
     //@+node:felix.20220213000510.9: *4* td.name & setName
-    public name() :string {
+    public name(): string {
         return this._name;
     }
 
@@ -674,15 +674,15 @@ export class TypedDict {
     /**
      * Update self.d from a the appropriate dict.
      */
-    public update(d: {[key: string]: any}) : void {
+    public update(d: { [key: string]: any }): void {
         // if isinstance(d, TypedDict):
-        if (d.hasOwnProperty('d')){
+        if (d.hasOwnProperty('d')) {
             this.d.update(d.d);
-        }else{
+        } else {
             // this.d.update(d);
             this.d = {
-            ...this.d,
-            ...d
+                ...this.d,
+                ...d
             };
         }
     }
@@ -2100,9 +2100,9 @@ export function getLine(s: string, i: number): [number, number] {
 /**
  * Return True if the encooding is valid.
  */
-export function isValidEncoding(encoding: string) : boolean {
+export function isValidEncoding(encoding: string): boolean {
     // ! TEMPORARY !
-    if (!encoding){
+    if (!encoding) {
         return false
     }
     return true;

@@ -1138,20 +1138,29 @@ export class LoadManager {
     // The are the defaults for computing settings and shortcuts for all loaded files.
 
     // A g.TypedDict: the join of settings in leoSettings.leo & myLeoSettings.leo.
-    public globalSettingsDict: g.TypedDict | undefined;
+    public globalSettingsDict!: g.TypedDict;
     // A g.TypedDict: the join of shortcuts in leoSettings.leo & myLeoSettings.leo
-    public globalBindingsDict: g.TypedDict | undefined;
+    public globalBindingsDict!: g.TypedDict;
 
     public files: string[]; // List of files to be loaded.
     public options: { [key: string]: any }; // Dictionary of user options. Keys are option names.
     public old_argv: string[]; // A copy of sys.argv for debugging.
     public more_cmdline_files: boolean; // True when more files remain on the command line to be loaded.
 
+    // Themes.
+    public leo_settings_c: any;//  = None
+    public leo_settings_path: any;//  = None
+    public my_settings_c: any;//  = None
+    public my_settings_path: any;//  = None
+    public theme_c: any;//  = None
+    // #1374.
+    public theme_path: any;//  = None
+
     //@+others
     //@+node:felix.20210119234943.1: *3*  LM.ctor
     constructor() {
-        this.globalSettingsDict = undefined;
-        this.globalBindingsDict = undefined;
+        // this.globalSettingsDict = undefined;
+        // this.globalBindingsDict = undefined;
         this.files = [];
         this.options = {};
         this.old_argv = [];

@@ -4,60 +4,10 @@
 //@+node:felix.20211031230614.1: ** << imports >>
 import { Commands } from './leoCommands';
 import * as g from './leoGlobals';
+import { Position } from './leoNodes';
 
 //@-<< imports >>
 //@+others
-//@+node:felix.20211031230501.1: ** class LocalConfigManager
-/**
- * A class to hold config settings for commanders.
- */
-export class LocalConfigManager {
-
-    public c: Commands;
-    public settingsDict: { [key: string]: any };
-
-    // TODO : REPLACE WITH REAL TRANSLATION FROM LEO
-    public default_derived_file_encoding: string = "utf-8";
-    public default_at_auto_file_encoding: string = "utf-8";
-    public new_leo_file_encoding: string = "UTF-8";
-    public save_clears_undo_buffer: boolean = false;
-
-    //@+others
-    //@+node:felix.20211031231935.1: *3* constructor
-
-    constructor(c: Commands) {
-        this.c = c;
-        this.settingsDict = {};
-
-        // TODO : TEMP stub settings
-
-        this.settingsDict['insert-new-nodes-at-end'] = false;
-        this.settingsDict['max-undo-stack-size'] = 0;
-        this.settingsDict['undo-granularity'] = 'line';
-
-    }
-
-    //@+node:felix.20211031234043.1: *3* get
-    /**
-     * Get the setting and make sure its type matches the expected type.
-     */
-    public get(setting: string): any {
-        return this.settingsDict[setting];
-    }
-    //@+node:felix.20211031234046.1: *3* getInt
-    public getInt(setting: string): any {
-        return this.get(setting);
-    }
-    //@+node:felix.20211031234049.1: *3* getBool
-    public getBool(setting: string): any {
-        return this.get(setting);
-    }
-    //@+node:felix.20211031234059.1: *3* getString
-    public getString(setting: string): any {
-        return this.get(setting);
-    }
-    //@-others
-}
 //@+node:felix.20220206213914.1: ** class GlobalConfigManager
 /**
  * A class to manage configuration settings.
@@ -218,7 +168,14 @@ export class GlobalConfigManager {
 
     public relative_path_base_directory!: string;
 
+    public at_root_bodies_start_in_doc_mode!: boolean; // = true;
+    public default_derived_file_encoding!: string; // = 'utf-8';
+    public output_newline!: string; // = 'nl';
+    public redirect_execute_script_output_to_log_pane!: boolean; // = true;
+
+
     //@+others
+
     //@+node:felix.20220207005211.1: *3* gcm.Birth...
     //@+node:felix.20220207005211.2: *4* gcm.ctor
     constructor() {
@@ -257,6 +214,9 @@ export class GlobalConfigManager {
         this.panes = undefined;
         this.sc = undefined;
         this.tree = undefined;
+
+        this.inited = true;
+
         this.initDicts();
         // this.initIvarsFromSettings(); // TODO ?
         this.initRecentFiles();
@@ -365,8 +325,7 @@ export class GlobalConfigManager {
      * - Called from c.initSettings to init corresponding commmander ivars.
      */
     public setIvarsFromSettings(c?: Commands): void {
-
-        if (g.app.loadedThemes) {
+        if (g.app.loadedThemes.length) {
             return;
         }
         if (!this.inited) {
@@ -385,11 +344,13 @@ export class GlobalConfigManager {
                 const kind = gs.kind;
                 let val: any;
                 if (c) {
-                    val = c.config.get(key);
+                    val = c.config.get(key, kind);
                 } else {
                     val = this.get(key, kind);  // Don't use bunch.val!
                 }
                 if (c) {
+                    console.log('-------------------------------SETTING c IVAR : ' + ivar + " to " + val);
+
                     (c as any)[ivar] = val;
                 }
                 if (true) {  // Always set the global ivars.
@@ -733,6 +694,828 @@ export class GlobalConfigManager {
                 return gs.val
         return None
      */
+    //@-others
+
+}
+//@+node:felix.20220214191554.1: ** class LocalConfigManager
+/**
+ * A class to hold config settings for commanders.
+ */
+export class LocalConfigManager {
+
+    public c: Commands;
+    public settingsDict: g.TypedDict;
+    public shortcutsDict: g.TypedDict;
+
+    public defaultBodyFontSize: number;
+    public defaultLogFontSize: number;
+    public defaultMenuFontSize: number;
+    public defaultTreeFontSize: number;
+
+    // TODO : REPLACE WITH REAL TRANSLATION FROM LEO
+    public default_derived_file_encoding!: string;//  = "utf-8";
+    public default_at_auto_file_encoding!: string;// = "utf-8";
+    public new_leo_file_encoding!: string; // = "UTF-8";
+    public save_clears_undo_buffer!: boolean; // = false;
+
+    //@+others
+    //@+node:felix.20220214191554.2: *3* c.config.Birth
+    //@+node:felix.20220214191554.3: *4* c.config.ctor
+    constructor(c: Commands, previousSettings?: LocalConfigManager) {
+        this.c = c;
+
+        const lm = g.app.loadManager;
+        //
+        // c.__init__ and helpers set the shortcuts and settings dicts for local files.
+        if (previousSettings) {
+            this.settingsDict = previousSettings.settingsDict;
+            this.shortcutsDict = previousSettings.shortcutsDict;
+            //assert isinstance(this.settingsDict, g.TypedDict), repr(this.settingsDict)
+            //assert isinstance(this.shortcutsDict, g.TypedDict), repr(this.shortcutsDict)
+            // was TypedDictOfLists.
+        } else {
+            this.settingsDict = lm!.globalSettingsDict;
+            this.shortcutsDict = lm!.globalBindingsDict;
+            // assert d1 is None or isinstance(d1, g.TypedDict), repr(d1)
+            // assert d2 is None or isinstance(d2, g.TypedDict), repr(d2)  // was TypedDictOfLists.
+        }
+        // Define these explicitly to eliminate a pylint warning.
+        if (0) {
+            // No longer needed now that c.config.initIvar always sets
+            // both c and c.config ivars.
+            // this.default_derived_file_encoding = g.app.config.default_derived_file_encoding;
+            // this.redirect_execute_script_output_to_log_pane = g.app.config.redirect_execute_script_output_to_log_pane;
+        }
+
+        this.defaultBodyFontSize = g.app.config.defaultBodyFontSize;
+        this.defaultLogFontSize = g.app.config.defaultLogFontSize;
+        this.defaultMenuFontSize = g.app.config.defaultMenuFontSize;
+        this.defaultTreeFontSize = g.app.config.defaultTreeFontSize;
+        for (let key of [g.app.config.encodingIvarsDict.keys()].sort()) {
+            this.initEncoding(key);
+        }
+        for (let key of [g.app.config.ivarsDict.keys()].sort()) {
+            this.initIvar(key);
+        }
+
+    }
+
+    //@+node:felix.20220214191554.4: *4* c.config.initEncoding
+    public initEncoding(key: string): void {
+        // Important: the key is munged.
+        const gs = g.app.config.encodingIvarsDict.get(key);
+        const encodingName = gs.ivar;
+        let encoding = this.get(encodingName, 'string');
+        // Use the global setting as a last resort.
+        // TODO check if needed
+        if (!encoding) {
+            encoding = (g.app.config as any)[encodingName];
+        }
+        (this as any)[encodingName] = encoding;
+        if (encoding && !g.isValidEncoding(encoding)) {
+            g.es('bad', `${encodingName}: ${encoding}`);
+        }
+    }
+
+    //@+node:felix.20220214191554.5: *4* c.config.initIvar
+    public initIvar(key: string): void {
+        const c = this.c;
+        // Important: the key is munged.
+        const gs = g.app.config.ivarsDict.get(key);
+        const ivarName = gs.ivar;
+        const val = this.get(ivarName, undefined);
+        if (val || !(this as any)[ivarName]) {
+            // Set *both* the commander ivar and the c.config ivar.
+            (this as any)[ivarName] = val;
+            (c as any)[ivarName] = val;
+            // * equivalent of
+            // setattr(self, ivarName, val)
+            // setattr(c, ivarName, val)
+        }
+    }
+
+    //@+node:felix.20220214191554.6: *3* c.config.createActivesSettingsOutline (new: #852)
+    /**
+     * Create and open an outline, summarizing all presently active settings.
+     *
+     * The outline retains the organization of all active settings files.
+     *
+     * See #852: https://github.com/leo-editor/leo-editor/issues/852
+     */
+    // ! uncomment if needed
+    // public createActivesSettingsOutline(): void {
+    //     ActiveSettingsOutline(this.c);
+    // }
+    //@+node:felix.20220214191554.7: *3* c.config.getSource
+    /**
+     * Return a string representing the source file of the given setting,
+     * one of ("local_file", "theme_file", "myLeoSettings", "leoSettings", "ignore", "error")
+     */
+    public getSource(setting: g.GeneralSetting): string {
+
+        let trace = false;
+
+        // ? needed ?
+        // if !isinstance(setting, g.GeneralSetting):
+        //     return "error"
+        let w_path: string;
+        try {
+            w_path = setting.path!;
+        }
+        catch (exception) {
+            return "error";
+        }
+
+        const val = setting.val.toString().substring(0, 50);
+
+        if (!w_path) {
+            // g.trace('NO PATH', setting.kind, val)
+            return "local_file";
+        }
+
+        w_path = w_path.toLowerCase();
+        for (let tag of ['myLeoSettings.leo', 'leoSettings.leo']) {
+            if (w_path.endsWith(tag.toLowerCase())) {
+                if (tag.endsWith('.leo')) {
+                    tag = tag.substring(0, tag.length - 4);
+                }
+                if (setting.kind === 'color') {
+                    if (trace) {
+                        g.trace('FOUND:', tag, setting.kind, setting.ivar, val);
+                    }
+                }
+                return tag;
+            }
+        }
+        const theme_path = g.app.loadManager!.theme_path;
+        if (theme_path && w_path.indexOf(g.shortFileName(theme_path.toLowerCase())) >= 0) {
+            if (trace) {
+                g.trace('FOUND:', "theme_file", setting.kind, setting.ivar, val);
+            }
+            return "theme_file";
+        }
+        // g.trace('NOT FOUND', repr(theme_path), repr(path))
+        if (w_path === 'register-command' || w_path.indexOf('mode') > -1) {
+            return 'ignore';
+        }
+        return "local_file";
+    }
+
+    //@+node:felix.20220214191554.8: *3* c.config.Getters
+    //@+node:felix.20220214191554.9: *4* c.config.findSettingsPosition & helper
+    // This was not used prior to Leo 4.5.
+
+    /**
+     * Return the position for the setting in the @settings tree for c.
+     */
+    public findSettingsPosition(setting: string): Position | undefined {
+
+        const munge = g.app.config.munge;
+
+        const root = this.settingsRoot()
+        if (!root || !root.__bool__()) {
+            return undefined;
+        }
+
+        setting = munge(setting)!;
+
+        for (let p of root.subtree()) {
+            //BJ munge will return None if a headstring is empty
+            const h: string = p.h ? (munge(p.h)! || '') : '';
+            if (h.startsWith(setting)) {
+                return p.copy();
+            }
+        }
+        return undefined;
+
+    }
+
+    //@+node:felix.20220214191554.10: *5* c.config.settingsRoot
+    /**
+     * Return the position of the @settings tree.
+     */
+    public settingsRoot(): Position | undefined {
+        const c = this.c;
+        for (let p of c.all_unique_positions()) {
+            // #1792: Allow comments after @settings.
+            if (g.match_word(p.h.trimEnd(), 0, "@settings")) {
+                return p.copy();
+            }
+        }
+        return undefined;
+    }
+    //@+node:felix.20220214191554.11: *4* c.config.Getters
+    //@@nocolor-node
+    //@+at Only the following need to be defined.
+    //     get (self,setting,theType)
+    //     getAbbrevDict (self)
+    //     getBool (self,setting,default=None)
+    //     getButtons (self)
+    //     getColor (self,setting)
+    //     getData (self,setting)
+    //     getDirectory (self,setting)
+    //     getFloat (self,setting)
+    //     getFontFromParams (self,family,size,slant,weight,defaultSize=12)
+    //     getInt (self,setting)
+    //     getLanguage (self,setting)
+    //     getMenusList (self)
+    //     getOutlineData (self)
+    //     getOpenWith (self)
+    //     getRatio (self,setting)
+    //     getShortcut (self,commandName)
+    //     getString (self,setting)
+    //@+node:felix.20220214191554.12: *5* c.config.get & allies
+    /**
+     * Get the setting and make sure its type matches the expected type.
+     */
+    public get(setting: string, kind?: string): any {
+        const d = this.settingsDict;
+        if (d) {
+            // assert isinstance(d, g.TypedDict), repr(d)
+            let val: any;
+            let junk: any;
+            [val, junk] = this.getValFromDict(d, setting, kind);
+            return val;
+        }
+        return undefined;
+    }
+    //@+node:felix.20220214191554.13: *6* c.config.getValFromDict
+    /**
+     * Look up the setting in d. If warn is True, warn if the requested type
+     * does not (loosely) match the actual type.
+     * returns (val,exists)
+     * @param d 
+     * @param setting 
+     * @param requestedType 
+     * @param warn flag to have method warn if value not found
+     * @returns array of value, and exist flag
+     */
+    public getValFromDict(d: any, setting: string, requestedType?: string, warn = true): [any, boolean] {
+        const tag = 'c.config.getValFromDict';
+        const gs = d.get(g.app.config.munge(setting));
+        if (!gs) {
+            return [undefined, false];
+        }
+        // assert isinstance(gs, g.GeneralSetting), repr(gs)
+        const val = gs.val;
+        const isNone = ['None', 'none', ''].includes(val);
+        if (!this.typesMatch(gs.kind, requestedType)) {
+            // New in 4.4: make sure the types match.
+            // A serious warning: one setting may have destroyed another!
+            // Important: this is not a complete test of conflicting settings:
+            // The warning is given only if the code tries to access the setting.
+            if (warn) {
+                g.error(
+                    `${tag}: ignoring '${setting}' setting.\n` +
+                    `${tag}: '${gs.kind}' is not '${requestedType}'.\n` +
+                    `${tag}: there may be conflicting settings!`);
+            }
+            return [undefined, false];
+        }
+        if (isNone) {
+            return ['', true];
+        }
+        // 2011/10/24: Exists, a *user-defined* empty value.
+        return [val, true];
+    }
+    //@+node:felix.20220214191554.14: *6* c.config.typesMatch
+    /**
+     * Return True if type1, the actual type, matches type2, the requeseted type.
+     * 
+     * The following equivalences are allowed:
+     * 
+     * - None matches anything.
+     * - An actual type of string or strings matches anything *except* shortcuts.
+     * - Shortcut matches shortcuts.
+     * 
+     * @param type1 string
+     * @param type2 string
+     */
+    public typesMatch(type1?: string, type2?: string): boolean {
+        // The shortcuts logic no longer uses the get/set code.
+        const shortcuts = ['shortcut', 'shortcuts'];
+        if ((type1 && shortcuts.includes(type1)) || (type2 && shortcuts.includes(type2))) {
+            g.trace('oops: type in shortcuts');
+        }
+        return (
+            type1 === null
+            || type2 === null
+            || type1 === undefined
+            || type2 === undefined
+            || type1.startsWith('string') && !shortcuts.includes(type2)
+            || type1 === 'language' && type2 === 'string'
+            || type1 === 'int' && type2 === 'size'
+            // added for javascript
+            || type1 === 'int' && type2 === 'number'
+            || type1 === 'float' && type2 === 'number'
+            || (type1 in shortcuts && type2 in shortcuts)
+            || type1 === type2
+        );
+
+    }
+    //@+node:felix.20220214191554.15: *5* c.config.getAbbrevDict
+    /**
+     * Search all dictionaries for the setting & check it's type
+     * @returns 
+     */
+    public getAbbrevDict(): any {
+        const d = this.get('abbrev', 'abbrev');
+        return d || {};
+    }
+    //@+node:felix.20220214191554.16: *5* c.config.getBool
+    /**
+     * Return the value of @bool setting, or the default if the setting is not found.
+     * @param setting value name
+     * @param defaultVal value if not found as being boolean
+     * @returns 
+     */
+    public getBool(setting: string, defaultVal: any): any {
+        const val = this.get(setting, "bool");
+        if ([true, false].includes(val)) {
+            return val;
+        }
+        return defaultVal;
+    }
+    //@+node:felix.20220214191554.17: *5* c.config.getColor
+    /**
+     * Return the value of @color setting.
+     * @param setting string name of setting
+     * @returns color string
+     */
+    public getColor(setting: string): string {
+        let col: string = this.get(setting, "color");
+        while (col && col.startsWith('@')) {
+            col = this.get(col.substring(1), "color");
+        }
+        return col;
+    }
+    //@+node:felix.20220214191554.18: *5* c.config.getData
+    /**
+     * Return a list of non-comment strings in the body text of @data setting.
+     * @param setting 
+     * @param strip_comments 
+     * @param strip_data 
+     */
+    public getData(setting: string, strip_comments = true, strip_data = true): string[] {
+
+        // 904: Add local abbreviations to global settings.
+        const append: boolean = setting === 'global-abbreviations';
+        let data0: string[] = [];
+        if (append) {
+            data0 = g.app.config.getData(setting, strip_comments, strip_data);
+        }
+        let data: string | string[] = this.get(setting, "data");
+        // New in Leo 4.11: parser.doData strips only comments now.
+        // New in Leo 4.12: parser.doData strips *nothing*.
+        if ((typeof data === 'string' || data instanceof String)) {
+            data = [data as string];
+        }
+        if (data && data.length && strip_comments) {
+            // data = [z for z in data if not z.strip().startswith('#')]
+            data = data.filter((z) => { !z.trim().startsWith('#') });
+        }
+        if (data && data.length && strip_data) {
+            // data = [z.strip() for z in data if z.strip()]
+            data = data.map((z) => { return z.trim(); }).filter((z) => { return !!z; });
+        }
+        if (append && JSON.stringify(data) !== JSON.stringify(data0)) {
+            if (data && data.length) {
+                data.push(...data0);
+            } else {
+                data = data0;
+            }
+        }
+        return data as string[];
+    }
+    //@+node:felix.20220214191554.19: *5* c.config.getOutlineData
+    /**
+     * Return the pastable (xml) text of the entire @outline-data tree.
+     * @param setting  
+     * @returns string
+     */
+    public getOutlineData(setting: string): string[] {
+
+        let data = this.get(setting, "outlinedata");
+        if (setting === 'tree-abbreviations') {
+            // 904: Append local tree abbreviations to the global abbreviations.
+            const data0 = g.app.config.getOutlineData(setting);
+            if (data && data0 && data !== data0) {
+                console.assert(typeof data0 === 'string' || data0 instanceof String);
+                console.assert(typeof data === 'string' || data instanceof String);
+                // We can't merge the data here: they are .leo files!
+                // abbrev.init_tree_abbrev_helper does the merge.
+                data = [data0, data];
+            }
+        }
+        return data;
+    }
+    //@+node:felix.20220214191554.20: *5* c.config.getDirectory
+    /**
+     * Return the value of @directory setting, or None if the directory does not exist.
+     * @param setting 
+     */
+    public getDirectory(setting: string): string | undefined {
+        // Fix https://bugs.launchpad.net/leo-editor/+bug/1173763
+        const theDir: string = this.get(setting, 'directory');
+        // TODO MAYBE CHECK???
+        // if( g.os_path_exists(theDir) && g.os_path_isdir(theDir)){
+        //     return theDir;
+        // }
+        if (theDir) {
+            return theDir;
+        }
+        return undefined;
+    }
+    //@+node:felix.20220214191554.21: *5* c.config.getFloat
+    /**
+     * Return the value of @float setting.
+     * @param setting 
+     */
+    public getFloat(setting: string): number | undefined {
+        let val = this.get(setting, "float");
+        try {
+            val = Number(val);
+            return val;
+        }
+        catch (TypeError) {
+            return undefined;
+        }
+    }
+    //@+node:felix.20220214191554.22: *5* c.config.getFontFromParams
+    /**
+     * Compute a font from font parameters. This should be used *only*
+        by the syntax coloring code.  Otherwise, use Leo's style sheets.
+
+        Arguments are the names of settings to be use.
+        Default to size=12, slant="roman", weight="normal".
+
+        Return None if there is no family setting so we can use system default fonts.
+     * @param family 
+     * @param size 
+     * @param slant 
+     * @param weight 
+     * @param defaultSize 
+     */
+    public getFontFromParams(family: string, size: number, slant: number, weight: number, defaultSize = 12): string {
+        // ? needed ?
+        // family = this.get(family, "family")
+        // if family in (None, ""):
+        //     family = g.app.config.defaultFontFamily
+        // size = this.get(size, "size")
+        // if size in (None, 0):
+        //     size = defaultSize
+        // slant = this.get(slant, "slant")
+        // if slant in (None, ""):
+        //     slant = "roman"
+        // weight = this.get(weight, "weight")
+        // if weight in (None, ""):
+        //     weight = "normal"
+        // return g.app.gui.getFontFromParams(family, size, slant, weight)
+
+        return "";
+    }
+    //@+node:felix.20220214191554.23: *5* c.config.getInt
+    /**
+     * Return the value of @int setting.
+     * @param setting 
+     */
+    public getInt(setting: string): number | undefined {
+        let val = this.get(setting, "int");
+        try {
+            val = Number(val);
+            return val;
+        }
+        catch (TypeError) {
+            return undefined;
+        }
+    }
+    //@+node:felix.20220214191554.24: *5* c.config.getLanguage
+    /**
+     * Return the setting whose value should be a language known to Leo.
+     * @param setting 
+     */
+    public getLanguage(setting: string): string {
+        const language = this.getString(setting);
+        return language;
+    }
+    //@+node:felix.20220214191554.25: *5* c.config.getMenusList
+    /**
+     * Return the list of entries for the @menus tree.
+     */
+    public getMenusList(): string[] {
+        const aList: string[] | undefined = this.get('menus', 'menus');
+        // aList is typically empty.
+        return aList || g.app.config.menusList;
+    }
+    //@+node:felix.20220214191554.26: *5* c.config.getOpenWith
+    /**
+     * Return a list of dictionaries corresponding to @openwith nodes.
+     * @returns 
+     */
+    public getOpenWith(): any {
+        const val = this.get('openwithtable', 'openwithtable');
+        return val;
+    }
+    //@+node:felix.20220214191554.27: *5* c.config.getRatio
+    /**
+     * Return the value of @float setting.
+     *
+     * Warn if the value is less than 0.0 or greater than 1.0.
+     */
+    public getRatio(setting: string): any {
+        let val = this.get(setting, "ratio");
+        try {
+            val = Number(val);
+            if (0.0 <= val && val <= 1.0) {
+                return val;
+            }
+        }
+        catch (TypeError) {
+            // pass
+        }
+        return undefined;
+    }
+    //@+node:felix.20220214191554.28: *5* c.config.getSettingSource
+    /**
+     * return the name of the file responsible for setting.
+     * @param setting 
+     */
+    public getSettingSource(setting: string): [string, any] | undefined {
+        const d = this.settingsDict;
+        if (d) {
+            // assert isinstance(d, g.TypedDict), repr(d)
+            const bi = d.get(setting);
+            if (bi === undefined) {
+                return ['unknown setting', undefined];
+            }
+            return [bi.path, bi.val];
+        }
+        //
+        // lm.readGlobalSettingsFiles is opening a settings file.
+        // lm.readGlobalSettingsFiles has not yet set lm.globalSettingsDict.
+        // assert d is None
+        return undefined;
+    }
+    //@+node:felix.20220214191554.29: *5* c.config.getShortcut
+    // no_menu_dict: Dict[Cmdr, bool] = {}
+
+    // ? Needed ?
+    /**
+     * Return rawKey,accel for shortcutName
+     * @param commandName 
+     * @returns 
+     */
+    public getShortcut(commandName: string): [string | undefined, any[]] {
+
+        // c = this.c
+        // d = this.shortcutsDict
+        // if not c.frame.menu:
+        //     if c not in this.no_menu_dict:
+        //         this.no_menu_dict[c] = True
+        //         g.trace(f"no menu: {c.shortFileName()}:{commandName}")
+        //     return None, []
+        // if d:
+        //     assert isinstance(d, g.TypedDict), repr(d)  // was TypedDictOfLists.
+        //     key = c.frame.menu.canonicalizeMenuName(commandName)
+        //     key = key.replace('&', '')  // Allow '&' in names.
+        //     aList = d.get(commandName, [])
+        //     if aList:  // A list of g.BindingInfo objects.
+        //         // It's important to filter empty strokes here.
+        //         aList = [z for z in aList
+        //             if z.stroke and z.stroke.lower() != 'none']
+        //     return key, aList
+        //             //
+        // // lm.readGlobalSettingsFiles is opening a settings file.
+        // // lm.readGlobalSettingsFiles has not yet set lm.globalSettingsDict.
+
+        return [undefined, []];
+    }
+    //@+node:felix.20220214191554.30: *5* c.config.getString
+    /**
+     * Return the value of @string setting.
+     * @param setting 
+     */
+    public getString(setting: string): string {
+        return this.get(setting, "string");
+    }
+    //@+node:felix.20220214191554.31: *4* c.config.Getters: redirect to g.app.config
+    /**
+     * Return a list of tuples (x,y) for common @button nodes.
+     * @param setting 
+     */
+    public getButtons(): any {
+        return g.app.config.atCommonButtonsList;  // unusual.
+    }
+    /**
+     * Return the list of tuples (headline,script) for common @command nodes.
+     * @param setting 
+     */
+    public getCommands(): any {
+        return g.app.config.atCommonCommandsList;  // unusual.
+    }
+    /**
+     * Return the body text of the @enabled-plugins node.
+     * @param setting 
+     */
+    public getEnabledPlugins(): any {
+        return g.app.config.enabledPluginsString;  // unusual.
+    }
+    /**
+     * Return the list of recently opened files.
+     * @param setting 
+     */
+    public getRecentFiles(): string[] {
+        // TODO !
+        // return g.app.config.getRecentFiles()  // unusual
+        return [];
+    }
+    //@+node:felix.20220214191554.32: *4* c.config.isLocalSetting
+    /**
+     * Return True if the indicated setting comes from a local .leo file.
+     * @param setting 
+     */
+    public isLocalSetting(setting: string, kind: string): boolean {
+        if (!kind || ['shortcut', 'shortcuts', 'openwithtable'].includes(kind)) {
+            return false;
+        }
+        let key = g.app.config.munge(setting);
+        if (key === undefined) {
+            return false;
+        }
+        if (!this.settingsDict) {
+            return false;
+        }
+        let gs = this.settingsDict.get(key)
+        if (!gs) {
+            return false;
+        }
+
+        // assert isinstance(gs, g.GeneralSetting), repr(gs)
+        let w_path: string = gs.path.toLowerCase();
+        ['myLeoSettings.leo', 'leoSettings.leo'].forEach(fn => {
+            if (w_path.endsWith(fn.toLowerCase())) {
+                return false;
+            }
+        });
+        return true;
+    }
+    //@+node:felix.20220214191554.33: *4* c.config.isLocalSettingsFile
+    /**
+     * Return true if c is not leoSettings.leo or myLeoSettings.leo
+     * @param setting 
+     */
+    public isLocalSettingsFile(): any {
+        const c = this.c;
+
+        const fn = c.shortFileName().toLowerCase();
+        ['leoSettings.leo', 'myLeoSettings.leo'].forEach(fn2 => {
+            if (fn.endsWith(fn2.toLowerCase())) {
+                return false;
+            }
+        });
+
+        return true;
+    }
+    //@+node:felix.20220214191554.34: *4* c.exists
+    /**
+     * Return true if a setting of the given kind exists, even if it is None.
+     * @param setting 
+     */
+    public exists(c: Commands, setting: string, kind: string): boolean {
+        let d = this.settingsDict;
+        let junk: any;
+        let found: boolean;
+        if (d) {
+            [junk, found] = this.getValFromDict(d, setting, kind);
+            if (found) {
+                return true;
+            }
+        }
+        return false;
+    }
+    //@+node:felix.20220214191554.35: *3* c.config.printSettings
+    /**
+     * Prints the value of every setting, except key bindings and commands and open-with tables.
+     * The following shows where the active setting came from:
+     *
+     *  -     leoSettings.leo,
+     *  -  @  @button, @command, @mode.
+     *  - [D] default settings.
+     *  - [F] indicates the file being loaded,
+     *  - [M] myLeoSettings.leo,
+     *  - [T] theme .leo file.
+     */
+    public printSettings(): void {
+
+        const legend = "legend:" +
+            "    leoSettings.leo" +
+            "@  @button, @command, @mode" +
+            "[D] default settings" +
+            "[F] loaded .leo File" +
+            "[M] myLeoSettings.leo" +
+            "[T] theme .leo file.";
+
+        const c = this.c;
+
+        // legend = textwrap.dedent(legend)
+        let result: string[] = [];
+        let name: any;
+        let val: any;
+        let w_c: any;
+        let letter: any;
+        for (let p_configEntry in g.app.config.config_iter(c)) {
+            [name, val, w_c, letter] = p_configEntry;
+            let kind = letter === ' ' ? '   ' : `[${letter}]`;
+            result.push(`${kind} ${name} = ${val}\n`);
+        }
+        // Use a single g.es statement.
+        result.push('\n' + legend)
+        if (g.unitTesting) {
+            // pass  // print(''.join(result))
+        } else {
+            g.es_print('', result.join(''), 'Settings');
+        }
+    }
+    //@+node:felix.20220214191554.36: *3* c.config.set
+    /**
+     * Init the setting for name to val.
+     *
+     * The "p" arg is not used.
+     */
+    public set(p: any, kind: string, name: string, val: any, warn = true): void {
+
+        const c = this.c;
+
+        // Note: when kind is 'shortcut', name is a command name.
+        let key: string = g.app.config.munge(name)!;
+        let d = this.settingsDict;
+        // assert isinstance(d, g.TypedDict), repr(d)
+        let gs = d.get(key);
+        if (gs) {
+            // assert isinstance(gs, g.GeneralSetting), repr(gs)
+            let w_path = gs.path;
+            if (warn && g.os_path_finalize(c.mFileName) !== g.os_path_finalize(w_path)) {  // #1341.
+                g.es("over-riding setting:", name, "from", w_path);
+            }
+        }
+
+        // ? equivalent of d[key] = g.GeneralSetting(kind, path=c.mFileName, val=val, tag='setting')
+        d.set(key, new g.GeneralSetting({ kind: kind, path: c.mFileName, val: val, tag: 'setting' }));
+
+    }
+    //@+node:felix.20220214191554.37: *3* c.config.settingIsActiveInPath
+    /**
+     * Return True if settings file given by path actually defines the setting, gs.
+     */
+    public settingIsActiveInPath(gs: any, target_path: string): boolean {
+
+        // assert isinstance(gs, g.GeneralSetting), repr(gs)
+        return gs.path === target_path;
+    }
+    //@+node:felix.20220214191554.38: *3* c.config.setUserSetting
+    /**
+     * Find and set the indicated setting, either in the local file or in
+     * myLeoSettings.leo.
+     */
+    public setUserSetting(setting: string, value: any): void {
+
+        let c: Commands | undefined = this.c;
+
+        let fn: string = g.shortFileName(c.fileName());
+        let p: Position | undefined = this.findSettingsPosition(setting);
+
+        if (!p || !p.__bool__()) {
+            c = c.openMyLeoSettings();
+            if (!c) {
+                return;
+            }
+            fn = 'myLeoSettings.leo';
+            p = c.config.findSettingsPosition(setting);
+        }
+        if (!p) {
+            const root = c.config.settingsRoot();
+            if (!root) {
+                return;
+            }
+            fn = 'leoSettings.leo';
+            p = c.config.findSettingsPosition(setting);
+            if (!p) {
+                p = root.insertAsLastChild();
+            }
+        }
+        let h = setting;
+        let i = h.indexOf('=');
+        if (i > -1) {
+            h = h.substring(2).trim();
+        }
+        p.h = `${h} = ${value}`;
+        console.log(`Updated '${setting}' in ${fn}`);  // #2390.
+        //
+        // Delay the second redraw until idle time.
+        c.setChanged();
+        p.setDirty();
+        c.redraw_later();
+    }
     //@-others
 
 }

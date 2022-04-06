@@ -226,13 +226,7 @@ export class Commands {
     public leoTestManager: any = undefined;
     public vimCommands: any = undefined;
 
-    //@+node:felix.20210223220814.10: *4* c.initSettings
-    //Init the settings *before* initing the objects.
-    // c = self
-    // from leo.core import leoConfig
     public config: LocalConfigManager;
-    // c.config = leoConfig.LocalConfigManager(c, previousSettings)
-    // g.app.config.setIvarsFromSettings(c)
 
     //@+node:felix.20210223002937.1: *3* constructor & helpers
     constructor(
@@ -249,6 +243,8 @@ export class Commands {
         // From initFileIvars
         this.mFileName = fileName || '';
         this.mRelativeFileName = relativeFileName || '';
+
+        this.initSettings(previousSettings);
 
         // From initObjects
         const gnx: string = 'hidden-root-vnode-gnx';
@@ -284,6 +280,17 @@ export class Commands {
         c.createCommandNames();
 
     }
+
+    //@+node:felix.20210223220814.10: *4* c.initSettings
+    /**
+     * Init the settings *before* initing the objects.
+     */
+    private initSettings(previousSettings: any): void {
+        const c: Commands = this;
+        c.config = new LocalConfigManager(c);
+        g.app.config.setIvarsFromSettings(c);
+    }
+
 
     //@+node:felix.20210223220814.9: *4* c.initObjects
     // * initObjects done in constructor.

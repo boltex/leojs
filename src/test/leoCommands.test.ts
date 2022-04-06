@@ -167,9 +167,12 @@ suite('Test cases for leoCommands.ts', () => {
             let setting_type;
             let defaultVal;
             [ivar, setting_type, defaultVal] = element;
+            console.log('------------------------------testing: ', ivar);
+
             assert.ok(c.hasOwnProperty(ivar), ivar);
             assert.ok(c.config.hasOwnProperty(ivar), ivar);
-            //@ts-expect-error
+
+            // @ts-expect-error
             const val = c.config[ivar];
             const val2 = c.config.get(ivar);
             assert.strictEqual(val, val2);
