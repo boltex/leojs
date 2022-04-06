@@ -601,7 +601,7 @@ export class CommanderFileCommands {
             c.syntaxErrorDialog();
         } else {
             const root: Position = c.rootPosition()!;
-            if (!root.next() && root.isAtEditNode()) {
+            if (!root.next().__bool__() && root.isAtEditNode()) {
                 // There is only a single @edit node in the outline.
                 // A hack to allow "quick edit" of non-Leo files.
                 // See https://bugs.launchpad.net/leo-editor/+bug/381527
@@ -1257,7 +1257,7 @@ export class CommanderFileCommands {
 
         c.atFileCommands.readAllSelected(p);
         // Force an update of the body pane.
-        c.setBodyString(p, p.b)  // Not a do-nothing!
+        c.setBodyString(p, p.b);  // Not a do-nothing!
         u.afterChangeTree(p, 'Read @file Nodes', undoData);
         c.redraw();
     }

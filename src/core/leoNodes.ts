@@ -960,7 +960,7 @@ export class Position {
         try {
             const parent_v: VNode = p._parentVnode()!;
             // Returns None if p.v is None.
-            return p.v && parent_v && p._childIndex + 1 < parent_v.children.length;
+            return p.v && parent_v && ((p._childIndex + 1) < parent_v.children.length);
         }
         catch (exception) {
             g.trace('*** Unexpected exception');

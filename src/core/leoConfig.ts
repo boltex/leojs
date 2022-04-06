@@ -502,13 +502,19 @@ export class GlobalConfigManager {
     }
 
     //@+node:felix.20220207005224.8: *4* gcm.getBool
-    /* def getBool(self, setting, default=None):
-        """Return the value of @bool setting, or the default if the setting is not found."""
-        val = self.get(setting, "bool")
-        if val in (True, False):
-            return val
-        return default
+    /**
+     * Return the value of @bool setting, or the default if the setting is not found.
+     * @param setting 
+     * @param defaultVal 
+     * @returns the boolean setting's value, or default
      */
+    public getBool(setting: string, defaultVal: any): any {
+        const val = this.get(setting, "bool");
+        if ([true, false].includes(val)) {
+            return val;
+        }
+        return defaultVal;
+    }
     //@+node:felix.20220207005224.9: *4* gcm.getButtons
     /* def getButtons(self):
         """Return a list of tuples (x,y) for common @button nodes."""
@@ -528,20 +534,31 @@ export class GlobalConfigManager {
         return g.app.config.atCommonCommandsList
      */
     //@+node:felix.20220207005224.12: *4* gcm.getData & getOutlineData
-    /* def getData(self, setting, strip_comments=True, strip_data=True):
-        """Return a list of non-comment strings in the body text of @data setting."""
-        data = self.get(setting, "data") or []
-        # New in Leo 4.12.1: add two keyword arguments, with legacy defaults.
-        if data and strip_comments:
-            data = [z for z in data if not z.strip().startswith('#')]
-        if data and strip_data:
-            data = [z.strip() for z in data if z.strip()]
-        return data
-
-    def getOutlineData(self, setting):
-        """Return the pastable (xml text) of the entire @outline-data tree."""
-        return self.get(setting, "outlinedata")
+    /**
+     * Return a list of non-comment strings in the body text of @data setting.
      */
+    public getData(setting: string, strip_comments = true, strip_data = true): string[] {
+
+        let data: string[] = this.get(setting, "data") || [];
+        // New in Leo 4.12.1: add two keyword arguments, with legacy defaults.
+        if (data && data.length && strip_comments) {
+            data = data.filter((z) => { !z.trim().startsWith('#') });
+        }
+        if (data && data.length && strip_data) {
+            data = data.map((z) => { return z.trim(); }).filter((z) => { return !!z; });
+        }
+        return data;
+    }
+
+    /**
+     * Return the pastable (xml text) of the entire @outline-data tree.
+     * @param setting  
+     * @returns 
+     */
+    public getOutlineData(setting: string): string[] {
+        return this.get(setting, "outlinedata");
+    }
+
     //@+node:felix.20220207005224.13: *4* gcm.getDirectory
     /* def getDirectory(self, setting):
         """Return the value of @directory setting, or None if the directory does not exist."""
@@ -680,6 +697,8 @@ export class GlobalConfigManager {
                     val = '<xml>'
                 key2 = f"@{gs.kind:>6} {key}"
                 yield key2, val, c, letter
+
+                
      */
     //@+node:felix.20220206213914.37: *3* gcm.valueInMyLeoSettings
     /* def valueInMyLeoSettings(self, settingName):
@@ -1027,7 +1046,7 @@ export class LocalConfigManager {
      * Return the value of @bool setting, or the default if the setting is not found.
      * @param setting value name
      * @param defaultVal value if not found as being boolean
-     * @returns 
+     * @returns the boolean setting's value, or default
      */
     public getBool(setting: string, defaultVal: any): any {
         const val = this.get(setting, "bool");
