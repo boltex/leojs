@@ -661,45 +661,60 @@ export class GlobalConfigManager {
         return this.get(setting, "string");
     }
     //@+node:felix.20220206213914.36: *3* gcm.config_iter
-    /* def config_iter(self, c):
-        """Letters:
-          leoSettings.leo
-        D default settings
-        F loaded .leo File
-        M myLeoSettings.leo
-        @ @button, @command, @mode.
-        """
-        lm = g.app.loadManager
-        d = c.config.settingsDict if c else lm.globalSettingsDict
-        limit = c.config.getInt('print-settings-at-data-limit')
-        if limit is None:
-            limit = 20  # A resonable default.
-        # pylint: disable=len-as-condition
-        for key in sorted(list(d.keys())):
-            gs = d.get(key)
-            assert isinstance(gs, g.GeneralSetting), repr(gs)
-            if gs and gs.kind:
-                letter = lm.computeBindingLetter(c, gs.path)
-                val = gs.val
-                if gs.kind == 'data':
-                    # #748: Remove comments
-                    aList = [' ' * 8 + z.rstrip() for z in val
-                        if z.strip() and not z.strip().startswith('#')]
-                    if not aList:
-                        val = '[]'
-                    elif limit == 0 or len(aList) < limit:
-                        val = '\n    [\n' + '\n'.join(aList) + '\n    ]'
-                        # The following doesn't work well.
-                        # val = g.objToString(aList, indent=' '*4)
-                    else:
-                        val = f"<{len(aList)} non-comment lines>"
-                elif isinstance(val, str) and val.startswith('<?xml'):
-                    val = '<xml>'
-                key2 = f"@{gs.kind:>6} {key}"
-                yield key2, val, c, letter
 
-                
+    /**
+     * Letters:
+     *   leoSettings.leo
+     *   D default settings
+     *   F loaded .leo File
+     *   M myLeoSettings.leo
+     *   @ @button, @command, @mode.
+     * 
+     * @param c 
      */
+    public *config_iter(c: Commands): Generator<[string, any, Commands, string]> {
+
+        const lm = g.app.loadManager!;
+        const d = c ? c.config.settingsDict : lm.globalSettingsDict;
+
+        let limit = c.config.getInt('print-settings-at-data-limit');
+        if (limit === undefined) {
+            limit = 20;  // A resonable default.
+        }
+        // pylint: disable=len-as-condition
+        for (let key of d.keys().sort()) {
+            // return Object.keys(this.d);
+            const gs = d.get(key);
+            // assert isinstance(gs, g.GeneralSetting), repr(gs);
+            if (gs && gs.kind) {
+                const letter: string = lm.computeBindingLetter(c, gs.path);
+                let val: string[] | string = gs.val;
+                if (gs.kind === 'data') {
+                    // #748: Remove comments
+                    const aList = (val as string[])
+                        .filter((z) => { return z.trim() && !z.trim().startsWith('#'); })
+                        .map((z) => { return '        ' + z.trimRight(); });
+                    // [' ' * 8 + z.rstrip() for z in val if z.strip() && !z.strip().startsWith('#')] ;
+
+                    if (!aList.length) {
+                        val = '[]';
+                    } else if (limit === 0 || aList.length < limit) {
+                        val = '\n    [\n' + aList.join('\n') + '\n    ]';
+                        // The following doesn't work well.
+                        // val = g.objToString(aList, indent=' '*4)
+                    } else {
+                        val = `<${aList.length} non-comment lines>`;
+                    }
+
+                } else if ((typeof val === 'string' || val instanceof String) && val.startsWith('<?xml')) {
+                    val = '<xml>';
+                }
+                let key2 = `@${gs.kind} ${key}`;
+                yield [key2, val, c, letter];
+            }
+        }
+    }
+
     //@+node:felix.20220206213914.37: *3* gcm.valueInMyLeoSettings
     /* def valueInMyLeoSettings(self, settingName):
         """Return the value of the setting, if any, in myLeoSettings.leo."""
@@ -770,10 +785,10 @@ export class LocalConfigManager {
         this.defaultLogFontSize = g.app.config.defaultLogFontSize;
         this.defaultMenuFontSize = g.app.config.defaultMenuFontSize;
         this.defaultTreeFontSize = g.app.config.defaultTreeFontSize;
-        for (let key of [g.app.config.encodingIvarsDict.keys()].sort()) {
+        for (let key of g.app.config.encodingIvarsDict.keys().sort()) {
             this.initEncoding(key);
         }
-        for (let key of [g.app.config.ivarsDict.keys()].sort()) {
+        for (let key of g.app.config.ivarsDict.keys().sort()) {
             this.initIvar(key);
         }
 
@@ -1048,7 +1063,7 @@ export class LocalConfigManager {
      * @param defaultVal value if not found as being boolean
      * @returns the boolean setting's value, or default
      */
-    public getBool(setting: string, defaultVal: any): any {
+    public getBool(setting: string, defaultVal?: any): any {
         const val = this.get(setting, "bool");
         if ([true, false].includes(val)) {
             return val;
@@ -1438,11 +1453,11 @@ export class LocalConfigManager {
 
         // legend = textwrap.dedent(legend)
         let result: string[] = [];
-        let name: any;
+        let name: string;
         let val: any;
-        let w_c: any;
+        let w_c: Commands;
         let letter: any;
-        for (let p_configEntry in g.app.config.config_iter(c)) {
+        for (let p_configEntry of g.app.config.config_iter(c)) {
             [name, val, w_c, letter] = p_configEntry;
             let kind = letter === ' ' ? '   ' : `[${letter}]`;
             result.push(`${kind} ${name} = ${val}\n`);
@@ -1504,7 +1519,10 @@ export class LocalConfigManager {
         let p: Position | undefined = this.findSettingsPosition(setting);
 
         if (!p || !p.__bool__()) {
-            c = c.openMyLeoSettings();
+            // c = c.openMyLeoSettings();
+            // TODO !
+            // ! Make command that builds outline of settings!
+            // ! From the leojs vscode config settings
             if (!c) {
                 return;
             }

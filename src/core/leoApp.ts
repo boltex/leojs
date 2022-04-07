@@ -1167,6 +1167,35 @@ export class LoadManager {
         this.more_cmdline_files = false;
     }
 
+    //@+node:felix.20220406235904.1: *3* LM.Settings
+    //@+node:felix.20220406235925.1: *4* LM.computeBindingLetter
+    public computeBindingLetter(c: Commands, p_path: string): string {
+        const lm = this;
+        if (!p_path) {
+            return 'D';
+        }
+        p_path = p_path.toLowerCase();
+        const table = [
+            ['M', 'myLeoSettings.leo'],
+            [' ', 'leoSettings.leo'],
+            ['F', c.shortFileName()],
+        ];
+        for (let p_entry of table) {
+            let letter;
+            let path2;
+            [letter, path2] = p_entry;
+            if (path2 && p_path.endsWith(path2.toLowerCase())) {
+                return letter;
+            }
+        }
+        if (lm.theme_path && p_path.endsWith(lm.theme_path.toLowerCase())) {
+            return 'T';
+        }
+        if (p_path === 'register-command' || p_path.indexOf('mode') > -1) {
+            return '@';
+        }
+        return 'D';
+    }
     //@+node:felix.20210120004121.1: *3* LM.load & helpers
     /**
      * This is Leo's main startup method.

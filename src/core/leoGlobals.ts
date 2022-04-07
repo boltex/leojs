@@ -632,11 +632,11 @@ export class TypedDict {
         });
     }
 
-    public keys(): any {
+    public keys(): string[] {
         return Object.keys(this.d);
     }
 
-    public values(): any {
+    public values(): any[] {
         return Object.keys(this.d).map((key) => {
             return this.d[key];
         });
