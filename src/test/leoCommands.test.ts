@@ -167,8 +167,6 @@ suite('Test cases for leoCommands.ts', () => {
             let setting_type;
             let defaultVal;
             [ivar, setting_type, defaultVal] = element;
-            console.log('------------------------------testing: ', ivar);
-
             assert.ok(c.hasOwnProperty(ivar), ivar);
             assert.ok(c.config.hasOwnProperty(ivar), ivar);
 
@@ -176,6 +174,7 @@ suite('Test cases for leoCommands.ts', () => {
             const val = c.config[ivar];
             const val2 = c.config.get(ivar);
             assert.strictEqual(val, val2);
+            console.log('-------------testing '+ ivar +'---------equals: ', val);
         });
     });
     /* def test_c_config_initIvar_sets_commander_ivars(self):

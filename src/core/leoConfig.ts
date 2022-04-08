@@ -349,7 +349,8 @@ export class GlobalConfigManager {
                     val = this.get(key, kind);  // Don't use bunch.val!
                 }
                 if (c) {
-                    console.log('-------------------------------SETTING c IVAR : ' + ivar + " to " + val);
+                    // ! TEST !
+                    // console.log('-------------------------------SETTING c IVAR : ' + ivar + " to " + val);
 
                     (c as any)[ivar] = val;
                 }
