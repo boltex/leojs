@@ -174,7 +174,7 @@ suite('Test cases for leoCommands.ts', () => {
             const val = c.config[ivar];
             const val2 = c.config.get(ivar);
             assert.strictEqual(val, val2);
-            console.log('-------------testing '+ ivar +'---------equals: ', val);
+            console.log('-------------testing ' + ivar + '---------equals: ', val);
         });
     });
     /* def test_c_config_initIvar_sets_commander_ivars(self):
@@ -189,7 +189,12 @@ suite('Test cases for leoCommands.ts', () => {
     //@+node:felix.20220129224954.11: *3* TestCommands.test_c_contractAllHeadlines
     test('test_c_contractAllHeadlines', async () => {
         const c = self.c;
-
+        c.contractAllHeadlines();
+        const p: Position = c.rootPosition()!;
+        while (p.hasNext()) {
+            p.moveToNext();
+        }
+        c.redraw(p);
     });
     /* def test_c_contractAllHeadlines(self):
         c = self.c
@@ -202,7 +207,21 @@ suite('Test cases for leoCommands.ts', () => {
     //@+node:felix.20220129224954.12: *3* TestCommands.test_c_demote_illegal_clone_demote
     test('test_c_demote_illegal_clone_demote', async () => {
         const c = self.c;
-
+        const p: Position = c.p;
+        // Create two cloned children.
+        c.selectPosition(p);
+        c.insertHeadline();
+        const p2 = c.p;
+        p2.moveToFirstChildOf(p);
+        p2.setHeadString('aClone');
+        c.selectPosition(p2);
+        c.clone();
+        assert.strictEqual(2, p.numberOfChildren());
+        // Select the first clone and demote (it should be illegal)
+        c.selectPosition(p2);
+        c.demote();  // This should do nothing.
+        assert.strictEqual(0, c.checkOutline());
+        assert.strictEqual(2, p.numberOfChildren());
     });
     /* def test_c_demote_illegal_clone_demote(self):
         c, p = self.c, self.c.p
