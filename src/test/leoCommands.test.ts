@@ -175,7 +175,9 @@ suite('Test cases for leoCommands.ts', () => {
             const val = c.config[ivar];
             const val2 = c.config.get(ivar);
             assert.strictEqual(val, val2);
-            console.log('-------------testing ' + ivar + '---------equals: ', val);
+            // ***********************************************************************
+            // console.log('-------------testing ' + ivar + '---------equals: ', val);
+            // ***********************************************************************
         });
     });
     //@+node:felix.20220129224954.11: *3* TestCommands.test_c_contractAllHeadlines

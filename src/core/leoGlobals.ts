@@ -1904,7 +1904,7 @@ export function skip_ws_and_nl(s: string, i: number): number {
  */
 export function splitLines(s?: string): string[] {
     if (s) {
-        return s.split(/\r?\n/);
+        return s.split(/\r?\n/).map(p_s => p_s + '\n');
     } else {
         return [];
     }
@@ -2064,17 +2064,60 @@ def pluginIsLoaded(fn):
 
 //@+node:felix.20211104210935.1: ** g.Importing
 //@+node:felix.20211104210938.1: ** g.Indices, Strings, Unicode & Whitespace
-//@+node:felix.20211104212212.1: *3* g.angleBrackets
+//@+node:felix.20220410005950.1: *3* g.Indices
+//@+node:felix.20220410005950.2: *4* g.convertPythonIndexToRowCol
 /**
- * Return < < s > >
+ * Convert index i into string s into zero-based row/col indices.
  */
-export function angleBrackets(s: string): string {
-    const lt = "<<";
-    const rt = ">>";
-    return lt + s + rt;
-}
+export function convertPythonIndexToRowCol(s: string, i: number): [number, number] {
 
-//@+node:felix.20220208171427.1: *3* g.getWord & getLine
+    if (!s || i <= 0) {
+        return [0, 0];
+    }
+
+    i = Math.min(i, s.length);
+
+    // works regardless of what s[i] is
+    let row = 0;
+    for (let j = 0; (j < s.length && j < i); j++) {
+        if (s[j] === '\n') {
+            row++;
+        }
+    }
+    // const row = s.count('\n', 0, i);  // Don't include i
+
+    if (row === 0) {
+        return [row, i];
+    }
+
+    s = s.substring(0, i);
+    const prevNL = s.lastIndexOf('\n') + 1;  // Don't include i
+
+    return [row, i - (prevNL)];
+}
+//@+node:felix.20220410005950.3: *4* g.convertRowColToPythonIndex
+/**
+ * Convert zero-based row/col indices into a python index into string s.
+ */
+export function convertRowColToPythonIndex(s: string, row: number, col: number, lines?: string[]): number {
+    if (row < 0) {
+        return 0;
+    }
+    if (lines === undefined) {
+        lines = splitLines(s);
+    }
+    if (row >= lines.length) {
+        return s.length;
+    }
+    col = Math.min(col, lines[row].length);
+    // A big bottleneck
+    let prev = 0;
+    for (let line of lines.slice(0, row)) {
+        prev += (line.length);
+    }
+    return prev + col;
+}
+//@+node:felix.20220208171427.1: *4* g.getWord & getLine
 /**
  *
  */
@@ -2130,6 +2173,49 @@ export function getLine(s: string, i: number): [number, number] {
     }
     return [j, k];
 }
+//@+node:felix.20220410005950.5: *4* g.toPythonIndex
+/**
+ * Convert index to a Python int.
+ *
+ * index may be a Tk index(x.y) or 'end'.
+ */
+export function toPythonIndex(s: string, index?: number | string): number {
+
+    if (index === undefined) {
+        return 0;
+    }
+    if (!isNaN(index as any)) {
+        return index as number;
+    }
+    if (index === '1.0') {
+        return 0;
+    }
+    if (index === 'end') {
+        return s.length;
+    }
+
+    const data = (index as string).split('.');
+    let row;
+    let col;
+    if (data.length === 2) {
+        [row, col] = data;
+        [row, col] = [Number(row), Number(col)];
+        let i = convertRowColToPythonIndex(s, row - 1, col);
+        return i;
+    }
+    trace(`bad string index: ${index}`);
+    return 0;
+}
+//@+node:felix.20211104212212.1: *3* g.angleBrackets
+/**
+ * Return < < s > >
+ */
+export function angleBrackets(s: string): string {
+    const lt = "<<";
+    const rt = ">>";
+    return lt + s + rt;
+}
+
 //@+node:felix.20220213223330.1: *3* g.isValidEncoding
 /**
  * Return True if the encooding is valid.

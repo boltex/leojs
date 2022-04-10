@@ -73,79 +73,112 @@ suite('Tests for leo.core.leoGlobals', () => {
         let expected: string[];
 
         for ([ext, expected] of table) {
-            console.log('ext:', ext);
-
             const result = g.comment_delims_from_extension(ext);
-            console.log('result', result);
-
-            assert.strictEqual(JSON.stringify(result), JSON.stringify(expected), ext.toString());
+            assert.strictEqual(
+                JSON.stringify(result),
+                JSON.stringify(expected), ext.toString()
+            );
         };
 
     });
     //@+node:felix.20220129223719.6: *3* TestGlobals.test_g_convertPythonIndexToRowCol
-    /* def test_g_convertPythonIndexToRowCol(self):
-        s1 = 'abc\n\np\nxy'
-        table1 = (
-            (-1, (0, 0)),  # One too small.
-            (0, (0, 0)),
-            (1, (0, 1)),
-            (2, (0, 2)),
-            (3, (0, 3)),  # The newline ends a row.
-            (4, (1, 0)),
-            (5, (2, 0)),
-            (6, (2, 1)),
-            (7, (3, 0)),
-            (8, (3, 1)),
-            (9, (3, 2)),  # One too many.
-            (10, (3, 2)),  # Two too many.
-        )
-        s2 = 'abc\n\np\nxy\n'
-        table2 = (
-            (9, (3, 2)),
-            (10, (4, 0)),  # One too many.
-            (11, (4, 0)),  # Two too many.
-        )
-        s3 = 'ab'  # Test special case.  This was the cause of off-by-one problems.
-        table3 = (
-            (-1, (0, 0)),  # One too small.
-            (0, (0, 0)),
-            (1, (0, 1)),
-            (2, (0, 2)),  # One too many.
-            (3, (0, 2)),  # Two too many.
-        )
-        for n, s, table in ((1, s1, table1), (2, s2, table2), (3, s3, table3)):
-            for i, result in table:
-                row, col = g.convertPythonIndexToRowCol(s, i)
-                self.assertEqual(row, result[0], msg=f"n: {n}, i: {i}")
-                self.assertEqual(col, result[1], msg=f"n: {n}, i: {i}")
-     */
+    test('test_g_convertPythonIndexToRowCol', async () => {
+        const s1 = 'abc\n\np\nxy';
+        const table1: [number, [number, number]][] = [
+            [-1, [0, 0]],  // One too small.
+            [0, [0, 0]],
+            [1, [0, 1]],
+            [2, [0, 2]],
+            [3, [0, 3]],  // The newline ends a row.
+            [4, [1, 0]],
+            [5, [2, 0]],
+            [6, [2, 1]],
+            [7, [3, 0]],
+            [8, [3, 1]],
+            [9, [3, 2]],  // One too many.
+            [10, [3, 2]]  // Two too many.
+        ];
+
+        const s2 = 'abc\n\np\nxy\n';
+        const table2: [number, [number, number]][] = [
+            [9, [3, 2]],
+            [10, [4, 0]],  // One too many.
+            [11, [4, 0]]  // Two too many.
+        ];
+
+        const s3 = 'ab';  // Test special case.  This was the cause of off-by-one problems.
+        const table3: [number, [number, number]][] = [
+            [-1, [0, 0]],  // One too small.
+            [0, [0, 0]],
+            [1, [0, 1]],
+            [2, [0, 2]],  // One too many.
+            [3, [0, 2]],  // Two too many.
+        ];
+
+        let n: number;
+        let s: string;
+        let table: [number, [number, number]][];
+        let i: number;
+        let result: [number, number];
+        let row;
+        let col;
+
+        const outerTable: [number, string, [number, [number, number]][]][] = [[1, s1, table1], [2, s2, table2], [3, s3, table3]];
+
+        for ([n, s, table] of outerTable) {
+
+            for ([i, result] of table) {
+                [row, col] = g.convertPythonIndexToRowCol(s, i);
+                assert.strictEqual(row, result[0], `row: ${row} r0: ${result[0]} n: ${n}, i: ${i}`);
+                assert.strictEqual(col, result[1], `col: ${col} r1: ${result[1]} n: ${n}, i: ${i}`);
+            }
+        }
+    });
+
     //@+node:felix.20220129223719.7: *3* TestGlobals.test_g_convertRowColToPythonIndex
-    /* def test_g_convertRowColToPythonIndex(self):
-        s1 = 'abc\n\np\nxy'
-        s2 = 'abc\n\np\nxy\n'
-        table1 = (
-            (0, (-1, 0)),  # One too small.
-            (0, (0, 0)),
-            (1, (0, 1)),
-            (2, (0, 2)),
-            (3, (0, 3)),  # The newline ends a row.
-            (4, (1, 0)),
-            (5, (2, 0)),
-            (6, (2, 1)),
-            (7, (3, 0)),
-            (8, (3, 1)),
-            (9, (3, 2)),  # One too large.
-        )
-        table2 = (
-            (9, (3, 2)),
-            (10, (4, 0)),  # One two many.
-        )
-        for s, table in ((s1, table1), (s2, table2)):
-            for i, data in table:
-                row, col = data
-                result = g.convertRowColToPythonIndex(s, row, col)
-                self.assertEqual(i, result, msg=f"row: {row}, col: {col}, i: {i}")
-     */
+    test('test_g_convertRowColToPythonIndex', async () => {
+
+        const s1: string = 'abc\n\np\nxy';
+        const s2: string = 'abc\n\np\nxy\n';
+        const table1: [number, [number, number]][] = [
+            [0, [-1, 0]],  // One too small.
+            [0, [0, 0]],
+            [1, [0, 1]],
+            [2, [0, 2]],
+            [3, [0, 3]],  // The newline ends a row.
+            [4, [1, 0]],
+            [5, [2, 0]],
+            [6, [2, 1]],
+            [7, [3, 0]],
+            [8, [3, 1]],
+            [9, [3, 2]]  // One too large.
+        ];
+        const table2: [number, [number, number]][] = [
+            [9, [3, 2]],
+            [10, [4, 0]]  // One two many.
+        ];
+
+        let n: number;
+        let s: string;
+        let table: [number, [number, number]][];
+        let i: number;
+        let result: number;
+        let row;
+        let col;
+        let data: [number, number];
+
+        let outerTable: [string, [number, [number, number]][]][] = [[s1, table1], [s2, table2]];
+
+        for ([s, table] of outerTable) {
+            for ([i, data] of table) {
+                [row, col] = data;
+                result = g.convertRowColToPythonIndex(s, row, col);
+                assert.strictEqual(i, result, `row: ${row}, col: ${col}, i: ${i}`);
+            }
+        }
+
+    });
+
     //@+node:felix.20220129223719.8: *3* TestGlobals.test_g_create_temp_file
     /* def test_g_create_temp_file(self):
         theFile = None
@@ -157,6 +190,8 @@ suite('Tests for leo.core.leoGlobals', () => {
             if theFile:
                 theFile.close()
      */
+
+
     //@+node:felix.20220129223719.9: *3* TestGlobals.test_g_ensureLeadingNewlines
     /* def test_g_ensureLeadingNewlines(self):
         s = ' \n \n\t\naa bc'
