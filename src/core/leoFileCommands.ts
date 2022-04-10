@@ -3215,20 +3215,35 @@ export class FileCommands extends DummyFileCommands {
     public putReferencedTElements(): void {
         const c: Commands = this.c;
 
-        let theIter: Position[];
+        // let theIter: Position[];
+
+        // if (this.usingClipboard) {// write the current tree.
+        //     theIter = [...this.currentPosition!.self_and_subtree(false)];
+        //     // theIter = Array.from(this.currentPosition!.self_and_subtree(false));
+        // } else { // write everything
+        //     theIter = [...c.all_unique_positions(false)];
+        //     //  theIter = Array.from(c.all_unique_positions(false));
+        // }
+
+        let theIter;
 
         if (this.usingClipboard) {// write the current tree.
-            theIter = Array.from(this.currentPosition!.self_and_subtree(false));
+            theIter = this.currentPosition!.self_and_subtree(false);
+            // theIter = Array.from(this.currentPosition!.self_and_subtree(false));
         } else { // write everything
-
-            theIter = Array.from(c.all_unique_positions(false));
+            theIter = c.all_unique_positions(false);
+            //  theIter = Array.from(c.all_unique_positions(false));
         }
+
+
         // Populate the vnodes dict.
         const vnodes: { [key: string]: VNode } = {};
 
         for (let p of theIter) {
             // Make *sure* the file index has the proper form.
             // pylint: disable=unbalanced-tuple-unpacking
+            console.log('p.v.fileIndex', p.v.fileIndex);
+
             const index: string = p.v.fileIndex;
             vnodes[index] = p.v;
         }
@@ -3241,6 +3256,9 @@ export class FileCommands extends DummyFileCommands {
             if (v) {
                 // Write only those vnodes whose vnodes were written.
                 // **Note**: @<file> trees are not written unless they contain clones.
+                console.log('v.isWriteBit()', v.isWriteBit());
+
+
                 if (v.isWriteBit()) {
                     this.put_t_element(v);
                 }

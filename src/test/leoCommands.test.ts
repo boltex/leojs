@@ -5,6 +5,7 @@
  */
 import * as assert from 'assert';
 import { afterEach, before, beforeEach } from 'mocha';
+import * as path from 'path';
 
 import * as g from '../core/leoGlobals';
 import { Position, VNode } from '../core/leoNodes';
@@ -177,15 +178,6 @@ suite('Test cases for leoCommands.ts', () => {
             console.log('-------------testing ' + ivar + '---------equals: ', val);
         });
     });
-    /* def test_c_config_initIvar_sets_commander_ivars(self):
-        c = self.c
-        for ivar, setting_type, default in g.app.config.ivarsData:
-            assert hasattr(c, ivar), ivar
-            assert hasattr(c.config, ivar), ivar
-            val = getattr(c.config, ivar)
-            val2 = c.config.get(ivar, setting_type)
-            self.assertEqual(val, val2)
-     */
     //@+node:felix.20220129224954.11: *3* TestCommands.test_c_contractAllHeadlines
     test('test_c_contractAllHeadlines', async () => {
         const c = self.c;
@@ -196,14 +188,7 @@ suite('Test cases for leoCommands.ts', () => {
         }
         c.redraw(p);
     });
-    /* def test_c_contractAllHeadlines(self):
-        c = self.c
-        c.contractAllHeadlines()
-        p = c.rootPosition()
-        while p.hasNext():
-            p.moveToNext()
-        c.redraw(p)
-     */
+
     //@+node:felix.20220129224954.12: *3* TestCommands.test_c_demote_illegal_clone_demote
     test('test_c_demote_illegal_clone_demote', async () => {
         const c = self.c;
@@ -223,46 +208,28 @@ suite('Test cases for leoCommands.ts', () => {
         assert.strictEqual(0, c.checkOutline());
         assert.strictEqual(2, p.numberOfChildren());
     });
-    /* def test_c_demote_illegal_clone_demote(self):
-        c, p = self.c, self.c.p
-        # Create two cloned children.
-        c.selectPosition(p)
-        c.insertHeadline()
-        p2 = c.p
-        p2.moveToFirstChildOf(p)
-        p2.setHeadString('aClone')
-        c.selectPosition(p2)
-        c.clone()
-        self.assertEqual(2, p.numberOfChildren())
-        # Select the first clone and demote (it should be illegal)
-        c.selectPosition(p2)
-        c.demote()  # This should do nothing.
-        self.assertEqual(0, c.checkOutline())
-        self.assertEqual(2, p.numberOfChildren())
-     */
     //@+node:felix.20220129224954.13: *3* TestCommands.test_c_expand_path_expression
     test('test_c_expand_path_expression', async () => {
         const c = self.c;
 
-    });
-    /* def test_c_expand_path_expression(self):
-        c = self.c
-        import os
-        sep = os.sep
-        table = (
-            ('~{{sep}}tmp{{sep}}x.py', '~%stmp%sx.py' % (sep, sep)),
-        )
-        for s, expected in table:
-            if g.isWindows:
-                expected = expected.replace('\\', '/')
-            got = c.expand_path_expression(s)
-            self.assertEqual(got, expected, msg=repr(s))
-     */
-    //@+node:felix.20220129224954.14: *3* TestCommands.test_c_findMatchingBracket
-    test('test_c_findMatchingBracket', async () => {
-        const c = self.c;
+        const sep = path.sep;
 
+        const table = [
+            ['~{{sep}}tmp{{sep}}x.py', `~${sep}tmp${sep}x.py`]
+        ];
+
+        let s: string;
+        let expected: string;
+        for ([s, expected] of table) {
+            if (g.isWindows) {
+                expected = expected.split('\\').join('/');
+            }
+            const got = c.expand_path_expression(s);
+            assert.strictEqual(got, expected, s);
+        }
     });
+    //@+node:felix.20220129224954.14: *3* TestCommands.test_c_findMatchingBracket
+    // ! uncomment if g.MatchBrackets is implemented !
     /* def test_c_findMatchingBracket(self):
         c, w = self.c, self.c.frame.body.wrapper
         s = '(abc)'
@@ -283,81 +250,81 @@ suite('Test cases for leoCommands.ts', () => {
     //@+node:felix.20220129224954.15: *3* TestCommands.test_c_hiddenRootNode_fileIndex
     test('test_c_hiddenRootNode_fileIndex', async () => {
         const c = self.c;
+        assert.ok(c.hiddenRootNode.fileIndex.startsWith('hidden-root-vnode-gnx'),
+            c.hiddenRootNode.fileIndex);
 
     });
-    /* def test_c_hiddenRootNode_fileIndex(self):
-        c = self.c
-        assert c.hiddenRootNode.fileIndex.startswith('hidden-root-vnode-gnx'), c.hiddenRootNode.fileIndex
-     */
     //@+node:felix.20220129224954.16: *3* TestCommands.test_c_hoist_chapter_node
     test('test_c_hoist_chapter_node', async () => {
         const c = self.c;
-
+        // Create the @settings and @chapter nodes.
+        const settings = c.rootPosition()!.insertAfter();
+        settings.h = '@settings';
+        const chapter = settings.insertAsLastChild();
+        chapter.h = '@chapter aaa';
+        const aaa = chapter.insertAsLastChild();
+        aaa.h = 'aaa node 1';
+        assert.ok(!c.hoistStack.length);
+        c.selectPosition(aaa);
+        // Test.
+        c.hoist();  // New in Leo 5.3: should do nothing
+        assert.strictEqual(c.p.gnx, aaa.gnx);
+        assert.ok(c.p.__eq__(aaa));
+        c.dehoist(); // New in Leo 5.3: should do nothing:
+        assert.strictEqual(c.p.gnx, aaa.gnx);
+        assert.ok(c.p.__eq__(aaa));
+        assert.strictEqual(c.hoistStack.length, [].length);
     });
-    /* def test_c_hoist_chapter_node(self):
-        c = self.c
-        # Create the @settings and @chapter nodes.
-        settings = c.rootPosition().insertAfter()
-        settings.h = '@settings'
-        chapter = settings.insertAsLastChild()
-        chapter.h = '@chapter aaa'
-        aaa = chapter.insertAsLastChild()
-        aaa.h = 'aaa node 1'
-        assert not c.hoistStack
-        c.selectPosition(aaa)
-        # Test.
-        c.hoist()  # New in Leo 5.3: should do nothing
-        self.assertEqual(c.p, aaa)
-        c.dehoist()  # New in Leo 5.3: should do nothing:
-        self.assertEqual(c.p, aaa)
-        self.assertEqual(c.hoistStack, [])
-     */
     //@+node:felix.20220129224954.17: *3* TestCommands.test_c_hoist_followed_by_goto_first_node
     test('test_c_hoist_followed_by_goto_first_node', async () => {
         const c = self.c;
+        // Create the @settings and @chapter nodes.
+        const settings = c.rootPosition()!.insertAfter();
+        settings.h = '@settings';
+        const chapter = settings.insertAsLastChild();
+        chapter.h = '@chapter aaa';
+        const aaa = chapter.insertAsLastChild();
+        aaa.h = 'aaa node 1';
+        // Test.
+        assert.ok(!c.hoistStack.length);
+        c.selectPosition(aaa);
+        assert.ok(!c.hoistStack.length);
 
+        // The de-hoist happens in c.expandOnlyAncestorsOfNode, the call to c.selectPosition.
+        if (1) {
+            c.hoist();
+            c.goToFirstVisibleNode();
+            assert.ok(c.p.__eq__(aaa));
+            assert.strictEqual(c.p.gnx, aaa.gnx);
+        } else {
+            c.hoist();
+            c.goToFirstNode();
+            assert.ok(!c.hoistStack.length);  // The hoist stack must be cleared to show the first node.
+            assert.strictEqual(c.p.gnx, c.rootPosition()!.gnx);
+            assert.ok(c.p.__eq__(aaa));
+
+            assert.ok(c.p.isVisible(c));
+        }
     });
-    /* def test_c_hoist_followed_by_goto_first_node(self):
-        c = self.c
-        # Create the @settings and @chapter nodes.
-        settings = c.rootPosition().insertAfter()
-        settings.h = '@settings'
-        chapter = settings.insertAsLastChild()
-        chapter.h = '@chapter aaa'
-        aaa = chapter.insertAsLastChild()
-        aaa.h = 'aaa node 1'
-        # Test.
-        assert not c.hoistStack
-        c.selectPosition(aaa)
-        assert not c.hoistStack
-
-        # The de-hoist happens in c.expandOnlyAncestorsOfNode, the call to c.selectPosition.
-        if 1:
-            c.hoist()
-            c.goToFirstVisibleNode()
-            self.assertEqual(c.p, aaa)
-        else:
-            c.hoist()
-            c.goToFirstNode()
-            assert not c.hoistStack  # The hoist stack must be cleared to show the first node.
-            self.assertEqual(c.p, c.rootPosition())
-            assert c.p.isVisible(c)
-     */
     //@+node:felix.20220129224954.18: *3* TestCommands.test_c_hoist_with_no_children
     test('test_c_hoist_with_no_children', async () => {
         const c = self.c;
-
+        c.hoist();
+        c.dehoist();
     });
-    /* def test_c_hoist_with_no_children(self):
-        c = self.c
-        c.hoist()
-        c.dehoist()
-     */
     //@+node:felix.20220129224954.19: *3* TestCommands.test_c_insertBodyTime
+    // TODO : uncomment if insertBodyTime is implemented
+    /*
     test('test_c_insertBodyTime', async () => {
         const c = self.c;
-
+        // p = c.p
+        // w = c.frame.body.wrapper
+        // s = w.getAllText()
+        // w.setInsertPoint(len(s))
+        c.insertBodyTime();
     });
+    */
+
     /* def test_c_insertBodyTime(self):
         c = self.c
         # p = c.p
@@ -366,65 +333,74 @@ suite('Test cases for leoCommands.ts', () => {
         # w.setInsertPoint(len(s))
         c.insertBodyTime()
      */
+
     //@+node:felix.20220129224954.20: *3* TestCommands.test_c_markAllAtFileNodesDirty
     test('test_c_markAllAtFileNodesDirty', async () => {
         const c = self.c;
-
+        // const marks = [p.v for p in c.all_positions() if p.isMarked()]
+        const marks = [...c.all_positions()].filter(p => p.isMarked()).map(p => p.v);
+        let ok;
+        try {
+            ok = true;
+            try {
+                c.markAllAtFileNodesDirty();
+            } catch (p_exception) {
+                g.es_exception();
+                ok = false;
+            }
+        }
+        catch (p_exception) {
+            // 
+        }
+        finally {
+            for (let p of c.all_positions()) {
+                if (marks.includes(p.v)) {
+                    if (!p.isMarked()) {
+                        c.setMarked(p);
+                    }
+                }
+                else {
+                    if (p.isMarked()) {
+                        c.clearMarked(p);
+                    }
+                }
+            }
+        }
+        assert.ok(ok);
     });
-    /* def test_c_markAllAtFileNodesDirty(self):
-        c = self.c
-        marks = [p.v for p in c.all_positions() if p.isMarked()]
-        try:
-            ok = True
-            try:
-                c.markAllAtFileNodesDirty()
-            except Exception:
-                g.es_exception()
-                ok = False
-        finally:
-            for p in c.all_positions():
-                if p.v in marks:
-                    if not p.isMarked():
-                        c.setMarked(p)
-                else:
-                    if p.isMarked():
-                        c.clearMarked(p)
-
-        assert ok
-     */
     //@+node:felix.20220129224954.21: *3* TestCommands.test_c_markSubheads
     test('test_c_markSubheads', async () => {
         const c = self.c;
-
+        const child1 = c.rootPosition()!.insertAsLastChild();
+        const child2 = c.rootPosition()!.insertAsLastChild();
+        assert.ok(child1.__bool__() && child2.__bool__());
+        c.markSubheads();
     });
-    /* def test_c_markSubheads(self):
-        c = self.c
-        child1 = c.rootPosition().insertAsLastChild()
-        child2 = c.rootPosition().insertAsLastChild()
-        assert child1 and child2
-        c.markSubheads()
-     */
+
     //@+node:felix.20220129224954.22: *3* TestCommands.test_c_pasteOutline_does_not_clone_top_node
     test('test_c_pasteOutline_does_not_clone_top_node', async () => {
         const c = self.c;
-
+        const p = c.p;
+        p.b = '# text.';
+        // child1 = c.rootPosition().insertAsLastChild()
+        // c.selectPosition(child)
+        c.copyOutline();
+        const p2 = c.pasteOutline();
+        assert.ok(p2 && p2.__bool__());
+        assert.ok(!p2.isCloned());
     });
-    /* def test_c_pasteOutline_does_not_clone_top_node(self):
-        c = self.c
-        p = c.p
-        p.b = '# text.'
-        # child1 = c.rootPosition().insertAsLastChild()
-        # c.selectPosition(child)
-        c.copyOutline()
-        p2 = c.pasteOutline()
-        assert p2
-        assert not p2.isCloned()
-     */
     //@+node:felix.20220129224954.23: *3* TestCommands.test_c_scanAllDirectives
-    test('test_c_scanAllDirectives', async () => {
-        const c = self.c;
-
-    });
+    // TODO : uncomment when atFile 'scanAllDirectives' is implemented
+    /* 
+        test('test_c_scanAllDirectives', async () => {
+            const c = self.c;
+            const d = c.scanAllDirectives(c.p);
+            // These are the commander defaults, without any settings.
+            assert.strictEqual(d.get('language'), 'python');
+            assert.strictEqual(d.get('tabwidth'), -4);
+            assert.strictEqual(d.get('pagewidth'), 132);
+        });
+    */
     /* def test_c_scanAllDirectives(self):
         c = self.c
         d = c.scanAllDirectives(c.p)
@@ -436,46 +412,63 @@ suite('Test cases for leoCommands.ts', () => {
     //@+node:felix.20220129224954.24: *3* TestCommands.test_c_scanAtPathDirectives
     test('test_c_scanAtPathDirectives', async () => {
         const c = self.c;
-
+        const p = self.c.p;
+        const child = p.insertAfter();
+        child.h = '@path one';
+        const grand = child.insertAsLastChild();
+        grand.h = '@path two';
+        const great = grand.insertAsLastChild();
+        great.h = 'xyz';
+        const aList = g.get_directives_dict_list(great);
+        const w_path = c.scanAtPathDirectives(aList);
+        const endpath = g.os_path_normpath('one/two');
+        assert.ok(w_path.endsWith(endpath), `expected '${endpath}' got '${path}'`);
     });
-    /* def test_c_scanAtPathDirectives(self):
-        c, p = self.c, self.c.p
-        child = p.insertAfter()
-        child.h = '@path one'
-        grand = child.insertAsLastChild()
-        grand.h = '@path two'
-        great = grand.insertAsLastChild()
-        great.h = 'xyz'
-        aList = g.get_directives_dict_list(great)
-        path = c.scanAtPathDirectives(aList)
-        endpath = g.os_path_normpath('one/two')
-        assert path.endswith(endpath), f"expected '{endpath}' got '{path}'"
-     */
+
     //@+node:felix.20220129224954.25: *3* TestCommands.test_c_scanAtPathDirectives_same_name_subdirs
     test('test_c_scanAtPathDirectives_same_name_subdirs', async () => {
         const c = self.c;
-
+        // p2 = p.firstChild().firstChild().firstChild()
+        const p = c.p;
+        const child = p.insertAfter();
+        child.h = '@path again';
+        const grand = child.insertAsLastChild();
+        grand.h = '@path again';
+        const great = grand.insertAsLastChild();
+        great.h = 'xyz';
+        const aList = g.get_directives_dict_list(great);
+        const w_path = c.scanAtPathDirectives(aList);
+        const endpath = g.os_path_normpath('again/again');
+        assert.ok(w_path && w_path.endsWith(endpath));
     });
-    /* def test_c_scanAtPathDirectives_same_name_subdirs(self):
-        c = self.c
-        # p2 = p.firstChild().firstChild().firstChild()
-        p = c.p
-        child = p.insertAfter()
-        child.h = '@path again'
-        grand = child.insertAsLastChild()
-        grand.h = '@path again'
-        great = grand.insertAsLastChild()
-        great.h = 'xyz'
-        aList = g.get_directives_dict_list(great)
-        path = c.scanAtPathDirectives(aList)
-        endpath = g.os_path_normpath('again/again')
-        self.assertTrue(path and path.endswith(endpath))
-     */
+
     //@+node:felix.20220129224954.26: *3* TestCommands.test_c_tabNannyNode
+    // TODO : uncomment when 'tabNannyNode' is implemented
+    /*
     test('test_c_tabNannyNode', async () => {
         const c = self.c;
+        const p = c.p;
 
+        // Test 1.
+        const s = textwrap.dedent(`\
+            # no error
+            def spam():
+                pass
+        `)
+        c.tabNannyNode(p, headline=p.h, body=s)
+        // Test 2.
+        s2 = textwrap.dedent(`\
+            # syntax error
+            def spam:
+                pass
+              a = 2
+        `)
+        try:
+            c.tabNannyNode(p, headline=p.h, body=s2)
+        except IndentationError:
+            pass
     });
+    */
     /* def test_c_tabNannyNode(self):
         c, p = self.c, self.c.p
         # Test 1.
@@ -500,19 +493,13 @@ suite('Test cases for leoCommands.ts', () => {
     //@+node:felix.20220129224954.27: *3* TestCommands.test_c_unmarkAll
     test('test_c_unmarkAll', async () => {
         const c = self.c;
-
+        c.unmarkAll();
+        for (let p of c.all_positions()) {
+            assert.ok(!p.isMarked(), p.h);
+        }
     });
-    /* def test_c_unmarkAll(self):
-        c = self.c
-        c.unmarkAll()
-        for p in c.all_positions():
-            assert not p.isMarked(), p.h
-     */
     //@+node:felix.20220129224954.28: *3* TestCommands.test_class_StubConfig
-    test('test_class_StubConfig', async () => {
-        const c = self.c;
-
-    });
+    // TODO : uncomment if 'g.NullObject' is implemented
     /* def test_class_StubConfig(self):
         c = self.c
         class StubConfig(g.NullObject):
@@ -523,10 +510,7 @@ suite('Test cases for leoCommands.ts', () => {
         assert not x.enabledPluginsFileName
      */
     //@+node:felix.20220129224954.29: *3* TestCommands.test_delete_comments_with_multiple_at_language_directives
-    test('test_delete_comments_with_multiple_at_language_directives', async () => {
-        const c = self.c;
-
-    });
+    // ! uncomment when setSelectionRange and body pane are implemented !
     /* def test_delete_comments_with_multiple_at_language_directives(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
         p.b = textwrap.dedent("""\
@@ -552,10 +536,7 @@ suite('Test cases for leoCommands.ts', () => {
 
      */
     //@+node:felix.20220129224954.30: *3* TestCommands.test_delete_html_comments
-    test('test_delete_html_comments', async () => {
-        const c = self.c;
-
-    });
+    // ! uncomment when setSelectionRange and body pane are implemented !
     /* def test_delete_html_comments(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
         p.b = textwrap.dedent("""\
@@ -576,10 +557,7 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(p.b, expected)
      */
     //@+node:felix.20220129224954.31: *3* TestCommands.test_delete_python_comments
-    test('test_delete_python_comments', async () => {
-        const c = self.c;
-
-    });
+    // ! uncomment when setSelectionRange and body pane are implemented !
     /* def test_delete_python_comments(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
         p.b = textwrap.dedent("""\
@@ -602,92 +580,92 @@ suite('Test cases for leoCommands.ts', () => {
     //@+node:felix.20220129224954.32: *3* TestCommands.test_efc_ask
     test('test_efc_ask', async () => {
         const c = self.c;
-
+        const p = c.p;
+        // Not a perfect test, but stil significant.
+        const efc = g.app.externalFilesController;
+        if (!efc) {
+            //  pass
+            // self.skipTest('No externalFilesController')
+            console.log('no externalFilesController in test_efc_ask');
+            return;
+        }
+        const result = efc.ask(c, p.h);
+        assert.ok([true, false].includes(result), result);
     });
-    /* def test_efc_ask(self):
-        c = self.c
-        p = c.p
-        # Not a perfect test, but stil significant.
-        efc = g.app.externalFilesController
-        if not efc:
-            self.skipTest('No externalFilesController')
-        result = efc.ask(c, p.h)
-        assert result in (True, False), result
-     */
     //@+node:felix.20220129224954.33: *3* TestCommands.test_efc_compute_ext
     test('test_efc_compute_ext', async () => {
         const c = self.c;
-
+        const p = c.p;
+        // Not a perfect test, but stil significant.
+        const efc = g.app.externalFilesController;
+        if (!efc) {
+            //  pass
+            // self.skipTest('No externalFilesController')
+            console.log('no externalFilesController in test_efc_compute_ext');
+            return;
+        }
+        const table = [
+            // (None,'.py'),
+            // ('','.py'),
+            ['txt', '.txt'],
+            ['.txt', '.txt']
+        ];
+        let ext;
+        let result;
+        for ([ext, result] of table) {
+            const result2 = efc.compute_ext(c, p, ext);
+            assert.strictEqual(result, result2, ext);
+        }
     });
-    /* def test_efc_compute_ext(self):
-        c, p = self.c, self.c.p
-        efc = g.app.externalFilesController
-        if not efc:
-            self.skipTest('No externalFilesController')
-        table = (
-            # (None,'.py'),
-            # ('','.py'),
-            ('txt', '.txt'),
-            ('.txt', '.txt'),
-        )
-        for ext, result in table:
-            result2 = efc.compute_ext(c, p, ext)
-            self.assertEqual(result, result2, msg=repr(ext))
-     */
     //@+node:felix.20220129224954.34: *3* TestCommands.test_efc_compute_temp_file_path
     test('test_efc_compute_temp_file_path', async () => {
         const c = self.c;
-
+        const p = c.p;
+        // Not a perfect test, but stil significant.
+        const efc = g.app.externalFilesController;
+        if (!efc) {
+            //  pass
+            // self.skipTest('No externalFilesController')
+            console.log('no externalFilesController in test_efc_compute_ext');
+            return;
+        }
+        const s: string = efc.compute_temp_file_path(c, p, '.py');
+        assert.ok(s.endsWith('.py'));
     });
-    /* def test_efc_compute_temp_file_path(self):
-        c = self.c
-        p = c.p
-        efc = g.app.externalFilesController
-        if not efc:
-            self.skipTest('no externalFilesController')
-        s = efc.compute_temp_file_path(c, p, '.py')
-        assert s.endswith('.py')
-     */
     //@+node:felix.20220129224954.35: *3* TestCommands.test_koi8_r_encoding
     test('test_koi8_r_encoding', async () => {
         const c = self.c;
-
+        const p = c.p;
+        const p1 = p.insertAsLastChild();
+        const s = '\xd4\xc5\xd3\xd4';  // the word 'test' in Russian, koi8-r
+        assert.ok((typeof s === 'string' || (s as any instanceof String)), s.toString());
+        p1.setBodyString(s);
+        c.selectPosition(p1);
+        c.copyOutline();
+        c.pasteOutline();
+        const p2 = p1.next();
+        assert.strictEqual(p1.b, p2.b);
     });
-    /* def test_koi8_r_encoding(self):
-        c, p = self.c, self.c.p
-        p1 = p.insertAsLastChild()
-        s = '\xd4\xc5\xd3\xd4'  # the word 'test' in Russian, koi8-r
-        assert isinstance(s, str), repr(s)
-        p1.setBodyString(s)
-        c.selectPosition(p1)
-        c.copyOutline()
-        c.pasteOutline()
-        p2 = p1.next()
-        self.assertEqual(p1.b, p2.b)
-
-     */
     //@+node:felix.20220129224954.36: *3* TestCommands.test_official_commander_ivars
     test('test_official_commander_ivars', async () => {
         const c = self.c;
-
-    });
-    /* def test_official_commander_ivars(self):
-        c = self.c
-        f = c.frame
-        self.assertEqual(c, f.c)
-        self.assertEqual(f, c.frame)
-        ivars = (
+        const f = c.frame;
+        assert.strictEqual(c, f.c);
+        assert.strictEqual(f, c.frame);
+        let ivars = [
             '_currentPosition',
             'hoistStack',
             'mFileName',
-            # Subcommanders...
+            // Subcommanders...
             'atFileCommands', 'fileCommands', 'importCommands', 'undoer',
-            # Args...
+            // Args...
             'page_width', 'tab_width', 'target_language',
-        )
-        for ivar in ivars:
-            self.assertTrue(hasattr(c, ivar), msg=ivar)
-     */
+        ];
+        for (let ivar of ivars) {
+            assert.ok(c.hasOwnProperty(ivar), ivar);
+        }
+    });
+
     //@-others
 
 });

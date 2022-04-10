@@ -3,6 +3,8 @@
 //@+<< imports >>
 //@+node:felix.20210220194059.1: ** << imports >>
 import * as vscode from "vscode";
+import * as path from 'path';
+
 // import 'browser-hrtime';
 // require('browser-hrtime');
 
@@ -18,7 +20,6 @@ import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
 import { AtFile } from './leoAtFile';
 // import * as fs from 'fs';
-// import * as path from 'path';
 // import * as sqlite3 from 'sqlite3';
 import { LeoFind } from './leoFind';
 import { LeoImportCommands } from './leoImport';
@@ -75,6 +76,7 @@ export class Commands {
     // TODO fake frame needed FOR wrapper and hasSelection
     // TODO : maybe MERGE frame.tree.generation WITH _treeId?
     public frame: {
+        c: Commands;
         title: string;
         openDirectory: string;
         tree: {
@@ -82,6 +84,7 @@ export class Commands {
             editLabel: (p: Position, selectAll: boolean, selection: any) => void
         }, body: any
     } = {
+            c: this,
             title: "",
             openDirectory: "",
             tree: {
@@ -722,7 +725,7 @@ export class Commands {
         let p: Position = c.p;
         while (1) {
             let back: Position = p.visBack(c);
-            if (back.__bool__() && back.isVisible(c)) {
+            if (back && back.__bool__() && back.isVisible(c)) {
                 p = back;
             } else {
                 break;
@@ -2143,19 +2146,18 @@ export class Commands {
         // TODO : TEST THIS METHOD !!
         const c: Commands = this;
         const p: Position = c.p;
-        // const d = {
-        //     'c': c,
-        //     'g': g,
-        //     // 'getString': c.config.getString,
-        //     'p': c.p,
-        //     'os': os,
-        //     'sep': os.sep,
-        //     'sys': sys,
-        // }
+        const d = {
+            'c': c,
+            'g': g,
+            // 'getString': c.config.getString,
+            'p': c.p,
+            // 'os': os,
+            'sep': path.sep,
+            // 'sys': sys,
+        }
         // #1338: Don't report errors when called by g.getUrlFromNode.
         try {
-            // pylint: disable=eval-used
-            const w_path = eval(expr);
+            const w_path = (new Function("with(this) { return " + expr + "}")).call(d);
             return g.toUnicode(w_path, 'utf-8');
         }
         catch (e) {

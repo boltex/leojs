@@ -565,7 +565,10 @@ export class Undoer {
     public afterChangeGroup(p: Position, undoType: string, reportFlag?: boolean): void {
         const u: Undoer = this;
         const c: Commands = this.c;
-        const w: any = c.frame.body.wrapper;
+
+        // TODO !
+        // const w: any = c.frame.body.wrapper;
+
         if (u.redoing || u.undoing) {
             return;
         }
@@ -589,7 +592,10 @@ export class Undoer {
         bunch.undoHelper = u.undoGroup;
         bunch.redoHelper = u.redoGroup;
         bunch.newP = p.copy();
-        bunch.newSel = w.getSelectionRange();
+
+        // TODO !
+        // bunch.newSel = w.getSelectionRange();
+
         // Tells whether to report the number of separate changes undone/redone.
         bunch.reportFlag = reportFlag;
 
