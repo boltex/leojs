@@ -59,30 +59,29 @@ suite('Tests for leo.core.leoGlobals', () => {
         self.assertEqual(g.CheckVersionToInt('b2'), 0)
      */
     //@+node:felix.20220129223719.5: *3* TestGlobals.test_g_comment_delims_from_extension
-    // ! Uncomment if comment_delims_from_extension is ever needed in leojs !
-    /*
-    test('test_g_comment_delims_from_extension', async () => {
 
+    test('test_g_comment_delims_from_extension', async () => {
         // New in Leo 4.6, set_delims_from_language returns '' instead of None.
-        const table:[string, string[]][] = [
+        const table: [string, string[]][] = [
             ['.c', ['//', '/*', '*\/']], // escaped
             ['.html', ['', '<!--', '-->']],
             ['.py', ['#', '', '']],
             ['.Globals', ['', '', '']]
         ];
 
-        table.forEach(element => {
-            let ext: string;
-            let expected: string[];
+        let ext: string;
+        let expected: string[];
 
-            [ext, expected ] = element;
+        for ([ext, expected] of table) {
+            console.log('ext:', ext);
+
             const result = g.comment_delims_from_extension(ext);
-            assert.strictEqual(result, expected, ext.toString());
-        });
+            console.log('result', result);
+
+            assert.strictEqual(JSON.stringify(result), JSON.stringify(expected), ext.toString());
+        };
 
     });
-    */
-
     //@+node:felix.20220129223719.6: *3* TestGlobals.test_g_convertPythonIndexToRowCol
     /* def test_g_convertPythonIndexToRowCol(self):
         s1 = 'abc\n\np\nxy'

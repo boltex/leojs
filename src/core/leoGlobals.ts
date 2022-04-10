@@ -874,6 +874,40 @@ export function printObj(obj: any, indent = '', printCaller = false, tag = null)
 }
 
 //@+node:felix.20211104210724.1: ** g.Directives
+//@+node:felix.20220410000509.1: *3* g.comment_delims_from_extension
+/**
+  * Return the comment delims corresponding to the filename's extension.
+  */
+export function comment_delims_from_extension(filename: string): [string, string, string] {
+
+    let root;
+    let ext;
+
+    if (filename.startsWith('.')) {
+        ext = filename;
+    } else {
+        ext = path.extname(filename);
+    }
+    if (ext === '.tmp') {
+        root = filename.slice(0, -4);
+        ext = path.extname(root);
+    }
+
+    let language = app.extension_dict[ext.substring(1)];
+
+    if (ext) {
+        return set_delims_from_language(language)
+    }
+
+    trace(
+        `unknown extension: {ext!r},` +
+        `filename: {filename!r},` +
+        `root: {root!r}`);
+
+
+    return ['', '', ''];
+}
+
 //@+node:felix.20220111004937.1: *3* g.findAllValidLanguageDirectives
 /**
  * Return list of all valid @language directives in p.b
