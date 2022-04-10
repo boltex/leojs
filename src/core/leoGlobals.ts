@@ -1904,7 +1904,9 @@ export function skip_ws_and_nl(s: string, i: number): number {
  */
 export function splitLines(s?: string): string[] {
     if (s) {
-        return s.split(/\r?\n/).map(p_s => p_s + '\n');
+        // return s.split(/\r?\n/).map(p_s => p_s + '\n');
+        // * improved from https://stackoverflow.com/a/62278659/920301
+        return s.match(/[^\n]*\n|[^\n]+/g) || [];
     } else {
         return [];
     }
