@@ -158,7 +158,6 @@ suite('Tests for leo.core.leoGlobals', () => {
             [10, [4, 0]]  // One two many.
         ];
 
-        let n: number;
         let s: string;
         let table: [number, [number, number]][];
         let i: number;
@@ -193,30 +192,49 @@ suite('Tests for leo.core.leoGlobals', () => {
 
 
     //@+node:felix.20220129223719.9: *3* TestGlobals.test_g_ensureLeadingNewlines
-    /* def test_g_ensureLeadingNewlines(self):
-        s = ' \n \n\t\naa bc'
-        s2 = 'aa bc'
-        for i in range(3):
-            result = g.ensureLeadingNewlines(s, i)
-            val = ('\n' * i) + s2
-            self.assertEqual(result, val)
-     */
+    test('test_g_ensureLeadingNewlines', async () => {
+        const s = ' \n \n\t\naa bc';
+        const s2 = 'aa bc';
+        for (let i of [0, 1, 2, 3]) {
+            const result = g.ensureLeadingNewlines(s, i);
+            const val = ('\n'.repeat(i)) + s2;
+            assert.strictEqual(result, val);
+        }
+    });
     //@+node:felix.20220129223719.10: *3* TestGlobals.test_g_ensureTrailingNewlines
-    /* def test_g_ensureTrailingNewlines(self):
-        s = 'aa bc \n \n\t\n'
-        s2 = 'aa bc'
-        for i in range(3):
-            result = g.ensureTrailingNewlines(s, i)
-            val = s2 + ('\n' * i)
-            self.assertEqual(result, val)
-     */
+    test('test_g_ensureTrailingNewlines', async () => {
+        const s = 'aa bc \n \n\t\n';
+        const s2 = 'aa bc';
+        for (let i of [0, 1, 2, 3]) {
+            const result = g.ensureTrailingNewlines(s, i);
+            const val = s2 + ('\n'.repeat(i));
+            assert.strictEqual(result, val);
+        }
+    });
     //@+node:felix.20220129223719.11: *3* TestGlobals.test_g_find_word
+    test('test_g_find_word', async () => {
+        const table: [string, string, number, number][] = [
+            ['abc a bc x', 'bc', 0, 6],
+            ['abc a bc x', 'bc', 1, 6],
+            ['abc a x', 'bc', 0, -1]
+        ];
+        let s: string;
+        let word: string;
+        let i: number;
+        let expected: number;
+        for ([s, word, i, expected] of table) {
+            const actual = g.find_word(s, word, i);
+            console.log('find word', actual, expected);
+
+            assert.strictEqual(actual, expected);
+        }
+    });
     /* def test_g_find_word(self):
         table = (
             ('abc a bc x', 'bc', 0, 6),
             ('abc a bc x', 'bc', 1, 6),
             ('abc a x', 'bc', 0, -1),
-        )6
+        )
         for s, word, i, expected in table:
             actual = g.find_word(s, word, i)
             self.assertEqual(actual, expected)
@@ -264,6 +282,10 @@ suite('Tests for leo.core.leoGlobals', () => {
 
 
     //@+node:felix.20220129223719.14: *3* TestGlobals.test_g_getDocString
+    // TODO:
+    test('test_g_getDocString', async () => {
+        const c = self.c;
+    });
     /* def test_g_getDocString(self):
         s1 = 'no docstring'
         s2 = textwrap.dedent('''\
@@ -414,6 +436,10 @@ suite('Tests for leo.core.leoGlobals', () => {
             print(path13, g.os.path.abspath(path13))
      */
     //@+node:felix.20220129223719.23: *3* TestGlobals.test_g_removeBlankLines
+    // TODO:
+    test('test_g_removeBlankLines', async () => {
+        const c = self.c;
+    });
     /* def test_g_removeBlankLines(self):
         for s, expected in (
             ('a\nb', 'a\nb'),
@@ -424,6 +450,10 @@ suite('Tests for leo.core.leoGlobals', () => {
             self.assertEqual(result, expected, msg=repr(s))
      */
     //@+node:felix.20220129223719.24: *3* TestGlobals.test_g_removeLeadingBlankLines
+    // TODO:
+    test('test_g_removeLeadingBlankLines', async () => {
+        const c = self.c;
+    });
     /* def test_g_removeLeadingBlankLines(self):
         for s, expected in (
             ('a\nb', 'a\nb'),
@@ -434,6 +464,10 @@ suite('Tests for leo.core.leoGlobals', () => {
             self.assertEqual(result, expected, msg=repr(s))
      */
     //@+node:felix.20220129223719.25: *3* TestGlobals.test_g_removeTrailing
+    // TODO:
+    test('test_g_removeTrailing', async () => {
+        const c = self.c;
+    });
     /* def test_g_removeTrailing(self):
         s = 'aa bc \n \n\t\n'
         table = (
@@ -446,6 +480,10 @@ suite('Tests for leo.core.leoGlobals', () => {
             self.assertEqual(result, val)
      */
     //@+node:felix.20220129223719.26: *3* TestGlobals.test_g_sanitize_filename
+    // TODO:
+    test('test_g_sanitize_filename', async () => {
+        const c = self.c;
+    });
     /* def test_g_sanitize_filename(self):
         table = (
             ('A25&()', 'A'),  # Non-alpha characters.

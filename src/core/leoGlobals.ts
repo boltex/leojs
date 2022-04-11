@@ -1625,7 +1625,57 @@ export function shortFileName(fileName?: string): string {
 export const shortFilename = shortFileName;
 
 //@+node:felix.20211104210802.1: ** g.Finding & Scanning
-//@+node:felix.20211104213154.1: *3* g.find_line_start
+//@+node:felix.20220410215925.1: *3* g.find_word
+/**
+ * Return the index of the first occurance of word in s, or -1 if not found.
+
+ * g.find_word is *not* the same as s.find(i,word);
+ * g.find_word ensures that only word-matches are reported.
+ */
+export function find_word(s: string, word: string, i: number = 0): number {
+
+    let progress: number;
+    while (i < s.length) {
+        progress = i;
+        i = s.indexOf(word, i);
+        if (i === -1) {
+            return -1;
+        }
+        // Make sure we are at the start of a word.
+        if (i > 0) {
+            const ch = s[i - 1];
+            if (ch === '_' || isAlNum(ch)) {
+                i += word.length;
+                continue;
+            }
+        }
+        if (match_word(s, i, word)) {
+            return i;
+        }
+        i += word.length;
+        console.assert(progress < i);
+
+    }
+
+    return -1;
+}
+//@+node:felix.20211104230121.1: *3* g.splitLines
+/**
+ * Split s into lines, preserving the number of lines and the endings
+ * of all lines, including the last line.
+ */
+export function splitLines(s?: string): string[] {
+    if (s) {
+        // return s.split(/\r?\n/).map(p_s => p_s + '\n');
+        // * improved from https://stackoverflow.com/a/62278659/920301
+        return s.match(/[^\n]*\n|[^\n]+/g) || [];
+    } else {
+        return [];
+    }
+}
+
+//@+node:felix.20220410214855.1: *3* Scanners: no error messages
+//@+node:felix.20211104213154.1: *4* g.find_line_start
 /**
   * Return the index in s of the start of the line containing s[i].
  */
@@ -1644,16 +1694,7 @@ export function find_line_start(s: string, p_i: number): number {
         return i + 1;
     }
 }
-//@+node:felix.20211104220753.1: *3* g.is_nl
-export function is_nl(s: string, i: number): boolean {
-    return (i < s.length) && (s.charAt(i) === '\n' || s.charAt(i) === '\r');
-}
-
-//@+node:felix.20211104220826.1: *3* g.isDigit
-export function isDigit(s: string): boolean {
-    return (s >= '0' && s <= '9');
-};
-//@+node:felix.20211104221002.1: *3* g.is_special      (coreGlobals.py)
+//@+node:felix.20211104221002.1: *4* g.is_special
 /**
  * Return non-negative number if the body text contains the @ directive.
  */
@@ -1672,19 +1713,40 @@ export function is_special(s: string, directive: string): number {
     return -1;
 }
 
-//@+node:felix.20211104221014.1: *3* g.isWordChar*     (coreGlobals.py)
+//@+node:felix.20211104220753.1: *4* g.is_nl
+export function is_nl(s: string, i: number): boolean {
+    return (i < s.length) && (s.charAt(i) === '\n' || s.charAt(i) === '\r');
+}
+
+//@+node:felix.20220410220931.1: *4* g.isAlNum
 /**
- * Return True if ch should be considered a letter.
+ * from https://stackoverflow.com/a/25352300/920301
  */
-export function isWordChar(ch: string): boolean {
-    return !!ch && (/^[0-9a-zA-Z]$/.test(ch) || ch === '_');
-}
+export function isAlNum(str: string): boolean {
+    var code, i, len;
 
-export function isWordChar1(ch: string): boolean {
-    return !!ch && (/^[a-zA-Z]$/.test(ch) || ch === '_');
+    for (i = 0, len = str.length; i < len; i++) {
+        code = str.charCodeAt(i);
+        if (!(code > 47 && code < 58) && // numeric (0-9)
+            !(code > 64 && code < 91) && // upper alpha (A-Z)
+            !(code > 96 && code < 123)) { // lower alpha (a-z)
+            return false;
+        }
+    }
+    return true;
+};
+//@+node:felix.20211104220826.1: *4* g.isDigit
+export function isDigit(s: string): boolean {
+    return (s >= '0' && s <= '9');
+};
+//@+node:felix.20220110223811.1: *4* g.is_ws & is_ws_or_nl
+export function is_ws(ch: string): boolean {
+    return ch === '\t' || ch === ' ';
 }
-
-//@+node:felix.20211104221259.1: *3* g.match           (coreGlobals.py)
+export function is_ws_or_nl(s: string, i: number): boolean {
+    return is_nl(s, i) || (i < s.length && is_ws(s[i]));
+}
+//@+node:felix.20211104221259.1: *4* g.match
 export function match(s: string, i: number, pattern: string): boolean {
     // Warning: this code makes no assumptions about what follows pattern.
     // Equivalent to original in python (only looks in specific substring)
@@ -1694,7 +1756,7 @@ export function match(s: string, i: number, pattern: string): boolean {
     return !!s && !!pattern && s.substring(i, i + pattern.length + 1).startsWith(pattern);
 }
 
-//@+node:felix.20211104221309.1: *3* g.match_word      (coreGlobals.py)
+//@+node:felix.20211104221309.1: *4* g.match_word
 export function match_word(s: string, i: number, pattern: string): boolean {
     // Using a regex is surprisingly tricky.
     if (!pattern) {
@@ -1726,7 +1788,7 @@ export function match_word(s: string, i: number, pattern: string): boolean {
         return s.substring(i).search(pat) === 0; */
 }
 
-//@+node:felix.20220208154405.1: *3* g.skip_blank_lines
+//@+node:felix.20220208154405.1: *4* g.skip_blank_lines
 /**
  * This routine differs from skip_ws_and_nl in that
  * it does not advance over whitespace at the start
@@ -1750,29 +1812,25 @@ export function skip_blank_lines(s: string, i: number): number {
     return i;
 }
 
-//@+node:felix.20211104220814.1: *3* g.skip_nl
-/**
- * We need this function because different systems have different end-of-line conventions.
- * Skips a single "logical" end-of-line character.
- */
-export function skip_nl(s: string, i: number): number {
-    if (match(s, i, "\r\n")) {
-        return i + 2;
+//@+node:felix.20220112011805.1: *4* g.skip_c_id
+export function skip_c_id(s: string, i: number): number {
+    let n: number = s.length;
+    while (i < n && isWordChar(s[i])) {
+        i += 1;
     }
-    if (match(s, i, '\n') || match(s, i, '\r')) {
-        return i + 1;
+    return i;
+}
+//@+node:felix.20211104220621.1: *4* g.skip_id
+export function skip_id(s: string, i: number, chars: string | null = null): number {
+    chars = chars ? chars.toString() : '';
+    const n = s.length;
+    while (i < n && (isWordChar(s.charAt(i)) || chars.indexOf(s.charAt(i)) >= 0)) {
+        i += 1;
     }
     return i;
 }
 
-//@+node:felix.20220110223811.1: *3* g.is_ws & is_ws_or_nl
-export function is_ws(ch: string): boolean {
-    return ch === '\t' || ch === ' ';
-}
-export function is_ws_or_nl(s: string, i: number): boolean {
-    return is_nl(s, i) || (i < s.length && is_ws(s[i]));
-}
-//@+node:felix.20211104220540.1: *3* g.skip_line, skip_to_start/end_of_line
+//@+node:felix.20211104220540.1: *4* g.skip_line, skip_to_start/end_of_line
 /* These methods skip to the next newline, regardless of whether the
 newline may be preceded by a backslash. Consequently, they should be
 used only when we know that we are not in a preprocessor directive or
@@ -1823,37 +1881,7 @@ export function skip_to_start_of_line(s: string, i: number): number {
     return w_i + 1;
 }
 
-//@+node:felix.20211104220609.1: *3* g.skip_to_char    (coreGlobals.py)
-/**
- * Returns object instead of original python tuple
- */
-export function skip_to_char(s: string, i: number, ch: string): [number, string] {
-    const j: number = s.indexOf(ch, i);
-    if (j === -1) {
-        // return {
-        //     position: s.length,
-        //     result: s.substring(i)
-        // };
-        return [s.length, s.substring(i)];
-    }
-    // return {
-    //     position: j,
-    //     result: s.substring(i, j)
-    // };
-    return [j, s.substring(i, j)];
-}
-
-//@+node:felix.20211104220621.1: *3* g.skip_id         (coreGlobals.py)
-export function skip_id(s: string, i: number, chars: string | null = null): number {
-    chars = chars ? chars.toString() : '';
-    const n = s.length;
-    while (i < n && (isWordChar(s.charAt(i)) || chars.indexOf(s.charAt(i)) >= 0)) {
-        i += 1;
-    }
-    return i;
-}
-
-//@+node:felix.20211104220631.1: *3* g.skip_long
+//@+node:felix.20211104220631.1: *4* g.skip_long
 /**
  * Scan s[i:] for a valid int.
  * Return (i, val) or (i, None) if s[i] does not point at a number.
@@ -1880,7 +1908,42 @@ export function skip_long(s: string, i: number): [number, number | undefined] {
         return [i, undefined];
     }
 }
-//@+node:felix.20211104220639.1: *3* g.skip_ws*        (coreGlobals.py)
+//@+node:felix.20211104220814.1: *4* g.skip_nl
+/**
+ * We need this function because different systems have different end-of-line conventions.
+ * Skips a single "logical" end-of-line character.
+ */
+export function skip_nl(s: string, i: number): number {
+    if (match(s, i, "\r\n")) {
+        return i + 2;
+    }
+    if (match(s, i, '\n') || match(s, i, '\r')) {
+        return i + 1;
+    }
+    return i;
+}
+
+//@+node:felix.20211104220609.1: *4* g.skip_to_char
+/**
+ * Returns object instead of original python tuple
+ */
+export function skip_to_char(s: string, i: number, ch: string): [number, string] {
+    const j: number = s.indexOf(ch, i);
+    if (j === -1) {
+        // return {
+        //     position: s.length,
+        //     result: s.substring(i)
+        // };
+        return [s.length, s.substring(i)];
+    }
+    // return {
+    //     position: j,
+    //     result: s.substring(i, j)
+    // };
+    return [j, s.substring(i, j)];
+}
+
+//@+node:felix.20211104220639.1: *4* g.skip_ws, skip_ws_and_nl
 export function skip_ws(s: string, i: number): number {
     const n: number = s.length;
     while (i < n && ('\t '.indexOf(s.charAt(i)) >= 0)) {
@@ -1897,65 +1960,6 @@ export function skip_ws_and_nl(s: string, i: number): number {
     return i;
 }
 
-//@+node:felix.20211104230121.1: *3* g.splitLines      (coreGlobals.py)
-/**
- * Split s into lines, preserving the number of lines and the endings
- * of all lines, including the last line.
- */
-export function splitLines(s?: string): string[] {
-    if (s) {
-        // return s.split(/\r?\n/).map(p_s => p_s + '\n');
-        // * improved from https://stackoverflow.com/a/62278659/920301
-        return s.match(/[^\n]*\n|[^\n]+/g) || [];
-    } else {
-        return [];
-    }
-}
-
-//@+node:felix.20211104230217.1: *3* g.toUnicode       (coreGlobals.py)
-/**
- * Convert bytes to unicode if necessary.
- */
-export function toUnicode(s: any, encoding: string | null = null, reportErrors = false): string {
-    // TODO : SEE g.toEncodedString.
-
-    // ORIGINAL
-    // if isinstance(s, str):
-    //     return s
-    // tag = 'g.toUnicode'
-    // if not isinstance(s, bytes):
-    //     if callers() not in unicode_warnings:
-    //         unicode_warnings[callers] = True
-    //         error(f"{tag}: unexpected argument of type {s.__class__.__name__}")
-    //         trace(callers())
-    //     return ''
-    // if not encoding:
-    //     encoding = 'utf-8'
-    // try:
-    //     s = s.decode(encoding, 'strict')
-    // except(UnicodeDecodeError, UnicodeError):
-    //     # https://wiki.python.org/moin/UnicodeDecodeError
-    //     s = s.decode(encoding, 'replace')
-    //     if reportErrors:
-    //         error(f"{tag}: unicode error. encoding: {encoding!r}, s:\n{s!r}")
-    //         trace(callers())
-    // except Exception:
-    //     es_exception()
-    //     error(f"{tag}: unexpected error! encoding: {encoding!r}, s:\n{s!r}")
-    //     trace(callers())
-    // return s
-
-    return s.toString(); // Skip for now
-}
-
-//@+node:felix.20220112011805.1: *3* g.skip_c_id
-export function skip_c_id(s: string, i: number): number {
-    let n: number = s.length;
-    while (i < n && isWordChar(s[i])) {
-        i += 1;
-    }
-    return i;
-}
 //@+node:felix.20211106230549.1: ** g.Hooks & Plugins
 //@+node:felix.20211106230549.2: *3* g.act_on_node
 export function dummy_act_on_node(c: Commands, p: Position): any {
@@ -2208,7 +2212,23 @@ export function toPythonIndex(s: string, index?: number | string): number {
     trace(`bad string index: ${index}`);
     return 0;
 }
-//@+node:felix.20211104212212.1: *3* g.angleBrackets
+//@+node:felix.20220410212530.1: *3* g.Strings
+//@+node:felix.20220410212530.2: *4* g.isascii
+/* 
+def isascii(s: str) -> bool:
+    # s.isascii() is defined in Python 3.7.
+    return all(ord(ch) < 128 for ch in s)
+ */
+//@+node:felix.20220410212530.3: *4* g.angleBrackets & virtual_event_name
+/*
+ def angleBrackets(s: str) -> str:
+    """Returns < < s > >"""
+    lt = "<<"
+    rt = ">>"
+    return lt + s + rt
+
+virtual_event_name = angleBrackets
+ */
 /**
  * Return < < s > >
  */
@@ -2217,7 +2237,413 @@ export function angleBrackets(s: string): string {
     const rt = ">>";
     return lt + s + rt;
 }
+export const virtual_event_name = angleBrackets;
+//@+node:felix.20220410212530.4: *4* g.ensureLeading/TrailingNewlines
 
+export function ensureLeadingNewlines(s: string, n: number): string {
+    s = removeLeading(s, '\t\n\r ');
+    return ('\n'.repeat(n)) + s;
+}
+
+export function ensureTrailingNewlines(s: string, n: number): string {
+    s = removeTrailing(s, '\t\n\r ');
+    return s + '\n'.repeat(n);
+}
+
+//@+node:felix.20220410212530.5: *4* g.longestCommonPrefix & g.itemsMatchingPrefixInList
+/* 
+def longestCommonPrefix(s1: str, s2: str) -> str:
+    """Find the longest prefix common to strings s1 and s2."""
+    prefix = ''
+    for ch in s1:
+        if s2.startswith(prefix + ch):
+            prefix = prefix + ch
+        else:
+            return prefix
+    return prefix
+
+def itemsMatchingPrefixInList(s: str, aList: List[str], matchEmptyPrefix: bool=False) -> Tuple[List, str]:
+    """This method returns a sorted list items of aList whose prefix is s.
+
+    It also returns the longest common prefix of all the matches.
+    """
+    if s:
+        pmatches = [a for a in aList if a.startswith(s)]
+    elif matchEmptyPrefix:
+        pmatches = aList[:]
+    else: pmatches = []
+    if pmatches:
+        pmatches.sort()
+        common_prefix = reduce(g.longestCommonPrefix, pmatches)
+    else:
+        common_prefix = ''
+    return pmatches, common_prefix
+ */
+//@+node:felix.20220410212530.6: *4* g.removeLeading/Trailing
+
+// Warning: g.removeTrailingWs already exists.
+// Do not change it!
+
+/**
+ * Remove all characters in chars from the front of s.
+ */
+export function removeLeading(s: string, chars: string): string {
+    let i = 0;
+    while (i < s.length && chars.includes(s[i])) {
+        i += 1;
+    }
+    return s.slice(i);
+}
+/**
+ * Remove all characters in chars from the end of s.
+ */
+export function removeTrailing(s: string, chars: string): string {
+    let i = s.length - 1;
+    while (i >= 0 && chars.includes(s[i])) {
+        i -= 1;
+    }
+    i += 1;
+    return s.slice(0, i);
+}
+
+//@+node:felix.20220410212530.7: *4* g.stripBrackets
+/* 
+def stripBrackets(s: str) -> str:
+    """Strip leading and trailing angle brackets."""
+    if s.startswith('<'):
+        s = s[1:]
+    if s.endswith('>'):
+        s = s[:-1]
+    return s
+ */
+//@+node:felix.20220410212530.8: *4* g.unCamel
+/* 
+def unCamel(s: str) -> List[str]:
+    """Return a list of sub-words in camelCased string s."""
+    result: List[str] = []
+    word: List[str] = []
+    for ch in s:
+        if ch.isalpha() and ch.isupper():
+            if word:
+                result.append(''.join(word))
+            word = [ch]
+        elif ch.isalpha():
+            word.append(ch)
+        elif word:
+            result.append(''.join(word))
+            word = []
+    if word:
+        result.append(''.join(word))
+    return result
+ */
+//@+node:felix.20220410215159.1: *3* g.Unicode
+//@+node:felix.20220410215214.1: *4* g.isWordChar*     (coreGlobals.py)
+/**
+ * Return True if ch should be considered a letter.
+ */
+export function isWordChar(ch: string): boolean {
+    return !!ch && (/^[0-9a-zA-Z]$/.test(ch) || ch === '_');
+}
+
+export function isWordChar1(ch: string): boolean {
+    return !!ch && (/^[a-zA-Z]$/.test(ch) || ch === '_');
+}
+
+//@+node:felix.20220410215545.1: *4* g.toUnicode       (coreGlobals.py)
+/**
+ * Convert bytes to unicode if necessary.
+ */
+export function toUnicode(s: any, encoding: string | null = null, reportErrors = false): string {
+    // TODO : SEE g.toEncodedString.
+
+    // ORIGINAL
+    // if isinstance(s, str):
+    //     return s
+    // tag = 'g.toUnicode'
+    // if not isinstance(s, bytes):
+    //     if callers() not in unicode_warnings:
+    //         unicode_warnings[callers] = True
+    //         error(f"{tag}: unexpected argument of type {s.__class__.__name__}")
+    //         trace(callers())
+    //     return ''
+    // if not encoding:
+    //     encoding = 'utf-8'
+    // try:
+    //     s = s.decode(encoding, 'strict')
+    // except(UnicodeDecodeError, UnicodeError):
+    //     # https://wiki.python.org/moin/UnicodeDecodeError
+    //     s = s.decode(encoding, 'replace')
+    //     if reportErrors:
+    //         error(f"{tag}: unicode error. encoding: {encoding!r}, s:\n{s!r}")
+    //         trace(callers())
+    // except Exception:
+    //     es_exception()
+    //     error(f"{tag}: unexpected error! encoding: {encoding!r}, s:\n{s!r}")
+    //     trace(callers())
+    // return s
+
+    return s.toString(); // Skip for now
+}
+
+//@+node:felix.20220410213527.1: *3* g.Whitespace
+//@+node:felix.20220410213527.2: *4* g.computeLeadingWhitespace
+/* 
+# Returns optimized whitespace corresponding to width with the indicated tab_width.
+
+def computeLeadingWhitespace(width: int, tab_width: int) -> str:
+    if width <= 0:
+        return ""
+    if tab_width > 1:
+        tabs = int(width / tab_width)
+        blanks = int(width % tab_width)
+        return ('\t' * tabs) + (' ' * blanks)
+    # Negative tab width always gets converted to blanks.
+    return ' ' * width
+ */
+//@+node:felix.20220410213527.3: *4* g.computeLeadingWhitespaceWidth
+/* 
+# Returns optimized whitespace corresponding to width with the indicated tab_width.
+
+def computeLeadingWhitespaceWidth(s: str, tab_width: int) -> int:
+    w = 0
+    for ch in s:
+        if ch == ' ':
+            w += 1
+        elif ch == '\t':
+            w += (abs(tab_width) - (w % abs(tab_width)))
+        else:
+            break
+    return w
+ */
+//@+node:felix.20220410213527.4: *4* g.computeWidth
+/* 
+# Returns the width of s, assuming s starts a line, with indicated tab_width.
+
+def computeWidth(s: str, tab_width: int) -> int:
+    w = 0
+    for ch in s:
+        if ch == '\t':
+            w += (abs(tab_width) - (w % abs(tab_width)))
+        elif ch == '\n':  # Bug fix: 2012/06/05.
+            break
+        else:
+            w += 1
+    return w
+ */
+//@+node:felix.20220410213527.5: *4* g.wrap_lines (newer)
+
+//@+at
+// Important note: this routine need not deal with leading whitespace.
+//
+// Instead, the caller should simply reduce pageWidth by the width of
+// leading whitespace wanted, then add that whitespace to the lines
+// returned here.
+//
+// The key to this code is the invarient that line never ends in whitespace.
+//@@c
+/* 
+def wrap_lines(lines: List[str], pageWidth: int, firstLineWidth: int=None) -> List[str]:
+    """Returns a list of lines, consisting of the input lines wrapped to the given pageWidth."""
+    if pageWidth < 10:
+        pageWidth = 10
+    # First line is special
+    if not firstLineWidth:
+        firstLineWidth = pageWidth
+    if firstLineWidth < 10:
+        firstLineWidth = 10
+    outputLineWidth = firstLineWidth
+    # Sentence spacing
+    # This should be determined by some setting, and can only be either 1 or 2
+    sentenceSpacingWidth = 1
+    assert 0 < sentenceSpacingWidth < 3
+    result = []  # The lines of the result.
+    line = ""  # The line being formed.  It never ends in whitespace.
+    for s in lines:
+        i = 0
+        while i < len(s):
+            assert len(line) <= outputLineWidth  # DTHEIN 18-JAN-2004
+            j = g.skip_ws(s, i)
+            k = g.skip_non_ws(s, j)
+            word = s[j:k]
+            assert k > i
+            i = k
+            # DTHEIN 18-JAN-2004: wrap at exactly the text width,
+            # not one character less
+            #
+            wordLen = len(word)
+            if line.endswith('.') or line.endswith('?') or line.endswith('!'):
+                space = ' ' * sentenceSpacingWidth
+            else:
+                space = ' '
+            if line and wordLen > 0:
+                wordLen += len(space)
+            if wordLen + len(line) <= outputLineWidth:
+                if wordLen > 0:
+                    //@+<< place blank and word on the present line >>
+                    //@+node:felix.20220410213527.6: *5* << place blank and word on the present line >>
+                    if line:
+                        # Add the word, preceeded by a blank.
+                        line = space.join((line, word))
+                    else:
+                        # Just add the word to the start of the line.
+                        line = word
+                    //@-<< place blank and word on the present line >>
+                else: pass  # discard the trailing whitespace.
+            else:
+                //@+<< place word on a new line >>
+                //@+node:felix.20220410213527.7: *5* << place word on a new line >>
+                # End the previous line.
+                if line:
+                    result.append(line)
+                    outputLineWidth = pageWidth  # DTHEIN 3-NOV-2002: width for remaining lines
+                # Discard the whitespace and put the word on a new line.
+                line = word
+                # Careful: the word may be longer than pageWidth.
+                if len(line) > pageWidth:  # DTHEIN 18-JAN-2004: line can equal pagewidth
+                    result.append(line)
+                    outputLineWidth = pageWidth  # DTHEIN 3-NOV-2002: width for remaining lines
+                    line = ""
+                //@-<< place word on a new line >>
+    if line:
+        result.append(line)
+    return result
+ */
+//@+node:felix.20220410213527.8: *4* g.get_leading_ws
+/* 
+def get_leading_ws(s: str) -> str:
+    """Returns the leading whitespace of 's'."""
+    i = 0
+    n = len(s)
+    while i < n and s[i] in (' ', '\t'):
+        i += 1
+    return s[0:i]
+ */
+//@+node:felix.20220410213527.9: *4* g.optimizeLeadingWhitespace
+/* 
+# Optimize leading whitespace in s with the given tab_width.
+
+def optimizeLeadingWhitespace(line: str, tab_width: int) -> str:
+    i, width = g.skip_leading_ws_with_indent(line, 0, tab_width)
+    s = g.computeLeadingWhitespace(width, tab_width) + line[i:]
+    return s
+ */
+//@+node:felix.20220410213527.10: *4* g.regularizeTrailingNewlines
+
+//@+at The caller should call g.stripBlankLines before calling this routine
+// if desired.
+//
+// This routine does _not_ simply call rstrip(): that would delete all
+// trailing whitespace-only lines, and in some cases that would change
+// the meaning of program or data.
+//@@c
+/* 
+def regularizeTrailingNewlines(s: str, kind: str) -> None:
+    """Kind is 'asis', 'zero' or 'one'."""
+    pass
+ */
+//@+node:felix.20220410213527.11: *4* g.removeBlankLines
+/* 
+def removeBlankLines(s: str) -> str:
+    lines = g.splitLines(s)
+    lines = [z for z in lines if z.strip()]
+    return ''.join(lines)
+ */
+//@+node:felix.20220410213527.12: *4* g.removeLeadingBlankLines
+/* 
+def removeLeadingBlankLines(s: str) -> str:
+    lines = g.splitLines(s)
+    result = []
+    remove = True
+    for line in lines:
+        if remove and not line.strip():
+            pass
+        else:
+            remove = False
+            result.append(line)
+    return ''.join(result)
+ */
+//@+node:felix.20220410213527.13: *4* g.removeLeadingWhitespace
+/* 
+# Remove whitespace up to first_ws wide in s, given tab_width, the width of a tab.
+
+def removeLeadingWhitespace(s: str, first_ws: int, tab_width: int) -> str:
+    j = 0
+    ws = 0
+    first_ws = abs(first_ws)
+    for ch in s:
+        if ws >= first_ws:
+            break
+        elif ch == ' ':
+            j += 1
+            ws += 1
+        elif ch == '\t':
+            j += 1
+            ws += (abs(tab_width) - (ws % abs(tab_width)))
+        else:
+            break
+    if j > 0:
+        s = s[j:]
+    return s
+ */
+//@+node:felix.20220410213527.14: *4* g.removeTrailingWs
+/* 
+# Warning: string.rstrip also removes newlines!
+
+def removeTrailingWs(s: str) -> str:
+    j = len(s) - 1
+    while j >= 0 and (s[j] == ' ' or s[j] == '\t'):
+        j -= 1
+    return s[: j + 1]
+ */
+//@+node:felix.20220410213527.15: *4* g.skip_leading_ws
+/* 
+# Skips leading up to width leading whitespace.
+
+def skip_leading_ws(s: str, i: int, ws: int, tab_width: int) -> int:
+    count = 0
+    while count < ws and i < len(s):
+        ch = s[i]
+        if ch == ' ':
+            count += 1
+            i += 1
+        elif ch == '\t':
+            count += (abs(tab_width) - (count % abs(tab_width)))
+            i += 1
+        else: break
+    return i
+ */
+//@+node:felix.20220410213527.16: *4* g.skip_leading_ws_with_indent
+/* 
+def skip_leading_ws_with_indent(s: str, i: int, tab_width: int) -> Tuple[int, int]:
+    """Skips leading whitespace and returns (i, indent),
+
+    - i points after the whitespace
+    - indent is the width of the whitespace, assuming tab_width wide tabs."""
+    count = 0
+    n = len(s)
+    while i < n:
+        ch = s[i]
+        if ch == ' ':
+            count += 1
+            i += 1
+        elif ch == '\t':
+            count += (abs(tab_width) - (count % abs(tab_width)))
+            i += 1
+        else: break
+    return i, count
+ */
+//@+node:felix.20220410213527.17: *4* g.stripBlankLines
+/* 
+def stripBlankLines(s: str) -> str:
+    lines = g.splitLines(s)
+    for i, line in enumerate(lines):
+        j = g.skip_ws(line, 0)
+        if j >= len(line):
+            lines[i] = ''
+        elif line[j] == '\n':
+            lines[i] = '\n'
+    return ''.join(lines)
+ */
 //@+node:felix.20220213223330.1: *3* g.isValidEncoding
 /**
  * Return True if the encooding is valid.
