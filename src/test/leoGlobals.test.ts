@@ -229,16 +229,6 @@ suite('Tests for leo.core.leoGlobals', () => {
             assert.strictEqual(actual, expected);
         }
     });
-    /* def test_g_find_word(self):
-        table = (
-            ('abc a bc x', 'bc', 0, 6),
-            ('abc a bc x', 'bc', 1, 6),
-            ('abc a x', 'bc', 0, -1),
-        )
-        for s, word, i, expected in table:
-            actual = g.find_word(s, word, i)
-            self.assertEqual(actual, expected)
-     */
     //@+node:felix.20220129223719.12: *3* TestGlobals.test_g_fullPath
     test('test_g_fullPath', async () => {
         const c = self.c;
@@ -252,10 +242,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         const end = g.os_path_normpath('abc/xyz');
 
         assert.ok(w_path.endsWith(end), w_path.toString());
-
     });
-
-
     //@+node:felix.20220129223719.13: *3* TestGlobals.test_g_get_directives_dict
     test('test_g_get_directives_dict', async () => {
         const c = self.c;
@@ -277,10 +264,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert.strictEqual(d['encoding'], 'utf-8');
         assert.strictEqual(d['comment'], 'a b c');
         assert.ok(!(d['path']), d['path']);
-
     });
-
-
     //@+node:felix.20220129223719.14: *3* TestGlobals.test_g_getDocString
     // TODO:
     test('test_g_getDocString', async () => {
@@ -499,18 +483,21 @@ suite('Tests for leo.core.leoGlobals', () => {
             self.assertEqual(got, expected, msg=repr(s))
      */
     //@+node:felix.20220129223719.27: *3* TestGlobals.test_g_scanAtHeaderDirectives_header
+    // TODO:
     /* def test_g_scanAtHeaderDirectives_header(self):
         c = self.c
         aList = g.get_directives_dict_list(c.p)
         g.scanAtHeaderDirectives(aList)
      */
     //@+node:felix.20220129223719.28: *3* TestGlobals.test_g_scanAtHeaderDirectives_noheader
+    // TODO:
     /* def test_g_scanAtHeaderDirectives_noheader(self):
         c = self.c
         aList = g.get_directives_dict_list(c.p)
         g.scanAtHeaderDirectives(aList)
      */
     //@+node:felix.20220129223719.29: *3* TestGlobals.test_g_scanAtLineendingDirectives_cr
+    // TODO:
     /* def test_g_scanAtLineendingDirectives_cr(self):
         c = self.c
         p = c.p
@@ -520,6 +507,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         self.assertEqual(s, '\r')
      */
     //@+node:felix.20220129223719.30: *3* TestGlobals.test_g_scanAtLineendingDirectives_crlf
+    // TODO:
     /* def test_g_scanAtLineendingDirectives_crlf(self):
         c = self.c
         p = c.p
@@ -529,6 +517,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         self.assertEqual(s, '\r\n')
      */
     //@+node:felix.20220129223719.31: *3* TestGlobals.test_g_scanAtLineendingDirectives_lf
+    // TODO:
     /* def test_g_scanAtLineendingDirectives_lf(self):
         c = self.c
         p = c.p
@@ -538,6 +527,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         self.assertEqual(s, '\n')
      */
     //@+node:felix.20220129223719.32: *3* TestGlobals.test_g_scanAtLineendingDirectives_nl
+    // TODO:
     /* def test_g_scanAtLineendingDirectives_nl(self):
         c = self.c
         p = c.p
@@ -547,6 +537,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         self.assertEqual(s, '\n')
      */
     //@+node:felix.20220129223719.33: *3* TestGlobals.test_g_scanAtLineendingDirectives_platform
+    // TODO:
     /* def test_g_scanAtLineendingDirectives_platform(self):
         c = self.c
         p = c.p
@@ -559,6 +550,7 @@ suite('Tests for leo.core.leoGlobals', () => {
             self.assertEqual(s, '\n')
      */
     //@+node:felix.20220129223719.34: *3* TestGlobals.test_g_scanAtPagewidthDirectives_minus_40
+    // TODO:
     /* def test_g_scanAtPagewidthDirectives_minus_40(self):
         c = self.c
         p = c.p
@@ -570,6 +562,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert n in (None, 80), repr(n)
      */
     //@+node:felix.20220129223719.35: *3* TestGlobals.test_g_scanAtPagewidthDirectives_40
+    // TODO:
     /* def test_g_scanAtPagewidthDirectives_40(self):
         c = self.c
         p = c.p
@@ -599,6 +592,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
 
     //@+node:felix.20220129223719.38: *3* TestGlobals.test_g_scanAtWrapDirectives_nowrap
+    // TODO:
     /* def test_g_scanAtWrapDirectives_nowrap(self):
         c = self.c
         p = c.p
@@ -608,6 +602,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert s is False, repr(s)
      */
     //@+node:felix.20220129223719.39: *3* TestGlobals.test_g_scanAtWrapDirectives_wrap_with_wrap_
+    // TODO:
     /* def test_g_scanAtWrapDirectives_wrap_with_wrap_(self):
         c = self.c
         p = c.p
@@ -617,6 +612,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert s is True, repr(s)
      */
     //@+node:felix.20220129223719.40: *3* TestGlobals.test_g_scanAtWrapDirectives_wrap_without_nowrap_
+    // TODO:
     /* def test_g_scanAtWrapDirectives_wrap_without_nowrap_(self):
         c = self.c
         aList = g.get_directives_dict_list(c.p)
@@ -768,6 +764,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
 
     //@+node:felix.20220129223719.47: *3* TestGlobals.test_g_splitLongFileName
+    // TODO:
     /* def test_g_splitLongFileName(self):
         table = (
             r'abcd/xy\pdqabc/aaa.py',

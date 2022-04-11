@@ -315,7 +315,7 @@ suite('Test cases for leoCommands.ts', () => {
         c.dehoist();
     });
     //@+node:felix.20220129224954.19: *3* TestCommands.test_c_insertBodyTime
-    // TODO : uncomment if insertBodyTime is implemented
+    // TODO: uncomment if insertBodyTime is implemented
     /*
     test('test_c_insertBodyTime', async () => {
         const c = self.c;
@@ -392,7 +392,7 @@ suite('Test cases for leoCommands.ts', () => {
         assert.ok(!p2.isCloned());
     });
     //@+node:felix.20220129224954.23: *3* TestCommands.test_c_scanAllDirectives
-    // TODO : uncomment when atFile 'scanAllDirectives' is implemented
+    // TODO: uncomment when atFile 'scanAllDirectives' is implemented
     /* 
         test('test_c_scanAllDirectives', async () => {
             const c = self.c;
@@ -445,7 +445,7 @@ suite('Test cases for leoCommands.ts', () => {
     });
 
     //@+node:felix.20220129224954.26: *3* TestCommands.test_c_tabNannyNode
-    // TODO : uncomment when 'tabNannyNode' is implemented
+    // TODO: uncomment when 'tabNannyNode' is implemented
     /*
     test('test_c_tabNannyNode', async () => {
         const c = self.c;
@@ -501,7 +501,7 @@ suite('Test cases for leoCommands.ts', () => {
         }
     });
     //@+node:felix.20220129224954.28: *3* TestCommands.test_class_StubConfig
-    // TODO : uncomment if 'g.NullObject' is implemented
+    // TODO: uncomment if 'g.NullObject' is implemented
     /* def test_class_StubConfig(self):
         c = self.c
         class StubConfig(g.NullObject):
