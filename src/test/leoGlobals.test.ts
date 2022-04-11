@@ -216,7 +216,9 @@ suite('Tests for leo.core.leoGlobals', () => {
         const table: [string, string, number, number][] = [
             ['abc a bc x', 'bc', 0, 6],
             ['abc a bc x', 'bc', 1, 6],
-            ['abc a x', 'bc', 0, -1]
+            ['abc a bc xssdfskdjfhskjdfhskjdf', 'bc', 1, 6],
+            ['abc a x', 'bc', 0, -1],
+            [' bc', 'bc', 0, 1]
         ];
         let s: string;
         let word: string;
@@ -224,8 +226,6 @@ suite('Tests for leo.core.leoGlobals', () => {
         let expected: number;
         for ([s, word, i, expected] of table) {
             const actual = g.find_word(s, word, i);
-            console.log('find word', actual, expected);
-
             assert.strictEqual(actual, expected);
         }
     });

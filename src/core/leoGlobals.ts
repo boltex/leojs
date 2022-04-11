@@ -1769,7 +1769,8 @@ export function match_word(s: string, i: number, pattern: string): boolean {
     if (j === 0) {
         return false;
     }
-    let found = s.indexOf(pattern);
+    let found = s.indexOf(pattern, i);
+
     if (found < i || found >= i + j) {
         found = -1;
     }
