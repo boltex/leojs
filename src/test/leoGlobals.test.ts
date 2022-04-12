@@ -266,29 +266,28 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert.ok(!(d['path']), d['path']);
     });
     //@+node:felix.20220129223719.14: *3* TestGlobals.test_g_getDocString
-    // TODO:
     test('test_g_getDocString', async () => {
-        const c = self.c;
+        let s1 = 'no docstring';
+        let s2 = g.dedent(`\
+        # comment
+        """docstring2."""
+        `);
+        let s3 = g.dedent(`\
+        """docstring3."""
+        \'\'\'docstring2.\'\'\'
+        `);
+        const table = [
+            [s1, ''],
+            [s2, 'docstring2.'],
+            [s3, 'docstring3.']
+        ];
+        let s;
+        let result;
+        for ([s, result] of table) {
+            s2 = g.getDocString(s);
+            assert.strictEqual(s2, result);
+        }
     });
-    /* def test_g_getDocString(self):
-        s1 = 'no docstring'
-        s2 = textwrap.dedent('''\
-    # comment
-    """docstring2."""
-    ''')
-        s3 = textwrap.dedent('''\
-    """docstring3."""
-    \'\'\'docstring2.\'\'\'
-    ''')
-        table = (
-            (s1, ''),
-            (s2, 'docstring2.'),
-            (s3, 'docstring3.'),
-        )
-        for s, result in table:
-            s2 = g.getDocString(s)
-            self.assertEqual(s2, result)
-     */
     //@+node:felix.20220129223719.15: *3* TestGlobals.test_g_getLine
     test('test_g_getLine', async () => {
         const s: string = 'a\ncd\n\ne';
@@ -420,53 +419,66 @@ suite('Tests for leo.core.leoGlobals', () => {
             print(path13, g.os.path.abspath(path13))
      */
     //@+node:felix.20220129223719.23: *3* TestGlobals.test_g_removeBlankLines
-    // TODO:
     test('test_g_removeBlankLines', async () => {
-        const c = self.c;
+        let s: string;
+        let expected: string;
+        const table = [
+            ['a\nb', 'a\nb'],
+            ['\n  \n\nb\n', 'b\n'],
+            [' \t \n\n  \n c\n\t\n', ' c\n']
+        ];
+        for ([s, expected] of table) {
+            const result = g.removeBlankLines(s);
+            assert.strictEqual(result, expected, s.toString());
+        }
     });
-    /* def test_g_removeBlankLines(self):
-        for s, expected in (
-            ('a\nb', 'a\nb'),
-            ('\n  \n\nb\n', 'b\n'),
-            (' \t \n\n  \n c\n\t\n', ' c\n'),
-        ):
-            result = g.removeBlankLines(s)
-            self.assertEqual(result, expected, msg=repr(s))
-     */
     //@+node:felix.20220129223719.24: *3* TestGlobals.test_g_removeLeadingBlankLines
-    // TODO:
     test('test_g_removeLeadingBlankLines', async () => {
-        const c = self.c;
+        let s: string;
+        let expected: string;
+        const table = [
+            ['a\nb', 'a\nb'],
+            ['\n  \nb\n', 'b\n'],
+            [' \t \n\n\n c', ' c']
+        ];
+        for ([s, expected] of table) {
+            const result = g.removeLeadingBlankLines(s);
+            assert.strictEqual(result, expected, s.toString());
+        }
     });
-    /* def test_g_removeLeadingBlankLines(self):
-        for s, expected in (
-            ('a\nb', 'a\nb'),
-            ('\n  \nb\n', 'b\n'),
-            (' \t \n\n\n c', ' c'),
-        ):
-            result = g.removeLeadingBlankLines(s)
-            self.assertEqual(result, expected, msg=repr(s))
-     */
     //@+node:felix.20220129223719.25: *3* TestGlobals.test_g_removeTrailing
-    // TODO:
     test('test_g_removeTrailing', async () => {
-        const c = self.c;
+        let s: string = 'aa bc \n \n\t\n';
+        const table = [
+            ['\t\n ', 'aa bc'],
+            ['abc\t\n ', ''],
+            ['c\t\n ', 'aa b']
+        ];
+        let arg;
+        let val;
+        for ([arg, val] of table) {
+            const result = g.removeTrailing(s, arg);
+            assert.strictEqual(result, val);
+        }
     });
-    /* def test_g_removeTrailing(self):
-        s = 'aa bc \n \n\t\n'
-        table = (
-            ('\t\n ', 'aa bc'),
-            ('abc\t\n ', ''),
-            ('c\t\n ', 'aa b'),
-        )
-        for arg, val in table:
-            result = g.removeTrailing(s, arg)
-            self.assertEqual(result, val)
-     */
     //@+node:felix.20220129223719.26: *3* TestGlobals.test_g_sanitize_filename
-    // TODO:
     test('test_g_sanitize_filename', async () => {
-        const c = self.c;
+        const table = [
+            ['A25&()', 'A'],  // Non-alpha characters.
+            ['B\tc', 'B c'],  // Tabs.
+            ['"AB"', "'AB'"],  // Double quotes.
+            ['\\/:|<>*:.', '_'],  // Special characters.
+            ['_____________', '_'],  // Combining underscores.
+            ['A'.repeat(200), 'A'.repeat(128)],  // Maximum length.
+            ['abc.', 'abc_']  // Trailing dots.
+        ];
+        let s;
+        let expected;
+        let got;
+        for ([s, expected] of table) {
+            got = g.sanitize_filename(s);
+            assert.strictEqual(got, expected, s.toString());
+        }
     });
     /* def test_g_sanitize_filename(self):
         table = (

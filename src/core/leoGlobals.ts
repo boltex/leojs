@@ -5,7 +5,7 @@
  * Important: This module imports no other Leo module.
  */
 //@+<< imports >>
-//@+node:felix.20210102181122.1: ** << imports >> (leoGlobals)
+//@+node:felix.20210102181122.1: ** << imports >>
 import * as vscode from "vscode";
 
 import * as os from 'os';
@@ -85,7 +85,7 @@ export let directives_pat: any = null;  // Set below.
 
 //@-<< define g.globalDirectiveList >>
 //@+<< define global decorator dicts >>
-//@+node:felix.20210102180405.1: ** << define global decorator dicts >> (leoGlobals.py)
+//@+node:felix.20210102180405.1: ** << define global decorator dicts >>
 /*
   The cmd_instance_dict supports per-class @cmd decorators. For example, the
   following appears in leo.commands.
@@ -1605,6 +1605,44 @@ export async function readFileIntoString(fileName: string,
 
 }
 
+//@+node:felix.20220412004053.1: *3* g.sanitize_filename
+/**
+ * Prepares string s to be a valid file name:
+ *
+ * - substitute '_' for whitespace and special path characters.
+ * - eliminate all other non-alphabetic characters.
+ * - convert double quotes to single quotes.
+ * - strip leading and trailing whitespace.
+ * - return at most 128 characters.
+ */
+export function sanitize_filename(s: string): string {
+    const result: string[] = [];
+
+    let ch: string;
+    for (let i = 0; i < s.length; i++) {
+        ch = s[i];
+        if ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'.includes(ch)) {
+            result.push(ch);
+        } else if (ch === '\t') {
+            result.push(' ');
+        } else if (ch === '"') {
+            result.push("'");
+        } else if ('\\/:|<>*:._'.includes(ch)) {
+            result.push('_');
+        }
+    }
+
+    s = result.join('').trim();
+    let n;
+    while (s.length > 1) {
+        n = s.length;
+        s = s.split('__').join('_'); // s.replace('__', '_');
+        if (s.length === n) {
+            break;
+        }
+    }
+    return s.slice(0, 128);
+}
 //@+node:felix.20220106230957.1: *3* g.setGlobalOpenDir
 export function setGlobalOpenDir(fileName: string): void {
     if (fileName) {
@@ -1718,6 +1756,10 @@ export function is_nl(s: string, i: number): boolean {
     return (i < s.length) && (s.charAt(i) === '\n' || s.charAt(i) === '\r');
 }
 
+//@+node:felix.20220411230914.1: *4* g.isAlpha
+export function isAlpha(ch: string) {
+    return /^[A-Z]$/i.test(ch);
+}
 //@+node:felix.20220410220931.1: *4* g.isAlNum
 /**
  * from https://stackoverflow.com/a/25352300/920301
@@ -1924,6 +1966,45 @@ export function skip_nl(s: string, i: number): number {
     return i;
 }
 
+//@+node:felix.20220411231219.1: *4* g.skip_python_string
+export function skip_python_string(s: string, i: number): number {
+    if (match(s, i, "'''") || match(s, i, '"""')) {
+        const delim = s[i].repeat(3);
+        i += 3;
+        const k = s.indexOf(delim, i);
+        if (k > -1) {
+            return k + 3;
+        }
+        return s.length;
+    }
+    return skip_string(s, i);
+}
+//@+node:felix.20220411231208.1: *4* g.skip_string
+/**
+ * Scan forward to the end of a string.
+ */
+export function skip_string(s: string, i: number): number {
+
+    const delim = s[i];
+    i += 1;
+
+    console.assert('\'"'.includes(delim), delim.toString() + " " + s);
+    let n = s.length;
+
+    while (i < n && s[i] !== delim) {
+        if (s[i] == '\\') {
+            i += 2;
+        } else {
+            i += 1;
+        }
+    }
+    if (i >= n) {
+        // pass
+    } else if (s[i] === delim) {
+        i += 1;
+    }
+    return i;
+}
 //@+node:felix.20211104220609.1: *4* g.skip_to_char
 /**
  * Returns object instead of original python tuple
@@ -1943,7 +2024,6 @@ export function skip_to_char(s: string, i: number, ch: string): [number, string]
     // };
     return [j, s.substring(i, j)];
 }
-
 //@+node:felix.20211104220639.1: *4* g.skip_ws, skip_ws_and_nl
 export function skip_ws(s: string, i: number): number {
     const n: number = s.length;
@@ -1960,7 +2040,6 @@ export function skip_ws_and_nl(s: string, i: number): number {
     }
     return i;
 }
-
 //@+node:felix.20211106230549.1: ** g.Hooks & Plugins
 //@+node:felix.20211106230549.2: *3* g.act_on_node
 export function dummy_act_on_node(c: Commands, p: Position): any {
@@ -2543,13 +2622,26 @@ def regularizeTrailingNewlines(s: str, kind: str) -> None:
     pass
  */
 //@+node:felix.20220410213527.11: *4* g.removeBlankLines
-/* 
-def removeBlankLines(s: str) -> str:
-    lines = g.splitLines(s)
-    lines = [z for z in lines if z.strip()]
-    return ''.join(lines)
- */
+export function removeBlankLines(s: string): string {
+    let lines = splitLines(s);
+    lines = lines.filter(z => !!z.trim()); // [z for z in lines if z.strip()]
+    return lines.join('');
+}
 //@+node:felix.20220410213527.12: *4* g.removeLeadingBlankLines
+export function removeLeadingBlankLines(s: string): string {
+    let lines = splitLines(s);
+    const result = [];
+    let remove = true;
+    for (let line of lines) {
+        if (remove && !line.trim()) {
+            // pass
+        } else {
+            remove = false;
+            result.push(line);
+        }
+    }
+    return result.join('');
+}
 /* 
 def removeLeadingBlankLines(s: str) -> str:
     lines = g.splitLines(s)
@@ -3401,7 +3493,158 @@ export function os_path_splitext(p_path: string): [string, string] {
 //             g.es_print(f"xdg-open {fname} failed with exit code {rc}")
 //         stderr2log(g, ree, fname)
 //         ree.close()
-//@+node:felix.20211104211222.1: ** g.Parsing & Tokenizing
+//@+node:felix.20220411212559.1: ** g.Parsing & Tokenizing
+//@+node:felix.20220411212559.2: *3* g.createTopologyList
+/**
+ * Creates a list describing a node and all its descendents
+ */
+export function createTopologyList(c: Commands, root?: Position, useHeadlines?: boolean): any[] {
+
+    if (!root) {
+        root = c.rootPosition()!;
+    }
+    const v = root;
+    let aList: any[];
+    if (useHeadlines) {
+        aList = [[v.numberOfChildren(), v.headString()]];  // type ignore
+    } else {
+        aList = [v.numberOfChildren()];  // type ignore
+    }
+    let child = v.firstChild();
+    while (child) {
+        aList.push(createTopologyList(c, child, useHeadlines));  // type ignore
+        child = child.next();
+    }
+
+    return aList;
+}
+//@+node:felix.20220411212559.3: *3* g.getDocString
+/**
+ * Return the text of the first docstring found in s.
+ */
+export function getDocString(s: string): string {
+
+    const tags = ['"""', "'''"];
+    let tag1;
+    let tag2;
+    [tag1, tag2] = tags;
+
+    let i1;
+    let i2;
+    [i1, i2] = [s.indexOf(tag1), s.indexOf(tag2)];
+
+    if (i1 === -1 && i2 === -1) {
+        return '';
+    }
+    let i: number;
+    if (i1 > -1 && i2 > -1) {
+        i = Math.min(i1, i2);
+    } else {
+        i = Math.max(i1, i2);
+    }
+    const tag = s.slice(i, i + 3);
+
+    console.assert(tags.includes(tag))
+
+    const j = s.indexOf(tag, i + 3);
+    if (j > -1) {
+        return s.slice(i + 3, j);
+    }
+    return '';
+}
+//@+node:felix.20220411212559.4: *3* g.getDocStringForFunction
+/**
+ * Return the docstring for a function that creates a Leo command.
+ */
+export function getDocStringForFunction(func: any): string {
+
+    const name = (func: any): string => {
+        if (func['__name__']) {
+            return func['__name__'];
+        } else {
+            return '<no __name__>';
+        }
+        // return func.__name__ if hasattr(func, '__name__') else '<no __name__>'
+    };
+
+    // Fix bug 1251252: https://bugs.launchpad.net/leo-editor/+bug/1251252
+    // Minibuffer commands created by mod_scripting.py have no docstrings.
+    // Do special cases first.
+    let s: string = '';
+
+    // TODO: Special cases needed? 
+    /* 
+    const get_defaults = (func: string, i: number) : any => {
+        const defaults = inspect.getfullargspec(func)[3];
+        return defaults[i];
+    };
+    
+    if (name(func) === 'minibufferCallback'){
+        func = get_defaults(func, 0);
+        if (hasattr(func, 'func.__doc__') && func.__doc__.trim()){
+            s = func.__doc__;
+        }
+    }
+    let script;
+    if (!s && name(func) === 'commonCommandCallback'){
+        script = get_defaults(func, 1);
+        s = getDocString(script);  // Do a text scan for the function.
+    }
+    */
+
+    // Now the general cases.  Prefer __doc__ to docstring()
+    if (!s && func['__doc__']) {
+        s = func.__doc__;
+    }
+    if (!s && func['docstring']) {
+        s = func.docstring;
+    }
+    return s;
+}
+//@+node:felix.20220411212559.5: *3* g.python_tokenize (not used)
+/**
+ * Tokenize string s and return a list of tokens (kind, value, line_number)
+ *
+ * where kind is in ('comment,'id','nl','other','string','ws').
+ */
+export function python_tokenize(s: string): [string, string, number][] {
+
+    const result: [string, string, number][] = [];
+
+    let i = 0;
+    let line_number = 0;
+
+    while (i < s.length) {
+        let j = i;
+        let progress = i;
+        let ch = s[i];
+        let kind;
+        if (ch === '\n') {
+            [kind, i] = ['nl', i + 1];
+        } else if (' \t'.includes(ch)) {
+            kind = 'ws';
+            while (i < s.length && ' \t'.includes(s[i])) {
+                i += 1;
+            }
+        } else if (ch === '#') {
+            [kind, i] = ['comment', skip_to_end_of_line(s, i)];
+        } else if ('"\''.includes(ch)) {
+            [kind, i] = ['string', skip_python_string(s, i)];
+        } else if (ch === '_' || isAlpha(ch)) {
+            [kind, i] = ['id', skip_id(s, i)];
+        } else {
+            [kind, i] = ['other', i + 1];
+        }
+        console.assert(progress < i && j === progress);
+        let val = s.slice(j, i);
+        console.assert(val);
+        line_number += (val.split("\n").length - 1); // val.count('\n');  // A comment.
+        result.push([kind, val, line_number]);
+    }
+    return result;
+
+}
+
 //@+node:felix.20211104211229.1: ** g.Scripting
 //@+node:felix.20211104220723.1: *3* g.getScript
 /**
