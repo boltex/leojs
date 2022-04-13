@@ -25,7 +25,7 @@ export class GlobalConfigManager {
     public defaultMenuFontSize = 12;  // 9 if sys.platform == "win32" else 12
     public defaultTreeFontSize = 12;  // 9 if sys.platform == "win32" else 12
 
-    defaultsDict = new g.TypedDict(
+    public defaultsDict = new g.TypedDict(
         'g.app.config.defaultsDict',
         'string',
         'GeneralSetting'
@@ -84,7 +84,7 @@ export class GlobalConfigManager {
     //@-<< gcm.defaultsDict >>
     //@+<< gcm.encodingIvarsDict >>
     //@+node:felix.20220206213914.3: *3* << gcm.encodingIvarsDict >>
-    encodingIvarsDict = new g.TypedDict(
+    public encodingIvarsDict = new g.TypedDict(
         'g.app.config.encodingIvarsDict',
         'string',
         'GeneralSetting'
@@ -752,6 +752,27 @@ export class LocalConfigManager {
     public default_at_auto_file_encoding!: string;// = "utf-8";
     public new_leo_file_encoding!: string; // = "UTF-8";
     public save_clears_undo_buffer!: boolean; // = false;
+
+    public use_plugins!: boolean;
+    public create_nonexistent_directories!: boolean;
+
+    public defaultFont: string | undefined;
+    public defaultFontFamily: string | undefined;
+    public enabledPluginsFileName: string | undefined;
+    public enabledPluginsString: string | undefined;
+
+    public panes: any;
+    public sc: any;
+    public tree: any;
+
+    public dictList!: { [key: string]: any }[];
+    public recentFiles!: string[];
+
+    public relative_path_base_directory!: string;
+
+    public at_root_bodies_start_in_doc_mode!: boolean; // = true;
+    public output_newline!: string; // = 'nl';
+    public redirect_execute_script_output_to_log_pane!: boolean; // = true;
 
     //@+others
     //@+node:felix.20220214191554.2: *3* c.config.Birth

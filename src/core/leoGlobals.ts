@@ -1123,6 +1123,45 @@ export function getLanguageAtPosition(c: Commands, p: Position): string {
 
     return language.toLowerCase();
 }
+//@+node:felix.20220412235837.1: *3* g.getOutputNewline
+/**
+ * Convert the name of a line ending to the line ending itself.
+ *
+ * Priority:
+ * - Use name if name given
+ * - Use c.config.output_newline if c given,
+ * - Otherwise use g.app.config.output_newline.
+ */
+export function getOutputNewline(c?: Commands, name?: string): string {
+    let s: string;
+    if (name) {
+        s = name
+    } else if (c) {
+        s = c.config.output_newline;
+    } else {
+        s = app.config.output_newline;
+    }
+    if (!s) {
+        s = '';
+    }
+
+    s = s.toLowerCase();
+
+    if (["nl", "lf"].includes(s)) {
+        s = '\n';
+    } else if (s === "cr") {
+        s = '\r';
+    } else if (s === "platform") {
+        s = os.EOL;  // 12/2/03 emakital
+    } else if (s === "crlf") {
+        s = "\r\n";
+    } else {
+        s = '\n';  // Default for erroneous values.
+    }
+    console.assert((typeof s === 'string' || s as any instanceof String), s.toString());
+
+    return s;
+}
 //@+node:felix.20211104213330.1: *3* g.isDirective
 /**
  * Return True if s starts with a directive.
@@ -1191,6 +1230,61 @@ export function scanAtCommentAndAtLanguageDirectives(aList: any[]): {
     }
     return undefined;
 }
+//@+node:felix.20220412232541.1: *3* g.scanAtHeaderDirectives
+/**
+ * scan aList for @header and @noheader directives.
+ * @param aList  
+ */
+export function scanAtHeaderDirectives(aList: any[]): void {
+
+    for (let d of aList) {
+        if (d.get('header') && d.get('noheader')) {
+            error("conflicting @header and @noheader directives");
+        }
+    }
+}
+//@+node:felix.20220412232548.1: *3* g.scanAtLineendingDirectives
+/**
+ * Scan aList for @lineending directives.
+ * @param aList  
+ */
+export function scanAtLineendingDirectives(aList: any[]): string | undefined {
+    for (let d of aList) {
+        const e = d.get('lineending')
+        if (["cr", "crlf", "lf", "nl", "platform"].includes(e)) {
+            const lineending = getOutputNewline(e);
+            return lineending;
+        }
+        // else:
+        // g.error("invalid @lineending directive:",e)
+    }
+    return undefined;
+}
+//@+node:felix.20220412232628.1: *3* g.scanAtPagewidthDirectives
+/**
+ * Scan aList for @pagewidth directives.
+ * @param aList 
+ * @param issue_error_flag 
+ */
+export function scanAtPagewidthDirectives(aList: any[], issue_error_flag?: boolean): number | undefined {
+
+    for (let d of aList) {
+        const s = d.get('pagewidth');
+        if (s && s !== '') {
+            let i;
+            let val;
+            [i, val] = skip_long(s, 0);
+            if (val && val > 0) {
+                return val;
+            }
+            if (issue_error_flag && !unitTesting) {
+                error("ignoring @pagewidth", s);
+            }
+        }
+    }
+    return undefined;
+
+}
 //@+node:felix.20211104225158.1: *3* g.scanAtTabwidthDirectives & scanAllTabWidthDirectives
 /**
  * Scan aList for '@tabwidth' directives.
@@ -1226,6 +1320,43 @@ export function scanAllAtTabWidthDirectives(c: Commands, p: Position): number | 
     } else {
         ret = undefined;
     }
+    return ret;
+}
+//@+node:felix.20220412232655.1: *3* g.scanAtWrapDirectives
+/**
+ * Scan aList for @wrap and @nowrap directives.
+ * @param aList 
+ * @param issue_error_flag 
+ */
+export function scanAtWrapDirectives(aList: any[], issue_error_flag?: boolean): boolean | undefined {
+
+    for (let d of aList) {
+        if (d.get('wrap') !== undefined) {
+            return true;
+        }
+        if (d.get('nowrap') !== undefined) {
+            return false;
+        }
+    }
+    return undefined;
+}
+
+/**
+ * Scan p and all ancestors looking for @wrap/@nowrap directives.
+ * @param aList 
+ * @param issue_error_flag 
+ */
+export function scanAllAtWrapDirectives(c: Commands, p: Position): boolean | undefined {
+
+    let ret: boolean | undefined;
+
+    if (c && p && p.__bool__()) {
+        const w_default = !!(c && c.config.getBool("body-pane-wraps"));
+        const aList = get_directives_dict_list(p);
+        const val = scanAtWrapDirectives(aList);
+        ret = val === undefined ? w_default : val;
+    }
+
     return ret;
 }
 //@+node:felix.20220110202727.1: *3* g.set_delims_from_language
@@ -1650,7 +1781,7 @@ export function setGlobalOpenDir(fileName: string): void {
         // g.es('current directory:',g.app.globalOpenDir)
     }
 }
-//@+node:felix.20211104230025.1: *3* g.shortFileName   (coreGlobals.py)
+//@+node:felix.20211104230025.1: *3* g.shortFileName
 /**
  * Return the base name of a path.
  */
@@ -1662,6 +1793,34 @@ export function shortFileName(fileName?: string): string {
 
 export const shortFilename = shortFileName;
 
+//@+node:felix.20220412232748.1: *3* g.splitLongFileName
+/**
+ * Return fn, split into lines at slash characters.
+ */
+export function splitLongFileName(fn: string, limit: number = 40): string {
+
+    const aList = fn.split('\\').join('/').split('/');
+
+    let n = 0;
+    let result: string[] = [];
+
+    let i: number = 0;
+
+    for (let s of aList) {
+        n += s.length;
+        result.push(s);
+        if ((i + 1) < aList.length) {
+            result.push('/');
+            n += 1;
+        }
+        if (n > limit) {
+            result.push('\n');
+            n = 0;
+        }
+        i += 1;
+    }
+    return result.join('');
+}
 //@+node:felix.20211104210802.1: ** g.Finding & Scanning
 //@+node:felix.20220410215925.1: *3* g.find_word
 /**

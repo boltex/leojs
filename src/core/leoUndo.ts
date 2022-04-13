@@ -1783,7 +1783,6 @@ export class Undoer {
     public undoDeleteNode(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        console.log('undo delete oldBack: ', u.oldBack);
 
         if (u.oldBack.__bool__()) {
             u.p!._linkAfter(u.oldBack);
