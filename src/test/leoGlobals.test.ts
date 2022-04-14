@@ -495,31 +495,35 @@ suite('Tests for leo.core.leoGlobals', () => {
             self.assertEqual(got, expected, msg=repr(s))
      */
     //@+node:felix.20220129223719.27: *3* TestGlobals.test_g_scanAtHeaderDirectives_header
-    // TODO:
-    /* def test_g_scanAtHeaderDirectives_header(self):
-        c = self.c
-        aList = g.get_directives_dict_list(c.p)
-        g.scanAtHeaderDirectives(aList)
-     */
+    test('test_g_scanAtHeaderDirectives_header', async () => {
+        const c = self.c;
+        const aList = g.get_directives_dict_list(c.p);
+        g.scanAtHeaderDirectives(aList); // ? Same as no-neader ?
+    });
     //@+node:felix.20220129223719.28: *3* TestGlobals.test_g_scanAtHeaderDirectives_noheader
-    // TODO:
-    /* def test_g_scanAtHeaderDirectives_noheader(self):
-        c = self.c
-        aList = g.get_directives_dict_list(c.p)
-        g.scanAtHeaderDirectives(aList)
-     */
+    test('test_g_scanAtHeaderDirectives_noheader', async () => {
+        const c = self.c;
+        const aList = g.get_directives_dict_list(c.p);
+        g.scanAtHeaderDirectives(aList); // ? Same as header ?
+    });
     //@+node:felix.20220129223719.29: *3* TestGlobals.test_g_scanAtLineendingDirectives_cr
-    // TODO:
-    /* def test_g_scanAtLineendingDirectives_cr(self):
-        c = self.c
-        p = c.p
-        p.b = '@lineending cr\n'
-        aList = g.get_directives_dict_list(p)
-        s = g.scanAtLineendingDirectives(aList)
-        self.assertEqual(s, '\r')
-     */
+    test('test_g_scanAtLineendingDirectives_cr', async () => {
+        const c = self.c;
+        const p = c.p;
+        p.b = '@lineending cr\n';
+        const aList = g.get_directives_dict_list(p);
+        const s = g.scanAtLineendingDirectives(aList);
+        assert.strictEqual(s, '\r');
+    });
     //@+node:felix.20220129223719.30: *3* TestGlobals.test_g_scanAtLineendingDirectives_crlf
-    // TODO:
+    test('test_g_scanAtLineendingDirectives_crlf', async () => {
+        const c = self.c;
+        const p = c.p;
+        p.b = '@lineending crlf\n';
+        const aList = g.get_directives_dict_list(p);
+        const s = g.scanAtLineendingDirectives(aList);
+        assert.strictEqual(s, '\r\n');
+    });
     /* def test_g_scanAtLineendingDirectives_crlf(self):
         c = self.c
         p = c.p
@@ -529,7 +533,14 @@ suite('Tests for leo.core.leoGlobals', () => {
         self.assertEqual(s, '\r\n')
      */
     //@+node:felix.20220129223719.31: *3* TestGlobals.test_g_scanAtLineendingDirectives_lf
-    // TODO:
+    test('test_g_scanAtLineendingDirectives_lf', async () => {
+        const c = self.c;
+        const p = c.p;
+        p.b = '@lineending lf\n';
+        const aList = g.get_directives_dict_list(p);
+        const s = g.scanAtLineendingDirectives(aList);
+        assert.strictEqual(s, '\n');
+    });
     /* def test_g_scanAtLineendingDirectives_lf(self):
         c = self.c
         p = c.p
@@ -539,7 +550,14 @@ suite('Tests for leo.core.leoGlobals', () => {
         self.assertEqual(s, '\n')
      */
     //@+node:felix.20220129223719.32: *3* TestGlobals.test_g_scanAtLineendingDirectives_nl
-    // TODO:
+    test('test_g_scanAtLineendingDirectives_nl', async () => {
+        const c = self.c;
+        const p = c.p;
+        p.b = '@lineending nl\n';
+        const aList = g.get_directives_dict_list(p);
+        const s = g.scanAtLineendingDirectives(aList);
+        assert.strictEqual(s, '\n');
+    });
     /* def test_g_scanAtLineendingDirectives_nl(self):
         c = self.c
         p = c.p
@@ -549,7 +567,18 @@ suite('Tests for leo.core.leoGlobals', () => {
         self.assertEqual(s, '\n')
      */
     //@+node:felix.20220129223719.33: *3* TestGlobals.test_g_scanAtLineendingDirectives_platform
-    // TODO:
+    test('test_g_scanAtLineendingDirectives_platform', async () => {
+        const c = self.c;
+        const p = c.p;
+        p.b = '@lineending platform\n';
+        const aList = g.get_directives_dict_list(p);
+        const s = g.scanAtLineendingDirectives(aList);
+        if (g.isWindows) {
+            assert.strictEqual(s, '\r\n');
+        } else {
+            assert.strictEqual(s, '\n');
+        }
+    });
     /* def test_g_scanAtLineendingDirectives_platform(self):
         c = self.c
         p = c.p
@@ -562,7 +591,16 @@ suite('Tests for leo.core.leoGlobals', () => {
             self.assertEqual(s, '\n')
      */
     //@+node:felix.20220129223719.34: *3* TestGlobals.test_g_scanAtPagewidthDirectives_minus_40
-    // TODO:
+    test('test_g_scanAtPagewidthDirectives_minus_40', async () => {
+        const c = self.c;
+        const p = c.p;
+        p.b = '@pagewidth -40\n';
+        const aList = g.get_directives_dict_list(p);
+        const n = g.scanAtPagewidthDirectives(aList);
+        // The @pagewidth directive in the parent should control.
+        // Depending on how this test is run, the result could be 80 or None.
+        assert.ok([undefined, 80].includes(n), n?.toString());
+    });
     /* def test_g_scanAtPagewidthDirectives_minus_40(self):
         c = self.c
         p = c.p
@@ -574,7 +612,14 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert n in (None, 80), repr(n)
      */
     //@+node:felix.20220129223719.35: *3* TestGlobals.test_g_scanAtPagewidthDirectives_40
-    // TODO:
+    test('test_g_scanAtPagewidthDirectives_40', async () => {
+        const c = self.c;
+        const p = c.p;
+        p.b = '@pagewidth 40\n';
+        const aList = g.get_directives_dict_list(p);
+        const n = g.scanAtPagewidthDirectives(aList);
+        assert.strictEqual(n, 40);
+    });
     /* def test_g_scanAtPagewidthDirectives_40(self):
         c = self.c
         p = c.p
@@ -602,9 +647,17 @@ suite('Tests for leo.core.leoGlobals', () => {
         const n = g.scanAtTabwidthDirectives(aList);
         assert.strictEqual(n, -6);
     });
-
     //@+node:felix.20220129223719.38: *3* TestGlobals.test_g_scanAtWrapDirectives_nowrap
-    // TODO:
+    test('test_g_scanAtWrapDirectives_nowrap', async () => {
+        const c = self.c;
+        const p = c.p;
+        p.b = '@nowrap\n';
+        const aList = g.get_directives_dict_list(p);
+        const s = g.scanAtWrapDirectives(aList);
+        console.log('nowrap s', s, aList);
+
+        assert.ok(s === false, s?.toString());
+    });
     /* def test_g_scanAtWrapDirectives_nowrap(self):
         c = self.c
         p = c.p
@@ -614,7 +667,16 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert s is False, repr(s)
      */
     //@+node:felix.20220129223719.39: *3* TestGlobals.test_g_scanAtWrapDirectives_wrap_with_wrap_
-    // TODO:
+    test('test_g_scanAtWrapDirectives_wrap_with_wrap_', async () => {
+        const c = self.c;
+        const p = c.p;
+        p.b = '@wrap\n';
+        const aList = g.get_directives_dict_list(p);
+        const s = g.scanAtWrapDirectives(aList);
+        console.log('wrap s', s, aList);
+
+        assert.ok(s === true, s?.toString());
+    });
     /* def test_g_scanAtWrapDirectives_wrap_with_wrap_(self):
         c = self.c
         p = c.p
@@ -624,7 +686,13 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert s is True, repr(s)
      */
     //@+node:felix.20220129223719.40: *3* TestGlobals.test_g_scanAtWrapDirectives_wrap_without_nowrap_
-    // TODO:
+    test('test_g_scanAtWrapDirectives_wrap_without_nowrap_', async () => {
+        const c = self.c;
+        const p = c.p;
+        const aList = g.get_directives_dict_list(p);
+        const s = g.scanAtWrapDirectives(aList);
+        assert.ok(s === undefined, s?.toString());
+    });
     /* def test_g_scanAtWrapDirectives_wrap_without_nowrap_(self):
         c = self.c
         aList = g.get_directives_dict_list(c.p)
@@ -776,7 +844,14 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
 
     //@+node:felix.20220129223719.47: *3* TestGlobals.test_g_splitLongFileName
-    // TODO:
+    test('test_g_splitLongFileName', async () => {
+        const table = [
+            String.raw`abcd/xy\pdqabc/aaa.py`
+        ];
+        for (let s of table) {
+            g.splitLongFileName(s, 3);
+        }
+    });
     /* def test_g_splitLongFileName(self):
         table = (
             r'abcd/xy\pdqabc/aaa.py',

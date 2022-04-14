@@ -1132,7 +1132,7 @@ export function getLanguageAtPosition(c: Commands, p: Position): string {
  * - Use c.config.output_newline if c given,
  * - Otherwise use g.app.config.output_newline.
  */
-export function getOutputNewline(c?: Commands, name?: string): string {
+export function getOutputNewline(c: Commands | undefined, name?: string): string {
     let s: string;
     if (name) {
         s = name
@@ -1238,7 +1238,7 @@ export function scanAtCommentAndAtLanguageDirectives(aList: any[]): {
 export function scanAtHeaderDirectives(aList: any[]): void {
 
     for (let d of aList) {
-        if (d.get('header') && d.get('noheader')) {
+        if ((d['header'] && d['noheader'])) {
             error("conflicting @header and @noheader directives");
         }
     }
@@ -1250,9 +1250,9 @@ export function scanAtHeaderDirectives(aList: any[]): void {
  */
 export function scanAtLineendingDirectives(aList: any[]): string | undefined {
     for (let d of aList) {
-        const e = d.get('lineending')
+        const e = d['lineending'];
         if (["cr", "crlf", "lf", "nl", "platform"].includes(e)) {
-            const lineending = getOutputNewline(e);
+            const lineending = getOutputNewline(undefined, e);
             return lineending;
         }
         // else:
@@ -1269,7 +1269,7 @@ export function scanAtLineendingDirectives(aList: any[]): string | undefined {
 export function scanAtPagewidthDirectives(aList: any[], issue_error_flag?: boolean): number | undefined {
 
     for (let d of aList) {
-        const s = d.get('pagewidth');
+        const s = d['pagewidth'];
         if (s && s !== '') {
             let i;
             let val;
@@ -1330,11 +1330,14 @@ export function scanAllAtTabWidthDirectives(c: Commands, p: Position): number | 
  */
 export function scanAtWrapDirectives(aList: any[], issue_error_flag?: boolean): boolean | undefined {
 
+
     for (let d of aList) {
-        if (d.get('wrap') !== undefined) {
+        const dWrap = d['wrap'];
+        const dNoWrap = d['nowrap'];
+        if (dWrap !== undefined) {
             return true;
         }
-        if (d.get('nowrap') !== undefined) {
+        if (dNoWrap !== undefined) {
             return false;
         }
     }
