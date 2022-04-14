@@ -3,45 +3,72 @@
 /**
  * Tests of leoUndo.ts
  */
+
 import * as assert from 'assert';
-import { after } from 'mocha';
+import { afterEach, after, before, beforeEach } from 'mocha';
+import * as g from '../core/leoGlobals';
 import * as vscode from 'vscode';
+import { LeoUnitTest } from './leoTest2';
 
 //@+others
 //@+node:felix.20220129225102.1: ** suite TestUndo (LeoUnitTest)
 suite('Test Undo', () => {
 
+    let self: LeoUnitTest;
+
+    before(async () => {
+        self = new LeoUnitTest();
+        return self.setUpClass();
+    });
+
+    beforeEach(async () => {
+        self.setUp();
+    });
+
+    afterEach(async () => {
+        self.tearDown();
+    });
+
     //@+others
     //@+node:felix.20220129225102.2: *3* TestUndo.runTest (Test)
-    /* def runTest(self, before, after, i, j, func):
-        """TestUndo.runTest."""
-        c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
-        # Restore section references.
-        before = before.replace('> >', '>>').replace('< <', '<<')
-        after = after.replace('> >', '>>').replace('< <', '<<')
-        # Check indices.
-        self.assertTrue(0 <= i <= len(before), msg=f"i: {i} len(before): {len(before)}")
-        self.assertTrue(0 <= j <= len(before), msg=f"j: {j} len(before): {len(before)}")
-        # Set the text and selection range.
-        p.b = before
-        self.assertEqual(p.b, w.getAllText())
-        w.setSelectionRange(i, j, insert=i)
-        # Test.
-        self.assertNotEqual(before, after)
-        func()
-        result = p.b
-        self.assertEqual(result, after, msg='before undo1')
-        c.undoer.undo()
-        result = w.getAllText()
-        self.assertEqual(result, before, msg='after undo1')
-        c.undoer.redo()
-        result = w.getAllText()
-        self.assertEqual(result, after, msg='after redo1')
-        c.undoer.undo()
-        result = w.getAllText()
-        self.assertEqual(result, before, msg='after undo2')
-     */
+    const runTest = (self: LeoUnitTest, before: string, after: string, i: number, j: number, func: () => any) => {
+        const c = self.c;
+        const p = self.c.p;
+        const w = self.c.frame.body.wrapper;
+        // Restore section references.
+        before = before.split('> >').join('>>');
+        before = before.split('< <').join('<<');
+
+        after = after.split('> >').join('>>');
+        after = after.split('< <').join('<<');
+
+        // Check indices.
+        assert.ok(0 <= i && i <= before.length, `i: ${i} before.length: ${before.length}`);
+        assert.ok(0 <= j && i <= before.length, `j: ${j} before.length: ${before.length}`);
+        // Set the text and selection range.
+        p.b = before;
+        assert.strictEqual(p.b, w.getAllText());
+        w.setSelectionRange(i, j, i);
+        // Test.
+        assert.notStrictEqual(before, after);
+        func();
+        let result = p.b;
+        assert.strictEqual(result, after, 'before undo1');
+        c.undoer.undo();
+        result = w.getAllText();
+        assert.strictEqual(result, before, 'after undo1');
+        c.undoer.redo();
+        result = w.getAllText();
+        assert.strictEqual(result, after, 'after redo1');
+        c.undoer.undo();
+        result = w.getAllText();
+        assert.strictEqual(result, before, 'after undo2');
+    };
     //@+node:felix.20220129225102.3: *3* TestUndo.test_addComments
+    test('test_addComments', async () => {
+        const c = self.c;
+
+    });
     /* def test_addComments(self):
         c = self.c
         before = textwrap.dedent("""\
@@ -72,6 +99,10 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.4: *3* TestUndo.test_convertAllBlanks
+    test('test_convertAllBlanks', async () => {
+        const c = self.c;
+
+    });
     /* def test_convertAllBlanks(self):
         c = self.c
         before = textwrap.dedent("""\
@@ -86,8 +117,8 @@ suite('Test Undo', () => {
             @tabwidth -4
 
             line 1
-            	line 2
-            	  line 3
+                line 2
+                  line 3
             line4
     """)
         i, j = 13, len(before)
@@ -95,14 +126,18 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.5: *3* TestUndo.test_convertAllTabs
+    test('test_convertAllTabs', async () => {
+        const c = self.c;
+
+    });
     /* def test_convertAllTabs(self):
         c = self.c
         before = textwrap.dedent("""\
             @tabwidth -4
 
             line 1
-            	line 2
-            	  line 3
+                line 2
+                  line 3
             line4
     """)
         after = textwrap.dedent("""\
@@ -118,6 +153,10 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.6: *3* TestUndo.test_convertBlanks
+    test('test_convertBlanks', async () => {
+        const c = self.c;
+
+    });
     /* def test_convertBlanks(self):
         c = self.c
         before = textwrap.dedent("""\
@@ -132,8 +171,8 @@ suite('Test Undo', () => {
             @tabwidth -4
 
             line 1
-            	line 2
-            	  line 3
+                line 2
+                  line 3
             line4
     """)
         i, j = 13, 51
@@ -141,14 +180,18 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.7: *3* TestUndo.test_convertTabs
+    test('test_convertTabs', async () => {
+        const c = self.c;
+
+    });
     /* def test_convertTabs(self):
         c = self.c
         before = textwrap.dedent("""\
             @tabwidth -4
 
             line 1
-            	line 2
-            	  line 3
+                line 2
+                  line 3
             line4
     """)
         after = textwrap.dedent("""\
@@ -164,6 +207,10 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.8: *3* TestUndo.test_dedentBody
+    test('test_dedentBody', async () => {
+        const c = self.c;
+
+    });
     /* def test_dedentBody(self):
         c = self.c
         before = textwrap.dedent("""\
@@ -184,6 +231,10 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.9: *3* TestUndo.test_deleteComments
+    test('test_deleteComments', async () => {
+        const c = self.c;
+
+    });
     /* def test_deleteComments(self):
         c = self.c
         before = textwrap.dedent("""\
@@ -214,6 +265,10 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.10: *3* TestUndo.test_deleteComments 2
+    test('2', async () => {
+        const c = self.c;
+
+    });
     /* def test_deleteComments_2(self):
         c = self.c
         before = textwrap.dedent("""\
@@ -252,6 +307,42 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.11: *3* TestUndo.test_edit_headline
+    test('test_edit_headline', async () => {
+        const c = self.c;
+        const p = self.c.p;
+        let node1 = p.insertAsLastChild();
+        const node2 = node1.insertAfter();
+        const node3 = node2.insertAfter();
+        node1.h = 'node 1';
+        node2.h = 'node 2';
+        node3.h = 'node 3';
+        const w_result = [...p.subtree()].map(p => p.h); // p.h for p in 
+        assert.strictEqual(JSON.stringify([...p.subtree()].map(p => p.h)), JSON.stringify(['node 1', 'node 2', 'node 3']));
+        // Select 'node 1' and modify the headline as if a user did it
+        c.undoer.clearUndoState();
+        node1 = p.copy().moveToFirstChild();
+        c.selectPosition(node1);
+
+        // c.editHeadline();
+        // w = c.frame.tree.edit_widget(node1);
+        // w.insert('1.0', 'changed - ');
+        // c.endEditing();
+        const undoData = c.undoer.beforeChangeHeadline(node1);
+        c.setHeadString(node1, 'changed - ' + node1.h);  // Set v.h *after* calling the undoer's before method.
+        if (!c.changed) {
+            c.setChanged();
+        }
+        c.undoer.afterChangeHeadline(node1, 'Edit Headline', undoData);
+
+        assert.strictEqual(JSON.stringify([...p.subtree()].map(p => p.h)), JSON.stringify(['changed - node 1', 'node 2', 'node 3']));
+        // Move the selection and undo the headline change
+        c.selectPosition(node1.copy().moveToNext());
+        c.undoer.undo();
+        // The undo should restore the 'node 1' headline string
+        assert.strictEqual(JSON.stringify([...p.subtree()].map(p => p.h)), JSON.stringify(['node 1', 'node 2', 'node 3']));
+        // The undo should select the edited headline.
+        assert.ok(c.p.__eq__(node1));
+    });
     /* def test_edit_headline(self):
         # Brian Theado.
         c, p = self.c, self.c.p
@@ -280,6 +371,10 @@ suite('Test Undo', () => {
         self.assertEqual(c.p, node1)
      */
     //@+node:felix.20220129225102.12: *3* TestUndo.test_extract_test
+    test('test_extract_test', async () => {
+        const c = self.c;
+
+    });
     /* def test_extract_test(self):
         c = self.c
         before = textwrap.dedent("""\
@@ -301,6 +396,10 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.13: *3* TestUndo.test_line_to_headline
+    test('test_line_to_headline', async () => {
+        const c = self.c;
+
+    });
     /* def test_line_to_headline(self):
         c = self.c
         before = textwrap.dedent("""\
@@ -317,6 +416,10 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.14: *3* TestUndo.test_restore_marked_bits
+    test('test_restore_marked_bits', async () => {
+        const c = self.c;
+
+    });
     /* def test_restore_marked_bits(self):
         c, p = self.c, self.c.p
         # Test of #1694.
@@ -344,6 +447,10 @@ suite('Test Undo', () => {
             self.assertEqual(p.isMarked(), oldMarked)
      */
     //@+node:felix.20220129225102.15: *3* TestUndo.test_undo_group
+    test('test_undo_group', async () => {
+        const c = self.c;
+
+    });
     /* def test_undo_group(self):
         # Test an off-by-one error in c.undoer.bead.
         # The buggy redoGroup code worked if the undo group was the first item on the undo stack.
