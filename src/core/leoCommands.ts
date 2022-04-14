@@ -90,10 +90,18 @@ export class Commands {
             tree: {
                 generation: 0,
                 editLabel: (p: Position, selectAll: boolean, selection: any) => {
-                    console.log("'EDIT LABEL!' from c.frame.tree.editLabel");
+                    console.log("TODO: editLabel of c.frame.tree.editLabel");
                 }
             },
-            body: {}
+            body: {
+                wrapper: {
+                    setAllText: (s: string) => {
+                        console.log('TODO: setAllText of "frame.body.wrapper"');
+
+                    }
+                }
+
+            }
         };
 
     //@+others
@@ -2364,7 +2372,7 @@ export class Commands {
         p2.h = `@edit ${fn}`;
         p2.b = prefix + s;
         const w: any = c.frame.body.wrapper;
-        if (w) {
+        if (w && w.setInsertPoint) {
             w.setInsertPoint(0);
         }
         c.redraw();

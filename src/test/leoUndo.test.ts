@@ -343,33 +343,6 @@ suite('Test Undo', () => {
         // The undo should select the edited headline.
         assert.ok(c.p.__eq__(node1));
     });
-    /* def test_edit_headline(self):
-        # Brian Theado.
-        c, p = self.c, self.c.p
-        node1 = p.insertAsLastChild()
-        node2 = node1.insertAfter()
-        node3 = node2.insertAfter()
-        node1.h = 'node 1'
-        node2.h = 'node 2'
-        node3.h = 'node 3'
-        self.assertEqual([p.h for p in p.subtree()], ['node 1', 'node 2', 'node 3'])
-        # Select 'node 1' and modify the headline as if a user did it
-        c.undoer.clearUndoState()
-        node1 = p.copy().moveToFirstChild()
-        c.selectPosition(node1)
-        c.editHeadline()
-        w = c.frame.tree.edit_widget(node1)
-        w.insert('1.0', 'changed - ')
-        c.endEditing()
-        self.assertEqual([p.h for p in p.subtree()], ['changed - node 1', 'node 2', 'node 3'])
-        # Move the selection and undo the headline change
-        c.selectPosition(node1.copy().moveToNext())
-        c.undoer.undo()
-        # The undo should restore the 'node 1' headline string
-        self.assertEqual([p.h for p in p.subtree()], ['node 1', 'node 2', 'node 3'])
-        # The undo should select the edited headline.
-        self.assertEqual(c.p, node1)
-     */
     //@+node:felix.20220129225102.12: *3* TestUndo.test_extract_test
     test('test_extract_test', async () => {
         const c = self.c;
@@ -418,7 +391,48 @@ suite('Test Undo', () => {
     //@+node:felix.20220129225102.14: *3* TestUndo.test_restore_marked_bits
     test('test_restore_marked_bits', async () => {
         const c = self.c;
+        const p = self.c.p;
 
+        // Test of #1694.
+        const u = c.undoer;
+        const w = c.frame.body.wrapper;
+        const oldText = p.b.toString();
+        const newText = p.b + '\n#changed';
+
+        for (let marked of [true, false]) {
+            c.undoer.clearUndoState();  // Required.
+            // RESET
+            p.v.setBodyString(oldText);
+
+            if (marked) {
+                p.setMarked();
+            } else {
+                p.clearMarked();
+            }
+            const oldMarked = p.isMarked();
+
+            // w.setAllText(newText);  // For the new assert in w.updateAfterTyping.
+            // u.setUndoTypingParams(p,
+            //     undo_type='typing',
+            //     oldText=oldText,
+            //     newText=newText,
+            // );
+
+            const bunch = u.beforeChangeNodeContents(p);
+            p.v.setBodyString(newText);
+            u.afterChangeNodeContents(p, "Body Text", bunch);
+            c.setChanged();
+            p.setDirty();
+
+            u.undo();
+
+            assert.strictEqual(p.b, oldText);
+            assert.strictEqual(p.isMarked(), oldMarked);
+            u.redo();
+
+            assert.strictEqual(p.b, newText);
+            assert.strictEqual(p.isMarked(), oldMarked);
+        }
     });
     /* def test_restore_marked_bits(self):
         c, p = self.c, self.c.p

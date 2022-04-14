@@ -539,7 +539,7 @@ export class Undoer {
         bunch.newMarked = p.isMarked();
 
         // Careful: don't use ternary operator.
-        if (w) {
+        if (w && w.getSelectionRange) {
             bunch.newSel = w.getSelectionRange();
         } else {
             bunch.newSel = [0, 0];
@@ -628,7 +628,7 @@ export class Undoer {
         bunch.newHead = p.h;
         bunch.newMarked = p.isMarked();
         // Bug fix 2017/11/12: don't use ternary operator.
-        if (w) {
+        if (w && w.getSelectionRange) {
             bunch.newSel = w.getSelectionRange();
         } else {
             bunch.newSel = [0, 0];
@@ -938,8 +938,8 @@ export class Undoer {
         // Sets u.oldMarked, u.oldSel, u.p
         bunch.oldBody = p.b;
         bunch.oldHead = p.h;
-        bunch.oldIns = w.getInsertPoint();
-        bunch.oldYScroll = w.getYScrollPosition();
+        bunch.oldIns = (w && w.getInsertPoint) ? w.getInsertPoint() : 0;
+        bunch.oldYScroll = (w && w.getYScrollPosition) ? w.getYScrollPosition() : 0;
         return bunch;
     }
     //@+node:felix.20211026230613.52: *5* u.beforeChangeGroup
@@ -990,7 +990,7 @@ export class Undoer {
         bunch.oldBody = p.b;
         bunch.oldHead = p.h;
         // #1413: Always restore yScroll if possible.
-        bunch.oldYScroll = w ? w.getYScrollPosition() : 0;
+        bunch.oldYScroll = (w && w.getYScrollPosition) ? w.getYScrollPosition() : 0;
         return bunch;
     }
     //@+node:felix.20211026230613.55: *5* u.beforeChangeTree
@@ -1088,7 +1088,7 @@ export class Undoer {
         const w: any = c.frame.body.wrapper;
         return {
             oldMarked: p && p.__bool__() && p.isMarked(),
-            oldSel: w && w.getSelectionRange() || undefined,
+            oldSel: w && w.getSelectionRange && w.getSelectionRange() || undefined,
             p: p && p.__bool__() && p.copy() // && makes sure the copy ends up in p.
         };
     }
@@ -1303,11 +1303,19 @@ export class Undoer {
         } else {
             u.p!.clearMarked();
         }
-        if (u.groupCount === 0) {
-            w.setAllText(u.newBody);
+        if (w && u.groupCount === 0) {
+            if (w.setAllText) {
+                w.setAllText(u.newBody);
+            }
+            if (w.setSelectionRange) {
+                w.setSelectionRange(u.newSel[0], u.newSel[1], u.newIns);
+
+            }
+            if (w.setYScrollPosition) {
+                w.setYScrollPosition(u.newYScroll);
+            }
             // i, j = u.newSel
-            w.setSelectionRange(u.newSel[0], u.newSel[1], u.newIns);
-            w.setYScrollPosition(u.newYScroll);
+
             // c.frame.body.recolor(u.p);
         }
         u.updateMarks('new');
@@ -1563,10 +1571,10 @@ export class Undoer {
 
         if (u.groupCount === 0 && u.newSel && u.newSel.length) {
             // i, j = u.newSel
-            w.setSelectionRange(u.newSel[0], u.newSel[1]);
+            w.setSelectionRange && w.setSelectionRange(u.newSel[0], u.newSel[1]);
         }
         if (u.groupCount === 0 && (u.newYScroll || u.newYScroll === 0)) {
-            w.setYScrollPosition(u.newYScroll);
+            w.setYScrollPosition && w.setYScrollPosition(u.newYScroll);
         }
         u.updateMarks('new');
         u.p!.setDirty();
@@ -1700,11 +1708,11 @@ export class Undoer {
         } else {
             u.p!.clearMarked();
         }
-        if (u.groupCount === 0) {
-            w.setAllText(u.oldBody);
+        if (w && u.groupCount === 0) {
+            w.setAllText && w.setAllText(u.oldBody);
             // i, j = u.oldSel;
-            w.setSelectionRange(u.oldSel[0], u.oldSel[1], u.oldIns);
-            w.setYScrollPosition(u.oldYScroll);
+            w.setSelectionRange && w.setSelectionRange(u.oldSel[0], u.oldSel[1], u.oldIns);
+            w.setYScrollPosition && w.setYScrollPosition(u.oldYScroll);
             //c.frame.body.recolor(u.p);
         }
         u.updateMarks('old');
@@ -1972,10 +1980,10 @@ export class Undoer {
 
         if (u.groupCount === 0 && u.oldSel && u.oldSel.length) {
             // i, j = u.oldSel
-            w.setSelectionRange(u.oldSel[0], u.oldSel[1]);
+            w.setSelectionRange && w.setSelectionRange(u.oldSel[0], u.oldSel[1]);
         }
         if (u.groupCount === 0 && (u.oldYScroll || u.oldYScroll === 0)) {
-            w.setYScrollPosition(u.oldYScroll);
+            w.setYScrollPosition && w.setYScrollPosition(u.oldYScroll);
         }
         u.updateMarks('old');
     }
