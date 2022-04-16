@@ -34,7 +34,7 @@ suite('Extension test examples', () => {
 		await vscode.commands.executeCommand(
 			Constants.COMMANDS.SHOW_OUTLINE
 		);
-		// 2 - create nodes 
+		// 2 - create new documents and nodes 
 		await vscode.commands.executeCommand(
 			"leojs.test"
 		);
@@ -48,15 +48,16 @@ suite('Extension test examples', () => {
 		);
 
 		// 4 - test undos, other gui commands & miscellaneous
+		await vscode.commands.executeCommand(
+			Constants.COMMANDS.UNDO_FO
+		);
+		await vscode.commands.executeCommand(
+			Constants.COMMANDS.UNDO_FO
+		);
 
-
+		// TODO: more tests
 		// 5 - test 'new' leojs document and repeat tests
 
-
-		// vscode.commands.executeCommand(
-		//     'vscode.removeFromRecentlyOpened',
-		//     p_textEditor.document.uri.path
-		// );
 	});
 
 });
