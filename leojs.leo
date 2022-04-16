@@ -214,6 +214,7 @@
 <v t="felix.20220107223824.1"><vh>runOpenFileDialog</vh></v>
 <v t="felix.20220108211806.1"><vh>runSaveFileDialog</vh></v>
 </v>
+<v t="felix.20220415194638.1"><vh>test/create outlines</vh></v>
 <v t="felix.20201214211706.1"><vh>test/dummy command</vh></v>
 </v>
 <v t="felix.20220204224240.1"><vh>class NullGui</vh></v>
@@ -452,6 +453,7 @@
 <v t="felix.20211002194716.1"><vh>Command classes</vh>
 <v t="felix.20211017230407.1"><vh>@file src/commands/commanderFileCommands.ts</vh></v>
 <v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
+<v t="felix.20220414231314.1"><vh>@file src/commands/commanderEditCommands.ts</vh></v>
 <v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 </v>
 <v t="felix.20220128232146.1"><vh>unittests</vh>
@@ -1502,13 +1504,13 @@ public static LEO_COMMANDS = {
     UNDO: "undo",
     REDO: "redo",
     // * Tree Building
-    EXECUTE_SCRIPT: "TODO", // TODO
-    REFRESH_FROM_DISK: "TODO", // TODO
-    REFRESH_FROM_DISK_PNODE: "TODO", // TODO
-    GIT_DIFF: "TODO", // TODO
+    EXECUTE_SCRIPT: "TODO_EXECUTE_SCRIPT", // TODO
+    REFRESH_FROM_DISK: "TODO_REFRESH_FROM_DISK", // TODO
+    REFRESH_FROM_DISK_PNODE: "TODO_REFRESH_FROM_DISK_PNODE", // TODO
+    GIT_DIFF: "TODO_GIT_DIFF", // TODO
     // * Outline from body text
-    EXTRACT: "TODO", // TODO
-    EXTRACT_NAMES: "TODO", // TODO
+    EXTRACT: "TODO_EXTRACT", // TODO
+    EXTRACT_NAMES: "TODO_EXTRACT_NAMES", // TODO
     // * Hoist Operations
     HOIST_PNODE: "hoist",
     DEHOIST: "de-hoist",
@@ -1558,10 +1560,10 @@ public static LEO_COMMANDS = {
     SORT_CHILDREN: "sort-children",
     SORT_SIBLINGS: "sort-siblings",
     // * Clone-find functionality
-    CLONE_FIND_ALL: "TODO", // TODO
-    CLONE_FIND_ALL_FLATTENED: "TODO", // TODO
-    CLONE_FIND_MARKED: "TODO", // TODO
-    CLONE_FIND_FLATTENED_MARKED: "TODO", // TODO
+    CLONE_FIND_ALL: "TODO_CLONE_FIND_ALL", // TODO
+    CLONE_FIND_ALL_FLATTENED: "TODO_CLONE_FIND_ALL_FLATTENED", // TODO
+    CLONE_FIND_MARKED: "TODO_CLONE_FIND_MARKED", // TODO
+    CLONE_FIND_FLATTENED_MARKED: "TODO_CLONE_FIND_FLATTENED_MARKED", // TODO
 };
 
 </t>
@@ -5505,6 +5507,8 @@ public test(): Thenable&lt;unknown&gt; {
     // * Test hasParent
     console.log('p has parent: ', c.p.hasParent());
 
+    this.testCreateOutline();
+    this.selectOpenedLeoDocument(this.commanderIndex + 1);
 
     // * test @cmd decorator and undoer
     // console.log('test @cmd decorator and undoer');
@@ -5541,6 +5545,8 @@ public test(): Thenable&lt;unknown&gt; {
     //         if keepSelection and c.positionExists(old_p):
     //             # Only if 'keep' old position was set, and old_p still exists
     //             c.selectPosition(old_p)
+
+
 
     return Promise.resolve(true);
 }
@@ -8382,113 +8388,8 @@ private _finishStartup(): void {
     //      g.app.loadManager.load(fileName, pymacs)
     // ELSE :
     //      TODO: CREATE NEW LEO OUTLINE (demo below)
-
-    // ************************************************************
-    // * demo test: CREATE NEW LEO OUTLINE: NEW COMMANDER
-    // ************************************************************
-    // First test commander
     let c = g.app.newCommander("", this);
     g.app.commanders().push(c);
-
-    // ************************************************************
-    // * demo test: BUILD SOME TEST OUTLINE
-    // ************************************************************
-    let w_node = c.p;
-    w_node.initHeadString("@file node1");
-    w_node.setBodyString('@tabwidth 8\nnode1 body\n@others');
-    w_node.expand();
-
-    w_node = c.p.insertAsLastChild();
-    w_node.initHeadString("node Inside1");
-    w_node.setBodyString('  @others \nnodeInside1 body\n@language c\nprint()');
-    w_node.setMarked();
-
-    w_node = c.p.insertAsLastChild();
-    w_node.initHeadString("node with UserData Inside2");
-    w_node.setBodyString('node Inside2 body');
-    w_node.u = { a: 'user content string a', b: "user content also" };
-
-    w_node = c.p.insertAfter();
-    w_node.initHeadString("@file node3");
-    w_node.setBodyString('node 3 body');
-
-    w_node = c.p.insertAfter();
-    w_node.initHeadString("node 2 selected but empty");
-    c.setCurrentPosition(w_node);
-
-    // ************************************************************
-    // * demo test: SOME OTHER COMMANDER
-    // ************************************************************
-    c = g.app.newCommander("", this);
-    g.app.commanders().push(c);
-
-    // ************************************************************
-    // * demo test: BUILD SOME OTHER TEST OUTLINE
-    // ************************************************************
-    w_node = c.p;
-    w_node.initHeadString("some other title");
-    w_node.setBodyString('body text');
-
-    let nodeCounter = 0;
-    while (nodeCounter &lt; 30) {
-        nodeCounter++;
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("top node numbered headline " + nodeCounter);
-    }
-
-    w_node = c.p.insertAsLastChild();
-    w_node.initHeadString("yet another node");
-    w_node.setBodyString('more body text\nwith a second line');
-
-    w_node = c.p.insertAfter();
-    w_node.initHeadString("@clean my-file.txt");
-    w_node.setBodyString('again some body text');
-    c.setCurrentPosition(w_node);
-
-    nodeCounter = 0;
-    while (nodeCounter &lt; 30) {
-        nodeCounter++;
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("middle node numbered headline " + nodeCounter);
-    }
-
-    w_node = c.p.insertAsLastChild();
-    w_node.initHeadString("sample cloned node");
-    w_node.setBodyString('some other body');
-    w_node.clone();
-
-    w_node = c.p.insertAfter();
-    w_node.setMarked();
-    w_node.initHeadString("a different headline");
-
-    c.setCurrentPosition(w_node);
-
-    nodeCounter = 0;
-    while (nodeCounter &lt; 30) {
-        nodeCounter++;
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("a numbered headline " + nodeCounter);
-    }
-
-    w_node = c.p.insertAfter();
-    w_node.initHeadString("another different headline");
-
-    nodeCounter = 0;
-    while (nodeCounter &lt; 30) {
-        nodeCounter++;
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("more numbered headlines " + nodeCounter);
-    }
-    c.setCurrentPosition(w_node);
-    nodeCounter = 0;
-    while (nodeCounter &lt; 30) {
-        nodeCounter++;
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("inside numbered headlines " + nodeCounter);
-    }
-    // ************************************************************
-    // * demo test end
-    // ************************************************************
 
     // * Create a single data provider for both outline trees, Leo view and Explorer view
     this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);
@@ -8751,6 +8652,122 @@ export class NullGui {
     public isTextWrapper(w: any): boolean {
         return false;
     }
+}
+
+</t>
+<t tx="felix.20220415194638.1">public testCreateOutline(): void {
+    // ************************************************************
+    // * demo test: CREATE NEW LEO OUTLINE: NEW COMMANDER
+    // ************************************************************
+    // First test commander
+    let c = g.app.newCommander("", this);
+    g.app.commanders().push(c);
+    this.commanderIndex + 1; // Select this new document
+
+    // ************************************************************
+    // * demo test: BUILD SOME TEST OUTLINE
+    // ************************************************************
+    let w_node = c.p;
+    w_node.initHeadString("@file node1");
+    w_node.setBodyString('@tabwidth 8\nnode1 body\n@others');
+    w_node.expand();
+
+    w_node = c.p.insertAsLastChild();
+    w_node.initHeadString("node Inside1");
+    w_node.setBodyString('  @others \nnodeInside1 body\n@language c\nprint()');
+    w_node.setMarked();
+
+    w_node = c.p.insertAsLastChild();
+    w_node.initHeadString("node with UserData Inside2");
+    w_node.setBodyString('node Inside2 body');
+    w_node.u = { a: 'user content string a', b: "user content also" };
+
+    w_node = c.p.insertAfter();
+    w_node.initHeadString("@file node3");
+    w_node.setBodyString('node 3 body');
+
+    w_node = c.p.insertAfter();
+    w_node.initHeadString("Node script");
+    w_node.setBodyString('g.es("hi!");');
+
+    w_node = c.p.insertAfter();
+    w_node.initHeadString("node 2 selected but empty");
+    c.setCurrentPosition(w_node);
+
+    // ************************************************************
+    // * demo test: SOME OTHER COMMANDER
+    // ************************************************************
+    c = g.app.newCommander("", this);
+    g.app.commanders().push(c);
+
+    // ************************************************************
+    // * demo test: BUILD SOME OTHER TEST OUTLINE
+    // ************************************************************
+    w_node = c.p;
+    w_node.initHeadString("some other title");
+    w_node.setBodyString('body text');
+
+    let nodeCounter = 0;
+    while (nodeCounter &lt; 30) {
+        nodeCounter++;
+        w_node = c.p.insertAsLastChild();
+        w_node.initHeadString("top node numbered headline " + nodeCounter);
+    }
+
+    w_node = c.p.insertAsLastChild();
+    w_node.initHeadString("yet another node");
+    w_node.setBodyString('more body text\nwith a second line');
+
+    w_node = c.p.insertAfter();
+    w_node.initHeadString("@clean my-file.txt");
+    w_node.setBodyString('again some body text');
+    c.setCurrentPosition(w_node);
+
+    nodeCounter = 0;
+    while (nodeCounter &lt; 30) {
+        nodeCounter++;
+        w_node = c.p.insertAsLastChild();
+        w_node.initHeadString("middle node numbered headline " + nodeCounter);
+    }
+
+    w_node = c.p.insertAsLastChild();
+    w_node.initHeadString("sample cloned node");
+    w_node.setBodyString('some other body');
+    w_node.clone();
+
+    w_node = c.p.insertAfter();
+    w_node.setMarked();
+    w_node.initHeadString("a different headline");
+
+    c.setCurrentPosition(w_node);
+
+    nodeCounter = 0;
+    while (nodeCounter &lt; 30) {
+        nodeCounter++;
+        w_node = c.p.insertAsLastChild();
+        w_node.initHeadString("a numbered headline " + nodeCounter);
+    }
+
+    w_node = c.p.insertAfter();
+    w_node.initHeadString("another different headline");
+
+    nodeCounter = 0;
+    while (nodeCounter &lt; 30) {
+        nodeCounter++;
+        w_node = c.p.insertAsLastChild();
+        w_node.initHeadString("more numbered headlines " + nodeCounter);
+    }
+    c.setCurrentPosition(w_node);
+    nodeCounter = 0;
+    while (nodeCounter &lt; 30) {
+        nodeCounter++;
+        w_node = c.p.insertAsLastChild();
+        w_node.initHeadString("inside numbered headlines " + nodeCounter);
+    }
+
+    // ************************************************************
+    // * demo test end
+    // ************************************************************
 }
 
 </t>

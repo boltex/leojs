@@ -461,8 +461,40 @@ suite('Test Undo', () => {
             self.assertEqual(p.isMarked(), oldMarked)
      */
     //@+node:felix.20220129225102.15: *3* TestUndo.test_undo_group
+    /**
+     * Test an off-by-one error in c.undoer.bead.
+     * The buggy redoGroup code worked if the undo group was the first item on the undo stack.
+     */
     test('test_undo_group', async () => {
         const c = self.c;
+
+        // TODO: finish unto unit tests & uncomment !
+        /* 
+        const p = self.c.p;
+        let original = p.insertAfter();
+        const original_s = original.b = g.dedent(
+            `@tabwidth -4
+
+            line 1
+                line 2
+                  line 3
+            line4
+        `);
+        c.undoer.clearUndoState();
+        c.selectPosition(original);
+        c.copyOutline();  // Add state to the undo stack!
+        c.pasteOutline();
+        c.convertAllBlanks();  // Uses undoGroup.
+        c.undoer.undo();
+        assert.strictEqual(original.b, original_s);
+        c.pasteOutline();
+        c.convertAllBlanks();
+        c.pasteOutline();
+        c.convertAllBlanks();
+        c.undoer.undo();
+        c.undoer.redo();
+        assert.strictEqual(original.b, original_s);
+        */
 
     });
     /* def test_undo_group(self):

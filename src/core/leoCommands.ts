@@ -13,6 +13,7 @@ import { LeoUI, NullGui } from '../leoUI';
 import { DummyFileCommands, FileCommands } from "./leoFileCommands";
 import { CommanderOutlineCommands } from "../commands/commanderOutlineCommands";
 import { CommanderFileCommands } from "../commands/commanderFileCommands";
+import { CommanderEditCommands } from "../commands/commanderEditCommands";
 
 import { Position, VNode, StackEntry, NodeIndices } from "./leoNodes";
 import { NodeHistory } from './leoHistory';
@@ -2162,7 +2163,7 @@ export class Commands {
             // 'os': os,
             'sep': path.sep,
             // 'sys': sys,
-        }
+        };
         // #1338: Don't report errors when called by g.getUrlFromNode.
         try {
             const w_path = (new Function("with(this) { return " + expr + "}")).call(d);
@@ -3438,7 +3439,7 @@ export class Commands {
 //@@tabwidth -4
 //@@pagewidth 70
 
-export interface Commands extends CommanderOutlineCommands, CommanderFileCommands {
+export interface Commands extends CommanderOutlineCommands, CommanderFileCommands, CommanderEditCommands {
     canCutOutline: () => boolean;
     canShiftBodyRight: () => boolean;
     canExtractSectionNames: () => boolean;

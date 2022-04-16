@@ -2231,7 +2231,42 @@ export const contentModifiedSet: VNode[] = [];
  * Set app.hookError on all exceptions.
  * Scripts may reset app.hookError to try again.
  */
-export function doHook(tag: string, ...args: any[]): any {
+export function doHook(tag: string, keywords: { [key: string]: any }): any {
+    if (app.killed || app.hookError) {
+        return undefined;
+    }
+    // unneeded
+    /*
+    if (args && args.length){
+        // A minor error in Leo's core.
+        pr(`***ignoring args param.  tag = ${tag}`);
+    }
+    */
+    if (!app.config.use_plugins) {
+        if (['open0', 'start1'].includes(tag)) {
+            warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.");
+        }
+        return undefined;
+    }
+    // Get the hook handler function.  Usually this is doPlugins.
+    const c: Commands = keywords["c"];
+    // pylint: disable=consider-using-ternary
+    let f = (c && c.hookFunction) || app.hookFunction;
+    if (!f) {
+        app.hookFunction = app.pluginsController.doPlugins;
+        f = app.hookFunction;
+    }
+    try {
+        // Pass the hook to the hook handler.
+        // pr('doHook',f.__name__,keywords.get('c'))
+        return f(tag, keywords);
+    }
+    catch (exception) {
+        es_exception();
+        app.hookError = true;  // Suppress this function.
+        app.idle_time_hooks_enabled = false;
+        return undefined;
+    }
     // TODO !
     /*
     if g.app.killed or g.app.hookError:

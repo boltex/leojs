@@ -2118,7 +2118,7 @@ export class FileCommands extends DummyFileCommands {
         const p: Position = c.p;
 
         // New in 4.2.  Return ok flag so shutdown logic knows if all went well.
-        let ok: boolean | undefined = g.doHook("save1", c, p, fileName);
+        let ok: boolean | undefined = g.doHook("save1", { c: c, p: p, fileName: fileName });
 
         if (ok === undefined) {
             // c.endEditing();  // Set the current headline text.
@@ -2145,7 +2145,7 @@ export class FileCommands extends DummyFileCommands {
             c.redraw_after_icons_changed();
         }
 
-        g.doHook("save2", c, p, fileName);
+        g.doHook("save2", { c: c, p: p, fileName: fileName });
         return !!ok;
 
     }
@@ -2271,7 +2271,7 @@ export class FileCommands extends DummyFileCommands {
 
 
         // New in 4.2.  Return ok flag so shutdown logic knows if all went well.
-        let ok = g.doHook("save1", c, p, fileName!);
+        let ok = g.doHook("save1", { c: c, p: p, fileName: fileName! });
 
         let content: string;
         if (ok === undefined) {
@@ -2292,7 +2292,7 @@ export class FileCommands extends DummyFileCommands {
             g.es('updated reference file:', g.shortFileName(fileName));
 
         }
-        g.doHook("save2", c, p, fileName!);
+        g.doHook("save2", { c: c, p: p, fileName: fileName! });
 
         return ok;
     }
@@ -2305,7 +2305,7 @@ export class FileCommands extends DummyFileCommands {
         const c: Commands = this.c;
         const p: Position = c.p;
 
-        if (!g.doHook("save1", c, p, fileName)) {
+        if (!g.doHook("save1", { c: c, p: p, fileName: fileName })) {
             // c.endEditing()  // Set the current headline text.
             if (c.sqlite_connection) {
                 c.sqlite_connection.close();
@@ -2327,7 +2327,7 @@ export class FileCommands extends DummyFileCommands {
             }
             c.redraw_after_icons_changed();
         }
-        g.doHook("save2", c, p, fileName);
+        g.doHook("save2", { c: c, p: p, fileName: fileName });
     }
     //@+node:felix.20211213224237.8: *5* fc.saveTo
     /**
@@ -2338,7 +2338,7 @@ export class FileCommands extends DummyFileCommands {
         const c: Commands = this.c;
         const p: Position = c.p;
 
-        if (!g.doHook("save1", c, p, fileName)) {
+        if (!g.doHook("save1", { c: c, p: p, fileName: fileName })) {
             //c.endEditing()  // Set the current headline text.
             if (c.sqlite_connection) {
                 c.sqlite_connection.close();
@@ -2361,7 +2361,7 @@ export class FileCommands extends DummyFileCommands {
             c.redraw_after_icons_changed();
 
         }
-        g.doHook("save2", c, p, fileName);
+        g.doHook("save2", { c: c, p: p, fileName: fileName });
     }
     //@+node:felix.20211213224237.9: *4* fc: Writing top-level
     //@+node:felix.20211213224237.10: *5* fc.exportToSqlite & helpers

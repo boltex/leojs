@@ -475,13 +475,13 @@ export class Constants {
         UNDO: "undo",
         REDO: "redo",
         // * Tree Building
-        EXECUTE_SCRIPT: "TODO", // TODO
-        REFRESH_FROM_DISK: "TODO", // TODO
-        REFRESH_FROM_DISK_PNODE: "TODO", // TODO
-        GIT_DIFF: "TODO", // TODO
+        EXECUTE_SCRIPT: "TODO_EXECUTE_SCRIPT", // TODO
+        REFRESH_FROM_DISK: "TODO_REFRESH_FROM_DISK", // TODO
+        REFRESH_FROM_DISK_PNODE: "TODO_REFRESH_FROM_DISK_PNODE", // TODO
+        GIT_DIFF: "TODO_GIT_DIFF", // TODO
         // * Outline from body text
-        EXTRACT: "TODO", // TODO
-        EXTRACT_NAMES: "TODO", // TODO
+        EXTRACT: "TODO_EXTRACT", // TODO
+        EXTRACT_NAMES: "TODO_EXTRACT_NAMES", // TODO
         // * Hoist Operations
         HOIST_PNODE: "hoist",
         DEHOIST: "de-hoist",
@@ -531,10 +531,10 @@ export class Constants {
         SORT_CHILDREN: "sort-children",
         SORT_SIBLINGS: "sort-siblings",
         // * Clone-find functionality
-        CLONE_FIND_ALL: "TODO", // TODO
-        CLONE_FIND_ALL_FLATTENED: "TODO", // TODO
-        CLONE_FIND_MARKED: "TODO", // TODO
-        CLONE_FIND_FLATTENED_MARKED: "TODO", // TODO
+        CLONE_FIND_ALL: "TODO_CLONE_FIND_ALL", // TODO
+        CLONE_FIND_ALL_FLATTENED: "TODO_CLONE_FIND_ALL_FLATTENED", // TODO
+        CLONE_FIND_MARKED: "TODO_CLONE_FIND_MARKED", // TODO
+        CLONE_FIND_FLATTENED_MARKED: "TODO_CLONE_FIND_FLATTENED_MARKED", // TODO
     };
 
     /**
