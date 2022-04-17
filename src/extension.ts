@@ -1,14 +1,8 @@
 import * as vscode from 'vscode';
 import * as utils from "./utils";
-import { ReqRefresh } from "./types";
 import * as g from './core/leoGlobals';
 import { LeoApp } from './core/leoApp';
 import { LoadManager } from "./core/leoApp";
-import { LeoUI } from './leoUI';
-import { Constants } from './constants';
-import { LeoButtonNode } from './leoButtons';
-import { LeoOutlineNode } from './leoOutline';
-import { Position } from './core/leoNodes';
 process.hrtime = require('browser-process-hrtime');
 
 export function activate(p_context: vscode.ExtensionContext) {
@@ -21,12 +15,12 @@ export function activate(p_context: vscode.ExtensionContext) {
         vscode.window.showWarningMessage("g.app leojs application instance already exists!");
     }
 
+    console.assert(g.app);
     g.app.loadManager = new LoadManager();
-
+    g.app.loadManager.load();
 
     // * Log time taken for startup
     console.log('leojs startup launched in ', utils.getDurationMs(w_start), 'ms');
-
 
 }
 

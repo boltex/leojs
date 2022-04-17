@@ -3,6 +3,7 @@
 //@+<< imports >>
 //@+node:felix.20210102211149.1: ** << imports >> (leoApp)
 import * as vscode from "vscode";
+const leojsPackageJson = require('../package.json')
 // import 'browser-hrtime';
 // require('browser-hrtime');
 
@@ -99,9 +100,10 @@ export class IdleTimeManager {
 export class LeoApp {
 
     //@+others
-    //@+node:felix.20210102214029.1: *3* app.Birth & startup
+    //@+node:felix.20220417164713.1: *3* app.Birth & startup
+    //@+node:felix.20210102214029.1: *4* app.__init__ (helpers contain language dicts)
     //@+<< LeoApp: command-line arguments >>
-    //@+node:felix.20210103024632.2: *4* << LeoApp: command-line arguments >>
+    //@+node:felix.20210103024632.2: *5* << LeoApp: command-line arguments >>
     public batchMode: boolean = false; // True: run in batch mode.
     public debug: string[] = []; // A list of switches to be enabled.
     public diff: boolean = false; // True: run Leo in diff mode.
@@ -116,7 +118,7 @@ export class LeoApp {
 
     //@-<< LeoApp: command-line arguments >>
     //@+<< LeoApp: Debugging & statistics >>
-    //@+node:felix.20210103024632.3: *4* << LeoApp: Debugging & statistics >>
+    //@+node:felix.20210103024632.3: *5* << LeoApp: Debugging & statistics >>
     public debug_dict: any = {}; // For general use.
     public disable_redraw: boolean = false; // True: disable all redraws.
     public disableSave: boolean = false; // May be set by plugins.
@@ -131,13 +133,13 @@ export class LeoApp {
 
     //@-<< LeoApp: Debugging & statistics >>
     //@+<< LeoApp: error messages >>
-    //@+node:felix.20210103024632.4: *4* << LeoApp: error messages >>
+    //@+node:felix.20210103024632.4: *5* << LeoApp: error messages >>
     public menuWarningsGiven: boolean = false; // True: suppress warnings in menu code.
     public unicodeErrorGiven: boolean = true; // True: suppress unicode trace-backs.
 
     //@-<< LeoApp: error messages >>
     //@+<< LeoApp: global directories >>
-    //@+node:felix.20210103024632.5: *4* << LeoApp: global directories >>
+    //@+node:felix.20210103024632.5: *5* << LeoApp: global directories >>
     public extensionsDir = null; // The leo / extensions directory
     public globalConfigDir = null; // leo / config directory
     public globalOpenDir: string | undefined; // The directory last used to open a file.
@@ -148,7 +150,7 @@ export class LeoApp {
 
     //@-<< LeoApp: global directories >>
     //@+<< LeoApp: global data >>
-    //@+node:felix.20210103024632.6: *4* << LeoApp: global data >>
+    //@+node:felix.20210103024632.6: *5* << LeoApp: global data >>
     public atAutoNames: string[] = []; // The set of all @auto spellings.
     public atFileNames: string[] = []; // The set of all built -in @<file>spellings.
 
@@ -167,7 +169,7 @@ export class LeoApp {
     public commandersList: Commands[] = [];
     //@-<< LeoApp: global data >>
     //@+<< LeoApp: global controller/manager objects >>
-    //@+node:felix.20210103024632.7: *4* << LeoApp: global controller/manager objects >>
+    //@+node:felix.20210103024632.7: *5* << LeoApp: global controller/manager objects >>
     // Most of these are defined in initApp.
     public backgroundProcessManager: any = null; // The singleton BackgroundProcessManager instance.
     public commander_cacher: any = null; // The singleton leoCacher.CommanderCacher instance.
@@ -190,7 +192,7 @@ export class LeoApp {
 
     //@-<< LeoApp: global controller/manager objects >>
     //@+<< LeoApp: global reader/writer data >>
-    //@+node:felix.20210103024632.8: *4* << LeoApp: global reader/writer data >>
+    //@+node:felix.20210103024632.8: *5* << LeoApp: global reader/writer data >>
     // From leoAtFile.py.
     public atAutoWritersDict: any = {};
     public writersDispatchDict: any = {};
@@ -201,7 +203,7 @@ export class LeoApp {
 
     //@-<< LeoApp: global reader/writer data >>
     //@+<< LeoApp: global status vars >>
-    //@+node:felix.20210103024632.9: *4* << LeoApp: global status vars >>
+    //@+node:felix.20210103024632.9: *5* << LeoApp: global status vars >>
     public already_open_files: any[] = []; // A list of file names that * might * be open in another copy of Leo.
     public inBridge: boolean = false; // True: running from leoBridge module.
     public inScript: boolean = false; // True: executing a script.
@@ -217,7 +219,7 @@ export class LeoApp {
 
     //@-<< LeoApp: global status vars >>
     //@+<< LeoApp: the global log >>
-    //@+node:felix.20210103024632.10: *4* << LeoApp: the global log >>
+    //@+node:felix.20210103024632.10: *5* << LeoApp: the global log >>
     // To be moved to the LogManager.
     public log = null; // The LeoFrame containing the present log.
     public logInited: boolean = false; // False: all log message go to logWaiting list.
@@ -230,7 +232,7 @@ export class LeoApp {
 
     //@-<< LeoApp: the global log >>
     //@+<< LeoApp: global theme data >>
-    //@+node:felix.20210103024632.11: *4* << LeoApp: global theme data >>
+    //@+node:felix.20210103024632.11: *5* << LeoApp: global theme data >>
     public theme_directory = null;
     // The directory from which the theme file was loaded, if any.
     // Set only by LM.readGlobalSettingsFiles.
@@ -238,7 +240,7 @@ export class LeoApp {
 
     //@-<< LeoApp: global theme data >>
     //@+<< LeoApp: global types >>
-    //@+node:felix.20210103024632.12: *4* << LeoApp: global types >>
+    //@+node:felix.20210103024632.12: *5* << LeoApp: global types >>
     /*
     from leo.core import leoFrame
     from leo.core import leoGui
@@ -249,7 +251,7 @@ export class LeoApp {
 
     //@-<< LeoApp: global types >>
     //@+<< LeoApp: plugins and event handlers >>
-    //@+node:felix.20210103024632.13: *4* << LeoApp: plugins and event handlers >>
+    //@+node:felix.20210103024632.13: *5* << LeoApp: plugins and event handlers >>
     public hookError: boolean = false; // True: suppress further calls to hooks.
     // g.doHook sets g.app.hookError on all exceptions.
     // Scripts may reset g.app.hookError to try again.
@@ -260,7 +262,7 @@ export class LeoApp {
 
     //@-<< LeoApp: plugins and event handlers >>
     //@+<< LeoApp: scripting ivars >>
-    //@+node:felix.20210103024632.14: *4* << LeoApp: scripting ivars >>
+    //@+node:felix.20210103024632.14: *5* << LeoApp: scripting ivars >>
     public searchDict: any = {};
     // For communication between find / change scripts.
     public scriptDict: any = {};
@@ -273,7 +275,7 @@ export class LeoApp {
 
     //@-<< LeoApp: scripting ivars >>
     //@+<< LeoApp: unit testing ivars >>
-    //@+node:felix.20210103024632.15: *4* << LeoApp: unit testing ivars >>
+    //@+node:felix.20210103024632.15: *5* << LeoApp: unit testing ivars >>
     public suppressImportChecks: boolean = false;
     // Used only in basescanner.py ;
     // True: suppress importCommands.check
@@ -294,21 +296,21 @@ export class LeoApp {
     public language_extension_dict: { [key: string]: string } = {};
 
     //@+others
-    //@+node:felix.20210102214102.1: *4* constructor
+    //@+node:felix.20210102214102.1: *5* constructor
     constructor() {
         // Define all global data.
-        this.define_delegate_language_dict();
         this.init_at_auto_names();
         this.init_at_file_names();
         this.define_global_constants();
         this.define_language_delims_dict();
         this.define_language_extension_dict();
         this.define_extension_dict();
+        this.define_delegate_language_dict();
         // this.gui = p_gui;
         // this.nodeIndices = new NodeIndices(g.app.leoID);
     }
 
-    //@+node:felix.20210103024632.16: *4* app.define_delegate_language_dict
+    //@+node:felix.20210103024632.16: *5* app.define_delegate_language_dict
     public define_delegate_language_dict(): void {
         this.delegate_language_dict = {
             // Keys are new language names.
@@ -321,7 +323,7 @@ export class LeoApp {
         };
     }
 
-    //@+node:felix.20210103024632.17: *4* app.define_extension_dict
+    //@+node:felix.20210103024632.17: *5* app.define_extension_dict
     public define_extension_dict(): void {
 
         // Keys are extensions, values are languages
@@ -504,7 +506,7 @@ export class LeoApp {
         };
     }
 
-    //@+node:felix.20210103024632.18: *4* app.define_global_constants
+    //@+node:felix.20210103024632.18: *5* app.define_global_constants
     public define_global_constants(): void {
         // this.prolog_string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
         this.prolog_prefix_string = "<?xml version=\"1.0\" encoding=";
@@ -512,7 +514,7 @@ export class LeoApp {
         this.prolog_namespace_string = 'xmlns:leo="http://edreamleo.org/namespaces/leo-python-editor/1.1"';
     }
 
-    //@+node:felix.20210103024632.19: *4* app.define_language_delims_dict
+    //@+node:felix.20210103024632.19: *5* app.define_language_delims_dict
     public define_language_delims_dict(): void {
 
         this.language_delims_dict = {
@@ -702,7 +704,7 @@ export class LeoApp {
 
     }
 
-    //@+node:felix.20210103024632.20: *4* app.define_language_extension_dict
+    //@+node:felix.20210103024632.20: *5* app.define_language_extension_dict
     public define_language_extension_dict(): void {
 
         // Used only by g.app.externalFilesController.get_ext.
@@ -868,7 +870,7 @@ export class LeoApp {
 
     }
 
-    //@+node:felix.20210103024632.21: *4* app.init_at_auto_names
+    //@+node:felix.20210103024632.21: *5* app.init_at_auto_names
     /**
      * Init the app.atAutoNames set.
      */
@@ -876,7 +878,7 @@ export class LeoApp {
         this.atAutoNames = ["@auto-rst", "@auto"];
     }
 
-    //@+node:felix.20210103024632.22: *4* app.init_at_file_names
+    //@+node:felix.20210103024632.22: *5* app.init_at_file_names
     /**
      * Init the app.atFileNames set.
      */
@@ -893,6 +895,83 @@ export class LeoApp {
 
     //@-others
 
+    //@+node:felix.20220417165216.1: *3* app.computeSignon & printSignon
+    public computeSignon(): void {
+        // from leo.core import leoVersion
+        const app = this;
+        let guiVersion = ', ' + app.gui ? (app.gui as LeoUI).getFullVersion() : '';
+
+        const leoVer: string = leojsPackageJson.version;
+
+        // n1, n2, n3, junk1, junk2 = sys.version_info
+        const n1: string = process.version;
+
+        const sysVersion: string = process.platform;
+        // TODO: fleshout Windows info
+        /*
+        if sys.platform.startswith('win'):
+            sysVersion = 'Windows '
+            try:
+                // peckj 20140416: determine true OS architecture
+                // the following code should return the proper architecture
+                // regardless of whether or not the python architecture matches
+                // the OS architecture (i.e. python 32-bit on windows 64-bit will return 64-bit)
+                v = platform.win32_ver()
+                release, winbuild, sp, ptype = v
+                true_platform = os.environ['PROCESSOR_ARCHITECTURE']
+                try:
+                    true_platform = os.environ['PROCESSOR_ARCHITEw6432']
+                except KeyError:
+                    pass
+                sysVersion = f"Windows {release} {true_platform} (build {winbuild}) {sp}"
+            except Exception:
+                pass
+        else: sysVersion = sys.platform 
+        */
+
+        // branch, junk_commit = g.gitInfo()
+        const branch = leojsPackageJson.gitBranch;
+
+        // author, commit, date = g.getGitVersion()
+        const commit = leojsPackageJson.gitCommit;
+        const date = leojsPackageJson.gitDate;
+
+        // Compute g.app.signon.
+        const signon: string[] = [`LeoJS ${leoVer}`];
+        if (branch) {
+            signon.push(`, ${branch} branch`);
+        }
+        if (commit) {
+            signon.push(', build ' + commit);
+        }
+        if (date) {
+            signon.push('\n' + date);
+        }
+        app.signon = signon.join('');
+        // Compute g.app.signon1.
+        app.signon1 = `Node.js ${n1}${guiVersion}\n${sysVersion}`
+    }
+
+    /**
+     * Print the signon to the log.
+     */
+    public printSignon(): void {
+        const app = this;
+
+        if (app.silentMode) {
+            return;
+        }
+        /*         
+        if (sys.stdout.encoding && sys.stdout.encoding.lower() !== 'utf-8'){
+            console.log('Note: sys.stdout.encoding is not UTF-8');
+            console.log(`Encoding is: ${sys.stdout.encoding}`);
+            console.log('See: https://stackoverflow.com/questions/14109024');
+            console.log('');
+        }
+        */
+        console.log(app.signon);
+        console.log(app.signon1);
+    }
     //@+node:felix.20220106225805.1: *3* app.commanders
     /**
      * Return list of currently active controllers
@@ -1217,6 +1296,8 @@ export class LoadManager {
         const t1 = process.hrtime();
 
         lm.doPrePluginsInit(fileName); // sets lm.options and lm.files
+        g.app.computeSignon();
+        g.app.printSignon();
         const t2 = process.hrtime();
 
         lm.doPostPluginsInit();

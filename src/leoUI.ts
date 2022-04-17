@@ -359,6 +359,11 @@ export class LeoUI {
         }, 10);
     }
 
+    public getFullVersion(): string {
+        //
+        return "LeoUI";
+    }
+
     /**
      * * 'getStates' action for use in debounced method call
      */
@@ -1998,6 +2003,10 @@ export class NullGui {
 
     public getTextFromClipboard(): string {
         return this.clipboardContent;
+    }
+
+    public getFullVersion(): string {
+        return "LeoJS NullGui";
     }
 
     public runOpenFileDialog(
