@@ -10,11 +10,13 @@ import * as os from "os";
 // import * as fs from 'fs';
 import * as path from 'path';
 import * as g from './leoGlobals';
+import * as utils from "../utils";
 import { LeoUI, NullGui } from '../leoUI';
 import { NodeIndices } from './leoNodes';
 import { Commands } from './leoCommands';
 import { FileCommands } from "./leoFileCommands";
 import { GlobalConfigManager } from "./leoConfig";
+import { Constants } from "../constants";
 
 //@-<< imports >>
 //@+others
@@ -1035,8 +1037,8 @@ export class LeoApp {
         let w_userName = ""; // = "TestUserName";
 
         // 1 - set leoID from configuration settings
-        if (!this.leoID && g.app.gui) {
-            w_userName = g.app.gui.getIdFromSetting();
+        if (!this.leoID && vscode && vscode.workspace) {
+            w_userName = vscode.workspace.getConfiguration(Constants.CONFIG_NAME).get(Constants.CONFIG_NAMES.LEO_ID, Constants.CONFIG_DEFAULTS.LEO_ID);
             if (w_userName) {
                 this.leoID = this.cleanLeoID(w_userName, 'config.leoID');
             }
@@ -1051,11 +1053,19 @@ export class LeoApp {
         }
 
         // 3 - Set leoID from user dialog if allowed
-        if (!this.leoID && useDialog && g.app.gui) {
-            return g.app.gui!.getIdFromDialog().then((p_id) => {
+        if (!this.leoID && useDialog) {
+            return utils.getIdFromDialog().then((p_id) => {
                 this.leoID = this.cleanLeoID(p_id, '');
-                if (this.leoID) {
-                    g.app.gui!.setIdSetting(this.leoID);
+                if (this.leoID && vscode && vscode.workspace) {
+                    const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
+                    // tslint:disable-next-line: strict-comparisons
+                    if (w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!.defaultValue === this.leoID) {
+                        // Set as undefined - same as default
+                        w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, undefined, true);
+                    } else {
+                        // Set as value which is not default
+                        w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, this.leoID, true);
+                    }
                 }
                 if (!this.leoID) {
                     throw new Error("Invalid Leo ID");

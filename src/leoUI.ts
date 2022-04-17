@@ -148,6 +148,7 @@ export class LeoUI {
         // * Create file browser instance
         this._leoFilesBrowser = new LeoFilesBrowser(_context);
 
+        /*    
         if (!g.app) {
             (g.app as LeoApp) = new LeoApp();
         } else {
@@ -166,6 +167,8 @@ export class LeoUI {
         });
 
         this._start();
+        */
+
     }
 
     /**
@@ -1654,7 +1657,7 @@ export class LeoUI {
      * and start leojs if the ID is valid, and not already started.
      */
     public setLeoIDCommand(): void {
-        this.getIdFromDialog().then((p_id) => {
+        utils.getIdFromDialog().then((p_id) => {
             p_id = p_id.trim();
             p_id = g.app.cleanLeoID(p_id, '');
             if (p_id && p_id.length >= 3 && utils.isAlphaNumeric(p_id)) {
@@ -1677,20 +1680,6 @@ export class LeoUI {
         return this.config.leoID;
     }
 
-
-    public getIdFromDialog(): Thenable<string> {
-        return vscode.window.showInputBox({
-            title: "Enter Leo id",
-            prompt: "Please enter an id that identifies you uniquely.\n" +
-                "(Letters and numbers only, and at least 3 characters in length)"
-
-        }).then((p_id) => {
-            if (p_id) {
-                return p_id;
-            }
-            return '';
-        });
-    }
 
     /**
      * * Sets the leoID setting for use as default in next activation
