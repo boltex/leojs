@@ -19,6 +19,7 @@ import { Commands } from './leoCommands';
 import { FileCommands } from "./leoFileCommands";
 import { GlobalConfigManager } from "./leoConfig";
 import { Constants } from "../constants";
+import { ExternalFilesController } from "./leoExternalFiles";
 
 //@-<< imports >>
 //@+others
@@ -896,7 +897,7 @@ export class LeoApp {
 
     //@-others
 
-    //@+node:felix.20220417165216.1: *3* app.computeSignon & printSignon
+    //@+node:felix.20220417165216.1: *4* app.computeSignon & printSignon
     public computeSignon(): void {
         // from leo.core import leoVersion
         const app = this;
@@ -977,6 +978,98 @@ export class LeoApp {
         console.log(app.signon);
         console.log(app.signon1);
     }
+    //@+node:felix.20220417215228.1: *4* app.setLeoID & helpers
+    /**
+     * Get g.app.leoID from various sources.
+     */
+    public async setLeoID(useDialog: boolean = true, verbose: boolean = true): Promise<string> {
+        this.leoID = "";
+
+        // tslint:disable-next-line: strict-comparisons
+        console.assert(this === g.app);
+
+        verbose = verbose && !g.unitTesting && !this.silentMode;
+
+        if (g.unitTesting) {
+            this.leoID = "unittestid";
+        }
+
+        let w_userName = ""; // = "TestUserName";
+
+        // 1 - set leoID from configuration settings
+        if (!this.leoID && vscode && vscode.workspace) {
+            w_userName = vscode.workspace.getConfiguration(Constants.CONFIG_NAME).get(Constants.CONFIG_NAMES.LEO_ID, Constants.CONFIG_DEFAULTS.LEO_ID);
+            if (w_userName) {
+                this.leoID = this.cleanLeoID(w_userName, 'config.leoID');
+            }
+        }
+
+        // 2 - Set leoID from environment
+        if (!this.leoID && os && os.userInfo) {
+            w_userName = os.userInfo().username;
+            if (w_userName) {
+                this.leoID = this.cleanLeoID(w_userName, 'os.userInfo().username');
+            }
+        }
+
+        // 3 - Set leoID from user dialog if allowed
+        if (!this.leoID && useDialog) {
+            return utils.getIdFromDialog().then((p_id) => {
+                this.leoID = this.cleanLeoID(p_id, '');
+                if (this.leoID && vscode && vscode.workspace) {
+                    const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
+                    // tslint:disable-next-line: strict-comparisons
+                    if (w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!.defaultValue === this.leoID) {
+                        // Set as undefined - same as default
+                        w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, undefined, true);
+                    } else {
+                        // Set as value which is not default
+                        w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, this.leoID, true);
+                    }
+                }
+                if (!this.leoID) {
+                    throw new Error("Invalid Leo ID");
+                }
+                return this.leoID;
+            });
+        } else {
+            if (!this.leoID) {
+                throw new Error("Could not get Leo ID");
+            }
+            return this.leoID;
+        }
+
+    }
+
+    //@+node:felix.20220417215228.2: *5* app.cleanLeoID
+    /**
+     * #1404: Make sure that the given Leo ID will not corrupt a .leo file.
+     */
+    public cleanLeoID(id_: string, tag: string): string {
+        const old_id: string = id_.toString();
+        try {
+            id_ = id_.replace(/\./g, "").replace(/\,/g, "").replace(/\"/g, "").replace(/\'/g, "");
+            //  Remove *all* whitespace: https://stackoverflow.com/questions/3739909
+            id_ = id_.split(' ').join('');
+        }
+        catch (exception) {
+            g.es_exception(exception);
+            id_ = '';
+        }
+        if (id_.length < 3) {
+            id_ = "";
+            // throw new Error("Invalid Leo ID");
+            // TODO: Show Leo Id syntax error message
+            // g.EmergencyDialog(
+            //   title=f"Invalid Leo ID: {tag}",
+            //    message=(
+            //        f"Invalid Leo ID: {old_id!r}\n\n"
+            //       "Your id should contain only letters and numbers\n"
+            //        "and must be at least 3 characters in length."))
+        }
+        return id_;
+    }
+
     //@+node:felix.20220106225805.1: *3* app.commanders
     /**
      * Return list of currently active controllers
@@ -1102,96 +1195,19 @@ export class LeoApp {
     //             title='Already Open Files',
     //             message=message,
     //             text="Ok")
-    //@+node:felix.20210221010822.1: *3* app.setLeoID & helpers
+    //@+node:felix.20220417215246.1: *3* app.makeAllBindings
     /**
-     * Get g.app.leoID from various sources.
+     * LeoApp.makeAllBindings:
+     *
+     * Modified version for leojs: call leoUI.makeAllBindings
      */
-    public async setLeoID(useDialog: boolean = true, verbose: boolean = true): Promise<string> {
-        this.leoID = "";
-
-        // tslint:disable-next-line: strict-comparisons
-        console.assert(this === g.app);
-
-        verbose = verbose && !g.unitTesting && !this.silentMode;
-
-        if (g.unitTesting) {
-            this.leoID = "unittestid";
-        }
-
-        let w_userName = ""; // = "TestUserName";
-
-        // 1 - set leoID from configuration settings
-        if (!this.leoID && vscode && vscode.workspace) {
-            w_userName = vscode.workspace.getConfiguration(Constants.CONFIG_NAME).get(Constants.CONFIG_NAMES.LEO_ID, Constants.CONFIG_DEFAULTS.LEO_ID);
-            if (w_userName) {
-                this.leoID = this.cleanLeoID(w_userName, 'config.leoID');
-            }
-        }
-
-        // 2 - Set leoID from environment
-        if (!this.leoID && os && os.userInfo) {
-            w_userName = os.userInfo().username;
-            if (w_userName) {
-                this.leoID = this.cleanLeoID(w_userName, 'os.userInfo().username');
-            }
-        }
-
-        // 3 - Set leoID from user dialog if allowed
-        if (!this.leoID && useDialog) {
-            return utils.getIdFromDialog().then((p_id) => {
-                this.leoID = this.cleanLeoID(p_id, '');
-                if (this.leoID && vscode && vscode.workspace) {
-                    const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
-                    // tslint:disable-next-line: strict-comparisons
-                    if (w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!.defaultValue === this.leoID) {
-                        // Set as undefined - same as default
-                        w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, undefined, true);
-                    } else {
-                        // Set as value which is not default
-                        w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, this.leoID, true);
-                    }
-                }
-                if (!this.leoID) {
-                    throw new Error("Invalid Leo ID");
-                }
-                return this.leoID;
-            });
-        } else {
-            if (!this.leoID) {
-                throw new Error("Could not get Leo ID");
-            }
-            return this.leoID;
-        }
-
-    }
-
-    //@+node:felix.20210221010822.2: *4* app.cleanLeoID
-    /**
-     * #1404: Make sure that the given Leo ID will not corrupt a .leo file.
-     */
-    public cleanLeoID(id_: string, tag: string): string {
-        const old_id: string = id_.toString();
-        try {
-            id_ = id_.replace(/\./g, "").replace(/\,/g, "").replace(/\"/g, "").replace(/\'/g, "");
-            //  Remove *all* whitespace: https://stackoverflow.com/questions/3739909
-            id_ = id_.split(' ').join('');
-        }
-        catch (exception) {
-            g.es_exception(exception);
-            id_ = '';
-        }
-        if (id_.length < 3) {
-            id_ = "";
-            // throw new Error("Invalid Leo ID");
-            // TODO: Show Leo Id syntax error message
-            // g.EmergencyDialog(
-            //   title=f"Invalid Leo ID: {tag}",
-            //    message=(
-            //        f"Invalid Leo ID: {old_id!r}\n\n"
-            //       "Your id should contain only letters and numbers\n"
-            //        "and must be at least 3 characters in length."))
-        }
-        return id_;
+    public makeAllBindings(): void {
+        (this.gui as LeoUI).makeAllBindings();
+        /* 
+        app = self
+        for c in app.commanders():
+            c.k.makeAllBindings()
+        */
     }
 
     //@+node:felix.20210123212411.1: *3* app.newCommander
@@ -1250,9 +1266,14 @@ export class LoadManager {
     // #1374.
     public theme_path: any;//  = None
 
+    private _context: vscode.ExtensionContext | undefined;
+
     //@+others
     //@+node:felix.20210119234943.1: *3*  LM.ctor
-    constructor() {
+    constructor(p_context?: vscode.ExtensionContext) {
+        if (p_context) {
+            this._context = p_context;
+        }
         // this.globalSettingsDict = undefined;
         // this.globalBindingsDict = undefined;
         this.files = [];
@@ -1290,26 +1311,144 @@ export class LoadManager {
         }
         return 'D';
     }
+    //@+node:felix.20220417222540.1: *4* LM.createDefaultSettingsDicts
+    /**
+     * Create lm.globalSettingsDict & lm.globalBindingsDict.
+     */
+    public createDefaultSettingsDicts(): [any, any] {
+
+        const settings_d = g.app.config.defaultsDict;
+
+        // console.assert( isinstance(settings_d, g.TypedDict), settings_d); 
+
+        settings_d.setName('lm.globalSettingsDict');
+
+        const bindings_d = new g.TypedDict(  // was TypedDictOfLists.
+            'lm.globalBindingsDict',
+            'string',
+            'object',
+        );
+
+        return [settings_d, bindings_d];
+    }
+
+    //@+node:felix.20220417222319.1: *4* LM.readGlobalSettingsFiles
+    /**
+     * Read leoSettings.leo and myLeoSettings.leo using a null gui.
+     *
+     * New in Leo 6.1: this sets ivars for the ActiveSettingsOutline class.
+     */
+    public readGlobalSettingsFiles(): void {
+        const lm = this;
+
+        let settings_d;
+        let bindings_d;
+
+        [settings_d, bindings_d] = lm.createDefaultSettingsDicts();
+
+        lm.globalSettingsDict = settings_d;
+        lm.globalBindingsDict = bindings_d;
+        /*    
+        trace = 'themes' in g.app.debug
+        lm = self
+        // Open the standard settings files with a nullGui.
+        // Important: their commanders do not exist outside this method!
+        old_commanders = g.app.commanders()
+        lm.leo_settings_path = lm.computeLeoSettingsPath()
+        lm.my_settings_path = lm.computeMyLeoSettingsPath()
+        lm.leo_settings_c = lm.openSettingsFile(self.leo_settings_path)
+        lm.my_settings_c = lm.openSettingsFile(self.my_settings_path)
+        commanders = [lm.leo_settings_c, lm.my_settings_c]
+        commanders = [z for z in commanders if z]
+        settings_d, bindings_d = lm.createDefaultSettingsDicts()
+        for c in commanders:
+            // Merge the settings dicts from c's outline into
+            // *new copies of* settings_d and bindings_d.
+            settings_d, bindings_d = lm.computeLocalSettings(
+                c, settings_d, bindings_d, localFlag=False)
+        // Adjust the name.
+        bindings_d.setName('lm.globalBindingsDict')
+        lm.globalSettingsDict = settings_d
+        lm.globalBindingsDict = bindings_d
+        // Add settings from --theme or @string theme-name files.
+        // This must be done *after* reading myLeoSettigns.leo.
+        lm.theme_path = lm.computeThemeFilePath()
+        if lm.theme_path:
+            lm.theme_c = lm.openSettingsFile(lm.theme_path)
+            if lm.theme_c:
+                // Merge theme_c's settings into globalSettingsDict.
+                settings_d, junk_shortcuts_d = lm.computeLocalSettings(
+                    lm.theme_c, settings_d, bindings_d, localFlag=False)
+                lm.globalSettingsDict = settings_d
+                // Set global var used by the StyleSheetManager.
+                g.app.theme_directory = g.os_path_dirname(lm.theme_path)
+                if trace:
+                    g.trace('g.app.theme_directory', g.app.theme_directory)
+        // Clear the cache entries for the commanders.
+        // This allows this method to be called outside the startup logic.
+        for c in commanders:
+            if c not in old_commanders:
+                g.app.forgetOpenFile(c.fileName())
+        */
+
+    }
+
     //@+node:felix.20210120004121.1: *3* LM.load & helpers
     /**
      * This is Leo's main startup method.
      */
     public load(fileName?: string): void {
-        // SIMPLIFIED JS VERSION
+
         const lm: LoadManager = this;
 
-        const t1 = process.hrtime();
+        const t1 = process.hrtime.bigint();
 
-        lm.doPrePluginsInit(fileName); // sets lm.options and lm.files
-        g.app.computeSignon();
-        g.app.printSignon();
-        const t2 = process.hrtime();
+        // sets lm.options and lm.files
+        lm.doPrePluginsInit(fileName).finally(() => {
+            g.app.computeSignon();
+            g.app.printSignon();
 
-        lm.doPostPluginsInit();
-        const t3 = process.hrtime();
+            if (!g.app.gui) {
+                return;
+            }
+            // Disable redraw until all files are loaded.
+            g.app.disable_redraw = true;
+            const t2 = process.hrtime.bigint();
+            g.doHook("start1");
 
-        // console.log('Startup PrePluginsInit' );
-        // console.log('Startup PostPluginsInit' );
+            if (g.app.killed) {
+                return;
+            }
+
+            // TODO: idleTimeManager
+            // g.app.idleTimeManager.start();
+
+            const t3 = process.hrtime.bigint();
+            let ok = lm.doPostPluginsInit();
+            g.app.makeAllBindings();
+
+            (g.app.gui as LeoUI).finishStartup();
+
+            if (!ok) {
+                return;
+            }
+            g.es('');  // Clears horizontal scrolling in the log pane.
+            if (g.app.listen_to_log_flag) {
+                // TODO: ?
+                // g.app.listenToLog();
+            }
+            if (g.app.debug.includes('startup')) {
+                const t4 = process.hrtime.bigint();
+
+                console.log('');
+                g.es_print(`settings:${Number((t2 - t1) / 1000000000n)} sec`);
+                g.es_print(` plugins:${Number((t3 - t2) / 1000000000n)} sec`);
+                g.es_print(`   files:${Number((t4 - t3) / 1000000000n)} sec`);
+                g.es_print(`   total:${Number((t4 - t1) / 1000000000n)} sec`);
+                console.log('');
+            }
+
+        });
 
     }
 
@@ -1466,38 +1605,104 @@ export class LoadManager {
     /**
      * Scan options, set directories and read settings.
      */
-    public doPrePluginsInit(fileName?: string): void {
+    public doPrePluginsInit(fileName?: string): Promise<unknown> {
         const lm: LoadManager = this;
         // lm.computeStandardDirectories();
         // lm.adjustSysPath();
         // A do-nothing.
-        // Scan the options as early as possible.
-        const options = {}; // lm.scanOptions(fileName);
-        lm.options = options;
+
+        // Scan the command line options as early as possible.
+        const options = {}; // lm.scanOptions(fileName); 
+        lm.options = options; // ! no command line options !
 
         // const script:string = options['script'];
         // const verbose:boolean = !script;
+
         // Init the app.
-        lm.initApp(); // lm.initApp(verbose);
-        // g.app.setGlobalDb()
-        // lm.reportDirectories(verbose)
-        // Read settings *after* setting g.app.config and *before* opening plugins.
-        // This means if-gui has effect only in per-file settings.
-        // lm.readGlobalSettingsFiles()
-        // reads only standard settings files, using a null gui.
-        // uses lm.files[0] to compute the local directory
-        // that might contain myLeoSettings.leo.
-        // Read the recent files file.
-        // localConfigFile = lm.files[0] if lm.files else None
-        // g.app.recentFilesManager.readRecentFiles(localConfigFile)
-        // Create the gui after reading options and settings.
-        // lm.createGui(pymacs)
-        // We can't print the signon until we know the gui.
-        // g.app.computeSignon()  // Set app.signon/signon1 for commanders.
+        return lm.initApp().finally(() => {
+            // g.app.setGlobalDb()
+
+            // lm.reportDirectories(verbose)
+
+            // Read settings *after* setting g.app.config and *before* opening plugins.
+            // This means if-gui has effect only in per-file settings.
+            lm.readGlobalSettingsFiles();
+            // reads only standard settings files, using a null gui.
+            // uses lm.files[0] to compute the local directory
+            // that might contain myLeoSettings.leo.
+            // Read the recent files file.
+            const localConfigFile = (lm.files && lm.files.length) ? lm.files[0] : undefined;
+
+            // TODO: ? recent-file management ?
+            // g.app.recentFilesManager.readRecentFiles(localConfigFile);
+
+            // Create the gui after reading options and settings.
+            lm.createGui();
+            // We can't print the signon until we know the gui.
+            g.app.computeSignon();  // Set app.signon/signon1 for commanders.
+        });
+
+    }
+
+    //@+node:felix.20220417225955.1: *5* LM.createGui
+    public createGui(): void {
+
+        const lm: LoadManager = this;
+
+        g.app.gui = new LeoUI(this._context!);
+
+        /* 
+        gui_option = lm.options.get('gui')
+        windowFlag = lm.options.get('windowFlag')
+        script = lm.options.get('script')
+        if g.app.gui:
+            if g.app.gui == g.app.nullGui:
+                g.app.gui = None  # Enable g.app.createDefaultGui
+                g.app.createDefaultGui(__file__)
+            else:
+                pass
+                # This can happen when launching Leo from IPython.
+                # This can also happen when leoID does not exist.
+        elif gui_option is None:
+            if script and not windowFlag:
+                # Always use null gui for scripts.
+                g.app.createNullGuiWithScript(script)
+            else:
+                g.app.createDefaultGui(__file__)
+        else:
+            lm.createSpecialGui(gui_option, pymacs, script, windowFlag)
+
+        */
     }
 
     //@+node:felix.20210120004121.16: *5* LM.initApp
-    public initApp(verbose?: boolean): void {
+    public initApp(verbose?: boolean): Promise<unknown> {
+
+
+        console.assert(g.app.loadManager);
+
+        // Make sure we call the new leoPlugins.init top-level function.
+        // leoPlugins.init(); // TODO: plugins system ? 
+
+        // Force the user to set g.app.leoID.
+        let w_leoID = "None";
+        return g.app.setLeoID(true, verbose).then((p_id) => {
+            if (p_id) {
+                w_leoID = p_id;
+            }
+        }).finally(() => {
+            g.app.inBridge = true;  // (From Leo) Support for g.getScript.
+            // w_leoID will at least be 'None'.
+            g.app.idleTimeManager = new IdleTimeManager();
+            // g.app.backgroundProcessManager = new leoBackground.BackgroundProcessManager();
+            g.app.externalFilesController = new ExternalFilesController();
+            // g.app.recentFilesManager = new RecentFilesManager(); // ! HANDLED with vscode workspace recent files
+            g.app.config = new GlobalConfigManager();
+            g.app.nodeIndices = new NodeIndices(g.app.leoID);
+            // g.app.sessionManager = leoSessions.SessionManager(); // ! HANDLED with vscode workspace recent files
+            // Complete the plugins class last.
+            g.app.pluginsController.finishCreate();
+        });
 
 
         /*
@@ -1519,6 +1724,7 @@ export class LoadManager {
             leoPlugins.init()
             # Force the user to set g.app.leoID.
             g.app.setLeoID(verbose=verbose)
+
             # Create early classes *after* doing plugins.init()
             g.app.idleTimeManager = IdleTimeManager()
             g.app.backgroundProcessManager = leoBackground.BackgroundProcessManager()

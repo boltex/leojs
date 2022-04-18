@@ -16,7 +16,7 @@ export function activate(p_context: vscode.ExtensionContext) {
     }
 
     console.assert(g.app);
-    g.app.loadManager = new LoadManager();
+    g.app.loadManager = new LoadManager(p_context);
     g.app.loadManager.load();
 
     // * Log time taken for startup

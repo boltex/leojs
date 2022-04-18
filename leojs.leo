@@ -115,7 +115,7 @@
 <v t="felix.20201214194144.2"><vh>Constructor</vh></v>
 <v t="felix.20220202004920.1"><vh>Start leojs</vh></v>
 <v t="felix.20220201235548.1"><vh>Finish Startup</vh></v>
-<v t="felix.20220417181949.1"><vh>getFullVersion</vh></v>
+<v t="felix.20220417215549.1"><vh>makeAllBindings</vh></v>
 <v t="felix.20201214194144.3"><vh>Document States</vh>
 <v t="felix.20201214202058.1"><vh>_triggerGetStates</vh></v>
 <v t="felix.20201227230901.1"><vh>_setupNoOpenedLeoDocument</vh></v>
@@ -1094,7 +1094,7 @@ public refreshTreeRoot(): void {
     }
 
     console.assert(g.app);
-    g.app.loadManager = new LoadManager();
+    g.app.loadManager = new LoadManager(p_context);
     g.app.loadManager.load();
 
     // * Log time taken for startup
@@ -2513,6 +2513,7 @@ export interface LeoButton {
 <t tx="felix.20201214194144.1">import * as vscode from "vscode";
 import { debounce } from "lodash";
 import * as utils from "./utils";
+import * as commandBindings from "./commandBindings";
 import { Constants } from "./constants";
 import { RevealType, Icon, ReqRefresh, LeoPackageStates, ConfigSetting } from "./types";
 
@@ -2526,8 +2527,6 @@ import { LeoBodyProvider } from "./leoBody";
 import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
 
 import * as g from './core/leoGlobals';
-import { LeoApp } from './core/leoApp';
-import { LoadManager } from "./core/leoApp";
 import { Commands } from "./core/leoCommands";
 import { NodeIndices, Position, VNode } from "./core/leoNodes";
 import { GlobalConfigManager } from "./core/leoConfig";
@@ -2692,9 +2691,6 @@ export class LeoUI {
 
     // * Debounced method
     public refreshUndoPane!: (() =&gt; void);
-
-    // * LeoID promise required to start leojs's UI &amp; core
-    private _leoIDResolve!: (value: string | PromiseLike&lt;string&gt;) =&gt; void;
 
     @others
 
@@ -8255,13 +8251,18 @@ export class IconConstants {
 </t>
 <t tx="felix.20220128232146.1"></t>
 <t tx="felix.20220131234257.1">/**
- * * Sets the leoID setting for use as default in next activation
+ * * Sets the leoID setting for immediate use, and in next activation
  */
 public setIdSetting(p_leoID: string): Promise&lt;unknown&gt; {
     const w_changes: ConfigSetting[] = [{
         code: "leoID",
         value: p_leoID
     }];
+    g.app.leoID = p_leoID;
+    if (g.app.nodeIndices) {
+        g.app.nodeIndices.defaultId = p_leoID;
+        g.app.nodeIndices.userId = p_leoID;
+    }
     return this.config.setLeojsSettings(w_changes);
 }
 
@@ -8285,10 +8286,7 @@ public setLeoIDCommand(): void {
         p_id = g.app.cleanLeoID(p_id, '');
         if (p_id &amp;&amp; p_id.length &gt;= 3 &amp;&amp; utils.isAlphaNumeric(p_id)) {
             // valid id: set in config settings
-            this.setIdSetting(p_id).then(() =&gt; {
-                // Will get it from config settings
-                this._start();
-            });
+            this.setIdSetting(p_id);
         } else {
             // Canceled or invalid: (re)warn user.
             this.showLeoIDMessage();
@@ -8338,11 +8336,13 @@ public showLeoIDMessage(): void {
 <t tx="felix.20220201235548.1">/**
  * * Set all remaining local objects, set ready flag(s) and refresh all panels
  */
-private _finishStartup(): void {
+public finishStartup(): void {
 
+    /* 
     g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
     g.app.config = new GlobalConfigManager();
     g.app.nodeIndices = new NodeIndices(g.app.leoID);
+    */
 
     // TODO FAKE CONFIG
 
@@ -8351,8 +8351,11 @@ private _finishStartup(): void {
     //      g.app.loadManager.load(fileName, pymacs)
     // ELSE :
     //      TODO: CREATE NEW LEO OUTLINE (demo below)
+
+    /*         
     let c = g.app.newCommander("", this);
     g.app.commanders().push(c);
+    */
 
     // * Create a single data provider for both outline trees, Leo view and Explorer view
     this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);
@@ -8510,18 +8513,21 @@ private _finishStartup(): void {
  * * Startup by checking for LeoID from os/env, settings, or input dialog
  */
 private _start(): void {
-    g.app.setLeoID(true, this.verbose).then((p_id) =&gt; {
-        if (p_id &amp;&amp; p_id.length &gt;= 3 &amp;&amp; utils.isAlphaNumeric(p_id)) {
-            if (!this.leoStates.leoReady) {
-                // start leojs only if not already started!
-                this._leoIDResolve(p_id);
+
+    /* 
+        g.app.setLeoID(true, this.verbose).then((p_id) =&gt; {
+            if (p_id &amp;&amp; p_id.length &gt;= 3 &amp;&amp; utils.isAlphaNumeric(p_id)) {
+                if (!this.leoStates.leoReady) {
+                    // start leojs only if not already started!
+                    this._leoIDResolve(p_id);
+                }
+            } else {
+                this.showLeoIDMessage();
             }
-        } else {
+        }, (p_reason) =&gt; {
             this.showLeoIDMessage();
-        }
-    }, (p_reason) =&gt; {
-        this.showLeoIDMessage();
-    });
+        });
+    */
 }
 
 </t>
@@ -8805,9 +8811,11 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 }
 
 </t>
-<t tx="felix.20220417181949.1">public getFullVersion(): string {
-    //
-    return "LeoUI";
+<t tx="felix.20220417215549.1">/** 
+ * Make all key and commands bindings
+ */
+public makeAllBindings(): void {
+    commandBindings.makeAllBindings(this, this._context);
 }
 
 </t>

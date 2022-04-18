@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { debounce } from "lodash";
 import * as utils from "./utils";
+import * as commandBindings from "./commandBindings";
 import { Constants } from "./constants";
 import { RevealType, Icon, ReqRefresh, LeoPackageStates, ConfigSetting } from "./types";
 
@@ -14,8 +15,6 @@ import { LeoBodyProvider } from "./leoBody";
 import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
 
 import * as g from './core/leoGlobals';
-import { LeoApp } from './core/leoApp';
-import { LoadManager } from "./core/leoApp";
 import { Commands } from "./core/leoCommands";
 import { NodeIndices, Position, VNode } from "./core/leoNodes";
 import { GlobalConfigManager } from "./core/leoConfig";
@@ -124,9 +123,6 @@ export class LeoUI {
     // * Debounced method
     public refreshUndoPane!: (() => void);
 
-    // * LeoID promise required to start leojs's UI & core
-    private _leoIDResolve!: (value: string | PromiseLike<string>) => void;
-
     constructor(private _context: vscode.ExtensionContext) {
 
         // * Setup States
@@ -175,28 +171,33 @@ export class LeoUI {
      * * Startup by checking for LeoID from os/env, settings, or input dialog
      */
     private _start(): void {
-        g.app.setLeoID(true, this.verbose).then((p_id) => {
-            if (p_id && p_id.length >= 3 && utils.isAlphaNumeric(p_id)) {
-                if (!this.leoStates.leoReady) {
-                    // start leojs only if not already started!
-                    this._leoIDResolve(p_id);
+
+        /* 
+            g.app.setLeoID(true, this.verbose).then((p_id) => {
+                if (p_id && p_id.length >= 3 && utils.isAlphaNumeric(p_id)) {
+                    if (!this.leoStates.leoReady) {
+                        // start leojs only if not already started!
+                        this._leoIDResolve(p_id);
+                    }
+                } else {
+                    this.showLeoIDMessage();
                 }
-            } else {
+            }, (p_reason) => {
                 this.showLeoIDMessage();
-            }
-        }, (p_reason) => {
-            this.showLeoIDMessage();
-        });
+            });
+        */
     }
 
     /**
      * * Set all remaining local objects, set ready flag(s) and refresh all panels
      */
-    private _finishStartup(): void {
+    public finishStartup(): void {
 
+        /* 
         g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
         g.app.config = new GlobalConfigManager();
         g.app.nodeIndices = new NodeIndices(g.app.leoID);
+        */
 
         // TODO FAKE CONFIG
 
@@ -205,8 +206,11 @@ export class LeoUI {
         //      g.app.loadManager.load(fileName, pymacs)
         // ELSE :
         //      TODO: CREATE NEW LEO OUTLINE (demo below)
+
+        /*         
         let c = g.app.newCommander("", this);
         g.app.commanders().push(c);
+        */
 
         // * Create a single data provider for both outline trees, Leo view and Explorer view
         this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);
@@ -359,9 +363,11 @@ export class LeoUI {
         }, 10);
     }
 
-    public getFullVersion(): string {
-        //
-        return "LeoUI";
+    /** 
+     * Make all key and commands bindings
+     */
+    public makeAllBindings(): void {
+        commandBindings.makeAllBindings(this, this._context);
     }
 
     /**
@@ -1667,10 +1673,7 @@ export class LeoUI {
             p_id = g.app.cleanLeoID(p_id, '');
             if (p_id && p_id.length >= 3 && utils.isAlphaNumeric(p_id)) {
                 // valid id: set in config settings
-                this.setIdSetting(p_id).then(() => {
-                    // Will get it from config settings
-                    this._start();
-                });
+                this.setIdSetting(p_id);
             } else {
                 // Canceled or invalid: (re)warn user.
                 this.showLeoIDMessage();
@@ -1687,13 +1690,18 @@ export class LeoUI {
 
 
     /**
-     * * Sets the leoID setting for use as default in next activation
+     * * Sets the leoID setting for immediate use, and in next activation
      */
     public setIdSetting(p_leoID: string): Promise<unknown> {
         const w_changes: ConfigSetting[] = [{
             code: "leoID",
             value: p_leoID
         }];
+        g.app.leoID = p_leoID;
+        if (g.app.nodeIndices) {
+            g.app.nodeIndices.defaultId = p_leoID;
+            g.app.nodeIndices.userId = p_leoID;
+        }
         return this.config.setLeojsSettings(w_changes);
     }
 

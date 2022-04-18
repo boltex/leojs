@@ -2231,7 +2231,7 @@ export const contentModifiedSet: VNode[] = [];
  * Set app.hookError on all exceptions.
  * Scripts may reset app.hookError to try again.
  */
-export function doHook(tag: string, keywords: { [key: string]: any }): any {
+export function doHook(tag: string, keywords?: { [key: string]: any }): any {
     if (app.killed || app.hookError) {
         return undefined;
     }
@@ -2249,12 +2249,16 @@ export function doHook(tag: string, keywords: { [key: string]: any }): any {
         return undefined;
     }
     // Get the hook handler function.  Usually this is doPlugins.
-    const c: Commands = keywords["c"];
+    const c: Commands = keywords ? keywords["c"] : undefined;
     // pylint: disable=consider-using-ternary
     let f = (c && c.hookFunction) || app.hookFunction;
     if (!f) {
         app.hookFunction = app.pluginsController.doPlugins;
         f = app.hookFunction;
+    }
+    if (!f) {
+        console.log('todo: doHook for', tag);
+        return;
     }
     try {
         // Pass the hook to the hook handler.
