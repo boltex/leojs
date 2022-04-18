@@ -3,7 +3,8 @@
 //@+<< imports >>
 //@+node:felix.20210102211149.1: ** << imports >> (leoApp)
 import * as vscode from "vscode";
-const leojsPackageJson = require('../package.json')
+
+// const leojsPackageJson = require('../../package.json');
 // import 'browser-hrtime';
 // require('browser-hrtime');
 
@@ -899,9 +900,13 @@ export class LeoApp {
     public computeSignon(): void {
         // from leo.core import leoVersion
         const app = this;
-        let guiVersion = ', ' + app.gui ? (app.gui as LeoUI).getFullVersion() : '';
 
-        const leoVer: string = leojsPackageJson.version;
+        let guiVersion = ', ' + 'VS Code version ' + vscode.version;
+
+        const w_leoIntegExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
+        const w_leojsPackageJson = w_leoIntegExtension.packageJSON;
+
+        const leoVer: string = w_leojsPackageJson.version;
 
         // n1, n2, n3, junk1, junk2 = sys.version_info
         const n1: string = process.version;
@@ -930,11 +935,11 @@ export class LeoApp {
         */
 
         // branch, junk_commit = g.gitInfo()
-        const branch = leojsPackageJson.gitBranch;
+        const branch = w_leojsPackageJson.gitBranch;
 
         // author, commit, date = g.getGitVersion()
-        const commit = leojsPackageJson.gitCommit;
-        const date = leojsPackageJson.gitDate;
+        const commit = w_leojsPackageJson.gitCommit;
+        const date = w_leojsPackageJson.gitDate;
 
         // Compute g.app.signon.
         const signon: string[] = [`LeoJS ${leoVer}`];
@@ -949,7 +954,7 @@ export class LeoApp {
         }
         app.signon = signon.join('');
         // Compute g.app.signon1.
-        app.signon1 = `Node.js ${n1}${guiVersion}\n${sysVersion}`
+        app.signon1 = `Node.js ${n1}${guiVersion}\n${sysVersion}`;
     }
 
     /**

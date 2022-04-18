@@ -1546,6 +1546,7 @@ public static LEO_COMMANDS = {
  */
 export class Constants {
 
+    public static PUBLISHER: string = "boltex";
     @others
 }
 </t>
@@ -5320,13 +5321,13 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 }
 </t>
 <t tx="felix.20201214205159.79">"vscode:prepublish": "npm run package",
-"compile": "webpack",
-"compile-web": "webpack",
+"compile": "node prepare.js &amp;&amp; webpack &amp;&amp; node cleanup.js",
+"compile-web": "node prepare.js &amp;&amp; webpack &amp;&amp; node cleanup.js",
 "open-in-browser": "vscode-test-web --browserType=chromium  --extensionDevelopmentPath=.",
-"watch": "webpack --watch",
-"watch-web": "webpack --watch",
-"package": "webpack --mode production --devtool hidden-source-map",
-"package-web": "webpack --mode production --devtool hidden-source-map",
+"watch": "node prepare.js &amp;&amp; webpack --watch &amp;&amp; node cleanup.js",
+"watch-web": "node prepare.js &amp;&amp; webpack --watch &amp;&amp; node cleanup.js",
+"package": "node prepare.js &amp;&amp; webpack --mode production --devtool hidden-source-map &amp;&amp; node cleanup.js",
+"package-web": "node prepare.js &amp;&amp; webpack --mode production --devtool hidden-source-map &amp;&amp; node cleanup.js",
 "compile-tests": "tsc -p . --outDir out",
 "watch-tests": "tsc -p . -w --outDir out",
 "pretest": "npm run compile-tests &amp;&amp; npm run compile &amp;&amp; npm run lint",
@@ -6501,8 +6502,8 @@ public buildId(p_position: Position, p_collapsed: number): string {
       "default": "",
       "type": "string",
       "description": "Used to uniquely identify nodes - Defaults to the OS/Environment user name",
-      "pattern":"(^$|^[a-zA-Z0-9]*$)",
-      "patternErrorMessage" : "Your id should contain only letters and numbers, and must contain at least 3 characters."
+      "pattern": "(^$|^[a-zA-Z0-9]*$)",
+      "patternErrorMessage": "Your id should contain only letters and numbers, and must contain at least 3 characters."
     }
   }
 },

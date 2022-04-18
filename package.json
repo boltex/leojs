@@ -221,8 +221,8 @@
           "default": "",
           "type": "string",
           "description": "Used to uniquely identify nodes - Defaults to the OS/Environment user name",
-          "pattern":"(^$|^[a-zA-Z0-9]*$)",
-          "patternErrorMessage" : "Your id should contain only letters and numbers, and must contain at least 3 characters."
+          "pattern": "(^$|^[a-zA-Z0-9]*$)",
+          "patternErrorMessage": "Your id should contain only letters and numbers, and must contain at least 3 characters."
         }
       }
     },
@@ -2327,13 +2327,13 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
-    "compile": "webpack",
-    "compile-web": "webpack",
+    "compile": "node prepare.js && webpack && node cleanup.js",
+    "compile-web": "node prepare.js && webpack && node cleanup.js",
     "open-in-browser": "vscode-test-web --browserType=chromium  --extensionDevelopmentPath=.",
-    "watch": "webpack --watch",
-    "watch-web": "webpack --watch",
-    "package": "webpack --mode production --devtool hidden-source-map",
-    "package-web": "webpack --mode production --devtool hidden-source-map",
+    "watch": "node prepare.js && webpack --watch && node cleanup.js",
+    "watch-web": "node prepare.js && webpack --watch && node cleanup.js",
+    "package": "node prepare.js && webpack --mode production --devtool hidden-source-map && node cleanup.js",
+    "package-web": "node prepare.js && webpack --mode production --devtool hidden-source-map && node cleanup.js",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",

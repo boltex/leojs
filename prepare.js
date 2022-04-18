@@ -1,4 +1,4 @@
-let gitCommitHash = require('child_process')
+let gitCommit = require('child_process')
     .execSync('git rev-parse --short HEAD')
     .toString()
     .trim();
@@ -26,7 +26,7 @@ const fs = require('fs');
 const fileName = './package.json';
 const file = require(fileName);
 
-file.gitCommitHash = gitCommitHash;
+file.gitCommit = gitCommit;
 file.gitBranch = gitBranch;
 file.gitDate = gitDate;
 
@@ -36,4 +36,4 @@ fs.writeFileSync(fileName, JSON.stringify(file, null, 2), function writeJSON(err
     console.log('writing to ' + fileName);
 });
 
-console.log("Replaced git info in package.json");
+console.log("Added git info in package.json");

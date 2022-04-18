@@ -5,6 +5,7 @@ import * as vscode from "vscode";
  */
 export class Constants {
 
+    public static PUBLISHER: string = "boltex";
     public static NAME: string = "leojs";
 
     public static TREEVIEW_ID: string = "leojsOutline";
