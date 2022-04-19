@@ -1938,8 +1938,8 @@ public refreshTreeRoot(): void {
     const w_children: LeoDocumentNode[] = [];
     // if called with element, or not ready, give back empty array as there won't be any children
     if (this._leoStates.fileOpenedReady &amp;&amp; !element) {
-        g.app.commanders().forEach(p_doc =&gt; {
-            w_children.push(new LeoDocumentNode(p_doc, this._leoUI));
+        g.app.commanders().forEach(p_commander =&gt; {
+            w_children.push(new LeoDocumentNode(p_commander, this._leoUI));
         });
     }
     return w_children; // Defaults to an empty list of children
@@ -1961,25 +1961,25 @@ export class LeoDocumentNode extends vscode.TreeItem {
     public contextValue: string;
 
     constructor(
-        public documentEntry: Commands,
-        private _leoJs: LeoUI
+        public commander: Commands,
+        private _leoUI: LeoUI
     ) {
-        super(documentEntry.fileName());
+        super(commander.fileName());
         // Setup this instance
-        const w_isNamed: boolean = !!this.documentEntry.fileName();
+        const w_isNamed: boolean = !!this.commander.fileName();
         const commanders: Commands[] = g.app.commanders();
-        this.label = w_isNamed ? utils.getFileFromPath(this.documentEntry.fileName()) : Constants.UNTITLED_FILE_NAME;
-        this.tooltip = w_isNamed ? this.documentEntry.fileName() : Constants.UNTITLED_FILE_NAME;
+        this.label = w_isNamed ? utils.getFileFromPath(this.commander.fileName()) : Constants.UNTITLED_FILE_NAME;
+        this.tooltip = w_isNamed ? this.commander.fileName() : Constants.UNTITLED_FILE_NAME;
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
-            arguments: [commanders.indexOf(this.documentEntry)]
+            arguments: [commanders.indexOf(this.commander)]
         };
         // If this was created as a selected node, make sure it's selected as we may have opened/closed document
         // tslint:disable-next-line: strict-comparisons
 
-        if (this.documentEntry === commanders[this._leoJs.commanderIndex]) {
-            this._leoJs.setDocumentSelection(this);
+        if (this.commander === commanders[this._leoUI.commanderIndex]) {
+            this._leoUI.setDocumentSelection(this);
             this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
         } else {
             this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_UNTITLED;
@@ -1992,14 +1992,14 @@ export class LeoDocumentNode extends vscode.TreeItem {
 </t>
 <t tx="felix.20201214151434.3">// @ts-ignore
 public get iconPath(): Icon {
-    return this._leoJs.documentIcons[this.documentEntry.changed ? 1 : 0];
+    return this._leoUI.documentIcons[this.commander.changed ? 1 : 0];
 }
 
 </t>
 <t tx="felix.20201214151434.4">// @ts-ignore
 public get id(): string {
     // Add prefix and suffix salt to numeric index to prevent accidental duplicates
-    return "p" + g.app.commanders().indexOf(this.documentEntry) + "s" + this.documentEntry.fileName();
+    return "p" + g.app.commanders().indexOf(this.commander) + "s" + this.commander.fileName();
 }
 
 </t>
@@ -2757,8 +2757,8 @@ private _refreshDocumentsPane(): void {
  * @param p_documentNode Document node instance in the Leo document view to be the 'selected' one.
  */
 public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
-    this._currentDocumentChanged = p_documentNode.documentEntry.changed;
-    this.leoStates.leoOpenedFileName = p_documentNode.documentEntry.fileName();
+    this._currentDocumentChanged = p_documentNode.commander.changed;
+    this.leoStates.leoOpenedFileName = p_documentNode.commander.fileName();
     setTimeout(() =&gt; {
         if (this._lastLeoDocuments &amp;&amp; this._lastLeoDocuments.selection.length &amp;&amp; this._lastLeoDocuments.selection[0] === p_documentNode) {
             // console.log('setDocumentSelection: already selected!');
@@ -3194,7 +3194,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "6e9ea84",
+  "gitBranch": "devel",
+  "gitDate": "2022-04-18 00:17:29 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{

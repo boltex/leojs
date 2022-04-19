@@ -268,8 +268,10 @@ export class Commands {
         c.fileCommands = null; // type:ignore
 
         // Define the subcommanders.
-        this.chapterController = {}; // TODO self.chapterController = leoChapters.ChapterController(c)
-        // this.shadowController       = leoShadow.ShadowController(c)
+
+        // this.chapterController // TODO: = leoChapters.ChapterController(c);
+        // this.shadowController // TODO: = leoShadow.ShadowController(c); 
+
         this.fileCommands = new FileCommands(c);
         this.findCommands = new LeoFind(c);
         this.atFileCommands = new AtFile(c);
@@ -290,7 +292,7 @@ export class Commands {
         c.hiddenRootNode.children = [];
         p._linkAsRoot();
         c.createCommandNames();
-
+        g.app.commandersList.push(c);
     }
 
     //@+node:felix.20210223220814.10: *4* c.initSettings

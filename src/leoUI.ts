@@ -684,8 +684,8 @@ export class LeoUI {
      * @param p_documentNode Document node instance in the Leo document view to be the 'selected' one.
      */
     public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
-        this._currentDocumentChanged = p_documentNode.documentEntry.changed;
-        this.leoStates.leoOpenedFileName = p_documentNode.documentEntry.fileName();
+        this._currentDocumentChanged = p_documentNode.commander.changed;
+        this.leoStates.leoOpenedFileName = p_documentNode.commander.fileName();
         setTimeout(() => {
             if (this._lastLeoDocuments && this._lastLeoDocuments.selection.length && this._lastLeoDocuments.selection[0] === p_documentNode) {
                 // console.log('setDocumentSelection: already selected!');

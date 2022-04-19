@@ -18,7 +18,7 @@ import { Position, VNode } from './leoNodes';
 /*
     import binascii
     import codecs
-    from functools import reduce
+    from functools import reduce/
     try:
         import gc
     except ImportError:
@@ -694,7 +694,7 @@ export class TypedDict {
 //@+node:felix.20211104210703.1: ** g.Debugging, GC, Stats & Timing
 //@+node:felix.20211205233429.1: *3* g._assert
 /**
- * * A safer alternative to a bare assert.
+ * A safer alternative to a bare assert.
  */
 export function _assert(condition: any, show_callers: boolean = true): boolean {
     if (unitTesting) {
@@ -2244,7 +2244,11 @@ export function doHook(tag: string, keywords?: { [key: string]: any }): any {
     */
     if (!app.config.use_plugins) {
         if (['open0', 'start1'].includes(tag)) {
-            warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.");
+
+            console.log("TODO: doHook called with tag:" + tag);
+            console.log("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.");
+            // warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.");
+
         }
         return undefined;
     }
@@ -3232,7 +3236,7 @@ export function os_path_dirname(p_path: string): string {
 /**
  * Return True if path exists.
  */
-export async function os_path_exists(p_path: string): Promise<boolean> {
+export async function os_path_exists(p_path?: string): Promise<boolean> {
 
     if (!p_path) {
         return false;
@@ -3439,7 +3443,7 @@ export function os_path_join(c: Commands | undefined, ...args: any[]): string {
 //     return path
 //@+node:felix.20211227182611.17: *3* g.os_path_normpath
 /**
- * * Normalize the path.
+ * Normalize the path.
  */
 export function os_path_normpath(p_path: string): string {
     if (!p_path) {
@@ -3461,19 +3465,32 @@ export function os_path_normpath(p_path: string): string {
 //     if g.isWindows and path:
 //         path = path.replace('\\', '/')
 //     return path
+
 //@+node:felix.20211227182611.19: *3* g.os_path_realpath
-// def os_path_realpath(path: str):
-//     """Return the canonical path of the specified filename, eliminating any
-//     symbolic links encountered in the path (if they are supported by the
-//     operating system).
-//     """
-//     if not path:
-//         return ''
-//     path = os.path.realpath(path)
-//     # os.path.normpath does the *reverse* of what we want.
-//     if g.isWindows:
-//         path = path.replace('\\', '/')
-//     return path
+/**
+ * Return the canonical path of the specified filename, eliminating any
+ * symbolic links encountered in the path (if they are supported by the
+ * operating system).
+ */
+export function os_path_realpath(p_path: string): string {
+
+    if (!p_path) {
+        return '';
+    }
+
+    // TODO !
+    console.log('Todo: better os_path_realpath!');
+
+    p_path = p_path; // fixme
+    // p_path = vscode.workspace.fs.realPath(p_path);
+    // os.path.normpath does the *reverse* of what we want.
+
+    if (isWindows) {
+        p_path = p_path.split('\\').join('/');
+    }
+    return p_path;
+}
+
 //@+node:felix.20211227182611.20: *3* g.os_path_split
 export function os_path_split(p_path: string): [string, string] {
 

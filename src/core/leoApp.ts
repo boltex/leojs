@@ -14,7 +14,7 @@ import * as path from 'path';
 import * as g from './leoGlobals';
 import * as utils from "../utils";
 import { LeoUI, NullGui } from '../leoUI';
-import { NodeIndices } from './leoNodes';
+import { NodeIndices, VNode, Position } from './leoNodes';
 import { Commands } from './leoCommands';
 import { FileCommands } from "./leoFileCommands";
 import { GlobalConfigManager } from "./leoConfig";
@@ -247,9 +247,9 @@ export class LeoApp {
     from leo.core import leoFrame
     from leo.core import leoGui
 
-    public nullGui = leoGui.NullGui()
-    public nullLog = leoFrame.NullLog()
     */
+    public nullGui = new NullGui();
+    // public nullLog = new NullLog();
 
     //@-<< LeoApp: global types >>
     //@+<< LeoApp: plugins and event handlers >>
@@ -1332,6 +1332,132 @@ export class LoadManager {
         return [settings_d, bindings_d];
     }
 
+    //@+node:felix.20220418170221.1: *4* LM.getPreviousSettings
+    /**
+     * Return the settings in effect for fn. Typically, this involves pre-reading fn.
+     */
+    public getPreviousSettings(fn?: string): PreviousSettings {
+
+        const lm = this;
+        const settingsName = `settings dict for ${g.shortFileName(fn)}`;
+        const shortcutsName = `shortcuts dict for ${g.shortFileName(fn)}`;
+        // A special case: settings in leoSettings.leo do *not* override
+        // the global settings, that is, settings in myLeoSettings.leo.
+        const isLeoSettings = fn && g.shortFileName(fn).toLowerCase() === 'leosettings.leo';
+        const exists = g.os_path_exists(fn);
+
+        let c: Commands;
+        let d1;
+        let d2;
+
+        // TODO: GET SETTINGS FROM VSCODE'S LEOJS SETTINGS
+        /* 
+        if (fn && exists && lm.isLeoFile(fn) && !isLeoSettings) {
+            // Open the file usinging a null gui.
+            try {
+                g.app.preReadFlag = true;
+                c = lm.openSettingsFile(fn);
+            }
+            catch (p_err) {
+                //
+            }
+            finally {
+                g.app.preReadFlag = false;
+            }
+            // Merge the settings from c into *copies* of the global dicts.
+
+            [d1, d2] = lm.computeLocalSettings(
+                c,
+                lm.globalSettingsDict,
+                lm.globalBindingsDict,
+                true
+            );
+
+            // d1 and d2 are copies.
+            d1.setName(settingsName);
+            d2.setName(shortcutsName);
+            return new PreviousSettings(d1, d2);
+        }
+        */
+
+        //
+        // The file does not exist, or is not valid.
+        // Get the settings from the globals settings dicts.
+        if (lm.globalSettingsDict && lm.globalBindingsDict) {  // #1766.
+            d1 = lm.globalSettingsDict.copy(settingsName);
+            d2 = lm.globalBindingsDict.copy(shortcutsName);
+        } else {
+            d1 = undefined;
+            d2 = undefined;
+        }
+        return new PreviousSettings(d1, d2);
+
+    }
+
+    //@+node:felix.20220418185142.1: *4* LM.openSettingsFile
+    /**
+     * Open a settings file with a null gui.  Return the commander.
+     *
+     * The caller must init the c.config object.
+     */
+    public openSettingsFile(fn: string): Promise<VNode | undefined> | undefined {
+
+        const lm = this;
+
+        if (!fn) {
+            return undefined;
+        }
+        /* 
+        const theFile = lm.openAnyLeoFile(fn);
+
+        if (!theFile) {
+            return undefined;  // Fix #843.
+        }
+         */
+        if (!(g.unitTesting || g.app.silentMode || g.app.batchMode)) {
+            // This occurs early in startup, so use the following.
+            const s = `reading settings in ${(fn)}`;
+            if (g.app.debug.includes('startup')) {
+                console.log(s);
+            }
+            g.es(s, 'blue');
+        }
+        // A useful trace.
+        // g.trace('%20s' % g.shortFileName(fn), g.callers(3))
+
+
+        // Changing g.app.gui here is a major hack.  It is necessary.
+        const oldGui = g.app.gui;
+        g.app.gui = g.app.nullGui;
+        const c = g.app.newCommander(fn);
+        const frame = c.frame;
+
+        // frame.log.enable(false);
+        // g.app.lockLog();
+
+        g.app.openingSettingsFile = true;
+
+        let ok: Promise<VNode | undefined> | undefined;
+        try {
+            ok = (c.fileCommands as FileCommands).openLeoFile(fn, false, true);
+            // closes theFile.
+        }
+        catch (p_err) {
+            //
+        }
+        finally {
+            g.app.openingSettingsFile = false
+        }
+
+        // g.app.unlockLog();
+        c.openDirectory = frame.openDirectory = g.os_path_dirname(fn);
+        g.app.gui = oldGui;
+
+
+        return ok;
+
+    }
+
     //@+node:felix.20220417222319.1: *4* LM.readGlobalSettingsFiles
     /**
      * Read leoSettings.leo and myLeoSettings.leo using a null gui.
@@ -1365,7 +1491,7 @@ export class LoadManager {
             // Merge the settings dicts from c's outline into
             // *new copies of* settings_d and bindings_d.
             settings_d, bindings_d = lm.computeLocalSettings(
-                c, settings_d, bindings_d, localFlag=False)
+                c, settings_d, bindings_d, localFlag=false)
         // Adjust the name.
         bindings_d.setName('lm.globalBindingsDict')
         lm.globalSettingsDict = settings_d
@@ -1529,6 +1655,7 @@ export class LoadManager {
         // Final inits...
         g.app.logInited = true;
         g.app.initComplete = true;
+
         // c.setLog();
         // c.redraw();
         // g.doHook("start2", c=c, p=c.p, fileName=c.fileName());
@@ -1700,8 +1827,10 @@ export class LoadManager {
             g.app.config = new GlobalConfigManager();
             g.app.nodeIndices = new NodeIndices(g.app.leoID);
             // g.app.sessionManager = leoSessions.SessionManager(); // ! HANDLED with vscode workspace recent files
+
+            // TODO: plugins system ? 
             // Complete the plugins class last.
-            g.app.pluginsController.finishCreate();
+            // g.app.pluginsController.finishCreate();
         });
 
 
@@ -1739,7 +1868,7 @@ export class LoadManager {
 
     }
 
-    //@+node:felix.20210120004121.31: *4* LM.loadLocalFile & helper
+    //@+node:felix.20210120004121.31: *4* LM.loadLocalFile & helpers
     public loadLocalFile(fn: string, gui: LeoUI | NullGui, old_c?: Commands): Commands {
         /*Completely read a file, creating the corresonding outline.
 
@@ -1756,6 +1885,12 @@ export class LoadManager {
         or open an empty outline.
         */
         const lm: LoadManager = this;
+
+        // #2489: If fn is empty, open an empty, untitled .leo file.
+        if (!fn) {
+            return lm.openEmptyLeoFile(gui as LeoUI, old_c);
+        }
+
         let c: Commands | undefined;
 
         // Step 0: Return if the file is already open.
@@ -1777,6 +1912,60 @@ export class LoadManager {
         c = lm.openFileByName(fn, gui, old_c, previousSettings)!;
         return c;
     }
+    //@+node:felix.20220418012120.1: *5* LM.openEmptyLeoFile
+    /**
+     * Open an empty, untitled, new Leo file.
+     */
+    public openEmptyLeoFile(gui: LeoUI, old_c?: Commands): Commands {
+
+        const lm = this;
+        // Disable the log.
+        // g.app.setLog(undefined);
+        // g.app.lockLog();
+
+        // Create the commander for the .leo  file.
+        const c: Commands = g.app.newCommander(
+            "",
+            gui,
+            lm.getPreviousSettings(undefined),
+        );
+        g.doHook('open0');
+
+        // Enable the log.
+        // g.app.unlockLog();
+        // c.frame.log.enable(true);
+
+        g.doHook("open1", { old_c: old_c, c: c, new_c: c, fileName: undefined });
+
+        // Init the frame.
+        // c.frame.setInitialWindowGeometry();
+        // c.frame.deiconify();
+        // c.frame.lift();
+        // c.frame.splitVerticalFlag, r1, r2 = c.frame.initialRatios();
+        // c.frame.resizePanesToRatio(r1, r2);
+
+        c.mFileName = "";
+        c.wrappedFileName = undefined;
+        // c.frame.title = c.computeWindowTitle(c.mFileName);
+        // c.frame.setTitle(c.frame.title);
+
+        // Late inits. Order matters.
+        if (c.config.getBool('use-chapters') && c.chapterController) {
+            c.chapterController.finishCreate();
+        }
+        c.clearChanged();
+        g.doHook("open2", { old_c: old_c, c: c, new_c: c, fileName: undefined });
+        g.doHook("new", { old_c: old_c, c: c, new_c: c });
+
+        // g.app.writeWaitingLog(c);
+        // c.setLog();
+
+        // lm.createMenu(c);
+        lm.finishOpen(c);
+
+        return c;
+    }
+
     //@+node:felix.20210120004121.32: *5* LM.openFileByName & helpers
     /**
      * Read the local file whose full path is fn using the given gui.
@@ -1800,10 +1989,10 @@ export class LoadManager {
         // For second read, the settings for the file are *exactly* previousSettings.
         const c: Commands = g.app.newCommander(fn, gui, previousSettings);
         // Open the file, if possible.
-        // g.doHook('open0');
+        g.doHook('open0');
 
         /*
-        theFile = lm.openLeoOrZipFile(fn);
+        theFile = lm.openAnyLeoFile(fn);
         if isinstance(theFile, sqlite3.Connection):
             // this commander is associated with sqlite db
             c.sqlite_connection = theFile
@@ -1814,34 +2003,95 @@ export class LoadManager {
         // c.frame.log.enable(true);
 
         // Phase 2: Create the outline.
-        // g.doHook("open1", old_c=None, c=c, new_c=c, fileName=fn)
-        /*
-        if theFile:
-            readAtFileNodesFlag = bool(previousSettings)
+        g.doHook("open1", { old_c: undefined, c: c, new_c: c, fileName: fn });
+
+        // TODO: 
+        if (fn) {
+            const readAtFileNodesFlag = !!(previousSettings);
             // The log is not set properly here.
-            ok = lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag, theFile) // c.fileCommands.openLeoFile(theFile)
-                // Call c.fileCommands.openLeoFile to read the .leo file.
-            if not ok: return None
-        else:
+            const ok = lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag); // c.fileCommands.openLeoFile(theFile)
+            // Call c.fileCommands.openLeoFile to read the .leo file.
+            if (!ok) {
+                return undefined;
+            }
+        } else {
             // Create a wrapper .leo file if:
             // a) fn is a .leo file that does not exist or
             // b) fn is an external file, existing or not.
-            lm.initWrapperLeoFile(c, fn)
+            lm.initWrapperLeoFile(c, fn);
+        }
 
-        */
-        // g.doHook("open2", old_c=None, c=c, new_c=c, fileName=fn)
+
+        g.doHook("open2", { old_c: undefined, c: c, new_c: c, fileName: fn });
 
         // Phase 3: Complete the initialization.
         // g.app.writeWaitingLog(c)
         // c.setLog()
         // lm.createMenu(c, fn)
-        // lm.finishOpen(c); // c.initAfterLoad()
+        lm.finishOpen(c); // c.initAfterLoad()
 
-        // TODO : OPEN LEO FILE
-        const ok: boolean = true; // c.fileCommands.openLeoFile(fn);
         return c;
     }
 
+    //@+node:felix.20210124192005.1: *6* LM.findOpenFile
+    /**
+     * Returns the commander of already opened Leo file
+     * returns undefined otherwise
+     */
+    public findOpenFile(fn: string): Commands | undefined {
+        // TODO: check in opened commanders array (g.app.windowList or other as needed)
+
+        function munge(name: string): string {
+            return g.os_path_normpath(name || '').toLowerCase();
+        }
+
+        let index = 0;
+        for (let c of g.app.commandersList) {
+
+            if (g.os_path_realpath(munge(fn)) === g.os_path_realpath(munge(c.mFileName))) {
+
+                (g.app.gui as LeoUI).commanderIndex = index;
+                (g.app.gui as LeoUI).refreshDocumentsPane();
+
+                c.outerUpdate();
+                return c;
+            }
+
+            index++;
+        }
+        return undefined;
+    }
+
+    //@+node:felix.20220418013716.1: *6* LM.finishOpen
+    public finishOpen(c: Commands): void {
+
+        // lm = self
+        const k = c.k;
+        // console.assert(k);
+
+        // New in Leo 4.6: provide an official way for very late initialization.
+        // c.frame.tree.initAfterLoad();
+        // c.initAfterLoad();
+
+        // chapterController.finishCreate must be called after the first real redraw
+        // because it requires a valid value for c.rootPosition().
+        if (c.chapterController) {
+            c.chapterController.finishCreate();
+        }
+        if (k) {
+            k.setDefaultInputState();
+        }
+
+        // c.initialFocusHelper();
+
+        if (k) {
+            k.showStateAndMode();
+        }
+        // c.frame.initCompleteHint();
+
+        c.outerUpdate();  // #181: Honor focus requests.
+
+    }
     //@+node:felix.20210222013344.1: *6* LM.initWrapperLeoFile
     /**
      * Create an empty file if the external fn is empty.
@@ -1861,45 +2111,58 @@ export class LoadManager {
         // frame.splitVerticalFlag, r1, r2 = frame.initialRatios()
         // frame.resizePanesToRatio(r1, r2)
 
-        /*
-        if not g.os_path_exists(fn):
-            p = c.rootPosition()
+        let p: Position | undefined;
+
+        if (!g.os_path_exists(fn)) {
+            p = c.rootPosition()!;
             // Create an empty @edit node unless fn is an .leo file.
             // Fix #1070: Use "newHeadline", not fn.
-            p.h = "newHeadline" if fn.endswith('.leo') else f"@edit {fn}"
-            c.selectPosition(p)
-        elif c.looksLikeDerivedFile(fn):
-            // 2011/10/10: Create an @file node.
-            p = c.importCommands.importDerivedFiles(parent=c.rootPosition(),
-                paths=[fn], command=None)  # Not undoable.
-            if p and p.hasBack():
-                p.back().doDelete()
-                p = c.rootPosition()
-            if not p: return None
-        else:
-            // Create an @<file> node.
-            p = c.rootPosition()
-            if p:
-                load_type = self.options['load_type']
-                p.setHeadString(f"{load_type} {fn}")
-                c.refreshFromDisk()
-                c.selectPosition(p)
+            p.h = fn.endsWith('.leo') ? "newHeadline" : `@edit ${fn}`;
+            c.selectPosition(p);
 
+            // TODO: importCommands and importDerivedFiles method
+
+            /* 
+    
+            }else if( c.looksLikeDerivedFile(fn)){
+                // 2011/10/10: Create an @file node.
+                p = c.importCommands.importDerivedFiles(parent=c.rootPosition(),
+                    paths=[fn], command=undefined);  // Not undoable.
+                if p && p.hasBack()
+                    p.back().doDelete();
+                    p = c.rootPosition();
+                if !p
+                    return undefined;
+    
+            */
+
+        } else {
+            // Create an @<file> node.
+            p = c.rootPosition();
+            if (p && p.__bool__()) {
+                const load_type = this.options['load_type'];
+                p.setHeadString(`${load_type} ${fn}`);
+                c.refreshFromDisk();
+                c.selectPosition(p);
+            }
+        }
         // Fix critical bug 1184855: data loss with command line 'leo somefile.ext'
         // Fix smallish bug 1226816 Command line "leo xxx.leo" creates file xxx.leo.leo.
-        c.mFileName = fn if fn.endswith('.leo') else f"{fn}.leo"
-        c.wrappedFileName = fn
-        c.frame.title = c.computeWindowTitle(c.mFileName)
-        c.frame.setTitle(c.frame.title)
+        c.mFileName = fn.endsWith('.leo') ? fn : `${fn}.leo`;
+        c.wrappedFileName = fn;
+        // c.frame.title = c.computeWindowTitle(c.mFileName)
+        // c.frame.setTitle(c.frame.title)
         // chapterController.finishCreate must be called after the first real redraw
         // because it requires a valid value for c.rootPosition().
-        if c.config.getBool('use-chapters') and c.chapterController:
-            c.chapterController.finishCreate()
-        frame.c.clearChanged()
-            // Mark the outline clean.
-            // This makes it easy to open non-Leo files for quick study.
-        return c;
-        */
+
+        if (c.config.getBool('use-chapters') && c.chapterController) {
+            c.chapterController.finishCreate();
+        }
+
+        // frame.c.clearChanged()
+        // Mark the outline clean.
+        // This makes it easy to open non-Leo files for quick study.
+
         return c;
     }
 
@@ -1978,57 +2241,40 @@ export class LoadManager {
         }
         */
     }
-    //@+node:felix.20210222013445.1: *6* LM.openLeoOrZipFile
+    //@+node:felix.20220418230225.1: *6* LM.readOpenedLeoFile
     /**
-     * @deprecated Now using async vscode.workspace.fs functions
-     * @param fn
-     * @returns number: file descriptor
+     * Call c.fileCommands.openLeoFile to open some kind of Leo file.
+     *
+     * the_file: An open file, which is a StringIO file for zipped files.
+     *
+     * Note: g.app.log is not inited here.
      */
-    public openLeoOrZipFile(fn: string): any {
-        const lm: LoadManager = this;
-        if (fn.endsWith('.db')) {
-            // return sqlite3.connect(fn)
-            return undefined;
+    public readOpenedLeoFile(c: Commands, fn: string, readAtFileNodesFlag: boolean): Promise<VNode | undefined> {
+
+        // New in Leo 4.10: The open1 event does not allow an override of the init logic.
+        // assert theFile
+
+        // Read and close the file.
+        const ok: Promise<VNode | undefined> = (c.fileCommands as FileCommands).openLeoFile(fn, readAtFileNodesFlag);
+        ok.then((p_result: VNode | undefined) => {
+            if (p_result) {
+                if (!c.openDirectory) {
+                    const theDir = g.os_path_finalize(g.os_path_dirname(fn));  // 1341
+                    c.openDirectory = c.frame.openDirectory = theDir;
+                }
+            }
+            return p_result;
+        });
+
+        // unused in leojs
+        /* 
+        else{
+            // #970: Never close Leo here.
+            g.app.closeLeoWindow(c.frame, false);
         }
-        let theFile: any;
-        // zipped = lm.isZippedFile(fn)
-
-        // TODO
-        // if(!!fn && fn.endsWith('.leo') && g.os_path_exists(fn)){
-        // theFile = lm.openLeoFile(fn);
-        // }else{
-        // theFile = undefined;
-        // }
-        return theFile;
-    }
-
-    //@+node:felix.20210124192005.1: *4* LM.findOpenFile
-    /**
-     * Returns the commander of already opened Leo file
-     * returns undefined otherwise
-     */
-    public findOpenFile(fn: string): Commands | undefined {
-        // TODO: check in opened commanders array (g.app.windowList or other as needed)
-        /*
-        def munge(name):
-            return g.os_path_normpath(name or '').lower()
-
-        for frame in g.app.windowList:
-            c = frame.c
-            if g.os_path_realpath(munge(fn)) == g.os_path_realpath(munge(c.mFileName)):
-                # Don't call frame.bringToFront(), it breaks --minimize
-                c.setLog()
-                # Selecting the new tab ensures focus is set.
-                master = getattr(frame.top, 'leo_master', None)
-                if master:  # master is a TabbedTopLevel.
-                    master.select(frame.c)
-                c.outerUpdate()
-                return c
-        return None
         */
-        return undefined;
+        return ok;
     }
-
     //@+node:felix.20220109232545.1: *3* LM.revertCommander
     /**
      * Revert c to the previously saved contents.
@@ -2050,6 +2296,33 @@ export class LoadManager {
         }
     }
     //@-others
+}
+//@+node:felix.20220418172358.1: ** class PreviousSettings
+/**
+ * A class holding the settings and shortcuts dictionaries
+ * that are computed in the first pass when loading local
+ * files and passed to the second pass.
+ */
+export class PreviousSettings {
+    public settingsDict: g.TypedDict | undefined;
+    public shortcutsDict: g.TypedDict | undefined;
+
+    constructor(settingsDict: g.TypedDict | undefined, shortcutsDict: g.TypedDict | undefined) {
+        if (!shortcutsDict || !settingsDict) {  // #1766: unit tests.
+            const lm = g.app.loadManager!;
+            [settingsDict, shortcutsDict] = lm.createDefaultSettingsDicts();
+        }
+        this.settingsDict = settingsDict;
+        this.shortcutsDict = shortcutsDict;
+    }
+
+    public toString(): string {
+        return (
+            `<PreviousSettings\n` +
+            `${this.settingsDict}\n` +
+            `${this.shortcutsDict}\n>`);
+    }
+
 }
 //@-others
 //@@language typescript
