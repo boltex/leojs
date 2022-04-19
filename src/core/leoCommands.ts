@@ -2671,6 +2671,9 @@ export class Commands {
             }
             c.redraw();
         }
+
+
+
         // ? useful ?
         // # Delayed focus requests will always be useful.
         // if c.requestedFocusWidget:

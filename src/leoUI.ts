@@ -1359,43 +1359,6 @@ export class LeoUI {
     }
 
     /**
-     * * Creates a new untitled Leo document
-     * * If not shown already, it also shows the outline, body and log panes along with leaving focus in the outline
-     * @returns A promise that resolves with a textEditor of the new file
-     */
-    public newLeoFile(): Thenable<unknown> {
-
-        this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
-
-        let w_c = g.app.newCommander("", this);
-
-        // Equivalent to leoBridge 'createFrame' method
-        let w_v = new VNode(w_c);
-        let w_p = new Position(w_v);
-        w_v.initHeadString("NewHeadline");
-
-        // #1631: Initialize here, not in p._linkAsRoot.
-        w_c.hiddenRootNode.children = [];
-
-        // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
-        w_p._linkAsRoot();
-
-        g.app.commanders().push(w_c);
-
-        // select last, that was just created
-        this.commanderIndex = g.app.commanders().length - 1;
-
-        const w_fakeOpenedFileInfo: any = undefined;
-        this._setupOpenedLeoDocument(w_fakeOpenedFileInfo);
-
-        this.launchRefresh();
-        // if created
-        return Promise.resolve(true);
-
-        // return Promise.resolve(undefined); // if cancelled
-    }
-
-    /**
      * * Shows an 'Open Leo File' dialog window and opens the chosen file
      * * If not shown already, it also shows the outline, body and log panes along with leaving focus in the outline
      * @param p_leoFileUri optional uri for specifying a file, if missing, a dialog will open

@@ -14,7 +14,6 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
     const U = undefined;
     const CMD = Constants.COMMANDS;
     const LEOCMD = Constants.LEO_COMMANDS;
-    const CTX = Constants.CONTEXT_FLAGS;
 
     const NO_REFRESH: ReqRefresh = {};
     const REFRESH_NODE_BODY: ReqRefresh = {
@@ -31,13 +30,20 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         body: true,
         states: true
     };
+    const REFRESH_ALL: ReqRefresh = {
+        tree: true,
+        body: true,
+        states: true,
+        documents: true,
+        buttons: true
+    };
 
     const w_commands: [string, (...args: any[]) => any][] = [
 
         // ! REMOVE TESTS ENTRIES FROM PACKAGE.JSON FOR MASTER BRANCH RELEASES !
         ["leojs.test", () => p_leoUI.test()], // Test function useful when debugging
 
-        [CMD.EXECUTE, () => p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, U, REFRESH_TREE_BODY, false)],
+        [CMD.EXECUTE, () => p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, U, REFRESH_ALL, false)],
 
         [CMD.MINIBUFFER, () => p_leoUI.minibuffer()], // Is referenced in package.json
         [CMD.SET_LEO_ID, () => p_leoUI.setLeoIDCommand()],
@@ -45,7 +51,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.CLICK_BUTTON, (p_node: LeoButtonNode) => p_leoUI.clickAtButton(p_node)], // Not referenced in package.json
         [CMD.REMOVE_BUTTON, (p_node: LeoButtonNode) => p_leoUI.removeAtButton(p_node)],
         [CMD.CLOSE_FILE, () => p_leoUI.closeLeoFile()],
-        [CMD.NEW_FILE, () => p_leoUI.newLeoFile()],
+        [CMD.NEW_FILE, () => p_leoUI.command(LEOCMD.NEW, U, REFRESH_ALL, false)],
 
         [CMD.OPEN_FILE, (p_uri?: vscode.Uri) => p_leoUI.openLeoFile(p_uri)],
 

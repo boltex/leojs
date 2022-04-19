@@ -10,7 +10,7 @@ import { StackEntry, Position, VNode } from "../core/leoNodes";
 import { FastRead, FileCommands } from "../core/leoFileCommands";
 import { Commands, HoistStackEntry } from "../core/leoCommands";
 import { Bead, Undoer } from '../core/leoUndo';
-import { LoadManager } from "../core/leoApp";
+import { LoadManager, PreviousSettings } from "../core/leoApp";
 import { AtFile } from '../core/leoAtFile';
 
 //@+others
@@ -303,55 +303,51 @@ export class CommanderFileCommands {
     )
     public new(this: Commands, gui: any): Commands {
 
-        console.log('TODO : NEW');
-
-        // TODO
-        const old_c: Commands = this;
-        const c: Commands = g.app.newCommander("", g.app.gui!);
-        return c;
-
-        /*
-        t1 = time.process_time()
-        from leo.core import leoApp
-        lm = g.app.loadManager
-        old_c = self
+        // t1 = time.process_time()
+        // from leo.core import leoApp
+        const lm = g.app.loadManager!;
+        const old_c = this;
         // Clean out the update queue so it won't interfere with the new window.
-        self.outerUpdate()
+        this.outerUpdate()
         // Supress redraws until later.
-        g.app.disable_redraw = True
+        g.app.disable_redraw = true;
         // Send all log messages to the new frame.
-        g.app.setLog(None)
-        g.app.lockLog()
+        // g.app.setLog(None)
+        // g.app.lockLog()
+
         // Retain all previous settings. Very important for theme code.
-        t2 = time.process_time()
-        c = g.app.newCommander(
-            fileName=None,
-            gui=gui,
-            previousSettings=leoApp.PreviousSettings(
-                settingsDict=lm.globalSettingsDict,
-                shortcutsDict=lm.globalBindingsDict,
-            ))
-        t3 = time.process_time()
-        frame = c.frame
-        g.app.unlockLog()
-        if not old_c:
-            frame.setInitialWindowGeometry()
+        // t2 = time.process_time()
+
+        const c = g.app.newCommander(
+            '',
+            gui,
+            new PreviousSettings(
+                lm.globalSettingsDict,
+                lm.globalBindingsDict,
+            ));
+
+        // t3 = time.process_time()
+        // frame = c.frame
+        // g.app.unlockLog()
+        // if not old_c:
+        //   frame.setInitialWindowGeometry()
         // #1643: This doesn't work.
-            // g.app.restoreWindowState(c)
-        frame.deiconify()
-        frame.lift()
-        frame.resizePanesToRatio(frame.ratio, frame.secondary_ratio)
-            // Resize the _new_ frame.
-        c.frame.createFirstTreeNode()
-        lm.createMenu(c)
-        lm.finishOpen(c)
-        g.app.writeWaitingLog(c)
-        g.doHook("new", old_c=old_c, c=c, new_c=c)
-        c.setLog()
-        c.clearChanged()  // Fix #387: Clear all dirty bits.
-        g.app.disable_redraw = False
-        c.redraw()
-        t4 = time.process_time()
+        // g.app.restoreWindowState(c)
+        // frame.deiconify()
+        // frame.lift()
+        // frame.resizePanesToRatio(frame.ratio, frame.secondary_ratio)
+        // Resize the _new_ frame.
+        // c.frame.createFirstTreeNode()
+        // lm.createMenu(c);
+        lm.finishOpen(c);
+        //g.app.writeWaitingLog(c);
+        g.doHook("new", { old_c: old_c, c: c, new_c: c });
+        // c.setLog();
+        c.clearChanged();  // Fix #387: Clear all dirty bits.
+        g.app.disable_redraw = false;
+        c.redraw();
+        // t4 = time.process_time()
+        /* 
         if 'speed' in g.app.debug:
             g.trace()
             print(
@@ -360,8 +356,9 @@ export class CommanderFileCommands {
                 f"    3: {t4-t3:5.2f}\n"  // 0.17 sec: Everything else.
                 f"total: {t4-t1:5.2f}"
             )
-        return c  // For unit tests and scripts.
         */
+        return c;  // For unit tests and scripts.
+
     }
     //@+node:felix.20220105210716.10: *4* c_file.open_outline
     @commander_command(

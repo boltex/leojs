@@ -455,6 +455,7 @@ export class Constants {
     public static LEO_COMMANDS = {
 
         // * File Commands
+        NEW: 'new',
         WRITE_AT_FILE_NODES: 'write-at-file-nodes',
         WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
 

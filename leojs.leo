@@ -167,7 +167,6 @@
 </v>
 <v t="felix.20201214194144.8"><vh>Leo Documents</vh>
 <v t="felix.20201214211830.1"><vh>closeLeoFile</vh></v>
-<v t="felix.20201214211831.1"><vh>newLeoFile</vh></v>
 <v t="felix.20201214211832.1"><vh>openLeoFile</vh></v>
 <v t="felix.20201214211834.1"><vh>showRecentLeoFiles</vh></v>
 <v t="felix.20201214211835.1"><vh>saveAsLeoFile</vh></v>
@@ -1205,7 +1204,7 @@ public refreshTreeRoot(): void {
 </t>
 <t tx="felix.20201214150149.2">@others
 </t>
-<t tx="felix.20201214150149.3">[CMD.EXECUTE, () =&gt; p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, U, REFRESH_TREE_BODY, false)],
+<t tx="felix.20201214150149.3">[CMD.EXECUTE, () =&gt; p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, U, REFRESH_ALL, false)],
 
 [CMD.MINIBUFFER, () =&gt; p_leoUI.minibuffer()], // Is referenced in package.json
 [CMD.SET_LEO_ID, () =&gt; p_leoUI.setLeoIDCommand()],
@@ -1214,7 +1213,7 @@ public refreshTreeRoot(): void {
 [CMD.REMOVE_BUTTON, (p_node: LeoButtonNode) =&gt; p_leoUI.removeAtButton(p_node)],
 </t>
 <t tx="felix.20201214150149.4">[CMD.CLOSE_FILE, () =&gt; p_leoUI.closeLeoFile()],
-[CMD.NEW_FILE, () =&gt; p_leoUI.newLeoFile()],
+[CMD.NEW_FILE, () =&gt; p_leoUI.command(LEOCMD.NEW, U, REFRESH_ALL, false)],
 
 [CMD.OPEN_FILE, (p_uri?: vscode.Uri) =&gt; p_leoUI.openLeoFile(p_uri)],
 
@@ -1457,6 +1456,7 @@ public static COMMANDS = {
 public static LEO_COMMANDS = {
 
     // * File Commands
+    NEW: 'new',
     WRITE_AT_FILE_NODES: 'write-at-file-nodes',
     WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
 
@@ -1912,6 +1912,8 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider&lt;LeoDocum
 
     readonly onDidChangeTreeData: vscode.Event&lt;LeoDocumentNode | undefined&gt; = this._onDidChangeTreeData.event;
 
+    // private _id: number = 0;
+
     constructor(
         private _leoStates: LeoStates,
         private _leoUI: LeoUI,
@@ -1939,8 +1941,13 @@ public refreshTreeRoot(): void {
     // if called with element, or not ready, give back empty array as there won't be any children
     if (this._leoStates.fileOpenedReady &amp;&amp; !element) {
         g.app.commanders().forEach(p_commander =&gt; {
-            w_children.push(new LeoDocumentNode(p_commander, this._leoUI));
+            w_children.push(new LeoDocumentNode(
+                p_commander,
+                this._leoUI,
+                // this._id++
+            ));
         });
+
     }
     return w_children; // Defaults to an empty list of children
 }
@@ -1962,7 +1969,8 @@ export class LeoDocumentNode extends vscode.TreeItem {
 
     constructor(
         public commander: Commands,
-        private _leoUI: LeoUI
+        private _leoUI: LeoUI,
+        // private _id: number
     ) {
         super(commander.fileName());
         // Setup this instance
@@ -1999,6 +2007,7 @@ public get iconPath(): Icon {
 <t tx="felix.20201214151434.4">// @ts-ignore
 public get id(): string {
     // Add prefix and suffix salt to numeric index to prevent accidental duplicates
+    // return "p" + this._id + "i" + g.app.commanders().indexOf(this.commander) + "s" + this.commander.fileName();
     return "p" + g.app.commanders().indexOf(this.commander) + "s" + this.commander.fileName();
 }
 
@@ -5595,44 +5604,6 @@ public closeLeoFile(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211831.1">/**
- * * Creates a new untitled Leo document
- * * If not shown already, it also shows the outline, body and log panes along with leaving focus in the outline
- * @returns A promise that resolves with a textEditor of the new file
- */
-public newLeoFile(): Thenable&lt;unknown&gt; {
-
-    this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
-
-    let w_c = g.app.newCommander("", this);
-
-    // Equivalent to leoBridge 'createFrame' method
-    let w_v = new VNode(w_c);
-    let w_p = new Position(w_v);
-    w_v.initHeadString("NewHeadline");
-
-    // #1631: Initialize here, not in p._linkAsRoot.
-    w_c.hiddenRootNode.children = [];
-
-    // New in Leo 4.5: p.moveToRoot would be wrong: the node hasn't been linked yet.
-    w_p._linkAsRoot();
-
-    g.app.commanders().push(w_c);
-
-    // select last, that was just created
-    this.commanderIndex = g.app.commanders().length - 1;
-
-    const w_fakeOpenedFileInfo: any = undefined;
-    this._setupOpenedLeoDocument(w_fakeOpenedFileInfo);
-
-    this.launchRefresh();
-    // if created
-    return Promise.resolve(true);
-
-    // return Promise.resolve(undefined); // if cancelled
-}
-
-</t>
 <t tx="felix.20201214211832.1">/**
  * * Shows an 'Open Leo File' dialog window and opens the chosen file
  * * If not shown already, it also shows the outline, body and log panes along with leaving focus in the outline
@@ -8782,7 +8753,6 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
     const U = undefined;
     const CMD = Constants.COMMANDS;
     const LEOCMD = Constants.LEO_COMMANDS;
-    const CTX = Constants.CONTEXT_FLAGS;
 
     const NO_REFRESH: ReqRefresh = {};
     const REFRESH_NODE_BODY: ReqRefresh = {
@@ -8798,6 +8768,13 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         tree: true,
         body: true,
         states: true
+    };
+    const REFRESH_ALL: ReqRefresh = {
+        tree: true,
+        body: true,
+        states: true,
+        documents: true,
+        buttons: true
     };
 
     const w_commands: [string, (...args: any[]) =&gt; any][] = [

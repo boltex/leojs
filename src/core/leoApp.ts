@@ -2089,6 +2089,12 @@ export class LoadManager {
         }
         // c.frame.initCompleteHint();
 
+        // TODO : revise position of this behavior: set selected document
+        const w_index = g.app.commandersList.indexOf(c);
+        if (w_index >= 0) {
+            (g.app.gui as LeoUI).commanderIndex = w_index;
+        }
+
         c.outerUpdate();  // #181: Honor focus requests.
 
     }

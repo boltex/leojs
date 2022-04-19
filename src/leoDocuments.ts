@@ -16,6 +16,8 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoDocument
 
     readonly onDidChangeTreeData: vscode.Event<LeoDocumentNode | undefined> = this._onDidChangeTreeData.event;
 
+    // private _id: number = 0;
+
     constructor(
         private _leoStates: LeoStates,
         private _leoUI: LeoUI,
@@ -37,8 +39,13 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoDocument
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoStates.fileOpenedReady && !element) {
             g.app.commanders().forEach(p_commander => {
-                w_children.push(new LeoDocumentNode(p_commander, this._leoUI));
+                w_children.push(new LeoDocumentNode(
+                    p_commander,
+                    this._leoUI,
+                    // this._id++
+                ));
             });
+
         }
         return w_children; // Defaults to an empty list of children
     }
@@ -60,7 +67,8 @@ export class LeoDocumentNode extends vscode.TreeItem {
 
     constructor(
         public commander: Commands,
-        private _leoUI: LeoUI
+        private _leoUI: LeoUI,
+        // private _id: number
     ) {
         super(commander.fileName());
         // Setup this instance
@@ -92,6 +100,7 @@ export class LeoDocumentNode extends vscode.TreeItem {
     // @ts-ignore
     public get id(): string {
         // Add prefix and suffix salt to numeric index to prevent accidental duplicates
+        // return "p" + this._id + "i" + g.app.commanders().indexOf(this.commander) + "s" + this.commander.fileName();
         return "p" + g.app.commanders().indexOf(this.commander) + "s" + this.commander.fileName();
     }
 
