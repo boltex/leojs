@@ -1587,15 +1587,23 @@ export class LeoUI {
     }
 
     /**
+     * * Adds a message string to leoInteg's log pane. Used when leoBridge receives an async 'log' command.
+     * @param p_message The string to be added in the log
+     */
+    public addLogPaneEntry(p_message: string): void {
+        this._leoLogPane.appendLine(p_message);
+    }
+
+    /**
      * * Reveals the log pane if not already visible
      */
     public showLogPane(): Thenable<unknown> {
-        vscode.window.showInformationMessage('TODO: Implement showLogPane');
-
-        // if shown
-        return Promise.resolve(true);
-
-        // return Promise.resolve(undefined); // if cancelled
+        if (this._leoLogPane) {
+            this._leoLogPane.show(true); // Just show, so use flag to preserve focus
+            return Promise.resolve(true);
+        } else {
+            return Promise.resolve(undefined); // if cancelled
+        }
     }
 
     /**
@@ -1618,17 +1626,9 @@ export class LeoUI {
         console.log("TODO ensure_commander_visible");
     }
 
-    public isTextWidget(w: any): boolean {
-        return false;
-    }
-
-    public isTextWrapper(w: any): boolean {
-        return false;
-    }
-
     /**
-     * Command to get the LeoID from dialog, save it to user settings
-     * and start leojs if the ID is valid, and not already started.
+     * * Command to get the LeoID from dialog, save it to user settings.
+     * Start leojs if the ID is valid, and not already started.
      */
     public setLeoIDCommand(): void {
         utils.getIdFromDialog().then((p_id) => {
@@ -1978,6 +1978,10 @@ export class NullGui {
 
     public getFullVersion(): string {
         return "LeoJS NullGui";
+    }
+
+    public addLogPaneEntry(...args: any[]): void {
+        console.log(...args);
     }
 
     public runOpenFileDialog(

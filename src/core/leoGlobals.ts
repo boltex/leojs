@@ -14,6 +14,8 @@ import * as path from 'path';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
+import G = require("glob");
+import { LeoUI } from "../leoUI";
 
 /*
     import binascii
@@ -3031,10 +3033,67 @@ export function doKeywordArgs(keys: { [key: string]: any }, d: { [key: string]: 
     return result;
 }
 
+//@+node:felix.20211104212837.1: *3* g.error, g.note, g.warning, g.red, g.blue
+// TODO : Replace with proper method
+export const blue = es_print;
+export const error = es_print;
+export const note = es_print;
+export const red = es_print;
+export const warning = es_print;
+
 //@+node:felix.20211104212741.1: *3* g.es
 // TODO : Replace with output to proper 'Leo log pane'
-export const es = console.log;
+export function es(...args: any[]): void {
+    if (app && app.gui) {
+        let s: string = "";
+        args.forEach((p_entry) => {
+            if (s) {
+                s += " ";
+            }
+            if (typeof p_entry === 'string' || p_entry instanceof String) {
+                // it's a string
+                s += p_entry;
+            } else {
+                s += p_entry.toString();
+            }
+        });
+        app.gui.addLogPaneEntry(s);
+    } else {
+        console.log(...args);
+    }
+}
 
+//@+node:felix.20220419215939.1: *3* g.es_dump
+export function es_dump(s: string, n: number = 30, title?: string): void {
+    if (title) {
+        es_print('', title);
+    }
+    let i = 0;
+    while (i < s.length) {
+        const s2 = s.slice(i, i + n);
+        const aList: string[] = [];//  ''.join([`${ord(ch)} ` for ch in s[i : i + n]]);
+        for (var j = 0; j < s2.length; j++) {
+            aList.push(`${s2.charAt(j).charCodeAt(0)} `);
+        }
+        es_print('', aList.join(''));
+        i += n;
+    }
+
+}
+
+//@+node:felix.20220419221016.1: *3* g.es_error & es_print_error
+export function es_error(...args: any[]): void {
+    // color = keys.get('color')
+    //if color is None and g.app.config:
+    //    keys['color'] = g.app.config.getColor("log-error-color") or 'red'
+    es(...args);
+}
+export function es_print_error(...args: any[]): void {
+    // color = keys.get('color')
+    //if color is None and g.app.config:
+    //    keys['color'] = g.app.config.getColor("log-error-color") or 'red'
+    es_print(...args);
+}
 //@+node:felix.20211104212802.1: *3* g.es_exception
 export function es_exception(p_error?: any, c?: Commands): string {
     const getCircularReplacer = () => {
@@ -3051,7 +3110,7 @@ export function es_exception(p_error?: any, c?: Commands): string {
     };
 
     // p_error = JSON.stringify(p_error, getCircularReplacer());
-    console.log('es_exception called with error: ', p_error);
+    es_print_error('es_exception called with error: ', p_error);
     return '<no file>';
 }
 
@@ -3071,22 +3130,14 @@ export function es_exception(p_error?: any, c?: Commands): string {
 
 //@+node:felix.20211104212809.1: *3* g.es_print
 /**
- * TODO : This is a temporary console output
  * Print all non-keyword args, and put them to the log pane.
- * Python code was:
- *     pr(*args, **keys)
- *     es(*args, **keys)
  */
-export const es_print = console.log;
-
-//@+node:felix.20211104212837.1: *3* g.error, g.note, g.warning, g.red, g.blue
-// TODO : Replace with proper method
-export const blue = console.log;
-export const error = console.log;
-export const note = console.log;
-export const red = console.log;
-export const warning = console.warn;
-
+export function es_print(...args: any[]): void {
+    pr(...args);
+    if (app && !unitTesting) {
+        es(...args);
+    }
+}
 //@+node:felix.20211227232452.1: *3* g.internalError
 /**
  * Report a serious internal error in Leo.
@@ -3094,7 +3145,7 @@ export const warning = console.warn;
 export function internalError(...args: any[]): void {
     const w_callers: any = callers(20).split(',');
     const caller: string = w_callers[w_callers.length - 1];
-    console.error('\nInternal Leo error in', caller);
+    error('\nInternal Leo error in', caller);
     es_print(...args);
     // es_print('Called from', ', '.join(callers[:-1]))
     es_print('Please report this error to Leo\'s developers', 'red');
@@ -3901,13 +3952,6 @@ export function findNodeAnywhere(c: Commands, headline: string, exact: boolean =
 //@-others
 //@+node:felix.20211104211349.1: ** g.Unit Tests
 //@+node:felix.20211104211355.1: ** g.Urls
-//@+node:felix.20211030164613.1: ** g.isTextWrapper & isTextWidget
-export function isTextWidget(w: any): boolean {
-    return !!app && !!app.gui && app.gui.isTextWidget && app.gui.isTextWidget(w);
-}
-export function isTextWrapper(w: any): boolean {
-    return !!app && !!app.gui && app.gui.isTextWrapper && app.gui.isTextWrapper(w);
-}
 //@-others
 
 //@@language typescript

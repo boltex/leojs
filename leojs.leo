@@ -181,12 +181,12 @@
 <v t="felix.20201228164116.1"><vh>closeBody</vh></v>
 </v>
 <v t="felix.20201214194144.10"><vh>Log &amp; Terminal Panes</vh>
+<v t="felix.20220419210727.1"><vh>addLogPaneEntry</vh></v>
 <v t="felix.20201214211655.1"><vh>showLogPane</vh></v>
 </v>
 <v t="felix.20211030165058.1"><vh>Leo GUI Wrappers &amp; Helpers</vh>
 <v t="felix.20220201230041.1"><vh>showLeoIDMessage</vh></v>
 <v t="felix.20220201225503.1"><vh>LeoGui.ensure_commander_visible</vh></v>
-<v t="felix.20211030165111.1"><vh>isTextWidget &amp; isTextWrapper</vh></v>
 <v t="felix.20220201194319.1"><vh>setLeoIDCommand</vh></v>
 <v t="felix.20220131235418.1"><vh>getIdFromSetting</vh></v>
 <v t="felix.20220131234257.1"><vh>setIdSetting</vh></v>
@@ -5452,12 +5452,12 @@ public showBody(p_aside: boolean, p_preserveFocus?: boolean): Thenable&lt;vscode
  * * Reveals the log pane if not already visible
  */
 public showLogPane(): Thenable&lt;unknown&gt; {
-    vscode.window.showInformationMessage('TODO: Implement showLogPane');
-
-    // if shown
-    return Promise.resolve(true);
-
-    // return Promise.resolve(undefined); // if cancelled
+    if (this._leoLogPane) {
+        this._leoLogPane.show(true); // Just show, so use flag to preserve focus
+        return Promise.resolve(true);
+    } else {
+        return Promise.resolve(undefined); // if cancelled
+    }
 }
 
 </t>
@@ -7431,15 +7431,6 @@ private _tryApplyNodeToBody(
 
 </t>
 <t tx="felix.20211030165058.1"></t>
-<t tx="felix.20211030165111.1">public isTextWidget(w: any): boolean {
-    return false;
-}
-
-public isTextWrapper(w: any): boolean {
-    return false;
-}
-
-</t>
 <t tx="felix.20211117232843.1">{
   "command": "leojs.undoFromOutline",
   "key": "ctrl+z",
@@ -8251,8 +8242,8 @@ public getIdFromSetting(): string {
 
 </t>
 <t tx="felix.20220201194319.1">/**
- * Command to get the LeoID from dialog, save it to user settings
- * and start leojs if the ID is valid, and not already started.
+ * * Command to get the LeoID from dialog, save it to user settings.
+ * Start leojs if the ID is valid, and not already started.
  */
 public setLeoIDCommand(): void {
     utils.getIdFromDialog().then((p_id) =&gt; {
@@ -8532,6 +8523,10 @@ export class NullGui {
         return "LeoJS NullGui";
     }
 
+    public addLogPaneEntry(...args: any[]): void {
+        console.log(...args);
+    }
+
     public runOpenFileDialog(
         c: Commands,
         title: string,
@@ -8796,6 +8791,15 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
  */
 public makeAllBindings(): void {
     commandBindings.makeAllBindings(this, this._context);
+}
+
+</t>
+<t tx="felix.20220419210727.1">/**
+ * * Adds a message string to leoInteg's log pane. Used when leoBridge receives an async 'log' command.
+ * @param p_message The string to be added in the log
+ */
+public addLogPaneEntry(p_message: string): void {
+    this._leoLogPane.appendLine(p_message);
 }
 
 </t>
