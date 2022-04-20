@@ -2503,9 +2503,14 @@ export class Commands {
     //@+node:felix.20211005023225.1: *3* c.Gui
     //@+node:felix.20211122010629.1: *4* c.Dialogs & messages
     //@+node:felix.20211120224234.1: *5* c.alert
-    public alert(...arg: any[]): void {
-        // TODO !
-        console.log(...arg);
+    public alert(message: string): void {
+        const c: Commands = this;
+
+        // The unit tests just tests the args.
+        if (!g.unitTesting) {
+            g.es(message);
+            // g.app.gui.alert(c, message)
+        }
     }
     //@+node:felix.20211225212807.1: *5* c.init_error_dialogs
     public init_error_dialogs(): void {

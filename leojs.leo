@@ -320,7 +320,6 @@
 <v t="felix.20201208224407.14"><vh>strToLeoUri</vh></v>
 <v t="felix.20201208224407.15"><vh>leoUriToStr</vh></v>
 <v t="felix.20201208224407.16"><vh>setContext</vh></v>
-<v t="felix.20210226202618.1"><vh>test</vh></v>
 </v>
 <v t="felix.20220417155704.1"><vh>@clean src/commandBindings.ts</vh>
 <v t="felix.20220417155732.1"><vh>makeAllBindings</vh>
@@ -485,17 +484,13 @@
  * @param p_event The configuration-change event passed by vscode
  */
 private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
-    console.log('changed config !!');
-
     if (p_event.affectsConfiguration(Constants.CONFIG_NAME)) {
         this.config.buildFromSavedSettings(); // If the config setting started with 'leojs'
     }
-
     // also check if workbench.editor.enablePreview
     this._bodyEnablePreview = !!vscode.workspace
         .getConfiguration('workbench.editor')
         .get('enablePreview');
-
     // Check For "workbench.editor.enablePreview" to be true.
     this.config.checkEnablePreview();
     this.config.checkCloseEmptyGroups();
@@ -2826,8 +2821,6 @@ private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Positi
 private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
     if (p_event.visible) {
         this._lastTreeView = p_explorerView ? this._leoTreeExView : this._leoTreeView;
-        console.log('_onTreeViewVisibilityChanged so refresh outline');
-
         this._refreshOutline(true, RevealType.RevealSelect);
     }
 }
@@ -2842,7 +2835,6 @@ private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChange
     if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
     if (p_event.visible) {
         this._lastLeoDocuments = p_explorerView ? this._leoDocumentsExplorer : this._leoDocuments;
-
         // TODO: Check if needed
         // this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
     }
@@ -2858,8 +2850,6 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
     if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
     if (p_event.visible) {
         this._lastLeoButtons = p_explorerView ? this._leoButtonsExplorer : this._leoButtons;
-
-
         // TODO: Check if needed
         // this._leoButtonsProvider.refreshTreeRoot(); // May not need to set selection...?
     }
@@ -3003,10 +2993,6 @@ public minibuffer(): Thenable&lt;unknown&gt; {
                 p_picked.label &amp;&amp;
                 Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label]) {
                 p_picked.label = Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label];
-                console.log('REPLACED WITH ', p_picked.label);
-            } else {
-                console.log('ALL GOOD');
-
             }
             if (p_picked &amp;&amp; p_picked.label) {
                 const c = g.app.commanders()[this.commanderIndex];
@@ -5993,9 +5979,6 @@ private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): 
     if (p_revealType !== undefined &amp;&amp; p_revealType.valueOf() &gt;= this._revealType.valueOf()) { // To check if selected node should self-select while redrawing whole tree
         this._revealType = p_revealType; // To be read/cleared (in arrayToLeoNodesArray instead of directly by nodes)
     }
-
-    console.log('refreshing outline');
-
     this._leoTreeProvider.refreshTreeRoot();
 }
 
@@ -6079,10 +6062,7 @@ public _launchRefresh(p_node?: Position): void {
         }
 
     } else if (this._refreshType.node) {
-        console.log('node only no parameter');
-
         this._refreshType.node = false;
-
         this.leoStates.setSelectedNodeFlags(c.p);
         this._revealTreeViewNode(c.p, {
             select: true, focus: true // FOCUS FORCED TO TRUE always leave focus on tree when navigating
@@ -6258,14 +6238,6 @@ var testVar = "some String";
 // import axios from 'axios';
 import * as vscode from 'vscode';
 
-</t>
-<t tx="felix.20210226202618.1">/**
- * * experiment
- */
-export function experiment(): void {
-    // fs.readFileSync('foo.txt','utf8');
-    console.log("test");
-}
 </t>
 <t tx="felix.20211002194716.1"></t>
 <t tx="felix.20211003223641.1">/**
@@ -7003,8 +6975,6 @@ export function isHexColor(p_hexString: string): boolean {
  */
 public configTreeRefresh(): void {
     if (this.leoStates.fileOpenedReady) {
-        console.log('config tree Refresh');
-
         this._preventShowBody = true;
         this._refreshOutline(true, RevealType.RevealSelect);
     }

@@ -477,8 +477,6 @@ export class LeoUI {
      */
     public configTreeRefresh(): void {
         if (this.leoStates.fileOpenedReady) {
-            console.log('config tree Refresh');
-
             this._preventShowBody = true;
             this._refreshOutline(true, RevealType.RevealSelect);
         }
@@ -619,10 +617,7 @@ export class LeoUI {
             }
 
         } else if (this._refreshType.node) {
-            console.log('node only no parameter');
-
             this._refreshType.node = false;
-
             this.leoStates.setSelectedNodeFlags(c.p);
             this._revealTreeViewNode(c.p, {
                 select: true, focus: true // FOCUS FORCED TO TRUE always leave focus on tree when navigating
@@ -646,9 +641,6 @@ export class LeoUI {
         if (p_revealType !== undefined && p_revealType.valueOf() >= this._revealType.valueOf()) { // To check if selected node should self-select while redrawing whole tree
             this._revealType = p_revealType; // To be read/cleared (in arrayToLeoNodesArray instead of directly by nodes)
         }
-
-        console.log('refreshing outline');
-
         this._leoTreeProvider.refreshTreeRoot();
     }
 
@@ -729,17 +721,13 @@ export class LeoUI {
      * @param p_event The configuration-change event passed by vscode
      */
     private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
-        console.log('changed config !!');
-
         if (p_event.affectsConfiguration(Constants.CONFIG_NAME)) {
             this.config.buildFromSavedSettings(); // If the config setting started with 'leojs'
         }
-
         // also check if workbench.editor.enablePreview
         this._bodyEnablePreview = !!vscode.workspace
             .getConfiguration('workbench.editor')
             .get('enablePreview');
-
         // Check For "workbench.editor.enablePreview" to be true.
         this.config.checkEnablePreview();
         this.config.checkCloseEmptyGroups();
@@ -788,8 +776,6 @@ export class LeoUI {
     private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
         if (p_event.visible) {
             this._lastTreeView = p_explorerView ? this._leoTreeExView : this._leoTreeView;
-            console.log('_onTreeViewVisibilityChanged so refresh outline');
-
             this._refreshOutline(true, RevealType.RevealSelect);
         }
     }
@@ -803,7 +789,6 @@ export class LeoUI {
         if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
         if (p_event.visible) {
             this._lastLeoDocuments = p_explorerView ? this._leoDocumentsExplorer : this._leoDocuments;
-
             // TODO: Check if needed
             // this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
         }
@@ -818,8 +803,6 @@ export class LeoUI {
         if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
         if (p_event.visible) {
             this._lastLeoButtons = p_explorerView ? this._leoButtonsExplorer : this._leoButtons;
-
-
             // TODO: Check if needed
             // this._leoButtonsProvider.refreshTreeRoot(); // May not need to set selection...?
         }
@@ -1107,10 +1090,6 @@ export class LeoUI {
                     p_picked.label &&
                     Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label]) {
                     p_picked.label = Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label];
-                    console.log('REPLACED WITH ', p_picked.label);
-                } else {
-                    console.log('ALL GOOD');
-
                 }
                 if (p_picked && p_picked.label) {
                     const c = g.app.commanders()[this.commanderIndex];

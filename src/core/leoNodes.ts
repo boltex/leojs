@@ -97,7 +97,7 @@ export class NodeIndices {
      */
     public getNewIndex(v: VNode | undefined, cached: boolean = false): string {
         if (!v) {
-            console.log('getNewIndex: v is None');
+            g.internalError('getNewIndex: v is None');
             return '';
         }
         const c: Commands = v.context;

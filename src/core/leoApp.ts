@@ -899,7 +899,6 @@ export class LeoApp {
 
     //@+node:felix.20220417165216.1: *4* app.computeSignon & printSignon
     public computeSignon(): void {
-        // from leo.core import leoVersion
         const app = this;
 
         let guiVersion = ', ' + 'VSCode version ' + vscode.version;
