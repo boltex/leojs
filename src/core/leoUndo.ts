@@ -1171,7 +1171,10 @@ export class Undoer {
      */
     public updateAfterTyping(p: Position, w: any): void {
         const c: Commands = this.c;
-        if (g.isTextWrapper(w)) {
+        // * sdf
+        // TODO : Add vscode body text cursor and selection handling
+        //if (g.isTextWrapper(w)) {
+        if (false) {
             // An important, ever-present unit test.
             const all: string = w.getAllText();
             if (g.unitTesting) {

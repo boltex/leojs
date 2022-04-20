@@ -1607,7 +1607,7 @@ public static GUI = {
     EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
     TREEVIEW_TITLE: "OUTLINE",
     BODY_TITLE: "LEOJS BODY",
-    LOG_PANE_TITLE: "Leojs Log Window",
+    LOG_PANE_TITLE: "LeoJS Log Window",
     THEME_STATUSBAR: "statusBar.foreground"
 };
 
@@ -2586,7 +2586,7 @@ import { GlobalConfigManager } from "./core/leoConfig";
 
     this._start();
     */
-
+    this.showLogPane();
 }
 
 </t>
@@ -3204,9 +3204,9 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
   },
-  "gitCommit": "6e9ea84",
+  "gitCommit": "32abb0a",
   "gitBranch": "devel",
-  "gitDate": "2022-04-18 00:17:29 -0400"
+  "gitDate": "2022-04-19 22:20:15 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{

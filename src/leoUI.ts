@@ -164,7 +164,7 @@ export class LeoUI {
 
         this._start();
         */
-
+        this.showLogPane();
     }
 
     /**

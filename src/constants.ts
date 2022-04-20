@@ -62,7 +62,7 @@ export class Constants {
         EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
         TREEVIEW_TITLE: "OUTLINE",
         BODY_TITLE: "LEOJS BODY",
-        LOG_PANE_TITLE: "Leojs Log Window",
+        LOG_PANE_TITLE: "LeoJS Log Window",
         THEME_STATUSBAR: "statusBar.foreground"
     };
 

@@ -902,7 +902,7 @@ export class LeoApp {
         // from leo.core import leoVersion
         const app = this;
 
-        let guiVersion = ', ' + 'VS Code version ' + vscode.version;
+        let guiVersion = ', ' + 'VSCode version ' + vscode.version;
 
         const w_leoIntegExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
         const w_leojsPackageJson = w_leoIntegExtension.packageJSON;
@@ -975,8 +975,9 @@ export class LeoApp {
             console.log('');
         }
         */
-        console.log(app.signon);
-        console.log(app.signon1);
+        // * Modified for leojs SINGLE log pane
+        g.es_print(app.signon);
+        g.es_print(app.signon1);
     }
     //@+node:felix.20220417215228.1: *4* app.setLeoID & helpers
     /**
@@ -2129,7 +2130,7 @@ export class LoadManager {
             // TODO: importCommands and importDerivedFiles method
 
             /* 
-    
+
             }else if( c.looksLikeDerivedFile(fn)){
                 // 2011/10/10: Create an @file node.
                 p = c.importCommands.importDerivedFiles(parent=c.rootPosition(),
@@ -2139,7 +2140,7 @@ export class LoadManager {
                     p = c.rootPosition();
                 if !p
                     return undefined;
-    
+
             */
 
         } else {
