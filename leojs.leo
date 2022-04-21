@@ -195,7 +195,6 @@
 <v t="felix.20220107223824.1"><vh>runOpenFileDialog</vh></v>
 <v t="felix.20220108211806.1"><vh>runSaveFileDialog</vh></v>
 </v>
-<v t="felix.20220415194638.1"><vh>test/create outlines</vh></v>
 <v t="felix.20201214211706.1"><vh>test/dummy command</vh></v>
 </v>
 <v t="felix.20220204224240.1"><vh>class NullGui</vh></v>
@@ -624,6 +623,8 @@ import { Constants } from "./constants";
 import { IconConstants } from "./iconConstants";
 import { Icon } from "./types";
 import { LeoOutlineNode } from "./leoOutline";
+process.hrtime = require('browser-process-hrtime');
+
 // import 'browser-hrtime';
 // require('browser-hrtime');
 
@@ -2516,6 +2517,8 @@ export interface LeoButton {
 </t>
 <t tx="felix.20201214194144.1">import * as vscode from "vscode";
 import { debounce } from "lodash";
+process.hrtime = require('browser-process-hrtime');
+
 import * as utils from "./utils";
 import * as commandBindings from "./commandBindings";
 import { Constants } from "./constants";
@@ -3155,7 +3158,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     "url": "https://github.com/boltex/leojs"
   },
   "engines": {
-    "vscode": "^1.63.0"
+    "vscode": "^1.66.0"
   },
   "keywords": [
     "leo",
@@ -3182,6 +3185,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     &lt;&lt; contributes &gt;&gt;
   },
   "scripts": {
+    "cleanup": "node ./cleanup.js",
     &lt;&lt; scripts &gt;&gt;
   },
   "devDependencies": {
@@ -3189,10 +3193,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "32abb0a",
-  "gitBranch": "devel",
-  "gitDate": "2022-04-19 22:20:15 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -5315,13 +5316,13 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 }
 </t>
 <t tx="felix.20201214205159.79">"vscode:prepublish": "npm run package",
-"compile": "node prepare.js &amp;&amp; webpack &amp;&amp; node cleanup.js",
-"compile-web": "node prepare.js &amp;&amp; webpack &amp;&amp; node cleanup.js",
-"open-in-browser": "vscode-test-web --browserType=chromium  --extensionDevelopmentPath=.",
-"watch": "node prepare.js &amp;&amp; webpack --watch &amp;&amp; node cleanup.js",
-"watch-web": "node prepare.js &amp;&amp; webpack --watch &amp;&amp; node cleanup.js",
-"package": "node prepare.js &amp;&amp; webpack --mode production --devtool hidden-source-map &amp;&amp; node cleanup.js",
-"package-web": "node prepare.js &amp;&amp; webpack --mode production --devtool hidden-source-map &amp;&amp; node cleanup.js",
+"compile": "webpack",
+"compile-web": "webpack",
+"open-in-browser": "node ./prepare.js &amp;&amp; vscode-test-web --browserType=chromium --extensionDevelopmentPath=. &amp;&amp; node ./cleanup.js",
+"watch": "webpack --watch",
+"watch-web": "webpack --watch",
+"package": "webpack --mode production --devtool hidden-source-map",
+"package-web": "webpack --mode production --devtool hidden-source-map",
 "compile-tests": "tsc -p . --outDir out",
 "watch-tests": "tsc -p . -w --outDir out",
 "pretest": "npm run compile-tests &amp;&amp; npm run compile &amp;&amp; npm run lint",
@@ -5354,23 +5355,24 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 "@types/glob": "^7.2.0",
 "@types/lodash": "^4.14.177",
 "@types/md5": "^2.3.1",
-"@types/mocha": "^9.0.0",
+"@types/mocha": "^9.1.0",
 "@types/node": "14.x",
-"@types/vscode": "^1.63.0",
-"@types/webpack-env": "^1.16.0",
-"@typescript-eslint/eslint-plugin": "^5.9.1",
-"@typescript-eslint/parser": "^5.9.1",
+"@types/vscode": "^1.66.0",
+"@types/webpack-env": "^1.16.3",
+"@typescript-eslint/eslint-plugin": "^5.16.0",
+"@typescript-eslint/parser": "^5.16.0",
 "@vscode/test-electron": "^2.0.3",
-"@vscode/test-web": "*",
+"@vscode/test-web": "^0.0.24",
 "assert": "^2.0.0",
-"eslint": "^8.6.0",
+"eslint": "^8.11.0",
 "glob": "^7.2.0",
 "mocha": "^9.1.3",
 "process": "^0.11.10",
 "ts-loader": "^9.2.6",
-"typescript": "^4.5.4",
-"webpack": "^5.66.0",
-"webpack-cli": "^4.9.1"
+"typescript": "^4.5.5",
+"webpack": "^5.70.0",
+"webpack-cli": "^4.9.2",
+"webpack-shell-plugin-next": "^2.2.2"
 </t>
 <t tx="felix.20201214205159.81">"browser-process-hrtime": "^1.0.0",
 "console-browserify": "^1.2.0",
@@ -5479,8 +5481,6 @@ public test(): Thenable&lt;unknown&gt; {
     // * Test hasParent
     console.log('p has parent: ', c.p.hasParent());
 
-    this.testCreateOutline();
-    this.selectOpenedLeoDocument(this.commanderIndex + 1);
 
     // * test @cmd decorator and undoer
     // console.log('test @cmd decorator and undoer');
@@ -8564,122 +8564,6 @@ export class NullGui {
     public isTextWrapper(w: any): boolean {
         return false;
     }
-}
-
-</t>
-<t tx="felix.20220415194638.1">public testCreateOutline(): void {
-    // ************************************************************
-    // * demo test: CREATE NEW LEO OUTLINE: NEW COMMANDER
-    // ************************************************************
-    // First test commander
-    let c = g.app.newCommander("", this);
-    g.app.commanders().push(c);
-    this.commanderIndex + 1; // Select this new document
-
-    // ************************************************************
-    // * demo test: BUILD SOME TEST OUTLINE
-    // ************************************************************
-    let w_node = c.p;
-    w_node.initHeadString("@file node1");
-    w_node.setBodyString('@tabwidth 8\nnode1 body\n@others');
-    w_node.expand();
-
-    w_node = c.p.insertAsLastChild();
-    w_node.initHeadString("node Inside1");
-    w_node.setBodyString('  @others \nnodeInside1 body\n@language c\nprint()');
-    w_node.setMarked();
-
-    w_node = c.p.insertAsLastChild();
-    w_node.initHeadString("node with UserData Inside2");
-    w_node.setBodyString('node Inside2 body');
-    w_node.u = { a: 'user content string a', b: "user content also" };
-
-    w_node = c.p.insertAfter();
-    w_node.initHeadString("@file node3");
-    w_node.setBodyString('node 3 body');
-
-    w_node = c.p.insertAfter();
-    w_node.initHeadString("Node script");
-    w_node.setBodyString('g.es("hi!");');
-
-    w_node = c.p.insertAfter();
-    w_node.initHeadString("node 2 selected but empty");
-    c.setCurrentPosition(w_node);
-
-    // ************************************************************
-    // * demo test: SOME OTHER COMMANDER
-    // ************************************************************
-    c = g.app.newCommander("", this);
-    g.app.commanders().push(c);
-
-    // ************************************************************
-    // * demo test: BUILD SOME OTHER TEST OUTLINE
-    // ************************************************************
-    w_node = c.p;
-    w_node.initHeadString("some other title");
-    w_node.setBodyString('body text');
-
-    let nodeCounter = 0;
-    while (nodeCounter &lt; 30) {
-        nodeCounter++;
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("top node numbered headline " + nodeCounter);
-    }
-
-    w_node = c.p.insertAsLastChild();
-    w_node.initHeadString("yet another node");
-    w_node.setBodyString('more body text\nwith a second line');
-
-    w_node = c.p.insertAfter();
-    w_node.initHeadString("@clean my-file.txt");
-    w_node.setBodyString('again some body text');
-    c.setCurrentPosition(w_node);
-
-    nodeCounter = 0;
-    while (nodeCounter &lt; 30) {
-        nodeCounter++;
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("middle node numbered headline " + nodeCounter);
-    }
-
-    w_node = c.p.insertAsLastChild();
-    w_node.initHeadString("sample cloned node");
-    w_node.setBodyString('some other body');
-    w_node.clone();
-
-    w_node = c.p.insertAfter();
-    w_node.setMarked();
-    w_node.initHeadString("a different headline");
-
-    c.setCurrentPosition(w_node);
-
-    nodeCounter = 0;
-    while (nodeCounter &lt; 30) {
-        nodeCounter++;
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("a numbered headline " + nodeCounter);
-    }
-
-    w_node = c.p.insertAfter();
-    w_node.initHeadString("another different headline");
-
-    nodeCounter = 0;
-    while (nodeCounter &lt; 30) {
-        nodeCounter++;
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("more numbered headlines " + nodeCounter);
-    }
-    c.setCurrentPosition(w_node);
-    nodeCounter = 0;
-    while (nodeCounter &lt; 30) {
-        nodeCounter++;
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("inside numbered headlines " + nodeCounter);
-    }
-
-    // ************************************************************
-    // * demo test end
-    // ************************************************************
 }
 
 </t>

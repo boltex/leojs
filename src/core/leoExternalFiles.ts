@@ -32,9 +32,10 @@ export class ExternalFile {
         // See efc.idle_check_open_with_file.
     }
 
-    public toString() {
+    // = () : trick for toString as per https://stackoverflow.com/a/35361695/920301
+    public toString = (): string => {
         return `<ExternalFile: ${this.time} ${g.shortFilename(this.path)}>`;
-    }
+    };
 
     //@+others
     //@+node:felix.20211226234245.2: *3* ef.shortFileName

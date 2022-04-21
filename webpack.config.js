@@ -1,5 +1,6 @@
 const path = require("path");
 const webpack = require("webpack");
+const WebpackShellPluginNext = require('webpack-shell-plugin-next');
 
 const webConfig = /** @type WebpackConfig */ {
   context: __dirname,
@@ -52,6 +53,18 @@ const webConfig = /** @type WebpackConfig */ {
       process: "process/browser", // provide a shim for the global `process` variable
       // "process.hrtime": "browser-process-hrtime"
     }),
+    new WebpackShellPluginNext({
+      onBuildStart: {
+        scripts: ['echo "Webpack onBuildStart"', 'node ./prepare.js'],
+        blocking: true,
+        parallel: false
+      },
+      onWatchRun: {
+        scripts: ['echo "Webpack onWatchRun"', 'node ./prepare.js'],
+        blocking: true,
+        parallel: false
+      }
+    })
   ],
   externals: {
     vscode: "commonjs vscode", // ignored because it doesn't exist
@@ -60,6 +73,9 @@ const webConfig = /** @type WebpackConfig */ {
     hints: false,
   },
   devtool: "nosources-source-map", // create a source map that points to the original source file
+  infrastructureLogging: {
+    level: "log", // enables logging required for problem matchers
+  },
 };
 const nodeConfig = /** @type WebpackConfig */ {
   context: __dirname,
@@ -93,6 +109,7 @@ const nodeConfig = /** @type WebpackConfig */ {
       },
     ],
   },
+  plugins: [],
   externals: {
     vscode: "commonjs vscode", // ignored because it doesn't exist
     mocha: "commonjs mocha", // don't bundle

@@ -2574,9 +2574,10 @@ export class VNode {
     }
 
     //@+node:felix.20211209010457.1: *3* v.toString
+    // = () : trick for toString as per https://stackoverflow.com/a/35361695/920301
     public toString = (): string => {
         return `VNode (gnx: ${this.gnx})`;
-    }
+    };
     //@+node:felix.20210112210731.1: *3* v.Comparisons
     //@+node:felix.20210112210731.2: *4* v.findAtFileName
     /**

@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 import { debounce } from "lodash";
+process.hrtime = require('browser-process-hrtime');
+
 import * as utils from "./utils";
 import * as commandBindings from "./commandBindings";
 import { Constants } from "./constants";
@@ -1739,121 +1741,6 @@ export class LeoUI {
 
     }
 
-    public testCreateOutline(): void {
-        // ************************************************************
-        // * demo test: CREATE NEW LEO OUTLINE: NEW COMMANDER
-        // ************************************************************
-        // First test commander
-        let c = g.app.newCommander("", this);
-        g.app.commanders().push(c);
-        this.commanderIndex + 1; // Select this new document
-
-        // ************************************************************
-        // * demo test: BUILD SOME TEST OUTLINE
-        // ************************************************************
-        let w_node = c.p;
-        w_node.initHeadString("@file node1");
-        w_node.setBodyString('@tabwidth 8\nnode1 body\n@others');
-        w_node.expand();
-
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("node Inside1");
-        w_node.setBodyString('  @others \nnodeInside1 body\n@language c\nprint()');
-        w_node.setMarked();
-
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("node with UserData Inside2");
-        w_node.setBodyString('node Inside2 body');
-        w_node.u = { a: 'user content string a', b: "user content also" };
-
-        w_node = c.p.insertAfter();
-        w_node.initHeadString("@file node3");
-        w_node.setBodyString('node 3 body');
-
-        w_node = c.p.insertAfter();
-        w_node.initHeadString("Node script");
-        w_node.setBodyString('g.es("hi!");');
-
-        w_node = c.p.insertAfter();
-        w_node.initHeadString("node 2 selected but empty");
-        c.setCurrentPosition(w_node);
-
-        // ************************************************************
-        // * demo test: SOME OTHER COMMANDER
-        // ************************************************************
-        c = g.app.newCommander("", this);
-        g.app.commanders().push(c);
-
-        // ************************************************************
-        // * demo test: BUILD SOME OTHER TEST OUTLINE
-        // ************************************************************
-        w_node = c.p;
-        w_node.initHeadString("some other title");
-        w_node.setBodyString('body text');
-
-        let nodeCounter = 0;
-        while (nodeCounter < 30) {
-            nodeCounter++;
-            w_node = c.p.insertAsLastChild();
-            w_node.initHeadString("top node numbered headline " + nodeCounter);
-        }
-
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("yet another node");
-        w_node.setBodyString('more body text\nwith a second line');
-
-        w_node = c.p.insertAfter();
-        w_node.initHeadString("@clean my-file.txt");
-        w_node.setBodyString('again some body text');
-        c.setCurrentPosition(w_node);
-
-        nodeCounter = 0;
-        while (nodeCounter < 30) {
-            nodeCounter++;
-            w_node = c.p.insertAsLastChild();
-            w_node.initHeadString("middle node numbered headline " + nodeCounter);
-        }
-
-        w_node = c.p.insertAsLastChild();
-        w_node.initHeadString("sample cloned node");
-        w_node.setBodyString('some other body');
-        w_node.clone();
-
-        w_node = c.p.insertAfter();
-        w_node.setMarked();
-        w_node.initHeadString("a different headline");
-
-        c.setCurrentPosition(w_node);
-
-        nodeCounter = 0;
-        while (nodeCounter < 30) {
-            nodeCounter++;
-            w_node = c.p.insertAsLastChild();
-            w_node.initHeadString("a numbered headline " + nodeCounter);
-        }
-
-        w_node = c.p.insertAfter();
-        w_node.initHeadString("another different headline");
-
-        nodeCounter = 0;
-        while (nodeCounter < 30) {
-            nodeCounter++;
-            w_node = c.p.insertAsLastChild();
-            w_node.initHeadString("more numbered headlines " + nodeCounter);
-        }
-        c.setCurrentPosition(w_node);
-        nodeCounter = 0;
-        while (nodeCounter < 30) {
-            nodeCounter++;
-            w_node = c.p.insertAsLastChild();
-            w_node.initHeadString("inside numbered headlines " + nodeCounter);
-        }
-
-        // ************************************************************
-        // * demo test end
-        // ************************************************************
-    }
-
     /**
      * * Test/Dummy command
      * @returns Thenable from the tested functionality
@@ -1886,8 +1773,6 @@ export class LeoUI {
         // * Test hasParent
         console.log('p has parent: ', c.p.hasParent());
 
-        this.testCreateOutline();
-        this.selectOpenedLeoDocument(this.commanderIndex + 1);
 
         // * test @cmd decorator and undoer
         // console.log('test @cmd decorator and undoer');

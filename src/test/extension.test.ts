@@ -12,15 +12,16 @@ import { Constants } from '../constants';
 suite('Extension test examples', () => {
 
 	// * Example tests for leojs
-	let wait: 3000;
 
 	before(async () => {
-		vscode.window.showInformationMessage(`Starting leojs extension tests in ${wait} ms`);
-		// Wait 1 second
+		let w_wait: number = 5000;
+
+		vscode.window.showInformationMessage(`Starting leojs extension tests in ${w_wait} ms`);
+
 		return new Promise<void>((resolve) => {
 			setTimeout(() => {
 				resolve();
-			}, wait);
+			}, w_wait);
 		});
 	});
 

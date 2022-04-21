@@ -3,6 +3,7 @@
 //@+<< imports >>
 //@+node:felix.20210102211149.1: ** << imports >> (leoApp)
 import * as vscode from "vscode";
+process.hrtime = require('browser-process-hrtime');
 
 // const leojsPackageJson = require('../../package.json');
 // import 'browser-hrtime';
@@ -1446,7 +1447,7 @@ export class LoadManager {
             //
         }
         finally {
-            g.app.openingSettingsFile = false
+            g.app.openingSettingsFile = false;
         }
 
         // g.app.unlockLog();
@@ -1527,7 +1528,7 @@ export class LoadManager {
 
         const lm: LoadManager = this;
 
-        const t1 = process.hrtime.bigint();
+        const t1 = process.hrtime();
 
         // sets lm.options and lm.files
         lm.doPrePluginsInit(fileName).finally(() => {
@@ -1539,7 +1540,7 @@ export class LoadManager {
             }
             // Disable redraw until all files are loaded.
             g.app.disable_redraw = true;
-            const t2 = process.hrtime.bigint();
+            const t2 = process.hrtime();
             g.doHook("start1");
 
             if (g.app.killed) {
@@ -1549,7 +1550,7 @@ export class LoadManager {
             // TODO: idleTimeManager
             // g.app.idleTimeManager.start();
 
-            const t3 = process.hrtime.bigint();
+            const t3 = process.hrtime();
             let ok = lm.doPostPluginsInit();
             g.app.makeAllBindings();
 
@@ -1564,13 +1565,12 @@ export class LoadManager {
                 // g.app.listenToLog();
             }
             if (g.app.debug.includes('startup')) {
-                const t4 = process.hrtime.bigint();
-
+                const t4 = process.hrtime();
                 console.log('');
-                g.es_print(`settings:${Number((t2 - t1) / 1000000000n)} sec`);
-                g.es_print(` plugins:${Number((t3 - t2) / 1000000000n)} sec`);
-                g.es_print(`   files:${Number((t4 - t3) / 1000000000n)} sec`);
-                g.es_print(`   total:${Number((t4 - t1) / 1000000000n)} sec`);
+                g.es_print(`settings:${utils.getDurationMs(t1, t2)} ms`);
+                g.es_print(` plugins:${utils.getDurationMs(t2, t3)} ms`);
+                g.es_print(`   files:${utils.getDurationMs(t3, t4)} ms`);
+                g.es_print(`   total:${utils.getDurationMs(t1, t4)} ms`);
                 console.log('');
             }
 
@@ -2322,12 +2322,13 @@ export class PreviousSettings {
         this.shortcutsDict = shortcutsDict;
     }
 
-    public toString(): string {
+    // = () : trick for toString as per https://stackoverflow.com/a/35361695/920301
+    public toString = (): string => {
         return (
             `<PreviousSettings\n` +
             `${this.settingsDict}\n` +
             `${this.shortcutsDict}\n>`);
-    }
+    };
 
 }
 //@-others

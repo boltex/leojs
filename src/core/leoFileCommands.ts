@@ -12,6 +12,8 @@ import { new_cmd_decorator } from './decorators';
 import "date-format-lite";
 import * as et from 'elementtree';
 import * as md5 from 'md5';
+process.hrtime = require('browser-process-hrtime');
+
 // import 'browser-hrtime';
 // require('browser-hrtime');
 // import * as fs from 'fs';
@@ -101,9 +103,10 @@ class BadLeoFile extends Error {
         Object.setPrototypeOf(this, BadLeoFile.prototype);
     }
 
-    public toString() {
+    // = () : trick for toString as per https://stackoverflow.com/a/35361695/920301
+    public toString = (): string => {
         return "Bad Leo File:" + this.message;
-    }
+    };
 }
 //@+node:felix.20211213223342.1: ** class FastRead
 export class FastRead {
@@ -1576,8 +1579,9 @@ export class FileCommands extends DummyFileCommands {
         function* priv_vnodes(): Generator<VNode> {
             let pub: boolean = true;
             for (let v of c.hiddenRootNode.children) {
-                if (v.h === PRIVAREA)
+                if (v.h === PRIVAREA) {
                     pub = false;
+                }
                 if (pub) {
                     continue;
                 }
@@ -1709,7 +1713,7 @@ export class FileCommands extends DummyFileCommands {
 
         return vscode.workspace.fs.readFile(w_uri).then((p_array: Uint8Array) => {
 
-            const s: string = p_array.toString() // fs.readFileSync(theFile).toString();
+            const s: string = p_array.toString(); // fs.readFileSync(theFile).toString();
 
             let d: any;
             try {
@@ -2875,7 +2879,7 @@ export class FileCommands extends DummyFileCommands {
 
         try {
             // To allow Leo to quit properly, do *not* signal failure here.
-            c.atFileCommands.writeAll(false)
+            c.atFileCommands.writeAll(false);
             return true;
         }
         catch (exception) {
@@ -2899,7 +2903,7 @@ export class FileCommands extends DummyFileCommands {
         const c: Commands = this.c;
 
         if (c.checkOutline()) {
-            g.error('Structure errors in outline! outline not written')
+            g.error('Structure errors in outline! outline not written');
             return false;
         }
         const w_readOnly = await this.isReadOnly(fileName);
@@ -3129,7 +3133,7 @@ export class FileCommands extends DummyFileCommands {
     }
     //@+node:felix.20211213224237.37: *5* fc.putPostlog
     public putPostlog(): void {
-        this.put("</leo_file>\n")
+        this.put("</leo_file>\n");
     }
     //@+node:felix.20211213224237.38: *5* fc.putPrefs
     public putPrefs(): void {

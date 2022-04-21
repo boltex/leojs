@@ -13,10 +13,12 @@ file.gitCommit = undefined;
 file.gitBranch = undefined;
 file.gitDate = undefined;
 
+console.log('Running cleanup.js');
+
 fs.writeFileSync(fileName, JSON.stringify(file, null, 2), function writeJSON(err) {
-    if (err) return console.log(err);
-    // console.log(JSON.stringify(file));
-    console.log('writing to ' + fileName);
+  if (err) return console.log(err);
+  // console.log(JSON.stringify(file));
+  console.log('writing to ' + fileName);
 });
 
 console.log("Removed git info in package.json");

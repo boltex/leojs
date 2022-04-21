@@ -543,7 +543,9 @@ export class GlobalConfigManager {
         let data: string[] = this.get(setting, "data") || [];
         // New in Leo 4.12.1: add two keyword arguments, with legacy defaults.
         if (data && data.length && strip_comments) {
-            data = data.filter((z) => { !z.trim().startsWith('#') });
+            data = data.filter((z) => {
+                !z.trim().startsWith('#');
+            });
         }
         if (data && data.length && strip_data) {
             data = data.map((z) => { return z.trim(); }).filter((z) => { return !!z; });
@@ -928,7 +930,7 @@ export class LocalConfigManager {
 
         const munge = g.app.config.munge;
 
-        const root = this.settingsRoot()
+        const root = this.settingsRoot();
         if (!root || !root.__bool__()) {
             return undefined;
         }
@@ -1128,7 +1130,9 @@ export class LocalConfigManager {
         }
         if (data && data.length && strip_comments) {
             // data = [z for z in data if not z.strip().startswith('#')]
-            data = data.filter((z) => { !z.trim().startsWith('#') });
+            data = data.filter((z) => {
+                !z.trim().startsWith('#');
+            });
         }
         if (data && data.length && strip_data) {
             // data = [z.strip() for z in data if z.strip()]
@@ -1401,7 +1405,7 @@ export class LocalConfigManager {
         if (!this.settingsDict) {
             return false;
         }
-        let gs = this.settingsDict.get(key)
+        let gs = this.settingsDict.get(key);
         if (!gs) {
             return false;
         }
@@ -1477,15 +1481,15 @@ export class LocalConfigManager {
         let result: string[] = [];
         let name: string;
         let val: any;
-        let w_c: Commands;
+        let c_junk: Commands;
         let letter: any;
         for (let p_configEntry of g.app.config.config_iter(c)) {
-            [name, val, w_c, letter] = p_configEntry;
+            [name, val, c_junk, letter] = p_configEntry;
             let kind = letter === ' ' ? '   ' : `[${letter}]`;
             result.push(`${kind} ${name} = ${val}\n`);
         }
         // Use a single g.es statement.
-        result.push('\n' + legend)
+        result.push('\n' + legend);
         if (g.unitTesting) {
             // pass  // print(''.join(result))
         } else {

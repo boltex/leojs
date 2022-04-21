@@ -3,6 +3,8 @@ import { Constants } from "./constants";
 import { IconConstants } from "./iconConstants";
 import { Icon } from "./types";
 import { LeoOutlineNode } from "./leoOutline";
+process.hrtime = require('browser-process-hrtime');
+
 // import 'browser-hrtime';
 // require('browser-hrtime');
 

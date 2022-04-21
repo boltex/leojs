@@ -465,9 +465,10 @@ export class GeneralSetting {
         return this.__repr__();
     }
 
-    public toString(): string {
+    // = () : trick for toString as per https://stackoverflow.com/a/35361695/920301
+    public toString = (): string => {
         return this.__repr__();
-    }
+    };
 
 }
 //@+node:felix.20220213000510.1: *3* class g.TypedDict
@@ -520,9 +521,10 @@ export class TypedDict {
     //     """Suitable for g.printObj"""
     //     return f"{g.dictToString(self.d)}\n{str(self)}\n"
 
-    public toString(): string {
+    // = () : trick for toString as per https://stackoverflow.com/a/35361695/920301
+    public toString = (): string => {
         return `${this.d.toString()}\nTypedDict name:${this._name}\n`;
-    }
+    };
 
     //@+node:felix.20220213000510.3: *4* td.__setitem__
     // def __setitem__(self, key: Any, val: Any) -> None:
@@ -544,7 +546,7 @@ export class TypedDict {
             trace('TypeDict: None is not a valid key', callers());
             return;
         }
-        this._checkKeyType(key)
+        this._checkKeyType(key);
 
         // try:
         //     for z in val:
@@ -898,7 +900,7 @@ export function comment_delims_from_extension(filename: string): [string, string
     let language = app.extension_dict[ext.substring(1)];
 
     if (ext) {
-        return set_delims_from_language(language)
+        return set_delims_from_language(language);
     }
 
     trace(
@@ -1137,7 +1139,7 @@ export function getLanguageAtPosition(c: Commands, p: Position): string {
 export function getOutputNewline(c: Commands | undefined, name?: string): string {
     let s: string;
     if (name) {
-        s = name
+        s = name;
     } else if (c) {
         s = c.config.output_newline;
     } else {
@@ -2156,7 +2158,7 @@ export function skip_string(s: string, i: number): number {
     let n = s.length;
 
     while (i < n && s[i] !== delim) {
-        if (s[i] == '\\') {
+        if (s[i] === '\\') {
             i += 2;
         } else {
             i += 1;
@@ -2951,7 +2953,7 @@ def stripBlankLines(s: str) -> str:
 export function isValidEncoding(encoding: string): boolean {
     // ! TEMPORARY !
     if (!encoding) {
-        return false
+        return false;
     }
     return true;
 
@@ -3813,7 +3815,7 @@ export function getDocString(s: string): string {
     }
     const tag = s.slice(i, i + 3);
 
-    console.assert(tags.includes(tag))
+    console.assert(tags.includes(tag));
 
     const j = s.indexOf(tag, i + 3);
     if (j > -1) {

@@ -308,7 +308,7 @@ export class CommanderFileCommands {
         const lm = g.app.loadManager!;
         const old_c = this;
         // Clean out the update queue so it won't interfere with the new window.
-        this.outerUpdate()
+        this.outerUpdate();
         // Supress redraws until later.
         g.app.disable_redraw = true;
         // Send all log messages to the new frame.

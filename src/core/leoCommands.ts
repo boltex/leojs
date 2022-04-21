@@ -4,6 +4,7 @@
 //@+node:felix.20210220194059.1: ** << imports >>
 import * as vscode from "vscode";
 import * as path from 'path';
+process.hrtime = require('browser-process-hrtime');
 
 // import 'browser-hrtime';
 // require('browser-hrtime');
