@@ -51,7 +51,7 @@ const webConfig = /** @type WebpackConfig */ {
   plugins: [
     new webpack.ProvidePlugin({
       process: "process/browser", // provide a shim for the global `process` variable
-      // "process.hrtime": "browser-process-hrtime"
+      // "process.hrtime": "browser-process-hrtime" // * 'hrtime' part of process only overriden in extension.ts
     }),
     new WebpackShellPluginNext({
       onBuildStart: {

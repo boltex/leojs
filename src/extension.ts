@@ -3,7 +3,7 @@ import * as utils from "./utils";
 import * as g from './core/leoGlobals';
 import { LeoApp } from './core/leoApp';
 import { LoadManager } from "./core/leoApp";
-process.hrtime = require('browser-process-hrtime');
+process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
 export function activate(p_context: vscode.ExtensionContext) {
 

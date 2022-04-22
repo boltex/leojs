@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { debounce } from "lodash";
-process.hrtime = require('browser-process-hrtime');
 
 import * as utils from "./utils";
 import * as commandBindings from "./commandBindings";
@@ -18,8 +17,7 @@ import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
 
 import * as g from './core/leoGlobals';
 import { Commands } from "./core/leoCommands";
-import { NodeIndices, Position, VNode } from "./core/leoNodes";
-import { GlobalConfigManager } from "./core/leoConfig";
+import { Position } from "./core/leoNodes";
 
 /**
  * Creates and manages instances of the UI elements along with their events

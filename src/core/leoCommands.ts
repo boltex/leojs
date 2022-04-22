@@ -4,25 +4,17 @@
 //@+node:felix.20210220194059.1: ** << imports >>
 import * as vscode from "vscode";
 import * as path from 'path';
-process.hrtime = require('browser-process-hrtime');
-
-// import 'browser-hrtime';
-// require('browser-hrtime');
-
 import * as g from './leoGlobals';
 import { LeoUI, NullGui } from '../leoUI';
 import { DummyFileCommands, FileCommands } from "./leoFileCommands";
 import { CommanderOutlineCommands } from "../commands/commanderOutlineCommands";
 import { CommanderFileCommands } from "../commands/commanderFileCommands";
 import { CommanderEditCommands } from "../commands/commanderEditCommands";
-
 import { Position, VNode, StackEntry, NodeIndices } from "./leoNodes";
 import { NodeHistory } from './leoHistory';
 import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
 import { AtFile } from './leoAtFile';
-// import * as fs from 'fs';
-// import * as sqlite3 from 'sqlite3';
 import { LeoFind } from './leoFind';
 import { LeoImportCommands } from './leoImport';
 

@@ -33,7 +33,6 @@ export function run(): Promise<void> {
 						console.log('ERRORS 20 seconds timeout to view extension instance');
 						setTimeout(() => {
 							e(new Error(`${failures} tests failed.`));
-
 						}, 20000);
 					} else {
 						console.log('SUCCESS 20 seconds timeout to view extension instance');

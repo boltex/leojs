@@ -578,7 +578,7 @@ import * as utils from "./utils";
 import * as g from './core/leoGlobals';
 import { LeoApp } from './core/leoApp';
 import { LoadManager } from "./core/leoApp";
-process.hrtime = require('browser-process-hrtime');
+process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
 @language typescript
 @tabwidth -4
@@ -623,10 +623,6 @@ import { Constants } from "./constants";
 import { IconConstants } from "./iconConstants";
 import { Icon } from "./types";
 import { LeoOutlineNode } from "./leoOutline";
-process.hrtime = require('browser-process-hrtime');
-
-// import 'browser-hrtime';
-// require('browser-hrtime');
 
 // String and other types/structures helper functions, along with common vscode API calls
 
@@ -2517,7 +2513,6 @@ export interface LeoButton {
 </t>
 <t tx="felix.20201214194144.1">import * as vscode from "vscode";
 import { debounce } from "lodash";
-process.hrtime = require('browser-process-hrtime');
 
 import * as utils from "./utils";
 import * as commandBindings from "./commandBindings";
@@ -2535,8 +2530,7 @@ import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
 
 import * as g from './core/leoGlobals';
 import { Commands } from "./core/leoCommands";
-import { NodeIndices, Position, VNode } from "./core/leoNodes";
-import { GlobalConfigManager } from "./core/leoConfig";
+import { Position } from "./core/leoNodes";
 
 @language typescript
 @tabwidth -4
@@ -3192,6 +3186,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     &lt;&lt; devDependencies &gt;&gt;
   },
   "dependencies": {
+    "bowser": "^2.11.0",
     &lt;&lt; dependencies &gt;&gt;
   }
 }

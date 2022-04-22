@@ -3,23 +3,14 @@
 //@+<< imports >>
 //@+node:felix.20210220195150.1: ** << imports >>
 import * as vscode from "vscode";
-
 import * as g from './leoGlobals';
 import { VNode, Position } from './leoNodes';
 import { Commands } from './leoCommands';
 import { new_cmd_decorator } from './decorators';
-
 import "date-format-lite";
 import * as et from 'elementtree';
 import * as md5 from 'md5';
-process.hrtime = require('browser-process-hrtime');
 
-// import 'browser-hrtime';
-// require('browser-hrtime');
-// import * as fs from 'fs';
-// import * as sqlite3 from 'sqlite3';
-
-// import difflib from 'difflib';
 var difflib = require('difflib');
 // example :
 // const matcher = new difflib.SequenceMatcher(null, sttWordsStripped, transcriptWordsStripped);

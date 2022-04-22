@@ -3,14 +3,8 @@
 //@+<< imports >>
 //@+node:felix.20210102211149.1: ** << imports >> (leoApp)
 import * as vscode from "vscode";
-process.hrtime = require('browser-process-hrtime');
-
-// const leojsPackageJson = require('../../package.json');
-// import 'browser-hrtime';
-// require('browser-hrtime');
-
+import * as Bowser from "bowser";
 import * as os from "os";
-// import * as fs from 'fs';
 import * as path from 'path';
 import * as g from './leoGlobals';
 import * as utils from "../utils";
@@ -900,7 +894,11 @@ export class LeoApp {
 
     //@+node:felix.20220417165216.1: *4* app.computeSignon & printSignon
     public computeSignon(): void {
+
         const app = this;
+        if (app.signon && app.signon1) {
+            return;
+        }
 
         let guiVersion = ', ' + 'VSCode version ' + vscode.version;
 
@@ -912,7 +910,31 @@ export class LeoApp {
         // n1, n2, n3, junk1, junk2 = sys.version_info
         const n1: string = process.version;
 
-        const sysVersion: string = process.platform;
+        let sysVersion: string = "Browser";
+
+        if (process.platform) {
+            sysVersion = process.platform;
+        } else {
+            let browserResult: any;
+            //@ts-expect-error
+            if (navigator.userAgent) {
+                //@ts-expect-error
+                browserResult = Bowser.parse(navigator.userAgent);
+                sysVersion = browserResult.browser.name;
+                if (browserResult.browser.version) {
+                    sysVersion += " " + browserResult.browser.version;
+                }
+
+                if (browserResult.os) {
+                    if (browserResult.os.name) {
+                        sysVersion += " on " + browserResult.os.name;
+                    }
+                    if (browserResult.os.version) {
+                        sysVersion += " " + browserResult.os.version;
+                    }
+                }
+            }
+        }
         // TODO: fleshout Windows info
         /*
         if sys.platform.startswith('win'):
