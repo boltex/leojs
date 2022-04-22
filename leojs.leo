@@ -8431,6 +8431,7 @@ public finishStartup(): void {
     // }, 0);
 
     setTimeout(() =&gt; {
+        this.showOutline();
         this._setupRefresh(true,
             { tree: true, body: true, documents: true, buttons: true, states: true }
         );

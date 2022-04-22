@@ -356,6 +356,7 @@ export class LeoUI {
         // }, 0);
 
         setTimeout(() => {
+            this.showOutline();
             this._setupRefresh(true,
                 { tree: true, body: true, documents: true, buttons: true, states: true }
             );

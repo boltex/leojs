@@ -900,7 +900,7 @@ export class LeoApp {
             return;
         }
 
-        let guiVersion = ', ' + 'VSCode version ' + vscode.version;
+        let guiVersion = 'VSCode version ' + vscode.version;
 
         const w_leoIntegExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
         const w_leojsPackageJson = w_leoIntegExtension.packageJSON;
@@ -908,7 +908,26 @@ export class LeoApp {
         const leoVer: string = w_leojsPackageJson.version;
 
         // n1, n2, n3, junk1, junk2 = sys.version_info
-        const n1: string = process.version;
+        let n1: string = "";
+        if (process.version) {
+            n1 = 'Node.js ' + process.version;
+            //@ts-expect-error
+        } else if (location.hostname) {
+            //@ts-expect-error
+            n1 = location.hostname;
+            // if dots take 2 last parts
+            if (n1.includes('.')) {
+                let n1_split = n1.split('.');
+                if (n1_split.length > 2) {
+                    n1_split = n1_split.slice(-2);
+                }
+                n1 = n1_split.join(".");
+            }
+
+        }
+        if (n1) {
+            n1 += ', ';
+        }
 
         let sysVersion: string = "Browser";
 
@@ -977,7 +996,7 @@ export class LeoApp {
         }
         app.signon = signon.join('');
         // Compute g.app.signon1.
-        app.signon1 = `Node.js ${n1}${guiVersion}\n${sysVersion}`;
+        app.signon1 = `${n1}${guiVersion}\n${sysVersion}`;
     }
 
     /**
