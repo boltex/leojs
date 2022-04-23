@@ -23,7 +23,7 @@
 			"request": "launch",
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
+				"--extensionTestsPath=${workspaceFolder}/out/test/suite/index-node"
 			],
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js",
@@ -38,7 +38,7 @@
 			"args": [
 				"--disable-extensions",
 				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
+				"--extensionTestsPath=${workspaceFolder}/out/test/suite/index-node"
 			],
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js",

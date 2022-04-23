@@ -14,8 +14,6 @@ import * as path from 'path';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
-import G = require("glob");
-import { LeoUI } from "../leoUI";
 
 /*
     import binascii
@@ -55,6 +53,7 @@ import { LeoUI } from "../leoUI";
 
 //@-<< imports >>
 
+// TODO: Make those platform detection methods better with 'bowser' js lib 
 export const isBrowser: boolean = (process as any)?.browser;
 export const isMac: boolean = process.platform?.startsWith('darwin');
 export const isWindows: boolean = process.platform?.startsWith('win');

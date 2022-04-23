@@ -294,7 +294,7 @@ export class Commands {
      */
     private initSettings(previousSettings: any): void {
         const c: Commands = this;
-        c.config = new LocalConfigManager(c);
+        c.config = new LocalConfigManager(c, previousSettings);
         g.app.config.setIvarsFromSettings(c);
     }
 

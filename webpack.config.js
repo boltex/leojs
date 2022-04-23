@@ -1,6 +1,7 @@
 const path = require("path");
 const webpack = require("webpack");
 const WebpackShellPluginNext = require('webpack-shell-plugin-next');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const webConfig = /** @type WebpackConfig */ {
   context: __dirname,
@@ -14,6 +15,20 @@ const webConfig = /** @type WebpackConfig */ {
     filename: "[name].js",
     path: path.join(__dirname, "./dist"),
     libraryTarget: "commonjs",
+  },
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        parallel: true,
+        terserOptions: {
+          // https://github.com/webpack-contrib/terser-webpack-plugin
+          mangle: false,
+          keep_classnames: true,
+          keep_fnames: true,
+        },
+      }),
+    ],
   },
   resolve: {
     mainFields: ["browser", "module", "main"], // look for `browser` entry point in imported node modules
@@ -86,6 +101,20 @@ const nodeConfig = /** @type WebpackConfig */ {
     "test/suite/index-node": "./src/test/suite/index-node.ts", // source of the node extension test runner
     "test/extension.test": "./src/test/extension.test.ts", // create a separate file for the tests, to be found by glob
     "test/runTest": "./src/test/runTest", // used to start the VS Code test runner (@vscode/test-electron)
+  },
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        parallel: true,
+        terserOptions: {
+          // https://github.com/webpack-contrib/terser-webpack-plugin
+          mangle: false,
+          keep_classnames: true,
+          keep_fnames: true,
+        },
+      }),
+    ],
   },
   output: {
     filename: "[name].js",

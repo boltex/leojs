@@ -12,3 +12,6 @@ webpack.config.js
 **/.eslintrc.json
 **/*.map
 **/*.ts
+*.leo
+prepare.js
+cleanup.js

@@ -5363,6 +5363,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 "glob": "^7.2.0",
 "mocha": "^9.1.3",
 "process": "^0.11.10",
+"terser-webpack-plugin": "^5.3.1",
 "ts-loader": "^9.2.6",
 "typescript": "^4.5.5",
 "webpack": "^5.70.0",

@@ -23,6 +23,8 @@ export function run(): Promise<void> {
 			// Add files to the test suite
 			files.sort(); // Make extension.test.ts first , alphabetically, before leo...test.ts
 			files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
+			mocha.files.sort();
+			console.log(mocha.files);
 
 			try {
 				// Run the mocha test
