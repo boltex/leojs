@@ -2738,7 +2738,7 @@ public showOutline(p_focusOutline?: boolean): void {
     }).then(
         () =&gt; { }, // Ok
         (p_error) =&gt; {
-            console.error('ERROR showOutline could not reveal: tree was refreshed!');
+            console.error('ERROR showOutline could not reveal: tree was refreshed!', 'Error:', p_error);
         }
     );
 }
@@ -2767,7 +2767,7 @@ public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
             this._lastLeoDocuments.reveal(p_documentNode, { select: true, focus: false }).then(
                 () =&gt; { }, // Ok
                 (p_error) =&gt; {
-                    console.error('ERROR setDocumentSelection could not reveal: tree was refreshed!');
+                    console.error('ERROR setDocumentSelection could not reveal: tree was refreshed!', 'Error:', p_error);
                 }
             );
         }
@@ -2795,7 +2795,7 @@ private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Positi
         this._lastTreeView.reveal(p_event.element).then(
             () =&gt; { }, // Ok
             (p_error) =&gt; {
-                console.error('ERROR _onChangeCollapsedState could not reveal: tree was refreshed!');
+                console.error('ERROR _onChangeCollapsedState could not reveal: tree was refreshed!', 'Error:', p_error);
             }
         );
         this.selectTreeNode(p_event.element, true);
@@ -2871,7 +2871,7 @@ public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable&lt;unknown&
             q_reveal = this._lastTreeView.reveal(p_node).then(
                 () =&gt; { }, // Ok
                 (p_error) =&gt; {
-                    console.error('ERROR selectTreeNode could not reveal: tree was refreshed!');
+                    console.error('ERROR selectTreeNode could not reveal: tree was refreshed!', 'Error:', p_error);
                 }
             );
         }
@@ -3188,7 +3188,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "dependencies": {
     "bowser": "^2.11.0",
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "acfd806",
+  "gitBranch": "devel",
+  "gitDate": "2022-04-24 00:17:00 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -6196,7 +6199,7 @@ public gotSelectedNode(p_node: Position): void {
                     this.lastCommandRefreshTimer = undefined;
                 },
                 (p_error) =&gt; {
-                    console.error('ERROR gotSelectedNode could not reveal: tree was refreshed!');
+                    console.error('ERROR gotSelectedNode could not reveal: tree was refreshed!', 'Error:', p_error);
                 }
             );
             // Done, so reset reveal type 'flag'
@@ -7580,7 +7583,7 @@ public setUndoSelection(p_undoNode: LeoUndoNode): void {
             this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
                 () =&gt; { }, // Ok - do nothing
                 (p_error) =&gt; {
-                    console.error('ERROR setUndoSelection could not reveal: tree was refreshed!');
+                    console.error('ERROR setUndoSelection could not reveal: tree was refreshed!', 'Error:', p_error);
                 }
             );
         }

@@ -626,6 +626,7 @@ export class FileCommands extends DummyFileCommands {
 
         this.leo_file_encoding = c.config.new_leo_file_encoding;
         console.log('in CONSTRUCTOR : leo_file_encoding', this.leo_file_encoding);
+
         // For reading...
         this.checking = false;  // True: checking only: do *not* alter the outline.
         this.descendentExpandedList = [];

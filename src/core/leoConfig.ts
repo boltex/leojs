@@ -218,7 +218,7 @@ export class GlobalConfigManager {
         this.inited = true;
 
         this.initDicts();
-        // this.initIvarsFromSettings(); // TODO ?
+        this.initIvarsFromSettings();
         this.initRecentFiles();
 
     }
@@ -256,6 +256,8 @@ export class GlobalConfigManager {
         });
 
         this.encodingIvarsData.forEach(element => {
+            console.log('encodingIvarsData', element);
+
             [key, kind, val] = element;
             this.encodingIvarsDict.d[this.munge(key)!] = new g.GeneralSetting(
                 {
@@ -263,6 +265,9 @@ export class GlobalConfigManager {
                 }
             );
         });
+
+        console.log('init dict in a.app.config\'s GlobalConfigManager:', this);
+
 
     }
 
@@ -289,6 +294,7 @@ export class GlobalConfigManager {
         // Important: The key is munged.
         const gs = this.encodingIvarsDict.get(key);
         (this as any)[gs.ivar!] = gs.encoding;
+
         if (gs.encoding && !g.isValidEncoding(gs.encoding)) {
             g.es('g.app.config: bad encoding: ' + `${gs.ivar}: ${gs.encoding}`);
         }
@@ -750,11 +756,10 @@ export class LocalConfigManager {
     public defaultMenuFontSize: number;
     public defaultTreeFontSize: number;
 
-    // TODO : REPLACE WITH REAL TRANSLATION FROM LEO
-    public default_derived_file_encoding!: string;//  = "utf-8";
-    public default_at_auto_file_encoding!: string;// = "utf-8";
-    public new_leo_file_encoding!: string; // = "UTF-8";
-    public save_clears_undo_buffer!: boolean; // = false;
+    public default_derived_file_encoding!: string;
+    public default_at_auto_file_encoding!: string;
+    public new_leo_file_encoding!: string;
+    public save_clears_undo_buffer!: boolean;
 
     public use_plugins!: boolean;
     public create_nonexistent_directories!: boolean;
@@ -826,11 +831,18 @@ export class LocalConfigManager {
         const encodingName = gs.ivar!;
         let encoding = this.get(encodingName, 'string');
         // Use the global setting as a last resort.
+        console.log('encoding', encoding);
+        console.log('encodingName', encodingName);
+
         // TODO check if needed
         if (!encoding) {
             encoding = (g.app.config as any)[encodingName];
         }
         (this as any)[encodingName] = encoding;
+
+        console.log('encoding again', encoding);
+        console.log('encodingName again', encodingName);
+
         if (encoding && !g.isValidEncoding(encoding)) {
             g.es('bad', `${encodingName}: ${encoding}`);
         }
@@ -1020,7 +1032,8 @@ export class LocalConfigManager {
         if (gs instanceof g.GeneralSetting) {
             console.log('ok is gs ', gs);
         } else {
-            console.log('NOT GS', gs);
+            console.log('_________________________NOT GS', gs);
+            console.log((new Error).stack);
 
         }
 

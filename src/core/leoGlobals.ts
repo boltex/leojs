@@ -2266,8 +2266,14 @@ export function doHook(tag: string, keywords?: { [key: string]: any }): any {
     // pylint: disable=consider-using-ternary
     let f = (c && c.hookFunction) || app.hookFunction;
     if (!f) {
-        app.hookFunction = app.pluginsController.doPlugins;
-        f = app.hookFunction;
+
+        if (!!app.pluginsController) {
+            app.hookFunction = app.pluginsController?.doPlugins;
+            if (app.hookFunction) {
+                f = app.hookFunction;
+            }
+        }
+
     }
     if (!f) {
         console.log('todo: doHook for', tag);

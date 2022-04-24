@@ -468,7 +468,7 @@ export class LeoUI {
         }).then(
             () => { }, // Ok
             (p_error) => {
-                console.error('ERROR showOutline could not reveal: tree was refreshed!');
+                console.error('ERROR showOutline could not reveal: tree was refreshed!', 'Error:', p_error);
             }
         );
     }
@@ -517,7 +517,7 @@ export class LeoUI {
                         this.lastCommandRefreshTimer = undefined;
                     },
                     (p_error) => {
-                        console.error('ERROR gotSelectedNode could not reveal: tree was refreshed!');
+                        console.error('ERROR gotSelectedNode could not reveal: tree was refreshed!', 'Error:', p_error);
                     }
                 );
                 // Done, so reset reveal type 'flag'
@@ -686,7 +686,7 @@ export class LeoUI {
                 this._lastLeoDocuments.reveal(p_documentNode, { select: true, focus: false }).then(
                     () => { }, // Ok
                     (p_error) => {
-                        console.error('ERROR setDocumentSelection could not reveal: tree was refreshed!');
+                        console.error('ERROR setDocumentSelection could not reveal: tree was refreshed!', 'Error:', p_error);
                     }
                 );
             }
@@ -710,7 +710,7 @@ export class LeoUI {
                 this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
                     () => { }, // Ok - do nothing
                     (p_error) => {
-                        console.error('ERROR setUndoSelection could not reveal: tree was refreshed!');
+                        console.error('ERROR setUndoSelection could not reveal: tree was refreshed!', 'Error:', p_error);
                     }
                 );
             }
@@ -755,7 +755,7 @@ export class LeoUI {
             this._lastTreeView.reveal(p_event.element).then(
                 () => { }, // Ok
                 (p_error) => {
-                    console.error('ERROR _onChangeCollapsedState could not reveal: tree was refreshed!');
+                    console.error('ERROR _onChangeCollapsedState could not reveal: tree was refreshed!', 'Error:', p_error);
                 }
             );
             this.selectTreeNode(p_event.element, true);
@@ -974,7 +974,7 @@ export class LeoUI {
                 q_reveal = this._lastTreeView.reveal(p_node).then(
                     () => { }, // Ok
                     (p_error) => {
-                        console.error('ERROR selectTreeNode could not reveal: tree was refreshed!');
+                        console.error('ERROR selectTreeNode could not reveal: tree was refreshed!', 'Error:', p_error);
                     }
                 );
             }
