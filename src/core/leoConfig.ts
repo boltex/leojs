@@ -139,8 +139,6 @@ export class GlobalConfigManager {
         ["write_strips_blank_lines", "bool", false],
     ];
 
-
-
     //@-<< gcm.ivarsDict >>
 
     public use_plugins: boolean;
@@ -189,7 +187,6 @@ export class GlobalConfigManager {
             // this.relative_path_base_directory = '!';
         }
 
-
         this.use_plugins = false;  // Required to keep pylint happy.
         this.create_nonexistent_directories = false;  // Required to keep pylint happy.
         this.atCommonButtonsList = []; // List of info for common @buttons nodes.
@@ -231,7 +228,6 @@ export class GlobalConfigManager {
         // Only the settings parser needs to search all dicts.
         this.dictList = [this.defaultsDict];
 
-
         let key: string;
         let kind: string;
         let val: any;
@@ -256,8 +252,6 @@ export class GlobalConfigManager {
         });
 
         this.encodingIvarsData.forEach(element => {
-            console.log('encodingIvarsData', element);
-
             [key, kind, val] = element;
             this.encodingIvarsDict.d[this.munge(key)!] = new g.GeneralSetting(
                 {
@@ -265,9 +259,6 @@ export class GlobalConfigManager {
                 }
             );
         });
-
-        console.log('init dict in a.app.config\'s GlobalConfigManager:', this);
-
 
     }
 
@@ -417,8 +408,10 @@ export class GlobalConfigManager {
         // It *is* valid to call this method: it returns the global settings.
         const d = lm!.globalSettingsDict;
         if (d) {
-            // ? needed ?
+
             // assert isinstance(d, g.TypedDict), repr(d)
+            console.assert(d instanceof g.TypedDict, d.toString());
+
             let val: any;
             let junk: boolean;
 
@@ -441,8 +434,9 @@ export class GlobalConfigManager {
         if (!gs) {
             return [undefined, false];
         }
-        // ? needed ?
-        // assert isinstance(gs, g.GeneralSetting), repr(gs)
+
+        console.assert(gs instanceof g.GeneralSetting, gs.toString());
+
         const val = gs.val;
         const isNone = ['Undefined', 'None', 'none', ''].includes(val);
         if (!this.typesMatch(gs.kind, requestedType)) {
@@ -831,17 +825,11 @@ export class LocalConfigManager {
         const encodingName = gs.ivar!;
         let encoding = this.get(encodingName, 'string');
         // Use the global setting as a last resort.
-        console.log('encoding', encoding);
-        console.log('encodingName', encodingName);
 
-        // TODO check if needed
         if (!encoding) {
             encoding = (g.app.config as any)[encodingName];
         }
         (this as any)[encodingName] = encoding;
-
-        console.log('encoding again', encoding);
-        console.log('encodingName again', encodingName);
 
         if (encoding && !g.isValidEncoding(encoding)) {
             g.es('bad', `${encodingName}: ${encoding}`);
@@ -1003,7 +991,7 @@ export class LocalConfigManager {
         const d = this.settingsDict;
         if (d) {
             // assert isinstance(d, g.TypedDict), repr(d)
-            console.assert(d instanceof g.TypedDict);
+            console.assert(d instanceof g.TypedDict, d.toString());
             let val: any;
             let junk: any;
             [val, junk] = this.getValFromDict(d, setting, kind);
@@ -1029,16 +1017,7 @@ export class LocalConfigManager {
             return [undefined, false];
         }
 
-        if (gs instanceof g.GeneralSetting) {
-            console.log('ok is gs ', gs);
-        } else {
-            console.log('_________________________NOT GS', gs);
-            console.log((new Error).stack);
-
-        }
-
-        // assert isinstance(gs, g.GeneralSetting), repr(gs)
-        // console.assert(gs instanceof g.GeneralSetting);
+        console.assert(gs instanceof g.GeneralSetting, gs.toString());
 
         const val = gs.val;
         const isNone = ['None', 'none', ''].includes(val);

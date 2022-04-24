@@ -84,14 +84,13 @@ export class Commands {
             tree: {
                 generation: 0,
                 editLabel: (p: Position, selectAll: boolean, selection: any) => {
-                    console.log("TODO: editLabel of c.frame.tree.editLabel");
+                    console.log("TODO: editLabel not used in leojs. From c.frame.tree.editLabel");
                 }
             },
             body: {
                 wrapper: {
                     setAllText: (s: string) => {
-                        console.log('TODO: setAllText of "frame.body.wrapper"');
-
+                        console.log('TODO: setAllText of c.frame.body.wrapper');
                     }
                 }
 
@@ -3250,8 +3249,8 @@ export class Commands {
             // TODO : allow headline rename ?
             // This should request focus.
 
-            // TODO : On init UI should use this to flag 'edit headline'
-            c.frame.tree.editLabel(p, selectAll, selection);
+            // * Unused in leojs *
+            // c.frame.tree.editLabel(p, selectAll, selection);
 
             if (k && !keepMinibuffer) {
                 // Setting the input state has no effect on focus.

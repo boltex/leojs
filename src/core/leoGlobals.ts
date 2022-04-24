@@ -622,7 +622,20 @@ export class TypedDict {
             this.keyType,
             this.valType
         );
-        newDict.d = JSON.parse(JSON.stringify(this.d));
+        // newDict.d = JSON.parse(JSON.stringify(this.d));
+        newDict.d = {};
+        for (const p_key in this.d) {
+            newDict.d[p_key] = new GeneralSetting({
+                kind: this.d[p_key].kind,
+                encoding: this.d[p_key].encoding,
+                ivar: this.d[p_key].ivar,
+                setting: this.d[p_key].setting,
+                val: this.d[p_key].val,
+                path: this.d[p_key].path,
+                tag: this.d[p_key].tag,
+                unl: this.d[p_key].unl
+            });
+        }
         return newDict;
     }
 
@@ -2253,11 +2266,8 @@ export function doHook(tag: string, keywords?: { [key: string]: any }): any {
     */
     if (!app.config.use_plugins) {
         if (['open0', 'start1'].includes(tag)) {
-
-            console.log("TODO: doHook called with tag:" + tag);
             console.log("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.");
             // warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.");
-
         }
         return undefined;
     }
@@ -2276,7 +2286,7 @@ export function doHook(tag: string, keywords?: { [key: string]: any }): any {
 
     }
     if (!f) {
-        console.log('todo: doHook for', tag);
+        console.log('TODO: (Plugin system) g.doHook for tag: ', tag);
         return;
     }
     try {
