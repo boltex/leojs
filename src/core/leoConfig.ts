@@ -11,6 +11,7 @@ import { Position } from './leoNodes';
 //@+node:felix.20220206213914.1: ** class GlobalConfigManager
 /**
  * A class to manage configuration settings.
+ * Used as g.app's config as 'g.app.config'
  */
 export class GlobalConfigManager {
 
@@ -175,7 +176,6 @@ export class GlobalConfigManager {
 
 
     //@+others
-
     //@+node:felix.20220207005211.1: *3* gcm.Birth...
     //@+node:felix.20220207005211.2: *4* gcm.ctor
     constructor() {
@@ -288,7 +288,7 @@ export class GlobalConfigManager {
     public initEncoding(key: string): void {
         // Important: The key is munged.
         const gs = this.encodingIvarsDict.get(key);
-        (this as any)[gs.ivar] = gs.encoding;
+        (this as any)[gs.ivar!] = gs.encoding;
         if (gs.encoding && !g.isValidEncoding(gs.encoding)) {
             g.es('g.app.config: bad encoding: ' + `${gs.ivar}: ${gs.encoding}`);
         }
@@ -307,7 +307,7 @@ export class GlobalConfigManager {
         const d = this.ivarsDict;
         const gs = d.get(key);
 
-        (this as any)[gs.ivar] = gs.val;
+        (this as any)[gs.ivar!] = gs.val;
         // setattr(self, gs.ivar, gs.val)
 
     }
@@ -340,7 +340,7 @@ export class GlobalConfigManager {
             if (gs) {
                 // ? needed ?
                 // assert isinstance(gs, g.GeneralSetting)
-                const ivar = gs.ivar;  // The actual name of the ivar.
+                const ivar = gs.ivar!;  // The actual name of the ivar.
                 const kind = gs.kind;
                 let val: any;
                 if (c) {
@@ -690,7 +690,7 @@ export class GlobalConfigManager {
             const gs = d.get(key);
             // assert isinstance(gs, g.GeneralSetting), repr(gs);
             if (gs && gs.kind) {
-                const letter: string = lm.computeBindingLetter(c, gs.path);
+                const letter: string = lm.computeBindingLetter(c, gs.path!);
                 let val: string[] | string = gs.val;
                 if (gs.kind === 'data') {
                     // #748: Remove comments
@@ -732,6 +732,7 @@ export class GlobalConfigManager {
         return None
      */
     //@-others
+
 
 }
 //@+node:felix.20220214191554.1: ** class LocalConfigManager
@@ -822,7 +823,7 @@ export class LocalConfigManager {
     public initEncoding(key: string): void {
         // Important: the key is munged.
         const gs = g.app.config.encodingIvarsDict.get(key);
-        const encodingName = gs.ivar;
+        const encodingName = gs.ivar!;
         let encoding = this.get(encodingName, 'string');
         // Use the global setting as a last resort.
         // TODO check if needed
@@ -840,7 +841,7 @@ export class LocalConfigManager {
         const c = this.c;
         // Important: the key is munged.
         const gs = g.app.config.ivarsDict.get(key);
-        const ivarName = gs.ivar;
+        const ivarName = gs.ivar!;
         const val = this.get(ivarName, undefined);
         if (val || !(this as any)[ivarName]) {
             // Set *both* the commander ivar and the c.config ivar.
@@ -990,6 +991,7 @@ export class LocalConfigManager {
         const d = this.settingsDict;
         if (d) {
             // assert isinstance(d, g.TypedDict), repr(d)
+            console.assert(d instanceof g.TypedDict);
             let val: any;
             let junk: any;
             [val, junk] = this.getValFromDict(d, setting, kind);
@@ -1008,13 +1010,23 @@ export class LocalConfigManager {
      * @param warn flag to have method warn if value not found
      * @returns array of value, and exist flag
      */
-    public getValFromDict(d: any, setting: string, requestedType?: string, warn = true): [any, boolean] {
+    public getValFromDict(d: g.TypedDict, setting: string, requestedType?: string, warn = true): [any, boolean] {
         const tag = 'c.config.getValFromDict';
-        const gs = d.get(g.app.config.munge(setting));
+        const gs = d.get(g.app.config.munge(setting)!);
         if (!gs) {
             return [undefined, false];
         }
+
+        if (gs instanceof g.GeneralSetting) {
+            console.log('ok is gs ', gs);
+        } else {
+            console.log('NOT GS', gs);
+
+        }
+
         // assert isinstance(gs, g.GeneralSetting), repr(gs)
+        // console.assert(gs instanceof g.GeneralSetting);
+
         const val = gs.val;
         const isNone = ['None', 'none', ''].includes(val);
         if (!this.typesMatch(gs.kind, requestedType)) {
@@ -1308,7 +1320,7 @@ export class LocalConfigManager {
             if (bi === undefined) {
                 return ['unknown setting', undefined];
             }
-            return [bi.path, bi.val];
+            return [bi.path!, bi.val];
         }
         //
         // lm.readGlobalSettingsFiles is opening a settings file.
@@ -1411,7 +1423,7 @@ export class LocalConfigManager {
         }
 
         // assert isinstance(gs, g.GeneralSetting), repr(gs)
-        let w_path: string = gs.path.toLowerCase();
+        let w_path: string = gs.path!.toLowerCase();
         ['myLeoSettings.leo', 'leoSettings.leo'].forEach(fn => {
             if (w_path.endsWith(fn.toLowerCase())) {
                 return false;
@@ -1513,7 +1525,7 @@ export class LocalConfigManager {
         let gs = d.get(key);
         if (gs) {
             // assert isinstance(gs, g.GeneralSetting), repr(gs)
-            let w_path = gs.path;
+            let w_path = gs.path!;
             if (warn && g.os_path_finalize(c.mFileName) !== g.os_path_finalize(w_path)) {  // #1341.
                 g.es("over-riding setting:", name, "from", w_path);
             }

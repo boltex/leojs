@@ -492,7 +492,7 @@ export class GeneralSetting {
  */
 export class TypedDict {
 
-    public d: { [key: string]: any };
+    public d: { [key: string]: GeneralSetting };
     public keyType: string;
     public valType: string;
 
@@ -564,6 +564,10 @@ export class TypedDict {
      */
     public add_to_list(key: string, val: any): void {
 
+        // ! Typing Needs Work !
+
+        // TODO : FIX THE TYPING !
+        /*
         if (key === undefined) {
             trace('TypeDict: None is not a valid key', callers());
             return;
@@ -573,6 +577,7 @@ export class TypedDict {
         this._checkValType(val);
 
         let aList;
+        // aList = this.d.get(key);
         if (this.d.hasOwnProperty(key)) {
             aList = this.d[key];
         } else {
@@ -583,6 +588,7 @@ export class TypedDict {
             aList.push(val);
             this.d[key] = aList;
         }
+        */
 
     }
 
@@ -621,7 +627,7 @@ export class TypedDict {
     }
 
     //@+node:felix.20220213000510.7: *4* td.get & keys & values
-    public get(key: string, p_default?: any): any {
+    public get(key: string, p_default?: any): GeneralSetting {
         if (this.d.hasOwnProperty(key)) {
             return this.d[key];
         } else {
@@ -680,7 +686,7 @@ export class TypedDict {
     public update(d: { [key: string]: any }): void {
         // if isinstance(d, TypedDict):
         if (d.hasOwnProperty('d')) {
-            this.d.update(d.d);
+            this.d = { ...this.d, ...d.d };
         } else {
             // this.d.update(d);
             this.d = {

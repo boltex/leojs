@@ -1874,39 +1874,6 @@ export class LoadManager {
             // g.app.pluginsController.finishCreate();
         });
 
-
-        /*
-            self.createAllImporterData()
-                # Can be done early. Uses only g.app.loadDir
-            assert g.app.loadManager
-            from leo.core import leoBackground
-            from leo.core import leoConfig
-            from leo.core import leoNodes
-            from leo.core import leoPlugins
-            from leo.core import leoSessions
-            # Import leoIPython only if requested.  The import is quite slow.
-            self.setStdStreams()
-            if g.app.useIpython:
-                from leo.core import leoIPython
-                    # This launches the IPython Qt Console.  It *is* required.
-                assert leoIPython  # suppress pyflakes/flake8 warning.
-            # Make sure we call the new leoPlugins.init top-level function.
-            leoPlugins.init()
-            # Force the user to set g.app.leoID.
-            g.app.setLeoID(verbose=verbose)
-
-            # Create early classes *after* doing plugins.init()
-            g.app.idleTimeManager = IdleTimeManager()
-            g.app.backgroundProcessManager = leoBackground.BackgroundProcessManager()
-            g.app.externalFilesController = leoExternalFiles.ExternalFilesController()
-            g.app.recentFilesManager = RecentFilesManager()
-            g.app.config = leoConfig.GlobalConfigManager()
-            g.app.nodeIndices = leoNodes.NodeIndices(g.app.leoID)
-            g.app.sessionManager = leoSessions.SessionManager()
-            # Complete the plugins class last.
-            g.app.pluginsController.finishCreate()
-        */
-
     }
 
     //@+node:felix.20210120004121.31: *4* LM.loadLocalFile & helpers

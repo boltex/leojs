@@ -86,12 +86,14 @@ export async function create_app(gui_name: string = 'null'): Promise<Commands> {
     const c = new Commands("", g.app.gui);
 
     // Create minimal config dictionaries.
-    // settings_d, bindings_d = lm.createDefaultSettingsDicts()
+    // let settings_d;
+    // let bindings_d;
+    // [settings_d, bindings_d] = lm.createDefaultSettingsDicts();
 
-    // lm.globalSettingsDict = settings_d
-    // lm.globalBindingsDict = bindings_d
-    // c.config.settingsDict = settings_d
-    // c.config.bindingsDict = bindings_d
+    // lm.globalSettingsDict = settings_d;
+    // lm.globalBindingsDict = bindings_d;
+    // c.config.settingsDict = settings_d;
+    // c.config.bindingsDict = bindings_d;
 
     assert.strictEqual(g.unitTesting, true, 'unit testing is set');  // Defensive.
 
