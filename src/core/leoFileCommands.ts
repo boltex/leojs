@@ -564,7 +564,7 @@ export class FastRead {
 export class FileCommands extends DummyFileCommands {
 
     public c: Commands;
-    public gnxDict: { [key: string]: VNode };
+    public gnxDict!: { [key: string]: VNode };
     // keys are gnx strings as returned by canonicalTnodeIndex.
     // Values are vnodes.
     // 2011/12/10: This dict is never re-inited.
@@ -576,30 +576,30 @@ export class FileCommands extends DummyFileCommands {
 
     // Init ivars of the FileCommands class.
     // General...
-    public mFileName: string;
-    public fileDate: number;
-    public leo_file_encoding: string;
+    public mFileName!: string;
+    public fileDate!: number;
+    public leo_file_encoding!: string;
     public tempCounter: number = 0;
     // For reading...
-    public checking: boolean;  // True: checking only: do *not* alter the outline.
-    public descendentExpandedList: string[];
-    public descendentMarksList: any[];
-    public forbiddenTnodes: any[];
-    public descendentTnodeUaDictList: any[];
-    public descendentVnodeUaDictList: any[];
-    public ratio: number;
+    public checking!: boolean;  // True: checking only: do *not* alter the outline.
+    public descendentExpandedList!: string[];
+    public descendentMarksList!: any[];
+    public forbiddenTnodes!: any[];
+    public descendentTnodeUaDictList!: any[];
+    public descendentVnodeUaDictList!: any[];
+    public ratio!: number;
     public currentVnode: VNode | undefined;
     // For writing...
-    public read_only: boolean;
+    public read_only!: boolean;
     public rootPosition: Position | undefined;
     public outputFile: any;
     public openDirectory: any;
-    public usingClipboard: boolean;
+    public usingClipboard!: boolean;
     public currentPosition: Position | undefined;
     // New in 3.12...
     public copiedTree: any;
 
-    public vnodesDict: { [key: string]: boolean };
+    public vnodesDict!: { [key: string]: boolean };
     // keys are gnx strings; values are booleans (ignored)
 
     //@+others
@@ -615,39 +615,9 @@ export class FileCommands extends DummyFileCommands {
             'descendentTnodeUnknownAttributes',
             'descendentVnodeUnknownAttributes',  // New in Leo 4.5.
             'expanded', 'marks', 't'
-            // 'vtag',
+            // 'tnodeList',  // Removed in Leo 4.7.
         ];
-
-        // Init ivars of the FileCommands class.
-        // General...
-        this.mFileName = "";
-        this.fileDate = -1;
-
-
-        this.leo_file_encoding = c.config.new_leo_file_encoding;
-        console.log('in CONSTRUCTOR : leo_file_encoding', this.leo_file_encoding);
-
-        // For reading...
-        this.checking = false;  // True: checking only: do *not* alter the outline.
-        this.descendentExpandedList = [];
-        this.descendentMarksList = [];
-        this.forbiddenTnodes = [];
-        this.descendentTnodeUaDictList = [];
-        this.descendentVnodeUaDictList = [];
-        this.ratio = 0.5;
-        this.currentVnode = undefined;
-        // For writing...
-        this.read_only = false;
-        this.rootPosition = undefined;
-        this.outputFile = undefined;
-        this.openDirectory = undefined;
-        this.usingClipboard = false;
-        this.currentPosition = undefined;
-        // New in 3.12...
-        this.copiedTree = undefined;
-        this.gnxDict = {}; // Keys are gnx strings. Values are vnodes.
-
-        this.vnodesDict = {};  // keys are gnx strings; values are ignored
+        this.initIvars();
 
     }
     //@+node:felix.20211222234753.1: *3* fc.initIvars
