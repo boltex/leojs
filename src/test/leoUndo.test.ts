@@ -265,7 +265,7 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.10: *3* TestUndo.test_deleteComments 2
-    test('2', async () => {
+    test('test_deleteComments_2', async () => {
         const c = self.c;
 
     });
