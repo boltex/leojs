@@ -3253,6 +3253,10 @@ export class FileCommands extends DummyFileCommands {
      */
     public putUnknownAttributes(v: VNode): string {
 
+        if (!v.unknownAttributes) {
+            return '';
+        }
+
         const attrDict = v.unknownAttributes;
 
         // if (isinstance(attrDict, dict)){
