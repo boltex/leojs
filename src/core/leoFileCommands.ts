@@ -3232,7 +3232,7 @@ export class FileCommands extends DummyFileCommands {
         // New in 4.3: leave string attributes starting with 'str_' alone.
         if (key.startsWith('str_')) {
 
-            if (typeof val === 'string') {
+            if (typeof val === 'string' || (val as any) instanceof String) {
                 val = g.toUnicode(val);
                 // attr = f' {key}="{xml.sax.saxutils.escape(val)}"'
                 attr = ` ${key}="${this.xmlEscape(val)}"`;
