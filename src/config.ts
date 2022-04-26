@@ -154,7 +154,7 @@ export class Config implements ConfigMembers {
                     .update("zoomLevel", p_settings.zoomLevel, true);
             } else {
                 vscode.window.showInformationMessage(
-                    "Value for zoom level should be between -12 and 12"
+                    Constants.USER_MESSAGES.ZOOM_LEVEL_RANGE_LIMIT
                 );
             }
         }
@@ -164,7 +164,7 @@ export class Config implements ConfigMembers {
                     .update("fontSize", p_settings.fontSize, true);
             } else {
                 vscode.window.showInformationMessage(
-                    "Value for font size should be between 6 and 30"
+                    Constants.USER_MESSAGES.FONT_SIZE_RANGE_LIMIT
                 );
             }
         }
@@ -209,14 +209,14 @@ export class Config implements ConfigMembers {
         if (w_result === false) {
             if (p_forced) {
                 this.setEnablePreview();
-                vscode.window.showInformationMessage("'Enable Preview' setting was set");
+                vscode.window.showInformationMessage(Constants.USER_MESSAGES.ENABLE_PREVIEW_SET);
             } else {
-                // if (!this._leoUI.finishedStartup) {
-                //     return;
-                // }
-                vscode.window.showWarningMessage("'Enable Preview' setting is recommended (currently disabled)", "Fix it")
+                vscode.window.showWarningMessage(
+                    Constants.USER_MESSAGES.ENABLE_PREVIEW_RECOMMEND,
+                    Constants.USER_MESSAGES.FIX_IT
+                )
                     .then(p_chosenButton => {
-                        if (p_chosenButton === "Fix it") {
+                        if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
                             vscode.commands.executeCommand(Constants.COMMANDS.SET_ENABLE_PREVIEW);
                         }
                     });
@@ -239,14 +239,14 @@ export class Config implements ConfigMembers {
         if (w_result === true) {
             if (p_forced) {
                 this.clearCloseEmptyGroups();
-                vscode.window.showInformationMessage("'Close Empty Groups' setting was cleared");
+                vscode.window.showInformationMessage(Constants.USER_MESSAGES.CLOSE_EMPTY_CLEARED);
             } else {
-                // if (!this._leoUI.finishedStartup) {
-                //     return;
-                // }
-                vscode.window.showWarningMessage("'Close Empty Groups' setting is NOT recommended!", "Fix it")
+                vscode.window.showWarningMessage(
+                    Constants.USER_MESSAGES.CLOSE_EMPTY_RECOMMEND,
+                    Constants.USER_MESSAGES.FIX_IT
+                )
                     .then(p_chosenButton => {
-                        if (p_chosenButton === "Fix it") {
+                        if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
                             vscode.commands.executeCommand(Constants.COMMANDS.CLEAR_CLOSE_EMPTY_GROUPS);
                         }
                     });
@@ -269,15 +269,15 @@ export class Config implements ConfigMembers {
         if (w_result === false) {
             if (p_forced) {
                 this.setCloseOnFileDelete();
-                vscode.window.showInformationMessage("'Close on File Delete' setting was set");
+                vscode.window.showInformationMessage(Constants.USER_MESSAGES.CLOSE_ON_DELETE_SET);
 
             } else {
-                // if (!this._leoUI.finishedStartup) {
-                //     return;
-                // }
-                vscode.window.showWarningMessage("'Close on File Delete' setting is recommended (currently disabled)", "Fix it")
+                vscode.window.showWarningMessage(
+                    Constants.USER_MESSAGES.CLOSE_ON_DELETE_RECOMMEND,
+                    Constants.USER_MESSAGES.FIX_IT
+                )
                     .then(p_chosenButton => {
-                        if (p_chosenButton === "Fix it") {
+                        if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
                             vscode.commands.executeCommand(Constants.COMMANDS.SET_CLOSE_ON_FILE_DELETE);
                         }
                     });

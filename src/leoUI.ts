@@ -1598,10 +1598,10 @@ export class LeoUI {
      */
     public showLeoIDMessage(): void {
         vscode.window.showInformationMessage(
-            "Leo ID not found. Please enter an id that identifies you uniquely.",
-            "Set Leo ID"
+            Constants.USER_MESSAGES.SET_LEO_ID_MESSAGE,
+            Constants.USER_MESSAGES.ENTER_LEO_ID
         ).then(p_chosenButton => {
-            if (p_chosenButton === "Set Leo ID") {
+            if (p_chosenButton === Constants.USER_MESSAGES.ENTER_LEO_ID) {
                 vscode.commands.executeCommand(Constants.COMMANDS.SET_LEO_ID);
             }
         });
@@ -1679,13 +1679,13 @@ export class LeoUI {
                     modal: true,
                     detail: message
                 },
-                ...["Yes", "No"]
+                ...[Constants.USER_MESSAGES.YES, Constants.USER_MESSAGES.NO]
             )
             .then((answer) => {
-                if (answer === "Yes") {
-                    return 'yes';
+                if (answer === Constants.USER_MESSAGES.YES) {
+                    return Constants.USER_MESSAGES.YES.toLowerCase();
                 } else {
-                    return 'no';
+                    return Constants.USER_MESSAGES.NO.toLowerCase();
                 }
             });
     }
@@ -1732,7 +1732,6 @@ export class LeoUI {
         return vscode.window.showSaveDialog(
             {
                 title: title,
-
                 filters: types
             }
         ).then((p_uri) => {
@@ -1741,7 +1740,6 @@ export class LeoUI {
             } else {
                 return "";
             }
-
         });
 
     }
@@ -1778,7 +1776,6 @@ export class LeoUI {
         // * Test hasParent
         console.log('p has parent: ', c.p.hasParent());
 
-
         // * test @cmd decorator and undoer
         // console.log('test @cmd decorator and undoer');
         // this.command("undo", undefined, {
@@ -1814,8 +1811,6 @@ export class LeoUI {
         //         if keepSelection and c.positionExists(old_p):
         //             # Only if 'keep' old position was set, and old_p still exists
         //             c.selectPosition(old_p)
-
-
 
         return Promise.resolve(true);
     }

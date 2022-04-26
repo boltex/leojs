@@ -5,6 +5,9 @@ import { LeoApp } from './core/leoApp';
 import { LoadManager } from "./core/leoApp";
 process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of process
 
+/**
+ * Entry point for Leo in Javascript.
+ */
 export function activate(p_context: vscode.ExtensionContext) {
 
     const w_start = process.hrtime(); // For calculating total startup time duration
@@ -15,12 +18,12 @@ export function activate(p_context: vscode.ExtensionContext) {
         vscode.window.showWarningMessage("g.app leojs application instance already exists!");
     }
 
+    // Initialize and run Leo
     console.assert(g.app);
     g.app.loadManager = new LoadManager(p_context);
     g.app.loadManager.load();
 
-    // * Log time taken for startup
-    console.log('leojs startup launched in ', utils.getDurationMs(w_start), 'ms');
+    console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
 
 }
 

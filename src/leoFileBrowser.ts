@@ -53,7 +53,7 @@ export class LeoFilesBrowser {
             if (p_saveAsFlag) {
                 // Choose file
                 vscode.window.showSaveDialog({
-                    saveLabel: "Save Leo File",
+                    saveLabel: Constants.USER_MESSAGES.SAVE_DIALOG_LABEL,
                     defaultUri: this._getBestOpenFolderUri(),
                     filters: { 'Leo File': ['leo'] }
                 })

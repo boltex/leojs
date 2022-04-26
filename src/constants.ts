@@ -56,6 +56,9 @@ export class Constants {
         ICON_LIGHT_PATH: "resources/light/box",
         ICON_DARK_PATH: "resources/dark/box",
         ICON_FILE_EXT: ".svg",
+        SVG_SHEME: "data",
+        SVG_OPEN: 'image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">',
+        SVG_CLOSE: "</svg>",
         STATUSBAR_INDICATOR: "$(keyboard) ",
         STATUSBAR_COLOR: "fb7c47",
         QUICK_OPEN_LEO_COMMANDS: ">leojs: ",
@@ -83,6 +86,7 @@ export class Constants {
             "3.  Select a node on which you want to run the script.\n" +
             "4.  Press the *new* button.",
         SAVE_CHANGES: "Save changes to",
+        SAVE_DIALOG_LABEL: "Save Leo File",
         BEFORE_CLOSING: "before closing?",
         CANCEL: "Cancel",
         OPEN_WITH_LEOJS: "Open this Leojs file?",
@@ -106,6 +110,18 @@ export class Constants {
         TOO_FAST: "Leo is busy! ", // with voluntary trailing space
         STATUSBAR_TOOLTIP_ON: "Leojs Key Bindings are in effect",
         STATUSBAR_TOOLTIP_OFF: "Leojs Key Bindings off",
+        ZOOM_LEVEL_RANGE_LIMIT: "Value for zoom level should be between -12 and 12",
+        FONT_SIZE_RANGE_LIMIT: "Value for font size should be between 6 and 30",
+        FIX_IT: "Fix it",
+        ENABLE_PREVIEW_SET: "'Enable Preview' setting was set",
+        ENABLE_PREVIEW_RECOMMEND: "'Enable Preview' setting is recommended (currently disabled)",
+        CLOSE_EMPTY_CLEARED: "'Close Empty Groups' setting was cleared",
+        CLOSE_EMPTY_RECOMMEND: "'Close Empty Groups' setting is NOT recommended!",
+        CLOSE_ON_DELETE_SET: "'Close on File Delete' setting was set",
+        CLOSE_ON_DELETE_RECOMMEND: "'Close on File Delete' setting is recommended (currently disabled)",
+        SET_LEO_ID_MESSAGE: "Leo ID not found. Please enter an id that identifies you uniquely.",
+        GET_LEO_ID_PROMPT: "Please enter an id that identifies you uniquely.\n(Letters and numbers only, and at least 3 characters in length)",
+        ENTER_LEO_ID: "Enter Leo id"
     };
 
     /**
@@ -540,8 +556,8 @@ export class Constants {
     };
 
     /**
-        * * Overridden 'good' minibuffer command name strings
-        */
+     * * Overridden 'good' minibuffer command name strings
+     */
     public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
         'paste-node': 'async-paste-node',
         'paste-retaining-clones': 'async-paste-retaining-clones',

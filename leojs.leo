@@ -765,12 +765,15 @@ export function buildNodeIconPaths(p_context: vscode.ExtensionContext): Icon[] {
     return Array(16).fill("").map((p_val, p_index) =&gt; {
         return {
             light: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' + '&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;' + IconConstants.nodeIcons[p_index &lt; 8 ? p_index + 8 : p_index - 8] + '&lt;/svg&gt;'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.nodeIcons[p_index &lt; 8 ? p_index + 8 : p_index - 8]}${Constants.GUI.SVG_OPEN}`
+                // 'image/svg+xml;utf8,' + '&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;' +
+                //  IconConstants.nodeIcons[p_index &lt; 8 ? p_index + 8 : p_index - 8] +
+                //   '&lt;/svg&gt;'
             }),
             dark: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' + '&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;' + IconConstants.nodeIcons[p_index] + '&lt;/svg&gt;'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.nodeIcons[p_index]}${Constants.GUI.SVG_OPEN}`
             })
         };
     });
@@ -786,34 +789,22 @@ export function buildDocumentIconPaths(p_context: vscode.ExtensionContext): Icon
     return [
         {
             light: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;' +
-                    IconConstants.leoDocuments[2] +
-                    '&lt;/svg&gt;'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[2]}${Constants.GUI.SVG_OPEN}`
             }),
             dark: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;' +
-                    IconConstants.leoDocuments[0] +
-                    '&lt;/svg&gt;'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[0]}${Constants.GUI.SVG_OPEN}`
             })
         },
         {
             light: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;' +
-                    IconConstants.leoDocuments[3] +
-                    '&lt;/svg&gt;'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[3]}${Constants.GUI.SVG_OPEN}`
             }),
             dark: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;' +
-                    IconConstants.leoDocuments[1] +
-                    '&lt;/svg&gt;'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[1]}${Constants.GUI.SVG_OPEN}`
             })
         }
     ];
@@ -829,34 +820,22 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
     return [
         {
             light: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;' +
-                    IconConstants.button[1] +
-                    '&lt;/svg&gt;'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.button[1]}${Constants.GUI.SVG_OPEN}`
             }),
             dark: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;' +
-                    IconConstants.button[0] +
-                    '&lt;/svg&gt;'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.button[0]}${Constants.GUI.SVG_OPEN}`
             })
         },
         {
             light: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;' +
-                    IconConstants.scriptButtons[1] +
-                    '&lt;/svg&gt;'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.scriptButtons[1]}${Constants.GUI.SVG_OPEN}`
             }),
             dark: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;' +
-                    IconConstants.scriptButtons[0] +
-                    '&lt;/svg&gt;'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.scriptButtons[0]}${Constants.GUI.SVG_OPEN}`
             })
         }
     ];
@@ -926,7 +905,7 @@ public getLeoFileUrl(p_saveAsFlag?: boolean): Promise&lt;string&gt; {
         if (p_saveAsFlag) {
             // Choose file
             vscode.window.showSaveDialog({
-                saveLabel: "Save Leo File",
+                saveLabel: Constants.USER_MESSAGES.SAVE_DIALOG_LABEL,
                 defaultUri: this._getBestOpenFolderUri(),
                 filters: { 'Leo File': ['leo'] }
             })
@@ -1074,7 +1053,10 @@ public refreshTreeRoot(): void {
 }
 
 </t>
-<t tx="felix.20201214150149.1">export function activate(p_context: vscode.ExtensionContext) {
+<t tx="felix.20201214150149.1">/**
+ * Entry point for Leo in Javascript.
+ */
+export function activate(p_context: vscode.ExtensionContext) {
 
     const w_start = process.hrtime(); // For calculating total startup time duration
 
@@ -1084,12 +1066,12 @@ public refreshTreeRoot(): void {
         vscode.window.showWarningMessage("g.app leojs application instance already exists!");
     }
 
+    // Initialize and run Leo
     console.assert(g.app);
     g.app.loadManager = new LoadManager(p_context);
     g.app.loadManager.load();
 
-    // * Log time taken for startup
-    console.log('leojs startup launched in ', utils.getDurationMs(w_start), 'ms');
+    console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
 
 }
 
@@ -1593,6 +1575,9 @@ public static GUI = {
     ICON_LIGHT_PATH: "resources/light/box",
     ICON_DARK_PATH: "resources/dark/box",
     ICON_FILE_EXT: ".svg",
+    SVG_SHEME: "data",
+    SVG_OPEN: 'image/svg+xml;utf8,&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;',
+    SVG_CLOSE: "&lt;/svg&gt;",
     STATUSBAR_INDICATOR: "$(keyboard) ",
     STATUSBAR_COLOR: "fb7c47",
     QUICK_OPEN_LEO_COMMANDS: "&gt;leojs: ",
@@ -1621,6 +1606,7 @@ public static USER_MESSAGES = {
         "3.  Select a node on which you want to run the script.\n" +
         "4.  Press the *new* button.",
     SAVE_CHANGES: "Save changes to",
+    SAVE_DIALOG_LABEL: "Save Leo File",
     BEFORE_CLOSING: "before closing?",
     CANCEL: "Cancel",
     OPEN_WITH_LEOJS: "Open this Leojs file?",
@@ -1644,6 +1630,18 @@ public static USER_MESSAGES = {
     TOO_FAST: "Leo is busy! ", // with voluntary trailing space
     STATUSBAR_TOOLTIP_ON: "Leojs Key Bindings are in effect",
     STATUSBAR_TOOLTIP_OFF: "Leojs Key Bindings off",
+    ZOOM_LEVEL_RANGE_LIMIT: "Value for zoom level should be between -12 and 12",
+    FONT_SIZE_RANGE_LIMIT: "Value for font size should be between 6 and 30",
+    FIX_IT: "Fix it",
+    ENABLE_PREVIEW_SET: "'Enable Preview' setting was set",
+    ENABLE_PREVIEW_RECOMMEND: "'Enable Preview' setting is recommended (currently disabled)",
+    CLOSE_EMPTY_CLEARED: "'Close Empty Groups' setting was cleared",
+    CLOSE_EMPTY_RECOMMEND: "'Close Empty Groups' setting is NOT recommended!",
+    CLOSE_ON_DELETE_SET: "'Close on File Delete' setting was set",
+    CLOSE_ON_DELETE_RECOMMEND: "'Close on File Delete' setting is recommended (currently disabled)",
+    SET_LEO_ID_MESSAGE: "Leo ID not found. Please enter an id that identifies you uniquely.",
+    GET_LEO_ID_PROMPT: "Please enter an id that identifies you uniquely.\n(Letters and numbers only, and at least 3 characters in length)",
+    ENTER_LEO_ID: "Enter Leo id"
 };
 
 </t>
@@ -5481,7 +5479,6 @@ public test(): Thenable&lt;unknown&gt; {
     // * Test hasParent
     console.log('p has parent: ', c.p.hasParent());
 
-
     // * test @cmd decorator and undoer
     // console.log('test @cmd decorator and undoer');
     // this.command("undo", undefined, {
@@ -5517,8 +5514,6 @@ public test(): Thenable&lt;unknown&gt; {
     //         if keepSelection and c.positionExists(old_p):
     //             # Only if 'keep' old position was set, and old_p still exists
     //             c.selectPosition(old_p)
-
-
 
     return Promise.resolve(true);
 }
@@ -6476,14 +6471,14 @@ public checkEnablePreview(p_forced?: boolean): void {
     if (w_result === false) {
         if (p_forced) {
             this.setEnablePreview();
-            vscode.window.showInformationMessage("'Enable Preview' setting was set");
+            vscode.window.showInformationMessage(Constants.USER_MESSAGES.ENABLE_PREVIEW_SET);
         } else {
-            // if (!this._leoUI.finishedStartup) {
-            //     return;
-            // }
-            vscode.window.showWarningMessage("'Enable Preview' setting is recommended (currently disabled)", "Fix it")
+            vscode.window.showWarningMessage(
+                Constants.USER_MESSAGES.ENABLE_PREVIEW_RECOMMEND,
+                Constants.USER_MESSAGES.FIX_IT
+            )
                 .then(p_chosenButton =&gt; {
-                    if (p_chosenButton === "Fix it") {
+                    if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
                         vscode.commands.executeCommand(Constants.COMMANDS.SET_ENABLE_PREVIEW);
                     }
                 });
@@ -6507,14 +6502,14 @@ public checkCloseEmptyGroups(p_forced?: boolean): void {
     if (w_result === true) {
         if (p_forced) {
             this.clearCloseEmptyGroups();
-            vscode.window.showInformationMessage("'Close Empty Groups' setting was cleared");
+            vscode.window.showInformationMessage(Constants.USER_MESSAGES.CLOSE_EMPTY_CLEARED);
         } else {
-            // if (!this._leoUI.finishedStartup) {
-            //     return;
-            // }
-            vscode.window.showWarningMessage("'Close Empty Groups' setting is NOT recommended!", "Fix it")
+            vscode.window.showWarningMessage(
+                Constants.USER_MESSAGES.CLOSE_EMPTY_RECOMMEND,
+                Constants.USER_MESSAGES.FIX_IT
+            )
                 .then(p_chosenButton =&gt; {
-                    if (p_chosenButton === "Fix it") {
+                    if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
                         vscode.commands.executeCommand(Constants.COMMANDS.CLEAR_CLOSE_EMPTY_GROUPS);
                     }
                 });
@@ -6538,15 +6533,15 @@ public checkCloseOnFileDelete(p_forced?: boolean): void {
     if (w_result === false) {
         if (p_forced) {
             this.setCloseOnFileDelete();
-            vscode.window.showInformationMessage("'Close on File Delete' setting was set");
+            vscode.window.showInformationMessage(Constants.USER_MESSAGES.CLOSE_ON_DELETE_SET);
 
         } else {
-            // if (!this._leoUI.finishedStartup) {
-            //     return;
-            // }
-            vscode.window.showWarningMessage("'Close on File Delete' setting is recommended (currently disabled)", "Fix it")
+            vscode.window.showWarningMessage(
+                Constants.USER_MESSAGES.CLOSE_ON_DELETE_RECOMMEND,
+                Constants.USER_MESSAGES.FIX_IT
+            )
                 .then(p_chosenButton =&gt; {
-                    if (p_chosenButton === "Fix it") {
+                    if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
                         vscode.commands.executeCommand(Constants.COMMANDS.SET_CLOSE_ON_FILE_DELETE);
                     }
                 });
@@ -6788,7 +6783,7 @@ public setFontConfig(p_settings: FontSettings): void {
                 .update("zoomLevel", p_settings.zoomLevel, true);
         } else {
             vscode.window.showInformationMessage(
-                "Value for zoom level should be between -12 and 12"
+                Constants.USER_MESSAGES.ZOOM_LEVEL_RANGE_LIMIT
             );
         }
     }
@@ -6798,7 +6793,7 @@ public setFontConfig(p_settings: FontSettings): void {
                 .update("fontSize", p_settings.fontSize, true);
         } else {
             vscode.window.showInformationMessage(
-                "Value for font size should be between 6 and 30"
+                Constants.USER_MESSAGES.FONT_SIZE_RANGE_LIMIT
             );
         }
     }
@@ -7472,12 +7467,6 @@ export class LeoUndoNode extends vscode.TreeItem {
 
     ) {
         super(bead.undoType || "unknown");
-        // Setup this instance (just differentiate 'script-button' for now)
-        // this.command = {
-        //     command: Constants.COMMANDS.CLICK_BUTTON,
-        //     title: '',
-        //     arguments: [this]
-        // };
         this.contextValue = "leojsUndoNode";
     }
 
@@ -8002,8 +7991,8 @@ public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
 
 </t>
 <t tx="felix.20220103222715.1">/**
-    * * Overridden 'good' minibuffer command name strings
-    */
+ * * Overridden 'good' minibuffer command name strings
+ */
 public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     'paste-node': 'async-paste-node',
     'paste-retaining-clones': 'async-paste-retaining-clones',
@@ -8066,7 +8055,6 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     return vscode.window.showSaveDialog(
         {
             title: title,
-
             filters: types
         }
     ).then((p_uri) =&gt; {
@@ -8075,7 +8063,6 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
         } else {
             return "";
         }
-
     });
 
 }
@@ -8123,13 +8110,13 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
                 modal: true,
                 detail: message
             },
-            ...["Yes", "No"]
+            ...[Constants.USER_MESSAGES.YES, Constants.USER_MESSAGES.NO]
         )
         .then((answer) =&gt; {
-            if (answer === "Yes") {
-                return 'yes';
+            if (answer === Constants.USER_MESSAGES.YES) {
+                return Constants.USER_MESSAGES.YES.toLowerCase();
             } else {
-                return 'no';
+                return Constants.USER_MESSAGES.NO.toLowerCase();
             }
         });
 }
@@ -8143,8 +8130,6 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
  * SVG string for treeview icons required for web-extension support
  */
 export class IconConstants {
-
-    public static TEST: string = "test";
 
     public static nodeIcons: string[] = [
         // 0 - 7
@@ -8171,6 +8156,7 @@ export class IconConstants {
         '&lt;path fill="#c5c5c5" d="M14 7v1H8v6H7V8H1V7h6V1h1v6h6z"/&gt;',
         '&lt;path fill="#424242" d="M14 7v1H8v6H7V8H1V7h6V1h1v6h6z"/&gt;'
     ];
+
     public static button: string[] = [
         '&lt;path d="M2.202 6.678c-.388.34-.42.704-.42 1.3.235 1.64 3.04 2.669 5.85 2.679 2.795.01 5.64-.986 5.958-2.582l.002-.027c.043-.616-.048-.946-.39-1.25-.3-.2-.527-.24-.718.025 0 1.242-2.145 2.248-4.79 2.249-2.647 0-4.793-1.007-4.794-2.249.001-.056-.102-.201-.2-.282-.158-.09-.386.03-.498.137z" fill="#c5c5c5" fill-opacity=".250"/&gt;&lt;path style="shape-padding:0;isolation:auto;mix-blend-mode:normal;solid-color:#000;solid-opacity:1" d="M7.697 1.219c-1.368 0-2.61.258-3.552.707-.842.4-1.504.99-1.637 1.756-.043.148-.018.268-.03.423v1.5C1.575 6.141.915 6.844.823 7.711c-.027.13-.01.271-.013.414v2.357h.003c.004.077.014.153.026.227.155.972 1 1.746 2.125 2.281 1.246.593 2.904.94 4.734.94s3.493-.347 4.74-.94c1.126-.535 1.972-1.31 2.126-2.283.033-.147.019-.251.029-.398V8.082c.019-.139-.015-.256-.022-.377-.082-.752-.576-1.385-1.3-1.889-.12-.078-.237-.157-.352-.236V4.086c-.003-.136-.015-.236-.022-.352-.11-.79-.781-1.4-1.642-1.808-.944-.45-2.189-.707-3.557-.707zm0 1c1.24 0 2.36.244 3.125.61.68.322 1.015.7 1.074 1.028.01.133.015.313.019.522.012.662.003 1.624.003 2.355l-.002.028a1.505 1.505 0 01-.05.293c-.03.071-.075.144-.132.218-.629.691-1.493.887-2.297 1.112a8.893 8.893 0 01-3.355.017c-.04-.007-.084-.01-.123-.017h-.002c-.812-.114-1.408-.452-2.039-.85h-.002a1.421 1.421 0 01-.353-.416c-.075-.1-.075-.224-.083-.33V4.148c.002-.177.004-.125.01-.28.057-.326.394-.712 1.084-1.04.766-.364 1.884-.61 3.123-.61zM2.48 6.809c-.002.09.019.184.028.27.128.77.791 1.366 1.638 1.769.943.448 2.183.705 3.551.705 1.368 0 2.613-.257 3.557-.705.853-.406 1.522-1.007 1.642-1.787.02-.095.015-.162.022-.252.355.299.574.61.638.978.044.176.02.277.036.49v1.961c.017.204-.015.188-.031.383-.122.495-.631 1.028-1.553 1.467-1.068.508-2.609.842-4.31.842-1.703 0-3.237-.334-4.305-.842-.891-.424-1.398-.935-1.541-1.416-.012-.064-.03-.127-.043-.19V8.266c-.016-.3-.018-.553.16-.852.11-.215.282-.413.511-.605z" fill="#c5c5c5"/&gt;&lt;path d="M7.697 2.219c-1.239 0-2.357.245-3.123.61-.655.31-.984.673-1.064.987a4.241 1.794 0 00-.02.159 4.241 1.794 0 004.242 1.793 4.241 1.794 0 004.18-1.504 10.7 10.7 0 00-.016-.407c-.06-.328-.395-.706-1.074-1.029-.765-.365-1.885-.61-3.125-.61z" fill="#c5c5c5" fill-opacity=".250"/&gt;',
         '&lt;path d="M1.777 7.966v2.885c.085.408.031.125.043.189 1.254 1.878 3.933 2.045 5.877 2.059 2.33-.098 4.586-.247 5.887-2.088.016-.195.048-.178.031-.382V7.966c-.198 1.667-3.12 2.718-5.982 2.708-2.821-.01-5.638-1.057-5.856-2.708z" fill="#424242" fill-opacity=".250"/&gt;&lt;path d="M3.426 5.35v1.83c.008.106.008.23.082.33 2.407 1.93 6.178 1.828 8.412-.065a1.49 1.49 0 00.053-.32V3.924c-.625 2.272-6.566 2.393-8.18.66-.182-.197-.31-.417-.338-.539z" fill="#424242" fill-opacity=".250"/&gt;&lt;path d="M7.697 1.219c-1.368 0-2.61.258-3.552.707-.842.4-1.504.99-1.637 1.756-.043.148-.018.268-.03.423v1.5C1.575 6.141.915 6.844.823 7.711c-.027.13-.01.271-.013.414v2.357h.003c.004.077.014.153.026.227.155.972 1 1.746 2.125 2.281 1.246.593 2.904.94 4.734.94s3.493-.347 4.74-.94c1.126-.535 1.972-1.31 2.126-2.283.033-.147.019-.251.029-.398V8.082c.019-.139-.015-.256-.022-.377-.082-.752-.576-1.385-1.3-1.889-.12-.078-.237-.157-.352-.236V4.086c-.003-.136-.015-.236-.022-.352-.11-.79-.781-1.4-1.642-1.808-.944-.45-2.189-.707-3.557-.707zm0 1c1.24 0 2.36.244 3.125.61.68.322 1.015.7 1.074 1.028.01.133.015.313.019.522.012.662.003 1.624.003 2.355l-.002.028a1.505 1.505 0 01-.05.293c-.03.071-.075.144-.132.218-.629.691-1.493.887-2.297 1.112a8.893 8.893 0 01-3.355.017c-.04-.007-.084-.01-.123-.017h-.002c-.812-.114-1.408-.452-2.039-.85h-.002a1.421 1.421 0 01-.353-.416c-.075-.1-.075-.224-.083-.33V4.148c.002-.177.004-.125.01-.28.057-.326.394-.712 1.084-1.04.766-.364 1.884-.61 3.123-.61zM2.48 6.809c-.002.09.019.184.028.27.128.77.791 1.366 1.638 1.769.943.448 2.183.705 3.551.705 1.368 0 2.613-.257 3.557-.705.853-.406 1.522-1.007 1.642-1.787.02-.095.015-.162.022-.252.355.299.574.61.638.978.044.176.02.277.036.49v1.961c.017.204-.015.188-.031.383-.122.495-.631 1.028-1.553 1.467-1.068.508-2.609.842-4.31.842-1.703 0-3.237-.334-4.305-.842-.891-.424-1.398-.935-1.541-1.416-.012-.064-.03-.127-.043-.19V8.266c-.016-.3-.018-.553.16-.852.11-.215.282-.413.511-.605z" style="shape-padding:0;isolation:auto;mix-blend-mode:normal;solid-color:#000;solid-opacity:1" fill="#424242"/&gt;'
@@ -8260,10 +8246,10 @@ public setLeoIDCommand(): void {
  */
 public showLeoIDMessage(): void {
     vscode.window.showInformationMessage(
-        "Leo ID not found. Please enter an id that identifies you uniquely.",
-        "Set Leo ID"
+        Constants.USER_MESSAGES.SET_LEO_ID_MESSAGE,
+        Constants.USER_MESSAGES.ENTER_LEO_ID
     ).then(p_chosenButton =&gt; {
-        if (p_chosenButton === "Set Leo ID") {
+        if (p_chosenButton === Constants.USER_MESSAGES.ENTER_LEO_ID) {
             vscode.commands.executeCommand(Constants.COMMANDS.SET_LEO_ID);
         }
     });
@@ -8572,9 +8558,8 @@ export class NullGui {
 </t>
 <t tx="felix.20220417151556.1">export function getIdFromDialog(): Thenable&lt;string&gt; {
     return vscode.window.showInputBox({
-        title: "Enter Leo id",
-        prompt: "Please enter an id that identifies you uniquely.\n" +
-            "(Letters and numbers only, and at least 3 characters in length)"
+        title: Constants.USER_MESSAGES.ENTER_LEO_ID,
+        prompt: Constants.USER_MESSAGES.GET_LEO_ID_PROMPT
 
     }).then((p_id) =&gt; {
         if (p_id) {

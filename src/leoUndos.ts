@@ -87,12 +87,6 @@ export class LeoUndoNode extends vscode.TreeItem {
 
     ) {
         super(bead.undoType || "unknown");
-        // Setup this instance (just differentiate 'script-button' for now)
-        // this.command = {
-        //     command: Constants.COMMANDS.CLICK_BUTTON,
-        //     title: '',
-        //     arguments: [this]
-        // };
         this.contextValue = "leojsUndoNode";
     }
 

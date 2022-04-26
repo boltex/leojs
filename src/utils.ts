@@ -66,12 +66,15 @@ export function buildNodeIconPaths(p_context: vscode.ExtensionContext): Icon[] {
     return Array(16).fill("").map((p_val, p_index) => {
         return {
             light: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' + '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">' + IconConstants.nodeIcons[p_index < 8 ? p_index + 8 : p_index - 8] + '</svg>'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.nodeIcons[p_index < 8 ? p_index + 8 : p_index - 8]}${Constants.GUI.SVG_OPEN}`
+                // 'image/svg+xml;utf8,' + '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">' +
+                //  IconConstants.nodeIcons[p_index < 8 ? p_index + 8 : p_index - 8] +
+                //   '</svg>'
             }),
             dark: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' + '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">' + IconConstants.nodeIcons[p_index] + '</svg>'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.nodeIcons[p_index]}${Constants.GUI.SVG_OPEN}`
             })
         };
     });
@@ -86,34 +89,22 @@ export function buildDocumentIconPaths(p_context: vscode.ExtensionContext): Icon
     return [
         {
             light: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">' +
-                    IconConstants.leoDocuments[2] +
-                    '</svg>'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[2]}${Constants.GUI.SVG_OPEN}`
             }),
             dark: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">' +
-                    IconConstants.leoDocuments[0] +
-                    '</svg>'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[0]}${Constants.GUI.SVG_OPEN}`
             })
         },
         {
             light: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">' +
-                    IconConstants.leoDocuments[3] +
-                    '</svg>'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[3]}${Constants.GUI.SVG_OPEN}`
             }),
             dark: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">' +
-                    IconConstants.leoDocuments[1] +
-                    '</svg>'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[1]}${Constants.GUI.SVG_OPEN}`
             })
         }
     ];
@@ -128,34 +119,22 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
     return [
         {
             light: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">' +
-                    IconConstants.button[1] +
-                    '</svg>'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.button[1]}${Constants.GUI.SVG_OPEN}`
             }),
             dark: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">' +
-                    IconConstants.button[0] +
-                    '</svg>'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.button[0]}${Constants.GUI.SVG_OPEN}`
             })
         },
         {
             light: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">' +
-                    IconConstants.scriptButtons[1] +
-                    '</svg>'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.scriptButtons[1]}${Constants.GUI.SVG_OPEN}`
             }),
             dark: vscode.Uri.from({
-                scheme: "data",
-                path: 'image/svg+xml;utf8,' +
-                    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">' +
-                    IconConstants.scriptButtons[0] +
-                    '</svg>'
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.scriptButtons[0]}${Constants.GUI.SVG_OPEN}`
             })
         }
     ];
@@ -214,9 +193,8 @@ export function getFileFromPath(p_path: string): string {
 
 export function getIdFromDialog(): Thenable<string> {
     return vscode.window.showInputBox({
-        title: "Enter Leo id",
-        prompt: "Please enter an id that identifies you uniquely.\n" +
-            "(Letters and numbers only, and at least 3 characters in length)"
+        title: Constants.USER_MESSAGES.ENTER_LEO_ID,
+        prompt: Constants.USER_MESSAGES.GET_LEO_ID_PROMPT
 
     }).then((p_id) => {
         if (p_id) {
