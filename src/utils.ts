@@ -67,14 +67,14 @@ export function buildNodeIconPaths(p_context: vscode.ExtensionContext): Icon[] {
         return {
             light: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.nodeIcons[p_index < 8 ? p_index + 8 : p_index - 8]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.nodeIcons[p_index < 8 ? p_index + 8 : p_index - 8]}${Constants.GUI.SVG_CLOSE}`
                 // 'image/svg+xml;utf8,' + '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none">' +
                 //  IconConstants.nodeIcons[p_index < 8 ? p_index + 8 : p_index - 8] +
                 //   '</svg>'
             }),
             dark: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.nodeIcons[p_index]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.nodeIcons[p_index]}${Constants.GUI.SVG_CLOSE}`
             })
         };
     });
@@ -90,21 +90,21 @@ export function buildDocumentIconPaths(p_context: vscode.ExtensionContext): Icon
         {
             light: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[2]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[2]}${Constants.GUI.SVG_CLOSE}`
             }),
             dark: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[0]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[0]}${Constants.GUI.SVG_CLOSE}`
             })
         },
         {
             light: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[3]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[3]}${Constants.GUI.SVG_CLOSE}`
             }),
             dark: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[1]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[1]}${Constants.GUI.SVG_CLOSE}`
             })
         }
     ];
@@ -120,21 +120,21 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
         {
             light: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.button[1]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.button[1]}${Constants.GUI.SVG_CLOSE}`
             }),
             dark: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.button[0]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.button[0]}${Constants.GUI.SVG_CLOSE}`
             })
         },
         {
             light: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.scriptButtons[1]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.scriptButtons[1]}${Constants.GUI.SVG_CLOSE}`
             }),
             dark: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.scriptButtons[0]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.scriptButtons[0]}${Constants.GUI.SVG_CLOSE}`
             })
         }
     ];

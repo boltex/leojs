@@ -766,14 +766,14 @@ export function buildNodeIconPaths(p_context: vscode.ExtensionContext): Icon[] {
         return {
             light: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.nodeIcons[p_index &lt; 8 ? p_index + 8 : p_index - 8]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.nodeIcons[p_index &lt; 8 ? p_index + 8 : p_index - 8]}${Constants.GUI.SVG_CLOSE}`
                 // 'image/svg+xml;utf8,' + '&lt;svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none"&gt;' +
                 //  IconConstants.nodeIcons[p_index &lt; 8 ? p_index + 8 : p_index - 8] +
                 //   '&lt;/svg&gt;'
             }),
             dark: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.nodeIcons[p_index]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.nodeIcons[p_index]}${Constants.GUI.SVG_CLOSE}`
             })
         };
     });
@@ -790,21 +790,21 @@ export function buildDocumentIconPaths(p_context: vscode.ExtensionContext): Icon
         {
             light: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[2]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[2]}${Constants.GUI.SVG_CLOSE}`
             }),
             dark: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[0]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[0]}${Constants.GUI.SVG_CLOSE}`
             })
         },
         {
             light: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[3]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[3]}${Constants.GUI.SVG_CLOSE}`
             }),
             dark: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[1]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.leoDocuments[1]}${Constants.GUI.SVG_CLOSE}`
             })
         }
     ];
@@ -821,21 +821,21 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
         {
             light: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.button[1]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.button[1]}${Constants.GUI.SVG_CLOSE}`
             }),
             dark: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.button[0]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.button[0]}${Constants.GUI.SVG_CLOSE}`
             })
         },
         {
             light: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.scriptButtons[1]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.scriptButtons[1]}${Constants.GUI.SVG_CLOSE}`
             }),
             dark: vscode.Uri.from({
                 scheme: Constants.GUI.SVG_SHEME,
-                path: `${Constants.GUI.SVG_OPEN}${IconConstants.scriptButtons[0]}${Constants.GUI.SVG_OPEN}`
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.scriptButtons[0]}${Constants.GUI.SVG_CLOSE}`
             })
         }
     ];
@@ -3181,7 +3181,6 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     &lt;&lt; contributes &gt;&gt;
   },
   "scripts": {
-    "cleanup": "node ./cleanup.js",
     &lt;&lt; scripts &gt;&gt;
   },
   "devDependencies": {
@@ -5312,7 +5311,8 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "when": "leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 }
 </t>
-<t tx="felix.20201214205159.79">"vscode:prepublish": "npm run package",
+<t tx="felix.20201214205159.79">"cleanup": "node ./cleanup.js",
+"vscode:prepublish": "npm run package",
 "compile": "webpack",
 "compile-web": "webpack",
 "open-in-browser": "node ./prepare.js &amp;&amp; vscode-test-web --browserType=chromium --extensionDevelopmentPath=. &amp;&amp; node ./cleanup.js",
@@ -5324,7 +5324,8 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 "watch-tests": "tsc -p . -w --outDir out",
 "pretest": "npm run compile-tests &amp;&amp; npm run compile &amp;&amp; npm run lint",
 "lint": "eslint src --ext ts",
-"test": "node ./out/test/runTest.js"
+"test": "node ./out/test/runTest.js",
+"test-web": "node ./prepare.js &amp;&amp; vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/test/suite/index-web.js &amp;&amp; node ./cleanup.js"
 </t>
 <t tx="felix.20201214205159.8">{
   "command": "leojs.executeScript",

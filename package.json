@@ -2339,7 +2339,8 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "test-web": "node ./prepare.js && vscode-test-web --extensionDevelopmentPath=. --extensionTestsPath=dist/test/suite/index-web.js && node ./cleanup.js"
   },
   "devDependencies": {
     "@types/debounce": "^1.2.0",
