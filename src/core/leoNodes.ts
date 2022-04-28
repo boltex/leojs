@@ -196,6 +196,7 @@ export class Position {
     v: VNode;
     _childIndex: number;
     stack: StackEntry[];
+    _isRoot: boolean = false;
 
     //@+others
     //@+node:felix.20210126210412.1: *3* p.ctor & other special methods...

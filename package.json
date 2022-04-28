@@ -1161,7 +1161,7 @@
         },
         {
           "command": "leojs.refreshFromDiskSelection",
-          "when": "leojsTreeOpened && leoAtFile"
+          "when": "leojsTreeOpened && LeojsAtFile"
         },
         {
           "command": "leojs.writeAtFileNodes",
@@ -1612,27 +1612,27 @@
         },
         {
           "command": "leojs.saveLeoFileFromOutline",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leoTreeTitled && leoChanged",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsTreeTitled && leojsChanged",
           "group": "navigation@2"
         },
         {
           "command": "leojs.saveAsLeoFile",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && !leoTreeTitled",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && !leojsTreeTitled",
           "group": "navigation@2"
         },
         {
           "command": "leojs.undoFromOutline",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leoCanUndo",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsCanUndo",
           "group": "navigation@3"
         },
         {
           "command": "leojs.redoFromOutline",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leoCanRedo",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsCanRedo",
           "group": "navigation@4"
         },
         {
           "command": "leojs.deHoistFromOutline",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leoCanDehoist",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsCanDehoist",
           "group": "navigation@5"
         },
         {
@@ -1699,17 +1699,17 @@
         },
         {
           "command": "leojs.hoistNode",
-          "when": "viewItem =~ /^leojsNodeNotRoot/",
+          "when": "viewItem =~ /leojsNodeNotRoot/",
           "group": "leojsNodeContext1@2"
         },
         {
           "command": "leojs.deHoist",
-          "when": "leoCanDehoist && viewItem =~ /^leojsNodeRoot/",
+          "when": "leojsCanDehoist && viewItem =~ /leojsNodeRoot/",
           "group": "leojsNodeContext1@2"
         },
         {
           "command": "leojs.refreshFromDisk",
-          "when": "viewItem =~ /^leojsNodeAtFile/",
+          "when": "viewItem =~ /leojsNodeAtFile/",
           "group": "leojsNodeContext1@3"
         },
         {
@@ -1759,7 +1759,7 @@
         },
         {
           "command": "leojs.gotoNextClone",
-          "when": "leojsTreeOpened && viewItem =~ /^leojsNodeCloned/",
+          "when": "leojsTreeOpened && viewItem =~ /leojsNodeCloned/",
           "group": "leojsNodeContext3@3"
         }
       ]

@@ -999,11 +999,15 @@ public refreshTreeRoot(): void {
         element.v.hasBody(),
         Object.keys(element.v.u).length ? element.v.u : false, // 'u' - user defined data
         this._icons,
-        this.buildId(element, w_collapse)
+        this.buildId(element, w_collapse),
+        element._isRoot
     );
     // Check if its the selected node and call signal it to the UI
     if (element.__eq__(g.app.commanders()[this._leoUI.commanderIndex].p)) {
         this._leoUI.gotSelectedNode(element);
+        if (element._isRoot) {
+            this._leoUI.leoStates.leoRoot = true;
+        }
     }
     // Build a LeoNode (a vscode tree node) from the Position
     return w_leoNode;
@@ -1024,7 +1028,9 @@ public refreshTreeRoot(): void {
             const w_c = w_commanders[this._leoUI.commanderIndex]!; // Currently Selected Document's Commander
             if (w_c.hoistStack.length) {
                 // topmost hoisted starts the outline as single root 'child'
-                return [w_c.hoistStack[w_c.hoistStack.length - 1].p];
+                const w_rootPosition = w_c.hoistStack[w_c.hoistStack.length - 1].p;
+                w_rootPosition._isRoot = true;
+                return [w_rootPosition];
             } else {
                 // true list of root nodes
                 return [...w_c.all_Root_Children()];
@@ -2965,7 +2971,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
                 // Going to get replaced
                 if (!(command as any).__name__.startsWith('async-')) {
                     commands.push({
-                        label: (command as any).__name__,
+                        label: key,
                         detail: (command as any).__doc__
                     });
                 }
@@ -3962,7 +3968,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 },
 {
   "command": "leojs.refreshFromDiskSelection",
-  "when": "leojsTreeOpened &amp;&amp; leoAtFile"
+  "when": "leojsTreeOpened &amp;&amp; LeojsAtFile"
 },
 {
   "command": "leojs.writeAtFileNodes",
@@ -4586,27 +4592,27 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   {
     "command": "leojs.saveLeoFileFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leoTreeTitled &amp;&amp; leoChanged",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsTreeTitled &amp;&amp; leojsChanged",
     "group": "navigation@2"
   },
   {
     "command": "leojs.saveAsLeoFile",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leoTreeTitled",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsTreeTitled",
     "group": "navigation@2"
   },
   {
     "command": "leojs.undoFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leoCanUndo",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsCanUndo",
     "group": "navigation@3"
   },
   {
     "command": "leojs.redoFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leoCanRedo",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsCanRedo",
     "group": "navigation@4"
   },
   {
     "command": "leojs.deHoistFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leoCanDehoist",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsCanDehoist",
     "group": "navigation@5"
   },
   {
@@ -4687,18 +4693,18 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 </t>
 <t tx="felix.20201214205159.63">{
   "command": "leojs.hoistNode",
-  "when": "viewItem =~ /^leojsNodeNotRoot/",
+  "when": "viewItem =~ /leojsNodeNotRoot/",
   "group": "leojsNodeContext1@2"
 },
 {
   "command": "leojs.deHoist",
-  "when": "leoCanDehoist &amp;&amp; viewItem =~ /^leojsNodeRoot/",
+  "when": "leojsCanDehoist &amp;&amp; viewItem =~ /leojsNodeRoot/",
   "group": "leojsNodeContext1@2"
 },
 </t>
 <t tx="felix.20201214205159.64">{
   "command": "leojs.refreshFromDisk",
-  "when": "viewItem =~ /^leojsNodeAtFile/",
+  "when": "viewItem =~ /leojsNodeAtFile/",
   "group": "leojsNodeContext1@3"
 },
 </t>
@@ -4750,7 +4756,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 },
 {
   "command": "leojs.gotoNextClone",
-  "when": "leojsTreeOpened &amp;&amp; viewItem =~ /^leojsNodeCloned/",
+  "when": "leojsTreeOpened &amp;&amp; viewItem =~ /leojsNodeCloned/",
   "group": "leojsNodeContext3@3"
 }
 </t>
@@ -7588,8 +7594,6 @@ public setUndoSelection(p_undoNode: LeoUndoNode): void {
 
     public contextValue: string; // * Context string is checked in package.json with 'when' clauses
 
-    public isRoot: boolean = false; // * for hoist/dehoist context flags purposes
-
     constructor(
         public label: string, // Node headline
         public collapsibleState: vscode.TreeItemCollapsibleState, // Computed in receiver/creator
@@ -7601,7 +7605,8 @@ public setUndoSelection(p_undoNode: LeoUndoNode): void {
         public hasBody: boolean,
         public u: any,
         private _icons: Icon[], // pointer to global array of node icons
-        private _id: string
+        private _id: string,
+        public isRoot: boolean
     ) {
         super(label, collapsibleState);
         this.contextValue = this._getNodeContextValue();
@@ -7649,6 +7654,7 @@ public setUndoSelection(p_undoNode: LeoUndoNode): void {
 
 </t>
 <t tx="felix.20211201001847.3">/**
+ * @deprecated
  * * Set this node as the root for hoist/dehoist context flags purposes
  */
 public setRoot(): void {

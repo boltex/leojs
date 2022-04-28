@@ -1070,7 +1070,7 @@ export class LeoUI {
                     // Going to get replaced
                     if (!(command as any).__name__.startsWith('async-')) {
                         commands.push({
-                            label: (command as any).__name__,
+                            label: key,
                             detail: (command as any).__doc__
                         });
                     }

@@ -62,11 +62,15 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             element.v.hasBody(),
             Object.keys(element.v.u).length ? element.v.u : false, // 'u' - user defined data
             this._icons,
-            this.buildId(element, w_collapse)
+            this.buildId(element, w_collapse),
+            element._isRoot
         );
         // Check if its the selected node and call signal it to the UI
         if (element.__eq__(g.app.commanders()[this._leoUI.commanderIndex].p)) {
             this._leoUI.gotSelectedNode(element);
+            if (element._isRoot) {
+                this._leoUI.leoStates.leoRoot = true;
+            }
         }
         // Build a LeoNode (a vscode tree node) from the Position
         return w_leoNode;
@@ -86,7 +90,9 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
                 const w_c = w_commanders[this._leoUI.commanderIndex]!; // Currently Selected Document's Commander
                 if (w_c.hoistStack.length) {
                     // topmost hoisted starts the outline as single root 'child'
-                    return [w_c.hoistStack[w_c.hoistStack.length - 1].p];
+                    const w_rootPosition = w_c.hoistStack[w_c.hoistStack.length - 1].p;
+                    w_rootPosition._isRoot = true;
+                    return [w_rootPosition];
                 } else {
                     // true list of root nodes
                     return [...w_c.all_Root_Children()];
@@ -119,8 +125,6 @@ export class LeoOutlineNode extends vscode.TreeItem {
 
     public contextValue: string; // * Context string is checked in package.json with 'when' clauses
 
-    public isRoot: boolean = false; // * for hoist/dehoist context flags purposes
-
     constructor(
         public label: string, // Node headline
         public collapsibleState: vscode.TreeItemCollapsibleState, // Computed in receiver/creator
@@ -132,7 +136,8 @@ export class LeoOutlineNode extends vscode.TreeItem {
         public hasBody: boolean,
         public u: any,
         private _icons: Icon[], // pointer to global array of node icons
-        private _id: string
+        private _id: string,
+        public isRoot: boolean
     ) {
         super(label, collapsibleState);
         this.contextValue = this._getNodeContextValue();
@@ -176,6 +181,7 @@ export class LeoOutlineNode extends vscode.TreeItem {
     }
 
     /**
+     * @deprecated
      * * Set this node as the root for hoist/dehoist context flags purposes
      */
     public setRoot(): void {
