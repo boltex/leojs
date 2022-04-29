@@ -909,7 +909,7 @@ export class CommanderOutlineCommands {
     public goNextVisitedNode(this: Commands): void {
         const c: Commands = this;
         c.nodeHistory.goNext();
-        // unused
+        // unused because goToNextHistory does it without
         /*
         const p: Position = c.nodeHistory.goNext();
         if(p && p.__bool__()) {
@@ -932,7 +932,7 @@ export class CommanderOutlineCommands {
     public goPrevVisitedNode(this: Commands): void {
         const c: Commands = this;
         c.nodeHistory.goPrev();
-        // unused
+        // unused because goToPrevHistory does it without
         /*
         p = c.nodeHistory.goPrev()
         if p:
@@ -947,8 +947,8 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211021013709.5: *4* c_oc.goToFirstNode
     @commander_command(
         'goto-first-node',
-        'Select the first node of the entire outline\n' +
-        'But (#2167), go to the first node of a chapter or hoist\n' +
+        'Select the first node of the entire outline,\n' +
+        'or the first node of a chapter or hoist\n' +
         'if Leo is hoisted or within a chapter.'
     )
     public goToFirstNode(this: Commands): void {
@@ -1798,7 +1798,7 @@ export class CommanderOutlineCommands {
         g.app.gui!.runAskYesNoDialog(
             c,
             'Move Marked Nodes?',
-            'move-marked-nodes is not undoable. Proceed?',
+            'move-marked-nodes is not undoable. Proceed?'
         ).then((result) => {
             if (result === 'no') {
                 return;
