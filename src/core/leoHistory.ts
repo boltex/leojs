@@ -80,7 +80,7 @@ export class NodeHistory {
     public select(p: Position, chapter: any): void {
         const c: Commands = this.c;
         const cc = this.c.chapterController;
-        if (c.positionExists(p)) {
+        if (cc && c.positionExists(p)) {
             this.skipBeadUpdate = true;
             try {
                 const oldChapter = cc.getSelectedChapter();

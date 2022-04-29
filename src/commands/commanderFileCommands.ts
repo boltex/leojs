@@ -1287,7 +1287,11 @@ export class CommanderFileCommands {
         const undoType: string = 'Read File Into Node';
 
         // c.endEditing();
-        const filetypes: [string, string][] = [["All files", "*"], ["Python files", "*.py"], ["Leo files", "*.leo"]];
+        const filetypes: [string, string][] = [
+            ["All files", "*"],
+            ["Python files", "*.py"],
+            ["Leo files", "*.leo"]
+        ];
 
         return g.app.gui!.runOpenFileDialog(
             c,
@@ -1359,7 +1363,7 @@ export class CommanderFileCommands {
     @commander_command(
         'write-file-from-node',
         'If node starts with @read-file-into-node, use the full path name ' +
-        'in the headline.  Otherwise, prompt for a file name.'
+        'in the headline.\nOtherwise, prompt for a file name.'
     )
     public writeFileFromNode(this: Commands): Thenable<void> {
 

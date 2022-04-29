@@ -22,9 +22,9 @@ export class CommanderEditCommands {
         const c: Commands = this;
         const u = this.undoer;
 
-        console.log('TODO: finish unto unit tests & uncomment!');
+        console.log('TODO: finish undo unit tests & uncomment!');
 
-        // TODO: finish unto unit tests & uncomment !
+        // TODO: finish undo unit tests & uncomment !
         /*
         const undoType = 'Convert All Blanks';
         const current = c.p;

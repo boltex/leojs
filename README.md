@@ -26,7 +26,7 @@ You can then run the **Run Extension** target, as shown above, in the **Debug Vi
 - The commands and menus icons for outline editing 
 - Undo and navigation history commands
 - The minibuffer Palette
-
+- Panels for Outline, Undo history, Leo documents and @buttons
 
 ## Keybindings
 
