@@ -13,6 +13,136 @@ import { Bead, Undoer } from '../core/leoUndo';
 export class CommanderEditCommands {
 
     //@+others
+    //@+node:felix.20220429212903.1: *3*  Top-level commands
+    //@+node:felix.20220429212903.3: *4* @g.command('mark-first-parents')
+    @commander_command(
+        'mark-first-parents',
+        'Mark the node and all its parents.'
+    )
+    public mark_first_parents(this: Commands):  Position[] {
+
+        const c: Commands = this;
+        const changed: Position[] = [];
+
+        if (!c){
+            return changed;
+        }
+        for(let parent of c.p.self_and_parents()){
+            if (!parent.isMarked()){
+                parent.setMarked();
+                parent.setDirty();
+                changed.push(parent.copy());
+            }
+        }
+        if (changed.length){
+            // g.es("marked: " + ', '.join([z.h for z in changed]))
+            c.setChanged();
+            c.redraw();
+        }
+        return changed;
+    }
+    //@+node:felix.20220429212903.8: *4* @g.command('promote-bodies')
+    @commander_command(
+        'promote-bodies',
+        'Copy the body text of all descendants to the parent\'s body text.'
+    )
+    public promoteBodies(this: Commands): void {
+
+        const c: Commands = this;
+        if (!c){
+            return;
+        }
+        const p: Position = c.p;
+        const result: string[] = p.b.trim() ? [p.b.trimEnd() + '\n'] : [];
+
+        const b: Bead = c.undoer.beforeChangeNodeContents(p);
+
+        let s: string;
+
+        for (let child of p.subtree()){
+            const h = child.h.trim();
+            if (child.b){
+
+                // body = '\n'.join([f"  {z}" for z in g.splitLines(child.b)])
+                const body = [...g.splitLines(child.b)].map(z => `  ${z}`).join('\n');
+
+                s = `- ${h}\n${body}`;
+            }else{
+                s = `- ${h}`;
+            }
+            if (s.trim()){
+                result.push(s.trim());
+            }
+        }
+        if (result.length){
+            result.push('');
+        }
+        p.b = result.join('\n');
+
+        c.undoer.afterChangeNodeContents(p, 'promote-bodies', b);
+
+    }
+    //@+node:felix.20220429212903.9: *4* @g.command('promote-headlines')
+    @commander_command(
+        'promote-headlines',
+        'Copy the headlines of all descendants to the parent\'s body text.'
+    )
+    public promoteHeadlines(this: Commands): void {
+
+        const c: Commands = this;
+        if (!c){
+            return;
+        }
+        const p: Position = c.p;
+
+        const b: Bead = c.undoer.beforeChangeNodeContents(p);
+
+        const result: string = [...p.subtree()].map(p_p=>p_p.h.trimEnd()).join('\n');
+         // '\n'.join([p.h.trimEnd() for p in p.subtree()])
+
+        if (result){
+            p.b = p.b.trimStart() + '\n' + result;
+            c.undoer.afterChangeNodeContents(p, 'promote-headlines', b);
+        }
+    }
+
+    //@+node:felix.20220429212903.13: *4* @g.command('unmark-first-parents')
+    @commander_command(
+        'unmark-first-parents',
+        'Unmark the node and all its parents.'
+    )
+    public unmark_first_parents(this: Commands): Position[] {
+
+        const c: Commands = this;
+        const changed: Position[] = [];
+
+        if (!c){
+            return changed;
+        }
+
+        for (let parent of c.p.self_and_parents()){
+            if (parent.isMarked()){
+                parent.clearMarked();
+                parent.setDirty();
+                changed.push(parent.copy());
+            }
+        }
+
+        if (changed.length){
+            // g.es("unmarked: " + ', '.join([z.h for z in changed]))
+            c.setChanged();
+            c.redraw();
+        }
+        return changed;
+    }
+    //@+node:felix.20220429212918.1: *3* ec.doNothing
+    @commander_command(
+        'do-nothing',
+        'A placeholder command, useful for testing bindings.'
+    )
+    public doNothing(this: Commands): void {
+        // pass
+    }
     //@+node:felix.20220414235045.1: *3* c_ec.convertAllBlanks
     @commander_command(
         'convert-all-blanks',

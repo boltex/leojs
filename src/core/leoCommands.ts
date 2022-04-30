@@ -3466,7 +3466,7 @@ export interface Commands extends CommanderOutlineCommands, CommanderFileCommand
 // Apply the mixins into the base class via
 // the JS at runtime & aliases for VNode members
 
-applyMixins(Commands, [CommanderOutlineCommands, CommanderFileCommands]);
+applyMixins(Commands, [CommanderOutlineCommands, CommanderFileCommands, CommanderEditCommands]);
 Commands.prototype.canCutOutline = Commands.prototype.canDeleteHeadline;
 Commands.prototype.canShiftBodyRight = Commands.prototype.canShiftBodyLeft;
 Commands.prototype.canExtractSectionNames = Commands.prototype.canExtract;

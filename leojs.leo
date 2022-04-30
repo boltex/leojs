@@ -3252,7 +3252,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "dependencies": {
     "bowser": "^2.11.0",
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "565a5f6",
+  "gitBranch": "devel",
+  "gitDate": "2022-04-29 00:56:58 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -8709,255 +8712,395 @@ public addLogPaneEntry(p_message: string): void {
 }
 
 </t>
-<t tx="felix.20220429005433.1">"""Classes that manage chapters in Leo's core."""
-import re
-import string
-from leo.core import leoGlobals as g
-@others
-@language python
-@tabwidth -4
-@pagewidth 70
-</t>
-<t tx="felix.20220429005433.10">@cmd('chapter-back')
-def backChapter(self, event=None):
-    cc = self
-    names = sorted(cc.setAllChapterNames())
-    sel_name = cc.selectedChapter.name if cc.selectedChapter else 'main'
-    i = names.index(sel_name)
-    new_name = names[i - 1 if i &gt; 0 else len(names) - 1]
-    cc.selectChapterByName(new_name)
+<t tx="felix.20220429005433.1">// * Classes that manage chapters in Leo's core.
+import * as g from './leoGlobals';
+import { Commands } from './leoCommands';
+import {VNode, Position} from './leoNodes';
 
-@cmd('chapter-next')
-def nextChapter(self, event=None):
-    cc = self
-    names = sorted(cc.setAllChapterNames())
-    sel_name = cc.selectedChapter.name if cc.selectedChapter else 'main'
-    i = names.index(sel_name)
-    new_name = names[i + 1 if i + 1 &lt; len(names) else 0]
-    cc.selectChapterByName(new_name)
+@others
+@language typescript
+@tabwidth -4
 </t>
-<t tx="felix.20220429005433.11">def selectChapterByName(self, name):
-    """Select a chapter without redrawing."""
-    cc = self
-    if self.selectChapterLockout:
-        return
-    if isinstance(name, int):
-        cc.note('PyQt5 chapters not supported')
-        return
-    chapter = cc.getChapter(name)
-    if not chapter:
-        if not g.unitTesting:
-            g.es_print(f"no such @chapter node: {name}")
-        return
-    try:
+<t tx="felix.20220429005433.10">@cmd('chapter-back', 'Chapter Back' )
+public backChapter(): void {
+    const cc = this;
+
+    const names: string[] = cc.setAllChapterNames().sort();
+    const sel_name = cc.selectedChapter ? cc.selectedChapter.name  : 'main';
+    let i = names.indexOf(sel_name);
+
+    const new_name = names[i &gt; 0 ? i - 1  : names.length - 1];
+
+    cc.selectChapterByName(new_name);
+}
+
+@cmd('chapter-next', 'Chapter Next')
+public nextChapter(): void {
+    const cc = this;
+
+    const names: string[] = cc.setAllChapterNames().sort();
+    const sel_name = cc.selectedChapter ? cc.selectedChapter.name  : 'main';
+    let i = names.indexOf(sel_name);
+
+    const = names[(i + 1) &lt; names.length ? i + 1 : 0];
+   
+    cc.selectChapterByName(new_name);
+}
+</t>
+<t tx="felix.20220429005433.11">/**
+ * Select a chapter without redrawing.
+ */
+public selectChapterByName(name: string): void {
+    
+    const cc = this;
+
+    if (this.selectChapterLockout){
+        return;
+    }
+    if (typeof name === 'number'){
+        cc.note('PyQt5 chapters not supported');
+        return;
+    }
+
+    const chapter = cc.getChapter(name);
+    if (!chapter){
+        if (!g.unitTesting){
+            g.es_print(`no such @chapter node: ${name}`);
+        }
+        return;
+    }
+    try{
         cc.selectChapterLockout = True
         cc.selectChapterByNameHelper(chapter)
-    finally:
+    }catch (err){
+        //
+    }finally{
         cc.selectChapterLockout = False
+    }
+}
 </t>
-<t tx="felix.20220429005433.12">def selectChapterByNameHelper(self, chapter, collapse=True):
-    """Select the chapter."""
-    cc, c = self, self.c
-    if not cc.selectedChapter and chapter.name == 'main':
-        chapter.p = c.p
-        return
-    if chapter == cc.selectedChapter:
-        chapter.p = c.p
-        return
-    if cc.selectedChapter:
-        cc.selectedChapter.unselect()
-    else:
-        main_chapter = cc.getChapter('main')
-        if main_chapter:
-            main_chapter.unselect()
-    if chapter.p and c.positionExists(chapter.p):
-        pass
-    elif chapter.name == 'main':
-        pass  # Do not use c.p.
-    else:
+<t tx="felix.20220429005433.12">/**
+ * Select the chapter.
+ */
+public selectChapterByNameHelper(chapter: Chapter, collapse=true): void {
+    
+    const cc = this;
+    const c: Commands = this.c;
+
+    if (!cc.selectedChapter &amp;&amp; chapter.name === 'main'){
+        chapter.p = c.p;
+        return;
+    }
+    if (chapter === cc.selectedChapter){
+        chapter.p = c.p;
+        return;
+    }
+    if (cc.selectedChapter){
+        cc.selectedChapter.unselect();
+    }else{
+        const main_chapter = cc.getChapter('main');
+        if (main_chapter){
+            main_chapter.unselect();
+        }
+    }
+
+    if (chapter.p &amp;&amp; c.positionExists(chapter.p)){
+        // pass
+    }else if (chapter.name == 'main'){
+        // pass  // Do not use c.p.
+    }else{
         chapter.p = chapter.findRootNode()
-    chapter.select()
-    c.contractAllHeadlines()
-    chapter.p.v.expand()
-    c.selectPosition(chapter.p)
+    }
+
+    chapter.select();
+    c.contractAllHeadlines();
+    chapter.p.v.expand();
+    c.selectPosition(chapter.p);
+}
 </t>
 <t tx="felix.20220429005433.13"></t>
-<t tx="felix.20220429005433.14">def error(self, s):
-    g.error(f"Error: {s}")
+<t tx="felix.20220429005433.14">public error(s: string): void {
+    g.error(`Error: ${s}`);
+}
 
-def note(self, s, killUnitTest=False):
-    if g.unitTesting:
-        if 0:  # To trace cause of failed unit test.
-            g.trace('=====', s, g.callers())
-        if killUnitTest:
-            assert False, s
-    else:
-        g.note(f"Note: {s}")
+public note(s: string, killUnitTest?:boolean): void { 
+    if( g.unitTesting){
+        if (0){  // To trace cause of failed unit test.
+            g.trace('=====', s, g.callers());
+        }
+        if (killUnitTest){
+            console.assert(false, s);
+        }
+    }else{
+        g.note(`Note: ${s}`);
+    }
+}
 
-def warning(self, s):
-    g.es_print(f"Warning: {s}")
+public warning(s: string): void {
+    g.es_print(`Warning: ${s}`);
+}
 </t>
-<t tx="felix.20220429005433.15">def findAnyChapterNode(self):
-    """Return True if the outline contains any @chapter node."""
-    cc = self
-    for p in cc.c.all_unique_positions():
-        if p.h.startswith('@chapter '):
-            return True
-    return False
-</t>
-<t tx="felix.20220429005433.16">def findChapterNameForPosition(self, p):
-    """Return the name of a chapter containing p or None if p does not exist."""
-    cc, c = self, self.c
-    if not p or not c.positionExists(p):
-        return None
-    for name in cc.chaptersDict:
-        if name != 'main':
-            theChapter = cc.chaptersDict.get(name)
-            if theChapter.positionIsInChapter(p):
-                return name
-    return 'main'
-</t>
-<t tx="felix.20220429005433.17">def findChapterNode(self, name):
-    """
-    Return the position of the first @chapter node with the given name
-    anywhere in the entire outline.
+<t tx="felix.20220429005433.15">/**
+ * Return True if the outline contains any @chapter node.
+ */
+public findAnyChapterNode(): boolean {
 
-    All @chapter nodes are created as children of the @chapters node,
-    but users may move them anywhere.
-    """
-    cc = self
-    name = g.checkUnicode(name)
-    for p in cc.c.all_positions():
-        chapterName, binding = self.parseHeadline(p)
-        if chapterName == name:
-            return p
-    return None  # Not an error.
-</t>
-<t tx="felix.20220429005433.18">def getChapter(self, name):
-    cc = self
-    return cc.chaptersDict.get(name)
-</t>
-<t tx="felix.20220429005433.19">def getSelectedChapter(self):
-    cc = self
-    return cc.selectedChapter
-</t>
-<t tx="felix.20220429005433.2">def cmd(name):
-    """Command decorator for the ChapterController class."""
-    return g.new_cmd_decorator(name, ['c', 'chapterController',])
-</t>
-<t tx="felix.20220429005433.20">def inChapter(self):
-    cc = self
-    theChapter = cc.getSelectedChapter()
-    return theChapter and theChapter.name != 'main'
-</t>
-<t tx="felix.20220429005433.21">def parseHeadline(self, p):
-    """Return the chapter name and key binding for p.h."""
-    if not self.re_chapter:
-        self.re_chapter = re.compile(
-            r'^@chapter\s+([^@]+)\s*(@key\s*=\s*(.+)\s*)?')
-            # @chapter (all up to @) (@key=(binding))?
-            # name=group(1), binding=group(3)
-    m = self.re_chapter.search(p.h)
-    if m:
-        chapterName, binding = m.group(1), m.group(3)
-        if chapterName:
-            chapterName = self.sanitize(chapterName)
-        if binding:
-            binding = binding.strip()
-    else:
-        chapterName = binding = None
-    return chapterName, binding
-</t>
-<t tx="felix.20220429005433.22">def sanitize(self, s):
-    """Convert s to a safe chapter name."""
-    # Similar to g.sanitize_filename, but simpler.
-    result = []
-    for ch in s.strip():
-        # pylint: disable=superfluous-parens
-        if ch in (string.ascii_letters + string.digits):
-            result.append(ch)
-        elif ch in ' \t':
-            result.append('-')
-    s = ''.join(result)
-    s = s.replace('--', '-')
-    return s[:128]
-</t>
-<t tx="felix.20220429005433.23">def selectChapterForPosition(self, p, chapter=None):
-    """
-    Select a chapter containing position p.
-    New in Leo 4.11: prefer the given chapter if possible.
-    Do nothing if p if p does not exist or is in the presently selected chapter.
+    const cc = this;
 
-    Note: this code calls c.redraw() if the chapter changes.
-    """
-    c, cc = self.c, self
-    # New in Leo 4.11
-    if cc.selectChapterLockout:
-        return
+    for (let p of cc.c.all_unique_positions()){
+        if (p.h.startsWith('@chapter ')){
+            return true;
+        }
+    }
+    return false
+
+}
+</t>
+<t tx="felix.20220429005433.16">/**
+ * Return the name of a chapter containing p or None if p does not exist.
+ */
+public findChapterNameForPosition(p: Position): string | undefined {
+    
+    const cc = this;
+    const c = this.c;
+
+    if (!p || !p.__bool__() || !c.positionExists(p)){
+        return undefined;
+    }
+    for( let name of cc.chaptersDict){
+        if (name !== 'main'){
+            theChapter = cc.chaptersDict.get(name);
+            if (theChapter.positionIsInChapter(p)){
+                return name;
+            }
+        }
+    }
+    return 'main';
+
+}
+</t>
+<t tx="felix.20220429005433.17">/**
+ * Return the position of the first @chapter node with the given name
+ * anywhere in the entire outline.
+ *
+ * All @chapter nodes are created as children of the @chapters node,
+ * but users may move them anywhere.
+ */
+public findChapterNode(name: string): Position| undefined {
+ 
+    const cc = this;
+
+    name = g.checkUnicode(name);
+
+    for (let p of cc.c.all_positions()){
+        let chapterName: string;
+        let binding: any;
+        [chapterName, binding] = this.parseHeadline(p);
+        if (chapterName === name){
+            return p;
+        }
+    }
+    return undefined;  // Not an error.
+
+}
+</t>
+<t tx="felix.20220429005433.18">public getChapter(name: string): Chapter {
+    const cc = this;
+
+    return cc.chaptersDict[name];
+}
+</t>
+<t tx="felix.20220429005433.19">public getSelectedChapter(): Chapter {
+    const cc = this;
+    return cc.selectedChapter;
+}
+</t>
+<t tx="felix.20220429005433.2">/**
+ * Command decorator for the ChapterController class.
+ */
+function cmd(p_name: string, p_doc: string) {
+    return new_cmd_decorator(p_name, p_doc, ['c', 'chapterController']);
+}
+</t>
+<t tx="felix.20220429005433.20">public inChapter(): boolean {
+    const cc = this;
+
+    const theChapter = cc.getSelectedChapter();
+
+    return theChapter &amp;&amp; theChapter.name !== 'main';
+
+}
+</t>
+<t tx="felix.20220429005433.21">/**
+ * Return the chapter name and key binding for p.h.
+ */
+public parseHeadline(p: Position): [string|undefined, string|undefined] {
+ 
+    if (!this.re_chapter){
+        this.re_chapter = re.compile(
+            r'^@chapter\s+([^@]+)\s*(@key\s*=\s*(.+)\s*)?'
+        );
+            // @chapter (all up to @) (@key=(binding))?
+            // name=group(1), binding=group(3)
+    }
+
+    const m = this.re_chapter.search(p.h);
+    let chapterName: string;
+    let binding: string;
+
+    if (m){
+        chapterName = m.group(1); // re operation 
+        binding = m.group(3); // re operation 
+        if (chapterName){
+            chapterName = this.sanitize(chapterName);
+        }
+        if (binding){
+            binding = binding.trim();
+        }
+    }else{
+        chapterName = undefined;
+        binding = undefined;
+    }
+
+    return [chapterName, binding];
+}</t>
+<t tx="felix.20220429005433.22">/**
+ * Convert s to a safe chapter name.
+ */
+public sanitize(s: string): string {
+    
+    // Similar to g.sanitize_filename, but simpler.
+    const result: string; = [];
+    for (let ch of s.strip()){
+        //  pylint: disable=superfluous-parens
+       if ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.includes(ch)) {
+            result.push(ch);
+        }else if (' \t'.includes(ch)){
+            result.push('-');
+        }
+    }
+    s = result.join('');
+    s = s.replace('--', '-');
+    
+    return s.slice(0,128);
+}
+</t>
+<t tx="felix.20220429005433.23">/**
+ * Select a chapter containing position p.
+ * New in Leo 4.11: prefer the given chapter if possible.
+ * Do nothing if p if p does not exist or is in the presently selected chapter.
+ *
+ * Note: this code calls c.redraw() if the chapter changes.
+ */
+public selectChapterForPosition(p: Position, chapter?:Chapter): void {
+    
+    const cc = this;
+    const c = this.c;    
+    
+    // New in Leo 4.11
+    if (cc.selectChapterLockout){
+        return;
+    }
     selChapter = cc.getSelectedChapter()
-    if not chapter and not selChapter:
-        return
-    if not p:
-        return
-    if not c.positionExists(p):
-        return
-    # New in Leo 4.11: prefer the given chapter if possible.
-    theChapter = chapter or selChapter
-    if not theChapter:
-        return
-    # First, try the presently selected chapter.
-    firstName = theChapter.name
-    if firstName == 'main':
-        return
-    if theChapter.positionIsInChapter(p):
-        cc.selectChapterByName(theChapter.name)
-        return
-    for name in cc.chaptersDict:
-        if name not in (firstName, 'main'):
-            theChapter = cc.chaptersDict.get(name)
-            if theChapter.positionIsInChapter(p):
-                cc.selectChapterByName(name)
-                break
-    else:
-        cc.selectChapterByName('main')
-    # Fix bug 869385: Chapters make the nav_qt.py plugin useless
-    assert not self.selectChapterLockout
-    # New in Leo 5.6: don't call c.redraw immediately.
-    c.redraw_later()
+    if (!chapter &amp;&amp; !selChapter){
+        return;
+    }
+    if (!p){
+        return;
+    }
+    if (!c.positionExists(p)){
+        return;
+    }
+    // New in Leo 4.11: prefer the given chapter if possible.
+    theChapter = chapter || selChapter;
+    if (!theChapter){
+        return;
+    }
+    // First, try the presently selected chapter.
+    firstName = theChapter.name;
+    if (firstName == 'main'){
+        return;
+    }
+    if (theChapter.positionIsInChapter(p)){
+        cc.selectChapterByName(theChapter.name);
+        return;
+    }
+    let noBreak = true;
+    for (let name of cc.chaptersDict){
+        if (![firstName, 'main'].includes(name)){
+            theChapter = cc.chaptersDict.get(name);
+            if (theChapter.positionIsInChapter(p)){
+                cc.selectChapterByName(name);
+                noBreak = false;
+                break;
+            }
+        }
+    }
+    if(noBreak){
+        cc.selectChapterByName('main');
+    }
+
+
+    // Fix bug 869385: Chapters make the nav_qt.py plugin useless
+    console.assert(!this.selectChapterLockout);
+    // New in Leo 5.6: don't call c.redraw immediately.
+    c.redraw_later();
+}
 </t>
-<t tx="felix.20220429005433.24">def setAllChapterNames(self):
-    """Called early and often to discover all chapter names."""
-    c, cc = self.c, self
-    # sel_name = cc.selectedChapter and cc.selectedChapter.name or 'main'
-    if 'main' not in cc.chaptersDict:
-        cc.chaptersDict['main'] = Chapter(c, cc, 'main')
-        cc.makeCommand('main')
-            # This binds any existing bindings to chapter-select-main.
-    result, seen = ['main'], set()
-    for p in c.all_unique_positions():
-        chapterName, binding = self.parseHeadline(p)
-        if chapterName and p.v not in seen:
-            seen.add(p.v)
-            result.append(chapterName)
-            if chapterName not in cc.chaptersDict:
-                cc.chaptersDict[chapterName] = Chapter(c, cc, chapterName)
-                cc.makeCommand(chapterName, binding)
-    return result
-</t>
-<t tx="felix.20220429005433.25">class Chapter:
-    """A class representing the non-gui data of a single chapter."""
+<t tx="felix.20220429005433.24">/**
+ * Called early and often to discover all chapter names.
+ */
+public setAllChapterNames(): string[] {
+    
+    const cc = this;
+    const c = this.c;
+    
+    // sel_name = cc.selectedChapter and cc.selectedChapter.name or 'main'
+    if(  !cc.chaptersDict.includes('main')){
+        cc.chaptersDict['main'] = Chapter(c, cc, 'main');
+        cc.makeCommand('main');
+            // This binds any existing bindings to chapter-select-main.
+    }
+
+    const result: string[] = ['main']; 
+    const seen : VNode[] = [];
+    for (let p of c.all_unique_positions()){
+        let chapterName: string;
+        let binding: string;
+        [chapterName, binding] = this.parseHeadline(p);
+        if( chapterName &amp;&amp; !seen.includes(p.v)){
+            seen.push(p.v);
+            result.push(chapterName);
+            if  (!cc.chaptersDict.includes(chapterName)){
+                cc.chaptersDict[chapterName] = new Chapter(c, cc, chapterName);
+                cc.makeCommand(chapterName, binding);
+            }
+        }
+    }
+    return result;
+
+}</t>
+<t tx="felix.20220429005433.25">/**
+ * A class representing the non-gui data of a single chapter.
+ */
+export class Chapter {
+    
     @others
+
+}
 </t>
-<t tx="felix.20220429005433.26">def __init__(self, c, chapterController, name):
-    self.c = c
-    self.cc = cc = chapterController
-    self.name = g.checkUnicode(name)
-    self.selectLockout = False  # True: in chapter.select logic.
-    # State variables: saved/restored when the chapter is unselected/selected.
-    self.p = c.p
-    self.root = self.findRootNode()
-    if cc.tt:
-        cc.tt.createTab(name)
+<t tx="felix.20220429005433.26">constructor(c: Commands, chapterController: ChapterController, name: string){
+    this.c = c
+    this.cc = cc = chapterController
+    this.name = g.checkUnicode(name)
+    this.selectLockout = False  # True: in chapter.select logic.
+    // State variables: saved/restored when the chapter is unselected/selected.
+    this.p = c.p
+    this.root = this.findRootNode()
+    if (cc.tt){
+        cc.tt.createTab(name);
+    }
+}
 </t>
 <t tx="felix.20220429005433.27">def __str__(self):
     """Chapter.__str__"""
@@ -8985,9 +9128,24 @@ __repr__ = __str__
     finally:
         self.selectLockout = False
 </t>
-<t tx="felix.20220429005433.3">class ChapterController:
-    """A per-commander controller that manages chapters and related nodes."""
+<t tx="felix.20220429005433.3">/**
+ * A per-commander controller that manages chapters and related nodes.
+ */
+export class ChapterController {
+    
+    public c: Commands;
+    // Note: chapter names never change, even if their @chapter node changes.
+    public chaptersDict : {[key: string]: Chapter};  // Keys are chapter names, values are chapters.
+    public initing:boolean;  // #31: True: suppress undo when creating chapters.
+    public re_chapter: any;  // Set where used.
+    public selectedChapter: Chapter;
+    public selectChapterLockout:boolean;  // True: cc.selectChapterForPosition does nothing.
+    public tt: any;  // May be set in finishCreate.
+    public use_tabs :boolean;
+
     @others
+
+}
 </t>
 <t tx="felix.20220429005433.30">def chapterSelectHelper(self, w=None):
 
@@ -9086,91 +9244,140 @@ __repr__ = __str__
         c.setCurrentPosition(p)
 </t>
 <t tx="felix.20220429005433.4"></t>
-<t tx="felix.20220429005433.5">def __init__(self, c):
-    """Ctor for ChapterController class."""
-    self.c = c
-    # Note: chapter names never change, even if their @chapter node changes.
-    self.chaptersDict = {}  # Keys are chapter names, values are chapters.
-    self.initing = True  # #31: True: suppress undo when creating chapters.
-    self.re_chapter = None  # Set where used.
-    self.selectedChapter = None
-    self.selectChapterLockout = False  # True: cc.selectChapterForPosition does nothing.
-    self.tt = None  # May be set in finishCreate.
-    self.reloadSettings()
+<t tx="felix.20220429005433.5">/**
+ * Ctor for ChapterController class.
+ */
+constructor(c: Commands) {
+    this.c = c
+    // Note: chapter names never change, even if their @chapter node changes.
+    this.chaptersDict = {}  // Keys are chapter names, values are chapters.
+    this.initing = true;  // #31: True: suppress undo when creating chapters.
+    this.re_chapter = undefined;  // Set where used.
+    this.selectedChapter = undefined;
+    this.selectChapterLockout = false;  // True: cc.selectChapterForPosition does nothing.
+    this.tt = undefined;  // May be set in finishCreate.
+    this.use_tabs = undefined;
+    this.reloadSettings();
+}
 
-def reloadSettings(self):
-    c = self.c
-    self.use_tabs = c.config.getBool('use-chapter-tabs')
+public reloadSettings(): void {
+    const c = this.c;
+    this.use_tabs = c.config.getBool('use-chapter-tabs');
+}
 </t>
-<t tx="felix.20220429005433.6">def createIcon(self):
-    """Create chapter-selection Qt ListBox in the icon area."""
-    cc = self
-    c = cc.c
-    if cc.use_tabs:
-        if hasattr(c.frame.iconBar, 'createChaptersIcon'):
-            if not cc.tt:
-                cc.tt = c.frame.iconBar.createChaptersIcon()
+<t tx="felix.20220429005433.6">/** 
+ * Create chapter-selection Qt ListBox in the icon area.
+ */
+public createIcon(): void {
+    const cc = this;
+    const c: Commands = cc.c;
+    if (cc.use_tabs){
+        if (c.frame &amp;&amp; c.frame.iconBar &amp;&amp; c.frame.iconBar.createChaptersIcon){
+            if (!cc.tt){
+
+                console.log('TODO : cc.tt = c.frame.iconBar.createChaptersIcon()');
+                
+                // cc.tt = c.frame.iconBar.createChaptersIcon();
+
+            }
+
+    }
+}
 </t>
-<t tx="felix.20220429005433.7"># This must be called late in the init process, after the first redraw.
+<t tx="felix.20220429005433.7">// This must be called late in the init process, after the first redraw.
 
-def finishCreate(self):
-    """Create the box in the icon area."""
-    c, cc = self.c, self
-    cc.createIcon()
-    cc.setAllChapterNames()
-        # Create all chapters.
-    # #31.
-    cc.initing = False
-    # Always select the main chapter.
-    # It can be alarming to open a small chapter in a large .leo file.
-    cc.selectChapterByName('main')
-    c.redraw()
+/**
+ * Create the box in the icon area.
+ */
+public finishCreate(): void {
+
+    const cc = this;
+    const c: Commands = cc.c;
+
+    cc.createIcon();
+    cc.setAllChapterNames();
+        // Create all chapters.
+    // #31.
+    cc.initing = false;
+    // Always select the main chapter.
+    // It can be alarming to open a small chapter in a large .leo file.
+    cc.selectChapterByName('main');
+    c.redraw();
+}
 </t>
-<t tx="felix.20220429005433.8">def makeCommand(self, chapterName, binding=None):
-    """Make chapter-select-&lt;chapterName&gt; command."""
-    c, cc = self.c, self
-    commandName = f"chapter-select-{chapterName}"
-    #
-    # For tracing:
-    # inverseBindingsDict = c.k.computeInverseBindingDict()
-    if commandName in c.commandsDict:
-        return
+<t tx="felix.20220429005433.8">/**
+ * Make chapter-select-&lt;chapterName&gt; command.
+ */
+public makeCommand(chapterName: string, binding?: any): void {
+    
+    const cc = this;
+    const c: Commands = cc.c;
+    
+    const commandName = `chapter-select-${chapterName}`;
+    //
+    // For tracing:
+    // inverseBindingsDict = c.k.computeInverseBindingDict()
+    if (c.commandsDict.includes(commandName)){
+        return;
+    }
 
-    def select_chapter_callback(event, cc=cc, name=chapterName):
-        chapter = cc.chaptersDict.get(name)
-        if chapter:
-            try:
-                cc.selectChapterLockout = True
-                cc.selectChapterByNameHelper(chapter, collapse=True)
-                c.redraw(chapter.p)  # 2016/04/20.
-            finally:
-                cc.selectChapterLockout = False
-        elif not g.unitTesting:
-            # Possible, but not likely.
-            cc.note(f"no such chapter: {name}")
+    const select_chapter_callback = function (cc: ChapterController, name:string) {
+        if(!name){
+            name = chapterName;
+        }
+        const chapter = cc.chaptersDict.get(name);
+        if (chapter){
+            try {
+                cc.selectChapterLockout = true;
+                cc.selectChapterByNameHelper(chapter, true);
+                c.redraw(chapter.p);  // 2016/04/20.
+            }
+            catch(err) {
+                // 
+            }
+            finally {
+                cc.selectChapterLockout = false;
+            }
+   
+        }else if(!g.unitTesting){
+            // Possible, but not likely.
+            cc.note(`no such chapter: ${name}`);
+        }
+    }
+    // Always bind the command without a shortcut.
+    // This will create the command bound to any existing settings.
 
-    # Always bind the command without a shortcut.
-    # This will create the command bound to any existing settings.
+    const bindings: any[] = binding ? [undefined, binding] : [undefined, undefined];
+    for (let shortcut of bindings){
+        console.log('TODO: c.k.registerCommand(commandName, select_chapter_callback, shortcut=shortcut)');
+        // c.k.registerCommand(commandName, select_chapter_callback, shortcut=shortcut)
+    }
+}</t>
+<t tx="felix.20220429005433.9">@cmd(
+    'chapter-select',
+    'Use the minibuffer to get a chapter name, then create the chapter.'
+)
+public selectChapter(): void {
+    const cc = this;
+    const k = this.c.k;
 
-    bindings = (None, binding) if binding else (None,)
-    for shortcut in bindings:
-        c.k.registerCommand(commandName, select_chapter_callback, shortcut=shortcut)
-</t>
-<t tx="felix.20220429005433.9">@cmd('chapter-select')
-def selectChapter(self, event=None):
-    """Use the minibuffer to get a chapter name, then create the chapter."""
-    cc, k = self, self.c.k
-    names = cc.setAllChapterNames()
-    g.es('Chapters:\n' + '\n'.join(names))
-    k.setLabelBlue('Select chapter: ')
-    k.get1Arg(event, handler=self.selectChapter1, tabList=names)
+    const names = cc.setAllChapterNames();
+    
+    g.es('Chapters:\n' + '\n'.join(names));
+    k.setLabelBlue('Select chapter: ');
+    k.get1Arg(this.selectChapter1, names);
+}
 
-def selectChapter1(self, event):
-    cc, k = self, self.c.k
-    k.clearState()
-    k.resetLabel()
-    if k.arg:
-        cc.selectChapterByName(k.arg)
+public selectChapter1(): void {
+    const cc = this;
+    const k = this.c.k;
+
+    k.clearState();
+    k.resetLabel();
+    if (k.arg){
+        cc.selectChapterByName(k.arg);
+    }
+}
 </t>
 </tnodes>
 </leo_file>
