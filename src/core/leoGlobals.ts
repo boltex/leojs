@@ -2647,6 +2647,63 @@ def unCamel(s: str) -> List[str]:
     return result
  */
 //@+node:felix.20220410215159.1: *3* g.Unicode
+//@+node:felix.20220430215156.1: *4* g.checkUnicode
+export const checkUnicode_dict: {[key: string]: boolean} = {};
+
+/**
+ * Warn when converting bytes. Report *all* errors.
+ *
+ * This method is meant to document defensive programming. We don't expect
+ * these errors, but they might arise as the result of problems in
+ * user-defined plugins or scripts.
+ */
+export function checkUnicode(s: string, encoding?:string ): string {
+ 
+    const tag = 'g.checkUnicode';
+
+    return s || '';
+
+    // TODO : ? Needed ?
+    /* 
+    if s is None and g.unitTesting:
+        return '';
+
+    if isinstance(s, str):
+        return s;
+
+    if not isinstance(s, bytes):
+        g.error(f"{tag}: unexpected argument: {s!r}")
+        return '';
+
+    //
+    // Report the unexpected conversion.
+    callers = g.callers(1)
+    if callers not in checkUnicode_dict:
+        g.trace(g.callers())
+        g.error(f"\n{tag}: expected unicode. got: {s!r}\n")
+        checkUnicode_dict[callers] = True
+    //
+    // Convert to unicode, reporting all errors.
+    if not encoding:
+        encoding = 'utf-8'
+
+    try
+        s = s.decode(encoding, 'strict')
+    except(UnicodeDecodeError, UnicodeError):
+        // https://wiki.python.org/moin/UnicodeDecodeError
+        s = s.decode(encoding, 'replace')
+        g.trace(g.callers())
+        g.error(f"{tag}: unicode error. encoding: {encoding!r}, s:\n{s!r}")
+    except Exception:
+        g.trace(g.callers())
+        g.es_excption()
+        g.error(f"{tag}: unexpected error! encoding: {encoding!r}, s:\n{s!r}")
+
+
+    return s;
+    */
+
+}
 //@+node:felix.20220410215214.1: *4* g.isWordChar*     (coreGlobals.py)
 /**
  * Return True if ch should be considered a letter.

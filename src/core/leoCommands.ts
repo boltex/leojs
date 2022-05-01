@@ -73,6 +73,7 @@ export class Commands {
         c: Commands;
         title: string;
         openDirectory: string;
+        iconBar: any;
         tree: {
             generation: number;
             editLabel: (p: Position, selectAll: boolean, selection: any) => void
@@ -81,6 +82,7 @@ export class Commands {
             c: this,
             title: "",
             openDirectory: "",
+            iconBar: {},
             tree: {
                 generation: 0,
                 editLabel: (p: Position, selectAll: boolean, selection: any) => {
