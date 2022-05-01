@@ -914,6 +914,7 @@ export class Position {
      * with_count - include ',x,y' at end where y zero based count of same headlines
      */
     public get_UNL(with_file = true, with_proto = false, with_index = true, with_count = false): string {
+        // TODO : ! CHange this method to reflext Leo 6.6 !
         const aList: string[] = [];
         for (let i of this.self_and_parents(false)) {
             if (with_index || with_count) {
@@ -927,13 +928,13 @@ export class Position {
                         count = count + 1;
                     }
                 }
-                aList.push(i.h.replace('-->', '--%3E') + ":" + ind.toString());
+                aList.push(i.h.split('-->').join('--%3E') + ":" + ind.toString());
                 // g.recursiveUNLFind and sf.copy_to_my_settings undo this replacement.
                 if (count || with_count) {
                     aList[aList.length - 1] = aList[aList.length - 1] + "," + count.toString();
                 }
             } else {
-                aList.push(i.h.replace('-->', '--%3E'));
+                aList.push(i.h.split('-->').join('--%3E'));
                 // g.recursiveUNLFind  and sf.copy_to_my_settings undo this replacement.
             }
         }
@@ -942,7 +943,7 @@ export class Position {
         if (with_proto) {
             // return ("file://%s#%s" % (self.v.context.fileName(), UNL)).replace(' ', '%20')
             const s: string = "unl:" + `//${this.v.context.fileName()}#${UNL}`;
-            return s.replace(' ', '%20');
+            return s.split(' ').join( '%20');
         }
         if (with_file) {
             return `${this.v.context.fileName()}#${UNL}`;
@@ -2773,14 +2774,14 @@ export class VNode {
     public matchHeadline(pattern: string): boolean {
         const v: VNode = this;
         let h: string = g.toUnicode(v.headString());
-        h = h.toLowerCase().replace(' ', '').replace('\t', '');
+        h = h.toLowerCase().split(' ').join('').split('\t').join('');
         // equivalent to h = h.lstrip('.')
         // 2013/04/05. Allow leading period before section names.
         while (h.charAt(0) === '.') {
             h = h.substring(1);
         }
         pattern = g.toUnicode(pattern);
-        pattern = pattern.toLowerCase().replace(' ', '').replace('\t', '');
+        pattern = pattern.toLowerCase().split(' ').join('').split('\t').join('');
         return h.startsWith(pattern);
     }
 

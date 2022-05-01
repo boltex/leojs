@@ -133,7 +133,7 @@ export class ChapterController {
                 // Possible, but not likely.
                 cc.note(`no such chapter: ${name}`);
             }
-        }
+        };
         // Always bind the command without a shortcut.
         // This will create the command bound to any existing settings.
 
@@ -301,7 +301,7 @@ export class ChapterController {
                 return true;
             }
         }
-        return false
+        return false;
 
     }
     //@+node:felix.20220429005433.16: *4* cc.findChapterNameForPosition
@@ -422,7 +422,7 @@ export class ChapterController {
             }
         }
         s = result.join('');
-        s = s.replace('--', '-');
+        s = s.split('--').join('-'); 
 
         return s.slice(0, 128);
     }
@@ -443,7 +443,7 @@ export class ChapterController {
         if (cc.selectChapterLockout) {
             return;
         }
-        const selChapter = cc.getSelectedChapter()
+        const selChapter = cc.getSelectedChapter();
         if (!chapter && !selChapter) {
             return;
         }

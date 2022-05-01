@@ -2139,7 +2139,7 @@ export class Commands {
 
         let val: string = aList.join('');
         if (g.isWindows) {
-            val = val.replace('\\', '/');
+            val = val.split('\\').join('/');
         }
 
         return val;

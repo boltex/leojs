@@ -1792,7 +1792,7 @@ export function sanitize_filename(s: string): string {
     let n;
     while (s.length > 1) {
         n = s.length;
-        s = s.split('__').join('_'); // s.replace('__', '_');
+        s = s.split('__').join('_');
         if (s.length === n) {
             break;
         }
