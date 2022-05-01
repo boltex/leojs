@@ -107,7 +107,7 @@ export class ChapterController {
         //
         // For tracing:
         // inverseBindingsDict = c.k.computeInverseBindingDict()
-        if (c.commandsDict.includes(commandName)) {
+        if (commandName in c.commandsDict) {
             return;
         }
 
