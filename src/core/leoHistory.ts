@@ -1,5 +1,6 @@
 //@+leo-ver=5-thin
 //@+node:felix.20211021231651.1: * @file src/core/leoHistory.ts
+import { Chapter } from './leoChapters';
 import { Commands } from './leoCommands';
 import { Position } from './leoNodes';
 //@+others
@@ -10,7 +11,7 @@ import { Position } from './leoNodes';
 export class NodeHistory {
 
     public c: Commands;
-    public beadList: [Position, any][]; // a list of (position,chapter) tuples.
+    public beadList: [Position, Chapter][]; // a list of (position,chapter) tuples.
     public beadPointer: number;
     public skipBeadUpdate: boolean;
 
@@ -30,19 +31,20 @@ export class NodeHistory {
     public dump(): void {
         this.beadList.forEach((data, i) => {
             let p: Position | string = data[0];
-            let chapter: any | string = data[1];
+            let chapter: Chapter = data[1];
+            let chapterName: string;
             if (p && p.__bool__()) {
                 p = p.h;
             } else {
                 p = 'no p';
             }
             if (chapter) {
-                chapter = chapter.name;
+                chapterName = chapter.name;
             } else {
-                chapter = 'main';
+                chapterName = 'main';
             }
             const mark: string = i === this.beadPointer ? '**' : '  '; // used in string
-            console.log(`${mark} ${i} ${chapter} ${p}`);
+            console.log(`${mark} ${i} ${chapterName} ${p}`);
         });
     }
 
@@ -54,7 +56,7 @@ export class NodeHistory {
         if (this.beadPointer + 1 < this.beadList.length) {
             this.beadPointer += 1;
             const p = this.beadList[this.beadPointer][0];
-            const chapter = this.beadList[this.beadPointer][1];
+            const chapter: Chapter = this.beadList[this.beadPointer][1];
             this.select(p, chapter);
         }
     }
@@ -67,7 +69,7 @@ export class NodeHistory {
         if (this.beadPointer > 0) {
             this.beadPointer -= 1;
             const p = this.beadList[this.beadPointer][0];
-            const chapter = this.beadList[this.beadPointer][1];
+            const chapter: Chapter = this.beadList[this.beadPointer][1];
             this.select(p, chapter);
         }
     }
@@ -77,7 +79,7 @@ export class NodeHistory {
      * Update the history list when selecting p.
      * Called only from self.goToNext/PrevHistory
      */
-    public select(p: Position, chapter: any): void {
+    public select(p: Position, chapter: Chapter): void {
         const c: Commands = this.c;
         const cc = this.c.chapterController;
         if (cc && c.positionExists(p)) {
@@ -114,12 +116,12 @@ export class NodeHistory {
             return;
         }
         // Fix bug #180: handle the change flag.
-        const aList: [Position, any][] = [];
+        const aList: [Position, Chapter][] = [];
         let found: number = -1;
 
         this.beadList.forEach((data, i) => {
-            const p2: Position | string = data[0];
-            const junk_chapter: any | string = data[1];
+            const p2: Position = data[0];
+            const junk_chapter: Chapter = data[1];
 
             if (c.positionExists(p2)) {
                 if (p.__eq__(p2)) {
@@ -138,7 +140,7 @@ export class NodeHistory {
         });
 
         if (change || found === -1) {
-            const data: [Position, any] = [p.copy(), cc.getSelectedChapter()];
+            const data: [Position, Chapter] = [p.copy(), cc.getSelectedChapter()!];
             aList.push(data);
             this.beadPointer = aList.length - 1;
         } else {

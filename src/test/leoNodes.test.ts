@@ -5,6 +5,7 @@
  */
 import * as assert from 'assert';
 import { afterEach, before, beforeEach } from 'mocha';
+import { Chapter } from '../core/leoChapters';
 
 import * as g from '../core/leoGlobals';
 import { Position, VNode } from '../core/leoNodes';
@@ -806,34 +807,28 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.45: *3* TestNodes.test_p_moveToVisBack_in_a_chapter
-    // ! Uncomment when test_p_moveToVisBack_in_a_chapter is implemented !
-
-    /*
-
     test('test_p_moveToVisBack_in_a_chapter', async () => {
         const c = self.c;
         let p = self.c.p;
 
         // Verify a fix for bug https://bugs.launchpad.net/leo-editor/+bug/1264350
-        import leo.core.leoChapters as leoChapters
-        c, p = self.c, self.c.p
-        cc = c.chapterController
-        settings_p = p.insertAsNthChild(0)
-        settings_p.h = '@settings'
-        chapter_p = settings_p.insertAsLastChild()
-        chapter_p.h = '@chapter aaa'
-        node_p = chapter_p.insertAsNthChild(0)
-        node_p.h = 'aaa node 1'
+        const cc = c.chapterController;
+        const settings_p = p.insertAsNthChild(0);
+        settings_p.h = '@settings';
+        const chapter_p = settings_p.insertAsLastChild();
+        chapter_p.h = '@chapter aaa';
+        const node_p = chapter_p.insertAsNthChild(0);
+        node_p.h = 'aaa node 1';
         // Hack the chaptersDict.
-        cc.chaptersDict['aaa'] = leoChapters.Chapter(c, cc, 'aaa')
+        cc.chaptersDict['aaa'] = new Chapter(c, cc, 'aaa');
         // Select the chapter.
-        cc.selectChapterByName('aaa')
-        self.assertEqual(c.p.h, 'aaa node 1')
-        p2 = c.p.moveToVisBack(c)
-        self.assertEqual(p2, None)
+        cc.selectChapterByName('aaa');
+        assert.strictEqual(c.p.h, 'aaa node 1');
+        const p2 = c.p.moveToVisBack(c);
+        assert.strictEqual(p2, undefined);
     });
 
-    */
+
 
     //@+node:felix.20220129225027.46: *3* TestNodes.test_p_nosentinels
     test('test_p_nosentinels', async () => {

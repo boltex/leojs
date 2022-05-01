@@ -618,7 +618,7 @@ export class CommanderOutlineCommands {
                     }
                 }
             }
-            if (cc && cc.inChapter && parent.h.startsWith('@chapter ')) {
+            if (cc && cc.inChapter() && parent.h.startsWith('@chapter ')) {
                 // pass
             } else {
                 c.goToParent();
@@ -1064,8 +1064,8 @@ export class CommanderOutlineCommands {
             if (cc) {
                 // #252: goto-next clone activate chapter.
                 const chapter = cc.getSelectedChapter();
-                const old_name: string | boolean = chapter && chapter.name;
-                const new_name: string = cc.findChapterNameForPosition(p);
+                const old_name: string | boolean = (!!chapter) && chapter.name;
+                const new_name: string = cc.findChapterNameForPosition(p)!;
                 if (new_name !== old_name) {
                     cc.selectChapterByName(new_name); // TODO
                 }
@@ -1849,10 +1849,8 @@ export class CommanderOutlineCommands {
                 }
                 c.setChanged();
             }
-            // c.contractAllHeadlines()
-            // Causes problems when in a chapter.
-            c.selectPosition(parent);
-            c.redraw();
+            // Calling c.contractAllHeadlines() causes problems when in a chapter.
+            c.redraw(parent);
 
         });
 

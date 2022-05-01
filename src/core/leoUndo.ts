@@ -46,6 +46,7 @@ import * as g from './leoGlobals';
 import { new_cmd_decorator } from "../core/decorators";
 import { Position, VNode } from './leoNodes';
 import { Commands } from './leoCommands';
+import { ChapterController } from './leoChapters';
 //@-<< imports >>
 //@+others
 //@+node:felix.20211028004540.1: ** Interfaces
@@ -1142,7 +1143,8 @@ export class Undoer {
     public putIvarsToVnode(p: Position): void {
         const u: Undoer = this;
         const v: VNode = p.v;
-        // assert this.per_node_undo
+        console.assert(this.per_node_undo);
+
         const bunch: Bead = {};
         for (let key of this.optionalIvars) {
             bunch[key] = (u as any)[key];
@@ -1361,10 +1363,9 @@ export class Undoer {
     public redoCloneNode(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const cc: any = c.chapterController;
+        const cc: ChapterController = c.chapterController;
         if (cc) {
-            // TODO cc chapter controller
-            // cc.selectChapterByName('main');
+            cc.selectChapterByName('main');
         }
         if (u.newBack.__bool__()) {
             u.newP._linkAfter(u.newBack);
@@ -1474,10 +1475,9 @@ export class Undoer {
     public redoInsertNode(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const cc: any = c.chapterController;
+        const cc: ChapterController = c.chapterController;
         if (cc) {
-            // TODO cc chapter controller
-            // cc.selectChapterByName('main');
+            cc.selectChapterByName('main');
         }
         if (u.newBack.__bool__()) {
             u.newP._linkAfter(u.newBack);
@@ -1515,17 +1515,16 @@ export class Undoer {
     public redoMove(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const cc: any = c.chapterController;
+        const cc: ChapterController = c.chapterController;
         const v: VNode = u.p!.v;
-        //assert u.oldParent_v
-        //assert u.newParent_v
-        //assert v
+        console.assert(u.oldParent_v);
+        console.assert(u.newParent_v);
+        console.assert(v);
         if (cc) {
-            // TODO cc chapter controller
-            // cc.selectChapterByName('main');
+            cc.selectChapterByName('main');
         }
         // Adjust the children arrays of the old parent.
-        // assert u.oldParent_v.children[u.oldN] == v
+        console.assert(u.oldParent_v.children[u.oldN] === v);
 
         // del u.oldParent_v.children[u.oldN]
         u.oldParent_v.children.splice(u.oldN, 1);
@@ -1742,7 +1741,7 @@ export class Undoer {
     public undoCloneMarkedNodes(): void {
         const u: Undoer = this;
         const next: Position = u.p!.next();
-        // assert next.h == 'Clones of marked nodes', (u.p, next.h);
+        console.assert(next.h === 'Clones of marked nodes', next.h);
         next.doDelete();
         u.p!.setAllAncestorAtFileNodesDirty();
         u.c.selectPosition(u.p!);
@@ -1751,10 +1750,9 @@ export class Undoer {
     public undoCloneNode(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const cc: any = c.chapterController;
+        const cc: ChapterController = c.chapterController;
         if (cc) {
-            // TODO cc chapter controller
-            // cc.selectChapterByName('main');
+            cc.selectChapterByName('main');
         }
         c.selectPosition(u.newP);
         c.deleteOutline();
@@ -1765,7 +1763,7 @@ export class Undoer {
     public undoCopyMarkedNodes(): void {
         const u: Undoer = this;
         const next: Position = u.p!.next();
-        // assert next.h == 'Copies of marked nodes', (u.p.h, next.h)
+        console.assert(next.h === 'Copies of marked nodes', next.h);
         next.doDelete();
         u.p!.setAllAncestorAtFileNodesDirty();
         u.c.selectPosition(u.p!);
@@ -1891,10 +1889,9 @@ export class Undoer {
     public undoInsertNode(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const cc: any = c.chapterController;
+        const cc: ChapterController = c.chapterController;
         if (cc) {
-            // TODO cc chapter controller
-            // cc.selectChapterByName('main');
+            cc.selectChapterByName('main');
         }
         u.newP.setAllAncestorAtFileNodesDirty();
         c.selectPosition(u.newP);
@@ -1929,17 +1926,16 @@ export class Undoer {
     public undoMove(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const cc: any = c.chapterController;
+        const cc: ChapterController = c.chapterController;
         if (cc) {
-            // TODO cc chapter controller
-            // cc.selectChapterByName('main');
+            cc.selectChapterByName('main');
         }
         const v: VNode = u.p!.v;
-        //assert u.oldParent_v
-        //assert u.newParent_v
-        //assert v
+        console.assert(u.oldParent_v);
+        console.assert(u.newParent_v);
+        console.assert(v);
         // Adjust the children arrays.
-        // assert u.newParent_v.children[u.newN] == v
+        console.assert(u.newParent_v.children[u.newN] === v);
 
         // del u.newParent_v.children[u.newN]
         u.newParent_v.children.splice(u.newN, 1);

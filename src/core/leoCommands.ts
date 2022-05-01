@@ -17,6 +17,7 @@ import { LocalConfigManager } from './leoConfig';
 import { AtFile } from './leoAtFile';
 import { LeoFind } from './leoFind';
 import { LeoImportCommands } from './leoImport';
+import { ChapterController } from "./leoChapters";
 
 
 //@-<< imports >>
@@ -61,7 +62,7 @@ export class Commands {
     public findCommands: LeoFind;
     public importCommands: LeoImportCommands;
 
-    public chapterController: any; // TODO : leoChapters.ChapterController(c)
+    public chapterController: ChapterController;
     public undoer: Undoer;
     public nodeHistory: NodeHistory;
     public gui: LeoUI | NullGui;
@@ -263,7 +264,7 @@ export class Commands {
 
         // Define the subcommanders.
 
-        // this.chapterController // TODO: = leoChapters.ChapterController(c);
+        this.chapterController = new ChapterController(c);
         // this.shadowController // TODO: = leoShadow.ShadowController(c); 
 
         this.fileCommands = new FileCommands(c);
@@ -966,7 +967,7 @@ export class Commands {
      */
     public visLimit(): [Position | undefined, boolean | undefined] {
         const c: Commands = this;
-        const cc: any = false;// c.chapterController
+        const cc: ChapterController = c.chapterController;
         if (c.hoistStack.length) {
             const bunch: HoistStackEntry = c.hoistStack[c.hoistStack.length - 1];
             const p: Position = bunch.p;
@@ -3279,9 +3280,9 @@ export class Commands {
      */
     public selectPosition(p: Position): void {
 
-        const trace = true; // For # 2167.
+        const trace = false; // For # 2167.
         const c: Commands = this;
-        // const cc = c.chapterController;
+        const cc: ChapterController = c.chapterController;
 
         if (!p || !p.__bool__()) {
             if (!g.app.batchMode) { // A serious error.
@@ -3289,10 +3290,10 @@ export class Commands {
             }
         }
 
-        // if(cc && !cc.selectChapterLockout){
-        //     cc.selectChapterForPosition(p)
-        //     // Calls c.redraw only if the chapter changes.
-        // }
+        if (cc && !cc.selectChapterLockout) {
+            cc.selectChapterForPosition(p);
+            // Calls c.redraw only if the chapter changes.
+        }
 
         // De-hoist as necessary to make p visible.
         if (c.hoistStack.length) {
