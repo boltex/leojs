@@ -37,9 +37,9 @@ export class ChapterController {
      * Ctor for ChapterController class.
      */
     constructor(c: Commands) {
-        this.c = c
+        this.c = c;
         // Note: chapter names never change, even if their @chapter node changes.
-        this.chaptersDict = {}  // Keys are chapter names, values are chapters.
+        this.chaptersDict = {}; // Keys are chapter names, values are chapters.
         this.initing = true;  // #31: True: suppress undo when creating chapters.
         this.re_chapter = undefined;  // Set where used.
         this.selectedChapter = undefined;
@@ -460,7 +460,7 @@ export class ChapterController {
         }
         // First, try the presently selected chapter.
         const firstName = theChapter.name;
-        if (firstName == 'main') {
+        if (firstName === 'main') {
             return;
         }
         if (theChapter.positionIsInChapter(p)) {
@@ -507,7 +507,7 @@ export class ChapterController {
         const seen: VNode[] = [];
         for (let p of c.all_unique_positions()) {
             let chapterName: string | undefined;
-            let binding: string | undefined
+            let binding: string | undefined;
             [chapterName, binding] = this.parseHeadline(p);
             if (chapterName && !seen.includes(p.v)) {
                 seen.push(p.v);
