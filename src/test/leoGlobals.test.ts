@@ -12,7 +12,6 @@ import { LeoUnitTest } from './leoTest2';
 //@+others
 //@+node:felix.20220129223719.1: ** suite TestGlobals(LeoUnitTest)
 suite('Tests for leo.core.leoGlobals', () => {
-
     let self: LeoUnitTest;
 
     before(async () => {
@@ -63,10 +62,10 @@ suite('Tests for leo.core.leoGlobals', () => {
     test('test_g_comment_delims_from_extension', async () => {
         // New in Leo 4.6, set_delims_from_language returns '' instead of None.
         const table: [string, string[]][] = [
-            ['.c', ['//', '/*', '*\/']], // escaped
+            ['.c', ['//', '/*', '*/']], // escaped
             ['.html', ['', '<!--', '-->']],
             ['.py', ['#', '', '']],
-            ['.Globals', ['', '', '']]
+            ['.Globals', ['', '', '']],
         ];
 
         let ext: string;
@@ -76,43 +75,43 @@ suite('Tests for leo.core.leoGlobals', () => {
             const result = g.comment_delims_from_extension(ext);
             assert.strictEqual(
                 JSON.stringify(result),
-                JSON.stringify(expected), ext.toString()
+                JSON.stringify(expected),
+                ext.toString()
             );
-        };
-
+        }
     });
     //@+node:felix.20220129223719.6: *3* TestGlobals.test_g_convertPythonIndexToRowCol
     test('test_g_convertPythonIndexToRowCol', async () => {
         const s1 = 'abc\n\np\nxy';
         const table1: [number, [number, number]][] = [
-            [-1, [0, 0]],  // One too small.
+            [-1, [0, 0]], // One too small.
             [0, [0, 0]],
             [1, [0, 1]],
             [2, [0, 2]],
-            [3, [0, 3]],  // The newline ends a row.
+            [3, [0, 3]], // The newline ends a row.
             [4, [1, 0]],
             [5, [2, 0]],
             [6, [2, 1]],
             [7, [3, 0]],
             [8, [3, 1]],
-            [9, [3, 2]],  // One too many.
-            [10, [3, 2]]  // Two too many.
+            [9, [3, 2]], // One too many.
+            [10, [3, 2]], // Two too many.
         ];
 
         const s2 = 'abc\n\np\nxy\n';
         const table2: [number, [number, number]][] = [
             [9, [3, 2]],
-            [10, [4, 0]],  // One too many.
-            [11, [4, 0]]  // Two too many.
+            [10, [4, 0]], // One too many.
+            [11, [4, 0]], // Two too many.
         ];
 
-        const s3 = 'ab';  // Test special case.  This was the cause of off-by-one problems.
+        const s3 = 'ab'; // Test special case.  This was the cause of off-by-one problems.
         const table3: [number, [number, number]][] = [
-            [-1, [0, 0]],  // One too small.
+            [-1, [0, 0]], // One too small.
             [0, [0, 0]],
             [1, [0, 1]],
-            [2, [0, 2]],  // One too many.
-            [3, [0, 2]],  // Two too many.
+            [2, [0, 2]], // One too many.
+            [3, [0, 2]], // Two too many.
         ];
 
         let n: number;
@@ -123,39 +122,49 @@ suite('Tests for leo.core.leoGlobals', () => {
         let row;
         let col;
 
-        const outerTable: [number, string, [number, [number, number]][]][] = [[1, s1, table1], [2, s2, table2], [3, s3, table3]];
+        const outerTable: [number, string, [number, [number, number]][]][] = [
+            [1, s1, table1],
+            [2, s2, table2],
+            [3, s3, table3],
+        ];
 
         for ([n, s, table] of outerTable) {
-
             for ([i, result] of table) {
                 [row, col] = g.convertPythonIndexToRowCol(s, i);
-                assert.strictEqual(row, result[0], `row: ${row} r0: ${result[0]} n: ${n}, i: ${i}`);
-                assert.strictEqual(col, result[1], `col: ${col} r1: ${result[1]} n: ${n}, i: ${i}`);
+                assert.strictEqual(
+                    row,
+                    result[0],
+                    `row: ${row} r0: ${result[0]} n: ${n}, i: ${i}`
+                );
+                assert.strictEqual(
+                    col,
+                    result[1],
+                    `col: ${col} r1: ${result[1]} n: ${n}, i: ${i}`
+                );
             }
         }
     });
 
     //@+node:felix.20220129223719.7: *3* TestGlobals.test_g_convertRowColToPythonIndex
     test('test_g_convertRowColToPythonIndex', async () => {
-
         const s1: string = 'abc\n\np\nxy';
         const s2: string = 'abc\n\np\nxy\n';
         const table1: [number, [number, number]][] = [
-            [0, [-1, 0]],  // One too small.
+            [0, [-1, 0]], // One too small.
             [0, [0, 0]],
             [1, [0, 1]],
             [2, [0, 2]],
-            [3, [0, 3]],  // The newline ends a row.
+            [3, [0, 3]], // The newline ends a row.
             [4, [1, 0]],
             [5, [2, 0]],
             [6, [2, 1]],
             [7, [3, 0]],
             [8, [3, 1]],
-            [9, [3, 2]]  // One too large.
+            [9, [3, 2]], // One too large.
         ];
         const table2: [number, [number, number]][] = [
             [9, [3, 2]],
-            [10, [4, 0]]  // One two many.
+            [10, [4, 0]], // One two many.
         ];
 
         let s: string;
@@ -166,16 +175,22 @@ suite('Tests for leo.core.leoGlobals', () => {
         let col;
         let data: [number, number];
 
-        let outerTable: [string, [number, [number, number]][]][] = [[s1, table1], [s2, table2]];
+        let outerTable: [string, [number, [number, number]][]][] = [
+            [s1, table1],
+            [s2, table2],
+        ];
 
         for ([s, table] of outerTable) {
             for ([i, data] of table) {
                 [row, col] = data;
                 result = g.convertRowColToPythonIndex(s, row, col);
-                assert.strictEqual(i, result, `row: ${row}, col: ${col}, i: ${i}`);
+                assert.strictEqual(
+                    i,
+                    result,
+                    `row: ${row}, col: ${col}, i: ${i}`
+                );
             }
         }
-
     });
 
     //@+node:felix.20220129223719.8: *3* TestGlobals.test_g_create_temp_file
@@ -190,14 +205,13 @@ suite('Tests for leo.core.leoGlobals', () => {
                 theFile.close()
      */
 
-
     //@+node:felix.20220129223719.9: *3* TestGlobals.test_g_ensureLeadingNewlines
     test('test_g_ensureLeadingNewlines', async () => {
         const s = ' \n \n\t\naa bc';
         const s2 = 'aa bc';
         for (let i of [0, 1, 2, 3]) {
             const result = g.ensureLeadingNewlines(s, i);
-            const val = ('\n'.repeat(i)) + s2;
+            const val = '\n'.repeat(i) + s2;
             assert.strictEqual(result, val);
         }
     });
@@ -207,7 +221,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         const s2 = 'aa bc';
         for (let i of [0, 1, 2, 3]) {
             const result = g.ensureTrailingNewlines(s, i);
-            const val = s2 + ('\n'.repeat(i));
+            const val = s2 + '\n'.repeat(i);
             assert.strictEqual(result, val);
         }
     });
@@ -218,7 +232,7 @@ suite('Tests for leo.core.leoGlobals', () => {
             ['abc a bc x', 'bc', 1, 6],
             ['abc a bc xssdfskdjfhskjdfhskjdf', 'bc', 1, 6],
             ['abc a x', 'bc', 0, -1],
-            [' bc', 'bc', 0, 1]
+            [' bc', 'bc', 0, 1],
         ];
         let s: string;
         let word: string;
@@ -263,7 +277,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert.strictEqual(d['pagewidth'], '72');
         assert.strictEqual(d['encoding'], 'utf-8');
         assert.strictEqual(d['comment'], 'a b c');
-        assert.ok(!(d['path']), d['path']);
+        assert.ok(!d['path'], d['path']);
     });
     //@+node:felix.20220129223719.14: *3* TestGlobals.test_g_getDocString
     test('test_g_getDocString', async () => {
@@ -279,7 +293,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         const table = [
             [s1, ''],
             [s2, 'docstring2.'],
-            [s3, 'docstring3.']
+            [s3, 'docstring3.'],
         ];
         let s;
         let result;
@@ -292,15 +306,18 @@ suite('Tests for leo.core.leoGlobals', () => {
     test('test_g_getLine', async () => {
         const s: string = 'a\ncd\n\ne';
         const table: [number, [number, number]][] = [
-            [-1, [0, 2]],  // One too few.
-            [0, [0, 2]], [1, [0, 2]],
-            [2, [2, 5]], [3, [2, 5]], [4, [2, 5]],
+            [-1, [0, 2]], // One too few.
+            [0, [0, 2]],
+            [1, [0, 2]],
+            [2, [2, 5]],
+            [3, [2, 5]],
+            [4, [2, 5]],
             [5, [5, 6]],
             [6, [6, 7]],
-            [7, [6, 7]],  // One too many.
+            [7, [6, 7]], // One too many.
         ];
 
-        table.forEach(element => {
+        table.forEach((element) => {
             let i: number;
             let result: [number, number];
             [i, result] = element;
@@ -309,7 +326,6 @@ suite('Tests for leo.core.leoGlobals', () => {
             [j, k] = g.getLine(s, i);
             assert.deepStrictEqual([j, k], result, `i: ${i}, j: ${j}, k: ${k}`);
         });
-
     });
 
     //@+node:felix.20220129223719.16: *3* TestGlobals.test_g_getWord
@@ -358,7 +374,6 @@ suite('Tests for leo.core.leoGlobals', () => {
      */
     //@+node:felix.20220129223719.20: *3* TestGlobals.test_g_isDirective
     test('test_g_isDirective', async () => {
-
         const table: [boolean, string][] = [
             [true, '@language python\n'],
             [true, '@tabwidth -4 #test\n'],
@@ -370,24 +385,22 @@ suite('Tests for leo.core.leoGlobals', () => {
             [false, 'encoding = "abc"\n'],
         ];
 
-        table.forEach(element => {
+        table.forEach((element) => {
             let expected: boolean;
             let s: string;
             [expected, s] = element;
             const result = g.isDirective(s);
             assert.strictEqual(expected, !!result, s);
         });
-
     });
 
     //@+node:felix.20220129223719.21: *3* TestGlobals.test_g_match_word
     test('test_g_match_word', async () => {
-
         const table: [boolean, number, string, string][] = [
             [true, 0, 'a', 'a'],
             [false, 0, 'a', 'b'],
             [true, 0, 'a', 'a b'],
-            [false, 1, 'a', 'aa b'],  // Tests bug fixed 2017/06/01.
+            [false, 1, 'a', 'aa b'], // Tests bug fixed 2017/06/01.
             [false, 1, 'a', '_a b'],
             [false, 0, 'a', 'aw b'],
             [false, 0, 'a', 'a_'],
@@ -395,7 +408,7 @@ suite('Tests for leo.core.leoGlobals', () => {
             [false, 0, 'a', 'b a c'],
         ];
 
-        table.forEach(element => {
+        table.forEach((element) => {
             let expected: boolean;
             let i: number;
             let word: string;
@@ -404,7 +417,6 @@ suite('Tests for leo.core.leoGlobals', () => {
             const got = g.match_word(line + '\n', i, word);
             assert.strictEqual(expected, got);
         });
-
     });
 
     //@+node:felix.20220129223719.22: *3* TestGlobals.test_g_os_path_finalize_join_with_thumb_drive
@@ -425,7 +437,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         const table = [
             ['a\nb', 'a\nb'],
             ['\n  \n\nb\n', 'b\n'],
-            [' \t \n\n  \n c\n\t\n', ' c\n']
+            [' \t \n\n  \n c\n\t\n', ' c\n'],
         ];
         for ([s, expected] of table) {
             const result = g.removeBlankLines(s);
@@ -439,7 +451,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         const table = [
             ['a\nb', 'a\nb'],
             ['\n  \nb\n', 'b\n'],
-            [' \t \n\n\n c', ' c']
+            [' \t \n\n\n c', ' c'],
         ];
         for ([s, expected] of table) {
             const result = g.removeLeadingBlankLines(s);
@@ -452,7 +464,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         const table = [
             ['\t\n ', 'aa bc'],
             ['abc\t\n ', ''],
-            ['c\t\n ', 'aa b']
+            ['c\t\n ', 'aa b'],
         ];
         let arg;
         let val;
@@ -464,13 +476,13 @@ suite('Tests for leo.core.leoGlobals', () => {
     //@+node:felix.20220129223719.26: *3* TestGlobals.test_g_sanitize_filename
     test('test_g_sanitize_filename', async () => {
         const table = [
-            ['A25&()', 'A'],  // Non-alpha characters.
-            ['B\tc', 'B c'],  // Tabs.
-            ['"AB"', "'AB'"],  // Double quotes.
-            ['\\/:|<>*:.', '_'],  // Special characters.
-            ['_____________', '_'],  // Combining underscores.
-            ['A'.repeat(200), 'A'.repeat(128)],  // Maximum length.
-            ['abc.', 'abc_']  // Trailing dots.
+            ['A25&()', 'A'], // Non-alpha characters.
+            ['B\tc', 'B c'], // Tabs.
+            ['"AB"', "'AB'"], // Double quotes.
+            ['\\/:|<>*:.', '_'], // Special characters.
+            ['_____________', '_'], // Combining underscores.
+            ['A'.repeat(200), 'A'.repeat(128)], // Maximum length.
+            ['abc.', 'abc_'], // Trailing dots.
         ];
         let s;
         let expected;
@@ -654,8 +666,6 @@ suite('Tests for leo.core.leoGlobals', () => {
         p.b = '@nowrap\n';
         const aList = g.get_directives_dict_list(p);
         const s = g.scanAtWrapDirectives(aList);
-        console.log('nowrap s', s, aList);
-
         assert.ok(s === false, s?.toString());
     });
     /* def test_g_scanAtWrapDirectives_nowrap(self):
@@ -673,8 +683,6 @@ suite('Tests for leo.core.leoGlobals', () => {
         p.b = '@wrap\n';
         const aList = g.get_directives_dict_list(p);
         const s = g.scanAtWrapDirectives(aList);
-        console.log('wrap s', s, aList);
-
         assert.ok(s === true, s?.toString());
     });
     /* def test_g_scanAtWrapDirectives_wrap_with_wrap_(self):
@@ -704,10 +712,10 @@ suite('Tests for leo.core.leoGlobals', () => {
         const table: [string, string[]][] = [
             ['c', ['//', '/*', '*/']],
             ['python', ['#', '', '']],
-            ['xxxyyy', ['', '', '']]
+            ['xxxyyy', ['', '', '']],
         ];
 
-        table.forEach(element => {
+        table.forEach((element) => {
             let language: string;
             let expected: string[];
             [language, expected] = element;
@@ -725,10 +733,10 @@ suite('Tests for leo.core.leoGlobals', () => {
             ['python', '@comment #', ['#', '', '']],
             ['python', '#', ['#', '', '']],
             ['xxxyyy', '@comment a b c', ['a', 'b', 'c']],
-            ['xxxyyy', 'a b c', ['a', 'b', 'c']]
+            ['xxxyyy', 'a b c', ['a', 'b', 'c']],
         ];
 
-        table.forEach(element => {
+        table.forEach((element) => {
             let language: string;
             let s: string;
             let expected: string[];
@@ -741,35 +749,34 @@ suite('Tests for leo.core.leoGlobals', () => {
 
     //@+node:felix.20220129223719.43: *3* TestGlobals.test_g_skip_blank_lines
     test('test_g_skip_blank_lines', async () => {
-        let end = g.skip_blank_lines("", 0);
+        let end = g.skip_blank_lines('', 0);
         assert.strictEqual(end, 0);
-        end = g.skip_blank_lines(" ", 0);
+        end = g.skip_blank_lines(' ', 0);
         assert.strictEqual(end, 0);
-        end = g.skip_blank_lines("\n", 0);
+        end = g.skip_blank_lines('\n', 0);
         assert.strictEqual(end, 1);
-        end = g.skip_blank_lines(" \n", 0);
+        end = g.skip_blank_lines(' \n', 0);
         assert.strictEqual(end, 2);
-        end = g.skip_blank_lines("\n\na\n", 0);
+        end = g.skip_blank_lines('\n\na\n', 0);
         assert.strictEqual(end, 2);
-        end = g.skip_blank_lines("\n\n a\n", 0);
+        end = g.skip_blank_lines('\n\n a\n', 0);
         assert.strictEqual(end, 2);
-
     });
 
     //@+node:felix.20220129223719.44: *3* TestGlobals.test_g_skip_line
     test('test_g_skip_line', async () => {
-
         const s: string = 'a\n\nc';
 
         const table: [number, number][] = [
-            [-1, 2],  // One too few.
-            [0, 2], [1, 2],
+            [-1, 2], // One too few.
+            [0, 2],
+            [1, 2],
             [2, 3],
             [3, 4],
-            [4, 4],  // One too many.
+            [4, 4], // One too many.
         ];
 
-        table.forEach(element => {
+        table.forEach((element) => {
             let i: number;
             let result: number;
             [i, result] = element;
@@ -777,23 +784,22 @@ suite('Tests for leo.core.leoGlobals', () => {
 
             assert.strictEqual(j, result, i.toString());
         });
-
     });
 
     //@+node:felix.20220129223719.45: *3* TestGlobals.test_g_skip_to_end_of_line
     test('test_g_skip_to_end_of_line', async () => {
-
         const s: string = 'a\n\nc';
 
         const table: [number, number][] = [
-            [-1, 1],  // One too few.
-            [0, 1], [1, 1],
+            [-1, 1], // One too few.
+            [0, 1],
+            [1, 1],
             [2, 2],
             [3, 4],
-            [4, 4],  // One too many.
+            [4, 4], // One too many.
         ];
 
-        table.forEach(element => {
+        table.forEach((element) => {
             let i: number;
             let result: number;
             [i, result] = element;
@@ -805,16 +811,16 @@ suite('Tests for leo.core.leoGlobals', () => {
 
     //@+node:felix.20220129223719.46: *3* TestGlobals.test_g_skip_to_start_of_line
     test('test_g_skip_to_start_of_line', async () => {
-
         const s1: string = 'a\n\nc';
 
         const table1: [number, number][] = [
-            [-1, 0],  // One too few.
-            [0, 0], [1, 0],
+            [-1, 0], // One too few.
+            [0, 0],
+            [1, 0],
             [2, 2],
             [3, 3],
             [4, 4],
-            [5, 4],  // One too many.
+            [5, 4], // One too many.
         ];
 
         const s2: string = 'a\n';
@@ -824,30 +830,40 @@ suite('Tests for leo.core.leoGlobals', () => {
             [2, 2],
         ]; // A special case at end.
 
-        const totalArrays: [string, [number, number][]][] = [[s1, table1], [s2, table2]];
+        const totalArrays: [string, [number, number][]][] = [
+            [s1, table1],
+            [s2, table2],
+        ];
 
-        totalArrays.forEach(p_tables => {
+        totalArrays.forEach((p_tables) => {
             let s: string;
             let table: [number, number][];
             [s, table] = p_tables;
 
-            table.forEach(element => {
+            table.forEach((element) => {
                 let i: number;
                 let result: number;
                 [i, result] = element;
                 const j = g.skip_to_start_of_line(s, i);
-                assert.strictEqual(j, result, "i " + i.toString() + " s " + s + " got " + j.toString() + " expected " + result.toString());
+                assert.strictEqual(
+                    j,
+                    result,
+                    'i ' +
+                        i.toString() +
+                        ' s ' +
+                        s +
+                        ' got ' +
+                        j.toString() +
+                        ' expected ' +
+                        result.toString()
+                );
             });
-
         });
-
     });
 
     //@+node:felix.20220129223719.47: *3* TestGlobals.test_g_splitLongFileName
     test('test_g_splitLongFileName', async () => {
-        const table = [
-            String.raw`abcd/xy\pdqabc/aaa.py`
-        ];
+        const table = [String.raw`abcd/xy\pdqabc/aaa.py`];
         for (let s of table) {
             g.splitLongFileName(s, 3);
         }
@@ -861,9 +877,8 @@ suite('Tests for leo.core.leoGlobals', () => {
      */
     //@+node:felix.20220129223719.48: *3* TestGlobals.test_g_stripPathCruft
     test('test_g_stripPathCruft', async () => {
-
         const table: [string | undefined, string | undefined][] = [
-            [undefined, undefined],  // Retain empty paths for warning.
+            [undefined, undefined], // Retain empty paths for warning.
             ['', ''],
             [g.app.loadDir, g.app.loadDir],
             ['<abc>', 'abc'],
@@ -871,7 +886,7 @@ suite('Tests for leo.core.leoGlobals', () => {
             ["'abc'", 'abc'],
         ];
 
-        table.forEach(element => {
+        table.forEach((element) => {
             let p_path: string | undefined;
             let expected: string | undefined;
             [p_path, expected] = element;
@@ -880,7 +895,6 @@ suite('Tests for leo.core.leoGlobals', () => {
 
             assert.strictEqual(expected, result);
         });
-
     });
 
     //@+node:felix.20220129223719.49: *3* TestGlobals.test_g_warnOnReadOnlyFile
@@ -896,7 +910,6 @@ suite('Tests for leo.core.leoGlobals', () => {
             fc.warnOnReadOnlyFiles(path)
      */
     //@-others
-
 });
 //@-others
 //@-leo

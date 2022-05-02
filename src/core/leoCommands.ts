@@ -2,23 +2,22 @@
 //@+node:felix.20210110222544.1: * @file src/core/leoCommands.ts
 //@+<< imports >>
 //@+node:felix.20210220194059.1: ** << imports >>
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
 import * as path from 'path';
 import * as g from './leoGlobals';
 import { LeoUI, NullGui } from '../leoUI';
-import { DummyFileCommands, FileCommands } from "./leoFileCommands";
-import { CommanderOutlineCommands } from "../commands/commanderOutlineCommands";
-import { CommanderFileCommands } from "../commands/commanderFileCommands";
-import { CommanderEditCommands } from "../commands/commanderEditCommands";
-import { Position, VNode, StackEntry, NodeIndices } from "./leoNodes";
+import { DummyFileCommands, FileCommands } from './leoFileCommands';
+import { CommanderOutlineCommands } from '../commands/commanderOutlineCommands';
+import { CommanderFileCommands } from '../commands/commanderFileCommands';
+import { CommanderEditCommands } from '../commands/commanderEditCommands';
+import { Position, VNode, StackEntry, NodeIndices } from './leoNodes';
 import { NodeHistory } from './leoHistory';
 import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
 import { AtFile } from './leoAtFile';
 import { LeoFind } from './leoFind';
 import { LeoImportCommands } from './leoImport';
-import { ChapterController } from "./leoChapters";
-
+import { ChapterController } from './leoChapters';
 
 //@-<< imports >>
 //@+others
@@ -30,7 +29,7 @@ function applyMixins(derivedCtor: any, constructors: any[]): void {
                 derivedCtor.prototype,
                 name,
                 Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
-                Object.create(null)
+                    Object.create(null)
             );
         });
     });
@@ -51,7 +50,6 @@ export interface HoistStackEntry {
  * via this class and its subcommanders.
  */
 export class Commands {
-
     // Official ivars.
     private _currentPosition: Position | undefined;
     private _topPosition: Position | undefined;
@@ -77,28 +75,34 @@ export class Commands {
         iconBar: any;
         tree: {
             generation: number;
-            editLabel: (p: Position, selectAll: boolean, selection: any) => void
-        }, body: any
-    } = {
-            c: this,
-            title: "",
-            openDirectory: "",
-            iconBar: {},
-            tree: {
-                generation: 0,
-                editLabel: (p: Position, selectAll: boolean, selection: any) => {
-                    console.log("TODO: editLabel not used in leojs. From c.frame.tree.editLabel");
-                }
-            },
-            body: {
-                wrapper: {
-                    setAllText: (s: string) => {
-                        console.log('TODO: setAllText of c.frame.body.wrapper');
-                    }
-                }
-
-            }
+            editLabel: (
+                p: Position,
+                selectAll: boolean,
+                selection: any
+            ) => void;
         };
+        body: any;
+    } = {
+        c: this,
+        title: '',
+        openDirectory: '',
+        iconBar: {},
+        tree: {
+            generation: 0,
+            editLabel: (p: Position, selectAll: boolean, selection: any) => {
+                console.log(
+                    'TODO: editLabel not used in leojs. From c.frame.tree.editLabel'
+                );
+            },
+        },
+        body: {
+            wrapper: {
+                setAllText: (s: string) => {
+                    console.log('TODO: setAllText of c.frame.body.wrapper');
+                },
+            },
+        },
+    };
 
     //@+others
     //@+node:felix.20210223220756.1: *3* Commander IVars
@@ -109,11 +113,11 @@ export class Commands {
     //@+node:felix.20210223220814.2: *4* c.initCommandIvars
     // Init ivars used while executing a command.
     public commandsDict: {
-        [key: string]: (...args: any[]) => any &
-        { __doc__: string } &
-        { __func_name__: string } &
-        { __name__: string } &
-        { __ivars__: string[] }
+        [key: string]: (...args: any[]) => any & { __doc__: string } & {
+            __func_name__: string;
+        } & {
+            __name__: string;
+        } & { __ivars__: string[] };
     } = {}; // Keys are command names, values are functions.
     public disableCommandsMessage: string = ''; // The presence of this message disables all commands.
     public hookFunction: any = undefined; // One of three places that g.doHook looks for hook functions.
@@ -121,7 +125,7 @@ export class Commands {
     public ignoreChangedPaths = false; // True: disable path changed message in at.WriteAllHelper.
     public inCommand: boolean = false; // Interlocks to prevent premature closing of a window.
     public isZipped: boolean = false; // Set by g.openWithFileName.
-    public outlineToNowebDefaultFileName: string = "noweb.nw"; // For Outline To Noweb dialog.
+    public outlineToNowebDefaultFileName: string = 'noweb.nw'; // For Outline To Noweb dialog.
 
     // For tangle/untangle
     public tangle_errors: number = 0;
@@ -187,7 +191,7 @@ export class Commands {
     public fixedWindowPosition = [];
     public forceExecuteEntireBody: boolean = false;
     public focus_border_color: string = 'white';
-    public focus_border_width: number = 1;  // pixels;
+    public focus_border_width: number = 1; // pixels;
     public make_node_conflicts_node: boolean = true;
     public outlineHasInitialFocus: boolean = false;
     public page_width: number = 132;
@@ -197,7 +201,7 @@ export class Commands {
     public stayInTreeAfterSelect: boolean = false;
     public tab_width: number = -4;
     public tangle_batch_flag: boolean = false;
-    public target_language: string = "python"; // TODO : switch to js for Leojs?
+    public target_language: string = 'python'; // TODO : switch to js for Leojs?
     public untangle_batch_flag: boolean = false;
     // # self.use_body_focus_border = True
     // # self.use_focus_border = False
@@ -208,7 +212,7 @@ export class Commands {
     // These ivars are set later by leoEditCommands.createEditCommanders
     public abbrevCommands: any = undefined;
     public editCommands: any = undefined;
-    public db: any = {};  // May be set to a PickleShare instance later.
+    public db: any = {}; // May be set to a PickleShare instance later.
     public bufferCommands: any = undefined;
     public chapterCommands: any = undefined;
     public controlCommands: any = undefined;
@@ -265,7 +269,7 @@ export class Commands {
         // Define the subcommanders.
 
         this.chapterController = new ChapterController(c);
-        // this.shadowController // TODO: = leoShadow.ShadowController(c); 
+        // this.shadowController // TODO: = leoShadow.ShadowController(c);
 
         this.fileCommands = new FileCommands(c);
         this.findCommands = new LeoFind(c);
@@ -283,7 +287,7 @@ export class Commands {
         // ! Equivalent of frame.createFirstTreeNode
         let v = new VNode(c);
         let p = new Position(v);
-        v.initHeadString("NewHeadline");
+        v.initHeadString('NewHeadline');
         c.hiddenRootNode.children = [];
         p._linkAsRoot();
         c.createCommandNames();
@@ -299,7 +303,6 @@ export class Commands {
         c.config = new LocalConfigManager(c, previousSettings);
         g.app.config.setIvarsFromSettings(c);
     }
-
 
     //@+node:felix.20210223220814.9: *4* c.initObjects
     // * initObjects done in constructor.
@@ -483,7 +486,6 @@ export class Commands {
         }
     }
 
-
     /**
      * A generator returning each vnode of the outline.
      */
@@ -498,7 +500,6 @@ export class Commands {
     // all_vnodes_iter = all_nodes
     // all_unique_vnodes_iter = all_unique_nodes
 
-
     //@+node:felix.20210131011508.3: *5* c.all_positions
     /**
      * A generator return all positions of the outline, in outline order.
@@ -507,7 +508,7 @@ export class Commands {
         const c: Commands = this;
         const p: Position | undefined = c.rootPosition();
         while (p && p.__bool__()) {
-            yield (copy ? p.copy() : p);
+            yield copy ? p.copy() : p;
             p.moveToThreadNext();
         }
     }
@@ -515,7 +516,6 @@ export class Commands {
     // Compatibility with old code...
     // all_positions_iter = all_positions
     // allNodes_iter = all_positions
-
 
     //@+node:felix.20210131011508.4: *5* c.all_positions_for_v
     /**
@@ -527,8 +527,10 @@ export class Commands {
      *
      *  By Виталије Милошевић (Vitalije Milosevic).
      */
-    public *all_positions_for_v(v: VNode, stack?: StackEntry[]): Generator<Position> {
-
+    public *all_positions_for_v(
+        v: VNode,
+        stack?: StackEntry[]
+    ): Generator<Position> {
         const c: Commands = this;
 
         if (!stack) {
@@ -537,7 +539,7 @@ export class Commands {
 
         if (!(v instanceof VNode)) {
             g.es_print(`not a VNode: ${JSON.stringify(v)}`);
-            return;  // Stop the generator.
+            return; // Stop the generator.
         }
 
         /**
@@ -583,7 +585,9 @@ export class Commands {
      *
      * Once a root is found, the generator skips its subtree.
      */
-    public *all_roots(predicate?: (p: Position) => boolean): Generator<Position> {
+    public *all_roots(
+        predicate?: (p: Position) => boolean
+    ): Generator<Position> {
         const c: Commands = this;
         if (!predicate) {
             // pylint: disable=function-redefined
@@ -594,7 +598,7 @@ export class Commands {
         const p: Position | undefined = c.rootPosition();
         while (p && p.__bool__()) {
             if (predicate(p)) {
-                yield p.copy();  // 2017/02/19
+                yield p.copy(); // 2017/02/19
                 p.moveToNodeAfterTree();
             } else {
                 p.moveToThreadNext();
@@ -616,7 +620,7 @@ export class Commands {
                 p.moveToNodeAfterTree();
             } else {
                 seen.push(p.v);
-                yield (copy ? p.copy() : p);
+                yield copy ? p.copy() : p;
                 p.moveToThreadNext();
             }
         }
@@ -624,7 +628,6 @@ export class Commands {
 
     // Compatibility with old code...
     // all_positions_with_unique_vnodes_iter = all_unique_positions
-
 
     //@+node:felix.20210131011508.7: *5* c.all_unique_roots
     /**
@@ -634,7 +637,10 @@ export class Commands {
      *
      * Once a root is found, the generator skips its subtree.
      */
-    public *all_unique_roots(copy = true, predicate?: (p: Position) => boolean): Generator<Position> {
+    public *all_unique_roots(
+        copy = true,
+        predicate?: (p: Position) => boolean
+    ): Generator<Position> {
         const c: Commands = this;
         if (!predicate) {
             // pylint: disable=function-redefined
@@ -647,7 +653,7 @@ export class Commands {
         while (p && p.__bool__()) {
             if (!seen.includes(p.v) && predicate(p)) {
                 seen.push(p.v);
-                yield (copy ? p.copy() : p);
+                yield copy ? p.copy() : p;
                 p.moveToNodeAfterTree();
             } else {
                 p.moveToThreadNext();
@@ -663,7 +669,7 @@ export class Commands {
         const c: Commands = this;
         const p: Position | undefined = c.rootPosition(); // Make one copy.
         while (p && p.__bool__()) {
-            yield (copy ? p.copy() : p);
+            yield copy ? p.copy() : p;
             p.safeMoveToThreadNext();
         }
     }
@@ -676,7 +682,7 @@ export class Commands {
         const c: Commands = this;
         const p: Position | undefined = c.rootPosition(); // Make one copy.
         while (p && p.__bool__()) {
-            yield (copy ? p.copy() : p);
+            yield copy ? p.copy() : p;
             p.moveToNext();
         }
     }
@@ -689,7 +695,8 @@ export class Commands {
      */
     public currentPosition(): Position | undefined {
         const c: Commands = this;
-        if (c._currentPosition) { // no __bool__() check intended
+        if (c._currentPosition) {
+            // no __bool__() check intended
             // *Always* return a copy.
             return c._currentPosition.copy();
         }
@@ -703,7 +710,7 @@ export class Commands {
     // Compatibility with scripts
 
     public fileName(): string {
-        let s: string = this.mFileName || "";
+        let s: string = this.mFileName || '';
         if (g.isWindows) {
             s = s.split('\\').join('/');
         }
@@ -761,10 +768,13 @@ export class Commands {
     public currentPositionIsRootPosition(): boolean {
         const c: Commands = this;
         const root: Position | undefined = c.rootPosition();
-        return !!c._currentPosition &&
+        return (
+            !!c._currentPosition &&
             !!root &&
             c._currentPosition.__bool__() &&
-            root.__bool__() && c._currentPosition.__eq__(root);
+            root.__bool__() &&
+            c._currentPosition.__eq__(root)
+        );
     }
 
     // return (
@@ -787,8 +797,12 @@ export class Commands {
     //@+node:felix.20210131011420.9: *6* c.isCurrentPosition
     public isCurrentPosition(p?: Position): boolean {
         const c: Commands = this;
-        if (!p || !c._currentPosition ||
-            !p.__bool__() || !c._currentPosition.__bool__()) {
+        if (
+            !p ||
+            !c._currentPosition ||
+            !p.__bool__() ||
+            !c._currentPosition.__bool__()
+        ) {
             return false;
         }
         return p.__eq__(c._currentPosition);
@@ -833,7 +847,7 @@ export class Commands {
 
     //@+node:felix.20210215204131.1: *5* c.lastVisible
     /**
-      *Move to the last visible node of the present chapter or hoist.
+     *Move to the last visible node of the present chapter or hoist.
      */
     public lastVisible(): Position {
         const c: Commands = this;
@@ -864,12 +878,18 @@ export class Commands {
     /**
      * Return true if a position exists in c's tree
      */
-    public positionExists(p: Position, root?: Position, trace?: boolean): boolean {
+    public positionExists(
+        p: Position,
+        root?: Position,
+        trace?: boolean
+    ): boolean {
         if (!p || !p.__bool__() || !p.v) {
             return false;
         }
         const rstack: StackEntry[] =
-            (root && root.__bool__()) ? root.stack.concat([[root.v, root._childIndex]]) : [];
+            root && root.__bool__()
+                ? root.stack.concat([[root.v, root._childIndex]])
+                : [];
         const pstack: StackEntry[] = p.stack.concat([[p.v, p._childIndex]]);
         if (rstack.length > pstack.length) {
             return false;
@@ -879,7 +899,10 @@ export class Commands {
         let arrayLength: number = pstack.length;
         for (let j = 0; j < arrayLength; j++) {
             const x: StackEntry = pstack[j];
-            if (j < rstack.length && (x[0].gnx !== rstack[j][0].gnx || x[1] !== rstack[j][1])) {
+            if (
+                j < rstack.length &&
+                (x[0].gnx !== rstack[j][0].gnx || x[1] !== rstack[j][1])
+            ) {
                 return false;
             }
             let v: VNode;
@@ -943,7 +966,9 @@ export class Commands {
         }
         // Always clear non-existent positions.
         // v.expandedPositions: Position[] = [z for z in v.expandedPositions if c.positionExists(z)]
-        v.expandedPositions = v.expandedPositions.filter(z => c.positionExists(z));
+        v.expandedPositions = v.expandedPositions.filter((z) =>
+            c.positionExists(z)
+        );
 
         if (!p.isCloned()) {
             // Do not call p.isExpanded here! It calls this method.
@@ -969,7 +994,8 @@ export class Commands {
         const c: Commands = this;
         const cc: ChapterController = c.chapterController;
         if (c.hoistStack.length) {
-            const bunch: HoistStackEntry = c.hoistStack[c.hoistStack.length - 1];
+            const bunch: HoistStackEntry =
+                c.hoistStack[c.hoistStack.length - 1];
             const p: Position = bunch.p;
             const limitIsVisible: boolean = !cc || !p.h.startsWith('@chapter');
             return [p, limitIsVisible];
@@ -984,7 +1010,7 @@ export class Commands {
      */
     public vnode2allPositions(v: VNode): Position[] {
         const c: Commands = this;
-        const context: Commands = v.context;  // v's commander.
+        const context: Commands = v.context; // v's commander.
         console.assert(c === context);
         const positions: Position[] = [];
         let n: number;
@@ -1022,7 +1048,7 @@ export class Commands {
      */
     public vnode2position(v: VNode): Position | undefined {
         const c: Commands = this;
-        const context: Commands = v.context;  // v's commander.
+        const context: Commands = v.context; // v's commander.
         console.assert(c === context);
         const stack: StackEntry[] = [];
         let n: number;
@@ -1176,13 +1202,19 @@ export class Commands {
             return;
         }
         if (c.positionExists(p)) {
-            if (c._currentPosition && c._currentPosition.__bool__() && p.__eq__(c._currentPosition)) {
+            if (
+                c._currentPosition &&
+                c._currentPosition.__bool__() &&
+                p.__eq__(c._currentPosition)
+            ) {
                 // We have already made a copy.
                 // pass;
-            } else { // Make a copy _now_
+            } else {
+                // Make a copy _now_
                 c._currentPosition = p.copy();
             }
-        } else { // 2011/02/25:
+        } else {
+            // 2011/02/25:
             c._currentPosition = c.rootPosition();
             g.trace(`Invalid position: ${p.h}`);
             g.trace(g.callers());
@@ -1213,7 +1245,7 @@ export class Commands {
     public setMarked(p: Position): void {
         const c: Commands = this;
         p.setMarked();
-        p.setDirty();  // Defensive programming.
+        p.setDirty(); // Defensive programming.
         // g.doHook("set-mark", c, p);
     }
 
@@ -1236,8 +1268,7 @@ export class Commands {
         const c: Commands = this;
         if (p && p.__bool__()) {
             c._topPosition = p.copy();
-        }
-        else {
+        } else {
             c._topPosition = undefined;
         }
     }
@@ -1271,9 +1302,11 @@ export class Commands {
             //     v._p_changed = true;
             // }
             let gnx: string = v.fileIndex;
-            if (gnx) {  // gnx must be a string.
+            if (gnx) {
+                // gnx must be a string.
                 const aSet: VNode[] = d[gnx] || []; // new if none yet
-                if (aSet.indexOf(v) === -1) { // Fake a set by checking before pushing
+                if (aSet.indexOf(v) === -1) {
+                    // Fake a set by checking before pushing
                     aSet.push(v);
                 }
                 d[gnx] = aSet;
@@ -1290,27 +1323,31 @@ export class Commands {
                 g.es_print(`multiple vnodes with gnx: ${gnx}`, 'red');
                 for (let v of aList) {
                     gnx_errors += 1;
-                    g.es_print(`id(v): {id(v)} gnx: ${v.fileIndex} ${v.h}`, 'red');
+                    g.es_print(
+                        `id(v): {id(v)} gnx: ${v.fileIndex} ${v.h}`,
+                        'red'
+                    );
                     v.fileIndex = ni.getNewIndex(v); // expanded newGnx(v)
                 }
             }
         }
         const ok: boolean = !gnx_errors && !g.app.structure_errors;
         const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1
-        const t2 = (t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000); // in ms
+        const t2 = t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000; // in ms
         if (!ok) {
             g.es_print(
                 `check-outline ERROR! ${c.shortFileName()} ` +
-                `${count} nodes, ` +
-                `${gnx_errors} gnx errors, ` +
-                `${g.app.structure_errors} ` +
-                `structure errors`,
+                    `${count} nodes, ` +
+                    `${gnx_errors} gnx errors, ` +
+                    `${g.app.structure_errors} ` +
+                    `structure errors`,
                 'red'
             );
         } else if (c.verbose_check_outline && !g.unitTesting) {
             g.es_print(
                 `check-outline OK: ${t2} ms. ` +
-                `${c.shortFileName()} ${count} nodes`);
+                    `${c.shortFileName()} ${count} nodes`
+            );
         }
         return g.app.structure_errors;
     }
@@ -1346,11 +1383,12 @@ export class Commands {
         //     g.error("test failed at position %s\n%s" % (repr(p), value))
 
         const t2Hrtime: [number, number] = process.hrtime(t1); // difference from t1
-        const t2 = (t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000); // in ms
+        const t2 = t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000; // in ms
 
         g.es_print(
-            `check-links: ${t2} ms. ` +
-            `${c.shortFileName()} ${count} nodes`, 'blue');
+            `check-links: ${t2} ms. ` + `${c.shortFileName()} ${count} nodes`,
+            'blue'
+        );
 
         return errors;
     }
@@ -1389,7 +1427,7 @@ export class Commands {
         }
 
         if (p.level() > 0 && !_assert(p.v.parents)) {
-            g.trace("no parents");
+            g.trace('no parents');
             dump(p);
             return false;
         }
@@ -1399,7 +1437,7 @@ export class Commands {
                 return false;
             }
             if (!_assert(p.__eq__(child.parent()))) {
-                g.trace("p != child.parent()");
+                g.trace('p != child.parent()');
                 dump(p);
                 dump(child.parent());
                 return false;
@@ -1407,7 +1445,7 @@ export class Commands {
         }
         if (p.hasNext()) {
             if (!_assert(p.next().parent().__eq__(p.parent()))) {
-                g.trace("p.next().parent() != p.parent()");
+                g.trace('p.next().parent() != p.parent()');
                 dump(p.next().parent());
                 dump(p.parent());
                 return false;
@@ -1415,7 +1453,7 @@ export class Commands {
         }
         if (p.hasBack()) {
             if (!_assert(p.back().parent().__eq__(p.parent()))) {
-                g.trace("p.back().parent() != parent()");
+                g.trace('p.back().parent() != parent()');
                 dump(p.back().parent());
                 dump(p.parent());
                 return false;
@@ -1427,7 +1465,7 @@ export class Commands {
         const parent_v: VNode = p._parentVnode()!;
         const n: number = p.childIndex();
         if (!_assert(parent_v.children[n] === p.v)) {
-            g.trace("parent_v.children[n] != p.v");
+            g.trace('parent_v.children[n] != p.v');
             parent_v.dump();
             p.v.dump();
             return false;
@@ -1446,7 +1484,8 @@ export class Commands {
                 g.trace(
                     `p!=p.back().next()\n`,
                     `     back: ${back}\n`,
-                    `back.next: ${back.next()}`);
+                    `back.next: ${back.next()}`
+                );
                 return false;
             }
         }
@@ -1455,7 +1494,8 @@ export class Commands {
                 g.trace(
                     `p!=p.next().back\n`,
                     `     next: ${next}\n`,
-                    `next.back: ${next.back()}`);
+                    `next.back: ${next.back()}`
+                );
                 return false;
             }
         }
@@ -1470,13 +1510,13 @@ export class Commands {
         const threadNext: Position = p.threadNext();
         if (threadBack.__bool__()) {
             if (!g._assert(p.__eq__(threadBack.threadNext()))) {
-                g.trace("p!=p.threadBack().threadNext()");
+                g.trace('p!=p.threadBack().threadNext()');
                 return false;
             }
         }
         if (threadNext.__bool__()) {
             if (!g._assert(p.__eq__(threadNext.threadBack()))) {
-                g.trace("p!=p.threadNext().threadBack()");
+                g.trace('p!=p.threadNext().threadBack()');
                 return false;
             }
         }
@@ -1494,7 +1534,8 @@ export class Commands {
         warningFlag: boolean
     ): boolean {
         const c: Commands = this;
-        const message: string = "Illegal move or drag: no clone may contain a clone of itself";
+        const message: string =
+            'Illegal move or drag: no clone may contain a clone of itself';
         const clonedVnodes: { [key: string]: VNode } = {};
         for (let ancestor of parent.self_and_parents(false)) {
             if (ancestor.isCloned()) {
@@ -1540,7 +1581,6 @@ export class Commands {
             structure_errors += c.checkLinks();
         }
         return structure_errors;
-
     }
     //@+node:felix.20211031193257.1: *4* validateOutline
     /**
@@ -1564,12 +1604,10 @@ export class Commands {
      * Update the timestamp for fn..
      */
     public setFileTimeStamp(fn: string): void {
-
         // c = self
         if (g.app.externalFilesController) {
             g.app.externalFilesController.set_time(fn);
         }
-
     }
     //@+node:felix.20211228212851.1: *3* c.Directive scanning
     // These are all new in Leo 4.5.1.
@@ -1600,13 +1638,11 @@ export class Commands {
      * Return the path in effect at node p.
      */
     public getNodePath(p: Position): string {
-
         const c: Commands = this;
 
         const aList: any[] = g.get_directives_dict_list(p);
         const w_path: string = c.scanAtPathDirectives(aList);
         return w_path;
-
     }
 
     /**
@@ -1615,13 +1651,12 @@ export class Commands {
      * Return '' if p is no kind of @file node.
      */
     public getNodeFileName(p_p: Position): string {
-
         const c: Commands = this;
 
         for (let p of p_p.self_and_parents(false)) {
             const name: string = p.anyAtFileNodeName();
             if (name) {
-                return g.fullPath(c, p);  // #1914.
+                return g.fullPath(c, p); // #1914.
             }
         }
         return '';
@@ -1690,26 +1725,30 @@ export class Commands {
      * Return a reasonable default if no @path directive is found.
      */
     public scanAtPathDirectives(aList: any[]): string {
-
         const c: Commands = this;
-        c.scanAtPathDirectivesCount += 1;  // An important statistic.
+        c.scanAtPathDirectivesCount += 1; // An important statistic.
         // Step 1: Compute the starting path.
         // The correct fallback directory is the absolute path to the base.
         let base: string;
-        if (c.openDirectory) {  // Bug fix: 2008/9/18
+        if (c.openDirectory) {
+            // Bug fix: 2008/9/18
             base = c.openDirectory;
         } else {
             base = g.app.config.relative_path_base_directory;
-            if (base && base === "!") {
+            if (base && base === '!') {
                 base = g.app.loadDir!;
-            } else if (base && base === ".") {
+            } else if (base && base === '.') {
                 base = c.openDirectory!;
             }
         }
-        base = c.expand_path_expression(base);  // #1341.
-        base = g.os_path_expanduser(base);  // #1889.
+        base = c.expand_path_expression(base); // #1341.
+        base = g.os_path_expanduser(base); // #1889.
 
-        const absbase: string = g.os_path_finalize_join(undefined, g.app.loadDir!, base);  // #1341.
+        const absbase: string = g.os_path_finalize_join(
+            undefined,
+            g.app.loadDir!,
+            base
+        ); // #1341.
         // Step 2: look for @path directives.
         const w_paths: string[] = [];
 
@@ -1717,12 +1756,13 @@ export class Commands {
             // Look for @path directives.
             let w_path: string = d['path'];
             const warning = d['@path_in_body'];
-            if (w_path !== undefined) {  // retain empty paths for warnings.
+            if (w_path !== undefined) {
+                // retain empty paths for warnings.
                 // Convert "path" or <path> to path.
                 w_path = g.stripPathCruft(w_path);
                 if (w_path && !warning) {
-                    w_path = c.expand_path_expression(w_path);  // #1341.
-                    w_path = g.os_path_expanduser(w_path);  // #1889.
+                    w_path = c.expand_path_expression(w_path); // #1341.
+                    w_path = g.os_path_expanduser(w_path); // #1889.
                     w_paths.push(w_path);
                     // We will silently ignore empty @path directives.
                 }
@@ -1763,7 +1803,7 @@ export class Commands {
         }
 
         if (c.exists && c.inCommand && !g.unitTesting) {
-            g.app.commandInterruptFlag = true;  // For sc.make_slide_show_command.
+            g.app.commandInterruptFlag = true; // For sc.make_slide_show_command.
             // 1912: This message is annoying and unhelpful.
             // g.error('ignoring command: already executing a command.')
             return undefined;
@@ -1775,34 +1815,33 @@ export class Commands {
             c.recent_commands_list.pop();
         }
         c.recent_commands_list.unshift(command_name);
-        if (!g.doHook("command1", { c: c, p: p, label: command_name })) {
+        if (!g.doHook('command1', { c: c, p: p, label: command_name })) {
             try {
                 c.inCommand = true;
                 try {
                     return_value = command_func();
-                }
-                catch (e) {
+                } catch (e) {
                     g.es_exception(e);
                     return_value = undefined;
                 }
-                if (c && c.exists) {  // Be careful: the command could destroy c.
+                if (c && c.exists) {
+                    // Be careful: the command could destroy c.
                     c.inCommand = false;
                     //# c.k.funcReturn = return_value
                 }
-            }
-            catch (e) {
+            } catch (e) {
                 c.inCommand = false;
                 if (g.unitTesting) {
-                    throw new Error("exception executing command");
+                    throw new Error('exception executing command');
                 }
-                g.es_print("exception executing command");
+                g.es_print('exception executing command');
                 g.es_exception(c);
             }
             if (c && c.exists) {
                 if (c.requestCloseWindow) {
                     c.requestCloseWindow = false;
                     // g.app.closeLeoWindow(c.frame);
-                    console.log("g.app.closeLeoWindow was called!");
+                    console.log('g.app.closeLeoWindow was called!');
                 } else {
                     c.outerUpdate();
                 }
@@ -1811,7 +1850,7 @@ export class Commands {
         // Be careful: the command could destroy c.
         if (c && c.exists) {
             p = c.p;
-            g.doHook("command2", { c: c, p: p, label: command_name });
+            g.doHook('command2', { c: c, p: p, label: command_name });
         }
         return return_value;
     }
@@ -1827,7 +1866,8 @@ export class Commands {
         const c: Commands = this;
 
         // Get the command's function.
-        let command_func: (p?: any) => any = c.commandsDict[command_name.replace(/\&/g, '')];
+        let command_func: (p?: any) => any =
+            c.commandsDict[command_name.replace(/\&/g, '')];
 
         if (!command_func) {
             const message = `no command function for ${command_name}`;
@@ -1840,7 +1880,7 @@ export class Commands {
         }
 
         // * Here the original new_cmd_decorator decorator is implemented 'run-time'
-        let ivars: string[] | undefined = (command_func as any)["__ivars__"];
+        let ivars: string[] | undefined = (command_func as any)['__ivars__'];
 
         if (ivars && ivars.length) {
             const w_baseObject: any = g.ivars2instance(c, g, ivars);
@@ -1855,7 +1895,6 @@ export class Commands {
             // c.frame.updateStatusLine();
         }
         return val;
-
     }
     //@+node:felix.20211106224948.5: *4* c.executeMinibufferCommand
     /**
@@ -1889,7 +1928,14 @@ export class Commands {
              This allows, for example, `go run .` to work as expected.
           3. Append the full path to the command.
      */
-    public general_script_helper(command: string, ext: string, language: string, root: any, directory: string | undefined, regex?: any): void {
+    public general_script_helper(
+        command: string,
+        ext: string,
+        language: string,
+        root: any,
+        directory: string | undefined,
+        regex?: any
+    ): void {
         const c: Commands = this;
 
         // log = self.frame.log
@@ -2038,7 +2084,6 @@ export class Commands {
             os.chdir(old_dir)
 
         */
-
     }
     //@+node:felix.20211106224948.10: *4* c.setComplexCommand
     /**
@@ -2050,7 +2095,6 @@ export class Commands {
     }
     //@+node:felix.20211106224948.12: *4* c.writeScriptFile (changed: does not expand expressions)
     public writeScriptFile(script: string): string | undefined {
-
         // Get the path to the file.
         const c: Commands = this;
 
@@ -2095,7 +2139,6 @@ export class Commands {
      * Expand all {{anExpression}} in c's context.
      */
     public expand_path_expression(s: string): string {
-
         const c: Commands = this;
 
         if (!s) {
@@ -2110,7 +2153,7 @@ export class Commands {
         while (previ < s.length) {
             const i = s.indexOf('{{', previ);
             const j = s.indexOf('}}', previ);
-            if ((-1 < i) && (i < j)) {
+            if (-1 < i && i < j) {
                 // Add anything from previous index up to '{{'
                 if (previ < i) {
                     aList.push(s.substring(previ, i));
@@ -2121,9 +2164,10 @@ export class Commands {
                     try {
                         const s2 = c.replace_path_expression(exp);
                         aList.push(s2);
-                    }
-                    catch (exception) {
-                        g.es(`Exception evaluating {{ ${exp} }} in ${s.trim()}`);
+                    } catch (exception) {
+                        g.es(
+                            `Exception evaluating {{ ${exp} }} in ${s.trim()}`
+                        );
                         g.es_exception(true, c);
                     }
                 }
@@ -2134,7 +2178,6 @@ export class Commands {
                 aList.push(s.substring(previ));
                 break;
             }
-
         }
 
         let val: string = aList.join('');
@@ -2153,24 +2196,25 @@ export class Commands {
         const c: Commands = this;
         const p: Position = c.p;
         const d = {
-            'c': c,
-            'g': g,
+            c: c,
+            g: g,
             // 'getString': c.config.getString,
-            'p': c.p,
+            p: c.p,
             // 'os': os,
-            'sep': path.sep,
+            sep: path.sep,
             // 'sys': sys,
         };
         // #1338: Don't report errors when called by g.getUrlFromNode.
         try {
-            const w_path = (new Function("with(this) { return " + expr + "}")).call(d);
+            const w_path = new Function(
+                'with(this) { return ' + expr + '}'
+            ).call(d);
             return g.toUnicode(w_path, 'utf-8');
-        }
-        catch (e) {
-            const message: string = (
+        } catch (e) {
+            const message: string =
                 `${c.shortFileName()}: ${c.p.h}\n` +
                 `expression: ${expr}\n` +
-                `     error: ${e}`);
+                `     error: ${e}`;
             if (!this.replace_errors.includes(message)) {
                 this.replace_errors.push(message);
                 g.trace(message);
@@ -2184,16 +2228,16 @@ export class Commands {
      * Convert an archived position (a string) to a position.
      */
     public archivedPositionToPosition(s: string): Position | undefined {
-
         const c: Commands = this;
 
         s = g.toUnicode(s);
         let aList: undefined | string[] | number[] = s.split(',');
 
         try {
-            aList = aList.map((z) => { return parseInt(z); });
-        }
-        catch (exception) {
+            aList = aList.map((z) => {
+                return parseInt(z);
+            });
+        } catch (exception) {
             aList = undefined;
         }
 
@@ -2232,7 +2276,6 @@ export class Commands {
         silent: boolean = false,
         useTimeStamp: boolean = true
     ): string | undefined {
-
         const c: Commands = this;
 
         let fn: string = fileName || c.fileName();
@@ -2256,7 +2299,7 @@ export class Commands {
             // this.timeString = new Date().format("YYYYMMDD-hhmmss");
 
             // time.strftime("%Y%m%d-%H%M%S")
-            const stamp: string = new Date().format("YYYYMMDD-hhmmss");
+            const stamp: string = new Date().format('YYYYMMDD-hhmmss');
 
             const branch: string = prefix ? prefix + '-' : '';
 
@@ -2274,7 +2317,6 @@ export class Commands {
             // g.es('in', theDir)
         }
         return w_path;
-
     }
     //@+node:felix.20211223223002.4: *4* c.backup_helper
     // def backup_helper(self,
@@ -2325,7 +2367,6 @@ export class Commands {
      * since Leo read it or if the user agrees to overwrite it.
      */
     public checkFileTimeStamp(fn: string): boolean {
-
         const c: Commands = this;
 
         if (g.app.externalFilesController) {
@@ -2339,7 +2380,6 @@ export class Commands {
      * Return None, indicating that c.open should set focus.
      */
     public async createNodeFromExternalFile(fn: string): Promise<void> {
-
         const c: Commands = this;
         let s: string | undefined;
         let e: string | undefined;
@@ -2387,8 +2427,7 @@ export class Commands {
             const readData = await vscode.workspace.fs.readFile(w_uri);
             const s = Buffer.from(readData).toString('utf8');
             return s.indexOf('@+leo-ver=') > -1;
-        }
-        catch (exception) {
+        } catch (exception) {
             g.es_exception();
             return false;
         }
@@ -2398,7 +2437,6 @@ export class Commands {
      * Mark all @file nodes as changed.
      */
     public markAllAtFileNodesDirty(): void {
-
         const c: Commands = this;
 
         // c.endEditing()
@@ -2420,7 +2458,6 @@ export class Commands {
      * Mark all @file nodes in the selected tree as changed.
      */
     public markAtFileNodesDirty(): void {
-
         const c: Commands = this;
         const p: Position = c.rootPosition()!;
 
@@ -2440,7 +2477,6 @@ export class Commands {
             }
         }
         c.redraw_after_icons_changed();
-
     }
     //@+node:felix.20211223223002.10: *4* c.openWith
     /**
@@ -2451,7 +2487,6 @@ export class Commands {
      * See ExternalFilesController.open_with for details about d.
      */
     public openWith(d?: any): void {
-
         const c: Commands = this;
 
         if (d && g.app.externalFilesController) {
@@ -2471,14 +2506,12 @@ export class Commands {
         } else if (!d) {
             g.trace('can not happen: no d', g.callers());
         }
-
     }
     //@+node:felix.20211223223002.11: *4* c.recreateGnxDict
     /**
      * Recreate the gnx dict prior to refreshing nodes from disk.
      */
     public recreateGnxDict(): void {
-
         const c: Commands = this;
         const d: { [key: string]: VNode } = {};
 
@@ -2590,7 +2623,6 @@ export class Commands {
      * Warn about syntax errors in files.
      */
     public syntaxErrorDialog(): void {
-
         const c: Commands = this;
 
         if (
@@ -2607,14 +2639,11 @@ export class Commands {
                 c,
                 'Python Errors',
                 `Python errors in:\n\n${list_s}`,
-                "Ok"
+                'Ok'
             );
         }
     }
     //@+node:felix.20211022202201.1: *4* c.Drawing
-
-
-
 
     //@+node:felix.20211120225325.1: *5* c.bringToFront
     public bringToFront(c2?: Commands): void {
@@ -2624,7 +2653,7 @@ export class Commands {
             g.app.gui.ensure_commander_visible(c2);
         } else {
             // TODO
-            console.log("missing g.app.gui.ensure_commander_visible");
+            console.log('missing g.app.gui.ensure_commander_visible');
         }
     }
 
@@ -2672,8 +2701,6 @@ export class Commands {
             c.redraw();
         }
 
-
-
         // ? useful ?
         // # Delayed focus requests will always be useful.
         // if c.requestedFocusWidget:
@@ -2694,7 +2721,6 @@ export class Commands {
         //     if mods:
         //         g.doHook(kind, c=c, nodes=mods)
         //         mods.clear()
-
     }
 
     //@+node:felix.20211120224224.1: *5* c.recolor
@@ -2811,7 +2837,6 @@ export class Commands {
 
     //@+node:felix.20211122010434.9: *6* c.redraw_later
     /**
-     *
      * Ensure that c.redraw() will be called eventually.
      * c.outerUpdate will call c.redraw() only if no other code calls c.redraw().
      */
@@ -2831,18 +2856,24 @@ export class Commands {
      */
     public contractAllHeadlines(redrawFlag: boolean = true): void {
         const c: Commands = this;
-        for (let p of c.all_positions()) {
-            p.contract();
+        let p: Position;
+        for (let v of c.all_nodes()) {
+            v.contract();
+            v.expandedPositions = []; // #2571
         }
-        // Select the topmost ancestor of the presently selected node.
-        const p = c.p;
-        while (p.__bool__() && p.hasParent()) {
-            p.moveToParent();
+        if (c.hoistStack.length) {
+            // #2380: Handle hoists properly.
+            let bunch = c.hoistStack[c.hoistStack.length - 1];
+            p = bunch.p;
+        } else {
+            // Select the topmost ancestor of the presently selected node.
+            p = c.p;
+            while (p && p.__bool__() && p.hasParent()) {
+                p.moveToParent();
+            }
         }
-        if (redrawFlag) {
-            c.selectPosition(p);
-        }
-        c.expansionLevel = 1;  // Reset expansion level.
+        c.selectPosition(p); // #2380: Don't redraw here.
+        c.expansionLevel = 1; // Reset expansion level.
     }
 
     //@+node:felix.20211005023931.1: *5* c.contractSubtree
@@ -2861,7 +2892,6 @@ export class Commands {
             p = p.moveToThreadNext();
         }
     }
-
 
     //@+node:felix.20211005024009.1: *5* c.expandToLevel
     public expandToLevel(level: number): void {
@@ -2910,7 +2940,8 @@ export class Commands {
      */
     public canContractAllHeadlines(): boolean {
         const c: Commands = this;
-        for (let p of c.all_positions()) {  // was c.all_unique_positions()
+        for (let p of c.all_positions()) {
+            // was c.all_unique_positions()
             if (p.isExpanded()) {
                 return true;
             }
@@ -2957,7 +2988,6 @@ export class Commands {
     }
     // canCutOutline = canDeleteHeadline
 
-
     //@+node:felix.20211023195447.10: *6* c.canDemote
     public canDemote(): boolean {
         const c: Commands = this;
@@ -2969,7 +2999,8 @@ export class Commands {
      */
     public canExpandAllHeadlines(): boolean {
         const c: Commands = this;
-        for (let p of c.all_positions()) {  // was c.all_unique_positions()
+        for (let p of c.all_positions()) {
+            // was c.all_unique_positions()
             if (!p.isExpanded()) {
                 return true;
             }
@@ -3013,27 +3044,28 @@ export class Commands {
             return false;
         }
         const line: string = g.get_line(s, 0);
-        const i1 = line.indexOf("<<");
-        const j1 = line.indexOf(">>");
-        const i2 = line.indexOf("@<");
-        const j2 = line.indexOf("@>");
-        return ((-1 < i1) && (i1 < j1)) || ((-1 < i2) && (i2 < j2));
+        const i1 = line.indexOf('<<');
+        const j1 = line.indexOf('>>');
+        const i2 = line.indexOf('@<');
+        const j2 = line.indexOf('@>');
+        return (-1 < i1 && i1 < j1) || (-1 < i2 && i2 < j2);
     }
     //@+node:felix.20211023195447.15: *6* c.canFindMatchingBracket
     //@@nobeautify
 
     public canFindMatchingBracket(): boolean {
         const c: Commands = this;
-        const brackets: string = "()[]{}";
+        const brackets: string = '()[]{}';
         const w = c.frame.body.wrapper; // TODO
         const s = w.getAllText();
         const ins: number = w.getInsertPoint();
 
         const c1 = ins < s.length ? s[ins] : '';
 
-        const c2 = ((0 <= ins - 1) && (ins - 1 < s.length)) ? s[ins - 1] : '';
+        const c2 = 0 <= ins - 1 && ins - 1 < s.length ? s[ins - 1] : '';
 
-        const val = (c1 && brackets.includes(c1)) || (c2 && brackets.includes(c2));
+        const val =
+            (c1 && brackets.includes(c1)) || (c2 && brackets.includes(c2));
         return !!val;
     }
     //@+node:felix.20211023195447.16: *6* c.canHoist & canDehoist
@@ -3097,7 +3129,8 @@ export class Commands {
     public canMoveOutlineUp(): boolean {
         const c: Commands = this;
         const current: Position = this.p;
-        const visBack: Position | false = (!!current && !!current.__bool__()) && current.visBack(c);
+        const visBack: Position | false =
+            !!current && !!current.__bool__() && current.visBack(c);
         if (!visBack || !visBack.__bool__()) {
             return false;
         }
@@ -3105,9 +3138,9 @@ export class Commands {
             return true;
         }
         if (c.hoistStack.length) {
-
             // limit, limitIsVisible = c.visLimit()
-            let w_vis: [Position | undefined, boolean | undefined] = c.visLimit();
+            let w_vis: [Position | undefined, boolean | undefined] =
+                c.visLimit();
             let limitIsVisible: boolean;
             let limit: Position | undefined;
             if (w_vis) {
@@ -3117,14 +3150,15 @@ export class Commands {
                 limitIsVisible = false;
             }
 
-            if (limitIsVisible && limit) {  // A hoist
+            if (limitIsVisible && limit) {
+                // A hoist
                 return !current.__eq__(limit);
             }
             // A chapter.
             return !!limit && !current.__eq__(limit.firstChild());
         }
         const w_root: Position | undefined = c.rootPosition();
-        return (!!w_root && w_root!.__bool__()) && !current.__eq__(w_root!);
+        return !!w_root && w_root!.__bool__() && !current.__eq__(w_root!);
     }
     //@+node:felix.20211023195447.21: *6* c.canPasteOutline
     public canPasteOutline(s: string): boolean {
@@ -3247,7 +3281,7 @@ export class Commands {
     ): void {
         const c: Commands = this;
         const k: any = this.k;
-        c.redraw(p);  // This *must* be done now.
+        c.redraw(p); // This *must* be done now.
         if (p && p.__bool__()) {
             // TODO : allow headline rename ?
             // This should request focus.
@@ -3279,13 +3313,13 @@ export class Commands {
      * change chapters.
      */
     public selectPosition(p: Position): void {
-
         const trace = false; // For # 2167.
         const c: Commands = this;
         const cc: ChapterController = c.chapterController;
 
         if (!p || !p.__bool__()) {
-            if (!g.app.batchMode) { // A serious error.
+            if (!g.app.batchMode) {
+                // A serious error.
                 g.trace('Warning: no p', g.callers());
             }
         }
@@ -3303,8 +3337,6 @@ export class Commands {
                     break;
                 } else {
                     if (trace) {
-                        console.log('trace in selectPosition');
-
                         // TODO
                         // command_name = c.command_name if c.inCommand else 'None'
                         // print('')
@@ -3327,7 +3359,6 @@ export class Commands {
         // Compatibility, but confusing.
         // TODO : Is this needed? (not used in Leo's codebase)
         // selectVnode = selectPosition
-
     }
 
     //@+node:felix.20211031220906.1: *5* c.setPositionAfterSort
@@ -3377,32 +3408,37 @@ export class Commands {
      *
      * See "Theory of operation of c.deletePositionsInList" in LeoDocs.leo.
      */
-    public deletePositionsInList(aList: Position[]): [string, number, string][] {
-
+    public deletePositionsInList(
+        aList: Position[]
+    ): [string, number, string][] {
         // New implementation by Vitalije 2020-03-17 17:29
         const c: Commands = this;
 
         // Ensure all positions are valid.
-        aList = aList.filter((p) => { return c.positionExists(p); });
+        aList = aList.filter((p) => {
+            return c.positionExists(p);
+        });
 
         if (!aList.length) {
             return [];
         }
 
         function p2link(p: Position): [number, VNode] {
-            const parent_v: VNode = p.stack.length ? p.stack[p.stack.length - 1][0] : c.hiddenRootNode;
+            const parent_v: VNode = p.stack.length
+                ? p.stack[p.stack.length - 1][0]
+                : c.hiddenRootNode;
             return [p._childIndex, parent_v];
         }
 
         let links_to_be_cut = [...aList.map(p2link, aList)];
         let unique_links: [number, VNode][] = [];
         // links_to_be_cut = [...new Set(links_to_be_cut)]; // Make unique
-        links_to_be_cut.forEach(fromElement => {
+        links_to_be_cut.forEach((fromElement) => {
             let i: number;
             let v: VNode;
             [i, v] = fromElement;
             let found = false;
-            unique_links.forEach(toElement => {
+            unique_links.forEach((toElement) => {
                 let j: number;
                 let w: VNode;
                 [j, w] = toElement;
@@ -3413,12 +3449,13 @@ export class Commands {
             if (!found) {
                 unique_links.push(fromElement); // add if not found
             }
-
         });
-        links_to_be_cut = unique_links.sort((a, b): number => { return a[0] < b[0] ? 1 : -1; });
+        links_to_be_cut = unique_links.sort((a, b): number => {
+            return a[0] < b[0] ? 1 : -1;
+        });
 
         const undodata: [string, number, string][] = [];
-        links_to_be_cut.forEach(element => {
+        links_to_be_cut.forEach((element) => {
             let i: number;
             let v: VNode;
             [i, v] = element;
@@ -3435,10 +3472,8 @@ export class Commands {
             c.selectPosition(c.rootPosition()!);
         }
         return undodata;
-
     }
     //@-others
-
 }
 
 //@-others
@@ -3446,7 +3481,10 @@ export class Commands {
 //@@tabwidth -4
 //@@pagewidth 70
 
-export interface Commands extends CommanderOutlineCommands, CommanderFileCommands, CommanderEditCommands {
+export interface Commands
+    extends CommanderOutlineCommands,
+        CommanderFileCommands,
+        CommanderEditCommands {
     canCutOutline: () => boolean;
     canShiftBodyRight: () => boolean;
     canExtractSectionNames: () => boolean;
@@ -3460,7 +3498,11 @@ export interface Commands extends CommanderOutlineCommands, CommanderFileCommand
     all_unique_vnodes_iter: () => Generator<VNode, any, unknown>;
     all_positions_iter: () => Generator<Position, any, unknown>;
     allNodes_iter: () => Generator<Position, any, unknown>;
-    all_positions_with_unique_vnodes_iter: () => Generator<Position, any, unknown>;
+    all_positions_with_unique_vnodes_iter: () => Generator<
+        Position,
+        any,
+        unknown
+    >;
     setCurrentVnode: (p: Position) => void;
     force_redraw: () => void;
     redraw_now: () => void;
@@ -3469,7 +3511,11 @@ export interface Commands extends CommanderOutlineCommands, CommanderFileCommand
 // Apply the mixins into the base class via
 // the JS at runtime & aliases for VNode members
 
-applyMixins(Commands, [CommanderOutlineCommands, CommanderFileCommands, CommanderEditCommands]);
+applyMixins(Commands, [
+    CommanderOutlineCommands,
+    CommanderFileCommands,
+    CommanderEditCommands,
+]);
 Commands.prototype.canCutOutline = Commands.prototype.canDeleteHeadline;
 Commands.prototype.canShiftBodyRight = Commands.prototype.canShiftBodyLeft;
 Commands.prototype.canExtractSectionNames = Commands.prototype.canExtract;
@@ -3483,10 +3529,10 @@ Commands.prototype.all_vnodes_iter = Commands.prototype.all_nodes;
 Commands.prototype.all_unique_vnodes_iter = Commands.prototype.all_unique_nodes;
 Commands.prototype.all_positions_iter = Commands.prototype.all_positions;
 Commands.prototype.allNodes_iter = Commands.prototype.all_positions;
-Commands.prototype.all_positions_with_unique_vnodes_iter = Commands.prototype.all_unique_positions;
+Commands.prototype.all_positions_with_unique_vnodes_iter =
+    Commands.prototype.all_unique_positions;
 Commands.prototype.setCurrentVnode = Commands.prototype.setCurrentPosition;
 Commands.prototype.force_redraw = Commands.prototype.redraw;
 Commands.prototype.redraw_now = Commands.prototype.redraw;
-
 
 //@-leo

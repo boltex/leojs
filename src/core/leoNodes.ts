@@ -1739,20 +1739,13 @@ export class Position {
         const c: Commands = p.v.context;
         if (limit.__eq__(p)) {
             if (limitIsVisible && p.isVisible(c)) {
-                console.log('saying p is visible 1: ', p.h);
-
                 return [true, p];
             }
-            console.log('saying p is visible 2: ', p.h);
-
             return [true, undefined];
         }
         if (limit.isAncestorOf(p)) {
-            console.log('checkVisBackLimit: false 1');
-
             return [false, undefined];
         }
-        console.log('checkVisBackLimit: false 2 ');
         return [true, undefined];
     }
 

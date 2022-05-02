@@ -262,7 +262,6 @@ export class ChapterController {
         } else {
             chapter.p = chapter.findRootNode()!;
         }
-
         chapter.select();
 
         c.contractAllHeadlines();

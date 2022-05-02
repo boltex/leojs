@@ -14,7 +14,6 @@ import { LeoUnitTest } from './leoTest2';
 //@+others
 //@+node:felix.20220129225027.1: ** suite TestNodes(LeoUnitTest)
 suite('Unit tests for leo/core/leoNodes.ts.', () => {
-
     let self: LeoUnitTest;
 
     before(async () => {
@@ -50,7 +49,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
             ['parents', root.firstChild().firstChild().parents.bind(root)],
             ['unique_subtree', root.unique_subtree.bind(root)],
         ];
-        table.forEach(element => {
+        table.forEach((element) => {
             let kind: string;
             let generator: (copy?: boolean) => Generator<Position>;
             [kind, generator] = element;
@@ -59,7 +58,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
             for (let p of generator()) {
                 let inList: boolean = false;
 
-                aList.forEach(p_p => {
+                aList.forEach((p_p) => {
                     if (p === p_p || p.__eq__(p_p)) {
                         inList = true;
                     }
@@ -74,12 +73,12 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     test('test_all_nodes_coverage', async () => {
         // @test c iters: <coverage tests>
         const c = self.c;
-        const v1: VNode[] = [...c.all_positions()].map(p => p.v);
+        const v1: VNode[] = [...c.all_positions()].map((p) => p.v);
         const v2: VNode[] = [...c.all_nodes()];
-        v2.forEach(v => {
+        v2.forEach((v) => {
             assert.ok(v1.includes(v));
         });
-        v1.forEach(v => {
+        v1.forEach((v) => {
             assert.ok(v2.includes(v));
         });
     });
@@ -168,7 +167,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const c = self.c;
         const p = self.c.p;
         const child = p.insertAsNthChild(0);
-        c.setHeadString(child, 'child');  // Force the headline to update.
+        c.setHeadString(child, 'child'); // Force the headline to update.
         assert.ok(child);
         c.selectPosition(child);
         const clone = c.clone()!;
@@ -186,7 +185,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         assert.ok(!child.isCloned(), 'fail 1-c');
         c.undoer.redo();
         assert.ok(child.isCloned(), 'fail 1-d');
-        clone.moveToRoot();  // Does not change child position.
+        clone.moveToRoot(); // Does not change child position.
         assert.ok(child.isCloned(), 'fail 3-2');
         assert.ok(clone.isCloned(), 'fail 4-2');
         assert.ok(!clone.parent().__bool__(), 'fail 5');
@@ -223,7 +222,6 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
             if (next && next.__bool__()) {
                 assert.ok(next.getBack().__eq__(p));
             }
-
         }
     });
 
@@ -248,11 +246,9 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
                 assert.ok(p3.__eq__(p2));
                 p2.moveToNext();
             }
-
         }
 
         assert.ok(!p2 || !p2.__bool__());
-
     });
 
     //@+node:felix.20220129225027.17: *3* TestNodes.test_consistency_of_level
@@ -380,7 +376,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const p = self.c.p;
         const root_h = p.h;
         const child = p.next();
-        child.moveToRoot();  // Does not change child position.
+        child.moveToRoot(); // Does not change child position.
         // * c.setRootPosition(child); // Do nothing
         assert.ok(c.positionExists(child));
         assert.strictEqual(c.rootPosition()!.h, child.h);
@@ -655,7 +651,6 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         assert.ok(p.__ne__(undefined));
         assert.ok(p.__eq__(root));
         assert.ok(!p.__ne__(root));
-
     });
 
     //@+node:felix.20220129225027.36: *3* TestNodes.test_p_comparisons
@@ -717,10 +712,12 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
             const next = p.next();
             assert.ok(
                 (back.__bool__() && p.hasBack()) ||
-                (!back.__bool__() && !p.hasBack()));
+                    (!back.__bool__() && !p.hasBack())
+            );
             assert.ok(
                 (next.__bool__() && p.hasNext()) ||
-                (!next.__bool__() && !p.hasNext()));
+                    (!next.__bool__() && !p.hasNext())
+            );
         }
     });
 
@@ -732,11 +729,12 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
             const parent = p.parent();
             assert.ok(
                 (child.__bool__() && p.hasFirstChild()) ||
-                (!child.__bool__() && !p.hasFirstChild()));
+                    (!child.__bool__() && !p.hasFirstChild())
+            );
             assert.ok(
                 (parent.__bool__() && p.hasParent()) ||
-                (!parent.__bool__() && !p.hasParent()));
-
+                    (!parent.__bool__() && !p.hasParent())
+            );
         }
     });
 
@@ -744,18 +742,18 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     test('test_p_hasThreadNextBack', async () => {
         const c = self.c;
         for (let p of c.all_positions()) {
-
             const threadBack = p.getThreadBack();
             const threadNext = p.getThreadNext();
 
             assert.ok(
                 (threadBack.__bool__() && p.hasThreadBack()) ||
-                (!threadBack.__bool__() && !p.hasThreadBack()));
+                    (!threadBack.__bool__() && !p.hasThreadBack())
+            );
             assert.ok(
                 (threadNext.__bool__() && p.hasThreadNext()) ||
-                (!threadNext.__bool__() && !p.hasThreadNext()));
+                    (!threadNext.__bool__() && !p.hasThreadNext())
+            );
         }
-
     });
 
     //@+node:felix.20220129225027.41: *3* TestNodes.test_p_isAncestorOf
@@ -771,7 +769,6 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
             }
             const next = p.next();
             assert.ok(!p.isAncestorOf(next));
-
         }
     });
 
@@ -796,9 +793,9 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const c = self.c;
         let p = self.c.p;
         const root2 = p.next();
-        assert.ok(root2 && root2.__bool__());;
+        assert.ok(root2 && root2.__bool__());
         const p2 = root2.insertAfter();
-        p2.h = "test";
+        p2.h = 'test';
         assert.ok(c.positionExists(p2));
         p2.moveToFirstChildOf(root2);
         assert.ok(c.positionExists(p2));
@@ -828,13 +825,11 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         assert.strictEqual(p2, undefined);
     });
 
-
-
     //@+node:felix.20220129225027.46: *3* TestNodes.test_p_nosentinels
     test('test_p_nosentinels', async () => {
         let p = self.c.p;
         // TODO
-        const s1 = g.splitLines(p.b.substring(2)).join(""); //  ''.join(g.splitLines(p.b)[2:]);
+        const s1 = g.splitLines(p.b.substring(2)).join(''); //  ''.join(g.splitLines(p.b)[2:]);
         const s2 = p.nosentinels;
         assert.strictEqual(s1, s2);
     });
@@ -886,21 +881,20 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         // w = self.c.frame.body.wrapper;
 
         const next = self.root_p.next();
-        c.setBodyString(next, "after");
+        c.setBodyString(next, 'after');
         c.selectPosition(next);
         const s = next.b; // w.get("1.0", "end");
-        assert.strictEqual(s.trimEnd(), "after");
+        assert.strictEqual(s.trimEnd(), 'after');
     });
 
     //@+node:felix.20220129225027.49: *3* TestNodes.test_p_u
     test('test_p_u', async () => {
-
         const p = self.c.p;
         assert.deepStrictEqual(p.u, p.v.u);
         p.v.u = undefined;
         assert.deepStrictEqual(p.u, {});
         assert.deepStrictEqual(p.v.u, {});
-        const d = { 'my_plugin': 'val' };
+        const d = { my_plugin: 'val' };
         p.u = d;
         assert.deepStrictEqual(p.u, d);
         assert.deepStrictEqual(p.v.u, d);
@@ -931,13 +925,17 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         c.selectPosition(child);
         assert.strictEqual(c.p.h, 'child');
         c.copyOutline();
-        const oldVnodes: VNode[] = [...child.self_and_subtree()].map(p2 => p2.v);
+        const oldVnodes: VNode[] = [...child.self_and_subtree()].map(
+            (p2) => p2.v
+        );
         c.selectPosition(child);
-        c.p.contract();  // Essential
+        c.p.contract(); // Essential
         c.pasteOutline();
         assert.ok(c.p.__ne__(child));
         assert.strictEqual(c.p.h, 'child');
-        const newVnodes: VNode[] = [...c.p.self_and_subtree()].map(p2 => p2.v);
+        const newVnodes: VNode[] = [...c.p.self_and_subtree()].map(
+            (p2) => p2.v
+        );
         for (let v of newVnodes) {
             assert.ok(!oldVnodes.includes(v));
         }
@@ -958,11 +956,15 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         grandChild.setHeadString('grand child');
         c.selectPosition(child);
         c.copyOutline();
-        const oldVnodes: VNode[] = [...child.self_and_subtree()].map(p2 => p2.v);
+        const oldVnodes: VNode[] = [...child.self_and_subtree()].map(
+            (p2) => p2.v
+        );
         c.p.contract(); // Essential
         c.pasteOutlineRetainingClones();
         assert.ok(c.p.__ne__(child));
-        const newVnodes: VNode[] = [...c.p.self_and_subtree()].map(p2 => p2.v);
+        const newVnodes: VNode[] = [...c.p.self_and_subtree()].map(
+            (p2) => p2.v
+        );
         for (let v of newVnodes) {
             assert.ok(oldVnodes.includes(v));
         }
@@ -977,8 +979,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
             // a = set()
             //  a.add(p)
             assert.ok(false, 'Adding position to set should throw exception');
-        }
-        catch (typeError) {
+        } catch (typeError) {
             // pass
         }
     });
@@ -1049,7 +1050,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const p = self.c.p;
         const p1 = p.insertAsLastChild();
         p1.setHeadString('@file zzz');
-        const body = `   ${(g.angleBrackets(' section '))}
+        const body = `   ${g.angleBrackets(' section ')}
         `;
         p1.setBodyString(body);
         const p2 = p1.insertAsLastChild();
@@ -1071,7 +1072,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
             ['xyz', '', ''],
         ];
 
-        table.forEach(element => {
+        table.forEach((element) => {
             let s;
             let expected1;
             let expected2;
@@ -1080,12 +1081,10 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
             const result2 = p.v.atAutoRstNodeName(s);
             assert.strictEqual(result1, expected1, s);
             assert.strictEqual(result2, expected2, s);
-
         });
     });
 
     //@-others
-
 });
 //@-others
 //@-leo
