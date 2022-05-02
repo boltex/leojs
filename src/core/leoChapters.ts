@@ -2,7 +2,7 @@
 //@+node:felix.20220429005433.1: * @file src/core/leoChapters.ts
 // * Classes that manage chapters in Leo's core.
 import * as g from './leoGlobals';
-import { new_cmd_decorator } from "../core/decorators";
+import { new_cmd_decorator } from '../core/decorators';
 import { Position, VNode } from './leoNodes';
 import { Commands } from './leoCommands';
 
@@ -19,15 +19,14 @@ function cmd(p_name: string, p_doc: string) {
  * A per-commander controller that manages chapters and related nodes.
  */
 export class ChapterController {
-
     public c: Commands;
     // Note: chapter names never change, even if their @chapter node changes.
-    public chaptersDict: { [key: string]: Chapter };  // Keys are chapter names, values are chapters.
-    public initing: boolean;  // #31: True: suppress undo when creating chapters.
-    public re_chapter: any;  // Set where used.
+    public chaptersDict: { [key: string]: Chapter }; // Keys are chapter names, values are chapters.
+    public initing: boolean; // #31: True: suppress undo when creating chapters.
+    public re_chapter: any; // Set where used.
     public selectedChapter: Chapter | undefined;
-    public selectChapterLockout: boolean;  // True: cc.selectChapterForPosition does nothing.
-    public tt: any;  // May be set in finishCreate.
+    public selectChapterLockout: boolean; // True: cc.selectChapterForPosition does nothing.
+    public tt: any; // May be set in finishCreate.
     public use_tabs: boolean | undefined;
 
     //@+others
@@ -40,11 +39,11 @@ export class ChapterController {
         this.c = c;
         // Note: chapter names never change, even if their @chapter node changes.
         this.chaptersDict = {}; // Keys are chapter names, values are chapters.
-        this.initing = true;  // #31: True: suppress undo when creating chapters.
-        this.re_chapter = undefined;  // Set where used.
+        this.initing = true; // #31: True: suppress undo when creating chapters.
+        this.re_chapter = undefined; // Set where used.
         this.selectedChapter = undefined;
-        this.selectChapterLockout = false;  // True: cc.selectChapterForPosition does nothing.
-        this.tt = undefined;  // May be set in finishCreate.
+        this.selectChapterLockout = false; // True: cc.selectChapterForPosition does nothing.
+        this.tt = undefined; // May be set in finishCreate.
         this.use_tabs = undefined;
         this.reloadSettings();
     }
@@ -54,22 +53,25 @@ export class ChapterController {
         this.use_tabs = c.config.getBool('use-chapter-tabs');
     }
     //@+node:felix.20220429005433.6: *4* cc.createIcon
-    /** 
+    /**
      * Create chapter-selection Qt ListBox in the icon area.
      */
     public createIcon(): void {
         const cc = this;
         const c: Commands = cc.c;
         if (cc.use_tabs) {
-            if (c.frame && c.frame.iconBar && c.frame.iconBar.createChaptersIcon) {
+            if (
+                c.frame &&
+                c.frame.iconBar &&
+                c.frame.iconBar.createChaptersIcon
+            ) {
                 if (!cc.tt) {
-
-                    console.log('TODO : cc.tt = c.frame.iconBar.createChaptersIcon()');
+                    console.log(
+                        'TODO : cc.tt = c.frame.iconBar.createChaptersIcon()'
+                    );
 
                     // cc.tt = c.frame.iconBar.createChaptersIcon();
-
                 }
-
             }
         }
     }
@@ -80,7 +82,6 @@ export class ChapterController {
      * Create the box in the icon area.
      */
     public finishCreate(): void {
-
         const cc = this;
         const c: Commands = cc.c;
 
@@ -99,7 +100,6 @@ export class ChapterController {
      * Make chapter-select-<chapterName> command.
      */
     public makeCommand(chapterName: string, binding?: string): void {
-
         const cc = this;
         const c: Commands = cc.c;
 
@@ -111,7 +111,10 @@ export class ChapterController {
             return;
         }
 
-        const select_chapter_callback = function (cc: ChapterController, name: string) {
+        const select_chapter_callback = function (
+            cc: ChapterController,
+            name: string
+        ) {
             if (!name) {
                 name = chapterName;
             }
@@ -120,15 +123,12 @@ export class ChapterController {
                 try {
                     cc.selectChapterLockout = true;
                     cc.selectChapterByNameHelper(chapter, true);
-                    c.redraw(chapter.p);  // 2016/04/20.
-                }
-                catch (err) {
-                    // 
-                }
-                finally {
+                    c.redraw(chapter.p); // 2016/04/20.
+                } catch (err) {
+                    //
+                } finally {
                     cc.selectChapterLockout = false;
                 }
-
             } else if (!g.unitTesting) {
                 // Possible, but not likely.
                 cc.note(`no such chapter: ${name}`);
@@ -137,9 +137,13 @@ export class ChapterController {
         // Always bind the command without a shortcut.
         // This will create the command bound to any existing settings.
 
-        const bindings: any[] = binding ? [undefined, binding] : [undefined, undefined];
+        const bindings: any[] = binding
+            ? [undefined, binding]
+            : [undefined, undefined];
         for (let shortcut of bindings) {
-            console.log('TODO: c.k.registerCommand(commandName, select_chapter_callback, shortcut=shortcut)');
+            console.log(
+                'TODO: c.k.registerCommand(commandName, select_chapter_callback, shortcut=shortcut)'
+            );
             // c.k.registerCommand(commandName, select_chapter_callback, shortcut=shortcut)
         }
     }
@@ -191,7 +195,7 @@ export class ChapterController {
         const sel_name = cc.selectedChapter ? cc.selectedChapter.name : 'main';
         let i = names.indexOf(sel_name);
 
-        const new_name = names[(i + 1) < names.length ? i + 1 : 0];
+        const new_name = names[i + 1 < names.length ? i + 1 : 0];
 
         cc.selectChapterByName(new_name);
     }
@@ -200,7 +204,6 @@ export class ChapterController {
      * Select a chapter without redrawing.
      */
     public selectChapterByName(name: string): void {
-
         const cc = this;
 
         if (this.selectChapterLockout) {
@@ -232,7 +235,6 @@ export class ChapterController {
      * Select the chapter.
      */
     public selectChapterByNameHelper(chapter: Chapter, collapse = true): void {
-
         const cc = this;
         const c: Commands = this.c;
 
@@ -262,6 +264,7 @@ export class ChapterController {
         }
 
         chapter.select();
+
         c.contractAllHeadlines();
         chapter.p.v.expand();
         c.selectPosition(chapter.p);
@@ -274,7 +277,8 @@ export class ChapterController {
 
     public note(s: string, killUnitTest?: boolean): void {
         if (g.unitTesting) {
-            if (0) {  // To trace cause of failed unit test.
+            if (0) {
+                // To trace cause of failed unit test.
                 g.trace('=====', s, g.callers());
             }
             if (killUnitTest) {
@@ -293,7 +297,6 @@ export class ChapterController {
      * Return True if the outline contains any @chapter node.
      */
     public findAnyChapterNode(): boolean {
-
         const cc = this;
 
         for (let p of cc.c.all_unique_positions()) {
@@ -302,14 +305,12 @@ export class ChapterController {
             }
         }
         return false;
-
     }
     //@+node:felix.20220429005433.16: *4* cc.findChapterNameForPosition
     /**
      * Return the name of a chapter containing p or None if p does not exist.
      */
     public findChapterNameForPosition(p: Position): string | undefined {
-
         const cc = this;
         const c = this.c;
 
@@ -325,7 +326,6 @@ export class ChapterController {
             }
         }
         return 'main';
-
     }
     //@+node:felix.20220429005433.17: *4* cc.findChapterNode
     /**
@@ -336,7 +336,6 @@ export class ChapterController {
      * but users may move them anywhere.
      */
     public findChapterNode(name: string): Position | undefined {
-
         const cc = this;
 
         name = g.checkUnicode(name);
@@ -349,8 +348,7 @@ export class ChapterController {
                 return p;
             }
         }
-        return undefined;  // Not an error.
-
+        return undefined; // Not an error.
     }
     //@+node:felix.20220429005433.18: *4* cc.getChapter
     public getChapter(name: string): Chapter {
@@ -369,17 +367,18 @@ export class ChapterController {
         const theChapter = cc.getSelectedChapter();
 
         return !!(theChapter && theChapter.name !== 'main');
-
     }
     //@+node:felix.20220429005433.21: *4* cc.parseHeadline
     /**
      * Return the chapter name and key binding for p.h.
      */
-    public parseHeadline(p: Position): [string | undefined, string | undefined] {
-
+    public parseHeadline(
+        p: Position
+    ): [string | undefined, string | undefined] {
         if (!this.re_chapter) {
-
-            this.re_chapter = new RegExp(/^@chapter\s+([^@]+)\s*(@key\s*=\s*(.+)\s*)?/);
+            this.re_chapter = new RegExp(
+                /^@chapter\s+([^@]+)\s*(@key\s*=\s*(.+)\s*)?/
+            );
 
             // @chapter (all up to @) (@key=(binding))?
             // name=group(1), binding=group(3)
@@ -390,8 +389,8 @@ export class ChapterController {
         let binding: string | undefined;
 
         if (m) {
-            chapterName = m[1]; // re operation 
-            binding = m[3]; // re operation 
+            chapterName = m[1]; // re operation
+            binding = m[3]; // re operation
             if (chapterName) {
                 chapterName = this.sanitize(chapterName);
             }
@@ -410,19 +409,22 @@ export class ChapterController {
      * Convert s to a safe chapter name.
      */
     public sanitize(s: string): string {
-
         // Similar to g.sanitize_filename, but simpler.
         const result: string[] = [];
         for (let ch of s.trim()) {
             //  pylint: disable=superfluous-parens
-            if ('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.includes(ch)) {
+            if (
+                'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.includes(
+                    ch
+                )
+            ) {
                 result.push(ch);
             } else if (' \t'.includes(ch)) {
                 result.push('-');
             }
         }
         s = result.join('');
-        s = s.split('--').join('-'); 
+        s = s.split('--').join('-');
 
         return s.slice(0, 128);
     }
@@ -435,7 +437,6 @@ export class ChapterController {
      * Note: this code calls c.redraw() if the chapter changes.
      */
     public selectChapterForPosition(p: Position, chapter?: Chapter): void {
-
         const cc = this;
         const c = this.c;
 
@@ -492,12 +493,11 @@ export class ChapterController {
      * Called early and often to discover all chapter names.
      */
     public setAllChapterNames(): string[] {
-
         const cc = this;
         const c = this.c;
 
         // sel_name = cc.selectedChapter and cc.selectedChapter.name or 'main'
-        if (!("main" in cc.chaptersDict)) {
+        if (!('main' in cc.chaptersDict)) {
             cc.chaptersDict['main'] = new Chapter(c, cc, 'main');
             cc.makeCommand('main');
             // This binds any existing bindings to chapter-select-main.
@@ -513,23 +513,24 @@ export class ChapterController {
                 seen.push(p.v);
                 result.push(chapterName);
                 if (!(chapterName in cc.chaptersDict)) {
-                    cc.chaptersDict[chapterName] = new Chapter(c, cc, chapterName);
+                    cc.chaptersDict[chapterName] = new Chapter(
+                        c,
+                        cc,
+                        chapterName
+                    );
                     cc.makeCommand(chapterName, binding);
                 }
             }
         }
         return result;
-
     }
     //@-others
-
 }
 //@+node:felix.20220429005433.25: ** class Chapter
 /**
  * A class representing the non-gui data of a single chapter.
  */
 export class Chapter {
-
     public c: Commands;
     public cc: ChapterController;
     public name: string;
@@ -540,12 +541,16 @@ export class Chapter {
 
     //@+others
     //@+node:felix.20220429005433.26: *3* chapter.__init__
-    constructor(c: Commands, chapterController: ChapterController, name: string) {
+    constructor(
+        c: Commands,
+        chapterController: ChapterController,
+        name: string
+    ) {
         this.c = c;
         this.cc = chapterController;
         const cc = chapterController;
         this.name = g.checkUnicode(name);
-        this.selectLockout = false;  // True: in chapter.select logic.
+        this.selectLockout = false; // True: in chapter.select logic.
         // State variables: saved/restored when the chapter is unselected/selected.
         this.p = c.p;
         this.root = this.findRootNode();
@@ -578,7 +583,6 @@ export class Chapter {
      * Restore chapter information and redraw the tree when a chapter is selected.
      */
     public select(w?: any): void {
-
         if (this.selectLockout) {
             return;
         }
@@ -590,17 +594,14 @@ export class Chapter {
                 // A bad kludge: update all the chapter names *after* the selection.
                 tt.setTabLabel(this.name);
             }
-        }
-        catch (p_err) {
+        } catch (p_err) {
             // pass
-        }
-        finally {
+        } finally {
             this.selectLockout = false;
         }
     }
     //@+node:felix.20220429005433.30: *4* chapter.chapterSelectHelper
     public chapterSelectHelper(w?: any): void {
-
         const cc = this.cc;
         const c = this.c;
 
@@ -608,7 +609,7 @@ export class Chapter {
         let p: Position;
 
         if (this.name === 'main') {
-            return;  // 2016/04/20
+            return; // 2016/04/20
         }
         // Remember the root (it may have changed) for dehoist.
         this.root = this.findRootNode();
@@ -626,24 +627,29 @@ export class Chapter {
         if (w) {
             console.assert(w === c.frame.body.wrapper);
             console.assert(w.leo_p);
-            this.p = p = this.findPositionInChapter(w.leo_p) || root.copy();
+            this.p = this.findPositionInChapter(w.leo_p) || root.copy();
+            p = this.p;
         } else {
             // This must be done *after* switching roots.
-            this.p = p = this.findPositionInChapter(this.p) || root.copy();
+            this.p = this.findPositionInChapter(this.p) || root.copy();
+            p = this.p;
             // Careful: c.selectPosition would pop the hoist stack.
 
             // TODO : Needed ?
             // w = this.findEditorInChapter(p);
             // c.frame.body.selectEditor(w);  // Switches text.
 
-            this.p = p;  // 2016/04/20: Apparently essential.
+            this.p = p; // 2016/04/20: Apparently essential.
         }
+
         if (g.match_word(p.h, 0, '@chapter')) {
             if (p.hasChildren()) {
-                this.p = p = p.firstChild();
+                this.p = p.firstChild();
+                p = this.p;
             } else {
                 // 2016/04/20: Create a dummy first child.
-                this.p = p = p.insertAsLastChild();
+                this.p = p.insertAsLastChild();
+                p = this.p;
                 p.h = 'New Headline';
             }
         }
@@ -651,14 +657,15 @@ export class Chapter {
         // Careful: c.selectPosition would pop the hoist stack.
         c.setCurrentPosition(p);
         g.doHook('hoist-changed', c);
-
     }
     //@+node:felix.20220429005433.31: *4* chapter.findPositionInChapter
     /**
      * Return a valid position p such that p.v == v.
      */
-    public findPositionInChapter(p1: Position, strict?: boolean): Position | undefined {
-
+    public findPositionInChapter(
+        p1: Position,
+        strict?: boolean
+    ): Position | undefined {
         const c = this.c;
         const name = this.name;
 
@@ -679,26 +686,34 @@ export class Chapter {
         if (strict) {
             return undefined;
         }
-        let theIter;
+        let theIter: Generator<Position, any, unknown>;
         if (name === 'main') {
-            theIter = c.all_unique_positions;
+            theIter = c.all_unique_positions(false);
+            // for (let p of c.all_unique_positions(false)) {
+            //     if (p.v === p1.v) {
+            //         return p.copy();
+            //     }
+            // }
         } else {
-            theIter = root.self_and_subtree;
+            theIter = root.self_and_subtree(false);
+            // for (let p of root.self_and_subtree(false)) {
+            //     if (p.v === p1.v) {
+            //         return p.copy();
+            //     }
+            // }
         }
-        for (let p of theIter(false)) {
+        for (let p of theIter) {
             if (p.v === p1.v) {
                 return p.copy();
             }
         }
         return undefined;
-
     }
     //@+node:felix.20220429005433.32: *4* chapter.findEditorInChapter
     /**
      * return w, an editor displaying position p.
      */
     public findEditorInChapter(p: Position): any {
-
         const chapter = this;
         const c = this.c;
         // TODO : Needed ?
@@ -719,7 +734,6 @@ export class Chapter {
      * Remember chapter info when a chapter is about to be unselected.
      */
     public unselect(): void {
-
         const c = this.c;
 
         // Always try to return to the same position.
@@ -749,7 +763,6 @@ export class Chapter {
         }
     }
     //@-others
-
 }
 //@-others
 //@@language typescript
