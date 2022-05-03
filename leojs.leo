@@ -501,7 +501,7 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 <t tx="felix.20201208214250.2"></t>
 <t tx="felix.20201208214319.1"># leojs
 
-## ![LeoEditor](resources/leoapp.png) Literate Editor with Outline _in Typescript_ ![Typescript](resources/typescript.png)
+## ![LeoEditor](https://raw.githubusercontent.com/boltex/leojs/master/resources/leoapp.png) Literate Editor with Outline _in Typescript_ ![Typescript](https://raw.githubusercontent.com/boltex/leojs/master/resources/typescript.png)
 
 ### Literate Programming with _Directed Acyclic Graphs_ ([dag](https://en.wikipedia.org/wiki/Directed_acyclic_graph))
 
@@ -512,13 +512,13 @@ Inspired by &lt;https://github.com/leo-editor/leo-editor/issues/1025&gt;.
 See Leo, the Literate Editor with Outline, at [leoeditor.com](https://leoeditor.com/)
 or on [github](https://github.com/leo-editor/leo-editor), and vscode at [code.visualstudio.com](https://code.visualstudio.com/).
 
-![Screenshot](resources/animated-screenshot.gif)
+![Screenshot](https://raw.githubusercontent.com/boltex/leojs/master/resources/animated-screenshot.gif)
 
 ## Development Version Installation
 
 Make sure you have Node.js and Git installed, then clone the sources and run `npm install` in a terminal to install the remaining development dependencies.
 
-![run extension](resources/run-extension.png)
+![run extension](https://raw.githubusercontent.com/boltex/leojs/master/resources/run-extension.png)
 
 You can then run the **Run Extension** target, as shown above, in the **Debug View**.
 
