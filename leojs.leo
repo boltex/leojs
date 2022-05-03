@@ -14,7 +14,7 @@
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh></v>
 <v t="felix.20201208224703.1"><vh>@clean CONTRIBUTING.md</vh></v>
 </v>
-<v t="felix.20220101161955.1"><vh>Example from LeoVue by Joe Orr</vh>
+<v t="felix.20220101161955.1"><vh>XML read Example (LeoVue)</vh>
 <v t="felix.20201215231023.1"><vh>@@clean src/leoFiles.js</vh>
 <v t="felix.20210124225736.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
 <v t="felix.20201215231023.2"><vh>&lt;&lt; xslTemplate &gt;&gt;</vh></v>
@@ -457,6 +457,8 @@
 <v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
 <v t="felix.20220414231314.1"><vh>@file src/commands/commanderEditCommands.ts</vh></v>
 <v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
+<v t="felix.20220503003653.1"><vh>@file src/commands/editCommands.ts</vh></v>
+<v t="felix.20220503003725.1"><vh>@file src/commands/gotoCommands.ts</vh></v>
 </v>
 <v t="felix.20220128232146.1"><vh>unittests</vh>
 <v t="felix.20220130224933.1"><vh>@file src/test/leoTest2.ts</vh></v>
@@ -1163,8 +1165,10 @@ export function activate(p_context: vscode.ExtensionContext) {
 </t>
 <t tx="felix.20201214150149.14">[CMD.REDO, () =&gt; p_leoUI.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, false)],
 [CMD.REDO_FO, () =&gt; p_leoUI.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, true)],
+[CMD.REDO_DISABLED, () =&gt; { }],
 [CMD.UNDO, () =&gt; p_leoUI.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, false)],
 [CMD.UNDO_FO, () =&gt; p_leoUI.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, true)],
+[CMD.UNDO_DISABLED, () =&gt; { }],
 </t>
 <t tx="felix.20201214150149.15">[CMD.SHOW_OUTLINE, () =&gt; p_leoUI.showOutline(true)], // Also focuses on outline
 [CMD.SHOW_LOG, () =&gt; p_leoUI.showLogPane()],
@@ -1177,6 +1181,14 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.CLONE_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.CLONE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
 [CMD.DELETE_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.DELETE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
 [CMD.MOVE_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.MOVE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
+
+[CMD.PREV_NODE, () =&gt; p_leoUI.command(LEOCMD.GOTO_PREV_HISTORY, U, REFRESH_TREE_BODY, false)],
+[CMD.PREV_NODE_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_PREV_HISTORY, U, REFRESH_TREE_BODY, true)],
+[CMD.PREV_NODE_DISABLED, () =&gt; { }],
+
+[CMD.NEXT_NODE, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, U, REFRESH_TREE_BODY, false)],
+[CMD.NEXT_NODE_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, U, REFRESH_TREE_BODY, true)],
+[CMD.NEXT_NODE_DISABLED, () =&gt; { }],
 
 </t>
 <t tx="felix.20201214150149.17">[CMD.CLONE_FIND_ALL, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_ALL, U, REFRESH_TREE_BODY, true)],
@@ -1339,8 +1351,10 @@ public static COMMANDS = {
     // Leo Operations
     UNDO: Constants.NAME + ".undo", // From command Palette
     UNDO_FO: Constants.NAME + ".undoFromOutline", // from button, return focus on OUTLINE
+    UNDO_DISABLED: Constants.NAME + ".undoDisabled", // Disabled - nop
     REDO: Constants.NAME + ".redo", // From command Palette
     REDO_FO: Constants.NAME + ".redoFromOutline", // from button, return focus on OUTLINE
+    REDO_DISABLED: Constants.NAME + ".redoDisabled", // Disabled - nop
     EXECUTE: Constants.NAME + ".executeScript",
     SHOW_BODY: Constants.NAME + ".showBody",
     SHOW_OUTLINE: Constants.NAME + ".showOutline",
@@ -1351,6 +1365,12 @@ public static COMMANDS = {
     SORT_SIBLING_FO: Constants.NAME + ".sortSiblingsSelectionFromOutline",
     CONTRACT_ALL: Constants.NAME + ".contractAll", // From command Palette
     CONTRACT_ALL_FO: Constants.NAME + ".contractAllFromOutline", // from button, return focus on OUTLINE
+    PREV_NODE: Constants.NAME + ".prev",
+    PREV_NODE_FO: Constants.NAME + ".prevFromOutline",
+    PREV_NODE_DISABLED: Constants.NAME + ".prevDisabled",
+    NEXT_NODE: Constants.NAME + ".next",
+    NEXT_NODE_FO: Constants.NAME + ".nextFromOutline",
+    NEXT_NODE_DISABLED: Constants.NAME + ".nextDisabled",
     // Commands from tree panel buttons or context: focus on OUTLINE
     MARK: Constants.NAME + ".mark",
     UNMARK: Constants.NAME + ".unmark",
@@ -3359,6 +3379,60 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     "dark": "resources/dark/collapse.svg"
   }
 },
+{
+  "command": "leojs.prev",
+  "category": "Leojs",
+  "title": "Prev",
+  "icon": {
+    "light": "resources/light/prev.svg",
+    "dark": "resources/dark/prev.svg"
+  }
+},
+{
+  "command": "leojs.prevDisabled",
+  "category": "Leojs",
+  "title": "Can't go back",
+  "icon": {
+    "light": "resources/light/prev-disabled.svg",
+    "dark": "resources/dark/prev-disabled.svg"
+  }
+},
+{
+  "command": "leojs.prevFromOutline",
+  "category": "Leojs",
+  "title": "Prev",
+  "icon": {
+    "light": "resources/light/prev.svg",
+    "dark": "resources/dark/prev.svg"
+  }
+},
+{
+  "command": "leojs.next",
+  "category": "Leojs",
+  "title": "Next",
+  "icon": {
+    "light": "resources/light/next.svg",
+    "dark": "resources/dark/next.svg"
+  }
+},
+{
+  "command": "leojs.nextDisabled",
+  "category": "Leojs",
+  "title": "Can't go forward",
+  "icon": {
+    "light": "resources/light/next-disabled.svg",
+    "dark": "resources/dark/next-disabled.svg"
+  }
+},
+{
+  "command": "leojs.nextFromOutline",
+  "category": "Leojs",
+  "title": "Next",
+  "icon": {
+    "light": "resources/light/next.svg",
+    "dark": "resources/dark/next.svg"
+  }
+},
 </t>
 <t tx="felix.20201214205159.12">{
   "command": "leojs.editHeadline",
@@ -3845,6 +3919,15 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   }
 },
 {
+  "command": "leojs.undoDisabled",
+  "category": "Leojs",
+  "title": "Can't Undo",
+  "icon": {
+    "light": "resources/light/undo-disabled.svg",
+    "dark": "resources/dark/undo-disabled.svg"
+  }
+},
+{
   "command": "leojs.undoFromOutline",
   "category": "Leojs",
   "title": "Undo",
@@ -3860,6 +3943,15 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "icon": {
     "light": "resources/light/redo.svg",
     "dark": "resources/dark/redo.svg"
+  }
+},
+{
+  "command": "leojs.redoDisabled",
+  "category": "Leojs",
+  "title": "Can't Redo",
+  "icon": {
+    "light": "resources/light/redo-disabled.svg",
+    "dark": "resources/dark/redo-disabled.svg"
   }
 },
 {

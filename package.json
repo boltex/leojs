@@ -557,6 +557,60 @@
         }
       },
       {
+        "command": "leojs.prev",
+        "category": "Leojs",
+        "title": "Prev",
+        "icon": {
+          "light": "resources/light/prev.svg",
+          "dark": "resources/dark/prev.svg"
+        }
+      },
+      {
+        "command": "leojs.prevDisabled",
+        "category": "Leojs",
+        "title": "Can't go back",
+        "icon": {
+          "light": "resources/light/prev-disabled.svg",
+          "dark": "resources/dark/prev-disabled.svg"
+        }
+      },
+      {
+        "command": "leojs.prevFromOutline",
+        "category": "Leojs",
+        "title": "Prev",
+        "icon": {
+          "light": "resources/light/prev.svg",
+          "dark": "resources/dark/prev.svg"
+        }
+      },
+      {
+        "command": "leojs.next",
+        "category": "Leojs",
+        "title": "Next",
+        "icon": {
+          "light": "resources/light/next.svg",
+          "dark": "resources/dark/next.svg"
+        }
+      },
+      {
+        "command": "leojs.nextDisabled",
+        "category": "Leojs",
+        "title": "Can't go forward",
+        "icon": {
+          "light": "resources/light/next-disabled.svg",
+          "dark": "resources/dark/next-disabled.svg"
+        }
+      },
+      {
+        "command": "leojs.nextFromOutline",
+        "category": "Leojs",
+        "title": "Next",
+        "icon": {
+          "light": "resources/light/next.svg",
+          "dark": "resources/dark/next.svg"
+        }
+      },
+      {
         "command": "leojs.editHeadline",
         "category": "Leojs",
         "title": "Edit Headline",
@@ -1031,6 +1085,15 @@
         }
       },
       {
+        "command": "leojs.undoDisabled",
+        "category": "Leojs",
+        "title": "Can't Undo",
+        "icon": {
+          "light": "resources/light/undo-disabled.svg",
+          "dark": "resources/dark/undo-disabled.svg"
+        }
+      },
+      {
         "command": "leojs.undoFromOutline",
         "category": "Leojs",
         "title": "Undo",
@@ -1046,6 +1109,15 @@
         "icon": {
           "light": "resources/light/redo.svg",
           "dark": "resources/dark/redo.svg"
+        }
+      },
+      {
+        "command": "leojs.redoDisabled",
+        "category": "Leojs",
+        "title": "Can't Redo",
+        "icon": {
+          "light": "resources/light/redo-disabled.svg",
+          "dark": "resources/dark/redo-disabled.svg"
         }
       },
       {

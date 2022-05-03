@@ -184,8 +184,10 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 
         [CMD.REDO, () => p_leoUI.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, false)],
         [CMD.REDO_FO, () => p_leoUI.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, true)],
+        [CMD.REDO_DISABLED, () => { }],
         [CMD.UNDO, () => p_leoUI.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, false)],
         [CMD.UNDO_FO, () => p_leoUI.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, true)],
+        [CMD.UNDO_DISABLED, () => { }],
         [CMD.SHOW_OUTLINE, () => p_leoUI.showOutline(true)], // Also focuses on outline
         [CMD.SHOW_LOG, () => p_leoUI.showLogPane()],
         [CMD.SHOW_BODY, () => p_leoUI.showBody(false)], // Also focuses on body
@@ -196,6 +198,14 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.CLONE_MARKED_NODES, () => p_leoUI.command(LEOCMD.CLONE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
         [CMD.DELETE_MARKED_NODES, () => p_leoUI.command(LEOCMD.DELETE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
         [CMD.MOVE_MARKED_NODES, () => p_leoUI.command(LEOCMD.MOVE_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
+
+        [CMD.PREV_NODE, () => p_leoUI.command(LEOCMD.GOTO_PREV_HISTORY, U, REFRESH_TREE_BODY, false)],
+        [CMD.PREV_NODE_FO, () => p_leoUI.command(LEOCMD.GOTO_PREV_HISTORY, U, REFRESH_TREE_BODY, true)],
+        [CMD.PREV_NODE_DISABLED, () => { }],
+
+        [CMD.NEXT_NODE, () => p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, U, REFRESH_TREE_BODY, false)],
+        [CMD.NEXT_NODE_FO, () => p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, U, REFRESH_TREE_BODY, true)],
+        [CMD.NEXT_NODE_DISABLED, () => { }],
 
         [CMD.CLONE_FIND_ALL, () => p_leoUI.command(LEOCMD.CLONE_FIND_ALL, U, REFRESH_TREE_BODY, true)],
         [CMD.CLONE_FIND_ALL_FLATTENED, () => p_leoUI.command(LEOCMD.CLONE_FIND_ALL_FLATTENED, U, REFRESH_TREE_BODY, true)],
