@@ -3232,10 +3232,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "dependencies": {
     "bowser": "^2.11.0",
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "1f886fd",
-  "gitBranch": "devel",
-  "gitDate": "2022-05-03 00:48:19 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -4718,8 +4715,18 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     "group": "navigation@3"
   },
   {
+    "command": "leojs.undoDisabled",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsCanUndo",
+    "group": "navigation@3"
+  },
+  {
     "command": "leojs.redoFromOutline",
     "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsCanRedo",
+    "group": "navigation@4"
+  },
+  {
+    "command": "leojs.redoDisabled",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsCanRedo",
     "group": "navigation@4"
   },
   {

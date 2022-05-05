@@ -1698,8 +1698,18 @@
           "group": "navigation@3"
         },
         {
+          "command": "leojs.undoDisabled",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && !leojsCanUndo",
+          "group": "navigation@3"
+        },
+        {
           "command": "leojs.redoFromOutline",
           "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsCanRedo",
+          "group": "navigation@4"
+        },
+        {
+          "command": "leojs.redoDisabled",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && !leojsCanRedo",
           "group": "navigation@4"
         },
         {
@@ -2453,8 +2463,5 @@
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "stream": "^0.0.2"
-  },
-  "gitCommit": "1f886fd",
-  "gitBranch": "devel",
-  "gitDate": "2022-05-03 00:48:19 -0400"
+  }
 }
