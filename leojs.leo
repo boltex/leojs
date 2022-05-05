@@ -2056,7 +2056,10 @@ import { Position } from "./core/leoNodes";
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201214151447.10">private _leoCanPromote: boolean = false;
+<t tx="felix.20201214151447.10">/**
+ * Current selection allows promote command
+ */
+private _leoCanPromote: boolean = false;
 get leoCanPromote(): boolean {
     return this._leoCanPromote;
 }
@@ -2066,7 +2069,10 @@ set leoCanPromote(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20201214151447.11">private _leoCanDehoist: boolean = false;
+<t tx="felix.20201214151447.11">/**
+ * Currently selected can de-hoist state
+ */
+private _leoCanDehoist: boolean = false;
 get leoCanDehoist(): boolean {
     return this._leoCanDehoist;
 }
@@ -2186,7 +2192,9 @@ export class LeoStates {
 }
 </t>
 <t tx="felix.20201214151447.3"></t>
-<t tx="felix.20201214151447.4">// * A Leo file is opened
+<t tx="felix.20201214151447.4">/**
+ * A Leo file is opened
+ */
 private _fileOpenedReady: boolean = false; // Sets context flag along with treeview title
 get fileOpenedReady(): boolean {
     return this._fileOpenedReady;
@@ -2197,7 +2205,10 @@ set fileOpenedReady(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20201214151447.5">// * Currently opened Leo file path and name, empty string if new unsaved file.
+<t tx="felix.20201214151447.5">
+/**
+ * Currently opened Leo file path and name, empty string if new unsaved file.
+ */
 private _leoOpenedFileName: string = "";
 get leoOpenedFileName(): string {
     return this._leoOpenedFileName;
@@ -2213,7 +2224,10 @@ set leoOpenedFileName(p_name: string) {
 }
 
 </t>
-<t tx="felix.20201214151447.6">// * 'states' flags for currently opened tree view
+<t tx="felix.20201214151447.6">
+/**
+ * Currently opened commander is dirty
+ */
 private _leoChanged: boolean = false;
 get leoChanged(): boolean {
     return this._leoChanged;
@@ -2229,7 +2243,10 @@ set leoChanged(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20201214151447.7">private _leoCanUndo: boolean = false;
+<t tx="felix.20201214151447.7">/**
+ * Undo operation available state
+ */
+private _leoCanUndo: boolean = false;
 get leoCanUndo(): boolean {
     return this._leoCanUndo;
 }
@@ -2239,7 +2256,10 @@ set leoCanUndo(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20201214151447.8">private _leoCanRedo: boolean = false;
+<t tx="felix.20201214151447.8">/**
+ * Redo operation available state
+ */
+private _leoCanRedo: boolean = false;
 get leoCanRedo(): boolean {
     return this._leoCanRedo;
 }
@@ -2249,7 +2269,10 @@ set leoCanRedo(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20201214151447.9">private _leoCanDemote: boolean = false;
+<t tx="felix.20201214151447.9">/**
+ * Current selection allows demote command
+ */
+private _leoCanDemote: boolean = false;
 get leoCanDemote(): boolean {
     return this._leoCanDemote;
 }
@@ -5834,7 +5857,9 @@ public selectOpenedLeoDocument(p_index: number, p_fromOutline?: boolean): Thenab
 }
 
 </t>
-<t tx="felix.20201214233119.1">// * General 'Leo is ready' state
+<t tx="felix.20201214233119.1">/**
+ * General 'Leo is ready' state
+ */
 private _leoReady: boolean = false;
 get leoReady(): boolean {
     return this._leoReady;

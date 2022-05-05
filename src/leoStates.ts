@@ -12,7 +12,9 @@ import { Position } from "./core/leoNodes";
  */
 export class LeoStates {
 
-    // * General 'Leo is ready' state
+    /**
+     * General 'Leo is ready' state
+     */
     private _leoReady: boolean = false;
     get leoReady(): boolean {
         return this._leoReady;
@@ -22,7 +24,9 @@ export class LeoStates {
         utils.setContext(Constants.CONTEXT_FLAGS.LEO_READY, p_value);
     }
 
-    // * A Leo file is opened
+    /**
+     * A Leo file is opened
+     */
     private _fileOpenedReady: boolean = false; // Sets context flag along with treeview title
     get fileOpenedReady(): boolean {
         return this._fileOpenedReady;
@@ -32,7 +36,10 @@ export class LeoStates {
         utils.setContext(Constants.CONTEXT_FLAGS.TREE_OPENED, p_value);
     }
 
-    // * Currently opened Leo file path and name, empty string if new unsaved file.
+
+    /**
+     * Currently opened Leo file path and name, empty string if new unsaved file.
+     */
     private _leoOpenedFileName: string = "";
     get leoOpenedFileName(): string {
         return this._leoOpenedFileName;
@@ -47,7 +54,10 @@ export class LeoStates {
         }
     }
 
-    // * 'states' flags for currently opened tree view
+
+    /**
+     * Currently opened commander is dirty
+     */
     private _leoChanged: boolean = false;
     get leoChanged(): boolean {
         return this._leoChanged;
@@ -62,6 +72,9 @@ export class LeoStates {
         utils.setContext(Constants.CONTEXT_FLAGS.LEO_CHANGED, p_value);
     }
 
+    /**
+     * Undo operation available state
+     */
     private _leoCanUndo: boolean = false;
     get leoCanUndo(): boolean {
         return this._leoCanUndo;
@@ -71,6 +84,9 @@ export class LeoStates {
         utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_UNDO, p_value);
     }
 
+    /**
+     * Redo operation available state
+     */
     private _leoCanRedo: boolean = false;
     get leoCanRedo(): boolean {
         return this._leoCanRedo;
@@ -80,6 +96,9 @@ export class LeoStates {
         utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_REDO, p_value);
     }
 
+    /**
+     * Current selection allows demote command
+     */
     private _leoCanDemote: boolean = false;
     get leoCanDemote(): boolean {
         return this._leoCanDemote;
@@ -89,6 +108,9 @@ export class LeoStates {
         utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_DEMOTE, p_value);
     }
 
+    /**
+     * Current selection allows promote command
+     */
     private _leoCanPromote: boolean = false;
     get leoCanPromote(): boolean {
         return this._leoCanPromote;
@@ -98,6 +120,9 @@ export class LeoStates {
         utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_PROMOTE, p_value);
     }
 
+    /**
+     * Currently selected can de-hoist state
+     */
     private _leoCanDehoist: boolean = false;
     get leoCanDehoist(): boolean {
         return this._leoCanDehoist;
