@@ -18,6 +18,7 @@ import { AtFile } from './leoAtFile';
 import { LeoFind } from './leoFind';
 import { LeoImportCommands } from './leoImport';
 import { ChapterController } from './leoChapters';
+import { EditCommandsClass, TopLevelEditCommands } from '../commands/editCommands';
 
 //@-<< imports >>
 //@+others
@@ -29,7 +30,7 @@ function applyMixins(derivedCtor: any, constructors: any[]): void {
                 derivedCtor.prototype,
                 name,
                 Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
-                    Object.create(null)
+                Object.create(null)
             );
         });
     });
@@ -83,26 +84,26 @@ export class Commands {
         };
         body: any;
     } = {
-        c: this,
-        title: '',
-        openDirectory: '',
-        iconBar: {},
-        tree: {
-            generation: 0,
-            editLabel: (p: Position, selectAll: boolean, selection: any) => {
-                console.log(
-                    'TODO: editLabel not used in leojs. From c.frame.tree.editLabel'
-                );
-            },
-        },
-        body: {
-            wrapper: {
-                setAllText: (s: string) => {
-                    console.log('TODO: setAllText of c.frame.body.wrapper');
+            c: this,
+            title: '',
+            openDirectory: '',
+            iconBar: {},
+            tree: {
+                generation: 0,
+                editLabel: (p: Position, selectAll: boolean, selection: any) => {
+                    console.log(
+                        'TODO: editLabel not used in leojs. From c.frame.tree.editLabel'
+                    );
                 },
             },
-        },
-    };
+            body: {
+                wrapper: {
+                    setAllText: (s: string) => {
+                        console.log('TODO: setAllText of c.frame.body.wrapper');
+                    },
+                },
+            },
+        };
 
     //@+others
     //@+node:felix.20210223220756.1: *3* Commander IVars
@@ -278,6 +279,7 @@ export class Commands {
 
         this.nodeHistory = new NodeHistory(c);
 
+        this.editCommands = new EditCommandsClass(c);
         this.undoer = new Undoer(c);
 
         // From initConfigSettings
@@ -1337,16 +1339,16 @@ export class Commands {
         if (!ok) {
             g.es_print(
                 `check-outline ERROR! ${c.shortFileName()} ` +
-                    `${count} nodes, ` +
-                    `${gnx_errors} gnx errors, ` +
-                    `${g.app.structure_errors} ` +
-                    `structure errors`,
+                `${count} nodes, ` +
+                `${gnx_errors} gnx errors, ` +
+                `${g.app.structure_errors} ` +
+                `structure errors`,
                 'red'
             );
         } else if (c.verbose_check_outline && !g.unitTesting) {
             g.es_print(
                 `check-outline OK: ${t2} ms. ` +
-                    `${c.shortFileName()} ${count} nodes`
+                `${c.shortFileName()} ${count} nodes`
             );
         }
         return g.app.structure_errors;
@@ -3483,8 +3485,9 @@ export class Commands {
 
 export interface Commands
     extends CommanderOutlineCommands,
-        CommanderFileCommands,
-        CommanderEditCommands {
+    CommanderFileCommands,
+    CommanderEditCommands,
+    TopLevelEditCommands {
     canCutOutline: () => boolean;
     canShiftBodyRight: () => boolean;
     canExtractSectionNames: () => boolean;
@@ -3515,6 +3518,7 @@ applyMixins(Commands, [
     CommanderOutlineCommands,
     CommanderFileCommands,
     CommanderEditCommands,
+    TopLevelEditCommands
 ]);
 Commands.prototype.canCutOutline = Commands.prototype.canDeleteHeadline;
 Commands.prototype.canShiftBodyRight = Commands.prototype.canShiftBodyLeft;
