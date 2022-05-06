@@ -7,6 +7,19 @@ import { LeoOutlineNode } from "./leoOutline";
 // String and other types/structures helper functions, along with common vscode API calls
 
 /**
+ * * Unique numeric Id
+ */
+var uniqueId: number = 0;
+
+/**
+ * * Get new uniqueID
+ */
+export function getUniqueId(): string {
+    const id = uniqueId++;
+    return id.toString();
+}
+
+/**
  * * Build a string for representing a number that's 2 digits wide, padding with a zero if needed
  * @param p_number Between 0 and 99
  * @returns a 2 digit wide string representation of the number, left padded with zeros as needed.
@@ -137,6 +150,56 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
                 path: `${Constants.GUI.SVG_OPEN}${IconConstants.scriptButtons[0]}${Constants.GUI.SVG_CLOSE}`
             })
         }
+    ];
+}
+
+/**
+ * * Build all possible strings for the goto panel
+ * @param p_context Needed to get to absolute paths on the system
+ * @returns An array containing icons for the goto anywhere tree view
+ */
+export function buildGotoIconPaths(p_context: vscode.ExtensionContext): Icon[] {
+    return [
+        {
+            light: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[0]}${Constants.GUI.SVG_CLOSE}`
+            }),
+            dark: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[1]}${Constants.GUI.SVG_CLOSE}`
+            })
+        },
+        {
+            light: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[2]}${Constants.GUI.SVG_CLOSE}`
+            }),
+            dark: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[3]}${Constants.GUI.SVG_CLOSE}`
+            })
+        },
+        {
+            light: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[4]}${Constants.GUI.SVG_CLOSE}`
+            }),
+            dark: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[5]}${Constants.GUI.SVG_CLOSE}`
+            })
+        },
+        {
+            light: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[6]}${Constants.GUI.SVG_CLOSE}`
+            }),
+            dark: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[7]}${Constants.GUI.SVG_CLOSE}`
+            })
+        },
     ];
 }
 

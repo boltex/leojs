@@ -349,12 +349,15 @@
 </v>
 <v t="felix.20210110210346.1"><vh>@clean src/declarations.d.ts</vh></v>
 <v t="felix.20201208224407.1"><vh>@clean src/utils.ts</vh>
+<v t="felix.20220505225030.1"><vh>uniqueId</vh></v>
+<v t="felix.20220505225023.1"><vh>getUniqueId</vh></v>
 <v t="felix.20201208224407.2"><vh>padNumber2</vh></v>
 <v t="felix.20201208224407.4"><vh>addFileToGlobal</vh></v>
 <v t="felix.20201208224407.5"><vh>removeFileFromGlobal</vh></v>
 <v t="felix.20201208224407.6"><vh>buildNodeIconPaths</vh></v>
 <v t="felix.20201208224407.7"><vh>buildDocumentIconPaths</vh></v>
 <v t="felix.20201208224407.8"><vh>buildButtonsIconPaths</vh></v>
+<v t="felix.20220505225236.1"><vh>buildGotoIconPaths</vh></v>
 <v t="felix.20220109180351.1"><vh>convertLeoFiletypes</vh></v>
 <v t="felix.20201208224407.10"><vh>getDurationMilliseconds</vh></v>
 <v t="felix.20201208224407.11"><vh>getFileFromPath</vh></v>
@@ -2712,6 +2715,7 @@ import { LeoGotoNode } from "./leoGoto";
     this.nodeIcons = utils.buildNodeIconPaths(_context);
     this.documentIcons = utils.buildDocumentIconPaths(_context);
     this.buttonIcons = utils.buildButtonsIconPaths(_context);
+    this.gotoIcons = utils.buildGotoIconPaths(_context);
 
     // * Create file browser instance
     this._leoFilesBrowser = new LeoFilesBrowser(_context);
@@ -2774,6 +2778,7 @@ export class LeoUI {
     public nodeIcons: Icon[] = [];
     public documentIcons: Icon[] = [];
     public buttonIcons: Icon[] = [];
+    public gotoIcons: Icon[] = [];
 
     // * File Browser
     private _leoFilesBrowser!: LeoFilesBrowser; // Browsing dialog service singleton used in the openLeoFile and save-as methods
@@ -8420,6 +8425,12 @@ export class IconConstants {
         '&lt;path d="M2.875 1.21h10.566v8.482H2.875z" fill="#b45d3c"/&gt;&lt;path d="M11.093 1.21c-1.14.782-1.827 2.105-1.828 3.523 0 1.747 1.023 3.246 2.482 3.89v6.021h1.694V1.21zm-8.218 0v13.67h1.713V9.009a4.073 4.225 0 003.167-4.115A4.073 4.225 0 005.673 1.21z" fill="#e87e58"/&gt;&lt;path d="M6.35 6.339c.12.188.21.425.174.645-.245.565-.76 1.076-1.191 1.44-.73.668-1.442.894-2.433.993V4.002C4 4.79 5.58 5.269 6.35 6.339z" fill="#ffa383"/&gt;&lt;path d="M4.332 8.389c-.158 0-.79.316-.79.316l-.65.561h-.07l-.034 3.3.333.28.562-.105c.37-.073.72-.394 1.106-.368 0 0-.368.375-.457.614-.177.595-.124 1.405.334 1.79.25.201.612.202.93.246 1.464-.037 4.222.01 5.74.035.626-.22.74-.879.841-1.422.07-.409.049-.903-.193-1.21-.215-.265-.877-.527-.877-.527s1.117.332 1.68.482c.2.054.601.15.601.15l.123-3.844-1.035-.298-1.176.07c-1.934.446-3.108.225-4.914.245l-1.053-.28s-.843-.035-1-.035z" fill="#fff"/&gt;&lt;path d="M4.708 2.514c-.947.022-1.475.03-1.808 1.194-.061.43.13.923.439 1.228.415.386 1.612.462 2.264.738.249.037.546.14.755 0 .277-.202.345-.987.473-1.37.003-.511-.243-1.192-.649-1.597-.477-.294-.98-.212-1.474-.193zm7.065.1c-.2.002-.405.024-.613.036-.518-.066-.748.086-.983.526-.343.738-.604 2.514.21 2.878.915.34 1.406-.481 2.001-.824.271-.149.585-.198.878-.299.049-1.108.161-1.483-.51-2.018-.322-.249-.648-.301-.983-.298z" fill="#ffffeb"/&gt;&lt;path d="M2.49.713V10l-1.516.143a.334.334 0 10.063.666l1.453-.138v.59l-1.483.288a.334.334 0 10.127.656l1.356-.263v3.349h11.39v-4.025h1.032a.334.334 0 100-.67H13.88v-.64l1.054-.108a.334.334 0 10-.067-.665l-.987.101V.713H2.49zm.905.905h9.579v2.411a1.607 1.607 0 00-.088-.224c-.315-.63-.738-.878-1.277-.857-.636.001-1.105.415-1.342 1.009-.152.398-.113.704-.09 1.082.016.24.4.593.692.537.453-.088 1.18-.482 1.757-.765.18-.088.289-.19.348-.303v4.869l-2.427.246a.334.334 0 10.067.665l2.36-.24v.549h-2.405a.334.334 0 100 .669h2.405v3.12H3.395v-.677c.117.087.348.15.436.11.33-.153.357-.46.749-.83.182-.171.323-.42.599-.562.246-.126.727-.052 1.452-.207 1.346-.232 2.858-.122 3.97.085.707.134.891.457 1.033.776.11.248.07.353.247.558.137.16.505.353.716.169.168-.147 0-.502.182-.682.204-.204.28-.442.007-.745-.902-.485-1.542-.586-2.66-.737-.199-.02-.316-.245-.461-.38-.345-.32-.675-.483-1.103-.532.016-.055.037-.204.068-.244.695-.897 1.659-1.467 2.392-1.634.273-.062.157-.392.093-.431-.145-.088-.331-.093-.5-.093-.319.001-.633.08-.95.098-.952.054-1.783.082-2.651.006-.287-.025-.576-.058-.864-.046-.463.02-.554.254-.43.598.045.128.579.135.84.272.423.22.632.51 1.103 1.097.058.071.126.137.167.218.023.046.023.1.03.15-.514.002-.712.127-1.025.46-.363.38-.283.403-1.243.553-.22.034-.458.033-.678.069-.413.067-1.056.097-1.375.472-.062.073-.1.14-.143.208v-.719l2.476-.48a.334.334 0 10-.128-.657l-2.348.456v-.5l2.445-.231a.334.334 0 10-.063-.666l-2.382.225v-5.62c.2.094.516.16.657.221.442.194.737.484 1.025.634.18.094.866.282 1.016.147.222-.2.262-1.117.074-1.538a2.12 2.12 0 00-.651-.854c-.09-.072-.43-.153-.68-.148-.25.004-.556.053-.711.091-.315.079-.473.259-.683.505-.012.012-.031.05-.047.076z" fill="#4d4d4d"/&gt;&lt;path d="M4.487 3.186c-.11.182-.05.382.062.533.094.125.222.226.36.298.222.11.36.162.484-.062.151-.264.091-.52-.112-.72-.23-.204-.581-.277-.794-.05zm7 .26c-.326.03-.478.33-.472.633a.91.91 0 00.162.385c.247-.037.604-.197.769-.36.093-.133.21-.369.149-.509-.152-.191-.403-.18-.608-.149z" fill="#fff"/&gt;'
     ];
 
+    public static goto: string[] = [
+        '', '' ,
+        '', '' ,
+        '', '' ,
+        '', '' 
+    ];
 
 }
 </t>
@@ -8949,7 +8960,7 @@ public findQuickTimeline(): Thenable&lt;unknown&gt; {
     //         this._leoGotoProvider.refreshTreeRoot();
     //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
     //     });
-    return vscode.window.showInformationMessage("TODO: ");
+    return vscode.window.showInformationMessage("TODO: findQuickTimeline");
 }
 
 </t>
@@ -8962,7 +8973,7 @@ public findQuickChanged(): Thenable&lt;unknown&gt; {
     //         this._leoGotoProvider.refreshTreeRoot();
     //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
     //     });
-    return vscode.window.showInformationMessage("TODO: ");
+    return vscode.window.showInformationMessage("TODO: findQuickChanged");
 
 }
 
@@ -8976,7 +8987,7 @@ public findQuickHistory(): Thenable&lt;unknown&gt; {
     //         this._leoGotoProvider.refreshTreeRoot();
     //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
     //     });
-    return vscode.window.showInformationMessage("TODO: ");
+    return vscode.window.showInformationMessage("TODO: findQuickHistory");
 
 }
 
@@ -8990,7 +9001,7 @@ public findQuickMarked(): Thenable&lt;unknown&gt; {
     //         this._leoGotoProvider.refreshTreeRoot();
     //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
     //     });
-    return vscode.window.showInformationMessage("TODO: ");
+    return vscode.window.showInformationMessage("TODO: findQuickMarked");
 
 }
 
@@ -9000,11 +9011,13 @@ public findQuickMarked(): Thenable&lt;unknown&gt; {
  */
 public findQuickGoAnywhere(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknown&gt; {
     let w_panel = "";
+
     if (this._lastTreeView === this._leoTreeExView) {
         w_panel = Constants.GOTO_EXPLORER_ID;
     } else {
         w_panel = Constants.GOTO_ID;
     }
+
     vscode.commands.executeCommand(w_panel + '.focus', p_options);
 
     return Promise.resolve();
@@ -9012,7 +9025,7 @@ public findQuickGoAnywhere(p_options?: { preserveFocus?: boolean }): Thenable&lt
 
 </t>
 <t tx="felix.20220505215916.9">public gotoNavEntry(p_node: LeoGotoNode): Thenable&lt;unknown&gt; {
-    return vscode.window.showInformationMessage("TODO: ");
+    return vscode.window.showInformationMessage("TODO: gotoNavEntry");
 
     // if (p_node.entryType === 'tag') {
 
@@ -9099,7 +9112,7 @@ public findQuickGoAnywhere(p_options?: { preserveFocus?: boolean }): Thenable&lt
  * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
  */
 public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
-    return vscode.window.showInformationMessage("TODO: ");
+    return vscode.window.showInformationMessage("TODO: findAll");
 
     // const w_action: string = p_replace
     //     ? Constants.LEOBRIDGE.REPLACE_ALL
@@ -9159,7 +9172,7 @@ public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
  * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
  */
 public cloneFind(p_marked: boolean, p_flat: boolean): Thenable&lt;unknown&gt; {
-    return vscode.window.showInformationMessage("TODO: ");
+    return vscode.window.showInformationMessage("TODO: cloneFind");
 
     // let w_searchString: string = this._lastSettingsUsed!.findText;
     // let w_action: string;
@@ -9222,13 +9235,8 @@ public cloneFind(p_marked: boolean, p_flat: boolean): Thenable&lt;unknown&gt; {
  * @param p_id string id of the setting name
  */
 public setSearchSetting(p_id: string): void {
-    let w_panel: vscode.WebviewView | undefined;
-    if (this._lastTreeView === this._leoTreeExView) {
-        w_panel = this._findPanelWebviewExplorerView;
-    } else {
-        w_panel = this._findPanelWebviewView;
-    }
-    w_panel!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
+    this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
+    this._findPanelWebviewView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
 }
 
 </t>
@@ -9236,7 +9244,7 @@ public setSearchSetting(p_id: string): void {
  * * Gets the search settings from Leo, and applies them to the find panel webviews
  */
 public loadSearchSettings(): void {
-    vscode.window.showInformationMessage("TODO: ");
+    vscode.window.showInformationMessage("TODO: loadSearchSettings");
 
     // this.sendAction(Constants.LEOBRIDGE.GET_SEARCH_SETTINGS).then(
     //     (p_result: LeoBridgePackage) =&gt; {
@@ -9291,7 +9299,7 @@ public loadSearchSettings(): void {
  */
 public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt; {
 
-    return vscode.window.showInformationMessage("TODO: ");
+    return vscode.window.showInformationMessage("TODO: saveSearchSettings");
 
     // this._lastSettingsUsed = p_settings;
     // // convert to LeoGuiFindTabManagerSettings
@@ -9326,7 +9334,7 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
  * * Goto Global Line
  */
 public gotoGlobalLine(): void {
-    vscode.window.showInformationMessage("TODO: ");
+    vscode.window.showInformationMessage("TODO: gotoGlobalLine");
 
     // this.triggerBodySave(false)
     //     .then((p_saveResult: boolean) =&gt; {
@@ -9368,7 +9376,7 @@ public gotoGlobalLine(): void {
  * * Tag Children
  */
 public tagChildren(): void {
-    vscode.window.showInformationMessage("TODO: ");
+    vscode.window.showInformationMessage("TODO: tagChildren");
 
     // this.triggerBodySave(false)
     //     .then((p_saveResult: boolean) =&gt; {
@@ -9410,7 +9418,7 @@ public tagChildren(): void {
  * * Tag Node
  */
 public tagNode(): void {
-    vscode.window.showInformationMessage("TODO: ");
+    vscode.window.showInformationMessage("TODO: tagNode");
 
     // this.triggerBodySave(false)
     //     .then((p_saveResult: boolean) =&gt; {
@@ -9453,7 +9461,7 @@ public tagNode(): void {
  * * Remove single Tag on selected node
  */
 public removeTag(): void {
-    vscode.window.showInformationMessage("TODO: ");
+    vscode.window.showInformationMessage("TODO: removeTag");
 
     // if (this.lastSelectedNode &amp;&amp; this.lastSelectedNode.u &amp;&amp;
     //     this.lastSelectedNode.u.__node_tags &amp;&amp; this.lastSelectedNode.u.__node_tags.length) {
@@ -9498,7 +9506,7 @@ public removeTag(): void {
  * * Remove all tags on selected node
  */
 public removeTags(): void {
-    vscode.window.showInformationMessage("TODO: ");
+    vscode.window.showInformationMessage("TODO: removeTags");
 
     // if (this.lastSelectedNode &amp;&amp; this.lastSelectedNode.u &amp;&amp;
     //     this.lastSelectedNode.u.__node_tags &amp;&amp; this.lastSelectedNode.u.__node_tags.length) {
@@ -9529,7 +9537,7 @@ public removeTags(): void {
 </t>
 <t tx="felix.20220505215924.2">
 public navEnter(): Thenable&lt;unknown&gt; {
-    return vscode.window.showInformationMessage("TODO: ");
+    return vscode.window.showInformationMessage("TODO: navEnter");
 
     // return this._isBusyTriggerSave(false, true).then(() =&gt; {
 
@@ -9547,7 +9555,7 @@ public navEnter(): Thenable&lt;unknown&gt; {
  * * Clone Find Tag
  */
 public cloneFindTag(): void {
-    vscode.window.showInformationMessage("TODO: ");
+    vscode.window.showInformationMessage("TODO: cloneFindTag");
 
     // this.triggerBodySave(false)
     //     .then((p_saveResult: boolean) =&gt; {
@@ -9586,7 +9594,7 @@ public cloneFindTag(): void {
 }
 
 public navTextChange(): Thenable&lt;unknown&gt; {
-    return vscode.window.showInformationMessage("TODO: ");
+    return vscode.window.showInformationMessage("TODO: navTextChange");
 
     // return this._isBusyTriggerSave(false, true).then(() =&gt; {
 
@@ -9647,7 +9655,7 @@ private _inputFindPattern(p_replace?: boolean): Thenable&lt;string | undefined&g
  * @returns Promise that resolves when the "launch refresh" is started
  */
 public find(p_fromOutline: boolean, p_reverse: boolean): Thenable&lt;unknown&gt; {
-    return vscode.window.showInformationMessage("TODO: ");
+    return vscode.window.showInformationMessage("TODO: find");
 
     // const w_action: string = p_reverse
     //     ? Constants.LEOBRIDGE.FIND_PREVIOUS
@@ -9688,7 +9696,7 @@ public find(p_fromOutline: boolean, p_reverse: boolean): Thenable&lt;unknown&gt;
  * @returns Promise that resolves when the "launch refresh" is started
  */
 public findSymbol(p_def: boolean): Thenable&lt;unknown&gt; {
-    return vscode.window.showInformationMessage("TODO: ");
+    return vscode.window.showInformationMessage("TODO: findSymbol");
 
     // const w_action: string = p_def
     //     ? Constants.LEOBRIDGE.FIND_DEF
@@ -9731,7 +9739,7 @@ public findSymbol(p_def: boolean): Thenable&lt;unknown&gt; {
  * @returns Promise that resolves when the "launch refresh" is started
  */
 public replace(p_fromOutline: boolean, p_thenFind: boolean): Thenable&lt;unknown&gt; {
-    return vscode.window.showInformationMessage("TODO: ");
+    return vscode.window.showInformationMessage("TODO: replace");
 
     // const w_action: string = p_thenFind
     //     ? Constants.LEOBRIDGE.REPLACE_THEN_FIND
@@ -9898,7 +9906,8 @@ import * as utils from "./utils";
 
 @language typescript
 @tabwidth -4
-@others</t>
+@others
+</t>
 <t tx="felix.20220505222045.1">/**
  * * Opened Leo documents shown as a list with this TreeDataProvider implementation
  */
@@ -9912,7 +9921,7 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
 
     private _topNode: LeoGotoNode | undefined;
 
-    constructor(private _leoIntegration: LeoIntegration) { }
+    constructor(private _leoUI: LeoUI) { }
 
     public showGotoPanel(): Thenable&lt;void&gt; {
         if (this._lastGotoView &amp;&amp; this._topNode) {
@@ -9939,11 +9948,15 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
     public getChildren(element?: LeoGotoNode): Thenable&lt;LeoGotoNode[]&gt; {
 
         // if called with element, or not ready, give back empty array as there won't be any children
-        if (this._leoIntegration.leoStates.fileOpenedReady &amp;&amp; !element) {
+        if (this._leoUI.leoStates.fileOpenedReady &amp;&amp; !element) {
 
+            // TODO !
+            return Promise.resolve([]);
+
+            /* 
 
             // call action to get get list, and convert to LeoButtonNode(s) array
-            return this._leoIntegration.sendAction(Constants.LEOBRIDGE.GET_GOTO_PANEL).then(p_package =&gt; {
+            return this._leoUI.sendAction(Constants.LEOBRIDGE.GET_GOTO_PANEL).then(p_package =&gt; {
                 if (p_package &amp;&amp; p_package.navList) {
 
                     const w_list: LeoGotoNode[] = [];
@@ -9951,7 +9964,7 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
                     const w_navList: LeoGoto[] = p_package.navList;
                     if (w_navList &amp;&amp; w_navList.length) {
                         w_navList.forEach((p_goto: LeoGoto) =&gt; {
-                            const w_newNode = new LeoGotoNode(this._leoIntegration, p_goto, p_package.navOptions!);
+                            const w_newNode = new LeoGotoNode(this._leoUI, p_goto, p_package.navOptions!);
                             if (!this._topNode) {
                                 this._topNode = w_newNode;
                             }
@@ -9964,13 +9977,14 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
                 }
             });
 
+            */
 
         } else {
             return Promise.resolve([]); // Defaults to an empty list of children
         }
     }
 
-    public getParent(element: LeoGotoNode): ProviderResult&lt;LeoGotoNode&gt; | null {
+    public getParent(element: LeoGotoNode): vscode.ProviderResult&lt;LeoGotoNode&gt; | null {
         // Leo documents are just a list, as such, entries are always child of root, so return null
         return null;
     }
@@ -9988,11 +10002,11 @@ export class LeoGotoNode extends vscode.TreeItem {
     private _description: string | boolean;
     private _headline: string;
     private _iconIndex: number; // default to tag
-    private _leoIntegration: LeoIntegration;
+    private _leoUI: LeoUI;
     public key: number; // id from python
 
     constructor(
-        p_leoIntegration: LeoIntegration,
+        p_leoUI: LeoUI,
         p_gotoEntry: LeoGoto,
         p_navOptions: { isTag: boolean, showParents: boolean },
 
@@ -10008,7 +10022,7 @@ export class LeoGotoNode extends vscode.TreeItem {
         super(w_label);
 
         // Setup this instance
-        this._leoIntegration = p_leoIntegration;
+        this._leoUI = p_leoUI;
         this._id = utils.getUniqueId();
         this.entryType = p_gotoEntry.t;
         this.key = p_gotoEntry.key;
@@ -10058,7 +10072,7 @@ export class LeoGotoNode extends vscode.TreeItem {
     // @ts-ignore
     public get iconPath(): Icon | vscode.ThemeIcon | string {
         if (this._iconIndex &lt; 4) {
-            return this._leoIntegration.gotoIcons[this._iconIndex];
+            return this._leoUI.gotoIcons[this._iconIndex];
         }
         // else return undefined for generic text without icon
         return undefined;
@@ -10083,6 +10097,72 @@ public setFindPanel(p_panel: vscode.WebviewView): void {
     } else {
         this._findPanelWebviewView = p_panel;
     }
+}
+
+</t>
+<t tx="felix.20220505225023.1">/**
+ * * Get new uniqueID
+ */
+export function getUniqueId(): string {
+    const id = uniqueId++;
+    return id.toString();
+}
+
+</t>
+<t tx="felix.20220505225030.1">/**
+ * * Unique numeric Id
+ */
+var uniqueId: number = 0;
+
+</t>
+<t tx="felix.20220505225236.1">/**
+ * * Build all possible strings for the goto panel
+ * @param p_context Needed to get to absolute paths on the system
+ * @returns An array containing icons for the goto anywhere tree view
+ */
+export function buildGotoIconPaths(p_context: vscode.ExtensionContext): Icon[] {
+    return [
+        {
+            light: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[0]}${Constants.GUI.SVG_CLOSE}`
+            }),
+            dark: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[1]}${Constants.GUI.SVG_CLOSE}`
+            })
+        },
+        {
+            light: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[2]}${Constants.GUI.SVG_CLOSE}`
+            }),
+            dark: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[3]}${Constants.GUI.SVG_CLOSE}`
+            })
+        },
+        {
+            light: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[4]}${Constants.GUI.SVG_CLOSE}`
+            }),
+            dark: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[5]}${Constants.GUI.SVG_CLOSE}`
+            })
+        },
+        {
+            light: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[6]}${Constants.GUI.SVG_CLOSE}`
+            }),
+            dark: vscode.Uri.from({
+                scheme: Constants.GUI.SVG_SHEME,
+                path: `${Constants.GUI.SVG_OPEN}${IconConstants.goto[7]}${Constants.GUI.SVG_CLOSE}`
+            })
+        },
+    ];
 }
 
 </t>

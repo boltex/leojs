@@ -17,7 +17,7 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
 
     private _topNode: LeoGotoNode | undefined;
 
-    constructor(private _leoIntegration: LeoIntegration) { }
+    constructor(private _leoUI: LeoUI) { }
 
     public showGotoPanel(): Thenable<void> {
         if (this._lastGotoView && this._topNode) {
@@ -44,11 +44,15 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
     public getChildren(element?: LeoGotoNode): Thenable<LeoGotoNode[]> {
 
         // if called with element, or not ready, give back empty array as there won't be any children
-        if (this._leoIntegration.leoStates.fileOpenedReady && !element) {
+        if (this._leoUI.leoStates.fileOpenedReady && !element) {
 
+            // TODO !
+            return Promise.resolve([]);
+
+            /* 
 
             // call action to get get list, and convert to LeoButtonNode(s) array
-            return this._leoIntegration.sendAction(Constants.LEOBRIDGE.GET_GOTO_PANEL).then(p_package => {
+            return this._leoUI.sendAction(Constants.LEOBRIDGE.GET_GOTO_PANEL).then(p_package => {
                 if (p_package && p_package.navList) {
 
                     const w_list: LeoGotoNode[] = [];
@@ -56,7 +60,7 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
                     const w_navList: LeoGoto[] = p_package.navList;
                     if (w_navList && w_navList.length) {
                         w_navList.forEach((p_goto: LeoGoto) => {
-                            const w_newNode = new LeoGotoNode(this._leoIntegration, p_goto, p_package.navOptions!);
+                            const w_newNode = new LeoGotoNode(this._leoUI, p_goto, p_package.navOptions!);
                             if (!this._topNode) {
                                 this._topNode = w_newNode;
                             }
@@ -69,13 +73,14 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
                 }
             });
 
+            */
 
         } else {
             return Promise.resolve([]); // Defaults to an empty list of children
         }
     }
 
-    public getParent(element: LeoGotoNode): ProviderResult<LeoGotoNode> | null {
+    public getParent(element: LeoGotoNode): vscode.ProviderResult<LeoGotoNode> | null {
         // Leo documents are just a list, as such, entries are always child of root, so return null
         return null;
     }
@@ -92,11 +97,11 @@ export class LeoGotoNode extends vscode.TreeItem {
     private _description: string | boolean;
     private _headline: string;
     private _iconIndex: number; // default to tag
-    private _leoIntegration: LeoIntegration;
+    private _leoUI: LeoUI;
     public key: number; // id from python
 
     constructor(
-        p_leoIntegration: LeoIntegration,
+        p_leoUI: LeoUI,
         p_gotoEntry: LeoGoto,
         p_navOptions: { isTag: boolean, showParents: boolean },
 
@@ -112,7 +117,7 @@ export class LeoGotoNode extends vscode.TreeItem {
         super(w_label);
 
         // Setup this instance
-        this._leoIntegration = p_leoIntegration;
+        this._leoUI = p_leoUI;
         this._id = utils.getUniqueId();
         this.entryType = p_gotoEntry.t;
         this.key = p_gotoEntry.key;
@@ -162,7 +167,7 @@ export class LeoGotoNode extends vscode.TreeItem {
     // @ts-ignore
     public get iconPath(): Icon | vscode.ThemeIcon | string {
         if (this._iconIndex < 4) {
-            return this._leoIntegration.gotoIcons[this._iconIndex];
+            return this._leoUI.gotoIcons[this._iconIndex];
         }
         // else return undefined for generic text without icon
         return undefined;

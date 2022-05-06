@@ -47,6 +47,7 @@ export class LeoUI {
     public nodeIcons: Icon[] = [];
     public documentIcons: Icon[] = [];
     public buttonIcons: Icon[] = [];
+    public gotoIcons: Icon[] = [];
 
     // * File Browser
     private _leoFilesBrowser!: LeoFilesBrowser; // Browsing dialog service singleton used in the openLeoFile and save-as methods
@@ -147,6 +148,7 @@ export class LeoUI {
         this.nodeIcons = utils.buildNodeIconPaths(_context);
         this.documentIcons = utils.buildDocumentIconPaths(_context);
         this.buttonIcons = utils.buildButtonsIconPaths(_context);
+        this.gotoIcons = utils.buildGotoIconPaths(_context);
 
         // * Create file browser instance
         this._leoFilesBrowser = new LeoFilesBrowser(_context);
@@ -1377,7 +1379,7 @@ export class LeoUI {
         //         this._leoGotoProvider.refreshTreeRoot();
         //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
         //     });
-        return vscode.window.showInformationMessage("TODO: ");
+        return vscode.window.showInformationMessage("TODO: findQuickTimeline");
     }
 
     /**
@@ -1389,7 +1391,7 @@ export class LeoUI {
         //         this._leoGotoProvider.refreshTreeRoot();
         //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
         //     });
-        return vscode.window.showInformationMessage("TODO: ");
+        return vscode.window.showInformationMessage("TODO: findQuickChanged");
 
     }
 
@@ -1402,7 +1404,7 @@ export class LeoUI {
         //         this._leoGotoProvider.refreshTreeRoot();
         //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
         //     });
-        return vscode.window.showInformationMessage("TODO: ");
+        return vscode.window.showInformationMessage("TODO: findQuickHistory");
 
     }
 
@@ -1415,7 +1417,7 @@ export class LeoUI {
         //         this._leoGotoProvider.refreshTreeRoot();
         //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
         //     });
-        return vscode.window.showInformationMessage("TODO: ");
+        return vscode.window.showInformationMessage("TODO: findQuickMarked");
 
     }
 
@@ -1424,18 +1426,20 @@ export class LeoUI {
      */
     public findQuickGoAnywhere(p_options?: { preserveFocus?: boolean }): Thenable<unknown> {
         let w_panel = "";
+
         if (this._lastTreeView === this._leoTreeExView) {
             w_panel = Constants.GOTO_EXPLORER_ID;
         } else {
             w_panel = Constants.GOTO_ID;
         }
+
         vscode.commands.executeCommand(w_panel + '.focus', p_options);
 
         return Promise.resolve();
     }
 
     public gotoNavEntry(p_node: LeoGotoNode): Thenable<unknown> {
-        return vscode.window.showInformationMessage("TODO: ");
+        return vscode.window.showInformationMessage("TODO: gotoNavEntry");
 
         // if (p_node.entryType === 'tag') {
 
@@ -1529,7 +1533,7 @@ export class LeoUI {
 
 
     public navEnter(): Thenable<unknown> {
-        return vscode.window.showInformationMessage("TODO: ");
+        return vscode.window.showInformationMessage("TODO: navEnter");
 
         // return this._isBusyTriggerSave(false, true).then(() => {
 
@@ -1546,7 +1550,7 @@ export class LeoUI {
     }
 
     public navTextChange(): Thenable<unknown> {
-        return vscode.window.showInformationMessage("TODO: ");
+        return vscode.window.showInformationMessage("TODO: navTextChange");
 
         // return this._isBusyTriggerSave(false, true).then(() => {
 
@@ -1603,7 +1607,7 @@ export class LeoUI {
      * @returns Promise that resolves when the "launch refresh" is started
      */
     public find(p_fromOutline: boolean, p_reverse: boolean): Thenable<unknown> {
-        return vscode.window.showInformationMessage("TODO: ");
+        return vscode.window.showInformationMessage("TODO: find");
 
         // const w_action: string = p_reverse
         //     ? Constants.LEOBRIDGE.FIND_PREVIOUS
@@ -1643,7 +1647,7 @@ export class LeoUI {
      * @returns Promise that resolves when the "launch refresh" is started
      */
     public findSymbol(p_def: boolean): Thenable<unknown> {
-        return vscode.window.showInformationMessage("TODO: ");
+        return vscode.window.showInformationMessage("TODO: findSymbol");
 
         // const w_action: string = p_def
         //     ? Constants.LEOBRIDGE.FIND_DEF
@@ -1685,7 +1689,7 @@ export class LeoUI {
      * @returns Promise that resolves when the "launch refresh" is started
      */
     public replace(p_fromOutline: boolean, p_thenFind: boolean): Thenable<unknown> {
-        return vscode.window.showInformationMessage("TODO: ");
+        return vscode.window.showInformationMessage("TODO: replace");
 
         // const w_action: string = p_thenFind
         //     ? Constants.LEOBRIDGE.REPLACE_THEN_FIND
@@ -1724,7 +1728,7 @@ export class LeoUI {
      * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
      */
     public findAll(p_replace: boolean): Thenable<unknown> {
-        return vscode.window.showInformationMessage("TODO: ");
+        return vscode.window.showInformationMessage("TODO: findAll");
 
         // const w_action: string = p_replace
         //     ? Constants.LEOBRIDGE.REPLACE_ALL
@@ -1783,7 +1787,7 @@ export class LeoUI {
      * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
      */
     public cloneFind(p_marked: boolean, p_flat: boolean): Thenable<unknown> {
-        return vscode.window.showInformationMessage("TODO: ");
+        return vscode.window.showInformationMessage("TODO: cloneFind");
 
         // let w_searchString: string = this._lastSettingsUsed!.findText;
         // let w_action: string;
@@ -1845,20 +1849,15 @@ export class LeoUI {
      * @param p_id string id of the setting name
      */
     public setSearchSetting(p_id: string): void {
-        let w_panel: vscode.WebviewView | undefined;
-        if (this._lastTreeView === this._leoTreeExView) {
-            w_panel = this._findPanelWebviewExplorerView;
-        } else {
-            w_panel = this._findPanelWebviewView;
-        }
-        w_panel!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
+        this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
+        this._findPanelWebviewView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
     }
 
     /**
      * * Gets the search settings from Leo, and applies them to the find panel webviews
      */
     public loadSearchSettings(): void {
-        vscode.window.showInformationMessage("TODO: ");
+        vscode.window.showInformationMessage("TODO: loadSearchSettings");
 
         // this.sendAction(Constants.LEOBRIDGE.GET_SEARCH_SETTINGS).then(
         //     (p_result: LeoBridgePackage) => {
@@ -1912,7 +1911,7 @@ export class LeoUI {
      */
     public saveSearchSettings(p_settings: LeoSearchSettings): Thenable<unknown> {
 
-        return vscode.window.showInformationMessage("TODO: ");
+        return vscode.window.showInformationMessage("TODO: saveSearchSettings");
 
         // this._lastSettingsUsed = p_settings;
         // // convert to LeoGuiFindTabManagerSettings
@@ -1946,7 +1945,7 @@ export class LeoUI {
      * * Goto Global Line
      */
     public gotoGlobalLine(): void {
-        vscode.window.showInformationMessage("TODO: ");
+        vscode.window.showInformationMessage("TODO: gotoGlobalLine");
 
         // this.triggerBodySave(false)
         //     .then((p_saveResult: boolean) => {
@@ -1987,7 +1986,7 @@ export class LeoUI {
      * * Tag Children
      */
     public tagChildren(): void {
-        vscode.window.showInformationMessage("TODO: ");
+        vscode.window.showInformationMessage("TODO: tagChildren");
 
         // this.triggerBodySave(false)
         //     .then((p_saveResult: boolean) => {
@@ -2028,7 +2027,7 @@ export class LeoUI {
      * * Tag Node
      */
     public tagNode(): void {
-        vscode.window.showInformationMessage("TODO: ");
+        vscode.window.showInformationMessage("TODO: tagNode");
 
         // this.triggerBodySave(false)
         //     .then((p_saveResult: boolean) => {
@@ -2070,7 +2069,7 @@ export class LeoUI {
      * * Remove single Tag on selected node
      */
     public removeTag(): void {
-        vscode.window.showInformationMessage("TODO: ");
+        vscode.window.showInformationMessage("TODO: removeTag");
 
         // if (this.lastSelectedNode && this.lastSelectedNode.u &&
         //     this.lastSelectedNode.u.__node_tags && this.lastSelectedNode.u.__node_tags.length) {
@@ -2114,7 +2113,7 @@ export class LeoUI {
      * * Remove all tags on selected node
      */
     public removeTags(): void {
-        vscode.window.showInformationMessage("TODO: ");
+        vscode.window.showInformationMessage("TODO: removeTags");
 
         // if (this.lastSelectedNode && this.lastSelectedNode.u &&
         //     this.lastSelectedNode.u.__node_tags && this.lastSelectedNode.u.__node_tags.length) {
@@ -2146,7 +2145,7 @@ export class LeoUI {
      * * Clone Find Tag
      */
     public cloneFindTag(): void {
-        vscode.window.showInformationMessage("TODO: ");
+        vscode.window.showInformationMessage("TODO: cloneFindTag");
 
         // this.triggerBodySave(false)
         //     .then((p_saveResult: boolean) => {
