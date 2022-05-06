@@ -138,12 +138,110 @@ export interface LeoButton {
     index: string; // STRING KEY
 }
 
+export type TGotoTypes = "tag" | "headline" | "body" | "parent" | "generic";
+
+export interface LeoGoto {
+    key: number; // id from python
+    h: string;
+    t: TGotoTypes;
+}
+
+/**
+ * * LeoInteg's Enum type for the search scope radio buttons of the find panel.
+ */
+export const enum LeoSearchScope {
+    entireOutline = 0,
+    subOutlineOnly,
+    nodeOnly
+}
+
+/**
+ * * LeoInteg search settings structure for use with the 'find' webview
+ */
+export interface LeoSearchSettings {
+    // Nav options
+    navText: string;
+    isTag: boolean;
+    showParents: boolean;
+    searchOptions: number;
+    // Find/change strings...
+    findText: string;
+    replaceText: string;
+    // Find options...
+    wholeWord: boolean;
+    ignoreCase: boolean;
+    regExp: boolean;
+    markFinds: boolean;
+    markChanges: boolean;
+    searchHeadline: boolean;
+    searchBody: boolean;
+    searchScope: LeoSearchScope; // 0, 1 or 2 for outline, sub-outline, or node.
+}
+
+/**
+ * * Leo's GUI search settings internal structure
+ */
+export interface LeoGuiFindTabManagerSettings {
+    // Nav options
+    nav_text: string;
+    is_tag: boolean;
+    show_parents: boolean;
+    search_options: number;
+    //Find/change strings...
+    find_text: string,
+    change_text: string,
+    // Find options...
+    ignore_case: boolean,
+    mark_changes: boolean,
+    mark_finds: boolean,
+    node_only: boolean,
+    pattern_match: boolean,
+    search_body: boolean,
+    search_headline: boolean,
+    suboutline_only: boolean,
+    whole_word: boolean
+}
+
 /**
  * * Icon path names used in leoNodes for rendering in treeview
  */
 export interface Icon {
     light: string | vscode.Uri;
     dark: string | vscode.Uri;
+}
+
+/**
+ * * LeoBody virtual file time information object
+ */
+export interface BodyTimeInfo {
+    ctime: number;
+    mtime: number;
+}
+
+/**
+ * * Body position
+ * Used in BodySelectionInfo interface
+ */
+export interface BodyPosition {
+    line: number;
+    col: number;
+}
+
+/**
+ * * LeoBody cursor active position and text selection state, along with gnx
+ */
+export interface BodySelectionInfo {
+    gnx: string;
+    // scroll is stored as-is as the 'scrollBarSpot' in Leo
+    // ! TEST scroll as single number only (for Leo vertical scroll value)
+    scroll: number;
+    // scroll: {
+    //     start: BodyPosition;
+    //     end: BodyPosition;
+    // }
+    insert: BodyPosition;
+    start: BodyPosition;
+    end: BodyPosition;
 }
 
 /**
@@ -194,6 +292,22 @@ export interface AskMessageItem extends vscode.MessageItem {
  */
 export interface ChooseDocumentItem extends vscode.QuickPickItem {
     value: number;
+}
+
+/**
+ * * Used to select a button's rclick by index
+ */
+export interface ChooseRClickItem extends vscode.QuickPickItem {
+    index: number;
+    rclick?: RClick;
+}
+
+/**
+ * * Returned from Leo with buttons data
+ */
+export interface RClick {
+    name: string;
+    children: RClick[];
 }
 
 /**

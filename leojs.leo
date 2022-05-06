@@ -165,6 +165,38 @@
 <v t="felix.20220103203600.1"><vh>asyncGetTextFromClipboard</vh></v>
 <v t="felix.20211024012523.1"><vh>getTextFromClipboard</vh></v>
 </v>
+<v t="felix.20220505215916.1"><vh>Nav</vh>
+<v t="felix.20220505215916.2"><vh>findQuick</vh></v>
+<v t="felix.20220505215916.3"><vh>findQuickSelected</vh></v>
+<v t="felix.20220505215916.4"><vh>findQuickTimeline</vh></v>
+<v t="felix.20220505215916.5"><vh>findQuickChanged</vh></v>
+<v t="felix.20220505215916.6"><vh>findQuickHistory</vh></v>
+<v t="felix.20220505215916.7"><vh>findQuick_marked</vh></v>
+<v t="felix.20220505215916.8"><vh>findQuickGoAnywhere</vh></v>
+<v t="felix.20220505215916.9"><vh>gotoNavEntry</vh></v>
+</v>
+<v t="felix.20220505215924.1"><vh>Search</vh>
+<v t="felix.20220505222504.1"><vh>setFindPanel</vh></v>
+<v t="felix.20220505215924.2"><vh>navEnter</vh></v>
+<v t="felix.20220505215924.3"><vh>navTextChange</vh></v>
+<v t="felix.20220505215924.4"><vh>startSearch</vh></v>
+<v t="felix.20220505215924.5"><vh>newHeadline</vh></v>
+<v t="felix.20220505215924.6"><vh>_inputFindPattern</vh></v>
+<v t="felix.20220505215924.7"><vh>find</vh></v>
+<v t="felix.20220505215924.8"><vh>findSymbol</vh></v>
+<v t="felix.20220505215924.9"><vh>replace</vh></v>
+<v t="felix.20220505215924.10"><vh>replaceAll</vh></v>
+<v t="felix.20220505215924.11"><vh>cloneFind</vh></v>
+<v t="felix.20220505215924.12"><vh>setSearchOption</vh></v>
+<v t="felix.20220505215924.13"><vh>loadSearchSettings</vh></v>
+<v t="felix.20220505215924.14"><vh>saveSearchSettings</vh></v>
+<v t="felix.20220505215924.15"><vh>gotoGlobalLine</vh></v>
+<v t="felix.20220505215924.16"><vh>tagChildren</vh></v>
+<v t="felix.20220505215924.17"><vh>tag_node</vh></v>
+<v t="felix.20220505215924.18"><vh>remove_tag</vh></v>
+<v t="felix.20220505215924.19"><vh>remove_tags</vh></v>
+<v t="felix.20220505215924.20"><vh>cloneFindTag</vh></v>
+</v>
 <v t="felix.20201214194144.8"><vh>Leo Documents</vh>
 <v t="felix.20201214211830.1"><vh>closeLeoFile</vh></v>
 <v t="felix.20201214211832.1"><vh>openLeoFile</vh></v>
@@ -224,6 +256,10 @@
 <v t="felix.20201214151434.3"><vh>iconPath</vh></v>
 <v t="felix.20201214151434.4"><vh>id</vh></v>
 </v>
+</v>
+<v t="felix.20220505221929.1"><vh>@clean src/leoGoto.ts</vh>
+<v t="felix.20220505222045.1"><vh>class LeoGotoProvider</vh></v>
+<v t="felix.20220505222101.1"><vh>class LeoGotoNode</vh></v>
 </v>
 <v t="felix.20211122205011.1"><vh>@clean src/leoUndos.ts</vh>
 <v t="felix.20211122205031.1"><vh>class LeoUndosProvider</vh>
@@ -292,13 +328,23 @@
 <v t="felix.20201214154816.7"><vh>LeoPackageStates</vh></v>
 <v t="felix.20201214154816.8"><vh>LeoDocument</vh></v>
 <v t="felix.20201214154816.9"><vh>LeoButton</vh></v>
+<v t="felix.20220505220527.1"><vh>TGotoTypes</vh></v>
+<v t="felix.20220505220532.1"><vh>LeoGoto</vh></v>
+<v t="felix.20220505220537.1"><vh>LeoSearchScope</vh></v>
+<v t="felix.20220505220544.1"><vh>LeoSearchSettings</vh></v>
+<v t="felix.20220505220550.1"><vh>LeoGuiFindTabManagerSettings</vh></v>
 <v t="felix.20201214154816.10"><vh>Icon</vh></v>
+<v t="felix.20220505220619.1"><vh>BodyTimeInfo</vh></v>
+<v t="felix.20220505220626.1"><vh>BodyPosition</vh></v>
+<v t="felix.20220505220630.1"><vh>BodySelectionInfo</vh></v>
 <v t="felix.20201214154816.11"><vh>showSaveAsDialogParameters</vh></v>
 <v t="felix.20201214154816.12"><vh>runAskYesNoDialogParameters</vh></v>
 <v t="felix.20201214154816.13"><vh>runWarnMessageDialogParameters</vh></v>
 <v t="felix.20201214154816.14"><vh>runInfoMessageDialogParameters</vh></v>
 <v t="felix.20201214154816.15"><vh>AskMessageItem</vh></v>
 <v t="felix.20201214154816.16"><vh>ChooseDocumentItem</vh></v>
+<v t="felix.20220505220706.1"><vh>ChooseRClickItem</vh></v>
+<v t="felix.20220505220722.1"><vh>RClick</vh></v>
 <v t="felix.20201214154816.17"><vh>MinibufferCommand</vh></v>
 </v>
 <v t="felix.20210110210346.1"><vh>@clean src/declarations.d.ts</vh></v>
@@ -1311,9 +1357,20 @@ export function activate(p_context: vscode.ExtensionContext) {
  * All commands this expansion exposes to the user via GUI/keybindings in package.json
  */
 public static COMMANDS = {
+    // * Access to the Settings/Welcome Webview
+    SHOW_WELCOME: Constants.NAME + ".showWelcomePage", // Always available: not in the commandPalette section of package.json
+    SHOW_SETTINGS: Constants.NAME + ".showSettingsPage", // Always available: not in the commandPalette section of package.json
+    STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
+    // * LeoBridge
+    CHOOSE_LEO_FOLDER: Constants.NAME + ".chooseLeoFolder",
+    START_SERVER: Constants.NAME + ".startServer",
+    STOP_SERVER: Constants.NAME + ".stopServer",
+    CONNECT: Constants.NAME + ".connectToServer",
     // Leo Documents
     SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
     OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
+    CLEAR_RECENT_FILES: Constants.NAME + ".clearRecentFiles",
+    IMPORT_ANY_FILE: Constants.NAME + ".importAnyFile",
     RECENT_FILES: Constants.NAME + ".recentLeoFiles", // shows recent Leo files, opens one on selection
     SWITCH_FILE: Constants.NAME + ".switchLeoFile",
     NEW_FILE: Constants.NAME + ".newLeoFile",
@@ -1444,13 +1501,41 @@ public static COMMANDS = {
     CLONE_MARKED_NODES: Constants.NAME + ".cloneMarkedNodes",
     DELETE_MARKED_NODES: Constants.NAME + ".deleteMarkedNodes",
     MOVE_MARKED_NODES: Constants.NAME + ".moveMarkedNodes",
+
+    FIND_QUICK: Constants.NAME + ".findQuick",
+    FIND_QUICK_SELECTED: Constants.NAME + ".findQuickSelected",
+    FIND_QUICK_TIMELINE: Constants.NAME + ".findQuickTimeline",
+    FIND_QUICK_CHANGED: Constants.NAME + ".findQuickChanged",
+    FIND_QUICK_HISTORY: Constants.NAME + ".history",
+    FIND_QUICK_MARKED: Constants.NAME + ".markedList",
+    FIND_QUICK_GO_ANYWHERE: Constants.NAME + ".goAnywhere",
+    GOTO_NAV_ENTRY: Constants.NAME + ".gotoNav",
+
+    START_SEARCH: Constants.NAME + ".startSearch",
+    FIND_ALL: Constants.NAME + ".findAll",
+    FIND_NEXT: Constants.NAME + ".findNext",
+    FIND_NEXT_FO: Constants.NAME + ".findNextFromOutline",
+    FIND_PREVIOUS: Constants.NAME + ".findPrevious",
+    FIND_PREVIOUS_FO: Constants.NAME + ".findPreviousFromOutline",
+    FIND_VAR: Constants.NAME + ".findVar",
+    FIND_DEF: Constants.NAME + ".findDef",
+    REPLACE: Constants.NAME + ".replace",
+    REPLACE_FO: Constants.NAME + ".replaceFromOutline",
+    REPLACE_THEN_FIND: Constants.NAME + ".replaceThenFind",
+    REPLACE_THEN_FIND_FO: Constants.NAME + ".replaceThenFindFromOutline",
+    REPLACE_ALL: Constants.NAME + ".replaceAll",
+
     CLONE_FIND_ALL: Constants.NAME + ".cloneFindAll",
     CLONE_FIND_ALL_FLATTENED: Constants.NAME + ".cloneFindAllFlattened",
+    CLONE_FIND_TAG: Constants.NAME + ".cloneFindTag",
     CLONE_FIND_MARKED: Constants.NAME + ".cloneFindMarked",
     CLONE_FIND_FLATTENED_MARKED: Constants.NAME + ".cloneFindFlattenedMarked",
     // TODO
     GOTO_GLOBAL_LINE: Constants.NAME + ".gotoGlobalLine",
     TAG_CHILDREN: Constants.NAME + ".tagChildren",
+    TAG_NODE: Constants.NAME + ".tagNode",
+    REMOVE_TAG: Constants.NAME + ".removeTag",
+    REMOVE_TAGS: Constants.NAME + ".removeTags",
     SET_FIND_EVERYWHERE_OPTION: Constants.NAME + ".setFindEverywhereOption",
     SET_FIND_NODE_ONLY_OPTION: Constants.NAME + ".setFindNodeOnlyOption",
     SET_FIND_SUBOUTLINE_ONLY_OPTION: Constants.NAME + ".setFindSuboutlineOnlyOption",
@@ -1580,6 +1665,12 @@ public static BUTTONS_EXPLORER_ID: string = "leojsButtonsExplorer";
 
 public static UNDOS_ID: string = "leojsUndos";
 public static UNDOS_EXPLORER_ID: string = "leojsUndosExplorer";
+
+public static FIND_ID: string = "leojsFindPanel";
+public static FIND_EXPLORER_ID: string = "leojsindPanelExplorer";
+
+public static GOTO_ID: string = "leojsGotoPanel";
+public static GOTO_EXPLORER_ID: string = "leojsGotoPanelExplorer";
 
 public static FILE_EXTENSION: string = "leojs";
 public static URI_LEO_SCHEME: string = "leojs";
@@ -1756,6 +1847,8 @@ public static CONTEXT_FLAGS = {
     DOCUMENT_TITLED: "leojsDocumentTitled",
     DOCUMENT_SELECTED_UNTITLED: "leojsDocumentSelectedUntitled",
     DOCUMENT_UNTITLED: "leojsDocumentUntitled",
+    // Flags for focus context
+    FOCUS_FIND: "leojsFindFocus",
 
     // Context flags that are mapped 'directly' onto leojs config settings
     // * PREFIXED WITH 'leojs' *
@@ -2581,7 +2674,7 @@ import { debounce } from "lodash";
 import * as utils from "./utils";
 import * as commandBindings from "./commandBindings";
 import { Constants } from "./constants";
-import { RevealType, Icon, ReqRefresh, LeoPackageStates, ConfigSetting } from "./types";
+import { RevealType, Icon, ReqRefresh, LeoPackageStates, ConfigSetting, LeoSearchSettings } from "./types";
 
 import { Config } from "./config";
 import { LeoOutlineProvider } from './leoOutline';
@@ -2595,6 +2688,7 @@ import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
 import * as g from './core/leoGlobals';
 import { Commands } from "./core/leoCommands";
 import { Position } from "./core/leoNodes";
+import { LeoGotoNode } from "./leoGoto";
 
 @language typescript
 @tabwidth -4
@@ -2712,6 +2806,12 @@ export class LeoUI {
         this._leoFileSystem.setBodyTime(p_uri);
         this._bodyUri = p_uri;
     }
+
+    // * Find panel
+    private _findPanelWebviewView: vscode.WebviewView | undefined;
+    private _findPanelWebviewExplorerView: vscode.WebviewView | undefined;
+    private _lastSettingsUsed: LeoSearchSettings | undefined; // Last settings loaded / saved for current document
+
 
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
@@ -8793,6 +8893,1196 @@ public makeAllBindings(): void {
  */
 public addLogPaneEntry(p_message: string): void {
     this._leoLogPane.appendLine(p_message);
+}
+
+</t>
+<t tx="felix.20220505215916.1"></t>
+<t tx="felix.20220505215916.2">/**
+ * Opens the Nav tab and focus on nav text input
+ */
+public findQuick(p_string?: string): Thenable&lt;unknown&gt; {
+    let w_panelID = '';
+    let w_panel: vscode.WebviewView | undefined;
+    if (this._lastTreeView === this._leoTreeExView) {
+        w_panelID = Constants.FIND_EXPLORER_ID;
+        w_panel = this._findPanelWebviewExplorerView;
+    } else {
+        w_panelID = Constants.FIND_ID;
+        w_panel = this._findPanelWebviewView;
+    }
+    vscode.commands.executeCommand(w_panelID + '.focus').then((p_result) =&gt; {
+        if (w_panel &amp;&amp; w_panel.show &amp;&amp; !w_panel.visible) {
+            w_panel.show(false);
+        }
+        const w_message: { [key: string]: string } = { type: 'selectNav' };
+        if (p_string &amp;&amp; p_string?.trim()) {
+            w_message["text"] = p_string.trim();
+        }
+        w_panel?.webview.postMessage(w_message);
+    });
+    return Promise.resolve();
+}
+
+</t>
+<t tx="felix.20220505215916.3">/**
+ * Opens the Nav tab with the selected text as the search string
+ */
+public findQuickSelected(): Thenable&lt;unknown&gt; {
+    if (vscode.window.activeTextEditor) {
+        const editor = vscode.window.activeTextEditor;
+        const selection = editor.selection;
+        if (!selection.isEmpty) {
+            const text = editor.document.getText(selection);
+            return this.findQuick(text);
+        }
+    }
+    return this.findQuick();
+}
+
+</t>
+<t tx="felix.20220505215916.4">/**
+ * Lists all nodes in reversed gnx order, newest to oldest
+ */
+public findQuickTimeline(): Thenable&lt;unknown&gt; {
+    // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_TIMELINE)
+    //     .then((p_result: LeoBridgePackage) =&gt; {
+    //         this._leoGotoProvider.refreshTreeRoot();
+    //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
+    //     });
+    return vscode.window.showInformationMessage("TODO: ");
+}
+
+</t>
+<t tx="felix.20220505215916.5">/**
+ * Lists all nodes that are changed (aka "dirty") since last save.
+ */
+public findQuickChanged(): Thenable&lt;unknown&gt; {
+    // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_CHANGED)
+    //     .then((p_result: LeoBridgePackage) =&gt; {
+    //         this._leoGotoProvider.refreshTreeRoot();
+    //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
+    //     });
+    return vscode.window.showInformationMessage("TODO: ");
+
+}
+
+</t>
+<t tx="felix.20220505215916.6">/**
+ * Lists nodes from c.nodeHistory.
+ */
+public findQuickHistory(): Thenable&lt;unknown&gt; {
+    // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_HISTORY)
+    //     .then((p_result: LeoBridgePackage) =&gt; {
+    //         this._leoGotoProvider.refreshTreeRoot();
+    //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
+    //     });
+    return vscode.window.showInformationMessage("TODO: ");
+
+}
+
+</t>
+<t tx="felix.20220505215916.7">/**
+ * List all marked nodes.
+ */
+public findQuickMarked(): Thenable&lt;unknown&gt; {
+    // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_MARKED)
+    //     .then((p_result: LeoBridgePackage) =&gt; {
+    //         this._leoGotoProvider.refreshTreeRoot();
+    //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
+    //     });
+    return vscode.window.showInformationMessage("TODO: ");
+
+}
+
+</t>
+<t tx="felix.20220505215916.8">/**
+ * Opens goto and focus in depending on passed options
+ */
+public findQuickGoAnywhere(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknown&gt; {
+    let w_panel = "";
+    if (this._lastTreeView === this._leoTreeExView) {
+        w_panel = Constants.GOTO_EXPLORER_ID;
+    } else {
+        w_panel = Constants.GOTO_ID;
+    }
+    vscode.commands.executeCommand(w_panel + '.focus', p_options);
+
+    return Promise.resolve();
+}
+
+</t>
+<t tx="felix.20220505215916.9">public gotoNavEntry(p_node: LeoGotoNode): Thenable&lt;unknown&gt; {
+    return vscode.window.showInformationMessage("TODO: ");
+
+    // if (p_node.entryType === 'tag') {
+
+    //     return this._isBusyTriggerSave(false, true)
+    //         .then((p_saveResult) =&gt; {
+
+    //             let w_string: string = p_node.label as string;
+
+    //             let w_panelID = '';
+    //             let w_panel: vscode.WebviewView | undefined;
+    //             if (this._lastTreeView === this._leoTreeExView) {
+    //                 w_panelID = Constants.FIND_EXPLORER_ID;
+    //                 w_panel = this._findPanelWebviewExplorerView;
+    //             } else {
+    //                 w_panelID = Constants.FIND_ID;
+    //                 w_panel = this._findPanelWebviewView;
+    //             }
+    //             vscode.commands.executeCommand(w_panelID + '.focus').then((p_result) =&gt; {
+    //                 if (w_panel &amp;&amp; w_panel.show &amp;&amp; !w_panel.visible) {
+    //                     w_panel.show(false);
+    //                 }
+    //                 const w_message: { [key: string]: string } = { type: 'selectNav' };
+    //                 if (w_string &amp;&amp; w_string?.trim()) {
+    //                     w_message["text"] = w_string.trim();
+    //                 }
+    //                 return w_panel!.webview.postMessage(w_message);
+    //             }).then(() =&gt; {
+    //                 // Do search
+    //                 setTimeout(() =&gt; {
+    //                     this.sendAction(
+    //                         Constants.LEOBRIDGE.NAV_SEARCH
+    //                     ).then((p_package) =&gt; {
+    //                         this._leoGotoProvider.refreshTreeRoot();
+    //                         this.findQuickGoAnywhere({ preserveFocus: true }); // show but dont change focus
+    //                         return p_package;
+    //                     });
+    //                 }, 10);
+
+    //             });
+    //         });
+
+    // }
+
+    // // Was not a tag
+    // if (p_node.entryType !== 'generic' &amp;&amp; p_node.entryType !== 'parent') {
+    //     return this._isBusyTriggerSave(false, true)
+    //         .then((p_saveResult) =&gt; {
+    //             return this.sendAction(
+    //                 Constants.LEOBRIDGE.GOTO_NAV_ENTRY,
+    //                 JSON.stringify({ key: p_node.key })
+    //             );
+    //         })
+    //         .then((p_navEntryResult: LeoBridgePackage) =&gt; {
+    //             if (!p_navEntryResult.focus) {
+    //                 vscode.window.showInformationMessage('Not found');
+    //             } else {
+    //                 let w_focusOnOutline = false;
+    //                 const w_focus = p_navEntryResult.focus.toLowerCase();
+
+    //                 if (w_focus.includes('tree') || w_focus.includes('head')) {
+    //                     // tree
+    //                     w_focusOnOutline = true;
+    //                 }
+    //                 this.launchRefresh(
+    //                     {
+    //                         tree: true,
+    //                         body: true,
+    //                         scroll: !w_focusOnOutline,
+    //                         documents: false,
+    //                         buttons: false,
+    //                         states: true,
+    //                     },
+    //                     w_focusOnOutline
+    //                 );
+    //             }
+    //         });
+    // }
+    // return Promise.resolve();
+}
+</t>
+<t tx="felix.20220505215924.1"></t>
+<t tx="felix.20220505215924.10">/**
+ * * Find / Replace All
+ * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
+ */
+public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
+    return vscode.window.showInformationMessage("TODO: ");
+
+    // const w_action: string = p_replace
+    //     ? Constants.LEOBRIDGE.REPLACE_ALL
+    //     : Constants.LEOBRIDGE.FIND_ALL;
+
+    // let w_searchString: string = this._lastSettingsUsed!.findText;
+    // let w_replaceString: string = this._lastSettingsUsed!.replaceText;
+
+    // return this._isBusyTriggerSave(false, true)
+    //     .then((p_saveResult) =&gt; {
+    //         return this._inputFindPattern()
+    //             .then((p_findString) =&gt; {
+    //                 if (!p_findString) {
+    //                     return true; // Cancelled with escape or empty string.
+    //                 }
+    //                 w_searchString = p_findString;
+    //                 if (p_replace) {
+    //                     return this._inputFindPattern(true).then((p_replaceString) =&gt; {
+    //                         if (p_replaceString === undefined) {
+    //                             return true;
+    //                         }
+    //                         w_replaceString = p_replaceString;
+    //                         return false;
+    //                     });
+    //                 }
+    //                 return false;
+    //             });
+    //     })
+    //     .then((p_cancelled: boolean) =&gt; {
+    //         if (this._lastSettingsUsed &amp;&amp; !p_cancelled) {
+    //             this._lastSettingsUsed.findText = w_searchString;
+    //             this._lastSettingsUsed.replaceText = w_replaceString;
+    //             this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
+    //             return this.sendAction(w_action)
+    //                 .then((p_findResult: LeoBridgePackage) =&gt; {
+    //                     let w_focusOnOutline = false;
+    //                     const w_focus = p_findResult.focus!.toLowerCase();
+    //                     if (w_focus.includes('tree') || w_focus.includes('head')) {
+    //                         // tree
+    //                         w_focusOnOutline = true;
+    //                     }
+    //                     this.loadSearchSettings();
+    //                     this.launchRefresh(
+    //                         { tree: true, body: true, documents: false, buttons: false, states: true },
+    //                         w_focusOnOutline
+    //                     );
+    //                 });
+    //         }
+    //     });
+}
+
+</t>
+<t tx="felix.20220505215924.11">/**
+ * * Clone Find All / Marked / Flattened
+ * @param p_marked flag for finding marked nodes
+ * @param p_flat flag to get flattened results
+ * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
+ */
+public cloneFind(p_marked: boolean, p_flat: boolean): Thenable&lt;unknown&gt; {
+    return vscode.window.showInformationMessage("TODO: ");
+
+    // let w_searchString: string = this._lastSettingsUsed!.findText;
+    // let w_action: string;
+    // if (p_marked) {
+    //     w_action = p_flat
+    //         ? Constants.LEOBRIDGE.CLONE_FIND_FLATTENED_MARKED
+    //         : Constants.LEOBRIDGE.CLONE_FIND_MARKED;
+    // } else {
+    //     w_action = p_flat
+    //         ? Constants.LEOBRIDGE.CLONE_FIND_ALL_FLATTENED
+    //         : Constants.LEOBRIDGE.CLONE_FIND_ALL;
+    // }
+
+    // if (p_marked) {
+    //     // don't use find methods.
+    //     return this.nodeCommand({
+    //         action: w_action,
+    //         node: undefined,
+    //         refreshType: { tree: true, body: true, states: true },
+    //         fromOutline: false,
+    //     }) || Promise.resolve();
+    // }
+
+    // return this._isBusyTriggerSave(false, true)
+    //     .then(() =&gt; {
+    //         return this._inputFindPattern()
+    //             .then((p_findString) =&gt; {
+    //                 if (!p_findString) {
+    //                     return true; // Cancelled with escape or empty string.
+    //                 }
+    //                 w_searchString = p_findString;
+    //                 return false;
+    //             });
+    //     })
+    //     .then((p_cancelled: boolean) =&gt; {
+    //         if (this._lastSettingsUsed &amp;&amp; !p_cancelled) {
+    //             this._lastSettingsUsed.findText = w_searchString;
+    //             this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
+    //             return this.sendAction(w_action)
+    //                 .then((p_cloneFindResult: LeoBridgePackage) =&gt; {
+    //                     let w_focusOnOutline = false;
+    //                     const w_focus = p_cloneFindResult.focus!.toLowerCase();
+    //                     if (w_focus.includes('tree') || w_focus.includes('head')) {
+    //                         // tree
+    //                         w_focusOnOutline = true;
+    //                     }
+    //                     this.loadSearchSettings();
+    //                     this.launchRefresh(
+    //                         { tree: true, body: true, documents: false, buttons: false, states: true },
+    //                         w_focusOnOutline
+    //                     );
+    //                 });
+    //         }
+    //     });
+}
+
+</t>
+<t tx="felix.20220505215924.12">/**
+ * * Set search setting in the search webview
+ * @param p_id string id of the setting name
+ */
+public setSearchSetting(p_id: string): void {
+    let w_panel: vscode.WebviewView | undefined;
+    if (this._lastTreeView === this._leoTreeExView) {
+        w_panel = this._findPanelWebviewExplorerView;
+    } else {
+        w_panel = this._findPanelWebviewView;
+    }
+    w_panel!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
+}
+
+</t>
+<t tx="felix.20220505215924.13">/**
+ * * Gets the search settings from Leo, and applies them to the find panel webviews
+ */
+public loadSearchSettings(): void {
+    vscode.window.showInformationMessage("TODO: ");
+
+    // this.sendAction(Constants.LEOBRIDGE.GET_SEARCH_SETTINGS).then(
+    //     (p_result: LeoBridgePackage) =&gt; {
+    //         const w_searchSettings: LeoGuiFindTabManagerSettings = p_result.searchSettings!;
+    //         const w_settings: LeoSearchSettings = {
+    //             isTag: w_searchSettings.is_tag,
+    //             navText: w_searchSettings.nav_text,
+    //             showParents: w_searchSettings.show_parents,
+    //             searchOptions: w_searchSettings.search_options,
+    //             //Find/change strings...
+    //             findText: w_searchSettings.find_text,
+    //             replaceText: w_searchSettings.change_text,
+    //             // Find options...
+    //             wholeWord: w_searchSettings.whole_word,
+    //             ignoreCase: w_searchSettings.ignore_case,
+    //             regExp: w_searchSettings.pattern_match,
+    //             markFinds: w_searchSettings.mark_finds,
+    //             markChanges: w_searchSettings.mark_changes,
+    //             searchHeadline: w_searchSettings.search_headline,
+    //             searchBody: w_searchSettings.search_body,
+    //             // 0, 1 or 2 for outline, sub-outline, or node.
+    //             searchScope:
+    //                 0 +
+    //                 (w_searchSettings.suboutline_only ? 1 : 0) +
+    //                 (w_searchSettings.node_only ? 2 : 0),
+    //         };
+    //         if (w_settings.searchScope &gt; 2) {
+    //             console.error('searchScope SHOULD BE 0, 1, 2 only: ', w_settings.searchScope);
+    //         }
+    //         this._lastSettingsUsed = w_settings;
+    //         if (this._findPanelWebviewExplorerView) {
+    //             this._findPanelWebviewExplorerView.webview.postMessage({
+    //                 type: 'setSettings',
+    //                 value: w_settings,
+    //             });
+    //         }
+    //         if (this._findPanelWebviewView) {
+    //             this._findPanelWebviewView.webview.postMessage({
+    //                 type: 'setSettings',
+    //                 value: w_settings,
+    //             });
+    //         }
+    //     }
+    // );
+}
+
+</t>
+<t tx="felix.20220505215924.14">/**
+ * * Send the settings to the Leo Bridge Server
+ * @param p_settings the search settings to be set server side to affect next results
+ * @returns the promise from the server call
+ */
+public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt; {
+
+    return vscode.window.showInformationMessage("TODO: ");
+
+    // this._lastSettingsUsed = p_settings;
+    // // convert to LeoGuiFindTabManagerSettings
+    // const w_settings: LeoGuiFindTabManagerSettings = {
+    //     // Nav settings
+    //     is_tag: p_settings.isTag,
+    //     nav_text: p_settings.navText,
+    //     show_parents: p_settings.showParents,
+    //     search_options: p_settings.searchOptions,
+    //     // Find/change strings...
+    //     find_text: p_settings.findText,
+    //     change_text: p_settings.replaceText,
+    //     // Find options...
+    //     ignore_case: p_settings.ignoreCase,
+    //     mark_changes: p_settings.markChanges,
+    //     mark_finds: p_settings.markFinds,
+    //     node_only: !!(p_settings.searchScope === 2),
+    //     pattern_match: p_settings.regExp,
+    //     search_body: p_settings.searchBody,
+    //     search_headline: p_settings.searchHeadline,
+    //     suboutline_only: !!(p_settings.searchScope === 1),
+    //     whole_word: p_settings.wholeWord,
+    // };
+    // return this.sendAction(
+    //     Constants.LEOBRIDGE.SET_SEARCH_SETTINGS,
+    //     JSON.stringify({ searchSettings: w_settings })
+    // );
+}
+
+</t>
+<t tx="felix.20220505215924.15">/**
+ * * Goto Global Line
+ */
+public gotoGlobalLine(): void {
+    vscode.window.showInformationMessage("TODO: ");
+
+    // this.triggerBodySave(false)
+    //     .then((p_saveResult: boolean) =&gt; {
+    //         return vscode.window.showInputBox({
+    //             title: Constants.USER_MESSAGES.TITLE_GOTO_GLOBAL_LINE,
+    //             placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_GOTO_GLOBAL_LINE,
+    //             prompt: Constants.USER_MESSAGES.PROMPT_GOTO_GLOBAL_LINE,
+    //         });
+    //     })
+    //     .then((p_inputResult?: string) =&gt; {
+    //         if (p_inputResult) {
+    //             const w_line = parseInt(p_inputResult);
+    //             if (!isNaN(w_line)) {
+    //                 this.sendAction(
+    //                     Constants.LEOBRIDGE.GOTO_GLOBAL_LINE,
+    //                     JSON.stringify({ line: w_line })
+    //                 ).then((p_resultGoto: LeoBridgePackage) =&gt; {
+    //                     if (!p_resultGoto.found) {
+    //                         // Not found
+    //                     }
+    //                     this.launchRefresh(
+    //                         {
+    //                             tree: true,
+    //                             body: true,
+    //                             documents: false,
+    //                             buttons: false,
+    //                             states: true,
+    //                         },
+    //                         false
+    //                     );
+    //                 });
+    //             }
+    //         }
+    //     });
+}
+
+</t>
+<t tx="felix.20220505215924.16">/**
+ * * Tag Children
+ */
+public tagChildren(): void {
+    vscode.window.showInformationMessage("TODO: ");
+
+    // this.triggerBodySave(false)
+    //     .then((p_saveResult: boolean) =&gt; {
+    //         return vscode.window.showInputBox({
+    //             title: Constants.USER_MESSAGES.TITLE_TAG_CHILDREN,
+    //             placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
+    //             prompt: Constants.USER_MESSAGES.PROMPT_TAG,
+    //         });
+    //     })
+    //     .then((p_inputResult?: string) =&gt; {
+    //         if (p_inputResult &amp;&amp; p_inputResult.trim()) {
+    //             p_inputResult = p_inputResult.trim();
+    //             // check for special chars first
+    //             if (p_inputResult.split(/(&amp;|\||-|\^)/).length &gt; 1) {
+    //                 vscode.window.showInformationMessage('Cannot add tags containing any of these characters: &amp;|^-');
+    //                 return;
+    //             }
+    //             this.sendAction(
+    //                 Constants.LEOBRIDGE.TAG_CHILDREN,
+    //                 JSON.stringify({ tag: p_inputResult })
+    //             ).then((p_resultTag: LeoBridgePackage) =&gt; {
+    //                 this.launchRefresh(
+    //                     {
+    //                         tree: true,
+    //                         body: false,
+    //                         documents: false,
+    //                         buttons: false,
+    //                         states: true,
+    //                     },
+    //                     false
+    //                 );
+    //             });
+    //         }
+    //     });
+}
+
+</t>
+<t tx="felix.20220505215924.17">/**
+ * * Tag Node
+ */
+public tagNode(): void {
+    vscode.window.showInformationMessage("TODO: ");
+
+    // this.triggerBodySave(false)
+    //     .then((p_saveResult: boolean) =&gt; {
+    //         return vscode.window.showInputBox({
+    //             title: Constants.USER_MESSAGES.TITLE_TAG_NODE,
+    //             placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
+    //             prompt: Constants.USER_MESSAGES.PROMPT_TAG,
+    //         });
+    //     })
+    //     .then((p_inputResult?: string) =&gt; {
+
+    //         if (p_inputResult &amp;&amp; p_inputResult.trim()) {
+    //             p_inputResult = p_inputResult.trim();
+    //             // check for special chars first
+    //             if (p_inputResult.split(/(&amp;|\||-|\^)/).length &gt; 1) {
+    //                 vscode.window.showInformationMessage('Cannot add tags containing any of these characters: &amp;|^-');
+    //                 return;
+    //             }
+    //             this.sendAction(
+    //                 Constants.LEOBRIDGE.TAG_NODE,
+    //                 JSON.stringify({ tag: p_inputResult })
+    //             ).then((p_resultTag: LeoBridgePackage) =&gt; {
+    //                 this.launchRefresh(
+    //                     {
+    //                         tree: true,
+    //                         body: false,
+    //                         documents: false,
+    //                         buttons: false,
+    //                         states: true,
+    //                     },
+    //                     false
+    //                 );
+    //             });
+    //         }
+    //     });
+}
+
+</t>
+<t tx="felix.20220505215924.18">/**
+ * * Remove single Tag on selected node
+ */
+public removeTag(): void {
+    vscode.window.showInformationMessage("TODO: ");
+
+    // if (this.lastSelectedNode &amp;&amp; this.lastSelectedNode.u &amp;&amp;
+    //     this.lastSelectedNode.u.__node_tags &amp;&amp; this.lastSelectedNode.u.__node_tags.length) {
+    //     this.triggerBodySave(false)
+    //         .then((p_saveResult: boolean) =&gt; {
+    //             return vscode.window.showQuickPick(this.lastSelectedNode!.u.__node_tags, {
+    //                 title: Constants.USER_MESSAGES.TITLE_REMOVE_TAG,
+    //                 placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
+    //                 canPickMany: false
+    //                 // prompt: Constants.USER_MESSAGES.PROMPT_TAG,
+    //             });
+    //         })
+    //         .then((p_inputResult?: string) =&gt; {
+    //             if (p_inputResult &amp;&amp; p_inputResult.trim()) {
+    //                 this.sendAction(
+    //                     Constants.LEOBRIDGE.REMOVE_TAG,
+    //                     JSON.stringify({ tag: p_inputResult.trim() })
+    //                 ).then((p_resultTag: LeoBridgePackage) =&gt; {
+    //                     this.launchRefresh(
+    //                         {
+    //                             tree: true,
+    //                             body: false,
+    //                             documents: false,
+    //                             buttons: false,
+    //                             states: true,
+    //                         },
+    //                         false
+    //                     );
+    //                 });
+    //             }
+    //         });
+    // } else if (this.lastSelectedNode) {
+    //     vscode.window.showInformationMessage("No tags on node: " + this.lastSelectedNode.label);
+    // } else {
+    //     return;
+    // }
+
+}
+
+</t>
+<t tx="felix.20220505215924.19">/**
+ * * Remove all tags on selected node
+ */
+public removeTags(): void {
+    vscode.window.showInformationMessage("TODO: ");
+
+    // if (this.lastSelectedNode &amp;&amp; this.lastSelectedNode.u &amp;&amp;
+    //     this.lastSelectedNode.u.__node_tags &amp;&amp; this.lastSelectedNode.u.__node_tags.length) {
+    //     this.triggerBodySave(false)
+    //         .then((p_saveResult: boolean) =&gt; {
+    //             this.sendAction(
+    //                 Constants.LEOBRIDGE.REMOVE_TAGS
+    //             ).then((p_resultTag: LeoBridgePackage) =&gt; {
+    //                 this.launchRefresh(
+    //                     {
+    //                         tree: true,
+    //                         body: false,
+    //                         documents: false,
+    //                         buttons: false,
+    //                         states: true,
+    //                     },
+    //                     false
+    //                 );
+    //             });
+    //         });
+    // } else if (this.lastSelectedNode) {
+    //     vscode.window.showInformationMessage("No tags on node: " + this.lastSelectedNode.label);
+    // } else {
+    //     return;
+    // }
+}
+
+</t>
+<t tx="felix.20220505215924.2">
+public navEnter(): Thenable&lt;unknown&gt; {
+    return vscode.window.showInformationMessage("TODO: ");
+
+    // return this._isBusyTriggerSave(false, true).then(() =&gt; {
+
+    //     return this.sendAction(
+    //         Constants.LEOBRIDGE.NAV_SEARCH
+    //     ).then((p_package) =&gt; {
+    //         this._leoGotoProvider.refreshTreeRoot();
+    //         this.findQuickGoAnywhere({ preserveFocus: true }); // show but dont change focus
+    //         return p_package;
+    //     });
+
+    // });
+</t>
+<t tx="felix.20220505215924.20">/**
+ * * Clone Find Tag
+ */
+public cloneFindTag(): void {
+    vscode.window.showInformationMessage("TODO: ");
+
+    // this.triggerBodySave(false)
+    //     .then((p_saveResult: boolean) =&gt; {
+    //         return vscode.window.showInputBox({
+    //             title: Constants.USER_MESSAGES.TITLE_FIND_TAG,
+    //             placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_CLONE_FIND_TAG,
+    //             prompt: Constants.USER_MESSAGES.PROMPT_CLONE_FIND_TAG,
+    //         });
+    //     })
+    //     .then((p_inputResult?: string) =&gt; {
+    //         if (p_inputResult &amp;&amp; p_inputResult.trim()) {
+    //             this.sendAction(
+    //                 Constants.LEOBRIDGE.CLONE_FIND_TAG,
+    //                 JSON.stringify({ tag: p_inputResult.trim() })
+    //             ).then((p_resultFind: LeoBridgePackage) =&gt; {
+    //                 if (!p_resultFind.found) {
+    //                     // Not found
+    //                 }
+    //                 this.launchRefresh(
+    //                     {
+    //                         tree: true,
+    //                         body: true,
+    //                         documents: false,
+    //                         buttons: false,
+    //                         states: true,
+    //                     },
+    //                     false
+    //                 );
+    //             });
+    //         }
+    //     });
+}
+
+</t>
+<t tx="felix.20220505215924.3">
+}
+
+public navTextChange(): Thenable&lt;unknown&gt; {
+    return vscode.window.showInformationMessage("TODO: ");
+
+    // return this._isBusyTriggerSave(false, true).then(() =&gt; {
+
+    //     return this.sendAction(
+    //         Constants.LEOBRIDGE.NAV_HEADLINE_SEARCH
+    //     ).then((p_package) =&gt; {
+    //         this._leoGotoProvider.refreshTreeRoot();
+    //         this.findQuickGoAnywhere({ preserveFocus: true }); // show but dont change focus
+    //         return p_package;
+    //     });
+
+    // });
+
+}
+
+</t>
+<t tx="felix.20220505215924.4">/**
+ * * Opens the find panel and selects all &amp; focuses on the find field.
+ */
+public startSearch(): void {
+    let w_panelID = '';
+    let w_panel: vscode.WebviewView | undefined;
+    if (this._lastTreeView === this._leoTreeExView) {
+        w_panelID = Constants.FIND_EXPLORER_ID;
+        w_panel = this._findPanelWebviewExplorerView;
+    } else {
+        w_panelID = Constants.FIND_ID;
+        w_panel = this._findPanelWebviewView;
+    }
+    vscode.commands.executeCommand(w_panelID + '.focus').then((p_result) =&gt; {
+        if (w_panel &amp;&amp; w_panel.show &amp;&amp; !w_panel.visible) {
+            w_panel.show(false);
+        }
+        w_panel?.webview.postMessage({ type: 'selectFind' });
+    });
+}
+
+</t>
+<t tx="felix.20220505215924.5"></t>
+<t tx="felix.20220505215924.6">/**
+ * * Get a find pattern string input from the user
+ * @param p_replace flag for doing a 'replace' instead of a 'find'
+ * @returns Promise of string or undefined if cancelled
+ */
+private _inputFindPattern(p_replace?: boolean): Thenable&lt;string | undefined&gt; {
+    return vscode.window.showInputBox({
+        title: p_replace ? "Replace with" : "Search for",
+        prompt: p_replace ? "Type text to replace with and press enter." : "Type text to search for and press enter.",
+        placeHolder: p_replace ? "Replace pattern here" : "Find pattern here",
+    });
+}
+
+</t>
+<t tx="felix.20220505215924.7">/**
+ * * Find next / previous commands
+ * @param p_fromOutline
+ * @param p_reverse
+ * @returns Promise that resolves when the "launch refresh" is started
+ */
+public find(p_fromOutline: boolean, p_reverse: boolean): Thenable&lt;unknown&gt; {
+    return vscode.window.showInformationMessage("TODO: ");
+
+    // const w_action: string = p_reverse
+    //     ? Constants.LEOBRIDGE.FIND_PREVIOUS
+    //     : Constants.LEOBRIDGE.FIND_NEXT;
+    // return this._isBusyTriggerSave(false, true)
+    //     .then((p_saveResult) =&gt; {
+    //         return this.sendAction(w_action, JSON.stringify({ fromOutline: !!p_fromOutline }));
+    //     })
+    //     .then((p_findResult: LeoBridgePackage) =&gt; {
+    //         if (!p_findResult.found || !p_findResult.focus) {
+    //             vscode.window.showInformationMessage('Not found');
+    //         } else {
+    //             let w_focusOnOutline = false;
+    //             const w_focus = p_findResult.focus.toLowerCase();
+    //             if (w_focus.includes('tree') || w_focus.includes('head')) {
+    //                 // tree
+    //                 w_focusOnOutline = true;
+    //             }
+    //             this.launchRefresh(
+    //                 {
+    //                     tree: true,
+    //                     body: true,
+    //                     scroll: p_findResult.found &amp;&amp; !w_focusOnOutline,
+    //                     documents: false,
+    //                     buttons: false,
+    //                     states: true,
+    //                 },
+    //                 w_focusOnOutline
+    //             );
+    //         }
+    //     });
+}
+
+</t>
+<t tx="felix.20220505215924.8">/**
+ * * find-var or find-def commands
+ * @param p_def find-def instead of find-var
+ * @returns Promise that resolves when the "launch refresh" is started
+ */
+public findSymbol(p_def: boolean): Thenable&lt;unknown&gt; {
+    return vscode.window.showInformationMessage("TODO: ");
+
+    // const w_action: string = p_def
+    //     ? Constants.LEOBRIDGE.FIND_DEF
+    //     : Constants.LEOBRIDGE.FIND_VAR;
+    // return this._isBusyTriggerSave(false, true)
+    //     .then((p_saveResult) =&gt; {
+    //         return this.sendAction(w_action, JSON.stringify({ fromOutline: false }));
+    //     })
+    //     .then((p_findResult: LeoBridgePackage) =&gt; {
+    //         if (!p_findResult.found || !p_findResult.focus) {
+    //             vscode.window.showInformationMessage('Not found');
+    //         } else {
+    //             let w_focusOnOutline = false;
+    //             const w_focus = p_findResult.focus.toLowerCase();
+    //             if (w_focus.includes('tree') || w_focus.includes('head')) {
+    //                 // tree
+    //                 w_focusOnOutline = true;
+    //             }
+    //             this.loadSearchSettings();
+    //             this.launchRefresh(
+    //                 {
+    //                     tree: true,
+    //                     body: true,
+    //                     scroll: p_findResult.found &amp;&amp; !w_focusOnOutline,
+    //                     documents: false,
+    //                     buttons: false,
+    //                     states: true,
+    //                 },
+    //                 w_focusOnOutline
+    //             );
+    //         }
+    //     });
+}
+
+</t>
+<t tx="felix.20220505215924.9">/**
+ * * Replace / Replace-Then-Find commands
+ * @param p_fromOutline
+ * @param p_thenFind
+ * @returns Promise that resolves when the "launch refresh" is started
+ */
+public replace(p_fromOutline: boolean, p_thenFind: boolean): Thenable&lt;unknown&gt; {
+    return vscode.window.showInformationMessage("TODO: ");
+
+    // const w_action: string = p_thenFind
+    //     ? Constants.LEOBRIDGE.REPLACE_THEN_FIND
+    //     : Constants.LEOBRIDGE.REPLACE;
+    // return this._isBusyTriggerSave(false, true)
+    //     .then((p_saveResult) =&gt; {
+    //         return this.sendAction(w_action, JSON.stringify({ fromOutline: !!p_fromOutline }));
+    //     })
+    //     .then((p_replaceResult: LeoBridgePackage) =&gt; {
+    //         if (!p_replaceResult.found || !p_replaceResult.focus) {
+    //             vscode.window.showInformationMessage('Not found');
+    //         } else {
+    //             let w_focusOnOutline = false;
+    //             const w_focus = p_replaceResult.focus.toLowerCase();
+    //             if (w_focus.includes('tree') || w_focus.includes('head')) {
+    //                 // tree
+    //                 w_focusOnOutline = true;
+    //             }
+    //             this.launchRefresh(
+    //                 {
+    //                     tree: true,
+    //                     body: true,
+    //                     scroll: true,
+    //                     documents: false,
+    //                     buttons: false,
+    //                     states: true,
+    //                 },
+    //                 w_focusOnOutline
+    //             );
+    //         }
+    //     });
+}
+
+</t>
+<t tx="felix.20220505220527.1">export type TGotoTypes = "tag" | "headline" | "body" | "parent" | "generic";
+
+</t>
+<t tx="felix.20220505220532.1">export interface LeoGoto {
+    key: number; // id from python
+    h: string;
+    t: TGotoTypes;
+}
+
+</t>
+<t tx="felix.20220505220537.1">/**
+ * * LeoInteg's Enum type for the search scope radio buttons of the find panel.
+ */
+export const enum LeoSearchScope {
+    entireOutline = 0,
+    subOutlineOnly,
+    nodeOnly
+}
+
+</t>
+<t tx="felix.20220505220544.1">/**
+ * * LeoInteg search settings structure for use with the 'find' webview
+ */
+export interface LeoSearchSettings {
+    // Nav options
+    navText: string;
+    isTag: boolean;
+    showParents: boolean;
+    searchOptions: number;
+    // Find/change strings...
+    findText: string;
+    replaceText: string;
+    // Find options...
+    wholeWord: boolean;
+    ignoreCase: boolean;
+    regExp: boolean;
+    markFinds: boolean;
+    markChanges: boolean;
+    searchHeadline: boolean;
+    searchBody: boolean;
+    searchScope: LeoSearchScope; // 0, 1 or 2 for outline, sub-outline, or node.
+}
+
+</t>
+<t tx="felix.20220505220550.1">/**
+ * * Leo's GUI search settings internal structure
+ */
+export interface LeoGuiFindTabManagerSettings {
+    // Nav options
+    nav_text: string;
+    is_tag: boolean;
+    show_parents: boolean;
+    search_options: number;
+    //Find/change strings...
+    find_text: string,
+    change_text: string,
+    // Find options...
+    ignore_case: boolean,
+    mark_changes: boolean,
+    mark_finds: boolean,
+    node_only: boolean,
+    pattern_match: boolean,
+    search_body: boolean,
+    search_headline: boolean,
+    suboutline_only: boolean,
+    whole_word: boolean
+}
+
+</t>
+<t tx="felix.20220505220619.1">/**
+ * * LeoBody virtual file time information object
+ */
+export interface BodyTimeInfo {
+    ctime: number;
+    mtime: number;
+}
+
+</t>
+<t tx="felix.20220505220626.1">/**
+ * * Body position
+ * Used in BodySelectionInfo interface
+ */
+export interface BodyPosition {
+    line: number;
+    col: number;
+}
+
+</t>
+<t tx="felix.20220505220630.1">/**
+ * * LeoBody cursor active position and text selection state, along with gnx
+ */
+export interface BodySelectionInfo {
+    gnx: string;
+    // scroll is stored as-is as the 'scrollBarSpot' in Leo
+    // ! TEST scroll as single number only (for Leo vertical scroll value)
+    scroll: number;
+    // scroll: {
+    //     start: BodyPosition;
+    //     end: BodyPosition;
+    // }
+    insert: BodyPosition;
+    start: BodyPosition;
+    end: BodyPosition;
+}
+
+</t>
+<t tx="felix.20220505220706.1">/**
+ * * Used to select a button's rclick by index
+ */
+export interface ChooseRClickItem extends vscode.QuickPickItem {
+    index: number;
+    rclick?: RClick;
+}
+
+</t>
+<t tx="felix.20220505220722.1">/**
+ * * Returned from Leo with buttons data
+ */
+export interface RClick {
+    name: string;
+    children: RClick[];
+}
+
+</t>
+<t tx="felix.20220505221929.1">import * as vscode from "vscode";
+import { Constants } from "./constants";
+import { LeoUI } from "./leoUI";
+import { LeoGoto, TGotoTypes } from "./types";
+import * as utils from "./utils";
+
+@language typescript
+@tabwidth -4
+@others</t>
+<t tx="felix.20220505222045.1">/**
+ * * Opened Leo documents shown as a list with this TreeDataProvider implementation
+ */
+export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&gt; {
+
+    private _onDidChangeTreeData: vscode.EventEmitter&lt;LeoGotoNode | undefined&gt; = new vscode.EventEmitter&lt;LeoGotoNode | undefined&gt;();
+
+    readonly onDidChangeTreeData: vscode.Event&lt;LeoGotoNode | undefined&gt; = this._onDidChangeTreeData.event;
+
+    private _lastGotoView: vscode.TreeView&lt;LeoGotoNode&gt; | undefined;
+
+    private _topNode: LeoGotoNode | undefined;
+
+    constructor(private _leoIntegration: LeoIntegration) { }
+
+    public showGotoPanel(): Thenable&lt;void&gt; {
+        if (this._lastGotoView &amp;&amp; this._topNode) {
+            return this._lastGotoView.reveal(this._topNode, { select: false, focus: false });
+        }
+        return Promise.resolve();
+    }
+
+    public setLastGotoView(p_view: vscode.TreeView&lt;LeoGotoNode&gt;): void {
+        this._lastGotoView = p_view;
+    }
+
+    /**
+     * * Refresh the whole outline
+     */
+    public refreshTreeRoot(): void {
+        this._onDidChangeTreeData.fire(undefined);
+    }
+
+    public getTreeItem(element: LeoGotoNode): Thenable&lt;LeoGotoNode&gt; | LeoGotoNode {
+        return element;
+    }
+
+    public getChildren(element?: LeoGotoNode): Thenable&lt;LeoGotoNode[]&gt; {
+
+        // if called with element, or not ready, give back empty array as there won't be any children
+        if (this._leoIntegration.leoStates.fileOpenedReady &amp;&amp; !element) {
+
+
+            // call action to get get list, and convert to LeoButtonNode(s) array
+            return this._leoIntegration.sendAction(Constants.LEOBRIDGE.GET_GOTO_PANEL).then(p_package =&gt; {
+                if (p_package &amp;&amp; p_package.navList) {
+
+                    const w_list: LeoGotoNode[] = [];
+                    this._topNode = undefined;
+                    const w_navList: LeoGoto[] = p_package.navList;
+                    if (w_navList &amp;&amp; w_navList.length) {
+                        w_navList.forEach((p_goto: LeoGoto) =&gt; {
+                            const w_newNode = new LeoGotoNode(this._leoIntegration, p_goto, p_package.navOptions!);
+                            if (!this._topNode) {
+                                this._topNode = w_newNode;
+                            }
+                            w_list.push(w_newNode);
+                        });
+                    }
+                    return w_list;
+                } else {
+                    return [];
+                }
+            });
+
+
+        } else {
+            return Promise.resolve([]); // Defaults to an empty list of children
+        }
+    }
+
+    public getParent(element: LeoGotoNode): ProviderResult&lt;LeoGotoNode&gt; | null {
+        // Leo documents are just a list, as such, entries are always child of root, so return null
+        return null;
+    }
+
+}
+</t>
+<t tx="felix.20220505222101.1">/**
+ * * Opened Leo documents tree view node item implementation for usage in a TreeDataProvider
+ */
+export class LeoGotoNode extends vscode.TreeItem {
+
+    // Context string is checked in package.json with 'when' clauses
+    public entryType: TGotoTypes;
+    private _id: string;
+    private _description: string | boolean;
+    private _headline: string;
+    private _iconIndex: number; // default to tag
+    private _leoIntegration: LeoIntegration;
+    public key: number; // id from python
+
+    constructor(
+        p_leoIntegration: LeoIntegration,
+        p_gotoEntry: LeoGoto,
+        p_navOptions: { isTag: boolean, showParents: boolean },
+
+    ) {
+        let w_spacing = "";
+        if (p_navOptions.showParents &amp;&amp; !p_navOptions.isTag) {
+            w_spacing = "    ";
+        }
+        let w_label = "";
+        if (["tag", "headline"].includes(p_gotoEntry.t)) {
+            w_label = w_spacing + p_gotoEntry.h;
+        }
+        super(w_label);
+
+        // Setup this instance
+        this._leoIntegration = p_leoIntegration;
+        this._id = utils.getUniqueId();
+        this.entryType = p_gotoEntry.t;
+        this.key = p_gotoEntry.key;
+        this._headline = p_gotoEntry.h.trim();
+
+        this._description = false;
+        if (this.entryType === 'body') {
+            this._iconIndex = 2;
+            if (p_navOptions.showParents) {
+                this._description = "    " + this._headline;
+            } else {
+                this._description = "  " + this._headline;
+            }
+        } else if (this.entryType === 'parent') {
+            this._iconIndex = 0;
+            this._description = this._headline.trim();
+        } else if (this.entryType === 'generic') {
+            this._iconIndex = 4;
+            this._description = this._headline;
+        } else if (this.entryType === 'headline') {
+            this._iconIndex = 1;
+        } else {
+            this._iconIndex = 3; // tag
+        }
+
+        this.command = {
+            command: Constants.COMMANDS.GOTO_NAV_ENTRY,
+            title: '',
+            arguments: [this]
+        };
+
+    }
+
+    // @ts-ignore
+    public get tooltip(): string {
+        if (this.entryType !== "generic") {
+            return this.entryType.charAt(0).toUpperCase() + this.entryType.slice(1);
+        }
+        return this._headline;
+    }
+
+    // @ts-ignore
+    public get description(): string | boolean {
+        return this._description;
+    }
+
+    // @ts-ignore
+    public get iconPath(): Icon | vscode.ThemeIcon | string {
+        if (this._iconIndex &lt; 4) {
+            return this._leoIntegration.gotoIcons[this._iconIndex];
+        }
+        // else return undefined for generic text without icon
+        return undefined;
+    }
+
+    // @ts-ignore
+    public get id(): string {
+        // Add prefix and suffix salt to numeric index to prevent accidental duplicates
+        // Should be unique when refreshed
+        return "g" + this._id + "o";
+    }
+
+}
+</t>
+<t tx="felix.20220505222504.1">/**
+ * * Capture instance for further calls on find panel webview
+ * @param p_panel The panel (usually that got the latest onDidReceiveMessage)
+ */
+public setFindPanel(p_panel: vscode.WebviewView): void {
+    if (this._lastTreeView === this._leoTreeExView) {
+        this._findPanelWebviewExplorerView = p_panel;
+    } else {
+        this._findPanelWebviewView = p_panel;
+    }
 }
 
 </t>

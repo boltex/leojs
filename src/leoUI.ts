@@ -4,7 +4,7 @@ import { debounce } from "lodash";
 import * as utils from "./utils";
 import * as commandBindings from "./commandBindings";
 import { Constants } from "./constants";
-import { RevealType, Icon, ReqRefresh, LeoPackageStates, ConfigSetting } from "./types";
+import { RevealType, Icon, ReqRefresh, LeoPackageStates, ConfigSetting, LeoSearchSettings } from "./types";
 
 import { Config } from "./config";
 import { LeoOutlineProvider } from './leoOutline';
@@ -18,6 +18,7 @@ import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
 import * as g from './core/leoGlobals';
 import { Commands } from "./core/leoCommands";
 import { Position } from "./core/leoNodes";
+import { LeoGotoNode } from "./leoGoto";
 
 /**
  * Creates and manages instances of the UI elements along with their events
@@ -78,6 +79,12 @@ export class LeoUI {
         this._leoFileSystem.setBodyTime(p_uri);
         this._bodyUri = p_uri;
     }
+
+    // * Find panel
+    private _findPanelWebviewView: vscode.WebviewView | undefined;
+    private _findPanelWebviewExplorerView: vscode.WebviewView | undefined;
+    private _lastSettingsUsed: LeoSearchSettings | undefined; // Last settings loaded / saved for current document
+
 
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
@@ -1318,6 +1325,859 @@ export class LeoUI {
     */
     public getTextFromClipboard(): string {
         return this.clipboardContent;
+    }
+
+    /**
+     * Opens the Nav tab and focus on nav text input
+     */
+    public findQuick(p_string?: string): Thenable<unknown> {
+        let w_panelID = '';
+        let w_panel: vscode.WebviewView | undefined;
+        if (this._lastTreeView === this._leoTreeExView) {
+            w_panelID = Constants.FIND_EXPLORER_ID;
+            w_panel = this._findPanelWebviewExplorerView;
+        } else {
+            w_panelID = Constants.FIND_ID;
+            w_panel = this._findPanelWebviewView;
+        }
+        vscode.commands.executeCommand(w_panelID + '.focus').then((p_result) => {
+            if (w_panel && w_panel.show && !w_panel.visible) {
+                w_panel.show(false);
+            }
+            const w_message: { [key: string]: string } = { type: 'selectNav' };
+            if (p_string && p_string?.trim()) {
+                w_message["text"] = p_string.trim();
+            }
+            w_panel?.webview.postMessage(w_message);
+        });
+        return Promise.resolve();
+    }
+
+    /**
+     * Opens the Nav tab with the selected text as the search string
+     */
+    public findQuickSelected(): Thenable<unknown> {
+        if (vscode.window.activeTextEditor) {
+            const editor = vscode.window.activeTextEditor;
+            const selection = editor.selection;
+            if (!selection.isEmpty) {
+                const text = editor.document.getText(selection);
+                return this.findQuick(text);
+            }
+        }
+        return this.findQuick();
+    }
+
+    /**
+     * Lists all nodes in reversed gnx order, newest to oldest
+     */
+    public findQuickTimeline(): Thenable<unknown> {
+        // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_TIMELINE)
+        //     .then((p_result: LeoBridgePackage) => {
+        //         this._leoGotoProvider.refreshTreeRoot();
+        //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
+        //     });
+        return vscode.window.showInformationMessage("TODO: ");
+    }
+
+    /**
+     * Lists all nodes that are changed (aka "dirty") since last save.
+     */
+    public findQuickChanged(): Thenable<unknown> {
+        // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_CHANGED)
+        //     .then((p_result: LeoBridgePackage) => {
+        //         this._leoGotoProvider.refreshTreeRoot();
+        //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
+        //     });
+        return vscode.window.showInformationMessage("TODO: ");
+
+    }
+
+    /**
+     * Lists nodes from c.nodeHistory.
+     */
+    public findQuickHistory(): Thenable<unknown> {
+        // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_HISTORY)
+        //     .then((p_result: LeoBridgePackage) => {
+        //         this._leoGotoProvider.refreshTreeRoot();
+        //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
+        //     });
+        return vscode.window.showInformationMessage("TODO: ");
+
+    }
+
+    /**
+     * List all marked nodes.
+     */
+    public findQuickMarked(): Thenable<unknown> {
+        // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_MARKED)
+        //     .then((p_result: LeoBridgePackage) => {
+        //         this._leoGotoProvider.refreshTreeRoot();
+        //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
+        //     });
+        return vscode.window.showInformationMessage("TODO: ");
+
+    }
+
+    /**
+     * Opens goto and focus in depending on passed options
+     */
+    public findQuickGoAnywhere(p_options?: { preserveFocus?: boolean }): Thenable<unknown> {
+        let w_panel = "";
+        if (this._lastTreeView === this._leoTreeExView) {
+            w_panel = Constants.GOTO_EXPLORER_ID;
+        } else {
+            w_panel = Constants.GOTO_ID;
+        }
+        vscode.commands.executeCommand(w_panel + '.focus', p_options);
+
+        return Promise.resolve();
+    }
+
+    public gotoNavEntry(p_node: LeoGotoNode): Thenable<unknown> {
+        return vscode.window.showInformationMessage("TODO: ");
+
+        // if (p_node.entryType === 'tag') {
+
+        //     return this._isBusyTriggerSave(false, true)
+        //         .then((p_saveResult) => {
+
+        //             let w_string: string = p_node.label as string;
+
+        //             let w_panelID = '';
+        //             let w_panel: vscode.WebviewView | undefined;
+        //             if (this._lastTreeView === this._leoTreeExView) {
+        //                 w_panelID = Constants.FIND_EXPLORER_ID;
+        //                 w_panel = this._findPanelWebviewExplorerView;
+        //             } else {
+        //                 w_panelID = Constants.FIND_ID;
+        //                 w_panel = this._findPanelWebviewView;
+        //             }
+        //             vscode.commands.executeCommand(w_panelID + '.focus').then((p_result) => {
+        //                 if (w_panel && w_panel.show && !w_panel.visible) {
+        //                     w_panel.show(false);
+        //                 }
+        //                 const w_message: { [key: string]: string } = { type: 'selectNav' };
+        //                 if (w_string && w_string?.trim()) {
+        //                     w_message["text"] = w_string.trim();
+        //                 }
+        //                 return w_panel!.webview.postMessage(w_message);
+        //             }).then(() => {
+        //                 // Do search
+        //                 setTimeout(() => {
+        //                     this.sendAction(
+        //                         Constants.LEOBRIDGE.NAV_SEARCH
+        //                     ).then((p_package) => {
+        //                         this._leoGotoProvider.refreshTreeRoot();
+        //                         this.findQuickGoAnywhere({ preserveFocus: true }); // show but dont change focus
+        //                         return p_package;
+        //                     });
+        //                 }, 10);
+
+        //             });
+        //         });
+
+        // }
+
+        // // Was not a tag
+        // if (p_node.entryType !== 'generic' && p_node.entryType !== 'parent') {
+        //     return this._isBusyTriggerSave(false, true)
+        //         .then((p_saveResult) => {
+        //             return this.sendAction(
+        //                 Constants.LEOBRIDGE.GOTO_NAV_ENTRY,
+        //                 JSON.stringify({ key: p_node.key })
+        //             );
+        //         })
+        //         .then((p_navEntryResult: LeoBridgePackage) => {
+        //             if (!p_navEntryResult.focus) {
+        //                 vscode.window.showInformationMessage('Not found');
+        //             } else {
+        //                 let w_focusOnOutline = false;
+        //                 const w_focus = p_navEntryResult.focus.toLowerCase();
+
+        //                 if (w_focus.includes('tree') || w_focus.includes('head')) {
+        //                     // tree
+        //                     w_focusOnOutline = true;
+        //                 }
+        //                 this.launchRefresh(
+        //                     {
+        //                         tree: true,
+        //                         body: true,
+        //                         scroll: !w_focusOnOutline,
+        //                         documents: false,
+        //                         buttons: false,
+        //                         states: true,
+        //                     },
+        //                     w_focusOnOutline
+        //                 );
+        //             }
+        //         });
+        // }
+        // return Promise.resolve();
+    }
+    /**
+     * * Capture instance for further calls on find panel webview
+     * @param p_panel The panel (usually that got the latest onDidReceiveMessage)
+     */
+    public setFindPanel(p_panel: vscode.WebviewView): void {
+        if (this._lastTreeView === this._leoTreeExView) {
+            this._findPanelWebviewExplorerView = p_panel;
+        } else {
+            this._findPanelWebviewView = p_panel;
+        }
+    }
+
+
+    public navEnter(): Thenable<unknown> {
+        return vscode.window.showInformationMessage("TODO: ");
+
+        // return this._isBusyTriggerSave(false, true).then(() => {
+
+        //     return this.sendAction(
+        //         Constants.LEOBRIDGE.NAV_SEARCH
+        //     ).then((p_package) => {
+        //         this._leoGotoProvider.refreshTreeRoot();
+        //         this.findQuickGoAnywhere({ preserveFocus: true }); // show but dont change focus
+        //         return p_package;
+        //     });
+
+        // });
+
+    }
+
+    public navTextChange(): Thenable<unknown> {
+        return vscode.window.showInformationMessage("TODO: ");
+
+        // return this._isBusyTriggerSave(false, true).then(() => {
+
+        //     return this.sendAction(
+        //         Constants.LEOBRIDGE.NAV_HEADLINE_SEARCH
+        //     ).then((p_package) => {
+        //         this._leoGotoProvider.refreshTreeRoot();
+        //         this.findQuickGoAnywhere({ preserveFocus: true }); // show but dont change focus
+        //         return p_package;
+        //     });
+
+        // });
+
+    }
+
+    /**
+     * * Opens the find panel and selects all & focuses on the find field.
+     */
+    public startSearch(): void {
+        let w_panelID = '';
+        let w_panel: vscode.WebviewView | undefined;
+        if (this._lastTreeView === this._leoTreeExView) {
+            w_panelID = Constants.FIND_EXPLORER_ID;
+            w_panel = this._findPanelWebviewExplorerView;
+        } else {
+            w_panelID = Constants.FIND_ID;
+            w_panel = this._findPanelWebviewView;
+        }
+        vscode.commands.executeCommand(w_panelID + '.focus').then((p_result) => {
+            if (w_panel && w_panel.show && !w_panel.visible) {
+                w_panel.show(false);
+            }
+            w_panel?.webview.postMessage({ type: 'selectFind' });
+        });
+    }
+
+    /**
+     * * Get a find pattern string input from the user
+     * @param p_replace flag for doing a 'replace' instead of a 'find'
+     * @returns Promise of string or undefined if cancelled
+     */
+    private _inputFindPattern(p_replace?: boolean): Thenable<string | undefined> {
+        return vscode.window.showInputBox({
+            title: p_replace ? "Replace with" : "Search for",
+            prompt: p_replace ? "Type text to replace with and press enter." : "Type text to search for and press enter.",
+            placeHolder: p_replace ? "Replace pattern here" : "Find pattern here",
+        });
+    }
+
+    /**
+     * * Find next / previous commands
+     * @param p_fromOutline
+     * @param p_reverse
+     * @returns Promise that resolves when the "launch refresh" is started
+     */
+    public find(p_fromOutline: boolean, p_reverse: boolean): Thenable<unknown> {
+        return vscode.window.showInformationMessage("TODO: ");
+
+        // const w_action: string = p_reverse
+        //     ? Constants.LEOBRIDGE.FIND_PREVIOUS
+        //     : Constants.LEOBRIDGE.FIND_NEXT;
+        // return this._isBusyTriggerSave(false, true)
+        //     .then((p_saveResult) => {
+        //         return this.sendAction(w_action, JSON.stringify({ fromOutline: !!p_fromOutline }));
+        //     })
+        //     .then((p_findResult: LeoBridgePackage) => {
+        //         if (!p_findResult.found || !p_findResult.focus) {
+        //             vscode.window.showInformationMessage('Not found');
+        //         } else {
+        //             let w_focusOnOutline = false;
+        //             const w_focus = p_findResult.focus.toLowerCase();
+        //             if (w_focus.includes('tree') || w_focus.includes('head')) {
+        //                 // tree
+        //                 w_focusOnOutline = true;
+        //             }
+        //             this.launchRefresh(
+        //                 {
+        //                     tree: true,
+        //                     body: true,
+        //                     scroll: p_findResult.found && !w_focusOnOutline,
+        //                     documents: false,
+        //                     buttons: false,
+        //                     states: true,
+        //                 },
+        //                 w_focusOnOutline
+        //             );
+        //         }
+        //     });
+    }
+
+    /**
+     * * find-var or find-def commands
+     * @param p_def find-def instead of find-var
+     * @returns Promise that resolves when the "launch refresh" is started
+     */
+    public findSymbol(p_def: boolean): Thenable<unknown> {
+        return vscode.window.showInformationMessage("TODO: ");
+
+        // const w_action: string = p_def
+        //     ? Constants.LEOBRIDGE.FIND_DEF
+        //     : Constants.LEOBRIDGE.FIND_VAR;
+        // return this._isBusyTriggerSave(false, true)
+        //     .then((p_saveResult) => {
+        //         return this.sendAction(w_action, JSON.stringify({ fromOutline: false }));
+        //     })
+        //     .then((p_findResult: LeoBridgePackage) => {
+        //         if (!p_findResult.found || !p_findResult.focus) {
+        //             vscode.window.showInformationMessage('Not found');
+        //         } else {
+        //             let w_focusOnOutline = false;
+        //             const w_focus = p_findResult.focus.toLowerCase();
+        //             if (w_focus.includes('tree') || w_focus.includes('head')) {
+        //                 // tree
+        //                 w_focusOnOutline = true;
+        //             }
+        //             this.loadSearchSettings();
+        //             this.launchRefresh(
+        //                 {
+        //                     tree: true,
+        //                     body: true,
+        //                     scroll: p_findResult.found && !w_focusOnOutline,
+        //                     documents: false,
+        //                     buttons: false,
+        //                     states: true,
+        //                 },
+        //                 w_focusOnOutline
+        //             );
+        //         }
+        //     });
+    }
+
+    /**
+     * * Replace / Replace-Then-Find commands
+     * @param p_fromOutline
+     * @param p_thenFind
+     * @returns Promise that resolves when the "launch refresh" is started
+     */
+    public replace(p_fromOutline: boolean, p_thenFind: boolean): Thenable<unknown> {
+        return vscode.window.showInformationMessage("TODO: ");
+
+        // const w_action: string = p_thenFind
+        //     ? Constants.LEOBRIDGE.REPLACE_THEN_FIND
+        //     : Constants.LEOBRIDGE.REPLACE;
+        // return this._isBusyTriggerSave(false, true)
+        //     .then((p_saveResult) => {
+        //         return this.sendAction(w_action, JSON.stringify({ fromOutline: !!p_fromOutline }));
+        //     })
+        //     .then((p_replaceResult: LeoBridgePackage) => {
+        //         if (!p_replaceResult.found || !p_replaceResult.focus) {
+        //             vscode.window.showInformationMessage('Not found');
+        //         } else {
+        //             let w_focusOnOutline = false;
+        //             const w_focus = p_replaceResult.focus.toLowerCase();
+        //             if (w_focus.includes('tree') || w_focus.includes('head')) {
+        //                 // tree
+        //                 w_focusOnOutline = true;
+        //             }
+        //             this.launchRefresh(
+        //                 {
+        //                     tree: true,
+        //                     body: true,
+        //                     scroll: true,
+        //                     documents: false,
+        //                     buttons: false,
+        //                     states: true,
+        //                 },
+        //                 w_focusOnOutline
+        //             );
+        //         }
+        //     });
+    }
+
+    /**
+     * * Find / Replace All
+     * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
+     */
+    public findAll(p_replace: boolean): Thenable<unknown> {
+        return vscode.window.showInformationMessage("TODO: ");
+
+        // const w_action: string = p_replace
+        //     ? Constants.LEOBRIDGE.REPLACE_ALL
+        //     : Constants.LEOBRIDGE.FIND_ALL;
+
+        // let w_searchString: string = this._lastSettingsUsed!.findText;
+        // let w_replaceString: string = this._lastSettingsUsed!.replaceText;
+
+        // return this._isBusyTriggerSave(false, true)
+        //     .then((p_saveResult) => {
+        //         return this._inputFindPattern()
+        //             .then((p_findString) => {
+        //                 if (!p_findString) {
+        //                     return true; // Cancelled with escape or empty string.
+        //                 }
+        //                 w_searchString = p_findString;
+        //                 if (p_replace) {
+        //                     return this._inputFindPattern(true).then((p_replaceString) => {
+        //                         if (p_replaceString === undefined) {
+        //                             return true;
+        //                         }
+        //                         w_replaceString = p_replaceString;
+        //                         return false;
+        //                     });
+        //                 }
+        //                 return false;
+        //             });
+        //     })
+        //     .then((p_cancelled: boolean) => {
+        //         if (this._lastSettingsUsed && !p_cancelled) {
+        //             this._lastSettingsUsed.findText = w_searchString;
+        //             this._lastSettingsUsed.replaceText = w_replaceString;
+        //             this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
+        //             return this.sendAction(w_action)
+        //                 .then((p_findResult: LeoBridgePackage) => {
+        //                     let w_focusOnOutline = false;
+        //                     const w_focus = p_findResult.focus!.toLowerCase();
+        //                     if (w_focus.includes('tree') || w_focus.includes('head')) {
+        //                         // tree
+        //                         w_focusOnOutline = true;
+        //                     }
+        //                     this.loadSearchSettings();
+        //                     this.launchRefresh(
+        //                         { tree: true, body: true, documents: false, buttons: false, states: true },
+        //                         w_focusOnOutline
+        //                     );
+        //                 });
+        //         }
+        //     });
+    }
+
+    /**
+     * * Clone Find All / Marked / Flattened
+     * @param p_marked flag for finding marked nodes
+     * @param p_flat flag to get flattened results
+     * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
+     */
+    public cloneFind(p_marked: boolean, p_flat: boolean): Thenable<unknown> {
+        return vscode.window.showInformationMessage("TODO: ");
+
+        // let w_searchString: string = this._lastSettingsUsed!.findText;
+        // let w_action: string;
+        // if (p_marked) {
+        //     w_action = p_flat
+        //         ? Constants.LEOBRIDGE.CLONE_FIND_FLATTENED_MARKED
+        //         : Constants.LEOBRIDGE.CLONE_FIND_MARKED;
+        // } else {
+        //     w_action = p_flat
+        //         ? Constants.LEOBRIDGE.CLONE_FIND_ALL_FLATTENED
+        //         : Constants.LEOBRIDGE.CLONE_FIND_ALL;
+        // }
+
+        // if (p_marked) {
+        //     // don't use find methods.
+        //     return this.nodeCommand({
+        //         action: w_action,
+        //         node: undefined,
+        //         refreshType: { tree: true, body: true, states: true },
+        //         fromOutline: false,
+        //     }) || Promise.resolve();
+        // }
+
+        // return this._isBusyTriggerSave(false, true)
+        //     .then(() => {
+        //         return this._inputFindPattern()
+        //             .then((p_findString) => {
+        //                 if (!p_findString) {
+        //                     return true; // Cancelled with escape or empty string.
+        //                 }
+        //                 w_searchString = p_findString;
+        //                 return false;
+        //             });
+        //     })
+        //     .then((p_cancelled: boolean) => {
+        //         if (this._lastSettingsUsed && !p_cancelled) {
+        //             this._lastSettingsUsed.findText = w_searchString;
+        //             this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
+        //             return this.sendAction(w_action)
+        //                 .then((p_cloneFindResult: LeoBridgePackage) => {
+        //                     let w_focusOnOutline = false;
+        //                     const w_focus = p_cloneFindResult.focus!.toLowerCase();
+        //                     if (w_focus.includes('tree') || w_focus.includes('head')) {
+        //                         // tree
+        //                         w_focusOnOutline = true;
+        //                     }
+        //                     this.loadSearchSettings();
+        //                     this.launchRefresh(
+        //                         { tree: true, body: true, documents: false, buttons: false, states: true },
+        //                         w_focusOnOutline
+        //                     );
+        //                 });
+        //         }
+        //     });
+    }
+
+    /**
+     * * Set search setting in the search webview
+     * @param p_id string id of the setting name
+     */
+    public setSearchSetting(p_id: string): void {
+        let w_panel: vscode.WebviewView | undefined;
+        if (this._lastTreeView === this._leoTreeExView) {
+            w_panel = this._findPanelWebviewExplorerView;
+        } else {
+            w_panel = this._findPanelWebviewView;
+        }
+        w_panel!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
+    }
+
+    /**
+     * * Gets the search settings from Leo, and applies them to the find panel webviews
+     */
+    public loadSearchSettings(): void {
+        vscode.window.showInformationMessage("TODO: ");
+
+        // this.sendAction(Constants.LEOBRIDGE.GET_SEARCH_SETTINGS).then(
+        //     (p_result: LeoBridgePackage) => {
+        //         const w_searchSettings: LeoGuiFindTabManagerSettings = p_result.searchSettings!;
+        //         const w_settings: LeoSearchSettings = {
+        //             isTag: w_searchSettings.is_tag,
+        //             navText: w_searchSettings.nav_text,
+        //             showParents: w_searchSettings.show_parents,
+        //             searchOptions: w_searchSettings.search_options,
+        //             //Find/change strings...
+        //             findText: w_searchSettings.find_text,
+        //             replaceText: w_searchSettings.change_text,
+        //             // Find options...
+        //             wholeWord: w_searchSettings.whole_word,
+        //             ignoreCase: w_searchSettings.ignore_case,
+        //             regExp: w_searchSettings.pattern_match,
+        //             markFinds: w_searchSettings.mark_finds,
+        //             markChanges: w_searchSettings.mark_changes,
+        //             searchHeadline: w_searchSettings.search_headline,
+        //             searchBody: w_searchSettings.search_body,
+        //             // 0, 1 or 2 for outline, sub-outline, or node.
+        //             searchScope:
+        //                 0 +
+        //                 (w_searchSettings.suboutline_only ? 1 : 0) +
+        //                 (w_searchSettings.node_only ? 2 : 0),
+        //         };
+        //         if (w_settings.searchScope > 2) {
+        //             console.error('searchScope SHOULD BE 0, 1, 2 only: ', w_settings.searchScope);
+        //         }
+        //         this._lastSettingsUsed = w_settings;
+        //         if (this._findPanelWebviewExplorerView) {
+        //             this._findPanelWebviewExplorerView.webview.postMessage({
+        //                 type: 'setSettings',
+        //                 value: w_settings,
+        //             });
+        //         }
+        //         if (this._findPanelWebviewView) {
+        //             this._findPanelWebviewView.webview.postMessage({
+        //                 type: 'setSettings',
+        //                 value: w_settings,
+        //             });
+        //         }
+        //     }
+        // );
+    }
+
+    /**
+     * * Send the settings to the Leo Bridge Server
+     * @param p_settings the search settings to be set server side to affect next results
+     * @returns the promise from the server call
+     */
+    public saveSearchSettings(p_settings: LeoSearchSettings): Thenable<unknown> {
+
+        return vscode.window.showInformationMessage("TODO: ");
+
+        // this._lastSettingsUsed = p_settings;
+        // // convert to LeoGuiFindTabManagerSettings
+        // const w_settings: LeoGuiFindTabManagerSettings = {
+        //     // Nav settings
+        //     is_tag: p_settings.isTag,
+        //     nav_text: p_settings.navText,
+        //     show_parents: p_settings.showParents,
+        //     search_options: p_settings.searchOptions,
+        //     // Find/change strings...
+        //     find_text: p_settings.findText,
+        //     change_text: p_settings.replaceText,
+        //     // Find options...
+        //     ignore_case: p_settings.ignoreCase,
+        //     mark_changes: p_settings.markChanges,
+        //     mark_finds: p_settings.markFinds,
+        //     node_only: !!(p_settings.searchScope === 2),
+        //     pattern_match: p_settings.regExp,
+        //     search_body: p_settings.searchBody,
+        //     search_headline: p_settings.searchHeadline,
+        //     suboutline_only: !!(p_settings.searchScope === 1),
+        //     whole_word: p_settings.wholeWord,
+        // };
+        // return this.sendAction(
+        //     Constants.LEOBRIDGE.SET_SEARCH_SETTINGS,
+        //     JSON.stringify({ searchSettings: w_settings })
+        // );
+    }
+
+    /**
+     * * Goto Global Line
+     */
+    public gotoGlobalLine(): void {
+        vscode.window.showInformationMessage("TODO: ");
+
+        // this.triggerBodySave(false)
+        //     .then((p_saveResult: boolean) => {
+        //         return vscode.window.showInputBox({
+        //             title: Constants.USER_MESSAGES.TITLE_GOTO_GLOBAL_LINE,
+        //             placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_GOTO_GLOBAL_LINE,
+        //             prompt: Constants.USER_MESSAGES.PROMPT_GOTO_GLOBAL_LINE,
+        //         });
+        //     })
+        //     .then((p_inputResult?: string) => {
+        //         if (p_inputResult) {
+        //             const w_line = parseInt(p_inputResult);
+        //             if (!isNaN(w_line)) {
+        //                 this.sendAction(
+        //                     Constants.LEOBRIDGE.GOTO_GLOBAL_LINE,
+        //                     JSON.stringify({ line: w_line })
+        //                 ).then((p_resultGoto: LeoBridgePackage) => {
+        //                     if (!p_resultGoto.found) {
+        //                         // Not found
+        //                     }
+        //                     this.launchRefresh(
+        //                         {
+        //                             tree: true,
+        //                             body: true,
+        //                             documents: false,
+        //                             buttons: false,
+        //                             states: true,
+        //                         },
+        //                         false
+        //                     );
+        //                 });
+        //             }
+        //         }
+        //     });
+    }
+
+    /**
+     * * Tag Children
+     */
+    public tagChildren(): void {
+        vscode.window.showInformationMessage("TODO: ");
+
+        // this.triggerBodySave(false)
+        //     .then((p_saveResult: boolean) => {
+        //         return vscode.window.showInputBox({
+        //             title: Constants.USER_MESSAGES.TITLE_TAG_CHILDREN,
+        //             placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
+        //             prompt: Constants.USER_MESSAGES.PROMPT_TAG,
+        //         });
+        //     })
+        //     .then((p_inputResult?: string) => {
+        //         if (p_inputResult && p_inputResult.trim()) {
+        //             p_inputResult = p_inputResult.trim();
+        //             // check for special chars first
+        //             if (p_inputResult.split(/(&|\||-|\^)/).length > 1) {
+        //                 vscode.window.showInformationMessage('Cannot add tags containing any of these characters: &|^-');
+        //                 return;
+        //             }
+        //             this.sendAction(
+        //                 Constants.LEOBRIDGE.TAG_CHILDREN,
+        //                 JSON.stringify({ tag: p_inputResult })
+        //             ).then((p_resultTag: LeoBridgePackage) => {
+        //                 this.launchRefresh(
+        //                     {
+        //                         tree: true,
+        //                         body: false,
+        //                         documents: false,
+        //                         buttons: false,
+        //                         states: true,
+        //                     },
+        //                     false
+        //                 );
+        //             });
+        //         }
+        //     });
+    }
+
+    /**
+     * * Tag Node
+     */
+    public tagNode(): void {
+        vscode.window.showInformationMessage("TODO: ");
+
+        // this.triggerBodySave(false)
+        //     .then((p_saveResult: boolean) => {
+        //         return vscode.window.showInputBox({
+        //             title: Constants.USER_MESSAGES.TITLE_TAG_NODE,
+        //             placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
+        //             prompt: Constants.USER_MESSAGES.PROMPT_TAG,
+        //         });
+        //     })
+        //     .then((p_inputResult?: string) => {
+
+        //         if (p_inputResult && p_inputResult.trim()) {
+        //             p_inputResult = p_inputResult.trim();
+        //             // check for special chars first
+        //             if (p_inputResult.split(/(&|\||-|\^)/).length > 1) {
+        //                 vscode.window.showInformationMessage('Cannot add tags containing any of these characters: &|^-');
+        //                 return;
+        //             }
+        //             this.sendAction(
+        //                 Constants.LEOBRIDGE.TAG_NODE,
+        //                 JSON.stringify({ tag: p_inputResult })
+        //             ).then((p_resultTag: LeoBridgePackage) => {
+        //                 this.launchRefresh(
+        //                     {
+        //                         tree: true,
+        //                         body: false,
+        //                         documents: false,
+        //                         buttons: false,
+        //                         states: true,
+        //                     },
+        //                     false
+        //                 );
+        //             });
+        //         }
+        //     });
+    }
+
+    /**
+     * * Remove single Tag on selected node
+     */
+    public removeTag(): void {
+        vscode.window.showInformationMessage("TODO: ");
+
+        // if (this.lastSelectedNode && this.lastSelectedNode.u &&
+        //     this.lastSelectedNode.u.__node_tags && this.lastSelectedNode.u.__node_tags.length) {
+        //     this.triggerBodySave(false)
+        //         .then((p_saveResult: boolean) => {
+        //             return vscode.window.showQuickPick(this.lastSelectedNode!.u.__node_tags, {
+        //                 title: Constants.USER_MESSAGES.TITLE_REMOVE_TAG,
+        //                 placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
+        //                 canPickMany: false
+        //                 // prompt: Constants.USER_MESSAGES.PROMPT_TAG,
+        //             });
+        //         })
+        //         .then((p_inputResult?: string) => {
+        //             if (p_inputResult && p_inputResult.trim()) {
+        //                 this.sendAction(
+        //                     Constants.LEOBRIDGE.REMOVE_TAG,
+        //                     JSON.stringify({ tag: p_inputResult.trim() })
+        //                 ).then((p_resultTag: LeoBridgePackage) => {
+        //                     this.launchRefresh(
+        //                         {
+        //                             tree: true,
+        //                             body: false,
+        //                             documents: false,
+        //                             buttons: false,
+        //                             states: true,
+        //                         },
+        //                         false
+        //                     );
+        //                 });
+        //             }
+        //         });
+        // } else if (this.lastSelectedNode) {
+        //     vscode.window.showInformationMessage("No tags on node: " + this.lastSelectedNode.label);
+        // } else {
+        //     return;
+        // }
+
+    }
+
+    /**
+     * * Remove all tags on selected node
+     */
+    public removeTags(): void {
+        vscode.window.showInformationMessage("TODO: ");
+
+        // if (this.lastSelectedNode && this.lastSelectedNode.u &&
+        //     this.lastSelectedNode.u.__node_tags && this.lastSelectedNode.u.__node_tags.length) {
+        //     this.triggerBodySave(false)
+        //         .then((p_saveResult: boolean) => {
+        //             this.sendAction(
+        //                 Constants.LEOBRIDGE.REMOVE_TAGS
+        //             ).then((p_resultTag: LeoBridgePackage) => {
+        //                 this.launchRefresh(
+        //                     {
+        //                         tree: true,
+        //                         body: false,
+        //                         documents: false,
+        //                         buttons: false,
+        //                         states: true,
+        //                     },
+        //                     false
+        //                 );
+        //             });
+        //         });
+        // } else if (this.lastSelectedNode) {
+        //     vscode.window.showInformationMessage("No tags on node: " + this.lastSelectedNode.label);
+        // } else {
+        //     return;
+        // }
+    }
+
+    /**
+     * * Clone Find Tag
+     */
+    public cloneFindTag(): void {
+        vscode.window.showInformationMessage("TODO: ");
+
+        // this.triggerBodySave(false)
+        //     .then((p_saveResult: boolean) => {
+        //         return vscode.window.showInputBox({
+        //             title: Constants.USER_MESSAGES.TITLE_FIND_TAG,
+        //             placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_CLONE_FIND_TAG,
+        //             prompt: Constants.USER_MESSAGES.PROMPT_CLONE_FIND_TAG,
+        //         });
+        //     })
+        //     .then((p_inputResult?: string) => {
+        //         if (p_inputResult && p_inputResult.trim()) {
+        //             this.sendAction(
+        //                 Constants.LEOBRIDGE.CLONE_FIND_TAG,
+        //                 JSON.stringify({ tag: p_inputResult.trim() })
+        //             ).then((p_resultFind: LeoBridgePackage) => {
+        //                 if (!p_resultFind.found) {
+        //                     // Not found
+        //                 }
+        //                 this.launchRefresh(
+        //                     {
+        //                         tree: true,
+        //                         body: true,
+        //                         documents: false,
+        //                         buttons: false,
+        //                         states: true,
+        //                     },
+        //                     false
+        //                 );
+        //             });
+        //         }
+        //     });
     }
 
     /**

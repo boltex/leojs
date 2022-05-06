@@ -20,6 +20,12 @@ export class Constants {
     public static UNDOS_ID: string = "leojsUndos";
     public static UNDOS_EXPLORER_ID: string = "leojsUndosExplorer";
 
+    public static FIND_ID: string = "leojsFindPanel";
+    public static FIND_EXPLORER_ID: string = "leojsindPanelExplorer";
+
+    public static GOTO_ID: string = "leojsGotoPanel";
+    public static GOTO_EXPLORER_ID: string = "leojsGotoPanelExplorer";
+
     public static FILE_EXTENSION: string = "leojs";
     public static URI_LEO_SCHEME: string = "leojs";
     public static URI_FILE_SCHEME: string = "file";
@@ -279,6 +285,8 @@ export class Constants {
         DOCUMENT_TITLED: "leojsDocumentTitled",
         DOCUMENT_SELECTED_UNTITLED: "leojsDocumentSelectedUntitled",
         DOCUMENT_UNTITLED: "leojsDocumentUntitled",
+        // Flags for focus context
+        FOCUS_FIND: "leojsFindFocus",
 
         // Context flags that are mapped 'directly' onto leojs config settings
         // * PREFIXED WITH 'leojs' *
@@ -318,9 +326,20 @@ export class Constants {
      * All commands this expansion exposes to the user via GUI/keybindings in package.json
      */
     public static COMMANDS = {
+        // * Access to the Settings/Welcome Webview
+        SHOW_WELCOME: Constants.NAME + ".showWelcomePage", // Always available: not in the commandPalette section of package.json
+        SHOW_SETTINGS: Constants.NAME + ".showSettingsPage", // Always available: not in the commandPalette section of package.json
+        STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
+        // * LeoBridge
+        CHOOSE_LEO_FOLDER: Constants.NAME + ".chooseLeoFolder",
+        START_SERVER: Constants.NAME + ".startServer",
+        STOP_SERVER: Constants.NAME + ".stopServer",
+        CONNECT: Constants.NAME + ".connectToServer",
         // Leo Documents
         SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
         OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
+        CLEAR_RECENT_FILES: Constants.NAME + ".clearRecentFiles",
+        IMPORT_ANY_FILE: Constants.NAME + ".importAnyFile",
         RECENT_FILES: Constants.NAME + ".recentLeoFiles", // shows recent Leo files, opens one on selection
         SWITCH_FILE: Constants.NAME + ".switchLeoFile",
         NEW_FILE: Constants.NAME + ".newLeoFile",
@@ -451,13 +470,41 @@ export class Constants {
         CLONE_MARKED_NODES: Constants.NAME + ".cloneMarkedNodes",
         DELETE_MARKED_NODES: Constants.NAME + ".deleteMarkedNodes",
         MOVE_MARKED_NODES: Constants.NAME + ".moveMarkedNodes",
+
+        FIND_QUICK: Constants.NAME + ".findQuick",
+        FIND_QUICK_SELECTED: Constants.NAME + ".findQuickSelected",
+        FIND_QUICK_TIMELINE: Constants.NAME + ".findQuickTimeline",
+        FIND_QUICK_CHANGED: Constants.NAME + ".findQuickChanged",
+        FIND_QUICK_HISTORY: Constants.NAME + ".history",
+        FIND_QUICK_MARKED: Constants.NAME + ".markedList",
+        FIND_QUICK_GO_ANYWHERE: Constants.NAME + ".goAnywhere",
+        GOTO_NAV_ENTRY: Constants.NAME + ".gotoNav",
+
+        START_SEARCH: Constants.NAME + ".startSearch",
+        FIND_ALL: Constants.NAME + ".findAll",
+        FIND_NEXT: Constants.NAME + ".findNext",
+        FIND_NEXT_FO: Constants.NAME + ".findNextFromOutline",
+        FIND_PREVIOUS: Constants.NAME + ".findPrevious",
+        FIND_PREVIOUS_FO: Constants.NAME + ".findPreviousFromOutline",
+        FIND_VAR: Constants.NAME + ".findVar",
+        FIND_DEF: Constants.NAME + ".findDef",
+        REPLACE: Constants.NAME + ".replace",
+        REPLACE_FO: Constants.NAME + ".replaceFromOutline",
+        REPLACE_THEN_FIND: Constants.NAME + ".replaceThenFind",
+        REPLACE_THEN_FIND_FO: Constants.NAME + ".replaceThenFindFromOutline",
+        REPLACE_ALL: Constants.NAME + ".replaceAll",
+
         CLONE_FIND_ALL: Constants.NAME + ".cloneFindAll",
         CLONE_FIND_ALL_FLATTENED: Constants.NAME + ".cloneFindAllFlattened",
+        CLONE_FIND_TAG: Constants.NAME + ".cloneFindTag",
         CLONE_FIND_MARKED: Constants.NAME + ".cloneFindMarked",
         CLONE_FIND_FLATTENED_MARKED: Constants.NAME + ".cloneFindFlattenedMarked",
         // TODO
         GOTO_GLOBAL_LINE: Constants.NAME + ".gotoGlobalLine",
         TAG_CHILDREN: Constants.NAME + ".tagChildren",
+        TAG_NODE: Constants.NAME + ".tagNode",
+        REMOVE_TAG: Constants.NAME + ".removeTag",
+        REMOVE_TAGS: Constants.NAME + ".removeTags",
         SET_FIND_EVERYWHERE_OPTION: Constants.NAME + ".setFindEverywhereOption",
         SET_FIND_NODE_ONLY_OPTION: Constants.NAME + ".setFindNodeOnlyOption",
         SET_FIND_SUBOUTLINE_ONLY_OPTION: Constants.NAME + ".setFindSuboutlineOnlyOption",
