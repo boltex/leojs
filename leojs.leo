@@ -102,7 +102,6 @@
 </v>
 <v t="felix.20211201001847.1"><vh>class LeoNode</vh>
 <v t="felix.20211201001847.2"><vh>copyProperties</vh></v>
-<v t="felix.20211201001847.3"><vh>setRoot</vh></v>
 <v t="felix.20211201001847.4"><vh>_getNodeContextValue</vh></v>
 <v t="felix.20211201001847.5"><vh>get_iconPath</vh></v>
 <v t="felix.20211201001847.6"><vh>get_id</vh></v>
@@ -1073,9 +1072,6 @@ public refreshTreeRoot(): void {
     // Check if its the selected node and call signal it to the UI
     if (element.__eq__(g.app.commanders()[this._leoUI.commanderIndex].p)) {
         this._leoUI.gotSelectedNode(element);
-        if (element._isRoot) {
-            this._leoUI.leoStates.leoRoot = true;
-        }
     }
     // Build a LeoNode (a vscode tree node) from the Position
     return w_leoNode;
@@ -1089,19 +1085,27 @@ public refreshTreeRoot(): void {
     //     console.log('called get children on root');
     // }
     if (element) {
+        // NORMAL TREEVIEW CHILDREN
         return [...element.children()];
     } else {
+        // No elements : FIRST CHILDREN OF VSCODE'S TREEVIEW
         const w_commanders: Commands[] = g.app.commanders();
         if (w_commanders[this._leoUI.commanderIndex]) {
-            const w_c = w_commanders[this._leoUI.commanderIndex]!; // Currently Selected Document's Commander
+            // Currently Selected Document's Commander
+            const w_c = w_commanders[this._leoUI.commanderIndex]!;
             if (w_c.hoistStack.length) {
-                // topmost hoisted starts the outline as single root 'child'
+                // HOISTED: Topmost hoisted node starts the outline as single root 'child'
                 const w_rootPosition = w_c.hoistStack[w_c.hoistStack.length - 1].p;
                 w_rootPosition._isRoot = true;
                 return [w_rootPosition];
             } else {
-                // true list of root nodes
-                return [...w_c.all_Root_Children()];
+                // NOT HOISTED: Normal list of root nodes
+                const w_rootNodes = [...w_c.all_Root_Children()];
+                if (w_rootNodes.length === 1) {
+                    // Exactly one: prevent hoisting on SINGLE top node
+                    w_rootNodes[0]._isRoot = true;
+                }
+                return w_rootNodes;
             }
         } else {
             // console.error('Commander not found in commanderList');
@@ -2268,13 +2272,13 @@ export class LeoStates {
 
 </t>
 <t tx="felix.20201214151447.21">public setSelectedNodeFlags(p_node: Position): void {
-    this.leoRoot = false; // * RESET the root flag : It is set by vscode instead right after getting list of children for root of outline
     this.leoMarked = p_node.isMarked();
     this.leoCloned = p_node.isCloned();
     this.leoDirty = p_node.isDirty();
     this.leoEmpty = !p_node.v.hasBody();
     this.leoChild = p_node.hasChildren();
     this.leoAtFile = p_node.isAtFileNode();
+    this.leoRoot = p_node._isRoot;
 }
 
 </t>
@@ -2285,6 +2289,7 @@ export class LeoStates {
     this.leoCanDemote = p_states.canDemote;
     this.leoCanPromote = p_states.canPromote;
     this.leoCanDehoist = p_states.canDehoist;
+    this.leoRoot = !p_states.canHoist;
 }
 </t>
 <t tx="felix.20201214151447.3"></t>
@@ -2648,6 +2653,7 @@ export interface LeoPackageStates {
     canDemote: boolean; // Currently selected node can have its siblings demoted
     canPromote: boolean; // Currently selected node can have its children promoted
     canDehoist: boolean; // Leo Document is currently hoisted and can be de-hoisted
+    canHoist: boolean; // Selected node is not the first top node already root
 }
 
 </t>
@@ -2882,13 +2888,28 @@ private _triggerGetStates(): void {
     if (this._refreshType.states) {
         this._refreshType.states = false;
         const c = g.app.commanders()[this.commanderIndex];
+        const p = c.p;
+        let w_canHoist = true;
+        if (c.hoistStack.length) {
+            const w_ph = c.hoistStack[c.hoistStack.length - 1].p;
+            if (p.__eq__(w_ph)) {
+                // p is already the hoisted node
+                w_canHoist = false;
+            }
+        } else {
+            // not hoisted, was it the single top child of the real root?
+            if (c.rootPosition()!.__eq__(p) &amp;&amp; c.hiddenRootNode.children.length === 1) {
+                w_canHoist = false;
+            }
+        }
         const w_states: LeoPackageStates = {
             changed: c.changed, // Document has changed (is dirty)
             canUndo: c.canUndo(), // Document can undo the last operation done
             canRedo: c.canRedo(), // Document can redo the last operation 'undone'
             canDemote: c.canDemote(), // Selected node can have its siblings demoted
             canPromote: c.canPromote(), // Selected node can have its children promoted
-            canDehoist: c.canDehoist() // Document is currently hoisted and can be de-hoisted
+            canDehoist: c.canDehoist(), // Document is currently hoisted and can be de-hoisted
+            canHoist: w_canHoist
         };
         this.leoStates.setLeoStateFlags(w_states);
     }
@@ -7882,7 +7903,7 @@ public setUndoSelection(p_undoNode: LeoUndoNode): void {
         public u: any,
         private _icons: Icon[], // pointer to global array of node icons
         private _id: string,
-        public isRoot: boolean
+        public isRoot: boolean // For contextual menu on each node (not the global selected node flag!)
     ) {
         super(label, collapsibleState);
         this.contextValue = this._getNodeContextValue();
@@ -7926,16 +7947,6 @@ public setUndoSelection(p_undoNode: LeoUndoNode): void {
     this.isRoot = p_node.isRoot;
     this.contextValue = this._getNodeContextValue();
     return this;
-}
-
-</t>
-<t tx="felix.20211201001847.3">/**
- * @deprecated
- * * Set this node as the root for hoist/dehoist context flags purposes
- */
-public setRoot(): void {
-    this.isRoot = true;
-    this.contextValue = this._getNodeContextValue();
 }
 
 </t>

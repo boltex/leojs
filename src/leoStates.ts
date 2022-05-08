@@ -203,13 +203,13 @@ export class LeoStates {
     ) { }
 
     public setSelectedNodeFlags(p_node: Position): void {
-        this.leoRoot = false; // * RESET the root flag : It is set by vscode instead right after getting list of children for root of outline
         this.leoMarked = p_node.isMarked();
         this.leoCloned = p_node.isCloned();
         this.leoDirty = p_node.isDirty();
         this.leoEmpty = !p_node.v.hasBody();
         this.leoChild = p_node.hasChildren();
         this.leoAtFile = p_node.isAtFileNode();
+        this.leoRoot = p_node._isRoot;
     }
 
     public setLeoStateFlags(p_states: LeoPackageStates): void {
@@ -219,5 +219,6 @@ export class LeoStates {
         this.leoCanDemote = p_states.canDemote;
         this.leoCanPromote = p_states.canPromote;
         this.leoCanDehoist = p_states.canDehoist;
+        this.leoRoot = !p_states.canHoist;
     }
 }

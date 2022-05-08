@@ -1296,8 +1296,8 @@ export class CommanderOutlineCommands {
         }
         const bunch: HoistStackEntry = c.hoistStack.pop()!;
         const p: Position = bunch.p;
-        // ! Check if exist BUT FALSE
-        if (p && !p.__bool__()) {
+        // #2643 Uses the expanded state preserved by 'hoist' method
+        if (bunch.expanded) {
             p.expand();
         } else {
             p.contract();

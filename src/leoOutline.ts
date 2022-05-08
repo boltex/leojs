@@ -68,9 +68,6 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
         // Check if its the selected node and call signal it to the UI
         if (element.__eq__(g.app.commanders()[this._leoUI.commanderIndex].p)) {
             this._leoUI.gotSelectedNode(element);
-            if (element._isRoot) {
-                this._leoUI.leoStates.leoRoot = true;
-            }
         }
         // Build a LeoNode (a vscode tree node) from the Position
         return w_leoNode;
@@ -83,19 +80,27 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
         //     console.log('called get children on root');
         // }
         if (element) {
+            // NORMAL TREEVIEW CHILDREN
             return [...element.children()];
         } else {
+            // No elements : FIRST CHILDREN OF VSCODE'S TREEVIEW
             const w_commanders: Commands[] = g.app.commanders();
             if (w_commanders[this._leoUI.commanderIndex]) {
-                const w_c = w_commanders[this._leoUI.commanderIndex]!; // Currently Selected Document's Commander
+                // Currently Selected Document's Commander
+                const w_c = w_commanders[this._leoUI.commanderIndex]!;
                 if (w_c.hoistStack.length) {
-                    // topmost hoisted starts the outline as single root 'child'
+                    // HOISTED: Topmost hoisted node starts the outline as single root 'child'
                     const w_rootPosition = w_c.hoistStack[w_c.hoistStack.length - 1].p;
                     w_rootPosition._isRoot = true;
                     return [w_rootPosition];
                 } else {
-                    // true list of root nodes
-                    return [...w_c.all_Root_Children()];
+                    // NOT HOISTED: Normal list of root nodes
+                    const w_rootNodes = [...w_c.all_Root_Children()];
+                    if (w_rootNodes.length === 1) {
+                        // Exactly one: prevent hoisting on SINGLE top node
+                        w_rootNodes[0]._isRoot = true;
+                    }
+                    return w_rootNodes;
                 }
             } else {
                 // console.error('Commander not found in commanderList');
@@ -137,7 +142,7 @@ export class LeoOutlineNode extends vscode.TreeItem {
         public u: any,
         private _icons: Icon[], // pointer to global array of node icons
         private _id: string,
-        public isRoot: boolean
+        public isRoot: boolean // For contextual menu on each node (not the global selected node flag!)
     ) {
         super(label, collapsibleState);
         this.contextValue = this._getNodeContextValue();
@@ -178,15 +183,6 @@ export class LeoOutlineNode extends vscode.TreeItem {
         this.isRoot = p_node.isRoot;
         this.contextValue = this._getNodeContextValue();
         return this;
-    }
-
-    /**
-     * @deprecated
-     * * Set this node as the root for hoist/dehoist context flags purposes
-     */
-    public setRoot(): void {
-        this.isRoot = true;
-        this.contextValue = this._getNodeContextValue();
     }
 
     private _getNodeContextValue(): string {

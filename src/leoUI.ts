@@ -395,13 +395,28 @@ export class LeoUI {
         if (this._refreshType.states) {
             this._refreshType.states = false;
             const c = g.app.commanders()[this.commanderIndex];
+            const p = c.p;
+            let w_canHoist = true;
+            if (c.hoistStack.length) {
+                const w_ph = c.hoistStack[c.hoistStack.length - 1].p;
+                if (p.__eq__(w_ph)) {
+                    // p is already the hoisted node
+                    w_canHoist = false;
+                }
+            } else {
+                // not hoisted, was it the single top child of the real root?
+                if (c.rootPosition()!.__eq__(p) && c.hiddenRootNode.children.length === 1) {
+                    w_canHoist = false;
+                }
+            }
             const w_states: LeoPackageStates = {
                 changed: c.changed, // Document has changed (is dirty)
                 canUndo: c.canUndo(), // Document can undo the last operation done
                 canRedo: c.canRedo(), // Document can redo the last operation 'undone'
                 canDemote: c.canDemote(), // Selected node can have its siblings demoted
                 canPromote: c.canPromote(), // Selected node can have its children promoted
-                canDehoist: c.canDehoist() // Document is currently hoisted and can be de-hoisted
+                canDehoist: c.canDehoist(), // Document is currently hoisted and can be de-hoisted
+                canHoist: w_canHoist
             };
             this.leoStates.setLeoStateFlags(w_states);
         }
