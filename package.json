@@ -1045,17 +1045,29 @@
       {
         "command": "leojs.hoistNode",
         "category": "Leojs",
-        "title": "Hoist"
+        "title": "Hoist",
+        "icon": {
+          "light": "resources/light/hoist.svg",
+          "dark": "resources/dark/hoist.svg"
+        }
       },
       {
         "command": "leojs.hoistSelection",
         "category": "Leojs",
-        "title": "Hoist"
+        "title": "Hoist",
+        "icon": {
+          "light": "resources/light/hoist.svg",
+          "dark": "resources/dark/hoist.svg"
+        }
       },
       {
         "command": "leojs.hoistSelectionFromOutline",
         "category": "Leojs",
-        "title": "Hoist"
+        "title": "Hoist",
+        "icon": {
+          "light": "resources/light/hoist.svg",
+          "dark": "resources/dark/hoist.svg"
+        }
       },
       {
         "command": "leojs.deHoist",
@@ -1715,6 +1727,11 @@
         {
           "command": "leojs.deHoistFromOutline",
           "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsCanDehoist",
+          "group": "navigation@5"
+        },
+        {
+          "command": "leojs.hoistSelectionFromOutline",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && !leojsRoot",
           "group": "navigation@5"
         },
         {
@@ -2463,8 +2480,5 @@
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "stream": "^0.0.2"
-  },
-  "gitCommit": "8ae0aa6",
-  "gitBranch": "devel",
-  "gitDate": "2022-05-05 23:01:17 -0400"
+  }
 }

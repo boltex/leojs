@@ -3123,9 +3123,9 @@ export class Commands {
         const p: Position = this.p;
         if (c.hoistStack.length) {
             const bunch = c.hoistStack[c.hoistStack.length - 1];
-            return p.__bool__() && p.hasBack() && !p.__eq__(bunch.p);
+            return p && p.__bool__() && p.hasBack() && !p.__eq__(bunch.p);
         }
-        return p.__bool__() && p.__bool__() && p.hasBack();
+        return p && p.__bool__() && p.hasBack();
     }
     //@+node:felix.20211023195447.20: *6* c.canMoveOutlineUp
     public canMoveOutlineUp(): boolean {

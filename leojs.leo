@@ -3360,10 +3360,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "dependencies": {
     "bowser": "^2.11.0",
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "8ae0aa6",
-  "gitBranch": "devel",
-  "gitDate": "2022-05-05 23:01:17 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -4007,17 +4004,29 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 <t tx="felix.20201214205159.19">{
   "command": "leojs.hoistNode",
   "category": "Leojs",
-  "title": "Hoist"
+  "title": "Hoist",
+  "icon": {
+    "light": "resources/light/hoist.svg",
+    "dark": "resources/dark/hoist.svg"
+  }
 },
 {
   "command": "leojs.hoistSelection",
   "category": "Leojs",
-  "title": "Hoist"
+  "title": "Hoist",
+  "icon": {
+    "light": "resources/light/hoist.svg",
+    "dark": "resources/dark/hoist.svg"
+  }
 },
 {
   "command": "leojs.hoistSelectionFromOutline",
   "category": "Leojs",
-  "title": "Hoist"
+  "title": "Hoist",
+  "icon": {
+    "light": "resources/light/hoist.svg",
+    "dark": "resources/dark/hoist.svg"
+  }
 },
 {
   "command": "leojs.deHoist",
@@ -4863,6 +4872,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   {
     "command": "leojs.deHoistFromOutline",
     "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsCanDehoist",
+    "group": "navigation@5"
+  },
+  {
+    "command": "leojs.hoistSelectionFromOutline",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsRoot",
     "group": "navigation@5"
   },
   {
