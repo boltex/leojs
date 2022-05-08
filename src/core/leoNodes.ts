@@ -48,8 +48,8 @@ export class NodeIndices {
         if (v2 && v2 !== v) {
             g.error(
                 `getNewIndex: gnx clash ${gnx}\n` +
-                    `          v: ${v}\n` +
-                    `         v2: ${v2}`
+                `          v: ${v}\n` +
+                `         v2: ${v2}`
             );
         }
     }
@@ -1832,7 +1832,7 @@ export class Position {
                     } else if (child_v.fileIndex === parent.v.fileIndex) {
                         g.error(
                             `duplicate gnx: ${child_v.fileIndex} ` +
-                                `v: ${child_v} parent: ${parent.v}`
+                            `v: ${child_v} parent: ${parent.v}`
                         );
                         child_v.fileIndex =
                             g.app.nodeIndices!.getNewIndex(child_v);
@@ -2518,10 +2518,10 @@ export interface Position {
     subtree_with_unique_vnodes_iter: () => Generator<Position>;
     threadBack: () => Position;
     threadNext: () => Position;
-    visBack: (c: Commands) => Position;
-    visNext: (c: Commands) => Position;
-    hasVisBack: (c: Commands) => Position;
-    hasVisNext: (c: Commands) => Position;
+    visBack: (c: Commands) => Position | undefined;
+    visNext: (c: Commands) => Position | undefined;
+    hasVisBack: (c: Commands) => Position | undefined;
+    hasVisNext: (c: Commands) => Position | undefined;
     hasFirstChild: () => boolean;
     atNoSentFileNodeName: () => string;
     atAsisFileNodeName: () => string;

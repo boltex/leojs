@@ -739,7 +739,7 @@ export class Commands {
         const c: Commands = this;
         let p: Position = c.p;
         while (1) {
-            let back: Position = p.visBack(c);
+            let back = p.visBack(c);
             if (back && back.__bool__() && back.isVisible(c)) {
                 p = back;
             } else {
@@ -855,7 +855,7 @@ export class Commands {
         const c: Commands = this;
         let p: Position = c.p;
         while (1) {
-            const next: Position = p.visNext(c);
+            const next = p.visNext(c);
             if (next && next.__bool__() && next.isVisible(c)) {
                 p = next;
             } else {
@@ -3101,7 +3101,8 @@ export class Commands {
     public canMoveOutlineDown(): boolean {
         const c: Commands = this;
         const p: Position = this.p;
-        return p && p.__bool__() && p.visNext(c).__bool__();
+        const next = p.visNext(c);
+        return p && p.__bool__() && !!next && next.__bool__();
     }
     //@+node:felix.20211023195447.18: *6* c.canMoveOutlineLeft
     public canMoveOutlineLeft(): boolean {
@@ -3131,7 +3132,7 @@ export class Commands {
     public canMoveOutlineUp(): boolean {
         const c: Commands = this;
         const current: Position = this.p;
-        const visBack: Position | false =
+        const visBack: Position | undefined | false =
             !!current && !!current.__bool__() && current.visBack(c);
         if (!visBack || !visBack.__bool__()) {
             return false;
@@ -3186,12 +3187,14 @@ export class Commands {
     public canSelectVisBack(): boolean {
         const c: Commands = this;
         const p: Position = this.p;
-        return p.visBack(c).__bool__();
+        const back = p.visBack(c);
+        return !!back && back.__bool__();
     }
     public canSelectVisNext(): boolean {
         const c: Commands = this;
         const p: Position = this.p;
-        return p.visNext(c).__bool__();
+        const next = p.visNext(c);
+        return !!next && next.__bool__();
     }
     //@+node:felix.20211023195447.24: *6* c.canShiftBodyLeft/Right
     public canShiftBodyLeft(): boolean {

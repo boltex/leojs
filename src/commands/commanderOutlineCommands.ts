@@ -1481,7 +1481,7 @@ export class CommanderOutlineCommands {
         if (!p || !p.__bool__()) {
             return;
         }
-        let newNode: Position;
+        let newNode: Position | undefined;
         // c.endEditing()  // Make sure we capture the headline for Undo.
         if (false) { // c.config.getBool('select-next-after-delete'):
             // #721: Optionally select next node after delete.
@@ -1494,7 +1494,8 @@ export class CommanderOutlineCommands {
             }
         } else {
             // Legacy: select previous node if possible.
-            if (p.hasVisBack(c).__bool__()) {
+            const back = p.hasVisBack(c);
+            if (back && back.__bool__()) {
                 newNode = p.visBack(c);
             } else {
                 newNode = p.next();  // _not_ p.visNext(): we are at the top level.
@@ -2024,7 +2025,7 @@ export class CommanderOutlineCommands {
             return;
         }
         const parent: Position = p.parent();
-        let next: Position = p.visNext(c);
+        let next: Position | undefined = p.visNext(c);
         while (next && next.__bool__() && p.isAncestorOf(next)) {
             next = next.visNext(c);
         }
@@ -2174,12 +2175,12 @@ export class CommanderOutlineCommands {
             // c.treeFocusHelper();
             return;
         }
-        const back: Position = p.visBack(c);
+        const back = p.visBack(c);
         if (!back || !back.__bool__()) {
             // c.treeFocusHelper();
             return;
         }
-        const back2: Position = back.visBack(c);
+        const back2 = back.visBack(c);
         // c.endEditing();
         const undoData: Bead = u.beforeMoveNode(p);
         let moved: boolean = false;
