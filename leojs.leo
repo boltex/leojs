@@ -1594,8 +1594,8 @@ public static LEO_COMMANDS = {
     HOIST_PNODE: "hoist",
     DEHOIST: "de-hoist",
     // * History Navigation
-    GOTO_PREV_HISTORY: "goToPrevHistory",
-    GOTO_NEXT_HISTORY: "goToNextHistory",
+    GOTO_PREV_HISTORY: "goto-prev-history-node",
+    GOTO_NEXT_HISTORY: "goto-next-history-node",
     // * Goto &amp; Folding
     PAGE_UP: "tree-page-up",
     PAGE_DOWN: "tree-page-down",
@@ -4850,39 +4850,49 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     "group": "navigation@2"
   },
   {
-    "command": "leojs.undoFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsCanUndo",
+    "command": "leojs.prevFromOutline",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened",
     "group": "navigation@3"
+  },
+  {
+    "command": "leojs.nextFromOutline",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened",
+    "group": "navigation@4"
+  },
+  {
+    "command": "leojs.undoFromOutline",
+    "when": "view =~ /^leojsOutline|^leojsUndo/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsCanUndo",
+    "group": "navigation@5"
   },
   {
     "command": "leojs.undoDisabled",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsCanUndo",
-    "group": "navigation@3"
+    "when": "view =~ /^leojsOutline|^leojsUndo/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsCanUndo",
+    "group": "navigation@5"
   },
   {
     "command": "leojs.redoFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsCanRedo",
-    "group": "navigation@4"
+    "when": "view =~ /^leojsOutline|^leojsUndo/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsCanRedo",
+    "group": "navigation@6"
   },
   {
     "command": "leojs.redoDisabled",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsCanRedo",
-    "group": "navigation@4"
+    "when": "view =~ /^leojsOutline|^leojsUndo/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsCanRedo",
+    "group": "navigation@6"
   },
   {
     "command": "leojs.deHoistFromOutline",
     "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsCanDehoist",
-    "group": "navigation@5"
+    "group": "navigation@7"
   },
   {
     "command": "leojs.hoistSelectionFromOutline",
     "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsRoot",
-    "group": "navigation@5"
+    "group": "navigation@7"
   },
   {
     "command": "leojs.contractAllFromOutline",
     "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened",
-    "group": "navigation@6"
+    "group": "navigation@8"
   }
 ],
 </t>

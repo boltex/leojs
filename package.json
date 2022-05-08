@@ -1705,39 +1705,49 @@
           "group": "navigation@2"
         },
         {
-          "command": "leojs.undoFromOutline",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsCanUndo",
+          "command": "leojs.prevFromOutline",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened",
           "group": "navigation@3"
+        },
+        {
+          "command": "leojs.nextFromOutline",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened",
+          "group": "navigation@4"
+        },
+        {
+          "command": "leojs.undoFromOutline",
+          "when": "view =~ /^leojsOutline|^leojsUndo/ && leojsTreeOpened && leojsCanUndo",
+          "group": "navigation@5"
         },
         {
           "command": "leojs.undoDisabled",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && !leojsCanUndo",
-          "group": "navigation@3"
+          "when": "view =~ /^leojsOutline|^leojsUndo/ && leojsTreeOpened && !leojsCanUndo",
+          "group": "navigation@5"
         },
         {
           "command": "leojs.redoFromOutline",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsCanRedo",
-          "group": "navigation@4"
+          "when": "view =~ /^leojsOutline|^leojsUndo/ && leojsTreeOpened && leojsCanRedo",
+          "group": "navigation@6"
         },
         {
           "command": "leojs.redoDisabled",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && !leojsCanRedo",
-          "group": "navigation@4"
+          "when": "view =~ /^leojsOutline|^leojsUndo/ && leojsTreeOpened && !leojsCanRedo",
+          "group": "navigation@6"
         },
         {
           "command": "leojs.deHoistFromOutline",
           "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsCanDehoist",
-          "group": "navigation@5"
+          "group": "navigation@7"
         },
         {
           "command": "leojs.hoistSelectionFromOutline",
           "when": "view =~ /^leojsOutline/ && leojsTreeOpened && !leojsRoot",
-          "group": "navigation@5"
+          "group": "navigation@7"
         },
         {
           "command": "leojs.contractAllFromOutline",
           "when": "view =~ /^leojsOutline/ && leojsTreeOpened",
-          "group": "navigation@6"
+          "group": "navigation@8"
         }
       ],
       "view/item/context": [

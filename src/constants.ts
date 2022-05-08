@@ -559,8 +559,8 @@ export class Constants {
         HOIST_PNODE: "hoist",
         DEHOIST: "de-hoist",
         // * History Navigation
-        GOTO_PREV_HISTORY: "goToPrevHistory",
-        GOTO_NEXT_HISTORY: "goToNextHistory",
+        GOTO_PREV_HISTORY: "goto-prev-history-node",
+        GOTO_NEXT_HISTORY: "goto-next-history-node",
         // * Goto & Folding
         PAGE_UP: "tree-page-up",
         PAGE_DOWN: "tree-page-down",
