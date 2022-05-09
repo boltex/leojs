@@ -115,6 +115,8 @@ export interface LeoPackageStates {
     changed: boolean; // Leo document has changed (is dirty)
     canUndo: boolean; // Leo document can undo the last operation done
     canRedo: boolean; // Leo document can redo the last operation 'undone'
+    canGoBack: boolean; // Has history
+    canGoNext: boolean; // Has used goBack at least once
     canDemote: boolean; // Currently selected node can have its siblings demoted
     canPromote: boolean; // Currently selected node can have its children promoted
     canDehoist: boolean; // Leo Document is currently hoisted and can be de-hoisted

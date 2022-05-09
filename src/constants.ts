@@ -260,6 +260,8 @@ export class Constants {
         LEO_CHANGED: "leojsChanged",
         LEO_CAN_UNDO: "leojsCanUndo",
         LEO_CAN_REDO: "leojsCanRedo",
+        LEO_CAN_BACK: "leojsCanGoBack",
+        LEO_CAN_NEXT: "leojsCanGoNext",
         LEO_CAN_DEMOTE: "leojsCanDemote",
         LEO_CAN_PROMOTE: "leojsCanPromote",
         LEO_CAN_DEHOIST: "leojsCanDehoist",
@@ -330,11 +332,6 @@ export class Constants {
         SHOW_WELCOME: Constants.NAME + ".showWelcomePage", // Always available: not in the commandPalette section of package.json
         SHOW_SETTINGS: Constants.NAME + ".showSettingsPage", // Always available: not in the commandPalette section of package.json
         STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
-        // * LeoBridge
-        CHOOSE_LEO_FOLDER: Constants.NAME + ".chooseLeoFolder",
-        START_SERVER: Constants.NAME + ".startServer",
-        STOP_SERVER: Constants.NAME + ".stopServer",
-        CONNECT: Constants.NAME + ".connectToServer",
         // Leo Documents
         SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
         OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
@@ -414,7 +411,9 @@ export class Constants {
         INSERT_CHILD: Constants.NAME + ".insertChildNode",
         CLONE: Constants.NAME + ".cloneNode",
         PROMOTE: Constants.NAME + ".promote",
+        PROMOTE_DISABLED: Constants.NAME + ".promoteDisabled",
         DEMOTE: Constants.NAME + ".demote",
+        DEMOTE_DISABLED: Constants.NAME + ".demoteDisabled",
         REFRESH_FROM_DISK: Constants.NAME + ".refreshFromDisk",
         // Commands from keyboard, while focus on BODY (command-palette returns to BODY for now)
         MARK_SELECTION: Constants.NAME + ".markSelection",
@@ -456,9 +455,11 @@ export class Constants {
         DEMOTE_SELECTION_FO: Constants.NAME + ".demoteSelectionFromOutline",
         REFRESH_FROM_DISK_SELECTION_FO: Constants.NAME + ".refreshFromDiskSelectionFromOutline",
         HOIST: Constants.NAME + ".hoistNode",
+        HOIST_DISABLED: Constants.NAME + ".hoistDisabled",
         HOIST_SELECTION: Constants.NAME + ".hoistSelection",
         HOIST_SELECTION_FO: Constants.NAME + ".hoistSelectionFromOutline",
         DEHOIST: Constants.NAME + ".deHoist",
+        DEHOIST_DISABLED: Constants.NAME + ".deHoistDisabled",
         DEHOIST_FO: Constants.NAME + ".deHoistFromOutline",
         EXTRACT: Constants.NAME + ".extract",
         EXTRACT_NAMES: Constants.NAME + ".extractNames",

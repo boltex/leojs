@@ -120,8 +120,10 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.PAGE_UP, () => p_leoUI.command(LEOCMD.PAGE_UP, U, REFRESH_NODE_BODY, true)],
         [CMD.PAGE_DOWN, () => p_leoUI.command(LEOCMD.PAGE_DOWN, U, REFRESH_NODE_BODY, true)],
         [CMD.DEHOIST, () => p_leoUI.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, false)],
+        [CMD.DEHOIST_DISABLED, () => { }],
         [CMD.DEHOIST_FO, () => p_leoUI.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, true)],
         [CMD.HOIST, (p_node: Position) => p_leoUI.command(LEOCMD.HOIST_PNODE, p_node, REFRESH_TREE_BODY, true)],
+        [CMD.HOIST_DISABLED, () => { }],
         [CMD.HOIST_SELECTION, () => p_leoUI.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, false)],
         [CMD.HOIST_SELECTION_FO, () => p_leoUI.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, true)],
         [CMD.INSERT, (p_node: Position) => p_leoUI.insertNode(p_node, true, false, false)],
@@ -143,10 +145,12 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.CLONE_SELECTION_FO, () => p_leoUI.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, true)],
 
         [CMD.PROMOTE, (p_node: Position) => p_leoUI.command(LEOCMD.PROMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+        [CMD.PROMOTE_DISABLED, () => { }],
         [CMD.PROMOTE_SELECTION, () => p_leoUI.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, false)],
         [CMD.PROMOTE_SELECTION_FO, () => p_leoUI.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, true)],
 
         [CMD.DEMOTE, (p_node: Position) => p_leoUI.command(LEOCMD.DEMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+        [CMD.DEMOTE_DISABLED, () => { }],
         [CMD.DEMOTE_SELECTION, () => p_leoUI.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, false)],
         [CMD.DEMOTE_SELECTION_FO, () => p_leoUI.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, true)],
 

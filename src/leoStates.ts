@@ -97,6 +97,30 @@ export class LeoStates {
     }
 
     /**
+     * Redo operation available state
+     */
+    private _leoCanGoBack: boolean = false;
+    get leoCanGoBack(): boolean {
+        return this._leoCanGoBack;
+    }
+    set leoCanGoBack(p_value: boolean) {
+        this._leoCanGoBack = p_value;
+        utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_BACK, p_value);
+    }
+
+    /**
+     * Redo operation available state
+     */
+    private _leoCanGoNext: boolean = false;
+    get leoCanGoNext(): boolean {
+        return this._leoCanGoNext;
+    }
+    set leoCanGoNext(p_value: boolean) {
+        this._leoCanGoNext = p_value;
+        utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_NEXT, p_value);
+    }
+
+    /**
      * Current selection allows demote command
      */
     private _leoCanDemote: boolean = false;
@@ -216,6 +240,8 @@ export class LeoStates {
         this.leoChanged = p_states.changed;
         this.leoCanUndo = p_states.canUndo;
         this.leoCanRedo = p_states.canRedo;
+        this.leoCanGoBack = p_states.canGoBack;
+        this.leoCanGoNext = p_states.canGoNext;
         this.leoCanDemote = p_states.canDemote;
         this.leoCanPromote = p_states.canPromote;
         this.leoCanDehoist = p_states.canDehoist;

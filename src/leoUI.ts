@@ -413,6 +413,8 @@ export class LeoUI {
                 changed: c.changed, // Document has changed (is dirty)
                 canUndo: c.canUndo(), // Document can undo the last operation done
                 canRedo: c.canRedo(), // Document can redo the last operation 'undone'
+                canGoBack: c.nodeHistory.beadPointer > 0,
+                canGoNext: c.nodeHistory.beadPointer + 1 < c.nodeHistory.beadList.length,
                 canDemote: c.canDemote(), // Selected node can have its siblings demoted
                 canPromote: c.canPromote(), // Selected node can have its children promoted
                 canDehoist: c.canDehoist(), // Document is currently hoisted and can be de-hoisted
@@ -1011,6 +1013,8 @@ export class LeoUI {
             c.selectPosition(p_node);
             // Set flags here - not only when 'got selection' is reached.
             this.leoStates.setSelectedNodeFlags(p_node);
+            this._refreshType.states = true;
+            this.getStates(); //  setLeoStateFlags gets called too
 
         } else {
             console.error('Selected a non-existent position', p_node.h);

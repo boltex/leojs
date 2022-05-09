@@ -287,6 +287,8 @@
 <v t="felix.20201214151447.6"><vh>leoChanged &amp; helper</vh></v>
 <v t="felix.20201214151447.7"><vh>leoCanUndo &amp; helper</vh></v>
 <v t="felix.20201214151447.8"><vh>leoCanRedo &amp; helper</vh></v>
+<v t="felix.20220508201944.1"><vh>leoCanGoBack &amp; helper</vh></v>
+<v t="felix.20220508201944.2"><vh>leoCanGoNext &amp; helper</vh></v>
 <v t="felix.20201214151447.9"><vh>leoCanDemote &amp; helper</vh></v>
 <v t="felix.20201214151447.10"><vh>leoCanPromote &amp; helper</vh></v>
 <v t="felix.20201214151447.11"><vh>leoCanDehoist &amp; helper</vh></v>
@@ -432,6 +434,7 @@
 <v t="felix.20201214205159.39"><vh>Marked Nodes Commands</vh></v>
 <v t="felix.20201214205159.40"><vh>Hidden from Palette</vh>
 <v t="felix.20201214205159.41"><vh>Test</vh></v>
+<v t="felix.20220508225045.1"><vh>disabled icon commands</vh></v>
 <v t="felix.20201214205159.42"><vh>Scripting &amp; @Buttons</vh></v>
 <v t="felix.20201214205159.43"><vh>Show UI Panes</vh></v>
 <v t="felix.20201214205159.44"><vh>Leo File Documents</vh></v>
@@ -1173,10 +1176,12 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.CLONE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, true)],
 
 [CMD.PROMOTE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.PROMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.PROMOTE_DISABLED, () =&gt; { }],
 [CMD.PROMOTE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, false)],
 [CMD.PROMOTE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, true)],
 
 [CMD.DEMOTE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.DEMOTE_PNODE, p_node, REFRESH_TREE_BODY, true, true)],
+[CMD.DEMOTE_DISABLED, () =&gt; { }],
 [CMD.DEMOTE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, false)],
 [CMD.DEMOTE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, true)],
 
@@ -1349,8 +1354,10 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.PAGE_DOWN, () =&gt; p_leoUI.command(LEOCMD.PAGE_DOWN, U, REFRESH_NODE_BODY, true)],
 </t>
 <t tx="felix.20201214150149.9">[CMD.DEHOIST, () =&gt; p_leoUI.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, false)],
+[CMD.DEHOIST_DISABLED, () =&gt; { }],
 [CMD.DEHOIST_FO, () =&gt; p_leoUI.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, true)],
 [CMD.HOIST, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.HOIST_PNODE, p_node, REFRESH_TREE_BODY, true)],
+[CMD.HOIST_DISABLED, () =&gt; { }],
 [CMD.HOIST_SELECTION, () =&gt; p_leoUI.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, false)],
 [CMD.HOIST_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, true)],
 </t>
@@ -1368,11 +1375,6 @@ public static COMMANDS = {
     SHOW_WELCOME: Constants.NAME + ".showWelcomePage", // Always available: not in the commandPalette section of package.json
     SHOW_SETTINGS: Constants.NAME + ".showSettingsPage", // Always available: not in the commandPalette section of package.json
     STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
-    // * LeoBridge
-    CHOOSE_LEO_FOLDER: Constants.NAME + ".chooseLeoFolder",
-    START_SERVER: Constants.NAME + ".startServer",
-    STOP_SERVER: Constants.NAME + ".stopServer",
-    CONNECT: Constants.NAME + ".connectToServer",
     // Leo Documents
     SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
     OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
@@ -1452,7 +1454,9 @@ public static COMMANDS = {
     INSERT_CHILD: Constants.NAME + ".insertChildNode",
     CLONE: Constants.NAME + ".cloneNode",
     PROMOTE: Constants.NAME + ".promote",
+    PROMOTE_DISABLED: Constants.NAME + ".promoteDisabled",
     DEMOTE: Constants.NAME + ".demote",
+    DEMOTE_DISABLED: Constants.NAME + ".demoteDisabled",
     REFRESH_FROM_DISK: Constants.NAME + ".refreshFromDisk",
     // Commands from keyboard, while focus on BODY (command-palette returns to BODY for now)
     MARK_SELECTION: Constants.NAME + ".markSelection",
@@ -1494,9 +1498,11 @@ public static COMMANDS = {
     DEMOTE_SELECTION_FO: Constants.NAME + ".demoteSelectionFromOutline",
     REFRESH_FROM_DISK_SELECTION_FO: Constants.NAME + ".refreshFromDiskSelectionFromOutline",
     HOIST: Constants.NAME + ".hoistNode",
+    HOIST_DISABLED: Constants.NAME + ".hoistDisabled",
     HOIST_SELECTION: Constants.NAME + ".hoistSelection",
     HOIST_SELECTION_FO: Constants.NAME + ".hoistSelectionFromOutline",
     DEHOIST: Constants.NAME + ".deHoist",
+    DEHOIST_DISABLED: Constants.NAME + ".deHoistDisabled",
     DEHOIST_FO: Constants.NAME + ".deHoistFromOutline",
     EXTRACT: Constants.NAME + ".extract",
     EXTRACT_NAMES: Constants.NAME + ".extractNames",
@@ -1829,6 +1835,8 @@ public static CONTEXT_FLAGS = {
     LEO_CHANGED: "leojsChanged",
     LEO_CAN_UNDO: "leojsCanUndo",
     LEO_CAN_REDO: "leojsCanRedo",
+    LEO_CAN_BACK: "leojsCanGoBack",
+    LEO_CAN_NEXT: "leojsCanGoNext",
     LEO_CAN_DEMOTE: "leojsCanDemote",
     LEO_CAN_PROMOTE: "leojsCanPromote",
     LEO_CAN_DEHOIST: "leojsCanDehoist",
@@ -2286,6 +2294,8 @@ export class LeoStates {
     this.leoChanged = p_states.changed;
     this.leoCanUndo = p_states.canUndo;
     this.leoCanRedo = p_states.canRedo;
+    this.leoCanGoBack = p_states.canGoBack;
+    this.leoCanGoNext = p_states.canGoNext;
     this.leoCanDemote = p_states.canDemote;
     this.leoCanPromote = p_states.canPromote;
     this.leoCanDehoist = p_states.canDehoist;
@@ -2650,6 +2660,8 @@ export interface LeoPackageStates {
     changed: boolean; // Leo document has changed (is dirty)
     canUndo: boolean; // Leo document can undo the last operation done
     canRedo: boolean; // Leo document can redo the last operation 'undone'
+    canGoBack: boolean; // Has history
+    canGoNext: boolean; // Has used goBack at least once
     canDemote: boolean; // Currently selected node can have its siblings demoted
     canPromote: boolean; // Currently selected node can have its children promoted
     canDehoist: boolean; // Leo Document is currently hoisted and can be de-hoisted
@@ -2906,6 +2918,8 @@ private _triggerGetStates(): void {
             changed: c.changed, // Document has changed (is dirty)
             canUndo: c.canUndo(), // Document can undo the last operation done
             canRedo: c.canRedo(), // Document can redo the last operation 'undone'
+            canGoBack: c.nodeHistory.beadPointer &gt; 0,
+            canGoNext: c.nodeHistory.beadPointer + 1 &lt; c.nodeHistory.beadList.length,
             canDemote: c.canDemote(), // Selected node can have its siblings demoted
             canPromote: c.canPromote(), // Selected node can have its children promoted
             canDehoist: c.canDehoist(), // Document is currently hoisted and can be de-hoisted
@@ -3072,6 +3086,8 @@ public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable&lt;unknown&
         c.selectPosition(p_node);
         // Set flags here - not only when 'got selection' is reached.
         this.leoStates.setSelectedNodeFlags(p_node);
+        this._refreshType.states = true;
+        this.getStates(); //  setLeoStateFlags gets called too
 
     } else {
         console.error('Selected a non-existent position', p_node.h);
@@ -3346,7 +3362,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     "url": "https://github.com/boltex/leojs"
   },
   "engines": {
-    "vscode": "^1.66.0"
+    "vscode": "^1.67.0"
   },
   "keywords": [
     "leo",
@@ -3615,7 +3631,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 {
   "command": "leojs.markSelection",
   "category": "Leojs",
-  "title": "Mark"
+  "title": "Mark",
+  "icon": {
+    "light": "resources/light/mark.svg",
+    "dark": "resources/dark/mark.svg"
+  }
 },
 {
   "command": "leojs.markSelectionFromOutline",
@@ -3634,7 +3654,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 {
   "command": "leojs.unmarkSelection",
   "category": "Leojs",
-  "title": "Unmark"
+  "title": "Unmark",
+  "icon": {
+    "light": "resources/light/unmark.svg",
+    "dark": "resources/dark/unmark.svg"
+  }
 },
 {
   "command": "leojs.unmarkSelectionFromOutline",
@@ -3659,7 +3683,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 {
   "command": "leojs.copyNodeSelection",
   "category": "Leojs",
-  "title": "Copy Node"
+  "title": "Copy Node",
+  "icon": {
+    "light": "resources/light/clipboard.svg",
+    "dark": "resources/dark/clipboard.svg"
+  }
 },
 {
   "command": "leojs.cutNode",
@@ -3669,7 +3697,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 {
   "command": "leojs.cutNodeSelection",
   "category": "Leojs",
-  "title": "Cut Node"
+  "title": "Cut Node",
+  "icon": {
+    "light": "resources/light/cut.svg",
+    "dark": "resources/dark/cut.svg"
+  }
 },
 {
   "command": "leojs.cutNodeSelectionFromOutline",
@@ -3684,7 +3716,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 {
   "command": "leojs.pasteNodeAtSelection",
   "category": "Leojs",
-  "title": "Paste Node"
+  "title": "Paste Node",
+  "icon": {
+    "light": "resources/light/paste.svg",
+    "dark": "resources/dark/paste.svg"
+  }
 },
 {
   "command": "leojs.pasteNodeAtSelectionFromOutline",
@@ -3699,7 +3735,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 {
   "command": "leojs.pasteNodeAsCloneAtSelection",
   "category": "Leojs",
-  "title": "Paste Node as Clone"
+  "title": "Paste Node as Clone",
+  "icon": {
+    "light": "resources/light/paste-clone.svg",
+    "dark": "resources/dark/paste-clone.svg"
+  }
 },
 {
   "command": "leojs.pasteNodeAsCloneAtSelectionFromOutline",
@@ -3718,23 +3758,35 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 {
   "command": "leojs.deleteSelection",
   "category": "Leojs",
-  "title": "Delete Node"
+  "title": "Delete Node",
+  "icon": {
+    "light": "resources/light/delete.svg",
+    "dark": "resources/dark/delete.svg"
+  }
 },
 {
   "command": "leojs.deleteSelectionFromOutline",
   "category": "Leojs",
   "title": "Delete Node"
 },
+{
 </t>
-<t tx="felix.20201214205159.15">{
-  "command": "leojs.extract",
+<t tx="felix.20201214205159.15">  "command": "leojs.extract",
   "category": "Leojs",
-  "title": "Extract"
+  "title": "Extract",
+  "icon": {
+    "light": "resources/light/extract.svg",
+    "dark": "resources/dark/extract.svg"
+  }
 },
 {
   "command": "leojs.extractNames",
   "category": "Leojs",
-  "title": "Extract Names"
+  "title": "Extract Names",
+  "icon": {
+    "light": "resources/light/extract-name.svg",
+    "dark": "resources/dark/extract-name.svg"
+  }
 },
 </t>
 <t tx="felix.20201214205159.16">{
@@ -3898,42 +3950,92 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 {
   "command": "leojs.cloneNodeSelection",
   "category": "Leojs",
-  "title": "Clone Node"
+  "title": "Clone Node",
+  "icon": {
+    "light": "resources/light/link.svg",
+    "dark": "resources/dark/link.svg"
+  }
 },
 {
   "command": "leojs.cloneNodeSelectionFromOutline",
   "category": "Leojs",
-  "title": "Clone Node"
+  "title": "Clone Node",
+  "icon": {
+    "light": "resources/light/link.svg",
+    "dark": "resources/dark/link.svg"
+  }
 },
 {
   "command": "leojs.promote",
   "category": "Leojs",
-  "title": "Promote Children"
+  "title": "Promote Children",
+  "icon": {
+    "light": "resources/light/promote.svg",
+    "dark": "resources/dark/promote.svg"
+  }
+},
+{
+  "command": "leojs.promoteDisabled",
+  "category": "Leojs",
+  "title": "Can't Promote",
+  "icon": {
+    "light": "resources/light/promote-disabled.svg",
+    "dark": "resources/dark/promote-disabled.svg"
+  }
 },
 {
   "command": "leojs.promoteSelection",
   "category": "Leojs",
-  "title": "Promote Children"
+  "title": "Promote Children",
+  "icon": {
+    "light": "resources/light/promote.svg",
+    "dark": "resources/dark/promote.svg"
+  }
 },
 {
   "command": "leojs.promoteSelectionFromOutline",
   "category": "Leojs",
-  "title": "Promote Children"
+  "title": "Promote Children",
+  "icon": {
+    "light": "resources/light/promote.svg",
+    "dark": "resources/dark/promote.svg"
+  }
 },
 {
   "command": "leojs.demote",
   "category": "Leojs",
-  "title": "Demote Siblings"
+  "title": "Demote Siblings",
+  "icon": {
+    "light": "resources/light/demote.svg",
+    "dark": "resources/dark/demote.svg"
+  }
+},
+{
+  "command": "leojs.demoteDisabled",
+  "category": "Leojs",
+  "title": "Can't Demote",
+  "icon": {
+    "light": "resources/light/demote-disabled.svg",
+    "dark": "resources/dark/demote-disabled.svg"
+  }
 },
 {
   "command": "leojs.demoteSelection",
   "category": "Leojs",
-  "title": "Demote Siblings"
+  "title": "Demote Siblings",
+  "icon": {
+    "light": "resources/light/demote.svg",
+    "dark": "resources/dark/demote.svg"
+  }
 },
 {
   "command": "leojs.demoteSelectionFromOutline",
   "category": "Leojs",
-  "title": "Demote Siblings"
+  "title": "Demote Siblings",
+  "icon": {
+    "light": "resources/light/demote.svg",
+    "dark": "resources/dark/demote.svg"
+  }
 },
 {
   "command": "leojs.sortChildrenSelection",
@@ -3948,12 +4050,20 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 {
   "command": "leojs.sortSiblingsSelection",
   "category": "Leojs",
-  "title": "Sort Siblings"
+  "title": "Sort Siblings",
+  "icon": {
+    "light": "resources/light/sort.svg",
+    "dark": "resources/dark/sort.svg"
+  }
 },
 {
   "command": "leojs.sortSiblingsSelectionFromOutline",
   "category": "Leojs",
-  "title": "Sort Siblings"
+  "title": "Sort Siblings",
+  "icon": {
+    "light": "resources/light/sort.svg",
+    "dark": "resources/dark/sort.svg"
+  }
 },
 </t>
 <t tx="felix.20201214205159.18">{
@@ -4041,6 +4151,15 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   }
 },
 {
+  "command": "leojs.hoistDisabled",
+  "category": "Leojs",
+  "title": "Can't Hoist",
+  "icon": {
+    "light": "resources/light/hoist-disabled.svg",
+    "dark": "resources/dark/hoist-disabled.svg"
+  }
+},
+{
   "command": "leojs.hoistSelectionFromOutline",
   "category": "Leojs",
   "title": "Hoist",
@@ -4056,6 +4175,15 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "icon": {
     "light": "resources/light/dehoist.svg",
     "dark": "resources/dark/dehoist.svg"
+  }
+},
+{
+  "command": "leojs.deHoistDisabled",
+  "category": "Leojs",
+  "title": "Can't De-Hoist",
+  "icon": {
+    "light": "resources/light/dehoist-disabled.svg",
+    "dark": "resources/dark/dehoist-disabled.svg"
   }
 },
 {
@@ -4138,11 +4266,13 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 {
   "command": "leojs.cloneFindMarked",
   "category": "Leojs",
-  "title": "Clone Find Marked"
+  "shortTitle": "cfam",
+  "title": "cfam - Clone Find All Marked Nodes"
 },
 {
   "command": "leojs.cloneFindFlattenedMarked",
   "category": "Leojs",
+  "shortTitle": "cffm",
   "title": "cffm - Clone Find Flattened Marked"
 },
 </t>
@@ -4872,12 +5002,22 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   {
     "command": "leojs.prevFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsCanGoBack",
+    "group": "navigation@3"
+  },
+  {
+    "command": "leojs.prevDisabled",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsCanGoBack",
     "group": "navigation@3"
   },
   {
     "command": "leojs.nextFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsCanGoNext",
+    "group": "navigation@4"
+  },
+  {
+    "command": "leojs.nextDisabled",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsCanGoNext",
     "group": "navigation@4"
   },
   {
@@ -4906,14 +5046,44 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     "group": "navigation@7"
   },
   {
+    "command": "leojs.deHoistDisabled",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsCanDehoist",
+    "group": "navigation@7"
+  },
+  {
     "command": "leojs.hoistSelectionFromOutline",
     "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsRoot",
-    "group": "navigation@7"
+    "group": "navigation@8"
+  },
+  {
+    "command": "leojs.hoistDisabled",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsRoot",
+    "group": "navigation@8"
+  },
+  {
+    "command": "leojs.promoteSelectionFromOutline",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsCanPromote",
+    "group": "navigation@9"
+  },
+  {
+    "command": "leojs.promoteDisabled",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsCanPromote",
+    "group": "navigation@9"
+  },
+  {
+    "command": "leojs.demoteSelectionFromOutline",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsCanDemote",
+    "group": "navigation@10"
+  },
+  {
+    "command": "leojs.demoteDisabled",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsCanDemote",
+    "group": "navigation@10"
   },
   {
     "command": "leojs.contractAllFromOutline",
     "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened",
-    "group": "navigation@8"
+    "group": "navigation@11"
   }
 ],
 </t>
@@ -5631,7 +5801,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 <t tx="felix.20201214205159.8">{
   "command": "leojs.executeScript",
   "category": "Leojs",
-  "title": "Execute Script"
+  "title": "Execute Script",
+  "icon": {
+    "light": "resources/light/execute.svg",
+    "dark": "resources/dark/execute.svg"
+  }
 },
 {
   "command": "leojs.minibuffer",
@@ -5656,7 +5830,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 "@types/md5": "^2.3.1",
 "@types/mocha": "^9.1.0",
 "@types/node": "14.x",
-"@types/vscode": "^1.66.0",
+"@types/vscode": "^1.67.0",
 "@types/webpack-env": "^1.16.3",
 "@typescript-eslint/eslint-plugin": "^5.16.0",
 "@typescript-eslint/parser": "^5.16.0",
@@ -10207,6 +10381,65 @@ export function buildGotoIconPaths(p_context: vscode.ExtensionContext): Icon[] {
     ];
 }
 
+</t>
+<t tx="felix.20220508201944.1">/**
+ * Redo operation available state
+ */
+private _leoCanGoBack: boolean = false;
+get leoCanGoBack(): boolean {
+    return this._leoCanGoBack;
+}
+set leoCanGoBack(p_value: boolean) {
+    this._leoCanGoBack = p_value;
+    utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_BACK, p_value);
+}
+
+</t>
+<t tx="felix.20220508201944.2">/**
+ * Redo operation available state
+ */
+private _leoCanGoNext: boolean = false;
+get leoCanGoNext(): boolean {
+    return this._leoCanGoNext;
+}
+set leoCanGoNext(p_value: boolean) {
+    this._leoCanGoNext = p_value;
+    utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_NEXT, p_value);
+}
+
+</t>
+<t tx="felix.20220508225045.1">{
+  "command": "leojs.prevDisabled",
+  "when": "false"
+},
+{
+  "command": "leojs.nextDisabled",
+  "when": "false"
+},
+{
+  "command": "leojs.promoteDisabled",
+  "when": "false"
+},
+{
+  "command": "leojs.demoteDisabled",
+  "when": "false"
+},
+{
+  "command": "leojs.hoistDisabled",
+  "when": "false"
+},
+{
+  "command": "leojs.deHoistDisabled",
+  "when": "false"
+},
+{
+  "command": "leojs.undoDisabled",
+  "when": "false"
+},
+{
+  "command": "leojs.redoDisabled",
+  "when": "false"
+},
 </t>
 </tnodes>
 </leo_file>
