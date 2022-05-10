@@ -1846,12 +1846,12 @@
         },
         {
           "command": "leojs.saveLeoFileFromOutline",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsTreeTitled && leojsChanged",
+          "when": "view =~ /^leojsOutline|^leojsDocuments/ && leojsTreeOpened && leojsTreeTitled",
           "group": "navigation@2"
         },
         {
           "command": "leojs.saveAsLeoFile",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && !leojsTreeTitled",
+          "when": "view =~ /^leojsOutline|^leojsDocuments/ && leojsTreeOpened && !leojsTreeTitled",
           "group": "navigation@2"
         },
         {

@@ -4992,12 +4992,12 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   {
     "command": "leojs.saveLeoFileFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsTreeTitled &amp;&amp; leojsChanged",
+    "when": "view =~ /^leojsOutline|^leojsDocuments/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsTreeTitled",
     "group": "navigation@2"
   },
   {
     "command": "leojs.saveAsLeoFile",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsTreeTitled",
+    "when": "view =~ /^leojsOutline|^leojsDocuments/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsTreeTitled",
     "group": "navigation@2"
   },
   {
