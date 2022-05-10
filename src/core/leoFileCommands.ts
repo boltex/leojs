@@ -879,11 +879,13 @@ export class FileCommands extends DummyFileCommands {
         */
 
         // Delete fileName.
-        if (fileName && g.os_path_exists(fileName)) {
+        const w_fileExists = await g.os_path_exists(fileName);
+        if (fileName && w_fileExists) {
             this.deleteBackupFile(fileName);
         }
         // Rename backupName to fileName.
-        if (backupName && g.os_path_exists(backupName)) {
+        const w_backupExists = await g.os_path_exists(backupName);
+        if (backupName && w_backupExists) {
             g.es("restoring", fileName, "from", backupName);
             // No need to create directories when restoring.
             let src: string;
@@ -953,12 +955,13 @@ export class FileCommands extends DummyFileCommands {
     /**
      * Set c.openDirectory for new files for the benefit of leoAtFile.scanAllDirectives.
      */
-    public setDefaultDirectoryForNewFiles(fileName: string): void {
+    public async setDefaultDirectoryForNewFiles(fileName: string): Promise<void> {
         const c: Commands = this.c;
         if (!c.openDirectory) {
             let theDir: string;
             theDir = g.os_path_dirname(fileName);
-            if (theDir && g.os_path_isabs(theDir) && g.os_path_exists(theDir)) {
+            const w_dirExists = await g.os_path_exists(theDir);
+            if (theDir && g.os_path_isabs(theDir) && w_dirExists) {
                 c.openDirectory = theDir;
                 // c.frame.openDirectory = theDir
             }
@@ -2091,7 +2094,7 @@ export class FileCommands extends DummyFileCommands {
 
         if (ok === undefined) {
             // c.endEditing();  // Set the current headline text.
-            this.setDefaultDirectoryForNewFiles(fileName);
+            await this.setDefaultDirectoryForNewFiles(fileName);
             g.app.commander_cacher.save(c, fileName);
             ok = c.checkFileTimeStamp(fileName);
             if (ok) {
@@ -2280,7 +2283,7 @@ export class FileCommands extends DummyFileCommands {
                 c.sqlite_connection.close();
                 c.sqlite_connection = undefined;
             }
-            this.setDefaultDirectoryForNewFiles(fileName);
+            await this.setDefaultDirectoryForNewFiles(fileName);
             g.app.commander_cacher.save(c, fileName);
             // Disable path-changed messages in writeAllHelper.
             c.ignoreChangedPaths = true;
@@ -2302,7 +2305,7 @@ export class FileCommands extends DummyFileCommands {
     /**
      * fc.saveTo: A helper for c.saveTo.
      */
-    public saveTo(fileName: string, silent: boolean = false): void {
+    public async saveTo(fileName: string, silent: boolean = false): Promise<void> {
 
         const c: Commands = this.c;
         const p: Position = c.p;
@@ -2313,7 +2316,7 @@ export class FileCommands extends DummyFileCommands {
                 c.sqlite_connection.close();
                 c.sqlite_connection = undefined;
             }
-            this.setDefaultDirectoryForNewFiles(fileName);
+            await this.setDefaultDirectoryForNewFiles(fileName);
             g.app.commander_cacher.commit();  // Commit, but don't save file name.
             // Disable path-changed messages in writeAllHelper.
             c.ignoreChangedPaths = true;
@@ -2691,7 +2694,8 @@ export class FileCommands extends DummyFileCommands {
 
             c.setFileTimeStamp(fileName);
             // Delete backup file.
-            if (backupName && g.os_path_exists(backupName)) {
+            const w_exists = await g.os_path_exists(backupName);
+            if (backupName && w_exists) {
                 this.deleteBackupFile(backupName);
             }
             this.mFileName = fileName;
@@ -2823,7 +2827,8 @@ export class FileCommands extends DummyFileCommands {
 
             c.setFileTimeStamp(fileName);
             // Delete backup file.
-            if (backupName && g.os_path_exists(backupName)) {
+            const w_exists = await g.os_path_exists(backupName);
+            if (backupName && w_exists) {
                 this.deleteBackupFile(backupName);
             }
             return true;
