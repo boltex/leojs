@@ -365,71 +365,75 @@ export class CommanderFileCommands {
         'open-outline',
         'Open a Leo window containing the contents of a .leo file.'
     )
-    public open_outline(this: Commands): void {
+    public async open_outline(this: Commands, p_uri?: vscode.Uri): Promise<unknown> {
 
         const c: Commands = this;
 
-        //@+others
+        //@+others // Defines open_completer function.
         //@+node:felix.20220105210716.11: *5* function: open_completer
-        function open_completer(p_c: Commands, closeFlag: boolean, fileName: string): void {
+        async function open_completer(p_c: Commands, closeFlag: boolean, fileName?: string): Promise<unknown> {
+            console.log('open_completer for filename: ', fileName);
 
             // TODO: FINISH
-            /*
+
             p_c.bringToFront();
             p_c.init_error_dialogs();
 
-            let ok: boolean = false;
+            let ok: any = false;
 
-            if (fileName){
-                if (g.app.loadManager!.isLeoFile(fileName)){
-                    const c2: Commands = g.openWithFileName(fileName, p_c);
-                    if (c2){
-                        c2.k.makeAllBindings();
-                            // Fix #579: Key bindings don't take for commands defined in plugins.
+            if (fileName) {
+                if (g.app.loadManager!.isLeoFile(fileName)) {
+                    const c2 = await g.openWithFileName(fileName, p_c, c.gui);
+                    if (c2) {
+
+                        // c2.k.makeAllBindings(); // ? needed ?
+
+                        // Fix #579: Key bindings don't take for commands defined in plugins.
                         g.chdir(fileName);
                         g.setGlobalOpenDir(fileName);
                     }
-                    if( c2 && closeFlag){
-                        g.app.destroyWindow(p_c.frame);
+                    if (c2 && closeFlag) {
+
+                        console.log('TODO : destroyWindow');
+                        // g.app.destroyWindow(p_c.frame);
                     }
-                }else if(p_c.looksLikeDerivedFile(fileName)){
+                } else {
                     // Create an @file node for files containing Leo sentinels.
-                    ok = p_c.importCommands.importDerivedFiles(
-                        p_c.p,
-                        [fileName],
-                        'Open');
-                }else{
-                    // otherwise, create an @edit node.
-                    ok = p_c.createNodeFromExternalFile(fileName);
+                    const w_looksDerived = await p_c.looksLikeDerivedFile(fileName);
+                    if (w_looksDerived) {
+                        console.log('TODO : IMPORT FILES');
+                        // TODO : IMPORT FILES
+                        // ok = p_c.importCommands.importDerivedFiles(
+                        //     p_c.p,
+                        //     [fileName],
+                        //     'Open');
+                    } else {
+                        // otherwise, create an @edit node.
+                        ok = p_c.createNodeFromExternalFile(fileName);
+                    }
+
                 }
             }
             p_c.raise_error_dialogs('write');
-            g.app.runAlreadyOpenDialog(p_c);
+            // g.app.runAlreadyOpenDialog(p_c); // ? Needed ?
+
             // openWithFileName sets focus if ok.
-
-
-            if (!ok){
-                p_c.initialFocusHelper();
+            if (!ok) {
+                // p_c.initialFocusHelper();  // ? Needed ?
             }
 
-            */
-
+            return Promise.resolve();
         }
         //@-others
-        // Defines open_completer function.
 
         // Close the window if this command completes successfully?
-
-        // TODO: FINISH
-
-        /*
         let closeFlag: boolean = (
-            c.frame.startupWindow &&
-                // The window was open on startup
+            // c.frame.startupWindow &&
+            // The window was open on startup
             !c.changed && !c.frame.saved &&
-                // The window has never been changed
+            // The window has never been changed
             g.app.numberOfUntitledWindows === 1
-                // Only one untitled window has ever been opened
+            // Only one untitled window has ever been opened
         );
 
         let table: [string, string][] = [
@@ -438,24 +442,27 @@ export class CommanderFileCommands {
             ["All files", "*"]
         ];
 
+        // maybe from c.k.
         let fileName: string = c.k?.givenArgs?.join('');
+        // override with given argument
+        if (p_uri && p_uri.fsPath.trim()) {
+            fileName = p_uri.fsPath.replace(/\\/g, '/');
+        }
 
-        if (fileName){
-            c.open_completer(c, closeFlag, fileName);
-            return;
+        if (fileName) {
+            return open_completer(c, closeFlag, fileName);
         }
 
         // Equivalent to legacy code.
-        g.app.gui!.runOpenFileDialog(
+        return g.app.gui!.runOpenFileDialog(
             c,
             "Open",
             table,
             g.defaultLeoFileExtension(c),
             false
-        ).then((fileNames)=>{
-            open_completer(c, closeFlag, fileNames[0]!);
+        ).then((fileNames) => {
+            return open_completer(c, closeFlag, fileNames.length ? fileNames[0] : undefined);
         });
-        */
 
     }
     //@+node:felix.20220105210716.12: *4* c_file.refreshFromDisk

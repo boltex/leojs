@@ -74,6 +74,7 @@ export class Commands {
         title: string;
         openDirectory: string;
         iconBar: any;
+        saved: boolean;
         tree: {
             generation: number;
             editLabel: (
@@ -86,6 +87,7 @@ export class Commands {
     } = {
             c: this,
             title: '',
+            saved: false,
             openDirectory: '',
             iconBar: {},
             tree: {
@@ -1607,6 +1609,9 @@ export class Commands {
      */
     public setFileTimeStamp(fn: string): void {
         // c = self
+        // TODO !
+        console.log('TODO : setFileTimeStamp AND g.app.externalFilesController.set_time');
+        return;
         if (g.app.externalFilesController) {
             g.app.externalFilesController.set_time(fn);
         }
@@ -2553,6 +2558,9 @@ export class Commands {
     // warnings_dict = {}
 
     public raise_error_dialogs(kind: string = 'read'): void {
+        console.log('TODO raise_error_dialogs !');
+
+
         /*
         """Warn about read/write failures."""
         c = self

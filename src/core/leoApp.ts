@@ -1565,7 +1565,7 @@ export class LoadManager {
     /**
      * This is Leo's main startup method.
      */
-    public load(fileName?: string): void {
+    public async load(fileName?: string): Promise<void> {
 
         const lm: LoadManager = this;
 
@@ -1592,28 +1592,31 @@ export class LoadManager {
             // g.app.idleTimeManager.start();
 
             const t3 = process.hrtime();
-            let ok = lm.doPostPluginsInit();
+            let q_ok = lm.doPostPluginsInit();
             g.app.makeAllBindings();
 
             (g.app.gui as LeoUI).finishStartup();
 
-            if (!ok) {
-                return;
-            }
             g.es('');  // Clears horizontal scrolling in the log pane.
-            if (g.app.listen_to_log_flag) {
-                // TODO: ?
-                // g.app.listenToLog();
-            }
-            if (g.app.debug.includes('startup')) {
-                const t4 = process.hrtime();
-                console.log('');
-                g.es_print(`settings:${utils.getDurationMs(t1, t2)} ms`);
-                g.es_print(` plugins:${utils.getDurationMs(t2, t3)} ms`);
-                g.es_print(`   files:${utils.getDurationMs(t3, t4)} ms`);
-                g.es_print(`   total:${utils.getDurationMs(t1, t4)} ms`);
-                console.log('');
-            }
+
+            q_ok.then(p_result => {
+                if (!p_result) {
+                    return;
+                } if (g.app.listen_to_log_flag) {
+                    // TODO: ?
+                    // g.app.listenToLog();
+                }
+                if (g.app.debug.includes('startup')) {
+                    const t4 = process.hrtime();
+                    console.log('');
+                    g.es_print(`settings:${utils.getDurationMs(t1, t2)} ms`);
+                    g.es_print(` plugins:${utils.getDurationMs(t2, t3)} ms`);
+                    g.es_print(`   files:${utils.getDurationMs(t3, t4)} ms`);
+                    g.es_print(`   total:${utils.getDurationMs(t1, t4)} ms`);
+                    console.log('');
+                }
+
+            });
 
         });
 
@@ -1623,7 +1626,7 @@ export class LoadManager {
     /**
      * Create a Leo window for each file in the lm.files list.
      */
-    public doPostPluginsInit(): boolean {
+    public async doPostPluginsInit(): Promise<boolean> {
         // Clear g.app.initing _before_ creating commanders.
         const lm: LoadManager = this;
         g.app.initing = false;  // "idle" hooks may now call g.app.forceShutdown.
@@ -1636,7 +1639,7 @@ export class LoadManager {
                 for (let n = 0; n < lm.files.length; n++) {
                     const fn = lm.files[n];
                     lm.more_cmdline_files = n < (lm.files.length - 1);
-                    c = lm.loadLocalFile(fn, g.app.gui!);
+                    c = await lm.loadLocalFile(fn, g.app.gui!);
                     // Returns None if the file is open in another instance of Leo.
                     if (c && !c1) {  // #1416:
                         c1 = c;
@@ -1676,7 +1679,7 @@ export class LoadManager {
 
         if (!c1) {
             try { // #1403.
-                c1 = lm.openEmptyWorkBook();
+                c1 = await lm.openEmptyWorkBook();
                 // Calls LM.loadLocalFile.
             }
             catch (exception) {
@@ -1720,7 +1723,7 @@ export class LoadManager {
     /**
      * Open an empty frame and paste the contents of CheatSheet.leo into it.
      */
-    public openEmptyWorkBook(): Commands | undefined {
+    public async openEmptyWorkBook(): Promise<Commands | undefined> {
         // TODO
         const lm: LoadManager = this;
 
@@ -1877,7 +1880,7 @@ export class LoadManager {
     }
 
     //@+node:felix.20210120004121.31: *4* LM.loadLocalFile & helpers
-    public loadLocalFile(fn: string, gui: LeoUI | NullGui, old_c?: Commands): Commands {
+    public async loadLocalFile(fn: string, gui: LeoUI | NullGui, old_c?: Commands): Promise<Commands | undefined> {
         /*Completely read a file, creating the corresonding outline.
 
         1. If fn is an existing .leo file (possibly zipped), read it twice:
@@ -1917,7 +1920,7 @@ export class LoadManager {
 
         // Step 2: open the outline in the requested gui.
         // For .leo files (and zipped .leo file) this opens the file a second time.
-        c = lm.openFileByName(fn, gui, old_c, previousSettings)!;
+        c = await lm.openFileByName(fn, gui, old_c, previousSettings);
         return c;
     }
     //@+node:felix.20220418012120.1: *5* LM.openEmptyLeoFile
@@ -1986,7 +1989,7 @@ export class LoadManager {
      * Creates an empty outline if fn is a non-existent Leo file.
      * Creates an wrapper outline if fn is an external file, existing or not.
      */
-    public openFileByName(fn: string, gui: LeoUI | NullGui, old_c?: Commands, previousSettings?: any): Commands | undefined {
+    public async openFileByName(fn: string, gui: LeoUI | NullGui, old_c?: Commands, previousSettings?: any): Promise<Commands | undefined> {
         const lm: LoadManager = this;
         // Disable the log.
         // g.app.setLog(None);
@@ -2013,12 +2016,11 @@ export class LoadManager {
         // Phase 2: Create the outline.
         g.doHook("open1", { old_c: undefined, c: c, new_c: c, fileName: fn });
 
-        // TODO: 
         if (fn) {
             const readAtFileNodesFlag = !!(previousSettings);
             // The log is not set properly here.
-            const ok = lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag); // c.fileCommands.openLeoFile(theFile)
-            // Call c.fileCommands.openLeoFile to read the .leo file.
+            const ok = await lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag); // c.fileCommands.openLeoFile(theFile)
+
             if (!ok) {
                 return undefined;
             }

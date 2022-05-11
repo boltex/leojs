@@ -528,6 +528,7 @@ export class Constants {
 
         // * File Commands
         NEW: 'new',
+        OPEN_OUTLINE: 'open_outline',
         WRITE_AT_FILE_NODES: 'write-at-file-nodes',
         WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
 

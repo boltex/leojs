@@ -116,6 +116,7 @@
 <v t="felix.20220201235548.1"><vh>Finish Startup</vh></v>
 <v t="felix.20220417215549.1"><vh>makeAllBindings</vh></v>
 <v t="felix.20201214194144.3"><vh>Document States</vh>
+<v t="felix.20220510214213.1"><vh>_triggerSave</vh></v>
 <v t="felix.20201214202058.1"><vh>_triggerGetStates</vh></v>
 <v t="felix.20201227230901.1"><vh>_setupNoOpenedLeoDocument</vh></v>
 <v t="felix.20201227230912.1"><vh>_setupOpenedLeoDocument</vh></v>
@@ -270,12 +271,6 @@
 <v t="felix.20211122212823.1"><vh>class LeoUndoNode</vh>
 <v t="felix.20211122214009.1"><vh>id</vh></v>
 <v t="felix.20211122214039.1"><vh>tooltip</vh></v>
-</v>
-</v>
-<v t="felix.20201208224441.1"><vh>@clean src/leoFileBrowser.ts</vh>
-<v t="felix.20201208224441.2"><vh>class LeoFilesBrowser</vh>
-<v t="felix.20201208224441.3"><vh>_getBestOpenFolderUri</vh></v>
-<v t="felix.20201208224441.4"><vh>getLeoFileUrl</vh></v>
 </v>
 </v>
 <v t="felix.20201214151447.1"><vh>@clean src/leoStates.ts</vh>
@@ -912,105 +907,6 @@ export function buildButtonsIconPaths(p_context: vscode.ExtensionContext): Icon[
 }
 
 </t>
-<t tx="felix.20201208224441.1">import * as vscode from "vscode";
-import { Constants } from "./constants";
-
-@language typescript
-@tabwidth -4
-@others
-</t>
-<t tx="felix.20201208224441.2">/**
- * * Handles opening of file browser when choosing which Leo file to open
- */
-export class LeoFilesBrowser {
-
-    private _fileBrowserActive: boolean = false;
-
-    constructor(private _context: vscode.ExtensionContext) { }
-
-    @others
-}
-</t>
-<t tx="felix.20201208224441.3">/**
- * * Finds a folder to propose when opening the browse-for-leo-file chooser
- * @returns An Uri for path to a folder for initial opening
- */
-private _getBestOpenFolderUri(): vscode.Uri {
-    let w_openedFileEnvUri: vscode.Uri | boolean = false;
-    let w_activeUri: vscode.Uri | undefined = undefined;
-
-    if (vscode.workspace.workspaceFolders &amp;&amp; vscode.workspace.workspaceFolders[0]) {
-        w_activeUri = vscode.workspace.workspaceFolders[0].uri;
-    }
-
-    if (w_activeUri) {
-        const w_defaultFolder = vscode.workspace.getWorkspaceFolder(w_activeUri);
-        if (w_defaultFolder) {
-            w_openedFileEnvUri = w_defaultFolder.uri; // Set as current opened document-path's folder
-        }
-    }
-    if (!w_openedFileEnvUri) {
-        w_openedFileEnvUri = vscode.Uri.file("~");
-        // TODO : set as home folder properly, this doesn't work
-        // ! EXAMPLE WITH os : const homedir = require('os').homedir();
-    }
-    return w_openedFileEnvUri;
-}
-
-</t>
-<t tx="felix.20201208224441.4">/**
- * * Open a file browser and let the user choose a Leo file or cancel the operation
- * @param p_saveAsFlag Optional flag that will ask for a 'save' path+filename
- * @returns A promise resolving to a chosen path string, or rejected with an empty string if cancelled
- */
-public getLeoFileUrl(p_saveAsFlag?: boolean): Promise&lt;string&gt; {
-    if (this._fileBrowserActive) {
-        return Promise.resolve("");
-    }
-    this._fileBrowserActive = true;
-    return new Promise((p_resolve, p_reject) =&gt; {
-        const w_filters: { [name: string]: string[] } = {};
-        w_filters[Constants.FILE_OPEN_FILTER_MESSAGE] = [Constants.FILE_EXTENSION];
-
-        if (p_saveAsFlag) {
-            // Choose file
-            vscode.window.showSaveDialog({
-                saveLabel: Constants.USER_MESSAGES.SAVE_DIALOG_LABEL,
-                defaultUri: this._getBestOpenFolderUri(),
-                filters: { 'Leo File': ['leo'] }
-            })
-                .then(p_chosenLeoFile =&gt; {
-                    this._fileBrowserActive = false;
-                    if (p_chosenLeoFile) {
-                        // single string
-                        // Replace backslashes for windows support
-                        p_resolve(p_chosenLeoFile.fsPath.replace(/\\/g, "/"));
-                    } else {
-                        p_resolve(""); // not rejection - resolve empty string
-                    }
-                });
-        } else {
-            vscode.window
-                .showOpenDialog({
-                    canSelectMany: false,
-                    defaultUri: this._getBestOpenFolderUri(),
-                    filters: w_filters
-                })
-                .then(p_chosenLeoFile =&gt; {
-                    this._fileBrowserActive = false;
-                    if (p_chosenLeoFile) {
-                        // array instead of single string
-                        // Replace backslashes for windows support
-                        p_resolve(p_chosenLeoFile[0].fsPath.replace(/\\/g, "/"));
-                    } else {
-                        p_resolve("");
-                    }
-                });
-        }
-    });
-}
-
-</t>
 <t tx="felix.20201208224703.1">@language rest
 @wrap
 
@@ -1572,6 +1468,7 @@ public static LEO_COMMANDS = {
 
     // * File Commands
     NEW: 'new',
+    OPEN_OUTLINE: 'open_outline',
     WRITE_AT_FILE_NODES: 'write-at-file-nodes',
     WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
 
@@ -2701,7 +2598,6 @@ import { Config } from "./config";
 import { LeoOutlineProvider } from './leoOutline';
 import { LeoButtonNode, LeoButtonsProvider } from "./leoButtons";
 import { LeoDocumentNode, LeoDocumentsProvider } from "./leoDocuments";
-import { LeoFilesBrowser } from "./leoFileBrowser";
 import { LeoStates } from "./leoStates";
 import { LeoBodyProvider } from "./leoBody";
 import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
@@ -2734,9 +2630,6 @@ import { LeoGotoNode } from "./leoGoto";
     this.documentIcons = utils.buildDocumentIconPaths(_context);
     this.buttonIcons = utils.buildButtonsIconPaths(_context);
     this.gotoIcons = utils.buildGotoIconPaths(_context);
-
-    // * Create file browser instance
-    this._leoFilesBrowser = new LeoFilesBrowser(_context);
 
     /*    
     if (!g.app) {
@@ -2797,9 +2690,6 @@ export class LeoUI {
     public documentIcons: Icon[] = [];
     public buttonIcons: Icon[] = [];
     public gotoIcons: Icon[] = [];
-
-    // * File Browser
-    private _leoFilesBrowser!: LeoFilesBrowser; // Browsing dialog service singleton used in the openLeoFile and save-as methods
 
     // * Refresh Cycle
     private _refreshType: ReqRefresh = {}; // Flags for commands to require parts of UI to refresh
@@ -3107,13 +2997,13 @@ public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable&lt;unknown&
  * @param p_fromOutline flag to bring back focus on outline afterward
  * @param p_keepSelection flags to bring back selection on the original node before command ran
  */
-public command(
+public async command(
     p_cmd: string,
     p_node: Position | undefined,
     p_refreshType: ReqRefresh,
     p_fromOutline: boolean,
     p_keepSelection?: boolean
-): Thenable&lt;unknown&gt; {
+): Promise&lt;unknown&gt; {
     this.lastCommandTimer = process.hrtime();
     if (this.commandTimer === undefined) {
         this.commandTimer = this.lastCommandTimer;
@@ -3122,6 +3012,8 @@ public command(
     if (this.commandRefreshTimer === undefined) {
         this.commandRefreshTimer = this.lastCommandTimer;
     }
+
+    await this._triggerSave();
 
     const c = g.app.commanders()[this.commanderIndex];
     this._setupRefresh(p_fromOutline, p_refreshType);
@@ -6067,7 +5959,23 @@ public closeLeoFile(): Thenable&lt;unknown&gt; {
  * @param p_leoFileUri optional uri for specifying a file, if missing, a dialog will open
  * @returns A promise that resolves with a textEditor of the chosen file
  */
-public openLeoFile(p_uri?: vscode.Uri): Thenable&lt;unknown&gt; {
+public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
+    await this._triggerSave();
+
+    // OPEN_OUTLINE
+    const c = g.app.commanders()[this.commanderIndex];
+    this._setupRefresh(true, {
+        tree: true,
+        body: true,
+        states: true,
+        documents: true,
+        buttons: true
+    });
+
+    await c.open_outline(p_uri);
+    return this.launchRefresh();
+
+    /* 
 
     vscode.window.showInformationMessage('TODO: Implement openLeoFile' +
         (p_uri ? " path: " + p_uri.fsPath : ""));
@@ -6078,7 +5986,44 @@ public openLeoFile(p_uri?: vscode.Uri): Thenable&lt;unknown&gt; {
 
     return Promise.resolve(true);
 
-    // return Promise.resolve(undefined); // if cancelled
+    */
+
+    // return this._triggerSave()
+    //     .then((p_saveResult) =&gt; {
+    //         let q_openedFile: Promise&lt;any&gt;; // Promise for opening a file
+    //         if (p_uri &amp;&amp; p_uri.fsPath.trim()) {
+    //             const w_fixedFilePath: string = p_uri.fsPath.replace(/\\/g, '/');
+    //             q_openedFile = Promise.resolve("TODO"); // use w_fixedFilePath
+    //         } else {
+    //             q_openedFile = this._leoFilesBrowser.getLeoFileUrl().then(
+    //                 (p_chosenLeoFile) =&gt; {
+    //                     if (p_chosenLeoFile.trim()) {
+    //                         return "TODO"; // use p_chosenLeoFile
+    //                     } else {
+    //                         return Promise.resolve(undefined);
+    //                     }
+    //                 },
+    //                 (p_errorGetFile) =&gt; {
+    //                     return Promise.reject(p_errorGetFile);
+    //                 }
+    //             );
+    //         }
+    //         return q_openedFile;
+    //     })
+    //     .then(
+    //         (p_openFileResult: any) =&gt; {
+    //             if (p_openFileResult) {
+    //                 return this._setupOpenedLeoDocument(p_openFileResult);
+    //             } else {
+    //                 return Promise.resolve(undefined);
+    //             }
+    //         },
+    //         (p_errorOpen) =&gt; {
+    //             console.log('in .then not opened or already opened'); // TODO : IS REJECTION BEHAVIOR NECESSARY HERE TOO?
+    //             return Promise.reject(p_errorOpen);
+    //         }
+    //     );
+
 }
 
 </t>
@@ -6579,6 +6524,8 @@ private _setupNoOpenedLeoDocument(): void {
  * @return a promise that resolves to an opened body pane text editor
  */
 private _setupOpenedLeoDocument(p_openFileResult: any): Promise&lt;unknown&gt; {
+    console.log('TODO: _setupOpenedLeoDocument with parameter : ', p_openFileResult);
+
     // const w_selectedLeoNode = this.apToLeoNode(p_openFileResult.node, false); // Just to get gnx for the body's fist appearance
     // this.leoStates.leoOpenedFileName = p_openFileResult.filename;
 
@@ -10440,6 +10387,16 @@ set leoCanGoNext(p_value: boolean) {
   "command": "leojs.redoDisabled",
   "when": "false"
 },
+</t>
+<t tx="felix.20220510214213.1">/** 
+ * * Save dirty body pane text to its VNode's 'b' content.
+ * @returns Promise that resolves when body is saved in its node's v.b.
+ */
+public _triggerSave(): Promise&lt;unknown&gt; {
+    // TODO: Save dirty body pane text to its VNode's 'b' content.
+    return Promise.resolve();
+}
+
 </t>
 </tnodes>
 </leo_file>

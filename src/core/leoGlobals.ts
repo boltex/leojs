@@ -14,6 +14,7 @@ import * as path from 'path';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
+import { LeoUI, NullGui } from "../leoUI";
 
 /*
     import binascii
@@ -1666,6 +1667,15 @@ export function getBaseDirectory(c: Commands): string {
 
     return "";  // No relative base given.
 }
+//@+node:felix.20220511001701.1: *3* g.openWithFileName
+/**
+ * Create a Leo Frame for the indicated fileName if the file exists.
+ *
+ * Return the commander of the newly-opened outline.
+ */
+export async function openWithFileName(fileName: string, old_c: Commands, gui: LeoUI | NullGui): Promise<Commands | undefined> {
+    return app.loadManager!.loadLocalFile(fileName, gui, old_c);
+}
 //@+node:felix.20220106231022.1: *3* g.readFileIntoString
 /**
  *  Return the contents of the file whose full path is fileName.
@@ -2648,7 +2658,7 @@ def unCamel(s: str) -> List[str]:
  */
 //@+node:felix.20220410215159.1: *3* g.Unicode
 //@+node:felix.20220430215156.1: *4* g.checkUnicode
-export const checkUnicode_dict: {[key: string]: boolean} = {};
+export const checkUnicode_dict: { [key: string]: boolean } = {};
 
 /**
  * Warn when converting bytes. Report *all* errors.
@@ -2657,8 +2667,8 @@ export const checkUnicode_dict: {[key: string]: boolean} = {};
  * these errors, but they might arise as the result of problems in
  * user-defined plugins or scripts.
  */
-export function checkUnicode(s: string, encoding?:string ): string {
- 
+export function checkUnicode(s: string, encoding?: string): string {
+
     const tag = 'g.checkUnicode';
 
     return s || '';

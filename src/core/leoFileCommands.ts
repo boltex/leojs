@@ -441,6 +441,9 @@ export class FastRead {
             //for key, val in e.attrib.items():
             for (let [key, val] of Object.entries(e.attrib)) {
                 if (key !== 'tx') {
+                    if (!gnx2ua[gnx]) {
+                        gnx2ua[gnx] = {};
+                    }
                     gnx2ua[gnx][key] = this.resolveUa(key, val);
                 }
             }

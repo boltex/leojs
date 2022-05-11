@@ -142,7 +142,7 @@ export class ChapterController {
             : [undefined, undefined];
         for (let shortcut of bindings) {
             console.log(
-                'TODO: c.k.registerCommand(commandName, select_chapter_callback, shortcut=shortcut)'
+                `TODO: c.k.registerCommand(commandName= ${commandName}, select_chapter_callback, shortcut=${shortcut})`
             );
             // c.k.registerCommand(commandName, select_chapter_callback, shortcut=shortcut)
         }

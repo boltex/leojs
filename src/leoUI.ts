@@ -10,7 +10,6 @@ import { Config } from "./config";
 import { LeoOutlineProvider } from './leoOutline';
 import { LeoButtonNode, LeoButtonsProvider } from "./leoButtons";
 import { LeoDocumentNode, LeoDocumentsProvider } from "./leoDocuments";
-import { LeoFilesBrowser } from "./leoFileBrowser";
 import { LeoStates } from "./leoStates";
 import { LeoBodyProvider } from "./leoBody";
 import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
@@ -48,9 +47,6 @@ export class LeoUI {
     public documentIcons: Icon[] = [];
     public buttonIcons: Icon[] = [];
     public gotoIcons: Icon[] = [];
-
-    // * File Browser
-    private _leoFilesBrowser!: LeoFilesBrowser; // Browsing dialog service singleton used in the openLeoFile and save-as methods
 
     // * Refresh Cycle
     private _refreshType: ReqRefresh = {}; // Flags for commands to require parts of UI to refresh
@@ -149,9 +145,6 @@ export class LeoUI {
         this.documentIcons = utils.buildDocumentIconPaths(_context);
         this.buttonIcons = utils.buildButtonsIconPaths(_context);
         this.gotoIcons = utils.buildGotoIconPaths(_context);
-
-        // * Create file browser instance
-        this._leoFilesBrowser = new LeoFilesBrowser(_context);
 
         /*    
         if (!g.app) {
@@ -380,6 +373,15 @@ export class LeoUI {
         commandBindings.makeAllBindings(this, this._context);
     }
 
+    /** 
+     * * Save dirty body pane text to its VNode's 'b' content.
+     * @returns Promise that resolves when body is saved in its node's v.b.
+     */
+    public _triggerSave(): Promise<unknown> {
+        // TODO: Save dirty body pane text to its VNode's 'b' content.
+        return Promise.resolve();
+    }
+
     /**
      * * 'getStates' action for use in debounced method call
      */
@@ -442,6 +444,8 @@ export class LeoUI {
      * @return a promise that resolves to an opened body pane text editor
      */
     private _setupOpenedLeoDocument(p_openFileResult: any): Promise<unknown> {
+        console.log('TODO: _setupOpenedLeoDocument with parameter : ', p_openFileResult);
+
         // const w_selectedLeoNode = this.apToLeoNode(p_openFileResult.node, false); // Just to get gnx for the body's fist appearance
         // this.leoStates.leoOpenedFileName = p_openFileResult.filename;
 
@@ -1033,13 +1037,13 @@ export class LeoUI {
      * @param p_fromOutline flag to bring back focus on outline afterward
      * @param p_keepSelection flags to bring back selection on the original node before command ran
      */
-    public command(
+    public async command(
         p_cmd: string,
         p_node: Position | undefined,
         p_refreshType: ReqRefresh,
         p_fromOutline: boolean,
         p_keepSelection?: boolean
-    ): Thenable<unknown> {
+    ): Promise<unknown> {
         this.lastCommandTimer = process.hrtime();
         if (this.commandTimer === undefined) {
             this.commandTimer = this.lastCommandTimer;
@@ -1048,6 +1052,8 @@ export class LeoUI {
         if (this.commandRefreshTimer === undefined) {
             this.commandRefreshTimer = this.lastCommandTimer;
         }
+
+        await this._triggerSave();
 
         const c = g.app.commanders()[this.commanderIndex];
         this._setupRefresh(p_fromOutline, p_refreshType);
@@ -2228,7 +2234,23 @@ export class LeoUI {
      * @param p_leoFileUri optional uri for specifying a file, if missing, a dialog will open
      * @returns A promise that resolves with a textEditor of the chosen file
      */
-    public openLeoFile(p_uri?: vscode.Uri): Thenable<unknown> {
+    public async openLeoFile(p_uri?: vscode.Uri): Promise<unknown> {
+        await this._triggerSave();
+
+        // OPEN_OUTLINE
+        const c = g.app.commanders()[this.commanderIndex];
+        this._setupRefresh(true, {
+            tree: true,
+            body: true,
+            states: true,
+            documents: true,
+            buttons: true
+        });
+
+        await c.open_outline(p_uri);
+        return this.launchRefresh();
+
+        /* 
 
         vscode.window.showInformationMessage('TODO: Implement openLeoFile' +
             (p_uri ? " path: " + p_uri.fsPath : ""));
@@ -2239,7 +2261,44 @@ export class LeoUI {
 
         return Promise.resolve(true);
 
-        // return Promise.resolve(undefined); // if cancelled
+        */
+
+        // return this._triggerSave()
+        //     .then((p_saveResult) => {
+        //         let q_openedFile: Promise<any>; // Promise for opening a file
+        //         if (p_uri && p_uri.fsPath.trim()) {
+        //             const w_fixedFilePath: string = p_uri.fsPath.replace(/\\/g, '/');
+        //             q_openedFile = Promise.resolve("TODO"); // use w_fixedFilePath
+        //         } else {
+        //             q_openedFile = this._leoFilesBrowser.getLeoFileUrl().then(
+        //                 (p_chosenLeoFile) => {
+        //                     if (p_chosenLeoFile.trim()) {
+        //                         return "TODO"; // use p_chosenLeoFile
+        //                     } else {
+        //                         return Promise.resolve(undefined);
+        //                     }
+        //                 },
+        //                 (p_errorGetFile) => {
+        //                     return Promise.reject(p_errorGetFile);
+        //                 }
+        //             );
+        //         }
+        //         return q_openedFile;
+        //     })
+        //     .then(
+        //         (p_openFileResult: any) => {
+        //             if (p_openFileResult) {
+        //                 return this._setupOpenedLeoDocument(p_openFileResult);
+        //             } else {
+        //                 return Promise.resolve(undefined);
+        //             }
+        //         },
+        //         (p_errorOpen) => {
+        //             console.log('in .then not opened or already opened'); // TODO : IS REJECTION BEHAVIOR NECESSARY HERE TOO?
+        //             return Promise.reject(p_errorOpen);
+        //         }
+        //     );
+
     }
 
     /**
