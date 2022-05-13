@@ -74,15 +74,14 @@ export class LeoDocumentNode extends vscode.TreeItem {
         // Setup this instance
         const w_isNamed: boolean = !!this.commander.fileName();
         const commanders: Commands[] = g.app.commanders();
-        this.label = w_isNamed ? utils.getFileFromPath(this.commander.fileName()) : Constants.UNTITLED_FILE_NAME;
-        this.tooltip = w_isNamed ? this.commander.fileName() : Constants.UNTITLED_FILE_NAME;
+        this.label = w_isNamed ? utils.getFileFromPath(this.commander.fileName()) : this.commander.frame.title;
+        this.tooltip = w_isNamed ? this.commander.fileName() : this.commander.frame.title;
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
             arguments: [commanders.indexOf(this.commander)]
         };
         // If this was created as a selected node, make sure it's selected as we may have opened/closed document
-        // tslint:disable-next-line: strict-comparisons
 
         if (this.commander === commanders[this._leoUI.commanderIndex]) {
             this._leoUI.setDocumentSelection(this);

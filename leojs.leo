@@ -14,24 +14,6 @@
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh></v>
 <v t="felix.20201208224703.1"><vh>@clean CONTRIBUTING.md</vh></v>
 </v>
-<v t="felix.20220101161955.1"><vh>XML read Example (LeoVue)</vh>
-<v t="felix.20201215231023.1"><vh>@@clean src/leoFiles.js</vh>
-<v t="felix.20210124225736.1"><vh>&lt;&lt; imports &gt;&gt;</vh></v>
-<v t="felix.20201215231023.2"><vh>&lt;&lt; xslTemplate &gt;&gt;</vh></v>
-<v t="felix.20201215231023.3"><vh>function transform</vh>
-<v t="felix.20201215231023.4"><vh>function serverTransform(resolve, reject)</vh></v>
-<v t="felix.20201215231023.5"><vh>function clientTransform(resolve, reject)</vh></v>
-</v>
-<v t="felix.20201215231023.6"><vh>function loadDoc </vh></v>
-<v t="felix.20201215231023.9"><vh>function cleanText</vh></v>
-<v t="felix.20201215231023.10"><vh>function isRelative</vh></v>
-<v t="felix.20201215231023.11"><vh>function getLeoJSON</vh></v>
-<v t="felix.20201215231023.12"><vh>function transformLeoXML2XML</vh></v>
-<v t="felix.20201215231023.13"><vh>function transformLeoXML2JSON</vh></v>
-<v t="felix.20201215231023.14"><vh>function transformLeoXML</vh></v>
-<v t="felix.20210124222835.1"><vh>tests</vh></v>
-</v>
-</v>
 <v t="ekr.20201209145358.1"><vh>VSCode extension</vh>
 <v t="felix.20211007213344.1"><vh>@clean src/config.ts</vh>
 <v t="felix.20211007213344.2"><vh>class Config</vh>
@@ -505,6 +487,9 @@
 <v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 <v t="felix.20220503003653.1"><vh>@file src/commands/editCommands.ts</vh></v>
 <v t="felix.20220503003725.1"><vh>@file src/commands/gotoCommands.ts</vh></v>
+</v>
+<v t="felix.20220512205007.1"><vh>Gui classes</vh>
+<v t="felix.20220512205042.1"><vh>@file src/core/leoFrame.ts</vh></v>
 </v>
 <v t="felix.20220128232146.1"><vh>unittests</vh>
 <v t="felix.20220130224933.1"><vh>@file src/test/leoTest2.ts</vh></v>
@@ -2014,15 +1999,14 @@ export class LeoDocumentNode extends vscode.TreeItem {
         // Setup this instance
         const w_isNamed: boolean = !!this.commander.fileName();
         const commanders: Commands[] = g.app.commanders();
-        this.label = w_isNamed ? utils.getFileFromPath(this.commander.fileName()) : Constants.UNTITLED_FILE_NAME;
-        this.tooltip = w_isNamed ? this.commander.fileName() : Constants.UNTITLED_FILE_NAME;
+        this.label = w_isNamed ? utils.getFileFromPath(this.commander.fileName()) : this.commander.frame.title;
+        this.tooltip = w_isNamed ? this.commander.fileName() : this.commander.frame.title;
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
             arguments: [commanders.indexOf(this.commander)]
         };
         // If this was created as a selected node, make sure it's selected as we may have opened/closed document
-        // tslint:disable-next-line: strict-comparisons
 
         if (this.commander === commanders[this._leoUI.commanderIndex]) {
             this._leoUI.setDocumentSelection(this);
@@ -3175,11 +3159,6 @@ public editHeadline(p_node?: Position, p_fromOutline?: boolean): Thenable&lt;unk
  * @returns Thenable that resolves when done
  */
 public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interrupt: boolean, p_asChild: boolean): Thenable&lt;unknown&gt; {
-    // Ignore p_fromOutline so as to not focus on tree to keep edit headline input open
-    // this.command('insert-node', p_node, { tree: true, states: true }, false);
-    // Call 'Edit Headline' on this newly made and selected node PASSING ORIGINAL p_fromOutline
-    // return this.editHeadline(g.app.commandersList[this.commanderIndex].p, p_fromOutline);
-
     let w_fromOutline: boolean = !!p_fromOutline; // Use w_fromOutline for where we intend to leave focus when done with the insert
 
     if (p_interrupt) {
@@ -3233,7 +3212,6 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
         this.launchRefresh();
         return Promise.resolve(value);
     });
-
 }
 
 </t>
@@ -6142,249 +6120,6 @@ set leoReady(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20201215231023.1">&lt;&lt; imports &gt;&gt;
-&lt;&lt; xslTemplate &gt;&gt;
-@language javascript
-@tabwidth -4
-@others
-
-export { getLeoJSON, transformLeoXML, transformLeoXML2XML, transform, test, testVar };
-
-</t>
-<t tx="felix.20201215231023.10">/**
- * TODO: move to util, also is in store/index, review logic for relative / subtrees
- * Is url relative
- * @param url {string}
- * @returns {boolean} - if is relative
- */
-function isRelative(url) {
-    var ok = true;
-    if (/^http/.test(url)) {
-        ok = false;
-    }
-    return ok;
-}
-
-</t>
-<t tx="felix.20201215231023.11">function getLeoJSON(filename, id) {
-    if (filename.indexOf('#') &gt; 0) {
-        filename = filename.substring(0, filename.indexOf('#'));
-    }
-    var p = new Promise((resolve, reject) =&gt; {
-        if (!filename.match(/static/) &amp;&amp; isRelative(filename)) {
-            // filename = 'static/' + filename
-        }
-        if (!filename.match(/\.leo$/)) {
-            filename = filename + '.leo';
-        }
-        loadDoc(filename, 'Text')
-            .then((xmlString) =&gt; {
-                return transformLeoXML(xmlString, id);
-            })
-            .then((data) =&gt; {
-                resolve(data);
-            });
-    });
-    return p;
-}
-
-</t>
-<t tx="felix.20201215231023.12">function transformLeoXML2XML(xmlString, startId, parser) {
-    const p = new Promise((resolve, reject) =&gt; {
-        let oParser = null;
-        if (parser) {
-            oParser = new parser();
-        } else {
-            oParser = new DOMParser();
-        }
-        const xml = oParser.parseFromString(xmlString, 'text/xml');
-        const tnodes = xml.getElementsByTagName('t');
-        let textItems = {};
-        for (let i = 0; i &lt; tnodes.length; i++) {
-            let el = tnodes[i];
-            let elText = el.textContent;
-            let a = el.getAttribute('tx');
-            a = a.replace(/\./g, '_');
-            a = a.replace(/^.*?_/, '');
-            if (startId) {
-                a = startId + '-' + a;
-            }
-            if (
-                /^@language /.test(elText) &amp;&amp;
-                !/^@language html/.test(elText) &amp;&amp;
-                !/^@language md/.test(elText)
-            ) {
-                // elText = escape(elText)
-            }
-            textItems[a] = elText;
-        }
-        const vnodes = xml.getElementsByTagName('v');
-        let pid;
-        for (let i = 0; i &lt; vnodes.length; i++) {
-            pid = i + 1;
-            if (startId) {
-                pid = startId + '-' + pid;
-            }
-            vnodes[i].setAttribute('id', '"' + pid + '"');
-        }
-        resolve({ xml, textItems });
-    });
-    return p;
-}
-
-</t>
-<t tx="felix.20201215231023.13">function transformLeoXML2JSON(data, startId, parser, transformer, serializer) {
-    const p = new Promise((resolve, reject) =&gt; {
-        const xml = data.xml;
-        const textItems = data.textItems;
-        transform(xml, xslTemplate, transformer, serializer)
-            .then((jsdata) =&gt; {
-                jsdata = jsdata.replace(
-                    /&lt;\?xml version="1\.0" encoding="UTF-8"\?&gt;/,
-                    ''
-                );
-                jsdata = jsdata.replace(/,\s?$/, ''); // kludge to get rid of trailing comma
-                jsdata = '[' + jsdata + ']';
-                jsdata = JSON.parse(jsdata);
-                jsdata.forEach((d) =&gt; cleanText(d, startId));
-                const xdata = {};
-                xdata.data = jsdata;
-                xdata.textItems = textItems;
-                return xdata;
-            })
-            .then((data) =&gt; resolve(data));
-    });
-    return p;
-}
-
-</t>
-<t tx="felix.20201215231023.14">function transformLeoXML(xmlString, startId, parser, transformer, serializer) {
-    return transformLeoXML2XML(xmlString, startId, parser).then((data) =&gt;
-        transformLeoXML2JSON(data, startId, parser, transformer, serializer)
-    );
-}
-
-</t>
-<t tx="felix.20201215231023.2">@language html
-const xslTemplate = `
-&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
-
-    &lt;xsl:template match="/"&gt;
-        &lt;xsl:apply-templates/&gt;
-    &lt;/xsl:template&gt;
-
-    &lt;xsl:template match="v"&gt;
-        &lt;xsl:variable name="t" select="@t"/&gt;
-        &lt;xsl:variable name="nodeSet" select="//v[@t=$t]"/&gt;
-        &lt;xsl:variable name="double_quote"&gt;"&lt;/xsl:variable&gt;
-        &lt;xsl:variable name="apos"&gt;'&lt;/xsl:variable&gt;
-        {
-            "id":  &lt;xsl:value-of select="@id"/&gt;,
-            "t":   "&lt;xsl:value-of select="translate(@t,'.','_')"/&gt;",
-            "name":"&lt;xsl:value-of select="translate($nodeSet[1]/vh,concat('\',$double_quote),concat('|',$apos))"/&gt;",
-            "children":[&lt;xsl:apply-templates select="$nodeSet[1]/v"/&gt;]
-        }
-        &lt;xsl:if test="position()!=last()"&gt;,&lt;/xsl:if&gt;
-    &lt;/xsl:template&gt;
-
-    &lt;xsl:template match="text()"/&gt;
-
-&lt;/xsl:stylesheet&gt;
-`;
-
-</t>
-<t tx="felix.20201215231023.3">function transform(xml, xslString, transformer, serializer) {
-    @others
-    const p = new Promise((resolve, reject) =&gt; {
-        if (transformer) {
-            return serverTransform(resolve, reject);
-        } else {
-            return clientTransform(resolve, reject);
-        }
-    });
-    return p;
-}
-
-</t>
-<t tx="felix.20201215231023.4">function serverTransform(resolve, reject) {
-    const xmlString = new serializer().serializeToString(xml);
-    const config = {
-        xslt: xslString,
-        source: xmlString,
-        result: String,
-        props: {
-            indent: 'yes',
-        },
-    };
-    transformer.transform(config, (err, result) =&gt; {
-        if (err) {
-            console.log('ERROR:', err);
-            return reject();
-        }
-        resolve(result);
-    });
-}
-
-</t>
-<t tx="felix.20201215231023.5">function clientTransform(resolve, reject) {
-    const oParser = new DOMParser();
-    const xsl = oParser.parseFromString(xslString, 'text/xml');
-    const xsltProcessor = new XSLTProcessor();
-    xsltProcessor.importStylesheet(xsl);
-    const resultDocument = xsltProcessor.transformToFragment(xml, document);
-    resolve(resultDocument.textContent);
-}
-
-</t>
-<t tx="felix.20201215231023.6">function loadDoc(filename) {
-    console.log('loading file:', filename);
-    var p = new Promise((resolve, reject) =&gt; {
-
-        // * had line in package.json -&gt; "axios": "^0.22.0",
-        // axios
-        //     .get(filename)
-        //     .then(function (response) {
-        //         resolve(response.data);
-        //     })
-        //     .catch(function (error) {
-        //         console.log(error);
-        //         reject();
-        //     });
-
-        // * New code
-        vscode.workspace.fs.readFile(filename, function (err, data) {
-            if (err) {
-                reject(err);
-            }
-            resolve(data.toString());
-        });
-    });
-    return p;
-}
-
-</t>
-<t tx="felix.20201215231023.9">function cleanText(data, startId) {
-    data.name = data.name.replace(/&lt;&lt;/g, '\u00AB');
-    data.name = data.name.replace(/&gt;&gt;/g, '\u00BB');
-    data.name = data.name.replace(/'/g, '\x27');
-    data.name = data.name.replace(/"/g, '\x22');
-    //data.name = escape(data.name)
-    data.name = data.name.replace(/&amp;#39;/g, '\x27');
-    data.id = data.id + ''; // probably unneeded now
-    let children = data.children;
-    if (!children) {
-        return;
-    }
-    for (let i = 0; i &lt; children.length; i++) {
-        cleanText(children[i], startId);
-    }
-    data.t = data.t.replace(/^.*?_/, ''); // remove file uid
-    if (startId) {
-        data.t = startId + '-' + data.t + '';
-    }
-}
-
-</t>
 <t tx="felix.20201222013904.1">/**
  * * Refreshes the outline. A reveal type can be passed along to specify the reveal type for the selected node
  * @param p_incrementTreeId Make all node id's be 'new' by incrementing the treeId prefix of the id's.
@@ -6621,7 +6356,7 @@ public gotSelectedNode(p_node: Position): void {
                 },
                 (p_error) =&gt; {
                     // console.error('ERROR gotSelectedNode could not reveal: tree was refreshed!', 'Error:', p_error);
-                    console.log('ERROR gotSelectedNode could not reveal: tree was refreshed!');
+                    console.log('gotSelectedNode could not reveal: tree was refreshed!');
                 }
             );
             // Done, so reset reveal type 'flag'
@@ -6646,18 +6381,6 @@ interface Date {
     format: (format?: string) =&gt; string;
     masks: { default: string };
 }
-
-</t>
-<t tx="felix.20210124222835.1">function test(p_message) {
-    console.log('Output message : ' + p_message);
-}
-
-var testVar = "some String";
-
-</t>
-<t tx="felix.20210124225736.1">// import escape from 'escape-html'
-// import axios from 'axios';
-import * as vscode from 'vscode';
 
 </t>
 <t tx="felix.20211002194716.1"></t>
@@ -8395,7 +8118,6 @@ public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
 }
 
 </t>
-<t tx="felix.20220101161955.1"></t>
 <t tx="felix.20220103203600.1">public asyncGetTextFromClipboard(): Thenable&lt;string&gt; {
     return vscode.env.clipboard.readText().then((s) =&gt; {
         // also set immediate clipboard string for possible future read
@@ -8685,25 +8407,6 @@ public showLeoIDMessage(): void {
  * * Set all remaining local objects, set ready flag(s) and refresh all panels
  */
 public finishStartup(): void {
-
-    /* 
-    g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
-    g.app.config = new GlobalConfigManager();
-    g.app.nodeIndices = new NodeIndices(g.app.leoID);
-    */
-
-    // TODO FAKE CONFIG
-
-    // IF RECENT FILES LIST :
-    //      TODO: CHECK RECENT LEO FILE LIST AND OPEN THEM
-    //      g.app.loadManager.load(fileName, pymacs)
-    // ELSE :
-    //      TODO: CREATE NEW LEO OUTLINE (demo below)
-
-    /*         
-    let c = g.app.newCommander("", this);
-    g.app.commanders().push(c);
-    */
 
     // * Create a single data provider for both outline trees, Leo view and Explorer view
     this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);
@@ -10398,5 +10101,6 @@ public _triggerSave(): Promise&lt;unknown&gt; {
 }
 
 </t>
+<t tx="felix.20220512205007.1"></t>
 </tnodes>
 </leo_file>

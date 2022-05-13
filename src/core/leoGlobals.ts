@@ -1584,6 +1584,32 @@ export async function chdir(p_path: string): Promise<void> {
     }
 
 }
+//@+node:felix.20220511212935.1: *3* g.computeWindowTitle
+export function computeWindowTitle(fileName: string): string {
+    let branch;
+    let commit;
+    [branch, commit] = gitInfoForFile(fileName);  // #1616
+    if (!fileName) {
+        return branch ? branch + ": untitled" : 'untitled';
+    }
+    let w_path;
+    let fn;
+    let title;
+    [w_path, fn] = os_path_split(fileName);
+    if (w_path) {
+        title = fn + " in " + w_path;
+    } else {
+        title = fn;
+    }
+    // Yet another fix for bug 1194209: regularize slashes.
+    if ('/\\'.includes(path.sep)) {
+        title = title.replace('/', path.sep).replace('\\', path.sep);
+    }
+    if (branch) {
+        title = branch + ": " + title;
+    }
+    return title;
+}
 //@+node:felix.20220108215158.1: *3* g.defaultLeoFileExtension
 export function defaultLeoFileExtension(c?: Commands): string {
     const conf = c ? c.config : app.config;
@@ -2233,6 +2259,17 @@ export function skip_ws_and_nl(s: string, i: number): number {
         i += 1;
     }
     return i;
+}
+//@+node:felix.20220511213218.1: ** g.Git
+//@+node:felix.20220511213305.1: *3* g.gitInfoForFile
+/**
+ * Return the git (branch, commit) info associated for the given file.
+ */
+export function gitInfoForFile(filename: string): [string, string] {
+    console.log('TODO : gitInfoForFile');
+    return ['', '']; // TODO !
+    // g.gitInfo and g.gitHeadPath now do all the work.
+    // return g.gitInfo(filename)
 }
 //@+node:felix.20211106230549.1: ** g.Hooks & Plugins
 //@+node:felix.20211106230549.2: *3* g.act_on_node

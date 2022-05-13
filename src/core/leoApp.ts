@@ -15,6 +15,7 @@ import { FileCommands } from "./leoFileCommands";
 import { GlobalConfigManager } from "./leoConfig";
 import { Constants } from "../constants";
 import { ExternalFilesController } from "./leoExternalFiles";
+import { LeoFrame } from "./leoFrame";
 
 //@-<< imports >>
 //@+others
@@ -159,11 +160,9 @@ export class LeoApp {
     public paste_c: any = null; // The commander that pasted the last outline.
     public spellDict: any = null; // The singleton PyEnchant spell dict.
     public numberOfUntitledWindows: number = 0; // Number of opened untitled windows.
-    public windowList: any[] = []; // * Global list of all frames. USE _commandersList instead
+    public windowList: LeoFrame[] = []; // * Global list of all frames.
     public realMenuNameDict = {}; // Translations of menu names.
 
-    // * Opened Leo File Commanders
-    public commandersList: Commands[] = [];
     //@-<< LeoApp: global data >>
     //@+<< LeoApp: global controller/manager objects >>
     //@+node:felix.20210103024632.7: *5* << LeoApp: global controller/manager objects >>
@@ -1112,12 +1111,159 @@ export class LeoApp {
         return id_;
     }
 
+    //@+node:felix.20220511231737.1: *3* app.Closing
+    //@+node:felix.20220511231737.2: *4* app.closeLeoWindow
+    /**
+     * Attempt to close a Leo window.
+     *
+     * Return False if the user veto's the close.
+     *
+     * finish_quit - usually True, close Leo when last file closes, but
+     *               False when closing an already-open-elsewhere file
+     *               during initial load, so UI remains for files
+     *               further along the command line.
+     */
+    /* 
+   public closeLeoWindow(frame, new_c=undefined, finish_quit=true): boolean {
+       const c = frame.c;
+       if (g.app.debug.includes('shutdown')){
+           g.trace(`changed: ${c.changed} ${c.shortFileName()}`);
+       }    
+       c.endEditing()  // Commit any open edits.
+       if c.promptingForClose
+           // There is already a dialog open asking what to do.
+           return false;
+       // Make sure .leoRecentFiles.txt is written.
+       g.app.recentFilesManager.writeRecentFilesFile(c)
+       if c.changed
+           c.promptingForClose = true;
+           veto = frame.promptForSave()
+           c.promptingForClose = false;
+           if veto
+               return false;
+       g.app.setLog(None)  // no log until we reactive a window.
+       g.doHook("close-frame", c=c)
+       //
+       // Save the window state for *all* open files.
+       g.app.commander_cacher.commit()  // store cache, but don't close it.
+       // This may remove frame from the window list.
+       if frame in g.app.windowList
+           g.app.destroyWindow(frame)
+           g.app.windowList.remove(frame)
+       else
+           // #69.
+           g.app.forgetOpenFile(fn=c.fileName())
+       if g.app.windowList
+           c2 = new_c or g.app.windowList[0].c
+           g.app.selectLeoWindow(c2)
+       elif finish_quit and not g.unitTesting
+           g.app.finishQuit()
+       return true;  // The window has been closed.
+   }
+    */
+    //@+node:felix.20220511231737.3: *4* app.destroyAllOpenWithFiles
+    /* 
+    def destroyAllOpenWithFiles(self):
+        """Remove temp files created with the Open With command."""
+        if 'shutdown' in g.app.debug:
+            g.pr('destroyAllOpenWithFiles')
+        if g.app.externalFilesController:
+            g.app.externalFilesController.shut_down()
+            g.app.externalFilesController = None
+     */
+    //@+node:felix.20220511231737.4: *4* app.destroyWindow
+    /**
+     * Destroy all ivars in a Leo frame.
+     */
+    public destroyWindow(frame: LeoFrame): void {
+        if (g.app.debug.includes('shutdown')) {
+            g.pr(`destroyWindow:  ${frame.c.shortFileName()}`);
+        }
+        if (g.app.externalFilesController && g.app.externalFilesController.destroy_frame) {
+            g.app.externalFilesController.destroy_frame(frame);
+        }
+        if (g.app.windowList.includes(frame)) {
+            g.app.forgetOpenFile(frame.c.fileName());
+        }
+        // force the window to go away now.
+        // Important: this also destroys all the objects of the commander.
+        frame.destroySelf();
+    }
+    //@+node:felix.20220511231737.5: *4* app.finishQuit
+    /* 
+    def finishQuit(self):
+        # forceShutdown may already have fired the "end1" hook.
+        assert self == g.app, repr(g.app)
+        trace = 'shutdown' in g.app.debug
+        if trace:
+            g.pr('finishQuit: killed:', g.app.killed)
+        if not g.app.killed:
+            g.doHook("end1")
+            if g.app.global_cacher:  # #1766.
+                g.app.global_cacher.commit_and_close()
+            if g.app.commander_cacher:  # #1766.
+                g.app.commander_cacher.commit()
+                g.app.commander_cacher.close()
+        if g.app.ipk:
+            g.app.ipk.cleanup_consoles()
+        g.app.destroyAllOpenWithFiles()
+        if hasattr(g.app, 'pyzo_close_handler'):
+            # pylint: disable=no-member
+            g.app.pyzo_close_handler()
+        # Disable all further hooks and events.
+        # Alas, "idle" events can still be called
+        # even after the following code.
+        g.app.killed = True
+        if g.app.gui:
+            g.app.gui.destroySelf()  # Calls qtApp.quit()
+     */
+    //@+node:felix.20220511231737.6: *4* app.forceShutdown
+    /* 
+    def forceShutdown(self):
+        """
+        Forces an immediate shutdown of Leo at any time.
+
+        In particular, may be called from plugins during startup.
+        """
+        trace = 'shutdown' in g.app.debug
+        app = self
+        if trace:
+            g.pr('forceShutdown')
+        for c in app.commanders():
+            app.forgetOpenFile(c.fileName())
+        # Wait until everything is quiet before really quitting.
+        if trace:
+            g.pr('forceShutdown: before end1')
+        g.doHook("end1")
+        if trace:
+            g.pr('forceShutdown: after end1')
+        self.log = None  # Disable writeWaitingLog
+        self.killed = True  # Disable all further hooks.
+        for w in self.windowList[:]:
+            if trace:
+                g.pr(f"forceShutdown: {w}")
+            self.destroyWindow(w)
+        if trace:
+            g.pr('before finishQuit')
+        self.finishQuit()
+     */
+    //@+node:felix.20220511231737.7: *4* app.onQuit
+    /* 
+    @cmd('exit-leo')
+    @cmd('quit-leo')
+    def onQuit(self, event=None):
+        """Exit Leo, prompting to save unsaved outlines first."""
+        if 'shutdown' in g.app.debug:
+            g.trace()
+        # #2433 - use the same method as clicking on the close box.
+        g.app.gui.close_event(QCloseEvent())  # type:ignore
+     */
     //@+node:felix.20220106225805.1: *3* app.commanders
     /**
      * Return list of currently active controllers
      */
     public commanders(): Commands[] {
-        return g.app.commandersList;
+        return g.app.windowList.map(f => f.c);
     }
     //@+node:felix.20211226221235.1: *3* app.Detecting already-open files
     //@+node:felix.20211226221235.2: *4* app.checkForOpenFile
@@ -1930,9 +2076,6 @@ export class LoadManager {
     public openEmptyLeoFile(gui: LeoUI, old_c?: Commands): Commands {
 
         const lm = this;
-        // Disable the log.
-        // g.app.setLog(undefined);
-        // g.app.lockLog();
 
         // Create the commander for the .leo  file.
         const c: Commands = g.app.newCommander(
@@ -1942,23 +2085,10 @@ export class LoadManager {
         );
         g.doHook('open0');
 
-        // Enable the log.
-        // g.app.unlockLog();
-        // c.frame.log.enable(true);
-
         g.doHook("open1", { old_c: old_c, c: c, new_c: c, fileName: undefined });
-
-        // Init the frame.
-        // c.frame.setInitialWindowGeometry();
-        // c.frame.deiconify();
-        // c.frame.lift();
-        // c.frame.splitVerticalFlag, r1, r2 = c.frame.initialRatios();
-        // c.frame.resizePanesToRatio(r1, r2);
 
         c.mFileName = "";
         c.wrappedFileName = undefined;
-        // c.frame.title = c.computeWindowTitle(c.mFileName);
-        // c.frame.setTitle(c.frame.title);
 
         // Late inits. Order matters.
         if (c.config.getBool('use-chapters') && c.chapterController) {
@@ -1968,10 +2098,6 @@ export class LoadManager {
         g.doHook("open2", { old_c: old_c, c: c, new_c: c, fileName: undefined });
         g.doHook("new", { old_c: old_c, c: c, new_c: c });
 
-        // g.app.writeWaitingLog(c);
-        // c.setLog();
-
-        // lm.createMenu(c);
         lm.finishOpen(c);
 
         return c;
@@ -1990,6 +2116,7 @@ export class LoadManager {
      * Creates an wrapper outline if fn is an external file, existing or not.
      */
     public async openFileByName(fn: string, gui: LeoUI | NullGui, old_c?: Commands, previousSettings?: any): Promise<Commands | undefined> {
+
         const lm: LoadManager = this;
         // Disable the log.
         // g.app.setLog(None);
@@ -2049,15 +2176,13 @@ export class LoadManager {
      * returns undefined otherwise
      */
     public findOpenFile(fn: string): Commands | undefined {
-        // TODO: check in opened commanders array (g.app.windowList or other as needed)
-
         function munge(name: string): string {
             return g.os_path_normpath(name || '').toLowerCase();
         }
 
         let index = 0;
-        for (let c of g.app.commandersList) {
-
+        for (let frame of g.app.windowList) {
+            const c = frame.c;
             if (g.os_path_realpath(munge(fn)) === g.os_path_realpath(munge(c.mFileName))) {
 
                 (g.app.gui as LeoUI).commanderIndex = index;
@@ -2098,15 +2223,12 @@ export class LoadManager {
             k.showStateAndMode();
         }
         // c.frame.initCompleteHint();
-
-        // TODO : revise position of this behavior: set selected document
-        const w_index = g.app.commandersList.indexOf(c);
+        const w_index = g.app.windowList.indexOf(c.frame);
         if (w_index >= 0) {
             (g.app.gui as LeoUI).commanderIndex = w_index;
         }
 
         c.outerUpdate();  // #181: Honor focus requests.
-
     }
     //@+node:felix.20210222013344.1: *6* LM.initWrapperLeoFile
     /**
@@ -2115,17 +2237,6 @@ export class LoadManager {
      * Otherwise, create an @edit or @file node for the external file.
      */
     public initWrapperLeoFile(c: Commands, fn: string): Commands {
-        // lm = self
-        // Use the config params to set the size and location of the window.
-
-        // frame = c.frame
-        // frame.setInitialWindowGeometry()
-        // frame.deiconify()
-        // frame.lift()
-
-        // #1570: Resize the _new_ frame.
-        // frame.splitVerticalFlag, r1, r2 = frame.initialRatios()
-        // frame.resizePanesToRatio(r1, r2)
 
         let p: Position | undefined;
 
@@ -2136,7 +2247,7 @@ export class LoadManager {
             p.h = fn.endsWith('.leo') ? "newHeadline" : `@edit ${fn}`;
             c.selectPosition(p);
 
-            // TODO: importCommands and importDerivedFiles method
+            // TODO: importCommands and importDerivedFiles method !
 
             /* 
 
@@ -2166,18 +2277,14 @@ export class LoadManager {
         // Fix smallish bug 1226816 Command line "leo xxx.leo" creates file xxx.leo.leo.
         c.mFileName = fn.endsWith('.leo') ? fn : `${fn}.leo`;
         c.wrappedFileName = fn;
-        // c.frame.title = c.computeWindowTitle(c.mFileName)
-        // c.frame.setTitle(c.frame.title)
+        c.frame.title = c.computeWindowTitle(c.mFileName);
+
         // chapterController.finishCreate must be called after the first real redraw
         // because it requires a valid value for c.rootPosition().
 
         if (c.config.getBool('use-chapters') && c.chapterController) {
             c.chapterController.finishCreate();
         }
-
-        // frame.c.clearChanged()
-        // Mark the outline clean.
-        // This makes it easy to open non-Leo files for quick study.
 
         return c;
     }

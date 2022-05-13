@@ -19,6 +19,7 @@ import { LeoFind } from './leoFind';
 import { LeoImportCommands } from './leoImport';
 import { ChapterController } from './leoChapters';
 import { EditCommandsClass, TopLevelEditCommands } from '../commands/editCommands';
+import { LeoFrame } from './leoFrame';
 
 //@-<< imports >>
 //@+others
@@ -69,43 +70,7 @@ export class Commands {
 
     // TODO fake frame needed FOR wrapper and hasSelection
     // TODO : maybe MERGE frame.tree.generation WITH _treeId?
-    public frame: {
-        c: Commands;
-        title: string;
-        openDirectory: string;
-        iconBar: any;
-        saved: boolean;
-        tree: {
-            generation: number;
-            editLabel: (
-                p: Position,
-                selectAll: boolean,
-                selection: any
-            ) => void;
-        };
-        body: any;
-    } = {
-            c: this,
-            title: '',
-            saved: false,
-            openDirectory: '',
-            iconBar: {},
-            tree: {
-                generation: 0,
-                editLabel: (p: Position, selectAll: boolean, selection: any) => {
-                    console.log(
-                        'TODO: editLabel not used in leojs. From c.frame.tree.editLabel'
-                    );
-                },
-            },
-            body: {
-                wrapper: {
-                    setAllText: (s: string) => {
-                        console.log('TODO: setAllText of c.frame.body.wrapper');
-                    },
-                },
-            },
-        };
+    public frame: LeoFrame;
 
     //@+others
     //@+node:felix.20210223220756.1: *3* Commander IVars
@@ -266,6 +231,11 @@ export class Commands {
         this.config = new LocalConfigManager(c); // Config before most other subcommanders
         this.hiddenRootNode = new VNode(this, gnx);
         this.hiddenRootNode.h = '<hidden root vnode>';
+
+        const title = this.computeWindowTitle(c.mFileName);
+        this.frame = new LeoFrame(this, title, this.gui as LeoUI);
+        console.assert(this.frame.c === this);
+
         // @ts-expect-error
         c.fileCommands = null; // type:ignore
 
@@ -295,7 +265,7 @@ export class Commands {
         c.hiddenRootNode.children = [];
         p._linkAsRoot();
         c.createCommandNames();
-        g.app.commandersList.push(c);
+        c.frame.finishCreate();
     }
 
     //@+node:felix.20210223220814.10: *4* c.initSettings
@@ -475,6 +445,25 @@ export class Commands {
         }
     }
 
+    //@+node:felix.20220511214845.1: *4* c.computeWindowTitle
+    /**
+     * Set the window title and fileName.
+     */
+    public computeWindowTitle(fileName: string): string {
+        let title: string;
+        if (fileName) {
+            title = g.computeWindowTitle(fileName);
+        } else {
+            let s = "untitled";
+            let n = g.app.numberOfUntitledWindows;
+            if (n > 0) {
+                s += n.toString();
+            }
+            title = g.computeWindowTitle(s);
+            g.app.numberOfUntitledWindows = n + 1;
+        }
+        return title;
+    }
     //@+node:felix.20210215185050.1: *3* c.API
     // These methods are a fundamental, unchanging, part of Leo's API.
 

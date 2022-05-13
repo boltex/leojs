@@ -6,12 +6,13 @@ import * as vscode from "vscode";
 
 import * as g from '../core/leoGlobals';
 import { commander_command } from "../core/decorators";
-import { StackEntry, Position, VNode } from "../core/leoNodes";
-import { FastRead, FileCommands } from "../core/leoFileCommands";
-import { Commands, HoistStackEntry } from "../core/leoCommands";
+import { Position, VNode } from "../core/leoNodes";
+import { FileCommands } from "../core/leoFileCommands";
+import { Commands } from "../core/leoCommands";
 import { Bead, Undoer } from '../core/leoUndo';
 import { LoadManager, PreviousSettings } from "../core/leoApp";
 import { AtFile } from '../core/leoAtFile';
+import { LeoUI } from "../leoUI";
 
 //@+others
 //@+node:felix.20220105223215.1: ** function: import_txt_file
@@ -301,7 +302,7 @@ export class CommanderFileCommands {
         'new',
         'Create a new Leo window.'
     )
-    public new(this: Commands, gui: any): Commands {
+    public new(this: Commands, gui: LeoUI): Commands {
 
         // t1 = time.process_time()
         // from leo.core import leoApp
@@ -345,7 +346,9 @@ export class CommanderFileCommands {
         // c.setLog();
         c.clearChanged();  // Fix #387: Clear all dirty bits.
         g.app.disable_redraw = false;
+
         c.redraw();
+
         // t4 = time.process_time()
         /* 
         if 'speed' in g.app.debug:
@@ -366,21 +369,20 @@ export class CommanderFileCommands {
         'Open a Leo window containing the contents of a .leo file.'
     )
     public async open_outline(this: Commands, p_uri?: vscode.Uri): Promise<unknown> {
+        console.log('open_owutline');
 
         const c: Commands = this;
 
         //@+others // Defines open_completer function.
         //@+node:felix.20220105210716.11: *5* function: open_completer
         async function open_completer(p_c: Commands, closeFlag: boolean, fileName?: string): Promise<unknown> {
-            console.log('open_completer for filename: ', fileName);
-
-            // TODO: FINISH
 
             p_c.bringToFront();
             p_c.init_error_dialogs();
 
             let ok: any = false;
 
+            let q_result = Promise.resolve();
             if (fileName) {
                 if (g.app.loadManager!.isLeoFile(fileName)) {
                     const c2 = await g.openWithFileName(fileName, p_c, c.gui);
@@ -393,9 +395,19 @@ export class CommanderFileCommands {
                         g.setGlobalOpenDir(fileName);
                     }
                     if (c2 && closeFlag) {
+                        g.app.destroyWindow(p_c.frame);
+                        // ! Need to remove here in leojs !
+                        let index = g.app.windowList.indexOf(p_c.frame, 0);
+                        if (index > -1) {
+                            g.app.windowList.splice(index, 1);
+                        }
 
-                        console.log('TODO : destroyWindow');
-                        // g.app.destroyWindow(p_c.frame);
+                        // Set UI document's pane and outline proper refresh selected index!
+
+                        index = g.app.windowList.indexOf(c2.frame);
+                        if (index >= 0) {
+                            (g.app.gui as LeoUI).commanderIndex = index;
+                        }
                     }
                 } else {
                     // Create an @file node for files containing Leo sentinels.
@@ -422,7 +434,7 @@ export class CommanderFileCommands {
                 // p_c.initialFocusHelper();  // ? Needed ?
             }
 
-            return Promise.resolve();
+            return q_result;
         }
         //@-others
 
@@ -572,15 +584,6 @@ export class CommanderFileCommands {
         const c: Commands = this;
         let p: Position = this.p;
 
-        // ? needed ?
-        // Do this now: w may go away.
-        /*
-        w = g.app.gui.get_focus(c)
-        inBody = g.app.gui.widget_name(w).startswith('body')
-        if inBody:
-            p.saveCursorAndScroll()
-
-        */
         if (g.app.disableSave) {
             g.es("save commands disabled", "purple");
             return;
@@ -590,8 +593,7 @@ export class CommanderFileCommands {
         // This supports the leoBridge.
         // Make sure we never pass None to the ctor.
         if (fileName) {
-            // ? Needed ?
-            // c.frame.title = g.computeWindowTitle(fileName);
+            c.frame.title = g.computeWindowTitle(fileName);
             c.mFileName = fileName;
         }
         if (!c.mFileName) {
@@ -637,43 +639,20 @@ export class CommanderFileCommands {
             if (fileName) {
                 // Don't change mFileName until the dialog has succeeded.
                 c.mFileName = g.ensure_extension(fileName, g.defaultLeoFileExtension(c));
+                c.frame.title = c.computeWindowTitle(c.mFileName);
 
-                // ? needed ?
-                // c.frame.title = c.computeWindowTitle(c.mFileName);
-
-                // ? needed ?
-                // c.frame.setTitle(c.computeWindowTitle(c.mFileName));
-
-                // 2013/08/04: use c.computeWindowTitle.
                 c.openDirectory = g.os_path_dirname(c.mFileName);
                 c.frame.openDirectory = c.openDirectory;
-                // Bug fix in 4.4b2.
-                // ? needed ?
-                // if( g.app.qt_use_tabs && c.frame['top']){
-                //     c.frame.top.leo_master.setTabName(c, c.mFileName);
-                // }
 
                 (c.fileCommands as FileCommands).save(c.mFileName);
 
-                // ? needed ?
+                // TODO !
+                // ? needed ? 
                 // g.app.recentFilesManager.updateRecentFiles(c.mFileName);
                 g.chdir(c.mFileName);
             }
         }
-        // Done in FileCommands.save.
-        // c.redraw_after_icons_changed()
         c.raise_error_dialogs('write');
-
-        // ? needed ?
-        // *Safely* restore focus, without using the old w directly.
-        /*
-        if inBody
-            c.bodyWantsFocus()
-            p.restoreCursorAndScroll()
-        else
-            c.treeWantsFocus()
-        */
-
     }
     //@+node:felix.20220105210716.15: *4* c_file.saveAll
     @commander_command(
@@ -714,15 +693,6 @@ export class CommanderFileCommands {
         const c: Commands = this;
         let p: Position = this.p;
 
-        // ? needed ?
-        // Do this now: w may go away.
-        /*
-        w = g.app.gui.get_focus(c)
-        inBody = g.app.gui.widget_name(w).startswith('body')
-        if inBody:
-            p.saveCursorAndScroll()
-        */
-
         if (g.app.disableSave) {
             g.es("save commands disabled", "purple");
             return;
@@ -732,8 +702,7 @@ export class CommanderFileCommands {
 
         // 2013/09/28: add fileName keyword arg for leoBridge scripts.
         if (fileName) {
-            // ? Needed ?
-            // c.frame.title = g.computeWindowTitle(fileName);
+            c.frame.title = g.computeWindowTitle(fileName);
             c.mFileName = fileName;
         }
         // Make sure we never pass None to the ctor.
@@ -759,7 +728,6 @@ export class CommanderFileCommands {
             return; // EXIT !
 
         }
-        // c.bringToFront();
 
         if (fileName) {
             // Fix bug 998090: save file as doesn't remove entry from open file list.
@@ -770,22 +738,16 @@ export class CommanderFileCommands {
             c.mFileName = g.ensure_extension(fileName, g.defaultLeoFileExtension(c));
             // Part of the fix for https://bugs.launchpad.net/leo-editor/+bug/1194209
 
-            // ? needed ?
-            //c.frame.title = title = c.computeWindowTitle(c.mFileName)
-            // c.frame.setTitle(title)
+            c.frame.title = c.computeWindowTitle(c.mFileName);
 
-            // 2013/08/04: use c.computeWindowTitle.
             c.openDirectory = g.os_path_dirname(c.mFileName);
             c.frame.openDirectory = c.openDirectory;
-            // Bug fix in 4.4b2.
 
             // Calls c.clearChanged() if no error.
-            // ? needed ?
-            // if( g.app.qt_use_tabs && c.frame['top']){
-            //     c.frame.top.leo_master.setTabName(c, c.mFileName);
-            // }
+
             (c.fileCommands as FileCommands).saveAs(c.mFileName);
 
+            // TODO !
             // ? needed ?
             //g.app.recentFilesManager.updateRecentFiles(c.mFileName);
             g.chdir(c.mFileName);
@@ -795,15 +757,6 @@ export class CommanderFileCommands {
 
         c.raise_error_dialogs('write');
 
-        // ? needed ?
-        // *Safely* restore focus, without using the old w directly.
-        /*
-        if inBody:
-            c.bodyWantsFocus()
-            p.restoreCursorAndScroll()
-        else:
-            c.treeWantsFocus()
-        */
     }
     //@+node:felix.20220105210716.17: *4* c_file.saveTo
     @commander_command('save-to',

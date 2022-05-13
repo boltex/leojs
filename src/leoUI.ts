@@ -195,25 +195,6 @@ export class LeoUI {
      */
     public finishStartup(): void {
 
-        /* 
-        g.app.inBridge = true;  // (From Leo) Added 2007/10/21: support for g.getScript.
-        g.app.config = new GlobalConfigManager();
-        g.app.nodeIndices = new NodeIndices(g.app.leoID);
-        */
-
-        // TODO FAKE CONFIG
-
-        // IF RECENT FILES LIST :
-        //      TODO: CHECK RECENT LEO FILE LIST AND OPEN THEM
-        //      g.app.loadManager.load(fileName, pymacs)
-        // ELSE :
-        //      TODO: CREATE NEW LEO OUTLINE (demo below)
-
-        /*         
-        let c = g.app.newCommander("", this);
-        g.app.commanders().push(c);
-        */
-
         // * Create a single data provider for both outline trees, Leo view and Explorer view
         this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);
         this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
@@ -549,7 +530,7 @@ export class LeoUI {
                     },
                     (p_error) => {
                         // console.error('ERROR gotSelectedNode could not reveal: tree was refreshed!', 'Error:', p_error);
-                        console.log('ERROR gotSelectedNode could not reveal: tree was refreshed!');
+                        console.log('gotSelectedNode could not reveal: tree was refreshed!');
                     }
                 );
                 // Done, so reset reveal type 'flag'
@@ -1212,11 +1193,6 @@ export class LeoUI {
      * @returns Thenable that resolves when done
      */
     public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interrupt: boolean, p_asChild: boolean): Thenable<unknown> {
-        // Ignore p_fromOutline so as to not focus on tree to keep edit headline input open
-        // this.command('insert-node', p_node, { tree: true, states: true }, false);
-        // Call 'Edit Headline' on this newly made and selected node PASSING ORIGINAL p_fromOutline
-        // return this.editHeadline(g.app.commandersList[this.commanderIndex].p, p_fromOutline);
-
         let w_fromOutline: boolean = !!p_fromOutline; // Use w_fromOutline for where we intend to leave focus when done with the insert
 
         if (p_interrupt) {
@@ -1270,7 +1246,6 @@ export class LeoUI {
             this.launchRefresh();
             return Promise.resolve(value);
         });
-
     }
 
     /**
