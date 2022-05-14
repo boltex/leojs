@@ -40,8 +40,8 @@ async function import_txt_file(c: Commands, fn: string): Promise<void> {
  *
  * A helper function for reload-settings and reload-all-settings.
  */
-function reloadSettingsHelper(c: Commands): void {
-
+async function reloadSettingsHelper(c: Commands): Promise<unknown> {
+    return;
     // ? needed ?
     // TODO
     /*
@@ -69,31 +69,20 @@ function reloadSettingsHelper(c: Commands): void {
             // Redraw so a pasted temp node isn't visible
     }
     */
+
 }
 //@+node:felix.20220105212849.1: ** Class CommanderFileCommands
 export class CommanderFileCommands {
 
     //@+others
-    //@+node:felix.20211017230407.2: *3* commanderFileCommandsTest
-    @commander_command(
-        'test-commander-files',
-        'Test commanderFileCommandsTest method in CommanderFileCommands'
-    )
-    public commanderFileCommandsTest(this: Commands): void {
-        const c: Commands = this;
-
-        console.log('CommanderFileCommands TEST Called!!');
-
-    }
-
     //@+node:felix.20220105210716.2: *3* c_file.reloadSettings
     @commander_command(
         'reload-settings',
         'Reload settings for the selected outline, saving it if necessary.'
     )
-    public reloadSettings(this: Commands): void {
+    public async reloadSettings(this: Commands): Promise<unknown> {
         const c: Commands = this;
-        reloadSettingsHelper(c);
+        return reloadSettingsHelper(c);
     }
     //@+node:felix.20220105210716.4: *3* c_file.restartLeo
     @commander_command(
@@ -161,11 +150,11 @@ export class CommanderFileCommands {
         'close-window',
         'Close the Leo window, prompting to save it if it has been changed.'
     )
-    public close(this: Commands, new_c?: Commands): void {
+    public async close(this: Commands, new_c?: Commands): Promise<unknown> {
 
         // TODO
         console.log('TODO : closeLeoWindow');
-
+        return;
         /*
         g.app.closeLeoWindow(this.frame, new_c);
         */
@@ -175,7 +164,7 @@ export class CommanderFileCommands {
         'import-file',
         'Import one or more files.'
     )
-    public importAnyFile(this: Commands): void {
+    public async importAnyFile(this: Commands): Promise<unknown> {
 
         const c: Commands = this;
 
@@ -199,7 +188,7 @@ export class CommanderFileCommands {
             ["Text files", "*.txt"]
         ];
 
-        g.app.gui!.runOpenFileDialog(
+        return g.app.gui!.runOpenFileDialog(
             c,
             "Import File",
             types,
@@ -519,19 +508,19 @@ export class CommanderFileCommands {
                 p.v._deleteAllChildren();
             }
             // Fix #451: refresh-from-disk selects wrong node.
-            p = at.readOneAtAutoNode(p);
+            p = await at.readOneAtAutoNode(p);
         } else if (['@thin', '@file'].includes(word)) {
             if (shouldDelete) {
                 p.v._deleteAllChildren();
             }
-            at.read(p);
+            await at.read(p);
         } else if (word === '@clean') {
             // Wishlist 148: use @auto parser if the node is empty.
             if (p.b.trim() || p.hasChildren()) {
-                at.readOneAtCleanNode(p);
+                await at.readOneAtCleanNode(p);
             } else {
                 // Fix #451: refresh-from-disk selects wrong node.
-                p = at.readOneAtAutoNode(p);
+                p = await at.readOneAtAutoNode(p);
             }
         } else if (word === '@shadow') {
             if (shouldDelete) {
@@ -539,11 +528,11 @@ export class CommanderFileCommands {
             }
             at.read(p);
         } else if (word === '@edit') {
-            at.readOneAtEditNode(fn, p);
+            await at.readOneAtEditNode(fn, p);
             // Always deletes children.
         } else if (word === '@asis') {
             // Fix #1067.
-            at.readOneAtAsisNode(fn, p);
+            await at.readOneAtAsisNode(fn, p);
             // Always deletes children.
         } else {
             g.es_print(`can not refresh from disk\n${p.h}`);
@@ -557,6 +546,7 @@ export class CommanderFileCommands {
             (c.fileCommands as FileCommands).handleNodeConflicts();
             c.redraw();
         }
+        return;
     }
     //@+node:felix.20220105210716.13: *4* c_file.pwd
     @commander_command(
@@ -579,10 +569,9 @@ export class CommanderFileCommands {
         'save-file',
         'Save a Leo outline to a file, using the existing file name unless fileName is given'
     )
-    public save(this: Commands, fileName?: string): void {
+    public async save(this: Commands, fileName?: string): Promise<unknown> {
 
         const c: Commands = this;
-        let p: Position = this.p;
 
         if (g.app.disableSave) {
             g.es("save commands disabled", "purple");
@@ -603,8 +592,11 @@ export class CommanderFileCommands {
         if (c.mFileName) {
             // Calls c.clearChanged() if no error.
             g.app.syntax_error_files = [];
-            (c.fileCommands as FileCommands).save(c.mFileName);
-            c.syntaxErrorDialog();
+            return (c.fileCommands as FileCommands).save(c.mFileName).then(() => {
+                c.syntaxErrorDialog();
+                return c.raise_error_dialogs('write');
+            });
+
         } else {
             const root: Position = c.rootPosition()!;
             if (!root.next().__bool__() && root.isAtEditNode()) {
@@ -618,10 +610,10 @@ export class CommanderFileCommands {
                 }
                 c.clearChanged();  // Clears all dirty bits.
             } else {
-                fileName = c.k.givenArgs.join('');
+                fileName = c.k?.givenArgs?.join('');
                 if (!fileName) {
                     // ! ASYNC SOLUTION !
-                    g.app.gui!.runSaveFileDialog(
+                    return g.app.gui!.runSaveFileDialog(
                         c,
                         "Save",
                         [["Leo files", "*.leo *.db"]], // Array of arrays (one in this case)
@@ -629,10 +621,10 @@ export class CommanderFileCommands {
                     ).then((p_filename) => {
                         if (p_filename) {
                             // re-start this 'save' method with given filename
-                            c.save(p_filename);
+                            return c.save(p_filename); // no need to finish with dialogs.
                         }
+                        return Promise.resolve();
                     });
-                    return; // EXIT !
                 }
             }
             c.bringToFront();
@@ -644,15 +636,15 @@ export class CommanderFileCommands {
                 c.openDirectory = g.os_path_dirname(c.mFileName);
                 c.frame.openDirectory = c.openDirectory;
 
-                (c.fileCommands as FileCommands).save(c.mFileName);
+                return (c.fileCommands as FileCommands).save(c.mFileName).then(() => {
+                    // ? needed ? 
+                    // g.app.recentFilesManager.updateRecentFiles(c.mFileName);
+                    g.chdir(c.mFileName);
+                    return c.raise_error_dialogs('write');
+                });
 
-                // TODO !
-                // ? needed ? 
-                // g.app.recentFilesManager.updateRecentFiles(c.mFileName);
-                g.chdir(c.mFileName);
             }
         }
-        c.raise_error_dialogs('write');
     }
     //@+node:felix.20220105210716.15: *4* c_file.saveAll
     @commander_command(
@@ -1224,7 +1216,7 @@ export class CommanderFileCommands {
         'read-at-shadow-nodes',
         'Read all @shadow nodes in the presently selected outline.'
     )
-    public readAtShadowNodes(this: Commands): void {
+    public async readAtShadowNodes(this: Commands): Promise<unknown> {
         const c: Commands = this;
         const p: Position = this.p;
         const u: Undoer = this.undoer;
@@ -1232,17 +1224,17 @@ export class CommanderFileCommands {
         // c.endEditing();
         c.init_error_dialogs();
         const undoData: Bead = u.beforeChangeTree(p);
-        c.atFileCommands.readAtShadowNodes(p);
+        await c.atFileCommands.readAtShadowNodes(p);
         u.afterChangeTree(p, 'Read @shadow Nodes', undoData);
         c.redraw();
-        c.raise_error_dialogs('read');
+        return c.raise_error_dialogs('read');
     }
     //@+node:felix.20220105210716.34: *4* c_file.readFileIntoNode
     @commander_command(
         'read-file-into-node',
         'Read a file into a single node.'
     )
-    public async readFileIntoNode(this: Commands): Promise<void> {
+    public async readFileIntoNode(this: Commands): Promise<unknown> {
         const c: Commands = this;
         const undoType: string = 'Read File Into Node';
 
@@ -1276,7 +1268,7 @@ export class CommanderFileCommands {
             p.setHeadString('@read-file-into-node ' + fileName[0]);
             p.setBodyString(s);
             // w.setAllText(s);
-            c.redraw(p);
+            return c.redraw(p);
         });
 
     }
@@ -1285,12 +1277,12 @@ export class CommanderFileCommands {
         'read-outline-only',
         'Open a Leo outline from a .leo file, but do not read any derived files.'
     )
-    public readOutlineOnly(this: Commands): void {
+    public async readOutlineOnly(this: Commands): Promise<unknown> {
         const c: Commands = this;
 
         // c.endEditing();
 
-        g.app.gui!.runOpenFileDialog(
+        return g.app.gui!.runOpenFileDialog(
             c,
             "Read Outline Only",
             [["Leo files", "*.leo"], ["All files", "*"]],
@@ -1311,7 +1303,7 @@ export class CommanderFileCommands {
                 //frame = c.frame;
                 //frame.deiconify();
                 //frame.lift();
-                (c.fileCommands as FileCommands).readOutlineOnly(fileName[0]); // closes file.
+                return (c.fileCommands as FileCommands).readOutlineOnly(fileName[0]); // closes file.
             }
             catch (exception) {
                 g.es("can not open:", fileName[0]);
@@ -1364,22 +1356,15 @@ export class CommanderFileCommands {
             if (p_fileName) {
                 try {
                     g.chdir(p_fileName);
-
                     if (s.startsWith('@nocolor\n')) {
                         s = s.slice('@nocolor\n'.length);
                     }
-
-                    //fs.writeFileSync(p_fileName, s);
                     const w_uri = vscode.Uri.file(p_fileName);
                     const writeData = Buffer.from(s, 'utf8');
-                    return vscode.workspace.fs.writeFile(w_uri, writeData);
+                    return vscode.workspace.fs.writeFile(w_uri, writeData).then(() => {
+                        g.blue('wrote:', p_fileName);
 
-                    // with open(p_fileName, 'w') as f:
-                    //f.write(s);
-                    //f.flush();
-
-                    g.blue('wrote:', p_fileName);
-
+                    });
                 }
                 catch (iOError) {
                     g.error('can not write %s', p_fileName);
@@ -1468,9 +1453,9 @@ export class CommanderFileCommands {
         "\n" +
         "**Note**: Use the set-reference-file command to create the separator node.\n"
     )
-    public updateRefLeoFile(this: Commands): void {
+    public async updateRefLeoFile(this: Commands): Promise<unknown> {
         const c: Commands = this;
-        (c.fileCommands as FileCommands).save_ref();
+        return (c.fileCommands as FileCommands).save_ref();
     }
     //@+node:felix.20220105210716.46: *4* c_file.readRefLeoFile
     @commander_command(
@@ -1485,9 +1470,9 @@ export class CommanderFileCommands {
         "\n" +
         "**Note**: Use the set-reference-file command to create the separator node.\n"
     )
-    public readRefLeoFile(this: Commands): void {
+    public async readRefLeoFile(this: Commands): Promise<unknown> {
         const c: Commands = this;
-        (c.fileCommands as FileCommands).updateFromRefFile();
+        return (c.fileCommands as FileCommands).updateFromRefFile();
     }
     //@+node:felix.20220105210716.47: *4* c_file.setReferenceFile
     @commander_command(
@@ -1510,18 +1495,18 @@ export class CommanderFileCommands {
         // "command *completely replaces* the public part of the outline with the\n" +
         // "contents of reference Leo file.\n"
     )
-    public setReferenceFile(this: Commands): void {
+    public async setReferenceFile(this: Commands): Promise<unknown> {
 
         const c: Commands = this;
 
-        g.app.gui!.runOpenFileDialog(
+        return g.app.gui!.runOpenFileDialog(
             c,
             "Select reference Leo file",
             [["Leo files", "*.leo *.db"]],
             g.defaultLeoFileExtension(c)
         ).then((p_names) => {
             if (p_names && p_names.length) {
-                (c.fileCommands as FileCommands).setReferenceFile(p_names[0]);
+                return (c.fileCommands as FileCommands).setReferenceFile(p_names[0]);
             }
         });
 

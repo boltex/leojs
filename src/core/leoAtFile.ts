@@ -80,34 +80,34 @@ export class AtFile {
     }
 
     //@+node:felix.20211225233823.1: *3* readAll
-    public readAll(root: Position, force: boolean = false): void {
-
+    public async readAll(root: Position, force: boolean = false): Promise<unknown> {
+        return;
     }
     //@+node:felix.20211225233821.1: *3* writeAll
-    public writeAll(all: boolean = false, dirty: boolean = false): void {
-
+    public async writeAll(all: boolean = false, dirty: boolean = false): Promise<unknown> {
+        return;
     }
     //@+node:felix.20211225233822.1: *3* writeMissing
-    public writeMissing(p: Position): void {
-
+    public async writeMissing(p: Position): Promise<unknown> {
+        return;
     }
     //@+node:felix.20220108204309.1: *3* writeOneAtEditNode
-    public writeOneAtEditNode(p: Position): void {
-        //
+    public async writeOneAtEditNode(p: Position): Promise<unknown> {
+        return;
     }
     //@+node:felix.20220108170000.1: *3* read
-    public read(p: Position): void {
-
+    public async read(p: Position): Promise<unknown> {
+        return;
     }
     //@+node:felix.20220122224516.1: *3* at.readAllSelected
     /**
      * Read all @<file> nodes in root's tree.
      */
-    public readAllSelected(root: Position): void {
+    public async readAllSelected(root: Position): Promise<unknown> {
 
         const at = this;
         const c = this.c;
-
+        return;
         // TODO !
 
         // const old_changed = c.changed;
@@ -129,23 +129,23 @@ export class AtFile {
         // c.raise_error_dialogs()
     }
     //@+node:felix.20220108165923.1: *3* readOneAtAutoNode
-    public readOneAtAutoNode(p: Position): Position {
+    public async readOneAtAutoNode(p: Position): Promise<Position> {
         return p;
     }
     //@+node:felix.20220108170029.1: *3* readOneAtCleanNode
-    public readOneAtCleanNode(p: Position): void {
-
+    public async readOneAtCleanNode(p: Position): Promise<unknown> {
+        return;
     }
     //@+node:felix.20220108170054.1: *3* readOneAtEditNode
-    public readOneAtEditNode(fn: string, p: Position): void {
-
+    public async readOneAtEditNode(fn: string, p: Position): Promise<unknown> {
+        return;
     }
     //@+node:felix.20220108170138.1: *3* readOneAtAsisNode
-    public readOneAtAsisNode(fn: string, p: Position): void {
-
+    public async readOneAtAsisNode(fn: string, p: Position): Promise<unknown> {
+        return;
     }
     //@+node:felix.20220111224436.1: *3* readAtShadowNodes
-    public readAtShadowNodes(p: Position): Position {
+    public async readAtShadowNodes(p: Position): Promise<Position> {
         return p;
     }
     //@-others

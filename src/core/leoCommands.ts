@@ -2625,7 +2625,7 @@ export class Commands {
         const c: Commands = this;
 
         if (
-            g.app.syntax_error_files &&
+            g.app.syntax_error_files && g.app.syntax_error_files.length &&
             c.config.getBool('syntax-error-popup')
         ) {
             const aList: string[] = [...g.app.syntax_error_files].sort();
