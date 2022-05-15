@@ -1074,12 +1074,11 @@ export function activate(p_context: vscode.ExtensionContext) {
 <t tx="felix.20201214150149.11">[CMD.MARK, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, p_node, REFRESH_TREE, true, true)],
 [CMD.MARK_SELECTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, U, REFRESH_TREE, false)],
 [CMD.MARK_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, U, REFRESH_TREE, true)],
-
 [CMD.UNMARK, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, p_node, REFRESH_TREE, true, true)],
 [CMD.UNMARK_SELECTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, U, REFRESH_TREE, false)],
 [CMD.UNMARK_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, U, REFRESH_TREE, true)],
-
 [CMD.UNMARK_ALL, () =&gt; p_leoUI.command(LEOCMD.UNMARK_ALL, U, REFRESH_TREE_BODY, true)],
+
 </t>
 <t tx="felix.20201214150149.12">[CMD.EXTRACT, () =&gt; p_leoUI.command(LEOCMD.EXTRACT, U, REFRESH_TREE_BODY, false)],
 [CMD.EXTRACT_NAMES, () =&gt; p_leoUI.command(LEOCMD.EXTRACT_NAMES, U, REFRESH_TREE_BODY, false)],
@@ -1108,10 +1107,12 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.UNDO, () =&gt; p_leoUI.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, false)],
 [CMD.UNDO_FO, () =&gt; p_leoUI.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, true)],
 [CMD.UNDO_DISABLED, () =&gt; { }],
+
 </t>
 <t tx="felix.20201214150149.15">[CMD.SHOW_OUTLINE, () =&gt; p_leoUI.showOutline(true)], // Also focuses on outline
 [CMD.SHOW_LOG, () =&gt; p_leoUI.showLogPane()],
 [CMD.SHOW_BODY, () =&gt; p_leoUI.showBody(false)], // Also focuses on body
+
 </t>
 <t tx="felix.20201214150149.16">[CMD.COPY_MARKED, () =&gt; p_leoUI.command(LEOCMD.COPY_MARKED, U, REFRESH_TREE_BODY, true)],
 [CMD.DIFF_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.DIFF_MARKED_NODES, U, REFRESH_TREE_BODY, true)],
@@ -1149,6 +1150,7 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.SET_ENABLE_PREVIEW, () =&gt; p_leoUI.config.setEnablePreview()],
 [CMD.CLEAR_CLOSE_EMPTY_GROUPS, () =&gt; p_leoUI.config.clearCloseEmptyGroups()],
 [CMD.SET_CLOSE_ON_FILE_DELETE, () =&gt; p_leoUI.config.setCloseOnFileDelete()],
+
 </t>
 <t tx="felix.20201214150149.2">@others
 </t>
@@ -1159,17 +1161,17 @@ export function activate(p_context: vscode.ExtensionContext) {
 
 [CMD.CLICK_BUTTON, (p_node: LeoButtonNode) =&gt; p_leoUI.clickAtButton(p_node)], // Not referenced in package.json
 [CMD.REMOVE_BUTTON, (p_node: LeoButtonNode) =&gt; p_leoUI.removeAtButton(p_node)],
+
 </t>
 <t tx="felix.20201214150149.4">[CMD.CLOSE_FILE, () =&gt; p_leoUI.closeLeoFile()],
 [CMD.NEW_FILE, () =&gt; p_leoUI.command(LEOCMD.NEW, U, REFRESH_ALL, false)],
-
 [CMD.OPEN_FILE, (p_uri?: vscode.Uri) =&gt; p_leoUI.openLeoFile(p_uri)],
-
-[CMD.RECENT_FILES, () =&gt; p_leoUI.showRecentLeoFiles()],
 [CMD.SAVE_AS_FILE, () =&gt; p_leoUI.saveAsLeoFile()],
 [CMD.SAVE_FILE, () =&gt; p_leoUI.saveLeoFile()],
 [CMD.SAVE_FILE_FO, () =&gt; p_leoUI.saveLeoFile(true)],
+
 [CMD.SWITCH_FILE, () =&gt; p_leoUI.switchLeoFile()],
+[CMD.RECENT_FILES, () =&gt; p_leoUI.showRecentLeoFiles()],
 
 [CMD.WRITE_AT_FILE_NODES, () =&gt; p_leoUI.command(LEOCMD.WRITE_AT_FILE_NODES, U, REFRESH_TREE, false, false)],
 [CMD.WRITE_AT_FILE_NODES_FO, () =&gt; p_leoUI.command(LEOCMD.WRITE_AT_FILE_NODES, U, REFRESH_TREE, true, false)],
@@ -1185,10 +1187,12 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.REFRESH_FROM_DISK_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, U, REFRESH_TREE_BODY, true)],
 
 [CMD.GIT_DIFF, () =&gt; p_leoUI.command(LEOCMD.GIT_DIFF, U, REFRESH_TREE_BODY, false)],
+
 </t>
 <t tx="felix.20201214150149.5">[CMD.HEADLINE, (p_node: Position) =&gt; p_leoUI.editHeadline(p_node, true)],
 [CMD.HEADLINE_SELECTION, () =&gt; p_leoUI.editHeadline(U, false)],
 [CMD.HEADLINE_SELECTION_FO, () =&gt; p_leoUI.editHeadline(U, true)],
+
 </t>
 <t tx="felix.20201214150149.6">// cut/copy/paste/delete given node.
 [CMD.COPY, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.COPY_PNODE, p_node, NO_REFRESH, true, true)],
@@ -1207,6 +1211,7 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.PASTE_CLONE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, U, REFRESH_TREE_BODY, true)],
 [CMD.PASTE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, false)],
 [CMD.PASTE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, true)],
+
 </t>
 <t tx="felix.20201214150149.7">// Called by nodes in the tree when selected either by mouse, or with enter
 //[CMD.SELECT_NODE, (p_node: Position) =&gt; w_leoUI.selectTreeNode(p_node.position, false)],
@@ -1219,6 +1224,7 @@ export function activate(p_context: vscode.ExtensionContext) {
 
 [CMD.CONTRACT_OR_GO_LEFT, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_OR_GO_LEFT, U, REFRESH_TREE_BODY, true)],
 [CMD.EXPAND_AND_GO_RIGHT, () =&gt; p_leoUI.command(LEOCMD.EXPAND_AND_GO_RIGHT, U, REFRESH_TREE_BODY, true)],
+
 </t>
 <t tx="felix.20201214150149.8">[CMD.GOTO_NEXT_CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, p_node, REFRESH_NODE_BODY, true)],
 [CMD.GOTO_NEXT_CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, false)],
@@ -1233,6 +1239,7 @@ export function activate(p_context: vscode.ExtensionContext) {
 
 [CMD.PAGE_UP, () =&gt; p_leoUI.command(LEOCMD.PAGE_UP, U, REFRESH_NODE_BODY, true)],
 [CMD.PAGE_DOWN, () =&gt; p_leoUI.command(LEOCMD.PAGE_DOWN, U, REFRESH_NODE_BODY, true)],
+
 </t>
 <t tx="felix.20201214150149.9">[CMD.DEHOIST, () =&gt; p_leoUI.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, false)],
 [CMD.DEHOIST_DISABLED, () =&gt; { }],
@@ -1241,6 +1248,7 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.HOIST_DISABLED, () =&gt; { }],
 [CMD.HOIST_SELECTION, () =&gt; p_leoUI.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, false)],
 [CMD.HOIST_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, true)],
+
 </t>
 <t tx="felix.20201214151326.1">import * as vscode from "vscode";
 
@@ -5932,15 +5940,13 @@ public closeLeoFile(): Thenable&lt;unknown&gt; {
 
 </t>
 <t tx="felix.20201214211832.1">/**
- * * Shows an 'Open Leo File' dialog window and opens the chosen file
- * * If not shown already, it also shows the outline, body and log panes along with leaving focus in the outline
+ * * Sets up the call to the 'open-outline' command ans its possible file url parameter.
  * @param p_leoFileUri optional uri for specifying a file, if missing, a dialog will open
- * @returns A promise that resolves with a textEditor of the chosen file
+ * @returns A promise that resolves when done trying to open the file
  */
 public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
     await this._triggerSave();
 
-    // OPEN_OUTLINE
     const c = g.app.commanders()[this.commanderIndex];
     this._setupRefresh(true, {
         tree: true,
@@ -5949,58 +5955,9 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         documents: true,
         buttons: true
     });
-
     await c.open_outline(p_uri);
+
     return this.launchRefresh();
-
-    /* 
-
-    vscode.window.showInformationMessage('TODO: Implement openLeoFile' +
-        (p_uri ? " path: " + p_uri.fsPath : ""));
-
-    // if opened
-    const w_fakeOpenedFileInfo: any = undefined;
-    this._setupOpenedLeoDocument(w_fakeOpenedFileInfo);
-
-    return Promise.resolve(true);
-
-    */
-
-    // return this._triggerSave()
-    //     .then((p_saveResult) =&gt; {
-    //         let q_openedFile: Promise&lt;any&gt;; // Promise for opening a file
-    //         if (p_uri &amp;&amp; p_uri.fsPath.trim()) {
-    //             const w_fixedFilePath: string = p_uri.fsPath.replace(/\\/g, '/');
-    //             q_openedFile = Promise.resolve("TODO"); // use w_fixedFilePath
-    //         } else {
-    //             q_openedFile = this._leoFilesBrowser.getLeoFileUrl().then(
-    //                 (p_chosenLeoFile) =&gt; {
-    //                     if (p_chosenLeoFile.trim()) {
-    //                         return "TODO"; // use p_chosenLeoFile
-    //                     } else {
-    //                         return Promise.resolve(undefined);
-    //                     }
-    //                 },
-    //                 (p_errorGetFile) =&gt; {
-    //                     return Promise.reject(p_errorGetFile);
-    //                 }
-    //             );
-    //         }
-    //         return q_openedFile;
-    //     })
-    //     .then(
-    //         (p_openFileResult: any) =&gt; {
-    //             if (p_openFileResult) {
-    //                 return this._setupOpenedLeoDocument(p_openFileResult);
-    //             } else {
-    //                 return Promise.resolve(undefined);
-    //             }
-    //         },
-    //         (p_errorOpen) =&gt; {
-    //             console.log('in .then not opened or already opened'); // TODO : IS REJECTION BEHAVIOR NECESSARY HERE TOO?
-    //             return Promise.reject(p_errorOpen);
-    //         }
-    //     );
 
 }
 
@@ -6024,44 +5981,50 @@ public showRecentLeoFiles(): Thenable&lt;unknown&gt; {
  * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
  * @returns a promise from saving the file results, or that will resolve to undefined if cancelled
  */
-public saveAsLeoFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+public async saveAsLeoFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
+    await this._triggerSave();
 
-    this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
+    const c = g.app.commanders()[this.commanderIndex];
 
-    vscode.window.showInformationMessage('TODO: Implement saveAsLeoFile' +
-        " called from " +
-        (p_fromOutline ? "outline" : "body")
-    );
+    this._setupRefresh(!!p_fromOutline, {
+        tree: true,
+        states: true,
+        documents: true
+    });
 
-    this.launchRefresh();
+    await c.saveAs();
+    // vscode.window.showInformationMessage('TODO: Implement saveAsLeoFile' +
+    //     " called from " +
+    //     (p_fromOutline ? "outline" : "body")
+    // );
 
-    // if saved
-    return Promise.resolve(true);
-
-    // return Promise.resolve(undefined); // if cancelled
+    return this.launchRefresh();
 }
 
 </t>
 <t tx="felix.20201214211836.1">/**
- * * Invokes the self.commander.save() Leo command
+ * * Invokes the commander.save() command
  * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
  * @returns Promise that resolves when the save command is placed on the front-end command stack
  */
-public saveLeoFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+public async saveLeoFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
+    await this._triggerSave();
 
-    this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
+    const c = g.app.commanders()[this.commanderIndex];
 
-    vscode.window.showInformationMessage('TODO: Implement saveLeoFile' +
-        " called from " +
-        (p_fromOutline ? "outline" : "body")
-    );
+    this._setupRefresh(!!p_fromOutline, {
+        tree: true,
+        states: true,
+        documents: true
+    });
 
-    this.launchRefresh();
+    await c.save();
+    // vscode.window.showInformationMessage('TODO: Implement saveLeoFile' +
+    //     " called from " +
+    //     (p_fromOutline ? "outline" : "body")
+    // );
 
-    // if saved
-    return Promise.resolve(true);
-
-    // return Promise.resolve(undefined); // if cancelled
+    return this.launchRefresh();
 }
 
 </t>
@@ -7454,21 +7417,24 @@ export interface BodyTimeInfo {
  * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
  * @returns a promise from saving the file results, or that will resolve to undefined if cancelled
  */
-public saveAsLeojsFile(p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
+public async saveAsLeojsFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
+    await this._triggerSave();
 
-    this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
+    const c = g.app.commanders()[this.commanderIndex];
 
-    vscode.window.showInformationMessage('TODO: Implement saveAsLeojsFile' +
-        " called from " +
-        (p_fromOutline ? "outline" : "body")
-    );
+    this._setupRefresh(!!p_fromOutline, {
+        tree: true,
+        states: true,
+        documents: true
+    });
 
-    this.launchRefresh();
+    await c.save_as_leojs;
+    // vscode.window.showInformationMessage('TODO: Implement saveAsLeojsFile' +
+    //     " called from " +
+    //     (p_fromOutline ? "outline" : "body")
+    // );
 
-    // if saved
-    return Promise.resolve(true);
-
-    // return Promise.resolve(undefined); // if cancelled
+    return this.launchRefresh();
 }
 
 </t>
@@ -8343,7 +8309,6 @@ public setIdSetting(p_leoID: string): Promise&lt;unknown&gt; {
 public getIdFromSetting(): string {
     return this.config.leoID;
 }
-
 
 </t>
 <t tx="felix.20220201194319.1">/**

@@ -2204,15 +2204,13 @@ export class LeoUI {
     }
 
     /**
-     * * Shows an 'Open Leo File' dialog window and opens the chosen file
-     * * If not shown already, it also shows the outline, body and log panes along with leaving focus in the outline
+     * * Sets up the call to the 'open-outline' command ans its possible file url parameter.
      * @param p_leoFileUri optional uri for specifying a file, if missing, a dialog will open
-     * @returns A promise that resolves with a textEditor of the chosen file
+     * @returns A promise that resolves when done trying to open the file
      */
     public async openLeoFile(p_uri?: vscode.Uri): Promise<unknown> {
         await this._triggerSave();
 
-        // OPEN_OUTLINE
         const c = g.app.commanders()[this.commanderIndex];
         this._setupRefresh(true, {
             tree: true,
@@ -2221,58 +2219,9 @@ export class LeoUI {
             documents: true,
             buttons: true
         });
-
         await c.open_outline(p_uri);
+
         return this.launchRefresh();
-
-        /* 
-
-        vscode.window.showInformationMessage('TODO: Implement openLeoFile' +
-            (p_uri ? " path: " + p_uri.fsPath : ""));
-
-        // if opened
-        const w_fakeOpenedFileInfo: any = undefined;
-        this._setupOpenedLeoDocument(w_fakeOpenedFileInfo);
-
-        return Promise.resolve(true);
-
-        */
-
-        // return this._triggerSave()
-        //     .then((p_saveResult) => {
-        //         let q_openedFile: Promise<any>; // Promise for opening a file
-        //         if (p_uri && p_uri.fsPath.trim()) {
-        //             const w_fixedFilePath: string = p_uri.fsPath.replace(/\\/g, '/');
-        //             q_openedFile = Promise.resolve("TODO"); // use w_fixedFilePath
-        //         } else {
-        //             q_openedFile = this._leoFilesBrowser.getLeoFileUrl().then(
-        //                 (p_chosenLeoFile) => {
-        //                     if (p_chosenLeoFile.trim()) {
-        //                         return "TODO"; // use p_chosenLeoFile
-        //                     } else {
-        //                         return Promise.resolve(undefined);
-        //                     }
-        //                 },
-        //                 (p_errorGetFile) => {
-        //                     return Promise.reject(p_errorGetFile);
-        //                 }
-        //             );
-        //         }
-        //         return q_openedFile;
-        //     })
-        //     .then(
-        //         (p_openFileResult: any) => {
-        //             if (p_openFileResult) {
-        //                 return this._setupOpenedLeoDocument(p_openFileResult);
-        //             } else {
-        //                 return Promise.resolve(undefined);
-        //             }
-        //         },
-        //         (p_errorOpen) => {
-        //             console.log('in .then not opened or already opened'); // TODO : IS REJECTION BEHAVIOR NECESSARY HERE TOO?
-        //             return Promise.reject(p_errorOpen);
-        //         }
-        //     );
 
     }
 
@@ -2294,21 +2243,24 @@ export class LeoUI {
      * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
      * @returns a promise from saving the file results, or that will resolve to undefined if cancelled
      */
-    public saveAsLeoFile(p_fromOutline?: boolean): Thenable<unknown> {
+    public async saveAsLeoFile(p_fromOutline?: boolean): Promise<unknown> {
+        await this._triggerSave();
 
-        this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
+        const c = g.app.commanders()[this.commanderIndex];
 
-        vscode.window.showInformationMessage('TODO: Implement saveAsLeoFile' +
-            " called from " +
-            (p_fromOutline ? "outline" : "body")
-        );
+        this._setupRefresh(!!p_fromOutline, {
+            tree: true,
+            states: true,
+            documents: true
+        });
 
-        this.launchRefresh();
+        await c.saveAs();
+        // vscode.window.showInformationMessage('TODO: Implement saveAsLeoFile' +
+        //     " called from " +
+        //     (p_fromOutline ? "outline" : "body")
+        // );
 
-        // if saved
-        return Promise.resolve(true);
-
-        // return Promise.resolve(undefined); // if cancelled
+        return this.launchRefresh();
     }
 
     /**
@@ -2316,43 +2268,49 @@ export class LeoUI {
      * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
      * @returns a promise from saving the file results, or that will resolve to undefined if cancelled
      */
-    public saveAsLeojsFile(p_fromOutline?: boolean): Thenable<unknown> {
+    public async saveAsLeojsFile(p_fromOutline?: boolean): Promise<unknown> {
+        await this._triggerSave();
 
-        this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
+        const c = g.app.commanders()[this.commanderIndex];
 
-        vscode.window.showInformationMessage('TODO: Implement saveAsLeojsFile' +
-            " called from " +
-            (p_fromOutline ? "outline" : "body")
-        );
+        this._setupRefresh(!!p_fromOutline, {
+            tree: true,
+            states: true,
+            documents: true
+        });
 
-        this.launchRefresh();
+        await c.save_as_leojs;
+        // vscode.window.showInformationMessage('TODO: Implement saveAsLeojsFile' +
+        //     " called from " +
+        //     (p_fromOutline ? "outline" : "body")
+        // );
 
-        // if saved
-        return Promise.resolve(true);
-
-        // return Promise.resolve(undefined); // if cancelled
+        return this.launchRefresh();
     }
 
     /**
-     * * Invokes the self.commander.save() Leo command
+     * * Invokes the commander.save() command
      * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
      * @returns Promise that resolves when the save command is placed on the front-end command stack
      */
-    public saveLeoFile(p_fromOutline?: boolean): Thenable<unknown> {
+    public async saveLeoFile(p_fromOutline?: boolean): Promise<unknown> {
+        await this._triggerSave();
 
-        this._setupRefresh(!!p_fromOutline, { tree: true, states: true, documents: true });
+        const c = g.app.commanders()[this.commanderIndex];
 
-        vscode.window.showInformationMessage('TODO: Implement saveLeoFile' +
-            " called from " +
-            (p_fromOutline ? "outline" : "body")
-        );
+        this._setupRefresh(!!p_fromOutline, {
+            tree: true,
+            states: true,
+            documents: true
+        });
 
-        this.launchRefresh();
+        await c.save();
+        // vscode.window.showInformationMessage('TODO: Implement saveLeoFile' +
+        //     " called from " +
+        //     (p_fromOutline ? "outline" : "body")
+        // );
 
-        // if saved
-        return Promise.resolve(true);
-
-        // return Promise.resolve(undefined); // if cancelled
+        return this.launchRefresh();
     }
 
     /**
@@ -2548,7 +2506,6 @@ export class LeoUI {
     public getIdFromSetting(): string {
         return this.config.leoID;
     }
-
 
     /**
      * * Sets the leoID setting for immediate use, and in next activation

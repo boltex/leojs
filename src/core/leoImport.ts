@@ -13,34 +13,40 @@ export class LeoImportCommands {
         this.c = c;
     }
 
-    public exportHeadlines(fileName: string): void {
+    public async exportHeadlines(fileName: string): Promise<unknown> {
         // TODO !
         console.log('TODO: exportHeadlines');
+        return;
     }
 
-    public flattenOutline(fileName: string): void {
+    public async flattenOutline(fileName: string): Promise<unknown> {
         // TODO !
         console.log('TODO: flattenOutline');
+        return;
     }
 
-    public outlineToWeb(fileName: string, webType: string): void {
+    public async outlineToWeb(fileName: string, webType: string): Promise<unknown> {
         // TODO !
         console.log('TODO: outlineToWeb');
+        return;
     }
 
-    public removeSentinelsCommand(names: string[]): void {
+    public async removeSentinelsCommand(names: string[]): Promise<unknown> {
         // TODO !
         console.log('TODO: removeSentinelsCommand');
+        return;
     }
 
-    public weave(fileName: string): void {
+    public async weave(fileName: string): Promise<unknown> {
         // TODO !
         console.log('TODO: weave');
+        return;
     }
 
-    public readAtAutoNodes(): void {
+    public async readAtAutoNodes(): Promise<unknown> {
         // TODO !
         console.log('TODO: readAtAutoNodes');
+        return;
     }
 
 }

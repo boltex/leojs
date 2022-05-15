@@ -968,7 +968,9 @@ export class FileCommands extends DummyFileCommands {
                 c.openDirectory = theDir;
                 // c.frame.openDirectory = theDir
             }
+            return Promise.resolve();
         }
+        return Promise.resolve();
     }
     //@+node:felix.20211213224228.8: *4* fc.warnOnReadOnlyFiles
     public async warnOnReadOnlyFiles(fileName: string): Promise<void> {
@@ -2098,7 +2100,11 @@ export class FileCommands extends DummyFileCommands {
         if (ok === undefined) {
             // c.endEditing();  // Set the current headline text.
             await this.setDefaultDirectoryForNewFiles(fileName);
-            g.app.commander_cacher.save(c, fileName);
+
+
+            if (g.app && g.app.commander_cacher && g.app.commander_cacher.save) {
+                g.app.commander_cacher.save(c, fileName);
+            }
             ok = c.checkFileTimeStamp(fileName);
             if (ok) {
                 if (c.sqlite_connection) {
@@ -2287,7 +2293,9 @@ export class FileCommands extends DummyFileCommands {
                 c.sqlite_connection = undefined;
             }
             await this.setDefaultDirectoryForNewFiles(fileName);
-            g.app.commander_cacher.save(c, fileName);
+            if (g.app && g.app.commander_cacher && g.app.commander_cacher.save) {
+                g.app.commander_cacher.save(c, fileName);
+            }
             // Disable path-changed messages in writeAllHelper.
             c.ignoreChangedPaths = true;
             try {
@@ -2315,12 +2323,14 @@ export class FileCommands extends DummyFileCommands {
 
         if (!g.doHook("save1", { c: c, p: p, fileName: fileName })) {
             //c.endEditing()  // Set the current headline text.
-            if (c.sqlite_connection) {
+            if (c.sqlite_connection && c.sqlite_connection.close) {
                 c.sqlite_connection.close();
                 c.sqlite_connection = undefined;
             }
             await this.setDefaultDirectoryForNewFiles(fileName);
-            g.app.commander_cacher.commit();  // Commit, but don't save file name.
+            if (g.app && g.app.commander_cacher && g.app.commander_cacher.commit) {
+                g.app.commander_cacher.commit();  // Commit, but don't save file name.
+            }
             // Disable path-changed messages in writeAllHelper.
             c.ignoreChangedPaths = true;
             try {
@@ -2334,7 +2344,6 @@ export class FileCommands extends DummyFileCommands {
                 this.putSavedMessage(fileName);
             }
             c.redraw_after_icons_changed();
-
         }
         g.doHook("save2", { c: c, p: p, fileName: fileName });
     }
@@ -2692,8 +2701,9 @@ export class FileCommands extends DummyFileCommands {
 
             // f.close();
             // fs.closeSync(f);
-
-            g.app.commander_cacher.save(c, fileName);
+            if (g.app && g.app.commander_cacher && g.app.commander_cacher.save) {
+                g.app.commander_cacher.save(c, fileName);
+            }
 
             c.setFileTimeStamp(fileName);
             // Delete backup file.
@@ -3411,7 +3421,7 @@ export class FileCommands extends DummyFileCommands {
      */
     public setCachedBits(): void {
 
-        const trace: boolean = true || !!g.app.debug.includes('cache');
+        const trace: boolean = !!g.app.debug.includes('cache');
 
         const c: Commands = this.c;
 
