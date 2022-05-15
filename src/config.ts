@@ -114,7 +114,7 @@ export class Config implements ConfigMembers {
      * @param p_changes is an array of codes and values to be changed
      * @returns a promise that resolves upon completion
      */
-    public setLeojsSettings(p_changes: ConfigSetting[]): Promise<unknown> {
+    public async setLeojsSettings(p_changes: ConfigSetting[]): Promise<unknown> {
         this._isBusySettingConfig = true;
         const w_promises: Thenable<void>[] = [];
         const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
@@ -132,16 +132,17 @@ export class Config implements ConfigMembers {
                 w_promises.push(w_vscodeConfig.update(i_change.code, i_change.value, true));
             }
         });
-        return Promise.all(w_promises).then(() => {
-            if (this._needsTreeRefresh) {
-                this._needsTreeRefresh = false;
-                setTimeout(() => {
-                    this._leoUI.configTreeRefresh();
-                }, 200);
-            }
-            this._isBusySettingConfig = false;
-            return this.buildFromSavedSettings(); // Refresh config from settings from vscode's saved config
-        });
+
+        await Promise.all(w_promises);
+        if (this._needsTreeRefresh) {
+            this._needsTreeRefresh = false;
+            setTimeout(() => {
+                this._leoUI.configTreeRefresh();
+            }, 200);
+        }
+        this._isBusySettingConfig = false;
+        return this.buildFromSavedSettings(); // Refresh config from settings from vscode's saved config
+
     }
 
     /**
@@ -214,12 +215,11 @@ export class Config implements ConfigMembers {
                 vscode.window.showWarningMessage(
                     Constants.USER_MESSAGES.ENABLE_PREVIEW_RECOMMEND,
                     Constants.USER_MESSAGES.FIX_IT
-                )
-                    .then(p_chosenButton => {
-                        if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
-                            vscode.commands.executeCommand(Constants.COMMANDS.SET_ENABLE_PREVIEW);
-                        }
-                    });
+                ).then(p_chosenButton => {
+                    if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
+                        vscode.commands.executeCommand(Constants.COMMANDS.SET_ENABLE_PREVIEW);
+                    }
+                });
             }
         }
     }
@@ -244,12 +244,11 @@ export class Config implements ConfigMembers {
                 vscode.window.showWarningMessage(
                     Constants.USER_MESSAGES.CLOSE_EMPTY_RECOMMEND,
                     Constants.USER_MESSAGES.FIX_IT
-                )
-                    .then(p_chosenButton => {
-                        if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
-                            vscode.commands.executeCommand(Constants.COMMANDS.CLEAR_CLOSE_EMPTY_GROUPS);
-                        }
-                    });
+                ).then(p_chosenButton => {
+                    if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
+                        vscode.commands.executeCommand(Constants.COMMANDS.CLEAR_CLOSE_EMPTY_GROUPS);
+                    }
+                });
             }
         }
     }
@@ -275,12 +274,11 @@ export class Config implements ConfigMembers {
                 vscode.window.showWarningMessage(
                     Constants.USER_MESSAGES.CLOSE_ON_DELETE_RECOMMEND,
                     Constants.USER_MESSAGES.FIX_IT
-                )
-                    .then(p_chosenButton => {
-                        if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
-                            vscode.commands.executeCommand(Constants.COMMANDS.SET_CLOSE_ON_FILE_DELETE);
-                        }
-                    });
+                ).then(p_chosenButton => {
+                    if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
+                        vscode.commands.executeCommand(Constants.COMMANDS.SET_CLOSE_ON_FILE_DELETE);
+                    }
+                });
             }
         }
     }

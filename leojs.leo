@@ -6587,12 +6587,11 @@ public checkEnablePreview(p_forced?: boolean): void {
             vscode.window.showWarningMessage(
                 Constants.USER_MESSAGES.ENABLE_PREVIEW_RECOMMEND,
                 Constants.USER_MESSAGES.FIX_IT
-            )
-                .then(p_chosenButton =&gt; {
-                    if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
-                        vscode.commands.executeCommand(Constants.COMMANDS.SET_ENABLE_PREVIEW);
-                    }
-                });
+            ).then(p_chosenButton =&gt; {
+                if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
+                    vscode.commands.executeCommand(Constants.COMMANDS.SET_ENABLE_PREVIEW);
+                }
+            });
         }
     }
 }
@@ -6618,12 +6617,11 @@ public checkCloseEmptyGroups(p_forced?: boolean): void {
             vscode.window.showWarningMessage(
                 Constants.USER_MESSAGES.CLOSE_EMPTY_RECOMMEND,
                 Constants.USER_MESSAGES.FIX_IT
-            )
-                .then(p_chosenButton =&gt; {
-                    if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
-                        vscode.commands.executeCommand(Constants.COMMANDS.CLEAR_CLOSE_EMPTY_GROUPS);
-                    }
-                });
+            ).then(p_chosenButton =&gt; {
+                if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
+                    vscode.commands.executeCommand(Constants.COMMANDS.CLEAR_CLOSE_EMPTY_GROUPS);
+                }
+            });
         }
     }
 }
@@ -6650,12 +6648,11 @@ public checkCloseOnFileDelete(p_forced?: boolean): void {
             vscode.window.showWarningMessage(
                 Constants.USER_MESSAGES.CLOSE_ON_DELETE_RECOMMEND,
                 Constants.USER_MESSAGES.FIX_IT
-            )
-                .then(p_chosenButton =&gt; {
-                    if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
-                        vscode.commands.executeCommand(Constants.COMMANDS.SET_CLOSE_ON_FILE_DELETE);
-                    }
-                });
+            ).then(p_chosenButton =&gt; {
+                if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
+                    vscode.commands.executeCommand(Constants.COMMANDS.SET_CLOSE_ON_FILE_DELETE);
+                }
+            });
         }
     }
 }
@@ -6853,7 +6850,7 @@ public getFontConfig(): FontSettings {
  * @param p_changes is an array of codes and values to be changed
  * @returns a promise that resolves upon completion
  */
-public setLeojsSettings(p_changes: ConfigSetting[]): Promise&lt;unknown&gt; {
+public async setLeojsSettings(p_changes: ConfigSetting[]): Promise&lt;unknown&gt; {
     this._isBusySettingConfig = true;
     const w_promises: Thenable&lt;void&gt;[] = [];
     const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
@@ -6871,16 +6868,17 @@ public setLeojsSettings(p_changes: ConfigSetting[]): Promise&lt;unknown&gt; {
             w_promises.push(w_vscodeConfig.update(i_change.code, i_change.value, true));
         }
     });
-    return Promise.all(w_promises).then(() =&gt; {
-        if (this._needsTreeRefresh) {
-            this._needsTreeRefresh = false;
-            setTimeout(() =&gt; {
-                this._leoUI.configTreeRefresh();
-            }, 200);
-        }
-        this._isBusySettingConfig = false;
-        return this.buildFromSavedSettings(); // Refresh config from settings from vscode's saved config
-    });
+
+    await Promise.all(w_promises);
+    if (this._needsTreeRefresh) {
+        this._needsTreeRefresh = false;
+        setTimeout(() =&gt; {
+            this._leoUI.configTreeRefresh();
+        }, 200);
+    }
+    this._isBusySettingConfig = false;
+    return this.buildFromSavedSettings(); // Refresh config from settings from vscode's saved config
+
 }
 
 </t>
@@ -8383,7 +8381,11 @@ public finishStartup(): void {
     this._leoTreeExView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeExView)));
     this._leoTreeExView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeExView)));
     this._leoTreeExView.onDidChangeVisibility((p_event =&gt; this._onTreeViewVisibilityChanged(p_event, true))); // * Trigger 'show tree in explorer view'
-    this._lastTreeView = this._leoTreeExView;
+    if (this.config.treeInExplorer) {
+        this._lastTreeView = this._leoTreeExView;
+    } else {
+        this._lastTreeView = this._leoTreeView;
+    }
 
     // * Create Leo Opened Documents Treeview Providers and tree views
     this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);

@@ -1039,7 +1039,11 @@ export class LeoApp {
 
         // 1 - set leoID from configuration settings
         if (!this.leoID && vscode && vscode.workspace) {
-            w_userName = vscode.workspace.getConfiguration(Constants.CONFIG_NAME).get(Constants.CONFIG_NAMES.LEO_ID, Constants.CONFIG_DEFAULTS.LEO_ID);
+            w_userName = vscode.workspace.getConfiguration(
+                Constants.CONFIG_NAME).get(
+                    Constants.CONFIG_NAMES.LEO_ID,
+                    Constants.CONFIG_DEFAULTS.LEO_ID
+                );
             if (w_userName) {
                 this.leoID = this.cleanLeoID(w_userName, 'config.leoID');
             }
@@ -1055,24 +1059,24 @@ export class LeoApp {
 
         // 3 - Set leoID from user dialog if allowed
         if (!this.leoID && useDialog) {
-            return utils.getIdFromDialog().then((p_id) => {
-                this.leoID = this.cleanLeoID(p_id, '');
-                if (this.leoID && vscode && vscode.workspace) {
-                    const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
-                    // tslint:disable-next-line: strict-comparisons
-                    if (w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!.defaultValue === this.leoID) {
-                        // Set as undefined - same as default
-                        w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, undefined, true);
-                    } else {
-                        // Set as value which is not default
-                        w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, this.leoID, true);
-                    }
+            const w_id = await utils.getIdFromDialog();
+            this.leoID = this.cleanLeoID(w_id, '');
+            if (this.leoID && vscode && vscode.workspace) {
+                const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
+                // tslint:disable-next-line: strict-comparisons
+                if (w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!.defaultValue === this.leoID) {
+                    // Set as undefined - same as default
+                    w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, undefined, true);
+                } else {
+                    // Set as value which is not default
+                    await w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, this.leoID, true);
                 }
-                if (!this.leoID) {
-                    throw new Error("Invalid Leo ID");
-                }
-                return this.leoID;
-            });
+            }
+            if (!this.leoID) {
+                throw new Error("Invalid Leo ID");
+            }
+            return this.leoID;
+
         } else {
             if (!this.leoID) {
                 throw new Error("Could not get Leo ID");
@@ -1711,61 +1715,58 @@ export class LoadManager {
     /**
      * This is Leo's main startup method.
      */
-    public async load(fileName?: string): Promise<void> {
+    public async load(fileName?: string): Promise<unknown> {
 
         const lm: LoadManager = this;
 
         const t1 = process.hrtime();
 
         // sets lm.options and lm.files
-        lm.doPrePluginsInit(fileName).finally(() => {
-            g.app.computeSignon();
-            g.app.printSignon();
+        await lm.doPrePluginsInit(fileName);
+        g.app.computeSignon();
+        g.app.printSignon();
 
-            if (!g.app.gui) {
-                return;
-            }
-            // Disable redraw until all files are loaded.
-            g.app.disable_redraw = true;
-            const t2 = process.hrtime();
-            g.doHook("start1");
+        if (!g.app.gui) {
+            return;
+        }
+        // Disable redraw until all files are loaded.
+        g.app.disable_redraw = true;
+        const t2 = process.hrtime();
+        g.doHook("start1");
 
-            if (g.app.killed) {
-                return;
-            }
+        if (g.app.killed) {
+            return;
+        }
 
-            // TODO: idleTimeManager
-            // g.app.idleTimeManager.start();
+        // TODO: idleTimeManager
+        // g.app.idleTimeManager.start();
 
-            const t3 = process.hrtime();
-            let q_ok = lm.doPostPluginsInit();
-            g.app.makeAllBindings();
+        const t3 = process.hrtime();
+        const ok = await lm.doPostPluginsInit();
+        g.app.makeAllBindings();
 
-            (g.app.gui as LeoUI).finishStartup();
+        (g.app.gui as LeoUI).finishStartup();
 
-            g.es('');  // Clears horizontal scrolling in the log pane.
+        g.es('');  // Clears horizontal scrolling in the log pane.
 
-            q_ok.then(p_result => {
-                if (!p_result) {
-                    return;
-                } if (g.app.listen_to_log_flag) {
-                    // TODO: ?
-                    // g.app.listenToLog();
-                }
-                if (g.app.debug.includes('startup')) {
-                    const t4 = process.hrtime();
-                    console.log('');
-                    g.es_print(`settings:${utils.getDurationMs(t1, t2)} ms`);
-                    g.es_print(` plugins:${utils.getDurationMs(t2, t3)} ms`);
-                    g.es_print(`   files:${utils.getDurationMs(t3, t4)} ms`);
-                    g.es_print(`   total:${utils.getDurationMs(t1, t4)} ms`);
-                    console.log('');
-                }
+        if (!ok) {
+            return;
+        }
+        if (g.app.listen_to_log_flag) {
+            // TODO: ?
+            // g.app.listenToLog();
+        }
+        if (g.app.debug.includes('startup')) {
+            const t4 = process.hrtime();
+            console.log('');
+            g.es_print(`settings:${utils.getDurationMs(t1, t2)} ms`);
+            g.es_print(` plugins:${utils.getDurationMs(t2, t3)} ms`);
+            g.es_print(`   files:${utils.getDurationMs(t3, t4)} ms`);
+            g.es_print(`   total:${utils.getDurationMs(t1, t4)} ms`);
+            console.log('');
+        }
 
-            });
-
-        });
-
+        return ok;
     }
 
     //@+node:felix.20210120004121.3: *4* LM.doPostPluginsInit & helpers
@@ -1993,8 +1994,7 @@ export class LoadManager {
     }
 
     //@+node:felix.20210120004121.16: *5* LM.initApp
-    public initApp(verbose?: boolean): Promise<unknown> {
-
+    public async initApp(verbose?: boolean): Promise<unknown> {
 
         console.assert(g.app.loadManager);
 
@@ -2002,26 +2002,23 @@ export class LoadManager {
         // leoPlugins.init(); // TODO: plugins system ? 
 
         // Force the user to set g.app.leoID.
-        let w_leoID = "None";
-        return g.app.setLeoID(true, verbose).then((p_id) => {
-            if (p_id) {
-                w_leoID = p_id;
-            }
-        }).finally(() => {
-            g.app.inBridge = true;  // (From Leo) Support for g.getScript.
-            // w_leoID will at least be 'None'.
-            g.app.idleTimeManager = new IdleTimeManager();
-            // g.app.backgroundProcessManager = new leoBackground.BackgroundProcessManager();
-            g.app.externalFilesController = new ExternalFilesController();
-            // g.app.recentFilesManager = new RecentFilesManager(); // ! HANDLED with vscode workspace recent files
-            g.app.config = new GlobalConfigManager();
-            g.app.nodeIndices = new NodeIndices(g.app.leoID);
-            // g.app.sessionManager = leoSessions.SessionManager(); // ! HANDLED with vscode workspace recent files
+        await g.app.setLeoID(true, verbose);
 
-            // TODO: plugins system ? 
-            // Complete the plugins class last.
-            // g.app.pluginsController.finishCreate();
-        });
+        g.app.inBridge = true;  // (From Leo) Support for g.getScript.
+        // w_leoID will at least be 'None'.
+        g.app.idleTimeManager = new IdleTimeManager();
+        // g.app.backgroundProcessManager = new leoBackground.BackgroundProcessManager();
+        g.app.externalFilesController = new ExternalFilesController();
+        // g.app.recentFilesManager = new RecentFilesManager(); // ! HANDLED with vscode workspace recent files
+        g.app.config = new GlobalConfigManager();
+        g.app.nodeIndices = new NodeIndices(g.app.leoID);
+        // g.app.sessionManager = leoSessions.SessionManager(); // ! HANDLED with vscode workspace recent files
+
+        // TODO: plugins system ? 
+        // Complete the plugins class last.
+        // g.app.pluginsController.finishCreate();
+
+        return g.app.leoID;
 
     }
 
@@ -2146,7 +2143,7 @@ export class LoadManager {
         if (fn) {
             const readAtFileNodesFlag = !!(previousSettings);
             // The log is not set properly here.
-            const ok = await lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag); // c.fileCommands.openLeoFile(theFile)
+            const ok = await lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag);
 
             if (!ok) {
                 return undefined;
@@ -2155,7 +2152,7 @@ export class LoadManager {
             // Create a wrapper .leo file if:
             // a) fn is a .leo file that does not exist or
             // b) fn is an external file, existing or not.
-            lm.initWrapperLeoFile(c, fn);
+            await lm.initWrapperLeoFile(c, fn);
         }
 
 
@@ -2236,7 +2233,7 @@ export class LoadManager {
      *
      * Otherwise, create an @edit or @file node for the external file.
      */
-    public initWrapperLeoFile(c: Commands, fn: string): Commands {
+    public async initWrapperLeoFile(c: Commands, fn: string): Promise<Commands> {
 
         let p: Position | undefined;
 
@@ -2269,7 +2266,7 @@ export class LoadManager {
             if (p && p.__bool__()) {
                 const load_type = this.options['load_type'];
                 p.setHeadString(`${load_type} ${fn}`);
-                c.refreshFromDisk();
+                await c.refreshFromDisk();
                 c.selectPosition(p);
             }
         }
@@ -2372,31 +2369,22 @@ export class LoadManager {
      *
      * Note: g.app.log is not inited here.
      */
-    public readOpenedLeoFile(c: Commands, fn: string, readAtFileNodesFlag: boolean): Promise<VNode | undefined> {
+    public async readOpenedLeoFile(c: Commands, fn: string, readAtFileNodesFlag: boolean): Promise<VNode | undefined> {
 
         // New in Leo 4.10: The open1 event does not allow an override of the init logic.
         // assert theFile
 
         // Read and close the file.
-        const ok: Promise<VNode | undefined> = (c.fileCommands as FileCommands).openLeoFile(fn, readAtFileNodesFlag);
-        ok.then((p_result: VNode | undefined) => {
-            if (p_result) {
-                if (!c.openDirectory) {
-                    const theDir = g.os_path_finalize(g.os_path_dirname(fn));  // 1341
-                    c.openDirectory = c.frame.openDirectory = theDir;
-                }
+        const w_result = await (c.fileCommands as FileCommands).openLeoFile(fn, readAtFileNodesFlag);
+        if (w_result) {
+            if (!c.openDirectory) {
+                const theDir = g.os_path_finalize(g.os_path_dirname(fn));  // 1341
+                c.openDirectory = theDir;
+                c.frame.openDirectory = theDir;
             }
-            return p_result;
-        });
-
-        // unused in leojs
-        /* 
-        else{
-            // #970: Never close Leo here.
-            g.app.closeLeoWindow(c.frame, false);
         }
-        */
-        return ok;
+        return w_result;
+
     }
     //@+node:felix.20220109232545.1: *3* LM.revertCommander
     /**
@@ -2413,7 +2401,7 @@ export class LoadManager {
             await vscode.workspace.fs.stat(w_uri);
             // OK exists
             (c.fileCommands as FileCommands).initIvars();
-            (c.fileCommands as FileCommands).getLeoFile(fn, false);
+            (c.fileCommands as FileCommands).getLeoFile(fn, undefined, undefined, false);
         } catch {
             // Does not exist !
         }

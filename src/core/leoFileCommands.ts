@@ -747,43 +747,43 @@ export class FileCommands extends DummyFileCommands {
         'write-at-file-nodes',
         'Write all @file nodes in the selected outline.'
     )
-    public writeAtFileNodes(): void {
+    public async writeAtFileNodes(): Promise<unknown> {
         const c: Commands = this.c;
         // c.endEditing();
         c.init_error_dialogs();
-        c.atFileCommands.writeAll(true);
-        c.raise_error_dialogs('write');
+        await c.atFileCommands.writeAll(true);
+        return c.raise_error_dialogs('write');
     }
     //@+node:felix.20211213224222.3: *4* fc.write-outline-only
     @cmd(
         'write-outline-only',
         'Write the entire outline without writing any derived files.')
-    public writeOutlineOnly(): void {
+    public async writeOutlineOnly(): Promise<unknown> {
         const c: Commands = this.c;
         // c.endEditing();
-        this.writeOutline(this.mFileName);
+        return this.writeOutline(this.mFileName);
     }
     //@+node:felix.20211213224222.4: *4* fc.writeDirtyAtFileNodes
     @cmd(
         'write-dirty-at-file-nodes',
         'Write all changed @file Nodes.'
     )
-    public writeDirtyAtFileNodes(): void {
+    public async writeDirtyAtFileNodes(): Promise<unknown> {
         const c: Commands = this.c;
         // c.endEditing()
         c.init_error_dialogs();
-        c.atFileCommands.writeAll(true);
-        c.raise_error_dialogs('write');
+        await c.atFileCommands.writeAll(true);
+        return c.raise_error_dialogs('write');
     }
     //@+node:felix.20211213224222.5: *4* fc.writeMissingAtFileNodes
     @cmd(
         'write-missing-at-file-nodes',
         'Write all @file nodes for which the corresponding external file does not exist.'
     )
-    public writeMissingAtFileNodes(): void {
+    public async writeMissingAtFileNodes(): Promise<unknown> {
         const c: Commands = this.c;
         // c.endEditing()
-        c.atFileCommands.writeMissing(c.p);
+        return c.atFileCommands.writeMissing(c.p);
     }
     //@+node:felix.20211213224228.1: *3* fc: File Utils
     //@+node:felix.20211213224228.2: *4* fc.createBackupFile
@@ -799,39 +799,21 @@ export class FileCommands extends DummyFileCommands {
 
         if (w_exists) {
 
-            let fd: number;
             let backupName: string | undefined;
             const timestamp: number = new Date().getTime();
-            // [fd, backupName] = temp.openSync()
             backupName = fileName + "." + timestamp.toString(32) + (this.tempCounter++).toString(32) + ".tmp";
 
-            // let tempFile = temp.openSync();
-            //fd = tempFile.fd;
-            //backupName = tempFile.path;
-            // fd = fs.openSync(backupName, 'w');
-
-            // let f: number;
             let s: string;
-            // f = fs.openSync(fileName, 'rb');  // rb is essential.
-            // s = fs.readFileSync(f, 'utf8');
-            // fs.closeSync(f);
             const w_readUri = vscode.Uri.file(fileName);
             const readData = await vscode.workspace.fs.readFile(w_readUri);
             s = Buffer.from(readData).toString('utf8');
 
             try {
-                try {
-                    const w_writeUri = vscode.Uri.file(backupName);
-                    const writeData = Buffer.from(s, 'utf8');
-                    vscode.workspace.fs.writeFile(w_writeUri, writeData);
-                    // fs.writeSync(fd, s);
-                }
-                finally {
-                    // fs.closeSync(fd);
-                }
+                const w_writeUri = vscode.Uri.file(backupName);
+                const writeData = Buffer.from(s, 'utf8');
+                await vscode.workspace.fs.writeFile(w_writeUri, writeData);
 
                 ok = true;
-
             }
             catch (exception) {
                 g.error('exception creating backup file');
@@ -853,10 +835,9 @@ export class FileCommands extends DummyFileCommands {
     }
     //@+node:felix.20211213224228.3: *4* fc.deleteBackupFile
     public async deleteBackupFile(fileName: string): Promise<void> {
+        const w_uri = vscode.Uri.file(fileName);
         try {
-            // fs.unlinkSync(fileName);
-            const w_uri = vscode.Uri.file(fileName);
-            vscode.workspace.fs.delete(w_uri, { useTrash: false });
+            await vscode.workspace.fs.delete(w_uri, { useTrash: false });
         }
         catch (exception) {
             if (this.read_only) {
@@ -871,20 +852,13 @@ export class FileCommands extends DummyFileCommands {
      * Report an exception. f is an open file, or None.
      */
     public async handleWriteLeoFileException(fileName: string, backupName: string): Promise<void> {
-        // c = this.c
         g.es("exception writing:", fileName);
         g.es_exception(true);
-
-        /*
-        if (f) {
-            fs.closeSync(f);
-        }
-        */
 
         // Delete fileName.
         const w_fileExists = await g.os_path_exists(fileName);
         if (fileName && w_fileExists) {
-            this.deleteBackupFile(fileName);
+            await this.deleteBackupFile(fileName);
         }
         // Rename backupName to fileName.
         const w_backupExists = await g.os_path_exists(backupName);
@@ -897,8 +871,7 @@ export class FileCommands extends DummyFileCommands {
             try {
                 const w_srcUri = vscode.Uri.file(src);
                 const w_dstUri = vscode.Uri.file(dst);
-                vscode.workspace.fs.rename(w_srcUri, w_dstUri, { overwrite: true });
-                // fs.renameSync(src, dst);
+                await vscode.workspace.fs.rename(w_srcUri, w_dstUri, { overwrite: true });
             }
             catch (exception) {
                 g.error('exception renaming', src, 'to', dst);
@@ -907,29 +880,19 @@ export class FileCommands extends DummyFileCommands {
         } else {
             g.error('backup file does not exist!', backupName.toString());
         }
-
     }
     //@+node:felix.20211213224228.5: *4* fc.isReadOnly
     public async isReadOnly(fileName: string): Promise<boolean> {
         // self.read_only is not valid for Save As and Save To commands.
         const w_exists = await g.os_path_exists(fileName);
         if (w_exists) {
-            try {
+            const w_uri = vscode.Uri.file(fileName);
 
-                const w_uri = vscode.Uri.file(fileName);
+            const fileStat = await vscode.workspace.fs.stat(w_uri);
 
-                // fs.accessSync(fileName, fs.constants.W_OK);
-                const fileStat = await vscode.workspace.fs.stat(w_uri);
-
-                if (fileStat.permissions && (fileStat.permissions & 1)) {
-                    g.error("can not write: read only:", fileName);
-                    return true;
-                }
-
-
-            }
-            catch (exception) {
-                // pass  // os.access() may not exist on all platforms.
+            if (fileStat.permissions && (fileStat.permissions & 1)) {
+                g.error("can not write: read only:", fileName);
+                return true;
             }
         }
         return false;
@@ -966,20 +929,19 @@ export class FileCommands extends DummyFileCommands {
             const w_dirExists = await g.os_path_exists(theDir);
             if (theDir && g.os_path_isabs(theDir) && w_dirExists) {
                 c.openDirectory = theDir;
-                // c.frame.openDirectory = theDir
+                c.frame.openDirectory = theDir;
             }
             return Promise.resolve();
         }
         return Promise.resolve();
     }
     //@+node:felix.20211213224228.8: *4* fc.warnOnReadOnlyFiles
-    public async warnOnReadOnlyFiles(fileName: string): Promise<void> {
-        // os.access may not exist on all platforms.
+    public async warnOnReadOnlyFiles(fileName: string): Promise<boolean> {
+
         try {
 
             const w_uri = vscode.Uri.file(fileName);
 
-            // fs.accessSync(fileName, fs.constants.W_OK);
             const fileStat = await vscode.workspace.fs.stat(w_uri);
 
             if (fileStat.permissions && (fileStat.permissions & 1)) {
@@ -997,6 +959,7 @@ export class FileCommands extends DummyFileCommands {
         if (this.read_only && !g.unitTesting) {
             g.error("read only:", fileName);
         }
+        return this.read_only;
     }
     //@+node:felix.20211213224232.1: *3* fc: Reading
     //@+node:felix.20211213224232.2: *4* fc: Paste
@@ -1176,14 +1139,13 @@ export class FileCommands extends DummyFileCommands {
         const t1: [number, number] = process.hrtime();
 
         c.clearChanged(); // May be set when reading @file nodes.
-        fc.warnOnReadOnlyFiles(fileName);
+        await fc.warnOnReadOnlyFiles(fileName);
         fc.checking = false;
         fc.mFileName = c.mFileName;
         fc.initReadIvars();
         let recoveryNode: Position | undefined = undefined;
 
         let v: VNode | undefined;
-
 
         try {
             c.loading = true;  // disable c.changed
@@ -1194,7 +1156,10 @@ export class FileCommands extends DummyFileCommands {
 
             // Read the .leo file and create the outline.
             if (fileName.endsWith('.db')) {
-                v = fc.retrieveVnodesFromDb(fileName) || fc.initNewDb(fileName);
+                v = await fc.retrieveVnodesFromDb(fileName);
+                if (!v) {
+                    v = await fc.initNewDb(fileName);
+                }
             } else if (fileName.endsWith('.leojs')) {
                 v = await fc.read_leojs(fileName);
                 readAtFileNodesFlag = false;  // Suppress post-processing.
@@ -1208,11 +1173,10 @@ export class FileCommands extends DummyFileCommands {
             if (v) {
                 c.setFileTimeStamp(fileName);
                 if (readAtFileNodesFlag) {
-                    recoveryNode = fc.readExternalFiles(fileName);
+                    recoveryNode = await fc.readExternalFiles(fileName);
                 }
             }
         }
-
 
         finally {
             const p = recoveryNode || c.p || c.lastTopLevel();
@@ -1296,11 +1260,11 @@ export class FileCommands extends DummyFileCommands {
      *
      * A helper for fc.getLeoFile.
      */
-    public readExternalFiles(fileName: string): Position | undefined {
+    public async readExternalFiles(fileName: string): Promise<Position | undefined> {
         const c: Commands = this.c;
         const fc: FileCommands = this;
 
-        c.atFileCommands.readAll(c.rootPosition()!);
+        await c.atFileCommands.readAll(c.rootPosition()!);
         const recoveryNode: Position | undefined = fc.handleNodeConflicts();
 
         // Do this after reading external files.
@@ -1402,7 +1366,7 @@ export class FileCommands extends DummyFileCommands {
      *
      * This method follows behavior of readSaxFile.
      */
-    public retrieveVnodesFromDb(conn: any): VNode | undefined {
+    public async retrieveVnodesFromDb(conn: any): Promise<VNode | undefined> {
 
         const c: Commands = this.c;
         const fc: FileCommands = this;
@@ -1467,7 +1431,7 @@ export class FileCommands extends DummyFileCommands {
     /**
      * Initializes tables and returns None
      */
-    public initNewDb(conn: any): VNode {
+    public async initNewDb(conn: any): Promise<VNode> {
         const c: Commands = this.c;
         const fc: FileCommands = this;
         const v: VNode = new VNode(c);
@@ -1525,7 +1489,7 @@ export class FileCommands extends DummyFileCommands {
     /**
      * Updates public part of outline from the specified file.
      */
-    public updateFromRefFile(): void {
+    public async updateFromRefFile(): Promise<unknown> {
         const c: Commands = this.c;
         const fc: FileCommands = this;
 
@@ -1609,9 +1573,6 @@ export class FileCommands extends DummyFileCommands {
             const result: DbRow[] = [];
             for (let x of gnxes) {
                 const v: VNode = fc.gnxDict[x];
-                const children: string[] = [];
-
-                const parents: string[] = [];
                 const dbrow: DbRow = {
                     gnx: v.gnx,
                     h: v.h,
@@ -1668,169 +1629,169 @@ export class FileCommands extends DummyFileCommands {
         // ! Not Needed with vscode.workspace.fs
         // const theFile: number = fs.openSync(fname, 'rb');
         fc.initIvars();
-        fc.getLeoFile(fname, false);
+        await fc.getLeoFile(fname, undefined, undefined, false);
         // }
         restore_priv(privnodes, toppriv);
 
-        c.redraw();
+        return c.redraw();
     }
     //@+node:felix.20211213224232.27: *5* fc.read_leojs & helpers
     /**
      * Read a JSON (.leojs) file and create the outline.
      */
-    public read_leojs(fileName: string): Thenable<VNode | undefined> {
+    public async read_leojs(fileName: string): Promise<VNode | undefined> {
 
         const c: Commands = this.c;
 
         const w_uri = vscode.Uri.file(fileName);
 
-        return vscode.workspace.fs.readFile(w_uri).then((p_array: Uint8Array) => {
+        const w_array: Uint8Array = await vscode.workspace.fs.readFile(w_uri);
 
-            const s: string = p_array.toString(); // fs.readFileSync(theFile).toString();
+        const s: string = w_array.toString(); // fs.readFileSync(theFile).toString();
 
-            let d: any;
-            try {
-                d = JSON.parse(s);
-            }
-            catch (exception) {
-                g.trace(`Error reading .leojs file: ${fileName}`);
-                g.es_exception();
-                return undefined;
-            }
+        let d: any;
+        try {
+            d = JSON.parse(s);
+        }
+        catch (exception) {
+            g.trace(`Error reading .leojs file: ${fileName}`);
+            g.es_exception();
+            return undefined;
+        }
 
-            // Get the top-level dicts.
-            const tnodes_dict = d['tnodes'];
-            const vnodes_list = d['vnodes'];
+        // Get the top-level dicts.
+        const tnodes_dict = d['tnodes'];
+        const vnodes_list = d['vnodes'];
 
-            if (!tnodes_dict || !Object.keys(tnodes_dict).length) {
-                g.trace(`Bad .leojs file: no tnodes dict: ${fileName}`);
-                return undefined;
-            }
-            if (!vnodes_list || !vnodes_list.length) {
-                g.trace(`Bad .leojs file: no vnodes list: ${fileName}`);
-                return undefined;
-            }
+        if (!tnodes_dict || !Object.keys(tnodes_dict).length) {
+            g.trace(`Bad .leojs file: no tnodes dict: ${fileName}`);
+            return undefined;
+        }
+        if (!vnodes_list || !vnodes_list.length) {
+            g.trace(`Bad .leojs file: no vnodes list: ${fileName}`);
+            return undefined;
+        }
 
-            // Define function: create_vnode_from_dicts.
-            //@+others
-            //@+node:felix.20211213224232.28: *6* function: create_vnode_from_dicts
-            /**
-             * Create a new vnode as the i'th child of the parent vnode.
-             */
-            function create_vnode_from_dicts(i: number, parent_v: VNode, v_dict: any): void {
-                // Get the gnx.
-                const gnx: string = v_dict['gnx'];
+        // Define function: create_vnode_from_dicts.
+        //@+others
+        //@+node:felix.20211213224232.28: *6* function: create_vnode_from_dicts
+        /**
+         * Create a new vnode as the i'th child of the parent vnode.
+         */
+        function create_vnode_from_dicts(i: number, parent_v: VNode, v_dict: any): void {
+            // Get the gnx.
+            const gnx: string = v_dict['gnx'];
 
-                if (!gnx) {
-                    g.trace(`Bad .leojs file: no gnx in v_dict: ${fileName}`);
-                    g.printObj(v_dict);
-                    return;
-                }
-
-                console.assert(
-                    parent_v.children.length === i,
-                    [i, parent_v, parent_v.children].toString()
-                );
-                // Create the vnode.
-                const v: VNode = new VNode(c, gnx);
-                parent_v.children.push(v);
-                v._headString = v_dict['vh'] || '';
-                v._bodyString = tnodes_dict[gnx] || '';
-
-                // Recursively create the children.
-                const children = v_dict['children'] || [];
-                for (let i2 = 0; i2 < children.length; i2++) {
-                    const v_dict2 = children[i2];
-                    create_vnode_from_dicts(i2, v, v_dict2);
-                }
-
-            }
-            //@+node:felix.20211213224232.29: *6* function: scan_leojs_globals
-            /**
-             * Set the geometries from the globals dict.
-             */
-            function scan_leojs_globals(json_d: any): void {
-                /*
-                function toInt(x, default):
-                    try:
-                        return int(x)
-                    except Exception:
-                        return default
-
-
-                // Priority 1: command-line args
-                windowSize = g.app.loadManager.options.get('windowSize')
-                windowSpot = g.app.loadManager.options.get('windowSpot')
-                //
-                // Priority 2: The cache.
-                db_top, db_left, db_height, db_width = c.db.get('window_position', (None, None, None, None))
-
-                // Priority 3: The globals dict in the .leojs file.
-                //             Leo doesn't write the globals element, but leoInteg might.
-                d = json_d.get('globals', {})
-
-                // height & width
-                height, width = windowSize or (None, None)
-                if height is None:
-                    height, width = d.get('height'), d.get('width')
-
-                if height is None:
-                    height, width = db_height, db_width
-
-                height, width = toInt(height, 500), toInt(width, 800)
-                //
-                // top, left.
-                top, left = windowSpot or (None, None)
-                if top is None:
-                    top, left = d.get('top'), d.get('left')
-
-                if top is None:
-                    top, left = db_top, db_left
-
-                top, left = toInt(top, 50), toInt(left, 50)
-                //
-                // r1, r2.
-                r1 = float(c.db.get('body_outline_ratio', '0.5'))
-                r2 = float(c.db.get('body_secondary_ratio', '0.5'))
-                if 'size' in g.app.debug:
-                    g.trace(width, height, left, top, c.shortFileName())
-
-                // c.frame may be a NullFrame.
-                c.frame.setTopGeometry(width, height, left, top)
-                c.frame.resizePanesToRatio(r1, r2)
-                frameFactory = getattr(g.app.gui, 'frameFactory', None)
-                if not frameFactory:
-                    return;
-
-                assert frameFactory is not None
-                mf = frameFactory.masterFrame
-                if g.app.start_minimized:
-                    mf.showMinimized()
-                else if g.app.start_maximized:
-                    // #1189: fast.scanGlobals calls showMaximized later.
-                    mf.showMaximized()
-                else if g.app.start_fullscreen:
-                    mf.showFullScreen()
-                else:
-                    mf.show()
-                */
-            }
-            //@-others
-
-            // Start the recursion by creating the top-level vnodes.
-            c.hiddenRootNode.children = [];  // Necessary.
-
-            const parent_v: VNode = c.hiddenRootNode;
-
-            // let IN to have keys
-            for (let i = 0; i < vnodes_list.length; i++) {
-                const v_dict = vnodes_list[i];
-                create_vnode_from_dicts(i, parent_v, v_dict);
+            if (!gnx) {
+                g.trace(`Bad .leojs file: no gnx in v_dict: ${fileName}`);
+                g.printObj(v_dict);
+                return;
             }
 
-            scan_leojs_globals(d);
-            return c.hiddenRootNode.children[0];
-        });
+            console.assert(
+                parent_v.children.length === i,
+                [i, parent_v, parent_v.children].toString()
+            );
+            // Create the vnode.
+            const v: VNode = new VNode(c, gnx);
+            parent_v.children.push(v);
+            v._headString = v_dict['vh'] || '';
+            v._bodyString = tnodes_dict[gnx] || '';
+
+            // Recursively create the children.
+            const children = v_dict['children'] || [];
+            for (let i2 = 0; i2 < children.length; i2++) {
+                const v_dict2 = children[i2];
+                create_vnode_from_dicts(i2, v, v_dict2);
+            }
+
+        }
+        //@+node:felix.20211213224232.29: *6* function: scan_leojs_globals
+        /**
+         * Set the geometries from the globals dict.
+         */
+        function scan_leojs_globals(json_d: any): void {
+            /*
+            function toInt(x, default):
+                try:
+                    return int(x)
+                except Exception:
+                    return default
+
+
+            // Priority 1: command-line args
+            windowSize = g.app.loadManager.options.get('windowSize')
+            windowSpot = g.app.loadManager.options.get('windowSpot')
+            //
+            // Priority 2: The cache.
+            db_top, db_left, db_height, db_width = c.db.get('window_position', (None, None, None, None))
+
+            // Priority 3: The globals dict in the .leojs file.
+            //             Leo doesn't write the globals element, but leoInteg might.
+            d = json_d.get('globals', {})
+
+            // height & width
+            height, width = windowSize or (None, None)
+            if height is None:
+                height, width = d.get('height'), d.get('width')
+
+            if height is None:
+                height, width = db_height, db_width
+
+            height, width = toInt(height, 500), toInt(width, 800)
+            //
+            // top, left.
+            top, left = windowSpot or (None, None)
+            if top is None:
+                top, left = d.get('top'), d.get('left')
+
+            if top is None:
+                top, left = db_top, db_left
+
+            top, left = toInt(top, 50), toInt(left, 50)
+            //
+            // r1, r2.
+            r1 = float(c.db.get('body_outline_ratio', '0.5'))
+            r2 = float(c.db.get('body_secondary_ratio', '0.5'))
+            if 'size' in g.app.debug:
+                g.trace(width, height, left, top, c.shortFileName())
+
+            // c.frame may be a NullFrame.
+            c.frame.setTopGeometry(width, height, left, top)
+            c.frame.resizePanesToRatio(r1, r2)
+            frameFactory = getattr(g.app.gui, 'frameFactory', None)
+            if not frameFactory:
+                return;
+
+            assert frameFactory is not None
+            mf = frameFactory.masterFrame
+            if g.app.start_minimized:
+                mf.showMinimized()
+            else if g.app.start_maximized:
+                // #1189: fast.scanGlobals calls showMaximized later.
+                mf.showMaximized()
+            else if g.app.start_fullscreen:
+                mf.showFullScreen()
+            else:
+                mf.show()
+            */
+        }
+        //@-others
+
+        // Start the recursion by creating the top-level vnodes.
+        c.hiddenRootNode.children = [];  // Necessary.
+
+        const parent_v: VNode = c.hiddenRootNode;
+
+        // let IN to have keys
+        for (let i = 0; i < vnodes_list.length; i++) {
+            const v_dict = vnodes_list[i];
+            create_vnode_from_dicts(i, parent_v, v_dict);
+        }
+
+        scan_leojs_globals(d);
+        return c.hiddenRootNode.children[0];
+
     }
     //@+node:felix.20211213224232.30: *4* fc: Read Utils
     // Methods common to both the sax and non-sax code.

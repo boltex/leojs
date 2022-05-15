@@ -205,7 +205,11 @@ export class LeoUI {
         this._leoTreeExView.onDidExpandElement((p_event => this._onChangeCollapsedState(p_event, true, this._leoTreeExView)));
         this._leoTreeExView.onDidCollapseElement((p_event => this._onChangeCollapsedState(p_event, false, this._leoTreeExView)));
         this._leoTreeExView.onDidChangeVisibility((p_event => this._onTreeViewVisibilityChanged(p_event, true))); // * Trigger 'show tree in explorer view'
-        this._lastTreeView = this._leoTreeExView;
+        if (this.config.treeInExplorer) {
+            this._lastTreeView = this._leoTreeExView;
+        } else {
+            this._lastTreeView = this._leoTreeView;
+        }
 
         // * Create Leo Opened Documents Treeview Providers and tree views
         this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);

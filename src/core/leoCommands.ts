@@ -1597,13 +1597,11 @@ export class Commands {
      * Update the timestamp for fn..
      */
     public setFileTimeStamp(fn: string): void {
-        // c = self
-        // TODO !
-        console.log('TODO : setFileTimeStamp AND g.app.externalFilesController.set_time');
-        return;
-        if (g.app.externalFilesController) {
+        if (g.app.externalFilesController && g.app.externalFilesController.set_time) {
             g.app.externalFilesController.set_time(fn);
         }
+        // TODO !
+        console.log('TODO : setFileTimeStamp AND g.app.externalFilesController.set_time');
     }
     //@+node:felix.20211228212851.1: *3* c.Directive scanning
     // These are all new in Leo 4.5.1.
@@ -2365,7 +2363,7 @@ export class Commands {
     public checkFileTimeStamp(fn: string): boolean {
         const c: Commands = this;
 
-        if (g.app.externalFilesController) {
+        if (g.app.externalFilesController && g.app.externalFilesController.check_overwrite) {
             return g.app.externalFilesController.check_overwrite(c, fn);
         }
         return true;

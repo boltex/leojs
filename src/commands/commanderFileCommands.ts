@@ -188,85 +188,85 @@ export class CommanderFileCommands {
             ["Text files", "*.txt"]
         ];
 
-        return g.app.gui!.runOpenFileDialog(
+        const names = await g.app.gui!.runOpenFileDialog(
             c,
             "Import File",
             types,
             ".py",
-            true).then((names) => {
+            true);
 
-                console.log('GOT NAMES FOR FILE IMPORT!', names);
+        return console.log('GOT NAMES FOR FILE IMPORT!', names);
 
-                // TODO
-                /*
-                c.bringToFront()
+        // TODO
+        /*
+        c.bringToFront()
 
-                if names
-                    g.chdir(names[0]);
-                else
-                    names = [];
+        if names
+            g.chdir(names[0]);
+        else
+            names = [];
 
-                if not names
-                    if g.unitTesting
-                        // a kludge for unit testing.
-                        c.init_error_dialogs();
-                        c.raise_error_dialogs('read');
-
-
-                    return;
-
-                // New in Leo 4.9: choose the type of import based on the extension.
+        if not names
+            if g.unitTesting
+                // a kludge for unit testing.
                 c.init_error_dialogs();
-                derived = [z for z in names if c.looksLikeDerivedFile(z)]
-
-                others = [z for z in names if z not in derived]
-
-                if derived
-                    ic.importDerivedFiles(c.p, derived);
+                c.raise_error_dialogs('read');
 
 
-                let junk: string;
-                let ext: string;
+            return;
 
-                for let fn of others
-                    [junk, ext] = g.os_path_splitext(fn);
-                    ext = ext.lower();  // #1522
-                    if ext.startswith('.')
-                        ext = ext[1:];
+        // New in Leo 4.9: choose the type of import based on the extension.
+        c.init_error_dialogs();
+        derived = [z for z in names if c.looksLikeDerivedFile(z)]
 
-                    if ext == 'csv'
-                        ic.importMindMap([fn]);
-                    else if ext in ('cw', 'cweb')
-                        ic.importWebCommand([fn], "cweb");
+        others = [z for z in names if z not in derived]
 
-                    // Not useful. Use @auto x.json instead.
-                    // else if ext == 'json':
-                        // ic.importJSON([fn])
-                    else if fn.endswith('mm.html')
-                        ic.importFreeMind([fn]);
-                    else if ext in ('nw', 'noweb')
-                        ic.importWebCommand([fn], "noweb");
-                    else if ext == 'more'
-                        leoImport.MORE_Importer(c).import_file(fn);  // #1522.
-                    else if ext == 'txt'
-                        // #1522: Create an @edit node.
-                        import_txt_file(c, fn);
-                    else
-                        // Make *sure* that parent.b is empty.
-                        last = c.lastTopLevel();
-                        parent = last.insertAfter();
-                        parent.v.h = 'Imported Files';
-                        ic.importFilesCommand(
-                            [fn],
-                            parent,
-                            '@auto'  // was '@clean'
-                                // Experimental: attempt to use permissive section ref logic.
-                        );
+        if derived
+            ic.importDerivedFiles(c.p, derived);
 
-                    c.redraw()
-                c.raise_error_dialogs('read')
-                */
-            });
+
+        let junk: string;
+        let ext: string;
+
+        for let fn of others
+            [junk, ext] = g.os_path_splitext(fn);
+            ext = ext.lower();  // #1522
+            if ext.startswith('.')
+                ext = ext[1:];
+
+            if ext == 'csv'
+                ic.importMindMap([fn]);
+            else if ext in ('cw', 'cweb')
+                ic.importWebCommand([fn], "cweb");
+
+            // Not useful. Use @auto x.json instead.
+            // else if ext == 'json':
+                // ic.importJSON([fn])
+            else if fn.endswith('mm.html')
+                ic.importFreeMind([fn]);
+            else if ext in ('nw', 'noweb')
+                ic.importWebCommand([fn], "noweb");
+            else if ext == 'more'
+                leoImport.MORE_Importer(c).import_file(fn);  // #1522.
+            else if ext == 'txt'
+                // #1522: Create an @edit node.
+                import_txt_file(c, fn);
+            else
+                // Make *sure* that parent.b is empty.
+                last = c.lastTopLevel();
+                parent = last.insertAfter();
+                parent.v.h = 'Imported Files';
+                ic.importFilesCommand(
+                    [fn],
+                    parent,
+                    '@auto'  // was '@clean'
+                        // Experimental: attempt to use permissive section ref logic.
+                );
+
+            c.redraw()
+        c.raise_error_dialogs('read')
+        */
+
 
     }
 
@@ -455,15 +455,14 @@ export class CommanderFileCommands {
         }
 
         // Equivalent to legacy code.
-        return g.app.gui!.runOpenFileDialog(
+        const fileNames = await g.app.gui!.runOpenFileDialog(
             c,
             "Open",
             table,
             g.defaultLeoFileExtension(c),
             false
-        ).then((fileNames) => {
-            return open_completer(c, closeFlag, fileNames.length ? fileNames[0] : undefined);
-        });
+        );
+        return open_completer(c, closeFlag, fileNames.length ? fileNames[0] : undefined);
 
     }
     //@+node:felix.20220105210716.12: *4* c_file.refreshFromDisk
@@ -1205,38 +1204,36 @@ export class CommanderFileCommands {
         'Open a Leo outline from a .leo file, but do not read any derived files.'
     )
     public async readOutlineOnly(this: Commands): Promise<unknown> {
+
         const c: Commands = this;
 
-        // c.endEditing();
-
-        return g.app.gui!.runOpenFileDialog(
+        const fileName = await g.app.gui!.runOpenFileDialog(
             c,
             "Read Outline Only",
             [["Leo files", "*.leo"], ["All files", "*"]],
             ".leo"
-        ).then((fileName) => {
-            if (!fileName.length) {
-                return;
-            }
-            try {
-                // pylint: disable=assignment-from-no-return
-                // Can't use 'with" because readOutlineOnly closes the file.
+        );
 
-                // ! Replaced with vscode.workspace.fs !
-                // const theFile: number = openSync(fileName[0], 'r');
-                g.chdir(fileName[0]);
-                const c: Commands = g.app.newCommander(fileName[0]);
-                // ? needed ?
-                //frame = c.frame;
-                //frame.deiconify();
-                //frame.lift();
-                return (c.fileCommands as FileCommands).readOutlineOnly(fileName[0]); // closes file.
-            }
-            catch (exception) {
-                g.es("can not open:", fileName[0]);
-            }
-        });
+        if (!fileName.length) {
+            return;
+        }
+        try {
+            // pylint: disable=assignment-from-no-return
+            // Can't use 'with" because readOutlineOnly closes the file.
 
+            // ! Replaced with vscode.workspace.fs !
+            // const theFile: number = openSync(fileName[0], 'r');
+            g.chdir(fileName[0]);
+            const c: Commands = g.app.newCommander(fileName[0]);
+            // ? needed ?
+            //frame = c.frame;
+            //frame.deiconify();
+            //frame.lift();
+            return (c.fileCommands as FileCommands).readOutlineOnly(fileName[0]); // closes file.
+        }
+        catch (exception) {
+            g.es("can not open:", fileName[0]);
+        }
     }
     //@+node:felix.20220105210716.36: *4* c_file.writeFileFromNode
     @commander_command(
@@ -1244,11 +1241,10 @@ export class CommanderFileCommands {
         'If node starts with @read-file-into-node, use the full path name ' +
         'in the headline.\nOtherwise, prompt for a file name.'
     )
-    public writeFileFromNode(this: Commands): Thenable<void> {
+    public async writeFileFromNode(this: Commands): Promise<unknown> {
 
         const c: Commands = this;
         let p: Position = this.p;
-        // c.endEditing();
 
         let h: string = p.h.trimEnd();
         let s: string = p.b;
@@ -1262,10 +1258,8 @@ export class CommanderFileCommands {
             fileName = undefined;
         }
 
-        let q_fileName: Thenable<string>;
-
         if (!fileName) {
-            q_fileName = g.app.gui!.runSaveFileDialog(
+            fileName = await g.app.gui!.runSaveFileDialog(
                 c,
                 'Write File From Node',
                 [
@@ -1275,29 +1269,23 @@ export class CommanderFileCommands {
                 ],
                 ""
             );
-        } else {
-            q_fileName = Promise.resolve(fileName);
         }
 
-        return q_fileName.then((p_fileName) => {
-            if (p_fileName) {
-                try {
-                    g.chdir(p_fileName);
-                    if (s.startsWith('@nocolor\n')) {
-                        s = s.slice('@nocolor\n'.length);
-                    }
-                    const w_uri = vscode.Uri.file(p_fileName);
-                    const writeData = Buffer.from(s, 'utf8');
-                    return vscode.workspace.fs.writeFile(w_uri, writeData).then(() => {
-                        g.blue('wrote:', p_fileName);
-                    });
+        if (fileName) {
+            try {
+                g.chdir(fileName);
+                if (s.startsWith('@nocolor\n')) {
+                    s = s.slice('@nocolor\n'.length);
                 }
-                catch (iOError) {
-                    g.error('can not write %s', p_fileName);
-                }
+                const w_uri = vscode.Uri.file(fileName);
+                const writeData = Buffer.from(s, 'utf8');
+                await vscode.workspace.fs.writeFile(w_uri, writeData);
+                return g.blue('wrote:', fileName);
             }
-        });
-
+            catch (iOError) {
+                g.error('can not write %s', fileName);
+            }
+        }
     }
     //@+node:felix.20220105210716.37: *3* Recent Files
     //@+node:felix.20220105210716.38: *4* c_file.cleanRecentFiles
