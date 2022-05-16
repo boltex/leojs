@@ -152,12 +152,8 @@ export class CommanderFileCommands {
     )
     public async close(this: Commands, new_c?: Commands): Promise<unknown> {
 
-        // TODO
-        console.log('TODO : closeLeoWindow');
-        return;
-        /*
-        g.app.closeLeoWindow(this.frame, new_c);
-        */
+        return g.app.closeLeoWindow(this.frame, new_c);
+
     }
     //@+node:felix.20220105210716.7: *4* c_file.importAnyFile & helper
     @commander_command(

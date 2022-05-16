@@ -2187,15 +2187,24 @@ export class LeoUI {
      * * Close an opened Leo file
      * @returns the launchRefresh promise started after it's done closing the Leo document
      */
-    public closeLeoFile(): Thenable<unknown> {
+    public async closeLeoFile(): Promise<unknown> {
 
-        this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
+        await this._triggerSave();
 
-        vscode.window.showInformationMessage('TODO: Implement closeLeoFile');
+        this._setupRefresh(false, {
+            tree: true,
+            body: true,
+            documents: true,
+            buttons: true,
+            states: true
+        });
 
-        const w_fakeTotalOpened = 1; // TODO
+        const c = g.app.commanders()[this.commanderIndex];
+        await c.close();
 
-        if (w_fakeTotalOpened > 0) {
+        const w_totalOpened = g.app.commanders().length;
+
+        if (w_totalOpened > 0) {
             this.launchRefresh();
         } else {
             this._setupNoOpenedLeoDocument();
@@ -2563,6 +2572,36 @@ export class LeoUI {
             });
     }
 
+    public runAskYesNoCancelDialog(
+        c: Commands,
+        title: string,
+        message: string
+
+    ): Thenable<string> {
+        return vscode.window
+            .showInformationMessage(
+                title,
+                {
+                    modal: true,
+                    detail: message
+                },
+                ...[
+                    Constants.USER_MESSAGES.YES,
+                    Constants.USER_MESSAGES.NO,
+                    Constants.USER_MESSAGES.CANCEL
+                ]
+            )
+            .then((answer) => {
+                if (answer === Constants.USER_MESSAGES.YES) {
+                    return Constants.USER_MESSAGES.YES.toLowerCase();
+                } else if (answer === Constants.USER_MESSAGES.NO) {
+                    return Constants.USER_MESSAGES.NO.toLowerCase();
+                } else {
+                    return Constants.USER_MESSAGES.CANCEL.toLowerCase();
+                }
+            });
+    }
+
     public runOpenFileDialog(
         c: Commands,
         title: string,
@@ -2750,6 +2789,14 @@ export class NullGui {
     }
 
     public runAskYesNoDialog(
+        c: Commands,
+        title: string,
+        message: string
+    ): Thenable<string> {
+        return Promise.resolve("");
+    }
+
+    public runAskYesNoCancelDialog(
         c: Commands,
         title: string,
         message: string

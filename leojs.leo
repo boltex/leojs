@@ -206,6 +206,7 @@
 <v t="felix.20220131234257.1"><vh>setIdSetting</vh></v>
 <v t="felix.20220108211750.1"><vh>runAskOkDialog</vh></v>
 <v t="felix.20220109220155.1"><vh>runAskYesNoDialog</vh></v>
+<v t="felix.20220516005841.1"><vh>runAskYesNoDialog</vh></v>
 <v t="felix.20220107223824.1"><vh>runOpenFileDialog</vh></v>
 <v t="felix.20220108211806.1"><vh>runSaveFileDialog</vh></v>
 </v>
@@ -5918,15 +5919,24 @@ public removeAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
  * * Close an opened Leo file
  * @returns the launchRefresh promise started after it's done closing the Leo document
  */
-public closeLeoFile(): Thenable&lt;unknown&gt; {
+public async closeLeoFile(): Promise&lt;unknown&gt; {
 
-    this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
+    await this._triggerSave();
 
-    vscode.window.showInformationMessage('TODO: Implement closeLeoFile');
+    this._setupRefresh(false, {
+        tree: true,
+        body: true,
+        documents: true,
+        buttons: true,
+        states: true
+    });
 
-    const w_fakeTotalOpened = 1; // TODO
+    const c = g.app.commanders()[this.commanderIndex];
+    await c.close();
 
-    if (w_fakeTotalOpened &gt; 0) {
+    const w_totalOpened = g.app.commanders().length;
+
+    if (w_totalOpened &gt; 0) {
         this.launchRefresh();
     } else {
         this._setupNoOpenedLeoDocument();
@@ -8617,6 +8627,14 @@ export class NullGui {
         return Promise.resolve("");
     }
 
+    public runAskYesNoCancelDialog(
+        c: Commands,
+        title: string,
+        message: string
+    ): Thenable&lt;string&gt; {
+        return Promise.resolve("");
+    }
+
     public showLeoIDMessage(): void {
         vscode.window.showInformationMessage(
             "Leo ID not found. Please enter an id that identifies you uniquely.",
@@ -10069,5 +10087,36 @@ public _triggerSave(): Promise&lt;unknown&gt; {
 
 </t>
 <t tx="felix.20220512205007.1"></t>
+<t tx="felix.20220516005841.1">public runAskYesNoCancelDialog(
+    c: Commands,
+    title: string,
+    message: string
+
+): Thenable&lt;string&gt; {
+    return vscode.window
+        .showInformationMessage(
+            title,
+            {
+                modal: true,
+                detail: message
+            },
+            ...[
+                Constants.USER_MESSAGES.YES,
+                Constants.USER_MESSAGES.NO,
+                Constants.USER_MESSAGES.CANCEL
+            ]
+        )
+        .then((answer) =&gt; {
+            if (answer === Constants.USER_MESSAGES.YES) {
+                return Constants.USER_MESSAGES.YES.toLowerCase();
+            } else if (answer === Constants.USER_MESSAGES.NO) {
+                return Constants.USER_MESSAGES.NO.toLowerCase();
+            } else {
+                return Constants.USER_MESSAGES.CANCEL.toLowerCase();
+            }
+        });
+}
+
+</t>
 </tnodes>
 </leo_file>

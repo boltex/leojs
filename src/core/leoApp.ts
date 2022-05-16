@@ -1127,44 +1127,60 @@ export class LeoApp {
      *               during initial load, so UI remains for files
      *               further along the command line.
      */
-    /* 
-   public closeLeoWindow(frame, new_c=undefined, finish_quit=true): boolean {
-       const c = frame.c;
-       if (g.app.debug.includes('shutdown')){
-           g.trace(`changed: ${c.changed} ${c.shortFileName()}`);
-       }    
-       c.endEditing()  // Commit any open edits.
-       if c.promptingForClose
-           // There is already a dialog open asking what to do.
-           return false;
-       // Make sure .leoRecentFiles.txt is written.
-       g.app.recentFilesManager.writeRecentFilesFile(c)
-       if c.changed
-           c.promptingForClose = true;
-           veto = frame.promptForSave()
-           c.promptingForClose = false;
-           if veto
-               return false;
-       g.app.setLog(None)  // no log until we reactive a window.
-       g.doHook("close-frame", c=c)
-       //
-       // Save the window state for *all* open files.
-       g.app.commander_cacher.commit()  // store cache, but don't close it.
-       // This may remove frame from the window list.
-       if frame in g.app.windowList
-           g.app.destroyWindow(frame)
-           g.app.windowList.remove(frame)
-       else
-           // #69.
-           g.app.forgetOpenFile(fn=c.fileName())
-       if g.app.windowList
-           c2 = new_c or g.app.windowList[0].c
-           g.app.selectLeoWindow(c2)
-       elif finish_quit and not g.unitTesting
-           g.app.finishQuit()
-       return true;  // The window has been closed.
-   }
-    */
+    public async closeLeoWindow(frame: LeoFrame, new_c?: Commands, finish_quit = true): Promise<boolean> {
+        const c = frame.c;
+        if (g.app.debug.includes('shutdown')) {
+            g.trace(`changed: ${c.changed} ${c.shortFileName()}`);
+        }
+        // c.endEditing()  // Commit any open edits.
+        if (c.promptingForClose) {
+            // There is already a dialog open asking what to do.
+            return false;
+        }
+
+        // TODO : NEEDED ?
+        // Make sure .leoRecentFiles.txt is written.
+        // g.app.recentFilesManager.writeRecentFilesFile(c)
+
+        if (c.changed) {
+            c.promptingForClose = true;
+            const veto = await frame.promptForSave();
+            c.promptingForClose = false;
+            if (veto) {
+                return false;
+            }
+        }
+        // g.app.setLog(None)  // no log until we reactive a window.
+
+        g.doHook("close-frame", { c: c });
+        //
+        // Save the window state for *all* open files.
+        g.app.commander_cacher.commit();  // store cache, but don't close it.
+        // This may remove frame from the window list.
+        if (g.app.windowList.includes(frame)) {
+            g.app.destroyWindow(frame);
+
+            // Remove frame
+            let index = g.app.windowList.indexOf(frame, 0);
+            if (index > -1) {
+                g.app.windowList.splice(index, 1);
+            }
+
+        } else {
+            // #69.
+            g.app.forgetOpenFile(c.fileName());
+        }
+
+        if (g.app.windowList.length) {
+            const c2 = new_c || g.app.windowList[0].c;
+            // PROBABLY NOT NEEDED
+            // g.app.selectLeoWindow(c2);
+        } else if (finish_quit && !g.unitTesting) {
+            console.log('TODO: HANDLE LAST LEO DOCUMENT CLOSED');
+            // g.app.finishQuit();
+        }
+        return true;  // The window has been closed.
+    }
     //@+node:felix.20220511231737.3: *4* app.destroyAllOpenWithFiles
     /* 
     def destroyAllOpenWithFiles(self):
