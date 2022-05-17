@@ -2152,9 +2152,42 @@ export class LeoUI {
     }
 
     /**
-     * * Close an opened Leo file
-     * @returns the launchRefresh promise started after it's done closing the Leo document
-     */
+    * * Creates a new Leo file
+    * @returns the promise started after it's done creating the frame and commander
+    */
+    public async newLeoFile(): Promise<unknown> {
+
+        this._setupRefresh(false, {
+            tree: true,
+            body: true,
+            documents: true,
+            buttons: true,
+            states: true
+        });
+
+        if (!this.leoStates.fileOpenedReady) {
+            if (g.app.loadManager) {
+                g.app.loadManager.openEmptyLeoFile(this);
+            }
+        } else {
+
+            await this._triggerSave();
+
+
+            const c = g.app.windowList[this.frameIndex].c;
+            c.new(this);
+        }
+
+
+
+        this.launchRefresh();
+        return Promise.resolve();
+    }
+
+    /**
+    * * Close an opened Leo file
+    * @returns the promise started after it's done closing the Leo document
+    */
     public async closeLeoFile(): Promise<unknown> {
 
         await this._triggerSave();
@@ -2180,10 +2213,6 @@ export class LeoUI {
      * @returns A promise that resolves when done trying to open the file
      */
     public async openLeoFile(p_uri?: vscode.Uri): Promise<unknown> {
-
-        await this._triggerSave();
-
-        const c = g.app.windowList[this.frameIndex].c;
         this._setupRefresh(true, {
             tree: true,
             body: true,
@@ -2191,7 +2220,20 @@ export class LeoUI {
             documents: true,
             buttons: true
         });
-        await c.open_outline(p_uri);
+        if (!this.leoStates.fileOpenedReady) {
+            // override with given argument
+            let fileName: string;
+            if (p_uri && p_uri.fsPath.trim() && g.app.loadManager) {
+                fileName = p_uri.fsPath.replace(/\\/g, '/');
+                await g.app.loadManager.openFileByName(fileName, this);
+            }
+        } else {
+            await this._triggerSave();
+
+            const c = g.app.windowList[this.frameIndex].c;
+
+            await c.open_outline(p_uri);
+        }
 
         this.launchRefresh();
         return Promise.resolve();
@@ -2214,7 +2256,7 @@ export class LeoUI {
     /**
      * * Asks for file name and path, then saves the Leo file
      * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
-     * @returns a promise from saving the file results, or that will resolve to undefined if cancelled
+     * @returns a promise from saving the file results.
      */
     public async saveAsLeoFile(p_fromOutline?: boolean): Promise<unknown> {
         await this._triggerSave();
@@ -2236,7 +2278,7 @@ export class LeoUI {
     /**
      * * Asks for .leojs file name and path, then saves the JSON Leo file
      * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
-     * @returns a promise from saving the file results, or that will resolve to undefined if cancelled
+     * @returns a promise from saving the file results.
      */
     public async saveAsLeojsFile(p_fromOutline?: boolean): Promise<unknown> {
         await this._triggerSave();
@@ -2258,7 +2300,7 @@ export class LeoUI {
     /**
      * * Invokes the commander.save() command
      * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
-     * @returns Promise that resolves when the save command is placed on the front-end command stack
+     * @returns Promise that resolves when the save command is done
      */
     public async saveLeoFile(p_fromOutline?: boolean): Promise<unknown> {
         await this._triggerSave();

@@ -52,7 +52,8 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.REMOVE_BUTTON, (p_node: LeoButtonNode) => p_leoUI.removeAtButton(p_node)],
 
         [CMD.CLOSE_FILE, () => p_leoUI.closeLeoFile()],
-        [CMD.NEW_FILE, () => p_leoUI.command(LEOCMD.NEW, U, REFRESH_ALL, false)],
+        // [CMD.NEW_FILE, () => p_leoUI.command(LEOCMD.NEW, U, REFRESH_ALL, false)],
+        [CMD.NEW_FILE, () => p_leoUI.newLeoFile()],
         [CMD.OPEN_FILE, (p_uri?: vscode.Uri) => p_leoUI.openLeoFile(p_uri)],
         [CMD.SAVE_AS_FILE, () => p_leoUI.saveAsLeoFile()],
         [CMD.SAVE_FILE, () => p_leoUI.saveLeoFile()],

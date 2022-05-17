@@ -354,7 +354,6 @@ export class CommanderFileCommands {
         'Open a Leo window containing the contents of a .leo file.'
     )
     public async open_outline(this: Commands, p_uri?: vscode.Uri): Promise<unknown> {
-        console.log('open_owutline');
 
         const c: Commands = this;
 

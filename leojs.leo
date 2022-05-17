@@ -179,6 +179,7 @@
 <v t="felix.20220505215924.20"><vh>cloneFindTag</vh></v>
 </v>
 <v t="felix.20201214194144.8"><vh>Leo Documents</vh>
+<v t="felix.20220517002104.1"><vh>newLeoFile</vh></v>
 <v t="felix.20201214211830.1"><vh>closeLeoFile</vh></v>
 <v t="felix.20201214211832.1"><vh>openLeoFile</vh></v>
 <v t="felix.20201214211834.1"><vh>showRecentLeoFiles</vh></v>
@@ -1160,7 +1161,8 @@ export function activate(p_context: vscode.ExtensionContext) {
 
 </t>
 <t tx="felix.20201214150149.4">[CMD.CLOSE_FILE, () =&gt; p_leoUI.closeLeoFile()],
-[CMD.NEW_FILE, () =&gt; p_leoUI.command(LEOCMD.NEW, U, REFRESH_ALL, false)],
+// [CMD.NEW_FILE, () =&gt; p_leoUI.command(LEOCMD.NEW, U, REFRESH_ALL, false)],
+[CMD.NEW_FILE, () =&gt; p_leoUI.newLeoFile()],
 [CMD.OPEN_FILE, (p_uri?: vscode.Uri) =&gt; p_leoUI.openLeoFile(p_uri)],
 [CMD.SAVE_AS_FILE, () =&gt; p_leoUI.saveAsLeoFile()],
 [CMD.SAVE_FILE, () =&gt; p_leoUI.saveLeoFile()],
@@ -5869,9 +5871,9 @@ public removeAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
 
 </t>
 <t tx="felix.20201214211830.1">/**
- * * Close an opened Leo file
- * @returns the launchRefresh promise started after it's done closing the Leo document
- */
+* * Close an opened Leo file
+* @returns the promise started after it's done closing the Leo document
+*/
 public async closeLeoFile(): Promise&lt;unknown&gt; {
 
     await this._triggerSave();
@@ -5899,17 +5901,26 @@ public async closeLeoFile(): Promise&lt;unknown&gt; {
  */
 public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
 
-    await this._triggerSave();
+    if (!this.leoStates.fileOpenedReady) {
+        // override with given argument
+        let fileName: string;
+        if (p_uri &amp;&amp; p_uri.fsPath.trim() &amp;&amp; g.app.loadManager) {
+            fileName = p_uri.fsPath.replace(/\\/g, '/');
+            await g.app.loadManager.openFileByName(fileName, this);
+        }
+    } else {
+        await this._triggerSave();
 
-    const c = g.app.windowList[this.frameIndex].c;
-    this._setupRefresh(true, {
-        tree: true,
-        body: true,
-        states: true,
-        documents: true,
-        buttons: true
-    });
-    await c.open_outline(p_uri);
+        const c = g.app.windowList[this.frameIndex].c;
+        this._setupRefresh(true, {
+            tree: true,
+            body: true,
+            states: true,
+            documents: true,
+            buttons: true
+        });
+        await c.open_outline(p_uri);
+    }
 
     this.launchRefresh();
     return Promise.resolve();
@@ -5934,7 +5945,7 @@ public showRecentLeoFiles(): Thenable&lt;unknown&gt; {
 <t tx="felix.20201214211835.1">/**
  * * Asks for file name and path, then saves the Leo file
  * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
- * @returns a promise from saving the file results, or that will resolve to undefined if cancelled
+ * @returns a promise from saving the file results.
  */
 public async saveAsLeoFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
     await this._triggerSave();
@@ -5957,7 +5968,7 @@ public async saveAsLeoFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
 <t tx="felix.20201214211836.1">/**
  * * Invokes the commander.save() command
  * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
- * @returns Promise that resolves when the save command is placed on the front-end command stack
+ * @returns Promise that resolves when the save command is done
  */
 public async saveLeoFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
     await this._triggerSave();
@@ -7372,7 +7383,7 @@ export interface BodyTimeInfo {
 <t tx="felix.20211012233514.1">/**
  * * Asks for .leojs file name and path, then saves the JSON Leo file
  * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
- * @returns a promise from saving the file results, or that will resolve to undefined if cancelled
+ * @returns a promise from saving the file results.
  */
 public async saveAsLeojsFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
     await this._triggerSave();
@@ -10031,6 +10042,39 @@ public _triggerSave(): Promise&lt;unknown&gt; {
                 return Constants.USER_MESSAGES.CANCEL.toLowerCase();
             }
         });
+}
+
+</t>
+<t tx="felix.20220517002104.1">/**
+* * Creates a new Leo file
+* @returns the promise started after it's done creating the frame and commander
+*/
+public async newLeoFile(): Promise&lt;unknown&gt; {
+
+    if (!this.leoStates.fileOpenedReady) {
+        if (g.app.loadManager) {
+            await g.app.loadManager.openEmptyLeoFile(this);
+        }
+    } else {
+
+        await this._triggerSave();
+
+        this._setupRefresh(false, {
+            tree: true,
+            body: true,
+            documents: true,
+            buttons: true,
+            states: true
+        });
+
+        const c = g.app.windowList[this.frameIndex].c;
+        c.new(this);
+    }
+
+
+
+    this.launchRefresh();
+    return Promise.resolve();
 }
 
 </t>
