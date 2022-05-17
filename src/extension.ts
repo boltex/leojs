@@ -21,9 +21,9 @@ export function activate(p_context: vscode.ExtensionContext) {
     // Initialize and run Leo
     console.assert(g.app);
     g.app.loadManager = new LoadManager(p_context);
-    g.app.loadManager.load();
-
-    console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
+    g.app.loadManager.load().then(() => {
+        console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
+    });
 
 }
 

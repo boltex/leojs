@@ -391,7 +391,7 @@ export class CommanderFileCommands {
 
                         index = g.app.windowList.indexOf(c2.frame);
                         if (index >= 0) {
-                            (g.app.gui as LeoUI).commanderIndex = index;
+                            (g.app.gui as LeoUI).frameIndex = index;
                         }
                     }
                 } else {

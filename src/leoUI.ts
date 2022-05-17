@@ -9,7 +9,7 @@ import { RevealType, Icon, ReqRefresh, LeoPackageStates, ConfigSetting, LeoSearc
 import { Config } from "./config";
 import { LeoOutlineProvider } from './leoOutline';
 import { LeoButtonNode, LeoButtonsProvider } from "./leoButtons";
-import { LeoDocumentNode, LeoDocumentsProvider } from "./leoDocuments";
+import { LeoDocumentsProvider } from "./leoDocuments";
 import { LeoStates } from "./leoStates";
 import { LeoBodyProvider } from "./leoBody";
 import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
@@ -18,6 +18,7 @@ import * as g from './core/leoGlobals';
 import { Commands } from "./core/leoCommands";
 import { Position } from "./core/leoNodes";
 import { LeoGotoNode } from "./leoGoto";
+import { LeoFrame } from "./core/leoFrame";
 
 /**
  * Creates and manages instances of the UI elements along with their events
@@ -27,7 +28,7 @@ export class LeoUI {
     public leoStates: LeoStates;
     public verbose: boolean = true;
     public trace: boolean = true;
-    public commanderIndex: number = 0;
+    public frameIndex: number = 0;
     public clipboardContent: string = "";
 
     // * Timers
@@ -85,9 +86,9 @@ export class LeoUI {
 
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
-    private _leoDocuments!: vscode.TreeView<LeoDocumentNode>;
-    private _leoDocumentsExplorer!: vscode.TreeView<LeoDocumentNode>;
-    private _lastLeoDocuments: vscode.TreeView<LeoDocumentNode> | undefined;
+    private _leoDocuments!: vscode.TreeView<LeoFrame>;
+    private _leoDocumentsExplorer!: vscode.TreeView<LeoFrame>;
+    private _lastLeoDocuments: vscode.TreeView<LeoFrame> | undefined;
 
     private _currentDocumentChanged: boolean = false; // if clean and an edit is done: refresh opened documents view
 
@@ -146,48 +147,7 @@ export class LeoUI {
         this.buttonIcons = utils.buildButtonsIconPaths(_context);
         this.gotoIcons = utils.buildGotoIconPaths(_context);
 
-        /*    
-        if (!g.app) {
-            (g.app as LeoApp) = new LeoApp();
-        } else {
-            vscode.window.showWarningMessage("g.app leojs application instance already exists!");
-        }
-
-        g.app.gui = this;
-        g.app.loadManager = new LoadManager();
-
-        const q_leoID = new Promise((resolve, reject) => {
-            this._leoIDResolve = resolve;
-        });
-
-        q_leoID.then((p_leoID) => {
-            this._finishStartup(); // Start leojs. No use for p_leoID for now.
-        });
-
-        this._start();
-        */
         this.showLogPane();
-    }
-
-    /**
-     * * Startup by checking for LeoID from os/env, settings, or input dialog
-     */
-    private _start(): void {
-
-        /* 
-            g.app.setLeoID(true, this.verbose).then((p_id) => {
-                if (p_id && p_id.length >= 3 && utils.isAlphaNumeric(p_id)) {
-                    if (!this.leoStates.leoReady) {
-                        // start leojs only if not already started!
-                        this._leoIDResolve(p_id);
-                    }
-                } else {
-                    this.showLeoIDMessage();
-                }
-            }, (p_reason) => {
-                this.showLeoIDMessage();
-            });
-        */
     }
 
     /**
@@ -328,22 +288,14 @@ export class LeoUI {
         this.launchRefresh = debounce(
             this._launchRefresh,
             Constants.REFRESH_DEBOUNCE_DELAY,
-            { leading: true, trailing: true }
+            { leading: false, trailing: true }
         );
 
-        // ! FAKE DEVELOPMENT STARTUP END ( TODO: finish _setupOpenedLeoDocument )
-        // Reset Extension context flags (used in 'when' clauses in package.json)
         this.leoStates.leoReady = true;
-        this.leoStates.fileOpenedReady = true;  // TODO : IMPLEMENT
-
-        // this.refreshDocumentsPane();
-        // ! VSCODE BUG : natural refresh from visibility change do not support 'getParent'!
-        // setTimeout(() => {
-        //     this._refreshOutline(true, RevealType.RevealSelectFocus);
-        // }, 0);
 
         setTimeout(() => {
-            this.showOutline();
+            // this.showOutline();
+
             this._setupRefresh(true,
                 { tree: true, body: true, documents: true, buttons: true, states: true }
             );
@@ -371,17 +323,9 @@ export class LeoUI {
      * * 'getStates' action for use in debounced method call
      */
     private _triggerGetStates(): void {
-        if (this._refreshType.documents) {
-            this._refreshType.documents = false;
-            this.refreshDocumentsPane();
-        }
-        if (this._refreshType.buttons) {
-            this._refreshType.buttons = false;
-            this._leoButtonsProvider.refreshTreeRoot();
-        }
         if (this._refreshType.states) {
             this._refreshType.states = false;
-            const c = g.app.commanders()[this.commanderIndex];
+            const c = g.app.windowList[this.frameIndex].c;
             const p = c.p;
             let w_canHoist = true;
             if (c.hoistStack.length) {
@@ -409,10 +353,18 @@ export class LeoUI {
             };
             this.leoStates.setLeoStateFlags(w_states);
         }
+        if (this._refreshType.documents) {
+            this._refreshType.documents = false;
+            this.refreshDocumentsPane();
+        }
+        if (this._refreshType.buttons) {
+            this._refreshType.buttons = false;
+            this._leoButtonsProvider.refreshTreeRoot();
+        }
     }
 
     /**
-     * * Setup leoInteg's UI for having no opened Leo documents
+     * * Setup UI for having no opened Leo documents
      */
     private _setupNoOpenedLeoDocument(): void {
         this.leoStates.fileOpenedReady = false;
@@ -424,15 +376,15 @@ export class LeoUI {
     }
 
     /**
-     * * A Leo file was opened: setup leoInteg's UI accordingly.
+     * * A Leo file was opened: setup UI accordingly.
      * @param p_openFileResult Returned info about currently opened and editing document
      * @return a promise that resolves to an opened body pane text editor
      */
-    private _setupOpenedLeoDocument(p_openFileResult: any): Promise<unknown> {
+    private _setupOpenedLeoDocument(p_openFileResult?: any): Promise<unknown> {
         console.log('TODO: _setupOpenedLeoDocument with parameter : ', p_openFileResult);
 
         // const w_selectedLeoNode = this.apToLeoNode(p_openFileResult.node, false); // Just to get gnx for the body's fist appearance
-        // this.leoStates.leoOpenedFileName = p_openFileResult.filename;
+        this.leoStates.leoOpenedFileName = g.app.windowList[this.frameIndex].c.fileName();
 
         // // * If not unnamed file add to recent list & last opened list
         // this._addRecentAndLastFile(p_openFileResult.filename);
@@ -453,14 +405,12 @@ export class LeoUI {
         //     this._bodyFileSystemStarted = true;
         // }
         // // * Startup flag
-        // this.leoStates.fileOpenedReady = true;
+        this.leoStates.fileOpenedReady = true;
         // // * Maybe first valid redraw of tree along with the selected node and its body
         // this._refreshOutline(true, RevealType.RevealSelectFocus); // p_revealSelection flag set
         // // * Maybe first StatusBar appearance
         // this._leoStatusBar.update(true, 0, true);
         // this._leoStatusBar.show(); // Just selected a node
-        // // * Show leo log pane
-        // this.showLogPane();
         // // * Send config to python's side (for settings such as defaultReloadIgnore and checkForChangeExternalFiles)
         // this.sendConfigToServer(this.config.getConfig());
         // // * Refresh Opened tree views
@@ -468,6 +418,8 @@ export class LeoUI {
         // this._leoButtonsProvider.refreshTreeRoot();
         // // * Maybe first Body appearance
         // return this.showBody(false);
+        // Reset Extension context flags (used in 'when' clauses in package.json)
+
         return Promise.resolve(true);
     }
 
@@ -476,7 +428,7 @@ export class LeoUI {
      * @param p_focusOutline Flag for focus to be placed in outline
      */
     public showOutline(p_focusOutline?: boolean): void {
-        const c = g.app.commanders()[this.commanderIndex];
+        const c = g.app.windowList[this.frameIndex].c;
         this._lastTreeView.reveal(c.p, {
             select: true,
             focus: !!p_focusOutline
@@ -559,7 +511,23 @@ export class LeoUI {
     /**
      * * Launches refresh for UI components and states (Debounced)
      */
-    public _launchRefresh(p_node?: Position): void {
+    public async _launchRefresh(p_node?: Position): Promise<unknown> {
+        // check states for having at least a document opened
+        if (this.leoStates.leoReady && this.leoStates.fileOpenedReady) {
+            // Had some opened
+            if (!g.app.windowList.length) {
+                return this._setupNoOpenedLeoDocument(); // All closed now!
+            }
+        }
+        if (this.leoStates.leoReady && !this.leoStates.fileOpenedReady) {
+            // Was all closed
+            if (g.app.windowList.length) {
+                this._setupOpenedLeoDocument();
+                // Has a commander opened, but wait for UI!
+                await this.leoStates.qLastContextChange;
+            }
+        }
+
         // Consider command finished
         if (this.trace) {
             if (this.commandTimer !== undefined) {
@@ -574,7 +542,7 @@ export class LeoUI {
             this.refreshTimer = this.lastRefreshTimer;
         }
 
-        const c = g.app.commanders()[this.commanderIndex];
+        const c = g.app.windowList[this.frameIndex].c;
 
         // Set w_revealType, it will ultimately set this._revealType.
         // Used when finding the OUTLINE's selected node and setting or preventing focus into it
@@ -644,7 +612,7 @@ export class LeoUI {
         }
 
         // getStates will check if documents, buttons and states flags are set and refresh accordingly
-        this.getStates();
+        return this.getStates();
     }
 
     /**
@@ -691,16 +659,16 @@ export class LeoUI {
 
     /**
      * * Places selection on the required node with a 'timeout'. Used after refreshing the opened Leo documents view.
-     * @param p_documentNode Document node instance in the Leo document view to be the 'selected' one.
+     * @param p_frame Document node instance in the Leo document view to be the 'selected' one.
      */
-    public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
-        this._currentDocumentChanged = p_documentNode.commander.changed;
-        this.leoStates.leoOpenedFileName = p_documentNode.commander.fileName();
+    public setDocumentSelection(p_frame: LeoFrame): void {
+        this._currentDocumentChanged = p_frame.c.changed;
+        this.leoStates.leoOpenedFileName = p_frame.c.fileName();
         setTimeout(() => {
-            if (this._lastLeoDocuments && this._lastLeoDocuments.selection.length && this._lastLeoDocuments.selection[0] === p_documentNode) {
+            if (this._lastLeoDocuments && this._lastLeoDocuments.selection.length && this._lastLeoDocuments.selection[0] === p_frame) {
                 // console.log('setDocumentSelection: already selected!');
             } else if (this._lastLeoDocuments && this._lastLeoDocuments.visible) {
-                this._lastLeoDocuments.reveal(p_documentNode, { select: true, focus: false }).then(
+                this._lastLeoDocuments.reveal(p_frame, { select: true, focus: false }).then(
                     () => { }, // Ok
                     (p_error) => {
                         // console.error('ERROR setDocumentSelection could not reveal: tree was refreshed!', 'Error:', p_error);
@@ -983,7 +951,7 @@ export class LeoUI {
      * @returns thenable for reveal to finish or select position to finish
      */
     public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable<unknown> {
-        const c = g.app.commanders()[this.commanderIndex];
+        const c = g.app.windowList[this.frameIndex].c;
         // Note: set context flags for current selection when capturing and revealing the selected node
         // when the tree refreshes and the selected node is processed by getTreeItem & gotSelectedNode
         let q_reveal: Thenable<void> | undefined;
@@ -1040,7 +1008,7 @@ export class LeoUI {
 
         await this._triggerSave();
 
-        const c = g.app.commanders()[this.commanderIndex];
+        const c = g.app.windowList[this.frameIndex].c;
         this._setupRefresh(p_fromOutline, p_refreshType);
 
         let value: any = undefined;
@@ -1082,7 +1050,7 @@ export class LeoUI {
 
         return this.triggerBodySave(false)
             .then((p_saveResults) => {
-                const c = g.app.commanders()[this.commanderIndex];
+                const c = g.app.windowList[this.frameIndex].c;
                 const commands: vscode.QuickPickItem[] = [];
                 for (let key in c.commandsDict) {
                     const command = c.commandsDict[key];
@@ -1118,7 +1086,7 @@ export class LeoUI {
                     p_picked.label = Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label];
                 }
                 if (p_picked && p_picked.label) {
-                    const c = g.app.commanders()[this.commanderIndex];
+                    const c = g.app.windowList[this.frameIndex].c;
                     const w_commandResult = c.doCommandByName(p_picked.label);
 
                     if (!this.preventRefresh) {
@@ -1144,7 +1112,7 @@ export class LeoUI {
     public editHeadline(p_node?: Position, p_fromOutline?: boolean): Thenable<unknown> {
         this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
-        const c = g.app.commanders()[this.commanderIndex];
+        const c = g.app.windowList[this.frameIndex].c;
         const u = c.undoer;
         if (!p_node) {
             p_node = c.p; // Current selection
@@ -1220,7 +1188,7 @@ export class LeoUI {
                 this.commandRefreshTimer = this.lastCommandTimer;
             }
 
-            const c = g.app.commanders()[this.commanderIndex];
+            const c = g.app.windowList[this.frameIndex].c;
 
             let value: any = undefined;
             const p = p_node ? p_node : c.p;
@@ -1258,7 +1226,7 @@ export class LeoUI {
     private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
         const LEOCMD = Constants.LEO_COMMANDS;
         const w_command = p_asChild ? LEOCMD.INSERT_CHILD_PNODE : LEOCMD.INSERT_PNODE;
-        const c = g.app.commanders()[this.commanderIndex];
+        const c = g.app.windowList[this.frameIndex].c;
         const u = c.undoer;
         let value: any = c.doCommandByName(w_command);
         if (!p_name) {
@@ -2199,21 +2167,11 @@ export class LeoUI {
             states: true
         });
 
-        const c = g.app.commanders()[this.commanderIndex];
+        const c = g.app.windowList[this.frameIndex].c;
         await c.close();
 
-        const w_totalOpened = g.app.commanders().length;
-
-        if (w_totalOpened > 0) {
-            this.launchRefresh();
-        } else {
-            this._setupNoOpenedLeoDocument();
-        }
-
-        // if closed
-        return Promise.resolve(true);
-
-        // return Promise.resolve(undefined); // if problem
+        this.launchRefresh();
+        return Promise.resolve();
     }
 
     /**
@@ -2222,9 +2180,10 @@ export class LeoUI {
      * @returns A promise that resolves when done trying to open the file
      */
     public async openLeoFile(p_uri?: vscode.Uri): Promise<unknown> {
+
         await this._triggerSave();
 
-        const c = g.app.commanders()[this.commanderIndex];
+        const c = g.app.windowList[this.frameIndex].c;
         this._setupRefresh(true, {
             tree: true,
             body: true,
@@ -2234,7 +2193,8 @@ export class LeoUI {
         });
         await c.open_outline(p_uri);
 
-        return this.launchRefresh();
+        this.launchRefresh();
+        return Promise.resolve();
 
     }
 
@@ -2259,7 +2219,7 @@ export class LeoUI {
     public async saveAsLeoFile(p_fromOutline?: boolean): Promise<unknown> {
         await this._triggerSave();
 
-        const c = g.app.commanders()[this.commanderIndex];
+        const c = g.app.windowList[this.frameIndex].c;
 
         this._setupRefresh(!!p_fromOutline, {
             tree: true,
@@ -2268,12 +2228,9 @@ export class LeoUI {
         });
 
         await c.saveAs();
-        // vscode.window.showInformationMessage('TODO: Implement saveAsLeoFile' +
-        //     " called from " +
-        //     (p_fromOutline ? "outline" : "body")
-        // );
 
-        return this.launchRefresh();
+        this.launchRefresh();
+        return Promise.resolve();
     }
 
     /**
@@ -2284,7 +2241,7 @@ export class LeoUI {
     public async saveAsLeojsFile(p_fromOutline?: boolean): Promise<unknown> {
         await this._triggerSave();
 
-        const c = g.app.commanders()[this.commanderIndex];
+        const c = g.app.windowList[this.frameIndex].c;
 
         this._setupRefresh(!!p_fromOutline, {
             tree: true,
@@ -2292,13 +2249,10 @@ export class LeoUI {
             documents: true
         });
 
-        await c.save_as_leojs;
-        // vscode.window.showInformationMessage('TODO: Implement saveAsLeojsFile' +
-        //     " called from " +
-        //     (p_fromOutline ? "outline" : "body")
-        // );
+        await c.save_as_leojs();
 
-        return this.launchRefresh();
+        this.launchRefresh();
+        return Promise.resolve();
     }
 
     /**
@@ -2309,7 +2263,7 @@ export class LeoUI {
     public async saveLeoFile(p_fromOutline?: boolean): Promise<unknown> {
         await this._triggerSave();
 
-        const c = g.app.commanders()[this.commanderIndex];
+        const c = g.app.windowList[this.frameIndex].c;
 
         this._setupRefresh(!!p_fromOutline, {
             tree: true,
@@ -2318,12 +2272,9 @@ export class LeoUI {
         });
 
         await c.save();
-        // vscode.window.showInformationMessage('TODO: Implement saveLeoFile' +
-        //     " called from " +
-        //     (p_fromOutline ? "outline" : "body")
-        // );
 
-        return this.launchRefresh();
+        this.launchRefresh();
+        return Promise.resolve();
     }
 
     /**
@@ -2352,13 +2303,7 @@ export class LeoUI {
 
         this._setupRefresh(!!p_fromOutline, { tree: true, body: true, buttons: true, states: true, documents: true });
 
-        this.commanderIndex = p_index;
-        this._refreshOutline(true, RevealType.RevealSelect);
-
-        const w_fakeOpenedFileInfo: any = undefined;
-        this._setupOpenedLeoDocument(w_fakeOpenedFileInfo);
-
-        this.refreshUndoPane(); // with largish debounce.
+        this.frameIndex = p_index;
 
         this.launchRefresh();
 
@@ -2587,8 +2532,8 @@ export class LeoUI {
                 },
                 ...[
                     Constants.USER_MESSAGES.YES,
-                    Constants.USER_MESSAGES.NO,
-                    Constants.USER_MESSAGES.CANCEL
+                    Constants.USER_MESSAGES.NO
+                    // Already shows a 'cancel' 
                 ]
             )
             .then((answer) => {
@@ -2661,7 +2606,7 @@ export class LeoUI {
      * @returns Thenable from the tested functionality
      */
     public test(): Thenable<unknown> {
-        const c = g.app.commanders()[this.commanderIndex];
+        const c = g.app.windowList[this.frameIndex].c;
 
         vscode.window.showInformationMessage("Test called!");
         console.log("Test called!");

@@ -2,21 +2,19 @@ import * as vscode from "vscode";
 import { LeoUI } from './leoUI';
 import { LeoStates } from "./leoStates";
 import { Constants } from "./constants";
-import { Icon } from "./types";
 import * as utils from "./utils";
 import * as g from './core/leoGlobals';
 import { Commands } from "./core/leoCommands";
+import { LeoFrame } from "./core/leoFrame";
 
 /**
- * * Opened Leo documents shown as a list with this TreeDataProvider implementation
+ * Opened Leo documents shown as a list with this TreeDataProvider implementation
  */
-export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoDocumentNode> {
+export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoFrame> {
 
-    private _onDidChangeTreeData: vscode.EventEmitter<LeoDocumentNode | undefined> = new vscode.EventEmitter<LeoDocumentNode | undefined>();
+    private _onDidChangeTreeData: vscode.EventEmitter<LeoFrame | undefined> = new vscode.EventEmitter<LeoFrame | undefined>();
 
-    readonly onDidChangeTreeData: vscode.Event<LeoDocumentNode | undefined> = this._onDidChangeTreeData.event;
-
-    // private _id: number = 0;
+    readonly onDidChangeTreeData: vscode.Event<LeoFrame | undefined> = this._onDidChangeTreeData.event;
 
     constructor(
         private _leoStates: LeoStates,
@@ -24,33 +22,26 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoDocument
     ) { }
 
     /**
-     * * Refresh the whole outline
+     * Refresh the whole Leo Document panel
      */
     public refreshTreeRoot(): void {
         this._onDidChangeTreeData.fire(undefined);
     }
 
-    public getTreeItem(element: LeoDocumentNode): Thenable<LeoDocumentNode> | LeoDocumentNode {
-        return element;
+    public getTreeItem(element: LeoFrame): Thenable<LeoDocumentNode> | LeoDocumentNode {
+        return new LeoDocumentNode(element, this._leoUI,);
     }
 
-    public getChildren(element?: LeoDocumentNode): LeoDocumentNode[] {
-        const w_children: LeoDocumentNode[] = [];
+    public getChildren(element?: LeoFrame): LeoFrame[] {
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoStates.fileOpenedReady && !element) {
-            g.app.commanders().forEach(p_commander => {
-                w_children.push(new LeoDocumentNode(
-                    p_commander,
-                    this._leoUI,
-                    // this._id++
-                ));
-            });
-
+            return g.app.windowList;
+        } else {
+            return []; // Should not happen!
         }
-        return w_children; // Defaults to an empty list of children
     }
 
-    public getParent(element: LeoDocumentNode): vscode.ProviderResult<LeoDocumentNode> {
+    public getParent(element: LeoFrame): vscode.ProviderResult<LeoFrame> {
         // Leo documents are just a list, as such, entries are always child of root, so return null
         return undefined;
     }
@@ -62,47 +53,32 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider<LeoDocument
  */
 export class LeoDocumentNode extends vscode.TreeItem {
 
-    // Context string is checked in package.json with 'when' clauses
-    public contextValue: string;
-
     constructor(
-        public commander: Commands,
+        public frame: LeoFrame,
         private _leoUI: LeoUI,
-        // private _id: number
     ) {
-        super(commander.fileName());
-        // Setup this instance
-        const w_isNamed: boolean = !!this.commander.fileName();
-        const commanders: Commands[] = g.app.commanders();
-        this.label = w_isNamed ? utils.getFileFromPath(this.commander.fileName()) : this.commander.frame.title;
-        this.tooltip = w_isNamed ? this.commander.fileName() : this.commander.frame.title;
+        super(frame.c.fileName() ? utils.getFileFromPath(frame.c.fileName()) : frame.title);
+
+        const c: Commands = frame.c;
+        const isNamed: boolean = !!c.fileName();
+        this.label = isNamed ? utils.getFileFromPath(c.fileName()) : frame.title;
+        this.tooltip = isNamed ? c.fileName() : frame.title;
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
-            arguments: [commanders.indexOf(this.commander)]
+            arguments: [g.app.windowList.indexOf(frame)]
         };
-        // If this was created as a selected node, make sure it's selected as we may have opened/closed document
 
-        if (this.commander === commanders[this._leoUI.commanderIndex]) {
-            this._leoUI.setDocumentSelection(this);
-            this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
+        if (frame === g.app.windowList[this._leoUI.frameIndex]) {
+            // If this was created as a selected node, make sure it's selected
+            this._leoUI.setDocumentSelection(frame);
+            this.contextValue = isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
         } else {
-            this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_UNTITLED;
+            this.contextValue = isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_UNTITLED;
         }
-    }
 
-    // @ts-ignore
-    public get iconPath(): Icon {
-        return this._leoUI.documentIcons[this.commander.changed ? 1 : 0];
-    }
-
-    // @ts-ignore
-    public get id(): string {
-        // Add prefix and suffix salt to numeric index to prevent accidental duplicates
-        // return "p" + this._id + "i" + g.app.commanders().indexOf(this.commander) + "s" + this.commander.fileName();
-        return "p" + g.app.commanders().indexOf(this.commander) + "s" + this.commander.fileName();
+        this.id = `d${g.app.windowList.indexOf(frame)}f${c.fileName()}c${c.changed.toString()}`;
+        this.iconPath = this._leoUI.documentIcons[c.changed ? 1 : 0];
     }
 
 }
-
-

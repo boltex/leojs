@@ -1155,7 +1155,9 @@ export class LeoApp {
         g.doHook("close-frame", { c: c });
         //
         // Save the window state for *all* open files.
-        g.app.commander_cacher.commit();  // store cache, but don't close it.
+        if (g.app.commander_cacher) {
+            g.app.commander_cacher.commit();  // store cache, but don't close it.
+        }
         // This may remove frame from the window list.
         if (g.app.windowList.includes(frame)) {
             g.app.destroyWindow(frame);
@@ -2198,7 +2200,7 @@ export class LoadManager {
             const c = frame.c;
             if (g.os_path_realpath(munge(fn)) === g.os_path_realpath(munge(c.mFileName))) {
 
-                (g.app.gui as LeoUI).commanderIndex = index;
+                (g.app.gui as LeoUI).frameIndex = index;
                 (g.app.gui as LeoUI).refreshDocumentsPane();
 
                 c.outerUpdate();
@@ -2236,9 +2238,9 @@ export class LoadManager {
             k.showStateAndMode();
         }
         // c.frame.initCompleteHint();
-        const w_index = g.app.windowList.indexOf(c.frame);
-        if (w_index >= 0) {
-            (g.app.gui as LeoUI).commanderIndex = w_index;
+        const index = g.app.windowList.indexOf(c.frame);
+        if (index >= 0) {
+            (g.app.gui as LeoUI).frameIndex = index;
         }
 
         c.outerUpdate();  // #181: Honor focus requests.

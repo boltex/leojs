@@ -94,7 +94,6 @@
 <v t="felix.20201214194144.1"><vh>@clean src/leoUI.ts</vh>
 <v t="felix.20201214195752.1"><vh>class LeoUI</vh>
 <v t="felix.20201214194144.2"><vh>Constructor</vh></v>
-<v t="felix.20220202004920.1"><vh>Start leojs</vh></v>
 <v t="felix.20220201235548.1"><vh>Finish Startup</vh></v>
 <v t="felix.20220417215549.1"><vh>makeAllBindings</vh></v>
 <v t="felix.20201214194144.3"><vh>Document States</vh>
@@ -235,10 +234,7 @@
 <v t="felix.20201214151429.5"><vh>getChildren</vh></v>
 <v t="felix.20201214151429.6"><vh>getParent</vh></v>
 </v>
-<v t="felix.20201214151434.2"><vh>class LeoDocumentNode</vh>
-<v t="felix.20201214151434.3"><vh>iconPath</vh></v>
-<v t="felix.20201214151434.4"><vh>id</vh></v>
-</v>
+<v t="felix.20201214151434.2"><vh>class LeoDocumentNode</vh></v>
 </v>
 <v t="felix.20220505221929.1"><vh>@clean src/leoGoto.ts</vh>
 <v t="felix.20220505222045.1"><vh>class LeoGotoProvider</vh></v>
@@ -955,7 +951,7 @@ public refreshTreeRoot(): void {
         element._isRoot
     );
     // Check if its the selected node and call signal it to the UI
-    if (element.__eq__(g.app.commanders()[this._leoUI.commanderIndex].p)) {
+    if (element.__eq__(g.app.windowList[this._leoUI.frameIndex].c.p)) {
         this._leoUI.gotSelectedNode(element);
     }
     // Build a LeoNode (a vscode tree node) from the Position
@@ -974,10 +970,9 @@ public refreshTreeRoot(): void {
         return [...element.children()];
     } else {
         // No elements : FIRST CHILDREN OF VSCODE'S TREEVIEW
-        const w_commanders: Commands[] = g.app.commanders();
-        if (w_commanders[this._leoUI.commanderIndex]) {
+        if (g.app.windowList[this._leoUI.frameIndex]) {
             // Currently Selected Document's Commander
-            const w_c = w_commanders[this._leoUI.commanderIndex]!;
+            const w_c = g.app.windowList[this._leoUI.frameIndex].c;
             if (w_c.hoistStack.length) {
                 // HOISTED: Topmost hoisted node starts the outline as single root 'child'
                 const w_rootPosition = w_c.hoistStack[w_c.hoistStack.length - 1].p;
@@ -1032,9 +1027,9 @@ export function activate(p_context: vscode.ExtensionContext) {
     // Initialize and run Leo
     console.assert(g.app);
     g.app.loadManager = new LoadManager(p_context);
-    g.app.loadManager.load();
-
-    console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
+    g.app.loadManager.load().then(() =&gt; {
+        console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
+    });
 
 }
 
@@ -1925,26 +1920,23 @@ public get description(): string | boolean {
 import { LeoUI } from './leoUI';
 import { LeoStates } from "./leoStates";
 import { Constants } from "./constants";
-import { Icon } from "./types";
 import * as utils from "./utils";
 import * as g from './core/leoGlobals';
 import { Commands } from "./core/leoCommands";
+import { LeoFrame } from "./core/leoFrame";
 
 @language typescript
 @tabwidth -4
 @others
-
 </t>
 <t tx="felix.20201214151429.2">/**
- * * Opened Leo documents shown as a list with this TreeDataProvider implementation
+ * Opened Leo documents shown as a list with this TreeDataProvider implementation
  */
-export class LeoDocumentsProvider implements vscode.TreeDataProvider&lt;LeoDocumentNode&gt; {
+export class LeoDocumentsProvider implements vscode.TreeDataProvider&lt;LeoFrame&gt; {
 
-    private _onDidChangeTreeData: vscode.EventEmitter&lt;LeoDocumentNode | undefined&gt; = new vscode.EventEmitter&lt;LeoDocumentNode | undefined&gt;();
+    private _onDidChangeTreeData: vscode.EventEmitter&lt;LeoFrame | undefined&gt; = new vscode.EventEmitter&lt;LeoFrame | undefined&gt;();
 
-    readonly onDidChangeTreeData: vscode.Event&lt;LeoDocumentNode | undefined&gt; = this._onDidChangeTreeData.event;
-
-    // private _id: number = 0;
+    readonly onDidChangeTreeData: vscode.Event&lt;LeoFrame | undefined&gt; = this._onDidChangeTreeData.event;
 
     constructor(
         private _leoStates: LeoStates,
@@ -1956,36 +1948,29 @@ export class LeoDocumentsProvider implements vscode.TreeDataProvider&lt;LeoDocum
 
 </t>
 <t tx="felix.20201214151429.3">/**
- * * Refresh the whole outline
+ * Refresh the whole Leo Document panel
  */
 public refreshTreeRoot(): void {
     this._onDidChangeTreeData.fire(undefined);
 }
 
 </t>
-<t tx="felix.20201214151429.4">public getTreeItem(element: LeoDocumentNode): Thenable&lt;LeoDocumentNode&gt; | LeoDocumentNode {
-    return element;
+<t tx="felix.20201214151429.4">public getTreeItem(element: LeoFrame): Thenable&lt;LeoDocumentNode&gt; | LeoDocumentNode {
+    return new LeoDocumentNode(element, this._leoUI,);
 }
 
 </t>
-<t tx="felix.20201214151429.5">public getChildren(element?: LeoDocumentNode): LeoDocumentNode[] {
-    const w_children: LeoDocumentNode[] = [];
+<t tx="felix.20201214151429.5">public getChildren(element?: LeoFrame): LeoFrame[] {
     // if called with element, or not ready, give back empty array as there won't be any children
     if (this._leoStates.fileOpenedReady &amp;&amp; !element) {
-        g.app.commanders().forEach(p_commander =&gt; {
-            w_children.push(new LeoDocumentNode(
-                p_commander,
-                this._leoUI,
-                // this._id++
-            ));
-        });
-
+        return g.app.windowList;
+    } else {
+        return []; // Should not happen!
     }
-    return w_children; // Defaults to an empty list of children
 }
 
 </t>
-<t tx="felix.20201214151429.6">public getParent(element: LeoDocumentNode): vscode.ProviderResult&lt;LeoDocumentNode&gt; {
+<t tx="felix.20201214151429.6">public getParent(element: LeoFrame): vscode.ProviderResult&lt;LeoFrame&gt; {
     // Leo documents are just a list, as such, entries are always child of root, so return null
     return undefined;
 }
@@ -1996,52 +1981,35 @@ public refreshTreeRoot(): void {
  */
 export class LeoDocumentNode extends vscode.TreeItem {
 
-    // Context string is checked in package.json with 'when' clauses
-    public contextValue: string;
-
     constructor(
-        public commander: Commands,
+        public frame: LeoFrame,
         private _leoUI: LeoUI,
-        // private _id: number
     ) {
-        super(commander.fileName());
-        // Setup this instance
-        const w_isNamed: boolean = !!this.commander.fileName();
-        const commanders: Commands[] = g.app.commanders();
-        this.label = w_isNamed ? utils.getFileFromPath(this.commander.fileName()) : this.commander.frame.title;
-        this.tooltip = w_isNamed ? this.commander.fileName() : this.commander.frame.title;
+        super(frame.c.fileName() ? utils.getFileFromPath(frame.c.fileName()) : frame.title);
+
+        const c: Commands = frame.c;
+        const isNamed: boolean = !!c.fileName();
+        this.label = isNamed ? utils.getFileFromPath(c.fileName()) : frame.title;
+        this.tooltip = isNamed ? c.fileName() : frame.title;
         this.command = {
             command: Constants.COMMANDS.SET_OPENED_FILE,
             title: '',
-            arguments: [commanders.indexOf(this.commander)]
+            arguments: [g.app.windowList.indexOf(frame)]
         };
-        // If this was created as a selected node, make sure it's selected as we may have opened/closed document
 
-        if (this.commander === commanders[this._leoUI.commanderIndex]) {
-            this._leoUI.setDocumentSelection(this);
-            this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
+        if (frame === g.app.windowList[this._leoUI.frameIndex]) {
+            // If this was created as a selected node, make sure it's selected
+            this._leoUI.setDocumentSelection(frame);
+            this.contextValue = isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_SELECTED_UNTITLED;
         } else {
-            this.contextValue = w_isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_UNTITLED;
+            this.contextValue = isNamed ? Constants.CONTEXT_FLAGS.DOCUMENT_TITLED : Constants.CONTEXT_FLAGS.DOCUMENT_UNTITLED;
         }
+
+        this.id = `d${g.app.windowList.indexOf(frame)}f${c.fileName()}c${c.changed.toString()}`;
+        this.iconPath = this._leoUI.documentIcons[c.changed ? 1 : 0];
     }
 
-    @others
 }
-
-</t>
-<t tx="felix.20201214151434.3">// @ts-ignore
-public get iconPath(): Icon {
-    return this._leoUI.documentIcons[this.commander.changed ? 1 : 0];
-}
-
-</t>
-<t tx="felix.20201214151434.4">// @ts-ignore
-public get id(): string {
-    // Add prefix and suffix salt to numeric index to prevent accidental duplicates
-    // return "p" + this._id + "i" + g.app.commanders().indexOf(this.commander) + "s" + this.commander.fileName();
-    return "p" + g.app.commanders().indexOf(this.commander) + "s" + this.commander.fileName();
-}
-
 </t>
 <t tx="felix.20201214151447.1">import * as vscode from "vscode";
 import * as utils from "./utils";
@@ -2063,7 +2031,7 @@ get leoCanPromote(): boolean {
 }
 set leoCanPromote(p_value: boolean) {
     this._leoCanPromote = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_PROMOTE, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_PROMOTE, p_value);
 }
 
 </t>
@@ -2076,7 +2044,7 @@ get leoCanDehoist(): boolean {
 }
 set leoCanDehoist(p_value: boolean) {
     this._leoCanDehoist = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_DEHOIST, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_DEHOIST, p_value);
 }
 
 </t>
@@ -2088,7 +2056,7 @@ get leoMarked(): boolean {
 }
 set leoMarked(p_value: boolean) {
     this._leoMarked = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_MARKED, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_MARKED, p_value);
 }
 
 </t>
@@ -2098,7 +2066,7 @@ get leoCloned(): boolean {
 }
 set leoCloned(p_value: boolean) {
     this._leoCloned = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_CLONE, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_CLONE, p_value);
 }
 
 </t>
@@ -2108,7 +2076,7 @@ get leoDirty(): boolean {
 }
 set leoDirty(p_value: boolean) {
     this._leoDirty = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_DIRTY, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_DIRTY, p_value);
 }
 
 </t>
@@ -2118,7 +2086,7 @@ get leoEmpty(): boolean {
 }
 set leoEmpty(p_value: boolean) {
     this._leoEmpty = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_EMPTY, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_EMPTY, p_value);
 }
 
 </t>
@@ -2128,7 +2096,7 @@ get leoChild(): boolean {
 }
 set leoChild(p_value: boolean) {
     this._leoChild = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_CHILD, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_CHILD, p_value);
 }
 
 </t>
@@ -2138,7 +2106,7 @@ get leoAtFile(): boolean {
 }
 set leoAtFile(p_value: boolean) {
     this._leoAtFile = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_ATFILE, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_ATFILE, p_value);
 }
 
 </t>
@@ -2149,7 +2117,7 @@ get leoRoot(): boolean {
 }
 set leoRoot(p_value: boolean) {
     this._leoRoot = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_ROOT, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_ROOT, p_value);
 }
 
 </t>
@@ -2160,13 +2128,17 @@ set leoRoot(p_value: boolean) {
  */
 export class LeoStates {
 
+    public qLastContextChange: Thenable&lt;unknown&gt;; // Promise that the last state change is applied
+
     @others
 }
 </t>
 <t tx="felix.20201214151447.20">constructor(
     private _context: vscode.ExtensionContext,
     private _leoJs: LeoUI
-) { }
+) {
+    this.qLastContextChange = Promise.resolve(); // Temporary.
+}
 
 </t>
 <t tx="felix.20201214151447.21">public setSelectedNodeFlags(p_node: Position): void {
@@ -2202,7 +2174,7 @@ get fileOpenedReady(): boolean {
 }
 set fileOpenedReady(p_value: boolean) {
     this._fileOpenedReady = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.TREE_OPENED, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.TREE_OPENED, p_value);
 }
 
 </t>
@@ -2217,10 +2189,10 @@ get leoOpenedFileName(): string {
 set leoOpenedFileName(p_name: string) {
     if (p_name &amp;&amp; p_name.length) {
         this._leoOpenedFileName = p_name;
-        utils.setContext(Constants.CONTEXT_FLAGS.TREE_TITLED, true);
+        this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.TREE_TITLED, true);
     } else {
         this._leoOpenedFileName = "";
-        utils.setContext(Constants.CONTEXT_FLAGS.TREE_TITLED, false);
+        this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.TREE_TITLED, false);
     }
 }
 
@@ -2240,7 +2212,7 @@ set leoChanged(p_value: boolean) {
         this._leoJs.refreshDocumentsPane();
     }
     this._leoChanged = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.LEO_CHANGED, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_CHANGED, p_value);
 }
 
 </t>
@@ -2253,7 +2225,7 @@ get leoCanUndo(): boolean {
 }
 set leoCanUndo(p_value: boolean) {
     this._leoCanUndo = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_UNDO, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_UNDO, p_value);
 }
 
 </t>
@@ -2266,7 +2238,7 @@ get leoCanRedo(): boolean {
 }
 set leoCanRedo(p_value: boolean) {
     this._leoCanRedo = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_REDO, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_REDO, p_value);
 }
 
 </t>
@@ -2279,7 +2251,7 @@ get leoCanDemote(): boolean {
 }
 set leoCanDemote(p_value: boolean) {
     this._leoCanDemote = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_DEMOTE, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_DEMOTE, p_value);
 }
 
 </t>
@@ -2590,7 +2562,7 @@ import { RevealType, Icon, ReqRefresh, LeoPackageStates, ConfigSetting, LeoSearc
 import { Config } from "./config";
 import { LeoOutlineProvider } from './leoOutline';
 import { LeoButtonNode, LeoButtonsProvider } from "./leoButtons";
-import { LeoDocumentNode, LeoDocumentsProvider } from "./leoDocuments";
+import { LeoDocumentsProvider } from "./leoDocuments";
 import { LeoStates } from "./leoStates";
 import { LeoBodyProvider } from "./leoBody";
 import { LeoUndoNode, LeoUndosProvider } from "./leoUndos";
@@ -2599,6 +2571,7 @@ import * as g from './core/leoGlobals';
 import { Commands } from "./core/leoCommands";
 import { Position } from "./core/leoNodes";
 import { LeoGotoNode } from "./leoGoto";
+import { LeoFrame } from "./core/leoFrame";
 
 @language typescript
 @tabwidth -4
@@ -2624,26 +2597,6 @@ import { LeoGotoNode } from "./leoGoto";
     this.buttonIcons = utils.buildButtonsIconPaths(_context);
     this.gotoIcons = utils.buildGotoIconPaths(_context);
 
-    /*    
-    if (!g.app) {
-        (g.app as LeoApp) = new LeoApp();
-    } else {
-        vscode.window.showWarningMessage("g.app leojs application instance already exists!");
-    }
-
-    g.app.gui = this;
-    g.app.loadManager = new LoadManager();
-
-    const q_leoID = new Promise((resolve, reject) =&gt; {
-        this._leoIDResolve = resolve;
-    });
-
-    q_leoID.then((p_leoID) =&gt; {
-        this._finishStartup(); // Start leojs. No use for p_leoID for now.
-    });
-
-    this._start();
-    */
     this.showLogPane();
 }
 
@@ -2663,7 +2616,7 @@ export class LeoUI {
     public leoStates: LeoStates;
     public verbose: boolean = true;
     public trace: boolean = true;
-    public commanderIndex: number = 0;
+    public frameIndex: number = 0;
     public clipboardContent: string = "";
 
     // * Timers
@@ -2721,9 +2674,9 @@ export class LeoUI {
 
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
-    private _leoDocuments!: vscode.TreeView&lt;LeoDocumentNode&gt;;
-    private _leoDocumentsExplorer!: vscode.TreeView&lt;LeoDocumentNode&gt;;
-    private _lastLeoDocuments: vscode.TreeView&lt;LeoDocumentNode&gt; | undefined;
+    private _leoDocuments!: vscode.TreeView&lt;LeoFrame&gt;;
+    private _leoDocumentsExplorer!: vscode.TreeView&lt;LeoFrame&gt;;
+    private _lastLeoDocuments: vscode.TreeView&lt;LeoFrame&gt; | undefined;
 
     private _currentDocumentChanged: boolean = false; // if clean and an edit is done: refresh opened documents view
 
@@ -2772,17 +2725,9 @@ export class LeoUI {
  * * 'getStates' action for use in debounced method call
  */
 private _triggerGetStates(): void {
-    if (this._refreshType.documents) {
-        this._refreshType.documents = false;
-        this.refreshDocumentsPane();
-    }
-    if (this._refreshType.buttons) {
-        this._refreshType.buttons = false;
-        this._leoButtonsProvider.refreshTreeRoot();
-    }
     if (this._refreshType.states) {
         this._refreshType.states = false;
-        const c = g.app.commanders()[this.commanderIndex];
+        const c = g.app.windowList[this.frameIndex].c;
         const p = c.p;
         let w_canHoist = true;
         if (c.hoistStack.length) {
@@ -2810,6 +2755,14 @@ private _triggerGetStates(): void {
         };
         this.leoStates.setLeoStateFlags(w_states);
     }
+    if (this._refreshType.documents) {
+        this._refreshType.documents = false;
+        this.refreshDocumentsPane();
+    }
+    if (this._refreshType.buttons) {
+        this._refreshType.buttons = false;
+        this._leoButtonsProvider.refreshTreeRoot();
+    }
 }
 
 </t>
@@ -2818,7 +2771,7 @@ private _triggerGetStates(): void {
  * @param p_focusOutline Flag for focus to be placed in outline
  */
 public showOutline(p_focusOutline?: boolean): void {
-    const c = g.app.commanders()[this.commanderIndex];
+    const c = g.app.windowList[this.frameIndex].c;
     this._lastTreeView.reveal(c.p, {
         select: true,
         focus: !!p_focusOutline
@@ -2843,16 +2796,16 @@ private _refreshDocumentsPane(): void {
 </t>
 <t tx="felix.20201214202128.1">/**
  * * Places selection on the required node with a 'timeout'. Used after refreshing the opened Leo documents view.
- * @param p_documentNode Document node instance in the Leo document view to be the 'selected' one.
+ * @param p_frame Document node instance in the Leo document view to be the 'selected' one.
  */
-public setDocumentSelection(p_documentNode: LeoDocumentNode): void {
-    this._currentDocumentChanged = p_documentNode.commander.changed;
-    this.leoStates.leoOpenedFileName = p_documentNode.commander.fileName();
+public setDocumentSelection(p_frame: LeoFrame): void {
+    this._currentDocumentChanged = p_frame.c.changed;
+    this.leoStates.leoOpenedFileName = p_frame.c.fileName();
     setTimeout(() =&gt; {
-        if (this._lastLeoDocuments &amp;&amp; this._lastLeoDocuments.selection.length &amp;&amp; this._lastLeoDocuments.selection[0] === p_documentNode) {
+        if (this._lastLeoDocuments &amp;&amp; this._lastLeoDocuments.selection.length &amp;&amp; this._lastLeoDocuments.selection[0] === p_frame) {
             // console.log('setDocumentSelection: already selected!');
         } else if (this._lastLeoDocuments &amp;&amp; this._lastLeoDocuments.visible) {
-            this._lastLeoDocuments.reveal(p_documentNode, { select: true, focus: false }).then(
+            this._lastLeoDocuments.reveal(p_frame, { select: true, focus: false }).then(
                 () =&gt; { }, // Ok
                 (p_error) =&gt; {
                     // console.error('ERROR setDocumentSelection could not reveal: tree was refreshed!', 'Error:', p_error);
@@ -2950,7 +2903,7 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
  * @returns thenable for reveal to finish or select position to finish
  */
 public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable&lt;unknown&gt; {
-    const c = g.app.commanders()[this.commanderIndex];
+    const c = g.app.windowList[this.frameIndex].c;
     // Note: set context flags for current selection when capturing and revealing the selected node
     // when the tree refreshes and the selected node is processed by getTreeItem &amp; gotSelectedNode
     let q_reveal: Thenable&lt;void&gt; | undefined;
@@ -3008,7 +2961,7 @@ public async command(
 
     await this._triggerSave();
 
-    const c = g.app.commanders()[this.commanderIndex];
+    const c = g.app.windowList[this.frameIndex].c;
     this._setupRefresh(p_fromOutline, p_refreshType);
 
     let value: any = undefined;
@@ -3051,7 +3004,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 
     return this.triggerBodySave(false)
         .then((p_saveResults) =&gt; {
-            const c = g.app.commanders()[this.commanderIndex];
+            const c = g.app.windowList[this.frameIndex].c;
             const commands: vscode.QuickPickItem[] = [];
             for (let key in c.commandsDict) {
                 const command = c.commandsDict[key];
@@ -3087,7 +3040,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
                 p_picked.label = Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label];
             }
             if (p_picked &amp;&amp; p_picked.label) {
-                const c = g.app.commanders()[this.commanderIndex];
+                const c = g.app.windowList[this.frameIndex].c;
                 const w_commandResult = c.doCommandByName(p_picked.label);
 
                 if (!this.preventRefresh) {
@@ -3114,7 +3067,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
 public editHeadline(p_node?: Position, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
     this._setupRefresh(!!p_fromOutline, { tree: true, states: true });
 
-    const c = g.app.commanders()[this.commanderIndex];
+    const c = g.app.windowList[this.frameIndex].c;
     const u = c.undoer;
     if (!p_node) {
         p_node = c.p; // Current selection
@@ -3191,7 +3144,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
             this.commandRefreshTimer = this.lastCommandTimer;
         }
 
-        const c = g.app.commanders()[this.commanderIndex];
+        const c = g.app.windowList[this.frameIndex].c;
 
         let value: any = undefined;
         const p = p_node ? p_node : c.p;
@@ -5807,7 +5760,7 @@ public showLogPane(): Thenable&lt;unknown&gt; {
  * @returns Thenable from the tested functionality
  */
 public test(): Thenable&lt;unknown&gt; {
-    const c = g.app.commanders()[this.commanderIndex];
+    const c = g.app.windowList[this.frameIndex].c;
 
     vscode.window.showInformationMessage("Test called!");
     console.log("Test called!");
@@ -5931,21 +5884,11 @@ public async closeLeoFile(): Promise&lt;unknown&gt; {
         states: true
     });
 
-    const c = g.app.commanders()[this.commanderIndex];
+    const c = g.app.windowList[this.frameIndex].c;
     await c.close();
 
-    const w_totalOpened = g.app.commanders().length;
-
-    if (w_totalOpened &gt; 0) {
-        this.launchRefresh();
-    } else {
-        this._setupNoOpenedLeoDocument();
-    }
-
-    // if closed
-    return Promise.resolve(true);
-
-    // return Promise.resolve(undefined); // if problem
+    this.launchRefresh();
+    return Promise.resolve();
 }
 
 </t>
@@ -5955,9 +5898,10 @@ public async closeLeoFile(): Promise&lt;unknown&gt; {
  * @returns A promise that resolves when done trying to open the file
  */
 public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
+
     await this._triggerSave();
 
-    const c = g.app.commanders()[this.commanderIndex];
+    const c = g.app.windowList[this.frameIndex].c;
     this._setupRefresh(true, {
         tree: true,
         body: true,
@@ -5967,7 +5911,8 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
     });
     await c.open_outline(p_uri);
 
-    return this.launchRefresh();
+    this.launchRefresh();
+    return Promise.resolve();
 
 }
 
@@ -5994,7 +5939,7 @@ public showRecentLeoFiles(): Thenable&lt;unknown&gt; {
 public async saveAsLeoFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
     await this._triggerSave();
 
-    const c = g.app.commanders()[this.commanderIndex];
+    const c = g.app.windowList[this.frameIndex].c;
 
     this._setupRefresh(!!p_fromOutline, {
         tree: true,
@@ -6003,12 +5948,9 @@ public async saveAsLeoFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
     });
 
     await c.saveAs();
-    // vscode.window.showInformationMessage('TODO: Implement saveAsLeoFile' +
-    //     " called from " +
-    //     (p_fromOutline ? "outline" : "body")
-    // );
 
-    return this.launchRefresh();
+    this.launchRefresh();
+    return Promise.resolve();
 }
 
 </t>
@@ -6020,7 +5962,7 @@ public async saveAsLeoFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
 public async saveLeoFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
     await this._triggerSave();
 
-    const c = g.app.commanders()[this.commanderIndex];
+    const c = g.app.windowList[this.frameIndex].c;
 
     this._setupRefresh(!!p_fromOutline, {
         tree: true,
@@ -6029,12 +5971,9 @@ public async saveLeoFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
     });
 
     await c.save();
-    // vscode.window.showInformationMessage('TODO: Implement saveLeoFile' +
-    //     " called from " +
-    //     (p_fromOutline ? "outline" : "body")
-    // );
 
-    return this.launchRefresh();
+    this.launchRefresh();
+    return Promise.resolve();
 }
 
 </t>
@@ -6065,13 +6004,7 @@ public selectOpenedLeoDocument(p_index: number, p_fromOutline?: boolean): Thenab
 
     this._setupRefresh(!!p_fromOutline, { tree: true, body: true, buttons: true, states: true, documents: true });
 
-    this.commanderIndex = p_index;
-    this._refreshOutline(true, RevealType.RevealSelect);
-
-    const w_fakeOpenedFileInfo: any = undefined;
-    this._setupOpenedLeoDocument(w_fakeOpenedFileInfo);
-
-    this.refreshUndoPane(); // with largish debounce.
+    this.frameIndex = p_index;
 
     this.launchRefresh();
 
@@ -6089,7 +6022,7 @@ get leoReady(): boolean {
 }
 set leoReady(p_value: boolean) {
     this._leoReady = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.LEO_READY, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_READY, p_value);
 }
 
 </t>
@@ -6112,7 +6045,23 @@ private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): 
 <t tx="felix.20201227014627.1">/**
  * * Launches refresh for UI components and states (Debounced)
  */
-public _launchRefresh(p_node?: Position): void {
+public async _launchRefresh(p_node?: Position): Promise&lt;unknown&gt; {
+    // check states for having at least a document opened
+    if (this.leoStates.leoReady &amp;&amp; this.leoStates.fileOpenedReady) {
+        // Had some opened
+        if (!g.app.windowList.length) {
+            return this._setupNoOpenedLeoDocument(); // All closed now!
+        }
+    }
+    if (this.leoStates.leoReady &amp;&amp; !this.leoStates.fileOpenedReady) {
+        // Was all closed
+        if (g.app.windowList.length) {
+            this._setupOpenedLeoDocument();
+            // Has a commander opened, but wait for UI!
+            await this.leoStates.qLastContextChange;
+        }
+    }
+
     // Consider command finished
     if (this.trace) {
         if (this.commandTimer !== undefined) {
@@ -6127,7 +6076,7 @@ public _launchRefresh(p_node?: Position): void {
         this.refreshTimer = this.lastRefreshTimer;
     }
 
-    const c = g.app.commanders()[this.commanderIndex];
+    const c = g.app.windowList[this.frameIndex].c;
 
     // Set w_revealType, it will ultimately set this._revealType.
     // Used when finding the OUTLINE's selected node and setting or preventing focus into it
@@ -6197,7 +6146,7 @@ public _launchRefresh(p_node?: Position): void {
     }
 
     // getStates will check if documents, buttons and states flags are set and refresh accordingly
-    this.getStates();
+    return this.getStates();
 }
 
 </t>
@@ -6214,7 +6163,7 @@ public _setupRefresh(p_focusOutline: boolean, p_refreshType: ReqRefresh): void {
 
 </t>
 <t tx="felix.20201227230901.1">/**
- * * Setup leoInteg's UI for having no opened Leo documents
+ * * Setup UI for having no opened Leo documents
  */
 private _setupNoOpenedLeoDocument(): void {
     this.leoStates.fileOpenedReady = false;
@@ -6227,15 +6176,15 @@ private _setupNoOpenedLeoDocument(): void {
 
 </t>
 <t tx="felix.20201227230912.1">/**
- * * A Leo file was opened: setup leoInteg's UI accordingly.
+ * * A Leo file was opened: setup UI accordingly.
  * @param p_openFileResult Returned info about currently opened and editing document
  * @return a promise that resolves to an opened body pane text editor
  */
-private _setupOpenedLeoDocument(p_openFileResult: any): Promise&lt;unknown&gt; {
+private _setupOpenedLeoDocument(p_openFileResult?: any): Promise&lt;unknown&gt; {
     console.log('TODO: _setupOpenedLeoDocument with parameter : ', p_openFileResult);
 
     // const w_selectedLeoNode = this.apToLeoNode(p_openFileResult.node, false); // Just to get gnx for the body's fist appearance
-    // this.leoStates.leoOpenedFileName = p_openFileResult.filename;
+    this.leoStates.leoOpenedFileName = g.app.windowList[this.frameIndex].c.fileName();
 
     // // * If not unnamed file add to recent list &amp; last opened list
     // this._addRecentAndLastFile(p_openFileResult.filename);
@@ -6256,14 +6205,12 @@ private _setupOpenedLeoDocument(p_openFileResult: any): Promise&lt;unknown&gt; {
     //     this._bodyFileSystemStarted = true;
     // }
     // // * Startup flag
-    // this.leoStates.fileOpenedReady = true;
+    this.leoStates.fileOpenedReady = true;
     // // * Maybe first valid redraw of tree along with the selected node and its body
     // this._refreshOutline(true, RevealType.RevealSelectFocus); // p_revealSelection flag set
     // // * Maybe first StatusBar appearance
     // this._leoStatusBar.update(true, 0, true);
     // this._leoStatusBar.show(); // Just selected a node
-    // // * Show leo log pane
-    // this.showLogPane();
     // // * Send config to python's side (for settings such as defaultReloadIgnore and checkForChangeExternalFiles)
     // this.sendConfigToServer(this.config.getConfig());
     // // * Refresh Opened tree views
@@ -6271,6 +6218,8 @@ private _setupOpenedLeoDocument(p_openFileResult: any): Promise&lt;unknown&gt; {
     // this._leoButtonsProvider.refreshTreeRoot();
     // // * Maybe first Body appearance
     // return this.showBody(false);
+    // Reset Extension context flags (used in 'when' clauses in package.json)
+
     return Promise.resolve(true);
 }
 
@@ -7428,7 +7377,7 @@ export interface BodyTimeInfo {
 public async saveAsLeojsFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
     await this._triggerSave();
 
-    const c = g.app.commanders()[this.commanderIndex];
+    const c = g.app.windowList[this.frameIndex].c;
 
     this._setupRefresh(!!p_fromOutline, {
         tree: true,
@@ -7436,13 +7385,10 @@ public async saveAsLeojsFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
         documents: true
     });
 
-    await c.save_as_leojs;
-    // vscode.window.showInformationMessage('TODO: Implement saveAsLeojsFile' +
-    //     " called from " +
-    //     (p_fromOutline ? "outline" : "body")
-    // );
+    await c.save_as_leojs();
 
-    return this.launchRefresh();
+    this.launchRefresh();
+    return Promise.resolve();
 }
 
 </t>
@@ -7631,8 +7577,8 @@ public get tooltip(): string {
 <t tx="felix.20211122214230.1">public getChildren(element?: LeoUndoNode): LeoUndoNode[] {
     const w_children: LeoUndoNode[] = [];
     // if called with element, or not ready, give back empty array as there won't be any children
-    if (this._leoStates.fileOpenedReady &amp;&amp; !element &amp;&amp; g.app.commanders().length) {
-        const c = g.app.commanders()[this._leoUI.commanderIndex];
+    if (this._leoStates.fileOpenedReady &amp;&amp; !element &amp;&amp; g.app.windowList.length) {
+        const c = g.app.windowList[this._leoUI.frameIndex].c;
         const undoer = c.undoer;
 
         let i: number = 0;
@@ -7982,7 +7928,7 @@ private _bodySaveDeactivate(
 private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
     const LEOCMD = Constants.LEO_COMMANDS;
     const w_command = p_asChild ? LEOCMD.INSERT_CHILD_PNODE : LEOCMD.INSERT_PNODE;
-    const c = g.app.commanders()[this.commanderIndex];
+    const c = g.app.windowList[this.frameIndex].c;
     const u = c.undoer;
     let value: any = c.doCommandByName(w_command);
     if (!p_name) {
@@ -8514,49 +8460,19 @@ public finishStartup(): void {
     this.launchRefresh = debounce(
         this._launchRefresh,
         Constants.REFRESH_DEBOUNCE_DELAY,
-        { leading: true, trailing: true }
+        { leading: false, trailing: true }
     );
 
-    // ! FAKE DEVELOPMENT STARTUP END ( TODO: finish _setupOpenedLeoDocument )
-    // Reset Extension context flags (used in 'when' clauses in package.json)
     this.leoStates.leoReady = true;
-    this.leoStates.fileOpenedReady = true;  // TODO : IMPLEMENT
-
-    // this.refreshDocumentsPane();
-    // ! VSCODE BUG : natural refresh from visibility change do not support 'getParent'!
-    // setTimeout(() =&gt; {
-    //     this._refreshOutline(true, RevealType.RevealSelectFocus);
-    // }, 0);
 
     setTimeout(() =&gt; {
-        this.showOutline();
+        // this.showOutline();
+
         this._setupRefresh(true,
             { tree: true, body: true, documents: true, buttons: true, states: true }
         );
         this.launchRefresh();
     }, 10);
-}
-
-</t>
-<t tx="felix.20220202004920.1">/**
- * * Startup by checking for LeoID from os/env, settings, or input dialog
- */
-private _start(): void {
-
-    /* 
-        g.app.setLeoID(true, this.verbose).then((p_id) =&gt; {
-            if (p_id &amp;&amp; p_id.length &gt;= 3 &amp;&amp; utils.isAlphaNumeric(p_id)) {
-                if (!this.leoStates.leoReady) {
-                    // start leojs only if not already started!
-                    this._leoIDResolve(p_id);
-                }
-            } else {
-                this.showLeoIDMessage();
-            }
-        }, (p_reason) =&gt; {
-            this.showLeoIDMessage();
-        });
-    */
 }
 
 </t>
@@ -10026,7 +9942,7 @@ get leoCanGoBack(): boolean {
 }
 set leoCanGoBack(p_value: boolean) {
     this._leoCanGoBack = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_BACK, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_BACK, p_value);
 }
 
 </t>
@@ -10039,7 +9955,7 @@ get leoCanGoNext(): boolean {
 }
 set leoCanGoNext(p_value: boolean) {
     this._leoCanGoNext = p_value;
-    utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_NEXT, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_NEXT, p_value);
 }
 
 </t>
@@ -10102,8 +10018,8 @@ public _triggerSave(): Promise&lt;unknown&gt; {
             },
             ...[
                 Constants.USER_MESSAGES.YES,
-                Constants.USER_MESSAGES.NO,
-                Constants.USER_MESSAGES.CANCEL
+                Constants.USER_MESSAGES.NO
+                // Already shows a 'cancel' 
             ]
         )
         .then((answer) =&gt; {

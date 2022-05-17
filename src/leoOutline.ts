@@ -66,7 +66,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             element._isRoot
         );
         // Check if its the selected node and call signal it to the UI
-        if (element.__eq__(g.app.commanders()[this._leoUI.commanderIndex].p)) {
+        if (element.__eq__(g.app.windowList[this._leoUI.frameIndex].c.p)) {
             this._leoUI.gotSelectedNode(element);
         }
         // Build a LeoNode (a vscode tree node) from the Position
@@ -84,10 +84,9 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             return [...element.children()];
         } else {
             // No elements : FIRST CHILDREN OF VSCODE'S TREEVIEW
-            const w_commanders: Commands[] = g.app.commanders();
-            if (w_commanders[this._leoUI.commanderIndex]) {
+            if (g.app.windowList[this._leoUI.frameIndex]) {
                 // Currently Selected Document's Commander
-                const w_c = w_commanders[this._leoUI.commanderIndex]!;
+                const w_c = g.app.windowList[this._leoUI.frameIndex].c;
                 if (w_c.hoistStack.length) {
                     // HOISTED: Topmost hoisted node starts the outline as single root 'child'
                     const w_rootPosition = w_c.hoistStack[w_c.hoistStack.length - 1].p;
