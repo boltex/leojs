@@ -1175,8 +1175,7 @@ export class LeoApp {
 
         if (g.app.windowList.length) {
             const c2 = new_c || g.app.windowList[0].c;
-            // PROBABLY NOT NEEDED
-            // g.app.selectLeoWindow(c2);
+            g.app.selectLeoWindow(c2);
         } else if (finish_quit && !g.unitTesting) {
             console.log('TODO: HANDLE LAST LEO DOCUMENT CLOSED');
             // g.app.finishQuit();
@@ -1443,6 +1442,32 @@ export class LeoApp {
             relativeFileName
         );
         return c;
+    }
+    //@+node:felix.20220517215520.1: *3* app.selectLeoWindow
+    public selectLeoWindow(c: Commands): void {
+        // * Rewritten for leojs
+
+        const frame = c.frame;
+
+        const index = g.app.windowList.indexOf(frame, 0);
+
+        (g.app.gui as LeoUI).frameIndex = index;
+
+        /* 
+        frame.deiconify()
+        frame.lift()
+        c.setLog()
+        master = getattr(frame.top, 'leo_master', None)
+        if master:
+            // master is a TabbedTopLevel.
+            // Selecting the new tab ensures focus is set.
+            master.select(c)
+        if 1:
+            c.initialFocusHelper()
+        else:
+            c.bodyWantsFocus()
+        c.outerUpdate()
+        */
     }
     //@-others
 

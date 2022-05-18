@@ -370,11 +370,6 @@
     ],
     "commands": [
       {
-        "command": "leojs.test",
-        "category": "Leojs",
-        "title": "Test leojs"
-      },
-      {
         "command": "leojs.executeScript",
         "category": "Leojs",
         "title": "Execute Script",
@@ -387,6 +382,11 @@
         "command": "leojs.minibuffer",
         "category": "Leojs",
         "title": "Minibuffer"
+      },
+      {
+        "command": "leojs.gotoScript",
+        "category": "Leo",
+        "title": "Goto Script"
       },
       {
         "command": "leojs.removeButton",
@@ -483,6 +483,15 @@
         "icon": {
           "light": "resources/light/save-as.svg",
           "dark": "resources/dark/save-as.svg"
+        }
+      },
+      {
+        "command": "leojs.saveAsLeoJsFile",
+        "category": "Leojs",
+        "title": "Save as leojs JSON File...",
+        "icon": {
+          "light": "resources/light/save-as-leojs.svg",
+          "dark": "resources/dark/save-as-leojs.svg"
         }
       },
       {
@@ -1542,10 +1551,6 @@
           "when": "leojsTreeOpened"
         },
         {
-          "command": "leojs.test",
-          "when": "true"
-        },
-        {
           "command": "leojs.prevDisabled",
           "when": "false"
         },
@@ -1942,6 +1947,26 @@
       ],
       "view/item/context": [
         {
+          "command": "leojs.saveLeoFileFromOutline",
+          "when": "viewItem =~ /^leojsDocumentSelectedTitled/",
+          "group": "inline@1"
+        },
+        {
+          "command": "leojs.saveAsLeoFile",
+          "when": "viewItem =~ /^leojsDocumentSelectedUntitled/",
+          "group": "inline@1"
+        },
+        {
+          "command": "leojs.saveAsLeoJsFile",
+          "when": "viewItem =~ /^leojsDocumentSelectedUntitled/",
+          "group": "inline@1"
+        },
+        {
+          "command": "leojs.closeLeoFile",
+          "when": "viewItem =~ /^leojsDocumentSelected/",
+          "group": "inline@2"
+        },
+        {
           "command": "leojs.editHeadline",
           "when": "leojsShowEditOnNodes && viewItem =~ /^leojsNode/",
           "group": "inline@1"
@@ -2060,6 +2085,16 @@
           "command": "leojs.gotoNextClone",
           "when": "leojsTreeOpened && viewItem =~ /leojsNodeCloned/",
           "group": "leojsNodeContext3@3"
+        },
+        {
+          "command": "leojs.removeButton",
+          "when": "leojsTreeOpened && viewItem =~ /^leojsButtonNode/",
+          "group": "leojsButtonContext1@1"
+        },
+        {
+          "command": "leojs.gotoScript",
+          "when": "leojsTreeOpened && viewItem =~ /^leojsButtonNode/",
+          "group": "leojsButtonContext1@2"
         }
       ]
     },

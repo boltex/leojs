@@ -1248,10 +1248,15 @@ export class LeoUI {
      */
     public clickAtButton(p_node: LeoButtonNode): Thenable<unknown> {
 
-        this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
+        this._setupRefresh(false, {
+            tree: true,
+            body: true,
+            documents: true,
+            buttons: true,
+            states: true
+        });
 
-        vscode.window.showInformationMessage('TODO: Implement clickAtButton' +
-            " button: " + p_node.label);
+        vscode.window.showInformationMessage('TODO: Implement clickAtButton ' + p_node.label);
 
         this.launchRefresh();
 
@@ -1262,6 +1267,69 @@ export class LeoUI {
     }
 
     /**
+     * * Show input window to select
+     */
+    private _handleRClicks(p_rclicks: any[], topLevelName?: string): Thenable<any> {
+        // private _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Thenable<ChooseRClickItem> {
+        /* 
+        const w_choices: ChooseRClickItem[] = [];
+        let w_index = 0;
+        if (topLevelName) {
+            w_choices.push(
+                { label: topLevelName, picked: true, alwaysShow: true, index: w_index++ }
+            );
+        }
+        w_choices.push(
+            ...p_rclicks.map((p_rclick): ChooseRClickItem => { return { label: p_rclick.name, index: w_index++, rclick: p_rclick }; })
+        );
+
+        const w_options: vscode.QuickPickOptions = {
+            placeHolder: Constants.USER_MESSAGES.CHOOSE_BUTTON
+        };
+        return vscode.window.showQuickPick(w_choices, w_options).then((p_picked) => {
+            if (p_picked) {
+                this._rclickSelected.push(p_picked.index);
+                if (topLevelName && p_picked.index === 0) {
+                    return Promise.resolve(p_picked);
+                }
+                if (p_picked.rclick && p_picked.rclick.children && p_picked.rclick.children.length) {
+                    return this._handleRClicks(p_picked.rclick.children);
+                } else {
+                    return Promise.resolve(p_picked);
+                }
+            }
+            // Escaped
+            return Promise.reject();
+        });
+        */
+        return Promise.resolve();
+    }
+    /**
+     * * Finds and goes to the script of an at-button. Used by '@buttons' treeview.
+     * @param p_node the node of the at-buttons panel that was right-clicked
+     * @returns the launchRefresh promise started after it's done finding the node
+     */
+    public gotoScript(p_node: LeoButtonNode): Promise<boolean> {
+        return Promise.resolve(true);
+        /* 
+        return this._isBusyTriggerSave(false)
+            .then((p_saveResult) => {
+                return this.sendAction(
+                    Constants.LEOBRIDGE.GOTO_SCRIPT,
+                    JSON.stringify({ index: p_node.button.index })
+                );
+            })
+            .then((p_gotoScriptResult: LeoBridgePackage) => {
+                return this.sendAction(Constants.LEOBRIDGE.DO_NOTHING);
+            })
+            .then((p_package) => {
+                // refresh and reveal selection
+                this.launchRefresh({ tree: true, body: true, states: true, buttons: false, documents: false }, false, p_package.node);
+                return Promise.resolve(true); // TODO launchRefresh should be a returned promise
+            });
+        */
+    }
+    /**
      * * Removes an '@button' from Leo's button dict, directly by index string. Used by '@buttons' treeview.
      * @param p_node the node of the at-buttons panel that was chosen to remove
      * @returns Thenable that resolves when done
@@ -1270,8 +1338,7 @@ export class LeoUI {
 
         this._setupRefresh(false, { buttons: true });
 
-        vscode.window.showInformationMessage('TODO: Implement removeAtButton' +
-            " button: " + p_node.label);
+        vscode.window.showInformationMessage('TODO: Implement removeAtButton ' + p_node.label);
 
         this.launchRefresh();
 
@@ -2280,7 +2347,7 @@ export class LeoUI {
      * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
      * @returns a promise from saving the file results.
      */
-    public async saveAsLeojsFile(p_fromOutline?: boolean): Promise<unknown> {
+    public async saveAsLeoJsFile(p_fromOutline?: boolean): Promise<unknown> {
         await this._triggerSave();
 
         const c = g.app.windowList[this.frameIndex].c;
@@ -2343,7 +2410,13 @@ export class LeoUI {
      */
     public selectOpenedLeoDocument(p_index: number, p_fromOutline?: boolean): Thenable<unknown> {
 
-        this._setupRefresh(!!p_fromOutline, { tree: true, body: true, buttons: true, states: true, documents: true });
+        this._setupRefresh(!!p_fromOutline, {
+            tree: true,
+            body: true,
+            buttons: true,
+            states: true,
+            documents: true
+        });
 
         this.frameIndex = p_index;
 
@@ -2640,78 +2713,6 @@ export class LeoUI {
                 return "";
             }
         });
-
-    }
-
-    /**
-     * * Test/Dummy command
-     * @returns Thenable from the tested functionality
-     */
-    public test(): Thenable<unknown> {
-        const c = g.app.windowList[this.frameIndex].c;
-
-        vscode.window.showInformationMessage("Test called!");
-        console.log("Test called!");
-        // console.log("c.p.isSelected()", c);
-
-        // * DO LEO COMMAND BY NAME
-        // keepSelection = False  # Set default, optional component of param
-        // if "keep" in param:
-        //     keepSelection = param["keep"]
-
-        // * Test directives_dict & directives_pat
-        // console.log('test get_directives_dict_list ');
-        // console.log(g.get_directives_dict_list(c.p));
-
-        // * Test getTabWidth
-        console.log(c.getTabWidth(c.p));
-
-        console.log(c.doCommandByName('check-outline'));
-
-        // * Test undo/redo
-        console.log('can undo', c.undoer.canUndo());
-        console.log('can redo', c.undoer.canRedo());
-
-        // * Test hasParent
-        console.log('p has parent: ', c.p.hasParent());
-
-        // * test @cmd decorator and undoer
-        // console.log('test @cmd decorator and undoer');
-        // this.command("undo", undefined, {
-        //     node: true, // Reveal the returned 'selected position' without changes to the tree
-        //     body: true, // Goto/select another node needs the body pane refreshed
-        //     states: true
-        // }, false);
-
-        // * test @commander_command decorator and general commands
-        /*
-        const func = c.commandsDict['goto-next-visible'];
-        if (!func) {
-            console.error('Leo command not found');
-        } else {
-            console.log('HAS FUNC!');
-            func.bind(c)();
-        }
-        */
-
-        // * Example from leoserver "LEO COMMAND BY NAME" method
-        // func = c.commandsDict.get(command_name) # Getting from kebab-cased 'Command Name'
-        // if not func:  # pragma: no cover
-        //     raise ServerError(f"{tag}: Leo command not found: {command_name!r}")
-
-        // p = self._get_p(param)
-        // try:
-        //     if p == c.p:
-        //         value = func(event={"c":c})  # no need for re-selection
-        //     else:
-        //         old_p = c.p  # preserve old position
-        //         c.selectPosition(p)  # set position upon which to perform the command
-        //         value = func(event={"c":c})
-        //         if keepSelection and c.positionExists(old_p):
-        //             # Only if 'keep' old position was set, and old_p still exists
-        //             c.selectPosition(old_p)
-
-        return Promise.resolve(true);
     }
 
 }

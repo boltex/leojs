@@ -40,15 +40,13 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 
     const w_commands: [string, (...args: any[]) => any][] = [
 
-        // ! REMOVE TESTS ENTRIES FROM PACKAGE.JSON FOR MASTER BRANCH RELEASES !
-        ["leojs.test", () => p_leoUI.test()], // Test function useful when debugging
-
         [CMD.EXECUTE, () => p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, U, REFRESH_ALL, false)],
 
         [CMD.MINIBUFFER, () => p_leoUI.minibuffer()], // Is referenced in package.json
         [CMD.SET_LEO_ID, () => p_leoUI.setLeoIDCommand()],
 
         [CMD.CLICK_BUTTON, (p_node: LeoButtonNode) => p_leoUI.clickAtButton(p_node)], // Not referenced in package.json
+        [CMD.GOTO_SCRIPT, (p_node: LeoButtonNode) => p_leoUI.gotoScript(p_node)],
         [CMD.REMOVE_BUTTON, (p_node: LeoButtonNode) => p_leoUI.removeAtButton(p_node)],
 
         [CMD.CLOSE_FILE, () => p_leoUI.closeLeoFile()],
@@ -56,6 +54,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.NEW_FILE, () => p_leoUI.newLeoFile()],
         [CMD.OPEN_FILE, (p_uri?: vscode.Uri) => p_leoUI.openLeoFile(p_uri)],
         [CMD.SAVE_AS_FILE, () => p_leoUI.saveAsLeoFile()],
+        [CMD.SAVE_AS_LEOJS, () => p_leoUI.saveAsLeoJsFile()],
         [CMD.SAVE_FILE, () => p_leoUI.saveLeoFile()],
         [CMD.SAVE_FILE_FO, () => p_leoUI.saveLeoFile(true)],
 

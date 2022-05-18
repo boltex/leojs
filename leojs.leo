@@ -139,6 +139,8 @@
 </v>
 <v t="felix.20201214194144.7"><vh>At Buttons</vh>
 <v t="felix.20201214211742.1"><vh>clickAtButton</vh></v>
+<v t="felix.20220517212706.1"><vh>_handleRClicks</vh></v>
+<v t="felix.20220517212718.1"><vh>gotoScript</vh></v>
 <v t="felix.20201214211744.1"><vh>removeAtButton</vh></v>
 </v>
 <v t="felix.20211024012536.1"><vh>Clipboard</vh>
@@ -210,7 +212,6 @@
 <v t="felix.20220107223824.1"><vh>runOpenFileDialog</vh></v>
 <v t="felix.20220108211806.1"><vh>runSaveFileDialog</vh></v>
 </v>
-<v t="felix.20201214211706.1"><vh>test/dummy command</vh></v>
 </v>
 <v t="felix.20220204224240.1"><vh>class NullGui</vh></v>
 </v>
@@ -373,7 +374,6 @@
 <v t="felix.20201214205159.4"><vh>views</vh></v>
 <v t="felix.20201214205159.5"><vh>viewsWelcome</vh></v>
 <v t="felix.20201214205159.6"><vh>commands</vh>
-<v t="felix.20201214205159.7"><vh>Test</vh></v>
 <v t="felix.20201214205159.8"><vh>Scripting &amp; @buttons</vh></v>
 <v t="felix.20201214205159.9"><vh>Show UI Panes</vh></v>
 <v t="felix.20201214205159.10"><vh>Leo File Documents</vh></v>
@@ -408,7 +408,6 @@
 <v t="felix.20201214205159.38"><vh>Clone Find Commands</vh></v>
 <v t="felix.20201214205159.39"><vh>Marked Nodes Commands</vh></v>
 <v t="felix.20201214205159.40"><vh>Hidden from Palette</vh>
-<v t="felix.20201214205159.41"><vh>Test</vh></v>
 <v t="felix.20220508225045.1"><vh>disabled icon commands</vh></v>
 <v t="felix.20201214205159.42"><vh>Scripting &amp; @Buttons</vh></v>
 <v t="felix.20201214205159.43"><vh>Show UI Panes</vh></v>
@@ -427,6 +426,7 @@
 <v t="felix.20201214205159.54"><vh>explorer/context</vh></v>
 <v t="felix.20201214205159.55"><vh>view/title</vh></v>
 <v t="felix.20201214205159.56"><vh>view/item/context</vh>
+<v t="felix.20220517202245.1"><vh>leo documents commands</vh></v>
 <v t="felix.20201214205159.57"><vh>Headline Editing Hover Icon</vh></v>
 <v t="felix.20201214205159.58"><vh>Insert Node Hover Icon</vh></v>
 <v t="felix.20201214205159.59"><vh>Move Nodes Hover Icon</vh></v>
@@ -437,6 +437,7 @@
 <v t="felix.20201214205159.64"><vh>Leo File Documents Context Menu</vh></v>
 <v t="felix.20201214205159.65"><vh>Mark/Unmark Context Menu</vh></v>
 <v t="felix.20201214205159.66"><vh>Outline Editing Context Menu</vh></v>
+<v t="felix.20220517203332.1"><vh>at buttons</vh></v>
 </v>
 </v>
 <v t="felix.20201214205159.67"><vh>keybindings</vh>
@@ -1157,6 +1158,7 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.SET_LEO_ID, () =&gt; p_leoUI.setLeoIDCommand()],
 
 [CMD.CLICK_BUTTON, (p_node: LeoButtonNode) =&gt; p_leoUI.clickAtButton(p_node)], // Not referenced in package.json
+[CMD.GOTO_SCRIPT, (p_node: LeoButtonNode) =&gt; p_leoUI.gotoScript(p_node)],
 [CMD.REMOVE_BUTTON, (p_node: LeoButtonNode) =&gt; p_leoUI.removeAtButton(p_node)],
 
 </t>
@@ -1165,6 +1167,7 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.NEW_FILE, () =&gt; p_leoUI.newLeoFile()],
 [CMD.OPEN_FILE, (p_uri?: vscode.Uri) =&gt; p_leoUI.openLeoFile(p_uri)],
 [CMD.SAVE_AS_FILE, () =&gt; p_leoUI.saveAsLeoFile()],
+[CMD.SAVE_AS_LEOJS, () =&gt; p_leoUI.saveAsLeoJsFile()],
 [CMD.SAVE_FILE, () =&gt; p_leoUI.saveLeoFile()],
 [CMD.SAVE_FILE_FO, () =&gt; p_leoUI.saveLeoFile(true)],
 
@@ -1273,6 +1276,7 @@ public static COMMANDS = {
     SAVE_FILE: Constants.NAME + ".saveLeoFile",
     SAVE_FILE_FO: Constants.NAME + ".saveLeoFileFromOutline",
     SAVE_AS_FILE: Constants.NAME + ".saveAsLeoFile",
+    SAVE_AS_LEOJS: Constants.NAME + ".saveAsLeoJsFile",
     CLOSE_FILE: Constants.NAME + ".closeLeoFile",
     MINIBUFFER: Constants.NAME + ".minibuffer",
     SET_LEO_ID: Constants.NAME + ".setLeoID",
@@ -1284,6 +1288,7 @@ public static COMMANDS = {
     // At-buttons
     CLICK_BUTTON: Constants.NAME + ".clickButton",
     REMOVE_BUTTON: Constants.NAME + ".removeButton",
+    GOTO_SCRIPT: Constants.NAME + ".gotoScript",
     // Outline Node User Interaction
     SELECT_NODE: Constants.NAME + ".selectTreeNode",
     OPEN_ASIDE: Constants.NAME + ".openAside", // selects and opens body splitting the workspace
@@ -2719,7 +2724,6 @@ export class LeoUI {
     public refreshUndoPane!: (() =&gt; void);
 
     @others
-
 }
 
 </t>
@@ -3300,6 +3304,15 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "icon": {
     "light": "resources/light/save-as.svg",
     "dark": "resources/dark/save-as.svg"
+  }
+},
+{
+  "command": "leojs.saveAsLeoJsFile",
+  "category": "Leojs",
+  "title": "Save as leojs JSON File...",
+  "icon": {
+    "light": "resources/light/save-as-leojs.svg",
+    "dark": "resources/dark/save-as-leojs.svg"
   }
 },
 {
@@ -4467,11 +4480,6 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 </t>
 <t tx="felix.20201214205159.40">@others
 </t>
-<t tx="felix.20201214205159.41">{
-  "command": "leojs.test",
-  "when": "true"
-},
-</t>
 <t tx="felix.20201214205159.42">{
   "command": "leojs.removeButton",
   "when": "false"
@@ -5057,7 +5065,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "command": "leojs.gotoNextClone",
   "when": "leojsTreeOpened &amp;&amp; viewItem =~ /leojsNodeCloned/",
   "group": "leojsNodeContext3@3"
-}
+},
 </t>
 <t tx="felix.20201214205159.67">"keybindings": [
   @others
@@ -5112,12 +5120,6 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "command": "leojs.showBody",
   "key": "enter",
   "when": "leojsLeoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
-},
-</t>
-<t tx="felix.20201214205159.7">{
-  "command": "leojs.test",
-  "category": "Leojs",
-  "title": "Test leojs"
 },
 </t>
 <t tx="felix.20201214205159.70">{
@@ -5647,14 +5649,14 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "title": "Minibuffer"
 },
 {
+  "command": "leojs.gotoScript",
+  "category": "Leo",
+  "title": "Goto Script"
+},
+{
   "command": "leojs.removeButton",
   "category": "Leojs",
   "title": "Remove Button"
-},
-{
-  "command": "leojs.setLeoID",
-  "category": "Leojs",
-  "title": "Set Leo ID"
 },
 </t>
 <t tx="felix.20201214205159.80">"@types/debounce": "^1.2.0",
@@ -5695,6 +5697,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 "stream": "^0.0.2"
 </t>
 <t tx="felix.20201214205159.9">{
+  "command": "leojs.setLeoID",
+  "category": "Leojs",
+  "title": "Set Leo ID"
+},
+{
   "command": "leojs.showBody",
   "category": "Leojs",
   "title": "Focus to Body"
@@ -5757,77 +5764,6 @@ public showLogPane(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211706.1">/**
- * * Test/Dummy command
- * @returns Thenable from the tested functionality
- */
-public test(): Thenable&lt;unknown&gt; {
-    const c = g.app.windowList[this.frameIndex].c;
-
-    vscode.window.showInformationMessage("Test called!");
-    console.log("Test called!");
-    // console.log("c.p.isSelected()", c);
-
-    // * DO LEO COMMAND BY NAME
-    // keepSelection = False  # Set default, optional component of param
-    // if "keep" in param:
-    //     keepSelection = param["keep"]
-
-    // * Test directives_dict &amp; directives_pat
-    // console.log('test get_directives_dict_list ');
-    // console.log(g.get_directives_dict_list(c.p));
-
-    // * Test getTabWidth
-    console.log(c.getTabWidth(c.p));
-
-    console.log(c.doCommandByName('check-outline'));
-
-    // * Test undo/redo
-    console.log('can undo', c.undoer.canUndo());
-    console.log('can redo', c.undoer.canRedo());
-
-    // * Test hasParent
-    console.log('p has parent: ', c.p.hasParent());
-
-    // * test @cmd decorator and undoer
-    // console.log('test @cmd decorator and undoer');
-    // this.command("undo", undefined, {
-    //     node: true, // Reveal the returned 'selected position' without changes to the tree
-    //     body: true, // Goto/select another node needs the body pane refreshed
-    //     states: true
-    // }, false);
-
-    // * test @commander_command decorator and general commands
-    /*
-    const func = c.commandsDict['goto-next-visible'];
-    if (!func) {
-        console.error('Leo command not found');
-    } else {
-        console.log('HAS FUNC!');
-        func.bind(c)();
-    }
-    */
-
-    // * Example from leoserver "LEO COMMAND BY NAME" method
-    // func = c.commandsDict.get(command_name) # Getting from kebab-cased 'Command Name'
-    // if not func:  # pragma: no cover
-    //     raise ServerError(f"{tag}: Leo command not found: {command_name!r}")
-
-    // p = self._get_p(param)
-    // try:
-    //     if p == c.p:
-    //         value = func(event={"c":c})  # no need for re-selection
-    //     else:
-    //         old_p = c.p  # preserve old position
-    //         c.selectPosition(p)  # set position upon which to perform the command
-    //         value = func(event={"c":c})
-    //         if keepSelection and c.positionExists(old_p):
-    //             # Only if 'keep' old position was set, and old_p still exists
-    //             c.selectPosition(old_p)
-
-    return Promise.resolve(true);
-}
-</t>
 <t tx="felix.20201214211742.1">/**
  * * Invoke an '@button' click directly by index string. Used by '@buttons' treeview.
  * @param p_node the node of the at-buttons panel that was clicked
@@ -5835,10 +5771,15 @@ public test(): Thenable&lt;unknown&gt; {
  */
 public clickAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
 
-    this._setupRefresh(false, { tree: true, body: true, documents: true, buttons: true, states: true });
+    this._setupRefresh(false, {
+        tree: true,
+        body: true,
+        documents: true,
+        buttons: true,
+        states: true
+    });
 
-    vscode.window.showInformationMessage('TODO: Implement clickAtButton' +
-        " button: " + p_node.label);
+    vscode.window.showInformationMessage('TODO: Implement clickAtButton ' + p_node.label);
 
     this.launchRefresh();
 
@@ -5858,8 +5799,7 @@ public removeAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
 
     this._setupRefresh(false, { buttons: true });
 
-    vscode.window.showInformationMessage('TODO: Implement removeAtButton' +
-        " button: " + p_node.label);
+    vscode.window.showInformationMessage('TODO: Implement removeAtButton ' + p_node.label);
 
     this.launchRefresh();
 
@@ -5870,7 +5810,34 @@ public removeAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211830.1">/**
+<t tx="felix.20201214211830.1">    this._setupRefresh(false, {
+        tree: true,
+        body: true,
+        documents: true,
+        buttons: true,
+        states: true
+    });
+
+    if (!this.leoStates.fileOpenedReady) {
+        if (g.app.loadManager) {
+            g.app.loadManager.openEmptyLeoFile(this);
+        }
+    } else {
+
+        await this._triggerSave();
+
+
+        const c = g.app.windowList[this.frameIndex].c;
+        c.new(this);
+    }
+
+
+
+    this.launchRefresh();
+    return Promise.resolve();
+}
+
+/**
 * * Close an opened Leo file
 * @returns the promise started after it's done closing the Leo document
 */
@@ -5900,7 +5867,13 @@ public async closeLeoFile(): Promise&lt;unknown&gt; {
  * @returns A promise that resolves when done trying to open the file
  */
 public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
-
+    this._setupRefresh(true, {
+        tree: true,
+        body: true,
+        states: true,
+        documents: true,
+        buttons: true
+    });
     if (!this.leoStates.fileOpenedReady) {
         // override with given argument
         let fileName: string;
@@ -5912,13 +5885,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         await this._triggerSave();
 
         const c = g.app.windowList[this.frameIndex].c;
-        this._setupRefresh(true, {
-            tree: true,
-            body: true,
-            states: true,
-            documents: true,
-            buttons: true
-        });
+
         await c.open_outline(p_uri);
     }
 
@@ -6013,7 +5980,13 @@ public switchLeoFile(): Thenable&lt;unknown&gt; {
  */
 public selectOpenedLeoDocument(p_index: number, p_fromOutline?: boolean): Thenable&lt;unknown&gt; {
 
-    this._setupRefresh(!!p_fromOutline, { tree: true, body: true, buttons: true, states: true, documents: true });
+    this._setupRefresh(!!p_fromOutline, {
+        tree: true,
+        body: true,
+        buttons: true,
+        states: true,
+        documents: true
+    });
 
     this.frameIndex = p_index;
 
@@ -7385,7 +7358,7 @@ export interface BodyTimeInfo {
  * @param p_fromOutlineSignifies that the focus was, and should be brought back to, the outline
  * @returns a promise from saving the file results.
  */
-public async saveAsLeojsFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
+public async saveAsLeoJsFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
     await this._triggerSave();
 
     const c = g.app.windowList[this.frameIndex].c;
@@ -8132,7 +8105,6 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
             return "";
         }
     });
-
 }
 
 </t>
@@ -8655,9 +8627,6 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
     };
 
     const w_commands: [string, (...args: any[]) =&gt; any][] = [
-
-        // ! REMOVE TESTS ENTRIES FROM PACKAGE.JSON FOR MASTER BRANCH RELEASES !
-        ["leojs.test", () =&gt; p_leoUI.test()], // Test function useful when debugging
 
         &lt;&lt; Define entries for all commands &gt;&gt;
     ];
@@ -10051,32 +10020,103 @@ public _triggerSave(): Promise&lt;unknown&gt; {
 */
 public async newLeoFile(): Promise&lt;unknown&gt; {
 
-    if (!this.leoStates.fileOpenedReady) {
-        if (g.app.loadManager) {
-            await g.app.loadManager.openEmptyLeoFile(this);
-        }
-    } else {
-
-        await this._triggerSave();
-
-        this._setupRefresh(false, {
-            tree: true,
-            body: true,
-            documents: true,
-            buttons: true,
-            states: true
-        });
-
-        const c = g.app.windowList[this.frameIndex].c;
-        c.new(this);
+</t>
+<t tx="felix.20220517202245.1">{
+  "command": "leojs.saveLeoFileFromOutline",
+  "when": "viewItem =~ /^leojsDocumentSelectedTitled/",
+  "group": "inline@1"
+},
+{
+  "command": "leojs.saveAsLeoFile",
+  "when": "viewItem =~ /^leojsDocumentSelectedUntitled/",
+  "group": "inline@1"
+},
+{
+  "command": "leojs.saveAsLeoJsFile",
+  "when": "viewItem =~ /^leojsDocumentSelectedUntitled/",
+  "group": "inline@1"
+},
+{
+  "command": "leojs.closeLeoFile",
+  "when": "viewItem =~ /^leojsDocumentSelected/",
+  "group": "inline@2"
+},
+</t>
+<t tx="felix.20220517203332.1">{
+  "command": "leojs.removeButton",
+  "when": "leojsTreeOpened &amp;&amp; viewItem =~ /^leojsButtonNode/",
+  "group": "leojsButtonContext1@1"
+},
+{
+  "command": "leojs.gotoScript",
+  "when": "leojsTreeOpened &amp;&amp; viewItem =~ /^leojsButtonNode/",
+  "group": "leojsButtonContext1@2"
+}
+</t>
+<t tx="felix.20220517212706.1">/**
+ * * Show input window to select
+ */
+private _handleRClicks(p_rclicks: any[], topLevelName?: string): Thenable&lt;any&gt; {
+    // private _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Thenable&lt;ChooseRClickItem&gt; {
+    /* 
+    const w_choices: ChooseRClickItem[] = [];
+    let w_index = 0;
+    if (topLevelName) {
+        w_choices.push(
+            { label: topLevelName, picked: true, alwaysShow: true, index: w_index++ }
+        );
     }
+    w_choices.push(
+        ...p_rclicks.map((p_rclick): ChooseRClickItem =&gt; { return { label: p_rclick.name, index: w_index++, rclick: p_rclick }; })
+    );
 
-
-
-    this.launchRefresh();
+    const w_options: vscode.QuickPickOptions = {
+        placeHolder: Constants.USER_MESSAGES.CHOOSE_BUTTON
+    };
+    return vscode.window.showQuickPick(w_choices, w_options).then((p_picked) =&gt; {
+        if (p_picked) {
+            this._rclickSelected.push(p_picked.index);
+            if (topLevelName &amp;&amp; p_picked.index === 0) {
+                return Promise.resolve(p_picked);
+            }
+            if (p_picked.rclick &amp;&amp; p_picked.rclick.children &amp;&amp; p_picked.rclick.children.length) {
+                return this._handleRClicks(p_picked.rclick.children);
+            } else {
+                return Promise.resolve(p_picked);
+            }
+        }
+        // Escaped
+        return Promise.reject();
+    });
+    */
     return Promise.resolve();
 }
-
+</t>
+<t tx="felix.20220517212718.1">/**
+ * * Finds and goes to the script of an at-button. Used by '@buttons' treeview.
+ * @param p_node the node of the at-buttons panel that was right-clicked
+ * @returns the launchRefresh promise started after it's done finding the node
+ */
+public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
+    return Promise.resolve(true);
+    /* 
+    return this._isBusyTriggerSave(false)
+        .then((p_saveResult) =&gt; {
+            return this.sendAction(
+                Constants.LEOBRIDGE.GOTO_SCRIPT,
+                JSON.stringify({ index: p_node.button.index })
+            );
+        })
+        .then((p_gotoScriptResult: LeoBridgePackage) =&gt; {
+            return this.sendAction(Constants.LEOBRIDGE.DO_NOTHING);
+        })
+        .then((p_package) =&gt; {
+            // refresh and reveal selection
+            this.launchRefresh({ tree: true, body: true, states: true, buttons: false, documents: false }, false, p_package.node);
+            return Promise.resolve(true); // TODO launchRefresh should be a returned promise
+        });
+    */
+}
 </t>
 </tnodes>
 </leo_file>

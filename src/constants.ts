@@ -343,6 +343,7 @@ export class Constants {
         SAVE_FILE: Constants.NAME + ".saveLeoFile",
         SAVE_FILE_FO: Constants.NAME + ".saveLeoFileFromOutline",
         SAVE_AS_FILE: Constants.NAME + ".saveAsLeoFile",
+        SAVE_AS_LEOJS: Constants.NAME + ".saveAsLeoJsFile",
         CLOSE_FILE: Constants.NAME + ".closeLeoFile",
         MINIBUFFER: Constants.NAME + ".minibuffer",
         SET_LEO_ID: Constants.NAME + ".setLeoID",
@@ -354,6 +355,7 @@ export class Constants {
         // At-buttons
         CLICK_BUTTON: Constants.NAME + ".clickButton",
         REMOVE_BUTTON: Constants.NAME + ".removeButton",
+        GOTO_SCRIPT: Constants.NAME + ".gotoScript",
         // Outline Node User Interaction
         SELECT_NODE: Constants.NAME + ".selectTreeNode",
         OPEN_ASIDE: Constants.NAME + ".openAside", // selects and opens body splitting the workspace
