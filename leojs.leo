@@ -658,9 +658,6 @@ import { Icon } from './types';
 import { LeoUI } from './leoUI';
 import * as g from './core/leoGlobals';
 import { Position } from './core/leoNodes';
-import { Commands } from './core/leoCommands';
-
-
 
 @language typescript
 @tabwidth -4
@@ -962,16 +959,9 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201209011931.5">public getChildren(element?: Position): Position[] {
-    // if(element){
-    //     console.log('called get children on', element.h);
-    // }else{
-    //     console.log('called get children on root');
-    // }
     if (element) {
-        // NORMAL TREEVIEW CHILDREN
         return [...element.children()];
     } else {
-        // No elements : FIRST CHILDREN OF VSCODE'S TREEVIEW
         if (g.app.windowList[this._leoUI.frameIndex]) {
             // Currently Selected Document's Commander
             const w_c = g.app.windowList[this._leoUI.frameIndex].c;
@@ -990,22 +980,18 @@ public refreshTreeRoot(): void {
                 return w_rootNodes;
             }
         } else {
-            // console.error('Commander not found in commanderList');
-            return [];
+            return []; // Attempted to access unexistant frame
         }
     }
 }
 
 </t>
 <t tx="felix.20201209011931.6">public getParent(element: Position): vscode.ProviderResult&lt;Position&gt; {
-    // console.log('called get parent on', element.h);
     if (element) {
         const p_parent = element.parent();
         if (p_parent.v) {
-            // console.log('had parent');
             return p_parent;
         } else {
-            // console.log('was root');
             return undefined;
         }
     }
@@ -2297,8 +2283,8 @@ export class LeoStatusBar {
         this._leoStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
         this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
 
-        // this._leoStatusBarItem.command = Constants.COMMANDS.SWITCH_FILE;
-        this._leoStatusBarItem.command = "leointeg.test"; // just call test function for now to help debugging
+        this._leoStatusBarItem.command = Constants.COMMANDS.SWITCH_FILE;
+        // this._leoStatusBarItem.command = "leojs.test"; // just call test function for now to help debugging
         this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR;
         this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_ON;
         _context.subscriptions.push(this._leoStatusBarItem);
@@ -2784,8 +2770,7 @@ public showOutline(p_focusOutline?: boolean): void {
     }).then(
         () =&gt; { }, // Ok
         (p_error) =&gt; {
-            // console.error('ERROR showOutline could not reveal: tree was refreshed!', 'Error:', p_error);
-            console.log('ERROR showOutline could not reveal: tree was refreshed!');
+            console.log('showOutline could not reveal');
         }
     );
 }
@@ -2814,8 +2799,7 @@ public setDocumentSelection(p_frame: LeoFrame): void {
             this._lastLeoDocuments.reveal(p_frame, { select: true, focus: false }).then(
                 () =&gt; { }, // Ok
                 (p_error) =&gt; {
-                    // console.error('ERROR setDocumentSelection could not reveal: tree was refreshed!', 'Error:', p_error);
-                    console.log('ERROR setDocumentSelection could not reveal: tree was refreshed!');
+                    console.log('setDocumentSelection could not reveal');
                 }
             );
         }
@@ -2843,8 +2827,7 @@ private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Positi
         this._lastTreeView.reveal(p_event.element).then(
             () =&gt; { }, // Ok
             (p_error) =&gt; {
-                // console.error('ERROR _onChangeCollapsedState could not reveal: tree was refreshed!', 'Error:', p_error);
-                console.log('ERROR _onChangeCollapsedState could not reveal: tree was refreshed!');
+                console.log('_onChangeCollapsedState could not reveal');
             }
         );
         this.selectTreeNode(p_event.element, true);
@@ -2868,6 +2851,16 @@ private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEve
     if (p_event.visible) {
         this._lastTreeView = p_explorerView ? this._leoTreeExView : this._leoTreeView;
         this._refreshOutline(true, RevealType.RevealSelect);
+
+        // * This gies error Data tree node not found
+        // const c = g.app.windowList[this.frameIndex].c;
+        // let q_reveal: Thenable&lt;void&gt; | undefined;
+        // q_reveal = this._lastTreeView.reveal(c.p).then(
+        //     () =&gt; { }, // Ok
+        //     (p_error) =&gt; {
+        //         console.log('_onTreeViewVisibilityChanged could not reveal');
+        //     }
+        // );
     }
 }
 
@@ -2920,8 +2913,7 @@ public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable&lt;unknown&
             q_reveal = this._lastTreeView.reveal(p_node).then(
                 () =&gt; { }, // Ok
                 (p_error) =&gt; {
-                    // console.error('ERROR selectTreeNode could not reveal: tree was refreshed!', 'Error:', p_error);
-                    console.log('ERROR selectTreeNode could not reveal: tree was refreshed!');
+                    console.log('selectTreeNode could not reveal');
                 }
             );
         }
@@ -6164,8 +6156,7 @@ private _setupNoOpenedLeoDocument(): void {
  * @param p_openFileResult Returned info about currently opened and editing document
  * @return a promise that resolves to an opened body pane text editor
  */
-private _setupOpenedLeoDocument(p_openFileResult?: any): Promise&lt;unknown&gt; {
-    console.log('TODO: _setupOpenedLeoDocument with parameter : ', p_openFileResult);
+private _setupOpenedLeoDocument(): Promise&lt;unknown&gt; {
 
     // const w_selectedLeoNode = this.apToLeoNode(p_openFileResult.node, false); // Just to get gnx for the body's fist appearance
     this.leoStates.leoOpenedFileName = g.app.windowList[this.frameIndex].c.fileName();
@@ -6261,8 +6252,7 @@ public gotSelectedNode(p_node: Position): void {
                     this.lastCommandRefreshTimer = undefined;
                 },
                 (p_error) =&gt; {
-                    // console.error('ERROR gotSelectedNode could not reveal: tree was refreshed!', 'Error:', p_error);
-                    console.log('gotSelectedNode could not reveal: tree was refreshed!');
+                    console.log('gotSelectedNode could not reveal');
                 }
             );
             // Done, so reset reveal type 'flag'
@@ -7626,8 +7616,7 @@ public setUndoSelection(p_undoNode: LeoUndoNode): void {
             this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
                 () =&gt; { }, // Ok - do nothing
                 (p_error) =&gt; {
-                    // console.error('ERROR setUndoSelection could not reveal: tree was refreshed!', 'Error:', p_error);
-                    console.log('ERROR setUndoSelection could not reveal: tree was refreshed!');
+                    console.log('setUndoSelection could not reveal');
                 }
             );
         }
@@ -8448,14 +8437,20 @@ public finishStartup(): void {
 
     this.leoStates.leoReady = true;
 
-    setTimeout(() =&gt; {
-        // this.showOutline();
+    if (!this.leoStates.fileOpenedReady &amp;&amp; g.app.windowList.length) {
+        this._setupOpenedLeoDocument();
+        this.leoStates.qLastContextChange.then(() =&gt; {
+            this.getStates();
+        });
+    }
 
-        this._setupRefresh(true,
-            { tree: true, body: true, documents: true, buttons: true, states: true }
-        );
-        this.launchRefresh();
-    }, 10);
+    // * Old startup method
+    // setTimeout(() =&gt; {
+    //     this._setupRefresh(true,
+    //         { tree: true, body: true, documents: true, buttons: true, states: true }
+    //     );
+    //     this.launchRefresh();
+    // }, 10);
 }
 
 </t>

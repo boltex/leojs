@@ -4,9 +4,6 @@ import { Icon } from './types';
 import { LeoUI } from './leoUI';
 import * as g from './core/leoGlobals';
 import { Position } from './core/leoNodes';
-import { Commands } from './core/leoCommands';
-
-
 
 export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
     private _onDidChangeTreeData: vscode.EventEmitter<Position | undefined> = new vscode.EventEmitter<Position | undefined>();
@@ -74,16 +71,9 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
     }
 
     public getChildren(element?: Position): Position[] {
-        // if(element){
-        //     console.log('called get children on', element.h);
-        // }else{
-        //     console.log('called get children on root');
-        // }
         if (element) {
-            // NORMAL TREEVIEW CHILDREN
             return [...element.children()];
         } else {
-            // No elements : FIRST CHILDREN OF VSCODE'S TREEVIEW
             if (g.app.windowList[this._leoUI.frameIndex]) {
                 // Currently Selected Document's Commander
                 const w_c = g.app.windowList[this._leoUI.frameIndex].c;
@@ -102,21 +92,17 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
                     return w_rootNodes;
                 }
             } else {
-                // console.error('Commander not found in commanderList');
-                return [];
+                return []; // Attempted to access unexistant frame
             }
         }
     }
 
     public getParent(element: Position): vscode.ProviderResult<Position> {
-        // console.log('called get parent on', element.h);
         if (element) {
             const p_parent = element.parent();
             if (p_parent.v) {
-                // console.log('had parent');
                 return p_parent;
             } else {
-                // console.log('was root');
                 return undefined;
             }
         }

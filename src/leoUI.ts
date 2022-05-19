@@ -293,14 +293,20 @@ export class LeoUI {
 
         this.leoStates.leoReady = true;
 
-        setTimeout(() => {
-            // this.showOutline();
+        if (!this.leoStates.fileOpenedReady && g.app.windowList.length) {
+            this._setupOpenedLeoDocument();
+            this.leoStates.qLastContextChange.then(() => {
+                this.getStates();
+            });
+        }
 
-            this._setupRefresh(true,
-                { tree: true, body: true, documents: true, buttons: true, states: true }
-            );
-            this.launchRefresh();
-        }, 10);
+        // * Old startup method
+        // setTimeout(() => {
+        //     this._setupRefresh(true,
+        //         { tree: true, body: true, documents: true, buttons: true, states: true }
+        //     );
+        //     this.launchRefresh();
+        // }, 10);
     }
 
     /** 
@@ -380,8 +386,7 @@ export class LeoUI {
      * @param p_openFileResult Returned info about currently opened and editing document
      * @return a promise that resolves to an opened body pane text editor
      */
-    private _setupOpenedLeoDocument(p_openFileResult?: any): Promise<unknown> {
-        console.log('TODO: _setupOpenedLeoDocument with parameter : ', p_openFileResult);
+    private _setupOpenedLeoDocument(): Promise<unknown> {
 
         // const w_selectedLeoNode = this.apToLeoNode(p_openFileResult.node, false); // Just to get gnx for the body's fist appearance
         this.leoStates.leoOpenedFileName = g.app.windowList[this.frameIndex].c.fileName();
@@ -435,8 +440,7 @@ export class LeoUI {
         }).then(
             () => { }, // Ok
             (p_error) => {
-                // console.error('ERROR showOutline could not reveal: tree was refreshed!', 'Error:', p_error);
-                console.log('ERROR showOutline could not reveal: tree was refreshed!');
+                console.log('showOutline could not reveal');
             }
         );
     }
@@ -485,8 +489,7 @@ export class LeoUI {
                         this.lastCommandRefreshTimer = undefined;
                     },
                     (p_error) => {
-                        // console.error('ERROR gotSelectedNode could not reveal: tree was refreshed!', 'Error:', p_error);
-                        console.log('gotSelectedNode could not reveal: tree was refreshed!');
+                        console.log('gotSelectedNode could not reveal');
                     }
                 );
                 // Done, so reset reveal type 'flag'
@@ -671,8 +674,7 @@ export class LeoUI {
                 this._lastLeoDocuments.reveal(p_frame, { select: true, focus: false }).then(
                     () => { }, // Ok
                     (p_error) => {
-                        // console.error('ERROR setDocumentSelection could not reveal: tree was refreshed!', 'Error:', p_error);
-                        console.log('ERROR setDocumentSelection could not reveal: tree was refreshed!');
+                        console.log('setDocumentSelection could not reveal');
                     }
                 );
             }
@@ -696,8 +698,7 @@ export class LeoUI {
                 this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
                     () => { }, // Ok - do nothing
                     (p_error) => {
-                        // console.error('ERROR setUndoSelection could not reveal: tree was refreshed!', 'Error:', p_error);
-                        console.log('ERROR setUndoSelection could not reveal: tree was refreshed!');
+                        console.log('setUndoSelection could not reveal');
                     }
                 );
             }
@@ -742,8 +743,7 @@ export class LeoUI {
             this._lastTreeView.reveal(p_event.element).then(
                 () => { }, // Ok
                 (p_error) => {
-                    // console.error('ERROR _onChangeCollapsedState could not reveal: tree was refreshed!', 'Error:', p_error);
-                    console.log('ERROR _onChangeCollapsedState could not reveal: tree was refreshed!');
+                    console.log('_onChangeCollapsedState could not reveal');
                 }
             );
             this.selectTreeNode(p_event.element, true);
@@ -766,6 +766,16 @@ export class LeoUI {
         if (p_event.visible) {
             this._lastTreeView = p_explorerView ? this._leoTreeExView : this._leoTreeView;
             this._refreshOutline(true, RevealType.RevealSelect);
+
+            // * This gies error Data tree node not found
+            // const c = g.app.windowList[this.frameIndex].c;
+            // let q_reveal: Thenable<void> | undefined;
+            // q_reveal = this._lastTreeView.reveal(c.p).then(
+            //     () => { }, // Ok
+            //     (p_error) => {
+            //         console.log('_onTreeViewVisibilityChanged could not reveal');
+            //     }
+            // );
         }
     }
 
@@ -962,8 +972,7 @@ export class LeoUI {
                 q_reveal = this._lastTreeView.reveal(p_node).then(
                     () => { }, // Ok
                     (p_error) => {
-                        // console.error('ERROR selectTreeNode could not reveal: tree was refreshed!', 'Error:', p_error);
-                        console.log('ERROR selectTreeNode could not reveal: tree was refreshed!');
+                        console.log('selectTreeNode could not reveal');
                     }
                 );
             }
