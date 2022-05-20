@@ -242,11 +242,9 @@
 <v t="felix.20211122213023.1"><vh>getTreeItem</vh></v>
 <v t="felix.20211122214230.1"><vh>getChildren</vh></v>
 <v t="felix.20211122213037.1"><vh>getParent</vh></v>
+<v t="felix.20220520011951.1"><vh>resolveTreeItem</vh></v>
 </v>
-<v t="felix.20211122212823.1"><vh>class LeoUndoNode</vh>
-<v t="felix.20211122214009.1"><vh>id</vh></v>
-<v t="felix.20211122214039.1"><vh>tooltip</vh></v>
-</v>
+<v t="felix.20211122212823.1"><vh>class LeoUndoNode</vh></v>
 </v>
 <v t="felix.20201214151447.1"><vh>@clean src/leoStates.ts</vh>
 <v t="felix.20201214151447.2"><vh>class LeoStates</vh>
@@ -702,7 +700,7 @@ export function getFileFromPath(p_path: string): string {
  * @returns True if it would change the icon with actual body content, false otherwise
  */
 export function isIconChangedByEdit(p_node: LeoOutlineNode, p_newHasBody: boolean): boolean {
-    if (!p_node.dirty || (p_node.hasBody === !p_newHasBody)) {
+    if (!p_node.position.isDirty() || (p_node.position.v.hasBody() !== p_newHasBody)) {
         return true;
     }
     return false;
@@ -7485,7 +7483,6 @@ private _tryApplyNodeToBody(
 import { LeoUI } from './leoUI';
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
-import { Bead } from "./core/leoUndo";
 
 @language typescript
 @tabwidth -4
@@ -7518,16 +7515,14 @@ export class LeoUndosProvider implements vscode.TreeDataProvider&lt;LeoUndoNode&
 export class LeoUndoNode extends vscode.TreeItem {
 
     // Context string is checked in package.json with 'when' clauses
-    public contextValue: string;
+    public contextValue: string = "leojsUndoNode";
 
     constructor(
-        bead: Bead,
+        public label: string,
         public description: string,
-        private _beadId: number,
-
+        public id: string,
     ) {
-        super(bead.undoType || "unknown");
-        this.contextValue = "leojsUndoNode";
+        super(label);
     }
 
     @others
@@ -7553,19 +7548,6 @@ public refreshTreeRoot(): void {
 }
 
 </t>
-<t tx="felix.20211122214009.1">// @ts-ignore
-public get id(): string {
-    // Add prefix and suffix salt to numeric index to prevent accidental duplicates
-    return "b" + this._beadId;
-}
-
-</t>
-<t tx="felix.20211122214039.1">// @ts-ignore
-public get tooltip(): string {
-    return "TODO leojs Undo Tooltip";
-}
-
-</t>
 <t tx="felix.20211122214230.1">public getChildren(element?: LeoUndoNode): LeoUndoNode[] {
     const w_children: LeoUndoNode[] = [];
     // if called with element, or not ready, give back empty array as there won't be any children
@@ -7573,26 +7555,35 @@ public get tooltip(): string {
         const c = g.app.windowList[this._leoUI.frameIndex].c;
         const undoer = c.undoer;
 
-        let i: number = 0;
-        undoer.beads.forEach(p_bead =&gt; {
-            let w_description: string = "";
-            let w_undoFlag: boolean = false;
-            if (i === undoer.bead) {
-                w_description = "Undo";
-                w_undoFlag = true;
-            }
-            if (i === undoer.bead + 1) {
-                w_description = "Redo";
-            }
-            const w_node = new LeoUndoNode(p_bead, w_description, this._beadId++);
-            w_children.push(w_node);
-            if (w_undoFlag) {
-                this._leoUI.setUndoSelection(w_node);
-            }
-            i++;
-        });
-        if (!undoer.beads.length) {
-            const w_node = new LeoUndoNode({ undoType: "Unchanged" }, "", this._beadId++);
+        if (undoer.beads.length) {
+            let i: number = 0;
+            undoer.beads.forEach(p_bead =&gt; {
+                let w_description: string = "";
+                let w_undoFlag: boolean = false;
+                if (i === undoer.bead) {
+                    w_description = "Undo";
+                    w_undoFlag = true;
+                }
+                if (i === undoer.bead + 1) {
+                    w_description = "Redo";
+                }
+                const w_node = new LeoUndoNode(
+                    p_bead.undoType || "unknown",
+                    w_description,
+                    (this._beadId++).toString()
+                );
+                w_children.push(w_node);
+                if (w_undoFlag) {
+                    this._leoUI.setUndoSelection(w_node);
+                }
+                i++;
+            });
+        } else {
+            const w_node = new LeoUndoNode(
+                "Unchanged",
+                "",
+                (this._beadId++).toString()
+            );
             w_children.push(w_node);
         }
 
@@ -10031,6 +10022,11 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
     return item;
 }
 
+</t>
+<t tx="felix.20220520011951.1">public resolveTreeItem(item: LeoUndoNode, element: LeoUndoNode, token: vscode.CancellationToken): vscode.ProviderResult&lt;LeoUndoNode&gt; {
+    item.tooltip = "TODO leojs Undo Tooltip";
+    return item;
+}
 </t>
 </tnodes>
 </leo_file>

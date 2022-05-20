@@ -289,7 +289,7 @@ export function isAlphaNumeric(str: string): boolean {
  * @returns True if it would change the icon with actual body content, false otherwise
  */
 export function isIconChangedByEdit(p_node: LeoOutlineNode, p_newHasBody: boolean): boolean {
-    if (!p_node.dirty || (p_node.hasBody === !p_newHasBody)) {
+    if (!p_node.position.isDirty() || (p_node.position.v.hasBody() !== p_newHasBody)) {
         return true;
     }
     return false;
