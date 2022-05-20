@@ -10,7 +10,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
 
     readonly onDidChangeTreeData: vscode.Event<Position | undefined> = this._onDidChangeTreeData.event;
 
-    public treeId: number = 0; // Starting salt for tree node murmurhash generated Ids
+    public treeId: number = 0; // Starting salt for generated tree node Ids
 
     constructor(
         private _icons: Icon[],
@@ -136,7 +136,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
     public resolveTreeItem(item: LeoOutlineNode, element: Position, token: vscode.CancellationToken): vscode.ProviderResult<LeoOutlineNode> {
         if (Object.keys(element.v.u).length) {
             item.tooltip = item.label + "\n" +
-                JSON.stringify(element.v.u, undefined, 2);
+                JSON.stringify(element.v.u, undefined, 2); // user attributes as JSON text tooltip
         } else {
             item.tooltip = item.label; // * Whole headline as tooltip
         }
@@ -160,6 +160,7 @@ export class LeoOutlineNode extends vscode.TreeItem {
         this.command = {
             command: Constants.COMMANDS.SELECT_NODE,
             title: '',
+            // using 'this' as LeoOutlineNode instead of position, to match 'openToTheSide' paramter
             arguments: [this]
         };
     }
