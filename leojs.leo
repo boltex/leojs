@@ -81,15 +81,9 @@
 <v t="felix.20201209011931.4"><vh>getTreeItem</vh></v>
 <v t="felix.20201209011931.5"><vh>getChildren</vh></v>
 <v t="felix.20201209011931.6"><vh>getParent</vh></v>
+<v t="felix.20220519232002.1"><vh>resolveTreeItem</vh></v>
 </v>
-<v t="felix.20211201001847.1"><vh>class LeoNode</vh>
-<v t="felix.20211201001847.2"><vh>copyProperties</vh></v>
-<v t="felix.20211201001847.4"><vh>_getNodeContextValue</vh></v>
-<v t="felix.20211201001847.5"><vh>get_iconPath</vh></v>
-<v t="felix.20211201001847.6"><vh>get_id</vh></v>
-<v t="felix.20211201001847.7"><vh>get_description</vh></v>
-<v t="felix.20211201001847.8"><vh>get_tooltip</vh></v>
-</v>
+<v t="felix.20211201001847.1"><vh>class LeoNode</vh></v>
 </v>
 <v t="felix.20201214194144.1"><vh>@clean src/leoUI.ts</vh>
 <v t="felix.20201214195752.1"><vh>class LeoUI</vh>
@@ -931,23 +925,44 @@ public refreshTreeRoot(): void {
 
 </t>
 <t tx="felix.20201209011931.4">public getTreeItem(element: Position): Thenable&lt;LeoOutlineNode&gt; | LeoOutlineNode {
+
     let w_collapse: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.None;
     if (element.hasChildren()) {
         w_collapse = element.isExpanded() ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
     }
+    let w_contextValue = Constants.CONTEXT_FLAGS.NODE_UNMARKED;
+    if (element.isMarked()) {
+        w_contextValue = Constants.CONTEXT_FLAGS.NODE_MARKED;
+    }
+    // then append 'leoNodeAtFile' to existing if needed
+    if (element.isAnyAtFileNode()) {
+        w_contextValue += Constants.CONTEXT_FLAGS.NODE_ATFILE;
+    }
+    // then append 'leoNodeCloned' to existing if needed
+    if (element.isCloned()) {
+        w_contextValue += Constants.CONTEXT_FLAGS.NODE_CLONED;
+    }
+    // and finally, check for 'root' too
+    if (element._isRoot) {
+        w_contextValue += Constants.CONTEXT_FLAGS.NODE_ROOT;
+    } else {
+        w_contextValue += Constants.CONTEXT_FLAGS.NODE_NOT_ROOT;
+    }
+    const w_icon: number =
+        (+element.isDirty() &lt;&lt; 3) |
+        (+element.isCloned() &lt;&lt; 2) |
+        (+element.isMarked() &lt;&lt; 1) |
+        +element.v.hasBody();
+    const w_u = Object.keys(element.v.u).length ? element.v.u : false;
+
     const w_leoNode = new LeoOutlineNode(
         element.h,
-        w_collapse, // element.hasChildren() ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None,
-        element, // ap
-        element.isCloned(), // cloned
-        element.isDirty(), // dirty
-        element.isMarked(), // marked
-        element.isAnyAtFileNode(), // atFile
-        element.v.hasBody(),
-        Object.keys(element.v.u).length ? element.v.u : false, // 'u' - user defined data
-        this._icons,
+        w_collapse,
+        element, // Position
+        w_u ? "\u{1F4CE} (" + Object.keys(w_u).length + ")" : "",
+        this._icons[w_icon],
         this.buildId(element, w_collapse),
-        element._isRoot
+        w_contextValue
     );
     // Check if its the selected node and call signal it to the UI
     if (element.__eq__(g.app.windowList[this._leoUI.frameIndex].c.p)) {
@@ -6290,12 +6305,15 @@ public buildId(p_position: Position, p_collapsed: number): string {
     let w_stringId = this.treeId.toString() +
         p_position.v.gnx + p_position.childIndex().toString() +
         p_position.stack.map(p_stackEntry =&gt; p_stackEntry[0].gnx + p_stackEntry[1].toString()).join("");
-    // p_collapsed.toString(); // Added Uniqueness:  VSCode's collapsible state linked to id
+    // NOT NEEDED -&gt; p_collapsed.toString(); // Added Uniqueness: VSCode's collapsible state in id
     return w_stringId;
 }
 
 </t>
-<t tx="felix.20211003233639.1">public incTreeId(): void {
+<t tx="felix.20211003233639.1">/**
+ * * Force uniqueness of ids generated for nodes in the  next tree refresh
+ */
+public incTreeId(): void {
     this.treeId++;
 }
 
@@ -7626,24 +7644,16 @@ public setUndoSelection(p_undoNode: LeoUndoNode): void {
 </t>
 <t tx="felix.20211201001847.1">export class LeoOutlineNode extends vscode.TreeItem {
 
-    public contextValue: string; // * Context string is checked in package.json with 'when' clauses
-
     constructor(
         public label: string, // Node headline
-        public collapsibleState: vscode.TreeItemCollapsibleState, // Computed in receiver/creator
+        public collapsibleState: vscode.TreeItemCollapsibleState,
         public position: Position, // Pointer/reference for leo's node position
-        public cloned: boolean,
-        public dirty: boolean,
-        public marked: boolean,
-        public atFile: boolean,
-        public hasBody: boolean,
-        public u: any,
-        private _icons: Icon[], // pointer to global array of node icons
-        private _id: string,
-        public isRoot: boolean // For contextual menu on each node (not the global selected node flag!)
+        public description: string,
+        public iconPath: Icon,
+        public id: string,
+        public contextValue: string // For contextual menu on each node (not the global 'selected node' flag!)
     ) {
         super(label, collapsibleState);
-        this.contextValue = this._getNodeContextValue();
         this.command = {
             command: Constants.COMMANDS.SELECT_NODE,
             title: '',
@@ -7651,111 +7661,8 @@ public setUndoSelection(p_undoNode: LeoUndoNode): void {
         };
     }
 
-    // * TO HELP DEBUG
-    // get description(): string {
-    //     // * some smaller grayed-out text accompanying the main label
-    //     const w_ap: ArchivedPosition = JSON.parse(this.ap);
-    //     return "child:" + w_ap.childIndex + " lvl:" + w_ap.level + " gnx:" + w_ap.gnx;
-    // }
-
-    // get description(): string {
-    //     // * some smaller grayed-out text accompanying the main label
-    //     return "id:" + this.id;
-    // }
-
-    /**
-     * * Sets this node properties (dirty, marked, etc.) by copying from a given node.
-     * * This is needed by the outline provider when refreshing a single node.
-     * @param p_node Node to copy properties from.
-     * @returns Node itself with the new properties applied
-     */
     @others
 }
-</t>
-<t tx="felix.20211201001847.2">public copyProperties(p_node: LeoOutlineNode): LeoOutlineNode {
-    this.label = p_node.label;
-    this.collapsibleState = p_node.collapsibleState;
-    this.position = p_node.position;
-    this.cloned = p_node.cloned;
-    this.dirty = p_node.dirty;
-    this.marked = p_node.marked;
-    this.atFile = p_node.atFile;
-    this.hasBody = p_node.hasBody;
-    this.isRoot = p_node.isRoot;
-    this.contextValue = this._getNodeContextValue();
-    return this;
-}
-
-</t>
-<t tx="felix.20211201001847.4">private _getNodeContextValue(): string {
-    // Start it with 'leoNodeMarked' or 'leoNodeUnmarked'
-    let w_contextValue = Constants.CONTEXT_FLAGS.NODE_UNMARKED;
-    if (this.marked) {
-        w_contextValue = Constants.CONTEXT_FLAGS.NODE_MARKED;
-    }
-    // then append 'leoNodeAtFile' to existing if needed
-    if (this.atFile) {
-        w_contextValue += Constants.CONTEXT_FLAGS.NODE_ATFILE;
-    }
-    // then append 'leoNodeCloned' to existing if needed
-    if (this.cloned) {
-        w_contextValue += Constants.CONTEXT_FLAGS.NODE_CLONED;
-    }
-    // and finally, check for 'root' too
-    if (this.isRoot) {
-        w_contextValue += Constants.CONTEXT_FLAGS.NODE_ROOT;
-    } else {
-        w_contextValue += Constants.CONTEXT_FLAGS.NODE_NOT_ROOT;
-    }
-    return w_contextValue;
-}
-
-</t>
-<t tx="felix.20211201001847.5">// @ts-ignore
-public get iconPath(): Icon {
-    // From Leo's leoNodes.py computeIcon function
-    // 1=has Body, 2=marked, 4=cloned, 8=dirty
-    let w_icon: number =
-        (+this.dirty &lt;&lt; 3) |
-        (+this.cloned &lt;&lt; 2) |
-        (+this.marked &lt;&lt; 1) |
-        +this.hasBody;
-    return this._icons[w_icon];
-}
-
-</t>
-<t tx="felix.20211201001847.6">// Optional id for the tree item that has to be unique across tree.
-// The id is used to preserve the selection and expansion state of the tree item.
-// If not provided, an id is generated using the tree item's label.
-// Note that when labels change, ids will change and that selection and expansion state cannot be kept stable anymore.
-// @ts-ignore
-public get id(): string { return this._id; }
-
-</t>
-<t tx="felix.20211201001847.7">// @ts-ignore
-public get description(): string {
-    // * some smaller grayed-out text accompanying the main label
-    if (this.u) {
-        return "\u{1F4CE} (" + Object.keys(this.u).length + ")";
-    } else {
-        // return "id:" + this.id; // ! debug test
-        // return "gnx:" + this.gnx; // ! debug test
-        return ""; // Falsy will not be shown
-    }
-}
-
-</t>
-<t tx="felix.20211201001847.8">// @ts-ignore
-public get tooltip(): string {
-    if (this.u) {
-        //  "\ntotal keys is :" + Object.keys(this.u).length
-        return this.label + "\n" +
-            JSON.stringify(this.u, undefined, 2);
-    } else {
-        return this.label; // * Whole headline as tooltip
-    }
-}
-
 </t>
 <t tx="felix.20211204144931.1"></t>
 <t tx="felix.20211204144931.2">/**
@@ -10112,6 +10019,17 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
         });
     */
 }
+</t>
+<t tx="felix.20220519232002.1">public resolveTreeItem(item: LeoOutlineNode, element: Position, token: vscode.CancellationToken): vscode.ProviderResult&lt;LeoOutlineNode&gt; {
+    if (Object.keys(element.v.u).length) {
+        item.tooltip = item.label + "\n" +
+            JSON.stringify(element.v.u, undefined, 2);
+    } else {
+        item.tooltip = item.label; // * Whole headline as tooltip
+    }
+    return item;
+}
+
 </t>
 </tnodes>
 </leo_file>
