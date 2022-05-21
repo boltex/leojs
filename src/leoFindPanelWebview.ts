@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { Constants } from './constants';
 import { LeoUI } from './leoUI';
-
 import * as utils from './utils';
 
 /**
@@ -32,57 +31,59 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
 
         webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
-        webviewView.webview.onDidReceiveMessage((data) => {
-            switch (data.type) {
-                case 'leoNavEnter': {
-                    this._leoUI.navEnter();
-                    break;
+        this._context.subscriptions.push(
+            webviewView.webview.onDidReceiveMessage((data) => {
+                switch (data.type) {
+                    case 'leoNavEnter': {
+                        this._leoUI.navEnter();
+                        break;
+                    }
+                    case 'leoNavTextChange': {
+                        this._leoUI.navTextChange();
+                        break;
+                    }
+                    case 'gotFocus': {
+                        // utils.setContext("sideBarFocus", true);
+                        // utils.setContext("focusedView", "leoFindPanel");
+                        utils.setContext(Constants.CONTEXT_FLAGS.FOCUS_FIND, true);
+                        break;
+                    }
+                    case 'lostFocus': {
+                        // utils.setContext("sideBarFocus", false);
+                        // utils.setContext("focusedView", "");
+                        utils.setContext(Constants.CONTEXT_FLAGS.FOCUS_FIND, false);
+                        break;
+                    }
+                    case 'leoFindNext': {
+                        vscode.commands.executeCommand(Constants.COMMANDS.FIND_NEXT);
+                        break;
+                    }
+                    case 'leoFindPrevious': {
+                        vscode.commands.executeCommand(Constants.COMMANDS.FIND_PREVIOUS);
+                        break;
+                    }
+                    case 'searchConfig': {
+                        this._leoUI.saveSearchSettings(data.value);
+                        break;
+                    }
+                    case 'replace': {
+                        this._leoUI.replace(true, false);
+                        break;
+                    }
+                    case 'replaceThenFind': {
+                        this._leoUI.replace(true, true);
+                        break;
+                    }
+                    case 'refreshSearchConfig': {
+                        // Leave a cycle before getting settings
+                        setTimeout(() => {
+                            this._leoUI.loadSearchSettings();
+                        }, 0);
+                        break;
+                    }
                 }
-                case 'leoNavTextChange': {
-                    this._leoUI.navTextChange();
-                    break;
-                }
-                case 'gotFocus': {
-                    // utils.setContext("sideBarFocus", true);
-                    // utils.setContext("focusedView", "leoFindPanel");
-                    utils.setContext(Constants.CONTEXT_FLAGS.FOCUS_FIND, true);
-                    break;
-                }
-                case 'lostFocus': {
-                    // utils.setContext("sideBarFocus", false);
-                    // utils.setContext("focusedView", "");
-                    utils.setContext(Constants.CONTEXT_FLAGS.FOCUS_FIND, false);
-                    break;
-                }
-                case 'leoFindNext': {
-                    vscode.commands.executeCommand(Constants.COMMANDS.FIND_NEXT);
-                    break;
-                }
-                case 'leoFindPrevious': {
-                    vscode.commands.executeCommand(Constants.COMMANDS.FIND_PREVIOUS);
-                    break;
-                }
-                case 'searchConfig': {
-                    this._leoUI.saveSearchSettings(data.value);
-                    break;
-                }
-                case 'replace': {
-                    this._leoUI.replace(true, false);
-                    break;
-                }
-                case 'replaceThenFind': {
-                    this._leoUI.replace(true, true);
-                    break;
-                }
-                case 'refreshSearchConfig': {
-                    // Leave a cycle before getting settings
-                    setTimeout(() => {
-                        this._leoUI.loadSearchSettings();
-                    }, 0);
-                    break;
-                }
-            }
-        });
+            })
+        );
         this._leoUI.setFindPanel(this._view);
     }
 

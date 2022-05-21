@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { Constants } from './constants';
 import * as utils from "./utils";
 import * as g from './core/leoGlobals';
 import { LeoApp } from './core/leoApp';
@@ -11,6 +12,16 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 export function activate(p_context: vscode.ExtensionContext) {
 
     const w_start = process.hrtime(); // For calculating total startup time duration
+
+    // * Close remaining leojs Bodies restored by vscode from last session.
+    // TODO : USE TABGROUPS
+    // vscode.window.visibleTextEditors.forEach(p_textEditor => {
+    //     if (p_textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+    //         if (p_textEditor.hide) {
+    //             p_textEditor.hide();
+    //         }
+    //     }
+    // });
 
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();

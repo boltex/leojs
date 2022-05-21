@@ -1072,18 +1072,12 @@ export class LeoApp {
                     await w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, this.leoID, true);
                 }
             }
-            if (!this.leoID) {
-                throw new Error("Invalid Leo ID");
-            }
-            return this.leoID;
-
-        } else {
-            if (!this.leoID) {
-                throw new Error("Could not get Leo ID");
-            }
-            return this.leoID;
         }
-
+        if (!this.leoID) {
+            // throw new Error("Could not get Leo ID");
+            this.leoID = "None";
+        }
+        return this.leoID;
     }
 
     //@+node:felix.20220417215228.2: *5* app.cleanLeoID

@@ -135,6 +135,12 @@ export class LeoUI {
 
         // * Get configuration settings
         this.config = new Config(_context, this);
+
+        // * Set required vscode configs if needed
+        this.config.checkEnablePreview(true);
+        this.config.checkCloseEmptyGroups(true);
+        this.config.checkCloseOnFileDelete(true);
+
         // * also check workbench.editor.enablePreview
         this.config.buildFromSavedSettings();
         this._bodyEnablePreview = !!vscode.workspace
@@ -158,13 +164,30 @@ export class LeoUI {
         // * Create a single data provider for both outline trees, Leo view and Explorer view
         this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);
         this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
-        this._leoTreeView.onDidExpandElement((p_event => this._onChangeCollapsedState(p_event, true, this._leoTreeView)));
-        this._leoTreeView.onDidCollapseElement((p_event => this._onChangeCollapsedState(p_event, false, this._leoTreeView)));
-        this._leoTreeView.onDidChangeVisibility((p_event => this._onTreeViewVisibilityChanged(p_event, false))); // * Trigger 'show tree in Leo's view'
+        this._context.subscriptions.push(this._leoTreeView);
+        this._context.subscriptions.push(
+            this._leoTreeView.onDidExpandElement((p_event => this._onChangeCollapsedState(p_event, true, this._leoTreeView)))
+        );
+        this._context.subscriptions.push(
+            this._leoTreeView.onDidCollapseElement((p_event => this._onChangeCollapsedState(p_event, false, this._leoTreeView)))
+        );
+        this._context.subscriptions.push(
+            // * Trigger 'show tree in Leo's view'
+            this._leoTreeView.onDidChangeVisibility((p_event => this._onTreeViewVisibilityChanged(p_event, false)))
+        );
         this._leoTreeExView = vscode.window.createTreeView(Constants.TREEVIEW_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
-        this._leoTreeExView.onDidExpandElement((p_event => this._onChangeCollapsedState(p_event, true, this._leoTreeExView)));
-        this._leoTreeExView.onDidCollapseElement((p_event => this._onChangeCollapsedState(p_event, false, this._leoTreeExView)));
-        this._leoTreeExView.onDidChangeVisibility((p_event => this._onTreeViewVisibilityChanged(p_event, true))); // * Trigger 'show tree in explorer view'
+        this._context.subscriptions.push(this._leoTreeExView);
+
+        this._context.subscriptions.push(
+            this._leoTreeExView.onDidExpandElement((p_event => this._onChangeCollapsedState(p_event, true, this._leoTreeExView)))
+        );
+        this._context.subscriptions.push(
+            this._leoTreeExView.onDidCollapseElement((p_event => this._onChangeCollapsedState(p_event, false, this._leoTreeExView)))
+        );
+        this._context.subscriptions.push(
+            // * Trigger 'show tree in explorer view'
+            this._leoTreeExView.onDidChangeVisibility((p_event => this._onTreeViewVisibilityChanged(p_event, true)))
+        );
         if (this.config.treeInExplorer) {
             this._lastTreeView = this._leoTreeExView;
         } else {
@@ -174,29 +197,48 @@ export class LeoUI {
         // * Create Leo Opened Documents Treeview Providers and tree views
         this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);
         this._leoDocuments = vscode.window.createTreeView(Constants.DOCUMENTS_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
-        this._leoDocuments.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, false)));
+        this._context.subscriptions.push(this._leoDocuments);
+        this._context.subscriptions.push(
+            this._leoDocuments.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, false)))
+        );
         this._leoDocumentsExplorer = vscode.window.createTreeView(Constants.DOCUMENTS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
-        this._leoDocumentsExplorer.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, true)));
+        this._context.subscriptions.push(this._leoDocumentsExplorer);
+        this._context.subscriptions.push(
+            this._leoDocumentsExplorer.onDidChangeVisibility((p_event => this._onDocTreeViewVisibilityChanged(p_event, true)))
+        );
         this._lastLeoDocuments = this._leoDocumentsExplorer;
 
         // * Create '@buttons' Treeview Providers and tree views
         this._leoButtonsProvider = new LeoButtonsProvider(this.leoStates, this.buttonIcons);
         this._leoButtons = vscode.window.createTreeView(Constants.BUTTONS_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
-        this._leoButtons.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, false)));
+        this._context.subscriptions.push(this._leoButtons);
+        this._context.subscriptions.push(
+            this._leoButtons.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, false)))
+        );
         this._leoButtonsExplorer = vscode.window.createTreeView(Constants.BUTTONS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
-        this._leoButtonsExplorer.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, true)));
+        this._context.subscriptions.push(this._leoButtonsExplorer);
+        this._context.subscriptions.push(
+            this._leoButtonsExplorer.onDidChangeVisibility((p_event => this._onButtonsTreeViewVisibilityChanged(p_event, true)))
+        );
         this._lastLeoButtons = this._leoButtonsExplorer;
 
         // * Create Undos Treeview Providers and tree views
         this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this);
         this._leoUndos = vscode.window.createTreeView(Constants.UNDOS_ID, { showCollapseAll: false, treeDataProvider: this._leoUndosProvider });
-        this._leoUndos.onDidChangeVisibility((p_event => this._onUndosTreeViewVisibilityChanged(p_event, false)));
+        this._context.subscriptions.push(this._leoUndos);
+        this._context.subscriptions.push(
+            this._leoUndos.onDidChangeVisibility((p_event => this._onUndosTreeViewVisibilityChanged(p_event, false)))
+        );
         this._leoUndosExplorer = vscode.window.createTreeView(Constants.UNDOS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoUndosProvider });
-        this._leoUndosExplorer.onDidChangeVisibility((p_event => this._onUndosTreeViewVisibilityChanged(p_event, true)));
+        this._context.subscriptions.push(this._leoUndosExplorer);
+        this._context.subscriptions.push(
+            this._leoUndosExplorer.onDidChangeVisibility((p_event => this._onUndosTreeViewVisibilityChanged(p_event, true)))
+        );
         this._lastLeoUndos = this._leoUndosExplorer;
 
         // * Create Body Pane
         this._leoFileSystem = new LeoBodyProvider(this);
+
         this._bodyMainSelectionColumn = 1;
 
         // * Create Status bar Entry
@@ -226,46 +268,65 @@ export class LeoUI {
         // * Configuration / Welcome webview
         // this.leoSettingsWebview = new LeoSettingsProvider(_context, this);
 
-
-
         // * React to change in active panel/text editor (window.activeTextEditor) - also fires when the active editor becomes undefined
+        // this._context.subscriptions.push(
         // vscode.window.onDidChangeActiveTextEditor((p_editor) =>
         //     this._onActiveEditorChanged(p_editor)
+        // )
         // );
 
         // * React to change in selection, cursor position and scroll position
+        // this._context.subscriptions.push(
         // vscode.window.onDidChangeTextEditorSelection((p_event) =>
         //     this._onChangeEditorSelection(p_event)
+        // )
         // );
+
+        // this._context.subscriptions.push(
         // vscode.window.onDidChangeTextEditorVisibleRanges((p_event) =>
         //     this._onChangeEditorScroll(p_event)
+        // )
         // );
 
         // * Triggers when a different text editor/vscode window changed focus or visibility, or dragged
         // This is also what triggers after drag and drop, see '_onChangeEditorViewColumn'
+        // this._context.subscriptions.push(
         // vscode.window.onDidChangeTextEditorViewColumn((p_columnChangeEvent) =>
         //     this._changedTextEditorViewColumn(p_columnChangeEvent)
-        // ); // Also triggers after drag and drop
+        // ) // Also triggers after drag and drop
+        // );
+
+        // this._context.subscriptions.push(
         // vscode.window.onDidChangeVisibleTextEditors((p_editors) =>
         //     this._changedVisibleTextEditors(p_editors)
-        // ); // Window.visibleTextEditors changed
+        // ) // Window.visibleTextEditors changed
+        // );
+
+        // this._context.subscriptions.push(
         // vscode.window.onDidChangeWindowState((p_windowState) =>
         //     this._changedWindowState(p_windowState)
-        // ); // Focus state of the current window changes
+        // ) // Focus state of the current window changes
+        // );
 
         // * React when typing and changing body pane
+        // this._context.subscriptions.push(
         // vscode.workspace.onDidChangeTextDocument((p_textDocumentChange) =>
         //     this._onDocumentChanged(p_textDocumentChange)
+        // )
         // );
 
         // * React to configuration settings events
-        vscode.workspace.onDidChangeConfiguration((p_configChange) =>
-            this._onChangeConfiguration(p_configChange)
+        this._context.subscriptions.push(
+            vscode.workspace.onDidChangeConfiguration((p_configChange) =>
+                this._onChangeConfiguration(p_configChange)
+            )
         );
 
         // * React to opening of any file in vscode
+        // this._context.subscriptions.push(
         // vscode.workspace.onDidOpenTextDocument((p_document) =>
         //     this._onDidOpenTextDocument(p_document)
+        // )
         // );
 
         // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
@@ -587,9 +648,10 @@ export class LeoUI {
 
         // * Either the whole tree refreshes, or a single tree node is revealed when just navigating
         if (this._refreshType.tree) {
-            this._refreshType.tree = false;
 
+            this._refreshType.tree = false;
             this._refreshOutline(true, w_revealType);
+
         } else if (this._refreshType.node && p_node) {
 
             // * Force single node "refresh" by revealing it, instead of "refreshing" it
@@ -717,10 +779,14 @@ export class LeoUI {
         this._bodyEnablePreview = !!vscode.workspace
             .getConfiguration('workbench.editor')
             .get('enablePreview');
-        // Check For "workbench.editor.enablePreview" to be true.
-        this.config.checkEnablePreview();
-        this.config.checkCloseEmptyGroups();
-        this.config.checkCloseOnFileDelete();
+
+        // Check For specific vscode settings needed for leojs
+        // Leave small delay for multiple possible forced changes at startup
+        setTimeout(() => {
+            this.config.checkEnablePreview();
+            this.config.checkCloseEmptyGroups();
+            this.config.checkCloseOnFileDelete();
+        }, 150);
     }
 
     /**

@@ -27,6 +27,8 @@ export class LeoStatusBar {
         private _leoJs: LeoUI
     ) {
         this._leoStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
+        this._context.subscriptions.push(this._leoStatusBarItem);
+
         this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
 
         this._leoStatusBarItem.command = Constants.COMMANDS.SWITCH_FILE;
