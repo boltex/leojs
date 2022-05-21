@@ -31,30 +31,30 @@ suite('Extension test examples', () => {
 		assert.strictEqual(-1, [1, 2, 3].indexOf(5));
 		assert.strictEqual(-1, [1, 2, 3].indexOf(0));
 
-		// 1 - show/open leo panel
-		await vscode.commands.executeCommand(
-			Constants.COMMANDS.SHOW_OUTLINE
-		);
-		// 2 - create new documents and nodes 
-		await vscode.commands.executeCommand(
-			"leojs.test"
-		);
+		// // 1 - show/open leo panel
+		// await vscode.commands.executeCommand(
+		// 	Constants.COMMANDS.SHOW_OUTLINE
+		// );
+		// // 2 - create new documents and nodes 
+		// await vscode.commands.executeCommand(
+		// 	"leojs.test"
+		// );
 
-		// 3 - test outline editing commands
-		await vscode.commands.executeCommand(
-			Constants.COMMANDS.MOVE_UP_SELECTION_FO
-		);
-		await vscode.commands.executeCommand(
-			Constants.COMMANDS.MARK_SELECTION_FO
-		);
+		// // 3 - test outline editing commands
+		// await vscode.commands.executeCommand(
+		// 	Constants.COMMANDS.MOVE_UP_SELECTION_FO
+		// );
+		// await vscode.commands.executeCommand(
+		// 	Constants.COMMANDS.MARK_SELECTION_FO
+		// );
 
-		// 4 - test undos, other gui commands & miscellaneous
-		await vscode.commands.executeCommand(
-			Constants.COMMANDS.UNDO_FO
-		);
-		await vscode.commands.executeCommand(
-			Constants.COMMANDS.UNDO_FO
-		);
+		// // 4 - test undos, other gui commands & miscellaneous
+		// await vscode.commands.executeCommand(
+		// 	Constants.COMMANDS.UNDO_FO
+		// );
+		// await vscode.commands.executeCommand(
+		// 	Constants.COMMANDS.UNDO_FO
+		// );
 
 		// TODO: more tests
 		// 5 - test 'new' leojs document and repeat tests
