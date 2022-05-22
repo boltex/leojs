@@ -2368,6 +2368,23 @@ export class LeoUI {
             if (p_uri && p_uri.fsPath.trim() && g.app.loadManager) {
                 fileName = p_uri.fsPath.replace(/\\/g, '/');
                 await g.app.loadManager.openFileByName(fileName, this);
+            } else {
+                const fileNames = await this.runOpenFileDialog(
+                    undefined,
+                    "Open",
+                    [
+                        ["Leo files", "*.leo *.db"],
+                        ["Python files", "*.py"],
+                        ["All files", "*"]
+                    ],
+                    g.defaultLeoFileExtension(),
+                    false
+                );
+                if (fileNames && fileNames.length && g.app.loadManager) {
+                    await g.app.loadManager.openFileByName(fileNames[0], this);
+                } else {
+                    return Promise.resolve();
+                }
             }
         } else {
             await this._triggerSave();
@@ -2738,7 +2755,7 @@ export class LeoUI {
     }
 
     public runOpenFileDialog(
-        c: Commands,
+        c: Commands | undefined,
         title: string,
         filetypes: [string, string][],
         defaultExtension: string,
@@ -2764,7 +2781,7 @@ export class LeoUI {
     }
 
     public runSaveFileDialog(
-        c: Commands,
+        c: Commands | undefined,
         title: string,
         filetypes: [string, string][],
         defaultExtension: string,

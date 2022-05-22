@@ -3292,10 +3292,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "6079c8d",
-  "gitBranch": "devel",
-  "gitDate": "2022-05-21 17:23:19 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -4693,12 +4690,12 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   {
     "view": "leojsOutline",
-    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.openLeoFile)",
+    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)",
     "when": "leojsReady &amp;&amp; !leojsTreeOpened"
   },
   {
     "view": "leojsOutlineExplorer",
-    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.openLeoFile)",
+    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)",
     "when": "leojsReady &amp;&amp; !leojsTreeOpened"
   },
   {
@@ -5733,6 +5730,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 "@vscode/test-electron": "^2.0.3",
 "@vscode/test-web": "^0.0.24",
 "assert": "^2.0.0",
+"buffer": "^6.0.3",
 "eslint": "^8.11.0",
 "glob": "^7.2.0",
 "mocha": "^9.1.3",
@@ -5942,6 +5940,23 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         if (p_uri &amp;&amp; p_uri.fsPath.trim() &amp;&amp; g.app.loadManager) {
             fileName = p_uri.fsPath.replace(/\\/g, '/');
             await g.app.loadManager.openFileByName(fileName, this);
+        } else {
+            const fileNames = await this.runOpenFileDialog(
+                undefined,
+                "Open",
+                [
+                    ["Leo files", "*.leo *.db"],
+                    ["Python files", "*.py"],
+                    ["All files", "*"]
+                ],
+                g.defaultLeoFileExtension(),
+                false
+            );
+            if (fileNames &amp;&amp; fileNames.length &amp;&amp; g.app.loadManager) {
+                await g.app.loadManager.openFileByName(fileNames[0], this);
+            } else {
+                return Promise.resolve();
+            }
         }
     } else {
         await this._triggerSave();
@@ -7987,7 +8002,7 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
 };
 </t>
 <t tx="felix.20220107223824.1">public runOpenFileDialog(
-    c: Commands,
+    c: Commands | undefined,
     title: string,
     filetypes: [string, string][],
     defaultExtension: string,
@@ -8027,7 +8042,7 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
 
 </t>
 <t tx="felix.20220108211806.1">public runSaveFileDialog(
-    c: Commands,
+    c: Commands | undefined,
     title: string,
     filetypes: [string, string][],
     defaultExtension: string,

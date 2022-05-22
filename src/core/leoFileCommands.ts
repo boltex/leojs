@@ -11,7 +11,7 @@ import "date-format-lite";
 import * as et from 'elementtree';
 import * as md5 from 'md5';
 var binascii = require('binascii');
-var pickle = require('./jpicklejs.js');
+var pickle = require('./jpicklejs');
 var difflib = require('difflib');
 // example :
 // const matcher = new difflib.SequenceMatcher(null, sttWordsStripped, transcriptWordsStripped);

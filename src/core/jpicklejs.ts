@@ -1,35 +1,41 @@
 // Mix of MIT licenced node-jpickle by Jeremy Lainé, and picklejs by Frank Salim
 
-var emulated = {
-    'datetime.datetime': function (args) {
-        var tmp = new Buffer.from(args[0], 'binary')
-            , year = tmp.readUInt16BE(0)
-            , month = tmp.readUInt8(2) - 1
-            , day = tmp.readUInt8(3)
-            , hour = tmp.readUInt8(4)
-            , minute = tmp.readUInt8(5)
-            , second = tmp.readUInt8(6)
-            , microsecond = tmp.readUInt32BE(6) & 0xffffff;
+const emulated: { [key: string]: (args: any) => any } = {
+    'datetime.datetime': function (args: any) {
+
+        // @ts-expect-error
+        let tmp: Buffer = new Buffer.from(args[0], 'binary');
+        let year = tmp.readUInt16BE(0);
+        let month = tmp.readUInt8(2) - 1;
+        let day = tmp.readUInt8(3);
+        let hour = tmp.readUInt8(4);
+        let minute = tmp.readUInt8(5);
+        let second = tmp.readUInt8(6);
+        let microsecond = tmp.readUInt32BE(6) & 0xffffff;
         if (args[1] === 'UTC') {
             return new Date(Date.UTC(year, month, day, hour, minute, second, microsecond / 1000));
         } else {
             return new Date(year, month, day, hour, minute, second, microsecond / 1000);
         }
     },
-    'django.utils.timezone.UTC': function (args) {
+    'django.utils.timezone.UTC': function (args: any) {
         return 'UTC';
     },
-    '__builtin__.set': function (args) {
+    '__builtin__.set': function (args: any[]) {
         return args[0];
     }
 };
 
 var Parser = function () {
+    // @ts-expect-error
     this.mark = 'THIS-NEEDS-TO-BE-UNIQUE-TO-SERVE-AS-A-BOUNDARY';
+    // @ts-expect-error
     this.memo = {};
+    // @ts-expect-error
     this.stack = [];
 };
 
+// @ts-expect-error
 Parser.prototype.load = function (pickle) {
     var MARK = '('              // push special markobject on stack
         , STOP = '.'              // every pickle ends with STOP
@@ -87,8 +93,9 @@ Parser.prototype.load = function (pickle) {
         , SHORT_BINBYTES = 'C'    //  "     "   ;    "      "       "      " < 256 bytes
         ;
 
+    // @ts-expect-error
     var buffer = new Buffer.from(pickle, 'binary');
-    buffer.readLine = function (i) {
+    buffer.readLine = function (i: any) {
         var index = pickle.indexOf('\n', i);
         if (index === -1) {
             throw new Error("Could not find end of line");
@@ -194,7 +201,7 @@ Parser.prototype.load = function (pickle) {
                 i += module.length + 1;
                 var name = buffer.readLine(i);
                 i += name.length + 1;
-                var func = emulated[module + '.' + name];
+                var func: any = emulated[module + '.' + name];
                 if (func === undefined) {
                     throw new Error("Cannot emulate global: " + module + " " + name);
                 }
@@ -352,7 +359,7 @@ Parser.prototype.load = function (pickle) {
     }
 };
 
-Parser.prototype.marker = function (parser) {
+Parser.prototype.marker = function (parser: any) {
     var k = this.stack.length - 1;
     while (k > 0 && this.stack[k] !== this.mark) {
         --k;
@@ -360,7 +367,9 @@ Parser.prototype.marker = function (parser) {
     return k;
 };
 
+// @ts-expect-error
 var pickle = (new function () {
+    // @ts-expect-error
     var self = this;
     /* Opcodes
      * !.. not all opcodes are currently supported!
@@ -387,15 +396,15 @@ var pickle = (new function () {
 
     /* Other magic constants that are not opcodes
      */
-    NEWLINE = "\n";
-    MARK_OBJECT = null;
-    SQUO = "'";
+    const NEWLINE = "\n";
+    const MARK_OBJECT = null;
+    const SQUO = "'";
 
     /*
      * dumps(object) -> string
      * serializes a JavaScript object to a Python pickle
      */
-    self.dumps = function (obj) {
+    self.dumps = function (obj: any) {
         try {
             JSON.stringify(obj);
         }
@@ -406,7 +415,7 @@ var pickle = (new function () {
         return _dumps(obj) + STOP;
     };
 
-    var _check_memo = function (obj, memo) {
+    var _check_memo = function (obj: any, memo: any[]) {
         for (var i = 0; i < memo.length; i++) {
             if (memo[i] === obj) {
                 return i;
@@ -415,7 +424,7 @@ var pickle = (new function () {
         return -1;
     };
 
-    var _dumps = function (obj, memo) {
+    var _dumps = function (obj: any, memo?: any[]) {
         memo = memo || [];
         if (obj === null) {
             return NONE;
@@ -461,9 +470,9 @@ var pickle = (new function () {
                 return GET + p + NEWLINE;
             }
 
-            var escaped = obj.replace("\\", "\\\\", "g")
-                .replace("'", "\\'", "g")
-                .replace("\n", "\\n", "g");
+            var escaped = obj.replace(/\\/g, "\\\\")
+                .replace(/'/g, "\\'")
+                .replace(/\n/g, "\\n");
 
             var s = STRING + SQUO + escaped + SQUO + NEWLINE
                 + PUT + memo.length + NEWLINE;
@@ -482,11 +491,12 @@ var pickle = (new function () {
 
 module.exports.emulated = emulated;
 // * Use loads from node-jpickle
-module.exports.loads = function (data) {
-    var parser = new Parser();
+module.exports.loads = function (data: any) {
+    // @ts-expect-error
+    var parser: any = new Parser() as any;
     return parser.load(data);
 };
 // * Use loads from picklejs
-module.exports.dumps = function (data, protocol) {
+module.exports.dumps = function (data: any, protocol: number) {
     return pickle.dumps(data);
 };

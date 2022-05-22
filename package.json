@@ -309,12 +309,12 @@
       },
       {
         "view": "leojsOutline",
-        "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.openLeoFile)",
+        "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)",
         "when": "leojsReady && !leojsTreeOpened"
       },
       {
         "view": "leojsOutlineExplorer",
-        "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.openLeoFile)",
+        "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)",
         "when": "leojsReady && !leojsTreeOpened"
       },
       {
@@ -2691,6 +2691,7 @@
     "@vscode/test-electron": "^2.0.3",
     "@vscode/test-web": "^0.0.24",
     "assert": "^2.0.0",
+    "buffer": "^6.0.3",
     "eslint": "^8.11.0",
     "glob": "^7.2.0",
     "mocha": "^9.1.3",
