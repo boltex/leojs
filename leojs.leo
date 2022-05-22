@@ -517,11 +517,12 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
         .get('enablePreview');
 
     // Check For specific vscode settings needed for leojs
+    // Leave small delay for multiple possible forced changes at startup
     setTimeout(() =&gt; {
         this.config.checkEnablePreview();
         this.config.checkCloseEmptyGroups();
         this.config.checkCloseOnFileDelete();
-    }, 250);
+    }, 150);
 }
 
 </t>
@@ -955,13 +956,36 @@ public refreshTreeRoot(): void {
         (+element.isCloned() &lt;&lt; 2) |
         (+element.isMarked() &lt;&lt; 1) |
         +element.v.hasBody();
-    const w_u = Object.keys(element.v.u).length ? element.v.u : false;
+
+    const w_u = (element.v.u &amp;&amp; Object.keys(element.v.u).length) ? element.v.u : false;
+    let desc: string = "";
+    // * some smaller grayed-out text accompanying the main label
+    if (w_u) {
+
+        const w_uLength = Object.keys(w_u).length;
+        if (w_uLength) {
+            desc = "\u{1F4CE} (" + w_uLength + ")";
+            if (w_u.__node_tags) {
+                if (w_uLength === 1) {
+                    // was only tag, so reset it
+                    desc = "";
+                } else {
+                    desc = desc + " "; // add space
+                }
+                desc = desc + "\u{1F3F7} (" + Object.keys(w_u.__node_tags).length + ")";
+            }
+        }
+
+    } else {
+        // desc = "id:" + this.id; // ! debug test
+        // desc = "gnx:" + this.gnx; // ! debug test
+    }
 
     const w_leoNode = new LeoOutlineNode(
         element.h,
         w_collapse,
         element, // Position
-        w_u ? "\u{1F4CE} (" + Object.keys(w_u).length + ")" : "",
+        desc,
         this._icons[w_icon],
         this.buildId(element, w_collapse),
         w_contextValue
@@ -3267,9 +3291,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     &lt;&lt; devDependencies &gt;&gt;
   },
   "dependencies": {
-    "bowser": "^2.11.0",
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "6079c8d",
+  "gitBranch": "devel",
+  "gitDate": "2022-05-21 17:23:19 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -5718,7 +5744,9 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 "webpack-cli": "^4.9.2",
 "webpack-shell-plugin-next": "^2.2.2"
 </t>
-<t tx="felix.20201214205159.81">"browser-process-hrtime": "^1.0.0",
+<t tx="felix.20201214205159.81">"binascii": "^0.0.2",
+"bowser": "^2.11.0",
+"browser-process-hrtime": "^1.0.0",
 "console-browserify": "^1.2.0",
 "crypto-browserify": "^3.12.0",
 "date-format-lite": "^17.7.0",
@@ -10098,12 +10126,25 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
 }
 </t>
 <t tx="felix.20220519232002.1">public resolveTreeItem(item: LeoOutlineNode, element: Position, token: vscode.CancellationToken): vscode.ProviderResult&lt;LeoOutlineNode&gt; {
-    if (Object.keys(element.v.u).length) {
-        item.tooltip = item.label + "\n" +
-            JSON.stringify(element.v.u, undefined, 2); // user attributes as JSON text tooltip
-    } else {
-        item.tooltip = item.label; // * Whole headline as tooltip
+    if (element.v.u) {
+        const w_u = element.v.u;
+        const w_uaLength = Object.keys(w_u).length;
+        if (w_uaLength) {
+
+            if (w_uaLength === 1 &amp;&amp; w_u.__node_tags &amp;&amp; w_u.__node_tags.length) {
+                // list tags instead
+                item.tooltip = item.label + "\n\u{1F3F7} " + w_u.__node_tags.join('\n\u{1F3F7} ');
+
+            } else {
+                item.tooltip = item.label + "\n" +
+                    JSON.stringify(w_u, undefined, 2);
+            }
+
+            return item;
+        }
+
     }
+    item.tooltip = item.label; // * Fallsback to whole headline as tooltip
     return item;
 }
 

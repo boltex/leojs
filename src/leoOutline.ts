@@ -75,13 +75,36 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             (+element.isCloned() << 2) |
             (+element.isMarked() << 1) |
             +element.v.hasBody();
-        const w_u = Object.keys(element.v.u).length ? element.v.u : false;
+
+        const w_u = (element.v.u && Object.keys(element.v.u).length) ? element.v.u : false;
+        let desc: string = "";
+        // * some smaller grayed-out text accompanying the main label
+        if (w_u) {
+
+            const w_uLength = Object.keys(w_u).length;
+            if (w_uLength) {
+                desc = "\u{1F4CE} (" + w_uLength + ")";
+                if (w_u.__node_tags) {
+                    if (w_uLength === 1) {
+                        // was only tag, so reset it
+                        desc = "";
+                    } else {
+                        desc = desc + " "; // add space
+                    }
+                    desc = desc + "\u{1F3F7} (" + Object.keys(w_u.__node_tags).length + ")";
+                }
+            }
+
+        } else {
+            // desc = "id:" + this.id; // ! debug test
+            // desc = "gnx:" + this.gnx; // ! debug test
+        }
 
         const w_leoNode = new LeoOutlineNode(
             element.h,
             w_collapse,
             element, // Position
-            w_u ? "\u{1F4CE} (" + Object.keys(w_u).length + ")" : "",
+            desc,
             this._icons[w_icon],
             this.buildId(element, w_collapse),
             w_contextValue
@@ -134,12 +157,25 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
     }
 
     public resolveTreeItem(item: LeoOutlineNode, element: Position, token: vscode.CancellationToken): vscode.ProviderResult<LeoOutlineNode> {
-        if (Object.keys(element.v.u).length) {
-            item.tooltip = item.label + "\n" +
-                JSON.stringify(element.v.u, undefined, 2); // user attributes as JSON text tooltip
-        } else {
-            item.tooltip = item.label; // * Whole headline as tooltip
+        if (element.v.u) {
+            const w_u = element.v.u;
+            const w_uaLength = Object.keys(w_u).length;
+            if (w_uaLength) {
+
+                if (w_uaLength === 1 && w_u.__node_tags && w_u.__node_tags.length) {
+                    // list tags instead
+                    item.tooltip = item.label + "\n\u{1F3F7} " + w_u.__node_tags.join('\n\u{1F3F7} ');
+
+                } else {
+                    item.tooltip = item.label + "\n" +
+                        JSON.stringify(w_u, undefined, 2);
+                }
+
+                return item;
+            }
+
         }
+        item.tooltip = item.label; // * Fallsback to whole headline as tooltip
         return item;
     }
 

@@ -10,7 +10,8 @@ import { new_cmd_decorator } from './decorators';
 import "date-format-lite";
 import * as et from 'elementtree';
 import * as md5 from 'md5';
-
+var binascii = require('binascii');
+var pickle = require('./jpicklejs.js');
 var difflib = require('difflib');
 // example :
 // const matcher = new difflib.SequenceMatcher(null, sttWordsStripped, transcriptWordsStripped);
@@ -236,7 +237,7 @@ export class FastRead {
     /**
      * Parse an unknown attribute in a <v> or <t> element.
      */
-    public resolveUa(attr: string, val: any, kind?: string): any {// Kind is for unit testing.
+    public resolveUa(attr: string, val: any, kind?: string): any { // Kind is for unit testing.
 
         try {
             val = g.toEncodedString(val);
@@ -253,42 +254,45 @@ export class FastRead {
             }
         }
 
-        return val;
+        // return val;
 
-        // TODO !!!
 
-        /*
-        try{
+        let binString = "";
+
+        try {
             binString = binascii.unhexlify(val);
-                // Throws a TypeError if val is not a hex string.
+            // Throws a TypeError if val is not a hex string.
         }
-        catch (e){
+        catch (e) {
             // Assume that Leo 4.1 or above wrote the attribute.
-            if (g.unitTesting){
+            if (g.unitTesting) {
                 console.log(kind === 'raw', `unit test failed: kind=${kind}`);
-            }else{
+            } else {
                 g.trace(`can not unhexlify ${attr}=${val}`);
             }
             return val;
         }
 
-        try{
+        let val2: any;
+
+        try {
             // No change needed to support protocols.
-            val2 = pickle.loads(binString);
+            let val2 = pickle.loads(binString);
             return val2;
         }
-        catch (err){
-            try{
-                val2 = pickle.loads(binString, encoding='bytes');
-                val2 = self.bytesToUnicode(val2);
+        catch (err) {
+            try {
+                // TODO: cannot use second string 'bytes' parameter
+                val2 = pickle.loads(binString);
+                val2 = this.bytesToUnicode(val2);
                 return val2;
             }
-            catch (e){
-                g.trace(`can not unpickle ${attr}=${val}`);
+            catch (e) {
+                g.trace(`can not unpickle ${attr}=${val}`, e);
                 return val;
             }
         }
-        */
+
 
     }
     //@+node:felix.20211213223342.7: *5* fast.bytesToUnicode
@@ -1828,23 +1832,21 @@ export class FileCommands extends DummyFileCommands {
     public getDescendentUnknownAttributes(s: string, v?: VNode): any {
         let bin: string;
         let val: any;
-        return {};
-        // TODO ?
-        /*
-        try{
+
+        try {
             // Changed in version 3.2: Accept only bytestring or bytearray objects as input.
             s = g.toEncodedString(s);  // 2011/02/22
             bin = binascii.unhexlify(s);
-                // Throws a TypeError if val is not a hex string.
+            // Throws a TypeError if val is not a hex string.
             val = pickle.loads(bin);
             return val;
         }
-        catch( exception){
+        catch (exception) {
             g.es_exception();
-            g.trace('Can not unpickle', (typeOf s), v && v.h);
+            g.trace('Can not unpickle', (typeof s), v && v.h, exception);
             return undefined;
         }
-        */
+
     }
     //@+node:felix.20211213224232.35: *5* fc.getPos/VnodeFromClipboard
     /**
@@ -2896,23 +2898,21 @@ export class FileCommands extends DummyFileCommands {
      */
     public pickle(torv: any, val: any, tag: string): string {
 
-        // TODO !
-
-        // try
-        //     s = pickle.dumps(val, protocol = 1)
-        //     s2 = binascii.hexlify(s)
-        //     s3 = g.toUnicode(s2, 'utf-8')
-        //     field = f' {tag}="{s3}"'
-        //     return field
-        // except pickle.PicklingError:
-        //     if tag:  // The caller will print the error if tag is None.
-        //         g.warning("ignoring non-pickleable value", val, "in", torv)
-        //         return ''
-
-        // except Exception:
-        //     g.error("fc.pickle: unexpected exception in", torv)
-        //     g.es_exception()
-
+        try {
+            const s = pickle.dumps(val, 1);
+            const s2 = binascii.hexlify(s);
+            const s3 = g.toUnicode(s2, 'utf-8');
+            const field = ` ${tag}="${s3}"`;
+            return field;
+        }
+        catch (exception) {
+            if (tag) { // The caller will print the error if tag is None.
+                g.warning("ignoring non-pickleable value", val, "in", torv);
+                return '';
+            }
+            g.error("fc.pickle: unexpected exception in", torv);
+            g.es_exception();
+        }
 
         return '';
     }
@@ -3003,8 +3003,6 @@ export class FileCommands extends DummyFileCommands {
             let torv: VNode;
             [p, torv] = p_a;
 
-
-
             // if (isinstance(torv.unknownAttributes, dict)){
             if (
                 typeof torv.unknownAttributes === 'object' &&
@@ -3015,15 +3013,22 @@ export class FileCommands extends DummyFileCommands {
                 // Create a new dict containing only entries that can be pickled.
                 const d = torv.unknownAttributes;  // Copy the dict.
 
-                // TODO : CHECK PICKLING EQUIVALENT
-                // for key in d
-                //     // Just see if val can be pickled.  Suppress any error.
-                //     const ok = this.pickle(torv, d[key], undefined);
-                //     if not ok
-                //         del d[key];
-                //         g.warning("ignoring bad unknownAttributes key", key, "in", p.h);
+                for (let key in d) {
+                    // Just see if val can be pickled.  Suppress any error.
+                    let ok;
+                    try {
+                        ok = this.pickle(torv, d[key], 'none');
+                    }
+                    catch (error) {
+                        ok = false;
+                    }
 
+                    if (!ok) {
+                        delete d[key];
+                        g.warning("ignoring bad unknownAttributes key", key, "in", p.h);
+                    }
 
+                }
                 if (d) {
                     result.push([torv, d]);
                 }

@@ -2703,6 +2703,7 @@
     "webpack-shell-plugin-next": "^2.2.2"
   },
   "dependencies": {
+    "binascii": "^0.0.2",
     "bowser": "^2.11.0",
     "browser-process-hrtime": "^1.0.0",
     "console-browserify": "^1.2.0",
