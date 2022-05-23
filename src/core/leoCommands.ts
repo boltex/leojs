@@ -148,7 +148,8 @@ export class Commands {
     public ignored_at_file_nodes: string[] = []; // (headers)
     public import_error_nodes: string[] = []; // List of nodes for c.raise_error_dialogs. (headers)
     public last_dir: string | undefined = undefined; // The last used directory.
-    public mFileName: string = ''; // Do _not_ use os_path_norm: it converts an empty path to '.' (!!)
+    public mFileName: string = ''; // ? Maybe Deprecated ? Do _not_ use os_path_norm: it converts an empty path to '.' (!!)
+    public uri: vscode.Uri | undefined; // For vscode workspace.fs file operations
     public mRelativeFileName: string = '';
     public openDirectory: string | undefined = undefined;
     public orphan_at_file_nodes: string[] = []; // List of orphaned nodes for c.raise_error_dialogs. (headers)

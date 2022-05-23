@@ -152,6 +152,7 @@ export class LeoApp {
     public atAutoNames: string[] = []; // The set of all @auto spellings.
     public atFileNames: string[] = []; // The set of all built -in @<file>spellings.
 
+    public vscodeUriScheme: string = ""; // * VSCODE WORKSPACE FILE SCHEME 
     public globalKillBuffer: any[] = []; // The global kill buffer.
     public globalRegisters: any = {}; // The global register list.
     public leoID: string = ''; // The id part of gnx's, using empty for falsy.

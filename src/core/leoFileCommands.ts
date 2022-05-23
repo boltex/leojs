@@ -2097,7 +2097,7 @@ export class FileCommands extends DummyFileCommands {
     /**
      * Saves reference outline file
      */
-    public save_ref(): boolean {
+    public async save_ref(): Promise<boolean> {
 
         const c: Commands = this.c;
         const p: Position = c.p;
@@ -2224,7 +2224,7 @@ export class FileCommands extends DummyFileCommands {
 
             const w_uri = vscode.Uri.file(fileName);
             const writeData = Buffer.from(content, 'utf8');
-            vscode.workspace.fs.writeFile(w_uri, writeData);
+            await vscode.workspace.fs.writeFile(w_uri, writeData);
             // fs.writeFileSync(fileName!, content);
 
 
@@ -2796,7 +2796,7 @@ export class FileCommands extends DummyFileCommands {
             //fs.writeFileSync(f, s);
 
             const w_uri = vscode.Uri.file(fileName);
-            vscode.workspace.fs.writeFile(w_uri, s);
+            await vscode.workspace.fs.writeFile(w_uri, s);
 
             // f.close();
             // fs.closeSync(f);

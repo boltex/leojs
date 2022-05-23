@@ -299,12 +299,12 @@
     "viewsWelcome": [
       {
         "view": "leojsOutline",
-        "contents": "Leo ID not found\n[Set Leo ID](command:leojs.setLeoID)\nPlease enter an id that identifies you uniquely",
+        "contents": "Open a folder or remote repository first to enable leojs.\n[Show Explorer](command:workbench.view.explorer)",
         "when": "!leojsReady"
       },
       {
         "view": "leojsOutlineExplorer",
-        "contents": "Leo ID not found\n[Set Leo ID](command:leojs.setLeoID)\nPlease enter an id that identifies you uniquely",
+        "contents": "Open a folder or remote repository first to enable leojs.\n[Show Explorer](command:workbench.view.explorer)",
         "when": "!leojsReady"
       },
       {

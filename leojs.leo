@@ -53,6 +53,8 @@
 </v>
 <v t="felix.20201208214322.1"><vh>@clean src/extension.ts</vh>
 <v t="felix.20201214150149.1"><vh>activate</vh></v>
+<v t="felix.20220523151725.1"><vh>setScheme</vh></v>
+<v t="felix.20220523140004.1"><vh>runLeo</vh></v>
 <v t="felix.20201208215619.1"><vh>deactivate</vh></v>
 </v>
 <v t="felix.20211010192923.1"><vh>@clean src/leoBody.ts</vh>
@@ -1059,14 +1061,10 @@ public refreshTreeRoot(): void {
 export function activate(p_context: vscode.ExtensionContext) {
 
     if (p_context.extensionUri) {
-        console.log('context.extensionUri', p_context.extensionUri, p_context.extensionUri.toJSON(),);
+        console.log('context.extensionUri', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
     }
-    console.log('g.osBrowser 1', g.isBrowser);
-    console.log('workspace folders 1: ', vscode.workspace.workspaceFolders);
+    console.log('g.osBrowser', g.isBrowser);
 
-
-
-    const w_start = process.hrtime(); // For calculating total startup time duration
 
     // * Close remaining leojs Bodies restored by vscode from last session.
     // TODO : USE TABGROUPS
@@ -1084,16 +1082,28 @@ export function activate(p_context: vscode.ExtensionContext) {
         vscode.window.showWarningMessage("g.app leojs application instance already exists!");
     }
 
-    // Initialize and run Leo
-    console.assert(g.app);
-    g.app.loadManager = new LoadManager(p_context);
-    g.app.loadManager.load().then(() =&gt; {
-        console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
-        console.log('g.osBrowser 2', g.isBrowser);
+    p_context.subscriptions.push(
+        vscode.workspace.onDidChangeWorkspaceFolders((p_event =&gt; setScheme(p_event, p_context)))
+    );
 
-        console.log('workspace folders 2: ', vscode.workspace.workspaceFolders);
+    if (!g.isBrowser) {
+        // Running as NodeJs Extension: Dont wait for workspace being opened
+        console.log('VSCODE regular nodejs startup');
+        g.app.vscodeUriScheme = 'file';
+        runLeo(p_context);
+    } else {
+        // IS WEB EXTENSION IN BROWSER! 
+        if (vscode.workspace.workspaceFolders &amp;&amp; vscode.workspace.workspaceFolders.length) {
+            g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
+            console.log('Web browser already had workspace Scheme: ' + g.app.vscodeUriScheme);
+            runLeo(p_context);
+        } else {
+            console.log('NOT started because no workspace yet');
 
-    });
+            // should detect workspace opening below with onDidChangeWorkspaceFolders + setScheme
+        }
+
+    }
 
 }
 
@@ -4706,12 +4716,12 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 <t tx="felix.20201214205159.5">"viewsWelcome": [
   {
     "view": "leojsOutline",
-    "contents": "Leo ID not found\n[Set Leo ID](command:leojs.setLeoID)\nPlease enter an id that identifies you uniquely",
+    "contents": "Open a folder or remote repository first to enable leojs.\n[Show Explorer](command:workbench.view.explorer)",
     "when": "!leojsReady"
   },
   {
     "view": "leojsOutlineExplorer",
-    "contents": "Leo ID not found\n[Set Leo ID](command:leojs.setLeoID)\nPlease enter an id that identifies you uniquely",
+    "contents": "Open a folder or remote repository first to enable leojs.\n[Show Explorer](command:workbench.view.explorer)",
     "when": "!leojsReady"
   },
   {
@@ -8460,7 +8470,7 @@ public finishStartup(): void {
     this._context.subscriptions.push(
         vscode.window.onDidChangeVisibleTextEditors((p_editors) =&gt; {
             if (p_editors &amp;&amp; p_editors.length) {
-                console.log('editors changed visibility', p_editors[0]);
+                console.log('editors changed visibility', p_editors[0].document, p_editors[0].document.uri.fsPath, p_editors[0].document.uri.scheme);
             }
         }
             //this._changedVisibleTextEditors(p_editors)
@@ -10225,6 +10235,40 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
     item.tooltip = "TODO leojs Undo Tooltip";
     return item;
 }
+</t>
+<t tx="felix.20220523140004.1">function runLeo(p_context: vscode.ExtensionContext) {
+    const w_start = process.hrtime(); // For calculating total startup time duration
+
+    // Initialize and run Leo
+    console.assert(g.app);
+
+    g.app.loadManager = new LoadManager(p_context);
+    g.app.loadManager.load().then(() =&gt; {
+        console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
+        console.log('Workspace folders: ', vscode.workspace.workspaceFolders);
+
+    });
+}
+
+</t>
+<t tx="felix.20220523151725.1">function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscode.ExtensionContext) {
+    if (vscode.workspace.workspaceFolders &amp;&amp; vscode.workspace.workspaceFolders.length) {
+        console.log('WORKSPACE CHANGE DETECTED! length ' + vscode.workspace.workspaceFolders.length);
+        g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
+
+        // not started yet? 
+        if (!g.app.loadManager &amp;&amp; g.isBrowser) {
+            // START UP!
+            console.log('Web browser leojs first startup! Scheme: ' + g.app.vscodeUriScheme);
+            runLeo(p_context);
+        }
+    } else {
+        console.log('WORKSPACE CHANGE DETECTED! but no workspace');
+
+    }
+
+}
+
 </t>
 </tnodes>
 </leo_file>

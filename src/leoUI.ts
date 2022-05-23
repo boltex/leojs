@@ -302,7 +302,7 @@ export class LeoUI {
         this._context.subscriptions.push(
             vscode.window.onDidChangeVisibleTextEditors((p_editors) => {
                 if (p_editors && p_editors.length) {
-                    console.log('editors changed visibility', p_editors[0]);
+                    console.log('editors changed visibility', p_editors[0].document, p_editors[0].document.uri.fsPath, p_editors[0].document.uri.scheme);
                 }
             }
                 //this._changedVisibleTextEditors(p_editors)

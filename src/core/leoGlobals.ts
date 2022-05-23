@@ -55,7 +55,7 @@ import { LeoUI, NullGui } from "../leoUI";
 //@-<< imports >>
 
 // TODO: Make those platform detection methods better with 'bowser' js lib 
-export const isBrowser: boolean = (process as any)?.browser;
+export const isBrowser: boolean = !!(process as any)?.browser; // coerced to boolean
 export const isMac: boolean = process.platform?.startsWith('darwin');
 export const isWindows: boolean = process.platform?.startsWith('win');
 
@@ -329,7 +329,7 @@ const languagesList = [
 export const tree_popup_handlers: ((...args: any[]) => any)[] = [];  // Set later.
 export const user_dict: { [key: string]: any } = {}; // Non-persistent dictionary for free use
 
-// The singleton app object. Originally was set by runLeo.py.
+// The singleton app object. Was set by runLeo.py. Leojs sets it in the runLeo method of extension.ts.
 export let app: LeoApp;
 
 // Global status vars.
