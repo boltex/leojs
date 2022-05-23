@@ -550,6 +550,18 @@ Make sure you have Node.js and Git installed, then clone the sources and run `np
 
 You can then run the **Run Extension** target, as shown above, in the **Debug View**.
 
+## Running Development version as a web extension
+
+To try out running as a web extension on vscode.dev, use the following commands:
+
+1. From your extension's path, start an HTTP server by running `npx serve --cors -l 5000`
+
+2. Open another terminal and run `npx localtunnel -p 5000`
+
+3. Click on the generated URL and select the _Click-to-Continue_ button
+
+4. Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.dev/github/boltex/practice-leo-phys` and run **Developer: Install Web Extension...** from the Command Palette and paste the generated URL.
+
 ## Features done so far
 
 - The commands and menus icons for outline editing 
@@ -662,6 +674,7 @@ import { Position } from './core/leoNodes';
 
 </t>
 <t tx="felix.20201208224407.1">import * as vscode from "vscode";
+import { Utils as uriUtils } from "vscode-uri";
 import { Constants } from "./constants";
 import { IconConstants } from "./iconConstants";
 import { Icon } from "./types";
@@ -1045,6 +1058,14 @@ public refreshTreeRoot(): void {
  */
 export function activate(p_context: vscode.ExtensionContext) {
 
+    if (p_context.extensionUri) {
+        console.log('context.extensionUri', p_context.extensionUri, p_context.extensionUri.toJSON(),);
+    }
+    console.log('g.osBrowser 1', g.isBrowser);
+    console.log('workspace folders 1: ', vscode.workspace.workspaceFolders);
+
+
+
     const w_start = process.hrtime(); // For calculating total startup time duration
 
     // * Close remaining leojs Bodies restored by vscode from last session.
@@ -1068,6 +1089,10 @@ export function activate(p_context: vscode.ExtensionContext) {
     g.app.loadManager = new LoadManager(p_context);
     g.app.loadManager.load().then(() =&gt; {
         console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
+        console.log('g.osBrowser 2', g.isBrowser);
+
+        console.log('workspace folders 2: ', vscode.workspace.workspaceFolders);
+
     });
 
 }
@@ -2605,6 +2630,7 @@ export interface LeoButton {
 
 </t>
 <t tx="felix.20201214194144.1">import * as vscode from "vscode";
+import { Utils as uriUtils } from "vscode-uri";
 import { debounce } from "lodash";
 
 import * as utils from "./utils";
@@ -4873,7 +4899,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 <t tx="felix.20201214205159.54">"explorer/context": [
   {
     "command": "leojs.openLeoFile",
-    "when": "resourceScheme == file &amp;&amp; resourceExtname == .leo",
+    "when": "resourceExtname == .leo || resourceExtname == .leojs",
     "group": "navigation@1"
   }
 ],
@@ -5927,6 +5953,11 @@ public async closeLeoFile(): Promise&lt;unknown&gt; {
  * @returns A promise that resolves when done trying to open the file
  */
 public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
+    if (p_uri) {
+        console.log('OPEN p_uri', p_uri, p_uri.toJSON(),);
+
+    }
+
     this._setupRefresh(true, {
         tree: true,
         body: true,
@@ -5937,6 +5968,19 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
     if (!this.leoStates.fileOpenedReady) {
         // override with given argument
         let fileName: string;
+
+
+        if (p_uri) {
+            console.log('test fspath');
+            console.log('p_uri.fsPath', p_uri.fsPath);
+            console.log('', uriUtils.basename);
+
+
+        }
+
+
+
+
         if (p_uri &amp;&amp; p_uri.fsPath.trim() &amp;&amp; g.app.loadManager) {
             fileName = p_uri.fsPath.replace(/\\/g, '/');
             await g.app.loadManager.openFileByName(fileName, this);
@@ -7128,6 +7172,7 @@ public static FIND_INPUTS_IDS = {
 
 </t>
 <t tx="felix.20211010192923.1">import * as vscode from "vscode";
+import { Utils as uriUtils } from "vscode-uri";
 import * as utils from "./utils";
 import * as path from 'path';
 import { Constants } from "./constants";
@@ -8020,6 +8065,8 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
         const names: string[] = [];
         if (p_names &amp;&amp; p_names.length) {
             p_names.forEach(name =&gt; {
+                console.log('open dialog chose uri:', name);
+
                 names.push(name.fsPath);
             });
         }
@@ -8061,6 +8108,8 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
         }
     ).then((p_uri) =&gt; {
         if (p_uri) {
+            console.log('CHOSE SAVE URI', p_uri);
+
             return p_uri.fsPath;
         } else {
             return "";
@@ -8400,23 +8449,31 @@ public finishStartup(): void {
 
     // * Triggers when a different text editor/vscode window changed focus or visibility, or dragged
     // This is also what triggers after drag and drop, see '_onChangeEditorViewColumn'
-    // this._context.subscriptions.push(
-    // vscode.window.onDidChangeTextEditorViewColumn((p_columnChangeEvent) =&gt;
-    //     this._changedTextEditorViewColumn(p_columnChangeEvent)
-    // ) // Also triggers after drag and drop
-    // );
+    this._context.subscriptions.push(
+        vscode.window.onDidChangeTextEditorViewColumn((p_columnChangeEvent) =&gt; {
+            // temp
+        }
+            //this._changedTextEditorViewColumn(p_columnChangeEvent)
+        ) // Also triggers after drag and drop
+    );
 
-    // this._context.subscriptions.push(
-    // vscode.window.onDidChangeVisibleTextEditors((p_editors) =&gt;
-    //     this._changedVisibleTextEditors(p_editors)
-    // ) // Window.visibleTextEditors changed
-    // );
+    this._context.subscriptions.push(
+        vscode.window.onDidChangeVisibleTextEditors((p_editors) =&gt; {
+            if (p_editors &amp;&amp; p_editors.length) {
+                console.log('editors changed visibility', p_editors[0]);
+            }
+        }
+            //this._changedVisibleTextEditors(p_editors)
+        ) // Window.visibleTextEditors changed
+    );
 
-    // this._context.subscriptions.push(
-    // vscode.window.onDidChangeWindowState((p_windowState) =&gt;
-    //     this._changedWindowState(p_windowState)
-    // ) // Focus state of the current window changes
-    // );
+    this._context.subscriptions.push(
+        vscode.window.onDidChangeWindowState((p_windowState) =&gt; {
+            // temp
+        }
+            //this._changedWindowState(p_windowState)
+        ) // Focus state of the current window changes
+    );
 
     // * React when typing and changing body pane
     // this._context.subscriptions.push(

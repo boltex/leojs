@@ -11,6 +11,14 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
  */
 export function activate(p_context: vscode.ExtensionContext) {
 
+    if (p_context.extensionUri) {
+        console.log('context.extensionUri', p_context.extensionUri, p_context.extensionUri.toJSON(),);
+    }
+    console.log('g.osBrowser 1', g.isBrowser);
+    console.log('workspace folders 1: ', vscode.workspace.workspaceFolders);
+
+
+
     const w_start = process.hrtime(); // For calculating total startup time duration
 
     // * Close remaining leojs Bodies restored by vscode from last session.
@@ -34,6 +42,10 @@ export function activate(p_context: vscode.ExtensionContext) {
     g.app.loadManager = new LoadManager(p_context);
     g.app.loadManager.load().then(() => {
         console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
+        console.log('g.osBrowser 2', g.isBrowser);
+
+        console.log('workspace folders 2: ', vscode.workspace.workspaceFolders);
+
     });
 
 }

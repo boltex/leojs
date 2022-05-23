@@ -3,6 +3,7 @@
 //@+<< imports >>
 //@+node:felix.20210220194059.1: ** << imports >>
 import * as vscode from 'vscode';
+import { Utils as uriUtils } from "vscode-uri";
 import * as path from 'path';
 import * as g from './leoGlobals';
 import { LeoUI, NullGui } from '../leoUI';
@@ -1829,7 +1830,7 @@ export class Commands {
                     throw new Error('exception executing command');
                 }
                 g.es_print('exception executing command');
-                g.es_exception(c);
+                g.es_exception(e, c);
             }
             if (c && c.exists) {
                 if (c.requestCloseWindow) {
@@ -2162,7 +2163,7 @@ export class Commands {
                         g.es(
                             `Exception evaluating {{ ${exp} }} in ${s.trim()}`
                         );
-                        g.es_exception(true, c);
+                        g.es_exception(exception, c);
                     }
                 }
                 // Prepare to search again after the last '}}'
@@ -2422,7 +2423,7 @@ export class Commands {
             const s = Buffer.from(readData).toString('utf8');
             return s.indexOf('@+leo-ver=') > -1;
         } catch (exception) {
-            g.es_exception();
+            g.es_exception(exception);
             return false;
         }
     }

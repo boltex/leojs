@@ -3,6 +3,7 @@
 // File commands that used to be defined in leoCommands.py
 // import * as fs from 'fs';
 import * as vscode from "vscode";
+import { Utils as uriUtils } from "vscode-uri";
 
 import * as g from '../core/leoGlobals';
 import { commander_command } from "../core/decorators";

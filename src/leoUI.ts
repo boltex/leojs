@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { Utils as uriUtils } from "vscode-uri";
 import { debounce } from "lodash";
 
 import * as utils from "./utils";
@@ -290,23 +291,31 @@ export class LeoUI {
 
         // * Triggers when a different text editor/vscode window changed focus or visibility, or dragged
         // This is also what triggers after drag and drop, see '_onChangeEditorViewColumn'
-        // this._context.subscriptions.push(
-        // vscode.window.onDidChangeTextEditorViewColumn((p_columnChangeEvent) =>
-        //     this._changedTextEditorViewColumn(p_columnChangeEvent)
-        // ) // Also triggers after drag and drop
-        // );
+        this._context.subscriptions.push(
+            vscode.window.onDidChangeTextEditorViewColumn((p_columnChangeEvent) => {
+                // temp
+            }
+                //this._changedTextEditorViewColumn(p_columnChangeEvent)
+            ) // Also triggers after drag and drop
+        );
 
-        // this._context.subscriptions.push(
-        // vscode.window.onDidChangeVisibleTextEditors((p_editors) =>
-        //     this._changedVisibleTextEditors(p_editors)
-        // ) // Window.visibleTextEditors changed
-        // );
+        this._context.subscriptions.push(
+            vscode.window.onDidChangeVisibleTextEditors((p_editors) => {
+                if (p_editors && p_editors.length) {
+                    console.log('editors changed visibility', p_editors[0]);
+                }
+            }
+                //this._changedVisibleTextEditors(p_editors)
+            ) // Window.visibleTextEditors changed
+        );
 
-        // this._context.subscriptions.push(
-        // vscode.window.onDidChangeWindowState((p_windowState) =>
-        //     this._changedWindowState(p_windowState)
-        // ) // Focus state of the current window changes
-        // );
+        this._context.subscriptions.push(
+            vscode.window.onDidChangeWindowState((p_windowState) => {
+                // temp
+            }
+                //this._changedWindowState(p_windowState)
+            ) // Focus state of the current window changes
+        );
 
         // * React when typing and changing body pane
         // this._context.subscriptions.push(
@@ -2355,6 +2364,11 @@ export class LeoUI {
      * @returns A promise that resolves when done trying to open the file
      */
     public async openLeoFile(p_uri?: vscode.Uri): Promise<unknown> {
+        if (p_uri) {
+            console.log('OPEN p_uri', p_uri, p_uri.toJSON(),);
+
+        }
+
         this._setupRefresh(true, {
             tree: true,
             body: true,
@@ -2365,6 +2379,19 @@ export class LeoUI {
         if (!this.leoStates.fileOpenedReady) {
             // override with given argument
             let fileName: string;
+
+
+            if (p_uri) {
+                console.log('test fspath');
+                console.log('p_uri.fsPath', p_uri.fsPath);
+                console.log('', uriUtils.basename);
+
+
+            }
+
+
+
+
             if (p_uri && p_uri.fsPath.trim() && g.app.loadManager) {
                 fileName = p_uri.fsPath.replace(/\\/g, '/');
                 await g.app.loadManager.openFileByName(fileName, this);
@@ -2773,6 +2800,8 @@ export class LeoUI {
             const names: string[] = [];
             if (p_names && p_names.length) {
                 p_names.forEach(name => {
+                    console.log('open dialog chose uri:', name);
+
                     names.push(name.fsPath);
                 });
             }
@@ -2800,6 +2829,8 @@ export class LeoUI {
             }
         ).then((p_uri) => {
             if (p_uri) {
+                console.log('CHOSE SAVE URI', p_uri);
+
                 return p_uri.fsPath;
             } else {
                 return "";

@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { Utils as uriUtils } from "vscode-uri";
 import { Constants } from "./constants";
 import { IconConstants } from "./iconConstants";
 import { Icon } from "./types";

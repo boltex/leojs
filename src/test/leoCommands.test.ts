@@ -347,7 +347,7 @@ suite('Test cases for leoCommands.ts', () => {
             try {
                 c.markAllAtFileNodesDirty();
             } catch (p_exception) {
-                g.es_exception();
+                g.es_exception(p_exception);
                 ok = false;
             }
         }

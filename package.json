@@ -1834,7 +1834,7 @@
       "explorer/context": [
         {
           "command": "leojs.openLeoFile",
-          "when": "resourceScheme == file && resourceExtname == .leo",
+          "when": "resourceExtname == .leo || resourceExtname == .leojs",
           "group": "navigation@1"
         }
       ],

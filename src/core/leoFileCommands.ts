@@ -3,6 +3,7 @@
 //@+<< imports >>
 //@+node:felix.20210220195150.1: ** << imports >>
 import * as vscode from "vscode";
+import { Utils as uriUtils } from "vscode-uri";
 import * as g from './leoGlobals';
 import { VNode, Position } from './leoNodes';
 import { Commands } from './leoCommands';
@@ -244,7 +245,7 @@ export class FastRead {
         }
         catch (e) {
             g.es_print('unexpected exception converting hexlified string to string');
-            g.es_exception();
+            g.es_exception(e);
             return undefined;
         }
         // Leave string attributes starting with 'str_' alone.
@@ -821,7 +822,7 @@ export class FileCommands extends DummyFileCommands {
             }
             catch (exception) {
                 g.error('exception creating backup file');
-                g.es_exception();
+                g.es_exception(exception);
                 ok = false;
                 backupName = undefined;
             }
@@ -848,7 +849,7 @@ export class FileCommands extends DummyFileCommands {
                 g.error("read only");
             }
             g.error("exception deleting backup file:", fileName);
-            g.es_exception(false);
+            g.es_exception(exception);
         }
     }
     //@+node:felix.20211213224228.4: *4* fc.handleWriteLeoFileException
@@ -857,7 +858,6 @@ export class FileCommands extends DummyFileCommands {
      */
     public async handleWriteLeoFileException(fileName: string, backupName: string): Promise<void> {
         g.es("exception writing:", fileName);
-        g.es_exception(true);
 
         // Delete fileName.
         const w_fileExists = await g.os_path_exists(fileName);
@@ -879,7 +879,7 @@ export class FileCommands extends DummyFileCommands {
             }
             catch (exception) {
                 g.error('exception renaming', src, 'to', dst);
-                g.es_exception(false);
+                g.es_exception(exception);
             }
         } else {
             g.error('backup file does not exist!', backupName.toString());
@@ -914,7 +914,7 @@ export class FileCommands extends DummyFileCommands {
         }
         catch (exception) {
             g.es(`can not open ${fileName}`);
-            g.es_exception();
+            g.es_exception(exception);
             f = undefined;
         }
         return f;
@@ -1659,7 +1659,7 @@ export class FileCommands extends DummyFileCommands {
         }
         catch (exception) {
             g.trace(`Error reading .leojs file: ${fileName}`);
-            g.es_exception();
+            g.es_exception(exception);
             return undefined;
         }
 
@@ -1842,7 +1842,7 @@ export class FileCommands extends DummyFileCommands {
             return val;
         }
         catch (exception) {
-            g.es_exception();
+            g.es_exception(exception);
             g.trace('Can not unpickle', (typeof s), v && v.h, exception);
             return undefined;
         }
@@ -2834,7 +2834,7 @@ export class FileCommands extends DummyFileCommands {
             // TODO : Make es_error if really needed
             // g.es_error("exception writing external files");
 
-            g.es_exception();
+            g.es_exception(exception);
             g.es('Internal error writing one or more external files.', 'red');
             g.es('Please report this error to:', 'blue');
             g.es('https://groups.google.com/forum/#!forum/leo-editor', 'blue');
@@ -2911,7 +2911,7 @@ export class FileCommands extends DummyFileCommands {
                 return '';
             }
             g.error("fc.pickle: unexpected exception in", torv);
-            g.es_exception();
+            g.es_exception(exception);
         }
 
         return '';

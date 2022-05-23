@@ -21,6 +21,18 @@ Make sure you have Node.js and Git installed, then clone the sources and run `np
 
 You can then run the **Run Extension** target, as shown above, in the **Debug View**.
 
+## Running Development version as a web extension
+
+To try out running as a web extension on vscode.dev, use the following commands:
+
+1. From your extension's path, start an HTTP server by running `npx serve --cors -l 5000`
+
+2. Open another terminal and run `npx localtunnel -p 5000`
+
+3. Click on the generated URL and select the _Click-to-Continue_ button
+
+4. Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.dev/github/boltex/practice-leo-phys` and run **Developer: Install Web Extension...** from the Command Palette and paste the generated URL.
+
 ## Features done so far
 
 - The commands and menus icons for outline editing 
