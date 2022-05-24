@@ -5,14 +5,14 @@
 import * as vscode from "vscode";
 import { Utils as uriUtils } from "vscode-uri";
 
-import * as g from '../core/leoGlobals';
+import * as g from "../core/leoGlobals";
 import { commander_command } from "../core/decorators";
 import { Position, VNode } from "../core/leoNodes";
 import { FileCommands } from "../core/leoFileCommands";
 import { Commands } from "../core/leoCommands";
-import { Bead, Undoer } from '../core/leoUndo';
+import { Bead, Undoer } from "../core/leoUndo";
 import { LoadManager, PreviousSettings } from "../core/leoApp";
-import { AtFile } from '../core/leoAtFile';
+import { AtFile } from "../core/leoAtFile";
 import { LeoUI } from "../leoUI";
 
 //@+others
@@ -605,17 +605,12 @@ export class CommanderFileCommands {
             } else {
                 fileName = c.k?.givenArgs?.join('');
                 if (!fileName) {
-                    const w_filename = await g.app.gui!.runSaveFileDialog(
+                    fileName = await g.app.gui!.runSaveFileDialog(
                         c,
                         "Save",
                         [["Leo files", "*.leo *.db"]], // Array of arrays (one in this case)
                         g.defaultLeoFileExtension(c)
                     );
-                    if (w_filename) {
-                        // re-start this 'save' method with given filename
-                        return c.save(w_filename); // no need to finish with dialogs.
-                    }
-                    return Promise.resolve(); // EXIT !
                 }
             }
             c.bringToFront();
