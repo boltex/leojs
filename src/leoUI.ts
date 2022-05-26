@@ -2365,8 +2365,7 @@ export class LeoUI {
      */
     public async openLeoFile(p_uri?: vscode.Uri): Promise<unknown> {
         if (p_uri) {
-            console.log('OPEN p_uri', p_uri, p_uri.toJSON(),);
-
+            console.log('OPEN p_uri', JSON.stringify(p_uri.toJSON()));
         }
 
         this._setupRefresh(true, {
@@ -2395,6 +2394,7 @@ export class LeoUI {
             if (p_uri && p_uri.fsPath.trim() && g.app.loadManager) {
                 fileName = p_uri.fsPath.replace(/\\/g, '/');
                 await g.app.loadManager.openFileByName(fileName, this);
+                //await g.app.loadManager.openFileByName(p_uri, this);
             } else {
                 const fileNames = await this.runOpenFileDialog(
                     undefined,
@@ -2409,6 +2409,7 @@ export class LeoUI {
                 );
                 if (fileNames && fileNames.length && g.app.loadManager) {
                     await g.app.loadManager.openFileByName(fileNames[0], this);
+                    // await g.app.loadManager.openFileByName(fileNames[0], this);
                 } else {
                     return Promise.resolve();
                 }
@@ -2796,15 +2797,18 @@ export class LeoUI {
                 canSelectMany: !!multiple,
                 filters: types
             }
-        ).then((p_names) => {
+        ).then((p_uris) => {
             const names: string[] = [];
-            if (p_names && p_names.length) {
-                p_names.forEach(name => {
-                    console.log('open dialog chose uri:', name);
+            if (p_uris && p_uris.length) {
+                p_uris.forEach(w_uri => {
+                    console.log('CHOSE OPEN URI');
+                    console.log('open json: ' + JSON.stringify(w_uri.toJSON()));
+                    console.log('open toString: ' + w_uri.toString());
 
-                    names.push(name.fsPath);
+                    names.push(w_uri.fsPath);
                 });
             }
+            //return p_uris || [];
             return names;
         });
     }
@@ -2814,11 +2818,6 @@ export class LeoUI {
         title: string,
         filetypes: [string, string][],
         defaultExtension: string,
-        // c,
-        // c.mFileName,
-        // "Save",
-        // [["Leo files", "*.leo *.db"]], // Array of arrays (one in this case)
-        // g.defaultLeoFileExtension(c)
     ): Thenable<string> {
         // convert to { [name: string]: string[] } typing
         const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
@@ -2829,7 +2828,9 @@ export class LeoUI {
             }
         ).then((p_uri) => {
             if (p_uri) {
-                console.log('CHOSE SAVE URI', p_uri);
+                console.log('CHOSE SAVE URI');
+                console.log('SAVE json: ' + JSON.stringify(p_uri.toJSON()));
+                console.log('SAVE toString: ' + p_uri.toString());
 
                 return p_uri.fsPath;
             } else {

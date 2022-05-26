@@ -146,6 +146,10 @@ export class LeoApp {
     public loadDir: string | undefined; // The leo / core directory.
     public machineDir = null; // The machine - specific directory.
 
+    public vscodeWorkspaceUri: vscode.Uri | undefined;
+    public vscodeUriAuthority: string = "";
+    public vscodeUriPath: string = "";
+
     //@-<< LeoApp: global directories >>
     //@+<< LeoApp: global data >>
     //@+node:felix.20210103024632.6: *5* << LeoApp: global data >>

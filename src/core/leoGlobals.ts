@@ -7,6 +7,7 @@
 //@+<< imports >>
 //@+node:felix.20210102181122.1: ** << imports >>
 import * as vscode from "vscode";
+import { Utils as uriUtils } from "vscode-uri";
 
 import * as os from 'os';
 // import * as fs from 'fs';

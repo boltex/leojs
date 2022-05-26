@@ -1065,7 +1065,6 @@ export function activate(p_context: vscode.ExtensionContext) {
     }
     console.log('g.osBrowser', g.isBrowser);
 
-
     // * Close remaining leojs Bodies restored by vscode from last session.
     // TODO : USE TABGROUPS
     // vscode.window.visibleTextEditors.forEach(p_textEditor =&gt; {
@@ -1086,21 +1085,33 @@ export function activate(p_context: vscode.ExtensionContext) {
         vscode.workspace.onDidChangeWorkspaceFolders((p_event =&gt; setScheme(p_event, p_context)))
     );
 
+    if (vscode.workspace.workspaceFolders &amp;&amp; vscode.workspace.workspaceFolders.length) {
+
+        g.app.vscodeWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
+        g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
+        g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
+        g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
+
+
+        console.log('Web browser already had workspace JSON: ' + JSON.stringify(g.app.vscodeWorkspaceUri.toJSON()));
+        console.log('Web browser already had workspace toString: ' + g.app.vscodeWorkspaceUri.toString());
+    }
+
     if (!g.isBrowser) {
         // Running as NodeJs Extension: Dont wait for workspace being opened
         console.log('VSCODE regular nodejs startup');
-        g.app.vscodeUriScheme = 'file';
+        if (g.app.vscodeUriScheme) {
+            console.assert(g.app.vscodeUriScheme === 'file');
+        } else {
+            g.app.vscodeUriScheme = 'file';
+        }
         runLeo(p_context);
     } else {
         // IS WEB EXTENSION IN BROWSER! 
         if (vscode.workspace.workspaceFolders &amp;&amp; vscode.workspace.workspaceFolders.length) {
-            g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
-            console.log('Web browser already had workspace Scheme: ' + g.app.vscodeUriScheme);
             runLeo(p_context);
         } else {
             console.log('NOT started because no workspace yet');
-
-            // should detect workspace opening below with onDidChangeWorkspaceFolders + setScheme
         }
 
     }
@@ -3329,9 +3340,9 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
   },
-  "gitCommit": "2bfad75",
+  "gitCommit": "204ccc5",
   "gitBranch": "devel",
-  "gitDate": "2022-05-23 17:12:23 -0400"
+  "gitDate": "2022-05-23 20:08:49 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -5967,8 +5978,7 @@ public async closeLeoFile(): Promise&lt;unknown&gt; {
  */
 public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
     if (p_uri) {
-        console.log('OPEN p_uri', p_uri, p_uri.toJSON(),);
-
+        console.log('OPEN p_uri', JSON.stringify(p_uri.toJSON()));
     }
 
     this._setupRefresh(true, {
@@ -5997,6 +6007,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         if (p_uri &amp;&amp; p_uri.fsPath.trim() &amp;&amp; g.app.loadManager) {
             fileName = p_uri.fsPath.replace(/\\/g, '/');
             await g.app.loadManager.openFileByName(fileName, this);
+            //await g.app.loadManager.openFileByName(p_uri, this);
         } else {
             const fileNames = await this.runOpenFileDialog(
                 undefined,
@@ -6011,6 +6022,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
             );
             if (fileNames &amp;&amp; fileNames.length &amp;&amp; g.app.loadManager) {
                 await g.app.loadManager.openFileByName(fileNames[0], this);
+                // await g.app.loadManager.openFileByName(fileNames[0], this);
             } else {
                 return Promise.resolve();
             }
@@ -8074,15 +8086,18 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
             canSelectMany: !!multiple,
             filters: types
         }
-    ).then((p_names) =&gt; {
+    ).then((p_uris) =&gt; {
         const names: string[] = [];
-        if (p_names &amp;&amp; p_names.length) {
-            p_names.forEach(name =&gt; {
-                console.log('open dialog chose uri:', name);
+        if (p_uris &amp;&amp; p_uris.length) {
+            p_uris.forEach(w_uri =&gt; {
+                console.log('CHOSE OPEN URI');
+                console.log('open json: ' + JSON.stringify(w_uri.toJSON()));
+                console.log('open toString: ' + w_uri.toString());
 
-                names.push(name.fsPath);
+                names.push(w_uri.fsPath);
             });
         }
+        //return p_uris || [];
         return names;
     });
 }
@@ -8106,11 +8121,6 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     title: string,
     filetypes: [string, string][],
     defaultExtension: string,
-    // c,
-    // c.mFileName,
-    // "Save",
-    // [["Leo files", "*.leo *.db"]], // Array of arrays (one in this case)
-    // g.defaultLeoFileExtension(c)
 ): Thenable&lt;string&gt; {
     // convert to { [name: string]: string[] } typing
     const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
@@ -8121,7 +8131,9 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
         }
     ).then((p_uri) =&gt; {
         if (p_uri) {
-            console.log('CHOSE SAVE URI', p_uri);
+            console.log('CHOSE SAVE URI');
+            console.log('SAVE json: ' + JSON.stringify(p_uri.toJSON()));
+            console.log('SAVE toString: ' + p_uri.toString());
 
             return p_uri.fsPath;
         } else {
@@ -10248,8 +10260,6 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
     g.app.loadManager = new LoadManager(p_context);
     g.app.loadManager.load().then(() =&gt; {
         console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
-        console.log('Workspace folders: ', vscode.workspace.workspaceFolders);
-
     });
 }
 
@@ -10257,7 +10267,14 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
 <t tx="felix.20220523151725.1">function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscode.ExtensionContext) {
     if (vscode.workspace.workspaceFolders &amp;&amp; vscode.workspace.workspaceFolders.length) {
         console.log('WORKSPACE CHANGE DETECTED! length ' + vscode.workspace.workspaceFolders.length);
+
+        g.app.vscodeWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
         g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
+        g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
+        g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
+
+        console.log('WORKSPACE CHANGE DETECTED! workspace JSON: ' + JSON.stringify(g.app.vscodeWorkspaceUri.toJSON()));
+        console.log('WORKSPACE CHANGE DETECTED! workspace toString: ' + g.app.vscodeWorkspaceUri.toString());
 
         // not started yet? 
         if (!g.app.loadManager &amp;&amp; g.isBrowser) {

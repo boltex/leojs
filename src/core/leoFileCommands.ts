@@ -2659,7 +2659,7 @@ export class FileCommands extends DummyFileCommands {
             // f.write(s);
             //fs.writeFileSync(f, s);
             const w_uri = vscode.Uri.file(fileName);
-            vscode.workspace.fs.writeFile(w_uri, s);
+            await vscode.workspace.fs.writeFile(w_uri, s);
 
 
             // f.close();

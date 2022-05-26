@@ -16,7 +16,6 @@ export function activate(p_context: vscode.ExtensionContext) {
     }
     console.log('g.osBrowser', g.isBrowser);
 
-
     // * Close remaining leojs Bodies restored by vscode from last session.
     // TODO : USE TABGROUPS
     // vscode.window.visibleTextEditors.forEach(p_textEditor => {
@@ -37,21 +36,33 @@ export function activate(p_context: vscode.ExtensionContext) {
         vscode.workspace.onDidChangeWorkspaceFolders((p_event => setScheme(p_event, p_context)))
     );
 
+    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length) {
+
+        g.app.vscodeWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
+        g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
+        g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
+        g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
+
+
+        console.log('Web browser already had workspace JSON: ' + JSON.stringify(g.app.vscodeWorkspaceUri.toJSON()));
+        console.log('Web browser already had workspace toString: ' + g.app.vscodeWorkspaceUri.toString());
+    }
+
     if (!g.isBrowser) {
         // Running as NodeJs Extension: Dont wait for workspace being opened
         console.log('VSCODE regular nodejs startup');
-        g.app.vscodeUriScheme = 'file';
+        if (g.app.vscodeUriScheme) {
+            console.assert(g.app.vscodeUriScheme === 'file');
+        } else {
+            g.app.vscodeUriScheme = 'file';
+        }
         runLeo(p_context);
     } else {
         // IS WEB EXTENSION IN BROWSER! 
         if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length) {
-            g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
-            console.log('Web browser already had workspace Scheme: ' + g.app.vscodeUriScheme);
             runLeo(p_context);
         } else {
             console.log('NOT started because no workspace yet');
-
-            // should detect workspace opening below with onDidChangeWorkspaceFolders + setScheme
         }
 
     }
@@ -61,7 +72,14 @@ export function activate(p_context: vscode.ExtensionContext) {
 function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscode.ExtensionContext) {
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length) {
         console.log('WORKSPACE CHANGE DETECTED! length ' + vscode.workspace.workspaceFolders.length);
+
+        g.app.vscodeWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
         g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
+        g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
+        g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
+
+        console.log('WORKSPACE CHANGE DETECTED! workspace JSON: ' + JSON.stringify(g.app.vscodeWorkspaceUri.toJSON()));
+        console.log('WORKSPACE CHANGE DETECTED! workspace toString: ' + g.app.vscodeWorkspaceUri.toString());
 
         // not started yet? 
         if (!g.app.loadManager && g.isBrowser) {
@@ -85,8 +103,6 @@ function runLeo(p_context: vscode.ExtensionContext) {
     g.app.loadManager = new LoadManager(p_context);
     g.app.loadManager.load().then(() => {
         console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
-        console.log('Workspace folders: ', vscode.workspace.workspaceFolders);
-
     });
 }
 
