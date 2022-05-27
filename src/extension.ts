@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { Constants } from './constants';
+import * as path from 'path';
 import * as utils from "./utils";
 import * as g from './core/leoGlobals';
 import { LeoApp } from './core/leoApp';
@@ -15,6 +16,11 @@ export function activate(p_context: vscode.ExtensionContext) {
         console.log('context.extensionUri', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
     }
     console.log('g.osBrowser', g.isBrowser);
+    console.log('test path.sep: ', path.sep);
+    console.log('env scheme', vscode.env.uriScheme);
+    console.log('env appHost', vscode.env.appHost);
+
+
 
     // * Close remaining leojs Bodies restored by vscode from last session.
     // TODO : USE TABGROUPS
@@ -42,6 +48,16 @@ export function activate(p_context: vscode.ExtensionContext) {
         g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
         g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
         g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
+
+        // @ts-ignore
+        if (g.app.vscodeWorkspaceUri.external) {
+            // @ts-ignore
+            console.log('it had external!', g.app.vscodeWorkspaceUri.external);
+
+        } else {
+            console.log('no external', g.app.vscodeWorkspaceUri);
+
+        }
 
 
         console.log('Web browser already had workspace JSON: ' + JSON.stringify(g.app.vscodeWorkspaceUri.toJSON()));

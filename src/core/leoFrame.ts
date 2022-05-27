@@ -23,6 +23,7 @@ export class LeoFrame {
     public openDirectory: string;
     public iconBar: any;
     public saved: boolean;
+    public startupWindow: boolean;
     public tree: {
         generation: number;
         editLabel: (
@@ -40,6 +41,7 @@ export class LeoFrame {
         this.title = title;
         this.gui = gui;
         this.saved = false;
+        this.startupWindow = false;
         this.openDirectory = '';
         this.iconBar = {};
 

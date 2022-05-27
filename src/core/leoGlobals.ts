@@ -1773,7 +1773,8 @@ export async function readFileIntoString(fileName: string,
         s = toUnicode(s, e || encoding);
         */
 
-        const w_uri = vscode.Uri.file(fileName);
+        // const w_uri = vscode.Uri.file(fileName);
+        const w_uri = makeVscodeUri(fileName);
         const readData = await vscode.workspace.fs.readFile(w_uri);
         const s = Buffer.from(readData).toString('utf8');
 
@@ -1883,11 +1884,35 @@ export function splitLongFileName(fn: string, limit: number = 40): string {
     }
     return result.join('');
 }
+//@+node:felix.20220526234706.1: *3* g.makeVscodeUri
+/**
+ * * VSCODE compatibility helper method:
+ * Builds a valid URI from a typical filename string.
+ * 
+ * @param p_fn String form of fsPath or path 
+ * @returns An URI for file access compatible with web extensions filesystems
+ */
+export function makeVscodeUri(p_fn: string): vscode.Uri {
+
+    if (isBrowser || app.vscodeUriScheme !== 'file') {
+        const newUri = app.vscodeWorkspaceUri!.with({ path: p_fn });
+        console.log('new URI:', JSON.stringify(newUri.toJSON()));
+        console.log('new URI toString:', newUri.toString());
+
+        return newUri;
+
+    } else {
+        // Normal file in desktop app
+        // return vscode.Uri.file(p_fn);
+        return makeVscodeUri(p_fn);
+    }
+}
+
 //@+node:felix.20211104210802.1: ** g.Finding & Scanning
 //@+node:felix.20220410215925.1: *3* g.find_word
 /**
  * Return the index of the first occurance of word in s, or -1 if not found.
-
+ *
  * g.find_word is *not* the same as s.find(i,word);
  * g.find_word ensures that only word-matches are reported.
  */
@@ -3426,7 +3451,8 @@ export async function os_path_exists(p_path?: string): Promise<boolean> {
         p_path = p_path.split('\x00').join(''); // Fix Python 3 bug on Windows 10.
     }
 
-    const w_uri = vscode.Uri.file(p_path);
+    // const w_uri = vscode.Uri.file(p_path);
+    const w_uri = makeVscodeUri(p_path);
 
     try {
         await vscode.workspace.fs.stat(w_uri);
@@ -3535,7 +3561,8 @@ export function os_path_isabs(p_path: string): boolean {
 export async function os_path_isdir(p_path: string): Promise<boolean> {
     if (path) {
 
-        const w_uri = vscode.Uri.file(p_path);
+        // const w_uri = vscode.Uri.file(p_path);
+        const w_uri = makeVscodeUri(p_path);
 
         try {
             const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(w_uri);

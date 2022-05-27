@@ -425,7 +425,7 @@ export class CommanderFileCommands {
 
         // Close the window if this command completes successfully?
         let closeFlag: boolean = (
-            // c.frame.startupWindow &&
+            c.frame.startupWindow &&
             // The window was open on startup
             !c.changed && !c.frame.saved &&
             // The window has never been changed
@@ -1268,7 +1268,8 @@ export class CommanderFileCommands {
                 if (s.startsWith('@nocolor\n')) {
                     s = s.slice('@nocolor\n'.length);
                 }
-                const w_uri = vscode.Uri.file(fileName);
+                // const w_uri = vscode.Uri.file(fileName);
+                const w_uri = g.makeVscodeUri(fileName);
                 const writeData = Buffer.from(s, 'utf8');
                 await vscode.workspace.fs.writeFile(w_uri, writeData);
                 return g.blue('wrote:', fileName);

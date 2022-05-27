@@ -634,6 +634,7 @@ _Move Outline commands need the 'Alt' key modifier only when focus is on body pa
 </t>
 <t tx="felix.20201208214322.1">import * as vscode from 'vscode';
 import { Constants } from './constants';
+import * as path from 'path';
 import * as utils from "./utils";
 import * as g from './core/leoGlobals';
 import { LeoApp } from './core/leoApp';
@@ -1064,6 +1065,11 @@ export function activate(p_context: vscode.ExtensionContext) {
         console.log('context.extensionUri', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
     }
     console.log('g.osBrowser', g.isBrowser);
+    console.log('test path.sep: ', path.sep);
+    console.log('env scheme', vscode.env.uriScheme);
+    console.log('env appHost', vscode.env.appHost);
+
+
 
     // * Close remaining leojs Bodies restored by vscode from last session.
     // TODO : USE TABGROUPS
@@ -1091,6 +1097,16 @@ export function activate(p_context: vscode.ExtensionContext) {
         g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
         g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
         g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
+
+        // @ts-ignore
+        if (g.app.vscodeWorkspaceUri.external) {
+            // @ts-ignore
+            console.log('it had external!', g.app.vscodeWorkspaceUri.external);
+
+        } else {
+            console.log('no external', g.app.vscodeWorkspaceUri);
+
+        }
 
 
         console.log('Web browser already had workspace JSON: ' + JSON.stringify(g.app.vscodeWorkspaceUri.toJSON()));
@@ -2653,6 +2669,7 @@ export interface LeoButton {
 <t tx="felix.20201214194144.1">import * as vscode from "vscode";
 import { Utils as uriUtils } from "vscode-uri";
 import { debounce } from "lodash";
+import * as path from 'path';
 
 import * as utils from "./utils";
 import * as commandBindings from "./commandBindings";
@@ -3339,10 +3356,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "204ccc5",
-  "gitBranch": "devel",
-  "gitDate": "2022-05-23 20:08:49 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -8091,8 +8105,11 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
         if (p_uris &amp;&amp; p_uris.length) {
             p_uris.forEach(w_uri =&gt; {
                 console.log('CHOSE OPEN URI');
+                console.log('open fsPath: ' + JSON.stringify(w_uri.fsPath));
                 console.log('open json: ' + JSON.stringify(w_uri.toJSON()));
                 console.log('open toString: ' + w_uri.toString());
+                console.log('test path: ' + path.normalize(w_uri.path));
+
 
                 names.push(w_uri.fsPath);
             });
@@ -8132,8 +8149,11 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     ).then((p_uri) =&gt; {
         if (p_uri) {
             console.log('CHOSE SAVE URI');
+            console.log('SAVE fsPath: ' + JSON.stringify(p_uri.fsPath));
             console.log('SAVE json: ' + JSON.stringify(p_uri.toJSON()));
             console.log('SAVE toString: ' + p_uri.toString());
+            console.log('test path: ' + path.normalize(p_uri.path));
+
 
             return p_uri.fsPath;
         } else {
@@ -8344,6 +8364,7 @@ public showLeoIDMessage(): void {
  * * Set all remaining local objects, set ready flag(s) and refresh all panels
  */
 public finishStartup(): void {
+    g.app.windowList[this.frameIndex].startupWindow = true;
 
     // * Create a single data provider for both outline trees, Leo view and Explorer view
     this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);

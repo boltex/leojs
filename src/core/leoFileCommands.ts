@@ -126,7 +126,8 @@ export class FastRead {
      */
     public async readFile(path: string): Promise<VNode | undefined> {
 
-        const w_uri = vscode.Uri.file(path);
+        // const w_uri = vscode.Uri.file(path);
+        const w_uri = g.makeVscodeUri(path);
         const readData = await vscode.workspace.fs.readFile(w_uri);
         const s = Buffer.from(readData).toString('utf8');
 
@@ -809,12 +810,14 @@ export class FileCommands extends DummyFileCommands {
             backupName = fileName + "." + timestamp.toString(32) + (this.tempCounter++).toString(32) + ".tmp";
 
             let s: string;
-            const w_readUri = vscode.Uri.file(fileName);
+            // const w_readUri = vscode.Uri.file(fileName);
+            const w_readUri = g.makeVscodeUri(fileName);
             const readData = await vscode.workspace.fs.readFile(w_readUri);
             s = Buffer.from(readData).toString('utf8');
 
             try {
-                const w_writeUri = vscode.Uri.file(backupName);
+                // const w_writeUri = vscode.Uri.file(backupName);
+                const w_writeUri = g.makeVscodeUri(backupName);
                 const writeData = Buffer.from(s, 'utf8');
                 await vscode.workspace.fs.writeFile(w_writeUri, writeData);
 
@@ -840,7 +843,8 @@ export class FileCommands extends DummyFileCommands {
     }
     //@+node:felix.20211213224228.3: *4* fc.deleteBackupFile
     public async deleteBackupFile(fileName: string): Promise<void> {
-        const w_uri = vscode.Uri.file(fileName);
+        // const w_uri = vscode.Uri.file(fileName);
+        const w_uri = g.makeVscodeUri(fileName);
         try {
             await vscode.workspace.fs.delete(w_uri, { useTrash: false });
         }
@@ -873,8 +877,10 @@ export class FileCommands extends DummyFileCommands {
             let dst: string;
             [src, dst] = [backupName, fileName];
             try {
-                const w_srcUri = vscode.Uri.file(src);
-                const w_dstUri = vscode.Uri.file(dst);
+                // const w_srcUri = vscode.Uri.file(src);
+                const w_srcUri = g.makeVscodeUri(src);
+                // const w_dstUri = vscode.Uri.file(dst);
+                const w_dstUri = g.makeVscodeUri(dst);
                 await vscode.workspace.fs.rename(w_srcUri, w_dstUri, { overwrite: true });
             }
             catch (exception) {
@@ -890,7 +896,8 @@ export class FileCommands extends DummyFileCommands {
         // self.read_only is not valid for Save As and Save To commands.
         const w_exists = await g.os_path_exists(fileName);
         if (w_exists) {
-            const w_uri = vscode.Uri.file(fileName);
+            // const w_uri = vscode.Uri.file(fileName);
+            const w_uri = g.makeVscodeUri(fileName);
 
             const fileStat = await vscode.workspace.fs.stat(w_uri);
 
@@ -944,7 +951,8 @@ export class FileCommands extends DummyFileCommands {
 
         try {
 
-            const w_uri = vscode.Uri.file(fileName);
+            // const w_uri = vscode.Uri.file(fileName);
+            const w_uri = g.makeVscodeUri(fileName);
 
             const fileStat = await vscode.workspace.fs.stat(w_uri);
 
@@ -1647,7 +1655,8 @@ export class FileCommands extends DummyFileCommands {
 
         const c: Commands = this.c;
 
-        const w_uri = vscode.Uri.file(fileName);
+        // const w_uri = vscode.Uri.file(fileName);
+        const w_uri = g.makeVscodeUri(fileName);
 
         const w_array: Uint8Array = await vscode.workspace.fs.readFile(w_uri);
 
@@ -2222,7 +2231,8 @@ export class FileCommands extends DummyFileCommands {
             [fileName, content] = getPublicLeoFile();
             fileName = g.os_path_finalize_join(undefined, c.openDirectory, fileName);
 
-            const w_uri = vscode.Uri.file(fileName);
+            // const w_uri = vscode.Uri.file(fileName);
+            const w_uri = g.makeVscodeUri(fileName);
             const writeData = Buffer.from(content, 'utf8');
             await vscode.workspace.fs.writeFile(w_uri, writeData);
             // fs.writeFileSync(fileName!, content);
@@ -2658,7 +2668,8 @@ export class FileCommands extends DummyFileCommands {
 
             // f.write(s);
             //fs.writeFileSync(f, s);
-            const w_uri = vscode.Uri.file(fileName);
+            // const w_uri = vscode.Uri.file(fileName);
+            const w_uri = g.makeVscodeUri(fileName);
             await vscode.workspace.fs.writeFile(w_uri, s);
 
 
@@ -2795,7 +2806,8 @@ export class FileCommands extends DummyFileCommands {
             // f.write(s);
             //fs.writeFileSync(f, s);
 
-            const w_uri = vscode.Uri.file(fileName);
+            // const w_uri = vscode.Uri.file(fileName);
+            const w_uri = g.makeVscodeUri(fileName);
             await vscode.workspace.fs.writeFile(w_uri, s);
 
             // f.close();

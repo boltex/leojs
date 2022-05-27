@@ -2419,7 +2419,8 @@ export class Commands {
      */
     public async looksLikeDerivedFile(fn: string): Promise<boolean> {
         try {
-            const w_uri = vscode.Uri.file(fn);
+            //const w_uri = vscode.Uri.file(fn);
+            const w_uri = g.makeVscodeUri(fn);
             const readData = await vscode.workspace.fs.readFile(w_uri);
             const s = Buffer.from(readData).toString('utf8');
             return s.indexOf('@+leo-ver=') > -1;

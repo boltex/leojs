@@ -2437,7 +2437,9 @@ export class LoadManager {
         const fn: string = c.mFileName;
         // Re-read the file.
         // const theFile = lm.openAnyLeoFile(fn);
-        const w_uri = vscode.Uri.file(fn);
+
+        // const w_uri = vscode.Uri.file(fn);
+        const w_uri = g.makeVscodeUri(fn);
 
         try {
             await vscode.workspace.fs.stat(w_uri);

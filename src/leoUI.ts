@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { Utils as uriUtils } from "vscode-uri";
 import { debounce } from "lodash";
+import * as path from 'path';
 
 import * as utils from "./utils";
 import * as commandBindings from "./commandBindings";
@@ -161,6 +162,7 @@ export class LeoUI {
      * * Set all remaining local objects, set ready flag(s) and refresh all panels
      */
     public finishStartup(): void {
+        g.app.windowList[this.frameIndex].startupWindow = true;
 
         // * Create a single data provider for both outline trees, Leo view and Explorer view
         this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);
@@ -2802,8 +2804,11 @@ export class LeoUI {
             if (p_uris && p_uris.length) {
                 p_uris.forEach(w_uri => {
                     console.log('CHOSE OPEN URI');
+                    console.log('open fsPath: ' + JSON.stringify(w_uri.fsPath));
                     console.log('open json: ' + JSON.stringify(w_uri.toJSON()));
                     console.log('open toString: ' + w_uri.toString());
+                    console.log('test path: ' + path.normalize(w_uri.path));
+
 
                     names.push(w_uri.fsPath);
                 });
@@ -2829,8 +2834,11 @@ export class LeoUI {
         ).then((p_uri) => {
             if (p_uri) {
                 console.log('CHOSE SAVE URI');
+                console.log('SAVE fsPath: ' + JSON.stringify(p_uri.fsPath));
                 console.log('SAVE json: ' + JSON.stringify(p_uri.toJSON()));
                 console.log('SAVE toString: ' + p_uri.toString());
+                console.log('test path: ' + path.normalize(p_uri.path));
+
 
                 return p_uri.fsPath;
             } else {
