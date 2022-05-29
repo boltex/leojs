@@ -805,7 +805,6 @@ export class FileCommands extends DummyFileCommands {
 
         if (w_exists) {
 
-            let backupName: string | undefined;
             const timestamp: number = new Date().getTime();
             backupName = fileName + "." + timestamp.toString(32) + (this.tempCounter++).toString(32) + ".tmp";
 
@@ -820,7 +819,6 @@ export class FileCommands extends DummyFileCommands {
                 const w_writeUri = g.makeVscodeUri(backupName);
                 const writeData = Buffer.from(s, 'utf8');
                 await vscode.workspace.fs.writeFile(w_writeUri, writeData);
-
                 ok = true;
             }
             catch (exception) {
@@ -837,7 +835,6 @@ export class FileCommands extends DummyFileCommands {
             ok = true;
             backupName = undefined;
         }
-
         return [ok, backupName];
 
     }
@@ -846,12 +843,9 @@ export class FileCommands extends DummyFileCommands {
         // const w_uri = vscode.Uri.file(fileName);
         const w_uri = g.makeVscodeUri(fileName);
         try {
-            console.log('trying to delete ' + w_uri.path);
-
-
             await vscode.workspace.fs.delete(w_uri, { useTrash: false });
 
-            console.log('Did Delete!');
+            console.log('Did Delete : ', fileName);
         }
         catch (exception) {
             if (this.read_only) {
@@ -2821,12 +2815,7 @@ export class FileCommands extends DummyFileCommands {
 
             c.setFileTimeStamp(fileName);
             // Delete backup file.
-            console.log('going to try see if backup exists!');
-
             const w_exists = await g.os_path_exists(backupName);
-            console.log(
-                'backup name file exists: ', w_exists
-            );
 
             if (backupName && w_exists) {
                 await this.deleteBackupFile(backupName);

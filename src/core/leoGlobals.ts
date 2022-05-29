@@ -1896,15 +1896,15 @@ export function makeVscodeUri(p_fn: string): vscode.Uri {
 
     if (isBrowser || app.vscodeUriScheme !== 'file') {
         const newUri = app.vscodeWorkspaceUri!.with({ path: p_fn });
-        console.log('new URI:', JSON.stringify(newUri.toJSON()));
-        console.log('new URI toString:', newUri.toString());
+
+        // console.log('new URI:', JSON.stringify(newUri.toJSON()));
+        // console.log('new URI toString:', newUri.toString());
 
         return newUri;
 
     } else {
         // Normal file in desktop app
-        // return vscode.Uri.file(p_fn);
-        return makeVscodeUri(p_fn);
+        return vscode.Uri.file(p_fn);
     }
 }
 
@@ -3455,17 +3455,9 @@ export async function os_path_exists(p_path?: string): Promise<boolean> {
     const w_uri = makeVscodeUri(p_path);
 
     try {
-        console.log('Try PAth Exist!');
-
         await vscode.workspace.fs.stat(w_uri);
-        // OK exists
-        console.log('it does! ', w_uri.toString());
-
         return true;
     } catch {
-        // Does not exist !
-        console.log('it does NOT! ', w_uri.toString());
-
         return false;
     }
 
