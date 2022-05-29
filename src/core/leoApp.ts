@@ -1784,7 +1784,7 @@ export class LoadManager {
         // g.app.idleTimeManager.start();
 
         const t3 = process.hrtime();
-        const ok = await lm.doPostPluginsInit();
+        const ok = await lm.doPostPluginsInit(); // loads recent, or, new untitled.
         g.app.makeAllBindings();
 
         (g.app.gui as LeoUI).finishStartup();

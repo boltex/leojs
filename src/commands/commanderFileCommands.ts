@@ -695,7 +695,7 @@ export class CommanderFileCommands {
                 // re-start this 'save' method with given filename
                 return c.saveAs(w_filename); // no need to finish with dialogs.
             }
-            return Promise.resolve(); // EXIT !
+            return Promise.resolve(); // EXIT: canceled 'save-as' file name dialog !
         } else {
             // Fix bug 998090: save file as doesn't remove entry from open file list.
             if (c.mFileName) {

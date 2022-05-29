@@ -3455,11 +3455,17 @@ export async function os_path_exists(p_path?: string): Promise<boolean> {
     const w_uri = makeVscodeUri(p_path);
 
     try {
+        console.log('Try PAth Exist!');
+
         await vscode.workspace.fs.stat(w_uri);
         // OK exists
+        console.log('it does! ', w_uri.toString());
+
         return true;
     } catch {
         // Does not exist !
+        console.log('it does NOT! ', w_uri.toString());
+
         return false;
     }
 

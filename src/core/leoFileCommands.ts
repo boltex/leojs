@@ -846,7 +846,12 @@ export class FileCommands extends DummyFileCommands {
         // const w_uri = vscode.Uri.file(fileName);
         const w_uri = g.makeVscodeUri(fileName);
         try {
+            console.log('trying to delete ' + w_uri.path);
+
+
             await vscode.workspace.fs.delete(w_uri, { useTrash: false });
+
+            console.log('Did Delete!');
         }
         catch (exception) {
             if (this.read_only) {
@@ -2683,7 +2688,7 @@ export class FileCommands extends DummyFileCommands {
             // Delete backup file.
             const w_exists = await g.os_path_exists(backupName);
             if (backupName && w_exists) {
-                this.deleteBackupFile(backupName);
+                await this.deleteBackupFile(backupName);
             }
             this.mFileName = fileName;
             return true;
@@ -2801,7 +2806,8 @@ export class FileCommands extends DummyFileCommands {
             const xml_s = this.outline_to_xml_string();
 
             //s = bytes(s, this.leo_file_encoding, 'replace');
-            const s = Buffer.from(xml_s, this.leo_file_encoding as BufferEncoding);
+            // const s = Buffer.from(xml_s, this.leo_file_encoding as BufferEncoding);
+            const s = Buffer.from(xml_s, this.leo_file_encoding.toLowerCase() as BufferEncoding);
 
             // f.write(s);
             //fs.writeFileSync(f, s);
@@ -2815,9 +2821,15 @@ export class FileCommands extends DummyFileCommands {
 
             c.setFileTimeStamp(fileName);
             // Delete backup file.
+            console.log('going to try see if backup exists!');
+
             const w_exists = await g.os_path_exists(backupName);
+            console.log(
+                'backup name file exists: ', w_exists
+            );
+
             if (backupName && w_exists) {
-                this.deleteBackupFile(backupName);
+                await this.deleteBackupFile(backupName);
             }
             return true;
         }
