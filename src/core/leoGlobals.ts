@@ -642,7 +642,7 @@ export class TypedDict {
     }
 
     //@+node:felix.20220213000510.7: *4* td.get & keys & values
-    public get(key: string, p_default?: any): GeneralSetting {
+    public get(key: string, p_default?: any): any {
         if (this.d.hasOwnProperty(key)) {
             return this.d[key];
         } else {
