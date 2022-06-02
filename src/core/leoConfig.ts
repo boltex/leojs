@@ -14,19 +14,19 @@ import { Position, VNode } from './leoNodes';
  * The base class for settings parsers.
  */
 export class ParserBaseClass {
-    
+
     public c: Commands;
     public clipBoard: any[];
     // True if this is the .leo file being opened,
     // as opposed to myLeoSettings.leo or leoSettings.leo.
     public localFlag: boolean;
 
-    public shortcutsDict : g.TypedDict;
+    public shortcutsDict: g.TypedDict;
 
-    public openWithList: {[key: string]: any}[];   // A list of dicts containing 'name','shortcut','command' keys.
+    public openWithList: { [key: string]: any }[];   // A list of dicts containing 'name','shortcut','command' keys.
 
     // Keys are canonicalized names.
-    public dispatchDict: {[key: string]: (p: Position, kind: string, name: string, val: any)=> any};
+    public dispatchDict: { [key: string]: (p: Position, kind: string, name: string, val: any) => any };
     public debug_count: number;
 
     //@+<< ParserBaseClass data >>
@@ -68,7 +68,7 @@ export class ParserBaseClass {
     ];
 
     // Keys are settings names, values are (type,value) tuples.
-    public settingsDict: {[key: string]: [string, any] } = {}
+    public settingsDict: g.TypedDict | undefined;
 
     //@-<< ParserBaseClass data >>
     //@+others
@@ -77,72 +77,72 @@ export class ParserBaseClass {
     /**
      * Ctor for the ParserBaseClass class.
      */
-    constructor(c: Commands, localFlag: boolean){
-        
-        this.c = c
-        this.clipBoard = []
+    constructor(c: Commands, localFlag: boolean) {
+
+        this.c = c;
+        this.clipBoard = [];
         // True if this is the .leo file being opened,
         // as opposed to myLeoSettings.leo or leoSettings.leo.
-        this.localFlag = localFlag
+        this.localFlag = localFlag;
         this.shortcutsDict = new g.TypedDict( // was TypedDictOfLists.
             'parser.shortcutsDict',
             'shortcutName',
             'BindingInfo',
-        )
+        );
         this.openWithList = [];  // A list of dicts containing 'name','shortcut','command' keys.
         // Keys are canonicalized names.
         this.dispatchDict = {
-            'bool':         this.doBool,
-            'buttons':      this.doButtons, // New in 4.4.4
-            'color':        this.doColor,
-            'commands':     this.doCommands, // New in 4.4.8.
-            'data':         this.doData, // New in 4.4.6
-            'directory':    this.doDirectory,
+            'bool': this.doBool,
+            'buttons': this.doButtons, // New in 4.4.4
+            'color': this.doColor,
+            'commands': this.doCommands, // New in 4.4.8.
+            'data': this.doData, // New in 4.4.6
+            'directory': this.doDirectory,
             'enabledplugins': this.doEnabledPlugins,
-            'font':         this.doFont,
-            'ifenv':        this.doIfEnv, // New in 5.2 b1.
-            'ifhostname':   this.doIfHostname,
-            'ifplatform':   this.doIfPlatform,
-            'ignore':       this.doIgnore,
-            'int':          this.doInt,
-            'ints':         this.doInts,
-            'float':        this.doFloat,
-            'menus':        this.doMenus, // New in 4.4.4
-            'menuat':       this.doMenuat,
-            'popup':        this.doPopup, // New in 4.4.8
-            'mode':         this.doMode, // New in 4.4b1.
-            'openwith':     this.doOpenWith, // New in 4.4.3 b1.
-            'outlinedata':  this.doOutlineData, // New in 4.11.1.
-            'path':         this.doPath,
-            'ratio':        this.doRatio,
-            'shortcuts':    this.doShortcuts,
-            'string':       this.doString,
-            'strings':      this.doStrings,
-        }
-        this.debug_count = 0
+            'font': this.doFont,
+            'ifenv': this.doIfEnv, // New in 5.2 b1.
+            'ifhostname': this.doIfHostname,
+            'ifplatform': this.doIfPlatform,
+            'ignore': this.doIgnore,
+            'int': this.doInt,
+            'ints': this.doInts,
+            'float': this.doFloat,
+            'menus': this.doMenus, // New in 4.4.4
+            'menuat': this.doMenuat,
+            'popup': this.doPopup, // New in 4.4.8
+            'mode': this.doMode, // New in 4.4b1.
+            'openwith': this.doOpenWith, // New in 4.4.3 b1.
+            'outlinedata': this.doOutlineData, // New in 4.11.1.
+            'path': this.doPath,
+            'ratio': this.doRatio,
+            'shortcuts': this.doShortcuts,
+            'string': this.doString,
+            'strings': this.doStrings,
+        };
+        this.debug_count = 0;
     }
 
     //@+node:felix.20220529184714.4: *3* pbc.computeModeName
-    public computeModeName(name: string) : string {
+    public computeModeName(name: string): string {
 
         let s = name.trim().toLowerCase();
         const j = s.indexOf(' ');
 
-        if (j > -1){
+        if (j > -1) {
             s = s.substring(0, j);
         }
 
-        if (s.endsWith('mode')){
-            s = s.substring(0, s.length-4).trim();
+        if (s.endsWith('mode')) {
+            s = s.substring(0, s.length - 4).trim();
         }
 
-        if( s.endsWith('-')){
-            s = s.substring(0, s.length-1);
+        if (s.endsWith('-')) {
+            s = s.substring(0, s.length - 1);
         }
 
         const i = s.indexOf('::');
 
-        if( i > -1){
+        if (i > -1) {
             // The actual mode name is everything up to the "::"
             // The prompt is everything after the prompt.
             s = s.substring(0, i);
@@ -153,7 +153,7 @@ export class ParserBaseClass {
         return modeName;
     }
     //@+node:felix.20220529184714.5: *3* pbc.createModeCommand
-    public createModeCommand(modeName: string, name: string, modeDict: any):  void {
+    public createModeCommand(modeName: string, name: string, modeDict: any): void {
 
         console.log('TODO : createModeCommand');
 
@@ -173,7 +173,7 @@ export class ParserBaseClass {
     }
 
     //@+node:felix.20220529184714.6: *3* pbc.error
-    public error(s:string): void {
+    public error(s: string): void {
         g.pr(s);
         // Does not work at present because we are using a null Gui.
         g.blue(s);
@@ -181,12 +181,12 @@ export class ParserBaseClass {
 
     //@+node:felix.20220529184714.7: *3* pbc.kind handlers
     //@+node:felix.20220529184714.8: *4* pbc.doBool
-    public doBool(p: Position, kind: string, name: string, val: any): void { 
-        if ( ['True', 'true', '1'].includes(val)){
+    public doBool(p: Position, kind: string, name: string, val: any): void {
+        if (['True', 'true', '1'].includes(val)) {
             this.set(p, kind, name, true);
-        }else if ( ['False', 'false', '0'].includes(val)){
+        } else if (['False', 'false', '0'].includes(val)) {
             this.set(p, kind, name, false);
-        }else{
+        } else {
             this.valueError(p, kind, name, val);
         }
     }
@@ -195,8 +195,8 @@ export class ParserBaseClass {
     /**
      * Create buttons for each @button node in an @buttons tree.
      */
-    public doButtons(p: Position, kind: string, name: string, val: any) : void {
-        
+    public doButtons(p: Position, kind: string, name: string, val: any): void {
+
         const c: Commands = this.c;
         const tag = '@button';
         const aList: any[] = [];
@@ -205,7 +205,7 @@ export class ParserBaseClass {
         const after = p.nodeAfterTree();
 
         console.log('TODO: doButtons in parserBaseClass');
-        
+
         /* 
         while (p && p.__bool__() && !p.__eq__(after)){
             if(seen.includes(p.v)){
@@ -237,10 +237,10 @@ export class ParserBaseClass {
 
         // This setting is handled differently from most other settings,
         // because the last setting must be retrieved before any commander exists.
-        if (aList.length){
+        if (aList.length) {
             // Bug fix: 2011/11/24: Extend the list, don't replace it.
             g.app.config.atCommonButtonsList.push(...aList);
-            g.app.config.buttonsFileName = (c?c.shortFileName():'<no settings file>');
+            g.app.config.buttonsFileName = c ? c.shortFileName() : '<no settings file>';
         }
 
     }
@@ -248,7 +248,7 @@ export class ParserBaseClass {
     public doColor(p: Position, kind: string, name: string, val: any): void {
         // At present no checking is done.
 
-        let val = val.replace(/^\"+|\"+$/g, '');
+        val = val.replace(/^\"+|\"+$/g, '');
         val = val.replace(/^\'+|\'+$/g, '');
         this.set(p, kind, name, val);
 
@@ -257,25 +257,25 @@ export class ParserBaseClass {
     /**
      * Handle an @commands tree.
      */
-    public doCommands(p: Position, kind:string, name:string, val: any) : void {
-        
+    public doCommands(p: Position, kind: string, name: string, val: any): void {
+
         const c = this.c;
         const aList: [Position, string][] = [];
         const tag = '@command';
-        const seen:VNode[] = []
+        const seen: VNode[] = [];
         const after: Position = p.nodeAfterTree();
 
-        while (p && p.__bool__() && !p.__eq__(after)){
-            if( seen.includes(p.v)){
-                p.moveToNodeAfterTree()
-            }else if( p.isAtIgnoreNode()){
+        while (p && p.__bool__() && !p.__eq__(after)) {
+            if (seen.includes(p.v)) {
+                p.moveToNodeAfterTree();
+            } else if (p.isAtIgnoreNode()) {
                 seen.push(p.v);
                 p.moveToNodeAfterTree();
-            }else{
+            } else {
                 seen.push(p.v);
-                if( g.match_word(p.h, 0, tag)){
+                if (g.match_word(p.h, 0, tag)) {
                     // We can not assume that p will be valid when it is used.
-                    const script = g.getScript(c, p,                    false,                    true,                    true);
+                    const script = g.getScript(c, p, false, true, true);
                     aList.push([p.copy(), script]);
                 }
                 p.moveToThreadNext();
@@ -283,14 +283,14 @@ export class ParserBaseClass {
         }
         // This setting is handled differently from most other settings,
         // because the last setting must be retrieved before any commander exists.
-        if (aList.length){
+        if (aList.length) {
             // Bug fix: 2011/11/24: Extend the list, don't replace it.
             g.app.config.atCommonCommandsList.push(...aList);
         }
     }
 
     //@+node:felix.20220529184714.12: *4* pbc.doData
-    public doData(p: Position, kind:string, name:string, val: any) : void {
+    public doData(p: Position, kind: string, name: string, val: any): void {
         // New in Leo 4.11: do not strip lines.
         // New in Leo 4.12.1: strip *nothing* here.
         // New in Leo 4.12.1: allow composition of nodes:
@@ -298,10 +298,10 @@ export class ParserBaseClass {
         // - Ensure all fragments end with a newline.
         const data: string[] = g.splitLines(p.b);
 
-        for( let p2 of p.subtree()){
-            if (p2.b && !p2.h.startsWith('@')){
+        for (let p2 of p.subtree()) {
+            if (p2.b && !p2.h.startsWith('@')) {
                 data.push(...g.splitLines(p2.b));
-                if( !p2.b.endsWith('\n')){
+                if (!p2.b.endsWith('\n')) {
                     data.push('\n');
                 }
             }
@@ -311,7 +311,7 @@ export class ParserBaseClass {
     }
 
     //@+node:felix.20220529184714.13: *4* pbc.doOutlineData & helper
-    public doOutlineData(p: Position, kind:string, name:string, val: any): string {
+    public doOutlineData(p: Position, kind: string, name: string, val: any): string {
         // New in Leo 4.11: do not strip lines.
         const data = this.getOutlineDataHelper(p);
         this.set(p, kind, name, data);
@@ -321,67 +321,67 @@ export class ParserBaseClass {
     //@+node:felix.20220529184714.14: *5* pbc.getOutlineDataHelper
     public getOutlineDataHelper(p: Position): string | undefined {
         const c = this.c;
-        if( !p || !p.__bool__()){
+        if (!p || !p.__bool__()) {
             return undefined;
         }
         let s: string | undefined;
-        try{
+        try {
             // Copy the entire tree to s.
             (c.fileCommands as FileCommands).leo_file_encoding = 'utf-8';
             s = (c.fileCommands as FileCommands).outline_to_clipboard_string(p);
             s = g.toUnicode(s, 'utf-8');
         }
-        catch(exception){
+        catch (exception) {
             g.es_exception(exception);
             s = undefined;
         }
         return s;
     }
     //@+node:felix.20220529184714.15: *4* pbc.doDirectory & doPath
-    public  doDirectory(p: Position, kind:string, name:string, val: any): void {
+    public doDirectory(p: Position, kind: string, name: string, val: any): void {
         // At present no checking is done.
-        this.set(p, kind, name, val)
+        this.set(p, kind, name, val);
     }
 
     // Same as doDirectory for backward compatibility
-    public  doPath(p: Position, kind:string, name:string, val: any): void {
+    public doPath(p: Position, kind: string, name: string, val: any): void {
         // At present no checking is done.
-        this.set(p, kind, name, val)
+        this.set(p, kind, name, val);
     }
 
     //@+node:felix.20220529184714.16: *4* pbc.doEnabledPlugins
-    public doEnabledPlugins(p: Position, kind:string, name:string, val: any): void {
-        const c = this.c
+    public doEnabledPlugins(p: Position, kind: string, name: string, val: any): void {
+        const c = this.c;
         let s = p.b;
         // This setting is handled differently from all other settings,
         // because the last setting must be retrieved before any commander exists.
         // 2011/09/04: Remove comments, comment lines and blank lines.
-        const aList: string[] =  [];
+        const aList: string[] = [];
         const lines: string[] = g.splitLines(s);
 
-        for (let s of lines){
+        for (let s of lines) {
             let i = s.indexOf('#');
-            if (i > -1){
-                s = s.substring(0,i) + '\n';  // 2011/09/29: must add newline back in.
+            if (i > -1) {
+                s = s.substring(0, i) + '\n';  // 2011/09/29: must add newline back in.
             }
-            if (s.trim()){
+            if (s.trim()) {
                 aList.push(s.trimStart());
             }
         }
         s = aList.join();
         // Set the global config ivars.
         g.app.config.enabledPluginsString = s;
-        g.app.config.enabledPluginsFileName = c?c.shortFileName() : '<no settings file>';
+        g.app.config.enabledPluginsFileName = c ? c.shortFileName() : '<no settings file>';
 
     }
 
     //@+node:felix.20220529184714.17: *4* pbc.doFloat
-    public doFloat(p: Position, kind:string, name:string, val: any): void {
-        try{
+    public doFloat(p: Position, kind: string, name: string, val: any): void {
+        try {
             val = Number(val);
             this.set(p, kind, name, val);
-        } 
-       catch (valError){
+        }
+        catch (valError) {
             this.valueError(p, kind, name, val);
         }
     }
@@ -390,13 +390,13 @@ export class ParserBaseClass {
     /**
      * Handle an @font node. Such nodes affect syntax coloring *only*.
      */
-    public doFont(p: Position, kind:string, name:string, val: any): void {
-        
-        const d = this.parseFont(p)
+    public doFont(p: Position, kind: string, name: string, val: any): void {
+
+        const d = this.parseFont(p);
         // Set individual settings.
-        for (let key of ['family', 'size', 'slant', 'weight']){
+        for (let key of ['family', 'size', 'slant', 'weight']) {
             const data = d.get(key);
-            if (data){
+            if (data) {
                 let name;
                 let w_val;
                 [name, w_val] = data;
@@ -412,24 +412,24 @@ export class ParserBaseClass {
      *
      * Enable descendant settings if the value of os.getenv is in any of the names.
      */
-    public doIfEnv(p: Position, kind:string, name:string, val: any): string | undefined {
-        
+    public doIfEnv(p: Position, kind: string, name: string, val: any): string | undefined {
+
         const aList = name.split(',');
-        if( !aList.length){
+        if (!aList.length) {
             return 'skip';
         }
         name = aList[0]; // first should be name
 
-        let env: string|undefined;
-        if(process && process.env && process.env[name]){
+        let env: string | undefined;
+        if (process && process.env && process.env[name]) {
             env = process.env[name];
         }
-        
-        env = env?env.toLowerCase().trim() : 'none';
+
+        env = env ? env.toLowerCase().trim() : 'none';
 
         aList.shift(); // remove first
-        for (let s of aList){
-            if (s.toLowerCase().trim() === env){
+        for (let s of aList) {
+            if (s.toLowerCase().trim() === env) {
                 return undefined;
             }
         }
@@ -450,10 +450,10 @@ export class ParserBaseClass {
      * @ifhostname !harry
      * Enable descendant settings if h != 'harry'
      */
-    public doIfHostname(p: Position, kind:string, name:string, val: any): string|undefined {
-        
+    public doIfHostname(p: Position, kind: string, name: string, val: any): string | undefined {
+
         console.log('TODO : doIfHostname');
-        
+
         /* 
         const lm = g.app.loadManager;
         const h = lm.computeMachineName().trim()
@@ -474,9 +474,10 @@ export class ParserBaseClass {
     /**
      * Support @ifplatform in @settings trees.
      */
-    public doIfPlatform(p: Position, kind:string, name:string, val: any): string|undefined {
-        
+    public doIfPlatform(p: Position, kind: string, name: string, val: any): string | undefined {
+
         console.log('TODO : doIfPlatform');
+        return undefined;
 
         /* 
 
@@ -492,19 +493,19 @@ export class ParserBaseClass {
     }
 
     //@+node:felix.20220529184714.22: *4* pbc.doIgnore
-    public doIgnore(p: Position, kind:string, name:string, val: any): string {
+    public doIgnore(p: Position, kind: string, name: string, val: any): string {
         return "skip";
     }
 
     //@+node:felix.20220529184714.23: *4* pbc.doInt
-    public  doInt(p: Position, kind:string, name:string, val: any): void {
-        try{
+    public doInt(p: Position, kind: string, name: string, val: any): void {
+        try {
             val = Number(val);
             val = Math.trunc(val);
 
             this.set(p, kind, name, val);
         }
-        catch (valError){
+        catch (valError) {
             this.valueError(p, kind, name, val);
         }
     }
@@ -515,40 +516,40 @@ export class ParserBaseClass {
      * @ints [val1,val2,...]aName=val
      *@ints aName[val1,val2,...]=val
      */
-    public doInts(p: Position, kind:string, name:string, val: any): void {
-        
+    public doInts(p: Position, kind: string, name: string, val: any): void {
+
         name = name.trim(); // The name indicates the valid values.
         let i = name.indexOf('[');
         let j = name.indexOf(']');
 
-        if (-1 < i && i < j){
+        if (-1 < i && i < j) {
             const items_s = name.substring(i + 1, j);
             let items: string[] | number[] = items_s.split(',');
             name = name.substring(0, i) + name.substring(j + 1).trim();
 
-            try{
+            try {
                 // items = [int(item.trim()) for item in items]  // type:ignore
-                items = items.map((item)=>{ return Number(item.trim()); });
+                items = items.map((item) => { return Number(item.trim()); });
             }
-            catch (valueError){
+            catch (valueError) {
                 items = [];
                 this.valueError(p, 'ints[]', name, val);
                 return;
             }
 
             // kind = `ints[${','.join([str(item) for item in items])}]`;
-            kind = `ints[${ items.map((item)=>{ return item.toString();}).join(',')}]`;
-                
-            try{
+            kind = `ints[${items.map((item) => { return item.toString(); }).join(',')}]`;
+
+            try {
                 val = Number(val);
                 val = Math.trunc(val);
             }
-            catch (valueError){
+            catch (valueError) {
                 this.valueError(p, 'int', name, val);
                 return;
             }
 
-            if(!items.includes(val)){
+            if (!items.includes(val)) {
                 this.error(`${val} is not in ${kind} in ${name}`);
                 return;
             }
@@ -562,10 +563,10 @@ export class ParserBaseClass {
     /**
      * Handle @menuat setting.
      */
-    public doMenuat(p: Position, kind:string, name:string, val: any): void {
-        
+    public doMenuat(p: Position, kind: string, name: string, val: any): void {
+
         console.log('TODO : doMenuat');
-        
+
         /* 
         
         if g.app.config.menusList:
@@ -618,13 +619,13 @@ export class ParserBaseClass {
         else:
             g.es_print("ERROR: @menuat found but no menu tree to patch")
 
-        */ 
+        */
 
     }
 
     //@+node:felix.20220529184714.26: *5* pbc.getName
-    public getName(val: string, val2?: string): string { 
-        if (val2 && val2.trim()){
+    public getName(val: string, val2?: string): string {
+        if (val2 && val2.trim()) {
             val = val2;
         }
         val = val.split('\n', 1)[0]; // keep first
@@ -642,7 +643,7 @@ export class ParserBaseClass {
     }
 
     //@+node:felix.20220529184714.27: *5* pbc.dumpMenuTree
-    public  dumpMenuTree(aList: any[], level= 0, path =''): void {
+    public dumpMenuTree(aList: any[], level = 0, path = ''): void {
 
         // Todo 
 
@@ -663,7 +664,7 @@ export class ParserBaseClass {
     }
 
     //@+node:felix.20220529184714.28: *5* pbc.patchMenuTree
-    public patchMenuTree(orig: any[], targetPath: string, path=''): any {
+    public patchMenuTree(orig: any[], targetPath: string, path = ''): any {
         // TODO 
         /* 
         kind: str
@@ -691,10 +692,10 @@ export class ParserBaseClass {
 
     }
     //@+node:felix.20220529184714.29: *4* pbc.doMenus & helper
-    public doMenus(p: Position, kind:string, name:string, val: any): void {
+    public doMenus(p: Position, kind: string, name: string, val: any): void {
 
         console.log('TODO: doMenus');
-        
+
         /* 
         
         c = self.c
@@ -775,8 +776,8 @@ export class ParserBaseClass {
     /**
      * Parse an @mode node and create the enter-<name>-mode command.
      */
-    public doMode(p: Position, kind:string, name:string, val: any): void {
-        
+    public doMode(p: Position, kind: string, name: string, val: any): void {
+
         const c = this.c;
         const name1 = name;
         const modeName = this.computeModeName(name);
@@ -788,16 +789,16 @@ export class ParserBaseClass {
 
         const s = p.b;
         const lines = g.splitLines(s);
-        for( let line in lines){
+        for (let line in lines) {
             line = line.trim();
-            if (line && !g.match(line, 0, '#')){
+            if (line && !g.match(line, 0, '#')) {
                 let name;
                 let bi;
                 [name, bi] = this.parseShortcutLine('*mode-setting*', line);
-                if (!name){
+                if (!name) {
                     // An entry command: put it in the special *entry-commands* key.
                     d.add_to_list('*entry-commands*', bi);
-                }else if( bi ){
+                } else if (bi) {
                     // A regular shortcut.
                     bi.pane = modeName;
                     const aList = d.get(name, []);
@@ -805,11 +806,13 @@ export class ParserBaseClass {
                     let key2;
                     let aList2;
                     [key2, aList2] = c.config.getShortcut(name);
-                    
-                    // aList3 = [z for z in aList2 if z.pane != modeName];
-                    const aList3 = aList2.filter((z)=> {return z.pane !== modeName});
 
-                    if( aList3.length){
+                    // aList3 = [z for z in aList2 if z.pane != modeName];
+                    const aList3 = aList2.filter((z) => {
+                        return z.pane !== modeName;
+                    });
+
+                    if (aList3.length) {
                         aList.push(...aList3);
                     }
                     aList.push(bi);
@@ -826,13 +829,13 @@ export class ParserBaseClass {
     }
 
     //@+node:felix.20220529184714.32: *4* pbc.doOpenWith
-    public doOpenWith(p: Position, kind:string, name:string, val: any): void {
+    public doOpenWith(p: Position, kind: string, name: string, val: any): void {
         const d = this.parseOpenWith(p);
         d['name'] = name;
         d['shortcut'] = val;
-        name = 'openwithtable'
+        name = 'openwithtable';
         kind = name;
-        
+
         this.openWithList.push(d);
         this.set(p, kind, name, this.openWithList);
 
@@ -842,15 +845,15 @@ export class ParserBaseClass {
     /**
      * Handle @popup menu items in @settings trees.
      */
-    public doPopup(p: Position, kind:string, name:string, val: any): void {
-        
+    public doPopup(p: Position, kind: string, name: string, val: any): void {
+
         const popupName = name;
         // popupType = val
         const aList: any[] = [];
 
         p = p.copy();
         this.doPopupItems(p, aList);
-        if (!g.app.config.context_menus){
+        if (!g.app.config.context_menus) {
             g.app.config.context_menus = {};
         }
         g.app.config.context_menus[popupName] = aList;
@@ -866,14 +869,14 @@ export class ParserBaseClass {
         let kind: string;
         let body: string;
         let head: string;
-        while (p && p.__bool__() && !p.__eq__(after)){
+        while (p && p.__bool__() && !p.__eq__(after)) {
             h = p.h;
             let hadBreak = false;
-            for( let tag of ['@menu', '@item']){
-                if (g.match_word(h, 0, tag)){
-                    const itemName = h.substring(tag.length ).trim();
-                    if (itemName){
-                        if (tag === '@menu'){
+            for (let tag of ['@menu', '@item']) {
+                if (g.match_word(h, 0, tag)) {
+                    const itemName = h.substring(tag.length).trim();
+                    if (itemName) {
+                        if (tag === '@menu') {
                             const aList2: any[] = [];
                             kind = `${itemName}`;
                             body = p.b;
@@ -882,7 +885,7 @@ export class ParserBaseClass {
                             p.moveToNodeAfterTree();
                             hadBreak = true;
                             break;
-                        }else{
+                        } else {
                             kind = tag;
                             head = itemName;
                             body = p.b;
@@ -894,26 +897,26 @@ export class ParserBaseClass {
                     }
 
                 }
-            if(!hadBreak) {
-                p.moveToThreadNext();
-            }
-    
+                if (!hadBreak) {
+                    p.moveToThreadNext();
+                }
+
             }
         }
     }
 
     //@+node:felix.20220529184714.35: *4* pbc.doRatio
-    public doRatio(p: Position, kind:string, name:string, val: any): void {
-        try{
+    public doRatio(p: Position, kind: string, name: string, val: any): void {
+        try {
             val = Number(val);
-            if (0.0 <= val && val <= 1.0){
+            if (0.0 <= val && val <= 1.0) {
                 this.set(p, kind, name, val);
-            }else{
+            } else {
                 this.valueError(p, kind, name, val);
             }
         }
-        catch (valError){
-            this.valueError(p, kind, name, val)
+        catch (valError) {
+            this.valueError(p, kind, name, val);
         }
     }
 
@@ -921,29 +924,29 @@ export class ParserBaseClass {
     /**
      * Handle an @shortcut or @shortcuts node.
      */
-    public doShortcuts(p: Position, kind:string, junk_name:string, junk_val: any, s?: string): void {
-   
+    public doShortcuts(p: Position, kind: string, junk_name: string, junk_val: any, s?: string): void {
+
         const c = this.c;
         const d = this.shortcutsDict;
 
-        if(s===undefined){
+        if (s === undefined) {
             s = p.b;
         }
         const fn = d.name();
-        for( let line of g.splitLines(s)){
+        for (let line of g.splitLines(s)) {
             line = line.trim()
-            if( line && !g.match(line, 0, '#')){
+            if (line && !g.match(line, 0, '#')) {
                 let commandName;
                 let bi;
                 [commandName, bi] = this.parseShortcutLine(fn, line);
-                if(bi === undefined){  // Fix #718.
+                if (bi === undefined) {  // Fix #718.
                     console.log(`\nWarning: bad shortcut specifier: ${line}\n`);
-                }else{
-                    if (bi && ![undefined, 'none', 'None'].includes(bi.stroke)){
-                        this.doOneShortcut(bi, commandName, p);
-                    }else
+                } else {
+                    if (bi && ![undefined, 'none', 'None'].includes(bi.stroke)) {
+                        this.doOneShortcut(bi, commandName!, p);
+                    } else
                         // New in Leo 5.7: Add local assignments to None to c.k.killedBindings.
-                        if (c.config.isLocalSettingsFile()){
+                        if (c.config.isLocalSettingsFile()) {
                             c.k.killedBindings.append(commandName);
                         }
 
@@ -961,7 +964,7 @@ export class ParserBaseClass {
      * Handle a regular shortcut.
      */
     public doOneShortcut(bi: any, commandName: string, p: Position): void {
-       
+
         const d = this.shortcutsDict;
         const aList = d.get(commandName, []);
         aList.append(bi);
@@ -970,7 +973,7 @@ export class ParserBaseClass {
     }
 
     //@+node:felix.20220529184714.38: *4* pbc.doString
-    public doString(p: Position, kind:string, name:string, val: any): void {
+    public doString(p: Position, kind: string, name: string, val: any): void {
         // At present no checking is done.
         this.set(p, kind, name, val);
 
@@ -982,16 +985,18 @@ export class ParserBaseClass {
      * @strings aName[val1,val2...]=val
      * @strings [val1,val2,...]aName=val
      */
-    public doStrings(p: Position, kind:string, name:string, val: any): void {
+    public doStrings(p: Position, kind: string, name: string, val: any): void {
 
         name = name.trim();
         let i = name.indexOf('[');
         let j = name.indexOf(']');
-        if (-1 < i && i < j){
+        if (-1 < i && i < j) {
             const items_s = name.substring(i + 1, j);
             let items = items_s.split(',');
-            items = items.map((p_item)=>{return p_item.trim()});
-            name = name.substring(0,i) + name.substring(j + 1 ).trim();
+            items = items.map((p_item) => {
+                return p_item.trim();
+            });
+            name = name.substring(0, i) + name.substring(j + 1).trim();
             kind = `strings[${items.join(',')}]`;
             // At present no checking is done.
             this.set(p, kind, name, val);
@@ -1013,90 +1018,125 @@ export class ParserBaseClass {
 
     //@+node:felix.20220529184714.42: *3* pbc.parsers
     //@+node:felix.20220529184714.43: *4* pbc.parseFont & helper
-    public parseFont(self, p: Pos) -> Dict[str, Any]:
-        d: Dict[str, Any] = {
+    public parseFont(p: Position): { [key: string]: any } { //  -> Dict[str, Any]:
+        const d: { [key: string]: any } = {
             'comments': [],
-            'family': None,
-            'size': None,
-            'slant': None,
-            'weight': None,
-        }
-        s = p.b
-        lines = g.splitLines(s)
-        for line in lines:
-            this.parseFontLine(line, d)
-        comments = d.get('comments')
-        d['comments'] = '\n'.join(comments)
-        return d
+            'family': undefined,
+            'size': undefined,
+            'slant': undefined,
+            'weight': undefined,
+        };
 
+        const s = p.b;
+        const lines = g.splitLines(s);
+        for (let line of lines) {
+            this.parseFontLine(line, d);
+        }
+        const comments = d.get('comments');
+        d['comments'] = comments.join('\n');
+        return d;
+    }
 
     //@+node:felix.20220529184714.44: *5* pbc.parseFontLine
-    public parseFontLine(self, line: str, d: Dict[str, Any]) -> None:
-        s = line.strip()
-        if not s:
-            return
-        try:
-            s = str(s)
-        except UnicodeError:
-            pass
-        if g.match(s, 0, '#'):
-            s = s[1:].strip()
-            comments = d.get('comments')
-            comments.append(s)
-            d['comments'] = comments
-            return
-        // name is everything up to '='
-        i = s.find('=')
-        if i == -1:
-            name = s
-            val = None
-        else:
-            name = s[:i].strip()
-            val = s[i + 1 :].strip().strip('"').strip("'")
-        for tag in ('_family', '_size', '_slant', '_weight'):
-            if name.endswith(tag):
-                kind = tag[1:]
-                d[kind] = name, val  // Used only by doFont.
-                return
+    public parseFontLine(line: string, d: { [key: string]: any }): void {
+        let s = line.trim();
 
+        if (!s) {
+            return;
+        }
+
+        try {
+            s = s.toString();
+        }
+        catch (unicodeError) {
+            // pass
+        }
+
+        let comments;
+        if (g.match(s, 0, '#')) {
+            s = s.substring(1).trim();
+            comments = d.get('comments');
+            comments.push(s);
+            d['comments'] = comments;
+            return;
+        }
+
+        // name is everything up to '='
+        let i = s.indexOf('=');
+
+        let name;
+        let val;
+        if (i === -1) {
+            name = s;
+            val = undefined;
+        } else {
+            name = s.substring(0, i).trim();
+            val = s.substring(i + 1).trim();
+            // trim single and double quotes
+            val = val.replace(/^\"+|\"+$/g, '');
+            val = val.replace(/^\'+|\'+$/g, '');
+
+        }
+
+        for (let tag of ['_family', '_size', '_slant', '_weight']) {
+            if (name.endsWith(tag)) {
+                const kind = tag.substring(1);
+                d[kind] = [name, val];  // Used only by doFont.
+                return;
+            }
+        }
+    }
 
     //@+node:felix.20220529184714.45: *4* pbc.parseHeadline
-    public parseHeadline(self, s: str) -> Tuple[str, str, Any]:
-        """
-        Parse a headline of the form @kind:name=val
-        Return (kind,name,val).
-        Leo 4.11.1: Ignore everything after @data name.
-        """
-        kind = name = val = None
-        if g.match(s, 0, '@'):
-            i = g.skip_id(s, 1, chars='-')
-            i = g.skip_ws(s, i)
-            kind = s[1:i].strip()
-            if kind:
+    /**
+     * Parse a headline of the form @kind:name=val
+     * Return (kind,name,val).
+     * Leo 4.11.1: Ignore everything after @data name.
+     */
+    public parseHeadline(s: string): [string | undefined, string | undefined, any] {
+
+        let kind;
+        let name;
+        let val;
+        let i;
+        let j;
+
+        if (g.match(s, 0, '@')) {
+            i = g.skip_id(s, 1, '-');
+            i = g.skip_ws(s, i);
+            kind = s.substring(1, i).trim();
+            if (kind) {
                 // name is everything up to '='
-                if kind == 'data':
+                if (kind === 'data') {
                     // i = g.skip_ws(s,i)
-                    j = s.find(' ', i)
-                    if j == -1:
-                        name = s[i:].strip()
-                    else:
-                        name = s[i:j].strip()
-                else:
-                    j = s.find('=', i)
-                    if j == -1:
-                        name = s[i:].strip()
-                    else:
-                        name = s[i:j].strip()
+                    j = s.indexOf(' ', i);
+                    if (j === -1) {
+                        name = s.substring(i).trim();
+                    } else {
+                        name = s.substring(i, j).trim();
+                    }
+                } else {
+                    j = s.indexOf('=', i);
+                    if (j === -1) {
+                        name = s.substring(i).trim();
+                    } else {
+                        name = s.substring(i, j).trim();
                         // val is everything after the '='
-                        val = s[j + 1 :].strip()
-        return kind, name, val
+                        val = s.substring(j + 1).trim();
+                    }
 
+                }
+            }
+        }
 
+        return [kind, name, val];
+
+    }
     //@+node:felix.20220529184714.46: *4* pbc.parseOpenWith & helper
-    public parseOpenWith(p: Position): {[key: string]: any} {
+    public parseOpenWith(p: Position): { [key: string]: any } {
 
-        const d = {'command': undefined};  // d contains args, kind, etc tags.
-        for (let line of g.splitLines(p.b)){
+        const d = { 'command': undefined };  // d contains args, kind, etc tags.
+        for (let line of g.splitLines(p.b)) {
             this.parseOpenWithLine(line, d);
         }
         return d;
@@ -1104,38 +1144,38 @@ export class ParserBaseClass {
     }
 
     //@+node:felix.20220529184714.47: *5* pbc.parseOpenWithLine
-    public parseOpenWithLine(line: string, d: {[key: string]: any}) : void {
+    public parseOpenWithLine(line: string, d: { [key: string]: any }): void {
         const s = line.trim();
-        if (!s){
+        if (!s) {
             return;
         }
         let i = g.skip_ws(s, 0);
-        if g.match(s, i, '#'){
+        if (g.match(s, i, '#')) {
             return;
         }
         let j = g.skip_c_id(s, i);
         const tag = s.substring(i, j).trim();
-        if (!tag){
+        if (!tag) {
             g.es_print(`@openwith lines must start with a tag: ${s}`);
             return;
         }
 
         i = g.skip_ws(s, j);
-        if (!g.match(s, i, ':')){
+        if (!g.match(s, i, ':')) {
             g.es_print(`colon must follow @openwith tag: ${s}`);
             return;
         }
         i += 1;
 
         const val = s.substring(i).trim() || '';  // An empty val is valid.
-        if (tag === 'arg'){
+        if (tag === 'arg') {
             const aList: any[] = d.get('args', []);
             aList.push(val);
             d['args'] = aList;
 
-        }else if (d.get(tag)){
+        } else if (d.get(tag)) {
             g.es_print(`ignoring duplicate definition of ${tag} ${s}`);
-        }else{
+        } else {
             d[tag] = val;
         }
 
@@ -1151,25 +1191,26 @@ export class ParserBaseClass {
      *  command-name --> mode-name = binding
      *  command-name --> same = binding
      */
-    public parseShortcutLine(kind: string, s: string): [string|undefined, any]{
-        
-        s = s.replace(/[\x7F]/g, '')  // Can happen on MacOS. Very weird.
+    public parseShortcutLine(kind: string, s: string): [string | undefined, any] {
+
+        s = s.replace(/[\x7F]/g, '');  // Can happen on MacOS. Very weird.
         let name;
         let val;
         let nextMode;
-        
-        nextMode = 'none'
+
+        nextMode = 'none';
         let i = g.skip_ws(s, 0);
         let j;
+        let entryCommandName;
 
-        if g.match(s, i, '-->'){  // New in 4.4.1 b1: allow mode-entry commands.
+        if (g.match(s, i, '-->')) {  // New in 4.4.1 b1: allow mode-entry commands.
             j = g.skip_ws(s, i + 3);
             i = g.skip_id(s, j, '-');
             entryCommandName = s.substring(j, i);
 
             // TODO : ? support key binding / keyStroke ?
             console.log('TODO support key binding / keyStroke : ', entryCommandName);
-            
+
             //  return [undefined, new g.BindingInfo('*entry-command*', commandName=entryCommandName)]
             return [undefined, undefined];
         }
@@ -1177,55 +1218,56 @@ export class ParserBaseClass {
         i = g.skip_id(s, j, '-@');  // #718.
         name = s.substring(j, i);
         // #718: Allow @button- and @command- prefixes.
-        for(let tag of ('@button-', '@command-')){
-            if(name.startswith(tag)){
-                name = name[len(tag) :];
+        for (let tag of ['@button-', '@command-']) {
+            if (name.startsWith(tag)) {
+                name = name.substring(tag.length);
                 break;
             }
         }
-        if( !name){
+        if (!name) {
             return [undefined, undefined];
-        }    
+        }
         // New in Leo 4.4b2.
         i = g.skip_ws(s, i);
         if (g.match(s, i, '->')) { // New in 4.4: allow pane-specific shortcuts.
             j = g.skip_ws(s, i + 2);
             i = g.skip_id(s, j);
-            nextMode = s[j:i];
+            nextMode = s.substring(j, i);
         }
         i = g.skip_ws(s, i);
-        if( g.match(s, i, '!')){  // New in 4.4: allow pane-specific shortcuts.
+        let pane;
+        if (g.match(s, i, '!')) {  // New in 4.4: allow pane-specific shortcuts.
             j = g.skip_ws(s, i + 1);
             i = g.skip_id(s, j);
-            pane = s[j:i];
-            if !pane.trim(){
+            pane = s.substring(j, i);
+            if (!pane.trim()) {
                 pane = 'all';
             }
-        }else{
-             pane = 'all';
+        } else {
+            pane = 'all';
         }
 
         i = g.skip_ws(s, i);
 
-        if( g.match(s, i, '=')){
+        if (g.match(s, i, '=')) {
             i = g.skip_ws(s, i + 1);
-            val = s[i:];
+            val = s.substring(i);
         }
         // New in 4.4: Allow comments after the shortcut.
         // Comments must be preceded by whitespace.
-        if( val){
+        if (val) {
             i = val.indexOf('#');
-            if( i > 0 && [' ', '\t'].includes(val[i - 1])){
-                val = val[:i].trim();
+            if (i > 0 && [' ', '\t'].includes(val[i - 1])) {
+                val = val.substring(0, i).trim();
             }
         }
-        if (!val){
+        if (!val) {
             return [name, undefined];
         }
 
-
         // TODO : ? support key binding / keyStroke ?
         console.log('TODO support key binding / keyStroke : ', kind, s);
+
         return [undefined, undefined];
         // stroke = g.KeyStroke(binding=val) if val else undefined;
         // bi = g.BindingInfo(kind=kind, nextMode=nextMode, pane=pane, stroke=stroke);
@@ -1237,43 +1279,44 @@ export class ParserBaseClass {
     /**
      * Init the setting for name to val.
      */
-    public set( p: Position, kind: string, name: string, val: any): void {
+    public set(p: Position, kind: string, name: string, val: any): void {
 
         const c = this.c;
         // Note: when kind is 'shortcut', name is a command name.
         const key = this.munge(name);
+        let parent;
 
-        if (!key){
-            g.es_print('Empty setting name in', p.h in c.fileName());
+        if (!key) {
+            g.es_print('Empty setting name in', ` ${p.h} in ${c.fileName()}`);
             parent = p.parent();
-            while( parent && parent.__bool__()){
+            while (parent && parent.__bool__()) {
                 g.trace('parent', parent.h);
                 parent.moveToParent();
             }
             return;
         }
 
-        const d = this.settingsDict;
+        const d = this.settingsDict!;
         const gs = d.get(key);
 
-        if (gs){
-            console.assert( gs instanceof g.GeneralSetting, gs);
+        if (gs) {
+            console.assert(gs instanceof g.GeneralSetting, gs);
             const w_path = gs.path;
-            if (g.os_path_finalize(c.mFileName) !== g.os_path_finalize(w_path)){
+            if (g.os_path_finalize(c.mFileName) !== g.os_path_finalize(w_path)) {
                 g.es("over-riding setting:", name, "from", w_path);  // 1341
             }
         }
         // Important: we can't use c here: it may be destroyed!
 
-        d[key] = new g.GeneralSetting(
+        d.set(key, new g.GeneralSetting(
             {
                 kind: kind,  // type:ignore
-                path:c.mFileName,
-                tag:'setting',
-                unl:( p && p.__bool__())? p.get_UNL()  : '',
-                val:val
+                path: c.mFileName,
+                tag: 'setting',
+                unl: (p && p.__bool__()) ? p.get_UNL() : '',
+                val: val
             }
-        );
+        ));
 
     }
 
@@ -1281,43 +1324,40 @@ export class ParserBaseClass {
     /**
      * Traverse the entire settings tree.
      */
-    public traverse() : [any, any] {
-        
-        const c = this.c
+    public traverse(): [any, any] {
 
-        this.settingsDict = g.TypedDict(  // type:ignore
-    {
-            name:`settingsDict for ${c.shortFileName()}`,
+        const c = this.c;
+
+        this.settingsDict = new g.TypedDict(  // type:ignore
+            `settingsDict for ${c.shortFileName()}`,
             // keyType:type('settingName'),
-            keyType: 'string',
-            valType: 'GeneralSetting' // typeof g.GeneralSetting
-            }
+            'string',
+            'GeneralSetting', // typeof g.GeneralSetting
         );
 
-        this.shortcutsDict = g.TypedDict(  // was TypedDictOfLists.
-            {
-                name: `shortcutsDict for ${c.shortFileName()}`,
-                keyType: 'string',
-                valType:  'BindingInfo' // typeof g.BindingInfo
-            }
+        this.shortcutsDict = new g.TypedDict(  // was TypedDictOfLists.
+            `shortcutsDict for ${c.shortFileName()}`,
+            'string',
+            'BindingInfo', // typeof g.BindingInfo
         );
 
         // This must be called after the outline has been inited.
         const p = c.config.settingsRoot();
 
-        if (!p || !p.__bool__()){
+        if (!p || !p.__bool__()) {
             // c.rootPosition() doesn't exist yet.
             // This is not an error.
             return [this.shortcutsDict, this.settingsDict];
         }
 
+
         const after: Position = p.nodeAfterTree();
-        while( p && p.__bool__() && !p.__eq__(after)){
-            result = this.visitNode(p);
-            if (result === "skip"){
+        while (p && p.__bool__() && !p.__eq__(after)) {
+            const result = this.visitNode(p);
+            if (result === "skip") {
                 // g.warning('skipping settings in',p.h)
                 p.moveToNodeAfterTree();
-            }else{
+            } else {
                 p.moveToThreadNext();
             }
 
@@ -1331,14 +1371,14 @@ export class ParserBaseClass {
     /**
      * Give an error: val is not valid for kind.
      */
-    public valueError(p: Position, kind: string, name: string, val: any) : void {
-        
+    public valueError(p: Position, kind: string, name: string, val: any): void {
+
         this.error(`${val} is not a valid ${kind} for ${name}`);
 
     }
 
     //@+node:felix.20220529184714.52: *3* pbc.visitNode (must be overwritten in subclasses)
-    public visitNode(p: Position) : string {
+    public visitNode(p: Position): string {
         this.oops();
         return '';
     }
@@ -1366,7 +1406,7 @@ export class GlobalConfigManager {
     public defaultLogFontSize = 12; // 8 if sys.platform == "win32" else 12
     public defaultMenuFontSize = 12;  // 9 if sys.platform == "win32" else 12
     public defaultTreeFontSize = 12;  // 9 if sys.platform == "win32" else 12
-    public context_menus: {[key: string]: any}| undefined;
+    public context_menus: { [key: string]: any } | undefined;
 
     public defaultsDict = new g.TypedDict(
         'g.app.config.defaultsDict',
