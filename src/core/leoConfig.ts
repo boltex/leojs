@@ -934,7 +934,7 @@ export class ParserBaseClass {
         }
         const fn = d.name();
         for (let line of g.splitLines(s)) {
-            line = line.trim()
+            line = line.trim();
             if (line && !g.match(line, 0, '#')) {
                 let commandName;
                 let bi;
@@ -1378,7 +1378,7 @@ export class ParserBaseClass {
     }
 
     //@+node:felix.20220529184714.52: *3* pbc.visitNode (must be overwritten in subclasses)
-    public visitNode(p: Position): string {
+    public visitNode(p: Position): string | undefined {
         this.oops();
         return '';
     }
@@ -2968,6 +2968,67 @@ export class LocalConfigManager {
     //@-others
 
 }
+//@+node:felix.20220602232038.1: ** class SettingsTreeParser (ParserBaseClass)
+/**
+ * A class that inits settings found in an @settings tree.
+ *
+ * Used by read settings logic.
+ */
+export class SettingsTreeParser extends ParserBaseClass {
+
+
+    // def __init__(self, c, localFlag=True):
+    // super().__init__(c, localFlag)
+
+    //@+others
+    //@+node:felix.20220602232038.2: *3* ctor (SettingsTreeParser)
+    //@+node:felix.20220602232038.3: *3* visitNode (SettingsTreeParser)
+    /**
+     * Init any settings found in node p.
+     */
+    public visitNode(p: Position): string | undefined {
+
+        p = p.copy();
+
+        const munge = g.app.config.munge;
+        let kind;
+        let name;
+        let val;
+        [kind, name, val] = this.parseHeadline(p.h);
+
+        kind = munge(kind);
+
+        const isNone = ['None', 'none', '', undefined].includes(val);
+
+        if (!kind) {  // Not an @x node. (New in Leo 4.4.4)
+            // pass
+        } else if (kind === "settings") {
+            // pass
+        } else if (SettingsTreeParser.basic_types.includes(kind) && isNone) {
+            // None is valid for all basic types.
+            this.set(p, kind, name!, undefined);
+        } else if (SettingsTreeParser.control_types.includes(kind) || SettingsTreeParser.basic_types.includes(kind)) {
+            const f = this.dispatchDict[kind];
+            if (f) {
+                try {
+                    return f(p, kind, name!, val);  // type:ignore
+                }
+                catch (exception) {
+                    g.es_exception(exception);
+                }
+
+            } else {
+                g.pr("*** no handler", kind);
+            }
+
+        }
+        return undefined;
+    }
+
+    //@-others
+
+}
+
 //@-others
 //@@language typescript
 //@@tabwidth -4

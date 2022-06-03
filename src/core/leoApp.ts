@@ -12,10 +12,11 @@ import { LeoUI, NullGui } from '../leoUI';
 import { NodeIndices, VNode, Position } from './leoNodes';
 import { Commands } from './leoCommands';
 import { FileCommands } from "./leoFileCommands";
-import { GlobalConfigManager } from "./leoConfig";
+import { GlobalConfigManager, SettingsTreeParser } from "./leoConfig";
 import { Constants } from "../constants";
 import { ExternalFilesController } from "./leoExternalFiles";
 import { LeoFrame } from "./leoFrame";
+import { TypedDict } from "./leoGlobals";
 
 //@-<< imports >>
 //@+others
@@ -1545,6 +1546,45 @@ export class LoadManager {
         }
         return 'D';
     }
+    //@+node:felix.20220601235600.1: *4* LM.computeLocalSettings
+    /**
+     * Merge the settings dicts from c's outline into *new copies of*
+     * settings_d and bindings_d.
+     */
+    public computeLocalSettings(c: Commands, settings_d: any, bindings_d: any, localFlag: boolean): [any, any] {
+
+        const lm = this;
+        let shortcuts_d2;
+        let settings_d2;
+
+        [shortcuts_d2, settings_d2] = lm.createSettingsDicts(c, localFlag);
+
+        if (!bindings_d) {// #1766: unit tests.
+            [settings_d, bindings_d] = lm.createDefaultSettingsDicts();
+        }
+        if (settings_d2) {
+            if (g.app.trace_setting) {
+                const key = g.app.config.munge(g.app.trace_setting);
+                const val = settings_d2.d.get(key);
+                if (val) {
+                    const fn = g.shortFileName(val.path);
+                    g.es_print(
+                        `--trace-setting: in ${fn}: ` +
+                        `@${val.kind} ${g.app.trace_setting}=${val.val}`
+                    );
+                }
+            }
+            settings_d = settings_d.copy();
+            settings_d.update(settings_d2);
+        }
+        if (shortcuts_d2) {
+            // TODO support shortcuts needed? 
+            // bindings_d = lm.mergeShortcutsDicts(c, bindings_d, shortcuts_d2, localFlag);
+        }
+
+        return [settings_d, bindings_d];
+    }
+
     //@+node:felix.20220417222540.1: *4* LM.createDefaultSettingsDicts
     /**
      * Create lm.globalSettingsDict & lm.globalBindingsDict.
@@ -1566,11 +1606,25 @@ export class LoadManager {
         return [settings_d, bindings_d];
     }
 
+    //@+node:felix.20220602202929.1: *4* LM.createSettingsDicts
+    public createSettingsDicts(c: Commands, localFlag: boolean): [any, any] {
+        if (c) {
+            // returns the *raw* shortcutsDict, not a *merged* shortcuts dict.
+            const parser = new SettingsTreeParser(c, localFlag);
+            let shortcutsDict;
+            let settingsDict;
+            [shortcutsDict, settingsDict] = parser.traverse();
+            return [shortcutsDict, settingsDict];
+        }
+        return [undefined, undefined];
+
+    }
+
     //@+node:felix.20220418170221.1: *4* LM.getPreviousSettings
     /**
      * Return the settings in effect for fn. Typically, this involves pre-reading fn.
      */
-    public getPreviousSettings(fn?: string): PreviousSettings {
+    public async getPreviousSettings(fn?: string): Promise<PreviousSettings> {
 
         const lm = this;
         const settingsName = `settings dict for ${g.shortFileName(fn)}`;
@@ -1578,22 +1632,18 @@ export class LoadManager {
         // A special case: settings in leoSettings.leo do *not* override
         // the global settings, that is, settings in myLeoSettings.leo.
         const isLeoSettings = fn && g.shortFileName(fn).toLowerCase() === 'leosettings.leo';
-        const exists = g.os_path_exists(fn);
+        const exists = await g.os_path_exists(fn);
 
-        let c: Commands;
+        let c: Commands | undefined;
         let d1;
         let d2;
 
-        // TODO: GET SETTINGS FROM VSCODE'S LEOJS SETTINGS
-        /* 
+
         if (fn && exists && lm.isLeoFile(fn) && !isLeoSettings) {
             // Open the file usinging a null gui.
             try {
                 g.app.preReadFlag = true;
-                c = lm.openSettingsFile(fn);
-            }
-            catch (p_err) {
-                //
+                c = await lm.openSettingsFile(fn);
             }
             finally {
                 g.app.preReadFlag = false;
@@ -1601,7 +1651,7 @@ export class LoadManager {
             // Merge the settings from c into *copies* of the global dicts.
 
             [d1, d2] = lm.computeLocalSettings(
-                c,
+                c!,
                 lm.globalSettingsDict,
                 lm.globalBindingsDict,
                 true
@@ -1612,7 +1662,6 @@ export class LoadManager {
             d2.setName(shortcutsName);
             return new PreviousSettings(d1, d2);
         }
-        */
 
         //
         // The file does not exist, or is not valid.
@@ -1628,13 +1677,193 @@ export class LoadManager {
 
     }
 
+    //@+node:felix.20220602203148.1: *4* LM.mergeShortcutsDicts & helpers
+    /**
+     * Create a new dict by overriding all shortcuts in old_d by shortcuts in new_d.
+     *
+     * Both old_d and new_d remain unchanged.
+     */
+    public mergeShortcutsDicts(c: Commands, old_d: any, new_d: any, localFlag: boolean): any {
+        /* 
+        const lm = this;
+        if (!old_d){
+            return new_d;
+            }
+        if (!new_d){
+            return old_d;
+        }
+        let pane;
+        let bi_list = new_d.get(g.app.trace_setting);
+        let fn;
+        let stroke;
+        if (bi_list && bi_list.length){
+            // This code executed only if g.app.trace_setting exists.
+            for( let bi of bi_list){
+                fn = bi.kind.split(' ').at(-1);
+                stroke = c.k.prettyPrintKey(bi.stroke);
+                if (bi.pane && bi.pane !== 'all'){
+                    pane = ` in ${bi.pane} panes`;
+                }else{
+                    pane = '';
+                }
+            }
+        }
+        const inverted_old_d = lm.invert(old_d);
+        const inverted_new_d = lm.invert(new_d);
+        // #510 & #327: always honor --trace-binding here.
+        if (g.app.trace_binding)
+            let binding = g.app.trace_binding;
+            // First, see if the binding is for a command. (Doesn't work for plugin commands).
+            if (localFlag && c.k.killedBindings.includes(binding)){
+                g.es_print(
+                    `--trace-binding: ${c.shortFileName()} ` +
+                    `sets ${binding} to None`
+                );
+            }else if (localFlag && c.commandsDict.includes(binding)){
+                const d = c.k.computeInverseBindingDict();
+                g.trace(
+                    `--trace-binding: ${c.shortFileName()} ` +
+                    `binds ${binding} to ${d.get(binding) || []}`
+                );
+            }else{
+                binding = g.app.trace_binding;
+                const stroke = new KeyStroke(binding);
+                bi_list = inverted_new_d.get(stroke);
+                if (bi_list){
+                    for (let bi of bi_list){
+                        const fn = bi.kind.split(' ').at(-1);  // bi.kind #
+                        const stroke2 = c.k.prettyPrintKey(stroke);
+                        if( bi.pane && bi.pane !== 'all'){
+                            pane = ` in ${bi.pane} panes`;
+                        }else{
+                            pane = '';
+                        }
+                        g.es_print(
+                            `--trace-binding: ${fn} binds ${stroke2} ` +
+                            `to ${bi.commandName}${pane}`
+                        );
+                    }
+                }
+            }
+
+        // Fix bug 951921: check for duplicate shortcuts only in the new file.
+        lm.checkForDuplicateShortcuts(c, inverted_new_d);
+        inverted_old_d.update(inverted_new_d);  // Updates inverted_old_d in place.
+
+        const result = lm.uninvert(inverted_old_d);
+
+        return result;
+        */
+    }
+
+    //@+node:felix.20220602203148.2: *5* LM.checkForDuplicateShortcuts
+    /**
+     * Check for duplicates in an "inverted" dictionary d
+     * whose keys are strokes and whose values are lists of BindingInfo nodes.
+     *
+     * Duplicates happen only if panes conflict.
+     */
+    public checkForDuplicateShortcuts(c: Commands, d: any): void {
+
+        // Fix bug 951921: check for duplicate shortcuts only in the new file.
+        //for (let ks of sorted(list(d.keys())))
+        for (let ks of Object.keys(d).sort()) {
+            const duplicates = [];
+            const panes = ['all'];
+            const aList = d.get(ks);  // A list of bi objects.
+
+            // aList2 = [z for z in aList if not z.pane.startsWith('mode')];
+            const aList2 = aList.filter((z: { pane: string }) => !z.pane.startsWith('mode'));
+
+            if (aList.length > 1) {
+                for (let bi of aList2) {
+                    if (panes.includes(bi.pane)) {
+                        duplicates.push(bi);
+                    } else {
+                        panes.push(bi.pane);
+                    }
+                }
+            }
+
+            if (duplicates.length) {
+                // bindings = list(set([z.stroke.s for z in duplicates])); 
+                const bindings: string[] = [];
+                for (let z of duplicates) {
+                    if (!bindings.includes(z.stroke.s)) {
+                        bindings.push(z.stroke.s);
+                    }
+                }
+                let kind;
+                if (bindings.length === 1) {
+                    kind = 'duplicate, (not conflicting)';
+                } else {
+                    kind = 'conflicting';
+                }
+                g.es_print(`${kind} key bindings in ${c.shortFileName()}`);
+                for (let bi of aList2) {
+                    g.es_print(`${bi.pane} ${bi.stroke.s} ${bi.commandName}`);
+                }
+            }
+        }
+    }
+
+    //@+node:felix.20220602203148.3: *5* LM.invert
+    /**
+     * Invert a shortcut dict whose keys are command names,
+     * returning a dict whose keys are strokes.
+     */
+    public invert(d: any): any {
+
+        const result = new TypedDict(  // was TypedDictOfLists.
+            `inverted ${d.name()}`,
+            'KeyStroke',
+            'BindingInfo'
+        );
+
+        for (let commandName of Object.keys(d)) {
+            for (let bi of d.get(commandName, [])) {
+                const stroke = bi.stroke;  // This is canonicalized.
+                bi.commandName = commandName;  // Add info.
+                console.assert(stroke);
+                result.add_to_list(stroke, bi);
+            }
+        }
+
+        return result;
+    }
+
+    //@+node:felix.20220602203148.4: *5* LM.uninvert
+    /**
+     * Uninvert an inverted shortcut dict whose keys are strokes,
+     * returning a dict whose keys are command names.
+     */
+    public uninvert(d: any): TypedDict {
+
+        // console.assert(d.keyType === g.KeyStroke, d.keyType); // TODO ? NEeded ?
+        const result = new TypedDict( // was TypedDictOfLists.
+            `uninverted ${d.name()}`,
+            'commandName',
+            'BindingInfo'
+        );
+
+        for (let stroke of Object.keys(d)) {
+            for (let bi of d.get(stroke, [])) {
+                const commandName = bi.commandName;
+                console.assert(commandName);
+                result.add_to_list(commandName, bi);
+            }
+        }
+        return result;
+
+    }
+
     //@+node:felix.20220418185142.1: *4* LM.openSettingsFile
     /**
      * Open a settings file with a null gui.  Return the commander.
      *
      * The caller must init the c.config object.
      */
-    public openSettingsFile(fn: string): Promise<VNode | undefined> | undefined {
+    public async openSettingsFile(fn: string): Promise<Commands | undefined> {
 
         const lm = this;
 
@@ -1671,9 +1900,9 @@ export class LoadManager {
 
         g.app.openingSettingsFile = true;
 
-        let ok: Promise<VNode | undefined> | undefined;
+        let ok: VNode | undefined;
         try {
-            ok = (c.fileCommands as FileCommands).openLeoFile(fn, false, true);
+            ok = await (c.fileCommands as FileCommands).openLeoFile(fn, false, true);
             // closes theFile.
         }
         catch (p_err) {
@@ -1688,7 +1917,7 @@ export class LoadManager {
         g.app.gui = oldGui;
 
 
-        return ok;
+        return ok ? c : undefined;
 
     }
 
@@ -2101,7 +2330,7 @@ export class LoadManager {
         // Step 1: get the previous settings.
         // For .leo files (and zipped .leo files) this pre-reads the file in a null gui.
         // Otherwise, get settings from leoSettings.leo, myLeoSettings.leo, or default settings.
-        const previousSettings: any = undefined; // lm.getPreviousSettings(fn);
+        const previousSettings = await lm.getPreviousSettings(fn);
 
         // Step 2: open the outline in the requested gui.
         // For .leo files (and zipped .leo file) this opens the file a second time.
