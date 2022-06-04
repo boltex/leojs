@@ -568,8 +568,9 @@ To try out running as a web extension on vscode.dev, use the following commands:
 
 - The commands and menus icons for outline editing 
 - Undo and navigation history commands
-- The minibuffer Palette
-- Panels for Outline, Undo history, Leo documents and @buttons
+- The minibuffer Command-Palette
+- Panels for Outline, Undo history, Leo documents (no find, goto or @buttons panes yet)
+- Basic 'New', 'Open' and 'Save' operations (no external @files/@clean... support yet)
 
 ## Keybindings
 
