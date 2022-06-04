@@ -31,7 +31,8 @@ export class LeoUI {
     public verbose: boolean = true;
     public trace: boolean = true;
     public frameIndex: number = 0;
-    public clipboardContent: string = "";
+    public clipboardContents: string = "";
+    public isNullGui: boolean = false;
 
     // * Timers
     public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already started refresh
@@ -1435,14 +1436,14 @@ export class LeoUI {
     }
 
     public replaceClipboardWith(s: string): Thenable<void> {
-        this.clipboardContent = s; // also set immediate clipboard string
+        this.clipboardContents = s; // also set immediate clipboard string
         return vscode.env.clipboard.writeText(s);
     }
 
     public asyncGetTextFromClipboard(): Thenable<string> {
         return vscode.env.clipboard.readText().then((s) => {
             // also set immediate clipboard string for possible future read
-            this.clipboardContent = s;
+            this.clipboardContents = s;
             return this.getTextFromClipboard();
         });
     }
@@ -1451,7 +1452,7 @@ export class LeoUI {
      * Returns clipboard content
     */
     public getTextFromClipboard(): string {
-        return this.clipboardContent;
+        return this.clipboardContents;
     }
 
     /**
@@ -2320,7 +2321,7 @@ export class LeoUI {
 
         if (!this.leoStates.fileOpenedReady) {
             if (g.app.loadManager) {
-                g.app.loadManager.openEmptyLeoFile(this);
+                await g.app.loadManager.openEmptyLeoFile(this);
             }
         } else {
 
@@ -2854,22 +2855,23 @@ export class LeoUI {
  */
 export class NullGui {
 
-    private clipboardContent: string = "";
+    private clipboardContents: string = "";
     public preventRefresh: boolean = false;
+    public isNullGui: boolean = true;
 
     public launchRefresh(): void { }
 
     public replaceClipboardWith(s: string): Thenable<void> {
-        this.clipboardContent = s; // also set immediate clipboard string
+        this.clipboardContents = s; // also set immediate clipboard string
         return Promise.resolve();
     }
 
     public asyncGetTextFromClipboard(): Thenable<string> {
-        return Promise.resolve(this.clipboardContent);
+        return Promise.resolve(this.clipboardContents);
     }
 
     public getTextFromClipboard(): string {
-        return this.clipboardContent;
+        return this.clipboardContents;
     }
 
     public getFullVersion(): string {

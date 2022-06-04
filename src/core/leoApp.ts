@@ -1426,8 +1426,8 @@ export class LeoApp {
     public newCommander(
         fileName: string,
         gui?: LeoUI | NullGui,
-        previousSettings?: any,
-        relativeFileName?: any,
+        previousSettings?: PreviousSettings,
+        relativeFileName?: string,
     ): Commands {
         // Create the commander and its subcommanders.
         // This takes about 3/4 sec when called by the leoBridge module.
@@ -2311,13 +2311,13 @@ export class LoadManager {
         or open an empty outline.
         */
         const lm: LoadManager = this;
+        let c: Commands | undefined;
 
         // #2489: If fn is empty, open an empty, untitled .leo file.
         if (!fn) {
-            return lm.openEmptyLeoFile(gui as LeoUI, old_c);
+            c = await lm.openEmptyLeoFile(gui as LeoUI, old_c);
+            return c;
         }
-
-        let c: Commands | undefined;
 
         // Step 0: Return if the file is already open.
         // fn = g.os_path_finalize(fn);
@@ -2325,13 +2325,13 @@ export class LoadManager {
         if (fn) {
             c = lm.findOpenFile(fn);
             if (c) {
-                return c;
+                return c; // Found it aready opened ! 
             }
         }
         // Step 1: get the previous settings.
         // For .leo files (and zipped .leo files) this pre-reads the file in a null gui.
         // Otherwise, get settings from leoSettings.leo, myLeoSettings.leo, or default settings.
-        const previousSettings = await lm.getPreviousSettings(fn);
+        const previousSettings: PreviousSettings = await lm.getPreviousSettings(fn);
 
         // Step 2: open the outline in the requested gui.
         // For .leo files (and zipped .leo file) this opens the file a second time.
@@ -2342,15 +2342,15 @@ export class LoadManager {
     /**
      * Open an empty, untitled, new Leo file.
      */
-    public openEmptyLeoFile(gui: LeoUI, old_c?: Commands): Commands {
+    public async openEmptyLeoFile(gui: LeoUI, old_c?: Commands): Promise<Commands> {
 
         const lm = this;
-
+        const w_previousSettings = await lm.getPreviousSettings(undefined);
         // Create the commander for the .leo  file.
         const c: Commands = g.app.newCommander(
             "",
             gui,
-            lm.getPreviousSettings(undefined),
+            w_previousSettings
         );
         g.doHook('open0');
 

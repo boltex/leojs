@@ -21,6 +21,7 @@ import { LeoImportCommands } from './leoImport';
 import { ChapterController } from './leoChapters';
 import { EditCommandsClass, TopLevelEditCommands } from '../commands/editCommands';
 import { LeoFrame } from './leoFrame';
+import { PreviousSettings } from './leoApp';
 
 //@-<< imports >>
 //@+others
@@ -213,7 +214,7 @@ export class Commands {
     constructor(
         fileName: string,
         gui?: LeoUI | NullGui,
-        previousSettings?: any,
+        previousSettings?: PreviousSettings,
         relativeFileName?: string
     ) {
         const c: Commands = this;
@@ -235,6 +236,8 @@ export class Commands {
         this.hiddenRootNode.h = '<hidden root vnode>';
 
         const title = this.computeWindowTitle(c.mFileName);
+
+        // * ORIGINALLY FROM GUI : gui.createLeoFrame(c, title)
         this.frame = new LeoFrame(this, title, this.gui as LeoUI);
         console.assert(this.frame.c === this);
 

@@ -58,7 +58,7 @@ async function reloadSettingsHelper(c: Commands): Promise<unknown> {
         // Read leoSettings.leo and myLeoSettings.leo, using a null gui.
 
     for (let w_c of g.app.commanders()){
-        previousSettings = lm.getPreviousSettings(w_c.mFileName);
+        previousSettings = await lm.getPreviousSettings(w_c.mFileName);
             // Read the local file, using a null gui.
         w_c.initSettings(previousSettings);
             // Init the config classes.

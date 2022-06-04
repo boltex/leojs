@@ -2743,7 +2743,8 @@ export class LeoUI {
     public verbose: boolean = true;
     public trace: boolean = true;
     public frameIndex: number = 0;
-    public clipboardContent: string = "";
+    public clipboardContents: string = "";
+    public isNullGui: boolean = false;
 
     // * Timers
     public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already started refresh
@@ -5947,7 +5948,7 @@ public removeAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
 
     if (!this.leoStates.fileOpenedReady) {
         if (g.app.loadManager) {
-            g.app.loadManager.openEmptyLeoFile(this);
+            await g.app.loadManager.openEmptyLeoFile(this);
         }
     } else {
 
@@ -7546,7 +7547,7 @@ public async saveAsLeoJsFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
  * Returns clipboard content
 */
 public getTextFromClipboard(): string {
-    return this.clipboardContent;
+    return this.clipboardContents;
 }
 
 </t>
@@ -8065,7 +8066,7 @@ public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
 
 </t>
 <t tx="felix.20211212205241.1">public replaceClipboardWith(s: string): Thenable&lt;void&gt; {
-    this.clipboardContent = s; // also set immediate clipboard string
+    this.clipboardContents = s; // also set immediate clipboard string
     return vscode.env.clipboard.writeText(s);
 }
 
@@ -8073,7 +8074,7 @@ public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
 <t tx="felix.20220103203600.1">public asyncGetTextFromClipboard(): Thenable&lt;string&gt; {
     return vscode.env.clipboard.readText().then((s) =&gt; {
         // also set immediate clipboard string for possible future read
-        this.clipboardContent = s;
+        this.clipboardContents = s;
         return this.getTextFromClipboard();
     });
 }
@@ -8592,22 +8593,23 @@ public finishStartup(): void {
  */
 export class NullGui {
 
-    private clipboardContent: string = "";
+    private clipboardContents: string = "";
     public preventRefresh: boolean = false;
+    public isNullGui: boolean = true;
 
     public launchRefresh(): void { }
 
     public replaceClipboardWith(s: string): Thenable&lt;void&gt; {
-        this.clipboardContent = s; // also set immediate clipboard string
+        this.clipboardContents = s; // also set immediate clipboard string
         return Promise.resolve();
     }
 
     public asyncGetTextFromClipboard(): Thenable&lt;string&gt; {
-        return Promise.resolve(this.clipboardContent);
+        return Promise.resolve(this.clipboardContents);
     }
 
     public getTextFromClipboard(): string {
-        return this.clipboardContent;
+        return this.clipboardContents;
     }
 
     public getFullVersion(): string {

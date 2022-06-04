@@ -65,11 +65,13 @@ export class LeoFrame {
     //@+node:felix.20220512220820.1: *3* destroySelf
     public destroySelf(): void {
         console.log('TODO: DestroySelf');
-
     }
     //@+node:felix.20220512222542.1: *3* finishCreate
     public finishCreate() {
-        g.app.windowList.push(this);
+        // ! HACK to simulate a different LeoFrame subclass for NULL GUI !
+        if (!this.gui.isNullGui) {
+            g.app.windowList.push(this);
+        }
     }
     //@+node:felix.20220516001519.1: *3* LeoFrame.promptForSave
     /**
