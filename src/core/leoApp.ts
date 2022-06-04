@@ -1883,7 +1883,8 @@ export class LoadManager {
             if (g.app.debug.includes('startup')) {
                 console.log(s);
             }
-            g.es(s, 'blue');
+            // g.es(s, 'blue');
+            g.es(s);
         }
         // A useful trace.
         // g.trace('%20s' % g.shortFileName(fn), g.callers(3))

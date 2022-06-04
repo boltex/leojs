@@ -1308,14 +1308,16 @@ export class Commands {
             } else {
                 gnx_errors += 1;
                 v.fileIndex = ni.getNewIndex(v); // expanded newGnx(v)
-                g.es_print(`empty v.fileIndex: ${v} new: ${p.v.gnx}`, 'red');
+                // g.es_print(`empty v.fileIndex: ${v} new: ${p.v.gnx}`, 'red');
+                g.es_print(`empty v.fileIndex: ${v} new: ${p.v.gnx}`);
             }
         }
         for (let gnx of Object.keys(d).sort()) {
             const aList: VNode[] = d[gnx];
             if (aList.length !== 1) {
                 console.log('\nc.checkGnxs...');
-                g.es_print(`multiple vnodes with gnx: ${gnx}`, 'red');
+                // g.es_print(`multiple vnodes with gnx: ${gnx}`, 'red');
+                g.es_print(`multiple vnodes with gnx: ${gnx}`);
                 for (let v of aList) {
                     gnx_errors += 1;
                     g.es_print(
@@ -1870,7 +1872,8 @@ export class Commands {
             if (g.unitTesting || g.app.inBridge) {
                 throw message;
             }
-            g.es_print(message, 'red');
+            // g.es_print(message, 'red');
+            g.es_print(message);
             g.trace(g.callers());
             return undefined;
         }

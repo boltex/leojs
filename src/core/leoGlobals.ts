@@ -3301,7 +3301,8 @@ export function internalError(...args: any[]): void {
     error('\nInternal Leo error in', caller);
     es_print(...args);
     // es_print('Called from', ', '.join(callers[:-1]))
-    es_print('Please report this error to Leo\'s developers', 'red');
+    // es_print('Please report this error to Leo\'s developers', 'red');
+    es_print('Please report this error to LeoJS developers');
 }
 //@+node:felix.20211104222740.1: *3* g.pr              (coreGlobals.py)
 /**

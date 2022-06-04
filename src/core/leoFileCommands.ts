@@ -201,7 +201,8 @@ export class FastRead {
             } else {
                 message = 'The clipboard is not a valid .leo file';
             }
-            g.es_print('\n' + message, 'red');
+            // g.es_print('\n' + message, 'red');
+            g.es_print('\n' + message);
             g.es_print(g.toUnicode(e));
             // console.log('');
             return [undefined, undefined]; // #1510: Return a tuple.
@@ -1299,7 +1300,8 @@ export class FileCommands extends DummyFileCommands {
 
         if (!c.make_node_conflicts_node) {
             const s: string = `suppressed ${c.nodeConflictList.length} node conflicts`;
-            g.es(s, 'red');
+            // g.es(s, 'red');
+            g.es(s);
             g.pr('\n' + s + '\n');
             return undefined;
         }
@@ -2848,11 +2850,16 @@ export class FileCommands extends DummyFileCommands {
             // g.es_error("exception writing external files");
 
             g.es_exception(exception);
-            g.es('Internal error writing one or more external files.', 'red');
-            g.es('Please report this error to:', 'blue');
-            g.es('https://groups.google.com/forum/#!forum/leo-editor', 'blue');
-            g.es('All changes will be lost unless you', 'red');
-            g.es('can save each changed file.', 'red');
+            // g.es('Internal error writing one or more external files.', 'red');
+            // g.es('Please report this error to:', 'blue');
+            // g.es('https://groups.google.com/forum/#!forum/leo-editor', 'blue');
+            // g.es('All changes will be lost unless you', 'red');
+            // g.es('can save each changed file.', 'red');
+            g.es('Internal error writing one or more external files.');
+            g.es('Please report this error to:');
+            g.es('https://groups.google.com/forum/#!forum/leo-editor');
+            g.es('All changes will be lost unless you');
+            g.es('can save each changed file.');
             return false;
         }
     }
@@ -2946,7 +2953,8 @@ export class FileCommands extends DummyFileCommands {
             // ! SHOULD NOT HAPPEN : USING vscode.workspace.fs async methods
         } else {
             g.es_exception();
-            g.es('Internal error writing OUTPUT FILE IS UNDEFINED', 'red');
+            // g.es('Internal error writing OUTPUT FILE IS UNDEFINED', 'red');
+            g.es('Internal error writing OUTPUT FILE IS UNDEFINED');
         }
     }
     //@+node:felix.20211213224237.32: *5* fc.putDescendentVnodeUas & helper
