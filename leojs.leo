@@ -603,14 +603,14 @@ _Move Outline commands need the 'Alt' key modifier only when focus is on body pa
 | `Tab` or `Enter`   | or  | `Alt + D` | or  | `Ctrl + G` | Focus on Body       |
 | `Alt + T`          |     |           |     |            | Focus on Outline    |
 | `Alt + -`          |     |           |     |            | Contract All        |
-| `Ctrl + B`         |     |           |     |            | Execute Script      |
 | `Ctrl + Shift + D` |     |           |     |            | Extract             |
 | `Ctrl + Shift + N` |     |           |     |            | Extract Names       |
 | `Alt + A`          |     |           |     |            | Sort Siblings       |
-&lt;!--- | `Ctrl + F`         |     |           |     |            | Start Search        | --&gt;
-&lt;!--- | `F3`               |     |           |     |            | Find Next           | --&gt;
-&lt;!--- | `F2`               |     |           |     |            | Find Previous       | --&gt;
 | `Alt + X`          |     |           |     |            | Minibuffer Palette  |
+&lt;!-- | `Ctrl + B`         |     |           |     |            | Execute Script      | --&gt;
+&lt;!-- | `Ctrl + F`         |     |           |     |            | Start Search        | --&gt;
+&lt;!-- | `F3`               |     |           |     |            | Find Next           | --&gt;
+&lt;!-- | `F2`               |     |           |     |            | Find Previous       | --&gt;
 
 | Tree Navigation    |     |                 |                          |
 | :----------------- | :-- | :-------------- | :----------------------- |
@@ -619,7 +619,7 @@ _Move Outline commands need the 'Alt' key modifier only when focus is on body pa
 |                    |     | `End` \*        | Go To Last Visible Node  |
 | `Alt + N`          |     |                 | Go To Next Clone         |
 | `Alt + Arrow Keys` | or  | `Arrow Keys` \* | Browse Tree              |
-&lt;!--- | `Alt + G`          |     |                 | Go To Global Line        | --&gt;
+&lt;!-- | `Alt + G`          |     |                 | Go To Global Line        | --&gt;
 
 \* _With the **'Leo Tree Browsing'** setting enabled by default, all arrows and numeric keypad keys change the outline's selection directly_
 
