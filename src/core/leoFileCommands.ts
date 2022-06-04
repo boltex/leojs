@@ -2802,8 +2802,7 @@ export class FileCommands extends DummyFileCommands {
             const xml_s = this.outline_to_xml_string();
 
             //s = bytes(s, this.leo_file_encoding, 'replace');
-            // const s = Buffer.from(xml_s, this.leo_file_encoding as BufferEncoding);
-            const s = Buffer.from(xml_s, this.leo_file_encoding.toLowerCase() as BufferEncoding);
+            const s = Buffer.from(xml_s, this.leo_file_encoding as BufferEncoding);
 
             // f.write(s);
             //fs.writeFileSync(f, s);

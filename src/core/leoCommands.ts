@@ -271,6 +271,11 @@ export class Commands {
         p._linkAsRoot();
         c.createCommandNames();
         c.frame.finishCreate();
+
+        // Only c.abbrevCommands needs a finishCreate method.
+        // c.abbrevCommands.finishCreate() // ! IN LEO THIS SETS c.fileCommands.leo_file_encoding to 'utf-8'
+        (c.fileCommands as FileCommands).leo_file_encoding = 'utf-8'; // * EQUIVALENT FIX FOR LOWERCASE 'utf-8'
+
     }
 
     //@+node:felix.20210223220814.10: *4* c.initSettings
