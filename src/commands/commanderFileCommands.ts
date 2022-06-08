@@ -35,43 +35,6 @@ async function import_txt_file(c: Commands, fn: string): Promise<void> {
     c.setChanged();
     c.redraw(p);
 }
-//@+node:felix.20220105222714.1: ** function: reloadSettingsHelper
-/**
- * Reload settings in all commanders, or just c.
- *
- * A helper function for reload-settings and reload-all-settings.
- */
-async function reloadSettingsHelper(c: Commands): Promise<unknown> {
-    return;
-    // ? needed ?
-    // TODO
-    /*
-    const lm : LoadManager = g.app.loadManager!;
-    // Save any changes so they can be seen.
-    for (let c2 of g.app.commanders()){
-        if (c2.isChanged()){
-            c2.save();
-        }
-    }
-
-    lm.readGlobalSettingsFiles();
-        // Read leoSettings.leo and myLeoSettings.leo, using a null gui.
-
-    for (let w_c of g.app.commanders()){
-        previousSettings = await lm.getPreviousSettings(w_c.mFileName);
-            // Read the local file, using a null gui.
-        w_c.initSettings(previousSettings);
-            // Init the config classes.
-        w_c.initConfigSettings();
-            // Init the commander config ivars.
-        w_c.reloadConfigurableSettings();
-            // Reload settings in all configurable classes
-        // c.redraw()
-            // Redraw so a pasted temp node isn't visible
-    }
-    */
-
-}
 //@+node:felix.20220105212849.1: ** Class CommanderFileCommands
 export class CommanderFileCommands {
 
@@ -83,7 +46,26 @@ export class CommanderFileCommands {
     )
     public async reloadSettings(this: Commands): Promise<unknown> {
         const c: Commands = this;
-        return reloadSettingsHelper(c);
+        const lm = g.app.loadManager!;
+        // Save any changes so they can be seen.
+        for (let c2 of g.app.commanders()) {
+            if (c2.isChanged()) {
+                await c2.save();
+            }
+        }
+        // Read leoSettings.leo and myLeoSettings.leo, using a null gui.
+        lm.readGlobalSettingsFiles();
+        for (let c of g.app.commanders()) {
+            // Read the local file, using a null gui.
+            const previousSettings = await lm.getPreviousSettings(c.mFileName);
+            // Init the config classes.
+            c.initSettings(previousSettings);
+            // Init the commander config ivars.
+            c.initConfigSettings();
+            // Reload settings in all configurable classes
+            c.reloadConfigurableSettings();
+        }
+        return Promise.resolve();
     }
     //@+node:felix.20220105210716.4: *3* c_file.restartLeo
     @commander_command(
@@ -538,7 +520,7 @@ export class CommanderFileCommands {
             c.selectPosition(p);
             u.afterChangeTree(p, 'refresh-from-disk', b);
             // Create the 'Recovered Nodes' tree.;
-            (c.fileCommands as FileCommands).handleNodeConflicts();
+            c.fileCommands.handleNodeConflicts();
             c.redraw();
         }
         return;
@@ -587,7 +569,7 @@ export class CommanderFileCommands {
         if (c.mFileName) {
             // Calls c.clearChanged() if no error.
             g.app.syntax_error_files = [];
-            await (c.fileCommands as FileCommands).save(c.mFileName);
+            await c.fileCommands.save(c.mFileName);
             c.syntaxErrorDialog();
             return c.raise_error_dialogs('write');
         } else {
@@ -622,7 +604,7 @@ export class CommanderFileCommands {
                 c.openDirectory = g.os_path_dirname(c.mFileName);
                 c.frame.openDirectory = c.openDirectory;
 
-                await (c.fileCommands as FileCommands).save(c.mFileName);
+                await c.fileCommands.save(c.mFileName);
                 // ? needed ? 
                 // g.app.recentFilesManager.updateRecentFiles(c.mFileName);
                 await g.chdir(c.mFileName);
@@ -709,7 +691,7 @@ export class CommanderFileCommands {
             c.frame.openDirectory = c.openDirectory;
 
             // Calls c.clearChanged() if no error.
-            await (c.fileCommands as FileCommands).saveAs(c.mFileName);
+            await c.fileCommands.saveAs(c.mFileName);
             // ? needed ? 
             // g.app.recentFilesManager.updateRecentFiles(c.mFileName);
             await g.chdir(c.mFileName);
@@ -754,7 +736,7 @@ export class CommanderFileCommands {
             return Promise.resolve(); // EXIT !
         } else {
             // Calls c.clearChanged() if no error.
-            await (c.fileCommands as FileCommands).saveTo(fileName, silent);
+            await c.fileCommands.saveTo(fileName, silent);
             // ? needed ? 
             // g.app.recentFilesManager.updateRecentFiles(c.mFileName);
             await g.chdir(c.mFileName);
@@ -817,7 +799,7 @@ export class CommanderFileCommands {
         }
         // Leo 6.4: Using save-to instead of save-as allows two versions of the file.
         await c.saveTo(fileName);
-        return (c.fileCommands as FileCommands).putSavedMessage(fileName);
+        return c.fileCommands.putSavedMessage(fileName);
 
     }
     //@+node:felix.20220105210716.20: *4* c_file.save-as-zipped
@@ -846,7 +828,7 @@ export class CommanderFileCommands {
         }
         // Leo 6.4: Using save-to instead of save-as allows two versions of the file.
         await c.saveTo(fileName);
-        return (c.fileCommands as FileCommands).putSavedMessage(fileName);
+        return c.fileCommands.putSavedMessage(fileName);
 
     }
     //@+node:felix.20220105210716.21: *4* c_file.save-as-xml
@@ -878,7 +860,7 @@ export class CommanderFileCommands {
         }
         // Leo 6.4: Using save-to instead of save-as allows two versions of the file.
         await c.saveTo(fileName);
-        return (c.fileCommands as FileCommands).putSavedMessage(fileName);
+        return c.fileCommands.putSavedMessage(fileName);
     }
     //@+node:felix.20220105210716.22: *3* Export
     //@+node:felix.20220105210716.23: *4* c_file.exportHeadlines
@@ -1220,7 +1202,7 @@ export class CommanderFileCommands {
             //frame = c.frame;
             //frame.deiconify();
             //frame.lift();
-            return (c.fileCommands as FileCommands).readOutlineOnly(fileName[0]); // closes file.
+            return c.fileCommands.readOutlineOnly(fileName[0]); // closes file.
         }
         catch (exception) {
             g.es("can not open:", fileName[0]);
@@ -1361,7 +1343,7 @@ export class CommanderFileCommands {
     )
     public async updateRefLeoFile(this: Commands): Promise<unknown> {
         const c: Commands = this;
-        return (c.fileCommands as FileCommands).save_ref();
+        return c.fileCommands.save_ref();
     }
     //@+node:felix.20220105210716.46: *4* c_file.readRefLeoFile
     @commander_command(
@@ -1378,7 +1360,7 @@ export class CommanderFileCommands {
     )
     public async readRefLeoFile(this: Commands): Promise<unknown> {
         const c: Commands = this;
-        return (c.fileCommands as FileCommands).updateFromRefFile();
+        return c.fileCommands.updateFromRefFile();
     }
     //@+node:felix.20220105210716.47: *4* c_file.setReferenceFile
     @commander_command(
@@ -1410,7 +1392,7 @@ export class CommanderFileCommands {
             g.defaultLeoFileExtension(c)
         );
         if (w_names && w_names.length) {
-            return (c.fileCommands as FileCommands).setReferenceFile(w_names[0]);
+            return c.fileCommands.setReferenceFile(w_names[0]);
         }
     }
     //@-others

@@ -63,26 +63,6 @@ const PRIVAREA: string = '---begin-private-area---';
 function cmd(p_name: string, p_doc: string) {
     return new_cmd_decorator(p_name, p_doc, ['c', 'fileCommands']);
 }
-//@+node:felix.20211121025828.1: ** class DummyFileCommands
-/**
- * Dummy class
- * Temporary usage of a single instance
- * in constuctor of 'Commands' class.
- */
-export class DummyFileCommands {
-
-    public gnxDict: { [key: string]: VNode };
-
-    //@+others
-    //@+node:felix.20211121025828.2: *3* constructor
-    constructor() {
-        this.gnxDict = {};
-    }
-
-    //@-others
-
-}
-
 //@+node:felix.20211213223326.1: ** class BadLeoFile
 class BadLeoFile extends Error {
 
@@ -224,7 +204,7 @@ export class FastRead {
      */
     public handleBits(): void {
         const c: Commands = this.c;
-        const fc = this.c.fileCommands as FileCommands;
+        const fc = this.c.fileCommands;
 
         const w_expanded: string = c.db['expanded'];
         const w_marked: string = c.db['marked'];
@@ -466,7 +446,7 @@ export class FastRead {
         v_elements: et.Element[]): VNode {
 
         const c: Commands = this.c;
-        const fc = this.c.fileCommands as FileCommands;
+        const fc = this.c.fileCommands;
 
         //@+<< define v_element_visitor >>
         //@+node:felix.20211213223342.12: *5* << define v_element_visitor >>
@@ -571,7 +551,7 @@ export class FastRead {
 
 }
 //@+node:felix.20210220190156.1: ** class FileCommands
-export class FileCommands extends DummyFileCommands {
+export class FileCommands {
 
     public c: Commands;
     public gnxDict!: { [key: string]: VNode };
@@ -615,8 +595,6 @@ export class FileCommands extends DummyFileCommands {
     //@+others
     //@+node:felix.20210220200109.1: *3* constructor
     constructor(c: Commands) {
-        super();
-
         this.c = c;
         this.frame = c.frame;
         this.nativeTnodeAttributes = ['tx'];
@@ -628,7 +606,6 @@ export class FileCommands extends DummyFileCommands {
             // 'tnodeList',  // Removed in Leo 4.7.
         ];
         this.initIvars();
-
     }
     //@+node:felix.20211222234753.1: *3* fc.initIvars
     /**

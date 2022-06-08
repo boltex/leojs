@@ -76,7 +76,7 @@ export class AtFile {
     //@+node:felix.20211225231716.1: *4* constructor
     constructor(c: Commands) {
         this.c = c;
-        this.fileCommands = c.fileCommands as FileCommands;
+        this.fileCommands = c.fileCommands;
     }
 
     //@+node:felix.20211225233823.1: *3* readAll

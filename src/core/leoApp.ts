@@ -1551,7 +1551,7 @@ export class LoadManager {
      * Merge the settings dicts from c's outline into *new copies of*
      * settings_d and bindings_d.
      */
-    public computeLocalSettings(c: Commands, settings_d: any, bindings_d: any, localFlag: boolean): [any, any] {
+    public computeLocalSettings(c: Commands, settings_d: g.TypedDict, bindings_d: g.TypedDict, localFlag: boolean): [g.TypedDict, g.TypedDict] {
 
         const lm = this;
         let shortcuts_d2;
@@ -1565,7 +1565,7 @@ export class LoadManager {
         if (settings_d2) {
             if (g.app.trace_setting) {
                 const key = g.app.config.munge(g.app.trace_setting);
-                const val = settings_d2.d.get(key);
+                const val = key ? settings_d2.d[key] : undefined;
                 if (val) {
                     const fn = g.shortFileName(val.path);
                     g.es_print(
@@ -1589,7 +1589,7 @@ export class LoadManager {
     /**
      * Create lm.globalSettingsDict & lm.globalBindingsDict.
      */
-    public createDefaultSettingsDicts(): [any, any] {
+    public createDefaultSettingsDicts(): [g.TypedDict, g.TypedDict] {
 
         const settings_d = g.app.config.defaultsDict;
 
@@ -1607,7 +1607,7 @@ export class LoadManager {
     }
 
     //@+node:felix.20220602202929.1: *4* LM.createSettingsDicts
-    public createSettingsDicts(c: Commands, localFlag: boolean): [any, any] {
+    public createSettingsDicts(c: Commands, localFlag: boolean): [g.TypedDict | undefined, g.TypedDict | undefined] {
         if (c) {
             // returns the *raw* shortcutsDict, not a *merged* shortcuts dict.
             const parser = new SettingsTreeParser(c, localFlag);
@@ -1893,6 +1893,7 @@ export class LoadManager {
         // Changing g.app.gui here is a major hack.  It is necessary.
         const oldGui = g.app.gui;
         g.app.gui = g.app.nullGui;
+
         const c = g.app.newCommander(fn);
         const frame = c.frame;
 
@@ -1903,7 +1904,7 @@ export class LoadManager {
 
         let ok: VNode | undefined;
         try {
-            ok = await (c.fileCommands as FileCommands).openLeoFile(fn, false, true);
+            ok = await c.fileCommands.openLeoFile(fn, false, true);
             // closes theFile.
         }
         catch (p_err) {
@@ -1914,7 +1915,8 @@ export class LoadManager {
         }
 
         // g.app.unlockLog();
-        c.openDirectory = frame.openDirectory = g.os_path_dirname(fn);
+        frame.openDirectory = g.os_path_dirname(fn);
+        c.openDirectory = frame.openDirectory;
         g.app.gui = oldGui;
 
 
@@ -2184,7 +2186,7 @@ export class LoadManager {
         return c
         */
         const fn: string = "";
-        const c = lm.loadLocalFile(fn, g.app.gui!);
+        const c = await lm.loadLocalFile(fn, g.app.gui!);
         if (!c) {
             return undefined;
         }
@@ -2296,6 +2298,7 @@ export class LoadManager {
 
     //@+node:felix.20210120004121.31: *4* LM.loadLocalFile & helpers
     public async loadLocalFile(fn: string, gui: LeoUI | NullGui, old_c?: Commands): Promise<Commands | undefined> {
+
         /*Completely read a file, creating the corresonding outline.
 
         1. If fn is an existing .leo file (possibly zipped), read it twice:
@@ -2384,7 +2387,8 @@ export class LoadManager {
      * Creates an empty outline if fn is a non-existent Leo file.
      * Creates an wrapper outline if fn is an external file, existing or not.
      */
-    public async openFileByName(fn: string, gui: LeoUI | NullGui, old_c?: Commands, previousSettings?: any): Promise<Commands | undefined> {
+    public async openFileByName(fn: string, gui: LeoUI | NullGui, old_c?: Commands, previousSettings?: PreviousSettings): Promise<Commands | undefined> {
+        console.log('openFileByName, PREVIOUS SETTINGS: ', !!previousSettings);
 
         const lm: LoadManager = this;
         // Disable the log.
@@ -2647,7 +2651,7 @@ export class LoadManager {
         // assert theFile
 
         // Read and close the file.
-        const w_result = await (c.fileCommands as FileCommands).openLeoFile(fn, readAtFileNodesFlag);
+        const w_result = await c.fileCommands.openLeoFile(fn, readAtFileNodesFlag);
         if (w_result) {
             if (!c.openDirectory) {
                 const theDir = g.os_path_finalize(g.os_path_dirname(fn));  // 1341
@@ -2674,8 +2678,8 @@ export class LoadManager {
         try {
             await vscode.workspace.fs.stat(w_uri);
             // OK exists
-            (c.fileCommands as FileCommands).initIvars();
-            (c.fileCommands as FileCommands).getLeoFile(fn, undefined, undefined, false);
+            c.fileCommands.initIvars();
+            c.fileCommands.getLeoFile(fn, undefined, undefined, false);
         } catch {
             // Does not exist !
         }

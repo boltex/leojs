@@ -7,7 +7,7 @@ import { Utils as uriUtils } from "vscode-uri";
 import * as path from 'path';
 import * as g from './leoGlobals';
 import { LeoUI, NullGui } from '../leoUI';
-import { DummyFileCommands, FileCommands } from './leoFileCommands';
+import { FileCommands } from './leoFileCommands';
 import { CommanderOutlineCommands } from '../commands/commanderOutlineCommands';
 import { CommanderFileCommands } from '../commands/commanderFileCommands';
 import { CommanderEditCommands } from '../commands/commanderEditCommands';
@@ -59,7 +59,7 @@ export class Commands {
     private _topPosition: Position | undefined;
 
     public hiddenRootNode: VNode;
-    public fileCommands: FileCommands | DummyFileCommands;
+    public fileCommands: FileCommands;
     public atFileCommands: AtFile;
     public findCommands: LeoFind;
     public importCommands: LeoImportCommands;
@@ -169,7 +169,10 @@ export class Commands {
     public sparse_find: boolean = true;
     public sparse_move: boolean = true;
     public sparse_spell: boolean = true;
+    public sparse_goto_visible: boolean = false;
+
     public stayInTreeAfterSelect: boolean = false;
+    public smart_tab: boolean = false;
     public tab_width: number = -4;
     public tangle_batch_flag: boolean = false;
     public target_language: string = 'python'; // TODO : switch to js for Leojs?
@@ -178,6 +181,7 @@ export class Commands {
     // # self.use_focus_border = False
     // # Replaced by style-sheet entries.
     public vim_mode: boolean = false;
+    public write_script_file: boolean = false;
 
     //@+node:felix.20210223220814.8: *4* c.initObjectIvars
     // These ivars are set later by leoEditCommands.createEditCommanders
@@ -208,7 +212,7 @@ export class Commands {
     public leoTestManager: any = undefined;
     public vimCommands: any = undefined;
 
-    public config: LocalConfigManager;
+    public config!: LocalConfigManager; // Set in constructor indirectly
 
     //@+node:felix.20210223002937.1: *3* constructor & helpers
     constructor(
@@ -226,25 +230,24 @@ export class Commands {
         this.mFileName = fileName || '';
         this.mRelativeFileName = relativeFileName || '';
 
-        this.initSettings(previousSettings);
+        // Init the settings *before* initing the objects.
+        c.initSettings(previousSettings);
 
+        // Initialize all subsidiary objects, including subcommanders.
         // From initObjects
-        const gnx: string = 'hidden-root-vnode-gnx';
-        this.fileCommands = new DummyFileCommands();
-        this.config = new LocalConfigManager(c); // Config before most other subcommanders
-        this.hiddenRootNode = new VNode(this, gnx);
+        this.hiddenRootNode = new VNode(this, 'hidden-root-vnode-gnx');
         this.hiddenRootNode.h = '<hidden root vnode>';
 
+        // Create the gui frame.
         const title = this.computeWindowTitle(c.mFileName);
 
         // * ORIGINALLY FROM GUI : gui.createLeoFrame(c, title)
         this.frame = new LeoFrame(this, title, this.gui as LeoUI);
         console.assert(this.frame.c === this);
 
-        // @ts-expect-error
-        c.fileCommands = null; // type:ignore
+        this.nodeHistory = new NodeHistory(c);
 
-        // Define the subcommanders.
+        this.initConfigSettings();
 
         this.chapterController = new ChapterController(c);
         // this.shadowController // TODO: = leoShadow.ShadowController(c);
@@ -254,13 +257,8 @@ export class Commands {
         this.atFileCommands = new AtFile(c);
         this.importCommands = new LeoImportCommands(c);
 
-        this.nodeHistory = new NodeHistory(c);
-
         this.editCommands = new EditCommandsClass(c);
         this.undoer = new Undoer(c);
-
-        // From initConfigSettings
-        this.collapse_on_lt_arrow = true; // getBool('collapse-on-lt-arrow', default=True)
 
         // From finishCreate
         // ! Equivalent of frame.createFirstTreeNode
@@ -272,176 +270,17 @@ export class Commands {
         c.createCommandNames();
         c.frame.finishCreate();
 
-        // Only c.abbrevCommands needs a finishCreate method.
-        // c.abbrevCommands.finishCreate() // ! IN LEO THIS SETS c.fileCommands.leo_file_encoding to 'utf-8'
-        (c.fileCommands as FileCommands).leo_file_encoding = 'utf-8'; // * EQUIVALENT FIX FOR LOWERCASE 'utf-8'
-
     }
 
     //@+node:felix.20210223220814.10: *4* c.initSettings
     /**
      * Init the settings *before* initing the objects.
      */
-    private initSettings(previousSettings: any): void {
+    public initSettings(previousSettings: any): void {
         const c: Commands = this;
         c.config = new LocalConfigManager(c, previousSettings);
         g.app.config.setIvarsFromSettings(c);
     }
-
-    //@+node:felix.20210223220814.9: *4* c.initObjects
-    // * initObjects done in constructor.
-    // * Kept here as comments for reference
-
-    // c = self
-    // gnx = 'hidden-root-vnode-gnx'
-    // assert not hasattr(c, 'fileCommands'), c.fileCommands
-
-    // class DummyFileCommands:
-    // def __init__(self):
-    // self.gnxDict = {}
-
-    // c.fileCommands = DummyFileCommands()
-    // self.hiddenRootNode = leoNodes.VNode(context=c, gnx=gnx)
-    // self.hiddenRootNode.h = '<hidden root vnode>'
-    // c.fileCommands = None
-    // # Create the gui frame.
-    // title = c.computeWindowTitle(c.mFileName)
-    // if not g.app.initing:
-    // g.doHook("before-create-leo-frame", c=c)
-    // self.frame = gui.createLeoFrame(c, title)
-    // assert self.frame
-    // assert self.frame.c == c
-    // from leo.core import leoHistory
-    // self.nodeHistory = leoHistory.NodeHistory(c)
-
-    // self.initConfigSettings()
-    // c.setWindowPosition() # Do this after initing settings.
-    // # Break circular import dependencies by doing imports here.
-    // # These imports take almost 3/4 sec in the leoBridge.
-    // from leo.core import leoAtFile
-    // from leo.core import leoBeautify  # So decorators are executed.
-    // assert leoBeautify  # for pyflakes.
-    // from leo.core import leoChapters
-    // # from leo.core import leoTest2  # So decorators are executed.
-    // # assert leoTest2  # For pyflakes.
-    // # User commands...
-    // from leo.commands import abbrevCommands
-    // from leo.commands import bufferCommands
-    // from leo.commands import checkerCommands
-    // assert checkerCommands
-    // # To suppress a pyflakes warning.
-    // # The import *is* required to define commands.
-    // from leo.commands import controlCommands
-    // from leo.commands import convertCommands
-    // from leo.commands import debugCommands
-    // from leo.commands import editCommands
-    // from leo.commands import editFileCommands
-    // from leo.commands import gotoCommands
-    // from leo.commands import helpCommands
-    // from leo.commands import keyCommands
-    // from leo.commands import killBufferCommands
-    // from leo.commands import rectangleCommands
-    // from leo.commands import spellCommands
-    // # Import files to execute @g.commander_command decorators
-    // from leo.core import leoCompare
-    // assert leoCompare
-    // from leo.core import leoDebugger
-    // assert leoDebugger
-    // from leo.commands import commanderEditCommands
-    // assert commanderEditCommands
-    // from leo.commands import commanderFileCommands
-    // assert commanderFileCommands
-    // from leo.commands import commanderFindCommands
-    // assert commanderFindCommands
-    // from leo.commands import commanderHelpCommands
-    // assert commanderHelpCommands
-    // from leo.commands import commanderOutlineCommands
-    // assert commanderOutlineCommands
-    // # Other subcommanders.
-    // from leo.core import leoFind # Leo 4.11.1
-    // from leo.core import leoKeys
-    // from leo.core import leoFileCommands
-    // from leo.core import leoImport
-    // from leo.core import leoMarkup
-    // from leo.core import leoPersistence
-    // from leo.core import leoPrinting
-    // from leo.core import leoRst
-    // from leo.core import leoShadow
-    // from leo.core import leoTangle
-    // from leo.core import leoTest
-    // from leo.core import leoUndo
-    // from leo.core import leoVim
-    // # Define the subcommanders.
-    // self.keyHandler = self.k    = leoKeys.KeyHandlerClass(c)
-    // self.chapterController      = leoChapters.ChapterController(c)
-    // self.shadowController       = leoShadow.ShadowController(c)
-    // self.fileCommands           = leoFileCommands.FileCommands(c)
-    // self.findCommands           = leoFind.LeoFind(c)
-    // self.atFileCommands         = leoAtFile.AtFile(c)
-    // self.importCommands         = leoImport.LeoImportCommands(c)
-    // self.markupCommands         = leoMarkup.MarkupCommands(c)
-    // self.persistenceController  = leoPersistence.PersistenceDataController(c)
-    // self.printingController     = leoPrinting.PrintingController(c)
-    // self.rstCommands            = leoRst.RstCommands(c)
-    // self.tangleCommands         = leoTangle.TangleCommands(c)
-    // self.testManager            = leoTest.TestManager(c)
-    // self.vimCommands            = leoVim.VimCommands(c)
-    // # User commands
-    // self.abbrevCommands     = abbrevCommands.AbbrevCommandsClass(c)
-    // self.bufferCommands     = bufferCommands.BufferCommandsClass(c)
-    // self.controlCommands    = controlCommands.ControlCommandsClass(c)
-    // self.convertCommands    = convertCommands.ConvertCommandsClass(c)
-    // self.debugCommands      = debugCommands.DebugCommandsClass(c)
-    // self.editCommands       = editCommands.EditCommandsClass(c)
-    // self.editFileCommands   = editFileCommands.EditFileCommandsClass(c)
-    // self.gotoCommands       = gotoCommands.GoToCommands(c)
-    // self.helpCommands       = helpCommands.HelpCommandsClass(c)
-    // self.keyHandlerCommands = keyCommands.KeyHandlerCommandsClass(c)
-    // self.killBufferCommands = killBufferCommands.KillBufferCommandsClass(c)
-    // self.rectangleCommands  = rectangleCommands.RectangleCommandsClass(c)
-    // self.spellCommands      = spellCommands.SpellCommandsClass(c)
-    // self.undoer             = leoUndo.Undoer(c)
-    // # Create the list of subcommanders.
-    // self.subCommanders = [
-    // self.abbrevCommands,
-    // self.atFileCommands,
-    // self.bufferCommands,
-    // self.chapterController,
-    // self.controlCommands,
-    // self.convertCommands,
-    // self.debugCommands,
-    // self.editCommands,
-    // self.editFileCommands,
-    // self.fileCommands,
-    // self.findCommands,
-    // self.gotoCommands,
-    // self.helpCommands,
-    // self.importCommands,
-    // self.keyHandler,
-    // self.keyHandlerCommands,
-    // self.killBufferCommands,
-    // self.persistenceController,
-    // self.printingController,
-    // self.rectangleCommands,
-    // self.rstCommands,
-    // self.shadowController,
-    // self.spellCommands,
-    // self.tangleCommands,
-    // self.testManager,
-    // self.vimCommands,
-    // self.undoer,
-    // ]
-    // # Other objects
-    // c.configurables = c.subCommanders[:]
-    // # A list of other classes that have a reloadSettings method
-    // c.db = g.app.commander_cacher.get_wrapper(c)
-    // from leo.plugins import free_layout
-    // self.free_layout = free_layout.FreeLayoutController(c)
-    // if hasattr(g.app.gui, 'styleSheetManagerClass'):
-    // self.styleSheetManager = g.app.gui.styleSheetManagerClass(c)
-    // self.subCommanders.append(self.styleSheetManager)
-    // else:
-    // self.styleSheetManager = None
 
     //@+node:felix.20211018215401.1: *4* c.createCommandNames
     /**
@@ -474,6 +313,47 @@ export class Commands {
         }
         return title;
     }
+    //@+node:felix.20220605211419.1: *4* c.initConfigSettings
+    /**
+     * Init all cached commander config settings.
+     */
+    public initConfigSettings(): void {
+
+        const c: Commands = this;
+        const getBool = c.config.getBool.bind(c.config);
+        const getColor = c.config.getColor.bind(c.config);
+        const getData = c.config.getData.bind(c.config);
+        const getInt = c.config.getInt.bind(c.config);
+
+        // c.autoindent_in_nocolor = getBool('autoindent-in-nocolor-mode');
+        c.collapse_nodes_after_move = getBool('collapse-nodes-after-move');
+        c.collapse_on_lt_arrow = getBool('collapse-on-lt-arrow', true);
+        // c.contractVisitedNodes = getBool('contractVisitedNodes');
+        // c.fixedWindowPositionData = getData('fixedWindowPosition');
+        c.focus_border_color = getColor('focus-border-color') || 'red';
+        // c.focus_border_command_state_color = getColor(
+        //     'focus-border-command-state-color') || 'blue';
+        // c.focus_border_overwrite_state_color = getColor(
+        //     'focus-border-overwrite-state-color') || 'green';
+        c.focus_border_width = getInt('focus-border-width') || 1;  // pixels
+        c.forceExecuteEntireBody = getBool('force-execute-entire-body', false);
+        c.make_node_conflicts_node = getBool('make-node-conflicts-node', true);
+        c.outlineHasInitialFocus = getBool('outline-pane-has-initial-focus');
+        c.page_width = getInt('page-width') || 132;
+        // c.putBitsFlag = getBool('put-expansion-bits-in-leo-files', true);
+        c.sparse_move = getBool('sparse-move-outline-left');
+        c.sparse_find = getBool('collapse-nodes-during-finds');
+        c.sparse_spell = getBool('collapse-nodes-while-spelling');
+        c.sparse_goto_visible = getBool('collapse-on-goto-first-last-visible', false);
+        c.stayInTreeAfterSelect = getBool('stayInTreeAfterSelect');
+        c.smart_tab = getBool('smart-tab');
+        c.tab_width = getInt('tab-width') || -4;
+        c.verbose_check_outline = getBool('verbose-check-outline', false);
+        c.vim_mode = getBool('vim-mode', false);
+        c.write_script_file = getBool('write-script-file');
+
+    }
+
     //@+node:felix.20210215185050.1: *3* c.API
     // These methods are a fundamental, unchanging, part of Leo's API.
 
@@ -3487,6 +3367,61 @@ export class Commands {
         }
         return undodata;
     }
+    //@+node:felix.20220605203342.1: *3* c.Settings
+    //@+node:felix.20220605203342.2: *4* c.registerReloadSettings
+    public registerReloadSettings(obj: any): void {
+
+        const c: Commands = this;
+        console.log('TODO: ? NEEDED ? registerReloadSettings');
+
+        /* 
+        if (!c.configurables.includes(obj)){
+            c.configurables.push(obj);
+        }
+        */
+    }
+
+    //@+node:felix.20220605203342.3: *4* c.reloadConfigurableSettings
+    /**
+     * Call all reloadSettings method in c.subcommanders, c.configurables and
+     * other known classes.
+     */
+    public reloadConfigurableSettings(): void {
+
+        console.log('TODO : ? NEEDED ? reloadConfigurableSettings');
+
+        /* 
+        
+        const c: Commands = this;
+        const table = [
+            g.app.gui,
+            g.app.pluginsController,
+            c.k.autoCompleter,
+            c.frame, c.frame.body, c.frame.log, c.frame.tree,
+            c.frame.body.colorizer,
+            getattr(c.frame.body.colorizer, 'highlighter', None),
+        ];
+
+        for obj in table:
+            if obj:
+                c.registerReloadSettings(obj)
+        // Useful now that instances add themselves to c.configurables.
+        c.configurables = list(set(c.configurables))
+        c.configurables.sort(key=lambda obj: obj.__class__.__name__.lower())
+        for obj in c.configurables:
+            func = getattr(obj, 'reloadSettings', None)
+            if func:
+                // pylint: disable=not-callable
+                try:
+                    func()
+                except Exception:
+                    g.es_exception()
+                    c.configurables.remove(obj)
+
+        */
+
+    }
+
     //@-others
 }
 

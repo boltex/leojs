@@ -327,8 +327,8 @@ export class ParserBaseClass {
         let s: string | undefined;
         try {
             // Copy the entire tree to s.
-            (c.fileCommands as FileCommands).leo_file_encoding = 'utf-8';
-            s = (c.fileCommands as FileCommands).outline_to_clipboard_string(p);
+            c.fileCommands.leo_file_encoding = 'utf-8';
+            s = c.fileCommands.outline_to_clipboard_string(p);
             s = g.toUnicode(s, 'utf-8');
         }
         catch (exception) {
@@ -1324,7 +1324,7 @@ export class ParserBaseClass {
     /**
      * Traverse the entire settings tree.
      */
-    public traverse(): [any, any] {
+    public traverse(): [g.TypedDict, g.TypedDict] {
 
         const c = this.c;
 
@@ -1539,12 +1539,12 @@ export class GlobalConfigManager {
     public inited: boolean;
     public menusList: string[];
     public menusFileName: string;
-    public modeCommandsDict: g.TypedDict;// { [key: string]: any };
+    public modeCommandsDict: g.TypedDict;
     public panes: any;
     public sc: any;
     public tree: any;
 
-    public dictList!: { [key: string]: any }[];
+    public dictList!: g.TypedDict[];
     public recentFiles!: string[];
 
     public relative_path_base_directory!: string;
@@ -1717,8 +1717,7 @@ export class GlobalConfigManager {
         for (let key of keys) {
             const gs = d.get(key);
             if (gs) {
-                // ? needed ?
-                // assert isinstance(gs, g.GeneralSetting)
+                console.assert(gs instanceof g.GeneralSetting);
                 const ivar = gs.ivar!;  // The actual name of the ivar.
                 const kind = gs.kind;
                 let val: any;
@@ -1728,9 +1727,6 @@ export class GlobalConfigManager {
                     val = this.get(key, kind);  // Don't use bunch.val!
                 }
                 if (c) {
-                    // ! TEST !
-                    // console.log('-------------------------------SETTING c IVAR : ' + ivar + " to " + val);
-
                     (c as any)[ivar] = val;
                 }
                 if (true) {  // Always set the global ivars.
@@ -1757,12 +1753,8 @@ export class GlobalConfigManager {
 
     }
 
-    public munge(name?: string): string | undefined {
-        return this.canonicalizeSettingName(name);
-    }
-
-    // ! ALIAS !
     // munge = canonicalizeSettingName
+
     //@+node:felix.20220207005224.3: *4* gcm.exists
     /**
      * Return true if a setting of the given kind exists, even if it is None.
@@ -2117,6 +2109,14 @@ export class GlobalConfigManager {
 
 
 }
+
+// Aliases for GlobalConfigManager members
+export interface GlobalConfigManager {
+    munge: (name?: string) => string | undefined;
+
+}
+
+GlobalConfigManager.prototype.munge = GlobalConfigManager.prototype.canonicalizeSettingName;
 //@+node:felix.20220214191554.1: ** class LocalConfigManager
 /**
  * A class to hold config settings for commanders.
@@ -2171,7 +2171,9 @@ export class LocalConfigManager {
             this.settingsDict = previousSettings.settingsDict;
             this.shortcutsDict = previousSettings.shortcutsDict;
             //assert isinstance(this.settingsDict, g.TypedDict), repr(this.settingsDict)
+            console.assert(this.settingsDict instanceof g.TypedDict, JSON.stringify(this.settingsDict, null, 4));
             //assert isinstance(this.shortcutsDict, g.TypedDict), repr(this.shortcutsDict)
+            console.assert(this.shortcutsDict instanceof g.TypedDict, JSON.stringify(this.shortcutsDict, null, 4));
             // was TypedDictOfLists.
         } else {
             this.settingsDict = lm!.globalSettingsDict;
@@ -2394,6 +2396,7 @@ export class LocalConfigManager {
      */
     public getValFromDict(d: g.TypedDict, setting: string, requestedType?: string, warn = true): [any, boolean] {
         const tag = 'c.config.getValFromDict';
+
         const gs = d.get(g.app.config.munge(setting)!);
         if (!gs) {
             return [undefined, false];
@@ -3011,7 +3014,7 @@ export class SettingsTreeParser extends ParserBaseClass {
             const f = this.dispatchDict[kind];
             if (f) {
                 try {
-                    return f(p, kind, name!, val);  // type:ignore
+                    return f.bind(this)(p, kind, name!, val);  // type:ignore
                 }
                 catch (exception) {
                     g.es_exception(exception);

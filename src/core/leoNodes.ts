@@ -6,7 +6,7 @@
 import * as g from './leoGlobals';
 import { Commands } from './leoCommands';
 import { Bead } from './leoUndo';
-import { DummyFileCommands, FileCommands } from './leoFileCommands';
+import { FileCommands } from './leoFileCommands';
 import 'date-format-lite';
 //@-<< imports >>
 //@+others
@@ -43,7 +43,7 @@ export class NodeIndices {
             // fast.readWithElementTree always generates a nominal hidden vnode.
             return;
         }
-        const fc: FileCommands | DummyFileCommands = c.fileCommands;
+        const fc: FileCommands = c.fileCommands;
         const v2: VNode = fc.gnxDict[gnx];
         if (v2 && v2 !== v) {
             g.error(
@@ -102,7 +102,7 @@ export class NodeIndices {
             return '';
         }
         const c: Commands = v.context;
-        const fc: FileCommands | DummyFileCommands = c.fileCommands;
+        const fc: FileCommands = c.fileCommands;
         const t_s: string = this.update();
         // Updates self.lastTime and self.lastIndex.
         const gnx: string = g.toUnicode(
@@ -124,6 +124,12 @@ export class NodeIndices {
         v: VNode
     ): void {
         const ni: NodeIndices = this;
+        // Special case for the c.hiddenRootNode. This eliminates a hack in c.initObjects.
+        if (!c.fileCommands) {
+            console.assert(gnx === 'hidden-root-vnode-gnx');
+            v.fileIndex = gnx!;
+            return;
+        }
         if (gnx) {
             v.fileIndex = gnx;
             ni.check_gnx(c, gnx, v);

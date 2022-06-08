@@ -126,7 +126,7 @@ export class LeoFrame {
             c.bringToFront();
         }
         if (c.mFileName) {
-            const ok = await (c.fileCommands as FileCommands).save(c.mFileName);
+            const ok = await c.fileCommands.save(c.mFileName);
             return !ok;  // Veto if the save did not succeed.
         }
         return true;  // Veto.

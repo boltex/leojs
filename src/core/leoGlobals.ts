@@ -699,8 +699,7 @@ export class TypedDict {
      * Update self.d from a the appropriate dict.
      */
     public update(d: { [key: string]: any }): void {
-        // if isinstance(d, TypedDict):
-        if (d.hasOwnProperty('d')) {
+        if (d instanceof TypedDict) {
             this.d = { ...this.d, ...d.d };
         } else {
             // this.d.update(d);
@@ -3106,7 +3105,10 @@ export function isValidEncoding(encoding: string): boolean {
     if (!encoding) {
         return false;
     }
-    return true;
+    if (encoding.toLowerCase() === 'utf-8') {
+        return true;
+    }
+    return false;
 
     // try:
     //     codecs.lookup(encoding)

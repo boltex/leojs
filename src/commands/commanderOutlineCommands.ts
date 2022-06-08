@@ -78,7 +78,7 @@ export class CommanderOutlineCommands {
         // Copying an outline has no undo consequences.
         const c: Commands = this;
         // c.endEditing();
-        const s: string = (c.fileCommands as FileCommands).outline_to_clipboard_string()!;
+        const s: string = c.fileCommands.outline_to_clipboard_string()!;
         g.app.paste_c = c;
         g.app.gui!.replaceClipboardWith(s);
     }
@@ -119,7 +119,7 @@ export class CommanderOutlineCommands {
             return undefined;
         }
         // Get *position* to be pasted.
-        const pasted: Position = (c.fileCommands as FileCommands).getLeoOutlineFromClipboard(s)!;
+        const pasted: Position = c.fileCommands.getLeoOutlineFromClipboard(s)!;
         if (!pasted) {
             // Leo no longer supports MORE outlines. Use import-MORE-files instead.
             return undefined;
@@ -189,7 +189,7 @@ export class CommanderOutlineCommands {
             return undefined;
         }
         // Get *position* to be pasted.
-        const pasted: Position = (c.fileCommands as FileCommands).getLeoOutlineFromClipboardRetainingClones(s)!;
+        const pasted: Position = c.fileCommands.getLeoOutlineFromClipboardRetainingClones(s)!;
         if (!pasted) {
             // Leo no longer supports MORE outlines. Use import-MORE-files instead.
             return undefined;

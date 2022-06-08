@@ -5990,7 +5990,7 @@ public async closeLeoFile(): Promise&lt;unknown&gt; {
 
 </t>
 <t tx="felix.20201214211832.1">/**
- * * Sets up the call to the 'open-outline' command ans its possible file url parameter.
+ * * Sets up the call to the 'open-outline' command and its possible file url parameter.
  * @param p_leoFileUri optional uri for specifying a file, if missing, a dialog will open
  * @returns A promise that resolves when done trying to open the file
  */
@@ -6010,22 +6010,9 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         // override with given argument
         let fileName: string;
 
-
-        if (p_uri) {
-            console.log('test fspath');
-            console.log('p_uri.fsPath', p_uri.fsPath);
-            console.log('', uriUtils.basename);
-
-
-        }
-
-
-
-
         if (p_uri &amp;&amp; p_uri.fsPath.trim() &amp;&amp; g.app.loadManager) {
             fileName = p_uri.fsPath.replace(/\\/g, '/');
-            await g.app.loadManager.openFileByName(fileName, this);
-            //await g.app.loadManager.openFileByName(p_uri, this);
+            await g.app.loadManager.loadLocalFile(fileName, this);
         } else {
             const fileNames = await this.runOpenFileDialog(
                 undefined,
@@ -6039,8 +6026,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
                 false
             );
             if (fileNames &amp;&amp; fileNames.length &amp;&amp; g.app.loadManager) {
-                await g.app.loadManager.openFileByName(fileNames[0], this);
-                // await g.app.loadManager.openFileByName(fileNames[0], this);
+                await g.app.loadManager.loadLocalFile(fileNames[0], this);
             } else {
                 return Promise.resolve();
             }
@@ -6293,6 +6279,19 @@ public async _launchRefresh(p_node?: Position): Promise&lt;unknown&gt; {
         });
 
     }
+
+    console.log('***********************finished refresh');
+
+    console.log('**** c.config should be lowercase: ', c.config.new_leo_file_encoding);
+
+    // @ts-expect-error
+    console.log('**** g.app.config should be uppercase: ', g.app.config.new_leo_file_encoding);
+
+    console.log('**** c.collapse_on_lt_arrow :', c.collapse_on_lt_arrow);
+    console.log('**** c.collapse_nodes_after_move :', c.collapse_nodes_after_move);
+    console.log('**** c.sparse_move: ', c.sparse_move);
+
+
 
     // getStates will check if documents, buttons and states flags are set and refresh accordingly
     return this.getStates();
