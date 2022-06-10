@@ -11,12 +11,13 @@ import * as utils from "../utils";
 import { LeoUI, NullGui } from '../leoUI';
 import { NodeIndices, VNode, Position } from './leoNodes';
 import { Commands } from './leoCommands';
-import { FileCommands } from "./leoFileCommands";
+import { FastRead, FileCommands } from "./leoFileCommands";
 import { GlobalConfigManager, SettingsTreeParser } from "./leoConfig";
 import { Constants } from "../constants";
 import { ExternalFilesController } from "./leoExternalFiles";
 import { LeoFrame } from "./leoFrame";
 import { TypedDict } from "./leoGlobals";
+import { leojsSettingsXml } from "../leojsSettings";
 
 //@-<< imports >>
 //@+others
@@ -1493,13 +1494,13 @@ export class LoadManager {
     public more_cmdline_files: boolean; // True when more files remain on the command line to be loaded.
 
     // Themes.
-    public leo_settings_c: any;//  = None
-    public leo_settings_path: any;//  = None
-    public my_settings_c: any;//  = None
-    public my_settings_path: any;//  = None
-    public theme_c: any;//  = None
+    public leo_settings_c: Commands | undefined;
+    public leo_settings_path: string | undefined;
+    public my_settings_c: Commands | undefined;
+    public my_settings_path: string | undefined;
+    public theme_c: Commands | undefined;
     // #1374.
-    public theme_path: any;//  = None
+    public theme_path: string | undefined;
 
     private _context: vscode.ExtensionContext | undefined;
 
@@ -1517,6 +1518,326 @@ export class LoadManager {
         this.more_cmdline_files = false;
     }
 
+    //@+node:felix.20220610002953.1: *3* LM.Directory & file utils
+    //@+node:felix.20220610002953.2: *4* LM.completeFileName
+    /* 
+    def completeFileName(self, fileName):
+        fileName = g.toUnicode(fileName)
+        fileName = g.os_path_finalize(fileName)
+        # 2011/10/12: don't add .leo to *any* file.
+        return fileName
+     */
+    //@+node:felix.20220610002953.3: *4* LM.computeLeoSettingsPath
+    /* 
+    def computeLeoSettingsPath(self):
+        """Return the full path to leoSettings.leo."""
+        # lm = self
+        join = g.os_path_finalize_join
+        settings_fn = 'leoSettings.leo'
+        table = (
+            # First, leoSettings.leo in the home directories.
+            join(g.app.homeDir, settings_fn),
+            join(g.app.homeLeoDir, settings_fn),
+            # Last, leoSettings.leo in leo/config directory.
+            join(g.app.globalConfigDir, settings_fn)
+        )
+        for path in table:
+            if g.os_path_exists(path):
+                break
+        else:
+            path = None
+        return path
+     */
+    //@+node:felix.20220610002953.4: *4* LM.computeMyLeoSettingsPath
+    /* 
+    def computeMyLeoSettingsPath(self):
+        """
+        Return the full path to myLeoSettings.leo.
+
+        The "footnote": Get the local directory from lm.files[0]
+        """
+        lm = self
+        join = g.os_path_finalize_join
+        settings_fn = 'myLeoSettings.leo'
+        # This seems pointless: we need a machine *directory*.
+        # For now, however, we'll keep the existing code as is.
+        machine_fn = lm.computeMachineName() + settings_fn
+        # First, compute the directory of the first loaded file.
+        # All entries in lm.files are full, absolute paths.
+        localDir = g.os_path_dirname(lm.files[0]) if lm.files else ''
+        table = (
+            # First, myLeoSettings.leo in the local directory
+            join(localDir, settings_fn),
+            # Next, myLeoSettings.leo in the home directories.
+            join(g.app.homeDir, settings_fn),
+            join(g.app.homeLeoDir, settings_fn),
+            # Next, <machine-name>myLeoSettings.leo in the home directories.
+            join(g.app.homeDir, machine_fn),
+            join(g.app.homeLeoDir, machine_fn),
+            # Last, leoSettings.leo in leo/config directory.
+            join(g.app.globalConfigDir, settings_fn),
+        )
+        for path in table:
+            if g.os_path_exists(path):
+                break
+        else:
+            path = None
+        return path
+     */
+    //@+node:felix.20220610002953.5: *4* LM.computeStandardDirectories & helpers
+    /*
+    def computeStandardDirectories(self):
+        """
+        Compute the locations of standard directories and
+        set the corresponding ivars.
+        """
+        lm = self
+        join = os.path.join
+        g.app.loadDir = lm.computeLoadDir()
+        g.app.globalConfigDir = lm.computeGlobalConfigDir()
+        g.app.homeDir = lm.computeHomeDir()
+        g.app.homeLeoDir = lm.computeHomeLeoDir()
+        g.app.leoDir = lm.computeLeoDir()
+        # These use g.app.loadDir...
+        g.app.extensionsDir = join(g.app.loadDir, '..', 'extensions')
+        g.app.leoEditorDir = join(g.app.loadDir, '..', '..')
+        g.app.testDir = join(g.app.loadDir, '..', 'test')
+     */
+    //@+node:felix.20220610002953.6: *5* LM.computeGlobalConfigDir
+    /* 
+    def computeGlobalConfigDir(self):
+        leo_config_dir = getattr(sys, 'leo_config_directory', None)
+        if leo_config_dir:
+            theDir = leo_config_dir
+        else:
+            theDir = os.path.join(g.app.loadDir, "..", "config")
+        if theDir:
+            theDir = os.path.abspath(theDir)
+        if not theDir or not g.os_path_exists(theDir) or not g.os_path_isdir(theDir):
+            theDir = None
+        return theDir
+     */
+    //@+node:felix.20220610002953.7: *5* LM.computeHomeDir
+    /* 
+    def computeHomeDir(self):
+        """Returns the user's home directory."""
+        # Windows searches the HOME, HOMEPATH and HOMEDRIVE
+        # environment vars, then gives up.
+        home = os.path.expanduser("~")
+        if home and len(home) > 1 and home[0] == '%' and home[-1] == '%':
+            # Get the indirect reference to the true home.
+            home = os.getenv(home[1:-1], default=None)
+        if home:
+            # Important: This returns the _working_ directory if home is None!
+            # This was the source of the 4.3 .leoID.txt problems.
+            home = g.os_path_finalize(home)
+            if (not g.os_path_exists(home) or not g.os_path_isdir(home)):
+                home = None
+        return home
+     */
+    //@+node:felix.20220610002953.8: *5* LM.computeHomeLeoDir
+    /* 
+    def computeHomeLeoDir(self):
+        # lm = self
+        homeLeoDir = g.os_path_finalize_join(g.app.homeDir, '.leo')
+        if g.os_path_exists(homeLeoDir):
+            return homeLeoDir
+        ok = g.makeAllNonExistentDirectories(homeLeoDir)
+        return homeLeoDir if ok else ''  # #1450
+     */
+    //@+node:felix.20220610002953.9: *5* LM.computeLeoDir
+    /* 
+    def computeLeoDir(self):
+        # lm = self
+        loadDir = g.app.loadDir
+        # We don't want the result in sys.path
+        return g.os_path_dirname(loadDir)
+     */
+    //@+node:felix.20220610002953.10: *5* LM.computeLoadDir
+    /* 
+    def computeLoadDir(self):
+        """Returns the directory containing leo.py."""
+        try:
+            # Fix a hangnail: on Windows the drive letter returned by
+            # __file__ is randomly upper or lower case!
+            # The made for an ugly recent files list.
+            path = g.__file__  # was leo.__file__
+            if path:
+                # Possible fix for bug 735938:
+                # Do the following only if path exists.
+                //@+<< resolve symlinks >>
+                //@+node:felix.20220610002953.11: *6* << resolve symlinks >>
+                 
+                if path.endswith('pyc'):
+                    srcfile = path[:-1]
+                    if os.path.islink(srcfile):
+                        path = os.path.realpath(srcfile)
+                //@-<< resolve symlinks >>
+                if sys.platform == 'win32':
+                    if len(path) > 2 and path[1] == ':':
+                        # Convert the drive name to upper case.
+                        path = path[0].upper() + path[1:]
+                path = g.os_path_finalize(path)
+                loadDir = g.os_path_dirname(path)
+            else: loadDir = None
+            if (
+                not loadDir or
+                not g.os_path_exists(loadDir) or
+                not g.os_path_isdir(loadDir)
+            ):
+                loadDir = os.getcwd()
+                # From Marc-Antoine Parent.
+                if loadDir.endswith("Contents/Resources"):
+                    loadDir += "/leo/plugins"
+                else:
+                    g.pr("Exception getting load directory")
+            loadDir = g.os_path_finalize(loadDir)
+            return loadDir
+        except Exception:
+            print("Exception getting load directory")
+            raise
+     */
+    //@+node:felix.20220610002953.12: *5* LM.computeMachineName
+    /* 
+    def computeMachineName(self):
+        """Return the name of the current machine, i.e, HOSTNAME."""
+        # This is prepended to leoSettings.leo or myLeoSettings.leo
+        # to give the machine-specific setting name.
+        # How can this be worth doing??
+        try:
+            name = os.getenv('HOSTNAME')
+            if not name:
+                name = os.getenv('COMPUTERNAME')
+            if not name:
+                import socket
+                name = socket.gethostname()
+        except Exception:
+            name = ''
+        return name
+     */
+    //@+node:felix.20220610002953.13: *4* LM.computeThemeDirectories
+    /* 
+    def computeThemeDirectories(self):
+        """
+        Return a list of *existing* directories that might contain theme .leo files.
+        """
+        join = g.os_path_finalize_join
+        home = g.app.homeDir
+        leo = join(g.app.loadDir, '..')
+        table = [
+            home,
+            join(home, 'themes'),
+            join(home, '.leo'),
+            join(home, '.leo', 'themes'),
+            join(leo, 'themes'),
+        ]
+        # Make sure home has normalized slashes.
+        return [g.os_path_normslashes(z) for z in table if g.os_path_exists(z)]
+     */
+    //@+node:felix.20220610002953.14: *4* LM.computeThemeFilePath & helper
+    /* 
+    def computeThemeFilePath(self):
+        """
+        Return the absolute path to the theme .leo file, resolved using the search order for themes.
+
+        1. Use the --theme command-line option if it exists.
+
+        2. Otherwise, preload the first .leo file.
+           Load the file given by @string theme-name setting.
+
+        3. Finally, look up the @string theme-name in the already-loaded, myLeoSettings.leo.
+           Load the file if setting exists.  Otherwise return None.
+        """
+        trace = 'themes' in g.app.db
+        lm = self
+        resolve = self.resolve_theme_path
+        #
+        # Step 1: Use the --theme command-line options if it exists
+        path = resolve(lm.options.get('theme_path'), tag='--theme')
+        if path:
+            # Caller (LM.readGlobalSettingsFiles) sets lm.theme_path
+            if trace:
+                g.trace('--theme:', path)
+            return path
+        #
+        # Step 2: look for the @string theme-name setting in the first loaded file.
+        path = lm.files and lm.files[0]
+        if path and g.os_path_exists(path):
+            # Tricky: we must call lm.computeLocalSettings *here*.
+            theme_c = lm.openSettingsFile(path)
+            if theme_c:
+                settings_d, junk_shortcuts_d = lm.computeLocalSettings(
+                    c=theme_c,
+                    settings_d=lm.globalSettingsDict,
+                    bindings_d=lm.globalBindingsDict,
+                    localFlag=False,
+                )
+                setting = settings_d.get_string_setting('theme-name')
+                if setting:
+                    tag = theme_c.shortFileName()
+                    path = resolve(setting, tag=tag)
+                    if path:
+                        # Caller (LM.readGlobalSettingsFiles) sets lm.theme_path
+                        if trace:
+                            g.trace("First loaded file", theme_c.shortFileName(), path)
+                        return path
+        #
+        # Step 3: use the @string theme-name setting in myLeoSettings.leo.
+        # Note: the setting should *never* appear in leoSettings.leo!
+        setting = lm.globalSettingsDict.get_string_setting('theme-name')
+        tag = 'myLeoSettings.leo'
+        path = resolve(setting, tag=tag)
+        if trace:
+            g.trace("myLeoSettings.leo", path)
+        return path
+     */
+    //@+node:felix.20220610002953.15: *5* LM.resolve_theme_path
+    /* 
+    def resolve_theme_path(self, fn, tag):
+        """Search theme directories for the given .leo file."""
+        if not fn or fn.lower().strip() == 'none':
+            return None
+        if not fn.endswith('.leo'):
+            fn += '.leo'
+        for directory in self.computeThemeDirectories():
+            path = g.os_path_join(directory, fn)  # Normalizes slashes, etc.
+            if g.os_path_exists(path):
+                return path
+        print(f"theme .leo file not found: {fn}")
+        return None
+     */
+    //@+node:felix.20220610002953.16: *4* LM.computeWorkbookFileName
+    /* 
+    def computeWorkbookFileName(self):
+        """
+        Return full path to the workbook.
+
+        Return None if testing, or in batch mode, or if the containing
+        directory does not exist.
+        """
+        # lm = self
+        # Never create a workbook during unit tests or in batch mode.
+        if g.unitTesting or g.app.batchMode:
+            return None
+        fn = g.app.config.getString(setting='default_leo_file') or '~/.leo/workbook.leo'
+        fn = g.os_path_finalize(fn)
+        directory = g.os_path_finalize(os.path.dirname(fn))
+        # #1415.
+        return fn if os.path.exists(directory) else None
+     */
+    //@+node:felix.20220610002953.17: *4* LM.reportDirectories
+    /* 
+    def reportDirectories(self):
+        """Report directories."""
+        # The cwd changes later, so it would be misleading to report it here.
+        for kind, theDir in (
+            ('home', g.app.homeDir),
+            ('leo-editor', g.app.leoEditorDir),
+            ('load', g.app.loadDir),
+            ('config', g.app.globalConfigDir),
+        ):  # g.blue calls g.es_print, and that's annoying.
+            g.es(f"{kind:>10}:", os.path.normpath(theDir), color='blue')
+     */
     //@+node:felix.20220406235904.1: *3* LM.Settings
     //@+node:felix.20220406235925.1: *4* LM.computeBindingLetter
     public computeBindingLetter(c: Commands, p_path: string): string {
@@ -1889,7 +2210,6 @@ export class LoadManager {
         // A useful trace.
         // g.trace('%20s' % g.shortFileName(fn), g.callers(3))
 
-
         // Changing g.app.gui here is a major hack.  It is necessary.
         const oldGui = g.app.gui;
         g.app.gui = g.app.nullGui;
@@ -1904,7 +2224,24 @@ export class LoadManager {
 
         let ok: VNode | undefined;
         try {
-            ok = await c.fileCommands.openLeoFile(fn, false, true);
+            // ! HACK FOR LEOJS: MAKE COMMANDER FROM FAKE leoSettings.leo STRING !
+            // ok = await c.fileCommands.openLeoFile(fn, false, true);
+            const w_fastRead: FastRead = new FastRead(c, c.fileCommands.gnxDict);
+            let g_element;
+            if (fn === 'leoSettings.leo') {
+                console.log('Doing Leo Settings!, ', fn);
+
+                [ok, g_element] = w_fastRead.readWithElementTree(fn, leojsSettingsXml);
+                if (ok) {
+                    c.hiddenRootNode = ok;
+                }
+
+            } else {
+                // MAYBE the other settings file: myleoSettings.leo
+                console.log('skipped settings file : ', fn);
+
+            }
+
             // closes theFile.
         }
         catch (p_err) {
@@ -1919,7 +2256,6 @@ export class LoadManager {
         c.openDirectory = frame.openDirectory;
         g.app.gui = oldGui;
 
-
         return ok ? c : undefined;
 
     }
@@ -1930,58 +2266,74 @@ export class LoadManager {
      *
      * New in Leo 6.1: this sets ivars for the ActiveSettingsOutline class.
      */
-    public readGlobalSettingsFiles(): void {
-        const lm = this;
+    public async readGlobalSettingsFiles(): Promise<unknown> {
 
-        let settings_d;
-        let bindings_d;
+        const trace = g.app.debug.includes('themes');
+        const lm = this;
+        // Open the standard settings files with a nullGui.
+        // Important: their commanders do not exist outside this method!
+        const old_commanders = g.app.commanders();
+
+        lm.leo_settings_path = 'leoSettings.leo'; // lm.computeLeoSettingsPath();
+        lm.my_settings_path = 'myLeoSettings.leo'; // lm.computeMyLeoSettingsPath();
+
+        lm.leo_settings_c = await lm.openSettingsFile(lm.leo_settings_path);
+        lm.my_settings_c = await lm.openSettingsFile(lm.my_settings_path);
+
+        let commanders = [lm.leo_settings_c, lm.my_settings_c];
+        commanders = commanders.filter(c => !!c);
+
+        let settings_d: g.TypedDict;
+        let bindings_d: g.TypedDict;
 
         [settings_d, bindings_d] = lm.createDefaultSettingsDicts();
 
-        lm.globalSettingsDict = settings_d;
-        lm.globalBindingsDict = bindings_d;
-        /*    
-        trace = 'themes' in g.app.debug
-        lm = self
-        // Open the standard settings files with a nullGui.
-        // Important: their commanders do not exist outside this method!
-        old_commanders = g.app.commanders()
-        lm.leo_settings_path = lm.computeLeoSettingsPath()
-        lm.my_settings_path = lm.computeMyLeoSettingsPath()
-        lm.leo_settings_c = lm.openSettingsFile(self.leo_settings_path)
-        lm.my_settings_c = lm.openSettingsFile(self.my_settings_path)
-        commanders = [lm.leo_settings_c, lm.my_settings_c]
-        commanders = [z for z in commanders if z]
-        settings_d, bindings_d = lm.createDefaultSettingsDicts()
-        for c in commanders:
+        for (let c of commanders) {
             // Merge the settings dicts from c's outline into
             // *new copies of* settings_d and bindings_d.
-            settings_d, bindings_d = lm.computeLocalSettings(
-                c, settings_d, bindings_d, localFlag=false)
+            [settings_d, bindings_d] = lm.computeLocalSettings(
+                c!, // Commands for sure because of filter(c => !!c)
+                settings_d,
+                bindings_d,
+                false
+            );
+        }
         // Adjust the name.
-        bindings_d.setName('lm.globalBindingsDict')
-        lm.globalSettingsDict = settings_d
-        lm.globalBindingsDict = bindings_d
+        bindings_d.setName('lm.globalBindingsDict');
+
+        lm.globalSettingsDict = settings_d;
+        lm.globalBindingsDict = bindings_d;
+
+
+        // TODO : ? THEMES NOT NEEDED ?
+        /* 
         // Add settings from --theme or @string theme-name files.
         // This must be done *after* reading myLeoSettigns.leo.
         lm.theme_path = lm.computeThemeFilePath()
-        if lm.theme_path:
+
+        if lm.theme_path
             lm.theme_c = lm.openSettingsFile(lm.theme_path)
-            if lm.theme_c:
+            if lm.theme_c
                 // Merge theme_c's settings into globalSettingsDict.
                 settings_d, junk_shortcuts_d = lm.computeLocalSettings(
                     lm.theme_c, settings_d, bindings_d, localFlag=False)
                 lm.globalSettingsDict = settings_d
                 // Set global var used by the StyleSheetManager.
                 g.app.theme_directory = g.os_path_dirname(lm.theme_path)
-                if trace:
+
+                if trace
                     g.trace('g.app.theme_directory', g.app.theme_directory)
+        */
+
         // Clear the cache entries for the commanders.
         // This allows this method to be called outside the startup logic.
-        for c in commanders:
-            if c not in old_commanders:
-                g.app.forgetOpenFile(c.fileName())
-        */
+        for (let c of commanders) {
+            if (c && !old_commanders.includes(c)) {
+                g.app.forgetOpenFile(c.fileName());
+            }
+        }
+
+        return;
 
     }
 
@@ -2197,7 +2549,7 @@ export class LoadManager {
     /**
      * Scan options, set directories and read settings.
      */
-    public doPrePluginsInit(fileName?: string): Promise<unknown> {
+    public async doPrePluginsInit(fileName?: string): Promise<unknown> {
         const lm: LoadManager = this;
         // lm.computeStandardDirectories();
         // lm.adjustSysPath();
@@ -2211,14 +2563,14 @@ export class LoadManager {
         // const verbose:boolean = !script;
 
         // Init the app.
-        return lm.initApp().finally(() => {
+        return lm.initApp().finally(async () => {
             // g.app.setGlobalDb()
 
             // lm.reportDirectories(verbose)
 
             // Read settings *after* setting g.app.config and *before* opening plugins.
             // This means if-gui has effect only in per-file settings.
-            lm.readGlobalSettingsFiles();
+            await lm.readGlobalSettingsFiles();
             // reads only standard settings files, using a null gui.
             // uses lm.files[0] to compute the local directory
             // that might contain myLeoSettings.leo.

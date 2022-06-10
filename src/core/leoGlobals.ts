@@ -457,7 +457,10 @@ export class GeneralSetting {
 
     public __repr__(): string {
         // Better for g.printObj.
-        const val = this.val.toString().split("\n").join(" ");
+        let val
+        if (val) {
+            val = this.val.toString().split("\n").join(" ");
+        }
         return (
             `GS: ${shortFileName(this.path)} ` +
             `${this.kind} = ${val} `);

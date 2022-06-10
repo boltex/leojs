@@ -560,17 +560,17 @@ To try out running as a web extension on vscode.dev, use the following commands:
 
 2. Open another terminal and run `npx localtunnel -p 5000`
 
-3. Click on the generated URL and select the _Click-to-Continue_ button
+3. Click on the generated URL and select the _Click-to-Continue_ button.
 
 4. Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.dev/github/boltex/practice-leo-phys` and run **Developer: Install Web Extension...** from the Command Palette and paste the generated URL.
 
 ## Features done so far
 
-- The commands and menus icons for outline editing 
-- Undo and navigation history commands
-- The minibuffer Command-Palette
-- Panels for Outline, Undo history, Leo documents (no find, goto or @buttons panes yet)
-- Basic 'New', 'Open' and 'Save' operations (no external @files/@clean... support yet)
+-   The commands and menus icons for outline editing
+-   Undo and navigation history commands
+-   The minibuffer Command-Palette
+-   Panels for Outline, Undo history, Leo documents (no find, goto or @buttons panes yet)
+-   Basic 'New', 'Open' and 'Save' operations (no external @files/@clean... support yet)
 
 ## Keybindings
 
@@ -583,7 +583,7 @@ To try out running as a web extension on vscode.dev, use the following commands:
 | `Ctrl + M`                 |     |                    | Mark / Unmark    |
 | `Ctrl + Shift + C`         |     |                    | Copy Node        |
 | `Ctrl + Shift + X`         |     |                    | Cut Node         |
-| `Ctrl + Shift + V`         |     |                    | Paste Node       | 
+| `Ctrl + Shift + V`         |     |                    | Paste Node       |
 | `Ctrl + Shift + Backspace` | or  | `Delete`           | Delete Node      |
 | `Ctrl + Backquote`         |     |                    | Clone Node       |
 | `Ctrl + {`                 | and | `Ctrl + }`         | Promote / Demote |
@@ -597,39 +597,39 @@ To try out running as a web extension on vscode.dev, use the following commands:
 
 _Move Outline commands need the 'Alt' key modifier only when focus is on body pane._
 
-| Common Operations  |     |           |     |            |                     |
-| :----------------- | :-- | :-------- | :-- | :--------- | :------------------ |
-| `Ctrl + T`         |     |           |     |            | Toggle Outline/Body |
-| `Tab` or `Enter`   | or  | `Alt + D` | or  | `Ctrl + G` | Focus on Body       |
-| `Alt + T`          |     |           |     |            | Focus on Outline    |
-| `Alt + -`          |     |           |     |            | Contract All        |
-| `Ctrl + Shift + D` |     |           |     |            | Extract             |
-| `Ctrl + Shift + N` |     |           |     |            | Extract Names       |
-| `Alt + A`          |     |           |     |            | Sort Siblings       |
-| `Alt + X`          |     |           |     |            | Minibuffer Palette  |
-&lt;!-- | `Ctrl + B`         |     |           |     |            | Execute Script      | --&gt;
-&lt;!-- | `Ctrl + F`         |     |           |     |            | Start Search        | --&gt;
-&lt;!-- | `F3`               |     |           |     |            | Find Next           | --&gt;
-&lt;!-- | `F2`               |     |           |     |            | Find Previous       | --&gt;
+| Common Operations  |            |           |     |            |                     |
+| :----------------- | :--------- | :-------- | :-- | :--------- | :------------------ | -------------- | --- |
+| `Ctrl + T`         |            |           |     |            | Toggle Outline/Body |
+| `Tab` or `Enter`   | or         | `Alt + D` | or  | `Ctrl + G` | Focus on Body       |
+| `Alt + T`          |            |           |     |            | Focus on Outline    |
+| `Alt + -`          |            |           |     |            | Contract All        |
+| `Ctrl + Shift + D` |            |           |     |            | Extract             |
+| `Ctrl + Shift + N` |            |           |     |            | Extract Names       |
+| `Alt + A`          |            |           |     |            | Sort Siblings       |
+| `Alt + X`          |            |           |     |            | Minibuffer Palette  |
+| &lt;!--               | `Ctrl + B` |           |     |            |                     | Execute Script | --&gt; |
+| &lt;!--               | `Ctrl + F` |           |     |            |                     | Start Search   | --&gt; |
+| &lt;!--               | `F3`       |           |     |            |                     | Find Next      | --&gt; |
+| &lt;!--               | `F2`       |           |     |            |                     | Find Previous  | --&gt; |
 
-| Tree Navigation    |     |                 |                          |
-| :----------------- | :-- | :-------------- | :----------------------- |
-| `Alt + Home`       | or  | `Home` \*       | Go To First Visible Node |
-| `Alt + End`        |     |                 | Go To Last Sibling       |
-|                    |     | `End` \*        | Go To Last Visible Node  |
-| `Alt + N`          |     |                 | Go To Next Clone         |
-| `Alt + Arrow Keys` | or  | `Arrow Keys` \* | Browse Tree              |
-&lt;!-- | `Alt + G`          |     |                 | Go To Global Line        | --&gt;
+| Tree Navigation    |           |                 |                          |
+| :----------------- | :-------- | :-------------- | :----------------------- | ----------------- | --- |
+| `Alt + Home`       | or        | `Home` \*       | Go To First Visible Node |
+| `Alt + End`        |           |                 | Go To Last Sibling       |
+|                    |           | `End` \*        | Go To Last Visible Node  |
+| `Alt + N`          |           |                 | Go To Next Clone         |
+| `Alt + Arrow Keys` | or        | `Arrow Keys` \* | Browse Tree              |
+| &lt;!--               | `Alt + G` |                 |                          | Go To Global Line | --&gt; |
 
 \* _With the **'Leo Tree Browsing'** setting enabled by default, all arrows and numeric keypad keys change the outline's selection directly_
 
-| File Commands        |     |                         |                    |
-| :------------------- | :-- | :---------------------- | :----------------- |
-| `Ctrl + S`           |     |                         | Save Leo Document  |
-| `Ctrl + N`           |     |                         | New Leo Document   |
-| `Ctrl + O`           |     |                         | Open Leo Document  |
-| `Ctrl + Shift + W`   |     |                         | Write File Nodes   |
-| `Ctrl + Shift + Q`   |     |                         | Write Dirty Files  |
+| File Commands      |     |     |                   |
+| :----------------- | :-- | :-- | :---------------- |
+| `Ctrl + S`         |     |     | Save Leo Document |
+| `Ctrl + N`         |     |     | New Leo Document  |
+| `Ctrl + O`         |     |     | Open Leo Document |
+| `Ctrl + Shift + W` |     |     | Write File Nodes  |
+| `Ctrl + Shift + Q` |     |     | Write Dirty Files |
 
 **Enjoy!**
 </t>

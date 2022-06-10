@@ -54,7 +54,7 @@ export class CommanderFileCommands {
             }
         }
         // Read leoSettings.leo and myLeoSettings.leo, using a null gui.
-        lm.readGlobalSettingsFiles();
+        await lm.readGlobalSettingsFiles();
         for (let c of g.app.commanders()) {
             // Read the local file, using a null gui.
             const previousSettings = await lm.getPreviousSettings(c.mFileName);

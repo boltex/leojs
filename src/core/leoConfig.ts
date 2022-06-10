@@ -2692,7 +2692,7 @@ export class LocalConfigManager {
     public getSettingSource(setting: string): [string, any] | undefined {
         const d = this.settingsDict;
         if (d) {
-            // assert isinstance(d, g.TypedDict), repr(d)
+            console.assert(d instanceof g.TypedDict, d.toString());
             const bi = d.get(setting);
             if (bi === undefined) {
                 return ['unknown setting', undefined];
@@ -2702,7 +2702,7 @@ export class LocalConfigManager {
         //
         // lm.readGlobalSettingsFiles is opening a settings file.
         // lm.readGlobalSettingsFiles has not yet set lm.globalSettingsDict.
-        // assert d is None
+        console.assert(d === undefined || d === null);
         return undefined;
     }
     //@+node:felix.20220214191554.29: *5* c.config.getShortcut
