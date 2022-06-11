@@ -2878,7 +2878,7 @@ export class NullGui {
     }
 
     public addLogPaneEntry(...args: any[]): void {
-        console.log(...args);
+        console.log('NullGui:', ...args);
     }
 
     public runOpenFileDialog(

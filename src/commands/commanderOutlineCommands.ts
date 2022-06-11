@@ -56,9 +56,10 @@ function computeCopiedBunchList(
         d[p.v.toString()] = p.v;
     }
     const aList: Bead[] = [];
+    // Use string keys instead of v keys like original Leo
     for (let v in vnodeInfoDict) {
-        if (d[v.toString()]) {
-            const bunch: Bead = vnodeInfoDict[v.toString()];
+        if (d[v]) {
+            const bunch: Bead = vnodeInfoDict[v];
             aList.push(bunch);
         }
     }

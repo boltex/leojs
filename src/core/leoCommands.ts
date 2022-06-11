@@ -1484,6 +1484,44 @@ export class Commands {
         return true;
     }
     //@+node:felix.20211226232321.1: *3* c.Convenience methods
+    //@+node:felix.20220611011224.1: *4* c.getTime
+    public getTime(body = true): string {
+        const c = this;
+        const default_format = "%m/%d/%Y %H:%M:%S";  // E.g., 1/30/2003 8:31:55
+        // Try to get the format string from settings.
+        let format: string;
+        let gmt: boolean;
+        if (body) {
+            format = c.config.getString("body-time-format-string");
+            gmt = c.config.getBool("body-gmt-time");
+        } else {
+            format = c.config.getString("headline-time-format-string");
+            gmt = c.config.getBool("headline-gmt-time");
+        }
+
+        if (!format) {
+            format = default_format;
+        }
+        let s: string;
+        try {
+            // import time
+            // see https://www.programiz.com/python-programming/datetime/strftime
+            // and https://day.js.org/docs/en/display/format
+            if (gmt) {
+                s = ' TODO GET DAYJS ! '; //  time.strftime(format, time.gmtime());
+            } else {
+                s = ' TODO GET DAYJS ! '; //  time.strftime(format, time.localtime());
+            }
+        }
+        catch (exeption) {
+            g.es_exception(exeption);  // Probably a bad format string in leoSettings.leo.
+            s = ' TODO GET DAYJS ! '; //  time.strftime(default_format, time.gmtime());
+        }
+
+        return s;
+
+    }
+
     //@+node:felix.20211226232349.1: *4* setFileTimeStamp
     /**
      * Update the timestamp for fn..
@@ -2434,6 +2472,10 @@ export class Commands {
         c.import_error_nodes = [];
         c.ignored_at_file_nodes = [];
         c.orphan_at_file_nodes = [];
+    }
+    //@+node:felix.20220611010339.1: *5* c.notValidInBatchMode
+    public notValidInBatchMode(commandName: string): void {
+        g.es('the', commandName, "command is not valid in batch mode");
     }
     //@+node:felix.20211225212946.1: *5* c.raise_error_dialogs
     // warnings_dict = {}

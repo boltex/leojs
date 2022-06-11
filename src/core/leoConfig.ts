@@ -2455,7 +2455,7 @@ export class LocalConfigManager {
             // added for javascript
             || type1 === 'int' && type2 === 'number'
             || type1 === 'float' && type2 === 'number'
-            || (type1 in shortcuts && type2 in shortcuts)
+            || (shortcuts.includes(type1) && shortcuts.includes(type2))
             || type1 === type2
         );
 

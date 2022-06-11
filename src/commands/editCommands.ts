@@ -167,35 +167,37 @@ export class EditCommandsClass {
         'Insert a date/time stamp in the headline of the selected node.'
     )
     public insertHeadlineTime(): void {
-        console.log('TODO : insert-headline-time');
 
-        /* 
+        const c = this.c;
+        const p = c.p;
+        const u = this.c.undoer;
 
-        frame = self
-        c, p = frame.c, self.c.p
-        if g.app.batchMode:
-            c.notValidInBatchMode("Insert Headline Time")
-            return
-        // #131: Do not get w from self.editWidget()!
-        w = c.frame.tree.edit_widget(p)
-        if w:
-            // Fix bug https://bugs.launchpad.net/leo-editor/+bug/1185933
-            // insert-headline-time should insert at cursor.
-            // Note: The command must be bound to a key for this to work.
-            ins = w.getInsertPoint()
-            s = c.getTime(body=False)
-            w.insert(ins, s)
-        else:
-            c.endEditing()
-            time = c.getTime(body=False)
-            s = p.h.rstrip()
-            if s:
-                p.h = ' '.join([s, time])
-            else:
-                p.h = time
-            c.redrawAndEdit(p, selectAll=True)
+        if (g.app.batchMode) {
+            c.notValidInBatchMode("Insert Headline Time");
+            return;
+        }
 
-         */
+        // c.endEditing();
+        const time = c.getTime(false);
+        const s = p.h.trimEnd();
+
+        const h = p.h;
+        const undoType = 'insert-headline-time';
+        const undoData = u.beforeChangeNodeContents(p);
+        if (s) {
+            p.h = [s, time].join(' ');
+        } else {
+            p.h = time;
+        }
+        const changed = p.h !== h;
+        if (changed) {
+            c.setChanged();
+            p.setDirty();
+            u.afterChangeNodeContents(p, undoType, undoData);
+        }
+
+        c.redrawAndEdit(p, true);
+
     }
     //@+node:felix.20220503225231.1: *3* ec.capitalizeHeadline
     @cmd(
@@ -203,32 +205,32 @@ export class EditCommandsClass {
         'Capitalize all words in the headline of the selected node.'
     )
     public capitalizeHeadline(): void {
-        console.log('TODO : capitalize-headline');
 
-        /* 
+        const c = this.c;
+        const p = this.c.p;
+        const u = this.c.undoer;
 
-        frame = self
-        c, p, u = frame.c, self.c.p, self.c.undoer
+        if (g.app.batchMode) {
+            c.notValidInBatchMode("Capitalize Headline");
+            return;
+        }
+        const h = p.h;
+        const undoType = 'capitalize-headline';
+        const undoData = u.beforeChangeNodeContents(p);
 
-        if g.app.batchMode:
-            c.notValidInBatchMode("Capitalize Headline")
-            return
+        // const words = [w.capitalize() for w in h.split(" ")];
+        const words = h.split(" ").map(w => w[0].toUpperCase() + w.substring(1));
 
-        h = p.h
-        undoType = 'capitalize-headline'
-        undoData = u.beforeChangeNodeContents(p)
+        const capitalized = words.join(' ');
+        const changed = capitalized !== h;
+        if (changed) {
+            p.h = capitalized;
+            c.setChanged();
+            p.setDirty();
+            u.afterChangeNodeContents(p, undoType, undoData);
+            c.redraw();
+        }
 
-        words = [w.capitalize() for w in h.split()]
-        capitalized = ' '.join(words)
-        changed = capitalized != h
-        if changed:
-            p.h = capitalized
-            c.setChanged()
-            p.setDirty()
-            u.afterChangeNodeContents(p, undoType, undoData)
-            c.redraw()
-
-        */
 
     }
     //@+node:felix.20220503225323.1: *3* ec: goto node
