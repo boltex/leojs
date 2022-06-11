@@ -865,7 +865,7 @@ export class FileCommands {
                 g.es_exception(exception);
             }
         } else {
-            g.error('backup file does not exist!', backupName.toString());
+            g.error('backup file does not exist!', backupName);
         }
     }
     //@+node:felix.20211213224228.5: *4* fc.isReadOnly

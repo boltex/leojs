@@ -23,6 +23,10 @@ import { EditCommandsClass, TopLevelEditCommands } from '../commands/editCommand
 import { LeoFrame } from './leoFrame';
 import { PreviousSettings } from './leoApp';
 
+import dayjs = require('dayjs');
+var utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
+
 //@-<< imports >>
 //@+others
 //@+node:felix.20211017232128.1: ** applyMixins
@@ -1487,7 +1491,7 @@ export class Commands {
     //@+node:felix.20220611011224.1: *4* c.getTime
     public getTime(body = true): string {
         const c = this;
-        const default_format = "%m/%d/%Y %H:%M:%S";  // E.g., 1/30/2003 8:31:55
+        const default_format = "M/D/YYYY H:mm:ss";  // E.g., 1/30/2003 8:31:55
         // Try to get the format string from settings.
         let format: string;
         let gmt: boolean;
@@ -1498,7 +1502,10 @@ export class Commands {
             format = c.config.getString("headline-time-format-string");
             gmt = c.config.getBool("headline-gmt-time");
         }
-
+        if (format) {
+            // * CONVERT PYTHON TO DAYJS FORMAT STRING *
+            format = g.convertPythonDayjs(format);
+        }
         if (!format) {
             format = default_format;
         }
@@ -1508,18 +1515,16 @@ export class Commands {
             // see https://www.programiz.com/python-programming/datetime/strftime
             // and https://day.js.org/docs/en/display/format
             if (gmt) {
-                s = ' TODO GET DAYJS ! '; //  time.strftime(format, time.gmtime());
+                s = (dayjs as any).utc().format(format); //  time.strftime(format, time.gmtime());
             } else {
-                s = ' TODO GET DAYJS ! '; //  time.strftime(format, time.localtime());
+                s = dayjs().format(format); //  time.strftime(format, time.localtime());
             }
         }
         catch (exeption) {
             g.es_exception(exeption);  // Probably a bad format string in leoSettings.leo.
-            s = ' TODO GET DAYJS ! '; //  time.strftime(default_format, time.gmtime());
+            s = dayjs().format(default_format); //  time.strftime(default_format, time.gmtime());
         }
-
         return s;
-
     }
 
     //@+node:felix.20211226232349.1: *4* setFileTimeStamp
