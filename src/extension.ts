@@ -61,8 +61,11 @@ export function activate(p_context: vscode.ExtensionContext) {
             if (!vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme)) {
                 vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info").then(selection => {
                     if (selection === "More Info") {
-                        vscode.env.openExternal(vscode.Uri.parse(
-                            'https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations'));
+                        vscode.env.openExternal(
+                            vscode.Uri.parse(
+                                'https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations'
+                            )
+                        );
                     }
                 });
                 console.log('NOT started because not writable workspace');

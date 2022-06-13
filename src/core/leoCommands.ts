@@ -11,6 +11,7 @@ import { FileCommands } from './leoFileCommands';
 import { CommanderOutlineCommands } from '../commands/commanderOutlineCommands';
 import { CommanderFileCommands } from '../commands/commanderFileCommands';
 import { CommanderEditCommands } from '../commands/commanderEditCommands';
+import { CommanderHelpCommands } from '../commands/commanderHelpCommands';
 import { Position, VNode, StackEntry, NodeIndices } from './leoNodes';
 import { NodeHistory } from './leoHistory';
 import { Undoer } from './leoUndo';
@@ -3480,6 +3481,7 @@ export class Commands {
 export interface Commands
     extends CommanderOutlineCommands,
     CommanderFileCommands,
+    CommanderHelpCommands,
     CommanderEditCommands,
     TopLevelEditCommands {
     canCutOutline: () => boolean;
@@ -3511,6 +3513,7 @@ export interface Commands
 applyMixins(Commands, [
     CommanderOutlineCommands,
     CommanderFileCommands,
+    CommanderHelpCommands,
     CommanderEditCommands,
     TopLevelEditCommands
 ]);

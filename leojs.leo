@@ -474,9 +474,10 @@
 <v t="felix.20211026230613.1"><vh>@file src/core/leoUndo.ts</vh></v>
 </v>
 <v t="felix.20211002194716.1"><vh>Command classes</vh>
-<v t="felix.20211017230407.1"><vh>@file src/commands/commanderFileCommands.ts</vh></v>
-<v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
 <v t="felix.20220414231314.1"><vh>@file src/commands/commanderEditCommands.ts</vh></v>
+<v t="felix.20211017230407.1"><vh>@file src/commands/commanderFileCommands.ts</vh></v>
+<v t="felix.20220612234816.1"><vh>@file src/commands/commanderHelpCommands.ts</vh></v>
+<v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
 <v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 <v t="felix.20220503003653.1"><vh>@file src/commands/editCommands.ts</vh></v>
 <v t="felix.20220503003725.1"><vh>@file src/commands/gotoCommands.ts</vh></v>
@@ -1116,8 +1117,11 @@ export function activate(p_context: vscode.ExtensionContext) {
             if (!vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme)) {
                 vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info").then(selection =&gt; {
                     if (selection === "More Info") {
-                        vscode.env.openExternal(vscode.Uri.parse(
-                            'https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations'));
+                        vscode.env.openExternal(
+                            vscode.Uri.parse(
+                                'https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations'
+                            )
+                        );
                     }
                 });
                 console.log('NOT started because not writable workspace');
