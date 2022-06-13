@@ -20,8 +20,6 @@ export function activate(p_context: vscode.ExtensionContext) {
     console.log('env scheme', vscode.env.uriScheme);
     console.log('env appHost', vscode.env.appHost);
 
-
-
     // * Close remaining leojs Bodies restored by vscode from last session.
     // TODO : USE TABGROUPS
     // vscode.window.visibleTextEditors.forEach(p_textEditor => {
@@ -43,44 +41,50 @@ export function activate(p_context: vscode.ExtensionContext) {
     );
 
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length) {
-
         g.app.vscodeWorkspaceUri = vscode.workspace.workspaceFolders[0].uri;
         g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
         g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
         g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
-        console.log('Writable filesystem: ', vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme));
-
-
-        // @ts-ignore
-        if (g.app.vscodeWorkspaceUri.external) {
-            // @ts-ignore
-            console.log('it had external!', g.app.vscodeWorkspaceUri.external);
-
-        } else {
-            console.log('no external', g.app.vscodeWorkspaceUri);
-
-        }
-
-
-        console.log('Web browser already had workspace JSON: ' + JSON.stringify(g.app.vscodeWorkspaceUri.toJSON()));
-        console.log('Web browser already had workspace toString: ' + g.app.vscodeWorkspaceUri.toString());
     }
 
     if (!g.isBrowser) {
-        // Running as NodeJs Extension: Dont wait for workspace being opened
-        console.log('VSCODE regular nodejs startup');
-        if (g.app.vscodeUriScheme) {
-            console.assert(g.app.vscodeUriScheme === 'file');
-        } else {
+        // Regular NodeJs Extension: Dont wait for workspace being opened
+        if (!g.app.vscodeUriScheme) {
+            // Only setting if undefined, because regular vscode can still work on remote github virtual filesystem
             g.app.vscodeUriScheme = 'file';
         }
         runLeo(p_context);
     } else {
-        // IS WEB EXTENSION IN BROWSER! 
-        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length) {
-            runLeo(p_context);
+        // Web Browser Extension: CHeck for type of workspace opened first
+        if (g.app.vscodeUriScheme) {
+
+            if (!vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme)) {
+                vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info").then(selection => {
+                    if (selection === "More Info") {
+                        vscode.env.openExternal(vscode.Uri.parse(
+                            'https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations'));
+                    }
+                });
+                console.log('NOT started because not writable workspace');
+                return;
+            }
+
+            // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
+            if (g.app.vscodeUriScheme !== 'file') {
+                runLeo(p_context);
+            } else {
+                // Is local filesystem
+                vscode.window.showInformationMessage("LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ", "More Info").then(selection => {
+                    if (selection === "More Info") {
+                        vscode.env.openExternal(vscode.Uri.parse(
+                            'https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project'));
+                    }
+                });
+                console.log('NOT started because no remote workspace yet');
+                return;
+            }
         } else {
-            console.log('NOT started because no workspace yet');
+            console.log('NOT started because no remote workspace yet');
         }
 
     }
@@ -102,13 +106,23 @@ function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscod
 
         // not started yet? 
         if (!g.app.loadManager && g.isBrowser) {
-            // START UP!
-            console.log('Web browser leojs first startup! Scheme: ' + g.app.vscodeUriScheme);
-            runLeo(p_context);
+            // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
+            if (g.app.vscodeUriScheme !== 'file') {
+                runLeo(p_context);
+            } else {
+                // Is local filesystem
+                vscode.window.showInformationMessage("LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ", "More Info").then(selection => {
+                    if (selection === "More Info") {
+                        vscode.env.openExternal(vscode.Uri.parse(
+                            'https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project'));
+                    }
+                });
+                console.log('NOT started because no remote workspace yet');
+                return;
+            }
         }
     } else {
-        console.log('WORKSPACE CHANGE DETECTED! but no workspace');
-
+        console.log('TODO : HANDLE WORKSPACE CHANGE DETECTED! but no workspace');
     }
 
 }

@@ -782,7 +782,6 @@ export class FileCommands {
         const w_exists = await g.os_path_exists(fileName);
 
         if (w_exists) {
-
             const timestamp: number = new Date().getTime();
             backupName = fileName + "." + timestamp.toString(32) + (this.tempCounter++).toString(32) + ".tmp";
 
@@ -790,13 +789,14 @@ export class FileCommands {
             // const w_readUri = vscode.Uri.file(fileName);
             const w_readUri = g.makeVscodeUri(fileName);
             const readData = await vscode.workspace.fs.readFile(w_readUri);
-            s = Buffer.from(readData).toString('utf8');
+            // s = Buffer.from(readData).toString('utf8'); // * No need to convert if already Uint8Array
 
             try {
                 // const w_writeUri = vscode.Uri.file(backupName);
                 const w_writeUri = g.makeVscodeUri(backupName);
-                const writeData = Buffer.from(s, 'utf8');
-                await vscode.workspace.fs.writeFile(w_writeUri, writeData);
+
+                // const writeData = Buffer.from(s, 'utf8'); // * No need to convert if already Uint8Array
+                await vscode.workspace.fs.writeFile(w_writeUri, readData);
                 ok = true;
             }
             catch (exception) {

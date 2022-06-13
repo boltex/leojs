@@ -685,6 +685,7 @@ export class CommanderFileCommands {
             }
             // Don't change mFileName until the dialog has suceeded.
             c.mFileName = g.ensure_extension(fileName, g.defaultLeoFileExtension(c));
+
             c.frame.title = c.computeWindowTitle(c.mFileName);
 
             c.openDirectory = g.os_path_dirname(c.mFileName);

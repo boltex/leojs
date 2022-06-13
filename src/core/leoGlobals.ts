@@ -3200,7 +3200,6 @@ export const red = es_print;
 export const warning = es_print;
 
 //@+node:felix.20211104212741.1: *3* g.es
-// TODO : Replace with output to proper 'Leo log pane'
 export function es(...args: any[]): void {
     if (app && app.gui) {
         let s: string = "";
@@ -3212,7 +3211,11 @@ export function es(...args: any[]): void {
                 // it's a string
                 s += p_entry;
             } else {
-                s += p_entry.toString();
+                if (p_entry !== undefined) {
+                    s += p_entry.toString();
+                } else {
+                    s += 'undefined';
+                }
             }
         });
         app.gui.addLogPaneEntry(s);
@@ -3508,7 +3511,7 @@ export async function os_path_exists(p_path?: string): Promise<boolean> {
     const w_uri = makeVscodeUri(p_path);
 
     try {
-        await vscode.workspace.fs.stat(w_uri);
+        const stat = await vscode.workspace.fs.stat(w_uri);
         return true;
     } catch {
         return false;

@@ -299,12 +299,12 @@
     "viewsWelcome": [
       {
         "view": "leojsOutline",
-        "contents": "Open a folder or remote repository first to enable leojs.\n[Show Explorer](command:workbench.view.explorer)",
+        "contents": "Open a remote repository first to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
         "when": "!leojsReady"
       },
       {
         "view": "leojsOutlineExplorer",
-        "contents": "Open a folder or remote repository first to enable leojs.\n[Show Explorer](command:workbench.view.explorer)",
+        "contents": "Open a remote repository first to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
         "when": "!leojsReady"
       },
       {
