@@ -10361,7 +10361,7 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
     email: string // UNUSED FOR NOW
 ): Thenable&lt;unknown&gt; {
     return vscode.window.showInformationMessage(
-        "About Leo " + version,
+        version,
         {
             modal: true,
             detail: theCopyright

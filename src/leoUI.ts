@@ -2726,7 +2726,7 @@ export class LeoUI {
         email: string // UNUSED FOR NOW
     ): Thenable<unknown> {
         return vscode.window.showInformationMessage(
-            "About Leo " + version,
+            version,
             {
                 modal: true,
                 detail: theCopyright

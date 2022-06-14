@@ -109,12 +109,12 @@ export class LeoApp {
     public diff: boolean = false; // True: run Leo in diff mode.
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
     public gui: LeoUI | NullGui | undefined; // The gui class.
-    public guiArgName = null; // The gui name given in --gui option.
+    public guiArgName: string | undefined; // The gui name given in --gui option.
     public listen_to_log_flag: boolean = false; // True: execute listen-to-log command.
     public loaded_session: boolean = false; // Set at startup if no files specified on command line.
     public silentMode: boolean = false; // True: no sign-on.
-    public trace_binding = null; // The name of a binding to trace, or None.
-    public trace_setting = null; // The name of a setting to trace, or None.
+    public trace_binding: string | undefined; // The name of a binding to trace, or None.
+    public trace_setting: string | undefined; // The name of a setting to trace, or None.
 
     //@-<< LeoApp: command-line arguments >>
     //@+<< LeoApp: Debugging & statistics >>
@@ -140,13 +140,13 @@ export class LeoApp {
     //@-<< LeoApp: error messages >>
     //@+<< LeoApp: global directories >>
     //@+node:felix.20210103024632.5: *5* << LeoApp: global directories >>
-    public extensionsDir = null; // The leo / extensions directory
-    public globalConfigDir = null; // leo / config directory
+    public extensionsDir: string | undefined; // The leo / extensions directory
+    public globalConfigDir: string | undefined; // leo / config directory 
     public globalOpenDir: string | undefined; // The directory last used to open a file.
-    public homeDir = null; // The user's home directory.
-    public homeLeoDir = null; // The user's home/.leo directory.
+    public homeDir: string | undefined; // The user's home directory.
+    public homeLeoDir: string | undefined; // The user's home/.leo directory.
     public loadDir: string | undefined; // The leo / core directory.
-    public machineDir = null; // The machine - specific directory.
+    public machineDir: string | undefined; // The machine - specific directory.
 
     public vscodeWorkspaceUri: vscode.Uri | undefined;
     public vscodeUriAuthority: string = "";
@@ -1561,29 +1561,36 @@ export class LoadManager {
         const join = g.os_path_finalize_join;
         const settings_fn = 'myLeoSettings.leo';
         // This seems pointless: we need a machine *directory*.
-        // For now, however, we'll keep the existing code as is.
-        const machine_fn = ''; // lm.computeMachineName() + settings_fn;
+
         // First, compute the directory of the first loaded file.
         // All entries in lm.files are full, absolute paths.
-        const localDir = g.os_path_dirname(lm.files.length ? lm.files[0] : '');
+        let localDir = g.os_path_dirname(lm.files.length ? lm.files[0] : '');
+        // IF NO FILES IN lm.files THEN USE WORKSPACE ROOT !
+        if (!localDir) {
+            localDir = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.path : "";
+        }
+
         const table = [
             // First, myLeoSettings.leo in the local directory
             join(undefined, localDir, settings_fn),
-            // Next, myLeoSettings.leo in the home directories.
-            join(undefined, g.app.homeDir, settings_fn),
-            join(undefined, g.app.homeLeoDir, settings_fn),
-            // Next, <machine-name>myLeoSettings.leo in the home directories.
-            join(undefined, g.app.homeDir, machine_fn),
-            join(undefined, g.app.homeLeoDir, machine_fn),
-            // Last, leoSettings.leo in leo/config directory.
-            join(undefined, g.app.globalConfigDir, settings_fn),
         ];
+        // Next, myLeoSettings.leo in the home directories.
+        if (g.app.homeDir) {
+            table.push(join(undefined, g.app.homeDir, settings_fn))
+        }
+        if (g.app.homeLeoDir) {
+            table.push(join(undefined, g.app.homeLeoDir, settings_fn))
+        }
+
+        console.log(JSON.stringify(table));
 
         let hasBreak = false;
         let path: string | undefined;
-        for (path of table) {
-            const exists = await g.os_path_exists(path);
+        for (let p_path of table) {
+
+            const exists = await g.os_path_exists(p_path);
             if (exists) {
+                path = p_path;
                 hasBreak = true;
                 break;
             }
@@ -1596,66 +1603,103 @@ export class LoadManager {
     }
 
     //@+node:felix.20220610002953.5: *4* LM.computeStandardDirectories & helpers
-    /*
-    def computeStandardDirectories(self):
-        """
-        Compute the locations of standard directories and
-        set the corresponding ivars.
-        """
-        lm = self
-        join = os.path.join
-        g.app.loadDir = lm.computeLoadDir()
-        g.app.globalConfigDir = lm.computeGlobalConfigDir()
-        g.app.homeDir = lm.computeHomeDir()
-        g.app.homeLeoDir = lm.computeHomeLeoDir()
-        g.app.leoDir = lm.computeLeoDir()
-        # These use g.app.loadDir...
-        g.app.extensionsDir = join(g.app.loadDir, '..', 'extensions')
-        g.app.leoEditorDir = join(g.app.loadDir, '..', '..')
-        g.app.testDir = join(g.app.loadDir, '..', 'test')
+    /**
+     * Compute the locations of standard directories and
+     * set the corresponding ivars.
      */
+    public async computeStandardDirectories(): Promise<unknown> {
+
+        const lm = this;
+        const join = path.join;
+        g.app.loadDir = lm.computeLoadDir(); // UNUSED The leo / core directory. 
+        g.app.globalConfigDir = lm.computeGlobalConfigDir(); // UNUSED leo / config directory 
+        g.app.homeDir = await lm.computeHomeDir(); // * The user's home directory.
+        g.app.homeLeoDir = await lm.computeHomeLeoDir(); // * The user's home/.leo directory.
+        // g.app.leoDir = lm.computeLeoDir(); // * not used in leojs 
+        // These use g.app.loadDir...
+        g.app.extensionsDir = ""; // join(g.app.loadDir, '..', 'extensions'); // UNSUSED The leo / extensions directory
+        // g.app.leoEditorDir = join(g.app.loadDir, '..', '..');
+        // g.app.testDir = join(g.app.loadDir, '..', 'test');
+
+        return;
+    }
+
     //@+node:felix.20220610002953.6: *5* LM.computeGlobalConfigDir
-    /* 
-    def computeGlobalConfigDir(self):
-        leo_config_dir = getattr(sys, 'leo_config_directory', None)
-        if leo_config_dir:
+
+    public computeGlobalConfigDir(): string {
+        let theDir: string = ""; // * unused : RETURN EMPTY / FALSY FOR NOW
+
+        /* 
+        const leo_config_dir = getattr(sys, 'leo_config_directory', None)
+        if leo_config_dir
             theDir = leo_config_dir
-        else:
+        else
             theDir = os.path.join(g.app.loadDir, "..", "config")
-        if theDir:
+
+        if theDir
             theDir = os.path.abspath(theDir)
-        if not theDir or not g.os_path_exists(theDir) or not g.os_path_isdir(theDir):
+
+        if not theDir or not g.os_path_exists(theDir) or not g.os_path_isdir(theDir)
             theDir = None
-        return theDir
-     */
+        */
+        return theDir;
+    }
     //@+node:felix.20220610002953.7: *5* LM.computeHomeDir
-    /* 
-    def computeHomeDir(self):
-        """Returns the user's home directory."""
-        # Windows searches the HOME, HOMEPATH and HOMEDRIVE
-        # environment vars, then gives up.
-        home = os.path.expanduser("~")
-        if home and len(home) > 1 and home[0] == '%' and home[-1] == '%':
-            # Get the indirect reference to the true home.
-            home = os.getenv(home[1:-1], default=None)
-        if home:
-            # Important: This returns the _working_ directory if home is None!
-            # This was the source of the 4.3 .leoID.txt problems.
-            home = g.os_path_finalize(home)
-            if (not g.os_path_exists(home) or not g.os_path_isdir(home)):
-                home = None
-        return home
+    /**
+     * Returns the user's home directory.
      */
+    public async computeHomeDir(): Promise<string> {
+        let home: string = "";
+
+        // Windows searches the HOME, HOMEPATH and HOMEDRIVE
+        // environment vars, then gives up.
+        // home = path.expanduser("~")
+
+        // if home and len(home) > 1 and home[0] == '%' and home[-1] == '%':
+        //     // Get the indirect reference to the true home.
+        //     home = os.getenv(home[1:-1], default=None)
+
+        if (os) {
+            home = os.homedir();
+        }
+
+        if (home) {
+            // Important: This returns the _working_ directory if home is None!
+            // This was the source of the 4.3 .leoID.txt problems.
+            home = g.os_path_finalize(home);
+            const exists = await g.os_path_exists(home);
+            const isDir = await g.os_path_isdir(home);
+            if (!exists || !isDir) {
+                home = "";
+            }
+        }
+
+        return home;
+    }
     //@+node:felix.20220610002953.8: *5* LM.computeHomeLeoDir
-    /* 
-    def computeHomeLeoDir(self):
-        # lm = self
-        homeLeoDir = g.os_path_finalize_join(g.app.homeDir, '.leo')
-        if g.os_path_exists(homeLeoDir):
-            return homeLeoDir
-        ok = g.makeAllNonExistentDirectories(homeLeoDir)
-        return homeLeoDir if ok else ''  # #1450
-     */
+
+    public async computeHomeLeoDir(): Promise<string> {
+        let homeLeoDir: string = "";
+
+        // * RETURN FALSY STRING IF NO HOME DIR (possibly in browser)
+        if (!g.app.homeDir) {
+            return "";
+        }
+
+        homeLeoDir = g.os_path_finalize_join(undefined, g.app.homeDir, '.leo');
+        const exists = await g.os_path_exists(homeLeoDir);
+
+        let ok;
+        if (exists) {
+            return homeLeoDir;
+        }
+
+        // * LEOJS does not create: user / home / .leo folder !
+
+        // const ok = g.makeAllNonExistentDirectories(homeLeoDir);
+
+        return ok ? homeLeoDir : '';  // #1450
+    }
     //@+node:felix.20220610002953.9: *5* LM.computeLeoDir
     /* 
     def computeLeoDir(self):
@@ -1665,9 +1709,12 @@ export class LoadManager {
         return g.os_path_dirname(loadDir)
      */
     //@+node:felix.20220610002953.10: *5* LM.computeLoadDir
-    /* 
-    def computeLoadDir(self):
-        """Returns the directory containing leo.py."""
+    /**
+     * Returns the directory containing leo.py.
+     */
+    public computeLoadDir(): string {
+        let loadDir: string = ""; // * unused : RETURN EMPTY / FALSY FOR NOW
+        /* 
         try:
             # Fix a hangnail: on Windows the drive letter returned by
             # __file__ is randomly upper or lower case!
@@ -1707,7 +1754,9 @@ export class LoadManager {
         except Exception:
             print("Exception getting load directory")
             raise
-     */
+        */
+        return loadDir;
+    }
     //@+node:felix.20220610002953.12: *5* LM.computeMachineName
     /* 
     def computeMachineName(self):
@@ -2195,7 +2244,7 @@ export class LoadManager {
      *
      * The caller must init the c.config object.
      */
-    public async openSettingsFile(fn: string): Promise<Commands | undefined> {
+    public async openSettingsFile(fn?: string): Promise<Commands | undefined> {
 
         const lm = this;
 
@@ -2224,7 +2273,6 @@ export class LoadManager {
         // Changing g.app.gui here is a major hack.  It is necessary.
         const oldGui = g.app.gui;
         g.app.gui = g.app.nullGui;
-
         const c = g.app.newCommander(fn);
         const frame = c.frame;
 
@@ -2236,11 +2284,10 @@ export class LoadManager {
         let ok: VNode | undefined;
         try {
             // ! HACK FOR LEOJS: MAKE COMMANDER FROM FAKE leoSettings.leo STRING !
-            // ok = await c.fileCommands.openLeoFile(fn, false, true);
             const w_fastRead: FastRead = new FastRead(c, c.fileCommands.gnxDict);
             let g_element;
             if (fn === 'leoSettings.leo') {
-                console.log('Doing Leo Settings!, ', fn);
+                console.log('Doing hard-coded leoSettings.leo!, ', fn);
 
                 [ok, g_element] = w_fastRead.readWithElementTree(fn, leojsSettingsXml);
                 if (ok) {
@@ -2248,11 +2295,10 @@ export class LoadManager {
                 }
 
             } else {
-                // MAYBE the other settings file: myleoSettings.leo
-                console.log('skipped settings file : ', fn);
+                console.log('Open settings filename (maybe myLeoSettings ?): ', fn);
 
+                ok = await c.fileCommands.openLeoFile(fn, false, true);
             }
-
             // closes theFile.
         }
         catch (p_err) {
@@ -2286,7 +2332,7 @@ export class LoadManager {
         const old_commanders = g.app.commanders();
 
         lm.leo_settings_path = 'leoSettings.leo'; // lm.computeLeoSettingsPath();
-        lm.my_settings_path = 'myLeoSettings.leo'; // lm.computeMyLeoSettingsPath();
+        lm.my_settings_path = await lm.computeMyLeoSettingsPath();
 
         lm.leo_settings_c = await lm.openSettingsFile(lm.leo_settings_path);
         lm.my_settings_c = await lm.openSettingsFile(lm.my_settings_path);
@@ -2314,7 +2360,6 @@ export class LoadManager {
 
         lm.globalSettingsDict = settings_d;
         lm.globalBindingsDict = bindings_d;
-
 
         // TODO : ? THEMES NOT NEEDED ?
         /* 
@@ -2562,9 +2607,7 @@ export class LoadManager {
      */
     public async doPrePluginsInit(fileName?: string): Promise<unknown> {
         const lm: LoadManager = this;
-        // lm.computeStandardDirectories();
-        // lm.adjustSysPath();
-        // A do-nothing.
+        await lm.computeStandardDirectories();
 
         // Scan the command line options as early as possible.
         const options = {}; // lm.scanOptions(fileName); 
