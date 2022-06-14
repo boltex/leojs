@@ -1154,7 +1154,7 @@ export class LeoUI {
                 const commands: vscode.QuickPickItem[] = [];
                 for (let key in c.commandsDict) {
                     const command = c.commandsDict[key];
-                    // Going to get replaced
+                    // Going to get replaced. Don't take those that begin with 'async-'
                     if (!(command as any).__name__.startsWith('async-')) {
                         commands.push({
                             label: key,
@@ -2718,16 +2718,33 @@ export class LeoUI {
         return this.config.setLeojsSettings(w_changes);
     }
 
+    public runAboutLeoDialog(
+        c: Commands,
+        version: string,
+        theCopyright: string,
+        url: string, // UNUSED FOR NOW
+        email: string // UNUSED FOR NOW
+    ): Thenable<unknown> {
+        return vscode.window.showInformationMessage(
+            "About Leo " + version,
+            {
+                modal: true,
+                detail: theCopyright
+            });
+    }
+
     public runAskOkDialog(
         c: Commands,
         title: string,
         message: string,
         buttonText?: string
     ): Thenable<unknown> {
-        return vscode.window.showInformationMessage(title, {
-            modal: true,
-            detail: message
-        });
+        return vscode.window.showInformationMessage(
+            title,
+            {
+                modal: true,
+                detail: message
+            });
     }
 
     public runAskYesNoDialog(
@@ -2743,7 +2760,8 @@ export class LeoUI {
                     modal: true,
                     detail: message
                 },
-                ...[Constants.USER_MESSAGES.YES, Constants.USER_MESSAGES.NO]
+                Constants.USER_MESSAGES.YES,
+                Constants.USER_MESSAGES.NO
             )
             .then((answer) => {
                 if (answer === Constants.USER_MESSAGES.YES) {
@@ -2767,11 +2785,9 @@ export class LeoUI {
                     modal: true,
                     detail: message
                 },
-                ...[
-                    Constants.USER_MESSAGES.YES,
-                    Constants.USER_MESSAGES.NO
-                    // Already shows a 'cancel' 
-                ]
+                Constants.USER_MESSAGES.YES,
+                Constants.USER_MESSAGES.NO
+                // Already shows a 'cancel' 
             )
             .then((answer) => {
                 if (answer === Constants.USER_MESSAGES.YES) {
@@ -2879,6 +2895,16 @@ export class NullGui {
 
     public addLogPaneEntry(...args: any[]): void {
         console.log('NullGui:', ...args);
+    }
+
+    public runAboutLeoDialog(
+        c: Commands,
+        version: string,
+        theCopyright: string,
+        url: string,
+        email: string
+    ): Thenable<unknown> {
+        return Promise.resolve("");
     }
 
     public runOpenFileDialog(

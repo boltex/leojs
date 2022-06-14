@@ -1549,41 +1549,52 @@ export class LoadManager {
         return path
      */
     //@+node:felix.20220610002953.4: *4* LM.computeMyLeoSettingsPath
-    /* 
-    def computeMyLeoSettingsPath(self):
-        """
-        Return the full path to myLeoSettings.leo.
 
-        The "footnote": Get the local directory from lm.files[0]
-        """
-        lm = self
-        join = g.os_path_finalize_join
-        settings_fn = 'myLeoSettings.leo'
-        # This seems pointless: we need a machine *directory*.
-        # For now, however, we'll keep the existing code as is.
-        machine_fn = lm.computeMachineName() + settings_fn
-        # First, compute the directory of the first loaded file.
-        # All entries in lm.files are full, absolute paths.
-        localDir = g.os_path_dirname(lm.files[0]) if lm.files else ''
-        table = (
-            # First, myLeoSettings.leo in the local directory
-            join(localDir, settings_fn),
-            # Next, myLeoSettings.leo in the home directories.
-            join(g.app.homeDir, settings_fn),
-            join(g.app.homeLeoDir, settings_fn),
-            # Next, <machine-name>myLeoSettings.leo in the home directories.
-            join(g.app.homeDir, machine_fn),
-            join(g.app.homeLeoDir, machine_fn),
-            # Last, leoSettings.leo in leo/config directory.
-            join(g.app.globalConfigDir, settings_fn),
-        )
-        for path in table:
-            if g.os_path_exists(path):
-                break
-        else:
-            path = None
-        return path
+    /**
+     * Return the full path to myLeoSettings.leo.
+     *
+     * The "footnote": Get the local directory from lm.files[0]
      */
+    public async computeMyLeoSettingsPath(): Promise<string | undefined> {
+
+        const lm = this;
+        const join = g.os_path_finalize_join;
+        const settings_fn = 'myLeoSettings.leo';
+        // This seems pointless: we need a machine *directory*.
+        // For now, however, we'll keep the existing code as is.
+        const machine_fn = ''; // lm.computeMachineName() + settings_fn;
+        // First, compute the directory of the first loaded file.
+        // All entries in lm.files are full, absolute paths.
+        const localDir = g.os_path_dirname(lm.files.length ? lm.files[0] : '');
+        const table = [
+            // First, myLeoSettings.leo in the local directory
+            join(undefined, localDir, settings_fn),
+            // Next, myLeoSettings.leo in the home directories.
+            join(undefined, g.app.homeDir, settings_fn),
+            join(undefined, g.app.homeLeoDir, settings_fn),
+            // Next, <machine-name>myLeoSettings.leo in the home directories.
+            join(undefined, g.app.homeDir, machine_fn),
+            join(undefined, g.app.homeLeoDir, machine_fn),
+            // Last, leoSettings.leo in leo/config directory.
+            join(undefined, g.app.globalConfigDir, settings_fn),
+        ];
+
+        let hasBreak = false;
+        let path: string | undefined;
+        for (path of table) {
+            const exists = await g.os_path_exists(path);
+            if (exists) {
+                hasBreak = true;
+                break;
+            }
+        }
+        if (!hasBreak) {
+            path = undefined;
+        }
+
+        return path;
+    }
+
     //@+node:felix.20220610002953.5: *4* LM.computeStandardDirectories & helpers
     /*
     def computeStandardDirectories(self):

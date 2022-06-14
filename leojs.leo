@@ -202,6 +202,7 @@
 <v t="felix.20220201194319.1"><vh>setLeoIDCommand</vh></v>
 <v t="felix.20220131235418.1"><vh>getIdFromSetting</vh></v>
 <v t="felix.20220131234257.1"><vh>setIdSetting</vh></v>
+<v t="felix.20220613164517.1"><vh>runAboutLeoDialog</vh></v>
 <v t="felix.20220108211750.1"><vh>runAskOkDialog</vh></v>
 <v t="felix.20220109220155.1"><vh>runAskYesNoDialog</vh></v>
 <v t="felix.20220516005841.1"><vh>runAskYesNoDialog</vh></v>
@@ -3153,7 +3154,7 @@ public minibuffer(): Thenable&lt;unknown&gt; {
             const commands: vscode.QuickPickItem[] = [];
             for (let key in c.commandsDict) {
                 const command = c.commandsDict[key];
-                // Going to get replaced
+                // Going to get replaced. Don't take those that begin with 'async-'
                 if (!(command as any).__name__.startsWith('async-')) {
                     commands.push({
                         label: key,
@@ -8144,10 +8145,12 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     message: string,
     buttonText?: string
 ): Thenable&lt;unknown&gt; {
-    return vscode.window.showInformationMessage(title, {
-        modal: true,
-        detail: message
-    });
+    return vscode.window.showInformationMessage(
+        title,
+        {
+            modal: true,
+            detail: message
+        });
 }
 
 </t>
@@ -8223,7 +8226,8 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
                 modal: true,
                 detail: message
             },
-            ...[Constants.USER_MESSAGES.YES, Constants.USER_MESSAGES.NO]
+            Constants.USER_MESSAGES.YES,
+            Constants.USER_MESSAGES.NO
         )
         .then((answer) =&gt; {
             if (answer === Constants.USER_MESSAGES.YES) {
@@ -8632,6 +8636,16 @@ export class NullGui {
 
     public addLogPaneEntry(...args: any[]): void {
         console.log('NullGui:', ...args);
+    }
+
+    public runAboutLeoDialog(
+        c: Commands,
+        version: string,
+        theCopyright: string,
+        url: string,
+        email: string
+    ): Thenable&lt;unknown&gt; {
+        return Promise.resolve("");
     }
 
     public runOpenFileDialog(
@@ -10140,11 +10154,9 @@ public _triggerSave(): Promise&lt;unknown&gt; {
                 modal: true,
                 detail: message
             },
-            ...[
-                Constants.USER_MESSAGES.YES,
-                Constants.USER_MESSAGES.NO
-                // Already shows a 'cancel' 
-            ]
+            Constants.USER_MESSAGES.YES,
+            Constants.USER_MESSAGES.NO
+            // Already shows a 'cancel' 
         )
         .then((answer) =&gt; {
             if (answer === Constants.USER_MESSAGES.YES) {
@@ -10338,6 +10350,22 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
         console.log('TODO : HANDLE WORKSPACE CHANGE DETECTED! but no workspace');
     }
 
+}
+
+</t>
+<t tx="felix.20220613164517.1">public runAboutLeoDialog(
+    c: Commands,
+    version: string,
+    theCopyright: string,
+    url: string, // UNUSED FOR NOW
+    email: string // UNUSED FOR NOW
+): Thenable&lt;unknown&gt; {
+    return vscode.window.showInformationMessage(
+        "About Leo " + version,
+        {
+            modal: true,
+            detail: theCopyright
+        });
 }
 
 </t>
