@@ -1178,21 +1178,11 @@ export class LeoApp {
             const c2 = new_c || g.app.windowList[0].c;
             g.app.selectLeoWindow(c2);
         } else if (finish_quit && !g.unitTesting) {
-            console.log('TODO: HANDLE LAST LEO DOCUMENT CLOSED');
+            // * Does not terminate when last is closed: Present 'new' and 'open' buttons instead!
             // g.app.finishQuit();
         }
         return true;  // The window has been closed.
     }
-    //@+node:felix.20220511231737.3: *4* app.destroyAllOpenWithFiles
-    /* 
-    def destroyAllOpenWithFiles(self):
-        """Remove temp files created with the Open With command."""
-        if 'shutdown' in g.app.debug:
-            g.pr('destroyAllOpenWithFiles')
-        if g.app.externalFilesController:
-            g.app.externalFilesController.shut_down()
-            g.app.externalFilesController = None
-     */
     //@+node:felix.20220511231737.4: *4* app.destroyWindow
     /**
      * Destroy all ivars in a Leo frame.
@@ -1211,75 +1201,6 @@ export class LeoApp {
         // Important: this also destroys all the objects of the commander.
         frame.destroySelf();
     }
-    //@+node:felix.20220511231737.5: *4* app.finishQuit
-    /* 
-    def finishQuit(self):
-        # forceShutdown may already have fired the "end1" hook.
-        assert self == g.app, repr(g.app)
-        trace = 'shutdown' in g.app.debug
-        if trace:
-            g.pr('finishQuit: killed:', g.app.killed)
-        if not g.app.killed:
-            g.doHook("end1")
-            if g.app.global_cacher:  # #1766.
-                g.app.global_cacher.commit_and_close()
-            if g.app.commander_cacher:  # #1766.
-                g.app.commander_cacher.commit()
-                g.app.commander_cacher.close()
-        if g.app.ipk:
-            g.app.ipk.cleanup_consoles()
-        g.app.destroyAllOpenWithFiles()
-        if hasattr(g.app, 'pyzo_close_handler'):
-            # pylint: disable=no-member
-            g.app.pyzo_close_handler()
-        # Disable all further hooks and events.
-        # Alas, "idle" events can still be called
-        # even after the following code.
-        g.app.killed = True
-        if g.app.gui:
-            g.app.gui.destroySelf()  # Calls qtApp.quit()
-     */
-    //@+node:felix.20220511231737.6: *4* app.forceShutdown
-    /* 
-    def forceShutdown(self):
-        """
-        Forces an immediate shutdown of Leo at any time.
-
-        In particular, may be called from plugins during startup.
-        """
-        trace = 'shutdown' in g.app.debug
-        app = self
-        if trace:
-            g.pr('forceShutdown')
-        for c in app.commanders():
-            app.forgetOpenFile(c.fileName())
-        # Wait until everything is quiet before really quitting.
-        if trace:
-            g.pr('forceShutdown: before end1')
-        g.doHook("end1")
-        if trace:
-            g.pr('forceShutdown: after end1')
-        self.log = None  # Disable writeWaitingLog
-        self.killed = True  # Disable all further hooks.
-        for w in self.windowList[:]:
-            if trace:
-                g.pr(f"forceShutdown: {w}")
-            self.destroyWindow(w)
-        if trace:
-            g.pr('before finishQuit')
-        self.finishQuit()
-     */
-    //@+node:felix.20220511231737.7: *4* app.onQuit
-    /* 
-    @cmd('exit-leo')
-    @cmd('quit-leo')
-    def onQuit(self, event=None):
-        """Exit Leo, prompting to save unsaved outlines first."""
-        if 'shutdown' in g.app.debug:
-            g.trace()
-        # #2433 - use the same method as clicking on the close box.
-        g.app.gui.close_event(QCloseEvent())  # type:ignore
-     */
     //@+node:felix.20220106225805.1: *3* app.commanders
     /**
      * Return list of currently active controllers
@@ -1581,8 +1502,6 @@ export class LoadManager {
         if (g.app.homeLeoDir) {
             table.push(join(undefined, g.app.homeLeoDir, settings_fn))
         }
-
-        console.log(JSON.stringify(table));
 
         let hasBreak = false;
         let path: string | undefined;
@@ -2287,19 +2206,13 @@ export class LoadManager {
             const w_fastRead: FastRead = new FastRead(c, c.fileCommands.gnxDict);
             let g_element;
             if (fn === 'leoSettings.leo') {
-                console.log('Doing hard-coded leoSettings.leo!, ', fn);
-
                 [ok, g_element] = w_fastRead.readWithElementTree(fn, leojsSettingsXml);
                 if (ok) {
                     c.hiddenRootNode = ok;
                 }
-
             } else {
-                console.log('Open settings filename (maybe myLeoSettings ?): ', fn);
-
                 ok = await c.fileCommands.openLeoFile(fn, false, true);
             }
-            // closes theFile.
         }
         catch (p_err) {
             //
@@ -2794,7 +2707,6 @@ export class LoadManager {
      * Creates an wrapper outline if fn is an external file, existing or not.
      */
     public async openFileByName(fn: string, gui: LeoUI | NullGui, old_c?: Commands, previousSettings?: PreviousSettings): Promise<Commands | undefined> {
-        console.log('openFileByName, PREVIOUS SETTINGS: ', !!previousSettings);
 
         const lm: LoadManager = this;
         // Disable the log.

@@ -8123,13 +8123,6 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
         const names: string[] = [];
         if (p_uris &amp;&amp; p_uris.length) {
             p_uris.forEach(w_uri =&gt; {
-                console.log('CHOSE OPEN URI');
-                console.log('open fsPath: ' + JSON.stringify(w_uri.fsPath));
-                console.log('open json: ' + JSON.stringify(w_uri.toJSON()));
-                console.log('open toString: ' + w_uri.toString());
-                console.log('test path: ' + path.normalize(w_uri.path));
-
-
                 names.push(w_uri.fsPath);
             });
         }

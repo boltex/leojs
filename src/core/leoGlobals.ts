@@ -3558,14 +3558,10 @@ export function os_path_finalize(p_path: string): string {
         p_path = path.join(os.homedir(), p_path.slice(1));
     }
 
-    console.log('before', p_path);
-
-
     // p_path = path.resolve(p_path); // ! Adds /home/<user> to path !
     // console.log('middle', p_path);
 
     p_path = path.normalize(p_path);
-    console.log('after', p_path);
 
     // path.normpath does the *reverse* of what we want.
 
