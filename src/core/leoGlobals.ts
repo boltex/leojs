@@ -3494,9 +3494,9 @@ export function os_path_dirname(p_path: string): string {
 }
 //@+node:felix.20211227205124.1: *3* g.os_path_exists
 /**
- * Return True if path exists.
+ * Return Truish FileStat if path exists. False otherwise
  */
-export async function os_path_exists(p_path?: string): Promise<boolean> {
+export async function os_path_exists(p_path?: string): Promise<boolean | vscode.FileStat> {
 
     if (!p_path) {
         return false;
@@ -3512,7 +3512,7 @@ export async function os_path_exists(p_path?: string): Promise<boolean> {
 
     try {
         const stat = await vscode.workspace.fs.stat(w_uri);
-        return true;
+        return stat;
     } catch {
         return false;
     }

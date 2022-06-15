@@ -3132,7 +3132,17 @@ public async command(
     this.lastCommandTimer = undefined;
 
     if (!this.preventRefresh) {
-        this.launchRefresh();
+
+        if (value &amp;&amp; value.then) {
+            // IS A PROMISE
+            (value as Thenable&lt;unknown&gt;).then((p_result) =&gt; {
+                this.launchRefresh();
+            });
+        } else {
+            this.launchRefresh();
+        }
+
+
     } else {
         this.preventRefresh = false;
     }
@@ -3190,7 +3200,14 @@ public minibuffer(): Thenable&lt;unknown&gt; {
                 const w_commandResult = c.doCommandByName(p_picked.label);
 
                 if (!this.preventRefresh) {
-                    this.launchRefresh();
+                    if (w_commandResult &amp;&amp; w_commandResult.then) {
+                        // IS A PROMISE
+                        (w_commandResult as Thenable&lt;unknown&gt;).then((p_result) =&gt; {
+                            this.launchRefresh();
+                        });
+                    } else {
+                        this.launchRefresh();
+                    }
                 } else {
                     this.preventRefresh = false;
                 }
@@ -6296,17 +6313,17 @@ public async _launchRefresh(p_node?: Position): Promise&lt;unknown&gt; {
 
     }
 
+
+    // * DEBUG INFO
+    /* 
     console.log('***********************finished refresh');
-
     console.log('**** c.config should be lowercase: ', c.config.new_leo_file_encoding);
-
     // @ts-expect-error
     console.log('**** g.app.config should be uppercase: ', g.app.config.new_leo_file_encoding);
-
     console.log('**** c.collapse_on_lt_arrow :', c.collapse_on_lt_arrow);
     console.log('**** c.collapse_nodes_after_move :', c.collapse_nodes_after_move);
     console.log('**** c.sparse_move: ', c.sparse_move);
-
+     */
 
 
     // getStates will check if documents, buttons and states flags are set and refresh accordingly

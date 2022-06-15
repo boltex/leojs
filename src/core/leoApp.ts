@@ -1497,10 +1497,10 @@ export class LoadManager {
         ];
         // Next, myLeoSettings.leo in the home directories.
         if (g.app.homeDir) {
-            table.push(join(undefined, g.app.homeDir, settings_fn))
+            table.push(join(undefined, g.app.homeDir, settings_fn));
         }
         if (g.app.homeLeoDir) {
-            table.push(join(undefined, g.app.homeLeoDir, settings_fn))
+            table.push(join(undefined, g.app.homeLeoDir, settings_fn));
         }
 
         let hasBreak = false;
@@ -1608,16 +1608,20 @@ export class LoadManager {
         homeLeoDir = g.os_path_finalize_join(undefined, g.app.homeDir, '.leo');
         const exists = await g.os_path_exists(homeLeoDir);
 
-        let ok;
         if (exists) {
             return homeLeoDir;
         }
 
-        // * LEOJS does not create: user / home / .leo folder !
-
         // const ok = g.makeAllNonExistentDirectories(homeLeoDir);
+        const w_uri = g.makeVscodeUri(homeLeoDir);
+        try {
+            await vscode.workspace.fs.createDirectory(w_uri);
+            return homeLeoDir;
+        }
+        catch (exception) {
+            return '';
+        }
 
-        return ok ? homeLeoDir : '';  // #1450
     }
     //@+node:felix.20220610002953.9: *5* LM.computeLeoDir
     /* 
@@ -2734,7 +2738,9 @@ export class LoadManager {
         // Phase 2: Create the outline.
         g.doHook("open1", { old_c: undefined, c: c, new_c: c, fileName: fn });
 
-        if (fn) {
+        const exists = await g.os_path_exists(fn);
+
+        if (fn && exists) {
             const readAtFileNodesFlag = !!(previousSettings);
             // The log is not set properly here.
             const ok = await lm.readOpenedLeoFile(c, fn, readAtFileNodesFlag);
@@ -2831,7 +2837,9 @@ export class LoadManager {
 
         let p: Position | undefined;
 
-        if (!g.os_path_exists(fn)) {
+        const exists = await g.os_path_exists(fn);
+
+        if (!exists) {
             p = c.rootPosition()!;
             // Create an empty @edit node unless fn is an .leo file.
             // Fix #1070: Use "newHeadline", not fn.

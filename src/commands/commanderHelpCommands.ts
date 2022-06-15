@@ -206,63 +206,84 @@ export class CommanderHelpCommands {
          */
         async function createMyLeoSettings(c: Commands): Promise<Commands | undefined> {
 
-            /* 
-            name = "myLeoSettings.leo"
-            homeLeoDir = g.app.homeLeoDir
-            loadDir = g.app.loadDir
-            configDir = g.app.globalConfigDir
-            # check it doesn't already exist
-            for path in homeLeoDir, loadDir, configDir:
-                fileName = g.os_path_join(path, name)
-                if g.os_path_exists(fileName):
-                    return None
-            ok = g.app.gui.runAskYesNoDialog(c,
-                title='Create myLeoSettings.leo?',
-                message=f"Create myLeoSettings.leo in {homeLeoDir}?",
-            )
-            if ok == 'no':
-                return None
-            # get '@enabled-plugins' from g.app.globalConfigDir
-            fileName = g.os_path_join(configDir, "leoSettings.leo")
-            leosettings = g.openWithFileName(fileName, old_c=c)
-            enabledplugins = g.findNodeAnywhere(leosettings, '@enabled-plugins')
-            if not enabledplugins:
-                return None
-            enabledplugins = enabledplugins.b
-            leosettings.close()
-            # now create "~/.leo/myLeoSettings.leo"
-            fileName = g.os_path_join(homeLeoDir, name)
-            c2 = g.openWithFileName(fileName, old_c=c)
-            # add content to outline
-            nd = c2.rootPosition()
-            nd.h = "Settings README"
-            nd.b = (
-                "myLeoSettings.leo personal settings file created {time}\n\n"
-                "Only nodes that are descendants of the @settings node are read.\n\n"
-                "Only settings you need to modify should be in this file, do\n"
-                "not copy large parts of leoSettings.py here.\n\n"
-                "For more information see http://leoeditor.com/customizing.html"
-                "".format(time=time.asctime())
-            )
-            nd = nd.insertAfter()
-            nd.h = '@settings'
-            nd = nd.insertAsNthChild(0)
-            nd.h = '@enabled-plugins'
-            nd.b = enabledplugins
-            nd = nd.insertAfter()
-            nd.h = '@keys'
-            nd = nd.insertAsNthChild(0)
-            nd.h = '@shortcuts'
-            nd.b = (
-                "# You can define keyboard shortcuts here of the form:\n"
-                "#\n"
-                "#    some-command Shift-F5\n"
-            )
-            c2.redraw()
-            return c2
-            */
+            const name = "myLeoSettings.leo";
+            let homeLeoDir = g.app.homeLeoDir;
+            // const loadDir = g.app.loadDir;
+            let fileName;
+            // check it doesn't already exist
+            for (let w_path of [homeLeoDir]) {
+                fileName = g.os_path_join(undefined, w_path || '/', name);
+                const exists = await g.os_path_exists(fileName);
+                if (exists) {
+                    return undefined;
+                }
+            }
 
-            return;
+            let ok;
+
+            ok = await g.app.gui!.runAskYesNoDialog(
+                c,
+                'Create myLeoSettings.leo?',
+                `Create myLeoSettings.leo in ${homeLeoDir}?`,
+            );
+
+            if (ok === 'no') {
+                return undefined;
+            }
+
+            // get '@enabled-plugins' from g.app.globalConfigDir ! SKIPPED IN LEOJS !
+            // fileName = g.os_path_join(undefined, configDir, "leoSettings.leo");
+            // const leosettings = await g.openWithFileName(fileName, c, g.app.gui!);
+            // const enabledplugins = g.findNodeAnywhere(leosettings!, '@enabled-plugins');
+            // if (!enabledplugins || !enabledplugins.__bool__()) {
+            //     return undefined;
+            // }
+
+            // const enabledpluginsBody = enabledplugins.b;
+            // if (leosettings) {
+            //     leosettings.close();
+            // }
+
+            // now create "~/.leo/myLeoSettings.leo" OR /myLeoSettings if leojs runs in browser!
+            if (homeLeoDir) {
+                fileName = g.os_path_join(undefined, homeLeoDir, name);
+            } else {
+                let localDir = g.os_path_dirname(lm.files.length ? lm.files[0] : '');
+                // IF NO FILES IN lm.files THEN USE WORKSPACE ROOT !
+                if (!localDir) {
+                    localDir = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.path : "";
+                }
+                fileName = g.os_path_join(undefined, localDir, name);;
+            }
+
+            const c2 = await g.openWithFileName(fileName, c, g.app.gui!);
+            // add content to outline
+            let nd = c2!.rootPosition()!;
+            nd.h = "Settings README";
+            nd.b =
+                `myLeoSettings.leo personal settings file created ${dayjs().format('llll')}\n\n` +
+                "Only nodes that are descendants of the @settings node are read.\n\n" +
+                "Only settings you need to modify should be in this file, do\n" +
+                "not copy large parts of leoSettings.py here.\n\n" +
+                "For more information see http://leoeditor.com/customizing.html";
+
+            nd = nd.insertAfter();
+            nd.h = '@settings';
+            // nd = nd.insertAsNthChild(0);
+            // nd.h = '@enabled-plugins';
+            // nd.b = enabledpluginsBody;
+            // nd = nd.insertAfter();
+            // nd.h = '@keys';
+            // nd = nd.insertAsNthChild(0);
+            // nd.h = '@shortcuts';
+            // nd.b =
+            //     "# You can define keyboard shortcuts here of the form:\n" +
+            //     "#\n" +
+            //     "#    some-command Shift-F5\n";
+
+            c2!.redraw();
+
+            return c2;
 
         }
 
@@ -272,9 +293,9 @@ export class CommanderHelpCommands {
         const lm = g.app.loadManager!;
 
         try {
-            const path = await lm.computeMyLeoSettingsPath();
-            if (path) {
-                return g.openWithFileName(path, c, g.app.gui!);
+            const w_path = await lm.computeMyLeoSettingsPath();
+            if (w_path) {
+                return g.openWithFileName(w_path, c, g.app.gui!);
             }
             g.es('not found: myLeoSettings.leo');
             return createMyLeoSettings(c);

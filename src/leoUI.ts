@@ -688,17 +688,17 @@ export class LeoUI {
 
         }
 
+
+        // * DEBUG INFO
+        /* 
         console.log('***********************finished refresh');
-
         console.log('**** c.config should be lowercase: ', c.config.new_leo_file_encoding);
-
         // @ts-expect-error
         console.log('**** g.app.config should be uppercase: ', g.app.config.new_leo_file_encoding);
-
         console.log('**** c.collapse_on_lt_arrow :', c.collapse_on_lt_arrow);
         console.log('**** c.collapse_nodes_after_move :', c.collapse_nodes_after_move);
         console.log('**** c.sparse_move: ', c.sparse_move);
-
+         */
 
 
         // getStates will check if documents, buttons and states flags are set and refresh accordingly
@@ -1133,7 +1133,17 @@ export class LeoUI {
         this.lastCommandTimer = undefined;
 
         if (!this.preventRefresh) {
-            this.launchRefresh();
+
+            if (value && value.then) {
+                // IS A PROMISE
+                (value as Thenable<unknown>).then((p_result) => {
+                    this.launchRefresh();
+                });
+            } else {
+                this.launchRefresh();
+            }
+
+
         } else {
             this.preventRefresh = false;
         }
@@ -1190,7 +1200,14 @@ export class LeoUI {
                     const w_commandResult = c.doCommandByName(p_picked.label);
 
                     if (!this.preventRefresh) {
-                        this.launchRefresh();
+                        if (w_commandResult && w_commandResult.then) {
+                            // IS A PROMISE
+                            (w_commandResult as Thenable<unknown>).then((p_result) => {
+                                this.launchRefresh();
+                            });
+                        } else {
+                            this.launchRefresh();
+                        }
                     } else {
                         this.preventRefresh = false;
                     }

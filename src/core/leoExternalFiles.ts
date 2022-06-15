@@ -2,6 +2,7 @@
 //@+node:felix.20211212162008.1: * @file src/core/leoExternalFiles.ts
 //@+<< imports >>
 //@+node:felix.20220102165214.1: ** << imports >>
+import * as vscode from "vscode";
 import * as g from './leoGlobals';
 import { Position } from './leoNodes';
 import { Commands } from './leoCommands';
@@ -46,7 +47,7 @@ export class ExternalFile {
     /**
      * Return True if the external file still exists.
      */
-    public async exists(): Promise<boolean> {
+    public async exists(): Promise<boolean | vscode.FileStat> {
         return g.os_path_exists(this.path);
     }
     //@-others
