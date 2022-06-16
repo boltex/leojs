@@ -605,7 +605,7 @@ To try out running as a web extension on vscode.dev, use the following commands:
 _Move Outline commands need the 'Alt' key modifier only when focus is on body pane._
 
 | Common Operations  |            |           |     |            |                     |
-| :----------------- | :--------- | :-------- | :-- | :--------- | :------------------ | -------------- | --- |
+| :----------------- | :--------- | :-------- | :-- | :--------- | :------------------ | 
 | `Ctrl + T`         |            |           |     |            | Toggle Outline/Body |
 | `Tab` or `Enter`   | or         | `Alt + D` | or  | `Ctrl + G` | Focus on Body       |
 | `Alt + T`          |            |           |     |            | Focus on Outline    |
@@ -614,19 +614,21 @@ _Move Outline commands need the 'Alt' key modifier only when focus is on body pa
 | `Ctrl + Shift + N` |            |           |     |            | Extract Names       |
 | `Alt + A`          |            |           |     |            | Sort Siblings       |
 | `Alt + X`          |            |           |     |            | Minibuffer Palette  |
-| &lt;!--               | `Ctrl + B` |           |     |            |                     | Execute Script | --&gt; |
-| &lt;!--               | `Ctrl + F` |           |     |            |                     | Start Search   | --&gt; |
-| &lt;!--               | `F3`       |           |     |            |                     | Find Next      | --&gt; |
-| &lt;!--               | `F2`       |           |     |            |                     | Find Previous  | --&gt; |
+
+ &lt;!--               | `Ctrl + B` |           |     |            |                     | Execute Script | --&gt; 
+ &lt;!--               | `Ctrl + F` |           |     |            |                     | Start Search   | --&gt; 
+ &lt;!--               | `F3`       |           |     |            |                     | Find Next      | --&gt; 
+ &lt;!--               | `F2`       |           |     |            |                     | Find Previous  | --&gt; 
 
 | Tree Navigation    |           |                 |                          |
-| :----------------- | :-------- | :-------------- | :----------------------- | ----------------- | --- |
+| :----------------- | :-------- | :-------------- | :----------------------- |
 | `Alt + Home`       | or        | `Home` \*       | Go To First Visible Node |
 | `Alt + End`        |           |                 | Go To Last Sibling       |
 |                    |           | `End` \*        | Go To Last Visible Node  |
 | `Alt + N`          |           |                 | Go To Next Clone         |
 | `Alt + Arrow Keys` | or        | `Arrow Keys` \* | Browse Tree              |
-| &lt;!--               | `Alt + G` |                 |                          | Go To Global Line | --&gt; |
+
+&lt;!--               | `Alt + G` |                 |                          | Go To Global Line | --&gt; 
 
 \* _With the **'Leo Tree Browsing'** setting enabled by default, all arrows and numeric keypad keys change the outline's selection directly_
 
