@@ -235,7 +235,7 @@ export class Commands {
         this.mFileName = fileName || '';
         this.mRelativeFileName = relativeFileName || '';
 
-        // Init the settings *before* initing the objects.
+        // Instantiate c.config *before* initing objects.
         c.initSettings(previousSettings);
 
         // Initialize all subsidiary objects, including subcommanders.
@@ -279,12 +279,12 @@ export class Commands {
 
     //@+node:felix.20210223220814.10: *4* c.initSettings
     /**
-     * Init the settings *before* initing the objects.
+     * Instantiate c.config from previous settings.
      */
     public initSettings(previousSettings: any): void {
         const c: Commands = this;
         c.config = new LocalConfigManager(c, previousSettings);
-        g.app.config.setIvarsFromSettings(c);
+        // g.app.config.setIvarsFromSettings(c); // Removed in https://github.com/leo-editor/leo-editor/pull/2681
     }
 
     //@+node:felix.20211018215401.1: *4* c.createCommandNames

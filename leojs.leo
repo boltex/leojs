@@ -6317,7 +6317,7 @@ public async _launchRefresh(p_node?: Position): Promise&lt;unknown&gt; {
 
 
     // * DEBUG INFO
-    /* 
+
     console.log('***********************finished refresh');
     console.log('**** c.config should be lowercase: ', c.config.new_leo_file_encoding);
     // @ts-expect-error
@@ -6325,7 +6325,7 @@ public async _launchRefresh(p_node?: Position): Promise&lt;unknown&gt; {
     console.log('**** c.collapse_on_lt_arrow :', c.collapse_on_lt_arrow);
     console.log('**** c.collapse_nodes_after_move :', c.collapse_nodes_after_move);
     console.log('**** c.sparse_move: ', c.sparse_move);
-     */
+
 
 
     // getStates will check if documents, buttons and states flags are set and refresh accordingly
