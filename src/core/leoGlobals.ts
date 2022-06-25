@@ -607,7 +607,8 @@ export class TypedDict {
 
     public _checkValType(val: any): void {
         if (typeof (val) !== this.valType) {
-            // TODO ?
+            // TODO !
+            // TRY WITH val.constructor.name; 
             // this._reportTypeError(val, this.valType);
         }
     }
@@ -1163,9 +1164,9 @@ export function getOutputNewline(c: Commands | undefined, name?: string): string
     if (name) {
         s = name;
     } else if (c) {
-        s = c.config.output_newline;
+        s = c.config.getString('output-newline');
     } else {
-        s = app.config.output_newline;
+        s = 'nl'; // Legacy value. Perhaps dubious.
     }
     if (!s) {
         s = '';
@@ -1673,28 +1674,35 @@ export function fullPath(c: Commands, p_p: Position, simulate: boolean = false):
  */
 export function getBaseDirectory(c: Commands): string {
 
-    let base: string = app.config.relative_path_base_directory;
+    // let base: string = app.config.relative_path_base_directory;
+
+    if (!c) {
+        return '';  // No relative base given.
+    }
+    let base: string = c.config.getString('relative-path-base-directory');
 
     if (base && base === "!") {
         base = app.loadDir!;
     } else if (base && base === ".") {
         base = c.openDirectory!;
+    } else {
+        return '';  // Settings error.
     }
 
-    if (base && os_path_isabs(base)) {
+    if (os_path_isabs(base)) {
         // Set c.chdir_to_relative_path as needed.
-        if (!(c as any)['chdir_to_relative_path']) {
-            (c as any)['chdir_to_relative_path'] = c.config.getBool('chdir-to-relative-path');
+        if (c.chdir_to_relative_path === undefined) {
+            c.chdir_to_relative_path = c.config.getBool('chdir-to-relative-path');
         }
         // Call os.chdir if requested.
-        if ((c as any).chdir_to_relative_path) {
+        if (c.chdir_to_relative_path) {
             // os.chdir(base);
             process.chdir(base);
         }
         return base;  // base need not exist yet.
     }
 
-    return "";  // No relative base given.
+    return '';  // No relative base given.
 }
 //@+node:felix.20220511001701.1: *3* g.openWithFileName
 /**

@@ -2068,7 +2068,7 @@ export class FileCommands {
                     this.putSavedMessage(fileName);
                 }
                 c.clearChanged();  // Clears all dirty bits.
-                if (c.config.save_clears_undo_buffer) {
+                if (c.config.getBool('save-clears-undo-buffer')) {
                     g.es("clearing undo");
                     c.undoer.clearUndoState();
                 }

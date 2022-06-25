@@ -85,6 +85,7 @@ export class Commands {
     public collapse_on_lt_arrow: boolean = true; // getBool('collapse-on-lt-arrow', default=True)
     public collapse_nodes_after_move: boolean = false;
     public verbose_check_outline: boolean = false;
+    public chdir_to_relative_path: boolean | undefined;
     //@+node:felix.20210223220814.2: *4* c.initCommandIvars
     // Init ivars used while executing a command.
     public commandsDict: {
@@ -1664,11 +1665,13 @@ export class Commands {
             // Bug fix: 2008/9/18
             base = c.openDirectory;
         } else {
-            base = g.app.config.relative_path_base_directory;
+            base = c.config.getString('relative-path-base-directory');
             if (base && base === '!') {
                 base = g.app.loadDir!;
             } else if (base && base === '.') {
                 base = c.openDirectory!;
+            } else {
+                base = ''; // Settings error.
             }
         }
         base = c.expand_path_expression(base); // #1341.

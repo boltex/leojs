@@ -1895,16 +1895,18 @@ export class LoadManager {
      */
     public createDefaultSettingsDicts(): [g.TypedDict, g.TypedDict] {
 
-        const settings_d = g.app.config.defaultsDict;
-
-        // console.assert( isinstance(settings_d, g.TypedDict), settings_d); 
+        const settings_d = new g.TypedDict(
+            'g.app.config.defaultsDict',
+            'string',
+            'object',// TODO g.GeneralSetting,
+        );
 
         settings_d.setName('lm.globalSettingsDict');
 
         const bindings_d = new g.TypedDict(  // was TypedDictOfLists.
             'lm.globalBindingsDict',
             'string',
-            'object',
+            'object', // TODO  g.BindingInfo,
         );
 
         return [settings_d, bindings_d];
