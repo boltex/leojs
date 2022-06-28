@@ -475,39 +475,18 @@ export class GeneralSetting {
     };
 
 }
-//@+node:felix.20220213000510.1: *3* class g.TypedDict
+//@+node:felix.20220213000510.1: *3* class g.SettingsDict
 /**
- * A class providing additional dictionary-related methods:
- *
- *   __init__:     Specifies types and the dict's name.
- *   __repr__:     Compatible with g.printObj, based on g.objToString.
- *   __setitem__:  Type checks its arguments.
- *   __str__:      A concise summary of the inner dict.
- *   add_to_list:  A convenience method that adds a value to its key's list.
- *   name:         The dict's name.
- *   setName:      Sets the dict's name, for use by __repr__.
- *
- * Overrides the following standard methods:
- *
- *   copy:         A thin wrapper for copy.deepcopy.
- *   get:          Returns self.d.get
- *   items:        Returns self.d.items
- *   keys:         Returns self.d.keys
- *   update:       Updates self.d from either a dict or a TypedDict.
+ * A subclass of dict providing settings-related methods.
  */
-export class TypedDict {
-
-    public d: { [key: string]: GeneralSetting };
-    public keyType: string;
-    public valType: string;
+export class SettingsDict extends Map<string, any> {
 
     private _name: string;
 
-    constructor(name: string, keyType: string, valType: string) {
-        this.d = {};
+    constructor(name: string) {
+        super();
         this._name = name;  // For __repr__ only.
-        this.keyType = keyType;
-        this.valType = valType;
+
     }
 
     //@+others
@@ -527,40 +506,43 @@ export class TypedDict {
 
     // = () : trick for toString as per https://stackoverflow.com/a/35361695/920301
     public toString = (): string => {
-        return `${this.d.toString()}\nTypedDict name:${this._name}\n`;
+        return `<SettingsDict name:${this._name} `;
+
     };
 
-    //@+node:felix.20220213000510.3: *4* td.__setitem__
-    // def __setitem__(self, key: Any, val: Any) -> None:
-    //     """Allow d[key] = val"""
-    //     if key is None:
-    //         g.trace('TypeDict: None is not a valid key', g.callers())
-    //         return
-    //     self._checkKeyType(key)
-    //     self._checkKeyType(key)
-    //     try:
-    //         for z in val:
-    //             self._checkValType(z)
-    //     except TypeError:
-    //         self._checkValType(val)  # val is not iterable.
-    //     self.d[key] = val
+    //@+node:felix.20220628012349.1: *4* td.copy
+    public copy(name?: string): SettingsDict {
+        const newDict = new SettingsDict(this._name);
+        // newDict.d = JSON.parse(JSON.stringify(this.d));
 
-    public set(key: string, val: any): void {
-        if (key === undefined) {
-            trace('TypeDict: None is not a valid key', callers());
-            return;
+        for (const p_key in this.keys()) {
+            newDict.set(p_key, new GeneralSetting({
+                kind: this.get(p_key).kind,
+                encoding: this.get(p_key).encoding,
+                ivar: this.get(p_key).ivar,
+                setting: this.get(p_key).setting,
+                val: this.get(p_key).val,
+                path: this.get(p_key).path,
+                tag: this.get(p_key).tag,
+                unl: this.get(p_key).unl
+            }));
         }
-        this._checkKeyType(key);
+        return newDict;
+    }
+    //@+node:felix.20220628014215.1: *4* td.get
+    public override get(key: string, p_default?: any): any {
+        if (this.has(key)) {
+            return super.get(key)
+        } else {
+            return p_default;
+        }
+    }
 
-        // try:
-        //     for z in val:
-        //         this._checkValType(z)
-        // except TypeError:
-        //     this._checkValType(val)  # val is not iterable.
-
-
-        this.d[key] = val;
-
+    //@+node:felix.20220628012922.1: *4* td.update
+    public update(d: SettingsDict): void {
+        for (let key of d.keys()) {
+            this.set(key, d.get(key));
+        }
     }
 
     //@+node:felix.20220213000510.4: *4* td.add_to_list
@@ -569,114 +551,36 @@ export class TypedDict {
      */
     public add_to_list(key: string, val: any): void {
 
-        // ! Typing Needs Work !
-
-        // TODO : FIX THE TYPING !
-        /*
         if (key === undefined) {
             trace('TypeDict: None is not a valid key', callers());
             return;
         }
 
-        this._checkKeyType(key);
-        this._checkValType(val);
-
-        let aList;
-        // aList = this.d.get(key);
-        if (this.d.hasOwnProperty(key)) {
-            aList = this.d[key];
+        let aList: any[];
+        aList = this.get(key);
+        if (this.has(key)) {
+            aList = this.get(key);
         } else {
             aList = [];
         }
 
         if (!aList.includes(val)) {
             aList.push(val);
-            this.d[key] = aList;
+            this.set(key, aList);
         }
-        */
 
-    }
-
-    //@+node:felix.20220213000510.5: *4* td.checking
-    public _checkKeyType(key: string): void {
-        if (key && typeof (key) !== this.keyType) {
-            // TODO ?
-            // this._reportTypeError(key, this.keyType);
-        }
-    }
-
-    public _checkValType(val: any): void {
-        if (typeof (val) !== this.valType) {
-            // TODO !
-            // TRY WITH val.constructor.name; 
-            // this._reportTypeError(val, this.valType);
-        }
-    }
-
-    // def _reportTypeError(obj: Any, objType: Any) -> str:
-    //     return (
-    //         f"{self._name}\n"
-    //         f"expected: {obj.__class__.__name__}\n"
-    //         f"     got: {objType.__name__}")
-    //@+node:felix.20220213000510.6: *4* td.copy
-    /**
-     * Return a new dict with the same contents.
-     */
-    public copy(name?: string): TypedDict {
-        const newDict = new TypedDict(
-            this._name,
-            this.keyType,
-            this.valType
-        );
-        // newDict.d = JSON.parse(JSON.stringify(this.d));
-        newDict.d = {};
-        for (const p_key in this.d) {
-            newDict.d[p_key] = new GeneralSetting({
-                kind: this.d[p_key].kind,
-                encoding: this.d[p_key].encoding,
-                ivar: this.d[p_key].ivar,
-                setting: this.d[p_key].setting,
-                val: this.d[p_key].val,
-                path: this.d[p_key].path,
-                tag: this.d[p_key].tag,
-                unl: this.d[p_key].unl
-            });
-        }
-        return newDict;
-    }
-
-    //@+node:felix.20220213000510.7: *4* td.get & keys & values
-    public get(key: string, p_default?: any): any {
-        if (this.d.hasOwnProperty(key)) {
-            return this.d[key];
-        } else {
-            return p_default;
-        }
-    }
-
-    public items(): any {
-        return Object.keys(this.d).map((key) => {
-            return [key, this.d[key]];
-        });
-    }
-
-    public keys(): string[] {
-        return Object.keys(this.d);
-    }
-
-    public values(): any[] {
-        return Object.keys(this.d).map((key) => {
-            return this.d[key];
-        });
     }
 
     //@+node:felix.20220213000510.8: *4* td.get_setting & get_string_setting
+    /**
+     * Return the canonical setting name.
+     */
     public get_setting(key: string): any {
         key = key.split('-').join('');
         key = key.split('_').join('');
 
         const gs = this.get(key);
-        const val = gs && gs.val;
+        const val = this.has(key) && gs.val;
         return val;
     }
 
@@ -696,22 +600,6 @@ export class TypedDict {
 
     public setName(name: string): void {
         this._name = name;
-    }
-
-    //@+node:felix.20220213000510.10: *4* td.update
-    /**
-     * Update self.d from a the appropriate dict.
-     */
-    public update(d: { [key: string]: any }): void {
-        if (d instanceof TypedDict) {
-            this.d = { ...this.d, ...d.d };
-        } else {
-            // this.d.update(d);
-            this.d = {
-                ...this.d,
-                ...d
-            };
-        }
     }
 
     //@-others
@@ -2347,7 +2235,7 @@ export function doHook(tag: string, keywords?: { [key: string]: any }): any {
         pr(`***ignoring args param.  tag = ${tag}`);
     }
     */
-    if (!app.config.use_plugins) {
+    if (!app.enablePlugins) {
         if (['open0', 'start1'].includes(tag)) {
             console.log("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.");
             // warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.");

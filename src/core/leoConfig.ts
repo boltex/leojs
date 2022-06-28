@@ -21,7 +21,7 @@ export class ParserBaseClass {
     // as opposed to myLeoSettings.leo or leoSettings.leo.
     public localFlag: boolean;
 
-    public shortcutsDict: g.TypedDict;
+    public shortcutsDict: g.SettingsDict;
 
     public openWithList: { [key: string]: any }[];   // A list of dicts containing 'name','shortcut','command' keys.
 
@@ -68,7 +68,7 @@ export class ParserBaseClass {
     ];
 
     // Keys are settings names, values are (type,value) tuples.
-    public settingsDict: g.TypedDict | undefined;
+    public settingsDict: g.SettingsDict | undefined;
 
     //@-<< ParserBaseClass data >>
     //@+others
@@ -84,11 +84,7 @@ export class ParserBaseClass {
         // True if this is the .leo file being opened,
         // as opposed to myLeoSettings.leo or leoSettings.leo.
         this.localFlag = localFlag;
-        this.shortcutsDict = new g.TypedDict( // was TypedDictOfLists.
-            'parser.shortcutsDict',
-            'shortcutName',
-            'object' // TODO 'BindingInfo',
-        );
+        this.shortcutsDict = new g.SettingsDict('parser.shortcutsDict');
         this.openWithList = [];  // A list of dicts containing 'name','shortcut','command' keys.
         // Keys are canonicalized names.
         this.dispatchDict = {
@@ -781,11 +777,7 @@ export class ParserBaseClass {
         const c = this.c;
         const name1 = name;
         const modeName = this.computeModeName(name);
-        const d = new g.TypedDict(
-            `modeDict for ${modeName}`,
-            'commandName',
-            'object' // TODO 'BindingInfo'
-        );
+        const d = new g.SettingsDict(`modeDict for ${modeName}`);
 
         const s = p.b;
         const lines = g.splitLines(s);
@@ -801,7 +793,7 @@ export class ParserBaseClass {
                 } else if (bi) {
                     // A regular shortcut.
                     bi.pane = modeName;
-                    const aList = d.get(name, []);
+                    const aList: any[] = d.get(name) || [];
                     // Important: use previous bindings if possible.
                     let key2;
                     let aList2;
@@ -966,8 +958,8 @@ export class ParserBaseClass {
     public doOneShortcut(bi: any, commandName: string, p: Position): void {
 
         const d = this.shortcutsDict;
-        const aList = d.get(commandName, []);
-        aList.append(bi);
+        const aList: any[] = d.get(commandName) || [];
+        aList.push(bi);
         d.set(commandName, aList);
 
     }
@@ -1324,21 +1316,16 @@ export class ParserBaseClass {
     /**
      * Traverse the entire settings tree.
      */
-    public traverse(): [g.TypedDict, g.TypedDict] {
+    public traverse(): [g.SettingsDict, g.SettingsDict] {
 
         const c = this.c;
 
-        this.settingsDict = new g.TypedDict(  // type:ignore
-            `settingsDict for ${c.shortFileName()}`,
-            // keyType:type('settingName'),
-            'string',
-            'object' // TODO 'GeneralSetting', // typeof g.GeneralSetting
+        this.settingsDict = new g.SettingsDict(  // type:ignore
+            `settingsDict for ${c.shortFileName()}`
         );
 
-        this.shortcutsDict = new g.TypedDict(  // was TypedDictOfLists.
-            `shortcutsDict for ${c.shortFileName()}`,
-            'string',
-            'object' // TODO 'BindingInfo', // typeof g.BindingInfo
+        this.shortcutsDict = new g.SettingsDict(  // was TypedDictOfLists.
+            `shortcutsDict for ${c.shortFileName()}`
         );
 
         // This must be called after the outline has been inited.
@@ -1411,13 +1398,12 @@ export class GlobalConfigManager {
     public enabledPluginsString: string;
     public menusList: string[];
     public menusFileName: string;
-    public modeCommandsDict: g.TypedDict;
+    public modeCommandsDict: g.SettingsDict;
     public panes: any;
     public sc: any;
     public tree: any;
-    public use_plugins: boolean;
 
-    public dictList!: g.TypedDict[];
+    public dictList!: g.SettingsDict[];
     public recentFiles: string[];
 
     public relative_path_base_directory!: string;
@@ -1444,16 +1430,14 @@ export class GlobalConfigManager {
         this.enabledPluginsString = '';
         this.menusList = [];
         this.menusFileName = '';
-        this.modeCommandsDict = new g.TypedDict(
-            'modeCommandsDict',
-            'string',
-            'object' // TODO 'TypedDict'
+        this.modeCommandsDict = new g.SettingsDict(
+            'modeCommandsDict'
         );  // was TypedDictOfLists.
         this.panes = undefined;
         this.recentFiles = [];
         this.sc = undefined;
         this.tree = undefined;
-        this.use_plugins = true; // Leo 4.3+: Use plugins by default.
+
 
     }
 
@@ -1479,7 +1463,7 @@ export class GlobalConfigManager {
             limit = 20;  // A resonable default.
         }
         // pylint: disable=len-as-condition
-        for (let key of d.keys().sort()) {
+        for (let key of [...d.keys()].sort()) {
             // return Object.keys(this.d);
             const gs = d.get(key);
             // assert isinstance(gs, g.GeneralSetting), repr(gs);
@@ -1587,7 +1571,7 @@ export class GlobalConfigManager {
         const lm = g.app.loadManager!;
         const d = lm.globalSettingsDict;
         if (d) {
-            console.assert(d instanceof g.TypedDict, d.toString());
+            console.assert(d instanceof g.SettingsDict, d.toString());
             let val: any;
             let junk: boolean;
             [val, junk] = this.getValFromDict(d, setting, kind);
@@ -1603,7 +1587,7 @@ export class GlobalConfigManager {
      * does not (loosely) match the actual type.
      * returns (val,exists)
      */
-    public getValFromDict(d: g.TypedDict, setting: string, requestedType: string, warn: boolean = true): [any, boolean] {
+    public getValFromDict(d: g.SettingsDict, setting: string, requestedType: string, warn: boolean = true): [any, boolean] {
         let tag = 'gcm.getValFromDict';
         const gs = d.get(this.munge(setting)!);
         if (!gs) {
@@ -1842,7 +1826,7 @@ export class GlobalConfigManager {
     /* def valueInMyLeoSettings(self, settingName):
         """Return the value of the setting, if any, in myLeoSettings.leo."""
         lm = g.app.loadManager
-        d = lm.globalSettingsDict.d
+        d = lm.globalSettingsDict
         gs = d.get(self.munge(settingName))
             # A GeneralSetting object.
         if gs:
@@ -1870,8 +1854,8 @@ GlobalConfigManager.prototype.munge = GlobalConfigManager.prototype.canonicalize
 export class LocalConfigManager {
 
     public c: Commands;
-    public settingsDict: g.TypedDict;
-    public shortcutsDict: g.TypedDict;
+    public settingsDict: g.SettingsDict;
+    public shortcutsDict: g.SettingsDict;
 
     public defaultBodyFontSize: number;
     public defaultLogFontSize: number;
@@ -1913,18 +1897,18 @@ export class LocalConfigManager {
         if (previousSettings) {
             this.settingsDict = previousSettings.settingsDict;
             this.shortcutsDict = previousSettings.shortcutsDict;
-            console.assert(this.settingsDict instanceof g.TypedDict, JSON.stringify(this.settingsDict, null, 4));
-            console.assert(this.shortcutsDict instanceof g.TypedDict, JSON.stringify(this.shortcutsDict, null, 4));
+            console.assert(this.settingsDict instanceof g.SettingsDict, JSON.stringify(this.settingsDict, null, 4));
+            console.assert(this.shortcutsDict instanceof g.SettingsDict, JSON.stringify(this.shortcutsDict, null, 4));
         } else {
             this.settingsDict = lm.globalSettingsDict;
             let d1 = this.settingsDict;
             this.shortcutsDict = lm.globalBindingsDict;
             let d2 = this.shortcutsDict;
             if (d1) {
-                console.assert(d1 instanceof g.TypedDict, JSON.stringify(d1, null, 4));
+                console.assert(d1 instanceof g.SettingsDict, JSON.stringify(d1, null, 4));
             }
             if (d2) {
-                console.assert(d2 instanceof g.TypedDict, JSON.stringify(d2, null, 4));
+                console.assert(d2 instanceof g.SettingsDict, JSON.stringify(d2, null, 4));
             }
         }
 
@@ -2079,7 +2063,7 @@ export class LocalConfigManager {
         const d = this.settingsDict;
         if (d) {
             // assert isinstance(d, g.TypedDict), repr(d)
-            console.assert(d instanceof g.TypedDict, d.toString());
+            console.assert(d instanceof g.SettingsDict, d.toString());
             let val: any;
             let junk: any;
             [val, junk] = this.getValFromDict(d, setting, kind);
@@ -2098,7 +2082,7 @@ export class LocalConfigManager {
      * @param warn flag to have method warn if value not found
      * @returns array of value, and exist flag
      */
-    public getValFromDict(d: g.TypedDict, setting: string, requestedType?: string, warn = true): [any, boolean] {
+    public getValFromDict(d: g.SettingsDict, setting: string, requestedType?: string, warn = true): [any, boolean] {
         const tag = 'c.config.getValFromDict';
 
         const gs = d.get(g.app.config.munge(setting)!);
@@ -2382,7 +2366,7 @@ export class LocalConfigManager {
     public getSettingSource(setting: string): [string, any] | undefined {
         const d = this.settingsDict;
         if (d) {
-            console.assert(d instanceof g.TypedDict, d.toString());
+            console.assert(d instanceof g.SettingsDict, d.toString());
             const bi = d.get(setting);
             if (bi === undefined) {
                 return ['unknown setting', undefined];
@@ -2414,7 +2398,7 @@ export class LocalConfigManager {
         //         g.trace(f"no menu: {c.shortFileName()}:{commandName}")
         //     return None, []
         // if d:
-        //     assert isinstance(d, g.TypedDict), repr(d)  // was TypedDictOfLists.
+        //     assert isinstance(d, g.SettingsDict), repr(d)  // was TypedDictOfLists.
         //     key = c.frame.menu.canonicalizeMenuName(commandName)
         //     key = key.replace('&', '')  // Allow '&' in names.
         //     aList = d.get(commandName, [])
@@ -2589,7 +2573,7 @@ export class LocalConfigManager {
         // Note: when kind is 'shortcut', name is a command name.
         let key: string = g.app.config.munge(name)!;
         let d = this.settingsDict;
-        // assert isinstance(d, g.TypedDict), repr(d)
+        console.assert(d instanceof g.SettingsDict, d.toString());
         let gs = d.get(key);
         if (gs) {
             // assert isinstance(gs, g.GeneralSetting), repr(gs)

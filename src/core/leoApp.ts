@@ -16,7 +16,7 @@ import { GlobalConfigManager, SettingsTreeParser } from "./leoConfig";
 import { Constants } from "../constants";
 import { ExternalFilesController } from "./leoExternalFiles";
 import { LeoFrame } from "./leoFrame";
-import { TypedDict } from "./leoGlobals";
+import { SettingsDict } from "./leoGlobals";
 import { leojsSettingsXml } from "../leojsSettings";
 
 //@-<< imports >>
@@ -107,6 +107,7 @@ export class LeoApp {
     public batchMode: boolean = false; // True: run in batch mode.
     public debug: string[] = []; // A list of switches to be enabled.
     public diff: boolean = false; // True: run Leo in diff mode.
+    public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
     public gui: LeoUI | NullGui | undefined; // The gui class.
     public guiArgName: string | undefined; // The gui name given in --gui option.
@@ -1404,10 +1405,10 @@ export class LoadManager {
     // Global settings & shortcuts dicts...
     // The are the defaults for computing settings and shortcuts for all loaded files.
 
-    // A g.TypedDict: the join of settings in leoSettings.leo & myLeoSettings.leo.
-    public globalSettingsDict!: g.TypedDict;
-    // A g.TypedDict: the join of shortcuts in leoSettings.leo & myLeoSettings.leo
-    public globalBindingsDict!: g.TypedDict;
+    // A g.SettingsDict: the join of settings in leoSettings.leo & myLeoSettings.leo.
+    public globalSettingsDict!: g.SettingsDict;
+    // A g.SettingsDict: the join of shortcuts in leoSettings.leo & myLeoSettings.leo
+    public globalBindingsDict!: g.SettingsDict;
 
     public files: string[]; // List of files to be loaded.
     public options: { [key: string]: any }; // Dictionary of user options. Keys are option names.
@@ -1855,7 +1856,7 @@ export class LoadManager {
      * Merge the settings dicts from c's outline into *new copies of*
      * settings_d and bindings_d.
      */
-    public computeLocalSettings(c: Commands, settings_d: g.TypedDict, bindings_d: g.TypedDict, localFlag: boolean): [g.TypedDict, g.TypedDict] {
+    public computeLocalSettings(c: Commands, settings_d: g.SettingsDict, bindings_d: g.SettingsDict, localFlag: boolean): [g.SettingsDict, g.SettingsDict] {
 
         const lm = this;
         let shortcuts_d2;
@@ -1869,7 +1870,7 @@ export class LoadManager {
         if (settings_d2) {
             if (g.app.trace_setting) {
                 const key = g.app.config.munge(g.app.trace_setting);
-                const val = key ? settings_d2.d[key] : undefined;
+                const val = key ? settings_d2.get(key) : undefined;
                 if (val) {
                     const fn = g.shortFileName(val.path);
                     g.es_print(
@@ -1893,27 +1894,19 @@ export class LoadManager {
     /**
      * Create lm.globalSettingsDict & lm.globalBindingsDict.
      */
-    public createDefaultSettingsDicts(): [g.TypedDict, g.TypedDict] {
+    public createDefaultSettingsDicts(): [g.SettingsDict, g.SettingsDict] {
 
-        const settings_d = new g.TypedDict(
-            'g.app.config.defaultsDict',
-            'string',
-            'object',// TODO g.GeneralSetting,
-        );
+        const settings_d = new g.SettingsDict('lm.globalSettingsDict');
 
         settings_d.setName('lm.globalSettingsDict');
 
-        const bindings_d = new g.TypedDict(  // was TypedDictOfLists.
-            'lm.globalBindingsDict',
-            'string',
-            'object', // TODO  g.BindingInfo,
-        );
+        const bindings_d = new g.SettingsDict('lm.globalBindingsDict');
 
         return [settings_d, bindings_d];
     }
 
     //@+node:felix.20220602202929.1: *4* LM.createSettingsDicts
-    public createSettingsDicts(c: Commands, localFlag: boolean): [g.TypedDict | undefined, g.TypedDict | undefined] {
+    public createSettingsDicts(c: Commands, localFlag: boolean): [g.SettingsDict | undefined, g.SettingsDict | undefined] {
         if (c) {
             // returns the *raw* shortcutsDict, not a *merged* shortcuts dict.
             const parser = new SettingsTreeParser(c, localFlag);
@@ -2118,13 +2111,9 @@ export class LoadManager {
      * Invert a shortcut dict whose keys are command names,
      * returning a dict whose keys are strokes.
      */
-    public invert(d: any): any {
+    public invert(d: any): g.SettingsDict {
 
-        const result = new TypedDict(  // was TypedDictOfLists.
-            `inverted ${d.name()}`,
-            'KeyStroke',
-            'BindingInfo'
-        );
+        const result = new SettingsDict(`inverted ${d.name()}`);
 
         for (let commandName of Object.keys(d)) {
             for (let bi of d.get(commandName, [])) {
@@ -2143,14 +2132,10 @@ export class LoadManager {
      * Uninvert an inverted shortcut dict whose keys are strokes,
      * returning a dict whose keys are command names.
      */
-    public uninvert(d: any): TypedDict {
+    public uninvert(d: g.SettingsDict): SettingsDict {
 
-        // console.assert(d.keyType === g.KeyStroke, d.keyType); // TODO ? NEeded ?
-        const result = new TypedDict( // was TypedDictOfLists.
-            `uninverted ${d.name()}`,
-            'commandName',
-            'BindingInfo'
-        );
+        // console.assert(d.keyType === g.KeyStroke, d.keyType); // TODO ? Needed ?
+        const result = new SettingsDict(`uninverted ${d.name()}`);
 
         for (let stroke of Object.keys(d)) {
             for (let bi of d.get(stroke, [])) {
@@ -2259,8 +2244,8 @@ export class LoadManager {
         let commanders = [lm.leo_settings_c, lm.my_settings_c];
         commanders = commanders.filter(c => !!c);
 
-        let settings_d: g.TypedDict;
-        let bindings_d: g.TypedDict;
+        let settings_d: g.SettingsDict;
+        let bindings_d: g.SettingsDict;
 
         [settings_d, bindings_d] = lm.createDefaultSettingsDicts();
 
@@ -3021,10 +3006,10 @@ export class LoadManager {
  * files and passed to the second pass.
  */
 export class PreviousSettings {
-    public settingsDict: g.TypedDict | undefined;
-    public shortcutsDict: g.TypedDict | undefined;
+    public settingsDict: g.SettingsDict | undefined;
+    public shortcutsDict: g.SettingsDict | undefined;
 
-    constructor(settingsDict: g.TypedDict | undefined, shortcutsDict: g.TypedDict | undefined) {
+    constructor(settingsDict: g.SettingsDict | undefined, shortcutsDict: g.SettingsDict | undefined) {
         if (!shortcutsDict || !settingsDict) {  // #1766: unit tests.
             const lm = g.app.loadManager!;
             [settingsDict, shortcutsDict] = lm.createDefaultSettingsDicts();

@@ -330,6 +330,8 @@ export class Commands {
         const getColor = c.config.getColor.bind(c.config);
         const getData = c.config.getData.bind(c.config);
         const getInt = c.config.getInt.bind(c.config);
+        const getString = c.config.getString.bind(c.config);
+
 
         // c.autoindent_in_nocolor = getBool('autoindent-in-nocolor-mode');
         c.collapse_nodes_after_move = getBool('collapse-nodes-after-move');
@@ -354,6 +356,8 @@ export class Commands {
         c.stayInTreeAfterSelect = getBool('stayInTreeAfterSelect');
         c.smart_tab = getBool('smart-tab');
         c.tab_width = getInt('tab-width') || -4;
+        c.target_language = getString('target-language') || 'python'; // should be javascript?
+
         c.verbose_check_outline = getBool('verbose-check-outline', false);
         c.vim_mode = getBool('vim-mode', false);
         c.write_script_file = getBool('write-script-file');
