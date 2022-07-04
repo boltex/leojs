@@ -419,7 +419,7 @@
       },
       {
         "command": "leojs.openLeoFile",
-        "title": "Open Leo File",
+        "title": "Open with LeoJS",
         "category": "Leojs",
         "icon": {
           "light": "resources/light/folder.svg",
@@ -1860,6 +1860,11 @@
           "group": "navigation@2"
         },
         {
+          "command": "leojs.saveAsLeoJsFile",
+          "when": "view =~ /^leojsOutline|^leojsDocuments/ && leojsTreeOpened && !leojsTreeTitled",
+          "group": "navigation@2"
+        },
+        {
           "command": "leojs.prevFromOutline",
           "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsCanGoBack",
           "group": "navigation@3"
@@ -2719,5 +2724,8 @@
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "stream": "^0.0.2"
-  }
+  },
+  "gitCommit": "1dd4d22",
+  "gitBranch": "devel",
+  "gitDate": "2022-06-28 01:54:49 -0400"
 }
