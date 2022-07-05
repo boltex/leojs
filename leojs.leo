@@ -3398,7 +3398,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 </t>
 <t tx="felix.20201214205159.10">{
   "command": "leojs.openLeoFile",
-  "title": "Open Leo File",
+  "title": "Open with LeoJS",
   "category": "Leojs",
   "icon": {
     "light": "resources/light/folder.svg",
@@ -4997,6 +4997,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   {
     "command": "leojs.saveAsLeoFile",
+    "when": "view =~ /^leojsOutline|^leojsDocuments/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsTreeTitled",
+    "group": "navigation@2"
+  },
+  {
+    "command": "leojs.saveAsLeoJsFile",
     "when": "view =~ /^leojsOutline|^leojsDocuments/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsTreeTitled",
     "group": "navigation@2"
   },
