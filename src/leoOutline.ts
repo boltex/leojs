@@ -29,7 +29,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
      * * Builds a unique Id from gnx and stack, plus collapsed state,
      * for vscode to distinguish the collapsed state.
      */
-    public buildId(p_position: Position, p_collapsed: number): string {
+    private _buildId(p_position: Position, p_collapsed: number): string {
         // concatenate gnx, stacks gnx's, and collapsible state number.
         // (vscode uses id for collapsible state)
         let w_stringId = this.treeId.toString() +
@@ -106,7 +106,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             element, // Position
             desc,
             this._icons[w_icon],
-            this.buildId(element, w_collapse),
+            this._buildId(element, w_collapse),
             w_contextValue
         );
         // Check if its the selected node and call signal it to the UI
