@@ -109,9 +109,8 @@ export class LeoUI {
     private _leoUndosExplorer!: vscode.TreeView<LeoUndoNode>;
     private _lastLeoUndos: vscode.TreeView<LeoUndoNode> | undefined;
 
-    // * Log and terminal Panes
-    private _leoLogPane: vscode.OutputChannel = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
-    private _leoTerminalPane: vscode.OutputChannel | undefined;
+    // * Log Pane
+    private _leoLogPane: vscode.OutputChannel;
 
     // * Edit/Insert Headline Input Box options instance, setup so clicking outside cancels the headline change
     private _headlineInputOptions: vscode.InputBoxOptions = {
@@ -134,6 +133,10 @@ export class LeoUI {
     public refreshUndoPane!: (() => void);
 
     constructor(private _context: vscode.ExtensionContext) {
+
+        // * Log pane instanciation
+        this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
+        this._context.subscriptions.push(this._leoLogPane);
 
         // * Setup States
         this.leoStates = new LeoStates(_context, this);
@@ -263,6 +266,8 @@ export class LeoUI {
 
         // * Configuration / Welcome webview
         // this.leoSettingsWebview = new LeoSettingsProvider(_context, this);
+
+        // TODO : Push all 'onDid' disposables below in a single push. (see leointeg)
 
         // * React to change in active panel/text editor (window.activeTextEditor) - also fires when the active editor becomes undefined
         // this._context.subscriptions.push(
