@@ -139,7 +139,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
                     return w_rootNodes;
                 }
             } else {
-                return []; // Attempted to access unexistant frame
+                return []; // Attempted to access un-existent frame
             }
         }
     }

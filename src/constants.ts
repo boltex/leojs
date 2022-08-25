@@ -76,6 +76,7 @@ export class Constants {
         STATUSBAR_COLOR: "fb7c47",
         QUICK_OPEN_LEO_COMMANDS: ">leojs: ",
         EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
+        TREEVIEW_TITLE_JS: 'JS',
         TREEVIEW_TITLE: "OUTLINE",
         BODY_TITLE: "LEOJS BODY",
         LOG_PANE_TITLE: "LeoJS Log Window",

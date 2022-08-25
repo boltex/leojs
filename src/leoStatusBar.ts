@@ -27,15 +27,15 @@ export class LeoStatusBar {
         private _leoJs: LeoUI
     ) {
         this._leoStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
-        this._context.subscriptions.push(this._leoStatusBarItem);
+        this._context.subscriptions.push(this._leoStatusBarItem); // Disposable 
 
         this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
-
-        this._leoStatusBarItem.command = Constants.COMMANDS.SWITCH_FILE;
+        // this._leoStatusBarItem.command = Constants.COMMANDS.SWITCH_FILE;
+        this._leoStatusBarItem.command = Constants.COMMANDS.SHOW_LOG;
         // this._leoStatusBarItem.command = "leojs.test"; // just call test function for now to help debugging
         this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR;
         this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_ON;
-        _context.subscriptions.push(this._leoStatusBarItem);
+
         this._leoStatusBarItem.hide();
     }
 

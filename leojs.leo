@@ -99,11 +99,12 @@
 <v t="felix.20201227230912.1"><vh>_setupOpenedLeoDocument</vh></v>
 </v>
 <v t="felix.20201214194144.4"><vh>Refresh UI</vh>
+<v t="felix.20220725004247.1"><vh>setTreeViewTitle</vh></v>
 <v t="felix.20201214202118.1"><vh>showOutline</vh></v>
 <v t="felix.20211007232334.1"><vh>configTreeRefresh</vh></v>
-<v t="felix.20201229025520.1"><vh>gotSelectedNode</vh></v>
 <v t="felix.20201227155008.1"><vh>_setupRefresh</vh></v>
 <v t="felix.20201227014627.1"><vh>_launchRefresh</vh></v>
+<v t="felix.20201229025520.1"><vh>gotSelectedNode</vh></v>
 <v t="felix.20201222013904.1"><vh>_refreshOutline</vh></v>
 <v t="felix.20211024203649.1"><vh>_revealTreeViewNode</vh></v>
 <v t="felix.20201214202123.1"><vh>_refreshDocumentsPane</vh></v>
@@ -1047,7 +1048,7 @@ public refreshTreeRoot(): void {
                 return w_rootNodes;
             }
         } else {
-            return []; // Attempted to access unexistant frame
+            return []; // Attempted to access un-existent frame
         }
     }
 }
@@ -1747,6 +1748,7 @@ public static GUI = {
     STATUSBAR_COLOR: "fb7c47",
     QUICK_OPEN_LEO_COMMANDS: "&gt;leojs: ",
     EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
+    TREEVIEW_TITLE_JS: 'JS',
     TREEVIEW_TITLE: "OUTLINE",
     BODY_TITLE: "LEOJS BODY",
     LOG_PANE_TITLE: "LeoJS Log Window",
@@ -2420,15 +2422,15 @@ export class LeoStatusBar {
         private _leoJs: LeoUI
     ) {
         this._leoStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
-        this._context.subscriptions.push(this._leoStatusBarItem);
+        this._context.subscriptions.push(this._leoStatusBarItem); // Disposable 
 
         this._leoStatusBarItem.color = Constants.GUI.STATUSBAR_COLOR;
-
-        this._leoStatusBarItem.command = Constants.COMMANDS.SWITCH_FILE;
+        // this._leoStatusBarItem.command = Constants.COMMANDS.SWITCH_FILE;
+        this._leoStatusBarItem.command = Constants.COMMANDS.SHOW_LOG;
         // this._leoStatusBarItem.command = "leojs.test"; // just call test function for now to help debugging
         this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR;
         this._leoStatusBarItem.tooltip = Constants.USER_MESSAGES.STATUSBAR_TOOLTIP_ON;
-        _context.subscriptions.push(this._leoStatusBarItem);
+
         this._leoStatusBarItem.hide();
     }
 
@@ -2761,6 +2763,8 @@ export class LeoUI {
     public frameIndex: number = 0;
     public clipboardContents: string = "";
     public isNullGui: boolean = false;
+    private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE_JS; // Might need to be re-set when switching visibility
+
 
     // * Timers
     public refreshTimer: [number, number] | undefined; // until the selected node is found - even if already started refresh
@@ -2983,7 +2987,7 @@ private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Positi
         this.selectTreeNode(p_event.element, true);
     }
 
-    // *  vscode will update its tree by itself, but we need to change Leo's model of its outline
+    // * vscode will update its tree by itself, but we need to change Leo's model of its outline
     if (p_expand) {
         p_event.element.expand();
     } else {
@@ -3048,10 +3052,10 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
 <t tx="felix.20201214202749.1">/**
  * * Called by UI when the user selects in the tree (click or 'open aside' through context menu)
  * @param p_node is the position node selected in the tree
- * @param p_aside flag meaning it's body should be shown in a new editor column
+ * @param p_reveal flag meaning it's body should be shown in a new editor column
  * @returns thenable for reveal to finish or select position to finish
  */
-public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable&lt;unknown&gt; {
+public selectTreeNode(p_node: Position, p_reveal?: boolean, p_aside?: boolean): Thenable&lt;unknown&gt; {
     const c = g.app.windowList[this.frameIndex].c;
     // Note: set context flags for current selection when capturing and revealing the selected node
     // when the tree refreshes and the selected node is processed by getTreeItem &amp; gotSelectedNode
@@ -3059,7 +3063,7 @@ public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable&lt;unknown&
 
     if (c.positionExists(p_node)) {
 
-        if (p_aside) {
+        if (p_reveal) {
             q_reveal = this._lastTreeView.reveal(p_node).then(
                 () =&gt; { }, // Ok
                 (p_error) =&gt; {
@@ -3077,7 +3081,7 @@ public selectTreeNode(p_node: Position, p_aside?: boolean): Thenable&lt;unknown&
         console.error('Selected a non-existent position', p_node.h);
     }
 
-    // this.lastSelectedNode = p_node;
+    // this.lastSelectedNode = p_node; // this is done in _tryApplyNodeToBody !
 
     return q_reveal ? q_reveal : Promise.resolve(true);
 }
@@ -6220,6 +6224,9 @@ private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): 
  * * Launches refresh for UI components and states (Debounced)
  */
 public async _launchRefresh(p_node?: Position): Promise&lt;unknown&gt; {
+
+    // * TODO : MAKE p_node GLOBAL! (so that _launchrefresh can always be debounced)
+
     // check states for having at least a document opened
     if (this.leoStates.leoReady &amp;&amp; this.leoStates.fileOpenedReady) {
         // Had some opened
@@ -6344,9 +6351,13 @@ public async _launchRefresh(p_node?: Position): Promise&lt;unknown&gt; {
  * @param p_refreshType Refresh flags for each UI part
  */
 public _setupRefresh(p_focusOutline: boolean, p_refreshType: ReqRefresh): void {
-    // Set final "focus-placement" and setup final refresh type, if command requires higher than the one setup so far
-    this._fromOutline = p_focusOutline; // set directly
-    Object.assign(this._refreshType, p_refreshType); // add all properties without replacing (only 'true' properties)
+
+    // * TODO : MAKE _launchRefresh's p_node GLOBAL! (so that _launchrefresh can always be debounced)
+
+    // Set final "focus-placement" EITHER true or false
+    this._fromOutline = p_focusOutline;
+    // Set all properties WITHOUT clearing others. (ONLY 'true' properties)
+    Object.assign(this._refreshType, p_refreshType);
 }
 
 </t>
@@ -8406,31 +8417,23 @@ public finishStartup(): void {
 
     // * Create a single data provider for both outline trees, Leo view and Explorer view
     this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);
+
     this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
-    this._context.subscriptions.push(this._leoTreeView);
     this._context.subscriptions.push(
-        this._leoTreeView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeView)))
-    );
-    this._context.subscriptions.push(
-        this._leoTreeView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeView)))
-    );
-    this._context.subscriptions.push(
-        // * Trigger 'show tree in Leo's view'
+        this._leoTreeView,
+        this._leoTreeView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeView))),
+        this._leoTreeView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeView))),
         this._leoTreeView.onDidChangeVisibility((p_event =&gt; this._onTreeViewVisibilityChanged(p_event, false)))
     );
-    this._leoTreeExView = vscode.window.createTreeView(Constants.TREEVIEW_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
-    this._context.subscriptions.push(this._leoTreeExView);
 
+    this._leoTreeExView = vscode.window.createTreeView(Constants.TREEVIEW_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
     this._context.subscriptions.push(
-        this._leoTreeExView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeExView)))
-    );
-    this._context.subscriptions.push(
-        this._leoTreeExView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeExView)))
-    );
-    this._context.subscriptions.push(
-        // * Trigger 'show tree in explorer view'
+        this._leoTreeExView,
+        this._leoTreeExView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeExView))),
+        this._leoTreeExView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeExView))),
         this._leoTreeExView.onDidChangeVisibility((p_event =&gt; this._onTreeViewVisibilityChanged(p_event, true)))
     );
+
     if (this.config.treeInExplorer) {
         this._lastTreeView = this._leoTreeExView;
     } else {
@@ -8440,13 +8443,13 @@ public finishStartup(): void {
     // * Create Leo Opened Documents Treeview Providers and tree views
     this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);
     this._leoDocuments = vscode.window.createTreeView(Constants.DOCUMENTS_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
-    this._context.subscriptions.push(this._leoDocuments);
     this._context.subscriptions.push(
+        this._leoDocuments,
         this._leoDocuments.onDidChangeVisibility((p_event =&gt; this._onDocTreeViewVisibilityChanged(p_event, false)))
     );
     this._leoDocumentsExplorer = vscode.window.createTreeView(Constants.DOCUMENTS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoDocumentsProvider });
-    this._context.subscriptions.push(this._leoDocumentsExplorer);
     this._context.subscriptions.push(
+        this._leoDocumentsExplorer,
         this._leoDocumentsExplorer.onDidChangeVisibility((p_event =&gt; this._onDocTreeViewVisibilityChanged(p_event, true)))
     );
     this._lastLeoDocuments = this._leoDocumentsExplorer;
@@ -8454,13 +8457,13 @@ public finishStartup(): void {
     // * Create '@buttons' Treeview Providers and tree views
     this._leoButtonsProvider = new LeoButtonsProvider(this.leoStates, this.buttonIcons);
     this._leoButtons = vscode.window.createTreeView(Constants.BUTTONS_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
-    this._context.subscriptions.push(this._leoButtons);
     this._context.subscriptions.push(
+        this._leoButtons,
         this._leoButtons.onDidChangeVisibility((p_event =&gt; this._onButtonsTreeViewVisibilityChanged(p_event, false)))
     );
     this._leoButtonsExplorer = vscode.window.createTreeView(Constants.BUTTONS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoButtonsProvider });
-    this._context.subscriptions.push(this._leoButtonsExplorer);
     this._context.subscriptions.push(
+        this._leoButtonsExplorer,
         this._leoButtonsExplorer.onDidChangeVisibility((p_event =&gt; this._onButtonsTreeViewVisibilityChanged(p_event, true)))
     );
     this._lastLeoButtons = this._leoButtonsExplorer;
@@ -8468,13 +8471,13 @@ public finishStartup(): void {
     // * Create Undos Treeview Providers and tree views
     this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this);
     this._leoUndos = vscode.window.createTreeView(Constants.UNDOS_ID, { showCollapseAll: false, treeDataProvider: this._leoUndosProvider });
-    this._context.subscriptions.push(this._leoUndos);
     this._context.subscriptions.push(
+        this._leoUndos,
         this._leoUndos.onDidChangeVisibility((p_event =&gt; this._onUndosTreeViewVisibilityChanged(p_event, false)))
     );
     this._leoUndosExplorer = vscode.window.createTreeView(Constants.UNDOS_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoUndosProvider });
-    this._context.subscriptions.push(this._leoUndosExplorer);
     this._context.subscriptions.push(
+        this._leoUndosExplorer,
         this._leoUndosExplorer.onDidChangeVisibility((p_event =&gt; this._onUndosTreeViewVisibilityChanged(p_event, true)))
     );
     this._lastLeoUndos = this._leoUndosExplorer;
@@ -8498,9 +8501,7 @@ public finishStartup(): void {
     //         Constants.FIND_ID,
     //         this._leoFindPanelProvider,
     //         { webviewOptions: { retainContextWhenHidden: true } }
-    //     )
-    // );
-    // this._context.subscriptions.push(
+    //     ),
     //     vscode.window.registerWebviewViewProvider(
     //         Constants.FIND_EXPLORER_ID,
     //         this._leoFindPanelProvider,
@@ -8611,14 +8612,6 @@ public finishStartup(): void {
             this.getStates();
         });
     }
-
-    // * Old startup method
-    // setTimeout(() =&gt; {
-    //     this._setupRefresh(true,
-    //         { tree: true, body: true, documents: true, buttons: true, states: true }
-    //     );
-    //     this.launchRefresh();
-    // }, 10);
 }
 
 </t>
@@ -10382,6 +10375,25 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
             modal: true,
             detail: theCopyright
         });
+}
+
+</t>
+<t tx="felix.20220725004247.1">/**
+ * * Sets the outline pane top bar string message or refreshes with existing title if no title passed
+ * @param p_title new string to replace the current title
+ */
+public setTreeViewTitle(p_title?: string): void {
+    if (p_title) {
+        this._currentOutlineTitle = p_title;
+    }
+    // * Set/Change outline pane title e.g. "INTEGRATION", "OUTLINE"
+    if (this._leoTreeView) {
+        this._leoTreeView.title = this._currentOutlineTitle;
+    }
+    if (this._leoTreeExView) {
+        this._leoTreeExView.title =
+            Constants.GUI.EXPLORER_TREEVIEW_PREFIX + this._currentOutlineTitle;
+    }
 }
 
 </t>
