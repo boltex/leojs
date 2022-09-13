@@ -48,6 +48,7 @@ export class Constants {
     public static BUTTONS_DEBOUNCE_DELAY: number = 160;
     public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
     public static UNDOS_DEBOUNCE_DELAY: number = 140;
+    public static UNDOS_REVEAL_DEBOUNCE_DELAY: number = 50;
     public static BODY_STATES_DEBOUNCE_DELAY: number = 120;
 
     public static CONFIG_NAME: string = "leojs";

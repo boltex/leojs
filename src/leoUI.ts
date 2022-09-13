@@ -120,17 +120,26 @@ export class LeoUI {
         prompt: '',
     };
 
-    // * Debounced method
-    public launchRefresh!: ((p_node?: Position) => void);
-
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
-    public getStates!: (() => void);
+    public getStates: (() => void);
 
-    // * Debounced method
-    public refreshDocumentsPane!: (() => void);
+    // * Debounced method used to get opened Leo Files for the documents pane
+    public refreshDocumentsPane: (() => void);
 
-    // * Debounced method
-    public refreshUndoPane!: (() => void);
+    // * Debounced method used to get content of the at-buttons pane
+    // public refreshButtonsPane: (() => void);
+
+    // * Debounced method used to get content of the at-buttons pane
+    // public refreshGotoPane: (() => void);
+
+    // * Debounced method used to get content of the undos pane
+    public refreshUndoPane: (() => void);
+
+    // * Debounced method used to set focused element of the undos pane
+    public setUndoSelection: ((p_node: LeoUndoNode) => void);
+
+    // * Debounced method for refreshing the UI
+    public launchRefresh: (() => void);
 
     constructor(private _context: vscode.ExtensionContext) {
 
@@ -160,6 +169,43 @@ export class LeoUI {
         this.documentIcons = utils.buildDocumentIconPaths(_context);
         this.buttonIcons = utils.buildButtonsIconPaths(_context);
         this.gotoIcons = utils.buildGotoIconPaths(_context);
+
+        // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
+        this.getStates = debounce(
+            this._triggerGetStates,
+            Constants.STATES_DEBOUNCE_DELAY,
+            { leading: false, trailing: true }
+        );
+        this.refreshDocumentsPane = debounce(
+            this._refreshDocumentsPane,
+            Constants.DOCUMENTS_DEBOUNCE_DELAY,
+            { leading: false, trailing: true }
+        );
+        // this.refreshButtonsPane = debounce(
+        //     this._refreshButtonsPane,
+        //     Constants.BUTTONS_DEBOUNCE_DELAY,
+        //     { leading: false, trailing: true }
+        // );
+        // this.refreshGotoPane = debounce(
+        //     this._refreshGotoPane,
+        //     Constants.GOTO_DEBOUNCE_DELAY,
+        //     { leading: false, trailing: true }
+        // );
+        this.refreshUndoPane = debounce(
+            this._refreshUndoPane,
+            Constants.UNDOS_DEBOUNCE_DELAY,
+            { leading: false, trailing: true }
+        );
+        this.setUndoSelection = debounce(
+            this._setUndoSelection,
+            Constants.UNDOS_REVEAL_DEBOUNCE_DELAY,
+            { leading: false, trailing: true }
+        );
+        this.launchRefresh = debounce(
+            this._launchRefresh,
+            Constants.REFRESH_DEBOUNCE_DELAY,
+            { leading: false, trailing: true }
+        );
 
         this.showLogPane();
     }
@@ -337,29 +383,6 @@ export class LeoUI {
         //     this._onDidOpenTextDocument(p_document)
         // )
         // );
-
-        // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
-        this.getStates = debounce(
-            this._triggerGetStates,
-            Constants.STATES_DEBOUNCE_DELAY,
-            { leading: false, trailing: true }
-        );
-        this.refreshDocumentsPane = debounce(
-            this._refreshDocumentsPane,
-            Constants.DOCUMENTS_DEBOUNCE_DELAY,
-            { leading: false, trailing: true }
-        );
-        this.refreshUndoPane = debounce(
-            this._refreshUndoPane,
-            Constants.UNDOS_DEBOUNCE_DELAY,
-            { leading: false, trailing: true }
-        );
-        // Immediate 'throttled' and debounced
-        this.launchRefresh = debounce(
-            this._launchRefresh,
-            Constants.REFRESH_DEBOUNCE_DELAY,
-            { leading: false, trailing: true }
-        );
 
         this.leoStates.leoReady = true;
 
@@ -790,20 +813,18 @@ export class LeoUI {
     }
 
     /**
-     * * Places selection on the required node with a 'timeout'. Used after refreshing the opened Leo documents view.
+     * * highlights the current undo state without disturbing focus
      * @param p_undoNode Node instance in the Leo History view to be the 'selected' one.
      */
-    public setUndoSelection(p_undoNode: LeoUndoNode): void {
-        setTimeout(() => {
-            if (this._lastLeoUndos && this._lastLeoUndos.visible) {
-                this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
-                    () => { }, // Ok - do nothing
-                    (p_error) => {
-                        console.log('setUndoSelection could not reveal');
-                    }
-                );
-            }
-        }, 0);
+    private _setUndoSelection(p_undoNode: LeoUndoNode): void {
+        if (this._lastLeoUndos && this._lastLeoUndos.visible) {
+            this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
+                () => { }, // Ok - do nothing
+                (p_error) => {
+                    console.log('setUndoSelection could not reveal');
+                }
+            );
+        }
     }
 
     /**

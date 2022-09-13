@@ -110,7 +110,7 @@
 <v t="felix.20201214202123.1"><vh>_refreshDocumentsPane</vh></v>
 <v t="felix.20201214202128.1"><vh>setDocumentSelection</vh></v>
 <v t="felix.20211124223735.1"><vh>_refreshUndoPane</vh></v>
-<v t="felix.20211129002604.1"><vh>setUndoSelection</vh></v>
+<v t="felix.20211129002604.1"><vh>_setUndoSelection</vh></v>
 </v>
 <v t="felix.20201214194144.5"><vh>UI Change Events</vh>
 <v t="felix.20200719025231.24"><vh>_onChangeConfiguration</vh></v>
@@ -1719,6 +1719,7 @@ public static STATES_DEBOUNCE_DELAY: number = 60;
 public static BUTTONS_DEBOUNCE_DELAY: number = 160;
 public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
 public static UNDOS_DEBOUNCE_DELAY: number = 140;
+public static UNDOS_REVEAL_DEBOUNCE_DELAY: number = 50;
 public static BODY_STATES_DEBOUNCE_DELAY: number = 120;
 
 public static CONFIG_NAME: string = "leojs";
@@ -2745,6 +2746,43 @@ import { LeoFrame } from "./core/leoFrame";
     this.buttonIcons = utils.buildButtonsIconPaths(_context);
     this.gotoIcons = utils.buildGotoIconPaths(_context);
 
+    // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
+    this.getStates = debounce(
+        this._triggerGetStates,
+        Constants.STATES_DEBOUNCE_DELAY,
+        { leading: false, trailing: true }
+    );
+    this.refreshDocumentsPane = debounce(
+        this._refreshDocumentsPane,
+        Constants.DOCUMENTS_DEBOUNCE_DELAY,
+        { leading: false, trailing: true }
+    );
+    // this.refreshButtonsPane = debounce(
+    //     this._refreshButtonsPane,
+    //     Constants.BUTTONS_DEBOUNCE_DELAY,
+    //     { leading: false, trailing: true }
+    // );
+    // this.refreshGotoPane = debounce(
+    //     this._refreshGotoPane,
+    //     Constants.GOTO_DEBOUNCE_DELAY,
+    //     { leading: false, trailing: true }
+    // );
+    this.refreshUndoPane = debounce(
+        this._refreshUndoPane,
+        Constants.UNDOS_DEBOUNCE_DELAY,
+        { leading: false, trailing: true }
+    );
+    this.setUndoSelection = debounce(
+        this._setUndoSelection,
+        Constants.UNDOS_REVEAL_DEBOUNCE_DELAY,
+        { leading: false, trailing: true }
+    );
+    this.launchRefresh = debounce(
+        this._launchRefresh,
+        Constants.REFRESH_DEBOUNCE_DELAY,
+        { leading: false, trailing: true }
+    );
+
     this.showLogPane();
 }
 
@@ -2854,17 +2892,26 @@ export class LeoUI {
         prompt: '',
     };
 
-    // * Debounced method
-    public launchRefresh!: ((p_node?: Position) =&gt; void);
-
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
-    public getStates!: (() =&gt; void);
+    public getStates: (() =&gt; void);
 
-    // * Debounced method
-    public refreshDocumentsPane!: (() =&gt; void);
+    // * Debounced method used to get opened Leo Files for the documents pane
+    public refreshDocumentsPane: (() =&gt; void);
 
-    // * Debounced method
-    public refreshUndoPane!: (() =&gt; void);
+    // * Debounced method used to get content of the at-buttons pane
+    // public refreshButtonsPane: (() =&gt; void);
+
+    // * Debounced method used to get content of the at-buttons pane
+    // public refreshGotoPane: (() =&gt; void);
+
+    // * Debounced method used to get content of the undos pane
+    public refreshUndoPane: (() =&gt; void);
+
+    // * Debounced method used to set focused element of the undos pane
+    public setUndoSelection: ((p_node: LeoUndoNode) =&gt; void);
+
+    // * Debounced method for refreshing the UI
+    public launchRefresh: (() =&gt; void);
 
     @others
 }
@@ -3366,7 +3413,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     "url": "https://github.com/boltex/leojs"
   },
   "engines": {
-    "vscode": "^1.67.0"
+    "vscode": "^1.71.0"
   },
   "keywords": [
     "leo",
@@ -5836,7 +5883,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 "@types/md5": "^2.3.1",
 "@types/mocha": "^9.1.0",
 "@types/node": "14.x",
-"@types/vscode": "^1.67.0",
+"@types/vscode": "^1.71.0",
 "@types/webpack-env": "^1.16.3",
 "@typescript-eslint/eslint-plugin": "^5.16.0",
 "@typescript-eslint/parser": "^5.16.0",
@@ -6195,7 +6242,7 @@ public selectOpenedLeoDocument(p_index: number, p_fromOutline?: boolean): Thenab
 
 </t>
 <t tx="felix.20201214233119.1">/**
- * General 'Leo is ready' state
+ * General 'Leo is ready' state, equivalent to leoBridgeReady in leoInteg
  */
 private _leoReady: boolean = false;
 get leoReady(): boolean {
@@ -7830,20 +7877,18 @@ private _refreshUndoPane(): void {
 
 </t>
 <t tx="felix.20211129002604.1">/**
- * * Places selection on the required node with a 'timeout'. Used after refreshing the opened Leo documents view.
+ * * highlights the current undo state without disturbing focus
  * @param p_undoNode Node instance in the Leo History view to be the 'selected' one.
  */
-public setUndoSelection(p_undoNode: LeoUndoNode): void {
-    setTimeout(() =&gt; {
-        if (this._lastLeoUndos &amp;&amp; this._lastLeoUndos.visible) {
-            this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
-                () =&gt; { }, // Ok - do nothing
-                (p_error) =&gt; {
-                    console.log('setUndoSelection could not reveal');
-                }
-            );
-        }
-    }, 0);
+private _setUndoSelection(p_undoNode: LeoUndoNode): void {
+    if (this._lastLeoUndos &amp;&amp; this._lastLeoUndos.visible) {
+        this._lastLeoUndos.reveal(p_undoNode, { select: true, focus: false }).then(
+            () =&gt; { }, // Ok - do nothing
+            (p_error) =&gt; {
+                console.log('setUndoSelection could not reveal');
+            }
+        );
+    }
 }
 
 </t>
@@ -8585,29 +8630,6 @@ public finishStartup(): void {
     //     this._onDidOpenTextDocument(p_document)
     // )
     // );
-
-    // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
-    this.getStates = debounce(
-        this._triggerGetStates,
-        Constants.STATES_DEBOUNCE_DELAY,
-        { leading: false, trailing: true }
-    );
-    this.refreshDocumentsPane = debounce(
-        this._refreshDocumentsPane,
-        Constants.DOCUMENTS_DEBOUNCE_DELAY,
-        { leading: false, trailing: true }
-    );
-    this.refreshUndoPane = debounce(
-        this._refreshUndoPane,
-        Constants.UNDOS_DEBOUNCE_DELAY,
-        { leading: false, trailing: true }
-    );
-    // Immediate 'throttled' and debounced
-    this.launchRefresh = debounce(
-        this._launchRefresh,
-        Constants.REFRESH_DEBOUNCE_DELAY,
-        { leading: false, trailing: true }
-    );
 
     this.leoStates.leoReady = true;
 
