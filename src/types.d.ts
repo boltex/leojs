@@ -155,7 +155,8 @@ export interface LeoGoto {
 export const enum LeoSearchScope {
     entireOutline = 0,
     subOutlineOnly,
-    nodeOnly
+    nodeOnly,
+    fileOnly
 }
 
 /**
@@ -198,6 +199,7 @@ export interface LeoGuiFindTabManagerSettings {
     mark_changes: boolean,
     mark_finds: boolean,
     node_only: boolean,
+    file_only: boolean,
     pattern_match: boolean,
     search_body: boolean,
     search_headline: boolean,

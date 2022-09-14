@@ -146,6 +146,7 @@ export class Constants {
         FIND_TEXT: "findText",
         REPLACE_TEXT: "replaceText",
         ENTIRE_OUTLINE: "entireOutline",
+        FILE_ONLY: "fileOnly",
         NODE_ONLY: "nodeOnly",
         SUBOUTLINE_ONLY: "subOutlineOnly",
         IGNORE_CASE: "ignoreCase",

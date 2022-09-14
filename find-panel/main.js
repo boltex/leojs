@@ -56,7 +56,7 @@
         'searchHeadline',
         'searchBody',
     ];
-    let radioIds = ['entireOutline', 'subOutlineOnly', 'nodeOnly'];
+    let radioIds = ['entireOutline', 'subOutlineOnly', 'nodeOnly', 'fileOnly'];
 
     function navTextChange() {
         // cancel timer, reset 'debounced' timer after checks, if still needed

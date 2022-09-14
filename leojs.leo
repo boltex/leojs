@@ -212,6 +212,7 @@
 </v>
 </v>
 <v t="felix.20220204224240.1"><vh>class NullGui</vh></v>
+<v t="felix.20220914003540.1"><vh>test webview</vh></v>
 </v>
 <v t="felix.20201214151419.1"><vh>@clean src/leoButtons.ts</vh>
 <v t="felix.20201214151419.2"><vh>class LeoButtonsProvider</vh>
@@ -1231,6 +1232,7 @@ export function activate(p_context: vscode.ExtensionContext) {
 
 // [CMD.SET_FIND_EVERYWHERE_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.ENTIRE_OUTLINE)],
 // [CMD.SET_FIND_NODE_ONLY_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.NODE_ONLY)],
+// [CMD.SET_FIND_FILE_ONLY_OPTION, () =&gt; w_leo.setSearchSetting(Constants.FIND_INPUTS_IDS.FILE_ONLY)],
 // [CMD.SET_FIND_SUBOUTLINE_ONLY_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SUBOUTLINE_ONLY)],
 // [CMD.TOGGLE_FIND_IGNORE_CASE_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.IGNORE_CASE)],
 // [CMD.TOGGLE_FIND_MARK_CHANGES_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_CHANGES)],
@@ -2684,6 +2686,12 @@ import { LeoFrame } from "./core/leoFrame";
 </t>
 <t tx="felix.20201214194144.10"></t>
 <t tx="felix.20201214194144.2">constructor(private _context: vscode.ExtensionContext) {
+
+
+    const provider = new ColorsViewProvider(_context.extensionUri);
+
+    _context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider(ColorsViewProvider.viewType, provider));
 
     // * Log pane instanciation
     this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
@@ -4419,6 +4427,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 </t>
 <t tx="felix.20201214205159.4">"views": {
   "explorer": [
+    {
+      "type": "webview",
+      "id": "calicoColors.colorsView",
+      "name": "Calico Colors"
+    },
     {
       "id": "leojsOutlineExplorer",
       "name": "Leojs Outline",
@@ -7057,6 +7070,7 @@ public static FIND_INPUTS_IDS = {
     FIND_TEXT: "findText",
     REPLACE_TEXT: "replaceText",
     ENTIRE_OUTLINE: "entireOutline",
+    FILE_ONLY: "fileOnly",
     NODE_ONLY: "nodeOnly",
     SUBOUTLINE_ONLY: "subOutlineOnly",
     IGNORE_CASE: "ignoreCase",
@@ -8965,7 +8979,8 @@ public loadSearchSettings(): void {
     //             searchScope:
     //                 0 +
     //                 (w_searchSettings.suboutline_only ? 1 : 0) +
-    //                 (w_searchSettings.node_only ? 2 : 0),
+    //                 (w_searchSettings.node_only ? 2 : 0) +
+    //                 (w_searchSettings.file_only ? 3 : 0),
     //         };
     //         if (w_settings.searchScope &gt; 2) {
     //             console.error('searchScope SHOULD BE 0, 1, 2 only: ', w_settings.searchScope);
@@ -9013,6 +9028,7 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
     //     mark_changes: p_settings.markChanges,
     //     mark_finds: p_settings.markFinds,
     //     node_only: !!(p_settings.searchScope === 2),
+    //     file_only: !!(p_settings.searchScope === 3),
     //     pattern_match: p_settings.regExp,
     //     search_body: p_settings.searchBody,
     //     search_headline: p_settings.searchHeadline,
@@ -9486,7 +9502,8 @@ public replace(p_fromOutline: boolean, p_thenFind: boolean): Thenable&lt;unknown
 export const enum LeoSearchScope {
     entireOutline = 0,
     subOutlineOnly,
-    nodeOnly
+    nodeOnly,
+    fileOnly
 }
 
 </t>
@@ -9531,6 +9548,7 @@ export interface LeoGuiFindTabManagerSettings {
     mark_changes: boolean,
     mark_finds: boolean,
     node_only: boolean,
+    file_only: boolean,
     pattern_match: boolean,
     search_body: boolean,
     search_headline: boolean,
@@ -10145,6 +10163,119 @@ public setTreeViewTitle(p_title?: string): void {
     }
 }
 
+</t>
+<t tx="felix.20220914003540.1">
+class ColorsViewProvider implements vscode.WebviewViewProvider {
+
+    public static readonly viewType = 'calicoColors.colorsView';
+
+    private _view?: vscode.WebviewView;
+
+    constructor(
+        private readonly _extensionUri: vscode.Uri,
+    ) { }
+
+    public resolveWebviewView(
+        webviewView: vscode.WebviewView,
+        context: vscode.WebviewViewResolveContext,
+        _token: vscode.CancellationToken,
+    ) {
+        this._view = webviewView;
+
+        webviewView.webview.options = {
+            // Allow scripts in the webview
+            enableScripts: true,
+
+            localResourceRoots: [
+                this._extensionUri
+            ]
+        };
+
+        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+
+        webviewView.webview.onDidReceiveMessage(data =&gt; {
+            switch (data.type) {
+                case 'colorSelected':
+                    {
+                        vscode.window.activeTextEditor?.insertSnippet(new vscode.SnippetString(`#${data.value}`));
+                        break;
+                    }
+            }
+        });
+    }
+
+    public addColor() {
+        if (this._view) {
+            this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
+            this._view.webview.postMessage({ type: 'addColor' });
+        }
+    }
+
+    public clearColors() {
+        if (this._view) {
+            this._view.webview.postMessage({ type: 'clearColors' });
+        }
+    }
+
+    private _getHtmlForWebview(webview: vscode.Webview) {
+        // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
+        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'main.js'));
+
+        // Do the same for the stylesheet.
+        const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'reset.css'));
+        const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css'));
+        const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'main.css'));
+
+        // And image ?
+        const imageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'leoapp128px.png'));
+
+        // Use a nonce to only allow a specific script to be run.
+        const nonce = getNonce();
+
+        return `&lt;!DOCTYPE html&gt;
+			&lt;html lang="en"&gt;
+			&lt;head&gt;
+				&lt;meta charset="UTF-8"&gt;
+
+				&lt;!--
+					Use a content security policy to only allow loading images from https or from our extension directory,
+					and only allow scripts that have a specific nonce.
+				--&gt;
+
+				&lt;meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}';"&gt;
+
+				&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+
+				&lt;link href="${styleResetUri}" rel="stylesheet"&gt;
+				&lt;link href="${styleVSCodeUri}" rel="stylesheet"&gt;
+				&lt;link href="${styleMainUri}" rel="stylesheet"&gt;
+
+				&lt;title&gt;Cat Colors&lt;/title&gt;
+			&lt;/head&gt;
+			&lt;body&gt;
+				&lt;ul class="color-list"&gt;
+				&lt;/ul&gt;
+
+				&lt;button class="add-color-button"&gt;Add Color&lt;/button&gt;
+				&lt;br&gt;
+				webview.cspSource ${webview.cspSource}
+				&lt;br&gt;
+				&lt;img src="${imageUri}" /&gt;
+
+				&lt;script nonce="${nonce}" src="${scriptUri}"&gt;&lt;/script&gt;
+			&lt;/body&gt;
+			&lt;/html&gt;`;
+    }
+}
+
+function getNonce() {
+    let text = '';
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (let i = 0; i &lt; 32; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+}
 </t>
 </tnodes>
 </leo_file>
