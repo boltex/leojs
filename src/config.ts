@@ -188,14 +188,6 @@ export class Config implements ConfigMembers {
     }
 
     /**
-     * * Set the "workbench.editor.closeOnFileDelete" vscode setting
-     */
-    public setCloseOnFileDelete(): Thenable<void> {
-        return vscode.workspace.getConfiguration("workbench.editor")
-            .update("closeOnFileDelete", true, true);
-    }
-
-    /**
      * * Check if the workbench.editor.enablePreview flag is set
      * @param p_forced Forces the setting instead of just suggesting with a message
      */
@@ -247,36 +239,6 @@ export class Config implements ConfigMembers {
                 ).then(p_chosenButton => {
                     if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
                         vscode.commands.executeCommand(Constants.COMMANDS.CLEAR_CLOSE_EMPTY_GROUPS);
-                    }
-                });
-            }
-        }
-    }
-
-    /**
-     * * Check if the workbench.editor.closeOnFileDelete flag is set
-     * @param p_forced Forces the setting instead of just suggesting with a message
-     */
-    public checkCloseOnFileDelete(p_forced?: boolean): void {
-        let w_result: any = true;
-        const w_setting = vscode.workspace.getConfiguration("workbench.editor");
-        if (w_setting.inspect("closeOnFileDelete")!.globalValue === undefined) {
-            w_result = w_setting.inspect("closeOnFileDelete")!.defaultValue;
-        } else {
-            w_result = w_setting.inspect("closeOnFileDelete")!.globalValue;
-        }
-        if (w_result === false) {
-            if (p_forced) {
-                this.setCloseOnFileDelete();
-                vscode.window.showInformationMessage(Constants.USER_MESSAGES.CLOSE_ON_DELETE_SET);
-
-            } else {
-                vscode.window.showWarningMessage(
-                    Constants.USER_MESSAGES.CLOSE_ON_DELETE_RECOMMEND,
-                    Constants.USER_MESSAGES.FIX_IT
-                ).then(p_chosenButton => {
-                    if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
-                        vscode.commands.executeCommand(Constants.COMMANDS.SET_CLOSE_ON_FILE_DELETE);
                     }
                 });
             }

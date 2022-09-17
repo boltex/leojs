@@ -23,10 +23,8 @@
 <v t="felix.20211007213344.6"><vh>setFontConfig</vh></v>
 <v t="felix.20211007213344.7"><vh>setEnablePreview</vh></v>
 <v t="felix.20211007213344.8"><vh>clearCloseEmptyGroups</vh></v>
-<v t="felix.20211007213344.9"><vh>setCloseOnFileDelete</vh></v>
 <v t="felix.20211007213344.10"><vh>checkEnablePreview</vh></v>
 <v t="felix.20211007213344.11"><vh>checkCloseEmptyGroups</vh></v>
-<v t="felix.20211007213344.12"><vh>checkCloseOnFileDelete</vh></v>
 <v t="felix.20211007213344.13"><vh>buildFromSavedSettings</vh></v>
 </v>
 </v>
@@ -361,6 +359,7 @@
 <v t="felix.20201214150149.15"><vh>Show UI panes</vh></v>
 <v t="felix.20201214150149.16"><vh>Marked Nodes Commands</vh></v>
 <v t="felix.20201214150149.17"><vh>Clone Find Commands</vh></v>
+<v t="felix.20220917013425.1"><vh>Config Set Recommended</vh></v>
 </v>
 </v>
 </v>
@@ -509,7 +508,6 @@ private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
     setTimeout(() =&gt; {
         this.config.checkEnablePreview();
         this.config.checkCloseEmptyGroups();
-        this.config.checkCloseOnFileDelete();
     }, 150);
 }
 
@@ -1242,10 +1240,6 @@ export function activate(p_context: vscode.ExtensionContext) {
 // [CMD.TOGGLE_FIND_SEARCH_BODY_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SEARCH_BODY)],
 // [CMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, () =&gt; w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SEARCH_HEADLINE)],
 
-[CMD.SET_ENABLE_PREVIEW, () =&gt; p_leoUI.config.setEnablePreview()],
-[CMD.CLEAR_CLOSE_EMPTY_GROUPS, () =&gt; p_leoUI.config.clearCloseEmptyGroups()],
-[CMD.SET_CLOSE_ON_FILE_DELETE, () =&gt; p_leoUI.config.setCloseOnFileDelete()],
-
 </t>
 <t tx="felix.20201214150149.2">@others
 </t>
@@ -1540,7 +1534,6 @@ public static COMMANDS = {
     TOGGLE_FIND_SEARCH_HEADLINE_OPTION: Constants.NAME + ".toggleFindSearchHeadlineOption",
     SET_ENABLE_PREVIEW: Constants.NAME + ".setEnablePreview",
     CLEAR_CLOSE_EMPTY_GROUPS: Constants.NAME + ".clearCloseEmptyGroups",
-    SET_CLOSE_ON_FILE_DELETE: Constants.NAME + ".setCloseOnFileDelete"
 };
 
 </t>
@@ -2706,7 +2699,6 @@ import { LeoFrame } from "./core/leoFrame";
     // * Set required vscode configs if needed
     this.config.checkEnablePreview(true);
     this.config.checkCloseEmptyGroups(true);
-    this.config.checkCloseOnFileDelete(true);
 
     // * also check workbench.editor.enablePreview
     this.config.buildFromSavedSettings();
@@ -3391,10 +3383,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "keywords": [
     "leo",
-    "literate",
     "tree",
     "outline",
-    "programming"
+    "editor",
+    "literate"
   ],
   "categories": [
     "Other"
@@ -6604,37 +6596,6 @@ public checkCloseEmptyGroups(p_forced?: boolean): void {
 }
 
 </t>
-<t tx="felix.20211007213344.12">/**
- * * Check if the workbench.editor.closeOnFileDelete flag is set
- * @param p_forced Forces the setting instead of just suggesting with a message
- */
-public checkCloseOnFileDelete(p_forced?: boolean): void {
-    let w_result: any = true;
-    const w_setting = vscode.workspace.getConfiguration("workbench.editor");
-    if (w_setting.inspect("closeOnFileDelete")!.globalValue === undefined) {
-        w_result = w_setting.inspect("closeOnFileDelete")!.defaultValue;
-    } else {
-        w_result = w_setting.inspect("closeOnFileDelete")!.globalValue;
-    }
-    if (w_result === false) {
-        if (p_forced) {
-            this.setCloseOnFileDelete();
-            vscode.window.showInformationMessage(Constants.USER_MESSAGES.CLOSE_ON_DELETE_SET);
-
-        } else {
-            vscode.window.showWarningMessage(
-                Constants.USER_MESSAGES.CLOSE_ON_DELETE_RECOMMEND,
-                Constants.USER_MESSAGES.FIX_IT
-            ).then(p_chosenButton =&gt; {
-                if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
-                    vscode.commands.executeCommand(Constants.COMMANDS.SET_CLOSE_ON_FILE_DELETE);
-                }
-            });
-        }
-    }
-}
-
-</t>
 <t tx="felix.20211007213344.13">/**
  * * Build config from settings from vscode's saved config settings
  */
@@ -6901,15 +6862,6 @@ public setEnablePreview(): Thenable&lt;void&gt; {
 public clearCloseEmptyGroups(): Thenable&lt;void&gt; {
     return vscode.workspace.getConfiguration("workbench.editor")
         .update("closeEmptyGroups", false, true);
-}
-
-</t>
-<t tx="felix.20211007213344.9">/**
- * * Set the "workbench.editor.closeOnFileDelete" vscode setting
- */
-public setCloseOnFileDelete(): Thenable&lt;void&gt; {
-    return vscode.workspace.getConfiguration("workbench.editor")
-        .update("closeOnFileDelete", true, true);
 }
 
 </t>
@@ -10276,6 +10228,10 @@ function getNonce() {
     }
     return text;
 }
+</t>
+<t tx="felix.20220917013425.1">[CMD.SET_ENABLE_PREVIEW, () =&gt; p_leoUI.config.setEnablePreview()],
+[CMD.CLEAR_CLOSE_EMPTY_GROUPS, () =&gt; p_leoUI.config.clearCloseEmptyGroups()],
+
 </t>
 </tnodes>
 </leo_file>

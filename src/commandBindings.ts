@@ -229,7 +229,6 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 
         [CMD.SET_ENABLE_PREVIEW, () => p_leoUI.config.setEnablePreview()],
         [CMD.CLEAR_CLOSE_EMPTY_GROUPS, () => p_leoUI.config.clearCloseEmptyGroups()],
-        [CMD.SET_CLOSE_ON_FILE_DELETE, () => p_leoUI.config.setCloseOnFileDelete()],
 
     ];
 

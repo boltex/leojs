@@ -162,7 +162,6 @@ export class LeoUI {
         // * Set required vscode configs if needed
         this.config.checkEnablePreview(true);
         this.config.checkCloseEmptyGroups(true);
-        this.config.checkCloseOnFileDelete(true);
 
         // * also check workbench.editor.enablePreview
         this.config.buildFromSavedSettings();
@@ -851,7 +850,6 @@ export class LeoUI {
         setTimeout(() => {
             this.config.checkEnablePreview();
             this.config.checkCloseEmptyGroups();
-            this.config.checkCloseOnFileDelete();
         }, 150);
     }
 
