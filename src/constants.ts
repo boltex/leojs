@@ -275,6 +275,9 @@ export class Constants {
         LEO_CAN_DEMOTE: "leojsCanDemote",
         LEO_CAN_PROMOTE: "leojsCanPromote",
         LEO_CAN_DEHOIST: "leojsCanDehoist",
+        LEO_CAN_HOIST: "leojsCanHoist", // isNotRoot equivalent, Computed by hand
+        LEO_IN_CHAPTER: "leojsInChapter", // TODO
+        LEO_TOP_HOIST_CHAPTER: "leojsTopHoistChapter", // TODO
         // 'states' flags about current selection, for visibility and commands availability
         SELECTED_MARKED: "leojsMarked", // no need for unmarked here, use !leojsMarked
         SELECTED_CLONE: "leojsCloned",
@@ -282,7 +285,6 @@ export class Constants {
         SELECTED_EMPTY: "leojsEmpty",
         SELECTED_CHILD: "leojsChild", // Has children
         SELECTED_ATFILE: "LeojsAtFile", // Can be refreshed
-        SELECTED_ROOT: "leojsRoot", // ! Computed by hand
         // Statusbar Flag 'keybindings in effect'
         LEO_SELECTED: "leojsObjectSelected", // keybindings "On": Outline or body has focus
         // Context Flags for 'when' clauses, used concatenated, for each outline node

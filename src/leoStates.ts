@@ -220,7 +220,7 @@ export class LeoStates {
     }
     set leoRoot(p_value: boolean) {
         this._leoRoot = p_value;
-        this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_ROOT, p_value);
+        this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_HOIST, !p_value);
     }
 
     constructor(

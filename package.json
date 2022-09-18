@@ -1252,7 +1252,7 @@
         "command": "leojs.hoistSelection",
         "category": "Leojs",
         "title": "Hoist",
-        "enablement": "leojsTreeOpened && !leojsRoot",
+        "enablement": "leojsTreeOpened && leojsCanHoist",
         "icon": {
           "light": "resources/light/hoist.svg",
           "dark": "resources/dark/hoist.svg"
@@ -1262,7 +1262,7 @@
         "command": "leojs.hoistSelectionFromOutline",
         "category": "Leojs",
         "title": "Hoist",
-        "enablement": "leojsTreeOpened && !leojsRoot",
+        "enablement": "leojsTreeOpened && leojsCanHoist",
         "icon": {
           "light": "resources/light/hoist.svg",
           "dark": "resources/dark/hoist.svg"

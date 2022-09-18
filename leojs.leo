@@ -1822,6 +1822,9 @@ public static CONTEXT_FLAGS = {
     LEO_CAN_DEMOTE: "leojsCanDemote",
     LEO_CAN_PROMOTE: "leojsCanPromote",
     LEO_CAN_DEHOIST: "leojsCanDehoist",
+    LEO_CAN_HOIST: "leojsCanHoist", // isNotRoot equivalent, Computed by hand
+    LEO_IN_CHAPTER: "leojsInChapter", // TODO
+    LEO_TOP_HOIST_CHAPTER: "leojsTopHoistChapter", // TODO
     // 'states' flags about current selection, for visibility and commands availability
     SELECTED_MARKED: "leojsMarked", // no need for unmarked here, use !leojsMarked
     SELECTED_CLONE: "leojsCloned",
@@ -1829,7 +1832,6 @@ public static CONTEXT_FLAGS = {
     SELECTED_EMPTY: "leojsEmpty",
     SELECTED_CHILD: "leojsChild", // Has children
     SELECTED_ATFILE: "LeojsAtFile", // Can be refreshed
-    SELECTED_ROOT: "leojsRoot", // ! Computed by hand
     // Statusbar Flag 'keybindings in effect'
     LEO_SELECTED: "leojsObjectSelected", // keybindings "On": Outline or body has focus
     // Context Flags for 'when' clauses, used concatenated, for each outline node
@@ -2213,7 +2215,7 @@ get leoRoot(): boolean {
 }
 set leoRoot(p_value: boolean) {
     this._leoRoot = p_value;
-    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_ROOT, p_value);
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_HOIST, !p_value);
 }
 
 </t>
@@ -2844,7 +2846,9 @@ export class LeoUI {
     // * Undos pane
     private _leoUndosProvider!: LeoUndosProvider;
     private _leoUndos!: vscode.TreeView&lt;LeoUndoNode&gt;;
+    private _leoUndosShown = false;
     private _leoUndosExplorer!: vscode.TreeView&lt;LeoUndoNode&gt;;
+    private _leoUndosExplorerShown = false;
     private _lastLeoUndos: vscode.TreeView&lt;LeoUndoNode&gt; | undefined;
 
     // * Log Pane
@@ -4247,7 +4251,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "command": "leojs.hoistSelection",
   "category": "Leojs",
   "title": "Hoist",
-  "enablement": "leojsTreeOpened &amp;&amp; !leojsRoot",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanHoist",
   "icon": {
     "light": "resources/light/hoist.svg",
     "dark": "resources/dark/hoist.svg"
@@ -4257,7 +4261,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "command": "leojs.hoistSelectionFromOutline",
   "category": "Leojs",
   "title": "Hoist",
-  "enablement": "leojsTreeOpened &amp;&amp; !leojsRoot",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanHoist",
   "icon": {
     "light": "resources/light/hoist.svg",
     "dark": "resources/dark/hoist.svg"
@@ -7582,9 +7586,19 @@ public refreshTreeRoot(): void {
 private _onUndosTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
     if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
     if (p_event.visible) {
-        this._lastLeoUndos = p_explorerView ? this._leoUndosExplorer : this._leoUndos;
-        // TODO: Check if needed
-        // this._leoUndosProvider.refreshTreeRoot(); // May not need to set selection...?
+        if (p_explorerView) {
+            this._lastLeoUndos = this._leoUndosExplorer;
+            if (this._leoUndosExplorerShown) {
+                this._leoUndosProvider.refreshTreeRoot(); // Already shown, will redraw but not re-select
+            }
+            this._leoUndosExplorerShown = true; // either way set it
+        } else {
+            this._lastLeoUndos = this._leoUndos;
+            if (this._leoUndosShown) {
+                this._leoUndosProvider.refreshTreeRoot(); // Already shown, will redraw but not re-select
+            }
+            this._leoUndosShown = true; // either way set it
+        }
     }
 }
 

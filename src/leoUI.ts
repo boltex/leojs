@@ -106,7 +106,9 @@ export class LeoUI {
     // * Undos pane
     private _leoUndosProvider!: LeoUndosProvider;
     private _leoUndos!: vscode.TreeView<LeoUndoNode>;
+    private _leoUndosShown = false;
     private _leoUndosExplorer!: vscode.TreeView<LeoUndoNode>;
+    private _leoUndosExplorerShown = false;
     private _lastLeoUndos: vscode.TreeView<LeoUndoNode> | undefined;
 
     // * Log Pane
@@ -945,9 +947,19 @@ export class LeoUI {
     private _onUndosTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
         if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
         if (p_event.visible) {
-            this._lastLeoUndos = p_explorerView ? this._leoUndosExplorer : this._leoUndos;
-            // TODO: Check if needed
-            // this._leoUndosProvider.refreshTreeRoot(); // May not need to set selection...?
+            if (p_explorerView) {
+                this._lastLeoUndos = this._leoUndosExplorer;
+                if (this._leoUndosExplorerShown) {
+                    this._leoUndosProvider.refreshTreeRoot(); // Already shown, will redraw but not re-select
+                }
+                this._leoUndosExplorerShown = true; // either way set it
+            } else {
+                this._lastLeoUndos = this._leoUndos;
+                if (this._leoUndosShown) {
+                    this._leoUndosProvider.refreshTreeRoot(); // Already shown, will redraw but not re-select
+                }
+                this._leoUndosShown = true; // either way set it
+            }
         }
     }
 
