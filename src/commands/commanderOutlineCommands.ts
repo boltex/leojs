@@ -1307,7 +1307,6 @@ export class CommanderOutlineCommands {
         c.redraw(); // redraw selects p
         // c.frame.clearStatusLine()
         // c.frame.putStatusLine("De-Hoist: " + p.h)
-        c.undoer.afterDehoist(p, 'DeHoist');
 
         // TODO : Needed?
         // g.doHook('hoist-changed', c=c)
@@ -1353,7 +1352,6 @@ export class CommanderOutlineCommands {
         c.redraw(p); // redraw selects p
         // c.frame.clearStatusLine();
         // c.frame.putStatusLine("Hoist: " + p.h);
-        c.undoer.afterHoist(p, 'Hoist');
 
         // TODO : Needed?
         // g.doHook('hoist-changed', c=c);

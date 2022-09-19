@@ -741,21 +741,6 @@ export class Undoer {
         bunch.newMarked = p.isMarked();
         u.pushBead(bunch);
     }
-    //@+node:felix.20211026230613.40: *5* u.afterDehoist
-    public afterDehoist(p: Position, command: string): void {
-        const u: Undoer = this;
-        if (u.redoing || u.undoing) {
-            return;
-        }
-        const bunch: Bead = u.createCommonBunch(p);
-        // Set types & helpers
-        bunch.kind = 'dehoist';
-        bunch.undoType = command;
-        // Set helpers
-        bunch.undoHelper = u.undoDehoistNode;
-        bunch.redoHelper = u.redoDehoistNode;
-        u.pushBead(bunch);
-    }
     //@+node:felix.20211026230613.41: *5* u.afterDeleteNode
     public afterDeleteNode(p: Position, command: string, bunch: Bead): void {
         const u: Undoer = this;
@@ -811,21 +796,6 @@ export class Undoer {
 
         // Recalculate the menu labels.
         u.setUndoTypes();
-    }
-    //@+node:felix.20211026230613.44: *5* u.afterHoist
-    public afterHoist(p: Position, command: string): void {
-        const u: Undoer = this;
-        if (u.redoing || u.undoing) {
-            return;
-        }
-        const bunch: Bead = u.createCommonBunch(p);
-        // Set types & helpers
-        bunch.kind = 'hoist';
-        bunch.undoType = command;
-        // Set helpers
-        bunch.undoHelper = u.undoHoistNode;
-        bunch.redoHelper = u.redoHoistNode;
-        u.pushBead(bunch);
     }
     //@+node:felix.20211026230613.45: *5* u.afterInsertNode
     public afterInsertNode(p: Position, command: string, bunch: Bead): void {
