@@ -301,6 +301,330 @@
         }
       ]
     },
+    "languages": [
+      {
+        "id": "leojsbody.plain",
+        "aliases": [
+          "Leo Body Plain",
+          "leojsbody"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.plain.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.python",
+        "aliases": [
+          "Leo Body Python",
+          "leojsbody.python"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.python.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.typescript",
+        "aliases": [
+          "Leo Body Typescript",
+          "leojsbody.typescript"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.typescript.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.javascript",
+        "aliases": [
+          "Leo Body Javascript",
+          "leojsbody.javascript"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.javascript.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.c",
+        "aliases": [
+          "Leo Body c",
+          "leojsbody.c"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.c.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.cpp",
+        "aliases": [
+          "Leo Body C++",
+          "leojsbody.cpp"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.cpp.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.css",
+        "aliases": [
+          "Leo Body CSS",
+          "leojsbody.css"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.css.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.fortran",
+        "aliases": [
+          "Leo Body Fortran",
+          "leojsbody.fortran"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.fortran90",
+        "aliases": [
+          "Leo Body Fortran90",
+          "leojsbody.fortran90"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.html",
+        "aliases": [
+          "Leo Body HTML",
+          "leojsbody.html"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.html.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.java",
+        "aliases": [
+          "Leo Body Java",
+          "leojsbody.java"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.java.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.json",
+        "aliases": [
+          "Leo Body Json",
+          "leojsbody.json"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.json.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.markdown",
+        "aliases": [
+          "Leo Body Markdown",
+          "leojsbody.markdown"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.markdown.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.php",
+        "aliases": [
+          "Leo Body PHP",
+          "leojsbody.php"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.php.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.restructuredtext",
+        "aliases": [
+          "Leo Body reStructuredText",
+          "leojsbody.restructuredtext"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.rst.language-configuration.json"
+      },
+      {
+        "id": "leojsbody.rust",
+        "aliases": [
+          "Leo Body Rust",
+          "leojsbody.rust"
+        ],
+        "extensions": [
+          ""
+        ],
+        "configuration": "./language-configurations/leojsbody.rust.language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "leojsbody.plain",
+        "scopeName": "source.leojsbody.plain",
+        "path": "./syntaxes/leojsbody.plain.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.python",
+        "scopeName": "source.leojsbody.python",
+        "path": "./syntaxes/leojsbody.python.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.typescript",
+        "scopeName": "source.leojsbody.typescript",
+        "path": "./syntaxes/leojsbody.typescript.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.javascript",
+        "scopeName": "source.leojsbody.javascript",
+        "path": "./syntaxes/leojsbody.javascript.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.c",
+        "scopeName": "source.leojsbody.c",
+        "path": "./syntaxes/leojsbody.c.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.cpp",
+        "scopeName": "source.leojsbody.cpp",
+        "path": "./syntaxes/leojsbody.cpp.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.css",
+        "scopeName": "source.leojsbody.css",
+        "path": "./syntaxes/leojsbody.css.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.fortran",
+        "scopeName": "source.leojsbody.fortran",
+        "path": "./syntaxes/leojsbody.fortran.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.fortran90",
+        "scopeName": "source.leojsbody.fortran90",
+        "path": "./syntaxes/leojsbody.fortran90.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.html",
+        "scopeName": "source.leojsbody.html",
+        "path": "./syntaxes/leojsbody.html.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.java",
+        "scopeName": "source.leojsbody.java",
+        "path": "./syntaxes/leojsbody.java.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.json",
+        "scopeName": "source.leojsbody.json",
+        "path": "./syntaxes/leojsbody.json.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.markdown",
+        "scopeName": "source.leojsbody.markdown",
+        "path": "./syntaxes/leojsbody.markdown.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.php",
+        "scopeName": "source.leojsbody.php",
+        "path": "./syntaxes/leojsbody.php.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.restructuredtext",
+        "scopeName": "source.leojsbody.restructuredtext",
+        "path": "./syntaxes/leojsbody.rst.tmLanguage.json"
+      },
+      {
+        "language": "leojsbody.rust",
+        "scopeName": "source.leojsbody.rust",
+        "path": "./syntaxes/leojsbody.rust.tmLanguage.json"
+      },
+      {
+        "injectTo": [
+          "source.leojsbody.c",
+          "source.leojsbody.cpp",
+          "source.leojsbody.css",
+          "source.leojsbody.fortran",
+          "source.leojsbody.fortran90",
+          "source.leojsbody.html",
+          "source.leojsbody.java",
+          "source.leojsbody.javascript",
+          "source.leojsbody.json",
+          "source.leojsbody.markdown",
+          "source.leojsbody.php",
+          "source.leojsbody.plain",
+          "source.leojsbody.python",
+          "source.leojsbody.restructuredtext",
+          "source.leojsbody.rust",
+          "source.leojsbody.typescript"
+        ],
+        "path": "./syntaxes/leojsbody.tmLanguage.json",
+        "scopeName": "leo.injection"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "leojsbody.c",
+        "path": "./snippets/c.code-snippets"
+      },
+      {
+        "language": "leojsbody.cpp",
+        "path": "./snippets/cpp.code-snippets"
+      },
+      {
+        "language": "leojsbody.fortran90",
+        "path": "./snippets/fortran90.code-snippets"
+      },
+      {
+        "language": "leojsbody.javascript",
+        "path": "./snippets/javascript.code-snippets"
+      },
+      {
+        "language": "leojsbody.typescript",
+        "path": "./snippets/typescript.code-snippets"
+      },
+      {
+        "language": "leojsbody.java",
+        "path": "./snippets/java.code-snippets"
+      },
+      {
+        "language": "leojsbody.php",
+        "path": "./snippets/php.code-snippets"
+      },
+      {
+        "language": "leojsbody.markdown",
+        "path": "./snippets/markdown.code-snippets"
+      },
+      {
+        "language": "leojsbody.restructuredtext",
+        "path": "./snippets/restructuredtext.code-snippets"
+      },
+      {
+        "language": "leojsbody.rust",
+        "path": "./snippets/rust.code-snippets"
+      }
+    ],
     "viewsWelcome": [
       {
         "view": "leojsOutline",

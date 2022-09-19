@@ -521,6 +521,268 @@ export class LeoUI {
     }
 
     /**
+     * * Handles the change of vscode config: a onDidChangeConfiguration event triggered
+     * @param p_event The configuration-change event passed by vscode
+     */
+    private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
+        if (p_event.affectsConfiguration(Constants.CONFIG_NAME)) {
+            this.config.buildFromSavedSettings(); // If the config setting started with 'leojs'
+        }
+        // also check if workbench.editor.enablePreview
+        this._bodyEnablePreview = !!vscode.workspace
+            .getConfiguration('workbench.editor')
+            .get('enablePreview');
+
+        // Check For specific vscode settings needed for leojs
+        // Leave small delay for multiple possible forced changes at startup
+        setTimeout(() => {
+            this.config.checkEnablePreview();
+            this.config.checkCloseEmptyGroups();
+        }, 150);
+    }
+
+    /**
+     * * Handles the node expanding and collapsing interactions by the user in the treeview
+     * @param p_event The event passed by vscode
+     * @param p_expand True if it was an expand, false if it was a collapse event
+     * @param p_treeView Pointer to the treeview itself, either the standalone treeview or the one under the explorer
+     */
+    private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent<Position>, p_expand: boolean, p_treeView: vscode.TreeView<Position>): void {
+
+        // * Expanding or collapsing via the treeview interface selects the node to mimic Leo.
+
+        // this.triggerBodySave(true); // Get any modifications from the editor into the Leo's body model
+
+        if (p_treeView.selection.length && p_treeView.selection[0] && p_treeView.selection[0].__eq__(p_event.element)) {
+            // * This happens if the tree selection is the same as the expanded/collapsed node: Just have Leo do the same
+            // pass
+        } else {
+            // * This part only happens if the user clicked on the arrow without trying to select the node
+            this._lastTreeView.reveal(p_event.element).then(
+                () => { }, // Ok
+                (p_error) => {
+                    console.log('_onChangeCollapsedState could not reveal');
+                }
+            );
+            this.selectTreeNode(p_event.element, true);
+        }
+
+        // * vscode will update its tree by itself, but we need to change Leo's model of its outline
+        if (p_expand) {
+            p_event.element.expand();
+        } else {
+            p_event.element.contract();
+        }
+    }
+
+    /**
+     * * Handle the change of visibility of either outline treeview and refresh it if its visible
+     * @param p_event The treeview-visibility-changed event passed by vscode
+     * @param p_explorerView Flag to signify that the treeview who triggered this event is the one in the explorer view
+     */
+    private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
+        if (p_event.visible) {
+            this._lastTreeView = p_explorerView ? this._leoTreeExView : this._leoTreeView;
+            this._refreshOutline(true, RevealType.RevealSelect);
+
+            // * This gies error Data tree node not found
+            // const c = g.app.windowList[this.frameIndex].c;
+            // let q_reveal: Thenable<void> | undefined;
+            // q_reveal = this._lastTreeView.reveal(c.p).then(
+            //     () => { }, // Ok
+            //     (p_error) => {
+            //         console.log('_onTreeViewVisibilityChanged could not reveal');
+            //     }
+            // );
+        }
+    }
+
+    /**
+     * * Handle the change of visibility of either outline treeview and refresh it if its visible
+     * @param p_event The treeview-visibility-changed event passed by vscode
+     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
+     */
+    private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
+        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
+        if (p_event.visible) {
+            this._lastLeoDocuments = p_explorerView ? this._leoDocumentsExplorer : this._leoDocuments;
+            // TODO: Check if needed
+            // this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
+        }
+    }
+
+    /**
+     * * Handle the change of visibility of either outline treeview and refresh it if its visible
+     * @param p_event The treeview-visibility-changed event passed by vscode
+     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
+     */
+    private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
+        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
+        if (p_event.visible) {
+            this._lastLeoButtons = p_explorerView ? this._leoButtonsExplorer : this._leoButtons;
+            // TODO: Check if needed
+            // this._leoButtonsProvider.refreshTreeRoot(); // May not need to set selection...?
+        }
+    }
+
+    /**
+     * * Handle the change of visibility of either outline treeview and refresh it if its visible
+     * @param p_event The treeview-visibility-changed event passed by vscode
+     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
+     */
+    private _onUndosTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
+        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
+        if (p_event.visible) {
+            if (p_explorerView) {
+                this._lastLeoUndos = this._leoUndosExplorer;
+                if (this._leoUndosExplorerShown) {
+                    this._leoUndosProvider.refreshTreeRoot(); // Already shown, will redraw but not re-select
+                }
+                this._leoUndosExplorerShown = true; // either way set it
+            } else {
+                this._lastLeoUndos = this._leoUndos;
+                if (this._leoUndosShown) {
+                    this._leoUndosProvider.refreshTreeRoot(); // Already shown, will redraw but not re-select
+                }
+                this._leoUndosShown = true; // either way set it
+            }
+        }
+    }
+
+    /**
+     * * Save body to Leo if its dirty. That is, only if a change has been made to the body 'document' so far
+     * @param p_forcedVsCodeSave Flag to also have vscode 'save' the content of this editor through the filesystem
+     * @returns a promise that resolves when the possible saving process is finished
+     */
+    public triggerBodySave(p_forcedVsCodeSave?: boolean): Thenable<unknown> {
+        // * Save body to Leo if a change has been made to the body 'document' so far
+        // let q_savePromise: Promise<boolean>;
+        // if (
+        //     this._bodyLastChangedDocument &&
+        //     (this._bodyLastChangedDocument.isDirty || this._editorTouched) &&
+        //     !this._bodyLastChangedDocumentSaved
+        // ) {
+        //     // * Is dirty and unsaved, so proper save is in order
+        //     const w_document = this._bodyLastChangedDocument; // backup for bodySaveDocument before reset
+        //     this._bodyLastChangedDocumentSaved = true;
+        //     this._editorTouched = false;
+        //     q_savePromise = this._bodySaveDocument(w_document, p_forcedVsCodeSave);
+        // } else if (
+        //     p_forcedVsCodeSave &&
+        //     this._bodyLastChangedDocument &&
+        //     this._bodyLastChangedDocument.isDirty &&
+        //     this._bodyLastChangedDocumentSaved
+        // ) {
+        //     // * Had 'forcedVsCodeSave' and isDirty only, so just clean up dirty VSCODE document flag.
+        //     this._bodyLastChangedDocument.save(); // ! USED INTENTIONALLY: This trims trailing spaces
+        //     q_savePromise = this._bodySaveSelection(); // just save selection if it's changed
+        // } else {
+        //     this._bodyLastChangedDocumentSaved = true;
+        //     q_savePromise = this._bodySaveSelection();  // just save selection if it's changed
+        // }
+        // return q_savePromise.then((p_result) => {
+        //     return p_result;
+        // }, (p_reason) => {
+        //     console.log('BodySave rejected :', p_reason);
+        //     return false;
+        // });
+        return Promise.resolve(true);
+    }
+
+    /**
+     * * Saves the cursor position along with the text selection range and scroll position
+     * @returns Promise that resolves when the "setSelection" action returns from Leo's side
+     */
+    private _bodySaveSelection(): Thenable<unknown> {
+        // if (this._selectionDirty && this._selection) {
+        //     // Prepare scroll data separately
+        //     // ! TEST NEW SCROLL WITH SINGLE LINE NUMBER
+        //     let w_scroll: number;
+        //     if (this._selectionGnx === this._scrollGnx && this._scrollDirty) {
+        //         w_scroll = this._scroll?.start.line || 0;
+        //     } else {
+        //         w_scroll = 0;
+        //     }
+        //     const w_param: BodySelectionInfo = {
+        //         gnx: this._selectionGnx,
+        //         scroll: w_scroll,
+        //         insert: {
+        //             line: this._selection.active.line || 0,
+        //             col: this._selection.active.character || 0,
+        //         },
+        //         start: {
+        //             line: this._selection.start.line || 0,
+        //             col: this._selection.start.character || 0,
+        //         },
+        //         end: {
+        //             line: this._selection.end.line || 0,
+        //             col: this._selection.end.character || 0,
+        //         },
+        //     };
+        //     // console.log("set scroll to leo: " + w_scroll + " start:" + this._selection.start.line);
+
+        //     this._scrollDirty = false;
+        //     this._selectionDirty = false; // don't wait for return of this call
+        //     return this.sendAction(Constants.LEOBRIDGE.SET_SELECTION, JSON.stringify(w_param)).then(
+        //         (p_result) => {
+        //             return Promise.resolve(true);
+        //         }
+        //     );
+        // } else {
+        //     return Promise.resolve(true);
+        // }
+        return Promise.resolve(true);
+    }
+
+    /**
+     * * Sets new body text on leo's side, and may optionally save vsCode's body editor (which will trim spaces)
+     * @param p_document Vscode's text document which content will be used to be the new node's body text in Leo
+     * @param p_forcedVsCodeSave Flag to also have vscode 'save' the content of this editor through the filesystem
+     * @returns a promise that resolves when the complete saving process is finished
+     */
+    private _bodySaveDocument(
+        p_document: vscode.TextDocument,
+        p_forcedVsCodeSave?: boolean
+    ): Thenable<unknown> {
+        // if (p_document) {
+        //     // * Fetch gnx and document's body text first, to be reused more than once in this method
+        //     const w_param = {
+        //         gnx: utils.leoUriToStr(p_document.uri),
+        //         body: p_document.getText(),
+        //     };
+        //     this.sendAction(Constants.LEOBRIDGE.SET_BODY, JSON.stringify(w_param)); // Don't wait for promise
+        //     // This bodySaveSelection is placed on the stack right after saving body, returns promise either way
+        //     return this._bodySaveSelection().then(() => {
+        //         this._refreshType.states = true;
+        //         this.getStates();
+        //         if (p_forcedVsCodeSave) {
+        //             return p_document.save(); // ! USED INTENTIONALLY: This trims trailing spaces
+        //         }
+        //         return Promise.resolve(p_document.isDirty);
+        //     });
+        // } else {
+        //     return Promise.resolve(false);
+        // }
+        return Promise.resolve(true);
+    }
+
+    /**
+     * * Sets new body text on leo's side before vscode closes itself if body is dirty
+     * @param p_document Vscode's text document which content will be used to be the new node's body text in Leo
+     * @returns a promise that resolves when the complete saving process is finished
+     */
+    private _bodySaveDeactivate(
+        p_document: vscode.TextDocument
+    ): Thenable<unknown> {
+        // const w_param = {
+        //     gnx: utils.leoUriToStr(p_document.uri),
+        //     body: p_document.getText(),
+        // };
+        // return this.sendAction(Constants.LEOBRIDGE.SET_BODY, JSON.stringify(w_param));
+        return Promise.resolve(true);
+    }
+
+    /**
      * * Sets the outline pane top bar string message or refreshes with existing title if no title passed
      * @param p_title new string to replace the current title
      */
@@ -832,268 +1094,6 @@ export class LeoUI {
                 }
             );
         }
-    }
-
-    /**
-     * * Handles the change of vscode config: a onDidChangeConfiguration event triggered
-     * @param p_event The configuration-change event passed by vscode
-     */
-    private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
-        if (p_event.affectsConfiguration(Constants.CONFIG_NAME)) {
-            this.config.buildFromSavedSettings(); // If the config setting started with 'leojs'
-        }
-        // also check if workbench.editor.enablePreview
-        this._bodyEnablePreview = !!vscode.workspace
-            .getConfiguration('workbench.editor')
-            .get('enablePreview');
-
-        // Check For specific vscode settings needed for leojs
-        // Leave small delay for multiple possible forced changes at startup
-        setTimeout(() => {
-            this.config.checkEnablePreview();
-            this.config.checkCloseEmptyGroups();
-        }, 150);
-    }
-
-    /**
-     * * Handles the node expanding and collapsing interactions by the user in the treeview
-     * @param p_event The event passed by vscode
-     * @param p_expand True if it was an expand, false if it was a collapse event
-     * @param p_treeView Pointer to the treeview itself, either the standalone treeview or the one under the explorer
-     */
-    private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent<Position>, p_expand: boolean, p_treeView: vscode.TreeView<Position>): void {
-
-        // * Expanding or collapsing via the treeview interface selects the node to mimic Leo.
-
-        // this.triggerBodySave(true); // Get any modifications from the editor into the Leo's body model
-
-        if (p_treeView.selection.length && p_treeView.selection[0] && p_treeView.selection[0].__eq__(p_event.element)) {
-            // * This happens if the tree selection is the same as the expanded/collapsed node: Just have Leo do the same
-            // pass
-        } else {
-            // * This part only happens if the user clicked on the arrow without trying to select the node
-            this._lastTreeView.reveal(p_event.element).then(
-                () => { }, // Ok
-                (p_error) => {
-                    console.log('_onChangeCollapsedState could not reveal');
-                }
-            );
-            this.selectTreeNode(p_event.element, true);
-        }
-
-        // * vscode will update its tree by itself, but we need to change Leo's model of its outline
-        if (p_expand) {
-            p_event.element.expand();
-        } else {
-            p_event.element.contract();
-        }
-    }
-
-    /**
-     * * Handle the change of visibility of either outline treeview and refresh it if its visible
-     * @param p_event The treeview-visibility-changed event passed by vscode
-     * @param p_explorerView Flag to signify that the treeview who triggered this event is the one in the explorer view
-     */
-    private _onTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
-        if (p_event.visible) {
-            this._lastTreeView = p_explorerView ? this._leoTreeExView : this._leoTreeView;
-            this._refreshOutline(true, RevealType.RevealSelect);
-
-            // * This gies error Data tree node not found
-            // const c = g.app.windowList[this.frameIndex].c;
-            // let q_reveal: Thenable<void> | undefined;
-            // q_reveal = this._lastTreeView.reveal(c.p).then(
-            //     () => { }, // Ok
-            //     (p_error) => {
-            //         console.log('_onTreeViewVisibilityChanged could not reveal');
-            //     }
-            // );
-        }
-    }
-
-    /**
-     * * Handle the change of visibility of either outline treeview and refresh it if its visible
-     * @param p_event The treeview-visibility-changed event passed by vscode
-     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
-     */
-    private _onDocTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
-        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
-        if (p_event.visible) {
-            this._lastLeoDocuments = p_explorerView ? this._leoDocumentsExplorer : this._leoDocuments;
-            // TODO: Check if needed
-            // this.refreshDocumentsPane(); // List may not have changed, but it's selection may have
-        }
-    }
-
-    /**
-     * * Handle the change of visibility of either outline treeview and refresh it if its visible
-     * @param p_event The treeview-visibility-changed event passed by vscode
-     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
-     */
-    private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
-        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
-        if (p_event.visible) {
-            this._lastLeoButtons = p_explorerView ? this._leoButtonsExplorer : this._leoButtons;
-            // TODO: Check if needed
-            // this._leoButtonsProvider.refreshTreeRoot(); // May not need to set selection...?
-        }
-    }
-
-    /**
-     * * Handle the change of visibility of either outline treeview and refresh it if its visible
-     * @param p_event The treeview-visibility-changed event passed by vscode
-     * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
-     */
-    private _onUndosTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityChangeEvent, p_explorerView: boolean): void {
-        if (p_explorerView) { } // (Facultative/unused) Do something different if explorer view is used
-        if (p_event.visible) {
-            if (p_explorerView) {
-                this._lastLeoUndos = this._leoUndosExplorer;
-                if (this._leoUndosExplorerShown) {
-                    this._leoUndosProvider.refreshTreeRoot(); // Already shown, will redraw but not re-select
-                }
-                this._leoUndosExplorerShown = true; // either way set it
-            } else {
-                this._lastLeoUndos = this._leoUndos;
-                if (this._leoUndosShown) {
-                    this._leoUndosProvider.refreshTreeRoot(); // Already shown, will redraw but not re-select
-                }
-                this._leoUndosShown = true; // either way set it
-            }
-        }
-    }
-
-    /**
-     * * Save body to Leo if its dirty. That is, only if a change has been made to the body 'document' so far
-     * @param p_forcedVsCodeSave Flag to also have vscode 'save' the content of this editor through the filesystem
-     * @returns a promise that resolves when the possible saving process is finished
-     */
-    public triggerBodySave(p_forcedVsCodeSave?: boolean): Thenable<unknown> {
-        // * Save body to Leo if a change has been made to the body 'document' so far
-        // let q_savePromise: Promise<boolean>;
-        // if (
-        //     this._bodyLastChangedDocument &&
-        //     (this._bodyLastChangedDocument.isDirty || this._editorTouched) &&
-        //     !this._bodyLastChangedDocumentSaved
-        // ) {
-        //     // * Is dirty and unsaved, so proper save is in order
-        //     const w_document = this._bodyLastChangedDocument; // backup for bodySaveDocument before reset
-        //     this._bodyLastChangedDocumentSaved = true;
-        //     this._editorTouched = false;
-        //     q_savePromise = this._bodySaveDocument(w_document, p_forcedVsCodeSave);
-        // } else if (
-        //     p_forcedVsCodeSave &&
-        //     this._bodyLastChangedDocument &&
-        //     this._bodyLastChangedDocument.isDirty &&
-        //     this._bodyLastChangedDocumentSaved
-        // ) {
-        //     // * Had 'forcedVsCodeSave' and isDirty only, so just clean up dirty VSCODE document flag.
-        //     this._bodyLastChangedDocument.save(); // ! USED INTENTIONALLY: This trims trailing spaces
-        //     q_savePromise = this._bodySaveSelection(); // just save selection if it's changed
-        // } else {
-        //     this._bodyLastChangedDocumentSaved = true;
-        //     q_savePromise = this._bodySaveSelection();  // just save selection if it's changed
-        // }
-        // return q_savePromise.then((p_result) => {
-        //     return p_result;
-        // }, (p_reason) => {
-        //     console.log('BodySave rejected :', p_reason);
-        //     return false;
-        // });
-        return Promise.resolve(true);
-    }
-
-    /**
-     * * Saves the cursor position along with the text selection range and scroll position
-     * @returns Promise that resolves when the "setSelection" action returns from Leo's side
-     */
-    private _bodySaveSelection(): Thenable<unknown> {
-        // if (this._selectionDirty && this._selection) {
-        //     // Prepare scroll data separately
-        //     // ! TEST NEW SCROLL WITH SINGLE LINE NUMBER
-        //     let w_scroll: number;
-        //     if (this._selectionGnx === this._scrollGnx && this._scrollDirty) {
-        //         w_scroll = this._scroll?.start.line || 0;
-        //     } else {
-        //         w_scroll = 0;
-        //     }
-        //     const w_param: BodySelectionInfo = {
-        //         gnx: this._selectionGnx,
-        //         scroll: w_scroll,
-        //         insert: {
-        //             line: this._selection.active.line || 0,
-        //             col: this._selection.active.character || 0,
-        //         },
-        //         start: {
-        //             line: this._selection.start.line || 0,
-        //             col: this._selection.start.character || 0,
-        //         },
-        //         end: {
-        //             line: this._selection.end.line || 0,
-        //             col: this._selection.end.character || 0,
-        //         },
-        //     };
-        //     // console.log("set scroll to leo: " + w_scroll + " start:" + this._selection.start.line);
-
-        //     this._scrollDirty = false;
-        //     this._selectionDirty = false; // don't wait for return of this call
-        //     return this.sendAction(Constants.LEOBRIDGE.SET_SELECTION, JSON.stringify(w_param)).then(
-        //         (p_result) => {
-        //             return Promise.resolve(true);
-        //         }
-        //     );
-        // } else {
-        //     return Promise.resolve(true);
-        // }
-        return Promise.resolve(true);
-    }
-
-    /**
-     * * Sets new body text on leo's side, and may optionally save vsCode's body editor (which will trim spaces)
-     * @param p_document Vscode's text document which content will be used to be the new node's body text in Leo
-     * @param p_forcedVsCodeSave Flag to also have vscode 'save' the content of this editor through the filesystem
-     * @returns a promise that resolves when the complete saving process is finished
-     */
-    private _bodySaveDocument(
-        p_document: vscode.TextDocument,
-        p_forcedVsCodeSave?: boolean
-    ): Thenable<unknown> {
-        // if (p_document) {
-        //     // * Fetch gnx and document's body text first, to be reused more than once in this method
-        //     const w_param = {
-        //         gnx: utils.leoUriToStr(p_document.uri),
-        //         body: p_document.getText(),
-        //     };
-        //     this.sendAction(Constants.LEOBRIDGE.SET_BODY, JSON.stringify(w_param)); // Don't wait for promise
-        //     // This bodySaveSelection is placed on the stack right after saving body, returns promise either way
-        //     return this._bodySaveSelection().then(() => {
-        //         this._refreshType.states = true;
-        //         this.getStates();
-        //         if (p_forcedVsCodeSave) {
-        //             return p_document.save(); // ! USED INTENTIONALLY: This trims trailing spaces
-        //         }
-        //         return Promise.resolve(p_document.isDirty);
-        //     });
-        // } else {
-        //     return Promise.resolve(false);
-        // }
-        return Promise.resolve(true);
-    }
-
-    /**
-     * * Sets new body text on leo's side before vscode closes itself if body is dirty
-     * @param p_document Vscode's text document which content will be used to be the new node's body text in Leo
-     * @returns a promise that resolves when the complete saving process is finished
-     */
-    private _bodySaveDeactivate(
-        p_document: vscode.TextDocument
-    ): Thenable<unknown> {
-        // const w_param = {
-        //     gnx: utils.leoUriToStr(p_document.uri),
-        //     body: p_document.getText(),
-        // };
-        // return this.sendAction(Constants.LEOBRIDGE.SET_BODY, JSON.stringify(w_param));
-        return Promise.resolve(true);
     }
 
     /**

@@ -96,20 +96,6 @@
 <v t="felix.20201227230901.1"><vh>_setupNoOpenedLeoDocument</vh></v>
 <v t="felix.20201227230912.1"><vh>_setupOpenedLeoDocument</vh></v>
 </v>
-<v t="felix.20201214194144.4"><vh>Refresh UI</vh>
-<v t="felix.20220725004247.1"><vh>setTreeViewTitle</vh></v>
-<v t="felix.20201214202118.1"><vh>showOutline</vh></v>
-<v t="felix.20211007232334.1"><vh>configTreeRefresh</vh></v>
-<v t="felix.20201227155008.1"><vh>_setupRefresh</vh></v>
-<v t="felix.20201227014627.1"><vh>_launchRefresh</vh></v>
-<v t="felix.20201229025520.1"><vh>gotSelectedNode</vh></v>
-<v t="felix.20201222013904.1"><vh>_refreshOutline</vh></v>
-<v t="felix.20211024203649.1"><vh>_revealTreeViewNode</vh></v>
-<v t="felix.20201214202123.1"><vh>_refreshDocumentsPane</vh></v>
-<v t="felix.20201214202128.1"><vh>setDocumentSelection</vh></v>
-<v t="felix.20211124223735.1"><vh>_refreshUndoPane</vh></v>
-<v t="felix.20211129002604.1"><vh>_setUndoSelection</vh></v>
-</v>
 <v t="felix.20201214194144.5"><vh>UI Change Events</vh>
 <v t="felix.20200719025231.24"><vh>_onChangeConfiguration</vh></v>
 <v t="felix.20201214202625.1"><vh>_onChangeCollapsedState</vh></v>
@@ -123,6 +109,20 @@
 <v t="felix.20211204144931.3"><vh>_bodySaveSelection</vh></v>
 <v t="felix.20211204144931.4"><vh>_bodySaveDocument</vh></v>
 <v t="felix.20211204144931.5"><vh>_bodySaveDeactivate</vh></v>
+</v>
+<v t="felix.20201214194144.4"><vh>Refresh UI</vh>
+<v t="felix.20220725004247.1"><vh>setTreeViewTitle</vh></v>
+<v t="felix.20201214202118.1"><vh>showOutline</vh></v>
+<v t="felix.20211007232334.1"><vh>configTreeRefresh</vh></v>
+<v t="felix.20201227155008.1"><vh>_setupRefresh</vh></v>
+<v t="felix.20201227014627.1"><vh>_launchRefresh</vh></v>
+<v t="felix.20201229025520.1"><vh>gotSelectedNode</vh></v>
+<v t="felix.20201222013904.1"><vh>_refreshOutline</vh></v>
+<v t="felix.20211024203649.1"><vh>_revealTreeViewNode</vh></v>
+<v t="felix.20201214202123.1"><vh>_refreshDocumentsPane</vh></v>
+<v t="felix.20201214202128.1"><vh>setDocumentSelection</vh></v>
+<v t="felix.20211124223735.1"><vh>_refreshUndoPane</vh></v>
+<v t="felix.20211129002604.1"><vh>_setUndoSelection</vh></v>
 </v>
 <v t="felix.20201214194144.6"><vh>Commands</vh>
 <v t="felix.20201214202749.1"><vh>selectTreeNode</vh></v>
@@ -368,6 +368,9 @@
 <v t="felix.20211006225245.1"><vh>configuration</vh></v>
 <v t="felix.20201214205159.3"><vh>viewsContainers</vh></v>
 <v t="felix.20201214205159.4"><vh>views</vh></v>
+<v t="felix.20220918234128.1"><vh>languages</vh></v>
+<v t="felix.20220918234147.1"><vh>grammars</vh></v>
+<v t="felix.20220918234152.1"><vh>snippets</vh></v>
 <v t="felix.20201214205159.5"><vh>viewsWelcome</vh></v>
 <v t="felix.20201214205159.6"><vh>commands</vh>
 <v t="felix.20201214205159.8"><vh>Scripting &amp; @buttons</vh></v>
@@ -10246,6 +10249,333 @@ function getNonce() {
 <t tx="felix.20220917013425.1">[CMD.SET_ENABLE_PREVIEW, () =&gt; p_leoUI.config.setEnablePreview()],
 [CMD.CLEAR_CLOSE_EMPTY_GROUPS, () =&gt; p_leoUI.config.clearCloseEmptyGroups()],
 
+</t>
+<t tx="felix.20220918234128.1">"languages": [
+  {
+    "id": "leojsbody.plain",
+    "aliases": [
+      "Leo Body Plain",
+      "leojsbody"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.plain.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.python",
+    "aliases": [
+      "Leo Body Python",
+      "leojsbody.python"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.python.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.typescript",
+    "aliases": [
+      "Leo Body Typescript",
+      "leojsbody.typescript"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.typescript.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.javascript",
+    "aliases": [
+      "Leo Body Javascript",
+      "leojsbody.javascript"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.javascript.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.c",
+    "aliases": [
+      "Leo Body c",
+      "leojsbody.c"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.c.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.cpp",
+    "aliases": [
+      "Leo Body C++",
+      "leojsbody.cpp"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.cpp.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.css",
+    "aliases": [
+      "Leo Body CSS",
+      "leojsbody.css"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.css.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.fortran",
+    "aliases": [
+      "Leo Body Fortran",
+      "leojsbody.fortran"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.fortran90",
+    "aliases": [
+      "Leo Body Fortran90",
+      "leojsbody.fortran90"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.fortran.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.html",
+    "aliases": [
+      "Leo Body HTML",
+      "leojsbody.html"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.html.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.java",
+    "aliases": [
+      "Leo Body Java",
+      "leojsbody.java"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.java.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.json",
+    "aliases": [
+      "Leo Body Json",
+      "leojsbody.json"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.json.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.markdown",
+    "aliases": [
+      "Leo Body Markdown",
+      "leojsbody.markdown"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.markdown.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.php",
+    "aliases": [
+      "Leo Body PHP",
+      "leojsbody.php"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.php.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.restructuredtext",
+    "aliases": [
+      "Leo Body reStructuredText",
+      "leojsbody.restructuredtext"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.rst.language-configuration.json"
+  },
+  {
+    "id": "leojsbody.rust",
+    "aliases": [
+      "Leo Body Rust",
+      "leojsbody.rust"
+    ],
+    "extensions": [
+      ""
+    ],
+    "configuration": "./language-configurations/leojsbody.rust.language-configuration.json"
+  }
+],
+</t>
+<t tx="felix.20220918234147.1">"grammars": [
+  {
+    "language": "leojsbody.plain",
+    "scopeName": "source.leojsbody.plain",
+    "path": "./syntaxes/leojsbody.plain.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.python",
+    "scopeName": "source.leojsbody.python",
+    "path": "./syntaxes/leojsbody.python.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.typescript",
+    "scopeName": "source.leojsbody.typescript",
+    "path": "./syntaxes/leojsbody.typescript.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.javascript",
+    "scopeName": "source.leojsbody.javascript",
+    "path": "./syntaxes/leojsbody.javascript.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.c",
+    "scopeName": "source.leojsbody.c",
+    "path": "./syntaxes/leojsbody.c.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.cpp",
+    "scopeName": "source.leojsbody.cpp",
+    "path": "./syntaxes/leojsbody.cpp.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.css",
+    "scopeName": "source.leojsbody.css",
+    "path": "./syntaxes/leojsbody.css.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.fortran",
+    "scopeName": "source.leojsbody.fortran",
+    "path": "./syntaxes/leojsbody.fortran.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.fortran90",
+    "scopeName": "source.leojsbody.fortran90",
+    "path": "./syntaxes/leojsbody.fortran90.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.html",
+    "scopeName": "source.leojsbody.html",
+    "path": "./syntaxes/leojsbody.html.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.java",
+    "scopeName": "source.leojsbody.java",
+    "path": "./syntaxes/leojsbody.java.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.json",
+    "scopeName": "source.leojsbody.json",
+    "path": "./syntaxes/leojsbody.json.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.markdown",
+    "scopeName": "source.leojsbody.markdown",
+    "path": "./syntaxes/leojsbody.markdown.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.php",
+    "scopeName": "source.leojsbody.php",
+    "path": "./syntaxes/leojsbody.php.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.restructuredtext",
+    "scopeName": "source.leojsbody.restructuredtext",
+    "path": "./syntaxes/leojsbody.rst.tmLanguage.json"
+  },
+  {
+    "language": "leojsbody.rust",
+    "scopeName": "source.leojsbody.rust",
+    "path": "./syntaxes/leojsbody.rust.tmLanguage.json"
+  },
+  {
+    "injectTo": [
+      "source.leojsbody.c",
+      "source.leojsbody.cpp",
+      "source.leojsbody.css",
+      "source.leojsbody.fortran",
+      "source.leojsbody.fortran90",
+      "source.leojsbody.html",
+      "source.leojsbody.java",
+      "source.leojsbody.javascript",
+      "source.leojsbody.json",
+      "source.leojsbody.markdown",
+      "source.leojsbody.php",
+      "source.leojsbody.plain",
+      "source.leojsbody.python",
+      "source.leojsbody.restructuredtext",
+      "source.leojsbody.rust",
+      "source.leojsbody.typescript"
+    ],
+    "path": "./syntaxes/leojsbody.tmLanguage.json",
+    "scopeName": "leo.injection"
+  }
+],
+</t>
+<t tx="felix.20220918234152.1">"snippets": [
+  {
+    "language": "leojsbody.c",
+    "path": "./snippets/c.code-snippets"
+  },
+  {
+    "language": "leojsbody.cpp",
+    "path": "./snippets/cpp.code-snippets"
+  },
+  {
+    "language": "leojsbody.fortran90",
+    "path": "./snippets/fortran90.code-snippets"
+  },
+  {
+    "language": "leojsbody.javascript",
+    "path": "./snippets/javascript.code-snippets"
+  },
+  {
+    "language": "leojsbody.typescript",
+    "path": "./snippets/typescript.code-snippets"
+  },
+  {
+    "language": "leojsbody.java",
+    "path": "./snippets/java.code-snippets"
+  },
+  {
+    "language": "leojsbody.php",
+    "path": "./snippets/php.code-snippets"
+  },
+  {
+    "language": "leojsbody.markdown",
+    "path": "./snippets/markdown.code-snippets"
+  },
+  {
+    "language": "leojsbody.restructuredtext",
+    "path": "./snippets/restructuredtext.code-snippets"
+  },
+  {
+    "language": "leojsbody.rust",
+    "path": "./snippets/rust.code-snippets"
+  }
+],
 </t>
 </tnodes>
 </leo_file>
