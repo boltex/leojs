@@ -145,7 +145,6 @@ export class LeoUI {
 
     constructor(private _context: vscode.ExtensionContext) {
 
-
         const provider = new ColorsViewProvider(_context.extensionUri);
 
         _context.subscriptions.push(
@@ -408,13 +407,31 @@ export class LeoUI {
         commandBindings.makeAllBindings(this, this._context);
     }
 
-    /** 
-     * * Save dirty body pane text to its VNode's 'b' content.
-     * @returns Promise that resolves when body is saved in its node's v.b.
+    /**
+     * * Adds a message string to leoInteg's log pane. Used when leoBridge receives an async 'log' command.
+     * @param p_message The string to be added in the log
      */
-    public _triggerSave(): Promise<unknown> {
-        // TODO: Save dirty body pane text to its VNode's 'b' content.
-        return Promise.resolve();
+    public addLogPaneEntry(p_message: string): void {
+        this._leoLogPane.appendLine(p_message);
+    }
+
+    /**
+     * * Reveals the log pane if not already visible
+     */
+    public showLogPane(): Thenable<unknown> {
+        if (this._leoLogPane) {
+            this._leoLogPane.show(true); // Just show, so use flag to preserve focus
+            return Promise.resolve(true);
+        } else {
+            return Promise.resolve(undefined); // if cancelled
+        }
+    }
+
+    /**
+     * * Hides the log pane
+     */
+    public hideLogPane(): void {
+        this._leoLogPane.hide();
     }
 
     /**
@@ -647,6 +664,15 @@ export class LeoUI {
                 this._leoUndosShown = true; // either way set it
             }
         }
+    }
+
+    /** 
+     * * Save dirty body pane text to its VNode's 'b' content.
+     * @returns Promise that resolves when body is saved in its node's v.b.
+     */
+    public _triggerSave(): Promise<unknown> {
+        // TODO: Save dirty body pane text to its VNode's 'b' content.
+        return Promise.resolve();
     }
 
     /**
@@ -1097,6 +1123,95 @@ export class LeoUI {
     }
 
     /**
+     * * Makes sure the body now reflects the selected node.
+     * This is called after 'selectTreeNode', or after '_gotSelection' when refreshing.
+     * @param p_node Node that was just selected
+     * @param p_aside Flag to indicate opening 'Aside' was required
+     * @param p_showBodyKeepFocus Flag used to keep focus where it was instead of forcing in body
+     * @param p_force_open Flag to force opening the body pane editor
+     * @returns a text editor of the p_node parameter's gnx (As 'leo' file scheme)
+     */
+    private _tryApplyNodeToBody(
+        p_node: Position,
+        p_aside: boolean,
+        p_showBodyKeepFocus: boolean,
+        p_force_open?: boolean
+    ): Thenable<vscode.TextEditor> {
+        // console.log('try to apply node -> ', p_node.gnx);
+
+        // this.lastSelectedNode = p_node; // Set the 'lastSelectedNode' this will also set the 'marked' node context
+        // this._commandStack.newSelection(); // Signal that a new selected node was reached and to stop using the received selection as target for next command
+
+        // if (this._bodyTextDocument) {
+        //     // if not first time and still opened - also not somewhat exactly opened somewhere.
+        //     if (
+        //         !this._bodyTextDocument.isClosed &&
+        //         !this._locateOpenedBody(p_node.gnx) // LOCATE NEW GNX
+        //     ) {
+        //         // if needs switching by actually having different gnx
+        //         if (utils.leoUriToStr(this.bodyUri) !== p_node.gnx) {
+        //             this._locateOpenedBody(utils.leoUriToStr(this.bodyUri)); // * LOCATE OLD GNX FOR PROPER COLUMN*
+        //             return this._bodyTextDocument.save().then(() => {
+        //                 return this._switchBody(p_node.gnx, p_aside, p_showBodyKeepFocus);
+        //             });
+        //         }
+        //     }
+        // } else {
+        //     // first time?
+        //     this.bodyUri = utils.strToLeoUri(p_node.gnx);
+        // }
+        // return this.showBody(p_aside, p_showBodyKeepFocus);
+        return Promise.resolve(vscode.window.activeTextEditor!); // TODO : TEMP
+    }
+
+    /**
+    * * Opens an an editor for the currently selected node: "this.bodyUri". If already opened, this just 'reveals' it
+    * @param p_aside Flag for opening the editor beside any currently opened and focused editor
+    * @param p_preserveFocus flag that when true will stop the editor from taking focus once opened
+    */
+    public showBody(p_aside: boolean, p_preserveFocus?: boolean): Thenable<vscode.TextEditor | undefined> {
+        const w_showOptions: vscode.TextDocumentShowOptions = p_aside ?
+            {
+                viewColumn: vscode.ViewColumn.Beside,
+                preserveFocus: p_preserveFocus, // an optional flag that when true will stop the editor from taking focus
+                preview: true // should text document be in preview only? set false for fully opened
+                // selection is instead set when the GET_BODY_STATES above resolves
+            } : {
+                viewColumn: this._bodyMainSelectionColumn ? this._bodyMainSelectionColumn : 1, // view column in which the editor should be shown
+                preserveFocus: p_preserveFocus, // an optional flag that when true will stop the editor from taking focus
+                preview: false // should text document be in preview only? set false for fully opened
+                // selection is instead set when the GET_BODY_STATES above resolves
+            };
+
+        // TODO : THIS IS PLACEHOLDER CODE
+        if (this._bodyTextDocument) {
+            return vscode.window.showTextDocument(this._bodyTextDocument, w_showOptions);
+        } else {
+            console.log('showBody: no _bodyTextDocument set to show');
+
+            return Promise.resolve(undefined);
+        }
+    }
+
+    /**
+     * * Closes any body pane opened in this vscode window instance
+     */
+    public closeBody(): void {
+        // TODO : CLEAR UNDO HISTORY AND FILE HISTORY for this.bodyUri !
+        if (this.bodyUri) {
+            vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', this.bodyUri.path);
+        }
+        vscode.window.visibleTextEditors.forEach(p_textEditor => {
+            if (p_textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+                vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', p_textEditor.document.uri.path);
+                if (p_textEditor.hide) {
+                    p_textEditor.hide();
+                }
+            }
+        });
+    }
+
+    /**
      * * Called by UI when the user selects in the tree (click or 'open aside' through context menu)
      * @param p_node is the position node selected in the tree
      * @param p_reveal flag meaning it's body should be shown in a new editor column
@@ -1407,113 +1522,6 @@ export class LeoUI {
         }
         u.afterChangeHeadline(c.p, 'Edit Headline', undoData);
         return value;
-    }
-
-    /**
-     * * Invoke an '@button' click directly by index string. Used by '@buttons' treeview.
-     * @param p_node the node of the at-buttons panel that was clicked
-     * @returns Promises that resolves when done
-     */
-    public clickAtButton(p_node: LeoButtonNode): Thenable<unknown> {
-
-        this._setupRefresh(false, {
-            tree: true,
-            body: true,
-            documents: true,
-            buttons: true,
-            states: true
-        });
-
-        vscode.window.showInformationMessage('TODO: Implement clickAtButton ' + p_node.label);
-
-        this.launchRefresh();
-
-        // if edited and accepted
-        return Promise.resolve(true);
-
-        // return Promise.resolve(undefined); // if cancelled
-    }
-
-    /**
-     * * Show input window to select
-     */
-    private _handleRClicks(p_rclicks: any[], topLevelName?: string): Thenable<any> {
-        // private _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Thenable<ChooseRClickItem> {
-        /* 
-        const w_choices: ChooseRClickItem[] = [];
-        let w_index = 0;
-        if (topLevelName) {
-            w_choices.push(
-                { label: topLevelName, picked: true, alwaysShow: true, index: w_index++ }
-            );
-        }
-        w_choices.push(
-            ...p_rclicks.map((p_rclick): ChooseRClickItem => { return { label: p_rclick.name, index: w_index++, rclick: p_rclick }; })
-        );
-
-        const w_options: vscode.QuickPickOptions = {
-            placeHolder: Constants.USER_MESSAGES.CHOOSE_BUTTON
-        };
-        return vscode.window.showQuickPick(w_choices, w_options).then((p_picked) => {
-            if (p_picked) {
-                this._rclickSelected.push(p_picked.index);
-                if (topLevelName && p_picked.index === 0) {
-                    return Promise.resolve(p_picked);
-                }
-                if (p_picked.rclick && p_picked.rclick.children && p_picked.rclick.children.length) {
-                    return this._handleRClicks(p_picked.rclick.children);
-                } else {
-                    return Promise.resolve(p_picked);
-                }
-            }
-            // Escaped
-            return Promise.reject();
-        });
-        */
-        return Promise.resolve();
-    }
-    /**
-     * * Finds and goes to the script of an at-button. Used by '@buttons' treeview.
-     * @param p_node the node of the at-buttons panel that was right-clicked
-     * @returns the launchRefresh promise started after it's done finding the node
-     */
-    public gotoScript(p_node: LeoButtonNode): Promise<boolean> {
-        return Promise.resolve(true);
-        /* 
-        return this._isBusyTriggerSave(false)
-            .then((p_saveResult) => {
-                return this.sendAction(
-                    Constants.LEOBRIDGE.GOTO_SCRIPT,
-                    JSON.stringify({ index: p_node.button.index })
-                );
-            })
-            .then((p_gotoScriptResult: LeoBridgePackage) => {
-                return this.sendAction(Constants.LEOBRIDGE.DO_NOTHING);
-            })
-            .then((p_package) => {
-                // refresh and reveal selection
-                this.launchRefresh({ tree: true, body: true, states: true, buttons: false, documents: false }, false, p_package.node);
-                return Promise.resolve(true); // TODO launchRefresh should be a returned promise
-            });
-        */
-    }
-    /**
-     * * Removes an '@button' from Leo's button dict, directly by index string. Used by '@buttons' treeview.
-     * @param p_node the node of the at-buttons panel that was chosen to remove
-     * @returns Thenable that resolves when done
-     */
-    public removeAtButton(p_node: LeoButtonNode): Thenable<unknown> {
-
-        this._setupRefresh(false, { buttons: true });
-
-        vscode.window.showInformationMessage('TODO: Implement removeAtButton ' + p_node.label);
-
-        this.launchRefresh();
-
-        // if edited and accepted
-        return Promise.resolve(true);
-
-        // return Promise.resolve(undefined); // if cancelled
     }
 
     public replaceClipboardWith(s: string): Thenable<void> {
@@ -2414,9 +2422,6 @@ export class LeoUI {
             const c = g.app.windowList[this.frameIndex].c;
             c.new(this);
         }
-
-
-
         this.launchRefresh();
         return Promise.resolve();
     }
@@ -2619,112 +2624,112 @@ export class LeoUI {
     }
 
     /**
-     * * Makes sure the body now reflects the selected node.
-     * This is called after 'selectTreeNode', or after '_gotSelection' when refreshing.
-     * @param p_node Node that was just selected
-     * @param p_aside Flag to indicate opening 'Aside' was required
-     * @param p_showBodyKeepFocus Flag used to keep focus where it was instead of forcing in body
-     * @param p_force_open Flag to force opening the body pane editor
-     * @returns a text editor of the p_node parameter's gnx (As 'leo' file scheme)
+     * * Invoke an '@button' click directly by index string. Used by '@buttons' treeview.
+     * @param p_node the node of the at-buttons panel that was clicked
+     * @returns Promises that resolves when done
      */
-    private _tryApplyNodeToBody(
-        p_node: Position,
-        p_aside: boolean,
-        p_showBodyKeepFocus: boolean,
-        p_force_open?: boolean
-    ): Thenable<vscode.TextEditor> {
-        // console.log('try to apply node -> ', p_node.gnx);
+    public clickAtButton(p_node: LeoButtonNode): Thenable<unknown> {
 
-        // this.lastSelectedNode = p_node; // Set the 'lastSelectedNode' this will also set the 'marked' node context
-        // this._commandStack.newSelection(); // Signal that a new selected node was reached and to stop using the received selection as target for next command
+        this._setupRefresh(false, {
+            tree: true,
+            body: true,
+            documents: true,
+            buttons: true,
+            states: true
+        });
 
-        // if (this._bodyTextDocument) {
-        //     // if not first time and still opened - also not somewhat exactly opened somewhere.
-        //     if (
-        //         !this._bodyTextDocument.isClosed &&
-        //         !this._locateOpenedBody(p_node.gnx) // LOCATE NEW GNX
-        //     ) {
-        //         // if needs switching by actually having different gnx
-        //         if (utils.leoUriToStr(this.bodyUri) !== p_node.gnx) {
-        //             this._locateOpenedBody(utils.leoUriToStr(this.bodyUri)); // * LOCATE OLD GNX FOR PROPER COLUMN*
-        //             return this._bodyTextDocument.save().then(() => {
-        //                 return this._switchBody(p_node.gnx, p_aside, p_showBodyKeepFocus);
-        //             });
-        //         }
-        //     }
-        // } else {
-        //     // first time?
-        //     this.bodyUri = utils.strToLeoUri(p_node.gnx);
-        // }
-        // return this.showBody(p_aside, p_showBodyKeepFocus);
-        return Promise.resolve(vscode.window.activeTextEditor!); // TODO : TEMP
+        vscode.window.showInformationMessage('TODO: Implement clickAtButton ' + p_node.label);
+
+        this.launchRefresh();
+
+        // if edited and accepted
+        return Promise.resolve(true);
+
+        // return Promise.resolve(undefined); // if cancelled
     }
 
     /**
-    * * Opens an an editor for the currently selected node: "this.bodyUri". If already opened, this just 'reveals' it
-    * @param p_aside Flag for opening the editor beside any currently opened and focused editor
-    * @param p_preserveFocus flag that when true will stop the editor from taking focus once opened
-    */
-    public showBody(p_aside: boolean, p_preserveFocus?: boolean): Thenable<vscode.TextEditor | undefined> {
-        const w_showOptions: vscode.TextDocumentShowOptions = p_aside ?
-            {
-                viewColumn: vscode.ViewColumn.Beside,
-                preserveFocus: p_preserveFocus, // an optional flag that when true will stop the editor from taking focus
-                preview: true // should text document be in preview only? set false for fully opened
-                // selection is instead set when the GET_BODY_STATES above resolves
-            } : {
-                viewColumn: this._bodyMainSelectionColumn ? this._bodyMainSelectionColumn : 1, // view column in which the editor should be shown
-                preserveFocus: p_preserveFocus, // an optional flag that when true will stop the editor from taking focus
-                preview: false // should text document be in preview only? set false for fully opened
-                // selection is instead set when the GET_BODY_STATES above resolves
-            };
-
-        // TODO : THIS IS PLACEHOLDER CODE
-        if (this._bodyTextDocument) {
-            return vscode.window.showTextDocument(this._bodyTextDocument, w_showOptions);
-        } else {
-            console.log('showBody: no _bodyTextDocument set to show');
-
-            return Promise.resolve(undefined);
-        }
-    }
-
-    /**
-     * * Closes any body pane opened in this vscode window instance
+     * * Show input window to select
      */
-    public closeBody(): void {
-        // TODO : CLEAR UNDO HISTORY AND FILE HISTORY for this.bodyUri !
-        if (this.bodyUri) {
-            vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', this.bodyUri.path);
+    private _handleRClicks(p_rclicks: any[], topLevelName?: string): Thenable<any> {
+        // private _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Thenable<ChooseRClickItem> {
+        /* 
+        const w_choices: ChooseRClickItem[] = [];
+        let w_index = 0;
+        if (topLevelName) {
+            w_choices.push(
+                { label: topLevelName, picked: true, alwaysShow: true, index: w_index++ }
+            );
         }
-        vscode.window.visibleTextEditors.forEach(p_textEditor => {
-            if (p_textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
-                vscode.commands.executeCommand('vscode.removeFromRecentlyOpened', p_textEditor.document.uri.path);
-                if (p_textEditor.hide) {
-                    p_textEditor.hide();
+        w_choices.push(
+            ...p_rclicks.map((p_rclick): ChooseRClickItem => { return { label: p_rclick.name, index: w_index++, rclick: p_rclick }; })
+        );
+
+        const w_options: vscode.QuickPickOptions = {
+            placeHolder: Constants.USER_MESSAGES.CHOOSE_BUTTON
+        };
+        return vscode.window.showQuickPick(w_choices, w_options).then((p_picked) => {
+            if (p_picked) {
+                this._rclickSelected.push(p_picked.index);
+                if (topLevelName && p_picked.index === 0) {
+                    return Promise.resolve(p_picked);
+                }
+                if (p_picked.rclick && p_picked.rclick.children && p_picked.rclick.children.length) {
+                    return this._handleRClicks(p_picked.rclick.children);
+                } else {
+                    return Promise.resolve(p_picked);
                 }
             }
+            // Escaped
+            return Promise.reject();
         });
+        */
+        return Promise.resolve();
     }
 
     /**
-     * * Adds a message string to leoInteg's log pane. Used when leoBridge receives an async 'log' command.
-     * @param p_message The string to be added in the log
+     * * Finds and goes to the script of an at-button. Used by '@buttons' treeview.
+     * @param p_node the node of the at-buttons panel that was right-clicked
+     * @returns the launchRefresh promise started after it's done finding the node
      */
-    public addLogPaneEntry(p_message: string): void {
-        this._leoLogPane.appendLine(p_message);
+    public gotoScript(p_node: LeoButtonNode): Promise<boolean> {
+        return Promise.resolve(true);
+        /* 
+        return this._isBusyTriggerSave(false)
+            .then((p_saveResult) => {
+                return this.sendAction(
+                    Constants.LEOBRIDGE.GOTO_SCRIPT,
+                    JSON.stringify({ index: p_node.button.index })
+                );
+            })
+            .then((p_gotoScriptResult: LeoBridgePackage) => {
+                return this.sendAction(Constants.LEOBRIDGE.DO_NOTHING);
+            })
+            .then((p_package) => {
+                // refresh and reveal selection
+                this.launchRefresh({ tree: true, body: true, states: true, buttons: false, documents: false }, false, p_package.node);
+                return Promise.resolve(true); // TODO launchRefresh should be a returned promise
+            });
+        */
     }
 
     /**
-     * * Reveals the log pane if not already visible
+     * * Removes an '@button' from Leo's button dict, directly by index string. Used by '@buttons' treeview.
+     * @param p_node the node of the at-buttons panel that was chosen to remove
+     * @returns Thenable that resolves when done
      */
-    public showLogPane(): Thenable<unknown> {
-        if (this._leoLogPane) {
-            this._leoLogPane.show(true); // Just show, so use flag to preserve focus
-            return Promise.resolve(true);
-        } else {
-            return Promise.resolve(undefined); // if cancelled
-        }
+    public removeAtButton(p_node: LeoButtonNode): Thenable<unknown> {
+
+        this._setupRefresh(false, { buttons: true });
+
+        vscode.window.showInformationMessage('TODO: Implement removeAtButton ' + p_node.label);
+
+        this.launchRefresh();
+
+        // if edited and accepted
+        return Promise.resolve(true);
+
+        // return Promise.resolve(undefined); // if cancelled
     }
 
     /**

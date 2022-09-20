@@ -90,8 +90,12 @@
 <v t="felix.20201214194144.2"><vh>Constructor</vh></v>
 <v t="felix.20220201235548.1"><vh>Finish Startup</vh></v>
 <v t="felix.20220417215549.1"><vh>makeAllBindings</vh></v>
+<v t="felix.20220920001018.1"><vh>Log Pane</vh>
+<v t="felix.20220920001018.2"><vh>addLogPaneEntry</vh></v>
+<v t="felix.20220920001018.3"><vh>showLogPane</vh></v>
+<v t="felix.20220920001202.1"><vh>hideLogPane</vh></v>
+</v>
 <v t="felix.20201214194144.3"><vh>Document States</vh>
-<v t="felix.20220510214213.1"><vh>_triggerSave</vh></v>
 <v t="felix.20201214202058.1"><vh>_triggerGetStates</vh></v>
 <v t="felix.20201227230901.1"><vh>_setupNoOpenedLeoDocument</vh></v>
 <v t="felix.20201227230912.1"><vh>_setupOpenedLeoDocument</vh></v>
@@ -105,6 +109,7 @@
 <v t="felix.20211122230343.1"><vh>_onUndosTreeViewVisibilityChanged</vh></v>
 </v>
 <v t="felix.20211204144931.1"><vh>Body Editing</vh>
+<v t="felix.20220920002631.1"><vh>_triggerSave</vh></v>
 <v t="felix.20211204144931.2"><vh>triggerBodySave</vh></v>
 <v t="felix.20211204144931.3"><vh>_bodySaveSelection</vh></v>
 <v t="felix.20211204144931.4"><vh>_bodySaveDocument</vh></v>
@@ -124,6 +129,11 @@
 <v t="felix.20211124223735.1"><vh>_refreshUndoPane</vh></v>
 <v t="felix.20211129002604.1"><vh>_setUndoSelection</vh></v>
 </v>
+<v t="felix.20201214194144.9"><vh>Body Pane Management</vh>
+<v t="felix.20211024203725.1"><vh>_tryApplyNodeToBody</vh></v>
+<v t="felix.20201214211645.1"><vh>showBody</vh></v>
+<v t="felix.20201228164116.1"><vh>closeBody</vh></v>
+</v>
 <v t="felix.20201214194144.6"><vh>Commands</vh>
 <v t="felix.20201214202749.1"><vh>selectTreeNode</vh></v>
 <v t="felix.20201214202755.1"><vh>command</vh></v>
@@ -131,12 +141,6 @@
 <v t="felix.20201214202759.1"><vh>editHeadline</vh></v>
 <v t="felix.20201214202800.1"><vh>insertNode</vh></v>
 <v t="felix.20211204181418.1"><vh>_insertAndSetHeadline</vh></v>
-</v>
-<v t="felix.20201214194144.7"><vh>At Buttons</vh>
-<v t="felix.20201214211742.1"><vh>clickAtButton</vh></v>
-<v t="felix.20220517212706.1"><vh>_handleRClicks</vh></v>
-<v t="felix.20220517212718.1"><vh>gotoScript</vh></v>
-<v t="felix.20201214211744.1"><vh>removeAtButton</vh></v>
 </v>
 <v t="felix.20211024012536.1"><vh>Clipboard</vh>
 <v t="felix.20211212205241.1"><vh>replaceClipboardWith</vh></v>
@@ -186,16 +190,13 @@
 <v t="felix.20201214211837.1"><vh>switchLeoFile</vh></v>
 <v t="felix.20201214211839.1"><vh>selectOpenedLeoDocument</vh></v>
 </v>
-<v t="felix.20201214194144.9"><vh>Body Pane</vh>
-<v t="felix.20211024203725.1"><vh>_tryApplyNodeToBody</vh></v>
-<v t="felix.20201214211645.1"><vh>showBody</vh></v>
-<v t="felix.20201228164116.1"><vh>closeBody</vh></v>
+<v t="felix.20201214194144.7"><vh>At Buttons</vh>
+<v t="felix.20201214211742.1"><vh>clickAtButton</vh></v>
+<v t="felix.20220517212706.1"><vh>_handleRClicks</vh></v>
+<v t="felix.20220517212718.1"><vh>gotoScript</vh></v>
+<v t="felix.20201214211744.1"><vh>removeAtButton</vh></v>
 </v>
-<v t="felix.20201214194144.10"><vh>Log &amp; Terminal Panes</vh>
-<v t="felix.20220419210727.1"><vh>addLogPaneEntry</vh></v>
-<v t="felix.20201214211655.1"><vh>showLogPane</vh></v>
-</v>
-<v t="felix.20211030165058.1"><vh>Leo GUI Wrappers &amp; Helpers</vh>
+<v t="felix.20211030165058.1"><vh>GUI Wrappers &amp; Helpers</vh>
 <v t="felix.20220201230041.1"><vh>showLeoIDMessage</vh></v>
 <v t="felix.20220201225503.1"><vh>LeoGui.ensure_commander_visible</vh></v>
 <v t="felix.20220201194319.1"><vh>setLeoIDCommand</vh></v>
@@ -2682,9 +2683,7 @@ import { LeoFrame } from "./core/leoFrame";
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201214194144.10"></t>
 <t tx="felix.20201214194144.2">constructor(private _context: vscode.ExtensionContext) {
-
 
     const provider = new ColorsViewProvider(_context.extensionUri);
 
@@ -5740,19 +5739,6 @@ public showBody(p_aside: boolean, p_preserveFocus?: boolean): Thenable&lt;vscode
 }
 
 </t>
-<t tx="felix.20201214211655.1">/**
- * * Reveals the log pane if not already visible
- */
-public showLogPane(): Thenable&lt;unknown&gt; {
-    if (this._leoLogPane) {
-        this._leoLogPane.show(true); // Just show, so use flag to preserve focus
-        return Promise.resolve(true);
-    } else {
-        return Promise.resolve(undefined); // if cancelled
-    }
-}
-
-</t>
 <t tx="felix.20201214211742.1">/**
  * * Invoke an '@button' click directly by index string. Used by '@buttons' treeview.
  * @param p_node the node of the at-buttons panel that was clicked
@@ -5799,34 +5785,7 @@ public removeAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20201214211830.1">    this._setupRefresh(false, {
-        tree: true,
-        body: true,
-        documents: true,
-        buttons: true,
-        states: true
-    });
-
-    if (!this.leoStates.fileOpenedReady) {
-        if (g.app.loadManager) {
-            await g.app.loadManager.openEmptyLeoFile(this);
-        }
-    } else {
-
-        await this._triggerSave();
-
-
-        const c = g.app.windowList[this.frameIndex].c;
-        c.new(this);
-    }
-
-
-
-    this.launchRefresh();
-    return Promise.resolve();
-}
-
-/**
+<t tx="felix.20201214211830.1">/**
 * * Close an opened Leo file
 * @returns the promise started after it's done closing the Leo document
 */
@@ -7047,9 +7006,9 @@ import { Utils as uriUtils } from "vscode-uri";
 import * as utils from "./utils";
 import * as path from 'path';
 import { Constants } from "./constants";
-
 import { BodyTimeInfo } from "./types";
 import { LeoUI } from "./leoUI";
+import * as g from './core/leoGlobals';
 
 @language typescript
 @tabwidth -4
@@ -7063,8 +7022,7 @@ import { LeoUI } from "./leoUI";
 </t>
 <t tx="felix.20211010192923.11">public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
     if (!this.preventSaveToLeo) {
-        // TODO :
-        // this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
+       this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
     } else {
         this.preventSaveToLeo = false;
     }
@@ -7092,7 +7050,6 @@ import { LeoUI } from "./leoUI";
 
 </t>
 <t tx="felix.20211010192923.13">public delete(p_uri: vscode.Uri): void {
-    // console.log("delete", p_uri.fsPath);
     const w_gnx = utils.leoUriToStr(p_uri);
     if (this._openedBodiesGnx.includes(w_gnx)) {
         this._openedBodiesGnx.splice(this._openedBodiesGnx.indexOf(w_gnx), 1);
@@ -7111,10 +7068,7 @@ import { LeoUI } from "./leoUI";
 }
 
 </t>
-<t tx="felix.20211010192923.14">/**
- * * // 
- */
-public copy(p_uri: vscode.Uri): void {
+<t tx="felix.20211010192923.14">public copy(p_uri: vscode.Uri): void {
     console.warn('Called copy on ', p_uri.fsPath); // should not happen
     throw vscode.FileSystemError.NoPermissions();
 }
@@ -7133,13 +7087,13 @@ public copy(p_uri: vscode.Uri): void {
 
 </t>
 <t tx="felix.20211010192923.2">/**
- * * Body panes implementation as a file system using "leo" as a scheme identifier
- * Saving and renaming prevents flickering and prevents undos to 'traverse through' different gnx
+ * * Body panes implementation as a file system using "leojs" as a scheme identifier
  */
 export class LeoBodyProvider implements vscode.FileSystemProvider {
 
     // * Flag normally false
     public preventSaveToLeo: boolean = false;
+    private _errorRefreshFlag: boolean = false;
 
     // * Last file read data with the readFile method
     private _lastGnx: string = ""; // gnx of last file read
@@ -7159,7 +7113,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     private _lastBodyTimeGnx: string = "";
 
     // * An event to signal that a resource has been changed
-    // * It should fire for resources that are being [watched](#FileSystemProvider.watch) by clients of this provider
+    // * It should fire for resources that are being watched by clients of this provider
     private _onDidChangeFileEmitter = new vscode.EventEmitter&lt;vscode.FileChangeEvent[]&gt;();
     readonly onDidChangeFile: vscode.Event&lt;vscode.FileChangeEvent[]&gt; = this._onDidChangeFileEmitter.event;
     private _bufferedEvents: vscode.FileChangeEvent[] = [];
@@ -7210,19 +7164,16 @@ public fireRefreshFile(p_gnx: string): void {
 
 </t>
 <t tx="felix.20211010192923.5">/**
- * Maybe deprecated
+ * ? Maybe deprecated 
  * * Refreshes the '_possibleGnxList' list of all unique gnx from Leo
- * @returns a promise that resolves to the fresh gnx string array
+ * @returns a 'fresh' gnx string array
  */
-public refreshPossibleGnxList(): Thenable&lt;string[]&gt; {
+public refreshPossibleGnxList(): string[] {
     // * Get updated list of possible gnx
-    // return this._leoUi.sendAction(
-    //     Constants.LEOBRIDGE.GET_ALL_GNX
-    // ).then((p_result) =&gt; {
-    //     this._possibleGnxList = p_result.gnx || [];
-    //     return Promise.resolve(this._possibleGnxList);
-    // });
-    return Promise.resolve([]);
+
+    // all_gnx = [p.v.gnx for p in c.all_unique_positions(copy=False)]
+    const c = g.app.windowList[this._leoUi.frameIndex].c;
+    return [...c.all_unique_positions(false)].map(p =&gt; p.v.gnx);
 }
 
 </t>
@@ -7230,8 +7181,8 @@ public refreshPossibleGnxList(): Thenable&lt;string[]&gt; {
     const w_gnx = utils.leoUriToStr(p_resource);
     if (!this._watchedBodiesGnx.includes(w_gnx)) {
         this._watchedBodiesGnx.push(w_gnx); // add gnx
-    } else {
     }
+    // else already in list
     return new vscode.Disposable(() =&gt; {
         const w_position = this._watchedBodiesGnx.indexOf(w_gnx); // find and remove it
         if (w_position &gt; -1) {
@@ -7241,11 +7192,10 @@ public refreshPossibleGnxList(): Thenable&lt;string[]&gt; {
 }
 
 </t>
-<t tx="felix.20211010192923.7">public stat(p_uri: vscode.Uri): vscode.FileStat | Thenable&lt;vscode.FileStat&gt; {
-    // TODO : Fix/Check extraneous stat(...) call(s)
+<t tx="felix.20211010192923.7">public stat(p_uri: vscode.Uri): vscode.FileStat {
     if (this._leoUi.leoStates.fileOpenedReady) {
         const w_gnx = utils.leoUriToStr(p_uri);
-        if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
+        if (p_uri.fsPath.length === 1) {
             return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
         } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesGnx.includes(this._lastGnx)) {
             return {
@@ -7255,20 +7205,14 @@ public refreshPossibleGnxList(): Thenable&lt;string[]&gt; {
                 size: this._lastBodyLength
             };
         } else if (this._openedBodiesGnx.includes(w_gnx)) {
-            // return this._leoUi.sendAction(
-            //     Constants.LEOBRIDGE.GET_BODY_LENGTH,
-            //     JSON.stringify({ "gnx": w_gnx })
-            // ).then((p_result) =&gt; {
-            return Promise.resolve(
-                {
-                    type: vscode.FileType.File,
-                    ctime: this._openedBodiesInfo[w_gnx].ctime,
-                    mtime: this._openedBodiesInfo[w_gnx].mtime,
-                    size: 0
-                    // size: p_result.len ? p_result.len : 0
-                }
-            );
-
+            const c = g.app.windowList[this._leoUi.frameIndex].c;
+            const w_v = c.fileCommands.gnxDict[w_gnx];  // vitalije
+            return {
+                type: vscode.FileType.File,
+                ctime: this._openedBodiesInfo[w_gnx].ctime,
+                mtime: this._openedBodiesInfo[w_gnx].mtime,
+                size: w_v.b.length
+            };
         }
     }
     // throw vscode.FileSystemError.FileNotFound();
@@ -7277,49 +7221,41 @@ public refreshPossibleGnxList(): Thenable&lt;string[]&gt; {
 }
 
 </t>
-<t tx="felix.20211010192923.8">public readFile(p_uri: vscode.Uri): Thenable&lt;Uint8Array&gt; {
+<t tx="felix.20211010192923.8">public readFile(p_uri: vscode.Uri): Uint8Array {
     if (this._leoUi.leoStates.fileOpenedReady) {
         if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
             throw vscode.FileSystemError.FileIsADirectory();
         } else {
             const w_gnx = utils.leoUriToStr(p_uri);
-            // if (!this._possibleGnxList.includes(w_gnx)) {
-            if (!this._openedBodiesGnx.includes(w_gnx)) {
-                console.error("readFile: ERROR File not in _openedBodiesGnx! readFile missing refreshes?");
-                // throw vscode.FileSystemError.FileNotFound();
-                // (Instead of FileNotFound) should be caught by _onActiveEditorChanged or _changedVisibleTextEditors
-                return Promise.resolve(Buffer.from(""));
-            } else {
-                // return this._leoUi.sendAction(
-                //     Constants.LEOBRIDGE.GET_BODY,
-                //     JSON.stringify({ "gnx": w_gnx })
-                // ).then((p_result) =&gt; {
-                // if (p_result.body) {
-                //     this._lastGnx = w_gnx;
-                //     this._lastBodyData = p_result.body;
-                //     const w_buffer: Uint8Array = Buffer.from(p_result.body);
-                //     this._lastBodyLength = w_buffer.byteLength;
-                //     return Promise.resolve(w_buffer);
-                // } else if (p_result.body === "") {
-                //     this._lastGnx = w_gnx;
-                //     this._lastBodyLength = 0;
-                //     this._lastBodyData = "";
-                //     return Promise.resolve(Buffer.from(""));
-                // } else {
-                //     if (this._lastGnx === w_gnx) {
-                //         // was last gnx of closed file about to be switched to new document selected
-                //         console.log('Passed in not found: ' + w_gnx);
 
-                //         return Promise.resolve(Buffer.from(this._lastBodyData));
-                //     }
-                //     console.error("ERROR =&gt; readFile of unknown GNX"); // is possibleGnxList updated correctly?
-                //     //  throw vscode.FileSystemError.FileNotFound();
-                //     // (Instead of FileNotFound) should be caught by _onActiveEditorChanged or _changedVisibleTextEditors
-                //     return Promise.resolve(Buffer.from(""));
-                // }
-                // });
-                // FAKE
-                return Promise.resolve(Buffer.from(""));
+            if (!this._openedBodiesGnx.includes(w_gnx)) {
+                console.log(
+                    " _openedBodiesGnx length: ", this._openedBodiesGnx.length,
+                    '\n *** readFile: ERROR File not in _openedBodiesGnx! readFile missing refreshes? gnx: ', w_gnx
+                );
+            }
+
+            const c = g.app.windowList[this._leoUi.frameIndex].c;
+            const w_v = c.fileCommands.gnxDict[w_gnx];  // vitalije
+            if (w_v) {
+                this._errorRefreshFlag = false; // got body so reset possible flag!
+                this._lastGnx = w_gnx;
+                this._lastBodyData = w_v.b;
+
+                const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
+                this._lastBodyLength = w_buffer.byteLength;
+                return w_buffer;
+            } else {
+                if (!this._errorRefreshFlag) {
+                    // this._leoUi.fullRefresh(); // TODO ?
+                }
+                if (this._lastGnx === w_gnx) {
+                    // was last gnx of closed file about to be switched to new document selected
+                    console.log('Passed in not found: ' + w_gnx);
+                    return Buffer.from(this._lastBodyData);
+                }
+                console.error("ERROR =&gt; readFile of unknown GNX"); // is possibleGnxList updated correctly?
+                return Buffer.from("");
             }
         }
     } else {
@@ -7328,13 +7264,13 @@ public refreshPossibleGnxList(): Thenable&lt;string[]&gt; {
 }
 
 </t>
-<t tx="felix.20211010192923.9">public readDirectory(p_uri: vscode.Uri): Thenable&lt;[string, vscode.FileType][]&gt; {
+<t tx="felix.20211010192923.9">public readDirectory(p_uri: vscode.Uri): [string, vscode.FileType][] {
     if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
         const w_directory: [string, vscode.FileType][] = [];
         w_directory.push([this._lastBodyTimeGnx, vscode.FileType.File]);
-        return Promise.resolve(w_directory);
+        return w_directory;
     } else {
-        throw vscode.FileSystemError.FileNotFound();
+        throw vscode.FileSystemError.FileNotFound(p_uri);
     }
 }
 
@@ -8574,15 +8510,6 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
  */
 public makeAllBindings(): void {
     commandBindings.makeAllBindings(this, this._context);
-}
-
-</t>
-<t tx="felix.20220419210727.1">/**
- * * Adds a message string to leoInteg's log pane. Used when leoBridge receives an async 'log' command.
- * @param p_message The string to be added in the log
- */
-public addLogPaneEntry(p_message: string): void {
-    this._leoLogPane.appendLine(p_message);
 }
 
 </t>
@@ -9875,16 +9802,6 @@ set leoCanGoNext(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20220510214213.1">/** 
- * * Save dirty body pane text to its VNode's 'b' content.
- * @returns Promise that resolves when body is saved in its node's v.b.
- */
-public _triggerSave(): Promise&lt;unknown&gt; {
-    // TODO: Save dirty body pane text to its VNode's 'b' content.
-    return Promise.resolve();
-}
-
-</t>
 <t tx="felix.20220512205007.1"></t>
 <t tx="felix.20220516005841.1">public runAskYesNoCancelDialog(
     c: Commands,
@@ -9920,6 +9837,30 @@ public _triggerSave(): Promise&lt;unknown&gt; {
 * @returns the promise started after it's done creating the frame and commander
 */
 public async newLeoFile(): Promise&lt;unknown&gt; {
+
+    this._setupRefresh(false, {
+        tree: true,
+        body: true,
+        documents: true,
+        buttons: true,
+        states: true
+    });
+
+    if (!this.leoStates.fileOpenedReady) {
+        if (g.app.loadManager) {
+            await g.app.loadManager.openEmptyLeoFile(this);
+        }
+    } else {
+
+        await this._triggerSave();
+
+
+        const c = g.app.windowList[this.frameIndex].c;
+        c.new(this);
+    }
+    this.launchRefresh();
+    return Promise.resolve();
+}
 
 </t>
 <t tx="felix.20220517202245.1">{
@@ -9992,6 +9933,7 @@ private _handleRClicks(p_rclicks: any[], topLevelName?: string): Thenable&lt;any
     */
     return Promise.resolve();
 }
+
 </t>
 <t tx="felix.20220517212718.1">/**
  * * Finds and goes to the script of an at-button. Used by '@buttons' treeview.
@@ -10018,6 +9960,7 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
         });
     */
 }
+
 </t>
 <t tx="felix.20220519232002.1">public resolveTreeItem(item: LeoOutlineNode, element: Position, token: vscode.CancellationToken): vscode.ProviderResult&lt;LeoOutlineNode&gt; {
     if (element.v.u) {
@@ -10576,6 +10519,47 @@ function getNonce() {
     "path": "./snippets/rust.code-snippets"
   }
 ],
+</t>
+<t tx="felix.20220920001018.1"></t>
+<t tx="felix.20220920001018.2">/**
+ * * Adds a message string to leoInteg's log pane. Used when leoBridge receives an async 'log' command.
+ * @param p_message The string to be added in the log
+ */
+public addLogPaneEntry(p_message: string): void {
+    this._leoLogPane.appendLine(p_message);
+}
+
+</t>
+<t tx="felix.20220920001018.3">/**
+ * * Reveals the log pane if not already visible
+ */
+public showLogPane(): Thenable&lt;unknown&gt; {
+    if (this._leoLogPane) {
+        this._leoLogPane.show(true); // Just show, so use flag to preserve focus
+        return Promise.resolve(true);
+    } else {
+        return Promise.resolve(undefined); // if cancelled
+    }
+}
+
+</t>
+<t tx="felix.20220920001202.1">/**
+ * * Hides the log pane
+ */
+public hideLogPane(): void {
+    this._leoLogPane.hide();
+}
+
+</t>
+<t tx="felix.20220920002631.1">/** 
+ * * Save dirty body pane text to its VNode's 'b' content.
+ * @returns Promise that resolves when body is saved in its node's v.b.
+ */
+public _triggerSave(): Promise&lt;unknown&gt; {
+    // TODO: Save dirty body pane text to its VNode's 'b' content.
+    return Promise.resolve();
+}
+
 </t>
 </tnodes>
 </leo_file>
