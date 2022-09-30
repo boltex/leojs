@@ -8,6 +8,15 @@ import { LeoOutlineNode } from "./leoOutline";
 // String and other types/structures helper functions, along with common vscode API calls
 
 /**
+ * * window.performace.now browser/node crossover utility
+ */
+export function performanceNow(): number {
+    const w_now = process.hrtime();
+    const [w_secs, w_nanosecs] = w_now;
+    return w_secs * 1000 + Math.floor(w_nanosecs / 1000000);
+}
+
+/**
  * * Unique numeric Id
  */
 var uniqueId: number = 0;

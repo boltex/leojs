@@ -120,7 +120,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                 };
             } else if (this._openedBodiesGnx.includes(w_gnx)) {
                 const c = g.app.windowList[this._leoUi.frameIndex].c;
-                const w_v = c.fileCommands.gnxDict[w_gnx];  // vitalije
+                const w_v = c.fileCommands.gnxDict[w_gnx];
                 return {
                     type: vscode.FileType.File,
                     ctime: this._openedBodiesInfo[w_gnx].ctime,
@@ -149,7 +149,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                 }
 
                 const c = g.app.windowList[this._leoUi.frameIndex].c;
-                const w_v = c.fileCommands.gnxDict[w_gnx];  // vitalije
+                const w_v = c.fileCommands.gnxDict[w_gnx];
                 if (w_v) {
                     this._errorRefreshFlag = false; // got body so reset possible flag!
                     this._lastGnx = w_gnx;
@@ -160,7 +160,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                     return w_buffer;
                 } else {
                     if (!this._errorRefreshFlag) {
-                        // this._leoUi.fullRefresh(); // TODO ?
+                        this._leoUi.fullRefresh(); // TODO ?
                     }
                     if (this._lastGnx === w_gnx) {
                         // was last gnx of closed file about to be switched to new document selected
@@ -193,7 +193,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
 
     public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
         if (!this.preventSaveToLeo) {
-           this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
+            this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
         } else {
             this.preventSaveToLeo = false;
         }

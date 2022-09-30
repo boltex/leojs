@@ -84,7 +84,7 @@ export const globalDirectiveList: string[] = [
     'unit', 'verbose', 'wrap'
 ];
 
-export let directives_pat: any = null;  // Set below.
+export let directives_pat: RegExp;  // Set below.
 
 //@-<< define g.globalDirectiveList >>
 //@+<< define global decorator dicts >>
@@ -871,20 +871,21 @@ export function findFirstValidAtLanguageDirective(s: string): string | undefined
  * Returns a dict containing the stripped remainder of the line
  * following the first occurrence of each recognized directive
  */
-export function get_directives_dict(p: Position, root?: Position[]): any {
+export function get_directives_dict(p: Position, root?: Position[]): { [key: string]: string } {
 
-    let d: any = {};
+    let d: { [key: string]: string } = {};
     // #1688:    legacy: Always compute the pattern.
     //           g.directives_pat is updated whenever loading a plugin.
     //
     // The headline has higher precedence because it is more visible.
-    let m: any;
+    let m: RegExpExecArray | null;
     for (let s of [p.h, p.b]) {
 
         while ((m = directives_pat.exec(s)) !== null) {
             const word: string = m[1].trim();
 
-            const i: number = m.indices[1][0];
+            // 'indices' property is only present when the d flag is set. 
+            const i: number = (m as any).indices[1][0];
             if (d[word]) {
                 continue;
             }
@@ -907,7 +908,7 @@ export function get_directives_dict(p: Position, root?: Position[]): any {
         // for (let m of anIter) {
         while ((m = g_noweb_root.exec(p.b)) !== null) {
             if (root_node && root_node.__bool__()) {
-                d["root"] = 0;  // value not important
+                d["root"] = "0";  // value not important
             } else {
                 es(`${angleBrackets("*")} may only occur in a topmost node(i.e., without a parent)`);
             }
@@ -924,8 +925,8 @@ export function get_directives_dict(p: Position, root?: Position[]): any {
  * Returns a list of dicts containing pointers to
  * the start of each directive
  */
-export function get_directives_dict_list(p: Position): any[] {
-    const result: any = [];
+export function get_directives_dict_list(p: Position): { [key: string]: string; }[] {
+    const result: { [key: string]: string; }[] = [];
     const p1: Position = p.copy();
     for (let p of p1.self_and_parents(false)) {
         const root: Position[] | undefined = p.hasParent() ? undefined : [p];
@@ -1029,7 +1030,7 @@ export function getLanguageFromAncestorAtFileNode(p: Position): string | undefin
  */
 export function getLanguageAtPosition(c: Commands, p: Position): string {
 
-    const aList: string[] = get_directives_dict_list(p);
+    const aList: { [key: string]: string; }[] = get_directives_dict_list(p);
     const d: { [key: string]: any } | undefined = scanAtCommentAndAtLanguageDirectives(aList);
     let language: string = d && d['language'] ||
         getLanguageFromAncestorAtFileNode(p) ||
@@ -1117,7 +1118,7 @@ export function isValidLanguage(language: string): boolean {
  * Scan aList for @comment and @language directives.
  * @comment should follow @language if both appear in the same node.
  */
-export function scanAtCommentAndAtLanguageDirectives(aList: any[]): {
+export function scanAtCommentAndAtLanguageDirectives(aList: { [key: string]: string; }[]): {
     language: string;
     comment: string;
     delims: [string, string, string];

@@ -2791,7 +2791,7 @@
     "@types/lodash": "^4.14.177",
     "@types/md5": "^2.3.1",
     "@types/mocha": "^9.1.0",
-    "@types/node": "14.x",
+    "@types/node": "16.x",
     "@types/vscode": "^1.71.0",
     "@types/webpack-env": "^1.16.3",
     "@typescript-eslint/eslint-plugin": "^5.16.0",
@@ -2827,5 +2827,8 @@
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "stream": "^0.0.2"
-  }
+  },
+  "gitCommit": "4ddc9e8",
+  "gitBranch": "devel",
+  "gitDate": "2022-09-20 00:27:29 -0400"
 }

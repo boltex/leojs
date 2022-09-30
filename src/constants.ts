@@ -33,7 +33,12 @@ export class Constants {
     public static GOTO_ID: string = "leojsGotoPanel";
     public static GOTO_EXPLORER_ID: string = "leojsGotoPanelExplorer";
 
-    public static FILE_EXTENSION: string = "leojs";
+    public static FILE_EXTENSION: string = "leo";
+    public static DB_FILE_EXTENSION: string = "db";
+    public static JS_FILE_EXTENSION: string = "leojs";
+
+    public static LEO_LANGUAGE_PREFIX: string = "leojsbody."; // all lowercase
+
     public static URI_LEO_SCHEME: string = "leojs";
     public static URI_FILE_SCHEME: string = "file";
     public static URI_SCHEME_HEADER: string = "leojs:/";
@@ -108,23 +113,52 @@ export class Constants {
         OPEN_RECENT_FILE: "Open Recent Leojs File",
         RIGHT_CLICK_TO_OPEN: "Right-click to open with leojs",
         FILE_ALREADY_OPENED: "Leojs file already opened",
+
+        CLEARED_RECENT: "Cleared recent files list",
         CHOOSE_OPENED_FILE: "Select an opened Leojs File",
         FILE_NOT_OPENED: "No files opened.",
+        STATUSBAR_TOOLTIP_ON: "Leo Key Bindings are in effect", // TODO : Add description of what happens if clicked
+        STATUSBAR_TOOLTIP_OFF: "Leo Key Bindings off", // TODO : Add description of what happens if clicked
         PROMPT_EDIT_HEADLINE: "Edit Headline",
         PROMPT_INSERT_NODE: "Insert Node",
         DEFAULT_HEADLINE: "New Headline",
+        TITLE_GOTO_GLOBAL_LINE: "Goto global line",
+        PLACEHOLDER_GOTO_GLOBAL_LINE: "#",
+        PROMPT_GOTO_GLOBAL_LINE: "Line number",
+
+        TITLE_TAG_CHILDREN: "Tag Children",
+        TITLE_REMOVE_TAG: "Remove Tag",
+        TITLE_TAG_NODE: "Tag Node",
+        PLACEHOLDER_TAG: "<tag>",
+        PROMPT_TAG: "Enter a tag name",
+
         CLOSE_ERROR: "Cannot close: No files opened.",
         YES: "Yes",
         NO: "No",
         YES_ALL: "Yes to all",
         NO_ALL: "No to all",
         MINIBUFFER_PROMPT: "Minibuffer Full Command",
+        SELECT_CHAPTER_PROMPT: "Select chapter",
+        SET_UA_NAME_TITLE: "Set ua",
+        SET_UA_NAME_PLACEHOLDER: "Attribute Name",
+        SET_UA_NAME_PROMPT: "Set unknown attribute name",
+        SET_UA_VAL_TITLE: "Set ua to",
+        SET_UA_VAL_PLACEHOLDER: "Attribute Value",
+        SET_UA_VAL_PROMPT: "Set unknown attribute value",
         CHANGES_DETECTED: "Changes to external files were detected.",
         REFRESHED: " Nodes refreshed.", // with voluntary leading space
         IGNORED: " They were ignored.", // with voluntary leading space
         TOO_FAST: "Leo is busy! ", // with voluntary trailing space
-        STATUSBAR_TOOLTIP_ON: "Leojs Key Bindings are in effect",
-        STATUSBAR_TOOLTIP_OFF: "Leojs Key Bindings off",
+
+        UNKNOWN_LANGUAGE_NOT_SUPPORTED: "Language not yet supported.",
+        LANGUAGE_NOT_SUPPORTED: " language not yet supported.", // with leading space
+        MINIBUFFER_BUTTON_START: "@button-",
+        MINIBUFFER_DEL_BUTTON_START: "delete-@button-",
+        MINIBUFFER_COMMAND_START: "@command-",
+        MINIBUFFER_USER_DEFINED: "$(run) User defined command.",
+        MINIBUFFER_HISTORY_LABEL: "Minibuffer History",
+        MINIBUFFER_HISTORY_DESC: "$(history) Choose from last run commands...",
+
         ZOOM_LEVEL_RANGE_LIMIT: "Value for zoom level should be between -12 and 12",
         FONT_SIZE_RANGE_LIMIT: "Value for font size should be between 6 and 30",
         FIX_IT: "Fix it",
@@ -334,6 +368,17 @@ export class Constants {
         SET_CONTEXT: "setContext",
         CLOSE_ACTIVE_EDITOR: "workbench.action.closeActiveEditor",
         QUICK_OPEN: "workbench.action.quickOpen"
+    };
+
+    /**
+     * * Table for converting Leo languages names for the currently opened body pane
+     * Used in showBody method of leoIntegration.ts
+     */
+    public static LANGUAGE_CODES: { [key: string]: string | undefined } = {
+        cplusplus: 'cpp',
+        md: 'markdown',
+        rest: 'restructuredtext',
+        rst: 'restructuredtext'
     };
 
     /**

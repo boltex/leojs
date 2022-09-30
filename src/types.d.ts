@@ -53,6 +53,16 @@ export interface FontSettings {
 }
 
 /**
+ * * Location of focus to be set when current/last command is resolved
+ */
+export const enum Focus {
+    NoChange = 0, // Stays on goto pane, or other current panel.
+    Body, // Forces body to appear, refresh leaves focus on body.
+    Outline, // Forces outline to appear, refresh leaves focus on Outline.
+    Goto
+}
+
+/**
  * * When refreshing the outline and getting to Leo's selected node
  */
 export const enum RevealType {
@@ -70,10 +80,15 @@ export interface ReqRefresh {
     node?: boolean; // Reveal received selected node (Navigation only, no tree change)
     tree?: boolean; // Tree needs refresh
     body?: boolean; // Body needs refresh
-    states?: boolean; // States needs refresh:
-    // (changed, canUndo, canRedo, canDemote, canPromote, canDehoist)
+    scroll?: boolean; // Body needs to set and reveal text selection
+
+    states?: boolean; // Currently opened tree view states needs refresh:
+    // changed, canUndo, canRedo, canGoBack, canGoNext, canDemote, canPromote, 
+    // canHoist, canDehoist, inChapter, topHoistChapter
+
     buttons?: boolean; // Buttons needs refresh
     documents?: boolean; // Documents needs refresh
+    goto?: boolean; // Goto pane needs refresh
 }
 
 /**
