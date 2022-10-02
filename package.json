@@ -2827,8 +2827,5 @@
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "stream": "^0.0.2"
-  },
-  "gitCommit": "278980d",
-  "gitBranch": "devel",
-  "gitDate": "2022-09-30 19:39:44 -0400"
+  }
 }

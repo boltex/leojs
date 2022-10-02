@@ -24,25 +24,27 @@ export class Constants {
     public static BUTTONS_ID: string = "leojsButtons";
     public static BUTTONS_EXPLORER_ID: string = "leojsButtonsExplorer";
 
-    public static UNDOS_ID: string = "leojsUndos";
-    public static UNDOS_EXPLORER_ID: string = "leojsUndosExplorer";
-
     public static FIND_ID: string = "leojsFindPanel";
     public static FIND_EXPLORER_ID: string = "leojsindPanelExplorer";
 
     public static GOTO_ID: string = "leojsGotoPanel";
     public static GOTO_EXPLORER_ID: string = "leojsGotoPanelExplorer";
 
+    public static UNDOS_ID: string = "leojsUndos";
+    public static UNDOS_EXPLORER_ID: string = "leojsUndosExplorer";
+
+    public static VERSION_STATE_KEY: string = "leojsVersion";
+
     public static FILE_EXTENSION: string = "leo";
     public static DB_FILE_EXTENSION: string = "db";
     public static JS_FILE_EXTENSION: string = "leojs";
 
-    public static LEO_LANGUAGE_PREFIX: string = "leojsbody."; // all lowercase
+    public static LEO_LANGUAGE_PREFIX: string = "leojsbody."; // all lowercase.
 
     public static URI_LEO_SCHEME: string = "leojs";
     public static URI_FILE_SCHEME: string = "file";
     public static URI_SCHEME_HEADER: string = "leojs:/";
-    public static FILE_OPEN_FILTER_MESSAGE: string = "Leojs Files";
+    public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files"; // Meant for all 3 leo, db and leojs.
     public static UNTITLED_FILE_NAME: string = "untitled";
     public static RECENT_FILES_KEY: string = "leojsRecentFiles";
     public static LAST_FILES_KEY: string = "leojsLastFiles";

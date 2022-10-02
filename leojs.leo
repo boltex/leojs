@@ -55,6 +55,8 @@
 <v t="felix.20220523151725.1"><vh>setScheme</vh></v>
 <v t="felix.20220523140004.1"><vh>runLeo</vh></v>
 <v t="felix.20201208215619.1"><vh>deactivate</vh></v>
+<v t="felix.20221002011858.1"><vh>closeLeoTextEditors</vh></v>
+<v t="felix.20221002011903.1"><vh>showWelcomeIfNewer</vh></v>
 </v>
 <v t="felix.20211010192923.1"><vh>@clean src/leoBody.ts</vh>
 <v t="felix.20211010192923.2"><vh>class LeoBodyProvider</vh>
@@ -1106,6 +1108,23 @@ export function activate(p_context: vscode.ExtensionContext) {
     //     }
     // });
 
+
+    const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
+    const w_leojsVersion = w_leojsExtension.packageJSON.version;
+
+    const w_previousVersion = p_context.globalState.get&lt;string&gt;(Constants.VERSION_STATE_KEY);
+
+    // * Close remaining Leo Bodies restored by vscode from last session.
+    closeLeoTextEditors();
+
+    // * Show a welcome screen on version updates, then start the actual extension.
+    showWelcomeIfNewer(w_leojsVersion, w_previousVersion)
+        .then(() =&gt; {
+
+            p_context.globalState.update(Constants.VERSION_STATE_KEY, w_leojsVersion);
+
+        });
+
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
     } else {
@@ -1695,25 +1714,27 @@ public static DOCUMENTS_EXPLORER_ID: string = "leojsDocumentsExplorer";
 public static BUTTONS_ID: string = "leojsButtons";
 public static BUTTONS_EXPLORER_ID: string = "leojsButtonsExplorer";
 
-public static UNDOS_ID: string = "leojsUndos";
-public static UNDOS_EXPLORER_ID: string = "leojsUndosExplorer";
-
 public static FIND_ID: string = "leojsFindPanel";
 public static FIND_EXPLORER_ID: string = "leojsindPanelExplorer";
 
 public static GOTO_ID: string = "leojsGotoPanel";
 public static GOTO_EXPLORER_ID: string = "leojsGotoPanelExplorer";
 
+public static UNDOS_ID: string = "leojsUndos";
+public static UNDOS_EXPLORER_ID: string = "leojsUndosExplorer";
+
+public static VERSION_STATE_KEY: string = "leojsVersion";
+
 public static FILE_EXTENSION: string = "leo";
 public static DB_FILE_EXTENSION: string = "db";
 public static JS_FILE_EXTENSION: string = "leojs";
 
-public static LEO_LANGUAGE_PREFIX: string = "leojsbody."; // all lowercase
+public static LEO_LANGUAGE_PREFIX: string = "leojsbody."; // all lowercase.
 
 public static URI_LEO_SCHEME: string = "leojs";
 public static URI_FILE_SCHEME: string = "file";
 public static URI_SCHEME_HEADER: string = "leojs:/";
-public static FILE_OPEN_FILTER_MESSAGE: string = "Leojs Files";
+public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files"; // Meant for all 3 leo, db and leojs.
 public static UNTITLED_FILE_NAME: string = "untitled";
 public static RECENT_FILES_KEY: string = "leojsRecentFiles";
 public static LAST_FILES_KEY: string = "leojsLastFiles";
@@ -3580,10 +3601,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "278980d",
-  "gitBranch": "devel",
-  "gitDate": "2022-09-30 19:39:44 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -11955,6 +11973,82 @@ private _refreshButtonsPane(): void {
     this._leoButtonsProvider.refreshTreeRoot();
 }
 
+</t>
+<t tx="felix.20221002011858.1">/**
+ * * Closes all visible text editors that have Leo filesystem scheme
+ */
+function closeLeoTextEditors(): Thenable&lt;unknown&gt; {
+    const w_foundTabs: vscode.Tab[] = [];
+
+    vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
+        p_tabGroup.tabs.forEach((p_tab) =&gt; {
+            if (p_tab.input &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri &amp;&amp;
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME
+            ) {
+                w_foundTabs.push(p_tab);
+            }
+        });
+    });
+
+    let q_closedTabs;
+    if (w_foundTabs.length) {
+        q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
+        w_foundTabs.forEach((p_tab) =&gt; {
+            if (p_tab.input) {
+                vscode.commands.executeCommand(
+                    'vscode.removeFromRecentlyOpened',
+                    (p_tab.input as vscode.TabInputText).uri
+                );
+                // Delete to close all other body tabs.
+                // (w_oldUri will be deleted last below)
+                const w_edit = new vscode.WorkspaceEdit();
+                w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
+                vscode.workspace.applyEdit(w_edit);
+            }
+        });
+    } else {
+        q_closedTabs = Promise.resolve(true);
+    }
+    return q_closedTabs;
+}
+
+</t>
+<t tx="felix.20221002011903.1">/**
+ * * Show welcome screen if needed, based on last version executed
+ * @param p_version Current version, as a string, from packageJSON.version
+ * @param p_previousVersion Previous version, as a string, from context.globalState.get service
+ * @returns A promise that triggers when command to show the welcome screen is finished, or immediately if not needed
+ */
+async function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undefined): Promise&lt;unknown&gt; {
+    let w_showWelcomeScreen: boolean = false;
+    if (p_previousVersion === undefined) {
+        console.log('leojs first-time install');
+        w_showWelcomeScreen = true;
+    } else {
+        if (p_previousVersion !== p_version) {
+            vscode.window.showInformationMessage(`leojs upgraded from v${p_previousVersion} to v${p_version}`);
+        }
+        const [w_major, w_minor] = p_version.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
+        const [w_prevMajor, w_prevMinor] = p_previousVersion.split('.').map(p_stringVal =&gt; parseInt(p_stringVal, 10));
+        if (
+            (w_major === w_prevMajor &amp;&amp; w_minor === w_prevMinor) ||
+            // Don't notify on downgrades
+            (w_major &lt; w_prevMajor || (w_major === w_prevMajor &amp;&amp; w_minor &lt; w_prevMinor))
+        ) {
+            w_showWelcomeScreen = false;
+        } else if (w_major !== w_prevMajor || (w_major === w_prevMajor &amp;&amp; w_minor &gt; w_prevMinor)) {
+            // Will show on major or minor upgrade (Formatted as 'Major.Minor.Revision' eg. 1.2.3)
+            w_showWelcomeScreen = true;
+        }
+    }
+    if (w_showWelcomeScreen) {
+        // todo
+        // return vscode.commands.executeCommand(Constants.COMMANDS.SHOW_WELCOME);
+    } else {
+        return Promise.resolve();
+    }
+}
 </t>
 </tnodes>
 </leo_file>
