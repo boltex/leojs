@@ -4,6 +4,7 @@ import { Constants } from "./constants";
 import { IconConstants } from "./iconConstants";
 import { Icon } from "./types";
 import { LeoOutlineNode } from "./leoOutline";
+import { Position } from "./core/leoNodes";
 
 // String and other types/structures helper functions, along with common vscode API calls
 
@@ -298,8 +299,9 @@ export function isAlphaNumeric(str: string): boolean {
  * @param p_newHasBody Flag to signify presence of body content, to be compared with its current state
  * @returns True if it would change the icon with actual body content, false otherwise
  */
-export function isIconChangedByEdit(p_node: LeoOutlineNode, p_newHasBody: boolean): boolean {
-    if (!p_node.position.isDirty() || (p_node.position.v.hasBody() !== p_newHasBody)) {
+export function isIconChangedByEdit(p_node: Position, p_newHasBody: boolean): boolean {
+    // hasBody can be undefined so force boolean.
+    if (!p_node.isDirty() || (!!p_node.bodyString().length === !p_newHasBody)) {
         return true;
     }
     return false;

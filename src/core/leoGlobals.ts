@@ -175,7 +175,7 @@ export function ivars2instance(c: Commands, g: any, ivars: string[]): any {
 //@-<< define g.Decorators >>
 //@+<< define regex's >>
 //@+node:felix.20210102180413.1: ** << define regex's >>
-export const g_language_pat = new RegExp(/^@language\s+(\w+)+/, 'm');
+export const g_language_pat = new RegExp(/^@language\s+(\w+)+/, 'mg'); // Needs g flag for 'exec' in while loop
 // Regex used by this module, and in leoColorizer.py.
 
 // Patterns used only in this module...
@@ -183,7 +183,7 @@ export const g_is_directive_pattern = new RegExp(/^\s*@([\w-]+)\s*/);
 // This pattern excludes @encoding.whatever and @encoding(whatever)
 // It must allow @language python, @nocolor-node, etc.
 
-export const g_noweb_root = new RegExp('<' + '<' + '*' + '>' + '>' + '=', 'm');
+export const g_noweb_root = new RegExp('<' + '<' + '*' + '>' + '>' + '=', 'mg');
 export const g_pos_pattern = new RegExp(/:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$/);
 export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
 
@@ -825,7 +825,7 @@ export function comment_delims_from_extension(filename: string): [string, string
 
 //@+node:felix.20220111004937.1: *3* g.findAllValidLanguageDirectives
 /**
- * Return list of all valid @language directives in p.b
+ * Return list of all valid @language directives in s
  */
 export function findAllValidLanguageDirectives(s: string): string[] {
 
@@ -834,7 +834,7 @@ export function findAllValidLanguageDirectives(s: string): string[] {
     }
     const languages: string[] = [];
     let m: any;
-    while (m = g_language_pat.exec(s)) {
+    while ((m = g_language_pat.exec(s)) !== null) {
         const language: string = m[1];
         if (isValidLanguage(language)) {
             languages.push(language);
@@ -844,7 +844,7 @@ export function findAllValidLanguageDirectives(s: string): string[] {
 }
 //@+node:felix.20220112011652.1: *3* g.findFirstAtLanguageDirective
 /**
- * Return the first *valid* @language directive ins.
+ * Return the first *valid* @language directive in s.
  */
 export function findFirstValidAtLanguageDirective(s: string): string | undefined {
 
@@ -853,7 +853,7 @@ export function findFirstValidAtLanguageDirective(s: string): string | undefined
     }
     let language: string;
     let m: any;
-    while (m = g_language_pat.exec(s)) {
+    while ((m = g_language_pat.exec(s)) !== null) {
         language = m[1];
         if (isValidLanguage(language)) {
             return language;
@@ -3286,7 +3286,7 @@ export function convertPythonDayjs(s: string): string {
  * from https://gist.github.com/malthe/02350255c759d5478e89
  */
 export function dedent(text: string) {
-    const re_whitespace = /^([ \t]*)(.*)\n/gm;
+    const re_whitespace = /^([ \t]*)(.*)\n/gm; // Needs 'g' flag for exec in while loop
     let l;
     let m;
     let i;
