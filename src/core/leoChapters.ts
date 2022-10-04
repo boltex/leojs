@@ -158,9 +158,11 @@ export class ChapterController {
 
         const names = cc.setAllChapterNames();
 
-        g.es('Chapters:\n' + names.join('\n'));
-        k.setLabelBlue('Select chapter: ');
-        k.get1Arg(this.selectChapter1, names);
+        // TODO !
+        console.log('TODO ! selectChapter : from this list with UI dialog! :', names);
+        // g.es('Chapters:\n' + names.join('\n'));
+        // k.setLabelBlue('Select chapter: ');
+        // k.get1Arg(this.selectChapter1, names);
     }
 
     public selectChapter1(): void {

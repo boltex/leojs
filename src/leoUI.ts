@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { Utils as uriUtils } from "vscode-uri";
-import { debounce } from "lodash";
+import { constant, debounce } from "lodash";
 import * as path from 'path';
 
 import * as utils from "./utils";
@@ -42,6 +42,7 @@ export class LeoUI {
 
     public frameIndex: number = 0; // the index of current document frame in g.app.windowList, mostly to get c, and the title, openDirectory, etc.
     public clipboardContents: string = "";
+    private _minibufferHistory: string[] = [];
     public isNullGui: boolean = false;
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE_JS; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
@@ -148,6 +149,8 @@ export class LeoUI {
     private _editorTouched: boolean = false; // Flag for applying editor changes to body when 'icon' state change and 'undo' back to untouched
 
     private _bodyStatesTimer: NodeJS.Timeout | undefined;
+
+    private _showBodyPromise = Promise.resolve();
 
     public preventIconChange: boolean = false; // Prevent refresh outline to keep selected node icon
 
@@ -449,12 +452,43 @@ export class LeoUI {
 
         this.leoStates.leoReady = true;
 
-        if (!this.leoStates.fileOpenedReady && g.app.windowList.length) {
-            this._setupOpenedLeoDocument();
-            this.leoStates.qLastContextChange.then(() => {
-                this.getStates();
-            });
-        }
+        this._setupOpenedLeoDocument(); // this sets this.leoStates.fileOpenedReady 
+        this.setupRefresh(
+            this.finalFocus,
+            {
+                tree: true,
+                body: true,
+                documents: true,
+                buttons: true,
+                states: true,
+                goto: true,
+            }
+        );
+
+        this.leoStates.qLastContextChange.then(() => {
+            if (!this._lastTreeView.visible && g.app.windowList.length) {
+                console.log('Had to reveal!');
+                // const c = g.app.windowList[this.frameIndex].c;
+                // this._lastTreeView.reveal(c.p, { select: true });
+                this._setupOpenedLeoDocument(); // this sets this.leoStates.fileOpenedReady 
+                this.setupRefresh(
+                    this.finalFocus,
+                    {
+                        tree: true,
+                        body: true,
+                        documents: true,
+                        buttons: true,
+                        states: true,
+                        goto: true,
+                    }
+                );
+                this._launchRefresh();
+
+            }
+            // this._launchRefresh();
+            // this.getStates();
+        });
+
     }
 
     /** 
@@ -681,7 +715,9 @@ export class LeoUI {
             if (this.leoStates.fileOpenedReady) {
                 this.loadSearchSettings();
             }
-            this._refreshOutline(true, RevealType.RevealSelect);
+            this._showBodyPromise.then(() => {
+                this._refreshOutline(true, RevealType.RevealSelect);
+            });
         }
     }
 
@@ -1265,8 +1301,26 @@ export class LeoUI {
                 // wont get 'gotSelectedNode so show body!
                 this._refreshType.body = false;
                 this._tryApplyNodeToBody(this._refreshNode || this.lastSelectedNode!, false, w_showBodyNoFocus);
+            } else if (!this.isOutlineVisible() && this.showOutlineIfClosed) {
+                let w_treeName;
+                if (this._lastTreeView === this._leoTreeExView) {
+                    w_treeName = Constants.TREEVIEW_EXPLORER_ID;
+                } else {
+                    w_treeName = Constants.TREEVIEW_ID;
+                }
+                // Reveal will trigger a native outline refresh
+                this._leoTreeProvider.incTreeId();
+                this._revealType = w_revealType;
+                vscode.commands.executeCommand(w_treeName + '.focus');
+                // } else if (!this.isOutlineVisible() && this.showOutlineIfClosed) {
+                //     const c = g.app.windowList[this.frameIndex].c;
+                //     this._lastTreeView.reveal(c.p, { select: true });
+                // } else {
+                //     this._refreshOutline(true, w_revealType);
+                // }
+            } else {
+                this._refreshOutline(true, w_revealType);
             }
-            this._refreshOutline(true, w_revealType);
         } else if (this._refreshType.node && this._refreshNode) {
             // * Force single node "refresh" by revealing it, instead of "refreshing" it
             this._refreshType.node = false;
@@ -1451,7 +1505,8 @@ export class LeoUI {
         ) {
             // ! MINIMAL TIMEOUT REQUIRED ! WHY ?? (works so leave)
             setTimeout(() => {
-                this.showBody(false, false); // SAME with scroll information specified
+                // SAME with scroll information specified
+                this.showBody(false, this.finalFocus.valueOf() !== Focus.Body);
             }, 25);
         } else {
 
@@ -1950,6 +2005,13 @@ export class LeoUI {
      */
     public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise<vscode.TextEditor | void> {
 
+        let w_bodyResolve: undefined | ((value: void | PromiseLike<void>) => void);
+
+        // REPLACE BODY PROMISE!
+        this._showBodyPromise = new Promise<void>((resolve) => {
+            w_bodyResolve = resolve;
+        });
+
         const w_openedDocumentTS = utils.performanceNow();
         const w_openedDocumentGnx = utils.leoUriToStr(this.bodyUri);
         let q_saved: Thenable<unknown> | undefined;
@@ -1980,6 +2042,9 @@ export class LeoUI {
         // Handle 'Prevent Show Body flag' and return
         if (this._preventShowBody) {
             this._preventShowBody = false;
+            if (w_bodyResolve) {
+                w_bodyResolve();
+            }
             return Promise.resolve(vscode.window.activeTextEditor!);
         }
 
@@ -2088,6 +2153,11 @@ export class LeoUI {
                     }
                 }, 0);
 
+                if (w_bodyResolve) {
+                    w_bodyResolve();
+                }
+                return;
+
             }
         }
 
@@ -2137,10 +2207,16 @@ export class LeoUI {
             // Should the gnx be relevant? -> !this.isGnxStillValid(w_openedDocumentGnx, w_openedDocumentTS)
 
         ) {
+            if (w_bodyResolve) {
+                w_bodyResolve();
+            }
             return;
         }
 
         // * Actually Show the body pane document in a text editor
+        if (w_bodyResolve) {
+            w_bodyResolve();
+        }
         const q_showTextDocument = vscode.window.showTextDocument(
             this._bodyTextDocument,
             w_showOptions
@@ -2358,6 +2434,8 @@ export class LeoUI {
             this._revealNode(p_node, { select: true, focus: false }); // no need to set focus: tree selection is set to right-click position
         }
 
+        this.showBodyIfClosed = true;
+
         this.leoStates.setSelectedNodeFlags(p_node);
         // this._leoStatusBar.update(true); // Just selected a node directly, or via expand/collapse
         const w_showBodyKeepFocus = p_aside
@@ -2383,39 +2461,8 @@ export class LeoUI {
         }
 
         // * Apply the node to the body text without waiting for the selection promise to resolve
-        this.showBodyIfClosed = true;
         return this._tryApplyNodeToBody(p_node, !!p_aside, w_showBodyKeepFocus);
 
-
-        // --------------------------------------------------------------------
-
-        // // Note: set context flags for current selection when capturing and revealing the selected node
-        // // when the tree refreshes and the selected node is processed by getTreeItem & gotSelectedNode
-        // let q_reveal: Thenable<void> | undefined;
-
-        // if (c.positionExists(p_node)) {
-
-        //     if (p_reveal) {
-        //         q_reveal = this._lastTreeView.reveal(p_node).then(
-        //             () => { }, // Ok
-        //             (p_error) => {
-        //                 console.log('selectTreeNode could not reveal');
-        //             }
-        //         );
-        //     }
-        //     c.selectPosition(p_node);
-        //     // Set flags here - not only when 'got selection' is reached.
-        //     this.leoStates.setSelectedNodeFlags(p_node);
-        //     this._refreshType.states = true;
-        //     this.getStates(); //  setLeoStateFlags gets called too
-
-        // } else {
-        //     console.error('Selected a non-existent position', p_node.h);
-        // }
-
-        // // this.lastSelectedNode = p_node; // this is done in _tryApplyNodeToBody !
-
-        // return q_reveal ? q_reveal : Promise.resolve(true);
     }
 
     /**
@@ -2489,71 +2536,143 @@ export class LeoUI {
 
     /**
      * Opens quickPick minibuffer pallette to choose from all commands in this file's Thenable
-     * @returns Thenable from the command resolving - or resolve with undefined if cancelled
+     * @returns Promise from the command resolving - or resolve with undefined if cancelled
      */
-    public minibuffer(): Thenable<unknown> {
+    public async minibuffer(): Promise<unknown> {
         this.setupRefresh(Focus.NoChange, { tree: true, body: true, documents: true, buttons: true, states: true });
 
-        return this.triggerBodySave(false)
-            .then((p_saveResults) => {
-                const c = g.app.windowList[this.frameIndex].c;
-                const commands: vscode.QuickPickItem[] = [];
-                for (let key in c.commandsDict) {
-                    const command = c.commandsDict[key];
-                    // Going to get replaced. Don't take those that begin with 'async-'
-                    if (!(command as any).__name__.startsWith('async-')) {
-                        commands.push({
-                            label: key,
-                            detail: (command as any).__doc__
-                        });
-                    }
-                }
-                commands.sort((a, b) => {
-                    return a.label === b.label ? 0 : (a.label > b.label ? 1 : -1);
+        await this.triggerBodySave(false);
+        const c = g.app.windowList[this.frameIndex].c;
+        const commands: vscode.QuickPickItem[] = [];
+        for (let key in c.commandsDict) {
+            const command = c.commandsDict[key];
+            // Going to get replaced. Don't take those that begin with 'async-'
+            if (!(command as any).__name__.startsWith('async-')) {
+                commands.push({
+                    label: key,
+                    detail: (command as any).__doc__
                 });
-                const w_options: vscode.QuickPickOptions = {
-                    placeHolder: Constants.USER_MESSAGES.MINIBUFFER_PROMPT,
-                    matchOnDetail: true,
-                };
-                return vscode.window.showQuickPick(commands, w_options);
-            }).then((p_picked) => {
-                if (
-                    p_picked &&
-                    p_picked.label &&
-                    Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
-                ) {
-                    return vscode.commands.executeCommand(
-                        Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
-                    );
-                }
-                if (p_picked &&
-                    p_picked.label &&
-                    Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label]) {
-                    p_picked.label = Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label];
-                }
-                if (p_picked && p_picked.label) {
-                    const c = g.app.windowList[this.frameIndex].c;
-                    const w_commandResult = c.doCommandByName(p_picked.label);
+            }
+        }
 
-                    if (!this.preventRefresh) {
-                        if (w_commandResult && w_commandResult.then) {
-                            // IS A PROMISE
-                            (w_commandResult as Thenable<unknown>).then((p_result) => {
-                                this.launchRefresh();
-                            });
-                        } else {
-                            this.launchRefresh();
-                        }
-                    } else {
-                        this.preventRefresh = false;
-                    }
+        const w_noDetails = commands
+            .filter(
+                p_command => !p_command.detail && !(
+                    p_command.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_BUTTON_START) ||
+                    p_command.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_DEL_BUTTON_START) ||
+                    p_command.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_COMMAND_START)
+                )
+            );
+        for (const p_command of w_noDetails) {
+            p_command.description = Constants.USER_MESSAGES.MINIBUFFER_USER_DEFINED;
+        }
 
-                    return Promise.resolve(w_commandResult);
-                } else {
-                    // Canceled
-                    return Promise.resolve(undefined);
-                }
+        const w_withDetails = commands.filter(p_command => !!p_command.detail);
+
+
+
+        // Only sort 'regular' Leo commands, leaving custom commands at the top
+        w_withDetails.sort((a, b) => {
+            return a.label < b.label ? -1 : (a.label === b.label ? 0 : 1);
+        });
+
+        const w_result: vscode.QuickPickItem[] = [];
+
+        if (this._minibufferHistory.length) {
+            w_result.push({
+                label: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_LABEL,
+                description: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_DESC
             });
+        }
+
+        // Finish minibuffer list
+        if (w_noDetails.length) {
+            w_result.push(...w_noDetails);
+        }
+
+        // Separator above real commands, if needed...
+        if (w_noDetails.length || this._minibufferHistory.length) {
+            w_result.push({
+                label: "", kind: vscode.QuickPickItemKind.Separator
+            });
+        }
+
+        w_result.push(...w_withDetails);
+
+
+        const w_options: vscode.QuickPickOptions = {
+            placeHolder: Constants.USER_MESSAGES.MINIBUFFER_PROMPT,
+            matchOnDetail: true,
+        };
+        const w_picked = await vscode.window.showQuickPick(w_result, w_options);
+        // First, check for undo-history list being requested
+        if (w_picked && w_picked.label === Constants.USER_MESSAGES.MINIBUFFER_HISTORY_LABEL) {
+            return this.minibufferHistory();
+        }
+        return this._doMinibufferCommand(w_picked);
+
+    }
+
+    /**
+     * * Opens quickPick minibuffer pallette to choose from all commands in this file's commander
+     * @returns Promise that resolves when the chosen command is placed on the front-end command stack
+     */
+    public async minibufferHistory(): Promise<unknown> {
+
+        // Wait for _isBusyTriggerSave resolve because the full body save may change available commands
+        await this.triggerBodySave(false);
+        if (!this._minibufferHistory.length) {
+            return Promise.resolve(undefined);
+        }
+        const w_commandList: vscode.QuickPickItem[] = this._minibufferHistory.map(
+            p_command => { return { label: p_command }; }
+        );
+        // Add Nav tab special commands
+        const w_options: vscode.QuickPickOptions = {
+            placeHolder: Constants.USER_MESSAGES.MINIBUFFER_PROMPT,
+            matchOnDetail: true,
+        };
+        const w_picked = await vscode.window.showQuickPick(w_commandList, w_options);
+        return this._doMinibufferCommand(w_picked);
+    }
+
+    /**
+     * * Perform chosen minibuffer command
+     */
+    private async _doMinibufferCommand(p_picked: vscode.QuickPickItem | undefined): Promise<unknown> {
+        // * First check for overridden command: Exit by doing the overridden command
+        if (p_picked &&
+            p_picked.label &&
+            Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]) {
+            this._minibufferHistory.push(p_picked.label); // Add to minibuffer history
+            return vscode.commands.executeCommand(
+                Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
+            );
+        }
+        // * Ok, it was really a minibuffer command
+        if (p_picked && p_picked.label) {
+            this._minibufferHistory.unshift(p_picked.label); // Add to minibuffer history
+            const c = g.app.windowList[this.frameIndex].c;
+            const w_commandResult = c.doCommandByName(p_picked.label);
+
+            if (!this.preventRefresh) {
+                if (w_commandResult && w_commandResult.then) {
+                    // IS A PROMISE
+                    (w_commandResult as Thenable<unknown>).then((p_result) => {
+                        this.launchRefresh();
+                    });
+                } else {
+                    this.launchRefresh();
+                }
+            } else {
+                this.preventRefresh = false;
+            }
+
+            return Promise.resolve(w_commandResult);
+        } else {
+            // Canceled
+            return Promise.resolve(undefined);
+        }
     }
 
     /**
