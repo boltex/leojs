@@ -2962,8 +2962,6 @@ export class LeoUI {
     private _leoDocumentsExplorer!: vscode.TreeView&lt;LeoFrame&gt;;
     private _lastLeoDocuments: vscode.TreeView&lt;LeoFrame&gt; | undefined;
 
-    private _currentDocumentChanged: boolean = false; // if clean and an edit is done: refresh opened documents view
-
     // * '@button' pane
     private _leoButtonsProvider!: LeoButtonsProvider;
     private _leoButtons!: vscode.TreeView&lt;LeoButtonNode&gt;;
@@ -11923,7 +11921,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
             const w_hasBody = !!p_textDocumentChange.document.getText().length;
             const w_iconChanged = utils.isIconChangedByEdit(this.lastSelectedNode, w_hasBody);
 
-            if (!this._currentDocumentChanged || w_iconChanged) {
+            if (!this.leoStates.leoChanged || w_iconChanged) {
                 if (this.preventIconChange) {
                     this.preventIconChange = false;
                 } else {
@@ -11942,7 +11940,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
                     });
                 }
 
-                if (!this._currentDocumentChanged) {
+                if (!this.leoStates.leoChanged) {
                     // also refresh document panel (icon may be dirty now)
                     this.refreshDocumentsPane();
                 }
@@ -12008,7 +12006,9 @@ public setFindPanel(p_panel: vscode.WebviewView): void {
  * @param p_frame Document node instance in the Leo document view to be the 'selected' one.
  */
 public setDocumentSelection(p_frame: LeoFrame): void {
-    this._currentDocumentChanged = p_frame.c.changed;
+    this.leoStates.leoChanged = p_frame.c.changed; // also set here since slightly newer.
+
+    // this._currentDocumentChanged = ;
     this.leoStates.leoOpenedFileName = p_frame.c.fileName();
     setTimeout(() =&gt; {
         if (this._lastLeoDocuments &amp;&amp; this._lastLeoDocuments.selection.length &amp;&amp; this._lastLeoDocuments.selection[0] === p_frame) {
