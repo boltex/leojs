@@ -30,7 +30,6 @@ export function activate(p_context: vscode.ExtensionContext) {
     //     }
     // });
 
-
     const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
     const w_leojsVersion = w_leojsExtension.packageJSON.version;
 
@@ -86,6 +85,7 @@ export function activate(p_context: vscode.ExtensionContext) {
                     }
                 });
                 console.log('NOT started because not writable workspace');
+                setStartupDoneContext(true);
                 return;
             }
 
@@ -101,14 +101,20 @@ export function activate(p_context: vscode.ExtensionContext) {
                     }
                 });
                 console.log('NOT started because no remote workspace yet');
+                setStartupDoneContext(true);
                 return;
             }
         } else {
             console.log('NOT started because no remote workspace yet');
+            setStartupDoneContext(true);
         }
 
     }
 
+}
+
+function setStartupDoneContext(p_value: boolean): Thenable<unknown> {
+    return vscode.commands.executeCommand(Constants.VSCODE_COMMANDS.SET_CONTEXT, Constants.CONTEXT_FLAGS.LEO_STARTUP_DONE, p_value);
 }
 
 function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscode.ExtensionContext) {
@@ -138,11 +144,13 @@ function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscod
                     }
                 });
                 console.log('NOT started because no remote workspace yet');
+                setStartupDoneContext(true);
                 return;
             }
         }
     } else {
         console.log('TODO : HANDLE WORKSPACE CHANGE DETECTED! but no workspace');
+        setStartupDoneContext(true);
     }
 
 }

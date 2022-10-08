@@ -118,6 +118,9 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
     }
 
     public getChildren(element?: Position): Position[] {
+        if (!this._leoUI.leoStates.fileOpenedReady) {
+            return [];
+        }
         if (element) {
             return [...element.children()];
         } else {

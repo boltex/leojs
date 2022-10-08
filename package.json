@@ -628,23 +628,33 @@
     "viewsWelcome": [
       {
         "view": "leojsOutline",
+        "contents": "Starting up leojs...",
+        "when": "!leojsReady && !leojsStartupDone"
+      },
+      {
+        "view": "leojsOutlineExplorer",
+        "contents": "Starting up leojs...",
+        "when": "!leojsReady && !leojsStartupDone"
+      },
+      {
+        "view": "leojsOutline",
         "contents": "Open a remote repository first to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
-        "when": "!leojsReady"
+        "when": "!leojsReady && leojsStartupDone"
       },
       {
         "view": "leojsOutlineExplorer",
         "contents": "Open a remote repository first to enable LeoJS\n[Open Remote Repository](command:remoteHub.openRepository)\nSee [Opening a project](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for more info.",
-        "when": "!leojsReady"
+        "when": "!leojsReady && leojsStartupDone"
       },
       {
         "view": "leojsOutline",
         "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)",
-        "when": "leojsReady && !leojsTreeOpened"
+        "when": "leojsReady && !leojsTreeOpened && leojsStartupDone"
       },
       {
         "view": "leojsOutlineExplorer",
         "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)",
-        "when": "leojsReady && !leojsTreeOpened"
+        "when": "leojsReady && !leojsTreeOpened && leojsStartupDone"
       },
       {
         "view": "leojsDocuments",
@@ -2828,7 +2838,7 @@
     "path-browserify": "^1.0.1",
     "stream": "^0.0.2"
   },
-  "gitCommit": "be85465",
+  "gitCommit": "f07e723",
   "gitBranch": "devel",
-  "gitDate": "2022-10-02 01:34:15 -0400"
+  "gitDate": "2022-10-03 22:36:33 -0400"
 }

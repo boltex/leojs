@@ -17,6 +17,18 @@ export class LeoStates {
     /**
      * General 'Leo is ready' state, equivalent to leoBridgeReady in leoInteg
      */
+    private _leojsStartupDone: boolean = false;
+    get leojsStartupDone(): boolean {
+        return this._leojsStartupDone;
+    }
+    set leojsStartupDone(p_value: boolean) {
+        this._leojsStartupDone = p_value;
+        this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_STARTUP_DONE, p_value);
+    }
+
+    /**
+     * General 'Leo is ready' state, equivalent to leoBridgeReady in leoInteg
+     */
     private _leoReady: boolean = false;
     get leoReady(): boolean {
         return this._leoReady;
