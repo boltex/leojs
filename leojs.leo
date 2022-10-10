@@ -329,7 +329,7 @@
 <v t="felix.20220922215553.1"><vh>Focus</vh></v>
 <v t="felix.20201214154816.3"><vh>RevealType</vh></v>
 <v t="felix.20201214154816.4"><vh>ReqRefresh</vh></v>
-<v t="felix.20201214154816.5"><vh>UserCommand</vh></v>
+<v t="felix.20221009011653.1"><vh>CommandOptions</vh></v>
 <v t="felix.20211010221959.1"><vh>BodyTimeInfo</vh></v>
 <v t="felix.20201214154816.6"><vh>ShowBodyParam</vh></v>
 <v t="felix.20201214154816.7"><vh>LeoPackageStates</vh></v>
@@ -644,8 +644,9 @@ _Move Outline commands need the 'Alt' key modifier only when focus is on body pa
 | Tree Navigation    |           |                 |                          |
 | :----------------- | :-------- | :-------------- | :----------------------- |
 | `Alt + Home`       | or        | `Home` \*       | Go To First Visible Node |
-| `Alt + End`        |           |                 | Go To Last Sibling       |
 |                    |           | `End` \*        | Go To Last Visible Node  |
+| `PgUp / pgDn`      |           |                 | Tree page up/down        |
+| `Alt + End`        |           |                 | Go To Last Sibling       |
 | `Alt + N`          |           |                 | Go To Next Clone         |
 | `Alt + Arrow Keys` | or        | `Arrow Keys` \* | Browse Tree              |
 
@@ -1213,57 +1214,57 @@ export function activate(p_context: vscode.ExtensionContext) {
 // even specifying a headline label, e.g. spamming CTRL+I rapidly.
 [CMD.INSERT_CHILD_SELECTION_INTERRUPT, () =&gt; p_leoUI.insertNode(U, false, true, true)],
 
-[CMD.CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, p_node, REFRESH_TREE_BODY, Focus.Outline)],
-[CMD.CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, Focus.Body)],
-[CMD.CLONE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, U, REFRESH_TREE, Focus.Outline)],
+[CMD.CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
+[CMD.CLONE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
 
-[CMD.PROMOTE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.PROMOTE_PNODE, p_node, REFRESH_TREE_BODY, Focus.Outline, true)],
-[CMD.PROMOTE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, Focus.Body)],
-[CMD.PROMOTE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.PROMOTE_PNODE, U, REFRESH_TREE, Focus.Outline)],
+[CMD.PROMOTE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.PROMOTE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
+[CMD.PROMOTE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.PROMOTE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
+[CMD.PROMOTE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.PROMOTE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
 
-[CMD.DEMOTE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.DEMOTE_PNODE, p_node, REFRESH_TREE_BODY, Focus.Outline, true)],
-[CMD.DEMOTE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, Focus.Body)],
-[CMD.DEMOTE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.DEMOTE_PNODE, U, REFRESH_TREE, Focus.Outline)],
+[CMD.DEMOTE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.DEMOTE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
+[CMD.DEMOTE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.DEMOTE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
+[CMD.DEMOTE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.DEMOTE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
 
-[CMD.SORT_CHILDREN, () =&gt; p_leoUI.command(LEOCMD.SORT_CHILDREN, U, REFRESH_TREE, Focus.Body, true)],
-[CMD.SORT_SIBLING, () =&gt; p_leoUI.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, Focus.Body, true)],
-[CMD.SORT_SIBLING_FO, () =&gt; p_leoUI.command(LEOCMD.SORT_SIBLINGS, U, REFRESH_TREE, Focus.Outline, true)],
-
-</t>
-<t tx="felix.20201214150149.11">[CMD.MARK, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, p_node, REFRESH_TREE, Focus.Outline, true)],
-[CMD.MARK_SELECTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, U, REFRESH_TREE, Focus.Body)],
-[CMD.MARK_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, U, REFRESH_TREE, Focus.Outline)],
-[CMD.UNMARK, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, p_node, REFRESH_TREE, Focus.Outline, true)],
-[CMD.UNMARK_SELECTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, U, REFRESH_TREE, Focus.Body)],
-[CMD.UNMARK_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, U, REFRESH_TREE, Focus.Outline)],
-[CMD.UNMARK_ALL, () =&gt; p_leoUI.command(LEOCMD.UNMARK_ALL, U, REFRESH_TREE_BODY, Focus.Outline)],
+[CMD.SORT_CHILDREN, () =&gt; p_leoUI.command(LEOCMD.SORT_CHILDREN, { refreshType: REFRESH_TREE, finalFocus: Focus.Body, keepSelection: true })],
+[CMD.SORT_SIBLING, () =&gt; p_leoUI.command(LEOCMD.SORT_SIBLINGS, { refreshType: REFRESH_TREE, finalFocus: Focus.Body, keepSelection: true })],
+[CMD.SORT_SIBLING_FO, () =&gt; p_leoUI.command(LEOCMD.SORT_SIBLINGS, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline, keepSelection: true })],
 
 </t>
-<t tx="felix.20201214150149.12">[CMD.EXTRACT, () =&gt; p_leoUI.command(LEOCMD.EXTRACT, U, REFRESH_TREE_BODY, Focus.Body)],
-[CMD.EXTRACT_NAMES, () =&gt; p_leoUI.command(LEOCMD.EXTRACT_NAMES, U, REFRESH_TREE_BODY, Focus.Body)],
+<t tx="felix.20201214150149.11">[CMD.MARK, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, { node: p_node, refreshType: REFRESH_TREE, finalFocus: Focus.Outline, keepSelection: true })],
+[CMD.MARK_SELECTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
+[CMD.MARK_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
+[CMD.UNMARK, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, { node: p_node, refreshType: REFRESH_TREE, finalFocus: Focus.Outline, keepSelection: true })],
+[CMD.UNMARK_SELECTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
+[CMD.UNMARK_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_MARK, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
+[CMD.UNMARK_ALL, () =&gt; p_leoUI.command(LEOCMD.UNMARK_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
 </t>
-<t tx="felix.20201214150149.13">[CMD.MOVE_DOWN, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, p_node, REFRESH_TREE_BODY, Focus.Outline, true)],
-[CMD.MOVE_DOWN_SELECTION, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, Focus.Body)],
-[CMD.MOVE_DOWN_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, U, REFRESH_TREE, Focus.Outline)],
-
-[CMD.MOVE_LEFT, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_LEFT, p_node, REFRESH_TREE_BODY, Focus.Outline, true)],
-[CMD.MOVE_LEFT_SELECTION, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, Focus.Body)],
-[CMD.MOVE_LEFT_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_LEFT, U, REFRESH_TREE, Focus.Outline)],
-
-[CMD.MOVE_RIGHT, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_RIGHT, p_node, REFRESH_TREE_BODY, Focus.Outline, true)],
-[CMD.MOVE_RIGHT_SELECTION, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, Focus.Body)],
-[CMD.MOVE_RIGHT_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_RIGHT, U, REFRESH_TREE, Focus.Outline)],
-
-[CMD.MOVE_UP, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_UP, p_node, REFRESH_TREE_BODY, Focus.Outline, true)],
-[CMD.MOVE_UP_SELECTION, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, Focus.Body)],
-[CMD.MOVE_UP_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_UP, U, REFRESH_TREE, Focus.Outline)],
+<t tx="felix.20201214150149.12">[CMD.EXTRACT, () =&gt; p_leoUI.command(LEOCMD.EXTRACT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
+[CMD.EXTRACT_NAMES, () =&gt; p_leoUI.command(LEOCMD.EXTRACT_NAMES, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 
 </t>
-<t tx="felix.20201214150149.14">[CMD.REDO, () =&gt; p_leoUI.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, Focus.Body)],
-[CMD.REDO_FO, () =&gt; p_leoUI.command(LEOCMD.REDO, U, REFRESH_TREE_BODY, Focus.Outline)],
-[CMD.UNDO, () =&gt; p_leoUI.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, Focus.Body)],
-[CMD.UNDO_FO, () =&gt; p_leoUI.command(LEOCMD.UNDO, U, REFRESH_TREE_BODY, Focus.Outline)],
+<t tx="felix.20201214150149.13">[CMD.MOVE_DOWN, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
+[CMD.MOVE_DOWN_SELECTION, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
+[CMD.MOVE_DOWN_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_DOWN, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
+
+[CMD.MOVE_LEFT, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_LEFT, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
+[CMD.MOVE_LEFT_SELECTION, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_LEFT, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
+[CMD.MOVE_LEFT_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_LEFT, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
+
+[CMD.MOVE_RIGHT, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_RIGHT, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
+[CMD.MOVE_RIGHT_SELECTION, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_RIGHT, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
+[CMD.MOVE_RIGHT_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_RIGHT, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
+
+[CMD.MOVE_UP, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_UP, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
+[CMD.MOVE_UP_SELECTION, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_UP, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
+[CMD.MOVE_UP_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.MOVE_PNODE_UP, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
+
+</t>
+<t tx="felix.20201214150149.14">[CMD.REDO, () =&gt; p_leoUI.command(LEOCMD.REDO, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
+[CMD.REDO_FO, () =&gt; p_leoUI.command(LEOCMD.REDO, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.UNDO, () =&gt; p_leoUI.command(LEOCMD.UNDO, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
+[CMD.UNDO_FO, () =&gt; p_leoUI.command(LEOCMD.UNDO, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
 </t>
 <t tx="felix.20201214150149.15">[CMD.SHOW_OUTLINE, () =&gt; p_leoUI.showOutline(true)], // Also focuses on outline
@@ -1271,19 +1272,19 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.SHOW_BODY, () =&gt; p_leoUI.showBody(false)], // Also focuses on body
 
 </t>
-<t tx="felix.20201214150149.16">[CMD.COPY_MARKED, () =&gt; p_leoUI.command(LEOCMD.COPY_MARKED, U, REFRESH_TREE_BODY, Focus.Outline)],
-[CMD.DIFF_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.DIFF_MARKED_NODES, U, REFRESH_TREE_BODY, Focus.Outline)],
-[CMD.MARK_CHANGED_ITEMS, () =&gt; p_leoUI.command(LEOCMD.MARK_CHANGED_ITEMS, U, REFRESH_TREE_BODY, Focus.Outline)],
-[CMD.MARK_SUBHEADS, () =&gt; p_leoUI.command(LEOCMD.MARK_SUBHEADS, U, REFRESH_TREE_BODY, Focus.Outline)],
-[CMD.CLONE_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.CLONE_MARKED_NODES, U, REFRESH_TREE_BODY, Focus.Outline)],
-[CMD.DELETE_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.DELETE_MARKED_NODES, U, REFRESH_TREE_BODY, Focus.Outline)],
-[CMD.MOVE_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.MOVE_MARKED_NODES, U, REFRESH_TREE_BODY, Focus.Outline)],
+<t tx="felix.20201214150149.16">[CMD.COPY_MARKED, () =&gt; p_leoUI.command(LEOCMD.COPY_MARKED, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.DIFF_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.DIFF_MARKED_NODES, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.MARK_CHANGED_ITEMS, () =&gt; p_leoUI.command(LEOCMD.MARK_CHANGED_ITEMS, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.MARK_SUBHEADS, () =&gt; p_leoUI.command(LEOCMD.MARK_SUBHEADS, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.CLONE_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.CLONE_MARKED_NODES, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.DELETE_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.DELETE_MARKED_NODES, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.MOVE_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.MOVE_MARKED_NODES, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
-[CMD.PREV_NODE, () =&gt; p_leoUI.command(LEOCMD.GOTO_PREV_HISTORY, U, REFRESH_TREE_BODY, Focus.Body)],
-[CMD.PREV_NODE_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_PREV_HISTORY, U, REFRESH_TREE_BODY, Focus.Outline)],
+[CMD.PREV_NODE, () =&gt; p_leoUI.command(LEOCMD.GOTO_PREV_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
+[CMD.PREV_NODE_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_PREV_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
-[CMD.NEXT_NODE, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, U, REFRESH_TREE_BODY, Focus.Body)],
-[CMD.NEXT_NODE_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, U, REFRESH_TREE_BODY, Focus.Outline)],
+[CMD.NEXT_NODE, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
+[CMD.NEXT_NODE_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
 </t>
 <t tx="felix.20201214150149.17">[CMD.CLONE_FIND_ALL, () =&gt; p_leoUI.cloneFind(false, false)],
@@ -1313,7 +1314,7 @@ export function activate(p_context: vscode.ExtensionContext) {
 </t>
 <t tx="felix.20201214150149.2">@others
 </t>
-<t tx="felix.20201214150149.3">[CMD.EXECUTE, () =&gt; p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, U, REFRESH_ALL, Focus.NoChange)],
+<t tx="felix.20201214150149.3">[CMD.EXECUTE, () =&gt; p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, { refreshType: REFRESH_ALL, finalFocus: Focus.NoChange })],
 
 [CMD.MINIBUFFER, () =&gt; p_leoUI.minibuffer()], // Is referenced in package.json
 [CMD.SET_LEO_ID, () =&gt; p_leoUI.setLeoIDCommand()],
@@ -1334,20 +1335,20 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.SWITCH_FILE, () =&gt; p_leoUI.switchLeoFile()],
 [CMD.RECENT_FILES, () =&gt; p_leoUI.showRecentLeoFiles()],
 
-[CMD.WRITE_AT_FILE_NODES, () =&gt; p_leoUI.command(LEOCMD.WRITE_AT_FILE_NODES, U, REFRESH_TREE, Focus.Body, false)],
-[CMD.WRITE_AT_FILE_NODES_FO, () =&gt; p_leoUI.command(LEOCMD.WRITE_AT_FILE_NODES, U, REFRESH_TREE, Focus.Outline, false)],
-[CMD.WRITE_DIRTY_AT_FILE_NODES, () =&gt; p_leoUI.command(LEOCMD.WRITE_DIRTY_AT_FILE_NODES, U, REFRESH_TREE, Focus.Body, false)],
-[CMD.WRITE_DIRTY_AT_FILE_NODES_FO, () =&gt; p_leoUI.command(LEOCMD.WRITE_DIRTY_AT_FILE_NODES, U, REFRESH_TREE, Focus.Outline, false)],
+[CMD.WRITE_AT_FILE_NODES, () =&gt; p_leoUI.command(LEOCMD.WRITE_AT_FILE_NODES, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
+[CMD.WRITE_AT_FILE_NODES_FO, () =&gt; p_leoUI.command(LEOCMD.WRITE_AT_FILE_NODES, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
+[CMD.WRITE_DIRTY_AT_FILE_NODES, () =&gt; p_leoUI.command(LEOCMD.WRITE_DIRTY_AT_FILE_NODES, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
+[CMD.WRITE_DIRTY_AT_FILE_NODES_FO, () =&gt; p_leoUI.command(LEOCMD.WRITE_DIRTY_AT_FILE_NODES, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
 
 [CMD.SET_OPENED_FILE, (p_index: number) =&gt; p_leoUI.selectOpenedLeoDocument(p_index, true)],
 
-[CMD.REFRESH_FROM_DISK, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, p_node, REFRESH_TREE_BODY, Focus.Outline)],
+[CMD.REFRESH_FROM_DISK, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
-[CMD.REFRESH_FROM_DISK_SELECTION, () =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, U, REFRESH_TREE_BODY, Focus.Body)],
+[CMD.REFRESH_FROM_DISK_SELECTION, () =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 
-[CMD.REFRESH_FROM_DISK_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, U, REFRESH_TREE_BODY, Focus.Outline)],
+[CMD.REFRESH_FROM_DISK_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
-[CMD.GIT_DIFF, () =&gt; p_leoUI.command(LEOCMD.GIT_DIFF, U, REFRESH_TREE_BODY, Focus.Body)],
+[CMD.GIT_DIFF, () =&gt; p_leoUI.command(LEOCMD.GIT_DIFF, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 
 </t>
 <t tx="felix.20201214150149.5">[CMD.HEADLINE, (p_node: Position) =&gt; p_leoUI.editHeadline(p_node, true)],
@@ -1356,55 +1357,56 @@ export function activate(p_context: vscode.ExtensionContext) {
 
 </t>
 <t tx="felix.20201214150149.6">// cut/copy/paste/delete given node.
-[CMD.COPY, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.COPY_PNODE, p_node, NO_REFRESH, Focus.Outline, true)],
-[CMD.CUT, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.CUT_PNODE, p_node, REFRESH_TREE_BODY, Focus.Outline, true)],
-[CMD.DELETE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.DELETE_PNODE, p_node, REFRESH_TREE_BODY, Focus.Outline, true)],
-[CMD.PASTE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.PASTE_PNODE, p_node, REFRESH_TREE_BODY, Focus.Outline, false)],
-[CMD.PASTE_CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, p_node, REFRESH_TREE_BODY, Focus.Outline, false)],
+[CMD.COPY, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.COPY_PNODE, { node: p_node, refreshType: NO_REFRESH, finalFocus: Focus.Outline, keepSelection: true })],
+[CMD.CUT, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.CUT_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
+[CMD.DELETE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.DELETE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
+[CMD.PASTE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.PASTE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.PASTE_CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
 // cut/copy/paste/delete current selection (self.commander.p)
-[CMD.COPY_SELECTION, () =&gt; p_leoUI.command(LEOCMD.COPY_PNODE, U, NO_REFRESH, Focus.NoChange)],
-[CMD.CUT_SELECTION, () =&gt; p_leoUI.command(LEOCMD.CUT_PNODE, U, REFRESH_TREE_BODY, Focus.Body)],
-[CMD.CUT_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.CUT_PNODE, U, REFRESH_TREE_BODY, Focus.Outline)],
-[CMD.DELETE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.DELETE_PNODE, U, REFRESH_TREE_BODY, Focus.Body)],
-[CMD.DELETE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.DELETE_PNODE, U, REFRESH_TREE_BODY, Focus.Outline)],
-[CMD.PASTE_CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, U, REFRESH_TREE_BODY, Focus.Body)],
-[CMD.PASTE_CLONE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, U, REFRESH_TREE_BODY, Focus.Outline)],
-[CMD.PASTE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, Focus.Body)],
-[CMD.PASTE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.PASTE_PNODE, U, REFRESH_TREE_BODY, Focus.Outline)],
+[CMD.COPY_SELECTION, () =&gt; p_leoUI.command(LEOCMD.COPY_PNODE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.CUT_SELECTION, () =&gt; p_leoUI.command(LEOCMD.CUT_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
+[CMD.CUT_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.CUT_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.DELETE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.DELETE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
+[CMD.DELETE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.DELETE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.PASTE_CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
+[CMD.PASTE_CLONE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.PASTE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.PASTE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
+[CMD.PASTE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.PASTE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
 </t>
 <t tx="felix.20201214150149.7">// Called by nodes in the tree when selected either by mouse, or with enter
 [CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) =&gt; p_leoUI.selectTreeNode(p_outlineNode.position, false)], // Select is NOT a Position!
 [CMD.OPEN_ASIDE, (p_position: Position) =&gt; p_leoUI.selectTreeNode(p_position, true)],
 
-[CMD.CONTRACT_ALL, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, Focus.Body)],
-[CMD.CONTRACT_ALL_FO, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_ALL, U, REFRESH_TREE_BODY, Focus.Outline)],
+[CMD.CONTRACT_ALL, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
+[CMD.CONTRACT_ALL_FO, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_ALL, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
-[CMD.CONTRACT_OR_GO_LEFT, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_OR_GO_LEFT, U, REFRESH_TREE_BODY, Focus.Outline)],
-[CMD.EXPAND_AND_GO_RIGHT, () =&gt; p_leoUI.command(LEOCMD.EXPAND_AND_GO_RIGHT, U, REFRESH_TREE_BODY, Focus.Outline)],
-
-</t>
-<t tx="felix.20201214150149.8">[CMD.GOTO_NEXT_CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, p_node, REFRESH_NODE_BODY, Focus.Outline)],
-[CMD.GOTO_NEXT_CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, Focus.Body)],
-[CMD.GOTO_NEXT_CLONE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, U, REFRESH_NODE_BODY, Focus.Outline)],
-
-[CMD.GOTO_NEXT_MARKED, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_MARKED, U, REFRESH_NODE_BODY, Focus.Outline)],
-[CMD.GOTO_FIRST_VISIBLE, () =&gt; p_leoUI.command(LEOCMD.GOTO_FIRST_VISIBLE, U, REFRESH_NODE_BODY, Focus.Outline)],
-[CMD.GOTO_LAST_SIBLING, () =&gt; p_leoUI.command(LEOCMD.GOTO_LAST_SIBLING, U, REFRESH_NODE_BODY, Focus.Outline)],
-[CMD.GOTO_LAST_VISIBLE, () =&gt; p_leoUI.command(LEOCMD.GOTO_LAST_VISIBLE, U, REFRESH_NODE_BODY, Focus.Outline)],
-[CMD.GOTO_NEXT_VISIBLE, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_VISIBLE, U, REFRESH_NODE_BODY, Focus.Outline)],
-[CMD.GOTO_PREV_VISIBLE, () =&gt; p_leoUI.command(LEOCMD.GOTO_PREV_VISIBLE, U, REFRESH_NODE_BODY, Focus.Outline)],
-
-[CMD.PAGE_UP, () =&gt; p_leoUI.command(LEOCMD.PAGE_UP, U, REFRESH_NODE_BODY, Focus.Outline)],
-[CMD.PAGE_DOWN, () =&gt; p_leoUI.command(LEOCMD.PAGE_DOWN, U, REFRESH_NODE_BODY, Focus.Outline)],
+[CMD.CONTRACT_OR_GO_LEFT, () =&gt; p_leoUI.command(LEOCMD.CONTRACT_OR_GO_LEFT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+[CMD.EXPAND_AND_GO_RIGHT, () =&gt; p_leoUI.command(LEOCMD.EXPAND_AND_GO_RIGHT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
 
 </t>
-<t tx="felix.20201214150149.9">[CMD.DEHOIST, () =&gt; p_leoUI.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, Focus.Body)],
-[CMD.DEHOIST_FO, () =&gt; p_leoUI.command(LEOCMD.DEHOIST, U, REFRESH_TREE_BODY, Focus.Outline)],
-[CMD.HOIST, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.HOIST_PNODE, p_node, REFRESH_TREE_BODY, Focus.Outline)],
-[CMD.HOIST_SELECTION, () =&gt; p_leoUI.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, Focus.Body)],
-[CMD.HOIST_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.HOIST_PNODE, U, REFRESH_TREE, Focus.Outline)],
+<t tx="felix.20201214150149.8">[CMD.GOTO_NEXT_CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { node: p_node, refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+[CMD.GOTO_NEXT_CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Body, isNavigation: true })],
+[CMD.GOTO_NEXT_CLONE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_CLONE, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+
+[CMD.GOTO_NEXT_MARKED, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_MARKED, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+[CMD.GOTO_FIRST_SIBLING, () =&gt; p_leoUI.command(LEOCMD.GOTO_FIRST_SIBLING, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+[CMD.GOTO_LAST_SIBLING, () =&gt; p_leoUI.command(LEOCMD.GOTO_LAST_SIBLING, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+[CMD.GOTO_FIRST_VISIBLE, () =&gt; p_leoUI.command(LEOCMD.GOTO_FIRST_VISIBLE, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+[CMD.GOTO_LAST_VISIBLE, () =&gt; p_leoUI.command(LEOCMD.GOTO_LAST_VISIBLE, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+[CMD.GOTO_NEXT_VISIBLE, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_VISIBLE, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+[CMD.GOTO_PREV_VISIBLE, () =&gt; p_leoUI.command(LEOCMD.GOTO_PREV_VISIBLE, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+
+[CMD.PAGE_UP, () =&gt; p_leoUI.command(LEOCMD.PAGE_UP, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+[CMD.PAGE_DOWN, () =&gt; p_leoUI.command(LEOCMD.PAGE_DOWN, { refreshType: REFRESH_NODE_BODY, finalFocus: Focus.Outline, isNavigation: true })],
+
+</t>
+<t tx="felix.20201214150149.9">[CMD.DEHOIST, () =&gt; p_leoUI.command(LEOCMD.DEHOIST, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
+[CMD.DEHOIST_FO, () =&gt; p_leoUI.command(LEOCMD.DEHOIST, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.HOIST, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.HOIST_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.HOIST_SELECTION, () =&gt; p_leoUI.command(LEOCMD.HOIST_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
+[CMD.HOIST_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.HOIST_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
 
 </t>
 <t tx="felix.20201214151326.1">import * as vscode from "vscode";
@@ -1453,6 +1455,7 @@ public static COMMANDS = {
     PAGE_DOWN: Constants.NAME + ".pageDown",
     GOTO_FIRST_VISIBLE: Constants.NAME + ".gotoFirstVisible",
     GOTO_LAST_VISIBLE: Constants.NAME + ".gotoLastVisible",
+    GOTO_FIRST_SIBLING: Constants.NAME + ".gotoFirstSibling",
     GOTO_LAST_SIBLING: Constants.NAME + ".gotoLastSibling",
     GOTO_NEXT_VISIBLE: Constants.NAME + ".gotoNextVisible",
     GOTO_PREV_VISIBLE: Constants.NAME + ".gotoPrevVisible",
@@ -1651,6 +1654,7 @@ public static LEO_COMMANDS = {
     PAGE_DOWN: "tree-page-down",
     GOTO_FIRST_VISIBLE: "goto-first-visible-node",
     GOTO_LAST_VISIBLE: "goto-last-visible-node",
+    GOTO_FIRST_SIBLING: "goto-first-sibling",
     GOTO_LAST_SIBLING: "goto-last-sibling",
     GOTO_NEXT_VISIBLE: "goto-next-visible",
     GOTO_PREV_VISIBLE: "goto-prev-visible",
@@ -2588,6 +2592,7 @@ private _updateLeoObjectIndicator(): void {
 
 </t>
 <t tx="felix.20201214154816.1">import * as vscode from "vscode";
+import { Position } from "./core/leoNodes";
 import { LeoOutlineNode } from "./leoOutline";
 
 @language typescript
@@ -2698,21 +2703,6 @@ export interface ReqRefresh {
 }
 
 </t>
-<t tx="felix.20201214154816.5">/**
- * * Stackable front end commands
- */
-export interface UserCommand {
-    action: string;
-    node?: LeoOutlineNode | undefined; // We can START a stack with a targeted command
-    text?: string | undefined; // If a string is required, for headline, etc.
-    refreshType: ReqRefresh; // Minimal refresh level required by this command
-    fromOutline: boolean; // Focus back on outline instead of body
-    keepSelection?: boolean; // Should bring back selection on node prior to command
-    resolveFn?: (result: any) =&gt; void; // call that with an answer from python's (or other) side
-    rejectFn?: (reason: any) =&gt; void; // call if problem is encountered
-}
-
-</t>
 <t tx="felix.20201214154816.6">/**
  * * Object container for parameters of leoJs "apply-selected-node-to-body" method
  */
@@ -2776,7 +2766,8 @@ import {
     ConfigSetting,
     LeoSearchSettings,
     Focus,
-    BodySelectionInfo
+    BodySelectionInfo,
+    CommandOptions
 } from "./types";
 
 import { Config } from "./config";
@@ -3273,17 +3264,11 @@ public selectTreeNode(
 <t tx="felix.20201214202755.1">/**
  * Leo Command
  * @param p_cmd Command name string
- * @param p_node facultative, precise node onto which the command is run (also see p_keepSelection)
- * @param p_refreshType Object containing flags for sections needing to refresh after command ran
- * @param p_finalFocus final focus placement
- * @param p_keepSelection flags to bring back selection on the original node before command ran
+ * @param p_options: CommandOptions for the command
  */
 public async command(
     p_cmd: string,
-    p_node: Position | undefined,
-    p_refreshType: ReqRefresh,
-    p_finalFocus: Focus,
-    p_keepSelection?: boolean
+    p_options: CommandOptions
 ): Promise&lt;unknown&gt; {
     this.lastCommandTimer = process.hrtime();
     if (this.commandTimer === undefined) {
@@ -3296,11 +3281,18 @@ public async command(
 
     await this.triggerBodySave();
 
+    if (p_options.isNavigation) {
+        // If any navigation command is used from outline or command palette: show body.
+        this.showBodyIfClosed = true;
+        // If alt+arrow is used to navigate: SHOW and leave focus on outline.
+        this.showOutlineIfClosed = true;
+    }
+
     const c = g.app.windowList[this.frameIndex].c;
-    this.setupRefresh(p_finalFocus, p_refreshType);
+    this.setupRefresh(p_options.finalFocus, p_options.refreshType);
 
     let value: any = undefined;
-    const p = p_node ? p_node : c.p;
+    const p = p_options.node ? p_options.node : c.p;
 
     if (p.__eq__(c.p)) {
         value = c.doCommandByName(p_cmd); // no need for re-selection
@@ -3308,7 +3300,7 @@ public async command(
         const old_p = c.p;
         c.selectPosition(p);
         value = c.doCommandByName(p_cmd);
-        if (p_keepSelection &amp;&amp; c.positionExists(old_p)) {
+        if (p_options.keepSelection &amp;&amp; c.positionExists(old_p)) {
             // Only if 'keep' old position was set, and old_p still exists
             c.selectPosition(old_p);
         }
@@ -3591,10 +3583,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "f07e723",
-  "gitBranch": "devel",
-  "gitDate": "2022-10-03 22:36:33 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -4360,6 +4349,12 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "title": "Page Down"
 },
 {
+  "command": "leojs.gotoFirstSibling",
+  "category": "leojs",
+  "enablement": "leojsTreeOpened",
+  "title": "Goto First Sibling"
+},
+{
   "command": "leojs.gotoLastSibling",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
@@ -4955,6 +4950,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 },
 {
   "command": "leojs.gotoLastVisible",
+  "when": "false"
+},
+{
+  "command": "leojs.gotoFirstSibling",
   "when": "false"
 },
 {
@@ -10677,7 +10676,7 @@ function getNonce() {
       "source.leojsbody.typescript"
     ],
     "path": "./syntaxes/leojsbody.tmLanguage.json",
-    "scopeName": "leo.injection"
+    "scopeName": "leojs.injection"
   }
 ],
 </t>
@@ -12263,6 +12262,15 @@ set leojsStartupDone(p_value: boolean) {
 </t>
 <t tx="felix.20221005002719.1">function setStartupDoneContext(p_value: boolean): Thenable&lt;unknown&gt; {
     return vscode.commands.executeCommand(Constants.VSCODE_COMMANDS.SET_CONTEXT, Constants.CONTEXT_FLAGS.LEO_STARTUP_DONE, p_value);
+}
+
+</t>
+<t tx="felix.20221009011653.1">export interface CommandOptions {
+    node?: Position, // facultative, precise node onto which the command is run (also see p_keepSelection)
+    refreshType: ReqRefresh, // Object containing flags for sections needing to refresh after command ran
+    finalFocus: Focus, // final focus placement
+    keepSelection?: boolean, // flag to bring back selection on the original node
+    isNavigation?: boolean // Navigation commands force-show the body and outline
 }
 
 </t>

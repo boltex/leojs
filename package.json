@@ -580,7 +580,7 @@
           "source.leojsbody.typescript"
         ],
         "path": "./syntaxes/leojsbody.tmLanguage.json",
-        "scopeName": "leo.injection"
+        "scopeName": "leojs.injection"
       }
     ],
     "snippets": [
@@ -1519,6 +1519,12 @@
         "title": "Page Down"
       },
       {
+        "command": "leojs.gotoFirstSibling",
+        "category": "leojs",
+        "enablement": "leojsTreeOpened",
+        "title": "Goto First Sibling"
+      },
+      {
         "command": "leojs.gotoLastSibling",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
@@ -1933,6 +1939,10 @@
         },
         {
           "command": "leojs.gotoLastVisible",
+          "when": "false"
+        },
+        {
+          "command": "leojs.gotoFirstSibling",
           "when": "false"
         },
         {
@@ -2837,8 +2847,5 @@
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "stream": "^0.0.2"
-  },
-  "gitCommit": "f07e723",
-  "gitBranch": "devel",
-  "gitDate": "2022-10-03 22:36:33 -0400"
+  }
 }

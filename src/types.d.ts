@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { Position } from "./core/leoNodes";
 import { LeoOutlineNode } from "./leoOutline";
 
 /**
@@ -91,18 +92,12 @@ export interface ReqRefresh {
     goto?: boolean; // Goto pane needs refresh
 }
 
-/**
- * * Stackable front end commands
- */
-export interface UserCommand {
-    action: string;
-    node?: LeoOutlineNode | undefined; // We can START a stack with a targeted command
-    text?: string | undefined; // If a string is required, for headline, etc.
-    refreshType: ReqRefresh; // Minimal refresh level required by this command
-    fromOutline: boolean; // Focus back on outline instead of body
-    keepSelection?: boolean; // Should bring back selection on node prior to command
-    resolveFn?: (result: any) => void; // call that with an answer from python's (or other) side
-    rejectFn?: (reason: any) => void; // call if problem is encountered
+export interface CommandOptions {
+    node?: Position, // facultative, precise node onto which the command is run (also see p_keepSelection)
+    refreshType: ReqRefresh, // Object containing flags for sections needing to refresh after command ran
+    finalFocus: Focus, // final focus placement
+    keepSelection?: boolean, // flag to bring back selection on the original node
+    isNavigation?: boolean // Navigation commands force-show the body and outline
 }
 
 /**

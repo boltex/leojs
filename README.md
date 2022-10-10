@@ -90,8 +90,9 @@ _Move Outline commands need the 'Alt' key modifier only when focus is on body pa
 | Tree Navigation    |           |                 |                          |
 | :----------------- | :-------- | :-------------- | :----------------------- |
 | `Alt + Home`       | or        | `Home` \*       | Go To First Visible Node |
-| `Alt + End`        |           |                 | Go To Last Sibling       |
 |                    |           | `End` \*        | Go To Last Visible Node  |
+| `PgUp / pgDn`      |           |                 | Tree page up/down        |
+| `Alt + End`        |           |                 | Go To Last Sibling       |
 | `Alt + N`          |           |                 | Go To Next Clone         |
 | `Alt + Arrow Keys` | or        | `Arrow Keys` \* | Browse Tree              |
 

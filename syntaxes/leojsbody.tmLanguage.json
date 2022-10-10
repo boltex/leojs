@@ -1,6 +1,6 @@
 {
     "name": "Leo Body",
-    "scopeName": "leo.injection",
+    "scopeName": "leojs.injection",
     "injectionSelector": "L:source.leojsbody",
     "patterns": [
         {

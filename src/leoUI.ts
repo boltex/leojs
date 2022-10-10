@@ -14,7 +14,8 @@ import {
     ConfigSetting,
     LeoSearchSettings,
     Focus,
-    BodySelectionInfo
+    BodySelectionInfo,
+    CommandOptions
 } from "./types";
 
 import { Config } from "./config";
@@ -2518,17 +2519,11 @@ export class LeoUI {
     /**
      * Leo Command
      * @param p_cmd Command name string
-     * @param p_node facultative, precise node onto which the command is run (also see p_keepSelection)
-     * @param p_refreshType Object containing flags for sections needing to refresh after command ran
-     * @param p_finalFocus final focus placement
-     * @param p_keepSelection flags to bring back selection on the original node before command ran
+     * @param p_options: CommandOptions for the command
      */
     public async command(
         p_cmd: string,
-        p_node: Position | undefined,
-        p_refreshType: ReqRefresh,
-        p_finalFocus: Focus,
-        p_keepSelection?: boolean
+        p_options: CommandOptions
     ): Promise<unknown> {
         this.lastCommandTimer = process.hrtime();
         if (this.commandTimer === undefined) {
@@ -2541,11 +2536,18 @@ export class LeoUI {
 
         await this.triggerBodySave();
 
+        if (p_options.isNavigation) {
+            // If any navigation command is used from outline or command palette: show body.
+            this.showBodyIfClosed = true;
+            // If alt+arrow is used to navigate: SHOW and leave focus on outline.
+            this.showOutlineIfClosed = true;
+        }
+
         const c = g.app.windowList[this.frameIndex].c;
-        this.setupRefresh(p_finalFocus, p_refreshType);
+        this.setupRefresh(p_options.finalFocus, p_options.refreshType);
 
         let value: any = undefined;
-        const p = p_node ? p_node : c.p;
+        const p = p_options.node ? p_options.node : c.p;
 
         if (p.__eq__(c.p)) {
             value = c.doCommandByName(p_cmd); // no need for re-selection
@@ -2553,7 +2555,7 @@ export class LeoUI {
             const old_p = c.p;
             c.selectPosition(p);
             value = c.doCommandByName(p_cmd);
-            if (p_keepSelection && c.positionExists(old_p)) {
+            if (p_options.keepSelection && c.positionExists(old_p)) {
                 // Only if 'keep' old position was set, and old_p still exists
                 c.selectPosition(old_p);
             }
