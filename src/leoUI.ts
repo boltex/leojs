@@ -55,7 +55,6 @@ export class LeoUI {
     public lastCommandRefreshTimer: [number, number] | undefined; // until the selected node is found - refreshed if starting a new command
     public commandTimer: [number, number] | undefined; // until the command done - keep if starting a new one already pending
     public lastCommandTimer: [number, number] | undefined; // until the command done - refreshed if starting a new one
-    public preventRefresh: boolean = false;
 
     // * Configuration Settings Service
     public config: Config; // Public configuration service singleton, used in leoSettingsWebview, leoBridge, and leoNode for inverted contrast
@@ -2549,15 +2548,43 @@ export class LeoUI {
         let value: any = undefined;
         const p = p_options.node ? p_options.node : c.p;
 
+        let w_offset = 0;
+        if (p_options.keepSelection) {
+            if (Constants.OLD_POS_OFFSETS.DELETE.includes(p_cmd)) {
+                w_offset = -1;
+            } else if (Constants.OLD_POS_OFFSETS.ADD.includes(p_cmd)) {
+                w_offset = 1;
+            }
+        }
+
         if (p.__eq__(c.p)) {
             value = c.doCommandByName(p_cmd); // no need for re-selection
         } else {
             const old_p = c.p;
             c.selectPosition(p);
             value = c.doCommandByName(p_cmd);
-            if (p_options.keepSelection && c.positionExists(old_p)) {
-                // Only if 'keep' old position was set, and old_p still exists
-                c.selectPosition(old_p);
+            if (p_options.keepSelection) {
+                if (value && value.then) {
+                    (value as Thenable<unknown>).then((p_result) => {
+                        if (c.positionExists(old_p)) {
+                            c.selectPosition(old_p);
+                        } else {
+                            old_p._childIndex = old_p._childIndex + w_offset;
+                            if (c.positionExists(old_p)) {
+                                c.selectPosition(old_p);
+                            }
+                        }
+                    });
+                } else {
+                    if (c.positionExists(old_p)) {
+                        c.selectPosition(old_p);
+                    } else {
+                        old_p._childIndex = old_p._childIndex + w_offset;
+                        if (c.positionExists(old_p)) {
+                            c.selectPosition(old_p);
+                        }
+                    }
+                }
             }
         }
         if (this.trace) {
@@ -2567,23 +2594,22 @@ export class LeoUI {
         }
         this.lastCommandTimer = undefined;
 
-        if (!this.preventRefresh) {
 
-            if (value && value.then) {
-                // IS A PROMISE
-                (value as Thenable<unknown>).then((p_result) => {
-                    this.launchRefresh();
-                });
-            } else {
+        if (value && value.then) {
+            (value as Thenable<unknown>).then((p_result) => {
                 this.launchRefresh();
-            }
-
-
+            });
         } else {
-            this.preventRefresh = false;
+            this.launchRefresh();
         }
 
-        return Promise.resolve(value);
+
+        if (value && value.then) {
+            return value;
+        } else {
+            return Promise.resolve(value); // value may be a promise but it will resolve all at once.
+
+        }
     }
 
     /**
@@ -2705,21 +2731,16 @@ export class LeoUI {
         if (p_picked && p_picked.label) {
             this._minibufferHistory.unshift(p_picked.label); // Add to minibuffer history
             const c = g.app.windowList[this.frameIndex].c;
-            const w_commandResult = c.doCommandByName(p_picked.label);
+            const w_commandResult = c.executeMinibufferCommand(p_picked.label);
 
-            if (!this.preventRefresh) {
-                if (w_commandResult && w_commandResult.then) {
-                    // IS A PROMISE
-                    (w_commandResult as Thenable<unknown>).then((p_result) => {
-                        this.launchRefresh();
-                    });
-                } else {
+            if (w_commandResult && w_commandResult.then) {
+                // IS A PROMISE
+                (w_commandResult as Thenable<unknown>).then((p_result) => {
                     this.launchRefresh();
-                }
+                });
             } else {
-                this.preventRefresh = false;
+                this.launchRefresh();
             }
-
             return Promise.resolve(w_commandResult);
         } else {
             // Canceled
@@ -2831,7 +2852,14 @@ export class LeoUI {
                     this.setupRefresh(w_finalFocus, { tree: true, documents: true, buttons: true, states: true });
                     c.selectPosition(old_p);
                 } else {
-                    this.setupRefresh(w_finalFocus, { tree: true, body: true, documents: true, buttons: true, states: true });
+                    old_p._childIndex = old_p._childIndex + 1;
+                    if (!!p_node && c.positionExists(old_p)) {
+                        // no need to refresh body
+                        this.setupRefresh(w_finalFocus, { tree: true, documents: true, buttons: true, states: true });
+                        c.selectPosition(old_p);
+                    } else {
+                        this.setupRefresh(w_finalFocus, { tree: true, body: true, documents: true, buttons: true, states: true });
+                    }
                 }
             }
             if (this.trace) {
@@ -4372,7 +4400,6 @@ export class LeoUI {
 export class NullGui {
 
     private clipboardContents: string = "";
-    public preventRefresh: boolean = false;
     public isNullGui: boolean = true;
 
     public launchRefresh(): void { }

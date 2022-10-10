@@ -668,6 +668,14 @@ export class Constants {
     };
 
     /**
+     * List of command names for both categories of possible offsets when keeping selection.
+     */
+    public static OLD_POS_OFFSETS = {
+        DELETE: ["cut-node", "delete-node"],
+        ADD: ["clone-node", "async-paste-node", "async-paste-retaining-clones"]
+    }
+
+    /**
      * * Overridden 'good' minibuffer command name strings
      */
     public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {

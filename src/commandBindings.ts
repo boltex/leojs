@@ -83,8 +83,8 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.COPY, (p_node: Position) => p_leoUI.command(LEOCMD.COPY_PNODE, { node: p_node, refreshType: NO_REFRESH, finalFocus: Focus.Outline, keepSelection: true })],
         [CMD.CUT, (p_node: Position) => p_leoUI.command(LEOCMD.CUT_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
         [CMD.DELETE, (p_node: Position) => p_leoUI.command(LEOCMD.DELETE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
-        [CMD.PASTE, (p_node: Position) => p_leoUI.command(LEOCMD.PASTE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
-        [CMD.PASTE_CLONE, (p_node: Position) => p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+        [CMD.PASTE, (p_node: Position) => p_leoUI.command(LEOCMD.PASTE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
+        [CMD.PASTE_CLONE, (p_node: Position) => p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
 
         // cut/copy/paste/delete current selection (self.commander.p)
         [CMD.COPY_SELECTION, () => p_leoUI.command(LEOCMD.COPY_PNODE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
@@ -142,7 +142,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         // even specifying a headline label, e.g. spamming CTRL+I rapidly.
         [CMD.INSERT_CHILD_SELECTION_INTERRUPT, () => p_leoUI.insertNode(U, false, true, true)],
 
-        [CMD.CLONE, (p_node: Position) => p_leoUI.command(LEOCMD.CLONE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+        [CMD.CLONE, (p_node: Position) => p_leoUI.command(LEOCMD.CLONE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
         [CMD.CLONE_SELECTION, () => p_leoUI.command(LEOCMD.CLONE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
         [CMD.CLONE_SELECTION_FO, () => p_leoUI.command(LEOCMD.CLONE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
 

@@ -43,6 +43,7 @@
 <v t="felix.20220923003944.1"><vh>body language code strings</vh></v>
 <v t="felix.20201214151326.10"><vh>commands strings</vh></v>
 <v t="felix.20201214151326.11"><vh>leo commands</vh></v>
+<v t="felix.20221009233703.1"><vh>keep-selection old position offsets</vh></v>
 <v t="felix.20220103222715.1"><vh>minibuffer overridden names</vh></v>
 <v t="felix.20211208011642.1"><vh>minibuffer overridden commands</vh></v>
 </v>
@@ -1214,7 +1215,7 @@ export function activate(p_context: vscode.ExtensionContext) {
 // even specifying a headline label, e.g. spamming CTRL+I rapidly.
 [CMD.INSERT_CHILD_SELECTION_INTERRUPT, () =&gt; p_leoUI.insertNode(U, false, true, true)],
 
-[CMD.CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
 [CMD.CLONE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
 [CMD.CLONE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.CLONE_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
 
@@ -1360,8 +1361,8 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.COPY, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.COPY_PNODE, { node: p_node, refreshType: NO_REFRESH, finalFocus: Focus.Outline, keepSelection: true })],
 [CMD.CUT, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.CUT_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
 [CMD.DELETE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.DELETE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
-[CMD.PASTE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.PASTE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
-[CMD.PASTE_CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.PASTE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.PASTE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
+[CMD.PASTE_CLONE, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.PASTE_CLONE_PNODE, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
 
 // cut/copy/paste/delete current selection (self.commander.p)
 [CMD.COPY_SELECTION, () =&gt; p_leoUI.command(LEOCMD.COPY_PNODE, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
@@ -2888,7 +2889,6 @@ export class LeoUI {
     public lastCommandRefreshTimer: [number, number] | undefined; // until the selected node is found - refreshed if starting a new command
     public commandTimer: [number, number] | undefined; // until the command done - keep if starting a new one already pending
     public lastCommandTimer: [number, number] | undefined; // until the command done - refreshed if starting a new one
-    public preventRefresh: boolean = false;
 
     // * Configuration Settings Service
     public config: Config; // Public configuration service singleton, used in leoSettingsWebview, leoBridge, and leoNode for inverted contrast
@@ -3294,15 +3294,43 @@ public async command(
     let value: any = undefined;
     const p = p_options.node ? p_options.node : c.p;
 
+    let w_offset = 0;
+    if (p_options.keepSelection) {
+        if (Constants.OLD_POS_OFFSETS.DELETE.includes(p_cmd)) {
+            w_offset = -1;
+        } else if (Constants.OLD_POS_OFFSETS.ADD.includes(p_cmd)) {
+            w_offset = 1;
+        }
+    }
+
     if (p.__eq__(c.p)) {
         value = c.doCommandByName(p_cmd); // no need for re-selection
     } else {
         const old_p = c.p;
         c.selectPosition(p);
         value = c.doCommandByName(p_cmd);
-        if (p_options.keepSelection &amp;&amp; c.positionExists(old_p)) {
-            // Only if 'keep' old position was set, and old_p still exists
-            c.selectPosition(old_p);
+        if (p_options.keepSelection) {
+            if (value &amp;&amp; value.then) {
+                (value as Thenable&lt;unknown&gt;).then((p_result) =&gt; {
+                    if (c.positionExists(old_p)) {
+                        c.selectPosition(old_p);
+                    } else {
+                        old_p._childIndex = old_p._childIndex + w_offset;
+                        if (c.positionExists(old_p)) {
+                            c.selectPosition(old_p);
+                        }
+                    }
+                });
+            } else {
+                if (c.positionExists(old_p)) {
+                    c.selectPosition(old_p);
+                } else {
+                    old_p._childIndex = old_p._childIndex + w_offset;
+                    if (c.positionExists(old_p)) {
+                        c.selectPosition(old_p);
+                    }
+                }
+            }
         }
     }
     if (this.trace) {
@@ -3312,23 +3340,22 @@ public async command(
     }
     this.lastCommandTimer = undefined;
 
-    if (!this.preventRefresh) {
 
-        if (value &amp;&amp; value.then) {
-            // IS A PROMISE
-            (value as Thenable&lt;unknown&gt;).then((p_result) =&gt; {
-                this.launchRefresh();
-            });
-        } else {
+    if (value &amp;&amp; value.then) {
+        (value as Thenable&lt;unknown&gt;).then((p_result) =&gt; {
             this.launchRefresh();
-        }
-
-
+        });
     } else {
-        this.preventRefresh = false;
+        this.launchRefresh();
     }
 
-    return Promise.resolve(value);
+
+    if (value &amp;&amp; value.then) {
+        return value;
+    } else {
+        return Promise.resolve(value); // value may be a promise but it will resolve all at once.
+
+    }
 }
 
 </t>
@@ -3517,7 +3544,14 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
                 this.setupRefresh(w_finalFocus, { tree: true, documents: true, buttons: true, states: true });
                 c.selectPosition(old_p);
             } else {
-                this.setupRefresh(w_finalFocus, { tree: true, body: true, documents: true, buttons: true, states: true });
+                old_p._childIndex = old_p._childIndex + 1;
+                if (!!p_node &amp;&amp; c.positionExists(old_p)) {
+                    // no need to refresh body
+                    this.setupRefresh(w_finalFocus, { tree: true, documents: true, buttons: true, states: true });
+                    c.selectPosition(old_p);
+                } else {
+                    this.setupRefresh(w_finalFocus, { tree: true, body: true, documents: true, buttons: true, states: true });
+                }
             }
         }
         if (this.trace) {
@@ -8540,7 +8574,6 @@ public finishStartup(): void {
 export class NullGui {
 
     private clipboardContents: string = "";
-    public preventRefresh: boolean = false;
     public isNullGui: boolean = true;
 
     public launchRefresh(): void { }
@@ -12224,21 +12257,16 @@ private async _doMinibufferCommand(p_picked: vscode.QuickPickItem | undefined): 
     if (p_picked &amp;&amp; p_picked.label) {
         this._minibufferHistory.unshift(p_picked.label); // Add to minibuffer history
         const c = g.app.windowList[this.frameIndex].c;
-        const w_commandResult = c.doCommandByName(p_picked.label);
+        const w_commandResult = c.executeMinibufferCommand(p_picked.label);
 
-        if (!this.preventRefresh) {
-            if (w_commandResult &amp;&amp; w_commandResult.then) {
-                // IS A PROMISE
-                (w_commandResult as Thenable&lt;unknown&gt;).then((p_result) =&gt; {
-                    this.launchRefresh();
-                });
-            } else {
+        if (w_commandResult &amp;&amp; w_commandResult.then) {
+            // IS A PROMISE
+            (w_commandResult as Thenable&lt;unknown&gt;).then((p_result) =&gt; {
                 this.launchRefresh();
-            }
+            });
         } else {
-            this.preventRefresh = false;
+            this.launchRefresh();
         }
-
         return Promise.resolve(w_commandResult);
     } else {
         // Canceled
@@ -12271,6 +12299,15 @@ set leojsStartupDone(p_value: boolean) {
     finalFocus: Focus, // final focus placement
     keepSelection?: boolean, // flag to bring back selection on the original node
     isNavigation?: boolean // Navigation commands force-show the body and outline
+}
+
+</t>
+<t tx="felix.20221009233703.1">/**
+ * List of command names for both categories of possible offsets when keeping selection.
+ */
+public static OLD_POS_OFFSETS = {
+    DELETE: ["cut-node", "delete-node"],
+    ADD: ["clone-node", "async-paste-node", "async-paste-retaining-clones"]
 }
 
 </t>

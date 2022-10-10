@@ -160,11 +160,10 @@ export class CommanderOutlineCommands {
         'Paste an outline into the present outline from the clipboard.\n' +
         'Nodes do *not* retain their original identify.'
     )
-    public asyncPasteOutline(this: Commands): void {
-        g.app.gui!.preventRefresh = true;
-        g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
+    public asyncPasteOutline(this: Commands): Thenable<unknown> {
+        return g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
             this.pasteOutline(clipboard);
-            g.app.gui!.launchRefresh();
+            return true;
         });
     }
     //@+node:felix.20211208235043.5: *4* c_oc.pasteOutlineRetainingClones
@@ -236,11 +235,10 @@ export class CommanderOutlineCommands {
         'Paste an outline into the present outline from the clipboard.\n' +
         'Nodes *retain* their original identify.'
     )
-    public asyncPasteOutlineRetainingClones(this: Commands): void {
-        g.app.gui!.preventRefresh = true;
-        g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
+    public asyncPasteOutlineRetainingClones(this: Commands): Thenable<unknown> {
+        return g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
             this.pasteOutlineRetainingClones(clipboard);
-            g.app.gui!.launchRefresh();
+            return true;
         });
     }
 
@@ -491,11 +489,10 @@ export class CommanderOutlineCommands {
         'async-paste-as-template',
         'Paste as template clones only nodes that were already clones'
     )
-    public asyncPasteAsTemplate(this: Commands): void {
-        g.app.gui!.preventRefresh = true;
-        g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
+    public asyncPasteAsTemplate(this: Commands): Thenable<unknown> {
+        return g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
             this.pasteAsTemplate(clipboard);
-            g.app.gui!.launchRefresh();
+            return true;
         });
     }
 
