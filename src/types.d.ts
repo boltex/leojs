@@ -67,8 +67,7 @@ export const enum Focus {
  * * When refreshing the outline and getting to Leo's selected node
  */
 export const enum RevealType {
-    NoReveal = 0,   // In apToLeoNode conversion. True:
-    // Re-use the old if the global revealType is "NoReveal" and it's the selected node.
+    NoReveal = 0, // Re-use the old treeId with "NoReveal" for the selected node.
     Reveal,
     RevealSelect,
     RevealSelectFocus

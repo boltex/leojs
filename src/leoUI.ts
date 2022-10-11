@@ -620,6 +620,8 @@ export class LeoUI {
         // * Startup flag
         this.leoStates.fileOpenedReady = true;
 
+        this._revealType = RevealType.RevealSelect; // For initial outline 'visible' event
+
         this.showBodyIfClosed = true;
         this.showOutlineIfClosed = true;
         this.setupRefresh(
