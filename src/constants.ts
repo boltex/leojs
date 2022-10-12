@@ -25,7 +25,7 @@ export class Constants {
     public static BUTTONS_EXPLORER_ID: string = "leojsButtonsExplorer";
 
     public static FIND_ID: string = "leojsFindPanel";
-    public static FIND_EXPLORER_ID: string = "leojsindPanelExplorer";
+    public static FIND_EXPLORER_ID: string = "leojsFindPanelExplorer";
 
     public static GOTO_ID: string = "leojsGotoPanel";
     public static GOTO_EXPLORER_ID: string = "leojsGotoPanelExplorer";

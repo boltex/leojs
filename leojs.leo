@@ -244,7 +244,6 @@
 </v>
 </v>
 <v t="felix.20220204224240.1"><vh>class NullGui</vh></v>
-<v t="felix.20220914003540.1"><vh>test webview</vh></v>
 </v>
 <v t="felix.20201214151419.1"><vh>@clean src/leoButtons.ts</vh>
 <v t="felix.20201214151419.2"><vh>class LeoButtonsProvider</vh>
@@ -2782,17 +2781,13 @@ import { Commands } from "./core/leoCommands";
 import { Position } from "./core/leoNodes";
 import { LeoGotoNode } from "./leoGoto";
 import { LeoFrame } from "./core/leoFrame";
+import { LeoFindPanelProvider } from "./leoFindPanelWebview";
 
 @language typescript
 @tabwidth -4
 @others
 </t>
 <t tx="felix.20201214194144.2">constructor(private _context: vscode.ExtensionContext) {
-
-    const provider = new ColorsViewProvider(_context.extensionUri);
-
-    _context.subscriptions.push( // todo remove this test
-        vscode.window.registerWebviewViewProvider(ColorsViewProvider.viewType, provider));
 
     // * Log pane instanciation
     this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
@@ -2939,6 +2934,7 @@ export class LeoUI {
     }
 
     // * Find panel
+    private _leoFindPanelProvider!: vscode.WebviewViewProvider;
     private _findPanelWebviewView: vscode.WebviewView | undefined;
     private _findPanelWebviewExplorerView: vscode.WebviewView | undefined;
     private _lastFindView: vscode.WebviewView | undefined;  // ? Maybe unused ?
@@ -4628,16 +4624,20 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 <t tx="felix.20201214205159.4">"views": {
   "explorer": [
     {
-      "type": "webview",
-      "id": "calicoColors.colorsView",
-      "name": "Calico Colors"
-    },
-    {
       "id": "leojsOutlineExplorer",
       "name": "Leojs Outline",
       "contextualTitle": "Leojs",
       "when": "leojsTreeInExplorer",
       "visibility": "visible"
+    },
+    {
+      "type": "webview",
+      "id": "leojsFindPanelExplorer",
+      "contextualTitle": "Leojs",
+      "name": "Leojs Find",
+      "title": "Leojs Find",
+      "when": "leojsTreeInExplorer &amp;&amp; leojsTreeOpened",
+      "visibility": "collapsed"
     },
     {
       "id": "leojsDocumentsExplorer",
@@ -4647,15 +4647,15 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
       "visibility": "collapsed"
     },
     {
-      "id": "leojsButtonsExplorer",
-      "name": "Leojs Buttons",
+      "id": "leojsUndosExplorer",
+      "name": "Leojs Undo History",
       "contextualTitle": "Leojs",
       "when": "leojsTreeInExplorer &amp;&amp; leojsTreeOpened",
       "visibility": "collapsed"
     },
     {
-      "id": "leojsUndosExplorer",
-      "name": "Leojs Undo History",
+      "id": "leojsButtonsExplorer",
+      "name": "Leojs Buttons",
       "contextualTitle": "Leojs",
       "when": "leojsTreeInExplorer &amp;&amp; leojsTreeOpened",
       "visibility": "collapsed"
@@ -4669,6 +4669,15 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
       "visibility": "visible"
     },
     {
+      "type": "webview",
+      "contextualTitle": "Leojs",
+      "id": "leojsFindPanel",
+      "name": "Find",
+      "title": "Find",
+      "when": "leojsTreeOpened",
+      "visibility": "collapsed"
+    },
+    {
       "id": "leojsDocuments",
       "contextualTitle": "Leojs",
       "name": "Documents",
@@ -4676,16 +4685,16 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
       "visibility": "collapsed"
     },
     {
-      "id": "leojsButtons",
+      "id": "leojsUndos",
       "contextualTitle": "Leojs",
-      "name": "Buttons",
+      "name": "Undo History",
       "when": "leojsTreeOpened",
       "visibility": "collapsed"
     },
     {
-      "id": "leojsUndos",
+      "id": "leojsButtons",
       "contextualTitle": "Leojs",
-      "name": "Undo History",
+      "name": "Buttons",
       "when": "leojsTreeOpened",
       "visibility": "collapsed"
     }
@@ -8461,23 +8470,23 @@ public finishStartup(): void {
     // this._leoStatusBar = new LeoStatusBar(_context, this);
 
     // * Leo Find Panel
-    // this._leoFindPanelProvider = new LeoFindPanelProvider(
-    //     _context.extensionUri,
-    //     _context,
-    //     this
-    // );
-    // this._context.subscriptions.push(
-    //     vscode.window.registerWebviewViewProvider(
-    //         Constants.FIND_ID,
-    //         this._leoFindPanelProvider,
-    //         { webviewOptions: { retainContextWhenHidden: true } }
-    //     ),
-    //     vscode.window.registerWebviewViewProvider(
-    //         Constants.FIND_EXPLORER_ID,
-    //         this._leoFindPanelProvider,
-    //         { webviewOptions: { retainContextWhenHidden: true } }
-    //     )
-    // );
+    this._leoFindPanelProvider = new LeoFindPanelProvider(
+        this._context.extensionUri,
+        this._context,
+        this
+    );
+    this._context.subscriptions.push(
+        vscode.window.registerWebviewViewProvider(
+            Constants.FIND_ID,
+            this._leoFindPanelProvider,
+            { webviewOptions: { retainContextWhenHidden: true } }
+        ),
+        vscode.window.registerWebviewViewProvider(
+            Constants.FIND_EXPLORER_ID,
+            this._leoFindPanelProvider,
+            { webviewOptions: { retainContextWhenHidden: true } }
+        )
+    );
 
     // * Configuration / Welcome webview
     // this.leoSettingsWebview = new LeoSettingsProvider(_context, this);
@@ -10311,119 +10320,6 @@ public setTreeViewTitle(p_title?: string): void {
     }
 }
 
-</t>
-<t tx="felix.20220914003540.1">
-class ColorsViewProvider implements vscode.WebviewViewProvider {
-
-    public static readonly viewType = 'calicoColors.colorsView';
-
-    private _view?: vscode.WebviewView;
-
-    constructor(
-        private readonly _extensionUri: vscode.Uri,
-    ) { }
-
-    public resolveWebviewView(
-        webviewView: vscode.WebviewView,
-        context: vscode.WebviewViewResolveContext,
-        _token: vscode.CancellationToken,
-    ) {
-        this._view = webviewView;
-
-        webviewView.webview.options = {
-            // Allow scripts in the webview
-            enableScripts: true,
-
-            localResourceRoots: [
-                this._extensionUri
-            ]
-        };
-
-        webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-
-        webviewView.webview.onDidReceiveMessage(data =&gt; {
-            switch (data.type) {
-                case 'colorSelected':
-                    {
-                        vscode.window.activeTextEditor?.insertSnippet(new vscode.SnippetString(`#${data.value}`));
-                        break;
-                    }
-            }
-        });
-    }
-
-    public addColor() {
-        if (this._view) {
-            this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-            this._view.webview.postMessage({ type: 'addColor' });
-        }
-    }
-
-    public clearColors() {
-        if (this._view) {
-            this._view.webview.postMessage({ type: 'clearColors' });
-        }
-    }
-
-    private _getHtmlForWebview(webview: vscode.Webview) {
-        // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
-        const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'main.js'));
-
-        // Do the same for the stylesheet.
-        const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'reset.css'));
-        const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css'));
-        const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'main.css'));
-
-        // And image ?
-        const imageUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'leoapp128px.png'));
-
-        // Use a nonce to only allow a specific script to be run.
-        const nonce = getNonce();
-
-        return `&lt;!DOCTYPE html&gt;
-			&lt;html lang="en"&gt;
-			&lt;head&gt;
-				&lt;meta charset="UTF-8"&gt;
-
-				&lt;!--
-					Use a content security policy to only allow loading images from https or from our extension directory,
-					and only allow scripts that have a specific nonce.
-				--&gt;
-
-				&lt;meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; img-src ${webview.cspSource} https:; script-src 'nonce-${nonce}';"&gt;
-
-				&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
-
-				&lt;link href="${styleResetUri}" rel="stylesheet"&gt;
-				&lt;link href="${styleVSCodeUri}" rel="stylesheet"&gt;
-				&lt;link href="${styleMainUri}" rel="stylesheet"&gt;
-
-				&lt;title&gt;Cat Colors&lt;/title&gt;
-			&lt;/head&gt;
-			&lt;body&gt;
-				&lt;ul class="color-list"&gt;
-				&lt;/ul&gt;
-
-				&lt;button class="add-color-button"&gt;Add Color&lt;/button&gt;
-				&lt;br&gt;
-				webview.cspSource ${webview.cspSource}
-				&lt;br&gt;
-				&lt;img src="${imageUri}" /&gt;
-
-				&lt;script nonce="${nonce}" src="${scriptUri}"&gt;&lt;/script&gt;
-			&lt;/body&gt;
-			&lt;/html&gt;`;
-    }
-}
-
-function getNonce() {
-    let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (let i = 0; i &lt; 32; i++) {
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    }
-    return text;
-}
 </t>
 <t tx="felix.20220917013425.1">[CMD.SET_ENABLE_PREVIEW, () =&gt; p_leoUI.config.setEnablePreview()],
 [CMD.CLEAR_CLOSE_EMPTY_GROUPS, () =&gt; p_leoUI.config.clearCloseEmptyGroups()],

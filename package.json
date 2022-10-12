@@ -238,16 +238,20 @@
     "views": {
       "explorer": [
         {
-          "type": "webview",
-          "id": "calicoColors.colorsView",
-          "name": "Calico Colors"
-        },
-        {
           "id": "leojsOutlineExplorer",
           "name": "Leojs Outline",
           "contextualTitle": "Leojs",
           "when": "leojsTreeInExplorer",
           "visibility": "visible"
+        },
+        {
+          "type": "webview",
+          "id": "leojsFindPanelExplorer",
+          "contextualTitle": "Leojs",
+          "name": "Leojs Find",
+          "title": "Leojs Find",
+          "when": "leojsTreeInExplorer && leojsTreeOpened",
+          "visibility": "collapsed"
         },
         {
           "id": "leojsDocumentsExplorer",
@@ -257,15 +261,15 @@
           "visibility": "collapsed"
         },
         {
-          "id": "leojsButtonsExplorer",
-          "name": "Leojs Buttons",
+          "id": "leojsUndosExplorer",
+          "name": "Leojs Undo History",
           "contextualTitle": "Leojs",
           "when": "leojsTreeInExplorer && leojsTreeOpened",
           "visibility": "collapsed"
         },
         {
-          "id": "leojsUndosExplorer",
-          "name": "Leojs Undo History",
+          "id": "leojsButtonsExplorer",
+          "name": "Leojs Buttons",
           "contextualTitle": "Leojs",
           "when": "leojsTreeInExplorer && leojsTreeOpened",
           "visibility": "collapsed"
@@ -279,6 +283,15 @@
           "visibility": "visible"
         },
         {
+          "type": "webview",
+          "contextualTitle": "Leojs",
+          "id": "leojsFindPanel",
+          "name": "Find",
+          "title": "Find",
+          "when": "leojsTreeOpened",
+          "visibility": "collapsed"
+        },
+        {
           "id": "leojsDocuments",
           "contextualTitle": "Leojs",
           "name": "Documents",
@@ -286,16 +299,16 @@
           "visibility": "collapsed"
         },
         {
-          "id": "leojsButtons",
+          "id": "leojsUndos",
           "contextualTitle": "Leojs",
-          "name": "Buttons",
+          "name": "Undo History",
           "when": "leojsTreeOpened",
           "visibility": "collapsed"
         },
         {
-          "id": "leojsUndos",
+          "id": "leojsButtons",
           "contextualTitle": "Leojs",
-          "name": "Undo History",
+          "name": "Buttons",
           "when": "leojsTreeOpened",
           "visibility": "collapsed"
         }
