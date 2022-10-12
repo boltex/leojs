@@ -22,8 +22,11 @@
      * - Sets when pressing Enter with non-empty input field && not tag mode.
      */
     let frozen = false;
-    document.getElementById("freeze").style.display = 'none';
-    let navSearchTimer // for debouncing the search-headline while typing if unfrozen
+    const w_freezeElement = document.getElementById("freeze");
+    if (w_freezeElement) {
+        w_freezeElement.style.display = 'none';
+    }
+    let navSearchTimer; // for debouncing the search-headline while typing if unfrozen
 
     // * LeoSearchSettings Type
     let searchSettings = {
@@ -112,10 +115,13 @@
 
     function setFrozen(p_focus) {
         frozen = p_focus;
-        if (frozen) {
-            document.getElementById("freeze").style.display = '';
-        } else {
-            document.getElementById("freeze").style.display = 'none';
+        const w_freezeElement = document.getElementById("freeze");
+        if (w_freezeElement) {
+            if (frozen) {
+                w_freezeElement.style.display = '';
+            } else {
+                w_freezeElement.style.display = 'none';
+            }
         }
     }
 
@@ -227,19 +233,20 @@
 
         if (keyCode === 'Tab') {
             var actEl = document.activeElement;
+            var lastEl = document.getElementById(lastTabEl);
+
             if (p_event.shiftKey) {
                 // shift + tab so if first got last
                 var firstEl = document.getElementById(firstTabEl);
-                if (actEl === firstEl) {
+                if (lastEl && actEl === firstEl) {
                     p_event.preventDefault();
                     p_event.stopPropagation();
                     p_event.stopImmediatePropagation();
-                    document.getElementById(lastTabEl).focus();
+                    lastEl.focus();
                     return;
                 }
             } else {
                 // tab, so if last goto first
-                var lastEl = document.getElementById(lastTabEl);
                 if (actEl === lastEl) {
                     p_event.preventDefault();
                     p_event.stopPropagation();
@@ -302,101 +309,131 @@
     }
 
     // * Nav text input detection
-    document.getElementById('navText').onkeypress = function (p_event) {
-        // @ts-expect-error
-        if (!p_event) p_event = window.event;
-        var keyCode = p_event.code || p_event.key;
-        if (keyCode === 'Enter') {
-            if (searchSettings.navText.length >= 3 || searchSettings.isTag) {
-                setFrozen(true);
-                if (navTextDirty) {
-                    navTextDirty = false;
-                    if (timer) {
-                        clearTimeout(timer);
-                    }
-                    if (navSearchTimer) {
-                        clearTimeout(navSearchTimer)
-                    }
-                    sendSearchConfig();
-                }
-                vscode.postMessage({ type: 'leoNavEnter' });
-            }
-            return false;
-        }
-    };
-    document.getElementById('navText').addEventListener('input', function (p_event) {
-        // @ts-expect-error
-        searchSettings.navText = this.value;
-        navTextDirty = true;
-        navTextChange(); // DEBOUNCE THIS! Don't process change too fast!
-    });
+    const w_nacTextEl = document.getElementById('navText');
+    if (w_nacTextEl) {
 
-    document.getElementById('showParents').addEventListener('change', function (p_event) {
-        // @ts-expect-error
-        searchSettings.showParents = this.checked;
-        processChange();
-    });
-    document.getElementById('isTag').addEventListener('change', function (p_event) {
 
-        // @ts-expect-error
-        let w_checked = this.checked;
-        let w_wasSet = false;
-        if (searchSettings.isTag !== w_checked) {
-            setFrozen(false); // Switched tagging so reset freeze
-            if (w_checked) {
-                w_wasSet = true;
-            }
-        }
-        searchSettings.isTag = w_checked;
-        // Set placeholder text
-        processChange();
-        handleIsTagSwitch(w_wasSet);
-    });
-
-    // * Find & Replace controls change detection
-    document.getElementById('searchOptions').addEventListener('change', function (p_event) {
-        // @ts-expect-error
-        searchSettings.searchOptions = Number(this.value);
-        processChange();
-    });
-
-    inputIds.forEach((p_inputId) => {
-        document.getElementById(p_inputId).onkeypress = function (p_event) {
+        w_nacTextEl.onkeypress = function (p_event) {
             // @ts-expect-error
             if (!p_event) p_event = window.event;
             var keyCode = p_event.code || p_event.key;
             if (keyCode === 'Enter') {
-                if (timer) {
-                    clearTimeout(timer);
-                    sendSearchConfig();
+                if (searchSettings.navText.length >= 3 || searchSettings.isTag) {
+                    setFrozen(true);
+                    if (navTextDirty) {
+                        navTextDirty = false;
+                        if (timer) {
+                            clearTimeout(timer);
+                        }
+                        if (navSearchTimer) {
+                            clearTimeout(navSearchTimer)
+                        }
+                        sendSearchConfig();
+                    }
+                    vscode.postMessage({ type: 'leoNavEnter' });
                 }
-                vscode.postMessage({ type: 'leoFindNext' });
                 return false;
             }
         };
-        document.getElementById(p_inputId).addEventListener('input', function (p_event) {
+
+        w_nacTextEl.addEventListener('input', function (p_event) {
             // @ts-expect-error
-            searchSettings[p_inputId] = this.value;
+            searchSettings.navText = this.value;
+            navTextDirty = true;
+            navTextChange(); // DEBOUNCE THIS! Don't process change too fast!
+        });
+    }
+
+    const w_showParentsEl = document.getElementById('showParents');
+    if (w_showParentsEl) {
+
+        w_showParentsEl.addEventListener('change', function (p_event) {
+            // @ts-expect-error
+            searchSettings.showParents = this.checked;
             processChange();
         });
+    }
+
+    const w_isTagEl = document.getElementById('isTag');
+    if (w_isTagEl) {
+
+        w_isTagEl.addEventListener('change', function (p_event) {
+            // @ts-expect-error
+            let w_checked = this.checked;
+            let w_wasSet = false;
+            if (searchSettings.isTag !== w_checked) {
+                setFrozen(false); // Switched tagging so reset freeze
+                if (w_checked) {
+                    w_wasSet = true;
+                }
+            }
+            searchSettings.isTag = w_checked;
+            // Set placeholder text
+            processChange();
+            handleIsTagSwitch(w_wasSet);
+        });
+    }
+
+    // * Find & Replace controls change detection
+    const w_searchOptionsEl = document.getElementById('searchOptions');
+    if (w_searchOptionsEl) {
+        w_searchOptionsEl.addEventListener('change', function (p_event) {
+            // @ts-expect-error
+            searchSettings.searchOptions = Number(this.value);
+            processChange();
+        });
+
+    }
+
+    inputIds.forEach((p_inputId) => {
+        const w_inputEl = document.getElementById(p_inputId);
+        if (w_inputEl) {
+
+            w_inputEl.onkeypress = function (p_event) {
+                // @ts-expect-error
+                if (!p_event) p_event = window.event;
+                var keyCode = p_event.code || p_event.key;
+                if (keyCode === 'Enter') {
+                    if (timer) {
+                        clearTimeout(timer);
+                        sendSearchConfig();
+                    }
+                    vscode.postMessage({ type: 'leoFindNext' });
+                    return false;
+                }
+            };
+            w_inputEl.addEventListener('input', function (p_event) {
+                // @ts-expect-error
+                searchSettings[p_inputId] = this.value;
+                processChange();
+            });
+        }
     });
 
     checkboxIds.forEach((p_inputId) => {
-        document.getElementById(p_inputId).addEventListener('change', function (p_event) {
-            // @ts-expect-error
-            searchSettings[p_inputId] = this.checked;
-            processChange();
-        });
+        const w_inputEl = document.getElementById(p_inputId);
+        if (w_inputEl) {
+
+            w_inputEl.addEventListener('change', function (p_event) {
+                // @ts-expect-error
+                searchSettings[p_inputId] = this.checked;
+                processChange();
+            });
+        }
     });
 
     radioIds.forEach((p_inputId) => {
-        document.getElementById(p_inputId).addEventListener('change', function (p_event) {
-            searchSettings['searchScope'] = parseInt(
-                // @ts-expect-error
-                document.querySelector('input[name="searchScope"]:checked').value
-            );
-            processChange();
-        });
+        const w_inputEl = document.getElementById(p_inputId);
+        if (w_inputEl) {
+
+            w_inputEl.addEventListener('change', function (p_event) {
+                searchSettings['searchScope'] = parseInt(
+                    // @ts-expect-error
+                    document.querySelector('input[name="searchScope"]:checked').value
+                );
+                processChange();
+            });
+        }
     });
 
     document.onkeydown = checkKeyDown;
