@@ -3615,10 +3615,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "0322ffa",
-  "gitBranch": "devel",
-  "gitDate": "2022-10-10 21:49:55 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{

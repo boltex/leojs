@@ -3283,7 +3283,7 @@ export class FileCommands {
             const valArray: string[] = [];
             const sorted_keys = Object.keys(attrDict).sort();
 
-            for (let key of sorted_keys) {
+            for (const key of sorted_keys) {
                 valArray.push(this.putUaHelper(v, key, attrDict[key]));
             }
 
