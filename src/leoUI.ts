@@ -45,7 +45,7 @@ export class LeoUI {
     public clipboardContents: string = "";
     private _minibufferHistory: string[] = [];
     public isNullGui: boolean = false;
-    private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE_JS; // VScode's outline pane title: Might need to be re-set when switching visibility
+    private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
 
     // * Timers

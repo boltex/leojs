@@ -644,27 +644,40 @@ export class FileCommands {
         this.vnodesDict = {};
         // keys are gnx strings; values are ignored
     }
-    //@+node:felix.20211230232601.1: *3* fc.xmlEscape
+    //@+node:felix.20221011210046.1: *3* fc.saxutils.Escape
     /**
      * Escape '&', '<', and '>' in a string of data.
+     * https://docs.python.org/3/library/xml.sax.utils.html#xml.sax.saxutils.escape
      */
-    public xmlEscape(s: string): string {
+    public saxutilsEscape(s: string): string {
         return s.replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&apos;');
+            .replace(/>/g, '&gt;');
     }
-    //@+node:felix.20211230232911.1: *3* fc.xmlDecode
+    //@+node:felix.20221011210921.1: *3* fc.saxutils.quoteattr
     /**
-     * Escape '&', '<', and '>' in a string of data.
+     * The quoteattr() function for embeding text into HTML/XML
+     * Similar to escape(), but also prepares data to be used as an attribute value.
+     * Examples below:
+     * https://docs.python.org/3/library/xml.sax.utils.html#xml.sax.saxutils.quoteattr
+     * https://stackoverflow.com/questions/7753448/how-do-i-escape-quotes-in-html-attribute-values
      */
-    public xmlDecode(s: string): string {
-        return s.replace(/&apos;/g, "'")
-            .replace(/&quot;/g, '"')
-            .replace(/&gt;/g, '>')
-            .replace(/&lt;/g, '<')
-            .replace(/&amp;/g, '&');
+    public quoteattr(s: string, preserveCR?: boolean | string): string {
+        preserveCR = preserveCR ? '&#13;' : '\n';
+        return ('' + s) /* Forces the conversion to string. */
+            .replace(/&/g, '&amp;') /* This MUST be the 1st replacement. */
+            .replace(/'/g, '&apos;') /* The 4 other predefined entities, required. */
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            /*
+            You may add other replacements here for HTML only 
+            (but it's not necessary).
+            Or for XML, only if the named entities are defined in its DTD.
+            */
+            .replace(/\r\n/g, preserveCR) /* Must be before the next replacement. */
+            .replace(/[\r\n]/g, preserveCR);
+        ;
     }
 
     //@+node:felix.20211212222746.1: *3*  commands (leoFileCommands.py)
@@ -3146,7 +3159,7 @@ export class FileCommands {
         const b: string = v.b;
         const gnx: string = v.fileIndex;
         const ua = this.putUnknownAttributes(v);
-        const body: string = b.length ? this.xmlEscape(b) : '';
+        const body: string = b.length ? this.saxutilsEscape(b) : '';
         this.put(`<t tx="${gnx}"${ua}>${body}</t>\n`);
     }
     //@+node:felix.20211213224237.43: *5* fc.put_t_elements
@@ -3215,8 +3228,8 @@ export class FileCommands {
 
             if (typeof val === 'string' || (val as any) instanceof String) {
                 val = g.toUnicode(val);
-                // attr = f' {key}="{xml.sax.saxutils.escape(val)}"'
-                attr = ` ${key}="${this.xmlEscape(val)}"`;
+                // attr = f' {key}={xml.sax.saxutils.quoteattr(val)}'
+                attr = ` ${key}=${this.quoteattr(val)}`;
                 return attr;
             }
 
@@ -3224,6 +3237,26 @@ export class FileCommands {
             g.warning("ignoring non-string attribute", key, "in", torv);
             return '';
 
+        }
+
+        // Support JSON encoded attributes
+        if (key.startsWith('json_')) {
+            let w_error = false;
+            try {
+                val = JSON.stringify(val);
+            }
+            catch (e) {
+                // fall back to pickle
+                g.trace(typeof val, val);
+                g.warning("pickling JSON incompatible attribute", key, "in", torv);
+                w_error = true;
+
+            }
+            if (!w_error) {
+                // attr = f' {key}={xml.sax.saxutils.quoteattr(val)}'
+                attr = ` ${key}=${this.quoteattr(val)}`;
+                return attr;
+            }
         }
         return this.pickle(torv, val, key);
 
@@ -3248,7 +3281,9 @@ export class FileCommands {
         ) {
 
             const valArray: string[] = [];
-            for (let key in attrDict) {
+            const sorted_keys = Object.keys(attrDict).sort();
+
+            for (let key of sorted_keys) {
                 valArray.push(this.putUaHelper(v, key, attrDict[key]));
             }
 
@@ -3300,7 +3335,7 @@ export class FileCommands {
             fc.put(v_head + '</v>\n');
         } else {
             fc.vnodesDict[gnx] = true;
-            v_head = v_head + `<vh>${this.xmlEscape(p.v.headString() || '')}</vh>`;
+            v_head = v_head + `<vh>${this.saxutilsEscape(p.v.headString() || '')}</vh>`;
 
             // xml.sax.saxutils.escape(data, entities={})
             // Escape '&', '<', and '>' in a string of data.

@@ -7,6 +7,7 @@ import { Utils as uriUtils } from "vscode-uri";
 import * as path from 'path';
 import * as g from './leoGlobals';
 import { LeoUI, NullGui } from '../leoUI';
+import { new_cmd_decorator } from './decorators';
 import { FileCommands } from './leoFileCommands';
 import { CommanderOutlineCommands } from '../commands/commanderOutlineCommands';
 import { CommanderFileCommands } from '../commands/commanderFileCommands';
@@ -44,6 +45,13 @@ function applyMixins(derivedCtor: any, constructors: any[]): void {
     });
 }
 
+//@+node:felix.20221011000033.1: ** cmd (decorator)
+/**
+ * Command decorator for the Commands class.
+ */
+function cmd(p_name: string, p_doc: string) {
+    return new_cmd_decorator(p_name, p_doc, ['c']);
+}
 //@+node:felix.20210224000242.1: ** interface HoistStackEntry
 export interface HoistStackEntry {
     p: Position;
@@ -364,6 +372,196 @@ export class Commands {
 
     }
 
+    //@+node:felix.20221010233956.1: *3* @cmd execute-script & public helpers
+    @cmd(
+        'execute-script',
+        'Execute a *Leo* script, written in python.'
+    )
+    public executeScript(
+        args: any = undefined,
+        p: Position | undefined = undefined,
+        script: string = "",
+        useSelectedText: boolean = true,
+        define_g: boolean = true,
+        define_name: string = '__main__',
+        silent: boolean = false,
+        namespace: { [key: string]: any } | undefined = undefined,
+        raiseFlag: boolean = false,
+        runPyflakes: boolean = true,
+    ): void {
+        /*
+        Execute a *Leo* script, written in python.
+        Keyword args:
+        args=None               Not None: set script_args in the execution environment.
+        p=None                  Get the script from p.b, unless script is given.
+        script=None             None: use script in p.b or c.p.b
+        useSelectedText=True    False: use all the text in p.b or c.p.b.
+        define_g=True           True: define g for the script.
+        define_name='__main__'  Not None: define the name symbol.
+        silent=False            No longer used.
+        namespace=None          Not None: execute the script in this namespace.
+        raiseFlag=False         True: reraise any exceptions.
+        runPyflakes=True        True: run pyflakes if allowed by setting.
+        */
+        const c: Commands = this;
+
+        const script1 = script;
+        let run_pyflakes: boolean;
+        if (runPyflakes) {
+            run_pyflakes = c.config.getBool('run-pyflakes-on-write', false);
+        } else {
+            run_pyflakes = false;
+        }
+        if (!script) {
+            if (c.forceExecuteEntireBody) {
+                useSelectedText = false;
+            }
+            script = g.getScript(c, p || c.p, useSelectedText);
+        }
+        const script_p: Position = p || c.p  // Only for error reporting below.
+        // #532: check all scripts with pyflakes.
+        // ? needed ?
+        // if run_pyflakes and not g.unitTesting:
+        //     from leo.commands import checkerCommands as cc
+        //     prefix = ('c,g,p,script_gnx=None,None,None,None;'
+        //               'assert c and g and p and script_gnx;\n')
+        //     cc.PyflakesCommand(c).check_script(script_p, prefix + script)
+
+        this.redirectScriptOutput()
+        // oldLog = g.app.log  // TODO : needed ?
+        try {
+            // log = c.frame.log  // TODO : needed ?
+            // g.app.log = log // TODO : needed ?
+            if (script.trim()) {
+                // sys.path.insert(0, '.')  // New in Leo 5.0 // TODO : needed ?
+                // sys.path.insert(0, c.frame.openDirectory)  // per SegundoBob // TODO : needed ?
+                script += '\n';  // Make sure we end the script properly.
+                try {
+                    if (!namespace || !namespace['script_gnx']) {
+                        namespace = namespace || {};
+                        namespace["script_gnx"] = script_p.gnx;
+                    }
+                    // We *always* execute the script with p = c.p.
+                    c.executeScriptHelper(args, define_g, define_name, namespace, script);
+
+                }
+                catch (e) {
+                    g.es('interrupted')
+                    // if raiseFlag:
+                    //      raise
+                    // g.handleScriptException(c, script_p, script, script1);
+
+                }
+                finally {
+                    // del sys.path[0]; // TODO : needed ?
+                    // del sys.path[0]; // TODO : needed ?
+                }
+
+            } else {
+                // tabName = log and hasattr(log, 'tabName') and log.tabName or 'Log' // TODO : needed ?
+                g.warning("no script selected");
+            }
+        }
+        catch (e) {
+            // pass
+        }
+        finally {
+            // g.app.log = oldLog // TODO : needed ?
+            this.unredirectScriptOutput();
+        }
+    }
+
+    //@+node:felix.20221010233956.2: *4* c.executeScriptHelper
+    public executeScriptHelper(
+        args: any,
+        define_g: any,
+        define_name: any,
+        namespace: any,
+        script: any
+    ): void {
+        const c: Commands = this;
+        let p: Position | undefined;
+        if (c.p.__bool__()) {
+            p = c.p.copy();  // *Always* use c.p and pass c.p to script.
+            c.setCurrentDirectoryFromContext(p);
+        } else {
+            p = undefined
+        }
+        const d: { [key: string]: any } = define_g ? { 'c': c, 'g': g, 'input': "", 'p': p } : {};
+
+        if (define_name) {
+            d['__name__'] = define_name;
+        }
+        d['script_args'] = args || [];
+        d['script_gnx'] = g.app.scriptDict.get('script_gnx');
+        if (namespace) {
+            // d.update(namespace)
+            Object.assign(d, namespace);
+        }
+        // A kludge: reset c.inCommand here to handle the case where we *never* return.
+        // (This can happen when there are multiple event loops.)
+        // This does not prevent zombie windows if the script puts up a dialog...
+        try {
+            c.inCommand = false;
+            g.app.inScript = true;
+            (g.inScript as boolean) = g.app.inScript; // g.inScript is a synonym for g.app.inScript.
+            console.log('TODO RUN SCRIPT: ', script);
+
+            // if (c.write_script_file){
+            //     scriptFile = self.writeScriptFile(script)
+            //     exec(compile(script, scriptFile, 'exec'), d)
+            // }else{
+            //     exec(script, d)
+            // }
+        }
+        catch (e) {
+            // pass
+        }
+        finally {
+            g.app.inScript = false;
+            (g.inScript as boolean) = g.app.inScript;
+        }
+    }
+
+    //@+node:felix.20221010233956.3: *4* c.redirectScriptOutput
+    public redirectScriptOutput(): void {
+        const c: Commands = this;
+        if (c.exists && c.config.getBool('redirect-execute-script-output-to-log-pane')) {
+            // TODO
+            // ? needed ? 
+            // g.redirectStdout()  // Redirect stdout
+            // g.redirectStderr()  // Redirect stderr
+        }
+    }
+    //@+node:felix.20221010233956.4: *4* c.setCurrentDirectoryFromContext
+    public setCurrentDirectoryFromContext(p: Position): void {
+        const c: Commands = this;
+        const aList = g.get_directives_dict_list(p);
+        const path = c.scanAtPathDirectives(aList);
+        // const curDir = g.os_path_abspath(os.getcwd()); // TODO !
+
+        console.log('TODO : setCurrentDirectoryFromContext');
+
+        // if (path && path !== curDir){
+        //     try{
+        //         os.chdir(path)
+        //     }
+        //    catch (e) {
+        //         // pass
+        //    }
+        // }
+    }
+
+    //@+node:felix.20221010233956.5: *4* c.unredirectScriptOutput
+    public unredirectScriptOutput(): void {
+        const c: Commands = this;
+        if (c.exists && c.config.getBool('redirect-execute-script-output-to-log-pane')) {
+            // TODO
+            // ? needed ? 
+            // g.restoreStderr()
+            // g.restoreStdout()
+        }
+    }
     //@+node:felix.20210215185050.1: *3* c.API
     // These methods are a fundamental, unchanging, part of Leo's API.
 

@@ -726,6 +726,7 @@ export class CommanderFileCommands {
             const w_filename = await g.app.gui!.runSaveFileDialog(
                 c,
                 "Save To",
+                // TODO : allow leojs in save choices like in leo
                 [["Leo files", "*.leo *.db"]], // Array of arrays (one in this case)
                 g.defaultLeoFileExtension(c)
             );

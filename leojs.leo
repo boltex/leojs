@@ -1637,7 +1637,7 @@ public static LEO_COMMANDS = {
     UNDO: "undo",
     REDO: "redo",
     // * Tree Building
-    EXECUTE_SCRIPT: "TODO_EXECUTE_SCRIPT", // TODO
+    EXECUTE_SCRIPT: "execute-script",
     REFRESH_FROM_DISK: "TODO_REFRESH_FROM_DISK", // TODO
     REFRESH_FROM_DISK_PNODE: "TODO_REFRESH_FROM_DISK_PNODE", // TODO
     GIT_DIFF: "TODO_GIT_DIFF", // TODO
@@ -1789,7 +1789,6 @@ public static GUI = {
     STATUSBAR_COLOR: "fb7c47",
     QUICK_OPEN_LEO_COMMANDS: "&gt;leojs: ",
     EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
-    TREEVIEW_TITLE_JS: 'JS',
     TREEVIEW_TITLE: "OUTLINE",
     BODY_TITLE: "LEOJS BODY",
     LOG_PANE_TITLE: "LeoJS Log Window",
@@ -2878,7 +2877,7 @@ export class LeoUI {
     public clipboardContents: string = "";
     private _minibufferHistory: string[] = [];
     public isNullGui: boolean = false;
-    private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE_JS; // VScode's outline pane title: Might need to be re-set when switching visibility
+    private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
 
     // * Timers
@@ -3616,7 +3615,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "0322ffa",
+  "gitBranch": "devel",
+  "gitDate": "2022-10-10 21:49:55 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{

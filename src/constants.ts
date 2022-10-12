@@ -84,7 +84,6 @@ export class Constants {
         STATUSBAR_COLOR: "fb7c47",
         QUICK_OPEN_LEO_COMMANDS: ">leojs: ",
         EXPLORER_TREEVIEW_PREFIX: "LEOJS ",
-        TREEVIEW_TITLE_JS: 'JS',
         TREEVIEW_TITLE: "OUTLINE",
         BODY_TITLE: "LEOJS BODY",
         LOG_PANE_TITLE: "LeoJS Log Window",
@@ -604,7 +603,7 @@ export class Constants {
         UNDO: "undo",
         REDO: "redo",
         // * Tree Building
-        EXECUTE_SCRIPT: "TODO_EXECUTE_SCRIPT", // TODO
+        EXECUTE_SCRIPT: "execute-script",
         REFRESH_FROM_DISK: "TODO_REFRESH_FROM_DISK", // TODO
         REFRESH_FROM_DISK_PNODE: "TODO_REFRESH_FROM_DISK_PNODE", // TODO
         GIT_DIFF: "TODO_GIT_DIFF", // TODO
