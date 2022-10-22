@@ -2616,7 +2616,6 @@ export class LeoUI {
      * @returns Promise from the command resolving - or resolve with undefined if cancelled
      */
     public async minibuffer(): Promise<unknown> {
-        this.setupRefresh(Focus.NoChange, { tree: true, body: true, documents: true, buttons: true, states: true });
 
         await this.triggerBodySave(false);
         const c = g.app.windowList[this.frameIndex].c;
@@ -2646,8 +2645,6 @@ export class LeoUI {
 
         const w_withDetails = commands.filter(p_command => !!p_command.detail);
 
-
-
         // Only sort 'regular' Leo commands, leaving custom commands at the top
         w_withDetails.sort((a, b) => {
             return a.label < b.label ? -1 : (a.label === b.label ? 0 : 1);
@@ -2675,7 +2672,6 @@ export class LeoUI {
         }
 
         w_result.push(...w_withDetails);
-
 
         const w_options: vscode.QuickPickOptions = {
             placeHolder: Constants.USER_MESSAGES.MINIBUFFER_PROMPT,
@@ -2728,6 +2724,17 @@ export class LeoUI {
         }
         // * Ok, it was really a minibuffer command
         if (p_picked && p_picked.label) {
+            // Setup refresh
+            this.setupRefresh(Focus.NoChange,
+                {
+                    tree: true,
+                    body: true,
+                    documents: true,
+                    buttons: true,
+                    states: true
+                }
+            );
+
             this._minibufferHistory.unshift(p_picked.label); // Add to minibuffer history
             const c = g.app.windowList[this.frameIndex].c;
             const w_commandResult = c.executeMinibufferCommand(p_picked.label);
@@ -3322,56 +3329,75 @@ export class LeoUI {
      * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
      */
     public findAll(p_replace: boolean): Thenable<unknown> {
-        return vscode.window.showInformationMessage("TODO: findAll");
+        // return vscode.window.showInformationMessage("TODO: findAll");
 
         // const w_action: string = p_replace
         //     ? Constants.LEOBRIDGE.REPLACE_ALL
         //     : Constants.LEOBRIDGE.FIND_ALL;
 
-        // let w_searchString: string = this._lastSettingsUsed!.findText;
-        // let w_replaceString: string = this._lastSettingsUsed!.replaceText;
+        let w_searchString: string = this._lastSettingsUsed!.findText;
+        let w_replaceString: string = this._lastSettingsUsed!.replaceText;
 
-        // return this._isBusyTriggerSave(false, true)
-        //     .then((p_saveResult) => {
-        //         return this._inputFindPattern()
-        //             .then((p_findString) => {
-        //                 if (!p_findString) {
-        //                     return true; // Cancelled with escape or empty string.
-        //                 }
-        //                 w_searchString = p_findString;
-        //                 if (p_replace) {
-        //                     return this._inputFindPattern(true).then((p_replaceString) => {
-        //                         if (p_replaceString === undefined) {
-        //                             return true;
-        //                         }
-        //                         w_replaceString = p_replaceString;
-        //                         return false;
-        //                     });
-        //                 }
-        //                 return false;
-        //             });
-        //     })
-        //     .then((p_cancelled: boolean) => {
-        //         if (this._lastSettingsUsed && !p_cancelled) {
-        //             this._lastSettingsUsed.findText = w_searchString;
-        //             this._lastSettingsUsed.replaceText = w_replaceString;
-        //             this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
-        //             return this.sendAction(w_action)
-        //                 .then((p_findResult: LeoBridgePackage) => {
-        //                     let w_focusOnOutline = false;
-        //                     const w_focus = p_findResult.focus!.toLowerCase();
-        //                     if (w_focus.includes('tree') || w_focus.includes('head')) {
-        //                         // tree
-        //                         w_focusOnOutline = true;
-        //                     }
-        //                     this.loadSearchSettings();
-        //                     this.launchRefresh(
-        //                         { tree: true, body: true, documents: false, buttons: false, states: true },
-        //                         w_focusOnOutline
-        //                     );
-        //                 });
-        //         }
-        //     });
+        return this.triggerBodySave(false)
+            .then((p_saveResult) => {
+                return this._inputFindPattern()
+                    .then((p_findString) => {
+                        if (!p_findString) {
+                            return true; // Cancelled with escape or empty string.
+                        }
+                        w_searchString = p_findString;
+                        if (p_replace) {
+                            return this._inputFindPattern(true).then((p_replaceString) => {
+                                if (p_replaceString === undefined) {
+                                    return true;
+                                }
+                                w_replaceString = p_replaceString;
+                                return false;
+                            });
+                        }
+                        return false;
+                    });
+            })
+            .then((p_cancelled: boolean) => {
+                if (this._lastSettingsUsed && !p_cancelled) {
+                    this._lastSettingsUsed.findText = w_searchString;
+                    this._lastSettingsUsed.replaceText = w_replaceString;
+
+                    // this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
+
+                    const c = g.app.windowList[this.frameIndex].c;
+                    const fc = c.findCommands;
+
+                    fc.ftm.get_settings();
+                    const w_result = fc.do_change_all(this._lastSettingsUsed);
+
+                    // TODO : GET FOCUS!
+                    const w_focus = ""; // = g.app.gui.get_focus();
+                    //                     focus = g.app.gui.widget_name(w)
+
+                    let w_finalFocus = Focus.Body;
+
+                    if (w_focus.includes('tree') || w_focus.includes('head')) {
+                        // tree
+                        w_finalFocus = Focus.Outline;
+                    }
+                    this.loadSearchSettings();
+                    this.setupRefresh(
+                        w_finalFocus,
+                        {
+                            tree: true,
+                            body: true,
+                            // documents: false,
+                            // buttons: false,
+                            states: true
+                        }
+                    );
+                    this.launchRefresh();
+
+                    return;
+
+                }
+            });
     }
 
     /**
@@ -3853,7 +3879,6 @@ export class LeoUI {
      * @returns A promise that resolves when done trying to open the file
      */
     public async openLeoFile(p_uri?: vscode.Uri): Promise<unknown> {
-        console.log('OPEN LEO FILE!');
 
         // make sure it's a real uri because vscode may send selected
         // node from other tree that has this command in title

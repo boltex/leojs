@@ -1078,6 +1078,23 @@ export function getOutputNewline(c: Commands | undefined, name?: string): string
 
     return s;
 }
+//@+node:felix.20221020012052.1: *3* g.inAtNosearch
+/**
+ * Return True if p or p's ancestors contain an @nosearch directive.
+ */
+export function inAtNosearch(p: Position): boolean {
+
+    if (!p || !p.__bool__()) {
+        return false;  // #2288.
+    }
+    for (let p_p of p.self_and_parents()) {
+        if (p_p.is_at_ignore() || p_p.b.search(/(^@|\n@)nosearch\b/)) {
+            return true;
+        }
+    }
+    return false;
+
+}
 //@+node:felix.20211104213330.1: *3* g.isDirective
 /**
  * Return True if s starts with a directive.
@@ -2501,6 +2518,21 @@ def isascii(s: str) -> bool:
     # s.isascii() is defined in Python 3.7.
     return all(ord(ch) < 128 for ch in s)
  */
+//@+node:felix.20221015014048.1: *4* g.isUpper
+export function isUpper(s: string): boolean {
+    return s !== s.toLowerCase() && s === s.toUpperCase();
+}
+//@+node:felix.20221015172825.1: *4* g.capitalize
+export function capitalize(s: string): string {
+    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+//@+node:felix.20221015014725.1: *4* g.enumerate
+export function* enumerate(it: any, start = 0) {
+    let i = start;
+    for (const x of it) {
+        yield [i++, x];
+    }
+}
 //@+node:felix.20220410212530.3: *4* g.angleBrackets & virtual_event_name
 /*
  def angleBrackets(s: str) -> str:
@@ -3233,6 +3265,15 @@ export const trace = console.log;
 // TODO : Replace with output to proper 'Leo terminal output'
 
 //@+node:felix.20211104211115.1: ** g.Miscellaneous
+//@+node:felix.20221017010728.1: *3* g.process_time
+/**
+ * python process_time equivalent that returns the current timestamp in SECONDS
+ */
+export function process_time(): number {
+    const w_now = process.hrtime();
+    const [w_secs, w_nanosecs] = w_now;
+    return (w_secs * 1.0) + Math.floor(w_nanosecs / 1000);
+}
 //@+node:felix.20220611031515.1: *3* g.convertPythonDayjs
 export function convertPythonDayjs(s: string): string {
 

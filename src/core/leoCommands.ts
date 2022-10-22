@@ -26,6 +26,7 @@ import { LeoFrame } from './leoFrame';
 import { PreviousSettings } from './leoApp';
 
 import dayjs = require('dayjs');
+import { TagController } from './nodeTags';
 var utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 
@@ -76,6 +77,8 @@ export class Commands {
     public atFileCommands: AtFile;
     public findCommands: LeoFind;
     public importCommands: LeoImportCommands;
+
+    public theTagController: TagController;
 
     public chapterController: ChapterController;
     public undoer: Undoer;
@@ -265,6 +268,8 @@ export class Commands {
 
         this.chapterController = new ChapterController(c);
         // this.shadowController // TODO: = leoShadow.ShadowController(c);
+
+        this.theTagController = new TagController(c);
 
         this.fileCommands = new FileCommands(c);
         this.findCommands = new LeoFind(c);
@@ -3547,6 +3552,123 @@ export class Commands {
     }
 
     //@+node:felix.20220210211453.1: *3* c.Scripting utils
+    //@+node:felix.20221014000217.1: *4* c.cloneFindByPredicate
+    /**
+     * Traverse the tree given using the generator, cloning all positions for
+     * which predicate(p) is True. Undoably move all clones to a new node, created
+     * as the last top-level node. Returns the newly-created node. Arguments:
+     *
+     * generator,      The generator used to traverse the tree.
+     * predicate,      A function of one argument p returning true if p should be included.
+     * failMsg=None,   Message given if nothing found. Default is no message.
+     * flatten=False,  True: Move all node to be parents of the root node.
+     * iconPath=None,  Full path to icon to attach to all matches.
+     * undo_type=None, The undo/redo name shown in the Edit:Undo menu.
+                        The default is 'clone-find-predicate'
+     */
+    public cloneFindByPredicate(
+        generator: any,  // The generator used to traverse the tree.
+        predicate: (p: Position) => boolean,  // A function of one argument p, returning True  // if p should be included in the results.
+        failMsg: string = "",  // Failure message. Default is no message.
+        flatten: boolean = false,  // True: Put all matches at the top level.
+        iconPath: string = "",  // Full path to icon to attach to all matches.
+        undoType: string = "",  // The undo name, shown in the Edit:Undo menu.  // The default is 'clone-find-predicate'
+    ): Position | undefined {
+
+        const c = this;
+        const u = c.undoer;
+        undoType = undoType || 'clone-find-predicate';
+
+        const clones: Position[] = [];
+        let root: Position | undefined;
+        const seen: VNode[] = []; // a set
+
+        for (let p of generator()) {
+            if (predicate(p) && !seen.includes(p.v)) {
+                c.setCloneFindByPredicateIcon(iconPath, p);
+                if (flatten) {
+                    if (!seen.includes(p.v)) {
+                        seen.push(p.v);
+                    }
+                } else {
+                    for (let p2 of p.this_and_subtree(false)) {
+                        if (!seen.includes(p2.v)) {
+                            seen.push(p2.v);
+                        }
+                    }
+                }
+
+                clones.push(p.copy());
+            }
+        }
+        if (clones.length) {
+            const undoData = u.beforeInsertNode(c.p);
+            root = c.createCloneFindPredicateRoot(flatten, undoType);
+            for (let p of clones) {
+                // Create the clone directly as a child of found.
+                const p2 = p.copy();
+                const n = root.numberOfChildren();
+                p2._linkCopiedAsNthChild(root, n);
+            }
+            u.afterInsertNode(root, undoType, undoData);
+            c.selectPosition(root);
+            c.setChanged();
+            c.contractAllHeadlines();
+            root.expand();
+        } else if (failMsg) {
+            g.es(failMsg, 'red');
+        }
+
+        return root;
+
+    }
+    //@+node:felix.20221014000217.2: *5* c.setCloneFindByPredicateIcon
+    /** 
+     * Attach an icon to p.v.u.
+     */
+    public setCloneFindByPredicateIcon(iconPath: any, p: Position): void {
+
+        // ? needed ?
+
+        // if (iconPath && g.os_path_exists(iconPath) && !g.os_path_isdir(iconPath)){
+        //     const aList = p.v.u['icons'] || [];
+        //     let w_break = false;
+        //     for (let d of aList){
+        //         if (d['file'] === iconPath){
+        //             w_break = true;
+        //             break;
+        //         }
+        //     }
+        //     if(!w_break){
+        //         aList.push({
+        //             'type': 'file',
+        //             'file': iconPath,
+        //             'on': 'VNode',
+        //             // 'relPath': iconPath,
+        //             'where': 'beforeHeadline',
+        //             'xoffset': 2, 'xpad': 1,
+        //             'yoffset': 0
+        //         })
+        //         p.v.u['icons'] = aList;
+        //     }
+
+
+        // }else if(iconPath){
+        //     g.trace('bad icon path', iconPath);
+        // }
+    }
+
+    //@+node:felix.20221014000217.3: *5* c.createCloneFindPredicateRoot
+    /**
+     * Create a root node for clone-find-predicate.
+     */
+    public createCloneFindPredicateRoot(flatten: boolean, undoType: string): Position {
+        const c: Commands = this;
+
+        const root = c.lastTopLevel().insertAfter();
+        root.h = undoType + (flatten ? ' (flattened)' : '');
+        return root;
+    }
     //@+node:felix.20220210211517.1: *4* deletePositionsInList
     /**
      * Delete all vnodes corresponding to the positions in aList.

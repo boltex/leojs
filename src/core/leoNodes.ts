@@ -3586,7 +3586,7 @@ export class VNode {
     /**
      * VNode u property
      */
-    public get u(): any {
+    public get u(): { [key: string]: any } {
         const v: VNode = this;
         if (!v.unknownAttributes) {
             v.unknownAttributes = {};
@@ -3594,7 +3594,7 @@ export class VNode {
         return v.unknownAttributes;
     }
 
-    public set u(val: any) {
+    public set u(val: { [key: string]: any }) {
         const v: VNode = this;
         if (val === undefined || val === null) {
             v.unknownAttributes = undefined;
@@ -3647,4 +3647,6 @@ VNode.prototype.__str__ = VNode.prototype.__repr__;
 //@@language typescript
 //@@tabwidth -4
 //@@pagewidth 70
+
+
 //@-leo
