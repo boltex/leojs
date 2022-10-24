@@ -320,7 +320,7 @@ export class LeoFind {
             return 0;
         }
         if (this.pattern_match) {
-            const ok = this.precompile_pattern();
+            const ok = this.compile_pattern();
             if (!ok) {
                 return 0;
             }
@@ -1401,7 +1401,7 @@ export class LeoFind {
         }
         this.change_text = this.replace_back_slashes(this.change_text);
         if (this.pattern_match) {
-            const ok = this.precompile_pattern();
+            const ok = this.compile_pattern();
             if (!ok) {
                 return 0;
             }
@@ -1922,7 +1922,7 @@ export class LeoFind {
         this.work_s = s;
         this.work_sel = [ins, ins, ins];
         if (this.pattern_match) {
-            const ok = this.precompile_pattern();
+            const ok = this.compile_pattern();
             if (!ok) {
                 return count;
             }
@@ -2704,7 +2704,7 @@ export class LeoFind {
         let pos;
         let newpos;
         if (this.pattern_match) {
-            ok = this.precompile_pattern();
+            ok = this.compile_pattern();
             if (!ok) {
                 return [undefined, undefined, undefined];
             }
@@ -3102,7 +3102,9 @@ export class LeoFind {
     ): [number, number]{
         
         // ! TODO !
-        // TODO : RE WRITE THIS FOR JAVASCRIPT REGEXP CAPABILITIES! (no params for search!)
+        // TODO : RE WRITE THIS FOR JAVASCRIPT REGEXP CAPABILITIES! (no start/end params for search!)
+        // Modify to consider i and j. 
+        // This set the match_obj with the exact match
 
         const re_obj = this.re_obj  // Use the pre-compiled object
         if (!re_obj){
@@ -3141,21 +3143,24 @@ export class LeoFind {
 
     }
     //@+node:felix.20221023141705.1: *4* find.make_regex_subs
-    def make_regex_subs(self, change_text: str, groups: MatchGroups) -> str:
-        """
-        Substitute group[i-1] for \\i strings in change_text.
+    /**
+     * Substitute group[i-1] for \\i strings in change_text.
+     *
+     * Groups is a tuple of strings, one for every matched group.
+     */
+    public make_regex_subs(change_text: string, groups: MatchGroups): string {
+        
+        // ! TODO !
 
-        Groups is a tuple of strings, one for every matched group.
-        """
+        // g.printObj(list(groups), tag=f"groups in {change_text!r}")
 
-        # g.printObj(list(groups), tag=f"groups in {change_text!r}")
 
         def repl(match_object: re.Match) -> str:
             """re.sub calls this function once per group."""
-            # # 1494...
+            // # 1494...
             n = int(match_object.group(1)) - 1
             if 0 <= n < len(groups):
-                # Executed only if the change text contains groups that match.
+                // Executed only if the change text contains groups that match.
                 return (
                     groups[n].
                         replace(r'\b', r'\\b').
@@ -3163,56 +3168,46 @@ export class LeoFind {
                         replace(r'\n', r'\\n').
                         replace(r'\r', r'\\r').
                         replace(r'\t', r'\\t').
-                        replace(r'\v', r'\\v'))
-            # No replacement.
+                        replace(r'\v', r'\\v')
+                );
+            // No replacement.
             return match_object.group(0)
 
-        result = re.sub(r'\\([0-9])', repl, change_text)
-        return result
-    //@+node:felix.20221023141715.1: *4* find.precompile_pattern
-    def precompile_pattern(self) -> bool:
-        """Precompile the regexp pattern if necessary."""
-        try:  # Precompile the regexp.
-            # pylint: disable=no-member
-            flags = re.MULTILINE
-            if self.ignore_case:
-                flags |= re.IGNORECASE
-            # Escape the search text.
-            # Ignore the whole_word option.
-            s = self.find_text
-            # A bad idea: insert \b automatically.
-                # b, s = '\\b', self.find_text
-                # if self.whole_word:
-                    # if not s.startswith(b): s = b + s
-                    # if not s.endswith(b): s = s + b
-            self.re_obj = re.compile(s, flags)
-            return True
-        except Exception:
-            if not g.unitTesting:
-                g.warning('invalid regular expression:', self.find_text)  # pragma: no cover
-            return False
+        result = re.sub(r'\\([0-9])', repl, change_text);
+        return result;
+
+    }
     //@+node:felix.20221023141723.1: *4* find.replace_back_slashes
-    def replace_back_slashes(self, s: str) -> str:
-        """Carefully replace backslashes in a search pattern."""
-        # This is NOT the same as:
-        #
-        #   s.replace('\\n','\n').replace('\\t','\t').replace('\\\\','\\')
-        #
-        # because there is no rescanning.
-        i = 0
-        while i + 1 < len(s):
-            if s[i] == '\\':
-                ch = s[i + 1]
-                if ch == '\\':
-                    s = s[:i] + s[i + 1 :]  # replace \\ by \
-                elif ch == 'n':
-                    s = s[:i] + '\n' + s[i + 2 :]  # replace the \n by a newline
-                elif ch == 't':
-                    s = s[:i] + '\t' + s[i + 2 :]  # replace \t by a tab
-                else:
-                    i += 1  # Skip the escaped character.
-            i += 1
-        return s
+    /**
+     * Carefully replace backslashes in a search pattern.
+     */
+    public replace_back_slashes(s: string): string {
+        
+        // This is NOT the same as:
+        //
+        //   s.replace('\\n','\n').replace('\\t','\t').replace('\\\\','\\')
+        //
+        // because there is no rescanning.
+
+        let i = 0;
+        while (i + 1 < s.length){
+            if (s[i] === '\\'){
+                ch = s[i + 1];
+                if( ch === '\\'){
+                    s = s.substring(0, i) + s.substring(i + 1); // replace \\ by \
+                }else if (ch === 'n'){
+                    s = s.substring(0, i) + '\n' + s.substring(i + 2); // replace the \n by a newline
+                }else if (ch === 't'){
+                    s = s.substring(0, i) + '\t' + s.substring(i + 2); // replace \t by a tab
+                }else{
+                    i += 1; // Skip the escaped character.
+                }
+            }
+            i += 1;
+        }
+        return s;
+
+    }
     //@+node:felix.20221022201759.1: *3* LeoFind.Initing & finalizing
     //@+node:felix.20221022201759.2: *4* find.init_in_headline & helper
     /**
