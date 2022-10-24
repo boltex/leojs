@@ -9,6 +9,7 @@ import * as g from './leoGlobals';
 import { new_cmd_decorator } from "../core/decorators";
 import { Commands } from "./leoCommands";
 import { Position, VNode } from './leoNodes';
+import { LeoUI } from '../leoUI';
 //@-<< leoFind imports >>
 //@+<< Theory of operation of find/change >>
 //@+node:felix.20221012210057.1: ** << Theory of operation of find/change >>
@@ -93,6 +94,13 @@ interface ISettings {
     wrapping: boolean;
 }
 type ISettingsKey = keyof ISettings;
+type IFindUndoData = {
+    end: number | undefined;
+    in_headline: boolean;
+    insert: number | undefined;
+    p: Position;
+    start: number | undefined;
+};
 
 //@+others
 //@+node:felix.20221012210621.1: ** class LeoFind
@@ -648,7 +656,7 @@ export class LeoFind {
     }
     //@+node:felix.20221013234514.7: *4* find.find-def, do_find_def & helpers
     @cmd('find-def', 'Find the def or class under the cursor.')
-    public find_def(strict: boolean = false): [Position, number, number] | [undefined, undefined, undefined] {
+    public find_def(strict: boolean = false): [Position|undefined, number|undefined, number|undefined]  {
 
         const ftm = this.ftm;
         const p = this.c.p;
@@ -674,13 +682,13 @@ export class LeoFind {
     /**
      * Same as find_def, but don't call _switch_style.
      */
-    public find_def_strict(): [Position, number, number] | [undefined, undefined, undefined] {
+    public find_def_strict(): [Position|undefined, number|undefined, number|undefined]  {
         return this.find_def(true);
     }
     /**
      * A standalone helper for unit tests.
      */
-    public do_find_def(settings: ISettings, word: string, strict: boolean): [Position, number, number] | [undefined, undefined, undefined] {
+    public do_find_def(settings: ISettings, word: string, strict: boolean): [Position|undefined, number|undefined, number|undefined] {
         return this._fd_helper(settings, word, true, strict);
     }
     //@+node:felix.20221013234514.8: *5* find._compute_find_def_settings
@@ -767,7 +775,7 @@ export class LeoFind {
         word: string,
         def_flag: boolean,
         strict: boolean,
-    ): [Position, number, number] | [undefined, undefined, undefined] {
+    ): [Position | undefined, number | undefined, number | undefined] {
 
         const c = this.c;
         const find = this;
@@ -783,7 +791,6 @@ export class LeoFind {
             this.find_text = word + ' =';
             settings.find_text = this.find_text;
         }
-        // g.printObj(settings, tag='_fd_helper: settings')
         //
         // Just search body text.
         this.search_headline = false;
@@ -984,7 +991,7 @@ export class LeoFind {
     /**
      * Find the previous instance of this.find_text.
      */
-    public do_find_prev(settings: ISettings): [Position, number, number] | [undefined, undefined, undefined] {
+    public do_find_prev(settings: ISettings): [Position|undefined, number|undefined, number|undefined]  {
 
         this.request_reverse = true;
         return this.do_find_next(settings);
@@ -994,7 +1001,7 @@ export class LeoFind {
      *
      * Return True (for vim-mode) if a match was found.
      */
-    public do_find_next(settings: ISettings): [Position, number, number] | [undefined, undefined, undefined] {
+    public do_find_next(settings: ISettings): [Position|undefined, number|undefined, number|undefined]  {
 
         const c = this.c;
         let p = this.c.p;
@@ -1114,7 +1121,7 @@ export class LeoFind {
     /**
      * A standalone helper for unit tests.
      */
-    public do_find_var(settings: ISettings, word: string): [Position, int, int] | [undefined, undefined, undefined] {
+    public do_find_var(settings: ISettings, word: string): [Position | undefined, number | undefined, number | undefined] {
 
         return this._fd_helper(settings, word, false, false);
     }
@@ -1130,7 +1137,6 @@ export class LeoFind {
         }
     }
 
-    // replace = change // TODO : ALTERNATE NAME! *************************************
 
     //@+node:felix.20221013234514.21: *4* find.set-find-*
     @cmd('set-find-everywhere', 'Set the \'Entire Outline\' radio button in the Find tab.')
@@ -1931,7 +1937,6 @@ export class LeoFind {
         }
 
         // Fix #292: Never collapse nodes during find-all commands.
-        // Fix #292: Never collapse nodes during find-all commands.
         const old_sparse_find = c.sparse_find;
         try {
             c.sparse_find = false;
@@ -2649,13 +2654,44 @@ export class LeoFind {
         return true;
 
     }
+    //@+node:felix.20221023141615.1: *4* find.compile_pattern
+    /**
+     * Precompile the regexp pattern if necessary.
+     */
+    public compile_pattern(): boolean {
+        let flags: string;
+        try { // Precompile the regexp.
+            
+            flags = "m"; // re.MULTILINE
+            if (this.ignore_case){
+                flags = flags + "i"; //|= re.IGNORECASE 
+            } // pragma: no cover
+            // Escape the search text.
+            // Ignore the whole_word option.
+            const s = this.find_text;
+            // A bad idea: insert \b automatically.
+                // b, s = '\\b', this.find_text
+                // if this.whole_word:
+                    // if not s.startswith(b): s = b + s
+                    // if not s.endswith(b): s = s + b
+            this.re_obj = new RegExp(s, flags); // re.compile(s, flags)
+            return true;
+        }
+        catch(e){ 
+            if (!g.unitTesting){
+                g.warning('invalid regular expression:', this.find_text);
+            }
+            return false;
+        }
+    }
+
     //@+node:felix.20221020232631.8: *4* find.find_next_match & helpers
     /**
      * Resume the search where it left off.
      *
      * Return (p, pos, newpos).
      */
-    public find_next_match(p: Position|undefined): [Position, number, number] | [undefined, undefined, undefined] {
+    public find_next_match(p: Position | undefined): [Position|undefined, number|undefined, number|undefined]  {
 
         if (!this.search_headline && !this.search_body) {
             return [undefined, undefined, undefined];
@@ -2835,8 +2871,8 @@ export class LeoFind {
         //   b) this is the first pane of the pair.
         // There is * no way * this can ever change.
         // So simple in retrospect, so difficult to see.
-    return(
-        this.search_headline && this.search_body && 
+        return (
+            this.search_headline && this.search_body &&
             (
                 (this.reverse && !this.in_headline) ||
                 (!this.reverse && this.in_headline)
@@ -2844,6 +2880,712 @@ export class LeoFind {
         )
 
     }
+    //@+node:felix.20221023141654.1: *4* find.inner_search_helper & helpers
+    /**
+     * Dispatch the proper search method based on settings.
+     */
+    public inner_search_helper(s: string, i: number, j: number, pattern: string):[number, number] {
+
+        const backwards = this.reverse;
+        const nocase = this.ignore_case;
+        const regexp = this.pattern_match;
+        const word = this.whole_word;
+
+        if (backwards){
+            [i, j] = [j, i];
+        }
+        if (!s.substring(i,j) || !pattern){
+            return [-1, -1];
+        }
+        
+        let pos;
+        let newpos;
+
+        if (regexp){
+            [pos, newpos] = this._inner_search_regex(s, i, j, pattern, backwards, nocase);
+        }else if (backwards){
+            [pos, newpos] = this._inner_search_backward(s, i, j, pattern, nocase, word);
+        }else{
+            [pos, newpos] = this._inner_search_plain(s, i, j, pattern, nocase, word);
+        }
+        return [pos, newpos];
+
+    }
+    //@+node:felix.20221023172646.1: *5* find._regexIndexOf & find._regexLastIndexOf
+    private _regexIndexOf(s: string, regex: RegExp, startpos?:number): number {
+        var indexOf = s.substring(startpos || 0).search(regex);
+        return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
+    }
+
+    private _regexLastIndexOf(s: string, regex: RegExp, startpos?:number): number {
+        regex = (regex.global) ? regex : new RegExp(regex.source, "g" + (regex.ignoreCase ? "i" : "") + (regex.multiLine ? "m" : ""));
+        if(typeof (startpos) === "undefined") {
+            startpos = s.length;
+        } else if(startpos < 0) {
+            startpos = 0;
+        }
+        var stringToWorkWith = s.substring(0, startpos + 1);
+        var lastIndexOf = -1;
+        var nextStop = 0;
+        let result:  RegExpExecArray | null;
+        while((result = regex.exec(stringToWorkWith)) !== null) {
+            lastIndexOf = result.index;
+            regex.lastIndex = ++nextStop;
+        }
+        return lastIndexOf;
+    }
+    //@+node:felix.20221023184334.1: *5* find._rfind
+    private _rfind(s: string, pattern: string, start: number, end: number): number {
+        const w_s = s.substring(start); // will start just past i
+        let result = w_s.lastIndexOf(pattern, end - start);
+        if(result>=0){
+            result = result + start;
+        }
+        return result
+    }
+
+    // to test in interpreter
+    // function _rfind(s, pattern, start, end) {
+    //     var w_s = s.substring(start);
+    //     var result = w_s.lastIndexOf(pattern, end-start);
+    //     if(result>=0){
+    //         result = result + start;
+    //     }
+    //     return result
+    // }
+
+    //@+node:felix.20221023141654.2: *5* find._inner_search_backward
+    /**
+     * rfind(sub [,start [,end]])
+     *
+     * Return the highest index in the string where substring sub is found,
+     * such that sub is contained within s[start,end].
+     *
+     * Optional arguments start and end are interpreted as in slice notation.
+     *
+     * Return (-1, -1) on failure.
+     */
+    public _inner_search_backward(
+        s: string,
+        i: number,
+        j: number,
+        pattern: string,
+        nocase: boolean,
+        word: boolean
+    ): [number, number]{
+
+        if (nocase){
+            s = s.toLowerCase();
+            pattern = pattern.toLowerCase();
+        }
+        pattern = this.replace_back_slashes(pattern);
+        const n = pattern.length;
+        // Put the indices in range.  Indices can get out of range
+        // because the search code strips '\r' characters when searching @edit nodes.
+        i = Math.max(0, i);
+        j = Math.min(s.length, j);
+        // short circuit the search: helps debugging.
+        if (s.indexOf(pattern) === -1){
+            return [-1, -1];
+        }
+        let k:number;
+        if (word){
+            while (1){
+
+                // k = s.rfind(pattern, i, j)
+                k = this._rfind(s, pattern, i,j);
+
+                if (k === -1){
+                    break;
+                }
+                if (this._inner_search_match_word(s, k, pattern)){
+                    return [k, k + n];
+                }
+                j = Math.max(0, k - 1);
+
+            }
+            return [-1, -1];
+
+        }
+        
+        // k = s.rfind(pattern, i, j)
+        k = this._rfind(s, pattern, i,j);
+
+        if (k === -1){
+            return [-1, -1];
+        }
+        return [k, k + n];
+
+    }
+    //@+node:felix.20221023141654.3: *5* find._inner_search_match_word
+    /**
+     * Do a whole-word search.
+     */
+    private _inner_search_match_word(s: string, i: number, pattern: string): boolean {
+        
+        pattern = this.replace_back_slashes(pattern);
+        if (!s || !pattern || !g.match(s, i, pattern)){
+            return false;
+        }
+
+        let pat1;
+        let pat2;
+        [pat1, pat2] = [pattern[0], pattern[pattern.length-1]];
+        const n = pattern.length;
+        const ch1 = (0 <= (i - 1) && (i - 1) < s.length)?s[i - 1] : '.';
+        const ch2 =(0 <= (i + n) && (i + n) < s.length )? s[i + n] : '.';
+        const isWordPat1 = g.isWordChar(pat1);
+        const isWordPat2 = g.isWordChar(pat2);
+        const isWordCh1 = g.isWordChar(ch1);
+        const isWordCh2 = g.isWordChar(ch2);
+        const inWord = isWordPat1 && isWordCh1 || isWordPat2 && isWordCh2;
+
+        return !inWord;
+
+    }
+    //@+node:felix.20221023141654.4: *5* find._inner_search_plain
+    /**
+     * Do a plain search.
+     */
+    public _inner_search_plain(
+        s: string,
+        i: number,
+        j: number,
+        pattern: string,
+        nocase: boolean,
+        word: boolean
+    ): [number, number] {
+        
+        if (nocase){
+            s = s.toLowerCase();
+            pattern = pattern.toLowerCase();
+        }
+
+        pattern = this.replace_back_slashes(pattern);
+        const n = pattern.length;
+        let k;
+
+        if (word){
+            while (1){
+                k = s.indexOf(pattern, i, j);
+                if (k === -1){
+                    break;
+                }
+                if (this._inner_search_match_word(s, k, pattern)){
+                    return [k, k + n];
+                }
+                i = k + n;
+
+            }
+            return [-1, -1];
+
+        }
+        k = s.indexOf(pattern, i, j);
+
+        if (k === -1){
+            return [-1, -1];
+        }
+        return [k, k + n];
+
+    }
+    //@+node:felix.20221023141654.5: *5* find._inner_search_regex
+    /**
+     * Called from inner_search_helper
+     */
+    private _inner_search_regex(
+        s: string,
+        i: number,
+        j: number,
+        pattern: string,
+        backwards: boolean,
+        nocase: boolean,
+    ): [number, number]{
+        
+        // ! TODO !
+        // TODO : RE WRITE THIS FOR JAVASCRIPT REGEXP CAPABILITIES! (no params for search!)
+
+        const re_obj = this.re_obj  // Use the pre-compiled object
+        if (!re_obj){
+            if (!g.unitTesting){
+                g.trace('can not happen: no re_obj')
+            }
+            return [-1, -1];
+        }
+
+        let last_mo = undefined;
+        let mo;
+
+        if (backwards){
+            // Scan to the last match using search here.
+            i = 0;
+            while (i < s.length){
+                mo = re_obj.search(s, i, j);
+                if (!mo){
+                    break;
+                }
+                i += 1;
+                last_mo = mo;
+            }
+            mo = last_mo;
+        }else{
+            mo = re_obj.search(s, i, j);
+        }
+
+        if (mo){
+            this.match_obj = mo;
+            return mo.start(), mo.end();
+        }
+
+        this.match_obj = undefined;
+        return [-1, -1];
+
+    }
+    //@+node:felix.20221023141705.1: *4* find.make_regex_subs
+    def make_regex_subs(self, change_text: str, groups: MatchGroups) -> str:
+        """
+        Substitute group[i-1] for \\i strings in change_text.
+
+        Groups is a tuple of strings, one for every matched group.
+        """
+
+        # g.printObj(list(groups), tag=f"groups in {change_text!r}")
+
+        def repl(match_object: re.Match) -> str:
+            """re.sub calls this function once per group."""
+            # # 1494...
+            n = int(match_object.group(1)) - 1
+            if 0 <= n < len(groups):
+                # Executed only if the change text contains groups that match.
+                return (
+                    groups[n].
+                        replace(r'\b', r'\\b').
+                        replace(r'\f', r'\\f').
+                        replace(r'\n', r'\\n').
+                        replace(r'\r', r'\\r').
+                        replace(r'\t', r'\\t').
+                        replace(r'\v', r'\\v'))
+            # No replacement.
+            return match_object.group(0)
+
+        result = re.sub(r'\\([0-9])', repl, change_text)
+        return result
+    //@+node:felix.20221023141715.1: *4* find.precompile_pattern
+    def precompile_pattern(self) -> bool:
+        """Precompile the regexp pattern if necessary."""
+        try:  # Precompile the regexp.
+            # pylint: disable=no-member
+            flags = re.MULTILINE
+            if self.ignore_case:
+                flags |= re.IGNORECASE
+            # Escape the search text.
+            # Ignore the whole_word option.
+            s = self.find_text
+            # A bad idea: insert \b automatically.
+                # b, s = '\\b', self.find_text
+                # if self.whole_word:
+                    # if not s.startswith(b): s = b + s
+                    # if not s.endswith(b): s = s + b
+            self.re_obj = re.compile(s, flags)
+            return True
+        except Exception:
+            if not g.unitTesting:
+                g.warning('invalid regular expression:', self.find_text)  # pragma: no cover
+            return False
+    //@+node:felix.20221023141723.1: *4* find.replace_back_slashes
+    def replace_back_slashes(self, s: str) -> str:
+        """Carefully replace backslashes in a search pattern."""
+        # This is NOT the same as:
+        #
+        #   s.replace('\\n','\n').replace('\\t','\t').replace('\\\\','\\')
+        #
+        # because there is no rescanning.
+        i = 0
+        while i + 1 < len(s):
+            if s[i] == '\\':
+                ch = s[i + 1]
+                if ch == '\\':
+                    s = s[:i] + s[i + 1 :]  # replace \\ by \
+                elif ch == 'n':
+                    s = s[:i] + '\n' + s[i + 2 :]  # replace the \n by a newline
+                elif ch == 't':
+                    s = s[:i] + '\t' + s[i + 2 :]  # replace \t by a tab
+                else:
+                    i += 1  # Skip the escaped character.
+            i += 1
+        return s
+    //@+node:felix.20221022201759.1: *3* LeoFind.Initing & finalizing
+    //@+node:felix.20221022201759.2: *4* find.init_in_headline & helper
+    /**
+     * Select the first pane to search for incremental searches and changes.
+     * This is called only at the start of each search.
+     * This must not alter the current insertion point or selection range.
+     */
+    public init_in_headline(): void {
+
+        // #1228458: Inconsistency between Find-forward and Find-backward.
+        if (this.search_headline && this.search_body) {
+            // We have no choice: we *must* search the present widget!
+            this.in_headline = this.focus_in_tree();
+        } else {
+            this.in_headline = this.search_headline;
+        }
+    }
+    //@+node:felix.20221022201759.3: *5* find.focus_in_tree
+    /**
+     * Return True is the focus widget w is anywhere in the tree pane.
+     *
+     * Note: the focus may be in the find pane.
+     */
+    public focus_in_tree(): boolean {
+
+        const c = this.c;
+        const ftm = this.ftm;
+        const w = ftm && ftm.entry_focus; // ! SET BY CLIENT WHEN CALLING FIND COMMANDS  || (g.app.gui as LeoUI).get_focus(true);
+        if (ftm) {
+            ftm.entry_focus = undefined;  // Only use this focus widget once!
+        }
+        const w_name = c.widget_name(w);
+        let val;
+        if (w === c.frame.body.wrapper) {
+            val = false;
+        } else if (w === c.frame.tree.treeWidget) {
+            val = true;
+        } else {
+            val = w_name.startswith('head');
+        }
+        return val;
+
+    }
+    //@+node:felix.20221022201759.4: *4* find.restore
+    /**
+     * Restore Leo's gui and settings from data, a g.Bunch.
+     */
+    public restore(data: IFindUndoData): void {
+
+        const c = this.c;
+        const p = data.p;
+        // c.frame.bringToFront();  // Needed on the Mac
+
+        if (!p || !p.__bool__() || !c.positionExists(p)) {
+            // Better than selecting the root!
+            return;
+        }
+        c.selectPosition(p);
+        // Fix bug 1258373: https://bugs.launchpad.net/leo-editor/+bug/1258373
+        if (this.in_headline) {
+            c.treeWantsFocus()
+        } else {
+            // Looks good and provides clear indication of failure or termination.
+            const w = c.frame.body.wrapper;
+            w.setSelectionRange(data.start, data.end, data.insert);
+            w.seeInsertPoint();
+            c.widgetWantsFocus(w);
+        }
+    }
+    //@+node:felix.20221022201759.5: *4* find.save
+    /**
+     * Save everything needed to restore after a search fails.
+     */
+    public save(): IFindUndoData {
+
+        const c = this.c;
+        let insert: number | undefined;
+        let start: number | undefined;
+        let end: number | undefined;
+
+        if (this.in_headline) {
+            // Fix bug 1258373: https://bugs.launchpad.net/leo-editor/+bug/1258373
+            // Don't try to re-edit the headline.
+            [insert, start, end] = [undefined, undefined, undefined];
+        } else {
+            const w = c.frame.body.wrapper;
+            insert = w.getInsertPoint();
+            [start, end] = w.getSelectionRange();
+        }
+        const data: IFindUndoData = {
+            end: end,
+            in_headline: this.in_headline,
+            insert: insert,
+            p: c.p.copy(),
+            start: start
+        };
+
+        return data;
+    }
+    //@+node:felix.20221022201759.6: *4* find.show_success
+    /**
+     * Display the result of a successful find operation.
+     */
+    public show_success(p: Position, pos: number, newpos: number, showState = true): any {
+
+        const c = this.c;
+        // Set state vars.
+        // Ensure progress in backwards searches.
+        const insert = this.reverse ? Math.min(pos, newpos) : Math.max(pos, newpos);
+        if (c.sparse_find) {
+            c.expandOnlyAncestorsOfNode(p);
+        }
+        let w;
+        if (this.in_headline) {
+            c.endEditing();
+            c.redraw(p);
+            c.frame.tree.editLabel(p);
+            w = c.edit_widget(p);  // #2220
+            if (w) {
+                w.setSelectionRange(pos, newpos, insert);  // #2220
+            }
+        } else {
+            // Tricky code.  Do not change without careful thought.
+            w = c.frame.body.wrapper;
+            // *Always* do the full selection logic.
+            // This ensures that the body text is inited and recolored.
+            c.selectPosition(p);
+            c.bodyWantsFocus();
+            if (showState) {
+                c.k.showStateAndMode(w);
+            }
+            c.bodyWantsFocusNow();
+            w.setSelectionRange(pos, newpos, insert);
+            const k = g.see_more_lines(w.getAllText(), insert, 4);
+            w.see(k);  // #78: find-next match not always scrolled into view.
+            c.outerUpdate();  // Set the focus immediately.
+            if (c.vim_mode && c.vimCommands) {
+                c.vimCommands.update_selection_after_search();
+            }
+        }
+        // Support for the console gui.
+        if ((g.app.gui as LeoUI).show_find_success) {
+            (g.app.gui as LeoUI).show_find_success(c, this.in_headline, insert, p);
+        }
+        c.frame.bringToFront();
+        return w;  // Support for isearch.
+    }
+    //@+node:felix.20221022201804.1: *3* LeoFind.Utils
+    //@+node:felix.20221022201804.2: *4* find.add_change_string_to_label
+    /**
+     * Add an unprotected change string to the minibuffer label.
+     */
+    public add_change_string_to_label(): void {
+
+        const c = this.c;
+        let s: string = this.ftm.get_change_text();
+        c.minibufferWantsFocus();
+        while (s.endsWith('\n') || s.endsWith('\r')) {
+            s = s.substring(0, s.length - 1);
+        }
+        c.k.extendLabel(s, true, false);
+    }
+    //@+node:felix.20221022201804.3: *4* find.add_find_string_to_label
+    public add_find_string_to_label(protect = true): void {
+
+        const c = this.c;
+        const k = this.c.k;
+        const ftm = c.findCommands.ftm;
+        let s = ftm.get_find_text();
+        c.minibufferWantsFocus();
+        while (s.endsWith('\n') || s.endsWith('\r')) {
+            s = s.substring(0, s.length - 1);
+        }
+        k.extendLabel(s, true, protect);
+
+    }
+    //@+node:felix.20221022201804.4: *4* find.compute_result_status
+    /**
+     * Return the status to be shown in the status line after a find command completes.
+     */
+    public compute_result_status(find_all_flag = false): string {
+
+        // Too similar to another method...
+        const status = [];
+        const table: [keyof LeoFind, string][] = [
+            ['whole_word', 'Word'],
+            ['ignore_case', 'Ignore Case'],
+            ['pattern_match', 'Regex'],
+            ['suboutline_only', '[Outline Only]'],
+            ['node_only', '[Node Only]'],
+            ['search_headline', 'Head'],
+            ['search_body', 'Body'],
+        ];
+
+        for (let [ivar, val] of table) {
+            if (this[ivar]) {
+                status.push(val);
+            }
+        }
+        return status ? ` (${status.join(', ')})` : '';
+
+    }
+    //@+node:felix.20221022201804.5: *4* find.help_for_find_commands
+    /**
+     * Called from Find panel.  Redirect.
+     */
+    public help_for_find_commands(): void {
+        console.log('TODO : help_for_find_commands');
+        // this.c.helpCommands.help_for_find_commands();
+    }
+    //@+node:felix.20221022201804.6: *4* find.init_vim_search
+    /**
+     * Initialize searches in vim mode.
+     */
+    public init_vim_search(pattern: string): void {
+
+        const c = this.c;
+        if (c.vim_mode && c.vimCommands) {
+            c.vimCommands.update_dot_before_search(
+                pattern,
+                undefined);  // A flag.
+        }
+    }
+    //@+node:felix.20221022201804.7: *4* find.preload_find_pattern
+    /**
+     * Preload the find pattern from the selected text of widget w.
+     */
+    public preload_find_pattern(w: any): void {
+
+        const c = this.c;
+        const ftm = this.ftm;
+        if (!c.config.getBool('preload-find-pattern', false)) {
+            // Make *sure* we don't preload the find pattern if it is not wanted.
+            return;
+        }
+        if (!w) {
+            return;
+        }
+        //
+        // #1436: Don't create a selection if there isn't one.
+        //        Leave the search pattern alone!
+        //
+        // if not w.hasSelection():
+        //     c.editCommands.extendToWord(event=None, select=True, w=w)
+        //
+        // #177:  Use selected text as the find string.
+        // #1436: Make make sure there is a significant search pattern.
+        const s = w.getSelectedText();
+        if (s.trim()) {
+            ftm.set_find_text(s);
+            ftm.init_focus();
+        }
+    }
+    //@+node:felix.20221022201804.8: *4* find.show_status
+    /**
+     * Show the find status the Find dialog, if present, and the status line.
+     */
+    public show_status(found: boolean): void {
+
+        const c = this.c;
+        const status = found ? 'found' : 'not found';
+        const options = this.compute_result_status();
+        const s = `${status}:${options} ${this.find_text}`;
+        // Set colors.
+        const found_bg = c.config.getColor('find-found-bg') || 'blue';
+        const not_found_bg = c.config.getColor('find-not-found-bg') || 'red';
+        const found_fg = c.config.getColor('find-found-fg') || 'white';
+        const not_found_fg = c.config.getColor('find-not-found-fg') || 'white';
+        const bg = found ? found_bg : not_found_bg;
+        const fg = found ? found_fg : not_found_fg;
+        if (c.config.getBool("show-find-result-in-status") !== false) {
+            c.frame.putStatusLine(s, bg, fg);
+        }
+    }
+    //@+node:felix.20221022201804.9: *4* find.show_find_options_in_status_area & helper
+    /**
+     * Show find options in the status area.
+     */
+    public show_find_options_in_status_area(): void {
+
+        const c = this.c;
+        const s = this.compute_find_options_in_status_area();
+        c.frame.putStatusLine(s);
+
+    }
+    //@+node:felix.20221022201804.10: *5* find.compute_find_options_in_status_area
+    public compute_find_options_in_status_area(): string {
+        
+        // TODO : REDO WITH APPROPRIATE GETTERS FROM VSCODE/LEOJS
+        const c = this.c;
+        const ftm = c.findCommands.ftm;
+        const table = [
+            ['Word', ftm.check_box_whole_word],
+            ['Ig-case', ftm.check_box_ignore_case],
+            ['regeXp', ftm.check_box_regexp],
+            ['Body', ftm.check_box_search_body],
+            ['Head', ftm.check_box_search_headline],
+            // ['wrap-Around', ftm.check_box_wrap_around],
+            ['mark-Changes', ftm.check_box_mark_changes],
+            ['mark-Finds', ftm.check_box_mark_finds],
+        ];
+
+        // const result = [option for option, ivar in table if ivar.isChecked()]
+        const result = table.filter((p_entry)=>{
+            return p_entry[1].isChecked()
+        }).map((p_entry)=>{
+            return p_entry[0];
+        });
+
+        const table2 = [
+            ['Suboutline', ftm.radio_button_suboutline_only],
+            ['Node', ftm.radio_button_node_only],
+            ['File', ftm.radio_button_file_only],
+        ];
+        for (let [option, ivar] of table2) {
+            if (ivar.isChecked()) {
+                result.push(`[${option}]`);
+                break;
+            }
+        }
+        return `Find: ${result.join(' ')}`;
+
+    }
+    //@+node:felix.20221022201804.11: *4* find.start_state_machine
+    // ! USE CLIENT UI DIALOGS INSTEAD OF ORIGINAL LEO'S STATE_MACHINE
+
+    // public start_state_machine(
+    //     event: Event,
+    //     prefix: str,
+    //     handler: Callable,
+    //     escape_handler: Callable = None,
+    // ): void
+    // """
+    //     Initialize and start the state machine used to get user arguments.
+    // """
+    //     c, k = this.c, this.k
+    // w = c.frame.body.wrapper
+    // if not w:
+    // return
+    //     # Gui...
+    // k.setLabelBlue(prefix)
+    //     # New in Leo 5.2: minibuffer modes shows options in status area.
+    // if this.minibuffer_mode:
+    // this.show_find_options_in_status_area()
+    //     elif c.config.getBool('use-find-dialog', default=True):
+    // g.app.gui.openFindDialog(c)
+    //     else:
+    // c.frame.log.selectTab('Find')
+    // this.add_find_string_to_label(protect = False)
+    // k.getArgEscapes = ['\t'] if escape_handler else[]
+    // this.handler = handler
+    // this.escape_handler = escape_handler
+    //     # Start the state matching!
+    // k.get1Arg(event, handler = this.state0, tabList = this.findTextList, completion = True)
+
+    // public state0(, event: Event): void
+    // """Dispatch the next handler."""
+    // k = this.k
+    // if k.getArgEscapeFlag:
+    // k.getArgEscapeFlag = False
+    // this.escape_handler(event)
+    //     else:
+    // this.handler(event)
+    //@+node:felix.20221022201804.12: *4* find.updateChange/FindList
+    // ! SEEMS TO ONLY BE USED BY STATE MACHINE
+
+    // public update_change_list(, s: str): void 
+    //     if s not in this.changeTextList:
+    // this.changeTextList.append(s)
+
+    // public update_find_list(, s: str): void 
+    //     if s not in this.findTextList:
+    // this.findTextList.append(s)
     //@-others
 
 }
