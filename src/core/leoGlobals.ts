@@ -1859,6 +1859,28 @@ export function find_word(s: string, word: string, i: number = 0): number {
 
     return -1;
 }
+//@+node:felix.20221025000455.1: *3* g.see_more_lines
+/**
+ * Extend index i within string s to include n more lines.
+ */
+export function see_more_lines(s: string, ins: number, n=4): number {
+    
+    // Show more lines, if they exist.
+    if (n > 0){
+        for (let z = 0; z < n; z++){
+            if (ins >= s.length){
+                break;
+            }
+            let i;
+            let j;
+            [i, j] = getLine(s, ins);
+            ins = j;
+        }
+    }
+
+    return Math.max(0, Math.min(ins, s.length));
+
+}
 //@+node:felix.20211104230121.1: *3* g.splitLines
 /**
  * Split s into lines, preserving the number of lines and the endings

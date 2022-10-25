@@ -28,8 +28,8 @@ export class LeoFrame {
         generation: number;
         editLabel: (
             p: Position,
-            selectAll: boolean,
-            selection: any
+            selectAll?: boolean,
+            selection?: any
         ) => void;
     };
     public body: any;
@@ -47,7 +47,7 @@ export class LeoFrame {
 
         this.tree = {
             generation: 0,
-            editLabel: (p: Position, selectAll: boolean, selection: any) => {
+            editLabel: (p: Position, selectAll?: boolean, selection?: any) => {
                 console.log(
                     'TODO: editLabel not used in leojs. From c.frame.tree.editLabel'
                 );

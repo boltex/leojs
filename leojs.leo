@@ -9687,8 +9687,8 @@ export interface LeoSearchSettings {
     showParents: boolean;
     searchOptions: number;
     // Find/change strings...
-    findText: string;
-    replaceText: string;
+    findText: string;  // find_text
+    replaceText: string; // change_text
     // Find options...
     wholeWord: boolean;
     ignoreCase: boolean;

@@ -72,10 +72,10 @@ function cmd(p_name: string, p_doc: string) {
     return new_cmd_decorator(p_name, p_doc, ['c', 'findCommands']);
 }
 
-interface ISettings {
+export interface ISettings {
     // State...
     in_headline: boolean;
-    p: Position,
+    p?: Position,
     // Find/change strings...
     find_text: string;
     change_text: string;
@@ -159,7 +159,7 @@ export class LeoFind {
     public findAllUniqueFlag: boolean = false;
     public find_def_data: any;
     public in_headline: boolean = false;
-    public match_obj!: RegExpExecArray;
+    public match_obj!: RegExpExecArray | undefined;
     public reverse: boolean = false;
     public root: Position | undefined;  // The start of the search, especially for suboutline-only.
     public unique_matches: string[] = [];
@@ -656,7 +656,7 @@ export class LeoFind {
     }
     //@+node:felix.20221013234514.7: *4* find.find-def, do_find_def & helpers
     @cmd('find-def', 'Find the def or class under the cursor.')
-    public find_def(strict: boolean = false): [Position|undefined, number|undefined, number|undefined]  {
+    public find_def(strict: boolean = false): [Position | undefined, number | undefined, number | undefined] {
 
         const ftm = this.ftm;
         const p = this.c.p;
@@ -682,13 +682,13 @@ export class LeoFind {
     /**
      * Same as find_def, but don't call _switch_style.
      */
-    public find_def_strict(): [Position|undefined, number|undefined, number|undefined]  {
+    public find_def_strict(): [Position | undefined, number | undefined, number | undefined] {
         return this.find_def(true);
     }
     /**
      * A standalone helper for unit tests.
      */
-    public do_find_def(settings: ISettings, word: string, strict: boolean): [Position|undefined, number|undefined, number|undefined] {
+    public do_find_def(settings: ISettings, word: string, strict: boolean): [Position | undefined, number | undefined, number | undefined] {
         return this._fd_helper(settings, word, true, strict);
     }
     //@+node:felix.20221013234514.8: *5* find._compute_find_def_settings
@@ -704,7 +704,7 @@ export class LeoFind {
             ['search_body', true],
             ['search_headline', false],
             ['whole_word', true],
-        ]
+        ];
         let attr: ISettingsKey;
         let val: boolean | string;
         for (let [attr, val] of table) {
@@ -991,7 +991,7 @@ export class LeoFind {
     /**
      * Find the previous instance of this.find_text.
      */
-    public do_find_prev(settings: ISettings): [Position|undefined, number|undefined, number|undefined]  {
+    public do_find_prev(settings: ISettings): [Position | undefined, number | undefined, number | undefined] {
 
         this.request_reverse = true;
         return this.do_find_next(settings);
@@ -1001,10 +1001,10 @@ export class LeoFind {
      *
      * Return True (for vim-mode) if a match was found.
      */
-    public do_find_next(settings: ISettings): [Position|undefined, number|undefined, number|undefined]  {
+    public do_find_next(settings: ISettings): [Position | undefined, number | undefined, number | undefined] {
 
         const c = this.c;
-        let p = this.c.p;
+        let p: Position | undefined = this.c.p;
         //
         // The gui widget may not exist for headlines.
         const gui_w = this.in_headline ? c.edit_widget(p) : c.frame.body.wrapper; // TODO : edit widget!
@@ -1087,7 +1087,7 @@ export class LeoFind {
         [p, pos, newpos] = this.find_next_match(p);
         const found = pos !== undefined;
         if (found) {
-            this.show_success(p, pos, newpos);
+            this.show_success(p!, pos!, newpos!);
         } else {
             // Restore previous position.
             this.restore(data);
@@ -1962,7 +1962,7 @@ export class LeoFind {
     public _find_all_helper(
         after: Position | undefined,
         data: any, // TODO : FIX TYPING
-        p: Position,
+        p: Position | undefined,
         undoType: string,
     ): number {
 
@@ -2002,7 +2002,7 @@ export class LeoFind {
             //  if ((p.v, pos) in seen){  // 2076
             if (
                 seen.reduce((previous, current): boolean => {
-                    if (current[0] === p.v && current[1] === pos) {
+                    if (p && current[0] === p.v && current[1] === pos) {
                         return true;
                     }
                     return previous;
@@ -2011,7 +2011,7 @@ export class LeoFind {
             ) {
                 continue;  // pragma: no cover
             }
-            seen.push([p.v, pos]);
+            seen.push([p!.v, pos]);
             count += 1;
 
             const s: string = this.work_s;
@@ -2028,27 +2028,27 @@ export class LeoFind {
                 const m = this.match_obj;
                 if (m && m.length) {
                     this.unique_matches.push(m[0].trim());
-                    put_link(line, line_number, p);  // #2023
+                    put_link(line, line_number, p!);  // #2023
                 }
             } else if (both) {
                 result.push(
                     '-'.repeat(20) +
-                    p.h + "\n" +
+                    p!.h + "\n" +
                     (this.in_headline ? "head: " : "body: ") +
                     line.trimEnd() + '\n\n'
                 );
-                put_link(line, line_number, p);  // #2023
-            } else if (p.isVisited()) {
+                put_link(line, line_number, p!);  // #2023
+            } else if (p!.isVisited()) {
                 result.push(line.trimEnd() + '\n');
-                put_link(line, line_number, p);  // #2023
+                put_link(line, line_number, p!);  // #2023
             } else {
                 result.push(
                     '-'.repeat(20) +
-                    p.h + "\n" +
+                    p!.h + "\n" +
                     line.trimEnd() + '\n'
                 );
-                put_link(line, line_number, p);  // #2023
-                p.setVisited();
+                put_link(line, line_number, p!);  // #2023
+                p!.setVisited();
             }
         }
 
@@ -2451,7 +2451,7 @@ export class LeoFind {
                         clones.push(p.copy()); // push if not already in.
                     }
                     // Don't look at the node or it's descendants.
-                    for (let p2 of p.this_and_subtree(false)) {
+                    for (let p2 of p.self_and_subtree(false)) {
                         if (!skip.includes(p2.v)) {
                             skip.push(p2.v); // as a set
                         }
@@ -2661,24 +2661,24 @@ export class LeoFind {
     public compile_pattern(): boolean {
         let flags: string;
         try { // Precompile the regexp.
-            
+
             flags = "m"; // re.MULTILINE
-            if (this.ignore_case){
+            if (this.ignore_case) {
                 flags = flags + "i"; //|= re.IGNORECASE 
             } // pragma: no cover
             // Escape the search text.
             // Ignore the whole_word option.
             const s = this.find_text;
             // A bad idea: insert \b automatically.
-                // b, s = '\\b', this.find_text
-                // if this.whole_word:
-                    // if not s.startswith(b): s = b + s
-                    // if not s.endswith(b): s = s + b
+            // b, s = '\\b', this.find_text
+            // if this.whole_word:
+            // if not s.startswith(b): s = b + s
+            // if not s.endswith(b): s = s + b
             this.re_obj = new RegExp(s, flags); // re.compile(s, flags)
             return true;
         }
-        catch(e){ 
-            if (!g.unitTesting){
+        catch (e) {
+            if (!g.unitTesting) {
                 g.warning('invalid regular expression:', this.find_text);
             }
             return false;
@@ -2691,7 +2691,7 @@ export class LeoFind {
      *
      * Return (p, pos, newpos).
      */
-    public find_next_match(p: Position | undefined): [Position|undefined, number|undefined, number|undefined]  {
+    public find_next_match(p: Position | undefined): [Position | undefined, number | undefined, number | undefined] {
 
         if (!this.search_headline && !this.search_body) {
             return [undefined, undefined, undefined];
@@ -2884,61 +2884,38 @@ export class LeoFind {
     /**
      * Dispatch the proper search method based on settings.
      */
-    public inner_search_helper(s: string, i: number, j: number, pattern: string):[number, number] {
+    public inner_search_helper(s: string, i: number, j: number, pattern: string): [number, number] {
 
         const backwards = this.reverse;
         const nocase = this.ignore_case;
         const regexp = this.pattern_match;
         const word = this.whole_word;
 
-        if (backwards){
+        if (backwards) {
             [i, j] = [j, i];
         }
-        if (!s.substring(i,j) || !pattern){
+        if (!s.substring(i, j) || !pattern) {
             return [-1, -1];
         }
-        
+
         let pos;
         let newpos;
 
-        if (regexp){
+        if (regexp) {
             [pos, newpos] = this._inner_search_regex(s, i, j, pattern, backwards, nocase);
-        }else if (backwards){
+        } else if (backwards) {
             [pos, newpos] = this._inner_search_backward(s, i, j, pattern, nocase, word);
-        }else{
+        } else {
             [pos, newpos] = this._inner_search_plain(s, i, j, pattern, nocase, word);
         }
         return [pos, newpos];
 
     }
-    //@+node:felix.20221023172646.1: *5* find._regexIndexOf & find._regexLastIndexOf
-    private _regexIndexOf(s: string, regex: RegExp, startpos?:number): number {
-        var indexOf = s.substring(startpos || 0).search(regex);
-        return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
-    }
-
-    private _regexLastIndexOf(s: string, regex: RegExp, startpos?:number): number {
-        regex = (regex.global) ? regex : new RegExp(regex.source, "g" + (regex.ignoreCase ? "i" : "") + (regex.multiLine ? "m" : ""));
-        if(typeof (startpos) === "undefined") {
-            startpos = s.length;
-        } else if(startpos < 0) {
-            startpos = 0;
-        }
-        var stringToWorkWith = s.substring(0, startpos + 1);
-        var lastIndexOf = -1;
-        var nextStop = 0;
-        let result:  RegExpExecArray | null;
-        while((result = regex.exec(stringToWorkWith)) !== null) {
-            lastIndexOf = result.index;
-            regex.lastIndex = ++nextStop;
-        }
-        return lastIndexOf;
-    }
     //@+node:felix.20221023184334.1: *5* find._rfind
     private _rfind(s: string, pattern: string, start: number, end: number): number {
         const w_s = s.substring(start); // will start just past i
         let result = w_s.lastIndexOf(pattern, end - start);
-        if(result>=0){
+        if (result >= 0) {
             result = result + start;
         }
         return result
@@ -2972,9 +2949,9 @@ export class LeoFind {
         pattern: string,
         nocase: boolean,
         word: boolean
-    ): [number, number]{
+    ): [number, number] {
 
-        if (nocase){
+        if (nocase) {
             s = s.toLowerCase();
             pattern = pattern.toLowerCase();
         }
@@ -2985,20 +2962,20 @@ export class LeoFind {
         i = Math.max(0, i);
         j = Math.min(s.length, j);
         // short circuit the search: helps debugging.
-        if (s.indexOf(pattern) === -1){
+        if (s.indexOf(pattern) === -1) {
             return [-1, -1];
         }
-        let k:number;
-        if (word){
-            while (1){
+        let k: number;
+        if (word) {
+            while (1) {
 
                 // k = s.rfind(pattern, i, j)
-                k = this._rfind(s, pattern, i,j);
+                k = this._rfind(s, pattern, i, j);
 
-                if (k === -1){
+                if (k === -1) {
                     break;
                 }
-                if (this._inner_search_match_word(s, k, pattern)){
+                if (this._inner_search_match_word(s, k, pattern)) {
                     return [k, k + n];
                 }
                 j = Math.max(0, k - 1);
@@ -3007,11 +2984,11 @@ export class LeoFind {
             return [-1, -1];
 
         }
-        
-        // k = s.rfind(pattern, i, j)
-        k = this._rfind(s, pattern, i,j);
 
-        if (k === -1){
+        // k = s.rfind(pattern, i, j)
+        k = this._rfind(s, pattern, i, j);
+
+        if (k === -1) {
             return [-1, -1];
         }
         return [k, k + n];
@@ -3022,18 +2999,18 @@ export class LeoFind {
      * Do a whole-word search.
      */
     private _inner_search_match_word(s: string, i: number, pattern: string): boolean {
-        
+
         pattern = this.replace_back_slashes(pattern);
-        if (!s || !pattern || !g.match(s, i, pattern)){
+        if (!s || !pattern || !g.match(s, i, pattern)) {
             return false;
         }
 
         let pat1;
         let pat2;
-        [pat1, pat2] = [pattern[0], pattern[pattern.length-1]];
+        [pat1, pat2] = [pattern[0], pattern[pattern.length - 1]];
         const n = pattern.length;
-        const ch1 = (0 <= (i - 1) && (i - 1) < s.length)?s[i - 1] : '.';
-        const ch2 =(0 <= (i + n) && (i + n) < s.length )? s[i + n] : '.';
+        const ch1 = (0 <= (i - 1) && (i - 1) < s.length) ? s[i - 1] : '.';
+        const ch2 = (0 <= (i + n) && (i + n) < s.length) ? s[i + n] : '.';
         const isWordPat1 = g.isWordChar(pat1);
         const isWordPat2 = g.isWordChar(pat2);
         const isWordCh1 = g.isWordChar(ch1);
@@ -3055,8 +3032,8 @@ export class LeoFind {
         nocase: boolean,
         word: boolean
     ): [number, number] {
-        
-        if (nocase){
+
+        if (nocase) {
             s = s.toLowerCase();
             pattern = pattern.toLowerCase();
         }
@@ -3065,13 +3042,13 @@ export class LeoFind {
         const n = pattern.length;
         let k;
 
-        if (word){
-            while (1){
-                k = s.indexOf(pattern, i, j);
-                if (k === -1){
+        if (word) {
+            while (1) {
+                k = s.indexOf(pattern, i);
+                if (k === -1 || k + pattern.length > j) {
                     break;
                 }
-                if (this._inner_search_match_word(s, k, pattern)){
+                if (this._inner_search_match_word(s, k, pattern)) {
                     return [k, k + n];
                 }
                 i = k + n;
@@ -3080,9 +3057,9 @@ export class LeoFind {
             return [-1, -1];
 
         }
-        k = s.indexOf(pattern, i, j);
+        k = s.indexOf(pattern, i);
 
-        if (k === -1){
+        if (k === -1 || k + pattern.length > j) {
             return [-1, -1];
         }
         return [k, k + n];
@@ -3099,43 +3076,53 @@ export class LeoFind {
         pattern: string,
         backwards: boolean,
         nocase: boolean,
-    ): [number, number]{
-        
+    ): [number, number] {
+
         // ! TODO !
         // TODO : RE WRITE THIS FOR JAVASCRIPT REGEXP CAPABILITIES! (no start/end params for search!)
         // Modify to consider i and j. 
         // This set the match_obj with the exact match
 
         const re_obj = this.re_obj  // Use the pre-compiled object
-        if (!re_obj){
-            if (!g.unitTesting){
+        if (!re_obj) {
+            if (!g.unitTesting) {
                 g.trace('can not happen: no re_obj')
             }
             return [-1, -1];
         }
 
         let last_mo = undefined;
-        let mo;
+        let mo: RegExpExecArray | null | undefined;
 
-        if (backwards){
+        if (backwards) {
             // Scan to the last match using search here.
             i = 0;
-            while (i < s.length){
-                mo = re_obj.search(s, i, j);
-                if (!mo){
+            while (i < s.length) {
+                re_obj.lastIndex = i; // start up from i 'start'
+                mo = re_obj.exec(s);
+
+                if (!mo || re_obj.lastIndex > j) {
+                    // no match or Busted past j 'end'
                     break;
                 }
                 i += 1;
                 last_mo = mo;
             }
             mo = last_mo;
-        }else{
-            mo = re_obj.search(s, i, j);
+        } else {
+            // normal forward search
+            re_obj.lastIndex = i; // start up from i 'start'
+            mo = re_obj.exec(s);
+            if (re_obj.lastIndex > j) {
+                // if busted past j 'end'
+                mo = undefined;
+            }
+
         }
 
-        if (mo){
+        if (mo) {
             this.match_obj = mo;
-            return mo.start(), mo.end();
+            return [mo.index, mo.index + mo[0].length - 1];
         }
 
         this.match_obj = undefined;
@@ -3148,32 +3135,42 @@ export class LeoFind {
      *
      * Groups is a tuple of strings, one for every matched group.
      */
-    public make_regex_subs(change_text: string, groups: MatchGroups): string {
-        
-        // ! TODO !
+    public make_regex_subs(change_text: string, groups: RegExpExecArray): string {
+
+        // ! TODO : TEST THIS METHOD !
+        // ! see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_function_as_the_replacement
+
+        // ! for python: https://pynative.com/python-regex-capturing-groups/#:~:text=To%20capture%20all%20matches%20to%20a%20regex%20group%20we%20need,object%20and%20extract%20its%20value.
 
         // g.printObj(list(groups), tag=f"groups in {change_text!r}")
 
+        /**
+        * re.sub calls this function once per group.
+        */
+        const repl = (match: string, p1: string, offset: number): string => {
+            // subgroup will be a number matched
 
-        def repl(match_object: re.Match) -> str:
-            """re.sub calls this function once per group."""
             // # 1494...
-            n = int(match_object.group(1)) - 1
-            if 0 <= n < len(groups):
+            // group(0) is the whole match including all groups, group 1 is the first 
+            const n = Number(p1) - 1;
+            if (0 <= n && n < groups.length) {
                 // Executed only if the change text contains groups that match.
                 return (
                     groups[n].
-                        replace(r'\b', r'\\b').
-                        replace(r'\f', r'\\f').
-                        replace(r'\n', r'\\n').
-                        replace(r'\r', r'\\r').
-                        replace(r'\t', r'\\t').
-                        replace(r'\v', r'\\v')
+                        replace(/\\b/g, '\\\\b').   // b
+                        replace(/\\f/g, '\\\\f').   // f 
+                        replace(/\\n/g, '\\\\n').   // n
+                        replace(/\\r/g, '\\\\r').   // r
+                        replace(/\\t/g, '\\\\t').   // t
+                        replace(/\\w/g, '\\\\v')    // w
                 );
+            }
             // No replacement.
-            return match_object.group(0)
+            return match; // in python group(0) is the whole match spanning all subgroups
+        };
 
-        result = re.sub(r'\\([0-9])', repl, change_text);
+        const result = change_text.replace(/\\([0-9])/, repl);
+
         return result;
 
     }
@@ -3182,7 +3179,7 @@ export class LeoFind {
      * Carefully replace backslashes in a search pattern.
      */
     public replace_back_slashes(s: string): string {
-        
+
         // This is NOT the same as:
         //
         //   s.replace('\\n','\n').replace('\\t','\t').replace('\\\\','\\')
@@ -3190,16 +3187,16 @@ export class LeoFind {
         // because there is no rescanning.
 
         let i = 0;
-        while (i + 1 < s.length){
-            if (s[i] === '\\'){
-                ch = s[i + 1];
-                if( ch === '\\'){
+        while (i + 1 < s.length) {
+            if (s[i] === '\\') {
+                const ch = s[i + 1];
+                if (ch === '\\') {
                     s = s.substring(0, i) + s.substring(i + 1); // replace \\ by \
-                }else if (ch === 'n'){
+                } else if (ch === 'n') {
                     s = s.substring(0, i) + '\n' + s.substring(i + 2); // replace the \n by a newline
-                }else if (ch === 't'){
+                } else if (ch === 't') {
                     s = s.substring(0, i) + '\t' + s.substring(i + 2); // replace \t by a tab
-                }else{
+                } else {
                     i += 1; // Skip the escaped character.
                 }
             }
@@ -3495,7 +3492,7 @@ export class LeoFind {
     }
     //@+node:felix.20221022201804.10: *5* find.compute_find_options_in_status_area
     public compute_find_options_in_status_area(): string {
-        
+
         // TODO : REDO WITH APPROPRIATE GETTERS FROM VSCODE/LEOJS
         const c = this.c;
         const ftm = c.findCommands.ftm;
@@ -3511,9 +3508,9 @@ export class LeoFind {
         ];
 
         // const result = [option for option, ivar in table if ivar.isChecked()]
-        const result = table.filter((p_entry)=>{
+        const result = table.filter((p_entry) => {
             return p_entry[1].isChecked()
-        }).map((p_entry)=>{
+        }).map((p_entry) => {
             return p_entry[0];
         });
 
