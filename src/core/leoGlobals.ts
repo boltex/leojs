@@ -457,7 +457,7 @@ export class GeneralSetting {
 
     public __repr__(): string {
         // Better for g.printObj.
-        let val
+        let val;
         if (val) {
             val = this.val.toString().split("\n").join(" ");
         }
@@ -532,7 +532,7 @@ export class SettingsDict extends Map<string, any> {
     //@+node:felix.20220628014215.1: *4* td.get
     public override get(key: string, p_default?: any): any {
         if (this.has(key)) {
-            return super.get(key)
+            return super.get(key);
         } else {
             return p_default;
         }
@@ -1082,7 +1082,7 @@ export function getOutputNewline(c: Commands | undefined, name?: string): string
 /**
  * Return True if p or p's ancestors contain an @nosearch directive.
  */
-export function inAtNosearch(p: Position): boolean {
+export function inAtNosearch(p?: Position): boolean {
 
     if (!p || !p.__bool__()) {
         return false;  // #2288.
@@ -1863,12 +1863,12 @@ export function find_word(s: string, word: string, i: number = 0): number {
 /**
  * Extend index i within string s to include n more lines.
  */
-export function see_more_lines(s: string, ins: number, n=4): number {
-    
+export function see_more_lines(s: string, ins: number, n = 4): number {
+
     // Show more lines, if they exist.
-    if (n > 0){
-        for (let z = 0; z < n; z++){
-            if (ins >= s.length){
+    if (n > 0) {
+        for (let z = 0; z < n; z++) {
+            if (ins >= s.length) {
                 break;
             }
             let i;

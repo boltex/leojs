@@ -423,7 +423,7 @@ export class Commands {
             }
             script = g.getScript(c, p || c.p, useSelectedText);
         }
-        const script_p: Position = p || c.p  // Only for error reporting below.
+        const script_p: Position = p || c.p;  // Only for error reporting below.
         // #532: check all scripts with pyflakes.
         // ? needed ?
         // if run_pyflakes and not g.unitTesting:
@@ -432,7 +432,7 @@ export class Commands {
         //               'assert c and g and p and script_gnx;\n')
         //     cc.PyflakesCommand(c).check_script(script_p, prefix + script)
 
-        this.redirectScriptOutput()
+        this.redirectScriptOutput();
         // oldLog = g.app.log  // TODO : needed ?
         try {
             // log = c.frame.log  // TODO : needed ?
@@ -451,7 +451,7 @@ export class Commands {
 
                 }
                 catch (e) {
-                    g.es('interrupted')
+                    g.es('interrupted');
                     // if raiseFlag:
                     //      raise
                     // g.handleScriptException(c, script_p, script, script1);
@@ -490,7 +490,7 @@ export class Commands {
             p = c.p.copy();  // *Always* use c.p and pass c.p to script.
             c.setCurrentDirectoryFromContext(p);
         } else {
-            p = undefined
+            p = undefined;
         }
         const d: { [key: string]: any } = define_g ? { 'c': c, 'g': g, 'input': "", 'p': p } : {};
 

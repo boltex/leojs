@@ -514,7 +514,7 @@ export class LeoFind {
      */
     public do_change_then_find(settings: ISettings): boolean {
 
-        const p = this.c.p
+        const p = this.c.p;
         this.init_ivars_from_settings(settings);
         if (!this.check_args('change-then-find')) {
             return false;
@@ -620,7 +620,7 @@ export class LeoFind {
             return false;
         }
         const p0 = p.copy();
-        const undoType = 'Find Clone Parents'
+        const undoType = 'Find Clone Parents';
         const aList = c.vnode2allPositions(p.v);
         if (!aList.length) {
             g.trace('can not happen: no parents');
@@ -638,7 +638,7 @@ export class LeoFind {
             const parent = p2.parent();
             if (parent && parent.__bool__() && !seen.includes(parent.v)) {
                 seen.push(parent.v);
-                b = u.beforeCloneNode(parent)
+                b = u.beforeCloneNode(parent);
                 // Bug fix 2021/06/15: Create the clone directly as a child of found.
                 const clone = parent.copy();
                 const n = found.numberOfChildren();
@@ -694,7 +694,7 @@ export class LeoFind {
     //@+node:felix.20221013234514.8: *5* find._compute_find_def_settings
     private _compute_find_def_settings(find_pattern: string): ISettings {
 
-        const settings = this.default_settings()
+        const settings = this.default_settings();
         const table: [ISettingsKey, boolean | string][] = [
             ['change_text', ''],
             ['find_text', find_pattern],
@@ -737,7 +737,7 @@ export class LeoFind {
             c.editCommands.extendToWord(true); // TODO or REPLACE with something else
         }
 
-        const word = w.getSelectedText().strip()
+        const word: string = w.getSelectedText().strip();
         if (!word) {
             return undefined;
         }
@@ -803,7 +803,7 @@ export class LeoFind {
         const save_sel = w.getSelectionRange();
         const ins = w.getInsertPoint();
         const old_p = c.p;
-        let p: Position;
+        let p: Position | undefined;
 
         if (this.reverse_find_defs) {
             // #2161: start at the last position.
@@ -920,7 +920,7 @@ export class LeoFind {
                 search_body: this.search_body,
                 search_headline: this.search_headline,
                 whole_word: this.whole_word
-            }
+            };
         }
     }
     //@+node:felix.20221013234514.13: *5* find._switch_style
@@ -1020,7 +1020,7 @@ export class LeoFind {
         //
         // Honor delayed requests.
         for (const ivar of ['reverse', 'pattern_match', 'whole_word']) {
-            const request = 'request_' + ivar
+            const request = 'request_' + ivar;
             const val = (this as any)[request]; // getattr(this, request)
             if (val) {  // Only *set* the ivar!
                 // setattr(this, ivar, val)  // Set the ivar.
@@ -1142,22 +1142,22 @@ export class LeoFind {
     @cmd('set-find-everywhere', 'Set the \'Entire Outline\' radio button in the Find tab.')
     public set_find_scope_every_where(): void {
 
-        this.set_find_scope('entire-outline')
+        this.set_find_scope('entire-outline');
     }
     @cmd('set-find-node-only', 'Set the \'Node Only\' radio button in the Find tab.')
     public set_find_scope_node_only(): void {
 
-        this.set_find_scope('node-only')
+        this.set_find_scope('node-only');
     }
     @cmd('set-find-file-only', 'Set the \'File Only\' radio button in the Find tab.')
     public set_find_scope_file_only(): void {
 
-        this.set_find_scope('file-only')
+        this.set_find_scope('file-only');
     }
     @cmd('set-find-suboutline-only', 'Set the \'Suboutline Only\' radio button in the Find tab.')
     public set_find_scope_suboutline_only(): void {
 
-        this.set_find_scope('suboutline-only')
+        this.set_find_scope('suboutline-only');
     }
 
     /**
@@ -1984,7 +1984,7 @@ export class LeoFind {
             }
             // log.put(line.strip() + '\n', nodeLink = `${unl}::${line_number}`);  // Local line.
             g.es(line.trim() + '\n' + `${unl}::${line_number}`);
-        }
+        };
 
         const seen: [VNode, number][] = []; // List of (vnode, pos).
         const both = this.search_body && this.search_headline;
@@ -2575,7 +2575,7 @@ export class LeoFind {
         if (!gui_w) {
             return false;
         }
-        const sel: [number, number] = gui_w.getSelectionRange()
+        const sel: [number, number] = gui_w.getSelectionRange();
         const oldSel: [number, number] = sel;
         let start;
         let end;
@@ -2877,7 +2877,7 @@ export class LeoFind {
                 (this.reverse && !this.in_headline) ||
                 (!this.reverse && this.in_headline)
             )
-        )
+        );
 
     }
     //@+node:felix.20221023141654.1: *4* find.inner_search_helper & helpers
@@ -2918,7 +2918,7 @@ export class LeoFind {
         if (result >= 0) {
             result = result + start;
         }
-        return result
+        return result;
     }
 
     // to test in interpreter
@@ -3083,10 +3083,10 @@ export class LeoFind {
         // Modify to consider i and j. 
         // This set the match_obj with the exact match
 
-        const re_obj = this.re_obj  // Use the pre-compiled object
+        const re_obj = this.re_obj;  // Use the pre-compiled object
         if (!re_obj) {
             if (!g.unitTesting) {
-                g.trace('can not happen: no re_obj')
+                g.trace('can not happen: no re_obj');
             }
             return [-1, -1];
         }
@@ -3265,7 +3265,7 @@ export class LeoFind {
         c.selectPosition(p);
         // Fix bug 1258373: https://bugs.launchpad.net/leo-editor/+bug/1258373
         if (this.in_headline) {
-            c.treeWantsFocus()
+            c.treeWantsFocus();
         } else {
             // Looks good and provides clear indication of failure or termination.
             const w = c.frame.body.wrapper;
@@ -3318,38 +3318,40 @@ export class LeoFind {
             c.expandOnlyAncestorsOfNode(p);
         }
         let w;
-        if (this.in_headline) {
-            c.endEditing();
-            c.redraw(p);
-            c.frame.tree.editLabel(p);
-            w = c.edit_widget(p);  // #2220
-            if (w) {
-                w.setSelectionRange(pos, newpos, insert);  // #2220
-            }
-        } else {
-            // Tricky code.  Do not change without careful thought.
-            w = c.frame.body.wrapper;
-            // *Always* do the full selection logic.
-            // This ensures that the body text is inited and recolored.
-            c.selectPosition(p);
-            c.bodyWantsFocus();
-            if (showState) {
-                c.k.showStateAndMode(w);
-            }
-            c.bodyWantsFocusNow();
-            w.setSelectionRange(pos, newpos, insert);
-            const k = g.see_more_lines(w.getAllText(), insert, 4);
-            w.see(k);  // #78: find-next match not always scrolled into view.
-            c.outerUpdate();  // Set the focus immediately.
-            if (c.vim_mode && c.vimCommands) {
-                c.vimCommands.update_selection_after_search();
-            }
-        }
-        // Support for the console gui.
-        if ((g.app.gui as LeoUI).show_find_success) {
-            (g.app.gui as LeoUI).show_find_success(c, this.in_headline, insert, p);
-        }
-        c.frame.bringToFront();
+
+        // ! NOT USED IN LEOJS !
+        // if (this.in_headline) {
+        //     c.endEditing();
+        //     c.redraw(p);
+        //     c.frame.tree.editLabel(p);
+        //     w = c.edit_widget(p);  // #2220
+        //     if (w) {
+        //         w.setSelectionRange(pos, newpos, insert);  // #2220
+        //     }
+        // } else {
+        //     // Tricky code.  Do not change without careful thought.
+        //     w = c.frame.body.wrapper;
+        //     // *Always* do the full selection logic.
+        //     // This ensures that the body text is inited and recolored.
+        //     c.selectPosition(p);
+        //     c.bodyWantsFocus();
+        //     if (showState) {
+        //         c.k.showStateAndMode(w);
+        //     }
+        //     c.bodyWantsFocusNow();
+        //     w.setSelectionRange(pos, newpos, insert);
+        //     const k = g.see_more_lines(w.getAllText(), insert, 4);
+        //     w.see(k);  // #78: find-next match not always scrolled into view.
+        //     c.outerUpdate();  // Set the focus immediately.
+        //     if (c.vim_mode && c.vimCommands) {
+        //         c.vimCommands.update_selection_after_search();
+        //     }
+        // }
+        // // Support for the console gui.
+        // if ((g.app.gui as LeoUI).show_find_success) {
+        //     (g.app.gui as LeoUI).show_find_success(c, this.in_headline, insert, p);
+        // }
+        // c.frame.bringToFront();
         return w;  // Support for isearch.
     }
     //@+node:felix.20221022201804.1: *3* LeoFind.Utils
@@ -3509,7 +3511,7 @@ export class LeoFind {
 
         // const result = [option for option, ivar in table if ivar.isChecked()]
         const result = table.filter((p_entry) => {
-            return p_entry[1].isChecked()
+            return p_entry[1].isChecked();
         }).map((p_entry) => {
             return p_entry[0];
         });
@@ -3569,15 +3571,17 @@ export class LeoFind {
     //     else:
     // this.handler(event)
     //@+node:felix.20221022201804.12: *4* find.updateChange/FindList
-    // ! SEEMS TO ONLY BE USED BY STATE MACHINE
+    public update_change_list(s: string): void {
+        if (!this.changeTextList.includes(s)) {
+            this.changeTextList.push(s);
+        }
+    }
 
-    // public update_change_list(, s: str): void 
-    //     if s not in this.changeTextList:
-    // this.changeTextList.append(s)
-
-    // public update_find_list(, s: str): void 
-    //     if s not in this.findTextList:
-    // this.findTextList.append(s)
+    public update_find_list(s: string): void {
+        if (!this.findTextList.includes(s)) {
+            this.findTextList.push(s);
+        }
+    }
     //@-others
 
 }

@@ -413,7 +413,6 @@ export class ChapterController {
         // Similar to g.sanitize_filename, but simpler.
         const result: string[] = [];
         for (let ch of s.trim()) {
-            //  pylint: disable=superfluous-parens
             if (
                 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.includes(
                     ch

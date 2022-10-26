@@ -2783,6 +2783,7 @@ import { Position } from "./core/leoNodes";
 import { LeoGotoNode } from "./leoGoto";
 import { LeoFrame } from "./core/leoFrame";
 import { LeoFindPanelProvider } from "./leoFindPanelWebview";
+import { ISettings } from "./core/leoFind";
 
 @language typescript
 @tabwidth -4
@@ -9014,7 +9015,29 @@ public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
                 const fc = c.findCommands;
 
                 fc.ftm.get_settings();
-                const w_result = fc.do_change_all(this._lastSettingsUsed);
+                const w_changeSettings: ISettings = {
+                    // this._lastSettingsUsed
+                    // State...
+                    in_headline: false, // ! TODO ! 
+                    // p: Position,
+                    // Find/change strings...
+                    find_text: this._lastSettingsUsed.findText,
+                    change_text: this._lastSettingsUsed.replaceText,
+                    // Find options...
+                    file_only: this._lastSettingsUsed.searchOptions === 3,
+                    ignore_case: this._lastSettingsUsed.ignoreCase,
+                    mark_changes: this._lastSettingsUsed.markChanges,
+                    mark_finds: this._lastSettingsUsed.markFinds,
+                    node_only: this._lastSettingsUsed.searchOptions === 2,
+                    pattern_match: this._lastSettingsUsed.regExp,
+                    reverse: false,
+                    search_body: this._lastSettingsUsed.searchBody,
+                    search_headline: this._lastSettingsUsed.searchHeadline,
+                    suboutline_only: this._lastSettingsUsed.searchOptions === 1,
+                    whole_word: this._lastSettingsUsed.wholeWord,
+                    wrapping: false, // unused
+                };
+                const w_result = fc.do_change_all(w_changeSettings);
 
                 // TODO : GET FOCUS!
                 const w_focus = ""; // = g.app.gui.get_focus();
