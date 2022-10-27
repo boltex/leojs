@@ -535,6 +535,11 @@ export class Constants {
         FIND_QUICK_GO_ANYWHERE: Constants.NAME + ".goAnywhere",
         GOTO_NAV_ENTRY: Constants.NAME + ".gotoNav",
 
+        GOTO_NAV_PREV: Constants.NAME + ".gotoNavPrev",
+        GOTO_NAV_NEXT: Constants.NAME + ".gotoNavNext",
+        GOTO_NAV_FIRST: Constants.NAME + ".gotoNavFirst",
+        GOTO_NAV_LAST: Constants.NAME + ".gotoNavLast",
+
         START_SEARCH: Constants.NAME + ".startSearch",
         FIND_ALL: Constants.NAME + ".findAll",
         FIND_NEXT: Constants.NAME + ".findNext",
@@ -555,6 +560,7 @@ export class Constants {
         CLONE_FIND_MARKED: Constants.NAME + ".cloneFindMarked",
         CLONE_FIND_FLATTENED_MARKED: Constants.NAME + ".cloneFindFlattenedMarked",
         // TODO
+        CLONE_FIND_PARENTS: Constants.NAME + ".cloneFindParents",
         GOTO_GLOBAL_LINE: Constants.NAME + ".gotoGlobalLine",
         TAG_CHILDREN: Constants.NAME + ".tagChildren",
         TAG_NODE: Constants.NAME + ".tagNode",
@@ -664,6 +670,7 @@ export class Constants {
         CLONE_FIND_ALL_FLATTENED: "TODO_CLONE_FIND_ALL_FLATTENED", // TODO
         CLONE_FIND_MARKED: "TODO_CLONE_FIND_MARKED", // TODO
         CLONE_FIND_FLATTENED_MARKED: "TODO_CLONE_FIND_FLATTENED_MARKED", // TODO
+        CLONE_FIND_PARENTS: "TODO_CLONE_FIND_PARENTS", // TODO
     };
 
     /**

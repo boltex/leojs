@@ -2617,7 +2617,25 @@ export class LeoFind {
         }
         if (this.in_headline) {
             // #2220: Let onHeadChanged handle undo, etc.
-            c.frame.tree.onHeadChanged(p, 'Change Headline'); // TODO: Replace with normal undo
+            // c.frame.tree.onHeadChanged(p, 'Change Headline'); // TODO: Replace with normal undo
+            const s = wrapper.getAllText();
+            const changed = s !== p.h;
+            if (changed) {
+                // Handle undo.
+                const undoData = u.beforeChangeHeadline(p)
+                p.initHeadString(s); // change p.h *after* calling undoer's before method.
+                if (!c.changed) {
+                    c.setChanged();
+                }
+                // New in Leo 4.4.5: we must recolor the body because
+                // the headline may contain directives.
+                // ? NEEDED ?
+                // c.frame.scanForTabWidth(p);
+                // c.frame.body.recolor(p);
+                p.setDirty();
+                u.afterChangeHeadline(p, 'Change Headline', undoData);
+            }
+
             // gui_w will change after a redraw.
             gui_w = c.edit_widget(p);
             if (gui_w) {
@@ -3243,7 +3261,7 @@ export class LeoFind {
         } else if (w === c.frame.tree.treeWidget) {
             val = true;
         } else {
-            val = w_name.startswith('head');
+            val = w_name.startsWith('head');
         }
         return val;
 

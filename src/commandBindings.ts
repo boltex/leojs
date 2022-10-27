@@ -2,9 +2,10 @@ import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { Position } from "./core/leoNodes";
 import { LeoButtonNode } from "./leoButtons";
+import { LeoGotoNode } from "./leoGoto";
 import { LeoOutlineNode } from "./leoOutline";
 import { LeoUI } from "./leoUI";
-import { ReqRefresh, Focus } from "./types";
+import { ReqRefresh, Focus, LeoGotoNavKey } from "./types";
 
 /**
  * * Make all command/key bindings 
@@ -208,29 +209,58 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.NEXT_NODE, () => p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
         [CMD.NEXT_NODE_FO, () => p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
+        [CMD.FIND_QUICK, () => p_leoUI.findQuick()],
+        [CMD.FIND_QUICK_SELECTED, () => p_leoUI.findQuickSelected()],
+        [CMD.FIND_QUICK_TIMELINE, () => p_leoUI.findQuickTimeline()],
+        [CMD.FIND_QUICK_CHANGED, () => p_leoUI.findQuickChanged()],
+        [CMD.FIND_QUICK_HISTORY, () => p_leoUI.findQuickHistory()],
+        [CMD.FIND_QUICK_MARKED, () => p_leoUI.findQuickMarked()],
+        [CMD.FIND_QUICK_GO_ANYWHERE, () => p_leoUI.findQuickGoAnywhere()],
+
+        [CMD.GOTO_NAV_PREV, () => p_leoUI.navigateNavEntry(LeoGotoNavKey.prev)],
+        [CMD.GOTO_NAV_NEXT, () => p_leoUI.navigateNavEntry(LeoGotoNavKey.next)],
+        [CMD.GOTO_NAV_FIRST, () => p_leoUI.navigateNavEntry(LeoGotoNavKey.first)],
+        [CMD.GOTO_NAV_LAST, () => p_leoUI.navigateNavEntry(LeoGotoNavKey.last)],
+
+        [CMD.GOTO_NAV_ENTRY, (p_node: LeoGotoNode) => p_leoUI.gotoNavEntry(p_node)],
+
+        [CMD.START_SEARCH, () => p_leoUI.startSearch()],
+        [CMD.FIND_ALL, () => p_leoUI.findAll(false)],
+        [CMD.FIND_NEXT, () => p_leoUI.find(false, false)],
+        [CMD.FIND_NEXT_FO, () => p_leoUI.find(true, false)],
+        [CMD.FIND_PREVIOUS, () => p_leoUI.find(false, true)],
+        [CMD.FIND_PREVIOUS_FO, () => p_leoUI.find(true, true)],
+        [CMD.FIND_VAR, () => p_leoUI.findSymbol(false)],
+        [CMD.FIND_DEF, () => p_leoUI.findSymbol(true)],
+        [CMD.REPLACE, () => p_leoUI.replace(false, false)],
+        [CMD.REPLACE_FO, () => p_leoUI.replace(true, false)],
+        [CMD.REPLACE_THEN_FIND, () => p_leoUI.replace(false, true)],
+        [CMD.REPLACE_THEN_FIND_FO, () => p_leoUI.replace(true, true)],
+        [CMD.REPLACE_ALL, () => p_leoUI.findAll(true)],
+        [CMD.GOTO_GLOBAL_LINE, () => p_leoUI.gotoGlobalLine()],
+        [CMD.TAG_CHILDREN, () => p_leoUI.tagChildren()],
+        [CMD.TAG_NODE, () => p_leoUI.tagNode()],
+        [CMD.REMOVE_TAG, () => p_leoUI.removeTag()],
+        [CMD.REMOVE_TAGS, () => p_leoUI.removeTags()],
+
         [CMD.CLONE_FIND_ALL, () => p_leoUI.cloneFind(false, false)],
         [CMD.CLONE_FIND_ALL_FLATTENED, () => p_leoUI.cloneFind(false, true)],
-        // [CMD.CLONE_FIND_TAG, () => w_leo.cloneFindTag()],
-        // [CMD.CLONE_FIND_PARENTS, () => w_leo.nodeCommand({
-        //     action: BRIDGE.CLONE_FIND_PARENTS,
-        //     node: U,
-        //     refreshType: REFRESH_TREE_BODY,
-        //     finalFocus: Focus.NoChange
-        // })],
+        [CMD.CLONE_FIND_TAG, () => p_leoUI.cloneFindTag()],
+        [CMD.CLONE_FIND_PARENTS, () => p_leoUI.command(LEOCMD.CLONE_FIND_PARENTS, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
         [CMD.CLONE_FIND_MARKED, () => p_leoUI.cloneFind(true, false)],
         [CMD.CLONE_FIND_FLATTENED_MARKED, () => p_leoUI.cloneFind(true, true)],
 
-        // [CMD.SET_FIND_EVERYWHERE_OPTION, () => w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.ENTIRE_OUTLINE)],
-        // [CMD.SET_FIND_NODE_ONLY_OPTION, () => w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.NODE_ONLY)],
-        // [CMD.SET_FIND_FILE_ONLY_OPTION, () => w_leo.setSearchSetting(Constants.FIND_INPUTS_IDS.FILE_ONLY)],
-        // [CMD.SET_FIND_SUBOUTLINE_ONLY_OPTION, () => w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SUBOUTLINE_ONLY)],
-        // [CMD.TOGGLE_FIND_IGNORE_CASE_OPTION, () => w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.IGNORE_CASE)],
-        // [CMD.TOGGLE_FIND_MARK_CHANGES_OPTION, () => w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_CHANGES)],
-        // [CMD.TOGGLE_FIND_MARK_FINDS_OPTION, () => w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_FINDS)],
-        // [CMD.TOGGLE_FIND_REGEXP_OPTION, () => w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.REG_EXP)],
-        // [CMD.TOGGLE_FIND_WORD_OPTION, () => w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.WHOLE_WORD)],
-        // [CMD.TOGGLE_FIND_SEARCH_BODY_OPTION, () => w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SEARCH_BODY)],
-        // [CMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, () => w_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SEARCH_HEADLINE)],
+        // [CMD.SET_FIND_EVERYWHERE_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.ENTIRE_OUTLINE)],
+        // [CMD.SET_FIND_NODE_ONLY_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.NODE_ONLY)],
+        // [CMD.SET_FIND_FILE_ONLY_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.FILE_ONLY)],
+        // [CMD.SET_FIND_SUBOUTLINE_ONLY_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SUBOUTLINE_ONLY)],
+        // [CMD.TOGGLE_FIND_IGNORE_CASE_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.IGNORE_CASE)],
+        // [CMD.TOGGLE_FIND_MARK_CHANGES_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_CHANGES)],
+        // [CMD.TOGGLE_FIND_MARK_FINDS_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_FINDS)],
+        // [CMD.TOGGLE_FIND_REGEXP_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.REG_EXP)],
+        // [CMD.TOGGLE_FIND_WORD_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.WHOLE_WORD)],
+        // [CMD.TOGGLE_FIND_SEARCH_BODY_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SEARCH_BODY)],
+        // [CMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SEARCH_HEADLINE)],
 
         [CMD.SET_ENABLE_PREVIEW, () => p_leoUI.config.setEnablePreview()],
         [CMD.CLEAR_CLOSE_EMPTY_GROUPS, () => p_leoUI.config.clearCloseEmptyGroups()],

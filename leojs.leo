@@ -185,6 +185,7 @@
 <v t="felix.20220505215916.7"><vh>findQuick_marked</vh></v>
 <v t="felix.20220505215916.8"><vh>findQuickGoAnywhere</vh></v>
 <v t="felix.20220505215916.9"><vh>gotoNavEntry</vh></v>
+<v t="felix.20221027155905.1"><vh>navigateNavEntry</vh></v>
 </v>
 <v t="felix.20220505215924.1"><vh>Search</vh>
 <v t="felix.20220505215924.2"><vh>navEnter</vh></v>
@@ -235,6 +236,9 @@
 <v t="felix.20220201194319.1"><vh>setLeoIDCommand</vh></v>
 <v t="felix.20220131235418.1"><vh>getIdFromSetting</vh></v>
 <v t="felix.20220131234257.1"><vh>setIdSetting</vh></v>
+<v t="felix.20221027153815.1"><vh>widget_name</vh></v>
+<v t="felix.20221026222034.1"><vh>set_focus</vh></v>
+<v t="felix.20221026222040.1"><vh>get_focus</vh></v>
 <v t="felix.20220613164517.1"><vh>runAboutLeoDialog</vh></v>
 <v t="felix.20220108211750.1"><vh>runAskOkDialog</vh></v>
 <v t="felix.20220109220155.1"><vh>runAskYesNoDialog</vh></v>
@@ -337,6 +341,7 @@
 <v t="felix.20201214154816.9"><vh>LeoButton</vh></v>
 <v t="felix.20220505220527.1"><vh>TGotoTypes</vh></v>
 <v t="felix.20220505220532.1"><vh>LeoGoto</vh></v>
+<v t="felix.20221027155442.1"><vh>LeoGotoNavKey</vh></v>
 <v t="felix.20220505220537.1"><vh>LeoSearchScope</vh></v>
 <v t="felix.20220505220544.1"><vh>LeoSearchSettings</vh></v>
 <v t="felix.20220505220550.1"><vh>LeoGuiFindTabManagerSettings</vh></v>
@@ -1287,6 +1292,40 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.NEXT_NODE, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 [CMD.NEXT_NODE_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
+[CMD.FIND_QUICK, () =&gt; p_leoUI.findQuick()],
+[CMD.FIND_QUICK_SELECTED, () =&gt; p_leoUI.findQuickSelected()],
+[CMD.FIND_QUICK_TIMELINE, () =&gt; p_leoUI.findQuickTimeline()],
+[CMD.FIND_QUICK_CHANGED, () =&gt; p_leoUI.findQuickChanged()],
+[CMD.FIND_QUICK_HISTORY, () =&gt; p_leoUI.findQuickHistory()],
+[CMD.FIND_QUICK_MARKED, () =&gt; p_leoUI.findQuickMarked()],
+[CMD.FIND_QUICK_GO_ANYWHERE, () =&gt; p_leoUI.findQuickGoAnywhere()],
+
+[CMD.GOTO_NAV_PREV, () =&gt; p_leoUI.navigateNavEntry(LeoGotoNavKey.prev)],
+[CMD.GOTO_NAV_NEXT, () =&gt; p_leoUI.navigateNavEntry(LeoGotoNavKey.next)],
+[CMD.GOTO_NAV_FIRST, () =&gt; p_leoUI.navigateNavEntry(LeoGotoNavKey.first)],
+[CMD.GOTO_NAV_LAST, () =&gt; p_leoUI.navigateNavEntry(LeoGotoNavKey.last)],
+
+[CMD.GOTO_NAV_ENTRY, (p_node: LeoGotoNode) =&gt; p_leoUI.gotoNavEntry(p_node)],
+
+[CMD.START_SEARCH, () =&gt; p_leoUI.startSearch()],
+[CMD.FIND_ALL, () =&gt; p_leoUI.findAll(false)],
+[CMD.FIND_NEXT, () =&gt; p_leoUI.find(false, false)],
+[CMD.FIND_NEXT_FO, () =&gt; p_leoUI.find(true, false)],
+[CMD.FIND_PREVIOUS, () =&gt; p_leoUI.find(false, true)],
+[CMD.FIND_PREVIOUS_FO, () =&gt; p_leoUI.find(true, true)],
+[CMD.FIND_VAR, () =&gt; p_leoUI.findSymbol(false)],
+[CMD.FIND_DEF, () =&gt; p_leoUI.findSymbol(true)],
+[CMD.REPLACE, () =&gt; p_leoUI.replace(false, false)],
+[CMD.REPLACE_FO, () =&gt; p_leoUI.replace(true, false)],
+[CMD.REPLACE_THEN_FIND, () =&gt; p_leoUI.replace(false, true)],
+[CMD.REPLACE_THEN_FIND_FO, () =&gt; p_leoUI.replace(true, true)],
+[CMD.REPLACE_ALL, () =&gt; p_leoUI.findAll(true)],
+[CMD.GOTO_GLOBAL_LINE, () =&gt; p_leoUI.gotoGlobalLine()],
+[CMD.TAG_CHILDREN, () =&gt; p_leoUI.tagChildren()],
+[CMD.TAG_NODE, () =&gt; p_leoUI.tagNode()],
+[CMD.REMOVE_TAG, () =&gt; p_leoUI.removeTag()],
+[CMD.REMOVE_TAGS, () =&gt; p_leoUI.removeTags()],
+
 </t>
 <t tx="felix.20201214150149.17">[CMD.CLONE_FIND_ALL, () =&gt; p_leoUI.cloneFind(false, false)],
 [CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; p_leoUI.cloneFind(false, true)],
@@ -1567,6 +1606,11 @@ public static COMMANDS = {
     FIND_QUICK_MARKED: Constants.NAME + ".markedList",
     FIND_QUICK_GO_ANYWHERE: Constants.NAME + ".goAnywhere",
     GOTO_NAV_ENTRY: Constants.NAME + ".gotoNav",
+
+    GOTO_NAV_PREV: Constants.NAME + ".gotoNavPrev",
+    GOTO_NAV_NEXT: Constants.NAME + ".gotoNavNext",
+    GOTO_NAV_FIRST: Constants.NAME + ".gotoNavFirst",
+    GOTO_NAV_LAST: Constants.NAME + ".gotoNavLast",
 
     START_SEARCH: Constants.NAME + ".startSearch",
     FIND_ALL: Constants.NAME + ".findAll",
@@ -2916,6 +2960,9 @@ export class LeoUI {
         this._lastRefreshNodeTS = utils.performanceNow();
     }
 
+    // * gui focus helper
+    public focusWidget: any;
+
     // * Outline Pane
     private _leoTreeProvider!: LeoOutlineProvider; // TreeDataProvider single instance
     private _leoTreeView!: vscode.TreeView&lt;Position&gt;; // Outline tree view added to the Tree View Container with an Activity Bar icon
@@ -3609,7 +3656,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "cf6c34d",
+  "gitBranch": "leoFind",
+  "gitDate": "2022-10-26 00:55:43 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -8711,9 +8761,10 @@ export class NullGui {
 import { Constants } from "./constants";
 import { Position } from "./core/leoNodes";
 import { LeoButtonNode } from "./leoButtons";
+import { LeoGotoNode } from "./leoGoto";
 import { LeoOutlineNode } from "./leoOutline";
 import { LeoUI } from "./leoUI";
-import { ReqRefresh, Focus } from "./types";
+import { ReqRefresh, Focus, LeoGotoNavKey } from "./types";
 
 @language typescript
 @tabwidth -4
@@ -12253,6 +12304,36 @@ set leojsStartupDone(p_value: boolean) {
 public static OLD_POS_OFFSETS = {
     DELETE: ["cut-node", "delete-node"],
     ADD: ["clone-node", "async-paste-node", "async-paste-retaining-clones"]
+}
+
+</t>
+<t tx="felix.20221026222034.1">public set_focus(commander: Commands, widget: any): void {
+    this.focusWidget = widget;
+}
+</t>
+<t tx="felix.20221026222040.1">public get_focus(c: Commands): any {
+    return this.focusWidget;
+}
+</t>
+<t tx="felix.20221027153815.1">public widget_name(widget: any): string {
+    console.log('UI ASKED FOR WIDGET NAME');
+    return "test";
+    
+}
+</t>
+<t tx="felix.20221027155442.1">export const enum LeoGotoNavKey {
+    prev = 0,
+    next,
+    first,
+    last
+}
+
+</t>
+<t tx="felix.20221027155905.1">/**
+ * * Goto the next, previous, first or last nav entry via arrow keys in
+ */
+public navigateNavEntry(p_nav: LeoGotoNavKey): void {
+    this._leoGotoProvider.navigateNavEntry(p_nav);
 }
 
 </t>

@@ -15,7 +15,8 @@ import {
     LeoSearchSettings,
     Focus,
     BodySelectionInfo,
-    CommandOptions
+    CommandOptions,
+    LeoGotoNavKey
 } from "./types";
 
 import { Config } from "./config";
@@ -88,6 +89,9 @@ export class LeoUI {
         this.__refreshNode = p_ap;
         this._lastRefreshNodeTS = utils.performanceNow();
     }
+
+    // * gui focus helper
+    public focusWidget: any;
 
     // * Outline Pane
     private _leoTreeProvider!: LeoOutlineProvider; // TreeDataProvider single instance
@@ -2557,15 +2561,27 @@ export class LeoUI {
             }
         }
 
-        if (p.__eq__(c.p)) {
-            value = c.doCommandByName(p_cmd); // no need for re-selection
-        } else {
-            const old_p = c.p;
-            c.selectPosition(p);
-            value = c.doCommandByName(p_cmd);
-            if (p_options.keepSelection) {
-                if (value && value.then) {
-                    (value as Thenable<unknown>).then((p_result) => {
+
+        try {
+            if (p.__eq__(c.p)) {
+                value = c.doCommandByName(p_cmd); // no need for re-selection
+            } else {
+                const old_p = c.p;
+                c.selectPosition(p);
+                value = c.doCommandByName(p_cmd);
+                if (p_options.keepSelection) {
+                    if (value && value.then) {
+                        (value as Thenable<unknown>).then((p_result) => {
+                            if (c.positionExists(old_p)) {
+                                c.selectPosition(old_p);
+                            } else {
+                                old_p._childIndex = old_p._childIndex + w_offset;
+                                if (c.positionExists(old_p)) {
+                                    c.selectPosition(old_p);
+                                }
+                            }
+                        });
+                    } else {
                         if (c.positionExists(old_p)) {
                             c.selectPosition(old_p);
                         } else {
@@ -2574,19 +2590,16 @@ export class LeoUI {
                                 c.selectPosition(old_p);
                             }
                         }
-                    });
-                } else {
-                    if (c.positionExists(old_p)) {
-                        c.selectPosition(old_p);
-                    } else {
-                        old_p._childIndex = old_p._childIndex + w_offset;
-                        if (c.positionExists(old_p)) {
-                            c.selectPosition(old_p);
-                        }
                     }
                 }
             }
+        } catch (e) {
+            vscode.window.showErrorMessage(
+                "LeoUI Error: " + e
+            );
         }
+
+
         if (this.trace) {
             if (this.lastCommandTimer) {
                 console.log('lastCommandTimer', utils.getDurationMs(this.lastCommandTimer));
@@ -3111,6 +3124,15 @@ export class LeoUI {
         // }
         // return Promise.resolve();
     }
+    /**
+     * * Goto the next, previous, first or last nav entry via arrow keys in
+     */
+    public navigateNavEntry(p_nav: LeoGotoNavKey): void {
+        console.log('TODO : navigateNavEntry');
+
+        // this._leoGotoProvider.navigateNavEntry(p_nav);
+    }
+
 
     public navEnter(): Thenable<unknown> {
         return vscode.window.showInformationMessage("TODO: navEnter");
@@ -4301,6 +4323,17 @@ export class LeoUI {
         return this.config.setLeojsSettings(w_changes);
     }
 
+    public widget_name(widget: any): string {
+        console.log('UI ASKED FOR WIDGET NAME');
+        return "test";
+
+    }
+    public set_focus(commander: Commands, widget: any): void {
+        this.focusWidget = widget;
+    }
+    public get_focus(c: Commands): any {
+        return this.focusWidget;
+    }
     public runAboutLeoDialog(
         c: Commands,
         version: string,

@@ -24,13 +24,17 @@ export class LeoFrame {
     public iconBar: any;
     public saved: boolean;
     public startupWindow: boolean;
+    public log: any; // ! UNUSED !
     public tree: {
+        canvas: any;
         generation: number;
+        edit_widget: (p: Position) => any;
         editLabel: (
             p: Position,
             selectAll?: boolean,
             selection?: any
         ) => void;
+        treeWidget: any;
     };
     public body: any;
 
@@ -46,12 +50,15 @@ export class LeoFrame {
         this.iconBar = {};
 
         this.tree = {
+            canvas: undefined,
             generation: 0,
+            edit_widget: (p: Position) => { return undefined; },
             editLabel: (p: Position, selectAll?: boolean, selection?: any) => {
                 console.log(
                     'TODO: editLabel not used in leojs. From c.frame.tree.editLabel'
                 );
-            }
+            },
+            treeWidget: {}
         };
 
         this.body = {
@@ -131,6 +138,10 @@ export class LeoFrame {
         }
         return true;  // Veto.
 
+    }
+    //@+node:felix.20221027154024.1: *3* putStatusLine
+    public putStatusLine(s: string, bg? : string, fg?: string): void {
+        console.log('TODO ? putStatusLine', s);
     }
     //@-others
 

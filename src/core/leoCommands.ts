@@ -802,6 +802,11 @@ export class Commands {
     // For compatibility with old scripts...
     // currentVnode = currentPosition
 
+    //@+node:felix.20221027142613.1: *5* c.edit_widget
+    public edit_widget(p: Position): any {
+        const c = this;
+        return p && c.frame.tree.edit_widget(p);
+    }
     //@+node:felix.20210131011420.3: *5* c.fileName & relativeFileName & shortFileName
     // Compatibility with scripts
 
@@ -2877,6 +2882,11 @@ export class Commands {
         // TODO
         // console.log("TODO: recolor");
     }
+    //@+node:felix.20221027153010.1: *5* c.widget_name
+    public widget_name(widget: any): string {
+        // c = self
+        return g.app.gui ? (g.app.gui as LeoUI).widget_name(widget) :'<no widget>';
+    }
     //@+node:felix.20211120231934.1: *5* c.redrawing...
     //@+node:felix.20211120224229.1: *6* c.redraw
     public redraw(p?: Position): void {
@@ -3071,6 +3081,151 @@ export class Commands {
         */
     }
 
+    //@+node:felix.20221026210523.1: *4* c.Focus
+    //@+node:felix.20221026210523.2: *5* c.get/request/set_focus
+    public get_focus(): any {
+        const c = this;
+        const w = g.app.gui && (g.app.gui as LeoUI).get_focus(c);
+        if (g.app.debug.includes('focus')) {
+            // name = w.objectName() if hasattr(w, 'objectName') else w.__class__.__name__
+            const name = w['objectName'];
+            g.trace('(c)', name);
+            // g.trace('\n(c)',  w.__class__.__name__)
+            // g.trace(g.callers(6))
+        }
+        return w;
+    }
+
+    public get_requested_focus(): any {
+        const c = this;
+        return c.requestedFocusWidget;
+    }
+
+    public request_focus(w: any): void {
+        const c = this;
+        if (w && g.app.gui) {
+            if (g.app.debug.includes('focus')) {
+                // g.trace('\n(c)', repr(w))
+                const name = w['objectName'];  // ?w['objectName'] : MyClass.name
+                g.trace('(c)', name);
+            }
+
+            c.requestedFocusWidget = w;
+        }
+    }
+
+    public set_focus(w: any): void {
+        const trace = g.app.debug.includes('focus');
+        const c = this;
+        if (w && g.app.gui) {
+            if (trace) {
+                const name = w['objectName'];
+                // name = w.objectName(
+                //     ) if hasattr(w, 'objectName') else w.__class__.__name__
+                g.trace('(c)', name);
+            }
+            (g.app.gui as LeoUI).set_focus(c, w);
+        } else if (trace) {
+            g.trace('(c) no w');
+        }
+        c.requestedFocusWidget = undefined;
+    }
+    //@+node:felix.20221026210523.3: *5* c.invalidateFocus (do nothing)
+    /**
+     * Indicate that the focus is in an invalid location, or is unknown.
+     */
+    public invalidateFocus(): void {
+
+        // c = self
+        // c.requestedFocusWidget = None
+        // pass
+    }
+    //@+node:felix.20221026210523.4: *5* c.traceFocus (not used)
+    public traceFocus(w: any): void {
+        const c = this;
+        if (g.app.debug.includes('focus')) {
+            c.trace_focus_count += 1;
+            // g.pr(f"{c.trace_focus_count:4d}", c.widget_name(w), g.callers(8));
+            g.pr(`${c.trace_focus_count}`);
+        }
+    }
+    //@+node:felix.20221026210523.5: *5* c.treeFocusHelper & initialFocusHelper
+    public treeFocusHelper(): void {
+        const c = this;
+        if (c.stayInTreeAfterSelect) {
+            c.treeWantsFocus();
+        } else {
+            c.bodyWantsFocus();
+        }
+    }
+
+    public initialFocusHelper(): void {
+        const c = this;
+        if (c.outlineHasInitialFocus) {
+            c.treeWantsFocus();
+        } else {
+            c.bodyWantsFocus();
+        }
+    }
+    //@+node:felix.20221026210523.6: *5* c.xWantsFocus
+    public bodyWantsFocus(): void {
+        const c = this;
+        const body = c.frame.body;
+        c.request_focus(body && body.wrapper);
+    }
+    public logWantsFocus(): void {
+        const c = this;
+        const log = c.frame.log;
+        c.request_focus(log && log.logCtrl);
+    }
+    public minibufferWantsFocus(): void {
+        const c = this;
+        c.request_focus(c.miniBufferWidget);
+    }
+    public treeWantsFocus(): void {
+        const c = this;
+        const tree = c.frame.tree;
+        c.request_focus(tree && tree.canvas);
+    }
+    public widgetWantsFocus(w: any): void {
+        const c = this;
+        c.request_focus(w);
+    }
+    //@+node:felix.20221026210523.7: *5* c.xWantsFocusNow
+    // widgetWantsFocusNow does an automatic update.
+
+    public widgetWantsFocusNow(w: any): void {
+        const c = this;
+        if (w) {
+            c.set_focus(w)
+            c.requestedFocusWidget = undefined;
+        }
+    }
+
+    // New in 4.9: all FocusNow methods now *do* call c.outerUpdate().
+
+    public bodyWantsFocusNow(): void {
+        const c = this;
+        const body = this.frame.body;
+        c.widgetWantsFocusNow(body && body.wrapper);
+    }
+
+    public logWantsFocusNow(): void {
+        const c = this;
+        const log = this.frame.log;
+        c.widgetWantsFocusNow(log && log.logCtrl);
+    }
+
+    public minibufferWantsFocusNow(): void {
+        const c = this;
+        c.widgetWantsFocusNow(c.miniBufferWidget);
+    }
+
+    public treeWantsFocusNow(): void {
+        const c = this;
+        const tree = this.frame.tree;
+        c.widgetWantsFocusNow(tree && tree.canvas);
+    }
     //@+node:felix.20211023195447.1: *4* c.Menus
     //@+node:felix.20211023195447.3: *5* c.Menu Enablers
     //@+node:felix.20211023195447.4: *6* c.canClone
