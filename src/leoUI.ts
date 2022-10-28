@@ -1149,11 +1149,47 @@ export class LeoUI {
     ): Promise<boolean> {
         if (p_document) {
 
-            const w_gnx = utils.leoUriToStr(p_document.uri);
             const c = g.app.windowList[this.frameIndex].c;
-            const w_v = c.fileCommands.gnxDict[w_gnx];
+            const u = c.undoer;
+            const w_gnx = utils.leoUriToStr(p_document.uri);
+            const body = p_document.getText(); // new body text
+
+            const w_v = c.fileCommands.gnxDict[w_gnx]; // target to change
             if (w_v) {
-                w_v.b = p_document.getText();
+
+                if (body !== w_v.b) {
+                    // if different, replace body and set dirty
+                    let w_p: Position | undefined;
+                    if (c.p.gnx === w_v.gnx) {
+                        // same gnx so it's the same position for saving the new body pane text.
+                        w_p = c.p;
+                    } else {
+                        // find p.
+                        for (let p of c.all_positions()) {
+                            if (p.v.gnx === w_gnx) {
+                                w_p = p;
+                                break;
+                            }
+                        }
+                    }
+                    if (w_p) {
+                        // ok we got a valid p.
+                        const bunch = u.beforeChangeNodeContents(w_p);
+                        w_p.v.setBodyString(body);
+                        u.afterChangeNodeContents(w_p, "Body Text", bunch);
+
+                        if (!c.isChanged()) {
+                            c.setChanged();
+                        }
+                        if (!w_p.v.isDirty()) {
+                            w_p.setDirty();
+                        }
+                    }
+
+                }
+
+            } else {
+                console.error("ERROR SAVING BODY FROM VSCODE TO LEOJS");
             }
 
             // await for bodySaveSelection that is placed on the stack right after saving body
