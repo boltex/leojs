@@ -2860,8 +2860,5 @@
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "stream": "^0.0.2"
-  },
-  "gitCommit": "cf6c34d",
-  "gitBranch": "leoFind",
-  "gitDate": "2022-10-26 00:55:43 -0400"
+  }
 }
