@@ -113,6 +113,32 @@ export function buildDocumentIconPaths(p_context: vscode.ExtensionContext): Icon
 }
 
 /**
+ * * Build all possible strings for undo icons graphic file paths
+ * @param p_context Needed to get to absolute paths on the system
+ * @returns An array containing icons for the undo tree view
+ */
+export function buildUndoIconPaths(p_context: vscode.ExtensionContext): Icon[] {
+    return [
+        {
+            light: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_LIGHT_UNDO_ACTIVE),
+            dark: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_DARK_UNDO_ACTIVE)
+        },
+        {
+            light: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_LIGHT_UNDO),
+            dark: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_DARK_UNDO)
+        },
+        {
+            light: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_LIGHT_REDO_ACTIVE),
+            dark: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_DARK_REDO_ACTIVE)
+        },
+        {
+            light: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_LIGHT_REDO),
+            dark: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_DARK_REDO)
+        }
+    ];
+}
+
+/**
  * * Build all possible strings for buttons icons graphic file paths
  * @param p_context Needed to get to absolute paths on the system
  * @returns An array containing icons for the documents tree view

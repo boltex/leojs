@@ -366,6 +366,7 @@
 <v t="felix.20201208224407.5"><vh>removeFileFromGlobal</vh></v>
 <v t="felix.20201208224407.6"><vh>buildNodeIconPaths</vh></v>
 <v t="felix.20201208224407.7"><vh>buildDocumentIconPaths</vh></v>
+<v t="felix.20221027230322.1"><vh>buildUndoIconPaths</vh></v>
 <v t="felix.20201208224407.8"><vh>buildButtonsIconPaths</vh></v>
 <v t="felix.20220505225236.1"><vh>buildGotoIconPaths</vh></v>
 <v t="felix.20220109180351.1"><vh>convertLeoFiletypes</vh></v>
@@ -1794,6 +1795,15 @@ public static GUI = {
     ICON_LIGHT_DOCUMENT_DIRTY: "resources/light/document-dirty.svg",
     ICON_DARK_DOCUMENT_DIRTY: "resources/dark/document-dirty.svg",
 
+    ICON_LIGHT_UNDO_ACTIVE: "resources/light/undo.svg",
+    ICON_DARK_UNDO_ACTIVE: "resources/dark/undo.svg",
+    ICON_LIGHT_UNDO: "resources/dark/undo.svg",
+    ICON_DARK_UNDO: "resources/light/undo.svg",
+    ICON_LIGHT_REDO_ACTIVE: "resources/light/redo.svg",
+    ICON_DARK_REDO_ACTIVE: "resources/dark/redo.svg",
+    ICON_LIGHT_REDO: "resources/dark/redo.svg",
+    ICON_DARK_REDO: "resources/light/redo.svg",
+
     ICON_LIGHT_BUTTON: "resources/light/button.svg",
     ICON_DARK_BUTTON: "resources/dark/button.svg",
     ICON_LIGHT_BUTTON_RCLICK: "resources/light/button-rclick.svg",
@@ -2836,6 +2846,7 @@ import { ISettings } from "./core/leoFind";
 
     // * Build Icon filename paths
     this.nodeIcons = utils.buildNodeIconPaths(_context);
+    this.undoIcons = utils.buildUndoIconPaths(_context);
     this.documentIcons = utils.buildDocumentIconPaths(_context);
     this.buttonIcons = utils.buildButtonsIconPaths(_context);
     this.gotoIcons = utils.buildGotoIconPaths(_context);
@@ -2912,7 +2923,8 @@ export class LeoUI {
     public config: Config; // Public configuration service singleton, used in leoSettingsWebview, leoBridge, and leoNode for inverted contrast
 
     // * Icon Paths (Singleton static arrays)
-    public nodeIcons: Icon[] = []; // TODO : REPLACE WITH FIXED URIs !!
+    public nodeIcons: Icon[] = [];
+    public undoIcons: Icon[] = [];
     public documentIcons: Icon[] = [];
     public buttonIcons: Icon[] = [];
     public gotoIcons: Icon[] = [];
@@ -7664,6 +7676,7 @@ public getTextFromClipboard(): string {
 import { LeoUI } from './leoUI';
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
+import { Icon } from "./types";
 
 @language typescript
 @tabwidth -4
@@ -7684,6 +7697,7 @@ export class LeoUndosProvider implements vscode.TreeDataProvider&lt;LeoUndoNode&
     constructor(
         private _leoStates: LeoStates,
         private _leoUI: LeoUI,
+        private _icons: Icon[],
     ) { }
 
     @others
@@ -7702,6 +7716,7 @@ export class LeoUndoNode extends vscode.TreeItem {
         public label: string,
         public description: string,
         public id: string,
+        public iconPath?: Icon
     ) {
         super(label);
     }
@@ -7737,21 +7752,30 @@ public refreshTreeRoot(): void {
         const undoer = c.undoer;
 
         if (undoer.beads.length) {
+
             let i: number = 0;
+            let w_defaultIcon = 1;
+
             undoer.beads.forEach(p_bead =&gt; {
                 let w_description: string = "";
                 let w_undoFlag: boolean = false;
+                let w_icon = w_defaultIcon;
                 if (i === undoer.bead) {
                     w_description = "Undo";
                     w_undoFlag = true;
+                    w_icon = 0;
+                    w_defaultIcon = 2;
                 }
                 if (i === undoer.bead + 1) {
                     w_description = "Redo";
+                    w_icon = 2;
+                    w_defaultIcon = 3;
                 }
                 const w_node = new LeoUndoNode(
                     p_bead.undoType || "unknown",
                     w_description,
-                    (this._beadId++).toString()
+                    (this._beadId++).toString(),
+                    this._icons[w_icon]
                 );
                 w_children.push(w_node);
                 if (w_undoFlag) {
@@ -7763,7 +7787,8 @@ public refreshTreeRoot(): void {
             const w_node = new LeoUndoNode(
                 "Unchanged",
                 "",
-                (this._beadId++).toString()
+                (this._beadId++).toString(),
+                undefined
             );
             w_children.push(w_node);
         }
@@ -8456,7 +8481,7 @@ public finishStartup(): void {
     // );
 
     // * Create Undos Treeview Providers and tree views
-    this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this);
+    this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this, this.undoIcons);
     this._leoUndos = vscode.window.createTreeView(Constants.UNDOS_ID, { showCollapseAll: false, treeDataProvider: this._leoUndosProvider });
     this._context.subscriptions.push(
         this._leoUndos,
@@ -12273,6 +12298,33 @@ public navigateNavEntry(p_nav: LeoGotoNavKey): void {
     console.log('TODO : navigateNavEntry');
 
     // this._leoGotoProvider.navigateNavEntry(p_nav);
+}
+
+</t>
+<t tx="felix.20221027230322.1">/**
+ * * Build all possible strings for undo icons graphic file paths
+ * @param p_context Needed to get to absolute paths on the system
+ * @returns An array containing icons for the undo tree view
+ */
+export function buildUndoIconPaths(p_context: vscode.ExtensionContext): Icon[] {
+    return [
+        {
+            light: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_LIGHT_UNDO_ACTIVE),
+            dark: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_DARK_UNDO_ACTIVE)
+        },
+        {
+            light: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_LIGHT_UNDO),
+            dark: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_DARK_UNDO)
+        },
+        {
+            light: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_LIGHT_REDO_ACTIVE),
+            dark: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_DARK_REDO_ACTIVE)
+        },
+        {
+            light: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_LIGHT_REDO),
+            dark: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_DARK_REDO)
+        }
+    ];
 }
 
 </t>

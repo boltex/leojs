@@ -63,7 +63,8 @@ export class LeoUI {
     public config: Config; // Public configuration service singleton, used in leoSettingsWebview, leoBridge, and leoNode for inverted contrast
 
     // * Icon Paths (Singleton static arrays)
-    public nodeIcons: Icon[] = []; // TODO : REPLACE WITH FIXED URIs !!
+    public nodeIcons: Icon[] = [];
+    public undoIcons: Icon[] = [];
     public documentIcons: Icon[] = [];
     public buttonIcons: Icon[] = [];
     public gotoIcons: Icon[] = [];
@@ -241,6 +242,7 @@ export class LeoUI {
 
         // * Build Icon filename paths
         this.nodeIcons = utils.buildNodeIconPaths(_context);
+        this.undoIcons = utils.buildUndoIconPaths(_context);
         this.documentIcons = utils.buildDocumentIconPaths(_context);
         this.buttonIcons = utils.buildButtonsIconPaths(_context);
         this.gotoIcons = utils.buildGotoIconPaths(_context);
@@ -387,7 +389,7 @@ export class LeoUI {
         // );
 
         // * Create Undos Treeview Providers and tree views
-        this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this);
+        this._leoUndosProvider = new LeoUndosProvider(this.leoStates, this, this.undoIcons);
         this._leoUndos = vscode.window.createTreeView(Constants.UNDOS_ID, { showCollapseAll: false, treeDataProvider: this._leoUndosProvider });
         this._context.subscriptions.push(
             this._leoUndos,

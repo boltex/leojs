@@ -80,6 +80,15 @@ export class Constants {
         ICON_LIGHT_DOCUMENT_DIRTY: "resources/light/document-dirty.svg",
         ICON_DARK_DOCUMENT_DIRTY: "resources/dark/document-dirty.svg",
 
+        ICON_LIGHT_UNDO_ACTIVE: "resources/light/undo.svg",
+        ICON_DARK_UNDO_ACTIVE: "resources/dark/undo.svg",
+        ICON_LIGHT_UNDO: "resources/dark/undo.svg",
+        ICON_DARK_UNDO: "resources/light/undo.svg",
+        ICON_LIGHT_REDO_ACTIVE: "resources/light/redo.svg",
+        ICON_DARK_REDO_ACTIVE: "resources/dark/redo.svg",
+        ICON_LIGHT_REDO: "resources/dark/redo.svg",
+        ICON_DARK_REDO: "resources/light/redo.svg",
+
         ICON_LIGHT_BUTTON: "resources/light/button.svg",
         ICON_DARK_BUTTON: "resources/dark/button.svg",
         ICON_LIGHT_BUTTON_RCLICK: "resources/light/button-rclick.svg",

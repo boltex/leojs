@@ -1250,7 +1250,7 @@ export class CommanderOutlineCommands {
         }
         const siblings: Position[] = [...parent.children()];
         const firstSibling = siblings[0];
-        if (firstSibling.gnx === c.p.gnx) {
+        if (firstSibling.__eq__(c.p)) {
             c.selectVisBack(); // already first sibling
         } else {
             c.goToFirstSibling();
@@ -1270,7 +1270,7 @@ export class CommanderOutlineCommands {
         }
         const siblings: Position[] = [...parent.children()];
         const lastSibling = siblings[siblings.length - 1];
-        if (lastSibling.gnx === c.p.gnx) {
+        if (lastSibling.__eq__(c.p)) {
             c.selectVisNext(); // already last sibling
         } else {
             c.goToLastSibling();
