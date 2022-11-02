@@ -5,7 +5,7 @@
   "version": "0.1.2",
   "publisher": "boltex",
   "author": {
-    "name": "Félix"
+    "name": "Félix Malboeuf"
   },
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
@@ -2680,13 +2680,13 @@
         "command": "leojs.undoFromOutline",
         "key": "ctrl+z",
         "mac": "cmd+z",
-        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline|^leojsDocuments|^leojsUndos/"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && !inputFocus && !editorTextFocus && focusedView =~ /^leojsOutline|^leojsFindPanel|^leojsUndos|^leojsDocuments|^leojsButtons/"
       },
       {
         "command": "leojs.redoFromOutline",
         "key": "ctrl+shift+z",
         "mac": "cmd+shift+z",
-        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline|^leojsDocuments|^leojsUndos/"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && !inputFocus && !editorTextFocus && focusedView =~ /^leojsOutline|^leojsFindPanel|^leojsUndos|^leojsDocuments|^leojsButtons/"
       },
       {
         "command": "leojs.gotoFirstVisible",
@@ -2861,7 +2861,7 @@
     "path-browserify": "^1.0.1",
     "stream": "^0.0.2"
   },
-  "gitCommit": "b8cb9f6",
+  "gitCommit": "57fe590",
   "gitBranch": "leoFind",
-  "gitDate": "2022-10-27 22:24:36 -0400"
+  "gitDate": "2022-10-28 22:59:15 -0400"
 }

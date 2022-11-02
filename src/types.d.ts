@@ -133,7 +133,7 @@ export interface LeoPackageStates {
 }
 
 /**
- * * Leo document structure used in the 'Opened Leo Documents' tree view provider sent back by the server
+ * * Leo document structure used in the 'Opened Leo Documents' tree view provider
  */
 export interface LeoDocument {
     name: string;
@@ -333,7 +333,6 @@ export interface RClick {
 
 /**
  * * Used by the minibuffer command pallette
- * Acquired from the getCommands method in leobridgeserver.py
  */
 export interface MinibufferCommand extends vscode.QuickPickItem {
     func: string;

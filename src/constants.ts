@@ -52,6 +52,7 @@ export class Constants {
     public static STATUSBAR_DEBOUNCE_DELAY: number = 70;
     public static REFRESH_DEBOUNCE_DELAY: number = 50;
     public static STATES_DEBOUNCE_DELAY: number = 60;
+    public static TITLE_DEBOUNCE_DELAY: number = 20;
     public static BUTTONS_DEBOUNCE_DELAY: number = 160;
     public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
     public static UNDOS_DEBOUNCE_DELAY: number = 140;
@@ -323,7 +324,6 @@ export class Constants {
         LEO_READY: "leojsReady", // Extension activated and classes created and ready
         TREE_OPENED: "leojsTreeOpened", // At least one Leo file opened
         TREE_TITLED: "leojsTreeTitled", // Tree is a Leo file and not a new untitled document
-        SERVER_STARTED: "leojsServerStarted", // Auto-start or manually started
         // 'states' flags for currently opened tree view
         LEO_CHANGED: "leojsChanged",
         LEO_CAN_UNDO: "leojsCanUndo",

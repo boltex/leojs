@@ -48,8 +48,8 @@ export class LeoStates {
     set fileOpenedReady(p_value: boolean) {
         this._fileOpenedReady = p_value;
         this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.TREE_OPENED, p_value);
+        this._leoJs.setTreeViewTitle();
     }
-
 
     /**
      * Currently opened Leo file path and name, empty string if new unsaved file.
@@ -66,8 +66,8 @@ export class LeoStates {
             this._leoOpenedFileName = "";
             this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.TREE_TITLED, false);
         }
+        this._leoJs.setTreeViewTitle();
     }
-
 
     /**
      * Currently opened commander is dirty
@@ -84,6 +84,7 @@ export class LeoStates {
         }
         this._leoChanged = p_value;
         this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_CHANGED, p_value);
+        this._leoJs.setTreeViewTitle();
     }
 
     /**

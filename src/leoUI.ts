@@ -200,6 +200,9 @@ export class LeoUI {
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
     public getStates: (() => void);
 
+    // * Debounced method used to set the outline tree title
+    public setTreeViewTitle: (() => void);
+
     // * Debounced method used to get opened Leo Files for the documents pane
     public refreshDocumentsPane: (() => void);
 
@@ -250,18 +253,19 @@ export class LeoUI {
         // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
         this.getStates = debounce(
             this._triggerGetStates,
-            Constants.STATES_DEBOUNCE_DELAY,
-            { leading: false, trailing: true }
+            Constants.STATES_DEBOUNCE_DELAY
+        );
+        this.setTreeViewTitle = debounce(
+            this._setTreeViewTitle,
+            Constants.TITLE_DEBOUNCE_DELAY
         );
         this.refreshDocumentsPane = debounce(
             this._refreshDocumentsPane,
-            Constants.DOCUMENTS_DEBOUNCE_DELAY,
-            { leading: false, trailing: true }
+            Constants.DOCUMENTS_DEBOUNCE_DELAY
         );
         this.refreshButtonsPane = debounce(
             this._refreshButtonsPane,
-            Constants.BUTTONS_DEBOUNCE_DELAY,
-            { leading: false, trailing: true }
+            Constants.BUTTONS_DEBOUNCE_DELAY
         );
         // this.refreshGotoPane = debounce(
         //     this._refreshGotoPane,
@@ -270,18 +274,15 @@ export class LeoUI {
         // );
         this.refreshUndoPane = debounce(
             this._refreshUndoPane,
-            Constants.UNDOS_DEBOUNCE_DELAY,
-            { leading: false, trailing: true }
+            Constants.UNDOS_DEBOUNCE_DELAY
         );
         this.setUndoSelection = debounce(
             this._setUndoSelection,
-            Constants.UNDOS_REVEAL_DEBOUNCE_DELAY,
-            { leading: false, trailing: true }
+            Constants.UNDOS_REVEAL_DEBOUNCE_DELAY
         );
         this.launchRefresh = debounce(
             this._launchRefresh,
-            Constants.REFRESH_DEBOUNCE_DELAY,
-            { leading: false, trailing: true }
+            Constants.REFRESH_DEBOUNCE_DELAY
         );
 
         // * Create a single data provider for both outline trees, Leo view and Explorer view
@@ -586,6 +587,11 @@ export class LeoUI {
             this.leoStates.setLeoStateFlags(w_states);
             this.refreshUndoPane();
         }
+        // Set leoChanged and leoOpenedFilename
+        const c = g.app.windowList[this.frameIndex].c;
+        this.leoStates.leoChanged = c.changed;
+        this.leoStates.leoOpenedFileName = c.fileName();
+
         if (this._refreshType.documents) {
             this._refreshType.documents = false;
             this.refreshDocumentsPane();
@@ -618,8 +624,9 @@ export class LeoUI {
     private _setupOpenedLeoDocument(): Promise<unknown> {
         this._needLastSelectedRefresh = true;
 
-        // const w_selectedLeoNode = this.apToLeoNode(p_openFileResult.node, false); // Just to get gnx for the body's fist appearance
-        this.leoStates.leoOpenedFileName = g.app.windowList[this.frameIndex].c.fileName();
+        const c = g.app.windowList[this.frameIndex].c;
+        this.leoStates.leoOpenedFileName = c.fileName();
+        this.leoStates.leoChanged = c.changed;
 
         // * Startup flag
         this.leoStates.fileOpenedReady = true;
@@ -1055,6 +1062,41 @@ export class LeoUI {
     }
 
     /**
+     * Set filename as description
+     */
+    public refreshDesc(): void {
+        let titleDesc = "";
+
+        if (this.leoStates.fileOpenedReady) {
+
+            const s = this.leoStates.leoOpenedFileName;
+            const w_filename = s ? utils.getFileFromPath(s) : Constants.UNTITLED_FILE_NAME;
+            let w_path = "";
+            const n = s ? s.lastIndexOf(w_filename) : -1;
+            if (n >= 0 && n + w_filename.length >= s.length) {
+                w_path = s.substring(0, n);
+            }
+            titleDesc = w_filename + (w_path ? " in " + w_path : '');
+
+            if (this._leoTreeView) {
+                this._leoTreeView.description = titleDesc;
+            }
+            if (this._leoTreeExView) {
+                this._leoTreeExView.description = titleDesc;
+            }
+        }
+        if (this._leoTreeView.description === titleDesc) {
+            return;
+        }
+        if (this._leoTreeView) {
+            this._leoTreeView.description = titleDesc;
+        }
+        if (this._leoTreeExView) {
+            this._leoTreeExView.description = titleDesc;
+        }
+    }
+
+    /**
      * * Save body to Leo if its dirty. That is, only if a change has been made to the body 'document' so far
      * @param p_forcedVsCodeSave Flag to also have vscode 'save' the content of this editor through the filesystem
      * @returns a promise that resolves when the possible saving process is finished
@@ -1231,18 +1273,21 @@ export class LeoUI {
      * * Sets the outline pane top bar string message or refreshes with existing title if no title passed
      * @param p_title new string to replace the current title
      */
-    public setTreeViewTitle(p_title?: string): void {
+    private _setTreeViewTitle(p_title?: string): void {
+        const w_changed = this.leoStates.fileOpenedReady && this.leoStates.leoOpenedFileName && this.leoStates.leoChanged ? "*" : "";
         if (p_title) {
             this._currentOutlineTitle = p_title;
         }
+        let w_title = this._currentOutlineTitle + w_changed;
         // * Set/Change outline pane title e.g. "INTEGRATION", "OUTLINE"
-        if (this._leoTreeView) {
-            this._leoTreeView.title = this._currentOutlineTitle;
+        if (this._leoTreeView && w_title !== this._leoTreeView.title) {
+            this._leoTreeView.title = w_title;
         }
-        if (this._leoTreeExView) {
-            this._leoTreeExView.title =
-                Constants.GUI.EXPLORER_TREEVIEW_PREFIX + this._currentOutlineTitle;
+        w_title = Constants.GUI.EXPLORER_TREEVIEW_PREFIX + w_title;
+        if (this._leoTreeExView && w_title !== this._leoTreeExView.title) {
+            this._leoTreeExView.title = w_title;
         }
+        this.refreshDesc();
     }
 
     /**
@@ -3609,9 +3654,9 @@ export class LeoUI {
     }
 
     /**
-     * * Send the settings to the Leo Bridge Server
-     * @param p_settings the search settings to be set server side to affect next results
-     * @returns the promise from the server call
+     * * Send the settings to Leo implementation
+     * @param p_settings the search settings to be set in Leo implementation to affect next results
+     * @returns 
      */
     public saveSearchSettings(p_settings: LeoSearchSettings): Thenable<unknown> {
 
@@ -3889,10 +3934,6 @@ export class LeoUI {
      * @param p_frame Document node instance in the Leo document view to be the 'selected' one.
      */
     public setDocumentSelection(p_frame: LeoFrame): void {
-        this.leoStates.leoChanged = p_frame.c.changed; // also set here since slightly newer.
-
-        // this._currentDocumentChanged = ;
-        this.leoStates.leoOpenedFileName = p_frame.c.fileName();
         setTimeout(() => {
             if (this._lastLeoDocuments && this._lastLeoDocuments.selection.length && this._lastLeoDocuments.selection[0] === p_frame) {
                 // console.log('setDocumentSelection: already selected!');

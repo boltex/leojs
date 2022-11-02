@@ -120,6 +120,7 @@
 <v t="felix.20220930215005.1"><vh>_onChangeEditorScroll</vh></v>
 <v t="felix.20220930215012.1"><vh>_onDocumentChanged</vh></v>
 <v t="felix.20220930215020.1"><vh>setFindPanel</vh></v>
+<v t="felix.20221101220727.1"><vh>refreshDesc</vh></v>
 </v>
 <v t="felix.20211204144931.1"><vh>Body Editing</vh>
 <v t="felix.20211204144931.2"><vh>triggerBodySave</vh></v>
@@ -128,7 +129,7 @@
 <v t="felix.20211204144931.5"><vh>_bodySaveDeactivate</vh></v>
 </v>
 <v t="felix.20201214194144.4"><vh>Refresh UI</vh>
-<v t="felix.20220725004247.1"><vh>setTreeViewTitle</vh></v>
+<v t="felix.20220725004247.1"><vh>_setTreeViewTitle</vh></v>
 <v t="felix.20201214202118.1"><vh>showOutline</vh></v>
 <v t="felix.20211007232334.1"><vh>configTreeRefresh</vh></v>
 <v t="felix.20201227155008.1"><vh>_setupRefresh</vh></v>
@@ -1766,6 +1767,7 @@ public static LAST_FILES_KEY: string = "leojsLastFiles";
 public static STATUSBAR_DEBOUNCE_DELAY: number = 70;
 public static REFRESH_DEBOUNCE_DELAY: number = 50;
 public static STATES_DEBOUNCE_DELAY: number = 60;
+public static TITLE_DEBOUNCE_DELAY: number = 20;
 public static BUTTONS_DEBOUNCE_DELAY: number = 160;
 public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
 public static UNDOS_DEBOUNCE_DELAY: number = 140;
@@ -1952,7 +1954,6 @@ public static CONTEXT_FLAGS = {
     LEO_READY: "leojsReady", // Extension activated and classes created and ready
     TREE_OPENED: "leojsTreeOpened", // At least one Leo file opened
     TREE_TITLED: "leojsTreeTitled", // Tree is a Leo file and not a new untitled document
-    SERVER_STARTED: "leojsServerStarted", // Auto-start or manually started
     // 'states' flags for currently opened tree view
     LEO_CHANGED: "leojsChanged",
     LEO_CAN_UNDO: "leojsCanUndo",
@@ -2413,11 +2414,11 @@ get fileOpenedReady(): boolean {
 set fileOpenedReady(p_value: boolean) {
     this._fileOpenedReady = p_value;
     this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.TREE_OPENED, p_value);
+    this._leoJs.setTreeViewTitle();
 }
 
 </t>
-<t tx="felix.20201214151447.5">
-/**
+<t tx="felix.20201214151447.5">/**
  * Currently opened Leo file path and name, empty string if new unsaved file.
  */
 private _leoOpenedFileName: string = "";
@@ -2432,11 +2433,11 @@ set leoOpenedFileName(p_name: string) {
         this._leoOpenedFileName = "";
         this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.TREE_TITLED, false);
     }
+    this._leoJs.setTreeViewTitle();
 }
 
 </t>
-<t tx="felix.20201214151447.6">
-/**
+<t tx="felix.20201214151447.6">/**
  * Currently opened commander is dirty
  */
 private _leoChanged: boolean = false;
@@ -2451,6 +2452,7 @@ set leoChanged(p_value: boolean) {
     }
     this._leoChanged = p_value;
     this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_CHANGED, p_value);
+    this._leoJs.setTreeViewTitle();
 }
 
 </t>
@@ -2698,7 +2700,6 @@ export interface ChooseDocumentItem extends vscode.QuickPickItem {
 </t>
 <t tx="felix.20201214154816.17">/**
  * * Used by the minibuffer command pallette
- * Acquired from the getCommands method in leobridgeserver.py
  */
 export interface MinibufferCommand extends vscode.QuickPickItem {
     func: string;
@@ -2762,7 +2763,7 @@ export interface LeoPackageStates {
 
 </t>
 <t tx="felix.20201214154816.8">/**
- * * Leo document structure used in the 'Opened Leo Documents' tree view provider sent back by the server
+ * * Leo document structure used in the 'Opened Leo Documents' tree view provider
  */
 export interface LeoDocument {
     name: string;
@@ -2854,18 +2855,19 @@ import { ISettings } from "./core/leoFind";
     // * Debounced refresh flags and UI parts, other than the tree and body, when operation(s) are done executing
     this.getStates = debounce(
         this._triggerGetStates,
-        Constants.STATES_DEBOUNCE_DELAY,
-        { leading: false, trailing: true }
+        Constants.STATES_DEBOUNCE_DELAY
+    );
+    this.setTreeViewTitle = debounce(
+        this._setTreeViewTitle,
+        Constants.TITLE_DEBOUNCE_DELAY
     );
     this.refreshDocumentsPane = debounce(
         this._refreshDocumentsPane,
-        Constants.DOCUMENTS_DEBOUNCE_DELAY,
-        { leading: false, trailing: true }
+        Constants.DOCUMENTS_DEBOUNCE_DELAY
     );
     this.refreshButtonsPane = debounce(
         this._refreshButtonsPane,
-        Constants.BUTTONS_DEBOUNCE_DELAY,
-        { leading: false, trailing: true }
+        Constants.BUTTONS_DEBOUNCE_DELAY
     );
     // this.refreshGotoPane = debounce(
     //     this._refreshGotoPane,
@@ -2874,18 +2876,15 @@ import { ISettings } from "./core/leoFind";
     // );
     this.refreshUndoPane = debounce(
         this._refreshUndoPane,
-        Constants.UNDOS_DEBOUNCE_DELAY,
-        { leading: false, trailing: true }
+        Constants.UNDOS_DEBOUNCE_DELAY
     );
     this.setUndoSelection = debounce(
         this._setUndoSelection,
-        Constants.UNDOS_REVEAL_DEBOUNCE_DELAY,
-        { leading: false, trailing: true }
+        Constants.UNDOS_REVEAL_DEBOUNCE_DELAY
     );
     this.launchRefresh = debounce(
         this._launchRefresh,
-        Constants.REFRESH_DEBOUNCE_DELAY,
-        { leading: false, trailing: true }
+        Constants.REFRESH_DEBOUNCE_DELAY
     );
 
 </t>
@@ -3060,6 +3059,9 @@ export class LeoUI {
     // * Debounced method used to get states for UI display flags (commands such as undo, redo, save, ...)
     public getStates: (() =&gt; void);
 
+    // * Debounced method used to set the outline tree title
+    public setTreeViewTitle: (() =&gt; void);
+
     // * Debounced method used to get opened Leo Files for the documents pane
     public refreshDocumentsPane: (() =&gt; void);
 
@@ -3117,6 +3119,11 @@ private _triggerGetStates(): void {
         this.leoStates.setLeoStateFlags(w_states);
         this.refreshUndoPane();
     }
+    // Set leoChanged and leoOpenedFilename
+    const c = g.app.windowList[this.frameIndex].c;
+    this.leoStates.leoChanged = c.changed;
+    this.leoStates.leoOpenedFileName = c.fileName();
+
     if (this._refreshType.documents) {
         this._refreshType.documents = false;
         this.refreshDocumentsPane();
@@ -3614,7 +3621,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "version": "0.1.2",
   "publisher": "boltex",
   "author": {
-    "name": "Félix"
+    "name": "Félix Malboeuf"
   },
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
@@ -3656,7 +3663,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "57fe590",
+  "gitBranch": "leoFind",
+  "gitDate": "2022-10-28 22:59:15 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -6459,8 +6469,9 @@ private _setupNoOpenedLeoDocument(): void {
 private _setupOpenedLeoDocument(): Promise&lt;unknown&gt; {
     this._needLastSelectedRefresh = true;
 
-    // const w_selectedLeoNode = this.apToLeoNode(p_openFileResult.node, false); // Just to get gnx for the body's fist appearance
-    this.leoStates.leoOpenedFileName = g.app.windowList[this.frameIndex].c.fileName();
+    const c = g.app.windowList[this.frameIndex].c;
+    this.leoStates.leoOpenedFileName = c.fileName();
+    this.leoStates.leoChanged = c.changed;
 
     // * Startup flag
     this.leoStates.fileOpenedReady = true;
@@ -7652,13 +7663,13 @@ public getTextFromClipboard(): string {
   "command": "leojs.undoFromOutline",
   "key": "ctrl+z",
   "mac": "cmd+z",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsUndos/"
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; !inputFocus &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsFindPanel|^leojsUndos|^leojsDocuments|^leojsButtons/"
 },
 {
   "command": "leojs.redoFromOutline",
   "key": "ctrl+shift+z",
   "mac": "cmd+shift+z",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments|^leojsUndos/"
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; !inputFocus &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsFindPanel|^leojsUndos|^leojsDocuments|^leojsButtons/"
 },
 </t>
 <t tx="felix.20211119001637.1">"resourceLabelFormatters": [
@@ -9235,9 +9246,9 @@ public loadSearchSettings(): void {
 
 </t>
 <t tx="felix.20220505215924.14">/**
- * * Send the settings to the Leo Bridge Server
- * @param p_settings the search settings to be set server side to affect next results
- * @returns the promise from the server call
+ * * Send the settings to Leo implementation
+ * @param p_settings the search settings to be set in Leo implementation to affect next results
+ * @returns 
  */
 public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt; {
 
@@ -10357,18 +10368,21 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
  * * Sets the outline pane top bar string message or refreshes with existing title if no title passed
  * @param p_title new string to replace the current title
  */
-public setTreeViewTitle(p_title?: string): void {
+private _setTreeViewTitle(p_title?: string): void {
+    const w_changed = this.leoStates.fileOpenedReady &amp;&amp; this.leoStates.leoOpenedFileName &amp;&amp; this.leoStates.leoChanged ? "*" : "";
     if (p_title) {
         this._currentOutlineTitle = p_title;
     }
+    let w_title = this._currentOutlineTitle + w_changed;
     // * Set/Change outline pane title e.g. "INTEGRATION", "OUTLINE"
-    if (this._leoTreeView) {
-        this._leoTreeView.title = this._currentOutlineTitle;
+    if (this._leoTreeView &amp;&amp; w_title !== this._leoTreeView.title) {
+        this._leoTreeView.title = w_title;
     }
-    if (this._leoTreeExView) {
-        this._leoTreeExView.title =
-            Constants.GUI.EXPLORER_TREEVIEW_PREFIX + this._currentOutlineTitle;
+    w_title = Constants.GUI.EXPLORER_TREEVIEW_PREFIX + w_title;
+    if (this._leoTreeExView &amp;&amp; w_title !== this._leoTreeExView.title) {
+        this._leoTreeExView.title = w_title;
     }
+    this.refreshDesc();
 }
 
 </t>
@@ -11985,10 +11999,6 @@ public setFindPanel(p_panel: vscode.WebviewView): void {
  * @param p_frame Document node instance in the Leo document view to be the 'selected' one.
  */
 public setDocumentSelection(p_frame: LeoFrame): void {
-    this.leoStates.leoChanged = p_frame.c.changed; // also set here since slightly newer.
-
-    // this._currentDocumentChanged = ;
-    this.leoStates.leoOpenedFileName = p_frame.c.fileName();
     setTimeout(() =&gt; {
         if (this._lastLeoDocuments &amp;&amp; this._lastLeoDocuments.selection.length &amp;&amp; this._lastLeoDocuments.selection[0] === p_frame) {
             // console.log('setDocumentSelection: already selected!');
@@ -12325,6 +12335,42 @@ export function buildUndoIconPaths(p_context: vscode.ExtensionContext): Icon[] {
             dark: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_DARK_REDO)
         }
     ];
+}
+
+</t>
+<t tx="felix.20221101220727.1">/**
+ * Set filename as description
+ */
+public refreshDesc(): void {
+    let titleDesc = "";
+
+    if (this.leoStates.fileOpenedReady) {
+
+        const s = this.leoStates.leoOpenedFileName;
+        const w_filename = s ? utils.getFileFromPath(s) : Constants.UNTITLED_FILE_NAME;
+        let w_path = "";
+        const n = s ? s.lastIndexOf(w_filename) : -1;
+        if (n &gt;= 0 &amp;&amp; n + w_filename.length &gt;= s.length) {
+            w_path = s.substring(0, n);
+        }
+        titleDesc = w_filename + (w_path ? " in " + w_path : '');
+
+        if (this._leoTreeView) {
+            this._leoTreeView.description = titleDesc;
+        }
+        if (this._leoTreeExView) {
+            this._leoTreeExView.description = titleDesc;
+        }
+    }
+    if (this._leoTreeView.description === titleDesc) {
+        return;
+    }
+    if (this._leoTreeView) {
+        this._leoTreeView.description = titleDesc;
+    }
+    if (this._leoTreeExView) {
+        this._leoTreeExView.description = titleDesc;
+    }
 }
 
 </t>
