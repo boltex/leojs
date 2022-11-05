@@ -3663,10 +3663,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "57fe590",
-  "gitBranch": "leoFind",
-  "gitDate": "2022-10-28 22:59:15 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -7890,11 +7887,12 @@ public triggerBodySave(p_forcedVsCodeSave?: boolean): Thenable&lt;unknown&gt; {
         this._bodyLastChangedDocumentSaved
     ) {
         // * Had 'forcedVsCodeSave' and isDirty only, so just clean up dirty VSCODE document flag.
-        this._bodyLastChangedDocument.save(); // ! USED INTENTIONALLY: This trims trailing spaces
-        q_savePromise = this._bodySaveSelection(); // just save selection if it's changed
+        this._bodySaveSelection(); // just save selection if it's changed
+        q_savePromise = this._bodyLastChangedDocument.save(); // ! USED INTENTIONALLY: This trims trailing spaces
     } else {
         this._bodyLastChangedDocumentSaved = true;
-        q_savePromise = this._bodySaveSelection();  // just save selection if it's changed
+        this._bodySaveSelection();  // just save selection if it's changed
+        q_savePromise = Promise.resolve(true);
     }
     return q_savePromise.then((p_result) =&gt; {
         return p_result;
@@ -7907,48 +7905,78 @@ public triggerBodySave(p_forcedVsCodeSave?: boolean): Thenable&lt;unknown&gt; {
 </t>
 <t tx="felix.20211204144931.3">/**
  * * Saves the cursor position along with the text selection range and scroll position
- * @returns Promise that resolves when the "setSelection" action returns from Leo's side
  */
-private _bodySaveSelection(): Promise&lt;boolean&gt; {
+private _bodySaveSelection(): void {
 
-    // if (this._selectionDirty &amp;&amp; this._selection) {
-    //     // Prepare scroll data separately
-    //     // ! TEST NEW SCROLL WITH SINGLE LINE NUMBER
-    //     let w_scroll: number;
-    //     if (this._selectionGnx === this._scrollGnx &amp;&amp; this._scrollDirty) {
-    //         w_scroll = this._scroll?.start.line || 0;
-    //     } else {
-    //         w_scroll = 0;
-    //     }
-    //     const w_param: BodySelectionInfo = {
-    //         gnx: this._selectionGnx,
-    //         scroll: w_scroll,
-    //         insert: {
-    //             line: this._selection.active.line || 0,
-    //             col: this._selection.active.character || 0,
-    //         },
-    //         start: {
-    //             line: this._selection.start.line || 0,
-    //             col: this._selection.start.character || 0,
-    //         },
-    //         end: {
-    //             line: this._selection.end.line || 0,
-    //             col: this._selection.end.character || 0,
-    //         },
-    //     };
-    //     // console.log("set scroll to leo: " + w_scroll + " start:" + this._selection.start.line);
+    if (!this._selectionDirty || !this._selection) {
+        return;
+    }
+    // Prepare scroll data separately
 
-    //     this._scrollDirty = false;
-    //     this._selectionDirty = false; // don't wait for return of this call
-    //     return this.sendAction(Constants.LEOBRIDGE.SET_SELECTION, JSON.stringify(w_param)).then(
-    //         (p_result) =&gt; {
-    //             return Promise.resolve(true);
-    //         }
-    //     );
-    // } else {
-    //     return Promise.resolve(true);
-    // }
-    return Promise.resolve(true);
+    let scroll: number;
+    if (this._selectionGnx === this._scrollGnx &amp;&amp; this._scrollDirty) {
+        scroll = this._scroll?.start.line || 0;
+    } else {
+        scroll = 0;
+    }
+    const gnx = this._selectionGnx;
+
+    const start = {
+        line: this._selection.start.line || 0,
+        col: this._selection.start.character || 0,
+    };
+    const end = {
+        line: this._selection.end.line || 0,
+        col: this._selection.end.character || 0,
+    };
+    const active = {
+        line: this._selection.active.line || 0,
+        col: this._selection.active.character || 0,
+    };
+
+    const c = g.app.windowList[this.frameIndex].c;
+    let p: Position | undefined;
+    if (c.p.gnx === gnx) {
+        p = c.p;
+    } else {
+        // find p.
+        for (let p_p of c.all_positions()) {
+            if (p_p.v.gnx === gnx) {
+                p = p_p;
+                break;
+            }
+        }
+    }
+    if (!p) {
+        return;
+    }
+
+    // - "ap":     An archived position for position p.
+    // - "start":  The start of the selection.
+    // - "end":    The end of the selection.
+    // - "active": The insert point. Must be either start or end.
+    // - "scroll": An optional scroll position.
+
+    const v = p.v;
+    const wrapper = c.frame.body.wrapper;
+    const insert = g.convertRowColToPythonIndex(v.b, active['line'], active['col']);
+    const startSel = g.convertRowColToPythonIndex(v.b, start['line'], start['col']);
+    const endSel = g.convertRowColToPythonIndex(v.b, end['line'], end['col']);
+
+    // If it's the currently selected node set the wrapper's states too
+    if (p.__eq__(c.p)) {
+        wrapper.setSelectionRange(startSel, endSel, insert);
+        wrapper.setYScrollPosition(scroll);
+    }
+    // Always set vnode attrs.
+    v.scrollBarSpot = scroll;
+    v.insertSpot = insert;
+    v.selectionStart = startSel;
+    v.selectionLength = Math.abs(startSel - endSel);
+
+    this._scrollDirty = false;
+    this._selectionDirty = false;
+
 }
 
 </t>
@@ -12276,7 +12304,7 @@ set leojsStartupDone(p_value: boolean) {
 public static OLD_POS_OFFSETS = {
     DELETE: ["cut-node", "delete-node"],
     ADD: ["clone-node", "async-paste-node", "async-paste-retaining-clones"]
-}
+};
 
 </t>
 <t tx="felix.20221026222034.1">public set_focus(commander: Commands, widget: any): void {

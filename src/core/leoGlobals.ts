@@ -412,6 +412,37 @@ export class FileLikeObject {
 
 }
 
+//@+node:felix.20221105181936.1: *3* class NullObject (Python Cookbook)
+/**
+ * An object that does nothing, and does it very well.
+ * From the Python cookbook, recipe 5.23
+ */
+export class NullObject {
+    
+    // def __init__(self, *args, **keys): pass
+    constructor(){}
+
+    public toString(): string{
+        return "NullObject";
+    }
+
+    // def __call__(self, *args, **keys): return self
+
+    // def __repr__(self): return "NullObject"
+
+    // def __str__(self): return "NullObject"
+
+    // def __bool__(self): return False
+
+    // def __nonzero__(self): return 0
+
+    // def __delattr__(self, attr): return self
+
+    // def __getattr__(self, attr): return self
+
+    // def __setattr__(self, attr, val): return self
+
+}
 //@+node:felix.20220213000607.1: *3* class g.GeneralSetting
 // Important: The startup code uses this class,
 // so it is convenient to define it in leoGlobals.py.

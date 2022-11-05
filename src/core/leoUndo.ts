@@ -1203,7 +1203,7 @@ export class Undoer {
         }
         //
         // Recolor the body. // TODO : test if needed
-        // c.frame.scanForTabWidth(p);  // Calls frame.setTabWidth()
+        c.frame.scanForTabWidth(p);  // Calls frame.setTabWidth()
 
         c.recolor();
         if (redraw_flag) {

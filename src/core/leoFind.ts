@@ -737,7 +737,7 @@ export class LeoFind {
             c.editCommands.extendToWord(true); // TODO or REPLACE with something else
         }
 
-        const word: string = w.getSelectedText().strip();
+        const word: string = w.getSelectedText().trim();
         if (!word) {
             return undefined;
         }
@@ -874,7 +874,7 @@ export class LeoFind {
         }
         if (found) {
             c.redraw(p);
-            w.setSelectionRange(pos, newpos, newpos);
+            w.setSelectionRange(pos || 0, newpos || 0, newpos || 0);
             c.bodyWantsFocusNow();
             return [p, pos, newpos];
         }
@@ -2622,7 +2622,7 @@ export class LeoFind {
             const changed = s !== p.h;
             if (changed) {
                 // Handle undo.
-                const undoData = u.beforeChangeHeadline(p)
+                const undoData = u.beforeChangeHeadline(p);
                 p.initHeadString(s); // change p.h *after* calling undoer's before method.
                 if (!c.changed) {
                     c.setChanged();
@@ -3287,7 +3287,7 @@ export class LeoFind {
         } else {
             // Looks good and provides clear indication of failure or termination.
             const w = c.frame.body.wrapper;
-            w.setSelectionRange(data.start, data.end, data.insert);
+            w.setSelectionRange(data.start || 0, data.end || 0, data.insert);
             w.seeInsertPoint();
             c.widgetWantsFocus(w);
         }

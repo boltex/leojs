@@ -702,7 +702,7 @@ export class Constants {
     public static OLD_POS_OFFSETS = {
         DELETE: ["cut-node", "delete-node"],
         ADD: ["clone-node", "async-paste-node", "async-paste-retaining-clones"]
-    }
+    };
 
     /**
      * * Overridden 'good' minibuffer command name strings

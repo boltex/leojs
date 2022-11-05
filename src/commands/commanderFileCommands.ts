@@ -852,7 +852,7 @@ export class CommanderFileCommands {
             "Save As XML",
             [["Leo files", "*.leo"]],
             g.defaultLeoFileExtension(c)
-        )
+        );
         if (!fileName) {
             return;
         }

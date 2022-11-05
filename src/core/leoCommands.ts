@@ -2885,7 +2885,7 @@ export class Commands {
     //@+node:felix.20221027153010.1: *5* c.widget_name
     public widget_name(widget: any): string {
         // c = self
-        return g.app.gui ? (g.app.gui as LeoUI).widget_name(widget) :'<no widget>';
+        return g.app.gui ? (g.app.gui as LeoUI).widget_name(widget) : '<no widget>';
     }
     //@+node:felix.20211120231934.1: *5* c.redrawing...
     //@+node:felix.20211120224229.1: *6* c.redraw
@@ -3197,7 +3197,7 @@ export class Commands {
     public widgetWantsFocusNow(w: any): void {
         const c = this;
         if (w) {
-            c.set_focus(w)
+            c.set_focus(w);
             c.requestedFocusWidget = undefined;
         }
     }
@@ -3502,7 +3502,7 @@ export class Commands {
     public canShiftBodyLeft(): boolean {
         const c: Commands = this;
         const w = c.frame.body.wrapper;
-        return w && w.getAllText();
+        return w && !!w.getAllText();
     }
     //@+node:felix.20211023195447.25: *6* c.canSortChildren, canSortSiblings
     public canSortChildren(): boolean {
