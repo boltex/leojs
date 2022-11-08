@@ -3366,9 +3366,9 @@ export class LeoFind {
         //     }
         // }
         // // Support for the console gui.
-        // if ((g.app.gui as LeoUI).show_find_success) {
-        //     (g.app.gui as LeoUI).show_find_success(c, this.in_headline, insert, p);
-        // }
+        if ((g.app.gui as LeoUI).show_find_success) {
+            (g.app.gui as LeoUI).show_find_success(c, this.in_headline, insert, p);
+        }
         // c.frame.bringToFront();
         return w;  // Support for isearch.
     }

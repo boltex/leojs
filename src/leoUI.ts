@@ -16,7 +16,8 @@ import {
     Focus,
     BodySelectionInfo,
     CommandOptions,
-    LeoGotoNavKey
+    LeoGotoNavKey,
+    LeoGuiFindTabManagerSettings
 } from "./types";
 
 import { Config } from "./config";
@@ -3636,7 +3637,72 @@ export class LeoUI {
      * * Gets the search settings from Leo, and applies them to the find panel webviews
      */
     public loadSearchSettings(): void {
-        vscode.window.showInformationMessage("TODO: loadSearchSettings");
+        // vscode.window.showInformationMessage("TODO: loadSearchSettings");
+
+
+        /*
+        def get_search_settings(self, param: Param) -> Response:
+            """
+            Gets search options
+            """
+            tag = 'get_search_settings'
+            c = self._check_c()
+            scon: QuickSearchController = c.patched_quicksearch_controller
+            try:
+                settings = c.findCommands.ftm.get_settings()
+                # Use the "__dict__" of the settings, to be serializable as a json string.
+                result = {"searchSettings": settings.__dict__}
+                result["searchSettings"]["nav_text"] = scon.navText
+                result["searchSettings"]["show_parents"] = scon.showParents
+                result["searchSettings"]["is_tag"] = scon.isTag
+                result["searchSettings"]["search_options"] = scon.searchOptions
+            except Exception as e:
+                raise ServerError(f"{tag}: exception getting search settings: {e}")
+            return self._make_response(result)
+        */
+
+        const w_searchSettings: LeoGuiFindTabManagerSettings = p_result.searchSettings!;
+
+
+        const w_settings: LeoSearchSettings = {
+            isTag: w_searchSettings.is_tag,
+            navText: w_searchSettings.nav_text,
+            showParents: w_searchSettings.show_parents,
+            searchOptions: w_searchSettings.search_options,
+            //Find/change strings...
+            findText: w_searchSettings.find_text,
+            replaceText: w_searchSettings.change_text,
+            // Find options...
+            wholeWord: w_searchSettings.whole_word,
+            ignoreCase: w_searchSettings.ignore_case,
+            regExp: w_searchSettings.pattern_match,
+            markFinds: w_searchSettings.mark_finds,
+            markChanges: w_searchSettings.mark_changes,
+            searchHeadline: w_searchSettings.search_headline,
+            searchBody: w_searchSettings.search_body,
+            // 0, 1 or 2 for outline, sub-outline, or node.
+            searchScope:
+                0 +
+                (w_searchSettings.suboutline_only ? 1 : 0) +
+                (w_searchSettings.node_only ? 2 : 0) +
+                (w_searchSettings.file_only ? 3 : 0),
+        };
+        if (w_settings.searchScope > 2) {
+            console.error('searchScope SHOULD BE 0, 1, 2 only: ', w_settings.searchScope);
+        }
+        this._lastSettingsUsed = w_settings;
+        if (this._findPanelWebviewExplorerView) {
+            this._findPanelWebviewExplorerView.webview.postMessage({
+                type: 'setSettings',
+                value: w_settings,
+            });
+        }
+        if (this._findPanelWebviewView) {
+            this._findPanelWebviewView.webview.postMessage({
+                type: 'setSettings',
+                value: w_settings,
+            });
+        }
 
         // this.sendAction(Constants.LEOBRIDGE.GET_SEARCH_SETTINGS).then(
         //     (p_result: LeoBridgePackage) => {
@@ -4385,6 +4451,28 @@ export class LeoUI {
                 vscode.commands.executeCommand(Constants.COMMANDS.SET_LEO_ID);
             }
         });
+    }
+
+    /**
+     * Handle a successful find match.
+     */
+    public show_find_success( c: Commands, in_headline: boolean, insert: number, p: Position): void {
+        
+        // ? needed ?
+
+        // trace = False and not g.unitTesting
+        // if in_headline:
+        //     if trace:
+        //         g.trace('HEADLINE', p.h)
+        //     c.frame.tree.widget.select_leo_node(p)
+        //     self.focus_to_head(c, p)  # Does not return.
+        // else:
+        //     w = c.frame.body.widget
+        //     row, col = g.convertPythonIndexToRowCol(p.b, insert)
+        //     if trace:
+        //         g.trace('BODY ROW', row, p.h)
+        //     w.cursor_line = row
+        //     self.focus_to_body(c)  # Does not return.
     }
 
     public ensure_commander_visible(c: Commands): void {

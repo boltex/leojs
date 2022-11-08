@@ -978,7 +978,7 @@ export class Position {
         with_index = true,
         with_count = false
     ): string {
-        // TODO : ! CHange this method to reflext Leo 6.6 !
+        // TODO : ! Change this method to reflect Leo 6.6 !
         const aList: string[] = [];
         for (let i of this.self_and_parents(false)) {
             if (with_index || with_count) {
