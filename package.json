@@ -1625,7 +1625,7 @@
         "command": "leojs.deHoist",
         "category": "Leojs",
         "title": "De-Hoist",
-        "enablement": "leojsCanDehoist",
+        "enablement": "leojsTreeOpened && leojsCanDehoist",
         "icon": {
           "light": "resources/light/dehoist.svg",
           "dark": "resources/dark/dehoist.svg"
@@ -1635,10 +1635,50 @@
         "command": "leojs.deHoistFromOutline",
         "category": "Leojs",
         "title": "De-Hoist",
-        "enablement": "leojsCanDehoist && !leojsTopHoistChapter",
+        "enablement": "leojsTreeOpened && leojsCanDehoist && !leojsTopHoistChapter",
         "icon": {
           "light": "resources/light/dehoist.svg",
           "dark": "resources/dark/dehoist.svg"
+        }
+      },
+      {
+        "command": "leojs.chapterNext",
+        "category": "Leojs",
+        "title": "Chapter Next",
+        "enablement": "leojsTreeOpened",
+        "icon": {
+          "light": "resources/light/chapter-next.svg",
+          "dark": "resources/dark/chapter-next.svg"
+        }
+      },
+      {
+        "command": "leojs.chapterBack",
+        "category": "Leojs",
+        "title": "Chapter Back",
+        "enablement": "leojsTreeOpened",
+        "icon": {
+          "light": "resources/light/chapter-back.svg",
+          "dark": "resources/dark/chapter-back.svg"
+        }
+      },
+      {
+        "command": "leojs.chapterMain",
+        "category": "Leojs",
+        "title": "Chapter Main",
+        "enablement": "leojsTreeOpened && leojsInChapter && leojsTopHoistChapter",
+        "icon": {
+          "light": "resources/light/chapter-main.svg",
+          "dark": "resources/dark/chapter-main.svg"
+        }
+      },
+      {
+        "command": "leojs.chapterSelect",
+        "category": "Leojs",
+        "title": "Chapter Select",
+        "enablement": "leojsTreeOpened",
+        "icon": {
+          "light": "resources/light/chapter-select.svg",
+          "dark": "resources/dark/chapter-select.svg"
         }
       },
       {

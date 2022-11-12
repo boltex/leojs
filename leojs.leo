@@ -168,6 +168,8 @@
 <v t="felix.20201214202759.1"><vh>editHeadline</vh></v>
 <v t="felix.20201214202800.1"><vh>insertNode</vh></v>
 <v t="felix.20211204181418.1"><vh>_insertAndSetHeadline</vh></v>
+<v t="felix.20221108224707.1"><vh>chapterMain</vh></v>
+<v t="felix.20221108224716.1"><vh>chapterSelect</vh></v>
 </v>
 <v t="felix.20211024012536.1"><vh>Clipboard</vh>
 <v t="felix.20211212205241.1"><vh>replaceClipboardWith</vh></v>
@@ -425,7 +427,7 @@
 <v t="felix.20201214205159.16"><vh>Move Nodes</vh></v>
 <v t="felix.20201214205159.17"><vh>Outline Editing</vh></v>
 <v t="felix.20201214205159.18"><vh>Goto Nodes</vh></v>
-<v t="felix.20201214205159.19"><vh>Hoist/Dehoist</vh></v>
+<v t="felix.20221108222157.1"><vh>Hoist/Dehoist</vh></v>
 <v t="felix.20201214205159.20"><vh>Undo/Redo</vh></v>
 <v t="felix.20201214205159.21"><vh>Clone Find Commands</vh></v>
 <v t="felix.20201214205159.22"><vh>Marked Nodes Commands</vh></v>
@@ -486,6 +488,7 @@
 <v t="felix.20210102000055.1"><vh>Leo</vh>
 <v t="felix.20210102000100.1"><vh>Core classes</vh>
 <v t="felix.20211018202009.1"><vh>@file src/core/decorators.ts</vh></v>
+<v t="felix.20221109235435.1"><vh>@file src/core/findTabManager.ts</vh></v>
 <v t="felix.20210102012334.1"><vh>@file src/core/leoApp.ts</vh></v>
 <v t="felix.20211211234842.1"><vh>@file src/core/leoAtFile.ts</vh></v>
 <v t="felix.20220429005433.1"><vh>@file src/core/leoChapters.ts</vh></v>
@@ -494,6 +497,7 @@
 <v t="felix.20211212162008.1"><vh>@file src/core/leoExternalFiles.ts</vh></v>
 <v t="felix.20210220181245.1"><vh>@file src/core/leoFileCommands.ts</vh></v>
 <v t="felix.20211212000140.1"><vh>@file src/core/leoFind.ts</vh></v>
+<v t="felix.20220512205042.1"><vh>@file src/core/leoFrame.ts</vh></v>
 <v t="felix.20210102012410.1"><vh>@file src/core/leoGlobals.ts</vh></v>
 <v t="felix.20211021231651.1"><vh>@file src/core/leoHistory.ts</vh></v>
 <v t="felix.20220105221256.1"><vh>@file src/core/leoImport.ts</vh></v>
@@ -511,9 +515,6 @@
 <v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 <v t="felix.20220503003653.1"><vh>@file src/commands/editCommands.ts</vh></v>
 <v t="felix.20220503003725.1"><vh>@file src/commands/gotoCommands.ts</vh></v>
-</v>
-<v t="felix.20220512205007.1"><vh>Gui classes</vh>
-<v t="felix.20220512205042.1"><vh>@file src/core/leoFrame.ts</vh></v>
 </v>
 <v t="felix.20220128232146.1"><vh>unittests</vh>
 <v t="felix.20220130224933.1"><vh>@file src/test/leoTest2.ts</vh></v>
@@ -1414,6 +1415,11 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.HOIST_SELECTION, () =&gt; p_leoUI.command(LEOCMD.HOIST_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
 [CMD.HOIST_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.HOIST_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
 
+[CMD.CHAPTER_NEXT, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_NEXT, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
+[CMD.CHAPTER_BACK, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_BACK, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
+[CMD.CHAPTER_MAIN, () =&gt; p_leoUI.chapterMain()],
+[CMD.CHAPTER_SELECT, () =&gt; p_leoUI.chapterSelect()],
+
 </t>
 <t tx="felix.20201214151326.1">import * as vscode from "vscode";
 
@@ -1553,6 +1559,10 @@ public static COMMANDS = {
     HOIST_SELECTION_FO: Constants.NAME + ".hoistSelectionFromOutline",
     DEHOIST: Constants.NAME + ".deHoist",
     DEHOIST_FO: Constants.NAME + ".deHoistFromOutline",
+    CHAPTER_NEXT: Constants.NAME + ".chapterNext",
+    CHAPTER_BACK: Constants.NAME + ".chapterBack",
+    CHAPTER_MAIN: Constants.NAME + ".chapterMain",
+    CHAPTER_SELECT: Constants.NAME + ".chapterSelect",
     EXTRACT: Constants.NAME + ".extract",
     EXTRACT_NAMES: Constants.NAME + ".extractNames",
     COPY_MARKED: Constants.NAME + ".copyMarked",
@@ -1659,6 +1669,8 @@ public static LEO_COMMANDS = {
     // * Hoist Operations
     HOIST_PNODE: "hoist",
     DEHOIST: "de-hoist",
+    CHAPTER_NEXT: "chapter-next",
+    CHAPTER_BACK: "chapter-back",
     // * History Navigation
     GOTO_PREV_HISTORY: "goto-prev-history-node",
     GOTO_NEXT_HISTORY: "goto-next-history-node",
@@ -3666,7 +3678,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "3fdae71",
+  "gitBranch": "leoFind",
+  "gitDate": "2022-11-08 00:19:42 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -4490,57 +4505,6 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "category": "Leojs",
   "enablement": "leojsTreeOpened &amp;&amp; leojsCloned",
   "title": "Goto Next Clone"
-},
-</t>
-<t tx="felix.20201214205159.19">{
-  "command": "leojs.hoistNode",
-  "category": "Leojs",
-  "title": "Hoist",
-  "enablement": "leojsTreeOpened",
-  "icon": {
-    "light": "resources/light/hoist.svg",
-    "dark": "resources/dark/hoist.svg"
-  }
-},
-{
-  "command": "leojs.hoistSelection",
-  "category": "Leojs",
-  "title": "Hoist",
-  "enablement": "leojsTreeOpened &amp;&amp; leojsCanHoist",
-  "icon": {
-    "light": "resources/light/hoist.svg",
-    "dark": "resources/dark/hoist.svg"
-  }
-},
-{
-  "command": "leojs.hoistSelectionFromOutline",
-  "category": "Leojs",
-  "title": "Hoist",
-  "enablement": "leojsTreeOpened &amp;&amp; leojsCanHoist",
-  "icon": {
-    "light": "resources/light/hoist.svg",
-    "dark": "resources/dark/hoist.svg"
-  }
-},
-{
-  "command": "leojs.deHoist",
-  "category": "Leojs",
-  "title": "De-Hoist",
-  "enablement": "leojsCanDehoist",
-  "icon": {
-    "light": "resources/light/dehoist.svg",
-    "dark": "resources/dark/dehoist.svg"
-  }
-},
-{
-  "command": "leojs.deHoistFromOutline",
-  "category": "Leojs",
-  "title": "De-Hoist",
-  "enablement": "leojsCanDehoist &amp;&amp; !leojsTopHoistChapter",
-  "icon": {
-    "light": "resources/light/dehoist.svg",
-    "dark": "resources/dark/dehoist.svg"
-  }
 },
 </t>
 <t tx="felix.20201214205159.2">@others
@@ -9229,29 +9193,31 @@ public setSearchSetting(p_id: string): void {
 public loadSearchSettings(): void {
     // vscode.window.showInformationMessage("TODO: loadSearchSettings");
 
+    const c = g.app.windowList[this.frameIndex].c;
+    const scon = c.quicksearchController;
+    const leoISettings = c.findCommands.ftm.get_settings();
 
-    /*
-    def get_search_settings(self, param: Param) -&gt; Response:
-        """
-        Gets search options
-        """
-        tag = 'get_search_settings'
-        c = self._check_c()
-        scon: QuickSearchController = c.patched_quicksearch_controller
-        try:
-            settings = c.findCommands.ftm.get_settings()
-            # Use the "__dict__" of the settings, to be serializable as a json string.
-            result = {"searchSettings": settings.__dict__}
-            result["searchSettings"]["nav_text"] = scon.navText
-            result["searchSettings"]["show_parents"] = scon.showParents
-            result["searchSettings"]["is_tag"] = scon.isTag
-            result["searchSettings"]["search_options"] = scon.searchOptions
-        except Exception as e:
-            raise ServerError(f"{tag}: exception getting search settings: {e}")
-        return self._make_response(result)
-    */
-
-    const w_searchSettings: LeoGuiFindTabManagerSettings = p_result.searchSettings!;
+    const w_searchSettings: LeoGuiFindTabManagerSettings = {
+        // Nav options
+        nav_text: scon.navText,
+        show_parents: scon.showParents,
+        is_tag: scon.isTag,
+        search_options: scon.searchOptions,
+        //Find/change strings...
+        find_text: leoISettings.find_text,
+        change_text: leoISettings.change_text,
+        // Find options...
+        ignore_case: leoISettings.ignore_case,
+        mark_changes: leoISettings.mark_changes,
+        mark_finds: leoISettings.mark_finds,
+        node_only: leoISettings.node_only,
+        file_only: leoISettings.file_only,
+        pattern_match: leoISettings.pattern_match,
+        search_body: leoISettings.search_body,
+        search_headline: leoISettings.search_headline,
+        suboutline_only: leoISettings.suboutline_only,
+        whole_word: leoISettings.whole_word
+    }
 
 
     const w_settings: LeoSearchSettings = {
@@ -10206,7 +10172,6 @@ set leoCanGoNext(p_value: boolean) {
 }
 
 </t>
-<t tx="felix.20220512205007.1"></t>
 <t tx="felix.20220516005841.1">public runAskYesNoCancelDialog(
     c: Commands,
     title: string,
@@ -12473,8 +12438,8 @@ public refreshDesc(): void {
 <t tx="felix.20221106230554.1">/**
  * Handle a successful find match.
  */
-public show_find_success( c: Commands, in_headline: boolean, insert: number, p: Position): void {
-    
+public show_find_success(c: Commands, in_headline: boolean, insert: number, p: Position): void {
+
     // ? needed ?
 
     // trace = False and not g.unitTesting
@@ -12490,6 +12455,151 @@ public show_find_success( c: Commands, in_headline: boolean, insert: number, p: 
     //         g.trace('BODY ROW', row, p.h)
     //     w.cursor_line = row
     //     self.focus_to_body(c)  # Does not return.
+}
+
+</t>
+<t tx="felix.20221108222157.1">{
+  "command": "leojs.hoistNode",
+  "category": "Leojs",
+  "title": "Hoist",
+  "enablement": "leojsTreeOpened",
+  "icon": {
+    "light": "resources/light/hoist.svg",
+    "dark": "resources/dark/hoist.svg"
+  }
+},
+{
+  "command": "leojs.hoistSelection",
+  "category": "Leojs",
+  "title": "Hoist",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanHoist",
+  "icon": {
+    "light": "resources/light/hoist.svg",
+    "dark": "resources/dark/hoist.svg"
+  }
+},
+{
+  "command": "leojs.hoistSelectionFromOutline",
+  "category": "Leojs",
+  "title": "Hoist",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanHoist",
+  "icon": {
+    "light": "resources/light/hoist.svg",
+    "dark": "resources/dark/hoist.svg"
+  }
+},
+{
+  "command": "leojs.deHoist",
+  "category": "Leojs",
+  "title": "De-Hoist",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanDehoist",
+  "icon": {
+    "light": "resources/light/dehoist.svg",
+    "dark": "resources/dark/dehoist.svg"
+  }
+},
+{
+  "command": "leojs.deHoistFromOutline",
+  "category": "Leojs",
+  "title": "De-Hoist",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsCanDehoist &amp;&amp; !leojsTopHoistChapter",
+  "icon": {
+    "light": "resources/light/dehoist.svg",
+    "dark": "resources/dark/dehoist.svg"
+  }
+},
+{
+  "command": "leojs.chapterNext",
+  "category": "Leojs",
+  "title": "Chapter Next",
+  "enablement": "leojsTreeOpened",
+  "icon": {
+    "light": "resources/light/chapter-next.svg",
+    "dark": "resources/dark/chapter-next.svg"
+  }
+},
+{
+  "command": "leojs.chapterBack",
+  "category": "Leojs",
+  "title": "Chapter Back",
+  "enablement": "leojsTreeOpened",
+  "icon": {
+    "light": "resources/light/chapter-back.svg",
+    "dark": "resources/dark/chapter-back.svg"
+  }
+},
+{
+  "command": "leojs.chapterMain",
+  "category": "Leojs",
+  "title": "Chapter Main",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsInChapter &amp;&amp; leojsTopHoistChapter",
+  "icon": {
+    "light": "resources/light/chapter-main.svg",
+    "dark": "resources/dark/chapter-main.svg"
+  }
+},
+{
+  "command": "leojs.chapterSelect",
+  "category": "Leojs",
+  "title": "Chapter Select",
+  "enablement": "leojsTreeOpened",
+  "icon": {
+    "light": "resources/light/chapter-select.svg",
+    "dark": "resources/dark/chapter-select.svg"
+  }
+},
+</t>
+<t tx="felix.20221108224707.1">/**
+ * * Selects chapter 'main'
+ */
+public async chapterMain(): Promise&lt;unknown&gt; {
+
+    this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
+
+    this.setupRefresh(Focus.NoChange, { tree: true, body: true, states: true });
+    const c = g.app.windowList[this.frameIndex].c;
+    const cc = c.chapterController;
+    cc.selectChapterByName('main');
+
+    this.launchRefresh();
+
+    return Promise.resolve(undefined);
+}
+
+</t>
+<t tx="felix.20221108224716.1">/**
+ * * Opens chapter list for the user to choose a new chapter, or cancel.
+ */
+public async chapterSelect(): Promise&lt;unknown&gt; {
+
+    this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
+
+    const c = g.app.windowList[this.frameIndex].c;
+    const cc = c.chapterController;
+
+
+    const w_chaptersList: vscode.QuickPickItem[] = cc.setAllChapterNames().map(
+        (p_chapter) =&gt; { return { label: p_chapter }; }
+    );
+    // {
+    //     label: p_chapter
+    // }
+
+    // Add Nav tab special commands
+    const w_options: vscode.QuickPickOptions = {
+        placeHolder: Constants.USER_MESSAGES.SELECT_CHAPTER_PROMPT
+    };
+
+    const p_picked = await vscode.window.showQuickPick(w_chaptersList, w_options);
+
+    if (p_picked &amp;&amp; p_picked.label) {
+        this.setupRefresh(Focus.NoChange, { tree: true, body: true, states: true });
+
+        cc.selectChapterByName(p_picked.label);
+        this.launchRefresh();
+    }
+
+    return Promise.resolve(undefined); // Canceled
 }
 
 </t>

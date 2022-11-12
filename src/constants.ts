@@ -537,6 +537,10 @@ export class Constants {
         HOIST_SELECTION_FO: Constants.NAME + ".hoistSelectionFromOutline",
         DEHOIST: Constants.NAME + ".deHoist",
         DEHOIST_FO: Constants.NAME + ".deHoistFromOutline",
+        CHAPTER_NEXT: Constants.NAME + ".chapterNext",
+        CHAPTER_BACK: Constants.NAME + ".chapterBack",
+        CHAPTER_MAIN: Constants.NAME + ".chapterMain",
+        CHAPTER_SELECT: Constants.NAME + ".chapterSelect",
         EXTRACT: Constants.NAME + ".extract",
         EXTRACT_NAMES: Constants.NAME + ".extractNames",
         COPY_MARKED: Constants.NAME + ".copyMarked",
@@ -642,6 +646,8 @@ export class Constants {
         // * Hoist Operations
         HOIST_PNODE: "hoist",
         DEHOIST: "de-hoist",
+        CHAPTER_NEXT: "chapter-next",
+        CHAPTER_BACK: "chapter-back",
         // * History Navigation
         GOTO_PREV_HISTORY: "goto-prev-history-node",
         GOTO_NEXT_HISTORY: "goto-next-history-node",

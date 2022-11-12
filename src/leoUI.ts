@@ -3029,6 +3029,58 @@ export class LeoUI {
         return value;
     }
 
+    /**
+     * * Selects chapter 'main'
+     */
+    public async chapterMain(): Promise<unknown> {
+
+        this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
+
+        this.setupRefresh(Focus.NoChange, { tree: true, body: true, states: true });
+        const c = g.app.windowList[this.frameIndex].c;
+        const cc = c.chapterController;
+        cc.selectChapterByName('main');
+
+        this.launchRefresh();
+
+        return Promise.resolve(undefined);
+    }
+
+    /**
+     * * Opens chapter list for the user to choose a new chapter, or cancel.
+     */
+    public async chapterSelect(): Promise<unknown> {
+
+        this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
+
+        const c = g.app.windowList[this.frameIndex].c;
+        const cc = c.chapterController;
+
+
+        const w_chaptersList: vscode.QuickPickItem[] = cc.setAllChapterNames().map(
+            (p_chapter) => { return { label: p_chapter }; }
+        );
+        // {
+        //     label: p_chapter
+        // }
+
+        // Add Nav tab special commands
+        const w_options: vscode.QuickPickOptions = {
+            placeHolder: Constants.USER_MESSAGES.SELECT_CHAPTER_PROMPT
+        };
+
+        const p_picked = await vscode.window.showQuickPick(w_chaptersList, w_options);
+
+        if (p_picked && p_picked.label) {
+            this.setupRefresh(Focus.NoChange, { tree: true, body: true, states: true });
+
+            cc.selectChapterByName(p_picked.label);
+            this.launchRefresh();
+        }
+
+        return Promise.resolve(undefined); // Canceled
+    }
+
     public replaceClipboardWith(s: string): Thenable<void> {
         this.clipboardContents = s; // also set immediate clipboard string
         return vscode.env.clipboard.writeText(s);
@@ -3639,29 +3691,31 @@ export class LeoUI {
     public loadSearchSettings(): void {
         // vscode.window.showInformationMessage("TODO: loadSearchSettings");
 
+        const c = g.app.windowList[this.frameIndex].c;
+        const scon = c.quicksearchController;
+        const leoISettings = c.findCommands.ftm.get_settings();
 
-        /*
-        def get_search_settings(self, param: Param) -> Response:
-            """
-            Gets search options
-            """
-            tag = 'get_search_settings'
-            c = self._check_c()
-            scon: QuickSearchController = c.patched_quicksearch_controller
-            try:
-                settings = c.findCommands.ftm.get_settings()
-                # Use the "__dict__" of the settings, to be serializable as a json string.
-                result = {"searchSettings": settings.__dict__}
-                result["searchSettings"]["nav_text"] = scon.navText
-                result["searchSettings"]["show_parents"] = scon.showParents
-                result["searchSettings"]["is_tag"] = scon.isTag
-                result["searchSettings"]["search_options"] = scon.searchOptions
-            except Exception as e:
-                raise ServerError(f"{tag}: exception getting search settings: {e}")
-            return self._make_response(result)
-        */
-
-        const w_searchSettings: LeoGuiFindTabManagerSettings = p_result.searchSettings!;
+        const w_searchSettings: LeoGuiFindTabManagerSettings = {
+            // Nav options
+            nav_text: scon.navText,
+            show_parents: scon.showParents,
+            is_tag: scon.isTag,
+            search_options: scon.searchOptions,
+            //Find/change strings...
+            find_text: leoISettings.find_text,
+            change_text: leoISettings.change_text,
+            // Find options...
+            ignore_case: leoISettings.ignore_case,
+            mark_changes: leoISettings.mark_changes,
+            mark_finds: leoISettings.mark_finds,
+            node_only: leoISettings.node_only,
+            file_only: leoISettings.file_only,
+            pattern_match: leoISettings.pattern_match,
+            search_body: leoISettings.search_body,
+            search_headline: leoISettings.search_headline,
+            suboutline_only: leoISettings.suboutline_only,
+            whole_word: leoISettings.whole_word
+        }
 
 
         const w_settings: LeoSearchSettings = {
@@ -4456,8 +4510,8 @@ export class LeoUI {
     /**
      * Handle a successful find match.
      */
-    public show_find_success( c: Commands, in_headline: boolean, insert: number, p: Position): void {
-        
+    public show_find_success(c: Commands, in_headline: boolean, insert: number, p: Position): void {
+
         // ? needed ?
 
         // trace = False and not g.unitTesting

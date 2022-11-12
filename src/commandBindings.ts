@@ -129,6 +129,11 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.HOIST_SELECTION, () => p_leoUI.command(LEOCMD.HOIST_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Body })],
         [CMD.HOIST_SELECTION_FO, () => p_leoUI.command(LEOCMD.HOIST_PNODE, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
 
+        [CMD.CHAPTER_NEXT, () => p_leoUI.command(LEOCMD.CHAPTER_NEXT, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
+        [CMD.CHAPTER_BACK, () => p_leoUI.command(LEOCMD.CHAPTER_BACK, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
+        [CMD.CHAPTER_MAIN, () => p_leoUI.chapterMain()],
+        [CMD.CHAPTER_SELECT, () => p_leoUI.chapterSelect()],
+
         [CMD.INSERT, (p_node: Position) => p_leoUI.insertNode(p_node, true, false, false)],
         [CMD.INSERT_SELECTION, () => p_leoUI.insertNode(U, false, false, false)],
         [CMD.INSERT_SELECTION_FO, () => p_leoUI.insertNode(U, true, false, false)],

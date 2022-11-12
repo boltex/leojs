@@ -10,6 +10,7 @@ import { new_cmd_decorator } from "../core/decorators";
 import { Commands } from "./leoCommands";
 import { Position, VNode } from './leoNodes';
 import { LeoUI } from '../leoUI';
+import { StringCheckBox, StringFindTabManager, StringRadioButton } from './findTabManager';
 //@-<< leoFind imports >>
 //@+<< Theory of operation of find/change >>
 //@+node:felix.20221012210057.1: ** << Theory of operation of find/change >>
@@ -74,7 +75,7 @@ function cmd(p_name: string, p_doc: string) {
 
 export interface ISettings {
     // State...
-    in_headline: boolean;
+    in_headline?: boolean;
     p?: Position,
     // Find/change strings...
     find_text: string;
@@ -86,12 +87,12 @@ export interface ISettings {
     mark_finds: boolean;
     node_only: boolean;
     pattern_match: boolean;
-    reverse: boolean;
     search_body: boolean;
     search_headline: boolean;
     suboutline_only: boolean;
     whole_word: boolean;
-    wrapping: boolean;
+    reverse?: boolean;
+    wrapping?: boolean;
 }
 type ISettingsKey = keyof ISettings;
 type IFindUndoData = {
@@ -112,7 +113,7 @@ export class LeoFind {
     public c: Commands;
     public expert_mode: boolean = false;  // Set in finishCreate.
     // Created by dw.createFindTab.
-    public ftm: any; // FindTabManager; // TODO !
+    public ftm!: StringFindTabManager; // FindTabManager;
     // public k: KeyHandler = c.k // ? needed ?
     public re_obj!: RegExp;
     //
@@ -419,66 +420,6 @@ export class LeoFind {
         if (errors) {
             g.printObj(Object.keys(valid).sort(), 'valid keys');
         }
-
-    }
-    //@+node:felix.20221013225533.1: *3* find.interactive_search_helper
-    /**
-     *
-     * * Support interactive find.
-     * 
-     * c.findCommands.interactive_search_helper starts an interactive search with
-     * the given settings. The settings argument may be either a g.Bunch or a
-     * dict.
-     * 
-     * Example 1, settings is a g.Bunch:
-     * 
-     *     c.findCommands.interactive_search_helper(
-     *         root = c.p,
-     *         settings = g.Bunch(
-     *             find_text = '^(def )',
-     *             change_text = '\1',
-     *             pattern_match=True,
-     *             search_headline=False,
-     *             whole_word=False,
-     *         )
-     *     )
-     * 
-     * Example 2, settings is a python dict:
-     * 
-     *     c.findCommands.interactive_search_helper(
-     *         root = c.p,
-     *         settings = {
-     *             'find_text': '^(def )',
-     *             'change_text': '\1',
-     *             'pattern_match': True,
-     *             'search_headline': False,
-     *             'whole_word': False,
-     *         }
-     *     )
-     */
-    public interactive_search_helper(
-        root?: Position,
-        settings?: ISettings
-    ): void {
-        // Merge settings into default settings.
-        const c = this.c;
-        const d = this.default_settings();  // A g.bunch
-        if (settings) {
-            // Settings can be a dict or a g.Bunch.
-            // g.Bunch has no update method.
-            for (const key in settings) { // Using 'in' for keys
-                (d as any)[key] = settings[(key as ISettingsKey)];
-            }
-        }
-        this.ftm.set_widgets_from_dict(d); // So the *next* find-next will work.
-        this.show_find_options_in_status_area();
-        if (!this.check_args('find-next')) {
-            return;
-        }
-        if (root && root.__bool__()) {
-            c.selectPosition(root);
-        }
-        this.do_find_next(d);
 
     }
     //@+node:felix.20221013234514.1: *3* LeoFind.Commands (immediate execution)
@@ -3516,7 +3457,7 @@ export class LeoFind {
         // TODO : REDO WITH APPROPRIATE GETTERS FROM VSCODE/LEOJS
         const c = this.c;
         const ftm = c.findCommands.ftm;
-        const table = [
+        const table: [string, StringCheckBox][] = [
             ['Word', ftm.check_box_whole_word],
             ['Ig-case', ftm.check_box_ignore_case],
             ['regeXp', ftm.check_box_regexp],
@@ -3534,7 +3475,7 @@ export class LeoFind {
             return p_entry[0];
         });
 
-        const table2 = [
+        const table2: [string, StringRadioButton][] = [
             ['Suboutline', ftm.radio_button_suboutline_only],
             ['Node', ftm.radio_button_node_only],
             ['File', ftm.radio_button_file_only],

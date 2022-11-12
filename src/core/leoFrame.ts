@@ -11,9 +11,9 @@ import { Commands } from "./leoCommands";
 import { Position, VNode } from './leoNodes';
 import { FileCommands } from './leoFileCommands';
 import { Chapter } from './leoChapters';
+import { StringFindTabManager } from './findTabManager';
 
 //@-<< imports >>
-
 //@+others
 //@+node:felix.20220512211744.1: ** class LeoFrame
 export class LeoFrame {
@@ -25,6 +25,8 @@ export class LeoFrame {
     public iconBar: any;
     public initComplete = false;
     public isNullFrame = false;
+
+    public ftm!: StringFindTabManager; // added in finishCreate
 
     public saved: boolean;
     public startupWindow: boolean;
@@ -85,16 +87,43 @@ export class LeoFrame {
         //     }
         // };
     }
+    //@+node:felix.20221109233352.1: *3* createFirstTreeNode
+    public createFirstTreeNode(): void {
+        const c = this.c;
+        c.hiddenRootNode.children = [];
+
+        // #1817: Clear the gnxDict.
+        c.fileCommands.gnxDict = {};
+        // 
+        //  Create the first node.
+        let v = new VNode(c);
+        let p = new Position(v);
+        v.initHeadString('NewHeadline');
+        // 
+        //  New in Leo 4.5: p.moveToRoot would be wrong:
+        //                  the node hasn't been linked yet.
+        p._linkAsRoot();
+    }
+
     //@+node:felix.20220512220820.1: *3* destroySelf
     public destroySelf(): void {
         console.log('TODO: DestroySelf');
     }
     //@+node:felix.20220512222542.1: *3* finishCreate
     public finishCreate() {
-        // ! HACK to simulate a different LeoFrame subclass for NULL GUI !
+
+        const c = this.c;
         if (!this.gui.isNullGui) {
             g.app.windowList.push(this);
+        } else {
+            console.log("DOES THIS HAPPEN? ");
         }
+        const ftm = new StringFindTabManager(c);
+        c.findCommands.ftm = ftm;
+        this.ftm = ftm;
+        // this.createFindTab(); // unused in leojs
+        this.createFirstTreeNode();
+
     }
     //@+node:felix.20221105172641.1: *3* LeoFrame.getTitle & setTitle
     public getTitle(): string {
@@ -852,7 +881,6 @@ export class StringTextWrapper {
 }
 
 //@-others
-
 //@@language typescript
 //@@tabwidth -4
 //@-leo

@@ -272,7 +272,7 @@ export class QuickSearchController {
     public addItem(it: { type: string; label: string; }, val: [Position, [number, number] | undefined] | undefined): boolean {
         this.its.push([it, val]);
         // changed to 999 from 3000 to replace old threadutil behavior
-        return this.its.length > 999  // Limit to 999 for now
+        return this.its.length > 999;  // Limit to 999 for now
 
     }
     //@+node:felix.20221105222427.20: *3* addParentMatches
@@ -348,7 +348,7 @@ export class QuickSearchController {
         catch (e) {
             return [];
         }
-        const aList: [Position, RegExp][] = []
+        const aList: [Position, RegExp][] = [];
         for (let p of positions) {
 
             pat.lastIndex = 0;
@@ -377,7 +377,7 @@ export class QuickSearchController {
         catch (e) {
             return [];
         }
-        const aList: [Position, undefined][] = []
+        const aList: [Position, undefined][] = [];
         for (let p of positions) {
 
             pat.lastIndex = 0;
@@ -435,7 +435,7 @@ export class QuickSearchController {
             } else if (op === '|') {
                 // Update the set, adding elements from all others
                 // resultset |= nodes;
-                resultset = resultset.concat(nodes).filter((v, i, a) => a.indexOf(v) === i)
+                resultset = resultset.concat(nodes).filter((v, i, a) => a.indexOf(v) === i);
 
             } else if (op === '-') {
                 // difference
@@ -530,7 +530,7 @@ export class QuickSearchController {
             }
         }
         catch (e) {
-            throw ("QuickSearchController onSelectItem error" + e);
+            throw (new Error("QuickSearchController onSelectItem error" + e));
         }
     }
 
@@ -599,7 +599,7 @@ export class QuickSearchController {
      */
     public qsc_find_tags(pat: string): void {
 
-        const c = this.c
+        const c = this.c;
 
         if (!pat) {
             // No pattern! list all tags as string
@@ -637,7 +637,7 @@ export class QuickSearchController {
     //@+node:felix.20221105222427.15: *3* qsc_get_history
     public qsc_get_history(): void {
 
-        const headlines: [Position, undefined][] = []
+        const headlines: [Position, undefined][] = [];
 
         for (let po of this.c.nodeHistory.beadList) {
             headlines.push([po[0].copy(), undefined]);
@@ -805,7 +805,7 @@ export class QuickSearchController {
 
         const c = this.c;
 
-        const timeline: [Position, undefined][] = []
+        const timeline: [Position, undefined][] = [];
 
 
         for (let p of c.all_unique_positions()) {

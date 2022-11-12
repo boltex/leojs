@@ -27,6 +27,7 @@ import { PreviousSettings } from './leoApp';
 
 import dayjs = require('dayjs');
 import { TagController } from './nodeTags';
+import { QuickSearchController } from './quicksearch';
 var utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 
@@ -79,6 +80,7 @@ export class Commands {
     public importCommands: LeoImportCommands;
 
     public theTagController: TagController;
+    public quicksearchController: QuickSearchController;
 
     public chapterController: ChapterController;
     public undoer: Undoer;
@@ -270,6 +272,7 @@ export class Commands {
         // this.shadowController // TODO: = leoShadow.ShadowController(c);
 
         this.theTagController = new TagController(c);
+        this.quicksearchController = new QuickSearchController(c);
 
         this.fileCommands = new FileCommands(c);
         this.findCommands = new LeoFind(c);
@@ -280,14 +283,8 @@ export class Commands {
         this.undoer = new Undoer(c);
 
         // From finishCreate
-        // ! Equivalent of frame.createFirstTreeNode
-        let v = new VNode(c);
-        let p = new Position(v);
-        v.initHeadString('NewHeadline');
-        c.hiddenRootNode.children = [];
-        p._linkAsRoot();
-        c.createCommandNames();
         c.frame.finishCreate();
+        c.createCommandNames();
 
     }
 
