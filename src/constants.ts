@@ -57,6 +57,7 @@ export class Constants {
     public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
     public static UNDOS_DEBOUNCE_DELAY: number = 140;
     public static UNDOS_REVEAL_DEBOUNCE_DELAY: number = 50;
+    public static GOTO_DEBOUNCE_DELAY: number = 50;
     public static BODY_STATES_DEBOUNCE_DELAY: number = 120;
 
     public static CONFIG_NAME: string = "leojs";
@@ -396,7 +397,7 @@ export class Constants {
 
     /**
      * * Table for converting Leo languages names for the currently opened body pane
-     * Used in showBody method of leoIntegration.ts
+     * Used in showBody method of leoUI.ts
      */
     public static LANGUAGE_CODES: { [key: string]: string | undefined } = {
         cplusplus: 'cpp',
@@ -409,7 +410,7 @@ export class Constants {
      * All commands this expansion exposes to the user via GUI/keybindings in package.json
      */
     public static COMMANDS = {
-        // * Access to the Settings/Welcome Webview
+        // Access to the Settings/Welcome Webview
         SHOW_WELCOME: Constants.NAME + ".showWelcomePage", // Always available: not in the commandPalette section of package.json
         SHOW_SETTINGS: Constants.NAME + ".showSettingsPage", // Always available: not in the commandPalette section of package.json
         STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
@@ -417,7 +418,17 @@ export class Constants {
         SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
         OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
         CLEAR_RECENT_FILES: Constants.NAME + ".clearRecentFiles",
+        // Import Export Commands
         IMPORT_ANY_FILE: Constants.NAME + ".importAnyFile",
+        READ_FILE_INTO_NODE: Constants.NAME + ".readFileIntoNode",
+        EXPORT_HEADLINES: Constants.NAME + ".exportHeadlines",
+        FLATTEN_OUTLINE: Constants.NAME + ".flattenOutline",
+        OUTLINE_TO_CWEB: Constants.NAME + ".outlineToCweb",
+        OUTLINE_TO_NOWEB: Constants.NAME + ".outlineToNoweb",
+        REMOVE_SENTINELS: Constants.NAME + ".removeSentinels",
+        WEAVE: Constants.NAME + ".weave",
+        WRITE_FILE_FROM_NODE: Constants.NAME + ".writeFileFromNode",
+        // Leo Document Files
         RECENT_FILES: Constants.NAME + ".recentLeoFiles", // shows recent Leo files, opens one on selection
         SWITCH_FILE: Constants.NAME + ".switchLeoFile",
         NEW_FILE: Constants.NAME + ".newLeoFile",
@@ -475,6 +486,7 @@ export class Constants {
         NEXT_NODE: Constants.NAME + ".next",
         NEXT_NODE_FO: Constants.NAME + ".nextFromOutline",
         // Commands from tree panel buttons or context: focus on OUTLINE
+        SET_UA: Constants.NAME + ".setUa",
         MARK: Constants.NAME + ".mark",
         UNMARK: Constants.NAME + ".unmark",
         COPY: Constants.NAME + ".copyNode",

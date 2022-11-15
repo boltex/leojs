@@ -118,7 +118,7 @@ export interface ShowBodyParam {
 }
 
 /**
- * * Object sent back from leoInteg's 'getStates' command
+ * * General state flags for UI representation and controls visibility.
  */
 export interface LeoPackageStates {
     changed: boolean; // Leo document has changed (is dirty)
@@ -166,7 +166,7 @@ export const enum LeoGotoNavKey {
 }
 
 /**
- * * LeoInteg's Enum type for the search scope radio buttons of the find panel.
+ * * Enum type for the search scope radio buttons of the find panel.
  */
 export const enum LeoSearchScope {
     entireOutline = 0,
@@ -176,7 +176,7 @@ export const enum LeoSearchScope {
 }
 
 /**
- * * LeoInteg search settings structure for use with the 'find' webview
+ * * Search settings structure for use with the 'find' webview
  */
 export interface LeoSearchSettings {
     // Nav options

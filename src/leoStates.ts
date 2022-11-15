@@ -15,7 +15,7 @@ export class LeoStates {
     public qLastContextChange: Thenable<unknown>; // Promise that the last state change is applied
 
     /**
-     * General 'Leo is ready' state, equivalent to leoBridgeReady in leoInteg
+     * Used mostly for leojsOutline ViewsWelcome content
      */
     private _leojsStartupDone: boolean = false;
     get leojsStartupDone(): boolean {

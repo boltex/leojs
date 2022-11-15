@@ -199,7 +199,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         }
         const w_gnx = utils.leoUriToStr(p_uri);
         if (!this._openedBodiesGnx.includes(w_gnx)) {
-            console.error("Leointeg: Tried to save body other than selected node's body", w_gnx);
+            console.error("LeoJS: Tried to save body other than selected node's body", w_gnx);
             this._openedBodiesGnx.push(w_gnx);
         }
         const w_now = new Date().getTime();

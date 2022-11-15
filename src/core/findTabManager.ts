@@ -327,7 +327,7 @@ export class StringFindTabManager {
             'entire-outline': this.radio_button_entire_outline,
             'suboutline-only': this.radio_button_suboutline_only,
         };
-        // loop the keys instead of targetting d[name] directly
+        // loop the keys instead of targeting d[name] directly
         for (let key in d) {
             let w = d[key];
             if(key === name){

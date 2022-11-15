@@ -41,6 +41,11 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 
     const w_commands: [string, (...args: any[]) => any][] = [
 
+        [CMD.SHOW_WELCOME, () => p_leoUI.showSettings()],
+        [CMD.SHOW_SETTINGS, () => p_leoUI.showSettings()],
+        [CMD.SHOW_OUTLINE, () => p_leoUI.showOutline(true)], // Also focuses on outline
+        [CMD.SHOW_LOG, () => p_leoUI.showLogPane()],
+        [CMD.SHOW_BODY, () => p_leoUI.showBody(false)], // Also focuses on body
         [CMD.EXECUTE, () => p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, { refreshType: REFRESH_ALL, finalFocus: Focus.NoChange })],
 
         [CMD.MINIBUFFER, () => p_leoUI.minibuffer()], // Is referenced in package.json
@@ -76,6 +81,17 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 
         [CMD.GIT_DIFF, () => p_leoUI.command(LEOCMD.GIT_DIFF, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 
+        [CMD.IMPORT_ANY_FILE, () => p_leoUI.importAnyFile()], // No URL passed from the command definition.
+        [CMD.READ_FILE_INTO_NODE, () => p_leoUI.readFileIntoNode()],
+
+        [CMD.EXPORT_HEADLINES, () => p_leoUI.exportHeadlines()],
+        [CMD.FLATTEN_OUTLINE, () => p_leoUI.flattenOutline()],
+        [CMD.OUTLINE_TO_CWEB, () => p_leoUI.outlineToCweb()],
+        [CMD.OUTLINE_TO_NOWEB, () => p_leoUI.outlineToNoweb()],
+        [CMD.REMOVE_SENTINELS, () => p_leoUI.removeSentinels()],
+        [CMD.WEAVE, () => p_leoUI.weave()],
+        [CMD.WRITE_FILE_FROM_NODE, () => p_leoUI.writeFileFromNode()],
+
         [CMD.HEADLINE, (p_node: Position) => p_leoUI.editHeadline(p_node, true)],
         [CMD.HEADLINE_SELECTION, () => p_leoUI.editHeadline(U, false)],
         [CMD.HEADLINE_SELECTION_FO, () => p_leoUI.editHeadline(U, true)],
@@ -98,6 +114,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.PASTE_SELECTION, () => p_leoUI.command(LEOCMD.PASTE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
         [CMD.PASTE_SELECTION_FO, () => p_leoUI.command(LEOCMD.PASTE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
+        [CMD.SET_UA, () => p_leoUI.setUa()],
         // Called by nodes in the tree when selected either by mouse, or with enter
         [CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) => p_leoUI.selectTreeNode(p_outlineNode.position, false)], // Select is NOT a Position!
         [CMD.OPEN_ASIDE, (p_position: Position) => p_leoUI.selectTreeNode(p_position, true)],
@@ -195,10 +212,6 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.REDO_FO, () => p_leoUI.command(LEOCMD.REDO, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
         [CMD.UNDO, () => p_leoUI.command(LEOCMD.UNDO, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
         [CMD.UNDO_FO, () => p_leoUI.command(LEOCMD.UNDO, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
-
-        [CMD.SHOW_OUTLINE, () => p_leoUI.showOutline(true)], // Also focuses on outline
-        [CMD.SHOW_LOG, () => p_leoUI.showLogPane()],
-        [CMD.SHOW_BODY, () => p_leoUI.showBody(false)], // Also focuses on body
 
         [CMD.COPY_MARKED, () => p_leoUI.command(LEOCMD.COPY_MARKED, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
         [CMD.DIFF_MARKED_NODES, () => p_leoUI.command(LEOCMD.DIFF_MARKED_NODES, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
