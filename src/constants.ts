@@ -164,12 +164,6 @@ export class Constants {
         NO_ALL: "No to all",
         MINIBUFFER_PROMPT: "Minibuffer Full Command",
         SELECT_CHAPTER_PROMPT: "Select chapter",
-        SET_UA_NAME_TITLE: "Set ua",
-        SET_UA_NAME_PLACEHOLDER: "Attribute Name",
-        SET_UA_NAME_PROMPT: "Set unknown attribute name",
-        SET_UA_VAL_TITLE: "Set ua to",
-        SET_UA_VAL_PLACEHOLDER: "Attribute Value",
-        SET_UA_VAL_PROMPT: "Set unknown attribute value",
         CHANGES_DETECTED: "Changes to external files were detected.",
         REFRESHED: " Nodes refreshed.", // with voluntary leading space
         IGNORED: " They were ignored.", // with voluntary leading space
@@ -634,6 +628,7 @@ export class Constants {
         //  TODO
         // GOTO_GLOBAL_LINE: "!goto_global_line",
         // TAG_CHILDREN: "!tag_children",
+        SET_UA: 'set-ua',
         // START_SEARCH: "!start_search",
         // FIND_ALL: "!find_all",
         // FIND_NEXT: "!find_next",

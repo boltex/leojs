@@ -418,11 +418,11 @@ export class FileLikeObject {
  * From the Python cookbook, recipe 5.23
  */
 export class NullObject {
-    
-    // def __init__(self, *args, **keys): pass
-    constructor(){}
 
-    public toString(): string{
+    // def __init__(self, *args, **keys): pass
+    constructor() { }
+
+    public toString(): string {
         return "NullObject";
     }
 
@@ -748,31 +748,47 @@ export const getLineAfter = get_line_after;
  * TODO : Temporary json stringify
  */
 export function listToString(obj: any): string {
-    return JSON.stringify(obj, undefined, 4);
+    // return JSON.stringify(obj, undefined, 4);
+    let result: string = "";
+    let cache: any[] = [];
+    result = JSON.stringify(obj, function (key, value) {
+        if (typeof value === 'object' && value !== null) {
+            if (cache!.indexOf(value) !== -1) {
+                // Circular reference found, discard key
+                return;
+            }
+            // Store value in our collection
+            cache!.push(value);
+        }
+        return value;
+    });
+    (cache as any) = null; // Enable garbage collection
+    return result;
 }
 
 //@+node:felix.20211104221420.1: *3* g.objToSTring     (coreGlobals.py)
 /**
- * Pretty print any Python object to a string.
- * TODO : Temporary json stringify
+ * Pretty print any object to a string.
  */
-export function objToString(obj: any, indent = '', printCaller = false, tag = null): string {
+export function objToString(obj: any, tag?: string): string {
 
     let result: string = "";
-    result = obj.toString();
-    // let cache: any[] = [];
-    // result = JSON.stringify(obj, function (key, value) {
-    //     if (typeof value === 'object' && value !== null) {
-    //         if (cache!.indexOf(value) !== -1) {
-    //             // Circular reference found, discard key
-    //             return;
-    //         }
-    //         // Store value in our collection
-    //         cache!.push(value);
-    //     }
-    //     return value;
-    // });
-    // cache = null; // Enable garbage collection
+    if (tag) {
+        result = result + `${tag}...` + '\n';
+    }
+    let cache: any[] = [];
+    result = result + JSON.stringify(obj, function (key, value) {
+        if (typeof value === 'object' && value !== null) {
+            if (cache!.indexOf(value) !== -1) {
+                // Circular reference found, discard key
+                return;
+            }
+            // Store value in our collection
+            cache!.push(value);
+        }
+        return value;
+    }, 4);
+    (cache as any) = null; // Enable garbage collection
     return result;
     // # pylint: disable=undefined-loop-variable
     //     # Looks like a a pylint bug.
@@ -2261,7 +2277,7 @@ export function skip_ws_and_nl(s: string, i: number): number {
  * Return the git (branch, commit) info associated for the given file.
  */
 export function gitInfoForFile(filename: string): [string, string] {
-    console.log('TODO : gitInfoForFile');
+    // console.log('TODO : gitInfoForFile');
     return ['', '']; // TODO !
     // g.gitInfo and g.gitHeadPath now do all the work.
     // return g.gitInfo(filename)

@@ -116,7 +116,7 @@ export class LeoFrame {
         if (!this.gui.isNullGui) {
             g.app.windowList.push(this);
         } else {
-            console.log("DOES THIS HAPPEN? ");
+            // console.log("Finished Creating Null Gui's frame");
         }
         const ftm = new StringFindTabManager(c);
         c.findCommands.ftm = ftm;

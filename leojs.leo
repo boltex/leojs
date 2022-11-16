@@ -172,7 +172,6 @@
 <v t="felix.20211204181418.1"><vh>_insertAndSetHeadline</vh></v>
 <v t="felix.20221108224707.1"><vh>chapterMain</vh></v>
 <v t="felix.20221108224716.1"><vh>chapterSelect</vh></v>
-<v t="felix.20221114222144.1"><vh>setUa</vh></v>
 </v>
 <v t="felix.20211024012536.1"><vh>Clipboard</vh>
 <v t="felix.20211212205241.1"><vh>replaceClipboardWith</vh></v>
@@ -254,6 +253,7 @@
 <v t="felix.20221027153815.1"><vh>widget_name</vh></v>
 <v t="felix.20221026222034.1"><vh>set_focus</vh></v>
 <v t="felix.20221026222040.1"><vh>get_focus</vh></v>
+<v t="felix.20221115230034.1"><vh>get1Arg</vh></v>
 <v t="felix.20220613164517.1"><vh>runAboutLeoDialog</vh></v>
 <v t="felix.20220108211750.1"><vh>runAskOkDialog</vh></v>
 <v t="felix.20220109220155.1"><vh>runAskYesNoDialog</vh></v>
@@ -462,6 +462,7 @@
 <v t="felix.20201214205159.50"><vh>Outline Editing</vh></v>
 <v t="felix.20201214205159.51"><vh>Goto Nodes</vh></v>
 <v t="felix.20201214205159.52"><vh>Hoist/Dehoist</vh></v>
+<v t="felix.20221115220743.1"><vh>Search</vh></v>
 <v t="felix.20201214205159.53"><vh>Undo/Redo</vh></v>
 </v>
 <v t="felix.20201214205159.54"><vh>explorer/context</vh></v>
@@ -495,6 +496,7 @@
 <v t="felix.20201214205159.76"><vh>Outline Editing</vh></v>
 <v t="felix.20201214205159.77"><vh>Node Editing</vh></v>
 <v t="felix.20211117232843.1"><vh>Undo/Redo</vh></v>
+<v t="felix.20221115214948.1"><vh>Search</vh></v>
 <v t="felix.20201214205159.78"><vh>Goto Nodes</vh></v>
 </v>
 <v t="felix.20211119001637.1"><vh>resourceLabelFormatters</vh></v>
@@ -1401,7 +1403,8 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.PASTE_SELECTION, () =&gt; p_leoUI.command(LEOCMD.PASTE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 [CMD.PASTE_SELECTION_FO, () =&gt; p_leoUI.command(LEOCMD.PASTE_PNODE, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
-[CMD.SET_UA, () =&gt; p_leoUI.setUa()],
+[CMD.SET_UA, () =&gt; p_leoUI.command(LEOCMD.SET_UA, { refreshType: REFRESH_TREE, finalFocus: Focus.NoChange })],
+
 </t>
 <t tx="felix.20201214150149.7">// Called by nodes in the tree when selected either by mouse, or with enter
 [CMD.SELECT_NODE, (p_outlineNode: LeoOutlineNode) =&gt; p_leoUI.selectTreeNode(p_outlineNode.position, false)], // Select is NOT a Position!
@@ -1677,6 +1680,7 @@ public static LEO_COMMANDS = {
     //  TODO
     // GOTO_GLOBAL_LINE: "!goto_global_line",
     // TAG_CHILDREN: "!tag_children",
+    SET_UA: 'set-ua',
     // START_SEARCH: "!start_search",
     // FIND_ALL: "!find_all",
     // FIND_NEXT: "!find_next",
@@ -1927,12 +1931,6 @@ public static USER_MESSAGES = {
     NO_ALL: "No to all",
     MINIBUFFER_PROMPT: "Minibuffer Full Command",
     SELECT_CHAPTER_PROMPT: "Select chapter",
-    SET_UA_NAME_TITLE: "Set ua",
-    SET_UA_NAME_PLACEHOLDER: "Attribute Name",
-    SET_UA_NAME_PROMPT: "Set unknown attribute name",
-    SET_UA_VAL_TITLE: "Set ua to",
-    SET_UA_VAL_PLACEHOLDER: "Attribute Value",
-    SET_UA_VAL_PROMPT: "Set unknown attribute value",
     CHANGES_DETECTED: "Changes to external files were detected.",
     REFRESHED: " Nodes refreshed.", // with voluntary leading space
     IGNORED: " They were ignored.", // with voluntary leading space
@@ -3715,10 +3713,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "58db158",
-  "gitBranch": "leoFind",
-  "gitDate": "2022-11-12 01:23:15 -0500"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -3841,25 +3836,41 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "command": "leojs.writeAtFileNodes",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Write @&lt;file&gt; Nodes"
+  "title": "Write @&lt;file&gt; Nodes",
+  "icon": {
+    "light": "resources/light/write-at-file-nodes.svg",
+    "dark": "resources/dark/write-at-file-nodes.svg"
+  }
 },
 {
   "command": "leojs.writeAtFileNodesFromOutline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Write @&lt;file&gt; Nodes"
+  "title": "Write @&lt;file&gt; Nodes",
+  "icon": {
+    "light": "resources/light/write-at-file-nodes.svg",
+    "dark": "resources/dark/write-at-file-nodes.svg"
+  }
 },
 {
   "command": "leojs.writeDirtyAtFileNodes",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Write Dirty @&lt;file&gt; Nodes"
+  "title": "Write Dirty @&lt;file&gt; Nodes",
+  "icon": {
+    "light": "resources/light/write-dirty-at-file-nodes.svg",
+    "dark": "resources/dark/write-dirty-at-file-nodes.svg"
+  }
 },
 {
   "command": "leojs.writeDirtyAtFileNodesFromOutline",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Write Dirty @&lt;file&gt; Nodes"
+  "title": "Write Dirty @&lt;file&gt; Nodes",
+  "icon": {
+    "light": "resources/light/write-dirty-at-file-nodes.svg",
+    "dark": "resources/dark/write-dirty-at-file-nodes.svg"
+  }
 },
 {
   "command": "leojs.gitDiff",
@@ -4184,7 +4195,8 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
   "title": "Set uA"
-},</t>
+},
+</t>
 <t tx="felix.20201214205159.15">{
   "command": "leojs.extract",
   "category": "Leojs",
@@ -9322,7 +9334,7 @@ public loadSearchSettings(): void {
         search_headline: leoISettings.search_headline,
         suboutline_only: leoISettings.suboutline_only,
         whole_word: leoISettings.whole_word
-    }
+    };
 
 
     const w_settings: LeoSearchSettings = {
@@ -12452,6 +12464,7 @@ public static OLD_POS_OFFSETS = {
 <t tx="felix.20221026222040.1">public get_focus(c: Commands): any {
     return this.focusWidget;
 }
+
 </t>
 <t tx="felix.20221027153815.1">public widget_name(widget: any): string {
     console.log('UI ASKED FOR WIDGET NAME');
@@ -13813,47 +13826,150 @@ public writeFileFromNode(): Thenable&lt;unknown&gt; {
 }
 
 </t>
-<t tx="felix.20221114222144.1">/**
- * * Asks for uA name, and value, then sets is on the server
+<t tx="felix.20221115214948.1">{
+  "command": "leojs.startSearch",
+  "key": "ctrl+f",
+  "mac": "cmd+f",
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; !editorFocus &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.findNextFromOutline",
+  "key": "f3",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/"
+},
+{
+  "command": "leojs.findNext",
+  "key": "f3",
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.findPreviousFromOutline",
+  "key": "f2",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; !editorTextFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/"
+},
+{
+  "command": "leojs.findPrevious",
+  "key": "f2",
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.replace",
+  "key": "ctrl+=",
+  "mac": "cmd+=",
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.replaceFromOutline",
+  "key": "ctrl+=",
+  "mac": "cmd+=",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/"
+},
+{
+  "command": "leojs.replaceThenFind",
+  "key": "ctrl+-",
+  "mac": "cmd+-",
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.replaceThenFindFromOutline",
+  "key": "ctrl+-",
+  "mac": "cmd+-",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/"
+},
+{
+  "command": "leojs.gotoGlobalLine",
+  "key": "alt+g",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.setFindEverywhereOption",
+  "key": "ctrl+alt+e",
+  "mac": "cmd+alt+e",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.setFindNodeOnlyOption",
+  "key": "ctrl+alt+n",
+  "mac": "cmd+alt+n",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.setFindFileOnlyOption",
+  "key": "ctrl+alt+l",
+  "mac": "cmd+alt+l",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.setFindSuboutlineOnlyOption",
+  "key": "ctrl+alt+s",
+  "mac": "cmd+alt+s",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.toggleFindIgnoreCaseOption",
+  "key": "ctrl+alt+i",
+  "mac": "cmd+alt+i",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.toggleFindMarkChangesOption",
+  "key": "ctrl+alt+c",
+  "mac": "cmd+alt+c",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.toggleFindMarkFindsOption",
+  "key": "ctrl+alt+f",
+  "mac": "cmd+alt+f",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.toggleFindRegexpOption",
+  "key": "ctrl+alt+x",
+  "mac": "cmd+alt+x",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.toggleFindWordOption",
+  "key": "ctrl+alt+w",
+  "mac": "cmd+alt+w",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.toggleFindSearchBodyOption",
+  "key": "ctrl+alt+b",
+  "mac": "cmd+alt+b",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+{
+  "command": "leojs.toggleFindSearchHeadlineOption",
+  "key": "ctrl+alt+h",
+  "mac": "cmd+alt+h",
+  "when": "leojsFindFocus || leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
+},
+</t>
+<t tx="felix.20221115220743.1">{
+  "command": "leojs.findNextFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.findPreviousFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.replaceFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.replaceThenFindFromOutline",
+  "when": "false"
+},
+</t>
+<t tx="felix.20221115230034.1">/**
+ * * Wrapper of vscode.window.showInputBox to get a user input with simple prompt
  */
-public async setUa(): Promise&lt;unknown&gt; {
-    // TODO : USE LEO'S REAL SET-UA METHOD
-    let w_name = "";
-
-    this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
-
-    let w_uaName = await vscode.window.showInputBox({
-        title: Constants.USER_MESSAGES.SET_UA_NAME_TITLE,
-        prompt: Constants.USER_MESSAGES.SET_UA_NAME_PROMPT,
-        placeHolder: Constants.USER_MESSAGES.SET_UA_NAME_PLACEHOLDER
-    });
-    // Trim string and re-check if valid string
-    if (w_uaName &amp;&amp; w_uaName.trim()) {
-        w_uaName = w_uaName.trim();
-        w_name = w_uaName;
-
-        const w_uaVal = await vscode.window.showInputBox({
-            title: Constants.USER_MESSAGES.SET_UA_VAL_TITLE,
-            prompt: Constants.USER_MESSAGES.SET_UA_VAL_PROMPT,
-            placeHolder: Constants.USER_MESSAGES.SET_UA_VAL_PLACEHOLDER
-        });
-
-        if (w_name &amp;&amp; !(typeof w_uaVal === 'undefined' || w_uaVal === null)) {
-            // ok got both name and val
-            const c = g.app.windowList[this.frameIndex].c;
-            const p = c.p;
-            if (!p.v.u) {
-                p.v.u = {}; // assert at least an empty dict if null or non existent
-            }
-            p.v.u[w_name] = w_uaVal
-            this.setupRefresh(Focus.NoChange, { tree: true });
-            this.launchRefresh();
-        }
-
-    }
-
-    return Promise.resolve(); // Canceled
-
+public get1Arg(p_options?: vscode.InputBoxOptions | undefined, p_token?: vscode.CancellationToken | undefined): Thenable&lt;string | undefined&gt; {
+    return vscode.window.showInputBox(p_options, p_token);
 }
 
 </t>

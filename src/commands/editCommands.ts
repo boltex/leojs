@@ -5,6 +5,7 @@ import { new_cmd_decorator, command } from "../core/decorators";
 import { Position, VNode } from "../core/leoNodes";
 import { Commands } from "../core/leoCommands";
 import { Bead } from '../core/leoUndo';
+import { LeoUI } from '../leoUI';
 
 //@+others
 //@+node:felix.20220503223721.1: ** editCommands.cmd (decorator)
@@ -460,45 +461,42 @@ export class EditCommandsClass {
         'set-ua',
         'Prompt for the name and value of a uA, then set the uA in the present node.'
     )
-    public setUa(): void {
-        console.log('TODO : setUa');
-        /* 
-        const k = this.c.k
-        this.w = this.editWidget(event)
-        if this.w:
-            k.setLabelBlue('Set uA: ')
-            k.get1Arg(event, handler=this.setUa1)
-         */
+    public async setUa(): Promise<boolean> {
+
+        let w_name = "";
+
+        let w_uaName = await (g.app.gui as LeoUI).get1Arg({
+            title: "Set ua",
+            prompt: "Set unknown attribute name",
+            placeHolder: "Attribute Name",
+        });
+        // Trim string and re-check if valid string
+        if (w_uaName && w_uaName.trim()) {
+            w_uaName = w_uaName.trim();
+            w_name = w_uaName;
+
+            const w_uaVal = await (g.app.gui as LeoUI).get1Arg({
+                title: "Set ua to",
+                prompt: "Set unknown attribute value",
+                placeHolder: "Attribute Value",
+            });
+
+            if (w_name && !(typeof w_uaVal === 'undefined' || w_uaVal === null)) {
+                // ok got both name and val
+                const c = this.c;
+                const p = c.p;
+                if (!p.v.u) {
+                    p.v.u = {}; // assert at least an empty dict if null or non existent
+                }
+                p.v.u[w_name] = w_uaVal;
+                this.showNodeUas();
+                return Promise.resolve(true);
+            }
+
+        }
+        return Promise.resolve(false);
     }
 
-    public setUa1(): void {
-        console.log('TODO : setUa1');
-
-        /* 
-        k = this.c.k
-        this.uaName = k.arg
-        s = f"Set uA: {this.uaName} To: "
-        k.setLabelBlue(s)
-        k.getNextArg(this.setUa2)
-        */
-
-    }
-
-    public setUa2(): void {
-        console.log('TODO : setUa2');
-
-        /* 
-        c, k = this.c, this.c.k
-        val = k.arg
-        d = c.p.v.u
-        d[this.uaName] = val
-        this.showNodeUas()
-        k.clearState()
-        k.resetLabel()
-        k.showStateAndMode()
-        */
-
-    }
     //@-others
 
 }

@@ -3097,49 +3097,6 @@ export class LeoUI {
         return Promise.resolve(); // Canceled
     }
 
-    /**
-     * * Asks for uA name, and value, then sets is on the server
-     */
-    public async setUa(): Promise<unknown> {
-        // TODO : USE LEO'S REAL SET-UA METHOD
-        let w_name = "";
-
-        this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
-
-        let w_uaName = await vscode.window.showInputBox({
-            title: Constants.USER_MESSAGES.SET_UA_NAME_TITLE,
-            prompt: Constants.USER_MESSAGES.SET_UA_NAME_PROMPT,
-            placeHolder: Constants.USER_MESSAGES.SET_UA_NAME_PLACEHOLDER
-        });
-        // Trim string and re-check if valid string
-        if (w_uaName && w_uaName.trim()) {
-            w_uaName = w_uaName.trim();
-            w_name = w_uaName;
-
-            const w_uaVal = await vscode.window.showInputBox({
-                title: Constants.USER_MESSAGES.SET_UA_VAL_TITLE,
-                prompt: Constants.USER_MESSAGES.SET_UA_VAL_PROMPT,
-                placeHolder: Constants.USER_MESSAGES.SET_UA_VAL_PLACEHOLDER
-            });
-
-            if (w_name && !(typeof w_uaVal === 'undefined' || w_uaVal === null)) {
-                // ok got both name and val
-                const c = g.app.windowList[this.frameIndex].c;
-                const p = c.p;
-                if (!p.v.u) {
-                    p.v.u = {}; // assert at least an empty dict if null or non existent
-                }
-                p.v.u[w_name] = w_uaVal
-                this.setupRefresh(Focus.NoChange, { tree: true });
-                this.launchRefresh();
-            }
-
-        }
-
-        return Promise.resolve(); // Canceled
-
-    }
-
     public replaceClipboardWith(s: string): Thenable<void> {
         this.clipboardContents = s; // also set immediate clipboard string
         return vscode.env.clipboard.writeText(s);
@@ -3774,7 +3731,7 @@ export class LeoUI {
             search_headline: leoISettings.search_headline,
             suboutline_only: leoISettings.suboutline_only,
             whole_word: leoISettings.whole_word
-        }
+        };
 
 
         const w_settings: LeoSearchSettings = {
@@ -5135,6 +5092,14 @@ export class LeoUI {
     public get_focus(c: Commands): any {
         return this.focusWidget;
     }
+
+    /**
+     * * Wrapper of vscode.window.showInputBox to get a user input with simple prompt
+     */
+    public get1Arg(p_options?: vscode.InputBoxOptions | undefined, p_token?: vscode.CancellationToken | undefined): Thenable<string | undefined> {
+        return vscode.window.showInputBox(p_options, p_token);
+    }
+
     public runAboutLeoDialog(
         c: Commands,
         version: string,
