@@ -465,7 +465,7 @@ export class EditCommandsClass {
 
         let w_name = "";
 
-        let w_uaName = await (g.app.gui as LeoUI).get1Arg({
+        let w_uaName = await g.app.gui.get1Arg({
             title: "Set ua",
             prompt: "Set unknown attribute name",
             placeHolder: "Attribute Name",
@@ -475,7 +475,7 @@ export class EditCommandsClass {
             w_uaName = w_uaName.trim();
             w_name = w_uaName;
 
-            const w_uaVal = await (g.app.gui as LeoUI).get1Arg({
+            const w_uaVal = await g.app.gui.get1Arg({
                 title: "Set ua to",
                 prompt: "Set unknown attribute value",
                 placeHolder: "Attribute Value",

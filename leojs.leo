@@ -8738,8 +8738,12 @@ public finishStartup(): void {
  */
 export class NullGui {
 
+    public frameIndex: number = 0;
     private clipboardContents: string = "";
     public isNullGui: boolean = true;
+
+    public makeAllBindings(): void { }
+    public finishStartup(): void { }
 
     public launchRefresh(): void { }
 
@@ -8762,6 +8766,28 @@ export class NullGui {
 
     public addLogPaneEntry(...args: any[]): void {
         console.log('NullGui:', ...args);
+    }
+
+    public show_find_success(c: Commands, in_headline: boolean, insert: number, p: Position): void {
+        //
+    }
+
+    public setLeoIDCommand(): void {
+        //
+    }
+
+    public widget_name(widget: any): string {
+        return "";
+    }
+    public set_focus(commander: Commands, widget: any): void {
+        //
+    }
+    public get_focus(c: Commands): any {
+        return;
+    }
+
+    public get1Arg(p_options?: vscode.InputBoxOptions | undefined, p_token?: vscode.CancellationToken | undefined): Thenable&lt;string | undefined&gt; {
+        return Promise.resolve("");
     }
 
     public runAboutLeoDialog(

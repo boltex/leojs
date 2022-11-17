@@ -261,7 +261,7 @@ export class Commands {
         const title = this.computeWindowTitle(c.mFileName);
 
         // * ORIGINALLY FROM GUI : gui.createLeoFrame(c, title)
-        this.frame = new LeoFrame(this, title, this.gui as LeoUI);
+        this.frame = new LeoFrame(this, title, this.gui);
         console.assert(this.frame.c === this);
 
         this.nodeHistory = new NodeHistory(c);
@@ -2882,7 +2882,7 @@ export class Commands {
     //@+node:felix.20221027153010.1: *5* c.widget_name
     public widget_name(widget: any): string {
         // c = self
-        return g.app.gui ? (g.app.gui as LeoUI).widget_name(widget) : '<no widget>';
+        return g.app.gui ? g.app.gui.widget_name(widget) : '<no widget>';
     }
     //@+node:felix.20211120231934.1: *5* c.redrawing...
     //@+node:felix.20211120224229.1: *6* c.redraw
@@ -3082,7 +3082,7 @@ export class Commands {
     //@+node:felix.20221026210523.2: *5* c.get/request/set_focus
     public get_focus(): any {
         const c = this;
-        const w = g.app.gui && (g.app.gui as LeoUI).get_focus(c);
+        const w = g.app.gui && g.app.gui.get_focus(c);
         if (g.app.debug.includes('focus')) {
             // name = w.objectName() if hasattr(w, 'objectName') else w.__class__.__name__
             const name = w['objectName'];
@@ -3121,7 +3121,7 @@ export class Commands {
                 //     ) if hasattr(w, 'objectName') else w.__class__.__name__
                 g.trace('(c)', name);
             }
-            (g.app.gui as LeoUI).set_focus(c, w);
+            g.app.gui.set_focus(c, w);
         } else if (trace) {
             g.trace('(c) no w');
         }

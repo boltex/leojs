@@ -6,7 +6,7 @@
 //@+<< imports >>
 //@+node:felix.20220512211158.1: ** << imports >>
 import * as g from './leoGlobals';
-import { LeoUI } from '../leoUI';
+import { LeoUI, NullGui } from '../leoUI';
 import { Commands } from "./leoCommands";
 import { Position, VNode } from './leoNodes';
 import { FileCommands } from './leoFileCommands';
@@ -20,7 +20,7 @@ export class LeoFrame {
 
     public c: Commands;
     public title: string;
-    public gui: LeoUI;
+    public gui: LeoUI | NullGui;
     public openDirectory: string;
     public iconBar: any;
     public initComplete = false;
@@ -48,7 +48,7 @@ export class LeoFrame {
 
     //@+others
     //@+node:felix.20220512211350.1: *3* frame.ctor
-    constructor(c: Commands, title: string, gui: LeoUI) {
+    constructor(c: Commands, title: string, gui: LeoUI | NullGui) {
         this.c = c;
         this.title = title;
         this.gui = gui;
@@ -650,11 +650,11 @@ export class StringTextWrapper {
 
     //@+node:felix.20221102232754.3: *3* stw.Clipboard
     public clipboard_clear(): void {
-        (g.app.gui as LeoUI).replaceClipboardWith('');
+        g.app.gui.replaceClipboardWith('');
     }
     public async clipboard_append(s: string): Promise<void> {
-        const s1 = await (g.app.gui as LeoUI).getTextFromClipboard();
-        (g.app.gui as LeoUI).replaceClipboardWith(s1 + s);
+        const s1 = await g.app.gui.getTextFromClipboard();
+        g.app.gui.replaceClipboardWith(s1 + s);
         return;
     }
 

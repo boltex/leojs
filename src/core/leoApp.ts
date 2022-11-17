@@ -109,7 +109,7 @@ export class LeoApp {
     public diff: boolean = false; // True: run Leo in diff mode.
     public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
-    public gui: LeoUI | NullGui | undefined; // The gui class.
+    public gui!: LeoUI | NullGui; // The gui class.
     public guiArgName: string | undefined; // The gui name given in --gui option.
     public listen_to_log_flag: boolean = false; // True: execute listen-to-log command.
     public loaded_session: boolean = false; // Set at startup if no files specified on command line.
@@ -1334,7 +1334,7 @@ export class LeoApp {
      * Modified version for leojs: call leoUI.makeAllBindings
      */
     public makeAllBindings(): void {
-        (this.gui as LeoUI).makeAllBindings();
+        this.gui.makeAllBindings();
         /* 
         app = self
         for c in app.commanders():
@@ -1374,7 +1374,7 @@ export class LeoApp {
 
         const index = g.app.windowList.indexOf(frame, 0);
 
-        (g.app.gui as LeoUI).frameIndex = index;
+        g.app.gui.frameIndex = index;
 
         /* 
         frame.deiconify()
@@ -2331,7 +2331,7 @@ export class LoadManager {
         const ok = await lm.doPostPluginsInit(); // loads recent, or, new untitled.
         g.app.makeAllBindings();
 
-        (g.app.gui as LeoUI).finishStartup();
+        g.app.gui.finishStartup();
 
         g.es('');  // Clears horizontal scrolling in the log pane.
 
@@ -2628,7 +2628,7 @@ export class LoadManager {
 
         // #2489: If fn is empty, open an empty, untitled .leo file.
         if (!fn) {
-            c = await lm.openEmptyLeoFile(gui as LeoUI, old_c);
+            c = await lm.openEmptyLeoFile(gui, old_c);
             return c;
         }
 
@@ -2655,7 +2655,7 @@ export class LoadManager {
     /**
      * Open an empty, untitled, new Leo file.
      */
-    public async openEmptyLeoFile(gui: LeoUI, old_c?: Commands): Promise<Commands> {
+    public async openEmptyLeoFile(gui: LeoUI | NullGui, old_c?: Commands): Promise<Commands> {
 
         const lm = this;
         const w_previousSettings = await lm.getPreviousSettings(undefined);
@@ -2769,8 +2769,8 @@ export class LoadManager {
             const c = frame.c;
             if (g.os_path_realpath(munge(fn)) === g.os_path_realpath(munge(c.mFileName))) {
 
-                (g.app.gui as LeoUI).frameIndex = index;
-                (g.app.gui as LeoUI).refreshDocumentsPane();
+                g.app.gui.frameIndex = index;
+                // (g.app.gui as LeoUI).refreshDocumentsPane(); // TODO : ? NEEDED ?
 
                 c.outerUpdate();
                 return c;
@@ -2809,7 +2809,7 @@ export class LoadManager {
         // c.frame.initCompleteHint();
         const index = g.app.windowList.indexOf(c.frame);
         if (index >= 0) {
-            (g.app.gui as LeoUI).frameIndex = index;
+            g.app.gui.frameIndex = index;
         }
 
         c.outerUpdate();  // #181: Honor focus requests.

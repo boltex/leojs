@@ -3191,7 +3191,7 @@ export class LeoFind {
 
         const c = this.c;
         const ftm = this.ftm;
-        const w = ftm && ftm.entry_focus; // ! SET BY CLIENT WHEN CALLING FIND COMMANDS  || (g.app.gui as LeoUI).get_focus(true);
+        const w = ftm && ftm.entry_focus; // ! SET BY CLIENT WHEN CALLING FIND COMMANDS  || g.app.gui.get_focus(true);
         if (ftm) {
             ftm.entry_focus = undefined;  // Only use this focus widget once!
         }
@@ -3307,9 +3307,9 @@ export class LeoFind {
         //     }
         // }
         // // Support for the console gui.
-        if ((g.app.gui as LeoUI).show_find_success) {
-            (g.app.gui as LeoUI).show_find_success(c, this.in_headline, insert, p);
-        }
+
+        g.app.gui.show_find_success(c, this.in_headline, insert, p);
+
         // c.frame.bringToFront();
         return w;  // Support for isearch.
     }

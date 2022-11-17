@@ -41,7 +41,7 @@ export class StringCheckBox {
     constructor(name: string, label = "") {
         this.label = label;
         this.name = name;
-        this.value = true
+        this.value = true;
     }
 
     public checkState(): boolean {
@@ -266,7 +266,7 @@ export class StringFindTabManager {
 
         for (let [setting_name, ivar, widget_ivar] of table3) {
             const w = this[widget_ivar as keyof StringFindTabManager];
-            const val = c.config.getBool(setting_name, false)
+            const val = c.config.getBool(setting_name, false);
             if (ivar !== undefined) {
                 // assert hasattr(find, setting_name), setting_name
                 (find[setting_name as keyof LeoFind] as any) = val;
@@ -330,11 +330,11 @@ export class StringFindTabManager {
         // loop the keys instead of targeting d[name] directly
         for (let key in d) {
             let w = d[key];
-            if(key === name){
+            if (key === name) {
                 if (w && !w.isChecked()) {
                     w.toggle();
                 }
-            }else{
+            } else {
                 if (w && w.isChecked()) {
                     w.toggle(); // turn off other radios
                 }

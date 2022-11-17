@@ -510,9 +510,7 @@ export class QuickSearchController {
                     }
                     c.selectPosition(p);
                     if (pos !== undefined) {
-                        if ((g.app.gui as LeoUI).show_find_success) {
-                            (g.app.gui as LeoUI).show_find_success(c, false, 0, p);
-                        }
+                        g.app.gui.show_find_success(c, false, 0, p);
                         let st;
                         let en;
                         [st, en] = pos;
@@ -522,9 +520,7 @@ export class QuickSearchController {
                         c.bodyWantsFocus();
                         c.bodyWantsFocusNow();
                     } else {
-                        if ((g.app.gui as LeoUI).show_find_success) {
-                            (g.app.gui as LeoUI).show_find_success(c, true, 0, p);
-                        }
+                        g.app.gui.show_find_success(c, true, 0, p);
                     }
                 }
             }
