@@ -19,7 +19,7 @@ import { LeoApp, LoadManager } from '../core/leoApp';
 import { Commands } from "../core/leoCommands";
 import { NodeIndices, VNode, Position } from '../core/leoNodes';
 import { GlobalConfigManager } from '../core/leoConfig';
-import { NullGui } from '../leoUI';
+import { NullGui } from '../core/leoGui';
 import * as assert from 'assert';
 
 //@+others

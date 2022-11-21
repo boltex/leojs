@@ -6,7 +6,7 @@
 //@+<< imports >>
 //@+node:felix.20220512211158.1: ** << imports >>
 import * as g from './leoGlobals';
-import { LeoUI, NullGui } from '../leoUI';
+import { LeoGui } from './leoGui';
 import { Commands } from "./leoCommands";
 import { Position, VNode } from './leoNodes';
 import { FileCommands } from './leoFileCommands';
@@ -20,7 +20,7 @@ export class LeoFrame {
 
     public c: Commands;
     public title: string;
-    public gui: LeoUI | NullGui;
+    public gui: LeoGui;
     public openDirectory: string;
     public iconBar: any;
     public initComplete = false;
@@ -48,7 +48,7 @@ export class LeoFrame {
 
     //@+others
     //@+node:felix.20220512211350.1: *3* frame.ctor
-    constructor(c: Commands, title: string, gui: LeoUI | NullGui) {
+    constructor(c: Commands, title: string, gui: LeoGui) {
         this.c = c;
         this.title = title;
         this.gui = gui;

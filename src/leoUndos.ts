@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { LeoUI } from './leoUI';
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
 import { Icon } from "./types";
+import { LeoUI } from "./leoUI";
 
 /**
  * * Undo beads shown as a list with this TreeDataProvider implementation

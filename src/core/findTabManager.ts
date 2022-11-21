@@ -2,8 +2,6 @@
 //@+node:felix.20221109235435.1: * @file src/core/findTabManager.ts
 //@+<< imports >>
 //@+node:felix.20221109235755.1: ** << imports >>
-import * as g from './leoGlobals';
-import { LeoUI } from '../leoUI';
 import { Commands } from "./leoCommands";
 import { ISettings, LeoFind } from './leoFind';
 

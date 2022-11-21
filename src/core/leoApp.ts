@@ -8,7 +8,7 @@ import * as os from "os";
 import * as path from 'path';
 import * as g from './leoGlobals';
 import * as utils from "../utils";
-import { LeoUI, NullGui } from '../leoUI';
+import { NullGui } from "./leoGui";
 import { NodeIndices, VNode, Position } from './leoNodes';
 import { Commands } from './leoCommands';
 import { FastRead, FileCommands } from "./leoFileCommands";
@@ -18,6 +18,7 @@ import { ExternalFilesController } from "./leoExternalFiles";
 import { LeoFrame } from "./leoFrame";
 import { SettingsDict } from "./leoGlobals";
 import { leojsSettingsXml } from "../leojsSettings";
+import { LeoUI } from "../leoUI";
 
 //@-<< imports >>
 //@+others
@@ -109,7 +110,7 @@ export class LeoApp {
     public diff: boolean = false; // True: run Leo in diff mode.
     public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
-    public gui!: LeoUI | NullGui; // The gui class.
+    public gui!: NullGui; // The gui class.
     public guiArgName: string | undefined; // The gui name given in --gui option.
     public listen_to_log_flag: boolean = false; // True: execute listen-to-log command.
     public loaded_session: boolean = false; // Set at startup if no files specified on command line.
@@ -1348,7 +1349,7 @@ export class LeoApp {
      */
     public newCommander(
         fileName: string,
-        gui?: LeoUI | NullGui,
+        gui?: NullGui,
         previousSettings?: PreviousSettings,
         relativeFileName?: string,
     ): Commands {
@@ -2551,7 +2552,7 @@ export class LoadManager {
 
         const lm: LoadManager = this;
 
-        g.app.gui = new LeoUI(this._context!);
+        g.app.gui = new LeoUI(undefined, this._context!); // replaces createDefaultGui
 
         /* 
         gui_option = lm.options.get('gui')
@@ -2607,7 +2608,7 @@ export class LoadManager {
     }
 
     //@+node:felix.20210120004121.31: *4* LM.loadLocalFile & helpers
-    public async loadLocalFile(fn: string, gui: LeoUI | NullGui, old_c?: Commands): Promise<Commands | undefined> {
+    public async loadLocalFile(fn: string, gui: NullGui, old_c?: Commands): Promise<Commands | undefined> {
 
         /*Completely read a file, creating the corresonding outline.
 
@@ -2655,7 +2656,7 @@ export class LoadManager {
     /**
      * Open an empty, untitled, new Leo file.
      */
-    public async openEmptyLeoFile(gui: LeoUI | NullGui, old_c?: Commands): Promise<Commands> {
+    public async openEmptyLeoFile(gui: NullGui, old_c?: Commands): Promise<Commands> {
 
         const lm = this;
         const w_previousSettings = await lm.getPreviousSettings(undefined);
@@ -2697,7 +2698,7 @@ export class LoadManager {
      * Creates an empty outline if fn is a non-existent Leo file.
      * Creates an wrapper outline if fn is an external file, existing or not.
      */
-    public async openFileByName(fn: string, gui: LeoUI | NullGui, old_c?: Commands, previousSettings?: PreviousSettings): Promise<Commands | undefined> {
+    public async openFileByName(fn: string, gui: NullGui, old_c?: Commands, previousSettings?: PreviousSettings): Promise<Commands | undefined> {
 
         const lm: LoadManager = this;
         // Disable the log.
@@ -2770,7 +2771,6 @@ export class LoadManager {
             if (g.os_path_realpath(munge(fn)) === g.os_path_realpath(munge(c.mFileName))) {
 
                 g.app.gui.frameIndex = index;
-                // (g.app.gui as LeoUI).refreshDocumentsPane(); // TODO : ? NEEDED ?
 
                 c.outerUpdate();
                 return c;

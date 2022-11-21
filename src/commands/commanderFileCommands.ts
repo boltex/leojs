@@ -12,7 +12,7 @@ import { Commands } from "../core/leoCommands";
 import { Bead, Undoer } from "../core/leoUndo";
 import { LoadManager, PreviousSettings } from "../core/leoApp";
 import { AtFile } from "../core/leoAtFile";
-import { LeoUI } from "../leoUI";
+import { NullGui } from "../core/leoGui";
 
 //@+others
 //@+node:felix.20220105223215.1: ** function: import_txt_file
@@ -269,7 +269,7 @@ export class CommanderFileCommands {
         'new',
         'Create a new Leo window.'
     )
-    public new(this: Commands, gui: LeoUI): Commands {
+    public new(this: Commands, gui: NullGui): Commands {
 
         // t1 = time.process_time()
         // from leo.core import leoApp

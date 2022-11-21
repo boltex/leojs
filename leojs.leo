@@ -262,7 +262,6 @@
 <v t="felix.20220108211806.1"><vh>runSaveFileDialog</vh></v>
 </v>
 </v>
-<v t="felix.20220204224240.1"><vh>class NullGui</vh></v>
 </v>
 <v t="felix.20201214151419.1"><vh>@clean src/leoButtons.ts</vh>
 <v t="felix.20201214151419.2"><vh>class LeoButtonsProvider</vh>
@@ -517,8 +516,6 @@
 <v t="felix.20211031230132.1"><vh>@file src/core/leoConfig.ts</vh></v>
 <v t="felix.20211212162008.1"><vh>@file src/core/leoExternalFiles.ts</vh></v>
 <v t="felix.20210220181245.1"><vh>@file src/core/leoFileCommands.ts</vh></v>
-<v t="felix.20211212000140.1"><vh>@file src/core/leoFind.ts</vh></v>
-<v t="felix.20220512205042.1"><vh>@file src/core/leoFrame.ts</vh></v>
 <v t="felix.20210102012410.1"><vh>@file src/core/leoGlobals.ts</vh></v>
 <v t="felix.20211021231651.1"><vh>@file src/core/leoHistory.ts</vh></v>
 <v t="felix.20220105221256.1"><vh>@file src/core/leoImport.ts</vh></v>
@@ -536,6 +533,11 @@
 <v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 <v t="felix.20220503003653.1"><vh>@file src/commands/editCommands.ts</vh></v>
 <v t="felix.20220503003725.1"><vh>@file src/commands/gotoCommands.ts</vh></v>
+</v>
+<v t="felix.20221119204248.1"><vh>Gui base classes</vh>
+<v t="felix.20211212000140.1"><vh>@file src/core/leoFind.ts</vh></v>
+<v t="felix.20220512205042.1"><vh>@file src/core/leoFrame.ts</vh></v>
+<v t="felix.20221119204422.1"><vh>@file src/core/leoGui.ts</vh></v>
 </v>
 <v t="felix.20220128232146.1"><vh>unittests</vh>
 <v t="felix.20220130224933.1"><vh>@file src/test/leoTest2.ts</vh></v>
@@ -2864,12 +2866,15 @@ import { LeoGotoNode, LeoGotoProvider } from "./leoGoto";
 import { LeoFrame } from "./core/leoFrame";
 import { LeoFindPanelProvider } from "./leoFindPanelWebview";
 import { ISettings } from "./core/leoFind";
+import { NullGui } from "./core/leoGui";
 
 @language typescript
 @tabwidth -4
 @others
 </t>
-<t tx="felix.20201214194144.2">constructor(private _context: vscode.ExtensionContext) {
+<t tx="felix.20201214194144.2">constructor(guiName = 'vscodeGui', private _context: vscode.ExtensionContext) {
+    super(guiName);
+    this.isNullGui = false;
 
     // * Log pane instanciation
     this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);
@@ -2942,16 +2947,13 @@ import { ISettings } from "./core/leoFind";
 <t tx="felix.20201214195752.1">/**
  * Creates and manages instances of the UI elements along with their events
  */
-export class LeoUI {
+export class LeoUI extends NullGui {
     // * State flags
     public leoStates: LeoStates;
     public verbose: boolean = true;
     public trace: boolean = false; //true;
 
-    public frameIndex: number = 0; // the index of current document frame in g.app.windowList, mostly to get c, and the title, openDirectory, etc.
-    public clipboardContents: string = "";
     private _minibufferHistory: string[] = [];
-    public isNullGui: boolean = false;
     private _currentOutlineTitle: string = Constants.GUI.TREEVIEW_TITLE; // VScode's outline pane title: Might need to be re-set when switching visibility
     private _hasShownContextOpenMessage: boolean = false;
 
@@ -2994,9 +2996,6 @@ export class LeoUI {
         this.__refreshNode = p_ap;
         this._lastRefreshNodeTS = utils.performanceNow();
     }
-
-    // * gui focus helper
-    public focusWidget: any;
 
     // * Outline Pane
     private _leoTreeProvider!: LeoOutlineProvider; // TreeDataProvider single instance
@@ -7765,10 +7764,10 @@ public getTextFromClipboard(): string {
 ]
 </t>
 <t tx="felix.20211122205011.1">import * as vscode from "vscode";
-import { LeoUI } from './leoUI';
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
 import { Icon } from "./types";
+import { LeoUI } from "./leoUI";
 
 @language typescript
 @tabwidth -4
@@ -8293,7 +8292,8 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     title: string,
     filetypes: [string, string][],
     defaultExtension: string,
-    multiple?: boolean
+    multiple?: boolean,
+    startpath?: string // TODO 
 ): Thenable&lt;string[]&gt; {
     // convert to { [name: string]: string[] } typing
     const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
@@ -8320,7 +8320,7 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     c: Commands,
     title: string,
     message: string,
-    buttonText?: string
+    text = "Ok"
 ): Thenable&lt;unknown&gt; {
     return vscode.window.showInformationMessage(
         title,
@@ -8393,7 +8393,9 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
 <t tx="felix.20220109220155.1">public runAskYesNoDialog(
     c: Commands,
     title: string,
-    message: string
+    message: string,
+    yes_all = false,
+    no_all = false,
 
 ): Thenable&lt;string&gt; {
     return vscode.window
@@ -8730,151 +8732,6 @@ public finishStartup(): void {
         // this.getStates();
     });
 
-}
-
-</t>
-<t tx="felix.20220204224240.1">/**
- * Null gui class.
- */
-export class NullGui {
-
-    public frameIndex: number = 0;
-    private clipboardContents: string = "";
-    public isNullGui: boolean = true;
-
-    public makeAllBindings(): void { }
-    public finishStartup(): void { }
-
-    public launchRefresh(): void { }
-
-    public replaceClipboardWith(s: string): Thenable&lt;void&gt; {
-        this.clipboardContents = s; // also set immediate clipboard string
-        return Promise.resolve();
-    }
-
-    public asyncGetTextFromClipboard(): Thenable&lt;string&gt; {
-        return Promise.resolve(this.clipboardContents);
-    }
-
-    public getTextFromClipboard(): string {
-        return this.clipboardContents;
-    }
-
-    public getFullVersion(): string {
-        return "LeoJS NullGui";
-    }
-
-    public addLogPaneEntry(...args: any[]): void {
-        console.log('NullGui:', ...args);
-    }
-
-    public show_find_success(c: Commands, in_headline: boolean, insert: number, p: Position): void {
-        //
-    }
-
-    public setLeoIDCommand(): void {
-        //
-    }
-
-    public widget_name(widget: any): string {
-        return "";
-    }
-    public set_focus(commander: Commands, widget: any): void {
-        //
-    }
-    public get_focus(c: Commands): any {
-        return;
-    }
-
-    public get1Arg(p_options?: vscode.InputBoxOptions | undefined, p_token?: vscode.CancellationToken | undefined): Thenable&lt;string | undefined&gt; {
-        return Promise.resolve("");
-    }
-
-    public runAboutLeoDialog(
-        c: Commands,
-        version: string,
-        theCopyright: string,
-        url: string,
-        email: string
-    ): Thenable&lt;unknown&gt; {
-        return Promise.resolve("");
-    }
-
-    public runOpenFileDialog(
-        c: Commands,
-        title: string,
-        filetypes: [string, string][],
-        defaultExtension: string,
-        multiple?: boolean
-    ): Thenable&lt;string[]&gt; {
-        return Promise.resolve([]);
-    }
-
-    public runSaveFileDialog(
-        c: Commands,
-        title: string,
-        filetypes: [string, string][],
-        defaultExtension: string,
-    ): Thenable&lt;string&gt; {
-        return Promise.resolve("");
-    }
-
-    public runAskOkDialog(
-        c: Commands,
-        title: string,
-        message: string,
-        buttonText?: string
-    ): Thenable&lt;unknown&gt; {
-        return Promise.resolve("");
-    }
-
-    public runAskYesNoDialog(
-        c: Commands,
-        title: string,
-        message: string
-    ): Thenable&lt;string&gt; {
-        return Promise.resolve("");
-    }
-
-    public runAskYesNoCancelDialog(
-        c: Commands,
-        title: string,
-        message: string
-    ): Thenable&lt;string&gt; {
-        return Promise.resolve("");
-    }
-
-    public showLeoIDMessage(): void {
-        vscode.window.showInformationMessage(
-            "Leo ID not found. Please enter an id that identifies you uniquely.",
-            "Set Leo ID"
-        ).then(p_chosenButton =&gt; {
-            if (p_chosenButton === "Set Leo ID") {
-                vscode.commands.executeCommand(Constants.COMMANDS.SET_LEO_ID);
-            }
-        });
-    }
-
-    public setIdSetting(p_id: string): void { };
-
-    public getIdFromSetting(): string {
-        return "";
-    }
-
-    public getIdFromDialog(): Thenable&lt;string&gt; {
-        return Promise.resolve("");
-    }
-
-    public ensure_commander_visible(c: Commands): void {
-    }
-
-    public isTextWidget(w: any): boolean {
-        return false;
-    }
-
-    public isTextWrapper(w: any): boolean {
-        return false;
-    }
 }
 
 </t>
@@ -10318,8 +10175,12 @@ set leoCanGoNext(p_value: boolean) {
 <t tx="felix.20220516005841.1">public runAskYesNoCancelDialog(
     c: Commands,
     title: string,
-    message: string
-
+    message: string,
+    yesMessage = "Yes",
+    noMessage = "No",
+    yesToAllMessage = "",
+    defaultButton = "Yes",
+    cancelMessage = ""
 ): Thenable&lt;string&gt; {
     return vscode.window
         .showInformationMessage(
@@ -10556,8 +10417,8 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
     c: Commands,
     version: string,
     theCopyright: string,
-    url: string, // UNUSED FOR NOW
-    email: string // UNUSED FOR NOW
+    url: string,
+    email: string
 ): Thenable&lt;unknown&gt; {
     return vscode.window.showInformationMessage(
         version,
@@ -13999,5 +13860,6 @@ public get1Arg(p_options?: vscode.InputBoxOptions | undefined, p_token?: vscode.
 }
 
 </t>
+<t tx="felix.20221119204248.1"></t>
 </tnodes>
 </leo_file>

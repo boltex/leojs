@@ -15,7 +15,7 @@ import * as path from 'path';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
-import { LeoUI, NullGui } from "../leoUI";
+import { NullGui } from "./leoGui";
 
 /*
     import binascii
@@ -1663,7 +1663,7 @@ export function getBaseDirectory(c: Commands): string {
  *
  * Return the commander of the newly-opened outline.
  */
-export async function openWithFileName(fileName: string, old_c: Commands, gui: LeoUI | NullGui): Promise<Commands | undefined> {
+export async function openWithFileName(fileName: string, old_c: Commands, gui: NullGui): Promise<Commands | undefined> {
     return app.loadManager!.loadLocalFile(fileName, gui, old_c);
 }
 //@+node:felix.20220106231022.1: *3* g.readFileIntoString

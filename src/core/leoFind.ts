@@ -9,7 +9,6 @@ import * as g from './leoGlobals';
 import { new_cmd_decorator } from "../core/decorators";
 import { Commands } from "./leoCommands";
 import { Position, VNode } from './leoNodes';
-import { LeoUI } from '../leoUI';
 import { StringCheckBox, StringFindTabManager, StringRadioButton } from './findTabManager';
 //@-<< leoFind imports >>
 //@+<< Theory of operation of find/change >>

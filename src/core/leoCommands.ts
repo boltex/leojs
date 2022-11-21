@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 import { Utils as uriUtils } from "vscode-uri";
 import * as path from 'path';
 import * as g from './leoGlobals';
-import { LeoUI, NullGui } from '../leoUI';
+import { NullGui } from './leoGui';
 import { new_cmd_decorator } from './decorators';
 import { FileCommands } from './leoFileCommands';
 import { CommanderOutlineCommands } from '../commands/commanderOutlineCommands';
@@ -85,7 +85,7 @@ export class Commands {
     public chapterController: ChapterController;
     public undoer: Undoer;
     public nodeHistory: NodeHistory;
-    public gui: LeoUI | NullGui;
+    public gui: NullGui;
     public replace_errors: string[] = [];
 
     // TODO fake frame needed FOR wrapper and hasSelection
@@ -236,7 +236,7 @@ export class Commands {
     //@+node:felix.20210223002937.1: *3* constructor & helpers
     constructor(
         fileName: string,
-        gui?: LeoUI | NullGui,
+        gui?: NullGui,
         previousSettings?: PreviousSettings,
         relativeFileName?: string
     ) {

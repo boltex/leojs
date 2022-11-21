@@ -6,7 +6,6 @@
 import * as g from './leoGlobals';
 import { Position, VNode } from './leoNodes';
 import { Commands } from './leoCommands';
-import { LeoUI } from '../leoUI';
 //@-<< quicksearch imports >>
 //@+others
 //@+node:felix.20221105222427.1: ** class QuickSearchController (leoserver.py)

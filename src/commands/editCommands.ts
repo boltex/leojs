@@ -5,7 +5,6 @@ import { new_cmd_decorator, command } from "../core/decorators";
 import { Position, VNode } from "../core/leoNodes";
 import { Commands } from "../core/leoCommands";
 import { Bead } from '../core/leoUndo';
-import { LeoUI } from '../leoUI';
 
 //@+others
 //@+node:felix.20220503223721.1: ** editCommands.cmd (decorator)
