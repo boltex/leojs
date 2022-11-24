@@ -2210,14 +2210,6 @@
           "when": "false"
         },
         {
-          "command": "leojs.showBody",
-          "when": "false"
-        },
-        {
-          "command": "leojs.showOutline",
-          "when": "false"
-        },
-        {
           "command": "leojs.saveLeoFileFromOutline",
           "when": "false"
         },
@@ -3408,12 +3400,12 @@
         "command": "leojs.startSearch",
         "key": "ctrl+f",
         "mac": "cmd+f",
-        "when": "leojsTreeOpened && sideBarFocus && !editorFocus && !editorTextFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsTreeOpened && sideBarFocus && !editorFocus && !editorTextFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.findNextFromOutline",
         "key": "f3",
-        "when": "leojsFindFocus || leojsTreeOpened && !editorTextFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/"
+        "when": "leojsFindFocus || leojsTreeOpened && !editorTextFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/"
       },
       {
         "command": "leojs.findNext",
@@ -3423,7 +3415,7 @@
       {
         "command": "leojs.findPreviousFromOutline",
         "key": "f2",
-        "when": "leojsFindFocus || leojsTreeOpened && !editorTextFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/"
+        "when": "leojsFindFocus || leojsTreeOpened && !editorTextFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/"
       },
       {
         "command": "leojs.findPrevious",
@@ -3440,7 +3432,7 @@
         "command": "leojs.replaceFromOutline",
         "key": "ctrl+=",
         "mac": "cmd+=",
-        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/"
       },
       {
         "command": "leojs.replaceThenFind",
@@ -3452,78 +3444,78 @@
         "command": "leojs.replaceThenFindFromOutline",
         "key": "ctrl+-",
         "mac": "cmd+-",
-        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/"
       },
       {
         "command": "leojs.gotoGlobalLine",
         "key": "alt+g",
-        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.setFindEverywhereOption",
         "key": "ctrl+alt+e",
         "mac": "cmd+alt+e",
-        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.setFindNodeOnlyOption",
         "key": "ctrl+alt+n",
         "mac": "cmd+alt+n",
-        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.setFindFileOnlyOption",
         "key": "ctrl+alt+l",
         "mac": "cmd+alt+l",
-        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.setFindSuboutlineOnlyOption",
         "key": "ctrl+alt+s",
         "mac": "cmd+alt+s",
-        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.toggleFindIgnoreCaseOption",
         "key": "ctrl+alt+i",
         "mac": "cmd+alt+i",
-        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.toggleFindMarkChangesOption",
         "key": "ctrl+alt+c",
         "mac": "cmd+alt+c",
-        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.toggleFindMarkFindsOption",
         "key": "ctrl+alt+f",
         "mac": "cmd+alt+f",
-        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.toggleFindRegexpOption",
         "key": "ctrl+alt+x",
         "mac": "cmd+alt+x",
-        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.toggleFindWordOption",
         "key": "ctrl+alt+w",
         "mac": "cmd+alt+w",
-        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.toggleFindSearchBodyOption",
         "key": "ctrl+alt+b",
         "mac": "cmd+alt+b",
-        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.toggleFindSearchHeadlineOption",
         "key": "ctrl+alt+h",
         "mac": "cmd+alt+h",
-        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
+        "when": "leojsFindFocus || leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsIntegration|^leojsFindPanel|^leojsDocuments|^leojsGoto|^leojsButtons/ || leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.gotoFirstVisible",
