@@ -60,6 +60,7 @@
 <v t="felix.20211010192923.1"><vh>@clean src/leoBody.ts</vh>
 <v t="felix.20211010192923.2"><vh>class LeoBodyProvider</vh>
 <v t="felix.20211010192923.3"><vh>setBodyTime</vh></v>
+<v t="felix.20221130233817.1"><vh>setOpenedBodyTime</vh></v>
 <v t="felix.20211010192923.4"><vh>fireRefreshFile</vh></v>
 <v t="felix.20211010192923.5"><vh>refreshPossibleGnxList</vh></v>
 <v t="felix.20211010192923.6"><vh>watch</vh></v>
@@ -1271,7 +1272,7 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.SHOW_SETTINGS, () =&gt; p_leoUI.showSettings()],
 [CMD.SHOW_OUTLINE, () =&gt; p_leoUI.showOutline(true)], // Also focuses on outline
 [CMD.SHOW_LOG, () =&gt; p_leoUI.showLogPane()],
-[CMD.SHOW_BODY, () =&gt; p_leoUI.showBody(false)], // Also focuses on body
+[CMD.SHOW_BODY, () =&gt; p_leoUI.showBody(false, undefined)], // Also focuses on body
 </t>
 <t tx="felix.20201214150149.16">[CMD.COPY_MARKED, () =&gt; p_leoUI.command(LEOCMD.COPY_MARKED, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 [CMD.DIFF_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.DIFF_MARKED_NODES, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
@@ -3070,7 +3071,7 @@ export class LeoUI extends NullGui {
         return this._bodyUri;
     }
     set bodyUri(p_uri: vscode.Uri) {
-        this._leoFileSystem.setBodyTime(p_uri);
+        this._leoFileSystem.setNewBodyUriTime(p_uri);
         this._bodyUri = p_uri;
     }
 
@@ -3437,7 +3438,6 @@ public async command(
         }
     }
     this.lastCommandTimer = undefined;
-
 
     if (value &amp;&amp; value.then) {
         (value as Thenable&lt;unknown&gt;).then((p_result) =&gt; {
@@ -6560,7 +6560,6 @@ private _setupOpenedLeoDocument(): Promise&lt;unknown&gt; {
             documents: true,
             goto: true
         },
-
     );
 
     // * Start body pane system
@@ -7439,13 +7438,10 @@ import * as g from './core/leoGlobals';
     const w_gnx = utils.leoUriToStr(p_uri);
     if (!this._openedBodiesGnx.includes(w_gnx)) {
         console.error("LeoJS: Tried to save body other than selected node's body", w_gnx);
-        this._openedBodiesGnx.push(w_gnx);
     }
-    const w_now = new Date().getTime();
-    this._openedBodiesInfo[w_gnx] = {
-        ctime: w_now,
-        mtime: w_now
-    };
+
+    this.setOpenedBodyTime(w_gnx);
+
     this._fireSoon({ type: vscode.FileChangeType.Changed, uri: p_uri });
 }
 
@@ -7517,9 +7513,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     private _openedBodiesGnx: string[] = [];
     private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
 
-    // * List of all possible vNodes gnx in the currently opened leo file (since last refresh/tree operation)
-    private _possibleGnxList: string[] = []; // Maybe deprecated
-
     private _lastBodyTimeGnx: string = "";
 
     // * An event to signal that a resource has been changed
@@ -7538,34 +7531,43 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
  * * Sets selected node body's modified time for this gnx virtual file
  * @param p_uri URI of file for which to set made-up modified time
  */
-public setBodyTime(p_uri: vscode.Uri): void {
+public setNewBodyUriTime(p_uri: vscode.Uri): void {
     const w_gnx = utils.leoUriToStr(p_uri);
     this._lastBodyTimeGnx = w_gnx;
-    if (!this._openedBodiesGnx.includes(w_gnx)) {
-        this._openedBodiesGnx.push(w_gnx);
-    }
-    const w_now = new Date().getTime();
-    this._openedBodiesInfo[w_gnx] = {
-        ctime: w_now,
-        mtime: w_now
-    };
+    this.setOpenedBodyTime(w_gnx);
 }
 
+/**
+ * * Adds entries in _openedBodiesGnx and _openedBodiesInfo if needed
+ * * and sets the modified time of an opened body.
+ */
+public setOpenedBodyTime(p_gnx: string): void {
+    const w_now = new Date().getTime();
+    let w_created = w_now;
+    if (!this._openedBodiesGnx.includes(p_gnx)) {
+        this._openedBodiesGnx.push(p_gnx);
+    } else {
+        w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
+    }
+    this._openedBodiesInfo[p_gnx] = {
+        ctime: w_now, // maybe kept.
+        mtime: w_now // new 'modified' time for sure.
+    };
+}
 </t>
 <t tx="felix.20211010192923.4">/**
  * * Refresh the body pane for a particular gnx by telling vscode that the file from the Leo file provider has changed
  * @param p_gnx Gnx of body associated with this virtual file, mostly Leo's selected node
  */
 public fireRefreshFile(p_gnx: string): void {
+    console.log('fireRefreshFile', p_gnx);
+
     if (!this._openedBodiesGnx.includes(p_gnx)) {
         console.error("ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
-        this._openedBodiesGnx.push(p_gnx);
     }
-    const w_now = new Date().getTime();
-    this._openedBodiesInfo[p_gnx] = {
-        ctime: w_now,
-        mtime: w_now
-    };
+
+    this.setOpenedBodyTime(p_gnx);
+
     this._onDidChangeFileEmitter.fire([{
         type: vscode.FileChangeType.Changed,
         uri: utils.strToLeoUri(p_gnx)
@@ -7587,7 +7589,7 @@ public refreshPossibleGnxList(): string[] {
 }
 
 </t>
-<t tx="felix.20211010192923.6">public watch(p_resource: vscode.Uri): vscode.Disposable {
+<t tx="felix.20211010192923.6">public watch(p_resource: vscode.Uri, p_options: { readonly recursive: boolean; readonly excludes: readonly string[] }): vscode.Disposable {
     const w_gnx = utils.leoUriToStr(p_resource);
     if (!this._watchedBodiesGnx.includes(w_gnx)) {
         this._watchedBodiesGnx.push(w_gnx); // add gnx
@@ -8683,44 +8685,35 @@ public finishStartup(): void {
     );
 
     this._setupOpenedLeoDocument(); // this sets this.leoStates.fileOpenedReady 
-    this.setupRefresh(
-        this.finalFocus,
-        {
-            tree: true,
-            body: true,
-            documents: true,
-            buttons: true,
-            states: true,
-            goto: true,
-        }
-    );
+
+    // * _setupOpenedLeoDocument above already does the setupRefresh below
+    // this.setupRefresh(
+    //     this.finalFocus,
+    //     {
+    //         tree: true,
+    //         body: true,
+    //         documents: true,
+    //         buttons: true,
+    //         states: true,
+    //         goto: true,
+    //     }
+    // );
 
     this.leoStates.leoReady = true;
     this.leoStates.leojsStartupDone = true;
 
-    this.leoStates.qLastContextChange.then(() =&gt; {
-        if (!this._lastTreeView.visible &amp;&amp; g.app.windowList.length) {
-            console.log('Had to reveal!');
-            // const c = g.app.windowList[this.frameIndex].c;
-            // this._lastTreeView.reveal(c.p, { select: true });
-            this._setupOpenedLeoDocument(); // this sets this.leoStates.fileOpenedReady 
-            this.setupRefresh(
-                this.finalFocus,
-                {
-                    tree: true,
-                    body: true,
-                    documents: true,
-                    buttons: true,
-                    states: true,
-                    goto: true,
-                }
-            );
-            this._launchRefresh();
+    // this.leoStates.qLastContextChange.then(() =&gt; {
+    //     if (!this._lastTreeView.visible &amp;&amp; g.app.windowList.length) {
+    //         console.log('Had to reveal!');
+    //         // const c = g.app.windowList[this.frameIndex].c;
+    //         // this._lastTreeView.reveal(c.p, { select: true });
+    //         this._setupOpenedLeoDocument(); // this sets this.leoStates.fileOpenedReady 
+    //         this.launchRefresh();
 
-        }
-        // this._launchRefresh();
-        // this.getStates();
-    });
+    //     }
+    //     // this._launchRefresh();
+    //     // this.getStates();
+    // });
 
 }
 
@@ -10910,7 +10903,6 @@ public cleanupBody(): Thenable&lt;any&gt; {
  * @returns a promise of an editor, or void if body had been changed again in the meantime.
  */
 public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise&lt;vscode.TextEditor | void&gt; {
-
     const w_openedDocumentTS = utils.performanceNow();
     const w_openedDocumentGnx = utils.leoUriToStr(this.bodyUri);
     let q_saved: Thenable&lt;unknown&gt; | undefined;
@@ -10924,7 +10916,7 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
             (this._bodyLastChangedDocument.isDirty || this._editorTouched) &amp;&amp;
             w_openedDocumentGnx === utils.leoUriToStr(this._bodyLastChangedDocument.uri)
         ) {
-            console.log('had to save'); // TODO : CLEANUP !
+            console.log('had to save so ------ fireRefreshFile !!'); // TODO : CLEANUP !
 
             // ! FAKE SAVE to make sure body is not dirty !
             this._leoFileSystem.preventSaveToLeo = true;
@@ -10945,6 +10937,25 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
         this._preventShowBody = false;
         return Promise.resolve(vscode.window.activeTextEditor!);
     }
+
+    // let w_preFoundDocOpened = false;
+    // let w_preFoundTabOpened = false;
+    // vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
+    //     p_tabGroup.tabs.forEach((p_tab) =&gt; {
+
+    //         if (p_tab.input &amp;&amp;
+    //             (p_tab.input as vscode.TabInputText).uri &amp;&amp;
+    //             (p_tab.input as vscode.TabInputText).uri.fsPath === this.bodyUri.fsPath) {
+    //             w_preFoundTabOpened = true;
+    //             vscode.workspace.textDocuments.forEach((p_textDocument) =&gt; {
+    //                 if (p_textDocument.uri.fsPath === (p_tab.input as vscode.TabInputText).uri.fsPath) {
+    //                     w_preFoundDocOpened = true;
+    //                 }
+    //             });
+    //         }
+    //     });
+    // });
+
 
     // * Step 1 : Open the document
     const w_openedDocument = await vscode.workspace.openTextDocument(this.bodyUri);
@@ -11004,7 +11015,7 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
         // console.log('WRAP: ', w_wrap);
 
         // Replace language string if in 'exceptions' array
-        w_language = 'leobody.' + (Constants.LANGUAGE_CODES[w_language] || w_language);
+        w_language = Constants.LEO_LANGUAGE_PREFIX + (Constants.LANGUAGE_CODES[w_language] || w_language);
 
         let w_debugMessage = "";
         let w_needRefreshFlag = false;
@@ -11056,7 +11067,7 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
     }
 
     // Find body pane's position if already opened with same gnx (language still needs to be set per position)
-    let w_foundOpened = false;
+    let w_foundDocOpened = false;
     vscode.window.tabGroups.all.forEach((p_tabGroup) =&gt; {
         p_tabGroup.tabs.forEach((p_tab) =&gt; {
 
@@ -11067,13 +11078,21 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
                     if (p_textDocument.uri.fsPath === (p_tab.input as vscode.TabInputText).uri.fsPath) {
                         this._bodyTextDocument = p_textDocument; // vscode.workspace.openTextDocument
                         this._bodyMainSelectionColumn = p_tab.group.viewColumn;
-                        w_foundOpened = true;
+                        w_foundDocOpened = true;
                     }
                 });
             }
         });
     });
-    if (w_foundOpened &amp;&amp; !q_saved) {
+
+    // console.log('pre found TAB: ', w_preFoundTabOpened);
+    // console.log('pre found DOC: ', w_preFoundDocOpened);
+
+    // console.log('POST found TAB: ', w_foundTabOpened);
+    // console.log('POST found DOC: ', w_foundDocOpened);
+
+
+    if (w_foundDocOpened &amp;&amp; !q_saved) {
         // Was the same and was asked to show body (and did not already had to fake-save and refresh)
         this._leoFileSystem.fireRefreshFile(w_openedDocumentGnx);
     }
@@ -11319,23 +11338,22 @@ private async _tryApplyNodeToBody(
 
     this.lastSelectedNode = p_node; // Set the 'lastSelectedNode' this will also set the 'marked' node context
 
-    if (this._bodyTextDocument) {
-        // if not first time and still opened - also not somewhat exactly opened somewhere.
-        if (
-            !this._bodyTextDocument.isClosed &amp;&amp;
-            !this._locateOpenedBody(p_node.gnx) // COULD NOT LOCATE NEW GNX
-        ) {
-            // if needs switching by actually having different gnx
-            if (utils.leoUriToStr(this.bodyUri) !== p_node.gnx) {
-                // * LOCATE OLD GNX FOR PROPER COLUMN
-                this._locateOpenedBody(utils.leoUriToStr(this.bodyUri));
-                // Make sure any pending changes in old body are applied before switching
-                return this._bodyTextDocument.save().then(() =&gt; {
-                    return this._switchBody(p_aside, p_preventTakingFocus);
-                });
-            }
+    // if not first time and still opened - also not somewhat exactly opened somewhere.
+    if (this._bodyTextDocument &amp;&amp;
+        !this._bodyTextDocument.isClosed &amp;&amp;
+        !this._locateOpenedBody(p_node.gnx) // COULD NOT LOCATE NEW GNX
+    ) {
+        // if needs switching by actually having different gnx
+        if (utils.leoUriToStr(this.bodyUri) !== p_node.gnx) {
+            // * LOCATE OLD GNX FOR PROPER COLUMN
+            this._locateOpenedBody(utils.leoUriToStr(this.bodyUri));
+            // Make sure any pending changes in old body are applied before switching
+            return this._bodyTextDocument.save().then(() =&gt; {
+                return this._switchBody(p_aside, p_preventTakingFocus);
+            });
         }
     }
+
     // first time or no body opened
     this.bodyUri = utils.strToLeoUri(p_node.gnx);
     if (this._isBodyVisible() === 0 &amp;&amp; !this.showBodyIfClosed) {
@@ -11885,7 +11903,7 @@ public _changedTextEditorViewColumn(
 public _changedVisibleTextEditors(p_editors: readonly vscode.TextEditor[]): void {
     // todo cleanup test log
     if (p_editors &amp;&amp; p_editors.length) {
-        console.log('editors changed visibility', p_editors[0].document, p_editors[0].document.uri.fsPath, p_editors[0].document.uri.scheme);
+        // console.log('editors changed visibility', p_editors[0].document, p_editors[0].document.uri.fsPath, p_editors[0].document.uri.scheme);
     }
 
     if (p_editors &amp;&amp; p_editors.length) {
@@ -13851,5 +13869,7 @@ public get1Arg(p_options?: vscode.InputBoxOptions | undefined, p_token?: vscode.
 
 </t>
 <t tx="felix.20221119204248.1"></t>
+<t tx="felix.20221130233817.1">
+</t>
 </tnodes>
 </leo_file>

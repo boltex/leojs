@@ -45,7 +45,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.SHOW_SETTINGS, () => p_leoUI.showSettings()],
         [CMD.SHOW_OUTLINE, () => p_leoUI.showOutline(true)], // Also focuses on outline
         [CMD.SHOW_LOG, () => p_leoUI.showLogPane()],
-        [CMD.SHOW_BODY, () => p_leoUI.showBody(false)], // Also focuses on body
+        [CMD.SHOW_BODY, () => p_leoUI.showBody(false, undefined)], // Also focuses on body
         [CMD.EXECUTE, () => p_leoUI.command(LEOCMD.EXECUTE_SCRIPT, { refreshType: REFRESH_ALL, finalFocus: Focus.NoChange })],
 
         [CMD.MINIBUFFER, () => p_leoUI.minibuffer()], // Is referenced in package.json

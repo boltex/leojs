@@ -164,7 +164,7 @@ export class LeoUI extends NullGui {
         return this._bodyUri;
     }
     set bodyUri(p_uri: vscode.Uri) {
-        this._leoFileSystem.setBodyTime(p_uri);
+        this._leoFileSystem.setNewBodyUriTime(p_uri);
         this._bodyUri = p_uri;
     }
 
@@ -479,44 +479,35 @@ export class LeoUI extends NullGui {
         );
 
         this._setupOpenedLeoDocument(); // this sets this.leoStates.fileOpenedReady 
-        this.setupRefresh(
-            this.finalFocus,
-            {
-                tree: true,
-                body: true,
-                documents: true,
-                buttons: true,
-                states: true,
-                goto: true,
-            }
-        );
+
+        // * _setupOpenedLeoDocument above already does the setupRefresh below
+        // this.setupRefresh(
+        //     this.finalFocus,
+        //     {
+        //         tree: true,
+        //         body: true,
+        //         documents: true,
+        //         buttons: true,
+        //         states: true,
+        //         goto: true,
+        //     }
+        // );
 
         this.leoStates.leoReady = true;
         this.leoStates.leojsStartupDone = true;
 
-        this.leoStates.qLastContextChange.then(() => {
-            if (!this._lastTreeView.visible && g.app.windowList.length) {
-                console.log('Had to reveal!');
-                // const c = g.app.windowList[this.frameIndex].c;
-                // this._lastTreeView.reveal(c.p, { select: true });
-                this._setupOpenedLeoDocument(); // this sets this.leoStates.fileOpenedReady 
-                this.setupRefresh(
-                    this.finalFocus,
-                    {
-                        tree: true,
-                        body: true,
-                        documents: true,
-                        buttons: true,
-                        states: true,
-                        goto: true,
-                    }
-                );
-                this._launchRefresh();
+        // this.leoStates.qLastContextChange.then(() => {
+        //     if (!this._lastTreeView.visible && g.app.windowList.length) {
+        //         console.log('Had to reveal!');
+        //         // const c = g.app.windowList[this.frameIndex].c;
+        //         // this._lastTreeView.reveal(c.p, { select: true });
+        //         this._setupOpenedLeoDocument(); // this sets this.leoStates.fileOpenedReady 
+        //         this.launchRefresh();
 
-            }
-            // this._launchRefresh();
-            // this.getStates();
-        });
+        //     }
+        //     // this._launchRefresh();
+        //     // this.getStates();
+        // });
 
     }
 
@@ -651,7 +642,6 @@ export class LeoUI extends NullGui {
                 documents: true,
                 goto: true
             },
-
         );
 
         // * Start body pane system
@@ -909,7 +899,7 @@ export class LeoUI extends NullGui {
     public _changedVisibleTextEditors(p_editors: readonly vscode.TextEditor[]): void {
         // todo cleanup test log
         if (p_editors && p_editors.length) {
-            console.log('editors changed visibility', p_editors[0].document, p_editors[0].document.uri.fsPath, p_editors[0].document.uri.scheme);
+            // console.log('editors changed visibility', p_editors[0].document, p_editors[0].document.uri.fsPath, p_editors[0].document.uri.scheme);
         }
 
         if (p_editors && p_editors.length) {
@@ -1812,23 +1802,22 @@ export class LeoUI extends NullGui {
 
         this.lastSelectedNode = p_node; // Set the 'lastSelectedNode' this will also set the 'marked' node context
 
-        if (this._bodyTextDocument) {
-            // if not first time and still opened - also not somewhat exactly opened somewhere.
-            if (
-                !this._bodyTextDocument.isClosed &&
-                !this._locateOpenedBody(p_node.gnx) // COULD NOT LOCATE NEW GNX
-            ) {
-                // if needs switching by actually having different gnx
-                if (utils.leoUriToStr(this.bodyUri) !== p_node.gnx) {
-                    // * LOCATE OLD GNX FOR PROPER COLUMN
-                    this._locateOpenedBody(utils.leoUriToStr(this.bodyUri));
-                    // Make sure any pending changes in old body are applied before switching
-                    return this._bodyTextDocument.save().then(() => {
-                        return this._switchBody(p_aside, p_preventTakingFocus);
-                    });
-                }
+        // if not first time and still opened - also not somewhat exactly opened somewhere.
+        if (this._bodyTextDocument &&
+            !this._bodyTextDocument.isClosed &&
+            !this._locateOpenedBody(p_node.gnx) // COULD NOT LOCATE NEW GNX
+        ) {
+            // if needs switching by actually having different gnx
+            if (utils.leoUriToStr(this.bodyUri) !== p_node.gnx) {
+                // * LOCATE OLD GNX FOR PROPER COLUMN
+                this._locateOpenedBody(utils.leoUriToStr(this.bodyUri));
+                // Make sure any pending changes in old body are applied before switching
+                return this._bodyTextDocument.save().then(() => {
+                    return this._switchBody(p_aside, p_preventTakingFocus);
+                });
             }
         }
+
         // first time or no body opened
         this.bodyUri = utils.strToLeoUri(p_node.gnx);
         if (this._isBodyVisible() === 0 && !this.showBodyIfClosed) {
@@ -2201,7 +2190,6 @@ export class LeoUI extends NullGui {
      * @returns a promise of an editor, or void if body had been changed again in the meantime.
      */
     public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise<vscode.TextEditor | void> {
-
         const w_openedDocumentTS = utils.performanceNow();
         const w_openedDocumentGnx = utils.leoUriToStr(this.bodyUri);
         let q_saved: Thenable<unknown> | undefined;
@@ -2215,7 +2203,7 @@ export class LeoUI extends NullGui {
                 (this._bodyLastChangedDocument.isDirty || this._editorTouched) &&
                 w_openedDocumentGnx === utils.leoUriToStr(this._bodyLastChangedDocument.uri)
             ) {
-                console.log('had to save'); // TODO : CLEANUP !
+                console.log('had to save so ------ fireRefreshFile !!'); // TODO : CLEANUP !
 
                 // ! FAKE SAVE to make sure body is not dirty !
                 this._leoFileSystem.preventSaveToLeo = true;
@@ -2236,6 +2224,25 @@ export class LeoUI extends NullGui {
             this._preventShowBody = false;
             return Promise.resolve(vscode.window.activeTextEditor!);
         }
+
+        // let w_preFoundDocOpened = false;
+        // let w_preFoundTabOpened = false;
+        // vscode.window.tabGroups.all.forEach((p_tabGroup) => {
+        //     p_tabGroup.tabs.forEach((p_tab) => {
+
+        //         if (p_tab.input &&
+        //             (p_tab.input as vscode.TabInputText).uri &&
+        //             (p_tab.input as vscode.TabInputText).uri.fsPath === this.bodyUri.fsPath) {
+        //             w_preFoundTabOpened = true;
+        //             vscode.workspace.textDocuments.forEach((p_textDocument) => {
+        //                 if (p_textDocument.uri.fsPath === (p_tab.input as vscode.TabInputText).uri.fsPath) {
+        //                     w_preFoundDocOpened = true;
+        //                 }
+        //             });
+        //         }
+        //     });
+        // });
+
 
         // * Step 1 : Open the document
         const w_openedDocument = await vscode.workspace.openTextDocument(this.bodyUri);
@@ -2295,7 +2302,7 @@ export class LeoUI extends NullGui {
             // console.log('WRAP: ', w_wrap);
 
             // Replace language string if in 'exceptions' array
-            w_language = 'leobody.' + (Constants.LANGUAGE_CODES[w_language] || w_language);
+            w_language = Constants.LEO_LANGUAGE_PREFIX + (Constants.LANGUAGE_CODES[w_language] || w_language);
 
             let w_debugMessage = "";
             let w_needRefreshFlag = false;
@@ -2347,7 +2354,7 @@ export class LeoUI extends NullGui {
         }
 
         // Find body pane's position if already opened with same gnx (language still needs to be set per position)
-        let w_foundOpened = false;
+        let w_foundDocOpened = false;
         vscode.window.tabGroups.all.forEach((p_tabGroup) => {
             p_tabGroup.tabs.forEach((p_tab) => {
 
@@ -2358,13 +2365,21 @@ export class LeoUI extends NullGui {
                         if (p_textDocument.uri.fsPath === (p_tab.input as vscode.TabInputText).uri.fsPath) {
                             this._bodyTextDocument = p_textDocument; // vscode.workspace.openTextDocument
                             this._bodyMainSelectionColumn = p_tab.group.viewColumn;
-                            w_foundOpened = true;
+                            w_foundDocOpened = true;
                         }
                     });
                 }
             });
         });
-        if (w_foundOpened && !q_saved) {
+
+        // console.log('pre found TAB: ', w_preFoundTabOpened);
+        // console.log('pre found DOC: ', w_preFoundDocOpened);
+
+        // console.log('POST found TAB: ', w_foundTabOpened);
+        // console.log('POST found DOC: ', w_foundDocOpened);
+
+
+        if (w_foundDocOpened && !q_saved) {
             // Was the same and was asked to show body (and did not already had to fake-save and refresh)
             this._leoFileSystem.fireRefreshFile(w_openedDocumentGnx);
         }
@@ -2734,7 +2749,6 @@ export class LeoUI extends NullGui {
             }
         }
         this.lastCommandTimer = undefined;
-
 
         if (value && value.then) {
             (value as Thenable<unknown>).then((p_result) => {

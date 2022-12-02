@@ -28,9 +28,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     private _openedBodiesGnx: string[] = [];
     private _openedBodiesInfo: { [key: string]: BodyTimeInfo } = {};
 
-    // * List of all possible vNodes gnx in the currently opened leo file (since last refresh/tree operation)
-    private _possibleGnxList: string[] = []; // Maybe deprecated
-
     private _lastBodyTimeGnx: string = "";
 
     // * An event to signal that a resource has been changed
@@ -46,16 +43,27 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
      * * Sets selected node body's modified time for this gnx virtual file
      * @param p_uri URI of file for which to set made-up modified time
      */
-    public setBodyTime(p_uri: vscode.Uri): void {
+    public setNewBodyUriTime(p_uri: vscode.Uri): void {
         const w_gnx = utils.leoUriToStr(p_uri);
         this._lastBodyTimeGnx = w_gnx;
-        if (!this._openedBodiesGnx.includes(w_gnx)) {
-            this._openedBodiesGnx.push(w_gnx);
-        }
+        this.setOpenedBodyTime(w_gnx);
+    }
+
+    /**
+     * * Adds entries in _openedBodiesGnx and _openedBodiesInfo if needed
+     * * and sets the modified time of an opened body.
+     */
+    public setOpenedBodyTime(p_gnx: string): void {
         const w_now = new Date().getTime();
-        this._openedBodiesInfo[w_gnx] = {
-            ctime: w_now,
-            mtime: w_now
+        let w_created = w_now;
+        if (!this._openedBodiesGnx.includes(p_gnx)) {
+            this._openedBodiesGnx.push(p_gnx);
+        } else {
+            w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
+        }
+        this._openedBodiesInfo[p_gnx] = {
+            ctime: w_now, // maybe kept.
+            mtime: w_now // new 'modified' time for sure.
         };
     }
 
@@ -64,15 +72,14 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
      * @param p_gnx Gnx of body associated with this virtual file, mostly Leo's selected node
      */
     public fireRefreshFile(p_gnx: string): void {
+        console.log('fireRefreshFile', p_gnx);
+
         if (!this._openedBodiesGnx.includes(p_gnx)) {
             console.error("ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
-            this._openedBodiesGnx.push(p_gnx);
         }
-        const w_now = new Date().getTime();
-        this._openedBodiesInfo[p_gnx] = {
-            ctime: w_now,
-            mtime: w_now
-        };
+
+        this.setOpenedBodyTime(p_gnx);
+
         this._onDidChangeFileEmitter.fire([{
             type: vscode.FileChangeType.Changed,
             uri: utils.strToLeoUri(p_gnx)
@@ -92,7 +99,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         return [...c.all_unique_positions(false)].map(p => p.v.gnx);
     }
 
-    public watch(p_resource: vscode.Uri): vscode.Disposable {
+    public watch(p_resource: vscode.Uri, p_options: { readonly recursive: boolean; readonly excludes: readonly string[] }): vscode.Disposable {
         const w_gnx = utils.leoUriToStr(p_resource);
         if (!this._watchedBodiesGnx.includes(w_gnx)) {
             this._watchedBodiesGnx.push(w_gnx); // add gnx
@@ -200,13 +207,10 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         const w_gnx = utils.leoUriToStr(p_uri);
         if (!this._openedBodiesGnx.includes(w_gnx)) {
             console.error("LeoJS: Tried to save body other than selected node's body", w_gnx);
-            this._openedBodiesGnx.push(w_gnx);
         }
-        const w_now = new Date().getTime();
-        this._openedBodiesInfo[w_gnx] = {
-            ctime: w_now,
-            mtime: w_now
-        };
+
+        this.setOpenedBodyTime(w_gnx);
+
         this._fireSoon({ type: vscode.FileChangeType.Changed, uri: p_uri });
     }
 
