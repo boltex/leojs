@@ -6155,7 +6155,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
 
         // make sure it's a real uri because vscode may send selected
         // node from other tree that has this command in title
-        if (p_uri &amp;&amp; !!p_uri.fsPath &amp;&amp; p_uri.fsPath.trim() &amp;&amp; g.app.loadManager) {
+        if (p_uri &amp;&amp; !!p_uri.fsPath &amp;&amp; p_uri.fsPath.trim &amp;&amp; p_uri.fsPath.trim() &amp;&amp; g.app.loadManager) {
             fileName = p_uri.fsPath.replace(/\\/g, '/');
             await g.app.loadManager.loadLocalFile(fileName, this);
         } else {

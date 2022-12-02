@@ -4202,7 +4202,7 @@ export class LeoUI extends NullGui {
 
             // make sure it's a real uri because vscode may send selected
             // node from other tree that has this command in title
-            if (p_uri && !!p_uri.fsPath && p_uri.fsPath.trim() && g.app.loadManager) {
+            if (p_uri && !!p_uri.fsPath && p_uri.fsPath.trim && p_uri.fsPath.trim() && g.app.loadManager) {
                 fileName = p_uri.fsPath.replace(/\\/g, '/');
                 await g.app.loadManager.loadLocalFile(fileName, this);
             } else {
