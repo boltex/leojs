@@ -3659,10 +3659,6 @@ export class Commands {
         // c.frame.tree.select(p);
         c.nodeHistory.update(p); // ! FROM select_new_node of tree wrapper 'select'
         c.setCurrentPosition(p);
-
-        // Compatibility, but confusing.
-        // TODO : Is this needed? (not used in Leo's codebase)
-        // selectVnode = selectPosition
     }
 
     //@+node:felix.20211031220906.1: *5* c.setPositionAfterSort

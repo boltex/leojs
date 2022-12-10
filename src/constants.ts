@@ -162,6 +162,8 @@ export class Constants {
         NO: "No",
         YES_ALL: "Yes to all",
         NO_ALL: "No to all",
+        CHOOSE_BUTTON: "Choose @button or @rclick",
+        SEARCH_POSITION_BY_HEADLINE: "Search positions by headline",
         MINIBUFFER_PROMPT: "Minibuffer Full Command",
         SELECT_CHAPTER_PROMPT: "Select chapter",
         CHANGES_DETECTED: "Changes to external files were detected.",

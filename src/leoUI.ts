@@ -3129,6 +3129,72 @@ export class LeoUI extends NullGui {
     }
 
     /**
+     * * Mimic vscode's CTRL+P to find any position by it's headline
+     */
+    public async gotoAnywhere(): Promise<unknown> {
+        await this.triggerBodySave(false);
+
+        const allPositions: { label: string; description?: string; position?: Position; }[] = [];
+        // Options for date to look like : Saturday, September 17, 2016
+        const w_dateOptions: Intl.DateTimeFormatOptions = { weekday: "long", year: 'numeric', month: "long", day: 'numeric' };
+        const c = g.app.windowList[this.frameIndex].c;
+
+        // 'true' parameter because each position is kept individually for the time the QuickPick control is opened
+        for (const p_position of c.all_unique_positions(true)) {
+
+            let w_description = p_position.gnx; // Defaults as gnx.
+            const w_gnxParts = w_description.split('.');
+            if (w_gnxParts.length === 3 && w_gnxParts[1].length === 14) {
+                // legit 3 part gnx
+                const dateString = w_gnxParts[1];
+                const w_year = +dateString.substring(0, 4); // unary + operator to convert the strings to numbers.
+                const w_month = +dateString.substring(4, 6);
+                const w_day = +dateString.substring(6, 8);
+                const w_date = new Date(w_year, w_month - 1, w_day);
+                w_description = `by ${w_gnxParts[0]} on ${w_date.toLocaleDateString("en-US", w_dateOptions)}`;
+            }
+            allPositions.push({
+                label: p_position.h,
+                position: p_position,
+                description: w_description
+            });
+
+        }
+        // Add Nav tab special commands
+        const w_options: vscode.QuickPickOptions = {
+            placeHolder: Constants.USER_MESSAGES.SEARCH_POSITION_BY_HEADLINE
+        };
+
+        const p_picked = await vscode.window.showQuickPick(allPositions, w_options);
+
+        if (p_picked && p_picked.label && p_picked.position) {
+            if (c.positionExists(p_picked.position)) {
+                console.log('position exists!');
+
+                c.selectPosition(p_picked.position);  // set this node as selection
+
+            } else {
+                console.log('POSITION DOES NOT EXIST!');
+
+            }
+            this.setupRefresh(
+                Focus.Body, // Finish in body pane given explicitly because last focus was in input box.
+                {
+                    tree: true,
+                    body: true,
+                    // documents: false,
+                    // buttons: false,
+                    states: true,
+                }
+            );
+            this.launchRefresh();
+        }
+
+        return Promise.resolve(undefined); // Canceled
+
+    }
+
+    /**
      * Opens the Nav tab and focus on nav text input
      */
     public findQuick(p_string?: string): Thenable<unknown> {
@@ -3176,7 +3242,7 @@ export class LeoUI extends NullGui {
         // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_TIMELINE)
         //     .then((p_result: LeoBridgePackage) => {
         //         this._leoGotoProvider.refreshTreeRoot();
-        //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
+        //         return this.showGotoPane(); // Finish by opening and focussing nav pane
         //     });
         return vscode.window.showInformationMessage("TODO: findQuickTimeline");
     }
@@ -3188,7 +3254,7 @@ export class LeoUI extends NullGui {
         // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_CHANGED)
         //     .then((p_result: LeoBridgePackage) => {
         //         this._leoGotoProvider.refreshTreeRoot();
-        //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
+        //         return this.showGotoPane(); // Finish by opening and focussing nav pane
         //     });
         return vscode.window.showInformationMessage("TODO: findQuickChanged");
 
@@ -3201,7 +3267,7 @@ export class LeoUI extends NullGui {
         // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_HISTORY)
         //     .then((p_result: LeoBridgePackage) => {
         //         this._leoGotoProvider.refreshTreeRoot();
-        //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
+        //         return this.showGotoPane(); // Finish by opening and focussing nav pane
         //     });
         return vscode.window.showInformationMessage("TODO: findQuickHistory");
 
@@ -3214,7 +3280,7 @@ export class LeoUI extends NullGui {
         // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_MARKED)
         //     .then((p_result: LeoBridgePackage) => {
         //         this._leoGotoProvider.refreshTreeRoot();
-        //         return this.findQuickGoAnywhere(); // Finish by opening and focussing nav pane
+        //         return this.showGotoPane(); // Finish by opening and focussing nav pane
         //     });
         return vscode.window.showInformationMessage("TODO: findQuickMarked");
 
@@ -3223,7 +3289,7 @@ export class LeoUI extends NullGui {
     /**
      * Opens goto and focus in depending on passed options
      */
-    public findQuickGoAnywhere(p_options?: { preserveFocus?: boolean }): Thenable<unknown> {
+    public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable<unknown> {
         let w_panel = "";
 
         if (this._lastTreeView === this._leoTreeExView) {
@@ -3272,7 +3338,7 @@ export class LeoUI extends NullGui {
         //                         Constants.LEOBRIDGE.NAV_SEARCH
         //                     ).then((p_package) => {
         //                         this._leoGotoProvider.refreshTreeRoot();
-        //                         this.findQuickGoAnywhere({ preserveFocus: true }); // show but dont change focus
+        //                         this.showGotoPane({ preserveFocus: true }); // show but dont change focus
         //                         return p_package;
         //                     });
         //                 }, 10);
@@ -3337,7 +3403,7 @@ export class LeoUI extends NullGui {
         //         Constants.LEOBRIDGE.NAV_SEARCH
         //     ).then((p_package) => {
         //         this._leoGotoProvider.refreshTreeRoot();
-        //         this.findQuickGoAnywhere({ preserveFocus: true }); // show but dont change focus
+        //         this.showGotoPane({ preserveFocus: true }); // show but dont change focus
         //         return p_package;
         //     });
 
@@ -3354,7 +3420,7 @@ export class LeoUI extends NullGui {
         //         Constants.LEOBRIDGE.NAV_HEADLINE_SEARCH
         //     ).then((p_package) => {
         //         this._leoGotoProvider.refreshTreeRoot();
-        //         this.findQuickGoAnywhere({ preserveFocus: true }); // show but dont change focus
+        //         this.showGotoPane({ preserveFocus: true }); // show but dont change focus
         //         return p_package;
         //     });
 
