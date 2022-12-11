@@ -3131,7 +3131,7 @@ export class LeoUI extends NullGui {
     /**
      * * Mimic vscode's CTRL+P to find any position by it's headline
      */
-    public async gotoAnywhere(): Promise<unknown> {
+    public async goAnywhere(): Promise<unknown> {
         await this.triggerBodySave(false);
 
         const allPositions: { label: string; description?: string; position?: Position; }[] = [];
@@ -3169,13 +3169,7 @@ export class LeoUI extends NullGui {
 
         if (p_picked && p_picked.label && p_picked.position) {
             if (c.positionExists(p_picked.position)) {
-                console.log('position exists!');
-
                 c.selectPosition(p_picked.position);  // set this node as selection
-
-            } else {
-                console.log('POSITION DOES NOT EXIST!');
-
             }
             this.setupRefresh(
                 Focus.Body, // Finish in body pane given explicitly because last focus was in input box.

@@ -3656,8 +3656,8 @@ export class Commands {
             }
         }
 
-        // c.frame.tree.select(p);
-        c.nodeHistory.update(p); // ! FROM select_new_node of tree wrapper 'select'
+        c.frame.tree.select(p);
+
         c.setCurrentPosition(p);
     }
 

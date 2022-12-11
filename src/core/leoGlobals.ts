@@ -2344,7 +2344,7 @@ export function doHook(tag: string, keywords?: { [key: string]: any }): any {
 
     }
     if (!f) {
-        console.log('TODO: (Plugin system) g.doHook for tag: ', tag);
+        // console.log('TODO: (Plugin system) g.doHook for tag: ', tag);
         return;
     }
     try {

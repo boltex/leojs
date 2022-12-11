@@ -12,32 +12,38 @@ export class Config implements ConfigMembers {
     // Config settings used on Leo's side
     public checkForChangeExternalFiles: string = Constants.CONFIG_DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES;
     public defaultReloadIgnore: string = Constants.CONFIG_DEFAULTS.DEFAULT_RELOAD_IGNORE;
+
     // Config settings used on vscode's side
     public leoTreeBrowse: boolean = Constants.CONFIG_DEFAULTS.LEO_TREE_BROWSE; // Used as Context Flag
     public treeKeepFocus: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS;
     public treeKeepFocusWhenAside: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS_WHEN_ASIDE;
-    public statusBarString: string = Constants.CONFIG_DEFAULTS.STATUSBAR_STRING;
+
+    public collapseAllShortcut: boolean = Constants.CONFIG_DEFAULTS.COLLAPSE_ALL_SHORTCUT;
+    public activityViewShortcut: boolean = Constants.CONFIG_DEFAULTS.ACTIVITY_VIEW_SHORTCUT;
+    public goAnywhereShortcut: boolean = Constants.CONFIG_DEFAULTS.GO_ANYWHERE_SHORTCUT;
+
+    // public statusBarString: string = Constants.CONFIG_DEFAULTS.STATUSBAR_STRING;
     public statusBarColor: string = Constants.CONFIG_DEFAULTS.STATUSBAR_COLOR;
     public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER; // Used as Context Flag
     public showOpenAside: boolean = Constants.CONFIG_DEFAULTS.SHOW_OPEN_ASIDE; // Used as Context Flag
     public showEditOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDIT; // Used as Context Flag
-    public showArrowsOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ARROWS; // Used as Context Flag
+
+    // public showArrowsOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ARROWS; // Used as Context Flag
     public showAddOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ADD; // Used as Context Flag
     public showMarkOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK; // Used as Context Flag
     public showCloneOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLONE; // Used as Context Flag
     public showCopyOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_COPY; // Used as Context Flag
 
-    public showEditionOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDITION_BODY; // Used as Context Flag
-    public showClipboardOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLIPBOARD_BODY; // Used as Context Flag
-    public showPromoteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_PROMOTE_BODY; // Used as Context Flag
-    public showExecuteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXECUTE_BODY; // Used as Context Flag
-    public showExtractOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXTRACT_BODY; // Used as Context Flag
-    public showImportOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_IMPORT_BODY; // Used as Context Flag
-    public showRefreshOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_REFRESH_BODY; // Used as Context Flag
-    public showHoistOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_HOIST_BODY; // Used as Context Flag
-    public showMarkOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK_BODY; // Used as Context Flag
-    public showSortOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_SORT_BODY; // Used as Context Flag
-
+    // public showEditionOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDITION_BODY; // Used as Context Flag
+    // public showClipboardOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLIPBOARD_BODY; // Used as Context Flag
+    // public showPromoteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_PROMOTE_BODY; // Used as Context Flag
+    // public showExecuteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXECUTE_BODY; // Used as Context Flag
+    // public showExtractOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXTRACT_BODY; // Used as Context Flag
+    // public showImportOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_IMPORT_BODY; // Used as Context Flag
+    // public showRefreshOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_REFRESH_BODY; // Used as Context Flag
+    // public showHoistOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_HOIST_BODY; // Used as Context Flag
+    // public showMarkOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK_BODY; // Used as Context Flag
+    // public showSortOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_SORT_BODY; // Used as Context Flag
 
     public invertNodeContrast: boolean = Constants.CONFIG_DEFAULTS.INVERT_NODES;
     public leoID: string = Constants.CONFIG_DEFAULTS.LEO_ID;
@@ -61,27 +67,32 @@ export class Config implements ConfigMembers {
             leoTreeBrowse: this.leoTreeBrowse, // Used as Context Flag
             treeKeepFocus: this.treeKeepFocus,
             treeKeepFocusWhenAside: this.treeKeepFocusWhenAside,
-            statusBarString: this.statusBarString,
+
+            collapseAllShortcut: this.collapseAllShortcut,
+            activityViewShortcut: this.activityViewShortcut,
+            goAnywhereShortcut: this.goAnywhereShortcut,
+
+            // statusBarString: this.statusBarString,
             statusBarColor: this.statusBarColor,
             treeInExplorer: this.treeInExplorer, // Used as Context Flag
             showOpenAside: this.showOpenAside,  // Used as Context Flag
             showEditOnNodes: this.showEditOnNodes, // Used as Context Flag
-            showArrowsOnNodes: this.showArrowsOnNodes, // Used as Context Flag
+            // showArrowsOnNodes: this.showArrowsOnNodes, // Used as Context Flag
             showAddOnNodes: this.showAddOnNodes, // Used as Context Flag
             showMarkOnNodes: this.showMarkOnNodes, // Used as Context Flag
             showCloneOnNodes: this.showCloneOnNodes, // Used as Context Flag
             showCopyOnNodes: this.showCopyOnNodes, // Used as Context Flag
 
-            showEditionOnBody: this.showEditionOnBody, // Used as Context Flag
-            showClipboardOnBody: this.showClipboardOnBody, // Used as Context Flag
-            showPromoteOnBody: this.showPromoteOnBody, // Used as Context Flag
-            showExecuteOnBody: this.showExecuteOnBody, // Used as Context Flag
-            showExtractOnBody: this.showExtractOnBody, // Used as Context Flag
-            showImportOnBody: this.showImportOnBody, // Used as Context Flag
-            showRefreshOnBody: this.showRefreshOnBody, // Used as Context Flag
-            showHoistOnBody: this.showHoistOnBody, // Used as Context Flag
-            showMarkOnBody: this.showMarkOnBody, // Used as Context Flag
-            showSortOnBody: this.showSortOnBody, // Used as Context Flag
+            // showEditionOnBody: this.showEditionOnBody, // Used as Context Flag
+            // showClipboardOnBody: this.showClipboardOnBody, // Used as Context Flag
+            // showPromoteOnBody: this.showPromoteOnBody, // Used as Context Flag
+            // showExecuteOnBody: this.showExecuteOnBody, // Used as Context Flag
+            // showExtractOnBody: this.showExtractOnBody, // Used as Context Flag
+            // showImportOnBody: this.showImportOnBody, // Used as Context Flag
+            // showRefreshOnBody: this.showRefreshOnBody, // Used as Context Flag
+            // showHoistOnBody: this.showHoistOnBody, // Used as Context Flag
+            // showMarkOnBody: this.showMarkOnBody, // Used as Context Flag
+            // showSortOnBody: this.showSortOnBody, // Used as Context Flag
 
             invertNodeContrast: this.invertNodeContrast,
             leoID: this.leoID
@@ -248,7 +259,7 @@ export class Config implements ConfigMembers {
     /**
      * * Build config from settings from vscode's saved config settings
      */
-    public buildFromSavedSettings(): Promise<unknown> {
+    public buildFromSavedSettings(): void {
         // Shorthand pointers for readability
         const GET = vscode.workspace.getConfiguration;
         const NAME = Constants.CONFIG_NAME;
@@ -258,17 +269,22 @@ export class Config implements ConfigMembers {
 
         if (this._isBusySettingConfig) {
             // * Currently setting config, wait until its done all, and this will be called automatically
-            return Promise.resolve();
+            return;
         } else {
             this.checkForChangeExternalFiles = GET(NAME).get(NAMES.CHECK_FOR_CHANGE_EXTERNAL_FILES, DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES);
             this.defaultReloadIgnore = GET(NAME).get(NAMES.DEFAULT_RELOAD_IGNORE, DEFAULTS.DEFAULT_RELOAD_IGNORE);
             this.leoTreeBrowse = GET(NAME).get(NAMES.LEO_TREE_BROWSE, DEFAULTS.LEO_TREE_BROWSE);
             this.treeKeepFocus = GET(NAME).get(NAMES.TREE_KEEP_FOCUS, DEFAULTS.TREE_KEEP_FOCUS);
             this.treeKeepFocusWhenAside = GET(NAME).get(NAMES.TREE_KEEP_FOCUS_WHEN_ASIDE, DEFAULTS.TREE_KEEP_FOCUS_WHEN_ASIDE);
-            this.statusBarString = GET(NAME).get(NAMES.STATUSBAR_STRING, DEFAULTS.STATUSBAR_STRING);
-            if (this.statusBarString.length > 8) {
-                this.statusBarString = DEFAULTS.STATUSBAR_STRING;
-            }
+
+            this.collapseAllShortcut = GET(NAME).get(NAMES.COLLAPSE_ALL_SHORTCUT, DEFAULTS.COLLAPSE_ALL_SHORTCUT);
+            this.activityViewShortcut = GET(NAME).get(NAMES.ACTIVITY_VIEW_SHORTCUT, DEFAULTS.ACTIVITY_VIEW_SHORTCUT);
+            this.goAnywhereShortcut = GET(NAME).get(NAMES.GO_ANYWHERE_SHORTCUT, DEFAULTS.GO_ANYWHERE_SHORTCUT);
+
+            // this.statusBarString = GET(NAME).get(NAMES.STATUSBAR_STRING, DEFAULTS.STATUSBAR_STRING);
+            // if (this.statusBarString.length > 8) {
+            //     this.statusBarString = DEFAULTS.STATUSBAR_STRING;
+            // }
             this.statusBarColor = GET(NAME).get(NAMES.STATUSBAR_COLOR, DEFAULTS.STATUSBAR_COLOR);
             if (!utils.isHexColor(this.statusBarColor)) {
                 this.statusBarColor = DEFAULTS.STATUSBAR_COLOR;
@@ -276,48 +292,27 @@ export class Config implements ConfigMembers {
             this.treeInExplorer = GET(NAME).get(NAMES.TREE_IN_EXPLORER, DEFAULTS.TREE_IN_EXPLORER);
             this.showOpenAside = GET(NAME).get(NAMES.SHOW_OPEN_ASIDE, DEFAULTS.SHOW_OPEN_ASIDE);
             this.showEditOnNodes = GET(NAME).get(NAMES.SHOW_EDIT, DEFAULTS.SHOW_EDIT);
-            this.showArrowsOnNodes = GET(NAME).get(NAMES.SHOW_ARROWS, DEFAULTS.SHOW_ARROWS);
             this.showAddOnNodes = GET(NAME).get(NAMES.SHOW_ADD, DEFAULTS.SHOW_ADD);
             this.showMarkOnNodes = GET(NAME).get(NAMES.SHOW_MARK, DEFAULTS.SHOW_MARK);
             this.showCloneOnNodes = GET(NAME).get(NAMES.SHOW_CLONE, DEFAULTS.SHOW_CLONE);
             this.showCopyOnNodes = GET(NAME).get(NAMES.SHOW_COPY, DEFAULTS.SHOW_COPY);
 
-            this.showEditionOnBody = GET(NAME).get(NAMES.SHOW_EDITION_BODY, DEFAULTS.SHOW_EDITION_BODY);
-            this.showClipboardOnBody = GET(NAME).get(NAMES.SHOW_CLIPBOARD_BODY, DEFAULTS.SHOW_CLIPBOARD_BODY);
-            this.showPromoteOnBody = GET(NAME).get(NAMES.SHOW_PROMOTE_BODY, DEFAULTS.SHOW_PROMOTE_BODY);
-            this.showExecuteOnBody = GET(NAME).get(NAMES.SHOW_EXECUTE_BODY, DEFAULTS.SHOW_EXECUTE_BODY);
-            this.showExtractOnBody = GET(NAME).get(NAMES.SHOW_EXTRACT_BODY, DEFAULTS.SHOW_EXTRACT_BODY);
-            this.showImportOnBody = GET(NAME).get(NAMES.SHOW_IMPORT_BODY, DEFAULTS.SHOW_IMPORT_BODY);
-            this.showRefreshOnBody = GET(NAME).get(NAMES.SHOW_REFRESH_BODY, DEFAULTS.SHOW_REFRESH_BODY);
-            this.showHoistOnBody = GET(NAME).get(NAMES.SHOW_HOIST_BODY, DEFAULTS.SHOW_HOIST_BODY);
-            this.showMarkOnBody = GET(NAME).get(NAMES.SHOW_MARK_BODY, DEFAULTS.SHOW_MARK_BODY);
-            this.showSortOnBody = GET(NAME).get(NAMES.SHOW_SORT_BODY, DEFAULTS.SHOW_SORT_BODY);
+            // this.showArrowsOnNodes = GET(NAME).get(NAMES.SHOW_ARROWS, DEFAULTS.SHOW_ARROWS);
+
+            // this.showEditionOnBody = GET(NAME).get(NAMES.SHOW_EDITION_BODY, DEFAULTS.SHOW_EDITION_BODY);
+            // this.showClipboardOnBody = GET(NAME).get(NAMES.SHOW_CLIPBOARD_BODY, DEFAULTS.SHOW_CLIPBOARD_BODY);
+            // this.showPromoteOnBody = GET(NAME).get(NAMES.SHOW_PROMOTE_BODY, DEFAULTS.SHOW_PROMOTE_BODY);
+            // this.showExecuteOnBody = GET(NAME).get(NAMES.SHOW_EXECUTE_BODY, DEFAULTS.SHOW_EXECUTE_BODY);
+            // this.showExtractOnBody = GET(NAME).get(NAMES.SHOW_EXTRACT_BODY, DEFAULTS.SHOW_EXTRACT_BODY);
+            // this.showImportOnBody = GET(NAME).get(NAMES.SHOW_IMPORT_BODY, DEFAULTS.SHOW_IMPORT_BODY);
+            // this.showRefreshOnBody = GET(NAME).get(NAMES.SHOW_REFRESH_BODY, DEFAULTS.SHOW_REFRESH_BODY);
+            // this.showHoistOnBody = GET(NAME).get(NAMES.SHOW_HOIST_BODY, DEFAULTS.SHOW_HOIST_BODY);
+            // this.showMarkOnBody = GET(NAME).get(NAMES.SHOW_MARK_BODY, DEFAULTS.SHOW_MARK_BODY);
+            // this.showSortOnBody = GET(NAME).get(NAMES.SHOW_SORT_BODY, DEFAULTS.SHOW_SORT_BODY);
+
             this.invertNodeContrast = GET(NAME).get(NAMES.INVERT_NODES, DEFAULTS.INVERT_NODES);
             this.leoID = GET(NAME).get(NAMES.LEO_ID, DEFAULTS.LEO_ID);
 
-            // * Set context for tree items visibility that are based on config options
-            return Promise.all([
-                utils.setContext(FLAGS.LEO_TREE_BROWSE, this.leoTreeBrowse),
-                utils.setContext(FLAGS.TREE_IN_EXPLORER, this.treeInExplorer),
-                utils.setContext(FLAGS.SHOW_OPEN_ASIDE, this.showOpenAside),
-                utils.setContext(FLAGS.SHOW_EDIT, this.showEditOnNodes),
-                utils.setContext(FLAGS.SHOW_ARROWS, this.showArrowsOnNodes),
-                utils.setContext(FLAGS.SHOW_ADD, this.showAddOnNodes),
-                utils.setContext(FLAGS.SHOW_MARK, this.showMarkOnNodes),
-                utils.setContext(FLAGS.SHOW_CLONE, this.showCloneOnNodes),
-                utils.setContext(FLAGS.SHOW_COPY, this.showCopyOnNodes),
-
-                utils.setContext(FLAGS.SHOW_EDITION_BODY, this.showEditionOnBody),
-                utils.setContext(FLAGS.SHOW_CLIPBOARD_BODY, this.showClipboardOnBody),
-                utils.setContext(FLAGS.SHOW_PROMOTE_BODY, this.showPromoteOnBody),
-                utils.setContext(FLAGS.SHOW_EXECUTE_BODY, this.showExecuteOnBody),
-                utils.setContext(FLAGS.SHOW_EXTRACT_BODY, this.showExtractOnBody),
-                utils.setContext(FLAGS.SHOW_IMPORT_BODY, this.showImportOnBody),
-                utils.setContext(FLAGS.SHOW_REFRESH_BODY, this.showRefreshOnBody),
-                utils.setContext(FLAGS.SHOW_HOIST_BODY, this.showHoistOnBody),
-                utils.setContext(FLAGS.SHOW_MARK_BODY, this.showMarkOnBody),
-                utils.setContext(FLAGS.SHOW_SORT_BODY, this.showSortOnBody)
-            ]);
         }
     }
 

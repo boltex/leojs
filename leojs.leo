@@ -180,7 +180,7 @@
 <v t="felix.20211024012523.1"><vh>getTextFromClipboard</vh></v>
 </v>
 <v t="felix.20220505215916.1"><vh>Nav</vh>
-<v t="felix.20221206201231.1"><vh>gotoAnywhere</vh></v>
+<v t="felix.20221206201231.1"><vh>goAnywhere</vh></v>
 <v t="felix.20220505215916.2"><vh>findQuick</vh></v>
 <v t="felix.20220505215916.3"><vh>findQuickSelected</vh></v>
 <v t="felix.20220505215916.4"><vh>findQuickTimeline</vh></v>
@@ -1295,7 +1295,7 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.FIND_QUICK_CHANGED, () =&gt; p_leoUI.findQuickChanged()],
 [CMD.FIND_QUICK_HISTORY, () =&gt; p_leoUI.findQuickHistory()],
 [CMD.FIND_QUICK_MARKED, () =&gt; p_leoUI.findQuickMarked()],
-[CMD.FIND_QUICK_GO_ANYWHERE, () =&gt; p_leoUI.gotoAnywhere()],
+[CMD.FIND_QUICK_GO_ANYWHERE, () =&gt; p_leoUI.goAnywhere()],
 
 [CMD.GOTO_NAV_PREV, () =&gt; p_leoUI.navigateNavEntry(LeoGotoNavKey.prev)],
 [CMD.GOTO_NAV_NEXT, () =&gt; p_leoUI.navigateNavEntry(LeoGotoNavKey.next)],
@@ -2004,6 +2004,7 @@ public static CONTEXT_FLAGS = {
     LEO_READY: "leojsReady", // Extension activated and classes created and ready
     TREE_OPENED: "leojsTreeOpened", // At least one Leo file opened
     TREE_TITLED: "leojsTreeTitled", // Tree is a Leo file and not a new untitled document
+
     // 'states' flags for currently opened tree view
     LEO_CHANGED: "leojsChanged",
     LEO_CAN_UNDO: "leojsCanUndo",
@@ -2016,6 +2017,7 @@ public static CONTEXT_FLAGS = {
     LEO_CAN_HOIST: "leojsCanHoist", // isNotRoot equivalent, Computed by hand
     LEO_IN_CHAPTER: "leojsInChapter", // TODO
     LEO_TOP_HOIST_CHAPTER: "leojsTopHoistChapter", // TODO
+
     // 'states' flags about current selection, for visibility and commands availability
     SELECTED_MARKED: "leojsMarked", // no need for unmarked here, use !leojsMarked
     SELECTED_CLONE: "leojsCloned",
@@ -2023,8 +2025,10 @@ public static CONTEXT_FLAGS = {
     SELECTED_EMPTY: "leojsEmpty",
     SELECTED_CHILD: "leojsChild", // Has children
     SELECTED_ATFILE: "LeojsAtFile", // Can be refreshed
+
     // Statusbar Flag 'keybindings in effect'
     LEO_SELECTED: "leojsObjectSelected", // keybindings "On": Outline or body has focus
+
     // Context Flags for 'when' clauses, used concatenated, for each outline node
     NODE_MARKED: "leojsNodeMarked",  // Selected node is marked
     NODE_UNMARKED: "leojsNodeUnmarked", // Selected node is unmarked (Needed for regexp)
@@ -2032,11 +2036,13 @@ public static CONTEXT_FLAGS = {
     NODE_CLONED: "leojsNodeCloned",
     NODE_ROOT: "leojsNodeRoot",
     NODE_NOT_ROOT: "leojsNodeNotRoot",
+
     // Flags for Leo documents tree view icons and hover node command buttons
     DOCUMENT_SELECTED_TITLED: "leojsDocumentSelectedTitled",
     DOCUMENT_TITLED: "leojsDocumentTitled",
     DOCUMENT_SELECTED_UNTITLED: "leojsDocumentSelectedUntitled",
     DOCUMENT_UNTITLED: "leojsDocumentUntitled",
+
     // Flags for focus context
     FOCUS_FIND: "leojsFindFocus",
 
@@ -2052,16 +2058,16 @@ public static CONTEXT_FLAGS = {
     SHOW_CLONE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLONE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLONE.slice(1),             // Hover Icons on outline nodes
     SHOW_COPY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_COPY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_COPY.slice(1),               // Hover Icons on outline nodes
 
-    SHOW_EDITION_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDITION_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDITION_BODY.slice(1),
-    SHOW_CLIPBOARD_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY.slice(1),
-    SHOW_PROMOTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY.slice(1),
-    SHOW_EXECUTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY.slice(1),
-    SHOW_EXTRACT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY.slice(1),
-    SHOW_IMPORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY.slice(1),
-    SHOW_REFRESH_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY.slice(1),
-    SHOW_HOIST_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_HOIST_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_HOIST_BODY.slice(1),
-    SHOW_MARK_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK_BODY.slice(1),
-    SHOW_SORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_SORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_SORT_BODY.slice(1)
+    // SHOW_EDITION_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDITION_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDITION_BODY.slice(1),
+    // SHOW_CLIPBOARD_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY.slice(1),
+    // SHOW_PROMOTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY.slice(1),
+    // SHOW_EXECUTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY.slice(1),
+    // SHOW_EXTRACT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY.slice(1),
+    // SHOW_IMPORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY.slice(1),
+    // SHOW_REFRESH_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY.slice(1),
+    // SHOW_HOIST_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_HOIST_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_HOIST_BODY.slice(1),
+    // SHOW_MARK_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK_BODY.slice(1),
+    // SHOW_SORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_SORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_SORT_BODY.slice(1)
 };
 
 </t>
@@ -3714,7 +3720,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "fa338d6",
+  "gitBranch": "leoFind",
+  "gitDate": "2022-12-10 01:53:38 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -6804,66 +6813,6 @@ public incTreeId(): void {
       "type": "boolean",
       "description": "Inverts the contrast of the dirty/clean border aspect of tree nodes"
     },
-    "leojs.showEditionOnBody": {
-      "scope": "application",
-      "default": true,
-      "type": "boolean",
-      "description": "Shows clone, delete and insert nodes above the body pane"
-    },
-    "leojs.showClipboardOnBody": {
-      "scope": "application",
-      "default": true,
-      "type": "boolean",
-      "description": "Shows cut, copy &amp; paste nodes above the body pane"
-    },
-    "leojs.showPromoteOnBody": {
-      "scope": "application",
-      "default": true,
-      "type": "boolean",
-      "description": "Shows promote and demote above the body pane"
-    },
-    "leojs.showExecuteOnBody": {
-      "scope": "application",
-      "default": true,
-      "type": "boolean",
-      "description": "Shows 'Execute Script' above the body pane"
-    },
-    "leojs.showExtractOnBody": {
-      "scope": "application",
-      "default": true,
-      "type": "boolean",
-      "description": "Shows extract commands above the body pane"
-    },
-    "leojs.showImportOnBody": {
-      "scope": "application",
-      "default": true,
-      "type": "boolean",
-      "description": "Shows 'Import File' above the body pane"
-    },
-    "leojs.showRefreshOnBody": {
-      "scope": "application",
-      "default": true,
-      "type": "boolean",
-      "description": "Shows 'Refresh from disk' above the body pane"
-    },
-    "leojs.showHoistOnBody": {
-      "scope": "application",
-      "default": true,
-      "type": "boolean",
-      "description": "Shows Hoist commands above the body pane"
-    },
-    "leojs.showMarkOnBody": {
-      "scope": "application",
-      "default": true,
-      "type": "boolean",
-      "description": "Shows Mark commands above the body pane"
-    },
-    "leojs.showSortOnBody": {
-      "scope": "application",
-      "default": true,
-      "type": "boolean",
-      "description": "Shows 'Sort Siblings' above the body pane"
-    },
     "leojs.leoID": {
       "scope": "application",
       "default": "",
@@ -6948,7 +6897,7 @@ public checkCloseEmptyGroups(p_forced?: boolean): void {
 <t tx="felix.20211007213344.13">/**
  * * Build config from settings from vscode's saved config settings
  */
-public buildFromSavedSettings(): Promise&lt;unknown&gt; {
+public buildFromSavedSettings(): void {
     // Shorthand pointers for readability
     const GET = vscode.workspace.getConfiguration;
     const NAME = Constants.CONFIG_NAME;
@@ -6958,17 +6907,22 @@ public buildFromSavedSettings(): Promise&lt;unknown&gt; {
 
     if (this._isBusySettingConfig) {
         // * Currently setting config, wait until its done all, and this will be called automatically
-        return Promise.resolve();
+        return;
     } else {
         this.checkForChangeExternalFiles = GET(NAME).get(NAMES.CHECK_FOR_CHANGE_EXTERNAL_FILES, DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES);
         this.defaultReloadIgnore = GET(NAME).get(NAMES.DEFAULT_RELOAD_IGNORE, DEFAULTS.DEFAULT_RELOAD_IGNORE);
         this.leoTreeBrowse = GET(NAME).get(NAMES.LEO_TREE_BROWSE, DEFAULTS.LEO_TREE_BROWSE);
         this.treeKeepFocus = GET(NAME).get(NAMES.TREE_KEEP_FOCUS, DEFAULTS.TREE_KEEP_FOCUS);
         this.treeKeepFocusWhenAside = GET(NAME).get(NAMES.TREE_KEEP_FOCUS_WHEN_ASIDE, DEFAULTS.TREE_KEEP_FOCUS_WHEN_ASIDE);
-        this.statusBarString = GET(NAME).get(NAMES.STATUSBAR_STRING, DEFAULTS.STATUSBAR_STRING);
-        if (this.statusBarString.length &gt; 8) {
-            this.statusBarString = DEFAULTS.STATUSBAR_STRING;
-        }
+
+        this.collapseAllShortcut = GET(NAME).get(NAMES.COLLAPSE_ALL_SHORTCUT, DEFAULTS.COLLAPSE_ALL_SHORTCUT);
+        this.activityViewShortcut = GET(NAME).get(NAMES.ACTIVITY_VIEW_SHORTCUT, DEFAULTS.ACTIVITY_VIEW_SHORTCUT);
+        this.goAnywhereShortcut = GET(NAME).get(NAMES.GO_ANYWHERE_SHORTCUT, DEFAULTS.GO_ANYWHERE_SHORTCUT);
+
+        // this.statusBarString = GET(NAME).get(NAMES.STATUSBAR_STRING, DEFAULTS.STATUSBAR_STRING);
+        // if (this.statusBarString.length &gt; 8) {
+        //     this.statusBarString = DEFAULTS.STATUSBAR_STRING;
+        // }
         this.statusBarColor = GET(NAME).get(NAMES.STATUSBAR_COLOR, DEFAULTS.STATUSBAR_COLOR);
         if (!utils.isHexColor(this.statusBarColor)) {
             this.statusBarColor = DEFAULTS.STATUSBAR_COLOR;
@@ -6976,48 +6930,27 @@ public buildFromSavedSettings(): Promise&lt;unknown&gt; {
         this.treeInExplorer = GET(NAME).get(NAMES.TREE_IN_EXPLORER, DEFAULTS.TREE_IN_EXPLORER);
         this.showOpenAside = GET(NAME).get(NAMES.SHOW_OPEN_ASIDE, DEFAULTS.SHOW_OPEN_ASIDE);
         this.showEditOnNodes = GET(NAME).get(NAMES.SHOW_EDIT, DEFAULTS.SHOW_EDIT);
-        this.showArrowsOnNodes = GET(NAME).get(NAMES.SHOW_ARROWS, DEFAULTS.SHOW_ARROWS);
         this.showAddOnNodes = GET(NAME).get(NAMES.SHOW_ADD, DEFAULTS.SHOW_ADD);
         this.showMarkOnNodes = GET(NAME).get(NAMES.SHOW_MARK, DEFAULTS.SHOW_MARK);
         this.showCloneOnNodes = GET(NAME).get(NAMES.SHOW_CLONE, DEFAULTS.SHOW_CLONE);
         this.showCopyOnNodes = GET(NAME).get(NAMES.SHOW_COPY, DEFAULTS.SHOW_COPY);
 
-        this.showEditionOnBody = GET(NAME).get(NAMES.SHOW_EDITION_BODY, DEFAULTS.SHOW_EDITION_BODY);
-        this.showClipboardOnBody = GET(NAME).get(NAMES.SHOW_CLIPBOARD_BODY, DEFAULTS.SHOW_CLIPBOARD_BODY);
-        this.showPromoteOnBody = GET(NAME).get(NAMES.SHOW_PROMOTE_BODY, DEFAULTS.SHOW_PROMOTE_BODY);
-        this.showExecuteOnBody = GET(NAME).get(NAMES.SHOW_EXECUTE_BODY, DEFAULTS.SHOW_EXECUTE_BODY);
-        this.showExtractOnBody = GET(NAME).get(NAMES.SHOW_EXTRACT_BODY, DEFAULTS.SHOW_EXTRACT_BODY);
-        this.showImportOnBody = GET(NAME).get(NAMES.SHOW_IMPORT_BODY, DEFAULTS.SHOW_IMPORT_BODY);
-        this.showRefreshOnBody = GET(NAME).get(NAMES.SHOW_REFRESH_BODY, DEFAULTS.SHOW_REFRESH_BODY);
-        this.showHoistOnBody = GET(NAME).get(NAMES.SHOW_HOIST_BODY, DEFAULTS.SHOW_HOIST_BODY);
-        this.showMarkOnBody = GET(NAME).get(NAMES.SHOW_MARK_BODY, DEFAULTS.SHOW_MARK_BODY);
-        this.showSortOnBody = GET(NAME).get(NAMES.SHOW_SORT_BODY, DEFAULTS.SHOW_SORT_BODY);
+        // this.showArrowsOnNodes = GET(NAME).get(NAMES.SHOW_ARROWS, DEFAULTS.SHOW_ARROWS);
+
+        // this.showEditionOnBody = GET(NAME).get(NAMES.SHOW_EDITION_BODY, DEFAULTS.SHOW_EDITION_BODY);
+        // this.showClipboardOnBody = GET(NAME).get(NAMES.SHOW_CLIPBOARD_BODY, DEFAULTS.SHOW_CLIPBOARD_BODY);
+        // this.showPromoteOnBody = GET(NAME).get(NAMES.SHOW_PROMOTE_BODY, DEFAULTS.SHOW_PROMOTE_BODY);
+        // this.showExecuteOnBody = GET(NAME).get(NAMES.SHOW_EXECUTE_BODY, DEFAULTS.SHOW_EXECUTE_BODY);
+        // this.showExtractOnBody = GET(NAME).get(NAMES.SHOW_EXTRACT_BODY, DEFAULTS.SHOW_EXTRACT_BODY);
+        // this.showImportOnBody = GET(NAME).get(NAMES.SHOW_IMPORT_BODY, DEFAULTS.SHOW_IMPORT_BODY);
+        // this.showRefreshOnBody = GET(NAME).get(NAMES.SHOW_REFRESH_BODY, DEFAULTS.SHOW_REFRESH_BODY);
+        // this.showHoistOnBody = GET(NAME).get(NAMES.SHOW_HOIST_BODY, DEFAULTS.SHOW_HOIST_BODY);
+        // this.showMarkOnBody = GET(NAME).get(NAMES.SHOW_MARK_BODY, DEFAULTS.SHOW_MARK_BODY);
+        // this.showSortOnBody = GET(NAME).get(NAMES.SHOW_SORT_BODY, DEFAULTS.SHOW_SORT_BODY);
+
         this.invertNodeContrast = GET(NAME).get(NAMES.INVERT_NODES, DEFAULTS.INVERT_NODES);
         this.leoID = GET(NAME).get(NAMES.LEO_ID, DEFAULTS.LEO_ID);
 
-        // * Set context for tree items visibility that are based on config options
-        return Promise.all([
-            utils.setContext(FLAGS.LEO_TREE_BROWSE, this.leoTreeBrowse),
-            utils.setContext(FLAGS.TREE_IN_EXPLORER, this.treeInExplorer),
-            utils.setContext(FLAGS.SHOW_OPEN_ASIDE, this.showOpenAside),
-            utils.setContext(FLAGS.SHOW_EDIT, this.showEditOnNodes),
-            utils.setContext(FLAGS.SHOW_ARROWS, this.showArrowsOnNodes),
-            utils.setContext(FLAGS.SHOW_ADD, this.showAddOnNodes),
-            utils.setContext(FLAGS.SHOW_MARK, this.showMarkOnNodes),
-            utils.setContext(FLAGS.SHOW_CLONE, this.showCloneOnNodes),
-            utils.setContext(FLAGS.SHOW_COPY, this.showCopyOnNodes),
-
-            utils.setContext(FLAGS.SHOW_EDITION_BODY, this.showEditionOnBody),
-            utils.setContext(FLAGS.SHOW_CLIPBOARD_BODY, this.showClipboardOnBody),
-            utils.setContext(FLAGS.SHOW_PROMOTE_BODY, this.showPromoteOnBody),
-            utils.setContext(FLAGS.SHOW_EXECUTE_BODY, this.showExecuteOnBody),
-            utils.setContext(FLAGS.SHOW_EXTRACT_BODY, this.showExtractOnBody),
-            utils.setContext(FLAGS.SHOW_IMPORT_BODY, this.showImportOnBody),
-            utils.setContext(FLAGS.SHOW_REFRESH_BODY, this.showRefreshOnBody),
-            utils.setContext(FLAGS.SHOW_HOIST_BODY, this.showHoistOnBody),
-            utils.setContext(FLAGS.SHOW_MARK_BODY, this.showMarkOnBody),
-            utils.setContext(FLAGS.SHOW_SORT_BODY, this.showSortOnBody)
-        ]);
     }
 }
 
@@ -7030,32 +6963,38 @@ export class Config implements ConfigMembers {
     // Config settings used on Leo's side
     public checkForChangeExternalFiles: string = Constants.CONFIG_DEFAULTS.CHECK_FOR_CHANGE_EXTERNAL_FILES;
     public defaultReloadIgnore: string = Constants.CONFIG_DEFAULTS.DEFAULT_RELOAD_IGNORE;
+
     // Config settings used on vscode's side
     public leoTreeBrowse: boolean = Constants.CONFIG_DEFAULTS.LEO_TREE_BROWSE; // Used as Context Flag
     public treeKeepFocus: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS;
     public treeKeepFocusWhenAside: boolean = Constants.CONFIG_DEFAULTS.TREE_KEEP_FOCUS_WHEN_ASIDE;
-    public statusBarString: string = Constants.CONFIG_DEFAULTS.STATUSBAR_STRING;
+
+    public collapseAllShortcut: boolean = Constants.CONFIG_DEFAULTS.COLLAPSE_ALL_SHORTCUT;
+    public activityViewShortcut: boolean = Constants.CONFIG_DEFAULTS.ACTIVITY_VIEW_SHORTCUT;
+    public goAnywhereShortcut: boolean = Constants.CONFIG_DEFAULTS.GO_ANYWHERE_SHORTCUT;
+
+    // public statusBarString: string = Constants.CONFIG_DEFAULTS.STATUSBAR_STRING;
     public statusBarColor: string = Constants.CONFIG_DEFAULTS.STATUSBAR_COLOR;
     public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER; // Used as Context Flag
     public showOpenAside: boolean = Constants.CONFIG_DEFAULTS.SHOW_OPEN_ASIDE; // Used as Context Flag
     public showEditOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDIT; // Used as Context Flag
-    public showArrowsOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ARROWS; // Used as Context Flag
+
+    // public showArrowsOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ARROWS; // Used as Context Flag
     public showAddOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_ADD; // Used as Context Flag
     public showMarkOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK; // Used as Context Flag
     public showCloneOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLONE; // Used as Context Flag
     public showCopyOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_COPY; // Used as Context Flag
 
-    public showEditionOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDITION_BODY; // Used as Context Flag
-    public showClipboardOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLIPBOARD_BODY; // Used as Context Flag
-    public showPromoteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_PROMOTE_BODY; // Used as Context Flag
-    public showExecuteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXECUTE_BODY; // Used as Context Flag
-    public showExtractOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXTRACT_BODY; // Used as Context Flag
-    public showImportOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_IMPORT_BODY; // Used as Context Flag
-    public showRefreshOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_REFRESH_BODY; // Used as Context Flag
-    public showHoistOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_HOIST_BODY; // Used as Context Flag
-    public showMarkOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK_BODY; // Used as Context Flag
-    public showSortOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_SORT_BODY; // Used as Context Flag
-
+    // public showEditionOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDITION_BODY; // Used as Context Flag
+    // public showClipboardOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_CLIPBOARD_BODY; // Used as Context Flag
+    // public showPromoteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_PROMOTE_BODY; // Used as Context Flag
+    // public showExecuteOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXECUTE_BODY; // Used as Context Flag
+    // public showExtractOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_EXTRACT_BODY; // Used as Context Flag
+    // public showImportOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_IMPORT_BODY; // Used as Context Flag
+    // public showRefreshOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_REFRESH_BODY; // Used as Context Flag
+    // public showHoistOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_HOIST_BODY; // Used as Context Flag
+    // public showMarkOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_MARK_BODY; // Used as Context Flag
+    // public showSortOnBody: boolean = Constants.CONFIG_DEFAULTS.SHOW_SORT_BODY; // Used as Context Flag
 
     public invertNodeContrast: boolean = Constants.CONFIG_DEFAULTS.INVERT_NODES;
     public leoID: string = Constants.CONFIG_DEFAULTS.LEO_ID;
@@ -7082,27 +7021,32 @@ public getConfig(): ConfigMembers {
         leoTreeBrowse: this.leoTreeBrowse, // Used as Context Flag
         treeKeepFocus: this.treeKeepFocus,
         treeKeepFocusWhenAside: this.treeKeepFocusWhenAside,
-        statusBarString: this.statusBarString,
+
+        collapseAllShortcut: this.collapseAllShortcut,
+        activityViewShortcut: this.activityViewShortcut,
+        goAnywhereShortcut: this.goAnywhereShortcut,
+
+        // statusBarString: this.statusBarString,
         statusBarColor: this.statusBarColor,
         treeInExplorer: this.treeInExplorer, // Used as Context Flag
         showOpenAside: this.showOpenAside,  // Used as Context Flag
         showEditOnNodes: this.showEditOnNodes, // Used as Context Flag
-        showArrowsOnNodes: this.showArrowsOnNodes, // Used as Context Flag
+        // showArrowsOnNodes: this.showArrowsOnNodes, // Used as Context Flag
         showAddOnNodes: this.showAddOnNodes, // Used as Context Flag
         showMarkOnNodes: this.showMarkOnNodes, // Used as Context Flag
         showCloneOnNodes: this.showCloneOnNodes, // Used as Context Flag
         showCopyOnNodes: this.showCopyOnNodes, // Used as Context Flag
 
-        showEditionOnBody: this.showEditionOnBody, // Used as Context Flag
-        showClipboardOnBody: this.showClipboardOnBody, // Used as Context Flag
-        showPromoteOnBody: this.showPromoteOnBody, // Used as Context Flag
-        showExecuteOnBody: this.showExecuteOnBody, // Used as Context Flag
-        showExtractOnBody: this.showExtractOnBody, // Used as Context Flag
-        showImportOnBody: this.showImportOnBody, // Used as Context Flag
-        showRefreshOnBody: this.showRefreshOnBody, // Used as Context Flag
-        showHoistOnBody: this.showHoistOnBody, // Used as Context Flag
-        showMarkOnBody: this.showMarkOnBody, // Used as Context Flag
-        showSortOnBody: this.showSortOnBody, // Used as Context Flag
+        // showEditionOnBody: this.showEditionOnBody, // Used as Context Flag
+        // showClipboardOnBody: this.showClipboardOnBody, // Used as Context Flag
+        // showPromoteOnBody: this.showPromoteOnBody, // Used as Context Flag
+        // showExecuteOnBody: this.showExecuteOnBody, // Used as Context Flag
+        // showExtractOnBody: this.showExtractOnBody, // Used as Context Flag
+        // showImportOnBody: this.showImportOnBody, // Used as Context Flag
+        // showRefreshOnBody: this.showRefreshOnBody, // Used as Context Flag
+        // showHoistOnBody: this.showHoistOnBody, // Used as Context Flag
+        // showMarkOnBody: this.showMarkOnBody, // Used as Context Flag
+        // showSortOnBody: this.showSortOnBody, // Used as Context Flag
 
         invertNodeContrast: this.invertNodeContrast,
         leoID: this.leoID
@@ -7223,27 +7167,33 @@ export interface ConfigMembers {
     leoTreeBrowse: boolean;
     treeKeepFocus: boolean;
     treeKeepFocusWhenAside: boolean;
-    statusBarString: string;
+
+    collapseAllShortcut: boolean;
+    activityViewShortcut: boolean;
+    goAnywhereShortcut: boolean;
+
+    // statusBarString: string;
     statusBarColor: string;
+
     treeInExplorer: boolean;
     showOpenAside: boolean;
     showEditOnNodes: boolean;
-    showArrowsOnNodes: boolean;
+    // showArrowsOnNodes: boolean;
     showAddOnNodes: boolean;
     showMarkOnNodes: boolean;
     showCloneOnNodes: boolean;
     showCopyOnNodes: boolean;
 
-    showEditionOnBody: boolean; // clone delete insert(s)
-    showClipboardOnBody: boolean; // cut copy paste(s)
-    showPromoteOnBody: boolean; // promote demote
-    showExecuteOnBody: boolean; // extract(s)
-    showExtractOnBody: boolean;
-    showImportOnBody: boolean;
-    showRefreshOnBody: boolean;
-    showHoistOnBody: boolean;
-    showMarkOnBody: boolean;
-    showSortOnBody: boolean;
+    // showEditionOnBody: boolean; // clone delete insert(s)
+    // showClipboardOnBody: boolean; // cut copy paste(s)
+    // showPromoteOnBody: boolean; // promote demote
+    // showExecuteOnBody: boolean; // extract(s)
+    // showExtractOnBody: boolean;
+    // showImportOnBody: boolean;
+    // showRefreshOnBody: boolean;
+    // showHoistOnBody: boolean;
+    // showMarkOnBody: boolean;
+    // showSortOnBody: boolean;
 
     invertNodeContrast: boolean;
     leoID: string;
@@ -7288,16 +7238,20 @@ public static CONFIG_NAMES = {
     SHOW_CLONE: "showCloneOnNodes",
     SHOW_COPY: "showCopyOnNodes",
 
-    SHOW_EDITION_BODY: "showEditionOnBody",
-    SHOW_CLIPBOARD_BODY: "showClipboardOnBody",
-    SHOW_PROMOTE_BODY: "showPromoteOnBody",
-    SHOW_EXECUTE_BODY: "showExecuteOnBody",
-    SHOW_EXTRACT_BODY: "showExtractOnBody",
-    SHOW_IMPORT_BODY: "showImportOnBody",
-    SHOW_REFRESH_BODY: "showRefreshOnBody",
-    SHOW_HOIST_BODY: "showHoistOnBody",
-    SHOW_MARK_BODY: "showMarkOnBody",
-    SHOW_SORT_BODY: "showSortOnBody",
+    COLLAPSE_ALL_SHORTCUT: "collapseAllShortcut",
+    ACTIVITY_VIEW_SHORTCUT: "ActivityViewShortcut",
+    GO_ANYWHERE_SHORTCUT: "goAnywhereShortcut",
+
+    // SHOW_EDITION_BODY: "showEditionOnBody",
+    // SHOW_CLIPBOARD_BODY: "showClipboardOnBody",
+    // SHOW_PROMOTE_BODY: "showPromoteOnBody",
+    // SHOW_EXECUTE_BODY: "showExecuteOnBody",
+    // SHOW_EXTRACT_BODY: "showExtractOnBody",
+    // SHOW_IMPORT_BODY: "showImportOnBody",
+    // SHOW_REFRESH_BODY: "showRefreshOnBody",
+    // SHOW_HOIST_BODY: "showHoistOnBody",
+    // SHOW_MARK_BODY: "showMarkOnBody",
+    // SHOW_SORT_BODY: "showSortOnBody",
 
     INVERT_NODES: "invertNodeContrast",
     LEO_ID: "leoID"
@@ -7314,7 +7268,13 @@ public static CONFIG_DEFAULTS = {
     LEO_TREE_BROWSE: true,
     TREE_KEEP_FOCUS: true,
     TREE_KEEP_FOCUS_WHEN_ASIDE: false,
-    STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
+
+    COLLAPSE_ALL_SHORTCUT: true,
+    ACTIVITY_VIEW_SHORTCUT: true,
+    GO_ANYWHERE_SHORTCUT: true,
+
+    // STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
+
     STATUSBAR_COLOR: "fb7c47",
     TREE_IN_EXPLORER: true,
     SHOW_OPEN_ASIDE: true,
@@ -7325,16 +7285,16 @@ public static CONFIG_DEFAULTS = {
     SHOW_CLONE: false,
     SHOW_COPY: false,
 
-    SHOW_EDITION_BODY: true,
-    SHOW_CLIPBOARD_BODY: true,
-    SHOW_PROMOTE_BODY: true,
-    SHOW_EXECUTE_BODY: true,
-    SHOW_EXTRACT_BODY: true,
-    SHOW_IMPORT_BODY: true,
-    SHOW_REFRESH_BODY: true,
-    SHOW_HOIST_BODY: true,
-    SHOW_MARK_BODY: true,
-    SHOW_SORT_BODY: true,
+    // SHOW_EDITION_BODY: true,
+    // SHOW_CLIPBOARD_BODY: true,
+    // SHOW_PROMOTE_BODY: true,
+    // SHOW_EXECUTE_BODY: true,
+    // SHOW_EXTRACT_BODY: true,
+    // SHOW_IMPORT_BODY: true,
+    // SHOW_REFRESH_BODY: true,
+    // SHOW_HOIST_BODY: true,
+    // SHOW_MARK_BODY: true,
+    // SHOW_SORT_BODY: true,
 
     INVERT_NODES: false,
     LEO_ID: ""
@@ -13854,7 +13814,7 @@ public get1Arg(p_options?: vscode.InputBoxOptions | undefined, p_token?: vscode.
 <t tx="felix.20221206201231.1">/**
  * * Mimic vscode's CTRL+P to find any position by it's headline
  */
-public async gotoAnywhere(): Promise&lt;unknown&gt; {
+public async goAnywhere(): Promise&lt;unknown&gt; {
     await this.triggerBodySave(false);
 
     const allPositions: { label: string; description?: string; position?: Position; }[] = [];
@@ -13892,13 +13852,7 @@ public async gotoAnywhere(): Promise&lt;unknown&gt; {
 
     if (p_picked &amp;&amp; p_picked.label &amp;&amp; p_picked.position) {
         if (c.positionExists(p_picked.position)) {
-            console.log('position exists!');
-
             c.selectPosition(p_picked.position);  // set this node as selection
-
-        } else {
-            console.log('POSITION DOES NOT EXIST!');
-
         }
         this.setupRefresh(
             Focus.Body, // Finish in body pane given explicitly because last focus was in input box.

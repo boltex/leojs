@@ -234,7 +234,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.FIND_QUICK_CHANGED, () => p_leoUI.findQuickChanged()],
         [CMD.FIND_QUICK_HISTORY, () => p_leoUI.findQuickHistory()],
         [CMD.FIND_QUICK_MARKED, () => p_leoUI.findQuickMarked()],
-        [CMD.FIND_QUICK_GO_ANYWHERE, () => p_leoUI.gotoAnywhere()],
+        [CMD.FIND_QUICK_GO_ANYWHERE, () => p_leoUI.goAnywhere()],
 
         [CMD.GOTO_NAV_PREV, () => p_leoUI.navigateNavEntry(LeoGotoNavKey.prev)],
         [CMD.GOTO_NAV_NEXT, () => p_leoUI.navigateNavEntry(LeoGotoNavKey.next)],

@@ -243,16 +243,20 @@ export class Constants {
         SHOW_CLONE: "showCloneOnNodes",
         SHOW_COPY: "showCopyOnNodes",
 
-        SHOW_EDITION_BODY: "showEditionOnBody",
-        SHOW_CLIPBOARD_BODY: "showClipboardOnBody",
-        SHOW_PROMOTE_BODY: "showPromoteOnBody",
-        SHOW_EXECUTE_BODY: "showExecuteOnBody",
-        SHOW_EXTRACT_BODY: "showExtractOnBody",
-        SHOW_IMPORT_BODY: "showImportOnBody",
-        SHOW_REFRESH_BODY: "showRefreshOnBody",
-        SHOW_HOIST_BODY: "showHoistOnBody",
-        SHOW_MARK_BODY: "showMarkOnBody",
-        SHOW_SORT_BODY: "showSortOnBody",
+        COLLAPSE_ALL_SHORTCUT: "collapseAllShortcut",
+        ACTIVITY_VIEW_SHORTCUT: "ActivityViewShortcut",
+        GO_ANYWHERE_SHORTCUT: "goAnywhereShortcut",
+
+        // SHOW_EDITION_BODY: "showEditionOnBody",
+        // SHOW_CLIPBOARD_BODY: "showClipboardOnBody",
+        // SHOW_PROMOTE_BODY: "showPromoteOnBody",
+        // SHOW_EXECUTE_BODY: "showExecuteOnBody",
+        // SHOW_EXTRACT_BODY: "showExtractOnBody",
+        // SHOW_IMPORT_BODY: "showImportOnBody",
+        // SHOW_REFRESH_BODY: "showRefreshOnBody",
+        // SHOW_HOIST_BODY: "showHoistOnBody",
+        // SHOW_MARK_BODY: "showMarkOnBody",
+        // SHOW_SORT_BODY: "showSortOnBody",
 
         INVERT_NODES: "invertNodeContrast",
         LEO_ID: "leoID"
@@ -268,7 +272,13 @@ export class Constants {
         LEO_TREE_BROWSE: true,
         TREE_KEEP_FOCUS: true,
         TREE_KEEP_FOCUS_WHEN_ASIDE: false,
-        STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
+
+        COLLAPSE_ALL_SHORTCUT: true,
+        ACTIVITY_VIEW_SHORTCUT: true,
+        GO_ANYWHERE_SHORTCUT: true,
+
+        // STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
+
         STATUSBAR_COLOR: "fb7c47",
         TREE_IN_EXPLORER: true,
         SHOW_OPEN_ASIDE: true,
@@ -279,16 +289,16 @@ export class Constants {
         SHOW_CLONE: false,
         SHOW_COPY: false,
 
-        SHOW_EDITION_BODY: true,
-        SHOW_CLIPBOARD_BODY: true,
-        SHOW_PROMOTE_BODY: true,
-        SHOW_EXECUTE_BODY: true,
-        SHOW_EXTRACT_BODY: true,
-        SHOW_IMPORT_BODY: true,
-        SHOW_REFRESH_BODY: true,
-        SHOW_HOIST_BODY: true,
-        SHOW_MARK_BODY: true,
-        SHOW_SORT_BODY: true,
+        // SHOW_EDITION_BODY: true,
+        // SHOW_CLIPBOARD_BODY: true,
+        // SHOW_PROMOTE_BODY: true,
+        // SHOW_EXECUTE_BODY: true,
+        // SHOW_EXTRACT_BODY: true,
+        // SHOW_IMPORT_BODY: true,
+        // SHOW_REFRESH_BODY: true,
+        // SHOW_HOIST_BODY: true,
+        // SHOW_MARK_BODY: true,
+        // SHOW_SORT_BODY: true,
 
         INVERT_NODES: false,
         LEO_ID: ""
@@ -321,6 +331,7 @@ export class Constants {
         LEO_READY: "leojsReady", // Extension activated and classes created and ready
         TREE_OPENED: "leojsTreeOpened", // At least one Leo file opened
         TREE_TITLED: "leojsTreeTitled", // Tree is a Leo file and not a new untitled document
+
         // 'states' flags for currently opened tree view
         LEO_CHANGED: "leojsChanged",
         LEO_CAN_UNDO: "leojsCanUndo",
@@ -333,6 +344,7 @@ export class Constants {
         LEO_CAN_HOIST: "leojsCanHoist", // isNotRoot equivalent, Computed by hand
         LEO_IN_CHAPTER: "leojsInChapter", // TODO
         LEO_TOP_HOIST_CHAPTER: "leojsTopHoistChapter", // TODO
+
         // 'states' flags about current selection, for visibility and commands availability
         SELECTED_MARKED: "leojsMarked", // no need for unmarked here, use !leojsMarked
         SELECTED_CLONE: "leojsCloned",
@@ -340,8 +352,10 @@ export class Constants {
         SELECTED_EMPTY: "leojsEmpty",
         SELECTED_CHILD: "leojsChild", // Has children
         SELECTED_ATFILE: "LeojsAtFile", // Can be refreshed
+
         // Statusbar Flag 'keybindings in effect'
         LEO_SELECTED: "leojsObjectSelected", // keybindings "On": Outline or body has focus
+
         // Context Flags for 'when' clauses, used concatenated, for each outline node
         NODE_MARKED: "leojsNodeMarked",  // Selected node is marked
         NODE_UNMARKED: "leojsNodeUnmarked", // Selected node is unmarked (Needed for regexp)
@@ -349,11 +363,13 @@ export class Constants {
         NODE_CLONED: "leojsNodeCloned",
         NODE_ROOT: "leojsNodeRoot",
         NODE_NOT_ROOT: "leojsNodeNotRoot",
+
         // Flags for Leo documents tree view icons and hover node command buttons
         DOCUMENT_SELECTED_TITLED: "leojsDocumentSelectedTitled",
         DOCUMENT_TITLED: "leojsDocumentTitled",
         DOCUMENT_SELECTED_UNTITLED: "leojsDocumentSelectedUntitled",
         DOCUMENT_UNTITLED: "leojsDocumentUntitled",
+
         // Flags for focus context
         FOCUS_FIND: "leojsFindFocus",
 
@@ -369,16 +385,16 @@ export class Constants {
         SHOW_CLONE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLONE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLONE.slice(1),             // Hover Icons on outline nodes
         SHOW_COPY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_COPY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_COPY.slice(1),               // Hover Icons on outline nodes
 
-        SHOW_EDITION_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDITION_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDITION_BODY.slice(1),
-        SHOW_CLIPBOARD_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY.slice(1),
-        SHOW_PROMOTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY.slice(1),
-        SHOW_EXECUTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY.slice(1),
-        SHOW_EXTRACT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY.slice(1),
-        SHOW_IMPORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY.slice(1),
-        SHOW_REFRESH_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY.slice(1),
-        SHOW_HOIST_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_HOIST_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_HOIST_BODY.slice(1),
-        SHOW_MARK_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK_BODY.slice(1),
-        SHOW_SORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_SORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_SORT_BODY.slice(1)
+        // SHOW_EDITION_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDITION_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDITION_BODY.slice(1),
+        // SHOW_CLIPBOARD_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY.slice(1),
+        // SHOW_PROMOTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY.slice(1),
+        // SHOW_EXECUTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY.slice(1),
+        // SHOW_EXTRACT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY.slice(1),
+        // SHOW_IMPORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY.slice(1),
+        // SHOW_REFRESH_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY.slice(1),
+        // SHOW_HOIST_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_HOIST_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_HOIST_BODY.slice(1),
+        // SHOW_MARK_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK_BODY.slice(1),
+        // SHOW_SORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_SORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_SORT_BODY.slice(1)
     };
 
     /**

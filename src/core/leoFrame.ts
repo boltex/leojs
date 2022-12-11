@@ -234,7 +234,7 @@ export class NullBody {
     public wrapper: StringTextWrapper;
     public use_chapters: boolean;
     public editorWrappers: { [key: string]: any } = {};
-    // this.colorizer: Any = NullColorizer(this.c)  # A Union.
+    // this.colorizer: Any = NullColorizer(this.c)  // A Union.
 
     //@+others
     //@+node:felix.20221102232737.2: *3*  NullBody.__init__
@@ -515,6 +515,225 @@ export class NullTree {
         // g.doHook("headkey2", c, p, ch, changed);
 
     }
+    //@+node:felix.20221210191616.1: *3* LeoTree.select & helpers
+    /**
+     * Select a node.
+     * Never redraws outline, but may change coloring of individual headlines.
+     * The scroll argument is used by the gui to suppress scrolling while dragging.
+     */
+    public select(p: Position): void {
+        //
+        // c.nodeHistory.update(p); // ! FROM select_new_node of tree wrapper 'select'
+
+        const trace = g.app.debug.includes('select') && !g.unitTesting;
+        const tag = 'LeoTree.select';
+        const c = this.c;
+        if (g.app.killed) {
+            return;
+        }
+        if (trace) {
+            console.log(`----- ${tag}: ${p.h}`);
+            // print(f"{tag:>30}: {c.frame.body.wrapper} {p.h}")
+            // Format matches traces in leoflexx.py
+            // print(f"{tag:30}: {len(p.b):4} {p.gnx} {p.h}")
+        }
+
+
+        try {
+            // this.tree_select_lockout = true;
+            // this.prev_v = c.p.v
+            this.selectHelper(p);
+        }
+
+        finally {
+            // this.tree_select_lockout = False
+            if (c.enableRedrawFlag) {
+                p = c.p;
+                // Don't redraw during unit testing: an important speedup.
+                if (c.expandAllAncestors(p) && !g.unitTesting) {
+                    // This can happen when doing goto-next-clone.
+                    c.redraw_later();  // This *does* happen sometimes.
+                } else {
+                    c.outerUpdate();  // Bring the tree up to date.
+                    // ! NOT USED IN LEOJS
+                    // if (this.setItemForCurrentPosition){
+                    //     // pylint: disable=no-member
+                    //     this.setItemForCurrentPosition();
+                    // }
+                }
+            } else {
+                c.requestLaterRedraw = true;
+            }
+        }
+    }
+
+    //@+node:felix.20221210193746.1: *4* LeoTree.selectHelper & helpers
+    /**
+     *  A helper function for leoTree.select.
+     * Do **not** "optimize" this by returning if p==c.p!
+     */
+    public selectHelper(p: Position): void {
+
+        if (!p || !p.__bool__()) {
+            // This is not an error! We may be changing roots.
+            // Do *not* test c.positionExists(p) here!
+            return;
+        }
+        const c = this.c;
+        if (!c.frame.body.wrapper) {
+            return;  // Defensive.
+        }
+        if (p.v.context !== c) {
+            // Selecting a foreign position will not be pretty.
+            g.trace(`Wrong context: ${p.v.context} != ${c}`);
+            return;
+        }
+        const old_p = c.p;
+        const call_event_handlers = !p.__eq__(old_p);
+        // Order is important...
+        // 1. Call c.endEditLabel.
+        this.unselect_helper(old_p, p);
+
+        // 2. Call set_body_text_after_select.
+        this.select_new_node(old_p, p);
+
+        // 3. Call c.undoer.onSelect.
+        this.change_current_position(old_p, p);
+
+        // 4. Set cursor in body.
+        this.scroll_cursor(p);
+
+        // 5. Last tweaks.
+        this.set_status_line(p);
+        if (call_event_handlers) {
+            //  g.doHook("select2", c=c, new_p=p, old_p=old_p, new_v=p, old_v=old_p)
+            g.doHook("select2", { c: c, new_p: p, old_p: old_p, new_v: p, old_v: old_p });
+            g.doHook("select3", { c: c, new_p: p, old_p: old_p, new_v: p, old_v: old_p });
+        }
+    }
+    //@+node:felix.20221210193746.2: *5* 1. LeoTree.unselect_helper
+    /**
+     * Unselect the old node, calling the unselect hooks.
+     */
+    public unselect_helper(old_p: Position, p: Position): void {
+
+        const c = this.c;
+        const call_event_handlers = !p.__eq__(old_p);
+        let unselect: boolean;
+        if (call_event_handlers) {
+            unselect = !g.doHook("unselect1", { c: c, new_p: p, old_p: old_p, new_v: p, old_v: old_p });
+        } else {
+            unselect = true;
+        }
+
+        // Actually unselect the old node. UNUSED IN LEOJS
+        // if unselect && old_p && old_p != p:
+        //     self.endEditLabel()
+        //     // #1168: Ctrl-minus selects multiple nodes.
+        //     if hasattr(self, 'unselectItem'):
+        //         // pylint: disable=no-member
+        //         self.unselectItem(old_p)
+
+        if (call_event_handlers) {
+            g.doHook("unselect2", { c: c, new_p: p, old_p: old_p, new_v: p, old_v: old_p });
+        }
+    }
+
+    //@+node:felix.20221210193746.3: *5* 2. LeoTree.select_new_node & helper
+    /**
+     * Select the new node, part 1.
+     */
+    public select_new_node(old_p: Position, p: Position): void {
+
+        const c = this.c;
+        const call_event_handlers = !p.__eq__(old_p);
+
+        if (call_event_handlers && g.doHook("select1",
+            { c: c, new_p: p, old_p: old_p, new_v: p, old_v: old_p })
+        ) {
+            if (g.app.debug.includes('select')) {
+                g.trace('select1 override');
+            }
+            return;
+        }
+
+        // c.frame.setWrap(p);  // Not that expensive  // NOT USED IN LEOJS
+        this.set_body_text_after_select(p, old_p);
+        c.nodeHistory.update(p);
+
+    }
+
+    //@+node:felix.20221210193746.4: *6* LeoTree.set_body_text_after_select
+    /**
+     * Set the text after selecting a node.
+     */
+    public set_body_text_after_select(p: Position, old_p: Position): void {
+
+        const c = this.c;
+        const w = c.frame.body.wrapper;
+        const s = p.v.b;  // Guaranteed to be unicode.
+        // Part 1: get the old text.
+        const old_s = w.getAllText();
+        if (p && p.__bool__() && p.__eq__(old_p) && s === old_s) {
+            return;
+        }
+        // Part 2: set the new text. This forces a recolor.
+        // Important: do this *before* setting text,
+        // so that the colorizer will have the proper c.p.
+        c.setCurrentPosition(p);
+        w.setAllText(s);
+        // This is now done after c.p has been changed.
+        // p.restoreCursorAndScroll()
+
+    }
+
+    //@+node:felix.20221210193746.5: *5* 3. LeoTree.change_current_position
+    /**
+     * Select the new node, part 2.
+     */
+    public change_current_position(old_p: Position, p: Position): void {
+
+        const c = this.c;
+        // c.setCurrentPosition(p)
+        // This is now done in set_body_text_after_select.
+        // GS I believe this should also get into the select1 hook
+        c.frame.scanForTabWidth(p);
+        const use_chapters = c.config.getBool('use-chapters');
+        if (use_chapters) {
+            const cc = c.chapterController;
+            const theChapter = cc && cc.getSelectedChapter();
+            if (theChapter) {
+                theChapter.p = p.copy();
+            }
+        }
+        // Do not call treeFocusHelper here!
+        // c.treeFocusHelper()
+        c.undoer.onSelect(old_p, p);
+
+    }
+
+    //@+node:felix.20221210193746.6: *5* 4. LeoTree.scroll_cursor
+    /**
+     * Scroll the cursor.
+     */
+    public scroll_cursor(p: Position): void {
+        p.restoreCursorAndScroll();  // Was in setBodyTextAfterSelect
+    }
+
+    //@+node:felix.20221210193746.7: *5* 5. LeoTree.set_status_line
+    /**
+     * Update the status line.
+     */
+    public set_status_line(p: Position): void {
+        const c = this.c;
+        // c.frame.body.assignPositionToEditor(p);  // New in Leo 4.4.1. // NOT USED IN LEOJS
+        // c.frame.updateStatusLine();  // New in Leo 4.4.1. // NOT USED IN LEOJS
+        // c.frame.clearStatusLine(); // NOT USED IN LEOJS
+        if (p && p.__bool__() && p.v) {
+            c.frame.putStatusLine(p.get_UNL());
+        }
+    }
+
     //@+node:felix.20221102232749.3: *3* NullTree.edit_widget
     public edit_widget(p: Position): StringTextWrapper | undefined {
         const d = this.editWidgetsDict;

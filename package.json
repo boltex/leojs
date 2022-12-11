@@ -168,66 +168,6 @@
           "type": "boolean",
           "description": "Inverts the contrast of the dirty/clean border aspect of tree nodes"
         },
-        "leojs.showEditionOnBody": {
-          "scope": "application",
-          "default": true,
-          "type": "boolean",
-          "description": "Shows clone, delete and insert nodes above the body pane"
-        },
-        "leojs.showClipboardOnBody": {
-          "scope": "application",
-          "default": true,
-          "type": "boolean",
-          "description": "Shows cut, copy & paste nodes above the body pane"
-        },
-        "leojs.showPromoteOnBody": {
-          "scope": "application",
-          "default": true,
-          "type": "boolean",
-          "description": "Shows promote and demote above the body pane"
-        },
-        "leojs.showExecuteOnBody": {
-          "scope": "application",
-          "default": true,
-          "type": "boolean",
-          "description": "Shows 'Execute Script' above the body pane"
-        },
-        "leojs.showExtractOnBody": {
-          "scope": "application",
-          "default": true,
-          "type": "boolean",
-          "description": "Shows extract commands above the body pane"
-        },
-        "leojs.showImportOnBody": {
-          "scope": "application",
-          "default": true,
-          "type": "boolean",
-          "description": "Shows 'Import File' above the body pane"
-        },
-        "leojs.showRefreshOnBody": {
-          "scope": "application",
-          "default": true,
-          "type": "boolean",
-          "description": "Shows 'Refresh from disk' above the body pane"
-        },
-        "leojs.showHoistOnBody": {
-          "scope": "application",
-          "default": true,
-          "type": "boolean",
-          "description": "Shows Hoist commands above the body pane"
-        },
-        "leojs.showMarkOnBody": {
-          "scope": "application",
-          "default": true,
-          "type": "boolean",
-          "description": "Shows Mark commands above the body pane"
-        },
-        "leojs.showSortOnBody": {
-          "scope": "application",
-          "default": true,
-          "type": "boolean",
-          "description": "Shows 'Sort Siblings' above the body pane"
-        },
         "leojs.leoID": {
           "scope": "application",
           "default": "",
@@ -3677,5 +3617,8 @@
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
     "stream": "^0.0.2"
-  }
+  },
+  "gitCommit": "fa338d6",
+  "gitBranch": "leoFind",
+  "gitDate": "2022-12-10 01:53:38 -0500"
 }
