@@ -1357,7 +1357,7 @@ export class LeoApp {
         // This takes about 3/4 sec when called by the leoBridge module.
         // Timeit reports 0.0175 sec when using a nullGui.
         if (!gui) {
-            gui = g.app.gui!;
+            gui = g.app.gui;
         }
         const c = new Commands(
             fileName,
@@ -2373,7 +2373,7 @@ export class LoadManager {
                 for (let n = 0; n < lm.files.length; n++) {
                     const fn = lm.files[n];
                     lm.more_cmdline_files = n < (lm.files.length - 1);
-                    c = await lm.loadLocalFile(fn, g.app.gui!);
+                    c = await lm.loadLocalFile(fn, g.app.gui);
                     // Returns None if the file is open in another instance of Leo.
                     if (c && !c1) {  // #1416:
                         c1 = c;
@@ -2499,7 +2499,7 @@ export class LoadManager {
         return c
         */
         const fn: string = "";
-        const c = await lm.loadLocalFile(fn, g.app.gui!);
+        const c = await lm.loadLocalFile(fn, g.app.gui);
         if (!c) {
             return undefined;
         }

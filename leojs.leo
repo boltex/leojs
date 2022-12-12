@@ -566,8 +566,20 @@
  * @param p_event The configuration-change event passed by vscode
  */
 private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
+
     if (p_event.affectsConfiguration(Constants.CONFIG_NAME)) {
         this.config.buildFromSavedSettings(); // If the config setting started with 'leojs'
+        if (
+            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.INVERT_NODES) ||
+            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_EDIT) ||
+            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_ARROWS) ||
+            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_ADD) ||
+            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_MARK) ||
+            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_CLONE) ||
+            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_COPY)
+        ) {
+            this.configTreeRefresh();
+        }
     }
     // also check if workbench.editor.enablePreview
     this._bodyEnablePreview = !!vscode.workspace
@@ -1004,7 +1016,7 @@ public refreshTreeRoot(): void {
         w_contextValue += Constants.CONTEXT_FLAGS.NODE_NOT_ROOT;
     }
     const w_icon: number =
-        (+element.isDirty() &lt;&lt; 3) |
+        (+(this._leoUI.config.invertNodeContrast !== !!element.isDirty()) &lt;&lt; 3) |
         (+element.isCloned() &lt;&lt; 2) |
         (+element.isMarked() &lt;&lt; 1) |
         +element.v.hasBody();
@@ -6129,7 +6141,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
             fileName = p_uri.fsPath.replace(/\\/g, '/');
             await g.app.loadManager.loadLocalFile(fileName, this);
         } else {
-            const fileNames = await this.runOpenFileDialog(
+            const fileName: string = await this.runOpenFileDialog(
                 undefined,
                 "Open",
                 [
@@ -6139,9 +6151,9 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
                 ],
                 g.defaultLeoFileExtension(),
                 false
-            );
-            if (fileNames &amp;&amp; fileNames.length &amp;&amp; g.app.loadManager) {
-                await g.app.loadManager.loadLocalFile(fileNames[0], this);
+            ) as string;
+            if (fileName &amp;&amp; g.app.loadManager) {
+                await g.app.loadManager.loadLocalFile(fileName, this);
             } else {
                 return Promise.resolve();
             }
@@ -6999,7 +7011,6 @@ export class Config implements ConfigMembers {
     public leoID: string = Constants.CONFIG_DEFAULTS.LEO_ID;
 
     private _isBusySettingConfig: boolean = false;
-    private _needsTreeRefresh: boolean = false;
 
     constructor(
         private _context: vscode.ExtensionContext,
@@ -7085,10 +7096,6 @@ public async setLeojsSettings(p_changes: ConfigSetting[]): Promise&lt;unknown&gt
     const w_promises: Thenable&lt;void&gt;[] = [];
     const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
     p_changes.forEach(i_change =&gt; {
-        if (i_change.code.includes(Constants.CONFIG_REFRESH_MATCH)) {
-            // Check if tree refresh is required for hover-icons to be displayed or hidden accordingly
-            this._needsTreeRefresh = true;
-        }
         // tslint:disable-next-line: strict-comparisons
         if (w_vscodeConfig.inspect(i_change.code)!.defaultValue === i_change.value) {
             // Set as undefined - same as default
@@ -7100,12 +7107,6 @@ public async setLeojsSettings(p_changes: ConfigSetting[]): Promise&lt;unknown&gt
     });
 
     await Promise.all(w_promises);
-    if (this._needsTreeRefresh) {
-        this._needsTreeRefresh = false;
-        setTimeout(() =&gt; {
-            this._leoUI.configTreeRefresh();
-        }, 200);
-    }
     this._isBusySettingConfig = false;
     return this.buildFromSavedSettings(); // Refresh config from settings from vscode's saved config
 
@@ -8219,7 +8220,7 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     defaultExtension: string,
     multiple?: boolean,
     startpath?: string // TODO 
-): Thenable&lt;string[]&gt; {
+): Thenable&lt;string[] | string&gt; {
     // convert to { [name: string]: string[] } typing
     const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
     return vscode.window.showOpenDialog(
@@ -8236,7 +8237,11 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
             });
         }
         //return p_uris || [];
-        return names;
+        if (!multiple) {
+            return names.length ? names[0] : ""; // Not multiple: return as string!
+        } else {
+            return names;
+        }
     });
 }
 

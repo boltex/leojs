@@ -81,7 +81,7 @@ export class CommanderOutlineCommands {
         // c.endEditing();
         const s: string = c.fileCommands.outline_to_clipboard_string()!;
         g.app.paste_c = c;
-        g.app.gui!.replaceClipboardWith(s);
+        g.app.gui.replaceClipboardWith(s);
     }
     //@+node:felix.20211208235043.3: *4* c_oc.cutOutline
     @commander_command(
@@ -108,7 +108,7 @@ export class CommanderOutlineCommands {
         undoFlag: boolean = true
     ): Position | undefined {
         if (s === undefined) {
-            s = g.app.gui!.getTextFromClipboard();
+            s = g.app.gui.getTextFromClipboard();
         }
         const c: Commands = this;
         // c.endEditing()
@@ -161,7 +161,7 @@ export class CommanderOutlineCommands {
         'Nodes do *not* retain their original identify.'
     )
     public asyncPasteOutline(this: Commands): Thenable<unknown> {
-        return g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
+        return g.app.gui.asyncGetTextFromClipboard().then((clipboard) => {
             this.pasteOutline(clipboard);
             return true;
         });
@@ -177,7 +177,7 @@ export class CommanderOutlineCommands {
         undoFlag: boolean = true
     ): Position | undefined {
         if (s === undefined) {
-            s = g.app.gui!.getTextFromClipboard();
+            s = g.app.gui.getTextFromClipboard();
         }
         const c: Commands = this;
         //c.endEditing()
@@ -236,7 +236,7 @@ export class CommanderOutlineCommands {
         'Nodes *retain* their original identify.'
     )
     public asyncPasteOutlineRetainingClones(this: Commands): Thenable<unknown> {
-        return g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
+        return g.app.gui.asyncGetTextFromClipboard().then((clipboard) => {
             this.pasteOutlineRetainingClones(clipboard);
             return true;
         });
@@ -249,7 +249,7 @@ export class CommanderOutlineCommands {
     )
     public pasteAsTemplate(this: Commands, s?: string): void {
         if (s === undefined) {
-            s = g.app.gui!.getTextFromClipboard();
+            s = g.app.gui.getTextFromClipboard();
         }
         const c: Commands = this;
         const p: Position = c.p;
@@ -490,7 +490,7 @@ export class CommanderOutlineCommands {
         'Paste as template clones only nodes that were already clones'
     )
     public asyncPasteAsTemplate(this: Commands): Thenable<unknown> {
-        return g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
+        return g.app.gui.asyncGetTextFromClipboard().then((clipboard) => {
             this.pasteAsTemplate(clipboard);
             return true;
         });
@@ -1767,7 +1767,7 @@ export class CommanderOutlineCommands {
             return;
         }
 
-        g.app.gui!.runAskYesNoDialog(
+        g.app.gui.runAskYesNoDialog(
             c,
             'Move Marked Nodes?',
             'move-marked-nodes is not undoable. Proceed?'

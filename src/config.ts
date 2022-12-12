@@ -49,7 +49,6 @@ export class Config implements ConfigMembers {
     public leoID: string = Constants.CONFIG_DEFAULTS.LEO_ID;
 
     private _isBusySettingConfig: boolean = false;
-    private _needsTreeRefresh: boolean = false;
 
     constructor(
         private _context: vscode.ExtensionContext,
@@ -130,10 +129,6 @@ export class Config implements ConfigMembers {
         const w_promises: Thenable<void>[] = [];
         const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
         p_changes.forEach(i_change => {
-            if (i_change.code.includes(Constants.CONFIG_REFRESH_MATCH)) {
-                // Check if tree refresh is required for hover-icons to be displayed or hidden accordingly
-                this._needsTreeRefresh = true;
-            }
             // tslint:disable-next-line: strict-comparisons
             if (w_vscodeConfig.inspect(i_change.code)!.defaultValue === i_change.value) {
                 // Set as undefined - same as default
@@ -145,12 +140,6 @@ export class Config implements ConfigMembers {
         });
 
         await Promise.all(w_promises);
-        if (this._needsTreeRefresh) {
-            this._needsTreeRefresh = false;
-            setTimeout(() => {
-                this._leoUI.configTreeRefresh();
-            }, 200);
-        }
         this._isBusySettingConfig = false;
         return this.buildFromSavedSettings(); // Refresh config from settings from vscode's saved config
 

@@ -243,7 +243,7 @@ export class Commands {
         const c: Commands = this;
 
         // From Official Ivars
-        this.gui = gui || g.app.gui!;
+        this.gui = gui || g.app.gui;
 
         // From initFileIvars
         this.mFileName = fileName || '';
@@ -2786,7 +2786,7 @@ export class Commands {
 
             const list_s: string = aList.join('\n');
 
-            g.app.gui!.runAskOkDialog(
+            g.app.gui.runAskOkDialog(
                 c,
                 'Python Errors',
                 `Python errors in:\n\n${list_s}`,

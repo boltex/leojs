@@ -161,7 +161,7 @@ export class LeoFrame {
         } else {
             name = c.mFileName ? c.mFileName : this.title;
         }
-        const answer = await g.app.gui!.runAskYesNoCancelDialog(
+        const answer = await g.app.gui.runAskYesNoCancelDialog(
             c,
             'Confirm',
             `Save changes to ${g.splitLongFileName(name)} before ${theType}`
@@ -185,7 +185,7 @@ export class LeoFrame {
                 }
                 return false;  // Don't save and don't veto.
             }
-            c.mFileName = await g.app.gui!.runSaveFileDialog(
+            c.mFileName = await g.app.gui.runSaveFileDialog(
                 c,
                 "Save",
                 [["Leo files", "*.leo"]],

@@ -668,8 +668,20 @@ export class LeoUI extends NullGui {
      * @param p_event The configuration-change event passed by vscode
      */
     private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
+
         if (p_event.affectsConfiguration(Constants.CONFIG_NAME)) {
             this.config.buildFromSavedSettings(); // If the config setting started with 'leojs'
+            if (
+                p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.INVERT_NODES) ||
+                p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_EDIT) ||
+                p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_ARROWS) ||
+                p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_ADD) ||
+                p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_MARK) ||
+                p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_CLONE) ||
+                p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_COPY)
+            ) {
+                this.configTreeRefresh();
+            }
         }
         // also check if workbench.editor.enablePreview
         this._bodyEnablePreview = !!vscode.workspace
@@ -4266,7 +4278,7 @@ export class LeoUI extends NullGui {
                 fileName = p_uri.fsPath.replace(/\\/g, '/');
                 await g.app.loadManager.loadLocalFile(fileName, this);
             } else {
-                const fileNames = await this.runOpenFileDialog(
+                const fileName: string = await this.runOpenFileDialog(
                     undefined,
                     "Open",
                     [
@@ -4276,9 +4288,9 @@ export class LeoUI extends NullGui {
                     ],
                     g.defaultLeoFileExtension(),
                     false
-                );
-                if (fileNames && fileNames.length && g.app.loadManager) {
-                    await g.app.loadManager.loadLocalFile(fileNames[0], this);
+                ) as string;
+                if (fileName && g.app.loadManager) {
+                    await g.app.loadManager.loadLocalFile(fileName, this);
                 } else {
                     return Promise.resolve();
                 }
@@ -5266,7 +5278,7 @@ export class LeoUI extends NullGui {
         defaultExtension: string,
         multiple?: boolean,
         startpath?: string // TODO 
-    ): Thenable<string[]> {
+    ): Thenable<string[] | string> {
         // convert to { [name: string]: string[] } typing
         const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
         return vscode.window.showOpenDialog(
@@ -5283,7 +5295,11 @@ export class LeoUI extends NullGui {
                 });
             }
             //return p_uris || [];
-            return names;
+            if (!multiple) {
+                return names.length ? names[0] : ""; // Not multiple: return as string!
+            } else {
+                return names;
+            }
         });
     }
 

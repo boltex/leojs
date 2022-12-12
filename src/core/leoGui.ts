@@ -230,7 +230,7 @@ export class LeoGui {
         multiple?: boolean,
         startpath?: string,
 
-    ): Thenable<string[]> {
+    ): Thenable<string[] | string> {
         // Return type depends on the evil multiple keyword.
         this.oops();
         return Promise.resolve(['no']);
@@ -514,7 +514,7 @@ export class NullGui extends LeoGui {
         filetypes: [string, string][],
         defaultExtension: string,
         multiple?: boolean
-    ): Thenable<string[]> {
+    ): Thenable<string[] | string> {
         return Promise.resolve([]);
     }
 
