@@ -1022,8 +1022,11 @@ export class FileCommands {
         } else {
             p._linkCopiedAfter(current);
         }
+
         // console.assert(!p.isCloned(), g.objToString(p.v.parents));
-        console.assert(!p.isCloned(), "parents length " + p.v.parents.length + "p.v.parents ");
+        // console.log('result: ', p.v.parents);
+        console.assert(!p.isCloned(), "parents length " + p.v.parents.length);
+
         this.gnxDict = oldGnxDict;
         this.reassignAllIndices(p);
         c.selectPosition(p);

@@ -10,6 +10,7 @@ import * as vscode from "vscode";
 import { Utils as uriUtils } from "vscode-uri";
 
 import * as os from 'os';
+import * as safeJsonStringify from 'safe-json-stringify';
 // import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
@@ -745,24 +746,26 @@ export const getLineAfter = get_line_after;
 //@+node:felix.20211104221354.1: *3* g.listToString     (coreGlobals.py)
 /**
  * Pretty print any array / python list to string
- * TODO : Temporary json stringify
  */
 export function listToString(obj: any): string {
     // return JSON.stringify(obj, undefined, 4);
     let result: string = "";
-    let cache: any[] = [];
-    result = JSON.stringify(obj, function (key, value) {
-        if (typeof value === 'object' && value !== null) {
-            if (cache!.indexOf(value) !== -1) {
-                // Circular reference found, discard key
-                return;
-            }
-            // Store value in our collection
-            cache!.push(value);
-        }
-        return value;
-    });
-    (cache as any) = null; // Enable garbage collection
+    result = safeJsonStringify(obj, null, 2);
+    // let cache: any[] = [];
+    // result = JSON.stringify(obj, function (key, value) {
+    //     if (typeof value === 'object' && value !== null) {
+    //         if (cache!.indexOf(value) !== -1) {
+    //             // Circular reference found, discard key
+    //             return;
+    //         }
+    //         // Store value in our collection
+    //         cache!.push(value);
+    //     }
+    //     return value;
+    // });
+    // (cache as any) = null; // Enable garbage collection
+
+
     return result;
 }
 
@@ -776,19 +779,23 @@ export function objToString(obj: any, tag?: string): string {
     if (tag) {
         result = result + `${tag}...` + '\n';
     }
-    let cache: any[] = [];
-    result = result + JSON.stringify(obj, function (key, value) {
-        if (typeof value === 'object' && value !== null) {
-            if (cache!.indexOf(value) !== -1) {
-                // Circular reference found, discard key
-                return;
-            }
-            // Store value in our collection
-            cache!.push(value);
-        }
-        return value;
-    }, 4);
-    (cache as any) = null; // Enable garbage collection
+    result = result + safeJsonStringify(obj, null, 2);
+
+    // let cache: any[] = [];
+    // result = result + JSON.stringify(obj, function (key, value) {
+    //     if (typeof value === 'object' && value !== null) {
+    //         if (cache!.indexOf(value) !== -1) {
+    //             // Circular reference found, discard key
+    //             return;
+    //         }
+    //         // Store value in our collection
+    //         cache!.push(value);
+    //     }
+    //     return value;
+    // }, 4);
+    // (cache as any) = null; // Enable garbage collection
+
+
     return result;
     // # pylint: disable=undefined-loop-variable
     //     # Looks like a a pylint bug.

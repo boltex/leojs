@@ -3719,11 +3719,9 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     &lt;&lt; devDependencies &gt;&gt;
   },
   "dependencies": {
+    "@types/safe-json-stringify": "^1.1.2",
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "fa338d6",
-  "gitBranch": "leoFind",
-  "gitDate": "2022-12-10 01:53:38 -0500"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -5985,6 +5983,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 "md5": "^2.3.0",
 "os-browserify": "^0.3.0",
 "path-browserify": "^1.0.1",
+"safe-json-stringify": "^1.2.0",
 "stream": "^0.0.2"
 </t>
 <t tx="felix.20201214205159.9">{
