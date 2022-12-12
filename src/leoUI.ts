@@ -1030,9 +1030,9 @@ export class LeoUI extends NullGui {
 
             if (w_textEditor && p_textDocumentChange.document.uri.fsPath === w_textEditor.document.uri.fsPath) {
                 w_textEditor.selections.forEach(p_selection => {
-                    // if line starts with @
+                    // TRY TO DETECT IF LANGUAGE RESET NEEDED: if line starts with @ or contains 'language'
                     let w_line = w_textEditor.document.lineAt(p_selection.active.line).text;
-                    if (w_line.trim().startsWith('@')) {
+                    if (w_line.trim().startsWith('@') || w_line.includes('language')) {
                         w_needsRefresh = true;
                     }
                 });

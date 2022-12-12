@@ -11964,9 +11964,9 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
 
         if (w_textEditor &amp;&amp; p_textDocumentChange.document.uri.fsPath === w_textEditor.document.uri.fsPath) {
             w_textEditor.selections.forEach(p_selection =&gt; {
-                // if line starts with @
+                // TRY TO DETECT IF LANGUAGE RESET NEEDED: if line starts with @ or contains 'language'
                 let w_line = w_textEditor.document.lineAt(p_selection.active.line).text;
-                if (w_line.trim().startsWith('@')) {
+                if (w_line.trim().startsWith('@') || w_line.includes('language')) {
                     w_needsRefresh = true;
                 }
             });
