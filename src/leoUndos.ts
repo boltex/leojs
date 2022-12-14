@@ -104,7 +104,9 @@ export class LeoUndosProvider implements vscode.TreeDataProvider<LeoUndoNode> {
 
     public resolveTreeItem(item: LeoUndoNode, element: LeoUndoNode, token: vscode.CancellationToken): vscode.ProviderResult<LeoUndoNode> {
         // item.tooltip = "TODO leojs Undo Tooltip";
-        item.tooltip = "Bead index " + item.beadIndex;
+        if (item.contextValue === Constants.CONTEXT_FLAGS.UNDO_BEAD) {
+            item.tooltip = "UNdo Bead #" + item.beadIndex;
+        }
         return item;
     }
 }

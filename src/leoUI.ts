@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Utils as uriUtils } from "vscode-uri";
+import { Utils as uriUtils } from "vscode-uri"; // May be useful!
 import { debounce } from "lodash";
 import * as path from 'path';
 
@@ -150,6 +150,7 @@ export class LeoUI extends NullGui {
     private _bodyMainSelectionColumn: vscode.ViewColumn | undefined; // Column of last body 'textEditor' found, set to 1
 
     private _languageFlagged: string[] = [];
+    private _killcolor_re: RegExp = new RegExp('(^@nocolor-node|^@killcolor)', 'm');
 
     private _bodyPreviewMode: boolean = true;
 
@@ -1032,7 +1033,7 @@ export class LeoUI extends NullGui {
                 w_textEditor.selections.forEach(p_selection => {
                     // TRY TO DETECT IF LANGUAGE RESET NEEDED: if line starts with @ or contains 'language'
                     let w_line = w_textEditor.document.lineAt(p_selection.active.line).text;
-                    if (w_line.trim().startsWith('@') || w_line.includes('language')) {
+                    if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
                         w_needsRefresh = true;
                     }
                 });
@@ -2267,16 +2268,7 @@ export class LeoUI extends NullGui {
             // * Get the language.
             const c = g.app.windowList[this.frameIndex].c;
             const p = c.p;
-            const w_gnx = c.p.gnx;
-
-            const aList = g.get_directives_dict_list(p);
-            const d = g.scanAtCommentAndAtLanguageDirectives(aList);
-            let w_language =
-                (d && d['language'])
-                || g.getLanguageFromAncestorAtFileNode(p)
-                || c.config.getLanguage('target-language')
-                || 'plain';
-            w_language = w_language.toLowerCase();
+            let w_language = this._getBodyLanguage();
 
             // # Get the body wrap state
             const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
@@ -2525,6 +2517,27 @@ export class LeoUI extends NullGui {
     }
 
     /**
+     * * Looks for c.p coloring language, taking account of '@killcolor', etc.
+     */
+    private _getBodyLanguage(): string {
+        const c = g.app.windowList[this.frameIndex].c;
+        const p = c.p;
+        let w_language = "plain";
+        if (!this._killcolor_re.test(p.b)) {
+            const aList = g.get_directives_dict_list(p);
+            const d = g.scanAtCommentAndAtLanguageDirectives(aList);
+            w_language =
+                (d && d['language'])
+                || g.getLanguageFromAncestorAtFileNode(p)
+                || c.config.getLanguage('target-language')
+                || 'plain';
+
+            w_language = w_language.toLowerCase();
+        }
+        return w_language;
+    }
+
+    /**
      * * Sets vscode's body-pane editor's language
      */
     private _setBodyLanguage(p_document: vscode.TextDocument, p_language: string): Thenable<vscode.TextDocument> {
@@ -2574,14 +2587,7 @@ export class LeoUI extends NullGui {
         // * Set document language along with the proper cursor position, selection range and scrolling position
         const c = g.app.windowList[this.frameIndex].c;
         const p = c.p;
-        const aList = g.get_directives_dict_list(p);
-        const d = g.scanAtCommentAndAtLanguageDirectives(aList);
-        let w_language =
-            (d && d['language'])
-            || g.getLanguageFromAncestorAtFileNode(p)
-            || c.config.getLanguage('target-language')
-            || 'plain';
-        w_language = w_language.toLowerCase();
+        let w_language = this._getBodyLanguage();
 
         // # Get the body wrap state
         let w_wrap = !!g.scanAllAtWrapDirectives(c, p);
@@ -4254,27 +4260,22 @@ export class LeoUI extends NullGui {
      */
     public async openLeoFile(p_uri?: vscode.Uri): Promise<unknown> {
 
-        // make sure it's a real uri because vscode may send selected
-        // node from other tree that has this command in title
-        if (p_uri && !!p_uri.toJSON) {
-            console.log('p_uri', p_uri);
-            console.log('OPEN p_uri', JSON.stringify(p_uri.toJSON()));
+        if (p_uri) {
+            if (!!p_uri.toJSON && !!p_uri.fsPath && p_uri.fsPath.trim()) {
+                // valid
+            } else {
+                p_uri = undefined; // clear uri
+            }
         }
 
-        this.setupRefresh(this.finalFocus, {
-            tree: true,
-            body: true,
-            states: true,
-            documents: true,
-            buttons: true
-        });
         if (!this.leoStates.fileOpenedReady) {
             // override with given argument
             let fileName: string;
 
             // make sure it's a real uri because vscode may send selected
             // node from other tree that has this command in title
-            if (p_uri && !!p_uri.fsPath && p_uri.fsPath.trim && p_uri.fsPath.trim() && g.app.loadManager) {
+
+            if (p_uri && p_uri?.fsPath?.trim() && g.app.loadManager) {
                 fileName = p_uri.fsPath.replace(/\\/g, '/');
                 await g.app.loadManager.loadLocalFile(fileName, this);
             } else {
@@ -4291,6 +4292,14 @@ export class LeoUI extends NullGui {
                 ) as string;
                 if (fileName && g.app.loadManager) {
                     await g.app.loadManager.loadLocalFile(fileName, this);
+                    this.setupRefresh(this.finalFocus, {
+                        tree: true,
+                        body: true,
+                        states: true,
+                        documents: true,
+                        buttons: true
+                    });
+                    this.launchRefresh();
                 } else {
                     return Promise.resolve();
                 }
@@ -4299,9 +4308,15 @@ export class LeoUI extends NullGui {
             await this.triggerBodySave();
             const c = g.app.windowList[this.frameIndex].c;
             await c.open_outline(p_uri);
+            this.setupRefresh(this.finalFocus, {
+                tree: true,
+                body: true,
+                states: true,
+                documents: true,
+                buttons: true
+            });
+            this.launchRefresh();
         }
-
-        this.launchRefresh();
         return Promise.resolve();
 
     }

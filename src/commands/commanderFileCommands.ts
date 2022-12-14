@@ -423,7 +423,7 @@ export class CommanderFileCommands {
         // maybe from c.k.
         let fileName: string = c.k?.givenArgs?.join('');
         // override with given argument
-        if (p_uri && p_uri.fsPath.trim()) {
+        if (p_uri && p_uri.fsPath && p_uri.fsPath.trim()) {
             fileName = p_uri.fsPath.replace(/\\/g, '/');
         }
 

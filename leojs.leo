@@ -158,6 +158,7 @@
 <v t="felix.20220922000450.10"><vh>closeBody</vh></v>
 <v t="felix.20220922000450.11"><vh>cleanupBody</vh></v>
 <v t="felix.20220922000450.12"><vh>showBody</vh></v>
+<v t="felix.20221214003903.1"><vh>_getBodyLanguage</vh></v>
 <v t="felix.20220922000450.13"><vh>_setBodyLanguage</vh></v>
 <v t="felix.20220922000450.14"><vh>refreshBodyStates</vh></v>
 <v t="felix.20220922000450.15"><vh>debouncedRefreshBodyStates</vh></v>
@@ -2859,7 +2860,7 @@ export interface LeoButton {
 
 </t>
 <t tx="felix.20201214194144.1">import * as vscode from "vscode";
-import { Utils as uriUtils } from "vscode-uri";
+import { Utils as uriUtils } from "vscode-uri"; // May be useful!
 import { debounce } from "lodash";
 import * as path from 'path';
 
@@ -3086,6 +3087,7 @@ export class LeoUI extends NullGui {
     private _bodyMainSelectionColumn: vscode.ViewColumn | undefined; // Column of last body 'textEditor' found, set to 1
 
     private _languageFlagged: string[] = [];
+    private _killcolor_re: RegExp = new RegExp('(^@nocolor-node|^@killcolor)', 'm');
 
     private _bodyPreviewMode: boolean = true;
 
@@ -6135,27 +6137,22 @@ public async closeLeoFile(): Promise&lt;unknown&gt; {
  */
 public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
 
-    // make sure it's a real uri because vscode may send selected
-    // node from other tree that has this command in title
-    if (p_uri &amp;&amp; !!p_uri.toJSON) {
-        console.log('p_uri', p_uri);
-        console.log('OPEN p_uri', JSON.stringify(p_uri.toJSON()));
+    if (p_uri) {
+        if (!!p_uri.toJSON &amp;&amp; !!p_uri.fsPath &amp;&amp; p_uri.fsPath.trim()) {
+            // valid
+        } else {
+            p_uri = undefined; // clear uri
+        }
     }
 
-    this.setupRefresh(this.finalFocus, {
-        tree: true,
-        body: true,
-        states: true,
-        documents: true,
-        buttons: true
-    });
     if (!this.leoStates.fileOpenedReady) {
         // override with given argument
         let fileName: string;
 
         // make sure it's a real uri because vscode may send selected
         // node from other tree that has this command in title
-        if (p_uri &amp;&amp; !!p_uri.fsPath &amp;&amp; p_uri.fsPath.trim &amp;&amp; p_uri.fsPath.trim() &amp;&amp; g.app.loadManager) {
+
+        if (p_uri &amp;&amp; p_uri?.fsPath?.trim() &amp;&amp; g.app.loadManager) {
             fileName = p_uri.fsPath.replace(/\\/g, '/');
             await g.app.loadManager.loadLocalFile(fileName, this);
         } else {
@@ -6172,6 +6169,14 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
             ) as string;
             if (fileName &amp;&amp; g.app.loadManager) {
                 await g.app.loadManager.loadLocalFile(fileName, this);
+                this.setupRefresh(this.finalFocus, {
+                    tree: true,
+                    body: true,
+                    states: true,
+                    documents: true,
+                    buttons: true
+                });
+                this.launchRefresh();
             } else {
                 return Promise.resolve();
             }
@@ -6180,9 +6185,15 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         await this.triggerBodySave();
         const c = g.app.windowList[this.frameIndex].c;
         await c.open_outline(p_uri);
+        this.setupRefresh(this.finalFocus, {
+            tree: true,
+            body: true,
+            states: true,
+            documents: true,
+            buttons: true
+        });
+        this.launchRefresh();
     }
-
-    this.launchRefresh();
     return Promise.resolve();
 
 }
@@ -10308,7 +10319,9 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
 </t>
 <t tx="felix.20220520011951.1">public resolveTreeItem(item: LeoUndoNode, element: LeoUndoNode, token: vscode.CancellationToken): vscode.ProviderResult&lt;LeoUndoNode&gt; {
     // item.tooltip = "TODO leojs Undo Tooltip";
-    item.tooltip = "Bead index " + item.beadIndex;
+    if (item.contextValue === Constants.CONTEXT_FLAGS.UNDO_BEAD) {
+        item.tooltip = "UNdo Bead #" + item.beadIndex;
+    }
     return item;
 }
 </t>
@@ -10936,16 +10949,7 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
         // * Get the language.
         const c = g.app.windowList[this.frameIndex].c;
         const p = c.p;
-        const w_gnx = c.p.gnx;
-
-        const aList = g.get_directives_dict_list(p);
-        const d = g.scanAtCommentAndAtLanguageDirectives(aList);
-        let w_language =
-            (d &amp;&amp; d['language'])
-            || g.getLanguageFromAncestorAtFileNode(p)
-            || c.config.getLanguage('target-language')
-            || 'plain';
-        w_language = w_language.toLowerCase();
+        let w_language = this._getBodyLanguage();
 
         // # Get the body wrap state
         const w_wrap = !!g.scanAllAtWrapDirectives(c, p);
@@ -11245,14 +11249,7 @@ public refreshBodyStates(): void {
     // * Set document language along with the proper cursor position, selection range and scrolling position
     const c = g.app.windowList[this.frameIndex].c;
     const p = c.p;
-    const aList = g.get_directives_dict_list(p);
-    const d = g.scanAtCommentAndAtLanguageDirectives(aList);
-    let w_language =
-        (d &amp;&amp; d['language'])
-        || g.getLanguageFromAncestorAtFileNode(p)
-        || c.config.getLanguage('target-language')
-        || 'plain';
-    w_language = w_language.toLowerCase();
+    let w_language = this._getBodyLanguage();
 
     // # Get the body wrap state
     let w_wrap = !!g.scanAllAtWrapDirectives(c, p);
@@ -11996,7 +11993,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
             w_textEditor.selections.forEach(p_selection =&gt; {
                 // TRY TO DETECT IF LANGUAGE RESET NEEDED: if line starts with @ or contains 'language'
                 let w_line = w_textEditor.document.lineAt(p_selection.active.line).text;
-                if (w_line.trim().startsWith('@') || w_line.includes('language')) {
+                if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
                     w_needsRefresh = true;
                 }
             });
@@ -13933,6 +13930,28 @@ public async goAnywhere(): Promise&lt;unknown&gt; {
   "when": "leojsTreeOpened &amp;&amp; viewItem =~ /^leojsUndoNode/",
   "group": "leojsUndosContext1@1"
 }
+</t>
+<t tx="felix.20221214003903.1">/**
+ * * Looks for c.p coloring language, taking account of '@killcolor', etc.
+ */
+private _getBodyLanguage(): string {
+    const c = g.app.windowList[this.frameIndex].c;
+    const p = c.p;
+    let w_language = "plain";
+    if (!this._killcolor_re.test(p.b)) {
+        const aList = g.get_directives_dict_list(p);
+        const d = g.scanAtCommentAndAtLanguageDirectives(aList);
+        w_language =
+            (d &amp;&amp; d['language'])
+            || g.getLanguageFromAncestorAtFileNode(p)
+            || c.config.getLanguage('target-language')
+            || 'plain';
+
+        w_language = w_language.toLowerCase();
+    }
+    return w_language;
+}
+
 </t>
 </tnodes>
 </leo_file>
