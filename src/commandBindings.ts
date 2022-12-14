@@ -5,6 +5,7 @@ import { LeoButtonNode } from "./leoButtons";
 import { LeoGotoNode } from "./leoGoto";
 import { LeoOutlineNode } from "./leoOutline";
 import { LeoUI } from "./leoUI";
+import { LeoUndoNode } from "./leoUndos";
 import { ReqRefresh, Focus, LeoGotoNavKey } from "./types";
 
 /**
@@ -213,6 +214,8 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.REDO_FO, () => p_leoUI.command(LEOCMD.REDO, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
         [CMD.UNDO, () => p_leoUI.command(LEOCMD.UNDO, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
         [CMD.UNDO_FO, () => p_leoUI.command(LEOCMD.UNDO, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+
+        [CMD.REVERT_TO_UNDO, (p_undo: LeoUndoNode) => p_leoUI.revertToUndo(p_undo)],
 
         [CMD.COPY_MARKED, () => p_leoUI.command(LEOCMD.COPY_MARKED, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
         [CMD.DIFF_MARKED_NODES, () => p_leoUI.command(LEOCMD.DIFF_MARKED_NODES, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],

@@ -5037,33 +5037,48 @@ export class LeoUI extends NullGui {
      * * Reverts to a particular undo bead state
      */
     public async revertToUndo(p_undo: LeoUndoNode): Promise<any> {
-        // TODO 
-        // if (p_undo.label === 'Unchanged') {
-        //     return Promise.resolve();
-        // }
-        // let action = Constants.LEOBRIDGE.REDO;
-        // let repeat = p_undo.beadIndex;
-        // if (p_undo.beadIndex <= 0) {
-        //     action = Constants.LEOBRIDGE.UNDO;
-        //     repeat = (-p_undo.beadIndex) + 1;
-        // }
-        // const w_package = await this.sendAction(
-        //     action,
-        //     { repeat: repeat }
-        // );
-        // this.setupRefresh(
-        //     Focus.Outline,
-        //     {
-        //         tree: true,
-        //         body: true,
-        //         documents: true,
-        //         states: true,
-        //         buttons: true,
-        //     }
-        // );
-        // this.launchRefresh();
-        // return w_package;
 
+        if (p_undo.label === 'Unchanged') {
+            return Promise.resolve();
+        }
+        let action = "redo"; // Constants.LEOBRIDGE.REDO;
+        let repeat = p_undo.beadIndex;
+        if (p_undo.beadIndex <= 0) {
+            action = "undo"; // Constants.LEOBRIDGE.UNDO;
+            repeat = (-p_undo.beadIndex) + 1;
+        }
+
+
+        const c = g.app.windowList[this.frameIndex].c;
+        const u = c.undoer;
+
+        for (let x = 0; x < repeat; x++) {
+
+            console.log(action);
+
+            if (action === "redo") {
+                if (u.canRedo()) {
+                    u.redo();
+                }
+            } else if (action === "undo") {
+                if (u.canUndo()) {
+                    u.undo();
+                }
+            }
+        }
+
+        this.setupRefresh(
+            Focus.Outline,
+            {
+                tree: true,
+                body: true,
+                documents: true,
+                states: true,
+                buttons: true,
+            }
+        );
+        this.launchRefresh();
+        return Promise.resolve();
     }
 
     /**

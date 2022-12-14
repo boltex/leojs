@@ -41,6 +41,7 @@ export class LeoUndosProvider implements vscode.TreeDataProvider<LeoUndoNode> {
 
             if (undoer.beads.length) {
 
+                let w_foundNode: LeoUndoNode | undefined;
                 let i: number = 0;
                 let w_defaultIcon = 1;
 
@@ -58,24 +59,34 @@ export class LeoUndosProvider implements vscode.TreeDataProvider<LeoUndoNode> {
                         w_description = "Redo";
                         w_icon = 2;
                         w_defaultIcon = 3;
+                        if (!w_foundNode) {
+                            w_undoFlag = true; // Passed all nodes until 'redo', no undo found.
+                        }
                     }
                     const w_node = new LeoUndoNode(
                         p_bead.undoType || "unknown",
                         w_description,
                         (this._beadId++).toString(),
+                        "leojsUndoNode",
+                        i - undoer.bead,
                         this._icons[w_icon]
                     );
                     w_children.push(w_node);
                     if (w_undoFlag) {
-                        this._leoUI.setUndoSelection(w_node);
+                        w_foundNode = w_node;
                     }
                     i++;
                 });
+                if (w_foundNode) {
+                    this._leoUI.setUndoSelection(w_foundNode);
+                }
             } else {
                 const w_node = new LeoUndoNode(
                     "Unchanged",
                     "",
                     (this._beadId++).toString(),
+                    "leojsNoUndoNode",
+                    0,
                     undefined
                 );
                 w_children.push(w_node);
@@ -91,7 +102,8 @@ export class LeoUndosProvider implements vscode.TreeDataProvider<LeoUndoNode> {
     }
 
     public resolveTreeItem(item: LeoUndoNode, element: LeoUndoNode, token: vscode.CancellationToken): vscode.ProviderResult<LeoUndoNode> {
-        item.tooltip = "TODO leojs Undo Tooltip";
+        // item.tooltip = "TODO leojs Undo Tooltip";
+        item.tooltip = "Bead index " + item.beadIndex;
         return item;
     }
 }
@@ -101,13 +113,12 @@ export class LeoUndosProvider implements vscode.TreeDataProvider<LeoUndoNode> {
  */
 export class LeoUndoNode extends vscode.TreeItem {
 
-    // Context string is checked in package.json with 'when' clauses
-    public contextValue: string = "leojsUndoNode";
-
     constructor(
         public label: string,
         public description: string,
         public id: string,
+        public contextValue: string,
+        public beadIndex: number,
         public iconPath?: Icon
     ) {
         super(label);

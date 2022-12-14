@@ -481,6 +481,7 @@
 <v t="felix.20201214205159.65"><vh>Mark/Unmark Context Menu</vh></v>
 <v t="felix.20201214205159.66"><vh>Outline Editing Context Menu</vh></v>
 <v t="felix.20220517203332.1"><vh>at buttons</vh></v>
+<v t="felix.20221213210705.1"><vh>undos</vh></v>
 </v>
 </v>
 <v t="felix.20201214205159.67"><vh>keybindings</vh>
@@ -1280,6 +1281,8 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.UNDO, () =&gt; p_leoUI.command(LEOCMD.UNDO, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 [CMD.UNDO_FO, () =&gt; p_leoUI.command(LEOCMD.UNDO, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
+[CMD.REVERT_TO_UNDO, (p_undo: LeoUndoNode) =&gt; p_leoUI.revertToUndo(p_undo)],
+
 </t>
 <t tx="felix.20201214150149.15">[CMD.SHOW_WELCOME, () =&gt; p_leoUI.showSettings()],
 [CMD.SHOW_SETTINGS, () =&gt; p_leoUI.showSettings()],
@@ -1531,6 +1534,7 @@ public static COMMANDS = {
     UNDO_FO: Constants.NAME + ".undoFromOutline", // from button, return focus on OUTLINE
     REDO: Constants.NAME + ".redo", // From command Palette
     REDO_FO: Constants.NAME + ".redoFromOutline", // from button, return focus on OUTLINE
+    REVERT_TO_UNDO: Constants.NAME + ".revertToUndo",
     EXECUTE: Constants.NAME + ".executeScript",
     SHOW_BODY: Constants.NAME + ".showBody",
     SHOW_OUTLINE: Constants.NAME + ".showOutline",
@@ -7726,13 +7730,12 @@ export class LeoUndosProvider implements vscode.TreeDataProvider&lt;LeoUndoNode&
  */
 export class LeoUndoNode extends vscode.TreeItem {
 
-    // Context string is checked in package.json with 'when' clauses
-    public contextValue: string = "leojsUndoNode";
-
     constructor(
         public label: string,
         public description: string,
         public id: string,
+        public contextValue: string,
+        public beadIndex: number,
         public iconPath?: Icon
     ) {
         super(label);
@@ -7770,6 +7773,7 @@ public refreshTreeRoot(): void {
 
         if (undoer.beads.length) {
 
+            let w_foundNode: LeoUndoNode | undefined;
             let i: number = 0;
             let w_defaultIcon = 1;
 
@@ -7787,24 +7791,34 @@ public refreshTreeRoot(): void {
                     w_description = "Redo";
                     w_icon = 2;
                     w_defaultIcon = 3;
+                    if (!w_foundNode) {
+                        w_undoFlag = true; // Passed all nodes until 'redo', no undo found.
+                    }
                 }
                 const w_node = new LeoUndoNode(
                     p_bead.undoType || "unknown",
                     w_description,
                     (this._beadId++).toString(),
+                    "leojsUndoNode",
+                    i - undoer.bead,
                     this._icons[w_icon]
                 );
                 w_children.push(w_node);
                 if (w_undoFlag) {
-                    this._leoUI.setUndoSelection(w_node);
+                    w_foundNode = w_node;
                 }
                 i++;
             });
+            if (w_foundNode) {
+                this._leoUI.setUndoSelection(w_foundNode);
+            }
         } else {
             const w_node = new LeoUndoNode(
                 "Unchanged",
                 "",
                 (this._beadId++).toString(),
+                "leojsNoUndoNode",
+                0,
                 undefined
             );
             w_children.push(w_node);
@@ -8677,6 +8691,7 @@ import { LeoButtonNode } from "./leoButtons";
 import { LeoGotoNode } from "./leoGoto";
 import { LeoOutlineNode } from "./leoOutline";
 import { LeoUI } from "./leoUI";
+import { LeoUndoNode } from "./leoUndos";
 import { ReqRefresh, Focus, LeoGotoNavKey } from "./types";
 
 @language typescript
@@ -10184,7 +10199,7 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
   "command": "leojs.gotoScript",
   "when": "leojsTreeOpened &amp;&amp; viewItem =~ /^leojsButtonNode/",
   "group": "leojsButtonContext1@2"
-}
+},
 </t>
 <t tx="felix.20220517212706.1">/**
  * * Show input window to select
@@ -10278,7 +10293,8 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
 
 </t>
 <t tx="felix.20220520011951.1">public resolveTreeItem(item: LeoUndoNode, element: LeoUndoNode, token: vscode.CancellationToken): vscode.ProviderResult&lt;LeoUndoNode&gt; {
-    item.tooltip = "TODO leojs Undo Tooltip";
+    // item.tooltip = "TODO leojs Undo Tooltip";
+    item.tooltip = "Bead index " + item.beadIndex;
     return item;
 }
 </t>
@@ -12046,33 +12062,48 @@ private _setUndoSelection(p_undoNode: LeoUndoNode): void {
  * * Reverts to a particular undo bead state
  */
 public async revertToUndo(p_undo: LeoUndoNode): Promise&lt;any&gt; {
-    // TODO 
-    // if (p_undo.label === 'Unchanged') {
-    //     return Promise.resolve();
-    // }
-    // let action = Constants.LEOBRIDGE.REDO;
-    // let repeat = p_undo.beadIndex;
-    // if (p_undo.beadIndex &lt;= 0) {
-    //     action = Constants.LEOBRIDGE.UNDO;
-    //     repeat = (-p_undo.beadIndex) + 1;
-    // }
-    // const w_package = await this.sendAction(
-    //     action,
-    //     { repeat: repeat }
-    // );
-    // this.setupRefresh(
-    //     Focus.Outline,
-    //     {
-    //         tree: true,
-    //         body: true,
-    //         documents: true,
-    //         states: true,
-    //         buttons: true,
-    //     }
-    // );
-    // this.launchRefresh();
-    // return w_package;
 
+    if (p_undo.label === 'Unchanged') {
+        return Promise.resolve();
+    }
+    let action = "redo"; // Constants.LEOBRIDGE.REDO;
+    let repeat = p_undo.beadIndex;
+    if (p_undo.beadIndex &lt;= 0) {
+        action = "undo"; // Constants.LEOBRIDGE.UNDO;
+        repeat = (-p_undo.beadIndex) + 1;
+    }
+
+
+    const c = g.app.windowList[this.frameIndex].c;
+    const u = c.undoer;
+
+    for (let x = 0; x &lt; repeat; x++) {
+
+        console.log(action);
+
+        if (action === "redo") {
+            if (u.canRedo()) {
+                u.redo();
+            }
+        } else if (action === "undo") {
+            if (u.canUndo()) {
+                u.undo();
+            }
+        }
+    }
+
+    this.setupRefresh(
+        Focus.Outline,
+        {
+            tree: true,
+            body: true,
+            documents: true,
+            states: true,
+            buttons: true,
+        }
+    );
+    this.launchRefresh();
+    return Promise.resolve();
 }
 
 </t>
@@ -13885,6 +13916,12 @@ public async goAnywhere(): Promise&lt;unknown&gt; {
   "command": "workbench.view.extension.leojsView",
   "key": "ctrl+shift+l",
   "when": "config.leojs.activityViewShortcut &amp;&amp; !editorHasSelection &amp;&amp; !inSearchEditor &amp;&amp; focusedView != workbench.view.search"
+}
+</t>
+<t tx="felix.20221213210705.1">{
+  "command": "leointeg.revertToUndo",
+  "when": "leojsTreeOpened &amp;&amp; viewItem =~ /^leojsUndoNode/",
+  "group": "leoUndosContext1@1"
 }
 </t>
 </tnodes>

@@ -2876,6 +2876,11 @@
           "command": "leojs.gotoScript",
           "when": "leojsTreeOpened && viewItem =~ /^leojsButtonNode/",
           "group": "leojsButtonContext1@2"
+        },
+        {
+          "command": "leointeg.revertToUndo",
+          "when": "leojsTreeOpened && viewItem =~ /^leojsUndoNode/",
+          "group": "leoUndosContext1@1"
         }
       ]
     },
