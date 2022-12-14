@@ -364,6 +364,10 @@ export class Constants {
         NODE_ROOT: "leojsNodeRoot",
         NODE_NOT_ROOT: "leojsNodeNotRoot",
 
+        // Flags for undo nodes 
+        UNDO_BEAD: "leojsUndoNode",
+        NOT_UNDO_BEAD: "leojsNoUndoNode",
+
         // Flags for Leo documents tree view icons and hover node command buttons
         DOCUMENT_SELECTED_TITLED: "leojsDocumentSelectedTitled",
         DOCUMENT_TITLED: "leojsDocumentTitled",

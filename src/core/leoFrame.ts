@@ -214,7 +214,8 @@ export class LeoFrame {
     }
     //@+node:felix.20221027154024.1: *3* putStatusLine
     public putStatusLine(s: string, bg?: string, fg?: string): void {
-        console.log('TODO ? putStatusLine', s);
+        // TODO !
+        // console.log('TODO ? putStatusLine', s);
     }
     //@-others
 

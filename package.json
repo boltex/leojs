@@ -1834,6 +1834,12 @@
         }
       },
       {
+        "command": "leojs.revertToUndo",
+        "category": "Leojs",
+        "enablement": "leojsTreeOpened",
+        "title": "Revert to Undo State"
+      },
+      {
         "command": "leojs.startSearch",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
@@ -2416,6 +2422,10 @@
         {
           "command": "leojs.redoFromOutline",
           "when": "false"
+        },
+        {
+          "command": "leojs.revertToUndo",
+          "when": "false"
         }
       ],
       "explorer/context": [
@@ -2878,9 +2888,9 @@
           "group": "leojsButtonContext1@2"
         },
         {
-          "command": "leointeg.revertToUndo",
+          "command": "leojs.revertToUndo",
           "when": "leojsTreeOpened && viewItem =~ /^leojsUndoNode/",
-          "group": "leoUndosContext1@1"
+          "group": "leojsUndosContext1@1"
         }
       ]
     },

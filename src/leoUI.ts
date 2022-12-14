@@ -5038,7 +5038,7 @@ export class LeoUI extends NullGui {
      */
     public async revertToUndo(p_undo: LeoUndoNode): Promise<any> {
 
-        if (p_undo.label === 'Unchanged') {
+        if (p_undo.contextValue !== Constants.CONTEXT_FLAGS.UNDO_BEAD) {
             return Promise.resolve();
         }
         let action = "redo"; // Constants.LEOBRIDGE.REDO;
@@ -5048,14 +5048,10 @@ export class LeoUI extends NullGui {
             repeat = (-p_undo.beadIndex) + 1;
         }
 
-
         const c = g.app.windowList[this.frameIndex].c;
         const u = c.undoer;
 
         for (let x = 0; x < repeat; x++) {
-
-            console.log(action);
-
             if (action === "redo") {
                 if (u.canRedo()) {
                     u.redo();

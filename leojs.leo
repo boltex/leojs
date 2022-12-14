@@ -2053,6 +2053,10 @@ public static CONTEXT_FLAGS = {
     NODE_ROOT: "leojsNodeRoot",
     NODE_NOT_ROOT: "leojsNodeNotRoot",
 
+    // Flags for undo nodes 
+    UNDO_BEAD: "leojsUndoNode",
+    NOT_UNDO_BEAD: "leojsNoUndoNode",
+
     // Flags for Leo documents tree view icons and hover node command buttons
     DOCUMENT_SELECTED_TITLED: "leojsDocumentSelectedTitled",
     DOCUMENT_TITLED: "leojsDocumentTitled",
@@ -4669,6 +4673,12 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     "dark": "resources/dark/redo.svg"
   }
 },
+{
+  "command": "leojs.revertToUndo",
+  "category": "Leojs",
+  "enablement": "leojsTreeOpened",
+  "title": "Revert to Undo State"
+},
 </t>
 <t tx="felix.20201214205159.23">"menus": {
   @others
@@ -5127,6 +5137,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 },
 {
   "command": "leojs.redoFromOutline",
+  "when": "false"
+},
+{
+  "command": "leojs.revertToUndo",
   "when": "false"
 }
 </t>
@@ -7498,7 +7512,6 @@ public setOpenedBodyTime(p_gnx: string): void {
  * @param p_gnx Gnx of body associated with this virtual file, mostly Leo's selected node
  */
 public fireRefreshFile(p_gnx: string): void {
-    console.log('fireRefreshFile', p_gnx);
 
     if (!this._openedBodiesGnx.includes(p_gnx)) {
         console.error("ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
@@ -7694,6 +7707,7 @@ public getTextFromClipboard(): string {
 ]
 </t>
 <t tx="felix.20211122205011.1">import * as vscode from "vscode";
+import { Constants } from "./constants";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
 import { Icon } from "./types";
@@ -7799,7 +7813,7 @@ public refreshTreeRoot(): void {
                     p_bead.undoType || "unknown",
                     w_description,
                     (this._beadId++).toString(),
-                    "leojsUndoNode",
+                    Constants.CONTEXT_FLAGS.UNDO_BEAD,
                     i - undoer.bead,
                     this._icons[w_icon]
                 );
@@ -7817,7 +7831,7 @@ public refreshTreeRoot(): void {
                 "Unchanged",
                 "",
                 (this._beadId++).toString(),
-                "leojsNoUndoNode",
+                Constants.CONTEXT_FLAGS.NOT_UNDO_BEAD,
                 0,
                 undefined
             );
@@ -12063,7 +12077,7 @@ private _setUndoSelection(p_undoNode: LeoUndoNode): void {
  */
 public async revertToUndo(p_undo: LeoUndoNode): Promise&lt;any&gt; {
 
-    if (p_undo.label === 'Unchanged') {
+    if (p_undo.contextValue !== Constants.CONTEXT_FLAGS.UNDO_BEAD) {
         return Promise.resolve();
     }
     let action = "redo"; // Constants.LEOBRIDGE.REDO;
@@ -12073,14 +12087,10 @@ public async revertToUndo(p_undo: LeoUndoNode): Promise&lt;any&gt; {
         repeat = (-p_undo.beadIndex) + 1;
     }
 
-
     const c = g.app.windowList[this.frameIndex].c;
     const u = c.undoer;
 
     for (let x = 0; x &lt; repeat; x++) {
-
-        console.log(action);
-
         if (action === "redo") {
             if (u.canRedo()) {
                 u.redo();
@@ -13919,9 +13929,9 @@ public async goAnywhere(): Promise&lt;unknown&gt; {
 }
 </t>
 <t tx="felix.20221213210705.1">{
-  "command": "leointeg.revertToUndo",
+  "command": "leojs.revertToUndo",
   "when": "leojsTreeOpened &amp;&amp; viewItem =~ /^leojsUndoNode/",
-  "group": "leoUndosContext1@1"
+  "group": "leojsUndosContext1@1"
 }
 </t>
 </tnodes>

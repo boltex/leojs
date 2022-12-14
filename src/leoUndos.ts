@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { Constants } from "./constants";
 import { LeoStates } from "./leoStates";
 import * as g from './core/leoGlobals';
 import { Icon } from "./types";
@@ -67,7 +68,7 @@ export class LeoUndosProvider implements vscode.TreeDataProvider<LeoUndoNode> {
                         p_bead.undoType || "unknown",
                         w_description,
                         (this._beadId++).toString(),
-                        "leojsUndoNode",
+                        Constants.CONTEXT_FLAGS.UNDO_BEAD,
                         i - undoer.bead,
                         this._icons[w_icon]
                     );
@@ -85,7 +86,7 @@ export class LeoUndosProvider implements vscode.TreeDataProvider<LeoUndoNode> {
                     "Unchanged",
                     "",
                     (this._beadId++).toString(),
-                    "leojsNoUndoNode",
+                    Constants.CONTEXT_FLAGS.NOT_UNDO_BEAD,
                     0,
                     undefined
                 );
