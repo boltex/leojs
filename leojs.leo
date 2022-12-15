@@ -7943,6 +7943,7 @@ public triggerBodySave(p_forcedVsCodeSave?: boolean): Thenable&lt;unknown&gt; {
         q_savePromise = Promise.resolve(true);
     }
     return q_savePromise.then((p_result) =&gt; {
+        this.debouncedRefreshBodyStates();
         return p_result;
     }, (p_reason) =&gt; {
         console.log('BodySave rejected :', p_reason);
@@ -11275,15 +11276,19 @@ public refreshBodyStates(): void {
 <t tx="felix.20220922000450.15">/**
  * * Refresh body states after a small debounced delay.
  */
-public debouncedRefreshBodyStates() {
+public debouncedRefreshBodyStates(p_delay?: number) {
+    if (!p_delay) {
+        p_delay = 0;
+    }
     if (this._bodyStatesTimer) {
         clearTimeout(this._bodyStatesTimer);
     }
     this._bodyStatesTimer = setTimeout(() =&gt; {
-        // this.triggerBodySave(true);
-        this._bodySaveDocument(this._bodyLastChangedDocument!);
-        this.refreshBodyStates();
-    }, Constants.BODY_STATES_DEBOUNCE_DELAY);
+        if (this._bodyLastChangedDocument &amp;&amp; this.leoStates.fileOpenedReady) {
+            this._bodySaveDocument(this._bodyLastChangedDocument);
+            this.refreshBodyStates();
+        }
+    }, p_delay || Constants.BODY_STATES_DEBOUNCE_DELAY);
 }
 
 </t>
@@ -11866,11 +11871,6 @@ public _changedTextEditorViewColumn(
  * @param p_editors text editor array (to be checked for changes in this method)
  */
 public _changedVisibleTextEditors(p_editors: readonly vscode.TextEditor[]): void {
-    // todo cleanup test log
-    if (p_editors &amp;&amp; p_editors.length) {
-        // console.log('editors changed visibility', p_editors[0].document, p_editors[0].document.uri.fsPath, p_editors[0].document.uri.scheme);
-    }
-
     if (p_editors &amp;&amp; p_editors.length) {
         // May be no changes - so check length
         p_editors.forEach((p_textEditor) =&gt; {

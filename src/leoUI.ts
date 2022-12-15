@@ -910,11 +910,6 @@ export class LeoUI extends NullGui {
      * @param p_editors text editor array (to be checked for changes in this method)
      */
     public _changedVisibleTextEditors(p_editors: readonly vscode.TextEditor[]): void {
-        // todo cleanup test log
-        if (p_editors && p_editors.length) {
-            // console.log('editors changed visibility', p_editors[0].document, p_editors[0].document.uri.fsPath, p_editors[0].document.uri.scheme);
-        }
-
         if (p_editors && p_editors.length) {
             // May be no changes - so check length
             p_editors.forEach((p_textEditor) => {
@@ -1138,6 +1133,7 @@ export class LeoUI extends NullGui {
             q_savePromise = Promise.resolve(true);
         }
         return q_savePromise.then((p_result) => {
+            this.debouncedRefreshBodyStates();
             return p_result;
         }, (p_reason) => {
             console.log('BodySave rejected :', p_reason);
@@ -2612,15 +2608,19 @@ export class LeoUI extends NullGui {
     /**
      * * Refresh body states after a small debounced delay.
      */
-    public debouncedRefreshBodyStates() {
+    public debouncedRefreshBodyStates(p_delay?: number) {
+        if (!p_delay) {
+            p_delay = 0;
+        }
         if (this._bodyStatesTimer) {
             clearTimeout(this._bodyStatesTimer);
         }
         this._bodyStatesTimer = setTimeout(() => {
-            // this.triggerBodySave(true);
-            this._bodySaveDocument(this._bodyLastChangedDocument!);
-            this.refreshBodyStates();
-        }, Constants.BODY_STATES_DEBOUNCE_DELAY);
+            if (this._bodyLastChangedDocument && this.leoStates.fileOpenedReady) {
+                this._bodySaveDocument(this._bodyLastChangedDocument);
+                this.refreshBodyStates();
+            }
+        }, p_delay || Constants.BODY_STATES_DEBOUNCE_DELAY);
     }
 
     /**
