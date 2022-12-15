@@ -128,6 +128,7 @@ export class LeoFind {
     public pattern_match!: boolean;
     public search_headline!: boolean;
     public search_body!: boolean;
+    public entire_outline!: boolean;
     public suboutline_only!: boolean;
     public mark_changes!: boolean;
     public mark_finds!: boolean;

@@ -260,7 +260,7 @@
 <v t="felix.20220613164517.1"><vh>runAboutLeoDialog</vh></v>
 <v t="felix.20220108211750.1"><vh>runAskOkDialog</vh></v>
 <v t="felix.20220109220155.1"><vh>runAskYesNoDialog</vh></v>
-<v t="felix.20220516005841.1"><vh>runAskYesNoDialog</vh></v>
+<v t="felix.20220516005841.1"><vh>runAskYesNoCancelDialog</vh></v>
 <v t="felix.20220107223824.1"><vh>runOpenFileDialog</vh></v>
 <v t="felix.20220108211806.1"><vh>runSaveFileDialog</vh></v>
 </v>
@@ -2895,8 +2895,9 @@ import { Position } from "./core/leoNodes";
 import { LeoGotoNode, LeoGotoProvider } from "./leoGoto";
 import { LeoFrame } from "./core/leoFrame";
 import { LeoFindPanelProvider } from "./leoFindPanelWebview";
-import { ISettings } from "./core/leoFind";
+import { ISettings, LeoFind } from "./core/leoFind";
 import { NullGui } from "./core/leoGui";
+import { StringFindTabManager } from "./core/findTabManager";
 
 @language typescript
 @tabwidth -4
@@ -9181,6 +9182,7 @@ public loadSearchSettings(): void {
         whole_word: leoISettings.whole_word
     };
 
+    // TODO : PASS DIRECTLY ! 
 
     const w_settings: LeoSearchSettings = {
         isTag: w_searchSettings.is_tag,
@@ -9276,35 +9278,129 @@ public loadSearchSettings(): void {
  */
 public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt; {
 
-    return vscode.window.showInformationMessage("TODO: saveSearchSettings");
+    // return vscode.window.showInformationMessage("TODO: saveSearchSettings");
 
-    // this._lastSettingsUsed = p_settings;
-    // // convert to LeoGuiFindTabManagerSettings
-    // const w_settings: LeoGuiFindTabManagerSettings = {
-    //     // Nav settings
-    //     is_tag: p_settings.isTag,
-    //     nav_text: p_settings.navText,
-    //     show_parents: p_settings.showParents,
-    //     search_options: p_settings.searchOptions,
-    //     // Find/change strings...
-    //     find_text: p_settings.findText,
-    //     change_text: p_settings.replaceText,
-    //     // Find options...
-    //     ignore_case: p_settings.ignoreCase,
-    //     mark_changes: p_settings.markChanges,
-    //     mark_finds: p_settings.markFinds,
-    //     node_only: !!(p_settings.searchScope === 2),
-    //     file_only: !!(p_settings.searchScope === 3),
-    //     pattern_match: p_settings.regExp,
-    //     search_body: p_settings.searchBody,
-    //     search_headline: p_settings.searchHeadline,
-    //     suboutline_only: !!(p_settings.searchScope === 1),
-    //     whole_word: p_settings.wholeWord,
-    // };
-    // return this.sendAction(
-    //     Constants.LEOBRIDGE.SET_SEARCH_SETTINGS,
-    //     JSON.stringify({ searchSettings: w_settings })
-    // );
+    this._lastSettingsUsed = p_settings;
+    // convert to LeoGuiFindTabManagerSettings
+    const searchSettings: LeoGuiFindTabManagerSettings = {
+        // Nav settings
+        is_tag: p_settings.isTag,
+        nav_text: p_settings.navText,
+        show_parents: p_settings.showParents,
+        search_options: p_settings.searchOptions,
+        // Find/change strings...
+        find_text: p_settings.findText,
+        change_text: p_settings.replaceText,
+        // Find options...
+        ignore_case: p_settings.ignoreCase,
+        mark_changes: p_settings.markChanges,
+        mark_finds: p_settings.markFinds,
+        node_only: !!(p_settings.searchScope === 2),
+        file_only: !!(p_settings.searchScope === 3),
+        pattern_match: p_settings.regExp,
+        search_body: p_settings.searchBody,
+        search_headline: p_settings.searchHeadline,
+        suboutline_only: !!(p_settings.searchScope === 1),
+        whole_word: p_settings.wholeWord,
+    };
+
+
+    // Sets search options. Init widgets and ivars from param.searchSettings
+    const c = g.app.windowList[this.frameIndex].c;
+    const scon = c.quicksearchController;
+    const find = c.findCommands;
+    const ftm = c.findCommands.ftm;
+
+    // * Try to set the search settings
+    // nav settings
+    scon.navText = searchSettings.nav_text;
+    scon.showParents = searchSettings.show_parents;
+    scon.isTag = searchSettings.is_tag;
+    scon.searchOptions = searchSettings.search_options;
+
+    // Find/change text boxes.
+    const table: [string, string, string][] = [
+        ['find_findbox', 'find_text', ''],
+        ['find_replacebox', 'change_text', ''],
+    ];
+    for (let [widget_ivar, setting_name, w_default] of table) {
+        const w = ftm[widget_ivar as keyof StringFindTabManager]; // getattr(ftm, widget_ivar)
+        const s = searchSettings[setting_name as keyof LeoGuiFindTabManagerSettings] || w_default
+        w.clear();
+        w.insert(s);
+    }
+
+    // Check boxes.
+    const table2: [string, string][] = [
+        ['ignore_case', 'check_box_ignore_case'],
+        ['mark_changes', 'check_box_mark_changes'],
+        ['mark_finds', 'check_box_mark_finds'],
+        ['pattern_match', 'check_box_regexp'],
+        ['search_body', 'check_box_search_body'],
+        ['search_headline', 'check_box_search_headline'],
+        ['whole_word', 'check_box_whole_word'],
+    ];
+    for (let [setting_name, widget_ivar] of table2) {
+        const w = ftm[widget_ivar as keyof StringFindTabManager]; // getattr(ftm, widget_ivar)
+        const val = searchSettings[setting_name as keyof LeoGuiFindTabManagerSettings];
+        (find as any)[setting_name as keyof LeoFind] = val;
+
+        if (val !== w.isChecked()) {
+            w.toggle();
+        }
+
+    }
+
+    // Radio buttons
+    const table3: [string, string, string][] = [
+        ['node_only', 'node_only', 'radio_button_node_only'],
+        ['file_only', 'file_only', 'radio_button_file_only'],
+        ['entire_outline', "", 'radio_button_entire_outline'],
+        ['suboutline_only', 'suboutline_only', 'radio_button_suboutline_only'],
+    ];
+    for (let [setting_name, ivar, widget_ivar] of table3) {
+        const w = ftm[widget_ivar as keyof StringFindTabManager]; // getattr(ftm, widget_ivar)
+        const val = searchSettings[setting_name as keyof LeoGuiFindTabManagerSettings] || false;
+
+        if (ivar) {
+            // assert hasattr(find, setting_name), setting_name
+
+            // setattr(find, setting_name, val)
+            (find as any)[setting_name as keyof LeoFind] = val;
+
+            if (val !== w.isChecked()) {
+                w.toggle();
+            }
+        }
+    }
+
+    // Ensure one radio button is set.
+    const w = ftm.radio_button_entire_outline;
+    const nodeOnly = searchSettings.node_only || false;
+    const fileOnly = searchSettings.file_only || false;
+    const suboutlineOnly = searchSettings.suboutline_only || false;
+
+    if (!nodeOnly &amp;&amp; !suboutlineOnly &amp;&amp; !fileOnly) {
+        find.entire_outline = true;
+        if (!w.isChecked()) {
+            w.toggle();
+        }
+    } else {
+        find.entire_outline = false;
+        if (w.isChecked()) {
+            w.toggle();
+        }
+    }
+    // # Confirm by sending back the settings to the client
+    // try:
+    //     settings = ftm.get_settings()
+    //     # Use the "__dict__" of the settings, to be serializable as a json string.
+    //     result = {"searchSettings": settings.__dict__}
+    // except Exception as e:
+    //     raise ServerError(f"{tag}: exception getting search settings: {e}")
+    // return self._make_response(result)
+
+    return Promise.resolve();
 }
 
 </t>
@@ -12331,6 +12427,7 @@ public static OLD_POS_OFFSETS = {
 <t tx="felix.20221026222034.1">public set_focus(commander: Commands, widget: any): void {
     this.focusWidget = widget;
 }
+
 </t>
 <t tx="felix.20221026222040.1">public get_focus(c: Commands): any {
     return this.focusWidget;
@@ -12342,6 +12439,7 @@ public static OLD_POS_OFFSETS = {
     return "test";
 
 }
+
 </t>
 <t tx="felix.20221027155442.1">export const enum LeoGotoNavKey {
     prev = 0,
@@ -13371,7 +13469,6 @@ public exportHeadlines(p_exportFileUri?: vscode.Uri): Thenable&lt;unknown&gt; {
     //     });
     return Promise.resolve();
 }
-
 
 </t>
 <t tx="felix.20221114222048.4">/**
