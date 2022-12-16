@@ -725,10 +725,10 @@ export class Constants {
         SORT_CHILDREN: "sort-children",
         SORT_SIBLINGS: "sort-siblings",
         // * Clone-find functionality
-        CLONE_FIND_ALL: "TODO_CLONE_FIND_ALL", // TODO
-        CLONE_FIND_ALL_FLATTENED: "TODO_CLONE_FIND_ALL_FLATTENED", // TODO
-        CLONE_FIND_MARKED: "TODO_CLONE_FIND_MARKED", // TODO
-        CLONE_FIND_FLATTENED_MARKED: "TODO_CLONE_FIND_FLATTENED_MARKED", // TODO
+        CLONE_FIND_ALL: "TODO_CLONE_FIND_ALL", // TODO : USE do_clone_find_all
+        CLONE_FIND_ALL_FLATTENED: "TODO_CLONE_FIND_ALL_FLATTENED", // TODO : USE do_clone_find_all_flattened
+        CLONE_FIND_MARKED: "cfam",
+        CLONE_FIND_FLATTENED_MARKED: "cffm",
         CLONE_FIND_PARENTS: "clone-find-parents",
     };
 

@@ -1777,10 +1777,10 @@ public static LEO_COMMANDS = {
     SORT_CHILDREN: "sort-children",
     SORT_SIBLINGS: "sort-siblings",
     // * Clone-find functionality
-    CLONE_FIND_ALL: "TODO_CLONE_FIND_ALL", // TODO
-    CLONE_FIND_ALL_FLATTENED: "TODO_CLONE_FIND_ALL_FLATTENED", // TODO
-    CLONE_FIND_MARKED: "TODO_CLONE_FIND_MARKED", // TODO
-    CLONE_FIND_FLATTENED_MARKED: "TODO_CLONE_FIND_FLATTENED_MARKED", // TODO
+    CLONE_FIND_ALL: "TODO_CLONE_FIND_ALL", // TODO : USE do_clone_find_all
+    CLONE_FIND_ALL_FLATTENED: "TODO_CLONE_FIND_ALL_FLATTENED", // TODO : USE do_clone_find_all_flattened
+    CLONE_FIND_MARKED: "cfam",
+    CLONE_FIND_FLATTENED_MARKED: "cffm",
     CLONE_FIND_PARENTS: "clone-find-parents",
 };
 
@@ -9085,61 +9085,76 @@ public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
  * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
  */
 public cloneFind(p_marked: boolean, p_flat: boolean): Thenable&lt;unknown&gt; {
-    return vscode.window.showInformationMessage("TODO: cloneFind");
+    // return vscode.window.showInformationMessage("TODO: cloneFind");
 
-    // let w_searchString: string = this._lastSettingsUsed!.findText;
-    // let w_action: string;
-    // if (p_marked) {
-    //     w_action = p_flat
-    //         ? Constants.LEOBRIDGE.CLONE_FIND_FLATTENED_MARKED
-    //         : Constants.LEOBRIDGE.CLONE_FIND_MARKED;
-    // } else {
-    //     w_action = p_flat
-    //         ? Constants.LEOBRIDGE.CLONE_FIND_ALL_FLATTENED
-    //         : Constants.LEOBRIDGE.CLONE_FIND_ALL;
-    // }
+    let w_searchString: string = this._lastSettingsUsed!.findText;
 
-    // if (p_marked) {
-    //     // don't use find methods.
-    //     return this.nodeCommand({
-    //         action: w_action,
-    //         node: undefined,
-    //         refreshType: { tree: true, body: true, states: true },
-    //         fromOutline: false,
-    //     }) || Promise.resolve();
-    // }
+    const c = g.app.windowList[this.frameIndex].c;
+    const fc = c.findCommands;
 
-    // return this._isBusyTriggerSave(false, true)
-    //     .then(() =&gt; {
-    //         return this._inputFindPattern()
-    //             .then((p_findString) =&gt; {
-    //                 if (!p_findString) {
-    //                     return true; // Cancelled with escape or empty string.
-    //                 }
-    //                 w_searchString = p_findString;
-    //                 return false;
-    //             });
-    //     })
-    //     .then((p_cancelled: boolean) =&gt; {
-    //         if (this._lastSettingsUsed &amp;&amp; !p_cancelled) {
-    //             this._lastSettingsUsed.findText = w_searchString;
-    //             this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
-    //             return this.sendAction(w_action)
-    //                 .then((p_cloneFindResult: LeoBridgePackage) =&gt; {
-    //                     let w_focusOnOutline = false;
-    //                     const w_focus = p_cloneFindResult.focus!.toLowerCase();
-    //                     if (w_focus.includes('tree') || w_focus.includes('head')) {
-    //                         // tree
-    //                         w_focusOnOutline = true;
-    //                     }
-    //                     this.loadSearchSettings();
-    //                     this.launchRefresh(
-    //                         { tree: true, body: true, documents: false, buttons: false, states: true },
-    //                         w_focusOnOutline
-    //                     );
-    //                 });
-    //         }
-    //     });
+    if (p_marked) {
+        // When marked, no input from user is required, do the command and exit.
+        const w_action = p_flat
+            ? Constants.LEO_COMMANDS.CLONE_FIND_FLATTENED_MARKED
+            : Constants.LEO_COMMANDS.CLONE_FIND_MARKED;
+        return this.command(w_action, {
+            finalFocus: Focus.NoChange,
+            refreshType: {
+                tree: true,
+                states: true,
+                documents: true,
+            }
+        });
+    }
+
+    return this.triggerBodySave(false)
+        .then(() =&gt; {
+            return this._inputFindPattern()
+                .then((p_findString) =&gt; {
+                    if (!p_findString) {
+                        return true; // Cancelled with escape or empty string.
+                    }
+                    w_searchString = p_findString;
+                    return false;
+                });
+        })
+        .then((p_cancelled: boolean) =&gt; {
+            if (this._lastSettingsUsed &amp;&amp; !p_cancelled) {
+                this._lastSettingsUsed.findText = w_searchString;
+                this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
+
+                const settings = fc.ftm.get_settings();
+                const result = fc.do_clone_find_all(settings);
+                const w = this.get_focus(c);
+                const w_focus = this.widget_name(w);
+
+                if (p_flat) {
+                    fc.do_clone_find_all_flattened(settings);
+                } else {
+                    fc.do_clone_find_all(settings);
+                }
+                let w_focusOnOutline = false;
+
+                if (w_focus.includes('tree') || w_focus.includes('head')) {
+                    // tree
+                    w_focusOnOutline = true;
+                }
+                this.loadSearchSettings();
+
+                this.setupRefresh(
+                    w_focusOnOutline ? Focus.Outline : Focus.Body,
+                    {
+                        tree: true,
+                        body: true,
+                        // documents: false,
+                        // buttons: false,
+                        states: true
+                    }
+                );
+                this.launchRefresh();
+
+            }
+        });
 }
 
 </t>
