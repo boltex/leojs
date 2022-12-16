@@ -260,6 +260,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.REPLACE_THEN_FIND_FO, () => p_leoUI.replace(true, true)],
         [CMD.REPLACE_ALL, () => p_leoUI.findAll(true)],
         [CMD.GOTO_GLOBAL_LINE, () => p_leoUI.gotoGlobalLine()],
+
         [CMD.TAG_CHILDREN, () => p_leoUI.tagChildren()],
         [CMD.TAG_NODE, () => p_leoUI.tagNode()],
         [CMD.REMOVE_TAG, () => p_leoUI.removeTag()],
@@ -267,15 +268,17 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 
         [CMD.CLONE_FIND_ALL, () => p_leoUI.cloneFind(false, false)],
         [CMD.CLONE_FIND_ALL_FLATTENED, () => p_leoUI.cloneFind(false, true)],
-        [CMD.CLONE_FIND_TAG, () => p_leoUI.cloneFindTag()],
         [CMD.CLONE_FIND_PARENTS, () => p_leoUI.command(LEOCMD.CLONE_FIND_PARENTS, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
         [CMD.CLONE_FIND_MARKED, () => p_leoUI.cloneFind(true, false)],
         [CMD.CLONE_FIND_FLATTENED_MARKED, () => p_leoUI.cloneFind(true, true)],
+
+        [CMD.CLONE_FIND_TAG, () => p_leoUI.cloneFindTag()],
 
         [CMD.SET_FIND_EVERYWHERE_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.ENTIRE_OUTLINE)],
         [CMD.SET_FIND_NODE_ONLY_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.NODE_ONLY)],
         [CMD.SET_FIND_FILE_ONLY_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.FILE_ONLY)],
         [CMD.SET_FIND_SUBOUTLINE_ONLY_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SUBOUTLINE_ONLY)],
+
         [CMD.TOGGLE_FIND_IGNORE_CASE_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.IGNORE_CASE)],
         [CMD.TOGGLE_FIND_MARK_CHANGES_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_CHANGES)],
         [CMD.TOGGLE_FIND_MARK_FINDS_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_FINDS)],

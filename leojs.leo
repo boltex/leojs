@@ -1334,6 +1334,7 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.REPLACE_THEN_FIND_FO, () =&gt; p_leoUI.replace(true, true)],
 [CMD.REPLACE_ALL, () =&gt; p_leoUI.findAll(true)],
 [CMD.GOTO_GLOBAL_LINE, () =&gt; p_leoUI.gotoGlobalLine()],
+
 [CMD.TAG_CHILDREN, () =&gt; p_leoUI.tagChildren()],
 [CMD.TAG_NODE, () =&gt; p_leoUI.tagNode()],
 [CMD.REMOVE_TAG, () =&gt; p_leoUI.removeTag()],
@@ -1342,15 +1343,17 @@ export function activate(p_context: vscode.ExtensionContext) {
 </t>
 <t tx="felix.20201214150149.17">[CMD.CLONE_FIND_ALL, () =&gt; p_leoUI.cloneFind(false, false)],
 [CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; p_leoUI.cloneFind(false, true)],
-[CMD.CLONE_FIND_TAG, () =&gt; p_leoUI.cloneFindTag()],
 [CMD.CLONE_FIND_PARENTS, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_PARENTS, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 [CMD.CLONE_FIND_MARKED, () =&gt; p_leoUI.cloneFind(true, false)],
 [CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; p_leoUI.cloneFind(true, true)],
+
+[CMD.CLONE_FIND_TAG, () =&gt; p_leoUI.cloneFindTag()],
 
 [CMD.SET_FIND_EVERYWHERE_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.ENTIRE_OUTLINE)],
 [CMD.SET_FIND_NODE_ONLY_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.NODE_ONLY)],
 [CMD.SET_FIND_FILE_ONLY_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.FILE_ONLY)],
 [CMD.SET_FIND_SUBOUTLINE_ONLY_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SUBOUTLINE_ONLY)],
+
 [CMD.TOGGLE_FIND_IGNORE_CASE_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.IGNORE_CASE)],
 [CMD.TOGGLE_FIND_MARK_CHANGES_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_CHANGES)],
 [CMD.TOGGLE_FIND_MARK_FINDS_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_FINDS)],
@@ -1778,7 +1781,7 @@ public static LEO_COMMANDS = {
     CLONE_FIND_ALL_FLATTENED: "TODO_CLONE_FIND_ALL_FLATTENED", // TODO
     CLONE_FIND_MARKED: "TODO_CLONE_FIND_MARKED", // TODO
     CLONE_FIND_FLATTENED_MARKED: "TODO_CLONE_FIND_FLATTENED_MARKED", // TODO
-    CLONE_FIND_PARENTS: "TODO_CLONE_FIND_PARENTS", // TODO
+    CLONE_FIND_PARENTS: "clone-find-parents",
 };
 
 </t>
