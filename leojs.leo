@@ -1341,13 +1341,13 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.REMOVE_TAGS, () =&gt; p_leoUI.removeTags()],
 
 </t>
-<t tx="felix.20201214150149.17">[CMD.CLONE_FIND_ALL, () =&gt; p_leoUI.cloneFind(false, false)],
+<t tx="felix.20201214150149.17">[CMD.CLONE_FIND_TAG, () =&gt; p_leoUI.cloneFindTag()],
+
+[CMD.CLONE_FIND_ALL, () =&gt; p_leoUI.cloneFind(false, false)],
 [CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; p_leoUI.cloneFind(false, true)],
 [CMD.CLONE_FIND_PARENTS, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_PARENTS, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 [CMD.CLONE_FIND_MARKED, () =&gt; p_leoUI.cloneFind(true, false)],
 [CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; p_leoUI.cloneFind(true, true)],
-
-[CMD.CLONE_FIND_TAG, () =&gt; p_leoUI.cloneFindTag()],
 
 [CMD.SET_FIND_EVERYWHERE_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.ENTIRE_OUTLINE)],
 [CMD.SET_FIND_NODE_ONLY_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.NODE_ONLY)],
@@ -1665,7 +1665,7 @@ public static COMMANDS = {
     CLONE_FIND_TAG: Constants.NAME + ".cloneFindTag",
     CLONE_FIND_MARKED: Constants.NAME + ".cloneFindMarked",
     CLONE_FIND_FLATTENED_MARKED: Constants.NAME + ".cloneFindFlattenedMarked",
-    // TODO
+
     CLONE_FIND_PARENTS: Constants.NAME + ".cloneFindParents",
     GOTO_GLOBAL_LINE: Constants.NAME + ".gotoGlobalLine",
     TAG_CHILDREN: Constants.NAME + ".tagChildren",
@@ -2970,6 +2970,34 @@ import { StringFindTabManager } from "./core/findTabManager";
         this._launchRefresh,
         Constants.REFRESH_DEBOUNCE_DELAY
     );
+
+    // * Create a single data provider for both outline trees, Leo view and Explorer view
+    this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);
+
+    this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
+    this._context.subscriptions.push(
+        this._leoTreeView,
+        this._leoTreeView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeView))),
+        this._leoTreeView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeView))),
+        this._leoTreeView.onDidChangeVisibility((p_event =&gt; this._onTreeViewVisibilityChanged(p_event, false)))
+    );
+
+    this._leoTreeExView = vscode.window.createTreeView(Constants.TREEVIEW_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
+    this._context.subscriptions.push(
+        this._leoTreeExView,
+        this._leoTreeExView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeExView))),
+        this._leoTreeExView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeExView))),
+        this._leoTreeExView.onDidChangeVisibility((p_event =&gt; this._onTreeViewVisibilityChanged(p_event, true)))
+    );
+
+    if (this.config.treeInExplorer) {
+        this._lastTreeView = this._leoTreeExView;
+    } else {
+        this._lastTreeView = this._leoTreeView;
+    }
+
+    this.showLogPane();
+}
 
 </t>
 <t tx="felix.20201214194144.3"></t>
@@ -8475,64 +8503,11 @@ public showLeoIDMessage(): void {
 }
 
 </t>
-<t tx="felix.20220201235548.1">    // * Create a single data provider for both outline trees, Leo view and Explorer view
-    this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);
-
-    this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
-    this._context.subscriptions.push(
-        this._leoTreeView,
-        this._leoTreeView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeView))),
-        this._leoTreeView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeView))),
-        this._leoTreeView.onDidChangeVisibility((p_event =&gt; this._onTreeViewVisibilityChanged(p_event, false)))
-    );
-
-    this._leoTreeExView = vscode.window.createTreeView(Constants.TREEVIEW_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
-    this._context.subscriptions.push(
-        this._leoTreeExView,
-        this._leoTreeExView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeExView))),
-        this._leoTreeExView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeExView))),
-        this._leoTreeExView.onDidChangeVisibility((p_event =&gt; this._onTreeViewVisibilityChanged(p_event, true)))
-    );
-
-    if (this.config.treeInExplorer) {
-        this._lastTreeView = this._leoTreeExView;
-    } else {
-        this._lastTreeView = this._leoTreeView;
-    }
-
-    this.showLogPane();
-}
-
-/**
+<t tx="felix.20220201235548.1">/**
  * * Set all remaining local objects, set ready flag(s) and refresh all panels
  */
 public finishStartup(): void {
     g.app.windowList[this.frameIndex].startupWindow = true;
-
-    // // * Create a single data provider for both outline trees, Leo view and Explorer view
-    // this._leoTreeProvider = new LeoOutlineProvider(this.nodeIcons, this);
-
-    // this._leoTreeView = vscode.window.createTreeView(Constants.TREEVIEW_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
-    // this._context.subscriptions.push(
-    //     this._leoTreeView,
-    //     this._leoTreeView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeView))),
-    //     this._leoTreeView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeView))),
-    //     this._leoTreeView.onDidChangeVisibility((p_event =&gt; this._onTreeViewVisibilityChanged(p_event, false)))
-    // );
-
-    // this._leoTreeExView = vscode.window.createTreeView(Constants.TREEVIEW_EXPLORER_ID, { showCollapseAll: false, treeDataProvider: this._leoTreeProvider });
-    // this._context.subscriptions.push(
-    //     this._leoTreeExView,
-    //     this._leoTreeExView.onDidExpandElement((p_event =&gt; this._onChangeCollapsedState(p_event, true, this._leoTreeExView))),
-    //     this._leoTreeExView.onDidCollapseElement((p_event =&gt; this._onChangeCollapsedState(p_event, false, this._leoTreeExView))),
-    //     this._leoTreeExView.onDidChangeVisibility((p_event =&gt; this._onTreeViewVisibilityChanged(p_event, true)))
-    // );
-
-    // if (this.config.treeInExplorer) {
-    //     this._lastTreeView = this._leoTreeExView;
-    // } else {
-    //     this._lastTreeView = this._leoTreeView;
-    // }
 
     // * Create Leo Opened Documents Treeview Providers and tree views
     this._leoDocumentsProvider = new LeoDocumentsProvider(this.leoStates, this);
@@ -8666,36 +8641,10 @@ public finishStartup(): void {
         )
     );
 
-    this._setupOpenedLeoDocument(); // this sets this.leoStates.fileOpenedReady 
-
-    // * _setupOpenedLeoDocument above already does the setupRefresh below
-    // this.setupRefresh(
-    //     this.finalFocus,
-    //     {
-    //         tree: true,
-    //         body: true,
-    //         documents: true,
-    //         buttons: true,
-    //         states: true,
-    //         goto: true,
-    //     }
-    // );
+    this._setupOpenedLeoDocument(); // this sets this.leoStates.fileOpenedReady
 
     this.leoStates.leoReady = true;
     this.leoStates.leojsStartupDone = true;
-
-    // this.leoStates.qLastContextChange.then(() =&gt; {
-    //     if (!this._lastTreeView.visible &amp;&amp; g.app.windowList.length) {
-    //         console.log('Had to reveal!');
-    //         // const c = g.app.windowList[this.frameIndex].c;
-    //         // this._lastTreeView.reveal(c.p, { select: true });
-    //         this._setupOpenedLeoDocument(); // this sets this.leoStates.fileOpenedReady 
-    //         this.launchRefresh();
-
-    //     }
-    //     // this._launchRefresh();
-    //     // this.getStates();
-    // });
 
 }
 
@@ -9048,9 +8997,8 @@ public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
                 };
                 const w_result = fc.do_change_all(w_changeSettings);
 
-                // TODO : GET FOCUS!
-                const w_focus = ""; // = g.app.gui.get_focus();
-                //                     focus = g.app.gui.widget_name(w)
+                const w = this.get_focus(c);
+                const w_focus = this.widget_name(w);
 
                 let w_finalFocus = Focus.Body;
 
@@ -9172,7 +9120,6 @@ public setSearchSetting(p_id: string): void {
  * * Gets the search settings from Leo, and applies them to the find panel webviews
  */
 public loadSearchSettings(): void {
-    // vscode.window.showInformationMessage("TODO: loadSearchSettings");
 
     const c = g.app.windowList[this.frameIndex].c;
     const scon = c.quicksearchController;
@@ -9200,7 +9147,7 @@ public loadSearchSettings(): void {
         whole_word: leoISettings.whole_word
     };
 
-    // TODO : PASS DIRECTLY ! 
+    // TODO : PASS DIRECTLY ! (combine w_searchSettings above and w_settings below once this is stable)
 
     const w_settings: LeoSearchSettings = {
         isTag: w_searchSettings.is_tag,
@@ -9242,50 +9189,6 @@ public loadSearchSettings(): void {
         });
     }
 
-    // this.sendAction(Constants.LEOBRIDGE.GET_SEARCH_SETTINGS).then(
-    //     (p_result: LeoBridgePackage) =&gt; {
-    //         const w_searchSettings: LeoGuiFindTabManagerSettings = p_result.searchSettings!;
-    //         const w_settings: LeoSearchSettings = {
-    //             isTag: w_searchSettings.is_tag,
-    //             navText: w_searchSettings.nav_text,
-    //             showParents: w_searchSettings.show_parents,
-    //             searchOptions: w_searchSettings.search_options,
-    //             //Find/change strings...
-    //             findText: w_searchSettings.find_text,
-    //             replaceText: w_searchSettings.change_text,
-    //             // Find options...
-    //             wholeWord: w_searchSettings.whole_word,
-    //             ignoreCase: w_searchSettings.ignore_case,
-    //             regExp: w_searchSettings.pattern_match,
-    //             markFinds: w_searchSettings.mark_finds,
-    //             markChanges: w_searchSettings.mark_changes,
-    //             searchHeadline: w_searchSettings.search_headline,
-    //             searchBody: w_searchSettings.search_body,
-    //             // 0, 1 or 2 for outline, sub-outline, or node.
-    //             searchScope:
-    //                 0 +
-    //                 (w_searchSettings.suboutline_only ? 1 : 0) +
-    //                 (w_searchSettings.node_only ? 2 : 0) +
-    //                 (w_searchSettings.file_only ? 3 : 0),
-    //         };
-    //         if (w_settings.searchScope &gt; 2) {
-    //             console.error('searchScope SHOULD BE 0, 1, 2 only: ', w_settings.searchScope);
-    //         }
-    //         this._lastSettingsUsed = w_settings;
-    //         if (this._findPanelWebviewExplorerView) {
-    //             this._findPanelWebviewExplorerView.webview.postMessage({
-    //                 type: 'setSettings',
-    //                 value: w_settings,
-    //             });
-    //         }
-    //         if (this._findPanelWebviewView) {
-    //             this._findPanelWebviewView.webview.postMessage({
-    //                 type: 'setSettings',
-    //                 value: w_settings,
-    //             });
-    //         }
-    //     }
-    // );
 }
 
 </t>
@@ -9295,8 +9198,6 @@ public loadSearchSettings(): void {
  * @returns 
  */
 public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt; {
-
-    // return vscode.window.showInformationMessage("TODO: saveSearchSettings");
 
     this._lastSettingsUsed = p_settings;
     // convert to LeoGuiFindTabManagerSettings
@@ -9409,14 +9310,6 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
             w.toggle();
         }
     }
-    // # Confirm by sending back the settings to the client
-    // try:
-    //     settings = ftm.get_settings()
-    //     # Use the "__dict__" of the settings, to be serializable as a json string.
-    //     result = {"searchSettings": settings.__dict__}
-    // except Exception as e:
-    //     raise ServerError(f"{tag}: exception getting search settings: {e}")
-    // return self._make_response(result)
 
     return Promise.resolve();
 }
@@ -9468,41 +9361,42 @@ public gotoGlobalLine(): void {
  * * Tag Children
  */
 public tagChildren(): void {
-    vscode.window.showInformationMessage("TODO: tagChildren");
 
-    // this.triggerBodySave(false)
-    //     .then((p_saveResult: boolean) =&gt; {
-    //         return vscode.window.showInputBox({
-    //             title: Constants.USER_MESSAGES.TITLE_TAG_CHILDREN,
-    //             placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
-    //             prompt: Constants.USER_MESSAGES.PROMPT_TAG,
-    //         });
-    //     })
-    //     .then((p_inputResult?: string) =&gt; {
-    //         if (p_inputResult &amp;&amp; p_inputResult.trim()) {
-    //             p_inputResult = p_inputResult.trim();
-    //             // check for special chars first
-    //             if (p_inputResult.split(/(&amp;|\||-|\^)/).length &gt; 1) {
-    //                 vscode.window.showInformationMessage('Cannot add tags containing any of these characters: &amp;|^-');
-    //                 return;
-    //             }
-    //             this.sendAction(
-    //                 Constants.LEOBRIDGE.TAG_CHILDREN,
-    //                 JSON.stringify({ tag: p_inputResult })
-    //             ).then((p_resultTag: LeoBridgePackage) =&gt; {
-    //                 this.launchRefresh(
-    //                     {
-    //                         tree: true,
-    //                         body: false,
-    //                         documents: false,
-    //                         buttons: false,
-    //                         states: true,
-    //                     },
-    //                     false
-    //                 );
-    //             });
-    //         }
-    //     });
+    this.triggerBodySave(false)
+        .then(() =&gt; {
+            return vscode.window.showInputBox({
+                title: Constants.USER_MESSAGES.TITLE_TAG_CHILDREN,
+                placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
+                prompt: Constants.USER_MESSAGES.PROMPT_TAG,
+            });
+        })
+        .then((p_inputResult?: string) =&gt; {
+
+            if (p_inputResult &amp;&amp; p_inputResult.trim()) {
+                p_inputResult = p_inputResult.trim();
+                // check for special chars first
+                if (p_inputResult.split(/(&amp;|\||-|\^)/).length &gt; 1) {
+                    vscode.window.showInformationMessage('Cannot add tags containing any of these characters: &amp;|^-');
+                    return;
+                }
+
+                const c = g.app.windowList[this.frameIndex].c;
+                const fc = c.findCommands;
+                fc.do_tag_children(c.p, p_inputResult);
+
+                this.setupRefresh(
+                    Focus.NoChange,
+                    {
+                        tree: true,
+                        // body: false,
+                        // documents: false,
+                        // buttons: false,
+                        states: true,
+                    }
+                );
+                this.launchRefresh();
+            }
+        });
 }
 
 </t>
@@ -9510,42 +9404,44 @@ public tagChildren(): void {
  * * Tag Node
  */
 public tagNode(): void {
-    vscode.window.showInformationMessage("TODO: tagNode");
 
-    // this.triggerBodySave(false)
-    //     .then((p_saveResult: boolean) =&gt; {
-    //         return vscode.window.showInputBox({
-    //             title: Constants.USER_MESSAGES.TITLE_TAG_NODE,
-    //             placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
-    //             prompt: Constants.USER_MESSAGES.PROMPT_TAG,
-    //         });
-    //     })
-    //     .then((p_inputResult?: string) =&gt; {
+    this.triggerBodySave(false)
+        .then(() =&gt; {
+            return vscode.window.showInputBox({
+                title: Constants.USER_MESSAGES.TITLE_TAG_NODE,
+                placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
+                prompt: Constants.USER_MESSAGES.PROMPT_TAG,
+            });
+        })
+        .then((p_inputResult?: string) =&gt; {
 
-    //         if (p_inputResult &amp;&amp; p_inputResult.trim()) {
-    //             p_inputResult = p_inputResult.trim();
-    //             // check for special chars first
-    //             if (p_inputResult.split(/(&amp;|\||-|\^)/).length &gt; 1) {
-    //                 vscode.window.showInformationMessage('Cannot add tags containing any of these characters: &amp;|^-');
-    //                 return;
-    //             }
-    //             this.sendAction(
-    //                 Constants.LEOBRIDGE.TAG_NODE,
-    //                 JSON.stringify({ tag: p_inputResult })
-    //             ).then((p_resultTag: LeoBridgePackage) =&gt; {
-    //                 this.launchRefresh(
-    //                     {
-    //                         tree: true,
-    //                         body: false,
-    //                         documents: false,
-    //                         buttons: false,
-    //                         states: true,
-    //                     },
-    //                     false
-    //                 );
-    //             });
-    //         }
-    //     });
+            if (p_inputResult &amp;&amp; p_inputResult.trim()) {
+                p_inputResult = p_inputResult.trim();
+                // check for special chars first
+                if (p_inputResult.split(/(&amp;|\||-|\^)/).length &gt; 1) {
+                    vscode.window.showInformationMessage('Cannot add tags containing any of these characters: &amp;|^-');
+                    return;
+                }
+
+                const c = g.app.windowList[this.frameIndex].c;
+                const tc = c.theTagController;
+                tc.add_tag(c.p, p_inputResult);
+
+                this.setupRefresh(
+                    Focus.NoChange,
+                    {
+                        tree: true,
+                        // body: false,
+                        // documents: false,
+                        // buttons: false,
+                        states: true,
+                    }
+                );
+                this.launchRefresh();
+
+            }
+        });
+
 }
 
 </t>
@@ -9558,7 +9454,7 @@ public removeTag(): void {
     // if (this.lastSelectedNode &amp;&amp; this.lastSelectedNode.u &amp;&amp;
     //     this.lastSelectedNode.u.__node_tags &amp;&amp; this.lastSelectedNode.u.__node_tags.length) {
     //     this.triggerBodySave(false)
-    //         .then((p_saveResult: boolean) =&gt; {
+    //         .then(() =&gt; {
     //             return vscode.window.showQuickPick(this.lastSelectedNode!.u.__node_tags, {
     //                 title: Constants.USER_MESSAGES.TITLE_REMOVE_TAG,
     //                 placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
@@ -9603,7 +9499,7 @@ public removeTags(): void {
     // if (this.lastSelectedNode &amp;&amp; this.lastSelectedNode.u &amp;&amp;
     //     this.lastSelectedNode.u.__node_tags &amp;&amp; this.lastSelectedNode.u.__node_tags.length) {
     //     this.triggerBodySave(false)
-    //         .then((p_saveResult: boolean) =&gt; {
+    //         .then(() =&gt; {
     //             this.sendAction(
     //                 Constants.LEOBRIDGE.REMOVE_TAGS
     //             ).then((p_resultTag: LeoBridgePackage) =&gt; {
@@ -9650,7 +9546,7 @@ public cloneFindTag(): void {
     vscode.window.showInformationMessage("TODO: cloneFindTag");
 
     // this.triggerBodySave(false)
-    //     .then((p_saveResult: boolean) =&gt; {
+    //     .then(() =&gt; {
     //         return vscode.window.showInputBox({
     //             title: Constants.USER_MESSAGES.TITLE_FIND_TAG,
     //             placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_CLONE_FIND_TAG,

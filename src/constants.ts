@@ -614,7 +614,7 @@ export class Constants {
         CLONE_FIND_TAG: Constants.NAME + ".cloneFindTag",
         CLONE_FIND_MARKED: Constants.NAME + ".cloneFindMarked",
         CLONE_FIND_FLATTENED_MARKED: Constants.NAME + ".cloneFindFlattenedMarked",
-        // TODO
+
         CLONE_FIND_PARENTS: Constants.NAME + ".cloneFindParents",
         GOTO_GLOBAL_LINE: Constants.NAME + ".gotoGlobalLine",
         TAG_CHILDREN: Constants.NAME + ".tagChildren",
