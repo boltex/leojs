@@ -156,6 +156,9 @@ export class Constants {
         TITLE_TAG_NODE: "Tag Node",
         PLACEHOLDER_TAG: "<tag>",
         PROMPT_TAG: "Enter a tag name",
+        TITLE_FIND_TAG: "Find Tag",
+        PLACEHOLDER_CLONE_FIND_TAG: "<tag>",
+        PROMPT_CLONE_FIND_TAG: "Enter a tag name",
 
         CLOSE_ERROR: "Cannot close: No files opened.",
         YES: "Yes",

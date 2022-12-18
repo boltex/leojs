@@ -4082,43 +4082,47 @@ export class LeoUI extends NullGui {
      * * Remove single Tag on selected node
      */
     public removeTag(): void {
-        vscode.window.showInformationMessage("TODO: removeTag");
 
-        // if (this.lastSelectedNode && this.lastSelectedNode.u &&
-        //     this.lastSelectedNode.u.__node_tags && this.lastSelectedNode.u.__node_tags.length) {
-        //     this.triggerBodySave(false)
-        //         .then(() => {
-        //             return vscode.window.showQuickPick(this.lastSelectedNode!.u.__node_tags, {
-        //                 title: Constants.USER_MESSAGES.TITLE_REMOVE_TAG,
-        //                 placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
-        //                 canPickMany: false
-        //                 // prompt: Constants.USER_MESSAGES.PROMPT_TAG,
-        //             });
-        //         })
-        //         .then((p_inputResult?: string) => {
-        //             if (p_inputResult && p_inputResult.trim()) {
-        //                 this.sendAction(
-        //                     Constants.LEOBRIDGE.REMOVE_TAG,
-        //                     JSON.stringify({ tag: p_inputResult.trim() })
-        //                 ).then((p_resultTag: LeoBridgePackage) => {
-        //                     this.launchRefresh(
-        //                         {
-        //                             tree: true,
-        //                             body: false,
-        //                             documents: false,
-        //                             buttons: false,
-        //                             states: true,
-        //                         },
-        //                         false
-        //                     );
-        //                 });
-        //             }
-        //         });
-        // } else if (this.lastSelectedNode) {
-        //     vscode.window.showInformationMessage("No tags on node: " + this.lastSelectedNode.label);
-        // } else {
-        //     return;
-        // }
+        if (this.lastSelectedNode && this.lastSelectedNode.u &&
+            this.lastSelectedNode.u.__node_tags && this.lastSelectedNode.u.__node_tags.length) {
+            this.triggerBodySave(false)
+                .then(() => {
+                    return vscode.window.showQuickPick(this.lastSelectedNode!.u.__node_tags, {
+                        title: Constants.USER_MESSAGES.TITLE_REMOVE_TAG,
+                        placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
+                        canPickMany: false
+                    });
+                })
+                .then((p_inputResult?: string) => {
+                    if (p_inputResult && p_inputResult.trim()) {
+                        p_inputResult = p_inputResult.trim();
+
+                        const c = g.app.windowList[this.frameIndex].c;
+                        const p = c.p;
+                        const v = p.v;
+                        const tc = c.theTagController;
+                        if (v.u && v.u.includes('__node_tags')) {
+                            tc.remove_tag(p, p_inputResult);
+                        }
+
+                        this.setupRefresh(
+                            Focus.NoChange,
+                            {
+                                tree: true,
+                                // body: false,
+                                // documents: false,
+                                // buttons: false,
+                                states: true,
+                            }
+                        );
+                        this.launchRefresh();
+                    }
+                });
+        } else if (this.lastSelectedNode) {
+            vscode.window.showInformationMessage("No tags on node: " + this.lastSelectedNode.h);
+        } else {
+            return;
+        }
 
     }
 
@@ -4126,32 +4130,39 @@ export class LeoUI extends NullGui {
      * * Remove all tags on selected node
      */
     public removeTags(): void {
-        vscode.window.showInformationMessage("TODO: removeTags");
 
-        // if (this.lastSelectedNode && this.lastSelectedNode.u &&
-        //     this.lastSelectedNode.u.__node_tags && this.lastSelectedNode.u.__node_tags.length) {
-        //     this.triggerBodySave(false)
-        //         .then(() => {
-        //             this.sendAction(
-        //                 Constants.LEOBRIDGE.REMOVE_TAGS
-        //             ).then((p_resultTag: LeoBridgePackage) => {
-        //                 this.launchRefresh(
-        //                     {
-        //                         tree: true,
-        //                         body: false,
-        //                         documents: false,
-        //                         buttons: false,
-        //                         states: true,
-        //                     },
-        //                     false
-        //                 );
-        //             });
-        //         });
-        // } else if (this.lastSelectedNode) {
-        //     vscode.window.showInformationMessage("No tags on node: " + this.lastSelectedNode.label);
-        // } else {
-        //     return;
-        // }
+        if (this.lastSelectedNode && this.lastSelectedNode.u &&
+            this.lastSelectedNode.u.__node_tags && this.lastSelectedNode.u.__node_tags.length) {
+            this.triggerBodySave(false)
+                .then(() => {
+                    const c = g.app.windowList[this.frameIndex].c;
+                    const p = c.p;
+                    const v = p.v;
+                    const tc = c.theTagController;
+
+                    if (v.u && v.u.includes('__node_tags')) {
+                        delete v.u['__node_tags'];
+                        tc.initialize_taglist();  // reset tag list: some may have been removed
+                    }
+
+                    this.setupRefresh(
+                        Focus.NoChange,
+                        {
+                            tree: true,
+                            // body: false,
+                            // documents: false,
+                            // buttons: false,
+                            states: true,
+                        }
+                    );
+                    this.launchRefresh();
+                });
+        } else if (this.lastSelectedNode) {
+            vscode.window.showInformationMessage("No tags on node: " + this.lastSelectedNode.h);
+        } else {
+            return;
+        }
+
     }
 
     /**
@@ -4160,36 +4171,39 @@ export class LeoUI extends NullGui {
     public cloneFindTag(): void {
         vscode.window.showInformationMessage("TODO: cloneFindTag");
 
-        // this.triggerBodySave(false)
-        //     .then(() => {
-        //         return vscode.window.showInputBox({
-        //             title: Constants.USER_MESSAGES.TITLE_FIND_TAG,
-        //             placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_CLONE_FIND_TAG,
-        //             prompt: Constants.USER_MESSAGES.PROMPT_CLONE_FIND_TAG,
-        //         });
-        //     })
-        //     .then((p_inputResult?: string) => {
-        //         if (p_inputResult && p_inputResult.trim()) {
-        //             this.sendAction(
-        //                 Constants.LEOBRIDGE.CLONE_FIND_TAG,
-        //                 JSON.stringify({ tag: p_inputResult.trim() })
-        //             ).then((p_resultFind: LeoBridgePackage) => {
-        //                 if (!p_resultFind.found) {
-        //                     // Not found
-        //                 }
-        //                 this.launchRefresh(
-        //                     {
-        //                         tree: true,
-        //                         body: true,
-        //                         documents: false,
-        //                         buttons: false,
-        //                         states: true,
-        //                     },
-        //                     false
-        //                 );
-        //             });
-        //         }
-        //     });
+        this.triggerBodySave(false)
+            .then(() => {
+                return vscode.window.showInputBox({
+                    title: Constants.USER_MESSAGES.TITLE_FIND_TAG,
+                    placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_CLONE_FIND_TAG,
+                    prompt: Constants.USER_MESSAGES.PROMPT_CLONE_FIND_TAG,
+                });
+            })
+            .then((p_inputResult?: string) => {
+                if (p_inputResult && p_inputResult.trim()) {
+
+                    p_inputResult = p_inputResult.trim();
+                    const c = g.app.windowList[this.frameIndex].c;
+                    const fc = c.findCommands;
+                    let n;
+                    let p;
+                    [n, p] = fc.do_clone_find_tag(p_inputResult);
+
+                    this.setupRefresh(
+                        Focus.NoChange,
+                        {
+                            tree: true,
+                            body: true,
+                            // documents: false,
+                            // buttons: false,
+                            states: true,
+                        }
+                    );
+                    this.launchRefresh();
+
+                }
+            });
+
     }
 
     /**
