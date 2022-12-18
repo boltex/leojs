@@ -8936,11 +8936,6 @@ public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknow
  * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
  */
 public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
-    // return vscode.window.showInformationMessage("TODO: findAll");
-
-    // const w_action: string = p_replace
-    //     ? Constants.LEOBRIDGE.REPLACE_ALL
-    //     : Constants.LEOBRIDGE.FIND_ALL;
 
     let w_searchString: string = this._lastSettingsUsed!.findText;
     let w_replaceString: string = this._lastSettingsUsed!.replaceText;
@@ -8970,6 +8965,7 @@ public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
                 this._lastSettingsUsed.findText = w_searchString;
                 this._lastSettingsUsed.replaceText = w_replaceString;
 
+                // * savesettings not needed, w_changeSettings is used directly
                 // this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
 
                 const c = g.app.windowList[this.frameIndex].c;
@@ -9226,7 +9222,6 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
         whole_word: p_settings.wholeWord,
     };
 
-
     // Sets search options. Init widgets and ivars from param.searchSettings
     const c = g.app.windowList[this.frameIndex].c;
     const scon = c.quicksearchController;
@@ -9324,39 +9319,41 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
 public gotoGlobalLine(): void {
     vscode.window.showInformationMessage("TODO: gotoGlobalLine");
 
-    // this.triggerBodySave(false)
-    //     .then((p_saveResult: boolean) =&gt; {
-    //         return vscode.window.showInputBox({
-    //             title: Constants.USER_MESSAGES.TITLE_GOTO_GLOBAL_LINE,
-    //             placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_GOTO_GLOBAL_LINE,
-    //             prompt: Constants.USER_MESSAGES.PROMPT_GOTO_GLOBAL_LINE,
-    //         });
-    //     })
-    //     .then((p_inputResult?: string) =&gt; {
-    //         if (p_inputResult) {
-    //             const w_line = parseInt(p_inputResult);
-    //             if (!isNaN(w_line)) {
-    //                 this.sendAction(
-    //                     Constants.LEOBRIDGE.GOTO_GLOBAL_LINE,
-    //                     JSON.stringify({ line: w_line })
-    //                 ).then((p_resultGoto: LeoBridgePackage) =&gt; {
-    //                     if (!p_resultGoto.found) {
-    //                         // Not found
-    //                     }
-    //                     this.launchRefresh(
-    //                         {
-    //                             tree: true,
-    //                             body: true,
-    //                             documents: false,
-    //                             buttons: false,
-    //                             states: true,
-    //                         },
-    //                         false
-    //                     );
-    //                 });
-    //             }
-    //         }
-    //     });
+    this.triggerBodySave(false)
+        .then(() =&gt; {
+            return vscode.window.showInputBox({
+                title: Constants.USER_MESSAGES.TITLE_GOTO_GLOBAL_LINE,
+                placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_GOTO_GLOBAL_LINE,
+                prompt: Constants.USER_MESSAGES.PROMPT_GOTO_GLOBAL_LINE,
+            });
+        })
+        .then((p_inputResult?: string) =&gt; {
+            if (p_inputResult) {
+                const w_line = parseInt(p_inputResult);
+                if (!isNaN(w_line)) {
+
+                    const c = g.app.windowList[this.frameIndex].c;
+                    const gc = c.gotoCommands;
+                    let junk_p;
+                    let junk_offset;
+                    let found;
+                    [junk_p, junk_offset, found] = gc.find_file_line(w_line);
+
+                    this.setupRefresh(
+                        Focus.Body,
+                        {
+                            tree: true,
+                            body: true,
+                            // documents: false,
+                            // buttons: false,
+                            states: true,
+                        }
+                    );
+                    this.launchRefresh();
+
+                }
+            }
+        });
 }
 
 </t>
@@ -9742,39 +9739,51 @@ public findSymbol(p_def: boolean): Thenable&lt;unknown&gt; {
  * @param p_thenFind
  * @returns Promise that resolves when the "launch refresh" is started
  */
-public replace(p_fromOutline: boolean, p_thenFind: boolean): Thenable&lt;unknown&gt; {
-    return vscode.window.showInformationMessage("TODO: replace");
+public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise&lt;unknown&gt; {
 
     // const w_action: string = p_thenFind
     //     ? Constants.LEOBRIDGE.REPLACE_THEN_FIND
     //     : Constants.LEOBRIDGE.REPLACE;
-    // return this._isBusyTriggerSave(false, true)
-    //     .then((p_saveResult) =&gt; {
-    //         return this.sendAction(w_action, JSON.stringify({ fromOutline: !!p_fromOutline }));
-    //     })
-    //     .then((p_replaceResult: LeoBridgePackage) =&gt; {
-    //         if (!p_replaceResult.found || !p_replaceResult.focus) {
-    //             vscode.window.showInformationMessage('Not found');
-    //         } else {
-    //             let w_focusOnOutline = false;
-    //             const w_focus = p_replaceResult.focus.toLowerCase();
-    //             if (w_focus.includes('tree') || w_focus.includes('head')) {
-    //                 // tree
-    //                 w_focusOnOutline = true;
-    //             }
-    //             this.launchRefresh(
-    //                 {
-    //                     tree: true,
-    //                     body: true,
-    //                     scroll: true,
-    //                     documents: false,
-    //                     buttons: false,
-    //                     states: true,
-    //                 },
-    //                 w_focusOnOutline
-    //             );
-    //         }
-    //     });
+
+    await this.triggerBodySave(false);
+
+    // const w_replaceResult = await this.sendAction(w_action, { fromOutline: !!p_fromOutline });
+
+    const c = g.app.windowList[this.frameIndex].c;
+    const fc = c.findCommands;
+
+    // const settings = fc.ftm.get_settings();
+    fc.change();
+
+    const w = this.get_focus(c);
+    const focus = this.widget_name(w);
+
+    //result = {"found": True, "focus": focus};
+    //return self._make_response(result)
+
+    if (!focus) {
+        return vscode.window.showInformationMessage('Not found');
+    } else {
+        let w_finalFocus = Focus.Body;
+        const w_focus = focus.toLowerCase();
+        if (w_focus.includes('tree') || w_focus.includes('head')) {
+            // tree
+            w_finalFocus = Focus.Outline;
+        }
+        this.setupRefresh(
+            w_finalFocus,
+            {
+                tree: true,
+                body: true,
+                scroll: true,
+                // documents: false,
+                // buttons: false,
+                states: true,
+            }
+        );
+        return this.launchRefresh();
+    }
+
 }
 
 </t>
