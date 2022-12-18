@@ -32,7 +32,7 @@ import * as g from './core/leoGlobals';
 import { Commands } from "./core/leoCommands";
 import { Position } from "./core/leoNodes";
 import { LeoGotoNode, LeoGotoProvider } from "./leoGoto";
-import { LeoFrame } from "./core/leoFrame";
+import { LeoFrame, StringTextWrapper } from "./core/leoFrame";
 import { LeoFindPanelProvider } from "./leoFindPanelWebview";
 import { ISettings, LeoFind } from "./core/leoFind";
 import { NullGui } from "./core/leoGui";
@@ -3452,39 +3452,105 @@ export class LeoUI extends NullGui {
      * @param p_reverse
      * @returns Promise that resolves when the "launch refresh" is started
      */
-    public find(p_fromOutline: boolean, p_reverse: boolean): Thenable<unknown> {
-        return vscode.window.showInformationMessage("TODO: find");
+    public async find(p_fromOutline: boolean, p_reverse: boolean): Promise<any> {
 
         // const w_action: string = p_reverse
         //     ? Constants.LEOBRIDGE.FIND_PREVIOUS
         //     : Constants.LEOBRIDGE.FIND_NEXT;
-        // return this._isBusyTriggerSave(false, true)
-        //     .then((p_saveResult) => {
-        //         return this.sendAction(w_action, JSON.stringify({ fromOutline: !!p_fromOutline }));
-        //     })
-        //     .then((p_findResult: LeoBridgePackage) => {
-        //         if (!p_findResult.found || !p_findResult.focus) {
-        //             vscode.window.showInformationMessage('Not found');
-        //         } else {
-        //             let w_focusOnOutline = false;
-        //             const w_focus = p_findResult.focus.toLowerCase();
-        //             if (w_focus.includes('tree') || w_focus.includes('head')) {
-        //                 // tree
-        //                 w_focusOnOutline = true;
-        //             }
-        //             this.launchRefresh(
-        //                 {
-        //                     tree: true,
-        //                     body: true,
-        //                     scroll: p_findResult.found && !w_focusOnOutline,
-        //                     documents: false,
-        //                     buttons: false,
-        //                     states: true,
-        //                 },
-        //                 w_focusOnOutline
-        //             );
-        //         }
-        //     });
+
+        await this.triggerBodySave(false);
+        let found;
+        let focus;
+        let node;
+
+        const c = g.app.windowList[this.frameIndex].c;
+        const fc = c.findCommands;
+        let p: Position | undefined = c.p;
+
+        const fromOutline = p_fromOutline;
+        const fromBody = !fromOutline;
+        //
+        const w = this.get_focus(c);
+        focus = this.widget_name(w);
+
+        const inOutline = (focus.includes("tree")) || (focus.includes("head"))
+        const inBody = !inOutline;
+        //
+
+        let pos;
+        let newpos;
+        let settings;
+
+        if (p_reverse) {
+            // * Find Previous
+            if (fromOutline && inBody) {
+                fc.in_headline = true;
+            } else if (fromBody && inOutline) {
+                fc.in_headline = false;
+                // w = c.frame.body.wrapper
+                c.bodyWantsFocus();
+                c.bodyWantsFocusNow();
+            }
+            //
+            if (fc.in_headline) {
+                const gui_w = c.edit_widget(p) as StringTextWrapper;
+                gui_w.setSelectionRange(0, 0, 0);
+            }
+            settings = fc.ftm.get_settings();
+            [p, pos, newpos] = fc.do_find_prev(settings);
+        } else {
+            // * Find Next
+            if (fromOutline && inBody) {
+                fc.in_headline = true;
+            } else if (fromBody && inOutline) {
+                fc.in_headline = false;
+                c.bodyWantsFocus();
+                c.bodyWantsFocusNow();
+            }
+            //
+            if (fc.in_headline) {
+                const ins = p.h.length;
+                const gui_w = c.edit_widget(p) as StringTextWrapper;
+                gui_w.setSelectionRange(ins, ins, ins);
+            }
+            // Let cursor as-is
+            settings = fc.ftm.get_settings();
+            [p, pos, newpos] = fc.do_find_next(settings);
+        }
+
+        // get focus again after the operation
+        focus = this.widget_name(w);
+
+        // result = {"found": bool(p), "pos": pos,
+        //             "newpos": newpos, "focus": focus}
+        found = p && p.__bool__();
+
+        if (!found || !focus) {
+            vscode.window.showInformationMessage('Not found');
+        } else {
+            let w_finalFocus = Focus.Body;
+            const w_focus = focus.toLowerCase();
+            if (w_focus.includes('tree') || w_focus.includes('head')) {
+                // tree
+                w_finalFocus = Focus.Outline;
+                this.showOutlineIfClosed = true;
+
+            } else {
+                this.showBodyIfClosed = true;
+            }
+            this.setupRefresh(
+                w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
+                {
+                    tree: true, // HAVE to refresh tree because find folds/unfolds only result outline paths
+                    body: true,
+                    scroll: found && w_finalFocus === Focus.Body,
+                    // documents: false,
+                    // buttons: false,
+                    states: true,
+                }
+            );
+            this.launchRefresh();
+        }
     }
 
     /**
@@ -3492,40 +3558,49 @@ export class LeoUI extends NullGui {
      * @param p_def find-def instead of find-var
      * @returns Promise that resolves when the "launch refresh" is started
      */
-    public findSymbol(p_def: boolean): Thenable<unknown> {
-        return vscode.window.showInformationMessage("TODO: findSymbol");
+    public async findSymbol(p_def: boolean): Promise<any> {
 
-        // const w_action: string = p_def
-        //     ? Constants.LEOBRIDGE.FIND_DEF
-        //     : Constants.LEOBRIDGE.FIND_VAR;
-        // return this._isBusyTriggerSave(false, true)
-        //     .then((p_saveResult) => {
-        //         return this.sendAction(w_action, JSON.stringify({ fromOutline: false }));
-        //     })
-        //     .then((p_findResult: LeoBridgePackage) => {
-        //         if (!p_findResult.found || !p_findResult.focus) {
-        //             vscode.window.showInformationMessage('Not found');
-        //         } else {
-        //             let w_focusOnOutline = false;
-        //             const w_focus = p_findResult.focus.toLowerCase();
-        //             if (w_focus.includes('tree') || w_focus.includes('head')) {
-        //                 // tree
-        //                 w_focusOnOutline = true;
-        //             }
-        //             this.loadSearchSettings();
-        //             this.launchRefresh(
-        //                 {
-        //                     tree: true,
-        //                     body: true,
-        //                     scroll: p_findResult.found && !w_focusOnOutline,
-        //                     documents: false,
-        //                     buttons: false,
-        //                     states: true,
-        //                 },
-        //                 w_focusOnOutline
-        //             );
-        //         }
-        //     });
+        // This sets the selection on a word in the body pane. (needs selection on a symbol word in vscode word)
+        await this.triggerBodySave(false);
+
+        const c = g.app.windowList[this.frameIndex].c;
+        const fc = c.findCommands;
+
+        // const p_findResult = await this.sendAction(w_action, { fromOutline: false });
+        if (p_def) {
+            fc.find_def();
+        } else {
+            fc.find_var();
+        }
+
+        let found = true;
+
+        const w = this.get_focus(c);
+        const focus = this.widget_name(w);
+
+        if (!found || !focus) {
+            vscode.window.showInformationMessage('Not found');
+        } else {
+            let w_finalFocus = Focus.Body;
+            const w_focus = focus.toLowerCase();
+            if (w_focus.includes('tree') || w_focus.includes('head')) {
+                // tree
+                w_finalFocus = Focus.Outline;
+            }
+            this.loadSearchSettings();
+            this.setupRefresh(
+                w_finalFocus,
+                {
+                    tree: true,
+                    body: true,
+                    scroll: found && w_finalFocus === Focus.Body,
+                    // documents: false,
+                    // buttons: false,
+                    states: true,
+                });
+            this.launchRefresh();
+        }
+
     }
 
     /**
@@ -3536,27 +3611,25 @@ export class LeoUI extends NullGui {
      */
     public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise<unknown> {
 
-        // const w_action: string = p_thenFind
-        //     ? Constants.LEOBRIDGE.REPLACE_THEN_FIND
-        //     : Constants.LEOBRIDGE.REPLACE;
-
         await this.triggerBodySave(false);
-
-        // const w_replaceResult = await this.sendAction(w_action, { fromOutline: !!p_fromOutline });
 
         const c = g.app.windowList[this.frameIndex].c;
         const fc = c.findCommands;
 
-        // const settings = fc.ftm.get_settings();
-        fc.change();
+        let found = false;
+        if (p_thenFind) {
+            const settings = fc.ftm.get_settings();
+            found = fc.do_change_then_find(settings);
+        } else {
+            // const settings = fc.ftm.get_settings();
+            fc.change();
+            found = true;
+        }
 
         const w = this.get_focus(c);
         const focus = this.widget_name(w);
 
-        //result = {"found": True, "focus": focus};
-        //return self._make_response(result)
-
-        if (!focus) {
+        if (!found || !focus) {
             return vscode.window.showInformationMessage('Not found');
         } else {
             let w_finalFocus = Focus.Body;

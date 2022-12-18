@@ -10,6 +10,7 @@ import { new_cmd_decorator } from "../core/decorators";
 import { Commands } from "./leoCommands";
 import { Position, VNode } from './leoNodes';
 import { StringCheckBox, StringFindTabManager, StringRadioButton } from './findTabManager';
+import { StringTextWrapper } from './leoFrame';
 //@-<< leoFind imports >>
 //@+<< Theory of operation of find/change >>
 //@+node:felix.20221012210057.1: ** << Theory of operation of find/change >>
@@ -3276,38 +3277,39 @@ export class LeoFind {
         if (c.sparse_find) {
             c.expandOnlyAncestorsOfNode(p);
         }
-        let w;
+        let w: StringTextWrapper;
 
-        // ! NOT USED IN LEOJS !
-        // if (this.in_headline) {
-        //     c.endEditing();
-        //     c.redraw(p);
-        //     c.frame.tree.editLabel(p);
-        //     w = c.edit_widget(p);  // #2220
-        //     if (w) {
-        //         w.setSelectionRange(pos, newpos, insert);  // #2220
-        //     }
-        // } else {
-        //     // Tricky code.  Do not change without careful thought.
-        //     w = c.frame.body.wrapper;
-        //     // *Always* do the full selection logic.
-        //     // This ensures that the body text is inited and recolored.
-        //     c.selectPosition(p);
-        //     c.bodyWantsFocus();
-        //     if (showState) {
-        //         c.k.showStateAndMode(w);
-        //     }
-        //     c.bodyWantsFocusNow();
-        //     w.setSelectionRange(pos, newpos, insert);
-        //     const k = g.see_more_lines(w.getAllText(), insert, 4);
-        //     w.see(k);  // #78: find-next match not always scrolled into view.
-        //     c.outerUpdate();  // Set the focus immediately.
-        //     if (c.vim_mode && c.vimCommands) {
-        //         c.vimCommands.update_selection_after_search();
-        //     }
-        // }
+        // TODO : Check if needed
+        if (this.in_headline) {
+            // c.endEditing();
+            c.redraw(p);
+            c.frame.tree.editLabel(p);
+            w = c.edit_widget(p) as StringTextWrapper;  // #2220
+            if (w) {
+                w.setSelectionRange(pos, newpos, insert);  // #2220
+            }
+        } else {
+            // Tricky code.  Do not change without careful thought.
+            w = c.frame.body.wrapper;
+            // *Always* do the full selection logic.
+            // This ensures that the body text is inited and recolored.
+            c.selectPosition(p);
+            c.bodyWantsFocus();
+            if (showState) {
+                c.k.showStateAndMode(w);
+            }
+            c.bodyWantsFocusNow();
+            w.setSelectionRange(pos, newpos, insert);
+            const k = g.see_more_lines(w.getAllText(), insert, 4);
+            w.see(k);  // #78: find-next match not always scrolled into view.
+            c.outerUpdate();  // Set the focus immediately.
+            if (c.vim_mode && c.vimCommands) {
+                c.vimCommands.update_selection_after_search();
+            }
+        }
+
+
         // // Support for the console gui.
-
         g.app.gui.show_find_success(c, this.in_headline, insert, p);
 
         // c.frame.bringToFront();

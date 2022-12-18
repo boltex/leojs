@@ -22,7 +22,7 @@ import { LeoFind } from './leoFind';
 import { LeoImportCommands } from './leoImport';
 import { ChapterController } from './leoChapters';
 import { EditCommandsClass, TopLevelEditCommands } from '../commands/editCommands';
-import { LeoFrame } from './leoFrame';
+import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
 
 import dayjs = require('dayjs');
@@ -800,9 +800,9 @@ export class Commands {
     // currentVnode = currentPosition
 
     //@+node:felix.20221027142613.1: *5* c.edit_widget
-    public edit_widget(p: Position): any {
+    public edit_widget(p: Position): false | StringTextWrapper | undefined {
         const c = this;
-        return p && c.frame.tree.edit_widget(p);
+        return p && p.__bool__() && c.frame.tree.edit_widget(p);
     }
     //@+node:felix.20210131011420.3: *5* c.fileName & relativeFileName & shortFileName
     // Compatibility with scripts
