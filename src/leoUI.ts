@@ -4035,7 +4035,6 @@ export class LeoUI extends NullGui {
      * * Goto Global Line
      */
     public gotoGlobalLine(): void {
-        vscode.window.showInformationMessage("TODO: gotoGlobalLine");
 
         this.triggerBodySave(false)
             .then(() => {

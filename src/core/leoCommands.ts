@@ -205,7 +205,7 @@ export class Commands {
     //@+node:felix.20210223220814.8: *4* c.initObjectIvars
     // These ivars are set later by leoEditCommands.createEditCommanders
     public abbrevCommands: any = undefined;
-    public editCommands: any = undefined;
+    public editCommands: EditCommandsClass;
     public db: any = {}; // May be set to a PickleShare instance later.
     public bufferCommands: any = undefined;
     public chapterCommands: any = undefined;
@@ -1814,51 +1814,61 @@ export class Commands {
     //             languages.add(word)
     //     return len(list(languages)) > 1
     //@+node:felix.20211228212851.5: *4* c.scanAllDirectives
-    // @nobeautify
+    /**
+     * Scan p and ancestors for directives.
+     *
+     * Returns a dict containing the results, including defaults.
+     */
+    public scanAllDirectives(p?: Position) : {[key: string]: any} {
+        
+        const c = this;
+        if(!p || !p.__bool__()){
+            p = c.p;
+        }
 
-    // def scanAllDirectives(self, p):
-    //     """
-    //     Scan p and ancestors for directives.
+        // Defaults...
+        const default_language = g.getLanguageFromAncestorAtFileNode(p) || c.target_language || 'python';
+        const default_delims = g.set_delims_from_language(default_language);
+        const wrap = c.config.getBool("body-pane-wraps");
+        const table: [string, any, any][] = [ 
+            ['encoding',    undefined,           g.scanAtEncodingDirectives],
+            ['lang-dict',   {},             g.scanAtCommentAndAtLanguageDirectives],
+            ['lineending',  undefined,           g.scanAtLineendingDirectives],
+            ['pagewidth',   c.page_width,   g.scanAtPagewidthDirectives],
+            ['path',        undefined,           c.scanAtPathDirectives],
+            ['tabwidth',    c.tab_width,    g.scanAtTabwidthDirectives],
+            ['wrap',        wrap,           g.scanAtWrapDirectives],
+        ];
+        // Set d by scanning all directives.
+        const aList = g.get_directives_dict_list(p);
+        let d: {[key: string]: any} = {};
+        // let key, w_default, func;
+        for (let [key, w_default, func] of table){
+            const val = func(aList);
+            if(typeof val === 'undefined'){
+                d[key] = w_default;
+            }else{
+                d[key] = val;
+            }
+        }
+        // Post process: do *not* set commander ivars.
+        const lang_dict = d['lang-dict'];
+        d = {
+            "delims":       lang_dict['delims'] || default_delims,
+            "comment":      lang_dict['comment'],  // Leo 6.4: New.
+            "encoding":     d['encoding'],
+            // Note: at.scanAllDirectives does not use the defaults for "language".
+            "language":     lang_dict['language'] || default_language,
+            "lang-dict":    lang_dict,  // Leo 6.4: New.
+            "lineending":   d['lineending'],
+            "pagewidth":    d['pagewidth'],
+            "path":         d['path'], // Redundant: || g.getBaseDirectory(c),
+            "tabwidth":     d['tabwidth'],
+            "wrap":         d['wrap'],
+        };
+        return d;
 
-    //     Returns a dict containing the results, including defaults.
-    //     """
-    //     c = self
-    //     p = p or c.p
-    //     # Defaults...
-    //     default_language = g.getLanguageFromAncestorAtFileNode(p) or c.target_language or 'python'
-    //     default_delims = g.set_delims_from_language(default_language)
-    //     wrap = c.config.getBool("body-pane-wraps")
-    //     table = (  # type:ignore
-    //         ('encoding',    None,           g.scanAtEncodingDirectives),
-    //         ('lang-dict',   {},             g.scanAtCommentAndAtLanguageDirectives),
-    //         ('lineending',  None,           g.scanAtLineendingDirectives),
-    //         ('pagewidth',   c.page_width,   g.scanAtPagewidthDirectives),
-    //         ('path',        None,           c.scanAtPathDirectives),
-    //         ('tabwidth',    c.tab_width,    g.scanAtTabwidthDirectives),
-    //         ('wrap',        wrap,           g.scanAtWrapDirectives),
-    //     )
-    //     # Set d by scanning all directives.
-    //     aList = g.get_directives_dict_list(p)
-    //     d = {}
-    //     for key, default, func in table:
-    //         val = func(aList)  # type:ignore
-    //         d[key] = default if val is None else val
-    //     # Post process: do *not* set commander ivars.
-    //     lang_dict = d.get('lang-dict')
-    //     d = {
-    //         "delims":       lang_dict.get('delims') or default_delims,
-    //         "comment":      lang_dict.get('comment'),  # Leo 6.4: New.
-    //         "encoding":     d.get('encoding'),
-    //         # Note: at.scanAllDirectives does not use the defaults for "language".
-    //         "language":     lang_dict.get('language') or default_language,
-    //         "lang-dict":    lang_dict,  # Leo 6.4: New.
-    //         "lineending":   d.get('lineending'),
-    //         "pagewidth":    d.get('pagewidth'),
-    //         "path":         d.get('path'), # Redundant: or g.getBaseDirectory(c),
-    //         "tabwidth":     d.get('tabwidth'),
-    //         "wrap":         d.get('wrap'),
-    //     }
-    //     return d
+    }
     //@+node:felix.20211228212851.6: *4* c.scanAtPathDirectives
     /**
      * Scan aList for @path directives.

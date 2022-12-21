@@ -14,6 +14,7 @@ import * as g from './leoGlobals';
 import { StringFindTabManager } from './findTabManager';
 import { Position } from './leoNodes';
 import { Commands } from './leoCommands';
+import { StringTextWrapper } from './leoFrame';
 //@-<< leoGui imports >>
 //@+others
 //@+node:felix.20221119205229.1: ** class LeoGui
@@ -570,11 +571,11 @@ export class NullGui extends LeoGui {
     }
 
     public isTextWidget(w: any): boolean {
-        return false;
+        return w instanceof StringTextWrapper;
     }
 
     public isTextWrapper(w: any): boolean {
-        return false;
+        return w instanceof StringTextWrapper;
     }
 }
 

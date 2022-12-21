@@ -638,6 +638,13 @@ export class SettingsDict extends Map<string, any> {
 
 }
 
+//@+node:felix.20221221003402.1: *3* g.isTextWrapper & isTextWidget
+export function isTextWidget(w: any): boolean {
+    return app.gui.isTextWidget(w);
+}
+export function isTextWrapper(w: any): boolean {
+    return app.gui.isTextWrapper(w);
+}
 //@+node:felix.20211104210703.1: ** g.Debugging, GC, Stats & Timing
 //@+node:felix.20211205233429.1: *3* g._assert
 /**
@@ -1217,6 +1224,24 @@ export function scanAtCommentAndAtLanguageDirectives(aList: { [key: string]: str
     }
     return undefined;
 }
+//@+node:felix.20221220000621.1: *3* g.scanAtEncodingDirectives
+/**
+ * Scan aList for @encoding directives.
+ */
+export function scanAtEncodingDirectives(aList: any[]): string | undefined {
+
+    for (let d of aList) {
+        const encoding = d['encoding'];
+        if (encoding && isValidEncoding(encoding)) {
+            return encoding;
+        }
+        if (encoding && !unitTesting) {
+            error("invalid @encoding:", encoding);
+        }
+    }
+    return undefined;
+
+}
 //@+node:felix.20220412232541.1: *3* g.scanAtHeaderDirectives
 /**
  * scan aList for @header and @noheader directives.
@@ -1348,6 +1373,32 @@ export function scanAllAtWrapDirectives(c: Commands, p: Position): boolean | und
     }
 
     return ret;
+}
+//@+node:felix.20221219221446.1: *3* g.scanForAtLanguage
+/**
+ * Scan position p and p's ancestors looking only for @language and @ignore directives.
+ *
+ * Returns the language found, or c.target_language.
+ */
+export function scanForAtLanguage(c: Commands, p: Position): string | undefined {
+
+    // Unlike the code in x.scanAllDirectives, this code ignores @comment directives.
+    if (c && p && p.__bool__()) {
+        for (let w_p of p.self_and_parents(false)) {
+            const d = get_directives_dict(w_p);
+            if (d["language"]) {
+                const z = d["language"];
+                let language;
+                let delim1;
+                let delim2;
+                let delim3;
+                [language, delim1, delim2, delim3] = set_language(z, 0);
+                return language;
+            }
+        }
+    }
+    return c.target_language;
+
 }
 //@+node:felix.20220110202727.1: *3* g.set_delims_from_language
 /**
@@ -1663,6 +1714,44 @@ export function getBaseDirectory(c: Commands): string {
     }
 
     return '';  // No relative base given.
+}
+//@+node:felix.20221219233638.1: *3* g.is_sentinel
+/** 
+ * Return True if line starts with a sentinel comment.
+ *
+ * Leo 6.7.2: Support blackened sentinels.
+ */
+export function is_sentinel(line: string, delims: [string | undefined, string | undefined, string | undefined]): boolean {
+
+    let delim1, delim2, delim3, sentinel1, sentinel2;
+    [delim1, delim2, delim3] = delims;
+    // Defensive code. Make *sure* delim has no trailing space.
+    if (delim1) {
+        delim1 = delim1.trimEnd();
+    }
+    line = line.trimStart();
+    if (delim1) {
+        sentinel1 = delim1 + '@';
+        sentinel2 = delim1 + ' @';
+        return line.startsWith(sentinel1) || line.startsWith(sentinel2);
+    }
+    let i, j;
+    if (delim2 && delim3) {
+        sentinel1 = delim2 + '@';
+        sentinel2 = delim2 + ' @';
+        if (line.includes(sentinel1)) {
+            i = line.indexOf(sentinel1);
+            j = line.indexOf(delim3);
+            return 0 == i && i < j;
+        }
+        if (line.includes(sentinel2)) {
+            i = line.indexOf(sentinel2);
+            j = line.indexOf(delim3);
+            return 0 == i && i < j;
+        }
+    }
+    error(`is_sentinel: can not happen. delims: ${delims}`);
+    return false;
 }
 //@+node:felix.20220511001701.1: *3* g.openWithFileName
 /**
@@ -3397,7 +3486,7 @@ export function convertPythonDayjs(s: string): string {
     return s;
 }
 
-//@+node:felix.20220206010631.1: *3* dedent
+//@+node:felix.20220206010631.1: *3* g.dedent
 /**
  * This is similar to Python's "textwrap.dedent" function
  * from https://gist.github.com/malthe/02350255c759d5478e89
@@ -3424,6 +3513,20 @@ export function dedent(text: string) {
         text = text.replace(new RegExp('^[ \t]{' + i + '}(.*\n)', 'gm'), '$1');
     }
     return text;
+}
+//@+node:felix.20221218195057.1: *3* g.reEscape
+
+/**
+ * python re.escape equivalent in typescript
+ */
+export function reEscape(text: string) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+//@+node:felix.20221219233315.1: *3* g.rtrim
+export function rtrim(str: string, ch: string): string {
+    let i = str.length;
+    while (i-- && ch.includes(str.charAt(i)));
+    return str.substring(0, i + 1);
 }
 //@+node:felix.20211104222646.1: *3* g.plural          (coreGlobals.py)
 /**
@@ -4138,7 +4241,7 @@ export function python_tokenize(s: string): [string, string, number][] {
 }
 
 //@+node:felix.20211104211229.1: ** g.Scripting
-//@+node:felix.20211104220723.1: *3* g.getScript
+//@+node:felix.20221219205826.1: *3* g.getScript & helpers
 /**
  * Return the expansion of the selected text of node p.
  * Return the expansion of all of node p's body text if
@@ -4149,8 +4252,133 @@ export function getScript(c: Commands, p: Position,
     forcePythonSentinels: boolean = true,
     useSentinels: boolean = true
 ): string {
-    console.log("get script called");
+    console.log("TODO : 'get script' called!");
     return "";
+
+    let script: string;
+    let s: string;
+    const w = c.frame.body.wrapper;
+
+    if (!p || !p.__bool__()) {
+        p = c.p;
+    }
+
+    try {
+        if (app.inBridge) {
+            s = p.b;
+        } else if (w && p.__eq__(c.p) && useSelectedText && w.hasSelection()) {
+            s = w.getSelectedText();
+        } else {
+            s = p.b;
+        }
+        // Remove extra leading whitespace so the user may execute indented code.
+        s = dedent(s);
+        s = extractExecutableString(c, p, s);
+        script = composeScript(
+            c, p, s,
+            forcePythonSentinels,
+            useSentinels
+        );
+    }
+    catch (exception) {
+        es_print("unexpected exception in g.getScript");
+        es_exception();
+        script = '';
+    }
+    return script;
+
+}
+//@+node:felix.20221219205826.2: *4* g.composeScript
+/**
+ * Compose a script from p.b.
+ */
+export function composeScript(
+    c: Commands,
+    p: Position,
+    s: string,
+    forcePythonSentinels: boolean = true,
+    useSentinels: boolean = true
+): string {
+
+    // This causes too many special cases.
+    // if not g.unitTesting and forceEncoding:
+    // aList = g.get_directives_dict_list(p)
+    // encoding = scanAtEncodingDirectives(aList) or 'utf-8'
+    // s = g.insertCodingLine(encoding,s)
+    if (!s.trim()) {
+        return '';
+    }
+    const at = c.atFileCommands;
+    const old_in_script = app.inScript;
+
+    let script;
+
+    try {
+        // #1297: set inScript flags.
+        inScript = true;
+        app.inScript = true;
+        app.scriptDict["script1"] = s;
+        // Important: converts unicode to utf-8 encoded strings.
+        script = at.stringToString(
+            p.copy(),
+            s,
+            forcePythonSentinels,
+            useSentinels
+        );
+        // Important, the script is an **encoded string**, not a unicode string.
+        script = script.replace(/(?:\r\n)/g, '\n'); // Use brute force.
+        app.scriptDict["script2"] = script;
+    }
+    finally {
+        app.inScript = old_in_script;
+        inScript = old_in_script;
+    }
+    return script;
+
+}
+
+//@+node:felix.20221219205826.3: *4* g.extractExecutableString
+/**
+ * Return all lines for the given @language directive.
+ *
+ * Ignore all lines under control of any other @language directive.
+ */
+export function extractExecutableString(c: Commands, p: Position, s: string): string {
+
+    //
+    // Rewritten to fix //1071.
+    if (unitTesting) {
+        return s;  // Regretable, but necessary.
+    }
+    //
+    // Return s if no @language in effect. Should never happen.
+    const language = scanForAtLanguage(c, p);
+    if (!language) {
+        return s;
+    }
+    //
+    // Return s if @language is unambiguous.
+    const pattern = /^@language\s+(\w+)/g;
+    const matches = ((s || '').match(pattern) || []); // list(re.finditer(pattern, s, re.MULTILINE))
+    if (matches.length < 2) {
+        return s;
+    }
+
+    //
+    // Scan the lines, extracting only the valid lines.
+    let extracting = false;
+    let result = [];
+
+    for (let line of splitLines(s)) {
+        const m = pattern.exec(line);// re.match(pattern, line);
+        if (m) {
+            extracting = m[1] === language;
+        } else if (extracting) {
+            result.push(line);
+        }
+    }
+    return result.join("");
+
 }
 
 //@+node:felix.20220211012808.1: *3* g.find*Node*

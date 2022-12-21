@@ -5,6 +5,8 @@ import { new_cmd_decorator, command } from "../core/decorators";
 import { Position, VNode } from "../core/leoNodes";
 import { Commands } from "../core/leoCommands";
 import { Bead } from '../core/leoUndo';
+import { StringTextWrapper } from '../core/leoFrame';
+import { BaseEditCommandsClass } from './baseCommands';
 
 //@+others
 //@+node:felix.20220503223721.1: ** editCommands.cmd (decorator)
@@ -144,14 +146,12 @@ export class TopLevelEditCommands {
 
 }
 //@+node:felix.20220503222535.1: ** class EditCommandsClass
-export class EditCommandsClass {
-
-    public c: Commands;
+export class EditCommandsClass extends BaseEditCommandsClass {
 
     //@+others
     //@+node:felix.20220504204405.1: *3* ec.constructor
     constructor(c: Commands) {
-        this.c = c;
+        super(c);
     }
     //@+node:felix.20220503223023.1: *3* ec.doNothing
     @cmd(
@@ -377,6 +377,65 @@ export class EditCommandsClass {
         c.widgetWantsFocus(w)
 
         */
+
+    }
+    //@+node:felix.20221220002620.1: *3* ec: move cursor
+    //@+node:felix.20221220002639.1: *4* ec.extend-to-word
+    @cmd(
+        'extend-to-word',
+        'Compute the word at the cursor. Select it if select arg is True.'
+    )
+    public extendToWord(select = true, w?: StringTextWrapper): [number, number] {
+
+        if (!w) {
+            (w = this.editWidget());
+        }
+        if (!w) {
+            return [0, 0];
+        }
+        const s = w.getAllText();
+        const n = s.length;
+        let i = w.getInsertPoint();
+        let i1 = i;
+        // Find a word char on the present line if one isn't at the cursor.
+        if (!(0 <= i && i < n && g.isWordChar(s[i]))) {
+            // First, look forward
+            while (i < n && !g.isWordChar(s[i]) && s[i] !== '\n') {
+                i += 1;
+            }
+            // Next, look backward.
+            if (!(0 <= i && i < n && g.isWordChar(s[i]))) {
+                if (i >= n || s[i] === '\n') {
+                    i = i1 - 1;
+                } else {
+                    i = i1;
+                }
+                while (i >= 0 && !g.isWordChar(s[i]) && s[i] !== '\n') {
+                    i -= 1;
+                }
+            }
+        }
+        // Make sure s[i] is a word char.
+        if (0 <= i && i < n && g.isWordChar(s[i])) {
+            // Find the start of the word.
+            while (0 <= i && i < n && g.isWordChar(s[i])) {
+                i -= 1;
+            }
+            i += 1;
+            i1 = i;
+
+            // Find the end of the word.
+            while (0 <= i && i < n && g.isWordChar(s[i])) {
+                i += 1;
+            }
+            if (select) {
+                w.setSelectionRange(i1, i);
+            }
+            return [i1, i];
+        }
+
+        return [0, 0];
+
 
     }
     //@+node:felix.20220503225545.1: *3* ec: uA's

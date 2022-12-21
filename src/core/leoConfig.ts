@@ -2654,9 +2654,9 @@ export class LocalConfigManager {
  */
 export class SettingsTreeParser extends ParserBaseClass {
 
-
-    // def __init__(self, c, localFlag=True):
-    // super().__init__(c, localFlag)
+    constructor(c: Commands, localFlag = true) {
+        super(c, localFlag);
+    }
 
     //@+others
     //@+node:felix.20220602232038.2: *3* ctor (SettingsTreeParser)

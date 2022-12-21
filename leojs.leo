@@ -529,6 +529,7 @@
 <v t="felix.20221105221426.1"><vh>@file src/core/quicksearch.ts</vh></v>
 </v>
 <v t="felix.20211002194716.1"><vh>Command classes</vh>
+<v t="felix.20221220233857.1"><vh>@file src/commands/baseCommands.ts</vh></v>
 <v t="felix.20220414231314.1"><vh>@file src/commands/commanderEditCommands.ts</vh></v>
 <v t="felix.20211017230407.1"><vh>@file src/commands/commanderFileCommands.ts</vh></v>
 <v t="felix.20220612234816.1"><vh>@file src/commands/commanderHelpCommands.ts</vh></v>
@@ -825,7 +826,7 @@ export function strToLeoUri(p_str: string): vscode.Uri {
 export function leoUriToStr(p_uri: vscode.Uri): string {
     // TODO : Use length of a constant or something other than 'fsPath'
     // For now, just remove the '/' (or backslash on Windows) before the path string
-    return p_uri.fsPath.substr(1);
+    return p_uri.fsPath.substring(1);
 }
 
 </t>
@@ -9317,7 +9318,6 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
  * * Goto Global Line
  */
 public gotoGlobalLine(): void {
-    vscode.window.showInformationMessage("TODO: gotoGlobalLine");
 
     this.triggerBodySave(false)
         .then(() =&gt; {

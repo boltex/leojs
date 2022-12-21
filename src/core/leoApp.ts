@@ -199,13 +199,20 @@ export class LeoApp {
     //@+<< LeoApp: global reader/writer data >>
     //@+node:felix.20210103024632.8: *5* << LeoApp: global reader/writer data >>
     // From leoAtFile.py.
-    public atAutoWritersDict: any = {};
-    public writersDispatchDict: any = {};
+    public atAutoWritersDict: {[key: string]: any} = {};
+    public writersDispatchDict: {[key: string]: any} = {};
     // From leoImport.py
-    public atAutoDict: any = {};
+    public atAutoDict: {[key: string]: any} = {};
     // Keys are @auto names, values are scanner classes.
-    public classDispatchDict: any = {};
+    public classDispatchDict: {[key: string]: any} = {};
 
+    // True if an @auto writer should write sentinels,
+    // even if the external file doesn't actually contain sentinels.
+    public force_at_auto_sentinels = false;
+
+    // leo 5.6: allow undefined section references in all @auto files.
+    // Leo 6.6.4: Make this a permanent g.app ivar.
+    public allow_undefined_refs = false;
     //@-<< LeoApp: global reader/writer data >>
     //@+<< LeoApp: global status vars >>
     //@+node:felix.20210103024632.9: *5* << LeoApp: global status vars >>

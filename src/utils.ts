@@ -307,7 +307,7 @@ export function strToLeoUri(p_str: string): vscode.Uri {
 export function leoUriToStr(p_uri: vscode.Uri): string {
     // TODO : Use length of a constant or something other than 'fsPath'
     // For now, just remove the '/' (or backslash on Windows) before the path string
-    return p_uri.fsPath.substr(1);
+    return p_uri.fsPath.substring(1);
 }
 
 /**
