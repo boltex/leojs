@@ -11,10 +11,9 @@
     let timer; // for debouncing sending the settings from this webview to leointeg
     let dirty = false; // all but nav input
     let navTextDirty = false;
-    let showNavElements = true;
 
-    let firstTabEl = 'searchOptions'; // used to be 'findText' before nav inputs
-    let lastTabEl = 'searchBody';
+    let firstTabElId = 'searchOptions'; // used to be 'findText' before nav inputs
+    let lastTabElId = 'searchBody';
 
     /**
      * * Flag for freezing the nav 'search as you type' headlines (concept from original nav plugin)
@@ -22,7 +21,7 @@
      * - Sets when pressing Enter with non-empty input field && not tag mode.
      */
     let frozen = false;
-    const w_freezeElement = document.getElementById("freeze");
+    let w_freezeElement = document.getElementById("freeze");
     if (w_freezeElement) {
         w_freezeElement.style.display = 'none';
     }
@@ -64,7 +63,7 @@
     function navTextChange() {
         // cancel timer, reset 'debounced' timer after checks, if still needed
         if (navSearchTimer) {
-            clearTimeout(navSearchTimer)
+            clearTimeout(navSearchTimer);
         }
 
         // * Needed Checks
@@ -76,7 +75,7 @@
                     if (navTextDirty) {
                         navTextDirty = false;
                         if (navSearchTimer) {
-                            clearTimeout(navSearchTimer)
+                            clearTimeout(navSearchTimer);
                         }
                         sendSearchConfig();
                     }
@@ -96,7 +95,7 @@
             if (navTextDirty) {
                 navTextDirty = false;
                 if (navSearchTimer) {
-                    clearTimeout(navSearchTimer)
+                    clearTimeout(navSearchTimer);
                 }
                 sendSearchConfig();
             }
@@ -115,7 +114,7 @@
 
     function setFrozen(p_focus) {
         frozen = p_focus;
-        const w_freezeElement = document.getElementById("freeze");
+        w_freezeElement = document.getElementById("freeze");
         if (w_freezeElement) {
             if (frozen) {
                 w_freezeElement.style.display = '';
@@ -150,9 +149,8 @@
             searchSettings["searchOptions"] = p_settings["searchOptions"];
         } else {
             // ! Not at least Leo 6.6 final : hide top elements !
-            showNavElements = false;
-            firstTabEl = 'findText';
-            var elements = document.getElementsByClassName("nav-element")
+            firstTabElId = 'findText';
+            var elements = document.getElementsByClassName("nav-element");
 
             for (var i = 0; i < elements.length; i++) {
                 // @ts-expect-error
@@ -233,11 +231,11 @@
 
         if (keyCode === 'Tab') {
             var actEl = document.activeElement;
-            var lastEl = document.getElementById(lastTabEl);
+            var lastEl = document.getElementById(lastTabElId);
 
             if (p_event.shiftKey) {
                 // shift + tab so if first got last
-                var firstEl = document.getElementById(firstTabEl);
+                var firstEl = document.getElementById(firstTabElId);
                 if (lastEl && actEl === firstEl) {
                     p_event.preventDefault();
                     p_event.stopPropagation();
@@ -251,7 +249,7 @@
                     p_event.preventDefault();
                     p_event.stopPropagation();
                     p_event.stopImmediatePropagation();
-                    focusOnField(firstTabEl);
+                    focusOnField(firstTabElId);
                     return;
                 }
             }
@@ -309,13 +307,13 @@
     }
 
     // * Nav text input detection
-    const w_nacTextEl = document.getElementById('navText');
-    if (w_nacTextEl) {
-
-
-        w_nacTextEl.onkeypress = function (p_event) {
-            // @ts-expect-error
-            if (!p_event) p_event = window.event;
+    const w_navTextEl = document.getElementById('navText');
+    if (w_navTextEl) {
+        w_navTextEl.onkeypress = function (p_event) {
+            if (!p_event) {
+                // @ts-expect-error
+                p_event = window.event;
+            }
             var keyCode = p_event.code || p_event.key;
             if (keyCode === 'Enter') {
                 if (searchSettings.navText.length >= 3 || searchSettings.isTag) {
@@ -326,17 +324,20 @@
                             clearTimeout(timer);
                         }
                         if (navSearchTimer) {
-                            clearTimeout(navSearchTimer)
+                            clearTimeout(navSearchTimer);
                         }
                         sendSearchConfig();
                     }
                     vscode.postMessage({ type: 'leoNavEnter' });
                 }
+                if (searchSettings.navText.length === 0) {
+                    vscode.postMessage({ type: 'leoNavClear' });
+                }
                 return false;
             }
         };
 
-        w_nacTextEl.addEventListener('input', function (p_event) {
+        w_navTextEl.addEventListener('input', function (p_event) {
             // @ts-expect-error
             searchSettings.navText = this.value;
             navTextDirty = true;
@@ -346,7 +347,6 @@
 
     const w_showParentsEl = document.getElementById('showParents');
     if (w_showParentsEl) {
-
         w_showParentsEl.addEventListener('change', function (p_event) {
             // @ts-expect-error
             searchSettings.showParents = this.checked;
@@ -356,7 +356,6 @@
 
     const w_isTagEl = document.getElementById('isTag');
     if (w_isTagEl) {
-
         w_isTagEl.addEventListener('change', function (p_event) {
             // @ts-expect-error
             let w_checked = this.checked;
@@ -390,8 +389,10 @@
         if (w_inputEl) {
 
             w_inputEl.onkeypress = function (p_event) {
-                // @ts-expect-error
-                if (!p_event) p_event = window.event;
+                if (!p_event) {
+                    // @ts-expect-error
+                    p_event = window.event;
+                }
                 var keyCode = p_event.code || p_event.key;
                 if (keyCode === 'Enter') {
                     if (timer) {

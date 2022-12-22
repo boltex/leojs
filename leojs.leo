@@ -9243,7 +9243,7 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
     ];
     for (let [widget_ivar, setting_name, w_default] of table) {
         const w = ftm[widget_ivar as keyof StringFindTabManager]; // getattr(ftm, widget_ivar)
-        const s = searchSettings[setting_name as keyof LeoGuiFindTabManagerSettings] || w_default
+        const s = searchSettings[setting_name as keyof LeoGuiFindTabManagerSettings] || w_default;
         w.clear();
         w.insert(s);
     }
@@ -9657,10 +9657,6 @@ private _inputFindPattern(p_replace?: boolean): Thenable&lt;string | undefined&g
  */
 public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;any&gt; {
 
-    // const w_action: string = p_reverse
-    //     ? Constants.LEOBRIDGE.FIND_PREVIOUS
-    //     : Constants.LEOBRIDGE.FIND_NEXT;
-
     await this.triggerBodySave(false);
     let found;
     let focus;
@@ -9676,7 +9672,7 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;any&gt
     const w = this.get_focus(c);
     focus = this.widget_name(w);
 
-    const inOutline = (focus.includes("tree")) || (focus.includes("head"))
+    const inOutline = (focus.includes("tree")) || (focus.includes("head"));
     const inBody = !inOutline;
     //
 
