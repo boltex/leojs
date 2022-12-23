@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
-import { LeoGoto, TGotoTypes } from "./types";
+import { LeoGoto, LeoGotoNavKey, TGotoTypes } from "./types";
 import * as utils from "./utils";
 
 /**
@@ -15,25 +15,64 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
 
     private _lastGotoView: vscode.TreeView<LeoGotoNode> | undefined;
 
-    private _topNode: LeoGotoNode | undefined;
+    private _nodeList: LeoGotoNode[] = []; // Node list kept here.
+
+    private _selectedNodeIndex: number = 0;
 
     constructor(private _leoUI: LeoUI) { }
 
-    public showGotoPanel(): Thenable<void> {
-        if (this._lastGotoView && this._topNode) {
-            return this._lastGotoView.reveal(this._topNode, { select: false, focus: false });
-        }
-        return Promise.resolve();
-    }
-
     public setLastGotoView(p_view: vscode.TreeView<LeoGotoNode>): void {
         this._lastGotoView = p_view;
+    }
+
+    public resetSelectedNode(p_node?: LeoGotoNode): void {
+        this._selectedNodeIndex = 0;
+        if (p_node) {
+            const w_found = this._nodeList.indexOf(p_node);
+            if (w_found >= 0) {
+                this._selectedNodeIndex = w_found;
+            }
+        }
+    }
+
+    public navigateNavEntry(p_nav: LeoGotoNavKey): void {
+        if (!this._nodeList.length) {
+            return;
+        }
+        switch (p_nav.valueOf()) {
+            case LeoGotoNavKey.first:
+                this._selectedNodeIndex = 0;
+                this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]);
+                break;
+
+            case LeoGotoNavKey.last:
+                this._selectedNodeIndex = this._nodeList.length - 1;
+                this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]);
+                break;
+
+            case LeoGotoNavKey.next:
+                if (this._selectedNodeIndex < this._nodeList.length - 1) {
+                    this._selectedNodeIndex += 1;
+                }
+                break;
+
+            case LeoGotoNavKey.prev:
+                if (this._selectedNodeIndex > 0) {
+                    this._selectedNodeIndex -= 1;
+                }
+                break;
+
+        }
+        this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex]);
+        this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]);
     }
 
     /**
      * * Refresh the whole outline
      */
     public refreshTreeRoot(): void {
+        this._nodeList = [];
+        this._selectedNodeIndex = 0;
         this._onDidChangeTreeData.fire(undefined);
     }
 

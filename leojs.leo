@@ -195,6 +195,7 @@
 <v t="felix.20220505215924.1"><vh>Search</vh>
 <v t="felix.20220505215924.2"><vh>navEnter</vh></v>
 <v t="felix.20220505215924.3"><vh>navTextChange</vh></v>
+<v t="felix.20221222003636.1"><vh>navTextClear</vh></v>
 <v t="felix.20220505215924.4"><vh>startSearch</vh></v>
 <v t="felix.20220930222931.1"><vh>checkForceFindFocus</vh></v>
 <v t="felix.20220505215924.6"><vh>_inputFindPattern</vh></v>
@@ -2905,6 +2906,7 @@ import { LeoFindPanelProvider } from "./leoFindPanelWebview";
 import { ISettings, LeoFind } from "./core/leoFind";
 import { NullGui } from "./core/leoGui";
 import { StringFindTabManager } from "./core/findTabManager";
+import { QuickSearchController } from "./core/quicksearch";
 
 @language typescript
 @tabwidth -4
@@ -3244,9 +3246,13 @@ private _triggerGetStates(): void {
         this._refreshType.documents = false;
         this.refreshDocumentsPane();
     }
+    if (this._refreshType.goto) {
+        this._refreshType.goto = false;
+        this.refreshGotoPane();
+    }
     if (this._refreshType.buttons) {
         this._refreshType.buttons = false;
-        this._leoButtonsProvider.refreshTreeRoot();
+        this.refreshButtonsPane();
     }
 }
 
@@ -3460,7 +3466,6 @@ public async command(
         }
     }
 
-
     try {
         if (p.__eq__(c.p)) {
             value = c.doCommandByName(p_cmd); // no need for re-selection
@@ -3493,34 +3498,27 @@ public async command(
             }
         }
     } catch (e) {
-        vscode.window.showErrorMessage(
-            "LeoUI Error: " + e
-        );
+        vscode.window.showErrorMessage("LeoUI Error: " + e);
     }
-
 
     if (this.trace) {
         if (this.lastCommandTimer) {
             console.log('lastCommandTimer', utils.getDurationMs(this.lastCommandTimer));
         }
     }
+
     this.lastCommandTimer = undefined;
 
     if (value &amp;&amp; value.then) {
         (value as Thenable&lt;unknown&gt;).then((p_result) =&gt; {
             this.launchRefresh();
         });
-    } else {
-        this.launchRefresh();
-    }
-
-
-    if (value &amp;&amp; value.then) {
         return value;
     } else {
+        this.launchRefresh();
         return Promise.resolve(value); // value may be a promise but it will resolve all at once.
-
     }
+
 }
 
 </t>
@@ -8780,12 +8778,11 @@ public findQuickSelected(): Thenable&lt;unknown&gt; {
  * Lists all nodes in reversed gnx order, newest to oldest
  */
 public findQuickTimeline(): Thenable&lt;unknown&gt; {
-    // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_TIMELINE)
-    //     .then((p_result: LeoBridgePackage) =&gt; {
-    //         this._leoGotoProvider.refreshTreeRoot();
-    //         return this.showGotoPane(); // Finish by opening and focussing nav pane
-    //     });
-    return vscode.window.showInformationMessage("TODO: findQuickTimeline");
+    const c = g.app.windowList[this.frameIndex].c;
+    const scon: QuickSearchController = c.quicksearchController;
+    scon.qsc_sort_by_gnx();
+    this._leoGotoProvider.refreshTreeRoot();
+    return this.showGotoPane(); // Finish by opening and focussing nav pane
 }
 
 </t>
@@ -8793,13 +8790,11 @@ public findQuickTimeline(): Thenable&lt;unknown&gt; {
  * Lists all nodes that are changed (aka "dirty") since last save.
  */
 public findQuickChanged(): Thenable&lt;unknown&gt; {
-    // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_CHANGED)
-    //     .then((p_result: LeoBridgePackage) =&gt; {
-    //         this._leoGotoProvider.refreshTreeRoot();
-    //         return this.showGotoPane(); // Finish by opening and focussing nav pane
-    //     });
-    return vscode.window.showInformationMessage("TODO: findQuickChanged");
-
+    const c = g.app.windowList[this.frameIndex].c;
+    const scon: QuickSearchController = c.quicksearchController;
+    scon.qsc_find_changed();
+    this._leoGotoProvider.refreshTreeRoot();
+    return this.showGotoPane(); // Finish by opening and focussing nav pane
 }
 
 </t>
@@ -8807,13 +8802,11 @@ public findQuickChanged(): Thenable&lt;unknown&gt; {
  * Lists nodes from c.nodeHistory.
  */
 public findQuickHistory(): Thenable&lt;unknown&gt; {
-    // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_HISTORY)
-    //     .then((p_result: LeoBridgePackage) =&gt; {
-    //         this._leoGotoProvider.refreshTreeRoot();
-    //         return this.showGotoPane(); // Finish by opening and focussing nav pane
-    //     });
-    return vscode.window.showInformationMessage("TODO: findQuickHistory");
-
+    const c = g.app.windowList[this.frameIndex].c;
+    const scon: QuickSearchController = c.quicksearchController;
+    scon.qsc_get_history();
+    this._leoGotoProvider.refreshTreeRoot();
+    return this.showGotoPane(); // Finish by opening and focussing nav pane
 }
 
 </t>
@@ -8821,13 +8814,11 @@ public findQuickHistory(): Thenable&lt;unknown&gt; {
  * List all marked nodes.
  */
 public findQuickMarked(): Thenable&lt;unknown&gt; {
-    // return this.sendAction(Constants.LEOBRIDGE.FIND_QUICK_MARKED)
-    //     .then((p_result: LeoBridgePackage) =&gt; {
-    //         this._leoGotoProvider.refreshTreeRoot();
-    //         return this.showGotoPane(); // Finish by opening and focussing nav pane
-    //     });
-    return vscode.window.showInformationMessage("TODO: findQuickMarked");
-
+    const c = g.app.windowList[this.frameIndex].c;
+    const scon: QuickSearchController = c.quicksearchController;
+    scon.qsc_show_marked();
+    this._leoGotoProvider.refreshTreeRoot();
+    return this.showGotoPane(); // Finish by opening and focussing nav pane
 }
 
 </t>
@@ -8849,86 +8840,93 @@ public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknow
 }
 
 </t>
-<t tx="felix.20220505215916.9">public gotoNavEntry(p_node: LeoGotoNode): Thenable&lt;unknown&gt; {
-    return vscode.window.showInformationMessage("TODO: gotoNavEntry");
+<t tx="felix.20220505215916.9">public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
 
-    // if (p_node.entryType === 'tag') {
+    await this.triggerBodySave(false);
+    this._leoGotoProvider.resetSelectedNode(p_node); // Inform controller of last index chosen
+    const c = g.app.windowList[this.frameIndex].c;
+    const scon: QuickSearchController = c.quicksearchController;
 
-    //     return this._isBusyTriggerSave(false, true)
-    //         .then((p_saveResult) =&gt; {
+    if (p_node.entryType === 'tag') {
+        // * For when the nav input IS CLEARED : GOTO PANE LISTS ALL TAGS!
+        // The node clicked was one of the tags, pre-fill the nac search with this tag and open find pane
+        let w_string: string = p_node.label as string;
+        let w_panelID = '';
+        let w_panel: vscode.WebviewView | undefined;
+        if (this._lastTreeView === this._leoTreeExView) {
+            w_panelID = Constants.FIND_EXPLORER_ID;
+            w_panel = this._findPanelWebviewExplorerView;
+        } else {
+            w_panelID = Constants.FIND_ID;
+            w_panel = this._findPanelWebviewView;
+        }
+        await vscode.commands.executeCommand(w_panelID + '.focus');
 
-    //             let w_string: string = p_node.label as string;
+        if (w_panel &amp;&amp; w_panel.show &amp;&amp; !w_panel.visible) {
+            w_panel.show(false);
+        }
+        const w_message: { [key: string]: string; } = { type: 'selectNav' };
+        if (w_string &amp;&amp; w_string?.trim()) {
+            w_message["text"] = w_string.trim();
+        }
+        await w_panel!.webview.postMessage(w_message);
+        // Do search
 
-    //             let w_panelID = '';
-    //             let w_panel: vscode.WebviewView | undefined;
-    //             if (this._lastTreeView === this._leoTreeExView) {
-    //                 w_panelID = Constants.FIND_EXPLORER_ID;
-    //                 w_panel = this._findPanelWebviewExplorerView;
-    //             } else {
-    //                 w_panelID = Constants.FIND_ID;
-    //                 w_panel = this._findPanelWebviewView;
-    //             }
-    //             vscode.commands.executeCommand(w_panelID + '.focus').then((p_result) =&gt; {
-    //                 if (w_panel &amp;&amp; w_panel.show &amp;&amp; !w_panel.visible) {
-    //                     w_panel.show(false);
-    //                 }
-    //                 const w_message: { [key: string]: string } = { type: 'selectNav' };
-    //                 if (w_string &amp;&amp; w_string?.trim()) {
-    //                     w_message["text"] = w_string.trim();
-    //                 }
-    //                 return w_panel!.webview.postMessage(w_message);
-    //             }).then(() =&gt; {
-    //                 // Do search
-    //                 setTimeout(() =&gt; {
-    //                     this.sendAction(
-    //                         Constants.LEOBRIDGE.NAV_SEARCH
-    //                     ).then((p_package) =&gt; {
-    //                         this._leoGotoProvider.refreshTreeRoot();
-    //                         this.showGotoPane({ preserveFocus: true }); // show but dont change focus
-    //                         return p_package;
-    //                     });
-    //                 }, 10);
+        setTimeout(async () =&gt; {
+            const inp = scon.navText;
+            if (scon.isTag) {
+                scon.qsc_find_tags(inp);
+            } else {
+                scon.qsc_search(inp);
+            }
+            this._leoGotoProvider.refreshTreeRoot();
+            await this.showGotoPane({ preserveFocus: true }); // show but dont change focus
+        }, 10);
 
-    //             });
-    //         });
+    } else if (p_node.entryType !== 'generic' &amp;&amp; p_node.entryType !== 'parent') {
+        // Other and not a tag so just locate the entry in either body or outline
+        // const p_navEntryResult = await this.sendAction(
+        //     Constants.LEOBRIDGE.GOTO_NAV_ENTRY,
+        //     { key: p_node.key }
+        // );
 
-    // }
+        const it = p_node.key;
+        scon.onSelectItem(it);
 
-    // // Was not a tag
-    // if (p_node.entryType !== 'generic' &amp;&amp; p_node.entryType !== 'parent') {
-    //     return this._isBusyTriggerSave(false, true)
-    //         .then((p_saveResult) =&gt; {
-    //             return this.sendAction(
-    //                 Constants.LEOBRIDGE.GOTO_NAV_ENTRY,
-    //                 JSON.stringify({ key: p_node.key })
-    //             );
-    //         })
-    //         .then((p_navEntryResult: LeoBridgePackage) =&gt; {
-    //             if (!p_navEntryResult.focus) {
-    //                 vscode.window.showInformationMessage('Not found');
-    //             } else {
-    //                 let w_focusOnOutline = false;
-    //                 const w_focus = p_navEntryResult.focus.toLowerCase();
+        const w = this.get_focus(c);
+        let w_focus = this.widget_name(w);
 
-    //                 if (w_focus.includes('tree') || w_focus.includes('head')) {
-    //                     // tree
-    //                     w_focusOnOutline = true;
-    //                 }
-    //                 this.launchRefresh(
-    //                     {
-    //                         tree: true,
-    //                         body: true,
-    //                         scroll: !w_focusOnOutline,
-    //                         documents: false,
-    //                         buttons: false,
-    //                         states: true,
-    //                     },
-    //                     w_focusOnOutline
-    //                 );
-    //             }
-    //         });
-    // }
-    // return Promise.resolve();
+        if (!w_focus) {
+            return vscode.window.showInformationMessage('Not found');
+        } else {
+            let w_revealTarget = Focus.Body;
+            w_focus = w_focus.toLowerCase();
+
+            if (w_focus.includes('tree') || w_focus.includes('head')) {
+                // tree
+                w_revealTarget = Focus.Outline;
+                this.showOutlineIfClosed = true;
+            } else {
+                this.showBodyIfClosed = true;
+            }
+
+            this.setupRefresh(
+                // ! KEEP FOCUS ON GOTO PANE !
+                Focus.Goto,
+                {
+                    tree: true,
+                    body: true,
+                    scroll: w_revealTarget === Focus.Body,
+                    // documents: false,
+                    // buttons: false,
+                    states: true,
+                }
+            );
+
+            return this.launchRefresh();
+        }
+    }
+
 }
 </t>
 <t tx="felix.20220505215924.1"></t>
@@ -9534,21 +9532,23 @@ public removeTags(): void {
 }
 
 </t>
-<t tx="felix.20220505215924.2">
-public navEnter(): Thenable&lt;unknown&gt; {
-    return vscode.window.showInformationMessage("TODO: navEnter");
+<t tx="felix.20220505215924.2">public async navEnter(): Promise&lt;unknown&gt; {
+    await this.triggerBodySave(false);
+    const c = g.app.windowList[this.frameIndex].c;
+    const scon: QuickSearchController = c.quicksearchController;
 
-    // return this._isBusyTriggerSave(false, true).then(() =&gt; {
+    const inp = scon.navText;
+    if (scon.isTag) {
+        scon.qsc_find_tags(inp);
+    } else {
+        scon.qsc_search(inp);
+    }
 
-    //     return this.sendAction(
-    //         Constants.LEOBRIDGE.NAV_SEARCH
-    //     ).then((p_package) =&gt; {
-    //         this._leoGotoProvider.refreshTreeRoot();
-    //         this.showGotoPane({ preserveFocus: true }); // show but dont change focus
-    //         return p_package;
-    //     });
+    this._leoGotoProvider.refreshTreeRoot();
+    return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
 
-    // });
+}
+
 </t>
 <t tx="felix.20220505215924.20">/**
  * * Clone Find Tag
@@ -9592,24 +9592,21 @@ public cloneFindTag(): void {
 }
 
 </t>
-<t tx="felix.20220505215924.3">
-}
+<t tx="felix.20220505215924.3">public async navTextChange(): Promise&lt;unknown&gt; {
 
-public navTextChange(): Thenable&lt;unknown&gt; {
-    return vscode.window.showInformationMessage("TODO: navTextChange");
+    await this.triggerBodySave(false);
+    const c = g.app.windowList[this.frameIndex].c;
+    const scon: QuickSearchController = c.quicksearchController;
 
-    // return this._isBusyTriggerSave(false, true).then(() =&gt; {
-
-    //     return this.sendAction(
-    //         Constants.LEOBRIDGE.NAV_HEADLINE_SEARCH
-    //     ).then((p_package) =&gt; {
-    //         this._leoGotoProvider.refreshTreeRoot();
-    //         this.showGotoPane({ preserveFocus: true }); // show but dont change focus
-    //         return p_package;
-    //     });
-
-    // });
-
+    const inp = scon.navText;
+    if (scon.isTag) {
+        scon.qsc_find_tags(inp);
+    } else {
+        const exp = inp.replace(/ /g, '*');
+        scon.qsc_background_search(exp);
+    }
+    this._leoGotoProvider.refreshTreeRoot();
+    return this.showGotoPane({ preserveFocus: true }); // show but dont change focus
 }
 
 </t>
@@ -9985,7 +9982,7 @@ export interface RClick {
 <t tx="felix.20220505221929.1">import * as vscode from "vscode";
 import { Constants } from "./constants";
 import { LeoUI } from "./leoUI";
-import { LeoGoto, TGotoTypes } from "./types";
+import { LeoGoto, LeoGotoNavKey, TGotoTypes } from "./types";
 import * as utils from "./utils";
 
 @language typescript
@@ -10003,25 +10000,64 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
 
     private _lastGotoView: vscode.TreeView&lt;LeoGotoNode&gt; | undefined;
 
-    private _topNode: LeoGotoNode | undefined;
+    private _nodeList: LeoGotoNode[] = []; // Node list kept here.
+
+    private _selectedNodeIndex: number = 0;
 
     constructor(private _leoUI: LeoUI) { }
 
-    public showGotoPanel(): Thenable&lt;void&gt; {
-        if (this._lastGotoView &amp;&amp; this._topNode) {
-            return this._lastGotoView.reveal(this._topNode, { select: false, focus: false });
-        }
-        return Promise.resolve();
-    }
-
     public setLastGotoView(p_view: vscode.TreeView&lt;LeoGotoNode&gt;): void {
         this._lastGotoView = p_view;
+    }
+
+    public resetSelectedNode(p_node?: LeoGotoNode): void {
+        this._selectedNodeIndex = 0;
+        if (p_node) {
+            const w_found = this._nodeList.indexOf(p_node);
+            if (w_found &gt;= 0) {
+                this._selectedNodeIndex = w_found;
+            }
+        }
+    }
+
+    public navigateNavEntry(p_nav: LeoGotoNavKey): void {
+        if (!this._nodeList.length) {
+            return;
+        }
+        switch (p_nav.valueOf()) {
+            case LeoGotoNavKey.first:
+                this._selectedNodeIndex = 0;
+                this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]);
+                break;
+
+            case LeoGotoNavKey.last:
+                this._selectedNodeIndex = this._nodeList.length - 1;
+                this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]);
+                break;
+
+            case LeoGotoNavKey.next:
+                if (this._selectedNodeIndex &lt; this._nodeList.length - 1) {
+                    this._selectedNodeIndex += 1;
+                }
+                break;
+
+            case LeoGotoNavKey.prev:
+                if (this._selectedNodeIndex &gt; 0) {
+                    this._selectedNodeIndex -= 1;
+                }
+                break;
+
+        }
+        this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex]);
+        this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]);
     }
 
     /**
      * * Refresh the whole outline
      */
     public refreshTreeRoot(): void {
+        this._nodeList = [];
+        this._selectedNodeIndex = 0;
         this._onDidChangeTreeData.fire(undefined);
     }
 
@@ -12443,10 +12479,20 @@ public static OLD_POS_OFFSETS = {
 }
 
 </t>
-<t tx="felix.20221027153815.1">public widget_name(widget: any): string {
-    console.log('UI ASKED FOR WIDGET NAME');
-    return "test";
-
+<t tx="felix.20221027153815.1">public widget_name(w: any): string {
+    let name: string;
+    if (!w) {
+        name = '&lt;no widget&gt;';
+    } else if (w['getName']) {
+        name = w.getName();
+    } else if (w['objectName']) {
+        name = w.objectName();
+    } else if (w['_name']) {
+        name = w._name;
+    } else {
+        name = w.toString();
+    }
+    return name;
 }
 
 </t>
@@ -12462,9 +12508,7 @@ public static OLD_POS_OFFSETS = {
  * * Goto the next, previous, first or last nav entry via arrow keys in
  */
 public navigateNavEntry(p_nav: LeoGotoNavKey): void {
-    console.log('TODO : navigateNavEntry');
-
-    // this._leoGotoProvider.navigateNavEntry(p_nav);
+    this._leoGotoProvider.navigateNavEntry(p_nav);
 }
 
 </t>
@@ -14056,6 +14100,20 @@ private _getBodyLanguage(): string {
         w_language = w_language.toLowerCase();
     }
     return w_language;
+}
+
+</t>
+<t tx="felix.20221222003636.1">/**
+ * * CLears the nav search results of the goto pane
+ */
+public async navTextClear(): Promise&lt;unknown&gt; {
+
+    const c = g.app.windowList[this.frameIndex].c;
+    const scon: QuickSearchController = c.quicksearchController;
+
+    scon.clear();
+
+    return this._leoGotoProvider.refreshTreeRoot();
 }
 
 </t>
