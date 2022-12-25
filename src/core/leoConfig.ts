@@ -1912,6 +1912,13 @@ export class LocalConfigManager {
             }
         }
 
+        console.log('previousSettings', previousSettings);
+        console.log('lm.globalSettingsDict', lm.globalSettingsDict);
+
+        console.log('this.settingsDict', this.settingsDict);
+
+
+
         // Default encodings.
         this.default_at_auto_file_encoding = 'utf-8';
         this.default_derived_file_encoding = 'utf-8';
@@ -2084,8 +2091,8 @@ export class LocalConfigManager {
      */
     public getValFromDict(d: g.SettingsDict, setting: string, requestedType?: string, warn = true): [any, boolean] {
         const tag = 'c.config.getValFromDict';
-
-        const gs = d.get(g.app.config.munge(setting)!);
+        const mungedSetting = g.app.config.munge(setting)!;
+        const gs = d.get(mungedSetting);
         if (!gs) {
             return [undefined, false];
         }

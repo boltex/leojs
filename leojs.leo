@@ -3507,6 +3507,10 @@ public async command(
         }
     }
 
+    console.log('hello', c.config.getBool("search-headline", false));
+
+
+
     this.lastCommandTimer = undefined;
 
     if (value &amp;&amp; value.then) {
@@ -8116,6 +8120,10 @@ private async _bodySaveDocument(
 
         } else {
             console.error("ERROR SAVING BODY FROM VSCODE TO LEOJS");
+            if (p_forcedVsCodeSave) {
+                return p_document.save(); // ! USED INTENTIONALLY: This trims trailing spaces
+            }
+            return Promise.resolve(false); // EARLY EXIT
         }
 
         // await for bodySaveSelection that is placed on the stack right after saving body
@@ -8263,13 +8271,24 @@ public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
 };
 
 </t>
-<t tx="felix.20211212205241.1">public replaceClipboardWith(s: string): Thenable&lt;void&gt; {
+<t tx="felix.20211212205241.1">/**
+ * Replaces the system's clipboard with the given string
+ * @param p_string actual string content to go onto the clipboard
+ * @returns a promise that resolves when the string is put on the clipboard
+ */
+public replaceClipboardWith(s: string): Thenable&lt;void&gt; {
     this.clipboardContents = s; // also set immediate clipboard string
     return vscode.env.clipboard.writeText(s);
 }
 
 </t>
-<t tx="felix.20220103203600.1">public asyncGetTextFromClipboard(): Thenable&lt;string&gt; {
+<t tx="felix.20220103203600.1">/**
+ * Asynchronous clipboards getter
+ * Get the system's clipboard contents and returns a promise
+ * Also puts it in the global clipboardContents variable
+ * @returns a promise of the clipboard string content
+ */
+public asyncGetTextFromClipboard(): Thenable&lt;string&gt; {
     return vscode.env.clipboard.readText().then((s) =&gt; {
         // also set immediate clipboard string for possible future read
         this.clipboardContents = s;
@@ -8840,7 +8859,10 @@ public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknow
 }
 
 </t>
-<t tx="felix.20220505215916.9">public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
+<t tx="felix.20220505215916.9">/**
+ * * Handles a click (selection) of a nav panel node: Sends 'goto' command to server.
+ */
+public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
 
     await this.triggerBodySave(false);
     this._leoGotoProvider.resetSelectedNode(p_node); // Inform controller of last index chosen
@@ -9532,7 +9554,10 @@ public removeTags(): void {
 }
 
 </t>
-<t tx="felix.20220505215924.2">public async navEnter(): Promise&lt;unknown&gt; {
+<t tx="felix.20220505215924.2">/**
+ * * Handles an enter press in the 'nav pattern' input
+ */
+public async navEnter(): Promise&lt;unknown&gt; {
     await this.triggerBodySave(false);
     const c = g.app.windowList[this.frameIndex].c;
     const scon: QuickSearchController = c.quicksearchController;
@@ -9592,7 +9617,10 @@ public cloneFindTag(): void {
 }
 
 </t>
-<t tx="felix.20220505215924.3">public async navTextChange(): Promise&lt;unknown&gt; {
+<t tx="felix.20220505215924.3">/**
+ * * Handles a debounced text change in the nav pattern input box
+ */
+public async navTextChange(): Promise&lt;unknown&gt; {
 
     await this.triggerBodySave(false);
     const c = g.app.windowList[this.frameIndex].c;
@@ -9614,21 +9642,32 @@ public cloneFindTag(): void {
  * * Opens the find panel and selects all &amp; focuses on the find field.
  */
 public startSearch(): void {
-    let w_panelID = '';
+
+    // already instantiated &amp; shown ?
     let w_panel: vscode.WebviewView | undefined;
+
+    if (this._findPanelWebviewView &amp;&amp; this._findPanelWebviewView.visible) {
+        w_panel = this._findPanelWebviewView;
+    } else if (this._findPanelWebviewExplorerView &amp;&amp; this._findPanelWebviewExplorerView.visible) {
+        w_panel = this._findPanelWebviewExplorerView;
+    }
+
+    if (w_panel) {
+        // ALREADY VISIBLE FIND PANEL
+        this._findNeedsFocus = false;
+        w_panel.webview.postMessage({ type: 'selectFind' });
+        return;
+    }
+
+    this._findNeedsFocus = true;
+    let w_panelID = '';
     if (this._lastTreeView === this._leoTreeExView) {
         w_panelID = Constants.FIND_EXPLORER_ID;
-        w_panel = this._findPanelWebviewExplorerView;
     } else {
         w_panelID = Constants.FIND_ID;
-        w_panel = this._findPanelWebviewView;
     }
-    vscode.commands.executeCommand(w_panelID + '.focus').then((p_result) =&gt; {
-        if (w_panel &amp;&amp; w_panel.show &amp;&amp; !w_panel.visible) {
-            w_panel.show(false);
-        }
-        w_panel?.webview.postMessage({ type: 'selectFind' });
-    });
+    vscode.commands.executeCommand(w_panelID + '.focus');
+
 }
 
 </t>
@@ -14004,7 +14043,7 @@ public get1Arg(p_options?: vscode.InputBoxOptions | undefined, p_token?: vscode.
 <t tx="felix.20221130233817.1">
 </t>
 <t tx="felix.20221206201231.1">/**
- * * Mimic vscode's CTRL+P to find any position by it's headline
+ * Mimic vscode's CTRL+P to find any position by it's headline
  */
 public async goAnywhere(): Promise&lt;unknown&gt; {
     await this.triggerBodySave(false);
@@ -14104,7 +14143,7 @@ private _getBodyLanguage(): string {
 
 </t>
 <t tx="felix.20221222003636.1">/**
- * * CLears the nav search results of the goto pane
+ * * Clears the nav search results of the goto pane
  */
 public async navTextClear(): Promise&lt;unknown&gt; {
 
