@@ -1912,13 +1912,6 @@ export class LocalConfigManager {
             }
         }
 
-        console.log('previousSettings', previousSettings);
-        console.log('lm.globalSettingsDict', lm.globalSettingsDict);
-
-        console.log('this.settingsDict', this.settingsDict);
-
-
-
         // Default encodings.
         this.default_at_auto_file_encoding = 'utf-8';
         this.default_derived_file_encoding = 'utf-8';

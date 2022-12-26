@@ -3507,10 +3507,6 @@ public async command(
         }
     }
 
-    console.log('hello', c.config.getBool("search-headline", false));
-
-
-
     this.lastCommandTimer = undefined;
 
     if (value &amp;&amp; value.then) {

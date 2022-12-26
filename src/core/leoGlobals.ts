@@ -544,17 +544,10 @@ export class SettingsDict extends Map<string, any> {
 
     //@+node:felix.20220628012349.1: *4* td.copy
     public copy(name?: string): SettingsDict {
-        // TODO : SHOULD BE SIMPLE DEEP COPY!
-        // * Return a new dict with the same contents.
         // The result is a g.SettingsDict.
         // return copy.deepcopy(self)
-
         const newDict = new SettingsDict(this._name);
-        // newDict.d = JSON.parse(JSON.stringify(this.d));
-
         for (const p_key of this.keys()) {
-            console.log('got key to copy', p_key);
-
             newDict.set(p_key, new GeneralSetting({
                 kind: this.get(p_key).kind,
                 encoding: this.get(p_key).encoding,
@@ -580,8 +573,6 @@ export class SettingsDict extends Map<string, any> {
     //@+node:felix.20220628012922.1: *4* td.update
     public update(d: SettingsDict): void {
         for (let key of d.keys()) {
-            console.log('UPDATING :', key);
-
             this.set(key, d.get(key));
         }
     }
@@ -1964,10 +1955,6 @@ export function makeVscodeUri(p_fn: string): vscode.Uri {
 
     if (isBrowser || app.vscodeUriScheme !== 'file') {
         const newUri = app.vscodeWorkspaceUri!.with({ path: p_fn });
-
-        // console.log('new URI:', JSON.stringify(newUri.toJSON()));
-        // console.log('new URI toString:', newUri.toString());
-
         return newUri;
 
     } else {

@@ -1873,13 +1873,7 @@ export class LoadManager {
         [shortcuts_d2, settings_d2] = lm.createSettingsDicts(c, localFlag);
 
         if (!bindings_d) {// #1766: unit tests.
-            console.log('WIPING DICTS!');
-
             [settings_d, bindings_d] = lm.createDefaultSettingsDicts();
-        } else {
-            console.log('OK NOT WIPING DICT');
-            console.log('setting: ', settings_d);
-
         }
         if (settings_d2) {
             if (g.app.trace_setting) {
@@ -1893,11 +1887,8 @@ export class LoadManager {
                     );
                 }
             }
-            // TODO : TEST THIS !!!!
             settings_d = settings_d.copy();
             settings_d.update(settings_d2);
-            console.log('settings_d', settings_d.name(), settings_d);
-
         }
         if (shortcuts_d2) {
             // TODO support shortcuts needed? 
@@ -2605,7 +2596,6 @@ export class LoadManager {
         // Force the user to set g.app.leoID.
         await g.app.setLeoID(true, verbose);
 
-        g.app.inBridge = true;  // (From Leo) Support for g.getScript.
         // w_leoID will at least be 'None'.
         g.app.idleTimeManager = new IdleTimeManager();
         // g.app.backgroundProcessManager = new leoBackground.BackgroundProcessManager();

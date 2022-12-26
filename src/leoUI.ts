@@ -2722,10 +2722,6 @@ export class LeoUI extends NullGui {
             }
         }
 
-        console.log('hello', c.config.getBool("search-headline", false));
-
-
-
         this.lastCommandTimer = undefined;
 
         if (value && value.then) {
