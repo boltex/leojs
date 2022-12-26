@@ -180,7 +180,7 @@ export class LeoApp {
     public commander_cacher: any = null; // The singleton leoCacher.CommanderCacher instance.
     public commander_db: any = null; // The singleton db, managed by g.app.commander_cacher.
     public config!: GlobalConfigManager; // The singleton leoConfig instance.
-    public db: any = null; // The singleton global db, managed by g.app.global_cacher.
+    public db: any = undefined; // The singleton global db, managed by g.app.global_cacher.
     public externalFilesController: any = null; // The singleton ExternalFilesController instance.
     public global_cacher: any = null; // The singleton leoCacher.GlobalCacher instance.
     public idleTimeManager: any = null; // The singleton IdleTimeManager instance.
@@ -1273,6 +1273,7 @@ export class LeoApp {
      * Forget the open file, so that is no longer considered open.
      */
     public forgetOpenFile(fn: string): void {
+
         const trace: boolean = g.app.debug.includes('shutdown');
         const d: any = g.app.db;
         const tag: string = 'open-leo-files';
