@@ -3295,8 +3295,8 @@ export class LeoFind {
             // This ensures that the body text is inited and recolored.
             c.selectPosition(p);
             c.bodyWantsFocus();
-            if (showState) {
-                c.k.showStateAndMode(w);
+            if (showState && c.k && c.k.showStateAndMode) {
+                c.k.showStateAndMode(w);  // TODO : ? NEEDED ?
             }
             c.bodyWantsFocusNow();
             w.setSelectionRange(pos, newpos, insert);
