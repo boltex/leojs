@@ -3754,7 +3754,6 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "categories": [
     "Other"
   ],
-  "icon": "resources/leoapp128px.png",
   "galleryBanner": {
     "color": "#f1af88",
     "theme": "light"
@@ -11345,9 +11344,13 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
                     if (!w_scrollRange) {
                         w_scrollRange = w_bodyTextEditor.document.lineAt(0).range;
                     }
+                    console.log('is scroll true? ', this._refreshType.scroll);
 
                     if (this._refreshType.scroll) {
                         this._refreshType.scroll = false;
+
+                        console.log(w_scrollRange);
+
                         // Set scroll approximation
                         w_bodyTextEditor.revealRange(w_scrollRange, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
                         // ! Compensate for reveal that steals the focus.

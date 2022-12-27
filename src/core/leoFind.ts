@@ -174,7 +174,6 @@ export class LeoFind {
     //@+node:felix.20221012210736.1: *3* LeoFind.birth
     //@+node:felix.20221012210752.1: *4*  find.__init__
     constructor(c: Commands) {
-
         this.c = c;
         this.reload_settings();
     }
@@ -387,7 +386,7 @@ export class LeoFind {
     private _init_from_dict(settings: { [key: string]: any }): void {
 
         // The valid ivars and reasonable defaults.
-        const valid = {
+        const valid: { [key: string]: any } = {
             ignore_case: false,
             node_only: false,
             pattern_match: false,
@@ -399,7 +398,7 @@ export class LeoFind {
         // Set ivars to reasonable defaults.
         for (const ivar in valid) { // * USING 'in' TO GET KEYS
             // setattr(self, ivar, valid.get(ivar));
-            (this as any)[ivar] = (valid as any)[ivar];
+            (this as any)[ivar] = valid[ivar];
         }
         // Override ivars from settings.
         let errors = 0;
@@ -1014,7 +1013,6 @@ export class LeoFind {
             this.root = node;
             this.set_find_scope_file_only(); // Update find-tab & status area.
             p = node;
-
 
         }
         //

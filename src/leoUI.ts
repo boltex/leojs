@@ -2442,9 +2442,13 @@ export class LeoUI extends NullGui {
                         if (!w_scrollRange) {
                             w_scrollRange = w_bodyTextEditor.document.lineAt(0).range;
                         }
+                        console.log('is scroll true? ', this._refreshType.scroll);
 
                         if (this._refreshType.scroll) {
                             this._refreshType.scroll = false;
+
+                            console.log(w_scrollRange);
+
                             // Set scroll approximation
                             w_bodyTextEditor.revealRange(w_scrollRange, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
                             // ! Compensate for reveal that steals the focus.

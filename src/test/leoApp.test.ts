@@ -10,7 +10,7 @@ import * as g from '../core/leoGlobals';
 import { LeoUnitTest } from './leoTest2';
 
 //@+others
-//@+node:felix.20220129221242.1: ** Suite TestApp(LeoUnitTest)
+//@+node:felix.20220129221242.1: ** suite TestApp(LeoUnitTest)
 suite('Test cases for leoApp.ts', () => {
 
     let self: LeoUnitTest;
