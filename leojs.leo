@@ -193,6 +193,7 @@
 <v t="felix.20221027155905.1"><vh>navigateNavEntry</vh></v>
 </v>
 <v t="felix.20220505215924.1"><vh>Search</vh>
+<v t="felix.20221227223718.1"><vh>_get_focus</vh></v>
 <v t="felix.20220505215924.2"><vh>navEnter</vh></v>
 <v t="felix.20220505215924.3"><vh>navTextChange</vh></v>
 <v t="felix.20221222003636.1"><vh>navTextClear</vh></v>
@@ -8910,8 +8911,7 @@ public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
         const it = p_node.key;
         scon.onSelectItem(it);
 
-        const w = this.get_focus(c);
-        let w_focus = this.widget_name(w);
+        let w_focus = this._get_focus();
 
         if (!w_focus) {
             return vscode.window.showInformationMessage('Not found');
@@ -9012,8 +9012,7 @@ public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
                 };
                 const w_result = fc.do_change_all(w_changeSettings);
 
-                const w = this.get_focus(c);
-                const w_focus = this.widget_name(w);
+                const w_focus = this._get_focus();
 
                 let w_finalFocus = Focus.Body;
 
@@ -9088,8 +9087,7 @@ public cloneFind(p_marked: boolean, p_flat: boolean): Thenable&lt;unknown&gt; {
 
                 const settings = fc.ftm.get_settings();
                 const result = fc.do_clone_find_all(settings);
-                const w = this.get_focus(c);
-                const w_focus = this.widget_name(w);
+                const w_focus = this._get_focus();
 
                 if (p_flat) {
                     fc.do_clone_find_all_flattened(settings);
@@ -9700,7 +9698,7 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;any&gt
     const fromOutline = p_fromOutline;
     const fromBody = !fromOutline;
     //
-    const w = this.get_focus(c);
+    let w = this.get_focus(c);
     focus = this.widget_name(w);
 
     const inOutline = (focus.includes("tree")) || (focus.includes("head"));
@@ -9749,6 +9747,7 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;any&gt
     }
 
     // get focus again after the operation
+    w = this.get_focus(c);
     focus = this.widget_name(w);
 
     // result = {"found": bool(p), "pos": pos,
@@ -9797,7 +9796,6 @@ public async findSymbol(p_def: boolean): Promise&lt;any&gt; {
     const c = g.app.windowList[this.frameIndex].c;
     const fc = c.findCommands;
 
-    // const p_findResult = await this.sendAction(w_action, { fromOutline: false });
     if (p_def) {
         fc.find_def();
     } else {
@@ -9806,8 +9804,7 @@ public async findSymbol(p_def: boolean): Promise&lt;any&gt; {
 
     let found = true;
 
-    const w = this.get_focus(c);
-    const focus = this.widget_name(w);
+    const focus = this._get_focus();
 
     if (!found || !focus) {
         vscode.window.showInformationMessage('Not found');
@@ -9858,8 +9855,7 @@ public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise&lt;un
         found = true;
     }
 
-    const w = this.get_focus(c);
-    const focus = this.widget_name(w);
+    const focus = this._get_focus();
 
     if (!found || !focus) {
         return vscode.window.showInformationMessage('Not found');
@@ -11157,6 +11153,30 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
             "end": row_col_pv_dict(end, p.v.b)
         };
 
+        // ! -------------------------------
+        // ! TEST SELECTION GETTER OVERRIDE!
+        // ! -------------------------------
+        function row_col_wrapper_dict(i: number): { "line": number, "col": number, "index": number } {
+            if (!i) {
+                i = 0; // prevent none type
+            }
+            let line, col;
+            [line, col] = wrapper.toPythonIndexRowCol(i);
+            return { "line": line, "col": col, "index": i };
+        }
+        const wrapper = c.frame.body.wrapper;
+        const test_insert = wrapper.getInsertPoint();
+        let test_start, test_end;
+        [test_start, test_end] = wrapper.getSelectionRange(true);
+        // ! OVERRIDE !
+        w_bodySelection = {
+            "gnx": p.v.gnx,
+            "scroll": scroll,
+            "insert": row_col_wrapper_dict(test_insert),
+            "start": row_col_wrapper_dict(test_start),
+            "end": row_col_wrapper_dict(test_end)
+        };
+
         // TODO : Apply tabwidth
         // console.log('TABWIDTH: ', w_tabWidth);
         // TODO : Apply Wrap. see https://github.com/microsoft/vscode/issues/136927
@@ -11344,12 +11364,9 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
                     if (!w_scrollRange) {
                         w_scrollRange = w_bodyTextEditor.document.lineAt(0).range;
                     }
-                    console.log('is scroll true? ', this._refreshType.scroll);
 
                     if (this._refreshType.scroll) {
                         this._refreshType.scroll = false;
-
-                        console.log(w_scrollRange);
 
                         // Set scroll approximation
                         w_bodyTextEditor.revealRange(w_scrollRange, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
@@ -12617,6 +12634,11 @@ public refreshDesc(): void {
  * Handle a successful find match.
  */
 public show_find_success(c: Commands, in_headline: boolean, insert: number, p: Position): void {
+
+    // * from leoserver
+    if (in_headline) {
+        g.app.gui.set_focus(c, { _name: 'tree' });
+    }
 
     // ? needed ?
 
@@ -14152,6 +14174,14 @@ public async navTextClear(): Promise&lt;unknown&gt; {
     scon.clear();
 
     return this._leoGotoProvider.refreshTreeRoot();
+}
+
+</t>
+<t tx="felix.20221227223718.1">private _get_focus(): string {
+    const c = g.app.windowList[this.frameIndex].c;
+    const w = g.app.gui.get_focus(c);
+    const focus = g.app.gui.widget_name(w);
+    return focus;
 }
 
 </t>

@@ -2792,7 +2792,7 @@ export class LoadManager {
     public finishOpen(c: Commands): void {
 
         // lm = self
-        const k = c.k;
+        // const k = c.k;
         // console.assert(k);
 
         // New in Leo 4.6: provide an official way for very late initialization.
@@ -2804,15 +2804,16 @@ export class LoadManager {
         if (c.chapterController) {
             c.chapterController.finishCreate();
         }
-        if (k) {
-            k.setDefaultInputState();
-        }
+        // if (k && k.setDefaultInputState) {
+        //     k.setDefaultInputState();
+        // }
 
         // c.initialFocusHelper();
 
-        if (k) {
-            k.showStateAndMode();
-        }
+        // if (k) {
+        //     k.showStateAndMode();
+        // }
+
         // c.frame.initCompleteHint();
         const index = g.app.windowList.indexOf(c.frame);
         if (index >= 0) {

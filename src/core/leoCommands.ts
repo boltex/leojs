@@ -159,7 +159,7 @@ export class Commands {
     // Flags for c.outerUpdate...
     public enableRedrawFlag = true;
     public requestCloseWindow = false;
-    public requestedFocusWidget = undefined;
+    public requestedFocusWidget: any;
     public requestLaterRedraw = false;
 
     //@+node:felix.20210223220814.6: *4* c.initFileIvars
@@ -1819,10 +1819,10 @@ export class Commands {
      *
      * Returns a dict containing the results, including defaults.
      */
-    public scanAllDirectives(p?: Position) : {[key: string]: any} {
-        
+    public scanAllDirectives(p?: Position): { [key: string]: any } {
+
         const c = this;
-        if(!p || !p.__bool__()){
+        if (!p || !p.__bool__()) {
             p = c.p;
         }
 
@@ -1830,41 +1830,41 @@ export class Commands {
         const default_language = g.getLanguageFromAncestorAtFileNode(p) || c.target_language || 'python';
         const default_delims = g.set_delims_from_language(default_language);
         const wrap = c.config.getBool("body-pane-wraps");
-        const table: [string, any, any][] = [ 
-            ['encoding',    undefined,           g.scanAtEncodingDirectives],
-            ['lang-dict',   {},             g.scanAtCommentAndAtLanguageDirectives],
-            ['lineending',  undefined,           g.scanAtLineendingDirectives],
-            ['pagewidth',   c.page_width,   g.scanAtPagewidthDirectives],
-            ['path',        undefined,           c.scanAtPathDirectives],
-            ['tabwidth',    c.tab_width,    g.scanAtTabwidthDirectives],
-            ['wrap',        wrap,           g.scanAtWrapDirectives],
+        const table: [string, any, any][] = [
+            ['encoding', undefined, g.scanAtEncodingDirectives],
+            ['lang-dict', {}, g.scanAtCommentAndAtLanguageDirectives],
+            ['lineending', undefined, g.scanAtLineendingDirectives],
+            ['pagewidth', c.page_width, g.scanAtPagewidthDirectives],
+            ['path', undefined, c.scanAtPathDirectives],
+            ['tabwidth', c.tab_width, g.scanAtTabwidthDirectives],
+            ['wrap', wrap, g.scanAtWrapDirectives],
         ];
         // Set d by scanning all directives.
         const aList = g.get_directives_dict_list(p);
-        let d: {[key: string]: any} = {};
+        let d: { [key: string]: any } = {};
         // let key, w_default, func;
-        for (let [key, w_default, func] of table){
+        for (let [key, w_default, func] of table) {
             const val = func(aList);
-            if(typeof val === 'undefined'){
+            if (typeof val === 'undefined') {
                 d[key] = w_default;
-            }else{
+            } else {
                 d[key] = val;
             }
         }
         // Post process: do *not* set commander ivars.
         const lang_dict = d['lang-dict'];
         d = {
-            "delims":       lang_dict['delims'] || default_delims,
-            "comment":      lang_dict['comment'],  // Leo 6.4: New.
-            "encoding":     d['encoding'],
+            "delims": lang_dict['delims'] || default_delims,
+            "comment": lang_dict['comment'],  // Leo 6.4: New.
+            "encoding": d['encoding'],
             // Note: at.scanAllDirectives does not use the defaults for "language".
-            "language":     lang_dict['language'] || default_language,
-            "lang-dict":    lang_dict,  // Leo 6.4: New.
-            "lineending":   d['lineending'],
-            "pagewidth":    d['pagewidth'],
-            "path":         d['path'], // Redundant: || g.getBaseDirectory(c),
-            "tabwidth":     d['tabwidth'],
-            "wrap":         d['wrap'],
+            "language": lang_dict['language'] || default_language,
+            "lang-dict": lang_dict,  // Leo 6.4: New.
+            "lineending": d['lineending'],
+            "pagewidth": d['pagewidth'],
+            "path": d['path'], // Redundant: || g.getBaseDirectory(c),
+            "tabwidth": d['tabwidth'],
+            "wrap": d['wrap'],
         };
         return d;
 
@@ -2861,27 +2861,34 @@ export class Commands {
             }
             c.redraw();
         }
+        // Delayed focus requests will always be useful.
+        if (c.requestedFocusWidget) {
+            const w = c.requestedFocusWidget;
+            if (g.app.debug.includes('focus') && !g.unitTesting) {
+                let name = "";
+                if (w.objectName) {
+                    name = w.objectName();
+                } else if (w['_name']) {
+                    name = w._name;
+                }
+                g.trace('DELAYED FOCUS', name);
+            }
+            c.set_focus(w);
+            c.requestedFocusWidget = undefined;
+        }
 
-        // ? useful ?
-        // # Delayed focus requests will always be useful.
-        // if c.requestedFocusWidget:
-        //     w = c.requestedFocusWidget
-        //     if 'focus' in g.app.debug and not g.unitTesting:
-        //         if hasattr(w, 'objectName'):
-        //             name = w.objectName()
-        //         else:
-        //             name = w.__class__.__name__
-        //         g.trace('DELAYED FOCUS', name)
-        //     c.set_focus(w)
-        //     c.requestedFocusWidget = None
-        // table = (
-        //     ("childrenModified", g.childrenModifiedSet),
-        //     ("contentModified", g.contentModifiedSet),
-        // )
-        // for kind, mods in table:
-        //     if mods:
-        //         g.doHook(kind, c=c, nodes=mods)
-        //         mods.clear()
+        const table: [string, VNode[]][] = [
+            ["childrenModified", g.childrenModifiedSet],
+            ["contentModified", g.contentModifiedSet],
+        ];
+
+        for (let [kind, mods] of table) {
+            if (mods.length) {
+                g.doHook(kind, { c: c, nodes: mods });
+                mods.length = 0;
+            }
+        }
+
     }
 
     //@+node:felix.20211120224224.1: *5* c.recolor

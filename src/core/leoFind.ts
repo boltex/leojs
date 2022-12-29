@@ -948,7 +948,7 @@ export class LeoFind {
         let p: Position | undefined = this.c.p;
         //
         // The gui widget may not exist for headlines.
-        const gui_w = this.in_headline ? c.edit_widget(p) : c.frame.body.wrapper; // TODO : edit widget!
+        const gui_w = this.in_headline ? c.edit_widget(p) : c.frame.body.wrapper;
         //
         // Init the work widget, so we don't get stuck.
         const s = this.in_headline ? p.h : p.b;
@@ -1123,8 +1123,8 @@ export class LeoFind {
         [part1, part2] = this.compute_find_options();
         // frame.putStatusLine(part1, 'blue');  // ? NEEDED ?
         // frame.putStatusLine(part2);  // ? NEEDED ?
-        console.log(part1);
-        console.log(part2);
+        g.es(part1);
+        g.es(part2);
 
     }
     //@+node:felix.20221013234514.23: *5* LeoFind.compute_find_options
@@ -2730,7 +2730,7 @@ export class LeoFind {
     public _fail_outside_range(p: Position): boolean {
 
         const c = this.c;
-        if (!p || p.__bool__()) {
+        if (!p || !p.__bool__()) {
             return true;
         }
         if (this.node_only) {
@@ -2872,6 +2872,10 @@ export class LeoFind {
     //@+node:felix.20221023184334.1: *5* find._rfind
     private _rfind(s: string, pattern: string, start: number, end: number): number {
         const w_s = s.substring(start); // will start just past i
+
+        // In javascript, the last one can be part of the find, unlike in python's rfind.
+        end = end - 1;
+
         let result = w_s.lastIndexOf(pattern, end - start);
         if (result >= 0) {
             result = result + start;
@@ -2882,8 +2886,8 @@ export class LeoFind {
     // to test in interpreter
     // function _rfind(s, pattern, start, end) {
     //     var w_s = s.substring(start);
-    //     var result = w_s.lastIndexOf(pattern, end-start);
-    //     if(result>=0){
+    //     var result = w_s.lastIndexOf(pattern, end - start);
+    //     if (result >= 0) {
     //         result = result + start;
     //     }
     //     return result

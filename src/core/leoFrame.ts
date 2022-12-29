@@ -757,7 +757,7 @@ export class NullTree {
     /**
      * Start editing p's headline.
      */
-    public editLabel(p: Position, selectAll = false, selection?: any): [any, any] {
+    public editLabel(p: Position, selectAll = false, selection?: any): [undefined, StringTextWrapper | undefined] {
 
         this.endEditLabel();
         if (p && p.__bool__()) {
