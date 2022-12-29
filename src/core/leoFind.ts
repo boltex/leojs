@@ -666,7 +666,7 @@ export class LeoFind {
     /**
      * Init the find-def command. Return the word to find or None.
      */
-    public _compute_find_def_word(): string | undefined {  // pragma: no cover (cmd)
+    private _compute_find_def_word(): string | undefined {  // pragma: no cover (cmd)
 
         const c = this.c;
 
@@ -1899,7 +1899,7 @@ export class LeoFind {
     /**
      * Handle the find-all command from p to after.
      */
-    public _find_all_helper(
+    private _find_all_helper(
         after: Position | undefined,
         data: any, // TODO : FIX TYPING
         p: Position | undefined,
@@ -2014,7 +2014,7 @@ export class LeoFind {
     /**
      * Create a "Found All" node as the last node of the outline.
      */
-    public _create_find_all_node(result: string[]): Position {
+    private _create_find_all_node(result: string[]): Position {
 
         const c = this.c;
         const found = c.lastTopLevel().insertAfter();
@@ -2035,7 +2035,7 @@ export class LeoFind {
     /**
      * Create a "Found Unique" node as the last node of the outline.
      */
-    public _create_find_unique_node(): Position {
+    private _create_find_unique_node(): Position {
 
         const c = this.c;
         const found = c.lastTopLevel().insertAfter();
@@ -2338,7 +2338,7 @@ export class LeoFind {
      *
      * Return the number of found nodes.
      */
-    public _cf_helper(settings: ISettings, flatten: boolean): number {
+    private _cf_helper(settings: ISettings, flatten: boolean): number {
 
         const c = this.c;
         const u = this.c.undoer;
@@ -2431,7 +2431,7 @@ export class LeoFind {
      * Create a "Found" node as the last node of the outline.
      * Clone all positions in the clones set a children of found.
      */
-    public _cfa_create_nodes(clones: Position[], flattened: boolean): Position {
+    private _cfa_create_nodes(clones: Position[], flattened: boolean): Position {
 
         const c = this.c;
         // Create the found node.
@@ -2476,7 +2476,7 @@ export class LeoFind {
     /**
      * Find the next batch match at p.
      */
-    public _cfa_find_next_match(p: Position): boolean {
+    private _cfa_find_next_match(p: Position): boolean {
 
         // Called only from unit tests.
         const table = [];
@@ -2620,7 +2620,7 @@ export class LeoFind {
         let flags: string;
         try { // Precompile the regexp.
 
-            flags = "m"; // re.MULTILINE
+            flags = "mg"; // re.MULTILINE and g for global search. 
             if (this.ignore_case) {
                 flags = flags + "i"; //|= re.IGNORECASE 
             } // pragma: no cover
@@ -2708,7 +2708,7 @@ export class LeoFind {
     /**
      * Return the next node after a failed search or undefined.
      */
-    public _fnm_next_after_fail(p: Position): Position | undefined {
+    private _fnm_next_after_fail(p: Position): Position | undefined {
 
         // Move to the next position.
         p = this.reverse ? p.threadBack() : p.threadNext();
@@ -2727,7 +2727,7 @@ export class LeoFind {
      * Return true; if the search is about to go outside its range, assuming
      * both the headline and body text of the present node have been searched.
      */
-    public _fail_outside_range(p: Position): boolean {
+    private _fail_outside_range(p: Position): boolean {
 
         const c = this.c;
         if (!p || !p.__bool__()) {
@@ -2757,7 +2757,7 @@ export class LeoFind {
      * Set return the value of this.in_headline
      * indicating which pane to search first.
      */
-    public _fnm_first_search_pane(): boolean {
+    private _fnm_first_search_pane(): boolean {
 
         if (this.search_headline && this.search_body) {
             // Fix bug 1228458: Inconsistency between Find-forward and Find-backward.
@@ -2781,7 +2781,7 @@ export class LeoFind {
      * Search this.work_s for this.find_text with present options.
      * Returns (pos, newpos) or (undefined, dundefined).
      */
-    public _fnm_search(p: Position): [number, number] | [undefined, undefined] {
+    private _fnm_search(p: Position): [number, number] | [undefined, undefined] {
 
         let index = this.work_sel[2];
         let s = this.work_s;
@@ -2821,7 +2821,7 @@ export class LeoFind {
     /**
      * Return True if the find should simply switch panes.
      */
-    public _fnm_should_stay_in_node(p: Position): boolean {
+    private _fnm_should_stay_in_node(p: Position): boolean {
 
         // Errors here cause the find command to fail badly.
         // Switch only if:
@@ -2904,7 +2904,7 @@ export class LeoFind {
      *
      * Return (-1, -1) on failure.
      */
-    public _inner_search_backward(
+    private _inner_search_backward(
         s: string,
         i: number,
         j: number,
@@ -2986,7 +2986,7 @@ export class LeoFind {
     /**
      * Do a plain search.
      */
-    public _inner_search_plain(
+    private _inner_search_plain(
         s: string,
         i: number,
         j: number,
