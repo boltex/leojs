@@ -3040,11 +3040,6 @@ export class LeoFind {
         nocase: boolean,
     ): [number, number] {
 
-        // ! TODO !
-        // TODO : RE WRITE THIS FOR JAVASCRIPT REGEXP CAPABILITIES! (no start/end params for search!)
-        // Modify to consider i and j. 
-        // This set the match_obj with the exact match
-
         const re_obj = this.re_obj;  // Use the pre-compiled object
         if (!re_obj) {
             if (!g.unitTesting) {
@@ -3084,7 +3079,7 @@ export class LeoFind {
 
         if (mo) {
             this.match_obj = mo;
-            return [mo.index, mo.index + mo[0].length - 1];
+            return [mo.index, mo.index + mo[0].length];
         }
 
         this.match_obj = undefined;
