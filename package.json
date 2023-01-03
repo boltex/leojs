@@ -3679,8 +3679,5 @@
     "path-browserify": "^1.0.1",
     "safe-json-stringify": "^1.2.0",
     "stream": "^0.0.2"
-  },
-  "gitCommit": "73f925b",
-  "gitBranch": "leoFind",
-  "gitDate": "2022-12-29 15:15:08 -0500"
+  }
 }

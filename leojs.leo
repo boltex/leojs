@@ -3777,10 +3777,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "dependencies": {
     "@types/safe-json-stringify": "^1.1.2",
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "73f925b",
-  "gitBranch": "leoFind",
-  "gitDate": "2022-12-29 15:15:08 -0500"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -8415,11 +8412,11 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
         }
     ).then((p_uri) =&gt; {
         if (p_uri) {
-            console.log('CHOSE SAVE URI');
-            console.log('SAVE fsPath: ' + JSON.stringify(p_uri.fsPath));
-            console.log('SAVE json: ' + JSON.stringify(p_uri.toJSON()));
-            console.log('SAVE toString: ' + p_uri.toString());
-            console.log('test path: ' + path.normalize(p_uri.path));
+            // console.log('CHOSE SAVE URI');
+            // console.log('SAVE fsPath: ' + JSON.stringify(p_uri.fsPath));
+            // console.log('SAVE json: ' + JSON.stringify(p_uri.toJSON()));
+            // console.log('SAVE toString: ' + p_uri.toString());
+            // console.log('test path: ' + path.normalize(p_uri.path));
 
 
             return p_uri.fsPath;
@@ -8909,9 +8906,6 @@ public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknow
  * * Handles a click (selection) of a nav panel node: Sends 'goto' command to server.
  */
 public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
-
-    console.log('gotoNavEntry p_node: ', p_node);
-
 
     await this.triggerBodySave(false);
     this._leoGotoProvider.resetSelectedNode(p_node); // Inform controller of last index chosen
@@ -10142,7 +10136,10 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
         }
 
         this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]).then(() =&gt; {
-            this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex]);
+            this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex], {
+                select: true,
+                focus: true
+            });
         });
     }
 

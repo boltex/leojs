@@ -5528,11 +5528,11 @@ export class LeoUI extends NullGui {
             }
         ).then((p_uri) => {
             if (p_uri) {
-                console.log('CHOSE SAVE URI');
-                console.log('SAVE fsPath: ' + JSON.stringify(p_uri.fsPath));
-                console.log('SAVE json: ' + JSON.stringify(p_uri.toJSON()));
-                console.log('SAVE toString: ' + p_uri.toString());
-                console.log('test path: ' + path.normalize(p_uri.path));
+                // console.log('CHOSE SAVE URI');
+                // console.log('SAVE fsPath: ' + JSON.stringify(p_uri.fsPath));
+                // console.log('SAVE json: ' + JSON.stringify(p_uri.toJSON()));
+                // console.log('SAVE toString: ' + p_uri.toString());
+                // console.log('test path: ' + path.normalize(p_uri.path));
 
 
                 return p_uri.fsPath;
