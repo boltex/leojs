@@ -3777,7 +3777,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "dependencies": {
     "@types/safe-json-stringify": "^1.1.2",
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "73f925b",
+  "gitBranch": "leoFind",
+  "gitDate": "2022-12-29 15:15:08 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -5153,6 +5156,22 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "command": "leojs.pageDown",
   "when": "false"
 },
+{
+  "command": "leojs.gotoNavPrev",
+  "when": "false"
+},
+{
+  "command": "leojs.gotoNavNext",
+  "when": "false"
+},
+{
+  "command": "leojs.gotoNavFirst",
+  "when": "false"
+},
+{
+  "command": "leojs.gotoNavLast",
+  "when": "false"
+},
 </t>
 <t tx="felix.20201214205159.52">{
   "command": "leojs.hoistNode",
@@ -5899,9 +5918,19 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
+  "command": "leojs.gotoNavFirst",
+  "key": "home",
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
+},
+{
   "command": "leojs.gotoLastVisible",
   "key": "end",
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+},
+{
+  "command": "leojs.gotoNavLast",
+  "key": "end",
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
 },
 {
   "command": "leojs.pageUp",
@@ -5909,9 +5938,19 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
+  "command": "leojs.gotoNavFirst",
+  "key": "pageup",
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
+},
+{
   "command": "leojs.pageDown",
   "key": "pagedown",
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+},
+{
+  "command": "leojs.gotoNavLast",
+  "key": "pagedown",
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
 },
 {
   "command": "leojs.gotoNextCloneSelectionFromOutline",
@@ -5929,6 +5968,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
 },
 {
+  "command": "leojs.gotoNavNext",
+  "key": "down",
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
+},
+{
   "command": "leojs.gotoNextVisible",
   "key": "alt+down",
   "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened &amp;&amp; !editorHasSelection &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
@@ -5937,6 +5981,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "command": "leojs.gotoPrevVisible",
   "key": "up",
   "when": "config.leojs.leoTreeBrowse &amp;&amp; leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsOutline/"
+},
+{
+  "command": "leojs.gotoNavPrev",
+  "key": "up",
+  "when": "leojsTreeOpened &amp;&amp; sideBarFocus &amp;&amp; focusedView =~ /^leojsGoto/"
 },
 {
   "command": "leojs.gotoPrevVisible",
@@ -8183,13 +8232,13 @@ private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
  * * Overridden 'good' minibuffer commands
  */
 public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
-    // "tag-children": Constants.COMMANDS.TAG_CHILDREN,
-    // "clone-find-tag": Constants.COMMANDS.CLONE_FIND_TAG,
+    "tag-children": Constants.COMMANDS.TAG_CHILDREN,
+    "clone-find-tag": Constants.COMMANDS.CLONE_FIND_TAG,
     // "import-file": Constants.COMMANDS.IMPORT_ANY_FILE,
     // "redo": Constants.COMMANDS.REDO,
     // "undo": Constants.COMMANDS.UNDO,
-    // "clone-find-all": Constants.COMMANDS.CLONE_FIND_ALL,
-    // "clone-find-all-flattened": Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
+    "clone-find-all": Constants.COMMANDS.CLONE_FIND_ALL,
+    "clone-find-all-flattened": Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
 
     // 'import-MORE-files': Constants.COMMANDS.IMPORT_ANY_FILE,
     // 'import-free-mind-files': Constants.COMMANDS.IMPORT_ANY_FILE,
@@ -8225,30 +8274,30 @@ public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
 
     // 'clone-marked-nodes': Constants.COMMANDS.CLONE_MARKED_NODES,
 
-    // 'cfa': Constants.COMMANDS.CLONE_FIND_ALL,
+    'cfa': Constants.COMMANDS.CLONE_FIND_ALL,
     // 'cfam': Constants.COMMANDS.CLONE_FIND_MARKED,
-    // 'cff': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
+    'cff': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
     // 'cffm': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED,
-    // 'cft': Constants.COMMANDS.CLONE_FIND_TAG,
+    'cft': Constants.COMMANDS.CLONE_FIND_TAG,
 
     // 'git-diff': Constants.COMMANDS.GIT_DIFF,
     // 'gd': Constants.COMMANDS.GIT_DIFF,
 
     // 'find-tab-open': Constants.COMMANDS.START_SEARCH,
-    // 'find-clone-all': Constants.COMMANDS.CLONE_FIND_ALL,
-    // 'find-clone-all-flattened': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
-    // 'find-clone-tag': Constants.COMMANDS.CLONE_FIND_TAG,
-    // 'find-all': Constants.COMMANDS.FIND_ALL,
-    // 'start-search': Constants.COMMANDS.START_SEARCH,
+    'find-clone-all': Constants.COMMANDS.CLONE_FIND_ALL,
+    'find-clone-all-flattened': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
+    'find-clone-tag': Constants.COMMANDS.CLONE_FIND_TAG,
+    'find-all': Constants.COMMANDS.FIND_ALL,
+    'start-search': Constants.COMMANDS.START_SEARCH,
     // 'find-next': Constants.COMMANDS.FIND_NEXT,
     // 'find-prev': Constants.COMMANDS.FIND_PREVIOUS,
     // 'search-backward': Constants.COMMANDS.FIND_NEXT,
-    // 'search-forward': Constants.COMMANDS.FIND_PREVIOUS,
+    'search-forward': Constants.COMMANDS.FIND_PREVIOUS,
     // 'find-var': Constants.COMMANDS.FIND_VAR,
     // 'find-def': Constants.COMMANDS.FIND_DEF,
     // 'replace': Constants.COMMANDS.REPLACE,
-    // 'replace-all': Constants.COMMANDS.REPLACE_ALL,
-    // 'change-all': Constants.COMMANDS.REPLACE_ALL,
+    'replace-all': Constants.COMMANDS.REPLACE_ALL,
+    'change-all': Constants.COMMANDS.REPLACE_ALL,
     // 'change-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
     // 'replace-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
     // 'show-find-options': Constants.COMMANDS.START_SEARCH,
@@ -8301,6 +8350,7 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     'paste-retaining-clones': 'async-paste-retaining-clones',
     'paste-as-template': 'async-paste-as-template'
 };
+
 </t>
 <t tx="felix.20220107223824.1">public runOpenFileDialog(
     c: Commands | undefined,
@@ -8860,6 +8910,9 @@ public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknow
  */
 public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
 
+    console.log('gotoNavEntry p_node: ', p_node);
+
+
     await this.triggerBodySave(false);
     this._leoGotoProvider.resetSelectedNode(p_node); // Inform controller of last index chosen
     const c = g.app.windowList[this.frameIndex].c;
@@ -9124,8 +9177,15 @@ public cloneFind(p_marked: boolean, p_flat: boolean): Thenable&lt;unknown&gt; {
  * @param p_id string id of the setting name
  */
 public setSearchSetting(p_id: string): void {
-    this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
-    this._findPanelWebviewView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
+    if (this._findPanelWebviewExplorerView) {
+        console.log('_findPanelWebviewExplorerView');
+        this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
+    }
+    if (this._findPanelWebviewView) {
+        console.log('_findPanelWebviewView');
+
+        this._findPanelWebviewView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
+    }
 }
 
 </t>
@@ -10011,6 +10071,8 @@ export interface RClick {
 </t>
 <t tx="felix.20220505221929.1">import * as vscode from "vscode";
 import { Constants } from "./constants";
+import * as g from './core/leoGlobals';
+import { QuickSearchController } from "./core/quicksearch";
 import { LeoUI } from "./leoUI";
 import { LeoGoto, LeoGotoNavKey, TGotoTypes } from "./types";
 import * as utils from "./utils";
@@ -10051,18 +10113,18 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
     }
 
     public navigateNavEntry(p_nav: LeoGotoNavKey): void {
+        console.log('navigateNavEntry', p_nav);
+
         if (!this._nodeList.length) {
             return;
         }
         switch (p_nav.valueOf()) {
             case LeoGotoNavKey.first:
                 this._selectedNodeIndex = 0;
-                this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]);
                 break;
 
             case LeoGotoNavKey.last:
                 this._selectedNodeIndex = this._nodeList.length - 1;
-                this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]);
                 break;
 
             case LeoGotoNavKey.next:
@@ -10078,8 +10140,10 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
                 break;
 
         }
-        this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex]);
-        this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]);
+
+        this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]).then(() =&gt; {
+            this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex]);
+        });
     }
 
     /**
@@ -10100,34 +10164,41 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoUI.leoStates.fileOpenedReady &amp;&amp; !element) {
 
-            // TODO !
-            return Promise.resolve([]);
+            const c = g.app.windowList[this._leoUI.frameIndex].c;
+            const scon: QuickSearchController = c.quicksearchController;
 
-            /* 
+            const result: { [key: string]: any } = {};
 
-            // call action to get get list, and convert to LeoButtonNode(s) array
-            return this._leoUI.sendAction(Constants.LEOBRIDGE.GET_GOTO_PANEL).then(p_package =&gt; {
-                if (p_package &amp;&amp; p_package.navList) {
-
-                    const w_list: LeoGotoNode[] = [];
-                    this._topNode = undefined;
-                    const w_navList: LeoGoto[] = p_package.navList;
-                    if (w_navList &amp;&amp; w_navList.length) {
-                        w_navList.forEach((p_goto: LeoGoto) =&gt; {
-                            const w_newNode = new LeoGotoNode(this._leoUI, p_goto, p_package.navOptions!);
-                            if (!this._topNode) {
-                                this._topNode = w_newNode;
-                            }
-                            w_list.push(w_newNode);
-                        });
+            const navlist: LeoGoto[] = [];
+            for (let k = 0; k &lt; scon.its.length; k++) {
+                navlist.push(
+                    {
+                        "key": k,
+                        "h": scon.its[k][0]["label"],
+                        "t": scon.its[k][0]["type"] as TGotoTypes
                     }
-                    return w_list;
-                } else {
-                    return [];
-                }
-            });
+                );
+            }
 
-            */
+            result["navList"] = navlist;
+            result["messages"] = scon.lw;
+            result["navText"] = scon.navText;
+            result["navOptions"] = { "isTag": scon.isTag, "showParents": scon.showParents };
+
+            this._nodeList = [];
+            if (result &amp;&amp; result.navList) {
+
+                const w_navList: LeoGoto[] = result.navList;
+                if (w_navList &amp;&amp; w_navList.length) {
+                    w_navList.forEach((p_goto: LeoGoto) =&gt; {
+                        const w_newNode = new LeoGotoNode(this._leoUI, p_goto, result.navOptions!);
+                        this._nodeList.push(w_newNode);
+                    });
+                }
+                return Promise.resolve(this._nodeList);
+            } else {
+                return Promise.resolve([]);
+            }
 
         } else {
             return Promise.resolve([]); // Defaults to an empty list of children
@@ -11980,13 +12051,10 @@ private _onGotoTreeViewVisibilityChanged(
     p_event: vscode.TreeViewVisibilityChangeEvent,
     p_explorerView: boolean
 ): void {
-
-    // if (p_explorerView) {
-    // } // (Facultative/unused) Do something different if explorer view is used
-    // if (p_event.visible) {
-    //     this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
-    //     // this.refreshGotoPane();  // No need to refresh because no selection needs to be set
-    // }
+    if (p_event.visible) {
+        this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
+        // this.refreshGotoPane();  // No need to refresh because no selection needs to be set
+    }
 }
 
 </t>
@@ -11996,20 +12064,17 @@ private _onGotoTreeViewVisibilityChanged(
  * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
  */
 private _onFindViewVisibilityChanged(p_explorerView: boolean): void {
-    // * todo
-    // if (p_explorerView) {
-    //     if (this._findPanelWebviewExplorerView?.visible) {
-    //         this._lastFindView = this._findPanelWebviewExplorerView;
-    //         this.checkForceFindFocus(false);
-    //     }
-
-    // } else {
-    //     if (this._findPanelWebviewView?.visible) {
-    //         this._lastFindView = this._findPanelWebviewView;
-    //         this.checkForceFindFocus(false);
-
-    //     }
-    // }
+    if (p_explorerView) {
+        if (this._findPanelWebviewExplorerView?.visible) {
+            this._lastFindView = this._findPanelWebviewExplorerView;
+            this.checkForceFindFocus(false);
+        }
+    } else {
+        if (this._findPanelWebviewView?.visible) {
+            this._lastFindView = this._findPanelWebviewView;
+            this.checkForceFindFocus(false);
+        }
+    }
 }
 
 </t>

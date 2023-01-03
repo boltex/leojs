@@ -2387,6 +2387,22 @@
           "when": "false"
         },
         {
+          "command": "leojs.gotoNavPrev",
+          "when": "false"
+        },
+        {
+          "command": "leojs.gotoNavNext",
+          "when": "false"
+        },
+        {
+          "command": "leojs.gotoNavFirst",
+          "when": "false"
+        },
+        {
+          "command": "leojs.gotoNavLast",
+          "when": "false"
+        },
+        {
           "command": "leojs.hoistNode",
           "when": "false"
         },
@@ -3485,9 +3501,19 @@
         "when": "config.leojs.leoTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
+        "command": "leojs.gotoNavFirst",
+        "key": "home",
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsGoto/"
+      },
+      {
         "command": "leojs.gotoLastVisible",
         "key": "end",
         "when": "config.leojs.leoTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+      },
+      {
+        "command": "leojs.gotoNavLast",
+        "key": "end",
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsGoto/"
       },
       {
         "command": "leojs.pageUp",
@@ -3495,9 +3521,19 @@
         "when": "config.leojs.leoTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
+        "command": "leojs.gotoNavFirst",
+        "key": "pageup",
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsGoto/"
+      },
+      {
         "command": "leojs.pageDown",
         "key": "pagedown",
         "when": "config.leojs.leoTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+      },
+      {
+        "command": "leojs.gotoNavLast",
+        "key": "pagedown",
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsGoto/"
       },
       {
         "command": "leojs.gotoNextCloneSelectionFromOutline",
@@ -3515,6 +3551,11 @@
         "when": "config.leojs.leoTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
       },
       {
+        "command": "leojs.gotoNavNext",
+        "key": "down",
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsGoto/"
+      },
+      {
         "command": "leojs.gotoNextVisible",
         "key": "alt+down",
         "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline|^leojsDocuments/ || leojsTreeOpened && !editorHasSelection && editorTextFocus && resourceScheme == leojs"
@@ -3523,6 +3564,11 @@
         "command": "leojs.gotoPrevVisible",
         "key": "up",
         "when": "config.leojs.leoTreeBrowse && leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsOutline/"
+      },
+      {
+        "command": "leojs.gotoNavPrev",
+        "key": "up",
+        "when": "leojsTreeOpened && sideBarFocus && focusedView =~ /^leojsGoto/"
       },
       {
         "command": "leojs.gotoPrevVisible",
@@ -3633,5 +3679,8 @@
     "path-browserify": "^1.0.1",
     "safe-json-stringify": "^1.2.0",
     "stream": "^0.0.2"
-  }
+  },
+  "gitCommit": "73f925b",
+  "gitBranch": "leoFind",
+  "gitDate": "2022-12-29 15:15:08 -0500"
 }

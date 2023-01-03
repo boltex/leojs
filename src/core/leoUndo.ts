@@ -47,6 +47,7 @@ import { new_cmd_decorator } from "../core/decorators";
 import { Position, VNode } from './leoNodes';
 import { Commands } from './leoCommands';
 import { ChapterController } from './leoChapters';
+import { StringTextWrapper } from './leoFrame';
 //@-<< imports >>
 //@+others
 //@+node:felix.20211028004540.1: ** Interfaces
@@ -523,7 +524,7 @@ export class Undoer {
     public afterChangeBody(p: Position, command: string, bunch: Bead): void {
         const c: Commands = this.c;
         const u: Undoer = this;
-        const w = c.frame.body.wrapper;
+        const w: StringTextWrapper = c.frame.body.wrapper;
 
         if (u.redoing || u.undoing) {
             return;
@@ -567,8 +568,7 @@ export class Undoer {
         const u: Undoer = this;
         const c: Commands = this.c;
 
-        // TODO !
-        // const w: any = c.frame.body.wrapper;
+        const w: StringTextWrapper = c.frame.body.wrapper;
 
         if (u.redoing || u.undoing) {
             return;
@@ -594,8 +594,7 @@ export class Undoer {
         bunch.redoHelper = u.redoGroup;
         bunch.newP = p.copy();
 
-        // TODO !
-        // bunch.newSel = w.getSelectionRange();
+        bunch.newSel = w.getSelectionRange();
 
         // Tells whether to report the number of separate changes undone/redone.
         bunch.reportFlag = reportFlag;
@@ -615,7 +614,7 @@ export class Undoer {
     public afterChangeNodeContents(p: Position, command: string, bunch: Bead): void {
         const u: Undoer = this;
         const c: Commands = this.c;
-        const w: any = c.frame.body.wrapper;
+        const w: StringTextWrapper = c.frame.body.wrapper;
         if (u.redoing || u.undoing) {
             return;
         }
@@ -664,7 +663,7 @@ export class Undoer {
     public afterChangeTree(p: Position, command: string, bunch: Bead): void {
         const u: Undoer = this;
         const c: Commands = this.c;
-        const w: any = c.frame.body.wrapper;
+        const w: StringTextWrapper = c.frame.body.wrapper;
         if (u.redoing || u.undoing) {
             return;
         }
@@ -674,8 +673,8 @@ export class Undoer {
         bunch.undoHelper = u.undoTree;
         bunch.redoHelper = u.redoTree;
         // Set by beforeChangeTree: changed, oldSel, oldText, oldTree, p
-        bunch.newSel = [0, 0]; // w.getSelectionRange(); // TODO !
-        bunch.newText = p.b; // w.getAllText(); // TODO !
+        bunch.newSel = w.getSelectionRange(); // [0, 0]; //
+        bunch.newText = w.getAllText(); // p.b; //
         bunch.newTree = u.saveTree(p);
         u.pushBead(bunch);
     }
@@ -956,7 +955,7 @@ export class Undoer {
     public beforeChangeNodeContents(p: Position): Bead {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const w: any = c.frame.body.wrapper;
+        const w: StringTextWrapper = c.frame.body.wrapper;
         const bunch: Bead = u.createCommonBunch(p);
         bunch.oldBody = p.b;
         bunch.oldHead = p.h;
@@ -968,7 +967,7 @@ export class Undoer {
     public beforeChangeTree(p: Position): Bead {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const w: any = c.frame.body.wrapper;
+        const w: StringTextWrapper = c.frame.body.wrapper;
         const bunch: Bead = u.createCommonBunch(p);
         bunch.oldSel = [0, 0]; // w.getSelectionRange(); // TODO !
         bunch.oldText = p.b; //w.getAllText(); // TODO !
@@ -1056,7 +1055,7 @@ export class Undoer {
     public createCommonBunch(p: Position): Bead {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const w: any = c.frame.body.wrapper;
+        const w: StringTextWrapper = c.frame.body.wrapper;
         return {
             oldMarked: p && p.__bool__() && p.isMarked(),
             oldSel: w && w.getSelectionRange && w.getSelectionRange() || undefined,
@@ -1143,10 +1142,8 @@ export class Undoer {
      */
     public updateAfterTyping(p: Position, w: any): void {
         const c: Commands = this.c;
-        // * sdf
-        // TODO : Add vscode body text cursor and selection handling
-        //if (g.isTextWrapper(w)) {
-        if (false) {
+
+        if (g.isTextWrapper(w)) {
             // An important, ever-present unit test.
             const all: string = w.getAllText();
             if (g.unitTesting) {
@@ -1167,9 +1164,10 @@ export class Undoer {
                 p.v.selectionStart = ins;
                 p.v.selectionLength = 0;
             } else {
-                // i, j = newSel
-                p.v.selectionStart = newSel[0];
-                p.v.selectionLength = newSel[1] - newSel[0];
+                let i, j;
+                [i, j] = newSel;
+                p.v.selectionStart = i;
+                p.v.selectionLength = j - i;
             }
         } else {
             // if g.unitTesting:
@@ -1223,7 +1221,7 @@ export class Undoer {
             return;
         }
         // End editing *before* getting state.
-        // c.endEditing();
+        c.endEditing();
         if (!u.canRedo()) {
             return;
         }
@@ -1238,7 +1236,6 @@ export class Undoer {
         if (u.redoHelper) {
             u.redoHelper();
         } else {
-            u.redoHelper();
             g.trace(`no redo helper for ${u.kind} ${u.undoType}`);
         }
         //
@@ -1261,7 +1258,7 @@ export class Undoer {
     public redoChangeBody(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const w: any = c.frame.body.wrapper;
+        const w: StringTextWrapper = c.frame.body.wrapper;
         // selectPosition causes recoloring, so don't do this unless needed.
         if (!c.p.__eq__(u.p!)) { // #1333.
             c.selectPosition(u.p!);
@@ -1271,7 +1268,7 @@ export class Undoer {
         u.p!.h = u.newHead;
 
         // This is required so. Otherwise redraw will revert the change!
-        // c.frame.tree.setHeadline(u.p, u.newHead);
+        c.frame.tree.setHeadline(u.p!, u.newHead);
 
         if (u.newMarked) {
             u.p!.setMarked();
@@ -1289,8 +1286,10 @@ export class Undoer {
             if (w.setYScrollPosition) {
                 w.setYScrollPosition(u.newYScroll);
             }
-            // i, j = u.newSel
-
+            let i, j;
+            [i, j] = u.newSel;
+            w.setSelectionRange(i, j, u.newIns);
+            w.setYScrollPosition(u.newYScroll);
             // c.frame.body.recolor(u.p);
         }
         u.updateMarks('new');
@@ -1310,7 +1309,7 @@ export class Undoer {
         u.p!.initHeadString(u.newHead);
 
         // This is required so.  Otherwise redraw will revert the change!
-        // c.frame.tree.setHeadline(u.p, u.newHead);
+        c.frame.tree.setHeadline(u.p!, u.newHead);
 
     }
     //@+node:felix.20211026230613.87: *4* u.redoCloneMarkedNodes
@@ -1407,7 +1406,7 @@ export class Undoer {
             for (let z of bunch.items) {
                 u.setIvarsFromBunch(z);
                 if (z.redoHelper) {
-                    z.redoHelper();
+                    z.redoHelper.bind(u)(); // Properly bound to undoer instead of bunch
                     count += 1;
                 } else {
                     g.trace(`oops: no redo helper for ${u.undoType} ${p.h}`);
@@ -1422,8 +1421,9 @@ export class Undoer {
         p.setDirty();
         c.selectPosition(p);
         if (newSel && newSel.length) {
-            // i, j = newSel
-            c.frame.body.wrapper.setSelectionRange(newSel[0], newSel[1]);
+            let i, j;
+            [i, j] = newSel;
+            c.frame.body.wrapper.setSelectionRange(i, j);
         }
     }
     //@+node:felix.20211026230613.94: *4* u.redoHoistNode & redoDehoistNode
@@ -1523,7 +1523,7 @@ export class Undoer {
     public redoNodeContents(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const w: any = c.frame.body.wrapper;
+        const w: StringTextWrapper = c.frame.body.wrapper;
         // selectPosition causes recoloring, so don't do this unless needed.
         if (!c.p.__eq__(u.p!)) { // #1333.
             c.selectPosition(u.p!);
@@ -1539,11 +1539,12 @@ export class Undoer {
         u.p!.initHeadString(u.newHead);
 
         // This is required so.  Otherwise redraw will revert the change!
-        // c.frame.tree.setHeadline(u.p, u.newHead)  // New in 4.4b2.
+        c.frame.tree.setHeadline(u.p!, u.newHead);  // New in 4.4b2.
 
         if (u.groupCount === 0 && u.newSel && u.newSel.length) {
-            // i, j = u.newSel
-            w.setSelectionRange && w.setSelectionRange(u.newSel[0], u.newSel[1]);
+            let i, j;
+            [i, j] = u.newSel;
+            w.setSelectionRange && w.setSelectionRange(i, j);
         }
         if (u.groupCount === 0 && (u.newYScroll || u.newYScroll === 0)) {
             w.setYScrollPosition && w.setYScrollPosition(u.newYScroll);
@@ -1601,8 +1602,9 @@ export class Undoer {
         u.p!.setDirty();
         c.selectPosition(u.p!);  // Does full recolor.
         if (u.newSel && u.newSel.length) {
-            // i, j = u.newSel
-            c.frame.body.wrapper.setSelectionRange(u.newSel[0], u.newSel[1]);
+            let i, j;
+            [i, j] = u.newSel;
+            c.frame.body.wrapper.setSelectionRange(i, j);
         }
     }
     //@+node:felix.20211026230613.103: *3* u.undo
@@ -1618,7 +1620,7 @@ export class Undoer {
             return;
         }
         // End editing *before* getting state.
-        // c.endEditing()
+        c.endEditing();
 
         if (u.per_node_undo) {  // 2011/05/19
             u.setIvarsFromVnode(c.p);
@@ -1664,7 +1666,7 @@ export class Undoer {
     public undoChangeBody(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const w: any = c.frame.body.wrapper;
+        const w: StringTextWrapper = c.frame.body.wrapper;
         // selectPosition causes recoloring, so don't do this unless needed.
         if (!c.p.__eq__(u.p!)) {
             c.selectPosition(u.p!);
@@ -1673,7 +1675,7 @@ export class Undoer {
         u.p!.b = u.oldBody;
         u.p!.h = u.oldHead;
         // This is required.  Otherwise c.redraw will revert the change!
-        // c.frame.tree.setHeadline(u.p, u.oldHead);
+        c.frame.tree.setHeadline(u.p!, u.oldHead);
 
         if (u.oldMarked) {
             u.p!.setMarked();
@@ -1682,8 +1684,9 @@ export class Undoer {
         }
         if (w && u.groupCount === 0) {
             w.setAllText && w.setAllText(u.oldBody);
-            // i, j = u.oldSel;
-            w.setSelectionRange && w.setSelectionRange(u.oldSel[0], u.oldSel[1], u.oldIns);
+            let i, j;
+            [i, j] = u.oldSel;
+            w.setSelectionRange && w.setSelectionRange(i, j, u.oldIns);
             w.setYScrollPosition && w.setYScrollPosition(u.oldYScroll);
             //c.frame.body.recolor(u.p);
         }
@@ -1705,7 +1708,7 @@ export class Undoer {
         u.p!.initHeadString(u.oldHead);
 
         // This is required.  Otherwise c.redraw will revert the change!
-        //c.frame.tree.setHeadline(u.p, u.oldHead)
+        c.frame.tree.setHeadline(u.p!, u.oldHead);
     }
     //@+node:felix.20211026230613.109: *4* u.undoCloneMarkedNodes
     public undoCloneMarkedNodes(): void {
@@ -1821,7 +1824,7 @@ export class Undoer {
             for (let z of reversedItems) {
                 u.setIvarsFromBunch(z);
                 if (z.undoHelper) {
-                    z.undoHelper();
+                    z.undoHelper.bind(u)(); // Properly bound to undoer instead of bunch
                     count += 1;
                 } else {
                     g.trace(`oops: no undo helper for ${u.undoType} ${p.v}`);
@@ -1836,8 +1839,9 @@ export class Undoer {
         p.setDirty();
         c.selectPosition(p);
         if (oldSel && oldSel.length) {
-            // i, j = oldSel
-            c.frame.body.wrapper.setSelectionRange(oldSel[0], oldSel[1]);
+            let i, j;
+            [i, j] = oldSel;
+            c.frame.body.wrapper.setSelectionRange(i, j);
         }
     }
     //@+node:felix.20211026230613.116: *4* u.undoHoistNode & undoDehoistNode
@@ -1933,7 +1937,7 @@ export class Undoer {
     public undoNodeContents(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const w: any = c.frame.body.wrapper;
+        const w: StringTextWrapper = c.frame.body.wrapper;
         // selectPosition causes recoloring, so don't do this unless needed.
         if (!c.p.__eq__(u.p!)) {
             c.selectPosition(u.p!);
@@ -1945,11 +1949,12 @@ export class Undoer {
         u.p!.h = u.oldHead;
 
         // This is required.  Otherwise c.redraw will revert the change!
-        // c.frame.tree.setHeadline(u.p, u.oldHead)
+        c.frame.tree.setHeadline(u.p!, u.oldHead);
 
         if (u.groupCount === 0 && u.oldSel && u.oldSel.length) {
-            // i, j = u.oldSel
-            w.setSelectionRange && w.setSelectionRange(u.oldSel[0], u.oldSel[1]);
+            let i, j;
+            [i, j] = u.oldSel;
+            w.setSelectionRange && w.setSelectionRange(i, j);
         }
         if (u.groupCount === 0 && (u.oldYScroll || u.oldYScroll === 0)) {
             w.setYScrollPosition && w.setYScrollPosition(u.oldYScroll);
@@ -2003,12 +2008,12 @@ export class Undoer {
         // newNewlines is unused, but it has symmetry.
         const u: Undoer = this;
         const c: Commands = u.c;
-        const w: any = c.frame.body.wrapper;
+        const w: StringTextWrapper = c.frame.body.wrapper;
         //@+<< Compute the result using p's body text >>
         //@+node:felix.20211026230613.123: *5* << Compute the result using p's body text >>
         // Recreate the text using the present body text.
         let body: string = p.b;
-        // body = g.checkUnicode(body);
+        body = g.checkUnicode(body);
 
         const body_lines: string[] = body.split('\n');
         let s: string[] | string = [];
@@ -2040,8 +2045,9 @@ export class Undoer {
         w.setAllText(result);
         const sel: number[] = tag === 'undo' ? u.oldSel : u.newSel;
         if (sel && sel.length) {
-            // i, j = sel
-            w.setSelectionRange(sel[0], sel[1], sel[1]);
+            let i, j;
+            [i, j] = sel;
+            w.setSelectionRange(i, j, j);
         }
 
         // c.frame.body.recolor(p);
@@ -2088,8 +2094,9 @@ export class Undoer {
         u.p.setAllAncestorAtFileNodesDirty();
         c.selectPosition(u.p);  // Does full recolor.
         if (u.oldSel && u.oldSel.length) {
-            //i, j = u.oldSel
-            // c.frame.body.wrapper.setSelectionRange(u.oldSel[0], u.oldSel[1]); // TODO !
+            let i, j;
+            [i, j] = u.oldSel;
+            c.frame.body.wrapper.setSelectionRange(i, j);
         }
     }
     //@+node:felix.20211026230613.128: *3* u.update_status
@@ -2099,7 +2106,7 @@ export class Undoer {
     public update_status(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const w: any = c.frame.body.wrapper;
+        const w: StringTextWrapper = c.frame.body.wrapper;
 
         // Redraw and recolor.
         // c.frame.body.updateEditors();  // New in Leo 4.4.8.
@@ -2115,22 +2122,20 @@ export class Undoer {
         //
         // # 1451. *Always* set the changed bit.
         // Redrawing *must* be done here before setting u.undoing to false.
-        // i, j = w.getSelectionRange()
-        const w_selRange: number[] = [0, 0]; // TODO : GET BODY SELECTION RANGE FROM VSCODE w.getSelectionRange();
-        const ins: number = 0; // TODO : GET BODY CURSOR INSERT POSITION FROM VSCODE w.getInsertPoint();
+        let i, j;
+        [i, j] = w.getSelectionRange();
+        const ins: number = w.getInsertPoint();
 
         c.redraw();
         // c.recolor();
 
         if (u.inHead) {
-            // c.editHeadline();
+            // c.editHeadline(); // TODO : NEEDED ???
             u.inHead = false;
         } else {
-            // c.bodyWantsFocus();
-            // TODO
-            // w.setSelectionRange(w_selRange[0], w_selRange[1], ins);
-            // TODO
-            // w.seeInsertPoint();
+            c.bodyWantsFocus();
+            w.setSelectionRange(i, j, ins);
+            w.seeInsertPoint();
         }
     }
     //@-others

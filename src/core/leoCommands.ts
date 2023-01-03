@@ -1250,9 +1250,8 @@ export class Commands {
         // This worked because commands work on the presently selected node.
         // But setRecentFiles may change a _clone_ of the selected node!
         if (current && current.__bool__() && p.v.gnx === current.v.gnx) {
-            // * Leo used to send it to gui
-            // const w:any = c.frame.body.wrapper;
-            // w.setAllText(s);
+            const w = c.frame.body.wrapper;
+            w.setAllText(s);
             v.setSelection(0, 0);
             c.recolor();
         }
@@ -2562,7 +2561,7 @@ export class Commands {
         p2 = c.insertHeadline('Open File', false)!;
         p2.h = `@edit ${fn}`;
         p2.b = prefix + s;
-        const w: any = c.frame.body.wrapper;
+        const w = c.frame.body.wrapper;
         if (w && w.setInsertPoint) {
             w.setInsertPoint(0);
         }
@@ -3348,12 +3347,12 @@ export class Commands {
     //@+node:felix.20211023195447.14: *6* c.canExtract, canExtractSection & canExtractSectionNames
     public canExtract(): boolean {
         const c: Commands = this;
-        const w = c.frame.body.wrapper; // TODO
+        const w = c.frame.body.wrapper;
         return w && w.hasSelection();
     }
     public canExtractSection(): boolean {
         const c: Commands = this;
-        const w = c.frame.body.wrapper; // TODO
+        const w = c.frame.body.wrapper;
         if (!w) {
             return false;
         }
@@ -3374,7 +3373,7 @@ export class Commands {
     public canFindMatchingBracket(): boolean {
         const c: Commands = this;
         const brackets: string = '()[]{}';
-        const w = c.frame.body.wrapper; // TODO
+        const w = c.frame.body.wrapper;
         const s = w.getAllText();
         const ins: number = w.getInsertPoint();
 
@@ -3590,6 +3589,17 @@ export class Commands {
         return false;
     }
     //@+node:felix.20211005023421.1: *4* c.Selecting
+    //@+node:felix.20221231011907.1: *5* c.endEditing
+    /**
+     * End the editing of a headline.
+     */
+    public endEditing(): void{
+        const c = this;
+        const p = c.p;
+        if (p && p.__bool__()){
+            c.frame.tree.endEditLabel();
+        }
+    }
     //@+node:felix.20211031215315.1: *5* c.redrawAndEdit
     /**
      * Redraw the screen and edit p's headline.

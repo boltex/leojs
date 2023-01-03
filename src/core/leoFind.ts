@@ -670,12 +670,12 @@ export class LeoFind {
 
         const c = this.c;
 
-        const w = c.frame.body.wrapper; // TODO : has to be pre-set by GUI ! 
+        const w = c.frame.body.wrapper;
         // First get the word.
-        c.bodyWantsFocusNow(); // TODO: sets GUI finalFocus position for next refresh
+        c.bodyWantsFocusNow();
 
         if (!w.hasSelection()) {
-            c.editCommands.extendToWord(true); // TODO or REPLACE with something else
+            c.editCommands.extendToWord(true);
         }
 
         const word: string = w.getSelectedText().trim();
@@ -756,7 +756,7 @@ export class LeoFind {
         // Required.
         c.selectPosition(p);
         c.redraw();
-        c.bodyWantsFocusNow(); // TODO : either set finalFocus or some flag in gui implementation
+        c.bodyWantsFocusNow();
 
         // #1592.  Ignore hits under control of @nosearch
         const old_reverse = this.reverse;
@@ -1069,7 +1069,6 @@ export class LeoFind {
     @cmd('replace', 'Replace the selected text with the replacement text.')
     @cmd('change', 'Replace the selected text with the replacement text.')
     public change(): void {
-
         const p = this.c.p;
         if (this.check_args('replace')) {
             this.init_in_headline();
@@ -1228,12 +1227,11 @@ export class LeoFind {
     }
     //@+node:felix.20221016013001.1: *3* LeoFind.Commands (interactive)
     //@+node:felix.20221018001528.1: *4* find.change-all & helper
-    // * The interactive_change_all methods are not implemented
-    // * '@cmd' commands @cmd('change-all'), etc,  are overriden in the UI client.
-    // * do_change_all is intended to be called directly from the UI client instead.
-
-    // @cmd('change-all')
-    // @cmd('replace-all')
+    @cmd('change-all', 'Replace all instances of the search string with the replacement string.')
+    @cmd('replace-all', 'Replace all instances of the search string with the replacement string.')
+    public interactive_change_all(): void {
+        console.log('interactive_change_all overriden in the UI client.');
+    }
     // def interactive_change_all(self, event: Event=None) -> None:  # pragma: no cover (interactive)
     //     """Replace all instances of the search string with the replacement string."""
     //     self.ftm.clear_focus()
@@ -1552,13 +1550,25 @@ export class LeoFind {
         return [count, result.join('')];
     }
     //@+node:felix.20221016013001.13: *4* find.clone-find-all & helper
-    // * The interactive_clone_find_all methods are not implemented
-    // * '@cmd' commands @cmd('clone-find-all'), etc,  are overriden in the UI client.
-    // * do_clone_find_all is intended to be called directly from the UI client instead.
+    @cmd('clone-find-all', 'clone-find-all (aka find-clone-all and cfa).\n' +
+        'Create an organizer node whose descendants contain clones of all nodes' +
+        'matching the search string, except @nosearch trees.\n' +
+        'The list is *not* flattened: clones appear only once in the' +
+        'descendants of the organizer node.')
+    @cmd('find-clone-all', 'clone-find-all (aka find-clone-all and cfa).\n' +
+        'Create an organizer node whose descendants contain clones of all nodes' +
+        'matching the search string, except @nosearch trees.\n' +
+        'The list is *not* flattened: clones appear only once in the' +
+        'descendants of the organizer node.')
+    @cmd('cfa', 'clone-find-all (aka find-clone-all and cfa).\n' +
+        'Create an organizer node whose descendants contain clones of all nodes' +
+        'matching the search string, except @nosearch trees.\n' +
+        'The list is *not* flattened: clones appear only once in the' +
+        'descendants of the organizer node.')
+    public interactive_clone_find_all(): void {
+        console.log('interactive_clone_find_all overriden in the UI client');
+    }
 
-    // @cmd('clone-find-all')
-    // @cmd('find-clone-all')
-    // @cmd('cfa')
     // def interactive_clone_find_all(self,
     //     event: Event=None,
     //     preloaded: bool=False,
@@ -1616,13 +1626,28 @@ export class LeoFind {
         return this._cf_helper(settings, false);
     }
     //@+node:felix.20221016013001.15: *4* find.clone-find-all-flattened & helper
-    // * The interactive_cff methods are not implemented
-    // * '@cmd' commands @cmd('clone-find-all-flattened'), etc,  are overriden in the UI client.
-    // * do_clone_find_all_flattened is intended to be called directly from the UI client instead.
-
-    // @cmd('clone-find-all-flattened')
-    // # @cmd('find-clone-all-flattened')
-    // @cmd('cff')
+    @cmd('clone-find-all-flattened',
+        'clone-find-all-flattened (aka find-clone-all-flattened and cff).\n' +
+        'Create an organizer node whose direct children are clones of all nodes' +
+        'matching the search string, except @nosearch trees.\n' +
+        'The list is flattened: every cloned node appears as a direct child' +
+        'of the organizer node, even if the clone also is a descendant of' +
+        'another cloned node.')
+    @cmd('find-clone-all-flattened', 'clone-find-all-flattened (aka find-clone-all-flattened and cff).\n' +
+        'Create an organizer node whose direct children are clones of all nodes' +
+        'matching the search string, except @nosearch trees.\n' +
+        'The list is flattened: every cloned node appears as a direct child' +
+        'of the organizer node, even if the clone also is a descendant of' +
+        'another cloned node.')
+    @cmd('cff', 'clone-find-all-flattened (aka find-clone-all-flattened and cff).\n' +
+        'Create an organizer node whose direct children are clones of all nodes' +
+        'matching the search string, except @nosearch trees.\n' +
+        'The list is flattened: every cloned node appears as a direct child' +
+        'of the organizer node, even if the clone also is a descendant of' +
+        'another cloned node.')
+    public interactive_cff(): void {
+        console.log('interactive_cff overriden in the UI client.');
+    }
     // def interactive_cff(self, event: Event=None, preloaded: bool=False) -> None:  # pragma: no cover (interactive)
     //     """
     //     clone-find-all-flattened (aka find-clone-all-flattened and cff).
@@ -1679,13 +1704,27 @@ export class LeoFind {
 
     }
     //@+node:felix.20221016013001.17: *4* find.clone-find-tag & helper
-    // * The interactive_clone_find_tag methods are not implemented
-    // * '@cmd' commands @cmd('clone-find-tag'), etc,  are overriden in the UI client.
-    // * do_clone_find_tag is intended to be called directly from the UI client instead.
-
-    // @cmd('clone-find-tag')
-    // @cmd('find-clone-tag')
-    // @cmd('cft')
+    @cmd('clone-find-tag', 'clone-find-tag (aka find-clone-tag and cft).\n' +
+        'Create an organizer node whose descendants contain clones of all' +
+        'nodes matching the given tag, except @nosearch trees.\n' +
+        'The list is *always* flattened: every cloned node appears as a' +
+        'direct child of the organizer node, even if the clone also is a' +
+        'descendant of another cloned node.\n')
+    @cmd('find-clone-tag', 'clone-find-tag (aka find-clone-tag and cft).\n' +
+        'Create an organizer node whose descendants contain clones of all' +
+        'nodes matching the given tag, except @nosearch trees.\n' +
+        'The list is *always* flattened: every cloned node appears as a' +
+        'direct child of the organizer node, even if the clone also is a' +
+        'descendant of another cloned node.\n')
+    @cmd('cft', 'clone-find-tag (aka find-clone-tag and cft).\n' +
+        'Create an organizer node whose descendants contain clones of all' +
+        'nodes matching the given tag, except @nosearch trees.\n' +
+        'The list is *always* flattened: every cloned node appears as a' +
+        'direct child of the organizer node, even if the clone also is a' +
+        'descendant of another cloned node.\n')
+    public interactive_clone_find_tag(): void {
+        console.log('interactive_clone_find_tag overriden in the UI client.');
+    }
     // def interactive_clone_find_tag(self, event: Event=None) -> None:  # pragma: no cover (interactive)
     //     """
     //     clone-find-tag (aka find-clone-tag and cft).
@@ -1754,7 +1793,6 @@ export class LeoFind {
      * Clone all positions in the clones set as children of found.
      */
     private _create_clone_tag_nodes(clones: Position[]): Position {
-
         const c = this.c;
         const p = this.c;
         // Create the found node.;
@@ -1777,7 +1815,14 @@ export class LeoFind {
     // * '@cmd' commands @cmd('find-all'), etc,  are overriden in the UI client.
     // * do_find_all is intended to be called directly from the UI client instead.
 
-    // @cmd('find-all')
+    @cmd('find-all',
+        'Create a summary node containing descriptions of all matches of the' +
+        'search string.\n' +
+        'Typing tab converts this to the change-all command.'
+    )
+    public interactive_find_all(): void {
+        console.log('interactive_find_all overriden in the UI client.');
+    }
     // def interactive_find_all(self, event: Event=None) -> None:  # pragma: no cover (interactive)
     //     """
     //     Create a summary node containing descriptions of all matches of the
@@ -1901,7 +1946,7 @@ export class LeoFind {
      */
     private _find_all_helper(
         after: Position | undefined,
-        data: any, // TODO : FIX TYPING
+        data: IFindUndoData,
         p: Position | undefined,
         undoType: string,
     ): number {
@@ -2158,8 +2203,15 @@ export class LeoFind {
     //         escape_handler=self.start_search_escape1,  # See start-search
     //     )
     //@+node:felix.20221016013001.29: *4* find.start-search (Ctrl-F) & common states
-    // @cmd('start-search')
-    // @cmd('search-forward')  # Compatibility.
+    @cmd('start-search',
+        'The default binding of Ctrl-F.\nAlso contains default state-machine entries for find/change commands.'
+    )
+    @cmd('search-forward',
+        'The default binding of Ctrl-F.\nAlso contains default state-machine entries for find/change commands.'
+    )
+    public start_search(): void {
+        console.log('start_search overriden in the UI client.');
+    }
     // def start_search(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """
     //     The default binding of Ctrl-F.
@@ -2250,12 +2302,10 @@ export class LeoFind {
     //     c.widgetWantsFocusNow(w)
     //     self.do_find_next(settings)
     //@+node:felix.20221016013001.33: *4* find.tag-children & helper
-    // * The interactive_tag_children methods are not implemented
-    // * '@cmd' commands @cmd('tag-children'), etc,  are overriden in the UI client.
-    // * do_tag_children is intended to be called directly from the UI client instead.
-
-    // @cmd('tag-children')
-    // def interactive_tag_children(self, event: Event=None) -> None:  # pragma: no cover (interactive)
+    @cmd('tag-children', 'Prompt for a tag and add it to all children of c.p.')
+    public interactive_tag_children(): void {
+        console.log('interactive_tag_children overriden in the UI client.');
+    }
     //     """tag-children: prompt for a tag and add it to all children of c.p."""
     //     w = self.c.frame.body.wrapper
     //     if not w:
@@ -2623,7 +2673,7 @@ export class LeoFind {
             flags = "mg"; // re.MULTILINE and g for global search. 
             if (this.ignore_case) {
                 flags = flags + "i"; //|= re.IGNORECASE 
-            } // pragma: no cover
+            }
             // Escape the search text.
             // Ignore the whole_word option.
             const s = this.find_text;

@@ -39,8 +39,11 @@ export class QuickSearchController {
     constructor(c: Commands) {
         this.c = c;
         this.lw = [];  // empty list
-        // Keys are id(w),values are either tuples in tuples (w (p,Position)) or tuples (w, f)
+
+        // ! OLD ! Keys are id(w),values are either tuples in tuples (w (p,Position)) or tuples (w, f)
+        // array of tuples (w (p,Position)) use index to refer.
         this.its = [];
+
         this.fileDirectives = [
             "@asis", "@auto",
             "@auto-md", "@auto-org", "@auto-otl", "@auto-rst",
@@ -190,7 +193,7 @@ export class QuickSearchController {
         let i = 0;
         let j = 0;
         let n = pat.length || 0;
-        let res = '^';
+        let res = ''; //  '^'; 
         let c: string;
         let stuff: string;
 
@@ -284,12 +287,8 @@ export class QuickSearchController {
             const h = v ? v.h : parent_key;
             const it = { "type": "parent", "label": h };
 
-            // ! unused !
-            // else:
-            //     it = {"type": "parent", "label": parent_key[0].h}
-
-            if (this.addItem(it, [parent_value[0][0], undefined])) { // TODO : TEST THIS!
-                return lineMatchHits;
+            if (this.addItem(it, [parent_value[0][0], undefined])) {
+                return lineMatchHits; // Will cap at max number of entries!
             }
 
             for (let p_item of parent_value) {
@@ -337,7 +336,7 @@ export class QuickSearchController {
     /**
      * Return list of all tuple (Position, matchiter/None) whose body matches regex one or more times.
      */
-    public find_b(regex: string, positions: Position[], flags = "rm"): [Position, RegExp][] {
+    public find_b(regex: string, positions: Position[], flags = "grm"): [Position, RegExp][] {
 
         let pat;
 
@@ -366,7 +365,7 @@ export class QuickSearchController {
     /**
      * Return the list of all tuple (Position, matchiter/None) whose headline matches the given pattern.
      */
-    public find_h(regex: string, positions: Position[], flags = "i"): [Position, undefined][] {
+    public find_h(regex: string, positions: Position[], flags = "gi"): [Position, undefined][] {
 
         let pat;
 
@@ -474,7 +473,7 @@ export class QuickSearchController {
             let en;
 
             const m_start = miter.lastIndex - m[0].length;
-            const m_end = miter.lastIndex - 1;
+            const m_end = miter.lastIndex;
 
             [st, en] = g.getLine(b, m_start);
 
@@ -546,11 +545,11 @@ export class QuickSearchController {
         if (!pat.startsWith('r:')) {
             // normal string so turn it into a valid regexp
             hpat = this.translate('*' + pat + '*').slice(0, -1); // remove last '$' part.
-            flags = 'i';
+            flags = 'gi';
         } else {
-            // Flagged as aregexp with "r:"" so just remove it
+            // Flagged as a regexp with "r:"" so just remove it
             hpat = pat.substring(2);
-            flags = "";
+            flags = "g";
         }
         let combo = this.searchOptionsStrings[this.searchOptions];
         let hNodes: Position[] | Generator<Position>;
@@ -662,11 +661,11 @@ export class QuickSearchController {
             // in python 3.6 there is no (?ms) at the end
             // only \Z
             //bpat = bpat.replace(r'\Z', '')
-            flags = "i";
+            flags = "gi";
         } else {
             hpat = pat.substring(2);
             bpat = pat.substring(2);
-            flags = "";
+            flags = "g";
         }
 
         const combo = this.searchOptionsStrings[this.searchOptions];
@@ -736,8 +735,6 @@ export class QuickSearchController {
         }
 
         if (!hitBase) {
-            // hNodes = list(hNodes)
-            // bNodes = list(bNodes)
             let hm = this.find_h(hpat, [...hNodes], flags);  // Returns a list of positions.
             let bm = this.find_b(bpat, [...bNodes], flags);  // Returns a list of positions.
 

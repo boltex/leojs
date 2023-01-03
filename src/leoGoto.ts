@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 import { Constants } from "./constants";
+import * as g from './core/leoGlobals';
+import { QuickSearchController } from "./core/quicksearch";
 import { LeoUI } from "./leoUI";
 import { LeoGoto, LeoGotoNavKey, TGotoTypes } from "./types";
 import * as utils from "./utils";
@@ -36,18 +38,18 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
     }
 
     public navigateNavEntry(p_nav: LeoGotoNavKey): void {
+        console.log('navigateNavEntry', p_nav);
+
         if (!this._nodeList.length) {
             return;
         }
         switch (p_nav.valueOf()) {
             case LeoGotoNavKey.first:
                 this._selectedNodeIndex = 0;
-                this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]);
                 break;
 
             case LeoGotoNavKey.last:
                 this._selectedNodeIndex = this._nodeList.length - 1;
-                this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]);
                 break;
 
             case LeoGotoNavKey.next:
@@ -63,8 +65,13 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
                 break;
 
         }
-        this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex]);
-        this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]);
+
+        this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]).then(() => {
+            this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex], {
+                select: true,
+                focus: true
+            });
+        });
     }
 
     /**
@@ -85,34 +92,41 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
         // if called with element, or not ready, give back empty array as there won't be any children
         if (this._leoUI.leoStates.fileOpenedReady && !element) {
 
-            // TODO !
-            return Promise.resolve([]);
+            const c = g.app.windowList[this._leoUI.frameIndex].c;
+            const scon: QuickSearchController = c.quicksearchController;
 
-            /* 
+            const result: { [key: string]: any } = {};
 
-            // call action to get get list, and convert to LeoButtonNode(s) array
-            return this._leoUI.sendAction(Constants.LEOBRIDGE.GET_GOTO_PANEL).then(p_package => {
-                if (p_package && p_package.navList) {
-
-                    const w_list: LeoGotoNode[] = [];
-                    this._topNode = undefined;
-                    const w_navList: LeoGoto[] = p_package.navList;
-                    if (w_navList && w_navList.length) {
-                        w_navList.forEach((p_goto: LeoGoto) => {
-                            const w_newNode = new LeoGotoNode(this._leoUI, p_goto, p_package.navOptions!);
-                            if (!this._topNode) {
-                                this._topNode = w_newNode;
-                            }
-                            w_list.push(w_newNode);
-                        });
+            const navlist: LeoGoto[] = [];
+            for (let k = 0; k < scon.its.length; k++) {
+                navlist.push(
+                    {
+                        "key": k,
+                        "h": scon.its[k][0]["label"],
+                        "t": scon.its[k][0]["type"] as TGotoTypes
                     }
-                    return w_list;
-                } else {
-                    return [];
-                }
-            });
+                );
+            }
 
-            */
+            result["navList"] = navlist;
+            result["messages"] = scon.lw;
+            result["navText"] = scon.navText;
+            result["navOptions"] = { "isTag": scon.isTag, "showParents": scon.showParents };
+
+            this._nodeList = [];
+            if (result && result.navList) {
+
+                const w_navList: LeoGoto[] = result.navList;
+                if (w_navList && w_navList.length) {
+                    w_navList.forEach((p_goto: LeoGoto) => {
+                        const w_newNode = new LeoGotoNode(this._leoUI, p_goto, result.navOptions!);
+                        this._nodeList.push(w_newNode);
+                    });
+                }
+                return Promise.resolve(this._nodeList);
+            } else {
+                return Promise.resolve([]);
+            }
 
         } else {
             return Promise.resolve([]); // Defaults to an empty list of children

@@ -1164,12 +1164,11 @@ export class CommanderFileCommands {
         }
         await g.chdir(fileName);
         s = '@nocolor\n' + s;
-        // ? needed ?;
-        // w = c.frame.body.wrapper;
+        const w = c.frame.body.wrapper;
         const p: Position = c.insertHeadline(undoType)!;
         p.setHeadString('@read-file-into-node ' + fileName);
         p.setBodyString(s);
-        // w.setAllText(s);
+        w.setAllText(s);
         return c.redraw(p);
     }
     //@+node:felix.20220105210716.35: *4* c_file.readOutlineOnly

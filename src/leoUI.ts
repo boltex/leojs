@@ -758,13 +758,10 @@ export class LeoUI extends NullGui {
         p_event: vscode.TreeViewVisibilityChangeEvent,
         p_explorerView: boolean
     ): void {
-
-        // if (p_explorerView) {
-        // } // (Facultative/unused) Do something different if explorer view is used
-        // if (p_event.visible) {
-        //     this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
-        //     // this.refreshGotoPane();  // No need to refresh because no selection needs to be set
-        // }
+        if (p_event.visible) {
+            this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
+            // this.refreshGotoPane();  // No need to refresh because no selection needs to be set
+        }
     }
 
     /**
@@ -797,20 +794,17 @@ export class LeoUI extends NullGui {
      * @param p_explorerView Flags that the treeview who triggered this event is the one in the explorer view
      */
     private _onFindViewVisibilityChanged(p_explorerView: boolean): void {
-        // * todo
-        // if (p_explorerView) {
-        //     if (this._findPanelWebviewExplorerView?.visible) {
-        //         this._lastFindView = this._findPanelWebviewExplorerView;
-        //         this.checkForceFindFocus(false);
-        //     }
-
-        // } else {
-        //     if (this._findPanelWebviewView?.visible) {
-        //         this._lastFindView = this._findPanelWebviewView;
-        //         this.checkForceFindFocus(false);
-
-        //     }
-        // }
+        if (p_explorerView) {
+            if (this._findPanelWebviewExplorerView?.visible) {
+                this._lastFindView = this._findPanelWebviewExplorerView;
+                this.checkForceFindFocus(false);
+            }
+        } else {
+            if (this._findPanelWebviewView?.visible) {
+                this._lastFindView = this._findPanelWebviewView;
+                this.checkForceFindFocus(false);
+            }
+        }
     }
 
     /**
@@ -3896,8 +3890,15 @@ export class LeoUI extends NullGui {
      * @param p_id string id of the setting name
      */
     public setSearchSetting(p_id: string): void {
-        this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
-        this._findPanelWebviewView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
+        if (this._findPanelWebviewExplorerView) {
+            console.log('_findPanelWebviewExplorerView');
+            this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
+        }
+        if (this._findPanelWebviewView) {
+            console.log('_findPanelWebviewView');
+
+            this._findPanelWebviewView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
+        }
     }
 
     /**
