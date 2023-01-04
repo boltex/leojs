@@ -517,7 +517,7 @@ export class LeoFind {
         }
 
         const root: Position | undefined = c.cloneFindByPredicate(
-            c.all_unique_positions,
+            c.all_unique_positions.bind(c),
             isMarked,
             'No marked nodes',
             flatten,

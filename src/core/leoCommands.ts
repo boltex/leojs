@@ -3593,10 +3593,10 @@ export class Commands {
     /**
      * End the editing of a headline.
      */
-    public endEditing(): void{
+    public endEditing(): void {
         const c = this;
         const p = c.p;
-        if (p && p.__bool__()){
+        if (p && p.__bool__()) {
             c.frame.tree.endEditLabel();
         }
     }
@@ -3742,7 +3742,7 @@ export class Commands {
                         The default is 'clone-find-predicate'
      */
     public cloneFindByPredicate(
-        generator: any,  // The generator used to traverse the tree.
+        generator: (copy?: boolean) => Generator<Position, any, unknown>,  // The generator used to traverse the tree.
         predicate: (p: Position) => boolean,  // A function of one argument p, returning True  // if p should be included in the results.
         failMsg: string = "",  // Failure message. Default is no message.
         flatten: boolean = false,  // True: Put all matches at the top level.
@@ -3766,7 +3766,7 @@ export class Commands {
                         seen.push(p.v);
                     }
                 } else {
-                    for (let p2 of p.this_and_subtree(false)) {
+                    for (let p2 of p.self_and_subtree(false)) {
                         if (!seen.includes(p2.v)) {
                             seen.push(p2.v);
                         }
