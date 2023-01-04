@@ -1348,7 +1348,7 @@ export function activate(p_context: vscode.ExtensionContext) {
 
 [CMD.CLONE_FIND_ALL, () =&gt; p_leoUI.cloneFind(false, false)],
 [CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; p_leoUI.cloneFind(false, true)],
-[CMD.CLONE_FIND_PARENTS, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_PARENTS, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
+[CMD.CLONE_FIND_PARENTS, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_PARENTS, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 [CMD.CLONE_FIND_MARKED, () =&gt; p_leoUI.cloneFind(true, false)],
 [CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; p_leoUI.cloneFind(true, true)],
 
@@ -3370,7 +3370,7 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
 <t tx="felix.20201214202749.1">/**
  * * Called by UI when the user selects in the tree (click or 'open aside' through context menu)
  * @param p_node is the position node selected in the tree
- * @param p_reveal 
+ * @param p_reveal
  * @returns thenable for reveal to finish or select position to finish
  */
 public selectTreeNode(
@@ -3411,7 +3411,7 @@ public selectTreeNode(
         // Voluntary exit
     }
 
-    // * Set selected node in Leo 
+    // * Set selected node in Leo
     c.selectPosition(p_node);
 
     if (!p_internalCall) {
@@ -6665,7 +6665,7 @@ private _setupOpenedLeoDocument(): Promise&lt;unknown&gt; {
         this._bodyFileSystemStarted = true;
     }
 
-    // this._leoStatusBar.update(true, 0, true); // todo 
+    // this._leoStatusBar.update(true, 0, true); // todo
     // this._leoStatusBar.show(); // Just selected a node // todo
     this.loadSearchSettings();
 
@@ -8355,7 +8355,7 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     filetypes: [string, string][],
     defaultExtension: string,
     multiple?: boolean,
-    startpath?: string // TODO 
+    startpath?: string // TODO
 ): Thenable&lt;string[] | string&gt; {
     // convert to { [name: string]: string[] } typing
     const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
@@ -8784,7 +8784,7 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 }
 
 </t>
-<t tx="felix.20220417215549.1">/** 
+<t tx="felix.20220417215549.1">/**
  * Make all key and commands bindings
  */
 public makeAllBindings(): void {
@@ -9038,7 +9038,7 @@ public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
                 const w_changeSettings: ISettings = {
                     // this._lastSettingsUsed
                     // State...
-                    in_headline: false, // ! TODO ! 
+                    in_headline: false, // ! TODO !
                     // p: Position,
                     // Find/change strings...
                     find_text: this._lastSettingsUsed.findText,
@@ -9098,9 +9098,6 @@ public cloneFind(p_marked: boolean, p_flat: boolean): Thenable&lt;unknown&gt; {
 
     let w_searchString: string = this._lastSettingsUsed!.findText;
 
-    const c = g.app.windowList[this.frameIndex].c;
-    const fc = c.findCommands;
-
     if (p_marked) {
         // When marked, no input from user is required, do the command and exit.
         const w_action = p_flat
@@ -9132,15 +9129,17 @@ public cloneFind(p_marked: boolean, p_flat: boolean): Thenable&lt;unknown&gt; {
                 this._lastSettingsUsed.findText = w_searchString;
                 this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
 
+                const c = g.app.windowList[this.frameIndex].c;
+                const fc = c.findCommands;
+
                 const settings = fc.ftm.get_settings();
-                const result = fc.do_clone_find_all(settings);
-                const w_focus = this._get_focus();
 
                 if (p_flat) {
                     fc.do_clone_find_all_flattened(settings);
                 } else {
                     fc.do_clone_find_all(settings);
                 }
+                const w_focus = this._get_focus();
                 let w_focusOnOutline = false;
 
                 if (w_focus.includes('tree') || w_focus.includes('head')) {
@@ -9262,7 +9261,7 @@ public loadSearchSettings(): void {
 <t tx="felix.20220505215924.14">/**
  * * Send the settings to Leo implementation
  * @param p_settings the search settings to be set in Leo implementation to affect next results
- * @returns 
+ * @returns
  */
 public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt; {
 
@@ -10392,7 +10391,7 @@ set leoCanGoNext(p_value: boolean) {
             },
             Constants.USER_MESSAGES.YES,
             Constants.USER_MESSAGES.NO
-            // Already shows a 'cancel' 
+            // Already shows a 'cancel'
         )
         .then((answer) =&gt; {
             if (answer === Constants.USER_MESSAGES.YES) {
@@ -10471,7 +10470,7 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
  */
 private _handleRClicks(p_rclicks: any[], topLevelName?: string): Thenable&lt;any&gt; {
     // private _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Thenable&lt;ChooseRClickItem&gt; {
-    /* 
+    /*
     const w_choices: ChooseRClickItem[] = [];
     let w_index = 0;
     if (topLevelName) {
@@ -10513,7 +10512,7 @@ private _handleRClicks(p_rclicks: any[], topLevelName?: string): Thenable&lt;any
  */
 public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
     return Promise.resolve(true);
-    /* 
+    /*
     return this._isBusyTriggerSave(false)
         .then((p_saveResult) =&gt; {
             return this.sendAction(
@@ -13039,7 +13038,7 @@ public async chapterSelect(): Promise&lt;unknown&gt; {
 ],
 </t>
 <t tx="felix.20221113002623.1">public showSettings(): void {
-    // TODO 
+    // TODO
     vscode.window.showInformationMessage('TODO: SHOW WELCOME/SETTINGS !');
 }
 </t>

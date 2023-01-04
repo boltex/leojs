@@ -1,6 +1,6 @@
 //@+leo-ver=5-thin
 //@+node:felix.20211212000140.1: * @file src/core/leoFind.ts
-/** 
+/**
  *  Leo's gui-independent find classes.
  */
 //@+<< leoFind imports >>
@@ -178,7 +178,7 @@ export class LeoFind {
         this.reload_settings();
     }
     //@+node:felix.20221012221041.1: *4* find.default_settings
-    /** 
+    /**
      * Return a dict representing all default settings.
      */
     public default_settings(): ISettings {
@@ -221,11 +221,11 @@ export class LeoFind {
     }
 
     //@+node:felix.20221012225100.1: *4* find.init_ivars_from_settings
-    /** 
+    /**
      * Initialize all ivars from settings, including required defaults.
-     * 
+     *
      * This should be called from the do_ methods as follows:
-     * 
+     *
      * self.init_ivars_from_settings(settings)
      * if not self.check_args('find-next'):
      *     return <appropriate error indication>
@@ -266,13 +266,13 @@ export class LeoFind {
     //@+node:felix.20221012233803.1: *3* find.batch_change (script helper) & helpers
     /*
      *  Support batch change scripts.
-     * 
+     *
      * replacement: a list of tuples (find_string, change_string).
      * settings: a dict or g.Bunch containing find/change settings.
      *           See find._init_from_dict for a list of valid settings.
-     * 
+     *
      * Example:
-     * 
+     *
      *     h = '@file src/ekr/coreFind.py'
      *     root = g.findNodeAnywhere(c, h)
      *     assert root
@@ -706,7 +706,7 @@ export class LeoFind {
         return word;
     }
     //@+node:felix.20221013234514.10: *5* find._fd_helper
-    /** 
+    /**
      * Find the definition of the class, def or var under the cursor.
      *
      * return p, pos, newpos for unit tests.
@@ -848,7 +848,7 @@ export class LeoFind {
         }
     }
     //@+node:felix.20221013234514.12: *5* find._save_before_find_def
-    /** 
+    /**
      * Save the find settings in effect before a find-def command.
      */
     private _save_before_find_def(p: Position): void {
@@ -937,7 +937,7 @@ export class LeoFind {
         this.request_reverse = true;
         return this.do_find_next(settings);
     }
-    /** 
+    /**
      * Find the next instance of this.find_text.
      *
      * Return True (for vim-mode) if a match was found.
@@ -1282,7 +1282,7 @@ export class LeoFind {
             return 0;
         }
         const n = this._change_all_helper(settings);
-        // 
+        //
         // Bugs #947, #880 and #722:
         // Set ancestor @<file> nodes by brute force.
         for (let p of c.all_positions()) {
@@ -1400,7 +1400,7 @@ export class LeoFind {
 
     }
     //@+node:felix.20221016013001.5: *6* find._change_all_search_and_replace & helpers
-    /** 
+    /**
      * Search s for this.find_text and replace with this.change_text.
      *
      * Return (found, new text)
@@ -1610,7 +1610,7 @@ export class LeoFind {
     //         c.treeWantsFocus()
     //     return count
     //@+node:felix.20221016013001.14: *5* find.do_clone_find_all
-    /** 
+    /**
      * Do the clone-all-find commands from settings.
      *
      * Return the count of found nodes.
@@ -1646,7 +1646,7 @@ export class LeoFind {
         'of the organizer node, even if the clone also is a descendant of' +
         'another cloned node.')
     public interactive_cff(): void {
-        console.log('interactive_cff overriden in the UI client.');
+        console.log('interactive_cff overridden in the UI client.');
     }
     // def interactive_cff(self, event: Event=None, preloaded: bool=False) -> None:  # pragma: no cover (interactive)
     //     """
@@ -1987,7 +1987,7 @@ export class LeoFind {
             //  if ((p.v, pos) in seen){  // 2076
             if (
                 seen.reduce((previous, current): boolean => {
-                    if (p && current[0] === p.v && current[1] === pos) {
+                    if (p && p.__bool__() && current[0] === p.v && current[1] === pos) {
                         return true;
                     }
                     return previous;
@@ -2069,7 +2069,7 @@ export class LeoFind {
         status = status.trim();
         // .lstrip('(')
         // .rstrip(')')
-        status = status.replace(/^\("+|\)+$/g, '');
+        status = status.replace(/^\(+|\)+$/g, '');
         status = status.trim();
 
         found.b = `# ${status}\n${result.join('')}`;
@@ -2413,15 +2413,16 @@ export class LeoFind {
         const clones: Position[] = [];
         const skip: VNode[] = [];
 
-        while (p && !p.__eq__(after)) {
+        while (p && p.__bool__() && !p.__eq__(after)) {
             const progress = p.copy();
             if (g.inAtNosearch(p)) {
                 p.moveToNodeAfterTree();
-            }
-            else if (skip.includes(p.v)) {
+            } else if (skip.includes(p.v)) {
                 p.moveToThreadNext();
             } else if (this._cfa_find_next_match(p)) {
-                count += 1;
+                count = count + 1;
+                console.log('got one');
+
                 if (flatten) {
                     if (!skip.includes(p.v)) {
                         skip.push(p.v); // as a set
@@ -2433,7 +2434,7 @@ export class LeoFind {
                         // p not in clones
                         clones.reduce((previous, current): boolean => {
                             if (p.__eq__(current)) {
-                                return false; //is in it! 
+                                return false; //is in it!
                             }
                             return previous;
                         }, true)
@@ -2495,7 +2496,7 @@ export class LeoFind {
         status = status.trim();
         // .lstrip('(')
         // .rstrip(')')
-        status = status.replace(/^\("+|\)+$/g, '');
+        status = status.replace(/^\(+|\)+$/g, '');
         status = status.trim();
 
         const flat = flattened ? 'flattened, ' : '';
@@ -2670,9 +2671,9 @@ export class LeoFind {
         let flags: string;
         try { // Precompile the regexp.
 
-            flags = "mg"; // re.MULTILINE and g for global search. 
+            flags = "mg"; // re.MULTILINE and g for global search.
             if (this.ignore_case) {
-                flags = flags + "i"; //|= re.IGNORECASE 
+                flags = flags + "i"; //|= re.IGNORECASE
             }
             // Escape the search text.
             // Ignore the whole_word option.
@@ -3158,14 +3159,14 @@ export class LeoFind {
             // subgroup will be a number matched
 
             // # 1494...
-            // group(0) is the whole match including all groups, group 1 is the first 
+            // group(0) is the whole match including all groups, group 1 is the first
             const n = Number(p1) - 1;
             if (0 <= n && n < groups.length) {
                 // Executed only if the change text contains groups that match.
                 return (
                     groups[n].
                         replace(/\\b/g, '\\\\b').   // b
-                        replace(/\\f/g, '\\\\f').   // f 
+                        replace(/\\f/g, '\\\\f').   // f
                         replace(/\\n/g, '\\\\n').   // n
                         replace(/\\r/g, '\\\\r').   // r
                         replace(/\\t/g, '\\\\t').   // t

@@ -56,7 +56,7 @@ import { NullGui } from "./leoGui";
 
 //@-<< imports >>
 
-// TODO: Make those platform detection methods better with 'bowser' js lib 
+// TODO: Make those platform detection methods better with 'bowser' js lib
 export const isBrowser: boolean = !!(process as any)?.browser; // coerced to boolean
 export const isMac: boolean = process.platform?.startsWith('darwin');
 export const isWindows: boolean = process.platform?.startsWith('win');
@@ -945,7 +945,7 @@ export function get_directives_dict(p: Position, root?: Position[]): { [key: str
         while ((m = directives_pat.exec(s)) !== null) {
             const word: string = m[1].trim();
 
-            // 'indices' property is only present when the d flag is set. 
+            // 'indices' property is only present when the d flag is set.
             const i: number = (m as any).indices[1][0];
             if (d[word]) {
                 continue;
@@ -1149,7 +1149,9 @@ export function inAtNosearch(p?: Position): boolean {
         return false;  // #2288.
     }
     for (let p_p of p.self_and_parents()) {
-        if (p_p.is_at_ignore() || p_p.b.search(/(^@|\n@)nosearch\b/)) {
+        const nosearch = p_p.b.search(/(^@|\n@)nosearch\b/) !== -1;
+        const ignored = p_p.is_at_ignore();
+        if (ignored || nosearch) {
             return true;
         }
     }
@@ -1245,7 +1247,7 @@ export function scanAtEncodingDirectives(aList: any[]): string | undefined {
 //@+node:felix.20220412232541.1: *3* g.scanAtHeaderDirectives
 /**
  * scan aList for @header and @noheader directives.
- * @param aList  
+ * @param aList
  */
 export function scanAtHeaderDirectives(aList: any[]): void {
 
@@ -1258,7 +1260,7 @@ export function scanAtHeaderDirectives(aList: any[]): void {
 //@+node:felix.20220412232548.1: *3* g.scanAtLineendingDirectives
 /**
  * Scan aList for @lineending directives.
- * @param aList  
+ * @param aList
  */
 export function scanAtLineendingDirectives(aList: any[]): string | undefined {
     for (let d of aList) {
@@ -1275,8 +1277,8 @@ export function scanAtLineendingDirectives(aList: any[]): string | undefined {
 //@+node:felix.20220412232628.1: *3* g.scanAtPagewidthDirectives
 /**
  * Scan aList for @pagewidth directives.
- * @param aList 
- * @param issue_error_flag 
+ * @param aList
+ * @param issue_error_flag
  */
 export function scanAtPagewidthDirectives(aList: any[], issue_error_flag?: boolean): number | undefined {
 
@@ -1337,8 +1339,8 @@ export function scanAllAtTabWidthDirectives(c: Commands, p: Position): number | 
 //@+node:felix.20220412232655.1: *3* g.scanAtWrapDirectives
 /**
  * Scan aList for @wrap and @nowrap directives.
- * @param aList 
- * @param issue_error_flag 
+ * @param aList
+ * @param issue_error_flag
  */
 export function scanAtWrapDirectives(aList: any[], issue_error_flag?: boolean): boolean | undefined {
 
@@ -1358,8 +1360,8 @@ export function scanAtWrapDirectives(aList: any[], issue_error_flag?: boolean): 
 
 /**
  * Scan p and all ancestors looking for @wrap/@nowrap directives.
- * @param aList 
- * @param issue_error_flag 
+ * @param aList
+ * @param issue_error_flag
  */
 export function scanAllAtWrapDirectives(c: Commands, p: Position): boolean | undefined {
 
@@ -1716,7 +1718,7 @@ export function getBaseDirectory(c: Commands): string {
     return '';  // No relative base given.
 }
 //@+node:felix.20221219233638.1: *3* g.is_sentinel
-/** 
+/**
  * Return True if line starts with a sentinel comment.
  *
  * Leo 6.7.2: Support blackened sentinels.
@@ -1947,8 +1949,8 @@ export function splitLongFileName(fn: string, limit: number = 40): string {
 /**
  * * VSCODE compatibility helper method:
  * Builds a valid URI from a typical filename string.
- * 
- * @param p_fn String form of fsPath or path 
+ *
+ * @param p_fn String form of fsPath or path
  * @returns An URI for file access compatible with web extensions filesystems
  */
 export function makeVscodeUri(p_fn: string): vscode.Uri {
@@ -2674,7 +2676,7 @@ export function toPythonIndex(s: string, index?: number | string): number {
 }
 //@+node:felix.20220410212530.1: *3* g.Strings
 //@+node:felix.20220410212530.2: *4* g.isascii
-/* 
+/*
 def isascii(s: str) -> bool:
     # s.isascii() is defined in Python 3.7.
     return all(ord(ch) < 128 for ch in s)
@@ -2726,7 +2728,7 @@ export function ensureTrailingNewlines(s: string, n: number): string {
 }
 
 //@+node:felix.20220410212530.5: *4* g.longestCommonPrefix & g.itemsMatchingPrefixInList
-/* 
+/*
 def longestCommonPrefix(s1: str, s2: str) -> str:
     """Find the longest prefix common to strings s1 and s2."""
     prefix = ''
@@ -2782,7 +2784,7 @@ export function removeTrailing(s: string, chars: string): string {
 }
 
 //@+node:felix.20220410212530.7: *4* g.stripBrackets
-/* 
+/*
 def stripBrackets(s: str) -> str:
     """Strip leading and trailing angle brackets."""
     if s.startswith('<'):
@@ -2792,7 +2794,7 @@ def stripBrackets(s: str) -> str:
     return s
  */
 //@+node:felix.20220410212530.8: *4* g.unCamel
-/* 
+/*
 def unCamel(s: str) -> List[str]:
     """Return a list of sub-words in camelCased string s."""
     result: List[str] = []
@@ -2829,7 +2831,7 @@ export function checkUnicode(s: string, encoding?: string): string {
     return s || '';
 
     // TODO : ? Needed ?
-    /* 
+    /*
     if s is None and g.unitTesting:
         return '';
 
@@ -2919,7 +2921,7 @@ export function toUnicode(s: any, encoding: string | null = null, reportErrors =
 
 //@+node:felix.20220410213527.1: *3* g.Whitespace
 //@+node:felix.20220410213527.2: *4* g.computeLeadingWhitespace
-/* 
+/*
 # Returns optimized whitespace corresponding to width with the indicated tab_width.
 
 def computeLeadingWhitespace(width: int, tab_width: int) -> str:
@@ -2933,7 +2935,7 @@ def computeLeadingWhitespace(width: int, tab_width: int) -> str:
     return ' ' * width
  */
 //@+node:felix.20220410213527.3: *4* g.computeLeadingWhitespaceWidth
-/* 
+/*
 # Returns optimized whitespace corresponding to width with the indicated tab_width.
 
 def computeLeadingWhitespaceWidth(s: str, tab_width: int) -> int:
@@ -2948,7 +2950,7 @@ def computeLeadingWhitespaceWidth(s: str, tab_width: int) -> int:
     return w
  */
 //@+node:felix.20220410213527.4: *4* g.computeWidth
-/* 
+/*
 # Returns the width of s, assuming s starts a line, with indicated tab_width.
 
 def computeWidth(s: str, tab_width: int) -> int:
@@ -2973,7 +2975,7 @@ def computeWidth(s: str, tab_width: int) -> int:
 //
 // The key to this code is the invarient that line never ends in whitespace.
 //@@c
-/* 
+/*
 def wrap_lines(lines: List[str], pageWidth: int, firstLineWidth: int=None) -> List[str]:
     """Returns a list of lines, consisting of the input lines wrapped to the given pageWidth."""
     if pageWidth < 10:
@@ -3041,7 +3043,7 @@ def wrap_lines(lines: List[str], pageWidth: int, firstLineWidth: int=None) -> Li
     return result
  */
 //@+node:felix.20220410213527.8: *4* g.get_leading_ws
-/* 
+/*
 def get_leading_ws(s: str) -> str:
     """Returns the leading whitespace of 's'."""
     i = 0
@@ -3051,7 +3053,7 @@ def get_leading_ws(s: str) -> str:
     return s[0:i]
  */
 //@+node:felix.20220410213527.9: *4* g.optimizeLeadingWhitespace
-/* 
+/*
 # Optimize leading whitespace in s with the given tab_width.
 
 def optimizeLeadingWhitespace(line: str, tab_width: int) -> str:
@@ -3068,7 +3070,7 @@ def optimizeLeadingWhitespace(line: str, tab_width: int) -> str:
 // trailing whitespace-only lines, and in some cases that would change
 // the meaning of program or data.
 //@@c
-/* 
+/*
 def regularizeTrailingNewlines(s: str, kind: str) -> None:
     """Kind is 'asis', 'zero' or 'one'."""
     pass
@@ -3094,7 +3096,7 @@ export function removeLeadingBlankLines(s: string): string {
     }
     return result.join('');
 }
-/* 
+/*
 def removeLeadingBlankLines(s: str) -> str:
     lines = g.splitLines(s)
     result = []
@@ -3108,7 +3110,7 @@ def removeLeadingBlankLines(s: str) -> str:
     return ''.join(result)
  */
 //@+node:felix.20220410213527.13: *4* g.removeLeadingWhitespace
-/* 
+/*
 # Remove whitespace up to first_ws wide in s, given tab_width, the width of a tab.
 
 def removeLeadingWhitespace(s: str, first_ws: int, tab_width: int) -> str:
@@ -3131,7 +3133,7 @@ def removeLeadingWhitespace(s: str, first_ws: int, tab_width: int) -> str:
     return s
  */
 //@+node:felix.20220410213527.14: *4* g.removeTrailingWs
-/* 
+/*
 # Warning: string.rstrip also removes newlines!
 
 def removeTrailingWs(s: str) -> str:
@@ -3141,7 +3143,7 @@ def removeTrailingWs(s: str) -> str:
     return s[: j + 1]
  */
 //@+node:felix.20220410213527.15: *4* g.skip_leading_ws
-/* 
+/*
 # Skips leading up to width leading whitespace.
 
 def skip_leading_ws(s: str, i: int, ws: int, tab_width: int) -> int:
@@ -3158,7 +3160,7 @@ def skip_leading_ws(s: str, i: int, ws: int, tab_width: int) -> int:
     return i
  */
 //@+node:felix.20220410213527.16: *4* g.skip_leading_ws_with_indent
-/* 
+/*
 def skip_leading_ws_with_indent(s: str, i: int, tab_width: int) -> Tuple[int, int]:
     """Skips leading whitespace and returns (i, indent),
 
@@ -3178,7 +3180,7 @@ def skip_leading_ws_with_indent(s: str, i: int, tab_width: int) -> Tuple[int, in
     return i, count
  */
 //@+node:felix.20220410213527.17: *4* g.stripBlankLines
-/* 
+/*
 def stripBlankLines(s: str) -> str:
     lines = g.splitLines(s)
     for i, line in enumerate(lines):
@@ -3461,8 +3463,8 @@ export function convertPythonDayjs(s: string): string {
         ["%S", "ss"], // %S    Second as a zero-padded decimal number.	00, 01, ..., 59
         ["%-S", "s"], // %-S  Second as a decimal number.	0, 1, ..., 59
         ["%f", ""], // %f    Microsecond as a decimal number, zero-padded on the left.	000000 - 999999
-        ["%z", "ZZ"], // %z    UTC offset in the form +HHMM or -HHMM.	 
-        ["%Z", ""], // %Z    Time zone name.	 
+        ["%z", "ZZ"], // %z    UTC offset in the form +HHMM or -HHMM.
+        ["%Z", ""], // %Z    Time zone name.
         ["%j", ""], // %j    Day of the year as a zero-padded decimal number.	001, 002, ..., 366
         ["%-j", ""], // %-j  Day of the year as a decimal number.	1, 2, ..., 366
         ["%U", ""], // %U    Week number of the year (Sunday as the first day of the week). All days in a new year preceding the first Sunday are considered to be in week 0.	00, 01, ..., 53
@@ -3470,7 +3472,7 @@ export function convertPythonDayjs(s: string): string {
         ["%c", "LLLL"], // %c    Locale’s appropriate date and time representation.	Mon Sep 30 07:06:05 2013
         ["%x", "L"], // %x    Locale’s appropriate date representation.	09/30/13
         ["%X", "LTS"], // %X    Locale’s appropriate time representation.	07:06:05
-        ["%%", "%"], // %%    A literal '%' character.	
+        ["%%", "%"], // %%    A literal '%' character.
     ];
 
     for (const pair of table) {
@@ -4087,7 +4089,7 @@ export function os_path_splitext(p_path: string): [string, string] {
 //@+node:felix.20220411212559.1: ** g.Parsing & Tokenizing
 //@+node:felix.20220411212559.2: *3* g.createTopologyList
 /**
- * Creates a list describing a node and all its descendents
+ * Creates a list describing a node and all its descendants
  */
 export function createTopologyList(c: Commands, root?: Position, useHeadlines?: boolean): any[] {
 
@@ -4163,13 +4165,13 @@ export function getDocStringForFunction(func: any): string {
     // Do special cases first.
     let s: string = '';
 
-    // TODO: Special cases needed? 
-    /* 
+    // TODO: Special cases needed?
+    /*
     const get_defaults = (func: string, i: number) : any => {
         const defaults = inspect.getfullargspec(func)[3];
         return defaults[i];
     };
-    
+
     if (name(func) === 'minibufferCallback'){
         func = get_defaults(func, 0);
         if (hasattr(func, 'func.__doc__') && func.__doc__.trim()){

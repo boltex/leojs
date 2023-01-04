@@ -463,7 +463,7 @@ export class LeoUI extends NullGui {
 
     }
 
-    /** 
+    /**
      * Make all key and commands bindings
      */
     public makeAllBindings(): void {
@@ -471,7 +471,7 @@ export class LeoUI extends NullGui {
     }
 
     public showSettings(): void {
-        // TODO 
+        // TODO
         vscode.window.showInformationMessage('TODO: SHOW WELCOME/SETTINGS !');
     }
     /**
@@ -612,7 +612,7 @@ export class LeoUI extends NullGui {
             this._bodyFileSystemStarted = true;
         }
 
-        // this._leoStatusBar.update(true, 0, true); // todo 
+        // this._leoStatusBar.update(true, 0, true); // todo
         // this._leoStatusBar.show(); // Just selected a node // todo
         this.loadSearchSettings();
 
@@ -2604,7 +2604,7 @@ export class LeoUI extends NullGui {
     /**
      * * Called by UI when the user selects in the tree (click or 'open aside' through context menu)
      * @param p_node is the position node selected in the tree
-     * @param p_reveal 
+     * @param p_reveal
      * @returns thenable for reveal to finish or select position to finish
      */
     public selectTreeNode(
@@ -2645,7 +2645,7 @@ export class LeoUI extends NullGui {
             // Voluntary exit
         }
 
-        // * Set selected node in Leo 
+        // * Set selected node in Leo
         c.selectPosition(p_node);
 
         if (!p_internalCall) {
@@ -3759,7 +3759,7 @@ export class LeoUI extends NullGui {
                     const w_changeSettings: ISettings = {
                         // this._lastSettingsUsed
                         // State...
-                        in_headline: false, // ! TODO ! 
+                        in_headline: false, // ! TODO !
                         // p: Position,
                         // Find/change strings...
                         find_text: this._lastSettingsUsed.findText,
@@ -3818,9 +3818,6 @@ export class LeoUI extends NullGui {
 
         let w_searchString: string = this._lastSettingsUsed!.findText;
 
-        const c = g.app.windowList[this.frameIndex].c;
-        const fc = c.findCommands;
-
         if (p_marked) {
             // When marked, no input from user is required, do the command and exit.
             const w_action = p_flat
@@ -3852,15 +3849,17 @@ export class LeoUI extends NullGui {
                     this._lastSettingsUsed.findText = w_searchString;
                     this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
 
+                    const c = g.app.windowList[this.frameIndex].c;
+                    const fc = c.findCommands;
+
                     const settings = fc.ftm.get_settings();
-                    const result = fc.do_clone_find_all(settings);
-                    const w_focus = this._get_focus();
 
                     if (p_flat) {
                         fc.do_clone_find_all_flattened(settings);
                     } else {
                         fc.do_clone_find_all(settings);
                     }
+                    const w_focus = this._get_focus();
                     let w_focusOnOutline = false;
 
                     if (w_focus.includes('tree') || w_focus.includes('head')) {
@@ -3979,7 +3978,7 @@ export class LeoUI extends NullGui {
     /**
      * * Send the settings to Leo implementation
      * @param p_settings the search settings to be set in Leo implementation to affect next results
-     * @returns 
+     * @returns
      */
     public saveSearchSettings(p_settings: LeoSearchSettings): Thenable<unknown> {
 
@@ -5136,7 +5135,7 @@ export class LeoUI extends NullGui {
      */
     private _handleRClicks(p_rclicks: any[], topLevelName?: string): Thenable<any> {
         // private _handleRClicks(p_rclicks: RClick[], topLevelName?: string): Thenable<ChooseRClickItem> {
-        /* 
+        /*
         const w_choices: ChooseRClickItem[] = [];
         let w_index = 0;
         if (topLevelName) {
@@ -5177,7 +5176,7 @@ export class LeoUI extends NullGui {
      */
     public gotoScript(p_node: LeoButtonNode): Promise<boolean> {
         return Promise.resolve(true);
-        /* 
+        /*
         return this._isBusyTriggerSave(false)
             .then((p_saveResult) => {
                 return this.sendAction(
@@ -5468,7 +5467,7 @@ export class LeoUI extends NullGui {
                 },
                 Constants.USER_MESSAGES.YES,
                 Constants.USER_MESSAGES.NO
-                // Already shows a 'cancel' 
+                // Already shows a 'cancel'
             )
             .then((answer) => {
                 if (answer === Constants.USER_MESSAGES.YES) {
@@ -5487,7 +5486,7 @@ export class LeoUI extends NullGui {
         filetypes: [string, string][],
         defaultExtension: string,
         multiple?: boolean,
-        startpath?: string // TODO 
+        startpath?: string // TODO
     ): Thenable<string[] | string> {
         // convert to { [name: string]: string[] } typing
         const types: { [name: string]: string[] } = utils.convertLeoFiletypes(filetypes);
