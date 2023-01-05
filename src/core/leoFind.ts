@@ -511,10 +511,14 @@ export class LeoFind {
     public do_find_marked(flatten: boolean): boolean {
 
         const c = this.c;
+        const u = this.c.undoer;
+        const undoType = 'clone-find-marked';
 
         function isMarked(p: Position): boolean {
             return p.isMarked();
         }
+
+        u.beforeChangeGroup(c.p.copy(), undoType);
 
         const root: Position | undefined = c.cloneFindByPredicate(
             c.all_unique_positions.bind(c),
@@ -522,14 +526,16 @@ export class LeoFind {
             'No marked nodes',
             flatten,
             undefined,
-            'clone-find-marked',
+            undoType,
         );
 
         if (root) {
             // Unmarking all nodes is convenient.
-            for (let v of c.all_unique_nodes()) {
-                if (v.isMarked()) {
-                    v.clearMarked();
+            for (let p of c.all_unique_positions()) {
+                if (p.isMarked()) {
+                    const bunch = u.beforeMark(p, 'Unmark');
+                    c.clearMarked(p);
+                    u.afterMark(p, 'Unmark', bunch);
                 }
             }
             const n = root.numberOfChildren();
@@ -538,6 +544,7 @@ export class LeoFind {
             c.redraw(root);
 
         }
+        u.afterChangeGroup(c.p.copy(), undoType, true);
         return !!root && root.__bool__();
 
     }
