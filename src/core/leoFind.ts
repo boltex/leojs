@@ -513,17 +513,28 @@ export class LeoFind {
         const c = this.c;
         const u = this.c.undoer;
         const undoType = 'clone-find-marked';
+        const failMsg = 'No marked nodes';
 
+        let count = 0;
+        for (let p of c.all_unique_positions()) {
+            if (p.isMarked()) {
+                count += 1;
+            }
+        }
+        if (count === 0) {
+            g.es(failMsg); // prevent even creating an undo bead.
+            return false;
+        }
         function isMarked(p: Position): boolean {
             return p.isMarked();
         }
 
-        u.beforeChangeGroup(c.p.copy(), undoType);
+        u.beforeChangeGroup(c.p.copy(), undoType, false); // will create a bead.
 
         const root: Position | undefined = c.cloneFindByPredicate(
             c.all_unique_positions.bind(c),
             isMarked,
-            'No marked nodes',
+            failMsg,
             flatten,
             undefined,
             undoType,
@@ -544,7 +555,7 @@ export class LeoFind {
             c.redraw(root);
 
         }
-        u.afterChangeGroup(c.p.copy(), undoType, true);
+        u.afterChangeGroup(c.p.copy(), undoType);
         return !!root && root.__bool__();
 
     }
