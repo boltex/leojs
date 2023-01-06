@@ -101,7 +101,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
         }
 
         const w_leoNode = new LeoOutlineNode(
-            element.h,
+            { label: element.h, highlights: [[0, 0]] },
             w_collapse,
             element, // Position
             desc,
@@ -167,10 +167,10 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
 
                 if (w_uaLength === 1 && w_u.__node_tags && w_u.__node_tags.length) {
                     // list tags instead
-                    item.tooltip = item.label + "\n\u{1F3F7} " + w_u.__node_tags.join('\n\u{1F3F7} ');
+                    item.tooltip = item.label.label + "\n\u{1F3F7} " + w_u.__node_tags.join('\n\u{1F3F7} ');
 
                 } else {
-                    item.tooltip = item.label + "\n" +
+                    item.tooltip = item.label.label + "\n" +
                         JSON.stringify(w_u, undefined, 2);
                 }
 
@@ -178,7 +178,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             }
 
         }
-        item.tooltip = item.label; // * Fallsback to whole headline as tooltip
+        item.tooltip = item.label.label; // * Fallsback to whole headline as tooltip
         return item;
     }
 
@@ -187,7 +187,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
 export class LeoOutlineNode extends vscode.TreeItem {
 
     constructor(
-        public label: string, // Node headline
+        public label: vscode.TreeItemLabel, // Node headline
         public collapsibleState: vscode.TreeItemCollapsibleState,
         public position: Position, // Pointer/reference for leo's node position
         public description: string,

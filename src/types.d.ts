@@ -114,16 +114,6 @@ export interface BodyTimeInfo {
 }
 
 /**
- * * Object container for parameters of leoJs "apply-selected-node-to-body" method
- */
-export interface ShowBodyParam {
-    node: LeoOutlineNode,
-    aside: boolean,
-    showBodyKeepFocus: boolean,
-    force_open?: boolean
-}
-
-/**
  * * General state flags for UI representation and controls visibility.
  */
 export interface LeoPackageStates {

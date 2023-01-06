@@ -118,6 +118,9 @@ export class LeoUI extends NullGui {
     private _lastFindView: vscode.WebviewView | undefined;  // ? Maybe unused ?
     private _findNeedsFocus: boolean = false;
     private _lastSettingsUsed: LeoSearchSettings | undefined; // Last settings loaded / saved for current document
+    public findFocusTree = false;
+    public findHeadlineRange: [number, number] = [0, 0];
+    public findHeadlinePosition: Position | undefined;
 
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;

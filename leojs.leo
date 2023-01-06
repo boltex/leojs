@@ -354,7 +354,6 @@
 <v t="felix.20201214154816.4"><vh>ReqRefresh</vh></v>
 <v t="felix.20221009011653.1"><vh>CommandOptions</vh></v>
 <v t="felix.20211010221959.1"><vh>BodyTimeInfo</vh></v>
-<v t="felix.20201214154816.6"><vh>ShowBodyParam</vh></v>
 <v t="felix.20201214154816.7"><vh>LeoPackageStates</vh></v>
 <v t="felix.20201214154816.8"><vh>LeoDocument</vh></v>
 <v t="felix.20201214154816.9"><vh>LeoButton</vh></v>
@@ -1051,7 +1050,7 @@ public refreshTreeRoot(): void {
     }
 
     const w_leoNode = new LeoOutlineNode(
-        element.h,
+        { label: element.h, highlights: [[0, 0]] },
         w_collapse,
         element, // Position
         desc,
@@ -2821,17 +2820,6 @@ export interface ReqRefresh {
 }
 
 </t>
-<t tx="felix.20201214154816.6">/**
- * * Object container for parameters of leoJs "apply-selected-node-to-body" method
- */
-export interface ShowBodyParam {
-    node: LeoOutlineNode,
-    aside: boolean,
-    showBodyKeepFocus: boolean,
-    force_open?: boolean
-}
-
-</t>
 <t tx="felix.20201214154816.7">/**
  * * General state flags for UI representation and controls visibility.
  */
@@ -3092,6 +3080,9 @@ export class LeoUI extends NullGui {
     private _lastFindView: vscode.WebviewView | undefined;  // ? Maybe unused ?
     private _findNeedsFocus: boolean = false;
     private _lastSettingsUsed: LeoSearchSettings | undefined; // Last settings loaded / saved for current document
+    public findFocusTree = false;
+    public findHeadlineRange: [number, number] = [0, 0];
+    public findHeadlinePosition: Position | undefined;
 
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
@@ -7970,7 +7961,7 @@ private _refreshUndoPane(): void {
 <t tx="felix.20211201001847.1">export class LeoOutlineNode extends vscode.TreeItem {
 
     constructor(
-        public label: string, // Node headline
+        public label: vscode.TreeItemLabel, // Node headline
         public collapsibleState: vscode.TreeItemCollapsibleState,
         public position: Position, // Pointer/reference for leo's node position
         public description: string,
@@ -10540,10 +10531,10 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
 
             if (w_uaLength === 1 &amp;&amp; w_u.__node_tags &amp;&amp; w_u.__node_tags.length) {
                 // list tags instead
-                item.tooltip = item.label + "\n\u{1F3F7} " + w_u.__node_tags.join('\n\u{1F3F7} ');
+                item.tooltip = item.label.label + "\n\u{1F3F7} " + w_u.__node_tags.join('\n\u{1F3F7} ');
 
             } else {
-                item.tooltip = item.label + "\n" +
+                item.tooltip = item.label.label + "\n" +
                     JSON.stringify(w_u, undefined, 2);
             }
 
@@ -10551,7 +10542,7 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
         }
 
     }
-    item.tooltip = item.label; // * Fallsback to whole headline as tooltip
+    item.tooltip = item.label.label; // * Fallsback to whole headline as tooltip
     return item;
 }
 
