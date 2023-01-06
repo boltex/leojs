@@ -564,7 +564,10 @@ export class Undoer {
      * Create an undo node for general tree operations using d created by
      * beforeChangeGroup
      */
-    public afterChangeGroup(p: Position, undoType: string, reportFlag?: boolean): void {
+    public afterChangeGroup(
+        p: Position,
+        undoType: string
+    ): void {
         const u: Undoer = this;
         const c: Commands = this.c;
 
@@ -595,9 +598,6 @@ export class Undoer {
         bunch.newP = p.copy();
 
         bunch.newSel = w.getSelectionRange();
-
-        // Tells whether to report the number of separate changes undone/redone.
-        bunch.reportFlag = reportFlag;
 
         // if 0:
         //     // Push the bunch.

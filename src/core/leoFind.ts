@@ -372,7 +372,7 @@ export class LeoFind {
             }
 
         }
-        u.afterChangeGroup(p1, undoType, true);
+        u.afterChangeGroup(p1, undoType);
 
         if (!g.unitTesting) {
             g.es(`${count}: ${find_text} => ${change_text}`);
@@ -1403,7 +1403,7 @@ export class LeoFind {
         this.node_only = false;
         this.suboutline_only = false;
         p = c.p;
-        u.afterChangeGroup(p, undoType, true);
+        u.afterChangeGroup(p, undoType);
         const t2 = g.process_time();
         if (!g.unitTesting) {
             g.es_print(

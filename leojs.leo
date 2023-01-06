@@ -9798,6 +9798,11 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;any&gt
     //             "newpos": newpos, "focus": focus}
     found = p &amp;&amp; p.__bool__();
 
+    // 
+    this.findFocusTree = false;
+    this.findHeadlineRange = [0, 0];
+    this.findHeadlinePosition = undefined;
+
     if (!found || !focus) {
         vscode.window.showInformationMessage('Not found');
     } else {
@@ -9807,6 +9812,12 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;any&gt
             // tree
             w_finalFocus = Focus.Outline;
             this.showOutlineIfClosed = true;
+            // 
+            this.findFocusTree = true;
+            this.findHeadlineRange = [0, 0];
+            console.log('Focus widget w: ', w);
+
+            this.findHeadlinePosition = c.p;
 
         } else {
             this.showBodyIfClosed = true;
@@ -12689,9 +12700,21 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
 
     // * from leoserver
     if (in_headline) {
-        g.app.gui.set_focus(c, { _name: 'tree' });
+        // edit_widget(p)
+        // c.frame.edit_widget(p);
+        console.log('try to set');
+        try {
+
+            g.app.gui.set_focus(c, c.frame.tree.edit_widget(p));
+        }
+        catch (e) {
+            console.log('oops!', e);
+
+        }
+        // g.app.gui.set_focus(c, { _name: 'tree' });
     }
 
+    // edit_widget
     // ? needed ?
 
     // trace = False and not g.unitTesting
