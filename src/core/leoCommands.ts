@@ -22,6 +22,7 @@ import { LeoFind } from './leoFind';
 import { LeoImportCommands } from './leoImport';
 import { ChapterController } from './leoChapters';
 import { EditCommandsClass, TopLevelEditCommands } from '../commands/editCommands';
+import { GoToCommands } from '../commands/gotoCommands';
 import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
 
@@ -214,13 +215,12 @@ export class Commands {
     public debugCommands: any = undefined;
     public editFileCommands: any = undefined;
     public evalController: any = undefined;
-    public gotoCommands: any = undefined;
+    public gotoCommands: GoToCommands;
     public helpCommands: any = undefined;
     public keyHandler: any = undefined; // TODO same as k
     public k: any = undefined; // TODO same as keyHandler
     public keyHandlerCommands: any = undefined;
     public killBufferCommands: any = undefined;
-    public leoCommands: any = undefined;
     public macroCommands: any = undefined;
     public miniBufferWidget: any = undefined;
     public printingController: any = undefined;
@@ -228,7 +228,6 @@ export class Commands {
     public rectangleCommands: any = undefined;
     public searchCommands: any = undefined;
     public spellCommands: any = undefined;
-    public leoTestManager: any = undefined;
     public vimCommands: any = undefined;
 
     public config!: LocalConfigManager; // Set in constructor indirectly
@@ -280,6 +279,7 @@ export class Commands {
         this.importCommands = new LeoImportCommands(c);
 
         this.editCommands = new EditCommandsClass(c);
+        this.gotoCommands = new GoToCommands(c);
         this.undoer = new Undoer(c);
 
         // From finishCreate
@@ -2896,7 +2896,7 @@ export class Commands {
         // console.log("TODO: recolor");
     }
     //@+node:felix.20221027153010.1: *5* c.widget_name
-    public widget_name(widget: any): string {
+    public widget_name(widget: StringTextWrapper): string {
         // c = self
         return g.app.gui ? g.app.gui.widget_name(widget) : '<no widget>';
     }
@@ -3096,7 +3096,7 @@ export class Commands {
 
     //@+node:felix.20221026210523.1: *4* c.Focus
     //@+node:felix.20221026210523.2: *5* c.get/request/set_focus
-    public get_focus(): any {
+    public get_focus(): StringTextWrapper {
         const c = this;
         const w = g.app.gui && g.app.gui.get_focus(c);
         if (g.app.debug.includes('focus')) {
@@ -3119,7 +3119,7 @@ export class Commands {
         if (w && g.app.gui) {
             if (g.app.debug.includes('focus')) {
                 // g.trace('\n(c)', repr(w))
-                const name = w['objectName'];  // ?w['objectName'] : MyClass.name
+                const name = w['name'];  // ?w['objectName'] : MyClass.name
                 g.trace('(c)', name);
             }
 
@@ -3127,12 +3127,12 @@ export class Commands {
         }
     }
 
-    public set_focus(w: any): void {
+    public set_focus(w: StringTextWrapper): void {
         const trace = g.app.debug.includes('focus');
         const c = this;
         if (w && g.app.gui) {
             if (trace) {
-                const name = w['objectName'];
+                const name = w['name'];
                 // name = w.objectName(
                 //     ) if hasattr(w, 'objectName') else w.__class__.__name__
                 g.trace('(c)', name);
@@ -3154,7 +3154,7 @@ export class Commands {
         // pass
     }
     //@+node:felix.20221026210523.4: *5* c.traceFocus (not used)
-    public traceFocus(w: any): void {
+    public traceFocus(w: StringTextWrapper): void {
         const c = this;
         if (g.app.debug.includes('focus')) {
             c.trace_focus_count += 1;

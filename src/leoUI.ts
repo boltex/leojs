@@ -80,6 +80,7 @@ export class LeoUI extends NullGui {
     public finalFocus: Focus = Focus.NoChange; // Set in _setupRefresh : Last command issued had focus on outline, as opposed to the body
     public showBodyIfClosed: boolean = false;
     public showOutlineIfClosed: boolean = false;
+    public refreshPreserveRange = false; // this makes the next refresh cycle preserve the "findFocusTree" flag once.
 
     private __refreshNode: Position | undefined; // Set in _setupRefresh : Last command issued a specific node to reveal
     private _lastRefreshNodeTS: number = 0;
@@ -1314,7 +1315,11 @@ export class LeoUI extends NullGui {
      * @param p_finalFocus Flag for focus to be placed in outline
      * @param p_refreshType Refresh flags for each UI part
     */
-    public setupRefresh(p_finalFocus: Focus, p_refreshType: ReqRefresh): void {
+    public setupRefresh(p_finalFocus: Focus, p_refreshType: ReqRefresh, p_preserveRange?: boolean): void {
+        if (p_preserveRange) {
+            // Lets the 
+            this.refreshPreserveRange = true; // Will be cleared after a refresh cycle.
+        }
         // Set final "focus-placement" EITHER true or false
         this.finalFocus = p_finalFocus;
         // Set all properties WITHOUT clearing others.
@@ -1325,6 +1330,17 @@ export class LeoUI extends NullGui {
      * * Launches refresh for UI components and context states (Debounced)
      */
     public async _launchRefresh(): Promise<unknown> {
+        if (!this.refreshPreserveRange) {
+            if (this.findFocusTree) {
+                // had a range but now refresh from other than find/replace
+                // So make sure tree is also refreshed.
+                this._refreshType.tree = true;
+            }
+            // Clear no matter what.
+            this.findFocusTree = false;
+        } else {
+            this.refreshPreserveRange = false; // preserved once, now cleared.
+        }
 
         // check states for having at least a document opened
         if (this.leoStates.leoReady && this.leoStates.fileOpenedReady) {
@@ -2213,7 +2229,7 @@ export class LeoUI extends NullGui {
         const w_openedDocument = await vscode.workspace.openTextDocument(this.bodyUri);
 
         this._bodyTextDocument = w_openedDocument;
-        let w_bodySelection: BodySelectionInfo | undefined;
+        let w_bodySel: BodySelectionInfo | undefined;
         // * Set document language along with the proper cursor position, selection range and scrolling position
         if (!this._needLastSelectedRefresh) {
 
@@ -2244,17 +2260,20 @@ export class LeoUI extends NullGui {
                 return { "line": line, "col": col, "index": i };
             };
 
-            w_bodySelection = {
+            w_bodySel = {
                 "gnx": p.v.gnx,
                 "scroll": scroll,
                 "insert": row_col_pv_dict(insert, p.v.b),
                 "start": row_col_pv_dict(start, p.v.b),
                 "end": row_col_pv_dict(end, p.v.b)
             };
+            console.log('From p:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
+
 
             // ! -------------------------------
             // ! TEST SELECTION GETTER OVERRIDE!
             // ! -------------------------------
+            const wrapper = c.frame.body.wrapper;
             function row_col_wrapper_dict(i: number): { "line": number, "col": number, "index": number } {
                 if (!i) {
                     i = 0; // prevent none type
@@ -2263,18 +2282,18 @@ export class LeoUI extends NullGui {
                 [line, col] = wrapper.toPythonIndexRowCol(i);
                 return { "line": line, "col": col, "index": i };
             }
-            const wrapper = c.frame.body.wrapper;
             const test_insert = wrapper.getInsertPoint();
             let test_start, test_end;
             [test_start, test_end] = wrapper.getSelectionRange(true);
             // ! OVERRIDE !
-            w_bodySelection = {
+            w_bodySel = {
                 "gnx": p.v.gnx,
                 "scroll": scroll,
                 "insert": row_col_wrapper_dict(test_insert),
                 "start": row_col_wrapper_dict(test_start),
                 "end": row_col_wrapper_dict(test_end)
             };
+            console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
 
             // TODO : Apply tabwidth
             // console.log('TABWIDTH: ', w_tabWidth);
@@ -2411,11 +2430,11 @@ export class LeoUI extends NullGui {
 
                     // * Set text selection range
                     const w_bodyTextEditor = p_textEditor;
-                    if (!w_bodySelection) {
+                    if (!w_bodySel) {
                         console.log("no selection in returned package from get_body_states");
                     }
 
-                    const w_leoBodySel: BodySelectionInfo = w_bodySelection!;
+                    const w_leoBodySel: BodySelectionInfo = w_bodySel!;
 
                     // * CHECK ALL 3 POSSIBLE NEW PLACES FOR BODY SWITCH AFTER q_bodyStates & q_showTextDocument
                     if (
@@ -2458,6 +2477,11 @@ export class LeoUI extends NullGui {
 
                     if (w_bodyTextEditor) {
                         // this._revealType = RevealType.NoReveal; // ! IN CASE THIS WAS STILL UP FROM SHOW_OUTLINE
+
+                        console.log(
+                            'Setting selection! anchor: ', w_selection.anchor.line, w_selection.anchor.character,
+                            ' active: ', w_selection.active.line, w_selection.active.character
+                        );
 
                         w_bodyTextEditor.selection = w_selection; // set cursor insertion point & selection range
                         if (!w_scrollRange) {
@@ -2679,7 +2703,7 @@ export class LeoUI extends NullGui {
             this.commandRefreshTimer = this.lastCommandTimer;
         }
 
-        await this.triggerBodySave();
+        await this.triggerBodySave(true);
 
         if (p_options.isNavigation) {
             // If any navigation command is used from outline or command palette: show body.
@@ -2764,7 +2788,7 @@ export class LeoUI extends NullGui {
      */
     public async minibuffer(): Promise<unknown> {
 
-        await this.triggerBodySave(false);
+        await this.triggerBodySave(true);
         const c = g.app.windowList[this.frameIndex].c;
         const commands: vscode.QuickPickItem[] = [];
         for (let key in c.commandsDict) {
@@ -2840,7 +2864,7 @@ export class LeoUI extends NullGui {
     public async minibufferHistory(): Promise<unknown> {
 
         // Wait for _isBusyTriggerSave resolve because the full body save may change available commands
-        await this.triggerBodySave(false);
+        await this.triggerBodySave(true);
         if (!this._minibufferHistory.length) {
             return Promise.resolve(undefined);
         }
@@ -3134,7 +3158,7 @@ export class LeoUI extends NullGui {
      * Mimic vscode's CTRL+P to find any position by it's headline
      */
     public async goAnywhere(): Promise<unknown> {
-        await this.triggerBodySave(false);
+        await this.triggerBodySave(true);
 
         const allPositions: { label: string; description?: string; position?: Position; }[] = [];
         // Options for date to look like : Saturday, September 17, 2016
@@ -3297,7 +3321,7 @@ export class LeoUI extends NullGui {
      */
     public async gotoNavEntry(p_node: LeoGotoNode): Promise<unknown> {
 
-        await this.triggerBodySave(false);
+        await this.triggerBodySave(true);
         this._leoGotoProvider.resetSelectedNode(p_node); // Inform controller of last index chosen
         const c = g.app.windowList[this.frameIndex].c;
         const scon: QuickSearchController = c.quicksearchController;
@@ -3400,7 +3424,7 @@ export class LeoUI extends NullGui {
      * * Handles an enter press in the 'nav pattern' input
      */
     public async navEnter(): Promise<unknown> {
-        await this.triggerBodySave(false);
+        await this.triggerBodySave(true);
         const c = g.app.windowList[this.frameIndex].c;
         const scon: QuickSearchController = c.quicksearchController;
 
@@ -3421,7 +3445,7 @@ export class LeoUI extends NullGui {
      */
     public async navTextChange(): Promise<unknown> {
 
-        await this.triggerBodySave(false);
+        await this.triggerBodySave(true);
         const c = g.app.windowList[this.frameIndex].c;
         const scon: QuickSearchController = c.quicksearchController;
 
@@ -3522,12 +3546,11 @@ export class LeoUI extends NullGui {
      * @param p_reverse
      * @returns Promise that resolves when the "launch refresh" is started
      */
-    public async find(p_fromOutline: boolean, p_reverse: boolean): Promise<any> {
+    public async find(p_fromOutline: boolean, p_reverse: boolean): Promise<unknown> {
 
-        await this.triggerBodySave(false);
+        await this.triggerBodySave(true);
         let found;
         let focus;
-        let node;
 
         const c = g.app.windowList[this.frameIndex].c;
         const fc = c.findCommands;
@@ -3535,70 +3558,37 @@ export class LeoUI extends NullGui {
 
         const fromOutline = p_fromOutline;
         const fromBody = !fromOutline;
-        //
+
         let w = this.get_focus(c);
         focus = this.widget_name(w);
 
         const inOutline = (focus.includes("tree")) || (focus.includes("head"));
         const inBody = !inOutline;
-        //
 
-        let pos;
-        let newpos;
-        let settings;
+        if (fromOutline && inBody) {
+            fc.in_headline = true;
+        } else if (fromBody && inOutline) {
+            fc.in_headline = false;
+            c.bodyWantsFocus();
+            c.bodyWantsFocusNow();
+        }
 
+        let pos, newpos, settings;
+        settings = fc.ftm.get_settings();
         if (p_reverse) {
-            // * Find Previous
-            if (fromOutline && inBody) {
-                fc.in_headline = true;
-            } else if (fromBody && inOutline) {
-                fc.in_headline = false;
-                // w = c.frame.body.wrapper
-                c.bodyWantsFocus();
-                c.bodyWantsFocusNow();
-            }
-            //
-            if (fc.in_headline) {
-                const gui_w = c.edit_widget(p) as StringTextWrapper;
-                gui_w.setSelectionRange(0, 0, 0);
-            }
-            settings = fc.ftm.get_settings();
             [p, pos, newpos] = fc.do_find_prev(settings);
         } else {
-            // * Find Next
-            if (fromOutline && inBody) {
-                fc.in_headline = true;
-            } else if (fromBody && inOutline) {
-                fc.in_headline = false;
-                c.bodyWantsFocus();
-                c.bodyWantsFocusNow();
-            }
-            //
-            if (fc.in_headline) {
-                const ins = p.h.length;
-                const gui_w = c.edit_widget(p) as StringTextWrapper;
-                gui_w.setSelectionRange(ins, ins, ins);
-            }
-            // Let cursor as-is
-            settings = fc.ftm.get_settings();
             [p, pos, newpos] = fc.do_find_next(settings);
         }
 
-        // get focus again after the operation
-        w = this.get_focus(c);
+        w = this.get_focus(c); // get focus again after the operation
         focus = this.widget_name(w);
-
-        // result = {"found": bool(p), "pos": pos,
-        //             "newpos": newpos, "focus": focus}
         found = p && p.__bool__();
 
-        // 
-        this.findFocusTree = false;
-        this.findHeadlineRange = [0, 0];
-        this.findHeadlinePosition = undefined;
+        this.findFocusTree = false; // Reset flag for headline range
 
         if (!found || !focus) {
-            vscode.window.showInformationMessage('Not found');
+            return vscode.window.showInformationMessage('Not found');
         } else {
             let w_finalFocus = Focus.Body;
             const w_focus = focus.toLowerCase();
@@ -3606,13 +3596,10 @@ export class LeoUI extends NullGui {
                 // tree
                 w_finalFocus = Focus.Outline;
                 this.showOutlineIfClosed = true;
-                // 
+                // * SETUP HEADLINE RANGE
                 this.findFocusTree = true;
-                this.findHeadlineRange = [0, 0];
-                console.log('Focus widget w: ', w);
-
+                this.findHeadlineRange = [w.sel[0], w.sel[1]];
                 this.findHeadlinePosition = c.p;
-
             } else {
                 this.showBodyIfClosed = true;
             }
@@ -3625,9 +3612,10 @@ export class LeoUI extends NullGui {
                     // documents: false,
                     // buttons: false,
                     states: true,
-                }
+                },
+                this.findFocusTree
             );
-            this.launchRefresh();
+            return this.launchRefresh();
         }
     }
 
@@ -3636,10 +3624,10 @@ export class LeoUI extends NullGui {
      * @param p_def find-def instead of find-var
      * @returns Promise that resolves when the "launch refresh" is started
      */
-    public async findSymbol(p_def: boolean): Promise<any> {
+    public async findSymbol(p_def: boolean): Promise<unknown> {
 
         // This sets the selection on a word in the body pane. (needs selection on a symbol word in vscode word)
-        await this.triggerBodySave(false);
+        await this.triggerBodySave(true);
 
         const c = g.app.windowList[this.frameIndex].c;
         const fc = c.findCommands;
@@ -3655,7 +3643,7 @@ export class LeoUI extends NullGui {
         const focus = this._get_focus();
 
         if (!found || !focus) {
-            vscode.window.showInformationMessage('Not found');
+            return vscode.window.showInformationMessage('Not found');
         } else {
             let w_finalFocus = Focus.Body;
             const w_focus = focus.toLowerCase();
@@ -3674,7 +3662,7 @@ export class LeoUI extends NullGui {
                     // buttons: false,
                     states: true,
                 });
-            this.launchRefresh();
+            return this.launchRefresh();
         }
 
     }
@@ -3687,44 +3675,85 @@ export class LeoUI extends NullGui {
      */
     public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise<unknown> {
 
-        await this.triggerBodySave(false);
+        await this.triggerBodySave(true);
+        let found;
+        let focus;
 
         const c = g.app.windowList[this.frameIndex].c;
         const fc = c.findCommands;
 
-        let found = false;
+        const fromOutline = p_fromOutline;
+        const fromBody = !fromOutline;
+
+        let w = this.get_focus(c);
+        focus = this.widget_name(w);
+
+        const inOutline = (focus.includes("tree")) || (focus.includes("head"));
+        const inBody = !inOutline;
+
+        if (fromOutline && inBody) {
+            fc.in_headline = true;
+        } else if (fromBody && inOutline) {
+            fc.in_headline = false;
+            c.bodyWantsFocus();
+            c.bodyWantsFocusNow();
+        }
+
+        console.log('focus BEFORE replace:', focus);
+
+        found = false;
         if (p_thenFind) {
             const settings = fc.ftm.get_settings();
             found = fc.do_change_then_find(settings);
+            // if (fc.change_selection(c.p)) {
+            //     fc.do_find_next(settings);
+            // }
+            // found = true;
+
         } else {
             // const settings = fc.ftm.get_settings();
-            fc.change();
+            // fc.change();
+            fc.change_selection(c.p);
             found = true;
         }
 
-        const focus = this._get_focus();
+        w = this.get_focus(c); // get focus again after the operation
+        focus = this.widget_name(w);
+
+        this.findFocusTree = false; // Reset flag for headline range
+
+        console.log('focus AFTER replace:', focus);
 
         if (!found || !focus) {
-            return vscode.window.showInformationMessage('Not found');
+            vscode.window.showInformationMessage('Not found');
         } else {
             let w_finalFocus = Focus.Body;
             const w_focus = focus.toLowerCase();
             if (w_focus.includes('tree') || w_focus.includes('head')) {
                 // tree
                 w_finalFocus = Focus.Outline;
+                this.showOutlineIfClosed = true;
+                // * SETUP HEADLINE RANGE
+                this.findFocusTree = true;
+                this.findHeadlineRange = [w.sel[0], w.sel[1]];
+                this.findHeadlinePosition = c.p;
+            } else {
+                this.showBodyIfClosed = true;
             }
             this.setupRefresh(
-                w_finalFocus,
+                w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
                 {
-                    tree: true,
+                    tree: true, // HAVE to refresh tree because find folds/unfolds only result outline paths
                     body: true,
-                    scroll: true,
+                    scroll: found && w_finalFocus === Focus.Body,
                     // documents: false,
                     // buttons: false,
                     states: true,
-                }
+                },
+                this.findFocusTree
             );
             return this.launchRefresh();
+
         }
 
     }
@@ -3738,7 +3767,7 @@ export class LeoUI extends NullGui {
         let w_searchString: string = this._lastSettingsUsed!.findText;
         let w_replaceString: string = this._lastSettingsUsed!.replaceText;
 
-        return this.triggerBodySave(false)
+        return this.triggerBodySave(true)
             .then((p_saveResult) => {
                 return this._inputFindPattern()
                     .then((p_findString) => {
@@ -3847,7 +3876,7 @@ export class LeoUI extends NullGui {
             });
         }
 
-        return this.triggerBodySave(false)
+        return this.triggerBodySave(true)
             .then(() => {
                 return this._inputFindPattern()
                     .then((p_findString) => {
@@ -4115,7 +4144,7 @@ export class LeoUI extends NullGui {
      */
     public gotoGlobalLine(): void {
 
-        this.triggerBodySave(false)
+        this.triggerBodySave(true)
             .then(() => {
                 return vscode.window.showInputBox({
                     title: Constants.USER_MESSAGES.TITLE_GOTO_GLOBAL_LINE,
@@ -4157,7 +4186,7 @@ export class LeoUI extends NullGui {
      */
     public tagChildren(): void {
 
-        this.triggerBodySave(false)
+        this.triggerBodySave(true)
             .then(() => {
                 return vscode.window.showInputBox({
                     title: Constants.USER_MESSAGES.TITLE_TAG_CHILDREN,
@@ -4199,7 +4228,7 @@ export class LeoUI extends NullGui {
      */
     public tagNode(): void {
 
-        this.triggerBodySave(false)
+        this.triggerBodySave(true)
             .then(() => {
                 return vscode.window.showInputBox({
                     title: Constants.USER_MESSAGES.TITLE_TAG_NODE,
@@ -4245,7 +4274,7 @@ export class LeoUI extends NullGui {
 
         if (this.lastSelectedNode && this.lastSelectedNode.u &&
             this.lastSelectedNode.u.__node_tags && this.lastSelectedNode.u.__node_tags.length) {
-            this.triggerBodySave(false)
+            this.triggerBodySave(true)
                 .then(() => {
                     return vscode.window.showQuickPick(this.lastSelectedNode!.u.__node_tags, {
                         title: Constants.USER_MESSAGES.TITLE_REMOVE_TAG,
@@ -4293,7 +4322,7 @@ export class LeoUI extends NullGui {
 
         if (this.lastSelectedNode && this.lastSelectedNode.u &&
             this.lastSelectedNode.u.__node_tags && this.lastSelectedNode.u.__node_tags.length) {
-            this.triggerBodySave(false)
+            this.triggerBodySave(true)
                 .then(() => {
                     const c = g.app.windowList[this.frameIndex].c;
                     const p = c.p;
@@ -4331,7 +4360,7 @@ export class LeoUI extends NullGui {
     public cloneFindTag(): void {
         vscode.window.showInformationMessage("TODO: cloneFindTag");
 
-        this.triggerBodySave(false)
+        this.triggerBodySave(true)
             .then(() => {
                 return vscode.window.showInputBox({
                     title: Constants.USER_MESSAGES.TITLE_FIND_TAG,
@@ -4404,7 +4433,7 @@ export class LeoUI extends NullGui {
                 await g.app.loadManager.openEmptyLeoFile(this);
             }
         } else {
-            await this.triggerBodySave();
+            await this.triggerBodySave(true);
             const c = g.app.windowList[this.frameIndex].c;
             c.new(this);
         }
@@ -4418,7 +4447,7 @@ export class LeoUI extends NullGui {
     */
     public async closeLeoFile(): Promise<unknown> {
 
-        await this.triggerBodySave();
+        await this.triggerBodySave(true);
 
         this.setupRefresh(Focus.Body, {
             tree: true,
@@ -4486,7 +4515,7 @@ export class LeoUI extends NullGui {
                 }
             }
         } else {
-            await this.triggerBodySave();
+            await this.triggerBodySave(true);
             const c = g.app.windowList[this.frameIndex].c;
             await c.open_outline(p_uri);
             this.setupRefresh(this.finalFocus, {
@@ -4521,7 +4550,7 @@ export class LeoUI extends NullGui {
      * @returns a promise from saving the file results.
      */
     public async saveAsLeoFile(p_fromOutline?: boolean): Promise<unknown> {
-        await this.triggerBodySave();
+        await this.triggerBodySave(true);
 
         const c = g.app.windowList[this.frameIndex].c;
 
@@ -4545,7 +4574,7 @@ export class LeoUI extends NullGui {
      * @returns a promise from saving the file results.
      */
     public async saveAsLeoJsFile(p_fromOutline?: boolean): Promise<unknown> {
-        await this.triggerBodySave();
+        await this.triggerBodySave(true);
 
         const c = g.app.windowList[this.frameIndex].c;
 
@@ -4569,7 +4598,7 @@ export class LeoUI extends NullGui {
      * @returns Promise that resolves when the save command is done
      */
     public async saveLeoFile(p_fromOutline?: boolean): Promise<unknown> {
-        await this.triggerBodySave();
+        await this.triggerBodySave(true);
 
         const c = g.app.windowList[this.frameIndex].c;
 
@@ -5387,16 +5416,16 @@ export class LeoUI extends NullGui {
         return this.config.setLeojsSettings(w_changes);
     }
 
-    public widget_name(w: any): string {
+    public widget_name(w: StringTextWrapper): string {
         let name: string;
         if (!w) {
             name = '<no widget>';
         } else if (w['getName']) {
             name = w.getName();
-        } else if (w['objectName']) {
-            name = w.objectName();
-        } else if (w['_name']) {
-            name = w._name;
+            // } else if (w['objectName']) {
+            //     name = w.objectName();
+            // } else if (w['_name']) {
+            //     name = w._name;
         } else {
             name = w.toString();
         }
@@ -5407,8 +5436,10 @@ export class LeoUI extends NullGui {
         this.focusWidget = widget;
     }
 
-    public get_focus(c: Commands): any {
-        return this.focusWidget;
+    public get_focus(c?: Commands): StringTextWrapper {
+        console.log("get_focus in leoUI.ts", this.focusWidget?.name);
+
+        return this.focusWidget!;
     }
 
     /**

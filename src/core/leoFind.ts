@@ -2439,7 +2439,6 @@ export class LeoFind {
                 p.moveToThreadNext();
             } else if (this._cfa_find_next_match(p)) {
                 count = count + 1;
-                console.log('got one');
 
                 if (flatten) {
                     if (!skip.includes(p.v)) {
@@ -2577,11 +2576,14 @@ export class LeoFind {
         const u = this.c.undoer;
         const wrapper = c.frame.body && c.frame.body.wrapper;
         let gui_w = this.in_headline ? c.edit_widget(p) : wrapper;
+
         if (!gui_w) {
             this.in_headline = false;
             gui_w = wrapper;
         }
         if (!gui_w) {
+            console.log('NO WIDGET AT ALL IN REPLACE!');
+
             return false;
         }
         const sel: [number, number] = gui_w.getSelectionRange();
@@ -2599,6 +2601,7 @@ export class LeoFind {
         const bunch = u.beforeChangeBody(p);
         [start, end] = oldSel;
         let change_text = this.change_text;
+
         // Perform regex substitutions of \1, \2, ...\9 in the change text.
         if (this.pattern_match && this.match_obj) {
             const groups = this.match_obj;
@@ -2607,6 +2610,7 @@ export class LeoFind {
             }
         }
         change_text = this.replace_back_slashes(change_text);
+
         // Update both the gui widget and the work "widget"
         const new_ins = this.reverse ? start : start + change_text.length;
         if (start !== end) {
@@ -2616,34 +2620,20 @@ export class LeoFind {
         gui_w.setInsertPoint(new_ins);
         this.work_s = gui_w.getAllText();  // #2220.
         this.work_sel = [new_ins, new_ins, new_ins];
+
         // Update the selection for the next match.
         gui_w.setSelectionRange(start, start + change_text.length);
         c.widgetWantsFocus(gui_w);
+
         // No redraws here: they would destroy the headline selection.
         if (this.mark_changes) {
             p.setMarked();
             p.setDirty();
         }
+
         if (this.in_headline) {
             // #2220: Let onHeadChanged handle undo, etc.
-            // c.frame.tree.onHeadChanged(p, 'Change Headline'); // TODO: Replace with normal undo
-            const s = wrapper.getAllText();
-            const changed = s !== p.h;
-            if (changed) {
-                // Handle undo.
-                const undoData = u.beforeChangeHeadline(p);
-                p.initHeadString(s); // change p.h *after* calling undoer's before method.
-                if (!c.changed) {
-                    c.setChanged();
-                }
-                // New in Leo 4.4.5: we must recolor the body because
-                // the headline may contain directives.
-                // ? NEEDED ?
-                // c.frame.scanForTabWidth(p);
-                // c.frame.body.recolor(p);
-                p.setDirty();
-                u.afterChangeHeadline(p, 'Change Headline', undoData);
-            }
+            c.frame.tree.onHeadChanged(p, 'Change Headline');
 
             // gui_w will change after a redraw.
             gui_w = c.edit_widget(p);
@@ -3461,7 +3451,7 @@ export class LeoFind {
     /**
      * Preload the find pattern from the selected text of widget w.
      */
-    public preload_find_pattern(w: any): void {
+    public preload_find_pattern(w: StringTextWrapper): void {
 
         const c = this.c;
         const ftm = this.ftm;

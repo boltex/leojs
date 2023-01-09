@@ -9,7 +9,6 @@ import * as g from './leoGlobals';
 import { LeoGui } from './leoGui';
 import { Commands } from "./leoCommands";
 import { Position, VNode } from './leoNodes';
-import { FileCommands } from './leoFileCommands';
 import { Chapter } from './leoChapters';
 import { StringFindTabManager } from './findTabManager';
 
@@ -32,17 +31,6 @@ export class LeoFrame {
     public startupWindow: boolean;
     public log: any; // ! UNUSED !
     public tree: NullTree;
-    // public tree: {
-    //     canvas: any;
-    //     generation: number;
-    //     edit_widget: (p: Position) => any;
-    //     editLabel: (
-    //         p: Position,
-    //         selectAll?: boolean,
-    //         selection?: any
-    //     ) => void;
-    //     treeWidget: any;
-    // };
     public body: NullBody;
     public tab_width: number = 0;
 
@@ -60,32 +48,7 @@ export class LeoFrame {
         this.isNullFrame = true;
 
         this.tree = new NullTree(this);
-        // this.tree = {
-        //     canvas: undefined,
-        //     generation: 0,
-        //     edit_widget: (p: Position) => { return undefined; },
-        //     editLabel: (p: Position, selectAll?: boolean, selection?: any) => {
-        //         console.log(
-        //             'TODO: editLabel not used in leojs. From c.frame.tree.editLabel'
-        //         );
-        //     },
-        //     treeWidget: {}
-        // };
-
         this.body = new NullBody(this);
-        // this.body = {
-        //     wrapper: {
-        //         setAllText: (s: string) => {
-        //             console.log('TODO: setAllText of c.frame.body.wrapper');
-        //         },
-        //         setSelectionRange: (startSel: number, endSel: number, insert: number) => {
-        //             console.log(" TODO : setSelectionRange");
-        //         },
-        //         setYScrollPosition: (scroll: number) => {
-        //             console.log(" TODO : setYScrollPosition");
-        //         }
-        //     }
-        // };
     }
     //@+node:felix.20221109233352.1: *3* createFirstTreeNode
     public createFirstTreeNode(): void {
@@ -627,14 +590,15 @@ export class NullTree {
             unselect = true;
         }
 
-        // Actually unselect the old node. UNUSED IN LEOJS
-        // if unselect && old_p && old_p != p:
-        //     self.endEditLabel()
-        //     // #1168: Ctrl-minus selects multiple nodes.
-        //     if hasattr(self, 'unselectItem'):
-        //         // pylint: disable=no-member
-        //         self.unselectItem(old_p)
-
+        // Actually unselect the old node. 
+        if (unselect && old_p && old_p.__bool__() && !old_p.__eq__(p)) {
+            this.endEditLabel();
+            // #1168: Ctrl-minus selects multiple nodes.
+            // UNUSED IN LEOJS
+            // if hasattr(this, 'unselectItem')
+            //     // pylint: disable=no-member
+            //     this.unselectItem(old_p)
+        }
         if (call_event_handlers) {
             g.doHook("unselect2", { c: c, new_p: p, old_p: old_p, new_v: p, old_v: old_p });
         }

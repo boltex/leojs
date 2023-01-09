@@ -4,6 +4,7 @@
 //@+<< imports >>
 //@+node:felix.20210127001502.1: ** << imports >>
 import * as g from './leoGlobals';
+import * as utils from "../utils";
 import { Commands } from './leoCommands';
 import { Bead } from './leoUndo';
 import { FileCommands } from './leoFileCommands';
@@ -3252,41 +3253,40 @@ export class VNode {
      * Restore the cursor position and scroll so it is visible.
      */
     public restoreCursorAndScroll(): void {
-        // TODO
-        /*
-        const traceTime:boolean = false && !g.unitTesting;
-        const v:VNode = this;
-        let ins:number = v.insertSpot;
+
+        const traceTime: boolean = false && !g.unitTesting;
+        const v: VNode = this;
+        let ins: number = v.insertSpot;
         // start, n = v.selectionStart, v.selectionLength
-        const spot:number = v.scrollBarSpot;
+        const spot: number = v.scrollBarSpot;
         const body: any = this.context.frame.body;
-        const w:any = body.wrapper;
+        const w: any = body.wrapper;
         // Fix bug 981849: incorrect body content shown.
-        if(ins===undefined){
-           ins = 0;
+        if (ins === undefined) {
+            ins = 0;
         }
         // This is very expensive for large text.
-        let t1:number;
-        if (traceTime){
-           t1 = time.time();
+        let t1: [number, number];
+        if (traceTime) {
+            t1 = process.hrtime();
         }
-        if(body.wrapper.setInsertPoint && body.wrapper.setInsertPoint!==undefined){
+        if (body.wrapper.setInsertPoint && body.wrapper.setInsertPoint !== undefined) {
             w.setInsertPoint(ins);
         }
-        if (traceTime){
-            const delta_t:number = time.time() - t1;
-            if(delta_t > 0.1){
+        if (traceTime) {
+            const delta_t: number = utils.getDurationMs(t1!, process.hrtime()); //  time.time() - t1;
+            if (delta_t > 0.1) {
                 g.trace(`${delta_t} sec`);
             }
         }
         // Override any changes to the scrollbar setting that might
         // have been done above by w.setSelectionRange or w.setInsertPoint.
-        if (spot !== undefined){
+        if (spot !== undefined) {
             w.setYScrollPosition(spot);
             v.scrollBarSpot = spot;
         }
         // Never call w.see here.
-        */
+
     }
 
     //@+node:felix.20210115195450.20: *4* v.saveCursorAndScroll
@@ -3296,21 +3296,22 @@ export class VNode {
      * insertSpot and scrollBarSpot
      */
     public saveCursorAndScroll(): void {
-        // TODO
-        /*
-        const v:VNode = this;
-        const c:any = v.context;
 
-        w = c.frame.body
-        if not w:
-            return
-        try:
-            v.scrollBarSpot = w.getYScrollPosition()
-            v.insertSpot = w.getInsertPoint()
-        except AttributeError:
-            # 2011/03/21: w may not support the high-level interface.
-            pass
-        */
+        const v: VNode = this;
+        const c: any = v.context;
+
+        const w = c.frame.body;
+        if (!w) {
+            return;
+        }
+        try {
+            v.scrollBarSpot = w.getYScrollPosition();
+            v.insertSpot = w.getInsertPoint();
+        }
+        catch (attributeError) {
+            // 2011/03/21: w may not support the high-level interface.
+            // pass
+        }
     }
 
     //@+node:felix.20210115195450.21: *4* v.setBodyString & v.setHeadString
@@ -3320,7 +3321,7 @@ export class VNode {
             v._bodyString = s;
             return;
         }
-        // TODO : Check if needed
+
         try {
             v._bodyString = g.toUnicode(s, null, true);
         } catch (exception) {

@@ -2,6 +2,7 @@
 //@+node:felix.20221109235435.1: * @file src/core/findTabManager.ts
 //@+<< imports >>
 //@+node:felix.20221109235755.1: ** << imports >>
+import * as g from './leoGlobals';
 import { Commands } from "./leoCommands";
 import { ISettings, LeoFind } from './leoFind';
 
@@ -178,13 +179,25 @@ export class StringFindTabManager {
 
     //@+node:felix.20221109235451.3: *3* sftm.clear_focus & init_focus & set_entry_focus
     public clear_focus(): void {
-        // pass
+        this.entry_focus = undefined;
+        // this.find_findbox.clearFocus(); // UNUSED IN LEOJS 
     }
     public init_focus(): void {
-        // pass
+        this.set_entry_focus();
+        // const w = this.find_findbox;
+        // w.setFocus()
+        // s = w.text()
+        // w.setSelection(0, len(s))
     }
     public set_entry_focus(): void {
-        // pass
+        // Remember the widget that had focus, changing headline widgets
+        // to the tree pane widget.  Headline widgets can disappear!
+        const c = this.c;
+        let w = g.app.gui.get_focus();
+        if (w !== c.frame.body.wrapper.widget) {
+            w = c.frame.tree.treeWidget;
+        }
+        this.entry_focus = w;
     }
 
     //@+node:felix.20221109235451.4: *3* sftm.get_settings

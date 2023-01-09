@@ -645,8 +645,8 @@ To try out running as a web extension on vscode.dev, use the following commands:
 -   The commands and menus icons for outline editing
 -   Undo and navigation history commands
 -   The minibuffer Command-Palette
--   Panels for Outline, Undo history, Leo documents (no find, goto or @buttons panes yet)
--   Basic 'New', 'Open' and 'Save' operations (no external @files/@clean... support yet)
+-   Panels for Outline, Undo history, Leo documents, find and goto panes (no @buttons panes support yet)
+-   Basic 'New', 'Open' and 'Save' operations (no external @files/@clean... nor scripting support yet)
 
 ## Keybindings
 
@@ -673,24 +673,28 @@ To try out running as a web extension on vscode.dev, use the following commands:
 
 _Move Outline commands need the 'Alt' key modifier only when focus is on body pane._
 
-| Common Operations  |            |           |     |            |                     |
-| :----------------- | :--------- | :-------- | :-- | :--------- | :------------------ | 
-| `Ctrl + T`         |            |           |     |            | Toggle Outline/Body |
-| `Tab` or `Enter`   | or         | `Alt + D` | or  | `Ctrl + G` | Focus on Body       |
-| `Alt + T`          |            |           |     |            | Focus on Outline    |
-| `Alt + -`          |            |           |     |            | Contract All        |
-| `Ctrl + Shift + D` |            |           |     |            | Extract             |
-| `Ctrl + Shift + N` |            |           |     |            | Extract Names       |
-| `Alt + A`          |            |           |     |            | Sort Siblings       |
-| `Alt + X`          |            |           |     |            | Minibuffer Palette  |
+| Common Operations  |     |          |     |           |    |            |                     |
+| :----------------- | :-- | :------- | :-- | :-------- |:-- | :--------- | :------------------ |
+| `Ctrl + T`         |     |          |     |           |    |            | Toggle Outline/Body |
+| `Tab`              | or  | `Enter`  | or  | `Alt + D` |or  | `Ctrl + G` | Focus on Body       |
+| `Alt + T`          |     |          |     |           |    |            | Focus on Outline    |
+| `Alt + -`          |     |          |     |           |    |            | Contract All        |
+| `Alt + A`          |     |          |     |           |    |            | Sort Siblings       |
+| `Ctrl + F`         |     |          |     |           |    |            | Start Search        |
+| `F3`               |     |          |     |           |    |            | Find Next           |
+| `F2`               |     |          |     |           |    |            | Find Previous       |
+| `Ctrl + =`         |     |          |     |           |    |            | Replace             |
+| `Ctrl + -`         |     |          |     |           |    |            | Replace then Find   |
+| `Alt + X`          |     |          |     |           |    |            | Minibuffer Palette  |
 
- &lt;!--               | `Ctrl + B` |           |     |            |                     | Execute Script | --&gt; 
- &lt;!--               | `Ctrl + F` |           |     |            |                     | Start Search   | --&gt; 
- &lt;!--               | `F3`       |           |     |            |                     | Find Next      | --&gt; 
- &lt;!--               | `F2`       |           |     |            |                     | Find Previous  | --&gt; 
+&lt;!-- | `Ctrl + Shift + D` |     |          |     |           |    |            | Extract             | --&gt;
+&lt;!-- | `Ctrl + Shift + N` |     |          |     |           |    |            | Extract Names       | --&gt;
+&lt;!-- | `Ctrl + B`         |     |          |     |           |    |            | Execute Script      |  --&gt;
 
 | Tree Navigation    |           |                 |                          |
 | :----------------- | :-------- | :-------------- | :----------------------- |
+| `Ctrl+Shift+L`     |           |                 | Show the LeoInteg View   |
+| `Ctrl+P`           |           |                 | Go Anywhere              |
 | `Alt + Home`       | or        | `Home` \*       | Go To First Visible Node |
 |                    |           | `End` \*        | Go To Last Visible Node  |
 | `PgUp / pgDn`      |           |                 | Tree page up/down        |
@@ -698,7 +702,7 @@ _Move Outline commands need the 'Alt' key modifier only when focus is on body pa
 | `Alt + N`          |           |                 | Go To Next Clone         |
 | `Alt + Arrow Keys` | or        | `Arrow Keys` \* | Browse Tree              |
 
-&lt;!--               | `Alt + G` |                 |                          | Go To Global Line | --&gt; 
+&lt;!-- | `Alt + G`    |           |                   | Go To Global Line      | --&gt; 
 
 \* _With the **'Leo Tree Browsing'** setting enabled by default, all arrows and numeric keypad keys change the outline's selection directly_
 
@@ -997,6 +1001,8 @@ public refreshTreeRoot(): void {
 </t>
 <t tx="felix.20201209011931.4">public getTreeItem(element: Position): Thenable&lt;LeoOutlineNode&gt; | LeoOutlineNode {
 
+    const w_ui = this._leoUI;
+
     let w_collapse: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.None;
     if (element.hasChildren()) {
         w_collapse = element.isExpanded() ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
@@ -1020,7 +1026,7 @@ public refreshTreeRoot(): void {
         w_contextValue += Constants.CONTEXT_FLAGS.NODE_NOT_ROOT;
     }
     const w_icon: number =
-        (+(this._leoUI.config.invertNodeContrast !== !!element.isDirty()) &lt;&lt; 3) |
+        (+(w_ui.config.invertNodeContrast !== !!element.isDirty()) &lt;&lt; 3) |
         (+element.isCloned() &lt;&lt; 2) |
         (+element.isMarked() &lt;&lt; 1) |
         +element.v.hasBody();
@@ -1049,8 +1055,20 @@ public refreshTreeRoot(): void {
         // desc = "gnx:" + this.gnx; // ! debug test
     }
 
+    let w_isSelected = false;
+    if (element.__eq__(g.app.windowList[w_ui.frameIndex].c.p)) {
+        w_isSelected = true;
+    }
+
+    let w_hl: [number, number] = [0, 0];
+    if (w_isSelected &amp;&amp; w_ui.findFocusTree) {
+        if (w_ui.findHeadlinePosition?.__eq__(element)) {
+            w_hl = w_ui.findHeadlineRange;
+        }
+    }
+
     const w_leoNode = new LeoOutlineNode(
-        { label: element.h, highlights: [[0, 0]] },
+        { label: element.h, highlights: [w_hl] },
         w_collapse,
         element, // Position
         desc,
@@ -1059,8 +1077,8 @@ public refreshTreeRoot(): void {
         w_contextValue
     );
     // Check if its the selected node and call signal it to the UI
-    if (element.__eq__(g.app.windowList[this._leoUI.frameIndex].c.p)) {
-        this._leoUI.gotSelectedNode(element);
+    if (w_isSelected) {
+        w_ui.gotSelectedNode(element);
     }
     // Build a LeoNode (a vscode tree node) from the Position
     return w_leoNode;
@@ -3042,6 +3060,7 @@ export class LeoUI extends NullGui {
     public finalFocus: Focus = Focus.NoChange; // Set in _setupRefresh : Last command issued had focus on outline, as opposed to the body
     public showBodyIfClosed: boolean = false;
     public showOutlineIfClosed: boolean = false;
+    public refreshPreserveRange = false; // this makes the next refresh cycle preserve the "findFocusTree" flag once.
 
     private __refreshNode: Position | undefined; // Set in _setupRefresh : Last command issued a specific node to reveal
     private _lastRefreshNodeTS: number = 0;
@@ -3434,7 +3453,7 @@ public async command(
         this.commandRefreshTimer = this.lastCommandTimer;
     }
 
-    await this.triggerBodySave();
+    await this.triggerBodySave(true);
 
     if (p_options.isNavigation) {
         // If any navigation command is used from outline or command palette: show body.
@@ -3520,7 +3539,7 @@ public async command(
  */
 public async minibuffer(): Promise&lt;unknown&gt; {
 
-    await this.triggerBodySave(false);
+    await this.triggerBodySave(true);
     const c = g.app.windowList[this.frameIndex].c;
     const commands: vscode.QuickPickItem[] = [];
     for (let key in c.commandsDict) {
@@ -6184,7 +6203,7 @@ public removeAtButton(p_node: LeoButtonNode): Thenable&lt;unknown&gt; {
 */
 public async closeLeoFile(): Promise&lt;unknown&gt; {
 
-    await this.triggerBodySave();
+    await this.triggerBodySave(true);
 
     this.setupRefresh(Focus.Body, {
         tree: true,
@@ -6253,7 +6272,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
             }
         }
     } else {
-        await this.triggerBodySave();
+        await this.triggerBodySave(true);
         const c = g.app.windowList[this.frameIndex].c;
         await c.open_outline(p_uri);
         this.setupRefresh(this.finalFocus, {
@@ -6290,7 +6309,7 @@ public showRecentLeoFiles(): Thenable&lt;unknown&gt; {
  * @returns a promise from saving the file results.
  */
 public async saveAsLeoFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
-    await this.triggerBodySave();
+    await this.triggerBodySave(true);
 
     const c = g.app.windowList[this.frameIndex].c;
 
@@ -6315,7 +6334,7 @@ public async saveAsLeoFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
  * @returns Promise that resolves when the save command is done
  */
 public async saveLeoFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
-    await this.triggerBodySave();
+    await this.triggerBodySave(true);
 
     const c = g.app.windowList[this.frameIndex].c;
 
@@ -6444,6 +6463,17 @@ private _refreshOutline(p_incrementTreeId: boolean, p_revealType?: RevealType): 
  * * Launches refresh for UI components and context states (Debounced)
  */
 public async _launchRefresh(): Promise&lt;unknown&gt; {
+    if (!this.refreshPreserveRange) {
+        if (this.findFocusTree) {
+            // had a range but now refresh from other than find/replace
+            // So make sure tree is also refreshed.
+            this._refreshType.tree = true;
+        }
+        // Clear no matter what.
+        this.findFocusTree = false;
+    } else {
+        this.refreshPreserveRange = false; // preserved once, now cleared.
+    }
 
     // check states for having at least a document opened
     if (this.leoStates.leoReady &amp;&amp; this.leoStates.fileOpenedReady) {
@@ -6590,7 +6620,11 @@ public async _launchRefresh(): Promise&lt;unknown&gt; {
  * @param p_finalFocus Flag for focus to be placed in outline
  * @param p_refreshType Refresh flags for each UI part
 */
-public setupRefresh(p_finalFocus: Focus, p_refreshType: ReqRefresh): void {
+public setupRefresh(p_finalFocus: Focus, p_refreshType: ReqRefresh, p_preserveRange?: boolean): void {
+    if (p_preserveRange) {
+        // Lets the 
+        this.refreshPreserveRange = true; // Will be cleared after a refresh cycle.
+    }
     // Set final "focus-placement" EITHER true or false
     this.finalFocus = p_finalFocus;
     // Set all properties WITHOUT clearing others.
@@ -7735,7 +7769,7 @@ export interface BodyTimeInfo {
  * @returns a promise from saving the file results.
  */
 public async saveAsLeoJsFile(p_fromOutline?: boolean): Promise&lt;unknown&gt; {
-    await this.triggerBodySave();
+    await this.triggerBodySave(true);
 
     const c = g.app.windowList[this.frameIndex].c;
 
@@ -8277,17 +8311,17 @@ public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
     'find-clone-tag': Constants.COMMANDS.CLONE_FIND_TAG,
     'find-all': Constants.COMMANDS.FIND_ALL,
     'start-search': Constants.COMMANDS.START_SEARCH,
-    // 'find-next': Constants.COMMANDS.FIND_NEXT,
-    // 'find-prev': Constants.COMMANDS.FIND_PREVIOUS,
+    'find-next': Constants.COMMANDS.FIND_NEXT,
+    'find-prev': Constants.COMMANDS.FIND_PREVIOUS,
     // 'search-backward': Constants.COMMANDS.FIND_NEXT,
     'search-forward': Constants.COMMANDS.FIND_PREVIOUS,
     // 'find-var': Constants.COMMANDS.FIND_VAR,
     // 'find-def': Constants.COMMANDS.FIND_DEF,
-    // 'replace': Constants.COMMANDS.REPLACE,
+    'replace': Constants.COMMANDS.REPLACE,
     'replace-all': Constants.COMMANDS.REPLACE_ALL,
     'change-all': Constants.COMMANDS.REPLACE_ALL,
-    // 'change-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
-    // 'replace-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
+    'change-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
+    'replace-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
     // 'show-find-options': Constants.COMMANDS.START_SEARCH,
     // 'toggle-find-ignore-case-option': Constants.COMMANDS.TOGGLE_FIND_IGNORE_CASE_OPTION,
     // 'toggle-find-in-body-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_BODY_OPTION,
@@ -8898,7 +8932,7 @@ public showGotoPane(p_options?: { preserveFocus?: boolean }): Thenable&lt;unknow
  */
 public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
 
-    await this.triggerBodySave(false);
+    await this.triggerBodySave(true);
     this._leoGotoProvider.resetSelectedNode(p_node); // Inform controller of last index chosen
     const c = g.app.windowList[this.frameIndex].c;
     const scon: QuickSearchController = c.quicksearchController;
@@ -8994,7 +9028,7 @@ public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
     let w_searchString: string = this._lastSettingsUsed!.findText;
     let w_replaceString: string = this._lastSettingsUsed!.replaceText;
 
-    return this.triggerBodySave(false)
+    return this.triggerBodySave(true)
         .then((p_saveResult) =&gt; {
             return this._inputFindPattern()
                 .then((p_findString) =&gt; {
@@ -9104,7 +9138,7 @@ public cloneFind(p_marked: boolean, p_flat: boolean): Thenable&lt;unknown&gt; {
         });
     }
 
-    return this.triggerBodySave(false)
+    return this.triggerBodySave(true)
         .then(() =&gt; {
             return this._inputFindPattern()
                 .then((p_findString) =&gt; {
@@ -9376,7 +9410,7 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
  */
 public gotoGlobalLine(): void {
 
-    this.triggerBodySave(false)
+    this.triggerBodySave(true)
         .then(() =&gt; {
             return vscode.window.showInputBox({
                 title: Constants.USER_MESSAGES.TITLE_GOTO_GLOBAL_LINE,
@@ -9419,7 +9453,7 @@ public gotoGlobalLine(): void {
  */
 public tagChildren(): void {
 
-    this.triggerBodySave(false)
+    this.triggerBodySave(true)
         .then(() =&gt; {
             return vscode.window.showInputBox({
                 title: Constants.USER_MESSAGES.TITLE_TAG_CHILDREN,
@@ -9462,7 +9496,7 @@ public tagChildren(): void {
  */
 public tagNode(): void {
 
-    this.triggerBodySave(false)
+    this.triggerBodySave(true)
         .then(() =&gt; {
             return vscode.window.showInputBox({
                 title: Constants.USER_MESSAGES.TITLE_TAG_NODE,
@@ -9509,7 +9543,7 @@ public removeTag(): void {
 
     if (this.lastSelectedNode &amp;&amp; this.lastSelectedNode.u &amp;&amp;
         this.lastSelectedNode.u.__node_tags &amp;&amp; this.lastSelectedNode.u.__node_tags.length) {
-        this.triggerBodySave(false)
+        this.triggerBodySave(true)
             .then(() =&gt; {
                 return vscode.window.showQuickPick(this.lastSelectedNode!.u.__node_tags, {
                     title: Constants.USER_MESSAGES.TITLE_REMOVE_TAG,
@@ -9558,7 +9592,7 @@ public removeTags(): void {
 
     if (this.lastSelectedNode &amp;&amp; this.lastSelectedNode.u &amp;&amp;
         this.lastSelectedNode.u.__node_tags &amp;&amp; this.lastSelectedNode.u.__node_tags.length) {
-        this.triggerBodySave(false)
+        this.triggerBodySave(true)
             .then(() =&gt; {
                 const c = g.app.windowList[this.frameIndex].c;
                 const p = c.p;
@@ -9595,7 +9629,7 @@ public removeTags(): void {
  * * Handles an enter press in the 'nav pattern' input
  */
 public async navEnter(): Promise&lt;unknown&gt; {
-    await this.triggerBodySave(false);
+    await this.triggerBodySave(true);
     const c = g.app.windowList[this.frameIndex].c;
     const scon: QuickSearchController = c.quicksearchController;
 
@@ -9618,7 +9652,7 @@ public async navEnter(): Promise&lt;unknown&gt; {
 public cloneFindTag(): void {
     vscode.window.showInformationMessage("TODO: cloneFindTag");
 
-    this.triggerBodySave(false)
+    this.triggerBodySave(true)
         .then(() =&gt; {
             return vscode.window.showInputBox({
                 title: Constants.USER_MESSAGES.TITLE_FIND_TAG,
@@ -9659,7 +9693,7 @@ public cloneFindTag(): void {
  */
 public async navTextChange(): Promise&lt;unknown&gt; {
 
-    await this.triggerBodySave(false);
+    await this.triggerBodySave(true);
     const c = g.app.windowList[this.frameIndex].c;
     const scon: QuickSearchController = c.quicksearchController;
 
@@ -9728,12 +9762,11 @@ private _inputFindPattern(p_replace?: boolean): Thenable&lt;string | undefined&g
  * @param p_reverse
  * @returns Promise that resolves when the "launch refresh" is started
  */
-public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;any&gt; {
+public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknown&gt; {
 
-    await this.triggerBodySave(false);
+    await this.triggerBodySave(true);
     let found;
     let focus;
-    let node;
 
     const c = g.app.windowList[this.frameIndex].c;
     const fc = c.findCommands;
@@ -9741,70 +9774,37 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;any&gt
 
     const fromOutline = p_fromOutline;
     const fromBody = !fromOutline;
-    //
+
     let w = this.get_focus(c);
     focus = this.widget_name(w);
 
     const inOutline = (focus.includes("tree")) || (focus.includes("head"));
     const inBody = !inOutline;
-    //
 
-    let pos;
-    let newpos;
-    let settings;
+    if (fromOutline &amp;&amp; inBody) {
+        fc.in_headline = true;
+    } else if (fromBody &amp;&amp; inOutline) {
+        fc.in_headline = false;
+        c.bodyWantsFocus();
+        c.bodyWantsFocusNow();
+    }
 
+    let pos, newpos, settings;
+    settings = fc.ftm.get_settings();
     if (p_reverse) {
-        // * Find Previous
-        if (fromOutline &amp;&amp; inBody) {
-            fc.in_headline = true;
-        } else if (fromBody &amp;&amp; inOutline) {
-            fc.in_headline = false;
-            // w = c.frame.body.wrapper
-            c.bodyWantsFocus();
-            c.bodyWantsFocusNow();
-        }
-        //
-        if (fc.in_headline) {
-            const gui_w = c.edit_widget(p) as StringTextWrapper;
-            gui_w.setSelectionRange(0, 0, 0);
-        }
-        settings = fc.ftm.get_settings();
         [p, pos, newpos] = fc.do_find_prev(settings);
     } else {
-        // * Find Next
-        if (fromOutline &amp;&amp; inBody) {
-            fc.in_headline = true;
-        } else if (fromBody &amp;&amp; inOutline) {
-            fc.in_headline = false;
-            c.bodyWantsFocus();
-            c.bodyWantsFocusNow();
-        }
-        //
-        if (fc.in_headline) {
-            const ins = p.h.length;
-            const gui_w = c.edit_widget(p) as StringTextWrapper;
-            gui_w.setSelectionRange(ins, ins, ins);
-        }
-        // Let cursor as-is
-        settings = fc.ftm.get_settings();
         [p, pos, newpos] = fc.do_find_next(settings);
     }
 
-    // get focus again after the operation
-    w = this.get_focus(c);
+    w = this.get_focus(c); // get focus again after the operation
     focus = this.widget_name(w);
-
-    // result = {"found": bool(p), "pos": pos,
-    //             "newpos": newpos, "focus": focus}
     found = p &amp;&amp; p.__bool__();
 
-    // 
-    this.findFocusTree = false;
-    this.findHeadlineRange = [0, 0];
-    this.findHeadlinePosition = undefined;
+    this.findFocusTree = false; // Reset flag for headline range
 
     if (!found || !focus) {
-        vscode.window.showInformationMessage('Not found');
+        return vscode.window.showInformationMessage('Not found');
     } else {
         let w_finalFocus = Focus.Body;
         const w_focus = focus.toLowerCase();
@@ -9812,13 +9812,10 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;any&gt
             // tree
             w_finalFocus = Focus.Outline;
             this.showOutlineIfClosed = true;
-            // 
+            // * SETUP HEADLINE RANGE
             this.findFocusTree = true;
-            this.findHeadlineRange = [0, 0];
-            console.log('Focus widget w: ', w);
-
+            this.findHeadlineRange = [w.sel[0], w.sel[1]];
             this.findHeadlinePosition = c.p;
-
         } else {
             this.showBodyIfClosed = true;
         }
@@ -9831,9 +9828,10 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;any&gt
                 // documents: false,
                 // buttons: false,
                 states: true,
-            }
+            },
+            this.findFocusTree
         );
-        this.launchRefresh();
+        return this.launchRefresh();
     }
 }
 
@@ -9843,10 +9841,10 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;any&gt
  * @param p_def find-def instead of find-var
  * @returns Promise that resolves when the "launch refresh" is started
  */
-public async findSymbol(p_def: boolean): Promise&lt;any&gt; {
+public async findSymbol(p_def: boolean): Promise&lt;unknown&gt; {
 
     // This sets the selection on a word in the body pane. (needs selection on a symbol word in vscode word)
-    await this.triggerBodySave(false);
+    await this.triggerBodySave(true);
 
     const c = g.app.windowList[this.frameIndex].c;
     const fc = c.findCommands;
@@ -9862,7 +9860,7 @@ public async findSymbol(p_def: boolean): Promise&lt;any&gt; {
     const focus = this._get_focus();
 
     if (!found || !focus) {
-        vscode.window.showInformationMessage('Not found');
+        return vscode.window.showInformationMessage('Not found');
     } else {
         let w_finalFocus = Focus.Body;
         const w_focus = focus.toLowerCase();
@@ -9881,7 +9879,7 @@ public async findSymbol(p_def: boolean): Promise&lt;any&gt; {
                 // buttons: false,
                 states: true,
             });
-        this.launchRefresh();
+        return this.launchRefresh();
     }
 
 }
@@ -9895,44 +9893,85 @@ public async findSymbol(p_def: boolean): Promise&lt;any&gt; {
  */
 public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise&lt;unknown&gt; {
 
-    await this.triggerBodySave(false);
+    await this.triggerBodySave(true);
+    let found;
+    let focus;
 
     const c = g.app.windowList[this.frameIndex].c;
     const fc = c.findCommands;
 
-    let found = false;
+    const fromOutline = p_fromOutline;
+    const fromBody = !fromOutline;
+
+    let w = this.get_focus(c);
+    focus = this.widget_name(w);
+
+    const inOutline = (focus.includes("tree")) || (focus.includes("head"));
+    const inBody = !inOutline;
+
+    if (fromOutline &amp;&amp; inBody) {
+        fc.in_headline = true;
+    } else if (fromBody &amp;&amp; inOutline) {
+        fc.in_headline = false;
+        c.bodyWantsFocus();
+        c.bodyWantsFocusNow();
+    }
+
+    console.log('focus BEFORE replace:', focus);
+
+    found = false;
     if (p_thenFind) {
         const settings = fc.ftm.get_settings();
         found = fc.do_change_then_find(settings);
+        // if (fc.change_selection(c.p)) {
+        //     fc.do_find_next(settings);
+        // }
+        // found = true;
+
     } else {
         // const settings = fc.ftm.get_settings();
-        fc.change();
+        // fc.change();
+        fc.change_selection(c.p);
         found = true;
     }
 
-    const focus = this._get_focus();
+    w = this.get_focus(c); // get focus again after the operation
+    focus = this.widget_name(w);
+
+    this.findFocusTree = false; // Reset flag for headline range
+
+    console.log('focus AFTER replace:', focus);
 
     if (!found || !focus) {
-        return vscode.window.showInformationMessage('Not found');
+        vscode.window.showInformationMessage('Not found');
     } else {
         let w_finalFocus = Focus.Body;
         const w_focus = focus.toLowerCase();
         if (w_focus.includes('tree') || w_focus.includes('head')) {
             // tree
             w_finalFocus = Focus.Outline;
+            this.showOutlineIfClosed = true;
+            // * SETUP HEADLINE RANGE
+            this.findFocusTree = true;
+            this.findHeadlineRange = [w.sel[0], w.sel[1]];
+            this.findHeadlinePosition = c.p;
+        } else {
+            this.showBodyIfClosed = true;
         }
         this.setupRefresh(
-            w_finalFocus,
+            w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
             {
-                tree: true,
+                tree: true, // HAVE to refresh tree because find folds/unfolds only result outline paths
                 body: true,
-                scroll: true,
+                scroll: found &amp;&amp; w_finalFocus === Focus.Body,
                 // documents: false,
                 // buttons: false,
                 states: true,
-            }
+            },
+            this.findFocusTree
         );
         return this.launchRefresh();
+
     }
 
 }
@@ -10426,7 +10465,7 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
             await g.app.loadManager.openEmptyLeoFile(this);
         }
     } else {
-        await this.triggerBodySave();
+        await this.triggerBodySave(true);
         const c = g.app.windowList[this.frameIndex].c;
         c.new(this);
     }
@@ -11183,7 +11222,7 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
     const w_openedDocument = await vscode.workspace.openTextDocument(this.bodyUri);
 
     this._bodyTextDocument = w_openedDocument;
-    let w_bodySelection: BodySelectionInfo | undefined;
+    let w_bodySel: BodySelectionInfo | undefined;
     // * Set document language along with the proper cursor position, selection range and scrolling position
     if (!this._needLastSelectedRefresh) {
 
@@ -11214,17 +11253,20 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
             return { "line": line, "col": col, "index": i };
         };
 
-        w_bodySelection = {
+        w_bodySel = {
             "gnx": p.v.gnx,
             "scroll": scroll,
             "insert": row_col_pv_dict(insert, p.v.b),
             "start": row_col_pv_dict(start, p.v.b),
             "end": row_col_pv_dict(end, p.v.b)
         };
+        console.log('From p:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
+
 
         // ! -------------------------------
         // ! TEST SELECTION GETTER OVERRIDE!
         // ! -------------------------------
+        const wrapper = c.frame.body.wrapper;
         function row_col_wrapper_dict(i: number): { "line": number, "col": number, "index": number } {
             if (!i) {
                 i = 0; // prevent none type
@@ -11233,18 +11275,18 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
             [line, col] = wrapper.toPythonIndexRowCol(i);
             return { "line": line, "col": col, "index": i };
         }
-        const wrapper = c.frame.body.wrapper;
         const test_insert = wrapper.getInsertPoint();
         let test_start, test_end;
         [test_start, test_end] = wrapper.getSelectionRange(true);
         // ! OVERRIDE !
-        w_bodySelection = {
+        w_bodySel = {
             "gnx": p.v.gnx,
             "scroll": scroll,
             "insert": row_col_wrapper_dict(test_insert),
             "start": row_col_wrapper_dict(test_start),
             "end": row_col_wrapper_dict(test_end)
         };
+        console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
 
         // TODO : Apply tabwidth
         // console.log('TABWIDTH: ', w_tabWidth);
@@ -11381,11 +11423,11 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
 
                 // * Set text selection range
                 const w_bodyTextEditor = p_textEditor;
-                if (!w_bodySelection) {
+                if (!w_bodySel) {
                     console.log("no selection in returned package from get_body_states");
                 }
 
-                const w_leoBodySel: BodySelectionInfo = w_bodySelection!;
+                const w_leoBodySel: BodySelectionInfo = w_bodySel!;
 
                 // * CHECK ALL 3 POSSIBLE NEW PLACES FOR BODY SWITCH AFTER q_bodyStates &amp; q_showTextDocument
                 if (
@@ -11428,6 +11470,11 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
 
                 if (w_bodyTextEditor) {
                     // this._revealType = RevealType.NoReveal; // ! IN CASE THIS WAS STILL UP FROM SHOW_OUTLINE
+
+                    console.log(
+                        'Setting selection! anchor: ', w_selection.anchor.line, w_selection.anchor.character,
+                        ' active: ', w_selection.active.line, w_selection.active.character
+                    );
 
                     w_bodyTextEditor.selection = w_selection; // set cursor insertion point &amp; selection range
                     if (!w_scrollRange) {
@@ -12488,7 +12535,7 @@ async function showWelcomeIfNewer(p_version: string, p_previousVersion: string |
 public async minibufferHistory(): Promise&lt;unknown&gt; {
 
     // Wait for _isBusyTriggerSave resolve because the full body save may change available commands
-    await this.triggerBodySave(false);
+    await this.triggerBodySave(true);
     if (!this._minibufferHistory.length) {
         return Promise.resolve(undefined);
     }
@@ -12592,21 +12639,23 @@ public static OLD_POS_OFFSETS = {
 }
 
 </t>
-<t tx="felix.20221026222040.1">public get_focus(c: Commands): any {
-    return this.focusWidget;
+<t tx="felix.20221026222040.1">public get_focus(c?: Commands): StringTextWrapper {
+    console.log("get_focus in leoUI.ts", this.focusWidget?.name);
+
+    return this.focusWidget!;
 }
 
 </t>
-<t tx="felix.20221027153815.1">public widget_name(w: any): string {
+<t tx="felix.20221027153815.1">public widget_name(w: StringTextWrapper): string {
     let name: string;
     if (!w) {
         name = '&lt;no widget&gt;';
     } else if (w['getName']) {
         name = w.getName();
-    } else if (w['objectName']) {
-        name = w.objectName();
-    } else if (w['_name']) {
-        name = w._name;
+        // } else if (w['objectName']) {
+        //     name = w.objectName();
+        // } else if (w['_name']) {
+        //     name = w._name;
     } else {
         name = w.toString();
     }
@@ -14142,7 +14191,7 @@ public get1Arg(p_options?: vscode.InputBoxOptions | undefined, p_token?: vscode.
  * Mimic vscode's CTRL+P to find any position by it's headline
  */
 public async goAnywhere(): Promise&lt;unknown&gt; {
-    await this.triggerBodySave(false);
+    await this.triggerBodySave(true);
 
     const allPositions: { label: string; description?: string; position?: Position; }[] = [];
     // Options for date to look like : Saturday, September 17, 2016

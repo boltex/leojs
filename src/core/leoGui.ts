@@ -438,7 +438,7 @@ export class NullGui extends LeoGui {
 
     public clipboardContents: string = "";
     public isNullGui: boolean = true;
-    public focusWidget: any;
+    public focusWidget: StringTextWrapper | undefined;
 
     /**
      * ctor for the NullGui class.
@@ -495,7 +495,7 @@ export class NullGui extends LeoGui {
     public set_focus(commander: Commands, widget: any): void {
         //
     }
-    public get_focus(c: Commands): any {
+    public get_focus(c?: Commands): any {
         return;
     }
 
