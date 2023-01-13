@@ -926,6 +926,7 @@ export class LeoUI extends NullGui {
             p_textDocumentChange.contentChanges.length &&
             p_textDocumentChange.document.uri.scheme === Constants.URI_LEO_SCHEME
         ) {
+            console.log('DOCUMENT CHANGE DETECTED!, dirty: ', p_textDocumentChange.document.isDirty === true);
 
             // * There was a on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
             this._bodyLastChangedDocument = p_textDocumentChange.document;
@@ -939,6 +940,19 @@ export class LeoUI extends NullGui {
             ) {
                 const w_hasBody = !!p_textDocumentChange.document.getText().length;
                 const w_iconChanged = utils.isIconChangedByEdit(this.lastSelectedNode, w_hasBody);
+
+                const c = g.app.windowList[this.frameIndex].c;
+
+                console.log('testing for real change');
+
+                if (c.p && c.p.__bool__() && p_textDocumentChange.document.getText() === c.p.b) {
+                    console.log('Was a p.b. update by replace or externale file change');
+                    // Set proper cursor insertion point and selection range.
+                    this.showBody(false, true, true);
+                    return;
+                } else {
+                    console.log('Change is a real user typing');
+                }
 
                 if (!this.leoStates.leoChanged || w_iconChanged) {
                     if (this.preventIconChange) {
@@ -1070,6 +1084,8 @@ export class LeoUI extends NullGui {
             const w_document = this._bodyLastChangedDocument; // backup for bodySaveDocument before reset
             this._bodyLastChangedDocumentSaved = true;
             this._editorTouched = false;
+            console.log('save in triggerBodySave!');
+
             q_savePromise = this._bodySaveDocument(w_document, p_forcedVsCodeSave);
         } else if (
             p_forcedVsCodeSave &&
@@ -1162,7 +1178,7 @@ export class LeoUI extends NullGui {
         // Always set vnode attrs.
         v.scrollBarSpot = scroll;
         v.insertSpot = insert;
-        v.selectionStart = startSel;
+        v.selectionStart = startSel < endSel ? startSel : endSel;
         v.selectionLength = Math.abs(startSel - endSel);
 
         this._scrollDirty = false;
@@ -2170,7 +2186,7 @@ export class LeoUI extends NullGui {
      * @param p_preventTakingFocus flag that when true will stop the editor from taking focus once opened
      * @returns a promise of an editor, or void if body had been changed again in the meantime.
      */
-    public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise<vscode.TextEditor | void> {
+    public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preventReveal?: boolean): Promise<vscode.TextEditor | void> {
         const w_openedDocumentTS = utils.performanceNow();
         const w_openedDocumentGnx = utils.leoUriToStr(this.bodyUri);
         let q_saved: Thenable<unknown> | undefined;
@@ -2248,52 +2264,31 @@ export class LeoUI extends NullGui {
             const end = p.v.selectionStart + p.v.selectionLength;
             const scroll = p.v.scrollBarSpot;
 
-            const row_col_pv_dict = (i: number, s: string) => {
-                if (!i) {
-                    i = 0; // prevent none type
-                }
-                // BUG: this uses current selection wrapper only, use
-                // g.convertPythonIndexToRowCol instead !
-                let line: number;
-                let col: number;
-                [line, col] = g.convertPythonIndexToRowCol(s, i);
-                return { "line": line, "col": col, "index": i };
-            };
-
             w_bodySel = {
                 "gnx": p.v.gnx,
                 "scroll": scroll,
-                "insert": row_col_pv_dict(insert, p.v.b),
-                "start": row_col_pv_dict(start, p.v.b),
-                "end": row_col_pv_dict(end, p.v.b)
+                "insert": this._row_col_pv_dict(insert, p.v.b),
+                "start": this._row_col_pv_dict(start, p.v.b),
+                "end": this._row_col_pv_dict(end, p.v.b)
             };
             console.log('From p:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
-
 
             // ! -------------------------------
             // ! TEST SELECTION GETTER OVERRIDE!
             // ! -------------------------------
-            const wrapper = c.frame.body.wrapper;
-            function row_col_wrapper_dict(i: number): { "line": number, "col": number, "index": number } {
-                if (!i) {
-                    i = 0; // prevent none type
-                }
-                let line, col;
-                [line, col] = wrapper.toPythonIndexRowCol(i);
-                return { "line": line, "col": col, "index": i };
-            }
-            const test_insert = wrapper.getInsertPoint();
-            let test_start, test_end;
-            [test_start, test_end] = wrapper.getSelectionRange(true);
-            // ! OVERRIDE !
-            w_bodySel = {
-                "gnx": p.v.gnx,
-                "scroll": scroll,
-                "insert": row_col_wrapper_dict(test_insert),
-                "start": row_col_wrapper_dict(test_start),
-                "end": row_col_wrapper_dict(test_end)
-            };
-            console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
+            // const wrapper = c.frame.body.wrapper;
+            // const test_insert = wrapper.getInsertPoint();
+            // let test_start, test_end;
+            // [test_start, test_end] = wrapper.getSelectionRange(true);
+            // // ! OVERRIDE !
+            // w_bodySel = {
+            //     "gnx": p.v.gnx,
+            //     "scroll": scroll,
+            //     "insert": this._row_col_wrapper_dict(test_insert, wrapper),
+            //     "start": this._row_col_wrapper_dict(test_start, wrapper),
+            //     "end": this._row_col_wrapper_dict(test_end, wrapper)
+            // };
+            // console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
 
             // TODO : Apply tabwidth
             // console.log('TABWIDTH: ', w_tabWidth);
@@ -2364,7 +2359,14 @@ export class LeoUI extends NullGui {
                         if (p_textDocument.uri.fsPath === (p_tab.input as vscode.TabInputText).uri.fsPath) {
                             this._bodyTextDocument = p_textDocument; // vscode.workspace.openTextDocument
                             this._bodyMainSelectionColumn = p_tab.group.viewColumn;
-                            w_foundDocOpened = true;
+                            if (p_preventReveal) {
+                                if (p_tab.isActive) {
+                                    w_foundDocOpened = true;
+                                }
+                            } else {
+                                w_foundDocOpened = true;
+
+                            }
                         }
                     });
                 }
@@ -2376,6 +2378,9 @@ export class LeoUI extends NullGui {
 
         // console.log('POST found TAB: ', w_foundTabOpened);
         // console.log('POST found DOC: ', w_foundDocOpened);
+        if (!w_foundDocOpened && p_preventReveal) {
+            return; // ! HAD PREVENT REVEAL !
+        }
 
 
         if (w_foundDocOpened && !q_saved) {
@@ -2479,7 +2484,7 @@ export class LeoUI extends NullGui {
                         // this._revealType = RevealType.NoReveal; // ! IN CASE THIS WAS STILL UP FROM SHOW_OUTLINE
 
                         console.log(
-                            'Setting selection! anchor: ', w_selection.anchor.line, w_selection.anchor.character,
+                            'ShowBody is setting selection! anchor: ', w_selection.anchor.line, w_selection.anchor.character,
                             ' active: ', w_selection.active.line, w_selection.active.character
                         );
 
@@ -2515,6 +2520,33 @@ export class LeoUI extends NullGui {
         }
 
         return q_showTextDocument;
+    }
+
+    /**
+     * Utility to convert a string index into a line, col dict
+     */
+    private _row_col_pv_dict(i: number, s: string): { line: number, col: number, index: number } {
+        if (!i) {
+            i = 0; // prevent none type
+        }
+        // BUG: this uses current selection wrapper only, use
+        // g.convertPythonIndexToRowCol instead !
+        let line: number;
+        let col: number;
+        [line, col] = g.convertPythonIndexToRowCol(s, i);
+        return { "line": line, "col": col, "index": i };
+    };
+
+    /**
+     * Converts from wrapper text index to line /col
+     */
+    private _row_col_wrapper_dict(i: number, wrapper: StringTextWrapper): { "line": number, "col": number, "index": number } {
+        if (!i) {
+            i = 0; // prevent none type
+        }
+        let line, col;
+        [line, col] = wrapper.toPythonIndexRowCol(i);
+        return { "line": line, "col": col, "index": i };
     }
 
     /**
@@ -2622,6 +2654,8 @@ export class LeoUI extends NullGui {
         }
         this._bodyStatesTimer = setTimeout(() => {
             if (this._bodyLastChangedDocument && this.leoStates.fileOpenedReady) {
+                console.log('gotta save in debouncedRefreshBodyStates');
+
                 this._bodySaveDocument(this._bodyLastChangedDocument);
                 this.refreshBodyStates();
             }
@@ -3702,8 +3736,12 @@ export class LeoUI extends NullGui {
         console.log('focus BEFORE replace:', focus);
 
         found = false;
+
+        const settings = fc.ftm.get_settings();
+        fc.init_ivars_from_settings(settings); // ? Needed for fc.change_selection
+
+        fc.check_args('replace');
         if (p_thenFind) {
-            const settings = fc.ftm.get_settings();
             found = fc.do_change_then_find(settings);
             // if (fc.change_selection(c.p)) {
             //     fc.do_find_next(settings);
@@ -4024,6 +4062,8 @@ export class LeoUI extends NullGui {
      * @returns
      */
     public saveSearchSettings(p_settings: LeoSearchSettings): Thenable<unknown> {
+
+        console.log('saveSearchSettings');
 
         this._lastSettingsUsed = p_settings;
         // convert to LeoGuiFindTabManagerSettings
@@ -5416,16 +5456,16 @@ export class LeoUI extends NullGui {
         return this.config.setLeojsSettings(w_changes);
     }
 
-    public widget_name(w: StringTextWrapper): string {
+    public widget_name(w: any): string {
         let name: string;
         if (!w) {
             name = '<no widget>';
         } else if (w['getName']) {
             name = w.getName();
-            // } else if (w['objectName']) {
-            //     name = w.objectName();
-            // } else if (w['_name']) {
-            //     name = w._name;
+        } else if (w['objectName']) {
+            name = w.objectName();
+        } else if (w['_name']) {
+            name = w._name;
         } else {
             name = w.toString();
         }
@@ -5442,6 +5482,18 @@ export class LeoUI extends NullGui {
         return this.focusWidget!;
     }
 
+    /**
+     * Put focus in body widget.
+     */
+    public focus_to_body(c: Commands, p: Position): void {
+        this.set_focus(c, c.frame.body);
+    }
+    /**
+     * Put focus in tree widget.
+     */
+    public focus_to_head(c: Commands, p: Position): void {
+        this.set_focus(c, c.frame.tree);
+    }
     /**
      * * Wrapper of vscode.window.showInputBox to get a user input with simple prompt
      */

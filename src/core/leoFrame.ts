@@ -374,7 +374,7 @@ export class NullTree {
     // public font = undefined;
     // public fontName = undefined;
     // public canvas = undefined;
-    public treeWidget: g.NullObject;
+    public treeWidget: g.NullObject | any;
 
     //@+others
     //@+node:felix.20221102232749.2: *3*  NullTree.__init__
@@ -397,7 +397,7 @@ export class NullTree {
         // this.font = undefined;
         // this.fontName = undefined;
         // this.canvas = undefined;
-        this.treeWidget = new g.NullObject();
+        this.treeWidget = { _name: 'tree' }; // new g.NullObject();
         this.redrawCount = 0;
         this.updateCount = 0;
 
@@ -1010,10 +1010,13 @@ export class StringTextWrapper {
      * StringTextWrapper.
      */
     public insert(i: number, s: string): void {
+        console.log('StringTextWrapper: before insert', this.s);
+
         this.s = this.s.substring(0, i) + s + this.s.substring(i);
         i += s.length;
         this.ins = i;
         this.sel = [i, i];
+        console.log('StringTextWrapper: after insert', this.s);
     }
     //@+node:felix.20221102232754.17: *4* stw.selectAllText
     /**

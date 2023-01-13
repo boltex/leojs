@@ -2586,10 +2586,12 @@ export class LeoFind {
 
             return false;
         }
+
+        console.log('gui_w', gui_w.name);
+
         const sel: [number, number] = gui_w.getSelectionRange();
         const oldSel: [number, number] = sel;
-        let start;
-        let end;
+        let start, end;
         [start, end] = sel;
         if (start > end) {
             [start, end] = [end, start];
@@ -2598,6 +2600,9 @@ export class LeoFind {
             g.es("no text selected");
             return false;
         }
+
+        console.log('SelectionRange before:', oldSel);
+
         const bunch = u.beforeChangeBody(p);
         [start, end] = oldSel;
         let change_text = this.change_text;
@@ -2611,10 +2616,12 @@ export class LeoFind {
         }
         change_text = this.replace_back_slashes(change_text);
 
+        console.log('Change text is : ', change_text);
+
         // Update both the gui widget and the work "widget"
         const new_ins = this.reverse ? start : start + change_text.length;
         if (start !== end) {
-            gui_w.delete(start, end);
+            gui_w.delete(start, end); // PERFORM REPLACE
         }
         gui_w.insert(start, change_text);
         gui_w.setInsertPoint(new_ins);
@@ -2632,6 +2639,8 @@ export class LeoFind {
         }
 
         if (this.in_headline) {
+            console.log('WAS IN HEADLINE!');
+
             // #2220: Let onHeadChanged handle undo, etc.
             c.frame.tree.onHeadChanged(p, 'Change Headline');
 
@@ -2643,6 +2652,10 @@ export class LeoFind {
             }
         } else {
             p.v.b = gui_w.getAllText();
+
+            console.log('WAS IN BODY! finished changebody :', p.v.b);
+            console.log('SelectionRange after:', gui_w.getSelectionRange());
+
             u.afterChangeBody(p, 'Change Body', bunch);
         }
 

@@ -158,6 +158,8 @@
 <v t="felix.20220922000450.10"><vh>closeBody</vh></v>
 <v t="felix.20220922000450.11"><vh>cleanupBody</vh></v>
 <v t="felix.20220922000450.12"><vh>showBody</vh></v>
+<v t="felix.20230112203533.1"><vh>_row_col_pv_dict</vh></v>
+<v t="felix.20230112220003.1"><vh>_row_col_wrapper_dict</vh></v>
 <v t="felix.20221214003903.1"><vh>_getBodyLanguage</vh></v>
 <v t="felix.20220922000450.13"><vh>_setBodyLanguage</vh></v>
 <v t="felix.20220922000450.14"><vh>refreshBodyStates</vh></v>
@@ -258,6 +260,8 @@
 <v t="felix.20221027153815.1"><vh>widget_name</vh></v>
 <v t="felix.20221026222034.1"><vh>set_focus</vh></v>
 <v t="felix.20221026222040.1"><vh>get_focus</vh></v>
+<v t="felix.20230109233134.1"><vh>focus_to_body</vh></v>
+<v t="felix.20230109233154.1"><vh>focus_to_head</vh></v>
 <v t="felix.20221115230034.1"><vh>get1Arg</vh></v>
 <v t="felix.20220613164517.1"><vh>runAboutLeoDialog</vh></v>
 <v t="felix.20220108211750.1"><vh>runAskOkDialog</vh></v>
@@ -3787,7 +3791,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "dependencies": {
     "@types/safe-json-stringify": "^1.1.2",
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "c7759c5",
+  "gitBranch": "leoFind",
+  "gitDate": "2023-01-09 00:11:58 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -8032,6 +8039,8 @@ public triggerBodySave(p_forcedVsCodeSave?: boolean): Thenable&lt;unknown&gt; {
         const w_document = this._bodyLastChangedDocument; // backup for bodySaveDocument before reset
         this._bodyLastChangedDocumentSaved = true;
         this._editorTouched = false;
+        console.log('save in triggerBodySave!');
+
         q_savePromise = this._bodySaveDocument(w_document, p_forcedVsCodeSave);
     } else if (
         p_forcedVsCodeSave &amp;&amp;
@@ -8125,7 +8134,7 @@ private _bodySaveSelection(): void {
     // Always set vnode attrs.
     v.scrollBarSpot = scroll;
     v.insertSpot = insert;
-    v.selectionStart = startSel;
+    v.selectionStart = startSel &lt; endSel ? startSel : endSel;
     v.selectionLength = Math.abs(startSel - endSel);
 
     this._scrollDirty = false;
@@ -9290,6 +9299,8 @@ public loadSearchSettings(): void {
  */
 public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt; {
 
+    console.log('saveSearchSettings');
+
     this._lastSettingsUsed = p_settings;
     // convert to LeoGuiFindTabManagerSettings
     const searchSettings: LeoGuiFindTabManagerSettings = {
@@ -9920,8 +9931,12 @@ public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise&lt;un
     console.log('focus BEFORE replace:', focus);
 
     found = false;
+
+    const settings = fc.ftm.get_settings();
+    fc.init_ivars_from_settings(settings); // ? Needed for fc.change_selection
+
+    fc.check_args('replace');
     if (p_thenFind) {
-        const settings = fc.ftm.get_settings();
         found = fc.do_change_then_find(settings);
         // if (fc.change_selection(c.p)) {
         //     fc.do_find_next(settings);
@@ -11163,7 +11178,7 @@ public cleanupBody(): Thenable&lt;any&gt; {
  * @param p_preventTakingFocus flag that when true will stop the editor from taking focus once opened
  * @returns a promise of an editor, or void if body had been changed again in the meantime.
  */
-public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise&lt;vscode.TextEditor | void&gt; {
+public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preventReveal?: boolean): Promise&lt;vscode.TextEditor | void&gt; {
     const w_openedDocumentTS = utils.performanceNow();
     const w_openedDocumentGnx = utils.leoUriToStr(this.bodyUri);
     let q_saved: Thenable&lt;unknown&gt; | undefined;
@@ -11241,52 +11256,31 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
         const end = p.v.selectionStart + p.v.selectionLength;
         const scroll = p.v.scrollBarSpot;
 
-        const row_col_pv_dict = (i: number, s: string) =&gt; {
-            if (!i) {
-                i = 0; // prevent none type
-            }
-            // BUG: this uses current selection wrapper only, use
-            // g.convertPythonIndexToRowCol instead !
-            let line: number;
-            let col: number;
-            [line, col] = g.convertPythonIndexToRowCol(s, i);
-            return { "line": line, "col": col, "index": i };
-        };
-
         w_bodySel = {
             "gnx": p.v.gnx,
             "scroll": scroll,
-            "insert": row_col_pv_dict(insert, p.v.b),
-            "start": row_col_pv_dict(start, p.v.b),
-            "end": row_col_pv_dict(end, p.v.b)
+            "insert": this._row_col_pv_dict(insert, p.v.b),
+            "start": this._row_col_pv_dict(start, p.v.b),
+            "end": this._row_col_pv_dict(end, p.v.b)
         };
         console.log('From p:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
-
 
         // ! -------------------------------
         // ! TEST SELECTION GETTER OVERRIDE!
         // ! -------------------------------
-        const wrapper = c.frame.body.wrapper;
-        function row_col_wrapper_dict(i: number): { "line": number, "col": number, "index": number } {
-            if (!i) {
-                i = 0; // prevent none type
-            }
-            let line, col;
-            [line, col] = wrapper.toPythonIndexRowCol(i);
-            return { "line": line, "col": col, "index": i };
-        }
-        const test_insert = wrapper.getInsertPoint();
-        let test_start, test_end;
-        [test_start, test_end] = wrapper.getSelectionRange(true);
-        // ! OVERRIDE !
-        w_bodySel = {
-            "gnx": p.v.gnx,
-            "scroll": scroll,
-            "insert": row_col_wrapper_dict(test_insert),
-            "start": row_col_wrapper_dict(test_start),
-            "end": row_col_wrapper_dict(test_end)
-        };
-        console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
+        // const wrapper = c.frame.body.wrapper;
+        // const test_insert = wrapper.getInsertPoint();
+        // let test_start, test_end;
+        // [test_start, test_end] = wrapper.getSelectionRange(true);
+        // // ! OVERRIDE !
+        // w_bodySel = {
+        //     "gnx": p.v.gnx,
+        //     "scroll": scroll,
+        //     "insert": this._row_col_wrapper_dict(test_insert, wrapper),
+        //     "start": this._row_col_wrapper_dict(test_start, wrapper),
+        //     "end": this._row_col_wrapper_dict(test_end, wrapper)
+        // };
+        // console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
 
         // TODO : Apply tabwidth
         // console.log('TABWIDTH: ', w_tabWidth);
@@ -11357,7 +11351,14 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
                     if (p_textDocument.uri.fsPath === (p_tab.input as vscode.TabInputText).uri.fsPath) {
                         this._bodyTextDocument = p_textDocument; // vscode.workspace.openTextDocument
                         this._bodyMainSelectionColumn = p_tab.group.viewColumn;
-                        w_foundDocOpened = true;
+                        if (p_preventReveal) {
+                            if (p_tab.isActive) {
+                                w_foundDocOpened = true;
+                            }
+                        } else {
+                            w_foundDocOpened = true;
+
+                        }
                     }
                 });
             }
@@ -11369,6 +11370,9 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
 
     // console.log('POST found TAB: ', w_foundTabOpened);
     // console.log('POST found DOC: ', w_foundDocOpened);
+    if (!w_foundDocOpened &amp;&amp; p_preventReveal) {
+        return; // ! HAD PREVENT REVEAL !
+    }
 
 
     if (w_foundDocOpened &amp;&amp; !q_saved) {
@@ -11472,7 +11476,7 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean): Promise
                     // this._revealType = RevealType.NoReveal; // ! IN CASE THIS WAS STILL UP FROM SHOW_OUTLINE
 
                     console.log(
-                        'Setting selection! anchor: ', w_selection.anchor.line, w_selection.anchor.character,
+                        'ShowBody is setting selection! anchor: ', w_selection.anchor.line, w_selection.anchor.character,
                         ' active: ', w_selection.active.line, w_selection.active.character
                     );
 
@@ -11597,6 +11601,8 @@ public debouncedRefreshBodyStates(p_delay?: number) {
     }
     this._bodyStatesTimer = setTimeout(() =&gt; {
         if (this._bodyLastChangedDocument &amp;&amp; this.leoStates.fileOpenedReady) {
+            console.log('gotta save in debouncedRefreshBodyStates');
+
             this._bodySaveDocument(this._bodyLastChangedDocument);
             this.refreshBodyStates();
         }
@@ -12244,6 +12250,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
         p_textDocumentChange.contentChanges.length &amp;&amp;
         p_textDocumentChange.document.uri.scheme === Constants.URI_LEO_SCHEME
     ) {
+        console.log('DOCUMENT CHANGE DETECTED!, dirty: ', p_textDocumentChange.document.isDirty === true);
 
         // * There was a on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
         this._bodyLastChangedDocument = p_textDocumentChange.document;
@@ -12257,6 +12264,19 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
         ) {
             const w_hasBody = !!p_textDocumentChange.document.getText().length;
             const w_iconChanged = utils.isIconChangedByEdit(this.lastSelectedNode, w_hasBody);
+
+            const c = g.app.windowList[this.frameIndex].c;
+
+            console.log('testing for real change');
+
+            if (c.p &amp;&amp; c.p.__bool__() &amp;&amp; p_textDocumentChange.document.getText() === c.p.b) {
+                console.log('Was a p.b. update by replace or externale file change');
+                // Set proper cursor insertion point and selection range.
+                this.showBody(false, true, true);
+                return;
+            } else {
+                console.log('Change is a real user typing');
+            }
 
             if (!this.leoStates.leoChanged || w_iconChanged) {
                 if (this.preventIconChange) {
@@ -12646,16 +12666,16 @@ public static OLD_POS_OFFSETS = {
 }
 
 </t>
-<t tx="felix.20221027153815.1">public widget_name(w: StringTextWrapper): string {
+<t tx="felix.20221027153815.1">public widget_name(w: any): string {
     let name: string;
     if (!w) {
         name = '&lt;no widget&gt;';
     } else if (w['getName']) {
         name = w.getName();
-        // } else if (w['objectName']) {
-        //     name = w.objectName();
-        // } else if (w['_name']) {
-        //     name = w._name;
+    } else if (w['objectName']) {
+        name = w.objectName();
+    } else if (w['_name']) {
+        name = w._name;
     } else {
         name = w.toString();
     }
@@ -14306,6 +14326,49 @@ public async navTextClear(): Promise&lt;unknown&gt; {
     const w = g.app.gui.get_focus(c);
     const focus = g.app.gui.widget_name(w);
     return focus;
+}
+
+</t>
+<t tx="felix.20230109233134.1">/**
+ * Put focus in body widget.
+ */
+public focus_to_body(c: Commands, p: Position): void {
+    this.set_focus(c, c.frame.body);
+}
+</t>
+<t tx="felix.20230109233154.1">/**
+ * Put focus in tree widget.
+ */
+public focus_to_head(c: Commands, p: Position): void {
+    this.set_focus(c, c.frame.tree);
+}
+</t>
+<t tx="felix.20230112203533.1">/**
+ * Utility to convert a string index into a line, col dict
+ */
+private _row_col_pv_dict(i: number, s: string): { line: number, col: number, index: number } {
+    if (!i) {
+        i = 0; // prevent none type
+    }
+    // BUG: this uses current selection wrapper only, use
+    // g.convertPythonIndexToRowCol instead !
+    let line: number;
+    let col: number;
+    [line, col] = g.convertPythonIndexToRowCol(s, i);
+    return { "line": line, "col": col, "index": i };
+};
+
+</t>
+<t tx="felix.20230112220003.1">/**
+ * Converts from wrapper text index to line /col
+ */
+private _row_col_wrapper_dict(i: number, wrapper: StringTextWrapper): { "line": number, "col": number, "index": number } {
+    if (!i) {
+        i = 0; // prevent none type
+    }
+    let line, col;
+    [line, col] = wrapper.toPythonIndexRowCol(i);
+    return { "line": line, "col": col, "index": i };
 }
 
 </t>

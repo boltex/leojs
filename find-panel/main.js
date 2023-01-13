@@ -222,6 +222,7 @@
         }
         var keyCode = p_event.code || p_event.key;
 
+        // Detect CTRL+F
         if (p_event.ctrlKey && !p_event.shiftKey && p_event.keyCode === 70) {
             p_event.preventDefault();
             p_event.stopPropagation();
@@ -406,6 +407,9 @@
             w_inputEl.addEventListener('input', function (p_event) {
                 // @ts-expect-error
                 searchSettings[p_inputId] = this.value;
+
+                console.log('searchSettings of', p_inputId, " is: ", searchSettings);
+
                 processChange();
             });
         }
