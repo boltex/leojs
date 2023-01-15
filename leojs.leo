@@ -60,7 +60,7 @@
 <v t="felix.20211010192923.1"><vh>@clean src/leoBody.ts</vh>
 <v t="felix.20211010192923.2"><vh>class LeoBodyProvider</vh>
 <v t="felix.20211010192923.3"><vh>setBodyTime</vh></v>
-<v t="felix.20221130233817.1"><vh>setOpenedBodyTime</vh></v>
+<v t="felix.20221130233817.1"><vh>_setOpenedBodyTime</vh></v>
 <v t="felix.20211010192923.4"><vh>fireRefreshFile</vh></v>
 <v t="felix.20211010192923.5"><vh>refreshPossibleGnxList</vh></v>
 <v t="felix.20211010192923.6"><vh>watch</vh></v>
@@ -158,6 +158,7 @@
 <v t="felix.20220922000450.10"><vh>closeBody</vh></v>
 <v t="felix.20220922000450.11"><vh>cleanupBody</vh></v>
 <v t="felix.20220922000450.12"><vh>showBody</vh></v>
+<v t="felix.20230113234242.1"><vh>_setTextSelection</vh></v>
 <v t="felix.20230112203533.1"><vh>_row_col_pv_dict</vh></v>
 <v t="felix.20230112220003.1"><vh>_row_col_wrapper_dict</vh></v>
 <v t="felix.20221214003903.1"><vh>_getBodyLanguage</vh></v>
@@ -3792,9 +3793,9 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     "@types/safe-json-stringify": "^1.1.2",
     &lt;&lt; dependencies &gt;&gt;
   },
-  "gitCommit": "c7759c5",
+  "gitCommit": "2f006cc",
   "gitBranch": "leoFind",
-  "gitDate": "2023-01-09 00:11:58 -0500"
+  "gitDate": "2023-01-12 22:09:32 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -6726,6 +6727,8 @@ public gotSelectedNode(p_node: Position): void {
         // ! MINIMAL TIMEOUT REQUIRED ! WHY ?? (works so leave)
         setTimeout(() =&gt; {
             // SAME with scroll information specified
+            console.log('gotSelectedNode: SHOW BODY WITH SCROLL!');
+
             this.showBody(false, this.finalFocus.valueOf() !== Focus.Body);
         }, 25);
     } else {
@@ -7505,6 +7508,8 @@ import * as g from './core/leoGlobals';
 
 </t>
 <t tx="felix.20211010192923.11">public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
+    console.log('write file gnx: ', utils.leoUriToStr(p_uri));
+
     if (!this.preventSaveToLeo) {
         this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
     } else {
@@ -7515,7 +7520,7 @@ import * as g from './core/leoGlobals';
         console.error("LeoJS: Tried to save body other than selected node's body", w_gnx);
     }
 
-    this.setOpenedBodyTime(w_gnx);
+    this._setOpenedBodyTime(w_gnx);
 
     this._fireSoon({ type: vscode.FileChangeType.Changed, uri: p_uri });
 }
@@ -7609,26 +7614,9 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
 public setNewBodyUriTime(p_uri: vscode.Uri): void {
     const w_gnx = utils.leoUriToStr(p_uri);
     this._lastBodyTimeGnx = w_gnx;
-    this.setOpenedBodyTime(w_gnx);
+    this._setOpenedBodyTime(w_gnx);
 }
 
-/**
- * * Adds entries in _openedBodiesGnx and _openedBodiesInfo if needed
- * * and sets the modified time of an opened body.
- */
-public setOpenedBodyTime(p_gnx: string): void {
-    const w_now = new Date().getTime();
-    let w_created = w_now;
-    if (!this._openedBodiesGnx.includes(p_gnx)) {
-        this._openedBodiesGnx.push(p_gnx);
-    } else {
-        w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
-    }
-    this._openedBodiesInfo[p_gnx] = {
-        ctime: w_now, // maybe kept.
-        mtime: w_now // new 'modified' time for sure.
-    };
-}
 </t>
 <t tx="felix.20211010192923.4">/**
  * * Refresh the body pane for a particular gnx by telling vscode that the file from the Leo file provider has changed
@@ -7640,12 +7628,12 @@ public fireRefreshFile(p_gnx: string): void {
         console.error("ASKED TO REFRESH NOT EVEN IN SELECTED BODY: ", p_gnx);
     }
 
-    this.setOpenedBodyTime(p_gnx);
+    this._setOpenedBodyTime(p_gnx);
 
     this._onDidChangeFileEmitter.fire([{
         type: vscode.FileChangeType.Changed,
         uri: utils.strToLeoUri(p_gnx)
-    } as vscode.FileChangeEvent]);
+    }]);
 }
 
 </t>
@@ -7679,11 +7667,15 @@ public refreshPossibleGnxList(): string[] {
 
 </t>
 <t tx="felix.20211010192923.7">public stat(p_uri: vscode.Uri): vscode.FileStat {
+    console.log('asking STAT for gnx ', utils.leoUriToStr(p_uri));
+
     if (this._leoUi.leoStates.fileOpenedReady) {
         const w_gnx = utils.leoUriToStr(p_uri);
         if (p_uri.fsPath.length === 1) {
             return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
-        } else if (w_gnx === this._lastGnx &amp;&amp; this._openedBodiesGnx.includes(this._lastGnx)) {
+        } else if (false &amp;&amp; w_gnx === this._lastGnx &amp;&amp; this._openedBodiesGnx.includes(this._lastGnx)) {
+            console.log('had stats: modified: ', this._openedBodiesInfo[this._lastGnx].mtime);
+
             return {
                 type: vscode.FileType.File,
                 ctime: this._openedBodiesInfo[this._lastGnx].ctime,
@@ -7708,6 +7700,8 @@ public refreshPossibleGnxList(): string[] {
 
 </t>
 <t tx="felix.20211010192923.8">public readFile(p_uri: vscode.Uri): Uint8Array {
+    console.log('try to read gnx: ', utils.leoUriToStr(p_uri));
+
     if (this._leoUi.leoStates.fileOpenedReady) {
         if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
             throw vscode.FileSystemError.FileIsADirectory();
@@ -7722,11 +7716,14 @@ public refreshPossibleGnxList(): string[] {
             }
 
             const c = g.app.windowList[this._leoUi.frameIndex].c;
+            console.log('c.p.b: ', c.p.b);
+
             const w_v = c.fileCommands.gnxDict[w_gnx];
             if (w_v) {
                 this._errorRefreshFlag = false; // got body so reset possible flag!
                 this._lastGnx = w_gnx;
                 this._lastBodyData = w_v.b;
+                console.log('read body: ', this._lastBodyData);
 
                 const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
                 this._lastBodyLength = w_buffer.byteLength;
@@ -9830,12 +9827,15 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknow
         } else {
             this.showBodyIfClosed = true;
         }
+        const w_scroll = (found &amp;&amp; w_finalFocus === Focus.Body) || undefined;
+        console.log('scroll is :', w_scroll);
+
         this.setupRefresh(
             w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
             {
                 tree: true, // HAVE to refresh tree because find folds/unfolds only result outline paths
                 body: true,
-                scroll: found &amp;&amp; w_finalFocus === Focus.Body,
+                scroll: w_scroll,
                 // documents: false,
                 // buttons: false,
                 states: true,
@@ -11202,7 +11202,12 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
 
         if (q_saved) {
             await q_saved;
+            console.log('firerefresh in showbody top because of this._refreshType.body');
+
             this._leoFileSystem.fireRefreshFile(w_openedDocumentGnx);
+        } else {
+            console.log('HAD to  this._refreshType.body but no q_saved !!!');
+
         }
 
     }
@@ -11377,9 +11382,13 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
 
     if (w_foundDocOpened &amp;&amp; !q_saved) {
         // Was the same and was asked to show body (and did not already had to fake-save and refresh)
-        this._leoFileSystem.fireRefreshFile(w_openedDocumentGnx);
-    }
+        console.log('firerefresh in showbody bottom because was the same and was asked to show body (and did not already had to fake-save and refresh)');
 
+        this._leoFileSystem.fireRefreshFile(w_openedDocumentGnx);
+    } else {
+        console.log('LAST CHANCE TO fireRefreshFile SKIPPED! ');
+
+    }
     // Setup options for the preview state of the opened editor, and to choose which column it should appear
     const w_showOptions: vscode.TextDocumentShowOptions = p_aside
         ? {
@@ -14205,7 +14214,28 @@ public get1Arg(p_options?: vscode.InputBoxOptions | undefined, p_token?: vscode.
 
 </t>
 <t tx="felix.20221119204248.1"></t>
-<t tx="felix.20221130233817.1">
+<t tx="felix.20221130233817.1">/**
+ * * Adds entries in _openedBodiesGnx and _openedBodiesInfo if needed
+ * * and sets the modified time of an opened body.
+ */
+private _setOpenedBodyTime(p_gnx: string): void {
+    const w_now = new Date().getTime();
+    console.log('set modified to gnx', p_gnx, ' to ', w_now);
+
+    let w_created = w_now;
+    if (!this._openedBodiesGnx.includes(p_gnx)) {
+        this._openedBodiesGnx.push(p_gnx);
+    } else {
+        console.log('( modified was : ' + this._openedBodiesInfo[p_gnx].mtime + ' )');
+
+        w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
+    }
+    this._openedBodiesInfo[p_gnx] = {
+        ctime: w_created, // w_now, // maybe kept.
+        mtime: w_now // new 'modified' time for sure.
+    };
+}
+
 </t>
 <t tx="felix.20221206201231.1">/**
  * Mimic vscode's CTRL+P to find any position by it's headline
@@ -14369,6 +14399,16 @@ private _row_col_wrapper_dict(i: number, wrapper: StringTextWrapper): { "line": 
     let line, col;
     [line, col] = wrapper.toPythonIndexRowCol(i);
     return { "line": line, "col": col, "index": i };
+}
+
+</t>
+<t tx="felix.20230113234242.1">/**
+ * Set the cursor selection for the given gnx if visible
+ */
+public _setTextSelection(): void {
+
+    // ? needed ?
+
 }
 
 </t>

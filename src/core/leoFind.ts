@@ -2654,7 +2654,10 @@ export class LeoFind {
             p.v.b = gui_w.getAllText();
 
             console.log('WAS IN BODY! finished changebody :', p.v.b);
+            console.log('c.fileCommands.gnxDict[w_gnx]:', c.fileCommands.gnxDict[p.v.gnx]?.b);
+
             console.log('SelectionRange after:', gui_w.getSelectionRange());
+
 
             u.afterChangeBody(p, 'Change Body', bunch);
         }

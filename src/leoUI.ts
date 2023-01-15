@@ -1001,7 +1001,9 @@ export class LeoUI extends NullGui {
                 });
             }
             if (w_needsRefresh) {
-                this.debouncedRefreshBodyStates();
+                console.log('-------------------------debouncedRefreshBodyStates in _onDocumentChanged end');
+
+                this.debouncedRefreshBodyStates(1);
             }
 
         }
@@ -1102,6 +1104,8 @@ export class LeoUI extends NullGui {
             q_savePromise = Promise.resolve(true);
         }
         return q_savePromise.then((p_result) => {
+            console.log('-------------------------debouncedRefreshBodyStates in triggerebody save');
+
             this.debouncedRefreshBodyStates();
             return p_result;
         }, (p_reason) => {
@@ -1684,6 +1688,8 @@ export class LeoUI extends NullGui {
             // ! MINIMAL TIMEOUT REQUIRED ! WHY ?? (works so leave)
             setTimeout(() => {
                 // SAME with scroll information specified
+                console.log('gotSelectedNode: SHOW BODY WITH SCROLL!');
+
                 this.showBody(false, this.finalFocus.valueOf() !== Focus.Body);
             }, 25);
         } else {
@@ -2210,7 +2216,12 @@ export class LeoUI extends NullGui {
 
             if (q_saved) {
                 await q_saved;
+                console.log('firerefresh in showbody top because of this._refreshType.body');
+
                 this._leoFileSystem.fireRefreshFile(w_openedDocumentGnx);
+            } else {
+                console.log('BODY REFRESH TRUE in show body but no q_saved !!!');
+
             }
 
         }
@@ -2385,9 +2396,13 @@ export class LeoUI extends NullGui {
 
         if (w_foundDocOpened && !q_saved) {
             // Was the same and was asked to show body (and did not already had to fake-save and refresh)
-            this._leoFileSystem.fireRefreshFile(w_openedDocumentGnx);
-        }
+            console.log('firerefresh in showbody bottom because was the same and was asked to show body (and did not already had to fake-save and refresh)');
 
+            this._leoFileSystem.fireRefreshFile(w_openedDocumentGnx);
+        } else {
+            console.log('LAST CHANCE TO fireRefreshFile SKIPPED! ');
+
+        }
         // Setup options for the preview state of the opened editor, and to choose which column it should appear
         const w_showOptions: vscode.TextDocumentShowOptions = p_aside
             ? {
@@ -2523,6 +2538,15 @@ export class LeoUI extends NullGui {
     }
 
     /**
+     * Set the cursor selection for the given gnx if visible
+     */
+    public _setTextSelection(): void {
+
+        // ? needed ?
+
+    }
+
+    /**
      * Utility to convert a string index into a line, col dict
      */
     private _row_col_pv_dict(i: number, s: string): { line: number, col: number, index: number } {
@@ -2646,20 +2670,35 @@ export class LeoUI extends NullGui {
      * * Refresh body states after a small debounced delay.
      */
     public debouncedRefreshBodyStates(p_delay?: number) {
+
         if (!p_delay) {
             p_delay = 0;
         }
+
+        console.log('debouncedRefreshBodyStates called, delay:', p_delay);
+
         if (this._bodyStatesTimer) {
             clearTimeout(this._bodyStatesTimer);
         }
-        this._bodyStatesTimer = setTimeout(() => {
+        if (p_delay === 0) {
+            console.log('NO DELAY gotta save in debouncedRefreshBodyStates');
+
             if (this._bodyLastChangedDocument && this.leoStates.fileOpenedReady) {
                 console.log('gotta save in debouncedRefreshBodyStates');
 
                 this._bodySaveDocument(this._bodyLastChangedDocument);
                 this.refreshBodyStates();
             }
-        }, p_delay || Constants.BODY_STATES_DEBOUNCE_DELAY);
+        } else {
+            this._bodyStatesTimer = setTimeout(() => {
+                if (this._bodyLastChangedDocument && this.leoStates.fileOpenedReady) {
+                    console.log('gotta save in debouncedRefreshBodyStates');
+
+                    this._bodySaveDocument(this._bodyLastChangedDocument);
+                    this.refreshBodyStates();
+                }
+            }, p_delay || Constants.BODY_STATES_DEBOUNCE_DELAY);
+        }
     }
 
     /**
@@ -3637,12 +3676,15 @@ export class LeoUI extends NullGui {
             } else {
                 this.showBodyIfClosed = true;
             }
+            const w_scroll = (found && w_finalFocus === Focus.Body) || undefined;
+            console.log('scroll is :', w_scroll);
+
             this.setupRefresh(
                 w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
                 {
                     tree: true, // HAVE to refresh tree because find folds/unfolds only result outline paths
                     body: true,
-                    scroll: found && w_finalFocus === Focus.Body,
+                    scroll: w_scroll,
                     // documents: false,
                     // buttons: false,
                     states: true,
