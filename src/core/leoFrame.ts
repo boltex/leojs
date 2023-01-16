@@ -410,11 +410,12 @@ export class NullTree {
 
         // Important: this will redraw if necessary.
         this.onHeadChanged(this.c.p);
-        // Do *not* call setDefaultUnboundKeyAction here: it might put us in ignore mode!
-        // k.setDefaultInputState()
-        // k.showStateAndMode()
-        // This interferes with the find command and interferes with focus generally!
-        // c.bodyWantsFocus()
+        // ! LEOJS: Mimic qt_tree 
+        const d = this.editWidgetsDict;
+        if (d[this.c.p.v.gnx]) {
+            delete d[this.c.p.v.gnx];
+        }
+
     }
     //@+node:felix.20221105000303.1: *3* LeoTree.onHeadChanged
 
@@ -706,14 +707,16 @@ export class NullTree {
             return undefined;
         }
         let w = d[p.v.gnx];
-        if (!w) {
-            w = new StringTextWrapper(
-                this.c,
-                `head-${1 + Object.keys(d).length}`
-            );
-            d[p.v.gnx] = w;
-            w.setAllText(p.h);
-        }
+        // ! LEOJS : Mimic from qt_tree
+        // ! Dont return if not already in dict as an active headline editor
+        // if (!w) {
+        //     w = new StringTextWrapper(
+        //         this.c,
+        //         `head-${1 + Object.keys(d).length}`
+        //     );
+        //     d[p.v.gnx] = w;
+        //     w.setAllText(p.h);
+        // }
         return w;
 
     }
@@ -725,7 +728,23 @@ export class NullTree {
 
         this.endEditLabel();
         if (p && p.__bool__()) {
-            const wrapper = new StringTextWrapper(this.c, 'head-wrapper');
+
+            // ! LEOJS : Mimic from qt_tree
+
+            const d = this.editWidgetsDict;
+
+            let wrapper = d[p.v.gnx];
+
+            if (!wrapper) {
+                wrapper = new StringTextWrapper(
+                    this.c,
+                    'head-wrapper'
+                );
+                d[p.v.gnx] = wrapper;
+                wrapper.setAllText(p.h);
+            }
+
+            // const wrapper = new StringTextWrapper(this.c, 'head-wrapper');
             const e = undefined;
             return [e, wrapper];
         }

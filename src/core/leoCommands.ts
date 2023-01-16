@@ -1334,8 +1334,8 @@ export class Commands {
         // Change the actual tree widget so
         // A later call to c.endEditing or c.redraw will use s.
 
-        // TODO: needed?
-        // c.frame.tree.setHeadline(p, s);
+
+        c.frame.tree.setHeadline(p, s);
     }
 
     //@+node:felix.20210215204844.1: *5* c.setMarked (calls hook)
@@ -2592,7 +2592,7 @@ export class Commands {
     public markAllAtFileNodesDirty(): void {
         const c: Commands = this;
 
-        // c.endEditing()
+        c.endEditing();
         const p: Position = c.rootPosition()!;
 
         while (p && p.__bool__()) {
@@ -2617,7 +2617,7 @@ export class Commands {
         if (!p || !p.__bool__()) {
             return;
         }
-        // c.endEditing()
+        c.endEditing();
         const after: Position = p.nodeAfterTree();
 
         while (p && p.__bool__() && !p.__eq__(after)) {
@@ -3682,6 +3682,7 @@ export class Commands {
                 }
             }
         }
+        console.log('gonna tree.select!');
 
         c.frame.tree.select(p);
 

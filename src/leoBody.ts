@@ -55,14 +55,10 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
      */
     private _setOpenedBodyTime(p_gnx: string): void {
         const w_now = new Date().getTime();
-        console.log('set modified to gnx', p_gnx, ' to ', w_now);
-
         let w_created = w_now;
         if (!this._openedBodiesGnx.includes(p_gnx)) {
             this._openedBodiesGnx.push(p_gnx);
         } else {
-            console.log('( modified was : ' + this._openedBodiesInfo[p_gnx].mtime + ' )');
-
             w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
         }
         this._openedBodiesInfo[p_gnx] = {
@@ -117,15 +113,13 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     }
 
     public stat(p_uri: vscode.Uri): vscode.FileStat {
-        console.log('asking STAT for gnx ', utils.leoUriToStr(p_uri));
-
         if (this._leoUi.leoStates.fileOpenedReady) {
             const w_gnx = utils.leoUriToStr(p_uri);
             if (p_uri.fsPath.length === 1) {
                 return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
             } else if (false && w_gnx === this._lastGnx && this._openedBodiesGnx.includes(this._lastGnx)) {
+                // ! Always return current size: w_v.b.length ! Not this._lastBodyLength !
                 console.log('had stats: modified: ', this._openedBodiesInfo[this._lastGnx].mtime);
-
                 return {
                     type: vscode.FileType.File,
                     ctime: this._openedBodiesInfo[this._lastGnx].ctime,
@@ -149,8 +143,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     }
 
     public readFile(p_uri: vscode.Uri): Uint8Array {
-        console.log('try to read gnx: ', utils.leoUriToStr(p_uri));
-
         if (this._leoUi.leoStates.fileOpenedReady) {
             if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
                 throw vscode.FileSystemError.FileIsADirectory();
@@ -165,16 +157,11 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                 }
 
                 const c = g.app.windowList[this._leoUi.frameIndex].c;
-                console.log('c.p.b: ', c.p.b);
-
                 const w_v = c.fileCommands.gnxDict[w_gnx];
                 if (w_v) {
                     this._errorRefreshFlag = false; // got body so reset possible flag!
                     this._lastGnx = w_gnx;
                     this._lastBodyData = w_v.b;
-                    console.log('read body: ', this._lastBodyData);
-                    console.log('------------------------------------------------------------------------------');
-
                     const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
                     this._lastBodyLength = w_buffer.byteLength;
                     return w_buffer;
@@ -212,8 +199,6 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
     }
 
     public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
-        console.log('write file gnx: ', utils.leoUriToStr(p_uri));
-
         if (!this.preventSaveToLeo) {
             this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
         } else {

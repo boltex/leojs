@@ -177,7 +177,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             return;
         }
 
-        // c.endEditing();
+        c.endEditing();
         const time = c.getTime(false);
         const s = p.h.trimEnd();
 

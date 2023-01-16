@@ -323,7 +323,7 @@ suite('Test Undo', () => {
         node1 = p.copy().moveToFirstChild();
         c.selectPosition(node1);
 
-        // c.editHeadline();
+        // c.editHeadline(); // TODO : UNCOMMENT THIS WITH THE NEW WRAPPER CODE !
         // w = c.frame.tree.edit_widget(node1);
         // w.insert('1.0', 'changed - ');
         // c.endEditing();

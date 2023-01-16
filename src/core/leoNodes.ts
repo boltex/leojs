@@ -9,6 +9,7 @@ import { Commands } from './leoCommands';
 import { Bead } from './leoUndo';
 import { FileCommands } from './leoFileCommands';
 import 'date-format-lite';
+import { NullBody } from './leoFrame';
 //@-<< imports >>
 //@+others
 //@+node:felix.20210102014453.1: ** class NodeIndices
@@ -3259,7 +3260,7 @@ export class VNode {
         let ins: number = v.insertSpot;
         // start, n = v.selectionStart, v.selectionLength
         const spot: number = v.scrollBarSpot;
-        const body: any = this.context.frame.body;
+        const body: NullBody = this.context.frame.body;
         const w: any = body.wrapper;
         // Fix bug 981849: incorrect body content shown.
         if (ins === undefined) {

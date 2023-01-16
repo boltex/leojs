@@ -1084,7 +1084,7 @@ export class CommanderFileCommands {
         const p: Position = this.p;
         const u: Undoer = this.undoer;
 
-        // c.endEditing();
+        c.endEditing();
         c.init_error_dialogs();
         const undoData: Bead = u.beforeChangeTree(p);
         await c.importCommands.readAtAutoNodes();
@@ -1103,7 +1103,7 @@ export class CommanderFileCommands {
         const p: Position = this.p;
         const u: Undoer = this.undoer;
 
-        // c.endEditing();
+        c.endEditing();
         const undoData: Bead = u.beforeChangeTree(p);
 
         await c.atFileCommands.readAllSelected(p);
@@ -1123,7 +1123,7 @@ export class CommanderFileCommands {
         const p: Position = this.p;
         const u: Undoer = this.undoer;
 
-        // c.endEditing();
+        c.endEditing();
         c.init_error_dialogs();
         const undoData: Bead = u.beforeChangeTree(p);
         await c.atFileCommands.readAtShadowNodes(p);
@@ -1140,7 +1140,7 @@ export class CommanderFileCommands {
         const c: Commands = this;
         const undoType: string = 'Read File Into Node';
 
-        // c.endEditing();
+        c.endEditing();
         const filetypes: [string, string][] = [
             ["All files", "*"],
             ["Python files", "*.py"],
@@ -1179,7 +1179,7 @@ export class CommanderFileCommands {
     public async readOutlineOnly(this: Commands): Promise<unknown> {
 
         const c: Commands = this;
-
+        c.endEditing();
         const fileName = await g.app.gui.runOpenFileDialog(
             c,
             "Read Outline Only",
@@ -1218,7 +1218,7 @@ export class CommanderFileCommands {
 
         const c: Commands = this;
         let p: Position = this.p;
-
+        c.endEditing();
         let h: string = p.h.trimEnd();
         let s: string = p.b;
 

@@ -1142,7 +1142,7 @@ export class LeoApp {
         if (g.app.debug.includes('shutdown')) {
             g.trace(`changed: ${c.changed} ${c.shortFileName()}`);
         }
-        // c.endEditing()  // Commit any open edits.
+        c.endEditing();  // Commit any open edits.
         if (c.promptingForClose) {
             // There is already a dialog open asking what to do.
             return false;

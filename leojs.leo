@@ -158,7 +158,6 @@
 <v t="felix.20220922000450.10"><vh>closeBody</vh></v>
 <v t="felix.20220922000450.11"><vh>cleanupBody</vh></v>
 <v t="felix.20220922000450.12"><vh>showBody</vh></v>
-<v t="felix.20230113234242.1"><vh>_setTextSelection</vh></v>
 <v t="felix.20230112203533.1"><vh>_row_col_pv_dict</vh></v>
 <v t="felix.20230112220003.1"><vh>_row_col_wrapper_dict</vh></v>
 <v t="felix.20221214003903.1"><vh>_getBodyLanguage</vh></v>
@@ -3793,9 +3792,9 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     "@types/safe-json-stringify": "^1.1.2",
     &lt;&lt; dependencies &gt;&gt;
   },
-  "gitCommit": "2f006cc",
+  "gitCommit": "f505340",
   "gitBranch": "leoFind",
-  "gitDate": "2023-01-12 22:09:32 -0500"
+  "gitDate": "2023-01-14 19:03:27 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -7508,8 +7507,6 @@ import * as g from './core/leoGlobals';
 
 </t>
 <t tx="felix.20211010192923.11">public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
-    console.log('write file gnx: ', utils.leoUriToStr(p_uri));
-
     if (!this.preventSaveToLeo) {
         this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
     } else {
@@ -7667,15 +7664,13 @@ public refreshPossibleGnxList(): string[] {
 
 </t>
 <t tx="felix.20211010192923.7">public stat(p_uri: vscode.Uri): vscode.FileStat {
-    console.log('asking STAT for gnx ', utils.leoUriToStr(p_uri));
-
     if (this._leoUi.leoStates.fileOpenedReady) {
         const w_gnx = utils.leoUriToStr(p_uri);
         if (p_uri.fsPath.length === 1) {
             return { type: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 };
         } else if (false &amp;&amp; w_gnx === this._lastGnx &amp;&amp; this._openedBodiesGnx.includes(this._lastGnx)) {
+            // ! Always return current size: w_v.b.length ! Not this._lastBodyLength !
             console.log('had stats: modified: ', this._openedBodiesInfo[this._lastGnx].mtime);
-
             return {
                 type: vscode.FileType.File,
                 ctime: this._openedBodiesInfo[this._lastGnx].ctime,
@@ -7700,8 +7695,6 @@ public refreshPossibleGnxList(): string[] {
 
 </t>
 <t tx="felix.20211010192923.8">public readFile(p_uri: vscode.Uri): Uint8Array {
-    console.log('try to read gnx: ', utils.leoUriToStr(p_uri));
-
     if (this._leoUi.leoStates.fileOpenedReady) {
         if (p_uri.fsPath.length === 1) { // p_uri.fsPath === '/' || p_uri.fsPath === '\\'
             throw vscode.FileSystemError.FileIsADirectory();
@@ -7716,15 +7709,11 @@ public refreshPossibleGnxList(): string[] {
             }
 
             const c = g.app.windowList[this._leoUi.frameIndex].c;
-            console.log('c.p.b: ', c.p.b);
-
             const w_v = c.fileCommands.gnxDict[w_gnx];
             if (w_v) {
                 this._errorRefreshFlag = false; // got body so reset possible flag!
                 this._lastGnx = w_gnx;
                 this._lastBodyData = w_v.b;
-                console.log('read body: ', this._lastBodyData);
-
                 const w_buffer: Uint8Array = Buffer.from(this._lastBodyData);
                 this._lastBodyLength = w_buffer.byteLength;
                 return w_buffer;
@@ -11202,12 +11191,7 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
 
         if (q_saved) {
             await q_saved;
-            console.log('firerefresh in showbody top because of this._refreshType.body');
-
             this._leoFileSystem.fireRefreshFile(w_openedDocumentGnx);
-        } else {
-            console.log('HAD to  this._refreshType.body but no q_saved !!!');
-
         }
 
     }
@@ -11273,19 +11257,19 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
         // ! -------------------------------
         // ! TEST SELECTION GETTER OVERRIDE!
         // ! -------------------------------
-        // const wrapper = c.frame.body.wrapper;
-        // const test_insert = wrapper.getInsertPoint();
-        // let test_start, test_end;
-        // [test_start, test_end] = wrapper.getSelectionRange(true);
+        const wrapper = c.frame.body.wrapper;
+        const test_insert = wrapper.getInsertPoint();
+        let test_start, test_end;
+        [test_start, test_end] = wrapper.getSelectionRange(true);
         // // ! OVERRIDE !
-        // w_bodySel = {
-        //     "gnx": p.v.gnx,
-        //     "scroll": scroll,
-        //     "insert": this._row_col_wrapper_dict(test_insert, wrapper),
-        //     "start": this._row_col_wrapper_dict(test_start, wrapper),
-        //     "end": this._row_col_wrapper_dict(test_end, wrapper)
-        // };
-        // console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
+        const w_bodySel_w = {
+            "gnx": p.v.gnx,
+            "scroll": scroll,
+            "insert": this._row_col_wrapper_dict(test_insert, wrapper),
+            "start": this._row_col_wrapper_dict(test_start, wrapper),
+            "end": this._row_col_wrapper_dict(test_end, wrapper)
+        };
+        console.log('From w:', ` insert:${w_bodySel_w.insert.line}, ${w_bodySel_w.insert.col} start:${w_bodySel_w.start.line},${w_bodySel_w.start.col} end:${w_bodySel_w.end.line}, ${w_bodySel_w.end.col}`);
 
         // TODO : Apply tabwidth
         // console.log('TABWIDTH: ', w_tabWidth);
@@ -11379,15 +11363,9 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
         return; // ! HAD PREVENT REVEAL !
     }
 
-
     if (w_foundDocOpened &amp;&amp; !q_saved) {
         // Was the same and was asked to show body (and did not already had to fake-save and refresh)
-        console.log('firerefresh in showbody bottom because was the same and was asked to show body (and did not already had to fake-save and refresh)');
-
         this._leoFileSystem.fireRefreshFile(w_openedDocumentGnx);
-    } else {
-        console.log('LAST CHANCE TO fireRefreshFile SKIPPED! ');
-
     }
     // Setup options for the preview state of the opened editor, and to choose which column it should appear
     const w_showOptions: vscode.TextDocumentShowOptions = p_aside
@@ -11484,10 +11462,10 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
                 if (w_bodyTextEditor) {
                     // this._revealType = RevealType.NoReveal; // ! IN CASE THIS WAS STILL UP FROM SHOW_OUTLINE
 
-                    console.log(
-                        'ShowBody is setting selection! anchor: ', w_selection.anchor.line, w_selection.anchor.character,
-                        ' active: ', w_selection.active.line, w_selection.active.character
-                    );
+                    // console.log(
+                    //     'ShowBody is setting selection! anchor: ', w_selection.anchor.line, w_selection.anchor.character,
+                    //     ' active: ', w_selection.active.line, w_selection.active.character
+                    // );
 
                     w_bodyTextEditor.selection = w_selection; // set cursor insertion point &amp; selection range
                     if (!w_scrollRange) {
@@ -11602,20 +11580,27 @@ public refreshBodyStates(): void {
  * * Refresh body states after a small debounced delay.
  */
 public debouncedRefreshBodyStates(p_delay?: number) {
+
     if (!p_delay) {
         p_delay = 0;
     }
+
     if (this._bodyStatesTimer) {
         clearTimeout(this._bodyStatesTimer);
     }
-    this._bodyStatesTimer = setTimeout(() =&gt; {
+    if (p_delay === 0) {
         if (this._bodyLastChangedDocument &amp;&amp; this.leoStates.fileOpenedReady) {
-            console.log('gotta save in debouncedRefreshBodyStates');
-
             this._bodySaveDocument(this._bodyLastChangedDocument);
             this.refreshBodyStates();
         }
-    }, p_delay || Constants.BODY_STATES_DEBOUNCE_DELAY);
+    } else {
+        this._bodyStatesTimer = setTimeout(() =&gt; {
+            if (this._bodyLastChangedDocument &amp;&amp; this.leoStates.fileOpenedReady) {
+                this._bodySaveDocument(this._bodyLastChangedDocument);
+                this.refreshBodyStates();
+            }
+        }, p_delay || Constants.BODY_STATES_DEBOUNCE_DELAY);
+    }
 }
 
 </t>
@@ -12334,7 +12319,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
             });
         }
         if (w_needsRefresh) {
-            this.debouncedRefreshBodyStates();
+            this.debouncedRefreshBodyStates(1);
         }
 
     }
@@ -14220,14 +14205,10 @@ public get1Arg(p_options?: vscode.InputBoxOptions | undefined, p_token?: vscode.
  */
 private _setOpenedBodyTime(p_gnx: string): void {
     const w_now = new Date().getTime();
-    console.log('set modified to gnx', p_gnx, ' to ', w_now);
-
     let w_created = w_now;
     if (!this._openedBodiesGnx.includes(p_gnx)) {
         this._openedBodiesGnx.push(p_gnx);
     } else {
-        console.log('( modified was : ' + this._openedBodiesInfo[p_gnx].mtime + ' )');
-
         w_created = this._openedBodiesInfo[p_gnx].ctime; // Already created?
     }
     this._openedBodiesInfo[p_gnx] = {
@@ -14363,14 +14344,14 @@ public async navTextClear(): Promise&lt;unknown&gt; {
  * Put focus in body widget.
  */
 public focus_to_body(c: Commands, p: Position): void {
-    this.set_focus(c, c.frame.body);
+    this.set_focus(c, c.frame.body.wrapper);
 }
 </t>
 <t tx="felix.20230109233154.1">/**
  * Put focus in tree widget.
  */
 public focus_to_head(c: Commands, p: Position): void {
-    this.set_focus(c, c.frame.tree);
+    this.set_focus(c, c.frame.tree.treeWidget);
 }
 </t>
 <t tx="felix.20230112203533.1">/**
@@ -14399,16 +14380,6 @@ private _row_col_wrapper_dict(i: number, wrapper: StringTextWrapper): { "line": 
     let line, col;
     [line, col] = wrapper.toPythonIndexRowCol(i);
     return { "line": line, "col": col, "index": i };
-}
-
-</t>
-<t tx="felix.20230113234242.1">/**
- * Set the cursor selection for the given gnx if visible
- */
-public _setTextSelection(): void {
-
-    // ? needed ?
-
 }
 
 </t>

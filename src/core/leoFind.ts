@@ -973,6 +973,10 @@ export class LeoFind {
         const ins = gui_w ? gui_w.getInsertPoint() : 0;
         this.work_s = s;
         this.work_sel = [ins, ins, ins];
+        console.log('Start of do_find_next, ins: ', ins);
+        console.log('But p.v.insertSpot is ', p.v.insertSpot);
+
+
         //
         // Set the settings *after* initing the search.
         this.init_ivars_from_settings(settings);
@@ -2861,6 +2865,11 @@ export class LeoFind {
         let index = this.work_sel[2];
         let s = this.work_s;
 
+        console.log('In _fnm_search, this.work_sel: ', this.work_sel);
+        console.log('this.in_headline is', this.in_headline);
+        console.log('work_s is:', this.work_s);
+
+
         // This hack would be dangerous on MacOs: it uses '\r' instead of '\n' (!)
         if (g.isWindows) {
             // Ignore '\r' characters, which may appear in @edit nodes.
@@ -3264,7 +3273,7 @@ export class LeoFind {
 
         const c = this.c;
         const ftm = this.ftm;
-        const w = ftm && ftm.entry_focus; // ! SET BY CLIENT WHEN CALLING FIND COMMANDS  || g.app.gui.get_focus(true);
+        const w = ftm && ftm.entry_focus || g.app.gui.get_focus();
         if (ftm) {
             ftm.entry_focus = undefined;  // Only use this focus widget once!
         }
@@ -3353,9 +3362,9 @@ export class LeoFind {
 
         // TODO : Check if needed
         if (this.in_headline) {
-            // c.endEditing();
+            c.endEditing();
             c.redraw(p);
-            c.frame.tree.editLabel(p);
+            c.frame.tree.editLabel(p); // <-- THIS SHOULD CREATE IT !
             w = c.edit_widget(p) as StringTextWrapper;  // #2220
             if (w) {
                 w.setSelectionRange(pos, newpos, insert);  // #2220

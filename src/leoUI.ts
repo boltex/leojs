@@ -1001,8 +1001,6 @@ export class LeoUI extends NullGui {
                 });
             }
             if (w_needsRefresh) {
-                console.log('-------------------------debouncedRefreshBodyStates in _onDocumentChanged end');
-
                 this.debouncedRefreshBodyStates(1);
             }
 
@@ -1104,8 +1102,6 @@ export class LeoUI extends NullGui {
             q_savePromise = Promise.resolve(true);
         }
         return q_savePromise.then((p_result) => {
-            console.log('-------------------------debouncedRefreshBodyStates in triggerebody save');
-
             this.debouncedRefreshBodyStates();
             return p_result;
         }, (p_reason) => {
@@ -2216,12 +2212,7 @@ export class LeoUI extends NullGui {
 
             if (q_saved) {
                 await q_saved;
-                console.log('firerefresh in showbody top because of this._refreshType.body');
-
                 this._leoFileSystem.fireRefreshFile(w_openedDocumentGnx);
-            } else {
-                console.log('BODY REFRESH TRUE in show body but no q_saved !!!');
-
             }
 
         }
@@ -2287,19 +2278,19 @@ export class LeoUI extends NullGui {
             // ! -------------------------------
             // ! TEST SELECTION GETTER OVERRIDE!
             // ! -------------------------------
-            // const wrapper = c.frame.body.wrapper;
-            // const test_insert = wrapper.getInsertPoint();
-            // let test_start, test_end;
-            // [test_start, test_end] = wrapper.getSelectionRange(true);
+            const wrapper = c.frame.body.wrapper;
+            const test_insert = wrapper.getInsertPoint();
+            let test_start, test_end;
+            [test_start, test_end] = wrapper.getSelectionRange(true);
             // // ! OVERRIDE !
-            // w_bodySel = {
-            //     "gnx": p.v.gnx,
-            //     "scroll": scroll,
-            //     "insert": this._row_col_wrapper_dict(test_insert, wrapper),
-            //     "start": this._row_col_wrapper_dict(test_start, wrapper),
-            //     "end": this._row_col_wrapper_dict(test_end, wrapper)
-            // };
-            // console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
+            const w_bodySel_w = {
+                "gnx": p.v.gnx,
+                "scroll": scroll,
+                "insert": this._row_col_wrapper_dict(test_insert, wrapper),
+                "start": this._row_col_wrapper_dict(test_start, wrapper),
+                "end": this._row_col_wrapper_dict(test_end, wrapper)
+            };
+            console.log('From w:', ` insert:${w_bodySel_w.insert.line}, ${w_bodySel_w.insert.col} start:${w_bodySel_w.start.line},${w_bodySel_w.start.col} end:${w_bodySel_w.end.line}, ${w_bodySel_w.end.col}`);
 
             // TODO : Apply tabwidth
             // console.log('TABWIDTH: ', w_tabWidth);
@@ -2393,15 +2384,9 @@ export class LeoUI extends NullGui {
             return; // ! HAD PREVENT REVEAL !
         }
 
-
         if (w_foundDocOpened && !q_saved) {
             // Was the same and was asked to show body (and did not already had to fake-save and refresh)
-            console.log('firerefresh in showbody bottom because was the same and was asked to show body (and did not already had to fake-save and refresh)');
-
             this._leoFileSystem.fireRefreshFile(w_openedDocumentGnx);
-        } else {
-            console.log('LAST CHANCE TO fireRefreshFile SKIPPED! ');
-
         }
         // Setup options for the preview state of the opened editor, and to choose which column it should appear
         const w_showOptions: vscode.TextDocumentShowOptions = p_aside
@@ -2498,10 +2483,10 @@ export class LeoUI extends NullGui {
                     if (w_bodyTextEditor) {
                         // this._revealType = RevealType.NoReveal; // ! IN CASE THIS WAS STILL UP FROM SHOW_OUTLINE
 
-                        console.log(
-                            'ShowBody is setting selection! anchor: ', w_selection.anchor.line, w_selection.anchor.character,
-                            ' active: ', w_selection.active.line, w_selection.active.character
-                        );
+                        // console.log(
+                        //     'ShowBody is setting selection! anchor: ', w_selection.anchor.line, w_selection.anchor.character,
+                        //     ' active: ', w_selection.active.line, w_selection.active.character
+                        // );
 
                         w_bodyTextEditor.selection = w_selection; // set cursor insertion point & selection range
                         if (!w_scrollRange) {
@@ -2535,15 +2520,6 @@ export class LeoUI extends NullGui {
         }
 
         return q_showTextDocument;
-    }
-
-    /**
-     * Set the cursor selection for the given gnx if visible
-     */
-    public _setTextSelection(): void {
-
-        // ? needed ?
-
     }
 
     /**
@@ -2675,25 +2651,17 @@ export class LeoUI extends NullGui {
             p_delay = 0;
         }
 
-        console.log('debouncedRefreshBodyStates called, delay:', p_delay);
-
         if (this._bodyStatesTimer) {
             clearTimeout(this._bodyStatesTimer);
         }
         if (p_delay === 0) {
-            console.log('NO DELAY gotta save in debouncedRefreshBodyStates');
-
             if (this._bodyLastChangedDocument && this.leoStates.fileOpenedReady) {
-                console.log('gotta save in debouncedRefreshBodyStates');
-
                 this._bodySaveDocument(this._bodyLastChangedDocument);
                 this.refreshBodyStates();
             }
         } else {
             this._bodyStatesTimer = setTimeout(() => {
                 if (this._bodyLastChangedDocument && this.leoStates.fileOpenedReady) {
-                    console.log('gotta save in debouncedRefreshBodyStates');
-
                     this._bodySaveDocument(this._bodyLastChangedDocument);
                     this.refreshBodyStates();
                 }
@@ -5528,13 +5496,13 @@ export class LeoUI extends NullGui {
      * Put focus in body widget.
      */
     public focus_to_body(c: Commands, p: Position): void {
-        this.set_focus(c, c.frame.body);
+        this.set_focus(c, c.frame.body.wrapper);
     }
     /**
      * Put focus in tree widget.
      */
     public focus_to_head(c: Commands, p: Position): void {
-        this.set_focus(c, c.frame.tree);
+        this.set_focus(c, c.frame.tree.treeWidget);
     }
     /**
      * * Wrapper of vscode.window.showInputBox to get a user input with simple prompt

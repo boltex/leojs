@@ -3680,7 +3680,7 @@
     "safe-json-stringify": "^1.2.0",
     "stream": "^0.0.2"
   },
-  "gitCommit": "2f006cc",
+  "gitCommit": "f505340",
   "gitBranch": "leoFind",
-  "gitDate": "2023-01-12 22:09:32 -0500"
+  "gitDate": "2023-01-14 19:03:27 -0500"
 }
