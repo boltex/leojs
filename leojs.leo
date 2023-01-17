@@ -3792,9 +3792,9 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     "@types/safe-json-stringify": "^1.1.2",
     &lt;&lt; dependencies &gt;&gt;
   },
-  "gitCommit": "f505340",
+  "gitCommit": "f604a6f",
   "gitBranch": "leoFind",
-  "gitDate": "2023-01-14 19:03:27 -0500"
+  "gitDate": "2023-01-16 00:09:12 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -8143,6 +8143,7 @@ private async _bodySaveDocument(
 
         const c = g.app.windowList[this.frameIndex].c;
         const u = c.undoer;
+        const wrapper = c.frame.body.wrapper;
         const w_gnx = utils.leoUriToStr(p_document.uri);
         const body = p_document.getText(); // new body text
 
@@ -8169,7 +8170,10 @@ private async _bodySaveDocument(
                     const bunch = u.beforeChangeNodeContents(w_p);
                     w_p.v.setBodyString(body);
                     u.afterChangeNodeContents(w_p, "Body Text", bunch);
-
+                    // Set in wrapper too if same gnx
+                    if (c.p.__eq__(w_p)) {
+                        wrapper.setAllText(body);
+                    }
                     if (!c.isChanged()) {
                         c.setChanged();
                     }
@@ -8188,8 +8192,8 @@ private async _bodySaveDocument(
             return Promise.resolve(false); // EARLY EXIT
         }
 
-        // await for bodySaveSelection that is placed on the stack right after saving body
-        await this._bodySaveSelection();
+        // save the cursor selection
+        this._bodySaveSelection();
 
         this._refreshType.states = true;
         this.getStates();
@@ -9774,6 +9778,8 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknow
 
     let w = this.get_focus(c);
     focus = this.widget_name(w);
+    console.log('focus BEFORE find:', focus, "c.p.b: ", c.p.b);
+
 
     const inOutline = (focus.includes("tree")) || (focus.includes("head"));
     const inBody = !inOutline;
@@ -9800,6 +9806,9 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknow
 
     this.findFocusTree = false; // Reset flag for headline range
 
+    console.log('focus AFTER find:', focus, "c.p.b: ", c.p.b);
+
+
     if (!found || !focus) {
         return vscode.window.showInformationMessage('Not found');
     } else {
@@ -9817,7 +9826,7 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknow
             this.showBodyIfClosed = true;
         }
         const w_scroll = (found &amp;&amp; w_finalFocus === Focus.Body) || undefined;
-        console.log('scroll is :', w_scroll);
+        console.log('FIND scroll is :', w_scroll);
 
         this.setupRefresh(
             w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
@@ -9917,7 +9926,7 @@ public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise&lt;un
         c.bodyWantsFocusNow();
     }
 
-    console.log('focus BEFORE replace:', focus);
+    console.log('focus BEFORE replace:', focus, "c.p.b: ", c.p.b);
 
     found = false;
 
@@ -9944,7 +9953,7 @@ public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise&lt;un
 
     this.findFocusTree = false; // Reset flag for headline range
 
-    console.log('focus AFTER replace:', focus);
+    console.log('focus AFTER replace:', focus, "c.p.b: ", c.p.b);
 
     if (!found || !focus) {
         vscode.window.showInformationMessage('Not found');
@@ -9962,12 +9971,15 @@ public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise&lt;un
         } else {
             this.showBodyIfClosed = true;
         }
+        const w_scroll = (found &amp;&amp; w_finalFocus === Focus.Body) || undefined;
+        console.log('REPLACE scroll is :', w_scroll);
+
         this.setupRefresh(
             w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
             {
                 tree: true, // HAVE to refresh tree because find folds/unfolds only result outline paths
                 body: true,
-                scroll: found &amp;&amp; w_finalFocus === Focus.Body,
+                scroll: w_scroll,
                 // documents: false,
                 // buttons: false,
                 states: true,
@@ -11261,15 +11273,17 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
         const test_insert = wrapper.getInsertPoint();
         let test_start, test_end;
         [test_start, test_end] = wrapper.getSelectionRange(true);
-        // // ! OVERRIDE !
-        const w_bodySel_w = {
+        // ! OVERRIDE !
+        //const w_bodySel_w = {
+        w_bodySel = {
             "gnx": p.v.gnx,
             "scroll": scroll,
             "insert": this._row_col_wrapper_dict(test_insert, wrapper),
             "start": this._row_col_wrapper_dict(test_start, wrapper),
             "end": this._row_col_wrapper_dict(test_end, wrapper)
         };
-        console.log('From w:', ` insert:${w_bodySel_w.insert.line}, ${w_bodySel_w.insert.col} start:${w_bodySel_w.start.line},${w_bodySel_w.start.col} end:${w_bodySel_w.end.line}, ${w_bodySel_w.end.col}`);
+        // console.log('From w:', ` insert:${w_bodySel_w.insert.line}, ${w_bodySel_w.insert.col} start:${w_bodySel_w.start.line},${w_bodySel_w.start.col} end:${w_bodySel_w.end.line}, ${w_bodySel_w.end.col}`);
+        console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
 
         // TODO : Apply tabwidth
         // console.log('TABWIDTH: ', w_tabWidth);

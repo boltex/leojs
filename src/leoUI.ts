@@ -1200,6 +1200,7 @@ export class LeoUI extends NullGui {
 
             const c = g.app.windowList[this.frameIndex].c;
             const u = c.undoer;
+            const wrapper = c.frame.body.wrapper;
             const w_gnx = utils.leoUriToStr(p_document.uri);
             const body = p_document.getText(); // new body text
 
@@ -1226,7 +1227,10 @@ export class LeoUI extends NullGui {
                         const bunch = u.beforeChangeNodeContents(w_p);
                         w_p.v.setBodyString(body);
                         u.afterChangeNodeContents(w_p, "Body Text", bunch);
-
+                        // Set in wrapper too if same gnx
+                        if (c.p.__eq__(w_p)) {
+                            wrapper.setAllText(body);
+                        }
                         if (!c.isChanged()) {
                             c.setChanged();
                         }
@@ -1245,8 +1249,8 @@ export class LeoUI extends NullGui {
                 return Promise.resolve(false); // EARLY EXIT
             }
 
-            // await for bodySaveSelection that is placed on the stack right after saving body
-            await this._bodySaveSelection();
+            // save the cursor selection
+            this._bodySaveSelection();
 
             this._refreshType.states = true;
             this.getStates();
@@ -2282,15 +2286,17 @@ export class LeoUI extends NullGui {
             const test_insert = wrapper.getInsertPoint();
             let test_start, test_end;
             [test_start, test_end] = wrapper.getSelectionRange(true);
-            // // ! OVERRIDE !
-            const w_bodySel_w = {
+            // ! OVERRIDE !
+            //const w_bodySel_w = {
+            w_bodySel = {
                 "gnx": p.v.gnx,
                 "scroll": scroll,
                 "insert": this._row_col_wrapper_dict(test_insert, wrapper),
                 "start": this._row_col_wrapper_dict(test_start, wrapper),
                 "end": this._row_col_wrapper_dict(test_end, wrapper)
             };
-            console.log('From w:', ` insert:${w_bodySel_w.insert.line}, ${w_bodySel_w.insert.col} start:${w_bodySel_w.start.line},${w_bodySel_w.start.col} end:${w_bodySel_w.end.line}, ${w_bodySel_w.end.col}`);
+            // console.log('From w:', ` insert:${w_bodySel_w.insert.line}, ${w_bodySel_w.insert.col} start:${w_bodySel_w.start.line},${w_bodySel_w.start.col} end:${w_bodySel_w.end.line}, ${w_bodySel_w.end.col}`);
+            console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
 
             // TODO : Apply tabwidth
             // console.log('TABWIDTH: ', w_tabWidth);
@@ -3602,6 +3608,8 @@ export class LeoUI extends NullGui {
 
         let w = this.get_focus(c);
         focus = this.widget_name(w);
+        console.log('focus BEFORE find:', focus, "c.p.b: ", c.p.b);
+
 
         const inOutline = (focus.includes("tree")) || (focus.includes("head"));
         const inBody = !inOutline;
@@ -3628,6 +3636,9 @@ export class LeoUI extends NullGui {
 
         this.findFocusTree = false; // Reset flag for headline range
 
+        console.log('focus AFTER find:', focus, "c.p.b: ", c.p.b);
+
+
         if (!found || !focus) {
             return vscode.window.showInformationMessage('Not found');
         } else {
@@ -3645,7 +3656,7 @@ export class LeoUI extends NullGui {
                 this.showBodyIfClosed = true;
             }
             const w_scroll = (found && w_finalFocus === Focus.Body) || undefined;
-            console.log('scroll is :', w_scroll);
+            console.log('FIND scroll is :', w_scroll);
 
             this.setupRefresh(
                 w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
@@ -3743,7 +3754,7 @@ export class LeoUI extends NullGui {
             c.bodyWantsFocusNow();
         }
 
-        console.log('focus BEFORE replace:', focus);
+        console.log('focus BEFORE replace:', focus, "c.p.b: ", c.p.b);
 
         found = false;
 
@@ -3770,7 +3781,7 @@ export class LeoUI extends NullGui {
 
         this.findFocusTree = false; // Reset flag for headline range
 
-        console.log('focus AFTER replace:', focus);
+        console.log('focus AFTER replace:', focus, "c.p.b: ", c.p.b);
 
         if (!found || !focus) {
             vscode.window.showInformationMessage('Not found');
@@ -3788,12 +3799,15 @@ export class LeoUI extends NullGui {
             } else {
                 this.showBodyIfClosed = true;
             }
+            const w_scroll = (found && w_finalFocus === Focus.Body) || undefined;
+            console.log('REPLACE scroll is :', w_scroll);
+
             this.setupRefresh(
                 w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
                 {
                     tree: true, // HAVE to refresh tree because find folds/unfolds only result outline paths
                     body: true,
-                    scroll: found && w_finalFocus === Focus.Body,
+                    scroll: w_scroll,
                     // documents: false,
                     // buttons: false,
                     states: true,
