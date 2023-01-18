@@ -3764,14 +3764,7 @@ export class LeoUI extends NullGui {
         fc.check_args('replace');
         if (p_thenFind) {
             found = fc.do_change_then_find(settings);
-            // if (fc.change_selection(c.p)) {
-            //     fc.do_find_next(settings);
-            // }
-            // found = true;
-
         } else {
-            // const settings = fc.ftm.get_settings();
-            // fc.change();
             fc.change_selection(c.p);
             found = true;
         }
@@ -3784,8 +3777,9 @@ export class LeoUI extends NullGui {
         console.log('focus AFTER replace:', focus, "c.p.b: ", c.p.b);
 
         if (!found || !focus) {
-            vscode.window.showInformationMessage('Not found');
-        } else {
+            vscode.window.showInformationMessage('Not found'); // Flag not found/replaced!
+        }
+        if (focus) {
             let w_finalFocus = Focus.Body;
             const w_focus = focus.toLowerCase();
             if (w_focus.includes('tree') || w_focus.includes('head')) {

@@ -3791,10 +3791,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "dependencies": {
     "@types/safe-json-stringify": "^1.1.2",
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "f604a6f",
-  "gitBranch": "leoFind",
-  "gitDate": "2023-01-16 00:09:12 -0500"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -9936,14 +9933,7 @@ public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise&lt;un
     fc.check_args('replace');
     if (p_thenFind) {
         found = fc.do_change_then_find(settings);
-        // if (fc.change_selection(c.p)) {
-        //     fc.do_find_next(settings);
-        // }
-        // found = true;
-
     } else {
-        // const settings = fc.ftm.get_settings();
-        // fc.change();
         fc.change_selection(c.p);
         found = true;
     }
@@ -9956,8 +9946,9 @@ public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise&lt;un
     console.log('focus AFTER replace:', focus, "c.p.b: ", c.p.b);
 
     if (!found || !focus) {
-        vscode.window.showInformationMessage('Not found');
-    } else {
+        vscode.window.showInformationMessage('Not found'); // Flag not found/replaced!
+    }
+    if (focus) {
         let w_finalFocus = Focus.Body;
         const w_focus = focus.toLowerCase();
         if (w_focus.includes('tree') || w_focus.includes('head')) {

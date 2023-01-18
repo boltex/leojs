@@ -461,9 +461,10 @@ export class LeoFind {
             return false;
         }
         if (this.change_selection(p)) {
-            this.do_find_next(settings);
+            return !!this.do_find_next(settings)[0];
+        } else {
+            return false;
         }
-        return true;
 
     }
     //@+node:felix.20221013234514.4: *4* find.clone-find_marked & helper
@@ -2607,7 +2608,6 @@ export class LeoFind {
 
         console.log('SelectionRange before:', oldSel);
 
-        const bunch = u.beforeChangeBody(p);
         [start, end] = oldSel;
         let change_text = this.change_text;
 
@@ -2621,9 +2621,16 @@ export class LeoFind {
         change_text = this.replace_back_slashes(change_text);
 
         console.log('Change text is : ', change_text);
+        // IF [start, end] EQUALS change_text -> skip change and no undo bead
+        if (gui_w.getAllText().substring(start, end) === change_text) {
+            g.es("Same as replacement");
+            return true; // Success but no actual change to body, nor undo created.
+        }
 
         // Update both the gui widget and the work "widget"
         const new_ins = this.reverse ? start : start + change_text.length;
+        const bunch = u.beforeChangeBody(p);
+
         if (start !== end) {
             gui_w.delete(start, end); // PERFORM REPLACE
         }
