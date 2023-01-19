@@ -123,6 +123,19 @@ export class LeoUI extends NullGui {
     public findHeadlineRange: [number, number] = [0, 0];
     public findHeadlinePosition: Position | undefined;
 
+    /**
+     * Used for 'set_entry_focus' of find panel for keybindings (enter, F2, F3 ctrl+=, ctrl+-) 
+     */
+    private _lastFocus: "body" | "tree" = "body";
+    get lastFocus(): "body" | "tree" {
+        return this._lastFocus;
+    }
+    set lastFocus(s: "body" | "tree") {
+        console.log('setting lastFocus: ', s);
+
+        this._lastFocus = s;
+    }
+
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
     private _leoDocuments!: vscode.TreeView<LeoFrame>;
@@ -820,11 +833,18 @@ export class LeoUI extends NullGui {
         p_editor: vscode.TextEditor | undefined,
         p_internalCall?: boolean
     ): void {
+
+
         if (p_editor && p_editor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
+            console.log("was a leo editor !");
+
             if (this.bodyUri.fsPath !== p_editor.document.uri.fsPath) {
                 this._hideDeleteBody(p_editor);
             }
             this._checkPreviewMode(p_editor);
+        } else {
+            console.log("was NOT a leo editor?");
+
         }
         if (!p_internalCall) {
             this.triggerBodySave(true); // Save in case edits were pending
@@ -1309,6 +1329,9 @@ export class LeoUI extends NullGui {
      */
     public showOutline(p_focusOutline?: boolean): void {
         const c = g.app.windowList[this.frameIndex].c;
+        if (p_focusOutline) {
+            this.lastFocus = "tree";
+        }
         this._lastTreeView.reveal(c.p, {
             select: true,
             focus: !!p_focusOutline
@@ -1395,8 +1418,13 @@ export class LeoUI extends NullGui {
         let w_revealType: RevealType;
         if (this.finalFocus.valueOf() === Focus.Outline) {
             w_revealType = RevealType.RevealSelectFocus;
+            this.lastFocus = "tree";
         } else {
             w_revealType = RevealType.RevealSelect;
+        }
+
+        if (this.finalFocus.valueOf() === Focus.Body) {
+            this.lastFocus = "body";
         }
 
         const c = g.app.windowList[this.frameIndex].c;
@@ -1701,6 +1729,11 @@ export class LeoUI extends NullGui {
                         focus: w_focusTree
                     }).then(() => {
                         // ok
+                        console.log('hi!');
+
+                        if (w_focusTree) {
+                            this.lastFocus = 'tree';
+                        }
                         if (this.trace) {
                             if (this.refreshTimer) {
                                 console.log('refreshTimer', utils.getDurationMs(this.refreshTimer));
@@ -2196,6 +2229,10 @@ export class LeoUI extends NullGui {
         const w_openedDocumentTS = utils.performanceNow();
         const w_openedDocumentGnx = utils.leoUriToStr(this.bodyUri);
         let q_saved: Thenable<unknown> | undefined;
+
+        if (!p_preventTakingFocus) {
+            this.lastFocus = "body";
+        }
 
         // First setup timeout asking for gnx file refresh in case we were resolving a refresh of type 'RefreshTreeAndBody'
         if (this._refreshType.body) {
@@ -2722,6 +2759,9 @@ export class LeoUI extends NullGui {
         // * Set selected node in Leo
         c.selectPosition(p_node);
 
+        // * For Find pane keybindings commands launch from.
+        this.lastFocus = "tree";
+
         if (!p_internalCall) {
             this._refreshType.states = true;
             this.getStates();
@@ -2816,6 +2856,14 @@ export class LeoUI extends NullGui {
         }
 
         this.lastCommandTimer = undefined;
+
+        // console.log('FINISHED COMMAND');
+        // const test = vscode.commands.executeCommand('getContextKeyInfo');
+        // test.then((p_result) => {
+        //     console.log('then result', p_result);
+
+
+        // });
 
         if (value && value.then) {
             (value as Thenable<unknown>).then((p_result) => {

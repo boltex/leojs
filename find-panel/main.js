@@ -48,7 +48,7 @@
     };
 
     // * Search related controls (No nav inputs)
-    let inputIds = ['findText', 'replaceText'];
+    let findReplaceInputIds = ['findText', 'replaceText'];
     let checkboxIds = [
         'wholeWord',
         'ignoreCase',
@@ -159,7 +159,7 @@
         }
 
         // When opening a Leo document, set default values of fields
-        inputIds.forEach((p_inputId) => {
+        findReplaceInputIds.forEach((p_inputId) => {
             // @ts-expect-error
             document.getElementById(p_inputId).value = p_settings[p_inputId];
             searchSettings[p_inputId] = p_settings[p_inputId];
@@ -227,6 +227,35 @@
             p_event.preventDefault();
             p_event.stopPropagation();
             focusOnField('findText');
+            return;
+        }
+
+        // Detect F2
+        if (!p_event.ctrlKey && !p_event.shiftKey && p_event.keyCode === 113) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            vscode.postMessage({ type: 'leoFindPrevious' });
+            return;
+        }
+        // Detect F3
+        if (!p_event.ctrlKey && !p_event.shiftKey && p_event.keyCode === 114) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            vscode.postMessage({ type: 'leoFindNext' });
+            return;
+        }
+        // Detect Ctrl + =
+        if (p_event.ctrlKey && !p_event.shiftKey && p_event.keyCode === 187) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            vscode.postMessage({ type: 'replace' });
+            return;
+        }
+        // Detect Ctrl + -
+        if (p_event.ctrlKey && !p_event.shiftKey && p_event.keyCode === 189) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            vscode.postMessage({ type: 'replaceThenFind' });
             return;
         }
 
@@ -385,7 +414,7 @@
 
     }
 
-    inputIds.forEach((p_inputId) => {
+    findReplaceInputIds.forEach((p_inputId) => {
         const w_inputEl = document.getElementById(p_inputId);
         if (w_inputEl) {
 

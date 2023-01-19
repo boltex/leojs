@@ -33,6 +33,7 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
 
         this._context.subscriptions.push(
             webviewView.webview.onDidReceiveMessage((data) => {
+                console.log("--------------------------->" + this._leoUI.lastFocus);
                 switch (data.type) {
                     case 'leoNavEnter': {
                         this._leoUI.navEnter();
@@ -55,11 +56,19 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                         break;
                     }
                     case 'leoFindNext': {
-                        vscode.commands.executeCommand(Constants.COMMANDS.FIND_NEXT);
+                        if (this._leoUI.lastFocus === 'tree') {
+                            vscode.commands.executeCommand(Constants.COMMANDS.FIND_NEXT_FO);
+                        } else {
+                            vscode.commands.executeCommand(Constants.COMMANDS.FIND_NEXT);
+                        }
                         break;
                     }
                     case 'leoFindPrevious': {
-                        vscode.commands.executeCommand(Constants.COMMANDS.FIND_PREVIOUS);
+                        if (this._leoUI.lastFocus === 'tree') {
+                            vscode.commands.executeCommand(Constants.COMMANDS.FIND_PREVIOUS_FO);
+                        } else {
+                            vscode.commands.executeCommand(Constants.COMMANDS.FIND_PREVIOUS);
+                        }
                         break;
                     }
                     case 'searchConfig': {
@@ -67,11 +76,19 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                         break;
                     }
                     case 'replace': {
-                        this._leoUI.replace(true, false);
+                        if (this._leoUI.lastFocus === 'tree') {
+                            this._leoUI.replace(true, false);
+                        } else {
+                            this._leoUI.replace(false, false);
+                        }
                         break;
                     }
                     case 'replaceThenFind': {
-                        this._leoUI.replace(true, true);
+                        if (this._leoUI.lastFocus === 'tree') {
+                            this._leoUI.replace(true, true);
+                        } else {
+                            this._leoUI.replace(false, true);
+                        }
                         break;
                     }
                     case 'refreshSearchConfig': {
