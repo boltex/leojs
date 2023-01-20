@@ -974,10 +974,6 @@ export class LeoFind {
         const ins = gui_w ? gui_w.getInsertPoint() : 0;
         this.work_s = s;
         this.work_sel = [ins, ins, ins];
-        console.log('Start of do_find_next, ins: ', ins);
-        console.log('But p.v.insertSpot is ', p.v.insertSpot);
-
-
         //
         // Set the settings *after* initing the search.
         this.init_ivars_from_settings(settings);
@@ -2587,12 +2583,8 @@ export class LeoFind {
             gui_w = wrapper;
         }
         if (!gui_w) {
-            console.log('NO WIDGET AT ALL IN REPLACE!');
-
             return false;
         }
-
-        console.log('gui_w', gui_w.name);
 
         const sel: [number, number] = gui_w.getSelectionRange();
         const oldSel: [number, number] = sel;
@@ -2606,8 +2598,6 @@ export class LeoFind {
             return false;
         }
 
-        console.log('SelectionRange before:', oldSel);
-
         [start, end] = oldSel;
         let change_text = this.change_text;
 
@@ -2620,10 +2610,9 @@ export class LeoFind {
         }
         change_text = this.replace_back_slashes(change_text);
 
-        console.log('Change text is : ', change_text);
         // IF [start, end] EQUALS change_text -> skip change and no undo bead
         if (gui_w.getAllText().substring(start, end) === change_text) {
-            g.es("Same as replacement");
+            g.es("same text as replacement");
             return true; // Success but no actual change to body, nor undo created.
         }
 
@@ -2650,7 +2639,6 @@ export class LeoFind {
         }
 
         if (this.in_headline) {
-            console.log('WAS IN HEADLINE!');
 
             // #2220: Let onHeadChanged handle undo, etc.
             c.frame.tree.onHeadChanged(p, 'Change Headline');
@@ -2663,13 +2651,6 @@ export class LeoFind {
             }
         } else {
             p.v.b = gui_w.getAllText();
-
-            console.log('WAS IN BODY! finished changebody :', p.v.b);
-            console.log('c.fileCommands.gnxDict[w_gnx]:', c.fileCommands.gnxDict[p.v.gnx]?.b);
-
-            console.log('SelectionRange after:', gui_w.getSelectionRange());
-
-
             u.afterChangeBody(p, 'Change Body', bunch);
         }
 
@@ -2871,11 +2852,6 @@ export class LeoFind {
 
         let index = this.work_sel[2];
         let s = this.work_s;
-
-        console.log('In _fnm_search, this.work_sel: ', this.work_sel);
-        console.log('this.in_headline is', this.in_headline);
-        console.log('work_s is:', this.work_s);
-
 
         // This hack would be dangerous on MacOs: it uses '\r' instead of '\n' (!)
         if (g.isWindows) {

@@ -123,19 +123,6 @@ export class LeoUI extends NullGui {
     public findHeadlineRange: [number, number] = [0, 0];
     public findHeadlinePosition: Position | undefined;
 
-    /**
-     * Used for 'set_entry_focus' of find panel for keybindings (enter, F2, F3 ctrl+=, ctrl+-) 
-     */
-    private _lastFocus: "body" | "tree" = "body";
-    get lastFocus(): "body" | "tree" {
-        return this._lastFocus;
-    }
-    set lastFocus(s: "body" | "tree") {
-        console.log('setting lastFocus: ', s);
-
-        this._lastFocus = s;
-    }
-
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
     private _leoDocuments!: vscode.TreeView<LeoFrame>;
@@ -834,17 +821,11 @@ export class LeoUI extends NullGui {
         p_internalCall?: boolean
     ): void {
 
-
         if (p_editor && p_editor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
-            console.log("was a leo editor !");
-
             if (this.bodyUri.fsPath !== p_editor.document.uri.fsPath) {
                 this._hideDeleteBody(p_editor);
             }
             this._checkPreviewMode(p_editor);
-        } else {
-            console.log("was NOT a leo editor?");
-
         }
         if (!p_internalCall) {
             this.triggerBodySave(true); // Save in case edits were pending
@@ -946,7 +927,6 @@ export class LeoUI extends NullGui {
             p_textDocumentChange.contentChanges.length &&
             p_textDocumentChange.document.uri.scheme === Constants.URI_LEO_SCHEME
         ) {
-            console.log('DOCUMENT CHANGE DETECTED!, dirty: ', p_textDocumentChange.document.isDirty === true);
 
             // * There was a on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
             this._bodyLastChangedDocument = p_textDocumentChange.document;
@@ -959,19 +939,14 @@ export class LeoUI extends NullGui {
                 utils.leoUriToStr(p_textDocumentChange.document.uri) === this.lastSelectedNode.gnx
             ) {
                 const w_hasBody = !!p_textDocumentChange.document.getText().length;
-                const w_iconChanged = utils.isIconChangedByEdit(this.lastSelectedNode, w_hasBody);
+                const w_iconChanged = utils.isIconChangedByEdit(this.lastSelectedNode, w_hasBody) || this.findFocusTree;
 
                 const c = g.app.windowList[this.frameIndex].c;
 
-                console.log('testing for real change');
-
                 if (c.p && c.p.__bool__() && p_textDocumentChange.document.getText() === c.p.b) {
-                    console.log('Was a p.b. update by replace or externale file change');
                     // Set proper cursor insertion point and selection range.
                     this.showBody(false, true, true);
                     return;
-                } else {
-                    console.log('Change is a real user typing');
                 }
 
                 if (!this.leoStates.leoChanged || w_iconChanged) {
@@ -986,6 +961,7 @@ export class LeoUI extends NullGui {
                             //     this.lastSelectedNode.hasBody = w_hasBody;
                             // }
                             if (w_iconChanged) {
+                                this.findFocusTree = false;
                                 // NOT incrementing this.treeID to keep ids intact
                                 // NoReveal since we're keeping the same id.
                                 this._refreshOutline(false, RevealType.NoReveal);
@@ -1104,8 +1080,6 @@ export class LeoUI extends NullGui {
             const w_document = this._bodyLastChangedDocument; // backup for bodySaveDocument before reset
             this._bodyLastChangedDocumentSaved = true;
             this._editorTouched = false;
-            console.log('save in triggerBodySave!');
-
             q_savePromise = this._bodySaveDocument(w_document, p_forcedVsCodeSave);
         } else if (
             p_forcedVsCodeSave &&
@@ -1257,6 +1231,7 @@ export class LeoUI extends NullGui {
                         if (!w_p.v.isDirty()) {
                             w_p.setDirty();
                         }
+                        // this.clearHeadlineSelection();
                     }
 
                 }
@@ -1329,9 +1304,6 @@ export class LeoUI extends NullGui {
      */
     public showOutline(p_focusOutline?: boolean): void {
         const c = g.app.windowList[this.frameIndex].c;
-        if (p_focusOutline) {
-            this.lastFocus = "tree";
-        }
         this._lastTreeView.reveal(c.p, {
             select: true,
             focus: !!p_focusOutline
@@ -1418,13 +1390,8 @@ export class LeoUI extends NullGui {
         let w_revealType: RevealType;
         if (this.finalFocus.valueOf() === Focus.Outline) {
             w_revealType = RevealType.RevealSelectFocus;
-            this.lastFocus = "tree";
         } else {
             w_revealType = RevealType.RevealSelect;
-        }
-
-        if (this.finalFocus.valueOf() === Focus.Body) {
-            this.lastFocus = "body";
         }
 
         const c = g.app.windowList[this.frameIndex].c;
@@ -1716,8 +1683,6 @@ export class LeoUI extends NullGui {
             // ! MINIMAL TIMEOUT REQUIRED ! WHY ?? (works so leave)
             setTimeout(() => {
                 // SAME with scroll information specified
-                console.log('gotSelectedNode: SHOW BODY WITH SCROLL!');
-
                 this.showBody(false, this.finalFocus.valueOf() !== Focus.Body);
             }, 25);
         } else {
@@ -1729,11 +1694,6 @@ export class LeoUI extends NullGui {
                         focus: w_focusTree
                     }).then(() => {
                         // ok
-                        console.log('hi!');
-
-                        if (w_focusTree) {
-                            this.lastFocus = 'tree';
-                        }
                         if (this.trace) {
                             if (this.refreshTimer) {
                                 console.log('refreshTimer', utils.getDurationMs(this.refreshTimer));
@@ -2230,10 +2190,6 @@ export class LeoUI extends NullGui {
         const w_openedDocumentGnx = utils.leoUriToStr(this.bodyUri);
         let q_saved: Thenable<unknown> | undefined;
 
-        if (!p_preventTakingFocus) {
-            this.lastFocus = "body";
-        }
-
         // First setup timeout asking for gnx file refresh in case we were resolving a refresh of type 'RefreshTreeAndBody'
         if (this._refreshType.body) {
             this._refreshType.body = false;
@@ -2314,7 +2270,7 @@ export class LeoUI extends NullGui {
                 "start": this._row_col_pv_dict(start, p.v.b),
                 "end": this._row_col_pv_dict(end, p.v.b)
             };
-            console.log('From p:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
+            // console.log('From p:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
 
             // ! -------------------------------
             // ! TEST SELECTION GETTER OVERRIDE!
@@ -2333,7 +2289,7 @@ export class LeoUI extends NullGui {
                 "end": this._row_col_wrapper_dict(test_end, wrapper)
             };
             // console.log('From w:', ` insert:${w_bodySel_w.insert.line}, ${w_bodySel_w.insert.col} start:${w_bodySel_w.start.line},${w_bodySel_w.start.col} end:${w_bodySel_w.end.line}, ${w_bodySel_w.end.col}`);
-            console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
+            // console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
 
             // TODO : Apply tabwidth
             // console.log('TABWIDTH: ', w_tabWidth);
@@ -2759,10 +2715,24 @@ export class LeoUI extends NullGui {
         // * Set selected node in Leo
         c.selectPosition(p_node);
 
-        // * For Find pane keybindings commands launch from.
-        this.lastFocus = "tree";
 
         if (!p_internalCall) {
+            if (this.findFocusTree) {
+                // had a range but now refresh from other than find/replace
+                // So make sure tree is also refreshed.
+                this.findFocusTree = false;
+                this.setupRefresh(
+                    Focus.Outline,
+                    {
+                        tree: true,
+                        body: true,
+                        // documents: false,
+                        // buttons: false,
+                        // states: false,
+                    }
+                );
+                return this._launchRefresh();
+            }
             this._refreshType.states = true;
             this.getStates();
         }
@@ -3656,8 +3626,7 @@ export class LeoUI extends NullGui {
 
         let w = this.get_focus(c);
         focus = this.widget_name(w);
-        console.log('focus BEFORE find:', focus, "c.p.b: ", c.p.b);
-
+        // console.log('focus BEFORE find:', focus, "c.p.b: ", c.p.b);
 
         const inOutline = (focus.includes("tree")) || (focus.includes("head"));
         const inBody = !inOutline;
@@ -3683,9 +3652,7 @@ export class LeoUI extends NullGui {
         found = p && p.__bool__();
 
         this.findFocusTree = false; // Reset flag for headline range
-
-        console.log('focus AFTER find:', focus, "c.p.b: ", c.p.b);
-
+        // console.log('focus AFTER find:', focus, "c.p.b: ", c.p.b);
 
         if (!found || !focus) {
             return vscode.window.showInformationMessage('Not found');
@@ -3704,7 +3671,7 @@ export class LeoUI extends NullGui {
                 this.showBodyIfClosed = true;
             }
             const w_scroll = (found && w_finalFocus === Focus.Body) || undefined;
-            console.log('FIND scroll is :', w_scroll);
+            // console.log('FIND scroll is :', w_scroll);
 
             this.setupRefresh(
                 w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
@@ -3802,7 +3769,7 @@ export class LeoUI extends NullGui {
             c.bodyWantsFocusNow();
         }
 
-        console.log('focus BEFORE replace:', focus, "c.p.b: ", c.p.b);
+        //console.log('focus BEFORE replace:', focus, "c.p.b: ", c.p.b);
 
         found = false;
 
@@ -3822,7 +3789,7 @@ export class LeoUI extends NullGui {
 
         this.findFocusTree = false; // Reset flag for headline range
 
-        console.log('focus AFTER replace:', focus, "c.p.b: ", c.p.b);
+        // console.log('focus AFTER replace:', focus, "c.p.b: ", c.p.b);
 
         if (!found || !focus) {
             vscode.window.showInformationMessage('Not found'); // Flag not found/replaced!
@@ -3842,7 +3809,7 @@ export class LeoUI extends NullGui {
                 this.showBodyIfClosed = true;
             }
             const w_scroll = (found && w_finalFocus === Focus.Body) || undefined;
-            console.log('REPLACE scroll is :', w_scroll);
+            // console.log('REPLACE scroll is :', w_scroll);
 
             this.setupRefresh(
                 w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
@@ -4037,12 +4004,9 @@ export class LeoUI extends NullGui {
      */
     public setSearchSetting(p_id: string): void {
         if (this._findPanelWebviewExplorerView) {
-            console.log('_findPanelWebviewExplorerView');
             this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
         }
         if (this._findPanelWebviewView) {
-            console.log('_findPanelWebviewView');
-
             this._findPanelWebviewView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
         }
     }
@@ -4128,8 +4092,6 @@ export class LeoUI extends NullGui {
      * @returns
      */
     public saveSearchSettings(p_settings: LeoSearchSettings): Thenable<unknown> {
-
-        console.log('saveSearchSettings');
 
         this._lastSettingsUsed = p_settings;
         // convert to LeoGuiFindTabManagerSettings
@@ -5446,7 +5408,7 @@ export class LeoUI extends NullGui {
         if (in_headline) {
             // edit_widget(p)
             // c.frame.edit_widget(p);
-            console.log('try to set');
+            // console.log('try to set');
             try {
 
                 g.app.gui.set_focus(c, c.frame.tree.edit_widget(p));
@@ -5543,8 +5505,6 @@ export class LeoUI extends NullGui {
     }
 
     public get_focus(c?: Commands): StringTextWrapper {
-        console.log("get_focus in leoUI.ts", this.focusWidget?.name);
-
         return this.focusWidget!;
     }
 

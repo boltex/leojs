@@ -3394,7 +3394,7 @@
         "command": "leojs.replace",
         "key": "ctrl+=",
         "mac": "cmd+=",
-        "when": "leojsTreeOpened && editorTextFocus && editorHasSelection && resourceScheme == leojs"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.replaceFromOutline",
@@ -3406,7 +3406,7 @@
         "command": "leojs.replaceThenFind",
         "key": "ctrl+-",
         "mac": "cmd+-",
-        "when": "leojsTreeOpened && editorTextFocus && editorHasSelection && resourceScheme == leojs"
+        "when": "leojsTreeOpened && editorTextFocus && resourceScheme == leojs"
       },
       {
         "command": "leojs.replaceThenFindFromOutline",

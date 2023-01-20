@@ -3682,7 +3682,6 @@ export class Commands {
                 }
             }
         }
-        console.log('gonna tree.select!');
 
         c.frame.tree.select(p);
 

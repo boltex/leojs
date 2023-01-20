@@ -3107,19 +3107,6 @@ export class LeoUI extends NullGui {
     public findHeadlineRange: [number, number] = [0, 0];
     public findHeadlinePosition: Position | undefined;
 
-    /**
-     * Used for 'set_entry_focus' of find panel for keybindings (enter, F2, F3 ctrl+=, ctrl+-) 
-     */
-    private _lastFocus: "body" | "tree" = "body";
-    get lastFocus(): "body" | "tree" {
-        return this._lastFocus;
-    }
-    set lastFocus(s: "body" | "tree") {
-        console.log('setting lastFocus: ', s);
-
-        this._lastFocus = s;
-    }
-
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
     private _leoDocuments!: vscode.TreeView&lt;LeoFrame&gt;;
@@ -3291,9 +3278,6 @@ private _triggerGetStates(): void {
  */
 public showOutline(p_focusOutline?: boolean): void {
     const c = g.app.windowList[this.frameIndex].c;
-    if (p_focusOutline) {
-        this.lastFocus = "tree";
-    }
     this._lastTreeView.reveal(c.p, {
         select: true,
         focus: !!p_focusOutline
@@ -3444,10 +3428,24 @@ public selectTreeNode(
     // * Set selected node in Leo
     c.selectPosition(p_node);
 
-    // * For Find pane keybindings commands launch from.
-    this.lastFocus = "tree";
 
     if (!p_internalCall) {
+        if (this.findFocusTree) {
+            // had a range but now refresh from other than find/replace
+            // So make sure tree is also refreshed.
+            this.findFocusTree = false;
+            this.setupRefresh(
+                Focus.Outline,
+                {
+                    tree: true,
+                    body: true,
+                    // documents: false,
+                    // buttons: false,
+                    // states: false,
+                }
+            );
+            return this._launchRefresh();
+        }
         this._refreshType.states = true;
         this.getStates();
     }
@@ -6539,13 +6537,8 @@ public async _launchRefresh(): Promise&lt;unknown&gt; {
     let w_revealType: RevealType;
     if (this.finalFocus.valueOf() === Focus.Outline) {
         w_revealType = RevealType.RevealSelectFocus;
-        this.lastFocus = "tree";
     } else {
         w_revealType = RevealType.RevealSelect;
-    }
-
-    if (this.finalFocus.valueOf() === Focus.Body) {
-        this.lastFocus = "body";
     }
 
     const c = g.app.windowList[this.frameIndex].c;
@@ -6755,8 +6748,6 @@ public gotSelectedNode(p_node: Position): void {
         // ! MINIMAL TIMEOUT REQUIRED ! WHY ?? (works so leave)
         setTimeout(() =&gt; {
             // SAME with scroll information specified
-            console.log('gotSelectedNode: SHOW BODY WITH SCROLL!');
-
             this.showBody(false, this.finalFocus.valueOf() !== Focus.Body);
         }, 25);
     } else {
@@ -6768,11 +6759,6 @@ public gotSelectedNode(p_node: Position): void {
                     focus: w_focusTree
                 }).then(() =&gt; {
                     // ok
-                    console.log('hi!');
-
-                    if (w_focusTree) {
-                        this.lastFocus = 'tree';
-                    }
                     if (this.trace) {
                         if (this.refreshTimer) {
                             console.log('refreshTimer', utils.getDurationMs(this.refreshTimer));
@@ -8059,8 +8045,6 @@ public triggerBodySave(p_forcedVsCodeSave?: boolean): Thenable&lt;unknown&gt; {
         const w_document = this._bodyLastChangedDocument; // backup for bodySaveDocument before reset
         this._bodyLastChangedDocumentSaved = true;
         this._editorTouched = false;
-        console.log('save in triggerBodySave!');
-
         q_savePromise = this._bodySaveDocument(w_document, p_forcedVsCodeSave);
     } else if (
         p_forcedVsCodeSave &amp;&amp;
@@ -8214,6 +8198,7 @@ private async _bodySaveDocument(
                     if (!w_p.v.isDirty()) {
                         w_p.setDirty();
                     }
+                    // this.clearHeadlineSelection();
                 }
 
             }
@@ -9229,12 +9214,9 @@ public cloneFind(p_marked: boolean, p_flat: boolean): Thenable&lt;unknown&gt; {
  */
 public setSearchSetting(p_id: string): void {
     if (this._findPanelWebviewExplorerView) {
-        console.log('_findPanelWebviewExplorerView');
         this._findPanelWebviewExplorerView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
     }
     if (this._findPanelWebviewView) {
-        console.log('_findPanelWebviewView');
-
         this._findPanelWebviewView!.webview.postMessage({ type: 'setSearchSetting', id: p_id });
     }
 }
@@ -9322,8 +9304,6 @@ public loadSearchSettings(): void {
  * @returns
  */
 public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt; {
-
-    console.log('saveSearchSettings');
 
     this._lastSettingsUsed = p_settings;
     // convert to LeoGuiFindTabManagerSettings
@@ -9812,8 +9792,7 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknow
 
     let w = this.get_focus(c);
     focus = this.widget_name(w);
-    console.log('focus BEFORE find:', focus, "c.p.b: ", c.p.b);
-
+    // console.log('focus BEFORE find:', focus, "c.p.b: ", c.p.b);
 
     const inOutline = (focus.includes("tree")) || (focus.includes("head"));
     const inBody = !inOutline;
@@ -9839,9 +9818,7 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknow
     found = p &amp;&amp; p.__bool__();
 
     this.findFocusTree = false; // Reset flag for headline range
-
-    console.log('focus AFTER find:', focus, "c.p.b: ", c.p.b);
-
+    // console.log('focus AFTER find:', focus, "c.p.b: ", c.p.b);
 
     if (!found || !focus) {
         return vscode.window.showInformationMessage('Not found');
@@ -9860,7 +9837,7 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknow
             this.showBodyIfClosed = true;
         }
         const w_scroll = (found &amp;&amp; w_finalFocus === Focus.Body) || undefined;
-        console.log('FIND scroll is :', w_scroll);
+        // console.log('FIND scroll is :', w_scroll);
 
         this.setupRefresh(
             w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
@@ -9960,7 +9937,7 @@ public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise&lt;un
         c.bodyWantsFocusNow();
     }
 
-    console.log('focus BEFORE replace:', focus, "c.p.b: ", c.p.b);
+    //console.log('focus BEFORE replace:', focus, "c.p.b: ", c.p.b);
 
     found = false;
 
@@ -9980,7 +9957,7 @@ public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise&lt;un
 
     this.findFocusTree = false; // Reset flag for headline range
 
-    console.log('focus AFTER replace:', focus, "c.p.b: ", c.p.b);
+    // console.log('focus AFTER replace:', focus, "c.p.b: ", c.p.b);
 
     if (!found || !focus) {
         vscode.window.showInformationMessage('Not found'); // Flag not found/replaced!
@@ -10000,7 +9977,7 @@ public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise&lt;un
             this.showBodyIfClosed = true;
         }
         const w_scroll = (found &amp;&amp; w_finalFocus === Focus.Body) || undefined;
-        console.log('REPLACE scroll is :', w_scroll);
+        // console.log('REPLACE scroll is :', w_scroll);
 
         this.setupRefresh(
             w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
@@ -11212,10 +11189,6 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
     const w_openedDocumentGnx = utils.leoUriToStr(this.bodyUri);
     let q_saved: Thenable&lt;unknown&gt; | undefined;
 
-    if (!p_preventTakingFocus) {
-        this.lastFocus = "body";
-    }
-
     // First setup timeout asking for gnx file refresh in case we were resolving a refresh of type 'RefreshTreeAndBody'
     if (this._refreshType.body) {
         this._refreshType.body = false;
@@ -11296,7 +11269,7 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
             "start": this._row_col_pv_dict(start, p.v.b),
             "end": this._row_col_pv_dict(end, p.v.b)
         };
-        console.log('From p:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
+        // console.log('From p:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
 
         // ! -------------------------------
         // ! TEST SELECTION GETTER OVERRIDE!
@@ -11315,7 +11288,7 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
             "end": this._row_col_wrapper_dict(test_end, wrapper)
         };
         // console.log('From w:', ` insert:${w_bodySel_w.insert.line}, ${w_bodySel_w.insert.col} start:${w_bodySel_w.start.line},${w_bodySel_w.start.col} end:${w_bodySel_w.end.line}, ${w_bodySel_w.end.col}`);
-        console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
+        // console.log('From w:', ` insert:${w_bodySel.insert.line}, ${w_bodySel.insert.col} start:${w_bodySel.start.line},${w_bodySel.start.col} end:${w_bodySel.end.line}, ${w_bodySel.end.col}`);
 
         // TODO : Apply tabwidth
         // console.log('TABWIDTH: ', w_tabWidth);
@@ -12179,17 +12152,11 @@ private _onActiveEditorChanged(
     p_internalCall?: boolean
 ): void {
 
-
     if (p_editor &amp;&amp; p_editor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
-        console.log("was a leo editor !");
-
         if (this.bodyUri.fsPath !== p_editor.document.uri.fsPath) {
             this._hideDeleteBody(p_editor);
         }
         this._checkPreviewMode(p_editor);
-    } else {
-        console.log("was NOT a leo editor?");
-
     }
     if (!p_internalCall) {
         this.triggerBodySave(true); // Save in case edits were pending
@@ -12297,7 +12264,6 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
         p_textDocumentChange.contentChanges.length &amp;&amp;
         p_textDocumentChange.document.uri.scheme === Constants.URI_LEO_SCHEME
     ) {
-        console.log('DOCUMENT CHANGE DETECTED!, dirty: ', p_textDocumentChange.document.isDirty === true);
 
         // * There was a on a Leo Body by the user OR FROM LEO REFRESH FROM FILE
         this._bodyLastChangedDocument = p_textDocumentChange.document;
@@ -12310,19 +12276,14 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
             utils.leoUriToStr(p_textDocumentChange.document.uri) === this.lastSelectedNode.gnx
         ) {
             const w_hasBody = !!p_textDocumentChange.document.getText().length;
-            const w_iconChanged = utils.isIconChangedByEdit(this.lastSelectedNode, w_hasBody);
+            const w_iconChanged = utils.isIconChangedByEdit(this.lastSelectedNode, w_hasBody) || this.findFocusTree;
 
             const c = g.app.windowList[this.frameIndex].c;
 
-            console.log('testing for real change');
-
             if (c.p &amp;&amp; c.p.__bool__() &amp;&amp; p_textDocumentChange.document.getText() === c.p.b) {
-                console.log('Was a p.b. update by replace or externale file change');
                 // Set proper cursor insertion point and selection range.
                 this.showBody(false, true, true);
                 return;
-            } else {
-                console.log('Change is a real user typing');
             }
 
             if (!this.leoStates.leoChanged || w_iconChanged) {
@@ -12337,6 +12298,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
                         //     this.lastSelectedNode.hasBody = w_hasBody;
                         // }
                         if (w_iconChanged) {
+                            this.findFocusTree = false;
                             // NOT incrementing this.treeID to keep ids intact
                             // NoReveal since we're keeping the same id.
                             this._refreshOutline(false, RevealType.NoReveal);
@@ -12707,8 +12669,6 @@ public static OLD_POS_OFFSETS = {
 
 </t>
 <t tx="felix.20221026222040.1">public get_focus(c?: Commands): StringTextWrapper {
-    console.log("get_focus in leoUI.ts", this.focusWidget?.name);
-
     return this.focusWidget!;
 }
 
@@ -12818,7 +12778,7 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
     if (in_headline) {
         // edit_widget(p)
         // c.frame.edit_widget(p);
-        console.log('try to set');
+        // console.log('try to set');
         try {
 
             g.app.gui.set_focus(c, c.frame.tree.edit_widget(p));
@@ -14134,7 +14094,7 @@ public writeFileFromNode(): Thenable&lt;unknown&gt; {
   "command": "leojs.replace",
   "key": "ctrl+=",
   "mac": "cmd+=",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.replaceFromOutline",
@@ -14146,7 +14106,7 @@ public writeFileFromNode(): Thenable&lt;unknown&gt; {
   "command": "leojs.replaceThenFind",
   "key": "ctrl+-",
   "mac": "cmd+-",
-  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; editorHasSelection &amp;&amp; resourceScheme == leojs"
+  "when": "leojsTreeOpened &amp;&amp; editorTextFocus &amp;&amp; resourceScheme == leojs"
 },
 {
   "command": "leojs.replaceThenFindFromOutline",

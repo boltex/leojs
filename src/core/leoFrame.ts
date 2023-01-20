@@ -429,7 +429,7 @@ export class NullTree {
         const u = this.c.undoer;
         const w = this.edit_widget(p);
         if (!w) {
-            g.trace('no w');
+            // g.trace('no w');
             return;
         }
         const ch = '\n';  // We only report the final keystroke.

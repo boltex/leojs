@@ -230,6 +230,8 @@
             return;
         }
 
+        // ? NEEDED ?
+        /*
         // Detect F2
         if (!p_event.ctrlKey && !p_event.shiftKey && p_event.keyCode === 113) {
             p_event.preventDefault();
@@ -258,6 +260,7 @@
             vscode.postMessage({ type: 'replaceThenFind' });
             return;
         }
+        */
 
         if (keyCode === 'Tab') {
             var actEl = document.activeElement;
