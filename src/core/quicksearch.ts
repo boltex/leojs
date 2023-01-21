@@ -265,7 +265,7 @@ export class QuickSearchController {
     public addHeadlineMatches(position_list: [Position, RegExp | undefined][]): void {
         for (let p of position_list) {
             const it = { "type": "headline", "label": p[0].h };
-            if (this.addItem(it, (p[0], undefined))) {
+            if (this.addItem(it, [p[0], undefined])) {
                 return; // 999 limit hit
             }
         }
@@ -626,6 +626,7 @@ export class QuickSearchController {
         const hm = this.find_tag(pat);
         this.clear(); // needed for external client ui replacement: fills this.its
         this.addHeadlineMatches(hm);  // added for external client ui replacement: fills this.its
+
     }
 
     //@+node:felix.20221105222427.15: *3* qsc_get_history

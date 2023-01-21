@@ -3102,6 +3102,7 @@ export class LeoUI extends NullGui {
     private _findPanelWebviewExplorerView: vscode.WebviewView | undefined;
     private _lastFindView: vscode.WebviewView | undefined;  // ? Maybe unused ?
     private _findNeedsFocus: boolean = false;
+    private _navNeedsFocus: boolean = false;
     private _lastSettingsUsed: LeoSearchSettings | undefined; // Last settings loaded / saved for current document
     public findFocusTree = false;
     public findHeadlineRange: [number, number] = [0, 0];
@@ -8272,6 +8273,7 @@ private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
  * * Overridden 'good' minibuffer commands
  */
 public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
+    "tag-node": Constants.COMMANDS.TAG_NODE,
     "tag-children": Constants.COMMANDS.TAG_CHILDREN,
     "clone-find-tag": Constants.COMMANDS.CLONE_FIND_TAG,
     // "import-file": Constants.COMMANDS.IMPORT_ANY_FILE,
@@ -8959,6 +8961,7 @@ public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
         // * For when the nav input IS CLEARED : GOTO PANE LISTS ALL TAGS!
         // The node clicked was one of the tags, pre-fill the nac search with this tag and open find pane
         let w_string: string = p_node.label as string;
+
         let w_panelID = '';
         let w_panel: vscode.WebviewView | undefined;
         if (this._lastTreeView === this._leoTreeExView) {
@@ -8970,11 +8973,17 @@ public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
         }
         await vscode.commands.executeCommand(w_panelID + '.focus');
 
+        if (this._findPanelWebviewView &amp;&amp; this._findPanelWebviewView.visible) {
+            w_panel = this._findPanelWebviewView;
+        } else if (this._findPanelWebviewExplorerView &amp;&amp; this._findPanelWebviewExplorerView.visible) {
+            w_panel = this._findPanelWebviewExplorerView;
+        }
+
         if (w_panel &amp;&amp; w_panel.show &amp;&amp; !w_panel.visible) {
             w_panel.show(false);
         }
         const w_message: { [key: string]: string; } = { type: 'selectNav' };
-        if (w_string &amp;&amp; w_string?.trim()) {
+        if (w_string &amp;&amp; w_string.trim()) {
             w_message["text"] = w_string.trim();
         }
         await w_panel!.webview.postMessage(w_message);
@@ -10168,8 +10177,6 @@ export class LeoGotoProvider implements vscode.TreeDataProvider&lt;LeoGotoNode&g
     }
 
     public navigateNavEntry(p_nav: LeoGotoNavKey): void {
-        console.log('navigateNavEntry', p_nav);
-
         if (!this._nodeList.length) {
             return;
         }

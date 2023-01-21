@@ -2320,6 +2320,11 @@ export class LeoFind {
     //     k.showStateAndMode()
     //     c.widgetWantsFocusNow(w)
     //     self.do_find_next(settings)
+    //@+node:felix.20230120221726.1: *4* find.tag-node
+    @cmd('tag-node', 'Prompt for a tag for this node')
+    public interactive_tag_node(): void {
+        console.log('interactive_tag_node overriden in the UI client.');
+    }
     //@+node:felix.20221016013001.33: *4* find.tag-children & helper
     @cmd('tag-children', 'Prompt for a tag and add it to all children of c.p.')
     public interactive_tag_children(): void {

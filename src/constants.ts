@@ -756,6 +756,7 @@ export class Constants {
      * * Overridden 'good' minibuffer commands
      */
     public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
+        "tag-node": Constants.COMMANDS.TAG_NODE,
         "tag-children": Constants.COMMANDS.TAG_CHILDREN,
         "clone-find-tag": Constants.COMMANDS.CLONE_FIND_TAG,
         // "import-file": Constants.COMMANDS.IMPORT_ANY_FILE,

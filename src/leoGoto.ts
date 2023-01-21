@@ -38,8 +38,6 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
     }
 
     public navigateNavEntry(p_nav: LeoGotoNavKey): void {
-        console.log('navigateNavEntry', p_nav);
-
         if (!this._nodeList.length) {
             return;
         }

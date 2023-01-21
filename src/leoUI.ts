@@ -118,6 +118,7 @@ export class LeoUI extends NullGui {
     private _findPanelWebviewExplorerView: vscode.WebviewView | undefined;
     private _lastFindView: vscode.WebviewView | undefined;  // ? Maybe unused ?
     private _findNeedsFocus: boolean = false;
+    private _navNeedsFocus: boolean = false;
     private _lastSettingsUsed: LeoSearchSettings | undefined; // Last settings loaded / saved for current document
     public findFocusTree = false;
     public findHeadlineRange: [number, number] = [0, 0];
@@ -3395,6 +3396,7 @@ export class LeoUI extends NullGui {
             // * For when the nav input IS CLEARED : GOTO PANE LISTS ALL TAGS!
             // The node clicked was one of the tags, pre-fill the nac search with this tag and open find pane
             let w_string: string = p_node.label as string;
+
             let w_panelID = '';
             let w_panel: vscode.WebviewView | undefined;
             if (this._lastTreeView === this._leoTreeExView) {
@@ -3406,11 +3408,17 @@ export class LeoUI extends NullGui {
             }
             await vscode.commands.executeCommand(w_panelID + '.focus');
 
+            if (this._findPanelWebviewView && this._findPanelWebviewView.visible) {
+                w_panel = this._findPanelWebviewView;
+            } else if (this._findPanelWebviewExplorerView && this._findPanelWebviewExplorerView.visible) {
+                w_panel = this._findPanelWebviewExplorerView;
+            }
+
             if (w_panel && w_panel.show && !w_panel.visible) {
                 w_panel.show(false);
             }
             const w_message: { [key: string]: string; } = { type: 'selectNav' };
-            if (w_string && w_string?.trim()) {
+            if (w_string && w_string.trim()) {
                 w_message["text"] = w_string.trim();
             }
             await w_panel!.webview.postMessage(w_message);
