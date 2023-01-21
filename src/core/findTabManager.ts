@@ -184,6 +184,10 @@ export class StringFindTabManager {
     }
     public init_focus(): void {
         this.set_entry_focus();
+        // SEND LEO SEARCH CONFIG TO VSCODE AND FOCUS IN FIND PANEL !
+        // TODO : TEST THIS !!
+        g.app.gui.startSearch();
+        //
         // const w = this.find_findbox;
         // w.setFocus()
         // s = w.text()

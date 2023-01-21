@@ -293,6 +293,12 @@ export class LeoGui {
     public createLeoFrame(c: Commands, title: string): void {
         this.oops();
     }
+    /**
+     * Focus in Find Panel
+     */
+    public startSearch(): void {
+        this.oops();
+    }
     //@+node:felix.20221120001229.13: *4* LeoGui.runMainLoop
     public runMainLoop(): void {
         this.oops();
