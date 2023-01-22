@@ -599,6 +599,13 @@ export class Constants {
         GOTO_NAV_LAST: Constants.NAME + ".gotoNavLast",
 
         START_SEARCH: Constants.NAME + ".startSearch",
+        SEARCH_BACKWARD: Constants.NAME + ".searchBackward",
+        RE_SEARCH: Constants.NAME + ".reSearch",
+        RE_SEARCH_BACKWARD: Constants.NAME + ".reSearchBackward",
+        WORD_SEARCH: Constants.NAME + ".wordSearch",
+        WORD_SEARCH_BACKWARD: Constants.NAME + ".wordSearchBackward",
+        FIND_ALL_UNIQUE_REGEX: Constants.NAME + ".findAllUniqueRegex",
+        REPLACE_ALL_UNIQUE_REGEX: Constants.NAME + ".replaceAllUniqueRegex",
         FIND_ALL: Constants.NAME + ".findAll",
         FIND_NEXT: Constants.NAME + ".findNext",
         FIND_NEXT_FO: Constants.NAME + ".findNextFromOutline",
@@ -794,48 +801,60 @@ export class Constants {
         // 'save-file-to': Constants.COMMANDS.SAVE_AS_FILE,
         // 'save-to': Constants.COMMANDS.SAVE_AS_FILE,
 
-        // 'clone-find-all-flattened-marked': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED,
-        // 'clone-find-all-marked': Constants.COMMANDS.CLONE_FIND_MARKED,
+        // 'clone-find-all-flattened-marked': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED,  // No prompt needed
+        // 'clone-find-all-marked': Constants.COMMANDS.CLONE_FIND_MARKED,  // No prompt needed
 
-        // 'clone-marked-nodes': Constants.COMMANDS.CLONE_MARKED_NODES,
+        // 'clone-marked-nodes': Constants.COMMANDS.CLONE_MARKED_NODES,  // No prompt needed
 
         'cfa': Constants.COMMANDS.CLONE_FIND_ALL,
-        // 'cfam': Constants.COMMANDS.CLONE_FIND_MARKED,
+        // 'cfam': Constants.COMMANDS.CLONE_FIND_MARKED, // No prompt needed
         'cff': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
-        // 'cffm': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED,
+        // 'cffm': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED, // No prompt needed
         'cft': Constants.COMMANDS.CLONE_FIND_TAG,
 
         // 'git-diff': Constants.COMMANDS.GIT_DIFF,
         // 'gd': Constants.COMMANDS.GIT_DIFF,
 
-        // 'find-tab-open': Constants.COMMANDS.START_SEARCH,
         'find-clone-all': Constants.COMMANDS.CLONE_FIND_ALL,
         'find-clone-all-flattened': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
         'find-clone-tag': Constants.COMMANDS.CLONE_FIND_TAG,
         'find-all': Constants.COMMANDS.FIND_ALL,
-        'start-search': Constants.COMMANDS.START_SEARCH,
         'find-next': Constants.COMMANDS.FIND_NEXT,
         'find-prev': Constants.COMMANDS.FIND_PREVIOUS,
-        // 'search-backward': Constants.COMMANDS.FIND_NEXT,
-        'search-forward': Constants.COMMANDS.FIND_PREVIOUS,
+
+        'start-search': Constants.COMMANDS.START_SEARCH,
+        'search-forward': Constants.COMMANDS.START_SEARCH,
+        'search-backward': Constants.COMMANDS.SEARCH_BACKWARD,
+        're-search': Constants.COMMANDS.RE_SEARCH,
+        're-search-forward': Constants.COMMANDS.RE_SEARCH,
+        're-search-backward': Constants.COMMANDS.RE_SEARCH_BACKWARD,
+        'word-search': Constants.COMMANDS.WORD_SEARCH,
+        'word-search-forward': Constants.COMMANDS.WORD_SEARCH,
+        'word-search-backward': Constants.COMMANDS.WORD_SEARCH_BACKWARD,
+        'find-all-unique-regex': Constants.COMMANDS.FIND_ALL_UNIQUE_REGEX,
+        'change-all-unique-regex': Constants.COMMANDS.REPLACE_ALL_UNIQUE_REGEX,
+        'replace-all-unique-regex': Constants.COMMANDS.REPLACE_ALL_UNIQUE_REGEX,
+
+        // TODO - needed ? 
         // 'find-var': Constants.COMMANDS.FIND_VAR,
         // 'find-def': Constants.COMMANDS.FIND_DEF,
+
         'replace': Constants.COMMANDS.REPLACE,
         'replace-all': Constants.COMMANDS.REPLACE_ALL,
         'change-all': Constants.COMMANDS.REPLACE_ALL,
         'change-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
         'replace-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
-        // 'show-find-options': Constants.COMMANDS.START_SEARCH,
-        // 'toggle-find-ignore-case-option': Constants.COMMANDS.TOGGLE_FIND_IGNORE_CASE_OPTION,
-        // 'toggle-find-in-body-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_BODY_OPTION,
-        // 'toggle-find-in-headline-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_HEADLINE_OPTION,
-        // 'toggle-find-mark-changes-option': Constants.COMMANDS.TOGGLE_FIND_MARK_CHANGES_OPTION,
-        // 'toggle-find-mark-finds-option': Constants.COMMANDS.TOGGLE_FIND_MARK_FINDS_OPTION,
-        // 'toggle-find-regex-option': Constants.COMMANDS.TOGGLE_FIND_REGEXP_OPTION,
-        // 'toggle-find-word-option': Constants.COMMANDS.TOGGLE_FIND_WORD_OPTION,
 
-        // 'goto-next-history-node': Constants.COMMANDS.PREV_NODE,
-        // 'goto-prev-history-node': Constants.COMMANDS.NEXT_NODE,
+        'toggle-find-ignore-case-option': Constants.COMMANDS.TOGGLE_FIND_IGNORE_CASE_OPTION,
+        'toggle-find-in-body-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_BODY_OPTION,
+        'toggle-find-in-headline-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_HEADLINE_OPTION,
+        'toggle-find-mark-changes-option': Constants.COMMANDS.TOGGLE_FIND_MARK_CHANGES_OPTION,
+        'toggle-find-mark-finds-option': Constants.COMMANDS.TOGGLE_FIND_MARK_FINDS_OPTION,
+        'toggle-find-regex-option': Constants.COMMANDS.TOGGLE_FIND_REGEXP_OPTION,
+        'toggle-find-word-option': Constants.COMMANDS.TOGGLE_FIND_WORD_OPTION,
+
+        'goto-next-history-node': Constants.COMMANDS.PREV_NODE_FO,
+        'goto-prev-history-node': Constants.COMMANDS.NEXT_NODE_FO,
 
 
     };

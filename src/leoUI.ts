@@ -2832,8 +2832,6 @@ export class LeoUI extends NullGui {
         // const test = vscode.commands.executeCommand('getContextKeyInfo');
         // test.then((p_result) => {
         //     console.log('then result', p_result);
-
-
         // });
 
         if (value && value.then) {
@@ -3838,10 +3836,23 @@ export class LeoUI extends NullGui {
     }
 
     /**
+     * Interactive Search to implement search-backward, re-search, word-search. etc.
+     */
+    public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_work: boolean): Promise<unknown> {
+        //
+        console.log('interactive search');
+
+        return true;
+    }
+
+    /**
      * * Find / Replace All
      * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
      */
     public findAll(p_replace: boolean): Thenable<unknown> {
+
+        console.log('REGULAR  findAll');
+
 
         let w_searchString: string = this._lastSettingsUsed!.findText;
         let w_replaceString: string = this._lastSettingsUsed!.replaceText;
@@ -3900,7 +3911,114 @@ export class LeoUI extends NullGui {
                         whole_word: this._lastSettingsUsed.wholeWord,
                         wrapping: false, // unused
                     };
-                    const w_result = fc.do_change_all(w_changeSettings);
+
+                    let w_result;
+                    if (p_replace) {
+                        w_result = fc.do_change_all(w_changeSettings);
+                    } else {
+                        w_result = fc.do_find_all(w_changeSettings);
+                    }
+
+                    const w_focus = this._get_focus();
+
+                    let w_finalFocus = Focus.Body;
+
+                    if (w_focus.includes('tree') || w_focus.includes('head')) {
+                        // tree
+                        w_finalFocus = Focus.Outline;
+                    }
+                    this.loadSearchSettings();
+                    this.setupRefresh(
+                        w_finalFocus,
+                        {
+                            tree: true,
+                            body: true,
+                            // documents: false,
+                            // buttons: false,
+                            states: true
+                        }
+                    );
+                    this.launchRefresh();
+
+                    return;
+
+                }
+            });
+    }
+
+    /**
+     * * Find Unique Regex / Replace All Unique Regex 
+     * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
+     */
+    public findAllUniqueRegex(p_replace: boolean): Thenable<unknown> {
+
+        // TODO : findAllUniqueRegex !
+        console.log('TODO : findAllUniqueRegex');
+
+        let w_searchString: string = this._lastSettingsUsed!.findText;
+        let w_replaceString: string = this._lastSettingsUsed!.replaceText;
+
+        return this.triggerBodySave(true)
+            .then((p_saveResult) => {
+                return this._inputFindPattern()
+                    .then((p_findString) => {
+                        if (!p_findString) {
+                            return true; // Cancelled with escape or empty string.
+                        }
+                        w_searchString = p_findString;
+                        if (p_replace) {
+                            return this._inputFindPattern(true).then((p_replaceString) => {
+                                if (p_replaceString === undefined) {
+                                    return true;
+                                }
+                                w_replaceString = p_replaceString;
+                                return false;
+                            });
+                        }
+                        return false;
+                    });
+            })
+            .then((p_cancelled: boolean) => {
+                if (this._lastSettingsUsed && !p_cancelled) {
+                    this._lastSettingsUsed.findText = w_searchString;
+                    this._lastSettingsUsed.replaceText = w_replaceString;
+
+                    // * savesettings not needed, w_changeSettings is used directly
+                    // this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
+
+                    const c = g.app.windowList[this.frameIndex].c;
+                    const fc = c.findCommands;
+
+                    fc.ftm.get_settings();
+                    const w_changeSettings: ISettings = {
+                        // this._lastSettingsUsed
+                        // State...
+                        in_headline: false, // ! TODO !
+                        // p: Position,
+                        // Find/change strings...
+                        find_text: this._lastSettingsUsed.findText,
+                        change_text: this._lastSettingsUsed.replaceText,
+                        // Find options...
+                        file_only: this._lastSettingsUsed.searchOptions === 3,
+                        ignore_case: this._lastSettingsUsed.ignoreCase,
+                        mark_changes: this._lastSettingsUsed.markChanges,
+                        mark_finds: this._lastSettingsUsed.markFinds,
+                        node_only: this._lastSettingsUsed.searchOptions === 2,
+                        pattern_match: this._lastSettingsUsed.regExp,
+                        reverse: false,
+                        search_body: this._lastSettingsUsed.searchBody,
+                        search_headline: this._lastSettingsUsed.searchHeadline,
+                        suboutline_only: this._lastSettingsUsed.searchOptions === 1,
+                        whole_word: this._lastSettingsUsed.wholeWord,
+                        wrapping: false, // unused
+                    };
+
+                    let w_result;
+                    if (p_replace) {
+                        w_result = fc.do_change_all(w_changeSettings);
+                    } else {
+                        w_result = fc.do_find_all(w_changeSettings);
+                    }
 
                     const w_focus = this._get_focus();
 

@@ -230,7 +230,6 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 
         [CMD.NEXT_NODE, () => p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
         [CMD.NEXT_NODE_FO, () => p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
-
         [CMD.FIND_QUICK, () => p_leoUI.findQuick()],
         [CMD.FIND_QUICK_SELECTED, () => p_leoUI.findQuickSelected()],
         [CMD.FIND_QUICK_TIMELINE, () => p_leoUI.findQuickTimeline()],
@@ -247,6 +246,15 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.GOTO_NAV_ENTRY, (p_node: LeoGotoNode) => p_leoUI.gotoNavEntry(p_node)],
 
         [CMD.START_SEARCH, () => p_leoUI.startSearch()],
+        [CMD.SEARCH_BACKWARD, () => p_leoUI.interactiveSearch(true, false, false)],
+        [CMD.RE_SEARCH, () => p_leoUI.interactiveSearch(false, true, false)],
+        [CMD.RE_SEARCH_BACKWARD, () => p_leoUI.interactiveSearch(true, true, false)],
+        [CMD.WORD_SEARCH, () => p_leoUI.interactiveSearch(false, false, true)],
+        [CMD.WORD_SEARCH_BACKWARD, () => p_leoUI.interactiveSearch(true, false, true)],
+
+        [CMD.FIND_ALL_UNIQUE_REGEX, () => p_leoUI.findAllUniqueRegex(false)],
+        [CMD.REPLACE_ALL_UNIQUE_REGEX, () => p_leoUI.findAllUniqueRegex(true)],
+
         [CMD.FIND_ALL, () => p_leoUI.findAll(false)],
         [CMD.FIND_NEXT, () => p_leoUI.find(false, false)],
         [CMD.FIND_NEXT_FO, () => p_leoUI.find(true, false)],

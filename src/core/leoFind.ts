@@ -1095,7 +1095,6 @@ export class LeoFind {
         }
     }
 
-
     //@+node:felix.20221013234514.21: *4* find.set-find-*
     @cmd('set-find-everywhere', 'Set the \'Entire Outline\' radio button in the Find tab.')
     public set_find_scope_every_where(): void {
@@ -2116,6 +2115,14 @@ export class LeoFind {
     // * do_find_all and do_change_all are intended to be called directly from the UI client instead.
 
 
+    @cmd(
+        'find-all-unique-regex',
+        'Create a summary node containing all unique matches of the regex search' +
+        'string. This command shows only the matched string itself.'
+    )
+    public interactive_find_all_unique_regex(): void {
+        console.log('interactive_find_all_unique_regex overriden in the UI client.');
+    }
     // @cmd('find-all-unique-regex')
     // def interactive_find_all_unique_regex(self, event: Event=None) -> None:  # pragma: no cover (interactive)
     //     """
@@ -2147,6 +2154,11 @@ export class LeoFind {
     //     k.showStateAndMode()
     //     return self.do_find_all(settings)
 
+    @cmd('change-all-unique-regex', 'Replace all instances of the search string with the replacement string.')
+    @cmd('replace-all-unique-regex', 'Replace all instances of the search string with the replacement string.')
+    public interactive_change_all_unique_regex1(): void {
+        console.log('interactive_change_all_unique_regex1 overriden in the UI client.');
+    }
     // def interactive_change_all_unique_regex1(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     k = self.k
     //     find_pattern = self._sString = k.arg
@@ -2173,8 +2185,11 @@ export class LeoFind {
     //     c.widgetWantsFocusNow(w)
     //     self.do_change_all(settings)
     //@+node:felix.20221016013001.26: *4* find.re-search
-    // @cmd('re-search')
-    // @cmd('re-search-forward')
+    @cmd('re-search', 'Same as start-find, with regex.')
+    @cmd('re-search-forward', 'Same as start-find, with regex.')
+    public interactive_re_search_forward(): void {
+        console.log('interactive_re_search_forward overriden in the UI client.');
+    }
     // def interactive_re_search_forward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, with regex."""
     //     # Set flag for show_find_options.
@@ -2189,7 +2204,10 @@ export class LeoFind {
     //         escape_handler=self.start_search_escape1,  # See start-search
     //     )
     //@+node:felix.20221016013001.27: *4* find.re-search-backward
-    // @cmd('re-search-backward')
+    @cmd('re-search-backward', 'Same as start-find, but with regex and in reverse.')
+    public interactive_re_search_backward(): void {
+        console.log('interactive_re_search_backward overriden in the UI client.');
+    }
     // def interactive_re_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, but with regex and in reverse."""
     //     # Set flags for show_find_options.
@@ -2207,7 +2225,10 @@ export class LeoFind {
     //     )
 
     //@+node:felix.20221016013001.28: *4* find.search_backward
-    // @cmd('search-backward')
+    @cmd('search-backward', 'Same as start-find, but in reverse.')
+    public interactive_search_backward(): void {
+        console.log('interactive_search_backward overriden in the UI client.');
+    }
     // def interactive_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, but in reverse."""
     //     # Set flag for show_find_options.
@@ -2374,6 +2395,11 @@ export class LeoFind {
         }
     }
     //@+node:felix.20221020230510.1: *4* find.word-search
+    @cmd('word-search', 'Same as start-search, with whole_word setting.')
+    @cmd('word-search-forward', 'Same as start-search, with whole_word setting.')
+    public word_search_forward(): void {
+        console.log('word_search_forward overriden in the UI client.');
+    }
     // @cmd('word-search')
     // @cmd('word-search-forward')
     // def word_search_forward(self, event: Event) -> None:  # pragma: no cover (interactive)
@@ -2390,7 +2416,10 @@ export class LeoFind {
     //         escape_handler=self.start_search_escape1,  # See start-search
     //     )
     //@+node:felix.20221016013001.36: *4* find.word-search-backward
-    // @cmd('word-search-backward')
+    @cmd('word-search-backward', 'Same as start-search-backward, with whole_word setting.')
+    public word_search_backward(): void {
+        console.log('word_search_backward overriden in the UI client.');
+    }
     // def word_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     # Set flags for show_find_options.
     //     self.reverse = True

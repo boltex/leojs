@@ -799,7 +799,8 @@ export class NullTree {
             }
             w.insert(0, s);
         } else {
-            g.trace('-------------------- oops');
+            // * LEOJS : Not currently editing the headline
+            // g.trace('-------------------- oops');
         }
     }
 

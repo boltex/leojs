@@ -205,7 +205,9 @@
 <v t="felix.20220505215924.7"><vh>find</vh></v>
 <v t="felix.20220505215924.8"><vh>findSymbol</vh></v>
 <v t="felix.20220505215924.9"><vh>replace &amp; replaceThenFind</vh></v>
+<v t="felix.20230121211548.1"><vh>interactiveSearch</vh></v>
 <v t="felix.20220505215924.10"><vh>findAll &amp; replaceAll</vh></v>
+<v t="felix.20230122001458.1"><vh>findAllUniqueRegex &amp; replaceAllUniqueRegex</vh></v>
 <v t="felix.20220505215924.11"><vh>cloneFind</vh></v>
 <v t="felix.20220505215924.12"><vh>setSearchOption</vh></v>
 <v t="felix.20220505215924.13"><vh>loadSearchSettings</vh></v>
@@ -423,6 +425,8 @@
 <v t="felix.20201214150149.13"><vh>Move Nodes</vh></v>
 <v t="felix.20201214150149.14"><vh>Undo</vh></v>
 <v t="felix.20201214150149.16"><vh>Marked Nodes Commands</vh></v>
+<v t="felix.20230121212426.1"><vh>History Commands</vh></v>
+<v t="felix.20230121212438.1"><vh>Search and Tag Commands</vh></v>
 <v t="felix.20201214150149.17"><vh>Clone Find Commands</vh></v>
 <v t="felix.20220917013425.1"><vh>Config Set Recommended</vh></v>
 </v>
@@ -1323,47 +1327,6 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.DELETE_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.DELETE_MARKED_NODES, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 [CMD.MOVE_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.MOVE_MARKED_NODES, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
-[CMD.PREV_NODE, () =&gt; p_leoUI.command(LEOCMD.GOTO_PREV_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
-[CMD.PREV_NODE_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_PREV_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
-
-[CMD.NEXT_NODE, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
-[CMD.NEXT_NODE_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
-
-[CMD.FIND_QUICK, () =&gt; p_leoUI.findQuick()],
-[CMD.FIND_QUICK_SELECTED, () =&gt; p_leoUI.findQuickSelected()],
-[CMD.FIND_QUICK_TIMELINE, () =&gt; p_leoUI.findQuickTimeline()],
-[CMD.FIND_QUICK_CHANGED, () =&gt; p_leoUI.findQuickChanged()],
-[CMD.FIND_QUICK_HISTORY, () =&gt; p_leoUI.findQuickHistory()],
-[CMD.FIND_QUICK_MARKED, () =&gt; p_leoUI.findQuickMarked()],
-[CMD.FIND_QUICK_GO_ANYWHERE, () =&gt; p_leoUI.goAnywhere()],
-
-[CMD.GOTO_NAV_PREV, () =&gt; p_leoUI.navigateNavEntry(LeoGotoNavKey.prev)],
-[CMD.GOTO_NAV_NEXT, () =&gt; p_leoUI.navigateNavEntry(LeoGotoNavKey.next)],
-[CMD.GOTO_NAV_FIRST, () =&gt; p_leoUI.navigateNavEntry(LeoGotoNavKey.first)],
-[CMD.GOTO_NAV_LAST, () =&gt; p_leoUI.navigateNavEntry(LeoGotoNavKey.last)],
-
-[CMD.GOTO_NAV_ENTRY, (p_node: LeoGotoNode) =&gt; p_leoUI.gotoNavEntry(p_node)],
-
-[CMD.START_SEARCH, () =&gt; p_leoUI.startSearch()],
-[CMD.FIND_ALL, () =&gt; p_leoUI.findAll(false)],
-[CMD.FIND_NEXT, () =&gt; p_leoUI.find(false, false)],
-[CMD.FIND_NEXT_FO, () =&gt; p_leoUI.find(true, false)],
-[CMD.FIND_PREVIOUS, () =&gt; p_leoUI.find(false, true)],
-[CMD.FIND_PREVIOUS_FO, () =&gt; p_leoUI.find(true, true)],
-[CMD.FIND_VAR, () =&gt; p_leoUI.findSymbol(false)],
-[CMD.FIND_DEF, () =&gt; p_leoUI.findSymbol(true)],
-[CMD.REPLACE, () =&gt; p_leoUI.replace(false, false)],
-[CMD.REPLACE_FO, () =&gt; p_leoUI.replace(true, false)],
-[CMD.REPLACE_THEN_FIND, () =&gt; p_leoUI.replace(false, true)],
-[CMD.REPLACE_THEN_FIND_FO, () =&gt; p_leoUI.replace(true, true)],
-[CMD.REPLACE_ALL, () =&gt; p_leoUI.findAll(true)],
-[CMD.GOTO_GLOBAL_LINE, () =&gt; p_leoUI.gotoGlobalLine()],
-
-[CMD.TAG_CHILDREN, () =&gt; p_leoUI.tagChildren()],
-[CMD.TAG_NODE, () =&gt; p_leoUI.tagNode()],
-[CMD.REMOVE_TAG, () =&gt; p_leoUI.removeTag()],
-[CMD.REMOVE_TAGS, () =&gt; p_leoUI.removeTags()],
-
 </t>
 <t tx="felix.20201214150149.17">[CMD.CLONE_FIND_TAG, () =&gt; p_leoUI.cloneFindTag()],
 
@@ -1671,6 +1634,13 @@ public static COMMANDS = {
     GOTO_NAV_LAST: Constants.NAME + ".gotoNavLast",
 
     START_SEARCH: Constants.NAME + ".startSearch",
+    SEARCH_BACKWARD: Constants.NAME + ".searchBackward",
+    RE_SEARCH: Constants.NAME + ".reSearch",
+    RE_SEARCH_BACKWARD: Constants.NAME + ".reSearchBackward",
+    WORD_SEARCH: Constants.NAME + ".wordSearch",
+    WORD_SEARCH_BACKWARD: Constants.NAME + ".wordSearchBackward",
+    FIND_ALL_UNIQUE_REGEX: Constants.NAME + ".findAllUniqueRegex",
+    REPLACE_ALL_UNIQUE_REGEX: Constants.NAME + ".replaceAllUniqueRegex",
     FIND_ALL: Constants.NAME + ".findAll",
     FIND_NEXT: Constants.NAME + ".findNext",
     FIND_NEXT_FO: Constants.NAME + ".findNextFromOutline",
@@ -3546,8 +3516,6 @@ public async command(
     // const test = vscode.commands.executeCommand('getContextKeyInfo');
     // test.then((p_result) =&gt; {
     //     console.log('then result', p_result);
-
-
     // });
 
     if (value &amp;&amp; value.then) {
@@ -8311,48 +8279,60 @@ public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
     // 'save-file-to': Constants.COMMANDS.SAVE_AS_FILE,
     // 'save-to': Constants.COMMANDS.SAVE_AS_FILE,
 
-    // 'clone-find-all-flattened-marked': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED,
-    // 'clone-find-all-marked': Constants.COMMANDS.CLONE_FIND_MARKED,
+    // 'clone-find-all-flattened-marked': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED,  // No prompt needed
+    // 'clone-find-all-marked': Constants.COMMANDS.CLONE_FIND_MARKED,  // No prompt needed
 
-    // 'clone-marked-nodes': Constants.COMMANDS.CLONE_MARKED_NODES,
+    // 'clone-marked-nodes': Constants.COMMANDS.CLONE_MARKED_NODES,  // No prompt needed
 
     'cfa': Constants.COMMANDS.CLONE_FIND_ALL,
-    // 'cfam': Constants.COMMANDS.CLONE_FIND_MARKED,
+    // 'cfam': Constants.COMMANDS.CLONE_FIND_MARKED, // No prompt needed
     'cff': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
-    // 'cffm': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED,
+    // 'cffm': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED, // No prompt needed
     'cft': Constants.COMMANDS.CLONE_FIND_TAG,
 
     // 'git-diff': Constants.COMMANDS.GIT_DIFF,
     // 'gd': Constants.COMMANDS.GIT_DIFF,
 
-    // 'find-tab-open': Constants.COMMANDS.START_SEARCH,
     'find-clone-all': Constants.COMMANDS.CLONE_FIND_ALL,
     'find-clone-all-flattened': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
     'find-clone-tag': Constants.COMMANDS.CLONE_FIND_TAG,
     'find-all': Constants.COMMANDS.FIND_ALL,
-    'start-search': Constants.COMMANDS.START_SEARCH,
     'find-next': Constants.COMMANDS.FIND_NEXT,
     'find-prev': Constants.COMMANDS.FIND_PREVIOUS,
-    // 'search-backward': Constants.COMMANDS.FIND_NEXT,
-    'search-forward': Constants.COMMANDS.FIND_PREVIOUS,
+
+    'start-search': Constants.COMMANDS.START_SEARCH,
+    'search-forward': Constants.COMMANDS.START_SEARCH,
+    'search-backward': Constants.COMMANDS.SEARCH_BACKWARD,
+    're-search': Constants.COMMANDS.RE_SEARCH,
+    're-search-forward': Constants.COMMANDS.RE_SEARCH,
+    're-search-backward': Constants.COMMANDS.RE_SEARCH_BACKWARD,
+    'word-search': Constants.COMMANDS.WORD_SEARCH,
+    'word-search-forward': Constants.COMMANDS.WORD_SEARCH,
+    'word-search-backward': Constants.COMMANDS.WORD_SEARCH_BACKWARD,
+    'find-all-unique-regex': Constants.COMMANDS.FIND_ALL_UNIQUE_REGEX,
+    'change-all-unique-regex': Constants.COMMANDS.REPLACE_ALL_UNIQUE_REGEX,
+    'replace-all-unique-regex': Constants.COMMANDS.REPLACE_ALL_UNIQUE_REGEX,
+
+    // TODO - needed ? 
     // 'find-var': Constants.COMMANDS.FIND_VAR,
     // 'find-def': Constants.COMMANDS.FIND_DEF,
+
     'replace': Constants.COMMANDS.REPLACE,
     'replace-all': Constants.COMMANDS.REPLACE_ALL,
     'change-all': Constants.COMMANDS.REPLACE_ALL,
     'change-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
     'replace-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
-    // 'show-find-options': Constants.COMMANDS.START_SEARCH,
-    // 'toggle-find-ignore-case-option': Constants.COMMANDS.TOGGLE_FIND_IGNORE_CASE_OPTION,
-    // 'toggle-find-in-body-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_BODY_OPTION,
-    // 'toggle-find-in-headline-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_HEADLINE_OPTION,
-    // 'toggle-find-mark-changes-option': Constants.COMMANDS.TOGGLE_FIND_MARK_CHANGES_OPTION,
-    // 'toggle-find-mark-finds-option': Constants.COMMANDS.TOGGLE_FIND_MARK_FINDS_OPTION,
-    // 'toggle-find-regex-option': Constants.COMMANDS.TOGGLE_FIND_REGEXP_OPTION,
-    // 'toggle-find-word-option': Constants.COMMANDS.TOGGLE_FIND_WORD_OPTION,
 
-    // 'goto-next-history-node': Constants.COMMANDS.PREV_NODE,
-    // 'goto-prev-history-node': Constants.COMMANDS.NEXT_NODE,
+    'toggle-find-ignore-case-option': Constants.COMMANDS.TOGGLE_FIND_IGNORE_CASE_OPTION,
+    'toggle-find-in-body-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_BODY_OPTION,
+    'toggle-find-in-headline-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_HEADLINE_OPTION,
+    'toggle-find-mark-changes-option': Constants.COMMANDS.TOGGLE_FIND_MARK_CHANGES_OPTION,
+    'toggle-find-mark-finds-option': Constants.COMMANDS.TOGGLE_FIND_MARK_FINDS_OPTION,
+    'toggle-find-regex-option': Constants.COMMANDS.TOGGLE_FIND_REGEXP_OPTION,
+    'toggle-find-word-option': Constants.COMMANDS.TOGGLE_FIND_WORD_OPTION,
+
+    'goto-next-history-node': Constants.COMMANDS.PREV_NODE_FO,
+    'goto-prev-history-node': Constants.COMMANDS.NEXT_NODE_FO,
 
 
 };
@@ -9052,6 +9032,9 @@ public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
  */
 public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
 
+    console.log('REGULAR  findAll');
+
+
     let w_searchString: string = this._lastSettingsUsed!.findText;
     let w_replaceString: string = this._lastSettingsUsed!.replaceText;
 
@@ -9109,7 +9092,13 @@ public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
                     whole_word: this._lastSettingsUsed.wholeWord,
                     wrapping: false, // unused
                 };
-                const w_result = fc.do_change_all(w_changeSettings);
+
+                let w_result;
+                if (p_replace) {
+                    w_result = fc.do_change_all(w_changeSettings);
+                } else {
+                    w_result = fc.do_find_all(w_changeSettings);
+                }
 
                 const w_focus = this._get_focus();
 
@@ -13178,6 +13167,48 @@ private _refreshGotoPane(): void {
   "title": "Start Search"
 },
 {
+  "command": "leojs.searchBackward",
+  "category": "Leojs",
+  "enablement": "leojsTreeOpened",
+  "title": "Search Backward"
+},
+{
+  "command": "leojs.reSearch",
+  "category": "Leojs",
+  "enablement": "leojsTreeOpened",
+  "title": "Search with Regex"
+},
+{
+  "command": "leojs.reSearchBackward",
+  "category": "Leojs",
+  "enablement": "leojsTreeOpened",
+  "title": "Search with Regex Backward"
+},
+{
+  "command": "leojs.wordSearch",
+  "category": "Leojs",
+  "enablement": "leojsTreeOpened",
+  "title": "Search with whole_word setting"
+},
+{
+  "command": "leojs.wordSearchBackward",
+  "category": "Leojs",
+  "enablement": "leojsTreeOpened",
+  "title": "Search with whole_word setting Backward"
+},
+{
+  "command": "leojs.findAllUniqueRegex",
+  "category": "Leojs",
+  "enablement": "leojsTreeOpened",
+  "title": "Find all unique regex matches"
+},
+{
+  "command": "leojs.replaceAllUniqueRegex",
+  "category": "Leojs",
+  "enablement": "leojsTreeOpened",
+  "title": "Replace all instances with regex"
+},
+{
   "command": "leojs.findAll",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
@@ -14400,6 +14431,170 @@ private _row_col_wrapper_dict(i: number, wrapper: StringTextWrapper): { "line": 
     let line, col;
     [line, col] = wrapper.toPythonIndexRowCol(i);
     return { "line": line, "col": col, "index": i };
+}
+
+</t>
+<t tx="felix.20230121211548.1">/**
+ * Interactive Search to implement search-backward, re-search, word-search. etc.
+ */
+public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_work: boolean): Promise&lt;unknown&gt; {
+    //
+    console.log('interactive search');
+
+    return true;
+}
+
+</t>
+<t tx="felix.20230121212426.1">[CMD.PREV_NODE, () =&gt; p_leoUI.command(LEOCMD.GOTO_PREV_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
+[CMD.PREV_NODE_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_PREV_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+
+[CMD.NEXT_NODE, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
+[CMD.NEXT_NODE_FO, () =&gt; p_leoUI.command(LEOCMD.GOTO_NEXT_HISTORY, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+</t>
+<t tx="felix.20230121212438.1">[CMD.FIND_QUICK, () =&gt; p_leoUI.findQuick()],
+[CMD.FIND_QUICK_SELECTED, () =&gt; p_leoUI.findQuickSelected()],
+[CMD.FIND_QUICK_TIMELINE, () =&gt; p_leoUI.findQuickTimeline()],
+[CMD.FIND_QUICK_CHANGED, () =&gt; p_leoUI.findQuickChanged()],
+[CMD.FIND_QUICK_HISTORY, () =&gt; p_leoUI.findQuickHistory()],
+[CMD.FIND_QUICK_MARKED, () =&gt; p_leoUI.findQuickMarked()],
+[CMD.FIND_QUICK_GO_ANYWHERE, () =&gt; p_leoUI.goAnywhere()],
+
+[CMD.GOTO_NAV_PREV, () =&gt; p_leoUI.navigateNavEntry(LeoGotoNavKey.prev)],
+[CMD.GOTO_NAV_NEXT, () =&gt; p_leoUI.navigateNavEntry(LeoGotoNavKey.next)],
+[CMD.GOTO_NAV_FIRST, () =&gt; p_leoUI.navigateNavEntry(LeoGotoNavKey.first)],
+[CMD.GOTO_NAV_LAST, () =&gt; p_leoUI.navigateNavEntry(LeoGotoNavKey.last)],
+
+[CMD.GOTO_NAV_ENTRY, (p_node: LeoGotoNode) =&gt; p_leoUI.gotoNavEntry(p_node)],
+
+[CMD.START_SEARCH, () =&gt; p_leoUI.startSearch()],
+[CMD.SEARCH_BACKWARD, () =&gt; p_leoUI.interactiveSearch(true, false, false)],
+[CMD.RE_SEARCH, () =&gt; p_leoUI.interactiveSearch(false, true, false)],
+[CMD.RE_SEARCH_BACKWARD, () =&gt; p_leoUI.interactiveSearch(true, true, false)],
+[CMD.WORD_SEARCH, () =&gt; p_leoUI.interactiveSearch(false, false, true)],
+[CMD.WORD_SEARCH_BACKWARD, () =&gt; p_leoUI.interactiveSearch(true, false, true)],
+
+[CMD.FIND_ALL_UNIQUE_REGEX, () =&gt; p_leoUI.findAllUniqueRegex(false)],
+[CMD.REPLACE_ALL_UNIQUE_REGEX, () =&gt; p_leoUI.findAllUniqueRegex(true)],
+
+[CMD.FIND_ALL, () =&gt; p_leoUI.findAll(false)],
+[CMD.FIND_NEXT, () =&gt; p_leoUI.find(false, false)],
+[CMD.FIND_NEXT_FO, () =&gt; p_leoUI.find(true, false)],
+[CMD.FIND_PREVIOUS, () =&gt; p_leoUI.find(false, true)],
+[CMD.FIND_PREVIOUS_FO, () =&gt; p_leoUI.find(true, true)],
+[CMD.FIND_VAR, () =&gt; p_leoUI.findSymbol(false)],
+[CMD.FIND_DEF, () =&gt; p_leoUI.findSymbol(true)],
+[CMD.REPLACE, () =&gt; p_leoUI.replace(false, false)],
+[CMD.REPLACE_FO, () =&gt; p_leoUI.replace(true, false)],
+[CMD.REPLACE_THEN_FIND, () =&gt; p_leoUI.replace(false, true)],
+[CMD.REPLACE_THEN_FIND_FO, () =&gt; p_leoUI.replace(true, true)],
+[CMD.REPLACE_ALL, () =&gt; p_leoUI.findAll(true)],
+[CMD.GOTO_GLOBAL_LINE, () =&gt; p_leoUI.gotoGlobalLine()],
+
+[CMD.TAG_CHILDREN, () =&gt; p_leoUI.tagChildren()],
+[CMD.TAG_NODE, () =&gt; p_leoUI.tagNode()],
+[CMD.REMOVE_TAG, () =&gt; p_leoUI.removeTag()],
+[CMD.REMOVE_TAGS, () =&gt; p_leoUI.removeTags()],
+
+</t>
+<t tx="felix.20230122001458.1">/**
+ * * Find Unique Regex / Replace All Unique Regex 
+ * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
+ */
+public findAllUniqueRegex(p_replace: boolean): Thenable&lt;unknown&gt; {
+
+    // TODO : findAllUniqueRegex !
+    console.log('TODO : findAllUniqueRegex');
+
+    let w_searchString: string = this._lastSettingsUsed!.findText;
+    let w_replaceString: string = this._lastSettingsUsed!.replaceText;
+
+    return this.triggerBodySave(true)
+        .then((p_saveResult) =&gt; {
+            return this._inputFindPattern()
+                .then((p_findString) =&gt; {
+                    if (!p_findString) {
+                        return true; // Cancelled with escape or empty string.
+                    }
+                    w_searchString = p_findString;
+                    if (p_replace) {
+                        return this._inputFindPattern(true).then((p_replaceString) =&gt; {
+                            if (p_replaceString === undefined) {
+                                return true;
+                            }
+                            w_replaceString = p_replaceString;
+                            return false;
+                        });
+                    }
+                    return false;
+                });
+        })
+        .then((p_cancelled: boolean) =&gt; {
+            if (this._lastSettingsUsed &amp;&amp; !p_cancelled) {
+                this._lastSettingsUsed.findText = w_searchString;
+                this._lastSettingsUsed.replaceText = w_replaceString;
+
+                // * savesettings not needed, w_changeSettings is used directly
+                // this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
+
+                const c = g.app.windowList[this.frameIndex].c;
+                const fc = c.findCommands;
+
+                fc.ftm.get_settings();
+                const w_changeSettings: ISettings = {
+                    // this._lastSettingsUsed
+                    // State...
+                    in_headline: false, // ! TODO !
+                    // p: Position,
+                    // Find/change strings...
+                    find_text: this._lastSettingsUsed.findText,
+                    change_text: this._lastSettingsUsed.replaceText,
+                    // Find options...
+                    file_only: this._lastSettingsUsed.searchOptions === 3,
+                    ignore_case: this._lastSettingsUsed.ignoreCase,
+                    mark_changes: this._lastSettingsUsed.markChanges,
+                    mark_finds: this._lastSettingsUsed.markFinds,
+                    node_only: this._lastSettingsUsed.searchOptions === 2,
+                    pattern_match: this._lastSettingsUsed.regExp,
+                    reverse: false,
+                    search_body: this._lastSettingsUsed.searchBody,
+                    search_headline: this._lastSettingsUsed.searchHeadline,
+                    suboutline_only: this._lastSettingsUsed.searchOptions === 1,
+                    whole_word: this._lastSettingsUsed.wholeWord,
+                    wrapping: false, // unused
+                };
+
+                let w_result;
+                if (p_replace) {
+                    w_result = fc.do_change_all(w_changeSettings);
+                } else {
+                    w_result = fc.do_find_all(w_changeSettings);
+                }
+
+                const w_focus = this._get_focus();
+
+                let w_finalFocus = Focus.Body;
+
+                if (w_focus.includes('tree') || w_focus.includes('head')) {
+                    // tree
+                    w_finalFocus = Focus.Outline;
+                }
+                this.loadSearchSettings();
+                this.setupRefresh(
+                    w_finalFocus,
+                    {
+                        tree: true,
+                        body: true,
+                        // documents: false,
+                        // buttons: false,
+                        states: true
+                    }
+                );
+                this.launchRefresh();
+
+                return;
+
+            }
+        });
 }
 
 </t>
