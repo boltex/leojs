@@ -17,6 +17,10 @@ import { StringTextWrapper } from './leoFrame';
 //@@language rest
 //@@nosearch
 //@+at
+//
+// NOTE: LEOJS DOES NOT RESPECT THE GUI-INDEPENDANCE 
+// TODO: CAll those via g.app.gui as LeoUi to respect GUI-independance!)
+//
 // LeoFind.py contains the gui-independent part of all of Leo's
 // find/change code. Such code is tricky, which is why it should be
 // gui-independent code! Here are the governing principles:
@@ -157,8 +161,7 @@ export class LeoFind {
     public request_pattern_match: boolean = false;
     public request_whole_word: boolean = false;
     // Internal state...
-    public changeAllFlag: boolean = false;
-    public findAllUniqueFlag: boolean = false;
+    public findAllUniqueFlag: boolean = false; // USEFUL !
     public find_def_data: any;
     public in_headline: boolean = false;
     public match_obj!: RegExpExecArray | undefined;
@@ -2131,7 +2134,6 @@ export class LeoFind {
     //     """
     //     self.ftm.clear_focus()
     //     self.match_obj = None
-    //     self.changeAllFlag = False
     //     self.findAllUniqueFlag = True
     //     self.ftm.set_entry_focus()
     //     self.start_state_machine(event,
@@ -2268,7 +2270,6 @@ export class LeoFind {
     //     if self.minibuffer_mode:
     //         # Set up the state machine.
     //         self.ftm.clear_focus()
-    //         self.changeAllFlag = False
     //         self.findAllUniqueFlag = False
     //         self.ftm.set_entry_focus()
     //         self.start_state_machine(event,
@@ -2408,7 +2409,7 @@ export class LeoFind {
     //     self.whole_word = True
     //     self.show_find_options()
     //     # Set flag for do_find_next().
-    //     self.request_whole_world = True
+    //     self.request_whole_word = True
     //     # Go.
     //     self.start_state_machine(event,
     //         prefix='Word Search: ',
@@ -2423,11 +2424,11 @@ export class LeoFind {
     // def word_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     # Set flags for show_find_options.
     //     self.reverse = True
-    //     self.whole_world = True
+    //     self.whole_word = True
     //     self.show_find_options()
     //     # Set flags for do_find_next().
     //     self.request_reverse = True
-    //     self.request_whole_world = True
+    //     self.request_whole_word = True
     //     # Go
     //     self.start_state_machine(event,
     //         prefix='Word Search Backward: ',

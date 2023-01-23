@@ -380,6 +380,9 @@ export class Constants {
         // Flags for focus context
         FOCUS_FIND: "leojsFindFocus",
 
+        // Flag for interactive Search
+        INTERACTIVE_SEARCH: "leojsInteractiveSearch", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
+
         // Context flags that are mapped 'directly' onto leojs config settings
         // * PREFIXED WITH 'leojs' *
         LEO_TREE_BROWSE: Constants.NAME + Constants.CONFIG_NAMES.LEO_TREE_BROWSE[0].toUpperCase() + Constants.CONFIG_NAMES.LEO_TREE_BROWSE.slice(1), // Force ar'jan's suggestion of Leo's tree behavior override
@@ -597,6 +600,8 @@ export class Constants {
         GOTO_NAV_NEXT: Constants.NAME + ".gotoNavNext",
         GOTO_NAV_FIRST: Constants.NAME + ".gotoNavFirst",
         GOTO_NAV_LAST: Constants.NAME + ".gotoNavLast",
+
+        INTERACTIVE_SEARCH_TAB: Constants.NAME + ".interactiveSearchTab", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
 
         START_SEARCH: Constants.NAME + ".startSearch",
         SEARCH_BACKWARD: Constants.NAME + ".searchBackward",

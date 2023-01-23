@@ -245,6 +245,8 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 
         [CMD.GOTO_NAV_ENTRY, (p_node: LeoGotoNode) => p_leoUI.gotoNavEntry(p_node)],
 
+        //  [CMD.INTERACTIVE_SEARCH_TAB, () => p_leoUI.interactiveSearchTab()], // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
+
         [CMD.START_SEARCH, () => p_leoUI.startSearch()],
         [CMD.SEARCH_BACKWARD, () => p_leoUI.interactiveSearch(true, false, false)],
         [CMD.RE_SEARCH, () => p_leoUI.interactiveSearch(false, true, false)],

@@ -123,6 +123,23 @@ export class LeoUI extends NullGui {
     public findFocusTree = false;
     public findHeadlineRange: [number, number] = [0, 0];
     public findHeadlinePosition: Position | undefined;
+    // * Interactive Find Input
+    // TODO : Convert this subsystem into a class!
+    private _interactiveSearchInputBox: vscode.InputBox | undefined;
+    private _interactiveSearchIsReplace: boolean = false; // Starts false for 'search'. True is replace
+    private _interactiveSearchOptions: {
+        search: string,
+        replace: string,
+        word: boolean,
+        regex: boolean,
+        backward: boolean
+    } = {
+            search: "",
+            replace: "",
+            word: false,
+            regex: false,
+            backward: false
+        };
 
     // * Documents Pane
     private _leoDocumentsProvider!: LeoDocumentsProvider;
@@ -3603,7 +3620,17 @@ export class LeoUI extends NullGui {
      * @param p_replace flag for doing a 'replace' instead of a 'find'
      * @returns Promise of string or undefined if cancelled
      */
-    private _inputFindPattern(p_replace?: boolean): Thenable<string | undefined> {
+    private _inputFindPattern(p_replace?: boolean, p_uniqueRegex?: boolean): Thenable<string | undefined> {
+        let w_title, w_prompt, w_placeHolder;
+        if (p_uniqueRegex) {
+            w_title = p_replace ? "Replace all unique regex matches with" : "Search for all unique regex matches";
+            w_prompt = p_replace ? "Type text to replace with and press enter." : "Type regex to search for and press enter.";
+            w_placeHolder = p_replace ? "Replace pattern here" : "Regex pattern here";
+        } else {
+            w_title = p_replace ? "Replace with" : "Search for";
+            w_prompt = p_replace ? "Type text to replace with and press enter." : "Type text to search for and press enter.";
+            w_placeHolder = p_replace ? "Replace pattern here" : "Find pattern here";
+        }
         return vscode.window.showInputBox({
             title: p_replace ? "Replace with" : "Search for",
             prompt: p_replace ? "Type text to replace with and press enter." : "Type text to search for and press enter.",
@@ -3838,11 +3865,174 @@ export class LeoUI extends NullGui {
     /**
      * Interactive Search to implement search-backward, re-search, word-search. etc.
      */
-    public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_work: boolean): Promise<unknown> {
-        //
-        console.log('interactive search');
+    public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: boolean): Promise<unknown> {
 
-        return true;
+        if (p_regex && p_word) {
+            console.error('interactiveSearch called with both "WORD" and "REGEX"');
+            return;
+        }
+
+        console.log('interactive search');
+        // 
+        let w_searchTitle = "Search";
+        let w_searchPrompt = "'Enter' to search, 'Tab' to set replace pattern";
+        let w_searchPlaceholder = "Find pattern here"; // Replace pattern here
+
+        const c = g.app.windowList[this.frameIndex].c;
+        const fc = c.findCommands;
+        const ftm = fc.ftm;
+
+        if (p_backward) {
+            w_searchTitle += " Backward";
+            // Set flag for show_find_options.
+            fc.reverse = true;
+            // Set flag for do_find_next().
+            fc.request_reverse = true;
+        }
+        if (p_regex) {
+            w_searchTitle = "Regexp " + w_searchTitle;
+            // Set flag for show_find_options.
+            fc.pattern_match = true;
+            // Set flag for do_find_next().
+            fc.request_pattern_match = true;
+        }
+        if (p_word) {
+            w_searchTitle = "Word " + w_searchTitle;
+            // Set flag for show_find_options.
+            fc.whole_word = true;
+            // Set flag for do_find_next().
+            fc.request_whole_word = true;
+        }
+        fc.show_find_options(); // ! PRINT THEM BUT DONT CHANGE IN FTM/FIND PANEL
+
+        const disposables: vscode.Disposable[] = [];
+        try {
+            return await new Promise<unknown>((resolve, reject) => {
+                const input = vscode.window.createInputBox();
+                input.title = w_searchTitle;
+                input.value = '';
+                input.prompt = w_searchPrompt;
+                input.placeholder = w_searchPlaceholder;
+
+                // * RESET interactive search !
+                this._interactiveSearchIsReplace = false;
+                this._interactiveSearchOptions = {
+                    search: "",
+                    replace: "",
+                    word: p_word,
+                    regex: p_regex,
+                    backward: p_backward
+                };
+
+                disposables.push(
+                    input.onDidAccept(async () => {
+                        utils.setContext(Constants.CONTEXT_FLAGS.INTERACTIVE_SEARCH, false);
+                        if (!input.value) {
+                            input.hide();
+                            return resolve(true); // Cancelled with escape or empty string.
+                        }
+                        const value = input.value; // maybe this was replace.
+                        if (!this._interactiveSearchIsReplace) {
+                            // accept on search
+                            this._interactiveSearchOptions.search = value;
+                        } else {
+                            // accept on replace
+                            this._interactiveSearchOptions.replace = value;
+                        }
+
+                        const find_pattern = this._interactiveSearchOptions.search;
+                        const change_pattern = this._interactiveSearchOptions.replace;
+
+                        ftm.set_find_text(find_pattern);
+                        fc.update_find_list(find_pattern);
+
+                        if (this._interactiveSearchIsReplace) {
+                            ftm.set_change_text(change_pattern);
+                            fc.update_change_list(change_pattern);
+                        }
+                        this.loadSearchSettings(); // * Set vscode's find panel from the Leo find settings
+                        fc.init_vim_search(find_pattern);
+                        fc.init_in_headline();  // Required.
+                        const settings = fc.ftm.get_settings();
+
+                        let p, pos, newpos;
+                        [p, pos, newpos] = fc.do_find_next(settings);
+                        let w, focus;
+                        let found;
+                        w = this.get_focus(c); // get focus again after the operation
+                        focus = this.widget_name(w);
+                        found = p && p.__bool__();
+
+                        this.findFocusTree = false; // Reset flag for headline range
+
+                        if (!found || !focus) {
+                            vscode.window.showInformationMessage('Not found');
+                            return resolve(true);
+                        } else {
+                            let w_finalFocus = Focus.Body;
+                            const w_focus = focus.toLowerCase();
+                            if (w_focus.includes('tree') || w_focus.includes('head')) {
+                                // tree
+                                w_finalFocus = Focus.Outline;
+                                this.showOutlineIfClosed = true;
+                                // * SETUP HEADLINE RANGE
+                                this.findFocusTree = true;
+                                this.findHeadlineRange = [w.sel[0], w.sel[1]];
+                                this.findHeadlinePosition = c.p;
+                            } else {
+                                this.showBodyIfClosed = true;
+                            }
+                            const w_scroll = (found && w_finalFocus === Focus.Body) || undefined;
+
+                            this.setupRefresh(
+                                w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
+                                {
+                                    tree: true, // HAVE to refresh tree because find folds/unfolds only result outline paths
+                                    body: true,
+                                    scroll: w_scroll,
+                                    // documents: false,
+                                    // buttons: false,
+                                    states: true,
+                                },
+                                this.findFocusTree
+                            );
+                            this.launchRefresh();
+                            return resolve(true);
+                        }
+
+                    }),
+                    input.onDidHide(() => {
+                        utils.setContext(Constants.CONTEXT_FLAGS.INTERACTIVE_SEARCH, false);
+                        return resolve(true);
+                    })
+                );
+                if (this._interactiveSearchInputBox) {
+                    this._interactiveSearchInputBox.dispose(); // just in case.
+                }
+                this._interactiveSearchInputBox = input;
+                utils.setContext(Constants.CONTEXT_FLAGS.INTERACTIVE_SEARCH, true);
+                this._interactiveSearchInputBox.show();
+            });
+        } finally {
+            disposables.forEach(d => d.dispose());
+            this._interactiveSearchInputBox?.hide();
+        }
+
+    }
+
+    /**
+     * Handler for pressing 'TAB' when interactiveSearch is opened.
+     */
+    public interactiveSearchTab(): void {
+        // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
+        console.log('interactiveSearchTab!!');
+        if (this._interactiveSearchInputBox && !this._interactiveSearchIsReplace) {
+            this._interactiveSearchIsReplace = true;
+            this._interactiveSearchOptions.search = this._interactiveSearchInputBox.value;
+            this._interactiveSearchInputBox.prompt = "'Enter' to search";
+            this._interactiveSearchInputBox.placeholder = "Replace pattern here";
+            this._interactiveSearchInputBox.value = "";
+        }
     }
 
     /**
@@ -3850,9 +4040,6 @@ export class LeoUI extends NullGui {
      * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
      */
     public findAll(p_replace: boolean): Thenable<unknown> {
-
-        console.log('REGULAR  findAll');
-
 
         let w_searchString: string = this._lastSettingsUsed!.findText;
         let w_replaceString: string = this._lastSettingsUsed!.replaceText;
@@ -3889,6 +4076,7 @@ export class LeoUI extends NullGui {
                     const fc = c.findCommands;
 
                     fc.ftm.get_settings();
+                    fc.findAllUniqueFlag = false;
                     const w_changeSettings: ISettings = {
                         // this._lastSettingsUsed
                         // State...
@@ -3952,22 +4140,19 @@ export class LeoUI extends NullGui {
      */
     public findAllUniqueRegex(p_replace: boolean): Thenable<unknown> {
 
-        // TODO : findAllUniqueRegex !
-        console.log('TODO : findAllUniqueRegex');
-
         let w_searchString: string = this._lastSettingsUsed!.findText;
         let w_replaceString: string = this._lastSettingsUsed!.replaceText;
 
         return this.triggerBodySave(true)
             .then((p_saveResult) => {
-                return this._inputFindPattern()
+                return this._inputFindPattern(false, true)
                     .then((p_findString) => {
                         if (!p_findString) {
                             return true; // Cancelled with escape or empty string.
                         }
                         w_searchString = p_findString;
                         if (p_replace) {
-                            return this._inputFindPattern(true).then((p_replaceString) => {
+                            return this._inputFindPattern(true, true).then((p_replaceString) => {
                                 if (p_replaceString === undefined) {
                                     return true;
                                 }
@@ -4012,6 +4197,7 @@ export class LeoUI extends NullGui {
                         whole_word: this._lastSettingsUsed.wholeWord,
                         wrapping: false, // unused
                     };
+                    fc.findAllUniqueFlag = true;
 
                     let w_result;
                     if (p_replace) {
