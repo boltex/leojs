@@ -2969,7 +2969,7 @@ export class LeoUI extends NullGui {
         if (p_picked &&
             p_picked.label &&
             Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]) {
-            this._minibufferHistory.push(p_picked.label); // Add to minibuffer history
+            this._minibufferHistory.unshift(p_picked.label); // Add to minibuffer history
             return vscode.commands.executeCommand(
                 Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
             );

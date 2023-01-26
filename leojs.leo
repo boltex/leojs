@@ -3808,7 +3808,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "dependencies": {
     "@types/safe-json-stringify": "^1.1.2",
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "a2751f3",
+  "gitBranch": "leoFind",
+  "gitDate": "2023-01-23 00:16:55 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -10648,7 +10651,7 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
 <t tx="felix.20220520011951.1">public resolveTreeItem(item: LeoUndoNode, element: LeoUndoNode, token: vscode.CancellationToken): vscode.ProviderResult&lt;LeoUndoNode&gt; {
     // item.tooltip = "TODO leojs Undo Tooltip";
     if (item.contextValue === Constants.CONTEXT_FLAGS.UNDO_BEAD) {
-        item.tooltip = "UNdo Bead #" + item.beadIndex;
+        item.tooltip = "Undo Bead #" + item.beadIndex;
     }
     return item;
 }
@@ -12616,7 +12619,7 @@ private async _doMinibufferCommand(p_picked: vscode.QuickPickItem | undefined): 
     if (p_picked &amp;&amp;
         p_picked.label &amp;&amp;
         Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]) {
-        this._minibufferHistory.push(p_picked.label); // Add to minibuffer history
+        this._minibufferHistory.unshift(p_picked.label); // Add to minibuffer history
         return vscode.commands.executeCommand(
             Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
         );
