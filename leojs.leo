@@ -59,7 +59,7 @@
 </v>
 <v t="felix.20211010192923.1"><vh>@clean src/leoBody.ts</vh>
 <v t="felix.20211010192923.2"><vh>class LeoBodyProvider</vh>
-<v t="felix.20211010192923.3"><vh>setBodyTime</vh></v>
+<v t="felix.20211010192923.3"><vh>setNewBodyUriTime</vh></v>
 <v t="felix.20221130233817.1"><vh>_setOpenedBodyTime</vh></v>
 <v t="felix.20211010192923.4"><vh>fireRefreshFile</vh></v>
 <v t="felix.20211010192923.5"><vh>refreshPossibleGnxList</vh></v>
@@ -3299,10 +3299,10 @@ private _refreshDocumentsPane(): void {
  * @param p_expand True if it was an expand, false if it was a collapse event
  * @param p_treeView Pointer to the treeview itself, either the standalone treeview or the one under the explorer
  */
-private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Position&gt;, p_expand: boolean, p_treeView: vscode.TreeView&lt;Position&gt;): void {
+private async _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Position&gt;, p_expand: boolean, p_treeView: vscode.TreeView&lt;Position&gt;): Promise&lt;unknown&gt; {
 
     // * Expanding or collapsing via the treeview interface selects the node to mimic Leo.
-    this.triggerBodySave(true); // Get any modifications from the editor into the Leo's body model
+    await this.triggerBodySave(true); // Get any modifications from the editor into the Leo's body model
     if (p_treeView.selection.length &amp;&amp; p_treeView.selection[0] &amp;&amp; p_treeView.selection[0].__eq__(p_event.element)) {
         // * This happens if the tree selection is the same as the expanded/collapsed node: Just have Leo do the same
         // pass
@@ -3317,9 +3317,9 @@ private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent&lt;Positi
 
     // * vscode will update its tree by itself, but we need to change Leo's model of its outline
     if (p_expand) {
-        p_event.element.expand();
+        return p_event.element.expand();
     } else {
-        p_event.element.contract();
+        return p_event.element.contract();
     }
 }
 
@@ -3421,7 +3421,6 @@ public selectTreeNode(
 
     // * Set selected node in Leo
     c.selectPosition(p_node);
-
 
     if (!p_internalCall) {
         if (this.findFocusTree) {
@@ -3808,10 +3807,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "dependencies": {
     "@types/safe-json-stringify": "^1.1.2",
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "a2751f3",
-  "gitBranch": "leoFind",
-  "gitDate": "2023-01-23 00:16:55 -0500"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -11648,7 +11644,7 @@ public debouncedRefreshBodyStates(p_delay?: number) {
                 this._bodySaveDocument(this._bodyLastChangedDocument);
                 this.refreshBodyStates();
             }
-        }, p_delay || Constants.BODY_STATES_DEBOUNCE_DELAY);
+        }, p_delay);
     }
 }
 
@@ -12935,7 +12931,7 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
  */
 public async chapterMain(): Promise&lt;unknown&gt; {
 
-    this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
+    await this.triggerBodySave(true);
 
     this.setupRefresh(Focus.NoChange, { tree: true, body: true, states: true });
     const c = g.app.windowList[this.frameIndex].c;

@@ -699,10 +699,10 @@ export class LeoUI extends NullGui {
      * @param p_expand True if it was an expand, false if it was a collapse event
      * @param p_treeView Pointer to the treeview itself, either the standalone treeview or the one under the explorer
      */
-    private _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent<Position>, p_expand: boolean, p_treeView: vscode.TreeView<Position>): void {
+    private async _onChangeCollapsedState(p_event: vscode.TreeViewExpansionEvent<Position>, p_expand: boolean, p_treeView: vscode.TreeView<Position>): Promise<unknown> {
 
         // * Expanding or collapsing via the treeview interface selects the node to mimic Leo.
-        this.triggerBodySave(true); // Get any modifications from the editor into the Leo's body model
+        await this.triggerBodySave(true); // Get any modifications from the editor into the Leo's body model
         if (p_treeView.selection.length && p_treeView.selection[0] && p_treeView.selection[0].__eq__(p_event.element)) {
             // * This happens if the tree selection is the same as the expanded/collapsed node: Just have Leo do the same
             // pass
@@ -717,9 +717,9 @@ export class LeoUI extends NullGui {
 
         // * vscode will update its tree by itself, but we need to change Leo's model of its outline
         if (p_expand) {
-            p_event.element.expand();
+            return p_event.element.expand();
         } else {
-            p_event.element.contract();
+            return p_event.element.contract();
         }
     }
 
@@ -2682,7 +2682,7 @@ export class LeoUI extends NullGui {
                     this._bodySaveDocument(this._bodyLastChangedDocument);
                     this.refreshBodyStates();
                 }
-            }, p_delay || Constants.BODY_STATES_DEBOUNCE_DELAY);
+            }, p_delay);
         }
     }
 
@@ -2732,7 +2732,6 @@ export class LeoUI extends NullGui {
 
         // * Set selected node in Leo
         c.selectPosition(p_node);
-
 
         if (!p_internalCall) {
             if (this.findFocusTree) {
@@ -3157,7 +3156,7 @@ export class LeoUI extends NullGui {
      */
     public async chapterMain(): Promise<unknown> {
 
-        this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
+        await this.triggerBodySave(true);
 
         this.setupRefresh(Focus.NoChange, { tree: true, body: true, states: true });
         const c = g.app.windowList[this.frameIndex].c;
