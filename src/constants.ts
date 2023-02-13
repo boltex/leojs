@@ -381,7 +381,7 @@ export class Constants {
         FOCUS_FIND: "leojsFindFocus",
 
         // Flag for interactive Search
-        INTERACTIVE_SEARCH: "leojsInteractiveSearch", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
+        // INTERACTIVE_SEARCH: "leojsInteractiveSearch", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
 
         // Context flags that are mapped 'directly' onto leojs config settings
         // * PREFIXED WITH 'leojs' *
@@ -601,7 +601,7 @@ export class Constants {
         GOTO_NAV_FIRST: Constants.NAME + ".gotoNavFirst",
         GOTO_NAV_LAST: Constants.NAME + ".gotoNavLast",
 
-        INTERACTIVE_SEARCH_TAB: Constants.NAME + ".interactiveSearchTab", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
+        // INTERACTIVE_SEARCH_TAB: Constants.NAME + ".interactiveSearchTab", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
 
         START_SEARCH: Constants.NAME + ".startSearch",
         SEARCH_BACKWARD: Constants.NAME + ".searchBackward",
@@ -609,8 +609,6 @@ export class Constants {
         RE_SEARCH_BACKWARD: Constants.NAME + ".reSearchBackward",
         WORD_SEARCH: Constants.NAME + ".wordSearch",
         WORD_SEARCH_BACKWARD: Constants.NAME + ".wordSearchBackward",
-        FIND_ALL_UNIQUE_REGEX: Constants.NAME + ".findAllUniqueRegex",
-        REPLACE_ALL_UNIQUE_REGEX: Constants.NAME + ".replaceAllUniqueRegex",
         FIND_ALL: Constants.NAME + ".findAll",
         FIND_NEXT: Constants.NAME + ".findNext",
         FIND_NEXT_FO: Constants.NAME + ".findNextFromOutline",
@@ -836,9 +834,6 @@ export class Constants {
         'word-search': Constants.COMMANDS.WORD_SEARCH,
         'word-search-forward': Constants.COMMANDS.WORD_SEARCH,
         'word-search-backward': Constants.COMMANDS.WORD_SEARCH_BACKWARD,
-        'find-all-unique-regex': Constants.COMMANDS.FIND_ALL_UNIQUE_REGEX,
-        'change-all-unique-regex': Constants.COMMANDS.REPLACE_ALL_UNIQUE_REGEX,
-        'replace-all-unique-regex': Constants.COMMANDS.REPLACE_ALL_UNIQUE_REGEX,
 
         // TODO - needed ? 
         // 'find-var': Constants.COMMANDS.FIND_VAR,

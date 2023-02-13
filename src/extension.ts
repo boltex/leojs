@@ -171,7 +171,7 @@ function runLeo(p_context: vscode.ExtensionContext) {
 export function deactivate() { }
 
 /**
- * * Closes all visible text editors that have Leo filesystem scheme
+ * * Closes all visible text editors that have Leo filesystem scheme (that are not dirty)
  */
 function closeLeoTextEditors(): Thenable<unknown> {
     const w_foundTabs: vscode.Tab[] = [];
@@ -180,7 +180,8 @@ function closeLeoTextEditors(): Thenable<unknown> {
         p_tabGroup.tabs.forEach((p_tab) => {
             if (p_tab.input &&
                 (p_tab.input as vscode.TabInputText).uri &&
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &&
+                !p_tab.isDirty
             ) {
                 w_foundTabs.push(p_tab);
             }

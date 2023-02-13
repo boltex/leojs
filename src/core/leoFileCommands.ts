@@ -3108,10 +3108,10 @@ export class FileCommands {
      * Put the prolog of the xml file.
      */
     public putProlog(): void {
-        const tag: string = 'http://leoeditor.com/namespaces/leo-python-editor/1.1';
+        const tag: string = 'https://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1';
         this.putXMLLine();
         // Put "created by Leo" line.
-        this.put('<!-- Created by Leo: http://leoeditor.com/leo_toc.html -->\n');
+        this.put('<!-- Created by Leo: https://leo-editor.github.io/leo-editor/leo_toc.html -->\n');
         this.putStyleSheetLine();
         // Put the namespace
         this.put(`<leo_file xmlns:leo="${tag}" >\n`);

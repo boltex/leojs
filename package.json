@@ -1854,37 +1854,25 @@
         "command": "leojs.reSearch",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Search with Regex"
+        "title": "Regexp Search"
       },
       {
         "command": "leojs.reSearchBackward",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Search with Regex Backward"
+        "title": "Regexp Search Backward"
       },
       {
         "command": "leojs.wordSearch",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Search with whole_word setting"
+        "title": "Word Search"
       },
       {
         "command": "leojs.wordSearchBackward",
         "category": "Leojs",
         "enablement": "leojsTreeOpened",
-        "title": "Search with whole_word setting Backward"
-      },
-      {
-        "command": "leojs.findAllUniqueRegex",
-        "category": "Leojs",
-        "enablement": "leojsTreeOpened",
-        "title": "Find all unique regex matches"
-      },
-      {
-        "command": "leojs.replaceAllUniqueRegex",
-        "category": "Leojs",
-        "enablement": "leojsTreeOpened",
-        "title": "Replace all instances with regex"
+        "title": "Word Search Backward"
       },
       {
         "command": "leojs.findAll",

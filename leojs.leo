@@ -208,7 +208,6 @@
 <v t="felix.20230121211548.1"><vh>interactiveSearch</vh></v>
 <v t="felix.20230122201158.1"><vh>interactiveSearchTab</vh></v>
 <v t="felix.20220505215924.10"><vh>findAll &amp; replaceAll</vh></v>
-<v t="felix.20230122001458.1"><vh>findAllUniqueRegex &amp; replaceAllUniqueRegex</vh></v>
 <v t="felix.20220505215924.11"><vh>cloneFind</vh></v>
 <v t="felix.20220505215924.12"><vh>setSearchOption</vh></v>
 <v t="felix.20220505215924.13"><vh>loadSearchSettings</vh></v>
@@ -619,7 +618,7 @@ LeoJS is [LeoInteg](https://github.com/boltex/leointeg#-leo-editor-integration-w
 
 Inspired by &lt;https://github.com/leo-editor/leo-editor/issues/1025&gt;.
 
-See Leo, the Literate Editor with Outline, at [leoeditor.com](https://leoeditor.com/)
+See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
 or on [github](https://github.com/leo-editor/leo-editor), and vscode at [code.visualstudio.com](https://code.visualstudio.com/).
 
 ![Screenshot](https://raw.githubusercontent.com/boltex/leojs/master/resources/animated-screenshot.gif)
@@ -1634,7 +1633,7 @@ public static COMMANDS = {
     GOTO_NAV_FIRST: Constants.NAME + ".gotoNavFirst",
     GOTO_NAV_LAST: Constants.NAME + ".gotoNavLast",
 
-    INTERACTIVE_SEARCH_TAB: Constants.NAME + ".interactiveSearchTab", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
+    // INTERACTIVE_SEARCH_TAB: Constants.NAME + ".interactiveSearchTab", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
 
     START_SEARCH: Constants.NAME + ".startSearch",
     SEARCH_BACKWARD: Constants.NAME + ".searchBackward",
@@ -1642,8 +1641,6 @@ public static COMMANDS = {
     RE_SEARCH_BACKWARD: Constants.NAME + ".reSearchBackward",
     WORD_SEARCH: Constants.NAME + ".wordSearch",
     WORD_SEARCH_BACKWARD: Constants.NAME + ".wordSearchBackward",
-    FIND_ALL_UNIQUE_REGEX: Constants.NAME + ".findAllUniqueRegex",
-    REPLACE_ALL_UNIQUE_REGEX: Constants.NAME + ".replaceAllUniqueRegex",
     FIND_ALL: Constants.NAME + ".findAll",
     FIND_NEXT: Constants.NAME + ".findNext",
     FIND_NEXT_FO: Constants.NAME + ".findNextFromOutline",
@@ -2071,7 +2068,7 @@ public static CONTEXT_FLAGS = {
     FOCUS_FIND: "leojsFindFocus",
 
     // Flag for interactive Search
-    INTERACTIVE_SEARCH: "leojsInteractiveSearch", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
+    // INTERACTIVE_SEARCH: "leojsInteractiveSearch", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
 
     // Context flags that are mapped 'directly' onto leojs config settings
     // * PREFIXED WITH 'leojs' *
@@ -3141,8 +3138,6 @@ export class LeoUI extends NullGui {
     private _editorTouched: boolean = false; // Flag for applying editor changes to body when 'icon' state change and 'undo' back to untouched
 
     private _bodyStatesTimer: NodeJS.Timeout | undefined;
-
-    public preventIconChange: boolean = false; // Prevent refresh outline to keep selected node icon
 
     private _bodyUri: vscode.Uri = utils.strToLeoUri("");
     get bodyUri(): vscode.Uri {
@@ -6642,7 +6637,6 @@ public async _launchRefresh(): Promise&lt;unknown&gt; {
 */
 public setupRefresh(p_finalFocus: Focus, p_refreshType: ReqRefresh, p_preserveRange?: boolean): void {
     if (p_preserveRange) {
-        // Lets the 
         this.refreshPreserveRange = true; // Will be cleared after a refresh cycle.
     }
     // Set final "focus-placement" EITHER true or false
@@ -8331,9 +8325,6 @@ public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
     'word-search': Constants.COMMANDS.WORD_SEARCH,
     'word-search-forward': Constants.COMMANDS.WORD_SEARCH,
     'word-search-backward': Constants.COMMANDS.WORD_SEARCH_BACKWARD,
-    'find-all-unique-regex': Constants.COMMANDS.FIND_ALL_UNIQUE_REGEX,
-    'change-all-unique-regex': Constants.COMMANDS.REPLACE_ALL_UNIQUE_REGEX,
-    'replace-all-unique-regex': Constants.COMMANDS.REPLACE_ALL_UNIQUE_REGEX,
 
     // TODO - needed ? 
     // 'find-var': Constants.COMMANDS.FIND_VAR,
@@ -9040,7 +9031,6 @@ public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
                     states: true,
                 }
             );
-
             return this.launchRefresh();
         }
     }
@@ -9089,7 +9079,6 @@ public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
                 const fc = c.findCommands;
 
                 fc.ftm.get_settings();
-                fc.findAllUniqueFlag = false;
                 const w_changeSettings: ISettings = {
                     // this._lastSettingsUsed
                     // State...
@@ -9780,7 +9769,7 @@ public startSearch(): void {
  * @param p_replace flag for doing a 'replace' instead of a 'find'
  * @returns Promise of string or undefined if cancelled
  */
-private _inputFindPattern(p_replace?: boolean, p_uniqueRegex?: boolean): Thenable&lt;string | undefined&gt; {
+private _inputFindPattern(p_replace?: boolean, p_uniqueRegex?: boolean, p_value?: string): Thenable&lt;string | undefined&gt; {
     let w_title, w_prompt, w_placeHolder;
     if (p_uniqueRegex) {
         w_title = p_replace ? "Replace all unique regex matches with" : "Search for all unique regex matches";
@@ -9792,9 +9781,10 @@ private _inputFindPattern(p_replace?: boolean, p_uniqueRegex?: boolean): Thenabl
         w_placeHolder = p_replace ? "Replace pattern here" : "Find pattern here";
     }
     return vscode.window.showInputBox({
-        title: p_replace ? "Replace with" : "Search for",
-        prompt: p_replace ? "Type text to replace with and press enter." : "Type text to search for and press enter.",
-        placeHolder: p_replace ? "Replace pattern here" : "Find pattern here",
+        title: w_title,
+        prompt: w_prompt,
+        value: p_value,
+        placeHolder: w_placeHolder,
     });
 }
 
@@ -11391,7 +11381,6 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
                             }
                         } else {
                             w_foundDocOpened = true;
-
                         }
                     }
                 });
@@ -12307,30 +12296,27 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
             const c = g.app.windowList[this.frameIndex].c;
 
             if (c.p &amp;&amp; c.p.__bool__() &amp;&amp; p_textDocumentChange.document.getText() === c.p.b) {
+                // WAS NOT A USER MODIFICATION? (external file change, replace, replace-then-find)
                 // Set proper cursor insertion point and selection range.
                 this.showBody(false, true, true);
                 return;
             }
 
             if (!this.leoStates.leoChanged || w_iconChanged) {
-                if (this.preventIconChange) {
-                    this.preventIconChange = false;
-                } else {
-                    // Document pane icon needs refresh (changed) and/or outline icon changed
-                    this._bodySaveDocument(p_textDocumentChange.document).then(() =&gt; {
-                        // todo : Really saved to node, no need to set dirty or hasbody -&gt; Check &amp; test to see if icon changes!
-                        // if (this.lastSelectedNode) {
-                        //     this.lastSelectedNode.dirty = true;
-                        //     this.lastSelectedNode.hasBody = w_hasBody;
-                        // }
-                        if (w_iconChanged) {
-                            this.findFocusTree = false;
-                            // NOT incrementing this.treeID to keep ids intact
-                            // NoReveal since we're keeping the same id.
-                            this._refreshOutline(false, RevealType.NoReveal);
-                        }
-                    });
-                }
+                // Document pane icon needs refresh (changed) and/or outline icon changed
+                this._bodySaveDocument(p_textDocumentChange.document).then(() =&gt; {
+                    // todo : Really saved to node, no need to set dirty or hasbody -&gt; Check &amp; test to see if icon changes!
+                    // if (this.lastSelectedNode) {
+                    //     this.lastSelectedNode.dirty = true;
+                    //     this.lastSelectedNode.hasBody = w_hasBody;
+                    // }
+                    if (w_iconChanged) {
+                        this.findFocusTree = false;
+                        // NOT incrementing this.treeID to keep ids intact
+                        // NoReveal since we're keeping the same id.
+                        this._refreshOutline(false, RevealType.NoReveal);
+                    }
+                });
 
                 if (!this.leoStates.leoChanged) {
                     // also refresh document panel (icon may be dirty now)
@@ -12352,7 +12338,7 @@ private _onDocumentChanged(p_textDocumentChange: vscode.TextDocumentChangeEvent)
 
         if (w_textEditor &amp;&amp; p_textDocumentChange.document.uri.fsPath === w_textEditor.document.uri.fsPath) {
             w_textEditor.selections.forEach(p_selection =&gt; {
-                // TRY TO DETECT IF LANGUAGE RESET NEEDED: if line starts with @ or contains 'language'
+                // TRY TO DETECT IF LANGUAGE RESET NEEDED!
                 let w_line = w_textEditor.document.lineAt(p_selection.active.line).text;
                 if (w_line.trim().startsWith('@') || w_line.includes('language') || w_line.includes('killcolor') || w_line.includes('nocolor-node')) {
                     w_needsRefresh = true;
@@ -12508,7 +12494,7 @@ private _refreshButtonsPane(): void {
 
 </t>
 <t tx="felix.20221002011858.1">/**
- * * Closes all visible text editors that have Leo filesystem scheme
+ * * Closes all visible text editors that have Leo filesystem scheme (that are not dirty)
  */
 function closeLeoTextEditors(): Thenable&lt;unknown&gt; {
     const w_foundTabs: vscode.Tab[] = [];
@@ -12517,7 +12503,8 @@ function closeLeoTextEditors(): Thenable&lt;unknown&gt; {
         p_tabGroup.tabs.forEach((p_tab) =&gt; {
             if (p_tab.input &amp;&amp;
                 (p_tab.input as vscode.TabInputText).uri &amp;&amp;
-                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &amp;&amp;
+                !p_tab.isDirty
             ) {
                 w_foundTabs.push(p_tab);
             }
@@ -13206,37 +13193,25 @@ private _refreshGotoPane(): void {
   "command": "leojs.reSearch",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Search with Regex"
+  "title": "Regexp Search"
 },
 {
   "command": "leojs.reSearchBackward",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Search with Regex Backward"
+  "title": "Regexp Search Backward"
 },
 {
   "command": "leojs.wordSearch",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Search with whole_word setting"
+  "title": "Word Search"
 },
 {
   "command": "leojs.wordSearchBackward",
   "category": "Leojs",
   "enablement": "leojsTreeOpened",
-  "title": "Search with whole_word setting Backward"
-},
-{
-  "command": "leojs.findAllUniqueRegex",
-  "category": "Leojs",
-  "enablement": "leojsTreeOpened",
-  "title": "Find all unique regex matches"
-},
-{
-  "command": "leojs.replaceAllUniqueRegex",
-  "category": "Leojs",
-  "enablement": "leojsTreeOpened",
-  "title": "Replace all instances with regex"
+  "title": "Word Search Backward"
 },
 {
   "command": "leojs.findAll",
@@ -14475,7 +14450,7 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
     }
 
     console.log('interactive search');
-    // 
+    //
     let w_searchTitle = "Search";
     let w_searchPrompt = "'Enter' to search, 'Tab' to set replace pattern";
     let w_searchPlaceholder = "Find pattern here"; // Replace pattern here
@@ -14505,6 +14480,7 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
         // Set flag for do_find_next().
         fc.request_whole_word = true;
     }
+
     fc.show_find_options(); // ! PRINT THEM BUT DONT CHANGE IN FTM/FIND PANEL
 
     const disposables: vscode.Disposable[] = [];
@@ -14528,7 +14504,7 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 
             disposables.push(
                 input.onDidAccept(async () =&gt; {
-                    utils.setContext(Constants.CONTEXT_FLAGS.INTERACTIVE_SEARCH, false);
+                    // utils.setContext(Constants.CONTEXT_FLAGS.INTERACTIVE_SEARCH, false);
                     if (!input.value) {
                         input.hide();
                         return resolve(true); // Cancelled with escape or empty string.
@@ -14604,7 +14580,7 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 
                 }),
                 input.onDidHide(() =&gt; {
-                    utils.setContext(Constants.CONTEXT_FLAGS.INTERACTIVE_SEARCH, false);
+                    // utils.setContext(Constants.CONTEXT_FLAGS.INTERACTIVE_SEARCH, false);
                     return resolve(true);
                 })
             );
@@ -14612,7 +14588,7 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
                 this._interactiveSearchInputBox.dispose(); // just in case.
             }
             this._interactiveSearchInputBox = input;
-            utils.setContext(Constants.CONTEXT_FLAGS.INTERACTIVE_SEARCH, true);
+            // utils.setContext(Constants.CONTEXT_FLAGS.INTERACTIVE_SEARCH, true);
             this._interactiveSearchInputBox.show();
         });
     } finally {
@@ -14653,9 +14629,6 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 [CMD.WORD_SEARCH, () =&gt; p_leoUI.interactiveSearch(false, false, true)],
 [CMD.WORD_SEARCH_BACKWARD, () =&gt; p_leoUI.interactiveSearch(true, false, true)],
 
-[CMD.FIND_ALL_UNIQUE_REGEX, () =&gt; p_leoUI.findAllUniqueRegex(false)],
-[CMD.REPLACE_ALL_UNIQUE_REGEX, () =&gt; p_leoUI.findAllUniqueRegex(true)],
-
 [CMD.FIND_ALL, () =&gt; p_leoUI.findAll(false)],
 [CMD.FIND_NEXT, () =&gt; p_leoUI.find(false, false)],
 [CMD.FIND_NEXT_FO, () =&gt; p_leoUI.find(true, false)],
@@ -14676,111 +14649,11 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 [CMD.REMOVE_TAGS, () =&gt; p_leoUI.removeTags()],
 
 </t>
-<t tx="felix.20230122001458.1">/**
- * * Find Unique Regex / Replace All Unique Regex 
- * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
- */
-public findAllUniqueRegex(p_replace: boolean): Thenable&lt;unknown&gt; {
-
-    let w_searchString: string = this._lastSettingsUsed!.findText;
-    let w_replaceString: string = this._lastSettingsUsed!.replaceText;
-
-    return this.triggerBodySave(true)
-        .then((p_saveResult) =&gt; {
-            return this._inputFindPattern(false, true)
-                .then((p_findString) =&gt; {
-                    if (!p_findString) {
-                        return true; // Cancelled with escape or empty string.
-                    }
-                    w_searchString = p_findString;
-                    if (p_replace) {
-                        return this._inputFindPattern(true, true).then((p_replaceString) =&gt; {
-                            if (p_replaceString === undefined) {
-                                return true;
-                            }
-                            w_replaceString = p_replaceString;
-                            return false;
-                        });
-                    }
-                    return false;
-                });
-        })
-        .then((p_cancelled: boolean) =&gt; {
-            if (this._lastSettingsUsed &amp;&amp; !p_cancelled) {
-                this._lastSettingsUsed.findText = w_searchString;
-                this._lastSettingsUsed.replaceText = w_replaceString;
-
-                // * savesettings not needed, w_changeSettings is used directly
-                // this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
-
-                const c = g.app.windowList[this.frameIndex].c;
-                const fc = c.findCommands;
-
-                fc.ftm.get_settings();
-                const w_changeSettings: ISettings = {
-                    // this._lastSettingsUsed
-                    // State...
-                    in_headline: false, // ! TODO !
-                    // p: Position,
-                    // Find/change strings...
-                    find_text: this._lastSettingsUsed.findText,
-                    change_text: this._lastSettingsUsed.replaceText,
-                    // Find options...
-                    file_only: this._lastSettingsUsed.searchOptions === 3,
-                    ignore_case: this._lastSettingsUsed.ignoreCase,
-                    mark_changes: this._lastSettingsUsed.markChanges,
-                    mark_finds: this._lastSettingsUsed.markFinds,
-                    node_only: this._lastSettingsUsed.searchOptions === 2,
-                    pattern_match: this._lastSettingsUsed.regExp,
-                    reverse: false,
-                    search_body: this._lastSettingsUsed.searchBody,
-                    search_headline: this._lastSettingsUsed.searchHeadline,
-                    suboutline_only: this._lastSettingsUsed.searchOptions === 1,
-                    whole_word: this._lastSettingsUsed.wholeWord,
-                    wrapping: false, // unused
-                };
-                fc.findAllUniqueFlag = true;
-
-                let w_result;
-                if (p_replace) {
-                    w_result = fc.do_change_all(w_changeSettings);
-                } else {
-                    w_result = fc.do_find_all(w_changeSettings);
-                }
-
-                const w_focus = this._get_focus();
-
-                let w_finalFocus = Focus.Body;
-
-                if (w_focus.includes('tree') || w_focus.includes('head')) {
-                    // tree
-                    w_finalFocus = Focus.Outline;
-                }
-                this.loadSearchSettings();
-                this.setupRefresh(
-                    w_finalFocus,
-                    {
-                        tree: true,
-                        body: true,
-                        // documents: false,
-                        // buttons: false,
-                        states: true
-                    }
-                );
-                this.launchRefresh();
-
-                return;
-
-            }
-        });
-}
-
-</t>
 <t tx="felix.20230122201158.1">/**
  * Handler for pressing 'TAB' when interactiveSearch is opened.
  */
 public interactiveSearchTab(): void {
-    // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
+    // TODO : UNUSED FOR NOW : NO WAY IN VSCODE TO DETECT TAB IN INPUTBOX !
     console.log('interactiveSearchTab!!');
     if (this._interactiveSearchInputBox &amp;&amp; !this._interactiveSearchIsReplace) {
         this._interactiveSearchIsReplace = true;

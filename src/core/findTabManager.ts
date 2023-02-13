@@ -305,6 +305,73 @@ export class StringFindTabManager {
 
     }
 
+    //@+node:felix.20230213001211.1: *3* ftm.set_widgets_from_dict
+    /**
+     * Set all settings from d.
+     */
+    public set_widgets_from_dict(d: {[key: string]: any}): void {
+        
+        // Similar to ftm.init_widgets, which has already been called.
+        const c = this.c;
+        const find = c.findCommands;
+        // Set find text.
+        const find_text = d['find_text'];
+        this.set_find_text(find_text)
+        find.find_text = find_text
+        // Set change text.
+        const change_text = d['change_text'];
+        this.set_change_text(change_text)
+        find.change_text = change_text
+        // Check boxes...
+        const table1 = [
+            ['ignore_case', 'check_box_ignore_case'],
+            ['mark_changes', 'check_box_mark_changes'],
+            ['mark_finds', 'check_box_mark_finds'],
+            ['pattern_match', 'check_box_regexp'],
+            ['search_body', 'check_box_search_body'],
+            ['search_headline', 'check_box_search_headline'],
+            ['whole_word', 'check_box_whole_word'],
+        ];
+        for (let [setting_name, widget_ivar] of table1) {
+            const w = this[widget_ivar as keyof StringFindTabManager];
+            const val = d[setting_name] || false;
+            // setattr(find, setting_name, val)
+            (find[setting_name as keyof LeoFind] as any) = val;
+            if (val !== w.isChecked()) {  // Support leoInteg. :) 
+                w.toggle();
+            }
+        }
+        // Radio buttons...
+        const table2: [string, string | undefined, string][] = [
+            ['node_only', 'node_only', 'radio_button_node_only'],
+            ['entire_outline', undefined, 'radio_button_entire_outline'],
+            ['suboutline_only', 'suboutline_only', 'radio_button_suboutline_only'],
+            ['file_only', 'file_only', 'radio_button_file_only'],  // #2684.
+        ];
+        for (let [setting_name, ivar, widget_ivar] of table2) {
+            const w = this[widget_ivar as keyof StringFindTabManager];
+            const val = d[setting_name] || false;
+            if (ivar !== undefined) {
+                // assert hasattr(find, setting_name), setting_name
+                (find[setting_name as keyof LeoFind] as any) = val;
+                if (val !== w.isChecked()) {
+                    w.toggle();
+                }
+            }
+        }
+        // Ensure one radio button is set.
+        const w = this.radio_button_entire_outline;
+        if (!find.node_only && !find.suboutline_only && !find.file_only) {
+            if (!w.isChecked()) {
+                w.toggle();
+            }
+        } else {
+            if (w.isChecked()) {
+                w.toggle();
+            }
+        }
+
+    }
     //@+node:felix.20221109235451.6: *3* sftm.set_body_and_headline_checkbox
     /**
      * Return the search-body and search-headline checkboxes to their defaults.

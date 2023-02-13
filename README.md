@@ -8,7 +8,7 @@ LeoJS is [LeoInteg](https://github.com/boltex/leointeg#-leo-editor-integration-w
 
 Inspired by <https://github.com/leo-editor/leo-editor/issues/1025>.
 
-See Leo, the Literate Editor with Outline, at [leoeditor.com](https://leoeditor.com/)
+See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
 or on [github](https://github.com/leo-editor/leo-editor), and vscode at [code.visualstudio.com](https://code.visualstudio.com/).
 
 ![Screenshot](https://raw.githubusercontent.com/boltex/leojs/master/resources/animated-screenshot.gif)

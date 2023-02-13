@@ -34,7 +34,7 @@ export class CommanderHelpCommands {
             `Copyright 1999-${dayjs().year()} by Edward K. Ream and Félix Malboeuf\n` +
             "All Rights Reserved\n" +
             "Leo and LeoJS are distributed under the MIT License";
-        const url = "http://leoeditor.com/"; // unused for now
+        const url = "https://leo-editor.github.io/leo-editor/"; // unused for now
         const email = "edreamleo@gmail.com"; // unused for now
         g.app.gui.runAboutLeoDialog(c, version, theCopyright, url, email);
 
@@ -265,7 +265,7 @@ export class CommanderHelpCommands {
                 "Only nodes that are descendants of the @settings node are read.\n\n" +
                 "Only settings you need to modify should be in this file, do\n" +
                 "not copy large parts of leoSettings.py here.\n\n" +
-                "For more information see http://leoeditor.com/customizing.html";
+                "For more information see https://leo-editor.github.io/leo-editor/customizing.html";
 
             nd = nd.insertAfter();
             nd.h = '@settings';
@@ -315,7 +315,7 @@ export class CommanderHelpCommands {
 
         vscode.env.openExternal(
             vscode.Uri.parse(
-                'https://leoeditor.com/'
+                'https://leo-editor.github.io/leo-editor/'
             )
         );
 
@@ -330,7 +330,7 @@ export class CommanderHelpCommands {
 
         vscode.env.openExternal(
             vscode.Uri.parse(
-                'https://leoeditor.com/leo_toc.html'
+                'https://leo-editor.github.io/leo-editor/leo_toc.html'
             )
         );
 
@@ -345,7 +345,7 @@ export class CommanderHelpCommands {
 
         vscode.env.openExternal(
             vscode.Uri.parse(
-                'https://leoeditor.com/tutorial.html'
+                'https://leo-editor.github.io/leo-editor/tutorial.html'
             )
         );
 
@@ -360,7 +360,7 @@ export class CommanderHelpCommands {
 
         vscode.env.openExternal(
             vscode.Uri.parse(
-                'https://leoeditor.com/usersguide.html"'
+                'https://leo-editor.github.io/leo-editor/usersguide.html"'
             )
         );
 
@@ -375,7 +375,7 @@ export class CommanderHelpCommands {
 
         vscode.env.openExternal(
             vscode.Uri.parse(
-                'https://leoeditor.com/screencasts.html'
+                'https://leo-editor.github.io/leo-editor/screencasts.html'
             )
         );
 

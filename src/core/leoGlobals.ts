@@ -1744,12 +1744,12 @@ export function is_sentinel(line: string, delims: [string | undefined, string | 
         if (line.includes(sentinel1)) {
             i = line.indexOf(sentinel1);
             j = line.indexOf(delim3);
-            return 0 == i && i < j;
+            return 0 === i && i < j;
         }
         if (line.includes(sentinel2)) {
             i = line.indexOf(sentinel2);
             j = line.indexOf(delim3);
-            return 0 == i && i < j;
+            return 0 === i && i < j;
         }
     }
     error(`is_sentinel: can not happen. delims: ${delims}`);
@@ -3520,13 +3520,23 @@ export function dedent(text: string) {
 export function reEscape(text: string) {
     return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
-//@+node:felix.20221219233315.1: *3* g.rtrim
+//@+node:felix.20221219233315.1: *3* g.ltrim
+export function ltrim(str: string, ch: string): string {
+    let i = 0;
+    while (ch.includes(str.charAt(i)) && ++i && i<str.length) {
+        // pass, the ++i expression is doing the job
+    };
+    return str.substring(i, str.length);
+}
+//@+node:felix.20230212205315.1: *3* g.rtrim
 export function rtrim(str: string, ch: string): string {
     let i = str.length;
-    while (i-- && ch.includes(str.charAt(i)));
+    while (i-- && ch.includes(str.charAt(i))) {
+        // pass, the i-- expression is doing the job
+    };
     return str.substring(0, i + 1);
 }
-//@+node:felix.20211104222646.1: *3* g.plural          (coreGlobals.py)
+//@+node:felix.20211104222646.1: *3* g.plural (coreGlobals.py)
 /**
  * Return "s" or "" depending on n.
  */

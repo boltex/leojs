@@ -254,9 +254,6 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.WORD_SEARCH, () => p_leoUI.interactiveSearch(false, false, true)],
         [CMD.WORD_SEARCH_BACKWARD, () => p_leoUI.interactiveSearch(true, false, true)],
 
-        [CMD.FIND_ALL_UNIQUE_REGEX, () => p_leoUI.findAllUniqueRegex(false)],
-        [CMD.REPLACE_ALL_UNIQUE_REGEX, () => p_leoUI.findAllUniqueRegex(true)],
-
         [CMD.FIND_ALL, () => p_leoUI.findAll(false)],
         [CMD.FIND_NEXT, () => p_leoUI.find(false, false)],
         [CMD.FIND_NEXT_FO, () => p_leoUI.find(true, false)],
