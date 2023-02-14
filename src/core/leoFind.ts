@@ -2207,15 +2207,17 @@ export class LeoFind {
      * return a list of matching indices.
      */
     private find_all_regex(find_s: string, s: string): number[] {
-        let flags = "m";
+        let flags = "mgd";
         if (this.ignore_case) {
             flags += "i";
         }
 
         // return [m.start() for m in re.finditer(find_s, s, flags)]
-        const re = RegExp(this.find_text, flags);
+        const re = RegExp(find_s, flags);
         let result = [];
         for (let m; m = re.exec(s); null) {
+            console.log('re.lastIndex', re.lastIndex);
+
             const i = re.lastIndex - m[0].length; // m.start();
             result.push(i);
         }
