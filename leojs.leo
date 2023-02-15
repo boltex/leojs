@@ -1935,6 +1935,26 @@ public static USER_MESSAGES = {
     PLACEHOLDER_GOTO_GLOBAL_LINE: "#",
     PROMPT_GOTO_GLOBAL_LINE: "Line number",
 
+    REPLACE_TITLE: "Replace with",
+    REPLACE_PROMPT: "Type text to replace with and press enter.",
+    REPLACE_PLACEHOLDER: "Replace pattern here",
+
+    SEARCH_TITLE: "Search for",
+    SEARCH_PROMPT: "Type text to search for and press enter.",
+    SEARCH_PLACEHOLDER: "Find pattern here",
+
+    INT_SEARCH_TITLE: "Search",
+    INT_SEARCH_PROMPT: "'Enter' to search",
+    INT_SEARCH_BACKWARD: " Backward", // Leading space intended
+    INT_SEARCH_REGEXP: "Regexp ", // Trailing space intended
+    INT_SEARCH_WORD: "Word ", // Trailing space intended
+
+    SEARCH_NOT_FOUND: "Not found",
+    FIND_PATTERN_HERE: "&lt;find pattern here&gt;",
+
+    TAGS_CHARACTERS_ERROR: "Cannot add tags containing any of these characters: &amp;|^-",
+    NO_TAGS_ON_NODE: "No tags on node: ", // Trailing space intended
+
     TITLE_TAG_CHILDREN: "Tag Children",
     TITLE_REMOVE_TAG: "Remove Tag",
     TITLE_TAG_NODE: "Tag Node",
@@ -3376,14 +3396,14 @@ private _onButtonsTreeViewVisibilityChanged(p_event: vscode.TreeViewVisibilityCh
  * @param p_reveal
  * @returns thenable for reveal to finish or select position to finish
  */
-public selectTreeNode(
+public async selectTreeNode(
     p_node: Position,
     p_internalCall?: boolean,
     p_aside?: boolean
     // p_reveal?: boolean, p_aside?: boolean
-): Thenable&lt;unknown&gt; {
+): Promise&lt;unknown&gt; {
 
-    this.triggerBodySave(true);
+    await this.triggerBodySave(true); // Needed for self-selection to avoid 'cant save file is newer...'
 
     const c = g.app.windowList[this.frameIndex].c;
 
@@ -9047,16 +9067,19 @@ public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
     let w_searchString: string = this._lastSettingsUsed!.findText;
     let w_replaceString: string = this._lastSettingsUsed!.replaceText;
 
+    const w_startValue = this._lastSettingsUsed!.findText === Constants.USER_MESSAGES.FIND_PATTERN_HERE ? '' : this._lastSettingsUsed!.findText;
+    const w_startReplace = this._lastSettingsUsed?.replaceText;
+
     return this.triggerBodySave(true)
         .then((p_saveResult) =&gt; {
-            return this._inputFindPattern()
+            return this._inputFindPattern(false, w_startValue)
                 .then((p_findString) =&gt; {
                     if (!p_findString) {
                         return true; // Cancelled with escape or empty string.
                     }
                     w_searchString = p_findString;
                     if (p_replace) {
-                        return this._inputFindPattern(true).then((p_replaceString) =&gt; {
+                        return this._inputFindPattern(true, w_startReplace).then((p_replaceString) =&gt; {
                             if (p_replaceString === undefined) {
                                 return true;
                             }
@@ -9073,7 +9096,7 @@ public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
                 this._lastSettingsUsed.replaceText = w_replaceString;
 
                 // * savesettings not needed, w_changeSettings is used directly
-                // this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
+                this.saveSearchSettings(this._lastSettingsUsed); // No need to wait, will be stacked.
 
                 const c = g.app.windowList[this.frameIndex].c;
                 const fc = c.findCommands;
@@ -9163,9 +9186,11 @@ public cloneFind(p_marked: boolean, p_flat: boolean): Thenable&lt;unknown&gt; {
         });
     }
 
+    const w_startValue = this._lastSettingsUsed!.findText === Constants.USER_MESSAGES.FIND_PATTERN_HERE ? '' : this._lastSettingsUsed!.findText;
+
     return this.triggerBodySave(true)
         .then(() =&gt; {
-            return this._inputFindPattern()
+            return this._inputFindPattern(false, w_startValue)
                 .then((p_findString) =&gt; {
                     if (!p_findString) {
                         return true; // Cancelled with escape or empty string.
@@ -9769,17 +9794,11 @@ public startSearch(): void {
  * @param p_replace flag for doing a 'replace' instead of a 'find'
  * @returns Promise of string or undefined if cancelled
  */
-private _inputFindPattern(p_replace?: boolean, p_uniqueRegex?: boolean, p_value?: string): Thenable&lt;string | undefined&gt; {
+private _inputFindPattern(p_replace?: boolean, p_value?: string): Thenable&lt;string | undefined&gt; {
     let w_title, w_prompt, w_placeHolder;
-    if (p_uniqueRegex) {
-        w_title = p_replace ? "Replace all unique regex matches with" : "Search for all unique regex matches";
-        w_prompt = p_replace ? "Type text to replace with and press enter." : "Type regex to search for and press enter.";
-        w_placeHolder = p_replace ? "Replace pattern here" : "Regex pattern here";
-    } else {
-        w_title = p_replace ? "Replace with" : "Search for";
-        w_prompt = p_replace ? "Type text to replace with and press enter." : "Type text to search for and press enter.";
-        w_placeHolder = p_replace ? "Replace pattern here" : "Find pattern here";
-    }
+    w_title = p_replace ? Constants.USER_MESSAGES.REPLACE_TITLE : Constants.USER_MESSAGES.SEARCH_TITLE;
+    w_prompt = p_replace ? Constants.USER_MESSAGES.REPLACE_PROMPT : Constants.USER_MESSAGES.SEARCH_PROMPT;
+    w_placeHolder = p_replace ? Constants.USER_MESSAGES.REPLACE_PLACEHOLDER : Constants.USER_MESSAGES.SEARCH_PLACEHOLDER;
     return vscode.window.showInputBox({
         title: w_title,
         prompt: w_prompt,
@@ -14444,37 +14463,37 @@ private _row_col_wrapper_dict(i: number, wrapper: StringTextWrapper): { "line": 
  */
 public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: boolean): Promise&lt;unknown&gt; {
 
+    await this.triggerBodySave(true);
+
     if (p_regex &amp;&amp; p_word) {
         console.error('interactiveSearch called with both "WORD" and "REGEX"');
         return;
     }
 
-    console.log('interactive search');
-    //
-    let w_searchTitle = "Search";
-    let w_searchPrompt = "'Enter' to search, 'Tab' to set replace pattern";
-    let w_searchPlaceholder = "Find pattern here"; // Replace pattern here
+    let w_searchTitle = Constants.USER_MESSAGES.INT_SEARCH_TITLE;
+    let w_searchPrompt = Constants.USER_MESSAGES.INT_SEARCH_PROMPT;
+    let w_searchPlaceholder = Constants.USER_MESSAGES.SEARCH_PLACEHOLDER;
 
     const c = g.app.windowList[this.frameIndex].c;
     const fc = c.findCommands;
     const ftm = fc.ftm;
 
     if (p_backward) {
-        w_searchTitle += " Backward";
+        w_searchTitle += Constants.USER_MESSAGES.INT_SEARCH_BACKWARD;
         // Set flag for show_find_options.
         fc.reverse = true;
         // Set flag for do_find_next().
         fc.request_reverse = true;
     }
     if (p_regex) {
-        w_searchTitle = "Regexp " + w_searchTitle;
+        w_searchTitle = Constants.USER_MESSAGES.INT_SEARCH_REGEXP + w_searchTitle;
         // Set flag for show_find_options.
         fc.pattern_match = true;
         // Set flag for do_find_next().
         fc.request_pattern_match = true;
     }
     if (p_word) {
-        w_searchTitle = "Word " + w_searchTitle;
+        w_searchTitle = Constants.USER_MESSAGES.INT_SEARCH_WORD + w_searchTitle;
         // Set flag for show_find_options.
         fc.whole_word = true;
         // Set flag for do_find_next().
@@ -14484,11 +14503,15 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
     fc.show_find_options(); // ! PRINT THEM BUT DONT CHANGE IN FTM/FIND PANEL
 
     const disposables: vscode.Disposable[] = [];
+
+    // Get value from find panel input
+    const w_startValue = this._lastSettingsUsed!.findText === Constants.USER_MESSAGES.FIND_PATTERN_HERE ? '' : this._lastSettingsUsed!.findText;
+
     try {
         return await new Promise&lt;unknown&gt;((resolve, reject) =&gt; {
             const input = vscode.window.createInputBox();
             input.title = w_searchTitle;
-            input.value = '';
+            input.value = w_startValue;
             input.prompt = w_searchPrompt;
             input.placeholder = w_searchPlaceholder;
 
@@ -14588,7 +14611,6 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
                 this._interactiveSearchInputBox.dispose(); // just in case.
             }
             this._interactiveSearchInputBox = input;
-            // utils.setContext(Constants.CONTEXT_FLAGS.INTERACTIVE_SEARCH, true);
             this._interactiveSearchInputBox.show();
         });
     } finally {

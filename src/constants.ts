@@ -151,6 +151,26 @@ export class Constants {
         PLACEHOLDER_GOTO_GLOBAL_LINE: "#",
         PROMPT_GOTO_GLOBAL_LINE: "Line number",
 
+        REPLACE_TITLE: "Replace with",
+        REPLACE_PROMPT: "Type text to replace with and press enter.",
+        REPLACE_PLACEHOLDER: "Replace pattern here",
+
+        SEARCH_TITLE: "Search for",
+        SEARCH_PROMPT: "Type text to search for and press enter.",
+        SEARCH_PLACEHOLDER: "Find pattern here",
+
+        INT_SEARCH_TITLE: "Search",
+        INT_SEARCH_PROMPT: "'Enter' to search",
+        INT_SEARCH_BACKWARD: " Backward", // Leading space intended
+        INT_SEARCH_REGEXP: "Regexp ", // Trailing space intended
+        INT_SEARCH_WORD: "Word ", // Trailing space intended
+
+        SEARCH_NOT_FOUND: "Not found",
+        FIND_PATTERN_HERE: "<find pattern here>",
+
+        TAGS_CHARACTERS_ERROR: "Cannot add tags containing any of these characters: &|^-",
+        NO_TAGS_ON_NODE: "No tags on node: ", // Trailing space intended
+
         TITLE_TAG_CHILDREN: "Tag Children",
         TITLE_REMOVE_TAG: "Remove Tag",
         TITLE_TAG_NODE: "Tag Node",
