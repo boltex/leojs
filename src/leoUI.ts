@@ -17,7 +17,9 @@ import {
     BodySelectionInfo,
     CommandOptions,
     LeoGotoNavKey,
-    LeoGuiFindTabManagerSettings
+    LeoGuiFindTabManagerSettings,
+    ChooseDocumentItem,
+    LeoDocument
 } from "./types";
 
 import { Config } from "./config";
@@ -1021,7 +1023,7 @@ export class LeoUI extends NullGui {
      * @param p_panel The panel (usually that got the latest onDidReceiveMessage)
      */
     public setFindPanel(p_panel: vscode.WebviewView): void {
-        if (p_panel.viewType === "leoFindPanelExplorer") {
+        if (p_panel.viewType === Constants.FIND_EXPLORER_ID) {
             // Explorer find panel
             this._lastFindView = this._findPanelWebviewExplorerView;
             this._findPanelWebviewExplorerView = p_panel;
@@ -4895,17 +4897,52 @@ export class LeoUI extends NullGui {
      * * Show switch document 'QuickPick' dialog and switch file if selection is made, or just return if no files are opened.
      * @returns A promise that resolves with a textEditor of the selected node's body from the newly selected document
      */
-    public switchLeoFile(): Thenable<unknown> {
+    public async switchLeoFile(): Promise<unknown> {
 
-        vscode.window.showInformationMessage('TODO: Implement switchLeoFile');
+        await this.triggerBodySave(true);
 
-        // vscode.window.showQuickPick(w_entries, w_pickOptions);
-        //     then
-        // return Promise.resolve(this.selectOpenedLeoDocument(p_chosenDocument.value));
+        const w_entries: ChooseDocumentItem[] = []; // Entries to offer as choices.
+        let w_index: number = 0;
+        const w_files: LeoDocument[] = g.app.windowList.map((p_frame) => {
+            const s = p_frame.c.fileName();
+            const w_filename = s ? utils.getFileFromPath(s) : Constants.UNTITLED_FILE_NAME;
+            return {
+                name: w_filename,
+                index: w_index++,
+                changed: p_frame.c.isChanged(),
+                selected: g.app.windowList[this.frameIndex] === p_frame,
+            };
+        });
+        w_index = 0; // reset w_index
+        let w_chosenDocument: ChooseDocumentItem | undefined;
+        if (w_files && w_files.length) {
+            w_files.forEach(function (p_filePath: LeoDocument) {
+                w_entries.push({
+                    label: w_index.toString(),
+                    description: p_filePath.name
+                        ? p_filePath.name
+                        : Constants.UNTITLED_FILE_NAME,
+                    value: w_index,
+                    alwaysShow: true,
+                });
+                w_index++;
+            });
+            const w_pickOptions: vscode.QuickPickOptions = {
+                matchOnDescription: true,
+                placeHolder: Constants.USER_MESSAGES.CHOOSE_OPENED_FILE,
+            };
+            w_chosenDocument = await vscode.window.showQuickPick(w_entries, w_pickOptions);
+        } else {
+            // "No opened documents"
+            return Promise.resolve(undefined);
+        }
+        if (w_chosenDocument) {
+            return Promise.resolve(this.selectOpenedLeoDocument(w_chosenDocument.value));
+        } else {
+            // Canceled
+            return Promise.resolve(undefined);
+        }
 
-        return Promise.resolve(true);
-
-        // return Promise.resolve(undefined); // if cancelled
     }
 
     /**
@@ -4913,25 +4950,51 @@ export class LeoUI extends NullGui {
      * @param p_index position of the opened Leo document in the document array
      * @returns A promise that resolves with a textEditor of the selected node's body from the newly opened document
      */
-    public selectOpenedLeoDocument(p_index: number, p_fromOutline?: boolean): Thenable<unknown> {
+    public async selectOpenedLeoDocument(p_index: number, p_fromOutline?: boolean): Promise<unknown> {
 
-        this.setupRefresh(
-            p_fromOutline ? Focus.Outline : Focus.Body,
-            {
-                tree: true,
-                body: true,
-                buttons: true,
-                states: true,
-                documents: true
-            }
-        );
+        // this.setupRefresh(
+        //     p_fromOutline ? Focus.Outline : Focus.Body,
+        //     {
+        //         tree: true,
+        //         body: true,
+        //         buttons: true,
+        //         states: true,
+        //         documents: true
+        //     }
+        // );
 
+        // this.frameIndex = p_index;
+
+        // this.launchRefresh();
+
+        // // if selected and opened
+        // return Promise.resolve(true);
+
+        await this.triggerBodySave(true);
         this.frameIndex = p_index;
+        // Like we just opened or made a new file
+        if (g.app.windowList.length) {
 
-        this.launchRefresh();
+            this.loadSearchSettings();
+            this.setupRefresh(
+                this.finalFocus,
+                {
+                    tree: true,
+                    body: true,
+                    documents: true,
+                    buttons: true,
+                    states: true,
+                    goto: true
 
-        // if selected and opened
-        return Promise.resolve(true);
+                }
+            );
+            this.launchRefresh();
+        } else {
+            this.launchRefresh();
+            console.log('Select Opened Leo File Error');
+            return Promise.reject('Select Opened Leo File Error');
+        }
+
     }
 
     /**
