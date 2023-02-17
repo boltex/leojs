@@ -12,7 +12,7 @@
     let dirty = false; // all but nav input
     let navTextDirty = false;
 
-    let firstTabElId = 'searchOptions'; // used to be 'findText' before nav inputs
+    let firstTabElId = 'searchOptions'; // The first tabable element used to be 'findText' before nav inputs
     let lastTabElId = 'searchBody';
 
     /**
@@ -482,6 +482,17 @@
             });
         }
     });
+
+    const w_findTextsEl = document.getElementById('findText');
+    if (w_findTextsEl) {
+        w_findTextsEl.addEventListener('click', function () {
+            // @ts-expect-error
+            if (w_findTextsEl.value === "<find pattern here>") {
+                // @ts-expect-error
+                w_findTextsEl.select();
+            }
+        });
+    }
 
     document.onkeydown = checkKeyDown;
 
