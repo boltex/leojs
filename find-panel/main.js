@@ -12,7 +12,7 @@
     let dirty = false; // all but nav input
     let navTextDirty = false;
 
-    let firstTabElId = 'searchOptions'; // The first tabable element used to be 'findText' before nav inputs
+    let firstTabElId = 'searchOptions'; // The first tabbable element used to be 'findText' before nav inputs
     let lastTabElId = 'searchBody';
 
     /**

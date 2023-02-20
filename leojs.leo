@@ -3153,7 +3153,6 @@ export class LeoUI extends NullGui {
     private _bodyMainSelectionColumn: vscode.ViewColumn | undefined; // Column of last body 'textEditor' found, set to 1
 
     private _languageFlagged: string[] = [];
-    private _killcolor_re: RegExp = new RegExp('(^@nocolor-node|^@killcolor)', 'm');
 
     private _bodyPreviewMode: boolean = true;
 
@@ -14441,7 +14440,8 @@ private _getBodyLanguage(): string {
     const c = g.app.windowList[this.frameIndex].c;
     const p = c.p;
     let w_language = "plain";
-    if (!this._killcolor_re.test(p.b)) {
+
+    if (g.useSyntaxColoring(p)) {
         const aList = g.get_directives_dict_list(p);
         const d = g.scanAtCommentAndAtLanguageDirectives(aList);
         w_language =

@@ -188,6 +188,7 @@ export const g_noweb_root = new RegExp('<' + '<' + '*' + '>' + '>' + '=', 'mg');
 export const g_pos_pattern = new RegExp(/:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$/);
 export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
 
+export const color_directives_pat = new RegExp(/^@color|^@killcolor|^@nocolor-node|^@nocolor/, 'mg');
 //@-<< define regex's >>
 //@+<< languages >>
 //@+node:felix.20220112011241.1: ** << languages >>
@@ -3523,7 +3524,7 @@ export function reEscape(text: string) {
 //@+node:felix.20221219233315.1: *3* g.ltrim
 export function ltrim(str: string, ch: string): string {
     let i = 0;
-    while (ch.includes(str.charAt(i)) && ++i && i<str.length) {
+    while (ch.includes(str.charAt(i)) && ++i && i < str.length) {
         // pass, the ++i expression is doing the job
     };
     return str.substring(i, str.length);
@@ -3552,6 +3553,51 @@ export function plural(obj: any): string {
     return n === 1 ? '' : "s";
 }
 
+//@+node:felix.20230220001637.1: *3* g.useSyntaxColoring
+/**
+ * True if p's parents enable coloring in p.
+ */
+export function useSyntaxColoring(p: Position): boolean {
+
+    // Special cases for the selected node.
+    let d = findColorDirectives(p);
+    if (d.includes('killcolor')) {
+        return false;
+    }
+    if (d.includes('nocolor-node')) {
+        return false;
+    }
+    // Now look at the parents.
+    for (const w_p of p.parents()) {
+        d = findColorDirectives(w_p);
+
+        // @killcolor anywhere disables coloring.
+        if (d.includes('killcolor')) {
+            return false;
+        }
+        // unambiguous @color enables coloring.
+        if (d.includes('color') && !d.includes('nocolor')) {
+            return true;
+        }
+        // Unambiguous @nocolor disables coloring.
+        if (d.includes('nocolor') && !d.includes('color')) {
+            return false;
+        }
+    }
+    return true;
+}
+//@+node:felix.20230220001655.1: *3* g.findColorDirectives
+/**
+ * Return an array with each color directive in p.b, without the leading '@'.
+ */
+export function findColorDirectives(p: Position): string[] {
+
+    const d = p.b.match(color_directives_pat) || [];
+
+    return d.map((s: string) => {
+        return s.substring(1);
+    });
+}
 //@+node:felix.20211227182611.1: ** g.os_path_ Wrappers
 //@+at Note: all these methods return Unicode strings. It is up to the user to
 // convert to an encoded string as needed, say when opening a file.
