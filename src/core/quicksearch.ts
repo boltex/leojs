@@ -241,7 +241,7 @@ export class QuickSearchController {
 
         for (let p of positions) {
             const it = { "type": "headline", "label": p[0].h };
-            if (this.addItem(it, (p[0], undefined))) {
+            if (this.addItem(it, [p[0], undefined])) {
                 return lineMatchHits; // Hit 999 limit 
             }
             const ms = this.matchlines(p[0].b, p[1]);
