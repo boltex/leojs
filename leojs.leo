@@ -1688,8 +1688,8 @@ public static COMMANDS = {
 public static LEO_COMMANDS = {
 
     // * File Commands
-    NEW: 'new',
-    OPEN_OUTLINE: 'open_outline',
+    // NEW: 'new', // newLeoFile used instead
+    // OPEN_OUTLINE: 'open_outline', // openLeoFile used instead
     WRITE_AT_FILE_NODES: 'write-at-file-nodes',
     WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
 
@@ -1771,8 +1771,8 @@ public static LEO_COMMANDS = {
     SORT_CHILDREN: "sort-children",
     SORT_SIBLINGS: "sort-siblings",
     // * Clone-find functionality
-    CLONE_FIND_ALL: "TODO_CLONE_FIND_ALL", // TODO : USE do_clone_find_all
-    CLONE_FIND_ALL_FLATTENED: "TODO_CLONE_FIND_ALL_FLATTENED", // TODO : USE do_clone_find_all_flattened
+    // CLONE_FIND_ALL: "CLONE_FIND_ALL", // cloneFind used instead
+    // CLONE_FIND_ALL_FLATTENED: "CLONE_FIND_ALL_FLATTENED", // cloneFind used instead
     CLONE_FIND_MARKED: "cfam",
     CLONE_FIND_FLATTENED_MARKED: "cffm",
     CLONE_FIND_PARENTS: "clone-find-parents",
@@ -2874,7 +2874,7 @@ export interface LeoButton {
 <t tx="felix.20201214194144.1">import * as vscode from "vscode";
 import { Utils as uriUtils } from "vscode-uri"; // May be useful!
 import { debounce } from "lodash";
-import * as path from 'path';
+import * as path from 'path'; // May be useful!
 
 import * as utils from "./utils";
 import * as commandBindings from "./commandBindings";
@@ -6252,6 +6252,7 @@ public async closeLeoFile(): Promise&lt;unknown&gt; {
     const c = g.app.windowList[this.frameIndex].c;
     await c.close();
     this.launchRefresh();
+    this.loadSearchSettings();
     return Promise.resolve();
 }
 
@@ -6320,6 +6321,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         });
         this.launchRefresh();
     }
+    this.loadSearchSettings();
     return Promise.resolve();
 
 }
@@ -6471,8 +6473,6 @@ public async selectOpenedLeoDocument(p_index: number, p_fromOutline?: boolean): 
     this.frameIndex = p_index;
     // Like we just opened or made a new file
     if (g.app.windowList.length) {
-
-        this.loadSearchSettings();
         this.setupRefresh(
             this.finalFocus,
             {
@@ -6486,6 +6486,7 @@ public async selectOpenedLeoDocument(p_index: number, p_fromOutline?: boolean): 
             }
         );
         this.launchRefresh();
+        this.loadSearchSettings();
     } else {
         this.launchRefresh();
         console.log('Select Opened Leo File Error');
@@ -8128,7 +8129,9 @@ public triggerBodySave(p_forcedVsCodeSave?: boolean): Thenable&lt;unknown&gt; {
         q_savePromise = Promise.resolve(true);
     }
     return q_savePromise.then((p_result) =&gt; {
-        this.debouncedRefreshBodyStates();
+
+        // this.debouncedRefreshBodyStates(); // ! test this !
+
         return p_result;
     }, (p_reason) =&gt; {
         console.log('BodySave rejected :', p_reason);
@@ -9321,6 +9324,10 @@ public setSearchSetting(p_id: string): void {
  */
 public loadSearchSettings(): void {
 
+    if (!g.app.windowList.length || !g.app.windowList[this.frameIndex]) {
+        return;
+    }
+
     const c = g.app.windowList[this.frameIndex].c;
     const scon = c.quicksearchController;
     const leoISettings = c.findCommands.ftm.get_settings();
@@ -9399,6 +9406,10 @@ public loadSearchSettings(): void {
  */
 public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt; {
 
+    if (!g.app.windowList.length || !g.app.windowList[this.frameIndex]) {
+        return Promise.resolve();
+    }
+
     this._lastSettingsUsed = p_settings;
     // convert to LeoGuiFindTabManagerSettings
     const searchSettings: LeoGuiFindTabManagerSettings = {
@@ -9462,11 +9473,9 @@ public saveSearchSettings(p_settings: LeoSearchSettings): Thenable&lt;unknown&gt
         const w = ftm[widget_ivar as keyof StringFindTabManager]; // getattr(ftm, widget_ivar)
         const val = searchSettings[setting_name as keyof LeoGuiFindTabManagerSettings];
         (find as any)[setting_name as keyof LeoFind] = val;
-
         if (val !== w.isChecked()) {
             w.toggle();
         }
-
     }
 
     // Radio buttons
@@ -10587,6 +10596,7 @@ public async newLeoFile(): Promise&lt;unknown&gt; {
         const c = g.app.windowList[this.frameIndex].c;
         c.new(this);
     }
+    this.loadSearchSettings();
     this.launchRefresh();
     return Promise.resolve();
 }

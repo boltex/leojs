@@ -704,7 +704,7 @@ export class LeoFind {
             this.update_change_list(this.change_text);  // Optional. An edge case.
             // Do the command!
             const settings = this._compute_find_def_settings(find_pattern);
-            const result = method(settings, word);
+            const result = method.bind(this)(settings, word);
             if (result[0]) {
                 // Keep the settings that found the match.
                 ftm.set_widgets_from_dict(settings);

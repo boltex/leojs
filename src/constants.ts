@@ -675,8 +675,8 @@ export class Constants {
     public static LEO_COMMANDS = {
 
         // * File Commands
-        NEW: 'new',
-        OPEN_OUTLINE: 'open_outline',
+        // NEW: 'new', // newLeoFile used instead
+        // OPEN_OUTLINE: 'open_outline', // openLeoFile used instead
         WRITE_AT_FILE_NODES: 'write-at-file-nodes',
         WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
 
@@ -758,8 +758,8 @@ export class Constants {
         SORT_CHILDREN: "sort-children",
         SORT_SIBLINGS: "sort-siblings",
         // * Clone-find functionality
-        CLONE_FIND_ALL: "TODO_CLONE_FIND_ALL", // TODO : USE do_clone_find_all
-        CLONE_FIND_ALL_FLATTENED: "TODO_CLONE_FIND_ALL_FLATTENED", // TODO : USE do_clone_find_all_flattened
+        // CLONE_FIND_ALL: "CLONE_FIND_ALL", // cloneFind used instead
+        // CLONE_FIND_ALL_FLATTENED: "CLONE_FIND_ALL_FLATTENED", // cloneFind used instead
         CLONE_FIND_MARKED: "cfam",
         CLONE_FIND_FLATTENED_MARKED: "cffm",
         CLONE_FIND_PARENTS: "clone-find-parents",

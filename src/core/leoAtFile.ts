@@ -31,7 +31,7 @@ import { Commands } from './leoCommands';
 function cmd(p_name: string, p_doc: string) {
     return new_cmd_decorator(p_name, p_doc, ['c', 'atFileCommands']);
 }
-//@+node:felix.20211225222130.1: ** class AtFile
+//@+node:felix.20211225222130.1: ** class AtFile (DUMMY)
 /**
  * A class implementing the atFile subcommander.
  */

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { Utils as uriUtils } from "vscode-uri"; // May be useful!
 import { debounce } from "lodash";
-import * as path from 'path';
+import * as path from 'path'; // May be useful!
 
 import * as utils from "./utils";
 import * as commandBindings from "./commandBindings";
@@ -1110,7 +1110,9 @@ export class LeoUI extends NullGui {
             q_savePromise = Promise.resolve(true);
         }
         return q_savePromise.then((p_result) => {
-            this.debouncedRefreshBodyStates();
+
+            // this.debouncedRefreshBodyStates(); // ! test this !
+
             return p_result;
         }, (p_reason) => {
             console.log('BodySave rejected :', p_reason);
@@ -4225,6 +4227,10 @@ export class LeoUI extends NullGui {
      */
     public loadSearchSettings(): void {
 
+        if (!g.app.windowList.length || !g.app.windowList[this.frameIndex]) {
+            return;
+        }
+
         const c = g.app.windowList[this.frameIndex].c;
         const scon = c.quicksearchController;
         const leoISettings = c.findCommands.ftm.get_settings();
@@ -4302,6 +4308,10 @@ export class LeoUI extends NullGui {
      */
     public saveSearchSettings(p_settings: LeoSearchSettings): Thenable<unknown> {
 
+        if (!g.app.windowList.length || !g.app.windowList[this.frameIndex]) {
+            return Promise.resolve();
+        }
+
         this._lastSettingsUsed = p_settings;
         // convert to LeoGuiFindTabManagerSettings
         const searchSettings: LeoGuiFindTabManagerSettings = {
@@ -4365,11 +4375,9 @@ export class LeoUI extends NullGui {
             const w = ftm[widget_ivar as keyof StringFindTabManager]; // getattr(ftm, widget_ivar)
             const val = searchSettings[setting_name as keyof LeoGuiFindTabManagerSettings];
             (find as any)[setting_name as keyof LeoFind] = val;
-
             if (val !== w.isChecked()) {
                 w.toggle();
             }
-
         }
 
         // Radio buttons
@@ -4714,6 +4722,7 @@ export class LeoUI extends NullGui {
             const c = g.app.windowList[this.frameIndex].c;
             c.new(this);
         }
+        this.loadSearchSettings();
         this.launchRefresh();
         return Promise.resolve();
     }
@@ -4737,6 +4746,7 @@ export class LeoUI extends NullGui {
         const c = g.app.windowList[this.frameIndex].c;
         await c.close();
         this.launchRefresh();
+        this.loadSearchSettings();
         return Promise.resolve();
     }
 
@@ -4804,6 +4814,7 @@ export class LeoUI extends NullGui {
             });
             this.launchRefresh();
         }
+        this.loadSearchSettings();
         return Promise.resolve();
 
     }
@@ -4974,8 +4985,6 @@ export class LeoUI extends NullGui {
         this.frameIndex = p_index;
         // Like we just opened or made a new file
         if (g.app.windowList.length) {
-
-            this.loadSearchSettings();
             this.setupRefresh(
                 this.finalFocus,
                 {
@@ -4989,6 +4998,7 @@ export class LeoUI extends NullGui {
                 }
             );
             this.launchRefresh();
+            this.loadSearchSettings();
         } else {
             this.launchRefresh();
             console.log('Select Opened Leo File Error');
