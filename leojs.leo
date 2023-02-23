@@ -171,6 +171,7 @@
 <v t="felix.20201214202757.1"><vh>minibuffer</vh></v>
 <v t="felix.20221002124249.1"><vh>minibufferHistory</vh></v>
 <v t="felix.20221002124535.1"><vh>_doMinibufferCommand</vh></v>
+<v t="felix.20230222212520.1"><vh>_addToMinibufferHistory</vh></v>
 <v t="felix.20201214202759.1"><vh>editHeadline</vh></v>
 <v t="felix.20201214202800.1"><vh>insertNode</vh></v>
 <v t="felix.20211204181418.1"><vh>_insertAndSetHeadline</vh></v>
@@ -12693,7 +12694,7 @@ private async _doMinibufferCommand(p_picked: vscode.QuickPickItem | undefined): 
     if (p_picked &amp;&amp;
         p_picked.label &amp;&amp;
         Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]) {
-        this._minibufferHistory.unshift(p_picked.label); // Add to minibuffer history
+        this._addToMinibufferHistory(p_picked.label);
         return vscode.commands.executeCommand(
             Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
         );
@@ -12711,7 +12712,7 @@ private async _doMinibufferCommand(p_picked: vscode.QuickPickItem | undefined): 
             }
         );
 
-        this._minibufferHistory.unshift(p_picked.label); // Add to minibuffer history
+        this._addToMinibufferHistory(p_picked.label);
         const c = g.app.windowList[this.frameIndex].c;
         const w_commandResult = c.executeMinibufferCommand(p_picked.label);
 
@@ -14757,6 +14758,20 @@ public interactiveSearchTab(): void {
         this._interactiveSearchInputBox.placeholder = "Replace pattern here";
         this._interactiveSearchInputBox.value = "";
     }
+}
+
+</t>
+<t tx="felix.20230222212520.1">/**
+ * Add to the minibuffer history (without duplicating entries)
+ */
+private _addToMinibufferHistory(p_commandName: string): void {
+    const w_found = this._minibufferHistory.indexOf(p_commandName);
+    // If found, will be removed (and placed on top)
+    if (w_found &gt;= 0) {
+        this._minibufferHistory.splice(w_found, 1);
+    }
+    // Add to top of minibuffer history
+    this._minibufferHistory.unshift(p_commandName);
 }
 
 </t>

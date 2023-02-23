@@ -89,87 +89,98 @@ suite('Test cases for leoFind.ts', () => {
     //@+node:felix.20221226222117.4: *3* Tests of Commands...
     //@+node:felix.20221226222117.5: *4* TestFind.change-all
     // def test_change_all(self):
-    //     c, settings, x = self.c, self.settings, self.x
-    //     root = c.rootPosition()
 
-    //     def init():
-    //         self.make_test_tree()  # Reinit the whole tree.
-    //         settings.change_text = '_DEF_'
-    //         settings.find_text = 'def'
-    //         settings.ignore_case = False
-    //         settings.node_only = False
-    //         settings.pattern_match = False
-    //         settings.suboutline_only = False
-    //         settings.whole_word = True
+    test('test_change_all', async () => {
+        const c = self.c;
+        const settings = self.settings;
+        const x = self.x;
+        const root = c.rootPosition()!;
 
-    //     # Default settings.
-    //     init()
-    //     x.do_change_all(settings)
-    //     # Plain search, ignore case.
-    //     init()
-    //     settings.whole_word = False
-    //     settings.ignore_case = True
-    //     x.do_change_all(settings)
-    //     # Node only.
-    //     init()
-    //     settings.node_only = True
-    //     x.do_change_all(settings)
-    //     # Suboutline only.
-    //     init()
-    //     settings.suboutline_only = True
-    //     x.do_change_all(settings)
-    //     # Pattern match.
-    //     init()
-    //     settings.pattern_match = True
-    //     x.do_change_all(settings)
-    //     # Pattern match, ignore case.
-    //     init()
-    //     settings.pattern_match = True
-    //     settings.ignore_case = True
-    //     x.do_change_all(settings)
-    //     # Pattern match, with groups.
-    //     init()
-    //     settings.pattern_match = True
-    //     settings.find_text = r'^(def)'
-    //     settings.change_text = '*\1*'
-    //     x.do_change_all(settings)
-    //     # Ignore case
-    //     init()
-    //     settings.ignore_case = True
-    //     x.do_change_all(settings)
-    //     # Word, ignore case.
-    //     init()
-    //     settings.ignore_case = True
-    //     settings.whole_word = True
-    //     x.do_change_all(settings)
-    //     # Multiple matches
-    //     init()
-    //     root.h = 'abc'
-    //     root.b = 'abc\nxyz abc\n'
-    //     settings.find_text = settings.change_text = 'abc'
-    //     x.do_change_all(settings)
-    //     # Set ancestor @file node dirty.
-    //     root.h = '@file xyzzy'
-    //     settings.find_text = settings.change_text = 'child1'
-    //     x.do_change_all(settings)
+        const init = () => {
+            make_test_tree();  // Reinit the whole tree.
+            settings.change_text = '_DEF_';
+            settings.find_text = 'def';
+            settings.ignore_case = false;
+            settings.node_only = false;
+            settings.pattern_match = false;
+            settings.suboutline_only = false;
+            settings.whole_word = true;
+        };
+
+        // Default settings.
+        init();
+        x.do_change_all(settings);
+        // Plain search, ignore case.
+        init();
+        settings.whole_word = false;
+        settings.ignore_case = true;
+        x.do_change_all(settings);
+        // Node only.
+        init();
+        settings.node_only = true;
+        x.do_change_all(settings);
+        // Suboutline only.
+        init();
+        settings.suboutline_only = true;
+        x.do_change_all(settings);
+        // Pattern match.
+        init();
+        settings.pattern_match = true;
+        x.do_change_all(settings);
+        // Pattern match, ignore case.
+        init();
+        settings.pattern_match = true;
+        settings.ignore_case = true;
+        x.do_change_all(settings);
+        // Pattern match, with groups.
+        init();
+        settings.pattern_match = true;
+        settings.find_text = '^(def)';
+        settings.change_text = '*\\1*';
+        x.do_change_all(settings);
+        // Ignore case
+        init();
+        settings.ignore_case = true;
+        x.do_change_all(settings);
+        // Word, ignore case.
+        init();
+        settings.ignore_case = true;
+        settings.whole_word = true;
+        x.do_change_all(settings);
+        // Multiple matches
+        init();
+        root.h = 'abc';
+        root.b = 'abc\nxyz abc\n';
+        settings.find_text = settings.change_text = 'abc';
+        x.do_change_all(settings);
+        // Set ancestor @file node dirty.
+        root.h = '@file xyzzy';
+        settings.find_text = settings.change_text = 'child1';
+        x.do_change_all(settings);
+
+    });
     //@+node:felix.20221226222117.6: *4* TestFind.change-all (@file node)
-    // def test_change_all_with_at_file_node(self):
-    //     c, settings, x = self.c, self.settings, self.x
-    //     root = c.rootPosition().next()  # Must have children.
-    //     settings.find_text = 'def'
-    //     settings.change_text = '_DEF_'
-    //     settings.ignore_case = False
-    //     settings.match_word = True
-    //     settings.pattern_match = False
-    //     settings.suboutline_only = False
-    //     # Ensure that the @file node is marked dirty.
-    //     root.h = '@file xyzzy.py'
-    //     root.b = ''
-    //     root.v.clearDirty()
-    //     assert root.anyAtFileNodeName()
-    //     x.do_change_all(settings)
-    //     assert root.v.isDirty(), root.h
+    test('test_change_all_with_at_file_node', async () => {
+        const c = self.c;
+        const settings = self.settings;
+        const x = self.x;
 
+        const root = c.rootPosition()!.next();  // Must have children.
+        settings.find_text = 'def';
+        settings.change_text = '_DEF_';
+        settings.ignore_case = false;
+        settings.whole_word = true;
+        settings.pattern_match = false;
+        settings.suboutline_only = false;
+        // Ensure that the @file node is marked dirty.
+        root.h = '@file xyzzy.py';
+        root.b = '';
+        root.v.clearDirty();
+        assert.strictEqual(true, !!root.anyAtFileNodeName());
+        x.do_change_all(settings);
+        assert.strictEqual(true, !!root.v.isDirty(), root.h);
+
+    });
     //@+node:felix.20221226222117.7: *4* TestFind.change-all (headline)
     // def test_change_all_headline(self):
     //     settings, x = self.settings, self.x

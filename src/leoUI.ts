@@ -2965,7 +2965,7 @@ export class LeoUI extends NullGui {
         if (p_picked &&
             p_picked.label &&
             Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]) {
-            this._minibufferHistory.unshift(p_picked.label); // Add to minibuffer history
+            this._addToMinibufferHistory(p_picked.label);
             return vscode.commands.executeCommand(
                 Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
             );
@@ -2983,7 +2983,7 @@ export class LeoUI extends NullGui {
                 }
             );
 
-            this._minibufferHistory.unshift(p_picked.label); // Add to minibuffer history
+            this._addToMinibufferHistory(p_picked.label);
             const c = g.app.windowList[this.frameIndex].c;
             const w_commandResult = c.executeMinibufferCommand(p_picked.label);
 
@@ -3000,6 +3000,19 @@ export class LeoUI extends NullGui {
             // Canceled
             return Promise.resolve(undefined);
         }
+    }
+
+    /**
+     * Add to the minibuffer history (without duplicating entries)
+     */
+    private _addToMinibufferHistory(p_commandName: string): void {
+        const w_found = this._minibufferHistory.indexOf(p_commandName);
+        // If found, will be removed (and placed on top)
+        if (w_found >= 0) {
+            this._minibufferHistory.splice(w_found, 1);
+        }
+        // Add to top of minibuffer history
+        this._minibufferHistory.unshift(p_commandName);
     }
 
     /**
