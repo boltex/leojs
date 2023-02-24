@@ -3824,7 +3824,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "dependencies": {
     "@types/safe-json-stringify": "^1.1.2",
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "ed08a21",
+  "gitBranch": "leoFind",
+  "gitDate": "2023-02-22 21:54:40 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{

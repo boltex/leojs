@@ -1479,7 +1479,7 @@ export class LeoFind {
      * Perform all plain find/replace on s.
      * return (count, new_s)
      */
-    private _change_all_plain(s: string): [number, string] {
+    public _change_all_plain(s: string): [number, string] {
         let find = this.find_text;
         const change = this.change_text;
         // #1166: s0 and find0 aren't affected by ignore-case.
@@ -1518,7 +1518,7 @@ export class LeoFind {
      * Perform all regex find/replace on s.
      * return (count, new_s)
      */
-    private _change_all_regex(s: string): [number, string] {
+    public _change_all_regex(s: string): [number, string] {
 
         let count = 0;
         let prev_i = 0;
@@ -1559,7 +1559,7 @@ export class LeoFind {
      * Perform all whole word find/replace on s.
      * return (count, new_s)
      */
-    private _change_all_word(s: string): [number, string] {
+    public _change_all_word(s: string): [number, string] {
 
         let find = this.find_text;
         const change = this.change_text;
@@ -3050,7 +3050,7 @@ export class LeoFind {
      *
      * Return (-1, -1) on failure.
      */
-    private _inner_search_backward(
+    public _inner_search_backward(
         s: string,
         i: number,
         j: number,
@@ -3132,7 +3132,7 @@ export class LeoFind {
     /**
      * Do a plain search.
      */
-    private _inner_search_plain(
+    public _inner_search_plain(
         s: string,
         i: number,
         j: number,
@@ -3177,7 +3177,7 @@ export class LeoFind {
     /**
      * Called from inner_search_helper
      */
-    private _inner_search_regex(
+    public _inner_search_regex(
         s: string,
         i: number,
         j: number,
