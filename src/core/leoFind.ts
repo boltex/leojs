@@ -2181,7 +2181,7 @@ export class LeoFind {
      * Perform all plain finds s, including whole-word finds.
      * return a list indices into s.
      */
-    private find_all_plain(find_s: string, s: string): number[] {
+    public find_all_plain(find_s: string, s: string): number[] {
         if (this.ignore_case) {
             find_s = find_s.toLowerCase();
             s = s.toLowerCase();
@@ -2206,7 +2206,7 @@ export class LeoFind {
      * Perform all regex find/replace on s.
      * return a list of matching indices.
      */
-    private find_all_regex(find_s: string, s: string): number[] {
+    public find_all_regex(find_s: string, s: string): number[] {
         let flags = "mgd";
         if (this.ignore_case) {
             flags += "i";
@@ -2216,8 +2216,6 @@ export class LeoFind {
         const re = RegExp(find_s, flags);
         let result = [];
         for (let m; m = re.exec(s); null) {
-            console.log('re.lastIndex', re.lastIndex);
-
             const i = re.lastIndex - m[0].length; // m.start();
             result.push(i);
         }
@@ -3017,27 +3015,15 @@ export class LeoFind {
     }
     //@+node:felix.20221023184334.1: *5* find._rfind
     private _rfind(s: string, pattern: string, start: number, end: number): number {
-        const w_s = s.substring(start); // will start just past i
+        const w_s = s.substring(start, end); // will start just past i
 
-        // In javascript, the last one can be part of the find, unlike in python's rfind.
-        end = end - 1;
+        let result = w_s.lastIndexOf(pattern);
 
-        let result = w_s.lastIndexOf(pattern, end - start);
         if (result >= 0) {
             result = result + start;
         }
         return result;
     }
-
-    // to test in interpreter
-    // function _rfind(s, pattern, start, end) {
-    //     var w_s = s.substring(start);
-    //     var result = w_s.lastIndexOf(pattern, end - start);
-    //     if (result >= 0) {
-    //         result = result + start;
-    //     }
-    //     return result
-    // }
 
     //@+node:felix.20221023141654.2: *5* find._inner_search_backward
     /**

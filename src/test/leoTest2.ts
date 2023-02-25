@@ -209,6 +209,23 @@ export class LeoUnitTest {
         clone.moveToLastChildOf(p);
     }
 
+    //@+node:felix.20230224231417.1: *3* LeoUnitTest.dump_tree
+    /**
+     * Dump root's tree, or the entire tree if root is None.
+     */
+    public dump_tree(root?: Position, tag?: string): void {
+
+        console.log('');
+        if (tag) {
+            console.log(tag);
+        }
+        const _iter = root ? root.self_and_subtree.bind(root) : this.c.all_positions.bind(this.c);
+        for (const p of _iter()) {
+            console.log('');
+            console.log('level:', p.level(), p.h);
+            g.printObj(g.splitLines(p.v.b));
+        }
+    }
     //@-others
 
 }

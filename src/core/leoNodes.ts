@@ -969,55 +969,29 @@ export class Position {
 
     //@+node:felix.20210202235315.11: *4* p.get_UNL
     /**
-     * with_file = True - include path to Leo file
-     * with_proto = False - include 'file://'
-     * with_index - include ',x' at end where x is child index in parent
-     * with_count - include ',x,y' at end where y zero based count of same headlines
+     *  Return a UNL representing a clickable link.
+     *  See the section < define global error regexs > for the regexes.
+     *
+     *  New in Leo 6.6: Use a single, simplified format for UNL's:
+     *
+     *  - unl: //
+     *  - self.v.context.fileName() #
+     *  - a list of headlines separated by '-->'
+     *
+     *  New in Leo 6.6:
+     *  - Always add unl: // and file name.
+     *  - Never translate '-->' to '--%3E'.
+     *  - Never generate child indices.
      */
-    public get_UNL(
-        with_file = true,
-        with_proto = false,
-        with_index = true,
-        with_count = false
-    ): string {
-        // TODO : ! Change this method to reflect Leo 6.6 !
-        const aList: string[] = [];
-        for (let i of this.self_and_parents(false)) {
-            if (with_index || with_count) {
-                let count: number = 0;
-                let ind: number = 0;
-                const p: Position = i.copy();
-                while (p.hasBack()) {
-                    ind = ind + 1;
-                    p.moveToBack();
-                    if (i.h === p.h) {
-                        count = count + 1;
-                    }
-                }
-                aList.push(
-                    i.h.split('-->').join('--%3E') + ':' + ind.toString()
-                );
-                // g.recursiveUNLFind and sf.copy_to_my_settings undo this replacement.
-                if (count || with_count) {
-                    aList[aList.length - 1] =
-                        aList[aList.length - 1] + ',' + count.toString();
-                }
-            } else {
-                aList.push(i.h.split('-->').join('--%3E'));
-                // g.recursiveUNLFind  and sf.copy_to_my_settings undo this replacement.
-            }
-        }
+    public get_UNL(): string {
 
-        const UNL: string = aList.reverse().join('-->');
-        if (with_proto) {
-            // return ("file://%s#%s" % (self.v.context.fileName(), UNL)).replace(' ', '%20')
-            const s: string = 'unl:' + `//${this.v.context.fileName()}#${UNL}`;
-            return s.split(' ').join('%20');
-        }
-        if (with_file) {
-            return `${this.v.context.fileName()}#${UNL}`;
-        }
-        return UNL;
+        const parents = [...this.self_and_parents(false)].reverse().map(p => (p.v ? p.h : 'no v node'));
+
+        const base_unl = this.v.context.fileName() + '#' + parents.join('-->');
+
+        const encoded = base_unl.replace(/'/g, "%27");
+        return 'unl://' + encoded;
+
     }
 
     //@+node:felix.20210202235315.12: *4* p.hasBack/Next/Parent/ThreadBack

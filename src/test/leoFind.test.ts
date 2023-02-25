@@ -79,7 +79,17 @@ suite('Test cases for leoFind.ts', () => {
     function make_test_tree() {
 
         const c = self.c;
-        const root = c.rootPosition()!;
+
+        // 2023/01/24: Remove any previous tree.
+        let root = c.rootPosition()!;
+        while (root.hasChildren()) {
+            root.firstChild().doDelete();
+        }
+        root = c.rootPosition()!;
+        while (root.hasNext()) {
+            root.next().doDelete();
+        }
+        root = c.rootPosition()!;
         root.h = '@file test.py';
         root.b = "def root():\n    pass\n";
         let last = root;
@@ -87,14 +97,18 @@ suite('Test cases for leoFind.ts', () => {
         function make_child(n: number, p: Position) {
             const p2 = p.insertAsLastChild();
             p2.h = `child ${n}`;
-            p2.b = `def child${n}():\n    v${n} = 2\n`;
+            p2.b = `def child${n}():\n` +
+                `    v${n} = 2\n` +
+                `    # node ${n} line 1: blabla second blabla bla second ble blu\n` +
+                `    # node ${n} line 2: blabla second blabla bla second ble blu`;
             return p2;
         }
 
         function make_top(n: number, sib: Position) {
             const p = sib.insertAfter();
             p.h = `Node ${n}`;
-            p.b = `def top${n}():\n    v${n} = 3\n`;
+            p.b = `def top${n}():\n` +
+                `    v${n} = 3\n`;
             return p;
         }
 
@@ -222,7 +236,7 @@ suite('Test cases for leoFind.ts', () => {
         const settings = self.settings;
         const x = self.x;
         // Regex find.
-        settings.find_text = '^def\b';
+        settings.find_text = '^def\\b';
         settings.change_text = 'def';  // Don't actually change anything!
         settings.pattern_match = true;
         x.do_clone_find_all(settings);
@@ -240,7 +254,7 @@ suite('Test cases for leoFind.ts', () => {
         const settings = self.settings;
         const x = self.x;
         // regex find.
-        settings.find_text = '^def\b';
+        settings.find_text = '^def\\b';
         settings.pattern_match = true;
         x.do_clone_find_all_flattened(settings);
         // word find.
@@ -273,13 +287,14 @@ suite('Test cases for leoFind.ts', () => {
         x.cloneFindParents();
     });
     //@+node:felix.20221226222117.12: *4* TestFind.clone-find-tag
-    test('test_clone_find_parents', async () => {
+    test('test_clone-find-tag', async () => {
         const c = self.c;
         const x = self.x;
         c.theTagController = new DummyTagController([c.rootPosition()!], c);
         x.do_clone_find_tag('test');
         c.theTagController = new DummyTagController([], c);
         x.do_clone_find_tag('test');
+        //@verbatim
         //@ts-expect-error
         c.theTagController = undefined;
         x.do_clone_find_tag('test');
@@ -290,8 +305,8 @@ suite('Test cases for leoFind.ts', () => {
         const x = self.x;
 
         const init = () => {
-            make_test_tree();  // Reinit the whole tree.
             // x.findAllUniqueFlag = false; // unused 
+            make_test_tree();  // Reinit the whole tree.
             x.unique_matches = [];
             settings.change_text = '_DEF_';
             settings.find_text = 'def';
@@ -350,31 +365,28 @@ suite('Test cases for leoFind.ts', () => {
     });
     //@+node:felix.20221226222117.14: *4* TestFind.find-def
     test('test_find_def', async () => {
-        const settings = self.settings;
+
         const x = self.x;
-        // Test methods called by x.find_def.
-        // It would be wrong to call these methods from x.do_find_def.
+        // Test 1: Test methods called by x.find_def.
         x._save_before_find_def(x.c.rootPosition());  // Also tests _restore_after_find_def.
-        x._compute_find_def_settings('my-find-pattern');
-        //
-        // Now the main tests...
-        // Test 1.
-        let p, pos, newpos;
-        for (const bool_val of [true, false]) {
-            x.reverse_find_defs = bool_val;
-            [p, pos, newpos] = x.do_find_def(settings, 'child5');
-            assert.ok(p.__bool__());
+
+        // Test 2:
+        for (const reverse of [true, false]) {
+            // Successful search.
+            x.reverse_find_defs = reverse;
+            let settings = x._compute_find_def_settings('def child5');
+            let p, pos, newpos;
+            [p, pos, newpos] = x.do_find_def(settings);
+            assert.ok(p && p.__bool__());
             assert.strictEqual(p.h, 'child 5');
             const s = p.b.substring(pos, newpos);
             assert.strictEqual(s, 'def child5');
-            // Test 2: switch style.
-            [p, pos, newpos] = x.do_find_def(settings, 'child_5');
-            assert.ok(p.__bool__());
-            assert.strictEqual(p.h, 'child 5');
-            // Test 3: not found after switching style.
-            [p, pos, newpos] = x.do_find_def(settings, 'xyzzy');
-            assert.strictEqual(p, undefined, p.gnx);
+            // Unsuccessful search.
+            settings = x._compute_find_def_settings('def xyzzy');
+            [p, pos, newpos] = x.do_find_def(settings);
+            assert.strictEqual(p, undefined, p ? p.gnx : 'undefined');
         }
+
     });
     //@+node:felix.20221226222117.15: *4* TestFind.find-next
     test('test_find_next', async () => {
@@ -383,7 +395,7 @@ suite('Test cases for leoFind.ts', () => {
         let p, pos, newpos;
         settings.find_text = 'def top1';
         [p, pos, newpos] = x.do_find_next(settings);
-        assert.ok(p.__bool__());
+        assert.ok(p && p.__bool__());
         assert.strictEqual(p.h, 'Node 1');
         const s = p.b.substring(pos, newpos);
         assert.strictEqual(s, settings.find_text);
@@ -396,7 +408,7 @@ suite('Test cases for leoFind.ts', () => {
         settings.file_only = true; // init_ivars_from_settings will set the ivar.
         settings.find_text = 'def root()';
         [p, pos, newpos] = x.do_find_next(settings);
-        assert.ok(p.__bool__());
+        assert.ok(p && p.__bool__());
         assert.strictEqual(p.h, '@file test.py');
         const s = p.b.substring(pos, newpos);
         assert.strictEqual(s, settings.find_text);
@@ -409,7 +421,7 @@ suite('Test cases for leoFind.ts', () => {
         settings.find_text = 'def root()';
         settings.suboutline_only = true;  // init_ivars_from_settings will set the ivar.
         [p, pos, newpos] = x.do_find_next(settings);
-        assert.ok(p.__bool__());
+        assert.ok(p && p.__bool__());
         assert.strictEqual(p.h, '@file test.py');
         const s = p.b.substring(pos, newpos);
         assert.strictEqual(s, settings.find_text);
@@ -443,7 +455,7 @@ suite('Test cases for leoFind.ts', () => {
         const ok = x.do_change_then_find(settings);
         assert.ok(ok);
         p = c.p;
-        assert.strictEqual(p, test_p);
+        assert.ok(p.__eq__(test_p));
         assert.strictEqual(p.h, 'XX1 Test2 Test3');
     });
     //@+node:felix.20221226222117.19: *4* TestFind.find-prev
@@ -461,18 +473,18 @@ suite('Test cases for leoFind.ts', () => {
         x.c.selectPosition(grand_child);
         let p, pos, newpos;
         [p, pos, newpos] = x.do_find_prev(settings);
-        assert.ok(p.__bool__());
+        assert.ok(p && p.__bool__());
         assert.strictEqual(p.h, 'child 2');
         const s = p.b.substring(pos, newpos);
         assert.strictEqual(s, settings.find_text);
     });
     //@+node:felix.20221226222117.20: *4* TestFind.find-var
     test('test_find_var', async () => {
-        const settings = self.settings;
         const x = self.x;
+        const settings = x._compute_find_def_settings('v5 =');
         let p, pos, newpos;
         [p, pos, newpos] = x.do_find_var(settings, 'v5');
-        assert.ok(p.__bool__());
+        assert.ok(p && p.__bool__());
         assert.strictEqual(p.h, 'child 5');
         const s = p.b.substring(pos, newpos);
         assert.strictEqual(s, 'v5 =');
@@ -487,7 +499,7 @@ suite('Test cases for leoFind.ts', () => {
         // find-next
         let p, pos, newpos;
         [p, pos, newpos] = x.do_find_next(settings);
-        assert.ok(p.__bool__());
+        assert.ok(p && p.__bool__());
         assert.strictEqual(p.h, 'Node 1');
         const s = p.b.substring(pos, newpos);
         assert.strictEqual(s, settings.find_text);
@@ -524,7 +536,7 @@ suite('Test cases for leoFind.ts', () => {
         // find-next
         let p, pos, newpos;
         [p, pos, newpos] = x.do_find_next(settings);
-        assert.ok(p.__bool__());
+        assert.ok(p && p.__bool__());
         assert.strictEqual(p.h, settings.find_text);
         const w = self.c.edit_widget(p);
         assert.ok(w);
@@ -536,6 +548,7 @@ suite('Test cases for leoFind.ts', () => {
         const c = self.c;
         const x = self.x;
         const p = c.rootPosition()!.next();
+        //@verbatim
         //@ts-expect-error
         c.theTagController = undefined;
         x.do_tag_children(p, 'test');
@@ -546,7 +559,7 @@ suite('Test cases for leoFind.ts', () => {
     test('test_batch_change_regex', async () => {
         const c = self.c;
         const x = self.x;
-        // self.dump_tree()
+        // self.dump_tree();
         // Test 1: Match in body.
         const settings = {
             ignore_case: false,
@@ -561,20 +574,20 @@ suite('Test cases for leoFind.ts', () => {
         // Test 1: Match in body.
         let n = x.batch_change(
             c.rootPosition(),
-            [['^def\b', 'DEF'],],
+            [['^def\\b', 'DEF'],],
             settings);
         assert.ok(n > 3, n);  // Test 1.
         // Test 2: Match in headline.
         n = x.batch_change(
             c.rootPosition(),
-            [['^Node\b', 'DEF'],],
+            [['^Node\\b', 'DEF'],],
             settings);
         assert.strictEqual(n, 2);
         // Test 3: node-only.
         settings['node_only'] = true;
         n = x.batch_change(
             c.rootPosition(),
-            [['^DEF\b', 'def'],],
+            [['^DEF\\b', 'def'],],
             settings);
         assert.strictEqual(n, 1);
         // Test 4: suboutline-only.
@@ -582,7 +595,7 @@ suite('Test cases for leoFind.ts', () => {
         settings['suboutline_only'] = true;
         n = x.batch_change(
             c.rootPosition(),
-            [['^def\b', 'DEF'],],
+            [['^def\\b', 'DEF'],],
             settings);
         assert.strictEqual(n, 1);
     });
@@ -632,7 +645,7 @@ suite('Test cases for leoFind.ts', () => {
         const settings = self.settings;
         const x = self.x;
         // Bad search pattern.
-        settings.find_text = '^def\b((';
+        settings.find_text = '^def\\b((';
         settings.pattern_match = true;
         x.do_clone_find_all(settings);
         x.find_next_match(undefined);
@@ -640,22 +653,20 @@ suite('Test cases for leoFind.ts', () => {
     });
     //@+node:felix.20221226222117.28: *4* TestFind.test_cfa_backwards_search
     test('test_cfa_backwards_search', async () => {
-        console.log(' *** *** *** skip test_cfa_backwards_search');
-
-        // const settings = self.settings;
-        // const x = self.x;
-        // const pattern = 'def';
-        // for (const nocase of [true, false]) {
-        //     settings.ignore_case = nocase;
-        //     for (const word of [true, false]) {
-        //         for (const s of ['def spam():\n', 'define spam']) {
-        //             settings.whole_word = word;
-        //             x.init_ivars_from_settings(settings);
-        //             x._inner_search_backward(s, 0, s.length, pattern, nocase, word);
-        //             x._inner_search_backward(s, 0, 0, pattern, nocase, word);
-        //         }
-        //     }
-        // }
+        const settings = self.settings;
+        const x = self.x;
+        const pattern = 'def';
+        for (const nocase of [true, false]) {
+            settings.ignore_case = nocase;
+            for (const word of [true, false]) {
+                for (const s of ['def spam():\n', 'define spam']) {
+                    settings.whole_word = word;
+                    x.init_ivars_from_settings(settings);
+                    x._inner_search_backward(s, 0, s.length, pattern, nocase, word);
+                    x._inner_search_backward(s, 0, 0, pattern, nocase, word);
+                }
+            }
+        }
     });
     //@+node:felix.20221226222117.29: *4* TestFind.test_cfa_find_next_match
     test('test_cfa_find_next_match', async () => {
@@ -779,56 +790,103 @@ suite('Test cases for leoFind.ts', () => {
         x.init_ivars_from_settings(partial_settings);
         x.compute_result_status(false);
     });
+    //@+node:felix.20230224225251.1: *4* TestFind.test_find_all_plain
+    test('test_find_all_plain', async () => {
+        const c = self.c;
+        const fc = c.findCommands;
+        const table = [
+            [false, false],
+            // s         find    expected
+            ['aA', 'a', [0]],
+            ['aAa', 'A', [1]],
+            ['AAbabc', 'b', [2, 4]],
+
+            [true, false],
+            ['axA', 'a', [0, 2]],
+            ['aAa', 'A', [0, 1, 2]],
+            ['ABbabc', 'b', [1, 2, 4]],
+
+            [true, true],
+            ['ax aba ab abc', 'ab', [7]],
+            ['ax aba\nab abc', 'ab', [7]],
+            ['ax aba ab\babc', 'ab', [7]],
+        ];
+        let s, find, expected;
+        for (const aTuple of table) {
+            if (aTuple.length === 2) {
+                [fc.ignore_case, fc.whole_word] = aTuple as [boolean, boolean];
+            } else {
+                [s, find, expected] = aTuple;
+                const aList = fc.find_all_plain(find as string, s as string);
+                assert.deepStrictEqual(aList, expected, s as string);
+            }
+        }
+    });
+    //@+node:felix.20230224225257.1: *4* TestFind.test_find_all_regex
+    test('test_find_all_regex', async () => {
+        const c = self.c;
+        const fc = c.findCommands;
+        const regex_table = [
+            // s                  find        expected
+            ['a ba aa a ab a', '\\b\\w+\\b', [0, 2, 5, 8, 10, 13]],
+            ['a AA aa aab ab a', '\\baa\\b', [5]],
+            // Multi-line
+            ['aaa AA\naa aab', '\\baa\\b', [7]],
+        ];
+        for (const [s, find, expected] of regex_table) {
+            fc.ignore_case = false;
+            const aList = fc.find_all_regex(find as string, s as string);
+            assert.deepStrictEqual(aList, expected, s as string);
+        }
+    });
     //@+node:felix.20221226222117.36: *4* TestFind.test_inner_search_backward
     test('test_inner_search_backward', async () => {
-        console.log(' *** *** *** SKIP test_inner_search_backward');
+        const c = self.c;
+        const x = new LeoFind(c);
 
-        // const c = self.c;
-        // const x = new LeoFind(c);
+        const test = (table: any, table_name: string, nocase: boolean, word: boolean) => {
+            let test_n = 0;
+            for (let [pattern, s, i, j, expected, expected_i, expected_j] of table) {
+                test_n += 1;
+                if (j === -1) {
+                    j = s.length;
+                }
+                let got_i, got_j;
+                [got_i, got_j] = x._inner_search_backward(s, i, j, pattern, nocase, word);
+                const got = s.substring(got_i, got_j);
+                assert.ok(expected === got && got_i === expected_i && got_j === expected_j,
+                    `\n     table: ${table_name}` +
+                    `\n    i test: ${test_n}` +
+                    `\n   pattern: ${pattern}` +
+                    `\n         s: ${s}` +
+                    `\n  expected: ${expected}` +
+                    `\n       got: ${got}` +
+                    `\nexpected i: ${expected_i}` +
+                    `\n     got i: ${got_i}` +
+                    `\nexpected j: ${expected_j}` +
+                    `\n     got j: ${got_j}`
+                );
+            }
+        };
 
-        // const test = (table: any, table_name: string, nocase: boolean, word: boolean) => {
-        //     let test_n = 0;
-        //     for (let [pattern, s, i, j, expected, expected_i, expected_j] of table) {
-        //         test_n += 1;
-        //         if (j === -1) {
-        //             j = s.length;
-        //         }
-        //         let got_i, got_j;
-        //         [got_i, got_j] = x._inner_search_backward(s, i, j, pattern, nocase, word);
-        //         const got = s.substring(got_i, got_j);
-        //         assert.ok(expected === got && got_i === expected_i && got_j === expected_j,
-        //             `\n     table: ${table_name}` +
-        //             `\n    i test: ${test_n}` +
-        //             `\n   pattern: ${pattern}` +
-        //             `\n         s: ${s}` +
-        //             `\n  expected: ${expected}` +
-        //             `\n       got: ${got}` +
-        //             `\nexpected i: ${expected_i}` +
-        //             `\n     got i: ${got_i}` +
-        //             `\nexpected j: ${expected_j}` +
-        //             `\n     got j: ${got_j}`
-        //         );
-        //     }
-        // };
-
-        // const plain_table = [
-        //     // pattern   s           i,  j   expected, expected_i, expected_j
-        //     ['a', 'abaca', 0, -1, 'a', 4, 5],
-        //     ['A', 'Abcde', 0, -1, 'A', 0, 1],
-        // ];
-        // const nocase_table = [
-        //     // pattern   s           i,  j   expected, expected_i, expected_j
-        //     ['a', 'abaAca', 0, -1, 'a', 5, 6],
-        //     ['A', 'Abcdca', 0, -1, 'a', 5, 6],
-        // ];
-        // const word_table = [
-        //     // pattern   s           i,  j   expected, expected_i, expected_j
-        //     ['a', 'abaAca', 0, -1, '', -1, -1],
-        //     ['A', 'AA A AB', 0, -1, 'A', 3, 4],
-        // ];
-        // test(plain_table, 'plain_table', false, false);
-        // test(nocase_table, 'nocase_table', true, false);
-        // test(word_table, 'word_table', false, true);
+        const plain_table = [
+            // pattern   s           i,  j   expected, expected_i, expected_j
+            ['a', 'abaca', 0, -1, 'a', 4, 5],
+            ['A', 'Abcde', 0, -1, 'A', 0, 1],
+        ];
+        const nocase_table = [
+            // pattern   s           i,  j   expected, expected_i, expected_j
+            ['a', 'abaAca', 0, -1, 'a', 5, 6],
+            ['A', 'Abcdca', 0, -1, 'a', 5, 6],
+        ];
+        const word_table = [
+            // pattern   s           i,  j   expected, expected_i, expected_j
+            ['a', 'abaAca', 0, -1, '', -1, -1],
+            ['A', 'AA A AB', 0, -1, 'A', 3, 4],
+        ];
+        test(plain_table, 'plain_table', false, false);
+        test(nocase_table, 'nocase_table', true, false);
+        test(word_table, 'word_table', false, true);
     });
     //@+node:felix.20221226222117.37: *4* TestFind.test_inner_search_plain
     test('test_inner_search_plain', async () => {
@@ -990,10 +1048,10 @@ suite('Test cases for leoFind.ts', () => {
         const fc = c.findCommands;
         const regex_table: [string, string, string, number, string][] = [
             // s                 find        change  count   result
-            ['a ba aa a ab a', '\b\w+\b', 'C', 6, 'C C C C C C'],
-            ['a AA aa aab ab a', '\baa\b', 'C', 1, 'a AA C aab ab a'],
+            ['a ba aa a ab a', '\\b\\w+\\b', 'C', 6, 'C C C C C C'],
+            ['a AA aa aab ab a', '\\baa\\b', 'C', 1, 'a AA C aab ab a'],
             // Multi-line
-            ['aaa AA\naa aab', '\baa\b', 'C', 1, 'aaa AA\nC aab'],
+            ['aaa AA\naa aab', '\\baa\\b', 'C', 1, 'aaa AA\nC aab'],
         ];
         for (const [s, find, change, count, result] of regex_table) {
             fc.ignore_case = false;
@@ -1051,10 +1109,10 @@ suite('Test cases for leoFind.ts', () => {
             ['\\\\', '\\'],
             ['\\n', '\n'],
             ['\\t', '\t'],
-            ['a\bc', 'a\bc'],
-            ['a\\bc', 'a\bc'],
-            ['a\tc', 'a\tc'],  // Replace \t by a tab.
-            ['a\nc', 'a\nc'],  // Replace \n by a newline.
+            ['a\\bc', 'a\\bc'],
+            ['a\\\\bc', 'a\\bc'],
+            ['a\\tc', 'a\tc'],  // Replace \t by a tab.
+            ['a\\nc', 'a\nc'],  // Replace \n by a newline.
         ];
         for (const [s, expected] of table) {
             const got = x.replace_back_slashes(s);
