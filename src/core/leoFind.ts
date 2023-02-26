@@ -620,47 +620,6 @@ export class LeoFind {
 
     }
     //@+node:felix.20230212162733.1: *4* find.find-def, do_find_def & helpers
-    // @cmd('find-def')
-    // def find_def(self, event: Event = None) -> Tuple[Position, int, int]:  # pragma: no cover (cmd)
-    //     """Find the class, def or assignment to var of the word under the cursor."""
-
-    //     # Note: This method is *also* part of the ctrl-click logic:
-    //     #
-    //     # QTextEditWrapper.mouseReleaseEvent calls g.openUrlOnClick.
-    //     # g.openUrlOnClick calls g.openUrlHelper.
-    //     # g.openUrlHelper calls this method.
-
-    //     # re searches are more accurate, but not enough to be worth changing the user's settings.
-    //     ftm, p = self.ftm, self.c.p
-    //     # Check.
-    //     word = self._compute_find_def_word(event)
-    //     if not word:
-    //         return None, None, None
-    //     # Settings...
-    //     self._save_before_find_def(p)  # Save previous settings.
-    //     assert self.find_def_data
-    //     # #3124. Try all possibilities, regardless of case.
-    //     alt_word = self._switch_style(word)
-    //     << compute the search table >>
-    //     for find_pattern, method in table:
-    //         ftm.set_find_text(find_pattern)
-    //         self.init_vim_search(find_pattern)
-    //         self.update_change_list(self.change_text)  # Optional. An edge case.
-    //         # Do the command!
-    //         settings = self._compute_find_def_settings(find_pattern)
-    //         result = method(settings, word)
-    //         if result[0]:
-    //             # Keep the settings that found the match.
-    //             ftm.set_widgets_from_dict(settings)
-    //             return result
-    //     # Restore the previous find settings!
-    //     self._restore_after_find_def()
-    //     return None, None, None
-
-    // def do_find_def(self, settings: Settings, word: str) -> Tuple[Position, int, int]:
-    //     """A standalone helper for unit tests."""
-    //     return self._fd_helper(settings, word)
-
     @cmd('find-def', 'Find the class, def or assignment to var of the word under the cursor.')
     public find_def(): [Position | undefined, number | undefined, number | undefined] {
 
@@ -679,7 +638,7 @@ export class LeoFind {
         const alt_word = this._switch_style(word);
         //@+<< compute the search table >>
         //@+node:felix.20230212162733.2: *5* << compute the search table >>
-        let table: [string, (settings: ISettings, word: string) => [Position | undefined, number | undefined, number | undefined]][];
+        let table: [string, (settings: ISettings) => [Position | undefined, number | undefined, number | undefined]][];
         if (alt_word) {
             table = [
                 [`class ${word}`, this.do_find_def],
@@ -697,14 +656,14 @@ export class LeoFind {
             ];
         }
         //@-<< compute the search table >>
-        let find_pattern: string, method: (settings: ISettings, word: string) => [Position | undefined, number | undefined, number | undefined];
+        let find_pattern: string, method: (settings: ISettings) => [Position | undefined, number | undefined, number | undefined];
         for ([find_pattern, method] of table) {
             ftm.set_find_text(find_pattern);
             this.init_vim_search(find_pattern);
             this.update_change_list(this.change_text);  // Optional. An edge case.
             // Do the command!
             const settings = this._compute_find_def_settings(find_pattern);
-            const result = method.bind(this)(settings, word);
+            const result = method.bind(this)(settings);
             if (result[0]) {
                 // Keep the settings that found the match.
                 ftm.set_widgets_from_dict(settings);
@@ -719,8 +678,8 @@ export class LeoFind {
     /**
      * A standalone helper for unit tests.
      */
-    public do_find_def(settings: ISettings, word: string): [Position | undefined, number | undefined, number | undefined] {
-        return this._fd_helper(settings, word);
+    public do_find_def(settings: ISettings): [Position | undefined, number | undefined, number | undefined] {
+        return this._fd_helper(settings);
     }
     //@+node:felix.20230212162733.3: *5* find._compute_find_def_settings
     private _compute_find_def_settings(find_pattern: string): ISettings {
@@ -802,7 +761,7 @@ export class LeoFind {
      *
      * return p, pos, newpos for unit tests.
      */
-    private _fd_helper(settings: ISettings, word: string): [Position | undefined, number | undefined, number | undefined] {
+    private _fd_helper(settings: ISettings): [Position | undefined, number | undefined, number | undefined] {
 
         const c = this.c;
         this.find_text = settings.find_text;
@@ -1102,7 +1061,7 @@ export class LeoFind {
         this.update_change_list(this.change_text);  // Optional. An edge case.
         const settings = this._compute_find_def_settings(find_pattern);
         // Do the command!
-        const result = this.do_find_var(settings, word);
+        const result = this.do_find_var(settings);
         if (result[0]) {
             //  Keep the settings that found the match.
             ftm.set_widgets_from_dict(settings);
@@ -1115,9 +1074,9 @@ export class LeoFind {
     /**
      * A standalone helper for unit tests.
      */
-    public do_find_var(settings: ISettings, word: string): [Position | undefined, number | undefined, number | undefined] {
+    public do_find_var(settings: ISettings): [Position | undefined, number | undefined, number | undefined] {
 
-        return this._fd_helper(settings, word);
+        return this._fd_helper(settings);
     }
     //@+node:felix.20221013234514.20: *4* find.replace
     @cmd('replace', 'Replace the selected text with the replacement text.')

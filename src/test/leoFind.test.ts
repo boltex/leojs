@@ -483,7 +483,7 @@ suite('Test cases for leoFind.ts', () => {
         const x = self.x;
         const settings = x._compute_find_def_settings('v5 =');
         let p, pos, newpos;
-        [p, pos, newpos] = x.do_find_var(settings, 'v5');
+        [p, pos, newpos] = x.do_find_var(settings);
         assert.ok(p && p.__bool__());
         assert.strictEqual(p.h, 'child 5');
         const s = p.b.substring(pos, newpos);
