@@ -4524,7 +4524,7 @@ export class LeoUI extends NullGui {
     /**
      * * Tag Node
      */
-    public tagNode(): void {
+    public tagNode(p_p?: Position): void {
 
         this.triggerBodySave(true)
             .then(() => {
@@ -4546,7 +4546,7 @@ export class LeoUI extends NullGui {
 
                     const c = g.app.windowList[this.frameIndex].c;
                     const tc = c.theTagController;
-                    tc.add_tag(c.p, p_inputResult);
+                    tc.add_tag(p_p ? p_p : c.p, p_inputResult);
 
                     this.setupRefresh(
                         Focus.NoChange,
@@ -4568,13 +4568,15 @@ export class LeoUI extends NullGui {
     /**
      * * Remove single Tag on selected node
      */
-    public removeTag(): void {
+    public removeTag(p_p?: Position): void {
 
-        if (this.lastSelectedNode && this.lastSelectedNode.u &&
-            this.lastSelectedNode.u.__node_tags && this.lastSelectedNode.u.__node_tags.length) {
+        const w_p = p_p ? p_p : this.lastSelectedNode;
+
+        if (w_p && w_p.u &&
+            w_p.u.__node_tags && w_p.u.__node_tags.length) {
             this.triggerBodySave(true)
                 .then(() => {
-                    return vscode.window.showQuickPick(this.lastSelectedNode!.u.__node_tags, {
+                    return vscode.window.showQuickPick(w_p.u.__node_tags, {
                         title: Constants.USER_MESSAGES.TITLE_REMOVE_TAG,
                         placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
                         canPickMany: false
@@ -4583,13 +4585,12 @@ export class LeoUI extends NullGui {
                 .then((p_inputResult?: string) => {
                     if (p_inputResult && p_inputResult.trim()) {
                         p_inputResult = p_inputResult.trim();
-
                         const c = g.app.windowList[this.frameIndex].c;
-                        const p = c.p;
-                        const v = p.v;
+                        const v = w_p.v;
                         const tc = c.theTagController;
-                        if (v.u && v.u.includes('__node_tags')) {
-                            tc.remove_tag(p, p_inputResult);
+
+                        if (v.u && v.u['__node_tags']) {
+                            tc.remove_tag(w_p, p_inputResult);
                         }
 
                         this.setupRefresh(
@@ -4605,8 +4606,8 @@ export class LeoUI extends NullGui {
                         this.launchRefresh();
                     }
                 });
-        } else if (this.lastSelectedNode) {
-            vscode.window.showInformationMessage("No tags on node: " + this.lastSelectedNode.h);
+        } else if (w_p) {
+            vscode.window.showInformationMessage("No tags on node: " + w_p.h);
         } else {
             return;
         }
@@ -4616,20 +4617,22 @@ export class LeoUI extends NullGui {
     /**
      * * Remove all tags on selected node
      */
-    public removeTags(): void {
+    public removeTags(p_p?: Position): void {
 
-        if (this.lastSelectedNode && this.lastSelectedNode.u &&
-            this.lastSelectedNode.u.__node_tags && this.lastSelectedNode.u.__node_tags.length) {
+        const w_p = p_p ? p_p : this.lastSelectedNode;
+
+        if (w_p && w_p.u &&
+            w_p.u.__node_tags && w_p.u.__node_tags.length) {
             this.triggerBodySave(true)
                 .then(() => {
                     const c = g.app.windowList[this.frameIndex].c;
-                    const p = c.p;
-                    const v = p.v;
+                    const v = w_p.v;
                     const tc = c.theTagController;
 
-                    if (v.u && v.u.includes('__node_tags')) {
+                    if (v.u['__node_tags']) {
                         delete v.u['__node_tags'];
                         tc.initialize_taglist();  // reset tag list: some may have been removed
+                        c.setChanged();
                     }
 
                     this.setupRefresh(
@@ -4644,8 +4647,8 @@ export class LeoUI extends NullGui {
                     );
                     this.launchRefresh();
                 });
-        } else if (this.lastSelectedNode) {
-            vscode.window.showInformationMessage("No tags on node: " + this.lastSelectedNode.h);
+        } else if (w_p) {
+            vscode.window.showInformationMessage("No tags on node: " + w_p.h);
         } else {
             return;
         }

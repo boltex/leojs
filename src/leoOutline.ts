@@ -87,6 +87,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             if (w_uLength) {
                 desc = "\u{1F4CE} (" + w_uLength + ")";
                 if (w_u.__node_tags) {
+                    w_contextValue += Constants.CONTEXT_FLAGS.NODE_TAGS;
                     if (w_uLength === 1) {
                         // was only tag, so reset it
                         desc = "";

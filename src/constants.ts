@@ -386,6 +386,7 @@ export class Constants {
         NODE_CLONED: "leojsNodeCloned",
         NODE_ROOT: "leojsNodeRoot",
         NODE_NOT_ROOT: "leojsNodeNotRoot",
+        NODE_TAGS: "leojsNodeTags",
 
         // Flags for undo nodes 
         UNDO_BEAD: "leojsUndoNode",

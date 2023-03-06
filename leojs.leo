@@ -490,6 +490,7 @@
 <v t="felix.20201214205159.63"><vh>Hoisting Context Menu</vh></v>
 <v t="felix.20201214205159.64"><vh>Leo File Documents Context Menu</vh></v>
 <v t="felix.20201214205159.65"><vh>Mark/Unmark Context Menu</vh></v>
+<v t="felix.20230305205014.1"><vh>Tagging Context Menu</vh></v>
 <v t="felix.20201214205159.66"><vh>Outline Editing Context Menu</vh></v>
 <v t="felix.20220517203332.1"><vh>at buttons</vh></v>
 <v t="felix.20221213210705.1"><vh>undos</vh></v>
@@ -1049,6 +1050,7 @@ public refreshTreeRoot(): void {
         if (w_uLength) {
             desc = "\u{1F4CE} (" + w_uLength + ")";
             if (w_u.__node_tags) {
+                w_contextValue += Constants.CONTEXT_FLAGS.NODE_TAGS;
                 if (w_uLength === 1) {
                     // was only tag, so reset it
                     desc = "";
@@ -2074,6 +2076,7 @@ public static CONTEXT_FLAGS = {
     NODE_CLONED: "leojsNodeCloned",
     NODE_ROOT: "leojsNodeRoot",
     NODE_NOT_ROOT: "leojsNodeNotRoot",
+    NODE_TAGS: "leojsNodeTags",
 
     // Flags for undo nodes 
     UNDO_BEAD: "leojsUndoNode",
@@ -5452,47 +5455,47 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 {
   "command": "leojs.unmark",
   "when": "viewItem =~ /^leojsNodeMarked/",
-  "group": "leojsNodeContext2@2"
+  "group": "leojsNodeContext2@1"
 },
 </t>
 <t tx="felix.20201214205159.66">{
   "command": "leojs.copyNode",
   "when": "viewItem =~ /^leojsNode/",
-  "group": "leojsNodeContext2@3"
+  "group": "leojsNodeContext2@5"
 },
 {
   "command": "leojs.cutNode",
   "when": "viewItem =~ /^leojsNode/",
-  "group": "leojsNodeContext2@4"
+  "group": "leojsNodeContext2@6"
 },
 {
   "command": "leojs.pasteNode",
   "when": "viewItem =~ /^leojsNode/",
-  "group": "leojsNodeContext2@5"
+  "group": "leojsNodeContext2@7"
 },
 {
   "command": "leojs.pasteNodeAsClone",
   "when": "viewItem =~ /^leojsNode/",
-  "group": "leojsNodeContext2@6"
+  "group": "leojsNodeContext2@8"
 },
 {
   "command": "leojs.delete",
   "when": "viewItem =~ /^leojsNode/",
-  "group": "leojsNodeContext2@7"
+  "group": "leojsNodeContext2@9"
 },
 {
   "command": "leojs.insertNode",
-  "when": "leojsTreeOpened &amp;&amp; viewItem =~ /^leojsNode/",
+  "when": "viewItem =~ /^leojsNode/",
   "group": "leojsNodeContext3@1"
 },
 {
   "command": "leojs.cloneNode",
-  "when": "leojsTreeOpened &amp;&amp; viewItem =~ /^leojsNode/",
+  "when": "viewItem =~ /^leojsNode/",
   "group": "leojsNodeContext3@2"
 },
 {
   "command": "leojs.gotoNextClone",
-  "when": "leojsTreeOpened &amp;&amp; viewItem =~ /leojsNodeCloned/",
+  "when": "viewItem =~ /leojsNodeCloned/",
   "group": "leojsNodeContext3@3"
 },
 </t>
@@ -9613,7 +9616,7 @@ public tagChildren(): void {
 <t tx="felix.20220505215924.17">/**
  * * Tag Node
  */
-public tagNode(): void {
+public tagNode(p_p?: Position): void {
 
     this.triggerBodySave(true)
         .then(() =&gt; {
@@ -9635,7 +9638,7 @@ public tagNode(): void {
 
                 const c = g.app.windowList[this.frameIndex].c;
                 const tc = c.theTagController;
-                tc.add_tag(c.p, p_inputResult);
+                tc.add_tag(p_p ? p_p : c.p, p_inputResult);
 
                 this.setupRefresh(
                     Focus.NoChange,
@@ -9658,13 +9661,15 @@ public tagNode(): void {
 <t tx="felix.20220505215924.18">/**
  * * Remove single Tag on selected node
  */
-public removeTag(): void {
+public removeTag(p_p?: Position): void {
 
-    if (this.lastSelectedNode &amp;&amp; this.lastSelectedNode.u &amp;&amp;
-        this.lastSelectedNode.u.__node_tags &amp;&amp; this.lastSelectedNode.u.__node_tags.length) {
+    const w_p = p_p ? p_p : this.lastSelectedNode;
+
+    if (w_p &amp;&amp; w_p.u &amp;&amp;
+        w_p.u.__node_tags &amp;&amp; w_p.u.__node_tags.length) {
         this.triggerBodySave(true)
             .then(() =&gt; {
-                return vscode.window.showQuickPick(this.lastSelectedNode!.u.__node_tags, {
+                return vscode.window.showQuickPick(w_p.u.__node_tags, {
                     title: Constants.USER_MESSAGES.TITLE_REMOVE_TAG,
                     placeHolder: Constants.USER_MESSAGES.PLACEHOLDER_TAG,
                     canPickMany: false
@@ -9673,13 +9678,12 @@ public removeTag(): void {
             .then((p_inputResult?: string) =&gt; {
                 if (p_inputResult &amp;&amp; p_inputResult.trim()) {
                     p_inputResult = p_inputResult.trim();
-
                     const c = g.app.windowList[this.frameIndex].c;
-                    const p = c.p;
-                    const v = p.v;
+                    const v = w_p.v;
                     const tc = c.theTagController;
-                    if (v.u &amp;&amp; v.u.includes('__node_tags')) {
-                        tc.remove_tag(p, p_inputResult);
+
+                    if (v.u &amp;&amp; v.u['__node_tags']) {
+                        tc.remove_tag(w_p, p_inputResult);
                     }
 
                     this.setupRefresh(
@@ -9695,8 +9699,8 @@ public removeTag(): void {
                     this.launchRefresh();
                 }
             });
-    } else if (this.lastSelectedNode) {
-        vscode.window.showInformationMessage("No tags on node: " + this.lastSelectedNode.h);
+    } else if (w_p) {
+        vscode.window.showInformationMessage("No tags on node: " + w_p.h);
     } else {
         return;
     }
@@ -9707,20 +9711,22 @@ public removeTag(): void {
 <t tx="felix.20220505215924.19">/**
  * * Remove all tags on selected node
  */
-public removeTags(): void {
+public removeTags(p_p?: Position): void {
 
-    if (this.lastSelectedNode &amp;&amp; this.lastSelectedNode.u &amp;&amp;
-        this.lastSelectedNode.u.__node_tags &amp;&amp; this.lastSelectedNode.u.__node_tags.length) {
+    const w_p = p_p ? p_p : this.lastSelectedNode;
+
+    if (w_p &amp;&amp; w_p.u &amp;&amp;
+        w_p.u.__node_tags &amp;&amp; w_p.u.__node_tags.length) {
         this.triggerBodySave(true)
             .then(() =&gt; {
                 const c = g.app.windowList[this.frameIndex].c;
-                const p = c.p;
-                const v = p.v;
+                const v = w_p.v;
                 const tc = c.theTagController;
 
-                if (v.u &amp;&amp; v.u.includes('__node_tags')) {
+                if (v.u['__node_tags']) {
                     delete v.u['__node_tags'];
                     tc.initialize_taglist();  // reset tag list: some may have been removed
+                    c.setChanged();
                 }
 
                 this.setupRefresh(
@@ -9735,8 +9741,8 @@ public removeTags(): void {
                 );
                 this.launchRefresh();
             });
-    } else if (this.lastSelectedNode) {
-        vscode.window.showInformationMessage("No tags on node: " + this.lastSelectedNode.h);
+    } else if (w_p) {
+        vscode.window.showInformationMessage("No tags on node: " + w_p.h);
     } else {
         return;
     }
@@ -14740,9 +14746,9 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 [CMD.GOTO_GLOBAL_LINE, () =&gt; p_leoUI.gotoGlobalLine()],
 
 [CMD.TAG_CHILDREN, () =&gt; p_leoUI.tagChildren()],
-[CMD.TAG_NODE, () =&gt; p_leoUI.tagNode()],
-[CMD.REMOVE_TAG, () =&gt; p_leoUI.removeTag()],
-[CMD.REMOVE_TAGS, () =&gt; p_leoUI.removeTags()],
+[CMD.TAG_NODE, (p_node?: Position) =&gt; p_leoUI.tagNode(p_node)],
+[CMD.REMOVE_TAG, (p_node?: Position) =&gt; p_leoUI.removeTag(p_node)],
+[CMD.REMOVE_TAGS, (p_node?: Position) =&gt; p_leoUI.removeTags(p_node)],
 
 </t>
 <t tx="felix.20230122201158.1">/**
@@ -14774,6 +14780,22 @@ private _addToMinibufferHistory(p_commandName: string): void {
     this._minibufferHistory.unshift(p_commandName);
 }
 
+</t>
+<t tx="felix.20230305205014.1">{
+  "command": "leojs.tagNode",
+  "when": "viewItem =~ /leojsNode/",
+  "group": "leojsNodeContext2@2"
+},
+{
+  "command": "leojs.removeTag",
+  "when": "viewItem =~ /leojsNodeTags/",
+  "group": "leojsNodeContext2@3"
+},
+{
+  "command": "leojs.removeTags",
+  "when": "viewItem =~ /leojsNodeTags/",
+  "group": "leojsNodeContext2@4"
+},
 </t>
 </tnodes>
 </leo_file>

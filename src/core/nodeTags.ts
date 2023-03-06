@@ -276,6 +276,7 @@ export class TagController {
         let tags = v.u[this.TAG_LIST_KEY] as string[] || [];
         if (tags.includes(tag)) {
             tags = tags.filter(e => e !== tag);
+            this.c.setChanged();
         }
         if (tags.length) {
             v.u[this.TAG_LIST_KEY] = tags;
@@ -283,10 +284,10 @@ export class TagController {
             //  prevent a few corner cases, and conserve disk space
             if (v.u.hasOwnProperty(this.TAG_LIST_KEY)) {
                 delete v.u[this.TAG_LIST_KEY];
+                this.c.setChanged();
             }
 
         }
-        this.c.setChanged();
         this.update_taglist(tag);
     }
     //@-others

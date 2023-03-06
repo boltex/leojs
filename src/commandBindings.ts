@@ -269,9 +269,9 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.GOTO_GLOBAL_LINE, () => p_leoUI.gotoGlobalLine()],
 
         [CMD.TAG_CHILDREN, () => p_leoUI.tagChildren()],
-        [CMD.TAG_NODE, () => p_leoUI.tagNode()],
-        [CMD.REMOVE_TAG, () => p_leoUI.removeTag()],
-        [CMD.REMOVE_TAGS, () => p_leoUI.removeTags()],
+        [CMD.TAG_NODE, (p_node?: Position) => p_leoUI.tagNode(p_node)],
+        [CMD.REMOVE_TAG, (p_node?: Position) => p_leoUI.removeTag(p_node)],
+        [CMD.REMOVE_TAGS, (p_node?: Position) => p_leoUI.removeTags(p_node)],
 
         [CMD.CLONE_FIND_TAG, () => p_leoUI.cloneFindTag()],
 

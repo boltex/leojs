@@ -2880,46 +2880,61 @@
         {
           "command": "leojs.unmark",
           "when": "viewItem =~ /^leojsNodeMarked/",
+          "group": "leojsNodeContext2@1"
+        },
+        {
+          "command": "leojs.tagNode",
+          "when": "viewItem =~ /leojsNode/",
           "group": "leojsNodeContext2@2"
+        },
+        {
+          "command": "leojs.removeTag",
+          "when": "viewItem =~ /leojsNodeTags/",
+          "group": "leojsNodeContext2@3"
+        },
+        {
+          "command": "leojs.removeTags",
+          "when": "viewItem =~ /leojsNodeTags/",
+          "group": "leojsNodeContext2@4"
         },
         {
           "command": "leojs.copyNode",
           "when": "viewItem =~ /^leojsNode/",
-          "group": "leojsNodeContext2@3"
+          "group": "leojsNodeContext2@5"
         },
         {
           "command": "leojs.cutNode",
           "when": "viewItem =~ /^leojsNode/",
-          "group": "leojsNodeContext2@4"
+          "group": "leojsNodeContext2@6"
         },
         {
           "command": "leojs.pasteNode",
           "when": "viewItem =~ /^leojsNode/",
-          "group": "leojsNodeContext2@5"
+          "group": "leojsNodeContext2@7"
         },
         {
           "command": "leojs.pasteNodeAsClone",
           "when": "viewItem =~ /^leojsNode/",
-          "group": "leojsNodeContext2@6"
+          "group": "leojsNodeContext2@8"
         },
         {
           "command": "leojs.delete",
           "when": "viewItem =~ /^leojsNode/",
-          "group": "leojsNodeContext2@7"
+          "group": "leojsNodeContext2@9"
         },
         {
           "command": "leojs.insertNode",
-          "when": "leojsTreeOpened && viewItem =~ /^leojsNode/",
+          "when": "viewItem =~ /^leojsNode/",
           "group": "leojsNodeContext3@1"
         },
         {
           "command": "leojs.cloneNode",
-          "when": "leojsTreeOpened && viewItem =~ /^leojsNode/",
+          "when": "viewItem =~ /^leojsNode/",
           "group": "leojsNodeContext3@2"
         },
         {
           "command": "leojs.gotoNextClone",
-          "when": "leojsTreeOpened && viewItem =~ /leojsNodeCloned/",
+          "when": "viewItem =~ /leojsNodeCloned/",
           "group": "leojsNodeContext3@3"
         },
         {
