@@ -215,9 +215,6 @@ export class TagController {
             regex = new RegExp(tag);
         }
         catch (e) {
-            if (!g.unitTesting) {
-                g.warning('invalid regular expression:', tag);
-            }
             return nodelist;
         }
         for (let p of this.c.all_unique_positions()) {
@@ -240,9 +237,6 @@ export class TagController {
             regex = new RegExp(tag);
         }
         catch (e) {
-            if (!g.unitTesting) {
-                g.warning('invalid regular expression:', tag);
-            }
             return;
         }
         for (let p of c.all_unique_positions()) {
