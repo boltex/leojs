@@ -4808,6 +4808,7 @@ export class LeoUI extends NullGui {
                     this.setupRefresh(this.finalFocus, {
                         tree: true,
                         body: true,
+                        goto: true,
                         states: true,
                         documents: true,
                         buttons: true
@@ -4824,6 +4825,7 @@ export class LeoUI extends NullGui {
             this.setupRefresh(this.finalFocus, {
                 tree: true,
                 body: true,
+                goto: true,
                 states: true,
                 documents: true,
                 buttons: true

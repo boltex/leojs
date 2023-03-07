@@ -6303,6 +6303,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
                 this.setupRefresh(this.finalFocus, {
                     tree: true,
                     body: true,
+                    goto: true,
                     states: true,
                     documents: true,
                     buttons: true
@@ -6319,6 +6320,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
         this.setupRefresh(this.finalFocus, {
             tree: true,
             body: true,
+            goto: true,
             states: true,
             documents: true,
             buttons: true
