@@ -98,9 +98,7 @@ export class GoToCommands {
         [delim1, delim2] = this.get_delims(root);
 
         // Match only the node with the correct gnx.
-        new RegExp('ab+c');
-
-        const node_pat = new RegExp(`\s*${g.reEscape(delim1)}@\+node:${g.reEscape(p.gnx)}:`); // re.compile(r'\s*%s@\+node:%s:' % (
+        const node_pat = new RegExp(`\s*${g.reEscape(delim1)}@\+node:${g.reEscape(p.gnx)}:`);
 
         for (let [i, w_s] of g.splitLines(s).entries()) {
 
@@ -575,7 +573,7 @@ export class GoToCommands {
             return;
         }
         const n0 = this.gotoCommands.find_node_start(c.p);
-        if (!n0){
+        if (!n0) {
             return;
         }
         const i = w.getInsertPoint();

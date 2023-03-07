@@ -210,7 +210,16 @@ export class TagController {
         const nodelist: Position[] = [];
         // replace * with .* for regex compatibility
         tag = tag.split('*').join('.*');
-        const regex = new RegExp(tag);
+        let regex;
+        try {
+            regex = new RegExp(tag);
+        }
+        catch (e) {
+            if (!g.unitTesting) {
+                g.warning('invalid regular expression:', tag);
+            }
+            return nodelist;
+        }
         for (let p of this.c.all_unique_positions()) {
             for (let tag of this.get_tags(p)) {
                 if (tag.match(regex)) {
@@ -226,7 +235,16 @@ export class TagController {
     public *get_tagged_gnxes(tag: string): Generator<string> {
         const c = this.c;
         tag = tag.split('*').join('.*');
-        const regex = new RegExp(tag);
+        let regex;
+        try {
+            regex = new RegExp(tag);
+        }
+        catch (e) {
+            if (!g.unitTesting) {
+                g.warning('invalid regular expression:', tag);
+            }
+            return;
+        }
         for (let p of c.all_unique_positions()) {
             for (let t of this.get_tags(p)) {
                 if (t.match(regex)) {
