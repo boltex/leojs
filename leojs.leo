@@ -5032,12 +5032,12 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   {
     "view": "leojsOutline",
-    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)",
+    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
     "when": "leojsReady &amp;&amp; !leojsTreeOpened &amp;&amp; leojsStartupDone"
   },
   {
     "view": "leojsOutlineExplorer",
-    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)",
+    "contents": "[Open Leo File](command:leojs.openLeoFile)\n[Create Leo File](command:leojs.newLeoFile)\nView LeoJS [configuration settings](command:leojs.showSettingsPage)",
     "when": "leojsReady &amp;&amp; !leojsTreeOpened &amp;&amp; leojsStartupDone"
   },
   {
