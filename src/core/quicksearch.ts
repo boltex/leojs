@@ -373,6 +373,9 @@ export class QuickSearchController {
             pat = new RegExp(regex, flags);
         }
         catch (e) {
+            if (!g.unitTesting) {
+                g.warning('invalid regular expression:', regex);
+            }
             return [];
         }
         const aList: [Position, undefined][] = [];
