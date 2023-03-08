@@ -2184,7 +2184,7 @@ export class LeoFind {
     @cmd('re-search', 'Same as start-find, with regex.')
     @cmd('re-search-forward', 'Same as start-find, with regex.')
     public interactive_re_search_forward(): void {
-        console.log('interactive_re_search_forward overriden in the UI client.');
+        g.app.gui.interactiveSearch(false, true, false);
     }
     // def interactive_re_search_forward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, with regex."""
@@ -2202,7 +2202,7 @@ export class LeoFind {
     //@+node:felix.20221016013001.27: *4* find.re-search-backward
     @cmd('re-search-backward', 'Same as start-find, but with regex and in reverse.')
     public interactive_re_search_backward(): void {
-        console.log('interactive_re_search_backward overriden in the UI client.');
+        g.app.gui.interactiveSearch(true, true, false);
     }
     // def interactive_re_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, but with regex and in reverse."""
@@ -2223,7 +2223,7 @@ export class LeoFind {
     //@+node:felix.20221016013001.28: *4* find.search_backward
     @cmd('search-backward', 'Same as start-find, but in reverse.')
     public interactive_search_backward(): void {
-        console.log('interactive_search_backward overriden in the UI client.');
+        g.app.gui.interactiveSearch(true, false, false);
     }
     // def interactive_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, but in reverse."""
@@ -2246,7 +2246,7 @@ export class LeoFind {
         'The default binding of Ctrl-F.\nAlso contains default state-machine entries for find/change commands.'
     )
     public start_search(): void {
-        console.log('start_search overriden in the UI client.');
+        g.app.gui.startSearch();
     }
     // def start_search(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """
@@ -2393,7 +2393,7 @@ export class LeoFind {
     @cmd('word-search', 'Same as start-search, with whole_word setting.')
     @cmd('word-search-forward', 'Same as start-search, with whole_word setting.')
     public word_search_forward(): void {
-        console.log('word_search_forward overriden in the UI client.');
+        g.app.gui.interactiveSearch(false, false, true);
     }
     // @cmd('word-search')
     // @cmd('word-search-forward')
@@ -2413,7 +2413,7 @@ export class LeoFind {
     //@+node:felix.20221016013001.36: *4* find.word-search-backward
     @cmd('word-search-backward', 'Same as start-search-backward, with whole_word setting.')
     public word_search_backward(): void {
-        console.log('word_search_backward overriden in the UI client.');
+        g.app.gui.interactiveSearch(true, false, true);
     }
     // def word_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     # Set flags for show_find_options.

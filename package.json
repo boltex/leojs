@@ -3687,6 +3687,7 @@
     "@types/md5": "^2.3.1",
     "@types/mocha": "^9.1.0",
     "@types/node": "16.x",
+    "@types/safe-json-stringify": "^1.1.2",
     "@types/vscode": "^1.74.0",
     "@types/webpack-env": "^1.16.3",
     "@typescript-eslint/eslint-plugin": "^5.16.0",
@@ -3707,7 +3708,6 @@
     "webpack-shell-plugin-next": "^2.2.2"
   },
   "dependencies": {
-    "@types/safe-json-stringify": "^1.1.2",
     "binascii": "^0.0.2",
     "bowser": "^2.11.0",
     "browser-process-hrtime": "^1.0.0",

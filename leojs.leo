@@ -1697,11 +1697,11 @@ public static LEO_COMMANDS = {
     WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
 
     // * More Commands
-    //  TODO
     // GOTO_GLOBAL_LINE: "!goto_global_line",
-    // TAG_CHILDREN: "!tag_children",
     SET_UA: 'set-ua',
-    // START_SEARCH: "!start_search",
+
+    // * Search operations
+    START_SEARCH: "start-search",
     // FIND_ALL: "!find_all",
     // FIND_NEXT: "!find_next",
     // FIND_PREVIOUS: "!find_previous",
@@ -1710,6 +1710,17 @@ public static LEO_COMMANDS = {
     // REPLACE: "!replace",
     // REPLACE_THEN_FIND: "!replace_then_find",
     // REPLACE_ALL: "!replace_all",
+
+    SEARCH_BACKWARD: "search-backward",
+    RE_SEARCH: "re-search",
+    RE_SEARCH_BACKWARD: "re-search-backward",
+    WORD_SEARCH: "word-search",
+    WORD_SEARCH_BACKWARD: "word-search-backward",
+
+    // TAG_NODE
+    // TAG_CHILDREN: "!tag_children",
+    // REMOVE_TAG
+    // REMOVE_TAGS
 
     // * Undo Operations
     UNDO: "undo",
@@ -3825,7 +3836,6 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     &lt;&lt; devDependencies &gt;&gt;
   },
   "dependencies": {
-    "@types/safe-json-stringify": "^1.1.2",
     &lt;&lt; dependencies &gt;&gt;
   }
 }
@@ -6112,6 +6122,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 "@types/md5": "^2.3.1",
 "@types/mocha": "^9.1.0",
 "@types/node": "16.x",
+"@types/safe-json-stringify": "^1.1.2",
 "@types/vscode": "^1.74.0",
 "@types/webpack-env": "^1.16.3",
 "@typescript-eslint/eslint-plugin": "^5.16.0",
@@ -8407,15 +8418,15 @@ public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
     'find-next': Constants.COMMANDS.FIND_NEXT,
     'find-prev': Constants.COMMANDS.FIND_PREVIOUS,
 
-    'start-search': Constants.COMMANDS.START_SEARCH,
-    'search-forward': Constants.COMMANDS.START_SEARCH,
-    'search-backward': Constants.COMMANDS.SEARCH_BACKWARD,
-    're-search': Constants.COMMANDS.RE_SEARCH,
-    're-search-forward': Constants.COMMANDS.RE_SEARCH,
-    're-search-backward': Constants.COMMANDS.RE_SEARCH_BACKWARD,
-    'word-search': Constants.COMMANDS.WORD_SEARCH,
-    'word-search-forward': Constants.COMMANDS.WORD_SEARCH,
-    'word-search-backward': Constants.COMMANDS.WORD_SEARCH_BACKWARD,
+    // 'start-search': Constants.COMMANDS.START_SEARCH,
+    // 'search-forward': Constants.COMMANDS.START_SEARCH,
+    // 'search-backward': Constants.COMMANDS.SEARCH_BACKWARD,
+    // 're-search': Constants.COMMANDS.RE_SEARCH,
+    // 're-search-forward': Constants.COMMANDS.RE_SEARCH,
+    // 're-search-backward': Constants.COMMANDS.RE_SEARCH_BACKWARD,
+    // 'word-search': Constants.COMMANDS.WORD_SEARCH,
+    // 'word-search-forward': Constants.COMMANDS.WORD_SEARCH,
+    // 'word-search-backward': Constants.COMMANDS.WORD_SEARCH_BACKWARD,
 
     // TODO - needed ? 
     // 'find-var': Constants.COMMANDS.FIND_VAR,
@@ -14726,12 +14737,19 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 
 //  [CMD.INTERACTIVE_SEARCH_TAB, () =&gt; p_leoUI.interactiveSearchTab()], // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
 
-[CMD.START_SEARCH, () =&gt; p_leoUI.startSearch()],
-[CMD.SEARCH_BACKWARD, () =&gt; p_leoUI.interactiveSearch(true, false, false)],
-[CMD.RE_SEARCH, () =&gt; p_leoUI.interactiveSearch(false, true, false)],
-[CMD.RE_SEARCH_BACKWARD, () =&gt; p_leoUI.interactiveSearch(true, true, false)],
-[CMD.WORD_SEARCH, () =&gt; p_leoUI.interactiveSearch(false, false, true)],
-[CMD.WORD_SEARCH_BACKWARD, () =&gt; p_leoUI.interactiveSearch(true, false, true)],
+// [CMD.START_SEARCH, () =&gt; p_leoUI.startSearch()],
+// [CMD.SEARCH_BACKWARD, () =&gt; p_leoUI.interactiveSearch(true, false, false)],
+// [CMD.RE_SEARCH, () =&gt; p_leoUI.interactiveSearch(false, true, false)],
+// [CMD.RE_SEARCH_BACKWARD, () =&gt; p_leoUI.interactiveSearch(true, true, false)],
+// [CMD.WORD_SEARCH, () =&gt; p_leoUI.interactiveSearch(false, false, true)],
+// [CMD.WORD_SEARCH_BACKWARD, () =&gt; p_leoUI.interactiveSearch(true, false, true)],
+
+[CMD.START_SEARCH, () =&gt; p_leoUI.command(LEOCMD.START_SEARCH, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.SEARCH_BACKWARD, () =&gt; p_leoUI.command(LEOCMD.SEARCH_BACKWARD, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.RE_SEARCH, () =&gt; p_leoUI.command(LEOCMD.RE_SEARCH, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.RE_SEARCH_BACKWARD, () =&gt; p_leoUI.command(LEOCMD.RE_SEARCH_BACKWARD, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.WORD_SEARCH, () =&gt; p_leoUI.command(LEOCMD.WORD_SEARCH, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.WORD_SEARCH_BACKWARD, () =&gt; p_leoUI.command(LEOCMD.WORD_SEARCH_BACKWARD, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
 [CMD.FIND_ALL, () =&gt; p_leoUI.findAll(false)],
 [CMD.FIND_NEXT, () =&gt; p_leoUI.find(false, false)],

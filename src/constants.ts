@@ -682,11 +682,11 @@ export class Constants {
         WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
 
         // * More Commands
-        //  TODO
         // GOTO_GLOBAL_LINE: "!goto_global_line",
-        // TAG_CHILDREN: "!tag_children",
         SET_UA: 'set-ua',
-        // START_SEARCH: "!start_search",
+
+        // * Search operations
+        START_SEARCH: "start-search",
         // FIND_ALL: "!find_all",
         // FIND_NEXT: "!find_next",
         // FIND_PREVIOUS: "!find_previous",
@@ -695,6 +695,17 @@ export class Constants {
         // REPLACE: "!replace",
         // REPLACE_THEN_FIND: "!replace_then_find",
         // REPLACE_ALL: "!replace_all",
+
+        SEARCH_BACKWARD: "search-backward",
+        RE_SEARCH: "re-search",
+        RE_SEARCH_BACKWARD: "re-search-backward",
+        WORD_SEARCH: "word-search",
+        WORD_SEARCH_BACKWARD: "word-search-backward",
+
+        // TAG_NODE
+        // TAG_CHILDREN: "!tag_children",
+        // REMOVE_TAG
+        // REMOVE_TAGS
 
         // * Undo Operations
         UNDO: "undo",
@@ -846,15 +857,15 @@ export class Constants {
         'find-next': Constants.COMMANDS.FIND_NEXT,
         'find-prev': Constants.COMMANDS.FIND_PREVIOUS,
 
-        'start-search': Constants.COMMANDS.START_SEARCH,
-        'search-forward': Constants.COMMANDS.START_SEARCH,
-        'search-backward': Constants.COMMANDS.SEARCH_BACKWARD,
-        're-search': Constants.COMMANDS.RE_SEARCH,
-        're-search-forward': Constants.COMMANDS.RE_SEARCH,
-        're-search-backward': Constants.COMMANDS.RE_SEARCH_BACKWARD,
-        'word-search': Constants.COMMANDS.WORD_SEARCH,
-        'word-search-forward': Constants.COMMANDS.WORD_SEARCH,
-        'word-search-backward': Constants.COMMANDS.WORD_SEARCH_BACKWARD,
+        // 'start-search': Constants.COMMANDS.START_SEARCH,
+        // 'search-forward': Constants.COMMANDS.START_SEARCH,
+        // 'search-backward': Constants.COMMANDS.SEARCH_BACKWARD,
+        // 're-search': Constants.COMMANDS.RE_SEARCH,
+        // 're-search-forward': Constants.COMMANDS.RE_SEARCH,
+        // 're-search-backward': Constants.COMMANDS.RE_SEARCH_BACKWARD,
+        // 'word-search': Constants.COMMANDS.WORD_SEARCH,
+        // 'word-search-forward': Constants.COMMANDS.WORD_SEARCH,
+        // 'word-search-backward': Constants.COMMANDS.WORD_SEARCH_BACKWARD,
 
         // TODO - needed ? 
         // 'find-var': Constants.COMMANDS.FIND_VAR,

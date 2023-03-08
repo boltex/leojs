@@ -130,6 +130,15 @@ export class LeoGui {
     }
     //@+node:felix.20221120001229.10: *4* LeoGui.dialogs
     /**
+     * Run Leo's interactive search dialog.
+     */
+    public interactiveSearch(
+        p_backward: boolean, p_regex: boolean, p_word: boolean
+    ): any {
+        this.oops();
+    }
+    /**
+    /**
      * Create and run Leo's About Leo dialog.
      */
     public runAboutLeoDialog(
@@ -505,6 +514,12 @@ export class NullGui extends LeoGui {
         return;
     }
 
+    public interactiveSearch(
+        p_backward: boolean, p_regex: boolean, p_word: boolean
+    ): Promise<unknown> {
+        return Promise.resolve();
+    }
+
     public runAboutLeoDialog(
         c: Commands,
         version: string,
@@ -560,7 +575,7 @@ export class NullGui extends LeoGui {
     }
 
     public showLeoIDMessage(): void {
-        //
+        // pass
     }
 
     public setIdSetting(p_id: string): void { };

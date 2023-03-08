@@ -247,12 +247,19 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
 
         //  [CMD.INTERACTIVE_SEARCH_TAB, () => p_leoUI.interactiveSearchTab()], // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
 
-        [CMD.START_SEARCH, () => p_leoUI.startSearch()],
-        [CMD.SEARCH_BACKWARD, () => p_leoUI.interactiveSearch(true, false, false)],
-        [CMD.RE_SEARCH, () => p_leoUI.interactiveSearch(false, true, false)],
-        [CMD.RE_SEARCH_BACKWARD, () => p_leoUI.interactiveSearch(true, true, false)],
-        [CMD.WORD_SEARCH, () => p_leoUI.interactiveSearch(false, false, true)],
-        [CMD.WORD_SEARCH_BACKWARD, () => p_leoUI.interactiveSearch(true, false, true)],
+        // [CMD.START_SEARCH, () => p_leoUI.startSearch()],
+        // [CMD.SEARCH_BACKWARD, () => p_leoUI.interactiveSearch(true, false, false)],
+        // [CMD.RE_SEARCH, () => p_leoUI.interactiveSearch(false, true, false)],
+        // [CMD.RE_SEARCH_BACKWARD, () => p_leoUI.interactiveSearch(true, true, false)],
+        // [CMD.WORD_SEARCH, () => p_leoUI.interactiveSearch(false, false, true)],
+        // [CMD.WORD_SEARCH_BACKWARD, () => p_leoUI.interactiveSearch(true, false, true)],
+
+        [CMD.START_SEARCH, () => p_leoUI.command(LEOCMD.START_SEARCH, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.SEARCH_BACKWARD, () => p_leoUI.command(LEOCMD.SEARCH_BACKWARD, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.RE_SEARCH, () => p_leoUI.command(LEOCMD.RE_SEARCH, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.RE_SEARCH_BACKWARD, () => p_leoUI.command(LEOCMD.RE_SEARCH_BACKWARD, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.WORD_SEARCH, () => p_leoUI.command(LEOCMD.WORD_SEARCH, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.WORD_SEARCH_BACKWARD, () => p_leoUI.command(LEOCMD.WORD_SEARCH_BACKWARD, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
         [CMD.FIND_ALL, () => p_leoUI.findAll(false)],
         [CMD.FIND_NEXT, () => p_leoUI.find(false, false)],
