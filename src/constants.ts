@@ -705,13 +705,13 @@ export class Constants {
         // TAG_NODE
         // TAG_CHILDREN: "!tag_children",
         // REMOVE_TAG
-        // REMOVE_TAGS
+        // REMOVE_ALL_TAGS
 
         // * Undo Operations
         UNDO: "undo",
         REDO: "redo",
         // * Tree Building
-        EXECUTE_SCRIPT: "execute-script",
+        EXECUTE_SCRIPT: "execute-script", // TODO
         REFRESH_FROM_DISK: "TODO_REFRESH_FROM_DISK", // TODO
         REFRESH_FROM_DISK_PNODE: "TODO_REFRESH_FROM_DISK_PNODE", // TODO
         GIT_DIFF: "TODO_GIT_DIFF", // TODO
@@ -796,6 +796,7 @@ export class Constants {
 
     /**
      * * Overridden 'good' minibuffer commands
+     * TODO : TRY TO ELIMINATE THIS !!!
      */
     public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
         "tag-node": Constants.COMMANDS.TAG_NODE,

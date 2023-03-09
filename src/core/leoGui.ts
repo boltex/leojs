@@ -138,6 +138,36 @@ export class LeoGui {
         this.oops();
     }
     /**
+     * Run Leo's remove tag dialog.
+     */
+    public removeTag(): any {
+        this.oops();
+    }
+    /**
+     * Run Leo's tag dialog.
+     */
+    public tagNode(): any {
+        this.oops();
+    }
+    /**
+     * Run Leo's tag children dialog.
+     */
+    public tagChildren(): any {
+        this.oops();
+    }
+    /**
+     * Run Leo's findAll/replaceAll dialog.
+     */
+    public findAll(p_replace: boolean): any {
+        this.oops();
+    }
+    /**
+     * Run Leo's clone-find methods.
+     */
+    public cloneFind(p_marked: boolean, p_flat: boolean): any {
+        this.oops();
+    }
+    /**
     /**
      * Create and run Leo's About Leo dialog.
      */
@@ -519,7 +549,21 @@ export class NullGui extends LeoGui {
     ): Promise<unknown> {
         return Promise.resolve();
     }
-
+    public removeTag(): any {
+        return;
+    }
+    public tagNode(): any {
+        return;
+    }
+    public tagChildren(): any {
+        return;
+    }
+    public findAll(p_replace: boolean): Thenable<unknown> {
+        return Promise.resolve();
+    }
+    public cloneFind(p_marked: boolean, p_flat: boolean): Thenable<unknown> {
+        return Promise.resolve();
+    }
     public runAboutLeoDialog(
         c: Commands,
         version: string,

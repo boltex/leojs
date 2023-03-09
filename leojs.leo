@@ -520,6 +520,11 @@
 </v>
 </v>
 <v t="felix.20210102000055.1"><vh>Leo</vh>
+<v t="ekr.20140902032918.18591"><vh> About this file</vh>
+<v t="ekr.20140831085423.18639"><vh>About widgets and wrappers</vh></v>
+<v t="ekr.20140831085423.18630"><vh>Terminology</vh></v>
+<v t="ekr.20140831085423.18631"><vh>Official ivars</vh></v>
+</v>
 <v t="felix.20210102000100.1"><vh>Core classes</vh>
 <v t="felix.20211018202009.1"><vh>@file src/core/decorators.ts</vh></v>
 <v t="felix.20221109235435.1"><vh>@file src/core/findTabManager.ts</vh></v>
@@ -573,6 +578,85 @@
 </v>
 </vnodes>
 <tnodes>
+<t tx="ekr.20140831085423.18630">This outline contains all of Leo's core source code.
+
+Leo's code uses the following conventions throughout:
+
+c:  a commander.
+ch: a character.
+d:  a dict.
+f:  an open file.
+fn: a file name.
+g:  the leoGlobals module.
+i, j, k: indices into a string.
+p:  a Position.
+s:  a string.
+t:  a text widget.
+u:  an undoer.
+w:  a gui widget.
+v:  a Vnode
+z:  a local temp.
+
+In more limited contexts, the following conventions apply:
+
+si:     a g.ShortcutInfo object.
+ks:     a g.KeyStroke object
+stroke: a KeyStroke object.
+
+btw:    leoFrame.BaseTextWrapper
+stw:    leoFrame.StringTextWrapper
+
+bqtw:   qt_text.BaseQTextWrapper
+lqtb:   qt_text.LeoQTextBrowser
+qhlw:   qt_text.QHeadlineWrapper
+qmbw:   qt_text.QMinibufferWrapper
+qlew:   qt_text.QLineEditWrapper
+qsciw:  qt_text.QScintiallaWrapper
+qtew:   qt_text.QTextEditWrapper</t>
+<t tx="ekr.20140831085423.18631">The following 'official' ivars will always exist:
+
+c.frame                 The frame containing the log,body,tree, etc.
+c.frame.body            The body pane.
+c.frame.body.widget     The gui widget for the body pane.
+c.frame.body.wrapper    The high level interface for the body widget.
+c.frame.iconBar         The icon bar.
+c.frame.log             The log pane.
+c.frame.log.widget      The gui widget for the log pane.
+c.frame.log.wrapper     The high-level inteface for the log pane.
+c.frame.tree            The tree pane.
+
+The following were official ivars that no longer exist:
+
+c.frame.body.bodyCtrl   Use c.frame.body.wrapper instead.
+c.frame.log.logCtrl     Use c.frame.log.wrapper instead.
+</t>
+<t tx="ekr.20140831085423.18639">Here is what you *must know* to understand Leo's core:
+
+1. A **widget** is an actual Qt widget.
+
+Leo's core seldom accesses widgets directly.  Instead...
+
+2. A **wrapper class** defines a standard api that hides the details
+   of the underlying gui **text** widgets.
+
+Leo's core uses this api almost exclusively. That is, Leo's core code treats wrappers *as if* they were only text widgets there are!
+
+There is, however, a back door for (hopefully rare!) special cases. All wrapper classes define an official ``widget`` ivar, so core or plugin code can gain access to the real Qt widget using wrapper.widget. Searching for wrapper.widget will find all gui-dependent snippets of code in Leo's core.
+</t>
+<t tx="ekr.20140902032918.18591">@language rest
+@wrap
+
+Leo uses a model/view/controller architecture.
+
+- Controller: The Commands class and its helpers in leoCommands.py and leoEditCommands.py.
+
+- Model: The VNode and Position classes in leoNodes.py.
+
+- View: The gui-independent base classes are in the node "Gui Base Classes". The Qt-Specific subclasses are in the node "Qt gui".
+
+**Important**: The general organization of these classes have changed hardly at all in Leo's 20+ year history.  The reason is that what each class does is fairly obvious.  How the gets the job done may have changed drastically, but *that's an internal implementation detail of the class itself*.  This is the crucial design principle that allows Leo's code to remain stable.  *Classes do not know or meddle in the internal details of other classes*.  As a result, nobody, including EKR, needs to remember internal details.
+
+</t>
 <t tx="ekr.20201209145256.1"></t>
 <t tx="ekr.20201209145358.1"></t>
 <t tx="felix.20200719025231.24">/**
@@ -1720,13 +1804,13 @@ public static LEO_COMMANDS = {
     // TAG_NODE
     // TAG_CHILDREN: "!tag_children",
     // REMOVE_TAG
-    // REMOVE_TAGS
+    // REMOVE_ALL_TAGS
 
     // * Undo Operations
     UNDO: "undo",
     REDO: "redo",
     // * Tree Building
-    EXECUTE_SCRIPT: "execute-script",
+    EXECUTE_SCRIPT: "execute-script", // TODO
     REFRESH_FROM_DISK: "TODO_REFRESH_FROM_DISK", // TODO
     REFRESH_FROM_DISK_PNODE: "TODO_REFRESH_FROM_DISK_PNODE", // TODO
     GIT_DIFF: "TODO_GIT_DIFF", // TODO
@@ -3837,7 +3921,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "dc450dc",
+  "gitBranch": "leoFind",
+  "gitDate": "2023-03-07 22:42:45 -0500"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -8357,6 +8444,7 @@ private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
 </t>
 <t tx="felix.20211208011642.1">/**
  * * Overridden 'good' minibuffer commands
+ * TODO : TRY TO ELIMINATE THIS !!!
  */
 public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
     "tag-node": Constants.COMMANDS.TAG_NODE,
