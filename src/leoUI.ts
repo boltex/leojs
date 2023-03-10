@@ -3779,7 +3779,7 @@ export class LeoUI extends NullGui {
      * @param p_thenFind
      * @returns Promise that resolves when the "launch refresh" is started
      */
-    public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise<unknown> {
+    public async replace(p_fromOutline?: boolean, p_thenFind?: boolean): Promise<unknown> {
 
         await this.triggerBodySave(true);
         let found;
@@ -4046,7 +4046,7 @@ export class LeoUI extends NullGui {
      * * Find / Replace All
      * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
      */
-    public findAll(p_replace: boolean): Thenable<unknown> {
+    public findAll(p_replace?: boolean): Thenable<unknown> {
 
         let w_searchString: string = this._lastSettingsUsed!.findText;
         let w_replaceString: string = this._lastSettingsUsed!.replaceText;

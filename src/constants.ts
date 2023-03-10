@@ -687,14 +687,14 @@ export class Constants {
 
         // * Search operations
         START_SEARCH: "start-search",
-        // FIND_ALL: "!find_all",
+        FIND_ALL: "find-all",
         // FIND_NEXT: "!find_next",
         // FIND_PREVIOUS: "!find_previous",
-        // FIND_VAR: "!find_var",
-        // FIND_DEF: "!find_def",
+        // FIND_VAR: "find-var",
+        // FIND_DEF: "find-def",
         // REPLACE: "!replace",
         // REPLACE_THEN_FIND: "!replace_then_find",
-        // REPLACE_ALL: "!replace_all",
+        REPLACE_ALL: "change-all",
 
         SEARCH_BACKWARD: "search-backward",
         RE_SEARCH: "re-search",
@@ -702,10 +702,10 @@ export class Constants {
         WORD_SEARCH: "word-search",
         WORD_SEARCH_BACKWARD: "word-search-backward",
 
-        // TAG_NODE
-        // TAG_CHILDREN: "!tag_children",
-        // REMOVE_TAG
-        // REMOVE_ALL_TAGS
+        TAG_NODE: "tag-node",
+        TAG_CHILDREN: "tag-children",
+        REMOVE_TAG: "remove-tag",
+        REMOVE_ALL_TAGS: "remove-all-tags",
 
         // * Undo Operations
         UNDO: "undo",
@@ -770,10 +770,13 @@ export class Constants {
         SORT_CHILDREN: "sort-children",
         SORT_SIBLINGS: "sort-siblings",
         // * Clone-find functionality
-        // CLONE_FIND_ALL: "CLONE_FIND_ALL", // cloneFind used instead
-        // CLONE_FIND_ALL_FLATTENED: "CLONE_FIND_ALL_FLATTENED", // cloneFind used instead
-        CLONE_FIND_MARKED: "cfam",
+
+        CLONE_FIND_ALL_FLATTENED: "cff",
+
         CLONE_FIND_FLATTENED_MARKED: "cffm",
+        CLONE_FIND_TAG: "cft",
+        CLONE_FIND_ALL: "cfa", // cloneFind used instead
+        CLONE_FIND_MARKED: "cfam",
         CLONE_FIND_PARENTS: "clone-find-parents",
     };
 
@@ -799,14 +802,14 @@ export class Constants {
      * TODO : TRY TO ELIMINATE THIS !!!
      */
     public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
-        "tag-node": Constants.COMMANDS.TAG_NODE,
-        "tag-children": Constants.COMMANDS.TAG_CHILDREN,
-        "clone-find-tag": Constants.COMMANDS.CLONE_FIND_TAG,
+        // "tag-node": Constants.COMMANDS.TAG_NODE,
+        // "tag-children": Constants.COMMANDS.TAG_CHILDREN,
+        // "clone-find-tag": Constants.COMMANDS.CLONE_FIND_TAG,
         // "import-file": Constants.COMMANDS.IMPORT_ANY_FILE,
         // "redo": Constants.COMMANDS.REDO,
         // "undo": Constants.COMMANDS.UNDO,
-        "clone-find-all": Constants.COMMANDS.CLONE_FIND_ALL,
-        "clone-find-all-flattened": Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
+        // "clone-find-all": Constants.COMMANDS.CLONE_FIND_ALL,
+        // "clone-find-all-flattened": Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
 
         // 'import-MORE-files': Constants.COMMANDS.IMPORT_ANY_FILE,
         // 'import-free-mind-files': Constants.COMMANDS.IMPORT_ANY_FILE,
@@ -842,21 +845,18 @@ export class Constants {
 
         // 'clone-marked-nodes': Constants.COMMANDS.CLONE_MARKED_NODES,  // No prompt needed
 
-        'cfa': Constants.COMMANDS.CLONE_FIND_ALL,
+        // 'cfa': Constants.COMMANDS.CLONE_FIND_ALL,
         // 'cfam': Constants.COMMANDS.CLONE_FIND_MARKED, // No prompt needed
-        'cff': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
+        // 'cff': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
         // 'cffm': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED, // No prompt needed
-        'cft': Constants.COMMANDS.CLONE_FIND_TAG,
+        // 'cft': Constants.COMMANDS.CLONE_FIND_TAG,
 
         // 'git-diff': Constants.COMMANDS.GIT_DIFF,
         // 'gd': Constants.COMMANDS.GIT_DIFF,
 
-        'find-clone-all': Constants.COMMANDS.CLONE_FIND_ALL,
-        'find-clone-all-flattened': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
-        'find-clone-tag': Constants.COMMANDS.CLONE_FIND_TAG,
-        'find-all': Constants.COMMANDS.FIND_ALL,
-        'find-next': Constants.COMMANDS.FIND_NEXT,
-        'find-prev': Constants.COMMANDS.FIND_PREVIOUS,
+        // 'find-clone-all': Constants.COMMANDS.CLONE_FIND_ALL,
+        // 'find-clone-all-flattened': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
+        // 'find-clone-tag': Constants.COMMANDS.CLONE_FIND_TAG,
 
         // 'start-search': Constants.COMMANDS.START_SEARCH,
         // 'search-forward': Constants.COMMANDS.START_SEARCH,
@@ -869,14 +869,18 @@ export class Constants {
         // 'word-search-backward': Constants.COMMANDS.WORD_SEARCH_BACKWARD,
 
         // TODO - needed ? 
-        // 'find-var': Constants.COMMANDS.FIND_VAR,
-        // 'find-def': Constants.COMMANDS.FIND_DEF,
+        'find-var': Constants.COMMANDS.FIND_VAR,
+        'find-def': Constants.COMMANDS.FIND_DEF,
 
-        'replace': Constants.COMMANDS.REPLACE,
-        'replace-all': Constants.COMMANDS.REPLACE_ALL,
-        'change-all': Constants.COMMANDS.REPLACE_ALL,
-        'change-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
-        'replace-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
+        // 'find-all': Constants.COMMANDS.FIND_ALL,
+        // 'find-next': Constants.COMMANDS.FIND_NEXT,
+        // 'find-prev': Constants.COMMANDS.FIND_PREVIOUS,
+
+        // 'replace': Constants.COMMANDS.REPLACE,
+        // 'replace-all': Constants.COMMANDS.REPLACE_ALL,
+        // 'change-all': Constants.COMMANDS.REPLACE_ALL,
+        // 'change-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
+        // 'replace-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
 
         'toggle-find-ignore-case-option': Constants.COMMANDS.TOGGLE_FIND_IGNORE_CASE_OPTION,
         'toggle-find-in-body-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_BODY_OPTION,
@@ -885,10 +889,6 @@ export class Constants {
         'toggle-find-mark-finds-option': Constants.COMMANDS.TOGGLE_FIND_MARK_FINDS_OPTION,
         'toggle-find-regex-option': Constants.COMMANDS.TOGGLE_FIND_REGEXP_OPTION,
         'toggle-find-word-option': Constants.COMMANDS.TOGGLE_FIND_WORD_OPTION,
-
-        'goto-next-history-node': Constants.COMMANDS.PREV_NODE_FO,
-        'goto-prev-history-node': Constants.COMMANDS.NEXT_NODE_FO,
-
 
     };
 

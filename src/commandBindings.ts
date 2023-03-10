@@ -261,32 +261,39 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.WORD_SEARCH, () => p_leoUI.command(LEOCMD.WORD_SEARCH, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
         [CMD.WORD_SEARCH_BACKWARD, () => p_leoUI.command(LEOCMD.WORD_SEARCH_BACKWARD, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
-        [CMD.FIND_ALL, () => p_leoUI.findAll(false)],
+        [CMD.FIND_ALL, () => p_leoUI.command(LEOCMD.FIND_ALL, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
         [CMD.FIND_NEXT, () => p_leoUI.find(false, false)],
         [CMD.FIND_NEXT_FO, () => p_leoUI.find(true, false)],
         [CMD.FIND_PREVIOUS, () => p_leoUI.find(false, true)],
         [CMD.FIND_PREVIOUS_FO, () => p_leoUI.find(true, true)],
+
         [CMD.FIND_VAR, () => p_leoUI.findSymbol(false)],
         [CMD.FIND_DEF, () => p_leoUI.findSymbol(true)],
         [CMD.REPLACE, () => p_leoUI.replace(false, false)],
         [CMD.REPLACE_FO, () => p_leoUI.replace(true, false)],
         [CMD.REPLACE_THEN_FIND, () => p_leoUI.replace(false, true)],
         [CMD.REPLACE_THEN_FIND_FO, () => p_leoUI.replace(true, true)],
-        [CMD.REPLACE_ALL, () => p_leoUI.findAll(true)],
+        [CMD.REPLACE_ALL, () => p_leoUI.command(LEOCMD.REPLACE_ALL, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+
         [CMD.GOTO_GLOBAL_LINE, () => p_leoUI.gotoGlobalLine()],
 
-        [CMD.TAG_CHILDREN, () => p_leoUI.tagChildren()],
-        [CMD.TAG_NODE, (p_node?: Position) => p_leoUI.tagNode(p_node)],
-        [CMD.REMOVE_TAG, (p_node?: Position) => p_leoUI.removeTag(p_node)],
-        [CMD.REMOVE_TAGS, (p_node?: Position) => p_leoUI.removeTags(p_node)],
+        [CMD.TAG_CHILDREN, () => p_leoUI.command(LEOCMD.TAG_CHILDREN, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.TAG_NODE, (p_node?: Position) => p_leoUI.tagNode(p_node)], // with para
+        [CMD.REMOVE_TAG, (p_node?: Position) => p_leoUI.removeTag(p_node)], // with para
+        [CMD.REMOVE_TAGS, (p_node?: Position) => p_leoUI.removeTags(p_node)], // with para
 
-        [CMD.CLONE_FIND_TAG, () => p_leoUI.cloneFindTag()],
+        [CMD.CLONE_FIND_TAG, () => p_leoUI.command(LEOCMD.CLONE_FIND_TAG, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
-        [CMD.CLONE_FIND_ALL, () => p_leoUI.cloneFind(false, false)],
-        [CMD.CLONE_FIND_ALL_FLATTENED, () => p_leoUI.cloneFind(false, true)],
         [CMD.CLONE_FIND_PARENTS, () => p_leoUI.command(LEOCMD.CLONE_FIND_PARENTS, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
-        [CMD.CLONE_FIND_MARKED, () => p_leoUI.cloneFind(true, false)],
-        [CMD.CLONE_FIND_FLATTENED_MARKED, () => p_leoUI.cloneFind(true, true)],
+
+        // [CMD.CLONE_FIND_ALL, () => p_leoUI.cloneFind(false, false)],
+        // [CMD.CLONE_FIND_ALL_FLATTENED, () => p_leoUI.cloneFind(false, true)],
+        // [CMD.CLONE_FIND_MARKED, () => p_leoUI.cloneFind(true, false)],
+        // [CMD.CLONE_FIND_FLATTENED_MARKED, () => p_leoUI.cloneFind(true, true)],
+        [CMD.CLONE_FIND_ALL, () => p_leoUI.command(LEOCMD.CLONE_FIND_ALL, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.CLONE_FIND_ALL_FLATTENED, () => p_leoUI.command(LEOCMD.CLONE_FIND_ALL_FLATTENED, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.CLONE_FIND_MARKED, () => p_leoUI.command(LEOCMD.CLONE_FIND_MARKED, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.CLONE_FIND_FLATTENED_MARKED, () => p_leoUI.command(LEOCMD.CLONE_FIND_FLATTENED_MARKED, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
         [CMD.SET_FIND_EVERYWHERE_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.ENTIRE_OUTLINE)],
         [CMD.SET_FIND_NODE_ONLY_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.NODE_ONLY)],

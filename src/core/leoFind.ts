@@ -446,11 +446,11 @@ export class LeoFind {
     @cmd('replace-then-find', 'Handle the replace-then-find command.')
     @cmd('change-then-find', 'Handle the replace-then-find command.')
     public change_then_find(): void {
-
-        // Settings...
-        this.init_in_headline();
-        const settings = this.ftm.get_settings();
-        this.do_change_then_find(settings);
+        g.app.gui.replace(false, true);
+        // // Settings...
+        // this.init_in_headline();
+        // const settings = this.ftm.get_settings();
+        // this.do_change_then_find(settings);
     }
     //@+node:felix.20221013234514.3: *5* find.do_change_then_find
     /**
@@ -915,29 +915,28 @@ export class LeoFind {
     //@+node:felix.20221013234514.14: *4* find.find-next, find-prev & do_find_*
     @cmd('find-next', 'The find-next command.')
     public find_next(): void {
-
-        // Settings...
-        this.reverse = false;
-        this.init_in_headline();  // Do this *before* creating the settings.
-        const settings = this.ftm.get_settings();
-        // Do the command!
-        this.do_find_next(settings);
+        g.app.gui.find(false, false);
+        // // Settings...
+        // this.reverse = false;
+        // this.init_in_headline();  // Do this *before* creating the settings.
+        // const settings = this.ftm.get_settings();
+        // // Do the command!
+        // this.do_find_next(settings);
     }
     @cmd('find-prev', 'Handle F2 (find-previous)')
     public find_prev(): void {
-
-        // Settings...
-        this.init_in_headline();  // Do this *before* creating the settings.
-        const settings = this.ftm.get_settings();
-        // Do the command!
-        this.do_find_prev(settings);
+        g.app.gui.find(false, true);
+        // // Settings...
+        // this.init_in_headline();  // Do this *before* creating the settings.
+        // const settings = this.ftm.get_settings();
+        // // Do the command!
+        // this.do_find_prev(settings);
     }
     //@+node:felix.20221013234514.15: *5* find.do_find_next & do_find_prev
     /**
      * Find the previous instance of this.find_text.
      */
     public do_find_prev(settings: ISettings): [Position | undefined, number | undefined, number | undefined] {
-
         this.request_reverse = true;
         return this.do_find_next(settings);
     }
@@ -1080,11 +1079,12 @@ export class LeoFind {
     @cmd('replace', 'Replace the selected text with the replacement text.')
     @cmd('change', 'Replace the selected text with the replacement text.')
     public change(): void {
-        const p = this.c.p;
-        if (this.check_args('replace')) {
-            this.init_in_headline();
-            this.change_selection(p);
-        }
+        g.app.gui.replace(false, false);
+        // const p = this.c.p;
+        // if (this.check_args('replace')) {
+        //     this.init_in_headline();
+        //     this.change_selection(p);
+        // }
     }
 
     //@+node:felix.20221013234514.21: *4* find.set-find-*
@@ -1240,8 +1240,7 @@ export class LeoFind {
     @cmd('change-all', 'Replace all instances of the search string with the replacement string.')
     @cmd('replace-all', 'Replace all instances of the search string with the replacement string.')
     public interactive_change_all(): void {
-        // TODO : Only have gui for dialog, move implementation here.
-        g.app.gui.findAll(true);
+        g.app.gui.findAll(true); // TODO : Only have gui for dialog, move implementation here.
     }
     // def interactive_change_all(self, event: Event=None) -> None:  # pragma: no cover (interactive)
     //     """Replace all instances of the search string with the replacement string."""
@@ -1569,8 +1568,7 @@ export class LeoFind {
         'The list is *not* flattened: clones appear only once in the' +
         'descendants of the organizer node.')
     public interactive_clone_find_all(): void {
-        // TODO : Only have gui for dialog, move implementation here.
-        g.app.gui.cloneFind(false, false);
+        g.app.gui.cloneFind(false, false); // TODO : Only have gui for dialog, move implementation here.
     }
 
     // def interactive_clone_find_all(self,
@@ -1650,8 +1648,7 @@ export class LeoFind {
         'of the organizer node, even if the clone also is a descendant of' +
         'another cloned node.')
     public interactive_cff(): void {
-        // TODO : Only have gui for dialog, move implementation here.
-        console.log('interactive_cff overridden in the UI client.');
+        g.app.gui.cloneFind(false, true); // TODO : Only have gui for dialog, move implementation here.
     }
     // def interactive_cff(self, event: Event=None, preloaded: bool=False) -> None:  # pragma: no cover (interactive)
     //     """
@@ -1728,8 +1725,7 @@ export class LeoFind {
         'direct child of the organizer node, even if the clone also is a' +
         'descendant of another cloned node.\n')
     public interactive_clone_find_tag(): void {
-        console.log('interactive_clone_find_tag overriden in the UI client.');
-        // TODO : Only have gui for dialog, move implementation here.
+        g.app.gui.cloneFindTag(); // TODO : Only have gui for dialog, move implementation here.
     }
     // def interactive_clone_find_tag(self, event: Event=None) -> None:  # pragma: no cover (interactive)
     //     """
@@ -1826,8 +1822,8 @@ export class LeoFind {
         'search string.'
     )
     public interactive_find_all(): void {
-        // TODO : Only have gui for dialog, move implementation here.
-        console.log('interactive_find_all overriden in the UI client.');
+        g.app.gui.findAll(); // TODO : Only have gui for dialog, move implementation here.
+
     }
     // def interactive_find_all(self, event: Event=None) -> None:  # pragma: no cover (interactive)
     //     """
@@ -2342,8 +2338,7 @@ export class LeoFind {
     //@+node:felix.20230120221726.1: *4* find.tag-node
     @cmd('tag-node', 'Prompt for a tag for this node')
     public interactive_tag_node(): void {
-        // TODO : Only have gui for dialog, move implementation here.
-        g.app.gui.tagNode();
+        g.app.gui.tagNode(); // TODO : Only have gui for dialog, move implementation here.
     }
     //@+node:felix.20230308231502.1: *4* find.remove-tag
     @cmd('remove-tag', 'Prompt for a tag to remove on selected node')

@@ -158,13 +158,37 @@ export class LeoGui {
     /**
      * Run Leo's findAll/replaceAll dialog.
      */
-    public findAll(p_replace: boolean): any {
+    public findAll(p_replace?: boolean): any {
         this.oops();
     }
     /**
      * Run Leo's clone-find methods.
      */
     public cloneFind(p_marked: boolean, p_flat: boolean): any {
+        this.oops();
+    }
+    /**
+     * Run Leo's clone-find-tag method.
+     */
+    public cloneFindTag(): any {
+        this.oops();
+    }
+    /**
+     * Run Leo's find method.
+     */
+    public find(p_fromOutline: boolean, p_reverse: boolean): any {
+        this.oops();
+    }
+    /**
+     * Run Leo's replace method.
+     */
+    public replace(p_fromOutline?: boolean, p_thenFind?: boolean): any {
+        this.oops();
+    }
+    /**
+     * Run Leo's findDef and findSymbol methods.
+     */
+    public findSymbol(p_def: boolean) {
         this.oops();
     }
     /**
@@ -558,11 +582,14 @@ export class NullGui extends LeoGui {
     public tagChildren(): any {
         return;
     }
-    public findAll(p_replace: boolean): Thenable<unknown> {
+    public findAll(p_replace?: boolean): Thenable<unknown> {
         return Promise.resolve();
     }
     public cloneFind(p_marked: boolean, p_flat: boolean): Thenable<unknown> {
         return Promise.resolve();
+    }
+    public cloneFindtag(): void {
+        // pass
     }
     public runAboutLeoDialog(
         c: Commands,
