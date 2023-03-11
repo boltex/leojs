@@ -690,11 +690,23 @@ export class Constants {
         FIND_ALL: "find-all",
         // FIND_NEXT: "!find_next",
         // FIND_PREVIOUS: "!find_previous",
-        // FIND_VAR: "find-var",
-        // FIND_DEF: "find-def",
+        FIND_VAR: "find-var",
+        FIND_DEF: "find-def",
         // REPLACE: "!replace",
         // REPLACE_THEN_FIND: "!replace_then_find",
         REPLACE_ALL: "change-all",
+
+        SET_FIND_EVERYWHERE_OPTION: "set-find-everywhere",
+        SET_FIND_NODE_ONLY_OPTION: "set-find-node-only",
+        SET_FIND_FILE_ONLY_OPTION: "set-find-file-only",
+        SET_FIND_SUBOUTLINE_ONLY_OPTION: "set-find-suboutline-only",
+        TOGGLE_FIND_IGNORE_CASE_OPTION: "toggle-find-ignore-case-option",
+        TOGGLE_FIND_MARK_CHANGES_OPTION: "toggle-find-mark-changes-option",
+        TOGGLE_FIND_MARK_FINDS_OPTION: "toggle-find-mark-finds-option",
+        TOGGLE_FIND_REGEXP_OPTION: "toggle-find-regex-option",
+        TOGGLE_FIND_WORD_OPTION: "toggle-find-word-option",
+        TOGGLE_FIND_SEARCH_BODY_OPTION: "toggle-find-in-body-option",
+        TOGGLE_FIND_SEARCH_HEADLINE_OPTION: "toggle-find-in-headline-option",
 
         SEARCH_BACKWARD: "search-backward",
         RE_SEARCH: "re-search",
@@ -869,8 +881,8 @@ export class Constants {
         // 'word-search-backward': Constants.COMMANDS.WORD_SEARCH_BACKWARD,
 
         // TODO - needed ? 
-        'find-var': Constants.COMMANDS.FIND_VAR,
-        'find-def': Constants.COMMANDS.FIND_DEF,
+        // 'find-var': Constants.COMMANDS.FIND_VAR,
+        // 'find-def': Constants.COMMANDS.FIND_DEF,
 
         // 'find-all': Constants.COMMANDS.FIND_ALL,
         // 'find-next': Constants.COMMANDS.FIND_NEXT,
@@ -882,13 +894,13 @@ export class Constants {
         // 'change-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
         // 'replace-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
 
-        'toggle-find-ignore-case-option': Constants.COMMANDS.TOGGLE_FIND_IGNORE_CASE_OPTION,
-        'toggle-find-in-body-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_BODY_OPTION,
-        'toggle-find-in-headline-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_HEADLINE_OPTION,
-        'toggle-find-mark-changes-option': Constants.COMMANDS.TOGGLE_FIND_MARK_CHANGES_OPTION,
-        'toggle-find-mark-finds-option': Constants.COMMANDS.TOGGLE_FIND_MARK_FINDS_OPTION,
-        'toggle-find-regex-option': Constants.COMMANDS.TOGGLE_FIND_REGEXP_OPTION,
-        'toggle-find-word-option': Constants.COMMANDS.TOGGLE_FIND_WORD_OPTION,
+        // 'toggle-find-ignore-case-option': Constants.COMMANDS.TOGGLE_FIND_IGNORE_CASE_OPTION,
+        // 'toggle-find-in-body-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_BODY_OPTION,
+        // 'toggle-find-in-headline-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_HEADLINE_OPTION,
+        // 'toggle-find-mark-changes-option': Constants.COMMANDS.TOGGLE_FIND_MARK_CHANGES_OPTION,
+        // 'toggle-find-mark-finds-option': Constants.COMMANDS.TOGGLE_FIND_MARK_FINDS_OPTION,
+        // 'toggle-find-regex-option': Constants.COMMANDS.TOGGLE_FIND_REGEXP_OPTION,
+        // 'toggle-find-word-option': Constants.COMMANDS.TOGGLE_FIND_WORD_OPTION,
 
     };
 

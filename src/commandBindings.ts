@@ -262,18 +262,20 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.WORD_SEARCH_BACKWARD, () => p_leoUI.command(LEOCMD.WORD_SEARCH_BACKWARD, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
         [CMD.FIND_ALL, () => p_leoUI.command(LEOCMD.FIND_ALL, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.REPLACE_ALL, () => p_leoUI.command(LEOCMD.REPLACE_ALL, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+
         [CMD.FIND_NEXT, () => p_leoUI.find(false, false)],
         [CMD.FIND_NEXT_FO, () => p_leoUI.find(true, false)],
         [CMD.FIND_PREVIOUS, () => p_leoUI.find(false, true)],
         [CMD.FIND_PREVIOUS_FO, () => p_leoUI.find(true, true)],
 
-        [CMD.FIND_VAR, () => p_leoUI.findSymbol(false)],
-        [CMD.FIND_DEF, () => p_leoUI.findSymbol(true)],
+        [CMD.FIND_VAR, () => p_leoUI.command(LEOCMD.FIND_VAR, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.FIND_DEF, () => p_leoUI.command(LEOCMD.FIND_DEF, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+
         [CMD.REPLACE, () => p_leoUI.replace(false, false)],
         [CMD.REPLACE_FO, () => p_leoUI.replace(true, false)],
         [CMD.REPLACE_THEN_FIND, () => p_leoUI.replace(false, true)],
         [CMD.REPLACE_THEN_FIND_FO, () => p_leoUI.replace(true, true)],
-        [CMD.REPLACE_ALL, () => p_leoUI.command(LEOCMD.REPLACE_ALL, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
         [CMD.GOTO_GLOBAL_LINE, () => p_leoUI.gotoGlobalLine()],
 
@@ -295,18 +297,18 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.CLONE_FIND_MARKED, () => p_leoUI.command(LEOCMD.CLONE_FIND_MARKED, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
         [CMD.CLONE_FIND_FLATTENED_MARKED, () => p_leoUI.command(LEOCMD.CLONE_FIND_FLATTENED_MARKED, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
-        [CMD.SET_FIND_EVERYWHERE_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.ENTIRE_OUTLINE)],
-        [CMD.SET_FIND_NODE_ONLY_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.NODE_ONLY)],
-        [CMD.SET_FIND_FILE_ONLY_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.FILE_ONLY)],
-        [CMD.SET_FIND_SUBOUTLINE_ONLY_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SUBOUTLINE_ONLY)],
+        [CMD.SET_FIND_EVERYWHERE_OPTION, () => p_leoUI.command(LEOCMD.SET_FIND_EVERYWHERE_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.SET_FIND_NODE_ONLY_OPTION, () => p_leoUI.command(LEOCMD.SET_FIND_NODE_ONLY_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.SET_FIND_FILE_ONLY_OPTION, () => p_leoUI.command(LEOCMD.SET_FIND_FILE_ONLY_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.SET_FIND_SUBOUTLINE_ONLY_OPTION, () => p_leoUI.command(LEOCMD.SET_FIND_SUBOUTLINE_ONLY_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
-        [CMD.TOGGLE_FIND_IGNORE_CASE_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.IGNORE_CASE)],
-        [CMD.TOGGLE_FIND_MARK_CHANGES_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_CHANGES)],
-        [CMD.TOGGLE_FIND_MARK_FINDS_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_FINDS)],
-        [CMD.TOGGLE_FIND_REGEXP_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.REG_EXP)],
-        [CMD.TOGGLE_FIND_WORD_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.WHOLE_WORD)],
-        [CMD.TOGGLE_FIND_SEARCH_BODY_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SEARCH_BODY)],
-        [CMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, () => p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SEARCH_HEADLINE)],
+        [CMD.TOGGLE_FIND_IGNORE_CASE_OPTION, () => p_leoUI.command(LEOCMD.TOGGLE_FIND_IGNORE_CASE_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.TOGGLE_FIND_MARK_CHANGES_OPTION, () => p_leoUI.command(LEOCMD.TOGGLE_FIND_MARK_CHANGES_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.TOGGLE_FIND_MARK_FINDS_OPTION, () => p_leoUI.command(LEOCMD.TOGGLE_FIND_MARK_FINDS_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.TOGGLE_FIND_REGEXP_OPTION, () => p_leoUI.command(LEOCMD.TOGGLE_FIND_REGEXP_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.TOGGLE_FIND_WORD_OPTION, () => p_leoUI.command(LEOCMD.TOGGLE_FIND_WORD_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.TOGGLE_FIND_SEARCH_BODY_OPTION, () => p_leoUI.command(LEOCMD.TOGGLE_FIND_SEARCH_BODY_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+        [CMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, () => p_leoUI.command(LEOCMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
         [CMD.SET_ENABLE_PREVIEW, () => p_leoUI.config.setEnablePreview()],
         [CMD.CLEAR_CLOSE_EMPTY_GROUPS, () => p_leoUI.config.clearCloseEmptyGroups()],

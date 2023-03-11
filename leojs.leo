@@ -1415,26 +1415,31 @@ export function activate(p_context: vscode.ExtensionContext) {
 [CMD.MOVE_MARKED_NODES, () =&gt; p_leoUI.command(LEOCMD.MOVE_MARKED_NODES, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
 </t>
-<t tx="felix.20201214150149.17">[CMD.CLONE_FIND_TAG, () =&gt; p_leoUI.cloneFindTag()],
+<t tx="felix.20201214150149.17">[CMD.CLONE_FIND_TAG, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_TAG, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
-[CMD.CLONE_FIND_ALL, () =&gt; p_leoUI.cloneFind(false, false)],
-[CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; p_leoUI.cloneFind(false, true)],
 [CMD.CLONE_FIND_PARENTS, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_PARENTS, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
-[CMD.CLONE_FIND_MARKED, () =&gt; p_leoUI.cloneFind(true, false)],
-[CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; p_leoUI.cloneFind(true, true)],
 
-[CMD.SET_FIND_EVERYWHERE_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.ENTIRE_OUTLINE)],
-[CMD.SET_FIND_NODE_ONLY_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.NODE_ONLY)],
-[CMD.SET_FIND_FILE_ONLY_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.FILE_ONLY)],
-[CMD.SET_FIND_SUBOUTLINE_ONLY_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SUBOUTLINE_ONLY)],
+// [CMD.CLONE_FIND_ALL, () =&gt; p_leoUI.cloneFind(false, false)],
+// [CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; p_leoUI.cloneFind(false, true)],
+// [CMD.CLONE_FIND_MARKED, () =&gt; p_leoUI.cloneFind(true, false)],
+// [CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; p_leoUI.cloneFind(true, true)],
+[CMD.CLONE_FIND_ALL, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_ALL, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_ALL_FLATTENED, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.CLONE_FIND_MARKED, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_MARKED, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_FLATTENED_MARKED, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
-[CMD.TOGGLE_FIND_IGNORE_CASE_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.IGNORE_CASE)],
-[CMD.TOGGLE_FIND_MARK_CHANGES_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_CHANGES)],
-[CMD.TOGGLE_FIND_MARK_FINDS_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.MARK_FINDS)],
-[CMD.TOGGLE_FIND_REGEXP_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.REG_EXP)],
-[CMD.TOGGLE_FIND_WORD_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.WHOLE_WORD)],
-[CMD.TOGGLE_FIND_SEARCH_BODY_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SEARCH_BODY)],
-[CMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, () =&gt; p_leoUI.setSearchSetting(Constants.FIND_INPUTS_IDS.SEARCH_HEADLINE)],
+[CMD.SET_FIND_EVERYWHERE_OPTION, () =&gt; p_leoUI.command(LEOCMD.SET_FIND_EVERYWHERE_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.SET_FIND_NODE_ONLY_OPTION, () =&gt; p_leoUI.command(LEOCMD.SET_FIND_NODE_ONLY_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.SET_FIND_FILE_ONLY_OPTION, () =&gt; p_leoUI.command(LEOCMD.SET_FIND_FILE_ONLY_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.SET_FIND_SUBOUTLINE_ONLY_OPTION, () =&gt; p_leoUI.command(LEOCMD.SET_FIND_SUBOUTLINE_ONLY_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+
+[CMD.TOGGLE_FIND_IGNORE_CASE_OPTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_FIND_IGNORE_CASE_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.TOGGLE_FIND_MARK_CHANGES_OPTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_FIND_MARK_CHANGES_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.TOGGLE_FIND_MARK_FINDS_OPTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_FIND_MARK_FINDS_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.TOGGLE_FIND_REGEXP_OPTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_FIND_REGEXP_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.TOGGLE_FIND_WORD_OPTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_FIND_WORD_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.TOGGLE_FIND_SEARCH_BODY_OPTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_FIND_SEARCH_BODY_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, () =&gt; p_leoUI.command(LEOCMD.TOGGLE_FIND_SEARCH_HEADLINE_OPTION, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
 </t>
 <t tx="felix.20201214150149.2">@others
@@ -1786,14 +1791,26 @@ public static LEO_COMMANDS = {
 
     // * Search operations
     START_SEARCH: "start-search",
-    // FIND_ALL: "!find_all",
+    FIND_ALL: "find-all",
     // FIND_NEXT: "!find_next",
     // FIND_PREVIOUS: "!find_previous",
-    // FIND_VAR: "!find_var",
-    // FIND_DEF: "!find_def",
+    FIND_VAR: "find-var",
+    FIND_DEF: "find-def",
     // REPLACE: "!replace",
     // REPLACE_THEN_FIND: "!replace_then_find",
-    // REPLACE_ALL: "!replace_all",
+    REPLACE_ALL: "change-all",
+
+    SET_FIND_EVERYWHERE_OPTION: "set-find-everywhere",
+    SET_FIND_NODE_ONLY_OPTION: "set-find-node-only",
+    SET_FIND_FILE_ONLY_OPTION: "set-find-file-only",
+    SET_FIND_SUBOUTLINE_ONLY_OPTION: "set-find-suboutline-only",
+    TOGGLE_FIND_IGNORE_CASE_OPTION: "toggle-find-ignore-case-option",
+    TOGGLE_FIND_MARK_CHANGES_OPTION: "toggle-find-mark-changes-option",
+    TOGGLE_FIND_MARK_FINDS_OPTION: "toggle-find-mark-finds-option",
+    TOGGLE_FIND_REGEXP_OPTION: "toggle-find-regex-option",
+    TOGGLE_FIND_WORD_OPTION: "toggle-find-word-option",
+    TOGGLE_FIND_SEARCH_BODY_OPTION: "toggle-find-in-body-option",
+    TOGGLE_FIND_SEARCH_HEADLINE_OPTION: "toggle-find-in-headline-option",
 
     SEARCH_BACKWARD: "search-backward",
     RE_SEARCH: "re-search",
@@ -1801,10 +1818,10 @@ public static LEO_COMMANDS = {
     WORD_SEARCH: "word-search",
     WORD_SEARCH_BACKWARD: "word-search-backward",
 
-    // TAG_NODE
-    // TAG_CHILDREN: "!tag_children",
-    // REMOVE_TAG
-    // REMOVE_ALL_TAGS
+    TAG_NODE: "tag-node",
+    TAG_CHILDREN: "tag-children",
+    REMOVE_TAG: "remove-tag",
+    REMOVE_ALL_TAGS: "remove-all-tags",
 
     // * Undo Operations
     UNDO: "undo",
@@ -1869,10 +1886,13 @@ public static LEO_COMMANDS = {
     SORT_CHILDREN: "sort-children",
     SORT_SIBLINGS: "sort-siblings",
     // * Clone-find functionality
-    // CLONE_FIND_ALL: "CLONE_FIND_ALL", // cloneFind used instead
-    // CLONE_FIND_ALL_FLATTENED: "CLONE_FIND_ALL_FLATTENED", // cloneFind used instead
-    CLONE_FIND_MARKED: "cfam",
+
+    CLONE_FIND_ALL_FLATTENED: "cff",
+
     CLONE_FIND_FLATTENED_MARKED: "cffm",
+    CLONE_FIND_TAG: "cft",
+    CLONE_FIND_ALL: "cfa", // cloneFind used instead
+    CLONE_FIND_MARKED: "cfam",
     CLONE_FIND_PARENTS: "clone-find-parents",
 };
 
@@ -3921,10 +3941,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "dc450dc",
-  "gitBranch": "leoFind",
-  "gitDate": "2023-03-07 22:42:45 -0500"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -8447,14 +8464,14 @@ private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
  * TODO : TRY TO ELIMINATE THIS !!!
  */
 public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
-    "tag-node": Constants.COMMANDS.TAG_NODE,
-    "tag-children": Constants.COMMANDS.TAG_CHILDREN,
-    "clone-find-tag": Constants.COMMANDS.CLONE_FIND_TAG,
+    // "tag-node": Constants.COMMANDS.TAG_NODE,
+    // "tag-children": Constants.COMMANDS.TAG_CHILDREN,
+    // "clone-find-tag": Constants.COMMANDS.CLONE_FIND_TAG,
     // "import-file": Constants.COMMANDS.IMPORT_ANY_FILE,
     // "redo": Constants.COMMANDS.REDO,
     // "undo": Constants.COMMANDS.UNDO,
-    "clone-find-all": Constants.COMMANDS.CLONE_FIND_ALL,
-    "clone-find-all-flattened": Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
+    // "clone-find-all": Constants.COMMANDS.CLONE_FIND_ALL,
+    // "clone-find-all-flattened": Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
 
     // 'import-MORE-files': Constants.COMMANDS.IMPORT_ANY_FILE,
     // 'import-free-mind-files': Constants.COMMANDS.IMPORT_ANY_FILE,
@@ -8490,21 +8507,18 @@ public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
 
     // 'clone-marked-nodes': Constants.COMMANDS.CLONE_MARKED_NODES,  // No prompt needed
 
-    'cfa': Constants.COMMANDS.CLONE_FIND_ALL,
+    // 'cfa': Constants.COMMANDS.CLONE_FIND_ALL,
     // 'cfam': Constants.COMMANDS.CLONE_FIND_MARKED, // No prompt needed
-    'cff': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
+    // 'cff': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
     // 'cffm': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED, // No prompt needed
-    'cft': Constants.COMMANDS.CLONE_FIND_TAG,
+    // 'cft': Constants.COMMANDS.CLONE_FIND_TAG,
 
     // 'git-diff': Constants.COMMANDS.GIT_DIFF,
     // 'gd': Constants.COMMANDS.GIT_DIFF,
 
-    'find-clone-all': Constants.COMMANDS.CLONE_FIND_ALL,
-    'find-clone-all-flattened': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
-    'find-clone-tag': Constants.COMMANDS.CLONE_FIND_TAG,
-    'find-all': Constants.COMMANDS.FIND_ALL,
-    'find-next': Constants.COMMANDS.FIND_NEXT,
-    'find-prev': Constants.COMMANDS.FIND_PREVIOUS,
+    // 'find-clone-all': Constants.COMMANDS.CLONE_FIND_ALL,
+    // 'find-clone-all-flattened': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
+    // 'find-clone-tag': Constants.COMMANDS.CLONE_FIND_TAG,
 
     // 'start-search': Constants.COMMANDS.START_SEARCH,
     // 'search-forward': Constants.COMMANDS.START_SEARCH,
@@ -8520,23 +8534,23 @@ public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
     // 'find-var': Constants.COMMANDS.FIND_VAR,
     // 'find-def': Constants.COMMANDS.FIND_DEF,
 
-    'replace': Constants.COMMANDS.REPLACE,
-    'replace-all': Constants.COMMANDS.REPLACE_ALL,
-    'change-all': Constants.COMMANDS.REPLACE_ALL,
-    'change-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
-    'replace-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
+    // 'find-all': Constants.COMMANDS.FIND_ALL,
+    // 'find-next': Constants.COMMANDS.FIND_NEXT,
+    // 'find-prev': Constants.COMMANDS.FIND_PREVIOUS,
 
-    'toggle-find-ignore-case-option': Constants.COMMANDS.TOGGLE_FIND_IGNORE_CASE_OPTION,
-    'toggle-find-in-body-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_BODY_OPTION,
-    'toggle-find-in-headline-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_HEADLINE_OPTION,
-    'toggle-find-mark-changes-option': Constants.COMMANDS.TOGGLE_FIND_MARK_CHANGES_OPTION,
-    'toggle-find-mark-finds-option': Constants.COMMANDS.TOGGLE_FIND_MARK_FINDS_OPTION,
-    'toggle-find-regex-option': Constants.COMMANDS.TOGGLE_FIND_REGEXP_OPTION,
-    'toggle-find-word-option': Constants.COMMANDS.TOGGLE_FIND_WORD_OPTION,
+    // 'replace': Constants.COMMANDS.REPLACE,
+    // 'replace-all': Constants.COMMANDS.REPLACE_ALL,
+    // 'change-all': Constants.COMMANDS.REPLACE_ALL,
+    // 'change-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
+    // 'replace-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
 
-    'goto-next-history-node': Constants.COMMANDS.PREV_NODE_FO,
-    'goto-prev-history-node': Constants.COMMANDS.NEXT_NODE_FO,
-
+    // 'toggle-find-ignore-case-option': Constants.COMMANDS.TOGGLE_FIND_IGNORE_CASE_OPTION,
+    // 'toggle-find-in-body-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_BODY_OPTION,
+    // 'toggle-find-in-headline-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_HEADLINE_OPTION,
+    // 'toggle-find-mark-changes-option': Constants.COMMANDS.TOGGLE_FIND_MARK_CHANGES_OPTION,
+    // 'toggle-find-mark-finds-option': Constants.COMMANDS.TOGGLE_FIND_MARK_FINDS_OPTION,
+    // 'toggle-find-regex-option': Constants.COMMANDS.TOGGLE_FIND_REGEXP_OPTION,
+    // 'toggle-find-word-option': Constants.COMMANDS.TOGGLE_FIND_WORD_OPTION,
 
 };
 
@@ -9232,7 +9246,7 @@ public async gotoNavEntry(p_node: LeoGotoNode): Promise&lt;unknown&gt; {
  * * Find / Replace All
  * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
  */
-public findAll(p_replace: boolean): Thenable&lt;unknown&gt; {
+public findAll(p_replace?: boolean): Thenable&lt;unknown&gt; {
 
     let w_searchString: string = this._lastSettingsUsed!.findText;
     let w_replaceString: string = this._lastSettingsUsed!.replaceText;
@@ -10127,7 +10141,7 @@ public async findSymbol(p_def: boolean): Promise&lt;unknown&gt; {
  * @param p_thenFind
  * @returns Promise that resolves when the "launch refresh" is started
  */
-public async replace(p_fromOutline: boolean, p_thenFind: boolean): Promise&lt;unknown&gt; {
+public async replace(p_fromOutline?: boolean, p_thenFind?: boolean): Promise&lt;unknown&gt; {
 
     await this.triggerBodySave(true);
     let found;
@@ -12797,15 +12811,17 @@ public async minibufferHistory(): Promise&lt;unknown&gt; {
  * * Perform chosen minibuffer command
  */
 private async _doMinibufferCommand(p_picked: vscode.QuickPickItem | undefined): Promise&lt;unknown&gt; {
+    // TODO : REMOVE IF NOT NEEDED! 
     // * First check for overridden command: Exit by doing the overridden command
-    if (p_picked &amp;&amp;
-        p_picked.label &amp;&amp;
-        Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]) {
-        this._addToMinibufferHistory(p_picked.label);
-        return vscode.commands.executeCommand(
-            Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
-        );
-    }
+    // if (p_picked &amp;&amp;
+    //     p_picked.label &amp;&amp;
+    //     Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
+    // ) {
+    //     this._addToMinibufferHistory(p_picked.label);
+    //     return vscode.commands.executeCommand(
+    //         Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
+    //     );
+    // }
     // * Ok, it was really a minibuffer command
     if (p_picked &amp;&amp; p_picked.label) {
         // Setup refresh
@@ -14839,24 +14855,28 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 [CMD.WORD_SEARCH, () =&gt; p_leoUI.command(LEOCMD.WORD_SEARCH, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 [CMD.WORD_SEARCH_BACKWARD, () =&gt; p_leoUI.command(LEOCMD.WORD_SEARCH_BACKWARD, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 
-[CMD.FIND_ALL, () =&gt; p_leoUI.findAll(false)],
+[CMD.FIND_ALL, () =&gt; p_leoUI.command(LEOCMD.FIND_ALL, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.REPLACE_ALL, () =&gt; p_leoUI.command(LEOCMD.REPLACE_ALL, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+
 [CMD.FIND_NEXT, () =&gt; p_leoUI.find(false, false)],
 [CMD.FIND_NEXT_FO, () =&gt; p_leoUI.find(true, false)],
 [CMD.FIND_PREVIOUS, () =&gt; p_leoUI.find(false, true)],
 [CMD.FIND_PREVIOUS_FO, () =&gt; p_leoUI.find(true, true)],
-[CMD.FIND_VAR, () =&gt; p_leoUI.findSymbol(false)],
-[CMD.FIND_DEF, () =&gt; p_leoUI.findSymbol(true)],
+
+[CMD.FIND_VAR, () =&gt; p_leoUI.command(LEOCMD.FIND_VAR, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.FIND_DEF, () =&gt; p_leoUI.command(LEOCMD.FIND_DEF, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+
 [CMD.REPLACE, () =&gt; p_leoUI.replace(false, false)],
 [CMD.REPLACE_FO, () =&gt; p_leoUI.replace(true, false)],
 [CMD.REPLACE_THEN_FIND, () =&gt; p_leoUI.replace(false, true)],
 [CMD.REPLACE_THEN_FIND_FO, () =&gt; p_leoUI.replace(true, true)],
-[CMD.REPLACE_ALL, () =&gt; p_leoUI.findAll(true)],
+
 [CMD.GOTO_GLOBAL_LINE, () =&gt; p_leoUI.gotoGlobalLine()],
 
-[CMD.TAG_CHILDREN, () =&gt; p_leoUI.tagChildren()],
-[CMD.TAG_NODE, (p_node?: Position) =&gt; p_leoUI.tagNode(p_node)],
-[CMD.REMOVE_TAG, (p_node?: Position) =&gt; p_leoUI.removeTag(p_node)],
-[CMD.REMOVE_TAGS, (p_node?: Position) =&gt; p_leoUI.removeTags(p_node)],
+[CMD.TAG_CHILDREN, () =&gt; p_leoUI.command(LEOCMD.TAG_CHILDREN, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
+[CMD.TAG_NODE, (p_node?: Position) =&gt; p_leoUI.tagNode(p_node)], // with para
+[CMD.REMOVE_TAG, (p_node?: Position) =&gt; p_leoUI.removeTag(p_node)], // with para
+[CMD.REMOVE_TAGS, (p_node?: Position) =&gt; p_leoUI.removeTags(p_node)], // with para
 
 </t>
 <t tx="felix.20230122201158.1">/**

@@ -621,6 +621,10 @@ export class LeoFind {
     }
     //@+node:felix.20230212162733.1: *4* find.find-def, do_find_def & helpers
     @cmd('find-def', 'Find the class, def or assignment to var of the word under the cursor.')
+    public find_def_command(): Promise<unknown> {
+        return g.app.gui.findSymbol(true);
+    }
+
     public find_def(): [Position | undefined, number | undefined, number | undefined] {
         // re searches are more accurate, but not enough to be worth changing the user's settings.
         const ftm = this.ftm;
@@ -1040,6 +1044,10 @@ export class LeoFind {
     }
     //@+node:felix.20221013234514.18: *4* find.find-var & do_find_var
     @cmd('find-var', 'Find the var under the cursor.')
+    public find_var_command(): Promise<unknown> {
+        return g.app.gui.findSymbol(false);
+    }
+
     public find_var(): void {
 
         const ftm = this.ftm;
@@ -1090,23 +1098,23 @@ export class LeoFind {
     //@+node:felix.20221013234514.21: *4* find.set-find-*
     @cmd('set-find-everywhere', 'Set the \'Entire Outline\' radio button in the Find tab.')
     public set_find_scope_every_where(): void {
-
-        this.set_find_scope('entire-outline');
+        g.app.gui.setSearchSetting("entireOutline");
+        // this.set_find_scope('entire-outline');
     }
     @cmd('set-find-node-only', 'Set the \'Node Only\' radio button in the Find tab.')
     public set_find_scope_node_only(): void {
-
-        this.set_find_scope('node-only');
+        g.app.gui.setSearchSetting("nodeOnly");
+        // this.set_find_scope('node-only');
     }
     @cmd('set-find-file-only', 'Set the \'File Only\' radio button in the Find tab.')
     public set_find_scope_file_only(): void {
-
-        this.set_find_scope('file-only');
+        g.app.gui.setSearchSetting("fileOnly");
+        // this.set_find_scope('file-only');
     }
     @cmd('set-find-suboutline-only', 'Set the \'Suboutline Only\' radio button in the Find tab.')
     public set_find_scope_suboutline_only(): void {
-
-        this.set_find_scope('suboutline-only');
+        g.app.gui.setSearchSetting("subOutlineOnly");
+        // this.set_find_scope('suboutline-only');
     }
 
     /**
@@ -1187,7 +1195,7 @@ export class LeoFind {
 
     }
     //@+node:felix.20221013234514.24: *4* find.toggle-find-*
-    @cmd('toggle-find-collapses-nodes', 'Toggle the \'Collapse Nodes\' checkbox in the find tab.')
+    @cmd('toggle-find-collapses-nodes', 'Toggle the \'Collapse Nodes\' setting.')
     public toggle_find_collapses_nodes(): void {
         const c = this.c;
         c.sparse_find = !c.sparse_find;
@@ -1197,31 +1205,38 @@ export class LeoFind {
     }
     @cmd('toggle-find-ignore-case-option', 'Toggle the \'Ignore Case\' checkbox in the Find tab.')
     public toggle_ignore_case_option(): void {
-        this.toggle_option('ignore_case');
+        g.app.gui.setSearchSetting("ignoreCase");
+        // this.toggle_option('ignore_case');
     }
     @cmd('toggle-find-mark-changes-option', 'Toggle the \'Mark Changes\' checkbox in the Find tab.')
     public toggle_mark_changes_option(): void {
-        this.toggle_option('mark_changes');
+        g.app.gui.setSearchSetting("markChanges");
+        // this.toggle_option('mark_changes');
     }
     @cmd('toggle-find-mark-finds-option', 'Toggle the \'Mark Finds\' checkbox in the Find tab.')
     public toggle_mark_finds_option(): void {
-        return this.toggle_option('mark_finds');
+        g.app.gui.setSearchSetting("markFinds");
+        // this.toggle_option('mark_finds');
     }
     @cmd('toggle-find-regex-option', 'Toggle the \'Regexp\' checkbox in the Find tab.')
     public toggle_regex_option(): void {
-        this.toggle_option('pattern_match');
+        g.app.gui.setSearchSetting("regExp");
+        // this.toggle_option('pattern_match');
     }
     @cmd('toggle-find-in-body-option', 'Set the \'Search Body\' checkbox in the Find tab.')
     public toggle_search_body_option(): void {
-        return this.toggle_option('search_body');
+        g.app.gui.setSearchSetting("searchBody");
+        // this.toggle_option('search_body');
     }
     @cmd('toggle-find-in-headline-option', 'Toggle the \'Search Headline\' checkbox in the Find tab.')
     public toggle_search_headline_option(): void {
-        this.toggle_option('search_headline');
+        g.app.gui.setSearchSetting("searchHeadline");
+        // this.toggle_option('search_headline');
     }
     @cmd('toggle-find-word-option', 'Toggle the \'Whole Word\' checkbox in the Find tab.')
     public toggle_whole_word_option(): void {
-        this.toggle_option('whole_word');
+        g.app.gui.setSearchSetting("wholeWord");
+        // this.toggle_option('whole_word');
     }
     // # @cmd('toggle-find-wrap-around-option')
     // # public toggleWrapSearchOption(this, event):
