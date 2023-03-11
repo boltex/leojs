@@ -45,7 +45,6 @@
 <v t="felix.20201214151326.11"><vh>leo commands</vh></v>
 <v t="felix.20221009233703.1"><vh>keep-selection old position offsets</vh></v>
 <v t="felix.20220103222715.1"><vh>minibuffer overridden names</vh></v>
-<v t="felix.20211208011642.1"><vh>minibuffer overridden commands</vh></v>
 </v>
 </v>
 <v t="felix.20201208214322.1"><vh>@clean src/extension.ts</vh>
@@ -1419,10 +1418,6 @@ export function activate(p_context: vscode.ExtensionContext) {
 
 [CMD.CLONE_FIND_PARENTS, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_PARENTS, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
 
-// [CMD.CLONE_FIND_ALL, () =&gt; p_leoUI.cloneFind(false, false)],
-// [CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; p_leoUI.cloneFind(false, true)],
-// [CMD.CLONE_FIND_MARKED, () =&gt; p_leoUI.cloneFind(true, false)],
-// [CMD.CLONE_FIND_FLATTENED_MARKED, () =&gt; p_leoUI.cloneFind(true, true)],
 [CMD.CLONE_FIND_ALL, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_ALL, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 [CMD.CLONE_FIND_ALL_FLATTENED, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_ALL_FLATTENED, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 [CMD.CLONE_FIND_MARKED, () =&gt; p_leoUI.command(LEOCMD.CLONE_FIND_MARKED, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
@@ -8459,102 +8454,6 @@ private _insertAndSetHeadline(p_name?: string, p_asChild?: boolean): any {
 }
 
 </t>
-<t tx="felix.20211208011642.1">/**
- * * Overridden 'good' minibuffer commands
- * TODO : TRY TO ELIMINATE THIS !!!
- */
-public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
-    // "tag-node": Constants.COMMANDS.TAG_NODE,
-    // "tag-children": Constants.COMMANDS.TAG_CHILDREN,
-    // "clone-find-tag": Constants.COMMANDS.CLONE_FIND_TAG,
-    // "import-file": Constants.COMMANDS.IMPORT_ANY_FILE,
-    // "redo": Constants.COMMANDS.REDO,
-    // "undo": Constants.COMMANDS.UNDO,
-    // "clone-find-all": Constants.COMMANDS.CLONE_FIND_ALL,
-    // "clone-find-all-flattened": Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
-
-    // 'import-MORE-files': Constants.COMMANDS.IMPORT_ANY_FILE,
-    // 'import-free-mind-files': Constants.COMMANDS.IMPORT_ANY_FILE,
-    // 'import-jupyter-notebook': Constants.COMMANDS.IMPORT_ANY_FILE,
-    // 'import-legacy-external-files': Constants.COMMANDS.IMPORT_ANY_FILE,
-    // 'import-mind-jet-files': Constants.COMMANDS.IMPORT_ANY_FILE,
-    // 'import-tabbed-files': Constants.COMMANDS.IMPORT_ANY_FILE,
-    // 'import-todo-text-files': Constants.COMMANDS.IMPORT_ANY_FILE,
-    // 'import-zim-folder': Constants.COMMANDS.IMPORT_ANY_FILE,
-
-    // 'file-new': Constants.COMMANDS.NEW_FILE,
-    // 'file-open-by-name': Constants.COMMANDS.OPEN_FILE,
-    // 'new': Constants.COMMANDS.NEW_FILE,
-    // 'open-outline': Constants.COMMANDS.OPEN_FILE,
-    // 'file-save': Constants.COMMANDS.SAVE_FILE,
-    // 'file-save-as': Constants.COMMANDS.SAVE_AS_FILE,
-    // 'file-save-as-leojs': Constants.COMMANDS.SAVE_AS_LEOJS,
-    // 'file-save-as-unzipped': Constants.COMMANDS.SAVE_AS_FILE,
-    // 'file-save-by-name': Constants.COMMANDS.SAVE_AS_FILE,
-    // 'file-save-to': Constants.COMMANDS.SAVE_AS_FILE,
-    // 'save': Constants.COMMANDS.SAVE_FILE,
-    // 'save-as': Constants.COMMANDS.SAVE_AS_FILE,
-    // 'save-file': Constants.COMMANDS.SAVE_FILE,
-    // 'save-file-as': Constants.COMMANDS.SAVE_AS_FILE,
-    // 'save-file-as-leojs': Constants.COMMANDS.SAVE_AS_LEOJS,
-    // 'save-file-as-unzipped': Constants.COMMANDS.SAVE_AS_FILE,
-    // 'save-file-by-name': Constants.COMMANDS.SAVE_AS_FILE,
-    // 'save-file-to': Constants.COMMANDS.SAVE_AS_FILE,
-    // 'save-to': Constants.COMMANDS.SAVE_AS_FILE,
-
-    // 'clone-find-all-flattened-marked': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED,  // No prompt needed
-    // 'clone-find-all-marked': Constants.COMMANDS.CLONE_FIND_MARKED,  // No prompt needed
-
-    // 'clone-marked-nodes': Constants.COMMANDS.CLONE_MARKED_NODES,  // No prompt needed
-
-    // 'cfa': Constants.COMMANDS.CLONE_FIND_ALL,
-    // 'cfam': Constants.COMMANDS.CLONE_FIND_MARKED, // No prompt needed
-    // 'cff': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
-    // 'cffm': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED, // No prompt needed
-    // 'cft': Constants.COMMANDS.CLONE_FIND_TAG,
-
-    // 'git-diff': Constants.COMMANDS.GIT_DIFF,
-    // 'gd': Constants.COMMANDS.GIT_DIFF,
-
-    // 'find-clone-all': Constants.COMMANDS.CLONE_FIND_ALL,
-    // 'find-clone-all-flattened': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
-    // 'find-clone-tag': Constants.COMMANDS.CLONE_FIND_TAG,
-
-    // 'start-search': Constants.COMMANDS.START_SEARCH,
-    // 'search-forward': Constants.COMMANDS.START_SEARCH,
-    // 'search-backward': Constants.COMMANDS.SEARCH_BACKWARD,
-    // 're-search': Constants.COMMANDS.RE_SEARCH,
-    // 're-search-forward': Constants.COMMANDS.RE_SEARCH,
-    // 're-search-backward': Constants.COMMANDS.RE_SEARCH_BACKWARD,
-    // 'word-search': Constants.COMMANDS.WORD_SEARCH,
-    // 'word-search-forward': Constants.COMMANDS.WORD_SEARCH,
-    // 'word-search-backward': Constants.COMMANDS.WORD_SEARCH_BACKWARD,
-
-    // TODO - needed ? 
-    // 'find-var': Constants.COMMANDS.FIND_VAR,
-    // 'find-def': Constants.COMMANDS.FIND_DEF,
-
-    // 'find-all': Constants.COMMANDS.FIND_ALL,
-    // 'find-next': Constants.COMMANDS.FIND_NEXT,
-    // 'find-prev': Constants.COMMANDS.FIND_PREVIOUS,
-
-    // 'replace': Constants.COMMANDS.REPLACE,
-    // 'replace-all': Constants.COMMANDS.REPLACE_ALL,
-    // 'change-all': Constants.COMMANDS.REPLACE_ALL,
-    // 'change-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
-    // 'replace-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
-
-    // 'toggle-find-ignore-case-option': Constants.COMMANDS.TOGGLE_FIND_IGNORE_CASE_OPTION,
-    // 'toggle-find-in-body-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_BODY_OPTION,
-    // 'toggle-find-in-headline-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_HEADLINE_OPTION,
-    // 'toggle-find-mark-changes-option': Constants.COMMANDS.TOGGLE_FIND_MARK_CHANGES_OPTION,
-    // 'toggle-find-mark-finds-option': Constants.COMMANDS.TOGGLE_FIND_MARK_FINDS_OPTION,
-    // 'toggle-find-regex-option': Constants.COMMANDS.TOGGLE_FIND_REGEXP_OPTION,
-    // 'toggle-find-word-option': Constants.COMMANDS.TOGGLE_FIND_WORD_OPTION,
-
-};
-
-</t>
 <t tx="felix.20211212205241.1">/**
  * Replaces the system's clipboard with the given string
  * @param p_string actual string content to go onto the clipboard
@@ -12811,18 +12710,6 @@ public async minibufferHistory(): Promise&lt;unknown&gt; {
  * * Perform chosen minibuffer command
  */
 private async _doMinibufferCommand(p_picked: vscode.QuickPickItem | undefined): Promise&lt;unknown&gt; {
-    // TODO : REMOVE IF NOT NEEDED! 
-    // * First check for overridden command: Exit by doing the overridden command
-    // if (p_picked &amp;&amp;
-    //     p_picked.label &amp;&amp;
-    //     Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
-    // ) {
-    //     this._addToMinibufferHistory(p_picked.label);
-    //     return vscode.commands.executeCommand(
-    //         Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
-    //     );
-    // }
-    // * Ok, it was really a minibuffer command
     if (p_picked &amp;&amp; p_picked.label) {
         // Setup refresh
         this.setupRefresh(Focus.NoChange,
@@ -14840,13 +14727,6 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 [CMD.GOTO_NAV_ENTRY, (p_node: LeoGotoNode) =&gt; p_leoUI.gotoNavEntry(p_node)],
 
 // [CMD.INTERACTIVE_SEARCH_TAB, () =&gt; p_leoUI.interactiveSearchTab()], // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
-
-// [CMD.START_SEARCH, () =&gt; p_leoUI.startSearch()],
-// [CMD.SEARCH_BACKWARD, () =&gt; p_leoUI.interactiveSearch(true, false, false)],
-// [CMD.RE_SEARCH, () =&gt; p_leoUI.interactiveSearch(false, true, false)],
-// [CMD.RE_SEARCH_BACKWARD, () =&gt; p_leoUI.interactiveSearch(true, true, false)],
-// [CMD.WORD_SEARCH, () =&gt; p_leoUI.interactiveSearch(false, false, true)],
-// [CMD.WORD_SEARCH_BACKWARD, () =&gt; p_leoUI.interactiveSearch(true, false, true)],
 
 [CMD.START_SEARCH, () =&gt; p_leoUI.command(LEOCMD.START_SEARCH, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 [CMD.SEARCH_BACKWARD, () =&gt; p_leoUI.command(LEOCMD.SEARCH_BACKWARD, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],

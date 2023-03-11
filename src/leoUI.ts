@@ -2961,18 +2961,6 @@ export class LeoUI extends NullGui {
      * * Perform chosen minibuffer command
      */
     private async _doMinibufferCommand(p_picked: vscode.QuickPickItem | undefined): Promise<unknown> {
-        // TODO : REMOVE IF NOT NEEDED! 
-        // * First check for overridden command: Exit by doing the overridden command
-        // if (p_picked &&
-        //     p_picked.label &&
-        //     Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
-        // ) {
-        //     this._addToMinibufferHistory(p_picked.label);
-        //     return vscode.commands.executeCommand(
-        //         Constants.MINIBUFFER_OVERRIDDEN_COMMANDS[p_picked.label]
-        //     );
-        // }
-        // * Ok, it was really a minibuffer command
         if (p_picked && p_picked.label) {
             // Setup refresh
             this.setupRefresh(Focus.NoChange,
