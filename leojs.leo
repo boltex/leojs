@@ -9351,7 +9351,6 @@ public findAll(p_replace?: boolean): Thenable&lt;unknown&gt; {
  * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
  */
 public cloneFind(p_marked: boolean, p_flat: boolean): Thenable&lt;unknown&gt; {
-    // return vscode.window.showInformationMessage("TODO: cloneFind");
 
     let w_searchString: string = this._lastSettingsUsed!.findText;
 
@@ -9890,8 +9889,6 @@ public async navEnter(): Promise&lt;unknown&gt; {
  * * Clone Find Tag
  */
 public cloneFindTag(): void {
-    vscode.window.showInformationMessage("TODO: cloneFindTag");
-
     this.triggerBodySave(true)
         .then(() =&gt; {
             return vscode.window.showInputBox({
@@ -9906,6 +9903,8 @@ public cloneFindTag(): void {
                 p_inputResult = p_inputResult.trim();
                 const c = g.app.windowList[this.frameIndex].c;
                 const fc = c.findCommands;
+                // Settings...
+                fc.find_text = p_inputResult;
                 let n;
                 let p;
                 [n, p] = fc.do_clone_find_tag(p_inputResult);
@@ -10222,7 +10221,6 @@ public async replace(p_fromOutline?: boolean, p_thenFind?: boolean): Promise&lt;
             this.findFocusTree
         );
         return this.launchRefresh();
-
     }
 
 }
@@ -14839,7 +14837,7 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 
 [CMD.GOTO_NAV_ENTRY, (p_node: LeoGotoNode) =&gt; p_leoUI.gotoNavEntry(p_node)],
 
-//  [CMD.INTERACTIVE_SEARCH_TAB, () =&gt; p_leoUI.interactiveSearchTab()], // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
+// [CMD.INTERACTIVE_SEARCH_TAB, () =&gt; p_leoUI.interactiveSearchTab()], // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
 
 // [CMD.START_SEARCH, () =&gt; p_leoUI.startSearch()],
 // [CMD.SEARCH_BACKWARD, () =&gt; p_leoUI.interactiveSearch(true, false, false)],

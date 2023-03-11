@@ -3862,7 +3862,6 @@ export class LeoUI extends NullGui {
                 this.findFocusTree
             );
             return this.launchRefresh();
-
         }
 
     }
@@ -4152,7 +4151,6 @@ export class LeoUI extends NullGui {
      * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
      */
     public cloneFind(p_marked: boolean, p_flat: boolean): Thenable<unknown> {
-        // return vscode.window.showInformationMessage("TODO: cloneFind");
 
         let w_searchString: string = this._lastSettingsUsed!.findText;
 
@@ -4661,8 +4659,6 @@ export class LeoUI extends NullGui {
      * * Clone Find Tag
      */
     public cloneFindTag(): void {
-        vscode.window.showInformationMessage("TODO: cloneFindTag");
-
         this.triggerBodySave(true)
             .then(() => {
                 return vscode.window.showInputBox({
@@ -4677,6 +4673,8 @@ export class LeoUI extends NullGui {
                     p_inputResult = p_inputResult.trim();
                     const c = g.app.windowList[this.frameIndex].c;
                     const fc = c.findCommands;
+                    // Settings...
+                    fc.find_text = p_inputResult;
                     let n;
                     let p;
                     [n, p] = fc.do_clone_find_tag(p_inputResult);
