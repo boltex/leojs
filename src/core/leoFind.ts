@@ -3238,12 +3238,14 @@ export class LeoFind {
             // subgroup will be a number matched
 
             // # 1494...
-            // group(0) is the whole match including all groups, group 1 is the first
+            // group[0] is the whole match including all groups, group 1 is the first
+            const w_group = Number(p1);
             const n = Number(p1) - 1;
-            if (0 <= n && n < groups.length) {
+
+            if (0 <= n && n < groups.length - 1) {
                 // Executed only if the change text contains groups that match.
                 return (
-                    groups[n].
+                    groups[w_group].
                         replace(/\\b/g, '\\\\b').   // b
                         replace(/\\f/g, '\\\\f').   // f
                         replace(/\\n/g, '\\\\n').   // n
@@ -3256,7 +3258,7 @@ export class LeoFind {
             return match; // in python group(0) is the whole match spanning all subgroups
         };
 
-        const result = change_text.replace(/\\([0-9])/, repl);
+        const result = change_text.replace(/\\([0-9])/g, repl);
 
         return result;
 
