@@ -4603,47 +4603,6 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * * Remove all tags on selected node
-     */
-    public removeTags(p_p?: Position): void {
-
-        const w_p = p_p ? p_p : this.lastSelectedNode;
-
-        if (w_p && w_p.u &&
-            w_p.u.__node_tags && w_p.u.__node_tags.length) {
-            this.triggerBodySave(true)
-                .then(() => {
-                    const c = g.app.windowList[this.frameIndex].c;
-                    const v = w_p.v;
-                    const tc = c.theTagController;
-
-                    if (v.u['__node_tags']) {
-                        delete v.u['__node_tags'];
-                        tc.initialize_taglist();  // reset tag list: some may have been removed
-                        c.setChanged();
-                    }
-
-                    this.setupRefresh(
-                        Focus.NoChange,
-                        {
-                            tree: true,
-                            // body: false,
-                            // documents: false,
-                            // buttons: false,
-                            states: true,
-                        }
-                    );
-                    this.launchRefresh();
-                });
-        } else if (w_p) {
-            vscode.window.showInformationMessage("No tags on node: " + w_p.h);
-        } else {
-            return;
-        }
-
-    }
-
-    /**
      * * Clone Find Tag
      */
     public cloneFindTag(): void {

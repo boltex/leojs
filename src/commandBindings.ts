@@ -273,9 +273,10 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.GOTO_GLOBAL_LINE, () => p_leoUI.gotoGlobalLine()],
 
         [CMD.TAG_CHILDREN, () => p_leoUI.command(LEOCMD.TAG_CHILDREN, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
-        [CMD.TAG_NODE, (p_node?: Position) => p_leoUI.tagNode(p_node)], // with para
-        [CMD.REMOVE_TAG, (p_node?: Position) => p_leoUI.removeTag(p_node)], // with para
-        [CMD.REMOVE_TAGS, (p_node?: Position) => p_leoUI.removeTags(p_node)], // with para
+
+        [CMD.TAG_NODE, (p_node?: Position) => p_leoUI.command(LEOCMD.TAG_NODE, { node: p_node, refreshType: NO_REFRESH, finalFocus: Focus.NoChange, keepSelection: true })],
+        [CMD.REMOVE_TAG, (p_node?: Position) => p_leoUI.command(LEOCMD.REMOVE_TAG, { node: p_node, refreshType: NO_REFRESH, finalFocus: Focus.NoChange, keepSelection: true })],
+        [CMD.REMOVE_TAGS, (p_node?: Position) => p_leoUI.command(LEOCMD.REMOVE_ALL_TAGS, { node: p_node, refreshType: REFRESH_TREE, finalFocus: Focus.NoChange, keepSelection: true })],
 
         [CMD.CLONE_FIND_TAG, () => p_leoUI.command(LEOCMD.CLONE_FIND_TAG, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 

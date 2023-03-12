@@ -216,7 +216,6 @@
 <v t="felix.20220505215924.16"><vh>tagChildren</vh></v>
 <v t="felix.20220505215924.17"><vh>tag_node</vh></v>
 <v t="felix.20220505215924.18"><vh>remove_tag</vh></v>
-<v t="felix.20220505215924.19"><vh>remove_tags</vh></v>
 <v t="felix.20220505215924.20"><vh>cloneFindTag</vh></v>
 </v>
 <v t="felix.20201214194144.8"><vh>Leo Documents</vh>
@@ -9721,48 +9720,6 @@ public removeTag(p_p?: Position): void {
 }
 
 </t>
-<t tx="felix.20220505215924.19">/**
- * * Remove all tags on selected node
- */
-public removeTags(p_p?: Position): void {
-
-    const w_p = p_p ? p_p : this.lastSelectedNode;
-
-    if (w_p &amp;&amp; w_p.u &amp;&amp;
-        w_p.u.__node_tags &amp;&amp; w_p.u.__node_tags.length) {
-        this.triggerBodySave(true)
-            .then(() =&gt; {
-                const c = g.app.windowList[this.frameIndex].c;
-                const v = w_p.v;
-                const tc = c.theTagController;
-
-                if (v.u['__node_tags']) {
-                    delete v.u['__node_tags'];
-                    tc.initialize_taglist();  // reset tag list: some may have been removed
-                    c.setChanged();
-                }
-
-                this.setupRefresh(
-                    Focus.NoChange,
-                    {
-                        tree: true,
-                        // body: false,
-                        // documents: false,
-                        // buttons: false,
-                        states: true,
-                    }
-                );
-                this.launchRefresh();
-            });
-    } else if (w_p) {
-        vscode.window.showInformationMessage("No tags on node: " + w_p.h);
-    } else {
-        return;
-    }
-
-}
-
-</t>
 <t tx="felix.20220505215924.2">/**
  * * Handles an enter press in the 'nav pattern' input
  */
@@ -14754,9 +14711,10 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 [CMD.GOTO_GLOBAL_LINE, () =&gt; p_leoUI.gotoGlobalLine()],
 
 [CMD.TAG_CHILDREN, () =&gt; p_leoUI.command(LEOCMD.TAG_CHILDREN, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
-[CMD.TAG_NODE, (p_node?: Position) =&gt; p_leoUI.tagNode(p_node)], // with para
-[CMD.REMOVE_TAG, (p_node?: Position) =&gt; p_leoUI.removeTag(p_node)], // with para
-[CMD.REMOVE_TAGS, (p_node?: Position) =&gt; p_leoUI.removeTags(p_node)], // with para
+
+[CMD.TAG_NODE, (p_node?: Position) =&gt; p_leoUI.command(LEOCMD.TAG_NODE, { node: p_node, refreshType: NO_REFRESH, finalFocus: Focus.NoChange, keepSelection: true })],
+[CMD.REMOVE_TAG, (p_node?: Position) =&gt; p_leoUI.command(LEOCMD.REMOVE_TAG, { node: p_node, refreshType: NO_REFRESH, finalFocus: Focus.NoChange, keepSelection: true })],
+[CMD.REMOVE_TAGS, (p_node?: Position) =&gt; p_leoUI.command(LEOCMD.REMOVE_ALL_TAGS, { node: p_node, refreshType: REFRESH_TREE, finalFocus: Focus.NoChange, keepSelection: true })],
 
 </t>
 <t tx="felix.20230122201158.1">/**
