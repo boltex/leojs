@@ -2364,6 +2364,10 @@
           "when": "false"
         },
         {
+          "command": "leojs.sortChildrenSelectionFromOutline",
+          "when": "false"
+        },
+        {
           "command": "leojs.gotoNextClone",
           "when": "false"
         },

@@ -5280,6 +5280,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "command": "leojs.sortSiblingsSelectionFromOutline",
   "when": "false"
 },
+{
+  "command": "leojs.sortChildrenSelectionFromOutline",
+  "when": "false"
+},
 </t>
 <t tx="felix.20201214205159.51">{
   "command": "leojs.gotoNextClone",
