@@ -746,7 +746,7 @@ export class FileCommands {
     )
     public async writeAtFileNodes(): Promise<unknown> {
         const c: Commands = this.c;
-        // c.endEditing();
+        c.endEditing();
         c.init_error_dialogs();
         await c.atFileCommands.writeAll(true);
         return c.raise_error_dialogs('write');
@@ -757,7 +757,7 @@ export class FileCommands {
         'Write the entire outline without writing any derived files.')
     public async writeOutlineOnly(): Promise<unknown> {
         const c: Commands = this.c;
-        // c.endEditing();
+        c.endEditing();
         return this.writeOutline(this.mFileName);
     }
     //@+node:felix.20211213224222.4: *4* fc.writeDirtyAtFileNodes
@@ -767,7 +767,7 @@ export class FileCommands {
     )
     public async writeDirtyAtFileNodes(): Promise<unknown> {
         const c: Commands = this.c;
-        // c.endEditing()
+        c.endEditing();
         c.init_error_dialogs();
         await c.atFileCommands.writeAll(true);
         return c.raise_error_dialogs('write');
@@ -779,7 +779,7 @@ export class FileCommands {
     )
     public async writeMissingAtFileNodes(): Promise<unknown> {
         const c: Commands = this.c;
-        // c.endEditing()
+        c.endEditing();
         return c.atFileCommands.writeMissing(c.p);
     }
     //@+node:felix.20211213224228.1: *3* fc: File Utils
@@ -1022,7 +1022,11 @@ export class FileCommands {
         } else {
             p._linkCopiedAfter(current);
         }
-        console.assert(!p.isCloned(), g.objToString(p.v.parents));
+
+        // console.assert(!p.isCloned(), g.objToString(p.v.parents));
+        // console.log('result: ', p.v.parents);
+        console.assert(!p.isCloned(), "parents length " + p.v.parents.length);
+
         this.gnxDict = oldGnxDict;
         this.reassignAllIndices(p);
         c.selectPosition(p);
@@ -2061,7 +2065,7 @@ export class FileCommands {
         let ok: boolean | undefined = g.doHook("save1", { c: c, p: p, fileName: fileName });
 
         if (ok === undefined) {
-            // c.endEditing();  // Set the current headline text.
+            c.endEditing();  // Set the current headline text.
             await this.setDefaultDirectoryForNewFiles(fileName);
 
 
@@ -2199,7 +2203,7 @@ export class FileCommands {
         }
         //@-others
 
-        //c.endEditing()
+        c.endEditing();
 
         let w_found = false;
         for (let v of c.hiddenRootNode.children) {
@@ -2251,7 +2255,7 @@ export class FileCommands {
         const p: Position = c.p;
 
         if (!g.doHook("save1", { c: c, p: p, fileName: fileName })) {
-            // c.endEditing()  // Set the current headline text.
+            c.endEditing();  // Set the current headline text.
             if (c.sqlite_connection) {
                 c.sqlite_connection.close();
                 c.sqlite_connection = undefined;
@@ -2286,7 +2290,7 @@ export class FileCommands {
         const p: Position = c.p;
 
         if (!g.doHook("save1", { c: c, p: p, fileName: fileName })) {
-            //c.endEditing()  // Set the current headline text.
+            c.endEditing();  // Set the current headline text.
             if (c.sqlite_connection && c.sqlite_connection.close) {
                 c.sqlite_connection.close();
                 c.sqlite_connection = undefined;
@@ -3104,10 +3108,10 @@ export class FileCommands {
      * Put the prolog of the xml file.
      */
     public putProlog(): void {
-        const tag: string = 'http://leoeditor.com/namespaces/leo-python-editor/1.1';
+        const tag: string = 'https://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1';
         this.putXMLLine();
         // Put "created by Leo" line.
-        this.put('<!-- Created by Leo: http://leoeditor.com/leo_toc.html -->\n');
+        this.put('<!-- Created by Leo: https://leo-editor.github.io/leo-editor/leo_toc.html -->\n');
         this.putStyleSheetLine();
         // Put the namespace
         this.put(`<leo_file xmlns:leo="${tag}" >\n`);

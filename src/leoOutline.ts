@@ -48,6 +48,8 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
 
     public getTreeItem(element: Position): Thenable<LeoOutlineNode> | LeoOutlineNode {
 
+        const w_ui = this._leoUI;
+
         let w_collapse: vscode.TreeItemCollapsibleState = vscode.TreeItemCollapsibleState.None;
         if (element.hasChildren()) {
             w_collapse = element.isExpanded() ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.Collapsed;
@@ -71,7 +73,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             w_contextValue += Constants.CONTEXT_FLAGS.NODE_NOT_ROOT;
         }
         const w_icon: number =
-            (+element.isDirty() << 3) |
+            (+(w_ui.config.invertNodeContrast !== !!element.isDirty()) << 3) |
             (+element.isCloned() << 2) |
             (+element.isMarked() << 1) |
             +element.v.hasBody();
@@ -85,6 +87,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             if (w_uLength) {
                 desc = "\u{1F4CE} (" + w_uLength + ")";
                 if (w_u.__node_tags) {
+                    w_contextValue += Constants.CONTEXT_FLAGS.NODE_TAGS;
                     if (w_uLength === 1) {
                         // was only tag, so reset it
                         desc = "";
@@ -100,8 +103,20 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             // desc = "gnx:" + this.gnx; // ! debug test
         }
 
+        let w_isSelected = false;
+        if (element.__eq__(g.app.windowList[w_ui.frameIndex].c.p)) {
+            w_isSelected = true;
+        }
+
+        let w_hl: [number, number] = [0, 0];
+        if (w_isSelected && w_ui.findFocusTree) {
+            if (w_ui.findHeadlinePosition?.__eq__(element)) {
+                w_hl = w_ui.findHeadlineRange;
+            }
+        }
+
         const w_leoNode = new LeoOutlineNode(
-            element.h,
+            { label: element.h, highlights: [w_hl] },
             w_collapse,
             element, // Position
             desc,
@@ -110,8 +125,8 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             w_contextValue
         );
         // Check if its the selected node and call signal it to the UI
-        if (element.__eq__(g.app.windowList[this._leoUI.frameIndex].c.p)) {
-            this._leoUI.gotSelectedNode(element);
+        if (w_isSelected) {
+            w_ui.gotSelectedNode(element);
         }
         // Build a LeoNode (a vscode tree node) from the Position
         return w_leoNode;
@@ -167,10 +182,10 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
 
                 if (w_uaLength === 1 && w_u.__node_tags && w_u.__node_tags.length) {
                     // list tags instead
-                    item.tooltip = item.label + "\n\u{1F3F7} " + w_u.__node_tags.join('\n\u{1F3F7} ');
+                    item.tooltip = item.label.label + "\n\u{1F3F7} " + w_u.__node_tags.join('\n\u{1F3F7} ');
 
                 } else {
-                    item.tooltip = item.label + "\n" +
+                    item.tooltip = item.label.label + "\n" +
                         JSON.stringify(w_u, undefined, 2);
                 }
 
@@ -178,7 +193,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
             }
 
         }
-        item.tooltip = item.label; // * Fallsback to whole headline as tooltip
+        item.tooltip = item.label.label; // * Fallsback to whole headline as tooltip
         return item;
     }
 
@@ -187,7 +202,7 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
 export class LeoOutlineNode extends vscode.TreeItem {
 
     constructor(
-        public label: string, // Node headline
+        public label: vscode.TreeItemLabel, // Node headline
         public collapsibleState: vscode.TreeItemCollapsibleState,
         public position: Position, // Pointer/reference for leo's node position
         public description: string,

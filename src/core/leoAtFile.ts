@@ -31,7 +31,7 @@ import { Commands } from './leoCommands';
 function cmd(p_name: string, p_doc: string) {
     return new_cmd_decorator(p_name, p_doc, ['c', 'atFileCommands']);
 }
-//@+node:felix.20211225222130.1: ** class AtFile
+//@+node:felix.20211225222130.1: ** class AtFile (DUMMY)
 /**
  * A class implementing the atFile subcommander.
  */
@@ -95,6 +95,69 @@ export class AtFile {
     public async writeOneAtEditNode(p: Position): Promise<unknown> {
         return;
     }
+    //@+node:felix.20221220001232.1: *3* at.atAutoToString
+    /**
+     * Write the root @auto node to a string, and return it.
+     */
+    public atAutoToString(root: Position): string {
+        
+        return "";
+
+        // TODO ! 
+
+        // at, c = self, self.c
+        // try:
+        //     c.endEditing()
+        //     fileName = at.initWriteIvars(root)
+        //     at.sentinels = False
+        //     # #1450.
+        //     if not fileName:
+        //         at.addToOrphanList(root)
+        //         return ''
+        //     return at.writeAtAutoContents(fileName, root) or ''
+        // except Exception:
+        //     at.writeException(fileName, root)
+        //     return ''
+    }
+    //@+node:felix.20221219223300.1: *3* at.stringToString
+    /**
+     * Write an external file from a string.
+     *
+     * This is at.write specialized for scripting.
+     */
+    public stringToString(
+        root: Position,
+        s: string,
+        forcePythonSentinels = true,
+        sentinels = true,
+    ): string {
+
+        return ""; // TODO     
+        // const at = this;
+        // const c = this.c;
+        // try
+        //     c.endEditing()
+        //     at.initWriteIvars(root)
+        //     if forcePythonSentinels:
+        //         at.endSentinelComment = None
+        //         at.startSentinelComment = "#"
+        //         at.language = "python"
+        //     at.sentinels = sentinels
+        //     at.outputList = []
+        //     at.putFile(root, fromString=s, sentinels=sentinels)
+        //     contents = '' if at.errors else ''.join(at.outputList)
+        //     // Major bug: failure to clear this wipes out headlines!
+        //     //            Sometimes this causes slight problems...
+        //     if root
+        //         root.v._p_changed = True
+        //     return contents
+        // except exception
+        //     at.exception("exception preprocessing script");
+        //     return ''
+
+
+    }
+
     //@+node:felix.20220108170000.1: *3* read
     public async read(p: Position): Promise<unknown> {
         return;

@@ -34,9 +34,9 @@ export class CommanderHelpCommands {
             `Copyright 1999-${dayjs().year()} by Edward K. Ream and Félix Malboeuf\n` +
             "All Rights Reserved\n" +
             "Leo and LeoJS are distributed under the MIT License";
-        const url = "http://leoeditor.com/"; // unused for now
+        const url = "https://leo-editor.github.io/leo-editor/"; // unused for now
         const email = "edreamleo@gmail.com"; // unused for now
-        g.app.gui!.runAboutLeoDialog(c, version, theCopyright, url, email);
+        g.app.gui.runAboutLeoDialog(c, version, theCopyright, url, email);
 
     }
 
@@ -221,7 +221,7 @@ export class CommanderHelpCommands {
 
             let ok;
 
-            ok = await g.app.gui!.runAskYesNoDialog(
+            ok = await g.app.gui.runAskYesNoDialog(
                 c,
                 'Create myLeoSettings.leo?',
                 `Create myLeoSettings.leo in ${homeLeoDir}?`,
@@ -233,7 +233,7 @@ export class CommanderHelpCommands {
 
             // get '@enabled-plugins' from g.app.globalConfigDir ! SKIPPED IN LEOJS !
             // fileName = g.os_path_join(undefined, configDir, "leoSettings.leo");
-            // const leosettings = await g.openWithFileName(fileName, c, g.app.gui!);
+            // const leosettings = await g.openWithFileName(fileName, c, g.app.gui);
             // const enabledplugins = g.findNodeAnywhere(leosettings!, '@enabled-plugins');
             // if (!enabledplugins || !enabledplugins.__bool__()) {
             //     return undefined;
@@ -256,7 +256,7 @@ export class CommanderHelpCommands {
                 fileName = g.os_path_join(undefined, localDir, name);;
             }
 
-            const c2 = await g.openWithFileName(fileName, c, g.app.gui!);
+            const c2 = await g.openWithFileName(fileName, c, g.app.gui);
             // add content to outline
             let nd = c2!.rootPosition()!;
             nd.h = "Settings README";
@@ -265,7 +265,7 @@ export class CommanderHelpCommands {
                 "Only nodes that are descendants of the @settings node are read.\n\n" +
                 "Only settings you need to modify should be in this file, do\n" +
                 "not copy large parts of leoSettings.py here.\n\n" +
-                "For more information see http://leoeditor.com/customizing.html";
+                "For more information see https://leo-editor.github.io/leo-editor/customizing.html";
 
             nd = nd.insertAfter();
             nd.h = '@settings';
@@ -295,7 +295,7 @@ export class CommanderHelpCommands {
         try {
             const w_path = await lm.computeMyLeoSettingsPath();
             if (w_path) {
-                return g.openWithFileName(w_path, c, g.app.gui!);
+                return g.openWithFileName(w_path, c, g.app.gui);
             }
             g.es('not found: myLeoSettings.leo');
             return createMyLeoSettings(c);
@@ -315,7 +315,7 @@ export class CommanderHelpCommands {
 
         vscode.env.openExternal(
             vscode.Uri.parse(
-                'https://leoeditor.com/'
+                'https://leo-editor.github.io/leo-editor/'
             )
         );
 
@@ -330,7 +330,7 @@ export class CommanderHelpCommands {
 
         vscode.env.openExternal(
             vscode.Uri.parse(
-                'https://leoeditor.com/leo_toc.html'
+                'https://leo-editor.github.io/leo-editor/leo_toc.html'
             )
         );
 
@@ -345,7 +345,7 @@ export class CommanderHelpCommands {
 
         vscode.env.openExternal(
             vscode.Uri.parse(
-                'https://leoeditor.com/tutorial.html'
+                'https://leo-editor.github.io/leo-editor/tutorial.html'
             )
         );
 
@@ -360,7 +360,7 @@ export class CommanderHelpCommands {
 
         vscode.env.openExternal(
             vscode.Uri.parse(
-                'https://leoeditor.com/usersguide.html"'
+                'https://leo-editor.github.io/leo-editor/usersguide.html"'
             )
         );
 
@@ -375,7 +375,7 @@ export class CommanderHelpCommands {
 
         vscode.env.openExternal(
             vscode.Uri.parse(
-                'https://leoeditor.com/screencasts.html'
+                'https://leo-editor.github.io/leo-editor/screencasts.html'
             )
         );
 

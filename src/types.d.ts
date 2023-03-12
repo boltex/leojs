@@ -11,27 +11,33 @@ export interface ConfigMembers {
     leoTreeBrowse: boolean;
     treeKeepFocus: boolean;
     treeKeepFocusWhenAside: boolean;
-    statusBarString: string;
+
+    collapseAllShortcut: boolean;
+    activityViewShortcut: boolean;
+    goAnywhereShortcut: boolean;
+
+    // statusBarString: string;
     statusBarColor: string;
+
     treeInExplorer: boolean;
     showOpenAside: boolean;
     showEditOnNodes: boolean;
-    showArrowsOnNodes: boolean;
+    // showArrowsOnNodes: boolean;
     showAddOnNodes: boolean;
     showMarkOnNodes: boolean;
     showCloneOnNodes: boolean;
     showCopyOnNodes: boolean;
 
-    showEditionOnBody: boolean; // clone delete insert(s)
-    showClipboardOnBody: boolean; // cut copy paste(s)
-    showPromoteOnBody: boolean; // promote demote
-    showExecuteOnBody: boolean; // extract(s)
-    showExtractOnBody: boolean;
-    showImportOnBody: boolean;
-    showRefreshOnBody: boolean;
-    showHoistOnBody: boolean;
-    showMarkOnBody: boolean;
-    showSortOnBody: boolean;
+    // showEditionOnBody: boolean; // clone delete insert(s)
+    // showClipboardOnBody: boolean; // cut copy paste(s)
+    // showPromoteOnBody: boolean; // promote demote
+    // showExecuteOnBody: boolean; // extract(s)
+    // showExtractOnBody: boolean;
+    // showImportOnBody: boolean;
+    // showRefreshOnBody: boolean;
+    // showHoistOnBody: boolean;
+    // showMarkOnBody: boolean;
+    // showSortOnBody: boolean;
 
     invertNodeContrast: boolean;
     leoID: string;
@@ -108,17 +114,7 @@ export interface BodyTimeInfo {
 }
 
 /**
- * * Object container for parameters of leoJs "apply-selected-node-to-body" method
- */
-export interface ShowBodyParam {
-    node: LeoOutlineNode,
-    aside: boolean,
-    showBodyKeepFocus: boolean,
-    force_open?: boolean
-}
-
-/**
- * * Object sent back from leoInteg's 'getStates' command
+ * * General state flags for UI representation and controls visibility.
  */
 export interface LeoPackageStates {
     changed: boolean; // Leo document has changed (is dirty)
@@ -133,7 +129,7 @@ export interface LeoPackageStates {
 }
 
 /**
- * * Leo document structure used in the 'Opened Leo Documents' tree view provider sent back by the server
+ * * Leo document structure used in the 'Opened Leo Documents' tree view provider
  */
 export interface LeoDocument {
     name: string;
@@ -158,8 +154,15 @@ export interface LeoGoto {
     t: TGotoTypes;
 }
 
+export const enum LeoGotoNavKey {
+    prev = 0,
+    next,
+    first,
+    last
+}
+
 /**
- * * LeoInteg's Enum type for the search scope radio buttons of the find panel.
+ * * Enum type for the search scope radio buttons of the find panel.
  */
 export const enum LeoSearchScope {
     entireOutline = 0,
@@ -169,7 +172,7 @@ export const enum LeoSearchScope {
 }
 
 /**
- * * LeoInteg search settings structure for use with the 'find' webview
+ * * Search settings structure for use with the 'find' webview
  */
 export interface LeoSearchSettings {
     // Nav options
@@ -178,8 +181,8 @@ export interface LeoSearchSettings {
     showParents: boolean;
     searchOptions: number;
     // Find/change strings...
-    findText: string;
-    replaceText: string;
+    findText: string;  // find_text
+    replaceText: string; // change_text
     // Find options...
     wholeWord: boolean;
     ignoreCase: boolean;
@@ -326,7 +329,6 @@ export interface RClick {
 
 /**
  * * Used by the minibuffer command pallette
- * Acquired from the getCommands method in leobridgeserver.py
  */
 export interface MinibufferCommand extends vscode.QuickPickItem {
     func: string;

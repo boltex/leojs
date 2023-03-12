@@ -8,7 +8,7 @@ LeoJS is [LeoInteg](https://github.com/boltex/leointeg#-leo-editor-integration-w
 
 Inspired by <https://github.com/leo-editor/leo-editor/issues/1025>.
 
-See Leo, the Literate Editor with Outline, at [leoeditor.com](https://leoeditor.com/)
+See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
 or on [github](https://github.com/leo-editor/leo-editor), and vscode at [code.visualstudio.com](https://code.visualstudio.com/).
 
 ![Screenshot](https://raw.githubusercontent.com/boltex/leojs/master/resources/animated-screenshot.gif)
@@ -43,8 +43,8 @@ To try out running as a web extension on vscode.dev, use the following commands:
 -   The commands and menus icons for outline editing
 -   Undo and navigation history commands
 -   The minibuffer Command-Palette
--   Panels for Outline, Undo history, Leo documents (no find, goto or @buttons panes yet)
--   Basic 'New', 'Open' and 'Save' operations (no external @files/@clean... support yet)
+-   Panels for Outline, Undo history, Leo documents, find and goto panes (no @buttons panes support yet)
+-   Basic 'New', 'Open' and 'Save' operations (no external @files/@clean... nor scripting support yet)
 
 ## Keybindings
 
@@ -71,24 +71,28 @@ To try out running as a web extension on vscode.dev, use the following commands:
 
 _Move Outline commands need the 'Alt' key modifier only when focus is on body pane._
 
-| Common Operations  |            |           |     |            |                     |
-| :----------------- | :--------- | :-------- | :-- | :--------- | :------------------ | 
-| `Ctrl + T`         |            |           |     |            | Toggle Outline/Body |
-| `Tab` or `Enter`   | or         | `Alt + D` | or  | `Ctrl + G` | Focus on Body       |
-| `Alt + T`          |            |           |     |            | Focus on Outline    |
-| `Alt + -`          |            |           |     |            | Contract All        |
-| `Ctrl + Shift + D` |            |           |     |            | Extract             |
-| `Ctrl + Shift + N` |            |           |     |            | Extract Names       |
-| `Alt + A`          |            |           |     |            | Sort Siblings       |
-| `Alt + X`          |            |           |     |            | Minibuffer Palette  |
+| Common Operations  |     |          |     |           |    |            |                     |
+| :----------------- | :-- | :------- | :-- | :-------- |:-- | :--------- | :------------------ |
+| `Ctrl + T`         |     |          |     |           |    |            | Toggle Outline/Body |
+| `Tab`              | or  | `Enter`  | or  | `Alt + D` |or  | `Ctrl + G` | Focus on Body       |
+| `Alt + T`          |     |          |     |           |    |            | Focus on Outline    |
+| `Alt + -`          |     |          |     |           |    |            | Contract All        |
+| `Alt + A`          |     |          |     |           |    |            | Sort Siblings       |
+| `Ctrl + F`         |     |          |     |           |    |            | Start Search        |
+| `F3`               |     |          |     |           |    |            | Find Next           |
+| `F2`               |     |          |     |           |    |            | Find Previous       |
+| `Ctrl + =`         |     |          |     |           |    |            | Replace             |
+| `Ctrl + -`         |     |          |     |           |    |            | Replace then Find   |
+| `Alt + X`          |     |          |     |           |    |            | Minibuffer Palette  |
 
- <!--               | `Ctrl + B` |           |     |            |                     | Execute Script | --> 
- <!--               | `Ctrl + F` |           |     |            |                     | Start Search   | --> 
- <!--               | `F3`       |           |     |            |                     | Find Next      | --> 
- <!--               | `F2`       |           |     |            |                     | Find Previous  | --> 
+<!-- | `Ctrl + Shift + D` |     |          |     |           |    |            | Extract             | -->
+<!-- | `Ctrl + Shift + N` |     |          |     |           |    |            | Extract Names       | -->
+<!-- | `Ctrl + B`         |     |          |     |           |    |            | Execute Script      |  -->
 
 | Tree Navigation    |           |                 |                          |
 | :----------------- | :-------- | :-------------- | :----------------------- |
+| `Ctrl+Shift+L`     |           |                 | Show the LeoInteg View   |
+| `Ctrl+P`           |           |                 | Go Anywhere              |
 | `Alt + Home`       | or        | `Home` \*       | Go To First Visible Node |
 |                    |           | `End` \*        | Go To Last Visible Node  |
 | `PgUp / pgDn`      |           |                 | Tree page up/down        |
@@ -96,7 +100,7 @@ _Move Outline commands need the 'Alt' key modifier only when focus is on body pa
 | `Alt + N`          |           |                 | Go To Next Clone         |
 | `Alt + Arrow Keys` | or        | `Arrow Keys` \* | Browse Tree              |
 
-<!--               | `Alt + G` |                 |                          | Go To Global Line | --> 
+<!-- | `Alt + G`    |           |                   | Go To Global Line      | --> 
 
 \* _With the **'Leo Tree Browsing'** setting enabled by default, all arrows and numeric keypad keys change the outline's selection directly_
 

@@ -5,6 +5,8 @@ import { new_cmd_decorator, command } from "../core/decorators";
 import { Position, VNode } from "../core/leoNodes";
 import { Commands } from "../core/leoCommands";
 import { Bead } from '../core/leoUndo';
+import { StringTextWrapper } from '../core/leoFrame';
+import { BaseEditCommandsClass } from './baseCommands';
 
 //@+others
 //@+node:felix.20220503223721.1: ** editCommands.cmd (decorator)
@@ -144,14 +146,12 @@ export class TopLevelEditCommands {
 
 }
 //@+node:felix.20220503222535.1: ** class EditCommandsClass
-export class EditCommandsClass {
-
-    public c: Commands;
+export class EditCommandsClass extends BaseEditCommandsClass {
 
     //@+others
     //@+node:felix.20220504204405.1: *3* ec.constructor
     constructor(c: Commands) {
-        this.c = c;
+        super(c);
     }
     //@+node:felix.20220503223023.1: *3* ec.doNothing
     @cmd(
@@ -177,7 +177,7 @@ export class EditCommandsClass {
             return;
         }
 
-        // c.endEditing();
+        c.endEditing();
         const time = c.getTime(false);
         const s = p.h.trimEnd();
 
@@ -379,6 +379,65 @@ export class EditCommandsClass {
         */
 
     }
+    //@+node:felix.20221220002620.1: *3* ec: move cursor
+    //@+node:felix.20221220002639.1: *4* ec.extend-to-word
+    @cmd(
+        'extend-to-word',
+        'Compute the word at the cursor. Select it if select arg is True.'
+    )
+    public extendToWord(select = true, w?: StringTextWrapper): [number, number] {
+
+        if (!w) {
+            (w = this.editWidget());
+        }
+        if (!w) {
+            return [0, 0];
+        }
+        const s = w.getAllText();
+        const n = s.length;
+        let i = w.getInsertPoint();
+        let i1 = i;
+        // Find a word char on the present line if one isn't at the cursor.
+        if (!(0 <= i && i < n && g.isWordChar(s[i]))) {
+            // First, look forward
+            while (i < n && !g.isWordChar(s[i]) && s[i] !== '\n') {
+                i += 1;
+            }
+            // Next, look backward.
+            if (!(0 <= i && i < n && g.isWordChar(s[i]))) {
+                if (i >= n || s[i] === '\n') {
+                    i = i1 - 1;
+                } else {
+                    i = i1;
+                }
+                while (i >= 0 && !g.isWordChar(s[i]) && s[i] !== '\n') {
+                    i -= 1;
+                }
+            }
+        }
+        // Make sure s[i] is a word char.
+        if (0 <= i && i < n && g.isWordChar(s[i])) {
+            // Find the start of the word.
+            while (0 <= i && i < n && g.isWordChar(s[i])) {
+                i -= 1;
+            }
+            i += 1;
+            i1 = i;
+
+            // Find the end of the word.
+            while (0 <= i && i < n && g.isWordChar(s[i])) {
+                i += 1;
+            }
+            if (select) {
+                w.setSelectionRange(i1, i);
+            }
+            return [i1, i];
+        }
+
+        return [0, 0];
+
+
+    }
     //@+node:felix.20220503225545.1: *3* ec: uA's
     //@+node:felix.20220503225545.2: *4* ec.clearNodeUas & clearAllUas
     @cmd(
@@ -460,45 +519,42 @@ export class EditCommandsClass {
         'set-ua',
         'Prompt for the name and value of a uA, then set the uA in the present node.'
     )
-    public setUa(): void {
-        console.log('TODO : setUa');
-        /* 
-        const k = this.c.k
-        this.w = this.editWidget(event)
-        if this.w:
-            k.setLabelBlue('Set uA: ')
-            k.get1Arg(event, handler=this.setUa1)
-         */
+    public async setUa(): Promise<boolean> {
+
+        let w_name = "";
+
+        let w_uaName = await g.app.gui.get1Arg({
+            title: "Set ua",
+            prompt: "Set unknown attribute name",
+            placeHolder: "Attribute Name",
+        });
+        // Trim string and re-check if valid string
+        if (w_uaName && w_uaName.trim()) {
+            w_uaName = w_uaName.trim();
+            w_name = w_uaName;
+
+            const w_uaVal = await g.app.gui.get1Arg({
+                title: "Set ua to",
+                prompt: "Set unknown attribute value",
+                placeHolder: "Attribute Value",
+            });
+
+            if (w_name && !(typeof w_uaVal === 'undefined' || w_uaVal === null)) {
+                // ok got both name and val
+                const c = this.c;
+                const p = c.p;
+                if (!p.v.u) {
+                    p.v.u = {}; // assert at least an empty dict if null or non existent
+                }
+                p.v.u[w_name] = w_uaVal;
+                this.showNodeUas();
+                return Promise.resolve(true);
+            }
+
+        }
+        return Promise.resolve(false);
     }
 
-    public setUa1(): void {
-        console.log('TODO : setUa1');
-
-        /* 
-        k = this.c.k
-        this.uaName = k.arg
-        s = f"Set uA: {this.uaName} To: "
-        k.setLabelBlue(s)
-        k.getNextArg(this.setUa2)
-        */
-
-    }
-
-    public setUa2(): void {
-        console.log('TODO : setUa2');
-
-        /* 
-        c, k = this.c, this.c.k
-        val = k.arg
-        d = c.p.v.u
-        d[this.uaName] = val
-        this.showNodeUas()
-        k.clearState()
-        k.resetLabel()
-        k.showStateAndMode()
-        */
-
-    }
     //@-others
 
 }

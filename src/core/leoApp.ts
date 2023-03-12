@@ -8,7 +8,7 @@ import * as os from "os";
 import * as path from 'path';
 import * as g from './leoGlobals';
 import * as utils from "../utils";
-import { LeoUI, NullGui } from '../leoUI';
+import { NullGui } from "./leoGui";
 import { NodeIndices, VNode, Position } from './leoNodes';
 import { Commands } from './leoCommands';
 import { FastRead, FileCommands } from "./leoFileCommands";
@@ -18,6 +18,7 @@ import { ExternalFilesController } from "./leoExternalFiles";
 import { LeoFrame } from "./leoFrame";
 import { SettingsDict } from "./leoGlobals";
 import { leojsSettingsXml } from "../leojsSettings";
+import { LeoUI } from "../leoUI";
 
 //@-<< imports >>
 //@+others
@@ -109,7 +110,7 @@ export class LeoApp {
     public diff: boolean = false; // True: run Leo in diff mode.
     public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
-    public gui: LeoUI | NullGui | undefined; // The gui class.
+    public gui!: NullGui; // The gui class.
     public guiArgName: string | undefined; // The gui name given in --gui option.
     public listen_to_log_flag: boolean = false; // True: execute listen-to-log command.
     public loaded_session: boolean = false; // Set at startup if no files specified on command line.
@@ -179,7 +180,7 @@ export class LeoApp {
     public commander_cacher: any = null; // The singleton leoCacher.CommanderCacher instance.
     public commander_db: any = null; // The singleton db, managed by g.app.commander_cacher.
     public config!: GlobalConfigManager; // The singleton leoConfig instance.
-    public db: any = null; // The singleton global db, managed by g.app.global_cacher.
+    public db: any = undefined; // The singleton global db, managed by g.app.global_cacher.
     public externalFilesController: any = null; // The singleton ExternalFilesController instance.
     public global_cacher: any = null; // The singleton leoCacher.GlobalCacher instance.
     public idleTimeManager: any = null; // The singleton IdleTimeManager instance.
@@ -198,13 +199,20 @@ export class LeoApp {
     //@+<< LeoApp: global reader/writer data >>
     //@+node:felix.20210103024632.8: *5* << LeoApp: global reader/writer data >>
     // From leoAtFile.py.
-    public atAutoWritersDict: any = {};
-    public writersDispatchDict: any = {};
+    public atAutoWritersDict: { [key: string]: any } = {};
+    public writersDispatchDict: { [key: string]: any } = {};
     // From leoImport.py
-    public atAutoDict: any = {};
+    public atAutoDict: { [key: string]: any } = {};
     // Keys are @auto names, values are scanner classes.
-    public classDispatchDict: any = {};
+    public classDispatchDict: { [key: string]: any } = {};
 
+    // True if an @auto writer should write sentinels,
+    // even if the external file doesn't actually contain sentinels.
+    public force_at_auto_sentinels = false;
+
+    // leo 5.6: allow undefined section references in all @auto files.
+    // Leo 6.6.4: Make this a permanent g.app ivar.
+    public allow_undefined_refs = false;
     //@-<< LeoApp: global reader/writer data >>
     //@+<< LeoApp: global status vars >>
     //@+node:felix.20210103024632.9: *5* << LeoApp: global status vars >>
@@ -1134,7 +1142,7 @@ export class LeoApp {
         if (g.app.debug.includes('shutdown')) {
             g.trace(`changed: ${c.changed} ${c.shortFileName()}`);
         }
-        // c.endEditing()  // Commit any open edits.
+        c.endEditing();  // Commit any open edits.
         if (c.promptingForClose) {
             // There is already a dialog open asking what to do.
             return false;
@@ -1265,6 +1273,7 @@ export class LeoApp {
      * Forget the open file, so that is no longer considered open.
      */
     public forgetOpenFile(fn: string): void {
+
         const trace: boolean = g.app.debug.includes('shutdown');
         const d: any = g.app.db;
         const tag: string = 'open-leo-files';
@@ -1334,7 +1343,7 @@ export class LeoApp {
      * Modified version for leojs: call leoUI.makeAllBindings
      */
     public makeAllBindings(): void {
-        (this.gui as LeoUI).makeAllBindings();
+        this.gui.makeAllBindings();
         /* 
         app = self
         for c in app.commanders():
@@ -1348,7 +1357,7 @@ export class LeoApp {
      */
     public newCommander(
         fileName: string,
-        gui?: LeoUI | NullGui,
+        gui?: NullGui,
         previousSettings?: PreviousSettings,
         relativeFileName?: string,
     ): Commands {
@@ -1356,7 +1365,7 @@ export class LeoApp {
         // This takes about 3/4 sec when called by the leoBridge module.
         // Timeit reports 0.0175 sec when using a nullGui.
         if (!gui) {
-            gui = g.app.gui!;
+            gui = g.app.gui;
         }
         const c = new Commands(
             fileName,
@@ -1374,7 +1383,7 @@ export class LeoApp {
 
         const index = g.app.windowList.indexOf(frame, 0);
 
-        (g.app.gui as LeoUI).frameIndex = index;
+        g.app.gui.frameIndex = index;
 
         /* 
         frame.deiconify()
@@ -2331,7 +2340,7 @@ export class LoadManager {
         const ok = await lm.doPostPluginsInit(); // loads recent, or, new untitled.
         g.app.makeAllBindings();
 
-        (g.app.gui as LeoUI).finishStartup();
+        g.app.gui.finishStartup();
 
         g.es('');  // Clears horizontal scrolling in the log pane.
 
@@ -2372,7 +2381,7 @@ export class LoadManager {
                 for (let n = 0; n < lm.files.length; n++) {
                     const fn = lm.files[n];
                     lm.more_cmdline_files = n < (lm.files.length - 1);
-                    c = await lm.loadLocalFile(fn, g.app.gui!);
+                    c = await lm.loadLocalFile(fn, g.app.gui);
                     // Returns None if the file is open in another instance of Leo.
                     if (c && !c1) {  // #1416:
                         c1 = c;
@@ -2498,7 +2507,7 @@ export class LoadManager {
         return c
         */
         const fn: string = "";
-        const c = await lm.loadLocalFile(fn, g.app.gui!);
+        const c = await lm.loadLocalFile(fn, g.app.gui);
         if (!c) {
             return undefined;
         }
@@ -2551,7 +2560,7 @@ export class LoadManager {
 
         const lm: LoadManager = this;
 
-        g.app.gui = new LeoUI(this._context!);
+        g.app.gui = new LeoUI(undefined, this._context!); // replaces createDefaultGui
 
         /* 
         gui_option = lm.options.get('gui')
@@ -2588,7 +2597,6 @@ export class LoadManager {
         // Force the user to set g.app.leoID.
         await g.app.setLeoID(true, verbose);
 
-        g.app.inBridge = true;  // (From Leo) Support for g.getScript.
         // w_leoID will at least be 'None'.
         g.app.idleTimeManager = new IdleTimeManager();
         // g.app.backgroundProcessManager = new leoBackground.BackgroundProcessManager();
@@ -2607,7 +2615,7 @@ export class LoadManager {
     }
 
     //@+node:felix.20210120004121.31: *4* LM.loadLocalFile & helpers
-    public async loadLocalFile(fn: string, gui: LeoUI | NullGui, old_c?: Commands): Promise<Commands | undefined> {
+    public async loadLocalFile(fn: string, gui: NullGui, old_c?: Commands): Promise<Commands | undefined> {
 
         /*Completely read a file, creating the corresonding outline.
 
@@ -2628,7 +2636,7 @@ export class LoadManager {
 
         // #2489: If fn is empty, open an empty, untitled .leo file.
         if (!fn) {
-            c = await lm.openEmptyLeoFile(gui as LeoUI, old_c);
+            c = await lm.openEmptyLeoFile(gui, old_c);
             return c;
         }
 
@@ -2655,7 +2663,7 @@ export class LoadManager {
     /**
      * Open an empty, untitled, new Leo file.
      */
-    public async openEmptyLeoFile(gui: LeoUI, old_c?: Commands): Promise<Commands> {
+    public async openEmptyLeoFile(gui: NullGui, old_c?: Commands): Promise<Commands> {
 
         const lm = this;
         const w_previousSettings = await lm.getPreviousSettings(undefined);
@@ -2697,7 +2705,7 @@ export class LoadManager {
      * Creates an empty outline if fn is a non-existent Leo file.
      * Creates an wrapper outline if fn is an external file, existing or not.
      */
-    public async openFileByName(fn: string, gui: LeoUI | NullGui, old_c?: Commands, previousSettings?: PreviousSettings): Promise<Commands | undefined> {
+    public async openFileByName(fn: string, gui: NullGui, old_c?: Commands, previousSettings?: PreviousSettings): Promise<Commands | undefined> {
 
         const lm: LoadManager = this;
         // Disable the log.
@@ -2769,8 +2777,7 @@ export class LoadManager {
             const c = frame.c;
             if (g.os_path_realpath(munge(fn)) === g.os_path_realpath(munge(c.mFileName))) {
 
-                (g.app.gui as LeoUI).frameIndex = index;
-                (g.app.gui as LeoUI).refreshDocumentsPane();
+                g.app.gui.frameIndex = index;
 
                 c.outerUpdate();
                 return c;
@@ -2785,7 +2792,7 @@ export class LoadManager {
     public finishOpen(c: Commands): void {
 
         // lm = self
-        const k = c.k;
+        // const k = c.k;
         // console.assert(k);
 
         // New in Leo 4.6: provide an official way for very late initialization.
@@ -2797,19 +2804,20 @@ export class LoadManager {
         if (c.chapterController) {
             c.chapterController.finishCreate();
         }
-        if (k) {
-            k.setDefaultInputState();
-        }
+        // if (k && k.setDefaultInputState) {
+        //     k.setDefaultInputState();
+        // }
 
         // c.initialFocusHelper();
 
-        if (k) {
-            k.showStateAndMode();
-        }
+        // if (k) {
+        //     k.showStateAndMode();
+        // }
+
         // c.frame.initCompleteHint();
         const index = g.app.windowList.indexOf(c.frame);
         if (index >= 0) {
-            (g.app.gui as LeoUI).frameIndex = index;
+            g.app.gui.frameIndex = index;
         }
 
         c.outerUpdate();  // #181: Honor focus requests.

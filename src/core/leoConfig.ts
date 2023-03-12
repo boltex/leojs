@@ -2084,8 +2084,8 @@ export class LocalConfigManager {
      */
     public getValFromDict(d: g.SettingsDict, setting: string, requestedType?: string, warn = true): [any, boolean] {
         const tag = 'c.config.getValFromDict';
-
-        const gs = d.get(g.app.config.munge(setting)!);
+        const mungedSetting = g.app.config.munge(setting)!;
+        const gs = d.get(mungedSetting);
         if (!gs) {
             return [undefined, false];
         }
@@ -2654,9 +2654,9 @@ export class LocalConfigManager {
  */
 export class SettingsTreeParser extends ParserBaseClass {
 
-
-    // def __init__(self, c, localFlag=True):
-    // super().__init__(c, localFlag)
+    constructor(c: Commands, localFlag = true) {
+        super(c, localFlag);
+    }
 
     //@+others
     //@+node:felix.20220602232038.2: *3* ctor (SettingsTreeParser)

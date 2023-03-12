@@ -140,6 +140,10 @@ def oops(message):
 #@-others
 main(node_list = ['Startup', 'Documentation', 'Code'])
 #@+node:ekr.20201214084854.11: ** @button diff-pr
+"""
+Create a Leonine version of the diffs that would be
+produced by a pull request between two branches.
+"""
 import leo.commands.editFileCommands as efc
 import os
 

@@ -42,24 +42,24 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                         this._leoUI.navTextChange();
                         break;
                     }
+                    case 'leoNavClear': {
+                        this._leoUI.navTextClear();
+                        break;
+                    }
                     case 'gotFocus': {
-                        // utils.setContext("sideBarFocus", true);
-                        // utils.setContext("focusedView", "leoFindPanel");
                         utils.setContext(Constants.CONTEXT_FLAGS.FOCUS_FIND, true);
                         break;
                     }
                     case 'lostFocus': {
-                        // utils.setContext("sideBarFocus", false);
-                        // utils.setContext("focusedView", "");
                         utils.setContext(Constants.CONTEXT_FLAGS.FOCUS_FIND, false);
                         break;
                     }
                     case 'leoFindNext': {
-                        vscode.commands.executeCommand(Constants.COMMANDS.FIND_NEXT);
+                        vscode.commands.executeCommand(Constants.COMMANDS.FIND_NEXT_FO);
                         break;
                     }
                     case 'leoFindPrevious': {
-                        vscode.commands.executeCommand(Constants.COMMANDS.FIND_PREVIOUS);
+                        vscode.commands.executeCommand(Constants.COMMANDS.FIND_PREVIOUS_FO);
                         break;
                     }
                     case 'searchConfig': {
@@ -134,7 +134,7 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                     </div>
                 </div>
                 <div class="input-holder mt-0 mb-6 nav-element">
-                    <input title="Typing searches headlines, Enter also searches body text and freeze" type="text" id="navText" name="navText" placeholder="<nav pattern here>">
+                    <input title="Typing searches headlines interactively&#013;Enter freezes input and searches body text" type="text" id="navText" name="navText" placeholder="<nav pattern here>">
                 </div>
                 <div class="nav-element" id="freeze" title="Clear field to unfreeze">&#x2744;</div>
 

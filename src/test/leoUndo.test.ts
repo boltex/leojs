@@ -323,7 +323,7 @@ suite('Test Undo', () => {
         node1 = p.copy().moveToFirstChild();
         c.selectPosition(node1);
 
-        // c.editHeadline();
+        // c.editHeadline(); // TODO : UNCOMMENT THIS WITH THE NEW WRAPPER CODE !
         // w = c.frame.tree.edit_widget(node1);
         // w.insert('1.0', 'changed - ');
         // c.endEditing();
@@ -468,18 +468,16 @@ suite('Test Undo', () => {
     test('test_undo_group', async () => {
         const c = self.c;
 
-        // TODO: finish unto unit tests & uncomment !
-        /* 
         const p = self.c.p;
         let original = p.insertAfter();
-        const original_s = original.b = g.dedent(
-            `@tabwidth -4
+        const original_s = original.b = g.dedent(`
+            @tabwidth -4
 
             line 1
                 line 2
                   line 3
-            line4
-        `);
+            line4\n`
+        );
         c.undoer.clearUndoState();
         c.selectPosition(original);
         c.copyOutline();  // Add state to the undo stack!
@@ -494,7 +492,6 @@ suite('Test Undo', () => {
         c.undoer.undo();
         c.undoer.redo();
         assert.strictEqual(original.b, original_s);
-        */
 
     });
     /* def test_undo_group(self):

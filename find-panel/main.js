@@ -11,10 +11,9 @@
     let timer; // for debouncing sending the settings from this webview to leointeg
     let dirty = false; // all but nav input
     let navTextDirty = false;
-    let showNavElements = true;
 
-    let firstTabEl = 'searchOptions'; // used to be 'findText' before nav inputs
-    let lastTabEl = 'searchBody';
+    let firstTabElId = 'searchOptions'; // The first tabbable element used to be 'findText' before nav inputs
+    let lastTabElId = 'searchBody';
 
     /**
      * * Flag for freezing the nav 'search as you type' headlines (concept from original nav plugin)
@@ -22,7 +21,7 @@
      * - Sets when pressing Enter with non-empty input field && not tag mode.
      */
     let frozen = false;
-    const w_freezeElement = document.getElementById("freeze");
+    let w_freezeElement = document.getElementById("freeze");
     if (w_freezeElement) {
         w_freezeElement.style.display = 'none';
     }
@@ -49,7 +48,7 @@
     };
 
     // * Search related controls (No nav inputs)
-    let inputIds = ['findText', 'replaceText'];
+    let findReplaceInputIds = ['findText', 'replaceText'];
     let checkboxIds = [
         'wholeWord',
         'ignoreCase',
@@ -61,10 +60,23 @@
     ];
     let radioIds = ['entireOutline', 'subOutlineOnly', 'nodeOnly', 'fileOnly'];
 
+    function resetTagNav() {
+        navSearchTimer = setTimeout(() => {
+            if (navTextDirty) {
+                navTextDirty = false;
+                if (navSearchTimer) {
+                    clearTimeout(navSearchTimer);
+                }
+                sendSearchConfig();
+            }
+            vscode.postMessage({ type: 'leoNavTextChange' });
+        }, 250); // quarter second
+    }
+
     function navTextChange() {
         // cancel timer, reset 'debounced' timer after checks, if still needed
         if (navSearchTimer) {
-            clearTimeout(navSearchTimer)
+            clearTimeout(navSearchTimer);
         }
 
         // * Needed Checks
@@ -72,16 +84,7 @@
             setFrozen(false);
             // if tagging but empty: SEND SEARCH LIST-ALL-TAGS COMMAND
             if (searchSettings.isTag) {
-                navSearchTimer = setTimeout(() => {
-                    if (navTextDirty) {
-                        navTextDirty = false;
-                        if (navSearchTimer) {
-                            clearTimeout(navSearchTimer)
-                        }
-                        sendSearchConfig();
-                    }
-                    vscode.postMessage({ type: 'leoNavTextChange' });
-                }, 250); // quarter second
+                resetTagNav();
             }
 
         }
@@ -96,7 +99,7 @@
             if (navTextDirty) {
                 navTextDirty = false;
                 if (navSearchTimer) {
-                    clearTimeout(navSearchTimer)
+                    clearTimeout(navSearchTimer);
                 }
                 sendSearchConfig();
             }
@@ -115,7 +118,7 @@
 
     function setFrozen(p_focus) {
         frozen = p_focus;
-        const w_freezeElement = document.getElementById("freeze");
+        w_freezeElement = document.getElementById("freeze");
         if (w_freezeElement) {
             if (frozen) {
                 w_freezeElement.style.display = '';
@@ -150,9 +153,8 @@
             searchSettings["searchOptions"] = p_settings["searchOptions"];
         } else {
             // ! Not at least Leo 6.6 final : hide top elements !
-            showNavElements = false;
-            firstTabEl = 'findText';
-            var elements = document.getElementsByClassName("nav-element")
+            firstTabElId = 'findText';
+            var elements = document.getElementsByClassName("nav-element");
 
             for (var i = 0; i < elements.length; i++) {
                 // @ts-expect-error
@@ -161,7 +163,7 @@
         }
 
         // When opening a Leo document, set default values of fields
-        inputIds.forEach((p_inputId) => {
+        findReplaceInputIds.forEach((p_inputId) => {
             // @ts-expect-error
             document.getElementById(p_inputId).value = p_settings[p_inputId];
             searchSettings[p_inputId] = p_settings[p_inputId];
@@ -224,6 +226,7 @@
         }
         var keyCode = p_event.code || p_event.key;
 
+        // Detect CTRL+F
         if (p_event.ctrlKey && !p_event.shiftKey && p_event.keyCode === 70) {
             p_event.preventDefault();
             p_event.stopPropagation();
@@ -231,13 +234,45 @@
             return;
         }
 
+        // ? NEEDED ?
+        /*
+        // Detect F2
+        if (!p_event.ctrlKey && !p_event.shiftKey && p_event.keyCode === 113) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            vscode.postMessage({ type: 'leoFindPrevious' });
+            return;
+        }
+        // Detect F3
+        if (!p_event.ctrlKey && !p_event.shiftKey && p_event.keyCode === 114) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            vscode.postMessage({ type: 'leoFindNext' });
+            return;
+        }
+        // Detect Ctrl + =
+        if (p_event.ctrlKey && !p_event.shiftKey && p_event.keyCode === 187) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            vscode.postMessage({ type: 'replace' });
+            return;
+        }
+        // Detect Ctrl + -
+        if (p_event.ctrlKey && !p_event.shiftKey && p_event.keyCode === 189) {
+            p_event.preventDefault();
+            p_event.stopPropagation();
+            vscode.postMessage({ type: 'replaceThenFind' });
+            return;
+        }
+        */
+
         if (keyCode === 'Tab') {
             var actEl = document.activeElement;
-            var lastEl = document.getElementById(lastTabEl);
+            var lastEl = document.getElementById(lastTabElId);
 
             if (p_event.shiftKey) {
                 // shift + tab so if first got last
-                var firstEl = document.getElementById(firstTabEl);
+                var firstEl = document.getElementById(firstTabElId);
                 if (lastEl && actEl === firstEl) {
                     p_event.preventDefault();
                     p_event.stopPropagation();
@@ -251,7 +286,7 @@
                     p_event.preventDefault();
                     p_event.stopPropagation();
                     p_event.stopImmediatePropagation();
-                    focusOnField(firstTabEl);
+                    focusOnField(firstTabElId);
                     return;
                 }
             }
@@ -283,8 +318,13 @@
         let w_showParent = document.getElementById('showParents');
         let w_navSelect = document.getElementById('searchOptions');
         if (searchSettings.isTag) {
-            // @ts-expect-error
-            w_input.placeholder = "<tag pattern here>";
+
+            if (w_input) {
+                // @ts-expect-error
+                w_input.placeholder = "<tag pattern here>";
+                w_input.title = "Enter a tag name to list tagged nodes in the Goto pane&#013;Clear this field to list all tags used in this file";
+            }
+
             // @ts-expect-error
             w_showParent.disabled = true;
             // @ts-expect-error
@@ -298,8 +338,11 @@
                 }, 100);
             }
         } else {
-            // @ts-expect-error
-            w_input.placeholder = "<nav pattern here>";
+            if (w_input) {
+                // @ts-expect-error
+                w_input.placeholder = "<nav pattern here>";
+                w_input.title = "Typing searches headlines interactively&#013;Enter freezes input and searches body text";
+            }
             // @ts-expect-error
             w_showParent.disabled = false;
             // @ts-expect-error
@@ -309,34 +352,43 @@
     }
 
     // * Nav text input detection
-    const w_nacTextEl = document.getElementById('navText');
-    if (w_nacTextEl) {
-
-
-        w_nacTextEl.onkeypress = function (p_event) {
-            // @ts-expect-error
-            if (!p_event) p_event = window.event;
+    const w_navTextEl = document.getElementById('navText');
+    if (w_navTextEl) {
+        w_navTextEl.onkeypress = function (p_event) {
+            if (!p_event) {
+                // @ts-expect-error
+                p_event = window.event;
+            }
             var keyCode = p_event.code || p_event.key;
             if (keyCode === 'Enter') {
-                if (searchSettings.navText.length >= 3 || searchSettings.isTag) {
-                    setFrozen(true);
-                    if (navTextDirty) {
-                        navTextDirty = false;
-                        if (timer) {
-                            clearTimeout(timer);
+                if (searchSettings.navText.length === 0 && searchSettings.isTag) {
+                    setFrozen(false);
+                    resetTagNav();
+                } else {
+                    if (searchSettings.navText.length >= 3 || searchSettings.isTag) {
+                        setFrozen(true);
+                        if (navTextDirty) {
+                            navTextDirty = false;
+                            if (timer) {
+                                clearTimeout(timer);
+                            }
+                            if (navSearchTimer) {
+                                clearTimeout(navSearchTimer);
+                            }
+                            sendSearchConfig();
                         }
-                        if (navSearchTimer) {
-                            clearTimeout(navSearchTimer)
-                        }
-                        sendSearchConfig();
+                        vscode.postMessage({ type: 'leoNavEnter' });
                     }
-                    vscode.postMessage({ type: 'leoNavEnter' });
+                    if (searchSettings.navText.length === 0) {
+                        vscode.postMessage({ type: 'leoNavClear' });
+                    }
                 }
+
                 return false;
             }
         };
 
-        w_nacTextEl.addEventListener('input', function (p_event) {
+        w_navTextEl.addEventListener('input', function (p_event) {
             // @ts-expect-error
             searchSettings.navText = this.value;
             navTextDirty = true;
@@ -346,7 +398,6 @@
 
     const w_showParentsEl = document.getElementById('showParents');
     if (w_showParentsEl) {
-
         w_showParentsEl.addEventListener('change', function (p_event) {
             // @ts-expect-error
             searchSettings.showParents = this.checked;
@@ -356,7 +407,6 @@
 
     const w_isTagEl = document.getElementById('isTag');
     if (w_isTagEl) {
-
         w_isTagEl.addEventListener('change', function (p_event) {
             // @ts-expect-error
             let w_checked = this.checked;
@@ -385,13 +435,15 @@
 
     }
 
-    inputIds.forEach((p_inputId) => {
+    findReplaceInputIds.forEach((p_inputId) => {
         const w_inputEl = document.getElementById(p_inputId);
         if (w_inputEl) {
 
             w_inputEl.onkeypress = function (p_event) {
-                // @ts-expect-error
-                if (!p_event) p_event = window.event;
+                if (!p_event) {
+                    // @ts-expect-error
+                    p_event = window.event;
+                }
                 var keyCode = p_event.code || p_event.key;
                 if (keyCode === 'Enter') {
                     if (timer) {
@@ -405,6 +457,9 @@
             w_inputEl.addEventListener('input', function (p_event) {
                 // @ts-expect-error
                 searchSettings[p_inputId] = this.value;
+
+                console.log('searchSettings of', p_inputId, " is: ", searchSettings);
+
                 processChange();
             });
         }
@@ -435,6 +490,17 @@
             });
         }
     });
+
+    const w_findTextsEl = document.getElementById('findText');
+    if (w_findTextsEl) {
+        w_findTextsEl.addEventListener('click', function () {
+            // @ts-expect-error
+            if (w_findTextsEl.value === "<find pattern here>") {
+                // @ts-expect-error
+                w_findTextsEl.select();
+            }
+        });
+    }
 
     document.onkeydown = checkKeyDown;
 

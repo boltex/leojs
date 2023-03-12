@@ -22,8 +22,8 @@ export function commander_command(p_name: string, p_doc: string) {
             { __doc__: p_doc },
             { __func_name__: propertyKey },
             { __name__: p_name },
-            { is_command: true},
-            { command_name: p_name}
+            { is_command: true },
+            { command_name: p_name }
         );
 
         if (!g.global_commands_dict) {
@@ -51,8 +51,8 @@ export function command(p_name: string, p_doc: string) {
             { __doc__: p_doc },
             { __func_name__: propertyKey },
             { __name__: p_name },
-            { is_command: true},
-            { command_name: p_name}
+            { is_command: true },
+            { command_name: p_name }
         );
 
         if (!g.global_commands_dict) {
@@ -86,7 +86,7 @@ export function new_cmd_decorator(p_name: string, p_doc: string, ivars: string[]
             { __doc__: p_doc },
             { __func_name__: propertyKey },
             { __name__: p_name },
-            {__ivars__: ivars}
+            { __ivars__: ivars }
         );
 
         if (!g.global_commands_dict) {
