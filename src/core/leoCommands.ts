@@ -3699,7 +3699,7 @@ export class Commands {
         const parent: Position = p.parent();
         const parent_v: VNode = p._parentVnode()!;
         if (sortChildren) {
-            return parent || c.rootPosition();
+            return (parent && parent.__bool__()) ? parent : c.rootPosition()!;
         }
         if (parent && parent.__bool__()) {
             p = parent.firstChild();

@@ -1587,7 +1587,13 @@ export class Undoer {
         const c: Commands = u.c;
         const parent_v: VNode = u.p!._parentVnode()!;
         parent_v.children = u.newChildren;
-        const p: Position = c.setPositionAfterSort(u.sortChildren);
+
+        let p: Position;
+        if (u.sortChildren) {
+            p = u.p!.parent();
+        } else {
+            p = c.setPositionAfterSort(false);
+        }
         p.setAllAncestorAtFileNodesDirty();
         c.setCurrentPosition(p);
     }
@@ -2079,7 +2085,13 @@ export class Undoer {
         const c: Commands = u.c;
         const parent_v: VNode = u.p!._parentVnode()!;
         parent_v.children = u.oldChildren;
-        const p: Position = c.setPositionAfterSort(u.sortChildren);
+        let p: Position;
+        if (u.sortChildren) {
+            p = u.p!.parent();
+        } else {
+            p = c.setPositionAfterSort(u.sortChildren);
+        }
+        // const p: Position = c.setPositionAfterSort(u.sortChildren);
         p.setAllAncestorAtFileNodesDirty();
         c.setCurrentPosition(p);
     }
