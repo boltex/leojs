@@ -1451,6 +1451,8 @@ export function activate(p_context: vscode.ExtensionContext) {
 <t tx="felix.20201214150149.4">[CMD.CLOSE_FILE, () =&gt; p_leoUI.closeLeoFile()],
 [CMD.NEW_FILE, () =&gt; p_leoUI.newLeoFile()],
 [CMD.OPEN_FILE, (p_uri?: vscode.Uri) =&gt; p_leoUI.openLeoFile(p_uri)],
+[CMD.REVERT, () =&gt; p_leoUI.command(LEOCMD.REVERT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
+
 [CMD.SAVE_AS_FILE, () =&gt; p_leoUI.saveAsLeoFile()],
 [CMD.SAVE_AS_LEOJS, () =&gt; p_leoUI.saveAsLeoJsFile()],
 [CMD.SAVE_FILE, () =&gt; p_leoUI.saveLeoFile()],
@@ -1557,6 +1559,7 @@ public static COMMANDS = {
     // Leo Documents
     SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
     OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
+    REVERT: Constants.NAME + ".revert",
     CLEAR_RECENT_FILES: Constants.NAME + ".clearRecentFiles",
     // Import Export Commands
     IMPORT_ANY_FILE: Constants.NAME + ".importAnyFile",
@@ -1778,7 +1781,7 @@ public static LEO_COMMANDS = {
     // OPEN_OUTLINE: 'open_outline', // openLeoFile used instead
     WRITE_AT_FILE_NODES: 'write-at-file-nodes',
     WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
-
+    REVERT: 'revert',
     // * More Commands
     // GOTO_GLOBAL_LINE: "!goto_global_line",
     SET_UA: 'set-ua',
@@ -3952,6 +3955,13 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     "light": "resources/light/folder.svg",
     "dark": "resources/dark/folder.svg"
   }
+},
+{
+  "command": "leojs.revert",
+  "category": "Leojs",
+  "enablement": "leojsReady &amp;&amp; leojsTreeOpened",
+  "shortTitle": "Revert Leo outline to last saved contents",
+  "title": "Revert"
 },
 {
   "command": "leojs.recentLeoFiles",
@@ -8490,7 +8500,10 @@ public asyncGetTextFromClipboard(): Thenable&lt;string&gt; {
 public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     'paste-node': 'async-paste-node',
     'paste-retaining-clones': 'async-paste-retaining-clones',
-    'paste-as-template': 'async-paste-as-template'
+    'paste-as-template': 'async-paste-as-template',
+    // TODO : insertNode, insertChild, ...
+    // TODO : select chapter
+
 };
 
 </t>

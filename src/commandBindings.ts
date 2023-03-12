@@ -59,6 +59,8 @@ export function makeAllBindings(p_leoUI: LeoUI, p_context: vscode.ExtensionConte
         [CMD.CLOSE_FILE, () => p_leoUI.closeLeoFile()],
         [CMD.NEW_FILE, () => p_leoUI.newLeoFile()],
         [CMD.OPEN_FILE, (p_uri?: vscode.Uri) => p_leoUI.openLeoFile(p_uri)],
+        [CMD.REVERT, () => p_leoUI.command(LEOCMD.REVERT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
+
         [CMD.SAVE_AS_FILE, () => p_leoUI.saveAsLeoFile()],
         [CMD.SAVE_AS_LEOJS, () => p_leoUI.saveAsLeoJsFile()],
         [CMD.SAVE_FILE, () => p_leoUI.saveLeoFile()],

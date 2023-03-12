@@ -461,6 +461,7 @@ export class Constants {
         // Leo Documents
         SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
         OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
+        REVERT: Constants.NAME + ".revert",
         CLEAR_RECENT_FILES: Constants.NAME + ".clearRecentFiles",
         // Import Export Commands
         IMPORT_ANY_FILE: Constants.NAME + ".importAnyFile",
@@ -681,7 +682,7 @@ export class Constants {
         // OPEN_OUTLINE: 'open_outline', // openLeoFile used instead
         WRITE_AT_FILE_NODES: 'write-at-file-nodes',
         WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
-
+        REVERT: 'revert',
         // * More Commands
         // GOTO_GLOBAL_LINE: "!goto_global_line",
         SET_UA: 'set-ua',
@@ -807,7 +808,10 @@ export class Constants {
     public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
         'paste-node': 'async-paste-node',
         'paste-retaining-clones': 'async-paste-retaining-clones',
-        'paste-as-template': 'async-paste-as-template'
+        'paste-as-template': 'async-paste-as-template',
+        // TODO : insertNode, insertChild, ...
+        // TODO : select chapter
+
     };
 
 }

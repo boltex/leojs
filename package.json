@@ -777,6 +777,13 @@
         }
       },
       {
+        "command": "leojs.revert",
+        "category": "Leojs",
+        "enablement": "leojsReady && leojsTreeOpened",
+        "shortTitle": "Revert Leo outline to last saved contents",
+        "title": "Revert"
+      },
+      {
         "command": "leojs.recentLeoFiles",
         "category": "Leojs",
         "enablement": "leojsReady",
