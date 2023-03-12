@@ -2042,6 +2042,7 @@ public static USER_MESSAGES = {
     STATUSBAR_TOOLTIP_OFF: "Leo Key Bindings off", // TODO : Add description of what happens if clicked
     PROMPT_EDIT_HEADLINE: "Edit Headline",
     PROMPT_INSERT_NODE: "Insert Node",
+    PROMPT_INSERT_CHILD: "Insert Child",
     DEFAULT_HEADLINE: "New Headline",
     TITLE_GOTO_GLOBAL_LINE: "Goto global line",
     PLACEHOLDER_GOTO_GLOBAL_LINE: "#",
@@ -3830,7 +3831,11 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
         w_finalFocus = Focus.NoChange; // Going to use last state
     }
     this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
-    this._headlineInputOptions.prompt = Constants.USER_MESSAGES.PROMPT_INSERT_NODE;
+    if (p_asChild) {
+        this._headlineInputOptions.prompt = Constants.USER_MESSAGES.PROMPT_INSERT_CHILD;
+    } else {
+        this._headlineInputOptions.prompt = Constants.USER_MESSAGES.PROMPT_INSERT_NODE;
+    }
     this._headlineInputOptions.value = Constants.USER_MESSAGES.DEFAULT_HEADLINE;
 
     return vscode.window.showInputBox(this._headlineInputOptions).then((p_newHeadline) =&gt; {

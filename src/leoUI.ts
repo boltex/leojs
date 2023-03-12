@@ -3076,7 +3076,11 @@ export class LeoUI extends NullGui {
             w_finalFocus = Focus.NoChange; // Going to use last state
         }
         this.triggerBodySave(true); // Don't wait for saving to resolve because we're waiting for user input anyways
-        this._headlineInputOptions.prompt = Constants.USER_MESSAGES.PROMPT_INSERT_NODE;
+        if (p_asChild) {
+            this._headlineInputOptions.prompt = Constants.USER_MESSAGES.PROMPT_INSERT_CHILD;
+        } else {
+            this._headlineInputOptions.prompt = Constants.USER_MESSAGES.PROMPT_INSERT_NODE;
+        }
         this._headlineInputOptions.value = Constants.USER_MESSAGES.DEFAULT_HEADLINE;
 
         return vscode.window.showInputBox(this._headlineInputOptions).then((p_newHeadline) => {

@@ -198,6 +198,25 @@ export class LeoGui {
         this.oops();
     }
     /**
+     * Asks for node headline string and inserts node.
+     * ! NOT USED FOR NOW IN LEOJS !
+     */
+    public insertNode(
+        p_node: Position | undefined,
+        p_fromOutline: boolean,
+        p_interrupt: boolean,
+        p_asChild: boolean
+    ): any {
+        this.oops();
+    }
+    /**
+     * Asks for chapter name and selects it.
+     * ! NOT USED FOR NOW IN LEOJS !
+     */
+    public chapterSelect(): any {
+        this.oops();
+    }
+    /**
     /**
      * Create and run Leo's About Leo dialog.
      */
