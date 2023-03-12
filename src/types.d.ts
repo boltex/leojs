@@ -17,7 +17,7 @@ export interface ConfigMembers {
     goAnywhereShortcut: boolean;
 
     // statusBarString: string;
-    statusBarColor: string;
+    // statusBarColor: string;
 
     treeInExplorer: boolean;
     showOpenAside: boolean;

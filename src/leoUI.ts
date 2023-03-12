@@ -207,7 +207,7 @@ export class LeoUI extends NullGui {
     private _leoLogPane: vscode.OutputChannel;
 
     // * Status Bar
-    // private _leoStatusBar: LeoStatusBar; // TODO !
+    // private _leoStatusBar: LeoStatusBar; // ! NOT USED UNTIL VSCODE API SUPPORTS "CURRENT-FOCUS" LOCATION INFO !
 
     // * Edit/Insert Headline Input Box options instance, setup so clicking outside cancels the headline change
     private _headlineInputOptions: vscode.InputBoxOptions = {

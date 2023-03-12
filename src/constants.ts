@@ -49,7 +49,6 @@ export class Constants {
     public static RECENT_FILES_KEY: string = "leojsRecentFiles";
     public static LAST_FILES_KEY: string = "leojsLastFiles";
 
-    public static STATUSBAR_DEBOUNCE_DELAY: number = 70;
     public static REFRESH_DEBOUNCE_DELAY: number = 50;
     public static STATES_DEBOUNCE_DELAY: number = 60;
     public static TITLE_DEBOUNCE_DELAY: number = 20;
@@ -256,8 +255,8 @@ export class Constants {
         LEO_TREE_BROWSE: "leoTreeBrowse",
         TREE_KEEP_FOCUS: "treeKeepFocus",
         TREE_KEEP_FOCUS_WHEN_ASIDE: "treeKeepFocusWhenAside",
-        STATUSBAR_STRING: "statusBarString",
-        STATUSBAR_COLOR: "statusBarColor",
+        // STATUSBAR_STRING: "statusBarString",
+        // STATUSBAR_COLOR: "statusBarColor",
         TREE_IN_EXPLORER: "treeInExplorer",
         SHOW_OPEN_ASIDE: "showOpenAside",
         SHOW_EDIT: "showEditOnNodes",
@@ -302,8 +301,8 @@ export class Constants {
         GO_ANYWHERE_SHORTCUT: true,
 
         // STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
+        // STATUSBAR_COLOR: "fb7c47",
 
-        STATUSBAR_COLOR: "fb7c47",
         TREE_IN_EXPLORER: true,
         SHOW_OPEN_ASIDE: true,
         SHOW_EDIT: true,
@@ -457,7 +456,7 @@ export class Constants {
         // Access to the Settings/Welcome Webview
         SHOW_WELCOME: Constants.NAME + ".showWelcomePage", // Always available: not in the commandPalette section of package.json
         SHOW_SETTINGS: Constants.NAME + ".showSettingsPage", // Always available: not in the commandPalette section of package.json
-        STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
+        // STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
         // Leo Documents
         SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
         OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY

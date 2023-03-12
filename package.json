@@ -59,7 +59,7 @@
           "scope": "application",
           "default": "none",
           "type": "string",
-          "description": "Set default for derived files to always reload, or always ignore, when changes are detected",
+          "description": "Set default for derived files so that they reload, or ignore, when changes are detected",
           "enum": [
             "none",
             "yes-all",
@@ -106,18 +106,6 @@
           "default": true,
           "type": "boolean",
           "description": "Enables the Ctrl+Shift+L keyboard shortcut for showing the LeoJS view"
-        },
-        "leojs.statusBarString": {
-          "scope": "application",
-          "default": "",
-          "type": "string",
-          "description": "Sets the message string of the Status Bar Indicator"
-        },
-        "leojs.statusBarColor": {
-          "scope": "application",
-          "default": "fb7c47",
-          "type": "string",
-          "description": "Specifies the hexadecimal color string for the Status Bar Indicator"
         },
         "leojs.treeInExplorer": {
           "scope": "application",
