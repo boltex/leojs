@@ -644,27 +644,40 @@ export class FileCommands {
         this.vnodesDict = {};
         // keys are gnx strings; values are ignored
     }
-    //@+node:felix.20211230232601.1: *3* fc.xmlEscape
+    //@+node:felix.20221011210046.1: *3* fc.saxutils.Escape
     /**
      * Escape '&', '<', and '>' in a string of data.
+     * https://docs.python.org/3/library/xml.sax.utils.html#xml.sax.saxutils.escape
      */
-    public xmlEscape(s: string): string {
+    public saxutilsEscape(s: string): string {
         return s.replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&apos;');
+            .replace(/>/g, '&gt;');
     }
-    //@+node:felix.20211230232911.1: *3* fc.xmlDecode
+    //@+node:felix.20221011210921.1: *3* fc.saxutils.quoteattr
     /**
-     * Escape '&', '<', and '>' in a string of data.
+     * The quoteattr() function for embeding text into HTML/XML
+     * Similar to escape(), but also prepares data to be used as an attribute value.
+     * Examples below:
+     * https://docs.python.org/3/library/xml.sax.utils.html#xml.sax.saxutils.quoteattr
+     * https://stackoverflow.com/questions/7753448/how-do-i-escape-quotes-in-html-attribute-values
      */
-    public xmlDecode(s: string): string {
-        return s.replace(/&apos;/g, "'")
-            .replace(/&quot;/g, '"')
-            .replace(/&gt;/g, '>')
-            .replace(/&lt;/g, '<')
-            .replace(/&amp;/g, '&');
+    public quoteattr(s: string, preserveCR?: boolean | string): string {
+        preserveCR = preserveCR ? '&#13;' : '\n';
+        return ('' + s) /* Forces the conversion to string. */
+            .replace(/&/g, '&amp;') /* This MUST be the 1st replacement. */
+            .replace(/'/g, '&apos;') /* The 4 other predefined entities, required. */
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            /*
+            You may add other replacements here for HTML only 
+            (but it's not necessary).
+            Or for XML, only if the named entities are defined in its DTD.
+            */
+            .replace(/\r\n/g, preserveCR) /* Must be before the next replacement. */
+            .replace(/[\r\n]/g, preserveCR);
+        ;
     }
 
     //@+node:felix.20211212222746.1: *3*  commands (leoFileCommands.py)
@@ -733,7 +746,7 @@ export class FileCommands {
     )
     public async writeAtFileNodes(): Promise<unknown> {
         const c: Commands = this.c;
-        // c.endEditing();
+        c.endEditing();
         c.init_error_dialogs();
         await c.atFileCommands.writeAll(true);
         return c.raise_error_dialogs('write');
@@ -744,7 +757,7 @@ export class FileCommands {
         'Write the entire outline without writing any derived files.')
     public async writeOutlineOnly(): Promise<unknown> {
         const c: Commands = this.c;
-        // c.endEditing();
+        c.endEditing();
         return this.writeOutline(this.mFileName);
     }
     //@+node:felix.20211213224222.4: *4* fc.writeDirtyAtFileNodes
@@ -754,7 +767,7 @@ export class FileCommands {
     )
     public async writeDirtyAtFileNodes(): Promise<unknown> {
         const c: Commands = this.c;
-        // c.endEditing()
+        c.endEditing();
         c.init_error_dialogs();
         await c.atFileCommands.writeAll(true);
         return c.raise_error_dialogs('write');
@@ -766,7 +779,7 @@ export class FileCommands {
     )
     public async writeMissingAtFileNodes(): Promise<unknown> {
         const c: Commands = this.c;
-        // c.endEditing()
+        c.endEditing();
         return c.atFileCommands.writeMissing(c.p);
     }
     //@+node:felix.20211213224228.1: *3* fc: File Utils
@@ -1009,7 +1022,11 @@ export class FileCommands {
         } else {
             p._linkCopiedAfter(current);
         }
-        console.assert(!p.isCloned(), g.objToString(p.v.parents));
+
+        // console.assert(!p.isCloned(), g.objToString(p.v.parents));
+        // console.log('result: ', p.v.parents);
+        console.assert(!p.isCloned(), "parents length " + p.v.parents.length);
+
         this.gnxDict = oldGnxDict;
         this.reassignAllIndices(p);
         c.selectPosition(p);
@@ -2048,7 +2065,7 @@ export class FileCommands {
         let ok: boolean | undefined = g.doHook("save1", { c: c, p: p, fileName: fileName });
 
         if (ok === undefined) {
-            // c.endEditing();  // Set the current headline text.
+            c.endEditing();  // Set the current headline text.
             await this.setDefaultDirectoryForNewFiles(fileName);
 
 
@@ -2068,7 +2085,7 @@ export class FileCommands {
                     this.putSavedMessage(fileName);
                 }
                 c.clearChanged();  // Clears all dirty bits.
-                if (c.config.save_clears_undo_buffer) {
+                if (c.config.getBool('save-clears-undo-buffer')) {
                     g.es("clearing undo");
                     c.undoer.clearUndoState();
                 }
@@ -2186,7 +2203,7 @@ export class FileCommands {
         }
         //@-others
 
-        //c.endEditing()
+        c.endEditing();
 
         let w_found = false;
         for (let v of c.hiddenRootNode.children) {
@@ -2238,7 +2255,7 @@ export class FileCommands {
         const p: Position = c.p;
 
         if (!g.doHook("save1", { c: c, p: p, fileName: fileName })) {
-            // c.endEditing()  // Set the current headline text.
+            c.endEditing();  // Set the current headline text.
             if (c.sqlite_connection) {
                 c.sqlite_connection.close();
                 c.sqlite_connection = undefined;
@@ -2273,7 +2290,7 @@ export class FileCommands {
         const p: Position = c.p;
 
         if (!g.doHook("save1", { c: c, p: p, fileName: fileName })) {
-            //c.endEditing()  // Set the current headline text.
+            c.endEditing();  // Set the current headline text.
             if (c.sqlite_connection && c.sqlite_connection.close) {
                 c.sqlite_connection.close();
                 c.sqlite_connection = undefined;
@@ -3091,10 +3108,10 @@ export class FileCommands {
      * Put the prolog of the xml file.
      */
     public putProlog(): void {
-        const tag: string = 'http://leoeditor.com/namespaces/leo-python-editor/1.1';
+        const tag: string = 'https://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1';
         this.putXMLLine();
         // Put "created by Leo" line.
-        this.put('<!-- Created by Leo: http://leoeditor.com/leo_toc.html -->\n');
+        this.put('<!-- Created by Leo: https://leo-editor.github.io/leo-editor/leo_toc.html -->\n');
         this.putStyleSheetLine();
         // Put the namespace
         this.put(`<leo_file xmlns:leo="${tag}" >\n`);
@@ -3146,7 +3163,7 @@ export class FileCommands {
         const b: string = v.b;
         const gnx: string = v.fileIndex;
         const ua = this.putUnknownAttributes(v);
-        const body: string = b.length ? this.xmlEscape(b) : '';
+        const body: string = b.length ? this.saxutilsEscape(b) : '';
         this.put(`<t tx="${gnx}"${ua}>${body}</t>\n`);
     }
     //@+node:felix.20211213224237.43: *5* fc.put_t_elements
@@ -3215,8 +3232,8 @@ export class FileCommands {
 
             if (typeof val === 'string' || (val as any) instanceof String) {
                 val = g.toUnicode(val);
-                // attr = f' {key}="{xml.sax.saxutils.escape(val)}"'
-                attr = ` ${key}="${this.xmlEscape(val)}"`;
+                // attr = f' {key}={xml.sax.saxutils.quoteattr(val)}'
+                attr = ` ${key}=${this.quoteattr(val)}`;
                 return attr;
             }
 
@@ -3224,6 +3241,26 @@ export class FileCommands {
             g.warning("ignoring non-string attribute", key, "in", torv);
             return '';
 
+        }
+
+        // Support JSON encoded attributes
+        if (key.startsWith('json_')) {
+            let w_error = false;
+            try {
+                val = JSON.stringify(val);
+            }
+            catch (e) {
+                // fall back to pickle
+                g.trace(typeof val, val);
+                g.warning("pickling JSON incompatible attribute", key, "in", torv);
+                w_error = true;
+
+            }
+            if (!w_error) {
+                // attr = f' {key}={xml.sax.saxutils.quoteattr(val)}'
+                attr = ` ${key}=${this.quoteattr(val)}`;
+                return attr;
+            }
         }
         return this.pickle(torv, val, key);
 
@@ -3248,7 +3285,9 @@ export class FileCommands {
         ) {
 
             const valArray: string[] = [];
-            for (let key in attrDict) {
+            const sorted_keys = Object.keys(attrDict).sort();
+
+            for (const key of sorted_keys) {
                 valArray.push(this.putUaHelper(v, key, attrDict[key]));
             }
 
@@ -3300,7 +3339,7 @@ export class FileCommands {
             fc.put(v_head + '</v>\n');
         } else {
             fc.vnodesDict[gnx] = true;
-            v_head = v_head + `<vh>${this.xmlEscape(p.v.headString() || '')}</vh>`;
+            v_head = v_head + `<vh>${this.saxutilsEscape(p.v.headString() || '')}</vh>`;
 
             // xml.sax.saxutils.escape(data, entities={})
             // Escape '&', '<', and '>' in a string of data.

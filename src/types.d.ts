@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { Position } from "./core/leoNodes";
 import { LeoOutlineNode } from "./leoOutline";
 
 /**
@@ -10,27 +11,33 @@ export interface ConfigMembers {
     leoTreeBrowse: boolean;
     treeKeepFocus: boolean;
     treeKeepFocusWhenAside: boolean;
-    statusBarString: string;
+
+    collapseAllShortcut: boolean;
+    activityViewShortcut: boolean;
+    goAnywhereShortcut: boolean;
+
+    // statusBarString: string;
     statusBarColor: string;
+
     treeInExplorer: boolean;
     showOpenAside: boolean;
     showEditOnNodes: boolean;
-    showArrowsOnNodes: boolean;
+    // showArrowsOnNodes: boolean;
     showAddOnNodes: boolean;
     showMarkOnNodes: boolean;
     showCloneOnNodes: boolean;
     showCopyOnNodes: boolean;
 
-    showEditionOnBody: boolean; // clone delete insert(s)
-    showClipboardOnBody: boolean; // cut copy paste(s)
-    showPromoteOnBody: boolean; // promote demote
-    showExecuteOnBody: boolean; // extract(s)
-    showExtractOnBody: boolean;
-    showImportOnBody: boolean;
-    showRefreshOnBody: boolean;
-    showHoistOnBody: boolean;
-    showMarkOnBody: boolean;
-    showSortOnBody: boolean;
+    // showEditionOnBody: boolean; // clone delete insert(s)
+    // showClipboardOnBody: boolean; // cut copy paste(s)
+    // showPromoteOnBody: boolean; // promote demote
+    // showExecuteOnBody: boolean; // extract(s)
+    // showExtractOnBody: boolean;
+    // showImportOnBody: boolean;
+    // showRefreshOnBody: boolean;
+    // showHoistOnBody: boolean;
+    // showMarkOnBody: boolean;
+    // showSortOnBody: boolean;
 
     invertNodeContrast: boolean;
     leoID: string;
@@ -53,11 +60,20 @@ export interface FontSettings {
 }
 
 /**
+ * * Location of focus to be set when current/last command is resolved
+ */
+export const enum Focus {
+    NoChange = 0, // Stays on goto pane, or other current panel.
+    Body, // Forces body to appear, refresh leaves focus on body.
+    Outline, // Forces outline to appear, refresh leaves focus on Outline.
+    Goto
+}
+
+/**
  * * When refreshing the outline and getting to Leo's selected node
  */
 export const enum RevealType {
-    NoReveal = 0,   // In apToLeoNode conversion. True:
-    // Re-use the old if the global revealType is "NoReveal" and it's the selected node.
+    NoReveal = 0, // Re-use the old treeId with "NoReveal" for the selected node.
     Reveal,
     RevealSelect,
     RevealSelectFocus
@@ -70,24 +86,23 @@ export interface ReqRefresh {
     node?: boolean; // Reveal received selected node (Navigation only, no tree change)
     tree?: boolean; // Tree needs refresh
     body?: boolean; // Body needs refresh
-    states?: boolean; // States needs refresh:
-    // (changed, canUndo, canRedo, canDemote, canPromote, canDehoist)
+    scroll?: boolean; // Body needs to set and reveal text selection
+
+    states?: boolean; // Currently opened tree view states needs refresh:
+    // changed, canUndo, canRedo, canGoBack, canGoNext, canDemote, canPromote, 
+    // canHoist, canDehoist, inChapter, topHoistChapter
+
     buttons?: boolean; // Buttons needs refresh
     documents?: boolean; // Documents needs refresh
+    goto?: boolean; // Goto pane needs refresh
 }
 
-/**
- * * Stackable front end commands
- */
-export interface UserCommand {
-    action: string;
-    node?: LeoOutlineNode | undefined; // We can START a stack with a targeted command
-    text?: string | undefined; // If a string is required, for headline, etc.
-    refreshType: ReqRefresh; // Minimal refresh level required by this command
-    fromOutline: boolean; // Focus back on outline instead of body
-    keepSelection?: boolean; // Should bring back selection on node prior to command
-    resolveFn?: (result: any) => void; // call that with an answer from python's (or other) side
-    rejectFn?: (reason: any) => void; // call if problem is encountered
+export interface CommandOptions {
+    node?: Position, // facultative, precise node onto which the command is run (also see p_keepSelection)
+    refreshType: ReqRefresh, // Object containing flags for sections needing to refresh after command ran
+    finalFocus: Focus, // final focus placement
+    keepSelection?: boolean, // flag to bring back selection on the original node
+    isNavigation?: boolean // Navigation commands force-show the body and outline
 }
 
 /**
@@ -99,17 +114,7 @@ export interface BodyTimeInfo {
 }
 
 /**
- * * Object container for parameters of leoJs "apply-selected-node-to-body" method
- */
-export interface ShowBodyParam {
-    node: LeoOutlineNode,
-    aside: boolean,
-    showBodyKeepFocus: boolean,
-    force_open?: boolean
-}
-
-/**
- * * Object sent back from leoInteg's 'getStates' command
+ * * General state flags for UI representation and controls visibility.
  */
 export interface LeoPackageStates {
     changed: boolean; // Leo document has changed (is dirty)
@@ -124,7 +129,7 @@ export interface LeoPackageStates {
 }
 
 /**
- * * Leo document structure used in the 'Opened Leo Documents' tree view provider sent back by the server
+ * * Leo document structure used in the 'Opened Leo Documents' tree view provider
  */
 export interface LeoDocument {
     name: string;
@@ -149,17 +154,25 @@ export interface LeoGoto {
     t: TGotoTypes;
 }
 
+export const enum LeoGotoNavKey {
+    prev = 0,
+    next,
+    first,
+    last
+}
+
 /**
- * * LeoInteg's Enum type for the search scope radio buttons of the find panel.
+ * * Enum type for the search scope radio buttons of the find panel.
  */
 export const enum LeoSearchScope {
     entireOutline = 0,
     subOutlineOnly,
-    nodeOnly
+    nodeOnly,
+    fileOnly
 }
 
 /**
- * * LeoInteg search settings structure for use with the 'find' webview
+ * * Search settings structure for use with the 'find' webview
  */
 export interface LeoSearchSettings {
     // Nav options
@@ -168,8 +181,8 @@ export interface LeoSearchSettings {
     showParents: boolean;
     searchOptions: number;
     // Find/change strings...
-    findText: string;
-    replaceText: string;
+    findText: string;  // find_text
+    replaceText: string; // change_text
     // Find options...
     wholeWord: boolean;
     ignoreCase: boolean;
@@ -198,6 +211,7 @@ export interface LeoGuiFindTabManagerSettings {
     mark_changes: boolean,
     mark_finds: boolean,
     node_only: boolean,
+    file_only: boolean,
     pattern_match: boolean,
     search_body: boolean,
     search_headline: boolean,
@@ -315,7 +329,6 @@ export interface RClick {
 
 /**
  * * Used by the minibuffer command pallette
- * Acquired from the getCommands method in leobridgeserver.py
  */
 export interface MinibufferCommand extends vscode.QuickPickItem {
     func: string;

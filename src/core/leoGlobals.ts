@@ -10,12 +10,13 @@ import * as vscode from "vscode";
 import { Utils as uriUtils } from "vscode-uri";
 
 import * as os from 'os';
+import * as safeJsonStringify from 'safe-json-stringify';
 // import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
-import { LeoUI, NullGui } from "../leoUI";
+import { NullGui } from "./leoGui";
 
 /*
     import binascii
@@ -55,7 +56,7 @@ import { LeoUI, NullGui } from "../leoUI";
 
 //@-<< imports >>
 
-// TODO: Make those platform detection methods better with 'bowser' js lib 
+// TODO: Make those platform detection methods better with 'bowser' js lib
 export const isBrowser: boolean = !!(process as any)?.browser; // coerced to boolean
 export const isMac: boolean = process.platform?.startsWith('darwin');
 export const isWindows: boolean = process.platform?.startsWith('win');
@@ -84,7 +85,7 @@ export const globalDirectiveList: string[] = [
     'unit', 'verbose', 'wrap'
 ];
 
-export let directives_pat: any = null;  // Set below.
+export let directives_pat: RegExp;  // Set below.
 
 //@-<< define g.globalDirectiveList >>
 //@+<< define global decorator dicts >>
@@ -175,7 +176,7 @@ export function ivars2instance(c: Commands, g: any, ivars: string[]): any {
 //@-<< define g.Decorators >>
 //@+<< define regex's >>
 //@+node:felix.20210102180413.1: ** << define regex's >>
-export const g_language_pat = new RegExp(/^@language\s+(\w+)+/, 'm');
+export const g_language_pat = new RegExp(/^@language\s+(\w+)+/, 'mg'); // Needs g flag for 'exec' in while loop
 // Regex used by this module, and in leoColorizer.py.
 
 // Patterns used only in this module...
@@ -183,10 +184,11 @@ export const g_is_directive_pattern = new RegExp(/^\s*@([\w-]+)\s*/);
 // This pattern excludes @encoding.whatever and @encoding(whatever)
 // It must allow @language python, @nocolor-node, etc.
 
-export const g_noweb_root = new RegExp('<' + '<' + '*' + '>' + '>' + '=', 'm');
+export const g_noweb_root = new RegExp('<' + '<' + '*' + '>' + '>' + '=', 'mg');
 export const g_pos_pattern = new RegExp(/:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$/);
 export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
 
+export const color_directives_pat = new RegExp(/^@color|^@killcolor|^@nocolor-node|^@nocolor/, 'mg');
 //@-<< define regex's >>
 //@+<< languages >>
 //@+node:felix.20220112011241.1: ** << languages >>
@@ -412,6 +414,37 @@ export class FileLikeObject {
 
 }
 
+//@+node:felix.20221105181936.1: *3* class NullObject (Python Cookbook)
+/**
+ * An object that does nothing, and does it very well.
+ * From the Python cookbook, recipe 5.23
+ */
+export class NullObject {
+
+    // def __init__(self, *args, **keys): pass
+    constructor() { }
+
+    public toString(): string {
+        return "NullObject";
+    }
+
+    // def __call__(self, *args, **keys): return self
+
+    // def __repr__(self): return "NullObject"
+
+    // def __str__(self): return "NullObject"
+
+    // def __bool__(self): return False
+
+    // def __nonzero__(self): return 0
+
+    // def __delattr__(self, attr): return self
+
+    // def __getattr__(self, attr): return self
+
+    // def __setattr__(self, attr, val): return self
+
+}
 //@+node:felix.20220213000607.1: *3* class g.GeneralSetting
 // Important: The startup code uses this class,
 // so it is convenient to define it in leoGlobals.py.
@@ -457,7 +490,7 @@ export class GeneralSetting {
 
     public __repr__(): string {
         // Better for g.printObj.
-        let val
+        let val;
         if (val) {
             val = this.val.toString().split("\n").join(" ");
         }
@@ -475,39 +508,18 @@ export class GeneralSetting {
     };
 
 }
-//@+node:felix.20220213000510.1: *3* class g.TypedDict
+//@+node:felix.20220213000510.1: *3* class g.SettingsDict
 /**
- * A class providing additional dictionary-related methods:
- *
- *   __init__:     Specifies types and the dict's name.
- *   __repr__:     Compatible with g.printObj, based on g.objToString.
- *   __setitem__:  Type checks its arguments.
- *   __str__:      A concise summary of the inner dict.
- *   add_to_list:  A convenience method that adds a value to its key's list.
- *   name:         The dict's name.
- *   setName:      Sets the dict's name, for use by __repr__.
- *
- * Overrides the following standard methods:
- *
- *   copy:         A thin wrapper for copy.deepcopy.
- *   get:          Returns self.d.get
- *   items:        Returns self.d.items
- *   keys:         Returns self.d.keys
- *   update:       Updates self.d from either a dict or a TypedDict.
+ * A subclass of dict providing settings-related methods.
  */
-export class TypedDict {
-
-    public d: { [key: string]: GeneralSetting };
-    public keyType: string;
-    public valType: string;
+export class SettingsDict extends Map<string, any> {
 
     private _name: string;
 
-    constructor(name: string, keyType: string, valType: string) {
-        this.d = {};
+    constructor(name: string) {
+        super();
         this._name = name;  // For __repr__ only.
-        this.keyType = keyType;
-        this.valType = valType;
+
     }
 
     //@+others
@@ -527,40 +539,43 @@ export class TypedDict {
 
     // = () : trick for toString as per https://stackoverflow.com/a/35361695/920301
     public toString = (): string => {
-        return `${this.d.toString()}\nTypedDict name:${this._name}\n`;
+        return `<SettingsDict name:${this._name} `;
+
     };
 
-    //@+node:felix.20220213000510.3: *4* td.__setitem__
-    // def __setitem__(self, key: Any, val: Any) -> None:
-    //     """Allow d[key] = val"""
-    //     if key is None:
-    //         g.trace('TypeDict: None is not a valid key', g.callers())
-    //         return
-    //     self._checkKeyType(key)
-    //     self._checkKeyType(key)
-    //     try:
-    //         for z in val:
-    //             self._checkValType(z)
-    //     except TypeError:
-    //         self._checkValType(val)  # val is not iterable.
-    //     self.d[key] = val
-
-    public set(key: string, val: any): void {
-        if (key === undefined) {
-            trace('TypeDict: None is not a valid key', callers());
-            return;
+    //@+node:felix.20220628012349.1: *4* td.copy
+    public copy(name?: string): SettingsDict {
+        // The result is a g.SettingsDict.
+        // return copy.deepcopy(self)
+        const newDict = new SettingsDict(this._name);
+        for (const p_key of this.keys()) {
+            newDict.set(p_key, new GeneralSetting({
+                kind: this.get(p_key).kind,
+                encoding: this.get(p_key).encoding,
+                ivar: this.get(p_key).ivar,
+                setting: this.get(p_key).setting,
+                val: this.get(p_key).val,
+                path: this.get(p_key).path,
+                tag: this.get(p_key).tag,
+                unl: this.get(p_key).unl
+            }));
         }
-        this._checkKeyType(key);
+        return newDict;
+    }
+    //@+node:felix.20220628014215.1: *4* td.get
+    public override get(key: string, p_default?: any): any {
+        if (this.has(key)) {
+            return super.get(key);
+        } else {
+            return p_default;
+        }
+    }
 
-        // try:
-        //     for z in val:
-        //         this._checkValType(z)
-        // except TypeError:
-        //     this._checkValType(val)  # val is not iterable.
-
-
-        this.d[key] = val;
-
+    //@+node:felix.20220628012922.1: *4* td.update
+    public update(d: SettingsDict): void {
+        for (let key of d.keys()) {
+            this.set(key, d.get(key));
+        }
     }
 
     //@+node:felix.20220213000510.4: *4* td.add_to_list
@@ -569,113 +584,36 @@ export class TypedDict {
      */
     public add_to_list(key: string, val: any): void {
 
-        // ! Typing Needs Work !
-
-        // TODO : FIX THE TYPING !
-        /*
         if (key === undefined) {
             trace('TypeDict: None is not a valid key', callers());
             return;
         }
 
-        this._checkKeyType(key);
-        this._checkValType(val);
-
-        let aList;
-        // aList = this.d.get(key);
-        if (this.d.hasOwnProperty(key)) {
-            aList = this.d[key];
+        let aList: any[];
+        aList = this.get(key);
+        if (this.has(key)) {
+            aList = this.get(key);
         } else {
             aList = [];
         }
 
         if (!aList.includes(val)) {
             aList.push(val);
-            this.d[key] = aList;
+            this.set(key, aList);
         }
-        */
 
-    }
-
-    //@+node:felix.20220213000510.5: *4* td.checking
-    public _checkKeyType(key: string): void {
-        if (key && typeof (key) !== this.keyType) {
-            // TODO ?
-            // this._reportTypeError(key, this.keyType);
-        }
-    }
-
-    public _checkValType(val: any): void {
-        if (typeof (val) !== this.valType) {
-            // TODO ?
-            // this._reportTypeError(val, this.valType);
-        }
-    }
-
-    // def _reportTypeError(obj: Any, objType: Any) -> str:
-    //     return (
-    //         f"{self._name}\n"
-    //         f"expected: {obj.__class__.__name__}\n"
-    //         f"     got: {objType.__name__}")
-    //@+node:felix.20220213000510.6: *4* td.copy
-    /**
-     * Return a new dict with the same contents.
-     */
-    public copy(name?: string): TypedDict {
-        const newDict = new TypedDict(
-            this._name,
-            this.keyType,
-            this.valType
-        );
-        // newDict.d = JSON.parse(JSON.stringify(this.d));
-        newDict.d = {};
-        for (const p_key in this.d) {
-            newDict.d[p_key] = new GeneralSetting({
-                kind: this.d[p_key].kind,
-                encoding: this.d[p_key].encoding,
-                ivar: this.d[p_key].ivar,
-                setting: this.d[p_key].setting,
-                val: this.d[p_key].val,
-                path: this.d[p_key].path,
-                tag: this.d[p_key].tag,
-                unl: this.d[p_key].unl
-            });
-        }
-        return newDict;
-    }
-
-    //@+node:felix.20220213000510.7: *4* td.get & keys & values
-    public get(key: string, p_default?: any): any {
-        if (this.d.hasOwnProperty(key)) {
-            return this.d[key];
-        } else {
-            return p_default;
-        }
-    }
-
-    public items(): any {
-        return Object.keys(this.d).map((key) => {
-            return [key, this.d[key]];
-        });
-    }
-
-    public keys(): string[] {
-        return Object.keys(this.d);
-    }
-
-    public values(): any[] {
-        return Object.keys(this.d).map((key) => {
-            return this.d[key];
-        });
     }
 
     //@+node:felix.20220213000510.8: *4* td.get_setting & get_string_setting
+    /**
+     * Return the canonical setting name.
+     */
     public get_setting(key: string): any {
         key = key.split('-').join('');
         key = key.split('_').join('');
 
         const gs = this.get(key);
-        const val = gs && gs.val;
+        const val = this.has(key) && gs.val;
         return val;
     }
 
@@ -697,26 +635,17 @@ export class TypedDict {
         this._name = name;
     }
 
-    //@+node:felix.20220213000510.10: *4* td.update
-    /**
-     * Update self.d from a the appropriate dict.
-     */
-    public update(d: { [key: string]: any }): void {
-        if (d instanceof TypedDict) {
-            this.d = { ...this.d, ...d.d };
-        } else {
-            // this.d.update(d);
-            this.d = {
-                ...this.d,
-                ...d
-            };
-        }
-    }
-
     //@-others
 
 }
 
+//@+node:felix.20221221003402.1: *3* g.isTextWrapper & isTextWidget
+export function isTextWidget(w: any): boolean {
+    return app.gui.isTextWidget(w);
+}
+export function isTextWrapper(w: any): boolean {
+    return app.gui.isTextWrapper(w);
+}
 //@+node:felix.20211104210703.1: ** g.Debugging, GC, Stats & Timing
 //@+node:felix.20211205233429.1: *3* g._assert
 /**
@@ -825,21 +754,11 @@ export const getLineAfter = get_line_after;
 //@+node:felix.20211104221354.1: *3* g.listToString     (coreGlobals.py)
 /**
  * Pretty print any array / python list to string
- * TODO : Temporary json stringify
  */
 export function listToString(obj: any): string {
-    return JSON.stringify(obj, undefined, 4);
-}
-
-//@+node:felix.20211104221420.1: *3* g.objToSTring     (coreGlobals.py)
-/**
- * Pretty print any Python object to a string.
- * TODO : Temporary json stringify
- */
-export function objToString(obj: any, indent = '', printCaller = false, tag = null): string {
-
+    // return JSON.stringify(obj, undefined, 4);
     let result: string = "";
-    result = obj.toString();
+    result = safeJsonStringify(obj, null, 2);
     // let cache: any[] = [];
     // result = JSON.stringify(obj, function (key, value) {
     //     if (typeof value === 'object' && value !== null) {
@@ -852,7 +771,39 @@ export function objToString(obj: any, indent = '', printCaller = false, tag = nu
     //     }
     //     return value;
     // });
-    // cache = null; // Enable garbage collection
+    // (cache as any) = null; // Enable garbage collection
+
+
+    return result;
+}
+
+//@+node:felix.20211104221420.1: *3* g.objToSTring     (coreGlobals.py)
+/**
+ * Pretty print any object to a string.
+ */
+export function objToString(obj: any, tag?: string): string {
+
+    let result: string = "";
+    if (tag) {
+        result = result + `${tag}...` + '\n';
+    }
+    result = result + safeJsonStringify(obj, null, 2);
+
+    // let cache: any[] = [];
+    // result = result + JSON.stringify(obj, function (key, value) {
+    //     if (typeof value === 'object' && value !== null) {
+    //         if (cache!.indexOf(value) !== -1) {
+    //             // Circular reference found, discard key
+    //             return;
+    //         }
+    //         // Store value in our collection
+    //         cache!.push(value);
+    //     }
+    //     return value;
+    // }, 4);
+    // (cache as any) = null; // Enable garbage collection
+
+
     return result;
     // # pylint: disable=undefined-loop-variable
     //     # Looks like a a pylint bug.
@@ -936,7 +887,7 @@ export function comment_delims_from_extension(filename: string): [string, string
 
 //@+node:felix.20220111004937.1: *3* g.findAllValidLanguageDirectives
 /**
- * Return list of all valid @language directives in p.b
+ * Return list of all valid @language directives in s
  */
 export function findAllValidLanguageDirectives(s: string): string[] {
 
@@ -945,7 +896,7 @@ export function findAllValidLanguageDirectives(s: string): string[] {
     }
     const languages: string[] = [];
     let m: any;
-    while (m = g_language_pat.exec(s)) {
+    while ((m = g_language_pat.exec(s)) !== null) {
         const language: string = m[1];
         if (isValidLanguage(language)) {
             languages.push(language);
@@ -955,7 +906,7 @@ export function findAllValidLanguageDirectives(s: string): string[] {
 }
 //@+node:felix.20220112011652.1: *3* g.findFirstAtLanguageDirective
 /**
- * Return the first *valid* @language directive ins.
+ * Return the first *valid* @language directive in s.
  */
 export function findFirstValidAtLanguageDirective(s: string): string | undefined {
 
@@ -964,7 +915,7 @@ export function findFirstValidAtLanguageDirective(s: string): string | undefined
     }
     let language: string;
     let m: any;
-    while (m = g_language_pat.exec(s)) {
+    while ((m = g_language_pat.exec(s)) !== null) {
         language = m[1];
         if (isValidLanguage(language)) {
             return language;
@@ -982,20 +933,21 @@ export function findFirstValidAtLanguageDirective(s: string): string | undefined
  * Returns a dict containing the stripped remainder of the line
  * following the first occurrence of each recognized directive
  */
-export function get_directives_dict(p: Position, root?: Position[]): any {
+export function get_directives_dict(p: Position, root?: Position[]): { [key: string]: string } {
 
-    let d: any = {};
+    let d: { [key: string]: string } = {};
     // #1688:    legacy: Always compute the pattern.
     //           g.directives_pat is updated whenever loading a plugin.
     //
     // The headline has higher precedence because it is more visible.
-    let m: any;
+    let m: RegExpExecArray | null;
     for (let s of [p.h, p.b]) {
 
         while ((m = directives_pat.exec(s)) !== null) {
             const word: string = m[1].trim();
 
-            const i: number = m.indices[1][0];
+            // 'indices' property is only present when the d flag is set.
+            const i: number = (m as any).indices[1][0];
             if (d[word]) {
                 continue;
             }
@@ -1018,7 +970,7 @@ export function get_directives_dict(p: Position, root?: Position[]): any {
         // for (let m of anIter) {
         while ((m = g_noweb_root.exec(p.b)) !== null) {
             if (root_node && root_node.__bool__()) {
-                d["root"] = 0;  // value not important
+                d["root"] = "0";  // value not important
             } else {
                 es(`${angleBrackets("*")} may only occur in a topmost node(i.e., without a parent)`);
             }
@@ -1035,8 +987,8 @@ export function get_directives_dict(p: Position, root?: Position[]): any {
  * Returns a list of dicts containing pointers to
  * the start of each directive
  */
-export function get_directives_dict_list(p: Position): any[] {
-    const result: any = [];
+export function get_directives_dict_list(p: Position): { [key: string]: string; }[] {
+    const result: { [key: string]: string; }[] = [];
     const p1: Position = p.copy();
     for (let p of p1.self_and_parents(false)) {
         const root: Position[] | undefined = p.hasParent() ? undefined : [p];
@@ -1140,7 +1092,7 @@ export function getLanguageFromAncestorAtFileNode(p: Position): string | undefin
  */
 export function getLanguageAtPosition(c: Commands, p: Position): string {
 
-    const aList: string[] = get_directives_dict_list(p);
+    const aList: { [key: string]: string; }[] = get_directives_dict_list(p);
     const d: { [key: string]: any } | undefined = scanAtCommentAndAtLanguageDirectives(aList);
     let language: string = d && d['language'] ||
         getLanguageFromAncestorAtFileNode(p) ||
@@ -1163,9 +1115,9 @@ export function getOutputNewline(c: Commands | undefined, name?: string): string
     if (name) {
         s = name;
     } else if (c) {
-        s = c.config.output_newline;
+        s = c.config.getString('output-newline');
     } else {
-        s = app.config.output_newline;
+        s = 'nl'; // Legacy value. Perhaps dubious.
     }
     if (!s) {
         s = '';
@@ -1187,6 +1139,25 @@ export function getOutputNewline(c: Commands | undefined, name?: string): string
     console.assert((typeof s === 'string' || s as any instanceof String), s.toString());
 
     return s;
+}
+//@+node:felix.20221020012052.1: *3* g.inAtNosearch
+/**
+ * Return True if p or p's ancestors contain an @nosearch directive.
+ */
+export function inAtNosearch(p?: Position): boolean {
+
+    if (!p || !p.__bool__()) {
+        return false;  // #2288.
+    }
+    for (let p_p of p.self_and_parents()) {
+        const nosearch = p_p.b.search(/(^@|\n@)nosearch\b/) !== -1;
+        const ignored = p_p.is_at_ignore();
+        if (ignored || nosearch) {
+            return true;
+        }
+    }
+    return false;
+
 }
 //@+node:felix.20211104213330.1: *3* g.isDirective
 /**
@@ -1228,7 +1199,7 @@ export function isValidLanguage(language: string): boolean {
  * Scan aList for @comment and @language directives.
  * @comment should follow @language if both appear in the same node.
  */
-export function scanAtCommentAndAtLanguageDirectives(aList: any[]): {
+export function scanAtCommentAndAtLanguageDirectives(aList: { [key: string]: string; }[]): {
     language: string;
     comment: string;
     delims: [string, string, string];
@@ -1256,10 +1227,28 @@ export function scanAtCommentAndAtLanguageDirectives(aList: any[]): {
     }
     return undefined;
 }
+//@+node:felix.20221220000621.1: *3* g.scanAtEncodingDirectives
+/**
+ * Scan aList for @encoding directives.
+ */
+export function scanAtEncodingDirectives(aList: any[]): string | undefined {
+
+    for (let d of aList) {
+        const encoding = d['encoding'];
+        if (encoding && isValidEncoding(encoding)) {
+            return encoding;
+        }
+        if (encoding && !unitTesting) {
+            error("invalid @encoding:", encoding);
+        }
+    }
+    return undefined;
+
+}
 //@+node:felix.20220412232541.1: *3* g.scanAtHeaderDirectives
 /**
  * scan aList for @header and @noheader directives.
- * @param aList  
+ * @param aList
  */
 export function scanAtHeaderDirectives(aList: any[]): void {
 
@@ -1272,7 +1261,7 @@ export function scanAtHeaderDirectives(aList: any[]): void {
 //@+node:felix.20220412232548.1: *3* g.scanAtLineendingDirectives
 /**
  * Scan aList for @lineending directives.
- * @param aList  
+ * @param aList
  */
 export function scanAtLineendingDirectives(aList: any[]): string | undefined {
     for (let d of aList) {
@@ -1289,8 +1278,8 @@ export function scanAtLineendingDirectives(aList: any[]): string | undefined {
 //@+node:felix.20220412232628.1: *3* g.scanAtPagewidthDirectives
 /**
  * Scan aList for @pagewidth directives.
- * @param aList 
- * @param issue_error_flag 
+ * @param aList
+ * @param issue_error_flag
  */
 export function scanAtPagewidthDirectives(aList: any[], issue_error_flag?: boolean): number | undefined {
 
@@ -1351,8 +1340,8 @@ export function scanAllAtTabWidthDirectives(c: Commands, p: Position): number | 
 //@+node:felix.20220412232655.1: *3* g.scanAtWrapDirectives
 /**
  * Scan aList for @wrap and @nowrap directives.
- * @param aList 
- * @param issue_error_flag 
+ * @param aList
+ * @param issue_error_flag
  */
 export function scanAtWrapDirectives(aList: any[], issue_error_flag?: boolean): boolean | undefined {
 
@@ -1372,8 +1361,8 @@ export function scanAtWrapDirectives(aList: any[], issue_error_flag?: boolean): 
 
 /**
  * Scan p and all ancestors looking for @wrap/@nowrap directives.
- * @param aList 
- * @param issue_error_flag 
+ * @param aList
+ * @param issue_error_flag
  */
 export function scanAllAtWrapDirectives(c: Commands, p: Position): boolean | undefined {
 
@@ -1387,6 +1376,32 @@ export function scanAllAtWrapDirectives(c: Commands, p: Position): boolean | und
     }
 
     return ret;
+}
+//@+node:felix.20221219221446.1: *3* g.scanForAtLanguage
+/**
+ * Scan position p and p's ancestors looking only for @language and @ignore directives.
+ *
+ * Returns the language found, or c.target_language.
+ */
+export function scanForAtLanguage(c: Commands, p: Position): string | undefined {
+
+    // Unlike the code in x.scanAllDirectives, this code ignores @comment directives.
+    if (c && p && p.__bool__()) {
+        for (let w_p of p.self_and_parents(false)) {
+            const d = get_directives_dict(w_p);
+            if (d["language"]) {
+                const z = d["language"];
+                let language;
+                let delim1;
+                let delim2;
+                let delim3;
+                [language, delim1, delim2, delim3] = set_language(z, 0);
+                return language;
+            }
+        }
+    }
+    return c.target_language;
+
 }
 //@+node:felix.20220110202727.1: *3* g.set_delims_from_language
 /**
@@ -1673,28 +1688,73 @@ export function fullPath(c: Commands, p_p: Position, simulate: boolean = false):
  */
 export function getBaseDirectory(c: Commands): string {
 
-    let base: string = app.config.relative_path_base_directory;
+    // let base: string = app.config.relative_path_base_directory;
+
+    if (!c) {
+        return '';  // No relative base given.
+    }
+    let base: string = c.config.getString('relative-path-base-directory');
 
     if (base && base === "!") {
         base = app.loadDir!;
     } else if (base && base === ".") {
         base = c.openDirectory!;
+    } else {
+        return '';  // Settings error.
     }
 
-    if (base && os_path_isabs(base)) {
+    if (os_path_isabs(base)) {
         // Set c.chdir_to_relative_path as needed.
-        if (!(c as any)['chdir_to_relative_path']) {
-            (c as any)['chdir_to_relative_path'] = c.config.getBool('chdir-to-relative-path');
+        if (c.chdir_to_relative_path === undefined) {
+            c.chdir_to_relative_path = c.config.getBool('chdir-to-relative-path');
         }
         // Call os.chdir if requested.
-        if ((c as any).chdir_to_relative_path) {
+        if (c.chdir_to_relative_path) {
             // os.chdir(base);
             process.chdir(base);
         }
         return base;  // base need not exist yet.
     }
 
-    return "";  // No relative base given.
+    return '';  // No relative base given.
+}
+//@+node:felix.20221219233638.1: *3* g.is_sentinel
+/**
+ * Return True if line starts with a sentinel comment.
+ *
+ * Leo 6.7.2: Support blackened sentinels.
+ */
+export function is_sentinel(line: string, delims: [string | undefined, string | undefined, string | undefined]): boolean {
+
+    let delim1, delim2, delim3, sentinel1, sentinel2;
+    [delim1, delim2, delim3] = delims;
+    // Defensive code. Make *sure* delim has no trailing space.
+    if (delim1) {
+        delim1 = delim1.trimEnd();
+    }
+    line = line.trimStart();
+    if (delim1) {
+        sentinel1 = delim1 + '@';
+        sentinel2 = delim1 + ' @';
+        return line.startsWith(sentinel1) || line.startsWith(sentinel2);
+    }
+    let i, j;
+    if (delim2 && delim3) {
+        sentinel1 = delim2 + '@';
+        sentinel2 = delim2 + ' @';
+        if (line.includes(sentinel1)) {
+            i = line.indexOf(sentinel1);
+            j = line.indexOf(delim3);
+            return 0 === i && i < j;
+        }
+        if (line.includes(sentinel2)) {
+            i = line.indexOf(sentinel2);
+            j = line.indexOf(delim3);
+            return 0 === i && i < j;
+        }
+    }
+    error(`is_sentinel: can not happen. delims: ${delims}`);
+    return false;
 }
 //@+node:felix.20220511001701.1: *3* g.openWithFileName
 /**
@@ -1702,7 +1762,7 @@ export function getBaseDirectory(c: Commands): string {
  *
  * Return the commander of the newly-opened outline.
  */
-export async function openWithFileName(fileName: string, old_c: Commands, gui: LeoUI | NullGui): Promise<Commands | undefined> {
+export async function openWithFileName(fileName: string, old_c: Commands, gui: NullGui): Promise<Commands | undefined> {
     return app.loadManager!.loadLocalFile(fileName, gui, old_c);
 }
 //@+node:felix.20220106231022.1: *3* g.readFileIntoString
@@ -1890,18 +1950,14 @@ export function splitLongFileName(fn: string, limit: number = 40): string {
 /**
  * * VSCODE compatibility helper method:
  * Builds a valid URI from a typical filename string.
- * 
- * @param p_fn String form of fsPath or path 
+ *
+ * @param p_fn String form of fsPath or path
  * @returns An URI for file access compatible with web extensions filesystems
  */
 export function makeVscodeUri(p_fn: string): vscode.Uri {
 
     if (isBrowser || app.vscodeUriScheme !== 'file') {
         const newUri = app.vscodeWorkspaceUri!.with({ path: p_fn });
-
-        // console.log('new URI:', JSON.stringify(newUri.toJSON()));
-        // console.log('new URI toString:', newUri.toString());
-
         return newUri;
 
     } else {
@@ -1944,6 +2000,28 @@ export function find_word(s: string, word: string, i: number = 0): number {
     }
 
     return -1;
+}
+//@+node:felix.20221025000455.1: *3* g.see_more_lines
+/**
+ * Extend index i within string s to include n more lines.
+ */
+export function see_more_lines(s: string, ins: number, n = 4): number {
+
+    // Show more lines, if they exist.
+    if (n > 0) {
+        for (let z = 0; z < n; z++) {
+            if (ins >= s.length) {
+                break;
+            }
+            let i;
+            let j;
+            [i, j] = getLine(s, ins);
+            ins = j;
+        }
+    }
+
+    return Math.max(0, Math.min(ins, s.length));
+
 }
 //@+node:felix.20211104230121.1: *3* g.splitLines
 /**
@@ -2294,7 +2372,7 @@ export function skip_ws_and_nl(s: string, i: number): number {
  * Return the git (branch, commit) info associated for the given file.
  */
 export function gitInfoForFile(filename: string): [string, string] {
-    console.log('TODO : gitInfoForFile');
+    // console.log('TODO : gitInfoForFile');
     return ['', '']; // TODO !
     // g.gitInfo and g.gitHeadPath now do all the work.
     // return g.gitInfo(filename)
@@ -2339,7 +2417,7 @@ export function doHook(tag: string, keywords?: { [key: string]: any }): any {
         pr(`***ignoring args param.  tag = ${tag}`);
     }
     */
-    if (!app.config.use_plugins) {
+    if (!app.enablePlugins) {
         if (['open0', 'start1'].includes(tag)) {
             console.log("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.");
             // warning("Plugins disabled: use_plugins is 0 in a leoSettings.leo file.");
@@ -2361,7 +2439,7 @@ export function doHook(tag: string, keywords?: { [key: string]: any }): any {
 
     }
     if (!f) {
-        console.log('TODO: (Plugin system) g.doHook for tag: ', tag);
+        // console.log('TODO: (Plugin system) g.doHook for tag: ', tag);
         return;
     }
     try {
@@ -2599,11 +2677,26 @@ export function toPythonIndex(s: string, index?: number | string): number {
 }
 //@+node:felix.20220410212530.1: *3* g.Strings
 //@+node:felix.20220410212530.2: *4* g.isascii
-/* 
+/*
 def isascii(s: str) -> bool:
     # s.isascii() is defined in Python 3.7.
     return all(ord(ch) < 128 for ch in s)
  */
+//@+node:felix.20221015014048.1: *4* g.isUpper
+export function isUpper(s: string): boolean {
+    return s !== s.toLowerCase() && s === s.toUpperCase();
+}
+//@+node:felix.20221015172825.1: *4* g.capitalize
+export function capitalize(s: string): string {
+    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+//@+node:felix.20221015014725.1: *4* g.enumerate
+export function* enumerate(it: any, start = 0) {
+    let i = start;
+    for (const x of it) {
+        yield [i++, x];
+    }
+}
 //@+node:felix.20220410212530.3: *4* g.angleBrackets & virtual_event_name
 /*
  def angleBrackets(s: str) -> str:
@@ -2636,7 +2729,7 @@ export function ensureTrailingNewlines(s: string, n: number): string {
 }
 
 //@+node:felix.20220410212530.5: *4* g.longestCommonPrefix & g.itemsMatchingPrefixInList
-/* 
+/*
 def longestCommonPrefix(s1: str, s2: str) -> str:
     """Find the longest prefix common to strings s1 and s2."""
     prefix = ''
@@ -2692,7 +2785,7 @@ export function removeTrailing(s: string, chars: string): string {
 }
 
 //@+node:felix.20220410212530.7: *4* g.stripBrackets
-/* 
+/*
 def stripBrackets(s: str) -> str:
     """Strip leading and trailing angle brackets."""
     if s.startswith('<'):
@@ -2702,7 +2795,7 @@ def stripBrackets(s: str) -> str:
     return s
  */
 //@+node:felix.20220410212530.8: *4* g.unCamel
-/* 
+/*
 def unCamel(s: str) -> List[str]:
     """Return a list of sub-words in camelCased string s."""
     result: List[str] = []
@@ -2739,7 +2832,7 @@ export function checkUnicode(s: string, encoding?: string): string {
     return s || '';
 
     // TODO : ? Needed ?
-    /* 
+    /*
     if s is None and g.unitTesting:
         return '';
 
@@ -2829,7 +2922,7 @@ export function toUnicode(s: any, encoding: string | null = null, reportErrors =
 
 //@+node:felix.20220410213527.1: *3* g.Whitespace
 //@+node:felix.20220410213527.2: *4* g.computeLeadingWhitespace
-/* 
+/*
 # Returns optimized whitespace corresponding to width with the indicated tab_width.
 
 def computeLeadingWhitespace(width: int, tab_width: int) -> str:
@@ -2843,7 +2936,7 @@ def computeLeadingWhitespace(width: int, tab_width: int) -> str:
     return ' ' * width
  */
 //@+node:felix.20220410213527.3: *4* g.computeLeadingWhitespaceWidth
-/* 
+/*
 # Returns optimized whitespace corresponding to width with the indicated tab_width.
 
 def computeLeadingWhitespaceWidth(s: str, tab_width: int) -> int:
@@ -2858,7 +2951,7 @@ def computeLeadingWhitespaceWidth(s: str, tab_width: int) -> int:
     return w
  */
 //@+node:felix.20220410213527.4: *4* g.computeWidth
-/* 
+/*
 # Returns the width of s, assuming s starts a line, with indicated tab_width.
 
 def computeWidth(s: str, tab_width: int) -> int:
@@ -2883,7 +2976,7 @@ def computeWidth(s: str, tab_width: int) -> int:
 //
 // The key to this code is the invarient that line never ends in whitespace.
 //@@c
-/* 
+/*
 def wrap_lines(lines: List[str], pageWidth: int, firstLineWidth: int=None) -> List[str]:
     """Returns a list of lines, consisting of the input lines wrapped to the given pageWidth."""
     if pageWidth < 10:
@@ -2951,7 +3044,7 @@ def wrap_lines(lines: List[str], pageWidth: int, firstLineWidth: int=None) -> Li
     return result
  */
 //@+node:felix.20220410213527.8: *4* g.get_leading_ws
-/* 
+/*
 def get_leading_ws(s: str) -> str:
     """Returns the leading whitespace of 's'."""
     i = 0
@@ -2961,7 +3054,7 @@ def get_leading_ws(s: str) -> str:
     return s[0:i]
  */
 //@+node:felix.20220410213527.9: *4* g.optimizeLeadingWhitespace
-/* 
+/*
 # Optimize leading whitespace in s with the given tab_width.
 
 def optimizeLeadingWhitespace(line: str, tab_width: int) -> str:
@@ -2978,7 +3071,7 @@ def optimizeLeadingWhitespace(line: str, tab_width: int) -> str:
 // trailing whitespace-only lines, and in some cases that would change
 // the meaning of program or data.
 //@@c
-/* 
+/*
 def regularizeTrailingNewlines(s: str, kind: str) -> None:
     """Kind is 'asis', 'zero' or 'one'."""
     pass
@@ -3004,7 +3097,7 @@ export function removeLeadingBlankLines(s: string): string {
     }
     return result.join('');
 }
-/* 
+/*
 def removeLeadingBlankLines(s: str) -> str:
     lines = g.splitLines(s)
     result = []
@@ -3018,7 +3111,7 @@ def removeLeadingBlankLines(s: str) -> str:
     return ''.join(result)
  */
 //@+node:felix.20220410213527.13: *4* g.removeLeadingWhitespace
-/* 
+/*
 # Remove whitespace up to first_ws wide in s, given tab_width, the width of a tab.
 
 def removeLeadingWhitespace(s: str, first_ws: int, tab_width: int) -> str:
@@ -3041,7 +3134,7 @@ def removeLeadingWhitespace(s: str, first_ws: int, tab_width: int) -> str:
     return s
  */
 //@+node:felix.20220410213527.14: *4* g.removeTrailingWs
-/* 
+/*
 # Warning: string.rstrip also removes newlines!
 
 def removeTrailingWs(s: str) -> str:
@@ -3051,7 +3144,7 @@ def removeTrailingWs(s: str) -> str:
     return s[: j + 1]
  */
 //@+node:felix.20220410213527.15: *4* g.skip_leading_ws
-/* 
+/*
 # Skips leading up to width leading whitespace.
 
 def skip_leading_ws(s: str, i: int, ws: int, tab_width: int) -> int:
@@ -3068,7 +3161,7 @@ def skip_leading_ws(s: str, i: int, ws: int, tab_width: int) -> int:
     return i
  */
 //@+node:felix.20220410213527.16: *4* g.skip_leading_ws_with_indent
-/* 
+/*
 def skip_leading_ws_with_indent(s: str, i: int, tab_width: int) -> Tuple[int, int]:
     """Skips leading whitespace and returns (i, indent),
 
@@ -3088,7 +3181,7 @@ def skip_leading_ws_with_indent(s: str, i: int, tab_width: int) -> Tuple[int, in
     return i, count
  */
 //@+node:felix.20220410213527.17: *4* g.stripBlankLines
-/* 
+/*
 def stripBlankLines(s: str) -> str:
     lines = g.splitLines(s)
     for i, line in enumerate(lines):
@@ -3336,6 +3429,15 @@ export const trace = console.log;
 // TODO : Replace with output to proper 'Leo terminal output'
 
 //@+node:felix.20211104211115.1: ** g.Miscellaneous
+//@+node:felix.20221017010728.1: *3* g.process_time
+/**
+ * python process_time equivalent that returns the current timestamp in SECONDS
+ */
+export function process_time(): number {
+    const w_now = process.hrtime();
+    const [w_secs, w_nanosecs] = w_now;
+    return (w_secs * 1.0) + Math.floor(w_nanosecs / 1000);
+}
 //@+node:felix.20220611031515.1: *3* g.convertPythonDayjs
 export function convertPythonDayjs(s: string): string {
 
@@ -3362,8 +3464,8 @@ export function convertPythonDayjs(s: string): string {
         ["%S", "ss"], // %S    Second as a zero-padded decimal number.	00, 01, ..., 59
         ["%-S", "s"], // %-S  Second as a decimal number.	0, 1, ..., 59
         ["%f", ""], // %f    Microsecond as a decimal number, zero-padded on the left.	000000 - 999999
-        ["%z", "ZZ"], // %z    UTC offset in the form +HHMM or -HHMM.	 
-        ["%Z", ""], // %Z    Time zone name.	 
+        ["%z", "ZZ"], // %z    UTC offset in the form +HHMM or -HHMM.
+        ["%Z", ""], // %Z    Time zone name.
         ["%j", ""], // %j    Day of the year as a zero-padded decimal number.	001, 002, ..., 366
         ["%-j", ""], // %-j  Day of the year as a decimal number.	1, 2, ..., 366
         ["%U", ""], // %U    Week number of the year (Sunday as the first day of the week). All days in a new year preceding the first Sunday are considered to be in week 0.	00, 01, ..., 53
@@ -3371,7 +3473,7 @@ export function convertPythonDayjs(s: string): string {
         ["%c", "LLLL"], // %c    Locale’s appropriate date and time representation.	Mon Sep 30 07:06:05 2013
         ["%x", "L"], // %x    Locale’s appropriate date representation.	09/30/13
         ["%X", "LTS"], // %X    Locale’s appropriate time representation.	07:06:05
-        ["%%", "%"], // %%    A literal '%' character.	
+        ["%%", "%"], // %%    A literal '%' character.
     ];
 
     for (const pair of table) {
@@ -3383,13 +3485,13 @@ export function convertPythonDayjs(s: string): string {
     return s;
 }
 
-//@+node:felix.20220206010631.1: *3* dedent
+//@+node:felix.20220206010631.1: *3* g.dedent
 /**
  * This is similar to Python's "textwrap.dedent" function
  * from https://gist.github.com/malthe/02350255c759d5478e89
  */
 export function dedent(text: string) {
-    const re_whitespace = /^([ \t]*)(.*)\n/gm;
+    const re_whitespace = /^([ \t]*)(.*)\n/gm; // Needs 'g' flag for exec in while loop
     let l;
     let m;
     let i;
@@ -3411,7 +3513,31 @@ export function dedent(text: string) {
     }
     return text;
 }
-//@+node:felix.20211104222646.1: *3* g.plural          (coreGlobals.py)
+//@+node:felix.20221218195057.1: *3* g.reEscape
+
+/**
+ * python re.escape equivalent in typescript
+ */
+export function reEscape(text: string) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+//@+node:felix.20221219233315.1: *3* g.ltrim
+export function ltrim(str: string, ch: string): string {
+    let i = 0;
+    while (ch.includes(str.charAt(i)) && ++i && i < str.length) {
+        // pass, the ++i expression is doing the job
+    };
+    return str.substring(i, str.length);
+}
+//@+node:felix.20230212205315.1: *3* g.rtrim
+export function rtrim(str: string, ch: string): string {
+    let i = str.length;
+    while (i-- && ch.includes(str.charAt(i))) {
+        // pass, the i-- expression is doing the job
+    };
+    return str.substring(0, i + 1);
+}
+//@+node:felix.20211104222646.1: *3* g.plural (coreGlobals.py)
 /**
  * Return "s" or "" depending on n.
  */
@@ -3427,6 +3553,51 @@ export function plural(obj: any): string {
     return n === 1 ? '' : "s";
 }
 
+//@+node:felix.20230220001637.1: *3* g.useSyntaxColoring
+/**
+ * True if p's parents enable coloring in p.
+ */
+export function useSyntaxColoring(p: Position): boolean {
+
+    // Special cases for the selected node.
+    let d = findColorDirectives(p);
+    if (d.includes('killcolor')) {
+        return false;
+    }
+    if (d.includes('nocolor-node')) {
+        return false;
+    }
+    // Now look at the parents.
+    for (const w_p of p.parents()) {
+        d = findColorDirectives(w_p);
+
+        // @killcolor anywhere disables coloring.
+        if (d.includes('killcolor')) {
+            return false;
+        }
+        // unambiguous @color enables coloring.
+        if (d.includes('color') && !d.includes('nocolor')) {
+            return true;
+        }
+        // Unambiguous @nocolor disables coloring.
+        if (d.includes('nocolor') && !d.includes('color')) {
+            return false;
+        }
+    }
+    return true;
+}
+//@+node:felix.20230220001655.1: *3* g.findColorDirectives
+/**
+ * Return an array with each color directive in p.b, without the leading '@'.
+ */
+export function findColorDirectives(p: Position): string[] {
+
+    const d = p.b.match(color_directives_pat) || [];
+
+    return d.map((s: string) => {
+        return s.substring(1);
+    });
+}
 //@+node:felix.20211227182611.1: ** g.os_path_ Wrappers
 //@+at Note: all these methods return Unicode strings. It is up to the user to
 // convert to an encoded string as needed, say when opening a file.
@@ -3974,7 +4145,7 @@ export function os_path_splitext(p_path: string): [string, string] {
 //@+node:felix.20220411212559.1: ** g.Parsing & Tokenizing
 //@+node:felix.20220411212559.2: *3* g.createTopologyList
 /**
- * Creates a list describing a node and all its descendents
+ * Creates a list describing a node and all its descendants
  */
 export function createTopologyList(c: Commands, root?: Position, useHeadlines?: boolean): any[] {
 
@@ -4050,13 +4221,13 @@ export function getDocStringForFunction(func: any): string {
     // Do special cases first.
     let s: string = '';
 
-    // TODO: Special cases needed? 
-    /* 
+    // TODO: Special cases needed?
+    /*
     const get_defaults = (func: string, i: number) : any => {
         const defaults = inspect.getfullargspec(func)[3];
         return defaults[i];
     };
-    
+
     if (name(func) === 'minibufferCallback'){
         func = get_defaults(func, 0);
         if (hasattr(func, 'func.__doc__') && func.__doc__.trim()){
@@ -4124,7 +4295,7 @@ export function python_tokenize(s: string): [string, string, number][] {
 }
 
 //@+node:felix.20211104211229.1: ** g.Scripting
-//@+node:felix.20211104220723.1: *3* g.getScript
+//@+node:felix.20221219205826.1: *3* g.getScript & helpers
 /**
  * Return the expansion of the selected text of node p.
  * Return the expansion of all of node p's body text if
@@ -4135,8 +4306,133 @@ export function getScript(c: Commands, p: Position,
     forcePythonSentinels: boolean = true,
     useSentinels: boolean = true
 ): string {
-    console.log("get script called");
+    console.log("TODO : 'get script' called!");
     return "";
+
+    let script: string;
+    let s: string;
+    const w = c.frame.body.wrapper;
+
+    if (!p || !p.__bool__()) {
+        p = c.p;
+    }
+
+    try {
+        if (app.inBridge) {
+            s = p.b;
+        } else if (w && p.__eq__(c.p) && useSelectedText && w.hasSelection()) {
+            s = w.getSelectedText();
+        } else {
+            s = p.b;
+        }
+        // Remove extra leading whitespace so the user may execute indented code.
+        s = dedent(s);
+        s = extractExecutableString(c, p, s);
+        script = composeScript(
+            c, p, s,
+            forcePythonSentinels,
+            useSentinels
+        );
+    }
+    catch (exception) {
+        es_print("unexpected exception in g.getScript");
+        es_exception();
+        script = '';
+    }
+    return script;
+
+}
+//@+node:felix.20221219205826.2: *4* g.composeScript
+/**
+ * Compose a script from p.b.
+ */
+export function composeScript(
+    c: Commands,
+    p: Position,
+    s: string,
+    forcePythonSentinels: boolean = true,
+    useSentinels: boolean = true
+): string {
+
+    // This causes too many special cases.
+    // if not g.unitTesting and forceEncoding:
+    // aList = g.get_directives_dict_list(p)
+    // encoding = scanAtEncodingDirectives(aList) or 'utf-8'
+    // s = g.insertCodingLine(encoding,s)
+    if (!s.trim()) {
+        return '';
+    }
+    const at = c.atFileCommands;
+    const old_in_script = app.inScript;
+
+    let script;
+
+    try {
+        // #1297: set inScript flags.
+        inScript = true;
+        app.inScript = true;
+        app.scriptDict["script1"] = s;
+        // Important: converts unicode to utf-8 encoded strings.
+        script = at.stringToString(
+            p.copy(),
+            s,
+            forcePythonSentinels,
+            useSentinels
+        );
+        // Important, the script is an **encoded string**, not a unicode string.
+        script = script.replace(/(?:\r\n)/g, '\n'); // Use brute force.
+        app.scriptDict["script2"] = script;
+    }
+    finally {
+        app.inScript = old_in_script;
+        inScript = old_in_script;
+    }
+    return script;
+
+}
+
+//@+node:felix.20221219205826.3: *4* g.extractExecutableString
+/**
+ * Return all lines for the given @language directive.
+ *
+ * Ignore all lines under control of any other @language directive.
+ */
+export function extractExecutableString(c: Commands, p: Position, s: string): string {
+
+    //
+    // Rewritten to fix //1071.
+    if (unitTesting) {
+        return s;  // Regretable, but necessary.
+    }
+    //
+    // Return s if no @language in effect. Should never happen.
+    const language = scanForAtLanguage(c, p);
+    if (!language) {
+        return s;
+    }
+    //
+    // Return s if @language is unambiguous.
+    const pattern = /^@language\s+(\w+)/g;
+    const matches = ((s || '').match(pattern) || []); // list(re.finditer(pattern, s, re.MULTILINE))
+    if (matches.length < 2) {
+        return s;
+    }
+
+    //
+    // Scan the lines, extracting only the valid lines.
+    let extracting = false;
+    let result = [];
+
+    for (let line of splitLines(s)) {
+        const m = pattern.exec(line);// re.match(pattern, line);
+        if (m) {
+            extracting = m[1] === language;
+        } else if (extracting) {
+            result.push(line);
+        }
+    }
+    return result.join("");
+
 }
 
 //@+node:felix.20220211012808.1: *3* g.find*Node*

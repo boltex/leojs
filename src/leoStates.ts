@@ -15,7 +15,19 @@ export class LeoStates {
     public qLastContextChange: Thenable<unknown>; // Promise that the last state change is applied
 
     /**
-     * General 'Leo is ready' state
+     * Used mostly for leojsOutline ViewsWelcome content
+     */
+    private _leojsStartupDone: boolean = false;
+    get leojsStartupDone(): boolean {
+        return this._leojsStartupDone;
+    }
+    set leojsStartupDone(p_value: boolean) {
+        this._leojsStartupDone = p_value;
+        this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_STARTUP_DONE, p_value);
+    }
+
+    /**
+     * General 'Leo is ready' state, equivalent to leoBridgeReady in leoInteg
      */
     private _leoReady: boolean = false;
     get leoReady(): boolean {
@@ -36,8 +48,8 @@ export class LeoStates {
     set fileOpenedReady(p_value: boolean) {
         this._fileOpenedReady = p_value;
         this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.TREE_OPENED, p_value);
+        this._leoJs.setTreeViewTitle();
     }
-
 
     /**
      * Currently opened Leo file path and name, empty string if new unsaved file.
@@ -54,8 +66,8 @@ export class LeoStates {
             this._leoOpenedFileName = "";
             this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.TREE_TITLED, false);
         }
+        this._leoJs.setTreeViewTitle();
     }
-
 
     /**
      * Currently opened commander is dirty
@@ -72,6 +84,7 @@ export class LeoStates {
         }
         this._leoChanged = p_value;
         this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_CHANGED, p_value);
+        this._leoJs.setTreeViewTitle();
     }
 
     /**
@@ -220,7 +233,7 @@ export class LeoStates {
     }
     set leoRoot(p_value: boolean) {
         this._leoRoot = p_value;
-        this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.SELECTED_ROOT, p_value);
+        this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_CAN_HOIST, !p_value);
     }
 
     constructor(

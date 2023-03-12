@@ -8,7 +8,7 @@ import * as os from "os";
 import * as path from 'path';
 import * as g from './leoGlobals';
 import * as utils from "../utils";
-import { LeoUI, NullGui } from '../leoUI';
+import { NullGui } from "./leoGui";
 import { NodeIndices, VNode, Position } from './leoNodes';
 import { Commands } from './leoCommands';
 import { FastRead, FileCommands } from "./leoFileCommands";
@@ -16,8 +16,9 @@ import { GlobalConfigManager, SettingsTreeParser } from "./leoConfig";
 import { Constants } from "../constants";
 import { ExternalFilesController } from "./leoExternalFiles";
 import { LeoFrame } from "./leoFrame";
-import { TypedDict } from "./leoGlobals";
+import { SettingsDict } from "./leoGlobals";
 import { leojsSettingsXml } from "../leojsSettings";
+import { LeoUI } from "../leoUI";
 
 //@-<< imports >>
 //@+others
@@ -107,8 +108,9 @@ export class LeoApp {
     public batchMode: boolean = false; // True: run in batch mode.
     public debug: string[] = []; // A list of switches to be enabled.
     public diff: boolean = false; // True: run Leo in diff mode.
+    public enablePlugins: boolean = true; // True: run start1 hook to load plugins. --no-plugins
     public failFast: boolean = false; // True: Use the failfast option in unit tests.
-    public gui: LeoUI | NullGui | undefined; // The gui class.
+    public gui!: NullGui; // The gui class.
     public guiArgName: string | undefined; // The gui name given in --gui option.
     public listen_to_log_flag: boolean = false; // True: execute listen-to-log command.
     public loaded_session: boolean = false; // Set at startup if no files specified on command line.
@@ -178,7 +180,7 @@ export class LeoApp {
     public commander_cacher: any = null; // The singleton leoCacher.CommanderCacher instance.
     public commander_db: any = null; // The singleton db, managed by g.app.commander_cacher.
     public config!: GlobalConfigManager; // The singleton leoConfig instance.
-    public db: any = null; // The singleton global db, managed by g.app.global_cacher.
+    public db: any = undefined; // The singleton global db, managed by g.app.global_cacher.
     public externalFilesController: any = null; // The singleton ExternalFilesController instance.
     public global_cacher: any = null; // The singleton leoCacher.GlobalCacher instance.
     public idleTimeManager: any = null; // The singleton IdleTimeManager instance.
@@ -197,13 +199,20 @@ export class LeoApp {
     //@+<< LeoApp: global reader/writer data >>
     //@+node:felix.20210103024632.8: *5* << LeoApp: global reader/writer data >>
     // From leoAtFile.py.
-    public atAutoWritersDict: any = {};
-    public writersDispatchDict: any = {};
+    public atAutoWritersDict: { [key: string]: any } = {};
+    public writersDispatchDict: { [key: string]: any } = {};
     // From leoImport.py
-    public atAutoDict: any = {};
+    public atAutoDict: { [key: string]: any } = {};
     // Keys are @auto names, values are scanner classes.
-    public classDispatchDict: any = {};
+    public classDispatchDict: { [key: string]: any } = {};
 
+    // True if an @auto writer should write sentinels,
+    // even if the external file doesn't actually contain sentinels.
+    public force_at_auto_sentinels = false;
+
+    // leo 5.6: allow undefined section references in all @auto files.
+    // Leo 6.6.4: Make this a permanent g.app ivar.
+    public allow_undefined_refs = false;
     //@-<< LeoApp: global reader/writer data >>
     //@+<< LeoApp: global status vars >>
     //@+node:felix.20210103024632.9: *5* << LeoApp: global status vars >>
@@ -1133,7 +1142,7 @@ export class LeoApp {
         if (g.app.debug.includes('shutdown')) {
             g.trace(`changed: ${c.changed} ${c.shortFileName()}`);
         }
-        // c.endEditing()  // Commit any open edits.
+        c.endEditing();  // Commit any open edits.
         if (c.promptingForClose) {
             // There is already a dialog open asking what to do.
             return false;
@@ -1264,6 +1273,7 @@ export class LeoApp {
      * Forget the open file, so that is no longer considered open.
      */
     public forgetOpenFile(fn: string): void {
+
         const trace: boolean = g.app.debug.includes('shutdown');
         const d: any = g.app.db;
         const tag: string = 'open-leo-files';
@@ -1333,7 +1343,7 @@ export class LeoApp {
      * Modified version for leojs: call leoUI.makeAllBindings
      */
     public makeAllBindings(): void {
-        (this.gui as LeoUI).makeAllBindings();
+        this.gui.makeAllBindings();
         /* 
         app = self
         for c in app.commanders():
@@ -1347,7 +1357,7 @@ export class LeoApp {
      */
     public newCommander(
         fileName: string,
-        gui?: LeoUI | NullGui,
+        gui?: NullGui,
         previousSettings?: PreviousSettings,
         relativeFileName?: string,
     ): Commands {
@@ -1355,7 +1365,7 @@ export class LeoApp {
         // This takes about 3/4 sec when called by the leoBridge module.
         // Timeit reports 0.0175 sec when using a nullGui.
         if (!gui) {
-            gui = g.app.gui!;
+            gui = g.app.gui;
         }
         const c = new Commands(
             fileName,
@@ -1373,7 +1383,7 @@ export class LeoApp {
 
         const index = g.app.windowList.indexOf(frame, 0);
 
-        (g.app.gui as LeoUI).frameIndex = index;
+        g.app.gui.frameIndex = index;
 
         /* 
         frame.deiconify()
@@ -1404,10 +1414,10 @@ export class LoadManager {
     // Global settings & shortcuts dicts...
     // The are the defaults for computing settings and shortcuts for all loaded files.
 
-    // A g.TypedDict: the join of settings in leoSettings.leo & myLeoSettings.leo.
-    public globalSettingsDict!: g.TypedDict;
-    // A g.TypedDict: the join of shortcuts in leoSettings.leo & myLeoSettings.leo
-    public globalBindingsDict!: g.TypedDict;
+    // A g.SettingsDict: the join of settings in leoSettings.leo & myLeoSettings.leo.
+    public globalSettingsDict!: g.SettingsDict;
+    // A g.SettingsDict: the join of shortcuts in leoSettings.leo & myLeoSettings.leo
+    public globalBindingsDict!: g.SettingsDict;
 
     public files: string[]; // List of files to be loaded.
     public options: { [key: string]: any }; // Dictionary of user options. Keys are option names.
@@ -1855,7 +1865,7 @@ export class LoadManager {
      * Merge the settings dicts from c's outline into *new copies of*
      * settings_d and bindings_d.
      */
-    public computeLocalSettings(c: Commands, settings_d: g.TypedDict, bindings_d: g.TypedDict, localFlag: boolean): [g.TypedDict, g.TypedDict] {
+    public computeLocalSettings(c: Commands, settings_d: g.SettingsDict, bindings_d: g.SettingsDict, localFlag: boolean): [g.SettingsDict, g.SettingsDict] {
 
         const lm = this;
         let shortcuts_d2;
@@ -1869,7 +1879,7 @@ export class LoadManager {
         if (settings_d2) {
             if (g.app.trace_setting) {
                 const key = g.app.config.munge(g.app.trace_setting);
-                const val = key ? settings_d2.d[key] : undefined;
+                const val = key ? settings_d2.get(key) : undefined;
                 if (val) {
                     const fn = g.shortFileName(val.path);
                     g.es_print(
@@ -1893,25 +1903,19 @@ export class LoadManager {
     /**
      * Create lm.globalSettingsDict & lm.globalBindingsDict.
      */
-    public createDefaultSettingsDicts(): [g.TypedDict, g.TypedDict] {
+    public createDefaultSettingsDicts(): [g.SettingsDict, g.SettingsDict] {
 
-        const settings_d = g.app.config.defaultsDict;
-
-        // console.assert( isinstance(settings_d, g.TypedDict), settings_d); 
+        const settings_d = new g.SettingsDict('lm.globalSettingsDict');
 
         settings_d.setName('lm.globalSettingsDict');
 
-        const bindings_d = new g.TypedDict(  // was TypedDictOfLists.
-            'lm.globalBindingsDict',
-            'string',
-            'object',
-        );
+        const bindings_d = new g.SettingsDict('lm.globalBindingsDict');
 
         return [settings_d, bindings_d];
     }
 
     //@+node:felix.20220602202929.1: *4* LM.createSettingsDicts
-    public createSettingsDicts(c: Commands, localFlag: boolean): [g.TypedDict | undefined, g.TypedDict | undefined] {
+    public createSettingsDicts(c: Commands, localFlag: boolean): [g.SettingsDict | undefined, g.SettingsDict | undefined] {
         if (c) {
             // returns the *raw* shortcutsDict, not a *merged* shortcuts dict.
             const parser = new SettingsTreeParser(c, localFlag);
@@ -2116,13 +2120,9 @@ export class LoadManager {
      * Invert a shortcut dict whose keys are command names,
      * returning a dict whose keys are strokes.
      */
-    public invert(d: any): any {
+    public invert(d: any): g.SettingsDict {
 
-        const result = new TypedDict(  // was TypedDictOfLists.
-            `inverted ${d.name()}`,
-            'KeyStroke',
-            'BindingInfo'
-        );
+        const result = new SettingsDict(`inverted ${d.name()}`);
 
         for (let commandName of Object.keys(d)) {
             for (let bi of d.get(commandName, [])) {
@@ -2141,14 +2141,10 @@ export class LoadManager {
      * Uninvert an inverted shortcut dict whose keys are strokes,
      * returning a dict whose keys are command names.
      */
-    public uninvert(d: any): TypedDict {
+    public uninvert(d: g.SettingsDict): SettingsDict {
 
-        // console.assert(d.keyType === g.KeyStroke, d.keyType); // TODO ? NEeded ?
-        const result = new TypedDict( // was TypedDictOfLists.
-            `uninverted ${d.name()}`,
-            'commandName',
-            'BindingInfo'
-        );
+        // console.assert(d.keyType === g.KeyStroke, d.keyType); // TODO ? Needed ?
+        const result = new SettingsDict(`uninverted ${d.name()}`);
 
         for (let stroke of Object.keys(d)) {
             for (let bi of d.get(stroke, [])) {
@@ -2257,8 +2253,8 @@ export class LoadManager {
         let commanders = [lm.leo_settings_c, lm.my_settings_c];
         commanders = commanders.filter(c => !!c);
 
-        let settings_d: g.TypedDict;
-        let bindings_d: g.TypedDict;
+        let settings_d: g.SettingsDict;
+        let bindings_d: g.SettingsDict;
 
         [settings_d, bindings_d] = lm.createDefaultSettingsDicts();
 
@@ -2344,7 +2340,7 @@ export class LoadManager {
         const ok = await lm.doPostPluginsInit(); // loads recent, or, new untitled.
         g.app.makeAllBindings();
 
-        (g.app.gui as LeoUI).finishStartup();
+        g.app.gui.finishStartup();
 
         g.es('');  // Clears horizontal scrolling in the log pane.
 
@@ -2385,7 +2381,7 @@ export class LoadManager {
                 for (let n = 0; n < lm.files.length; n++) {
                     const fn = lm.files[n];
                     lm.more_cmdline_files = n < (lm.files.length - 1);
-                    c = await lm.loadLocalFile(fn, g.app.gui!);
+                    c = await lm.loadLocalFile(fn, g.app.gui);
                     // Returns None if the file is open in another instance of Leo.
                     if (c && !c1) {  // #1416:
                         c1 = c;
@@ -2511,7 +2507,7 @@ export class LoadManager {
         return c
         */
         const fn: string = "";
-        const c = await lm.loadLocalFile(fn, g.app.gui!);
+        const c = await lm.loadLocalFile(fn, g.app.gui);
         if (!c) {
             return undefined;
         }
@@ -2564,7 +2560,7 @@ export class LoadManager {
 
         const lm: LoadManager = this;
 
-        g.app.gui = new LeoUI(this._context!);
+        g.app.gui = new LeoUI(undefined, this._context!); // replaces createDefaultGui
 
         /* 
         gui_option = lm.options.get('gui')
@@ -2601,7 +2597,6 @@ export class LoadManager {
         // Force the user to set g.app.leoID.
         await g.app.setLeoID(true, verbose);
 
-        g.app.inBridge = true;  // (From Leo) Support for g.getScript.
         // w_leoID will at least be 'None'.
         g.app.idleTimeManager = new IdleTimeManager();
         // g.app.backgroundProcessManager = new leoBackground.BackgroundProcessManager();
@@ -2620,7 +2615,7 @@ export class LoadManager {
     }
 
     //@+node:felix.20210120004121.31: *4* LM.loadLocalFile & helpers
-    public async loadLocalFile(fn: string, gui: LeoUI | NullGui, old_c?: Commands): Promise<Commands | undefined> {
+    public async loadLocalFile(fn: string, gui: NullGui, old_c?: Commands): Promise<Commands | undefined> {
 
         /*Completely read a file, creating the corresonding outline.
 
@@ -2641,7 +2636,7 @@ export class LoadManager {
 
         // #2489: If fn is empty, open an empty, untitled .leo file.
         if (!fn) {
-            c = await lm.openEmptyLeoFile(gui as LeoUI, old_c);
+            c = await lm.openEmptyLeoFile(gui, old_c);
             return c;
         }
 
@@ -2668,7 +2663,7 @@ export class LoadManager {
     /**
      * Open an empty, untitled, new Leo file.
      */
-    public async openEmptyLeoFile(gui: LeoUI, old_c?: Commands): Promise<Commands> {
+    public async openEmptyLeoFile(gui: NullGui, old_c?: Commands): Promise<Commands> {
 
         const lm = this;
         const w_previousSettings = await lm.getPreviousSettings(undefined);
@@ -2710,7 +2705,7 @@ export class LoadManager {
      * Creates an empty outline if fn is a non-existent Leo file.
      * Creates an wrapper outline if fn is an external file, existing or not.
      */
-    public async openFileByName(fn: string, gui: LeoUI | NullGui, old_c?: Commands, previousSettings?: PreviousSettings): Promise<Commands | undefined> {
+    public async openFileByName(fn: string, gui: NullGui, old_c?: Commands, previousSettings?: PreviousSettings): Promise<Commands | undefined> {
 
         const lm: LoadManager = this;
         // Disable the log.
@@ -2782,8 +2777,7 @@ export class LoadManager {
             const c = frame.c;
             if (g.os_path_realpath(munge(fn)) === g.os_path_realpath(munge(c.mFileName))) {
 
-                (g.app.gui as LeoUI).frameIndex = index;
-                (g.app.gui as LeoUI).refreshDocumentsPane();
+                g.app.gui.frameIndex = index;
 
                 c.outerUpdate();
                 return c;
@@ -2798,7 +2792,7 @@ export class LoadManager {
     public finishOpen(c: Commands): void {
 
         // lm = self
-        const k = c.k;
+        // const k = c.k;
         // console.assert(k);
 
         // New in Leo 4.6: provide an official way for very late initialization.
@@ -2810,19 +2804,20 @@ export class LoadManager {
         if (c.chapterController) {
             c.chapterController.finishCreate();
         }
-        if (k) {
-            k.setDefaultInputState();
-        }
+        // if (k && k.setDefaultInputState) {
+        //     k.setDefaultInputState();
+        // }
 
         // c.initialFocusHelper();
 
-        if (k) {
-            k.showStateAndMode();
-        }
+        // if (k) {
+        //     k.showStateAndMode();
+        // }
+
         // c.frame.initCompleteHint();
         const index = g.app.windowList.indexOf(c.frame);
         if (index >= 0) {
-            (g.app.gui as LeoUI).frameIndex = index;
+            g.app.gui.frameIndex = index;
         }
 
         c.outerUpdate();  // #181: Honor focus requests.
@@ -3019,10 +3014,10 @@ export class LoadManager {
  * files and passed to the second pass.
  */
 export class PreviousSettings {
-    public settingsDict: g.TypedDict | undefined;
-    public shortcutsDict: g.TypedDict | undefined;
+    public settingsDict: g.SettingsDict | undefined;
+    public shortcutsDict: g.SettingsDict | undefined;
 
-    constructor(settingsDict: g.TypedDict | undefined, shortcutsDict: g.TypedDict | undefined) {
+    constructor(settingsDict: g.SettingsDict | undefined, shortcutsDict: g.SettingsDict | undefined) {
         if (!shortcutsDict || !settingsDict) {  // #1766: unit tests.
             const lm = g.app.loadManager!;
             [settingsDict, shortcutsDict] = lm.createDefaultSettingsDicts();

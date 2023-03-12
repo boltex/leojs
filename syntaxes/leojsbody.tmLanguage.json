@@ -1,0 +1,199 @@
+{
+    "name": "Leo Body",
+    "scopeName": "leojs.injection",
+    "injectionSelector": "L:source.leojsbody",
+    "patterns": [
+        {
+            "include": "#leo-sectionref"
+        },
+        {
+            "include": "#leo-keywords"
+        },
+        {
+            "include": "#leo-languages"
+        },
+        {
+            "include": "#leo-section-delims"
+        },
+        {
+            "include": "#leo-no-color"
+        },
+        {
+            "include": "#leo-comments"
+        }
+    ],
+    "repository": {
+        "leo-comments": {
+            "patterns": [
+                {
+                    "name": "comment.block.leojsbody",
+                    "begin": "^(@doc|@)($|\\s+)",
+                    "beginCaptures": {
+                        "1": {
+                            "name": "keyword"
+                        }
+                    },
+                    "end": "^(@code|@c)($|\\s+)",
+                    "endCaptures": {
+                        "1": {
+                            "name": "keyword"
+                        }
+                    }
+                }
+            ]
+        },
+        "leo-no-color": {
+            "patterns": [
+                {
+                    "name": "documentation.block.leobody",
+                    "begin": "^(@nocolor)($|\\s+)",
+                    "beginCaptures": {
+                        "1": {
+                            "name": "keyword"
+                        }
+                    },
+                    "end": "^(@color)($|\\s+)",
+                    "endCaptures": {
+                        "1": {
+                            "name": "keyword"
+                        }
+                    }
+                }
+            ]
+        },
+        "leo-section-delims": {
+            "patterns": [
+                {
+                    "name": "markup.inline.raw",
+                    "begin": "^(@raw)($|\\s+)",
+                    "end": "^(@end_raw)($|\\s+)",
+                    "beginCaptures": {
+                        "0": {
+                            "name": "invalid"
+                        }
+                    },
+                    "endCaptures": {
+                        "0": {
+                            "name": "invalid"
+                        }
+                    }
+                }
+            ]
+        },
+        "leo-sectionref": {
+            "patterns": [
+                {
+                    "match": "(<<)(.*?)(>>)",
+                    "captures": {
+                        "1": {
+                            "name": "punctuation.section.embedded"
+                        },
+                        "2": {
+                            "name": "markup.underline.link.markdown"
+                        },
+                        "3": {
+                            "name": "punctuation.section.embedded"
+                        }
+                    }
+                }
+            ]
+        },
+        "leo-keywords": {
+            "patterns": [
+                {
+                    "match": "^\\s*(@others|@all)($|\\s+)",
+                    "name": "keyword"
+                },
+                {
+                    "match": "^(@language)\\s+\\b(batch|c|cplusplus|csharp|css|fortran|fortran90|haskell|html|java|javascript|json|latex|lua|makefile|matlab|md|pascal|perl|php|python|rest|ruby|rust|typescript)\\b",
+                    "name": "keyword"
+                },
+                {
+                    "match": "^(@encoding|@ignore|@lineending|@path|@pagewidth|@tabwidth)($|\\s+)",
+                    "name": "keyword"
+                },
+                {
+                    "match": "^(@color|@killcolor|@nocolor|@nocolor\\-node)($|\\s+)",
+                    "name": "keyword"
+                },
+                {
+                    "match": "^(@first|@last)($|\\s+)",
+                    "name": "keyword"
+                },
+                {
+                    "match": "^(@section-delims)($|\\s+)",
+                    "name": "keyword"
+                },
+                {
+                    "match": "^(@wrap|@nowrap)($|\\s+)",
+                    "name": "keyword"
+                },
+                {
+                    "match": "^(@comment|@delims)($|\\s+)",
+                    "name": "invalid"
+                }
+            ]
+        },
+        "strings": {
+            "patterns": [
+                {
+                    "name": "string.quoted.double.leojsbody",
+                    "begin": "\"",
+                    "end": "\"",
+                    "patterns": [
+                        {
+                            "name": "constant.character.escape.leojsbody",
+                            "match": "\\\\."
+                        }
+                    ]
+                },
+                {
+                    "name": "string.quoted.single.leojsbody",
+                    "begin": "\\'",
+                    "end": "\\'",
+                    "patterns": [
+                        {
+                            "name": "constant.character.escape.leojsbody",
+                            "match": "\\\\."
+                        }
+                    ]
+                }
+            ]
+        },
+        "leo-languages": {
+            "patterns": [],
+            "// TEST patterns": [
+                {
+                    "begin": "^(@language python)($|\\s+)",
+                    "end": "^(@language)($|\\s+)",
+                    "beginCaptures": {
+                        "0": {
+                            "name": "keyword"
+                        }
+                    },
+                    "endCaptures": {
+                        "0": {
+                            "name": "keyword"
+                        }
+                    },
+                    "name": "meta.embedded.block.leojsbody.python"
+                },
+                {
+                    "begin": "^(@language typescript)($|\\s+)",
+                    "end": "^(@language)($|\\s+)",
+                    "beginCaptures": {
+                        "0": {
+                            "name": "keyword"
+                        }
+                    },
+                    "endCaptures": {
+                        "0": {
+                            "name": "keyword"
+                        }
+                    },
+                    "name": "meta.embedded.block.leojsbody.typescript"
+                }
+            ]
+        }
+    }
+}

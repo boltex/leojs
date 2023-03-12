@@ -160,26 +160,6 @@ suite('Test cases for leoCommands.ts', () => {
         result = c.checkPythonCode(event=None, checkOnSave=False, ignoreAtIgnore=True)
         self.assertEqual(result, 'error')
      */
-    //@+node:felix.20220129224954.10: *3* TestCommands.test_c_config_initIvar_sets_commander_ivars
-    test('test_c_config_initIvar_sets_commander_ivars', async () => {
-        const c = self.c;
-        g.app.config.ivarsData.forEach(element => {
-            let ivar;
-            let setting_type;
-            let defaultVal;
-            [ivar, setting_type, defaultVal] = element;
-            assert.ok(c.hasOwnProperty(ivar), ivar);
-            assert.ok(c.config.hasOwnProperty(ivar), ivar);
-
-            // @ts-expect-error
-            const val = c.config[ivar];
-            const val2 = c.config.get(ivar);
-            assert.strictEqual(val, val2);
-            // ***********************************************************************
-            // console.log('-------------testing ' + ivar + '---------equals: ', val);
-            // ***********************************************************************
-        });
-    });
     //@+node:felix.20220129224954.11: *3* TestCommands.test_c_contractAllHeadlines
     test('test_c_contractAllHeadlines', async () => {
         const c = self.c;

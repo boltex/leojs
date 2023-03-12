@@ -42,24 +42,24 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                         this._leoUI.navTextChange();
                         break;
                     }
+                    case 'leoNavClear': {
+                        this._leoUI.navTextClear();
+                        break;
+                    }
                     case 'gotFocus': {
-                        // utils.setContext("sideBarFocus", true);
-                        // utils.setContext("focusedView", "leoFindPanel");
                         utils.setContext(Constants.CONTEXT_FLAGS.FOCUS_FIND, true);
                         break;
                     }
                     case 'lostFocus': {
-                        // utils.setContext("sideBarFocus", false);
-                        // utils.setContext("focusedView", "");
                         utils.setContext(Constants.CONTEXT_FLAGS.FOCUS_FIND, false);
                         break;
                     }
                     case 'leoFindNext': {
-                        vscode.commands.executeCommand(Constants.COMMANDS.FIND_NEXT);
+                        vscode.commands.executeCommand(Constants.COMMANDS.FIND_NEXT_FO);
                         break;
                     }
                     case 'leoFindPrevious': {
-                        vscode.commands.executeCommand(Constants.COMMANDS.FIND_PREVIOUS);
+                        vscode.commands.executeCommand(Constants.COMMANDS.FIND_PREVIOUS_FO);
                         break;
                     }
                     case 'searchConfig': {
@@ -134,7 +134,7 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                     </div>
                 </div>
                 <div class="input-holder mt-0 mb-6 nav-element">
-                    <input title="Typing searches headlines, Enter also searches body text and freeze" type="text" id="navText" name="navText" placeholder="<nav pattern here>">
+                    <input title="Typing searches headlines interactively&#013;Enter freezes input and searches body text" type="text" id="navText" name="navText" placeholder="<nav pattern here>">
                 </div>
                 <div class="nav-element" id="freeze" title="Clear field to unfreeze">&#x2744;</div>
 
@@ -166,6 +166,8 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
                         <label title="Limit to Selected Outline (Ctrl+Alt+S)" class="label-fix" for="subOutlineOnly"><u>S</u>uboutline Only</label><br>
                         <input type="radio" id="nodeOnly" name="searchScope" value="2">
                         <label title="Limit to Selected Node (Ctrl+Alt+N)" class="label-fix" for="nodeOnly"><u>N</u>ode only</label><br>
+                        <input type="radio" id="fileOnly" name="searchScope" value="3">
+                        <label title="Limit to External Files (Ctrl+Alt+L)" class="label-fix" for="fileOnly">Fi<u>l</u>e only</label><br>
                         <!-- CHECKBOXES -->
                         <input type="checkbox" id="searchHeadline" name="searchHeadline" >
                         <label title="Search in Headlines (Ctrl+Alt+H)" class="label-fix" for="searchHeadline">Search <u>h</u>eadline</label><br>

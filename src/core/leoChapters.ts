@@ -1,11 +1,13 @@
 //@+leo-ver=5-thin
 //@+node:felix.20220429005433.1: * @file src/core/leoChapters.ts
 // * Classes that manage chapters in Leo's core.
+//@+<< leoChapters imports >>
+//@+node:felix.20221110000315.1: ** << leoChapters imports >>
 import * as g from './leoGlobals';
 import { new_cmd_decorator } from '../core/decorators';
 import { Position, VNode } from './leoNodes';
 import { Commands } from './leoCommands';
-
+//@-<< leoChapters imports >>
 //@+others
 //@+node:felix.20220429005433.2: ** cc.cmd (decorator)
 /**
@@ -158,9 +160,11 @@ export class ChapterController {
 
         const names = cc.setAllChapterNames();
 
-        g.es('Chapters:\n' + names.join('\n'));
-        k.setLabelBlue('Select chapter: ');
-        k.get1Arg(this.selectChapter1, names);
+        // TODO !
+        console.log('TODO ! selectChapter : from this list with UI dialog! :', names);
+        // g.es('Chapters:\n' + names.join('\n'));
+        // k.setLabelBlue('Select chapter: ');
+        // k.get1Arg(this.selectChapter1, names);
     }
 
     public selectChapter1(): void {
@@ -411,7 +415,6 @@ export class ChapterController {
         // Similar to g.sanitize_filename, but simpler.
         const result: string[] = [];
         for (let ch of s.trim()) {
-            //  pylint: disable=superfluous-parens
             if (
                 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.includes(
                     ch

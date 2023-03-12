@@ -19,8 +19,9 @@ import { LeoApp, LoadManager } from '../core/leoApp';
 import { Commands } from "../core/leoCommands";
 import { NodeIndices, VNode, Position } from '../core/leoNodes';
 import { GlobalConfigManager } from '../core/leoConfig';
-import { NullGui } from '../leoUI';
+import { NullGui } from '../core/leoGui';
 import * as assert from 'assert';
+import { ISettings } from '../core/leoFind';
 
 //@+others
 //@+node:felix.20220130224933.2: ** function.create_app
@@ -86,13 +87,13 @@ export async function create_app(gui_name: string = 'null'): Promise<Commands> {
     const c = new Commands("", g.app.gui);
 
     // Create minimal config dictionaries.
-    // let settings_d;
-    // let bindings_d;
-    // [settings_d, bindings_d] = lm.createDefaultSettingsDicts();
+    let settings_d;
+    let bindings_d;
+    [settings_d, bindings_d] = lm.createDefaultSettingsDicts();
 
-    // lm.globalSettingsDict = settings_d;
-    // lm.globalBindingsDict = bindings_d;
-    // c.config.settingsDict = settings_d;
+    lm.globalSettingsDict = settings_d;
+    lm.globalBindingsDict = bindings_d;
+    c.config.settingsDict = settings_d;
     // c.config.bindingsDict = bindings_d;
 
     assert.strictEqual(g.unitTesting, true, 'unit testing is set');  // Defensive.
@@ -126,6 +127,8 @@ export class LeoUnitTest {
     public c!: Commands;
     public root_p!: Position;
     public settings_p!: Position;
+    public x: any;
+    public settings!: ISettings;
 
     //@+others
     //@+node:felix.20220130224933.4: *3* LeoUnitTest.setUp, tearDown & setUpClass
@@ -206,6 +209,23 @@ export class LeoUnitTest {
         clone.moveToLastChildOf(p);
     }
 
+    //@+node:felix.20230224231417.1: *3* LeoUnitTest.dump_tree
+    /**
+     * Dump root's tree, or the entire tree if root is None.
+     */
+    public dump_tree(root?: Position, tag?: string): void {
+
+        console.log('');
+        if (tag) {
+            console.log(tag);
+        }
+        const _iter = root ? root.self_and_subtree.bind(root) : this.c.all_positions.bind(this.c);
+        for (const p of _iter()) {
+            console.log('');
+            console.log('level:', p.level(), p.h);
+            g.printObj(g.splitLines(p.v.b));
+        }
+    }
     //@-others
 
 }

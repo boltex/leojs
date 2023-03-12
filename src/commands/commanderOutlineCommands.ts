@@ -78,10 +78,10 @@ export class CommanderOutlineCommands {
     public copyOutline(this: Commands): void {
         // Copying an outline has no undo consequences.
         const c: Commands = this;
-        // c.endEditing();
+        c.endEditing();
         const s: string = c.fileCommands.outline_to_clipboard_string()!;
         g.app.paste_c = c;
-        g.app.gui!.replaceClipboardWith(s);
+        g.app.gui.replaceClipboardWith(s);
     }
     //@+node:felix.20211208235043.3: *4* c_oc.cutOutline
     @commander_command(
@@ -108,10 +108,10 @@ export class CommanderOutlineCommands {
         undoFlag: boolean = true
     ): Position | undefined {
         if (s === undefined) {
-            s = g.app.gui!.getTextFromClipboard();
+            s = g.app.gui.getTextFromClipboard();
         }
         const c: Commands = this;
-        // c.endEditing()
+        c.endEditing();
         if (!s || !c.canPasteOutline(s)) {
             return undefined;  // This should never happen.
         }
@@ -160,11 +160,10 @@ export class CommanderOutlineCommands {
         'Paste an outline into the present outline from the clipboard.\n' +
         'Nodes do *not* retain their original identify.'
     )
-    public asyncPasteOutline(this: Commands): void {
-        g.app.gui!.preventRefresh = true;
-        g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
+    public asyncPasteOutline(this: Commands): Thenable<unknown> {
+        return g.app.gui.asyncGetTextFromClipboard().then((clipboard) => {
             this.pasteOutline(clipboard);
-            g.app.gui!.launchRefresh();
+            return true;
         });
     }
     //@+node:felix.20211208235043.5: *4* c_oc.pasteOutlineRetainingClones
@@ -178,10 +177,10 @@ export class CommanderOutlineCommands {
         undoFlag: boolean = true
     ): Position | undefined {
         if (s === undefined) {
-            s = g.app.gui!.getTextFromClipboard();
+            s = g.app.gui.getTextFromClipboard();
         }
         const c: Commands = this;
-        //c.endEditing()
+        c.endEditing();
         if (!s || !c.canPasteOutline(s)) {
             return undefined;  // This should never happen.
         }
@@ -236,11 +235,10 @@ export class CommanderOutlineCommands {
         'Paste an outline into the present outline from the clipboard.\n' +
         'Nodes *retain* their original identify.'
     )
-    public asyncPasteOutlineRetainingClones(this: Commands): void {
-        g.app.gui!.preventRefresh = true;
-        g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
+    public asyncPasteOutlineRetainingClones(this: Commands): Thenable<unknown> {
+        return g.app.gui.asyncGetTextFromClipboard().then((clipboard) => {
             this.pasteOutlineRetainingClones(clipboard);
-            g.app.gui!.launchRefresh();
+            return true;
         });
     }
 
@@ -251,7 +249,7 @@ export class CommanderOutlineCommands {
     )
     public pasteAsTemplate(this: Commands, s?: string): void {
         if (s === undefined) {
-            s = g.app.gui!.getTextFromClipboard();
+            s = g.app.gui.getTextFromClipboard();
         }
         const c: Commands = this;
         const p: Position = c.p;
@@ -491,11 +489,10 @@ export class CommanderOutlineCommands {
         'async-paste-as-template',
         'Paste as template clones only nodes that were already clones'
     )
-    public asyncPasteAsTemplate(this: Commands): void {
-        g.app.gui!.preventRefresh = true;
-        g.app.gui!.asyncGetTextFromClipboard().then((clipboard) => {
+    public asyncPasteAsTemplate(this: Commands): Thenable<unknown> {
+        return g.app.gui.asyncGetTextFromClipboard().then((clipboard) => {
             this.pasteAsTemplate(clipboard);
-            g.app.gui!.launchRefresh();
+            return true;
         });
     }
 
@@ -587,7 +584,7 @@ export class CommanderOutlineCommands {
     public contractNode(this: Commands): void {
         const c: Commands = this;
         let p = c.p;
-        // c.endEditing() // not in leojs
+        c.endEditing();
         p.contract();
         c.redraw_after_contract(p); // not in leojs
         c.selectPosition(p);
@@ -636,6 +633,7 @@ export class CommanderOutlineCommands {
     )
     public contractParent(this: Commands): void {
         const c: Commands = this;
+        c.endEditing();
         const p: Position = c.p;
         const parent = p.parent();
         if (!parent || !parent.__bool__()) {
@@ -653,6 +651,7 @@ export class CommanderOutlineCommands {
     )
     public expandAllHeadlines(this: Commands): void {
         const c: Commands = this;
+        c.endEditing();
         const p: Position = c.rootPosition()!;
         while (p && p.__bool__()) {
             c.expandSubtree(p);
@@ -775,7 +774,7 @@ export class CommanderOutlineCommands {
     public expandNode(this: Commands): void {
         const c: Commands = this;
         const p: Position = c.p;
-        // c.endEditing();
+        c.endEditing();
         p.expand();
         c.redraw_after_expand(p);
         c.selectPosition(p);
@@ -788,7 +787,7 @@ export class CommanderOutlineCommands {
     public expandNodeAndGoToFirstChild(this: Commands): void {
         const c: Commands = this;
         const p: Position = this.p;
-        // c.endEditing()
+        c.endEditing();
         if (p.hasChildren()) {
             if (!p.isExpanded()) {
                 c.expandNode();
@@ -808,7 +807,7 @@ export class CommanderOutlineCommands {
     public expandNodeOrGoToFirstChild(this: Commands): void {
         const c: Commands = this;
         const p: Position = this.p;
-        // c.endEditing()
+        c.endEditing();
         if (p.hasChildren()) {
             if (p.isExpanded()) {
                 c.redraw_after_expand(p.firstChild());
@@ -1215,9 +1214,9 @@ export class CommanderOutlineCommands {
         if (c.canSelectVisBack()) {
             p.moveToVisBack(c);
             c.treeSelectHelper(p);
+        } else {
+            c.endEditing();  // 2011/05/28: A special case.
         }
-        // else:
-        // c.endEditing()  // 2011/05/28: A special case.
 
     }
     //@+node:felix.20211021013709.21: *4* c_oc.selectVisNext
@@ -1234,9 +1233,9 @@ export class CommanderOutlineCommands {
         if (c.canSelectVisNext()) {
             p.moveToVisNext(c);
             c.treeSelectHelper(p);
+        } else {
+            c.endEditing();  // 2011/05/28: A special case.
         }
-        // else:
-        // c.endEditing()  // 2011/05/28: A special case.
 
     }
     //@+node:felix.20211025221132.1: *4* c_oc.treePageUp
@@ -1253,7 +1252,7 @@ export class CommanderOutlineCommands {
         }
         const siblings: Position[] = [...parent.children()];
         const firstSibling = siblings[0];
-        if (firstSibling.gnx === c.p.gnx) {
+        if (firstSibling.__eq__(c.p)) {
             c.selectVisBack(); // already first sibling
         } else {
             c.goToFirstSibling();
@@ -1273,7 +1272,7 @@ export class CommanderOutlineCommands {
         }
         const siblings: Position[] = [...parent.children()];
         const lastSibling = siblings[siblings.length - 1];
-        if (lastSibling.gnx === c.p.gnx) {
+        if (lastSibling.__eq__(c.p)) {
             c.selectVisNext(); // already last sibling
         } else {
             c.goToLastSibling();
@@ -1307,7 +1306,6 @@ export class CommanderOutlineCommands {
         c.redraw(); // redraw selects p
         // c.frame.clearStatusLine()
         // c.frame.putStatusLine("De-Hoist: " + p.h)
-        c.undoer.afterDehoist(p, 'DeHoist');
 
         // TODO : Needed?
         // g.doHook('hoist-changed', c=c)
@@ -1353,7 +1351,6 @@ export class CommanderOutlineCommands {
         c.redraw(p); // redraw selects p
         // c.frame.clearStatusLine();
         // c.frame.putStatusLine("Hoist: " + p.h);
-        c.undoer.afterHoist(p, 'Hoist');
 
         // TODO : Needed?
         // g.doHook('hoist-changed', c=c);
@@ -1375,7 +1372,7 @@ export class CommanderOutlineCommands {
 
         const undoData: Bead = c.undoer.beforeCloneNode(p);
 
-        // c.endEditing();  // Capture any changes to the headline.
+        c.endEditing();  // Capture any changes to the headline.
         const clone: Position = p.clone();
         clone.setDirty();
         c.setChanged();
@@ -1424,7 +1421,7 @@ export class CommanderOutlineCommands {
 
         const undoData = c.undoer.beforeCloneNode(p);
 
-        // c.endEditing()  // Capture any changes to the headline.
+        c.endEditing();  // Capture any changes to the headline.
 
         const clone: Position = p.copy();
         clone._linkAsNthChild(last_spot, last_spot.numberOfChildren());
@@ -1457,7 +1454,7 @@ export class CommanderOutlineCommands {
         }
         const prev: Position = p.copy();
         const undoData: Bead = c.undoer.beforeCloneNode(p);
-        // c.endEditing()  // Capture any changes to the headline.
+        c.endEditing();  // Capture any changes to the headline.
         const clone: Position = p.clone();
         const last: Position = c.rootPosition()!;
         while (last && last.__bool__() && last.hasNext()) {
@@ -1483,7 +1480,7 @@ export class CommanderOutlineCommands {
             return;
         }
         let newNode: Position | undefined;
-        // c.endEditing()  // Make sure we capture the headline for Undo.
+        c.endEditing();  // Make sure we capture the headline for Undo.
         if (false) { // c.config.getBool('select-next-after-delete'):
             // #721: Optionally select next node after delete.
             if (p.hasVisNext(c)) {
@@ -1565,7 +1562,7 @@ export class CommanderOutlineCommands {
         if (!current || !current.__bool__()) {
             return;
         }
-        // c.endEditing()
+        c.endEditing();
         const undoData: Bead = c.undoer.beforeInsertNode(current);
         let p: Position;
         if (as_first_child) {
@@ -1611,7 +1608,7 @@ export class CommanderOutlineCommands {
             g.warning('can not insert a node before the base of a hoist');
             return;
         }
-        // c.endEditing()
+        c.endEditing();
         const undoData: Bead = u.beforeInsertNode(current);
         const p: Position = current.insertBefore();
         // g.doHook('create-node', c, p);
@@ -1772,7 +1769,7 @@ export class CommanderOutlineCommands {
             return;
         }
 
-        g.app.gui!.runAskYesNoDialog(
+        g.app.gui.runAskYesNoDialog(
             c,
             'Move Marked Nodes?',
             'move-marked-nodes is not undoable. Proceed?'
@@ -1843,7 +1840,7 @@ export class CommanderOutlineCommands {
         const current: Position = this.p;
         const u: Undoer = c.undoer;
         const undoType: string = 'Mark Changed';
-        // c.endEditing()
+        c.endEditing();
         u.beforeChangeGroup(current, undoType);
         for (let p of c.all_unique_positions()) {
             if (p.isDirty() && !p.isMarked()) {
@@ -1878,6 +1875,7 @@ export class CommanderOutlineCommands {
         if (!p || !p.__bool__()) {
             return;
         }
+        c.endEditing();
         const undoType: string = p.isMarked() ? 'Unmark' : 'Mark';
         const bunch = u.beforeMark(p, undoType);
         // c.set/clearMarked call a hook.
@@ -1904,6 +1902,7 @@ export class CommanderOutlineCommands {
         if (!current || !current.__bool__()) {
             return;
         }
+        c.endEditing();
         u.beforeChangeGroup(current, undoType);
         for (let p of current.children()) {
             if (!p.isMarked()) {
@@ -1930,6 +1929,7 @@ export class CommanderOutlineCommands {
         if (!current || !current.__bool__()) {
             return;
         }
+        c.endEditing();
         u.beforeChangeGroup(current, undoType);
         let changed = false;
         let w_p: Position | undefined;  //  To keep pylint happy.
@@ -1975,7 +1975,7 @@ export class CommanderOutlineCommands {
             }
             next.moveToNext();
         }
-        // c.endEditing()
+        c.endEditing();
         const parent_v: VNode = p._parentVnode()!;
         const n: number = p.childIndex();
         const followingSibs: VNode[] = parent_v.children.slice(n + 1);
@@ -2037,7 +2037,7 @@ export class CommanderOutlineCommands {
             // c.treeFocusHelper();
             return;
         }
-        // c.endEditing();
+        c.endEditing();
         const undoData: Bead = u.beforeMoveNode(p);
 
         let moved: boolean;
@@ -2104,7 +2104,7 @@ export class CommanderOutlineCommands {
             return;
         }
         const parent: Position = p.parent();
-        // c.endEditing()
+        c.endEditing();
         const undoData: Bead = u.beforeMoveNode(p);
         p.setDirty();
         p.moveAfter(parent);
@@ -2146,7 +2146,7 @@ export class CommanderOutlineCommands {
             // c.treeFocusHelper();
             return;
         }
-        // c.endEditing();
+        c.endEditing();
         const undoData: Bead = u.beforeMoveNode(p);
         p.setDirty();
         const n: number = back.numberOfChildren();
@@ -2182,7 +2182,7 @@ export class CommanderOutlineCommands {
             return;
         }
         const back2 = back.visBack(c);
-        // c.endEditing();
+        c.endEditing();
         const undoData: Bead = u.beforeMoveNode(p);
         let moved: boolean = false;
 
@@ -2255,7 +2255,7 @@ export class CommanderOutlineCommands {
             // c.treeFocusHelper()
             return;
         }
-        // c.endEditing()
+        c.endEditing();
         const children: VNode[] = p.v.children;  // First, for undo.
         p.promote();
         c.setChanged();
@@ -2318,7 +2318,7 @@ export class CommanderOutlineCommands {
         if (!p || !p.__bool__()) {
             return;
         }
-        // c.endEditing()
+        c.endEditing();
         const undoType: string = sortChildren ? 'Sort Children' : 'Sort Siblings';
         const parent_v: VNode = p._parentVnode()!;
         const oldChildren: VNode[] = [...parent_v.children];

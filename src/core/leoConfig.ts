@@ -21,7 +21,7 @@ export class ParserBaseClass {
     // as opposed to myLeoSettings.leo or leoSettings.leo.
     public localFlag: boolean;
 
-    public shortcutsDict: g.TypedDict;
+    public shortcutsDict: g.SettingsDict;
 
     public openWithList: { [key: string]: any }[];   // A list of dicts containing 'name','shortcut','command' keys.
 
@@ -68,7 +68,7 @@ export class ParserBaseClass {
     ];
 
     // Keys are settings names, values are (type,value) tuples.
-    public settingsDict: g.TypedDict | undefined;
+    public settingsDict: g.SettingsDict | undefined;
 
     //@-<< ParserBaseClass data >>
     //@+others
@@ -84,11 +84,7 @@ export class ParserBaseClass {
         // True if this is the .leo file being opened,
         // as opposed to myLeoSettings.leo or leoSettings.leo.
         this.localFlag = localFlag;
-        this.shortcutsDict = new g.TypedDict( // was TypedDictOfLists.
-            'parser.shortcutsDict',
-            'shortcutName',
-            'BindingInfo',
-        );
+        this.shortcutsDict = new g.SettingsDict('parser.shortcutsDict');
         this.openWithList = [];  // A list of dicts containing 'name','shortcut','command' keys.
         // Keys are canonicalized names.
         this.dispatchDict = {
@@ -781,11 +777,7 @@ export class ParserBaseClass {
         const c = this.c;
         const name1 = name;
         const modeName = this.computeModeName(name);
-        const d = new g.TypedDict(
-            `modeDict for ${modeName}`,
-            'commandName',
-            'BindingInfo'
-        );
+        const d = new g.SettingsDict(`modeDict for ${modeName}`);
 
         const s = p.b;
         const lines = g.splitLines(s);
@@ -801,7 +793,7 @@ export class ParserBaseClass {
                 } else if (bi) {
                     // A regular shortcut.
                     bi.pane = modeName;
-                    const aList = d.get(name, []);
+                    const aList: any[] = d.get(name) || [];
                     // Important: use previous bindings if possible.
                     let key2;
                     let aList2;
@@ -966,8 +958,8 @@ export class ParserBaseClass {
     public doOneShortcut(bi: any, commandName: string, p: Position): void {
 
         const d = this.shortcutsDict;
-        const aList = d.get(commandName, []);
-        aList.append(bi);
+        const aList: any[] = d.get(commandName) || [];
+        aList.push(bi);
         d.set(commandName, aList);
 
     }
@@ -1324,21 +1316,16 @@ export class ParserBaseClass {
     /**
      * Traverse the entire settings tree.
      */
-    public traverse(): [g.TypedDict, g.TypedDict] {
+    public traverse(): [g.SettingsDict, g.SettingsDict] {
 
         const c = this.c;
 
-        this.settingsDict = new g.TypedDict(  // type:ignore
-            `settingsDict for ${c.shortFileName()}`,
-            // keyType:type('settingName'),
-            'string',
-            'GeneralSetting', // typeof g.GeneralSetting
+        this.settingsDict = new g.SettingsDict(  // type:ignore
+            `settingsDict for ${c.shortFileName()}`
         );
 
-        this.shortcutsDict = new g.TypedDict(  // was TypedDictOfLists.
-            `shortcutsDict for ${c.shortFileName()}`,
-            'string',
-            'BindingInfo', // typeof g.BindingInfo
+        this.shortcutsDict = new g.SettingsDict(  // was TypedDictOfLists.
+            `shortcutsDict for ${c.shortFileName()}`
         );
 
         // This must be called after the outline has been inited.
@@ -1392,139 +1379,10 @@ export class ParserBaseClass {
 //@+node:felix.20220206213914.1: ** class GlobalConfigManager
 /**
  * A class to manage configuration settings.
- * Used as g.app's config as 'g.app.config'
  */
 export class GlobalConfigManager {
 
-    // Class data...
-    //@+<< gcm.defaultsDict >>
-    //@+node:felix.20220206213914.2: *3* << gcm.defaultsDict >>
-    //@+at This contains only the "interesting" defaults.
-    // Ints and bools default to 0, floats to 0.0 and strings to "".
-    //@@c
-    public defaultBodyFontSize = 12;  // 9 if sys.platform == "win32" else 12
-    public defaultLogFontSize = 12; // 8 if sys.platform == "win32" else 12
-    public defaultMenuFontSize = 12;  // 9 if sys.platform == "win32" else 12
-    public defaultTreeFontSize = 12;  // 9 if sys.platform == "win32" else 12
-    public context_menus: { [key: string]: any } | undefined;
 
-    public defaultsDict = new g.TypedDict(
-        'g.app.config.defaultsDict',
-        'string',
-        'GeneralSetting'
-    );
-
-    public defaultsData: [string, string, any][] = [
-        // compare options...
-        ["ignore_blank_lines", "bool", true],
-        ["limit_count", "int", 9],
-        ["print_mismatching_lines", "bool", true],
-        ["print_trailing_lines", "bool", true],
-        // find/change options...
-        ["search_body", "bool", true],
-        ["whole_word", "bool", true],
-        // Prefs panel.
-        // ("default_target_language","language","python"),
-        ["target_language", "language", "python"],  // Bug fix: 6/20,2005.
-        ["tab_width", "int", -4],
-        ["page_width", "int", 132],
-        ["output_doc_chunks", "bool", true],
-        ["tangle_outputs_header", "bool", true],
-        // Syntax coloring options...
-        // Defaults for colors are handled by leoColor.py.
-        ["color_directives_in_plain_text", "bool", true],
-        ["underline_undefined_section_names", "bool", true],
-        // Window options...
-        ["body_pane_wraps", "bool", true],
-        ["body_text_font_family", "family", "Courier"],
-        ["body_text_font_size", "size", this.defaultBodyFontSize],
-        ["body_text_font_slant", "slant", "roman"],
-        ["body_text_font_weight", "weight", "normal"],
-        ["enable_drag_messages", "bool", true],
-        ["headline_text_font_family", "string", undefined],
-        ["headline_text_font_size", "size", this.defaultLogFontSize],
-        ["headline_text_font_slant", "slant", "roman"],
-        ["headline_text_font_weight", "weight", "normal"],
-        ["log_text_font_family", "string", undefined],
-        ["log_text_font_size", "size", this.defaultLogFontSize],
-        ["log_text_font_slant", "slant", "roman"],
-        ["log_text_font_weight", "weight", "normal"],
-        ["initial_window_height", "int", 600],
-        ["initial_window_width", "int", 800],
-        ["initial_window_left", "int", 10],
-        ["initial_window_top", "int", 10],
-        ["initial_split_orientation", "string", "vertical"],  // was initial_splitter_orientation.
-        ["initial_vertical_ratio", "ratio", 0.5],
-        ["initial_horizontal_ratio", "ratio", 0.3],
-        ["initial_horizontal_secondary_ratio", "ratio", 0.5],
-        ["initial_vertical_secondary_ratio", "ratio", 0.7],
-        // ("outline_pane_scrolls_horizontally","bool",False),
-        ["split_bar_color", "color", "LightSteelBlue2"],
-        ["split_bar_relief", "relief", "groove"],
-        ["split_bar_width", "int", 7],
-    ];
-
-    //@-<< gcm.defaultsDict >>
-    //@+<< gcm.encodingIvarsDict >>
-    //@+node:felix.20220206213914.3: *3* << gcm.encodingIvarsDict >>
-    public encodingIvarsDict = new g.TypedDict(
-        'g.app.config.encodingIvarsDict',
-        'string',
-        'GeneralSetting'
-    );
-
-    public encodingIvarsData: [string, string, string][] = [
-        ["default_at_auto_file_encoding", "string", "utf-8"],
-        ["default_derived_file_encoding", "string", "utf-8"],
-        ["new_leo_file_encoding", "string", "UTF-8"],
-        // Upper case for compatibility with previous versions.
-        //
-        // The defaultEncoding ivar is no longer used,
-        // so it doesn't override better defaults.
-    ];
-
-
-    //@-<< gcm.encodingIvarsDict >>
-    //@+<< gcm.ivarsDict >>
-    //@+node:felix.20220206213914.4: *3* << gcm.ivarsDict >>
-    // Each of these settings sets the corresponding ivar.
-    //  Also, the LocalConfigManager class inits the corresponding commander ivar.
-
-    public ivarsDict = new g.TypedDict(
-        'g.app.config.ivarsDict',
-        'string',
-        'GeneralSetting'
-    );
-
-    public ivarsData: [string, string, any][] = [
-        ["at_root_bodies_start_in_doc_mode", "bool", true],
-        // For compatibility with previous versions.
-        ["create_nonexistent_directories", "bool", false],
-        ["output_initial_comment", "string", ""],
-        // "" for compatibility with previous versions.
-        ["output_newline", "string", "nl"],
-        ["page_width", "int", "132"],
-        ["read_only", "bool", true],
-        ["redirect_execute_script_output_to_log_pane", "bool", false],
-        ["relative_path_base_directory", "string", "!"],
-        ["remove_sentinels_extension", "string", ".txt"],
-        ["save_clears_undo_buffer", "bool", false],
-        ["stylesheet", "string", undefined],
-        ["tab_width", "int", -4],
-        ["target_language", "language", "python"],
-        // Bug fix: added: 6 / 20 / 2005.
-        ["trailing_body_newlines", "string", "asis"],
-        ["use_plugins", "bool", true],
-        // New in 4.3: use_plugins = True by default.
-        ["undo_granularity", "string", "word"],
-        // "char", "word", "line", "node"
-        ["write_strips_blank_lines", "bool", false],
-    ];
-
-    //@-<< gcm.ivarsDict >>
-
-    public use_plugins: boolean;
-    public create_nonexistent_directories: boolean;
     public atCommonButtonsList: any[];
     public atCommonCommandsList: any[];
     public atLocalButtonsList: any[];
@@ -1532,20 +1390,21 @@ export class GlobalConfigManager {
     public buttonsFileName: string;
     public configsExist: boolean;
 
+    public context_menus: { [key: string]: any[] } | undefined;
+
     public defaultFont: string | undefined;
     public defaultFontFamily: string | undefined;
     public enabledPluginsFileName: string | undefined;
     public enabledPluginsString: string;
-    public inited: boolean;
     public menusList: string[];
     public menusFileName: string;
-    public modeCommandsDict: g.TypedDict;
+    public modeCommandsDict: g.SettingsDict;
     public panes: any;
     public sc: any;
     public tree: any;
 
-    public dictList!: g.TypedDict[];
-    public recentFiles!: string[];
+    public dictList!: g.SettingsDict[];
+    public recentFiles: string[];
 
     public relative_path_base_directory!: string;
 
@@ -1556,189 +1415,119 @@ export class GlobalConfigManager {
 
 
     //@+others
-    //@+node:felix.20220207005211.1: *3* gcm.Birth...
-    //@+node:felix.20220207005211.2: *4* gcm.ctor
+    //@+node:felix.20220207005211.2: *3* gcm.ctor
     constructor() {
-        //
-        // Set later.  To keep pylint happy.
-        if (0) {  // No longer needed, now that setIvarsFromSettings always sets gcm ivars.
-            // this.at_root_bodies_start_in_doc_mode = true;
-            // this.default_derived_file_encoding = 'utf-8';
-            // this.output_newline = 'nl';
-            // this.redirect_execute_script_output_to_log_pane = true;
-            // this.relative_path_base_directory = '!';
-        }
-
-        this.use_plugins = false;  // Required to keep pylint happy.
-        this.create_nonexistent_directories = false;  // Required to keep pylint happy.
+        // List of info (command_p, script, rclicks) for common @buttons nodes.
+        // where rclicks is a namedtuple('RClick', 'position,children')
         this.atCommonButtonsList = []; // List of info for common @buttons nodes.
         this.atCommonCommandsList = []; // List of info for common @commands nodes.
         this.atLocalButtonsList = []; // List of positions of @button nodes.
         this.atLocalCommandsList = [];  // List of positions of @command nodes.
         this.buttonsFileName = '';
         this.configsExist = false;  // True when we successfully open a setting file.
-        this.defaultFont = undefined;  // Set in gui.getDefaultConfigFont.
-        this.defaultFontFamily = undefined;  // Set in gui.getDefaultConfigFont.
+        this.default_derived_file_encoding = 'utf-8';
         this.enabledPluginsFileName = undefined;
         this.enabledPluginsString = '';
-        this.inited = false;
         this.menusList = [];
         this.menusFileName = '';
-
-        this.modeCommandsDict = new g.TypedDict(
-            'modeCommandsDict',
-            'string',
-            'TypedDict');  // was TypedDictOfLists.
-        // Inited later...
+        this.modeCommandsDict = new g.SettingsDict(
+            'modeCommandsDict'
+        );  // was TypedDictOfLists.
         this.panes = undefined;
+        this.recentFiles = [];
         this.sc = undefined;
         this.tree = undefined;
 
-        this.inited = true;
-
-        this.initDicts();
-        this.initIvarsFromSettings();
-        this.initRecentFiles();
 
     }
 
-    //@+node:felix.20220207005211.3: *4* gcm.initDicts
+    //@+node:felix.20220206213914.36: *3* gcm.config_iter
+
     /**
-     * Only the settings parser needs to search all dicts.
-      */
-    public initDicts(): void {
-        // Only the settings parser needs to search all dicts.
-        this.dictList = [this.defaultsDict];
-
-        let key: string;
-        let kind: string;
-        let val: any;
-
-        this.defaultsData.forEach(element => {
-            [key, kind, val] = element;
-            this.defaultsDict.d[this.munge(key)!] = new g.GeneralSetting(
-                {
-                    kind: kind, setting: key, val: val, tag: 'defaults'
-                }
-            );
-        });
-
-        this.ivarsData.forEach(element => {
-            [key, kind, val] = element;
-            this.ivarsDict.d[this.munge(key)!] = new g.GeneralSetting(
-                {
-                    kind: kind, ivar: key, val: val, tag: 'ivars'
-                }
-
-            );
-        });
-
-        this.encodingIvarsData.forEach(element => {
-            [key, kind, val] = element;
-            this.encodingIvarsDict.d[this.munge(key)!] = new g.GeneralSetting(
-                {
-                    kind: kind, encoding: val, ivar: key, tag: 'encoding'
-                }
-            );
-        });
-
-    }
-
-    //@+node:felix.20220207005211.4: *4* gcm.initIvarsFromSettings & helpers
-
-    public initIvarsFromSettings(): void {
-
-        Object.keys(this.encodingIvarsDict.d).sort().forEach(ivar => {
-            this.initEncoding(ivar);
-        });
-
-        Object.keys(this.ivarsDict.d).sort().forEach(ivar => {
-            this.initIvar(ivar);
-        });
-
-    }
-
-
-    //@+node:felix.20220207005211.5: *5* initEncoding
-    /**
-     * Init g.app.config encoding ivars during initialization.
+     * Letters:
+     *   leoSettings.leo
+     *   D default settings
+     *   F loaded .leo File
+     *   M myLeoSettings.leo
+     *   @ @button, @command, @mode.
+     * 
+     * @param c 
      */
-    public initEncoding(key: string): void {
-        // Important: The key is munged.
-        const gs = this.encodingIvarsDict.get(key);
-        (this as any)[gs.ivar!] = gs.encoding;
+    public *config_iter(c: Commands): Generator<[string, any, Commands, string]> {
 
-        if (gs.encoding && !g.isValidEncoding(gs.encoding)) {
-            g.es('g.app.config: bad encoding: ' + `${gs.ivar}: ${gs.encoding}`);
+        const lm = g.app.loadManager!;
+        const d = c ? c.config.settingsDict : lm.globalSettingsDict;
+
+        let limit = c.config.getInt('print-settings-at-data-limit');
+        if (limit === undefined) {
+            limit = 20;  // A resonable default.
         }
-    }
-
-    //@+node:felix.20220207005211.6: *5* initIvar
-    /**
-     * Init g.app.config ivars during initialization.
-     *
-     * This does NOT init the corresponding commander ivars.
-     *
-     * Such initing must be done in setIvarsFromSettings.
-     */
-    public initIvar(key: string): void {
-        // Important: the key is munged.
-        const d = this.ivarsDict;
-        const gs = d.get(key);
-
-        (this as any)[gs.ivar!] = gs.val;
-        // setattr(self, gs.ivar, gs.val)
-
-    }
-
-    //@+node:felix.20220207005211.7: *4* gcm.initRecentFiles
-    public initRecentFiles(): void {
-        this.recentFiles = [];
-    }
-
-    //@+node:felix.20220207005211.8: *4* gcm.setIvarsFromSettings
-    /**
-     * Init g.app.config ivars or c's ivars from settings.
-     *
-     * - Called from c.initSettings with c = None to init g.app.config ivars.
-     * - Called from c.initSettings to init corresponding commmander ivars.
-     */
-    public setIvarsFromSettings(c?: Commands): void {
-        if (g.app.loadedThemes.length) {
-            return;
-        }
-        if (!this.inited) {
-            return;
-        }
-        // Ignore temporary commanders created by readSettingsFiles.
-        const d = this.ivarsDict;
-        const keys = d.keys().sort();
-
-        for (let key of keys) {
+        // pylint: disable=len-as-condition
+        for (let key of [...d.keys()].sort()) {
+            // return Object.keys(this.d);
             const gs = d.get(key);
-            if (gs) {
-                console.assert(gs instanceof g.GeneralSetting);
-                const ivar = gs.ivar!;  // The actual name of the ivar.
-                const kind = gs.kind;
-                let val: any;
-                if (c) {
-                    val = c.config.get(key, kind);
-                } else {
-                    val = this.get(key, kind);  // Don't use bunch.val!
-                }
-                if (c) {
-                    (c as any)[ivar] = val;
-                }
-                if (true) {  // Always set the global ivars.
-                    (this as any)[ivar] = val;
-                }
-            }
+            // assert isinstance(gs, g.GeneralSetting), repr(gs);
+            if (gs && gs.kind) {
+                const letter: string = lm.computeBindingLetter(c, gs.path!);
+                let val: string[] | string = gs.val;
+                if (gs.kind === 'data') {
+                    // #748: Remove comments
+                    const aList = (val as string[])
+                        .filter((z) => { return z.trim() && !z.trim().startsWith('#'); })
+                        .map((z) => { return '        ' + z.trimRight(); });
+                    // [' ' * 8 + z.rstrip() for z in val if z.strip() && !z.strip().startsWith('#')] ;
 
+                    if (!aList.length) {
+                        val = '[]';
+                    } else if (limit === 0 || aList.length < limit) {
+                        val = '\n    [\n' + aList.join('\n') + '\n    ]';
+                        // The following doesn't work well.
+                        // val = g.objToString(aList, indent=' '*4)
+                    } else {
+                        val = `<${aList.length} non-comment lines>`;
+                    }
+
+                } else if ((typeof val === 'string' || val instanceof String) && val.startsWith('<?xml')) {
+                    val = '<xml>';
+                }
+                let key2 = `@${gs.kind} ${key}`;
+                yield [key2, val, c, letter];
+            }
         }
     }
+    /* 
 
-    //@+node:felix.20220207005224.1: *3* gcm.Getters...
-    //@+node:felix.20220207005224.2: *4* gcm.canonicalizeSettingName (munge)
+    lm = g.app.loadManager
+    d = c.config.settingsDict if c else lm.globalSettingsDict
+    limit = c.config.getInt('print-settings-at-data-limit')
+    if limit is None:
+        limit = 20  # A reasonable default.
+    # pylint: disable=len-as-condition
+    for key in sorted(list(d.keys())):
+        gs = d.get(key)
+        assert isinstance(gs, g.GeneralSetting), repr(gs)
+        if gs and gs.kind:
+            letter = lm.computeBindingLetter(c, gs.path)
+            val = gs.val
+            if gs.kind == 'data':
+                # #748: Remove comments
+                aList = [' ' * 8 + z.rstrip() for z in val
+                    if z.strip() and not z.strip().startswith('#')]
+                if not aList:
+                    val = '[]'
+                elif limit == 0 or len(aList) < limit:
+                    val = '\n    [\n' + '\n'.join(aList) + '\n    ]'
+                    # The following doesn't work well.
+                    # val = g.objToString(aList, indent=' '*4)
+                else:
+                    val = f"<{len(aList)} non-comment lines>"
+            elif isinstance(val, str) and val.startswith('<?xml'):
+                val = '<xml>'
+            key2 = f"@{gs.kind:>6} {key}"
+            yield key2, val, c, letter
+
+    */
+    //@+node:felix.20220207005224.2: *3* gcm.canonicalizeSettingName (munge)
     public canonicalizeSettingName(name?: string): string | undefined {
         if (name === undefined) {
             return undefined;
@@ -1755,6 +1544,7 @@ export class GlobalConfigManager {
 
     // munge = canonicalizeSettingName
 
+    //@+node:felix.20220207005224.1: *3* gcm.Getters...
     //@+node:felix.20220207005224.3: *4* gcm.exists
     /**
      * Return true if a setting of the given kind exists, even if it is None.
@@ -1777,18 +1567,13 @@ export class GlobalConfigManager {
      */
     public get(setting: string, kind: string): any {
 
-        const lm = g.app.loadManager;
-
         // It *is* valid to call this method: it returns the global settings.
-        const d = lm!.globalSettingsDict;
+        const lm = g.app.loadManager!;
+        const d = lm.globalSettingsDict;
         if (d) {
-
-            // assert isinstance(d, g.TypedDict), repr(d)
-            console.assert(d instanceof g.TypedDict, d.toString());
-
+            console.assert(d instanceof g.SettingsDict, d.toString());
             let val: any;
             let junk: boolean;
-
             [val, junk] = this.getValFromDict(d, setting, kind);
             return val;
         }
@@ -1802,7 +1587,7 @@ export class GlobalConfigManager {
      * does not (loosely) match the actual type.
      * returns (val,exists)
      */
-    public getValFromDict(d: g.TypedDict, setting: string, requestedType: string, warn: boolean = true): [any, boolean] {
+    public getValFromDict(d: g.SettingsDict, setting: string, requestedType: string, warn: boolean = true): [any, boolean] {
         let tag = 'gcm.getValFromDict';
         const gs = d.get(this.munge(setting)!);
         if (!gs) {
@@ -2037,66 +1822,11 @@ export class GlobalConfigManager {
     public getString(setting: string): string {
         return this.get(setting, "string");
     }
-    //@+node:felix.20220206213914.36: *3* gcm.config_iter
-
-    /**
-     * Letters:
-     *   leoSettings.leo
-     *   D default settings
-     *   F loaded .leo File
-     *   M myLeoSettings.leo
-     *   @ @button, @command, @mode.
-     * 
-     * @param c 
-     */
-    public *config_iter(c: Commands): Generator<[string, any, Commands, string]> {
-
-        const lm = g.app.loadManager!;
-        const d = c ? c.config.settingsDict : lm.globalSettingsDict;
-
-        let limit = c.config.getInt('print-settings-at-data-limit');
-        if (limit === undefined) {
-            limit = 20;  // A resonable default.
-        }
-        // pylint: disable=len-as-condition
-        for (let key of d.keys().sort()) {
-            // return Object.keys(this.d);
-            const gs = d.get(key);
-            // assert isinstance(gs, g.GeneralSetting), repr(gs);
-            if (gs && gs.kind) {
-                const letter: string = lm.computeBindingLetter(c, gs.path!);
-                let val: string[] | string = gs.val;
-                if (gs.kind === 'data') {
-                    // #748: Remove comments
-                    const aList = (val as string[])
-                        .filter((z) => { return z.trim() && !z.trim().startsWith('#'); })
-                        .map((z) => { return '        ' + z.trimRight(); });
-                    // [' ' * 8 + z.rstrip() for z in val if z.strip() && !z.strip().startsWith('#')] ;
-
-                    if (!aList.length) {
-                        val = '[]';
-                    } else if (limit === 0 || aList.length < limit) {
-                        val = '\n    [\n' + aList.join('\n') + '\n    ]';
-                        // The following doesn't work well.
-                        // val = g.objToString(aList, indent=' '*4)
-                    } else {
-                        val = `<${aList.length} non-comment lines>`;
-                    }
-
-                } else if ((typeof val === 'string' || val instanceof String) && val.startsWith('<?xml')) {
-                    val = '<xml>';
-                }
-                let key2 = `@${gs.kind} ${key}`;
-                yield [key2, val, c, letter];
-            }
-        }
-    }
-
     //@+node:felix.20220206213914.37: *3* gcm.valueInMyLeoSettings
     /* def valueInMyLeoSettings(self, settingName):
         """Return the value of the setting, if any, in myLeoSettings.leo."""
         lm = g.app.loadManager
-        d = lm.globalSettingsDict.d
+        d = lm.globalSettingsDict
         gs = d.get(self.munge(settingName))
             # A GeneralSetting object.
         if gs:
@@ -2124,8 +1854,8 @@ GlobalConfigManager.prototype.munge = GlobalConfigManager.prototype.canonicalize
 export class LocalConfigManager {
 
     public c: Commands;
-    public settingsDict: g.TypedDict;
-    public shortcutsDict: g.TypedDict;
+    public settingsDict: g.SettingsDict;
+    public shortcutsDict: g.SettingsDict;
 
     public defaultBodyFontSize: number;
     public defaultLogFontSize: number;
@@ -2159,82 +1889,39 @@ export class LocalConfigManager {
     public redirect_execute_script_output_to_log_pane!: boolean; // = true;
 
     //@+others
-    //@+node:felix.20220214191554.2: *3* c.config.Birth
-    //@+node:felix.20220214191554.3: *4* c.config.ctor
+    //@+node:felix.20220214191554.3: *3* c.config.ctor
     constructor(c: Commands, previousSettings?: LocalConfigManager) {
         this.c = c;
 
-        const lm = g.app.loadManager;
-        //
-        // c.__init__ and helpers set the shortcuts and settings dicts for local files.
+        const lm = g.app.loadManager!;
         if (previousSettings) {
             this.settingsDict = previousSettings.settingsDict;
             this.shortcutsDict = previousSettings.shortcutsDict;
-            //assert isinstance(this.settingsDict, g.TypedDict), repr(this.settingsDict)
-            console.assert(this.settingsDict instanceof g.TypedDict, JSON.stringify(this.settingsDict, null, 4));
-            //assert isinstance(this.shortcutsDict, g.TypedDict), repr(this.shortcutsDict)
-            console.assert(this.shortcutsDict instanceof g.TypedDict, JSON.stringify(this.shortcutsDict, null, 4));
-            // was TypedDictOfLists.
+            console.assert(this.settingsDict instanceof g.SettingsDict, JSON.stringify(this.settingsDict, null, 4));
+            console.assert(this.shortcutsDict instanceof g.SettingsDict, JSON.stringify(this.shortcutsDict, null, 4));
         } else {
-            this.settingsDict = lm!.globalSettingsDict;
-            this.shortcutsDict = lm!.globalBindingsDict;
-            // assert d1 is None or isinstance(d1, g.TypedDict), repr(d1)
-            // assert d2 is None or isinstance(d2, g.TypedDict), repr(d2)  // was TypedDictOfLists.
-        }
-        // Define these explicitly to eliminate a pylint warning.
-        if (0) {
-            // No longer needed now that c.config.initIvar always sets
-            // both c and c.config ivars.
-            // this.default_derived_file_encoding = g.app.config.default_derived_file_encoding;
-            // this.redirect_execute_script_output_to_log_pane = g.app.config.redirect_execute_script_output_to_log_pane;
-        }
-
-        this.defaultBodyFontSize = g.app.config.defaultBodyFontSize;
-        this.defaultLogFontSize = g.app.config.defaultLogFontSize;
-        this.defaultMenuFontSize = g.app.config.defaultMenuFontSize;
-        this.defaultTreeFontSize = g.app.config.defaultTreeFontSize;
-        for (let key of g.app.config.encodingIvarsDict.keys().sort()) {
-            this.initEncoding(key);
-        }
-        for (let key of g.app.config.ivarsDict.keys().sort()) {
-            this.initIvar(key);
+            this.settingsDict = lm.globalSettingsDict;
+            let d1 = this.settingsDict;
+            this.shortcutsDict = lm.globalBindingsDict;
+            let d2 = this.shortcutsDict;
+            if (d1) {
+                console.assert(d1 instanceof g.SettingsDict, JSON.stringify(d1, null, 4));
+            }
+            if (d2) {
+                console.assert(d2 instanceof g.SettingsDict, JSON.stringify(d2, null, 4));
+            }
         }
 
-    }
+        // Default encodings.
+        this.default_at_auto_file_encoding = 'utf-8';
+        this.default_derived_file_encoding = 'utf-8';
+        this.new_leo_file_encoding = 'utf-8';
+        // Default fonts.
+        this.defaultBodyFontSize = 12;  // 9 if sys.platform == "win32" else 12
+        this.defaultLogFontSize = 12;  // 8 if sys.platform == "win32" else 12
+        this.defaultMenuFontSize = 12;  // 9 if sys.platform == "win32" else 12
+        this.defaultTreeFontSize = 12;  // 9 if sys.platform == "win32" else 12
 
-    //@+node:felix.20220214191554.4: *4* c.config.initEncoding
-    public initEncoding(key: string): void {
-        // Important: the key is munged.
-        const gs = g.app.config.encodingIvarsDict.get(key);
-        const encodingName = gs.ivar!;
-        let encoding = this.get(encodingName, 'string');
-        // Use the global setting as a last resort.
-
-        if (!encoding) {
-            encoding = (g.app.config as any)[encodingName];
-        }
-        (this as any)[encodingName] = encoding;
-
-        if (encoding && !g.isValidEncoding(encoding)) {
-            g.es('bad', `${encodingName}: ${encoding}`);
-        }
-    }
-
-    //@+node:felix.20220214191554.5: *4* c.config.initIvar
-    public initIvar(key: string): void {
-        const c = this.c;
-        // Important: the key is munged.
-        const gs = g.app.config.ivarsDict.get(key);
-        const ivarName = gs.ivar!;
-        const val = this.get(ivarName, undefined);
-        if (val || !(this as any)[ivarName]) {
-            // Set *both* the commander ivar and the c.config ivar.
-            (this as any)[ivarName] = val;
-            (c as any)[ivarName] = val;
-            // * equivalent of
-            // setattr(self, ivarName, val)
-            // setattr(c, ivarName, val)
-        }
     }
 
     //@+node:felix.20220214191554.6: *3* c.config.createActivesSettingsOutline (new: #852)
@@ -2249,6 +1936,7 @@ export class LocalConfigManager {
     // public createActivesSettingsOutline(): void {
     //     ActiveSettingsOutline(this.c);
     // }
+
     //@+node:felix.20220214191554.7: *3* c.config.getSource
     /**
      * Return a string representing the source file of the given setting,
@@ -2375,7 +2063,7 @@ export class LocalConfigManager {
         const d = this.settingsDict;
         if (d) {
             // assert isinstance(d, g.TypedDict), repr(d)
-            console.assert(d instanceof g.TypedDict, d.toString());
+            console.assert(d instanceof g.SettingsDict, d.toString());
             let val: any;
             let junk: any;
             [val, junk] = this.getValFromDict(d, setting, kind);
@@ -2394,10 +2082,10 @@ export class LocalConfigManager {
      * @param warn flag to have method warn if value not found
      * @returns array of value, and exist flag
      */
-    public getValFromDict(d: g.TypedDict, setting: string, requestedType?: string, warn = true): [any, boolean] {
+    public getValFromDict(d: g.SettingsDict, setting: string, requestedType?: string, warn = true): [any, boolean] {
         const tag = 'c.config.getValFromDict';
-
-        const gs = d.get(g.app.config.munge(setting)!);
+        const mungedSetting = g.app.config.munge(setting)!;
+        const gs = d.get(mungedSetting);
         if (!gs) {
             return [undefined, false];
         }
@@ -2476,12 +2164,12 @@ export class LocalConfigManager {
      * @param defaultVal value if not found as being boolean
      * @returns the boolean setting's value, or default
      */
-    public getBool(setting: string, defaultVal?: any): any {
+    public getBool(setting: string, defaultVal?: boolean): boolean {
         const val = this.get(setting, "bool");
         if ([true, false].includes(val)) {
             return val;
         }
-        return defaultVal;
+        return defaultVal as boolean;
     }
     //@+node:felix.20220214191554.17: *5* c.config.getColor
     /**
@@ -2606,20 +2294,6 @@ export class LocalConfigManager {
      * @param defaultSize 
      */
     public getFontFromParams(family: string, size: number, slant: number, weight: number, defaultSize = 12): string {
-        // ? needed ?
-        // family = this.get(family, "family")
-        // if family in (None, ""):
-        //     family = g.app.config.defaultFontFamily
-        // size = this.get(size, "size")
-        // if size in (None, 0):
-        //     size = defaultSize
-        // slant = this.get(slant, "slant")
-        // if slant in (None, ""):
-        //     slant = "roman"
-        // weight = this.get(weight, "weight")
-        // if weight in (None, ""):
-        //     weight = "normal"
-        // return g.app.gui.getFontFromParams(family, size, slant, weight)
 
         return "";
     }
@@ -2692,7 +2366,7 @@ export class LocalConfigManager {
     public getSettingSource(setting: string): [string, any] | undefined {
         const d = this.settingsDict;
         if (d) {
-            console.assert(d instanceof g.TypedDict, d.toString());
+            console.assert(d instanceof g.SettingsDict, d.toString());
             const bi = d.get(setting);
             if (bi === undefined) {
                 return ['unknown setting', undefined];
@@ -2724,7 +2398,7 @@ export class LocalConfigManager {
         //         g.trace(f"no menu: {c.shortFileName()}:{commandName}")
         //     return None, []
         // if d:
-        //     assert isinstance(d, g.TypedDict), repr(d)  // was TypedDictOfLists.
+        //     assert isinstance(d, g.SettingsDict), repr(d)  // was TypedDictOfLists.
         //     key = c.frame.menu.canonicalizeMenuName(commandName)
         //     key = key.replace('&', '')  // Allow '&' in names.
         //     aList = d.get(commandName, [])
@@ -2885,6 +2559,7 @@ export class LocalConfigManager {
             g.es_print('', result.join(''), 'Settings');
         }
     }
+
     //@+node:felix.20220214191554.36: *3* c.config.set
     /**
      * Init the setting for name to val.
@@ -2898,7 +2573,7 @@ export class LocalConfigManager {
         // Note: when kind is 'shortcut', name is a command name.
         let key: string = g.app.config.munge(name)!;
         let d = this.settingsDict;
-        // assert isinstance(d, g.TypedDict), repr(d)
+        console.assert(d instanceof g.SettingsDict, d.toString());
         let gs = d.get(key);
         if (gs) {
             // assert isinstance(gs, g.GeneralSetting), repr(gs)
@@ -2979,9 +2654,9 @@ export class LocalConfigManager {
  */
 export class SettingsTreeParser extends ParserBaseClass {
 
-
-    // def __init__(self, c, localFlag=True):
-    // super().__init__(c, localFlag)
+    constructor(c: Commands, localFlag = true) {
+        super(c, localFlag);
+    }
 
     //@+others
     //@+node:felix.20220602232038.2: *3* ctor (SettingsTreeParser)

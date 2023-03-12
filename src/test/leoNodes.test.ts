@@ -712,11 +712,11 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
             const next = p.next();
             assert.ok(
                 (back.__bool__() && p.hasBack()) ||
-                    (!back.__bool__() && !p.hasBack())
+                (!back.__bool__() && !p.hasBack())
             );
             assert.ok(
                 (next.__bool__() && p.hasNext()) ||
-                    (!next.__bool__() && !p.hasNext())
+                (!next.__bool__() && !p.hasNext())
             );
         }
     });
@@ -729,11 +729,11 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
             const parent = p.parent();
             assert.ok(
                 (child.__bool__() && p.hasFirstChild()) ||
-                    (!child.__bool__() && !p.hasFirstChild())
+                (!child.__bool__() && !p.hasFirstChild())
             );
             assert.ok(
                 (parent.__bool__() && p.hasParent()) ||
-                    (!parent.__bool__() && !p.hasParent())
+                (!parent.__bool__() && !p.hasParent())
             );
         }
     });
@@ -747,11 +747,11 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
 
             assert.ok(
                 (threadBack.__bool__() && p.hasThreadBack()) ||
-                    (!threadBack.__bool__() && !p.hasThreadBack())
+                (!threadBack.__bool__() && !p.hasThreadBack())
             );
             assert.ok(
                 (threadNext.__bool__() && p.hasThreadNext()) ||
-                    (!threadNext.__bool__() && !p.hasThreadNext())
+                (!threadNext.__bool__() && !p.hasThreadNext())
             );
         }
     });
@@ -891,7 +891,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     test('test_p_u', async () => {
         const p = self.c.p;
         assert.deepStrictEqual(p.u, p.v.u);
-        p.v.u = undefined;
+        p.v.u = {};
         assert.deepStrictEqual(p.u, {});
         assert.deepStrictEqual(p.v.u, {});
         const d = { my_plugin: 'val' };

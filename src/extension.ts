@@ -30,6 +30,22 @@ export function activate(p_context: vscode.ExtensionContext) {
     //     }
     // });
 
+    const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
+    const w_leojsVersion = w_leojsExtension.packageJSON.version;
+
+    const w_previousVersion = p_context.globalState.get<string>(Constants.VERSION_STATE_KEY);
+
+    // * Close remaining Leo Bodies restored by vscode from last session.
+    closeLeoTextEditors();
+
+    // * Show a welcome screen on version updates, then start the actual extension.
+    showWelcomeIfNewer(w_leojsVersion, w_previousVersion)
+        .then(() => {
+
+            p_context.globalState.update(Constants.VERSION_STATE_KEY, w_leojsVersion);
+
+        });
+
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
     } else {
@@ -69,6 +85,7 @@ export function activate(p_context: vscode.ExtensionContext) {
                     }
                 });
                 console.log('NOT started because not writable workspace');
+                setStartupDoneContext(true);
                 return;
             }
 
@@ -84,14 +101,20 @@ export function activate(p_context: vscode.ExtensionContext) {
                     }
                 });
                 console.log('NOT started because no remote workspace yet');
+                setStartupDoneContext(true);
                 return;
             }
         } else {
             console.log('NOT started because no remote workspace yet');
+            setStartupDoneContext(true);
         }
 
     }
 
+}
+
+function setStartupDoneContext(p_value: boolean): Thenable<unknown> {
+    return vscode.commands.executeCommand(Constants.VSCODE_COMMANDS.SET_CONTEXT, Constants.CONTEXT_FLAGS.LEO_STARTUP_DONE, p_value);
 }
 
 function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscode.ExtensionContext) {
@@ -121,11 +144,13 @@ function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscod
                     }
                 });
                 console.log('NOT started because no remote workspace yet');
+                setStartupDoneContext(true);
                 return;
             }
         }
     } else {
         console.log('TODO : HANDLE WORKSPACE CHANGE DETECTED! but no workspace');
+        setStartupDoneContext(true);
     }
 
 }
@@ -145,4 +170,79 @@ function runLeo(p_context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() { }
 
+/**
+ * * Closes all visible text editors that have Leo filesystem scheme (that are not dirty)
+ */
+function closeLeoTextEditors(): Thenable<unknown> {
+    const w_foundTabs: vscode.Tab[] = [];
+
+    vscode.window.tabGroups.all.forEach((p_tabGroup) => {
+        p_tabGroup.tabs.forEach((p_tab) => {
+            if (p_tab.input &&
+                (p_tab.input as vscode.TabInputText).uri &&
+                (p_tab.input as vscode.TabInputText).uri.scheme === Constants.URI_LEO_SCHEME &&
+                !p_tab.isDirty
+            ) {
+                w_foundTabs.push(p_tab);
+            }
+        });
+    });
+
+    let q_closedTabs;
+    if (w_foundTabs.length) {
+        q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
+        w_foundTabs.forEach((p_tab) => {
+            if (p_tab.input) {
+                vscode.commands.executeCommand(
+                    'vscode.removeFromRecentlyOpened',
+                    (p_tab.input as vscode.TabInputText).uri
+                );
+                // Delete to close all other body tabs.
+                // (w_oldUri will be deleted last below)
+                const w_edit = new vscode.WorkspaceEdit();
+                w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
+                vscode.workspace.applyEdit(w_edit);
+            }
+        });
+    } else {
+        q_closedTabs = Promise.resolve(true);
+    }
+    return q_closedTabs;
+}
+
+/**
+ * * Show welcome screen if needed, based on last version executed
+ * @param p_version Current version, as a string, from packageJSON.version
+ * @param p_previousVersion Previous version, as a string, from context.globalState.get service
+ * @returns A promise that triggers when command to show the welcome screen is finished, or immediately if not needed
+ */
+async function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undefined): Promise<unknown> {
+    let w_showWelcomeScreen: boolean = false;
+    if (p_previousVersion === undefined) {
+        console.log('leojs first-time install');
+        w_showWelcomeScreen = true;
+    } else {
+        if (p_previousVersion !== p_version) {
+            vscode.window.showInformationMessage(`leojs upgraded from v${p_previousVersion} to v${p_version}`);
+        }
+        const [w_major, w_minor] = p_version.split('.').map(p_stringVal => parseInt(p_stringVal, 10));
+        const [w_prevMajor, w_prevMinor] = p_previousVersion.split('.').map(p_stringVal => parseInt(p_stringVal, 10));
+        if (
+            (w_major === w_prevMajor && w_minor === w_prevMinor) ||
+            // Don't notify on downgrades
+            (w_major < w_prevMajor || (w_major === w_prevMajor && w_minor < w_prevMinor))
+        ) {
+            w_showWelcomeScreen = false;
+        } else if (w_major !== w_prevMajor || (w_major === w_prevMajor && w_minor > w_prevMinor)) {
+            // Will show on major or minor upgrade (Formatted as 'Major.Minor.Revision' eg. 1.2.3)
+            w_showWelcomeScreen = true;
+        }
+    }
+    if (w_showWelcomeScreen) {
+        // todo
+        // return vscode.commands.executeCommand(Constants.COMMANDS.SHOW_WELCOME);
+    } else {
+        return Promise.resolve();
+    }
+}
 

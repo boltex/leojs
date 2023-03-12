@@ -24,20 +24,27 @@ export class Constants {
     public static BUTTONS_ID: string = "leojsButtons";
     public static BUTTONS_EXPLORER_ID: string = "leojsButtonsExplorer";
 
-    public static UNDOS_ID: string = "leojsUndos";
-    public static UNDOS_EXPLORER_ID: string = "leojsUndosExplorer";
-
     public static FIND_ID: string = "leojsFindPanel";
-    public static FIND_EXPLORER_ID: string = "leojsindPanelExplorer";
+    public static FIND_EXPLORER_ID: string = "leojsFindPanelExplorer";
 
     public static GOTO_ID: string = "leojsGotoPanel";
     public static GOTO_EXPLORER_ID: string = "leojsGotoPanelExplorer";
 
-    public static FILE_EXTENSION: string = "leojs";
+    public static UNDOS_ID: string = "leojsUndos";
+    public static UNDOS_EXPLORER_ID: string = "leojsUndosExplorer";
+
+    public static VERSION_STATE_KEY: string = "leojsVersion";
+
+    public static FILE_EXTENSION: string = "leo";
+    public static DB_FILE_EXTENSION: string = "db";
+    public static JS_FILE_EXTENSION: string = "leojs";
+
+    public static LEO_LANGUAGE_PREFIX: string = "leojsbody."; // all lowercase.
+
     public static URI_LEO_SCHEME: string = "leojs";
     public static URI_FILE_SCHEME: string = "file";
     public static URI_SCHEME_HEADER: string = "leojs:/";
-    public static FILE_OPEN_FILTER_MESSAGE: string = "Leojs Files";
+    public static FILE_OPEN_FILTER_MESSAGE: string = "Leo Files"; // Meant for all 3 leo, db and leojs.
     public static UNTITLED_FILE_NAME: string = "untitled";
     public static RECENT_FILES_KEY: string = "leojsRecentFiles";
     public static LAST_FILES_KEY: string = "leojsLastFiles";
@@ -45,9 +52,12 @@ export class Constants {
     public static STATUSBAR_DEBOUNCE_DELAY: number = 70;
     public static REFRESH_DEBOUNCE_DELAY: number = 50;
     public static STATES_DEBOUNCE_DELAY: number = 60;
+    public static TITLE_DEBOUNCE_DELAY: number = 20;
     public static BUTTONS_DEBOUNCE_DELAY: number = 160;
     public static DOCUMENTS_DEBOUNCE_DELAY: number = 80;
     public static UNDOS_DEBOUNCE_DELAY: number = 140;
+    public static UNDOS_REVEAL_DEBOUNCE_DELAY: number = 50;
+    public static GOTO_DEBOUNCE_DELAY: number = 50;
     public static BODY_STATES_DEBOUNCE_DELAY: number = 120;
 
     public static CONFIG_NAME: string = "leojs";
@@ -58,14 +68,36 @@ export class Constants {
      * Strings used in the workbench interface panels (not for messages or dialogs)
      */
     public static GUI = {
+        ICON_LIGHT_PARENT: "resources/light/parent.svg",
+        ICON_DARK_PARENT: "resources/dark/parent.svg",
+        ICON_LIGHT_NODE: "resources/light/node.svg",
+        ICON_DARK_NODE: "resources/dark/node.svg",
+        ICON_LIGHT_BODY: "resources/light/body.svg",
+        ICON_DARK_BODY: "resources/dark/body.svg",
+        ICON_LIGHT_TAG: "resources/light/tag.svg",
+        ICON_DARK_TAG: "resources/dark/tag.svg",
+
         ICON_LIGHT_DOCUMENT: "resources/light/document.svg",
         ICON_DARK_DOCUMENT: "resources/dark/document.svg",
         ICON_LIGHT_DOCUMENT_DIRTY: "resources/light/document-dirty.svg",
         ICON_DARK_DOCUMENT_DIRTY: "resources/dark/document-dirty.svg",
+
+        ICON_LIGHT_UNDO_ACTIVE: "resources/light/undo.svg",
+        ICON_DARK_UNDO_ACTIVE: "resources/dark/undo.svg",
+        ICON_LIGHT_UNDO: "resources/dark/undo.svg",
+        ICON_DARK_UNDO: "resources/light/undo.svg",
+        ICON_LIGHT_REDO_ACTIVE: "resources/light/redo.svg",
+        ICON_DARK_REDO_ACTIVE: "resources/dark/redo.svg",
+        ICON_LIGHT_REDO: "resources/dark/redo.svg",
+        ICON_DARK_REDO: "resources/light/redo.svg",
+
         ICON_LIGHT_BUTTON: "resources/light/button.svg",
         ICON_DARK_BUTTON: "resources/dark/button.svg",
+        ICON_LIGHT_BUTTON_RCLICK: "resources/light/button-rclick.svg",
+        ICON_DARK_BUTTON_RCLICK: "resources/dark/button-rclick.svg",
         ICON_LIGHT_BUTTON_ADD: "resources/light/button-add.svg",
         ICON_DARK_BUTTON_ADD: "resources/dark/button-add.svg",
+
         ICON_LIGHT_PATH: "resources/light/box",
         ICON_DARK_PATH: "resources/dark/box",
         ICON_FILE_EXT: ".svg",
@@ -106,23 +138,72 @@ export class Constants {
         OPEN_RECENT_FILE: "Open Recent Leojs File",
         RIGHT_CLICK_TO_OPEN: "Right-click to open with leojs",
         FILE_ALREADY_OPENED: "Leojs file already opened",
+
+        CLEARED_RECENT: "Cleared recent files list",
         CHOOSE_OPENED_FILE: "Select an opened Leojs File",
         FILE_NOT_OPENED: "No files opened.",
+        STATUSBAR_TOOLTIP_ON: "Leo Key Bindings are in effect", // TODO : Add description of what happens if clicked
+        STATUSBAR_TOOLTIP_OFF: "Leo Key Bindings off", // TODO : Add description of what happens if clicked
         PROMPT_EDIT_HEADLINE: "Edit Headline",
         PROMPT_INSERT_NODE: "Insert Node",
+        PROMPT_INSERT_CHILD: "Insert Child",
         DEFAULT_HEADLINE: "New Headline",
+        TITLE_GOTO_GLOBAL_LINE: "Goto global line",
+        PLACEHOLDER_GOTO_GLOBAL_LINE: "#",
+        PROMPT_GOTO_GLOBAL_LINE: "Line number",
+
+        REPLACE_TITLE: "Replace with",
+        REPLACE_PROMPT: "Type text to replace with and press enter.",
+        REPLACE_PLACEHOLDER: "Replace pattern here",
+
+        SEARCH_TITLE: "Search for",
+        SEARCH_PROMPT: "Type text to search for and press enter.",
+        SEARCH_PLACEHOLDER: "Find pattern here",
+
+        INT_SEARCH_TITLE: "Search",
+        INT_SEARCH_PROMPT: "'Enter' to search",
+        INT_SEARCH_BACKWARD: " Backward", // Leading space intended
+        INT_SEARCH_REGEXP: "Regexp ", // Trailing space intended
+        INT_SEARCH_WORD: "Word ", // Trailing space intended
+
+        SEARCH_NOT_FOUND: "Not found",
+        FIND_PATTERN_HERE: "<find pattern here>",
+
+        TAGS_CHARACTERS_ERROR: "Cannot add tags containing any of these characters: &|^-",
+        NO_TAGS_ON_NODE: "No tags on node: ", // Trailing space intended
+
+        TITLE_TAG_CHILDREN: "Tag Children",
+        TITLE_REMOVE_TAG: "Remove Tag",
+        TITLE_TAG_NODE: "Tag Node",
+        PLACEHOLDER_TAG: "<tag>",
+        PROMPT_TAG: "Enter a tag name",
+        TITLE_FIND_TAG: "Find Tag",
+        PLACEHOLDER_CLONE_FIND_TAG: "<tag>",
+        PROMPT_CLONE_FIND_TAG: "Enter a tag name",
+
         CLOSE_ERROR: "Cannot close: No files opened.",
         YES: "Yes",
         NO: "No",
         YES_ALL: "Yes to all",
         NO_ALL: "No to all",
+        CHOOSE_BUTTON: "Choose @button or @rclick",
+        SEARCH_POSITION_BY_HEADLINE: "Search positions by headline",
         MINIBUFFER_PROMPT: "Minibuffer Full Command",
+        SELECT_CHAPTER_PROMPT: "Select chapter",
         CHANGES_DETECTED: "Changes to external files were detected.",
         REFRESHED: " Nodes refreshed.", // with voluntary leading space
         IGNORED: " They were ignored.", // with voluntary leading space
         TOO_FAST: "Leo is busy! ", // with voluntary trailing space
-        STATUSBAR_TOOLTIP_ON: "Leojs Key Bindings are in effect",
-        STATUSBAR_TOOLTIP_OFF: "Leojs Key Bindings off",
+
+        UNKNOWN_LANGUAGE_NOT_SUPPORTED: "Language not yet supported.",
+        LANGUAGE_NOT_SUPPORTED: " language not yet supported.", // with leading space
+        MINIBUFFER_BUTTON_START: "@button-",
+        MINIBUFFER_DEL_BUTTON_START: "delete-@button-",
+        MINIBUFFER_COMMAND_START: "@command-",
+        MINIBUFFER_USER_DEFINED: "$(run) User defined command.",
+        MINIBUFFER_HISTORY_LABEL: "Minibuffer History",
+        MINIBUFFER_HISTORY_DESC: "$(history) Choose from last run commands...",
+
         ZOOM_LEVEL_RANGE_LIMIT: "Value for zoom level should be between -12 and 12",
         FONT_SIZE_RANGE_LIMIT: "Value for font size should be between 6 and 30",
         FIX_IT: "Fix it",
@@ -144,6 +225,7 @@ export class Constants {
         FIND_TEXT: "findText",
         REPLACE_TEXT: "replaceText",
         ENTIRE_OUTLINE: "entireOutline",
+        FILE_ONLY: "fileOnly",
         NODE_ONLY: "nodeOnly",
         SUBOUTLINE_ONLY: "subOutlineOnly",
         IGNORE_CASE: "ignoreCase",
@@ -185,16 +267,20 @@ export class Constants {
         SHOW_CLONE: "showCloneOnNodes",
         SHOW_COPY: "showCopyOnNodes",
 
-        SHOW_EDITION_BODY: "showEditionOnBody",
-        SHOW_CLIPBOARD_BODY: "showClipboardOnBody",
-        SHOW_PROMOTE_BODY: "showPromoteOnBody",
-        SHOW_EXECUTE_BODY: "showExecuteOnBody",
-        SHOW_EXTRACT_BODY: "showExtractOnBody",
-        SHOW_IMPORT_BODY: "showImportOnBody",
-        SHOW_REFRESH_BODY: "showRefreshOnBody",
-        SHOW_HOIST_BODY: "showHoistOnBody",
-        SHOW_MARK_BODY: "showMarkOnBody",
-        SHOW_SORT_BODY: "showSortOnBody",
+        COLLAPSE_ALL_SHORTCUT: "collapseAllShortcut",
+        ACTIVITY_VIEW_SHORTCUT: "ActivityViewShortcut",
+        GO_ANYWHERE_SHORTCUT: "goAnywhereShortcut",
+
+        // SHOW_EDITION_BODY: "showEditionOnBody",
+        // SHOW_CLIPBOARD_BODY: "showClipboardOnBody",
+        // SHOW_PROMOTE_BODY: "showPromoteOnBody",
+        // SHOW_EXECUTE_BODY: "showExecuteOnBody",
+        // SHOW_EXTRACT_BODY: "showExtractOnBody",
+        // SHOW_IMPORT_BODY: "showImportOnBody",
+        // SHOW_REFRESH_BODY: "showRefreshOnBody",
+        // SHOW_HOIST_BODY: "showHoistOnBody",
+        // SHOW_MARK_BODY: "showMarkOnBody",
+        // SHOW_SORT_BODY: "showSortOnBody",
 
         INVERT_NODES: "invertNodeContrast",
         LEO_ID: "leoID"
@@ -210,7 +296,13 @@ export class Constants {
         LEO_TREE_BROWSE: true,
         TREE_KEEP_FOCUS: true,
         TREE_KEEP_FOCUS_WHEN_ASIDE: false,
-        STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
+
+        COLLAPSE_ALL_SHORTCUT: true,
+        ACTIVITY_VIEW_SHORTCUT: true,
+        GO_ANYWHERE_SHORTCUT: true,
+
+        // STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
+
         STATUSBAR_COLOR: "fb7c47",
         TREE_IN_EXPLORER: true,
         SHOW_OPEN_ASIDE: true,
@@ -221,16 +313,16 @@ export class Constants {
         SHOW_CLONE: false,
         SHOW_COPY: false,
 
-        SHOW_EDITION_BODY: true,
-        SHOW_CLIPBOARD_BODY: true,
-        SHOW_PROMOTE_BODY: true,
-        SHOW_EXECUTE_BODY: true,
-        SHOW_EXTRACT_BODY: true,
-        SHOW_IMPORT_BODY: true,
-        SHOW_REFRESH_BODY: true,
-        SHOW_HOIST_BODY: true,
-        SHOW_MARK_BODY: true,
-        SHOW_SORT_BODY: true,
+        // SHOW_EDITION_BODY: true,
+        // SHOW_CLIPBOARD_BODY: true,
+        // SHOW_PROMOTE_BODY: true,
+        // SHOW_EXECUTE_BODY: true,
+        // SHOW_EXTRACT_BODY: true,
+        // SHOW_IMPORT_BODY: true,
+        // SHOW_REFRESH_BODY: true,
+        // SHOW_HOIST_BODY: true,
+        // SHOW_MARK_BODY: true,
+        // SHOW_SORT_BODY: true,
 
         INVERT_NODES: false,
         LEO_ID: ""
@@ -259,10 +351,11 @@ export class Constants {
      */
     public static CONTEXT_FLAGS = {
         // Main flags for connection and opened file
+        LEO_STARTUP_DONE: "leojsStartupDone",
         LEO_READY: "leojsReady", // Extension activated and classes created and ready
         TREE_OPENED: "leojsTreeOpened", // At least one Leo file opened
         TREE_TITLED: "leojsTreeTitled", // Tree is a Leo file and not a new untitled document
-        SERVER_STARTED: "leojsServerStarted", // Auto-start or manually started
+
         // 'states' flags for currently opened tree view
         LEO_CHANGED: "leojsChanged",
         LEO_CAN_UNDO: "leojsCanUndo",
@@ -272,6 +365,10 @@ export class Constants {
         LEO_CAN_DEMOTE: "leojsCanDemote",
         LEO_CAN_PROMOTE: "leojsCanPromote",
         LEO_CAN_DEHOIST: "leojsCanDehoist",
+        LEO_CAN_HOIST: "leojsCanHoist", // isNotRoot equivalent, Computed by hand
+        LEO_IN_CHAPTER: "leojsInChapter", // TODO
+        LEO_TOP_HOIST_CHAPTER: "leojsTopHoistChapter", // TODO
+
         // 'states' flags about current selection, for visibility and commands availability
         SELECTED_MARKED: "leojsMarked", // no need for unmarked here, use !leojsMarked
         SELECTED_CLONE: "leojsCloned",
@@ -279,9 +376,10 @@ export class Constants {
         SELECTED_EMPTY: "leojsEmpty",
         SELECTED_CHILD: "leojsChild", // Has children
         SELECTED_ATFILE: "LeojsAtFile", // Can be refreshed
-        SELECTED_ROOT: "leojsRoot", // ! Computed by hand
+
         // Statusbar Flag 'keybindings in effect'
         LEO_SELECTED: "leojsObjectSelected", // keybindings "On": Outline or body has focus
+
         // Context Flags for 'when' clauses, used concatenated, for each outline node
         NODE_MARKED: "leojsNodeMarked",  // Selected node is marked
         NODE_UNMARKED: "leojsNodeUnmarked", // Selected node is unmarked (Needed for regexp)
@@ -289,13 +387,23 @@ export class Constants {
         NODE_CLONED: "leojsNodeCloned",
         NODE_ROOT: "leojsNodeRoot",
         NODE_NOT_ROOT: "leojsNodeNotRoot",
+        NODE_TAGS: "leojsNodeTags",
+
+        // Flags for undo nodes 
+        UNDO_BEAD: "leojsUndoNode",
+        NOT_UNDO_BEAD: "leojsNoUndoNode",
+
         // Flags for Leo documents tree view icons and hover node command buttons
         DOCUMENT_SELECTED_TITLED: "leojsDocumentSelectedTitled",
         DOCUMENT_TITLED: "leojsDocumentTitled",
         DOCUMENT_SELECTED_UNTITLED: "leojsDocumentSelectedUntitled",
         DOCUMENT_UNTITLED: "leojsDocumentUntitled",
+
         // Flags for focus context
         FOCUS_FIND: "leojsFindFocus",
+
+        // Flag for interactive Search
+        // INTERACTIVE_SEARCH: "leojsInteractiveSearch", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
 
         // Context flags that are mapped 'directly' onto leojs config settings
         // * PREFIXED WITH 'leojs' *
@@ -309,16 +417,16 @@ export class Constants {
         SHOW_CLONE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLONE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLONE.slice(1),             // Hover Icons on outline nodes
         SHOW_COPY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_COPY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_COPY.slice(1),               // Hover Icons on outline nodes
 
-        SHOW_EDITION_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDITION_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDITION_BODY.slice(1),
-        SHOW_CLIPBOARD_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY.slice(1),
-        SHOW_PROMOTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY.slice(1),
-        SHOW_EXECUTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY.slice(1),
-        SHOW_EXTRACT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY.slice(1),
-        SHOW_IMPORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY.slice(1),
-        SHOW_REFRESH_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY.slice(1),
-        SHOW_HOIST_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_HOIST_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_HOIST_BODY.slice(1),
-        SHOW_MARK_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK_BODY.slice(1),
-        SHOW_SORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_SORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_SORT_BODY.slice(1)
+        // SHOW_EDITION_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDITION_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDITION_BODY.slice(1),
+        // SHOW_CLIPBOARD_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLIPBOARD_BODY.slice(1),
+        // SHOW_PROMOTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_PROMOTE_BODY.slice(1),
+        // SHOW_EXECUTE_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXECUTE_BODY.slice(1),
+        // SHOW_EXTRACT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EXTRACT_BODY.slice(1),
+        // SHOW_IMPORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_IMPORT_BODY.slice(1),
+        // SHOW_REFRESH_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_REFRESH_BODY.slice(1),
+        // SHOW_HOIST_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_HOIST_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_HOIST_BODY.slice(1),
+        // SHOW_MARK_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK_BODY.slice(1),
+        // SHOW_SORT_BODY: Constants.NAME + Constants.CONFIG_NAMES.SHOW_SORT_BODY[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_SORT_BODY.slice(1)
     };
 
     /**
@@ -332,18 +440,40 @@ export class Constants {
     };
 
     /**
+     * * Table for converting Leo languages names for the currently opened body pane
+     * Used in showBody method of leoUI.ts
+     */
+    public static LANGUAGE_CODES: { [key: string]: string | undefined } = {
+        cplusplus: 'cpp',
+        md: 'markdown',
+        rest: 'restructuredtext',
+        rst: 'restructuredtext'
+    };
+
+    /**
      * All commands this expansion exposes to the user via GUI/keybindings in package.json
      */
     public static COMMANDS = {
-        // * Access to the Settings/Welcome Webview
+        // Access to the Settings/Welcome Webview
         SHOW_WELCOME: Constants.NAME + ".showWelcomePage", // Always available: not in the commandPalette section of package.json
         SHOW_SETTINGS: Constants.NAME + ".showSettingsPage", // Always available: not in the commandPalette section of package.json
         STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
         // Leo Documents
         SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
         OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
+        REVERT: Constants.NAME + ".revert",
         CLEAR_RECENT_FILES: Constants.NAME + ".clearRecentFiles",
+        // Import Export Commands
         IMPORT_ANY_FILE: Constants.NAME + ".importAnyFile",
+        READ_FILE_INTO_NODE: Constants.NAME + ".readFileIntoNode",
+        EXPORT_HEADLINES: Constants.NAME + ".exportHeadlines",
+        FLATTEN_OUTLINE: Constants.NAME + ".flattenOutline",
+        OUTLINE_TO_CWEB: Constants.NAME + ".outlineToCweb",
+        OUTLINE_TO_NOWEB: Constants.NAME + ".outlineToNoweb",
+        REMOVE_SENTINELS: Constants.NAME + ".removeSentinels",
+        WEAVE: Constants.NAME + ".weave",
+        WRITE_FILE_FROM_NODE: Constants.NAME + ".writeFileFromNode",
+        // Leo Document Files
         RECENT_FILES: Constants.NAME + ".recentLeoFiles", // shows recent Leo files, opens one on selection
         SWITCH_FILE: Constants.NAME + ".switchLeoFile",
         NEW_FILE: Constants.NAME + ".newLeoFile",
@@ -371,6 +501,7 @@ export class Constants {
         PAGE_DOWN: Constants.NAME + ".pageDown",
         GOTO_FIRST_VISIBLE: Constants.NAME + ".gotoFirstVisible",
         GOTO_LAST_VISIBLE: Constants.NAME + ".gotoLastVisible",
+        GOTO_FIRST_SIBLING: Constants.NAME + ".gotoFirstSibling",
         GOTO_LAST_SIBLING: Constants.NAME + ".gotoLastSibling",
         GOTO_NEXT_VISIBLE: Constants.NAME + ".gotoNextVisible",
         GOTO_PREV_VISIBLE: Constants.NAME + ".gotoPrevVisible",
@@ -383,10 +514,9 @@ export class Constants {
         // Leo Operations
         UNDO: Constants.NAME + ".undo", // From command Palette
         UNDO_FO: Constants.NAME + ".undoFromOutline", // from button, return focus on OUTLINE
-        UNDO_DISABLED: Constants.NAME + ".undoDisabled", // Disabled - nop
         REDO: Constants.NAME + ".redo", // From command Palette
         REDO_FO: Constants.NAME + ".redoFromOutline", // from button, return focus on OUTLINE
-        REDO_DISABLED: Constants.NAME + ".redoDisabled", // Disabled - nop
+        REVERT_TO_UNDO: Constants.NAME + ".revertToUndo",
         EXECUTE: Constants.NAME + ".executeScript",
         SHOW_BODY: Constants.NAME + ".showBody",
         SHOW_OUTLINE: Constants.NAME + ".showOutline",
@@ -399,11 +529,10 @@ export class Constants {
         CONTRACT_ALL_FO: Constants.NAME + ".contractAllFromOutline", // from button, return focus on OUTLINE
         PREV_NODE: Constants.NAME + ".prev",
         PREV_NODE_FO: Constants.NAME + ".prevFromOutline",
-        PREV_NODE_DISABLED: Constants.NAME + ".prevDisabled",
         NEXT_NODE: Constants.NAME + ".next",
         NEXT_NODE_FO: Constants.NAME + ".nextFromOutline",
-        NEXT_NODE_DISABLED: Constants.NAME + ".nextDisabled",
         // Commands from tree panel buttons or context: focus on OUTLINE
+        SET_UA: Constants.NAME + ".setUa",
         MARK: Constants.NAME + ".mark",
         UNMARK: Constants.NAME + ".unmark",
         COPY: Constants.NAME + ".copyNode",
@@ -420,9 +549,7 @@ export class Constants {
         INSERT_CHILD: Constants.NAME + ".insertChildNode",
         CLONE: Constants.NAME + ".cloneNode",
         PROMOTE: Constants.NAME + ".promote",
-        PROMOTE_DISABLED: Constants.NAME + ".promoteDisabled",
         DEMOTE: Constants.NAME + ".demote",
-        DEMOTE_DISABLED: Constants.NAME + ".demoteDisabled",
         REFRESH_FROM_DISK: Constants.NAME + ".refreshFromDisk",
         // Commands from keyboard, while focus on BODY (command-palette returns to BODY for now)
         MARK_SELECTION: Constants.NAME + ".markSelection",
@@ -464,12 +591,14 @@ export class Constants {
         DEMOTE_SELECTION_FO: Constants.NAME + ".demoteSelectionFromOutline",
         REFRESH_FROM_DISK_SELECTION_FO: Constants.NAME + ".refreshFromDiskSelectionFromOutline",
         HOIST: Constants.NAME + ".hoistNode",
-        HOIST_DISABLED: Constants.NAME + ".hoistDisabled",
         HOIST_SELECTION: Constants.NAME + ".hoistSelection",
         HOIST_SELECTION_FO: Constants.NAME + ".hoistSelectionFromOutline",
         DEHOIST: Constants.NAME + ".deHoist",
-        DEHOIST_DISABLED: Constants.NAME + ".deHoistDisabled",
         DEHOIST_FO: Constants.NAME + ".deHoistFromOutline",
+        CHAPTER_NEXT: Constants.NAME + ".chapterNext",
+        CHAPTER_BACK: Constants.NAME + ".chapterBack",
+        CHAPTER_MAIN: Constants.NAME + ".chapterMain",
+        CHAPTER_SELECT: Constants.NAME + ".chapterSelect",
         EXTRACT: Constants.NAME + ".extract",
         EXTRACT_NAMES: Constants.NAME + ".extractNames",
         COPY_MARKED: Constants.NAME + ".copyMarked",
@@ -490,7 +619,19 @@ export class Constants {
         FIND_QUICK_GO_ANYWHERE: Constants.NAME + ".goAnywhere",
         GOTO_NAV_ENTRY: Constants.NAME + ".gotoNav",
 
+        GOTO_NAV_PREV: Constants.NAME + ".gotoNavPrev",
+        GOTO_NAV_NEXT: Constants.NAME + ".gotoNavNext",
+        GOTO_NAV_FIRST: Constants.NAME + ".gotoNavFirst",
+        GOTO_NAV_LAST: Constants.NAME + ".gotoNavLast",
+
+        // INTERACTIVE_SEARCH_TAB: Constants.NAME + ".interactiveSearchTab", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
+
         START_SEARCH: Constants.NAME + ".startSearch",
+        SEARCH_BACKWARD: Constants.NAME + ".searchBackward",
+        RE_SEARCH: Constants.NAME + ".reSearch",
+        RE_SEARCH_BACKWARD: Constants.NAME + ".reSearchBackward",
+        WORD_SEARCH: Constants.NAME + ".wordSearch",
+        WORD_SEARCH_BACKWARD: Constants.NAME + ".wordSearchBackward",
         FIND_ALL: Constants.NAME + ".findAll",
         FIND_NEXT: Constants.NAME + ".findNext",
         FIND_NEXT_FO: Constants.NAME + ".findNextFromOutline",
@@ -509,7 +650,8 @@ export class Constants {
         CLONE_FIND_TAG: Constants.NAME + ".cloneFindTag",
         CLONE_FIND_MARKED: Constants.NAME + ".cloneFindMarked",
         CLONE_FIND_FLATTENED_MARKED: Constants.NAME + ".cloneFindFlattenedMarked",
-        // TODO
+
+        CLONE_FIND_PARENTS: Constants.NAME + ".cloneFindParents",
         GOTO_GLOBAL_LINE: Constants.NAME + ".gotoGlobalLine",
         TAG_CHILDREN: Constants.NAME + ".tagChildren",
         TAG_NODE: Constants.NAME + ".tagNode",
@@ -517,6 +659,7 @@ export class Constants {
         REMOVE_TAGS: Constants.NAME + ".removeTags",
         SET_FIND_EVERYWHERE_OPTION: Constants.NAME + ".setFindEverywhereOption",
         SET_FIND_NODE_ONLY_OPTION: Constants.NAME + ".setFindNodeOnlyOption",
+        SET_FIND_FILE_ONLY_OPTION: Constants.NAME + ".setFindFileOnlyOption",
         SET_FIND_SUBOUTLINE_ONLY_OPTION: Constants.NAME + ".setFindSuboutlineOnlyOption",
         TOGGLE_FIND_IGNORE_CASE_OPTION: Constants.NAME + ".toggleFindIgnoreCaseOption",
         TOGGLE_FIND_MARK_CHANGES_OPTION: Constants.NAME + ".toggleFindMarkChangesOption",
@@ -527,7 +670,6 @@ export class Constants {
         TOGGLE_FIND_SEARCH_HEADLINE_OPTION: Constants.NAME + ".toggleFindSearchHeadlineOption",
         SET_ENABLE_PREVIEW: Constants.NAME + ".setEnablePreview",
         CLEAR_CLOSE_EMPTY_GROUPS: Constants.NAME + ".clearCloseEmptyGroups",
-        SET_CLOSE_ON_FILE_DELETE: Constants.NAME + ".setCloseOnFileDelete"
     };
 
     /**
@@ -536,30 +678,54 @@ export class Constants {
     public static LEO_COMMANDS = {
 
         // * File Commands
-        NEW: 'new',
-        OPEN_OUTLINE: 'open_outline',
+        // NEW: 'new', // newLeoFile used instead
+        // OPEN_OUTLINE: 'open_outline', // openLeoFile used instead
         WRITE_AT_FILE_NODES: 'write-at-file-nodes',
         WRITE_DIRTY_AT_FILE_NODES: 'write-dirty-at-file-nodes',
-
+        REVERT: 'revert',
         // * More Commands
-        //  TODO
         // GOTO_GLOBAL_LINE: "!goto_global_line",
-        // TAG_CHILDREN: "!tag_children",
-        // START_SEARCH: "!start_search",
-        // FIND_ALL: "!find_all",
+        SET_UA: 'set-ua',
+
+        // * Search operations
+        START_SEARCH: "start-search",
+        FIND_ALL: "find-all",
         // FIND_NEXT: "!find_next",
         // FIND_PREVIOUS: "!find_previous",
-        // FIND_VAR: "!find_var",
-        // FIND_DEF: "!find_def",
+        FIND_VAR: "find-var",
+        FIND_DEF: "find-def",
         // REPLACE: "!replace",
         // REPLACE_THEN_FIND: "!replace_then_find",
-        // REPLACE_ALL: "!replace_all",
+        REPLACE_ALL: "change-all",
+
+        SET_FIND_EVERYWHERE_OPTION: "set-find-everywhere",
+        SET_FIND_NODE_ONLY_OPTION: "set-find-node-only",
+        SET_FIND_FILE_ONLY_OPTION: "set-find-file-only",
+        SET_FIND_SUBOUTLINE_ONLY_OPTION: "set-find-suboutline-only",
+        TOGGLE_FIND_IGNORE_CASE_OPTION: "toggle-find-ignore-case-option",
+        TOGGLE_FIND_MARK_CHANGES_OPTION: "toggle-find-mark-changes-option",
+        TOGGLE_FIND_MARK_FINDS_OPTION: "toggle-find-mark-finds-option",
+        TOGGLE_FIND_REGEXP_OPTION: "toggle-find-regex-option",
+        TOGGLE_FIND_WORD_OPTION: "toggle-find-word-option",
+        TOGGLE_FIND_SEARCH_BODY_OPTION: "toggle-find-in-body-option",
+        TOGGLE_FIND_SEARCH_HEADLINE_OPTION: "toggle-find-in-headline-option",
+
+        SEARCH_BACKWARD: "search-backward",
+        RE_SEARCH: "re-search",
+        RE_SEARCH_BACKWARD: "re-search-backward",
+        WORD_SEARCH: "word-search",
+        WORD_SEARCH_BACKWARD: "word-search-backward",
+
+        TAG_NODE: "tag-node",
+        TAG_CHILDREN: "tag-children",
+        REMOVE_TAG: "remove-tag",
+        REMOVE_ALL_TAGS: "remove-all-tags",
 
         // * Undo Operations
         UNDO: "undo",
         REDO: "redo",
         // * Tree Building
-        EXECUTE_SCRIPT: "TODO_EXECUTE_SCRIPT", // TODO
+        EXECUTE_SCRIPT: "execute-script", // TODO
         REFRESH_FROM_DISK: "TODO_REFRESH_FROM_DISK", // TODO
         REFRESH_FROM_DISK_PNODE: "TODO_REFRESH_FROM_DISK_PNODE", // TODO
         GIT_DIFF: "TODO_GIT_DIFF", // TODO
@@ -569,6 +735,8 @@ export class Constants {
         // * Hoist Operations
         HOIST_PNODE: "hoist",
         DEHOIST: "de-hoist",
+        CHAPTER_NEXT: "chapter-next",
+        CHAPTER_BACK: "chapter-back",
         // * History Navigation
         GOTO_PREV_HISTORY: "goto-prev-history-node",
         GOTO_NEXT_HISTORY: "goto-next-history-node",
@@ -577,6 +745,7 @@ export class Constants {
         PAGE_DOWN: "tree-page-down",
         GOTO_FIRST_VISIBLE: "goto-first-visible-node",
         GOTO_LAST_VISIBLE: "goto-last-visible-node",
+        GOTO_FIRST_SIBLING: "goto-first-sibling",
         GOTO_LAST_SIBLING: "goto-last-sibling",
         GOTO_NEXT_VISIBLE: "goto-next-visible",
         GOTO_PREV_VISIBLE: "goto-prev-visible",
@@ -615,10 +784,22 @@ export class Constants {
         SORT_CHILDREN: "sort-children",
         SORT_SIBLINGS: "sort-siblings",
         // * Clone-find functionality
-        CLONE_FIND_ALL: "TODO_CLONE_FIND_ALL", // TODO
-        CLONE_FIND_ALL_FLATTENED: "TODO_CLONE_FIND_ALL_FLATTENED", // TODO
-        CLONE_FIND_MARKED: "TODO_CLONE_FIND_MARKED", // TODO
-        CLONE_FIND_FLATTENED_MARKED: "TODO_CLONE_FIND_FLATTENED_MARKED", // TODO
+
+        CLONE_FIND_ALL_FLATTENED: "cff",
+
+        CLONE_FIND_FLATTENED_MARKED: "cffm",
+        CLONE_FIND_TAG: "cft",
+        CLONE_FIND_ALL: "cfa", // cloneFind used instead
+        CLONE_FIND_MARKED: "cfam",
+        CLONE_FIND_PARENTS: "clone-find-parents",
+    };
+
+    /**
+     * List of command names for both categories of possible offsets when keeping selection.
+     */
+    public static OLD_POS_OFFSETS = {
+        DELETE: ["cut-node", "delete-node"],
+        ADD: ["clone-node", "async-paste-node", "async-paste-retaining-clones"]
     };
 
     /**
@@ -627,92 +808,9 @@ export class Constants {
     public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
         'paste-node': 'async-paste-node',
         'paste-retaining-clones': 'async-paste-retaining-clones',
-        'paste-as-template': 'async-paste-as-template'
-    };
-    /**
-     * * Overridden 'good' minibuffer commands
-     */
-    public static MINIBUFFER_OVERRIDDEN_COMMANDS: { [key: string]: string } = {
-        // "tag-children": Constants.COMMANDS.TAG_CHILDREN,
-        // "clone-find-tag": Constants.COMMANDS.CLONE_FIND_TAG,
-        // "import-file": Constants.COMMANDS.IMPORT_ANY_FILE,
-        // "redo": Constants.COMMANDS.REDO,
-        // "undo": Constants.COMMANDS.UNDO,
-        // "clone-find-all": Constants.COMMANDS.CLONE_FIND_ALL,
-        // "clone-find-all-flattened": Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
-
-        // 'import-MORE-files': Constants.COMMANDS.IMPORT_ANY_FILE,
-        // 'import-free-mind-files': Constants.COMMANDS.IMPORT_ANY_FILE,
-        // 'import-jupyter-notebook': Constants.COMMANDS.IMPORT_ANY_FILE,
-        // 'import-legacy-external-files': Constants.COMMANDS.IMPORT_ANY_FILE,
-        // 'import-mind-jet-files': Constants.COMMANDS.IMPORT_ANY_FILE,
-        // 'import-tabbed-files': Constants.COMMANDS.IMPORT_ANY_FILE,
-        // 'import-todo-text-files': Constants.COMMANDS.IMPORT_ANY_FILE,
-        // 'import-zim-folder': Constants.COMMANDS.IMPORT_ANY_FILE,
-
-        // 'file-new': Constants.COMMANDS.NEW_FILE,
-        // 'file-open-by-name': Constants.COMMANDS.OPEN_FILE,
-        // 'new': Constants.COMMANDS.NEW_FILE,
-        // 'open-outline': Constants.COMMANDS.OPEN_FILE,
-        // 'file-save': Constants.COMMANDS.SAVE_FILE,
-        // 'file-save-as': Constants.COMMANDS.SAVE_AS_FILE,
-        // 'file-save-as-leojs': Constants.COMMANDS.SAVE_AS_LEOJS,
-        // 'file-save-as-unzipped': Constants.COMMANDS.SAVE_AS_FILE,
-        // 'file-save-by-name': Constants.COMMANDS.SAVE_AS_FILE,
-        // 'file-save-to': Constants.COMMANDS.SAVE_AS_FILE,
-        // 'save': Constants.COMMANDS.SAVE_FILE,
-        // 'save-as': Constants.COMMANDS.SAVE_AS_FILE,
-        // 'save-file': Constants.COMMANDS.SAVE_FILE,
-        // 'save-file-as': Constants.COMMANDS.SAVE_AS_FILE,
-        // 'save-file-as-leojs': Constants.COMMANDS.SAVE_AS_LEOJS,
-        // 'save-file-as-unzipped': Constants.COMMANDS.SAVE_AS_FILE,
-        // 'save-file-by-name': Constants.COMMANDS.SAVE_AS_FILE,
-        // 'save-file-to': Constants.COMMANDS.SAVE_AS_FILE,
-        // 'save-to': Constants.COMMANDS.SAVE_AS_FILE,
-
-        // 'clone-find-all-flattened-marked': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED,
-        // 'clone-find-all-marked': Constants.COMMANDS.CLONE_FIND_MARKED,
-
-        // 'clone-marked-nodes': Constants.COMMANDS.CLONE_MARKED_NODES,
-
-        // 'cfa': Constants.COMMANDS.CLONE_FIND_ALL,
-        // 'cfam': Constants.COMMANDS.CLONE_FIND_MARKED,
-        // 'cff': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
-        // 'cffm': Constants.COMMANDS.CLONE_FIND_FLATTENED_MARKED,
-        // 'cft': Constants.COMMANDS.CLONE_FIND_TAG,
-
-        // 'git-diff': Constants.COMMANDS.GIT_DIFF,
-        // 'gd': Constants.COMMANDS.GIT_DIFF,
-
-        // 'find-tab-open': Constants.COMMANDS.START_SEARCH,
-        // 'find-clone-all': Constants.COMMANDS.CLONE_FIND_ALL,
-        // 'find-clone-all-flattened': Constants.COMMANDS.CLONE_FIND_ALL_FLATTENED,
-        // 'find-clone-tag': Constants.COMMANDS.CLONE_FIND_TAG,
-        // 'find-all': Constants.COMMANDS.FIND_ALL,
-        // 'start-search': Constants.COMMANDS.START_SEARCH,
-        // 'find-next': Constants.COMMANDS.FIND_NEXT,
-        // 'find-prev': Constants.COMMANDS.FIND_PREVIOUS,
-        // 'search-backward': Constants.COMMANDS.FIND_NEXT,
-        // 'search-forward': Constants.COMMANDS.FIND_PREVIOUS,
-        // 'find-var': Constants.COMMANDS.FIND_VAR,
-        // 'find-def': Constants.COMMANDS.FIND_DEF,
-        // 'replace': Constants.COMMANDS.REPLACE,
-        // 'replace-all': Constants.COMMANDS.REPLACE_ALL,
-        // 'change-all': Constants.COMMANDS.REPLACE_ALL,
-        // 'change-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
-        // 'replace-then-find': Constants.COMMANDS.REPLACE_THEN_FIND,
-        // 'show-find-options': Constants.COMMANDS.START_SEARCH,
-        // 'toggle-find-ignore-case-option': Constants.COMMANDS.TOGGLE_FIND_IGNORE_CASE_OPTION,
-        // 'toggle-find-in-body-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_BODY_OPTION,
-        // 'toggle-find-in-headline-option': Constants.COMMANDS.TOGGLE_FIND_SEARCH_HEADLINE_OPTION,
-        // 'toggle-find-mark-changes-option': Constants.COMMANDS.TOGGLE_FIND_MARK_CHANGES_OPTION,
-        // 'toggle-find-mark-finds-option': Constants.COMMANDS.TOGGLE_FIND_MARK_FINDS_OPTION,
-        // 'toggle-find-regex-option': Constants.COMMANDS.TOGGLE_FIND_REGEXP_OPTION,
-        // 'toggle-find-word-option': Constants.COMMANDS.TOGGLE_FIND_WORD_OPTION,
-
-        // 'goto-next-history-node': Constants.COMMANDS.PREV_NODE,
-        // 'goto-prev-history-node': Constants.COMMANDS.NEXT_NODE,
-
+        'paste-as-template': 'async-paste-as-template',
+        // TODO : insertNode, insertChild, ...
+        // TODO : select chapter
 
     };
 

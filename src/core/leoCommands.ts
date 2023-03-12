@@ -6,7 +6,8 @@ import * as vscode from 'vscode';
 import { Utils as uriUtils } from "vscode-uri";
 import * as path from 'path';
 import * as g from './leoGlobals';
-import { LeoUI, NullGui } from '../leoUI';
+import { NullGui } from './leoGui';
+import { new_cmd_decorator } from './decorators';
 import { FileCommands } from './leoFileCommands';
 import { CommanderOutlineCommands } from '../commands/commanderOutlineCommands';
 import { CommanderFileCommands } from '../commands/commanderFileCommands';
@@ -21,10 +22,13 @@ import { LeoFind } from './leoFind';
 import { LeoImportCommands } from './leoImport';
 import { ChapterController } from './leoChapters';
 import { EditCommandsClass, TopLevelEditCommands } from '../commands/editCommands';
-import { LeoFrame } from './leoFrame';
+import { GoToCommands } from '../commands/gotoCommands';
+import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
 
 import dayjs = require('dayjs');
+import { TagController } from './nodeTags';
+import { QuickSearchController } from './quicksearch';
 var utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 
@@ -44,6 +48,13 @@ function applyMixins(derivedCtor: any, constructors: any[]): void {
     });
 }
 
+//@+node:felix.20221011000033.1: ** cmd (decorator)
+/**
+ * Command decorator for the Commands class.
+ */
+function cmd(p_name: string, p_doc: string) {
+    return new_cmd_decorator(p_name, p_doc, ['c']);
+}
 //@+node:felix.20210224000242.1: ** interface HoistStackEntry
 export interface HoistStackEntry {
     p: Position;
@@ -69,10 +80,13 @@ export class Commands {
     public findCommands: LeoFind;
     public importCommands: LeoImportCommands;
 
+    public theTagController: TagController;
+    public quicksearchController: QuickSearchController;
+
     public chapterController: ChapterController;
     public undoer: Undoer;
     public nodeHistory: NodeHistory;
-    public gui: LeoUI | NullGui;
+    public gui: NullGui;
     public replace_errors: string[] = [];
 
     // TODO fake frame needed FOR wrapper and hasSelection
@@ -85,6 +99,7 @@ export class Commands {
     public collapse_on_lt_arrow: boolean = true; // getBool('collapse-on-lt-arrow', default=True)
     public collapse_nodes_after_move: boolean = false;
     public verbose_check_outline: boolean = false;
+    public chdir_to_relative_path: boolean | undefined;
     //@+node:felix.20210223220814.2: *4* c.initCommandIvars
     // Init ivars used while executing a command.
     public commandsDict: {
@@ -145,7 +160,7 @@ export class Commands {
     // Flags for c.outerUpdate...
     public enableRedrawFlag = true;
     public requestCloseWindow = false;
-    public requestedFocusWidget = undefined;
+    public requestedFocusWidget: any;
     public requestLaterRedraw = false;
 
     //@+node:felix.20210223220814.6: *4* c.initFileIvars
@@ -191,7 +206,7 @@ export class Commands {
     //@+node:felix.20210223220814.8: *4* c.initObjectIvars
     // These ivars are set later by leoEditCommands.createEditCommanders
     public abbrevCommands: any = undefined;
-    public editCommands: any = undefined;
+    public editCommands: EditCommandsClass;
     public db: any = {}; // May be set to a PickleShare instance later.
     public bufferCommands: any = undefined;
     public chapterCommands: any = undefined;
@@ -200,13 +215,12 @@ export class Commands {
     public debugCommands: any = undefined;
     public editFileCommands: any = undefined;
     public evalController: any = undefined;
-    public gotoCommands: any = undefined;
+    public gotoCommands: GoToCommands;
     public helpCommands: any = undefined;
     public keyHandler: any = undefined; // TODO same as k
     public k: any = undefined; // TODO same as keyHandler
     public keyHandlerCommands: any = undefined;
     public killBufferCommands: any = undefined;
-    public leoCommands: any = undefined;
     public macroCommands: any = undefined;
     public miniBufferWidget: any = undefined;
     public printingController: any = undefined;
@@ -214,7 +228,6 @@ export class Commands {
     public rectangleCommands: any = undefined;
     public searchCommands: any = undefined;
     public spellCommands: any = undefined;
-    public leoTestManager: any = undefined;
     public vimCommands: any = undefined;
 
     public config!: LocalConfigManager; // Set in constructor indirectly
@@ -222,20 +235,20 @@ export class Commands {
     //@+node:felix.20210223002937.1: *3* constructor & helpers
     constructor(
         fileName: string,
-        gui?: LeoUI | NullGui,
+        gui?: NullGui,
         previousSettings?: PreviousSettings,
         relativeFileName?: string
     ) {
         const c: Commands = this;
 
         // From Official Ivars
-        this.gui = gui || g.app.gui!;
+        this.gui = gui || g.app.gui;
 
         // From initFileIvars
         this.mFileName = fileName || '';
         this.mRelativeFileName = relativeFileName || '';
 
-        // Init the settings *before* initing the objects.
+        // Instantiate c.config *before* initing objects.
         c.initSettings(previousSettings);
 
         // Initialize all subsidiary objects, including subcommanders.
@@ -247,7 +260,7 @@ export class Commands {
         const title = this.computeWindowTitle(c.mFileName);
 
         // * ORIGINALLY FROM GUI : gui.createLeoFrame(c, title)
-        this.frame = new LeoFrame(this, title, this.gui as LeoUI);
+        this.frame = new LeoFrame(this, title, this.gui);
         console.assert(this.frame.c === this);
 
         this.nodeHistory = new NodeHistory(c);
@@ -257,34 +270,32 @@ export class Commands {
         this.chapterController = new ChapterController(c);
         // this.shadowController // TODO: = leoShadow.ShadowController(c);
 
+        this.theTagController = new TagController(c);
+        this.quicksearchController = new QuickSearchController(c);
+
         this.fileCommands = new FileCommands(c);
         this.findCommands = new LeoFind(c);
         this.atFileCommands = new AtFile(c);
         this.importCommands = new LeoImportCommands(c);
 
         this.editCommands = new EditCommandsClass(c);
+        this.gotoCommands = new GoToCommands(c);
         this.undoer = new Undoer(c);
 
         // From finishCreate
-        // ! Equivalent of frame.createFirstTreeNode
-        let v = new VNode(c);
-        let p = new Position(v);
-        v.initHeadString('NewHeadline');
-        c.hiddenRootNode.children = [];
-        p._linkAsRoot();
-        c.createCommandNames();
         c.frame.finishCreate();
+        c.createCommandNames();
 
     }
 
     //@+node:felix.20210223220814.10: *4* c.initSettings
     /**
-     * Init the settings *before* initing the objects.
+     * Instantiate c.config from previous settings.
      */
     public initSettings(previousSettings: any): void {
         const c: Commands = this;
         c.config = new LocalConfigManager(c, previousSettings);
-        g.app.config.setIvarsFromSettings(c);
+        // g.app.config.setIvarsFromSettings(c); // Removed in https://github.com/leo-editor/leo-editor/pull/2681
     }
 
     //@+node:felix.20211018215401.1: *4* c.createCommandNames
@@ -329,6 +340,8 @@ export class Commands {
         const getColor = c.config.getColor.bind(c.config);
         const getData = c.config.getData.bind(c.config);
         const getInt = c.config.getInt.bind(c.config);
+        const getString = c.config.getString.bind(c.config);
+
 
         // c.autoindent_in_nocolor = getBool('autoindent-in-nocolor-mode');
         c.collapse_nodes_after_move = getBool('collapse-nodes-after-move');
@@ -353,12 +366,204 @@ export class Commands {
         c.stayInTreeAfterSelect = getBool('stayInTreeAfterSelect');
         c.smart_tab = getBool('smart-tab');
         c.tab_width = getInt('tab-width') || -4;
+        c.target_language = getString('target-language') || 'python'; // should be javascript?
+
         c.verbose_check_outline = getBool('verbose-check-outline', false);
         c.vim_mode = getBool('vim-mode', false);
         c.write_script_file = getBool('write-script-file');
 
     }
 
+    //@+node:felix.20221010233956.1: *3* @cmd execute-script & public helpers
+    @cmd(
+        'execute-script',
+        'Execute a *Leo* script, written in python.'
+    )
+    public executeScript(
+        args: any = undefined,
+        p: Position | undefined = undefined,
+        script: string = "",
+        useSelectedText: boolean = true,
+        define_g: boolean = true,
+        define_name: string = '__main__',
+        silent: boolean = false,
+        namespace: { [key: string]: any } | undefined = undefined,
+        raiseFlag: boolean = false,
+        runPyflakes: boolean = true,
+    ): void {
+        /*
+        Execute a *Leo* script, written in python.
+        Keyword args:
+        args=None               Not None: set script_args in the execution environment.
+        p=None                  Get the script from p.b, unless script is given.
+        script=None             None: use script in p.b or c.p.b
+        useSelectedText=True    False: use all the text in p.b or c.p.b.
+        define_g=True           True: define g for the script.
+        define_name='__main__'  Not None: define the name symbol.
+        silent=False            No longer used.
+        namespace=None          Not None: execute the script in this namespace.
+        raiseFlag=False         True: reraise any exceptions.
+        runPyflakes=True        True: run pyflakes if allowed by setting.
+        */
+        const c: Commands = this;
+
+        const script1 = script;
+        let run_pyflakes: boolean;
+        if (runPyflakes) {
+            run_pyflakes = c.config.getBool('run-pyflakes-on-write', false);
+        } else {
+            run_pyflakes = false;
+        }
+        if (!script) {
+            if (c.forceExecuteEntireBody) {
+                useSelectedText = false;
+            }
+            script = g.getScript(c, p || c.p, useSelectedText);
+        }
+        const script_p: Position = p || c.p;  // Only for error reporting below.
+        // #532: check all scripts with pyflakes.
+        // ? needed ?
+        // if run_pyflakes and not g.unitTesting:
+        //     from leo.commands import checkerCommands as cc
+        //     prefix = ('c,g,p,script_gnx=None,None,None,None;'
+        //               'assert c and g and p and script_gnx;\n')
+        //     cc.PyflakesCommand(c).check_script(script_p, prefix + script)
+
+        this.redirectScriptOutput();
+        // oldLog = g.app.log  // TODO : needed ?
+        try {
+            // log = c.frame.log  // TODO : needed ?
+            // g.app.log = log // TODO : needed ?
+            if (script.trim()) {
+                // sys.path.insert(0, '.')  // New in Leo 5.0 // TODO : needed ?
+                // sys.path.insert(0, c.frame.openDirectory)  // per SegundoBob // TODO : needed ?
+                script += '\n';  // Make sure we end the script properly.
+                try {
+                    if (!namespace || !namespace['script_gnx']) {
+                        namespace = namespace || {};
+                        namespace["script_gnx"] = script_p.gnx;
+                    }
+                    // We *always* execute the script with p = c.p.
+                    c.executeScriptHelper(args, define_g, define_name, namespace, script);
+
+                }
+                catch (e) {
+                    g.es('interrupted');
+                    // if raiseFlag:
+                    //      raise
+                    // g.handleScriptException(c, script_p, script, script1);
+
+                }
+                finally {
+                    // del sys.path[0]; // TODO : needed ?
+                    // del sys.path[0]; // TODO : needed ?
+                }
+
+            } else {
+                // tabName = log and hasattr(log, 'tabName') and log.tabName or 'Log' // TODO : needed ?
+                g.warning("no script selected");
+            }
+        }
+        catch (e) {
+            // pass
+        }
+        finally {
+            // g.app.log = oldLog // TODO : needed ?
+            this.unredirectScriptOutput();
+        }
+    }
+
+    //@+node:felix.20221010233956.2: *4* c.executeScriptHelper
+    public executeScriptHelper(
+        args: any,
+        define_g: any,
+        define_name: any,
+        namespace: any,
+        script: any
+    ): void {
+        const c: Commands = this;
+        let p: Position | undefined;
+        if (c.p.__bool__()) {
+            p = c.p.copy();  // *Always* use c.p and pass c.p to script.
+            c.setCurrentDirectoryFromContext(p);
+        } else {
+            p = undefined;
+        }
+        const d: { [key: string]: any } = define_g ? { 'c': c, 'g': g, 'input': "", 'p': p } : {};
+
+        if (define_name) {
+            d['__name__'] = define_name;
+        }
+        d['script_args'] = args || [];
+        d['script_gnx'] = g.app.scriptDict.get('script_gnx');
+        if (namespace) {
+            // d.update(namespace)
+            Object.assign(d, namespace);
+        }
+        // A kludge: reset c.inCommand here to handle the case where we *never* return.
+        // (This can happen when there are multiple event loops.)
+        // This does not prevent zombie windows if the script puts up a dialog...
+        try {
+            c.inCommand = false;
+            g.app.inScript = true;
+            (g.inScript as boolean) = g.app.inScript; // g.inScript is a synonym for g.app.inScript.
+            console.log('TODO RUN SCRIPT: ', script);
+
+            // if (c.write_script_file){
+            //     scriptFile = self.writeScriptFile(script)
+            //     exec(compile(script, scriptFile, 'exec'), d)
+            // }else{
+            //     exec(script, d)
+            // }
+        }
+        catch (e) {
+            // pass
+        }
+        finally {
+            g.app.inScript = false;
+            (g.inScript as boolean) = g.app.inScript;
+        }
+    }
+
+    //@+node:felix.20221010233956.3: *4* c.redirectScriptOutput
+    public redirectScriptOutput(): void {
+        const c: Commands = this;
+        if (c.exists && c.config.getBool('redirect-execute-script-output-to-log-pane')) {
+            // TODO
+            // ? needed ? 
+            // g.redirectStdout()  // Redirect stdout
+            // g.redirectStderr()  // Redirect stderr
+        }
+    }
+    //@+node:felix.20221010233956.4: *4* c.setCurrentDirectoryFromContext
+    public setCurrentDirectoryFromContext(p: Position): void {
+        const c: Commands = this;
+        const aList = g.get_directives_dict_list(p);
+        const path = c.scanAtPathDirectives(aList);
+        // const curDir = g.os_path_abspath(os.getcwd()); // TODO !
+
+        console.log('TODO : setCurrentDirectoryFromContext');
+
+        // if (path && path !== curDir){
+        //     try{
+        //         os.chdir(path)
+        //     }
+        //    catch (e) {
+        //         // pass
+        //    }
+        // }
+    }
+
+    //@+node:felix.20221010233956.5: *4* c.unredirectScriptOutput
+    public unredirectScriptOutput(): void {
+        const c: Commands = this;
+        if (c.exists && c.config.getBool('redirect-execute-script-output-to-log-pane')) {
+            // TODO
+            // ? needed ? 
+            // g.restoreStderr()
+            // g.restoreStdout()
+        }
+    }
     //@+node:felix.20210215185050.1: *3* c.API
     // These methods are a fundamental, unchanging, part of Leo's API.
 
@@ -594,6 +799,11 @@ export class Commands {
     // For compatibility with old scripts...
     // currentVnode = currentPosition
 
+    //@+node:felix.20221027142613.1: *5* c.edit_widget
+    public edit_widget(p: Position): false | StringTextWrapper | undefined {
+        const c = this;
+        return p && p.__bool__() && c.frame.tree.edit_widget(p);
+    }
     //@+node:felix.20210131011420.3: *5* c.fileName & relativeFileName & shortFileName
     // Compatibility with scripts
 
@@ -1040,9 +1250,8 @@ export class Commands {
         // This worked because commands work on the presently selected node.
         // But setRecentFiles may change a _clone_ of the selected node!
         if (current && current.__bool__() && p.v.gnx === current.v.gnx) {
-            // * Leo used to send it to gui
-            // const w:any = c.frame.body.wrapper;
-            // w.setAllText(s);
+            const w = c.frame.body.wrapper;
+            w.setAllText(s);
             v.setSelection(0, 0);
             c.recolor();
         }
@@ -1125,8 +1334,8 @@ export class Commands {
         // Change the actual tree widget so
         // A later call to c.endEditing or c.redraw will use s.
 
-        // TODO: needed?
-        // c.frame.tree.setHeadline(p, s);
+
+        c.frame.tree.setHeadline(p, s);
     }
 
     //@+node:felix.20210215204844.1: *5* c.setMarked (calls hook)
@@ -1604,51 +1813,61 @@ export class Commands {
     //             languages.add(word)
     //     return len(list(languages)) > 1
     //@+node:felix.20211228212851.5: *4* c.scanAllDirectives
-    // @nobeautify
+    /**
+     * Scan p and ancestors for directives.
+     *
+     * Returns a dict containing the results, including defaults.
+     */
+    public scanAllDirectives(p?: Position): { [key: string]: any } {
 
-    // def scanAllDirectives(self, p):
-    //     """
-    //     Scan p and ancestors for directives.
+        const c = this;
+        if (!p || !p.__bool__()) {
+            p = c.p;
+        }
 
-    //     Returns a dict containing the results, including defaults.
-    //     """
-    //     c = self
-    //     p = p or c.p
-    //     # Defaults...
-    //     default_language = g.getLanguageFromAncestorAtFileNode(p) or c.target_language or 'python'
-    //     default_delims = g.set_delims_from_language(default_language)
-    //     wrap = c.config.getBool("body-pane-wraps")
-    //     table = (  # type:ignore
-    //         ('encoding',    None,           g.scanAtEncodingDirectives),
-    //         ('lang-dict',   {},             g.scanAtCommentAndAtLanguageDirectives),
-    //         ('lineending',  None,           g.scanAtLineendingDirectives),
-    //         ('pagewidth',   c.page_width,   g.scanAtPagewidthDirectives),
-    //         ('path',        None,           c.scanAtPathDirectives),
-    //         ('tabwidth',    c.tab_width,    g.scanAtTabwidthDirectives),
-    //         ('wrap',        wrap,           g.scanAtWrapDirectives),
-    //     )
-    //     # Set d by scanning all directives.
-    //     aList = g.get_directives_dict_list(p)
-    //     d = {}
-    //     for key, default, func in table:
-    //         val = func(aList)  # type:ignore
-    //         d[key] = default if val is None else val
-    //     # Post process: do *not* set commander ivars.
-    //     lang_dict = d.get('lang-dict')
-    //     d = {
-    //         "delims":       lang_dict.get('delims') or default_delims,
-    //         "comment":      lang_dict.get('comment'),  # Leo 6.4: New.
-    //         "encoding":     d.get('encoding'),
-    //         # Note: at.scanAllDirectives does not use the defaults for "language".
-    //         "language":     lang_dict.get('language') or default_language,
-    //         "lang-dict":    lang_dict,  # Leo 6.4: New.
-    //         "lineending":   d.get('lineending'),
-    //         "pagewidth":    d.get('pagewidth'),
-    //         "path":         d.get('path'), # Redundant: or g.getBaseDirectory(c),
-    //         "tabwidth":     d.get('tabwidth'),
-    //         "wrap":         d.get('wrap'),
-    //     }
-    //     return d
+        // Defaults...
+        const default_language = g.getLanguageFromAncestorAtFileNode(p) || c.target_language || 'python';
+        const default_delims = g.set_delims_from_language(default_language);
+        const wrap = c.config.getBool("body-pane-wraps");
+        const table: [string, any, any][] = [
+            ['encoding', undefined, g.scanAtEncodingDirectives],
+            ['lang-dict', {}, g.scanAtCommentAndAtLanguageDirectives],
+            ['lineending', undefined, g.scanAtLineendingDirectives],
+            ['pagewidth', c.page_width, g.scanAtPagewidthDirectives],
+            ['path', undefined, c.scanAtPathDirectives],
+            ['tabwidth', c.tab_width, g.scanAtTabwidthDirectives],
+            ['wrap', wrap, g.scanAtWrapDirectives],
+        ];
+        // Set d by scanning all directives.
+        const aList = g.get_directives_dict_list(p);
+        let d: { [key: string]: any } = {};
+        // let key, w_default, func;
+        for (let [key, w_default, func] of table) {
+            const val = func(aList);
+            if (typeof val === 'undefined') {
+                d[key] = w_default;
+            } else {
+                d[key] = val;
+            }
+        }
+        // Post process: do *not* set commander ivars.
+        const lang_dict = d['lang-dict'];
+        d = {
+            "delims": lang_dict['delims'] || default_delims,
+            "comment": lang_dict['comment'],  // Leo 6.4: New.
+            "encoding": d['encoding'],
+            // Note: at.scanAllDirectives does not use the defaults for "language".
+            "language": lang_dict['language'] || default_language,
+            "lang-dict": lang_dict,  // Leo 6.4: New.
+            "lineending": d['lineending'],
+            "pagewidth": d['pagewidth'],
+            "path": d['path'], // Redundant: || g.getBaseDirectory(c),
+            "tabwidth": d['tabwidth'],
+            "wrap": d['wrap'],
+        };
+        return d;
+
+    }
     //@+node:felix.20211228212851.6: *4* c.scanAtPathDirectives
     /**
      * Scan aList for @path directives.
@@ -1664,11 +1883,13 @@ export class Commands {
             // Bug fix: 2008/9/18
             base = c.openDirectory;
         } else {
-            base = g.app.config.relative_path_base_directory;
+            base = c.config.getString('relative-path-base-directory');
             if (base && base === '!') {
                 base = g.app.loadDir!;
             } else if (base && base === '.') {
                 base = c.openDirectory!;
+            } else {
+                base = ''; // Settings error.
             }
         }
         base = c.expand_path_expression(base); // #1341.
@@ -2340,7 +2561,7 @@ export class Commands {
         p2 = c.insertHeadline('Open File', false)!;
         p2.h = `@edit ${fn}`;
         p2.b = prefix + s;
-        const w: any = c.frame.body.wrapper;
+        const w = c.frame.body.wrapper;
         if (w && w.setInsertPoint) {
             w.setInsertPoint(0);
         }
@@ -2371,7 +2592,7 @@ export class Commands {
     public markAllAtFileNodesDirty(): void {
         const c: Commands = this;
 
-        // c.endEditing()
+        c.endEditing();
         const p: Position = c.rootPosition()!;
 
         while (p && p.__bool__()) {
@@ -2396,7 +2617,7 @@ export class Commands {
         if (!p || !p.__bool__()) {
             return;
         }
-        // c.endEditing()
+        c.endEditing();
         const after: Position = p.nodeAfterTree();
 
         while (p && p.__bool__() && !p.__eq__(after)) {
@@ -2574,7 +2795,7 @@ export class Commands {
 
             const list_s: string = aList.join('\n');
 
-            g.app.gui!.runAskOkDialog(
+            g.app.gui.runAskOkDialog(
                 c,
                 'Python Errors',
                 `Python errors in:\n\n${list_s}`,
@@ -2639,33 +2860,45 @@ export class Commands {
             }
             c.redraw();
         }
+        // Delayed focus requests will always be useful.
+        if (c.requestedFocusWidget) {
+            const w = c.requestedFocusWidget;
+            if (g.app.debug.includes('focus') && !g.unitTesting) {
+                let name = "";
+                if (w.objectName) {
+                    name = w.objectName();
+                } else if (w['_name']) {
+                    name = w._name;
+                }
+                g.trace('DELAYED FOCUS', name);
+            }
+            c.set_focus(w);
+            c.requestedFocusWidget = undefined;
+        }
 
-        // ? useful ?
-        // # Delayed focus requests will always be useful.
-        // if c.requestedFocusWidget:
-        //     w = c.requestedFocusWidget
-        //     if 'focus' in g.app.debug and not g.unitTesting:
-        //         if hasattr(w, 'objectName'):
-        //             name = w.objectName()
-        //         else:
-        //             name = w.__class__.__name__
-        //         g.trace('DELAYED FOCUS', name)
-        //     c.set_focus(w)
-        //     c.requestedFocusWidget = None
-        // table = (
-        //     ("childrenModified", g.childrenModifiedSet),
-        //     ("contentModified", g.contentModifiedSet),
-        // )
-        // for kind, mods in table:
-        //     if mods:
-        //         g.doHook(kind, c=c, nodes=mods)
-        //         mods.clear()
+        const table: [string, VNode[]][] = [
+            ["childrenModified", g.childrenModifiedSet],
+            ["contentModified", g.contentModifiedSet],
+        ];
+
+        for (let [kind, mods] of table) {
+            if (mods.length) {
+                g.doHook(kind, { c: c, nodes: mods });
+                mods.length = 0;
+            }
+        }
+
     }
 
     //@+node:felix.20211120224224.1: *5* c.recolor
     public recolor(): void {
         // TODO
         // console.log("TODO: recolor");
+    }
+    //@+node:felix.20221027153010.1: *5* c.widget_name
+    public widget_name(widget: StringTextWrapper): string {
+        // c = self
+        return g.app.gui ? g.app.gui.widget_name(widget) : '<no widget>';
     }
     //@+node:felix.20211120231934.1: *5* c.redrawing...
     //@+node:felix.20211120224229.1: *6* c.redraw
@@ -2861,6 +3094,151 @@ export class Commands {
         */
     }
 
+    //@+node:felix.20221026210523.1: *4* c.Focus
+    //@+node:felix.20221026210523.2: *5* c.get/request/set_focus
+    public get_focus(): StringTextWrapper {
+        const c = this;
+        const w = g.app.gui && g.app.gui.get_focus(c);
+        if (g.app.debug.includes('focus')) {
+            // name = w.objectName() if hasattr(w, 'objectName') else w.__class__.__name__
+            const name = w['objectName'];
+            g.trace('(c)', name);
+            // g.trace('\n(c)',  w.__class__.__name__)
+            // g.trace(g.callers(6))
+        }
+        return w;
+    }
+
+    public get_requested_focus(): any {
+        const c = this;
+        return c.requestedFocusWidget;
+    }
+
+    public request_focus(w: any): void {
+        const c = this;
+        if (w && g.app.gui) {
+            if (g.app.debug.includes('focus')) {
+                // g.trace('\n(c)', repr(w))
+                const name = w['name'];  // ?w['objectName'] : MyClass.name
+                g.trace('(c)', name);
+            }
+
+            c.requestedFocusWidget = w;
+        }
+    }
+
+    public set_focus(w: StringTextWrapper): void {
+        const trace = g.app.debug.includes('focus');
+        const c = this;
+        if (w && g.app.gui) {
+            if (trace) {
+                const name = w['name'];
+                // name = w.objectName(
+                //     ) if hasattr(w, 'objectName') else w.__class__.__name__
+                g.trace('(c)', name);
+            }
+            g.app.gui.set_focus(c, w);
+        } else if (trace) {
+            g.trace('(c) no w');
+        }
+        c.requestedFocusWidget = undefined;
+    }
+    //@+node:felix.20221026210523.3: *5* c.invalidateFocus (do nothing)
+    /**
+     * Indicate that the focus is in an invalid location, or is unknown.
+     */
+    public invalidateFocus(): void {
+
+        // c = self
+        // c.requestedFocusWidget = None
+        // pass
+    }
+    //@+node:felix.20221026210523.4: *5* c.traceFocus (not used)
+    public traceFocus(w: StringTextWrapper): void {
+        const c = this;
+        if (g.app.debug.includes('focus')) {
+            c.trace_focus_count += 1;
+            // g.pr(f"{c.trace_focus_count:4d}", c.widget_name(w), g.callers(8));
+            g.pr(`${c.trace_focus_count}`);
+        }
+    }
+    //@+node:felix.20221026210523.5: *5* c.treeFocusHelper & initialFocusHelper
+    public treeFocusHelper(): void {
+        const c = this;
+        if (c.stayInTreeAfterSelect) {
+            c.treeWantsFocus();
+        } else {
+            c.bodyWantsFocus();
+        }
+    }
+
+    public initialFocusHelper(): void {
+        const c = this;
+        if (c.outlineHasInitialFocus) {
+            c.treeWantsFocus();
+        } else {
+            c.bodyWantsFocus();
+        }
+    }
+    //@+node:felix.20221026210523.6: *5* c.xWantsFocus
+    public bodyWantsFocus(): void {
+        const c = this;
+        const body = c.frame.body;
+        c.request_focus(body && body.wrapper);
+    }
+    public logWantsFocus(): void {
+        const c = this;
+        const log = c.frame.log;
+        c.request_focus(log && log.logCtrl);
+    }
+    public minibufferWantsFocus(): void {
+        const c = this;
+        c.request_focus(c.miniBufferWidget);
+    }
+    public treeWantsFocus(): void {
+        const c = this;
+        const tree = c.frame.tree;
+        c.request_focus(tree && tree.canvas);
+    }
+    public widgetWantsFocus(w: any): void {
+        const c = this;
+        c.request_focus(w);
+    }
+    //@+node:felix.20221026210523.7: *5* c.xWantsFocusNow
+    // widgetWantsFocusNow does an automatic update.
+
+    public widgetWantsFocusNow(w: any): void {
+        const c = this;
+        if (w) {
+            c.set_focus(w);
+            c.requestedFocusWidget = undefined;
+        }
+    }
+
+    // New in 4.9: all FocusNow methods now *do* call c.outerUpdate().
+
+    public bodyWantsFocusNow(): void {
+        const c = this;
+        const body = this.frame.body;
+        c.widgetWantsFocusNow(body && body.wrapper);
+    }
+
+    public logWantsFocusNow(): void {
+        const c = this;
+        const log = this.frame.log;
+        c.widgetWantsFocusNow(log && log.logCtrl);
+    }
+
+    public minibufferWantsFocusNow(): void {
+        const c = this;
+        c.widgetWantsFocusNow(c.miniBufferWidget);
+    }
+
+    public treeWantsFocusNow(): void {
+        const c = this;
+        const tree = this.frame.tree;
+        c.widgetWantsFocusNow(tree && tree.canvas);
+    }
     //@+node:felix.20211023195447.1: *4* c.Menus
     //@+node:felix.20211023195447.3: *5* c.Menu Enablers
     //@+node:felix.20211023195447.4: *6* c.canClone
@@ -2969,12 +3347,12 @@ export class Commands {
     //@+node:felix.20211023195447.14: *6* c.canExtract, canExtractSection & canExtractSectionNames
     public canExtract(): boolean {
         const c: Commands = this;
-        const w = c.frame.body.wrapper; // TODO
+        const w = c.frame.body.wrapper;
         return w && w.hasSelection();
     }
     public canExtractSection(): boolean {
         const c: Commands = this;
-        const w = c.frame.body.wrapper; // TODO
+        const w = c.frame.body.wrapper;
         if (!w) {
             return false;
         }
@@ -2995,7 +3373,7 @@ export class Commands {
     public canFindMatchingBracket(): boolean {
         const c: Commands = this;
         const brackets: string = '()[]{}';
-        const w = c.frame.body.wrapper; // TODO
+        const w = c.frame.body.wrapper;
         const s = w.getAllText();
         const ins: number = w.getInsertPoint();
 
@@ -3137,7 +3515,7 @@ export class Commands {
     public canShiftBodyLeft(): boolean {
         const c: Commands = this;
         const w = c.frame.body.wrapper;
-        return w && w.getAllText();
+        return w && !!w.getAllText();
     }
     //@+node:felix.20211023195447.25: *6* c.canSortChildren, canSortSiblings
     public canSortChildren(): boolean {
@@ -3211,6 +3589,17 @@ export class Commands {
         return false;
     }
     //@+node:felix.20211005023421.1: *4* c.Selecting
+    //@+node:felix.20221231011907.1: *5* c.endEditing
+    /**
+     * End the editing of a headline.
+     */
+    public endEditing(): void {
+        const c = this;
+        const p = c.p;
+        if (p && p.__bool__()) {
+            c.frame.tree.endEditLabel();
+        }
+    }
     //@+node:felix.20211031215315.1: *5* c.redrawAndEdit
     /**
      * Redraw the screen and edit p's headline.
@@ -3294,13 +3683,9 @@ export class Commands {
             }
         }
 
-        // c.frame.tree.select(p);
-        c.nodeHistory.update(p); // ! FROM select_new_node of tree wrapper 'select'
-        c.setCurrentPosition(p);
+        c.frame.tree.select(p);
 
-        // Compatibility, but confusing.
-        // TODO : Is this needed? (not used in Leo's codebase)
-        // selectVnode = selectPosition
+        c.setCurrentPosition(p);
     }
 
     //@+node:felix.20211031220906.1: *5* c.setPositionAfterSort
@@ -3342,6 +3727,123 @@ export class Commands {
     }
 
     //@+node:felix.20220210211453.1: *3* c.Scripting utils
+    //@+node:felix.20221014000217.1: *4* c.cloneFindByPredicate
+    /**
+     * Traverse the tree given using the generator, cloning all positions for
+     * which predicate(p) is True. Undoably move all clones to a new node, created
+     * as the last top-level node. Returns the newly-created node. Arguments:
+     *
+     * generator,      The generator used to traverse the tree.
+     * predicate,      A function of one argument p returning true if p should be included.
+     * failMsg=None,   Message given if nothing found. Default is no message.
+     * flatten=False,  True: Move all node to be parents of the root node.
+     * iconPath=None,  Full path to icon to attach to all matches.
+     * undo_type=None, The undo/redo name shown in the Edit:Undo menu.
+                        The default is 'clone-find-predicate'
+     */
+    public cloneFindByPredicate(
+        generator: (copy?: boolean) => Generator<Position, any, unknown>,  // The generator used to traverse the tree.
+        predicate: (p: Position) => boolean,  // A function of one argument p, returning True  // if p should be included in the results.
+        failMsg: string = "",  // Failure message. Default is no message.
+        flatten: boolean = false,  // True: Put all matches at the top level.
+        iconPath: string = "",  // Full path to icon to attach to all matches.
+        undoType: string = "",  // The undo name, shown in the Edit:Undo menu.  // The default is 'clone-find-predicate'
+    ): Position | undefined {
+
+        const c = this;
+        const u = c.undoer;
+        undoType = undoType || 'clone-find-predicate';
+
+        const clones: Position[] = [];
+        let root: Position | undefined;
+        const seen: VNode[] = []; // a set
+
+        for (let p of generator()) {
+            if (predicate(p) && !seen.includes(p.v)) {
+                c.setCloneFindByPredicateIcon(iconPath, p);
+                if (flatten) {
+                    if (!seen.includes(p.v)) {
+                        seen.push(p.v);
+                    }
+                } else {
+                    for (let p2 of p.self_and_subtree(false)) {
+                        if (!seen.includes(p2.v)) {
+                            seen.push(p2.v);
+                        }
+                    }
+                }
+
+                clones.push(p.copy());
+            }
+        }
+        if (clones.length) {
+            const undoData = u.beforeInsertNode(c.p);
+            root = c.createCloneFindPredicateRoot(flatten, undoType);
+            for (let p of clones) {
+                // Create the clone directly as a child of found.
+                const p2 = p.copy();
+                const n = root.numberOfChildren();
+                p2._linkCopiedAsNthChild(root, n);
+            }
+            u.afterInsertNode(root, undoType, undoData);
+            c.selectPosition(root);
+            c.setChanged();
+            c.contractAllHeadlines();
+            root.expand();
+        } else if (failMsg) {
+            g.es(failMsg, 'red');
+        }
+
+        return root;
+
+    }
+    //@+node:felix.20221014000217.2: *5* c.setCloneFindByPredicateIcon
+    /** 
+     * Attach an icon to p.v.u.
+     */
+    public setCloneFindByPredicateIcon(iconPath: any, p: Position): void {
+
+        // ? needed ?
+
+        // if (iconPath && g.os_path_exists(iconPath) && !g.os_path_isdir(iconPath)){
+        //     const aList = p.v.u['icons'] || [];
+        //     let w_break = false;
+        //     for (let d of aList){
+        //         if (d['file'] === iconPath){
+        //             w_break = true;
+        //             break;
+        //         }
+        //     }
+        //     if(!w_break){
+        //         aList.push({
+        //             'type': 'file',
+        //             'file': iconPath,
+        //             'on': 'VNode',
+        //             // 'relPath': iconPath,
+        //             'where': 'beforeHeadline',
+        //             'xoffset': 2, 'xpad': 1,
+        //             'yoffset': 0
+        //         })
+        //         p.v.u['icons'] = aList;
+        //     }
+
+
+        // }else if(iconPath){
+        //     g.trace('bad icon path', iconPath);
+        // }
+    }
+
+    //@+node:felix.20221014000217.3: *5* c.createCloneFindPredicateRoot
+    /**
+     * Create a root node for clone-find-predicate.
+     */
+    public createCloneFindPredicateRoot(flatten: boolean, undoType: string): Position {
+        const c: Commands = this;
+
+        const root = c.lastTopLevel().insertAfter();
+        root.h = undoType + (flatten ? ' (flattened)' : '');
+        return root;
+    }
     //@+node:felix.20220210211517.1: *4* deletePositionsInList
     /**
      * Delete all vnodes corresponding to the positions in aList.
