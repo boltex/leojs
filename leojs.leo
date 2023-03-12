@@ -832,9 +832,13 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 
 - Outline, undos and commands.
 
-## 0.1.2 24.01.2022.
+## 0.1.2 01.24.2022.
 
 - Support web extension compilation for vscode.dev
+
+## 0.1.3 03.11.20.
+
+- Implemented Find and Goto panels and commands
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export function deactivate() { }
@@ -3899,7 +3903,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "Leo, the literate editor with outline extension for Visual Studio Code.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
