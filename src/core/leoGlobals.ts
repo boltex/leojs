@@ -2922,19 +2922,24 @@ export function toUnicode(s: any, encoding: string | null = null, reportErrors =
 
 //@+node:felix.20220410213527.1: *3* g.Whitespace
 //@+node:felix.20220410213527.2: *4* g.computeLeadingWhitespace
-/*
-# Returns optimized whitespace corresponding to width with the indicated tab_width.
 
-def computeLeadingWhitespace(width: int, tab_width: int) -> str:
-    if width <= 0:
-        return ""
-    if tab_width > 1:
-        tabs = int(width / tab_width)
-        blanks = int(width % tab_width)
-        return ('\t' * tabs) + (' ' * blanks)
-    # Negative tab width always gets converted to blanks.
-    return ' ' * width
+
+/**
+ * Returns optimized whitespace corresponding to width with the indicated tab_width.
  */
+export function computeLeadingWhitespace(width: number, tab_width: number): string {
+    if (width <= 0) {
+        return "";
+    }
+    if (tab_width > 1) {
+        const tabs = Math.floor(width / tab_width);
+        const blanks = Math.floor(width % tab_width);
+        return ('\t'.repeat(tabs)) + (' '.repeat(blanks));
+    };
+    // Negative tab width always gets converted to blanks.
+    return ' '.repeat(width);
+}
+
 //@+node:felix.20220410213527.3: *4* g.computeLeadingWhitespaceWidth
 /*
 # Returns optimized whitespace corresponding to width with the indicated tab_width.
@@ -3054,14 +3059,18 @@ def get_leading_ws(s: str) -> str:
     return s[0:i]
  */
 //@+node:felix.20220410213527.9: *4* g.optimizeLeadingWhitespace
-/*
-# Optimize leading whitespace in s with the given tab_width.
 
-def optimizeLeadingWhitespace(line: str, tab_width: int) -> str:
-    i, width = g.skip_leading_ws_with_indent(line, 0, tab_width)
-    s = g.computeLeadingWhitespace(width, tab_width) + line[i:]
-    return s
+/**
+ * 
+ * Optimize leading whitespace in s with the given tab_width.
  */
+export function optimizeLeadingWhitespace(line: string, tab_width: number): string {
+    let i, width;
+    [i, width] = skip_leading_ws_with_indent(line, 0, tab_width);
+    const s = computeLeadingWhitespace(width, tab_width) + line.substring(i);
+    return s;
+
+}
 //@+node:felix.20220410213527.10: *4* g.regularizeTrailingNewlines
 
 //@+at The caller should call g.stripBlankLines before calling this routine
@@ -3111,28 +3120,32 @@ def removeLeadingBlankLines(s: str) -> str:
     return ''.join(result)
  */
 //@+node:felix.20220410213527.13: *4* g.removeLeadingWhitespace
-/*
-# Remove whitespace up to first_ws wide in s, given tab_width, the width of a tab.
 
-def removeLeadingWhitespace(s: str, first_ws: int, tab_width: int) -> str:
-    j = 0
-    ws = 0
-    first_ws = abs(first_ws)
-    for ch in s:
-        if ws >= first_ws:
-            break
-        elif ch == ' ':
-            j += 1
-            ws += 1
-        elif ch == '\t':
-            j += 1
-            ws += (abs(tab_width) - (ws % abs(tab_width)))
-        else:
-            break
-    if j > 0:
-        s = s[j:]
-    return s
+/**
+ * Remove whitespace up to first_ws wide in s, given tab_width, the width of a tab.
  */
+export function removeLeadingWhitespace(s: string, first_ws: number, tab_width: number): string {
+    let j = 0;
+    let ws = 0;
+    first_ws = Math.abs(first_ws);
+    for (const ch of s) {
+        if (ws >= first_ws) {
+            break;
+        } else if (ch === ' ') {
+            j += 1;
+            ws += 1;
+        } else if (ch === '\t') {
+            j += 1;
+            ws += (Math.abs(tab_width) - (ws % Math.abs(tab_width)));
+        } else {
+            break;
+        }
+    }
+    if (j > 0) {
+        s = s.substring(j);
+    }
+    return s;
+}
 //@+node:felix.20220410213527.14: *4* g.removeTrailingWs
 /*
 # Warning: string.rstrip also removes newlines!
@@ -3162,24 +3175,31 @@ def skip_leading_ws(s: str, i: int, ws: int, tab_width: int) -> int:
  */
 //@+node:felix.20220410213527.16: *4* g.skip_leading_ws_with_indent
 /*
-def skip_leading_ws_with_indent(s: str, i: int, tab_width: int) -> Tuple[int, int]:
-    """Skips leading whitespace and returns (i, indent),
-
-    - i points after the whitespace
-    - indent is the width of the whitespace, assuming tab_width wide tabs."""
-    count = 0
-    n = len(s)
-    while i < n:
-        ch = s[i]
-        if ch == ' ':
-            count += 1
-            i += 1
-        elif ch == '\t':
-            count += (abs(tab_width) - (count % abs(tab_width)))
-            i += 1
-        else: break
-    return i, count
+/**
+ * Skips leading whitespace and returns (i, indent),
+ *
+ * - i points after the whitespace
+ * - indent is the width of the whitespace, assuming tab_width wide tabs.
  */
+export function skip_leading_ws_with_indent(s: string, i: number, tab_width: number): [number, number] {
+
+    let count = 0;
+    const n = s.length;
+    while (i < n) {
+        const ch = s[i];
+        if (ch === ' ') {
+            count += 1;
+            i += 1;
+        } else if (ch === '\t') {
+            count += (Math.abs(tab_width) - (count % Math.abs(tab_width)));
+            i += 1;
+        } else {
+            break;
+        }
+    }
+    return [i, count];
+}
+
 //@+node:felix.20220410213527.17: *4* g.stripBlankLines
 /*
 def stripBlankLines(s: str) -> str:

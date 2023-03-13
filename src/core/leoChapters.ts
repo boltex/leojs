@@ -25,7 +25,7 @@ export class ChapterController {
     // Note: chapter names never change, even if their @chapter node changes.
     public chaptersDict: { [key: string]: Chapter }; // Keys are chapter names, values are chapters.
     public initing: boolean; // #31: True: suppress undo when creating chapters.
-    public re_chapter: any; // Set where used.
+    public re_chapter: RegExp | undefined; // Set where used.
     public selectedChapter: Chapter | undefined;
     public selectChapterLockout: boolean; // True: cc.selectChapterForPosition does nothing.
     public tt: any; // May be set in finishCreate.

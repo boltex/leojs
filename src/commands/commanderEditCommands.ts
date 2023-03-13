@@ -1,8 +1,10 @@
 //@+leo-ver=5-thin
 //@+node:felix.20220414231314.1: * @file src/commands/commanderEditCommands.ts
 // * Outline commands that used to be defined in leoCommands.py
+import * as g from "../core/leoGlobals";
 import { commander_command } from "../core/decorators";
 import { Commands } from "../core/leoCommands";
+import { Position } from "../core/leoNodes";
 
 //@+others
 //@+node:felix.20220414231634.1: ** Class CommanderEditCommands
@@ -18,10 +20,6 @@ export class CommanderEditCommands {
         const c: Commands = this;
         const u = this.undoer;
 
-        console.log('TODO: finish undo unit tests & uncomment!');
-
-        // TODO: finish undo unit tests & uncomment !
-        /*
         const undoType = 'Convert All Blanks';
         const current = c.p;
         if (g.app.batchMode) {
@@ -29,13 +27,13 @@ export class CommanderEditCommands {
             return;
         }
         const d = c.scanAllDirectives(c.p);
-        const tabWidth = d.get("tabwidth");
+        const tabWidth = d["tabwidth"];
         let count = 0;
         u.beforeChangeGroup(current, undoType);
 
         for (let p of current.self_and_subtree()) {
             let changed = false;
-            const innerUndoData = u.beforeChangeNodeContents(p)
+            const innerUndoData = u.beforeChangeNodeContents(p);
             if (p === current) {
                 changed = c.convertBlanks();
                 if (changed) {
@@ -74,162 +72,257 @@ export class CommanderEditCommands {
         if (count > 0) {
             c.redraw_after_icons_changed();
         }
-        */
+
 
     }
 
+    //@+node:felix.20230312214917.1: *3* c_ec.convertBlanks
+    @commander_command(
+        'convert-blanks',
+        'Convert *all* blanks to tabs in the selected node.' +
+        'Return True if the the p.b was changed.'
+    )
+    public convertBlanks(this: Commands): boolean {
+        const c: Commands = this;
+        const p = this.p;
+        const u = this.undoer;
+        const w = this.frame.body.wrapper;
+
+        //
+        // "Before" snapshot.
+        const bunch = u.beforeChangeBody(p);
+        let oldYview = w.getYScrollPosition();
+        w.selectAllText()
+        let head, lines, tail, oldSel;
+        [head, lines, tail, oldSel, oldYview] = c.getBodyLines();
+        //
+        // Use the relative @tabwidth, not the global one.
+        const d = c.scanAllDirectives(p);
+        const tabWidth = d["tabwidth"];
+        if (!tabWidth) {
+            return false;
+        }
+        //
+        // Calculate the result.
+        let changed = false;
+        const result: string[] = [];
+
+        for (let line of lines) {
+            const s = g.optimizeLeadingWhitespace(line, Math.abs(tabWidth));  // Use positive width.
+            if (s !== line) {
+                changed = true;
+            }
+            result.push(s);
+        }
+        if (!changed) {
+            return false;
+        }
+        //
+        // Set p.b and w's text first.
+        const middle = result.join('');
+        p.b = head + middle + tail;  // Sets dirty and changed bits.
+        w.setAllText(head + middle + tail);
+        //
+        // Select all text and set scroll position.
+        w.selectAllText();
+        w.setYScrollPosition(oldYview);
+        //
+        // "after" snapshot.
+        u.afterChangeBody(p, 'Indent Region', bunch);
+        return true;
+    }
     //@+node:felix.20230221160425.1: *3* c_ec.extract & helpers
-    //@+<< docstring for extract command >>
-    //@+node:felix.20230221160425.2: *4* << docstring for extract command >>
-    // r"""
-    // Create child node from the selected body text.
+    @commander_command('extract', 'Create child node from the selected body text.')
+    public extract(this: Commands): void {
+        //@+<< docstring for extract command >>
+        //@+node:felix.20230221160425.2: *4* << docstring for extract command >>
+        /**
+         * Create child node from the selected body text.
+         * 
+         * 1. If the selection starts with a section reference, the section
+         *    name becomes the child's headline. All following lines become
+         *    the child's body text. The section reference line remains in
+         *    the original body text.
+         *
+         * 2. If the selection looks like a definition line (for the Python,
+         *    JavaScript, CoffeeScript or Clojure languages) the
+         *    class/function/method name becomes the child's headline and all
+         *    selected lines become the child's body text.
+         *
+         *    You may add additional regex patterns for definition lines using
+         *    @data extract-patterns nodes. Each line of the body text should a
+         *    valid regex pattern. Lines starting with # are comment lines. Use \#
+         *    for patterns starting with #.
+         *
+         * 3. Otherwise, the first line becomes the child's headline, and all
+         *    selected lines become the child's body text.
+         */
+        //@-<< docstring for extract command >>
 
-    // 1. If the selection starts with a section reference, the section
-    //    name becomes the child's headline. All following lines become
-    //    the child's body text. The section reference line remains in
-    //    the original body text.
+        //@+others
+        //@+node:felix.20230221160425.3: *4* def createLastChildNode
+        /**
+         * A helper function for the three extract commands.
+         */
+        const createLastChildNode = (c: Commands, parent: Position, headline: string, body: string): Position => {
 
-    // 2. If the selection looks like a definition line (for the Python,
-    //    JavaScript, CoffeeScript or Clojure languages) the
-    //    class/function/method name becomes the child's headline and all
-    //    selected lines become the child's body text.
+            // #1955: don't strip trailing lines.
+            if (!body) {
+                body = "";
+            }
+            const p = parent.insertAsLastChild();
+            p.initHeadString(headline);
+            p.setBodyString(body);
+            p.setDirty();
+            c.validateOutline();
+            return p;
+        }
+        //@+node:felix.20230221160425.4: *4* def extractDef
+        const extractDef_patterns = [
+            /\((?:def|defn|defui|deftype|defrecord|defonce)\s+(\S+)/, // clojure definition
+            /^\s*(?:def|class)\s+(\w+)/, // python definitions
+            /^\bvar\s+(\w+)\s*=\s*function\b/, // js function
+            /^(?:export\s)?\s*function\s+(\w+)\s*\(/, // js function
+            /\b(\w+)\s*:\s*function\s/, // js function
+            /\.(\w+)\s*=\s*function\b/, // js function
+            /(?:export\s)?\b(\w+)\s*=\s(?:=>|->)/, // coffeescript function
+            /(?:export\s)?\b(\w+)\s*=\s(?:\([^)]*\))\s*(?:=>|->)/, // coffeescript function
+            /\b(\w+)\s*:\s(?:=>|->)/, // coffeescript function
+            /\b(\w+)\s*:\s(?:\([^)]*\))\s*(?:=>|->)/, // coffeescript function
+        ];
 
-    //    You may add additional regex patterns for definition lines using
-    //    @data extract-patterns nodes. Each line of the body text should a
-    //    valid regex pattern. Lines starting with # are comment lines. Use \#
-    //    for patterns starting with #.
+        /**
+         * Return the defined function/method/class name if s
+         * looks like definition. Tries several different languages.
+         */
+        const extractDef = (c: Commands, s: string): string => {
+            const patterns = c.config.getData('extract-patterns') || [];
+            for (const p_pat of patterns) {
+                try {
+                    const pat = new RegExp(p_pat);
+                    const m = pat.exec(s);
+                    if (m && m.length) {
+                        return m[1];
+                    }
+                } catch (e) {
+                    g.es_print('bad regex in @data extract-patterns');
+                    g.es_print(p_pat);
+                }
+            }
+            for (const p_pat of extractDef_patterns) {
+                const m = p_pat.exec(s);
+                if (m && m.length) {
+                    return m[1];
+                }
+            }
+            return '';
+        }
+        //@+node:felix.20230221160425.5: *4* def extractDef_find
+        const extractDef_find = (c: Commands, lines: string[]): string | undefined => {
+            for (const line of lines) {
+                const def_h = extractDef(c, line.trim());
+                if (def_h) {
+                    return def_h;
+                }
+            }
+            return undefined;
+        }
+        //@+node:felix.20230221160425.6: *4* def extractRef
+        /**
+         * Return s if it starts with a section name.
+         */
+        const extractRef = (c: Commands, s: string): string => {
 
-    // 3. Otherwise, the first line becomes the child's headline, and all
-    //    selected lines become the child's body text.
-    // """
-    //@-<< docstring for extract command >>
-    //@+others
-    //@+node:felix.20230221160425.3: *4* def createLastChildNode
-    // def createLastChildNode(c: Cmdr, parent: Position, headline: str, body: str) -> Position:
-    //     """A helper function for the three extract commands."""
-    //     # #1955: don't strip trailing lines.
-    //     if not body:
-    //         body = ""
-    //     p = parent.insertAsLastChild()
-    //     p.initHeadString(headline)
-    //     p.setBodyString(body)
-    //     p.setDirty()
-    //     c.validateOutline()
-    //     return p
-    //@+node:felix.20230221160425.4: *4* def extractDef
-    // extractDef_patterns = (
-    //     re.compile(
-    //     r'\((?:def|defn|defui|deftype|defrecord|defonce)\s+(\S+)'),  # clojure definition
-    //     re.compile(r'^\s*(?:def|class)\s+(\w+)'),  # python definitions
-    //     re.compile(r'^\bvar\s+(\w+)\s*=\s*function\b'),  # js function
-    //     re.compile(r'^(?:export\s)?\s*function\s+(\w+)\s*\('),  # js function
-    //     re.compile(r'\b(\w+)\s*:\s*function\s'),  # js function
-    //     re.compile(r'\.(\w+)\s*=\s*function\b'),  # js function
-    //     re.compile(r'(?:export\s)?\b(\w+)\s*=\s(?:=>|->)'),  # coffeescript function
-    //     re.compile(
-    //     r'(?:export\s)?\b(\w+)\s*=\s(?:\([^)]*\))\s*(?:=>|->)'),  # coffeescript function
-    //     re.compile(r'\b(\w+)\s*:\s(?:=>|->)'),  # coffeescript function
-    //     re.compile(r'\b(\w+)\s*:\s(?:\([^)]*\))\s*(?:=>|->)'),  # coffeescript function
-    // )
+            let i = s.indexOf('<<');
+            let j = s.indexOf('>>');
+            if (-1 < i && i < j) {
+                return s;
+            }
+            i = s.indexOf('@<');
+            j = s.indexOf('@>');
+            if (-1 < i && i < j) {
+                return s;
+            }
+            return '';
+        }
+        //@-others
 
-    // def extractDef(c: Cmdr, s: str) -> str:
-    //     """
-    //     Return the defined function/method/class name if s
-    //     looks like definition. Tries several different languages.
-    //     """
-    //     for pat in c.config.getData('extract-patterns') or []:
-    //         try:
-    //             pat = re.compile(pat)
-    //             m = pat.search(s)
-    //             if m:
-    //                 return m.group(1)
-    //         except Exception:
-    //             g.es_print('bad regex in @data extract-patterns', color='blue')
-    //             g.es_print(pat)
-    //     for pat in extractDef_patterns:
-    //         m = pat.search(s)
-    //         if m:
-    //             return m.group(1)
-    //     return ''
-    //@+node:felix.20230221160425.5: *4* def extractDef_find
-    // def extractDef_find(c: Cmdr, lines: List[str]) -> Optional[str]:
-    //     for line in lines:
-    //         def_h = extractDef(c, line.strip())
-    //         if def_h:
-    //             return def_h
-    //     return None
-    //@+node:felix.20230221160425.6: *4* def extractRef
-    // def extractRef(c: Cmdr, s: str) -> str:
-    //     """Return s if it starts with a section name."""
-    //     i = s.find('<<')
-    //     j = s.find('>>')
-    //     if -1 < i < j:
-    //         return s
-    //     i = s.find('@<')
-    //     j = s.find('@>')
-    //     if -1 < i < j:
-    //         return s
-    //     return ''
-    //@-others
-    // @g.commander_command('extract')
-    // def extract(self: Self, event: Event = None) -> None:
-    //     << docstring for extract command >>
-    //     c, u, w = self, self.undoer, self.frame.body.wrapper
-    //     undoType = 'Extract'
-    //     # Set data.
-    //     head, lines, tail, oldSel, oldYview = c.getBodyLines()
-    //     if not lines:
-    //         return  # Nothing selected.
-    //     #
-    //     # Remove leading whitespace.
-    //     junk, ws = g.skip_leading_ws_with_indent(lines[0], 0, c.tab_width)
-    //     lines = [g.removeLeadingWhitespace(s, ws, c.tab_width) for s in lines]
-    //     h = lines[0].strip()
-    //     ref_h = extractRef(c, h).strip()
-    //     def_h = extractDef_find(c, lines)
-    //     if ref_h:
-    //         h, b, middle = ref_h, lines[1:], ' ' * ws + lines[0]  # By vitalije.
-    //     elif def_h:
-    //         h, b, middle = def_h, lines, ''
-    //     else:
-    //         h, b, middle = lines[0].strip(), lines[1:], ''
-    //     #
-    //     # Start the outer undo group.
-    //     u.beforeChangeGroup(c.p, undoType)
-    //     undoData = u.beforeInsertNode(c.p)
-    //     p = createLastChildNode(c, c.p, h, ''.join(b))
-    //     u.afterInsertNode(p, undoType, undoData)
-    //     #
-    //     # Start inner undo.
-    //     if oldSel:
-    //         i, j = oldSel
-    //         w.setSelectionRange(i, j, insert=j)
-    //     bunch = u.beforeChangeBody(c.p)  # Not p.
-    //     #
-    //     # Update the text and selection
-    //     c.p.v.b = head + middle + tail  # Don't redraw.
-    //     w.setAllText(head + middle + tail)
-    //     i = len(head)
-    //     j = max(i, len(head) + len(middle) - 1)
-    //     w.setSelectionRange(i, j, insert=j)
-    //     #
-    //     # End the inner undo.
-    //     u.afterChangeBody(c.p, undoType, bunch)
-    //     #
-    //     # Scroll as necessary.
-    //     if oldYview:
-    //         w.setYScrollPosition(oldYview)
-    //     else:
-    //         w.seeInsertPoint()
-    //     #
-    //     # Add the changes to the outer undo group.
-    //     u.afterChangeGroup(c.p, undoType=undoType)
-    //     p.parent().expand()
-    //     c.redraw(p.parent())  # A bit more convenient than p.
-    //     c.bodyWantsFocus()
+        const c: Commands = this;
+        const u = this.undoer;
+        const w = this.frame.body.wrapper;
 
-    // # Compatibility
+        const undoType = 'Extract';
+        // Set data.
+        let lines: string[];
+        let head, tail, oldSel, oldYview;
+        [head, lines, tail, oldSel, oldYview] = c.getBodyLines();
+        if (!lines || !lines.length) {
+            return  // Nothing selected.
+        }
+        //
+        // Remove leading whitespace.
+        let junk, ws;
+        [junk, ws] = g.skip_leading_ws_with_indent(lines[0], 0, c.tab_width);
 
+        // lines = [g.removeLeadingWhitespace(s, ws, c.tab_width) for s in lines];
+        lines = [];
+        for (const s of lines) {
+            lines.push(g.removeLeadingWhitespace(s, ws, c.tab_width));
+        }
+
+        let h = lines[0].trim();
+        let b: string[];
+        let middle: string;
+        const ref_h = extractRef(c, h).trim();
+        const def_h = extractDef_find(c, lines);
+        if (ref_h) {
+            [h, b, middle] = [ref_h, lines.slice(1), ' '.repeat(ws) + lines[0]];  // By vitalije.
+        } else if (def_h) {
+            [h, b, middle] = [def_h, lines, ''];
+        } else {
+            [h, b, middle] = [lines[0].trim(), lines.slice(1), ''];
+        }
+        //
+        // Start the outer undo group.
+        u.beforeChangeGroup(c.p, undoType);
+        const undoData = u.beforeInsertNode(c.p);
+        const p = createLastChildNode(c, c.p, h, b.join(""));
+        u.afterInsertNode(p, undoType, undoData);
+        //
+        // Start inner undo.
+        let i, j;
+        if (oldSel) {
+            [i, j] = oldSel;
+            w.setSelectionRange(i, j, j);
+        }
+        const bunch = u.beforeChangeBody(c.p);  // Not p.
+        //
+        // Update the text and selection
+        c.p.v.b = head + middle + tail;  // Don't redraw.
+        w.setAllText(head + middle + tail);
+        i = head.length;
+        j = Math.max(i, head.length + middle.length - 1);
+        w.setSelectionRange(i, j, j);
+        //
+        // End the inner undo.
+        u.afterChangeBody(c.p, undoType, bunch);
+        //
+        // Scroll as necessary.
+        if (oldYview) {
+            w.setYScrollPosition(oldYview);
+        } else {
+            w.seeInsertPoint();
+        }
+        //
+        // Add the changes to the outer undo group.
+        u.afterChangeGroup(c.p, undoType);
+        p.parent().expand();
+        c.redraw(p.parent());  // A bit more convenient than p.
+        c.bodyWantsFocus();
+    }
+
+    // Compatibility
+    // ? Needed ?
     // g.command_alias('extractSection', extract)
     // g.command_alias('extractPythonMethod', extract)
     //@+node:felix.20230221160431.1: *3* c_ec.extractSectionNames & helper

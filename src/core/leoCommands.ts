@@ -845,6 +845,38 @@ export class Commands {
         return p;
     }
 
+    //@+node:felix.20230312220217.1: *5* c.getBodyLines
+    /**
+     * Return (head, lines, tail, oldSel, oldYview).
+     *
+     * - head: string containing all the lines before the selected text (or the
+     *   text before the insert point if no selection)
+     * - lines: list of lines containing the selected text
+     *   (or the line containing the insert point if no selection)
+     * - after: string containing all lines after the selected text
+     *   (or the text after the insert point if no  selection)
+     * - oldSel: tuple containing the old selection range, or None.
+     * - oldYview: int containing the old y-scroll value, or None.
+     */
+    public getBodyLines(): [string, string[], string, [number, number], number] {
+
+        const c: Commands = this;
+
+        const body = c.frame.body;
+        const w = body.wrapper;
+        const oldYview = w.getYScrollPosition();
+        // Note: lines is the entire line containing the insert point if no selection.
+        let head: string;
+        let s: string;
+        let tail: string;
+        [head, s, tail] = body.getSelectionLines();
+        const lines = g.splitLines(s);  // Retain the newlines of each line.
+        // Expand the selection.
+        const i = head.length;
+        const j = head.length + s.length;
+        const oldSel: [number, number] = [i, j];
+        return [head, lines, tail, oldSel, oldYview];  // string,list,string,tuple,int.
+    }
     //@+node:felix.20210131011420.5: *5* c.getTabWidth
     /**
      * Return the tab width in effect at p.
@@ -1843,7 +1875,7 @@ export class Commands {
         let d: { [key: string]: any } = {};
         // let key, w_default, func;
         for (let [key, w_default, func] of table) {
-            const val = func(aList);
+            const val = func.bind(this)(aList);
             if (typeof val === 'undefined') {
                 d[key] = w_default;
             } else {
