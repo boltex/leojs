@@ -79,7 +79,7 @@ export class CommanderEditCommands {
     //@+node:felix.20230312214917.1: *3* c_ec.convertBlanks
     @commander_command(
         'convert-blanks',
-        'Convert *all* blanks to tabs in the selected node.' +
+        'Convert *all* blanks to tabs in the selected node. ' +
         'Return True if the the p.b was changed.'
     )
     public convertBlanks(this: Commands): boolean {
@@ -92,7 +92,7 @@ export class CommanderEditCommands {
         // "Before" snapshot.
         const bunch = u.beforeChangeBody(p);
         let oldYview = w.getYScrollPosition();
-        w.selectAllText()
+        w.selectAllText();
         let head, lines, tail, oldSel;
         [head, lines, tail, oldSel, oldYview] = c.getBodyLines();
         //
@@ -216,7 +216,7 @@ export class CommanderEditCommands {
                 }
             }
             return '';
-        }
+        };
         //@+node:felix.20230221160425.5: *4* def extractDef_find
         const extractDef_find = (c: Commands, lines: string[]): string | undefined => {
             for (const line of lines) {
@@ -226,7 +226,7 @@ export class CommanderEditCommands {
                 }
             }
             return undefined;
-        }
+        };
         //@+node:felix.20230221160425.6: *4* def extractRef
         /**
          * Return s if it starts with a section name.
@@ -244,7 +244,7 @@ export class CommanderEditCommands {
                 return s;
             }
             return '';
-        }
+        };
         //@-others
 
         const c: Commands = this;
@@ -359,7 +359,7 @@ export class CommanderEditCommands {
                 name = s.substring(head1, head2 + 2);
             }
             return name;
-        }
+        };
 
         //@-others
 
