@@ -257,18 +257,20 @@ export class CommanderEditCommands {
         let head, tail, oldSel, oldYview;
         [head, lines, tail, oldSel, oldYview] = c.getBodyLines();
         if (!lines || !lines.length) {
-            return  // Nothing selected.
+            return;  // Nothing selected.
         }
         //
         // Remove leading whitespace.
-        let junk, ws;
+        let junk: number;
+        let ws: number;
         [junk, ws] = g.skip_leading_ws_with_indent(lines[0], 0, c.tab_width);
 
         // lines = [g.removeLeadingWhitespace(s, ws, c.tab_width) for s in lines];
-        lines = [];
+        const lines2 = [];
         for (const s of lines) {
-            lines.push(g.removeLeadingWhitespace(s, ws, c.tab_width));
+            lines2.push(g.removeLeadingWhitespace(s, ws, c.tab_width));
         }
+        lines = lines2;
 
         let h = lines[0].trim();
         let b: string[];
@@ -427,15 +429,15 @@ export class CommanderEditCommands {
         'insert-body-time',
         'Insert a time/date stamp at the cursor.'
     )
-    public insertBodyTime(this: Commands) : void {
-        
+    public insertBodyTime(this: Commands): void {
+
         const c: Commands = this;
         const p = this.p;
         const u = this.undoer;
         const w = this.frame.body.wrapper;
 
         const undoType = 'Insert Body Time';
-        if (g.app.batchMode){
+        if (g.app.batchMode) {
             c.notValidInBatchMode(undoType);
             return;
         }
@@ -467,7 +469,7 @@ export class CommanderEditCommands {
         const i = g.find_line_start(s, ins);
         const j = g.skip_line(s, i);
         const line = s.substring(i, j).trim();
-        if (!line){
+        if (!line) {
             return;
         }
         u.beforeChangeGroup(p, undoType);

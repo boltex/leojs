@@ -729,8 +729,8 @@ export class Constants {
         REFRESH_FROM_DISK_PNODE: "TODO_REFRESH_FROM_DISK_PNODE", // TODO
         GIT_DIFF: "TODO_GIT_DIFF", // TODO
         // * Outline from body text
-        EXTRACT: "TODO_EXTRACT", // TODO
-        EXTRACT_NAMES: "TODO_EXTRACT_NAMES", // TODO
+        EXTRACT: "extract",
+        EXTRACT_NAMES: "extract-names",
         // * Hoist Operations
         HOIST_PNODE: "hoist",
         DEHOIST: "de-hoist",

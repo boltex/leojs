@@ -346,7 +346,25 @@ suite('Test Undo', () => {
     //@+node:felix.20220129225102.12: *3* TestUndo.test_extract_test
     test('test_extract_test', async () => {
         const c = self.c;
-
+        const before = g.dedent(
+            `\
+            before
+                < < section > >
+                sec line 1
+                    sec line 2 indented
+            sec line 3
+            after\n`
+        );
+        const after = g.dedent(
+            `\
+            before
+                < < section > >
+            after\n`
+        );
+        const i = before.indexOf('< <');
+        const j = before.indexOf('line 3');
+        const func = c.extract;
+        runTest(self, before, after, i, j, func);
     });
     /* def test_extract_test(self):
         c = self.c
