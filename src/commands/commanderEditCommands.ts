@@ -131,6 +131,23 @@ export class CommanderEditCommands {
         u.afterChangeBody(p, 'Indent Region', bunch);
         return true;
     }
+    //@+node:felix.20230221160425.3: *3* def createLastChildNode
+    /**
+     * A helper function for the three extract commands.
+     */
+    private createLastChildNode(c: Commands, parent: Position, headline: string, body?: string): Position {
+
+        // #1955: don't strip trailing lines.
+        if (!body) {
+            body = "";
+        }
+        const p = parent.insertAsLastChild();
+        p.initHeadString(headline);
+        p.setBodyString(body);
+        p.setDirty();
+        c.validateOutline();
+        return p;
+    };
     //@+node:felix.20230221160425.1: *3* c_ec.extract & helpers
     @commander_command('extract', 'Create child node from the selected body text.')
     public extract(this: Commands): void {
@@ -160,23 +177,6 @@ export class CommanderEditCommands {
         //@-<< docstring for extract command >>
 
         //@+others
-        //@+node:felix.20230221160425.3: *4* def createLastChildNode
-        /**
-         * A helper function for the three extract commands.
-         */
-        const createLastChildNode = (c: Commands, parent: Position, headline: string, body: string): Position => {
-
-            // #1955: don't strip trailing lines.
-            if (!body) {
-                body = "";
-            }
-            const p = parent.insertAsLastChild();
-            p.initHeadString(headline);
-            p.setBodyString(body);
-            p.setDirty();
-            c.validateOutline();
-            return p;
-        }
         //@+node:felix.20230221160425.4: *4* def extractDef
         const extractDef_patterns = [
             /\((?:def|defn|defui|deftype|defrecord|defonce)\s+(\S+)/, // clojure definition
@@ -286,7 +286,7 @@ export class CommanderEditCommands {
         // Start the outer undo group.
         u.beforeChangeGroup(c.p, undoType);
         const undoData = u.beforeInsertNode(c.p);
-        const p = createLastChildNode(c, c.p, h, b.join(""));
+        const p = this.createLastChildNode(c, c.p, h, b.join(""));
         u.afterInsertNode(p, undoType, undoData);
         //
         // Start inner undo.
@@ -326,60 +326,84 @@ export class CommanderEditCommands {
     // g.command_alias('extractSection', extract)
     // g.command_alias('extractPythonMethod', extract)
     //@+node:felix.20230221160431.1: *3* c_ec.extractSectionNames & helper
-    //@+others
-    //@+node:felix.20230221160431.2: *4* def findSectionName
-    // def findSectionName(self: Self, s: str) -> Optional[str]:
-    //     head1 = s.find("<<")
-    //     if head1 > -1:
-    //         head2 = s.find(">>", head1)
-    //     else:
-    //         head1 = s.find("@<")
-    //         if head1 > -1:
-    //             head2 = s.find("@>", head1)
-    //     if head1 == -1 or head2 == -1 or head1 > head2:
-    //         name = None
-    //     else:
-    //         name = s[head1 : head2 + 2]
-    //     return name
-    //@-others
-    // @g.commander_command('extract-names')
-    // def extractSectionNames(self: Self, event: Event = None) -> None:
-    //     """
-    //     Create child nodes for every section reference in the selected text.
-    //     - The headline of each new child node is the section reference.
-    //     - The body of each child node is empty.
-    //     """
-    //     c = self
-    //     current = c.p
-    //     u = c.undoer
-    //     undoType = 'Extract Section Names'
-    //     body = c.frame.body
-    //     head, lines, tail, oldSel, oldYview = c.getBodyLines()
-    //     if not lines:
-    //         g.warning('No lines selected')
-    //         return
-    //     found = False
-    //     for s in lines:
-    //         name = findSectionName(c, s)
-    //         if name:
-    //             if not found:
-    //                 u.beforeChangeGroup(current, undoType)  # first one!
-    //             undoData = u.beforeInsertNode(current)
-    //             p = createLastChildNode(c, current, name, None)
-    //             u.afterInsertNode(p, undoType, undoData)
-    //             found = True
-    //     c.validateOutline()
-    //     if found:
-    //         u.afterChangeGroup(current, undoType)
-    //         c.redraw(p)
-    //     else:
-    //         g.warning("selected text should contain section names")
-    //     # Restore the selection.
-    //     i, j = oldSel
-    //     w = body.wrapper
-    //     if w:
-    //         w.setSelectionRange(i, j)
-    //         w.setFocus()
+    @commander_command(
+        'extract-names',
+        'Create child nodes for every section reference in the selected text.'
+    )
+    public extractSectionNames(this: Commands): void {
+        // - The headline of each new child node is the section reference.
+        // - The body of each child node is empty.
+
+        //@+others
+        //@+node:felix.20230221160431.2: *4* def findSectionName
+        const findSectionName = (s: string): string | undefined => {
+
+            let head1 = s.indexOf("<<");
+            let head2 = -1;
+            if (head1 > -1) {
+                head2 = s.indexOf(">>", head1);
+            } else {
+                head1 = s.indexOf("@<");
+                if (head1 > -1) {
+                    head2 = s.indexOf("@>", head1);
+                }
+            }
+
+            let name: string | undefined;
+
+            if (head1 === -1 || head2 === -1 || head1 > head2) {
+                name = undefined;
+            } else {
+                name = s.substring(head1, head2 + 2);
+            }
+            return name;
+        }
+
+        //@-others
+
+        const c: Commands = this;
+        const current = c.p;
+        const u = c.undoer;
+
+        const undoType = 'Extract Section Names';
+        const body = c.frame.body;
+        let head, lines, tail, oldSel, oldYview;
+        [head, lines, tail, oldSel, oldYview] = c.getBodyLines();
+        if (!lines || !lines.length) {
+            g.warning('No lines selected');
+            return;
+        }
+        let found = false;
+        let p;
+        for (const s of lines) {
+            const name = findSectionName(s);
+            if (name) {
+                if (!found) {
+                    u.beforeChangeGroup(current, undoType);  // first one!
+                }
+                const undoData = u.beforeInsertNode(current);
+                p = this.createLastChildNode(c, current, name, undefined);
+                u.afterInsertNode(p, undoType, undoData);
+                found = true;
+            }
+        }
+        c.validateOutline();
+        if (found) {
+            u.afterChangeGroup(current, undoType);
+            c.redraw(p);
+        } else {
+            g.warning("selected text should contain section names");
+        }
+        // Restore the selection.
+        let i, j;
+        [i, j] = oldSel;
+        const w = body.wrapper;
+        if (w) {
+            w.setSelectionRange(i, j);
+            w.setFocus();
+        }
+
+    }
     //@+node:felix.20220503232001.1: *3* c_ec.goToNext/PrevHistory
     @commander_command(
         'goto-next-history-node',
@@ -399,61 +423,77 @@ export class CommanderEditCommands {
         c.nodeHistory.goPrev();
     }
     //@+node:felix.20230221160446.1: *3* c_ec.insertBodyTime
-    // @g.commander_command('insert-body-time')
-    // def insertBodyTime(self: Self, event: Event = None) -> None:
-    //     """Insert a time/date stamp at the cursor."""
-    //     c, p, u = self, self.p, self.undoer
-    //     w = c.frame.body.wrapper
-    //     undoType = 'Insert Body Time'
-    //     if g.app.batchMode:
-    //         c.notValidInBatchMode(undoType)
-    //         return
-    //     bunch = u.beforeChangeBody(p)
-    //     w.deleteTextSelection()
-    //     s = self.getTime(body=True)
-    //     i = w.getInsertPoint()
-    //     w.insert(i, s)
-    //     p.v.b = w.getAllText()
-    //     u.afterChangeBody(p, undoType, bunch)
-    //@+node:felix.20230221160455.1: *3* c_ec.line_to_headline
-    // @g.commander_command('line-to-headline')
-    // def line_to_headline(self: Self, event: Event = None) -> None:
-    //     """
-    //     Create child node from the selected line.
+    @commander_command(
+        'insert-body-time',
+        'Insert a time/date stamp at the cursor.'
+    )
+    public insertBodyTime(this: Commands) : void {
+        
+        const c: Commands = this;
+        const p = this.p;
+        const u = this.undoer;
+        const w = this.frame.body.wrapper;
 
-    //     Cut the selected line and make it the new node's headline
-    //     """
-    //     c, p, u, w = self, self.p, self.undoer, self.frame.body.wrapper
-    //     undoType = 'line-to-headline'
-    //     ins, s = w.getInsertPoint(), p.b
-    //     i = g.find_line_start(s, ins)
-    //     j = g.skip_line(s, i)
-    //     line = s[i:j].strip()
-    //     if not line:
-    //         return
-    //     u.beforeChangeGroup(p, undoType)
-    //     #
-    //     # Start outer undo.
-    //     undoData = u.beforeInsertNode(p)
-    //     p2 = p.insertAsLastChild()
-    //     p2.h = line
-    //     u.afterInsertNode(p2, undoType, undoData)
-    //     #
-    //     # "before" snapshot.
-    //     bunch = u.beforeChangeBody(p)
-    //     p.b = s[:i] + s[j:]
-    //     w.setInsertPoint(i)
-    //     p2.setDirty()
-    //     c.setChanged()
-    //     #
-    //     # "after" snapshot.
-    //     u.afterChangeBody(p, undoType, bunch)
-    //     #
-    //     # Finish outer undo.
-    //     u.afterChangeGroup(p, undoType=undoType)
-    //     p.expand()
-    //     c.redraw(p)
-    //     c.bodyWantsFocus()
+        const undoType = 'Insert Body Time';
+        if (g.app.batchMode){
+            c.notValidInBatchMode(undoType);
+            return;
+        }
+        const bunch = u.beforeChangeBody(p);
+        w.deleteTextSelection();
+        const s = this.getTime(true);
+        const i = w.getInsertPoint();
+        w.insert(i, s);
+        p.v.b = w.getAllText();
+        u.afterChangeBody(p, undoType, bunch);
+
+    }
+    //@+node:felix.20230221160455.1: *3* c_ec.line_to_headline
+    @commander_command(
+        'line-to-headline',
+        'Create child node from the selected line.'
+    )
+    public line_to_headline(this: Commands): void {
+        // Cut the selected line and make it the new node's headline
+
+        const c: Commands = this;
+        const p = this.p;
+        const u = this.undoer;
+        const w = this.frame.body.wrapper;
+
+        const undoType = 'line-to-headline';
+        const ins = w.getInsertPoint();
+        const s = p.b;
+        const i = g.find_line_start(s, ins);
+        const j = g.skip_line(s, i);
+        const line = s.substring(i, j).trim();
+        if (!line){
+            return;
+        }
+        u.beforeChangeGroup(p, undoType);
+        //
+        // Start outer undo.
+        const undoData = u.beforeInsertNode(p);
+        const p2 = p.insertAsLastChild();
+        p2.h = line;
+        u.afterInsertNode(p2, undoType, undoData);
+        //
+        // "before" snapshot.
+        const bunch = u.beforeChangeBody(p);
+        p.b = s.substring(0, i) + s.substring(j);
+        w.setInsertPoint(i);
+        p2.setDirty();
+        c.setChanged();
+        //
+        // "after" snapshot.
+        u.afterChangeBody(p, undoType, bunch);
+        //
+        // Finish outer undo.
+        u.afterChangeGroup(p, undoType);
+        p.expand();
+        c.redraw(p);
+        c.bodyWantsFocus();
+    }
     //@-others
 
 }
