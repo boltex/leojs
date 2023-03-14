@@ -824,21 +824,25 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 </t>
 <t tx="felix.20201208214506.1"># Change Log
 
-## 0.1.0 12.9.2020.
+## 0.1.0 Dec 9, 2020 
 
 - Initial state
 
-## 0.1.1 12.31.2021.
+## 0.1.1 Dec 31, 2021
 
 - Outline, undos and commands.
 
-## 0.1.2 01.24.2022.
+## 0.1.2 Jan 01 2022
 
 - Support web extension compilation for vscode.dev
 
-## 0.1.3 03.11.20.
+## 0.1.3 Mar 11 2023
 
 - Implemented Find and Goto panels and commands
+
+## 0.1.4 Xxx xx xxxx
+
+- Implemented extract &amp; extract-names commands
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export function deactivate() { }
@@ -3902,7 +3906,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "Leo, the literate editor with outline extension for Visual Studio Code.",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -3913,7 +3917,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     "url": "https://github.com/boltex/leojs"
   },
   "engines": {
-    "vscode": "^1.74.0"
+    "vscode": "^1.76.0"
   },
   "keywords": [
     "leo",
@@ -6243,7 +6247,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 "@types/mocha": "^9.1.0",
 "@types/node": "16.x",
 "@types/safe-json-stringify": "^1.1.2",
-"@types/vscode": "^1.74.0",
+"@types/vscode": "^1.76.0",
 "@types/webpack-env": "^1.16.3",
 "@typescript-eslint/eslint-plugin": "^5.16.0",
 "@typescript-eslint/parser": "^5.16.0",
