@@ -917,8 +917,8 @@ export class LeoApp {
 
         let guiVersion = 'VSCode version ' + vscode.version;
 
-        const w_leoIntegExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
-        const w_leojsPackageJson = w_leoIntegExtension.packageJSON;
+        const w_LeoJSExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
+        const w_leojsPackageJson = w_LeoJSExtension.packageJSON;
 
         const leoVer: string = w_leojsPackageJson.version;
 

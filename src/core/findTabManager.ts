@@ -266,7 +266,7 @@ export class StringFindTabManager {
             const val = c.config.getBool(setting_name, false);
             // setattr(find, setting_name, val)
             (find[setting_name as keyof LeoFind] as any) = val;
-            if (val !== w.isChecked()) {  // Support leoInteg. :) 
+            if (val !== w.isChecked()) {  // Support LeoJS. :) 
                 w.toggle();
             }
         }
@@ -309,8 +309,8 @@ export class StringFindTabManager {
     /**
      * Set all settings from d.
      */
-    public set_widgets_from_dict(d: {[key: string]: any}): void {
-        
+    public set_widgets_from_dict(d: { [key: string]: any }): void {
+
         // Similar to ftm.init_widgets, which has already been called.
         const c = this.c;
         const find = c.findCommands;
@@ -337,7 +337,7 @@ export class StringFindTabManager {
             const val = d[setting_name] || false;
             // setattr(find, setting_name, val)
             (find[setting_name as keyof LeoFind] as any) = val;
-            if (val !== w.isChecked()) {  // Support leoInteg. :) 
+            if (val !== w.isChecked()) {  // Support LeoJS. :) 
                 w.toggle();
             }
         }

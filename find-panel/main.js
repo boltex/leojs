@@ -2,13 +2,13 @@
 
 // This script will be run within the webview itself
 // It cannot access the main VS Code APIs directly.
-// Send message to leoInteg with vscode.postMessage({ keyNameEx1: someValue, ... });
-// Receive messages from leoInteg with window.addEventListener('message', event => { ... });
+// Send message to LeoJS with vscode.postMessage({ keyNameEx1: someValue, ... });
+// Receive messages from LeoJS with window.addEventListener('message', event => { ... });
 (function () {
     // @ts-expect-error
     const vscode = acquireVsCodeApi();
 
-    let timer; // for debouncing sending the settings from this webview to leointeg
+    let timer; // for debouncing sending the settings from this webview to LeoJS
     let dirty = false; // all but nav input
     let navTextDirty = false;
 
