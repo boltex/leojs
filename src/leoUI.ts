@@ -36,6 +36,7 @@ import { Position } from "./core/leoNodes";
 import { LeoGotoNode, LeoGotoProvider } from "./leoGoto";
 import { LeoFrame, StringTextWrapper } from "./core/leoFrame";
 import { LeoFindPanelProvider } from "./leoFindPanelWebview";
+import { LeoSettingsProvider } from "./leoSettingsWebview";
 import { ISettings, LeoFind } from "./core/leoFind";
 import { NullGui } from "./core/leoGui";
 import { StringFindTabManager } from "./core/findTabManager";
@@ -201,7 +202,7 @@ export class LeoUI extends NullGui {
     private _scroll: vscode.Range | undefined;
 
     // * Settings / Welcome webview
-    // public leoSettingsWebview: LeoSettingsProvider; // TODO !
+    public leoSettingsWebview: LeoSettingsProvider;
 
     // * Log Pane
     private _leoLogPane: vscode.OutputChannel;
@@ -336,6 +337,9 @@ export class LeoUI extends NullGui {
             this._lastTreeView = this._leoTreeView;
         }
 
+        // * Configuration / Welcome webview
+        this.leoSettingsWebview = new LeoSettingsProvider(this._context.extensionUri, this._context, this);
+
         this.showLogPane();
     }
 
@@ -431,9 +435,6 @@ export class LeoUI extends NullGui {
             )
         );
 
-        // * Configuration / Welcome webview
-        // this.leoSettingsWebview = new LeoSettingsProvider(_context, this);
-
         // * 'onDid' event detections all pushed as disposables in context.subscription
         this._context.subscriptions.push(
             // * React to change in active panel/text editor (window.activeTextEditor) - also fires when the active editor becomes undefined
@@ -492,8 +493,7 @@ export class LeoUI extends NullGui {
     }
 
     public showSettings(): void {
-        // TODO
-        vscode.window.showInformationMessage('TODO: SHOW WELCOME/SETTINGS !');
+        this.leoSettingsWebview.openWebview();
     }
     /**
      * * Adds a message string to LeoJS log pane. Used when leoBridge receives an async 'log' command.

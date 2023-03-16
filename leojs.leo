@@ -387,6 +387,7 @@
 <v t="felix.20220929001102.1"><vh>performanceNow</vh></v>
 <v t="felix.20220505225030.1"><vh>uniqueId</vh></v>
 <v t="felix.20220505225023.1"><vh>getUniqueId</vh></v>
+<v t="felix.20230315215040.1"><vh>getOnce</vh></v>
 <v t="felix.20201208224407.2"><vh>padNumber2</vh></v>
 <v t="felix.20201208224407.4"><vh>addFileToGlobal</vh></v>
 <v t="felix.20201208224407.5"><vh>removeFileFromGlobal</vh></v>
@@ -785,7 +786,7 @@ _Move Outline commands need the 'Alt' key modifier only when focus is on body pa
 
 | Tree Navigation    |           |                 |                          |
 | :----------------- | :-------- | :-------------- | :----------------------- |
-| `Ctrl+Shift+L`     |           |                 | Show the LeoInteg View   |
+| `Ctrl+Shift+L`     |           |                 | Show the LeoJS View   |
 | `Ctrl+P`           |           |                 | Go Anywhere              |
 | `Alt + Home`       | or        | `Home` \*       | Go To First Visible Node |
 |                    |           | `End` \*        | Go To Last Visible Node  |
@@ -3033,6 +3034,7 @@ import { Position } from "./core/leoNodes";
 import { LeoGotoNode, LeoGotoProvider } from "./leoGoto";
 import { LeoFrame, StringTextWrapper } from "./core/leoFrame";
 import { LeoFindPanelProvider } from "./leoFindPanelWebview";
+import { LeoSettingsProvider } from "./leoSettingsWebview";
 import { ISettings, LeoFind } from "./core/leoFind";
 import { NullGui } from "./core/leoGui";
 import { StringFindTabManager } from "./core/findTabManager";
@@ -3131,6 +3133,9 @@ import { QuickSearchController } from "./core/quicksearch";
     } else {
         this._lastTreeView = this._leoTreeView;
     }
+
+    // * Configuration / Welcome webview
+    this.leoSettingsWebview = new LeoSettingsProvider(this._context.extensionUri, this._context, this);
 
     this.showLogPane();
 }
@@ -3302,7 +3307,7 @@ export class LeoUI extends NullGui {
     private _scroll: vscode.Range | undefined;
 
     // * Settings / Welcome webview
-    // public leoSettingsWebview: LeoSettingsProvider; // TODO !
+    public leoSettingsWebview: LeoSettingsProvider;
 
     // * Log Pane
     private _leoLogPane: vscode.OutputChannel;
@@ -3950,7 +3955,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  }
+  },
+  "gitCommit": "b2147d0",
+  "gitBranch": "devel",
+  "gitDate": "2023-03-14 23:11:51 -0400"
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -8816,9 +8824,6 @@ public finishStartup(): void {
         )
     );
 
-    // * Configuration / Welcome webview
-    // this.leoSettingsWebview = new LeoSettingsProvider(_context, this);
-
     // * 'onDid' event detections all pushed as disposables in context.subscription
     this._context.subscriptions.push(
         // * React to change in active panel/text editor (window.activeTextEditor) - also fires when the active editor becomes undefined
@@ -13217,8 +13222,7 @@ public async chapterSelect(): Promise&lt;unknown&gt; {
 ],
 </t>
 <t tx="felix.20221113002623.1">public showSettings(): void {
-    // TODO
-    vscode.window.showInformationMessage('TODO: SHOW WELCOME/SETTINGS !');
+    this.leoSettingsWebview.openWebview();
 }
 </t>
 <t tx="felix.20221113165005.1">"editor/context": [
@@ -14779,6 +14783,16 @@ private _addToMinibufferHistory(p_commandName: string): void {
   "when": "viewItem =~ /leojsNodeTags/",
   "group": "leojsNodeContext2@4"
 },
+</t>
+<t tx="felix.20230315215040.1">export function getNonce(): string {
+    let text = '';
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (let i = 0; i &lt; 32; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+}
+
 </t>
 </tnodes>
 </leo_file>

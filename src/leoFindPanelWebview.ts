@@ -97,7 +97,7 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
             vscode.Uri.joinPath(this._extensionUri, 'find-panel', 'style.css')
         );
         // Use a nonce to only allow a specific script to be run.
-        const nonce = this.getNonce();
+        const nonce = utils.getNonce();
 
         return `<!DOCTYPE html>
             <html lang="en" tabindex="-1">
@@ -180,12 +180,4 @@ export class LeoFindPanelProvider implements vscode.WebviewViewProvider {
             </html>`;
     }
 
-    private getNonce() {
-        let text = '';
-        const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        for (let i = 0; i < 32; i++) {
-            text += possible.charAt(Math.floor(Math.random() * possible.length));
-        }
-        return text;
-    }
 }
