@@ -70,7 +70,7 @@ export class LeoSettingsProvider {
                         )
                         .replace(
                             "#{style}",
-                            style.toString()
+                            `${style}`
                         )
                         .replace(
                             "#{webview.cspSource}",
@@ -78,7 +78,7 @@ export class LeoSettingsProvider {
                         )
                         .replace(
                             /#{root}/g,
-                            w_baseUri.toString()
+                            `${w_baseUri}`
                         ).replace(
                             /#{endOfBody}/g,
                             `<script type="text/javascript" nonce="${w_nonce}">window.leoConfig = ${JSON.stringify(
