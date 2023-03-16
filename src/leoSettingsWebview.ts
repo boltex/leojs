@@ -65,8 +65,12 @@ export class LeoSettingsProvider {
 
                     this._panel.webview.html = p_baseHtml
                         .replace(
-                            "#{nonce}",
+                            /#{nonce}/g,
                             w_nonce
+                        )
+                        .replace(
+                            "#{style}",
+                            style.toString()
                         )
                         .replace(
                             "#{webview.cspSource}",
@@ -81,7 +85,9 @@ export class LeoSettingsProvider {
                                 this._leoUI.config.getConfig()
                             )};window.fontConfig = ${JSON.stringify(
                                 this._leoUI.config.getFontConfig()
-                            )};</script>`
+                            )};</script>
+                            <script nonce="${w_nonce}" src="${scriptUri}"></script>
+                            `
                         );
                     this._panel.webview.onDidReceiveMessage(
                         message => {
