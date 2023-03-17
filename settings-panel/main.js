@@ -33,6 +33,7 @@
 
     // @ts-expect-error
     vscodeConfig = window.leoConfig; // PRE SET BY leoSettingsWebview
+    console.log("vscodeConfig", vscodeConfig);
     frontConfig = JSON.parse(JSON.stringify(vscodeConfig));
     // @ts-expect-error
     vscodeFontConfig = window.fontConfig; // PRE SET BY leoSettingsWebview
@@ -54,8 +55,12 @@
                     break;
                 case "vscodeConfig":
                     dirty.className = dirty.className.replace("show", "");
+                    console.log("hide dirty and show toast!");
                     toast.className = "show";
-                    setTimeout(function () { toast.className = toast.className.replace("show", ""); }, 1500);
+                    setTimeout(function () {
+                        console.log("hide toast!");
+                        toast.className = toast.className.replace("show", "");
+                    }, 1500);
                     vscodeConfig = message.config; // next changes will be confronted to those settings
                     break;
                 case "newFontConfig":
@@ -284,11 +289,15 @@
     function onVscodeInputChanged(element) {
         if (element.id === "zoomLevel") {
             frontFontConfig.zoomLevel = element.valueAsNumber;
+            applyFontChanges();
         }
         if (element.id === "editorFontSize") {
             frontFontConfig.fontSize = element.valueAsNumber;
+            applyFontChanges();
         }
-        applyFontChanges();
+        if (element.id === "leoID") {
+            showDirtyAndApplyChange();
+        }
     }
 
     function setFontControls() {
