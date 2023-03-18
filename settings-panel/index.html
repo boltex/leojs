@@ -77,12 +77,11 @@
               <div class="setting__input">
                 <label for="leoID">Your ID</label>
                 <input id="leoID" name="leoID" type="text" minLength="3" maxlength="128" placeholder="Leo Id"
-                  data-vscode />
+                  data-setting />
               </div>
               <span class="setting__hint">
-                Defaults to your logged user name.<br>
-                An id that identifies you uniquely.<br>
-                (Letters and numbers only, and at least 3 characters in length)
+                An id that identifies you uniquely. <strong>Defaults to your current user name.</strong><br>
+                <em>Letters and numbers only, at least 3 characters.</em>
               </span>
             </div>
           </div>
@@ -383,6 +382,9 @@
       <div class="sidebar__group">
         <h2>Configuration</h2>
         <ul>
+          <li>
+            <a href="#leo-id" title="Uniquely identifies you">Leo ID</a>
+          </li>
           <li>
             <a href="#external-files" title="File change detection settings">External Files</a>
           </li>

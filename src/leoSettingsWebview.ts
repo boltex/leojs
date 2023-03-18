@@ -7,16 +7,14 @@ export class LeoSettingsProvider {
 
     private _panel: vscode.WebviewPanel | undefined;
     private _html: string | undefined;
+    private _extensionUri: vscode.Uri;
     private _waitingForUpdate: boolean = false;
 
     constructor(
-        private readonly _extensionUri: vscode.Uri,
         private _context: vscode.ExtensionContext,
         private _leoUI: LeoUI
     ) {
-        _context.subscriptions.push(
-            vscode.workspace.onDidChangeConfiguration(p_event => this.changedConfiguration(p_event))
-        );
+        this._extensionUri = _context.extensionUri;
     }
 
     public changedConfiguration(p_event?: vscode.ConfigurationChangeEvent): void {

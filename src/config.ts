@@ -48,6 +48,8 @@ export class Config implements ConfigMembers {
     public invertNodeContrast: boolean = Constants.CONFIG_DEFAULTS.INVERT_NODES;
     public leoID: string = Constants.CONFIG_DEFAULTS.LEO_ID;
 
+    public setLeoJsSettingsPromise: Promise<unknown> = Promise.resolve();
+
     private _isBusySettingConfig: boolean = false;
 
     constructor(
@@ -139,9 +141,12 @@ export class Config implements ConfigMembers {
             }
         });
 
-        await Promise.all(w_promises);
-        this._isBusySettingConfig = false;
-        return this.buildFromSavedSettings(); // Refresh config from settings from vscode's saved config
+        this.setLeoJsSettingsPromise = Promise.all(w_promises);
+        return this.setLeoJsSettingsPromise.then(() => {
+            this._isBusySettingConfig = false;
+            this.buildFromSavedSettings();
+            return Promise.resolve();
+        });
 
     }
 

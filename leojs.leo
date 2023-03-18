@@ -664,20 +664,30 @@ Leo uses a model/view/controller architecture.
  */
 private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
-    if (p_event.affectsConfiguration(Constants.CONFIG_NAME)) {
-        this.config.buildFromSavedSettings(); // If the config setting started with 'leojs'
-        if (
-            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.INVERT_NODES) ||
-            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_EDIT) ||
-            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_ARROWS) ||
-            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_ADD) ||
-            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_MARK) ||
-            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_CLONE) ||
-            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_COPY)
-        ) {
-            this.configTreeRefresh();
-        }
+    if (
+        p_event.affectsConfiguration(Constants.CONFIG_NAME) ||
+        p_event.affectsConfiguration('editor.fontSize') ||
+        p_event.affectsConfiguration('window.zoomLevel')
+    ) {
+        this.config.setLeoJsSettingsPromise.then(
+            () =&gt; {
+                this.config.buildFromSavedSettings();
+                this.leoSettingsWebview.changedConfiguration();
+                if (
+                    p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.INVERT_NODES) ||
+                    p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_EDIT) ||
+                    p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_ADD) ||
+                    p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_MARK) ||
+                    p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_CLONE) ||
+                    p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_COPY)
+                ) {
+                    this.configTreeRefresh();
+                }
+            }
+        );
+
     }
+
     // also check if workbench.editor.enablePreview
     this._bodyEnablePreview = !!vscode.workspace
         .getConfiguration('workbench.editor')
@@ -2221,7 +2231,7 @@ public static CONTEXT_FLAGS = {
     TREE_IN_EXPLORER: Constants.NAME + Constants.CONFIG_NAMES.TREE_IN_EXPLORER[0].toUpperCase() + Constants.CONFIG_NAMES.TREE_IN_EXPLORER.slice(1), // Leo outline also in the explorer view
     SHOW_OPEN_ASIDE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE.slice(1),   // Show 'open aside' in context menu
     SHOW_EDIT: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDIT[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDIT.slice(1),              // Hover Icons on outline nodes
-    SHOW_ARROWS: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ARROWS[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ARROWS.slice(1),           // Hover Icons on outline nodes
+    // SHOW_ARROWS: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ARROWS[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ARROWS.slice(1),           // Hover Icons on outline nodes
     SHOW_ADD: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ADD[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ADD.slice(1),                 // Hover Icons on outline nodes
     SHOW_MARK: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK.slice(1),               // Hover Icons on outline nodes
     SHOW_CLONE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLONE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLONE.slice(1),             // Hover Icons on outline nodes
@@ -3135,7 +3145,7 @@ import { QuickSearchController } from "./core/quicksearch";
     }
 
     // * Configuration / Welcome webview
-    this.leoSettingsWebview = new LeoSettingsProvider(this._context.extensionUri, this._context, this);
+    this.leoSettingsWebview = new LeoSettingsProvider(this._context, this);
 
     this.showLogPane();
 }
@@ -7375,6 +7385,8 @@ export class Config implements ConfigMembers {
     public invertNodeContrast: boolean = Constants.CONFIG_DEFAULTS.INVERT_NODES;
     public leoID: string = Constants.CONFIG_DEFAULTS.LEO_ID;
 
+    public setLeoJsSettingsPromise: Promise&lt;unknown&gt; = Promise.resolve();
+
     private _isBusySettingConfig: boolean = false;
 
     constructor(
@@ -7471,9 +7483,12 @@ public async setLeojsSettings(p_changes: ConfigSetting[]): Promise&lt;unknown&gt
         }
     });
 
-    await Promise.all(w_promises);
-    this._isBusySettingConfig = false;
-    return this.buildFromSavedSettings(); // Refresh config from settings from vscode's saved config
+    this.setLeoJsSettingsPromise = Promise.all(w_promises);
+    return this.setLeoJsSettingsPromise.then(() =&gt; {
+        this._isBusySettingConfig = false;
+        this.buildFromSavedSettings();
+        return Promise.resolve();
+    });
 
 }
 
@@ -7597,7 +7612,7 @@ public static CONFIG_NAMES = {
     TREE_IN_EXPLORER: "treeInExplorer",
     SHOW_OPEN_ASIDE: "showOpenAside",
     SHOW_EDIT: "showEditOnNodes",
-    SHOW_ARROWS: "showArrowsOnNodes",
+    // SHOW_ARROWS: "showArrowsOnNodes",
     SHOW_ADD: "showAddOnNodes",
     SHOW_MARK: "showMarkOnNodes",
     SHOW_CLONE: "showCloneOnNodes",
@@ -7644,7 +7659,7 @@ public static CONFIG_DEFAULTS = {
     TREE_IN_EXPLORER: true,
     SHOW_OPEN_ASIDE: true,
     SHOW_EDIT: true,
-    SHOW_ARROWS: false,
+    // SHOW_ARROWS: false,
     SHOW_ADD: false,
     SHOW_MARK: false,
     SHOW_CLONE: false,
@@ -9898,7 +9913,6 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknow
 
     let w = this.get_focus(c);
     focus = this.widget_name(w);
-    // console.log('focus BEFORE find:', focus, "c.p.b: ", c.p.b);
 
     const inOutline = (focus.includes("tree")) || (focus.includes("head"));
     const inBody = !inOutline;
@@ -9924,7 +9938,6 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknow
     found = p &amp;&amp; p.__bool__();
 
     this.findFocusTree = false; // Reset flag for headline range
-    // console.log('focus AFTER find:', focus, "c.p.b: ", c.p.b);
 
     if (!found || !focus) {
         return vscode.window.showInformationMessage('Not found');
@@ -9943,7 +9956,6 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknow
             this.showBodyIfClosed = true;
         }
         const w_scroll = (found &amp;&amp; w_finalFocus === Focus.Body) || undefined;
-        // console.log('FIND scroll is :', w_scroll);
 
         this.setupRefresh(
             w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
@@ -10043,8 +10055,6 @@ public async replace(p_fromOutline?: boolean, p_thenFind?: boolean): Promise&lt;
         c.bodyWantsFocusNow();
     }
 
-    //console.log('focus BEFORE replace:', focus, "c.p.b: ", c.p.b);
-
     found = false;
 
     const settings = fc.ftm.get_settings();
@@ -10062,8 +10072,6 @@ public async replace(p_fromOutline?: boolean, p_thenFind?: boolean): Promise&lt;
     focus = this.widget_name(w);
 
     this.findFocusTree = false; // Reset flag for headline range
-
-    // console.log('focus AFTER replace:', focus, "c.p.b: ", c.p.b);
 
     if (!found || !focus) {
         vscode.window.showInformationMessage('Not found'); // Flag not found/replaced!
@@ -10083,7 +10091,6 @@ public async replace(p_fromOutline?: boolean, p_thenFind?: boolean): Promise&lt;
             this.showBodyIfClosed = true;
         }
         const w_scroll = (found &amp;&amp; w_finalFocus === Focus.Body) || undefined;
-        // console.log('REPLACE scroll is :', w_scroll);
 
         this.setupRefresh(
             w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.

@@ -338,7 +338,7 @@ export class LeoUI extends NullGui {
         }
 
         // * Configuration / Welcome webview
-        this.leoSettingsWebview = new LeoSettingsProvider(this._context.extensionUri, this._context, this);
+        this.leoSettingsWebview = new LeoSettingsProvider(this._context, this);
 
         this.showLogPane();
     }
@@ -646,20 +646,30 @@ export class LeoUI extends NullGui {
      */
     private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
-        if (p_event.affectsConfiguration(Constants.CONFIG_NAME)) {
-            this.config.buildFromSavedSettings(); // If the config setting started with 'leojs'
-            if (
-                p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.INVERT_NODES) ||
-                p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_EDIT) ||
-                p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_ARROWS) ||
-                p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_ADD) ||
-                p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_MARK) ||
-                p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_CLONE) ||
-                p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_COPY)
-            ) {
-                this.configTreeRefresh();
-            }
+        if (
+            p_event.affectsConfiguration(Constants.CONFIG_NAME) ||
+            p_event.affectsConfiguration('editor.fontSize') ||
+            p_event.affectsConfiguration('window.zoomLevel')
+        ) {
+            this.config.setLeoJsSettingsPromise.then(
+                () => {
+                    this.config.buildFromSavedSettings();
+                    this.leoSettingsWebview.changedConfiguration();
+                    if (
+                        p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.INVERT_NODES) ||
+                        p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_EDIT) ||
+                        p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_ADD) ||
+                        p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_MARK) ||
+                        p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_CLONE) ||
+                        p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_COPY)
+                    ) {
+                        this.configTreeRefresh();
+                    }
+                }
+            );
+
         }
+
         // also check if workbench.editor.enablePreview
         this._bodyEnablePreview = !!vscode.workspace
             .getConfiguration('workbench.editor')
@@ -3656,7 +3666,6 @@ export class LeoUI extends NullGui {
 
         let w = this.get_focus(c);
         focus = this.widget_name(w);
-        // console.log('focus BEFORE find:', focus, "c.p.b: ", c.p.b);
 
         const inOutline = (focus.includes("tree")) || (focus.includes("head"));
         const inBody = !inOutline;
@@ -3682,7 +3691,6 @@ export class LeoUI extends NullGui {
         found = p && p.__bool__();
 
         this.findFocusTree = false; // Reset flag for headline range
-        // console.log('focus AFTER find:', focus, "c.p.b: ", c.p.b);
 
         if (!found || !focus) {
             return vscode.window.showInformationMessage('Not found');
@@ -3701,7 +3709,6 @@ export class LeoUI extends NullGui {
                 this.showBodyIfClosed = true;
             }
             const w_scroll = (found && w_finalFocus === Focus.Body) || undefined;
-            // console.log('FIND scroll is :', w_scroll);
 
             this.setupRefresh(
                 w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
@@ -3799,8 +3806,6 @@ export class LeoUI extends NullGui {
             c.bodyWantsFocusNow();
         }
 
-        //console.log('focus BEFORE replace:', focus, "c.p.b: ", c.p.b);
-
         found = false;
 
         const settings = fc.ftm.get_settings();
@@ -3818,8 +3823,6 @@ export class LeoUI extends NullGui {
         focus = this.widget_name(w);
 
         this.findFocusTree = false; // Reset flag for headline range
-
-        // console.log('focus AFTER replace:', focus, "c.p.b: ", c.p.b);
 
         if (!found || !focus) {
             vscode.window.showInformationMessage('Not found'); // Flag not found/replaced!
@@ -3839,7 +3842,6 @@ export class LeoUI extends NullGui {
                 this.showBodyIfClosed = true;
             }
             const w_scroll = (found && w_finalFocus === Focus.Body) || undefined;
-            // console.log('REPLACE scroll is :', w_scroll);
 
             this.setupRefresh(
                 w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.

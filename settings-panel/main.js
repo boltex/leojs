@@ -33,7 +33,6 @@
 
     // @ts-expect-error
     vscodeConfig = window.leoConfig; // PRE SET BY leoSettingsWebview
-    console.log("vscodeConfig", vscodeConfig);
     frontConfig = JSON.parse(JSON.stringify(vscodeConfig));
     // @ts-expect-error
     vscodeFontConfig = window.fontConfig; // PRE SET BY leoSettingsWebview
@@ -43,10 +42,8 @@
     window.addEventListener("message", event => {
         const message = event.data; // The json data that the extension sent
         if (message.command && dirty && toast) {
-            console.log("message.command", message.command);
             switch (message.command) {
                 case "test":
-                    console.log("got test message");
                     break;
                 case "newConfig":
                     vscodeConfig = message.config;
@@ -55,10 +52,8 @@
                     break;
                 case "vscodeConfig":
                     dirty.className = dirty.className.replace("show", "");
-                    console.log("hide dirty and show toast!");
                     toast.className = "show";
                     setTimeout(function () {
-                        console.log("hide toast!");
                         toast.className = toast.className.replace("show", "");
                     }, 1500);
                     vscodeConfig = message.config; // next changes will be confronted to those settings
@@ -72,7 +67,6 @@
                     vscodeFontConfig = message.config; // next changes will be confronted to those settings
                     break;
                 default:
-                    console.log("got message: ", message.command);
                     break;
             }
         } else {
@@ -220,30 +214,30 @@
 
     function onBind() {
         listenAll('input[type=checkbox][data-setting]', 'change', function (p_this) {
-            return onInputChecked(p_this);
+            return onInputChecked(p_this.target);
         });
         listenAll('input[type=text][data-setting], input:not([type])[data-setting]', 'blur', function (
             p_this
         ) {
-            return onInputBlurred(p_this);
+            return onInputBlurred(p_this.target);
         });
         listenAll('input[type=text][data-setting], input:not([type])[data-setting]', 'focus', function (
             p_this
         ) {
-            return onInputFocused(p_this);
+            return onInputFocused(p_this.target);
         });
         listenAll('input[type=text][data-setting], input[type=number][data-setting]', 'input', function (
             p_this
         ) {
-            return onInputChanged(p_this);
+            return onInputChanged(p_this.target);
         });
         listenAll('select[data-setting]', 'change', function (p_this) {
-            return onDropdownChanged(p_this);
+            return onDropdownChanged(p_this.target);
         });
         listenAll('input[type=number][data-vscode]', 'input', function (
             p_this
         ) {
-            return onVscodeInputChanged(p_this);
+            return onVscodeInputChanged(p_this.target);
         });
     }
     function showDirtyAndApplyChange() {
@@ -277,13 +271,18 @@
         if (element.type === 'number' && Number(element.value) < Number(element.max) && Number(element.value) > Number(element.min)) {
             frontConfig[element.id] = Number(element.value);
             element.classList.remove("is-invalid");
+            showDirtyAndApplyChange();
         } else if (element.type === 'number' && (Number(element.value) > Number(element.max) || Number(element.value) < Number(element.min))) {
             // make red
             element.classList.add("is-invalid");
+        } else if (element.type === 'text' && (element.value.length > element.maxLength || (element.value.length < element.minLength && element.value.length !== 0))) {
+            element.classList.add("is-invalid");
         } else if (element.type === 'text' && element.value.length <= element.maxLength) {
+            element.classList.remove("is-invalid");
             frontConfig[element.id] = element.value;
+            showDirtyAndApplyChange();
+
         }
-        showDirtyAndApplyChange();
     }
 
     function onVscodeInputChanged(element) {
@@ -400,12 +399,10 @@
 
     var applyChanges = debounce(
         function () {
-            console.log("applyChanges!!");
             var w_changes = [];
             if (frontConfig) {
                 for (var prop in frontConfig) {
                     if (Object.prototype.hasOwnProperty.call(frontConfig, prop)) {
-                        // console.log(prop);
                         if (frontConfig[prop] !== vscodeConfig[prop]) {
                             w_changes.push({ code: prop, value: frontConfig[prop] });
                         }
@@ -430,7 +427,6 @@
 
     var applyFontChanges = debounce(
         function () {
-            console.log("applyFontChanges!!");
             vscode.postMessage({
                 command: "fontConfig",
                 changes: frontFontConfig
