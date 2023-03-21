@@ -3720,32 +3720,6 @@ export class Commands {
         c.setCurrentPosition(p);
     }
 
-    //@+node:felix.20211031220906.1: *5* c.setPositionAfterSort
-    /**
-     * Return the position to be selected after a sort.
-     */
-    public setPositionAfterSort(sortChildren: boolean): Position {
-        const c: Commands = this;
-        let p: Position = c.p;
-        const p_v: VNode = p.v;
-        const parent: Position = p.parent();
-        const parent_v: VNode = p._parentVnode()!;
-        if (sortChildren) {
-            return (parent && parent.__bool__()) ? parent : c.rootPosition()!;
-        }
-        if (parent && parent.__bool__()) {
-            p = parent.firstChild();
-        } else {
-            p = new Position(parent_v.children[0]);
-        }
-        while (p && p.__bool__() && p.v.gnx !== p_v.gnx) {
-            p.moveToNext();
-        }
-        if (!p || !p.__bool__()) {
-            p = parent;
-        }
-        return p;
-    }
     //@+node:felix.20211022013445.1: *5* c.treeSelectHelper
     public treeSelectHelper(p: Position | false): void {
         const c: Commands = this;

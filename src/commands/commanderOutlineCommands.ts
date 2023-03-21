@@ -2279,6 +2279,23 @@ export class CommanderOutlineCommands {
         }
     }
     //@+node:felix.20211031235022.1: *3* c_oc.Sort commands
+    //@+node:felix.20230321002512.1: *4* c_oc.reverseSortChildren
+    @commander_command(
+        'reverse-sort-children',
+        'Sort the children of a node in reverse order.'
+    )
+    public reverseSortChildren(this: Commands, key = undefined): void {
+        this.sortChildren(key, true)  // as reverse, Fixes #3188
+    }
+    //@+node:felix.20230321002519.1: *4* c_oc.reverseSortSiblings
+    @commander_command(
+        'reverse-sort-siblings',
+        'Sort the siblings of a node in reverse order.'
+    )
+    public reverseSortSiblings(this: Commands, key = undefined): void {
+
+        this.sortSiblings(key, true)  // as reverse, Fixes #3188
+    }
     //@+node:felix.20211031235022.2: *4* c_oc.sortChildren
     @commander_command(
         'sort-children',
@@ -2289,12 +2306,7 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         const p: Position = c.p;
         if (p && p.__bool__() && p.hasChildren()) {
-            c.sortSiblings(
-                p.firstChild(),
-                true,
-                key,
-                reverse
-            );
+            c.sortSiblings(p.firstChild(), true, key, reverse);
         }
     }
     //@+node:felix.20211031235022.3: *4* c_oc.sortSiblings
@@ -2318,8 +2330,13 @@ export class CommanderOutlineCommands {
         if (!p || !p.__bool__()) {
             return;
         }
+        const oldP = p.copy();
+        const newP = p.copy();
         c.endEditing();
-        const undoType: string = sortChildren ? 'Sort Children' : 'Sort Siblings';
+        let undoType: string = sortChildren ? 'Sort Children' : 'Sort Siblings';
+        if (reverse) {
+            undoType = 'Reverse ' + undoType;
+        }
         const parent_v: VNode = p._parentVnode()!;
         const oldChildren: VNode[] = [...parent_v.children];
         const newChildren: VNode[] = [...parent_v.children];
@@ -2345,6 +2362,7 @@ export class CommanderOutlineCommands {
         for (var _i = 0; _i < oldChildren.length; _i++) {
             if (oldChildren[_i].gnx !== newChildren[_i].gnx) {
                 same = false;
+                break;
             }
         }
         if (same) {
@@ -2353,14 +2371,26 @@ export class CommanderOutlineCommands {
         // 2010/01/20. Fix bug 510148.
         c.setChanged();
         const bunch: Bead = u.beforeSort(p, undoType, oldChildren, newChildren, sortChildren);
-        parent_v.children = newChildren;
-        u.afterSort(p, bunch);
+        // A copy, so its not the undo bead's oldChildren. Fixes #3205
+        parent_v.children = [...newChildren];
         // Sorting destroys position p, and possibly the root position.
-        p = c.setPositionAfterSort(sortChildren);
-        if (p.parent().__bool__()) {
-            p.parent().setDirty();
+        // Only the child index of new position changes!
+        for (var _i = 0; _i < newChildren.length; _i++) {
+            const v = newChildren[_i];
+            if (v.gnx === oldP.v.gnx) {
+                newP._childIndex = _i;
+                break;
+            }
         }
-        c.redraw(p); // redraw selects p
+
+        if (newP.parent() && newP.parent().__bool__()) {
+            newP.parent().setDirty();
+        }
+        if (sortChildren) {
+            c.redraw(newP.parent());
+        } else {
+            c.redraw(newP);
+        }
     }
     //@-others
 

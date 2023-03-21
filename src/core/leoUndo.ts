@@ -1030,8 +1030,13 @@ export class Undoer {
         sortChildren: boolean
     ): Bead {
         const u: Undoer = this;
-        const bunch: Bead = u.createCommonBunch(p);
+        let bunch: Bead;
         // Set types.
+        if (sortChildren) {
+            bunch = u.createCommonBunch(p.parent());
+        } else {
+            bunch = u.createCommonBunch(p);
+        }
         bunch.kind = 'sort';
         bunch.undoType = undoType;
         bunch.undoHelper = u.undoSort;
@@ -1585,14 +1590,21 @@ export class Undoer {
     public redoSort(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const parent_v: VNode = u.p!._parentVnode()!;
-        parent_v.children = u.newChildren;
 
-        let p: Position;
+        const p = u.p!;
         if (u.sortChildren) {
-            p = u.p!.parent();
+            p.v.children = [...u.newChildren];
         } else {
-            p = c.setPositionAfterSort(false);
+            const parent_v = p._parentVnode()!;
+            parent_v.children = [...u.newChildren];
+            // Only the child index of new position changes!
+            for (var _i = 0; _i < parent_v.children.length; _i++) {
+                const v = parent_v.children[_i];
+                if (v.gnx === p.v.gnx) {
+                    p._childIndex = _i;
+                    break;
+                }
+            }
         }
         p.setAllAncestorAtFileNodesDirty();
         c.setCurrentPosition(p);
@@ -2083,15 +2095,21 @@ export class Undoer {
     public undoSort(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const parent_v: VNode = u.p!._parentVnode()!;
-        parent_v.children = u.oldChildren;
-        let p: Position;
+        const p = u.p!;
         if (u.sortChildren) {
-            p = u.p!.parent();
+            p.v.children = [...u.oldChildren];
         } else {
-            p = c.setPositionAfterSort(u.sortChildren);
+            const parent_v = p._parentVnode()!;
+            parent_v.children = [...u.oldChildren];
+            // Only the child index of new position changes!
+            for (var _i = 0; _i < parent_v.children.length; _i++) {
+                const v = parent_v.children[_i];
+                if (v.gnx === p.v.gnx) {
+                    p._childIndex = _i;
+                    break;
+                }
+            }
         }
-        // const p: Position = c.setPositionAfterSort(u.sortChildren);
         p.setAllAncestorAtFileNodesDirty();
         c.setCurrentPosition(p);
     }
