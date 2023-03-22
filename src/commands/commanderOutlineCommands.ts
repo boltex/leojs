@@ -75,13 +75,98 @@ export class CommanderOutlineCommands {
         'copy-node',
         'Copy the selected outline to the clipboard.'
     )
-    public copyOutline(this: Commands): void {
+    public copyOutline(this: Commands): string {
         // Copying an outline has no undo consequences.
         const c: Commands = this;
         c.endEditing();
         const s: string = c.fileCommands.outline_to_clipboard_string()!;
         g.app.paste_c = c;
         g.app.gui.replaceClipboardWith(s);
+        return s;
+    }
+    //@+node:felix.20230322003228.1: *4* c_oc.copyOutlineAsJson & helpers
+    @commander_command(
+        'copy-node-as-json',
+        'Copy the selected outline to the clipboard in json format.'
+    )
+    public copyOutlineAsJSON(this: Commands): string {
+        // Copying an outline has no undo consequences.
+        //@+others  // Define helper functions
+        //@+node:felix.20230322003228.2: *5* function: json_globals
+        /**
+         * Put json representation of Leo's cached globals.
+         */
+        const json_globals = (c: Commands): { [key: string]: any } => {
+
+            let width, height, left, top;
+            [width, height, left, top] = [0, 0, 0, 0]; // c.frame.get_window_info();
+            return {
+                'body_outline_ratio': 0.5, // c.frame.ratio,
+                'body_secondary_ratio': 0.5, // c.frame.secondary_ratio,
+                'globalWindowPosition': {
+                    'height': height,
+                    'left': left,
+                    'top': top,
+                    'width': width,
+                }
+            };
+        }
+        //@+node:felix.20230322003228.3: *5* function: json_vnode
+        const json_vnode = (v: VNode): { [key: string]: any } => {
+            const children: { [key: string]: any }[] = [];
+            for (const child of v.children) {
+                children.push(json_vnode(child));
+            }
+            return {
+                'gnx': v.fileIndex,
+                'vh': v._headString,
+                'status': v.statusBits,
+                'children': children
+            };
+        }
+        //@+node:felix.20230322003228.4: *5* function: outline_to_json
+        /**
+         * Return the JSON representation of c.
+         */
+        const outline_to_json = (c: Commands): string => {
+            const positions = [...c.p.self_and_subtree()];
+            const uas_dict: { [key: string]: any } = {};
+            for (const p of positions) {
+                if (p.u) {
+                    try {
+                        uas_dict[p.v.gnx] = JSON.stringify(p.u); // json.dumps(p.u, skipkeys=True)
+                    }
+                    catch (typeError) {
+                        g.trace(`Can not serialize uA for ${p.h}`, g.callers(6))
+                        // g.printObj(p.u)
+                    }
+                }
+
+            }
+            const tnodes: { [key: string]: any } = {};
+            for (const p of positions) {
+                tnodes[p.v.gnx] = p.v._bodyString;
+            }
+            const d = {
+                'leoHeader': { 'fileFormat': 2 },
+                'globals': json_globals(c),
+                'tnodes': tnodes,
+                'uas': uas_dict,
+                'vnodes': [
+                    json_vnode(c.p.v)
+                ],
+            }
+
+            // return json.dumps(d, indent=2, sort_keys=False)
+            return JSON.stringify(d, null, "  ");
+        }
+        //@-others
+        const c: Commands = this;
+        c.endEditing();
+        const s = outline_to_json(c);
+        g.app.paste_c = c;
+        g.app.gui.replaceClipboardWith(s);
+        return s;
     }
     //@+node:felix.20211208235043.3: *4* c_oc.cutOutline
     @commander_command(
@@ -1284,14 +1369,15 @@ export class CommanderOutlineCommands {
     @commander_command('dehoist', 'Undo a previous hoist of an outline.')
     public dehoist(this: Commands): void {
         const c: Commands = this;
+        const cc = this.chapterController;
+        const tag = '@chapter ';
         if (!c.p || !c.p.__bool__() || !c.hoistStack.length) {
             return;
         }
-        // Don't de-hoist an @chapter node.
-        if (c.chapterController && c.p.h.startsWith('@chapter ')) {
-            if (!g.unitTesting) {
-                g.es('can not de-hoist an @chapter node.');
-            }
+        // #2718: de-hoisting an @chapter node is equivalent to selecting the main chapter.
+        if (c.p.h.startsWith(tag) || c.hoistStack[-1].p.h.startsWith(tag)) {
+            c.hoistStack = [];
+            cc.selectChapterByName('main');
             return;
         }
         const bunch: HoistStackEntry = c.hoistStack.pop()!;
@@ -1308,7 +1394,7 @@ export class CommanderOutlineCommands {
         // c.frame.putStatusLine("De-Hoist: " + p.h)
 
         // TODO : Needed?
-        // g.doHook('hoist-changed', c=c)
+        g.doHook('hoist-changed', { c: c });
     }
     //@+node:felix.20211031143537.3: *4* c_oc.clearAllHoists
     @commander_command(
@@ -1432,7 +1518,6 @@ export class CommanderOutlineCommands {
             u.afterCloneNode(clone, 'Clone Node', undoData);
             c.contractAllHeadlines();
             c.redraw();
-            c.selectPosition(clone);
         } else {
             clone.doDelete();
             c.setCurrentPosition(p);
@@ -1523,7 +1608,9 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211031143555.7: *4* c_oc.insertHeadline (insert-*)
     @commander_command(
         'insert-node',
-        'Insert a node after the presently selected node.'
+        'If c.p is expanded, insert a new node as the first or last child of c.p,' +
+        'depending on @bool insert-new-nodes-at-end.' +
+        'If c.p is not expanded, insert a new node after c.p.'
     )
     public insertHeadline(this: Commands, op_name: string = "Insert Node", as_child: boolean = false): Position | undefined {
         const c: Commands = this;
@@ -1532,7 +1619,7 @@ export class CommanderOutlineCommands {
     }
     @commander_command(
         'insert-as-first-child',
-        'Insert a node as the last child of the previous node.'
+        'Insert a node as the first child of the previous node.'
     )
     public insertNodeAsFirstChild(this: Commands): Position | undefined {
         const c: Commands = this;

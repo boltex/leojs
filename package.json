@@ -3723,5 +3723,8 @@
     "path-browserify": "^1.0.1",
     "safe-json-stringify": "^1.2.0",
     "stream": "^0.0.2"
-  }
+  },
+  "gitCommit": "59a6cf9",
+  "gitBranch": "devel",
+  "gitDate": "2023-03-21 01:33:21 -0400"
 }
