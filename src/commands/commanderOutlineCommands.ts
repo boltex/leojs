@@ -200,7 +200,7 @@ export class CommanderOutlineCommands {
         if (!s || !c.canPasteOutline(s)) {
             return undefined;  // This should never happen.
         }
-        const isLeo = g.match(s, 0, g.app.prolog_prefix_string);
+        const isLeo = s.trimStart().startsWith("{") || g.match(s, 0, g.app.prolog_prefix_string);
         if (!isLeo) {
             return undefined;
         }
@@ -269,10 +269,6 @@ export class CommanderOutlineCommands {
         if (!s || !c.canPasteOutline(s)) {
             return undefined;  // This should never happen.
         }
-        const isLeo = g.match(s, 0, g.app.prolog_prefix_string);
-        if (!isLeo) {
-            return undefined;
-        }
         // Get *position* to be pasted.
         const pasted: Position = c.fileCommands.getLeoOutlineFromClipboardRetainingClones(s)!;
         if (!pasted) {
@@ -339,6 +335,11 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         const p: Position = c.p;
 
+        if (!s || !c.canPasteOutline(s)) {
+            return; // This should never happen.
+        }
+        const isJson = s.trimStart().startsWith("{");
+
         // * Variables local to pasteAsTemplate
         let root_gnx: string;
         let outside: string[] = [];
@@ -353,9 +354,9 @@ export class CommanderOutlineCommands {
         let pasted: VNode;
         let index: number;
         let parStack: StackEntry[];
-        let xroot: et.ElementTree;
-        let xvelements: et.Element[];
-        let xtelements: et.Element[];
+        let xroot: et.ElementTree | any;
+        let xvelements: et.Element[] | any;
+        let xtelements: et.Element[] | any;
         const gnx2v = c.fileCommands.gnxDict;
 
 
@@ -390,10 +391,14 @@ export class CommanderOutlineCommands {
          *
          * skipping the descendants of already seen nodes.
          */
-        function* viter(parent_gnx: string, xv: et.Element): Generator<[string, string, string, string]> {
+        function* viter(parent_gnx: string, xv: et.Element | any): Generator<[string, string, string, string]> {
 
-            const chgnx: string = xv.attrib['t']!;
-
+            let chgnx: string;
+            if (!isJson) {
+                chgnx = xv.attrib['t']!;
+            } else {
+                chgnx = xv['gnx'];
+            }
             const b: string = bodies[chgnx]!;
 
             const gnx: string = translation[chgnx];
@@ -403,13 +408,28 @@ export class CommanderOutlineCommands {
             } else {
 
                 seen.push(gnx);
-                const h: string = xv.getchildren()[0].text!.toString();
+                let h: string;//  = xv.getchildren()[0].text!.toString();
+                if (!isJson) {
+                    h = xv.getchildren()[0].text!.toString();
+                } else {
+                    h = xv['vh'] || '';
+                }
                 heads[gnx] = h;
+
                 yield [parent_gnx, gnx, h, b];
 
-                for (let xch of xv.getchildren().slice(1)) {
-                    yield* viter(gnx, xch);
+                if (!isJson) {
+                    for (let xch of xv.getchildren().slice(1)) {
+                        yield* viter(gnx, xch);
+                    }
+                } else {
+                    if (xv['children'] && xv['children'].length) {
+                        for (let xch of xv['children']) {
+                            yield* viter(gnx, xch);
+                        }
+                    }
                 }
+
             }
         }
         //@+node:felix.20211208235043.12: *5* getv
@@ -505,18 +525,40 @@ export class CommanderOutlineCommands {
         }
         //@-others
 
-        xroot = et.parse(s);
-        xvelements = xroot.find('vnodes')!.getchildren();
-        xtelements = xroot.find('tnodes')!.getchildren();
+        if (!isJson) {
+            xroot = et.parse(s);
+            xvelements = xroot.find('vnodes')!.getchildren();
+            xtelements = xroot.find('tnodes')!.getchildren();
+            [bodies, uas] = new FastRead(c, {}).scanTnodes(xtelements);
+            root_gnx = xvelements[0].attrib['t']!;  // the gnx of copied node
+        } else {
+            xroot = JSON.parse(g.app.gui.getTextFromClipboard());
+            xvelements = xroot['vnodes'];  // <v> elements.
+            xtelements = xroot['tnodes']; // <t> elements.
+            // bodies, uas = leoFileCommands.FastRead(c, {}).scanTnodes(xtelements)
+            bodies = new FastRead(c, {}).scanJsonTnodes(xtelements);
 
-        [bodies, uas] = new FastRead(c, {}).scanTnodes(xtelements);
+            const addBody = (node: any): void => {
+                if (!bodies[node['gnx']]) {
+                    bodies[node['gnx']] = '';
+                }
+                if (node['children'] && node['children'].length) {
+                    for (const child of node['children']) {
+                        addBody(child);
+                    }
+                }
+            };
+            // generate bodies for all possible nodes, not just non-empty bodies.
+            addBody(xvelements[0]);
+            uas = {};
+            Object.assign(uas, xroot['uas'] || {});
+            root_gnx = xvelements[0]['gnx'];  // the gnx of copied node
+        }
 
-        root_gnx = xvelements[0].attrib['t']!;  // the gnx of copied node
-
+        // outside will contain gnxes of nodes that are outside the copied tree
         for (let x of skip_root(c.hiddenRootNode)) {
             outside.push(x.gnx);
         }
-        // outside will contain gnxes of nodes that are outside the copied tree
 
         for (let x in bodies) { // Voluntary use of 'in' for keys
             translation[x] = translate_gnx(x);
@@ -611,6 +653,7 @@ export class CommanderOutlineCommands {
         // The helper does all the work.
         const c: Commands = this;
         c.contractAllHeadlines();
+        c.redraw();
     }
     //@+node:felix.20211020002058.3: *4* c_oc.contractAllOtherNodes & helper
     @commander_command(
@@ -737,12 +780,13 @@ export class CommanderOutlineCommands {
     public expandAllHeadlines(this: Commands): void {
         const c: Commands = this;
         c.endEditing();
+        const p0: Position = c.p;
         const p: Position = c.rootPosition()!;
         while (p && p.__bool__()) {
             c.expandSubtree(p);
             p.moveToNext();
         }
-        c.redraw_after_expand(c.rootPosition()!);
+        c.redraw_after_expand(p0); // Keep focus on original position
         c.expansionLevel = 0;  // Reset expansion level.
     }
     //@+node:felix.20211020002058.10: *4* c_oc.expandAllSubheads
@@ -905,7 +949,7 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211020002058.16: *4* c_oc.expandOnlyAncestorsOfNode
     @commander_command(
         'expand-ancestors-only',
-        'Contract all nodes in the outline.'
+        'Contract all nodes except ancestors of the selected node.'
     )
     public expandOnlyAncestorsOfNode(this: Commands, p?: Position): void {
         const c: Commands = this;
@@ -1008,8 +1052,7 @@ export class CommanderOutlineCommands {
     @commander_command(
         'goto-first-node',
         'Select the first node of the entire outline,\n' +
-        'or the first node of a chapter or hoist\n' +
-        'if Leo is hoisted or within a chapter.'
+        'Or the first visible node if Leo is hoisted or within a chapter.'
     )
     public goToFirstNode(this: Commands): void {
         const c: Commands = this;
@@ -1041,7 +1084,11 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         const p: Position = c.firstVisible();
         if (p && p.__bool__()) {
-            c.expandOnlyAncestorsOfNode(p);
+            if (c.sparse_goto_visible) {
+                c.expandOnlyAncestorsOfNode(p);
+            } else {
+                c.treeSelectHelper(p);
+            }
             c.redraw();
         }
     }
@@ -1083,7 +1130,11 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         const p: Position = c.lastVisible();
         if (p && p.__bool__()) {
-            c.expandOnlyAncestorsOfNode(p);
+            if (c.sparse_goto_visible) {
+                c.expandOnlyAncestorsOfNode(p);
+            } else {
+                c.treeSelectHelper(p);
+            }
             c.redraw();
         }
     }
@@ -1393,7 +1444,6 @@ export class CommanderOutlineCommands {
         // c.frame.clearStatusLine()
         // c.frame.putStatusLine("De-Hoist: " + p.h)
 
-        // TODO : Needed?
         g.doHook('hoist-changed', { c: c });
     }
     //@+node:felix.20211031143537.3: *4* c_oc.clearAllHoists
@@ -1405,9 +1455,8 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         c.hoistStack = [];
 
-        // TODO : Needed?
         // c.frame.putStatusLine("Hoists cleared")
-        // g.doHook('hoist-changed', c=c)
+        g.doHook('hoist-changed', { c: c });
     }
     //@+node:felix.20211031143537.4: *4* c_oc.hoist
     @commander_command(
@@ -1438,8 +1487,7 @@ export class CommanderOutlineCommands {
         // c.frame.clearStatusLine();
         // c.frame.putStatusLine("Hoist: " + p.h);
 
-        // TODO : Needed?
-        // g.doHook('hoist-changed', c=c);
+        g.doHook('hoist-changed', { c: c });
     }
     //@+node:felix.20211031143555.1: *3* c_oc.Insert, Delete & Clone commands
     //@+node:felix.20211031143555.2: *4* c_oc.clone
@@ -1517,7 +1565,7 @@ export class CommanderOutlineCommands {
         if (c.validateOutline()) {
             u.afterCloneNode(clone, 'Clone Node', undoData);
             c.contractAllHeadlines();
-            c.redraw();
+            c.redraw(clone);
         } else {
             clone.doDelete();
             c.setCurrentPosition(p);
@@ -1829,8 +1877,7 @@ export class CommanderOutlineCommands {
         }
         // Don't even *think* about restoring the old position.
         c.contractAllHeadlines();
-        c.selectPosition(c.rootPosition()!);
-        c.redraw();
+        c.redraw(c.rootPosition());
     }
 
     //@+node:felix.20211025223803.5: *4* c_oc.moveMarked
@@ -1943,7 +1990,6 @@ export class CommanderOutlineCommands {
         if (!g.unitTesting) {
             g.blue('done');
         }
-        c.redraw_after_icons_changed();
     }
 
     //@+node:felix.20211025223803.9: *4* c_oc.markHeadline
@@ -1974,7 +2020,6 @@ export class CommanderOutlineCommands {
         p.setDirty();
         c.setChanged();
         u.afterMark(p, undoType, bunch);
-        c.redraw_after_icons_changed();
     }
     //@+node:felix.20211025223803.10: *4* c_oc.markSubheads
     @commander_command(
@@ -2001,7 +2046,6 @@ export class CommanderOutlineCommands {
             }
         }
         u.afterChangeGroup(current, undoType);
-        c.redraw_after_icons_changed();
     }
     //@+node:felix.20211025223803.11: *4* c_oc.unmarkAll
     @commander_command(
@@ -2036,7 +2080,6 @@ export class CommanderOutlineCommands {
             c.setChanged();
         }
         u.afterChangeGroup(current, undoType);
-        c.redraw_after_icons_changed();
     }
     //@+node:felix.20211031235049.1: *3* c_oc.Move commands
     //@+node:felix.20211031235049.2: *4* c_oc.demote
@@ -2478,6 +2521,20 @@ export class CommanderOutlineCommands {
         } else {
             c.redraw(newP);
         }
+    }
+    //@+node:felix.20230322231828.1: *3* count-children
+
+    @commander_command(
+        'count-children', 'Print out the number of children for the currently selected node'
+    )
+    public count_children(this: Commands): number {
+        const c: Commands = this;
+        let childQty: number = 0;
+        if (c) {
+            childQty = c.p.numberOfChildren();
+            g.es_print(`${childQty} children`);
+        }
+        return childQty;
     }
     //@-others
 

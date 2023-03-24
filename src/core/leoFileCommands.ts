@@ -547,6 +547,220 @@ export class FastRead {
         v_element_visitor(v_elements, hidden_v);
         return hidden_v;
     }
+    //@+node:felix.20230322233904.1: *3* fast.readFileFromJsonClipboard
+    /**
+     * Recreate a file from a JSON string s, and return its hidden vnode.
+     */
+    public readFileFromJsonClipboard(s: string): VNode | undefined {
+        let v, g_element;
+        [v, g_element] = this.readWithJsonTree(undefined, s);
+        if (!v) {  // #1510.
+            return undefined;
+        }
+        //
+        // #1111: ensure that all outlines have at least one node.
+        if (!v.children || !v.children.length) {
+            const new_vnode = new VNode(this.c);
+            new_vnode.h = 'newHeadline';
+            v.children = [new_vnode];
+        }
+        return v;
+    }
+    //@+node:felix.20230322233910.1: *3* fast.readWithJsonTree & helpers
+    public readWithJsonTree(path: string | undefined, s: string): [VNode | undefined, any] {
+        let d: any;
+        try {
+            d = JSON.parse(s);
+        } catch (exception) {
+            g.trace(`Error converting JSON from  .leojs file: ${path}`);
+            g.es_exception();
+            return [undefined, undefined];
+        }
+        let g_element, hidden_v;
+        try {
+            const g_element = d['globals'] || {};
+            const v_elements = d['vnodes'];
+            const t_elements = d['tnodes'];
+            const gnx2ua: { [key: string]: any } = {};
+
+            Object.assign(gnx2ua, d['uas'] || {}); // User attributes in their own dict for leojs files
+
+            const gnx2body = this.scanJsonTnodes(t_elements);
+            const hidden_v = this.scanJsonVnodes(gnx2body, this.gnx2vnode, gnx2ua, v_elements);
+            this.handleBits();
+        } catch (exception) {
+            g.trace(`Error .leojs JSON is not valid: ${path}`);
+            g.es_exception();
+            return [undefined, undefined];
+        }
+        return [hidden_v, g_element];
+
+    }
+    //@+node:felix.20230322233910.2: *4* fast.scanJsonGlobals
+    /**
+     * Set the geometries from the globals dict.
+     */
+    public scanJsonGlobals(json_d: { [key: string]: any }): void {
+        // TODO
+        /*
+        const c = this.c;
+
+        const toInt = (x: number, default: number): number => {
+            try{
+                return Math.floor(x);
+            }catch (exception){
+                return default;
+            }
+        };
+        // Priority 1: command-line args
+        const windowSize = g.app.loadManager.options.get('windowSize');
+        const windowSpot = g.app.loadManager.options.get('windowSpot');
+        //
+        // Priority 2: The cache.
+        let db_top, db_left, db_height, db_width ;
+        [db_top, db_left, db_height, db_width] = c.db.get('window_position', (None, None, None, None));
+        //
+        // Priority 3: The globals dict in the .leojs file.
+        //             Leo doesn't write the globals element, but leoInteg might.
+
+        // height & width
+        let height, width;
+        height, width = windowSize or (None, None)
+        if height is None:
+            height, width = json_d.get('height'), json_d.get('width')
+        if height is None:
+            height, width = db_height, db_width
+        height, width = toInt(height, 500), toInt(width, 800)
+        //
+        // top, left.
+        let top, left;
+        top, left = windowSpot or (None, None)
+        if top is None:
+            top, left = json_d.get('top'), json_d.get('left')
+        if top is None:
+            top, left = db_top, db_left
+        top, left = toInt(top, 50), toInt(left, 50)
+        //
+        // r1, r2.
+        r1 = float(c.db.get('body_outline_ratio', '0.5'))
+        r2 = float(c.db.get('body_secondary_ratio', '0.5'))
+        if 'size' in g.app.debug:
+            g.trace(width, height, left, top, c.shortFileName())
+        // c.frame may be a NullFrame.
+        c.frame.setTopGeometry(width, height, left, top)
+        c.frame.resizePanesToRatio(r1, r2)
+        frameFactory = getattr(g.app.gui, 'frameFactory', None)
+        if not frameFactory:
+            return
+        assert frameFactory is not None
+        mf = frameFactory.masterFrame
+        if g.app.start_minimized:
+            mf.showMinimized()
+        elif g.app.start_maximized:
+            // #1189: fast.scanGlobals calls showMaximized later.
+            mf.showMaximized()
+        elif g.app.start_fullscreen:
+            mf.showFullScreen()
+        else:
+            mf.show()
+
+        */
+
+    }
+    //@+node:felix.20230322233910.3: *4* fast.scanJsonTnodes
+    public scanJsonTnodes(t_elements: any): { [key: string]: string } {
+
+        const gnx2body: { [key: string]: string } = {};
+
+        for (const [gnx, body] of t_elements.entries()) {
+            gnx2body[gnx] = body || '';
+        }
+        return gnx2body;
+
+    }
+    //@+node:felix.20230322233910.4: *4* scanJsonVnodes & helper
+    public scanJsonVnodes(
+        gnx2body: { [key: string]: string },
+        gnx2vnode: { [key: string]: VNode },
+        gnx2ua: { [key: string]: any },
+        v_elements: any,
+    ): VNode | undefined {
+
+        const c = this.c;
+        const fc = this.c.fileCommands;
+
+        // Visit the given element, creating or updating the parent vnode.
+        const v_element_visitor = (parent_e: any, parent_v: VNode): void => {
+            for (const [i, v_dict] of parent_e.entries()) {
+                // Get the gnx.
+                let gnx = v_dict['gnx'];
+                if (!gnx) {
+                    g.trace("Bad .leojs file: no gnx in v_dict");
+                    g.printObj(v_dict);
+                    return;
+                }
+                //
+                // Create the vnode.
+                console.assert(parent_v.children.length === i, JSON.stringify([i, parent_v, parent_v.children]));
+                let v: VNode | undefined;
+                try {
+                    v = gnx2vnode[gnx];
+                } catch (keyError) {
+                    // g.trace('no "t" attrib')
+                    gnx = undefined;
+                    v = undefined;
+                }
+                if (v) {
+                    // A clone
+                    parent_v.children.push(v);
+                    v.parents.push(parent_v);
+                    // The body overrides any previous body text.
+                    const body: any = g.toUnicode(gnx2body[gnx] || '');
+                    // assert isinstance(body, str), body.__class__.__name__
+                    console.assert((typeof body === 'string' || body instanceof String), typeof body);
+                    v._bodyString = body;
+                } else {
+                    v = new VNode(c, gnx);
+                    gnx2vnode[gnx] = v;
+                    parent_v.children.push(v);
+                    v.parents.push(parent_v);
+
+                    v._headString = v_dict['vh'] || '';
+                    v._bodyString = gnx2body[gnx] || '';
+                    v.statusBits = v_dict['status'] || 0;  // Needed ?
+                    if (v.isExpanded()) {
+                        fc.descendentExpandedList.push(gnx);
+                    }
+                    if (v.isMarked()) {
+                        fc.descendentMarksList.push(gnx);
+                    }
+                    //
+
+                    // Handle vnode uA's
+                    const uaDict = gnx2ua[gnx];  // A defaultdict(dict);
+
+                    if (uaDict && Object.keys(uaDict).length) {
+                        v.unknownAttributes = uaDict;
+                    }
+                    // Recursively create the children.
+                    v_element_visitor(v_dict['children'] || [], v);
+
+                }
+            }
+        };
+        const gnx = 'hidden-root-vnode-gnx';
+        const hidden_v = new VNode(c, gnx);
+        hidden_v._headString = '<hidden root vnode>';
+        gnx2vnode[gnx] = hidden_v;
+        //
+        // Traverse the tree of v elements.
+        v_element_visitor(v_elements, hidden_v);
+
+        // add all possible UAs for external files loading process to add UA's.
+        fc.descendentTnodeUaDictList.push(gnx2ua);
+        return hidden_v;
+
+    }
     //@-others
 
 }
