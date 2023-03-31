@@ -13,6 +13,7 @@
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh></v>
 <v t="felix.20201208224703.1"><vh>@clean CONTRIBUTING.md</vh></v>
+<v t="felix.20230330224010.1"><vh>@clean BACKERS.md</vh></v>
 </v>
 <v t="ekr.20201209145358.1"><vh>VSCode extension</vh>
 <v t="felix.20211007213344.1"><vh>@clean src/config.ts</vh>
@@ -3965,10 +3966,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "59a6cf9",
-  "gitBranch": "devel",
-  "gitDate": "2023-03-21 01:33:21 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -14800,6 +14798,41 @@ private _addToMinibufferHistory(p_commandName: string): void {
     return text;
 }
 
+</t>
+<t tx="felix.20230330224010.1">@language md
+@tabwidth -4
+# Sponsors and Backers 🏅
+
+[Support Me via GitHub Sponsors](https://github.com/sponsors/boltex)
+
+## Many thanks to these awesome sponsors and backers
+
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;td align="center"&gt;
+            &lt;a href="https://github.com/edreamleo"&gt;
+                &lt;img src="https://avatars.githubusercontent.com/u/592928?v=4"
+                     alt="Edward K. Ream"
+                     width="48"
+                     height="48"
+                &gt;
+            &lt;/a&gt;
+            &lt;br&gt;
+            Edward K. Ream
+        &lt;/td&gt;
+        &lt;td align="center"&gt;
+            &lt;a href="https://github.com/kghenderson"&gt;
+                &lt;img src="https://avatars.githubusercontent.com/u/3522168?v=4"
+                     alt="Kevin Henderson"
+                     width="48"
+                     height="48"
+                &gt;
+            &lt;/a&gt;
+            &lt;br&gt;
+            Kevin Henderson
+        &lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
 </t>
 </tnodes>
 </leo_file>
