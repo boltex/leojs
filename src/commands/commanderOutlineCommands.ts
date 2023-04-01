@@ -1426,7 +1426,7 @@ export class CommanderOutlineCommands {
             return;
         }
         // #2718: de-hoisting an @chapter node is equivalent to selecting the main chapter.
-        if (c.p.h.startsWith(tag) || c.hoistStack[-1].p.h.startsWith(tag)) {
+        if (c.p.h.startsWith(tag) || c.hoistStack[c.hoistStack.length - 1].p.h.startsWith(tag)) {
             c.hoistStack = [];
             cc.selectChapterByName('main');
             return;
