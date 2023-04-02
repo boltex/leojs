@@ -81,90 +81,96 @@ export class CommanderOutlineCommands {
         c.endEditing();
         const s: string = c.fileCommands.outline_to_clipboard_string()!;
         g.app.paste_c = c;
+        if (g.app.inBridge) {
+            return s;
+        }
         g.app.gui.replaceClipboardWith(s);
         return s;
     }
-    //@+node:felix.20230322003228.1: *4* c_oc.copyOutlineAsJson & helpers
+    //@+node:felix.20230322003228.1: *4* c_oc.copyOutlineAsJson
     @commander_command(
         'copy-node-as-json',
         'Copy the selected outline to the clipboard in json format.'
     )
     public copyOutlineAsJSON(this: Commands): string {
         // Copying an outline has no undo consequences.
-        //@+others  // Define helper functions
-        //@+node:felix.20230322003228.2: *5* function: json_globals
-        /**
-         * Put json representation of Leo's cached globals.
-         */
-        const json_globals = (c: Commands): { [key: string]: any } => {
+        // //@+others  // Define helper functions
+        // //@+node:felix.20230322003228.2: *5* function: json_globals
+        // /**
+        //  * Put json representation of Leo's cached globals.
+        //  */
+        // const json_globals = (c: Commands): { [key: string]: any } => {
 
-            let width, height, left, top;
-            [width, height, left, top] = [0, 0, 0, 0]; // c.frame.get_window_info();
-            return {
-                'body_outline_ratio': 0.5, // c.frame.ratio,
-                'body_secondary_ratio': 0.5, // c.frame.secondary_ratio,
-                'globalWindowPosition': {
-                    'height': height,
-                    'left': left,
-                    'top': top,
-                    'width': width,
-                }
-            };
-        }
-        //@+node:felix.20230322003228.3: *5* function: json_vnode
-        const json_vnode = (v: VNode): { [key: string]: any } => {
-            const children: { [key: string]: any }[] = [];
-            for (const child of v.children) {
-                children.push(json_vnode(child));
-            }
-            return {
-                'gnx': v.fileIndex,
-                'vh': v._headString,
-                'status': v.statusBits,
-                'children': children
-            };
-        }
-        //@+node:felix.20230322003228.4: *5* function: outline_to_json
-        /**
-         * Return the JSON representation of c.
-         */
-        const outline_to_json = (c: Commands): string => {
-            const positions = [...c.p.self_and_subtree()];
-            const uas_dict: { [key: string]: any } = {};
-            for (const p of positions) {
-                if (p.u) {
-                    try {
-                        uas_dict[p.v.gnx] = JSON.stringify(p.u); // json.dumps(p.u, skipkeys=True)
-                    }
-                    catch (typeError) {
-                        g.trace(`Can not serialize uA for ${p.h}`, g.callers(6))
-                        // g.printObj(p.u)
-                    }
-                }
+        //     let width, height, left, top;
+        //     [width, height, left, top] = [0, 0, 0, 0]; // c.frame.get_window_info();
+        //     return {
+        //         'body_outline_ratio': 0.5, // c.frame.ratio,
+        //         'body_secondary_ratio': 0.5, // c.frame.secondary_ratio,
+        //         'globalWindowPosition': {
+        //             'height': height,
+        //             'left': left,
+        //             'top': top,
+        //             'width': width,
+        //         }
+        //     };
+        // }
+        // //@+node:felix.20230322003228.3: *5* function: json_vnode
+        // const json_vnode = (v: VNode): { [key: string]: any } => {
+        //     const children: { [key: string]: any }[] = [];
+        //     for (const child of v.children) {
+        //         children.push(json_vnode(child));
+        //     }
+        //     return {
+        //         'gnx': v.fileIndex,
+        //         'vh': v._headString,
+        //         'status': v.statusBits,
+        //         'children': children
+        //     };
+        // }
+        // //@+node:felix.20230322003228.4: *5* function: outline_to_json
+        // /**
+        //  * Return the JSON representation of c.
+        //  */
+        // const outline_to_json = (c: Commands): string => {
+        //     const positions = [...c.p.self_and_subtree()];
+        //     const uas_dict: { [key: string]: any } = {};
+        //     for (const p of positions) {
+        //         if (p.u) {
+        //             try {
+        //                 uas_dict[p.v.gnx] = JSON.stringify(p.u); // json.dumps(p.u, skipkeys=True)
+        //             }
+        //             catch (typeError) {
+        //                 g.trace(`Can not serialize uA for ${p.h}`, g.callers(6))
+        //                 // g.printObj(p.u)
+        //             }
+        //         }
 
-            }
-            const tnodes: { [key: string]: any } = {};
-            for (const p of positions) {
-                tnodes[p.v.gnx] = p.v._bodyString;
-            }
-            const d = {
-                'leoHeader': { 'fileFormat': 2 },
-                'globals': json_globals(c),
-                'tnodes': tnodes,
-                'uas': uas_dict,
-                'vnodes': [
-                    json_vnode(c.p.v)
-                ],
-            }
+        //     }
+        //     const tnodes: { [key: string]: any } = {};
+        //     for (const p of positions) {
+        //         tnodes[p.v.gnx] = p.v._bodyString;
+        //     }
+        //     const d = {
+        //         'leoHeader': { 'fileFormat': 2 },
+        //         'globals': json_globals(c),
+        //         'tnodes': tnodes,
+        //         'uas': uas_dict,
+        //         'vnodes': [
+        //             json_vnode(c.p.v)
+        //         ],
+        //     }
 
-            // return json.dumps(d, indent=2, sort_keys=False)
-            return JSON.stringify(d, null, "  ");
-        }
-        //@-others
+        //     // return json.dumps(d, indent=2, sort_keys=False)
+        //     return JSON.stringify(d, null, "  ");
+        // }
+        // //@-others
         const c: Commands = this;
         c.endEditing();
-        const s = outline_to_json(c);
+        const s = c.fileCommands.outline_to_clipboard_json_string();
         g.app.paste_c = c;
+        if (g.app.inBridge) {
+            return s;
+        }
         g.app.gui.replaceClipboardWith(s);
         return s;
     }
@@ -1037,7 +1043,17 @@ export class CommanderOutlineCommands {
     )
     public goNextVisitedNode(this: Commands): void {
         const c: Commands = this;
-        c.nodeHistory.goNext();
+        const p = c.nodeHistory.goNext();
+        if (p && p.__bool__()) {
+            c.nodeHistory.skipBeadUpdate = true;
+            try {
+                c.selectPosition(p);
+            }
+            finally {
+                c.nodeHistory.skipBeadUpdate = false;
+                c.redraw_after_select(p);
+            }
+        }
     }
     //@+node:felix.20211021013709.4: *4* c_oc.goPrevVisitedNode
     @commander_command(
@@ -1046,7 +1062,17 @@ export class CommanderOutlineCommands {
     )
     public goPrevVisitedNode(this: Commands): void {
         const c: Commands = this;
-        c.nodeHistory.goPrev();
+        const p = c.nodeHistory.goPrev();
+        if (p && p.__bool__()) {
+            c.nodeHistory.skipBeadUpdate = true;
+            try {
+                c.selectPosition(p);
+            }
+            finally {
+                c.nodeHistory.skipBeadUpdate = false;
+                c.redraw_after_select(p);
+            }
+        }
     }
     //@+node:felix.20211021013709.5: *4* c_oc.goToFirstNode
     @commander_command(

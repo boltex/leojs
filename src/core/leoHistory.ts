@@ -30,21 +30,22 @@ export class NodeHistory {
      */
     public dump(): void {
         this.beadList.forEach((data, i) => {
-            let p: Position | string = data[0];
+            let p: Position = data[0];
+            let p_s: string;
             let chapter: Chapter = data[1];
-            let chapterName: string;
+            let chapter_s: string;
             if (p && p.__bool__()) {
-                p = p.h;
+                p_s = p.h;
             } else {
-                p = 'no p';
+                p_s = 'no p';
             }
             if (chapter) {
-                chapterName = chapter.name;
+                chapter_s = chapter.name;
             } else {
-                chapterName = 'main';
+                chapter_s = 'main';
             }
             const mark: string = i === this.beadPointer ? '**' : '  '; // used in string
-            console.log(`${mark} ${i} ${chapterName} ${p}`);
+            console.log(`${mark} ${i} ${chapter_s} ${p_s}`);
         });
     }
 
@@ -52,26 +53,30 @@ export class NodeHistory {
     /**
      * * Select the next node, if possible.
      */
-    public goNext(): void {
+    public goNext(): Position | undefined {
         if (this.beadPointer + 1 < this.beadList.length) {
             this.beadPointer += 1;
             const p = this.beadList[this.beadPointer][0];
             const chapter: Chapter = this.beadList[this.beadPointer][1];
             this.select(p, chapter);
+            return p;
         }
+        return undefined;
     }
 
     //@+node:felix.20211021231651.6: *3* NodeHistory.goPrev
     /**
      * * Select the previously visited node, if possible.
      */
-    public goPrev(): void {
+    public goPrev(): Position | undefined {
         if (this.beadPointer > 0) {
             this.beadPointer -= 1;
             const p = this.beadList[this.beadPointer][0];
             const chapter: Chapter = this.beadList[this.beadPointer][1];
             this.select(p, chapter);
+            return p;
         }
+        return undefined;
     }
 
     //@+node:felix.20211021231651.7: *3* NodeHistory.select
@@ -140,8 +145,7 @@ export class NodeHistory {
         });
 
         if (change || found === -1) {
-            const data: [Position, Chapter] = [p.copy(), cc.getSelectedChapter()!];
-            aList.push(data);
+            aList.push([p.copy(), cc.getSelectedChapter()!]);
             this.beadPointer = aList.length - 1;
         } else {
             this.beadPointer = found;

@@ -2564,7 +2564,7 @@ Position.prototype.setTnodeText = Position.prototype.setBodyString;
 Position.prototype.scriptSetBodyString = Position.prototype.setBodyString;
 
 //@+node:felix.20210102150654.1: ** Enum StatusFlags
-enum StatusFlags {
+export enum StatusFlags {
     // Define the meaning of status bits in new vnodes.
     // Archived...
     clonedBit = 0x01, // True: VNode has clone mark.
