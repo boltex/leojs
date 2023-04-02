@@ -503,7 +503,7 @@ export class QuickSearchController {
                 [p, pos] = tgt[1];
                 if (p.v) {// p might be "Root"
                     if (!c.positionExists(p)) {
-                        g.es("Node moved or deleted.\nMaybe re-do search.", 'red');
+                        g.es("Node moved or deleted.\nMaybe re-do search.");
                         return;
                     }
                     c.selectPosition(p);

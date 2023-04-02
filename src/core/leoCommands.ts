@@ -1455,8 +1455,7 @@ export class Commands {
                 for (let v of aList) {
                     gnx_errors += 1;
                     g.es_print(
-                        `id(v): {id(v)} gnx: ${v.fileIndex} ${v.h}`,
-                        'red'
+                        `id(v): {id(v)} gnx: ${v.fileIndex} ${v.h}`
                     );
                     v.fileIndex = ni.getNewIndex(v); // expanded newGnx(v)
                 }
@@ -1471,8 +1470,7 @@ export class Commands {
                 `${count} nodes, ` +
                 `${gnx_errors} gnx errors, ` +
                 `${g.app.structure_errors} ` +
-                `structure errors`,
-                'red'
+                `structure errors`
             );
         } else if (c.verbose_check_outline && !g.unitTesting) {
             g.es_print(
@@ -1517,8 +1515,7 @@ export class Commands {
         const t2 = t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000; // in ms
 
         g.es_print(
-            `check-links: ${t2} ms. ` + `${c.shortFileName()} ${count} nodes`,
-            'blue'
+            `check-links: ${t2} ms. ` + `${c.shortFileName()} ${count} nodes`
         );
 
         return errors;
@@ -3797,7 +3794,7 @@ export class Commands {
             c.contractAllHeadlines();
             root.expand();
         } else if (failMsg) {
-            g.es(failMsg, 'red');
+            g.es(failMsg);
         }
 
         return root;

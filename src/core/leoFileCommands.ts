@@ -1241,7 +1241,7 @@ export class FileCommands {
         // Restore the hidden root's children
         c.hiddenRootNode.children = old_children;
         if (!v) {
-            g.es("the clipboard is not valid ", "blue");
+            g.es("the clipboard is not valid");
             return undefined;
         }
         // Create the position.
@@ -1313,7 +1313,7 @@ export class FileCommands {
         // Restore the hidden root's children
         c.hiddenRootNode.children = old_children;
         if (!v) {
-            g.es("the clipboard is not valid ", "blue");
+            g.es("the clipboard is not valid ");
             return undefined;
         }
 
@@ -1961,7 +1961,7 @@ export class FileCommands {
             const s_bytes = g.toEncodedString(s, this.leo_file_encoding, true);
             v = new FastRead(c, {}).readFileFromClipboard(s_bytes);
             if (!v) {
-                g.es("the clipboard is not valid ", "blue");
+                g.es("the clipboard is not valid");
                 return undefined;
             }
         }
