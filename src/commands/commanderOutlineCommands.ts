@@ -2441,7 +2441,7 @@ export class CommanderOutlineCommands {
         'Sort the children of a node in reverse order.'
     )
     public reverseSortChildren(this: Commands, key = undefined): void {
-        this.sortChildren(key, true)  // as reverse, Fixes #3188
+        this.sortChildren(key, true);  // as reverse, Fixes #3188
     }
     //@+node:felix.20230321002519.1: *4* c_oc.reverseSortSiblings
     @commander_command(
@@ -2450,7 +2450,7 @@ export class CommanderOutlineCommands {
     )
     public reverseSortSiblings(this: Commands, key = undefined): void {
 
-        this.sortSiblings(key, true)  // as reverse, Fixes #3188
+        this.sortSiblings(key, true);  // as reverse, Fixes #3188
     }
     //@+node:felix.20211031235022.2: *4* c_oc.sortChildren
     @commander_command(

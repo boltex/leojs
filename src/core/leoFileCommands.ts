@@ -620,7 +620,7 @@ export class FastRead {
             this.handleBits();
         } catch (exception) {
             g.trace(`Error .leojs JSON is not valid: ${path}`);
-            g.es_exception();
+            g.es_exception(exception);
             return [undefined, undefined];
         }
         return [hidden_v, g_element];
@@ -702,8 +702,8 @@ export class FastRead {
 
         const gnx2body: { [key: string]: string } = {};
 
-        for (const [gnx, body] of t_elements.entries()) {
-            gnx2body[gnx] = body || '';
+        for (const [gnx, body] of Object.entries(t_elements)) {
+            gnx2body[gnx] = body as string || '';
         }
         return gnx2body;
 
@@ -721,9 +721,9 @@ export class FastRead {
 
         // Visit the given element, creating or updating the parent vnode.
         const v_element_visitor = (parent_e: any, parent_v: VNode): void => {
-            for (const [i, v_dict] of parent_e.entries()) {
+            for (const [i, v_dict] of Object.entries(parent_e)) {
                 // Get the gnx.
-                let gnx = v_dict['gnx'];
+                let gnx = (v_dict as { [key: string]: string })['gnx'];
                 if (!gnx) {
                     g.trace("Bad .leojs file: no gnx in v_dict");
                     g.printObj(v_dict);
@@ -731,12 +731,14 @@ export class FastRead {
                 }
                 //
                 // Create the vnode.
-                console.assert(parent_v.children.length === i, JSON.stringify([i, parent_v, parent_v.children]));
+                console.assert(parent_v.children.length.toString() === i, [i, parent_v, parent_v.children].toString());
+
                 let v: VNode | undefined;
                 try {
                     v = gnx2vnode[gnx];
                 } catch (keyError) {
                     // g.trace('no "t" attrib')
+                    // @ts-expect-error
                     gnx = undefined;
                     v = undefined;
                 }
@@ -755,9 +757,9 @@ export class FastRead {
                     parent_v.children.push(v);
                     v.parents.push(parent_v);
 
-                    v._headString = v_dict['vh'] || '';
+                    v._headString = (v_dict as { [key: string]: any })['vh'] || '';
                     v._bodyString = gnx2body[gnx] || '';
-                    v.statusBits = v_dict['status'] || 0;  // Needed ?
+                    v.statusBits = (v_dict as { [key: string]: any })['status'] || 0;  // Needed ?
                     if (v.isExpanded()) {
                         fc.descendentExpandedList.push(gnx);
                     }
@@ -773,7 +775,7 @@ export class FastRead {
                         v.unknownAttributes = uaDict;
                     }
                     // Recursively create the children.
-                    v_element_visitor(v_dict['children'] || [], v);
+                    v_element_visitor((v_dict as { [key: string]: any })['children'] || [], v);
 
                 }
             }
@@ -2646,7 +2648,7 @@ export class FileCommands {
             this.usingClipboard = true;
             if (this.c.config.getBool('json-outline-clipboard', false)) {
                 const d = this.leojs_outline_dict(p || this.c.p);
-                s = JSON.stringify(d);
+                s = JSON.stringify(d, null, 4);
             } else {
                 this.outputFile = ""; // io.StringIO()
                 this.putProlog();
@@ -2683,7 +2685,7 @@ export class FileCommands {
         try {
             this.usingClipboard = true;
             const d = this.leojs_outline_dict(p || this.c.p);  // Checks for illegal ua's
-            s = JSON.stringify(d);
+            s = JSON.stringify(d, null, 4);
         } finally {  // Restore
             this.descendentTnodeUaDictList = tua;
             this.descendentVnodeUaDictList = vua;
@@ -2768,7 +2770,7 @@ export class FileCommands {
             // Create the dict corresponding to the JSON.
             const d = this.leojs_outline_dict();
             // Convert the dict to JSON.
-            const json_s = JSON.stringify(d); // json.dumps(d, indent = 2);
+            const json_s = JSON.stringify(d, null, 4); // json.dumps(d, indent = 2);
 
             const w_uri = g.makeVscodeUri(fileName);
             await vscode.workspace.fs.writeFile(w_uri, Buffer.from(json_s, this.leo_file_encoding));
@@ -2949,7 +2951,7 @@ export class FileCommands {
         if (p.isExpanded()) {
             status |= StatusFlags.expandedBit;
         }
-        if (p == c.p) {
+        if (p.__eq__(c.p)) {
             status |= StatusFlags.selectedBit;
         }
 

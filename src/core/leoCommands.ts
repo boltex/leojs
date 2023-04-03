@@ -3509,6 +3509,18 @@ export class Commands {
     }
     //@+node:felix.20211023195447.21: *6* c.canPasteOutline
     public canPasteOutline(s: string): boolean {
+        // check for JSON
+        if (s && s.trimStart().startsWith("{")) {
+            try {
+                const d = JSON.parse(s);
+                if (!(d['vnodes'] && d['tnodes'])) {
+                    return false;
+                }
+            } catch (exception) {
+                return false;
+            }
+            return true;
+        }
         if (s && g.match(s, 0, g.app.prolog_prefix_string)) {
             return true;
         }
