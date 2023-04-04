@@ -114,26 +114,23 @@ export class ChapterController {
         }
 
         const select_chapter_callback = function (
-            cc: ChapterController,
-            name: string
+            p_cc = cc,
+            name = chapterName
         ) {
-            if (!name) {
-                name = chapterName;
-            }
-            const chapter = cc.chaptersDict[name];
+            const chapter = p_cc.chaptersDict[name];
             if (chapter) {
                 try {
-                    cc.selectChapterLockout = true;
-                    cc.selectChapterByNameHelper(chapter, true);
+                    p_cc.selectChapterLockout = true;
+                    p_cc.selectChapterByNameHelper(chapter, true);
                     c.redraw(chapter.p); // 2016/04/20.
                 } catch (err) {
                     //
                 } finally {
-                    cc.selectChapterLockout = false;
+                    p_cc.selectChapterLockout = false;
                 }
             } else if (!g.unitTesting) {
                 // Possible, but not likely.
-                cc.note(`no such chapter: ${name}`);
+                p_cc.note(`no such chapter: ${name}`);
             }
         };
         // Always bind the command without a shortcut.
@@ -142,11 +139,16 @@ export class ChapterController {
         const bindings: any[] = binding
             ? [undefined, binding]
             : [undefined, undefined];
+
+        // Replace the docstring for proper details label in minibuffer, etc.
+        if (chapterName === 'main') {
+            select_chapter_callback.__doc__ = "Select the main chapter";
+        } else {
+            select_chapter_callback.__doc__ = "Select chapter \"" + chapterName + "\".";
+        }
+
         for (let shortcut of bindings) {
-            console.log(
-                `TODO: c.k.registerCommand(commandName= ${commandName}, select_chapter_callback, shortcut=${shortcut})`
-            );
-            // c.k.registerCommand(commandName, select_chapter_callback, shortcut=shortcut)
+            c.registerCommand(commandName, select_chapter_callback, shortcut);
         }
     }
     //@+node:felix.20220429005433.9: *3* cc.selectChapter
@@ -155,13 +157,10 @@ export class ChapterController {
         'Use the minibuffer to get a chapter name, then create the chapter.'
     )
     public selectChapter(): void {
-        const cc = this;
-        const k = this.c.k;
-
-        const names = cc.setAllChapterNames();
-
-        // TODO !
-        console.log('TODO ! selectChapter : from this list with UI dialog! :', names);
+        return g.app.gui.chapterSelect(); // TODO : Only have gui for dialog, move implementation here.
+        // const cc = this;
+        // const k = this.c.k;
+        // const names = cc.setAllChapterNames();
         // g.es('Chapters:\n' + names.join('\n'));
         // k.setLabelBlue('Select chapter: ');
         // k.get1Arg(this.selectChapter1, names);

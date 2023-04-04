@@ -326,6 +326,7 @@
 <v t="felix.20201214151447.9"><vh>leoCanDemote &amp; helper</vh></v>
 <v t="felix.20201214151447.10"><vh>leoCanPromote &amp; helper</vh></v>
 <v t="felix.20201214151447.11"><vh>leoCanDehoist &amp; helper</vh></v>
+<v t="felix.20230403223923.1"><vh>leoTopHoistChapter &amp; helper</vh></v>
 </v>
 <v t="felix.20201214151447.12"><vh>Selected Node Flags</vh>
 <v t="felix.20201214151447.13"><vh>leoMarked</vh></v>
@@ -1558,8 +1559,8 @@ export function activate(p_context: vscode.ExtensionContext) {
 
 [CMD.CHAPTER_NEXT, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_NEXT, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
 [CMD.CHAPTER_BACK, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_BACK, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
-[CMD.CHAPTER_MAIN, () =&gt; p_leoUI.chapterMain()],
-[CMD.CHAPTER_SELECT, () =&gt; p_leoUI.chapterSelect()],
+[CMD.CHAPTER_MAIN, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_MAIN, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
+[CMD.CHAPTER_SELECT, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_SELECT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
 </t>
 <t tx="felix.20201214151326.1">import * as vscode from "vscode";
@@ -1856,6 +1857,8 @@ public static LEO_COMMANDS = {
     DEHOIST: "de-hoist",
     CHAPTER_NEXT: "chapter-next",
     CHAPTER_BACK: "chapter-back",
+    CHAPTER_SELECT: "chapter-select",
+    CHAPTER_MAIN: "chapter-select-main",
     // * History Navigation
     GOTO_PREV_HISTORY: "goto-prev-history-node",
     GOTO_NEXT_HISTORY: "goto-next-history-node",
@@ -2187,8 +2190,7 @@ public static CONTEXT_FLAGS = {
     LEO_CAN_PROMOTE: "leojsCanPromote",
     LEO_CAN_DEHOIST: "leojsCanDehoist",
     LEO_CAN_HOIST: "leojsCanHoist", // isNotRoot equivalent, Computed by hand
-    LEO_IN_CHAPTER: "leojsInChapter", // TODO
-    LEO_TOP_HOIST_CHAPTER: "leojsTopHoistChapter", // TODO
+    LEO_TOP_HOIST_CHAPTER: "leojsTopHoistChapter",
 
     // 'states' flags about current selection, for visibility and commands availability
     SELECTED_MARKED: "leojsMarked", // no need for unmarked here, use !leojsMarked
@@ -2637,6 +2639,7 @@ export class LeoStates {
     this.leoCanPromote = p_states.canPromote;
     this.leoCanDehoist = p_states.canDehoist;
     this.leoRoot = !p_states.canHoist;
+    this.leoTopHoistChapter = p_states.topIsChapter;
 }
 </t>
 <t tx="felix.20201214151447.3"></t>
@@ -2984,6 +2987,7 @@ export interface LeoPackageStates {
     canPromote: boolean; // Currently selected node can have its children promoted
     canDehoist: boolean; // Leo Document is currently hoisted and can be de-hoisted
     canHoist: boolean; // Selected node is not the first top node already root
+    topIsChapter: boolean; // Top of the hoisted outline is an @chapter node
 }
 
 </t>
@@ -3376,8 +3380,10 @@ private _triggerGetStates(): void {
         const c = g.app.windowList[this.frameIndex].c;
         const p = c.p;
         let w_canHoist = true;
+        let w_topIsChapter = false;
         if (c.hoistStack.length) {
             const w_ph = c.hoistStack[c.hoistStack.length - 1].p;
+            w_topIsChapter = w_ph.h.startsWith('@chapter ');
             if (p.__eq__(w_ph)) {
                 // p is already the hoisted node
                 w_canHoist = false;
@@ -3397,7 +3403,9 @@ private _triggerGetStates(): void {
             canDemote: c.canDemote(), // Selected node can have its siblings demoted
             canPromote: c.canPromote(), // Selected node can have its children promoted
             canDehoist: c.canDehoist(), // Document is currently hoisted and can be de-hoisted
-            canHoist: w_canHoist
+            canHoist: w_canHoist,
+            topIsChapter: w_topIsChapter
+            // 
         };
         this.leoStates.setLeoStateFlags(w_states);
         this.refreshUndoPane();
@@ -3718,10 +3726,12 @@ public async minibuffer(): Promise&lt;unknown&gt; {
     await this.triggerBodySave(true);
     const c = g.app.windowList[this.frameIndex].c;
     const commands: vscode.QuickPickItem[] = [];
-    for (let key in c.commandsDict) {
-        const command = c.commandsDict[key];
+    const cDict = c.commandsDict;
+    for (let key in cDict) {
+        const command = cDict[key];
         // Going to get replaced. Don't take those that begin with 'async-'
-        if (!(command as any).__name__.startsWith('async-')) {
+        const w_name = (command as any).__name__ || '';
+        if (!w_name.startsWith('async-')) {
             commands.push({
                 label: key,
                 detail: (command as any).__doc__
@@ -12982,7 +12992,7 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
   "command": "leojs.chapterMain",
   "category": "Leojs",
   "title": "Chapter Main",
-  "enablement": "leojsTreeOpened &amp;&amp; leojsInChapter &amp;&amp; leojsTopHoistChapter",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsTopHoistChapter",
   "icon": {
     "light": "resources/light/chapter-main.svg",
     "dark": "resources/dark/chapter-main.svg"
@@ -13026,7 +13036,6 @@ public async chapterSelect(): Promise&lt;unknown&gt; {
 
     const c = g.app.windowList[this.frameIndex].c;
     const cc = c.chapterController;
-
 
     const w_chaptersList: vscode.QuickPickItem[] = cc.setAllChapterNames().map(
         (p_chapter) =&gt; { return { label: p_chapter }; }
@@ -14833,6 +14842,19 @@ private _addToMinibufferHistory(p_commandName: string): void {
         &lt;/td&gt;
     &lt;/tr&gt;
 &lt;/table&gt;
+</t>
+<t tx="felix.20230403223923.1">/**
+ * Currently selected can de-hoist state
+ */
+private _leoTopHoistChapter: boolean = false;
+get leoTopHoistChapter(): boolean {
+    return this._leoTopHoistChapter;
+}
+set leoTopHoistChapter(p_value: boolean) {
+    this._leoTopHoistChapter = p_value;
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_TOP_HOIST_CHAPTER, p_value);
+}
+
 </t>
 </tnodes>
 </leo_file>

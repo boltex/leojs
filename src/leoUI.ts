@@ -531,8 +531,10 @@ export class LeoUI extends NullGui {
             const c = g.app.windowList[this.frameIndex].c;
             const p = c.p;
             let w_canHoist = true;
+            let w_topIsChapter = false;
             if (c.hoistStack.length) {
                 const w_ph = c.hoistStack[c.hoistStack.length - 1].p;
+                w_topIsChapter = w_ph.h.startsWith('@chapter ');
                 if (p.__eq__(w_ph)) {
                     // p is already the hoisted node
                     w_canHoist = false;
@@ -552,7 +554,9 @@ export class LeoUI extends NullGui {
                 canDemote: c.canDemote(), // Selected node can have its siblings demoted
                 canPromote: c.canPromote(), // Selected node can have its children promoted
                 canDehoist: c.canDehoist(), // Document is currently hoisted and can be de-hoisted
-                canHoist: w_canHoist
+                canHoist: w_canHoist,
+                topIsChapter: w_topIsChapter
+                // 
             };
             this.leoStates.setLeoStateFlags(w_states);
             this.refreshUndoPane();
@@ -2878,10 +2882,12 @@ export class LeoUI extends NullGui {
         await this.triggerBodySave(true);
         const c = g.app.windowList[this.frameIndex].c;
         const commands: vscode.QuickPickItem[] = [];
-        for (let key in c.commandsDict) {
-            const command = c.commandsDict[key];
+        const cDict = c.commandsDict;
+        for (let key in cDict) {
+            const command = cDict[key];
             // Going to get replaced. Don't take those that begin with 'async-'
-            if (!(command as any).__name__.startsWith('async-')) {
+            const w_name = (command as any).__name__ || '';
+            if (!w_name.startsWith('async-')) {
                 commands.push({
                     label: key,
                     detail: (command as any).__doc__
@@ -3191,7 +3197,6 @@ export class LeoUI extends NullGui {
 
         const c = g.app.windowList[this.frameIndex].c;
         const cc = c.chapterController;
-
 
         const w_chaptersList: vscode.QuickPickItem[] = cc.setAllChapterNames().map(
             (p_chapter) => { return { label: p_chapter }; }

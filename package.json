@@ -1771,7 +1771,7 @@
         "command": "leojs.chapterMain",
         "category": "Leojs",
         "title": "Chapter Main",
-        "enablement": "leojsTreeOpened && leojsInChapter && leojsTopHoistChapter",
+        "enablement": "leojsTreeOpened && leojsTopHoistChapter",
         "icon": {
           "light": "resources/light/chapter-main.svg",
           "dark": "resources/dark/chapter-main.svg"

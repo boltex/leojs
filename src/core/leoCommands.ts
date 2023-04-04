@@ -3742,6 +3742,33 @@ export class Commands {
     }
 
     //@+node:felix.20220210211453.1: *3* c.Scripting utils
+    //@+node:felix.20230403205855.1: *4* c.registerCommand
+    /**
+     * Equivalent of c.k.registerCommand from leoKeys.py.
+     */
+    public registerCommand(
+        commandName: string,
+        func: (...args: any[]) => any,
+        allowBinding = false,
+        pane = 'all',
+        shortcut?: string
+    ): void {
+        const c = this;
+        if (!func) {
+            g.es_print('Null func passed to k.registerCommand\n', commandName);
+            return;
+        }
+        const f: (...args: any[]) => any & { __doc__: string } & {
+            __func_name__: string;
+        } & {
+            __name__: string;
+        } & { __ivars__: string[] } = c.commandsDict[commandName];
+
+        if (f && (f as any)['__name__'] != (func as any)['__name__']) {
+            g.trace('redefining', commandName, f, '->', func);
+        }
+        c.commandsDict[commandName] = func;
+    }
     //@+node:felix.20221014000217.1: *4* c.cloneFindByPredicate
     /**
      * Traverse the tree given using the generator, cloning all positions for
@@ -3859,7 +3886,7 @@ export class Commands {
         root.h = undoType + (flatten ? ' (flattened)' : '');
         return root;
     }
-    //@+node:felix.20220210211517.1: *4* deletePositionsInList
+    //@+node:felix.20220210211517.1: *4* c.deletePositionsInList
     /**
      * Delete all vnodes corresponding to the positions in aList.
      *

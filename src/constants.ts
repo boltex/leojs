@@ -365,8 +365,7 @@ export class Constants {
         LEO_CAN_PROMOTE: "leojsCanPromote",
         LEO_CAN_DEHOIST: "leojsCanDehoist",
         LEO_CAN_HOIST: "leojsCanHoist", // isNotRoot equivalent, Computed by hand
-        LEO_IN_CHAPTER: "leojsInChapter", // TODO
-        LEO_TOP_HOIST_CHAPTER: "leojsTopHoistChapter", // TODO
+        LEO_TOP_HOIST_CHAPTER: "leojsTopHoistChapter",
 
         // 'states' flags about current selection, for visibility and commands availability
         SELECTED_MARKED: "leojsMarked", // no need for unmarked here, use !leojsMarked
@@ -736,6 +735,8 @@ export class Constants {
         DEHOIST: "de-hoist",
         CHAPTER_NEXT: "chapter-next",
         CHAPTER_BACK: "chapter-back",
+        CHAPTER_SELECT: "chapter-select",
+        CHAPTER_MAIN: "chapter-select-main",
         // * History Navigation
         GOTO_PREV_HISTORY: "goto-prev-history-node",
         GOTO_NEXT_HISTORY: "goto-next-history-node",
