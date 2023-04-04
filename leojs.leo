@@ -5497,7 +5497,12 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   {
     "command": "leojs.deHoistFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsTopHoistChapter",
+    "group": "navigation@7"
+  },
+  {
+    "command": "leojs.chapterMain",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsTopHoistChapter",
     "group": "navigation@7"
   },
   {

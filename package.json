@@ -2756,7 +2756,12 @@
         },
         {
           "command": "leojs.deHoistFromOutline",
-          "when": "view =~ /^leojsOutline/ && leojsTreeOpened",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && !leojsTopHoistChapter",
+          "group": "navigation@7"
+        },
+        {
+          "command": "leojs.chapterMain",
+          "when": "view =~ /^leojsOutline/ && leojsTreeOpened && leojsTopHoistChapter",
           "group": "navigation@7"
         },
         {
