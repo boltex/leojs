@@ -1643,7 +1643,7 @@ export function ensure_extension(name: string, ext: string): string {
     if (!name) {
         return name; // don't add to an empty name.
     }
-    if (['.db', '.leo'].includes(old_ext)) {
+    if (['.db', '.leo', '.leojs'].includes(old_ext)) {
         return name;
     }
     if (old_ext && old_ext === ext) {

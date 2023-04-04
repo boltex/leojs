@@ -6452,7 +6452,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
                 undefined,
                 "Open",
                 [
-                    ["Leo files", "*.leo *.db"],
+                    ["Leo files", "*.leo *.leojs *.db"],
                     ["Python files", "*.py"],
                     ["All files", "*"]
                 ],

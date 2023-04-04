@@ -4756,7 +4756,7 @@ export class LeoUI extends NullGui {
                     undefined,
                     "Open",
                     [
-                        ["Leo files", "*.leo *.db"],
+                        ["Leo files", "*.leo *.leojs *.db"],
                         ["Python files", "*.py"],
                         ["All files", "*"]
                     ],
