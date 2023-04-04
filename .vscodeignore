@@ -15,3 +15,5 @@ webpack.config.js
 *.leo
 prepare.js
 cleanup.js
+resources/animated-screenshot.gif
+resources/run-extension.png

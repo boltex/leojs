@@ -95,6 +95,7 @@ export class Undoer {
     public children!: VNode[];
     public deleteMarkedNodesData!: Position[];
     public followingSibs!: VNode[];
+    public headlines!: { [key: string]: [string, string | undefined] };
     public inHead!: boolean;
     public kind!: string;
     public newBack!: Position;
@@ -656,6 +657,33 @@ export class Undoer {
 
     // afterChangeHead = afterChangeHeadline // TODO (not used) !
 
+    //@+node:felix.20230331230459.1: *5* u.afterChangeMultiHeadline
+    /**
+     * Create an undo node using d created by beforeChangeMultiHeadline.
+     */
+    public afterChangeMultiHeadline(command: string, bunch: Bead): void {
+        const u: Undoer = this;
+        const c: Commands = this.c;
+        if (u.redoing || u.undoing) {
+            return;
+        }
+        // Set the type & helpers.
+        bunch.kind = 'multipleHeadline';
+        bunch.undoType = command;
+        bunch.undoHelper = u.undoChangeMultiHeadline;
+        bunch.redoHelper = u.redoChangeMultiHeadline;
+        const oldHeadlines = bunch.headlines;
+        const newHeadlines: { [key: string]: [string, string | undefined] } = {};
+        for (const p of c.all_unique_positions()) {
+            if (p.h !== oldHeadlines[p.gnx][0]) {
+                newHeadlines[p.gnx] = [oldHeadlines[p.gnx][0], p.h];
+            }
+        }
+        // Filtered down dict containing only the changed ones.
+        bunch.headlines = newHeadlines;
+        u.pushBead(bunch);
+    }
+    // afterChangeMultiHead = afterChangeMultiHeadline // TODO (not used) !
     //@+node:felix.20211026230613.35: *5* u.afterChangeTree
     /**
      * Create an undo node for general tree operations using d created by beforeChangeTree
@@ -946,8 +974,26 @@ export class Undoer {
         return bunch;
     }
 
-    // beforeChangeHead = beforeChangeHeadline // ! unused
+    // beforeChangeHead = beforeChangeHeadline // TODO (not used) !
 
+    //@+node:felix.20230331230548.1: *5* u.beforeChangeMultiHeadline
+    /**
+     * Return data that gets passed to afterChangeMultiHeadline.
+     * p is used to select position after undo/redo multiple headline changes is done
+     */
+    public beforeChangeMultiHeadline(p: Position): Bead {
+        const u: Undoer = this;
+        const c: Commands = u.c;
+        const bunch: Bead = u.createCommonBunch(p);
+        const headlines: { [key: string]: [string, string | undefined] } = {};
+        for (const p of c.all_unique_positions()) {
+            headlines[p.gnx] = [p.h, undefined];
+        }
+        // contains all, but will get reduced by afterChangeMultiHeadline
+        bunch.headlines = headlines;
+        return bunch;
+    }
+    // beforeChangeMultiHead = beforeChangeMultiHeadline // TODO (not used) ! 
     //@+node:felix.20211026230613.54: *5* u.beforeChangeNodeContents
     /**
      * Return data that gets passed to afterChangeNode.
@@ -1030,7 +1076,12 @@ export class Undoer {
         sortChildren: boolean
     ): Bead {
         const u: Undoer = this;
-        const bunch: Bead = u.createCommonBunch(p);
+        let bunch: Bead;
+        if (sortChildren) {
+            bunch = u.createCommonBunch(p.parent());
+        } else {
+            bunch = u.createCommonBunch(p);
+        }
         // Set types.
         bunch.kind = 'sort';
         bunch.undoType = undoType;
@@ -1041,10 +1092,8 @@ export class Undoer {
         bunch.sortChildren = sortChildren;  // A bool
         // Push the bunch.
         u.bead += 1;
-
         // u.beads[u.bead:] = [bunch]
         u.beads.splice(u.bead, u.beads.length - u.bead, bunch);
-
         return bunch;
     }
     //@+node:felix.20211026230613.63: *5* u.createCommonBunch
@@ -1311,6 +1360,27 @@ export class Undoer {
         // This is required so.  Otherwise redraw will revert the change!
         c.frame.tree.setHeadline(u.p!, u.newHead);
 
+    }
+    //@+node:felix.20230331230645.1: *4* u.redoChangeMultiHeadline
+    public redoChangeMultiHeadline(): void {
+        const u: Undoer = this;
+        const c: Commands = u.c;
+        // c.frame.body.recolor(u.p);
+        // Swap the ones from the 'bunch.headline' dict
+        for (const [gnx, oldNewTuple] of Object.entries(u.headlines)) {
+            const v = c.fileCommands.gnxDict[gnx];
+            v.initHeadString(oldNewTuple[1]!);
+            if (u.p && v.gnx === u.p.gnx) {
+                u.p.setDirty();
+                // This is required.  Otherwise redraw will revert the change!
+                c.frame.tree.setHeadline(u.p, oldNewTuple[1]!);
+            }
+        }
+
+        // selectPosition causes recoloring, so don't do this unless needed.
+        if (!c.p.__eq__(u.p) && u.p) {  // #1333.
+            c.selectPosition(u.p);
+        }
     }
     //@+node:felix.20211026230613.87: *4* u.redoCloneMarkedNodes
     public redoCloneMarkedNodes(): void {
@@ -1585,9 +1655,21 @@ export class Undoer {
     public redoSort(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const parent_v: VNode = u.p!._parentVnode()!;
-        parent_v.children = u.newChildren;
-        const p: Position = c.setPositionAfterSort(u.sortChildren);
+        const p = u.p!;
+        if (u.sortChildren) {
+            p.v.children = [...u.newChildren];
+        } else {
+            const parent_v = p._parentVnode()!;
+            parent_v.children = [...u.newChildren];
+            // Only the child index of new position changes!
+            for (var _i = 0; _i < parent_v.children.length; _i++) {
+                const v = parent_v.children[_i];
+                if (v.gnx === p.v.gnx) {
+                    p._childIndex = _i;
+                    break;
+                }
+            }
+        }
         p.setAllAncestorAtFileNodesDirty();
         c.setCurrentPosition(p);
     }
@@ -1709,6 +1791,30 @@ export class Undoer {
 
         // This is required.  Otherwise c.redraw will revert the change!
         c.frame.tree.setHeadline(u.p!, u.oldHead);
+    }
+    //@+node:felix.20230331230746.1: *4* u.undoChangeMultiHeadline
+    /**
+     * Undo a change to a node's headline.
+     */
+    public undoChangeMultiHeadline(): void {
+        const u: Undoer = this;
+        const c: Commands = u.c;
+        // selectPosition causes recoloring, so don't do this unless needed.
+        // c.frame.body.recolor(u.p)
+        // Swap the ones from the 'bunch.headline' dict
+        for (const [gnx, oldNewTuple] of Object.entries(u.headlines)) {
+            const v = c.fileCommands.gnxDict[gnx];
+            v.initHeadString(oldNewTuple[0]);
+            if (u.p && v.gnx === u.p.gnx) {
+                u.p.setDirty();
+                // This is required.  Otherwise redraw will revert the change!
+                c.frame.tree.setHeadline(u.p, oldNewTuple[0]);
+            }
+        }
+        //
+        if (!c.p.__eq__(u.p) && u.p) {  // #1333.
+            c.selectPosition(u.p);
+        }
     }
     //@+node:felix.20211026230613.109: *4* u.undoCloneMarkedNodes
     public undoCloneMarkedNodes(): void {
@@ -2077,9 +2183,21 @@ export class Undoer {
     public undoSort(): void {
         const u: Undoer = this;
         const c: Commands = u.c;
-        const parent_v: VNode = u.p!._parentVnode()!;
-        parent_v.children = u.oldChildren;
-        const p: Position = c.setPositionAfterSort(u.sortChildren);
+        const p = u.p!;
+        if (u.sortChildren) {
+            p.v.children = [...u.oldChildren];
+        } else {
+            const parent_v = p._parentVnode()!;
+            parent_v.children = [...u.oldChildren];
+            // Only the child index of new position changes!
+            for (var _i = 0; _i < parent_v.children.length; _i++) {
+                const v = parent_v.children[_i];
+                if (v.gnx === p.v.gnx) {
+                    p._childIndex = _i;
+                    break;
+                }
+            }
+        }
         p.setAllAncestorAtFileNodesDirty();
         c.setCurrentPosition(p);
     }

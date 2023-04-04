@@ -17,7 +17,7 @@ export interface ConfigMembers {
     goAnywhereShortcut: boolean;
 
     // statusBarString: string;
-    statusBarColor: string;
+    // statusBarColor: string;
 
     treeInExplorer: boolean;
     showOpenAside: boolean;
@@ -126,6 +126,7 @@ export interface LeoPackageStates {
     canPromote: boolean; // Currently selected node can have its children promoted
     canDehoist: boolean; // Leo Document is currently hoisted and can be de-hoisted
     canHoist: boolean; // Selected node is not the first top node already root
+    topIsChapter: boolean; // Top of the hoisted outline is an @chapter node
 }
 
 /**

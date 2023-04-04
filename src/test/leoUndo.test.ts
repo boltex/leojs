@@ -51,7 +51,7 @@ suite('Test Undo', () => {
         w.setSelectionRange(i, j, i);
         // Test.
         assert.notStrictEqual(before, after);
-        func();
+        func.bind(self.c)();
         let result = p.b;
         assert.strictEqual(result, after, 'before undo1');
         c.undoer.undo();
@@ -346,7 +346,25 @@ suite('Test Undo', () => {
     //@+node:felix.20220129225102.12: *3* TestUndo.test_extract_test
     test('test_extract_test', async () => {
         const c = self.c;
-
+        const before = g.dedent(
+            `\
+            before
+                < < section > >
+                sec line 1
+                    sec line 2 indented
+            sec line 3
+            after\n`
+        );
+        const after = g.dedent(
+            `\
+            before
+                < < section > >
+            after\n`
+        );
+        const i = before.indexOf('< <');
+        const j = before.indexOf('line 3');
+        const func = c.extract;
+        runTest(self, before, after, i, j, func);
     });
     /* def test_extract_test(self):
         c = self.c
@@ -371,7 +389,21 @@ suite('Test Undo', () => {
     //@+node:felix.20220129225102.13: *3* TestUndo.test_line_to_headline
     test('test_line_to_headline', async () => {
         const c = self.c;
+        const before = g.dedent(`\
+            before
+            headline
+            after\n`
+        );
 
+        const after = g.dedent(`\
+            before
+            after\n`
+        );
+
+        let i = 10;
+        let j = 10;
+        const func = c.line_to_headline;
+        runTest(self, before, after, i, j, func);
     });
     /* def test_line_to_headline(self):
         c = self.c

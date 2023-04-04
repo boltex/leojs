@@ -91,7 +91,7 @@ _Move Outline commands need the 'Alt' key modifier only when focus is on body pa
 
 | Tree Navigation    |           |                 |                          |
 | :----------------- | :-------- | :-------------- | :----------------------- |
-| `Ctrl+Shift+L`     |           |                 | Show the LeoInteg View   |
+| `Ctrl+Shift+L`     |           |                 | Show the LeoJS View   |
 | `Ctrl+P`           |           |                 | Go Anywhere              |
 | `Alt + Home`       | or        | `Home` \*       | Go To First Visible Node |
 |                    |           | `End` \*        | Go To Last Visible Node  |

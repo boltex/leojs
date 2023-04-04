@@ -23,7 +23,7 @@ export class Config implements ConfigMembers {
     public goAnywhereShortcut: boolean = Constants.CONFIG_DEFAULTS.GO_ANYWHERE_SHORTCUT;
 
     // public statusBarString: string = Constants.CONFIG_DEFAULTS.STATUSBAR_STRING;
-    public statusBarColor: string = Constants.CONFIG_DEFAULTS.STATUSBAR_COLOR;
+    // public statusBarColor: string = Constants.CONFIG_DEFAULTS.STATUSBAR_COLOR;
     public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER; // Used as Context Flag
     public showOpenAside: boolean = Constants.CONFIG_DEFAULTS.SHOW_OPEN_ASIDE; // Used as Context Flag
     public showEditOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDIT; // Used as Context Flag
@@ -47,6 +47,8 @@ export class Config implements ConfigMembers {
 
     public invertNodeContrast: boolean = Constants.CONFIG_DEFAULTS.INVERT_NODES;
     public leoID: string = Constants.CONFIG_DEFAULTS.LEO_ID;
+
+    public setLeoJsSettingsPromise: Promise<unknown> = Promise.resolve();
 
     private _isBusySettingConfig: boolean = false;
 
@@ -72,7 +74,7 @@ export class Config implements ConfigMembers {
             goAnywhereShortcut: this.goAnywhereShortcut,
 
             // statusBarString: this.statusBarString,
-            statusBarColor: this.statusBarColor,
+            // statusBarColor: this.statusBarColor,
             treeInExplorer: this.treeInExplorer, // Used as Context Flag
             showOpenAside: this.showOpenAside,  // Used as Context Flag
             showEditOnNodes: this.showEditOnNodes, // Used as Context Flag
@@ -139,9 +141,12 @@ export class Config implements ConfigMembers {
             }
         });
 
-        await Promise.all(w_promises);
-        this._isBusySettingConfig = false;
-        return this.buildFromSavedSettings(); // Refresh config from settings from vscode's saved config
+        this.setLeoJsSettingsPromise = Promise.all(w_promises);
+        return this.setLeoJsSettingsPromise.then(() => {
+            this._isBusySettingConfig = false;
+            this.buildFromSavedSettings();
+            return Promise.resolve();
+        });
 
     }
 
@@ -274,10 +279,10 @@ export class Config implements ConfigMembers {
             // if (this.statusBarString.length > 8) {
             //     this.statusBarString = DEFAULTS.STATUSBAR_STRING;
             // }
-            this.statusBarColor = GET(NAME).get(NAMES.STATUSBAR_COLOR, DEFAULTS.STATUSBAR_COLOR);
-            if (!utils.isHexColor(this.statusBarColor)) {
-                this.statusBarColor = DEFAULTS.STATUSBAR_COLOR;
-            }
+            // this.statusBarColor = GET(NAME).get(NAMES.STATUSBAR_COLOR, DEFAULTS.STATUSBAR_COLOR);
+            // if (!utils.isHexColor(this.statusBarColor)) {
+            //     this.statusBarColor = DEFAULTS.STATUSBAR_COLOR;
+            // }
             this.treeInExplorer = GET(NAME).get(NAMES.TREE_IN_EXPLORER, DEFAULTS.TREE_IN_EXPLORER);
             this.showOpenAside = GET(NAME).get(NAMES.SHOW_OPEN_ASIDE, DEFAULTS.SHOW_OPEN_ASIDE);
             this.showEditOnNodes = GET(NAME).get(NAMES.SHOW_EDIT, DEFAULTS.SHOW_EDIT);

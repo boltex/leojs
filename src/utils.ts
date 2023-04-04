@@ -29,6 +29,15 @@ export function getUniqueId(): string {
     return id.toString();
 }
 
+export function getNonce(): string {
+    let text = '';
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (let i = 0; i < 32; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+}
+
 /**
  * * Build a string for representing a number that's 2 digits wide, padding with a zero if needed
  * @param p_number Between 0 and 99

@@ -415,7 +415,7 @@ export class CommanderFileCommands {
         );
 
         let table: [string, string][] = [
-            ["Leo files", "*.leo *.db"],
+            ["Leo files", "*.leo *.leojs *.db"],
             ["Python files", "*.py"],
             ["All files", "*"]
         ];
@@ -589,7 +589,7 @@ export class CommanderFileCommands {
                     fileName = await g.app.gui.runSaveFileDialog(
                         c,
                         "Save",
-                        [["Leo files", "*.leo *.db"]], // Array of arrays (one in this case)
+                        [["Leo files", "*.leo *.leojs *.db"]], // Array of arrays (one in this case)
                         g.defaultLeoFileExtension(c)
                     );
                 }
@@ -669,7 +669,7 @@ export class CommanderFileCommands {
             const w_filename = await g.app.gui.runSaveFileDialog(
                 c,
                 "Save As",
-                [["Leo files", "*.leo *.db"]], // Array of arrays (one in this case)
+                [["Leo files", "*.leo *.leojs *.db"]], // Array of arrays (one in this case)
                 g.defaultLeoFileExtension(c)
             );
             if (w_filename) {
@@ -726,8 +726,7 @@ export class CommanderFileCommands {
             const w_filename = await g.app.gui.runSaveFileDialog(
                 c,
                 "Save To",
-                // TODO : allow leojs in save choices like in leo
-                [["Leo files", "*.leo *.db"]], // Array of arrays (one in this case)
+                [["Leo files", "*.leo *.leojs *.db"]], // Array of arrays (one in this case)
                 g.defaultLeoFileExtension(c)
             );
             if (w_filename) {
@@ -1144,7 +1143,7 @@ export class CommanderFileCommands {
         const filetypes: [string, string][] = [
             ["All files", "*"],
             ["Python files", "*.py"],
-            ["Leo files", "*.leo"]
+            ["Leo files", "*.leo *.leojs"]
         ];
 
         const fileName = await g.app.gui.runOpenFileDialog(
@@ -1183,7 +1182,7 @@ export class CommanderFileCommands {
         const fileName = await g.app.gui.runOpenFileDialog(
             c,
             "Read Outline Only",
-            [["Leo files", "*.leo"], ["All files", "*"]],
+            [["Leo files", "*.leo *.leojs"], ["All files", "*"]],
             ".leo"
         ) as string;
 
@@ -1238,7 +1237,7 @@ export class CommanderFileCommands {
                 [
                     ["All files", "*"],
                     ["Python files", "*.py"],
-                    ["Leo files", "*.leo"]
+                    ["Leo files", "*.leo *.leojs"]
                 ],
                 ""
             );
@@ -1388,7 +1387,7 @@ export class CommanderFileCommands {
         const fileName = await g.app.gui.runOpenFileDialog(
             c,
             "Select reference Leo file",
-            [["Leo files", "*.leo *.db"]],
+            [["Leo files", "*.leo *.leojs *.db"]],
             g.defaultLeoFileExtension(c)
         ) as string;
         if (!fileName) {

@@ -845,6 +845,38 @@ export class Commands {
         return p;
     }
 
+    //@+node:felix.20230312220217.1: *5* c.getBodyLines
+    /**
+     * Return (head, lines, tail, oldSel, oldYview).
+     *
+     * - head: string containing all the lines before the selected text (or the
+     *   text before the insert point if no selection)
+     * - lines: list of lines containing the selected text
+     *   (or the line containing the insert point if no selection)
+     * - after: string containing all lines after the selected text
+     *   (or the text after the insert point if no  selection)
+     * - oldSel: tuple containing the old selection range, or None.
+     * - oldYview: int containing the old y-scroll value, or None.
+     */
+    public getBodyLines(): [string, string[], string, [number, number], number] {
+
+        const c: Commands = this;
+
+        const body = c.frame.body;
+        const w = body.wrapper;
+        const oldYview = w.getYScrollPosition();
+        // Note: lines is the entire line containing the insert point if no selection.
+        let head: string;
+        let s: string;
+        let tail: string;
+        [head, s, tail] = body.getSelectionLines();
+        const lines = g.splitLines(s);  // Retain the newlines of each line.
+        // Expand the selection.
+        const i = head.length;
+        const j = head.length + s.length;
+        const oldSel: [number, number] = [i, j];
+        return [head, lines, tail, oldSel, oldYview];  // string,list,string,tuple,int.
+    }
     //@+node:felix.20210131011420.5: *5* c.getTabWidth
     /**
      * Return the tab width in effect at p.
@@ -1423,8 +1455,7 @@ export class Commands {
                 for (let v of aList) {
                     gnx_errors += 1;
                     g.es_print(
-                        `id(v): {id(v)} gnx: ${v.fileIndex} ${v.h}`,
-                        'red'
+                        `id(v): {id(v)} gnx: ${v.fileIndex} ${v.h}`
                     );
                     v.fileIndex = ni.getNewIndex(v); // expanded newGnx(v)
                 }
@@ -1439,8 +1470,7 @@ export class Commands {
                 `${count} nodes, ` +
                 `${gnx_errors} gnx errors, ` +
                 `${g.app.structure_errors} ` +
-                `structure errors`,
-                'red'
+                `structure errors`
             );
         } else if (c.verbose_check_outline && !g.unitTesting) {
             g.es_print(
@@ -1485,8 +1515,7 @@ export class Commands {
         const t2 = t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000; // in ms
 
         g.es_print(
-            `check-links: ${t2} ms. ` + `${c.shortFileName()} ${count} nodes`,
-            'blue'
+            `check-links: ${t2} ms. ` + `${c.shortFileName()} ${count} nodes`
         );
 
         return errors;
@@ -1843,7 +1872,7 @@ export class Commands {
         let d: { [key: string]: any } = {};
         // let key, w_default, func;
         for (let [key, w_default, func] of table) {
-            const val = func(aList);
+            const val = func.bind(this)(aList);
             if (typeof val === 'undefined') {
                 d[key] = w_default;
             } else {
@@ -3480,6 +3509,18 @@ export class Commands {
     }
     //@+node:felix.20211023195447.21: *6* c.canPasteOutline
     public canPasteOutline(s: string): boolean {
+        // check for JSON
+        if (s && s.trimStart().startsWith("{")) {
+            try {
+                const d = JSON.parse(s);
+                if (!(d['vnodes'] && d['tnodes'])) {
+                    return false;
+                }
+            } catch (exception) {
+                return false;
+            }
+            return true;
+        }
         if (s && g.match(s, 0, g.app.prolog_prefix_string)) {
             return true;
         }
@@ -3688,32 +3729,6 @@ export class Commands {
         c.setCurrentPosition(p);
     }
 
-    //@+node:felix.20211031220906.1: *5* c.setPositionAfterSort
-    /**
-     * Return the position to be selected after a sort.
-     */
-    public setPositionAfterSort(sortChildren: boolean): Position {
-        const c: Commands = this;
-        let p: Position = c.p;
-        const p_v: VNode = p.v;
-        const parent: Position = p.parent();
-        const parent_v: VNode = p._parentVnode()!;
-        if (sortChildren) {
-            return parent || c.rootPosition();
-        }
-        if (parent && parent.__bool__()) {
-            p = parent.firstChild();
-        } else {
-            p = new Position(parent_v.children[0]);
-        }
-        while (p && p.__bool__() && p.v.gnx !== p_v.gnx) {
-            p.moveToNext();
-        }
-        if (!p || !p.__bool__()) {
-            p = parent;
-        }
-        return p;
-    }
     //@+node:felix.20211022013445.1: *5* c.treeSelectHelper
     public treeSelectHelper(p: Position | false): void {
         const c: Commands = this;
@@ -3727,6 +3742,33 @@ export class Commands {
     }
 
     //@+node:felix.20220210211453.1: *3* c.Scripting utils
+    //@+node:felix.20230403205855.1: *4* c.registerCommand
+    /**
+     * Equivalent of c.k.registerCommand from leoKeys.py.
+     */
+    public registerCommand(
+        commandName: string,
+        func: (...args: any[]) => any,
+        allowBinding = false,
+        pane = 'all',
+        shortcut?: string
+    ): void {
+        const c = this;
+        if (!func) {
+            g.es_print('Null func passed to k.registerCommand\n', commandName);
+            return;
+        }
+        const f: (...args: any[]) => any & { __doc__: string } & {
+            __func_name__: string;
+        } & {
+            __name__: string;
+        } & { __ivars__: string[] } = c.commandsDict[commandName];
+
+        if (f && (f as any)['__name__'] != (func as any)['__name__']) {
+            g.trace('redefining', commandName, f, '->', func);
+        }
+        c.commandsDict[commandName] = func;
+    }
     //@+node:felix.20221014000217.1: *4* c.cloneFindByPredicate
     /**
      * Traverse the tree given using the generator, cloning all positions for
@@ -3791,7 +3833,7 @@ export class Commands {
             c.contractAllHeadlines();
             root.expand();
         } else if (failMsg) {
-            g.es(failMsg, 'red');
+            g.es(failMsg);
         }
 
         return root;
@@ -3844,7 +3886,7 @@ export class Commands {
         root.h = undoType + (flatten ? ' (flattened)' : '');
         return root;
     }
-    //@+node:felix.20220210211517.1: *4* deletePositionsInList
+    //@+node:felix.20220210211517.1: *4* c.deletePositionsInList
     /**
      * Delete all vnodes corresponding to the positions in aList.
      *

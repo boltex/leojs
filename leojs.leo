@@ -13,6 +13,7 @@
 <v t="felix.20201208214319.1"><vh>@clean README.md</vh></v>
 <v t="felix.20201208214506.1"><vh>@clean CHANGELOG.md</vh></v>
 <v t="felix.20201208224703.1"><vh>@clean CONTRIBUTING.md</vh></v>
+<v t="felix.20230330224010.1"><vh>@clean BACKERS.md</vh></v>
 </v>
 <v t="ekr.20201209145358.1"><vh>VSCode extension</vh>
 <v t="felix.20211007213344.1"><vh>@clean src/config.ts</vh>
@@ -325,6 +326,7 @@
 <v t="felix.20201214151447.9"><vh>leoCanDemote &amp; helper</vh></v>
 <v t="felix.20201214151447.10"><vh>leoCanPromote &amp; helper</vh></v>
 <v t="felix.20201214151447.11"><vh>leoCanDehoist &amp; helper</vh></v>
+<v t="felix.20230403223923.1"><vh>leoTopHoistChapter &amp; helper</vh></v>
 </v>
 <v t="felix.20201214151447.12"><vh>Selected Node Flags</vh>
 <v t="felix.20201214151447.13"><vh>leoMarked</vh></v>
@@ -387,6 +389,7 @@
 <v t="felix.20220929001102.1"><vh>performanceNow</vh></v>
 <v t="felix.20220505225030.1"><vh>uniqueId</vh></v>
 <v t="felix.20220505225023.1"><vh>getUniqueId</vh></v>
+<v t="felix.20230315215040.1"><vh>getOnce</vh></v>
 <v t="felix.20201208224407.2"><vh>padNumber2</vh></v>
 <v t="felix.20201208224407.4"><vh>addFileToGlobal</vh></v>
 <v t="felix.20201208224407.5"><vh>removeFileFromGlobal</vh></v>
@@ -663,20 +666,30 @@ Leo uses a model/view/controller architecture.
  */
 private _onChangeConfiguration(p_event: vscode.ConfigurationChangeEvent): void {
 
-    if (p_event.affectsConfiguration(Constants.CONFIG_NAME)) {
-        this.config.buildFromSavedSettings(); // If the config setting started with 'leojs'
-        if (
-            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.INVERT_NODES) ||
-            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_EDIT) ||
-            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_ARROWS) ||
-            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_ADD) ||
-            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_MARK) ||
-            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_CLONE) ||
-            p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_COPY)
-        ) {
-            this.configTreeRefresh();
-        }
+    if (
+        p_event.affectsConfiguration(Constants.CONFIG_NAME) ||
+        p_event.affectsConfiguration('editor.fontSize') ||
+        p_event.affectsConfiguration('window.zoomLevel')
+    ) {
+        this.config.setLeoJsSettingsPromise.then(
+            () =&gt; {
+                this.config.buildFromSavedSettings();
+                this.leoSettingsWebview.changedConfiguration();
+                if (
+                    p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.INVERT_NODES) ||
+                    p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_EDIT) ||
+                    p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_ADD) ||
+                    p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_MARK) ||
+                    p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_CLONE) ||
+                    p_event.affectsConfiguration(Constants.CONFIG_NAME + "." + Constants.CONFIG_NAMES.SHOW_COPY)
+                ) {
+                    this.configTreeRefresh();
+                }
+            }
+        );
+
     }
+
     // also check if workbench.editor.enablePreview
     this._bodyEnablePreview = !!vscode.workspace
         .getConfiguration('workbench.editor')
@@ -785,7 +798,7 @@ _Move Outline commands need the 'Alt' key modifier only when focus is on body pa
 
 | Tree Navigation    |           |                 |                          |
 | :----------------- | :-------- | :-------------- | :----------------------- |
-| `Ctrl+Shift+L`     |           |                 | Show the LeoInteg View   |
+| `Ctrl+Shift+L`     |           |                 | Show the LeoJS View   |
 | `Ctrl+P`           |           |                 | Go Anywhere              |
 | `Alt + Home`       | or        | `Home` \*       | Go To First Visible Node |
 |                    |           | `End` \*        | Go To Last Visible Node  |
@@ -824,21 +837,25 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 </t>
 <t tx="felix.20201208214506.1"># Change Log
 
-## 0.1.0 12.9.2020.
+## 0.1.0 Dec 9, 2020 
 
 - Initial state
 
-## 0.1.1 12.31.2021.
+## 0.1.1 Dec 31, 2021
 
 - Outline, undos and commands.
 
-## 0.1.2 01.24.2022.
+## 0.1.2 Jan 01 2022
 
 - Support web extension compilation for vscode.dev
 
-## 0.1.3 03.11.20.
+## 0.1.3 Mar 11 2023
 
 - Implemented Find and Goto panels and commands
+
+## 0.1.4 Xxx xx xxxx
+
+- Implemented extract &amp; extract-names commands
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export function deactivate() { }
@@ -1542,8 +1559,8 @@ export function activate(p_context: vscode.ExtensionContext) {
 
 [CMD.CHAPTER_NEXT, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_NEXT, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
 [CMD.CHAPTER_BACK, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_BACK, { refreshType: REFRESH_TREE, finalFocus: Focus.Outline })],
-[CMD.CHAPTER_MAIN, () =&gt; p_leoUI.chapterMain()],
-[CMD.CHAPTER_SELECT, () =&gt; p_leoUI.chapterSelect()],
+[CMD.CHAPTER_MAIN, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_MAIN, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
+[CMD.CHAPTER_SELECT, () =&gt; p_leoUI.command(LEOCMD.CHAPTER_SELECT, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.NoChange })],
 
 </t>
 <t tx="felix.20201214151326.1">import * as vscode from "vscode";
@@ -1559,7 +1576,7 @@ public static COMMANDS = {
     // Access to the Settings/Welcome Webview
     SHOW_WELCOME: Constants.NAME + ".showWelcomePage", // Always available: not in the commandPalette section of package.json
     SHOW_SETTINGS: Constants.NAME + ".showSettingsPage", // Always available: not in the commandPalette section of package.json
-    STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
+    // STATUS_BAR: Constants.NAME + ".statusBar", // Status Bar Click Command
     // Leo Documents
     SET_OPENED_FILE: Constants.NAME + ".setOpenedFile",
     OPEN_FILE: Constants.NAME + ".openLeoFile", // sets focus on BODY
@@ -1833,13 +1850,15 @@ public static LEO_COMMANDS = {
     REFRESH_FROM_DISK_PNODE: "TODO_REFRESH_FROM_DISK_PNODE", // TODO
     GIT_DIFF: "TODO_GIT_DIFF", // TODO
     // * Outline from body text
-    EXTRACT: "TODO_EXTRACT", // TODO
-    EXTRACT_NAMES: "TODO_EXTRACT_NAMES", // TODO
+    EXTRACT: "extract",
+    EXTRACT_NAMES: "extract-names",
     // * Hoist Operations
     HOIST_PNODE: "hoist",
     DEHOIST: "de-hoist",
     CHAPTER_NEXT: "chapter-next",
     CHAPTER_BACK: "chapter-back",
+    CHAPTER_SELECT: "chapter-select",
+    CHAPTER_MAIN: "chapter-select-main",
     // * History Navigation
     GOTO_PREV_HISTORY: "goto-prev-history-node",
     GOTO_NEXT_HISTORY: "goto-next-history-node",
@@ -1950,7 +1969,6 @@ public static UNTITLED_FILE_NAME: string = "untitled";
 public static RECENT_FILES_KEY: string = "leojsRecentFiles";
 public static LAST_FILES_KEY: string = "leojsLastFiles";
 
-public static STATUSBAR_DEBOUNCE_DELAY: number = 70;
 public static REFRESH_DEBOUNCE_DELAY: number = 50;
 public static STATES_DEBOUNCE_DELAY: number = 60;
 public static TITLE_DEBOUNCE_DELAY: number = 20;
@@ -2172,8 +2190,7 @@ public static CONTEXT_FLAGS = {
     LEO_CAN_PROMOTE: "leojsCanPromote",
     LEO_CAN_DEHOIST: "leojsCanDehoist",
     LEO_CAN_HOIST: "leojsCanHoist", // isNotRoot equivalent, Computed by hand
-    LEO_IN_CHAPTER: "leojsInChapter", // TODO
-    LEO_TOP_HOIST_CHAPTER: "leojsTopHoistChapter", // TODO
+    LEO_TOP_HOIST_CHAPTER: "leojsTopHoistChapter",
 
     // 'states' flags about current selection, for visibility and commands availability
     SELECTED_MARKED: "leojsMarked", // no need for unmarked here, use !leojsMarked
@@ -2217,7 +2234,7 @@ public static CONTEXT_FLAGS = {
     TREE_IN_EXPLORER: Constants.NAME + Constants.CONFIG_NAMES.TREE_IN_EXPLORER[0].toUpperCase() + Constants.CONFIG_NAMES.TREE_IN_EXPLORER.slice(1), // Leo outline also in the explorer view
     SHOW_OPEN_ASIDE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_OPEN_ASIDE.slice(1),   // Show 'open aside' in context menu
     SHOW_EDIT: Constants.NAME + Constants.CONFIG_NAMES.SHOW_EDIT[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_EDIT.slice(1),              // Hover Icons on outline nodes
-    SHOW_ARROWS: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ARROWS[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ARROWS.slice(1),           // Hover Icons on outline nodes
+    // SHOW_ARROWS: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ARROWS[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ARROWS.slice(1),           // Hover Icons on outline nodes
     SHOW_ADD: Constants.NAME + Constants.CONFIG_NAMES.SHOW_ADD[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_ADD.slice(1),                 // Hover Icons on outline nodes
     SHOW_MARK: Constants.NAME + Constants.CONFIG_NAMES.SHOW_MARK[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_MARK.slice(1),               // Hover Icons on outline nodes
     SHOW_CLONE: Constants.NAME + Constants.CONFIG_NAMES.SHOW_CLONE[0].toUpperCase() + Constants.CONFIG_NAMES.SHOW_CLONE.slice(1),             // Hover Icons on outline nodes
@@ -2622,6 +2639,7 @@ export class LeoStates {
     this.leoCanPromote = p_states.canPromote;
     this.leoCanDehoist = p_states.canDehoist;
     this.leoRoot = !p_states.canHoist;
+    this.leoTopHoistChapter = p_states.topIsChapter;
 }
 </t>
 <t tx="felix.20201214151447.3"></t>
@@ -2969,6 +2987,7 @@ export interface LeoPackageStates {
     canPromote: boolean; // Currently selected node can have its children promoted
     canDehoist: boolean; // Leo Document is currently hoisted and can be de-hoisted
     canHoist: boolean; // Selected node is not the first top node already root
+    topIsChapter: boolean; // Top of the hoisted outline is an @chapter node
 }
 
 </t>
@@ -3030,6 +3049,7 @@ import { Position } from "./core/leoNodes";
 import { LeoGotoNode, LeoGotoProvider } from "./leoGoto";
 import { LeoFrame, StringTextWrapper } from "./core/leoFrame";
 import { LeoFindPanelProvider } from "./leoFindPanelWebview";
+import { LeoSettingsProvider } from "./leoSettingsWebview";
 import { ISettings, LeoFind } from "./core/leoFind";
 import { NullGui } from "./core/leoGui";
 import { StringFindTabManager } from "./core/findTabManager";
@@ -3128,6 +3148,9 @@ import { QuickSearchController } from "./core/quicksearch";
     } else {
         this._lastTreeView = this._leoTreeView;
     }
+
+    // * Configuration / Welcome webview
+    this.leoSettingsWebview = new LeoSettingsProvider(this._context, this);
 
     this.showLogPane();
 }
@@ -3299,13 +3322,13 @@ export class LeoUI extends NullGui {
     private _scroll: vscode.Range | undefined;
 
     // * Settings / Welcome webview
-    // public leoSettingsWebview: LeoSettingsProvider; // TODO !
+    public leoSettingsWebview: LeoSettingsProvider;
 
     // * Log Pane
     private _leoLogPane: vscode.OutputChannel;
 
     // * Status Bar
-    // private _leoStatusBar: LeoStatusBar; // TODO !
+    // private _leoStatusBar: LeoStatusBar; // ! NOT USED UNTIL VSCODE API SUPPORTS "CURRENT-FOCUS" LOCATION INFO !
 
     // * Edit/Insert Headline Input Box options instance, setup so clicking outside cancels the headline change
     private _headlineInputOptions: vscode.InputBoxOptions = {
@@ -3357,8 +3380,10 @@ private _triggerGetStates(): void {
         const c = g.app.windowList[this.frameIndex].c;
         const p = c.p;
         let w_canHoist = true;
+        let w_topIsChapter = false;
         if (c.hoistStack.length) {
             const w_ph = c.hoistStack[c.hoistStack.length - 1].p;
+            w_topIsChapter = w_ph.h.startsWith('@chapter ');
             if (p.__eq__(w_ph)) {
                 // p is already the hoisted node
                 w_canHoist = false;
@@ -3378,7 +3403,9 @@ private _triggerGetStates(): void {
             canDemote: c.canDemote(), // Selected node can have its siblings demoted
             canPromote: c.canPromote(), // Selected node can have its children promoted
             canDehoist: c.canDehoist(), // Document is currently hoisted and can be de-hoisted
-            canHoist: w_canHoist
+            canHoist: w_canHoist,
+            topIsChapter: w_topIsChapter
+            // 
         };
         this.leoStates.setLeoStateFlags(w_states);
         this.refreshUndoPane();
@@ -3699,10 +3726,12 @@ public async minibuffer(): Promise&lt;unknown&gt; {
     await this.triggerBodySave(true);
     const c = g.app.windowList[this.frameIndex].c;
     const commands: vscode.QuickPickItem[] = [];
-    for (let key in c.commandsDict) {
-        const command = c.commandsDict[key];
+    const cDict = c.commandsDict;
+    for (let key in cDict) {
+        const command = cDict[key];
         // Going to get replaced. Don't take those that begin with 'async-'
-        if (!(command as any).__name__.startsWith('async-')) {
+        const w_name = (command as any).__name__ || '';
+        if (!w_name.startsWith('async-')) {
             commands.push({
                 label: key,
                 detail: (command as any).__doc__
@@ -3903,7 +3932,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "name": "leojs",
   "displayName": "Leo Editor for Visual Studio Code",
   "description": "Leo, the literate editor with outline extension for Visual Studio Code.",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "publisher": "boltex",
   "author": {
     "name": "Félix Malboeuf"
@@ -3914,7 +3943,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     "url": "https://github.com/boltex/leojs"
   },
   "engines": {
-    "vscode": "^1.74.0"
+    "vscode": "^1.76.0"
   },
   "keywords": [
     "leo",
@@ -5281,6 +5310,10 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   "command": "leojs.sortSiblingsSelectionFromOutline",
   "when": "false"
 },
+{
+  "command": "leojs.sortChildrenSelectionFromOutline",
+  "when": "false"
+},
 </t>
 <t tx="felix.20201214205159.51">{
   "command": "leojs.gotoNextClone",
@@ -5464,7 +5497,12 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   {
     "command": "leojs.deHoistFromOutline",
-    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; !leojsTopHoistChapter",
+    "group": "navigation@7"
+  },
+  {
+    "command": "leojs.chapterMain",
+    "when": "view =~ /^leojsOutline/ &amp;&amp; leojsTreeOpened &amp;&amp; leojsTopHoistChapter",
     "group": "navigation@7"
   },
   {
@@ -6240,7 +6278,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 "@types/mocha": "^9.1.0",
 "@types/node": "16.x",
 "@types/safe-json-stringify": "^1.1.2",
-"@types/vscode": "^1.74.0",
+"@types/vscode": "^1.76.0",
 "@types/webpack-env": "^1.16.3",
 "@typescript-eslint/eslint-plugin": "^5.16.0",
 "@typescript-eslint/parser": "^5.16.0",
@@ -6419,7 +6457,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
                 undefined,
                 "Open",
                 [
-                    ["Leo files", "*.leo *.db"],
+                    ["Leo files", "*.leo *.leojs *.db"],
                     ["Python files", "*.py"],
                     ["All files", "*"]
                 ],
@@ -7081,7 +7119,7 @@ public incTreeId(): void {
       "scope": "application",
       "default": "none",
       "type": "string",
-      "description": "Set default for derived files to always reload, or always ignore, when changes are detected",
+      "description": "Set default for derived files so that they reload, or ignore, when changes are detected",
       "enum": [
         "none",
         "yes-all",
@@ -7128,18 +7166,6 @@ public incTreeId(): void {
       "default": true,
       "type": "boolean",
       "description": "Enables the Ctrl+Shift+L keyboard shortcut for showing the LeoJS view"
-    },
-    "leojs.statusBarString": {
-      "scope": "application",
-      "default": "",
-      "type": "string",
-      "description": "Sets the message string of the Status Bar Indicator"
-    },
-    "leojs.statusBarColor": {
-      "scope": "application",
-      "default": "fb7c47",
-      "type": "string",
-      "description": "Specifies the hexadecimal color string for the Status Bar Indicator"
     },
     "leojs.treeInExplorer": {
       "scope": "application",
@@ -7299,10 +7325,10 @@ public buildFromSavedSettings(): void {
         // if (this.statusBarString.length &gt; 8) {
         //     this.statusBarString = DEFAULTS.STATUSBAR_STRING;
         // }
-        this.statusBarColor = GET(NAME).get(NAMES.STATUSBAR_COLOR, DEFAULTS.STATUSBAR_COLOR);
-        if (!utils.isHexColor(this.statusBarColor)) {
-            this.statusBarColor = DEFAULTS.STATUSBAR_COLOR;
-        }
+        // this.statusBarColor = GET(NAME).get(NAMES.STATUSBAR_COLOR, DEFAULTS.STATUSBAR_COLOR);
+        // if (!utils.isHexColor(this.statusBarColor)) {
+        //     this.statusBarColor = DEFAULTS.STATUSBAR_COLOR;
+        // }
         this.treeInExplorer = GET(NAME).get(NAMES.TREE_IN_EXPLORER, DEFAULTS.TREE_IN_EXPLORER);
         this.showOpenAside = GET(NAME).get(NAMES.SHOW_OPEN_ASIDE, DEFAULTS.SHOW_OPEN_ASIDE);
         this.showEditOnNodes = GET(NAME).get(NAMES.SHOW_EDIT, DEFAULTS.SHOW_EDIT);
@@ -7350,7 +7376,7 @@ export class Config implements ConfigMembers {
     public goAnywhereShortcut: boolean = Constants.CONFIG_DEFAULTS.GO_ANYWHERE_SHORTCUT;
 
     // public statusBarString: string = Constants.CONFIG_DEFAULTS.STATUSBAR_STRING;
-    public statusBarColor: string = Constants.CONFIG_DEFAULTS.STATUSBAR_COLOR;
+    // public statusBarColor: string = Constants.CONFIG_DEFAULTS.STATUSBAR_COLOR;
     public treeInExplorer: boolean = Constants.CONFIG_DEFAULTS.TREE_IN_EXPLORER; // Used as Context Flag
     public showOpenAside: boolean = Constants.CONFIG_DEFAULTS.SHOW_OPEN_ASIDE; // Used as Context Flag
     public showEditOnNodes: boolean = Constants.CONFIG_DEFAULTS.SHOW_EDIT; // Used as Context Flag
@@ -7374,6 +7400,8 @@ export class Config implements ConfigMembers {
 
     public invertNodeContrast: boolean = Constants.CONFIG_DEFAULTS.INVERT_NODES;
     public leoID: string = Constants.CONFIG_DEFAULTS.LEO_ID;
+
+    public setLeoJsSettingsPromise: Promise&lt;unknown&gt; = Promise.resolve();
 
     private _isBusySettingConfig: boolean = false;
 
@@ -7402,7 +7430,7 @@ public getConfig(): ConfigMembers {
         goAnywhereShortcut: this.goAnywhereShortcut,
 
         // statusBarString: this.statusBarString,
-        statusBarColor: this.statusBarColor,
+        // statusBarColor: this.statusBarColor,
         treeInExplorer: this.treeInExplorer, // Used as Context Flag
         showOpenAside: this.showOpenAside,  // Used as Context Flag
         showEditOnNodes: this.showEditOnNodes, // Used as Context Flag
@@ -7471,9 +7499,12 @@ public async setLeojsSettings(p_changes: ConfigSetting[]): Promise&lt;unknown&gt
         }
     });
 
-    await Promise.all(w_promises);
-    this._isBusySettingConfig = false;
-    return this.buildFromSavedSettings(); // Refresh config from settings from vscode's saved config
+    this.setLeoJsSettingsPromise = Promise.all(w_promises);
+    return this.setLeoJsSettingsPromise.then(() =&gt; {
+        this._isBusySettingConfig = false;
+        this.buildFromSavedSettings();
+        return Promise.resolve();
+    });
 
 }
 
@@ -7538,7 +7569,7 @@ export interface ConfigMembers {
     goAnywhereShortcut: boolean;
 
     // statusBarString: string;
-    statusBarColor: string;
+    // statusBarColor: string;
 
     treeInExplorer: boolean;
     showOpenAside: boolean;
@@ -7592,12 +7623,12 @@ public static CONFIG_NAMES = {
     LEO_TREE_BROWSE: "leoTreeBrowse",
     TREE_KEEP_FOCUS: "treeKeepFocus",
     TREE_KEEP_FOCUS_WHEN_ASIDE: "treeKeepFocusWhenAside",
-    STATUSBAR_STRING: "statusBarString",
-    STATUSBAR_COLOR: "statusBarColor",
+    // STATUSBAR_STRING: "statusBarString",
+    // STATUSBAR_COLOR: "statusBarColor",
     TREE_IN_EXPLORER: "treeInExplorer",
     SHOW_OPEN_ASIDE: "showOpenAside",
     SHOW_EDIT: "showEditOnNodes",
-    SHOW_ARROWS: "showArrowsOnNodes",
+    // SHOW_ARROWS: "showArrowsOnNodes",
     SHOW_ADD: "showAddOnNodes",
     SHOW_MARK: "showMarkOnNodes",
     SHOW_CLONE: "showCloneOnNodes",
@@ -7639,12 +7670,12 @@ public static CONFIG_DEFAULTS = {
     GO_ANYWHERE_SHORTCUT: true,
 
     // STATUSBAR_STRING: "", // Strings like "Literate", "Leo", UTF-8 also supported: \u{1F981}
+    // STATUSBAR_COLOR: "fb7c47",
 
-    STATUSBAR_COLOR: "fb7c47",
     TREE_IN_EXPLORER: true,
     SHOW_OPEN_ASIDE: true,
     SHOW_EDIT: true,
-    SHOW_ARROWS: false,
+    // SHOW_ARROWS: false,
     SHOW_ADD: false,
     SHOW_MARK: false,
     SHOW_CLONE: false,
@@ -8821,9 +8852,6 @@ public finishStartup(): void {
         )
     );
 
-    // * Configuration / Welcome webview
-    // this.leoSettingsWebview = new LeoSettingsProvider(_context, this);
-
     // * 'onDid' event detections all pushed as disposables in context.subscription
     this._context.subscriptions.push(
         // * React to change in active panel/text editor (window.activeTextEditor) - also fires when the active editor becomes undefined
@@ -9901,7 +9929,6 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknow
 
     let w = this.get_focus(c);
     focus = this.widget_name(w);
-    // console.log('focus BEFORE find:', focus, "c.p.b: ", c.p.b);
 
     const inOutline = (focus.includes("tree")) || (focus.includes("head"));
     const inBody = !inOutline;
@@ -9927,7 +9954,6 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknow
     found = p &amp;&amp; p.__bool__();
 
     this.findFocusTree = false; // Reset flag for headline range
-    // console.log('focus AFTER find:', focus, "c.p.b: ", c.p.b);
 
     if (!found || !focus) {
         return vscode.window.showInformationMessage('Not found');
@@ -9946,7 +9972,6 @@ public async find(p_fromOutline: boolean, p_reverse: boolean): Promise&lt;unknow
             this.showBodyIfClosed = true;
         }
         const w_scroll = (found &amp;&amp; w_finalFocus === Focus.Body) || undefined;
-        // console.log('FIND scroll is :', w_scroll);
 
         this.setupRefresh(
             w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
@@ -10046,8 +10071,6 @@ public async replace(p_fromOutline?: boolean, p_thenFind?: boolean): Promise&lt;
         c.bodyWantsFocusNow();
     }
 
-    //console.log('focus BEFORE replace:', focus, "c.p.b: ", c.p.b);
-
     found = false;
 
     const settings = fc.ftm.get_settings();
@@ -10065,8 +10088,6 @@ public async replace(p_fromOutline?: boolean, p_thenFind?: boolean): Promise&lt;
     focus = this.widget_name(w);
 
     this.findFocusTree = false; // Reset flag for headline range
-
-    // console.log('focus AFTER replace:', focus, "c.p.b: ", c.p.b);
 
     if (!found || !focus) {
         vscode.window.showInformationMessage('Not found'); // Flag not found/replaced!
@@ -10086,7 +10107,6 @@ public async replace(p_fromOutline?: boolean, p_thenFind?: boolean): Promise&lt;
             this.showBodyIfClosed = true;
         }
         const w_scroll = (found &amp;&amp; w_finalFocus === Focus.Body) || undefined;
-        // console.log('REPLACE scroll is :', w_scroll);
 
         this.setupRefresh(
             w_finalFocus, // ! Unlike gotoNavEntry, this sets focus in outline -or- body.
@@ -12977,7 +12997,7 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
   "command": "leojs.chapterMain",
   "category": "Leojs",
   "title": "Chapter Main",
-  "enablement": "leojsTreeOpened &amp;&amp; leojsInChapter &amp;&amp; leojsTopHoistChapter",
+  "enablement": "leojsTreeOpened &amp;&amp; leojsTopHoistChapter",
   "icon": {
     "light": "resources/light/chapter-main.svg",
     "dark": "resources/dark/chapter-main.svg"
@@ -13021,7 +13041,6 @@ public async chapterSelect(): Promise&lt;unknown&gt; {
 
     const c = g.app.windowList[this.frameIndex].c;
     const cc = c.chapterController;
-
 
     const w_chaptersList: vscode.QuickPickItem[] = cc.setAllChapterNames().map(
         (p_chapter) =&gt; { return { label: p_chapter }; }
@@ -13222,8 +13241,7 @@ public async chapterSelect(): Promise&lt;unknown&gt; {
 ],
 </t>
 <t tx="felix.20221113002623.1">public showSettings(): void {
-    // TODO
-    vscode.window.showInformationMessage('TODO: SHOW WELCOME/SETTINGS !');
+    this.leoSettingsWebview.openWebview();
 }
 </t>
 <t tx="felix.20221113165005.1">"editor/context": [
@@ -14784,6 +14802,64 @@ private _addToMinibufferHistory(p_commandName: string): void {
   "when": "viewItem =~ /leojsNodeTags/",
   "group": "leojsNodeContext2@4"
 },
+</t>
+<t tx="felix.20230315215040.1">export function getNonce(): string {
+    let text = '';
+    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (let i = 0; i &lt; 32; i++) {
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    }
+    return text;
+}
+
+</t>
+<t tx="felix.20230330224010.1">@language md
+@tabwidth -4
+# Sponsors and Backers 🏅
+
+[Support Me via GitHub Sponsors](https://github.com/sponsors/boltex)
+
+## Many thanks to these awesome sponsors and backers
+
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;td align="center"&gt;
+            &lt;a href="https://github.com/edreamleo"&gt;
+                &lt;img src="https://avatars.githubusercontent.com/u/592928?v=4"
+                     alt="Edward K. Ream"
+                     width="48"
+                     height="48"
+                &gt;
+            &lt;/a&gt;
+            &lt;br&gt;
+            Edward K. Ream
+        &lt;/td&gt;
+        &lt;td align="center"&gt;
+            &lt;a href="https://github.com/kghenderson"&gt;
+                &lt;img src="https://avatars.githubusercontent.com/u/3522168?v=4"
+                     alt="Kevin Henderson"
+                     width="48"
+                     height="48"
+                &gt;
+            &lt;/a&gt;
+            &lt;br&gt;
+            Kevin Henderson
+        &lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+</t>
+<t tx="felix.20230403223923.1">/**
+ * Currently selected can de-hoist state
+ */
+private _leoTopHoistChapter: boolean = false;
+get leoTopHoistChapter(): boolean {
+    return this._leoTopHoistChapter;
+}
+set leoTopHoistChapter(p_value: boolean) {
+    this._leoTopHoistChapter = p_value;
+    this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_TOP_HOIST_CHAPTER, p_value);
+}
+
 </t>
 </tnodes>
 </leo_file>

@@ -211,7 +211,6 @@ export class LeoGui {
     }
     /**
      * Asks for chapter name and selects it.
-     * ! NOT USED FOR NOW IN LEOJS !
      */
     public chapterSelect(): any {
         this.oops();

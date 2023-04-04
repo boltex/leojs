@@ -148,6 +148,9 @@ export class TopLevelEditCommands {
 //@+node:felix.20220503222535.1: ** class EditCommandsClass
 export class EditCommandsClass extends BaseEditCommandsClass {
 
+    // Match exactly one trailing blank.
+    private hn_pattern = new RegExp(/^[0-9]+(\.[0-9]+)* /);
+
     //@+others
     //@+node:felix.20220504204405.1: *3* ec.constructor
     constructor(c: Commands) {
@@ -378,6 +381,188 @@ export class EditCommandsClass extends BaseEditCommandsClass {
 
         */
 
+    }
+    //@+node:felix.20230402171528.1: *3* ec: headline numbers
+    //@+node:felix.20230402171528.2: *4* hn-add-all & helper
+    @cmd(
+        'hn-add-all',
+        'Add headline numbers to all nodes of the outline *except*\n' +
+        '-  @<file> nodes and their descendants.\n' +
+        '- Any node whose headline starts with "@".\n' +
+        'Use the *first* clone\'s position for all clones.'
+    )
+    @cmd(
+        'headline-number-add-all',
+        'Add headline numbers to all nodes of the outline *except*\n' +
+        '-  @<file> nodes and their descendants.\n' +
+        '- Any node whose headline starts with "@".\n' +
+        'Use the *first* clone\'s position for all clones.'
+    )
+    @cmd(
+        'add-all-headline-numbers',
+        'Add headline numbers to all nodes of the outline *except*\n' +
+        '-  @<file> nodes and their descendants.\n' +
+        '- Any node whose headline starts with "@".\n' +
+        'Use the *first* clone\'s position for all clones.'
+    )
+    public hn_add_all(): void {
+        const c: Commands = this.c;
+        const command = 'add-all-headline-numbers';
+        const u = c.undoer;
+
+        const data = u.beforeChangeMultiHeadline(c.p);
+        for (const p of c.all_unique_positions()) {
+            this.hn_delete(p);
+            this.hn_add(p);
+        }
+        c.setChanged();
+        u.afterChangeMultiHeadline(command, data);
+        c.redraw();
+    }
+    //@+node:felix.20230402171528.3: *5* hn_add
+    /**
+     * Add a 1-based outline number to p.h.
+     *
+     * Do *not* add a headline number for:
+     * -  @<file> nodes and their descendants.
+     * - Any node whose headline starts with "@".
+     */
+    public hn_add(p: Position): void {
+        const skip = (p: Position): boolean => {
+            //True if we should skip p.
+            for (const z of p.self_and_parents()) {
+                if (z.isAnyAtFileNode()) {
+                    return true; // In an @<file> tree.
+                }
+            }
+            return p.h.trim().startsWith('@');
+        }
+
+        // Don't add numbers to special nodes.
+        if (skip(p)) {
+            return;
+        }
+
+        const a_s: string[] = [];
+        for (const z of p.self_and_parents()) {
+            a_s.push((1 + z.childIndex()).toString());
+        }
+        a_s.reverse();
+        const s = a_s.join('.');
+        // s = '.'.join(reversed(  list(str(1 + z.childIndex()) for z in p.self_and_parents())  ))
+
+        // Do not strip the original headline!
+        p.v.h = `${s} ${p.v.h}`;
+        p.v.setDirty();
+
+    }
+    //@+node:felix.20230402171528.4: *4* hn-add-subtree & helper
+    @cmd(
+        'hn-add-subtree',
+        'Add headline numbers to *all* children of c.p.' +
+        'Use the *last* clone\'s position for all clones.'
+    )
+    @cmd(
+        'headline-number-add-subtree',
+        'Add headline numbers to *all* children of c.p.' +
+        'Use the *last* clone\'s position for all clones.'
+    )
+    @cmd(
+        'add-subtree-headline-numbers',
+        'Add headline numbers to *all* children of c.p.' +
+        'Use the *last* clone\'s position for all clones.'
+    )
+    public hn_add_children(): void {
+        const c: Commands = this.c;
+        const command = 'add-subtree-headline-numbers';
+        const u = c.undoer;
+        const root = c.p;
+        const data = u.beforeChangeMultiHeadline(root);
+        for (const p of c.p.subtree()) {
+            this.hn_delete(p);
+            this.hn_add_relative(p, root);
+        }
+        c.setChanged();
+        u.afterChangeMultiHeadline(command, data);
+        root.expand();
+        c.redraw();
+    }
+    //@+node:felix.20230402171528.5: *5* hn_add_relative
+    /**
+     * Add a 1-based outline number (relative to the root) to p.h.
+     */
+    public hn_add_relative(p: Position, root: Position): void {
+
+        const c: Commands = this.c;
+        const indices: number[] = [];
+        for (const p2 of p.self_and_parents()) {
+            if (p2.__eq__(root)) {
+                break;
+            }
+            indices.unshift(p2.childIndex());
+        }
+
+        const s = [...indices.map(z => (1 + z).toString())].join(',');
+        // s = '.'.join([str(1 + z) for z in indices]);
+
+        // Do not strip the original headline!
+        c.setHeadString(p, `${s} ${p.v.h}`);
+        p.v.setDirty();
+
+    }
+    //@+node:felix.20230402171528.6: *4* hn-delete-all
+    @cmd('hn-delete-all', 'Delete all headline numbers in the entire outline.')
+    @cmd('headline-number-delete-all', 'Delete all headline numbers in the entire outline.')
+    @cmd('delete-all-headline-numbers', 'Delete all headline numbers in the entire outline.')
+    public hn_delete_all(): void {
+        const c: Commands = this.c;
+        const command = 'delete-all-headline-numbers';
+        const u = c.undoer;
+
+        const data = u.beforeChangeMultiHeadline(c.p);
+        for (const p of c.all_unique_positions()) {
+            this.hn_delete(p);
+        }
+        c.setChanged();
+        u.afterChangeMultiHeadline(command, data);
+        c.redraw();
+
+    }
+    //@+node:felix.20230402171528.7: *4* hn-delete-subtree
+    @cmd('hn-delete-subtree', 'Delete all headline numbers in c.p\'s subtree.')
+    @cmd('headline-number-delete-subtree', 'Delete all headline numbers in c.p\'s subtree.')
+    @cmd('delete-subtree-headline-numbers', 'Delete all headline numbers in c.p\'s subtree.')
+    public hn_delete_tree(): void {
+        const c: Commands = this.c;
+        const command = 'delete-subtree-headline-numbers';
+        const u = c.undoer;
+
+        const data = u.beforeChangeMultiHeadline(c.p);
+        for (const p of c.p.subtree()) {
+            this.hn_delete(p);
+        }
+        c.setChanged();
+        u.afterChangeMultiHeadline(command, data);
+        c.redraw();
+
+    }
+    //@+node:felix.20230402171528.8: *4* hn_delete
+
+
+    /**
+     * Helper: delete the headline number in p.h.
+     */
+    public hn_delete(p: Position): void {
+
+        const c: Commands = this.c;
+        // const m = re.match(this.hn_pattern, p.h);
+        const m: RegExpExecArray | null = this.hn_pattern.exec(p.h);
+        if (m) {
+            // Do not strip the headline!
+            const n = m[0].length;
+            c.setHeadString(p, p.v.h.substring(n));
+            p.v.setDirty();
+        }
     }
     //@+node:felix.20221220002620.1: *3* ec: move cursor
     //@+node:felix.20221220002639.1: *4* ec.extend-to-word

@@ -5,7 +5,7 @@
 import * as vscode from "vscode";
 import { Utils as uriUtils } from "vscode-uri";
 import * as g from './leoGlobals';
-import { VNode, Position } from './leoNodes';
+import { VNode, Position, StatusFlags } from './leoNodes';
 import { Commands } from './leoCommands';
 import { new_cmd_decorator } from './decorators';
 import "date-format-lite";
@@ -124,8 +124,35 @@ export class FastRead {
         // #1047: only this method changes splitter sizes.
 
         // #1111: ensure that all outlines have at least one node.
-        if (!v.children.length) {
+        if (!v.children || !v.children.length) {
             const new_vnode: VNode = new VNode(this.c);
+            new_vnode.h = 'newHeadline';
+            v.children = [new_vnode];
+        }
+        return v;
+    }
+    //@+node:felix.20230401175456.1: *3* fast.readJsonFile
+    /**
+     * Read the leojs JSON file, change splitter ratios, and return its hidden vnode.
+     */
+    public async readJsonFile(path: string): Promise<VNode | undefined> {
+
+        // const w_uri = vscode.Uri.file(path);
+        const w_uri = g.makeVscodeUri(path);
+        const readData = await vscode.workspace.fs.readFile(w_uri);
+        const s = Buffer.from(readData).toString('utf8');
+
+        let v, g_dict;
+        [v, g_dict] = this.readWithJsonTree(path, s);
+        if (!v) { // #1510.
+            return undefined;
+        }
+        // #1047: only this method changes splitter sizes.
+        this.scanJsonGlobals(g_dict);
+        //
+        // #1111: ensure that all outlines have at least one node.
+        if (!v.children || !v.children.length) {
+            const new_vnode = new VNode(this.c);
             new_vnode.h = 'newHeadline';
             v.children = [new_vnode];
         }
@@ -220,15 +247,14 @@ export class FastRead {
     /**
      * Parse an unknown attribute in a <v> or <t> element.
      */
-    public resolveUa(attr: string, val: any, kind?: string): any { // Kind is for unit testing.
-
+    public resolveUa(attr: string, val: any, kind?: string): string { // Kind is for unit testing.
         try {
             val = g.toEncodedString(val);
         }
         catch (e) {
             g.es_print('unexpected exception converting hexlified string to string');
             g.es_exception(e);
-            return undefined;
+            return '';
         }
         // Leave string attributes starting with 'str_' alone.
         if (attr.startsWith('str_')) {
@@ -236,12 +262,18 @@ export class FastRead {
                 return g.toUnicode(val);
             }
         }
-
-        // return val;
-
-
+        // Support JSON encoded attributes
+        if (attr.startsWith('json_')) {
+            if (typeof val === 'string' || Buffer.isBuffer(val)) {
+                try {
+                    return JSON.parse(g.toUnicode(val));
+                } catch (jsonJSONDecodeError) {
+                    // fall back to standard handling
+                    g.trace(`attribute not JSON encoded ${attr}=${g.toUnicode(val)}`);
+                }
+            }
+        }
         let binString = "";
-
         try {
             binString = binascii.unhexlify(val);
             // Throws a TypeError if val is not a hex string.
@@ -253,30 +285,24 @@ export class FastRead {
             } else {
                 g.trace(`can not unhexlify ${attr}=${val}`);
             }
-            return val;
+            return '';
         }
-
         let val2: any;
-
         try {
             // No change needed to support protocols.
-            let val2 = pickle.loads(binString);
-            return val2;
+            return pickle.loads(binString);
         }
         catch (err) {
             try {
                 // TODO: cannot use second string 'bytes' parameter
                 val2 = pickle.loads(binString);
-                val2 = this.bytesToUnicode(val2);
-                return val2;
+                return g.toUnicode(val2);
             }
             catch (e) {
                 g.trace(`can not unpickle ${attr}=${val}`, e);
-                return val;
+                return '';
             }
         }
-
-
     }
     //@+node:felix.20211213223342.7: *5* fast.bytesToUnicode
     /**
@@ -286,7 +312,7 @@ export class FastRead {
      * Needed for reading Python 2.7 pickles in Python 3.4.
      */
     public bytesToUnicode(ob: any): string {
-        // TODO
+        // TODO REMOVE THIS METHOD
         return (ob as string);
 
         // This is simpler than using isinstance.
@@ -423,15 +449,18 @@ export class FastRead {
         for (let e of t_elements) {
             // First, find the gnx.
             let gnx = e.attrib['tx']!;
-            gnx2body[gnx] = e.text!.toString() || '';
+            gnx2body[gnx] = (e.text?.toString()) || '';
             // Next, scan for uA's for this gnx.
             //for key, val in e.attrib.items():
             for (let [key, val] of Object.entries(e.attrib)) {
                 if (key !== 'tx') {
-                    if (!gnx2ua[gnx]) {
-                        gnx2ua[gnx] = {};
+                    const s: string | undefined = this.resolveUa(key, val);
+                    if (s) {
+                        if (!gnx2ua[gnx]) {
+                            gnx2ua[gnx] = {};
+                        }
+                        gnx2ua[gnx][key] = s;
                     }
-                    gnx2ua[gnx][key] = this.resolveUa(key, val);
                 }
             }
         }
@@ -547,6 +576,223 @@ export class FastRead {
         v_element_visitor(v_elements, hidden_v);
         return hidden_v;
     }
+    //@+node:felix.20230322233904.1: *3* fast.readFileFromJsonClipboard
+    /**
+     * Recreate a file from a JSON string s, and return its hidden vnode.
+     */
+    public readFileFromJsonClipboard(s: string): VNode | undefined {
+        let v, unused;
+        [v, unused] = this.readWithJsonTree(undefined, s);
+        if (!v) {  // #1510.
+            return undefined;
+        }
+        //
+        // #1111: ensure that all outlines have at least one node.
+        if (!v.children || !v.children.length) {
+            const new_vnode = new VNode(this.c);
+            new_vnode.h = 'newHeadline';
+            v.children = [new_vnode];
+        }
+        return v;
+    }
+    //@+node:felix.20230322233910.1: *3* fast.readWithJsonTree & helpers
+    public readWithJsonTree(path: string | undefined, s: string): [VNode | undefined, any] {
+        let d: any;
+        try {
+            d = JSON.parse(s);
+        } catch (exception) {
+            g.trace(`Error converting JSON from  .leojs file: ${path}`);
+            g.es_exception();
+            return [undefined, undefined];
+        }
+        let g_element: { [key: string]: any };
+        let hidden_v: VNode | undefined;
+        try {
+            g_element = d['globals'] || {};
+            const v_elements = d['vnodes'];
+            const t_elements = d['tnodes'];
+            const gnx2ua: { [key: string]: any } = {};
+
+            Object.assign(gnx2ua, d['uas'] || {}); // User attributes in their own dict for leojs files
+
+            const gnx2body = this.scanJsonTnodes(t_elements);
+            hidden_v = this.scanJsonVnodes(gnx2body, this.gnx2vnode, gnx2ua, v_elements);
+            this.handleBits();
+        } catch (exception) {
+            g.trace(`Error .leojs JSON is not valid: ${path}`);
+            g.es_exception(exception);
+            return [undefined, undefined];
+        }
+        return [hidden_v, g_element];
+
+    }
+    //@+node:felix.20230322233910.2: *4* fast.scanJsonGlobals
+    /**
+     * Set the geometries from the globals dict.
+     */
+    public scanJsonGlobals(json_d: { [key: string]: any }): void {
+        // TODO
+        /*
+        const c = this.c;
+
+        const toInt = (x: number, default: number): number => {
+            try{
+                return Math.floor(x);
+            }catch (exception){
+                return default;
+            }
+        };
+        // Priority 1: command-line args
+        const windowSize = g.app.loadManager.options.get('windowSize');
+        const windowSpot = g.app.loadManager.options.get('windowSpot');
+        //
+        // Priority 2: The cache.
+        let db_top, db_left, db_height, db_width ;
+        [db_top, db_left, db_height, db_width] = c.db.get('window_position', (None, None, None, None));
+        //
+        // Priority 3: The globals dict in the .leojs file.
+        //             Leo doesn't write the globals element, but leoInteg might.
+
+        // height & width
+        let height, width;
+        height, width = windowSize or (None, None)
+        if height is None:
+            height, width = json_d.get('height'), json_d.get('width')
+        if height is None:
+            height, width = db_height, db_width
+        height, width = toInt(height, 500), toInt(width, 800)
+        //
+        // top, left.
+        let top, left;
+        top, left = windowSpot or (None, None)
+        if top is None:
+            top, left = json_d.get('top'), json_d.get('left')
+        if top is None:
+            top, left = db_top, db_left
+        top, left = toInt(top, 50), toInt(left, 50)
+        //
+        // r1, r2.
+        r1 = float(c.db.get('body_outline_ratio', '0.5'))
+        r2 = float(c.db.get('body_secondary_ratio', '0.5'))
+        if 'size' in g.app.debug:
+            g.trace(width, height, left, top, c.shortFileName())
+        // c.frame may be a NullFrame.
+        c.frame.setTopGeometry(width, height, left, top)
+        c.frame.resizePanesToRatio(r1, r2)
+        frameFactory = getattr(g.app.gui, 'frameFactory', None)
+        if not frameFactory:
+            return
+        assert frameFactory is not None
+        mf = frameFactory.masterFrame
+        if g.app.start_minimized:
+            mf.showMinimized()
+        elif g.app.start_maximized:
+            // #1189: fast.scanGlobals calls showMaximized later.
+            mf.showMaximized()
+        elif g.app.start_fullscreen:
+            mf.showFullScreen()
+        else:
+            mf.show()
+
+        */
+
+    }
+    //@+node:felix.20230322233910.3: *4* fast.scanJsonTnodes
+    public scanJsonTnodes(t_elements: any): { [key: string]: string } {
+
+        const gnx2body: { [key: string]: string } = {};
+
+        for (const [gnx, body] of Object.entries(t_elements)) {
+            gnx2body[gnx] = body as string || '';
+        }
+        return gnx2body;
+
+    }
+    //@+node:felix.20230322233910.4: *4* scanJsonVnodes & helper
+    public scanJsonVnodes(
+        gnx2body: { [key: string]: string },
+        gnx2vnode: { [key: string]: VNode },
+        gnx2ua: { [key: string]: any },
+        v_elements: any,
+    ): VNode | undefined {
+
+        const c = this.c;
+        const fc = this.c.fileCommands;
+
+        // Visit the given element, creating or updating the parent vnode.
+        const v_element_visitor = (parent_e: any, parent_v: VNode): void => {
+            for (const [i, v_dict] of Object.entries(parent_e)) {
+                // Get the gnx.
+                let gnx = (v_dict as { [key: string]: string })['gnx'];
+                if (!gnx) {
+                    g.trace("Bad .leojs file: no gnx in v_dict");
+                    g.printObj(v_dict);
+                    return;
+                }
+                //
+                // Create the vnode.
+                console.assert(parent_v.children.length.toString() === i, [i, parent_v, parent_v.children].toString());
+
+                let v: VNode | undefined;
+                try {
+                    v = gnx2vnode[gnx];
+                } catch (keyError) {
+                    // g.trace('no "t" attrib')
+                    // @ts-expect-error
+                    gnx = undefined;
+                    v = undefined;
+                }
+                if (v) {
+                    // A clone
+                    parent_v.children.push(v);
+                    v.parents.push(parent_v);
+                    // The body overrides any previous body text.
+                    const body: any = g.toUnicode(gnx2body[gnx] || '');
+                    // assert isinstance(body, str), body.__class__.__name__
+                    console.assert((typeof body === 'string' || body instanceof String), typeof body);
+                    v._bodyString = body;
+                } else {
+                    v = new VNode(c, gnx);
+                    gnx2vnode[gnx] = v;
+                    parent_v.children.push(v);
+                    v.parents.push(parent_v);
+
+                    v._headString = (v_dict as { [key: string]: any })['vh'] || '';
+                    v._bodyString = gnx2body[gnx] || '';
+                    v.statusBits = (v_dict as { [key: string]: any })['status'] || 0;  // Needed ?
+                    if (v.isExpanded()) {
+                        fc.descendentExpandedList.push(gnx);
+                    }
+                    if (v.isMarked()) {
+                        fc.descendentMarksList.push(gnx);
+                    }
+                    //
+
+                    // Handle vnode uA's
+                    const uaDict = gnx2ua[gnx];  // A defaultdict(dict);
+
+                    if (uaDict && Object.keys(uaDict).length) {
+                        v.unknownAttributes = uaDict;
+                    }
+                    // Recursively create the children.
+                    v_element_visitor((v_dict as { [key: string]: any })['children'] || [], v);
+
+                }
+            }
+        };
+        const gnx = 'hidden-root-vnode-gnx';
+        const hidden_v = new VNode(c, gnx);
+        hidden_v._headString = '<hidden root vnode>';
+        gnx2vnode[gnx] = hidden_v;
+        //
+        // Traverse the tree of v elements.
+        v_element_visitor(v_elements, hidden_v);
+
+        // add all possible UAs for external files loading process to add UA's.
+        fc.descendentTnodeUaDictList.push(gnx2ua);
+        return hidden_v;
+
+    }
     //@-others
 
 }
@@ -554,7 +800,6 @@ export class FastRead {
 export class FileCommands {
 
     public c: Commands;
-    public gnxDict!: { [key: string]: VNode };
     // keys are gnx strings as returned by canonicalTnodeIndex.
     // Values are vnodes.
     // 2011/12/10: This dict is never re-inited.
@@ -566,29 +811,28 @@ export class FileCommands {
 
     // Init ivars of the FileCommands class.
     // General...
-    public mFileName!: string;
-    public fileDate!: number;
-    public leo_file_encoding!: string;
+    public mFileName: string = "";
+    public fileDate: number = -1;
+    public leo_file_encoding!: BufferEncoding;
     public tempCounter: number = 0;
     // For reading...
-    public checking!: boolean;  // True: checking only: do *not* alter the outline.
-    public descendentExpandedList!: string[];
-    public descendentMarksList!: any[];
-    public forbiddenTnodes!: any[];
-    public descendentTnodeUaDictList!: any[];
-    public descendentVnodeUaDictList!: any[];
-    public ratio!: number;
+    public checking: boolean = false;  // True: checking only: do *not* alter the outline.
+    public descendentExpandedList: string[] = [];  // List of gnx's.
+    public descendentMarksList: string[] = [];  // List of gnx's.
+    public descendentTnodeUaDictList: any[] = [];
+    public descendentVnodeUaDictList: any[] = [];
+    public ratio: number = 0.5;
     public currentVnode: VNode | undefined;
     // For writing...
-    public read_only!: boolean;
+    public read_only: boolean = false;
     public rootPosition: Position | undefined;
     public outputFile: any;
-    public openDirectory: any;
-    public usingClipboard!: boolean;
+    public openDirectory: string | undefined;
+    public usingClipboard: boolean = false;
     public currentPosition: Position | undefined;
     // New in 3.12...
-    public copiedTree: any;
-
+    public copiedTree: Position | undefined;
+    public gnxDict: { [key: string]: VNode } = {};
     public vnodesDict!: { [key: string]: boolean };
     // keys are gnx strings; values are booleans (ignored)
 
@@ -617,12 +861,11 @@ export class FileCommands {
         // General...
         this.mFileName = "";
         this.fileDate = -1;
-        this.leo_file_encoding = c.config.new_leo_file_encoding;
+        this.leo_file_encoding = c.config.new_leo_file_encoding as BufferEncoding;
         // For reading...
         this.checking = false;  // True: checking only: do *not* alter the outline.
         this.descendentExpandedList = [];
         this.descendentMarksList = [];
-        this.forbiddenTnodes = [];
         this.descendentTnodeUaDictList = [];
         this.descendentVnodeUaDictList = [];
         this.ratio = 0.5;
@@ -898,26 +1141,6 @@ export class FileCommands {
         }
         return false;
     }
-    //@+node:felix.20211213224228.6: *4* fc.openOutlineForWriting
-    /**
-     * @deprecated with usage of async vscode.workspace.fs methods
-     * Open a .leo file for writing. Return the open file, or None.
-     */
-    public openOutlineForWriting(fileName: string): number | undefined {
-        /*
-        let f: number | undefined;
-        try {
-            f = fs.openSync(fileName, 'wb');  // Always use binary mode.
-        }
-        catch (exception) {
-            g.es(`can not open ${fileName}`);
-            g.es_exception(exception);
-            f = undefined;
-        }
-        return f;
-        */
-        return undefined;
-    }
     //@+node:felix.20211213224228.7: *4* fc.setDefaultDirectoryForNewFiles
     /**
      * Set c.openDirectory for new files for the benefit of leoAtFile.scanAllDirectives.
@@ -1003,15 +1226,24 @@ export class FileCommands {
         // Save and clear gnxDict.
         const oldGnxDict = this.gnxDict;
         this.gnxDict = {};
-        s = g.toEncodedString(s, this.leo_file_encoding, true);
-        // This encoding must match the encoding used in outline_to_clipboard_string.
-        const hidden_v = new FastRead(c, this.gnxDict).readFileFromClipboard(s);
+
+        let hidden_v;
+        let s_bytes;
+        if (s.trimStart().startsWith("{")) {
+            // Maybe JSON
+            hidden_v = new FastRead(c, this.gnxDict).readFileFromJsonClipboard(s);
+        } else {
+            // This encoding must match the encoding used in outline_to_clipboard_string.
+            s_bytes = g.toEncodedString(s, this.leo_file_encoding, true);
+            hidden_v = new FastRead(c, this.gnxDict).readFileFromClipboard(s_bytes);
+        }
+
         const v = hidden_v!.children[0];
         v.parents = [];
         // Restore the hidden root's children
         c.hiddenRootNode.children = old_children;
         if (!v) {
-            g.es("the clipboard is not valid ", "blue");
+            g.es("the clipboard is not valid");
             return undefined;
         }
         // Create the position.
@@ -1034,7 +1266,7 @@ export class FileCommands {
         return p;
     }
 
-    // TODO
+    // TODO ?
     // getLeoOutline = getLeoOutlineFromClipboard  // for compatibility
 
     //@+node:felix.20211213224232.5: *5* fc.getLeoOutlineFromClipBoardRetainingClones
@@ -1058,10 +1290,18 @@ export class FileCommands {
         for (let v of c.all_unique_nodes()) {
             ni.check_gnx(c, v.fileIndex, v);
         }
-        s = g.toEncodedString(s, this.leo_file_encoding, true);
-        // This encoding must match the encoding used in outline_to_clipboard_string.
 
-        const hidden_v = new FastRead(c, this.gnxDict).readFileFromClipboard(s);
+        let hidden_v;
+        let s_bytes;
+        if (s.trimStart().startsWith("{")) {
+            // Maybe JSON
+            hidden_v = new FastRead(c, this.gnxDict).readFileFromJsonClipboard(s);
+        } else {
+            // This encoding must match the encoding used in outline_to_clipboard_string.
+            s_bytes = g.toEncodedString(s, this.leo_file_encoding, true);
+            hidden_v = new FastRead(c, this.gnxDict).readFileFromClipboard(s_bytes);
+        }
+
         const v = hidden_v!.children[0];
 
         // v.parents.remove(hidden_v);
@@ -1075,7 +1315,7 @@ export class FileCommands {
         // Restore the hidden root's children
         c.hiddenRootNode.children = old_children;
         if (!v) {
-            g.es("the clipboard is not valid ", "blue");
+            g.es("the clipboard is not valid ");
             return undefined;
         }
 
@@ -1167,8 +1407,10 @@ export class FileCommands {
                     v = await fc.initNewDb(fileName);
                 }
             } else if (fileName.endsWith('.leojs')) {
-                v = await fc.read_leojs(fileName);
-                readAtFileNodesFlag = false;  // Suppress post-processing.
+                v = await new FastRead(c, this.gnxDict).readJsonFile(fileName);
+                if (v) {
+                    c.hiddenRootNode = v;
+                }
             } else {
                 const w_fastRead: FastRead = new FastRead(c, this.gnxDict);
                 v = await w_fastRead.readFile(fileName);
@@ -1185,17 +1427,14 @@ export class FileCommands {
         }
 
         finally {
-            const p = recoveryNode || c.p || c.lastTopLevel();
             // lastTopLevel is a better fallback, imo.
+            const p = recoveryNode || c.p || c.lastTopLevel();
             c.selectPosition(p);
-            c.redraw_later();
             // Delay the second redraw until idle time.
             // This causes a slight flash, but corrects a hangnail.
-            c.checkOutline();
-            // Must be called *after* ni.end_holding.
-            c.loading = false;
-            // reenable c.changed
-
+            c.redraw_later();
+            c.checkOutline(); // Must be called *after* ni.end_holding.
+            c.loading = false; // reenable c.changed
             // if (!isinstance(theFile, sqlite3.Connection)){
             // ! Not Needed with vscode.workspace.fs
             // if ((typeof theFile) === 'number') {
@@ -1215,6 +1454,7 @@ export class FileCommands {
         const t2 = (t2Hrtime[0] * 1000 + t2Hrtime[1] / 1000000); // in ms
 
         g.es(`read outline in ${(t2 / 1000).toFixed(2)} seconds`);
+
         // return [v, c.frame.ratio];
         // TODO : Eliminate frame and/or ratio
         return [v!, 0.5];
@@ -1233,32 +1473,33 @@ export class FileCommands {
     ): Promise<VNode | undefined> {
 
         const c: Commands = this.c;
-        // const frame = this.c.frame
+        const frame = this.c.frame;
 
         // Set c.openDirectory
         const theDir: string = g.os_path_dirname(fileName);
 
         if (theDir) {
             c.openDirectory = theDir;
-            // c.frame.openDirectory = theDir
+            c.frame.openDirectory = theDir;
         }
         // Get the file.
         this.gnxDict = {};  // #1437
 
         // [VNode, number]
-        let ok: VNode;
+        let v: VNode;
         let ratio: number;
-        [ok, ratio] = await this.getLeoFile(
+        [v, ratio] = await this.getLeoFile(
             fileName,
             readAtFileNodesFlag,
             silent
         );
 
-        if (ok) {
-            // frame.resizePanesToRatio(ratio, frame.secondary_ratio);
-        }
+        // TODO : Eliminate Ratio concepts for leojs
+        // if (v) {
+        //     frame.resizePanesToRatio(ratio, frame.secondary_ratio);
+        // }
 
-        return ok;
+        return v;
     }
     //@+node:felix.20211213224232.12: *5* fc.readExternalFiles & helper
     /**
@@ -1358,14 +1599,14 @@ export class FileCommands {
             c.openDirectory = theDir;
             // c.frame.openDirectory  =  theDir;
         }
-        let ok: VNode;
+        let v: VNode;
         let ratio: number;
-        [ok, ratio] = await this.getLeoFile(fileName, false);
+        [v, ratio] = await this.getLeoFile(fileName, false);
         c.redraw();
         // c.frame.deiconify()
         // junk, junk, secondary_ratio = this.frame.initialRatios()
         // c.frame.resizePanesToRatio(ratio, secondary_ratio);
-        return ok;
+        return v;
     }
     //@+node:felix.20211213224232.15: *5* fc.retrieveVnodesFromDb & helpers
     /**
@@ -1419,8 +1660,8 @@ export class FileCommands {
             g.trace('there should be at least one top level node!')
             return None
 
-        findNode = lambda x: fc.gnxDict.get(x, c.hiddenRootNode)
-
+        def findNode(x: VNode) -> VNode:
+            return fc.gnxDict.get(x, c.hiddenRootNode)  // type:ignore
         // let us replace every gnx with the corresponding vnode
         for v in vnodes:
             v.children = [findNode(x) for x in v.children]
@@ -1502,13 +1743,13 @@ export class FileCommands {
 
         //@+others
         //@+node:felix.20211213224232.20: *6* function: get_ref_filename
-        function get_ref_filename(): string {
+        function get_ref_filename(): string | undefined {
             // ! This is what the code in original Leo's 'get_ref_filename' function does !
             for (let v of priv_vnodes()) {
                 return g.splitLines(v.b)[0].trim();
             }
             // unused
-            return '';
+            return undefined;
         }
         //@+node:felix.20211213224232.21: *6* function: pub_vnodes
         function* pub_vnodes(): Generator<VNode> {
@@ -1551,7 +1792,6 @@ export class FileCommands {
         }
         //@+node:felix.20211213224232.24: *6* function: restore_priv
         function restore_priv(prdata: DbRow[], topgnxes: string[]): void {
-
             const vnodes: VNode[] = [];
             for (let row of prdata) {
                 const v: VNode = new VNode(c, row.gnx);
@@ -1564,6 +1804,14 @@ export class FileCommands {
                 v.u = row.u;
                 vnodes.push(v);
             }
+
+            // ! Note : This python code is already done in the loop above.
+            // def pv(x: VNode) -> VNode:
+            //     return fc.gnxDict.get(x, c.hiddenRootNode)  # type:ignore
+
+            // for v in vnodes:
+            //     v.children = [pv(x) for x in v.children]
+            //     v.parents = [pv(x) for x in v.parents]
 
             for (let gnx of topgnxes) {
                 const v: VNode = fc.gnxDict[gnx];
@@ -1622,16 +1870,15 @@ export class FileCommands {
                 diffnodes.push(gnx);
             }
         });
-
         const privnodes = priv_data(diffnodes);
-
         const toppriv: string[] = [];
         for (let v of priv_vnodes()) {
             toppriv.push(v.gnx);
         }
-
-        let fname: string = get_ref_filename();
-
+        let fname = get_ref_filename();
+        if (!fname) {
+            return;
+        }
         // with (nosqlite_commander(fname)){
         // ! Not Needed with vscode.workspace.fs
         // const theFile: number = fs.openSync(fname, 'rb');
@@ -1641,165 +1888,6 @@ export class FileCommands {
         restore_priv(privnodes, toppriv);
 
         return c.redraw();
-    }
-    //@+node:felix.20211213224232.27: *5* fc.read_leojs & helpers
-    /**
-     * Read a JSON (.leojs) file and create the outline.
-     */
-    public async read_leojs(fileName: string): Promise<VNode | undefined> {
-
-        const c: Commands = this.c;
-
-        // const w_uri = vscode.Uri.file(fileName);
-        const w_uri = g.makeVscodeUri(fileName);
-
-        const w_array: Uint8Array = await vscode.workspace.fs.readFile(w_uri);
-
-        const s: string = w_array.toString(); // fs.readFileSync(theFile).toString();
-
-        let d: any;
-        try {
-            d = JSON.parse(s);
-        }
-        catch (exception) {
-            g.trace(`Error reading .leojs file: ${fileName}`);
-            g.es_exception(exception);
-            return undefined;
-        }
-
-        // Get the top-level dicts.
-        const tnodes_dict = d['tnodes'];
-        const vnodes_list = d['vnodes'];
-
-        if (!tnodes_dict || !Object.keys(tnodes_dict).length) {
-            g.trace(`Bad .leojs file: no tnodes dict: ${fileName}`);
-            return undefined;
-        }
-        if (!vnodes_list || !vnodes_list.length) {
-            g.trace(`Bad .leojs file: no vnodes list: ${fileName}`);
-            return undefined;
-        }
-
-        // Define function: create_vnode_from_dicts.
-        //@+others
-        //@+node:felix.20211213224232.28: *6* function: create_vnode_from_dicts
-        /**
-         * Create a new vnode as the i'th child of the parent vnode.
-         */
-        function create_vnode_from_dicts(i: number, parent_v: VNode, v_dict: any): void {
-            // Get the gnx.
-            const gnx: string = v_dict['gnx'];
-
-            if (!gnx) {
-                g.trace(`Bad .leojs file: no gnx in v_dict: ${fileName}`);
-                g.printObj(v_dict);
-                return;
-            }
-
-            console.assert(
-                parent_v.children.length === i,
-                [i, parent_v, parent_v.children].toString()
-            );
-            // Create the vnode.
-            const v: VNode = new VNode(c, gnx);
-            parent_v.children.push(v);
-            v._headString = v_dict['vh'] || '';
-            v._bodyString = tnodes_dict[gnx] || '';
-
-            // Recursively create the children.
-            const children = v_dict['children'] || [];
-            for (let i2 = 0; i2 < children.length; i2++) {
-                const v_dict2 = children[i2];
-                create_vnode_from_dicts(i2, v, v_dict2);
-            }
-
-        }
-        //@+node:felix.20211213224232.29: *6* function: scan_leojs_globals
-        /**
-         * Set the geometries from the globals dict.
-         */
-        function scan_leojs_globals(json_d: any): void {
-            /*
-            function toInt(x, default):
-                try:
-                    return int(x)
-                except Exception:
-                    return default
-
-
-            // Priority 1: command-line args
-            windowSize = g.app.loadManager.options.get('windowSize')
-            windowSpot = g.app.loadManager.options.get('windowSpot')
-            //
-            // Priority 2: The cache.
-            db_top, db_left, db_height, db_width = c.db.get('window_position', (None, None, None, None))
-
-            // Priority 3: The globals dict in the .leojs file.
-            //             Leo doesn't write the globals element, but leoInteg might.
-            d = json_d.get('globals', {})
-
-            // height & width
-            height, width = windowSize or (None, None)
-            if height is None:
-                height, width = d.get('height'), d.get('width')
-
-            if height is None:
-                height, width = db_height, db_width
-
-            height, width = toInt(height, 500), toInt(width, 800)
-            //
-            // top, left.
-            top, left = windowSpot or (None, None)
-            if top is None:
-                top, left = d.get('top'), d.get('left')
-
-            if top is None:
-                top, left = db_top, db_left
-
-            top, left = toInt(top, 50), toInt(left, 50)
-            //
-            // r1, r2.
-            r1 = float(c.db.get('body_outline_ratio', '0.5'))
-            r2 = float(c.db.get('body_secondary_ratio', '0.5'))
-            if 'size' in g.app.debug:
-                g.trace(width, height, left, top, c.shortFileName())
-
-            // c.frame may be a NullFrame.
-            c.frame.setTopGeometry(width, height, left, top)
-            c.frame.resizePanesToRatio(r1, r2)
-            frameFactory = getattr(g.app.gui, 'frameFactory', None)
-            if not frameFactory:
-                return;
-
-            assert frameFactory is not None
-            mf = frameFactory.masterFrame
-            if g.app.start_minimized:
-                mf.showMinimized()
-            else if g.app.start_maximized:
-                // #1189: fast.scanGlobals calls showMaximized later.
-                mf.showMaximized()
-            else if g.app.start_fullscreen:
-                mf.showFullScreen()
-            else:
-                mf.show()
-            */
-        }
-        //@-others
-
-        // Start the recursion by creating the top-level vnodes.
-        c.hiddenRootNode.children = [];  // Necessary.
-
-        const parent_v: VNode = c.hiddenRootNode;
-
-        // let IN to have keys
-        for (let i = 0; i < vnodes_list.length; i++) {
-            const v_dict = vnodes_list[i];
-            create_vnode_from_dicts(i, parent_v, v_dict);
-        }
-
-        scan_leojs_globals(d);
-        return c.hiddenRootNode.children[0];
-
     }
     //@+node:felix.20211213224232.30: *4* fc: Read Utils
     // Methods common to both the sax and non-sax code.
@@ -1839,8 +1927,8 @@ export class FileCommands {
 
         try {
             // Changed in version 3.2: Accept only bytestring or bytearray objects as input.
-            s = g.toEncodedString(s);  // 2011/02/22
-            bin = binascii.unhexlify(s);
+            const s_bytes = g.toEncodedString(s);  // 2011/02/22
+            bin = binascii.unhexlify(s_bytes);
             // Throws a TypeError if val is not a hex string.
             val = pickle.loads(bin);
             return val;
@@ -1872,10 +1960,10 @@ export class FileCommands {
         let v: VNode | undefined;
         try {
             // This encoding must match the encoding used in outline_to_clipboard_string.
-            s = g.toEncodedString(s, this.leo_file_encoding, true);
-            v = new FastRead(c, {}).readFileFromClipboard(s);
+            const s_bytes = g.toEncodedString(s, this.leo_file_encoding, true);
+            v = new FastRead(c, {}).readFileFromClipboard(s_bytes);
             if (!v) {
-                g.es("the clipboard is not valid ", "blue");
+                g.es("the clipboard is not valid");
                 return undefined;
             }
         }
@@ -1917,9 +2005,9 @@ export class FileCommands {
      */
     public resolveArchivedPosition(archivedPosition: string, root_v: VNode): VNode | undefined {
 
-        function oops(message: string): any {
+        function oops(message: string): void {
             // Give an error only if no file errors have been seen.
-            return undefined;
+            // g.trace(message);
         }
 
         let aList: number[];
@@ -1931,17 +2019,20 @@ export class FileCommands {
             });
             aList.reverse();
         } catch (exception) {
-            return oops(`"${archivedPosition}"`);
+            oops(`"${archivedPosition}"`);
+            return undefined;
         }
 
         if (!aList || !aList.length) {
-            return oops('empty');
+            oops('empty');
+            return undefined;
         }
 
         let last_v: VNode = root_v;
         let n: number = aList.pop()!;
         if (n !== 0) {
-            return oops(`root index="${n}"`);
+            oops(`root index="${n}"`);
+            return undefined;
         }
 
         let children: VNode[];
@@ -1951,7 +2042,8 @@ export class FileCommands {
             if (n < children.length) {
                 last_v = children[n];
             } else {
-                return oops(`bad index="${n}", children.length="${children.length}"`);
+                oops(`bad index="${n}", children.length="${children.length}"`);
+                return undefined;
             }
         }
         return last_v;
@@ -2403,10 +2495,10 @@ export class FileCommands {
         const sep: string = '<->';
         const comma: string = ',';
 
-        //     const w_stack1: [string, string][] = [x.split(comma) for x in s.split(sep)]
+        // const w_stack1: [string, string][] = [x.split(comma) for x in s.split(sep)]
         const w_stack1: [string, string][] = s.split(sep).map(x => (x.split(comma) as [string, string]));
 
-        //    const stack: [VNode, number][] = [(fc.gnxDict[x], int(y)) for x, y in stack]
+        // const stack: [VNode, number][] = [(fc.gnxDict[x], int(y)) for x, y in stack]
         const stack: [VNode, number][] = w_stack1.map(z => [fc.gnxDict[z[0]]!, parseInt(z[1])]);
 
         let v: VNode;
@@ -2420,7 +2512,7 @@ export class FileCommands {
     }
     //@+node:felix.20211213224237.12: *6* fc.encodePosition
     /**
-     * New schema for encoding current position hopefully simplier one.
+     * New schema for encoding current position hopefully simpler one.
      */
     public encodePosition(p: Position): string {
 
@@ -2545,34 +2637,29 @@ export class FileCommands {
     }
     //@+node:felix.20211213224237.18: *5* fc.outline_to_clipboard_string
     public outline_to_clipboard_string(p?: Position): string | undefined {
-
-        // TODO TYPE CORRECTLY!
-        let tua: any;
-        let vua: any;
-        let gnxDict: any;
-        let vnodesDict: any;
+        // Save
+        const tua = this.descendentTnodeUaDictList;
+        const vua = this.descendentVnodeUaDictList;
+        const gnxDict = this.gnxDict;
+        const vnodesDict = this.vnodesDict;
         let s: string;
-
         try {
-            // Save
-            tua = this.descendentTnodeUaDictList;
-            vua = this.descendentVnodeUaDictList;
-            gnxDict = this.gnxDict;
-            vnodesDict = this.vnodesDict;
-            // Paste.
-
             // TODO : USE BUFFER OR OTHER OBJECT ???
-
-            this.outputFile = ""; // io.StringIO()
             this.usingClipboard = true;
-            this.putProlog();
-            this.putHeader();
-            this.put_v_elements(p || this.c.p);
-            this.put_t_elements();
-            this.putPostlog();
-            s = this.outputFile as string; // Direct access as string
-            //s = this.outputFile.getvalue();
-            this.outputFile = undefined;
+            if (this.c.config.getBool('json-outline-clipboard', false)) {
+                const d = this.leojs_outline_dict(p || this.c.p);
+                s = JSON.stringify(d, null, 4);
+            } else {
+                this.outputFile = ""; // io.StringIO()
+                this.putProlog();
+                this.putHeader();
+                this.put_v_elements(p || this.c.p);
+                this.put_t_elements();
+                this.putPostlog();
+                // //s = this.outputFile.getvalue();
+                s = this.outputFile as string; // Direct access as string
+                this.outputFile = undefined;
+            }
         } finally {
             // Restore
             this.descendentTnodeUaDictList = tua;
@@ -2581,8 +2668,33 @@ export class FileCommands {
             this.vnodesDict = vnodesDict;
             this.usingClipboard = false;
         }
-
         return s;
+    }
+    //@+node:felix.20230402005913.1: *5* fc.outline_to_clipboard_json_string
+    /**
+     * Return a JSON string suitable for pasting to the clipboard.
+     */
+    public outline_to_clipboard_json_string(p?: Position): string {
+
+        // Save
+        const tua = this.descendentTnodeUaDictList;
+        const vua = this.descendentVnodeUaDictList;
+        const gnxDict = this.gnxDict;
+        const vnodesDict = this.vnodesDict;
+        let s: string;
+        try {
+            this.usingClipboard = true;
+            const d = this.leojs_outline_dict(p || this.c.p);  // Checks for illegal ua's
+            s = JSON.stringify(d, null, 4);
+        } finally {  // Restore
+            this.descendentTnodeUaDictList = tua;
+            this.descendentVnodeUaDictList = vua;
+            this.gnxDict = gnxDict;
+            this.vnodesDict = vnodesDict;
+            this.usingClipboard = false;
+        }
+        return s;
+
     }
     //@+node:felix.20211213224237.19: *5* fc.outline_to_xml_string
     /**
@@ -2646,27 +2758,22 @@ export class FileCommands {
         }
 
         /*
-        const f: number | undefined = this.openOutlineForWriting(fileName);
-        if (!f) {
-            return false;
-        }
+        try:
+            f = open(fileName, 'wb')  # Must write bytes.
+        except Exception:
+            g.es(f"can not open {fileName}")
+            g.es_exception()
+            return False
         */
 
         try {
             // Create the dict corresponding to the JSON.
-            const d = this.leojs_file();
+            const d = this.leojs_outline_dict();
             // Convert the dict to JSON.
-            const json_s = JSON.stringify(d); // json.dumps(d, indent = 2);
+            const json_s = JSON.stringify(d, null, 4); // json.dumps(d, indent = 2);
 
-            // s = bytes(json_s, this.leo_file_encoding, 'replace');
-            const s = Buffer.from(json_s, this.leo_file_encoding as BufferEncoding);
-
-            // f.write(s);
-            //fs.writeFileSync(f, s);
-            // const w_uri = vscode.Uri.file(fileName);
             const w_uri = g.makeVscodeUri(fileName);
-            await vscode.workspace.fs.writeFile(w_uri, s);
-
+            await vscode.workspace.fs.writeFile(w_uri, Buffer.from(json_s, this.leo_file_encoding));
 
             // f.close();
             // fs.closeSync(f);
@@ -2688,30 +2795,90 @@ export class FileCommands {
             return false;
         }
     }
-    //@+node:felix.20211213224237.22: *6* fc.leojs_file
+    //@+node:felix.20211213224237.22: *6* fc.leojs_outline_dict
     /**
      * Return a dict representing the outline.
      */
-    public leojs_file(): { leoHeader: any, globals: any, tnodes: any, vnodes: any[] } {
+    public leojs_outline_dict(p?: Position): { leoHeader: any, globals?: any, tnodes: any, vnodes: any[], uas?: any } {
 
         const c: Commands = this.c;
 
-        const tnodes: { [key: string]: string } = {};
-        for (let v of c.all_unique_nodes()) {
-            tnodes[v.gnx] = v._bodyString;
-        }
+        const uas: { [key: string]: any } = {};
+        // holds all gnx found so far, to exclude adding headlines of already defined gnx.
+        const gnxSet: string[] = [];
+        let result: { leoHeader: any, globals?: any, tnodes: any, vnodes: any[], uas?: any };
+        if (this.usingClipboard) { // write the currently selected subtree ONLY.
+            // Node to be root of tree to be put on clipboard
+            const sp = p || c.p;  // Selected Position: sp
+            // build uas dict
+            for (const p of sp.self_and_subtree()) {
+                // if (hasattr(p.v, 'unknownAttributes') && len(p.v.unknownAttributes.keys())) {
+                if (p.v['unknownAttributes'] && Object.keys(p.v['unknownAttributes']).length) {
+                    try {
+                        JSON.stringify(p.v.unknownAttributes);  // If this test passes ok
+                        uas[p.v.gnx] = p.v.unknownAttributes;  // Valid UA's as-is. UA's are NOT encoded.
+                    } catch (typeError) {
+                        g.trace(`Can not serialize uA for ${p.h}`, g.callers(6));
+                        g.printObj(p.v.unknownAttributes);
+                    }
+                }
+            }
+            // result for specific starting p
+            const w_tnodes: { [key: string]: string } = {};
+            for (const p of sp.self_and_subtree()) {
+                if (p.v._bodyString) {
+                    w_tnodes[p.v.gnx] = p.v._bodyString;
+                }
+            }
+            result = {
+                'leoHeader': { 'fileFormat': 2 },
+                'vnodes': [
+                    this.leojs_vnode(sp, gnxSet)
+                ],
+                'tnodes': w_tnodes
+            };
 
-        const vnodes: any[] = [];
-        for (let p of c.rootPosition()!.self_and_siblings()) {
-            vnodes.push(this.leojs_vnode(p.v));
-        }
+        } else {  // write everything from the top node 'c.rootPosition()'
+            // build uas dict
+            for (const v of c.all_unique_nodes()) {
+                if (v['unknownAttributes'] && Object.keys(v['unknownAttributes']).length) {
+                    try {
+                        JSON.stringify(v.unknownAttributes);  // If this passes ok, ua's are valid json
+                        uas[v.gnx] = v.unknownAttributes;  // Valid UA's as-is. UA's are NOT encoded.
+                    } catch (typeError) {
+                        g.trace(`Can not serialize uA for ${v.h}`, g.callers(6));
+                        g.printObj(v.unknownAttributes);
+                    }
+                }
+            }
+            // result for whole outline
+            const w_vnodes: VNodeJSON[] = [];
+            for (const p of c.rootPosition()!.self_and_siblings()) {
+                w_vnodes.push(this.leojs_vnode(p, gnxSet));
+            }
+            const w_tnodes: { [key: string]: string } = {};
+            for (const v of c.all_unique_nodes()) {
+                if (v._bodyString && v.isWriteBit()) {
+                    w_tnodes[v.gnx] = v._bodyString;
+                }
+            }
+            result = {
+                'leoHeader': { 'fileFormat': 2 },
+                'vnodes': w_vnodes,
+                'tnodes': w_tnodes
+            };
 
-        return {
-            'leoHeader': { 'fileFormat': 2 },
-            'globals': this.leojs_globals(),
-            'tnodes': tnodes,
-            'vnodes': vnodes
-        };
+        }
+        this.leojs_globals();  // Call only to set db like non-json save file.
+        // uas could be empty. Only add it if needed
+        if (uas && Object.keys(uas).length) {
+            result["uas"] = uas;
+        }
+        if (!this.usingClipboard) {
+            this.currentPosition = p || c.p;
+            this.setCachedBits();
+        }
+        return result;
 
     }
     //@+node:felix.20211213224237.23: *6* fc.leojs_globals (sets window_position)
@@ -2751,19 +2918,76 @@ export class FileCommands {
     /**
      * Return a jsonized vnode.
      */
-    public leojs_vnode(v: VNode): VNodeJSON {
+    public leojs_vnode(p: Position, gnxSet: string[], isIgnore = false): VNodeJSON {
 
-        const children: VNodeJSON[] = [];
-        for (let child of v.children) {
-            children.push(this.leojs_vnode(child));
+        const c: Commands = this.c;
+        const fc: FileCommands = this;
+
+        const v = p.v;
+        // Precompute constants.
+        // Write the entire @edit tree if it has children.
+        const isAuto = p.isAtAutoNode() && p.atAutoNodeName().trim();
+        const isEdit = p.isAtEditNode() && p.atEditNodeName().trim() && !p.hasChildren();
+        const isFile = p.isAtFileNode();
+        const isShadow = p.isAtShadowFileNode();
+        const isThin = p.isAtThinFileNode();
+        let forceWrite: boolean;
+        // Set forceWrite.
+        if (isIgnore || p.isAtIgnoreNode()) {
+            forceWrite = true;
+        } else if (isAuto || isEdit || isFile || isShadow || isThin) {
+            forceWrite = false;
+        } else {
+            forceWrite = true;
+        }
+        // Set the write bit if necessary.
+        if (forceWrite || this.usingClipboard) {
+            v.setWriteBit();  // 4.2: Indicate we wrote the body text.
+        }
+        let status = 0;
+        if (v.isMarked()) {
+            status |= StatusFlags.markedBit;
+        }
+        if (p.isExpanded()) {
+            status |= StatusFlags.expandedBit;
+        }
+        if (p.__eq__(c.p)) {
+            status |= StatusFlags.selectedBit;
         }
 
-        return {
+        const children: VNodeJSON[] = [];  // Start empty
+
+        if (p.hasChildren() && (forceWrite || this.usingClipboard)) {
+            // This optimization eliminates all "recursive" copies.
+            p.moveToFirstChild();
+            while (1) {
+                children.push(fc.leojs_vnode(p, gnxSet, isIgnore));
+                if (p.hasNext()) {
+                    p.moveToNext();
+                } else {
+                    break;
+                }
+            }
+            p.moveToParent()  // Restore p in the caller.
+        }
+        // At least will contain the gnx
+        const result: VNodeJSON = {
             'gnx': v.fileIndex,
-            'vh': v._headString,
-            'status': v.statusBits,
-            'children': children
-        };
+        } as VNodeJSON;
+
+        if (!gnxSet.includes(v.fileIndex)) {
+            result['vh'] = v._headString;  // Not a clone so far so add his headline text
+            gnxSet.push(v.fileIndex);
+            if (children && children.length) {
+                result['children'] = children;
+            }
+        }
+
+        // Else, just add status if needed
+        if (status) {
+            result['status'] = status;
+        }
+        return result;
 
     }
     //@+node:felix.20211213224237.25: *5* fc.write_xml_file
@@ -2999,8 +3223,10 @@ export class FileCommands {
         }
 
         // Pickle and hexlify d
-        // pylint: disable=consider-using-ternary
-        return d && this.pickle(p.v, d, 'descendentVnodeUnknownAttributes') || '';
+        if (!d || !Object.keys(d).length) {
+            return '';
+        }
+        return this.pickle(p.v, d, 'descendentVnodeUnknownAttributes') || '';
 
     }
     //@+node:felix.20211213224237.33: *6* fc.createUaList

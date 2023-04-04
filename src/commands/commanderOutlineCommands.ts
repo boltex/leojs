@@ -75,13 +75,104 @@ export class CommanderOutlineCommands {
         'copy-node',
         'Copy the selected outline to the clipboard.'
     )
-    public copyOutline(this: Commands): void {
+    public copyOutline(this: Commands): string {
         // Copying an outline has no undo consequences.
         const c: Commands = this;
         c.endEditing();
         const s: string = c.fileCommands.outline_to_clipboard_string()!;
         g.app.paste_c = c;
+        if (g.app.inBridge) {
+            return s;
+        }
         g.app.gui.replaceClipboardWith(s);
+        return s;
+    }
+    //@+node:felix.20230322003228.1: *4* c_oc.copyOutlineAsJson
+    @commander_command(
+        'copy-node-as-json',
+        'Copy the selected outline to the clipboard in json format.'
+    )
+    public copyOutlineAsJSON(this: Commands): string {
+        // Copying an outline has no undo consequences.
+        // //@+others  // Define helper functions
+        // //@+node:felix.20230322003228.2: *5* function: json_globals
+        // /**
+        //  * Put json representation of Leo's cached globals.
+        //  */
+        // const json_globals = (c: Commands): { [key: string]: any } => {
+
+        //     let width, height, left, top;
+        //     [width, height, left, top] = [0, 0, 0, 0]; // c.frame.get_window_info();
+        //     return {
+        //         'body_outline_ratio': 0.5, // c.frame.ratio,
+        //         'body_secondary_ratio': 0.5, // c.frame.secondary_ratio,
+        //         'globalWindowPosition': {
+        //             'height': height,
+        //             'left': left,
+        //             'top': top,
+        //             'width': width,
+        //         }
+        //     };
+        // }
+        // //@+node:felix.20230322003228.3: *5* function: json_vnode
+        // const json_vnode = (v: VNode): { [key: string]: any } => {
+        //     const children: { [key: string]: any }[] = [];
+        //     for (const child of v.children) {
+        //         children.push(json_vnode(child));
+        //     }
+        //     return {
+        //         'gnx': v.fileIndex,
+        //         'vh': v._headString,
+        //         'status': v.statusBits,
+        //         'children': children
+        //     };
+        // }
+        // //@+node:felix.20230322003228.4: *5* function: outline_to_json
+        // /**
+        //  * Return the JSON representation of c.
+        //  */
+        // const outline_to_json = (c: Commands): string => {
+        //     const positions = [...c.p.self_and_subtree()];
+        //     const uas_dict: { [key: string]: any } = {};
+        //     for (const p of positions) {
+        //         if (p.u) {
+        //             try {
+        //                 uas_dict[p.v.gnx] = JSON.stringify(p.u); // json.dumps(p.u, skipkeys=True)
+        //             }
+        //             catch (typeError) {
+        //                 g.trace(`Can not serialize uA for ${p.h}`, g.callers(6))
+        //                 // g.printObj(p.u)
+        //             }
+        //         }
+
+        //     }
+        //     const tnodes: { [key: string]: any } = {};
+        //     for (const p of positions) {
+        //         tnodes[p.v.gnx] = p.v._bodyString;
+        //     }
+        //     const d = {
+        //         'leoHeader': { 'fileFormat': 2 },
+        //         'globals': json_globals(c),
+        //         'tnodes': tnodes,
+        //         'uas': uas_dict,
+        //         'vnodes': [
+        //             json_vnode(c.p.v)
+        //         ],
+        //     }
+
+        //     // return json.dumps(d, indent=2, sort_keys=False)
+        //     return JSON.stringify(d, null, "  ");
+        // }
+        // //@-others
+        const c: Commands = this;
+        c.endEditing();
+        const s = c.fileCommands.outline_to_clipboard_json_string();
+        g.app.paste_c = c;
+        if (g.app.inBridge) {
+            return s;
+        }
+        g.app.gui.replaceClipboardWith(s);
+        return s;
     }
     //@+node:felix.20211208235043.3: *4* c_oc.cutOutline
     @commander_command(
@@ -115,7 +206,7 @@ export class CommanderOutlineCommands {
         if (!s || !c.canPasteOutline(s)) {
             return undefined;  // This should never happen.
         }
-        const isLeo = g.match(s, 0, g.app.prolog_prefix_string);
+        const isLeo = s.trimStart().startsWith("{") || g.match(s, 0, g.app.prolog_prefix_string);
         if (!isLeo) {
             return undefined;
         }
@@ -184,10 +275,6 @@ export class CommanderOutlineCommands {
         if (!s || !c.canPasteOutline(s)) {
             return undefined;  // This should never happen.
         }
-        const isLeo = g.match(s, 0, g.app.prolog_prefix_string);
-        if (!isLeo) {
-            return undefined;
-        }
         // Get *position* to be pasted.
         const pasted: Position = c.fileCommands.getLeoOutlineFromClipboardRetainingClones(s)!;
         if (!pasted) {
@@ -254,6 +341,11 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         const p: Position = c.p;
 
+        if (!s || !c.canPasteOutline(s)) {
+            return; // This should never happen.
+        }
+        const isJson = s.trimStart().startsWith("{");
+
         // * Variables local to pasteAsTemplate
         let root_gnx: string;
         let outside: string[] = [];
@@ -268,9 +360,9 @@ export class CommanderOutlineCommands {
         let pasted: VNode;
         let index: number;
         let parStack: StackEntry[];
-        let xroot: et.ElementTree;
-        let xvelements: et.Element[];
-        let xtelements: et.Element[];
+        let xroot: et.ElementTree | any;
+        let xvelements: et.Element[] | any;
+        let xtelements: et.Element[] | any;
         const gnx2v = c.fileCommands.gnxDict;
 
 
@@ -305,10 +397,14 @@ export class CommanderOutlineCommands {
          *
          * skipping the descendants of already seen nodes.
          */
-        function* viter(parent_gnx: string, xv: et.Element): Generator<[string, string, string, string]> {
+        function* viter(parent_gnx: string, xv: et.Element | any): Generator<[string, string, string, string]> {
 
-            const chgnx: string = xv.attrib['t']!;
-
+            let chgnx: string;
+            if (!isJson) {
+                chgnx = xv.attrib['t']!;
+            } else {
+                chgnx = xv['gnx'];
+            }
             const b: string = bodies[chgnx]!;
 
             const gnx: string = translation[chgnx];
@@ -318,13 +414,28 @@ export class CommanderOutlineCommands {
             } else {
 
                 seen.push(gnx);
-                const h: string = xv.getchildren()[0].text!.toString();
+                let h: string;//  = xv.getchildren()[0].text!.toString();
+                if (!isJson) {
+                    h = xv.getchildren()[0].text!.toString();
+                } else {
+                    h = xv['vh'] || '';
+                }
                 heads[gnx] = h;
+
                 yield [parent_gnx, gnx, h, b];
 
-                for (let xch of xv.getchildren().slice(1)) {
-                    yield* viter(gnx, xch);
+                if (!isJson) {
+                    for (let xch of xv.getchildren().slice(1)) {
+                        yield* viter(gnx, xch);
+                    }
+                } else {
+                    if (xv['children'] && xv['children'].length) {
+                        for (let xch of xv['children']) {
+                            yield* viter(gnx, xch);
+                        }
+                    }
                 }
+
             }
         }
         //@+node:felix.20211208235043.12: *5* getv
@@ -420,18 +531,40 @@ export class CommanderOutlineCommands {
         }
         //@-others
 
-        xroot = et.parse(s);
-        xvelements = xroot.find('vnodes')!.getchildren();
-        xtelements = xroot.find('tnodes')!.getchildren();
+        if (!isJson) {
+            xroot = et.parse(s);
+            xvelements = xroot.find('vnodes')!.getchildren();
+            xtelements = xroot.find('tnodes')!.getchildren();
+            [bodies, uas] = new FastRead(c, {}).scanTnodes(xtelements);
+            root_gnx = xvelements[0].attrib['t']!;  // the gnx of copied node
+        } else {
+            xroot = JSON.parse(g.app.gui.getTextFromClipboard());
+            xvelements = xroot['vnodes'];  // <v> elements.
+            xtelements = xroot['tnodes']; // <t> elements.
+            // bodies, uas = leoFileCommands.FastRead(c, {}).scanTnodes(xtelements)
+            bodies = new FastRead(c, {}).scanJsonTnodes(xtelements);
 
-        [bodies, uas] = new FastRead(c, {}).scanTnodes(xtelements);
+            const addBody = (node: any): void => {
+                if (!bodies[node['gnx']]) {
+                    bodies[node['gnx']] = '';
+                }
+                if (node['children'] && node['children'].length) {
+                    for (const child of node['children']) {
+                        addBody(child);
+                    }
+                }
+            };
+            // generate bodies for all possible nodes, not just non-empty bodies.
+            addBody(xvelements[0]);
+            uas = {};
+            Object.assign(uas, xroot['uas'] || {});
+            root_gnx = xvelements[0]['gnx'];  // the gnx of copied node
+        }
 
-        root_gnx = xvelements[0].attrib['t']!;  // the gnx of copied node
-
+        // outside will contain gnxes of nodes that are outside the copied tree
         for (let x of skip_root(c.hiddenRootNode)) {
             outside.push(x.gnx);
         }
-        // outside will contain gnxes of nodes that are outside the copied tree
 
         for (let x in bodies) { // Voluntary use of 'in' for keys
             translation[x] = translate_gnx(x);
@@ -526,6 +659,7 @@ export class CommanderOutlineCommands {
         // The helper does all the work.
         const c: Commands = this;
         c.contractAllHeadlines();
+        c.redraw();
     }
     //@+node:felix.20211020002058.3: *4* c_oc.contractAllOtherNodes & helper
     @commander_command(
@@ -652,12 +786,13 @@ export class CommanderOutlineCommands {
     public expandAllHeadlines(this: Commands): void {
         const c: Commands = this;
         c.endEditing();
+        const p0: Position = c.p;
         const p: Position = c.rootPosition()!;
         while (p && p.__bool__()) {
             c.expandSubtree(p);
             p.moveToNext();
         }
-        c.redraw_after_expand(c.rootPosition()!);
+        c.redraw_after_expand(p0); // Keep focus on original position
         c.expansionLevel = 0;  // Reset expansion level.
     }
     //@+node:felix.20211020002058.10: *4* c_oc.expandAllSubheads
@@ -820,7 +955,7 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211020002058.16: *4* c_oc.expandOnlyAncestorsOfNode
     @commander_command(
         'expand-ancestors-only',
-        'Contract all nodes in the outline.'
+        'Contract all nodes except ancestors of the selected node.'
     )
     public expandOnlyAncestorsOfNode(this: Commands, p?: Position): void {
         const c: Commands = this;
@@ -908,7 +1043,17 @@ export class CommanderOutlineCommands {
     )
     public goNextVisitedNode(this: Commands): void {
         const c: Commands = this;
-        c.nodeHistory.goNext();
+        const p = c.nodeHistory.goNext();
+        if (p && p.__bool__()) {
+            c.nodeHistory.skipBeadUpdate = true;
+            try {
+                c.selectPosition(p);
+            }
+            finally {
+                c.nodeHistory.skipBeadUpdate = false;
+                c.redraw_after_select(p);
+            }
+        }
     }
     //@+node:felix.20211021013709.4: *4* c_oc.goPrevVisitedNode
     @commander_command(
@@ -917,14 +1062,23 @@ export class CommanderOutlineCommands {
     )
     public goPrevVisitedNode(this: Commands): void {
         const c: Commands = this;
-        c.nodeHistory.goPrev();
+        const p = c.nodeHistory.goPrev();
+        if (p && p.__bool__()) {
+            c.nodeHistory.skipBeadUpdate = true;
+            try {
+                c.selectPosition(p);
+            }
+            finally {
+                c.nodeHistory.skipBeadUpdate = false;
+                c.redraw_after_select(p);
+            }
+        }
     }
     //@+node:felix.20211021013709.5: *4* c_oc.goToFirstNode
     @commander_command(
         'goto-first-node',
         'Select the first node of the entire outline,\n' +
-        'or the first node of a chapter or hoist\n' +
-        'if Leo is hoisted or within a chapter.'
+        'Or the first visible node if Leo is hoisted or within a chapter.'
     )
     public goToFirstNode(this: Commands): void {
         const c: Commands = this;
@@ -956,7 +1110,11 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         const p: Position = c.firstVisible();
         if (p && p.__bool__()) {
-            c.expandOnlyAncestorsOfNode(p);
+            if (c.sparse_goto_visible) {
+                c.expandOnlyAncestorsOfNode(p);
+            } else {
+                c.treeSelectHelper(p);
+            }
             c.redraw();
         }
     }
@@ -998,7 +1156,11 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         const p: Position = c.lastVisible();
         if (p && p.__bool__()) {
-            c.expandOnlyAncestorsOfNode(p);
+            if (c.sparse_goto_visible) {
+                c.expandOnlyAncestorsOfNode(p);
+            } else {
+                c.treeSelectHelper(p);
+            }
             c.redraw();
         }
     }
@@ -1284,14 +1446,15 @@ export class CommanderOutlineCommands {
     @commander_command('dehoist', 'Undo a previous hoist of an outline.')
     public dehoist(this: Commands): void {
         const c: Commands = this;
+        const cc = this.chapterController;
+        const tag = '@chapter ';
         if (!c.p || !c.p.__bool__() || !c.hoistStack.length) {
             return;
         }
-        // Don't de-hoist an @chapter node.
-        if (c.chapterController && c.p.h.startsWith('@chapter ')) {
-            if (!g.unitTesting) {
-                g.es('can not de-hoist an @chapter node.');
-            }
+        // #2718: de-hoisting an @chapter node is equivalent to selecting the main chapter.
+        if (c.p.h.startsWith(tag) || c.hoistStack[c.hoistStack.length - 1].p.h.startsWith(tag)) {
+            c.hoistStack = [];
+            cc.selectChapterByName('main');
             return;
         }
         const bunch: HoistStackEntry = c.hoistStack.pop()!;
@@ -1307,8 +1470,7 @@ export class CommanderOutlineCommands {
         // c.frame.clearStatusLine()
         // c.frame.putStatusLine("De-Hoist: " + p.h)
 
-        // TODO : Needed?
-        // g.doHook('hoist-changed', c=c)
+        g.doHook('hoist-changed', { c: c });
     }
     //@+node:felix.20211031143537.3: *4* c_oc.clearAllHoists
     @commander_command(
@@ -1319,9 +1481,8 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         c.hoistStack = [];
 
-        // TODO : Needed?
         // c.frame.putStatusLine("Hoists cleared")
-        // g.doHook('hoist-changed', c=c)
+        g.doHook('hoist-changed', { c: c });
     }
     //@+node:felix.20211031143537.4: *4* c_oc.hoist
     @commander_command(
@@ -1352,8 +1513,7 @@ export class CommanderOutlineCommands {
         // c.frame.clearStatusLine();
         // c.frame.putStatusLine("Hoist: " + p.h);
 
-        // TODO : Needed?
-        // g.doHook('hoist-changed', c=c);
+        g.doHook('hoist-changed', { c: c });
     }
     //@+node:felix.20211031143555.1: *3* c_oc.Insert, Delete & Clone commands
     //@+node:felix.20211031143555.2: *4* c_oc.clone
@@ -1431,8 +1591,7 @@ export class CommanderOutlineCommands {
         if (c.validateOutline()) {
             u.afterCloneNode(clone, 'Clone Node', undoData);
             c.contractAllHeadlines();
-            c.redraw();
-            c.selectPosition(clone);
+            c.redraw(clone);
         } else {
             clone.doDelete();
             c.setCurrentPosition(p);
@@ -1523,7 +1682,9 @@ export class CommanderOutlineCommands {
     //@+node:felix.20211031143555.7: *4* c_oc.insertHeadline (insert-*)
     @commander_command(
         'insert-node',
-        'Insert a node after the presently selected node.'
+        'If c.p is expanded, insert a new node as the first or last child of c.p,' +
+        'depending on @bool insert-new-nodes-at-end.' +
+        'If c.p is not expanded, insert a new node after c.p.'
     )
     public insertHeadline(this: Commands, op_name: string = "Insert Node", as_child: boolean = false): Position | undefined {
         const c: Commands = this;
@@ -1532,7 +1693,7 @@ export class CommanderOutlineCommands {
     }
     @commander_command(
         'insert-as-first-child',
-        'Insert a node as the last child of the previous node.'
+        'Insert a node as the first child of the previous node.'
     )
     public insertNodeAsFirstChild(this: Commands): Position | undefined {
         const c: Commands = this;
@@ -1742,8 +1903,7 @@ export class CommanderOutlineCommands {
         }
         // Don't even *think* about restoring the old position.
         c.contractAllHeadlines();
-        c.selectPosition(c.rootPosition()!);
-        c.redraw();
+        c.redraw(c.rootPosition());
     }
 
     //@+node:felix.20211025223803.5: *4* c_oc.moveMarked
@@ -1856,7 +2016,6 @@ export class CommanderOutlineCommands {
         if (!g.unitTesting) {
             g.blue('done');
         }
-        c.redraw_after_icons_changed();
     }
 
     //@+node:felix.20211025223803.9: *4* c_oc.markHeadline
@@ -1887,7 +2046,6 @@ export class CommanderOutlineCommands {
         p.setDirty();
         c.setChanged();
         u.afterMark(p, undoType, bunch);
-        c.redraw_after_icons_changed();
     }
     //@+node:felix.20211025223803.10: *4* c_oc.markSubheads
     @commander_command(
@@ -1914,7 +2072,6 @@ export class CommanderOutlineCommands {
             }
         }
         u.afterChangeGroup(current, undoType);
-        c.redraw_after_icons_changed();
     }
     //@+node:felix.20211025223803.11: *4* c_oc.unmarkAll
     @commander_command(
@@ -1949,7 +2106,6 @@ export class CommanderOutlineCommands {
             c.setChanged();
         }
         u.afterChangeGroup(current, undoType);
-        c.redraw_after_icons_changed();
     }
     //@+node:felix.20211031235049.1: *3* c_oc.Move commands
     //@+node:felix.20211031235049.2: *4* c_oc.demote
@@ -2279,6 +2435,23 @@ export class CommanderOutlineCommands {
         }
     }
     //@+node:felix.20211031235022.1: *3* c_oc.Sort commands
+    //@+node:felix.20230321002512.1: *4* c_oc.reverseSortChildren
+    @commander_command(
+        'reverse-sort-children',
+        'Sort the children of a node in reverse order.'
+    )
+    public reverseSortChildren(this: Commands, key = undefined): void {
+        this.sortChildren(key, true);  // as reverse, Fixes #3188
+    }
+    //@+node:felix.20230321002519.1: *4* c_oc.reverseSortSiblings
+    @commander_command(
+        'reverse-sort-siblings',
+        'Sort the siblings of a node in reverse order.'
+    )
+    public reverseSortSiblings(this: Commands, key = undefined): void {
+
+        this.sortSiblings(key, true);  // as reverse, Fixes #3188
+    }
     //@+node:felix.20211031235022.2: *4* c_oc.sortChildren
     @commander_command(
         'sort-children',
@@ -2289,12 +2462,7 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         const p: Position = c.p;
         if (p && p.__bool__() && p.hasChildren()) {
-            c.sortSiblings(
-                p.firstChild(),
-                true,
-                key,
-                reverse
-            );
+            c.sortSiblings(p.firstChild(), true, key, reverse);
         }
     }
     //@+node:felix.20211031235022.3: *4* c_oc.sortSiblings
@@ -2318,8 +2486,13 @@ export class CommanderOutlineCommands {
         if (!p || !p.__bool__()) {
             return;
         }
+        const oldP = p.copy();
+        const newP = p.copy();
         c.endEditing();
-        const undoType: string = sortChildren ? 'Sort Children' : 'Sort Siblings';
+        let undoType: string = sortChildren ? 'Sort Children' : 'Sort Siblings';
+        if (reverse) {
+            undoType = 'Reverse ' + undoType;
+        }
         const parent_v: VNode = p._parentVnode()!;
         const oldChildren: VNode[] = [...parent_v.children];
         const newChildren: VNode[] = [...parent_v.children];
@@ -2345,6 +2518,7 @@ export class CommanderOutlineCommands {
         for (var _i = 0; _i < oldChildren.length; _i++) {
             if (oldChildren[_i].gnx !== newChildren[_i].gnx) {
                 same = false;
+                break;
             }
         }
         if (same) {
@@ -2353,14 +2527,40 @@ export class CommanderOutlineCommands {
         // 2010/01/20. Fix bug 510148.
         c.setChanged();
         const bunch: Bead = u.beforeSort(p, undoType, oldChildren, newChildren, sortChildren);
-        parent_v.children = newChildren;
-        u.afterSort(p, bunch);
+        // A copy, so its not the undo bead's oldChildren. Fixes #3205
+        parent_v.children = [...newChildren];
         // Sorting destroys position p, and possibly the root position.
-        p = c.setPositionAfterSort(sortChildren);
-        if (p.parent().__bool__()) {
-            p.parent().setDirty();
+        // Only the child index of new position changes!
+        for (var _i = 0; _i < newChildren.length; _i++) {
+            const v = newChildren[_i];
+            if (v.gnx === oldP.v.gnx) {
+                newP._childIndex = _i;
+                break;
+            }
         }
-        c.redraw(p); // redraw selects p
+
+        if (newP.parent() && newP.parent().__bool__()) {
+            newP.parent().setDirty();
+        }
+        if (sortChildren) {
+            c.redraw(newP.parent());
+        } else {
+            c.redraw(newP);
+        }
+    }
+    //@+node:felix.20230322231828.1: *3* count-children
+
+    @commander_command(
+        'count-children', 'Print out the number of children for the currently selected node'
+    )
+    public count_children(this: Commands): number {
+        const c: Commands = this;
+        let childQty: number = 0;
+        if (c) {
+            childQty = c.p.numberOfChildren();
+            g.es_print(`${childQty} children`);
+        }
+        return childQty;
     }
     //@-others
 

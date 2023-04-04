@@ -151,7 +151,7 @@ export class LeoFrame {
             c.mFileName = await g.app.gui.runSaveFileDialog(
                 c,
                 "Save",
-                [["Leo files", "*.leo"]],
+                [["Leo files", "*.leo *.leojs"]],
                 ".leo"
             );
 
@@ -346,6 +346,94 @@ export class NullBody {
         w.leo_v = w.leo_p.v;
         w.leo_label_s = p.h;
 
+    }
+    //@+node:felix.20230312221628.1: *3* LeoBody.Text
+    //@+node:felix.20230312221628.2: *4* LeoBody.getInsertLines
+    /*
+    def getInsertLines(self) -> Tuple[str, str, str]:
+        """
+        Return before,after where:
+
+        before is all the lines before the line containing the insert point.
+        sel is the line containing the insert point.
+        after is all the lines after the line containing the insert point.
+
+        All lines end in a newline, except possibly the last line.
+        """
+        body = self
+        w = body.wrapper
+        s = w.getAllText()
+        insert = w.getInsertPoint()
+        i, j = g.getLine(s, insert)
+        before = s[0:i]
+        ins = s[i:j]
+        after = s[j:]
+        before = g.checkUnicode(before)
+        ins = g.checkUnicode(ins)
+        after = g.checkUnicode(after)
+        return before, ins, after
+    */
+    //@+node:felix.20230312221628.3: *4* LeoBody.getSelectionAreas
+    /*
+    def getSelectionAreas(self) -> Tuple[str, str, str]:
+        """
+        Return before,sel,after where:
+
+        before is the text before the selected text
+        (or the text before the insert point if no selection)
+        sel is the selected text (or "" if no selection)
+        after is the text after the selected text
+        (or the text after the insert point if no selection)
+        """
+        body = self
+        w = body.wrapper
+        s = w.getAllText()
+        i, j = w.getSelectionRange()
+        if i == j:
+            j = i + 1
+        before = s[0:i]
+        sel = s[i:j]
+        after = s[j:]
+        before = g.checkUnicode(before)
+        sel = g.checkUnicode(sel)
+        after = g.checkUnicode(after)
+        return before, sel, after
+    */
+    //@+node:felix.20230312221628.4: *4* LeoBody.getSelectionLines
+    /**
+     *         Return before,sel,after where:
+     *
+     * before is the all lines before the selected text
+     * (or the text before the insert point if no selection)
+     * sel is the selected text (or "" if no selection)
+     * after is all lines after the selected text
+     * (or the text after the insert point if no selection)
+     */
+    public getSelectionLines(): [string, string, string] {
+
+        if (g.app.batchMode) {
+            return ['', '', ''];
+        }
+        // At present, called only by c.getBodyLines.
+        const body = this;
+        const w = body.wrapper;
+        const s = w.getAllText();
+        let i, j, junk;
+        [i, j] = w.getSelectionRange();
+        if (i === j) {
+            [i, j] = g.getLine(s, i);
+        } else {
+            // #1742: Move j back if it is at the start of a line.
+            if (j > i && j > 0 && s[j - 1] === '\n') {
+                j -= 1;
+            }
+            [i, junk] = g.getLine(s, i);
+            [junk, j] = g.getLine(s, j);
+        }
+        const before = g.checkUnicode(s.substring(0, i));
+        const sel = g.checkUnicode(s.substring(i, j));
+        const after = g.checkUnicode(s.substring(j, s.length));
+        return [before, sel, after];  // 3 strings.
     }
     //@-others
 
