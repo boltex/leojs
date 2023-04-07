@@ -9,6 +9,7 @@ import { VNode, Position, StatusFlags } from './leoNodes';
 import { Commands } from './leoCommands';
 import { new_cmd_decorator } from './decorators';
 import "date-format-lite";
+// import * as AdmZip from 'adm-zip';
 import * as et from 'elementtree';
 import * as md5 from 'md5';
 var binascii = require('binascii');
@@ -581,12 +582,16 @@ export class FastRead {
      * Set the geometries from the globals dict.
      */
     public scanJsonGlobals(json_d: { [key: string]: any }): void {
+
+        return;
+        // ? Needed ?
+
         const c: Commands = this.c;
         const toInt = (x: number, d_val: number): number => {
             try {
                 return Math.floor(x);
             } catch (exception) {
-                return d_val
+                return d_val;
             }
         };
         // Priority 1: command-line args
@@ -615,7 +620,7 @@ export class FastRead {
         let top, left;
         [top, left] = windowSpot || [undefined, undefined];
         if (top === undefined) {
-            [top, left] = [json_d.get('top'), json_d.get('left')];
+            [top, left] = [json_d['top'], json_d['left']];
         }
         if (top === undefined) {
             [top, left] = [db_top, db_left];
@@ -982,7 +987,8 @@ export class FileCommands {
      */
     @cmd(
         'write-zip-archive',
-        ''
+        'Write a .zip file containing this .leo file and all external files.\n' +
+        'Write to os.environ[\'LEO_ARCHIVE\'] or the directory containing this .leo file.'
     )
     public async writeZipArchive(): Promise<unknown> {
 
@@ -1037,6 +1043,10 @@ export class FileCommands {
             let n = 1;
             // TODO
             vscode.window.showInformationMessage("TODO : writeZipArchive for " + `${archive_name} containing ${n} file${g.plural(n)}`);
+
+            // const f = new AdmZip();
+
+            console.log(process.env);
 
             // with (zipfile.ZipFile(archive_name, 'w') as f){
             //     f.write(leo_file);
@@ -1438,7 +1448,8 @@ export class FileCommands {
                     v = await fc.initNewDb(fileName);
                 }
             } else if (fileName.endsWith('.leojs')) {
-                v = await new FastRead(c, this.gnxDict).readJsonFile(fileName);
+                const w_fastRead: FastRead = new FastRead(c, this.gnxDict);
+                v = await w_fastRead.readJsonFile(fileName);
                 if (v) {
                     c.hiddenRootNode = v;
                 }
@@ -1456,7 +1467,10 @@ export class FileCommands {
                 }
             }
         }
+        catch (p_error) {
+            console.log('ERROR IN getLeoFile', p_error);
 
+        }
         finally {
             // lastTopLevel is a better fallback, imo.
             const p = recoveryNode || c.p || c.lastTopLevel();
