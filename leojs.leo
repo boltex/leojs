@@ -853,9 +853,16 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 
 - Implemented Find and Goto panels and commands
 
-## 0.1.4 Xxx xx xxxx
+## 0.1.4 Apr 04 2023
 
 - Implemented extract &amp; extract-names commands
+- Fixed clipboard handling of JSON clipbard content
+- Added new headline numbering commands
+- Fixed undo behavior and added multiple-headline-change helpers
+- Fixed @chapter/hoisting related issues
+- implemented c.registerCommand (instead of c.k.registerCommand)
+- Fixed reading/writing JSON leojs file format
+- Removed status bar indicator (until vscode API can provide focus status)
 </t>
 <t tx="felix.20201208215619.1">// this method is called when your extension is deactivated
 export function deactivate() { }
