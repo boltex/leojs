@@ -9,6 +9,7 @@ import { VNode, Position, StatusFlags } from './leoNodes';
 import { Commands } from './leoCommands';
 import { new_cmd_decorator } from './decorators';
 import "date-format-lite";
+// import * as AdmZip from 'adm-zip';
 import * as et from 'elementtree';
 import * as md5 from 'md5';
 var binascii = require('binascii');
@@ -243,7 +244,7 @@ export class FastRead {
         fc.descendentExpandedList = a_expanded;
         fc.descendentMarksList = a_marked;
     }
-    //@+node:felix.20211213223342.6: *4* fast.resolveUa & helper
+    //@+node:felix.20211213223342.6: *4* fast.resolveUa
     /**
      * Parse an unknown attribute in a <v> or <t> element.
      */
@@ -287,7 +288,6 @@ export class FastRead {
             }
             return '';
         }
-        let val2: any;
         try {
             // No change needed to support protocols.
             return pickle.loads(binString);
@@ -295,7 +295,7 @@ export class FastRead {
         catch (err) {
             try {
                 // TODO: cannot use second string 'bytes' parameter
-                val2 = pickle.loads(binString);
+                const val2 = pickle.loads(binString);
                 return g.toUnicode(val2);
             }
             catch (e) {
@@ -303,55 +303,6 @@ export class FastRead {
                 return '';
             }
         }
-    }
-    //@+node:felix.20211213223342.7: *5* fast.bytesToUnicode
-    /**
-     * Recursively convert bytes objects in strings / lists / dicts to str
-     * objects, thanks to TNT
-     * http://stackoverflow.com/questions/22840092
-     * Needed for reading Python 2.7 pickles in Python 3.4.
-     */
-    public bytesToUnicode(ob: any): string {
-        // TODO REMOVE THIS METHOD
-        return (ob as string);
-
-        // This is simpler than using isinstance.
-        // pylint: disable=unidiomatic-typecheck
-        /*
-        t = type(ob);
-
-        if t in (list, tuple):
-            l = [str(i, 'utf-8') if type(i) is bytes else i for i in ob]
-            l = [self.bytesToUnicode(i)
-                    if type(i) in (list, tuple, dict) else i
-                        for i in l]
-
-            ro = tuple(l) if t is tuple else l
-
-        else if t is dict
-            byte_keys = [i for i in ob if type(i) is bytes]
-
-            for bk in byte_keys:
-                v = ob[bk]
-                del ob[bk]
-                ob[str(bk, 'utf-8')] = v
-
-            for k in ob:
-                if type(ob[k]) is bytes:
-                    ob[k] = str(ob[k], 'utf-8')
-                elif type(ob[k]) in (list, tuple, dict):
-                    ob[k] = self.bytesToUnicode(ob[k])
-
-
-            ro = ob
-        elif t is bytes:  // TNB added this clause
-            ro = str(ob, 'utf-8')
-        else:
-            ro = ob
-
-
-        return ro
-        */
     }
     //@+node:felix.20211213223342.8: *4* fast.scanGlobals & helper
     /**
@@ -601,24 +552,24 @@ export class FastRead {
         try {
             d = JSON.parse(s);
         } catch (exception) {
-            g.trace(`Error converting JSON from  .leojs file: ${path}`);
+            g.trace(`Error converting JSON from .leojs file: ${path}`);
             g.es_exception();
             return [undefined, undefined];
         }
         let g_element: { [key: string]: any };
         let hidden_v: VNode | undefined;
         try {
-            g_element = d['globals'] || {};
+            g_element = d['globals'] || {};  // globals is optional
             const v_elements = d['vnodes'];
             const t_elements = d['tnodes'];
             const gnx2ua: { [key: string]: any } = {};
-
             Object.assign(gnx2ua, d['uas'] || {}); // User attributes in their own dict for leojs files
 
             const gnx2body = this.scanJsonTnodes(t_elements);
             hidden_v = this.scanJsonVnodes(gnx2body, this.gnx2vnode, gnx2ua, v_elements);
             this.handleBits();
-        } catch (exception) {
+        }
+        catch (exception) {
             g.trace(`Error .leojs JSON is not valid: ${path}`);
             g.es_exception(exception);
             return [undefined, undefined];
@@ -631,71 +582,79 @@ export class FastRead {
      * Set the geometries from the globals dict.
      */
     public scanJsonGlobals(json_d: { [key: string]: any }): void {
-        // TODO
-        /*
-        const c = this.c;
 
-        const toInt = (x: number, default: number): number => {
-            try{
+        return;
+        // ? Needed ?
+
+        const c: Commands = this.c;
+        const toInt = (x: number, d_val: number): number => {
+            try {
                 return Math.floor(x);
-            }catch (exception){
-                return default;
+            } catch (exception) {
+                return d_val;
             }
         };
         // Priority 1: command-line args
-        const windowSize = g.app.loadManager.options.get('windowSize');
-        const windowSpot = g.app.loadManager.options.get('windowSpot');
+        const windowSize = g.app.loadManager?.options['windowSize'];
+        const windowSpot = g.app.loadManager?.options['windowSpot'];
         //
         // Priority 2: The cache.
-        let db_top, db_left, db_height, db_width ;
-        [db_top, db_left, db_height, db_width] = c.db.get('window_position', (None, None, None, None));
+        let db_top, db_left, db_height, db_width;
+        [db_top, db_left, db_height, db_width] = c.db['window_position'] || [undefined, undefined, undefined, undefined];
         //
         // Priority 3: The globals dict in the .leojs file.
         //             Leo doesn't write the globals element, but leoInteg might.
 
         // height & width
         let height, width;
-        height, width = windowSize or (None, None)
-        if height is None:
-            height, width = json_d.get('height'), json_d.get('width')
-        if height is None:
-            height, width = db_height, db_width
-        height, width = toInt(height, 500), toInt(width, 800)
+        [height, width] = windowSize || [undefined, undefined];
+        if (height === undefined) {
+            [height, width] = [json_d['height'], json_d['width']];
+        }
+        if (height === undefined) {
+            [height, width] = [db_height, db_width];
+        }
+        [height, width] = [toInt(height, 500), toInt(width, 800)];
         //
         // top, left.
         let top, left;
-        top, left = windowSpot or (None, None)
-        if top is None:
-            top, left = json_d.get('top'), json_d.get('left')
-        if top is None:
-            top, left = db_top, db_left
-        top, left = toInt(top, 50), toInt(left, 50)
+        [top, left] = windowSpot || [undefined, undefined];
+        if (top === undefined) {
+            [top, left] = [json_d['top'], json_d['left']];
+        }
+        if (top === undefined) {
+            [top, left] = [db_top, db_left];
+        }
+        [top, left] = [toInt(top, 50), toInt(left, 50)];
         //
         // r1, r2.
-        r1 = float(c.db.get('body_outline_ratio', '0.5'))
-        r2 = float(c.db.get('body_secondary_ratio', '0.5'))
-        if 'size' in g.app.debug:
-            g.trace(width, height, left, top, c.shortFileName())
+        const r1 = Number(c.db['body_outline_ratio'] || '0.5');
+        const r2 = Number(c.db['body_secondary_ratio'] || '0.5');
+        if (g.app.debug.includes('size')) {
+            g.trace(width, height, left, top, c.shortFileName());
+        }
         // c.frame may be a NullFrame.
-        c.frame.setTopGeometry(width, height, left, top)
-        c.frame.resizePanesToRatio(r1, r2)
-        frameFactory = getattr(g.app.gui, 'frameFactory', None)
-        if not frameFactory:
-            return
-        assert frameFactory is not None
-        mf = frameFactory.masterFrame
-        if g.app.start_minimized:
-            mf.showMinimized()
-        elif g.app.start_maximized:
-            // #1189: fast.scanGlobals calls showMaximized later.
-            mf.showMaximized()
-        elif g.app.start_fullscreen:
-            mf.showFullScreen()
-        else:
-            mf.show()
-
-        */
-
+        // ? NOT NEEDED ?
+        // c.frame.setTopGeometry(width, height, left, top);
+        // ? NOT NEEDED ?
+        // c.frame.resizePanesToRatio(r1, r2);
+        const frameFactory: any = undefined; // getattr(g.app.gui, 'frameFactory', undefined);
+        if (!frameFactory) {
+            return;
+        }
+        // ? NOT NEEDED ?
+        // console.assert(frameFactory !== undefined);
+        // const mf = frameFactory.masterFrame;
+        // if (g.app.start_minimized){
+        //     mf.showMinimized();
+        // }else if (g.app.start_maximized){
+        //     // #1189: fast.scanGlobals calls showMaximized later.
+        //     mf.showMaximized();
+        // }else if (g.app.start_fullscreen){
+        //     mf.showFullScreen();
+        // }else{
+        //     mf.show();
+        // }
     }
     //@+node:felix.20230322233910.3: *4* fast.scanJsonTnodes
     public scanJsonTnodes(t_elements: any): { [key: string]: string } {
@@ -713,17 +672,20 @@ export class FastRead {
         gnx2body: { [key: string]: string },
         gnx2vnode: { [key: string]: VNode },
         gnx2ua: { [key: string]: any },
-        v_elements: any,
+        v_elements: any[],
     ): VNode | undefined {
 
         const c = this.c;
         const fc = this.c.fileCommands;
 
-        // Visit the given element, creating or updating the parent vnode.
-        const v_element_visitor = (parent_e: any, parent_v: VNode): void => {
-            for (const [i, v_dict] of Object.entries(parent_e)) {
+        /**
+         * Visit the given element, creating or updating the parent vnode.
+         */
+        const v_element_visitor = (parent_e: any[], parent_v: VNode): void => {
+
+            for (const [i, v_dict] of parent_e.entries()) {
                 // Get the gnx.
-                let gnx = (v_dict as { [key: string]: string })['gnx'];
+                let gnx: string | undefined = v_dict['gnx'];
                 if (!gnx) {
                     g.trace("Bad .leojs file: no gnx in v_dict");
                     g.printObj(v_dict);
@@ -731,14 +693,13 @@ export class FastRead {
                 }
                 //
                 // Create the vnode.
-                console.assert(parent_v.children.length.toString() === i, [i, parent_v, parent_v.children].toString());
+                console.assert(parent_v.children.length === i);
 
                 let v: VNode | undefined;
                 try {
                     v = gnx2vnode[gnx];
                 } catch (keyError) {
                     // g.trace('no "t" attrib')
-                    // @ts-expect-error
                     gnx = undefined;
                     v = undefined;
                 }
@@ -747,36 +708,34 @@ export class FastRead {
                     parent_v.children.push(v);
                     v.parents.push(parent_v);
                     // The body overrides any previous body text.
-                    const body: any = g.toUnicode(gnx2body[gnx] || '');
-                    // assert isinstance(body, str), body.__class__.__name__
-                    console.assert((typeof body === 'string' || body instanceof String), typeof body);
+                    const body = g.toUnicode(gnx2body[gnx!] || '');
+                    console.assert(typeof body === 'string' || body as any instanceof String, typeof body);
                     v._bodyString = body;
                 } else {
                     v = new VNode(c, gnx);
-                    gnx2vnode[gnx] = v;
+                    gnx2vnode[gnx!] = v;
                     parent_v.children.push(v);
                     v.parents.push(parent_v);
 
-                    v._headString = (v_dict as { [key: string]: any })['vh'] || '';
-                    v._bodyString = gnx2body[gnx] || '';
-                    v.statusBits = (v_dict as { [key: string]: any })['status'] || 0;  // Needed ?
+                    v._headString = v_dict['vh'] || '';
+                    v._bodyString = gnx2body[gnx!] || '';
+                    v.statusBits = v_dict['status'] || 0;  // Needed ?
                     if (v.isExpanded()) {
-                        fc.descendentExpandedList.push(gnx);
+                        fc.descendentExpandedList.push(gnx!);
                     }
                     if (v.isMarked()) {
-                        fc.descendentMarksList.push(gnx);
+                        fc.descendentMarksList.push(gnx!);
                     }
                     //
 
                     // Handle vnode uA's
-                    const uaDict = gnx2ua[gnx];  // A defaultdict(dict);
+                    const uaDict = gnx2ua[gnx!];  // A defaultdict(dict)
 
                     if (uaDict && Object.keys(uaDict).length) {
                         v.unknownAttributes = uaDict;
                     }
                     // Recursively create the children.
-                    v_element_visitor((v_dict as { [key: string]: any })['children'] || [], v);
-
+                    v_element_visitor(v_dict['children'] || [], v);
                 }
             }
         };
@@ -800,12 +759,7 @@ export class FastRead {
 export class FileCommands {
 
     public c: Commands;
-    // keys are gnx strings as returned by canonicalTnodeIndex.
-    // Values are vnodes.
-    // 2011/12/10: This dict is never re-inited.
-
     public frame: any;
-
     public nativeTnodeAttributes: string[];
     public nativeVnodeAttributes: string[];
 
@@ -814,7 +768,7 @@ export class FileCommands {
     public mFileName: string = "";
     public fileDate: number = -1;
     public leo_file_encoding!: BufferEncoding;
-    public tempCounter: number = 0;
+    public tempfileNameCounter: number = 0;
     // For reading...
     public checking: boolean = false;  // True: checking only: do *not* alter the outline.
     public descendentExpandedList: string[] = [];  // List of gnx's.
@@ -856,9 +810,9 @@ export class FileCommands {
      * Init ivars of the FileCommands class.
      */
     public initIvars(): void {
-        const c: Commands = this.c;
 
         // General...
+        const c: Commands = this.c;
         this.mFileName = "";
         this.fileDate = -1;
         this.leo_file_encoding = c.config.new_leo_file_encoding as BufferEncoding;
@@ -982,7 +936,7 @@ export class FileCommands {
         g.printObj(d, 'gnxDict');
     }
     //@+node:felix.20211213224222.1: *3* fc: Commands
-    //@+node:felix.20211213224222.2: *4* fc.writeAtFileNodes
+    //@+node:felix.20211213224222.2: *4* writeAtFileNodes
     @cmd(
         'write-at-file-nodes',
         'Write all @file nodes in the selected outline.'
@@ -994,16 +948,7 @@ export class FileCommands {
         await c.atFileCommands.writeAll(true);
         return c.raise_error_dialogs('write');
     }
-    //@+node:felix.20211213224222.3: *4* fc.write-outline-only
-    @cmd(
-        'write-outline-only',
-        'Write the entire outline without writing any derived files.')
-    public async writeOutlineOnly(): Promise<unknown> {
-        const c: Commands = this.c;
-        c.endEditing();
-        return this.writeOutline(this.mFileName);
-    }
-    //@+node:felix.20211213224222.4: *4* fc.writeDirtyAtFileNodes
+    //@+node:felix.20211213224222.4: *4* writeDirtyAtFileNodes
     @cmd(
         'write-dirty-at-file-nodes',
         'Write all changed @file Nodes.'
@@ -1015,7 +960,7 @@ export class FileCommands {
         await c.atFileCommands.writeAll(true);
         return c.raise_error_dialogs('write');
     }
-    //@+node:felix.20211213224222.5: *4* fc.writeMissingAtFileNodes
+    //@+node:felix.20211213224222.5: *4* writeMissingAtFileNodes
     @cmd(
         'write-missing-at-file-nodes',
         'Write all @file nodes for which the corresponding external file does not exist.'
@@ -1024,6 +969,103 @@ export class FileCommands {
         const c: Commands = this.c;
         c.endEditing();
         return c.atFileCommands.writeMissing(c.p);
+    }
+    //@+node:felix.20211213224222.3: *4* write-outline-only
+    @cmd(
+        'write-outline-only',
+        'Write the entire outline without writing any derived files.')
+    public async writeOutlineOnly(): Promise<unknown> {
+        const c: Commands = this.c;
+        c.endEditing();
+        return this.writeOutline(this.mFileName);
+    }
+    //@+node:felix.20230406222218.1: *4* write-zip-archive
+    /**
+     * Write a .zip file containing this .leo file and all external files.
+     *
+     * Write to os.environ['LEO_ARCHIVE'] or the directory containing this .leo file.
+     */
+    @cmd(
+        'write-zip-archive',
+        'Write a .zip file containing this .leo file and all external files.\n' +
+        'Write to os.environ[\'LEO_ARCHIVE\'] or the directory containing this .leo file.'
+    )
+    public async writeZipArchive(): Promise<unknown> {
+
+        const c: Commands = this.c;
+        const leo_file = c.fileName();
+        if (!leo_file) {
+            g.es('Please save this outline first');
+            return;
+        }
+        // Compute the timestamp.
+
+        // var date = new Date(unix_timestamp * 1000);
+        // // Hours part from the timestamp
+        // var hours = date.getHours();
+        // // Minutes part from the timestamp
+        // var minutes = "0" + date.getMinutes();
+        // // Seconds part from the timestamp
+        // var seconds = "0" + date.getSeconds();
+
+
+        const timestamp = new Date().getTime(); // datetime.now().timestamp();
+        const time = new Date(timestamp);
+        const time_s = time.format('YYYY-MM-DD-hh-mm-ss');
+
+        // Compute archive_name.
+        let archive_name = '';
+        // TODO
+        // try{
+        //     const directory = os.environ['LEO_ARCHIVE'];
+        //     // todo this should be a uri 
+        //     try {
+        //         await vscode.workspace.fs.stat(directory);
+        //         // OK exists
+
+        //     } catch {
+        //         // Does not exist !
+        //         g.es_print(`Not found: ${directory}`);
+        //         // TODO : TEST THIS WITH / WITHOUT ESCAPING SPECIAL CHARS
+        //         archive_name = `${directory}${os.sep}${g.shortFileName(leo_file)}-${time_s}.zip`;
+        //     }
+
+
+        // }catch (keyError){
+        //     // pass
+        // }
+        if (!archive_name) {
+            archive_name = `${leo_file}-${time_s}.zip`;
+        }
+        // Write the archive.
+        try {
+
+            let n = 1;
+            // TODO
+            vscode.window.showInformationMessage("TODO : writeZipArchive for " + `${archive_name} containing ${n} file${g.plural(n)}`);
+
+            // const f = new AdmZip();
+
+            console.log(process.env);
+
+            // with (zipfile.ZipFile(archive_name, 'w') as f){
+            //     f.write(leo_file);
+            //     for (const p of c.all_unique_positions()){
+            //         if (p.isAnyAtFileNode()){
+            //             fn = c.fullPath(p);
+            //             if (os.path.exists(fn)){
+            //                 n += 1;
+            //                 f.write(fn);
+            //             }
+            //         }
+            //     }
+            // }
+
+            g.es(`Wrote ${archive_name} containing ${n} file${g.plural(n)}`);
+        } catch (exception) {
+            g.es_print(`Error writing ${archive_name}`);
+            g.es_exception(exception);
+        }
     }
     //@+node:felix.20211213224228.1: *3* fc: File Utils
     //@+node:felix.20211213224228.2: *4* fc.createBackupFile
@@ -1039,7 +1081,7 @@ export class FileCommands {
 
         if (w_exists) {
             const timestamp: number = new Date().getTime();
-            backupName = fileName + "." + timestamp.toString(32) + (this.tempCounter++).toString(32) + ".tmp";
+            backupName = fileName + "." + timestamp.toString(32) + (this.tempfileNameCounter++).toString(32) + ".tmp";
 
             let s: string;
             // const w_readUri = vscode.Uri.file(fileName);
@@ -1095,6 +1137,7 @@ export class FileCommands {
      */
     public async handleWriteLeoFileException(fileName: string, backupName: string): Promise<void> {
         g.es("exception writing:", fileName);
+        g.es_exception();
 
         // Delete fileName.
         const w_fileExists = await g.os_path_exists(fileName);
@@ -1226,15 +1269,13 @@ export class FileCommands {
         // Save and clear gnxDict.
         const oldGnxDict = this.gnxDict;
         this.gnxDict = {};
-
         let hidden_v;
-        let s_bytes;
         if (s.trimStart().startsWith("{")) {
             // Maybe JSON
             hidden_v = new FastRead(c, this.gnxDict).readFileFromJsonClipboard(s);
         } else {
             // This encoding must match the encoding used in outline_to_clipboard_string.
-            s_bytes = g.toEncodedString(s, this.leo_file_encoding, true);
+            const s_bytes = g.toEncodedString(s, this.leo_file_encoding, true);
             hidden_v = new FastRead(c, this.gnxDict).readFileFromClipboard(s_bytes);
         }
 
@@ -1407,7 +1448,8 @@ export class FileCommands {
                     v = await fc.initNewDb(fileName);
                 }
             } else if (fileName.endsWith('.leojs')) {
-                v = await new FastRead(c, this.gnxDict).readJsonFile(fileName);
+                const w_fastRead: FastRead = new FastRead(c, this.gnxDict);
+                v = await w_fastRead.readJsonFile(fileName);
                 if (v) {
                     c.hiddenRootNode = v;
                 }
@@ -1425,7 +1467,10 @@ export class FileCommands {
                 }
             }
         }
+        catch (p_error) {
+            console.log('ERROR IN getLeoFile', p_error);
 
+        }
         finally {
             // lastTopLevel is a better fallback, imo.
             const p = recoveryNode || c.p || c.lastTopLevel();
