@@ -1260,6 +1260,54 @@ export class CommanderFileCommands {
             }
         }
     }
+    //@+node:felix.20230407210935.1: *4* c_file.writeFileFromSubtree
+    @commander_command(
+        'write-file-from-subtree',
+        'Write the entire tree from the selected node as text to a file.\n' +
+        'If node starts with @read-file-into-node, use the full path name in the headline.\n' +
+        'Otherwise, prompt for a file name.'
+    )
+    public async writeFileFromSubtree(this: Commands): Promise<void> {
+        const c: Commands = this;
+        const p: Position = this.p;
+        c.endEditing();
+        const h = p.h.trimStart();
+        let s = '';
+        for (const p1 of p.self_and_subtree()) {
+            s += p1.b + '\n';
+        }
+        let fileName = "";
+        const tag = '@read-file-into-node';
+        if (h.startsWith(tag)) {
+            fileName = h.substring(tag.length).trim();
+        } else {
+            fileName = "";
+        }
+        if (!fileName) {
+            fileName = await g.app.gui.runSaveFileDialog(c,
+                'Write File From Node',
+                [["All files", "*"], ["Python files", "*.py"], ["Leo files", "*.leo *.leojs"]],
+                "");
+        }
+        if (fileName) {
+            try {
+                // with open(fileName, 'w') as f:
+                g.chdir(fileName);
+                if (s.startsWith('@nocolor\n')) {
+                    s = s.substring('@nocolor\n'.length);
+                }
+                // f.write(s)
+                // f.flush()
+                const w_uri = g.makeVscodeUri(fileName);
+                const writeData = Buffer.from(s, 'utf8');
+                await vscode.workspace.fs.writeFile(w_uri, writeData);
+                g.blue('wrote:', fileName);
+            }
+            catch (IOError) {
+                g.error('can not write %s', fileName);
+            }
+        }
+    }
     //@+node:felix.20220105210716.37: *3* Recent Files
     //@+node:felix.20220105210716.38: *4* c_file.cleanRecentFiles
     // ? unused ?
