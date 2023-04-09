@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Created by Leo: http://leoeditor.com/leo_toc.html -->
-<leo_file xmlns:leo="http://leoeditor.com/namespaces/leo-python-editor/1.1" >
+<!-- Created by Leo: https://leo-editor.github.io/leo-editor/leo_toc.html -->
+<leo_file xmlns:leo="http://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
 <leo_header file_format="2"/>
 <globals/>
 <preferences/>
@@ -6443,7 +6443,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
 
     if (p_uri) {
         if (!!p_uri.toJSON &amp;&amp; !!p_uri.fsPath &amp;&amp; p_uri.fsPath.trim()) {
-            // valid
+            // valid: pass!
         } else {
             p_uri = undefined; // clear uri
         }
@@ -6458,9 +6458,8 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
 
         if (p_uri &amp;&amp; p_uri?.fsPath?.trim() &amp;&amp; g.app.loadManager) {
             fileName = p_uri.fsPath.replace(/\\/g, '/');
-            await g.app.loadManager.loadLocalFile(fileName, this);
         } else {
-            const fileName: string = await this.runOpenFileDialog(
+            fileName = await this.runOpenFileDialog(
                 undefined,
                 "Open",
                 [
@@ -6471,20 +6470,20 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
                 g.defaultLeoFileExtension(),
                 false
             ) as string;
-            if (fileName &amp;&amp; g.app.loadManager) {
-                await g.app.loadManager.loadLocalFile(fileName, this);
-                this.setupRefresh(this.finalFocus, {
-                    tree: true,
-                    body: true,
-                    goto: true,
-                    states: true,
-                    documents: true,
-                    buttons: true
-                });
-                this.launchRefresh();
-            } else {
-                return Promise.resolve();
-            }
+        }
+        if (fileName &amp;&amp; g.app.loadManager) {
+            await g.app.loadManager.loadLocalFile(fileName, this);
+            this.setupRefresh(this.finalFocus, {
+                tree: true,
+                body: true,
+                goto: true,
+                states: true,
+                documents: true,
+                buttons: true
+            });
+            this.launchRefresh();
+        } else {
+            return Promise.resolve();
         }
     } else {
         await this.triggerBodySave(true);

@@ -682,8 +682,15 @@ export class CommanderFileCommands {
             if (c.mFileName) {
                 g.app.forgetOpenFile(c.mFileName);
             }
-            // Don't change mFileName until the dialog has suceeded.
-            c.mFileName = g.ensure_extension(fileName, g.defaultLeoFileExtension(c));
+            // Don't change mFileName until the dialog has succeeded.
+            if (fileName.endsWith('.leo') ||
+                fileName.endsWith('.db',) ||
+                fileName.endsWith('.leojs')
+            ) {
+                c.mFileName = fileName;
+            } else {
+                c.mFileName = g.ensure_extension(fileName, g.defaultLeoFileExtension(c));
+            }
 
             c.frame.title = c.computeWindowTitle(c.mFileName);
 
@@ -751,6 +758,7 @@ export class CommanderFileCommands {
     public async revert(this: Commands): Promise<unknown> {
 
         const c: Commands = this;
+        const u = c.undoer;
 
         // Make sure the user wants to Revert.
         const fn: string = c.mFileName;
@@ -768,6 +776,7 @@ export class CommanderFileCommands {
             `Revert to previous version of ${fn}?`);
 
         if (w_reply === "yes") {
+            u.clearUndoState();
             return g.app.loadManager!.revertCommander(c);
         }
     }
@@ -1018,7 +1027,8 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.28: *4* c_file.removeSentinels
     @commander_command(
         'remove-sentinels',
-        'Import one or more files, removing any sentinels.'
+        'Convert one or more files, replacing the original files\n' +
+        'while removing any sentinels they contain.'
     )
     public async removeSentinels(this: Commands): Promise<unknown> {
 
@@ -1256,6 +1266,54 @@ export class CommanderFileCommands {
                 return g.blue('wrote:', fileName);
             }
             catch (iOError) {
+                g.error('can not write %s', fileName);
+            }
+        }
+    }
+    //@+node:felix.20230407210935.1: *4* c_file.writeFileFromSubtree
+    @commander_command(
+        'write-file-from-subtree',
+        'Write the entire tree from the selected node as text to a file.\n' +
+        'If node starts with @read-file-into-node, use the full path name in the headline.\n' +
+        'Otherwise, prompt for a file name.'
+    )
+    public async writeFileFromSubtree(this: Commands): Promise<void> {
+        const c: Commands = this;
+        const p: Position = this.p;
+        c.endEditing();
+        const h = p.h.trimStart();
+        let s = '';
+        for (const p1 of p.self_and_subtree()) {
+            s += p1.b + '\n';
+        }
+        let fileName = "";
+        const tag = '@read-file-into-node';
+        if (h.startsWith(tag)) {
+            fileName = h.substring(tag.length).trim();
+        } else {
+            fileName = "";
+        }
+        if (!fileName) {
+            fileName = await g.app.gui.runSaveFileDialog(c,
+                'Write File From Node',
+                [["All files", "*"], ["Python files", "*.py"], ["Leo files", "*.leo *.leojs"]],
+                "");
+        }
+        if (fileName) {
+            try {
+                // with open(fileName, 'w') as f:
+                g.chdir(fileName);
+                if (s.startsWith('@nocolor\n')) {
+                    s = s.substring('@nocolor\n'.length);
+                }
+                // f.write(s)
+                // f.flush()
+                const w_uri = g.makeVscodeUri(fileName);
+                const writeData = Buffer.from(s, 'utf8');
+                await vscode.workspace.fs.writeFile(w_uri, writeData);
+                g.blue('wrote:', fileName);
+            }
+            catch (IOError) {
                 g.error('can not write %s', fileName);
             }
         }
