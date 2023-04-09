@@ -2691,7 +2691,7 @@ export class FileCommands {
         try {
             // TODO : USE BUFFER OR OTHER OBJECT ???
             this.usingClipboard = true;
-            if (this.c.config.getBool('json-outline-clipboard', false)) {
+            if (this.c.config.getBool('json-outline-clipboard', true)) {
                 const d = this.leojs_outline_dict(p || this.c.p);
                 s = JSON.stringify(d, null, 4);
             } else {
@@ -2746,7 +2746,6 @@ export class FileCommands {
      * Write the outline in .leo (XML) format to a string.
      */
     public outline_to_xml_string(): string {
-
         // TODO : USE BUFFER OR OTHER OBJECT ???
         this.outputFile = ""; // io.StringIO()
         this.putProlog();
