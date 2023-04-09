@@ -4735,7 +4735,7 @@ export class LeoUI extends NullGui {
 
         if (p_uri) {
             if (!!p_uri.toJSON && !!p_uri.fsPath && p_uri.fsPath.trim()) {
-                // valid
+                // valid: pass!
             } else {
                 p_uri = undefined; // clear uri
             }
@@ -4750,9 +4750,8 @@ export class LeoUI extends NullGui {
 
             if (p_uri && p_uri?.fsPath?.trim() && g.app.loadManager) {
                 fileName = p_uri.fsPath.replace(/\\/g, '/');
-                await g.app.loadManager.loadLocalFile(fileName, this);
             } else {
-                const fileName: string = await this.runOpenFileDialog(
+                fileName = await this.runOpenFileDialog(
                     undefined,
                     "Open",
                     [
@@ -4763,20 +4762,20 @@ export class LeoUI extends NullGui {
                     g.defaultLeoFileExtension(),
                     false
                 ) as string;
-                if (fileName && g.app.loadManager) {
-                    await g.app.loadManager.loadLocalFile(fileName, this);
-                    this.setupRefresh(this.finalFocus, {
-                        tree: true,
-                        body: true,
-                        goto: true,
-                        states: true,
-                        documents: true,
-                        buttons: true
-                    });
-                    this.launchRefresh();
-                } else {
-                    return Promise.resolve();
-                }
+            }
+            if (fileName && g.app.loadManager) {
+                await g.app.loadManager.loadLocalFile(fileName, this);
+                this.setupRefresh(this.finalFocus, {
+                    tree: true,
+                    body: true,
+                    goto: true,
+                    states: true,
+                    documents: true,
+                    buttons: true
+                });
+                this.launchRefresh();
+            } else {
+                return Promise.resolve();
             }
         } else {
             await this.triggerBodySave(true);
