@@ -682,8 +682,15 @@ export class CommanderFileCommands {
             if (c.mFileName) {
                 g.app.forgetOpenFile(c.mFileName);
             }
-            // Don't change mFileName until the dialog has suceeded.
-            c.mFileName = g.ensure_extension(fileName, g.defaultLeoFileExtension(c));
+            // Don't change mFileName until the dialog has succeeded.
+            if (fileName.endsWith('.leo') ||
+                fileName.endsWith('.db',) ||
+                fileName.endsWith('.leojs')
+            ) {
+                c.mFileName = fileName;
+            } else {
+                c.mFileName = g.ensure_extension(fileName, g.defaultLeoFileExtension(c));
+            }
 
             c.frame.title = c.computeWindowTitle(c.mFileName);
 
@@ -751,6 +758,7 @@ export class CommanderFileCommands {
     public async revert(this: Commands): Promise<unknown> {
 
         const c: Commands = this;
+        const u = c.undoer;
 
         // Make sure the user wants to Revert.
         const fn: string = c.mFileName;
@@ -768,6 +776,7 @@ export class CommanderFileCommands {
             `Revert to previous version of ${fn}?`);
 
         if (w_reply === "yes") {
+            u.clearUndoState();
             return g.app.loadManager!.revertCommander(c);
         }
     }
@@ -1018,7 +1027,8 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.28: *4* c_file.removeSentinels
     @commander_command(
         'remove-sentinels',
-        'Import one or more files, removing any sentinels.'
+        'Convert one or more files, replacing the original files\n' +
+        'while removing any sentinels they contain.'
     )
     public async removeSentinels(this: Commands): Promise<unknown> {
 
