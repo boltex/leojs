@@ -348,6 +348,8 @@ export class CommanderFileCommands {
 
             let ok: any = false;
 
+            // ! THIS METHOD VOLUNTARILY DIFFERENT THAN LEO'S PYTHON CODE
+
             let q_result = Promise.resolve();
             if (fileName) {
                 if (g.app.loadManager!.isLeoFile(fileName)) {
@@ -404,6 +406,7 @@ export class CommanderFileCommands {
         }
         //@-others
 
+        // ! THIS METHOD VOLUNTARILY DIFFERENT THAN LEO'S PYTHON CODE
         // Close the window if this command completes successfully?
         let closeFlag: boolean = (
             c.frame.startupWindow &&
@@ -707,15 +710,15 @@ export class CommanderFileCommands {
     }
     //@+node:felix.20220105210716.17: *4* c_file.saveTo
     @commander_command('save-to',
-        'Save a Leo outline to a file, prompting for a new file name unless fileName is given.\n' +
+        'Save a copy of the Leo outline to a file, prompting for a new file name.\n' +
         'Leave the file name of the Leo outline unchanged.'
     )
     @commander_command('file-save-to',
-        'Save a Leo outline to a file, prompting for a new file name unless fileName is given.\n' +
+        'Save a copy of the Leo outline to a file, prompting for a new file name.\n' +
         'Leave the file name of the Leo outline unchanged.'
     )
     @commander_command('save-file-to',
-        'Save a Leo outline to a file, prompting for a new file name unless fileName is given.\n' +
+        'Save a copy of the Leo outline to a file, prompting for a new file name.\n' +
         'Leave the file name of the Leo outline unchanged.'
     )
     public async saveTo(this: Commands, fileName?: string, silent?: boolean): Promise<unknown> {
@@ -783,11 +786,13 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.19: *4* c_file.save-as-leojs
     @commander_command(
         'file-save-as-leojs',
-        'Save a Leo outline as a JSON (.leojs) file with a new file name.'
+        'Save a copy of the Leo outline as a JSON (.leojs) file with a new file name.\n' +
+        'Leave the file name of the Leo outline unchanged.'
     )
     @commander_command(
         'save-file-as-leojs',
-        'Save a Leo outline as a JSON (.leojs) file with a new file name.'
+        'Save a copy of the Leo outline as a JSON (.leojs) file with a new file name.\n' +
+        'Leave the file name of the Leo outline unchanged.'
     )
     public async save_as_leojs(this: Commands): Promise<unknown> {
 
@@ -796,7 +801,7 @@ export class CommanderFileCommands {
         let fileName = await g.app.gui.runSaveFileDialog(
             c,
             "Save As JSON (.leojs)",
-            [["Leo files", "*.leojs"]],
+            [["Leo JSON files", "*.leojs"]],
             '.leojs'
         );
 
@@ -814,11 +819,13 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.20: *4* c_file.save-as-zipped
     @commander_command(
         'file-save-as-zipped',
-        'Save a Leo outline as a zipped (.db) file with a new file name.'
+        'Save a copy of the Leo outline as a zipped (.db) file with a new file name.\n' +
+        'Leave the file name of the Leo outline unchanged.'
     )
     @commander_command(
         'save-file-as-zipped',
-        'Save a Leo outline as a zipped (.db) file with a new file name.'
+        'Save a copy of the Leo outline as a zipped (.db) file with a new file name.\n' +
+        'Leave the file name of the Leo outline unchanged.'
     )
     public async save_as_zipped(this: Commands): Promise<unknown> {
 
@@ -843,12 +850,14 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.21: *4* c_file.save-as-xml
     @commander_command(
         'file-save-as-xml',
-        'Save a Leo outline as a .leo file with a new file name.\n' +
+        'Save a copy of the Leo outline as an XML .leo file with a new file name.\n' +
+        'Leave the file name of the Leo outline unchanged.\n' +
         'Useful for converting a .leo.db file to a .leo file.'
     )
     @commander_command(
         'save-file-as-xml',
-        'Save a Leo outline as a .leo file with a new file name.\n' +
+        'Save a copy of the Leo outline as an XML .leo file with a new file name.\n' +
+        'Leave the file name of the Leo outline unchanged.\n' +
         'Useful for converting a .leo.db file to a .leo file.'
     )
     public async save_as_xml(this: Commands): Promise<unknown> {
@@ -1183,7 +1192,7 @@ export class CommanderFileCommands {
     //@+node:felix.20220105210716.35: *4* c_file.readOutlineOnly
     @commander_command(
         'read-outline-only',
-        'Open a Leo outline from a .leo file, but do not read any derived files.'
+        'Open a Leo outline, but do not read any derived files.'
     )
     public async readOutlineOnly(this: Commands): Promise<unknown> {
 
@@ -1192,7 +1201,7 @@ export class CommanderFileCommands {
         const fileName = await g.app.gui.runOpenFileDialog(
             c,
             "Read Outline Only",
-            [["Leo files", "*.leo *.leojs"], ["All files", "*"]],
+            [["Leo files", "*.leo *.leojs *.db"], ["All files", "*"]],
             ".leo"
         ) as string;
 

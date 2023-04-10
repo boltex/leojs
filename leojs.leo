@@ -4072,7 +4072,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 {
   "command": "leojs.saveAsLeoJsFile",
   "category": "Leojs",
-  "title": "Save as leojs JSON File...",
+  "title": "Save a copy as leojs File...",
   "enablement": "leojsTreeOpened",
   "icon": {
     "light": "resources/light/save-as-leojs.svg",
