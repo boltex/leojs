@@ -342,6 +342,23 @@ export let unitTesting: boolean = false; // A synonym for app.unitTesting.
 export let unicode_warnings: { [key: string]: any } = {};  // Keys are callers.
 
 //@+others
+//@+node:felix.20230413003654.1: ** g.codecs
+export const codecs = {
+    // UTF-8
+    BOM_UTF8: new Uint8Array([0xef, 0xbb, 0xbf]),
+
+    // UTF-16, little endian
+    BOM_UTF16_LE: new Uint8Array([0xff, 0xfe]),
+
+    // UTF-16, big endian
+    BOM_UTF16_BE: new Uint8Array([0xfe, 0xff]),
+
+    // UTF-32, little endian
+    BOM_UTF32_LE: new Uint8Array([0xff, 0xfe, 0x00, 0x00]),
+
+    // UTF-32, big endian
+    BOM_UTF32_BE: new Uint8Array([0x00, 0x00, 0xfe, 0xff]),
+};
 //@+node:felix.20220213000430.1: ** g.Classes & class accessors
 //@+node:felix.20220213000459.1: *3* class g.FileLikeObject (coreGlobals.py)
 /**
@@ -1756,6 +1773,35 @@ export function is_sentinel(line: string, delims: [string | undefined, string | 
     error(`is_sentinel: can not happen. delims: ${delims}`);
     return false;
 }
+//@+node:felix.20230413202326.1: *3* g.makeAllNonExistentDirectories
+/**
+ * A wrapper from os.makedirs.
+ * Attempt to make all non-existent directories.
+ *
+ * Return True if the directory exists or was created successfully.
+ */
+export async function makeAllNonExistentDirectories(theDir: string): Promise<string | undefined> {
+
+    // Return True if the directory already exists.
+    theDir = os_path_normpath(theDir);
+
+    let [w_isDir, w_exists] = await Promise.all([os_path_isdir(theDir), os_path_exists(theDir)]);
+    const ok = w_isDir && w_exists;
+
+    if (ok) {
+        return theDir;
+    }
+
+    // #1450: Create the directory with os.makedirs.
+    try {
+        const w_uri = makeVscodeUri(theDir);
+        await vscode.workspace.fs.createDirectory(w_uri);
+        return theDir;
+    } catch (exception) {
+        return undefined;
+    }
+}
+
 //@+node:felix.20220511001701.1: *3* g.openWithFileName
 /**
  * Create a Leo Frame for the indicated fileName if the file exists.
@@ -2872,7 +2918,7 @@ export function checkUnicode(s: string, encoding?: string): string {
     */
 
 }
-//@+node:felix.20220410215214.1: *4* g.isWordChar*     (coreGlobals.py)
+//@+node:felix.20220410215214.1: *4* g.isWordChar*
 /**
  * Return True if ch should be considered a letter.
  */
@@ -2884,40 +2930,77 @@ export function isWordChar1(ch: string): boolean {
     return !!ch && (/^[a-zA-Z]$/.test(ch) || ch === '_');
 }
 
-//@+node:felix.20220410215545.1: *4* g.toUnicode       (coreGlobals.py)
+//@+node:felix.20230413002946.1: *4* g.stripBOM
+/**
+ * If there is a BOM, return (e,s2) where e is the encoding
+ * implied by the BOM and s2 is the s stripped of the BOM.
+ *
+ * If there is no BOM, return (None,s)
+ *
+ * s must be the contents of a file (a string) read in binary mode.
+ */
+export function stripBOM(s_bytes: Uint8Array): [BufferEncoding | undefined, Uint8Array] {
+    const table: [number, BufferEncoding, Uint8Array][] = [
+        // Important: test longer bom's first.
+        // [4, 'utf-32', codecs.BOM_UTF32_BE],
+        // [4, 'utf-32', codecs.BOM_UTF32_LE],
+        [3, 'utf-8', codecs.BOM_UTF8],
+        [2, 'utf16le', codecs.BOM_UTF16_LE],
+        // [2, 'utf-16', codecs.BOM_UTF16_BE],
+        // [2, 'utf-16', codecs.BOM_UTF16_LE],
+    ];
+    if (s_bytes && s_bytes.length) {
+
+        for (const [n, e, bom] of table) {
+            console.assert(bom.length === n);
+            const subarray = s_bytes.subarray(0, bom.length);
+            if (subarray.every((value, index) => value === bom[index])) {
+                return [e, s_bytes.subarray(bom.length, s_bytes.length)];
+            }
+        }
+    }
+    return [undefined, s_bytes];
+}
+//@+node:felix.20220410215545.1: *4* g.toUnicode
 /**
  * Convert bytes to unicode if necessary.
  */
-export function toUnicode(s: any, encoding: string | null = null, reportErrors = false): string {
+export function toUnicode(s: string | Uint8Array, encoding: BufferEncoding | null = null, reportErrors = false): string {
     // TODO : SEE g.toEncodedString.
 
     // ORIGINAL
-    // if isinstance(s, str):
-    //     return s
-    // tag = 'g.toUnicode'
-    // if not isinstance(s, bytes):
-    //     if callers() not in unicode_warnings:
-    //         unicode_warnings[callers] = True
-    //         error(f"{tag}: unexpected argument of type {s.__class__.__name__}")
-    //         trace(callers())
-    //     return ''
-    // if not encoding:
-    //     encoding = 'utf-8'
-    // try:
-    //     s = s.decode(encoding, 'strict')
-    // except(UnicodeDecodeError, UnicodeError):
+    if (typeof s === 'string' || s instanceof String) {
+        return s as string;
+    }
+    const tag = 'g.toUnicode';
+    if (!(s instanceof Uint8Array)) {
+        // if reportErrors and not isinstance(s, (NullObject, TracingNullObject)):
+        // callers = g.callers()
+        // if callers not in unicode_warnings.includes(callers):
+        //     unicode_warnings[callers] = True
+        //     g.error(f"{tag}: unexpected argument of type {s.__class__.__name__}")
+        //     g.trace(callers)
+        error(`${tag}: unexpected argument of type ${typeof s}`);
+        return '';
+    }
+    if (!encoding) {
+        encoding = 'utf-8';
+    }
+    try {
+        s = Buffer.from(s).toString(encoding);
+    }
+    // except(UnicodeDecodeError, UnicodeError):  # noqa
     //     # https://wiki.python.org/moin/UnicodeDecodeError
     //     s = s.decode(encoding, 'replace')
     //     if reportErrors:
-    //         error(f"{tag}: unicode error. encoding: {encoding!r}, s:\n{s!r}")
-    //         trace(callers())
-    // except Exception:
-    //     es_exception()
-    //     error(f"{tag}: unexpected error! encoding: {encoding!r}, s:\n{s!r}")
-    //     trace(callers())
-    // return s
-
-    return s.toString(); // Skip for now
+    //         g.error(f"{tag}: unicode error. encoding: {encoding!r}, s:\n{s!r}")
+    //         g.trace(g.callers())
+    catch (exception) {
+        es_exception(exception);
+        error(`${tag}: unexpected error! encoding: ${encoding}, s:\n${s}`);
+        trace(callers());
+    }
+    return s as string;
 }
 
 //@+node:felix.20220410213527.1: *3* g.Whitespace
@@ -3668,7 +3751,7 @@ export function os_path_abspath(p_path: string): string {
 /**
  * Return the first half of the pair returned by split(path).
  */
-export function os_path_dirname(p_path: string): string {
+export function os_path_dirname(p_path?: string): string {
 
     if (!p_path) {
         return '';
@@ -3786,9 +3869,31 @@ export function os_path_finalize_join(c: Commands | undefined, ...args: any[]): 
 //     except Exception:
 //         return 0
 //@+node:felix.20211227182611.11: *3* g.os_path_getsize
-// def os_path_getsize(path: str):
-//     """Return the size of path."""
-//     return os.path.getsize(path) if path else 0
+/**
+ * Return the size of path.
+ */
+export async function os_path_getsize(p_path: string): Promise<number> {
+
+    if (p_path) {
+
+        // const w_uri = vscode.Uri.file(p_path);
+        const w_uri = makeVscodeUri(p_path);
+
+        try {
+            const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(w_uri);
+            // OK exists
+            return fileStat.size;
+        } catch {
+            // Does not exist !
+            return 0;
+        }
+
+    } else {
+        return 0;
+    }
+}
+
+
 //@+node:felix.20211227205142.1: *3* g.os_path_isabs
 /**
  * Return True if path is an absolute path.
@@ -3807,7 +3912,7 @@ export function os_path_isabs(p_path: string): boolean {
  * Return True if the path is a directory.
  */
 export async function os_path_isdir(p_path: string): Promise<boolean> {
-    if (path) {
+    if (p_path) {
 
         // const w_uri = vscode.Uri.file(p_path);
         const w_uri = makeVscodeUri(p_path);
@@ -3827,9 +3932,30 @@ export async function os_path_isdir(p_path: string): Promise<boolean> {
 }
 
 //@+node:felix.20211227182611.14: *3* g.os_path_isfile
-// def os_path_isfile(path: str):
-//     """Return True if path is a file."""
-//     return os.path.isfile(path) if path else False
+/**
+ * Return True if path is a file.
+ */
+export async function os_path_isfile(p_path: string): Promise<boolean> {
+    if (p_path) {
+
+        // const w_uri = vscode.Uri.file(p_path);
+        const w_uri = makeVscodeUri(p_path);
+
+        try {
+            const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(w_uri);
+            // OK exists
+            return fileStat.type === vscode.FileType.File;
+        } catch {
+            // Does not exist !
+            return false;
+        }
+
+    } else {
+        return false;
+    }
+
+
+}
 //@+node:felix.20211227182611.15: *3* g.os_path_join
 /**
  * Join paths, like os.path.join, with enhancements:

@@ -325,7 +325,7 @@ export class ParserBaseClass {
             // Copy the entire tree to s.
             c.fileCommands.leo_file_encoding = 'utf-8';
             s = c.fileCommands.outline_to_clipboard_string(p);
-            s = g.toUnicode(s, 'utf-8');
+            s = g.toUnicode(s!, 'utf-8');
         }
         catch (exception) {
             g.es_exception(exception);
@@ -1862,8 +1862,8 @@ export class LocalConfigManager {
     public defaultMenuFontSize: number;
     public defaultTreeFontSize: number;
 
-    public default_derived_file_encoding!: string;
-    public default_at_auto_file_encoding!: string;
+    public default_derived_file_encoding!: BufferEncoding;
+    public default_at_auto_file_encoding!: BufferEncoding;
     public new_leo_file_encoding!: string;
     public save_clears_undo_buffer!: boolean;
 

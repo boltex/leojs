@@ -3622,7 +3622,5 @@ VNode.prototype.__str__ = VNode.prototype.__repr__;
 //@-others
 //@@language typescript
 //@@tabwidth -4
-//@@pagewidth 70
-
 
 //@-leo

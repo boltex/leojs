@@ -6278,6 +6278,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 },
 </t>
 <t tx="felix.20201214205159.80">"@types/debounce": "^1.2.0",
+"@types/difflib": "^0.2.1",
 "@types/elementtree": "^0.1.1",
 "@types/glob": "^7.2.0",
 "@types/lodash": "^4.14.177",

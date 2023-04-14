@@ -12,9 +12,10 @@ import "date-format-lite";
 // import * as AdmZip from 'adm-zip';
 import * as et from 'elementtree';
 import * as md5 from 'md5';
+import * as difflib from "difflib";
 var binascii = require('binascii');
 var pickle = require('./jpicklejs');
-var difflib = require('difflib');
+
 // example :
 // const matcher = new difflib.SequenceMatcher(null, sttWordsStripped, transcriptWordsStripped);
 // const opCodes = matcher.getOpcodes();
@@ -211,7 +212,7 @@ export class FastRead {
             }
             // g.es_print('\n' + message, 'red');
             g.es_print('\n' + message);
-            g.es_print(g.toUnicode(e));
+            g.es_print(g.toUnicode((e as any).toString()));
             // console.log('');
             return [undefined, undefined]; // #1510: Return a tuple.
         }
@@ -310,7 +311,7 @@ export class FastRead {
      */
     public scanGlobals(g_element: any): void {
 
-        // TODO
+        // TODO ? Not Needed in leojs ?
         /*
         const c: Commands = this.c;
         let d = this.getGlobalData();
@@ -437,7 +438,7 @@ export class FastRead {
             for (let e of parent_e) {
                 console.assert(['v', 'vh'].includes(e.tag.toString()), e.tag.toString());
                 if (e.tag === 'vh') {
-                    parent_v._headString = g.toUnicode(e.text || '');
+                    parent_v._headString = g.toUnicode(e.text?.toString() || '');
                     continue;
                 }
                 // #1581: Attempt to handle old Leo outlines.
@@ -1084,15 +1085,12 @@ export class FileCommands {
             backupName = fileName + "." + timestamp.toString(32) + (this.tempfileNameCounter++).toString(32) + ".tmp";
 
             let s: string;
-            // const w_readUri = vscode.Uri.file(fileName);
             const w_readUri = g.makeVscodeUri(fileName);
             const readData = await vscode.workspace.fs.readFile(w_readUri);
             // s = Buffer.from(readData).toString('utf8'); // * No need to convert if already Uint8Array
 
             try {
-                // const w_writeUri = vscode.Uri.file(backupName);
                 const w_writeUri = g.makeVscodeUri(backupName);
-
                 // const writeData = Buffer.from(s, 'utf8'); // * No need to convert if already Uint8Array
                 await vscode.workspace.fs.writeFile(w_writeUri, readData);
                 ok = true;
