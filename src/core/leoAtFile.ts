@@ -667,7 +667,7 @@ export class FastAtRead {
                 // Previous line was verbatim *sentinel*. Append this line as it is.
 
                 // 2022/12/02: Bug fix: adjust indentation.
-                if (indent && /^\s*$/.test(line.substring(indent)) && line.length > indent) {
+                if (indent && /^\s*$/.test(line.substring(0, indent)) && line.length > indent) {
                     line = line.substring(indent);
                 }
                 body.push(line);
@@ -1018,7 +1018,7 @@ export class FastAtRead {
                 // CONVERTED FROM : j = s.rfind('\n', 0, i);
                 // let j = s.substring(0, i).lastIndexOf('\n');
 
-                const jj = comment_delim2 ? line.lastIndexOf(comment_delim2) : line.length;
+                const jj = comment_delim2 ? line.lastIndexOf(comment_delim2) : line.length - 1;
                 body.push(line.substring(ii, jj) + '\n');
                 continue;
             }
