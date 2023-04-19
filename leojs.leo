@@ -400,6 +400,7 @@
 <v t="felix.20220505225236.1"><vh>buildGotoIconPaths</vh></v>
 <v t="felix.20220109180351.1"><vh>convertLeoFiletypes</vh></v>
 <v t="felix.20201208224407.10"><vh>getDurationMilliseconds</vh></v>
+<v t="felix.20230416212643.1"><vh>getDurationSeconds</vh></v>
 <v t="felix.20201208224407.11"><vh>getFileFromPath</vh></v>
 <v t="felix.20220417151556.1"><vh>getIdFromDialog</vh></v>
 <v t="felix.20220201195806.1"><vh>isAlphaNumeric</vh></v>
@@ -901,9 +902,11 @@ import { Position } from "./core/leoNodes";
  */
 export function getDurationMs(p_start: [number, number], p_end?: [number, number]): number {
     if (!p_end) {
-        p_end = process.hrtime(p_start);
+        p_end = process.hrtime();
     }
-    const [w_secs, w_nanosecs] = p_end;
+    const w_secs = p_end[0] - p_start[0];
+    const w_nanosecs = p_end[1] - p_start[1];
+
     return w_secs * 1000 + Math.floor(w_nanosecs / 1000000);
 }
 
@@ -14867,6 +14870,13 @@ set leoTopHoistChapter(p_value: boolean) {
     this.qLastContextChange = utils.setContext(Constants.CONTEXT_FLAGS.LEO_TOP_HOIST_CHAPTER, p_value);
 }
 
+</t>
+<t tx="felix.20230416212643.1">/**
+ * Milliseconds converted into seconds, limiting to two decimals. 
+ */
+export function getDurationSeconds(p_start: [number, number], p_end?: [number, number]): number {
+    return parseFloat((getDurationMs(p_start, p_end) / 1000).toFixed(2));
+}
 </t>
 </tnodes>
 </leo_file>

@@ -3249,7 +3249,7 @@ export class VNode {
             w.setInsertPoint(ins);
         }
         if (traceTime) {
-            const delta_t: number = utils.getDurationMs(t1!, process.hrtime()); //  time.time() - t1;
+            const delta_t: number = utils.getDurationMs(t1!); //  time.time() - t1;
             if (delta_t > 0.1) {
                 g.trace(`${delta_t} sec`);
             }

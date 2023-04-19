@@ -1785,10 +1785,9 @@ export async function makeAllNonExistentDirectories(theDir: string): Promise<str
     // Return True if the directory already exists.
     theDir = os_path_normpath(theDir);
 
-    let [w_isDir, w_exists] = await Promise.all([os_path_isdir(theDir), os_path_exists(theDir)]);
-    const ok = w_isDir && w_exists;
+    let [w_exists, w_isDir] = await Promise.all([os_path_exists(theDir), os_path_isdir(theDir)]);
 
-    if (ok) {
+    if (w_exists && w_isDir) {
         return theDir;
     }
 
@@ -1824,7 +1823,7 @@ export async function openWithFileName(fileName: string, old_c: Commands, gui: N
     - None, which typically means 'utf-8'.
  */
 export async function readFileIntoString(fileName: string,
-    encoding: string = 'utf-8',  // BOM may override this.
+    encoding: BufferEncoding = 'utf-8',  // BOM may override this.
     kind: string | undefined = undefined,  // @file, @edit, ...
     verbose: boolean = true,
 ): Promise<[string | undefined, string | undefined]> {
@@ -1884,7 +1883,7 @@ export async function readFileIntoString(fileName: string,
         // const w_uri = vscode.Uri.file(fileName);
         const w_uri = makeVscodeUri(fileName);
         const readData = await vscode.workspace.fs.readFile(w_uri);
-        const s = Buffer.from(readData).toString('utf8');
+        const s = Buffer.from(readData).toString('utf-8');
 
         // s = fs.readFile(fileName, { encoding: 'utf8' });
 
@@ -2980,7 +2979,9 @@ export function toUnicode(s: string | Uint8Array, encoding: BufferEncoding | nul
         //     unicode_warnings[callers] = True
         //     g.error(f"{tag}: unexpected argument of type {s.__class__.__name__}")
         //     g.trace(callers)
-        error(`${tag}: unexpected argument of type ${typeof s}`);
+        if (reportErrors && (s !== null && s !== undefined)) {
+            error(`${tag}: unexpected argument of type ${typeof s}`);
+        }
         return '';
     }
     if (!encoding) {
