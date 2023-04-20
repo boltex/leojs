@@ -108,6 +108,7 @@ export class AtFile {
      //
     public force_newlines_in_at_nosent_bodies: boolean | undefined;
     public outputList: string[] = [];
+    public sentinels: boolean = false;
 
     //@+others
     //@+node:felix.20211225231532.1: *3* at.Birth & init
@@ -167,7 +168,7 @@ export class AtFile {
         this.inCode = true;
         this.indent = 0;  // The unit of indentation is spaces, not tabs.
         this.language = undefined;
-        this.output_newline = g.getOutputNewline(c=c);
+        this.output_newline = g.getOutputNewline(c);
         this.page_width = undefined;
         this.root = undefined;  // The root (a position) of tree being read or written.
         this.startSentinelComment = "";
@@ -244,7 +245,7 @@ export class AtFile {
         // Overrides of at.scanAllDirectives...
         if (at.language === 'python'){
             // Encoding directive overrides everything else.
-            encoding = g.getPythonEncodingFromString(root.b);
+            const encoding = g.getPythonEncodingFromString(root.b);
             if (encoding){
                 at.encoding = encoding;
             }
@@ -256,12 +257,12 @@ export class AtFile {
         }
         //
         // #1907: Compute the file name and create directories as needed.
-        const targetFileName = g.os_path_realpath(c.fullPath(root));
+        let targetFileName: string | undefined = g.os_path_realpath(c.fullPath(root));
         at.targetFileName = targetFileName;  // For at.writeError only.
         //
         // targetFileName can be empty for unit tests & @command nodes.
         if (!targetFileName) {
-            g.unitTesting?targetFileName = root.h:undefined;
+            targetFileName = g.unitTesting? root.h:undefined;
             at.targetFileName = targetFileName;  // For at.writeError only.
             return targetFileName;
         }
@@ -277,7 +278,7 @@ export class AtFile {
         // Create directories if enabled.
         const root_dir = g.os_path_dirname(targetFileName);
         if (make_dirs && root_dir){
-            ok = g.makeAllNonExistentDirectories(root_dir)
+            const ok = g.makeAllNonExistentDirectories(root_dir)
             if (!ok){
                 g.error(`Error creating directories: ${root_dir}`);
                 return undefined;
@@ -314,8 +315,8 @@ export class AtFile {
         }
         //
         // Create a dummy, unconnected, VNode as the root.
-        root_v = leoNodes.VNode(c);
-        root = leoNodes.Position(root_v);
+        const root_v = new VNode(c);
+        const root = new Position(root_v);
         new FastAtRead(c, {}).read_into_root(s, fn, root);
     }
     //@+node:felix.20230415162513.4: *5* at.openFileForReading & helper
@@ -327,7 +328,7 @@ export class AtFile {
         const at = this;
         const c = this.c;
 
-        const is_at_shadow = this.root.isAtShadowFileNode();
+        const is_at_shadow = this.root!.isAtShadowFileNode();
         if (fromString){
             if (is_at_shadow){
                 at.error('can not call at.read from string for @shadow files');
@@ -339,12 +340,12 @@ export class AtFile {
         //
         // Not from a string. Carefully read the file.
         // Returns full path, including file name.
-        let fn = g.fullPath(c, at.root);
+        let fn: string | undefined = g.fullPath(c, at.root!);
         let s: string | undefined;
         // Remember the full path to this node.
         at.setPathUa(at.root, fn);
         if (is_at_shadow){
-            fn = at.openAtShadowFileForReading(fn);
+            fn = await at.openAtShadowFileForReading(fn);
             if (!fn){
                 return [undefined, undefined];
             }
@@ -352,7 +353,7 @@ export class AtFile {
         console.assert(fn);
         try{
             // Sets at.encoding, regularizes whitespace and calls at.initReadLines.
-            s = at.readFileToUnicode(fn);
+            s = await at.readFileToUnicode(fn);
             // #1466.
             if (s === undefined){
                 // The error has been given.
@@ -365,7 +366,7 @@ export class AtFile {
             at._file_bytes = g.toEncodedString('');
             [fn, s] = [undefined, undefined];
         }
-        return [fn, s];
+        return [fn!, s!];
     }
     //@+node:felix.20230415162513.5: *6* at.openAtShadowFileForReading
     /**
@@ -376,7 +377,7 @@ export class AtFile {
         const at = this;
         const x = at.c.shadowController;
         // readOneAtShadowNode should already have checked these.
-        shadow_fn = x.shadowPathName(fn);
+        const shadow_fn = x.shadowPathName(fn);
 
         let [w_exists, w_isFile] = await Promise.all([g.os_path_exists(shadow_fn), g.os_path_isfile(shadow_fn)]);
         const shadow_exists = w_isFile && w_exists;
@@ -395,10 +396,11 @@ export class AtFile {
     /**
      * Read an @thin or @file tree.
      */
-    public async read(self, root: Position, fromString: str = None) : Promise<boolean> {
+    public async read(root: Position, fromString?: string) : Promise<boolean> {
         const at = this;
         const c = this.c;
-        const fileName = c.fullPath(root);  // #1341. #1889.
+        let file_s;
+        let fileName = c.fullPath(root);  // #1341. #1889.
         if (!fileName){
             at.error("Missing file name. Restoring @file tree from .leo file.");
             return false;
@@ -411,7 +413,7 @@ export class AtFile {
         if (at.errors){
             return false;
         }
-        let [fileName, file_s] = await at.openFileForReading(fromString);
+        [fileName, file_s] = await at.openFileForReading(fromString);
         // #1798:
         if (file_s ===undefined){
             return false;
@@ -433,8 +435,8 @@ export class AtFile {
         // at.page_width
         // at.tab_width
         at.scanAllDirectives(root)
-        gnx2vnode = c.fileCommands.gnxDict
-        contents = fromString || file_s;
+        const gnx2vnode = c.fileCommands.gnxDict
+        const contents = fromString || file_s;
         new FastAtRead(c, gnx2vnode).read_into_root(contents, fileName, root);
         root.clearDirty();
         return true;
@@ -466,7 +468,7 @@ export class AtFile {
         const at = this;
         const c = this.c;
         const old_changed = c.changed;
-        t1 = process.hrtime();
+        const t1 = process.hrtime();
         c.init_error_dialogs();
         const files = at.findFilesToRead(root, true);
         for (const p of files){
@@ -476,7 +478,7 @@ export class AtFile {
             p.v.clearDirty();
         }
         if (!g.unitTesting && files.length){
-            t2 = process.hrtime();
+            const t2 = process.hrtime();
             g.es(`read ${files.length} files in ${t2 - t1} seconds`);
         }
         c.changed = old_changed;
@@ -562,7 +564,7 @@ export class AtFile {
     /** 
      * Read all @<file> nodes in root's tree.
      */
-    public readAllSelected(root: Position): Promise<void> {
+    public async readAllSelected(root: Position): Promise<void> {
         const at = this;
         const c = this.c;
         const old_changed = c.changed;
@@ -570,7 +572,7 @@ export class AtFile {
         c.init_error_dialogs();
         const files = at.findFilesToRead(root, false);
         for (const p of files){
-            at.readFileAtPosition(p);
+            await at.readFileAtPosition(p);
         }
         for (const p of files){
             p.v.clearDirty();
@@ -594,7 +596,7 @@ export class AtFile {
         
         const at = this;
         const after = p.nodeAfterTree();
-        const p = p.copy();  // Don't change p in the caller.
+        p = p.copy();  // Don't change p in the caller.
         while (p && !p.__eq__(after)) { // Don't use iterator.
             if (p.isAtShadowFileNode()){
                 const fileName = p.atShadowFileNodeName();
@@ -666,11 +668,11 @@ export class AtFile {
         // Fix bug 889175: Remember the full fileName.
         at.rememberReadPath(fn, p);
         // if not g.unitTesting: g.es("reading: @edit %s" % (g.shortFileName(fn)))
-        let [s, e] = await g.readFileIntoString(fn, '@edit');
+        let [s, e] = await g.readFileIntoString(fn, undefined, '@edit');
         if (s === undefined ){
             return;
         }
-        const encoding = e === undefined ? 'utf-8': e;
+        const encoding: BufferEncoding = e === undefined ? 'utf-8': e;
         // Delete all children.
         while (p.hasChildren()){
             p.firstChild().doDelete();
@@ -708,7 +710,7 @@ export class AtFile {
         // Remember the full fileName.
         at.rememberReadPath(fn, p);
         // if not g.unitTesting: g.es("reading: @asis %s" % (g.shortFileName(fn)))
-        let [s, e] = g.readFileIntoString(fn, '@edit');
+        let [s, e] = await g.readFileIntoString(fn, undefined, '@edit');
         if (s === undefined){
             return;
         }
@@ -717,7 +719,7 @@ export class AtFile {
         while (p.hasChildren()){
             p.firstChild().doDelete();
         }
-        old_body = p.b;
+        const old_body = p.b;
         p.b = g.toUnicode(s, encoding, true);
         if (!c.isChanged() && p.b !== old_body){
             c.setChanged();
@@ -727,7 +729,7 @@ export class AtFile {
     /**
      * Update the @clean/@nosent node at root.
      */
-    public async readOneAtCleanNode(root: Position): Promise<void> {
+    public async readOneAtCleanNode(root: Position): Promise<boolean> {
         
         const at = this;
         const c = this.c;
@@ -744,9 +746,10 @@ export class AtFile {
         // Sets at.startSentinelComment/endSentinelComment.
         at.scanAllDirectives(root);
         const new_public_lines = at.read_at_clean_lines(fileName);
-        const old_private_lines = self.write_at_clean_sentinels(root);
+        const old_private_lines = this.write_at_clean_sentinels(root);
         const marker = x.markerFromFileLines(old_private_lines, fileName);
         let [old_public_lines, junk] = x.separate_sentinels(old_private_lines, marker);
+        let new_private_lines;
         if (old_public_lines){
             new_private_lines = x.propagate_changed_lines(
                 new_public_lines, old_private_lines, marker, root);
@@ -762,8 +765,8 @@ export class AtFile {
             g.es("updating:", root.h);
         }
         root.clearVisitedInTree();
-        gnx2vnode = at.fileCommands.gnxDict;
-        contents = new_private_lines.join('');
+        const gnx2vnode = at.fileCommands.gnxDict;
+        const contents = new_private_lines.join('');
         new FastAtRead(c, gnx2vnode).read_into_root(contents, fileName, root);
         return true;  // Errors not detected.
 
@@ -2949,11 +2952,6 @@ export class AtFile {
 
     }
     //@+node:felix.20230415162517.71: *5* at.directiveKind4 (write logic)
-    // These patterns exclude constructs such as @encoding.setter or @encoding(whatever)
-    // However, they must allow @language python, @nocolor-node, etc.
-
-    at_directive_kind_pattern = re.compile(r'\s*@([\w-]+)\s*')
-
     /**
      * Return the kind of at-directive or noDirective.
      *
@@ -2962,285 +2960,341 @@ export class AtFile {
      * - Using additional regex's to recognize directives.
      */
     public directiveKind4(s: string, i: number): number{
+
+        // These patterns exclude constructs such as @encoding.setter or @encoding(whatever)
+        // However, they must allow @language python, @nocolor-node, etc.
+
+        const at_directive_kind_pattern = /\s*@([\w-]+)\s*/;
+
         const at = this;
         const n = s.length;
-        if i >= n or s[i] != '@':
-            j = g.skip_ws(s, i)
-            if g.match_word(s, j, "@others")
-                return at.othersDirective
-
-            if g.match_word(s, j, "@all")
-                return at.allDirective
-
-
-            return at.noDirective
-
-
-        table = (
-            ("@all", at.allDirective),
-            ("@c", at.cDirective),
-            ("@code", at.codeDirective),
-            ("@doc", at.docDirective),
-            ("@others", at.othersDirective),
-            ("@verbatim", at.startVerbatim)
-        )
+        let j;
+        if (i >= n || s[i] !== '@'){
+            j = g.skip_ws(s, i);
+            if (g.match_word(s, j, "@others")){
+                return at.othersDirective;
+            }
+            if( g.match_word(s, j, "@all")){
+                return at.allDirective;
+            }
+            return at.noDirective;
+        };
+        const table = [
+            ["@all", at.allDirective],
+            ["@c", at.cDirective],
+            ["@code", at.codeDirective],
+            ["@doc", at.docDirective],
+            ["@others", at.othersDirective],
+            ["@verbatim", at.startVerbatim]
+        ];
 
             // ("@end_raw", at.endRawDirective),  // #2276.
             // ("@raw", at.rawDirective),  // #2276
         // Rewritten 6/8/2005.
-        if i + 1 >= n or s[i + 1] in (' ', '\t', '\n')
+        if (i + 1 >= n || [' ', '\t', '\n'].includes(s[i + 1])){
             // Bare '@' not recognized in cweb mode.
-            return at.noDirective if at.language == "cweb" else at.atDirective
-
-        if !s[i + 1].isalpha()
-            return at.noDirective  // Bug fix: do NOT return miscDirective here!
-
-        if at.language == "cweb" and g.match_word(s, i, '@c')
-            return at.noDirective
-
+            return at.language === "cweb" ? at.noDirective : at.atDirective;
+        }
+        if (!s[i + 1].match(/[a-zA-Z]/)) {
+            return at.noDirective;  // Bug fix: do NOT return miscDirective here!
+        }
+        if (at.language === "cweb" && g.match_word(s, i, '@c')){
+            return at.noDirective;
+        }
         // When the language is elixir, @doc followed by a space and string delimiter
         // needs to be treated as plain text; the following does not enforce the
         // 'string delimiter' part of that.  An @doc followed by something other than
         // a space will fall through to usual Leo @doc processing.
-        if at.language == "elixir" and g.match_word(s, i, '@doc '):  
-            return at.noDirective
-
-        for name, directive in table:
-            if g.match_word(s, i, name)
-                return directive
-
-
+        if (at.language === "elixir" && g.match_word(s, i, '@doc ')){
+            return at.noDirective;
+        }
+        for (let [name, directive] of table){
+            if (g.match_word(s, i, name)){
+                return directive;
+            }
+        }
         // Support for add_directives plugin.
         // Use regex to properly distinguish between Leo directives
         // and python decorators.
-        s2 = s[i:]
-        m = self.at_directive_kind_pattern.match(s2)
-        if m:
-            word = m.group(1)
-            if word not in g.globalDirectiveList:
-                return at.noDirective
+        const s2 = s.substring(i);
+        const m = at_directive_kind_pattern.exec(s2);
+        let w_group1EndIndex: number;
+        if (m && m.length){
+            const word = m[1];
+            w_group1EndIndex = m.index + word.length;
+            if (!g.globalDirectiveList.includes(word)){
+                return at.noDirective;
+            }
+            const s3 = s2[w_group1EndIndex];
+            if (s3 && ".(".includes(s3[0])){
+                return at.noDirective;
+            }
+            return at.miscDirective;
 
-            s3 = s2[m.end(1) :]
-            if s3 and s3[0] in ".(":
-                return at.noDirective
-
-            return at.miscDirective
-
-
+        }
         // An unusual case.
         return at.noDirective;  // pragma: no cover
 
     }
     //@+node:felix.20230415162517.72: *5* at.isSectionName
-    // returns (flag, end). end is the index of the character after the section name.
-
-    public isSectionName(s: str, i: int) -> Tuple[bool, int]:  
+    /**
+     * returns (flag, end). end is the index of the character after the section name.
+     */
+    public isSectionName(s: string, i: number): [boolean, number] {
 
         const at = this;
         // Allow leading periods.
-        while i < len(s) and s[i] == '.'
-            i += 1
-        if !g.match(s, i, at.section_delim1)
-            return False, -1
-        i = g.find_on_line(s, i, at.section_delim2)
-        if i > -1
-            return True, i + len(at.section_delim2)
-        return False, -1
+        while (i < s.length && s[i] === '.'){
+            i += 1;
+        }
+        if( !g.match(s, i, at.section_delim1)){
+            return [false, -1];
+        }
+        i = g.find_on_line(s, i, at.section_delim2);
+        if (i > -1){
+            return [true, i + at.section_delim2.length];
+        }
+        return [false, -1];
+
+    }
     //@+node:felix.20230415162517.73: *5* at.isWritable
-    public isWritable(path: Any): boolean
-        """Return True if the path is writable."""
-        try
-            // os.access() may not exist on all platforms.
-            ok = os.access(path, os.W_OK)
-        catch AttributeError
-            return true;
-        if !ok
-            g.es('read only:', repr(path), color='red')
-        return ok
+    /**
+     * Return True if the path is writable.
+     */
+    public isWritable(path: any): boolean {
+        return true;
+
+        // TODO : ? NOT USED IN LEO'S CODEBASE
+        // try
+        //     // os.access() may not exist on all platforms.
+        //     ok = os.access(path, os.W_OK)
+        // catch AttributeError
+        //     return true;
+        // if !ok
+        //     g.es('read only:', repr(path), color='red')
+        // return ok
+    }
     //@+node:felix.20230415162517.74: *5* at.os and allies
     //@+node:felix.20230415162517.75: *6* at.oblank, oblanks & otabs
-    public oblank(): void
-        self.os(' ')
-
-    public oblanks(n: int): void
-        self.os(' ' * abs(n))
-
-    public otabs(n: int): void
-        self.os('\t' * abs(n))
+    public oblank(): void{
+        this.os(' ');
+    }
+    public oblanks(n: int): void{
+        this.os(' '.repeat(Math.abs(n)));
+    }
+    public otabs(n: int): void{
+        this.os('\t'.repeat(Math.abs(n)));
+    }
     //@+node:felix.20230415162517.76: *6* at.onl & onl_sent
-    public onl(): void
-        """Write a newline to the output stream."""
-        self.os('\n')  // **not** self.output_newline
-
-    public onl_sent(): void
-        """Write a newline to the output stream, provided we are outputting sentinels."""
-        if self.sentinels
-            this.onl()
+    /**
+     * Write a newline to the output stream.
+     */
+    public onl(): void {
+        this.os('\n')  // **not** this.output_newline
+    }
+    /**
+     * Write a newline to the output stream, provided we are outputting sentinels.
+     */
+    public onl_sent(): void {
+        if( this.sentinels){
+            this.onl();
+        }
+    }
     //@+node:felix.20230415162517.77: *6* at.os
-    public os(s: string): void
-        """
-        Append a string to at.outputList.
-
-        All output produced by leoAtFile module goes here.
-        """
+    /**
+     * Append a string to at.outputList.
+     *
+     * All output produced by leoAtFile module goes here.
+     */
+    public os(s: string): void {
         const at = this;
         s = g.toUnicode(s, at.encoding);
-        at.outputList.push(s)
+        at.outputList.push(s);
+    }
     //@+node:felix.20230415162517.78: *5* at.outputStringWithLineEndings
-    public outputStringWithLineEndings(s: string): void
-        """
-        Write the string s as-is except that we replace '\n' with the proper line ending.
-
-        Calling self.onl() runs afoul of queued newlines.
-        """
+    /**
+     * Write the string s as-is except that we replace '\n' with the proper line ending.
+     *
+     * Calling self.onl() runs afoul of queued newlines.
+     */
+    public outputStringWithLineEndings(s: string): void {
         const at = this;
         s = g.toUnicode(s, at.encoding);
-        s = s.replace('\n', at.output_newline)
-        self.os(s)
+        s = s.replace('\n', at.output_newline);
+        this.os(s);
+    }
     //@+node:felix.20230415162517.79: *5* at.precheck (calls shouldPrompt...)
-    public precheck(fileName: str, root: Position): boolean
-        """
-        Check whether a dirty, potentially dangerous, file should be written.
-
-        Return True if so.  Return False *and* issue a warning otherwise.
-        """
+    /**
+     * Check whether a dirty, potentially dangerous, file should be written.
+     *
+     * Return True if so.  Return False *and* issue a warning otherwise.
+     */
+    public async precheck(fileName: string, root: Position): Promise<boolean> {
         const at = this;
         //
         // #1450: First, check that the directory exists.
-        theDir = g.os_path_dirname(fileName)
-        if theDir and not g.os_path_exists(theDir)
-            at.error(f"Directory not found:\n{theDir}")
+        const theDir = g.os_path_dirname(fileName);
+        const w_exists = await g.os_path_exists(theDir);
+        if (theDir && !w_exists){
+            at.error(`Directory not found:\n{theDir}`);
             return false;
+        }
         //
         // Now check the file.
-        if !at.shouldPromptForDangerousWrite(fileName, root)
+        if (!at.shouldPromptForDangerousWrite(fileName, root)){
             // Fix bug 889175: Remember the full fileName.
-            at.rememberReadPath(fileName, root)
+            at.rememberReadPath(fileName, root);
             return true;
+        }
         //
         // Prompt if the write would overwrite the existing file.
-        ok = self.promptForDangerousWrite(fileName)
-        if ok
+        const ok = await this.promptForDangerousWrite(fileName);
+        if (ok){
             // Fix bug 889175: Remember the full fileName.
-            at.rememberReadPath(fileName, root)
+            at.rememberReadPath(fileName, root);
             return true;
+        }
         //
         // Fix #1031: do not add @ignore here!
-        g.es("not written:", fileName)
+        g.es("not written:", fileName);
         return false;
-    //@+node:felix.20230415162517.80: *5* at.putAtFirstLines
-    public putAtFirstLines(s: string): void
-        """
-        Write any @firstlines from string s.
-        These lines are converted to @verbatim lines,
-        so the read logic simply ignores lines preceding the @+leo sentinel.
-        """
-        const at = this;
-        tag = "@first"
-        i = 0
-        while g.match(s, i, tag)
-            i += len(tag)
-            i = g.skip_ws(s, i)
-            j = i
-            i = g.skip_to_end_of_line(s, i)
-            // Write @first line, whether empty or not
-            line = s[j:i]
-            at.os(line)
-            at.onl()
-            i = g.skip_nl(s, i)
-    //@+node:felix.20230415162517.81: *5* at.putAtLastLines
-    public putAtLastLines(s: string): void
-        """
-        Write any @last lines from string s.
-        These lines are converted to @verbatim lines,
-        so the read logic simply ignores lines following the @-leo sentinel.
-        """
-        const at = this;
-        tag = "@last"
-        // Use g.splitLines to preserve trailing newlines.
-        lines = g.splitLines(s)
-        n = len(lines)
-        j = k = n - 1
-        // Scan backwards for @last directives.
-        while j >= 0
-            line = lines[j]
-            if g.match(line, 0, tag)
-                j -= 1
-            else if not line.strip()
-                j -= 1
-            else
-                break
-        // Write the @last lines.
-        for line in lines[j + 1 : k + 1]
-            if g.match(line, 0, tag)
-                i = len(tag)
-                i = g.skip_ws(line, i)
-                at.os(line[i:])
-    //@+node:felix.20230415162517.82: *5* at.putDirective & helper
-    public putDirective(s: str, i: int, p: Position): number
-        r"""
-        Output a sentinel a directive or reference s.
 
-        It is important for PHP and other situations that \@first and \@last
-        directives get translated to verbatim lines that do *not* include what
-        follows the @first & @last directives.
-        """
+    }
+    //@+node:felix.20230415162517.80: *5* at.putAtFirstLines
+    /**
+     * Write any @firstlines from string s.
+     * These lines are converted to @verbatim lines,
+     * so the read logic simply ignores lines preceding the @+leo sentinel.
+     */
+    public putAtFirstLines(s: string): void {
         const at = this;
-        k = i
-        j = g.skip_to_end_of_line(s, i)
-        directive = s[i:j]
-        if g.match_word(s, k, "@delims")
-            at.putDelims(directive, s, k)
-        else if g.match_word(s, k, "@language")
-            this.putSentinel("@" + directive)
-        else if g.match_word(s, k, "@comment")
-            this.putSentinel("@" + directive)
-        else if g.match_word(s, k, "@last")
+        const tag = "@first";
+        let i = 0;
+        while (g.match(s, i, tag)){
+            i += tag.length;
+            i = g.skip_ws(s, i);
+            j = i;
+            i = g.skip_to_end_of_line(s, i);
+            // Write @first line, whether empty or not
+            const line = s.substring(j, i);
+            at.os(line);
+            at.onl();
+            i = g.skip_nl(s, i);
+        }
+    }
+    //@+node:felix.20230415162517.81: *5* at.putAtLastLines
+    /**
+     * Write any @last lines from string s.
+     * These lines are converted to @verbatim lines,
+     * so the read logic simply ignores lines following the @-leo sentinel.
+     */
+    public putAtLastLines(s: string): void{
+        const at = this;
+        const tag = "@last";
+        // Use g.splitLines to preserve trailing newlines.
+        const lines = g.splitLines(s);
+        const n = lines.length;
+        let j = n - 1;
+        const k = j;
+        // Scan backwards for @last directives.
+        while (j >= 0){
+            line = lines[j];
+            if( g.match(line, 0, tag)){
+                j -= 1;
+            }else if (!line.trim()){
+                j -= 1;
+            }else{
+                break;
+            }
+        }
+        // Write the @last lines.
+        for (const line of lines.slice(j + 1, k + 1)){
+            if (g.match(line, 0, tag)){
+                const i = tag.length;
+                i = g.skip_ws(line, i);
+                at.os(line.substring(i));
+            }
+        }
+    }
+    //@+node:felix.20230415162517.82: *5* at.putDirective & helper
+    /**  
+     * Output a sentinel a directive or reference s.
+     *
+     * It is important for PHP and other situations that \@first and \@last
+     * directives get translated to verbatim lines that do *not* include what
+     * follows the @first & @last directives.
+    */
+    public putDirective(s: string, i: number, p: Position): number {
+        const at = this;
+        const k = i;
+        const j = g.skip_to_end_of_line(s, i);
+        const directive = s.substring(i, j);
+        if (g.match_word(s, k, "@delims")){
+            at.putDelims(directive, s, k);
+        }else if (g.match_word(s, k, "@language")){
+            this.putSentinel("@" + directive);
+        }else if (g.match_word(s, k, "@comment")){
+            this.putSentinel("@" + directive);
+        }else if (g.match_word(s, k, "@last")){
             // #1307.
-            if p.isAtCleanNode()
-                at.error(f"ignoring @last directive in {p.h!r}")
-                g.es_print('@last is not valid in @clean nodes')
+            if (p.isAtCleanNode()){
+                at.error(`ignoring @last directive in ${p.h}`);
+                g.es_print('@last is not valid in @clean nodes');
             // #1297.
-            else if g.app.inScript or g.unitTesting or p.isAnyAtFileNode()
+            }else if (g.app.inScript || g.unitTesting || p.isAnyAtFileNode()){
                 // Convert to an verbatim line _without_ anything else.
-                this.putSentinel("@@last")
-            else
-                at.error(f"ignoring @last directive in {p.h!r}")  
-        else if g.match_word(s, k, "@first")
+                this.putSentinel("@@last");
+            }else{
+                at.error(`ignoring @last directive in ${p.h}`);
+            }
+        }else if (g.match_word(s, k, "@first")){
             // #1307.
-            if p.isAtCleanNode():  
-                at.error(f"ignoring @first directive in {p.h!r}")
-                g.es_print('@first is not valid in @clean nodes')
+            if (p.isAtCleanNode()){
+                at.error(`ignoring @first directive in ${p.h}`);
+                g.es_print('@first is not valid in @clean nodes');
             // #1297.
-            else if g.app.inScript or g.unitTesting or p.isAnyAtFileNode()
+            }else if (g.app.inScript || g.unitTesting || p.isAnyAtFileNode()){
                 // Convert to an verbatim line _without_ anything else.
-                this.putSentinel("@@first")
-            else
-                at.error(f"ignoring @first directive in {p.h!r}")  
-        else
-            this.putSentinel("@" + directive)
-        i = g.skip_line(s, k)
-        return i
+                this.putSentinel("@@first");
+            }else{
+                at.error(`ignoring @first directive in ${p.h}`);
+            }
+        }else{
+            this.putSentinel("@" + directive);
+        }
+        i = g.skip_line(s, k);
+        return i;
+
+    }
     //@+node:felix.20230415162517.83: *6* at.putDelims
-    public putDelims(directive: str, s: str, k: int): void
-        """Put an @delims directive."""
+    /**
+     * Put an @delims directive.
+     */
+    public putDelims(directive: string, s: string, k: number): void {
+
         const at = this;
         // Put a space to protect the last delim.
-        at.putSentinel(directive + " ")  // 10/23/02: put @delims, not @@delims
+        at.putSentinel(directive + " ");  // 10/23/02: put @delims, not @@delims
         // Skip the keyword and whitespace.
-        j = i = g.skip_ws(s, k + len("@delims"))
+        j = g.skip_ws(s, k + len("@delims"));
+        i = j;
         // Get the first delim.
-        while i < len(s) and not g.is_ws(s[i]) and not g.is_nl(s, i)
-            i += 1
-        if j < i
-            at.startSentinelComment = s[j:i]
+        while (i < s.length && !g.is_ws(s[i]) && !g.is_nl(s, i)){
+            i += 1;
+        }
+        if (j < i){
+            at.startSentinelComment = s.substring(j, i);
             // Get the optional second delim.
-            j = i = g.skip_ws(s, i)
-            while i < len(s) and not g.is_ws(s[i]) and not g.is_nl(s, i)
-                i += 1
-            at.endSentinelComment = s[j:i] if j < i else ""
-        else
-            at.writeError("Bad @delims directive")  // pragma: no cover
+            const j = g.skip_ws(s, i);
+            let i = j;
+            while (i < s.length && !g.is_ws(s[i]) && !g.is_nl(s, i)){
+                i += 1;
+            }
+            at.endSentinelComment = j < i ? s.substring(j, i) : "";
+        }else{
+            at.writeError("Bad @delims directive");
+        }
+    }
     //@+node:felix.20230415162517.84: *5* at.putIndent
     public putIndent(n: int, s: str = '') : void
         """Put tabs and spaces corresponding to n spaces,

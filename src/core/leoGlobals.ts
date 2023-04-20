@@ -1826,7 +1826,7 @@ export async function readFileIntoString(fileName: string,
     encoding: BufferEncoding = 'utf-8',  // BOM may override this.
     kind: string | undefined = undefined,  // @file, @edit, ...
     verbose: boolean = true,
-): Promise<[string | undefined, string | undefined]> {
+): Promise<[string | undefined, BufferEncoding | undefined]> {
 
     if (!fileName) {
         if (verbose) {
@@ -1851,42 +1851,25 @@ export async function readFileIntoString(fileName: string,
     }
 
     let s: string | undefined;
-    let e: string | undefined;
+    let e: BufferEncoding | undefined;
     let junk: string;
 
     try {
-        e = undefined;
-        let buffer: any;
-
-        // ! SKIP FOR NOW
-        // TODO
-        /*
-        const f: number = fs.openSync(fileName, 'rb')
-        fs.readSync(f, buffer, );
-
-        // Fix #391.
-        if (!s){
+        const w_uri = makeVscodeUri(fileName);
+        let readData = await vscode.workspace.fs.readFile(w_uri);
+        if (!readData) {
             return ['', undefined];
         }
-        // New in Leo 4.11: check for unicode BOM first.
-        [e, s] = stripBOM(s)
-        if (!e){
+        [e, readData] = stripBOM(readData);
+        if (!e) {
             // Python's encoding comments override everything else.
-            [junk, ext] = os_path_splitext(fileName);
-            if (ext === '.py'){
-                e = getPythonEncodingFromString(s);
+            let [junk, ext] = os_path_splitext(fileName);
+            if (ext === '.py') {
+                e = getPythonEncodingFromString(readData);
             }
         }
-        s = toUnicode(s, e || encoding);
-        */
-
-        // const w_uri = vscode.Uri.file(fileName);
-        const w_uri = makeVscodeUri(fileName);
-        const readData = await vscode.workspace.fs.readFile(w_uri);
-        const s = Buffer.from(readData).toString('utf-8');
-
-        // s = fs.readFile(fileName, { encoding: 'utf8' });
-
+        s = toUnicode(readData, e || encoding);
+        // const s = Buffer.from(readData).toString('utf-8');
         return [s, e];
     }
     catch (iOError) {
@@ -2916,6 +2899,41 @@ export function checkUnicode(s: string, encoding?: string): string {
     return s;
     */
 
+}
+//@+node:felix.20230420014718.1: *4* g.getPythonEncodingFromString
+/**
+ * Return the encoding given by Python's encoding line.
+ * s is the entire file.
+ */
+export function getPythonEncodingFromString(readData?: Uint8Array | string): BufferEncoding | undefined {
+
+    let encoding = undefined;
+    let [tag, tag2] = ['# -*- coding:', '-*-'];
+    let [n1, n2] = [tag.length, tag2.length];
+    if (readData) {
+        // For Python 3.x we must convert to unicode before calling startsWith.
+        // The encoding doesn't matter: we only look at the first line, and if
+        // the first line is an encoding line, it will contain only ascii characters.
+        const s = toUnicode(readData, 'ascii');
+        const lines = splitLines(s);
+        let line1 = lines[0].trim();
+        let e: BufferEncoding;
+        if (line1.startsWith(tag) && line1.endsWith(tag2)) {
+            e = line1.substring(n1, -n2).trim() as BufferEncoding;
+            if (e && isValidEncoding(e)) {
+                encoding = e;
+            }
+        } else if (match_word(line1, 0, '@first')) {  // 2011/10/21.
+            line1 = line1.substring('@first'.length).trim();
+            if (line1.startsWith(tag) && line1.endsWith(tag2)) {
+                e = line1.substring(n1, -n2).trim() as BufferEncoding;
+                if (e && isValidEncoding(e)) {
+                    encoding = e;
+                }
+            }
+        }
+    }
+    return encoding;
 }
 //@+node:felix.20220410215214.1: *4* g.isWordChar*
 /**
