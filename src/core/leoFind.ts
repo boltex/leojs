@@ -6,7 +6,7 @@
 //@+<< leoFind imports >>
 //@+node:felix.20221012210017.1: ** << leoFind imports >>
 import * as g from './leoGlobals';
-import { new_cmd_decorator } from "../core/decorators";
+import { new_cmd_decorator } from "./decorators";
 import { Commands } from "./leoCommands";
 import { Position, VNode } from './leoNodes';
 import { StringCheckBox, StringFindTabManager, StringRadioButton } from './findTabManager';

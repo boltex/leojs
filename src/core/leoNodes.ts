@@ -2624,6 +2624,8 @@ export class VNode {
 
     public tempTnodeList: undefined | string[]; // TODO : Type better than that!
     public unknownAttributes: undefined | { [key: string]: any };
+    public tempAttributes: undefined | { [key: string]: any };
+    public at_read: undefined | { [key: string]: any };
     unicode_warning_given: boolean = false;
 
     //@+others
@@ -3249,7 +3251,7 @@ export class VNode {
             w.setInsertPoint(ins);
         }
         if (traceTime) {
-            const delta_t: number = utils.getDurationMs(t1!); //  time.time() - t1;
+            const delta_t: number = utils.getDurationSeconds(t1!); //  time.time() - t1;
             if (delta_t > 0.1) {
                 g.trace(`${delta_t} sec`);
             }

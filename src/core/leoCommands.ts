@@ -29,6 +29,7 @@ import { PreviousSettings } from './leoApp';
 import dayjs = require('dayjs');
 import { TagController } from './nodeTags';
 import { QuickSearchController } from './quicksearch';
+import { ShadowController } from './leoShadow';
 var utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 
@@ -84,6 +85,7 @@ export class Commands {
     public quicksearchController: QuickSearchController;
 
     public chapterController: ChapterController;
+    public shadowController: ShadowController;
     public undoer: Undoer;
     public nodeHistory: NodeHistory;
     public gui: NullGui;
@@ -268,7 +270,7 @@ export class Commands {
         this.initConfigSettings();
 
         this.chapterController = new ChapterController(c);
-        // this.shadowController // TODO: = leoShadow.ShadowController(c);
+        this.shadowController = new ShadowController(c);
 
         this.theTagController = new TagController(c);
         this.quicksearchController = new QuickSearchController(c);
@@ -280,6 +282,11 @@ export class Commands {
 
         this.editCommands = new EditCommandsClass(c);
         this.gotoCommands = new GoToCommands(c);
+
+        // TODO 
+        // self.persistenceController  = leoPersistence.PersistenceDataController(c)
+        // self.rstCommands        = leoRst.RstCommands(c)
+
         this.undoer = new Undoer(c);
 
         // From finishCreate

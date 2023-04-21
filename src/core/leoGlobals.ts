@@ -184,6 +184,9 @@ export const g_is_directive_pattern = new RegExp(/^\s*@([\w-]+)\s*/);
 // This pattern excludes @encoding.whatever and @encoding(whatever)
 // It must allow @language python, @nocolor-node, etc.
 
+// #2267: Support for @section-delims.
+export const g_section_delims_pat = new RegExp(/^@section-delims[ \t]+([^ \w\n\t]+)[ \t]+([^ \w\n\t]+)[ \t]*$/);
+
 export const g_noweb_root = new RegExp('<' + '<' + '*' + '>' + '>' + '=', 'mg');
 export const g_pos_pattern = new RegExp(/:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$/);
 export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
@@ -3719,6 +3722,12 @@ export function findColorDirectives(p: Position): string[] {
     return d.map((s: string) => {
         return s.substring(1);
     });
+}
+//@+node:felix.20230420214829.1: *3* g.divmod
+export function divmod(dividend: number, divisor: number): [number, number] {
+    const quotient = Math.floor(dividend / divisor);
+    const remainder = dividend % divisor;
+    return [quotient, remainder];
 }
 //@+node:felix.20211227182611.1: ** g.os_path_ Wrappers
 //@+at Note: all these methods return Unicode strings. It is up to the user to

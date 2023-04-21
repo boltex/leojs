@@ -1,7 +1,7 @@
 //@+leo-ver=5-thin
 //@+node:felix.20210102012334.1: * @file src/core/leoApp.ts
 //@+<< imports >>
-//@+node:felix.20210102211149.1: ** << imports >> (leoApp)
+//@+node:felix.20210102211149.1: ** << imports >>
 import * as vscode from "vscode";
 import * as Bowser from "bowser";
 import * as os from "os";

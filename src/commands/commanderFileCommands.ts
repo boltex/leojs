@@ -271,7 +271,7 @@ export class CommanderFileCommands {
     )
     public new(this: Commands, gui: NullGui): Commands {
 
-        // t1 = time.process_time()
+        const t1 = process.hrtime();
         // from leo.core import leoApp
         const lm = g.app.loadManager!;
         const old_c = this;
@@ -284,7 +284,7 @@ export class CommanderFileCommands {
         // g.app.lockLog()
 
         // Retain all previous settings. Very important for theme code.
-        // t2 = time.process_time()
+        const t2 = process.hrtime();
 
         const c = g.app.newCommander(
             '',
@@ -294,7 +294,7 @@ export class CommanderFileCommands {
                 lm.globalBindingsDict,
             ));
 
-        // t3 = time.process_time()
+        const t3 = process.hrtime();
         // frame = c.frame
         // g.app.unlockLog()
         // if not old_c:
@@ -316,17 +316,17 @@ export class CommanderFileCommands {
 
         c.redraw();
 
-        // t4 = time.process_time()
-        /* 
-        if 'speed' in g.app.debug:
+        const t4 = process.hrtime();
+         
+        if  (g.app.debug.includes('speed')){
             g.trace()
             print(
-                f"    1: {t2-t1:5.2f}\n"  // 0.00 sec.
-                f"    2: {t3-t2:5.2f}\n"  // 0.36 sec: c.__init__
-                f"    3: {t4-t3:5.2f}\n"  // 0.17 sec: Everything else.
-                f"total: {t4-t1:5.2f}"
+                `    1: ${utils.getDurationSeconds(t1, t2)}\n`+  // 0.00 sec.
+                `    2: ${utils.getDurationSeconds(t2, t3)}\n`+  // 0.36 sec: c.__init__
+                `    3: ${utils.getDurationSeconds(t3, t4)}\n`+  // 0.17 sec: Everything else.
+                `total: ${utils.getDurationSeconds(t1, t4)}`
             )
-        */
+        }
         return c;  // For unit tests and scripts.
 
     }

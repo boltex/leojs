@@ -17,11 +17,13 @@ from leo.core import leoNodes
 */
 
 import * as vscode from 'vscode';
+import * as utils from "../utils";
 import * as g from './leoGlobals';
-import { new_cmd_decorator } from "../core/decorators";
+import { new_cmd_decorator } from "./decorators";
 import { Position, VNode } from './leoNodes';
 import { FileCommands } from "./leoFileCommands";
 import { Commands } from './leoCommands';
+import dayjs = require('dayjs');
 
 //@-<< imports >>
 //@+others
@@ -479,7 +481,7 @@ export class AtFile {
         }
         if (!g.unitTesting && files.length){
             const t2 = process.hrtime();
-            g.es(`read ${files.length} files in ${t2 - t1} seconds`);
+            g.es(`read ${files.length} files in ${utils.getDurationSeconds(t1, t2)} seconds`);
         }
         c.changed = old_changed;
         c.raise_error_dialogs();
@@ -568,7 +570,7 @@ export class AtFile {
         const at = this;
         const c = this.c;
         const old_changed = c.changed;
-        const t1 = time.time();
+        const t1 = process.hrtime();
         c.init_error_dialogs();
         const files = at.findFilesToRead(root, false);
         for (const p of files){
@@ -579,8 +581,8 @@ export class AtFile {
         }
         if (!g.unitTesting){
             if (files.length){
-                const t2 = time.time()
-                g.es(`read ${files.length} files in ${t2 - t1} seconds`);
+                const t2 = process.hrtime()
+                g.es(`read ${files.length} files in ${utils.getDurationSeconds(t1, t2)} seconds`);
             }else{
                 g.es("no @<file> nodes in the selected tree");
             }
@@ -1382,7 +1384,8 @@ export class AtFile {
         }
         const c = this.c;
         let after;
-        let root: Position;
+        let root: Position|undefined;
+        let p: Position|undefined;
         if (force){
             // The Write @<file> Nodes command.
             // Write all nodes in the selected tree.
@@ -1408,7 +1411,7 @@ export class AtFile {
                 p.moveToNodeAfterTree()
             }else if (p.isAnyAtFileNode()){
                 const data = [p.v, c.fullPath(p)];
-                const w_found = false;
+                let w_found = false;
                 for(const w_item of seen){
                     // seen.includes(data)
                     if(w_item[0] === data[0] && w_item[1] === data[1]){
@@ -1437,9 +1440,9 @@ export class AtFile {
             files = files.filter(z=>z.isDirty());  // [z for z in files if z.isDirty()]
         }
         if (trace){
-            g.printObj( ...files.map(z=>z.h), 'Files to be saved');
+            g.printObj(files.map(z=>z.h), 'Files to be saved');
         }
-        return [files, root];
+        return [files, root!];
 
     }
     //@+node:felix.20230415162517.11: *6* at.internalWriteError
@@ -1495,14 +1498,14 @@ export class AtFile {
         }catch (IOError){
             return;
         }
-        const table = [
+        const table: [() => boolean, (root: Position) => Promise<void>][] = [
             [p.isAtAsisFileNode, at.asisWrite],
             [p.isAtAutoNode, at.writeOneAtAutoNode],
             [p.isAtCleanNode, at.writeOneAtCleanNode],
             [p.isAtEditNode, at.writeOneAtEditNode],
             [p.isAtFileNode, at.writeOneAtFileNode],
             [p.isAtNoSentFileNode, at.writeOneAtNosentNode],
-            [p.isAtShadowFileNode, at.writeOneAtShadowNode],
+            [p.isAtShadowFileNode, at.writeOneAtShadowNode as any],
             [p.isAtThinFileNode, at.writeOneAtFileNode],
         ];
 
@@ -1510,11 +1513,11 @@ export class AtFile {
         for (let [pred, func] of table){
             if (pred.bind(p)()){
                 await func(p);  // type:ignore
-                found = true;
+                w_found = true;
                 break
             }
         }
-        if (!found){
+        if (!w_found){
             g.trace(`Can not happen: ${p.h}`);
             return;
         }
@@ -1529,7 +1532,7 @@ export class AtFile {
     /**
      * raise IOError if p's path has changed *and* user forbids the write.
      */
-    public writePathChanged(p: Position): Promise<void> {
+    public async writePathChanged(p: Position): Promise<void> {
 
         const at = this;
         const c = this.c;
@@ -1540,6 +1543,7 @@ export class AtFile {
         }
         const oldPath = g.os_path_normcase(at.getPathUa(p));
         const newPath = g.os_path_normcase(c.fullPath(p));
+        let changed;
         try { // #1367: samefile can throw an exception.
             const w_same = await g.os_path_samefile(oldPath, newPath); // TODO !
             changed = oldPath && !w_same;
@@ -2813,7 +2817,7 @@ export class AtFile {
         if (g.unitTesting){
             return;
         }
-        const is_python = fileName && fileName.endsWith(('py', 'pyw'));
+        const is_python = fileName && (fileName.endsWith('py') && fileName.endsWith('pyw'));
         if (!contents || !is_python){
             return;
         }
@@ -2832,13 +2836,13 @@ export class AtFile {
     /**
      * Perform python-related checks on root.
      */
-    public checkPythonCode(contents: str, fileName: str, root: Position): void {
+    public checkPythonCode(contents: string, fileName: string, root: Position): void {
         
         if (!g.app.log){
             return;  // We are auto-saving.
         }
         const at = this;
-        const is_python = fileName && fileName.endsWith(('py', 'pyw'));
+        const is_python = fileName && (fileName.endsWith('py') && fileName.endsWith('pyw'));
 
         if (g.unitTesting || !contents || !is_python){
             return;
@@ -2848,10 +2852,10 @@ export class AtFile {
             ok = at.checkPythonSyntax(root, contents);
         }
         if (ok && at.runPyFlakesOnWrite){
-            ok = self.runPyflakes(root);
+            ok = this.runPyflakes(root);
         }
         if (ok && at.runFlake8OnWrite){
-            ok = self.runFlake8(root);
+            ok = this.runFlake8(root);
         }
         if (!ok){
             g.app.syntax_error_files.push(g.shortFileName(fileName));
@@ -3079,10 +3083,10 @@ export class AtFile {
     public oblank(): void{
         this.os(' ');
     }
-    public oblanks(n: int): void{
+    public oblanks(n: number): void{
         this.os(' '.repeat(Math.abs(n)));
     }
-    public otabs(n: int): void{
+    public otabs(n: number): void{
         this.os('\t'.repeat(Math.abs(n)));
     }
     //@+node:felix.20230415162517.76: *6* at.onl & onl_sent
@@ -3173,7 +3177,7 @@ export class AtFile {
         while (g.match(s, i, tag)){
             i += tag.length;
             i = g.skip_ws(s, i);
-            j = i;
+            const j = i;
             i = g.skip_to_end_of_line(s, i);
             // Write @first line, whether empty or not
             const line = s.substring(j, i);
@@ -3198,7 +3202,7 @@ export class AtFile {
         const k = j;
         // Scan backwards for @last directives.
         while (j >= 0){
-            line = lines[j];
+            const line = lines[j];
             if( g.match(line, 0, tag)){
                 j -= 1;
             }else if (!line.trim()){
@@ -3296,238 +3300,303 @@ export class AtFile {
         }
     }
     //@+node:felix.20230415162517.84: *5* at.putIndent
-    public putIndent(n: int, s: str = '') : void
-        """Put tabs and spaces corresponding to n spaces,
-        assuming that we are at the start of a line.
-        """
-        if n > 0
-            w = self.tab_width
-            if w > 1
-                q, r = divmod(n, w)
-                this.otabs(q)
-                this.oblanks(r)
-            else
-                this.oblanks(n)
+    /**
+     * Put tabs and spaces corresponding to n spaces,
+     * assuming that we are at the start of a line.
+     */
+    public putIndent(n: number, s = '') : void {
+        if (n > 0){
+            w = this.tab_width;
+            if (w > 1){
+                let [q, r] = g.divmod(n, w);
+                this.otabs(q);
+                this.oblanks(r);
+            }else{
+                this.oblanks(n);
+            }
+        }
+    }
     //@+node:felix.20230415162517.85: *5* at.putInitialComment
-    public putInitialComment(): void
+    public putInitialComment(): void {
         const c = this.c;
-        s2 = c.config.getString('output-initial-comment') || ''
-        if s2.strip()
-            lines = s2.split("\\n")
-            for line in lines
-                line = line.replace("@date", time.asctime())
-                if line
-                    this.putSentinel("@comment " + line)
+        const s2 = c.config.getString('output-initial-comment') || '';
+        if (s2.trim())
+            const lines = s2.split("\\n");
+            for (let line of lines){
+                line = line.replace("@date", dayjs(new Date()).format('ddd MMM DD HH:mm:ss YYYY'));
+                if (line){
+                    this.putSentinel("@comment " + line);
+                }
+            }
+    }
     //@+node:felix.20230415162517.86: *5* at.replaceFile & helpers
+    /**
+     * Write or create the given file from the contents.
+     * Return True if the original file was changed.
+     */
     public replaceFile(self,
         contents: string,
         encoding: string,
         fileName: string,
         root: Position,
-        ignoreBlankLines: bool = false,
-    ): boolean
-        """
-        Write or create the given file from the contents.
-        Return True if the original file was changed.
-        """
+        ignoreBlankLines = false,
+    ): boolean {
         const at = this;
         const c = this.c;
-        if root
-            root.clearDirty()
+        if (root && root.__bool__()){
+            root.clearDirty();
+        }
         //
         // Create the timestamp (only for messages).
-        if c.config.getBool('log-show-save-time', false)
-            format = c.config.getString('log-timestamp-format') or "%H:%M:%S"
-            timestamp = time.strftime(format) + ' '
-        else
-            timestamp = ''
+        let timestamp;
+        if (c.config.getBool('log-show-save-time', false)){
+            format = c.config.getString('log-timestamp-format') || "HH:mm:ss";
+            timestamp = dayjs(new Date()).format(format) + ' ';
+        }else{
+            timestamp = '';
+        }
         //
         // Adjust the contents.
-        assert isinstance(contents, string), g.callers()
-        if at.output_newline != '\n'
-            contents = contents.replace('\r', '').replace('\n', at.output_newline)
+        console.assert( typeof contents === 'string');
+        if( at.output_newline !== '\n'){
+            contents = contents.replace(/\r/g, '').replace(/\n/g, at.output_newline);
+        }
         //
         // If file does not exist, create it from the contents.
-        fileName = g.os_path_realpath(fileName)
-        sfn = g.shortFileName(fileName)
-        if !g.os_path_exists(fileName)
-            ok = g.writeFile(contents, encoding, fileName)
-            if ok
-                c.setFileTimeStamp(fileName)
-                if !g.unitTesting
-                    g.es(f"{timestamp}created: {fileName}")  
-                if root
+        fileName = g.os_path_realpath(fileName);
+        let ok;
+        const sfn = g.shortFileName(fileName);
+        if (!g.os_path_exists(fileName)){
+            ok = g.writeFile(contents, encoding, fileName);
+            if (ok){
+                c.setFileTimeStamp(fileName);
+                if (!g.unitTesting){
+                    g.es(`${timestamp}created: ${fileName}`);
+                }
+                if (root && root.__bool__()){
                     // Fix bug 889175: Remember the full fileName.
-                    at.rememberReadPath(fileName, root)
-                    at.checkPythonCode(contents, fileName, root)
-            else
-                at.addToOrphanList(root)  
+                    at.rememberReadPath(fileName, root);
+                    at.checkPythonCode(contents, fileName, root);
+                }
+            }else{
+                at.addToOrphanList(root);
+            }
             // No original file to change. Return value tested by a unit test.
             return false;  // No change to original file.
+        }
         //
         // Compare the old and new contents.
-        old_contents = g.readFileIntoUnicodeString(fileName,
-            encoding=at.encoding, silent=True)
-        if !old_contents
-            old_contents = ''
-        unchanged = (
-            contents == old_contents
-            or (not at.explicitLineEnding and at.compareIgnoringLineEndings(old_contents, contents))
-            or ignoreBlankLines and at.compareIgnoringBlankLines(old_contents, contents))
-        if unchanged
-            at.unchangedFiles += 1
-            if !g.unitTesting and c.config.getBool('report-unchanged-files', true)
-                g.es(f"{timestamp}unchanged: {sfn}")  
+        let old_contents = g.readFileIntoUnicodeString(fileName, at.encoding, true);
+        if (!old_contents){
+            old_contents = '';
+        }
+        const unchanged = (
+            contents === old_contents
+            || (!at.explicitLineEnding && at.compareIgnoringLineEndings(old_contents, contents))
+            || ignoreBlankLines && at.compareIgnoringBlankLines(old_contents, contents));
+
+        if (unchanged){
+            at.unchangedFiles += 1;
+            if( !g.unitTesting && c.config.getBool('report-unchanged-files', true)){
+                g.es(`${timestamp}unchanged: ${sfn}`);
+            }
             // Check unchanged files.
-            at.checkUnchangedFiles(contents, fileName, root)
+            at.checkUnchangedFiles(contents, fileName, root);
             return false;  // No change to original file.
+        }
         //
         // Warn if we are only adjusting the line endings.
-        if at.explicitLineEnding:  
+        if (at.explicitLineEnding){
             ok = (
-                at.compareIgnoringLineEndings(old_contents, contents) or
-                ignoreBlankLines and at.compareIgnoringLineEndings(
-                old_contents, contents))
-            if !ok:
-                g.warning("correcting line endings in:", fileName)
+                at.compareIgnoringLineEndings(old_contents, contents) ||
+                ignoreBlankLines && at.compareIgnoringLineEndings(
+                old_contents, contents));
+            if (!ok){
+                g.warning("correcting line endings in:", fileName);
+            }
+        }
         //
         // Write a changed file.
-        ok = g.writeFile(contents, encoding, fileName)
-        if ok:
-            c.setFileTimeStamp(fileName)
-            if !g.unitTesting:
-                g.es(f"{timestamp}wrote: {sfn}")  
-        else:  
-            g.error('error writing', sfn)
-            g.es('not written:', sfn)
-            at.addToOrphanList(root)
+        ok = g.writeFile(contents, encoding, fileName);
+        if (ok){
+            c.setFileTimeStamp(fileName);
+            if (!g.unitTesting){
+                g.es(`${timestamp}wrote: ${sfn}`);
+            }
+        }else{
+            g.error('error writing', sfn);
+            g.es('not written:', sfn);
+            at.addToOrphanList(root);
+        }
         // Check *after* writing the file.
-        at.checkPythonCode(contents, fileName, root)
-        return ok
+        at.checkPythonCode(contents, fileName, root);
+        return ok;
+
+    }
     //@+node:felix.20230415162517.87: *6* at.compareIgnoringBlankLines
-    public compareIgnoringBlankLines(s1: Any, s2: Any): boolean
-        """Compare two strings, ignoring blank lines."""
-        assert isinstance(s1, str), g.callers()
-        assert isinstance(s2, str), g.callers()
-        if s1 == s2
+    /**
+     * Compare two strings, ignoring blank lines.
+     */
+    public compareIgnoringBlankLines(s1: any, s2: any): boolean {
+        
+        console.assert(typeof s1 === 'string');
+        console.assert(typeof s2 === 'string');
+        if (s1 === s2){
             return true;
-        s1 = g.removeBlankLines(s1)
-        s2 = g.removeBlankLines(s2)
-        return s1 == s2
+        }
+        s1 = g.removeBlankLines(s1);
+        s2 = g.removeBlankLines(s2);
+        return s1 === s2;
+
+    }
     //@+node:felix.20230415162517.88: *6* at.compareIgnoringLineEndings
-    public compareIgnoringLineEndings(s1: Any, s2: Any): boolean
-        """Compare two strings, ignoring line endings."""
-        assert isinstance(s1, str), (repr(s1), g.callers())
-        assert isinstance(s2, str), (repr(s2), g.callers())
-        if s1 == s2
+    /** 
+     * Compare two strings, ignoring line endings.
+     */
+    public compareIgnoringLineEndings(s1: any, s2: any): boolean {
+        
+        console.assert(typeof s1 === 'string');
+        console.assert(typeof s2 === 'string');
+        if (s1 === s2){
             return true;
+        }
         // Wrong: equivalent to ignoreBlankLines!
             // s1 = s1.replace('\n','').replace('\r','')
             // s2 = s2.replace('\n','').replace('\r','')
-        s1 = s1.replace('\r', '')
-        s2 = s2.replace('\r', '')
-        return s1 == s2
+        s1 = s1.replace(/\r/g, '');
+        s2 = s2.replace(/\r/g, '');
+        return s1 === s2;
+
+    }
     //@+node:felix.20230415162517.89: *5* at.scanRootForSectionDelims
-    public scanRootForSectionDelims(root: Position): void
-        """
-        Scan root.b for an "@section-delims" directive.
-        Set section_delim1 and section_delim2 ivars.
-        """
+    /**
+     * Scan root.b for an "@section-delims" directive.
+     * Set section_delim1 and section_delim2 ivars.
+     */
+    public scanRootForSectionDelims(root: Position): void {
         const at = this;
         // Set defaults.
-        at.section_delim1 = '<<'
-        at.section_delim2 = '>>'
+        at.section_delim1 = '<<';
+        at.section_delim2 = '>>';
         // Scan root.b.
-        lines = []
-        for s in g.splitLines(root.b)
-            m = g.g_section_delims_pat.match(s)
-            if m:
-                lines.push(s)
-                at.section_delim1 = m.group(1)
-                at.section_delim2 = m.group(2)
+        const lines = [];
+        for (const s of g.splitLines(root.b)){
+            const m = g.g_section_delims_pat.exec(s);
+            if (m && m.length){
+                lines.push(s);
+                at.section_delim1 = m[1];
+                at.section_delim2 = m[2];
+            }
+        }
         // Disallow multiple directives.
-        if len(lines) > 1:  
-            at.error(f"Multiple @section-delims directives in {root.h}")
-            g.es_print('using default delims')
-            at.section_delim1 = '<<'
-            at.section_delim2 = '>>'
+        if (lines.length > 1){
+            at.error(`Multiple @section-delims directives in ${root.h}`);
+            g.es_print('using default delims');
+            at.section_delim1 = '<<';
+            at.section_delim2 = '>>';
+        }
+    }
     //@+node:felix.20230415162517.90: *5* at.tabNannyNode
-    public tabNannyNode(p: Position, body: string): void
-        try
-            readline = g.ReadLinesClass(body).next
-            tabnanny.process_tokens(tokenize.generate_tokens(readline))
-        catch IndentationError
-            if g.unitTesting
-                raise
-            junk2, msg, junk = sys.exc_info()
-            g.error("IndentationError in", p.h)
-            g.es('', str(msg))
-        catch tokenize.TokenError
-            if g.unitTesting:
-                raise
-            junk3, msg, junk = sys.exc_info()
-            g.error("TokenError in", p.h)
-            g.es('', str(msg))
-        catch tabnanny.NannyNag
-            if g.unitTesting:
-                raise
-            junk4, nag, junk = sys.exc_info()
-            badline = nag.get_lineno()
-            line = nag.get_line()
-            message = nag.get_msg()
-            g.error("indentation error in", p.h, "line", badline)
-            g.es(message)
-            line2 = repr(str(line))[1:-1]
-            g.es("offending line:\n", line2)
-        catch Exception
-            g.trace("unexpected exception")
-            g.es_exception()
-            raise
-    //@+node:felix.20230415162517.91: *5* at.warnAboutOrpanAndIgnoredNodes
-    // Called from putFile.
+    public tabNannyNode(p: Position, body: string): void {
+        // TODO
+        console.log('TODO : tabNannyNode');
+        
+        // try
+        //     readline = g.ReadLinesClass(body).next
+        //     tabnanny.process_tokens(tokenize.generate_tokens(readline))
+        // catch IndentationError
+        //     if g.unitTesting
+        //         raise
+        //     junk2, msg, junk = sys.exc_info()
+        //     g.error("IndentationError in", p.h)
+        //     g.es('', str(msg))
+        // catch tokenize.TokenError
+        //     if g.unitTesting:
+        //         raise
+        //     junk3, msg, junk = sys.exc_info()
+        //     g.error("TokenError in", p.h)
+        //     g.es('', str(msg))
+        // catch tabnanny.NannyNag
+        //     if g.unitTesting:
+        //         raise
+        //     junk4, nag, junk = sys.exc_info()
+        //     badline = nag.get_lineno()
+        //     line = nag.get_line()
+        //     message = nag.get_msg()
+        //     g.error("indentation error in", p.h, "line", badline)
+        //     g.es(message)
+        //     line2 = repr(str(line))[1:-1]
+        //     g.es("offending line:\n", line2)
+        // catch Exception
+        //     g.trace("unexpected exception")
+        //     g.es_exception()
+        //     raise
 
-    public warnAboutOrphandAndIgnoredNodes(): void
-        // Always warn, even when language=="cweb"
-        at, root = self, self.root
-        if at.errors:
-            return  // No need to repeat this.
-        for p in root.self_and_subtree(false)
-            if !p.v.isVisited()
-                at.writeError("Orphan node:  " + p.h)
-                if p.hasParent()
-                    g.blue("parent node:", p.parent().h)
-        p = root.copy()
-        after = p.nodeAfterTree()
-        while p and !p.__eq__(after)
-            if p.isAtAllNode()
-                p.moveToNodeAfterTree()
-            else
+    }
+    //@+node:felix.20230415162517.91: *5* at.warnAboutOrpanAndIgnoredNodes
+    /**
+     * Called from putFile.
+     * Always warn, even when language=="cweb"
+     */
+    public warnAboutOrphandAndIgnoredNodes(): void {
+        const at = this;
+        const root = this.root!;
+        if (at.errors){
+            return;  // No need to repeat this.
+        }
+        for (const p of root.self_and_subtree(false)){
+            if (!p.v.isVisited()){
+                at.writeError("Orphan node:  " + p.h);
+                if( p.hasParent()){
+                    g.blue("parent node:", p.parent().h);
+                }
+            }
+        }
+
+        const p = root.copy();
+        const after = p.nodeAfterTree();
+        while (p && !p.__eq__(after)){
+            if (p.isAtAllNode()){
+                p.moveToNodeAfterTree();
+            }else{
                 // #1050: test orphan bit.
-                if p.isOrphan()
-                    at.writeError("Orphan node: " + p.h)
-                    if p.hasParent()
-                        g.blue("parent node:", p.parent().h)
-                p.moveToThreadNext()
+                if (p.isOrphan()){
+                    at.writeError("Orphan node: " + p.h);
+                    if (p.hasParent()){
+                        g.blue("parent node:", p.parent().h);
+                    }
+                }
+                p.moveToThreadNext();
+            }
+        }
+    }
     //@+node:felix.20230415162517.92: *5* at.writeError
-    public writeError(message: string): void
-        """Issue an error while writing an @<file> node."""
+    /**
+     * Issue an error while writing an @<file> node.
+     */
+    public writeError(message: string): void{
         const at = this;
-        if at.errors == 0
-            fn = at.targetFileName or 'unnamed file'
-            g.es_error(f"errors writing: {fn}")
-        at.error(message)
-        at.addToOrphanList(at.root)
+        if (at.errors === 0){
+            const fn = at.targetFileName || 'unnamed file';
+            g.es_error(`errors writing: ${fn}`);
+        }
+        at.error(message);
+        at.addToOrphanList(at.root!);
+    }
     //@+node:felix.20230415162517.93: *5* at.writeException
-    public writeException(fileName: str, root: Position): void
+    public async writeException(fileName: string, root: Position): Promise<void> {
         const at = this;
-        g.error("exception writing:", fileName)
-        g.es_exception()
-        if getattr(at, 'outputFile', undefined)
-            at.outputFile.flush()
-            at.outputFile.close()
-            at.outputFile = undefined
-        at.remove(fileName)
-        at.addToOrphanList(root)
+        g.error("exception writing:", fileName);
+        g.es_exception();
+        if (at.outputFile){
+            at.outputFile.flush();
+            at.outputFile.close();
+            at.outputFile = undefined;
+        }
+        at.remove(fileName);
+        at.addToOrphanList(root);
+
+    }
     //@+node:felix.20230415162522.1: *3* at.Utilities
     //@+node:felix.20230416214203.1: *4* at.error & printError
     public error(...args: any): void {
@@ -3547,240 +3616,334 @@ export class AtFile {
         }
     }
     //@+node:felix.20230415162522.3: *4* at.exception
-    public exception(message: string): void
-        self.error(message)
-        g.es_exception()
+    public exception(message: string): void {
+        this.error(message);
+        g.es_exception();
+    }
     //@+node:felix.20230415162522.4: *4* at.file operations...
     // Error checking versions of corresponding functions in Python's os module.
     //@+node:felix.20230415162522.5: *5* at.chmod
-    public chmod(fileName: str, mode: Any): void
+    public chmod(fileName: string, mode: any): void {
         // Do _not_ call self.error here.
-        if mode is None
+        if (mode === undefined || mode === null){
             return;
-        try
-            os.chmod(fileName, mode);
-        catch (exception)
-            g.es("exception in os.chmod", fileName);
-            g.es_exception();
+        }
+        try{
+            // TODO !
+            // os.chmod(fileName, mode);
+            console.log('TODO : leoAtfile.ts -> chmod');
+            
+        }catch (exception){
+            g.es("exception in os.chmod", fileName);;
+            g.es_exception();;
+        }
 
+    }
     //@+node:felix.20230415162522.6: *5* at.remove
-    public remove(fileName: string): boolean
-        if !fileName
+    public async remove(fileName: string): Promise<boolean> {
+        if (!fileName){
             g.trace('No file name', g.callers());
             return false;
-        try
-            os.remove(fileName);
-            return true;;
-        catch (exception)
-            if !g.unitTesting
-                this.error(f"exception removing: {fileName}");
-                g.es_exception();
-            return false;
-    //@+node:felix.20230415162522.7: *5* at.stat
-    public stat(fileName: string): any
-        """Return the access mode of named file, removing any setuid, setgid, and sticky bits."""
-        // Do _not_ call self.error here.
-        try
-            mode = (os.stat(fileName))[0] & (7 * 8 * 8 + 7 * 8 + 7)  // 0777
-        catch (exception)
-            mode = None
-        return mode
-
-    //@+node:felix.20230415162522.8: *4* at.get/setPathUa
-    public getPathUa(p: Position): string
-        if hasattr(p.v, 'tempAttributes')
-            d = p.v.tempAttributes.get('read-path', {})
-            return d.get('path')  // type:ignore
-        return ''
-
-    public setPathUa(p: Position, path: Any): void
-        if !hasattr(p.v, 'tempAttributes')
-            p.v.tempAttributes = {}
-        d = p.v.tempAttributes.get('read-path', {})
-        d['path'] = path
-        p.v.tempAttributes['read-path'] = d
-    //@+node:felix.20230415162522.9: *4* at.promptForDangerousWrite
-    public promptForDangerousWrite(fileName: str, message: str = None): boolean
-        """Raise a dialog asking the user whether to overwrite an existing file."""
-        at, c, root = self, self.c, self.root
-        if at.cancelFlag
-            assert at.canCancelFlag
-            return false;
-        if at.yesToAll
-            assert at.canCancelFlag
+        }
+        try {
+            // os.remove(fileName);
+            const w_uri = g.makeVscodeUri(fileName);
+            await vscode.workspace.fs.delete(w_uri, {recursive: true});
             return true;
-        if root and root.h.startswith('@auto-rst')
-            // Fix bug 50: body text lost switching @file to @auto-rst
-            // Refuse to convert any @<file> node to @auto-rst.
-            d = root.v.at_read if hasattr(root.v, 'at_read') else {}
-            aList = sorted(d.get(fileName, []))
-            for h in aList
-                if !h.startswith('@auto-rst')
-                    g.es('can not convert @file to @auto-rst!', color='red')
-                    g.es('reverting to:', h)
-                    root.h = h
-                    c.redraw()
-                    return false;
-        if message is None
-            message = (
-                f"{g.splitLongFileName(fileName)}\n"
-                f"{g.tr('already exists.')}\n"
-                f"{g.tr('Overwrite this file?')}")
-        result = g.app.gui.runAskYesNoCancelDialog(c,
-            title='Overwrite existing file?',
-            yesToAllMessage="Yes To &All",
-            message=message,
-            cancelMessage="&Cancel (No To All)",
-        )
-        if at.canCancelFlag
-            // We are in the writeAll logic so these flags can be set.
-            if result == 'cancel'
-                at.cancelFlag = true;
-            else if result == 'yes-to-all'
-                at.yesToAll = true;
-        return result in ('yes', 'yes-to-all')
-    //@+node:felix.20230415162522.10: *4* at.rememberReadPath
-    public rememberReadPath(fn: str, p: Position): void
-        """
-        Remember the files that have been read *and*
-        the full headline (@<file> type) that caused the read.
-        """
-        v = p.v
-        // Fix bug #50: body text lost switching @file to @auto-rst
-        if !hasattr(v, 'at_read')
-            v.at_read = {}  
-        d = v.at_read
-        aSet = d.get(fn, set())
-        aSet.add(p.h)
-        d[fn] = aSet
-    //@+node:felix.20230415162522.11: *4* at.scanAllDirectives
-    public scanAllDirectives(p: Position) -> Dict[str, Any]:
-        """
-        Scan p and p's ancestors looking for directives,
-        setting corresponding AtFile ivars.
-        """
+        }catch (exception){
+            if (!g.unitTesting){
+                this.error(`exception removing: ${fileName}`);
+                g.es_exception();
+            }
+            return false;
+        }
+    }
+    //@+node:felix.20230415162522.7: *5* at.stat
+    /** 
+     * Return the access mode of named file, removing any setuid, setgid, and sticky bits.
+     */
+    public async stat(fileName: string): Promise<vscode.FilePermission | undefined> {
+        // Do _not_ call self.error here.
+        let mode;
+        try{
+            const w_uri = g.makeVscodeUri(fileName);
+            const stat = await vscode.workspace.fs.stat(w_uri);
+            mode = stat.permissions; // 0777
+        }catch (exception){
+            mode = undefined;
+        }
+        return mode;
+    }
+    //@+node:felix.20230415162522.8: *4* at.get/setPathUa
+    public getPathUa(p: Position): string{
+        if (p.v.tempAttributes){
+            const d = p.v.tempAttributes['read-path'] || {};
+            return d.get('path');
+        }
+        return '';
+    }
+
+    public setPathUa(p: Position, path: any): void {
+        if (!p.v.tempAttributes){
+            p.v.tempAttributes = {};
+        }
+        const d = p.v.tempAttributes['read-path'] || {};
+        d['path'] = path;
+        p.v.tempAttributes['read-path'] = d;
+    }
+    //@+node:felix.20230415162522.9: *4* at.promptForDangerousWrite
+    /**
+     * Raise a dialog asking the user whether to overwrite an existing file.
+     */
+    public async promptForDangerousWrite(fileName: string, message?: string): Promise<boolean> {
+        
         const at = this;
         const c = this.c;
-        d = c.scanAllDirectives(p)
+        const root = this.root;
+          
+        if(at.cancelFlag){
+            console.assert(at.canCancelFlag);
+            return false;
+        }
+        if(at.yesToAll){
+            console.assert(at.canCancelFlag);
+            return true;
+        }
+        if (root && root.__bool__() && root.h.startsWith('@auto-rst')){
+            // Fix bug 50: body text lost switching @file to @auto-rst
+            // Refuse to convert any @<file> node to @auto-rst.
+            let d;
+            if(root.v.at_read){
+                d = root.v.at_read;
+            }else{
+                d = {};
+            }
+            // d = root.v.at_read if hasattr(root.v, 'at_read') else {};
+            const w_array = d[fileName] || [];
+            const aList = w_array.sort();
+            for( const h of aList){
+                if( !h.startsWith('@auto-rst')){
+                    g.es('can not convert @file to @auto-rst!');
+                    g.es('reverting to:', h);
+                    root.h = h;
+                    c.redraw();
+                    return false;
+                }
+            }
+        }
+        if (message === undefined){
+            message = `{g.splitLongFileName(fileName)}\n`+
+                `{g.tr('already exists.')}\n`+
+                `{g.tr('Overwrite this file?')}`;
+        }
+        // TODO : look in async of leointeg for multi button modal dialog
+        const result = await g.app.gui.runAskYesNoToAllCancelDialog(c,
+            'Overwrite existing file?',
+            "Yes To &All",
+            message,
+            "&Cancel (No To All)",
+            // title='Overwrite existing file?',
+            // yesToAllMessage="Yes To &All",
+            // message=message,
+            // cancelMessage="&Cancel (No To All)",
+        );
+
+        if (at.canCancelFlag){
+            // We are in the writeAll logic so these flags can be set.
+            if (result === 'cancel'){
+                at.cancelFlag = true;
+            }else if (result === 'yes-to-all'){
+                at.yesToAll = true;
+            }
+        }
+
+        return ['yes', 'yes-to-all'].includes(result);
+
+    }
+    //@+node:felix.20230415162522.10: *4* at.rememberReadPath
+    /**
+     * Remember the files that have been read *and*
+     * the full headline (@<file> type) that caused the read.
+     */
+    public rememberReadPath(fn: string, p: Position): void {
+      
+        const v = p.v
+        // Fix bug #50: body text lost switching @file to @auto-rst
+        if (!v.at_read){
+            v.at_read = {};
+        }
+        const d = v.at_read;
+        const aSet = d[fn] || [];
+        if(!aSet.includes(p.h)){
+            aSet.push(p.h);
+        }
+        d[fn] = aSet;
+
+    }
+
+    //@+node:felix.20230415162522.11: *4* at.scanAllDirectives
+    /**
+     * Scan p and p's ancestors looking for directives,
+     * setting corresponding AtFile ivars.
+     */
+    public scanAllDirectives(p: Position): {[key: string]: any}  {
+      
+        const at = this;
+        const c = this.c;
+        const d = c.scanAllDirectives(p);
         //
         // Language & delims: Tricky.
-        lang_dict = d.get('lang-dict') or {}
-        delims, language = None, None
-        if lang_dict
+        const lang_dict = d['lang-dict'] || {};
+        let delims;
+        let language;
+        if (lang_dict){
             // There was an @delims or @language directive.
-            language = lang_dict.get('language')
-            delims = lang_dict.get('delims')
-        if !language
+            language = lang_dict['language'];
+            delims = lang_dict['delims'];
+        }
+        if (!language){
             // No language directive.  Look for @<file> nodes.
             // Do *not* used.get('language')!
-            language = g.getLanguageFromAncestorAtFileNode(p) or 'python'
-        at.language = language
-        if !delims
-            delims = g.set_delims_from_language(language)
+            //
+            // TODO : DEFAULT TO JS OR TS !
+            //
+            language = g.getLanguageFromAncestorAtFileNode(p) || 'python';
+        }
+        at.language = language;
+        if (!delims){
+            delims = g.set_delims_from_language(language);
+        }
         //
         // Previously, setting delims was sometimes skipped, depending on kwargs.
         //@+<< Set comment strings from delims >>
         //@+node:felix.20230415162522.12: *5* << Set comment strings from delims >> (at.scanAllDirectives)
-        delim1, delim2, delim3 = delims
+        let [delim1, delim2, delim3] = delims;
         // Use single-line comments if we have a choice.
         // delim1,delim2,delim3 now correspond to line,start,end
-        if delim1
-            at.startSentinelComment = delim1
-            at.endSentinelComment = ""  // Must not be None.
-        else if delim2 and delim3
-            at.startSentinelComment = delim2
-            at.endSentinelComment = delim3
-        else
+        if (delim1){
+            at.startSentinelComment = delim1;
+            at.endSentinelComment = "";  // Must not be None.
+        }else if (delim2 && delim3){
+            at.startSentinelComment = delim2;
+            at.endSentinelComment = delim3;
+        }else{
             //
             // Emergency!
             //
             // Issue an error only if at.language has been set.
             // This suppresses a message from the markdown importer.
-            if !g.unitTesting and at.language:
-                g.trace(repr(at.language), g.callers())
-                g.es_print("unknown language: using Python comment delimiters")
-                g.es_print("c.target_language:", c.target_language)
-            at.startSentinelComment = "#"  // This should never happen!
-            at.endSentinelComment = ""
+            if (!g.unitTesting && at.language){
+                g.trace(at.language, g.callers());
+                g.es_print("unknown language: using Python comment delimiters");
+                g.es_print("c.target_language:", c.target_language);
+            }
+            at.startSentinelComment = "#";  // This should never happen!
+            at.endSentinelComment = "";
+        }
         //@-<< Set comment strings from delims >>
         //
         // Easy cases
-        at.encoding = d.get('encoding') or c.config.default_derived_file_encoding
-        lineending = d.get('lineending')
-        at.explicitLineEnding = bool(lineending)
-        at.output_newline = lineending or g.getOutputNewline(c=c)
-        at.page_width = d.get('pagewidth') or c.page_width
-        at.tab_width = d.get('tabwidth') or c.tab_width
+        at.encoding = d['encoding'] || c.config.default_derived_file_encoding;
+        const lineending = d['lineending'];
+        at.explicitLineEnding = !!lineending;
+        at.output_newline = lineending || g.getOutputNewline(c);
+        at.page_width = d['pagewidth'] || c.page_width;
+        at.tab_width = d['tabwidth'] || c.tab_width;
         return {
             "encoding": at.encoding,
             "language": at.language,
             "lineending": at.output_newline,
             "pagewidth": at.page_width,
-            "path": d.get('path'),
+            "path": d['path'],
             "tabwidth": at.tab_width,
         };
-    //@+node:felix.20230415162522.13: *4* at.shouldPromptForDangerousWrite
-    public shouldPromptForDangerousWrite(fn: str, p: Position): boolean
-        """
-        Return True if Leo should warn the user that p is an @<file> node that
-        was not read during startup. Writing that file might cause data loss.
 
-        See #50: https://github.com/leo-editor/leo-editor/issues/50
-        """
-        trace = 'save' in g.app.debug
-        sfn = g.shortFileName(fn)
+    }
+    //@+node:felix.20230415162522.13: *4* at.shouldPromptForDangerousWrite
+    /**
+     * Return True if Leo should warn the user that p is an @<file> node that
+     * was not read during startup. Writing that file might cause data loss.
+     *
+     * See #50: https://github.com/leo-editor/leo-editor/issues/50
+     */
+    public async shouldPromptForDangerousWrite(fn: string, p: Position): Promise<boolean> {
+      
+        const trace = g.app.debug.includes('save');
+        const sfn = g.shortFileName(fn);
         const c = this.c;
-        efc = g.app.externalFilesController
-        if p.isAtNoSentFileNode()
+        const efc = g.app.externalFilesController;
+        if (p.isAtNoSentFileNode()){
             // #1450.
             // No danger of overwriting a file.
             // It was never read.
             return false;
-        if !g.os_path_exists(fn)
+        }
+        if (!g.os_path_exists(fn)){
             // No danger of overwriting fn.
-            if trace
+            if (trace){
                 g.trace('Return False: does not exist:', sfn)
+            }
             return false;
+        }
         // #1347: Prompt if the external file is newer.
-        if efc
+        if (efc){
             // Like c.checkFileTimeStamp.
-            if c.sqlite_connection and c.mFileName == fn:
+            if (c.sqlite_connection && c.mFileName === fn){
                 // sqlite database file is never actually overwritten by Leo,
                 // so do *not* check its timestamp.
-                pass
-            else if efc.has_changed(fn)
-                if trace
+                //pass
+            }else if (efc.has_changed(fn)){
+                if (trace){
                     g.trace('Return True: changed:', sfn)
+                }
                 return true;
-        if hasattr(p.v, 'at_read')
+            }
+        }
+        if (p.v.at_read){
             // Fix bug #50: body text lost switching @file to @auto-rst
-            d = p.v.at_read
-            for k in d
+            const d = p.v.at_read;
+            for (const k in d){ // ! LOOP 'IN' TO GET THE KEYS
                 // Fix bug # #1469: make sure k still exists.
-                if (
-                    os.path.exists(k) and os.path.samefile(k, fn)
-                    and p.h in d.get(k, set())
-                )
-                    d[fn] = d[k]
-                    if trace
-                        g.trace('Return False: in p.v.at_read:', sfn)
+                const w_exists = await g.os_path_exists(k);
+                const w_same = await g.os_path_samefile(k, fn);
+                const w_k = d[k] || [];
+                if (w_exists && w_same && w_k.includes(p.h)){
+                    d[fn] = d[k];
+                    if (trace){
+                        g.trace('Return False: in p.v.at_read:', sfn);
+                    }
                     return false;
-            aSet = d.get(fn, set())
-            if trace
-                g.trace(f"Return {p.h} not in aSet(): {sfn}")
-            return p.h not in aSet
-        if trace
-            g.trace('Return True: never read:', sfn)
-        return True  // The file was never read.
+                }
+            }
+            const aSet = d[fn] || [];
+            if (trace){
+                g.trace(`Return ${p.h} not in aSet(): ${sfn}`)
+            }
+            return !aSet.includes(p.h);
+
+        }
+
+        if (trace){
+            g.trace('Return True: never read:', sfn);
+        }
+        return true;  // The file was never read.
+
+    }
     //@+node:felix.20230415162522.14: *4* at.warnOnReadOnlyFile
-    public warnOnReadOnlyFile(fn: string): void
+    public async warnOnReadOnlyFile(fn: string): Promise<void> {
         // os.access() may not exist on all platforms.
-        try
-            read_only = not os.access(fn, os.W_OK)
-        catch AttributeError  
+        let read_only;
+        try{
+            const w_uri = g.makeVscodeUri(fn);
+            const w_stats = await vscode.workspace.fs.stat(w_uri);
+            read_only = w_stats.permissions === vscode.FilePermission.Readonly
+        }catch (attributeError  ){
             read_only = false;
-        if read_only
-            g.error("read only:", fn)  // pragma: no cover
+        }
+        if (read_only){
+            g.error("read only:", fn);
+        }
+    }
     //@-others
 
 }
