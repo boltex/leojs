@@ -253,7 +253,7 @@ export class ParserBaseClass {
     /**
      * Handle an @commands tree.
      */
-    public doCommands(p: Position, kind: string, name: string, val: any): void {
+    public async doCommands(p: Position, kind: string, name: string, val: any): Promise<void> {
 
         const c = this.c;
         const aList: [Position, string][] = [];
@@ -271,7 +271,7 @@ export class ParserBaseClass {
                 seen.push(p.v);
                 if (g.match_word(p.h, 0, tag)) {
                     // We can not assume that p will be valid when it is used.
-                    const script = g.getScript(c, p, false, true, true);
+                    const script = await g.getScript(c, p, false, true, true);
                     aList.push([p.copy(), script]);
                 }
                 p.moveToThreadNext();

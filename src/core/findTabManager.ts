@@ -316,12 +316,12 @@ export class StringFindTabManager {
         const find = c.findCommands;
         // Set find text.
         const find_text = d['find_text'];
-        this.set_find_text(find_text)
-        find.find_text = find_text
+        this.set_find_text(find_text);
+        find.find_text = find_text;
         // Set change text.
         const change_text = d['change_text'];
-        this.set_change_text(change_text)
-        find.change_text = change_text
+        this.set_change_text(change_text);
+        find.change_text = change_text;
         // Check boxes...
         const table1 = [
             ['ignore_case', 'check_box_ignore_case'],

@@ -3010,7 +3010,7 @@ export class FileCommands {
                     break;
                 }
             }
-            p.moveToParent()  // Restore p in the caller.
+            p.moveToParent(); // Restore p in the caller.
         }
         // At least will contain the gnx
         const result: VNodeJSON = {

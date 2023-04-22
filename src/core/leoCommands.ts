@@ -386,7 +386,7 @@ export class Commands {
         'execute-script',
         'Execute a *Leo* script, written in python.'
     )
-    public executeScript(
+    public async executeScript(
         args: any = undefined,
         p: Position | undefined = undefined,
         script: string = "",
@@ -397,7 +397,7 @@ export class Commands {
         namespace: { [key: string]: any } | undefined = undefined,
         raiseFlag: boolean = false,
         runPyflakes: boolean = true,
-    ): void {
+    ): Promise<void> {
         /*
         Execute a *Leo* script, written in python.
         Keyword args:
@@ -425,7 +425,7 @@ export class Commands {
             if (c.forceExecuteEntireBody) {
                 useSelectedText = false;
             }
-            script = g.getScript(c, p || c.p, useSelectedText);
+            script = await g.getScript(c, p || c.p, useSelectedText);
         }
         const script_p: Position = p || c.p;  // Only for error reporting below.
         // #532: check all scripts with pyflakes.
@@ -2059,7 +2059,7 @@ export class Commands {
         if (!command_func) {
             const message = `no command function for ${command_name}`;
             if (g.unitTesting || g.app.inBridge) {
-                throw message;
+                throw new Error(message);
             }
             // g.es_print(message, 'red');
             g.es_print(message);
@@ -3771,7 +3771,7 @@ export class Commands {
             __name__: string;
         } & { __ivars__: string[] } = c.commandsDict[commandName];
 
-        if (f && (f as any)['__name__'] != (func as any)['__name__']) {
+        if (f && ((f as any)['__name__'] !== (func as any)['__name__'])) {
             g.trace('redefining', commandName, f, '->', func);
         }
         c.commandsDict[commandName] = func;
@@ -3821,7 +3821,6 @@ export class Commands {
                         }
                     }
                 }
-
                 clones.push(p.copy());
             }
         }
@@ -3842,7 +3841,6 @@ export class Commands {
         } else if (failMsg) {
             g.es(failMsg);
         }
-
         return root;
 
     }

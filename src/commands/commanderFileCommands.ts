@@ -3,6 +3,7 @@
 // File commands that used to be defined in leoCommands.py
 import * as vscode from "vscode";
 import { Utils as uriUtils } from "vscode-uri";
+import * as utils from "../utils";
 
 import * as g from "../core/leoGlobals";
 import { commander_command } from "../core/decorators";
@@ -317,15 +318,15 @@ export class CommanderFileCommands {
         c.redraw();
 
         const t4 = process.hrtime();
-         
-        if  (g.app.debug.includes('speed')){
-            g.trace()
-            print(
-                `    1: ${utils.getDurationSeconds(t1, t2)}\n`+  // 0.00 sec.
-                `    2: ${utils.getDurationSeconds(t2, t3)}\n`+  // 0.36 sec: c.__init__
-                `    3: ${utils.getDurationSeconds(t3, t4)}\n`+  // 0.17 sec: Everything else.
+
+        if (g.app.debug.includes('speed')) {
+            g.trace();
+            g.es(
+                `    1: ${utils.getDurationSeconds(t1, t2)}\n` +  // 0.00 sec.
+                `    2: ${utils.getDurationSeconds(t2, t3)}\n` +  // 0.36 sec: c.__init__
+                `    3: ${utils.getDurationSeconds(t3, t4)}\n` +  // 0.17 sec: Everything else.
                 `total: ${utils.getDurationSeconds(t1, t4)}`
-            )
+            );
         }
         return c;  // For unit tests and scripts.
 
@@ -768,7 +769,8 @@ export class CommanderFileCommands {
         if (!fn) {
             g.es('can not revert unnamed file.');
         }
-        if (!g.os_path_exists(fn)) {
+        const w_exists = await g.os_path_exists(fn);
+        if (!w_exists) {
             g.es(`Can not revert unsaved file: ${fn}`);
             return;
         }

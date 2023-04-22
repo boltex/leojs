@@ -111,6 +111,10 @@ export class AtFile {
     public force_newlines_in_at_nosent_bodies: boolean | undefined;
     public outputList: string[] = [];
     public sentinels: boolean = false;
+    public outputFile = ""; // io.StringIO();
+    public public_s = "";
+    public private_s = "";
+    public explicitLineEnding = false;
 
     //@+others
     //@+node:felix.20211225231532.1: *3* at.Birth & init
@@ -1550,7 +1554,7 @@ export class AtFile {
         );
         if (!ok) {
             // raise IOError
-            throw ("IOError");
+            throw new Error("IOError in atFile 'writePathChanged'.");
         }
         at.setPathUa(p, newPath);  // Remember that we have changed paths.
 
@@ -1582,8 +1586,8 @@ export class AtFile {
             if (!ok) {
                 return '';
             }
-            const s = at.outputFile.getvalue();
-            at.outputFile.close();
+            const s = at.outputFile; // .getvalue();
+            // at.outputFile.close();
             return s;
         }
         // leo 5.6: allow undefined section references in all @auto files.
@@ -1612,8 +1616,12 @@ export class AtFile {
             c.endEditing();
             c.init_error_dialogs();
             fileName = await at.initWriteIvars(root);
+            let w_precheck;
+            if (fileName) {
+                w_precheck = await at.precheck(fileName, root);
+            }
             // #1450.
-            if (!fileName || !at.precheck(fileName, root)) {
+            if (!fileName || !w_precheck) {
                 at.addToOrphanList(root);
                 return;
             }
@@ -1827,7 +1835,11 @@ export class AtFile {
             c.endEditing();
             fileName = await at.initWriteIvars(root);
             at.sentinels = false;
-            if (!fileName || !at.precheck(fileName, root)) {
+            let w_precheck;
+            if (fileName) {
+                w_precheck = await at.precheck(fileName, root);
+            }
+            if (!fileName || !w_precheck) {
                 return;
             }
             at.outputList = [];
@@ -1866,8 +1878,12 @@ export class AtFile {
             }
             fileName = await at.initWriteIvars(root);
             at.sentinels = false;
+            let w_precheck;
+            if (fileName) {
+                w_precheck = await at.precheck(fileName, root);
+            }
             // #1450.
-            if (!fileName || !at.precheck(fileName, root)) {
+            if (!fileName || !w_precheck) {
                 at.addToOrphanList(root);
                 return false;
             }
@@ -1891,8 +1907,13 @@ export class AtFile {
         try {
             c.endEditing();
             fileName = await at.initWriteIvars(root);
+
             at.sentinels = true;
-            if (!fileName || !at.precheck(fileName, root)) {
+            let w_precheck;
+            if (fileName) {
+                w_precheck = await at.precheck(fileName, root);
+            }
+            if (!fileName || !w_precheck) {
                 // Raise dialog warning of data loss.
                 at.addToOrphanList(root);
                 return;
@@ -1925,7 +1946,11 @@ export class AtFile {
             c.endEditing();
             fileName = await at.initWriteIvars(root);
             at.sentinels = false;
-            if (!fileName || !at.precheck(fileName, root)) {
+            let w_precheck;
+            if (fileName) {
+                w_precheck = await at.precheck(fileName, root);
+            }
+            if (!fileName || !w_precheck) {
                 return;
             }
             at.outputList = [];
@@ -1975,7 +2000,8 @@ export class AtFile {
             if (!private_fn) {
                 return false;
             }
-            if (!testing && !at.precheck(full_path, root)) {
+            const w_precheck = await at.precheck(full_path, root);
+            if (!testing && !w_precheck) {
                 return false;
             }
             //
@@ -1998,14 +2024,13 @@ export class AtFile {
             };
 
 
-            at.public_s = put(false);
-            at.private_s = put(true);
+            at.public_s = await put(false);
+            at.private_s = await put(true);
             at.warnAboutOrphandAndIgnoredNodes();
             if (g.unitTesting) {
                 const exceptions = ['public_s', 'private_s', 'sentinels', 'outputList'];
                 console.assert(g.checkUnchangedIvars(at, ivars_dict, exceptions), 'writeOneAtShadowNode');
             }
-
 
             if (!at.errors) {
                 // Write the public and private files.
@@ -2229,7 +2254,7 @@ export class AtFile {
     /**
      * Put the line at s[i:] of the given kind, updating the status.
      */
-    public putLine(i: number, kind: any, p: Position, s: string, status: {
+    public putLine(i: number, kind: number, p: Position, s: string, status: {
         at_comment_seen: boolean;
         at_delims_seen: boolean;
         at_warning_given: boolean;
@@ -2619,11 +2644,11 @@ export class AtFile {
     /**
      * Write the start of a doc part.
      */
-    public putStartDocLine(s: string, i: number, kind: any): void {
+    public putStartDocLine(s: string, i: number, kind: number): void {
 
         const at = this;
-        const sentinel = kind == AtFile.docDirective ? "@+doc" : "@+at";
-        const directive = kind == AtFile.docDirective ? "@doc" : "@";
+        const sentinel = kind === AtFile.docDirective ? "@+doc" : "@+at";
+        const directive = kind === AtFile.docDirective ? "@doc" : "@";
         // Put whatever follows the directive in the sentinel.
         // Skip past the directive.
         i += directive.length;
@@ -2647,7 +2672,7 @@ export class AtFile {
         const at = this;
         const h = at.removeCommentDelims(p);
         const w_attr = (at as any)['at_shadow_test_hack'];
-        if (!(w_attr == undefined || w_attr == null)) {
+        if (!(w_attr === undefined || w_attr === null)) {
             // A hack for @shadow unit testing.
             // see AtShadowTestCase.makePrivateLines.
             return h;
@@ -2711,7 +2736,7 @@ export class AtFile {
         const at = this;
         if (at.sentinels || g.app.force_at_auto_sentinels) {
             s = s + "-thin";
-            const encoding = at.encoding.toLowerCase();
+            const encoding = at.encoding!.toLowerCase();
             if (encoding !== "utf-8") {
                 // New in 4.2: encoding fields end in ",."
                 s = s + `-encoding=${encoding},.`;
@@ -2808,7 +2833,7 @@ export class AtFile {
             return;  // We are auto-saving.
         }
         const at = this;
-        const is_python = fileName && (fileName.endsWith('py') && fileName.endsWith('pyw'));
+        const is_python = (!!fileName) && (fileName.endsWith('py') && fileName.endsWith('pyw'));
 
         if (g.unitTesting || !contents || !is_python) {
             return;
@@ -3085,7 +3110,7 @@ export class AtFile {
     public outputStringWithLineEndings(s: string): void {
         const at = this;
         s = g.toUnicode(s, at.encoding);
-        s = s.replace('\n', at.output_newline);
+        s = s.replace('\n', at.output_newline!);
         this.os(s);
     }
     //@+node:felix.20230415162517.79: *5* at.precheck (calls shouldPrompt...)
@@ -3545,9 +3570,9 @@ export class AtFile {
         g.error("exception writing:", fileName);
         g.es_exception();
         if (at.outputFile) {
-            at.outputFile.flush();
-            at.outputFile.close();
-            at.outputFile = undefined;
+            // at.outputFile.flush();
+            // at.outputFile.close();
+            at.outputFile = '';
         }
         at.remove(fileName);
         at.addToOrphanList(root);
@@ -4496,7 +4521,7 @@ export class FastAtRead {
             console.assert(root_gnx === gnx, [root_gnx, gnx].toString());
         } else if (root_gnx_adjusted) {
             // pass  // Don't check!
-        } else if (stack) {
+        } else if (stack && stack.length) {
             g.error('scan_lines: Stack should be empty');
             g.printObj(stack, 'stack');
         } else if (root_gnx !== gnx) {

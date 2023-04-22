@@ -27,7 +27,7 @@ export class GoToCommands {
      * Place the cursor on the n'th line (one-based) of an external file.
      * Return (p, offset, found) for unit testing.
      */
-    public find_file_line(n: number, p?: Position): [Position | undefined, number, boolean] {
+    public async find_file_line(n: number, p?: Position): Promise<[Position | undefined, number, boolean]> {
         const c = this.c;
         if (n < 0) {
             return [undefined, -1, false];
@@ -40,7 +40,7 @@ export class GoToCommands {
             // Step 1: Get the lines of external files *with* sentinels,
             // even if the actual external file actually contains no sentinels.
             const sentinels = root.isAtFileNode();
-            const s = this.get_external_file_with_sentinels(root);
+            const s = await this.get_external_file_with_sentinels(root);
             const lines = g.splitLines(s);
 
             let gnx;
@@ -59,7 +59,7 @@ export class GoToCommands {
             let found;
             [p, found] = this.find_gnx(root, gnx, h);
             if (gnx && found) {
-                this.success(n, offset, p!)
+                this.success(n, offset, p!);
                 return [p, offset, true];
             }
 
@@ -76,7 +76,7 @@ export class GoToCommands {
     /**
      * Return the global line number of the first line of p.b
      */
-    public find_node_start(p: Position, s?: string): number | undefined {
+    public async find_node_start(p: Position, s?: string): Promise<number | undefined> {
         // See #283.
 
         let root;
@@ -89,7 +89,7 @@ export class GoToCommands {
         console.assert(root.isAnyAtFileNode());
 
         if (!s) {
-            s = this.get_external_file_with_sentinels(root);
+            s = await this.get_external_file_with_sentinels(root);
         }
 
         let delim1;
@@ -106,9 +106,7 @@ export class GoToCommands {
                 return i + 1;
             }
         }
-
         return undefined;
-
     }
 
     //@+node:felix.20221218143456.4: *3* goto.find_script_line
@@ -116,14 +114,14 @@ export class GoToCommands {
      * Go to line n (zero based) of the script with the given root.
      * Return p, offset, found for unit testing.
      */
-    public find_script_line(n: number, root: Position): [Position | undefined, number, boolean] {
+    public async find_script_line(n: number, root: Position): Promise<[Position | undefined, number, boolean]> {
 
         const c = this.c;
 
         if (n < 0) {
             return [undefined, -1, false];
         }
-        const script = g.getScript(c, root, false);
+        const script = await g.getScript(c, root, false);
         const lines = g.splitLines(script);
 
         // Script lines now *do* have gnx's.
@@ -149,13 +147,13 @@ export class GoToCommands {
      * Given a zero-based target_offset within target_p.b, return the line
      * number of the corresponding line within root's file.
      */
-    public node_offset_to_file_line(target_offset: number, target_p: Position, root: Position): number | undefined {
+    public async node_offset_to_file_line(target_offset: number, target_p: Position, root: Position): Promise<number | undefined> {
 
         let delim1;
         let delim2;
         [delim1, delim2] = this.get_delims(root);
 
-        const file_s = this.get_external_file_with_sentinels(root);
+        const file_s = await this.get_external_file_with_sentinels(root);
 
         let gnx;
         let h;
@@ -270,7 +268,7 @@ export class GoToCommands {
             [gnx, h, offset] = [undefined, undefined, -1];
         }
 
-        return [gnx, h, offset]
+        return [gnx, h, offset];
 
     }
     //@+node:felix.20221218143456.7: *3* goto.scan_sentinel_lines
@@ -307,7 +305,7 @@ export class GoToCommands {
                     [gnx, h] = this.get_script_node_info(s, delim2);
                 } else if (s2.startsWith('@+others') || s2.startsWith('@+<<')) {
                     stack.push([gnx, h, offset]);
-                    offset += 1
+                    offset += 1;
                 } else if (s2.startsWith('@-others') || s2.startsWith('@-<<')) {
                     [gnx, h, offset] = stack.pop()!;
                     offset += 1;
@@ -384,7 +382,7 @@ export class GoToCommands {
     public find_root(p: Position): [Position | undefined, string | undefined] {
 
         const c = this.c;
-        const p1 = p.copy()
+        const p1 = p.copy();
         let fileName;
         // First look for ancestor @file node.
         for (let w_p of p.self_and_parents(false)) {
@@ -452,7 +450,7 @@ export class GoToCommands {
      * writing the file *with* sentinels, even if the external file normally
      * would *not* have sentinels.
      */
-    public get_external_file_with_sentinels(root: Position): string {
+    public async get_external_file_with_sentinels(root: Position): Promise<string> {
 
         const c = this.c;
         let s: string;
@@ -461,7 +459,7 @@ export class GoToCommands {
             // Leo does not write sentinels in the root @auto node.
             try {
                 g.app.force_at_auto_sentinels = true;
-                s = c.atFileCommands.atAutoToString(root);
+                s = await c.atFileCommands.atAutoToString(root);
             }
             finally {
                 g.app.force_at_auto_sentinels = true;
@@ -512,7 +510,7 @@ export class GoToCommands {
             delims = [delim1, undefined, undefined];
         }
 
-        return g.is_sentinel(s, delims)
+        return g.is_sentinel(s, delims);
 
     }
     //@+node:felix.20221218143456.16: *4* goto.remove_level_stars
@@ -562,7 +560,7 @@ export class GoToCommands {
         'show-file-line',
         'Show the line number of the current body cursor position in an external file'
     )
-    public show_file_line(this: Commands): void {
+    public async show_file_line(this: Commands): Promise<void> {
         const c: Commands = this;
 
         if (!c) {
@@ -572,7 +570,7 @@ export class GoToCommands {
         if (!w) {
             return;
         }
-        const n0 = this.gotoCommands.find_node_start(c.p);
+        const n0 = await this.gotoCommands.find_node_start(c.p);
         if (!n0) {
             return;
         }

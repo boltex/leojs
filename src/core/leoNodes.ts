@@ -2198,7 +2198,7 @@ export class Position {
     /**
      * position property returning the script formed by p and its descendants
      */
-    public get script(): string {
+    public get script(): Promise<string> {
         const p: Position = this;
         return g.getScript(
             p.v.context,

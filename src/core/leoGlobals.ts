@@ -511,7 +511,7 @@ export class GeneralSetting {
     public __repr__(): string {
         // Better for g.printObj.
         let val;
-        if (val) {
+        if (this.val) {
             val = this.val.toString().split("\n").join(" ");
         }
         return (
@@ -1846,7 +1846,7 @@ export async function readFileIntoString(fileName: string,
         return [undefined, undefined];
     }
 
-    if (!os_path_exists(fileName)) {
+    if (! await os_path_exists(fileName)) {
         if (verbose) {
             error('file not found:', fileName);
         }
@@ -4334,7 +4334,7 @@ export function createTopologyList(c: Commands, root?: Position, useHeadlines?: 
         aList = [v.numberOfChildren()];  // type ignore
     }
     let child = v.firstChild();
-    while (child) {
+    while (child && child.__bool__()) {
         aList.push(createTopologyList(c, child, useHeadlines));  // type ignore
         child = child.next();
     }
@@ -4475,11 +4475,11 @@ export function python_tokenize(s: string): [string, string, number][] {
  * Return the expansion of all of node p's body text if
  * p is not the current node or if there is no text selection.
  */
-export function getScript(c: Commands, p: Position,
+export async function getScript(c: Commands, p: Position,
     useSelectedText: boolean = true,
     forcePythonSentinels: boolean = true,
     useSentinels: boolean = true
-): string {
+): Promise<string> {
     console.log("TODO : 'get script' called!");
     return "";
 
@@ -4502,7 +4502,7 @@ export function getScript(c: Commands, p: Position,
         // Remove extra leading whitespace so the user may execute indented code.
         s = dedent(s);
         s = extractExecutableString(c, p, s);
-        script = composeScript(
+        script = await composeScript(
             c, p, s,
             forcePythonSentinels,
             useSentinels
@@ -4520,13 +4520,13 @@ export function getScript(c: Commands, p: Position,
 /**
  * Compose a script from p.b.
  */
-export function composeScript(
+export async function composeScript(
     c: Commands,
     p: Position,
     s: string,
     forcePythonSentinels: boolean = true,
     useSentinels: boolean = true
-): string {
+): Promise<string> {
 
     // This causes too many special cases.
     // if not g.unitTesting and forceEncoding:
@@ -4547,7 +4547,7 @@ export function composeScript(
         app.inScript = true;
         app.scriptDict["script1"] = s;
         // Important: converts unicode to utf-8 encoded strings.
-        script = at.stringToString(
+        script = await at.stringToString(
             p.copy(),
             s,
             forcePythonSentinels,

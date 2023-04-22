@@ -436,7 +436,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
                 }
             }
             return p.h.trim().startsWith('@');
-        }
+        };
 
         // Don't add numbers to special nodes.
         if (skip(p)) {
