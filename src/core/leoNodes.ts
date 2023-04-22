@@ -2685,20 +2685,15 @@ export class VNode {
         if (!h) {
             h = this.headString();
         }
-
         if (!g.match(h, 0, '@')) {
             return '';
         }
-
         const i: number = g.skip_id(h, 1, '-');
-
         const word: string = h.substring(0, i);
-
         if (names.includes(word) && g.match_word(h, 0, word)) {
             const name = h.substring(i).trim();
             return name;
         }
-
         return '';
     }
 

@@ -3963,7 +3963,7 @@ export async function os_path_isdir(p_path: string): Promise<boolean> {
 /**
  * Return True if path is a file.
  */
-export async function os_path_isfile(p_path: string): Promise<boolean> {
+export async function os_path_isfile(p_path?: string): Promise<boolean> {
     if (p_path) {
 
         // const w_uri = vscode.Uri.file(p_path);
