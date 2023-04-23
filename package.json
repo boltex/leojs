@@ -37,7 +37,7 @@
   "browser": "./dist/extension-web",
   "contributes": {
     "configuration": {
-      "title": "Leojs",
+      "title": "LeoJS Leo Editor",
       "properties": {
         "leojs.checkForChangeExternalFiles": {
           "scope": "application",

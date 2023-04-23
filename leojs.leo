@@ -7110,7 +7110,7 @@ public incTreeId(): void {
 
 </t>
 <t tx="felix.20211006225245.1">"configuration": {
-  "title": "Leojs",
+  "title": "LeoJS Leo Editor",
   "properties": {
     "leojs.checkForChangeExternalFiles": {
       "scope": "application",
