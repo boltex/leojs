@@ -32,7 +32,7 @@ suite('Test cases for leoCommands.ts', () => {
 
     //@+others
     //@+node:felix.20220129224954.2: *3* TestCommands.test_add_comments_with_multiple_language_directives
-    // ! uncomment when setSelectionRange and body pane are implemented !
+    // ! uncomment when addComments, setSelectionRange and body pane are implemented !
     /* def test_add_comments_with_multiple_language_directives(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
         p.b = textwrap.dedent("""\
@@ -58,7 +58,7 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(p.b, expected)
      */
     //@+node:felix.20220129224954.3: *3* TestCommands.test_add_html_comments
-    // ! uncomment when setSelectionRange and body pane are implemented !
+    // ! uncomment when addComments, setSelectionRange and body pane are implemented !
     /* def test_add_html_comments(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
         p.b = textwrap.dedent("""\
@@ -79,7 +79,7 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(p.b, expected)
      */
     //@+node:felix.20220129224954.4: *3* TestCommands.test_add_python_comments
-    // ! uncomment when setSelectionRange and body pane are implemented !
+    // ! uncomment when addComments, setSelectionRange and body pane are implemented !
     /* def test_add_python_comments(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
         p.b = textwrap.dedent("""\
@@ -168,7 +168,8 @@ suite('Test cases for leoCommands.ts', () => {
         while (p.hasNext()) {
             p.moveToNext();
         }
-        c.redraw(p);
+        c.selectPosition(p);
+        c.redraw();
     });
 
     //@+node:felix.20220129224954.12: *3* TestCommands.test_c_demote_illegal_clone_demote
@@ -210,6 +211,32 @@ suite('Test cases for leoCommands.ts', () => {
             assert.strictEqual(got, expected, s);
         }
     });
+    //@+node:felix.20230423155356.1: *3* TestCommands.test_find_b_h
+    // ! uncomment if c.find_b and c.find_h are implemented !
+    // test('test_find_b_h', async () => {
+    //     const c = self.c;
+    //     const p = self.c.p;
+
+    //     // Create two children of c.p.
+    //     const child1 = p.insertAsLastChild()
+    //     child1.h = 'child1 headline'
+    //     child1.b = 'child1 line1\nchild2 line2\n'
+    //     const child2 = p.insertAsLastChild()
+    //     child2.h = 'child2 headline'
+    //     child2.b = 'child2 line1\nchild2 line2\n'
+
+    //     // Tests.
+    //     const list1 = c.find_h(r'^child1')
+    //     assert.strictEqual( list1 == [child1], repr(list1));
+    //     const list2 = c.find_h(r'^child1', it=[child2])
+    //     assert.strictEqual( not list2, repr(list2));
+    //     const list3 = c.find_b(r'.*\bline2\n')
+    //     assert.strictEqual( list3 == [child1, child2], repr(list3));
+    //     const list4 = c.find_b(r'.*\bline2\n', it=[child1])
+    //     assert.strictEqual( list4 == [child1], repr(list3));
+
+    // });
+
     //@+node:felix.20220129224954.14: *3* TestCommands.test_c_findMatchingBracket
     // ! uncomment if g.MatchBrackets is implemented !
     /* def test_c_findMatchingBracket(self):
@@ -492,7 +519,7 @@ suite('Test cases for leoCommands.ts', () => {
         assert not x.enabledPluginsFileName
      */
     //@+node:felix.20220129224954.29: *3* TestCommands.test_delete_comments_with_multiple_at_language_directives
-    // ! uncomment when setSelectionRange and body pane are implemented !
+    // ! uncomment when deleteComments, setSelectionRange and body pane are implemented !
     /* def test_delete_comments_with_multiple_at_language_directives(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
         p.b = textwrap.dedent("""\
@@ -518,7 +545,7 @@ suite('Test cases for leoCommands.ts', () => {
 
      */
     //@+node:felix.20220129224954.30: *3* TestCommands.test_delete_html_comments
-    // ! uncomment when setSelectionRange and body pane are implemented !
+    // ! uncomment when deleteComments, setSelectionRange and body pane are implemented !
     /* def test_delete_html_comments(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
         p.b = textwrap.dedent("""\
@@ -539,7 +566,7 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(p.b, expected)
      */
     //@+node:felix.20220129224954.31: *3* TestCommands.test_delete_python_comments
-    // ! uncomment when setSelectionRange and body pane are implemented !
+    // ! uncomment when deleteComments, setSelectionRange and body pane are implemented !
     /* def test_delete_python_comments(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
         p.b = textwrap.dedent("""\

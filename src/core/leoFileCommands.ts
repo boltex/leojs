@@ -166,7 +166,7 @@ export class FastRead {
      *
      * Unlike readFile above, this does not affect splitter sizes.
      */
-    public readFileFromClipboard(s: string): VNode | undefined {
+    public readFileFromClipboard(s: Uint8Array): VNode | undefined {
 
         let v: VNode | undefined;
         let g_element: et.Element | undefined;
@@ -190,10 +190,9 @@ export class FastRead {
     // TODO : NEEDED ?
     // translate_table = {z: None for z in range(20) if chr(z) not in '\t\r\n'}
 
-    public readWithElementTree(path: string | undefined, s: string): [VNode, et.Element] | [undefined, undefined] {
+    public readWithElementTree(path: string | undefined, s: Uint8Array | string): [VNode, et.Element] | [undefined, undefined] {
 
-        let contents: string = s;
-        contents = g.toUnicode(s);
+        let contents = g.toUnicode(s);
 
         // TODO : NEEDED ?
         // contents = contents.translate(this.translate_table); // #1036 and #1046.
@@ -2359,7 +2358,7 @@ export class FileCommands {
         let content: string;
         if (ok === undefined) {
             [fileName, content] = getPublicLeoFile();
-            fileName = g.os_path_finalize_join(undefined, c.openDirectory, fileName);
+            fileName = g.finalize_join(c.openDirectory!, fileName);
 
             // const w_uri = vscode.Uri.file(fileName);
             const w_uri = g.makeVscodeUri(fileName);

@@ -77,7 +77,7 @@ export class AtFile {
     public underindentEscapeString: string = '\\-';
     public read_i: number = 0;
     public read_lines: string[] = [];
-    public _file_bytes: string | undefined;
+    public _file_bytes: Uint8Array | undefined;
     public readVersion: string | undefined;
     public readVersion5: boolean | undefined;
     public startSentinelComment: string | undefined;
@@ -404,7 +404,7 @@ export class AtFile {
         const at = this;
         const c = this.c;
         let file_s;
-        let fileName = c.fullPath(root);  // #1341. #1889.
+        let fileName: string | undefined = c.fullPath(root);  // #1341. #1889.
         if (!fileName) {
             at.error("Missing file name. Restoring @file tree from .leo file.");
             return false;
@@ -441,7 +441,7 @@ export class AtFile {
         at.scanAllDirectives(root);
         const gnx2vnode = c.fileCommands.gnxDict;
         const contents = fromString || file_s;
-        new FastAtRead(c, gnx2vnode).read_into_root(contents, fileName, root);
+        new FastAtRead(c, gnx2vnode).read_into_root(contents, fileName!, root);
         root.clearDirty();
         return true;
 
@@ -705,11 +705,8 @@ export class AtFile {
      * Read one @asis node. Used only by refresh-from-disk
      */
     public async readOneAtAsisNode(fn: string, p: Position): Promise<void> {
-
         const at = this;
         const c = this.c;
-
-        // #1521 & #1341.
         fn = c.fullPath(p);
         let [junk, ext] = g.os_path_splitext(fn);
         // Remember the full fileName.
@@ -1981,8 +1978,8 @@ export class AtFile {
         const c = this.c;
         const root = p.copy();
         const x = c.shadowController;
-        let full_path;
-        let ivars_dict;
+        let full_path = "";
+        let ivars_dict: { [key: string]: any } = {};
         try {
             c.endEditing();  // Capture the current headline.
             const fn = p.atShadowFileNodeName();
@@ -3714,15 +3711,24 @@ export class AtFile {
                 `${'Overwrite this file?'}`;
         }
         // ! TODO : look in async of leointeg for multi button modal dialog
-        const result = await g.app.gui.runAskYesNoToAllCancelDialog(c,
+        const result = await g.app.gui.runAskYesNoCancelDialog(
+            c,
             'Overwrite existing file?',
-            "Yes To &All",
             message,
-            "&Cancel (No To All)",
-            // title='Overwrite existing file?',
-            // yesToAllMessage="Yes To &All",
-            // message=message,
-            // cancelMessage="&Cancel (No To All)",
+            undefined,
+            undefined,
+            "Yes To All",
+            undefined,
+            "No To All",
+            // order of those params: 
+            //    c: Commands,
+            //    title: string,
+            //    message: string,
+            //    yesMessage = "Yes",
+            //    noMessage = "No",
+            //    yesToAllMessage = "",
+            //    defaultButton = "Yes",
+            //    cancelMessage = ""
         );
         if (at.canCancelFlag) {
             // We are in the writeAll logic so these flags can be set.

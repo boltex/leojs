@@ -1734,6 +1734,26 @@ export class Commands {
         return true;
     }
     //@+node:felix.20211226232321.1: *3* c.Convenience methods
+    //@+node:felix.20230423004652.1: *4* c.fullPath
+    /**
+     * Return the full path (including fileName) in effect at p. Neither the
+     * path nor the fileName will be created if it does not exist.
+     */
+    public fullPath(p_p: Position, simulate: boolean = false): string {
+
+        // Search p and p's parents.
+        for (let p of p_p.self_and_parents(false)) {
+            const aList: any[] = g.get_directives_dict_list(p);
+            const w_path: string = this.scanAtPathDirectives(aList);
+            let fn: string = simulate ? p.h : p.anyAtFileNodeName();
+            //fn = p.h if simulate else p.anyAtFileNodeName()
+            // Use p.h for unit tests.
+            if (fn) {
+                return g.finalize_join(w_path, fn);
+            }
+        }
+        return '';
+    }
     //@+node:felix.20220611011224.1: *4* c.getTime
     public getTime(body = true): string {
         const c = this;
@@ -1773,6 +1793,24 @@ export class Commands {
         return s;
     }
 
+    //@+node:felix.20230423004739.1: *4* c.goToLineNumber & goToScriptLineNumber
+    /**
+     * Go to line n (zero-based) of a script.
+     * A convenience method called from g.handleScriptException.
+     */
+    public goToLineNumber(n: number): void {
+        const c = this;
+        c.gotoCommands.find_file_line(n);
+    }
+
+    /**
+     * Go to line n (zero-based) of a script.
+     * A convenience method called from g.handleScriptException.
+     */
+    public goToScriptLineNumber(n: number, p: Position): void {
+        const c = this;
+        c.gotoCommands.find_script_line(n, p);
+    }
     //@+node:felix.20211226232349.1: *4* setFileTimeStamp
     /**
      * Update the timestamp for fn..
@@ -1912,33 +1950,11 @@ export class Commands {
     public scanAtPathDirectives(aList: any[]): string {
         const c: Commands = this;
         c.scanAtPathDirectivesCount += 1; // An important statistic.
-        // Step 1: Compute the starting path.
-        // The correct fallback directory is the absolute path to the base.
-        let base: string;
-        if (c.openDirectory) {
-            // Bug fix: 2008/9/18
-            base = c.openDirectory;
-        } else {
-            base = c.config.getString('relative-path-base-directory');
-            if (base && base === '!') {
-                base = g.app.loadDir!;
-            } else if (base && base === '.') {
-                base = c.openDirectory!;
-            } else {
-                base = ''; // Settings error.
-            }
-        }
-        base = c.expand_path_expression(base); // #1341.
-        base = g.os_path_expanduser(base); // #1889.
+        let base: string = c.openDirectory!;
+        const absbase: string = g.finalize_join(g.app.loadDir!, base);
 
-        const absbase: string = g.os_path_finalize_join(
-            undefined,
-            g.app.loadDir!,
-            base
-        ); // #1341.
-        // Step 2: look for @path directives.
+        // Look for @path directives.
         const w_paths: string[] = [];
-
         for (let d of aList) {
             // Look for @path directives.
             let w_path: string = d['path'];
@@ -1948,22 +1964,19 @@ export class Commands {
                 // Convert "path" or <path> to path.
                 w_path = g.stripPathCruft(w_path);
                 if (w_path && !warning) {
-                    w_path = c.expand_path_expression(w_path); // #1341.
-                    w_path = g.os_path_expanduser(w_path); // #1889.
                     w_paths.push(w_path);
                     // We will silently ignore empty @path directives.
                 }
             }
         }
+
         // Add absbase and reverse the list.
         w_paths.push(absbase);
         w_paths.reverse();
 
-        // Step 3: Compute the full, effective, absolute path.
-        const w_path: string = g.os_path_finalize_join(undefined, ...w_paths); // #1341.
-
+        // Compute the full, effective, absolute path.
+        const w_path: string = g.finalize_join(...w_paths);
         return w_path || g.getBaseDirectory(c);
-        // 2010/10/22: A useful default.
     }
     //@+node:felix.20211106224948.1: *3* c.Executing commands & scripts
     //@+node:felix.20211106224948.3: *4* c.doCommand
@@ -2299,10 +2312,10 @@ export class Commands {
                 // make the first element absolute
                 parts[0] = driveSpec + os.sep + parts[0]
             allParts = [path] + parts
-            path = g.os_path_finalize_join(*allParts)  // #1431
+            path = g.finalize_join(*allParts)
 
         }else{
-            path = g.os_path_finalize_join(g.app.homeLeoDir, 'scriptFile.py');  // #1431
+            path = g.finalize_join(g.app.homeLeoDir, 'scriptFile.py');
         }
         //
         // Write the file.
@@ -2316,7 +2329,6 @@ export class Commands {
             // g.es("Check your configuration of script_file_path, currently %s" %
                 // c.config.getString('script-file-path'))
             path = undefined
-
 
         return path;
         */
@@ -2488,11 +2500,9 @@ export class Commands {
 
             // time.strftime("%Y%m%d-%H%M%S")
             const stamp: string = new Date().format('YYYYMMDD-hhmmss');
-
             const branch: string = prefix ? prefix + '-' : '';
-
             fn = `${branch}${base}-${stamp}.leo`;
-            w_path = g.os_path_finalize_join(undefined, theDir, fn);
+            w_path = g.finalize_join(theDir, fn);
         } else {
             w_path = fn;
         }
@@ -2520,7 +2530,7 @@ export class Commands {
     //     """
     //     c = self
     //     old_cwd = os.getcwd()
-    //     join = g.os_path_finalize_join
+    //     join = g.finalize_join
     //     if not base_dir:
     //         if env_key:
     //             try:

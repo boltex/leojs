@@ -117,6 +117,7 @@ export class LeoApp {
     public silentMode: boolean = false; // True: no sign-on.
     public trace_binding: string | undefined; // The name of a binding to trace, or None.
     public trace_setting: string | undefined; // The name of a setting to trace, or None.
+    public write_black_sentinels = false; // True: write a space befor '@' in sentinel lines.
 
     //@-<< LeoApp: command-line arguments >>
     //@+<< LeoApp: Debugging & statistics >>
@@ -1451,19 +1452,19 @@ export class LoadManager {
 
     //@+node:felix.20220610002953.1: *3* LM.Directory & file utils
     //@+node:felix.20220610002953.2: *4* LM.completeFileName
-    /* 
-    def completeFileName(self, fileName):
-        fileName = g.toUnicode(fileName)
-        fileName = g.os_path_finalize(fileName)
-        # 2011/10/12: don't add .leo to *any* file.
-        return fileName
-     */
+
+    public completeFileName(fileName: string): string {
+        fileName = g.toUnicode(fileName);
+        fileName = g.finalize(fileName);
+        // 2011/10/12: don't add .leo to *any* file.
+        return fileName;
+    }
     //@+node:felix.20220610002953.3: *4* LM.computeLeoSettingsPath
     /* 
     def computeLeoSettingsPath(self):
         """Return the full path to leoSettings.leo."""
         # lm = self
-        join = g.os_path_finalize_join
+        join = g.finalize_join
         settings_fn = 'leoSettings.leo'
         table = (
             # First, leoSettings.leo in the home directories.
@@ -1489,7 +1490,7 @@ export class LoadManager {
     public async computeMyLeoSettingsPath(): Promise<string | undefined> {
 
         const lm = this;
-        const join = g.os_path_finalize_join;
+        const join = g.finalize_join;
         const settings_fn = 'myLeoSettings.leo';
         // This seems pointless: we need a machine *directory*.
 
@@ -1503,14 +1504,14 @@ export class LoadManager {
 
         const table = [
             // First, myLeoSettings.leo in the local directory
-            join(undefined, localDir, settings_fn),
+            join(localDir, settings_fn),
         ];
         // Next, myLeoSettings.leo in the home directories.
         if (g.app.homeDir) {
-            table.push(join(undefined, g.app.homeDir, settings_fn));
+            table.push(join(g.app.homeDir, settings_fn));
         }
         if (g.app.homeLeoDir) {
-            table.push(join(undefined, g.app.homeLeoDir, settings_fn));
+            table.push(join(g.app.homeLeoDir, settings_fn));
         }
 
         let hasBreak = false;
@@ -1556,7 +1557,7 @@ export class LoadManager {
     //@+node:felix.20220610002953.6: *5* LM.computeGlobalConfigDir
 
     public computeGlobalConfigDir(): string {
-        let theDir: string = ""; // * unused : RETURN EMPTY / FALSY FOR NOW
+        let theDir: string = ""; // ! unused : RETURN EMPTY / FALSY FOR NOW
 
         /* 
         const leo_config_dir = getattr(sys, 'leo_config_directory', None)
@@ -1595,7 +1596,7 @@ export class LoadManager {
         if (home) {
             // Important: This returns the _working_ directory if home is None!
             // This was the source of the 4.3 .leoID.txt problems.
-            home = g.os_path_finalize(home);
+            home = g.finalize(home);
             const exists = await g.os_path_exists(home);
             const isDir = await g.os_path_isdir(home);
             if (!exists || !isDir) {
@@ -1615,7 +1616,7 @@ export class LoadManager {
             return "";
         }
 
-        homeLeoDir = g.os_path_finalize_join(undefined, g.app.homeDir, '.leo');
+        homeLeoDir = g.finalize_join(g.app.homeDir, '.leo');
         const exists = await g.os_path_exists(homeLeoDir);
 
         if (exists) {
@@ -1646,7 +1647,7 @@ export class LoadManager {
      * Returns the directory containing leo.py.
      */
     public computeLoadDir(): string {
-        let loadDir: string = ""; // * unused : RETURN EMPTY / FALSY FOR NOW
+        let loadDir: string = ""; // ! unused : RETURN EMPTY / FALSY FOR NOW
         /* 
         try:
             # Fix a hangnail: on Windows the drive letter returned by
@@ -1668,7 +1669,7 @@ export class LoadManager {
                     if len(path) > 2 and path[1] == ':':
                         # Convert the drive name to upper case.
                         path = path[0].upper() + path[1:]
-                path = g.os_path_finalize(path)
+                path = g.finalize(path)
                 loadDir = g.os_path_dirname(path)
             else: loadDir = None
             if (
@@ -1682,7 +1683,7 @@ export class LoadManager {
                     loadDir += "/leo/plugins"
                 else:
                     g.pr("Exception getting load directory")
-            loadDir = g.os_path_finalize(loadDir)
+            loadDir = g.finalize(loadDir)
             return loadDir
         except Exception:
             print("Exception getting load directory")
@@ -1714,7 +1715,7 @@ export class LoadManager {
         """
         Return a list of *existing* directories that might contain theme .leo files.
         """
-        join = g.os_path_finalize_join
+        join = g.finalize_join
         home = g.app.homeDir
         leo = join(g.app.loadDir, '..')
         table = [
@@ -1813,8 +1814,8 @@ export class LoadManager {
         if g.unitTesting or g.app.batchMode:
             return None
         fn = g.app.config.getString(setting='default_leo_file') or '~/.leo/workbook.leo'
-        fn = g.os_path_finalize(fn)
-        directory = g.os_path_finalize(os.path.dirname(fn))
+        fn = g.finalize(fn)
+        directory = g.finalize(os.path.dirname(fn))
         # #1415.
         return fn if os.path.exists(directory) else None
      */
@@ -2480,7 +2481,7 @@ export class LoadManager {
         if g.app.batchMode and g.os_path_exists(fn):
             return c
         # Open the cheatsheet.
-        fn = g.os_path_finalize_join(g.app.loadDir, '..', 'doc', 'CheatSheet.leo')
+        fn = g.finalize_join(g.app.loadDir, '..', 'doc', 'CheatSheet.leo')
         if not g.os_path_exists(fn):
             g.es(f"file not found: {fn}")
             return None
@@ -2641,7 +2642,7 @@ export class LoadManager {
         }
 
         // Step 0: Return if the file is already open.
-        // fn = g.os_path_finalize(fn);
+        // fn = g.finalize(fn);
 
         if (fn) {
             c = lm.findOpenFile(fn);
@@ -2975,7 +2976,7 @@ export class LoadManager {
         const w_result = await c.fileCommands.openLeoFile(fn, readAtFileNodesFlag);
         if (w_result) {
             if (!c.openDirectory) {
-                const theDir = g.os_path_finalize(g.os_path_dirname(fn));  // 1341
+                const theDir = g.finalize(g.os_path_dirname(fn));  // 1341
                 c.openDirectory = theDir;
                 c.frame.openDirectory = theDir;
             }

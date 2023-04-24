@@ -9615,7 +9615,7 @@ public gotoGlobalLine(): void {
                 prompt: Constants.USER_MESSAGES.PROMPT_GOTO_GLOBAL_LINE,
             });
         })
-        .then((p_inputResult?: string) =&gt; {
+        .then(async (p_inputResult?: string) =&gt; {
             if (p_inputResult) {
                 const w_line = parseInt(p_inputResult);
                 if (!isNaN(w_line)) {
@@ -9625,7 +9625,7 @@ public gotoGlobalLine(): void {
                     let junk_p;
                     let junk_offset;
                     let found;
-                    [junk_p, junk_offset, found] = gc.find_file_line(w_line);
+                    [junk_p, junk_offset, found] = await gc.find_file_line(w_line);
 
                     this.setupRefresh(
                         Focus.Body,
@@ -10577,12 +10577,24 @@ set leoCanGoNext(p_value: boolean) {
     c: Commands,
     title: string,
     message: string,
-    yesMessage = "Yes",
-    noMessage = "No",
+    yesMessage = Constants.USER_MESSAGES.YES,
+    noMessage = Constants.USER_MESSAGES.NO,
     yesToAllMessage = "",
-    defaultButton = "Yes",
+    defaultButton = Constants.USER_MESSAGES.YES,
     cancelMessage = ""
 ): Thenable&lt;string&gt; {
+    const w_choices = [
+        yesMessage,
+        noMessage,
+        // Note: Already shows a 'cancel' !
+    ];
+    if (yesToAllMessage) {
+        w_choices.push(yesToAllMessage);
+    }
+    if (cancelMessage) {
+        w_choices.push(cancelMessage);
+    }
+
     return vscode.window
         .showInformationMessage(
             title,
@@ -10590,17 +10602,20 @@ set leoCanGoNext(p_value: boolean) {
                 modal: true,
                 detail: message
             },
-            Constants.USER_MESSAGES.YES,
-            Constants.USER_MESSAGES.NO
-            // Already shows a 'cancel'
+            ...w_choices
+            // Note: Already shows a 'cancel' !
         )
         .then((answer) =&gt; {
-            if (answer === Constants.USER_MESSAGES.YES) {
-                return Constants.USER_MESSAGES.YES.toLowerCase();
-            } else if (answer === Constants.USER_MESSAGES.NO) {
-                return Constants.USER_MESSAGES.NO.toLowerCase();
+            if (answer === yesMessage) {
+                return 'yes';
+            } else if (noMessage) {
+                return 'no';
+            } else if (answer === yesToAllMessage) {
+                return 'yes-to-all';
+            } else if (answer === cancelMessage) {
+                return 'cancel';
             } else {
-                return Constants.USER_MESSAGES.CANCEL.toLowerCase();
+                return 'cancel';
             }
         });
 }

@@ -24,11 +24,11 @@ import { NullGui } from "./leoGui";
     from functools import reduce/
     try:
         import gc
-    except ImportError:
+    catch ImportError:
         gc = None
     try:
         import gettext
-    except ImportError:  # does not exist in jython.
+    catch ImportError:  # does not exist in jython.
         gettext = None
     import glob
     import io
@@ -187,7 +187,6 @@ export const g_is_directive_pattern = new RegExp(/^\s*@([\w-]+)\s*/);
 // #2267: Support for @section-delims.
 export const g_section_delims_pat = new RegExp(/^@section-delims[ \t]+([^ \w\n\t]+)[ \t]+([^ \w\n\t]+)[ \t]*$/);
 
-export const g_noweb_root = new RegExp('<' + '<' + '*' + '>' + '>' + '=', 'mg');
 export const g_pos_pattern = new RegExp(/:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$/);
 export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
 
@@ -477,7 +476,7 @@ export class GeneralSetting {
     public kind: string;
     public encoding: string | undefined = undefined;
     public ivar: string | undefined = undefined;
-    public setting: string | undefined = undefined;
+    public source: string | undefined = undefined;
     public val: any | undefined = undefined;
     public path: string | undefined = undefined;
     public tag: string = 'setting';
@@ -488,7 +487,7 @@ export class GeneralSetting {
             kind: string;
             encoding?: string;
             ivar?: string;
-            setting?: string;
+            source?: string;
             val?: any;
             path?: string;
             tag?: string;
@@ -501,7 +500,7 @@ export class GeneralSetting {
         this.kind = p_generalSetting.kind;
         this.path = p_generalSetting.path;
         this.unl = p_generalSetting.unl;
-        this.setting = p_generalSetting.setting;
+        this.source = p_generalSetting.source;
         this.val = p_generalSetting.val;
         if (p_generalSetting.tag) {
             this.tag = p_generalSetting.tag;
@@ -515,8 +514,19 @@ export class GeneralSetting {
             val = this.val.toString().split("\n").join(" ");
         }
         return (
-            `GS: ${shortFileName(this.path)} ` +
-            `${this.kind} = ${val} `);
+            // `GS: ${shortFileName(this.path)} ` +
+            // `${this.kind} = ${val} `
+
+
+            `GS: path: ${shortFileName(this.path || '')} ` +
+            `source: ${this.source || ''} ` +
+            `kind: ${this.kind} val: ${val}`
+
+        );
+
+
+
+
     }
     public dump(): string {
         return this.__repr__();
@@ -573,7 +583,7 @@ export class SettingsDict extends Map<string, any> {
                 kind: this.get(p_key).kind,
                 encoding: this.get(p_key).encoding,
                 ivar: this.get(p_key).ivar,
-                setting: this.get(p_key).setting,
+                source: this.get(p_key).source,
                 val: this.get(p_key).val,
                 path: this.get(p_key).path,
                 tag: this.get(p_key).tag,
@@ -771,6 +781,50 @@ export function get_line_after(s: string, i: number): string {
 // getLineAfter = get_line_after
 export const getLineAfter = get_line_after;
 
+//@+node:felix.20230423224653.1: *3* g.getIvarsDict and checkUnchangedIvars
+/**
+ * Return a dictionary of ivars:values for non-methods of obj.
+ */
+export function getIvarsDict(obj: any): {[key: string]: any} {
+    
+    const d: {[key: string]: any} = {};
+
+    //    [[key, getattr(obj, key)] for key in dir(obj)
+    // if not isinstance(getattr(obj, key), types.MethodType)])
+    for (const key in obj) {
+        // console.log(key); // prints 'a', 'b', and 'c'
+        const w_callable = (typeof obj[key] === 'function') || (obj[key] instanceof Function);
+        if(!w_callable){
+            d[key] = obj[key];
+        }
+    }
+    return d;
+}
+
+export function checkUnchangedIvars(
+    obj: any,
+    d: {[key: string]: any},
+    exceptions?: string[]
+) : boolean {
+    if( !exceptions || !exceptions.length){
+        exceptions = [];
+    }
+    let ok = true;
+    for(const key in d){ // USE 'IN' FOR KEY!
+        if(!exceptions.includes(key)){
+            if( obj[key] !== d[key]){
+                trace(
+                    `changed ivar: ${key} ` +
+                    `old: ${d[key]} ` +
+                    `new: ${obj[key]}`
+                );
+                ok = false;
+            }
+        }
+    }
+    return ok;
+
+}
 //@+node:felix.20211104221354.1: *3* g.listToString     (coreGlobals.py)
 /**
  * Pretty print any array / python list to string
@@ -907,7 +961,8 @@ export function comment_delims_from_extension(filename: string): [string, string
 
 //@+node:felix.20220111004937.1: *3* g.findAllValidLanguageDirectives
 /**
- * Return list of all valid @language directives in s
+ * Return list of all languages for which there is a valid @language
+ * directive in s.
  */
 export function findAllValidLanguageDirectives(s: string): string[] {
 
@@ -926,7 +981,8 @@ export function findAllValidLanguageDirectives(s: string): string[] {
 }
 //@+node:felix.20220112011652.1: *3* g.findFirstAtLanguageDirective
 /**
- * Return the first *valid* @language directive in s.
+ * Return the first language for which there is a valid @language
+ * directive in s.
  */
 export function findFirstValidAtLanguageDirective(s: string): string | undefined {
 
@@ -943,22 +999,35 @@ export function findFirstValidAtLanguageDirective(s: string): string | undefined
     }
     return undefined;
 }
-//@+node:felix.20211104213229.1: *3* g.get_directives_dict (must be fast)
-// The caller passes [root_node] or None as the second arg.
-// This allows us to distinguish between None and [None].
+//@+node:felix.20230423231138.1: *3* g.findReference
+/**
+ * Return the position containing the section definition for name.
+ *
+ * Called from the syntax coloring method that colorizes section references.
+ * Also called from write at.putRefAt.
+ */
+export function findReference(name: string, root: Position): Position | undefined {
+    
+    for( const p of root.subtree(false)){
+        console.assert (!p.__eq__(root));
+        if (p.matchHeadline(name) && !p.isAtIgnoreNode()){
+            return p.copy();
+        }
+    }
+    return undefined;
 
+}
+//@+node:felix.20211104213229.1: *3* g.get_directives_dict (must be fast)
 /**
  *  Scan p for Leo directives found in globalDirectiveList.
  *
  * Returns a dict containing the stripped remainder of the line
- * following the first occurrence of each recognized directive
+ * following the first occurrence of each recognized directive.
  */
-export function get_directives_dict(p: Position, root?: Position[]): { [key: string]: string } {
+export function get_directives_dict(p: Position): { [key: string]: string } {
 
     let d: { [key: string]: string } = {};
-    // #1688:    legacy: Always compute the pattern.
-    //           g.directives_pat is updated whenever loading a plugin.
-    //
+
     // The headline has higher precedence because it is more visible.
     let m: RegExpExecArray | null;
     for (let s of [p.h, p.b]) {
@@ -984,20 +1053,6 @@ export function get_directives_dict(p: Position, root?: Position[]): { [key: str
         }
     }
 
-    if (root && root.length) {
-        const root_node: Position = root[0];
-        //anIter = g_noweb_root.exec(p.b);
-        // for (let m of anIter) {
-        while ((m = g_noweb_root.exec(p.b)) !== null) {
-            if (root_node && root_node.__bool__()) {
-                d["root"] = "0";  // value not important
-            } else {
-                es(`${angleBrackets("*")} may only occur in a topmost node(i.e., without a parent)`);
-            }
-            break;
-        }
-    }
-
     return d;
 }
 //@+node:felix.20211104213315.1: *3* g.get_directives_dict_list (must be fast)
@@ -1011,9 +1066,8 @@ export function get_directives_dict_list(p: Position): { [key: string]: string; 
     const result: { [key: string]: string; }[] = [];
     const p1: Position = p.copy();
     for (let p of p1.self_and_parents(false)) {
-        const root: Position[] | undefined = p.hasParent() ? undefined : [p];
         // No copy necessary: g.get_directives_dict does not change p.
-        result.push(get_directives_dict(p, root));
+        result.push(get_directives_dict(p));
     }
     return result;
 }
@@ -1674,69 +1728,78 @@ export function ensure_extension(name: string, ext: string): string {
 }
 //@+node:felix.20211228213652.1: *3* g.fullPath
 /**
- * Return the full path (including fileName) in effect at p. Neither the
- * path nor the fileName will be created if it does not exist.
+ * Return the full path (including fileName) in effect at p.
+ *
+ * Create neither the path nor the fileName.
+ *
+ * This function is deprecated. Use c.fullPath(p) instead.
  */
-export function fullPath(c: Commands, p_p: Position, simulate: boolean = false): string {
+export function fullPath(c: Commands, p: Position, simulate: boolean = false): string {
+    return c.fullPath(p, simulate);
     // Search p and p's parents.
-    for (let p of p_p.self_and_parents(false)) {
-        const aList: any[] = get_directives_dict_list(p);
-        const w_path: string = c.scanAtPathDirectives(aList);
-        let fn: string = simulate ? p.h : p.anyAtFileNodeName();
-        //fn = p.h if simulate else p.anyAtFileNodeName()
-        // Use p.h for unit tests.
-        if (fn) {
-            // Fix #102: expand path expressions.
-            fn = c.expand_path_expression(fn);  // #1341.
-            // fn = os.path.expanduser(fn);  // 1900.
+    // for (let p of p_p.self_and_parents(false)) {
+    //     const aList: any[] = get_directives_dict_list(p);
+    //     const w_path: string = c.scanAtPathDirectives(aList);
+    //     let fn: string = simulate ? p.h : p.anyAtFileNodeName();
+    //     //fn = p.h if simulate else p.anyAtFileNodeName()
+    //     // Use p.h for unit tests.
+    //     if (fn) {
+    //         // Fix #102: expand path expressions.
+    //         fn = c.expand_path_expression(fn);  // #1341.
+    //         // fn = os.path.expanduser(fn);  // 1900.
 
-            if (fn[0] === '~') {
-                fn = path.join(os.homedir(), fn.slice(1));
-            }
+    //         if (fn[0] === '~') {
+    //             fn = path.join(os.homedir(), fn.slice(1));
+    //         }
 
-            return os_path_finalize_join(undefined, w_path, fn);  // #1341.
-        }
+    //         return os_path_finalize_join(undefined, w_path, fn);  // #1341.
+    //     }
 
-    }
-    return '';
+    // }
+    // return '';
 }
 //@+node:felix.20220102154348.1: *3* g.getBaseDirectory
 /**
- * Handles the conventions applying to the "relative_path_base_directory" configuration option.
+ * This function is deprectated.
  *
- * Convert '!' or '.' to proper directory references.
+ * Previously it convert '!' or '.' to proper directory references using
+ * @string relative-path-base-directory.
  */
 export function getBaseDirectory(c: Commands): string {
 
-    // let base: string = app.config.relative_path_base_directory;
+    return '';
 
-    if (!c) {
-        return '';  // No relative base given.
-    }
-    let base: string = c.config.getString('relative-path-base-directory');
+    // TODO : REMOVE IF TOTALLY UNUSED
 
-    if (base && base === "!") {
-        base = app.loadDir!;
-    } else if (base && base === ".") {
-        base = c.openDirectory!;
-    } else {
-        return '';  // Settings error.
-    }
+    // // let base: string = app.config.relative_path_base_directory;
 
-    if (os_path_isabs(base)) {
-        // Set c.chdir_to_relative_path as needed.
-        if (c.chdir_to_relative_path === undefined) {
-            c.chdir_to_relative_path = c.config.getBool('chdir-to-relative-path');
-        }
-        // Call os.chdir if requested.
-        if (c.chdir_to_relative_path) {
-            // os.chdir(base);
-            process.chdir(base);
-        }
-        return base;  // base need not exist yet.
-    }
+    // if (!c) {
+    //     return '';  // No relative base given.
+    // }
+    // let base: string = c.config.getString('relative-path-base-directory');
 
-    return '';  // No relative base given.
+    // if (base && base === "!") {
+    //     base = app.loadDir!;
+    // } else if (base && base === ".") {
+    //     base = c.openDirectory!;
+    // } else {
+    //     return '';  // Settings error.
+    // }
+
+    // if (os_path_isabs(base)) {
+    //     // Set c.chdir_to_relative_path as needed.
+    //     if (c.chdir_to_relative_path === undefined) {
+    //         c.chdir_to_relative_path = c.config.getBool('chdir-to-relative-path');
+    //     }
+    //     // Call os.chdir if requested.
+    //     if (c.chdir_to_relative_path) {
+    //         // os.chdir(base);
+    //         process.chdir(base);
+    //     }
+    //     return base;  // base need not exist yet.
+    // }
+
+    // return '';  // No relative base given.
 }
 //@+node:felix.20221219233638.1: *3* g.is_sentinel
 /**
@@ -1977,6 +2040,63 @@ export function splitLongFileName(fn: string, limit: number = 40): string {
     }
     return result.join('');
 }
+//@+node:felix.20230422213613.1: *3* g.writeFile
+/**
+ * Create a file with the given contents.
+ */
+export async function writeFile(contents: Uint8Array | string, encoding: string, fileName: string): Promise<boolean> {
+
+    try {
+        if (typeof contents === 'string') {
+            contents = toEncodedString(contents, encoding);
+        }
+
+        // // 'wb' preserves line endings.
+        // with open(fileName, 'wb') as f:
+        //     f.write(contents)  // type:ignore
+
+        const w_uri = makeVscodeUri(fileName);
+        await vscode.workspace.fs.writeFile(w_uri, contents);
+
+        return true;
+    } catch (e) {
+        console.log(`exception writing: ${fileName}:\n${e}`);
+        // g.trace(g.callers())
+        // g.es_exception()
+        return false;
+    }
+}
+//@+node:felix.20230422213619.1: *3* g.write_file_if_changed
+/**
+ * Replace file whose filename is give with s, but *only* if file's
+ * context has changed (or the file does not exist).
+ * & Return true if the file was written.
+ */
+export async function write_file_if_changed(fn: string, s: string, encoding = 'utf-8'): Promise<boolean> {
+    try {
+        const encoded_s = toEncodedString(s, encoding, true);
+        if (await os_path_exists(fn)) {
+            // with open(fn, 'rb') as f
+            //     contents = f.read()
+            const w_uri = makeVscodeUri(fn);
+            const contents = await vscode.workspace.fs.readFile(w_uri);
+            if (Buffer.compare(contents, encoded_s) === 0) {
+                return false;
+            }
+        }
+        // with open(fn, 'wb') as f
+        //     f.write(encoded_s);
+        const w_uri = makeVscodeUri(fn);
+        await vscode.workspace.fs.writeFile(w_uri, encoded_s);
+        return true;
+
+    } catch (exception) {
+        es_print(`Exception writing ${fn}`);
+        es_exception();
+        return false;
+    }
+}
+
 //@+node:felix.20220526234706.1: *3* g.makeVscodeUri
 /**
  * * VSCODE compatibility helper method:
@@ -2505,7 +2625,7 @@ export function doHook(tag: string, keywords?: { [key: string]: any }): any {
         # Pass the hook to the hook handler.
         # g.pr('doHook',f.__name__,keywords.get('c'))
         return f(tag, keywords)
-    except Exception:
+    catch Exception:
         g.es_exception()
         g.app.hookError = True  # Suppress this function.
         g.app.idle_time_hooks_enabled = False
@@ -2893,7 +3013,7 @@ export function checkUnicode(s: string, encoding?: string): string {
         s = s.decode(encoding, 'replace')
         g.trace(g.callers())
         g.error(f"{tag}: unicode error. encoding: {encoding!r}, s:\n{s!r}")
-    except Exception:
+    catch Exception:
         g.trace(g.callers())
         g.es_excption()
         g.error(f"{tag}: unexpected error! encoding: {encoding!r}, s:\n{s!r}")
@@ -3349,10 +3469,11 @@ export function isValidEncoding(encoding: string): boolean {
 /**
  * Convert unicode string to an encoded string.
  */
-export function toEncodedString(s: any, encoding = 'utf-8', reportErrors = false): string {
-    if ((typeof s) !== "string") {
-        return s;
-    }
+export function toEncodedString(s: any, encoding = 'utf-8', reportErrors = false): Uint8Array {
+    return Buffer.from(s);
+    // if ((typeof s) !== "string") {
+    //     return s;
+    // }
     // TODO : TEST AND CHECK IF MORE THAN utf-8 IS NEEDED
     // use atob() for ascii to base 64, or other functionality for more encodings
     // (other examples)
@@ -3372,7 +3493,7 @@ export function toEncodedString(s: any, encoding = 'utf-8', reportErrors = false
     //     if reportErrors:
     //         error(f"Error converting {s} from unicode to {encoding} encoding")
 
-    return s; // skip for now
+    // return s; // skip for now
 }
 
 //@+node:felix.20211104210858.1: ** g.Logging & Printing
@@ -3732,6 +3853,155 @@ export function divmod(dividend: number, divisor: number): [number, number] {
 //@+node:felix.20211227182611.1: ** g.os_path_ Wrappers
 //@+at Note: all these methods return Unicode strings. It is up to the user to
 // convert to an encoded string as needed, say when opening a file.
+//@+node:felix.20230422214424.1: *3* g.finalize
+/**
+ * 
+ * Finalize the path. Do not call os.path.realpath.
+ *
+ * - Call os.path.expanduser and os.path.expandvars.
+ * - Convert to an absolute path, relative to os.getwd().
+ * - On Windows, convert backslashes to forward slashes.
+ */
+export function finalize(p_path: string): string {
+
+    if (!p_path) {
+        return '';
+    }
+    if (os.homedir()) {
+        p_path = p_path.replace(/^~([\\/])/, `${os.homedir()}$1`);
+        // p_path = os.path.expanduser(p_path)
+    }
+
+    if (process && process.env) {
+        //p_path = os.path.expandvars(p_path)
+        p_path = p_path.replace(/\${(\w+)}/g, (match, varName) => {
+            return process.env[varName] || '';
+        });
+    }
+
+    // Convert to an abosolute path, similar to os.path.normpath(os.getcwd(), path)
+    // p_path = os.path.abspath(p_path)
+    p_path = path.resolve(p_path);
+
+    // p_path = os.path.normpath(p_path)
+    p_path = path.normalize(p_path);
+
+    // Convert backslashes to forward slashes, regradless of platform.
+    p_path = os_path_normslashes(p_path);
+    return p_path;
+
+}
+
+// TODO : ? Needed ?    
+// os_path_finalize = finalize  # Compatibility.
+//@+node:felix.20211227182611.8: *3* g.os_path_finalize
+/**
+ * DEPRECATED os_path_finalize = finalize  # Compatibility.
+ */
+export function os_path_finalize(p_path: string): string {
+    return finalize(p_path);
+    // if (p_path.includes('\x00')) {
+    //     trace('NULL in', p_path.toString(), callers());
+    //     p_path = p_path.split('\x00').join(''); // Fix Python 3 bug on Windows 10.
+    // }
+
+    // // p_path = path.expanduser(p_path);  // #1383.
+    // if (p_path[0] === '~') {
+    //     p_path = path.join(os.homedir(), p_path.slice(1));
+    // }
+
+    // // p_path = path.resolve(p_path); // ! Adds /home/<user> to path !
+    // // console.log('middle', p_path);
+
+    // p_path = path.normalize(p_path);
+
+    // // path.normpath does the *reverse* of what we want.
+
+    // if (isWindows) {
+    //     p_path = p_path.split('\\').join('/');
+    // }
+
+    // // calling os.path.realpath here would cause problems in some situations.
+    // return p_path;
+}
+//@+node:felix.20230422214428.1: *3* g.finalize_join
+/**
+ * Join and finalize. Do not call os.path.realpath.
+ *
+ * - Return an empty string if all of the args are empty.
+ * - Call os.path.expanduser and  os.path.expandvars for each arg.
+ * - Call os.path.join on the resulting list of expanded arguments.
+ * - Convert to an absolute path, relative to os.getwd().
+ * - On Windows, convert backslashes to forward slashes.
+ */
+export function finalize_join(...args: string[]): string {
+
+    // uargs = [z for z in args if z]
+    // if not uargs:
+    //     return ''
+    // // Expand everything before joining.
+    // uargs2 = [os.path.expandvars(os.path.expanduser(z)) for z in uargs]
+
+
+    if (!args || !args.length) {
+        return '';
+    }
+
+    const uargs: string[] = [];
+    for (let z of args) {
+        if (z) {
+
+            if (os.homedir()) {
+                z = z.replace(/^~([\\/])/, `${os.homedir()}$1`);
+                // p_path = os.path.expanduser(p_path)
+            }
+
+            if (process && process.env) {
+                //p_path = os.path.expandvars(p_path)
+                z = z.replace(/\${(\w+)}/g, (match, varName) => {
+                    return process.env[varName] || '';
+                });
+            }
+
+            uargs.push(z);
+        }
+    }
+    // uargs = [z for z in args if z]
+
+    if (!uargs.length) {
+        return '';
+    }
+
+    let w_path = path.join(...uargs);
+    // Join the paths.
+    // let w_path = os.path.join(*uargs2)
+
+    // Convert to an abosolute path, similar to os.path.normpath(os.getcwd(), path)
+    //w_path = os.path.abspath(w_path)
+    //w_path = os.path.normpath(w_path)
+    w_path = path.resolve(w_path);
+    w_path = path.normalize(w_path);
+
+    // Convert backslashes to forward slashes, regradless of platform.
+    w_path = os_path_normslashes(w_path);
+    return w_path;
+}
+// TODO : ? Needed ?
+// os_path_finalize_join = finalize_join  # Compatibility.
+//@+node:felix.20211227182611.9: *3* g.os_path_finalize_join
+/**
+ * DEPRECATED
+ * os_path_finalize_join = finalize_join  # Compatibility.
+ */
+export function os_path_finalize_join(c: Commands | undefined, ...args: any[]): string {
+
+    return finalize_join(...args);
+
+    // let w_path: string = os_path_join(c, ...args);
+
+    // w_path = os_path_finalize(w_path);
+    // return w_path;
+}
 //@+node:felix.20211227182611.2: *3* g.glob_glob
 // def glob_glob(pattern):
 //     """Return the regularized glob.glob(pattern)"""
@@ -3766,14 +4036,12 @@ export function os_path_abspath(p_path: string): string {
 }
 
 //@+node:felix.20211227182611.4: *3* g.os_path_basename
-// def os_path_basename(path: str):
+// def os_path_basename(path: str) -> str:
 //     """Return the second half of the pair returned by split(path)."""
 //     if not path:
 //         return ''
 //     path = os.path.basename(path)
-//     # os.path.normpath does the *reverse* of what we want.
-//     if g.isWindows:
-//         path = path.replace('\\', '/')
+//     path = g.os_path_normslashes(path)
 //     return path
 //@+node:felix.20211227205112.1: *3* g.os_path_dirname
 /**
@@ -3826,66 +4094,26 @@ export async function os_path_exists(p_path?: string): Promise<boolean | vscode.
  */
 export function os_path_expanduser(p_path: string): string {
 
-    p_path = p_path.trim();
-    if (!p_path) {
-        return '';
-    }
+    return finalize(p_path);
 
-    // os.path.expanduser(p_path)
-    if (p_path[0] === '~') {
-        p_path = path.join(os.homedir(), p_path.slice(1));
-    }
-    let result: string = path.normalize(p_path);
+    // DEPRECATED
 
-    // os.path.normpath does the *reverse* of what we want.
-    if (isWindows) {
-        result = result.split('\\').join('/');
-    }
-    return result;
-}
-//@+node:felix.20211227182611.8: *3* g.os_path_finalize
-/**
- * Expand '~', then return os.path.normpath, os.path.abspath of the path.
- * There is no corresponding os.path method
- */
-export function os_path_finalize(p_path: string): string {
+    // p_path = p_path.trim();
+    // if (!p_path) {
+    //     return '';
+    // }
 
-    if (p_path.includes('\x00')) {
-        trace('NULL in', p_path.toString(), callers());
-        p_path = p_path.split('\x00').join(''); // Fix Python 3 bug on Windows 10.
-    }
+    // // os.path.expanduser(p_path)
+    // if (p_path[0] === '~') {
+    //     p_path = path.join(os.homedir(), p_path.slice(1));
+    // }
+    // let result: string = path.normalize(p_path);
 
-    // p_path = path.expanduser(p_path);  // #1383.
-    if (p_path[0] === '~') {
-        p_path = path.join(os.homedir(), p_path.slice(1));
-    }
-
-    // p_path = path.resolve(p_path); // ! Adds /home/<user> to path !
-    // console.log('middle', p_path);
-
-    p_path = path.normalize(p_path);
-
-    // path.normpath does the *reverse* of what we want.
-
-    if (isWindows) {
-        p_path = p_path.split('\\').join('/');
-    }
-
-    // calling os.path.realpath here would cause problems in some situations.
-    return p_path;
-}
-//@+node:felix.20211227182611.9: *3* g.os_path_finalize_join
-/**
- * Join and finalize.
-
- * *keys may contain a 'c' kwarg, used by g.os_path_join.
- */
-export function os_path_finalize_join(c: Commands | undefined, ...args: any[]): string {
-
-    let w_path: string = os_path_join(c, ...args);
-
-    w_path = os_path_finalize(w_path);
-    return w_path;
+    // // os.path.normpath does the *reverse* of what we want.
+    // if (isWindows) {
+    //     result = result.split('\\').join('/');
+    // }
+    // return result;
 }
 //@+node:felix.20211227182611.10: *3* g.os_path_getmtime
 // def os_path_getmtime(path: str):
@@ -3894,7 +4122,7 @@ export function os_path_finalize_join(c: Commands | undefined, ...args: any[]): 
 //         return 0
 //     try:
 //         return os.path.getmtime(path)
-//     except Exception:
+//     catch Exception:
 //         return 0
 //@+node:felix.20211227182611.11: *3* g.os_path_getsize
 /**
@@ -4007,45 +4235,56 @@ export function os_path_join(c: Commands | undefined, ...args: any[]): string {
     if (!uargs.length) {
         return '';
     }
-    // Note:  This is exactly the same convention as used by getBaseDirectory.
-    if (uargs[0] === '!!') {
-        uargs[0] = app.loadDir || '';
-    } else if (uargs[0] === '.') {
-        if (c && c.openDirectory) {
-            uargs[0] = c.openDirectory;
-        }
-    }
-    let w_path: string;
+    let w_path = path.join(...uargs);
 
-    try {
-        w_path = path.join(...uargs);
-    }
-    catch (typeError) {
-        trace(uargs, callers());
-        throw (typeError);
-    }
-    // May not be needed on some Pythons.
-    if (w_path.includes('\x00')) {
-        trace('NULL in', w_path.toString(), callers());
-        w_path = w_path.split('\x00').join(''); // Fix Python 3 bug on Windows 10.
-    }
+    // // Note:  This is exactly the same convention as used by getBaseDirectory.
+    // if (uargs[0] === '!!') {
+    //     uargs[0] = app.loadDir || '';
+    // } else if (uargs[0] === '.') {
+    //     if (c && c.openDirectory) {
+    //         uargs[0] = c.openDirectory;
+    //     }
+    // }
+    // let w_path: string;
 
-    // os.path.normpath does the *reverse* of what we want.
-    if (isWindows) {
-        w_path = w_path.split('\\').join('/');
-    }
+    // try {
+    //     w_path = path.join(...uargs);
+    // }
+    // catch (typeError) {
+    //     trace(uargs, callers());
+    //     throw (typeError);
+    // }
+    // // May not be needed on some Pythons.
+    // if (w_path.includes('\x00')) {
+    //     trace('NULL in', w_path.toString(), callers());
+    //     w_path = w_path.split('\x00').join(''); // Fix Python 3 bug on Windows 10.
+    // }
 
+    // // os.path.normpath does the *reverse* of what we want.
+    // if (isWindows) {
+    //     w_path = w_path.split('\\').join('/');
+    // }
+
+    w_path = os_path_normslashes(w_path);
     return w_path;
 }
 //@+node:felix.20211227182611.16: *3* g.os_path_normcase
-// def os_path_normcase(path: str):
-//     """Normalize the path's case."""
-//     if not path:
-//         return ''
-//     path = os.path.normcase(path)
-//     if g.isWindows:
-//         path = path.replace('\\', '/')
-//     return path
+/**
+ * Normalize the path's case.
+ */
+export function os_path_normcase(p_path: string): string {
+    if (!p_path) {
+        return '';
+    }
+
+    // p_path = os.path.normcase(p_path);
+    if (isWindows) {
+        p_path = p_path.toLowerCase();
+    }
+
+    p_path = os_path_normslashes(p_path);
+    return p_path;
+}
 //@+node:felix.20211227182611.17: *3* g.os_path_normpath
 /**
  * Normalize the path.
@@ -4056,21 +4295,30 @@ export function os_path_normpath(p_path: string): string {
     }
     p_path = path.normalize(p_path);
     // os.path.normpath does the *reverse* of what we want.
-    if (isWindows) {
-        p_path = p_path.split('\\').join('/').toLowerCase();
-    }
+    // if (isWindows) {
+    //     p_path = p_path.split('\\').join('/').toLowerCase();
+    // }
+    p_path = os_path_normslashes(p_path);
     return p_path;
+
 }
 
 
 //@+node:felix.20211227182611.18: *3* g.os_path_normslashes
-// def os_path_normslashes(path: str):
-
-//     # os.path.normpath does the *reverse* of what we want.
-//     if g.isWindows and path:
-//         path = path.replace('\\', '/')
-//     return path
-
+/**
+ * Convert backslashes to forward slashes (Windows only).
+ *
+ * In effect, this convert Windows paths to POSIX paths.
+ */
+export function os_path_normslashes(p_path: string): string {
+    if (!p_path) {
+        return '';
+    }
+    if (isWindows) {
+        p_path = p_path.split('\\').join('/');
+    }
+    return p_path;
+}
 //@+node:felix.20211227182611.19: *3* g.os_path_realpath
 /**
  * Return the canonical path of the specified filename, eliminating any
@@ -4088,14 +4336,73 @@ export function os_path_realpath(p_path: string): string {
 
     p_path = p_path; // fixme
     // p_path = vscode.workspace.fs.realPath(p_path);
-    // os.path.normpath does the *reverse* of what we want.
+    // // os.path.normpath does the *reverse* of what we want.
 
-    if (isWindows) {
-        p_path = p_path.split('\\').join('/');
-    }
+    // if (isWindows) {
+    //     p_path = p_path.split('\\').join('/');
+    // }
+    p_path = os_path_normslashes(p_path);
     return p_path;
 }
 
+//@+node:felix.20230423204948.1: *3* g.os_path_samefile
+export async function os_path_samefile(fn1: string, fn2: string): Promise<boolean> {
+
+    // 1- with string themselves
+    if (os_path_normpath(os_path_normcase(fn1)) === os_path_normpath(os_path_normcase(fn2))) {
+        return true;
+    }
+
+    // 2- with fs.stat ino and dev
+    const w_uri1 = makeVscodeUri(fn1);
+    const w_uri2 = makeVscodeUri(fn2);
+
+    // 2.5 with vscode.Uri :
+    //  path
+    //  fsPath
+    //  toString
+    if (w_uri1.path === w_uri2.path || w_uri1.fsPath === w_uri2.fsPath || w_uri1.toString() === w_uri2.path.toString()) {
+        return true;
+    }
+
+    // IF REAL NODE FS ONLY !
+    try {
+        const w_stat1: vscode.FileStat = await vscode.workspace.fs.stat(w_uri1);
+        const w_stat2: vscode.FileStat = await vscode.workspace.fs.stat(w_uri2);
+        if (
+            (w_stat1 as any)['ino'] &&
+            (w_stat1 as any)['dev'] &&
+            (w_stat2 as any)['ino'] &&
+            (w_stat2 as any)['dev']
+        ) {
+            if (
+                (w_stat1 as any)['ino'] === (w_stat2 as any)['ino'] &&
+                (w_stat1 as any)['dev'] === (w_stat2 as any)['dev']
+            ) {
+                return true;
+            }
+        }
+    }
+    catch (e) {
+        // A file didnt exist! 
+        return false;
+    }
+
+    // 3- with path.resolve
+    let absPath1 = path.resolve(fn1);
+    let absPath2 = path.resolve(fn2);
+    if (absPath1 === absPath2) {
+        return true;
+    }
+
+    // 4- with fs.realpath
+    // DOES NOT EXIST IN VSCODE vscode.workspace.fs !
+
+    // 5- finalize
+    absPath1 = finalize(fn1);
+    absPath2 = finalize(fn2);
+    return fn1 === fn2;
+}
 //@+node:felix.20211227182611.20: *3* g.os_path_split
 export function os_path_split(p_path: string): [string, string] {
 
@@ -4244,23 +4551,23 @@ export function os_path_splitext(p_path: string): [string, string] {
 //             # Fix bug 1226358: File URL's are broken on MacOS:
 //             # use fname, not quoted_fname, as the argument to subprocess.call.
 //             subprocess.call(['open', fname])
-//         except OSError:
+//         catch OSError:
 //             pass  # There may be a spurious "Interrupted system call"
-//         except ImportError:
+//         catch ImportError:
 //             os.system(f"open {quoted_fname}")
 //     else:
 //         try:
 //             ree = None
 //             wre = tempfile.NamedTemporaryFile()
 //             ree = io.open(wre.name, 'rb', buffering=0)
-//         except IOError:
+//         catch IOError:
 //             g.trace(f"error opening temp file for {fname!r}")
 //             if ree:
 //                 ree.close()
 //             return
 //         try:
 //             subPopen = subprocess.Popen(['xdg-open', fname], stderr=wre, shell=False)
-//         except Exception:
+//         catch Exception:
 //             g.es_print(f"error opening {fname!r}")
 //             g.es_exception()
 //         try:
@@ -4271,7 +4578,7 @@ export function os_path_splitext(p_path: string): [string, string] {
 //             itoPoll.start()
 //             # Let the Leo-Editor process run
 //             # so that Leo-Editor is usable while the file is open.
-//         except Exception:
+//         catch Exception:
 //             g.es_exception(f"exception executing g.startfile for {fname!r}")
 //@+node:felix.20211227182611.23: *4* stderr2log()
 // def stderr2log(g, ree, fname):

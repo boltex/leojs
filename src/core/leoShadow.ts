@@ -109,7 +109,7 @@ export class ShadowController {
         const c = this.c;
         const filename = c.fileName();
         if (filename) {
-            return g.os_path_dirname(g.os_path_finalize(filename));  // 1341
+            return g.os_path_dirname(g.finalize(filename));  // 1341
         }
         console.log('');
         this.error('Can not compute shadow path: .leo file has not been saved');
@@ -129,7 +129,7 @@ export class ShadowController {
     public pathName(filename: string): string {
         const x = this;
         const theDir = x.baseDirName();
-        return theDir ? g.os_path_finalize_join(undefined, theDir, filename) : '';  // 1341
+        return theDir ? g.finalize_join(theDir, filename) : '';  // 1341
     }
     //@+node:felix.20230410203541.6: *4* x.isSignificantPublicFile
     /**
@@ -203,7 +203,7 @@ export class ShadowController {
             // f.write(g.toEncodedString(s, encoding));
 
             const w_writeUri = g.makeVscodeUri(fileName);
-            const writeData = Buffer.from(g.toEncodedString(s, encoding), 'utf8');
+            const writeData = g.toEncodedString(s, encoding);
 
             await vscode.workspace.fs.writeFile(w_writeUri, writeData);
 
@@ -247,11 +247,10 @@ export class ShadowController {
             // build the cache path as a subdir of the base dir
             fileDir = [baseDir, fname, fileDir].join("/");
         };
-        return baseDir && g.os_path_finalize_join(  // 1341
-            undefined,
+        return baseDir && g.finalize_join(  // 1341
             baseDir,
             fileDir,  // Bug fix: honor any directories specified in filename.
-            x.shadow_subdir,
+            x.shadow_subdir!,
             x.shadow_prefix + g.shortFileName(filename));
 
     }

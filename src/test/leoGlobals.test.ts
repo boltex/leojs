@@ -225,6 +225,102 @@ suite('Tests for leo.core.leoGlobals', () => {
             assert.strictEqual(result, val);
         }
     });
+    //@+node:felix.20230423154801.1: *3* TestGlobals.test_g_finalize
+    // def test_g_finalize(self):
+        
+    //     # This is also a strong test of g.finalize.
+    //     import os
+    //     c = self.c
+    //     normslashes = g.os_path_normslashes
+
+    //     # Setup environment.
+    //     expected_leo_base = 'C:/leo_base' if g.isWindows else '/leo_base'
+    //     c.mFileName = "/leo_base/test.leo"
+        
+    //     # Note: These directories do *not* have to exist.
+    //     os.environ = {
+    //         'HOME': '/home',  # Linux.
+    //         'USERPROFILE': normslashes(r'c:/Whatever'),  # Windows.
+    //         'LEO_BASE': expected_leo_base,
+    //     }
+
+    //     curdir = normslashes(os.getcwd())
+    //     home = normslashes(os.path.expanduser('~'))
+    //     assert home in (os.environ['HOME'], os.environ['USERPROFILE']), repr(home)
+
+    //     seps = ('\\', '/') if g.isWindows else ('/',)
+    //     for sep in seps:
+    //         table = (
+    //             # The most basic test. The *only* reasonable base is os.getcwd().
+    //             ('basic.py',                    f"{curdir}/basic.py"),
+    //             (f"~{sep}a.py",                 f"{home}/a.py"),
+    //             (f"~{sep}x{sep}..{sep}b.py",    f"{home}/b.py"),
+    //             (f"$LEO_BASE{sep}c.py",         f"{expected_leo_base}/c.py"),        
+    //         )
+    //         for arg, expected in table:
+    //             got = g.finalize(arg)
+    //             # Weird: the case is wrong whatever the case of expected_leo_base!
+    //             if g.isWindows:
+    //                 expected = expected.replace('C:', 'c:')
+    //                 got = got.replace('C:', 'c:')
+    //             self.assertEqual(expected, got)
+    //@+node:felix.20230423154806.1: *3* TestGlobals.test_g_finalize_join
+    // def test_g_finalize_join(self):
+        
+    //     # This is also a strong test of g.finalize.
+    //     import os
+    //     c = self.c
+    //     normslashes = g.os_path_normslashes
+
+    //     # Setup environment.
+    //     expected_leo_base = 'C:/leo_base' if g.isWindows else '/leo_base'
+    //     c.mFileName = "/leo_base/test.leo"
+        
+    //     # Note: These directories do *not* have to exist.
+    //     os.environ = {
+    //         'HOME': '/home',  # Linux.
+    //         'USERPROFILE': normslashes(r'c:/Whatever'),  # Windows.
+    //         'LEO_BASE': expected_leo_base,
+    //     }
+
+    //     curdir = normslashes(os.getcwd())
+    //     home = normslashes(os.path.expanduser('~'))
+    //     assert home in (os.environ['HOME'], os.environ['USERPROFILE']), repr(home)
+
+    //     seps = ('\\', '/') if g.isWindows else ('/',)
+    //     for sep in seps:
+    //         table = (
+    //             # The most basic test. The *only* reasonable base is os.getcwd().
+    //             (('basic.py',),                     f"{curdir}/basic.py"),
+    //             # One element in *args...
+    //             ((f"~{sep}a.py",),                  f"{home}/a.py"),
+    //             ((f"~{sep}x{sep}..{sep}b.py",),     f"{home}/b.py"),
+    //             ((f"$LEO_BASE{sep}c.py",),          f"{expected_leo_base}/c.py"),
+    //             # Two elements in *args...
+    //             (('~', 'w.py'),                     f"{home}/w.py"),
+    //             (('$LEO_BASE', 'x.py'),             f"{expected_leo_base}/x.py"),
+    //             # Strange cases...
+    //             (('~', '~', 's1.py'),               f"{home}/s1.py"),
+    //             ((f"~{sep}b", '~', 's2.py'),        f"{home}/s2.py"),
+    //             (('~', f"~{sep}b", 's3.py'),        f"{home}/b/s3.py"),
+    //             (('$LEO_BASE', '~', 's4.py'),       f"{home}/s4.py"),
+    //             (('~', '$LEO_BASE', 's5.py'),       f"{expected_leo_base}/s5.py"),
+    //             # More strange cases.
+    //             (('~', 'xxx.py', '~', 's6.py'),     f"{home}/s6.py"),
+    //             (('yyy', '~'),                      f"{home}"),
+    //             (('zzz', '$LEO_BASE',),             f"{expected_leo_base}"),
+    //             (('${LEO_BASE}b',),                 f"{expected_leo_base}b"),
+        
+    //             # This goes beyond the limits of what Windows can do.
+    //             # (('a${LEO_BASE}b',),                f"a{expected_leo_base}b"),            
+    //         )
+    //         for args, expected in table:
+    //             got = g.finalize_join(*args)
+    //             # Weird: the case is wrong whatever the case of expected_leo_base!
+    //             if g.isWindows:
+    //                 expected = expected.replace('C:', 'c:')
+    //                 got = got.replace('C:', 'c:')
+    //             self.assertEqual(expected, got)
     //@+node:felix.20220129223719.11: *3* TestGlobals.test_g_find_word
     test('test_g_find_word', async () => {
         const table: [string, string, number, number][] = [

@@ -57,7 +57,7 @@ export class CommanderHelpCommands {
         /*     
         c = self
         name = "LeoDocs.leo"
-        fileName = g.os_path_finalize_join(g.app.loadDir, "..", "doc", name)
+        fileName = g.finalize_join(g.app.loadDir, "..", "doc", name)
         # Bug fix: 2012/04/09: only call g.openWithFileName if the file exists.
         if g.os_path_exists(fileName):
             c2 = g.openWithFileName(fileName, old_c=c)
@@ -84,7 +84,7 @@ export class CommanderHelpCommands {
         /* 
         c = self
         name = "quickstart.leo"
-        fileName = g.os_path_finalize_join(g.app.loadDir, "..", "doc", name)
+        fileName = g.finalize_join(g.app.loadDir, "..", "doc", name)
         # Bug fix: 2012/04/09: only call g.openWithFileName if the file exists.
         if g.os_path_exists(fileName):
             c2 = g.openWithFileName(fileName, old_c=c)
@@ -112,7 +112,7 @@ export class CommanderHelpCommands {
 
         /* 
         c = self
-        fn = g.os_path_finalize_join(g.app.loadDir, '..', 'doc', 'CheatSheet.leo')
+        fn = g.finalize_join(g.app.loadDir, '..', 'doc', 'CheatSheet.leo')
         if not g.os_path_exists(fn):
             g.es(f"file not found: {fn}")
             return
@@ -183,7 +183,6 @@ export class CommanderHelpCommands {
         }
 
     }
-
 
     @commander_command(
         'open-my-leo-settings',

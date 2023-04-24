@@ -1294,7 +1294,7 @@ export class ParserBaseClass {
         if (gs) {
             console.assert(gs instanceof g.GeneralSetting, gs);
             const w_path = gs.path;
-            if (g.os_path_finalize(c.mFileName) !== g.os_path_finalize(w_path)) {
+            if (g.finalize(c.mFileName) !== g.finalize(w_path)) {
                 g.es("over-riding setting:", name, "from", w_path);  // 1341
             }
         }
@@ -2578,7 +2578,7 @@ export class LocalConfigManager {
         if (gs) {
             // assert isinstance(gs, g.GeneralSetting), repr(gs)
             let w_path = gs.path!;
-            if (warn && g.os_path_finalize(c.mFileName) !== g.os_path_finalize(w_path)) {  // #1341.
+            if (warn && g.finalize(c.mFileName) !== g.finalize(w_path)) {  // #1341.
                 g.es("over-riding setting:", name, "from", w_path);
             }
         }
