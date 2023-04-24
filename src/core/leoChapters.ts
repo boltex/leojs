@@ -1,6 +1,8 @@
 //@+leo-ver=5-thin
 //@+node:felix.20220429005433.1: * @file src/core/leoChapters.ts
-// * Classes that manage chapters in Leo's core.
+/**
+ * Classes that manage chapters in Leo's core.
+ */ 
 //@+<< leoChapters imports >>
 //@+node:felix.20221110000315.1: ** << leoChapters imports >>
 import * as g from './leoGlobals';

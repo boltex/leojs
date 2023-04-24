@@ -1,6 +1,8 @@
 //@+leo-ver=5-thin
 //@+node:felix.20211211234842.1: * @file src/core/leoAtFile.ts
-// * Classes to read and write @file nodes.
+/**
+ * Classes to read and write @file nodes.
+ */ 
 //@+<< imports >>
 //@+node:felix.20211225220235.1: ** << imports >>
 /*

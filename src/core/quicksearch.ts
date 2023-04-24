@@ -1,6 +1,8 @@
 //@+leo-ver=5-thin
 //@+node:felix.20221105221426.1: * @file src/core/quicksearch.ts
-// Original by Ville M. Vainio <vivainio@gmail.com>.
+/**
+ * Original by Ville M. Vainio <vivainio@gmail.com>.
+ */
 //@+<< quicksearch imports >>
 //@+node:felix.20221106160744.1: ** << quicksearch imports >>
 import * as g from './leoGlobals';

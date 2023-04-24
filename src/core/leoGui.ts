@@ -1,13 +1,13 @@
 //@+leo-ver=5-thin
 //@+node:felix.20221119204422.1: * @file src/core/leoGui.ts
-/*
-A module containing the base gui-related classes.
-
-These classes hide the details of which gui is actually being used.
-Leo's core calls this class to allocate all gui objects.
-
-Plugins may define their own gui classes by setting g.app.gui.
-*/
+/**
+ * A module containing the base gui-related classes.
+ *
+ * These classes hide the details of which gui is actually being used.
+ * Leo's core calls this class to allocate all gui objects.
+ *
+ * Plugins may define their own gui classes by setting g.app.gui.
+ */
 //@+<< leoGui imports >>
 //@+node:felix.20221120015443.1: ** << leoGui imports >>
 import * as g from './leoGlobals';

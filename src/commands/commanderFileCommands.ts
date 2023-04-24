@@ -1,6 +1,8 @@
 //@+leo-ver=5-thin
 //@+node:felix.20211017230407.1: * @file src/commands/commanderFileCommands.ts
-// File commands that used to be defined in leoCommands.py
+/**
+ * File commands that used to be defined in leoCommands.py
+ */
 import * as vscode from "vscode";
 import { Utils as uriUtils } from "vscode-uri";
 import * as utils from "../utils";

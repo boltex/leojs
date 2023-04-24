@@ -1,6 +1,8 @@
 //@+leo-ver=5-thin
 //@+node:felix.20210102012632.1: * @file src/core/leoNodes.ts
-// Leo's fundamental data classes.
+/**
+ * Leo's fundamental data classes.
+ */
 //@+<< imports >>
 //@+node:felix.20210127001502.1: ** << imports >>
 import * as g from './leoGlobals';

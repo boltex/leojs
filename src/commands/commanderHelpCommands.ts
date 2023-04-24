@@ -1,6 +1,8 @@
 //@+leo-ver=5-thin
 //@+node:felix.20220612234816.1: * @file src/commands/commanderHelpCommands.ts
-// Help commands that used to be defined in leoCommands.py
+/**
+ * Help commands that used to be defined in leoCommands.py
+ */
 import * as vscode from "vscode";
 import { Utils as uriUtils } from "vscode-uri";
 
