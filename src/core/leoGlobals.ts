@@ -1955,6 +1955,30 @@ export async function readFileIntoString(fileName: string,
 
 }
 
+//@+node:felix.20230423233617.1: *3* g.readFileToUnicodeString
+/**
+ * Return the raw contents of the file whose full path is fn.
+ */
+export async function readFileIntoUnicodeString(
+    fn: string,
+    encoding: BufferEncoding | undefined,
+    silent= false,
+): Promise<string | undefined> {
+    try{
+        const w_uri = makeVscodeUri(fn);
+        let s = await vscode.workspace.fs.readFile(w_uri);
+        return toUnicode(s, encoding);
+    }catch (e){
+        if (!silent){
+            error('can not open', fn);
+        }
+        error(`readFileIntoUnicodeString: unexpected exception reading ${fn}`);
+        es_exception();
+    }
+
+    return undefined;
+
+}
 //@+node:felix.20220412004053.1: *3* g.sanitize_filename
 /**
  * Prepares string s to be a valid file name:
@@ -2208,6 +2232,20 @@ export function find_line_start(s: string, p_i: number): number {
     } else {
         return i + 1;
     }
+}
+//@+node:felix.20230423232315.1: *4* g.find_on_line
+export function find_on_line(s: string, i: number, pattern: string): number {
+    let j = s.indexOf('\n', i);
+    if (j === -1){
+        j = s.length;
+    }
+
+    var k = s.indexOf(pattern, i);
+    if (k >= 0 && k < j) {
+        return k;
+    }
+    return -1;
+
 }
 //@+node:felix.20211104221002.1: *4* g.is_special
 /**
