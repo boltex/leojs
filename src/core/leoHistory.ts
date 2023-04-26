@@ -3,6 +3,7 @@
 import { Chapter } from './leoChapters';
 import { Commands } from './leoCommands';
 import { Position } from './leoNodes';
+
 //@+others
 //@+node:felix.20211021231651.2: ** class NodeHistory
 /**

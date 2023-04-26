@@ -161,7 +161,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'do-nothing',
         'A placeholder command, useful for testing bindings.'
     )
-    public doNothing(this: Commands): void {
+    public doNothing(): void {
         // pass
     }
     //@+node:felix.20220503225225.1: *3* ec.insertHeadlineTime

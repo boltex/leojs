@@ -14,7 +14,7 @@ import { Commands } from "../core/leoCommands";
 import { LoadManager, PreviousSettings } from "../core/leoApp";
 import { leojsSettingsXml } from "../leojsSettings";
 
-import dayjs = require('dayjs');
+const dayjs = require('dayjs');
 
 //@+others
 //@+node:felix.20220613000058.1: ** Class CommanderHelpCommands

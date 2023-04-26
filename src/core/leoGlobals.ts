@@ -3888,6 +3888,11 @@ export function divmod(dividend: number, divisor: number): [number, number] {
     const remainder = dividend % divisor;
     return [quotient, remainder];
 }
+//@+node:felix.20230426001612.1: *3* g.zip
+export function zip<T>(...arrays: T[][]): T[][] {
+  const length = Math.min(...arrays.map((arr) => arr.length));
+  return Array.from({ length }, (_, i) => arrays.map((arr) => arr[i]));
+}
 //@+node:felix.20211227182611.1: ** g.os_path_ Wrappers
 //@+at Note: all these methods return Unicode strings. It is up to the user to
 // convert to an encoded string as needed, say when opening a file.

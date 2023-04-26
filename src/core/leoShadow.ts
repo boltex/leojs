@@ -42,7 +42,6 @@ type DispatchKeys =
     'replace';
 
 //@-<< leoShadow imports & annotations >>
-
 //@+others
 //@+node:felix.20230410203541.1: ** class ShadowController
 /**

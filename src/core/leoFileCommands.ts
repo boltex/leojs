@@ -56,7 +56,6 @@ interface VNodeJSON {
 //@+node:felix.20211222215249.1: ** << constants >>
 const PRIVAREA: string = '---begin-private-area---';
 //@-<< constants >>
-
 //@+others
 //@+node:felix.20211212220328.1: ** u.cmd (decorator)
 /**

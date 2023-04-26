@@ -21,16 +21,16 @@ import { AtFile } from './leoAtFile';
 import { LeoFind } from './leoFind';
 import { LeoImportCommands } from './leoImport';
 import { ChapterController } from './leoChapters';
+import { PersistenceDataController, TopLevelPersistanceCommands } from './leoPersistence';
 import { EditCommandsClass, TopLevelEditCommands } from '../commands/editCommands';
 import { GoToCommands } from '../commands/gotoCommands';
 import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
-
-import dayjs = require('dayjs');
 import { TagController } from './nodeTags';
 import { QuickSearchController } from './quicksearch';
 import { ShadowController } from './leoShadow';
-var utc = require('dayjs/plugin/utc');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 
 //@-<< imports >>
@@ -80,6 +80,7 @@ export class Commands {
     public atFileCommands: AtFile;
     public findCommands: LeoFind;
     public importCommands: LeoImportCommands;
+    public persistenceController: PersistenceDataController;
 
     public theTagController: TagController;
     public quicksearchController: QuickSearchController;
@@ -279,12 +280,12 @@ export class Commands {
         this.findCommands = new LeoFind(c);
         this.atFileCommands = new AtFile(c);
         this.importCommands = new LeoImportCommands(c);
+        this.persistenceController = new PersistenceDataController(c);
 
         this.editCommands = new EditCommandsClass(c);
         this.gotoCommands = new GoToCommands(c);
 
         // TODO 
-        // self.persistenceController  = leoPersistence.PersistenceDataController(c)
         // self.rstCommands        = leoRst.RstCommands(c)
 
         this.undoer = new Undoer(c);
@@ -4042,6 +4043,7 @@ export interface Commands
     CommanderFileCommands,
     CommanderHelpCommands,
     CommanderEditCommands,
+    TopLevelPersistanceCommands,
     TopLevelEditCommands {
     canCutOutline: () => boolean;
     canShiftBodyRight: () => boolean;
@@ -4074,6 +4076,7 @@ applyMixins(Commands, [
     CommanderFileCommands,
     CommanderHelpCommands,
     CommanderEditCommands,
+    TopLevelPersistanceCommands,
     TopLevelEditCommands
 ]);
 Commands.prototype.canCutOutline = Commands.prototype.canDeleteHeadline;
