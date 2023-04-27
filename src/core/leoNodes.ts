@@ -192,6 +192,34 @@ export class NodeIndices {
         return t_s;
     }
 
+    //@+node:felix.20230426235322.1: *3* ni.updateLastIndex
+    /**
+     * Update ni.lastIndex if the gnx affects it.
+     */
+    public updateLastIndex(gnx: string): undefined {
+
+        let [id_, t, n] = this.scanGnx(gnx);
+        // pylint: disable=literal-comparison
+        // Don't you dare touch this code to keep pylint happy.
+        if (!id_ || (n as any !== 0 && !n)) {
+            return;  // the gnx is not well formed or n in ('',None)
+        }
+        if (id_ === this.userId && t === this.timeString) {
+            try {
+                const n2 = parseInt(n!);
+                if (n2 > this.lastIndex) {
+                    this.lastIndex = n2;
+                    if (!g.unitTesting) {
+                        g.trace(gnx, '-->', n2);
+                    }
+                }
+            }
+            catch (exception) {
+                g.trace('can not happen', n);
+            }
+
+        }
+    }
     //@-others
 }
 

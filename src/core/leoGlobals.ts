@@ -4961,7 +4961,7 @@ export function extractExecutableString(c: Commands, p: Position, s: string): st
 
 //@+node:felix.20220211012808.1: *3* g.find*Node*
 //@+others
-//@+node:felix.20220211012829.1: *4* findNodeAnywhere
+//@+node:felix.20220211012829.1: *4* g.findNodeAnywhere
 export function findNodeAnywhere(c: Commands, headline: string, exact: boolean = true): Position | undefined {
     const h = headline.trim();
     for (let p of c.all_unique_positions(false)) {
@@ -4977,6 +4977,29 @@ export function findNodeAnywhere(c: Commands, headline: string, exact: boolean =
         }
     }
     return undefined;
+}
+//@+node:felix.20230427000458.1: *4* g.findNodeInTree
+/**
+ * Search for a node in v's tree matching the given headline.
+ */
+export function findNodeInTree(c: Commands, p: Position, headline: string, exact: = true) Position | undefined {
+    
+    const h = headline.trim();
+    const p1 = p.copy();
+    for (const p of p1.subtree()){
+        if (p.h.trim() === h){
+            return p.copy();
+        }
+    }
+    if (!exact){
+        for (const p of p1.subtree()){
+            if (p.h.trim().startsWith(h)){
+                return p.copy();
+            }
+        }
+    }
+    return undefined;
+
 }
 //@-others
 //@+node:felix.20211104211349.1: ** g.Unit Tests
