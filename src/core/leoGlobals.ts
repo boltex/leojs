@@ -785,16 +785,16 @@ export const getLineAfter = get_line_after;
 /**
  * Return a dictionary of ivars:values for non-methods of obj.
  */
-export function getIvarsDict(obj: any): {[key: string]: any} {
-    
-    const d: {[key: string]: any} = {};
+export function getIvarsDict(obj: any): { [key: string]: any } {
+
+    const d: { [key: string]: any } = {};
 
     //    [[key, getattr(obj, key)] for key in dir(obj)
     // if not isinstance(getattr(obj, key), types.MethodType)])
     for (const key in obj) {
         // console.log(key); // prints 'a', 'b', and 'c'
         const w_callable = (typeof obj[key] === 'function') || (obj[key] instanceof Function);
-        if(!w_callable){
+        if (!w_callable) {
             d[key] = obj[key];
         }
     }
@@ -803,16 +803,16 @@ export function getIvarsDict(obj: any): {[key: string]: any} {
 
 export function checkUnchangedIvars(
     obj: any,
-    d: {[key: string]: any},
+    d: { [key: string]: any },
     exceptions?: string[]
-) : boolean {
-    if( !exceptions || !exceptions.length){
+): boolean {
+    if (!exceptions || !exceptions.length) {
         exceptions = [];
     }
     let ok = true;
-    for(const key in d){ // USE 'IN' FOR KEY!
-        if(!exceptions.includes(key)){
-            if( obj[key] !== d[key]){
+    for (const key in d) { // USE 'IN' FOR KEY!
+        if (!exceptions.includes(key)) {
+            if (obj[key] !== d[key]) {
                 trace(
                     `changed ivar: ${key} ` +
                     `old: ${d[key]} ` +
@@ -1007,10 +1007,10 @@ export function findFirstValidAtLanguageDirective(s: string): string | undefined
  * Also called from write at.putRefAt.
  */
 export function findReference(name: string, root: Position): Position | undefined {
-    
-    for( const p of root.subtree(false)){
-        console.assert (!p.__eq__(root));
-        if (p.matchHeadline(name) && !p.isAtIgnoreNode()){
+
+    for (const p of root.subtree(false)) {
+        console.assert(!p.__eq__(root));
+        if (p.matchHeadline(name) && !p.isAtIgnoreNode()) {
             return p.copy();
         }
     }
@@ -1962,14 +1962,14 @@ export async function readFileIntoString(fileName: string,
 export async function readFileIntoUnicodeString(
     fn: string,
     encoding: BufferEncoding | undefined,
-    silent= false,
+    silent = false,
 ): Promise<string | undefined> {
-    try{
+    try {
         const w_uri = makeVscodeUri(fn);
         let s = await vscode.workspace.fs.readFile(w_uri);
         return toUnicode(s, encoding);
-    }catch (e){
-        if (!silent){
+    } catch (e) {
+        if (!silent) {
             error('can not open', fn);
         }
         error(`readFileIntoUnicodeString: unexpected exception reading ${fn}`);
@@ -2236,7 +2236,7 @@ export function find_line_start(s: string, p_i: number): number {
 //@+node:felix.20230423232315.1: *4* g.find_on_line
 export function find_on_line(s: string, i: number, pattern: string): number {
     let j = s.indexOf('\n', i);
-    if (j === -1){
+    if (j === -1) {
         j = s.length;
     }
 
@@ -3890,8 +3890,8 @@ export function divmod(dividend: number, divisor: number): [number, number] {
 }
 //@+node:felix.20230426001612.1: *3* g.zip
 export function zip<T>(...arrays: T[][]): T[][] {
-  const length = Math.min(...arrays.map((arr) => arr.length));
-  return Array.from({ length }, (_, i) => arrays.map((arr) => arr[i]));
+    const length = Math.min(...arrays.map((arr) => arr.length));
+    return Array.from({ length }, (_, i) => arrays.map((arr) => arr[i]));
 }
 //@+node:felix.20211227182611.1: ** g.os_path_ Wrappers
 //@+at Note: all these methods return Unicode strings. It is up to the user to
@@ -4982,18 +4982,18 @@ export function findNodeAnywhere(c: Commands, headline: string, exact: boolean =
 /**
  * Search for a node in v's tree matching the given headline.
  */
-export function findNodeInTree(c: Commands, p: Position, headline: string, exact: = true) Position | undefined {
-    
+export function findNodeInTree(c: Commands, p: Position, headline: string, exact = true): Position | undefined {
+
     const h = headline.trim();
     const p1 = p.copy();
-    for (const p of p1.subtree()){
-        if (p.h.trim() === h){
+    for (const p of p1.subtree()) {
+        if (p.h.trim() === h) {
             return p.copy();
         }
     }
-    if (!exact){
-        for (const p of p1.subtree()){
-            if (p.h.trim().startsWith(h)){
+    if (!exact) {
+        for (const p of p1.subtree()) {
+            if (p.h.trim().startsWith(h)) {
                 return p.copy();
             }
         }
