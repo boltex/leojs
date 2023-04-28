@@ -2176,6 +2176,70 @@ export function find_word(s: string, word: string, i: number = 0): number {
 
     return -1;
 }
+//@+node:felix.20230427235714.1: *3* g.findRootsWithPredicate
+/**
+ * Commands often want to find one or more **roots**, given a position p.
+ * A root is the position of any node matching a predicate.
+ *
+ * This function formalizes the search order used by the black,
+ * pylint, pyflakes and the rst3 commands, returning a list of zero
+ * or more found roots.
+ */
+export function findRootsWithPredicate(c: Commands, root: Position, predicate?: (p: Position) => boolean): Position[] {
+
+    const seen: VNode[] = [];
+    const roots = [];
+    if (predicate == undefined) {
+
+        // A useful default predicate for python.
+        // pylint: disable=function-redefined
+
+        predicate = (p: Position): boolean => {
+            const headline = p.h.trim();
+            const is_python = headline.endsWith('py') || headline.endsWith('pyw');
+            return p.isAnyAtFileNode() && is_python;
+        };
+    }
+
+    // 1. Search p's tree.
+    for (const p of root.self_and_subtree(false)) {
+        if (predicate(p) && !seen.includes(p.v)) {
+            seen.push(p.v);
+            roots.push(p.copy());
+        }
+    }
+
+    if (roots.length) {
+        return roots;
+    }
+    // 2. Look up the tree.
+    for (const p of root.parents()) {
+        if (predicate(p)) {
+            return [p.copy()];
+        }
+    }
+    // 3. Expand the search if root is a clone.
+    const clones: VNode[] = [];
+    for (const p of root.self_and_parents(false)) {
+        if (p.isCloned()) {
+            clones.push(p.v);
+        }
+    }
+    if (clones.length) {
+        for (const p of c.all_positions(false)) {
+            if (predicate(p)) {
+                // Match if any node in p's tree matches any clone.
+                for (const p2 of p.self_and_subtree()) {
+                    if (clones.includes(p2.v)) {
+                        return [p.copy()];
+                    }
+                }
+            }
+        }
+    }
+    return [];
+
+}
 //@+node:felix.20221025000455.1: *3* g.see_more_lines
 /**
  * Extend index i within string s to include n more lines.

@@ -325,21 +325,26 @@ export class RstCommands {
 
     }
     //@+node:felix.20230427003032.16: *5* rst.processTopTree
-    def processTopTree(self, p: Position) -> None:
-        """Call processTree for @rst and @slides node p's subtree or p's ancestors."""
+    /**
+     * Call processTree for @rst and @slides node p's subtree or p's ancestors.
+     */
+    public processTopTree(p: Position): void {
+        const predicate = (p: Position): boolean => {
+            return this.is_rst_node(p) || g.match_word(p.h, 0, '@slides');
+        };
 
-        def predicate(p: Position) -> bool:
-            return self.is_rst_node(p) or g.match_word(p.h, 0, '@slides')
-
-        self.changed_positions = []
-        self.changed_vnodes = set()
-        roots = g.findRootsWithPredicate(self.c, p, predicate=predicate)
-        if roots:
-            for p in roots:
-                self.processTree(p)
-            self.do_actions()
-        else:
-            g.warning('No @rst or @slides nodes in', p.h)
+        this.changed_positions = [];
+        this.changed_vnodes = []  // as a set
+        const roots = g.findRootsWithPredicate(this.c, p, predicate);
+        if (roots && roots.length){
+            for (const p of roots){
+                this.processTree(p);
+            }
+            this.do_actions();
+        }else{
+            g.warning('No @rst or @slides nodes in', p.h);
+        }
+    }
     //@+node:felix.20230427003032.17: *5* rst.processTree
     def processTree(self, root: Position) -> None:
         """Process all @rst nodes in a tree."""
