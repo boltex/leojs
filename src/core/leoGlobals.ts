@@ -2377,7 +2377,7 @@ export function match(s: string, i: number, pattern: string): boolean {
     return !!s && !!pattern && s.substring(i, i + pattern.length + 1).startsWith(pattern);
 }
 
-//@+node:felix.20211104221309.1: *4* g.match_word
+//@+node:felix.20211104221309.1: *4* g.match_word & g.match_words
 export function match_word(s: string, i: number, pattern: string): boolean {
     // Using a regex is surprisingly tricky.
     if (!pattern) {
@@ -2410,6 +2410,9 @@ export function match_word(s: string, i: number, pattern: string): boolean {
         return s.substring(i).search(pat) === 0; */
 }
 
+export function match_words(s: string, i: number, patterns: string[]): boolean {
+    return patterns.some((pattern) => match_word(s, i, pattern));
+}
 //@+node:felix.20220208154405.1: *4* g.skip_blank_lines
 /**
  * This routine differs from skip_ws_and_nl in that
@@ -2443,7 +2446,7 @@ export function skip_c_id(s: string, i: number): number {
     return i;
 }
 //@+node:felix.20211104220621.1: *4* g.skip_id
-export function skip_id(s: string, i: number, chars: string | null = null): number {
+export function skip_id(s: string, i: number, chars?: string): number {
     chars = chars ? chars.toString() : '';
     const n = s.length;
     while (i < n && (isWordChar(s.charAt(i)) || chars.indexOf(s.charAt(i)) >= 0)) {

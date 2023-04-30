@@ -2,7 +2,7 @@
 //@+node:felix.20211211234842.1: * @file src/core/leoAtFile.ts
 /**
  * Classes to read and write @file nodes.
- */ 
+ */
 //@+<< imports >>
 //@+node:felix.20211225220235.1: ** << imports >>
 /*
@@ -277,7 +277,8 @@ export class AtFile {
         at.scanRootForSectionDelims(root);
         //
         // Do nothing more if the file already exists.
-        if (await g.os_path_exists(targetFileName)) {
+        const w_exists = await g.os_path_exists(targetFileName);
+        if (w_exists) {
             return targetFileName;
         }
         //
@@ -740,7 +741,8 @@ export class AtFile {
         const x = this.c.shadowController;
 
         const fileName = c.fullPath(root);
-        if (! await g.os_path_exists(fileName)) {
+        const w_exists = await g.os_path_exists(fileName);
+        if (!w_exists) {
             g.es_print(`not found: ${fileName}̀`);
             return false;
         }
@@ -858,7 +860,8 @@ export class AtFile {
         const c = this.c;
         const ic = this.c.importCommands;
         const fn = c.fullPath(p);  // #1521, #1341, #1914.
-        if (! await g.os_path_exists(fn)) {
+        const w_exist = await g.os_path_exists(fn);
+        if (!w_exist) {
             g.error(`not found: ${p.h}`);
             return false;
         }
@@ -3351,7 +3354,8 @@ export class AtFile {
         fileName = g.os_path_realpath(fileName);
         let ok;
         const sfn = g.shortFileName(fileName);
-        if (! await g.os_path_exists(fileName)) {
+        const w_exists = await g.os_path_exists(fileName);
+        if (!w_exists) {
             ok = await g.writeFile(contents, encoding, fileName);
             if (ok) {
                 c.setFileTimeStamp(fileName);
@@ -3656,7 +3660,7 @@ export class AtFile {
     public getPathUa(p: Position): string {
         if (p.v.tempAttributes) {
             const d = p.v.tempAttributes['read-path'] || {};
-            return d.get('path');
+            return d['path'];
         }
         return '';
     }
@@ -3855,7 +3859,8 @@ export class AtFile {
             // It was never read.
             return false;
         }
-        if (!g.os_path_exists(fn)) {
+        const w_exists = await g.os_path_exists(fn);
+        if (!w_exists) {
             // No danger of overwriting fn.
             if (trace) {
                 g.trace('Return False: does not exist:', sfn);

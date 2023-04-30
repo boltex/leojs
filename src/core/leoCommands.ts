@@ -29,6 +29,7 @@ import { PreviousSettings } from './leoApp';
 import { TagController } from './nodeTags';
 import { QuickSearchController } from './quicksearch';
 import { ShadowController } from './leoShadow';
+import { RstCommands } from './leoRst';
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
@@ -219,6 +220,7 @@ export class Commands {
     public editFileCommands: any = undefined;
     public evalController: any = undefined;
     public gotoCommands: GoToCommands;
+    public rstCommands: RstCommands;
     public helpCommands: any = undefined;
     public keyHandler: any = undefined; // TODO same as k
     public k: any = undefined; // TODO same as keyHandler
@@ -285,8 +287,7 @@ export class Commands {
         this.editCommands = new EditCommandsClass(c);
         this.gotoCommands = new GoToCommands(c);
 
-        // TODO 
-        // self.rstCommands        = leoRst.RstCommands(c)
+        this.rstCommands = new RstCommands(c);
 
         this.undoer = new Undoer(c);
 
