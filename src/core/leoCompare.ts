@@ -8,7 +8,6 @@
 
 import * as vscode from "vscode";
 import * as difflib from "difflib";
-import * as utils from "../utils";
 import * as g from './leoGlobals';
 import { command } from "../core/decorators";
 import { Commands } from './leoCommands';
