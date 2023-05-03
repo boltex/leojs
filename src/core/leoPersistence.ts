@@ -17,8 +17,7 @@ import { Position } from './leoNodes';
 export class TopLevelPersistanceCommands {
 
     //@+others
-    //@+node:felix.20230425220115.2: *3*  Top-level commands
-    //@+node:felix.20230424003144.3: *4* @g.command('clean-persistence')
+    //@+node:felix.20230424003144.3: *3* @g.command('clean-persistence')
     @command(
         'clean-persistence',
         'Remove all @data nodes that do not correspond to an existing foreign file.'

@@ -5,19 +5,6 @@
  */
 //@+<< imports >>
 //@+node:felix.20211225220235.1: ** << imports >>
-/*
-import io
-import os
-import re
-import sys
-import tabnanny
-import time
-import tokenize
-from typing import List
-from leo.core import leoGlobals as g
-from leo.core import leoNodes
-*/
-
 import * as vscode from 'vscode';
 import * as utils from "../utils";
 import * as g from './leoGlobals';
@@ -26,7 +13,6 @@ import { Position, VNode } from './leoNodes';
 import { FileCommands } from "./leoFileCommands";
 import { Commands } from './leoCommands';
 import dayjs = require('dayjs');
-
 //@-<< imports >>
 //@+others
 //@+node:felix.20211225220217.1: ** atFile.cmd

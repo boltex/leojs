@@ -23,6 +23,7 @@ import { LeoImportCommands } from './leoImport';
 import { ChapterController } from './leoChapters';
 import { PersistenceDataController, TopLevelPersistanceCommands } from './leoPersistence';
 import { EditCommandsClass, TopLevelEditCommands } from '../commands/editCommands';
+import { TopLevelCompareCommands } from './leoCompare';
 import { GoToCommands } from '../commands/gotoCommands';
 import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
@@ -4044,6 +4045,7 @@ export interface Commands
     CommanderFileCommands,
     CommanderHelpCommands,
     CommanderEditCommands,
+    TopLevelCompareCommands,
     TopLevelPersistanceCommands,
     TopLevelEditCommands {
     canCutOutline: () => boolean;

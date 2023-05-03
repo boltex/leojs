@@ -5910,11 +5910,10 @@ export class LeoUI extends NullGui {
                     names.push(w_uri.fsPath);
                 });
             }
-            //return p_uris || [];
-            if (!multiple) {
-                return names.length ? names[0] : ""; // Not multiple: return as string!
-            } else {
+            if (multiple) {
                 return names;
+            } else {
+                return names.length ? names[0] : ""; // Not multiple: return as string!
             }
         });
     }

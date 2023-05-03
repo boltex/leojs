@@ -1726,6 +1726,24 @@ export function ensure_extension(name: string, ext: string): string {
 
     return name + ext;
 }
+//@+node:felix.20230430163312.1: *3* g.filecmp_cmp
+export async function filecmp_cmp(path1: string, path2: string, shallow = true): Promise<boolean> {
+    let w_same = false;
+    let w_uri: vscode.Uri;
+    w_uri = makeVscodeUri(path1); // first uri, no matter if shallow or not.
+    if (shallow) {
+        const stats1 = await vscode.workspace.fs.stat(w_uri);
+        w_uri = makeVscodeUri(path2);
+        const stats2 = await vscode.workspace.fs.stat(w_uri);
+        w_same = stats1.size === stats2.size && stats1.mtime === stats2.mtime;
+    } else {
+        const file1 = await vscode.workspace.fs.readFile(w_uri);
+        w_uri = makeVscodeUri(path2);
+        const file2 = await vscode.workspace.fs.readFile(w_uri);
+        w_same = Buffer.compare(file1, file2) === 0;
+    }
+    return w_same;
+}
 //@+node:felix.20211228213652.1: *3* g.fullPath
 /**
  * Return the full path (including fileName) in effect at p.
@@ -1873,7 +1891,7 @@ export async function makeAllNonExistentDirectories(theDir: string): Promise<str
  *
  * Return the commander of the newly-opened outline.
  */
-export async function openWithFileName(fileName: string, old_c: Commands, gui: NullGui): Promise<Commands | undefined> {
+export async function openWithFileName(fileName: string, old_c: Commands | undefined, gui: NullGui): Promise<Commands | undefined> {
     return app.loadManager!.loadLocalFile(fileName, gui, old_c);
 }
 //@+node:felix.20220106231022.1: *3* g.readFileIntoString
@@ -1977,6 +1995,33 @@ export async function readFileIntoUnicodeString(
     }
 
     return undefined;
+
+}
+//@+node:felix.20230501215854.1: *3* g.readlineForceUnixNewline
+//@+at Stephen P. Schaefer 9/7/2002
+//
+// The Unix readline() routine delivers "\r\n" line end strings verbatim,
+// while the windows versions force the string to use the Unix convention
+// of using only "\n". This routine causes the Unix readline to do the
+// same.
+//@@c
+
+export function readlineForceUnixNewline(f: string[], fileName?: string): string {
+    // Addapted for leojs : receives array of string with their newline endings intact
+    let s = f.shift();
+    if (s == null) {
+        s = '';
+    }
+    //   try {
+    //     s = f.readline();
+    //   } catch (err) {
+    //     console.log(`UnicodeDecodeError: ${fileName}`, f, err);
+    //   }
+    if (s.length >= 2 && s.slice(-2) === "\r\n") {
+        s = s.slice(0, -2) + "\n";
+    }
+
+    return s;
 
 }
 //@+node:felix.20220412004053.1: *3* g.sanitize_filename
@@ -3904,6 +3949,15 @@ export function plural(obj: any): string {
     return n === 1 ? '' : "s";
 }
 
+//@+node:felix.20230501203659.1: *3* g.rjust
+export function rjust(s: string, n: number, ch = ' '): string {
+    if (s.length >= n) {
+        return s;
+    } else {
+        const pad = ch.repeat(n - s.length);
+        return pad + s;
+    }
+}
 //@+node:felix.20230220001637.1: *3* g.useSyntaxColoring
 /**
  * True if p's parents enable coloring in p.
@@ -4330,7 +4384,7 @@ export async function os_path_isfile(p_path?: string): Promise<boolean> {
  * A '.'  arg prepends c.openDirectory to the list of paths,
  * provided there is a 'c' kwarg.
  */
-export function os_path_join(c: Commands | undefined, ...args: any[]): string {
+export function os_path_join(...args: any[]): string {
 
     // c = keys.get('c')
 

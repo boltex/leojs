@@ -534,7 +534,7 @@
 <v t="felix.20211211234842.1"><vh>@file src/core/leoAtFile.ts</vh></v>
 <v t="felix.20220429005433.1"><vh>@file src/core/leoChapters.ts</vh></v>
 <v t="felix.20210110222544.1"><vh>@file src/core/leoCommands.ts</vh></v>
-<v t="felix.20230420210303.1"><vh>@file src/core/leoCompare.ts</vh></v>
+<v t="felix.20230430023337.1"><vh>@file src/core/leoCompare.ts</vh></v>
 <v t="felix.20211031230132.1"><vh>@file src/core/leoConfig.ts</vh></v>
 <v t="felix.20211212162008.1"><vh>@file src/core/leoExternalFiles.ts</vh></v>
 <v t="felix.20210220181245.1"><vh>@file src/core/leoFileCommands.ts</vh></v>
@@ -8578,11 +8578,10 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
                 names.push(w_uri.fsPath);
             });
         }
-        //return p_uris || [];
-        if (!multiple) {
-            return names.length ? names[0] : ""; // Not multiple: return as string!
-        } else {
+        if (multiple) {
             return names;
+        } else {
+            return names.length ? names[0] : ""; // Not multiple: return as string!
         }
     });
 }

@@ -213,7 +213,7 @@ export class CommanderHelpCommands {
             let fileName;
             // check it doesn't already exist
             for (let w_path of [homeLeoDir]) {
-                fileName = g.os_path_join(undefined, w_path || '/', name);
+                fileName = g.os_path_join(w_path || '/', name);
                 const exists = await g.os_path_exists(fileName);
                 if (exists) {
                     return undefined;
@@ -233,7 +233,7 @@ export class CommanderHelpCommands {
             }
 
             // get '@enabled-plugins' from g.app.globalConfigDir ! SKIPPED IN LEOJS !
-            // fileName = g.os_path_join(undefined, configDir, "leoSettings.leo");
+            // fileName = g.os_path_join(configDir, "leoSettings.leo");
             // const leosettings = await g.openWithFileName(fileName, c, g.app.gui);
             // const enabledplugins = g.findNodeAnywhere(leosettings!, '@enabled-plugins');
             // if (!enabledplugins || !enabledplugins.__bool__()) {
@@ -247,14 +247,14 @@ export class CommanderHelpCommands {
 
             // now create "~/.leo/myLeoSettings.leo" OR /myLeoSettings if leojs runs in browser!
             if (homeLeoDir) {
-                fileName = g.os_path_join(undefined, homeLeoDir, name);
+                fileName = g.os_path_join(homeLeoDir, name);
             } else {
                 let localDir = g.os_path_dirname(lm.files.length ? lm.files[0] : '');
                 // IF NO FILES IN lm.files THEN USE WORKSPACE ROOT !
                 if (!localDir) {
                     localDir = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.path : "";
                 }
-                fileName = g.os_path_join(undefined, localDir, name);;
+                fileName = g.os_path_join(localDir, name);;
             }
 
             const c2 = await g.openWithFileName(fileName, c, g.app.gui);

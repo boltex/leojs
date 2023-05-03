@@ -20,8 +20,7 @@ function cmd(p_name: string, p_doc: string) {
 export class TopLevelEditCommands {
 
     //@+others
-    //@+node:felix.20220504203200.1: *3*  Top-level commands
-    //@+node:felix.20220504203200.2: *4* @g.command('mark-first-parents')
+    //@+node:felix.20220504203200.2: *3* @g.command('mark-first-parents')
     @command(
         'mark-first-parents',
         'Mark the node and all its parents.'
@@ -48,7 +47,7 @@ export class TopLevelEditCommands {
         }
         return changed;
     }
-    //@+node:felix.20220504203200.3: *4* @g.command('promote-bodies')
+    //@+node:felix.20220504203200.3: *3* @g.command('promote-bodies')
     @command(
         'promote-bodies',
         'Copy the body text of all descendants to the parent\'s body text.'
@@ -89,7 +88,7 @@ export class TopLevelEditCommands {
         c.undoer.afterChangeNodeContents(p, 'promote-bodies', b);
 
     }
-    //@+node:felix.20220504203200.4: *4* @g.command('promote-headlines')
+    //@+node:felix.20220504203200.4: *3* @g.command('promote-headlines')
     @command(
         'promote-headlines',
         'Copy the headlines of all descendants to the parent\'s body text.'
@@ -113,7 +112,7 @@ export class TopLevelEditCommands {
         }
     }
 
-    //@+node:felix.20220504203200.5: *4* @g.command('unmark-first-parents')
+    //@+node:felix.20220504203200.5: *3* @g.command('unmark-first-parents')
     @command(
         'unmark-first-parents',
         'Unmark the node and all its parents.'
