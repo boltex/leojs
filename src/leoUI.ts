@@ -5785,7 +5785,7 @@ export class LeoUI extends NullGui {
     }
 
     public runAboutLeoDialog(
-        c: Commands,
+        c: Commands | undefined,
         version: string,
         theCopyright: string,
         url: string,
@@ -5800,7 +5800,7 @@ export class LeoUI extends NullGui {
     }
 
     public runAskOkDialog(
-        c: Commands,
+        c: Commands | undefined,
         title: string,
         message: string,
         text = "Ok"
@@ -5814,7 +5814,7 @@ export class LeoUI extends NullGui {
     }
 
     public runAskYesNoDialog(
-        c: Commands,
+        c: Commands | undefined,
         title: string,
         message: string,
         yes_all = false,
@@ -5841,7 +5841,7 @@ export class LeoUI extends NullGui {
     }
 
     public runAskYesNoCancelDialog(
-        c: Commands,
+        c: Commands | undefined,
         title: string,
         message: string,
         yesMessage = Constants.USER_MESSAGES.YES,
