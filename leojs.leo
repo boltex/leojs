@@ -8588,7 +8588,7 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
 
 </t>
 <t tx="felix.20220108211750.1">public runAskOkDialog(
-    c: Commands,
+    c: Commands | undefined,
     title: string,
     message: string,
     text = "Ok"
@@ -8662,7 +8662,7 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
 }
 </t>
 <t tx="felix.20220109220155.1">public runAskYesNoDialog(
-    c: Commands,
+    c: Commands | undefined,
     title: string,
     message: string,
     yes_all = false,
@@ -10573,7 +10573,7 @@ set leoCanGoNext(p_value: boolean) {
 
 </t>
 <t tx="felix.20220516005841.1">public runAskYesNoCancelDialog(
-    c: Commands,
+    c: Commands | undefined,
     title: string,
     message: string,
     yesMessage = Constants.USER_MESSAGES.YES,
@@ -10833,7 +10833,7 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
 
 </t>
 <t tx="felix.20220613164517.1">public runAboutLeoDialog(
-    c: Commands,
+    c: Commands | undefined,
     version: string,
     theCopyright: string,
     url: string,

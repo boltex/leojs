@@ -4043,7 +4043,7 @@ export function finalize(p_path: string): string {
         });
     }
 
-    // Convert to an abosolute path, similar to os.path.normpath(os.getcwd(), path)
+    // Convert to an absolute path, similar to os.path.normpath(os.getcwd(), path)
     // p_path = os.path.abspath(p_path)
     p_path = path.resolve(p_path);
 

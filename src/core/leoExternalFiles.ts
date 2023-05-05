@@ -3,6 +3,8 @@
 //@+<< imports >>
 //@+node:felix.20220102165214.1: ** << imports >>
 import * as vscode from "vscode";
+import * as path from 'path';
+import * as os from 'os';
 import * as g from './leoGlobals';
 import { LeoFrame } from "./leoFrame";
 import { Position } from './leoNodes';
@@ -308,7 +310,7 @@ export class ExternalFilesController {
     public async update_open_with_node(ef: ExternalFile): Promise<void> {
         console.assert(ef instanceof ExternalFile, ef.toString());
         
-        const c =    ef.c;
+        const c = ef.c;
         const p = (ef.p as Position).copy();
          
         g.blue(`updated ${p.h}`);
@@ -318,7 +320,7 @@ export class ExternalFilesController {
             c.selectPosition(p);
         }
         if( c.config.getBool('open-with-save-on-update')){
-            c.save();
+            await c.save();
         }else{
             p.setDirty();
             c.setChanged();
@@ -414,89 +416,103 @@ export class ExternalFilesController {
     /**
      * Return the path to the temp file for p and ext.
      */
-    public compute_temp_file_path(c: Commands, p: Position, ext: string): string 
-        
-        if c.config.getBool('open-with-clean-filenames')
-            path = self.clean_file_name(c, ext, p)
-        else
-            path = self.legacy_file_name(c, ext, p)
+    public async compute_temp_file_path(c: Commands, p: Position, ext: string): Promise<string> {
+        let w_path;
+        if( c.config.getBool('open-with-clean-filenames')){
+            w_path = await this.clean_file_name(c, ext, p);
+        }else{
+            w_path = await this.legacy_file_name(c, ext, p);
+        }
+        if (!w_path){
+            g.error('c.temp_file_path failed');
+        }
+        return w_path;
 
-        if not path
-            g.error('c.temp_file_path failed')
-
-        return path
-
+    }
     //@+node:felix.20230503004807.15: *6* efc.clean_file_name
     /**
      * Compute the file name when subdirectories mirror the node's hierarchy in Leo.
      */
-    public clean_file_name(self, c: Commands, ext: str, p: Position): string 
+    public async clean_file_name(c: Commands, ext: string, p: Position): Promise<string> {
         
-        use_extensions = c.config.getBool('open-with-uses-derived-file-extensions')
-        ancestors, found = [], false
-        for p2 in p.self_and_parents(false)
-            h = p2.anyAtFileNodeName()
-            if not h
-                h = p2.h  // Not an @file node: use the entire header
-            else if use_extensions and not found
+        const use_extensions = c.config.getBool('open-with-uses-derived-file-extensions');
+        const ancestors = [];
+        let found = false;
+        for (const p2 of p.self_and_parents(false)){
+            let h = p2.anyAtFileNodeName();
+            if (!h){
+                h = p2.h;  // Not an @file node: use the entire header
+            }else if (use_extensions && !found){
                 // Found the nearest ancestor @<file> node.
-                found = True
-                base, ext2 = g.os_path_splitext(h)
-                if p2 == p
-                    h = base
+                found = true;
+                let [base, ext2] = g.os_path_splitext(h);
+                if (p2.__eq__(p)){
+                    h = base;
+                }
+                if (ext2){
+                    ext = ext2;
+                }
 
-                if ext2
-                    ext = ext2
+            }
+            ancestors.push(g.sanitize_filename(h));
+        }
 
-
-
-            ancestors.push(g.sanitize_filename(h))
-
-
-
+        // ! NO 'id' in javascript!
         // The base directory is <tempdir>/Leo<id(v)>.
-        ancestors.push("Leo" + str(id(p.v)))
+        // ancestors.push("Leo" + str(id(p.v)));
+        // TODO : TEST IF OTHER STRING IS OK!
+        ancestors.push("Leo" + p.v.gnx);
+
         // Build temporary directories.
-        td = os.path.abspath(tempfile.gettempdir())
-        while ancestors.length > 1
-            td = os.path.join(td, ancestors.pop())
-            if not os.path.exists(td)
-                os.mkdir(td)
+        // let td = os.path.abspath(tempfile.gettempdir());
+        let td = path.resolve(os.tmpdir());
 
+        while (ancestors.length > 1){
+            td = path.join(td, ancestors.pop()!);
+            const w_exists = await g.os_path_exists(td);
+            if (!w_exists ){
+                const w_uri = g.makeVscodeUri(td);
+                await vscode.workspace.fs.createDirectory(w_uri);
+                // os.mkdir(td);
 
+            }
+        }
         // Compute the full path.
-        name = ancestors.pop() + ext
-        path = os.path.join(td, name)
-        return path
+        const w_name = ancestors.pop() + ext;
+        const w_path = path.join(td, w_name);
+        return w_path;
 
+    }
     //@+node:felix.20230503004807.16: *6* efc.legacy_file_name
     /**
      * Compute a legacy file name for unsupported operating systems.
      */
-    public legacy_file_name(self, c: Commands, ext: str, p: Position): string 
-        
-        try
-            leoTempDir = getpass.getuser() + "_" + "Leo"
-        catch exception
-            leoTempDir = "LeoTemp"
-            g.es("Could not retrieve your user name.")
-            g.es(f"Temporary files will be stored in: {leoTempDir}")
+    public async legacy_file_name(c: Commands, ext: string, p: Position): Promise<string> {
+        let leoTempDir;
+        try{
+            leoTempDir = getpass.getuser() + "_" + "Leo";
+        }catch (exception){
+            leoTempDir = "LeoTemp";
+            g.es("Could not retrieve your user name.");
+            g.es(`Temporary files will be stored in: ${leoTempDir}`);
+        }
 
-
-        td = os.path.join(os.path.abspath(tempfile.gettempdir()), leoTempDir)
+        td = os.path.join(os.path.abspath(tempfile.gettempdir()), leoTempDir);
         if not os.path.exists(td)
-            os.mkdir(td)
+            os.mkdir(td);
 
-        name = g.sanitize_filename(p.h) + '_' + str(id(p.v)) + ext
-        path = os.path.join(td, name)
-        return path
+        name = g.sanitize_filename(p.h) + '_' + str(id(p.v)) + ext;
+        const w_path = os.path.join(td, name);
+        return w_path;
 
+    }
     //@+node:felix.20230503004807.17: *5* efc.create_temp_file
-    public create_temp_file(self, c: Commands, ext: str, p: Position): string 
-        """
-        Create the file used by open-with if necessary.
-        Add the corresponding ExternalFile instance to self.files
-        """
+    /**
+     * Create the file used by open-with if necessary.
+     * Add the corresponding ExternalFile instance to self.files
+     */
+    public create_temp_file(c: Commands, ext: string, p: Position): string 
+
         w_path = self.compute_temp_file_path(c, p, ext)
         exists = g.os_path_exists(w_path);
         // Compute encoding and s.
@@ -606,50 +622,55 @@ export class ExternalFilesController {
     //         g.es_exception()
     //         return f"oops: {command}"
     //@+node:felix.20230503004807.19: *5* efc.remove_temp_file
+    /**
+     * Remove any existing *temp* file for p and path, updating this.files.
+     */
     public remove_temp_file(p: Position, p_path: string): void 
-        """
-        Remove any existing *temp* file for p and path, updating self.files.
-        """
-        for ef in self.files:
-            if p_path && p_path == ef.path && p.v == ef.p.v:
-                self.destroy_temp_file(ef)
-                self.files = [z for z in self.files if z != ef]
-                return
-
+        
+        for (const ef of this.files){
+            if (p_path && p_path === ef.path && p.v === ef.p.v){
+                this.destroy_temp_file(ef);
+                this.files = this.files.filter(z=>z !== ef);
+                return;
+            }
+        }
 
 
     //@+node:felix.20230503004807.20: *4* efc.shut_down
-    public shut_down(): void 
-        """
-        Destroy all temporary open-with files.
-        This may fail if the files are still open.
-
-        Called by g.app.finishQuit.
-        """
+    /**
+     * Destroy all temporary open-with files.
+     * This may fail if the files are still open.
+     *
+     * Called by g.app.finishQuit.
+     */
+    public shut_down(): void {
+      
         // Dont call g.es or g.trace! The log stream no longer exists.
-        for ef in self.files[:]
-            self.destroy_temp_file(ef)
+        for (const ef of [...this.files]){
+            this.destroy_temp_file(ef);
+        }
 
+        this.files = []
 
-        self.files = []
-
+    }
     //@+node:felix.20230503004807.21: *3* efc.utilities
     // pylint: disable=no-value-for-parameter
     //@+node:felix.20230503004807.22: *4* efc.ask
-    public ask(self, c: Commands, path: str, p: Position = None): string 
-        """
-        Ask user whether to overwrite an @<file> tree.
-
-        Return one of ('yes', 'no', 'yes-all', 'no-all')
-        """
-        if g.unitTesting
-            return ''
-
-        if c not in g.app.commanders()
-            return ''
-
-        is_leo = path.endswith(('.leo', '.db'))
-        is_external_file = not is_leo
+    /**
+     * Ask user whether to overwrite an @<file> tree.
+     *
+     * Return one of ('yes', 'no', 'yes-all', 'no-all')
+     */
+    public async ask(c: Commands, path: str, p: Position = None): Promise<string> { 
+        
+        if (g.unitTesting){
+            return '';
+        }
+        if (!g.app.commanders().includes(c)){
+            return '';
+        }
+        const is_leo = path.endsWith('.db') || path.endsWith('.leo');
+        const is_external_file = !is_leo;
         //
         // Create the message.
         message1 = f"{g.splitLongFileName(path)} has changed outside Leo.\n"
@@ -683,6 +704,8 @@ export class ExternalFilesController {
         //
         // #1888: return one of ('yes', 'no', 'yes-all', 'no-all')
         return result.lower() if result else 'no'
+
+    }
     //@+node:felix.20230503004807.23: *4* efc.checksum
     /**
      * Return the checksum of the file at the given path.
@@ -731,7 +754,7 @@ export class ExternalFilesController {
      * Return True if the file at path has changed outside of Leo.
      */
     public has_changed(path: string): boolean 
-    
+
         if not path
             return False
 
@@ -774,7 +797,7 @@ export class ExternalFilesController {
      * Return the cached @bool check_for_changed_external_file setting.
      */
     public is_enabled(c: Commands): boolean 
-    
+
         d = self.enabled_d
         val = d.get(c)
         if val is None
@@ -789,7 +812,7 @@ export class ExternalFilesController {
      * Return s1 + ' ' + s2
      */
     public join(s1: str, s2: string): string 
-    
+
         return `${s1} ${s2}`;
     //@+node:felix.20230503004807.30: *4* efc.set_time
     public set_time(self, path: str, new_time: float = None): void 
