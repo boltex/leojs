@@ -5821,6 +5821,18 @@ export class LeoUI extends NullGui {
         no_all = false,
 
     ): Thenable<string> {
+        const w_choices = [
+            Constants.USER_MESSAGES.YES,
+            Constants.USER_MESSAGES.NO
+            // Note: Already shows a 'cancel' !
+        ];
+        if (yes_all) {
+            w_choices.push(Constants.USER_MESSAGES.YES_ALL,);
+        }
+        if (no_all) {
+            w_choices.push(Constants.USER_MESSAGES.NO_ALL,);
+        }
+
         return vscode.window
             .showInformationMessage(
                 title,
@@ -5828,14 +5840,17 @@ export class LeoUI extends NullGui {
                     modal: true,
                     detail: message
                 },
-                Constants.USER_MESSAGES.YES,
-                Constants.USER_MESSAGES.NO
+                ...w_choices
             )
             .then((answer) => {
                 if (answer === Constants.USER_MESSAGES.YES) {
                     return Constants.USER_MESSAGES.YES.toLowerCase();
-                } else {
+                } else if (answer === Constants.USER_MESSAGES.NO) {
                     return Constants.USER_MESSAGES.NO.toLowerCase();
+                } else if (answer === Constants.USER_MESSAGES.YES_ALL) {
+                    return "yes-all";
+                } else { // (answer === Constants.USER_MESSAGES.NO_ALL)
+                    return "no-all";
                 }
             });
     }

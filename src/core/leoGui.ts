@@ -656,7 +656,9 @@ export class NullGui extends LeoGui {
     public runAskYesNoDialog(
         c: Commands,
         title: string,
-        message: string
+        message: string,
+        yes_all?: boolean,
+        no_all?: boolean,
     ): Thenable<string> {
         return Promise.resolve("");
     }

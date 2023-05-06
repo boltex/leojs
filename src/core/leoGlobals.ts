@@ -4280,14 +4280,25 @@ export function os_path_expanduser(p_path: string): string {
     // return result;
 }
 //@+node:felix.20211227182611.10: *3* g.os_path_getmtime
-// def os_path_getmtime(path: str):
-//     """Return the modification time of path."""
-//     if not path:
-//         return 0
-//     try:
-//         return os.path.getmtime(path)
-//     catch Exception:
-//         return 0
+/**
+ * Return the modification time of path. 
+ */
+export async function os_path_getmtime(p_path: string): Promise<number>{
+    
+    if (!p_path){
+        return 0;
+    }
+    try{
+
+        // return os.path.getmtime(p_path);
+        const w_uri = makeVscodeUri(p_path);
+        const w_stats = await vscode.workspace.fs.stat(w_uri);
+        return w_stats.mtime;
+
+    }catch (exception){
+        return 0;
+    }
+}
 //@+node:felix.20211227182611.11: *3* g.os_path_getsize
 /**
  * Return the size of path.

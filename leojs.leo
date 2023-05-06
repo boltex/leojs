@@ -8697,6 +8697,18 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
     no_all = false,
 
 ): Thenable&lt;string&gt; {
+    const w_choices = [
+        Constants.USER_MESSAGES.YES,
+        Constants.USER_MESSAGES.NO
+        // Note: Already shows a 'cancel' !
+    ];
+    if (yes_all) {
+        w_choices.push(Constants.USER_MESSAGES.YES_ALL,);
+    }
+    if (no_all) {
+        w_choices.push(Constants.USER_MESSAGES.NO_ALL,);
+    }
+
     return vscode.window
         .showInformationMessage(
             title,
@@ -8704,14 +8716,17 @@ export function convertLeoFiletypes(p_filetypes: [string, string][]): { [name: s
                 modal: true,
                 detail: message
             },
-            Constants.USER_MESSAGES.YES,
-            Constants.USER_MESSAGES.NO
+            ...w_choices
         )
         .then((answer) =&gt; {
             if (answer === Constants.USER_MESSAGES.YES) {
                 return Constants.USER_MESSAGES.YES.toLowerCase();
-            } else {
+            } else if (answer === Constants.USER_MESSAGES.NO) {
                 return Constants.USER_MESSAGES.NO.toLowerCase();
+            } else if (answer === Constants.USER_MESSAGES.YES_ALL) {
+                return "yes-all";
+            } else { // (answer === Constants.USER_MESSAGES.NO_ALL)
+                return "no-all";
             }
         });
 }
@@ -14923,11 +14938,11 @@ export function getDurationSeconds(p_start: [number, number], p_end?: [number, n
     return parseFloat((getDurationMs(p_start, p_end) / 1000).toFixed(2));
 }
 </t>
-<t tx="felix.20230505220205.1"># Leo loads these plugins automatically.  Do not add them to @enabled-plugins nodes.
+<t tx="felix.20230505220205.1">// Leo loads these plugins automatically.  Do not add them to @enabled-plugins nodes.
 
-# These plugins now contain the importer code for all kinds of @auto nodes.
-# Each plugin must define a top-level importer_dict dictionary describing the plugin.
-@language python
+// These plugins now contain the importer code for all kinds of @auto nodes.
+// Each plugin must define a top-level importer_dict dictionary describing the plugin.
+@language typescript
 </t>
 </tnodes>
 </leo_file>
