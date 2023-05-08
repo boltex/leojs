@@ -91,7 +91,7 @@ export class ExternalFilesController {
     /**
      * Ctor for ExternalFiles class.
      */
-    constructor(c: Commands) {
+    constructor() {
         this.checksum_d = {};  // Keys are full paths, values are file checksums.
         // For efc.on_idle.
         // Keys are commanders.

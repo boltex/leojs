@@ -2832,6 +2832,77 @@ def pluginIsLoaded(fn):
     return pc.isLoaded(fn)
 */
 
+//@+node:felix.20230508013117.1: ** g.Idle time functions
+//@+node:felix.20230508013117.2: *3* g.disableIdleTimeHook
+/**
+ * Disable the global idle-time hook.
+ */
+export function disableIdleTimeHook(): void {
+    app.idle_time_hooks_enabled = false;
+}
+//@+node:felix.20230508013117.3: *3* g.enableIdleTimeHook
+/**
+ * Enable idle-time processing.
+ */
+export function enableIdleTimeHook(...args: any): void {
+    app.idle_time_hooks_enabled = true;
+}
+//@+node:felix.20230508013117.4: *3* g.IdleTime
+/**
+ * A thin wrapper for the LeoQtGui.IdleTime class.
+ *
+ * The IdleTime class executes a handler with a given delay at idle time.
+ * The handler takes a single argument, the IdleTime instance::
+ *
+ *       def handler(timer):
+ *           '''IdleTime handler.  timer is an IdleTime instance.'''
+ *           delta_t = timer.time-timer.starting_time
+ *           g.trace(timer.count, '%2.4f' % (delta_t))
+ *           if timer.count >= 5:
+ *               g.trace('done')
+ *               timer.stop()
+ *
+ *       # Execute handler every 500 msec. at idle time.
+ *       timer = g.IdleTime(handler,delay=500)
+ *       if timer: timer.start()
+ *
+ *   Timer instances are completely independent::
+ *
+ *       def handler1(timer):
+ *           delta_t = timer.time-timer.starting_time
+ *           g.trace('%2s %2.4f' % (timer.count,delta_t))
+ *           if timer.count >= 5:
+ *               g.trace('done')
+ *               timer.stop()
+ *
+ *       def handler2(timer):
+ *           delta_t = timer.time-timer.starting_time
+ *           g.trace('%2s %2.4f' % (timer.count,delta_t))
+ *           if timer.count >= 10:
+ *               g.trace('done')
+ *               timer.stop()
+ *
+ *       timer1 = g.IdleTime(handler1, delay=500)
+ *       timer2 = g.IdleTime(handler2, delay=1000)
+ *       if timer1 and timer2:
+ *           timer1.start()
+ *           timer2.start()
+ */
+export function IdleTime(handler: any, delay = 500, tag?: string): any {
+    try {
+        return app.gui.idleTimeClass(handler, delay, tag);
+    } catch (exception) {
+        return undefined;
+    }
+}
+//@+node:felix.20230508013117.5: *3* g.idleTimeHookHandler (stub)
+/**
+ * This function exists for compatibility.
+ */
+export function idleTimeHookHandler(timer: any): void {
+    es_print('Replaced by IdleTimeManager.on_idle');
+    trace(callers());
+}
 //@+node:felix.20211104210935.1: ** g.Importing
 //@+node:felix.20211104210938.1: ** g.Indices, Strings, Unicode & Whitespace
 //@+node:felix.20220410005950.1: *3* g.Indices
@@ -4283,19 +4354,19 @@ export function os_path_expanduser(p_path: string): string {
 /**
  * Return the modification time of path. 
  */
-export async function os_path_getmtime(p_path: string): Promise<number>{
-    
-    if (!p_path){
+export async function os_path_getmtime(p_path: string): Promise<number> {
+
+    if (!p_path) {
         return 0;
     }
-    try{
+    try {
 
         // return os.path.getmtime(p_path);
         const w_uri = makeVscodeUri(p_path);
         const w_stats = await vscode.workspace.fs.stat(w_uri);
         return w_stats.mtime;
 
-    }catch (exception){
+    } catch (exception) {
         return 0;
     }
 }

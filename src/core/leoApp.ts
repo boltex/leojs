@@ -34,6 +34,7 @@ export class IdleTimeManager {
 
     callback_list: ((...args: any[]) => any)[];
     timer: any;
+    on_idle_count = 0;
 
     /**
      * Ctor for IdleTimeManager class.
@@ -45,50 +46,66 @@ export class IdleTimeManager {
 
     //@+others
     //@+node:felix.20210102213337.2: *3* itm.add_callback
-    /*
-    def add_callback(self, callback):
-        """Add a callback to be called at every idle time."""
-        self.callback_list.append(callback)
-    */
+    /**
+     * Add a callback to be called at every idle time.
+     */
+    public add_callback(callback: (...args: any[]) => any): void {
 
+        this.callback_list.push(callback);
+
+    }
     //@+node:felix.20210102213337.3: *3* itm.on_idle
-    /*
-    on_idle_count = 0
+    /**
+     * IdleTimeManager: Run all idle-time callbacks.
+     */
+    public on_idle(timer: any): void {
 
-    def on_idle(self, timer):
-        """IdleTimeManager: Run all idle-time callbacks."""
-        if not g.app: return
-        if g.app.killed: return
-        if not g.app.pluginsController:
-            g.trace('No g.app.pluginsController', g.callers())
-            timer.stop()
-            return  # For debugger.
-        self.on_idle_count += 1
-        # Handle the registered callbacks.
-        for callback in self.callback_list:
-            try:
-                callback()
-            except Exception:
-                g.es_exception()
-                g.es_print(f"removing callback: {callback}")
-                self.callback_list.remove(callback)
-        # Handle idle-time hooks.
-        g.app.pluginsController.on_idle()
+        if (!g.app) {
+            return;
+        }
+        if (g.app.killed) {
+            return;
+        }
+        if (!g.app.pluginsController) {
+            g.trace('No g.app.pluginsController', g.callers());
+            timer.stop();
+            return;  // For debugger.
+        }
+        this.on_idle_count += 1;
+        // Handle the registered callbacks.
+        for (const callback of this.callback_list) {
+            try {
+                callback();
+            } catch (exception) {
+                g.es_exception(exception);
+                g.es_print(`removing callback: ${callback.toString()}`);
+                const index = this.callback_list.indexOf(callback);
+                if (index > -1) { // only splice array when item is found
+                    this.callback_list.splice(index, 1); // 2nd parameter means remove one item only
+                }
+                // this.callback_list.remove(callback);
+            }
+        }
+        // Handle idle-time hooks.
+        g.app.pluginsController.on_idle();
 
-    */
-
+    }
     //@+node:felix.20210102213337.4: *3* itm.start
-    /*
-    def start(self):
-        """Start the idle-time timer."""
-        self.timer = g.IdleTime(
-            self.on_idle,
-            delay=500,
-            tag='IdleTimeManager.on_idle')
-        if self.timer:
-            self.timer.start()
-    */
+    /**
+     * Start the idle-time timer.
+     */
+    public start(): void {
 
+        this.timer = g.IdleTime(
+            this.on_idle,
+            500,
+            'IdleTimeManager.on_idle'
+        );
+
+        if (this.timer) {
+            this.timer.start();
+        }
+    }
     //@-others
 
 }
