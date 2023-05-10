@@ -3096,6 +3096,7 @@ import { ISettings, LeoFind } from "./core/leoFind";
 import { NullGui } from "./core/leoGui";
 import { StringFindTabManager } from "./core/findTabManager";
 import { QuickSearchController } from "./core/quicksearch";
+import { IdleTime } from "./core/idle_time";
 
 @language typescript
 @tabwidth -4
@@ -3104,6 +3105,8 @@ import { QuickSearchController } from "./core/quicksearch";
 <t tx="felix.20201214194144.2">constructor(guiName = 'vscodeGui', private _context: vscode.ExtensionContext) {
     super(guiName);
     this.isNullGui = false;
+
+    this.idleTimeClass = IdleTime;
 
     // * Log pane instanciation
     this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);

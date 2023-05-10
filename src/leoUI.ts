@@ -41,6 +41,7 @@ import { ISettings, LeoFind } from "./core/leoFind";
 import { NullGui } from "./core/leoGui";
 import { StringFindTabManager } from "./core/findTabManager";
 import { QuickSearchController } from "./core/quicksearch";
+import { IdleTime } from "./core/idle_time";
 
 /**
  * Creates and manages instances of the UI elements along with their events
@@ -250,6 +251,8 @@ export class LeoUI extends NullGui {
     constructor(guiName = 'vscodeGui', private _context: vscode.ExtensionContext) {
         super(guiName);
         this.isNullGui = false;
+
+        this.idleTimeClass = IdleTime;
 
         // * Log pane instanciation
         this._leoLogPane = vscode.window.createOutputChannel(Constants.GUI.LOG_PANE_TITLE);

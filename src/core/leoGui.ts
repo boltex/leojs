@@ -15,6 +15,7 @@ import { StringFindTabManager } from './findTabManager';
 import { Position } from './leoNodes';
 import { Commands } from './leoCommands';
 import { StringTextWrapper } from './leoFrame';
+import { IdleTime } from './idle_time';
 //@-<< leoGui imports >>
 //@+others
 //@+node:felix.20221119205229.1: ** class LeoGui
@@ -29,7 +30,7 @@ export class LeoGui {
     public consoleOnly: boolean;  //  True if g.es goes to console.
     public globalFindTabManager: StringFindTabManager | undefined;
     public globalFindTab: any;
-    public idleTimeClass: any;  //  Hard to annotate.
+    public idleTimeClass: any; // IdleTime | undefined | g.NullObject;  //  Hard to annotate.
     public isNullGui: boolean;
     public lastFrame: any;
     public leoIcon: any;
@@ -544,7 +545,7 @@ export class NullGui extends LeoGui {
         this.script = undefined;
         this.lastFrame = undefined;  // The outer frame, to set g.app.log in runMainLoop.
         this.isNullGui = true;
-        this.idleTimeClass = new g.NullObject();
+        this.idleTimeClass = g.NullObject;
 
     }
 

@@ -2890,7 +2890,7 @@ export function enableIdleTimeHook(...args: any): void {
  */
 export function IdleTime(handler: any, delay = 500, tag?: string): any {
     try {
-        return app.gui.idleTimeClass(handler, delay, tag);
+        return new app.gui.idleTimeClass(handler, delay, tag);
     } catch (exception) {
         return undefined;
     }
