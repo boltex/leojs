@@ -541,6 +541,179 @@
 <v t="felix.20210102012410.1"><vh>@file src/core/leoGlobals.ts</vh></v>
 <v t="felix.20211021231651.1"><vh>@file src/core/leoHistory.ts</vh></v>
 <v t="felix.20220105221256.1"><vh>@file src/core/leoImport.ts</vh></v>
+<v t="felix.20230510224951.1"><vh>file leoImport.py</vh>
+<v t="felix.20230510224951.2"><vh>&lt;&lt; leoImport imports &gt;&gt;</vh></v>
+<v t="felix.20230510224951.3"><vh>&lt;&lt; leoImport annotations &gt;&gt;</vh></v>
+<v t="felix.20230510224951.4"><vh>class FreeMindImporter</vh>
+<v t="felix.20230510224951.5"><vh>freemind.add_children</vh></v>
+<v t="felix.20230510224951.6"><vh>freemind.create_outline</vh></v>
+<v t="felix.20230510224951.7"><vh>freemind.import_file</vh></v>
+<v t="felix.20230510224951.8"><vh>freemind.import_files</vh></v>
+<v t="felix.20230510224951.9"><vh>freemind.prompt_for_files</vh></v>
+</v>
+<v t="felix.20230510224951.10"><vh>class JSON_Import_Helper</vh>
+<v t="felix.20230510224951.11"><vh>json.create_nodes (generalize)</vh></v>
+<v t="felix.20230510224951.12"><vh>json.create_outline (generalize)</vh></v>
+<v t="felix.20230510224951.13"><vh>json.scan (generalize)</vh></v>
+</v>
+<v t="felix.20230510224951.14"><vh>class LeoImportCommands</vh>
+<v t="felix.20230510224951.15"><vh>ic.__init__&amp; ic.reload_settings</vh></v>
+<v t="felix.20230510224951.16"><vh>ic.Export</vh>
+<v t="felix.20230510224951.17"><vh>ic.convertCodePartToWeb &amp; helpers</vh>
+<v t="felix.20230510224951.18"><vh>ic.appendHeadRef</vh></v>
+<v t="felix.20230510224951.19"><vh>ic.appendRefToFileName</vh></v>
+<v t="felix.20230510224951.20"><vh>ic.getHeadRef</vh></v>
+<v t="felix.20230510224951.21"><vh>ic.getFileName</vh></v>
+</v>
+<v t="felix.20230510224951.22"><vh>ic.convertDocPartToWeb (handle @ %def)</vh></v>
+<v t="felix.20230510224951.23"><vh>ic.convertVnodeToWeb</vh></v>
+<v t="felix.20230510224951.24"><vh>ic.copyPart</vh></v>
+<v t="felix.20230510224951.25"><vh>ic.exportHeadlines</vh></v>
+<v t="felix.20230510224951.26"><vh>ic.flattenOutline</vh></v>
+<v t="felix.20230510224951.27"><vh>ic.outlineToWeb</vh></v>
+<v t="felix.20230510224951.28"><vh>ic.removeSentinelsCommand</vh>
+<v t="felix.20230510224951.29"><vh>&lt;&lt; set delims from the header line &gt;&gt;</vh></v>
+<v t="felix.20230510224951.30"><vh>&lt;&lt; Write s into newFileName &gt;&gt; (remove-sentinels)</vh></v>
+</v>
+<v t="felix.20230510224951.31"><vh>ic.removeSentinelLines</vh></v>
+<v t="felix.20230510224951.32"><vh>ic.weave</vh>
+<v t="felix.20230510224951.33"><vh>&lt;&lt; write the context of p to f &gt;&gt; (weave)</vh></v>
+</v>
+</v>
+<v t="felix.20230510224951.34"><vh>ic.Import</vh>
+<v t="felix.20230510224951.35"><vh>ic.createOutline &amp; helpers</vh>
+<v t="felix.20230510224951.36"><vh>ic.dispatch &amp; helpers</vh></v>
+<v t="felix.20230510224951.37"><vh>ic.import_binary_file</vh></v>
+<v t="felix.20230510224951.38"><vh>ic.init_import</vh></v>
+<v t="felix.20230510224951.39"><vh>ic.scanUnknownFileType &amp; helper</vh>
+<v t="felix.20230510224951.40"><vh>ic.languageForExtension</vh></v>
+</v>
+</v>
+<v t="felix.20230510224951.41"><vh>ic.readAtAutoNodes</vh></v>
+<v t="felix.20230510224951.42"><vh>ic.importDerivedFiles</vh></v>
+<v t="felix.20230510224951.43"><vh>ic.importFilesCommand</vh></v>
+<v t="felix.20230510224951.44"><vh>ic.importFreeMind</vh></v>
+<v t="felix.20230510224951.45"><vh>ic.importMindMap</vh></v>
+<v t="felix.20230510224951.46"><vh>ic.importWebCommand &amp; helpers</vh>
+<v t="felix.20230510224951.47"><vh>createOutlineFromWeb</vh></v>
+<v t="felix.20230510224951.48"><vh>findFunctionDef</vh></v>
+<v t="felix.20230510224951.49"><vh>scanBodyForHeadline</vh>
+<v t="felix.20230510224951.50"><vh>&lt;&lt; scan cweb body for headline &gt;&gt;</vh></v>
+<v t="felix.20230510224951.51"><vh>&lt;&lt; scan noweb body for headline &gt;&gt;</vh></v>
+</v>
+<v t="felix.20230510224951.52"><vh>scanWebFile (handles limbo)</vh>
+<v t="felix.20230510224951.53"><vh>&lt;&lt; Create a symbol table of all section names &gt;&gt;</vh></v>
+<v t="felix.20230510224951.54"><vh>&lt;&lt; Create nodes for limbo text and the root section &gt;&gt;</vh></v>
+<v t="felix.20230510224951.55"><vh>&lt;&lt; Create a node for the next module &gt;&gt;</vh>
+<v t="felix.20230510224951.56"><vh>&lt;&lt; Handle cweb @d, @f, @c and @p directives &gt;&gt;</vh></v>
+</v>
+</v>
+<v t="felix.20230510224951.57"><vh>Symbol table</vh>
+<v t="felix.20230510224951.58"><vh>cstCanonicalize</vh></v>
+<v t="felix.20230510224951.59"><vh>cstDump</vh></v>
+<v t="felix.20230510224951.60"><vh>cstEnter</vh></v>
+<v t="felix.20230510224951.61"><vh>cstLookup</vh></v>
+</v>
+</v>
+</v>
+<v t="felix.20230510224951.62"><vh>ic.parse_body</vh></v>
+<v t="felix.20230510224951.63"><vh>ic.Utilities</vh>
+<v t="felix.20230510224951.64"><vh>ic.appendStringToBody &amp; setBodyString (leoImport)</vh></v>
+<v t="felix.20230510224951.65"><vh>ic.createHeadline</vh></v>
+<v t="felix.20230510224951.66"><vh>ic.error</vh></v>
+<v t="felix.20230510224951.67"><vh>ic.isDocStart &amp; isModuleStart</vh></v>
+<v t="felix.20230510224951.68"><vh>ic.massageWebBody</vh>
+<v t="felix.20230510224951.69"><vh>&lt;&lt; Remove most newlines from @space and @* sections &gt;&gt;</vh></v>
+<v t="felix.20230510224951.70"><vh>&lt;&lt; Replace abbreviated names with full names &gt;&gt;</vh></v>
+</v>
+<v t="felix.20230510224951.71"><vh>ic.setEncoding</vh></v>
+</v>
+</v>
+<v t="felix.20230510224951.72"><vh>class MindMapImporter</vh>
+<v t="felix.20230510224951.73"><vh>mindmap.create_outline</vh></v>
+<v t="felix.20230510224951.74"><vh>mindmap.import_files</vh></v>
+<v t="felix.20230510224951.75"><vh>mindmap.prompt_for_files</vh></v>
+<v t="felix.20230510224951.76"><vh>mindmap.scan &amp; helpers</vh>
+<v t="felix.20230510224951.77"><vh>mindmap.csv_level</vh></v>
+<v t="felix.20230510224951.78"><vh>mindmap.csv_string</vh></v>
+</v>
+</v>
+<v t="felix.20230510224951.79"><vh>class MORE_Importer</vh>
+<v t="felix.20230510224951.80"><vh>MORE.prompt_for_files</vh></v>
+<v t="felix.20230510224951.81"><vh>MORE.import_files</vh></v>
+<v t="felix.20230510224951.82"><vh>MORE.import_file</vh></v>
+<v t="felix.20230510224951.83"><vh>MORE.import_lines</vh>
+<v t="felix.20230510224951.84"><vh>&lt;&lt; Link a new position p into the outline &gt;&gt;</vh></v>
+<v t="felix.20230510224951.85"><vh>&lt;&lt; Set the headline string, skipping over the leader &gt;&gt;</vh></v>
+<v t="felix.20230510224951.86"><vh>&lt;&lt; Count the number of following body lines &gt;&gt;</vh></v>
+<v t="felix.20230510224951.87"><vh>&lt;&lt; Add the lines to the body text of p &gt;&gt;</vh></v>
+</v>
+<v t="felix.20230510224951.88"><vh>MORE.headlineLevel</vh></v>
+<v t="felix.20230510224951.89"><vh>MORE.check &amp; check_lines</vh></v>
+</v>
+<v t="felix.20230510224951.90"><vh>class RecursiveImportController</vh>
+<v t="felix.20230510224951.91"><vh>ric.ctor</vh></v>
+<v t="felix.20230510224951.92"><vh>ric.run &amp; helpers</vh>
+<v t="felix.20230510224951.93"><vh>ric.import_dir</vh></v>
+<v t="felix.20230510224951.94"><vh>ric.import_one_file</vh></v>
+<v t="felix.20230510224951.95"><vh>ric.post_process &amp; helpers</vh>
+<v t="felix.20230510224951.96"><vh>ric.add_class_names</vh></v>
+<v t="felix.20230510224951.97"><vh>ric.clear_dirty_bits</vh></v>
+<v t="felix.20230510224951.98"><vh>ric.dump_headlines</vh></v>
+<v t="felix.20230510224951.99"><vh>ric.fix_back_slashes</vh></v>
+<v t="felix.20230510224951.100"><vh>ric.minimize_headlines &amp; helper</vh>
+<v t="felix.20230510224951.101"><vh>ric.strip_prefix</vh></v>
+</v>
+<v t="felix.20230510224951.102"><vh>ric.remove_empty_nodes</vh></v>
+</v>
+</v>
+</v>
+<v t="felix.20230510224951.103"><vh>class TabImporter</vh>
+<v t="felix.20230510224951.104"><vh>tabbed.check</vh></v>
+<v t="felix.20230510224951.105"><vh>tabbed.dump_stack</vh></v>
+<v t="felix.20230510224951.106"><vh>tabbed.import_files</vh></v>
+<v t="felix.20230510224951.107"><vh>tabbed.lws</vh></v>
+<v t="felix.20230510224951.108"><vh>tabbed.prompt_for_files</vh></v>
+<v t="felix.20230510224951.109"><vh>tabbed.scan</vh></v>
+<v t="felix.20230510224951.110"><vh>tabbed.scan_helper</vh></v>
+<v t="felix.20230510224951.111"><vh>tabbed.undent</vh></v>
+</v>
+<v t="felix.20230510224951.112"><vh>class ToDoImporter</vh>
+<v t="felix.20230510224951.113"><vh>todo_i.get_tasks_from_file</vh></v>
+<v t="felix.20230510224951.114"><vh>todo_i.import_files</vh></v>
+<v t="felix.20230510224951.115"><vh>todo_i.parse_file_contents</vh></v>
+<v t="felix.20230510224951.116"><vh>todo_i.prompt_for_files</vh></v>
+</v>
+<v t="felix.20230510224951.117"><vh>class ToDoTask</vh>
+<v t="felix.20230510224951.118"><vh>task.__repr__ &amp; __str__</vh></v>
+<v t="felix.20230510224951.119"><vh>task.parse_task</vh></v>
+</v>
+<v t="felix.20230510224951.120"><vh>class ZimImportController</vh>
+<v t="felix.20230510224951.121"><vh>zic.__init__ &amp; zic.reloadSettings</vh></v>
+<v t="felix.20230510224951.122"><vh>zic.parseZimIndex</vh></v>
+<v t="felix.20230510224951.123"><vh>zic.rstToLastChild</vh></v>
+<v t="felix.20230510224951.124"><vh>zic.clean</vh></v>
+<v t="felix.20230510224951.125"><vh>zic.run</vh></v>
+</v>
+<v t="felix.20230510224951.126"><vh>class LegacyExternalFileImporter</vh>
+<v t="felix.20230510224951.127"><vh>class Node</vh></v>
+<v t="felix.20230510224951.128"><vh>legacy.add</vh></v>
+<v t="felix.20230510224951.129"><vh>legacy.compute_delim1</vh></v>
+<v t="felix.20230510224951.130"><vh>legacy.import_file</vh></v>
+<v t="felix.20230510224951.131"><vh>legacy.import_files</vh></v>
+<v t="felix.20230510224951.132"><vh>legacy.prompt_for_files</vh></v>
+</v>
+<v t="felix.20230510224951.133"><vh>Commands (leoImport)</vh>
+<v t="felix.20230510224951.134"><vh>@g.command(import-free-mind-files)</vh></v>
+<v t="felix.20230510224951.135"><vh>@g.command(import-legacy-external-file)</vh></v>
+<v t="felix.20230510224951.136"><vh>@g.command(import-mind-map-files</vh></v>
+<v t="felix.20230510224951.137"><vh>@g.command(import-MORE-files)</vh></v>
+<v t="felix.20230510224951.138"><vh>@g.command(import-tabbed-files)</vh></v>
+<v t="felix.20230510224951.139"><vh>@g.command(import-todo-text-files)</vh></v>
+<v t="felix.20230510224951.140"><vh>@g.command(import-zim-folder)</vh></v>
+<v t="felix.20230510224951.141"><vh>@g.command(parse-body)</vh></v>
+</v>
+</v>
 <v t="felix.20210102012632.1"><vh>@file src/core/leoNodes.ts</vh></v>
 <v t="felix.20230420210348.1"><vh>@file src/core/leoPersistence.ts</vh></v>
 <v t="felix.20230427003032.1"><vh>@file src/core/leoRst.ts</vh></v>
@@ -14947,6 +15120,2600 @@ export function getDurationSeconds(p_start: [number, number], p_end?: [number, n
 // These plugins now contain the importer code for all kinds of @auto nodes.
 // Each plugin must define a top-level importer_dict dictionary describing the plugin.
 @language typescript
+</t>
+<t tx="felix.20230510224951.1">&lt;&lt; leoImport imports &gt;&gt;
+&lt;&lt; leoImport annotations &gt;&gt;
+@others
+@language python
+@tabwidth -4
+@pagewidth 70
+@encoding utf-8
+</t>
+<t tx="felix.20230510224951.10">class JSON_Import_Helper:
+    """
+    A class that helps client scripts import .json files.
+
+    Client scripts supply data describing how to create Leo outlines from
+    the .json data.
+    """
+
+    def __init__(self, c: Cmdr) -&gt; None:
+        """ctor for the JSON_Import_Helper class."""
+        self.c = c
+        self.vnodes_dict: Dict[str, VNode] = {}  # Keys are gnxs.
+
+    @others
+</t>
+<t tx="felix.20230510224951.100">def minimize_headlines(self, p: Position, prefix: str) -&gt; None:
+    """Create @path nodes to minimize the paths required in descendant nodes."""
+    if prefix and not prefix.endswith('/'):
+        prefix = prefix + '/'
+    m = self.file_pattern.match(p.h)
+    if m:
+        # It's an @file node of some kind. Strip off the prefix.
+        kind = m.group(0)
+        path = p.h[len(kind) :].strip()
+        stripped = self.strip_prefix(path, prefix)
+        p.h = f"{kind} {stripped or path}"
+        # Put the *full* @path directive in the body.
+        if self.add_path and prefix:
+            tail = g.os_path_dirname(stripped).rstrip('/')
+            p.b = f"@path {prefix}{tail}\n{p.b}"
+    else:
+        # p.h is a path.
+        path = p.h
+        stripped = self.strip_prefix(path, prefix)
+        p.h = f"@path {stripped or path}"
+        for p in p.children():
+            self.minimize_headlines(p, prefix + stripped)
+</t>
+<t tx="felix.20230510224951.101">def strip_prefix(self, path: str, prefix: str) -&gt; str:
+    """Strip the prefix from the path and return the result."""
+    if path.startswith(prefix):
+        return path[len(prefix) :]
+    return ''  # A signal.
+</t>
+<t tx="felix.20230510224951.102">def remove_empty_nodes(self, p: Position) -&gt; None:
+    """Remove empty nodes. Not called for @auto or @edit trees."""
+    c = self.c
+    aList = [
+        p2 for p2 in p.self_and_subtree()
+            if not p2.b and not p2.hasChildren()]
+    if aList:
+        c.deletePositionsInList(aList)  # Don't redraw.
+</t>
+<t tx="felix.20230510224951.103">class TabImporter:
+    """
+    A class to import a file whose outline levels are indicated by
+    leading tabs or blanks (but not both).
+    """
+
+    def __init__(self, c: Cmdr, separate: bool = True) -&gt; None:
+        """Ctor for the TabImporter class."""
+        self.c = c
+        self.root: Position = None
+        self.separate = separate
+        self.stack: List[Tuple[int, Position]] = []
+
+    @others
+</t>
+<t tx="felix.20230510224951.104">def check(self, lines: List[str], warn: bool = True) -&gt; bool:
+    """Return False and warn if lines contains mixed leading tabs/blanks."""
+    blanks, tabs = 0, 0
+    for s in lines:
+        lws = self.lws(s)
+        if '\t' in lws:
+            tabs += 1
+        if ' ' in lws:
+            blanks += 1
+    if tabs and blanks:
+        if warn:
+            g.es_print('intermixed leading blanks and tabs.')
+        return False
+    return True
+</t>
+<t tx="felix.20230510224951.105">def dump_stack(self) -&gt; None:
+    """Dump the stack, containing (level, p) tuples."""
+    g.trace('==========')
+    for i, data in enumerate(self.stack):
+        level, p = data
+        print(f"{i:2} {level} {p.h!r}")
+</t>
+<t tx="felix.20230510224951.106">def import_files(self, files: List[str]) -&gt; None:
+    """Import a list of tab-delimited files."""
+    c, u = self.c, self.c.undoer
+    if files:
+        p = None
+        for fn in files:
+            try:
+                g.setGlobalOpenDir(fn)
+                s = open(fn).read()
+                s = s.replace('\r', '')
+            except Exception:
+                continue
+            if s.strip() and self.check(g.splitLines(s)):
+                undoData = u.beforeInsertNode(c.p)
+                last = c.lastTopLevel()
+                self.root = p = last.insertAfter()
+                self.scan(s)
+                p.h = g.shortFileName(fn)
+                p.contract()
+                p.setDirty()
+                u.afterInsertNode(p, 'Import Tabbed File', undoData)
+            if p:
+                c.setChanged()
+                c.redraw(p)
+</t>
+<t tx="felix.20230510224951.107">def lws(self, s: str) -&gt; str:
+    """Return the length of the leading whitespace of s."""
+    for i, ch in enumerate(s):
+        if ch not in ' \t':
+            return s[:i]
+    return s
+</t>
+<t tx="felix.20230510224951.108">def prompt_for_files(self) -&gt; None:
+    """Prompt for a list of FreeMind (.mm.html) files and import them."""
+    c = self.c
+    types = [
+        ("All files", "*"),
+    ]
+    names = g.app.gui.runOpenFileDialog(c,
+        title="Import Tabbed File",
+        filetypes=types,
+        defaultextension=".html",
+        multiple=True)
+    c.bringToFront()
+    if names:
+        g.chdir(names[0])
+        self.import_files(names)
+</t>
+<t tx="felix.20230510224951.109">def scan(self, s1: str, fn: str = None, root: Position = None) -&gt; Position:
+    """Create the outline corresponding to s1."""
+    c = self.c
+    # Self.root can be None if we are called from a script or unit test.
+    if not self.root:
+        last = root if root else c.lastTopLevel()  # For unit testing.
+        self.root = last.insertAfter()
+        if fn:
+            self.root.h = fn
+    lines = g.splitLines(s1)
+    self.stack = []
+    # Redo the checks in case we are called from a script.
+    if s1.strip() and self.check(lines):
+        for s in lines:
+            if s.strip() or not self.separate:
+                self.scan_helper(s)
+    return self.root
+</t>
+<t tx="felix.20230510224951.11">def create_nodes(self, parent: Position, parent_d: Dict[str, str]) -&gt; None:
+    """Create the tree of nodes rooted in parent."""
+    d = self.gnx_dict
+    for child_gnx in parent_d.get('children'):
+        d2 = d.get(child_gnx)
+        if child_gnx in self.vnodes_dict:
+            # It's a clone.
+            v = self.vnodes_dict.get(child_gnx)
+            n = parent.numberOfChildren()
+            child = leoNodes.Position(v)
+            child._linkAsNthChild(parent, n)
+            # Don't create children again.
+        else:
+            child = parent.insertAsLastChild()
+            child.h = d2.get('h') or '&lt;**no h**&gt;'
+            child.b = d2.get('b') or ''
+            if d2.get('gnx'):
+                child.v.fileIndex = gnx = d2.get('gnx')  # 2021/06/23: found by mypy.
+                self.vnodes_dict[gnx] = child.v
+            if d2.get('ua'):
+                child.u = d2.get('ua')
+            self.create_nodes(child, d2)
+</t>
+<t tx="felix.20230510224951.110">def scan_helper(self, s: str) -&gt; int:
+    """Update the stack as necessary and return level."""
+    root, separate, stack = self.root, self.separate, self.stack
+    if stack:
+        level, parent = stack[-1]
+    else:
+        level, parent = 0, None
+    lws = len(self.lws(s))
+    h = s.strip()
+    if lws == level:
+        if separate or not parent:
+            # Replace the top of the stack with a new entry.
+            if stack:
+                stack.pop()
+            grand_parent = stack[-1][1] if stack else root
+            parent = grand_parent.insertAsLastChild()  # lws == level
+            parent.h = h
+            stack.append((level, parent),)
+        elif not parent.h:
+            parent.h = h
+    elif lws &gt; level:
+        # Create a new parent.
+        level = lws
+        parent = parent.insertAsLastChild()
+        parent.h = h
+        stack.append((level, parent),)
+    else:
+        # Find the previous parent.
+        while stack:
+            level2, parent2 = stack.pop()
+            if level2 == lws:
+                grand_parent = stack[-1][1] if stack else root
+                parent = grand_parent.insertAsLastChild()  # lws &lt; level
+                parent.h = h
+                level = lws
+                stack.append((level, parent),)
+                break
+        else:
+            level = 0
+            parent = root.insertAsLastChild()
+            parent.h = h
+            stack = [(0, parent),]
+    assert parent and parent == stack[-1][1]  # An important invariant.
+    assert level == stack[-1][0], (level, stack[-1][0])
+    if not separate:
+        parent.b = parent.b + self.undent(level, s)
+    return level
+</t>
+<t tx="felix.20230510224951.111">def undent(self, level: int, s: str) -&gt; str:
+    """Unindent all lines of p.b by level."""
+    if level &lt;= 0:
+        return s
+    if s.strip():
+        lines = g.splitLines(s)
+        ch = lines[0][0]
+        assert ch in ' \t', repr(ch)
+        # Check that all lines start with the proper lws.
+        lws = ch * level
+        for s in lines:
+            if not s.startswith(lws):
+                g.trace(f"bad indentation: {s!r}")
+                return s
+        return ''.join([z[len(lws) :] for z in lines])
+    return ''
+</t>
+<t tx="felix.20230510224951.112">class ToDoImporter:
+
+    def __init__(self, c: Cmdr) -&gt; None:
+        self.c = c
+
+    @others
+</t>
+<t tx="felix.20230510224951.113">def get_tasks_from_file(self, path: str) -&gt; List[Any]:
+    """Return the tasks from the given path."""
+    tag = 'import-todo-text-files'
+    if not os.path.exists(path):
+        print(f"{tag}: file not found: {path}")
+        return []
+    try:
+        with open(path, 'r') as f:
+            contents = f.read()
+            tasks = self.parse_file_contents(contents)
+        return tasks
+    except Exception:
+        print(f"unexpected exception in {tag}")
+        g.es_exception()
+        return []
+</t>
+<t tx="felix.20230510224951.114">def import_files(self, files: List[str]) -&gt; Dict[str, List[Any]]:
+    """
+    Import all todo.txt files in the given list of file names.
+
+    Return a dict: keys are full paths, values are lists of ToDoTasks"
+    """
+    d, tag = {}, 'import-todo-text-files'
+    for path in files:
+        try:
+            with open(path, 'r') as f:
+                contents = f.read()
+                tasks = self.parse_file_contents(contents)
+                d[path] = tasks
+        except Exception:
+            print(f"unexpected exception in {tag}")
+            g.es_exception()
+    return d
+</t>
+<t tx="felix.20230510224951.115"># Patterns...
+mark_s = r'([x]\ )'
+priority_s = r'(\([A-Z]\)\ )'
+date_s = r'([0-9]{4}-[0-9]{2}-[0-9]{2}\ )'
+task_s = r'\s*(.+)'
+line_s = fr"^{mark_s}?{priority_s}?{date_s}?{date_s}?{task_s}$"
+line_pat = re.compile(line_s)
+
+def parse_file_contents(self, s: str) -&gt; List[Any]:
+    """
+    Parse the contents of a file.
+    Return a list of ToDoTask objects.
+    """
+    trace = False
+    tasks = []
+    for line in g.splitLines(s):
+        if not line.strip():
+            continue
+        if trace:
+            print(f"task: {line.rstrip()!s}")
+        m = self.line_pat.match(line)
+        if not m:
+            print(f"invalid task: {line.rstrip()!s}")
+            continue
+        # Groups 1, 2 and 5 are context independent.
+        completed = m.group(1)
+        priority = m.group(2)
+        task_s = m.group(5)
+        if not task_s:
+            print(f"invalid task: {line.rstrip()!s}")
+            continue
+        # Groups 3 and 4 are context dependent.
+        if m.group(3) and m.group(4):
+            complete_date = m.group(3)
+            start_date = m.group(4)
+        elif completed:
+            complete_date = m.group(3)
+            start_date = ''
+        else:
+            start_date = m.group(3) or ''
+            complete_date = ''
+        if completed and not complete_date:
+            print(f"no completion date: {line.rstrip()!s}")
+        tasks.append(ToDoTask(
+            bool(completed), priority, start_date, complete_date, task_s))
+    return tasks
+</t>
+<t tx="felix.20230510224951.116">def prompt_for_files(self) -&gt; Dict[str, Any]:
+    """
+    Prompt for a list of todo.text files and import them.
+
+    Return a python dict. Keys are full paths; values are lists of ToDoTask objects.
+    """
+    c = self.c
+    types = [
+        ("Text files", "*.txt"),
+        ("All files", "*"),
+    ]
+    names = g.app.gui.runOpenFileDialog(c,
+        title="Import todo.txt File",
+        filetypes=types,
+        defaultextension=".txt",
+        multiple=True,
+    )
+    c.bringToFront()
+    if not names:
+        return {}
+    g.chdir(names[0])
+    d = self.import_files(names)
+    for key in sorted(d):
+        tasks = d.get(key)
+        print(f"tasks in {g.shortFileName(key)}...\n")
+        for task in tasks:
+            print(f"    {task}")
+    return d
+</t>
+<t tx="felix.20230510224951.117">class ToDoTask:
+    """A class representing the components of a task line."""
+
+    def __init__(self,
+        completed: bool,
+        priority: str,
+        start_date: str,
+        complete_date: str,
+        task_s: str,
+    ) -&gt; None:
+        self.completed = completed
+        self.priority = priority and priority[1] or ''
+        self.start_date = start_date and start_date.rstrip() or ''
+        self.complete_date = complete_date and complete_date.rstrip() or ''
+        self.task_s = task_s.strip()
+        # Parse tags into separate dictionaries.
+        self.projects: List[str] = []
+        self.contexts: List[str] = []
+        self.key_vals: List[str] = []
+        self.parse_task()
+
+    @others
+</t>
+<t tx="felix.20230510224951.118">def __repr__(self) -&gt; str:
+    start_s = self.start_date if self.start_date else ''
+    end_s = self.complete_date if self.complete_date else ''
+    mark_s = '[X]' if self.completed else '[ ]'
+    result = [
+        f"Task: "
+        f"{mark_s} "
+        f"{self.priority:1} "
+        f"start: {start_s:10} "
+        f"end: {end_s:10} "
+        f"{self.task_s}"
+    ]
+    for ivar in ('contexts', 'projects', 'key_vals'):
+        aList = getattr(self, ivar, None)
+        if aList:
+            result.append(f"{' '*13}{ivar}: {aList}")
+    return '\n'.join(result)
+
+__str__ = __repr__
+</t>
+<t tx="felix.20230510224951.119"># Patterns...
+project_pat = re.compile(r'(\+\S+)')
+context_pat = re.compile(r'(@\S+)')
+key_val_pat = re.compile(r'((\S+):(\S+))')  # Might be a false match.
+
+def parse_task(self) -&gt; None:
+
+    trace = False and not g.unitTesting
+    s = self.task_s
+    table = (
+        ('context', self.context_pat, self.contexts),
+        ('project', self.project_pat, self.projects),
+        ('key:val', self.key_val_pat, self.key_vals),
+    )
+    for kind, pat, aList in table:
+        for m in re.finditer(pat, s):
+            pat_s = repr(pat).replace("re.compile('", "").replace("')", "")
+            pat_s = pat_s.replace(r'\\', '\\')
+            # Check for false key:val match:
+            if pat == self.key_val_pat:
+                key, value = m.group(2), m.group(3)
+                if ':' in key or ':' in value:
+                    break
+            tag = m.group(1)
+            # Add the tag.
+            if tag in aList:
+                if trace:
+                    g.trace('Duplicate tag:', tag)
+            else:
+                if trace:
+                    g.trace(f"Add {kind} tag: {tag!s}")
+                aList.append(tag)
+            # Remove the tag from the task.
+            s = re.sub(pat, "", s)
+    if s != self.task_s:
+        self.task_s = s.strip()
+</t>
+<t tx="felix.20230510224951.12">def create_outline(self, path: str) -&gt; Position:
+    c = self.c
+    junk, fileName = g.os_path_split(path)
+    undoData = c.undoer.beforeInsertNode(c.p)
+    # Create the top-level headline.
+    p = c.lastTopLevel().insertAfter()
+    fn = g.shortFileName(path).strip()
+    if fn.endswith('.json'):
+        fn = fn[:-5]
+    p.h = fn
+    self.scan(path, p)
+    c.undoer.afterInsertNode(p, 'Import', undoData)
+    return p
+</t>
+<t tx="felix.20230510224951.120">class ZimImportController:
+    """
+    A class to import Zim folders and files: http://zim-wiki.org/
+    First use Zim to export your project to rst files.
+
+    Original script by Davy Cottet.
+
+    User options:
+        @int rst_level = 0
+        @string rst_type
+        @string zim_node_name
+        @string path_to_zim
+
+    """
+    @others
+</t>
+<t tx="felix.20230510224951.121">def __init__(self, c: Cmdr) -&gt; None:
+    """Ctor for ZimImportController class."""
+    self.c = c
+    self.pathToZim = c.config.getString('path-to-zim')
+    self.rstLevel = c.config.getInt('zim-rst-level') or 0
+    self.rstType = c.config.getString('zim-rst-type') or 'rst'
+    self.zimNodeName = c.config.getString('zim-node-name') or 'Imported Zim Tree'
+</t>
+<t tx="felix.20230510224951.122">def parseZimIndex(self) -&gt; List[Tuple[int, str, List[str]]]:
+    """
+    Parse Zim wiki index.rst and return a list of tuples (level, name, path) or None.
+    """
+    # c = self.c
+    pathToZim = g.os_path_abspath(self.pathToZim)
+    pathToIndex = g.os_path_join(pathToZim, 'index.rst')
+    if not g.os_path_exists(pathToIndex):
+        g.es(f"not found: {pathToIndex}", color='red')
+        return None
+    index = open(pathToIndex).read()
+    parse = re.findall(r'(\t*)-\s`(.+)\s&lt;(.+)&gt;`_', index)
+    if not parse:
+        g.es(f"invalid index: {pathToIndex}", color='red')
+        return None
+    results = []
+    for result in parse:
+        level = len(result[0])
+        name = result[1].decode('utf-8')
+        unquote = urllib.parse.unquote
+        # mypy: error: "str" has no attribute "decode"; maybe "encode"?  [attr-defined]
+        path = [
+            g.os_path_abspath(g.os_path_join(pathToZim, unquote(result[2]).decode('utf-8')))
+        ]  # type:ignore
+        results.append((level, name, path))
+    return results
+</t>
+<t tx="felix.20230510224951.123">def rstToLastChild(self, p: Position, name: str, rst: List[str]) -&gt; Position:
+    """Import an rst file as a last child of pos node with the specified name"""
+    c = self.c
+    c.importCommands.importFilesCommand(
+        files=rst,
+        parent=p,
+        treeType='@rst',
+    )
+    rstNode = p.getLastChild()
+    rstNode.h = name
+    return rstNode
+</t>
+<t tx="felix.20230510224951.124">def clean(self, zimNode: Position, rstType: str) -&gt; None:
+    """Clean useless nodes"""
+    warning = 'Warning: this node is ignored when writing this file'
+    for p in zimNode.subtree_iter():
+        # looking for useless bodies
+        if p.hasFirstChild() and warning in p.b:
+            child = p.getFirstChild()
+            fmt = "@rst-no-head %s declarations"
+            table = (
+                fmt % p.h.replace(' ', '_'),
+                fmt % p.h.replace(rstType, '').strip().replace(' ', '_'),
+            )
+            # Replace content with @rest-no-head first child (without title head) and delete it
+            if child.h in table:
+                p.b = '\n'.join(child.b.split('\n')[3:])
+                child.doDelete()
+                # Replace content of empty body parent node with first child with same name
+            elif p.h == child.h or (f"{rstType} {child.h}" == p.h):
+                if not child.hasFirstChild():
+                    p.b = child.b
+                    child.doDelete()
+                elif not child.hasNext():
+                    p.b = child.b
+                    child.copyTreeFromSelfTo(p)
+                    child.doDelete()
+                else:
+                    child.h = 'Introduction'
+        elif p.hasFirstChild(
+            ) and p.h.startswith("@rst-no-head") and not p.b.strip():
+            child = p.getFirstChild()
+            p_no_head = p.h.replace("@rst-no-head", "").strip()
+            # Replace empty @rst-no-head by its same named children
+            if child.h.strip() == p_no_head and not child.hasFirstChild():
+                p.h = p_no_head
+                p.b = child.b
+                child.doDelete()
+        elif p.h.startswith("@rst-no-head"):
+            lines = p.b.split('\n')
+            p.h = lines[1]
+            p.b = '\n'.join(lines[3:])
+</t>
+<t tx="felix.20230510224951.125">def run(self) -&gt; None:
+    """Create the zim node as the last top-level node."""
+    c = self.c
+    # Make sure a path is given.
+    if not self.pathToZim:
+        g.es('Missing setting: @string path_to_zim', color='red')
+        return
+    root = c.rootPosition()
+    while root.hasNext():
+        root.moveToNext()
+    zimNode = root.insertAfter()
+    zimNode.h = self.zimNodeName
+    # Parse the index file
+    files = self.parseZimIndex()
+    if files:
+        # Do the import
+        rstNodes: Dict[str, Position] = {'0': zimNode}
+        for level, name, rst in files:
+            if level == self.rstLevel:
+                name = f"{self.rstType} {name}"
+            rstNodes[str(level + 1)] = self.rstToLastChild(rstNodes[str(level)], name, rst)
+        # Clean nodes
+        g.es('Start cleaning process. Please wait...', color='blue')
+        self.clean(zimNode, self.rstType)
+        g.es('Done', color='blue')
+        # Select zimNode
+        c.selectPosition(zimNode)
+        c.redraw()
+</t>
+<t tx="felix.20230510224951.126">class LegacyExternalFileImporter:
+    """
+    A class to import external files written by versions of Leo earlier
+    than 5.0.
+    """
+    # Sentinels to ignore, without the leading comment delim.
+    ignore = ('@+at', '@-at', '@+leo', '@-leo', '@nonl', '@nl', '@-others')
+
+    def __init__(self, c: Cmdr) -&gt; None:
+        self.c = c
+
+    @others
+</t>
+<t tx="felix.20230510224951.127">class Node:
+
+    def __init__(self, h: str, level: int) -&gt; None:
+        """Hold node data."""
+        self.h = h.strip()
+        self.level = level
+        self.lines: List[str] = []
+</t>
+<t tx="felix.20230510224951.128">def add(self, line: str, stack: List[Any]) -&gt; None:
+    """Add a line to the present node."""
+    if stack:
+        node = stack[-1]
+        node.lines.append(line)
+    else:
+        print('orphan line: ', repr(line))
+</t>
+<t tx="felix.20230510224951.129">def compute_delim1(self, path: str) -&gt; str:
+    """Return the opening comment delim for the given file."""
+    junk, ext = os.path.splitext(path)
+    if not ext:
+        return None
+    language = g.app.extension_dict.get(ext[1:])
+    if not language:
+        return None
+    delim1, delim2, delim3 = g.set_delims_from_language(language)
+    g.trace(language, delim1 or delim2)
+    return delim1 or delim2
+</t>
+<t tx="felix.20230510224951.13">def scan(self, s: str, parent: Position) -&gt; bool:
+    """Create an outline from a MindMap (.csv) file."""
+    c, d, self.gnx_dict = self.c, json.loads(s), {}
+    for d2 in d.get('nodes', []):
+        gnx = d2.get('gnx')
+        self.gnx_dict[gnx] = d2
+    top_d = d.get('top')
+    if top_d:
+        # Don't set parent.h or parent.gnx or parent.v.u.
+        parent.b = top_d.get('b') or ''
+        self.create_nodes(parent, top_d)
+        c.redraw()
+    return bool(top_d)
+</t>
+<t tx="felix.20230510224951.130">def import_file(self, path: str) -&gt; None:
+    """Import one legacy external file."""
+    c = self.c
+    root_h = g.shortFileName(path)
+    delim1 = self.compute_delim1(path)
+    if not delim1:
+        g.es_print('unknown file extension:', color='red')
+        g.es_print(path)
+        return
+    # Read the file into s.
+    with open(path, 'r') as f:
+        s = f.read()
+    # Do nothing if the file is a newer external file.
+    if delim1 + '@+leo-ver=4' not in s:
+        g.es_print('not a legacy external file:', color='red')
+        g.es_print(path)
+        return
+    # Compute the local ignore list for this file.
+    ignore = tuple(delim1 + z for z in self.ignore)
+    # Handle each line of the file.
+    nodes: List[Any] = []  # An list of Nodes, in file order.
+    stack: List[Any] = []  # A stack of Nodes.
+    for line in g.splitLines(s):
+        s = line.lstrip()
+        lws = line[: len(line) - len(line.lstrip())]
+        if s.startswith(delim1 + '@@'):
+            self.add(lws + s[2:], stack)
+        elif s.startswith(ignore):
+            # Ignore these. Use comments instead of @doc bodies.
+            pass
+        elif (
+            s.startswith(delim1 + '@+others') or
+            s.startswith(delim1 + '@' + lws + '@+others')
+        ):
+            self.add(lws + '@others\n', stack)
+        elif s.startswith(delim1 + '@&lt;&lt;'):
+            n = len(delim1 + '@&lt;&lt;')
+            self.add(lws + '&lt;&lt;' + s[n:].rstrip() + '\n', stack)
+        elif s.startswith(delim1 + '@+node:'):
+            # Compute the headline.
+            if stack:
+                h = s[8:]
+                i = h.find(':')
+                h = h[i + 1 :] if ':' in h else h
+            else:
+                h = root_h
+            # Create a node and push it.
+            node = self.Node(h, len(stack))
+            nodes.append(node)
+            stack.append(node)
+        elif s.startswith(delim1 + '@-node'):
+            # End the node.
+            stack.pop()
+        elif s.startswith(delim1 + '@'):
+            print('oops:', repr(s))
+        else:
+            self.add(line, stack)
+    if stack:
+        print('Unbalanced node sentinels')
+    # Generate nodes.
+    last = c.lastTopLevel()
+    root = last.insertAfter()
+    root.h = f"imported file: {root_h}"
+    stack = [root]
+    for node in nodes:
+        b = textwrap.dedent(''.join(node.lines))
+        level = node.level
+        if level == 0:
+            root.h = root_h
+            root.b = b
+        else:
+            parent = stack[level - 1]
+            p = parent.insertAsLastChild()
+            p.b = b
+            p.h = node.h
+            # Good for debugging.
+            # p.h = f"{level} {node.h}"
+            stack = stack[:level] + [p]
+    c.selectPosition(root)
+    root.expand()  # c.expandAllSubheads()
+    c.redraw()
+</t>
+<t tx="felix.20230510224951.131">def import_files(self, paths: List[str]) -&gt; None:
+    """Import zero or more files."""
+    for path in paths:
+        if os.path.exists(path):
+            self.import_file(path)
+        else:
+            g.es_print(f"not found: {path!r}")
+</t>
+<t tx="felix.20230510224951.132">def prompt_for_files(self) -&gt; None:
+    """Prompt for a list of legacy external .py files and import them."""
+    c = self.c
+    types = [
+        ("Legacy external files", "*.py"),
+        ("All files", "*"),
+    ]
+    paths = g.app.gui.runOpenFileDialog(c,
+        title="Import Legacy External Files",
+        filetypes=types,
+        defaultextension=".py",
+        multiple=True)
+    c.bringToFront()
+    if paths:
+        g.chdir(paths[0])
+        self.import_files(paths)
+</t>
+<t tx="felix.20230510224951.133"></t>
+<t tx="felix.20230510224951.134">@g.command('import-free-mind-files')
+def import_free_mind_files(event: Event) -&gt; None:
+    """Prompt for free-mind files and import them."""
+    c = event.get('c')
+    if c:
+        FreeMindImporter(c).prompt_for_files()
+
+</t>
+<t tx="felix.20230510224951.135">@g.command('import-legacy-external-files')
+def import_legacy_external_files(event: Event) -&gt; None:
+    """Prompt for legacy external files and import them."""
+    c = event.get('c')
+    if c:
+        LegacyExternalFileImporter(c).prompt_for_files()
+</t>
+<t tx="felix.20230510224951.136">@g.command('import-mind-jet-files')
+def import_mind_jet_files(event: Event) -&gt; None:
+    """Prompt for mind-jet files and import them."""
+    c = event.get('c')
+    if c:
+        MindMapImporter(c).prompt_for_files()
+</t>
+<t tx="felix.20230510224951.137">@g.command('import-MORE-files')
+def import_MORE_files_command(event: Event) -&gt; None:
+    """Prompt for MORE files and import them."""
+    c = event.get('c')
+    if c:
+        MORE_Importer(c).prompt_for_files()
+</t>
+<t tx="felix.20230510224951.138">@g.command('import-tabbed-files')
+def import_tabbed_files_command(event: Event) -&gt; None:
+    """Prompt for tabbed files and import them."""
+    c = event.get('c')
+    if c:
+        TabImporter(c).prompt_for_files()
+</t>
+<t tx="felix.20230510224951.139">@g.command('import-todo-text-files')
+def import_todo_text_files(event: Event) -&gt; None:
+    """Prompt for free-mind files and import them."""
+    c = event.get('c')
+    if c:
+        ToDoImporter(c).prompt_for_files()
+</t>
+<t tx="felix.20230510224951.14">class LeoImportCommands:
+    """
+    A class implementing all of Leo's import/export code. This class
+    uses **importers** in the leo/plugins/importers folder.
+
+    For more information, see leo/plugins/importers/howto.txt.
+    """
+    @others
+</t>
+<t tx="felix.20230510224951.140">@g.command('import-zim-folder')
+def import_zim_command(event: Event) -&gt; None:
+    """
+    Import a zim folder, http://zim-wiki.org/, as the last top-level node of the outline.
+
+    First use Zim to export your project to rst files.
+
+    This command requires the following Leo settings::
+
+        @int rst_level = 0
+        @string rst_type
+        @string zim_node_name
+        @string path_to_zim
+    """
+    c = event.get('c')
+    if c:
+        ZimImportController(c).run()
+</t>
+<t tx="felix.20230510224951.141">@g.command('parse-body')
+def parse_body_command(event: Event) -&gt; None:
+    """Parse p.b as source code, creating a tree of descendant nodes."""
+    c = event.get('c')
+    if c and c.p:
+        c.importCommands.parse_body(c.p)
+</t>
+<t tx="felix.20230510224951.15">def __init__(self, c: Cmdr) -&gt; None:
+    """ctor for LeoImportCommands class."""
+    self.c = c
+    self.encoding = 'utf-8'
+    self.errors = 0
+    self.fileName: str = None  # The original file name, say x.cpp
+    self.fileType: str = None  # ".py", ".c", etc.
+    self.methodName: str = None  # x, as in &lt; &lt; x methods &gt; &gt; =
+    self.output_newline: str = g.getOutputNewline(c=c)  # Value of @bool output_newline
+    self.tab_width = c.tab_width
+    self.treeType = "@file"  # None or "@file"
+    self.verbose = True  # Leo 6.6
+    self.webType = "@noweb"  # "cweb" or "noweb"
+    self.web_st: List[str] = []  # noweb symbol table.
+    self.reload_settings()
+
+def reload_settings(self) -&gt; None:
+    pass
+
+reloadSettings = reload_settings
+</t>
+<t tx="felix.20230510224951.16"></t>
+<t tx="felix.20230510224951.17">def convertCodePartToWeb(self, s: str, i: int, p: Position, result: str) -&gt; Tuple[int, str]:
+    """
+    # Headlines not containing a section reference are ignored in noweb
+    and generate index index in cweb.
+    """
+    ic = self
+    nl = ic.output_newline
+    head_ref = ic.getHeadRef(p)
+    file_name = ic.getFileName(p)
+    if g.match_word(s, i, "@root"):
+        i = g.skip_line(s, i)
+        ic.appendRefToFileName(file_name, result)
+    elif g.match_word(s, i, "@c") or g.match_word(s, i, "@code"):
+        i = g.skip_line(s, i)
+        ic.appendHeadRef(p, file_name, head_ref, result)
+    elif g.match_word(p.h, 0, "@file"):
+        # Only do this if nothing else matches.
+        ic.appendRefToFileName(file_name, result)
+        i = g.skip_line(s, i)  # 4/28/02
+    else:
+        ic.appendHeadRef(p, file_name, head_ref, result)
+    i, result = ic.copyPart(s, i, result)
+    return i, result.strip() + nl
+</t>
+<t tx="felix.20230510224951.18">def appendHeadRef(self, p: Position, file_name: str, head_ref: str, result: str) -&gt; None:
+    ic = self
+    nl = ic.output_newline
+    if ic.webType == "cweb":
+        if head_ref:
+            escaped_head_ref = head_ref.replace("@", "@@")
+            result += "@&lt;" + escaped_head_ref + "@&gt;=" + nl
+        else:
+            # Convert the headline to an index entry.
+            result += "@^" + p.h.strip() + "@&gt;" + nl
+            result += "@c" + nl  # @c denotes a new section.
+    else:
+        if head_ref:
+            pass
+        elif p == ic.c.p:
+            head_ref = file_name or "*"
+        else:
+            head_ref = "@others"
+        # 2019/09/12
+        result += (g.angleBrackets(head_ref) + "=" + nl)
+</t>
+<t tx="felix.20230510224951.19">def appendRefToFileName(self, file_name: str, result: str) -&gt; None:
+    ic = self
+    nl = ic.output_newline
+    if ic.webType == "cweb":
+        if not file_name:
+            result += "@&lt;root@&gt;=" + nl
+        else:
+            result += "@(" + file_name + "@&gt;" + nl  # @(...@&gt; denotes a file.
+    else:
+        if not file_name:
+            file_name = "*"
+        # 2019/09/12.
+        lt = "&lt;&lt;"
+        rt = "&gt;&gt;"
+        result += (lt + file_name + rt + "=" + nl)
+</t>
+<t tx="felix.20230510224951.2">from __future__ import annotations
+import csv
+import io
+import json
+import os
+import re
+import textwrap
+import time
+from typing import Any, Callable, Dict, List, Optional, Tuple, TYPE_CHECKING
+import urllib
+#
+# Third-party imports.
+try:
+    import docutils
+    import docutils.core
+    assert docutils
+    assert docutils.core
+except ImportError:
+    # print('leoImport.py: can not import docutils')
+    docutils = None  # type:ignore
+try:
+    import lxml
+except ImportError:
+    lxml = None
+#
+# Leo imports...
+from leo.core import leoGlobals as g
+from leo.core import leoNodes
+#
+# Abbreviation.
+StringIO = io.StringIO
+</t>
+<t tx="felix.20230510224951.20">def getHeadRef(self, p: Position) -&gt; str:
+    """
+    Look for either noweb or cweb brackets.
+    Return everything between those brackets.
+    """
+    h = p.h.strip()
+    if g.match(h, 0, "&lt;&lt;"):
+        i = h.find("&gt;&gt;", 2)
+    elif g.match(h, 0, "&lt;@"):
+        i = h.find("@&gt;", 2)
+    else:
+        return h
+    return h[2:i].strip()
+</t>
+<t tx="felix.20230510224951.21">def getFileName(self, p: Position) -&gt; str:
+    """Return the file name from an @file or @root node."""
+    h = p.h.strip()
+    if g.match(h, 0, "@file") or g.match(h, 0, "@root"):
+        line = h[5:].strip()
+        # set j &amp; k so line[j:k] is the file name.
+        if g.match(line, 0, "&lt;"):
+            j, k = 1, line.find("&gt;", 1)
+        elif g.match(line, 0, '"'):
+            j, k = 1, line.find('"', 1)
+        else:
+            j, k = 0, line.find(" ", 0)
+        if k == -1:
+            k = len(line)
+        file_name = line[j:k].strip()
+    else:
+        file_name = ''
+    return file_name
+</t>
+<t tx="felix.20230510224951.22">def convertDocPartToWeb(self, s: str, i: int, result: Any) -&gt; Tuple[int, str]:
+    nl = self.output_newline
+    if g.match_word(s, i, "@doc"):
+        i = g.skip_line(s, i)
+    elif g.match(s, i, "@ ") or g.match(s, i, "@\t") or g.match(s, i, "@*"):
+        i += 2
+    elif g.match(s, i, "@\n"):
+        i += 1
+    i = g.skip_ws_and_nl(s, i)
+    i, result2 = self.copyPart(s, i, "")
+    if result2:
+        # Break lines after periods.
+        result2 = result2.replace(".  ", "." + nl)
+        result2 = result2.replace(". ", "." + nl)
+        result += nl + "@" + nl + result2.strip() + nl + nl
+    else:
+        # All nodes should start with '@', even if the doc part is empty.
+        result += nl + "@ " if self.webType == "cweb" else nl + "@" + nl
+    return i, result
+</t>
+<t tx="felix.20230510224951.23">def positionToWeb(self, p: Position) -&gt; str:
+    """
+    This code converts a VNode to noweb text as follows:
+
+    Convert @doc to @
+    Convert @root or @code to &lt; &lt; name &gt; &gt;=, assuming the headline contains &lt; &lt; name &gt; &gt;
+    Ignore other directives
+    Format doc parts so they fit in pagewidth columns.
+    Output code parts as is.
+    """
+    c = self.c
+    if not p or not c:
+        return ""
+    startInCode = c.config.getBool('at-root-bodies-start-in-doc-mode')
+    nl = self.output_newline
+    docstart = nl + "@ " if self.webType == "cweb" else nl + "@" + nl
+    s = p.b
+    lb = "@&lt;" if self.webType == "cweb" else "&lt;&lt;"
+    i, result, docSeen = 0, "", False
+    while i &lt; len(s):
+        progress = i
+        i = g.skip_ws_and_nl(s, i)
+        if self.isDocStart(s, i) or g.match_word(s, i, "@doc"):
+            i, result = self.convertDocPartToWeb(s, i, result)
+            docSeen = True
+        elif (
+            g.match_word(s, i, "@code") or
+            g.match_word(s, i, "@root") or
+            g.match_word(s, i, "@c") or
+            g.match(s, i, lb)
+        ):
+            if not docSeen:
+                docSeen = True
+                result += docstart
+            i, result = self.convertCodePartToWeb(s, i, p, result)
+        elif self.treeType == "@file" or startInCode:
+            if not docSeen:
+                docSeen = True
+                result += docstart
+            i, result = self.convertCodePartToWeb(s, i, p, result)
+        else:
+            i, result = self.convertDocPartToWeb(s, i, result)
+            docSeen = True
+        assert progress &lt; i
+    result = result.strip()
+    if result:
+        result += nl
+    return result
+</t>
+<t tx="felix.20230510224951.24"># Copies characters to result until the end of the present section is seen.
+
+def copyPart(self, s: str, i: int, result: Any) -&gt; Tuple[int, str]:
+
+    lb = "@&lt;" if self.webType == "cweb" else "&lt;&lt;"
+    rb = "@&gt;" if self.webType == "cweb" else "&gt;&gt;"
+    theType = self.webType
+    while i &lt; len(s):
+        progress = j = i  # We should be at the start of a line here.
+        i = g.skip_nl(s, i)
+        i = g.skip_ws(s, i)
+        if self.isDocStart(s, i):
+            return i, result
+        if (g.match_word(s, i, "@doc") or
+            g.match_word(s, i, "@c") or
+            g.match_word(s, i, "@root") or
+            g.match_word(s, i, "@code")  # 2/25/03
+        ):
+            return i, result
+        # 2019/09/12
+        lt = "&lt;&lt;"
+        rt = "&gt;&gt;="
+        if g.match(s, i, lt) and g.find_on_line(s, i, rt) &gt; -1:
+            return i, result
+        # Copy the entire line, escaping '@' and
+        # Converting @others to &lt; &lt; @ others &gt; &gt;
+        i = g.skip_line(s, j)
+        line = s[j:i]
+        if theType == "cweb":
+            line = line.replace("@", "@@")
+        else:
+            j = g.skip_ws(line, 0)
+            if g.match(line, j, "@others"):
+                line = line.replace("@others", lb + "@others" + rb)
+            elif g.match(line, 0, "@"):
+                # Special case: do not escape @ %defs.
+                k = g.skip_ws(line, 1)
+                if not g.match(line, k, "%defs"):
+                    line = "@" + line
+        result += line
+        assert progress &lt; i
+    return i, result.rstrip()
+</t>
+<t tx="felix.20230510224951.25">def exportHeadlines(self, fileName: str) -&gt; None:
+    p = self.c.p
+    nl = self.output_newline
+    if not p:
+        return
+    self.setEncoding()
+    firstLevel = p.level()
+    try:
+        with open(fileName, 'w') as theFile:
+            for p in p.self_and_subtree(copy=False):
+                head = p.moreHead(firstLevel, useVerticalBar=True)
+                theFile.write(head + nl)
+    except IOError:
+        g.warning("can not open", fileName)
+</t>
+<t tx="felix.20230510224951.26">def flattenOutline(self, fileName: str) -&gt; None:
+    """
+    A helper for the flatten-outline command.
+
+    Export the selected outline to an external file.
+    The outline is represented in MORE format.
+    """
+    c = self.c
+    nl = self.output_newline
+    p = c.p
+    if not p:
+        return
+    self.setEncoding()
+    firstLevel = p.level()
+    try:
+        theFile = open(fileName, 'wb')  # Fix crasher: open in 'wb' mode.
+    except IOError:
+        g.warning("can not open", fileName)
+        return
+    for p in p.self_and_subtree(copy=False):
+        s = p.moreHead(firstLevel) + nl
+        s = g.toEncodedString(s, encoding=self.encoding, reportErrors=True)
+        theFile.write(s)
+        s = p.moreBody() + nl  # Inserts escapes.
+        if s.strip():
+            s = g.toEncodedString(s, self.encoding, reportErrors=True)
+            theFile.write(s)
+    theFile.close()
+</t>
+<t tx="felix.20230510224951.27">def outlineToWeb(self, fileName: str, webType: str) -&gt; None:
+    c = self.c
+    nl = self.output_newline
+    current = c.p
+    if not current:
+        return
+    self.setEncoding()
+    self.webType = webType
+    try:
+        theFile = open(fileName, 'w')
+    except IOError:
+        g.warning("can not open", fileName)
+        return
+    self.treeType = "@file"
+    # Set self.treeType to @root if p or an ancestor is an @root node.
+    for p in current.parents():
+        flag, junk = g.is_special(p.b, "@root")
+        if flag:
+            self.treeType = "@root"
+            break
+    for p in current.self_and_subtree(copy=False):
+        s = self.positionToWeb(p)
+        if s:
+            theFile.write(s)
+            if s[-1] != '\n':
+                theFile.write(nl)
+    theFile.close()
+</t>
+<t tx="felix.20230510224951.28">def removeSentinelsCommand(self, paths: List[str], toString: bool = False) -&gt; Optional[str]:
+    c = self.c
+    self.setEncoding()
+    for fileName in paths:
+        g.setGlobalOpenDir(fileName)
+        path, self.fileName = g.os_path_split(fileName)
+        s, e = g.readFileIntoString(fileName, self.encoding)
+        if s is None:
+            return None
+        if e:
+            self.encoding = e
+        &lt;&lt; set delims from the header line &gt;&gt;
+        s = self.removeSentinelLines(s, line_delim, start_delim, end_delim)
+        ext = c.config.getString('remove-sentinels-extension')
+        if not ext:
+            ext = ".txt"
+        if ext[0] == '.':
+            newFileName = g.finalize_join(path, fileName + ext)  # 1341
+        else:
+            head, ext2 = g.os_path_splitext(fileName)
+            newFileName = g.finalize_join(path, head + ext + ext2)  # 1341
+        if toString:
+            return s
+        &lt;&lt; Write s into newFileName &gt;&gt;
+    return None
+</t>
+<t tx="felix.20230510224951.29"># Skip any non @+leo lines.
+i = 0
+while i &lt; len(s) and g.find_on_line(s, i, "@+leo") == -1:
+    i = g.skip_line(s, i)
+# Get the comment delims from the @+leo sentinel line.
+at = self.c.atFileCommands
+j = g.skip_line(s, i)
+line = s[i:j]
+valid, junk, start_delim, end_delim, junk = at.parseLeoSentinel(line)
+if not valid:
+    if not toString:
+        g.es("invalid @+leo sentinel in", fileName)
+    return None
+if end_delim:
+    line_delim = None
+else:
+    line_delim, start_delim = start_delim, None
+</t>
+<t tx="felix.20230510224951.3">if TYPE_CHECKING:  # pragma: no cover
+    from leo.core.leoCommands import Commands as Cmdr
+    from leo.core.leoGui import LeoKeyEvent as Event
+    from leo.core.leoNodes import Position, VNode
+</t>
+<t tx="felix.20230510224951.30"># Remove sentinels command.
+try:
+    with open(newFileName, 'w') as theFile:
+        theFile.write(s)
+    if not g.unitTesting:
+        g.es("created:", newFileName)
+except Exception:
+    g.es("exception creating:", newFileName)
+    g.print_exception()
+</t>
+<t tx="felix.20230510224951.31"># This does not handle @nonl properly, but that no longer matters.
+
+def removeSentinelLines(self, s: str, line_delim: str, start_delim: str, unused_end_delim: str) -&gt; str:
+    """Properly remove all sentinel lines in s."""
+    delim = (line_delim or start_delim or '') + '@'
+    verbatim = delim + 'verbatim'
+    verbatimFlag = False
+    result = []
+    for line in g.splitLines(s):
+        i = g.skip_ws(line, 0)
+        if not verbatimFlag and g.match(line, i, delim):
+            if g.match(line, i, verbatim):
+                # Force the next line to be in the result.
+                verbatimFlag = True
+        else:
+            result.append(line)
+            verbatimFlag = False
+    return ''.join(result)
+</t>
+<t tx="felix.20230510224951.32">def weave(self, filename: str) -&gt; None:
+    p = self.c.p
+    nl = self.output_newline
+    if not p:
+        return
+    self.setEncoding()
+    try:
+        with open(filename, 'w', encoding=self.encoding) as f:
+            for p in p.self_and_subtree():
+                s = p.b
+                s2 = s.strip()
+                if s2:
+                    f.write("-" * 60)
+                    f.write(nl)
+                    &lt;&lt; write the context of p to f &gt;&gt;
+                    f.write("-" * 60)
+                    f.write(nl)
+                    f.write(s.rstrip() + nl)
+    except Exception:
+        g.es("exception opening:", filename)
+        g.print_exception()
+</t>
+<t tx="felix.20230510224951.33"># write the headlines of p, p's parent and p's grandparent.
+context = []
+p2 = p.copy()
+i = 0
+while i &lt; 3:
+    i += 1
+    if not p2:
+        break
+    context.append(p2.h)
+    p2.moveToParent()
+context.reverse()
+indent = ""
+for line in context:
+    f.write(indent)
+    indent += '\t'
+    f.write(line)
+    f.write(nl)
+</t>
+<t tx="felix.20230510224951.34"></t>
+<t tx="felix.20230510224951.35">def createOutline(self, parent: Position, ext: str = None, s: str = None) -&gt; Position:
+    """
+    Create an outline by importing a file, reading the file with the
+    given encoding if string s is None.
+
+    ext,        The file extension to be used, or None.
+    fileName:   A string or None. The name of the file to be read.
+    parent:     The parent position of the created outline.
+    s:          A string or None. The file's contents.
+    """
+    c = self.c
+    p = parent.copy()
+    self.treeType = '@file'  # Fix #352.
+    fileName = c.fullPath(parent)
+    if g.is_binary_external_file(fileName):
+        return self.import_binary_file(fileName, parent)
+    # Init ivars.
+    self.setEncoding(
+        p=parent,
+        default=c.config.default_at_auto_file_encoding,
+    )
+    ext, s = self.init_import(ext, fileName, s)
+    if s is None:
+        return None
+    # The so-called scanning func is a callback. It must have a c argument.
+    func = self.dispatch(ext, p)
+    # Call the scanning function.
+    if g.unitTesting:
+        assert func or ext in ('.txt', '.w', '.xxx'), (repr(func), ext, p.h)
+    if func and not c.config.getBool('suppress-import-parsing', default=False):
+        s = g.toUnicode(s, encoding=self.encoding)
+        s = s.replace('\r', '')
+        # func is a factory that instantiates the importer class.
+        func(c, p, s)
+    else:
+        # Just copy the file to the parent node.
+        s = g.toUnicode(s, encoding=self.encoding)
+        s = s.replace('\r', '')
+        self.scanUnknownFileType(s, p, ext)
+    if g.unitTesting:
+        return p
+    # #488894: unsettling dialog when saving Leo file
+    # #889175: Remember the full fileName.
+    c.atFileCommands.rememberReadPath(fileName, p)
+    p.contract()
+    w = c.frame.body.wrapper
+    w.setInsertPoint(0)
+    w.seeInsertPoint()
+    return p
+</t>
+<t tx="felix.20230510224951.36">def dispatch(self, ext: str, p: Position) -&gt; Optional[Callable]:
+    """Return the correct scanner function for p, an @auto node."""
+    # Match the @auto type first, then the file extension.
+    c = self.c
+    return g.app.scanner_for_at_auto(c, p) or g.app.scanner_for_ext(c, ext)
+</t>
+<t tx="felix.20230510224951.37">def import_binary_file(self, fileName: str, parent: Position) -&gt; Position:
+
+    # Fix bug 1185409 importing binary files puts binary content in body editor.
+    # Create an @url node.
+    c = self.c
+    if parent:
+        p = parent.insertAsLastChild()
+    else:
+        p = c.lastTopLevel().insertAfter()
+    p.h = f"@url file://{fileName}"
+    return p
+</t>
+<t tx="felix.20230510224951.38">def init_import(self, ext: str, fileName: str, s: str) -&gt; Tuple[str, str]:
+    """
+    Init ivars imports and read the file into s.
+    Return ext, s.
+    """
+    junk, self.fileName = g.os_path_split(fileName)
+    self.methodName, self.fileType = g.os_path_splitext(self.fileName)
+    if not ext:
+        ext = self.fileType
+    ext = ext.lower()
+    if not s:
+        # Set the kind for error messages in readFileIntoString.
+        s, e = g.readFileIntoString(fileName, encoding=self.encoding)
+        if s is None:
+            return None, None
+        if e:
+            self.encoding = e
+    return ext, s
+</t>
+<t tx="felix.20230510224951.39">def scanUnknownFileType(self, s: str, p: Position, ext: str) -&gt; bool:
+    """Scan the text of an unknown file type."""
+    body = ''
+    if ext in ('.html', '.htm'):
+        body += '@language html\n'
+    elif ext in ('.txt', '.text'):
+        body += '@nocolor\n'
+    else:
+        language = self.languageForExtension(ext)
+        if language:
+            body += f"@language {language}\n"
+    self.setBodyString(p, body + s)
+    for p in p.self_and_subtree():
+        p.clearDirty()
+    return True
+</t>
+<t tx="felix.20230510224951.4">class FreeMindImporter:
+    """Importer class for FreeMind (.mmap) files."""
+
+    def __init__(self, c: Cmdr) -&gt; None:
+        """ctor for FreeMind Importer class."""
+        self.c = c
+        self.count = 0
+
+    @others
+</t>
+<t tx="felix.20230510224951.40">def languageForExtension(self, ext: str) -&gt; str:
+    """Return the language corresponding to the extension ext."""
+    unknown = 'unknown_language'
+    if ext.startswith('.'):
+        ext = ext[1:]
+    if ext:
+        z = g.app.extra_extension_dict.get(ext)
+        if z not in (None, 'none', 'None'):
+            language = z
+        else:
+            language = g.app.extension_dict.get(ext)
+        if language in (None, 'none', 'None'):
+            language = unknown
+    else:
+        language = unknown
+    # Return the language even if there is no colorizer mode for it.
+    return language
+</t>
+<t tx="felix.20230510224951.41">def readAtAutoNodes(self) -&gt; None:
+    c, p = self.c, self.c.p
+    after = p.nodeAfterTree()
+    found = False
+    while p and p != after:
+        if p.isAtAutoNode():
+            if p.isAtIgnoreNode():
+                g.warning('ignoring', p.h)
+                p.moveToThreadNext()
+            else:
+                c.atFileCommands.readOneAtAutoNode(p)
+                found = True
+                p.moveToNodeAfterTree()
+        else:
+            p.moveToThreadNext()
+    if not g.unitTesting:
+        message = 'finished' if found else 'no @auto nodes in the selected tree'
+        g.blue(message)
+    c.redraw()
+</t>
+<t tx="felix.20230510224951.42">def importDerivedFiles(self,
+    parent: Position = None,
+    paths: List[str] = None,
+    command: str = 'Import',
+) -&gt; Optional[Position]:
+    """
+    Import one or more external files.
+    This is not a command.  It must *not* have an event arg.
+    command is None when importing from the command line.
+    """
+    at, c, u = self.c.atFileCommands, self.c, self.c.undoer
+    current = c.p or c.rootPosition()
+    self.tab_width = c.getTabWidth(current)
+    if not paths:
+        return None
+    # Initial open from command line is not undoable.
+    if command:
+        u.beforeChangeGroup(current, command)
+    for fileName in paths:
+        fileName = fileName.replace('\\', '/')  # 2011/10/09.
+        g.setGlobalOpenDir(fileName)
+        isThin = at.scanHeaderForThin(fileName)
+        if command:
+            undoData = u.beforeInsertNode(parent)
+        p = parent.insertAfter()
+        if isThin:
+            # Create @file node, not a deprecated @thin node.
+            p.initHeadString("@file " + fileName)
+            at.read(p)
+        else:
+            p.initHeadString("Imported @file " + fileName)
+            at.read(p)
+        p.contract()
+        p.setDirty()  # 2011/10/09: tell why the file is dirty!
+        if command:
+            u.afterInsertNode(p, command, undoData)
+    current.expand()
+    c.setChanged()
+    if command:
+        u.afterChangeGroup(p, command)
+    c.redraw(current)
+    return p
+</t>
+<t tx="felix.20230510224951.43">def importFilesCommand(
+    self,
+    files: List[str] = None,
+    parent: Position = None,
+    shortFn: bool = False,
+    treeType: str = None,
+    verbose: bool = True,  # Legacy value.
+) -&gt; None:
+    # Not a command.  It must *not* have an event arg.
+    c, u = self.c, self.c.undoer
+    if not c or not c.p or not files:
+        return
+    self.tab_width = c.getTabWidth(c.p)
+    self.treeType = treeType or '@file'
+    self.verbose = verbose
+    if not parent:
+        g.trace('===== no parent', g.callers())
+        return
+    for fn in files or []:
+        # Report exceptions here, not in the caller.
+        try:
+            g.setGlobalOpenDir(fn)
+            # Leo 5.6: Handle undo here, not in createOutline.
+            undoData = u.beforeInsertNode(parent)
+            p = parent.insertAsLastChild()
+            p.h = f"{treeType} {fn}"
+            u.afterInsertNode(p, 'Import', undoData)
+            p = self.createOutline(parent=p)
+            if p:  # createOutline may fail.
+                if self.verbose and not g.unitTesting:
+                    g.blue("imported", g.shortFileName(fn) if shortFn else fn)
+                p.contract()
+                p.setDirty()
+                c.setChanged()
+        except Exception:
+            g.es_print('Exception importing', fn)
+            g.es_exception()
+    c.validateOutline()
+    parent.expand()
+</t>
+<t tx="felix.20230510224951.44">def importFreeMind(self, files: List[str]) -&gt; None:
+    """
+    Import a list of .mm.html files exported from FreeMind:
+    http://freemind.sourceforge.net/wiki/index.php/Main_Page
+    """
+    FreeMindImporter(self.c).import_files(files)
+</t>
+<t tx="felix.20230510224951.45">def importMindMap(self, files: List[str]) -&gt; None:
+    """
+    Import a list of .csv files exported from MindJet:
+    https://www.mindjet.com/
+    """
+    MindMapImporter(self.c).import_files(files)
+</t>
+<t tx="felix.20230510224951.46">def importWebCommand(self, files: List[str], webType: str) -&gt; None:
+    c, current = self.c, self.c.p
+    if current is None:
+        return
+    if not files:
+        return
+    self.tab_width = c.getTabWidth(current)  # New in 4.3.
+    self.webType = webType
+    for fileName in files:
+        g.setGlobalOpenDir(fileName)
+        p = self.createOutlineFromWeb(fileName, current)
+        p.contract()
+        p.setDirty()
+        c.setChanged()
+    c.redraw(current)
+</t>
+<t tx="felix.20230510224951.47">def createOutlineFromWeb(self, path: str, parent: Position) -&gt; Position:
+    c = self.c
+    u = c.undoer
+    junk, fileName = g.os_path_split(path)
+    undoData = u.beforeInsertNode(parent)
+    # Create the top-level headline.
+    p = parent.insertAsLastChild()
+    p.initHeadString(fileName)
+    if self.webType == "cweb":
+        self.setBodyString(p, "@ignore\n@language cweb")
+    # Scan the file, creating one section for each function definition.
+    self.scanWebFile(path, p)
+    u.afterInsertNode(p, 'Import', undoData)
+    return p
+</t>
+<t tx="felix.20230510224951.48">def findFunctionDef(self, s: str, i: int) -&gt; Optional[str]:
+    # Look at the next non-blank line for a function name.
+    i = g.skip_ws_and_nl(s, i)
+    k = g.skip_line(s, i)
+    name = None
+    while i &lt; k:
+        if g.is_c_id(s[i]):
+            j = i
+            i = g.skip_c_id(s, i)
+            name = s[j:i]
+        elif s[i] == '(':
+            if name:
+                return name
+            break
+        else:
+            i += 1
+    return None
+</t>
+<t tx="felix.20230510224951.49">@ This method returns the proper headline text.
+1. If s contains a section def, return the section ref.
+2. cweb only: if s contains @c, return the function name following the @c.
+3. cweb only: if s contains @d name, returns @d name.
+4. Otherwise, returns "@"
+@c
+
+def scanBodyForHeadline(self, s: str) -&gt; str:
+    if self.webType == "cweb":
+        &lt;&lt; scan cweb body for headline &gt;&gt;
+    else:
+        &lt;&lt; scan noweb body for headline &gt;&gt;
+    return "@"  # default.
+</t>
+<t tx="felix.20230510224951.5">def add_children(self, parent: Position, element: Any) -&gt; None:
+    """
+    parent is the parent position, element is the parent element.
+    Recursively add all the child elements as descendants of parent_p.
+    """
+    p = parent.insertAsLastChild()
+    attrib_text = element.attrib.get('text', '').strip()
+    tag = element.tag if isinstance(element.tag, str) else ''
+    text = element.text or ''
+    if not tag:
+        text = text.strip()
+    p.h = attrib_text or tag or 'Comment'
+    p.b = text if text.strip() else ''
+    for child in element:
+        self.add_children(p, child)
+</t>
+<t tx="felix.20230510224951.50">i = 0
+while i &lt; len(s):
+    i = g.skip_ws_and_nl(s, i)
+    # Allow constructs such as @ @c, or @ @&lt;.
+    if self.isDocStart(s, i):
+        i += 2
+        i = g.skip_ws(s, i)
+    if g.match(s, i, "@d") or g.match(s, i, "@f"):
+        # Look for a macro name.
+        directive = s[i : i + 2]
+        i = g.skip_ws(s, i + 2)  # skip the @d or @f
+        if i &lt; len(s) and g.is_c_id(s[i]):
+            j = i
+            g.skip_c_id(s, i)
+            return s[j:i]
+        return directive
+    if g.match(s, i, "@c") or g.match(s, i, "@p"):
+        # Look for a function def.
+        name = self.findFunctionDef(s, i + 2)
+        return name if name else "outer function"
+    if g.match(s, i, "@&lt;"):
+        # Look for a section def.
+        # A small bug: the section def must end on this line.
+        j = i
+        k = g.find_on_line(s, i, "@&gt;")
+        if k &gt; -1 and (g.match(s, k + 2, "+=") or g.match(s, k + 2, "=")):
+            return s[j : k + 2]  # return the section ref.
+    i = g.skip_line(s, i)
+</t>
+<t tx="felix.20230510224951.51">i = 0
+while i &lt; len(s):
+    i = g.skip_ws_and_nl(s, i)
+    if g.match(s, i, "&lt;&lt;"):
+        k = g.find_on_line(s, i, "&gt;&gt;=")
+        if k &gt; -1:
+            ref = s[i : k + 2]
+            name = s[i + 2 : k].strip()
+            if name != "@others":
+                return ref
+    else:
+        name = self.findFunctionDef(s, i)
+        if name:
+            return name
+    i = g.skip_line(s, i)
+</t>
+<t tx="felix.20230510224951.52">def scanWebFile(self, fileName: str, parent: Position) -&gt; None:
+    theType = self.webType
+    lb = "@&lt;" if theType == "cweb" else "&lt;&lt;"
+    rb = "@&gt;" if theType == "cweb" else "&gt;&gt;"
+    s, e = g.readFileIntoString(fileName)
+    if s is None:
+        return
+    &lt;&lt; Create a symbol table of all section names &gt;&gt;
+    &lt;&lt; Create nodes for limbo text and the root section &gt;&gt;
+    while i &lt; len(s):
+        outer_progress = i
+        &lt;&lt; Create a node for the next module &gt;&gt;
+        assert i &gt; outer_progress
+</t>
+<t tx="felix.20230510224951.53">i = 0
+self.web_st = []
+while i &lt; len(s):
+    progress = i
+    i = g.skip_ws_and_nl(s, i)
+    if self.isDocStart(s, i):
+        if theType == "cweb":
+            i += 2
+        else:
+            i = g.skip_line(s, i)
+    elif theType == "cweb" and g.match(s, i, "@@"):
+        i += 2
+    elif g.match(s, i, lb):
+        i += 2
+        j = i
+        k = g.find_on_line(s, j, rb)
+        if k &gt; -1:
+            self.cstEnter(s[j:k])
+    else:
+        i += 1
+    assert i &gt; progress
+</t>
+<t tx="felix.20230510224951.54">i = 0
+while i &lt; len(s):
+    progress = i
+    i = g.skip_ws_and_nl(s, i)
+    if self.isModuleStart(s, i) or g.match(s, i, lb):
+        break
+    else:
+        i = g.skip_line(s, i)
+    assert i &gt; progress
+j = g.skip_ws(s, 0)
+if j &lt; i:
+    self.createHeadline(parent, "@ " + s[j:i], "Limbo")
+j = i
+if g.match(s, i, lb):
+    while i &lt; len(s):
+        progress = i
+        i = g.skip_ws_and_nl(s, i)
+        if self.isModuleStart(s, i):
+            break
+        else:
+            i = g.skip_line(s, i)
+        assert i &gt; progress
+    self.createHeadline(parent, s[j:i], g.angleBrackets(" @ "))
+
+</t>
+<t tx="felix.20230510224951.55">if theType == "cweb":
+    assert self.isModuleStart(s, i)
+    start = i
+    if self.isDocStart(s, i):
+        i += 2
+        while i &lt; len(s):
+            progress = i
+            i = g.skip_ws_and_nl(s, i)
+            if self.isModuleStart(s, i):
+                break
+            else:
+                i = g.skip_line(s, i)
+            assert i &gt; progress
+    &lt;&lt; Handle cweb @d, @f, @c and @p directives &gt;&gt;
+else:
+    assert self.isDocStart(s, i)
+    start = i
+    i = g.skip_line(s, i)
+    while i &lt; len(s):
+        progress = i
+        i = g.skip_ws_and_nl(s, i)
+        if self.isDocStart(s, i):
+            break
+        else:
+            i = g.skip_line(s, i)
+        assert i &gt; progress
+body = s[start:i]
+body = self.massageWebBody(body)
+headline = self.scanBodyForHeadline(body)
+self.createHeadline(parent, body, headline)
+</t>
+<t tx="felix.20230510224951.56">if g.match(s, i, "@d") or g.match(s, i, "@f"):
+    i += 2
+    i = g.skip_line(s, i)
+    # Place all @d and @f directives in the same node.
+    while i &lt; len(s):
+        progress = i
+        i = g.skip_ws_and_nl(s, i)
+        if g.match(s, i, "@d") or g.match(s, i, "@f"):
+            i = g.skip_line(s, i)
+        else:
+            break
+        assert i &gt; progress
+    i = g.skip_ws_and_nl(s, i)
+while i &lt; len(s) and not self.isModuleStart(s, i):
+    progress = i
+    i = g.skip_line(s, i)
+    i = g.skip_ws_and_nl(s, i)
+    assert i &gt; progress
+if g.match(s, i, "@c") or g.match(s, i, "@p"):
+    i += 2
+    while i &lt; len(s):
+        progress = i
+        i = g.skip_line(s, i)
+        i = g.skip_ws_and_nl(s, i)
+        if self.isModuleStart(s, i):
+            break
+        assert i &gt; progress
+</t>
+<t tx="felix.20230510224951.57"></t>
+<t tx="felix.20230510224951.58"># We canonicalize strings before looking them up,
+# but strings are entered in the form they are first encountered.
+
+def cstCanonicalize(self, s: str, lower: bool = True) -&gt; str:
+    if lower:
+        s = s.lower()
+    s = s.replace("\t", " ").replace("\r", "")
+    s = s.replace("\n", " ").replace("  ", " ")
+    return s.strip()
+</t>
+<t tx="felix.20230510224951.59">def cstDump(self) -&gt; str:
+    s = "Web Symbol Table...\n\n"
+    for name in sorted(self.web_st):
+        s += name + "\n"
+    return s
+</t>
+<t tx="felix.20230510224951.6">def create_outline(self, path: str) -&gt; Position:
+    """Create a tree of nodes from a FreeMind file."""
+    c = self.c
+    junk, fileName = g.os_path_split(path)
+    undoData = c.undoer.beforeInsertNode(c.p)
+    try:
+        self.import_file(path)
+        c.undoer.afterInsertNode(c.p, 'Import', undoData)
+    except Exception:
+        g.es_print('Exception importing FreeMind file', g.shortFileName(path))
+        g.es_exception()
+    return c.p
+</t>
+<t tx="felix.20230510224951.60"># We only enter the section name into the symbol table if the ... convention is not used.
+
+def cstEnter(self, s: str) -&gt; None:
+    # Don't enter names that end in "..."
+    s = s.rstrip()
+    if s.endswith("..."):
+        return
+    # Put the section name in the symbol table, retaining capitalization.
+    lower = self.cstCanonicalize(s, True)  # do lower
+    upper = self.cstCanonicalize(s, False)  # don't lower.
+    for name in self.web_st:
+        if name.lower() == lower:
+            return
+    self.web_st.append(upper)
+</t>
+<t tx="felix.20230510224951.61"># This method returns a string if the indicated string is a prefix of an entry in the web_st.
+
+def cstLookup(self, target: str) -&gt; str:
+    # Do nothing if the ... convention is not used.
+    target = target.strip()
+    if not target.endswith("..."):
+        return target
+    # Canonicalize the target name, and remove the trailing "..."
+    ctarget = target[:-3]
+    ctarget = self.cstCanonicalize(ctarget).strip()
+    found = False
+    result = target
+    for s in self.web_st:
+        cs = self.cstCanonicalize(s)
+        if cs[: len(ctarget)] == ctarget:
+            if found:
+                g.es('', f"****** {target}", 'is also a prefix of', s)
+            else:
+                found = True
+                result = s
+                # g.es("replacing",target,"with",s)
+    return result
+</t>
+<t tx="felix.20230510224951.62">def parse_body(self, p: Position) -&gt; None:
+    """
+    Parse p.b as source code, creating a tree of descendant nodes.
+    This is essentially an import of p.b.
+    """
+    if not p:
+        return
+    c, d, ic = self.c, g.app.language_extension_dict, self
+    if p.hasChildren():
+        g.es_print('can not run parse-body: node has children:', p.h)
+        return
+    language = g.scanForAtLanguage(c, p)
+    self.treeType = '@file'
+    ext = '.' + d.get(language)
+    parser = g.app.classDispatchDict.get(ext)
+    # Fix bug 151: parse-body creates "None declarations"
+    if p.isAnyAtFileNode():
+        fn = p.anyAtFileNodeName()
+        ic.methodName, ic.fileType = g.os_path_splitext(fn)
+    else:
+        fileType = d.get(language, 'py')
+        ic.methodName, ic.fileType = p.h, fileType
+    if not parser:
+        g.es_print(f"parse-body: no parser for @language {language or 'None'}")
+        return
+    bunch = c.undoer.beforeChangeTree(p)
+    s = p.b
+    p.b = ''
+    try:
+        parser(c, p, s)
+        c.undoer.afterChangeTree(p, 'parse-body', bunch)
+        p.expand()
+        c.selectPosition(p)
+        c.redraw()
+    except Exception:
+        g.es_exception()
+        p.b = s
+</t>
+<t tx="felix.20230510224951.63"></t>
+<t tx="felix.20230510224951.64">def appendStringToBody(self, p: Position, s: str) -&gt; None:
+    """Similar to c.appendStringToBody,
+    but does not recolor the text or redraw the screen."""
+    if s:
+        p.b = p.b + g.toUnicode(s, self.encoding)
+
+def setBodyString(self, p: Position, s: str) -&gt; None:
+    """
+    Similar to c.setBodyString, but does not recolor the text or
+    redraw the screen.
+    """
+    c, v = self.c, p.v
+    if not c or not p:
+        return
+    s = g.toUnicode(s, self.encoding)
+    if c.p and p.v == c.p.v:
+        w = c.frame.body.wrapper
+        i = len(s)
+        w.setAllText(s)
+        w.setSelectionRange(i, i, insert=i)
+    # Keep the body text up-to-date.
+    if v.b != s:
+        v.setBodyString(s)
+        v.setSelection(0, 0)
+        p.setDirty()
+        if not c.isChanged():
+            c.setChanged()
+</t>
+<t tx="felix.20230510224951.65">def createHeadline(self, parent: Position, body: str, headline: str) -&gt; Position:
+    """Create a new VNode as the last child of parent position."""
+    p = parent.insertAsLastChild()
+    p.initHeadString(headline)
+    if body:
+        self.setBodyString(p, body)
+    return p
+</t>
+<t tx="felix.20230510224951.66">def error(self, s: str) -&gt; None:
+    g.es('', s)
+</t>
+<t tx="felix.20230510224951.67"># The start of a document part or module in a noweb or cweb file.
+# Exporters may have to test for @doc as well.
+
+def isDocStart(self, s: str, i: int) -&gt; bool:
+    if not g.match(s, i, "@"):
+        return False
+    j = g.skip_ws(s, i + 1)
+    if g.match(s, j, "%defs"):
+        return False
+    if self.webType == "cweb" and g.match(s, i, "@*"):
+        return True
+    return g.match(s, i, "@ ") or g.match(s, i, "@\t") or g.match(s, i, "@\n")
+
+def isModuleStart(self, s: str, i: int) -&gt; bool:
+    if self.isDocStart(s, i):
+        return True
+    return self.webType == "cweb" and (
+        g.match(s, i, "@c") or g.match(s, i, "@p") or
+        g.match(s, i, "@d") or g.match(s, i, "@f"))
+</t>
+<t tx="felix.20230510224951.68">def massageWebBody(self, s: str) -&gt; str:
+    theType = self.webType
+    lb = "@&lt;" if theType == "cweb" else "&lt;&lt;"
+    rb = "@&gt;" if theType == "cweb" else "&gt;&gt;"
+    &lt;&lt; Remove most newlines from @space and @* sections &gt;&gt;
+    &lt;&lt; Replace abbreviated names with full names &gt;&gt;
+    s = s.rstrip()
+    return s
+</t>
+<t tx="felix.20230510224951.69">i = 0
+while i &lt; len(s):
+    progress = i
+    i = g.skip_ws_and_nl(s, i)
+    if self.isDocStart(s, i):
+        # Scan to end of the doc part.
+        if g.match(s, i, "@ %def"):
+            # Don't remove the newline following %def
+            i = g.skip_line(s, i)
+            start = end = i
+        else:
+            start = end = i
+            i += 2
+        while i &lt; len(s):
+            progress2 = i
+            i = g.skip_ws_and_nl(s, i)
+            if self.isModuleStart(s, i) or g.match(s, i, lb):
+                end = i
+                break
+            elif theType == "cweb":
+                i += 1
+            else:
+                i = g.skip_to_end_of_line(s, i)
+            assert i &gt; progress2
+        # Remove newlines from start to end.
+        doc = s[start:end]
+        doc = doc.replace("\n", " ")
+        doc = doc.replace("\r", "")
+        doc = doc.strip()
+        if doc:
+            if doc == "@":
+                doc = "@ " if self.webType == "cweb" else "@\n"
+            else:
+                doc += "\n\n"
+            s = s[:start] + doc + s[end:]
+            i = start + len(doc)
+    else:
+        i = g.skip_line(s, i)
+    assert i &gt; progress
+</t>
+<t tx="felix.20230510224951.7">def import_file(self, path: str) -&gt; None:
+    """The main line of the FreeMindImporter class."""
+    c = self.c
+    sfn = g.shortFileName(path)
+    if g.os_path_exists(path):
+        htmltree = lxml.html.parse(path)
+        root = htmltree.getroot()
+        body = root.findall('body')[0]
+        if body is None:
+            g.error(f"no body in: {sfn}")
+        else:
+            root_p = c.lastTopLevel().insertAfter()
+            root_p.h = g.shortFileName(path)
+            for child in body:
+                if child != body:
+                    self.add_children(root_p, child)
+            c.selectPosition(root_p)
+            c.redraw()
+    else:
+        g.error(f"file not found: {sfn}")
+</t>
+<t tx="felix.20230510224951.70">i = 0
+while i &lt; len(s):
+    progress = i
+    if g.match(s, i, lb):
+        i += 2
+        j = i
+        k = g.find_on_line(s, j, rb)
+        if k &gt; -1:
+            name = s[j:k]
+            name2 = self.cstLookup(name)
+            if name != name2:
+                # Replace name by name2 in s.
+                s = s[:j] + name2 + s[k:]
+                i = j + len(name2)
+    i = g.skip_line(s, i)
+    assert i &gt; progress
+</t>
+<t tx="felix.20230510224951.71">def setEncoding(self, p: Position = None, default: str = None) -&gt; None:
+    c = self.c
+    encoding = g.getEncodingAt(p or c.p) or default
+    if encoding and g.isValidEncoding(encoding):
+        self.encoding = encoding
+    elif default:
+        self.encoding = default
+    else:
+        self.encoding = 'utf-8'
+</t>
+<t tx="felix.20230510224951.72">class MindMapImporter:
+    """Mind Map Importer class."""
+
+    def __init__(self, c: Cmdr) -&gt; None:
+        """ctor for MindMapImporter class."""
+        self.c = c
+    @others
+</t>
+<t tx="felix.20230510224951.73">def create_outline(self, path: str) -&gt; Position:
+    c = self.c
+    junk, fileName = g.os_path_split(path)
+    undoData = c.undoer.beforeInsertNode(c.p)
+    # Create the top-level headline.
+    p = c.lastTopLevel().insertAfter()
+    fn = g.shortFileName(path).strip()
+    if fn.endswith('.csv'):
+        fn = fn[:-4]
+    p.h = fn
+    try:
+        f = open(path)
+        self.scan(f, p)
+        f.close()
+        c.redraw()
+    except Exception:
+        g.es_print('Invalid MindJet file:', fn)
+    c.undoer.afterInsertNode(p, 'Import', undoData)
+    return p
+</t>
+<t tx="felix.20230510224951.74">def import_files(self, files: List[str]) -&gt; None:
+    """Import a list of MindMap (.csv) files."""
+    c = self.c
+    if files:
+        self.tab_width = c.getTabWidth(c.p)
+        for fileName in files:
+            g.setGlobalOpenDir(fileName)
+            p = self.create_outline(fileName)
+            p.contract()
+            p.setDirty()
+            c.setChanged()
+        c.redraw(p)
+</t>
+<t tx="felix.20230510224951.75">def prompt_for_files(self) -&gt; None:
+    """Prompt for a list of MindJet (.csv) files and import them."""
+    c = self.c
+    types = [
+        ("MindJet files", "*.csv"),
+        ("All files", "*"),
+    ]
+    names = g.app.gui.runOpenFileDialog(c,
+        title="Import MindJet File",
+        filetypes=types,
+        defaultextension=".csv",
+        multiple=True)
+    c.bringToFront()
+    if names:
+        g.chdir(names[0])
+        self.import_files(names)
+</t>
+<t tx="felix.20230510224951.76">def scan(self, f: Any, target: Position) -&gt; None:
+    """Create an outline from a MindMap (.csv) file."""
+    reader = csv.reader(f)  # Yields list of lists.
+    max_chars_in_header = 80
+    n1 = n = target.level()
+    p = target.copy()
+    for row in list(reader)[1:]:
+        # Row is a List of fields.
+        new_level = self.csv_level(row) + n1
+        self.csv_string(row)
+        if new_level &gt; n:
+            p = p.insertAsLastChild().copy()
+            p.b = self.csv_string(row)
+            n = n + 1
+        elif new_level == n:
+            p = p.insertAfter().copy()
+            p.b = self.csv_string(row)
+        elif new_level &lt; n:
+            for item in p.parents():
+                if item.level() == new_level - 1:
+                    p = item.copy()
+                    break
+            p = p.insertAsLastChild().copy()
+            p.b = self.csv_string(row)
+            n = p.level()
+    for p in target.unique_subtree():
+        if len(p.b.splitlines()) == 1:
+            if len(p.b.splitlines()[0]) &lt; max_chars_in_header:
+                p.h = p.b.splitlines()[0]
+                p.b = ""
+            else:
+                p.h = "@node_with_long_text"
+        else:
+            p.h = "@node_with_long_text"
+</t>
+<t tx="felix.20230510224951.77">def csv_level(self, row: List[Any]) -&gt; int:
+    """
+    Return the level of the given row, a list of fields.
+    """
+    count = 0
+    while count &lt;= len(row):
+        if row[count]:
+            return count + 1
+        count = count + 1
+    return -1
+</t>
+<t tx="felix.20230510224951.78">def csv_string(self, row: List[str]) -&gt; str:
+    """Return the string for the given csv row."""
+    count = 0
+    while count &lt;= len(row):
+        if row[count]:
+            return row[count]
+        count = count + 1
+    return None
+</t>
+<t tx="felix.20230510224951.79">class MORE_Importer:
+    """Class to import MORE files."""
+
+    def __init__(self, c: Cmdr) -&gt; None:
+        """ctor for MORE_Importer class."""
+        self.c = c
+    @others
+</t>
+<t tx="felix.20230510224951.8">def import_files(self, files: List[str]) -&gt; None:
+    """Import a list of FreeMind (.mmap) files."""
+    c = self.c
+    if files:
+        self.tab_width = c.getTabWidth(c.p)
+        for fileName in files:
+            g.setGlobalOpenDir(fileName)
+            p = self.create_outline(fileName)
+            p.contract()
+            p.setDirty()
+            c.setChanged()
+        c.redraw(p)
+</t>
+<t tx="felix.20230510224951.80">def prompt_for_files(self) -&gt; None:
+    """Prompt for a list of MORE files and import them."""
+    c = self.c
+    types = [
+        ("All files", "*"),
+    ]
+    names = g.app.gui.runOpenFileDialog(c,
+        title="Import MORE Files",
+        filetypes=types,
+        # defaultextension=".txt",
+        multiple=True)
+    c.bringToFront()
+    if names:
+        g.chdir(names[0])
+        self.import_files(names)
+</t>
+<t tx="felix.20230510224951.81">def import_files(self, files: List[str]) -&gt; None:
+    """Import a list of MORE (.csv) files."""
+    c = self.c
+    if files:
+        changed = False
+        self.tab_width = c.getTabWidth(c.p)
+        for fileName in files:
+            g.setGlobalOpenDir(fileName)
+            p = self.import_file(fileName)
+            if p:
+                p.contract()
+                p.setDirty()
+                c.setChanged()
+                changed = True
+        if changed:
+            c.redraw(p)
+</t>
+<t tx="felix.20230510224951.82">def import_file(self, fileName: str) -&gt; Optional[Position]:  # Not a command, so no event arg.
+    c = self.c
+    u = c.undoer
+    ic = c.importCommands
+    if not c.p:
+        return None
+    ic.setEncoding()
+    g.setGlobalOpenDir(fileName)
+    s, e = g.readFileIntoString(fileName)
+    if s is None:
+        return None
+    s = s.replace('\r', '')  # Fixes bug 626101.
+    lines = g.splitLines(s)
+    # Convert the string to an outline and insert it after the current node.
+    if self.check_lines(lines):
+        last = c.lastTopLevel()
+        undoData = u.beforeInsertNode(c.p)
+        root = last.insertAfter()
+        root.h = fileName
+        p = self.import_lines(lines, root)
+        if p:
+            c.endEditing()
+            c.validateOutline()
+            p.setDirty()
+            c.setChanged()
+            u.afterInsertNode(root, 'Import MORE File', undoData)
+            c.selectPosition(root)
+            c.redraw()
+            return root
+    if not g.unitTesting:
+        g.es("not a valid MORE file", fileName)
+    return None
+</t>
+<t tx="felix.20230510224951.83">def import_lines(self, strings: List[str], first_p: Position) -&gt; Position:
+    c = self.c
+    if not strings:
+        return None
+    if not self.check_lines(strings):
+        return None
+    firstLevel, junk = self.headlineLevel(strings[0])
+    lastLevel = -1
+    theRoot = last_p = None
+    index = 0
+    while index &lt; len(strings):
+        progress = index
+        s = strings[index]
+        level, junk = self.headlineLevel(s)
+        level -= firstLevel
+        if level &gt;= 0:
+            &lt;&lt; Link a new position p into the outline &gt;&gt;
+            &lt;&lt; Set the headline string, skipping over the leader &gt;&gt;
+            &lt;&lt; Count the number of following body lines &gt;&gt;
+            &lt;&lt; Add the lines to the body text of p &gt;&gt;
+            p.setDirty()
+        else:
+            index += 1
+        assert progress &lt; index
+    if theRoot:
+        theRoot.setDirty()
+        c.setChanged()
+    c.redraw()
+    return theRoot
+</t>
+<t tx="felix.20230510224951.84">assert level &gt;= 0
+if not last_p:
+    theRoot = p = first_p.insertAsLastChild()  # 2016/10/06.
+elif level == lastLevel:
+    p = last_p.insertAfter()
+elif level == lastLevel + 1:
+    p = last_p.insertAsNthChild(0)
+else:
+    assert level &lt; lastLevel
+    while level &lt; lastLevel:
+        lastLevel -= 1
+        last_p = last_p.parent()
+        assert last_p
+        assert lastLevel &gt;= 0
+    p = last_p.insertAfter()
+last_p = p
+lastLevel = level
+</t>
+<t tx="felix.20230510224951.85">j = 0
+while g.match(s, j, '\t') or g.match(s, j, ' '):
+    j += 1
+if g.match(s, j, "+ ") or g.match(s, j, "- "):
+    j += 2
+p.initHeadString(s[j:])
+</t>
+<t tx="felix.20230510224951.86">bodyLines = 0
+index += 1  # Skip the headline.
+while index &lt; len(strings):
+    s = strings[index]
+    level, junk = self.headlineLevel(s)
+    level -= firstLevel
+    if level &gt;= 0:
+        break
+    # Remove first backslash of the body line.
+    if g.match(s, 0, '\\'):
+        strings[index] = s[1:]
+    bodyLines += 1
+    index += 1
+</t>
+<t tx="felix.20230510224951.87">if bodyLines &gt; 0:
+    body = ""
+    n = index - bodyLines
+    while n &lt; index:
+        body += strings[n].rstrip()
+        if n != index - 1:
+            body += "\n"
+        n += 1
+    p.setBodyString(body)
+</t>
+<t tx="felix.20230510224951.88">def headlineLevel(self, s: str) -&gt; Tuple[int, bool]:
+    """return the headline level of s,or -1 if the string is not a MORE headline."""
+    level = 0
+    i = 0
+    while i &lt; len(s) and s[i] in ' \t':  # 2016/10/06: allow blanks or tabs.
+        level += 1
+        i += 1
+    plusFlag = g.match(s, i, "+")
+    if g.match(s, i, "+ ") or g.match(s, i, "- "):
+        return level, plusFlag
+    return -1, plusFlag
+</t>
+<t tx="felix.20230510224951.89">def check(self, s: str) -&gt; bool:
+    s = s.replace("\r", "")
+    strings = g.splitLines(s)
+    return self.check_lines(strings)
+
+def check_lines(self, strings: List[str]) -&gt; bool:
+
+    if not strings:
+        return False
+    level1, plusFlag = self.headlineLevel(strings[0])
+    if level1 == -1:
+        return False
+    # Check the level of all headlines.
+    lastLevel = level1
+    for s in strings:
+        level, newFlag = self.headlineLevel(s)
+        if level == -1:
+            return True  # A body line.
+        if level &lt; level1 or level &gt; lastLevel + 1:
+            return False  # improper level.
+        if level &gt; lastLevel and not plusFlag:
+            return False  # parent of this node has no children.
+        if level == lastLevel and plusFlag:
+            return False  # last node has missing child.
+        lastLevel = level
+        plusFlag = newFlag
+    return True
+</t>
+<t tx="felix.20230510224951.9">def prompt_for_files(self) -&gt; None:
+    """Prompt for a list of FreeMind (.mm.html) files and import them."""
+    if not lxml:
+        g.trace("FreeMind importer requires lxml")
+        return
+    c = self.c
+    types = [
+        ("FreeMind files", "*.mm.html"),
+        ("All files", "*"),
+    ]
+    names = g.app.gui.runOpenFileDialog(c,
+        title="Import FreeMind File",
+        filetypes=types,
+        defaultextension=".html",
+        multiple=True)
+    c.bringToFront()
+    if names:
+        g.chdir(names[0])
+        self.import_files(names)
+</t>
+<t tx="felix.20230510224951.90">class RecursiveImportController:
+    """Recursively import all python files in a directory and clean the result."""
+    @others
+</t>
+<t tx="felix.20230510224951.91">def __init__(
+    self,
+    c: Cmdr,
+    kind: str,
+    add_context: bool = None,  # Override setting only if True/False
+    add_file_context: bool = None,  # Override setting only if True/False
+    add_path: bool = True,
+    recursive: bool = True,
+    safe_at_file: bool = True,
+    theTypes: List[str] = None,
+    ignore_pattern: re.Pattern = None,
+    verbose: bool = True,  # legacy value.
+) -&gt; None:
+    """Ctor for RecursiveImportController class."""
+    self.c = c
+    self.add_path = add_path
+    self.file_pattern = re.compile(r'^(@@|@)(auto|clean|edit|file|nosent)')
+    self.ignore_pattern = ignore_pattern or re.compile(r'\.git|node_modules')
+    self.kind = kind  # in ('@auto', '@clean', '@edit', '@file', '@nosent')
+    self.recursive = recursive
+    self.root = None
+    self.safe_at_file = safe_at_file
+    self.theTypes = theTypes
+    self.verbose = verbose
+    # #1605:
+
+    def set_bool(setting: str, val: Any) -&gt; None:
+        if val not in (True, False):
+            return
+        c.config.set(None, 'bool', setting, val, warn=True)
+
+    set_bool('add-context-to-headlines', add_context)
+    set_bool('add-file-context-to-headlines', add_file_context)
+</t>
+<t tx="felix.20230510224951.92">def run(self, dir_: str) -&gt; None:
+    """
+    Import all files whose extension matches self.theTypes in dir_.
+    In fact, dir_ can be a path to a single file.
+    """
+    if self.kind not in ('@auto', '@clean', '@edit', '@file', '@nosent'):
+        g.es('bad kind param', self.kind, color='red')
+    try:
+        c = self.c
+        p1 = self.root = c.p
+        t1 = time.time()
+        g.app.disable_redraw = True
+        bunch = c.undoer.beforeChangeTree(p1)
+        # Leo 5.6: Always create a new last top-level node.
+        last = c.lastTopLevel()
+        parent = last.insertAfter()
+        parent.v.h = 'imported files'
+        # Leo 5.6: Special case for a single file.
+        self.n_files = 0
+        if g.os_path_isfile(dir_):
+            if self.verbose:
+                g.es_print('\nimporting file:', dir_)
+            self.import_one_file(dir_, parent)
+        else:
+            self.import_dir(dir_, parent)
+        self.post_process(parent, dir_)  # Fix # 1033.
+        c.undoer.afterChangeTree(p1, 'recursive-import', bunch)
+    except Exception:
+        g.es_print('Exception in recursive import')
+        g.es_exception()
+    finally:
+        g.app.disable_redraw = False
+        for p2 in parent.self_and_subtree(copy=False):
+            p2.contract()
+        c.redraw(parent)
+    t2 = time.time()
+    n = len(list(parent.self_and_subtree()))
+    g.es_print(
+        f"imported {n} node{g.plural(n)} "
+        f"in {self.n_files} file{g.plural(self.n_files)} "
+        f"in {t2 - t1:2.2f} seconds")
+</t>
+<t tx="felix.20230510224951.93">def import_dir(self, dir_: str, parent: Position) -&gt; None:
+    """Import selected files from dir_, a directory."""
+    if g.os_path_isfile(dir_):
+        files = [dir_]
+    else:
+        if self.verbose:
+            g.es_print('importing directory:', dir_)
+        files = os.listdir(dir_)
+    dirs, files2 = [], []
+    for path in files:
+        try:
+            # Fix #408. Catch path exceptions.
+            # The idea here is to keep going on small errors.
+            path = g.os_path_join(dir_, path)
+            if g.os_path_isfile(path):
+                name, ext = g.os_path_splitext(path)
+                if ext in self.theTypes:
+                    files2.append(path)
+            elif self.recursive:
+                if not self.ignore_pattern.search(path):
+                    dirs.append(path)
+        except OSError:
+            g.es_print('Exception computing', path)
+            g.es_exception()
+    if files or dirs:
+        assert parent and parent.v != self.root.v, g.callers()
+        parent = parent.insertAsLastChild()
+        parent.v.h = dir_
+        if files2:
+            for f in files2:
+                if not self.ignore_pattern.search(f):
+                    self.import_one_file(f, parent=parent)
+        if dirs:
+            assert self.recursive
+            for dir_ in sorted(dirs):
+                self.import_dir(dir_, parent)
+</t>
+<t tx="felix.20230510224951.94">def import_one_file(self, path: str, parent: Position) -&gt; None:
+    """Import one file to the last top-level node."""
+    c = self.c
+    self.n_files += 1
+    assert parent and parent.v != self.root.v, g.callers()
+    if self.kind == '@edit':
+        p = parent.insertAsLastChild()
+        p.v.h = '@edit ' + path.replace('\\', '/')  # 2021/02/19: bug fix: add @edit.
+        s, e = g.readFileIntoString(path, kind=self.kind)
+        p.v.b = s
+        return
+    # #1484: Use this for @auto as well.
+    c.importCommands.importFilesCommand(
+        files=[path],
+        parent=parent,
+        shortFn=True,
+        treeType='@file',  # '@auto','@clean','@nosent' cause problems.
+        verbose=self.verbose,  # Leo 6.6.
+    )
+    p = parent.lastChild()
+    p.h = self.kind + p.h[5:]  # Honor the requested kind.
+    if self.safe_at_file:
+        p.v.h = '@' + p.v.h
+</t>
+<t tx="felix.20230510224951.95">def post_process(self, p: Position, prefix: str) -&gt; None:
+    """
+    Traverse p's tree, replacing all nodes that start with prefix
+    by the smallest equivalent @path or @file node.
+    """
+    self.fix_back_slashes(p)
+    prefix = prefix.replace('\\', '/')
+    if self.kind not in ('@auto', '@edit'):
+        self.remove_empty_nodes(p)
+    if p.firstChild():
+        self.minimize_headlines(p.firstChild(), prefix)
+    self.clear_dirty_bits(p)
+    self.add_class_names(p)
+</t>
+<t tx="felix.20230510224951.96">def add_class_names(self, p: Position) -&gt; None:
+    """Add class names to headlines for all descendant nodes."""
+    # pylint: disable=no-else-continue
+    after, class_name = None, None
+    class_paren_pattern = re.compile(r'(.*)\(.*\)\.(.*)')
+    paren_pattern = re.compile(r'(.*)\(.*\.py\)')
+    for p in p.self_and_subtree(copy=False):
+        # Part 1: update the status.
+        m = self.file_pattern.match(p.h)
+        if m:
+            # prefix = m.group(1)
+            # fn = g.shortFileName(p.h[len(prefix):].strip())
+            after, class_name = None, None
+            continue
+        elif p.h.startswith('@path '):
+            after, class_name = None, None
+        elif p.h.startswith('class '):
+            class_name = p.h[5:].strip()
+            if class_name:
+                after = p.nodeAfterTree()
+                continue
+        elif p == after:
+            after, class_name = None, None
+        # Part 2: update the headline.
+        if class_name:
+            if p.h.startswith(class_name):
+                m = class_paren_pattern.match(p.h)
+                if m:
+                    p.h = f"{m.group(1)}.{m.group(2)}".rstrip()
+            else:
+                p.h = f"{class_name}.{p.h}"
+        else:
+            m = paren_pattern.match(p.h)
+            if m:
+                p.h = m.group(1).rstrip()
+        # elif fn:
+            # tag = ' (%s)' % fn
+            # if not p.h.endswith(tag):
+                # p.h += tag
+</t>
+<t tx="felix.20230510224951.97">def clear_dirty_bits(self, p: Position) -&gt; None:
+    c = self.c
+    c.clearChanged()  # Clears *all* dirty bits.
+    for p in p.self_and_subtree(copy=False):
+        p.clearDirty()
+</t>
+<t tx="felix.20230510224951.98">def dump_headlines(self, p: Position) -&gt; None:
+    # show all headlines.
+    for p in p.self_and_subtree(copy=False):
+        print(p.h)
+</t>
+<t tx="felix.20230510224951.99">def fix_back_slashes(self, p: Position) -&gt; None:
+    """Convert backslash to slash in all headlines."""
+    for p in p.self_and_subtree(copy=False):
+        s = p.h.replace('\\', '/')
+        if s != p.h:
+            p.v.h = s
 </t>
 </tnodes>
 </leo_file>

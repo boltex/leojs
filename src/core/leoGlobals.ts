@@ -11,7 +11,6 @@ import { Utils as uriUtils } from "vscode-uri";
 
 import * as os from 'os';
 import * as safeJsonStringify from 'safe-json-stringify';
-// import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
