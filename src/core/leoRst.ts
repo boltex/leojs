@@ -88,7 +88,7 @@ export class RstCommands {
     public at_auto_write: boolean;  // True: in @auto-rst importer.
     public changed_positions: Position[];
     public changed_vnodes: VNode[];  // As a set
-    public encoding: string;  // From any @encoding directive.
+    public encoding: BufferEncoding;  // From any @encoding directive.
     public path: string;  // The path from any @path directive.
     public result_list: string[];  // The intermediate results.
     public root: Position | undefined;  // The @rst node being processed.

@@ -166,7 +166,7 @@ export class ShadowController {
      * Replace the file with s if s is different from theFile's contents.
      * Return True if theFile was changed.
      */
-    public async replaceFileWithString(encoding: string, fileName: string, s: string): Promise<boolean> {
+    public async replaceFileWithString(encoding: BufferEncoding, fileName: string, s: string): Promise<boolean> {
 
         const x = this;
         const c = this.c;

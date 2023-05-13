@@ -368,11 +368,11 @@ export const codecs = {
  */
 export class FileLikeObject {
 
-    public encoding: string;
+    public encoding: BufferEncoding;
     public ptr: number;
     private _list: string[];
 
-    constructor(encoding: string = 'utf-8', fromString?: string) {
+    constructor(encoding: BufferEncoding = 'utf-8', fromString?: string) {
         this.encoding = encoding || 'utf-8';
         this._list = splitLines(fromString);  // Must preserve newlines!
         this.ptr = 0;
@@ -473,7 +473,7 @@ export class NullObject {
 export class GeneralSetting {
 
     public kind: string;
-    public encoding: string | undefined = undefined;
+    public encoding: BufferEncoding | undefined = undefined;
     public ivar: string | undefined = undefined;
     public source: string | undefined = undefined;
     public val: any | undefined = undefined;
@@ -484,7 +484,7 @@ export class GeneralSetting {
     constructor(
         p_generalSetting: {
             kind: string;
-            encoding?: string;
+            encoding?: BufferEncoding;
             ivar?: string;
             source?: string;
             val?: any;
@@ -2112,7 +2112,7 @@ export function splitLongFileName(fn: string, limit: number = 40): string {
 /**
  * Create a file with the given contents.
  */
-export async function writeFile(contents: Uint8Array | string, encoding: string, fileName: string): Promise<boolean> {
+export async function writeFile(contents: Uint8Array | string, encoding: BufferEncoding, fileName: string): Promise<boolean> {
 
     try {
         if (typeof contents === 'string') {
@@ -2140,7 +2140,7 @@ export async function writeFile(contents: Uint8Array | string, encoding: string,
  * context has changed (or the file does not exist).
  * & Return true if the file was written.
  */
-export async function write_file_if_changed(fn: string, s: string, encoding = 'utf-8'): Promise<boolean> {
+export async function write_file_if_changed(fn: string, s: string, encoding: BufferEncoding = 'utf-8'): Promise<boolean> {
     try {
         const encoded_s = toEncodedString(s, encoding, true);
         if (await os_path_exists(fn)) {
@@ -3689,8 +3689,8 @@ export function isValidEncoding(encoding: string): boolean {
 /**
  * Convert unicode string to an encoded string.
  */
-export function toEncodedString(s: any, encoding = 'utf-8', reportErrors = false): Uint8Array {
-    return Buffer.from(s);
+export function toEncodedString(s: any, encoding: BufferEncoding = 'utf-8', reportErrors = false): Uint8Array {
+    return Buffer.from(s, encoding);
     // if ((typeof s) !== "string") {
     //     return s;
     // }

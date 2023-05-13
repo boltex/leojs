@@ -389,7 +389,7 @@ class LeoImportCommands {
             let s = "";
             // with open(fileName, 'w') as theFile:
             for (const p of p.self_and_subtree(false)){
-                const head = p.moreHead(firstLevel, useVerticalBar=True);
+                const head = p.moreHead(firstLevel, true);
                 // theFile.write(head + nl);
                 s += head + nl;
             }
@@ -407,263 +407,327 @@ class LeoImportCommands {
      * Export the selected outline to an external file.
      * The outline is represented in MORE format.
      */
-    public flattenOutline(fileName: string): void {
+    public async flattenOutline(fileName: string): Promise<void> {
         
         const c = this.c;
-        const nl = this.output_newline
-        const p = c.p
-        if !p || !p.__bool__()
-            return
+        const nl = this.output_newline;
+        const p = c.p;
+        if (!p || !p.__bool__()){
+            return; 
+        }
+        this.setEncoding();
+        firstLevel = p.level();
 
-        this.setEncoding()
-        firstLevel = p.level()
-        try
-            theFile = open(fileName, 'wb')  // Fix crasher: open in 'wb' mode.
-        catch IOError
-            g.warning("can not open", fileName)
-            return
+        try{
+            const w_uri = g.makeVscodeUri(fileName);
+            let theFile: string = "";
+            // theFile = open(fileName, 'wb')  // Fix crasher: open in 'wb' mode.
+            for (const p of p.self_and_subtree(false)){
+                let s = p.moreHead(firstLevel) + nl;
+                // s = g.toEncodedString(s, this.encoding, true);
+                theFile += s;
+                s = p.moreBody() + nl;  // Inserts escapes.
+                if (s.trim()){
+                    // s = g.toEncodedString(s, this.encoding, true);
+                    theFile += s;
+                }
+            }
 
-        for p in p.self_and_subtree(false)
-            s = p.moreHead(firstLevel) + nl
-            s = g.toEncodedString(s, this.encoding, true)
-            theFile.write(s)
-            s = p.moreBody() + nl  // Inserts escapes.
-            if s.trim()
-                s = g.toEncodedString(s, this.encoding, true);
-                theFile.write(s);
+            const writeData = g.toEncodedString(theFile, this.encoding, true);
+            
+            await vscode.workspace.fs.writeFile(w_uri, writeData);
 
-
-        theFile.close()
-
+        }catch (IOError){
+            g.warning("can not open", fileName);
+            return;
+        }
     }
     //@+node:felix.20230511002352.14: *4* ic.outlineToWeb
-    public outlineToWeb(fileName: string, webType: string): void
+    public outlineToWeb(fileName: string, webType: string): void{
         const c = this.c;
-        nl = self.output_newline
-        current = c.p
-        if !current
+        const nl = thjis.output_newline;
+        const current = c.p;
+        if (!current || !current.__bool__()){
             return;
+        }
         this.setEncoding();
-        this.webType = webType
-        try
-            theFile = open(fileName, 'w')
-        catch IOError
-            g.warning("can not open", fileName)
-            return
+        this.webType = webType;
+        try{
+            // theFile = open(fileName, 'w')
+            const w_uri = g.makeVscodeUri(fileName);
+            let theFile: string = "";
 
-        this.treeType = "@file"
-        // Set self.treeType to @root if p or an ancestor is an @root node.
-        for p in current.parents()
-            flag, junk = g.is_special(p.b, "@root")
-            if flag
-                this.treeType = "@root"
-                break
-        for p in current.self_and_subtree(false)
-            s = this.positionToWeb(p)
-            if s
-                theFile.write(s)
-                if s[-1] != '\n':
-                    theFile.write(nl)
+            this.treeType = "@file"
 
+            // Set self.treeType to @root if p or an ancestor is an @root node.
+            for (const p of current.parents()){
+                let [flag, junk] = g.is_special(p.b, "@root");
+                if (flag){
+                    this.treeType = "@root";
+                    break;
+                }
+            }
 
+            for (const p of current.self_and_subtree(false)){
+                s = this.positionToWeb(p)
+                if (s){
+                    theFile += s;
+                    if (s.charAt(s.length - 1) !== '\n'){
+                       theFile += nl;   
+                    }
+                }
+            }
 
-        theFile.close()
+            const writeData = g.toEncodedString(theFile);
+            await vscode.workspace.fs.writeFile(w_uri, writeData);
+
+        }catch (IOError){
+            g.warning("can not open", fileName);
+            return;
+        }
+
+    }
     //@+node:felix.20230511002352.15: *4* ic.removeSentinelsCommand
-    public removeSentinelsCommand(paths: string[], toString = false):string|undefined
+    public removeSentinelsCommand(paths: string[], toString = false): string|undefined {
         const c = this.c;
         this.setEncoding();
-        for const fileName of paths
-            g.setGlobalOpenDir(fileName)
-            path, self.fileName = g.os_path_split(fileName)
-            s, e = g.readFileIntoString(fileName, self.encoding)
-            if s is None
-                return undefined
+        for (const fileName of paths){
+            g.setGlobalOpenDir(fileName);
+            let path;
+            [path, this.fileName] = g.os_path_split(fileName);
+            let [s, e] = g.readFileIntoString(fileName, this.encoding);
+            if (s == null){
+                return undefined;
+            }
 
-
-            if e
-                self.encoding = e
-
+            if (e){
+                this.encoding = e;
+            }
 
             //@+<< set delims from the header line >>
             //@+node:felix.20230511002352.16: *5* << set delims from the header line >>
             // Skip any non @+leo lines.
-            i = 0
-            while i < len(s) and g.find_on_line(s, i, "@+leo") == -1:
-                i = g.skip_line(s, i)
-
+            let i = 0;
+            while (i < s.length && g.find_on_line(s, i, "@+leo") === -1){
+                i = g.skip_line(s, i);
+            }
             // Get the comment delims from the @+leo sentinel line.
-            at = self.c.atFileCommands
-            j = g.skip_line(s, i)
-            line = s[i:j]
-            valid, junk, start_delim, end_delim, junk = at.parseLeoSentinel(line)
-            if not valid:
-                if not toString:
-                    g.es("invalid @+leo sentinel in", fileName)
-
-
-                return undefined
-
-
-            if end_delim:
-                line_delim = None
-            else
-                line_delim, start_delim = start_delim, None
-
+            const at = this.c.atFileCommands;
+            let j = g.skip_line(s, i);
+            let line = s.substring(i, j);
+            let [valid, junk, start_delim, end_delim, junk] = at.parseLeoSentinel(line);
+            if (!valid){
+                if (!toString){
+                    g.es("invalid @+leo sentinel in", fileName);
+                }
+                return undefined;
+            }
+            let line_delim;
+            if (end_delim){
+                line_delim = undefined;
+            }else{
+                [line_delim, start_delim] = [start_delim, undefined];
+            }
             //@-<< set delims from the header line >>
-            s = self.removeSentinelLines(s, line_delim, start_delim, end_delim)
-            ext = c.config.getString('remove-sentinels-extension')
-            if not ext:
-                ext = ".txt"
 
-            if ext[0] == '.':
-                newFileName = g.finalize_join(path, fileName + ext)  // 1341
-            else
-                head, ext2 = g.os_path_splitext(fileName)
-                newFileName = g.finalize_join(path, head + ext + ext2)  // 1341
-
-            if toString
-                return s
+            let s = this.removeSentinelLines(s, line_delim, start_delim, end_delim);
+            let ext = c.config.getString('remove-sentinels-extension');
+            if (!ext){
+                ext = ".txt";
+            }
+            if (ext[0] === '.'){
+                newFileName = g.finalize_join(path, fileName + ext);  // 1341
+            }else{
+                head, ext2 = g.os_path_splitext(fileName);
+                newFileName = g.finalize_join(path, head + ext + ext2);  // 1341
+            }
+            if (toString){
+                return s;
+            }
 
             //@+<< Write s into newFileName >>
             //@+node:felix.20230511002352.17: *5* << Write s into newFileName >> (remove-sentinels)
             // Remove sentinels command.
-            try
-                with open(newFileName, 'w') as theFile
-                    theFile.write(s)
-                if not g.unitTesting
-                    g.es("created:", newFileName)
+            try {
+                const w_uri = g.makeVscodeUri(newFileName);
+                const writeData = Buffer.from(s, 'utf8');
+                await vscode.workspace.fs.writeFile(w_uri, writeData);
 
+                if( !g.unitTesting){
+                    g.es("created:", newFileName);
+                }
 
-            except Exception
-                g.es("exception creating:", newFileName)
-                g.print_exception()
-
-
+            }catch (exception){
+                g.es("exception creating:", newFileName);
+                g.print_exception(exception);
+            }
             //@-<< Write s into newFileName >>
-        return None
-    //@+node:felix.20230511002352.18: *4* ic.removeSentinelLines
-    // This does not handle @nonl properly, but that no longer matters.
 
-    public removeSentinelLines( s: string, line_delim: string, start_delim: string, unused_end_delim: string): string
-        """Properly remove all sentinel lines in s."""
-        delim = (line_delim or start_delim or '') + '@'
-        verbatim = delim + 'verbatim'
-        verbatimFlag = False
-        result = []
-        for line in g.splitLines(s):
-            i = g.skip_ws(line, 0)
-            if not verbatimFlag and g.match(line, i, delim):
-                if g.match(line, i, verbatim):
+        }
+        return undefined;
+
+    }
+    //@+node:felix.20230511002352.18: *4* ic.removeSentinelLines
+    /**
+     * Properly remove all sentinel lines in s.
+     * Note: This does not handle @nonl properly, but that no longer matters.
+     */
+    public removeSentinelLines( s: string, line_delim: string, start_delim: string, unused_end_delim: string): string {
+
+        const delim = (line_delim || start_delim || '') + '@';
+        const verbatim = delim + 'verbatim';
+        let verbatimFlag = false;
+        const result: string[] = [];
+        for (const line of g.splitLines(s)){
+            let i = g.skip_ws(line, 0)
+            if (!verbatimFlag && g.match(line, i, delim)){
+                if( g.match(line, i, verbatim)){
                     // Force the next line to be in the result.
-                    verbatimFlag = True
-            else
-                result.append(line)
-                verbatimFlag = False
-        return ''.join(result)
+                    verbatimFlag = true;
+                }
+            }else{
+                result.push(line);
+                verbatimFlag = false;
+            }
+        }
+        return result.join('');
+
+    }
     //@+node:felix.20230511002352.19: *4* ic.weave
-    public weave( filename:string): void
-        p = self.c.p
-        nl = self.output_newline
-        if not p:
-            return
+    public weave(filename: string): void {
+        const p = this.c.p;
+        const nl = this.output_newline;
+        if (!p || !p.__bool__()){
+            return;
+        }
         this.setEncoding();
-        try:
-            with open(filename, 'w', encoding=self.encoding) as f:
-                for p in p.self_and_subtree():
-                    s = p.b
-                    s2 = s.trim()
-                    if s2:
-                        f.write("-" * 60)
-                        f.write(nl)
-                        //@+<< write the context of p to f >>
-                        //@+node:felix.20230511002352.20: *5* << write the context of p to f >> (weave)
-                        // write the headlines of p, p's parent and p's grandparent.
-                        context = []
-                        p2 = p.copy()
-                        i = 0
-                        while i < 3:
-                            i += 1
-                            if not p2:
-                                break
-                            context.append(p2.h)
-                            p2.moveToParent()
-                        context.reverse()
-                        indent = ""
-                        for line in context:
-                            f.write(indent)
-                            indent += '\t'
-                            f.write(line)
-                            f.write(nl)
-                        //@-<< write the context of p to f >>
-                        f.write("-" * 60)
-                        f.write(nl)
-                        f.write(s.trimEnd() + nl)
-        catch Exception
-            g.es("exception opening:", filename)
-            g.print_exception()
+
+        try{
+
+            // with open(filename, 'w', this.encoding) as f
+            let f = "";
+
+            for(const p of p.self_and_subtree()){
+                s = p.b;
+                s2 = s.trim();
+                if (s2){
+                    f += "-".repeat(60);
+                    f += nl;
+                    //@+<< write the context of p to f >>
+                    //@+node:felix.20230511002352.20: *5* << write the context of p to f >> (weave)
+                    // write the headlines of p, p's parent and p's grandparent.
+                    const context = [];
+                    const p2 = p.copy();
+                    let i = 0;
+
+                    while (i < 3){
+                        i += 1;
+                        if (!p2 || !p2.__bool__()){
+                            break;
+                        }
+                        context.push(p2.h);
+                        p2.moveToParent();
+                    }
+
+                    context.reverse();
+                    let indent = "";
+
+                    for (const line of context){
+                        f += indent;
+                        indent += '\t';
+                        f += line;
+                        f += nl;
+                    }
+                    //@-<< write the context of p to f >>
+                    f += "-".repeat(60);
+                    f += nl;
+                    f += s.trimEnd() + nl;
+                }
+            }
+
+            const writeData = g.toEncodedString(f);
+            await vscode.workspace.fs.writeFile(w_uri, writeData);
+
+        }catch (exception){
+            g.es("exception opening:", filename);
+            g.print_exception(exception);
+        }
+    }
     //@+node:felix.20230511002352.21: *3* ic.Import
     //@+node:felix.20230511002352.22: *4* ic.createOutline & helpers
-    public createOutline( parent: Position, ext:string = None, s:string = None) -> Position:
-        """
-        Create an outline by importing a file, reading the file with the
-        given encoding if string s is None.
-
-        ext,        The file extension to be used, or None.
-        fileName:   A string or None. The name of the file to be read.
-        parent:     The parent position of the created outline.
-        s:          A string or None. The file's contents.
-        """
+    /**
+     * Create an outline by importing a file, reading the file with the
+     * given encoding if string s is None.
+     *
+     * ext,        The file extension to be used, or None.
+     * fileName:   A string or None. The name of the file to be read.
+     * parent:     The parent position of the created outline.
+     * s:          A string or None. The file's contents.
+     */
+    public createOutline(parent: Position, ext?:string , s?:string): Position {
+      
         const c = this.c;
-        p = parent.copy()
-        this.treeType = '@file'  // Fix #352.
-        fileName = c.fullPath(parent)
-        if g.is_binary_external_file(fileName)
-            return self.import_binary_file(fileName, parent)
-
+        const p = parent.copy();
+        this.treeType = '@file';  // Fix #352.
+        fileName = c.fullPath(parent);
+        if( g.is_binary_external_file(fileName)){
+            return this.import_binary_file(fileName, parent);
+        }
         // Init ivars.
         this.setEncoding(
-            p=parent,
-            default=c.config.default_at_auto_file_encoding,
-        )
-        ext, s = self.init_import(ext, fileName, s)
-        if s is None:
-            return None
+            parent,
+            c.config.default_at_auto_file_encoding
+        );
 
+        let s;
+        [ext, s] = this.init_import(ext, fileName, s);
+        if (s == null){
+            return undefined;
+        }
         // The so-called scanning func is a callback. It must have a c argument.
-        func = self.dispatch(ext, p)
+        const func = this.dispatch(ext, p);
         // Call the scanning function.
-        if g.unitTesting:
-            console.assert func or ext in ('.txt', '.w', '.xxx'), (repr(func), ext, p.h)
-
-        if func and not c.config.getBool('suppress-import-parsing', false)
-            s = g.toUnicode(s, encoding=self.encoding)
-            s = s.replace('\r', '')
+        if( g.unitTesting){
+            // console.assert (func or ext in ('.txt', '.w', '.xxx'), (repr(func), ext, p.h));
+            console.assert (func || ['.txt', '.w', '.xxx'].includes(ext), p.h);
+        }
+        if (func && !c.config.getBool('suppress-import-parsing', false)){
+            s = g.toUnicode(s, this.encoding);
+            s = s.replace('\r', '');
             // func is a factory that instantiates the importer class.
-            func(c, p, s)
-        else
+            func(c, p, s);
+        }else{
             // Just copy the file to the parent node.
-            s = g.toUnicode(s, encoding=self.encoding)
+            s = g.toUnicode(s, this.encoding)
             s = s.replace('\r', '')
-            self.scanUnknownFileType(s, p, ext)
-
-        if g.unitTesting
-            return p
+            this.scanUnknownFileType(s, p, ext)
+        }
+        if (g.unitTesting){
+            return p;
+        }
         // #488894: unsettling dialog when saving Leo file
         // #889175: Remember the full fileName.
-        c.atFileCommands.rememberReadPath(fileName, p)
-        p.contract()
-        w = c.frame.body.wrapper
-        w.setInsertPoint(0)
-        w.seeInsertPoint()
-        return p
+        c.atFileCommands.rememberReadPath(fileName, p);
+        p.contract();
+        w = c.frame.body.wrapper;
+        w.setInsertPoint(0);
+        w.seeInsertPoint();
+        return p;
+
+    }
     //@+node:felix.20230511002352.23: *5* ic.dispatch & helpers
-    public dispatch( ext:string, p: Position) -> Optional[Callable]:
-        """Return the correct scanner function for p, an @auto node."""
+    /**
+     * Return the correct scanner function for p, an @auto node.
+     */
+    public dispatch(ext:string, p: Position): ((...args: any[])=>any)|undefined {
+        
         // Match the @auto type first, then the file extension.
         const c = this.c;
-        return g.app.scanner_for_at_auto(c, p) or g.app.scanner_for_ext(c, ext)
+        return g.app.scanner_for_at_auto(c, p) || g.app.scanner_for_ext(c, ext);
+
+    }
     //@+node:felix.20230511002352.24: *5* ic.import_binary_file
-    public import_binary_file( fileName:string, parent: Position) -> Position:
+    public import_binary_file( fileName:string, parent: Position): Position 
 
         // Fix bug 1185409 importing binary files puts binary content in body editor.
         // Create an @url node.
@@ -842,7 +906,7 @@ class LeoImportCommands {
                     p.setDirty()
                     c.setChanged()
 
-            except Exception:
+            catch Exception:
                 g.es_print('Exception importing', fn)
                 g.es_exception()
 
@@ -882,7 +946,7 @@ class LeoImportCommands {
 
         c.redraw(current)
     //@+node:felix.20230511002352.34: *5* createOutlineFromWeb
-    public createOutlineFromWeb(path: str, parent: Position) -> Position:
+    public createOutlineFromWeb(path: str, parent: Position): Position 
         const c = this.c;
         u = c.undoer
         junk, fileName = g.os_path_split(path)
@@ -1222,7 +1286,7 @@ class LeoImportCommands {
             if not c.isChanged():
                 c.setChanged()
     //@+node:felix.20230511002352.52: *4* ic.createHeadline
-    public createHeadline(parent: Position, body: str, headline: str) -> Position:
+    public createHeadline(parent: Position, body: str, headline: str): Position 
         """Create a new VNode as the last child of parent position."""
         p = parent.insertAsLastChild()
         p.initHeadString(headline)
@@ -1434,7 +1498,7 @@ class RecursiveImportController:
                 else if self.recursive:
                     if not self.ignore_pattern.search(path):
                         dirs.append(path)
-            except OSError:
+            catch OSError:
                 g.es_print('Exception computing', path)
                 g.es_exception()
         if files or dirs:
@@ -1697,7 +1761,7 @@ class TabImporter:
             self.import_files(names);
 
     //@+node:felix.20230511002653.7: *3* tabbed.scan
-    public scan(s1: str, fn?: string, root: Position = None) -> Position:
+    public scan(s1: str, fn?: string, root: Position = None): Position 
         """Create the outline corresponding to s1."""
         const c = this.c;
         // Self.root can be None if we are called from a script or unit test.

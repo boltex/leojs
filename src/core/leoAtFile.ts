@@ -3310,7 +3310,7 @@ export class AtFile {
      */
     public async replaceFile(
         contents: string,
-        encoding: string,
+        encoding: BufferEncoding,
         fileName: string,
         root: Position,
         ignoreBlankLines = false,
