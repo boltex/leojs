@@ -727,239 +727,284 @@ class LeoImportCommands {
 
     }
     //@+node:felix.20230511002352.24: *5* ic.import_binary_file
-    public import_binary_file( fileName:string, parent: Position): Position 
+    public import_binary_file(fileName: string, parent: Position): Position {
 
         // Fix bug 1185409 importing binary files puts binary content in body editor.
         // Create an @url node.
         const c = this.c;
-        if parent:
-            p = parent.insertAsLastChild()
-        else
-            p = c.lastTopLevel().insertAfter()
-        p.h = f"@url file://{fileName}"
-        return p
+        if (parent && parent.__bool__()){
+            p = parent.insertAsLastChild();
+        }else{
+            p = c.lastTopLevel().insertAfter();
+        }
+        p.h = `@url file://${fileName}`;
+        return p;
+    }
     //@+node:felix.20230511002352.25: *5* ic.init_import
-    public init_import(ext:string, fileName:string, s:string) -> Tuple[str, str]:
-        """
-        Init ivars imports and read the file into s.
-        Return ext, s.
-        """
-        junk, self.fileName = g.os_path_split(fileName)
-        this.methodName, self.fileType = g.os_path_splitext(self.fileName)
-        if not ext:
-            ext = self.fileType
-        ext = ext.lower()
-        if not s:
+    /** 
+     * Init ivars imports and read the file into s.
+     * Return ext, s.
+     */
+    public init_import(ext:string, fileName:string, s:string): [string|undefined, string|undefined] {
+        let junk;
+        [junk, this.fileName] = g.os_path_split(fileName);
+        [this.methodName, this.fileType] = g.os_path_splitext(this.fileName);
+        if (!ext){
+            ext = this.fileType;
+        }
+        ext = ext.toLowerCase();
+        if (!s){
+            let e;
             // Set the kind for error messages in readFileIntoString.
-            s, e = g.readFileIntoString(fileName, encoding=self.encoding)
-            if s is None:
-                return undefined, None
-            if e:
-                self.encoding = e
-        return ext, s
+            [s, e] = g.readFileIntoString(fileName, this.encoding);
+            if( s == null){
+                return [undefined, undefined];
+            }
+            if (e){
+                this.encoding = e;
+            }
+        }
+        return [ext, s];
+
+    }
     //@+node:felix.20230511002352.26: *5* ic.scanUnknownFileType & helper
-    public scanUnknownFileType(s:string, p: Position, ext:string) -> bool:
-        """Scan the text of an unknown file type."""
-        body = ''
-        if ext in ('.html', '.htm'):
-            body += '@language html\n'
-        else if ext in ('.txt', '.text'):
-            body += '@nocolor\n'
-        else
-            language = self.languageForExtension(ext)
-            if language:
-                body += f"@language {language}\n"
-        this.setBodyString(p, body + s)
-        for p in p.self_and_subtree():
-            p.clearDirty()
+    /**
+     * Scan the text of an unknown file type.
+     */
+    public scanUnknownFileType(s:string, p: Position, ext:string): boolean {
+        
+        body = '';
+        if (['.html', '.htm'].includes(ext)){
+            body += '@language html\n';
+        }else if (['.txt', '.text'].includes(ext)){
+            body += '@nocolor\n';
+        }else{
+            language = this.languageForExtension(ext);
+            if (language){
+                body += `@language ${language}\n`;
+            }
+        }
+        this.setBodyString(p, body + s);
+        for (const p of p.self_and_subtree()){
+            p.clearDirty();
+        }
         return true;
+    }
     //@+node:felix.20230511002352.27: *6* ic.languageForExtension
-    public languageForExtension(ext: string): string
-        """Return the language corresponding to the extension ext."""
-        unknown = 'unknown_language'
-        if ext.startsWith('.')
-            ext = ext[1:]
+    /**
+     * Return the language corresponding to the extension ext.
+     */
+    public languageForExtension(ext: string): string {
+        
+        const unknown = 'unknown_language';
+        if (ext.startsWith('.')){
+            ext = ext.substring(1);
+        }
 
+        if (ext){
+            z = g.app.extra_extension_dict[ext];
+            if (![undefined, 'undefined', 'none', 'None'].includes(z)){
+                language = z;
+            }else{
+                language = g.app.extension_dict[ext];
+            }
+            if ([undefined, 'undefined', 'none', 'None'].includes(language)){
+                language = unknown;
+            }
 
-        if ext
-            z = g.app.extra_extension_dict.get(ext)
-            if z not in (None, 'none', 'None')
-                language = z
-            else
-                language = g.app.extension_dict.get(ext)
-
-            if language in (None, 'none', 'None')
-                language = unknown
-
-
-        else
-            language = unknown
-
+        }else{
+            language = unknown;
+        }
 
         // Return the language even if there is no colorizer mode for it.
-        return language
+        return language;
+    }
     //@+node:felix.20230511002352.28: *4* ic.readAtAutoNodes
-    public readAtAutoNodes(): void
+    public readAtAutoNodes(): void {
         const c =  this.c;
         const p =  this.c.p;
-        after = p.nodeAfterTree()
-        found = False
-        while p && p != after
-            if p.isAtAutoNode()
-                if p.isAtIgnoreNode():
-                    g.warning('ignoring', p.h)
-                    p.moveToThreadNext()
-                else
-                    c.atFileCommands.readOneAtAutoNode(p)
-                    found = True
-                    p.moveToNodeAfterTree()
-
-
-            else
-                p.moveToThreadNext()
-
-
-        if not g.unitTesting:
-            message = 'finished' if found else 'no @auto nodes in the selected tree'
-            g.blue(message)
-
-        c.redraw()
+        const after = p.nodeAfterTree();
+        let found = false;
+        while (p && !p.__eq__(after)){
+            if(p.isAtAutoNode()){
+                if (p.isAtIgnoreNode()){
+                    g.warning('ignoring', p.h);
+                    p.moveToThreadNext();
+                }else{
+                    c.atFileCommands.readOneAtAutoNode(p);
+                    found = true;
+                    p.moveToNodeAfterTree();
+                }
+            }else{
+                p.moveToThreadNext();
+            }
+        }
+        if (!g.unitTesting){
+            const message = found ? 'finished' : 'no @auto nodes in the selected tree';
+            g.blue(message);
+        }
+        c.redraw();
+    }
     //@+node:felix.20230511002352.29: *4* ic.importDerivedFiles
+    /**
+     * Import one or more external files.
+     * This is not a command.  It must *not* have an event arg.
+     * command is None when importing from the command line.
+     */
     public importDerivedFiles(
-        parent: Position = None,
-        paths: List[str] = None,
-        command: str = 'Import',
-    ) : Position | undefined 
-        """
-        Import one or more external files.
-        This is not a command.  It must *not* have an event arg.
-        command is None when importing from the command line.
-        """
-        at, c, u = self.c.atFileCommands, self.c, self.c.undoer
-        current = c.p or c.rootPosition()
-        this.tab_width = c.getTabWidth(current)
-        if not paths:
-            return None
-        // Initial open from command line is not undoable.
-        if command:
-            u.beforeChangeGroup(current, command)
-        for fileName in paths:
-            fileName = fileName.replace('\\', '/')  // 2011/10/09.
-            g.setGlobalOpenDir(fileName)
-            isThin = at.scanHeaderForThin(fileName)
-            if command:
-                undoData = u.beforeInsertNode(parent)
-            p = parent.insertAfter()
-            if isThin:
-                // Create @file node, not a deprecated @thin node.
-                p.initHeadString("@file " + fileName)
-                at.read(p)
-            else
-                p.initHeadString("Imported @file " + fileName)
-                at.read(p)
-            p.contract()
-            p.setDirty()  // 2011/10/09: tell why the file is dirty!
-            if command:
-                u.afterInsertNode(p, command, undoData)
-        current.expand()
-        c.setChanged()
-        if command
-            u.afterChangeGroup(p, command)
+        parent: Position  | undefined,
+        paths: string[]| undefined,
+        command = 'Import',
+    ) : Position | undefined {
+       
+        const at = this.c.atFileCommands;
+        const c = this.c;
+        const u = this.c.undoer;
+        const current = c.p && c.p.__bool__()?c.p : c.rootPosition();
+        this.tab_width = c.getTabWidth(current);
 
-        c.redraw(current)
-        return p
+        if (!paths || !paths.length){
+            return undefined;
+        }
+        // Initial open from command line is not undoable.
+        if (command){
+            u.beforeChangeGroup(current, command);
+        }
+        for (const fileName of paths){
+            fileName = fileName.replace('\\', '/');  // 2011/10/09.
+            g.setGlobalOpenDir(fileName);
+            isThin = at.scanHeaderForThin(fileName);
+            if (command){
+                undoData = u.beforeInsertNode(parent);
+            }
+            const p = parent.insertAfter();
+            if (isThin){
+                // Create @file node, not a deprecated @thin node.
+                p.initHeadString("@file " + fileName);
+                at.read(p);
+            }else{
+                p.initHeadString("Imported @file " + fileName);
+                at.read(p);
+            }
+            p.contract();
+            p.setDirty();  // 2011/10/09: tell why the file is dirty!
+            if (command){
+                u.afterInsertNode(p, command, undoData);
+            }
+        }
+        current.expand();
+        c.setChanged();
+        if (command){
+            u.afterChangeGroup(p, command);
+        }
+        c.redraw(current);
+        return p;
+
+    }
     //@+node:felix.20230511002352.30: *4* ic.importFilesCommand
     public importFilesCommand(
-        files: List[str] = None,
-        parent: Position = None,
-        shortFn: bool = False,
+        files: string[] | undefined,
+        parent: Position | undefined,
+        shortFn: false,
         treeType?: string,
-        verbose: bool = True,  // Legacy value.
-    ): void
+        verbose: true,  // Legacy value.
+    ): void {
         // Not a command.  It must *not* have an event arg.
-        c = this.c;
-        u = this.c.undoer;
-        if not c or not c.p or not files:
-            return
-
-        this.tab_width = c.getTabWidth(c.p)
-        this.treeType = treeType or '@file'
-        this.verbose = verbose
-        if not parent
-            g.trace('===== no parent', g.callers())
-            return
-
-        for fn in files or []
-            // Report exceptions here, not in the caller.
-            try
-                g.setGlobalOpenDir(fn)
-                // Leo 5.6: Handle undo here, not in createOutline.
-                undoData = u.beforeInsertNode(parent)
-                p = parent.insertAsLastChild()
-                p.h = f"{treeType} {fn}"
-                u.afterInsertNode(p, 'Import', undoData)
-                p = self.createOutline(parent=p)
-                if p:  // createOutline may fail.
-                    if self.verbose and not g.unitTesting:
-                        g.blue("imported", g.shortFileName(fn) if shortFn else fn)
-                    p.contract()
-                    p.setDirty()
-                    c.setChanged()
-
-            catch Exception:
-                g.es_print('Exception importing', fn)
-                g.es_exception()
-
-        c.validateOutline()
-        parent.expand()
-    //@+node:felix.20230511002352.31: *4* ic.importFreeMind
-    public importFreeMind(files: List[str]): void
-        """
-        Import a list of .mm.html files exported from FreeMind:
-        http://freemind.sourceforge.net/wiki/index.php/Main_Page
-        """
-        FreeMindImporter(self.c).import_files(files)
-    //@+node:felix.20230511002352.32: *4* ic.importMindMap
-    public importMindMap(files: List[str]): void
-        """
-        Import a list of .csv files exported from MindJet:
-        https://www.mindjet.com/
-        """
-        MindMapImporter(self.c).import_files(files)
-    //@+node:felix.20230511002352.33: *4* ic.importWebCommand & helpers
-    public importWebCommand(files: List[str], webType: str): void
-        c, current = self.c, self.c.p
-        if current is None
-            return
-
-        if not files
-            return
-
-        this.tab_width = c.getTabWidth(current)  // New in 4.3.
-        this.webType = webType
-        for fileName in files
-            g.setGlobalOpenDir(fileName)
-            p = self.createOutlineFromWeb(fileName, current)
-            p.contract()
-            p.setDirty()
-            c.setChanged()
-
-        c.redraw(current)
-    //@+node:felix.20230511002352.34: *5* createOutlineFromWeb
-    public createOutlineFromWeb(path: str, parent: Position): Position 
         const c = this.c;
-        u = c.undoer
-        junk, fileName = g.os_path_split(path)
-        undoData = u.beforeInsertNode(parent)
+        const u = this.c.undoer;
+        if (!c || !c.p || !c.p.__bool__() || !files || !files.length){
+            return;
+        }
+        this.tab_width = c.getTabWidth(c.p);
+        this.treeType = treeType || '@file';
+        this.verbose = verbose;
+        if (!parent || !parent.__bool__()){
+            g.trace('===== no parent', g.callers());
+            return;
+        }
+        
+        for (const fn of files) {
+            // Report exceptions here, not in the caller.
+            try{
+                g.setGlobalOpenDir(fn);
+                // Leo 5.6: Handle undo here, not in createOutline.
+                const undoData = u.beforeInsertNode(parent);
+                const p = parent.insertAsLastChild();
+                p.h = `${treeType} ${fn}`;
+                u.afterInsertNode(p, 'Import', undoData);
+                p = this.createOutline(parent=p);
+                if (p && p.__bool__()){  // createOutline may fail.
+                    if (this.verbose && !g.unitTesting){
+                        g.blue("imported", shortFn? g.shortFileName(fn) : fn);
+                    }
+                    p.contract();
+                    p.setDirty();
+                    c.setChanged();
+                }
+           } catch (exception){
+                g.es_print('Exception importing', fn);
+                g.es_exception();
+            }
+        }
+
+        c.validateOutline();
+        parent.expand();
+    }
+    //@+node:felix.20230511002352.31: *4* ic.importFreeMind
+    /**
+     * Import a list of .mm.html files exported from FreeMind:
+     * http://freemind.sourceforge.net/wiki/index.php/Main_Page
+     */
+    public importFreeMind(files: string[]): void {
+        new FreeMindImporter(this.c).import_files(files);
+    }
+    //@+node:felix.20230511002352.32: *4* ic.importMindMap
+    /**
+     * Import a list of .csv files exported from MindJet:
+     * https://www.mindjet.com/
+     */
+    public importMindMap(files: string[]): void {
+        new MindMapImporter(this.c).import_files(files);
+    }
+    //@+node:felix.20230511002352.33: *4* ic.importWebCommand & helpers
+    public importWebCommand(files: string[], webType: string): void {
+        const c = this.c;
+        const current = this.c.p;
+        if (current == null){
+            return;
+        }
+        if (!files || !files.length){
+            return;
+        }
+        this.tab_width = c.getTabWidth(current);  // New in 4.3.
+        this.webType = webType;
+        for (const fileName of files){
+            g.setGlobalOpenDir(fileName);
+            p = this.createOutlineFromWeb(fileName, current);
+            p.contract();
+            p.setDirty();
+            c.setChanged();
+        }
+        c.redraw(current);
+    }
+    //@+node:felix.20230511002352.34: *5* createOutlineFromWeb
+    public createOutlineFromWeb(path: string, parent: Position): Position {
+        const c = this.c;
+        const u = c.undoer;
+        let [junk, fileName] = g.os_path_split(path);
+        const undoData = u.beforeInsertNode(parent);
         // Create the top-level headline.
-        p = parent.insertAsLastChild()
-        p.initHeadString(fileName)
-        if this.webType == "cweb"
-            this.setBodyString(p, "@ignore\n@language cweb")
+        p = parent.insertAsLastChild();
+        p.initHeadString(fileName);
+        if (this.webType === "cweb"){
+            this.setBodyString(p, "@ignore\n@language cweb");
+        }
         // Scan the file, creating one section for each function definition.
-        this.scanWebFile(path, p)
-        u.afterInsertNode(p, 'Import', undoData)
-        return p
+        this.scanWebFile(path, p);
+        u.afterInsertNode(p, 'Import', undoData);
+        return p;
+
+    }
     //@+node:felix.20230511002352.35: *5* findFunctionDef
     public findFunctionDef(s: str, i: int) -> Optional[str]:
         // Look at the next non-blank line for a function name.
@@ -1300,7 +1345,7 @@ class LeoImportCommands {
     // The start of a document part or module in a noweb or cweb file.
     // Exporters may have to test for @doc as well.
 
-    public isDocStart(s: str, i: int) -> bool:
+    public isDocStart(s: str, i: int): boolean 
         if not g.match(s, i, "@"):
             return false;
         j = g.skip_ws(s, i + 1)
@@ -1310,7 +1355,7 @@ class LeoImportCommands {
             return true;
         return g.match(s, i, "@ ") or g.match(s, i, "@\t") or g.match(s, i, "@\n")
 
-    public isModuleStart(s: str, i: int) -> bool:
+    public isModuleStart(s: str, i: int): boolean 
         if self.isDocStart(s, i):
             return true;
         return self.webType == "cweb" and (
@@ -1681,7 +1726,7 @@ class TabImporter:
 
     //@+others
     //@+node:felix.20230511002653.2: *3* tabbed.check
-    public check(lines: List[str], warn: bool = True) -> bool:
+    public check(lines: List[str], warn: bool = True): boolean 
         """Return False and warn if lines contains mixed leading tabs/blanks."""
         blanks, tabs = 0, 0
         for s in lines:
