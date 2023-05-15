@@ -2806,7 +2806,7 @@ export class VNode {
      * Returns True if the receiver contains @others in its body at the start of a line.
      */
     public isAtAllNode(): boolean {
-        const flag: boolean = g.is_special(this._bodyString, '@all') < 0;
+        let [flag, i] = g.is_special(this._bodyString, '@all');
         return flag;
     }
 
@@ -2873,7 +2873,7 @@ export class VNode {
         if (g.match_word(this._headString, 0, '@ignore')) {
             return true;
         }
-        const flag: boolean = g.is_special(this._bodyString, '@ignore') < 0;
+        let [flag, i] = g.is_special(this._bodyString, '@ignore');
         return flag;
     }
 
@@ -2882,7 +2882,7 @@ export class VNode {
      * Returns True if the receiver contains @others in its body at the start of a line.
      */
     public isAtOthersNode(): boolean {
-        const flag: boolean = g.is_special(this._bodyString, '@others') < 0;
+        let [flag, i] = g.is_special(this._bodyString, '@others');
         return flag;
     }
 

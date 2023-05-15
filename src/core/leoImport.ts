@@ -20,53 +20,53 @@ import { Position, VNode } from './leoNodes';
 //@-<< leoImport imports >>
 //@+others
 //@+node:felix.20230510230016.1: ** leoImport Dummy
-export class LeoImportCommands {
+// export class LeoImportCommands {
 
-    // TODO
+//     // TODO
 
-    public c: Commands;
+//     public c: Commands;
 
-    constructor(c: Commands) {
-        this.c = c;
-    }
+//     constructor(c: Commands) {
+//         this.c = c;
+//     }
 
-    public async exportHeadlines(fileName: string): Promise<unknown> {
-        // TODO !
-        console.log('TODO: exportHeadlines');
-        return;
-    }
+//     public async exportHeadlines(fileName: string): Promise<unknown> {
+//         // TODO !
+//         console.log('TODO: exportHeadlines');
+//         return;
+//     }
 
-    public async flattenOutline(fileName: string): Promise<unknown> {
-        // TODO !
-        console.log('TODO: flattenOutline');
-        return;
-    }
+//     public async flattenOutline(fileName: string): Promise<unknown> {
+//         // TODO !
+//         console.log('TODO: flattenOutline');
+//         return;
+//     }
 
-    public async outlineToWeb(fileName: string, webType: string): Promise<unknown> {
-        // TODO !
-        console.log('TODO: outlineToWeb');
-        return;
-    }
+//     public async outlineToWeb(fileName: string, webType: string): Promise<unknown> {
+//         // TODO !
+//         console.log('TODO: outlineToWeb');
+//         return;
+//     }
 
-    public async removeSentinelsCommand(names: string[]): Promise<unknown> {
-        // TODO !
-        console.log('TODO: removeSentinelsCommand');
-        return;
-    }
+//     public async removeSentinelsCommand(names: string[]): Promise<unknown> {
+//         // TODO !
+//         console.log('TODO: removeSentinelsCommand');
+//         return;
+//     }
 
-    public async weave(fileName: string): Promise<unknown> {
-        // TODO !
-        console.log('TODO: weave');
-        return;
-    }
+//     public async weave(fileName: string): Promise<unknown> {
+//         // TODO !
+//         console.log('TODO: weave');
+//         return;
+//     }
 
-    public async readAtAutoNodes(): Promise<unknown> {
-        // TODO !
-        console.log('TODO: readAtAutoNodes');
-        return;
-    }
+//     public async readAtAutoNodes(): Promise<unknown> {
+//         // TODO !
+//         console.log('TODO: readAtAutoNodes');
+//         return;
+//     }
 
-}
+// }
 
 //@+node:felix.20230511002352.1: ** class LeoImportCommands
 /**
@@ -202,14 +202,15 @@ class LeoImportCommands {
     public getHeadRef(p: Position): string {
        
         const h = p.h.trim();
+        let i;
         if (g.match(h, 0, "<<")){
-            i = h.find(">>", 2);
+            i = h.indexOf(">>", 2);
         }else if (g.match(h, 0, "<@")){
-            i = h.find("@>", 2);
+            i = h.indexOf("@>", 2);
         }else{
             return h;
         }
-        return h.substring(2, i).trim();
+        return h.slice(2, i).trim();
 
     }
     //@+node:felix.20230511002352.8: *5* ic.getFileName
@@ -218,6 +219,7 @@ class LeoImportCommands {
      */
     public getFileName(p: Position): string {
         const h = p.h.trim();
+        let file_name;
         if( g.match(h, 0, "@file") || g.match(h, 0, "@root")){
             const line = h.substring(5).trim();
             // set j & k so line[j:k] is the file name.
@@ -286,8 +288,8 @@ class LeoImportCommands {
         const s = p.b;
         const lb = this.webType === "cweb" ? "@<" : "<<";
         let [i, result, docSeen] = [0, "", false];
-        while (i < s.length)
-            progress = i;
+        while (i < s.length){
+            const progress = i;
             i = g.skip_ws_and_nl(s, i);
             if (this.isDocStart(s, i) || g.match_word(s, i, "@doc")){
                 [i, result] = this.convertDocPartToWeb(s, i, result);
@@ -315,7 +317,7 @@ class LeoImportCommands {
             }
 
             console.assert(progress < i);
-
+        }
         result = result.trim();
         if (result){
             result += nl;
@@ -332,7 +334,8 @@ class LeoImportCommands {
         const rb = this.webType === "cweb" ? "@>" : ">>";
         const theType = this.webType;
         while (i < s.length){
-            progress = j = i;  // We should be at the start of a line here.
+            const progress = i;
+            let j = i;  // We should be at the start of a line here.
             i = g.skip_nl(s, i);
             i = g.skip_ws(s, i);
             if (this.isDocStart(s, i)){
@@ -354,7 +357,7 @@ class LeoImportCommands {
             // Copy the entire line, escaping '@' and
             // Converting @others to < < @ others > >
             i = g.skip_line(s, j);
-            line = s.substring(j, i);
+            let line = s.substring(j, i);
             if (theType === "cweb"){
                 line = line.replace("@", "@@")
             }else{
@@ -363,7 +366,7 @@ class LeoImportCommands {
                     line = line.replace("@others", lb + "@others" + rb);
                 }else if (g.match(line, 0, "@")){
                     // Special case: do not escape @ %defs.
-                    k = g.skip_ws(line, 1);
+                    const k = g.skip_ws(line, 1);
                     if (!g.match(line, k, "%defs")){
                         line = "@" + line;
                     }
@@ -388,8 +391,8 @@ class LeoImportCommands {
             const w_uri = g.makeVscodeUri(fileName);
             let s = "";
             // with open(fileName, 'w') as theFile:
-            for (const p of p.self_and_subtree(false)){
-                const head = p.moreHead(firstLevel, true);
+            for (const w_p of p.self_and_subtree(false)){
+                const head = w_p.moreHead(firstLevel, true);
                 // theFile.write(head + nl);
                 s += head + nl;
             }
@@ -416,17 +419,17 @@ class LeoImportCommands {
             return; 
         }
         this.setEncoding();
-        firstLevel = p.level();
+        const firstLevel = p.level();
 
         try{
             const w_uri = g.makeVscodeUri(fileName);
             let theFile: string = "";
             // theFile = open(fileName, 'wb')  // Fix crasher: open in 'wb' mode.
-            for (const p of p.self_and_subtree(false)){
-                let s = p.moreHead(firstLevel) + nl;
+            for (const w_p of p.self_and_subtree(false)){
+                let s = w_p.moreHead(firstLevel) + nl;
                 // s = g.toEncodedString(s, this.encoding, true);
                 theFile += s;
-                s = p.moreBody() + nl;  // Inserts escapes.
+                s = w_p.moreBody() + nl;  // Inserts escapes.
                 if (s.trim()){
                     // s = g.toEncodedString(s, this.encoding, true);
                     theFile += s;
@@ -445,7 +448,7 @@ class LeoImportCommands {
     //@+node:felix.20230511002352.14: *4* ic.outlineToWeb
     public outlineToWeb(fileName: string, webType: string): void{
         const c = this.c;
-        const nl = thjis.output_newline;
+        const nl = this.output_newline;
         const current = c.p;
         if (!current || !current.__bool__()){
             return;
@@ -469,7 +472,7 @@ class LeoImportCommands {
             }
 
             for (const p of current.self_and_subtree(false)){
-                s = this.positionToWeb(p)
+                const s = this.positionToWeb(p)
                 if (s){
                     theFile += s;
                     if (s.charAt(s.length - 1) !== '\n'){
@@ -488,14 +491,16 @@ class LeoImportCommands {
 
     }
     //@+node:felix.20230511002352.15: *4* ic.removeSentinelsCommand
-    public removeSentinelsCommand(paths: string[], toString = false): string|undefined {
+    public async removeSentinelsCommand(paths: string[], toString = false): Promise<string|undefined> {
         const c = this.c;
         this.setEncoding();
         for (const fileName of paths){
             g.setGlobalOpenDir(fileName);
             let path;
             [path, this.fileName] = g.os_path_split(fileName);
-            let [s, e] = g.readFileIntoString(fileName, this.encoding);
+            let s: string|undefined;
+            let e;
+            [s, e] = await g.readFileIntoString(fileName, this.encoding);
             if (s == null){
                 return undefined;
             }
@@ -515,7 +520,12 @@ class LeoImportCommands {
             const at = this.c.atFileCommands;
             let j = g.skip_line(s, i);
             let line = s.substring(i, j);
-            let [valid, junk, start_delim, end_delim, junk] = at.parseLeoSentinel(line);
+            let start_delim: string|undefined;
+            let valid;
+            let junk1;
+            let end_delim;
+            let junk2;
+            [valid, junk1, start_delim, end_delim, junk2] = at.parseLeoSentinel(line);
             if (!valid){
                 if (!toString){
                     g.es("invalid @+leo sentinel in", fileName);
@@ -530,15 +540,16 @@ class LeoImportCommands {
             }
             //@-<< set delims from the header line >>
 
-            let s = this.removeSentinelLines(s, line_delim, start_delim, end_delim);
+            s = this.removeSentinelLines(s, line_delim, start_delim, end_delim);
             let ext = c.config.getString('remove-sentinels-extension');
             if (!ext){
                 ext = ".txt";
             }
+            let newFileName;
             if (ext[0] === '.'){
                 newFileName = g.finalize_join(path, fileName + ext);  // 1341
             }else{
-                head, ext2 = g.os_path_splitext(fileName);
+                let [head, ext2] = g.os_path_splitext(fileName);
                 newFileName = g.finalize_join(path, head + ext + ext2);  // 1341
             }
             if (toString){
@@ -572,7 +583,7 @@ class LeoImportCommands {
      * Properly remove all sentinel lines in s.
      * Note: This does not handle @nonl properly, but that no longer matters.
      */
-    public removeSentinelLines( s: string, line_delim: string, start_delim: string, unused_end_delim: string): string {
+    public removeSentinelLines( s: string, line_delim: string|undefined, start_delim: string|undefined, unused_end_delim: string): string {
 
         const delim = (line_delim || start_delim || '') + '@';
         const verbatim = delim + 'verbatim';
@@ -1006,23 +1017,27 @@ class LeoImportCommands {
 
     }
     //@+node:felix.20230511002352.35: *5* findFunctionDef
-    public findFunctionDef(s: str, i: int) -> Optional[str]:
+    public findFunctionDef(s: string, i: number): string | undefined {
         // Look at the next non-blank line for a function name.
-        i = g.skip_ws_and_nl(s, i)
-        k = g.skip_line(s, i)
-        name = None
-        while i < k:
-            if g.is_c_id(s[i]):
-                j = i
-                i = g.skip_c_id(s, i)
-                name = s[j:i]
-            else if s[i] == '(':
-                if name:
-                    return name
-                break
-            else
-                i += 1
-        return None
+        i = g.skip_ws_and_nl(s, i);
+        let k = g.skip_line(s, i);
+        let name: string | undefined = undefined;
+        while (i < k){
+            if (g.is_c_id(s[i])){
+                j = i;
+                i = g.skip_c_id(s, i);
+                name = s.substring(j, i);
+            }else if( s[i] === '('){
+                if (name){
+                    return name;
+                }
+                break;
+            }else{
+                i += 1;
+            }
+        }
+        return undefined;
+    }
     //@+node:felix.20230511002352.36: *5* scanBodyForHeadline
     //@+at This method returns the proper headline text.
     // 1. If s contains a section def, return the section ref.
@@ -1031,414 +1046,538 @@ class LeoImportCommands {
     // 4. Otherwise, returns "@"
     //@@c
 
-    public scanBodyForHeadline(s: str): string
-        if self.webType == "cweb":
+    public scanBodyForHeadline(s: string): string {
+        let name;
+        if (this.webType === "cweb"){
             //@+<< scan cweb body for headline >>
             //@+node:felix.20230511002352.37: *6* << scan cweb body for headline >>
-            i = 0
-            while i < len(s):
-                i = g.skip_ws_and_nl(s, i)
+            let i = 0;
+            while (i < s.length){
+                i = g.skip_ws_and_nl(s, i);
                 // Allow constructs such as @ @c, or @ @<.
-                if self.isDocStart(s, i):
-                    i += 2
-                    i = g.skip_ws(s, i)
-                if g.match(s, i, "@d") or g.match(s, i, "@f"):
+                if (this.isDocStart(s, i)){
+                    i += 2;
+                    i = g.skip_ws(s, i);
+                }
+                let j;
+                if (g.match(s, i, "@d") || g.match(s, i, "@f")){
                     // Look for a macro name.
-                    directive = s[i : i + 2]
+                    const directive = s.substring(i, i + 2);
                     i = g.skip_ws(s, i + 2)  // skip the @d or @f
-                    if i < len(s) and g.is_c_id(s[i]):
-                        j = i
-                        g.skip_c_id(s, i)
-                        return s[j:i]
-                    return directive
-                if g.match(s, i, "@c") or g.match(s, i, "@p"):
+                    if (i < s.length && g.is_c_id(s[i])){
+                        j = i;
+                        g.skip_c_id(s, i); // TODO : MAYBE FIX THIS LINE!
+                        return s.substring(j, i);
+                    }
+                    return directive;
+                }
+                if (g.match(s, i, "@c") || g.match(s, i, "@p")){
                     // Look for a function def.
-                    name = self.findFunctionDef(s, i + 2)
-                    return name if name else "outer function"
-                if g.match(s, i, "@<"):
+                    name = this.findFunctionDef(s, i + 2);
+                    return name?name: "outer function";
+                }
+                if (g.match(s, i, "@<")){
                     // Look for a section def.
                     // A small bug: the section def must end on this line.
-                    j = i
-                    k = g.find_on_line(s, i, "@>")
-                    if k > -1 and (g.match(s, k + 2, "+=") or g.match(s, k + 2, "=")):
-                        return s[j : k + 2]  // return the section ref.
-                i = g.skip_line(s, i)
+                    j = i;
+                    k = g.find_on_line(s, i, "@>");
+                    if (k > -1 && (g.match(s, k + 2, "+=") || g.match(s, k + 2, "="))){
+                        return s.substring(j, i);
+                        return s.substring(j, k + 2);  // return the section ref.
+                    }
+
+                }
+                i = g.skip_line(s, i);
+
+            }
             //@-<< scan cweb body for headline >>
-        else
+        }else{
             //@+<< scan noweb body for headline >>
             //@+node:felix.20230511002352.38: *6* << scan noweb body for headline >>
-            i = 0
-            while i < len(s):
-                i = g.skip_ws_and_nl(s, i)
-                if g.match(s, i, "<<"):
-                    k = g.find_on_line(s, i, ">>=")
-                    if k > -1:
-                        ref = s[i : k + 2]
-                        name = s[i + 2 : k].trim()
-                        if name != "@others":
-                            return ref
-                else:
-                    name = self.findFunctionDef(s, i)
-                    if name:
-                        return name
-                i = g.skip_line(s, i)
+            let i = 0;
+            while (i < s.length){
+                i = g.skip_ws_and_nl(s, i);
+                if( g.match(s, i, "<<")){
+                    k = g.find_on_line(s, i, ">>=");
+                    if (k > -1){
+                        ref = s.substring(i, k + 2);
+                        name = s.substring(i + 2, k).trim();
+                        if (name !== "@others"){
+                            return ref;
+                        }
+                    }
+                }else{
+                    name = this.findFunctionDef(s, i);
+                    if (name){
+                        return name;
+                    }
+                }
+                i = g.skip_line(s, i);
+
+            }
             //@-<< scan noweb body for headline >>
-        return "@"  // default.
+        }
+
+        return "@";  // default.
+    }
     //@+node:felix.20230511002352.39: *5* scanWebFile (handles limbo)
-    public scanWebFile(fileName: str, parent: Position): void
-        theType = self.webType
-        lb = "@<" if theType == "cweb" else "<<"
-        rb = "@>" if theType == "cweb" else ">>"
-        s, e = g.readFileIntoString(fileName)
-        if s is None:
-            return
+    public scanWebFile(fileName: string, parent: Position): void {
+        const theType = this.webType;
+        const lb =theType == "cweb" ? "@<" : "<<";
+        const rb =theType == "cweb" ? "@>" : ">>";
+        let [s, e] = g.readFileIntoString(fileName);
+        if (s == null){
+            return;
+        }
         //@+<< Create a symbol table of all section names >>
         //@+node:felix.20230511002352.40: *6* << Create a symbol table of all section names >>
-        i = 0
-        this.web_st = []
-        while i < len(s):
-            progress = i
-            i = g.skip_ws_and_nl(s, i)
-            if self.isDocStart(s, i):
-                if theType == "cweb":
-                    i += 2
-                else:
-                    i = g.skip_line(s, i)
-            else if theType == "cweb" and g.match(s, i, "@@"):
-                i += 2
-            else if g.match(s, i, lb):
-                i += 2
-                j = i
-                k = g.find_on_line(s, j, rb)
-                if k > -1:
-                    self.cstEnter(s[j:k])
-            else
-                i += 1
-            console.assert i > progress
+        let i = 0;
+        this.web_st = [];
+        while( i < s.length){
+            let progress = i;
+            i = g.skip_ws_and_nl(s, i);
+            if (this.isDocStart(s, i)){
+                if (theType === "cweb"){
+                    i += 2;
+                }else{
+                    i = g.skip_line(s, i);
+                }
+            }else if(theType === "cweb" && g.match(s, i, "@@")){
+                i += 2;
+            }else if(g.match(s, i, lb)){
+                i += 2;
+                j = i;
+                k = g.find_on_line(s, j, rb);
+                if (k > -1){
+                    this.cstEnter(s.substring(j, k));
+                }
+            }else{
+                i += 1;
+            }
+            console.assert( i > progress);
+        }
         //@-<< Create a symbol table of all section names >>
         //@+<< Create nodes for limbo text and the root section >>
         //@+node:felix.20230511002352.41: *6* << Create nodes for limbo text and the root section >>
-        i = 0
-        while i < len(s):
-            progress = i
-            i = g.skip_ws_and_nl(s, i)
-            if self.isModuleStart(s, i) or g.match(s, i, lb):
+        i = 0;
+        while (i < s.length){
+            let progress = i;
+            i = g.skip_ws_and_nl(s, i);
+            if (this.isModuleStart(s, i) || g.match(s, i, lb)){
                 break
-            else
+            }else{
                 i = g.skip_line(s, i)
-            console.assert i > progress
-        j = g.skip_ws(s, 0)
-        if j < i:
-            self.createHeadline(parent, "@ " + s[j:i], "Limbo")
-        j = i
-        if g.match(s, i, lb):
-            while i < len(s):
-                progress = i
-                i = g.skip_ws_and_nl(s, i)
-                if self.isModuleStart(s, i):
-                    break
-                else:
-                    i = g.skip_line(s, i)
-                console.assert i > progress
-            self.createHeadline(parent, s[j:i], g.angleBrackets(" @ "))
+            }
+            console.assert( i > progress);
+        }
 
+        let j = g.skip_ws(s, 0);
+        if (j < i){
+            this.createHeadline(parent, "@ " + s.substring(j, i), "Limbo");
+        }
+        j = i;
+        if (g.match(s, i, lb)){
+            while (i < s.length){
+                let progress = i;
+                i = g.skip_ws_and_nl(s, i);
+                if (this.isModuleStart(s, i)){
+                    break;
+                }else{
+                    i = g.skip_line(s, i);
+                }
+                console.assert(i > progress);
+            }
+            this.createHeadline(parent, s.substring(j, i), g.angleBrackets(" @ "));
+        }
         //@-<< Create nodes for limbo text and the root section >>
-        while i < len(s):
-            outer_progress = i
+        let outer_progress;
+        while (i < s.length){
+            outer_progress = i;
             //@+<< Create a node for the next module >>
             //@+node:felix.20230511002352.42: *6* << Create a node for the next module >>
-            if theType == "cweb":
-                console.assert self.isModuleStart(s, i)
-                start = i
-                if self.isDocStart(s, i):
-                    i += 2
-                    while i < len(s):
-                        progress = i
-                        i = g.skip_ws_and_nl(s, i)
-                        if self.isModuleStart(s, i):
-                            break
-                        else:
-                            i = g.skip_line(s, i)
-                        console.assert i > progress
+            if( theType === "cweb"){
+                console.assert( this.isModuleStart(s, i));
+                const start = i;
+                if (this.isDocStart(s, i)){
+                    i += 2;
+                    while (i < s.length){
+                        progress = i;
+                        i = g.skip_ws_and_nl(s, i);
+                        if (this.isModuleStart(s, i)){
+                            break;
+                        }else{
+                            i = g.skip_line(s, i);
+                        }
+                        console.assert(i > progress);
+                    }
+                }
+
                 //@+<< Handle cweb @d, @f, @c and @p directives >>
                 //@+node:felix.20230511002352.43: *7* << Handle cweb @d, @f, @c and @p directives >>
-                if g.match(s, i, "@d") or g.match(s, i, "@f"):
-                    i += 2
-                    i = g.skip_line(s, i)
+                if (g.match(s, i, "@d") || g.match(s, i, "@f")){
+                    i += 2;
+                    i = g.skip_line(s, i);
                     // Place all @d and @f directives in the same node.
-                    while i < len(s):
-                        progress = i
-                        i = g.skip_ws_and_nl(s, i)
-                        if g.match(s, i, "@d") or g.match(s, i, "@f"):
-                            i = g.skip_line(s, i)
-                        else:
-                            break
-                        console.assert i > progress
-                    i = g.skip_ws_and_nl(s, i)
-                while i < len(s) and not self.isModuleStart(s, i):
-                    progress = i
-                    i = g.skip_line(s, i)
-                    i = g.skip_ws_and_nl(s, i)
-                    console.assert i > progress
-                if g.match(s, i, "@c") or g.match(s, i, "@p"):
-                    i += 2
-                    while i < len(s):
-                        progress = i
-                        i = g.skip_line(s, i)
-                        i = g.skip_ws_and_nl(s, i)
-                        if self.isModuleStart(s, i):
-                            break
-                        console.assert i > progress
+                    while (i < s.length){
+                        progress = i;
+                        i = g.skip_ws_and_nl(s, i);
+                        if ((g.match(s, i, "@d") || g.match(s, i, "@f"))){
+                            i = g.skip_line(s, i);
+                        }else{
+                            break;
+                        }
+                        console.assert( i > progress);
+                    }
+                    i = g.skip_ws_and_nl(s, i);
+
+                }
+                while (i < s.length && !this.isModuleStart(s, i)){
+                    progress = i;
+                    i = g.skip_line(s, i);
+                    i = g.skip_ws_and_nl(s, i);
+                    console.assert( i > progress);
+                }
+
+                if (g.match(s, i, "@c") || g.match(s, i, "@p")){
+                    i += 2;
+                    while (i < s.length){
+                        progress = i;
+                        i = g.skip_line(s, i);
+                        i = g.skip_ws_and_nl(s, i);
+                        if (this.isModuleStart(s, i)){
+                            break;
+                        }
+
+                        console.assert( i > progress);
+                    }
+                }
                 //@-<< Handle cweb @d, @f, @c and @p directives >>
-            else
-                console.assert self.isDocStart(s, i)
-                start = i
-                i = g.skip_line(s, i)
-                while i < len(s):
-                    progress = i
-                    i = g.skip_ws_and_nl(s, i)
-                    if self.isDocStart(s, i):
-                        break
-                    else:
-                        i = g.skip_line(s, i)
-                    console.assert i > progress
-            body = s[start:i]
-            body = self.massageWebBody(body)
-            headline = self.scanBodyForHeadline(body)
-            self.createHeadline(parent, body, headline)
+            }else{
+                console.assert (this.isDocStart(s, i));
+                const start = i;
+                i = g.skip_line(s, i);
+                while( i < s.length){
+                    progress = i;
+                    i = g.skip_ws_and_nl(s, i);
+                    if( this.isDocStart(s, i)){
+                        break;
+                    }else{
+                        i = g.skip_line(s, i);
+                    }
+                    console.assert( i > progress);
+                }
+            }
+            let body = s.substring(start, i);
+            body = this.massageWebBody(body);
+            headline = this.scanBodyForHeadline(body);
+            this.createHeadline(parent, body, headline);
             //@-<< Create a node for the next module >>
-            console.assert i > outer_progress
+            console.assert(i > outer_progress);
+        }
+    }
     //@+node:felix.20230511002352.44: *5* Symbol table
     //@+node:felix.20230511002352.45: *6* cstCanonicalize
     // We canonicalize strings before looking them up,
     // but strings are entered in the form they are first encountered.
 
-    public cstCanonicalize(s: str, lower: bool = True): string
-        if lower:
-            s = s.lower()
-        s = s.replace("\t", " ").replace("\r", "")
-        s = s.replace("\n", " ").replace("  ", " ")
-        return s.trim()
+    public cstCanonicalize(s: string, lower = true): string {
+        if (lower){
+            s = s.toLowerCase();
+        }
+        s = s.replace(/\t/g, ' ').replace(/\r/g, '');
+        s = s.replace(/\n/g, ' ').replace(/  /g, ' ');
+        return s.trim();
+
+    }
     //@+node:felix.20230511002352.46: *6* cstDump
-    public cstDump(self): string
-        s = "Web Symbol Table...\n\n"
-        for name in sorted(self.web_st):
-            s += name + "\n"
-        return s
+    public cstDump(): string {
+        s = "Web Symbol Table...\n\n";
+        for (const name of [...this.web_st].sort()){
+            s += name + "\n";
+        }
+        return s;
+    }
     //@+node:felix.20230511002352.47: *6* cstEnter
     // We only enter the section name into the symbol table if the ... convention is not used.
 
-    public cstEnter(s: str): void
+    public cstEnter(s: string): void {
         // Don't enter names that end in "..."
-        s = s.trimEnd()
-        if s.endsWith("..."):
-            return
+        s = s.trimEnd();
+        if(s.endsWith("...")){
+            return;
+        }
         // Put the section name in the symbol table, retaining capitalization.
-        lower = self.cstCanonicalize(s, True)  // do lower
-        upper = self.cstCanonicalize(s, False)  // don't lower.
-        for name in self.web_st:
-            if name.lower() == lower:
-                return
-        this.web_st.append(upper)
+        const lower = this.cstCanonicalize(s, true);  // do lower
+        const upper = this.cstCanonicalize(s, false);  // don't lower.
+        for (const name of this.web_st){
+            if (name.toLowerCase() === lower){
+                return;
+            }
+        }
+        this.web_st.push(upper);
+
+    }
     //@+node:felix.20230511002352.48: *6* cstLookup
     // This method returns a string if the indicated string is a prefix of an entry in the web_st.
 
-    public cstLookup(target: str): string
+    public cstLookup(target: string): string {
         // Do nothing if the ... convention is not used.
-        target = target.trim()
-        if not target.endsWith("..."):
-            return target
+        target = target.trim();
+        if (!target.endsWith("...")){
+            return target;
+        }
         // Canonicalize the target name, and remove the trailing "..."
-        ctarget = target[:-3]
-        ctarget = self.cstCanonicalize(ctarget).trim()
-        found = False
-        result = target
-        for s in self.web_st:
-            cs = self.cstCanonicalize(s)
-            if cs[: len(ctarget)] == ctarget:
-                if found:
-                    g.es('', f"****** {target}", 'is also a prefix of', s)
-                else:
-                    found = True
-                    result = s
+        let ctarget = target.slice(0,-3);
+        ctarget = this.cstCanonicalize(ctarget).trim();
+        let found = false;
+        let result = target;
+        for (const s of this.web_st){
+            cs = self.cstCanonicalize(s);
+            if (cs.substring(0, ctarget.length) === ctarget){
+                if (found){
+                    g.es('', `****** ${target}`, 'is also a prefix of', s);
+                }else{
+                    found = true;
+                    result = s;
                     // g.es("replacing",target,"with",s)
-        return result
+                }
+            }
+        }
+        return result;
+    }
     //@+node:felix.20230511002352.49: *3* ic.parse_body
-    public parse_body(p: Position): void
-        """
-        Parse p.b as source code, creating a tree of descendant nodes.
-        This is essentially an import of p.b.
-        """
-        if not p:
-            return
-        c, d, ic = self.c, g.app.language_extension_dict, self
-        if p.hasChildren():
-            g.es_print('can not run parse-body: node has children:', p.h)
-            return
-        language = g.scanForAtLanguage(c, p)
-        this.treeType = '@file'
-        ext = '.' + d.get(language)
-        parser = g.app.classDispatchDict.get(ext)
+    /**
+     * Parse p.b as source code, creating a tree of descendant nodes.
+     * This is essentially an import of p.b.
+     */
+    public parse_body(p: Position): void{
+       
+        if (!p || !p.__bool__()){
+            return;
+        }
+        const c = this.c;
+        const d= g.app.language_extension_dict;
+        const ic = this;
+        if (p.hasChildren()){
+            g.es_print('can not run parse-body: node has children:', p.h);
+            return;
+        }
+        const language = g.scanForAtLanguage(c, p);
+        this.treeType = '@file';
+        const ext = '.' + d[language];
+        const parser = g.app.classDispatchDict[ext];
         // Fix bug 151: parse-body creates "None declarations"
-        if p.isAnyAtFileNode():
-            fn = p.anyAtFileNodeName()
-            ic.methodName, ic.fileType = g.os_path_splitext(fn)
-        else
-            fileType = d.get(language, 'py')
-            ic.methodName, ic.fileType = p.h, fileType
-        if not parser:
-            g.es_print(f"parse-body: no parser for @language {language or 'None'}")
-            return
-        bunch = c.undoer.beforeChangeTree(p)
-        s = p.b
-        p.b = ''
-        try:
-            parser(c, p, s)
-            c.undoer.afterChangeTree(p, 'parse-body', bunch)
-            p.expand()
-            c.selectPosition(p)
-            c.redraw()
-        catch Exception:
-            g.es_exception()
-            p.b = s
+        if (p.isAnyAtFileNode()){
+            const fn = p.anyAtFileNodeName();
+            [ic.methodName, ic.fileType] = g.os_path_splitext(fn);
+        }else{
+            fileType = d.get(language, 'py');
+            [ic.methodName, ic.fileType] = [p.h, fileType];
+        }
+        if (!parser){
+            g.es_print(`parse-body: no parser for @language ${language || 'None'}`);
+            return;
+        }
+        const bunch = c.undoer.beforeChangeTree(p);
+        const s = p.b;
+        p.b = '';
+        try{
+            parser(c, p, s);
+            c.undoer.afterChangeTree(p, 'parse-body', bunch);
+            p.expand();
+            c.selectPosition(p);
+            c.redraw();
+        }catch (exception){
+            g.es_exception(exception);
+            p.b = s;
+        }
+
+    }
     //@+node:felix.20230511002352.50: *3* ic.Utilities
     //@+node:felix.20230511002352.51: *4* ic.appendStringToBody & setBodyString (leoImport)
-    public appendStringToBody(p: Position, s: str): void
-        """Similar to c.appendStringToBody,
-        but does not recolor the text or redraw the screen."""
-        if s:
-            p.b = p.b + g.toUnicode(s, self.encoding)
+    /**
+     * Similar to c.appendStringToBody,
+     * but does not recolor the text or redraw the screen.
+     */
+    public appendStringToBody(p: Position, s: string): void {
+        if (s){
+            p.b = p.b + g.toUnicode(s, this.encoding);
+        }
+    }
+    /**
+     * Similar to c.setBodyString, but does not recolor the text or
+     * redraw the screen.
+     */
+    public setBodyString(p: Position, s: string): void {
+       
+        const c = this.c;
+        const v =  p.v;
+        if (!c || !p || !p.__bool__()){
+            return;
+        }
+        s = g.toUnicode(s, this.encoding);
+        if (c.p && c.p.__bool__() && p.v === c.p.v){
+            const w = c.frame.body.wrapper;
+            const i = s.length;
+            w.setAllText(s);
+            w.setSelectionRange(i, i, i);
+        }
 
-    public setBodyString(p: Position, s: str): void
-        """
-        Similar to c.setBodyString, but does not recolor the text or
-        redraw the screen.
-        """
-        c, v = self.c, p.v
-        if not c or not p:
-            return
-        s = g.toUnicode(s, self.encoding)
-        if c.p and p.v == c.p.v:
-            w = c.frame.body.wrapper
-            i = len(s)
-            w.setAllText(s)
-            w.setSelectionRange(i, i, insert=i)
         // Keep the body text up-to-date.
-        if v.b != s:
-            v.setBodyString(s)
-            v.setSelection(0, 0)
-            p.setDirty()
-            if not c.isChanged():
-                c.setChanged()
+        if( v.b !== s){
+            v.setBodyString(s);
+            v.setSelection(0, 0);
+            p.setDirty();
+            if (!c.isChanged()){
+                c.setChanged();
+            }
+        }
+    }
     //@+node:felix.20230511002352.52: *4* ic.createHeadline
-    public createHeadline(parent: Position, body: str, headline: str): Position 
-        """Create a new VNode as the last child of parent position."""
-        p = parent.insertAsLastChild()
-        p.initHeadString(headline)
-        if body:
-            self.setBodyString(p, body)
-        return p
+    /**
+     * Create a new VNode as the last child of parent position.
+     */
+    public createHeadline(parent: Position, body: string, headline: string): Position {
+        
+        const p = parent.insertAsLastChild();
+        p.initHeadString(headline);
+        if (body){
+            this.setBodyString(p, body);
+        }
+        return p;
+
+    }
     //@+node:felix.20230511002352.53: *4* ic.error
-    public error(s: str): void
-        g.es('', s)
+    public error(s: string): void {
+        g.es('', s);
+    }
     //@+node:felix.20230511002352.54: *4* ic.isDocStart & isModuleStart
     // The start of a document part or module in a noweb or cweb file.
     // Exporters may have to test for @doc as well.
 
-    public isDocStart(s: str, i: int): boolean 
-        if not g.match(s, i, "@"):
+    public isDocStart(s: str, i: int): boolean {
+        if( !g.match(s, i, "@")){
             return false;
-        j = g.skip_ws(s, i + 1)
-        if g.match(s, j, "%defs"):
+        }
+        const j = g.skip_ws(s, i + 1);
+        if (g.match(s, j, "%defs")){
             return false;
-        if self.webType == "cweb" and g.match(s, i, "@*"):
+        }
+        if (this.webType === "cweb" && g.match(s, i, "@*")){
             return true;
-        return g.match(s, i, "@ ") or g.match(s, i, "@\t") or g.match(s, i, "@\n")
+        }
+        return g.match(s, i, "@ ") || g.match(s, i, "@\t") || g.match(s, i, "@\n");
+    }
 
-    public isModuleStart(s: str, i: int): boolean 
-        if self.isDocStart(s, i):
+
+    public isModuleStart(s: str, i: int): boolean {
+        if (this.isDocStart(s, i)){
             return true;
-        return self.webType == "cweb" and (
-            g.match(s, i, "@c") or g.match(s, i, "@p") or
-            g.match(s, i, "@d") or g.match(s, i, "@f"))
+        }
+        return this.webType == "cweb" && (
+            g.match(s, i, "@c") || g.match(s, i, "@p") ||
+            g.match(s, i, "@d") || g.match(s, i, "@f"));
+    }
     //@+node:felix.20230511002352.55: *4* ic.massageWebBody
-    public massageWebBody(s: str): string
-        theType = self.webType
-        lb = "@<" if theType == "cweb" else "<<"
-        rb = "@>" if theType == "cweb" else ">>"
+    public massageWebBody(s: string): string {
+        const theType = this.webType;
+        const lb = theType == "cweb" ? "@<" : "<<";
+        const rb = theType == "cweb" ? "@>" : ">>";
         //@+<< Remove most newlines from @space and @* sections >>
         //@+node:felix.20230511002352.56: *5* << Remove most newlines from @space and @* sections >>
-        i = 0
-        while i < len(s):
-            progress = i
-            i = g.skip_ws_and_nl(s, i)
-            if self.isDocStart(s, i):
+        let i = 0;
+        let start;
+        let end;
+
+        while (i < s.length){
+            const progress = i;
+            i = g.skip_ws_and_nl(s, i);
+            if (this.isDocStart(s, i)){
                 // Scan to end of the doc part.
-                if g.match(s, i, "@ %def"):
+                if (g.match(s, i, "@ %def")){
                     // Don't remove the newline following %def
-                    i = g.skip_line(s, i)
-                    start = end = i
-                else:
-                    start = end = i
-                    i += 2
-                while i < len(s):
-                    progress2 = i
-                    i = g.skip_ws_and_nl(s, i)
-                    if self.isModuleStart(s, i) or g.match(s, i, lb):
-                        end = i
-                        break
-                    else if theType == "cweb":
+                    i = g.skip_line(s, i);
+                    start = i;
+                    end = i;
+                }else{
+                    start = i;
+                    end = i;
+                    i += 2;
+                }
+                while (i < s.length){
+                    const progress2 = i;
+                    i = g.skip_ws_and_nl(s, i);
+                    if (this.isModuleStart(s, i) || g.match(s, i, lb)){
+                        end = i;
+                        break;
+                    }else if (theType === "cweb"){
                         i += 1
-                    else:
-                        i = g.skip_to_end_of_line(s, i)
-                    console.assert i > progress2
+                    }else{
+                        i = g.skip_to_end_of_line(s, i);
+                    }
+                    console.assert (i > progress2);
+                }
                 // Remove newlines from start to end.
-                doc = s[start:end]
-                doc = doc.replace("\n", " ")
-                doc = doc.replace("\r", "")
-                doc = doc.trim()
-                if doc:
-                    if doc == "@":
-                        doc = "@ " if self.webType == "cweb" else "@\n"
-                    else:
-                        doc += "\n\n"
-                    s = s[:start] + doc + s[end:]
-                    i = start + len(doc)
-            else
-                i = g.skip_line(s, i)
-            console.assert i > progress
+                let doc = s.substring(start, end);
+                doc = doc.replace("\n", " ");
+                doc = doc.replace("\r", "");
+                doc = doc.trim();
+                if (doc){
+                    if (doc === "@"){
+                        doc = this.webType === "cweb"?"@ ": "@\n";
+                    }else{
+                        doc += "\n\n";
+                    }
+                    s = s.substring(0, start) + doc + s.substring(end);
+                    i = start + doc.length;
+                }
+
+            }else{
+                i = g.skip_line(s, i);
+            }
+            console.assert (i > progress);
+
+
+        }
         //@-<< Remove most newlines from @space and @* sections >>
         //@+<< Replace abbreviated names with full names >>
         //@+node:felix.20230511002352.57: *5* << Replace abbreviated names with full names >>
-        i = 0
-        while i < len(s):
-            progress = i
-            if g.match(s, i, lb):
-                i += 2
-                j = i
-                k = g.find_on_line(s, j, rb)
-                if k > -1:
-                    name = s[j:k]
-                    name2 = self.cstLookup(name)
-                    if name != name2:
+        i = 0;
+        while (i < s.length){
+            const progress = i;
+            if (g.match(s, i, lb)){
+                i += 2;
+                j = i;
+                k = g.find_on_line(s, j, rb);
+                if (k > -1){
+                    const name = s.substring(j, k);
+                    const name2 = this.cstLookup(name);
+                    if (name !== name2){
                         // Replace name by name2 in s.
-                        s = s[:j] + name2 + s[k:]
-                        i = j + len(name2)
-            i = g.skip_line(s, i)
-            console.assert i > progress
+                        s = s.substring(0, j) + name2 + s.substring(k);
+                        i = j + name2.length;
+                    }
+                }
+            }
+            i = g.skip_line(s, i);
+            console.assert( i > progress);
+        }
         //@-<< Replace abbreviated names with full names >>
-        s = s.trimEnd()
-        return s
+        s = s.trimEnd();
+        return s;
+    }
     //@+node:felix.20230511002352.58: *4* ic.setEncoding
-    public setEncoding(p?: Position, default?: string): void
+    public setEncoding(p?: Position, p_default?: BufferEncoding): void {
         const c = this.c;
-        encoding = g.getEncodingAt(p or c.p) or default
-        if encoding and g.isValidEncoding(encoding):
-            self.encoding = encoding
-        else if default:
-            self.encoding = default
-        else
-            self.encoding = 'utf-8'
+        const encoding = g.getEncodingAt(p || c.p) || p_default;
+        if (encoding && g.isValidEncoding(encoding)){
+            this.encoding = encoding;
+        }else if (p_default){
+            this.encoding = p_default;
+        }else{
+            this.encoding = 'utf-8';
+        }
+    }
     //@-others
 
 }

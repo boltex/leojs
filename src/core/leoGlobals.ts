@@ -2359,7 +2359,7 @@ export function find_on_line(s: string, i: number, pattern: string): number {
 /**
  * Return non-negative number if the body text contains the @ directive.
  */
-export function is_special(s: string, directive: string): number {
+export function is_special(s: string, directive: string): [boolean, number] {
     console.assert(directive && directive.substring(0, 1) === '@');
     // Most directives must start the line.
     const lws: boolean = ["@others", "@all"].includes(directive);
@@ -2369,9 +2369,9 @@ export function is_special(s: string, directive: string): number {
 
     if (m) {
         // javascript returns index including spaces before the match after newline
-        return m.index + m[0].length - m[1].length;
+        return [true, m.index + m[0].length - m[1].length];
     }
-    return -1;
+    return [false, -1];
 }
 
 //@+node:felix.20211104220753.1: *4* g.is_nl
