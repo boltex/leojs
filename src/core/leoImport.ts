@@ -4,6 +4,7 @@
 //@+node:felix.20230510231730.1: ** << leoImport imports >>
 import * as vscode from "vscode";
 import { Utils as uriUtils } from "vscode-uri";
+import * as utils from "../utils";
 
 import * as os from 'os';
 import * as safeJsonStringify from 'safe-json-stringify';
@@ -1582,121 +1583,173 @@ class LeoImportCommands {
 
 }
 //@+node:felix.20230511002459.1: ** class RecursiveImportController
-class RecursiveImportController:
-    """Recursively import all python files in a directory and clean the result."""
+/**
+ * Recursively import all python files in a directory and clean the result.
+ */
+export class RecursiveImportController {
+    
+    public c: Commands;
+    public add_path: boolean;
+    public file_pattern: RegExp;
+    public ignore_pattern: RegExp;
+    public kind: string;
+    public recursive: boolean;
+    public root: Position | undefined;
+    public safe_at_file: boolean;
+    public theTypes:string[] | undefined;
+    public verbose:boolean;
+    public n_files: number =0 ;
+
     //@+others
     //@+node:felix.20230511002459.2: *3* ric.ctor
-    public __init__(
-        c: Cmdr,
-        kind: str,
-        add_context: bool = None,  // Override setting only if True/False
-        add_file_context: bool = None,  // Override setting only if True/False
-        add_path: bool = True,
-        recursive: bool = True,
-        safe_at_file: bool = True,
-        theTypes: List[str] = None,
-        ignore_pattern: re.Pattern = None,
-        verbose: bool = True,  // legacy value.
-    ): void
-        """Ctor for RecursiveImportController class."""
-        this.c = c
-        this.add_path = add_path
-        this.file_pattern = re.compile(r'^(@@|@)(auto|clean|edit|file|nosent)')
-        this.ignore_pattern = ignore_pattern or re.compile(r'\.git|node_modules')
-        this.kind = kind  // in ('@auto', '@clean', '@edit', '@file', '@nosent')
-        this.recursive = recursive
-        this.root = None
-        this.safe_at_file = safe_at_file
-        this.theTypes = theTypes
-        this.verbose = verbose
+    /**
+     * Ctor for RecursiveImportController class.
+     */
+    constructor (
+        c: Commands,
+        kind: string,
+        add_context: boolean | undefined= undefined,  // Override setting only if True/False
+        add_file_context: boolean | undefined= undefined,  // Override setting only if True/False
+        add_path: boolean = true,
+        recursive: boolean = true,
+        safe_at_file: boolean = true,
+        theTypes: string[] | undefined= undefined,
+        ignore_pattern: RegExp | undefined = undefined,
+        verbose: boolean = true,  // legacy value.
+    ) {
+        
+        this.c = c;
+        this.add_path = add_path;
+        this.file_pattern = /^(@@|@)(auto|clean|edit|file|nosent)/;
+        this.ignore_pattern = ignore_pattern || /\.git|node_modules/;
+        this.kind = kind;  // in ('@auto', '@clean', '@edit', '@file', '@nosent')
+        this.recursive = recursive;
+        this.root = undefined;
+        this.safe_at_file = safe_at_file;
+        this.theTypes = theTypes;
+        this.verbose = verbose;
         // #1605:
 
-        def set_bool(setting: str, val: Any): void
-            if val not in (True, False):
-                return
-            c.config.set(None, 'bool', setting, val, warn=True)
+        const set_bool = (setting: string, val: any) : void => {
+            if (![true, false].includes(val)){
+                return;
+            }
+            c.config.set(undefined, 'bool', setting, val, true);
+        };
 
-        set_bool('add-context-to-headlines', add_context)
-        set_bool('add-file-context-to-headlines', add_file_context)
+        set_bool('add-context-to-headlines', add_context);
+        set_bool('add-file-context-to-headlines', add_file_context);
+    }
     //@+node:felix.20230511002459.3: *3* ric.run & helpers
-    public run(dir_: str): void
-        """
-        Import all files whose extension matches self.theTypes in dir_.
-        In fact, dir_ can be a path to a single file.
-        """
-        if self.kind not in ('@auto', '@clean', '@edit', '@file', '@nosent'):
-            g.es('bad kind param', self.kind, color='red')
-        try:
-            c = self.c
-            p1 = self.root = c.p
-            t1 = time.time()
-            g.app.disable_redraw = True
-            bunch = c.undoer.beforeChangeTree(p1)
-            // Leo 5.6: Always create a new last top-level node.
-            last = c.lastTopLevel()
-            parent = last.insertAfter()
-            parent.v.h = 'imported files'
+    /**
+     * Import all files whose extension matches this.theTypes in dir_.
+     * In fact, dir_ can be a path to a single file.
+     */
+    public async run(dir_: string): Promise<void> {
+        
+        if ( !['@auto', '@clean', '@edit', '@file', '@nosent'].includes(this.kind)){
+            g.es('bad kind param', this.kind);
+        }
+        const c = this.c;
+        const p1 = c.p; 
+        this.root = c.p;
+        const t1 = process.hrtime();
+        g.app.disable_redraw = true;
+        const bunch = c.undoer.beforeChangeTree(p1);
+        // Leo 5.6: Always create a new last top-level node.
+        const last = c.lastTopLevel();
+        const parent = last.insertAfter();
+        try{
+            parent.v.h = 'imported files';
             // Leo 5.6: Special case for a single file.
-            self.n_files = 0
-            if g.os_path_isfile(dir_):
-                if self.verbose:
-                    g.es_print('\nimporting file:', dir_)
-                self.import_one_file(dir_, parent)
-            else
-                self.import_dir(dir_, parent)
-            self.post_process(parent, dir_)  // Fix # 1033.
-            c.undoer.afterChangeTree(p1, 'recursive-import', bunch)
-        catch Exception:
-            g.es_print('Exception in recursive import')
-            g.es_exception()
-        finally:
-            g.app.disable_redraw = False
-            for p2 in parent.self_and_subtree(false):
-                p2.contract()
-            c.redraw(parent)
-        t2 = time.time()
-        n = len(list(parent.self_and_subtree()))
+            this.n_files = 0;
+            const w_isFile = await g.os_path_isfile(dir_);
+            if(w_isFile){
+                if (this.verbose){
+                    g.es_print('\nimporting file:', dir_);
+                }
+                await this.import_one_file(dir_, parent);
+            }else{
+                await this.import_dir(dir_, parent);
+            }
+            this.post_process(parent, dir_);  // Fix # 1033.
+            c.undoer.afterChangeTree(p1, 'recursive-import', bunch);
+        }catch (exception){
+            g.es_print('Exception in recursive import');
+            g.es_exception(exception);
+        }finally{
+            g.app.disable_redraw = false;
+            for (const p2 of parent.self_and_subtree(false)){
+                p2.contract();
+            }
+            c.redraw(parent);
+        }
+
+        const t2 = process.hrtime();
+        const n = [...parent.self_and_subtree()].length;
         g.es_print(
-            f"imported {n} node{g.plural(n)} "
-            f"in {self.n_files} file{g.plural(self.n_files)} "
-            f"in {t2 - t1:2.2f} seconds")
+            `imported ${n} node${g.plural(n)} ` +
+            `in ${this.n_files} file${g.plural(this.n_files)} ` +
+            `in ${utils.getDurationSeconds(t1, t2)} seconds`
+        );
+
+    }
     //@+node:felix.20230511002459.4: *4* ric.import_dir
-    public import_dir(dir_: str, parent: Position): void
-        """Import selected files from dir_, a directory."""
-        if g.os_path_isfile(dir_):
-            files = [dir_]
+    /**
+     * Import selected files from dir_, a directory.
+     */
+    public import_dir(dir_: string, parent: Position): Promise<void> 
+        
+        if g.os_path_isfile(dir_)
+            files = [dir_];
         else
-            if self.verbose:
+            if this.verbose
                 g.es_print('importing directory:', dir_)
+
             files = os.listdir(dir_)
-        dirs, files2 = [], []
-        for path in files:
-            try:
+
+        const dirs= [];
+        const files2 = [];
+        for const path of files
+            try
                 // Fix #408. Catch path exceptions.
                 // The idea here is to keep going on small errors.
                 path = g.os_path_join(dir_, path)
-                if g.os_path_isfile(path):
+                if g.os_path_isfile(path)
                     name, ext = g.os_path_splitext(path)
-                    if ext in self.theTypes:
-                        files2.append(path)
-                else if self.recursive:
-                    if not self.ignore_pattern.search(path):
-                        dirs.append(path)
-            catch OSError:
+                    if const ext of this.theTypes
+                        files2.push(path);
+
+
+                else if this.recursive
+                    if not this.ignore_pattern.search(path)
+                        dirs.push(path);
+
+
+            catch OSError
                 g.es_print('Exception computing', path)
                 g.es_exception()
-        if files or dirs:
-            console.assert parent and parent.v != self.root.v, g.callers()
+
+
+
+        if files or dirs
+            console.assert parent and parent.v != this.root.v, g.callers()
             parent = parent.insertAsLastChild()
             parent.v.h = dir_
-            if files2:
-                for f in files2:
-                    if not self.ignore_pattern.search(f):
-                        self.import_one_file(f, parent=parent)
-            if dirs:
-                console.assert self.recursive
-                for dir_ in sorted(dirs):
-                    self.import_dir(dir_, parent)
+            if files2
+                for f in files2
+                    if not this.ignore_pattern.search(f)
+                        this.import_one_file(f, parent=parent)
+
+
+
+            if dirs
+                console.assert this.recursive
+                for dir_ in sorted(dirs)
+                    this.import_dir(dir_, parent)
+
+
+
     //@+node:felix.20230511002459.5: *4* ric.import_one_file
     public import_one_file(path: str, parent: Position): void
         """Import one file to the last top-level node."""
@@ -1849,6 +1902,8 @@ class RecursiveImportController:
             c.deletePositionsInList(aList)  // Don't redraw
 
     //@-others
+
+}
 //@+node:felix.20230511002653.1: ** class TabImporter
 class TabImporter:
     """
