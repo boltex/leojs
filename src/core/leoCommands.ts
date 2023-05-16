@@ -891,7 +891,7 @@ export class Commands {
     /**
      * Return the tab width in effect at p.
      */
-    public getTabWidth(p: Position): number | undefined {
+    public getTabWidth(p?: Position): number | undefined {
         const c: Commands = this;
         const val: number | undefined = g.scanAllAtTabWidthDirectives(c, p);
         return val;

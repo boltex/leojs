@@ -76,7 +76,7 @@ import { Position, VNode } from './leoNodes';
  *
  * For more information, see leo/plugins/importers/howto.txt.
  */
-class LeoImportCommands {
+export class LeoImportCommands {
    
     public c: Commands ;
     public encoding: BufferEncoding;
@@ -85,7 +85,7 @@ class LeoImportCommands {
     public fileType: string | undefined;
     public methodName: string | undefined;
     public output_newline: string;
-    public tab_width: number;
+    public tab_width: number|undefined;
     public treeType: string;
     public verbose: boolean;
     public webType: string;
@@ -617,11 +617,13 @@ class LeoImportCommands {
         try{
 
             // with open(filename, 'w', this.encoding) as f
+            const w_uri = g.makeVscodeUri(filename);
+
             let f = "";
 
-            for(const p of p.self_and_subtree()){
-                s = p.b;
-                s2 = s.trim();
+            for(const w_p of p.self_and_subtree()){
+                const s = p.b;
+                const s2 = s.trim();
                 if (s2){
                     f += "-".repeat(60);
                     f += nl;
@@ -629,7 +631,7 @@ class LeoImportCommands {
                     //@+node:felix.20230511002352.20: *5* << write the context of p to f >> (weave)
                     // write the headlines of p, p's parent and p's grandparent.
                     const context = [];
-                    const p2 = p.copy();
+                    const p2 = w_p.copy();
                     let i = 0;
 
                     while (i < 3){
@@ -676,12 +678,12 @@ class LeoImportCommands {
      * parent:     The parent position of the created outline.
      * s:          A string or None. The file's contents.
      */
-    public createOutline(parent: Position, ext?:string , s?:string): Position {
+    public async createOutline(parent: Position, ext?:string , s?:string): Promise<Position|undefined> {
       
         const c = this.c;
         const p = parent.copy();
         this.treeType = '@file';  // Fix #352.
-        fileName = c.fullPath(parent);
+        const fileName = c.fullPath(parent);
         if( g.is_binary_external_file(fileName)){
             return this.import_binary_file(fileName, parent);
         }
@@ -691,9 +693,8 @@ class LeoImportCommands {
             c.config.default_at_auto_file_encoding
         );
 
-        let s;
-        [ext, s] = this.init_import(ext, fileName, s);
-        if (s == null){
+        [ext, s] = await this.init_import(ext, fileName, s);
+        if (s == null || !ext){
             return undefined;
         }
         // The so-called scanning func is a callback. It must have a c argument.
@@ -721,7 +722,7 @@ class LeoImportCommands {
         // #889175: Remember the full fileName.
         c.atFileCommands.rememberReadPath(fileName, p);
         p.contract();
-        w = c.frame.body.wrapper;
+        const w = c.frame.body.wrapper;
         w.setInsertPoint(0);
         w.seeInsertPoint();
         return p;
@@ -744,6 +745,7 @@ class LeoImportCommands {
         // Fix bug 1185409 importing binary files puts binary content in body editor.
         // Create an @url node.
         const c = this.c;
+        let p;
         if (parent && parent.__bool__()){
             p = parent.insertAsLastChild();
         }else{
@@ -757,7 +759,7 @@ class LeoImportCommands {
      * Init ivars imports and read the file into s.
      * Return ext, s.
      */
-    public init_import(ext:string, fileName:string, s:string): [string|undefined, string|undefined] {
+    public async init_import(ext:string|undefined, fileName:string, s?:string): Promise<[string|undefined, string|undefined]> {
         let junk;
         [junk, this.fileName] = g.os_path_split(fileName);
         [this.methodName, this.fileType] = g.os_path_splitext(this.fileName);
@@ -768,7 +770,7 @@ class LeoImportCommands {
         if (!s){
             let e;
             // Set the kind for error messages in readFileIntoString.
-            [s, e] = g.readFileIntoString(fileName, this.encoding);
+            [s, e] =await g.readFileIntoString(fileName, this.encoding);
             if( s == null){
                 return [undefined, undefined];
             }
@@ -785,20 +787,20 @@ class LeoImportCommands {
      */
     public scanUnknownFileType(s:string, p: Position, ext:string): boolean {
         
-        body = '';
+        let body = '';
         if (['.html', '.htm'].includes(ext)){
             body += '@language html\n';
         }else if (['.txt', '.text'].includes(ext)){
             body += '@nocolor\n';
         }else{
-            language = this.languageForExtension(ext);
+            const language = this.languageForExtension(ext);
             if (language){
                 body += `@language ${language}\n`;
             }
         }
         this.setBodyString(p, body + s);
-        for (const p of p.self_and_subtree()){
-            p.clearDirty();
+        for (const w_p of p.self_and_subtree()){
+            w_p.clearDirty();
         }
         return true;
     }
@@ -812,9 +814,9 @@ class LeoImportCommands {
         if (ext.startsWith('.')){
             ext = ext.substring(1);
         }
-
+        let language;
         if (ext){
-            z = g.app.extra_extension_dict[ext];
+            const z = g.app.extra_extension_dict[ext];
             if (![undefined, 'undefined', 'none', 'None'].includes(z)){
                 language = z;
             }else{
@@ -882,10 +884,11 @@ class LeoImportCommands {
         if (command){
             u.beforeChangeGroup(current, command);
         }
-        for (const fileName of paths){
+        for (let fileName of paths){
             fileName = fileName.replace('\\', '/');  // 2011/10/09.
             g.setGlobalOpenDir(fileName);
-            isThin = at.scanHeaderForThin(fileName);
+            const isThin = at.scanHeaderForThin(fileName);
+            let undoData;
             if (command){
                 undoData = u.beforeInsertNode(parent);
             }
@@ -2043,7 +2046,7 @@ class TabImporter:
                 parent.h = h
 
 
-        else if lws > level:
+        else if lws > level
             // Create a new parent.
             level = lws
             parent = parent.insertAsLastChild()
@@ -2051,9 +2054,9 @@ class TabImporter:
             stack.append((level, parent),)
         else
             // Find the previous parent.
-            while stack:
+            while stack
                 level2, parent2 = stack.pop()
-                if level2 == lws:
+                if level2 === lws
                     grand_parent = stack[-1][1] if stack else root
                     parent = grand_parent.insertAsLastChild()  // lws < level
                     parent.h = h
@@ -2064,19 +2067,22 @@ class TabImporter:
                 level = 0
                 parent = root.insertAsLastChild()
                 parent.h = h
-                stack = [(0, parent),]
+                stack = [[0, parent]]
 
 
-        console.assert parent and parent == stack[-1][1]  // An important invariant.
-        console.assert level == stack[-1][0], (level, stack[-1][0])
-        if not separate:
-            parent.b = parent.b + this.undent(level, s)
+        console.assert parent && parent.__eq__(stack[-1][1]);  // An important invariant.
+        console.assert level === stack[-1][0], JSON.stringify([level, stack[-1][0]])
+        if !separate
+            parent.b = parent.b + this.undent(level, s);
 
 
         return level
     //@+node:felix.20230511002653.9: *3* tabbed.undent
-    public undent(level: number, s: string): string
-        """Unindent all lines of p.b by level."""
+    /**
+     * Unindent all lines of p.b by level.
+     */
+    public undent(level: number, s: string): string 
+        
         if level <= 0
             return s
 
@@ -2085,10 +2091,10 @@ class TabImporter:
             ch = lines[0][0]
             console.assert ch in ' \t', repr(ch)
             // Check that all lines start with the proper lws.
-            lws = ch * level
-            for s in lines
+            lws = ch.repeat(level)
+            for const s of lines
                 if !s.startsWith(lws)
-                    g.trace(f"bad indentation: {s!r}");
+                    g.trace(`bad indentation: ${s!r}`);
                     return s;
 
 

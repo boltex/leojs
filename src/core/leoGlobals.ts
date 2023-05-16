@@ -1399,7 +1399,7 @@ export function scanAtTabwidthDirectives(aList: any[], issue_error_flag = false)
 /**
  * Scan p and all ancestors looking for '@tabwidth' directives.
  */
-export function scanAllAtTabWidthDirectives(c: Commands, p: Position): number | undefined {
+export function scanAllAtTabWidthDirectives(c: Commands, p?: Position): number | undefined {
     let ret: number | undefined;
     if (c && p && p.__bool__()) {
         const aList: any[] = get_directives_dict_list(p);
