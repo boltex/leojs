@@ -203,7 +203,7 @@ export class CommanderFileCommands {
         others = [z for z in names if z not in derived]
 
         if derived
-            ic.importDerivedFiles(c.p, derived);
+            await ic.importDerivedFiles(c.p, derived);
 
 
         let junk: string;
@@ -386,7 +386,7 @@ export class CommanderFileCommands {
                     if (w_looksDerived) {
                         console.log('TODO : IMPORT FILES');
                         // TODO : IMPORT FILES
-                        // ok = p_c.importCommands.importDerivedFiles(
+                        // ok = await p_c.importCommands.importDerivedFiles(
                         //     p_c.p,
                         //     [fileName],
                         //     'Open');

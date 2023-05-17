@@ -2865,7 +2865,7 @@ export class LoadManager {
 
             }else if( c.looksLikeDerivedFile(fn)){
                 // 2011/10/10: Create an @file node.
-                p = c.importCommands.importDerivedFiles(parent=c.rootPosition(),
+                p = await c.importCommands.importDerivedFiles(parent=c.rootPosition(),
                     paths=[fn], command=undefined);  // Not undoable.
                 if p && p.hasBack()
                     p.back().doDelete();

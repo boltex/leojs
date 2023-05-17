@@ -684,7 +684,7 @@ export class LeoImportCommands {
         const p = parent.copy();
         this.treeType = '@file';  // Fix #352.
         const fileName = c.fullPath(parent);
-        if( g.is_binary_external_file(fileName)){
+        if(await g.is_binary_external_file(fileName)){
             return this.import_binary_file(fileName, parent);
         }
         // Init ivars.
@@ -865,16 +865,16 @@ export class LeoImportCommands {
      * This is not a command.  It must *not* have an event arg.
      * command is None when importing from the command line.
      */
-    public importDerivedFiles(
-        parent: Position  | undefined,
+    public async importDerivedFiles(
+        parent: Position,
         paths: string[]| undefined,
         command = 'Import',
-    ) : Position | undefined {
+    ) : Promise<Position | undefined> {
        
         const at = this.c.atFileCommands;
         const c = this.c;
         const u = this.c.undoer;
-        const current = c.p && c.p.__bool__()?c.p : c.rootPosition();
+        const current = c.p && c.p.__bool__()?c.p : c.rootPosition()!;
         this.tab_width = c.getTabWidth(current);
 
         if (!paths || !paths.length){
@@ -884,46 +884,47 @@ export class LeoImportCommands {
         if (command){
             u.beforeChangeGroup(current, command);
         }
+        let p: Position; // p will exist because path is not empty.
         for (let fileName of paths){
             fileName = fileName.replace('\\', '/');  // 2011/10/09.
             g.setGlobalOpenDir(fileName);
-            const isThin = at.scanHeaderForThin(fileName);
+            const isThin = await at.scanHeaderForThin(fileName);
             let undoData;
             if (command){
                 undoData = u.beforeInsertNode(parent);
             }
-            const p = parent.insertAfter();
+            p = parent.insertAfter();
             if (isThin){
                 // Create @file node, not a deprecated @thin node.
                 p.initHeadString("@file " + fileName);
-                at.read(p);
+                await at.read(p);
             }else{
                 p.initHeadString("Imported @file " + fileName);
-                at.read(p);
+                await at.read(p);
             }
             p.contract();
             p.setDirty();  // 2011/10/09: tell why the file is dirty!
             if (command){
-                u.afterInsertNode(p, command, undoData);
+                u.afterInsertNode(p, command, undoData!); // undodata will exist under same 'if'.
             }
         }
         current.expand();
         c.setChanged();
         if (command){
-            u.afterChangeGroup(p, command);
+            u.afterChangeGroup(p!, command);
         }
         c.redraw(current);
-        return p;
+        return p!;
 
     }
     //@+node:felix.20230511002352.30: *4* ic.importFilesCommand
-    public importFilesCommand(
+    public async importFilesCommand(
         files: string[] | undefined,
         parent: Position | undefined,
-        shortFn: false,
-        treeType?: string,
-        verbose: true,  // Legacy value.
-    ): void {
+        shortFn = false,
+        treeType: string | undefined,
+        verbose = true,  // Legacy value.
+    ): Promise<void> {
         // Not a command.  It must *not* have an event arg.
         const c = this.c;
         const u = this.c.undoer;
@@ -944,10 +945,10 @@ export class LeoImportCommands {
                 g.setGlobalOpenDir(fn);
                 // Leo 5.6: Handle undo here, not in createOutline.
                 const undoData = u.beforeInsertNode(parent);
-                const p = parent.insertAsLastChild();
+                let p: Position | undefined = parent.insertAsLastChild();
                 p.h = `${treeType} ${fn}`;
                 u.afterInsertNode(p, 'Import', undoData);
-                p = this.createOutline(parent=p);
+                p = await this.createOutline(p);
                 if (p && p.__bool__()){  // createOutline may fail.
                     if (this.verbose && !g.unitTesting){
                         g.blue("imported", shortFn? g.shortFileName(fn) : fn);
@@ -995,7 +996,7 @@ export class LeoImportCommands {
         this.webType = webType;
         for (const fileName of files){
             g.setGlobalOpenDir(fileName);
-            p = this.createOutlineFromWeb(fileName, current);
+            let p = this.createOutlineFromWeb(fileName, current);
             p.contract();
             p.setDirty();
             c.setChanged();
@@ -1009,7 +1010,7 @@ export class LeoImportCommands {
         let [junk, fileName] = g.os_path_split(path);
         const undoData = u.beforeInsertNode(parent);
         // Create the top-level headline.
-        p = parent.insertAsLastChild();
+        let p = parent.insertAsLastChild();
         p.initHeadString(fileName);
         if (this.webType === "cweb"){
             this.setBodyString(p, "@ignore\n@language cweb");
@@ -1028,7 +1029,7 @@ export class LeoImportCommands {
         let name: string | undefined = undefined;
         while (i < k){
             if (g.is_c_id(s[i])){
-                j = i;
+                const j = i;
                 i = g.skip_c_id(s, i);
                 name = s.substring(j, i);
             }else if( s[i] === '('){
@@ -1084,7 +1085,7 @@ export class LeoImportCommands {
                     // Look for a section def.
                     // A small bug: the section def must end on this line.
                     j = i;
-                    k = g.find_on_line(s, i, "@>");
+                    const k = g.find_on_line(s, i, "@>");
                     if (k > -1 && (g.match(s, k + 2, "+=") || g.match(s, k + 2, "="))){
                         return s.substring(j, i);
                         return s.substring(j, k + 2);  // return the section ref.
@@ -1102,9 +1103,9 @@ export class LeoImportCommands {
             while (i < s.length){
                 i = g.skip_ws_and_nl(s, i);
                 if( g.match(s, i, "<<")){
-                    k = g.find_on_line(s, i, ">>=");
+                    const k = g.find_on_line(s, i, ">>=");
                     if (k > -1){
-                        ref = s.substring(i, k + 2);
+                        const ref = s.substring(i, k + 2);
                         name = s.substring(i + 2, k).trim();
                         if (name !== "@others"){
                             return ref;
@@ -1125,11 +1126,11 @@ export class LeoImportCommands {
         return "@";  // default.
     }
     //@+node:felix.20230511002352.39: *5* scanWebFile (handles limbo)
-    public scanWebFile(fileName: string, parent: Position): void {
+    public async scanWebFile(fileName: string, parent: Position): Promise<void> {
         const theType = this.webType;
         const lb =theType == "cweb" ? "@<" : "<<";
         const rb =theType == "cweb" ? "@>" : ">>";
-        let [s, e] = g.readFileIntoString(fileName);
+        let [s, e] = await g.readFileIntoString(fileName);
         if (s == null){
             return;
         }
@@ -1150,8 +1151,8 @@ export class LeoImportCommands {
                 i += 2;
             }else if(g.match(s, i, lb)){
                 i += 2;
-                j = i;
-                k = g.find_on_line(s, j, rb);
+                let j = i;
+                let k = g.find_on_line(s, j, rb);
                 if (k > -1){
                     this.cstEnter(s.substring(j, k));
                 }
@@ -1195,17 +1196,18 @@ export class LeoImportCommands {
         }
         //@-<< Create nodes for limbo text and the root section >>
         let outer_progress;
+        let start;
         while (i < s.length){
             outer_progress = i;
             //@+<< Create a node for the next module >>
             //@+node:felix.20230511002352.42: *6* << Create a node for the next module >>
             if( theType === "cweb"){
                 console.assert( this.isModuleStart(s, i));
-                const start = i;
+                start = i;
                 if (this.isDocStart(s, i)){
                     i += 2;
                     while (i < s.length){
-                        progress = i;
+                        let progress = i;
                         i = g.skip_ws_and_nl(s, i);
                         if (this.isModuleStart(s, i)){
                             break;
@@ -1223,7 +1225,7 @@ export class LeoImportCommands {
                     i = g.skip_line(s, i);
                     // Place all @d and @f directives in the same node.
                     while (i < s.length){
-                        progress = i;
+                        let progress = i;
                         i = g.skip_ws_and_nl(s, i);
                         if ((g.match(s, i, "@d") || g.match(s, i, "@f"))){
                             i = g.skip_line(s, i);
@@ -1236,7 +1238,7 @@ export class LeoImportCommands {
 
                 }
                 while (i < s.length && !this.isModuleStart(s, i)){
-                    progress = i;
+                    let progress = i;
                     i = g.skip_line(s, i);
                     i = g.skip_ws_and_nl(s, i);
                     console.assert( i > progress);
@@ -1245,7 +1247,7 @@ export class LeoImportCommands {
                 if (g.match(s, i, "@c") || g.match(s, i, "@p")){
                     i += 2;
                     while (i < s.length){
-                        progress = i;
+                        let progress = i;
                         i = g.skip_line(s, i);
                         i = g.skip_ws_and_nl(s, i);
                         if (this.isModuleStart(s, i)){
@@ -1258,10 +1260,10 @@ export class LeoImportCommands {
                 //@-<< Handle cweb @d, @f, @c and @p directives >>
             }else{
                 console.assert (this.isDocStart(s, i));
-                const start = i;
+                start = i;
                 i = g.skip_line(s, i);
                 while( i < s.length){
-                    progress = i;
+                    let progress = i;
                     i = g.skip_ws_and_nl(s, i);
                     if( this.isDocStart(s, i)){
                         break;
@@ -1273,7 +1275,7 @@ export class LeoImportCommands {
             }
             let body = s.substring(start, i);
             body = this.massageWebBody(body);
-            headline = this.scanBodyForHeadline(body);
+            const headline = this.scanBodyForHeadline(body);
             this.createHeadline(parent, body, headline);
             //@-<< Create a node for the next module >>
             console.assert(i > outer_progress);
@@ -1295,7 +1297,7 @@ export class LeoImportCommands {
     }
     //@+node:felix.20230511002352.46: *6* cstDump
     public cstDump(): string {
-        s = "Web Symbol Table...\n\n";
+        let s = "Web Symbol Table...\n\n";
         for (const name of [...this.web_st].sort()){
             s += name + "\n";
         }
@@ -1336,7 +1338,7 @@ export class LeoImportCommands {
         let found = false;
         let result = target;
         for (const s of this.web_st){
-            cs = self.cstCanonicalize(s);
+            const cs = this.cstCanonicalize(s);
             if (cs.substring(0, ctarget.length) === ctarget){
                 if (found){
                     g.es('', `****** ${target}`, 'is also a prefix of', s);
@@ -1366,7 +1368,7 @@ export class LeoImportCommands {
             g.es_print('can not run parse-body: node has children:', p.h);
             return;
         }
-        const language = g.scanForAtLanguage(c, p);
+        const language = g.scanForAtLanguage(c, p) || "";
         this.treeType = '@file';
         const ext = '.' + d[language];
         const parser = g.app.classDispatchDict[ext];
@@ -1375,7 +1377,7 @@ export class LeoImportCommands {
             const fn = p.anyAtFileNodeName();
             [ic.methodName, ic.fileType] = g.os_path_splitext(fn);
         }else{
-            fileType = d.get(language, 'py');
+            const fileType = d[language] || 'py';
             [ic.methodName, ic.fileType] = [p.h, fileType];
         }
         if (!parser){
@@ -1459,7 +1461,7 @@ export class LeoImportCommands {
     // The start of a document part or module in a noweb or cweb file.
     // Exporters may have to test for @doc as well.
 
-    public isDocStart(s: str, i: int): boolean {
+    public isDocStart(s: string, i: number): boolean {
         if( !g.match(s, i, "@")){
             return false;
         }
@@ -1474,7 +1476,7 @@ export class LeoImportCommands {
     }
 
 
-    public isModuleStart(s: str, i: int): boolean {
+    public isModuleStart(s: string, i: number): boolean {
         if (this.isDocStart(s, i)){
             return true;
         }
@@ -1551,8 +1553,8 @@ export class LeoImportCommands {
             const progress = i;
             if (g.match(s, i, lb)){
                 i += 2;
-                j = i;
-                k = g.find_on_line(s, j, rb);
+                const j = i;
+                const k = g.find_on_line(s, j, rb);
                 if (k > -1){
                     const name = s.substring(j, k);
                     const name2 = this.cstLookup(name);
@@ -1701,111 +1703,132 @@ export class RecursiveImportController {
     /**
      * Import selected files from dir_, a directory.
      */
-    public import_dir(dir_: string, parent: Position): Promise<void> 
-        
-        if g.os_path_isfile(dir_)
-            files = [dir_];
-        else
-            if this.verbose
-                g.es_print('importing directory:', dir_)
+    public async import_dir(dir_: string, parent: Position): Promise<void> {
 
-            files = os.listdir(dir_)
+        let files;
+
+        if (await g.os_path_isfile(dir_)){
+            files = [dir_];
+        }else{
+            if (this.verbose){
+                g.es_print('importing directory:', dir_);
+            }
+            files = await g.os_listdir(dir_);
+        }
 
         const dirs= [];
         const files2 = [];
-        for const path of files
-            try
+
+        for (let w_path of files){
+            try{
                 // Fix #408. Catch path exceptions.
                 // The idea here is to keep going on small errors.
-                path = g.os_path_join(dir_, path)
-                if g.os_path_isfile(path)
-                    name, ext = g.os_path_splitext(path)
-                    if const ext of this.theTypes
-                        files2.push(path);
+                w_path = g.os_path_join(dir_, w_path);
+                if (await g.os_path_isfile(w_path)){
+                    let [name, ext] = g.os_path_splitext(w_path);
+                    if (this.theTypes && this.theTypes.includes(ext)){
+                        files2.push(w_path);
+                    }
+                }else if (this.recursive){
+                    // if (this.ignore_pattern.search(w_path) === -1){
+                    if (w_path.search(this.ignore_pattern) === -1){
+                        dirs.push(w_path);
+                    }
+                }
+            }catch (OSError){
+                g.es_print('Exception computing', w_path);
+                g.es_exception(OSError);
+            }
+        }
 
-
-                else if this.recursive
-                    if not this.ignore_pattern.search(path)
-                        dirs.push(path);
-
-
-            catch OSError
-                g.es_print('Exception computing', path)
-                g.es_exception()
-
-
-
-        if files or dirs
-            console.assert parent and parent.v != this.root.v, g.callers()
-            parent = parent.insertAsLastChild()
-            parent.v.h = dir_
-            if files2
-                for f in files2
-                    if not this.ignore_pattern.search(f)
-                        this.import_one_file(f, parent=parent)
-
-
-
-            if dirs
-                console.assert this.recursive
-                for dir_ in sorted(dirs)
-                    this.import_dir(dir_, parent)
-
-
-
+        if (files.length || dirs.length){
+            console.assert(this.root && parent && parent.v !== this.root.v, "import_dir failed!" );
+            parent = parent.insertAsLastChild();
+            parent.v.h = dir_;
+            if (files2.length){
+                for (const f of files2){
+                    // if (this.ignore_pattern.search(f)===-1){
+                    if (f.search(this.ignore_pattern)===-1){
+                        await this.import_one_file(f, parent=parent);
+                    }
+                }
+            }
+            if (dirs.length){
+                console.assert( this.recursive);
+                for(const dir_ of dirs.sort()){
+                    await this.import_dir(dir_, parent);
+                }
+            }
+        }
+    }
     //@+node:felix.20230511002459.5: *4* ric.import_one_file
-    public import_one_file(path: str, parent: Position): void
-        """Import one file to the last top-level node."""
+    /**
+     * Import one file to the last top-level node.
+     */
+    public async import_one_file(p_path: string, parent: Position): Promise<void> {
+        
         const c = this.c;
-        this.n_files += 1
-        console.assert parent and parent.v != self.root.v, g.callers()
-        if self.kind == '@edit':
-            p = parent.insertAsLastChild()
-            p.v.h = '@edit ' + path.replace('\\', '/')  // 2021/02/19: bug fix: add @edit.
-            s, e = g.readFileIntoString(path, kind=self.kind)
-            p.v.b = s
-            return
+        this.n_files += 1;
+        console.assert( this.root && parent && parent.v !== this.root.v, "Error in import_one_file");
+        let p: Position;
+        if (this.kind === '@edit'){
+            p = parent.insertAsLastChild();
+            p.v.h = '@edit ' + p_path.replace(/\\/g, '/');  // 2021/02/19: bug fix: add @edit.
+            let [s, e] = await g.readFileIntoString(p_path, undefined, this.kind);
+            p.v.b = s || "";
+            return;
+        }
         // #1484: Use this for @auto as well.
         c.importCommands.importFilesCommand(
-            files=[path],
-            parent=parent,
-            shortFn=True,
-            treeType='@file',  // '@auto','@clean','@nosent' cause problems.
-            verbose=self.verbose,  // Leo 6.6.
-        )
-        p = parent.lastChild()
-        p.h = self.kind + p.h[5:]  // Honor the requested kind.
-        if self.safe_at_file:
-            p.v.h = '@' + p.v.h
+            [p_path],
+            parent,
+            true,
+            '@file',  // '@auto','@clean','@nosent' cause problems.
+            this.verbose,  // Leo 6.6.
+        );
+        p = parent.lastChild();
+        p.h = this.kind + p.h.substring(5);  // Honor the requested kind.
+        if (this.safe_at_file){
+            p.v.h = '@' + p.v.h;
+        }
+
+    }
     //@+node:felix.20230511002459.6: *4* ric.post_process & helpers
-    public post_process(p: Position, prefix: str): void
-        """
-        Traverse p's tree, replacing all nodes that start with prefix
-        by the smallest equivalent @path or @file node.
-        """
+    /**
+     * Traverse p's tree, replacing all nodes that start with prefix
+     * by the smallest equivalent @path or @file node.
+     */
+    public post_process(p: Position, prefix: string): void {
+        
         this.fix_back_slashes(p)
         prefix = prefix.replace('\\', '/')
-        if self.kind not in ('@auto', '@edit'):
-            self.remove_empty_nodes(p)
-        if p.firstChild():
-            self.minimize_headlines(p.firstChild(), prefix)
+        if this.kind not in ('@auto', '@edit')
+            this.remove_empty_nodes(p)
+        if p.firstChild()
+            this.minimize_headlines(p.firstChild(), prefix)
         this.clear_dirty_bits(p)
         this.add_class_names(p)
+    }
     //@+node:felix.20230511002459.7: *5* ric.add_class_names
-    public add_class_names(p: Position): void
-        """Add class names to headlines for all descendant nodes."""
+    /**
+     * Add class names to headlines for all descendant nodes.
+     */
+    public add_class_names(p: Position): void {
+
         // pylint: disable=no-else-continue
-        after, class_name = None, None
-        class_paren_pattern = re.compile(r'(.*)\(.*\)\.(.*)')
-        paren_pattern = re.compile(r'(.*)\(.*\.py\)')
-        for p of p.self_and_subtree(false)
+        const after = undefined;
+        const class_name = undefined;
+        const class_paren_pattern = re.compile(r'(.*)\(.*\)\.(.*)')
+        const paren_pattern = re.compile(r'(.*)\(.*\.py\)')
+        for (const p of p.self_and_subtree(false))
             // Part 1: update the status.
-            m = self.file_pattern.match(p.h)
+            m = this.file_pattern.match(p.h)
             if m
                 // prefix = m.group(1)
                 // fn = g.shortFileName(p.h[len(prefix):].trim())
                 after, class_name = None, None
                 continue
+
             else if p.h.startsWith('@path '):
                 after, class_name = None, None
             else if p.h.startsWith('class '):
@@ -1813,6 +1836,7 @@ export class RecursiveImportController {
                 if class_name
                     after = p.nodeAfterTree()
                     continue
+
 
             else if p == after:
                 after, class_name = None, None
@@ -1827,6 +1851,7 @@ export class RecursiveImportController {
                 else
                     p.h = f"{class_name}.{p.h}"
 
+
             else
                 m = paren_pattern.match(p.h)
                 if m
@@ -1839,71 +1864,94 @@ export class RecursiveImportController {
                 // if not p.h.endsWith(tag):
                     // p.h += tag
 
-
+    }
     //@+node:felix.20230511002459.8: *5* ric.clear_dirty_bits
-    public clear_dirty_bits(p: Position): void
+    public clear_dirty_bits(p: Position): void {
         const c = this.c;
-        c.clearChanged()  // Clears *all* dirty bits.
-        for p in p.self_and_subtree(false)
-            p.clearDirty()
+        c.clearChanged();  // Clears *all* dirty bits.
+        for (const p of p.self_and_subtree(false)){
+            p.clearDirty();
+        }
 
+    }
     //@+node:felix.20230511002459.9: *5* ric.dump_headlines
-    public dump_headlines(p: Position): void
+    public dump_headlines(p: Position): void {
         // show all headlines.
-        for p in p.self_and_subtree(false)
-            print(p.h)
+        for (const p of p.self_and_subtree(false)){
+            print(p.h);
+        }
+    }
     //@+node:felix.20230511002459.10: *5* ric.fix_back_slashes
-    public fix_back_slashes(p: Position): void
-        """Convert backslash to slash in all headlines."""
-        for p in p.self_and_subtree(false):
-            s = p.h.replace('\\', '/')
-            if s != p.h
-                p.v.h = s
+    /**
+     * Convert backslash to slash in all headlines.
+     */
+    public fix_back_slashes(p: Position): void {
+        
+        for( const p of p.self_and_subtree(false)){
+            s = p.h.replace(/\\/g, '/');
+            if( s !== p.h){
+                p.v.h = s;
+            }
 
-
+        }
+    }
     //@+node:felix.20230511002459.11: *5* ric.minimize_headlines & helper
-    public minimize_headlines(p: Position, prefix: str): void
-        """Create @path nodes to minimize the paths required in descendant nodes."""
-        if prefix and not prefix.endsWith('/'):
-            prefix = prefix + '/'
-
-        m = self.file_pattern.match(p.h)
-        if m
+    /**
+     * Create @path nodes to minimize the paths required in descendant nodes.
+     */
+    public minimize_headlines(p: Position, prefix: string): void {
+        
+        if (prefix && !prefix.endsWith('/')){
+            prefix = prefix + '/';
+        }
+        const m = p.h.match(this.file_pattern);
+        if (m && m.length){
             // It's an @file node of some kind. Strip off the prefix.
-            kind = m.group(0)
-            path = p.h[len(kind) :].trim()
-            stripped = self.strip_prefix(path, prefix)
-            p.h = f"{kind} {stripped or path}"
+            kind = m[0];
+            path = p.h.substring(kind.length).trim();
+            stripped = this.strip_prefix(path, prefix);
+            p.h = `${kind} ${stripped || path}`;
             // Put the *full* @path directive in the body.
-            if self.add_path and prefix:
-                tail = g.os_path_dirname(stripped).rstrip('/')
-                p.b = f"@path {prefix}{tail}\n{p.b}"
-
-        else
+            if (this.add_path && prefix){
+                tail = g.os_path_dirname(stripped).trimEnd('/');
+                p.b = `@path ${prefix}${tail}\n${p.b}`;
+            }
+        }else{
             // p.h is a path.
-            path = p.h
-            stripped = self.strip_prefix(path, prefix)
-            p.h = f"@path {stripped or path}"
-            for p in p.children():
-                self.minimize_headlines(p, prefix + stripped)
-
+            path = p.h;
+            stripped = this.strip_prefix(path, prefix);
+            p.h = `@path ${stripped || path}`;
+            for (const p of p.children()){
+                this.minimize_headlines(p, prefix + stripped);
+            }
+        }
+    }
     //@+node:felix.20230511002459.12: *6* ric.strip_prefix
-    public strip_prefix(path: str, prefix: str): string
-        """Strip the prefix from the path and return the result."""
-        if path.startsWith(prefix):
-            return path[len(prefix) :]
+    /**
+     * Strip the prefix from the path and return the result.
+     */
+    public strip_prefix(p_path: string, prefix: string): string {
+        
+        if (p_path.startsWith(prefix)){
+            return p_path.substring(prefix.length);
+        }
+        return '';  // A signal.
 
-        return ''  // A signal.
+    }
     //@+node:felix.20230511002459.13: *5* ric.remove_empty_nodes
-    public remove_empty_nodes(p: Position): void
-        """Remove empty nodes. Not called for @auto or @edit trees."""
+    /**
+     * Remove empty nodes. Not called for @auto or @edit trees.
+     */
+    public remove_empty_nodes(p: Position): void {
         const c = this.c;
         aList = [
             p2 for p2 in p.self_and_subtree()
-                if not p2.b and not p2.hasChildren()]
-        if aList
-            c.deletePositionsInList(aList)  // Don't redraw
-
+                if not p2.b and not p2.hasChildren()
+        ];
+        if (aList && aList.length){
+            c.deletePositionsInList(aList);  // Don't redraw
+        }
+    }
     //@-others
 
 }
@@ -1923,11 +1971,14 @@ class TabImporter:
 
     //@+others
     //@+node:felix.20230511002653.2: *3* tabbed.check
-    public check(lines: List[str], warn: bool = True): boolean 
-        """Return False and warn if lines contains mixed leading tabs/blanks."""
+    /**
+     * Return False and warn if lines contains mixed leading tabs/blanks.
+     */
+    public check(lines: List[str], warn: bool = True): boolean {
+        
         blanks, tabs = 0, 0
         for s in lines:
-            lws = self.lws(s)
+            lws = this.lws(s)
             if '\t' in lws:
                 tabs += 1
             if ' ' in lws:
@@ -1939,16 +1990,24 @@ class TabImporter:
             return false;
 
         return true;
+    }
     //@+node:felix.20230511002653.3: *3* tabbed.dump_stack
-    public dump_stack(self): void
-        """Dump the stack, containing (level, p) tuples."""
+    /**
+     * Dump the stack, containing (level, p) tuples.
+     */
+    public dump_stack(self): void {
+        
         g.trace('==========')
-        for i, data in enumerate(self.stack):
+        for i, data in enumerate(this.stack):
             level, p = data
             print(f"{i:2} {level} {p.h!r}")
+    }
     //@+node:felix.20230511002653.4: *3* tabbed.import_files
-    public import_files(files: List[str]): void
-        """Import a list of tab-delimited files."""
+    /**
+     * Import a list of tab-delimited files.
+     */
+    public import_files(files: List[str]): void {
+        
         c = this.c;
         u = this.c.undoer;
         if files
@@ -1961,11 +2020,11 @@ class TabImporter:
                 catch Exception
                     continue
 
-                if s.trim() and self.check(g.splitLines(s))
+                if s.trim() and this.check(g.splitLines(s))
                     undoData = u.beforeInsertNode(c.p)
                     last = c.lastTopLevel()
-                    self.root = p = last.insertAfter()
-                    self.scan(s)
+                    this.root = p = last.insertAfter()
+                    this.scan(s)
                     p.h = g.shortFileName(fn)
                     p.contract()
                     p.setDirty()
@@ -1975,19 +2034,26 @@ class TabImporter:
                     c.setChanged();
                     c.redraw(p);
 
-
+    }
     //@+node:felix.20230511002653.5: *3* tabbed.lws
-    public lws(s: str): string
-        """Return the length of the leading whitespace of s."""
+    /**
+     * Return the length of the leading whitespace of s.
+     */
+    public lws(s: string): string {
+        
         for i, ch in enumerate(s)
             if ch not in ' \t'
                 return s[:i]
 
 
         return s;
+    }
     //@+node:felix.20230511002653.6: *3* tabbed.prompt_for_files
-    public prompt_for_files(self): void
-        """Prompt for a list of FreeMind (.mm.html) files and import them."""
+    /**
+     * Prompt for a list of FreeMind (.mm.html) files and import them.
+     */
+    public prompt_for_files(): void 
+        
         const c = this.c;
         types = [
             ("All files", "*"),
@@ -2000,11 +2066,15 @@ class TabImporter:
         c.bringToFront()
         if names
             g.chdir(names[0]);
-            self.import_files(names);
+            this.import_files(names);
+
 
     //@+node:felix.20230511002653.7: *3* tabbed.scan
-    public scan(s1: str, fn?: string, root: Position = None): Position 
-        """Create the outline corresponding to s1."""
+    /**
+     * Create the outline corresponding to s1.
+     */
+    public scan(s1: string, fn?: string, root?: Position): Position {
+        
         const c = this.c;
         // Self.root can be None if we are called from a script or unit test.
         if not this.root
@@ -2020,9 +2090,14 @@ class TabImporter:
                 if s.trim() || !this.separate
                     this.scan_helper(s)
         return this.root
+
+    }
     //@+node:felix.20230511002653.8: *3* tabbed.scan_helper
-    public scan_helper(s: str) -> int:
-        """Update the stack as necessary and return level."""
+    /**
+     * Update the stack as necessary and return level.
+     */
+    public scan_helper(s: string): number {
+        
         root, separate, stack = this.root, this.separate, this.stack
         if stack
             level, parent = stack[-1]
@@ -2077,11 +2152,13 @@ class TabImporter:
 
 
         return level
+
+    }
     //@+node:felix.20230511002653.9: *3* tabbed.undent
     /**
      * Unindent all lines of p.b by level.
      */
-    public undent(level: number, s: string): string 
+    public undent(level: number, s: string): string {
         
         if level <= 0
             return s
@@ -2103,6 +2180,8 @@ class TabImporter:
 
 
         return '';
+
+    }
     //@-others
 //@-others
 //@@language typescript
