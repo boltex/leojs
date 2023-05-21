@@ -543,7 +543,6 @@
 <v t="felix.20220105221256.1"><vh>@file src/core/leoImport.ts</vh></v>
 <v t="felix.20230510224951.1"><vh>file leoImport.py</vh>
 <v t="felix.20230510224951.2"><vh>&lt;&lt; leoImport imports &gt;&gt;</vh></v>
-<v t="felix.20230510224951.3"><vh>&lt;&lt; leoImport annotations &gt;&gt;</vh></v>
 <v t="felix.20230510224951.4"><vh>class FreeMindImporter</vh>
 <v t="felix.20230510224951.5"><vh>freemind.add_children</vh></v>
 <v t="felix.20230510224951.6"><vh>freemind.create_outline</vh></v>
@@ -6521,6 +6520,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 "browser-process-hrtime": "^1.0.0",
 "console-browserify": "^1.2.0",
 "crypto-browserify": "^3.12.0",
+"csvtojson": "^2.0.10",
 "date-format-lite": "^17.7.0",
 "dayjs": "^1.11.3",
 "dayjs-plugin-utc": "^0.1.2",
@@ -16332,11 +16332,6 @@ if end_delim:
     line_delim = None
 else:
     line_delim, start_delim = start_delim, None
-</t>
-<t tx="felix.20230510224951.3">if TYPE_CHECKING:  # pragma: no cover
-    from leo.core.leoCommands import Commands as Cmdr
-    from leo.core.leoGui import LeoKeyEvent as Event
-    from leo.core.leoNodes import Position, VNode
 </t>
 <t tx="felix.20230510224951.30"># Remove sentinels command.
 try:

@@ -1304,10 +1304,10 @@ export function scanAtCommentAndAtLanguageDirectives(aList: { [key: string]: str
 /**
  * Scan aList for @encoding directives.
  */
-export function scanAtEncodingDirectives(aList: any[]): string | undefined {
+export function scanAtEncodingDirectives(aList: any[]): BufferEncoding | undefined {
 
     for (let d of aList) {
-        const encoding = d['encoding'];
+        const encoding = d['encoding'] as BufferEncoding | undefined;
         if (encoding && isValidEncoding(encoding)) {
             return encoding;
         }
@@ -1817,6 +1817,67 @@ export function getBaseDirectory(c: Commands): string {
     // }
 
     // return '';  // No relative base given.
+}
+//@+node:felix.20230518232533.1: *3* g.getEncodingAt
+/**
+ * Return the encoding in effect at p and/or for string s.
+ *
+ * Read logic:  s is not None.
+ * Write logic: s is None.
+ */
+export function getEncodingAt(p: Position, b?: Uint8Array): BufferEncoding | undefined {
+    let e: BufferEncoding | undefined;
+    let junk_s;
+    // A BOM overrides everything.
+    if (b) {
+        [e, junk_s] = stripBOM(b);
+        if (e) {
+            return e;
+        }
+    }
+    const aList = get_directives_dict_list(p);
+    e = scanAtEncodingDirectives(aList);
+    if (b && Buffer.from(b).toString().trim() && !e) {
+        e = 'utf-8' as BufferEncoding;;
+    }
+    return e;
+
+}
+//@+node:felix.20230518225302.1: *3* g.is_binary_file/external_file/string
+// export function is_binary_file(f: any): boolean {
+
+//     return f and isinstance(f, io.BufferedIOBase)
+
+// }
+export async function is_binary_external_file(fileName: string): Promise<boolean> {
+
+    try {
+        // with open(fileName, 'rb') as f:
+        //     s = f.read(1024)  // bytes, in Python 3.
+        const w_readUri = makeVscodeUri(fileName);
+        const readData = await vscode.workspace.fs.readFile(w_readUri);
+        const trimmedData = readData.slice(0, 1024);
+        const s = Buffer.from(trimmedData).toString();
+        return is_binary_string(s);
+        // except IOError:
+        //     return False
+    } catch (exception) {
+        es_exception(exception);
+        return false;
+    }
+}
+export function is_binary_string(s: string): boolean {
+
+    // http://stackoverflow.com/questions/898669
+    // aList is a list of all non-binary characters.
+    // aList = [7, 8, 9, 10, 12, 13, 27] + list(range(0x20, 0x100))
+    // return bool(s.translate(None, bytes(aList)))  // type:ignore
+
+    const nullCharacter = '\x00';
+    const nonPrintableCharactersRegex = /[^\x09\x0A\x0D\x20-\x7E]/;
+
+    return s.includes(nullCharacter) || nonPrintableCharactersRegex.test(s);
+
 }
 //@+node:felix.20221219233638.1: *3* g.is_sentinel
 /**
@@ -2354,6 +2415,10 @@ export function find_on_line(s: string, i: number, pattern: string): number {
     }
     return -1;
 
+}
+//@+node:felix.20230519000231.1: *4* g.is_c_id
+export function is_c_id(ch: string): boolean {
+    return isWordChar(ch);
 }
 //@+node:felix.20211104221002.1: *4* g.is_special
 /**
@@ -3871,7 +3936,7 @@ export function internalError(...args: any[]): void {
     // es_print('Please report this error to Leo\'s developers', 'red');
     es_print('Please report this error to LeoJS developers');
 }
-//@+node:felix.20211104222740.1: *3* g.pr              (coreGlobals.py)
+//@+node:felix.20211104222740.1: *3* g.pr
 /**
  * Print all non-keyword args.
  */
@@ -3887,7 +3952,33 @@ export const pr = console.log;
 //             result.append(repr(arg))
 //     print(','.join(result))
 
-//@+node:felix.20211104230337.1: *3* g.trace           (coreGlobals.py)
+//@+node:felix.20230518224754.1: *3* g.print_exception
+/**
+ * Print exception info about the last exception.
+ */
+export function print_exception(
+    p_exception: any
+    // full: bool = True,
+    // c: Cmdr = None,
+    // flush: bool = False,
+    // color: str = "red",
+): void {
+    console.log(p_exception.toString());
+    // val is the second argument to the raise statement.
+    // typ, val, tb = sys.exc_info()
+    // if full:
+    //     lines = traceback.format_exception(typ, val, tb)
+    // else:
+    //     lines = traceback.format_exception_only(typ, val)
+    // print(''.join(lines), flush=flush)
+    // try:
+    //     fileName, n = g.getLastTracebackFileAndLineNumber()
+    //     return fileName, n
+    // except Exception:
+    //     return "<no file>", 0
+
+}
+//@+node:felix.20211104230337.1: *3* g.trace
 /**
  * Print a tracing message
  */

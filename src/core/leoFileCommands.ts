@@ -136,15 +136,15 @@ export class FastRead {
     /**
      * Read the leojs JSON file, change splitter ratios, and return its hidden vnode.
      */
-    public async readJsonFile(path: string): Promise<VNode | undefined> {
+    public async readJsonFile(p_path: string): Promise<VNode | undefined> {
 
         // const w_uri = vscode.Uri.file(path);
-        const w_uri = g.makeVscodeUri(path);
+        const w_uri = g.makeVscodeUri(p_path);
         const readData = await vscode.workspace.fs.readFile(w_uri);
         const s = Buffer.from(readData).toString('utf8');
 
         let v, g_dict;
-        [v, g_dict] = this.readWithJsonTree(path, s);
+        [v, g_dict] = this.readWithJsonTree(p_path, s);
         if (!v) { // #1510.
             return undefined;
         }

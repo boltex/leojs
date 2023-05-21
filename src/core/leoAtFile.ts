@@ -624,7 +624,7 @@ export class AtFile {
             at.scanAllDirectives(p);
             p.v.b = '';  // Required for @auto API checks.
             p.v._deleteAllChildren();
-            p = ic.createOutline(p.copy());
+            p = await ic.createOutline(p.copy()) as Position;
             // Do *not* call c.selectPosition(p) here.
             // That would improperly expand nodes.
         } catch (exception) {

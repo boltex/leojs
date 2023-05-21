@@ -1354,6 +1354,33 @@ export class LeoApp {
     //             title='Already Open Files',
     //             message=message,
     //             text="Ok")
+    //@+node:felix.20230518231054.1: *3* app.Import utils
+    //@+node:felix.20230518231054.2: *4* app.scanner_for_at_auto
+    /**
+     * A factory returning a scanner function for p, an @auto node.
+     */
+    public scanner_for_at_auto(c: Commands, p: Position): ((...args: any[]) => any) | undefined {
+
+        const d = g.app.atAutoDict;
+        for (const key in d) { // USING 'in' for KEYS
+
+            const func = d[key];
+            if (func && g.match_word(p.h, 0, key)) {
+                return func;
+            }
+        }
+        return undefined;
+
+    }
+    //@+node:felix.20230518231054.3: *4* app.scanner_for_ext
+    /**
+     * A factory returning a scanner function for the given file extension.
+     */
+    public scanner_for_ext(c: Commands, ext: string): ((...args: any[]) => any) | undefined {
+
+        return g.app.classDispatchDict[ext];
+
+    }
     //@+node:felix.20220417215246.1: *3* app.makeAllBindings
     /**
      * LeoApp.makeAllBindings:
