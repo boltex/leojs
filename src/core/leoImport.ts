@@ -1254,7 +1254,7 @@ export class LeoImportCommands {
     //@@c
 
     public scanBodyForHeadline(s: string): string {
-        let name;
+        let name: string | undefined;
         if (this.webType === "cweb") {
             //@+<< scan cweb body for headline >>
             //@+node:felix.20230511002352.37: *6* << scan cweb body for headline >>
@@ -1830,7 +1830,7 @@ export class MindMapImporter {
             c.redraw();
 
         } catch (exception) {
-            g.es_print('Invalid MindJet file:', fn)
+            g.es_print('Invalid MindJet file:', fn);
         }
         c.undoer.afterInsertNode(p, 'Import', undoData);
         return p;
@@ -1899,8 +1899,8 @@ export class MindMapImporter {
 
         for (const row of reader.slice(1)) {
             // Row is a List of fields.
-            const new_level = this.csv_level(row) + n1
-            this.csv_string(row)
+            const new_level = this.csv_level(row) + n1;
+            this.csv_string(row);
             if (new_level > n) {
                 p = p.insertAsLastChild().copy();
                 p.b = this.csv_string(row) || '';
@@ -1982,7 +1982,7 @@ export class MORE_Importer {
      * ctor for MORE_Importer class.
      */
     constructor(c: Commands) {
-        this.c = c
+        this.c = c;
     }
 
     //@+others
@@ -2082,10 +2082,10 @@ export class MORE_Importer {
         const c = this.c;
 
         if (!strings) {
-            return undefined
+            return undefined;
         }
         if (!this.check_lines(strings)) {
-            return undefined
+            return undefined;
         }
         let [firstLevel, junk] = this.headlineLevel(strings[0]);
         let lastLevel = -1;
@@ -2219,7 +2219,7 @@ export class MORE_Importer {
         // Check the level of all headlines.
         let lastLevel = level1;
         for (const s of strings) {
-            let [level, newFlag] = this.headlineLevel(s)
+            let [level, newFlag] = this.headlineLevel(s);
             if (level === -1) {
                 return true;  // A body line.
             }
@@ -3218,7 +3218,7 @@ export class ZimImportController {
         const pathToIndex = g.os_path_join(pathToZim, 'index.rst');
         const w_exists = await g.os_path_exists(pathToIndex);
         if (!w_exists) {
-            g.es(`not found: ${pathToIndex}`)
+            g.es(`not found: ${pathToIndex}`);
             return undefined;
         }
 
@@ -3351,7 +3351,7 @@ export class ZimImportController {
             const rstNodes: { [key: string]: Position } = { '0': zimNode };
             for (let [level, name, rst] of files) {
                 if (level === this.rstLevel) {
-                    name = `${this.rstType} ${name}`
+                    name = `${this.rstType} ${name}`;
                 }
                 rstNodes[(level + 1).toString()] = await this.rstToLastChild(rstNodes[level.toString()], name, rst);
             }
@@ -3395,7 +3395,7 @@ export class LegacyExternalFileImporter {
     public ignore = ['@+at', '@-at', '@+leo', '@-leo', '@nonl', '@nl', '@-others'];
 
     constructor(c: Commands) {
-        this.c = c
+        this.c = c;
     }
 
     //@+others
@@ -3470,7 +3470,7 @@ export class LegacyExternalFileImporter {
             s = line.trimStart();
             const lws = line.substring(0, line.length - line.trimStart().length);
             if (s.startsWith(delim1 + '@@')) {
-                this.add(lws + s.substring(2), stack)
+                this.add(lws + s.substring(2), stack);
             } else if (ignore.some(prefix => s.startsWith(prefix))) {
                 // Ignore these. Use comments instead of @doc bodies.
                 // pass
@@ -3480,14 +3480,14 @@ export class LegacyExternalFileImporter {
                 this.add(lws + '@others\n', stack);
             } else if (s.startsWith(delim1 + '@<<')) {
                 const n = (delim1 + '@<<').length;
-                this.add(lws + '<<' + s.substring(n).trimEnd() + '\n', stack)
+                this.add(lws + '<<' + s.substring(n).trimEnd() + '\n', stack);
             } else if (s.startsWith(delim1 + '@+node:')) {
                 // Compute the headline.
                 let h;
                 if (stack && stack.length) {
                     h = s.substring(8);
                     let i = h.indexOf(':');
-                    h = h.includes(':') ? h.substring(i + 1) : h
+                    h = h.includes(':') ? h.substring(i + 1) : h;
                 } else {
                     h = root_h;
                 }
@@ -3513,11 +3513,11 @@ export class LegacyExternalFileImporter {
         root.h = `imported file: ${root_h}`;
         let stack2 = [root];
         for (const node of nodes) {
-            const b = g.dedent(node.lines.join(''))
-            const level = node.level
+            const b = g.dedent(node.lines.join(''));
+            const level = node.level;
             if (level === 0) {
-                root.h = root_h
-                root.b = b
+                root.h = root_h;
+                root.b = b;
             } else {
                 const parent = stack2[level - 1];
                 const p = parent.insertAsLastChild();
@@ -3572,7 +3572,7 @@ export class LegacyExternalFileImporter {
         // c.bringToFront()
 
         if (paths && paths.length) {
-            g.chdir(paths[0])
+            g.chdir(paths[0]);
             await this.import_files(paths);
         }
     }
