@@ -2,7 +2,7 @@
 //@+node:felix.20220429005433.1: * @file src/core/leoChapters.ts
 /**
  * Classes that manage chapters in Leo's core.
- */ 
+ */
 //@+<< leoChapters imports >>
 //@+node:felix.20221110000315.1: ** << leoChapters imports >>
 import * as g from './leoGlobals';
@@ -391,7 +391,7 @@ export class ChapterController {
             // name=group(1), binding=group(3)
         }
 
-        const m: RegExpExecArray | null = this.re_chapter.exec(p.h);
+        const m: RegExpMatchArray | null = p.h.match(this.re_chapter);
         let chapterName: string | undefined;
         let binding: string | undefined;
 

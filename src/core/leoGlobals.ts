@@ -969,7 +969,7 @@ export function findAllValidLanguageDirectives(s: string): string[] {
         return [];
     }
     const languages: string[] = [];
-    let m: any;
+    let m: RegExpExecArray | null;
     while ((m = g_language_pat.exec(s)) !== null) {
         const language: string = m[1];
         if (isValidLanguage(language)) {

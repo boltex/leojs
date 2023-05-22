@@ -1897,6 +1897,44 @@ export class Position {
         return new Position(this.v, this._childIndex, this.stack);
     }
 
+    //@+node:felix.20230521190938.1: *4* p.copyTreeAfter, copyTreeTo
+    // These used by unit tests, by the group_operations plugin,
+    // and by the files-compare-leo-files command.
+
+    // To do: use v.copyTree instead.
+
+    /**
+     * Copy p and insert it after itself.
+     */
+    public copyTreeAfter(copyGnxs = false): Position {
+        const p: Position = this;
+        const p2 = p.insertAfter();
+        p.copyTreeFromSelfTo(p2, copyGnxs=copyGnxs);
+        return p2;
+    }
+
+    public copyTreeFromSelfTo(p2: Position, copyGnxs = false): void {
+        const p: Position = this;
+        p2.v._headString = g.toUnicode(p.h, undefined, true);  // 2017/01/24
+        p2.v._bodyString = g.toUnicode(p.b, undefined, true);  // 2017/01/24
+        //
+        // #1019794: p.copyTreeFromSelfTo, should deepcopy p.v.u.
+        try{
+            p2.v.u = JSON.parse(JSON.stringify(p.v.u));
+        } catch(e){
+            p2.v.u = {};
+        }
+        // p2.v.u = copy.deepcopy(p.v.u);
+        if (copyGnxs){
+            p2.v.fileIndex = p.v.fileIndex;
+        }
+        // 2009/10/02: no need to copy arg to iter
+
+        for (const child of p.children()){
+            const child2 = p2.insertAsLastChild();
+            child.copyTreeFromSelfTo(child2, copyGnxs);
+        }
+    }
     //@+node:felix.20211026001924.1: *4* p.copyWithNewVnodes
     /**
      * Return an **unlinked** copy of p with a new vnode v.

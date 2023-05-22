@@ -162,7 +162,7 @@ export class FreeMindImporter {
 
         if (names && names.length) {
             g.chdir(names[0]);
-            this.import_files(names);
+            await this.import_files(names);
         }
     }
     //@-others
@@ -1172,19 +1172,19 @@ export class LeoImportCommands {
      * Import a list of .mm.html files exported from FreeMind:
      * http://freemind.sourceforge.net/wiki/index.php/Main_Page
      */
-    public importFreeMind(files: string[]): void {
-        new FreeMindImporter(this.c).import_files(files);
+    public async importFreeMind(files: string[]): Promise<void> {
+        await new FreeMindImporter(this.c).import_files(files);
     }
     //@+node:felix.20230511002352.32: *4* ic.importMindMap
     /**
      * Import a list of .csv files exported from MindJet:
      * https://www.mindjet.com/
      */
-    public importMindMap(files: string[]): void {
-        new MindMapImporter(this.c).import_files(files);
+    public async importMindMap(files: string[]): Promise<void> {
+        await new MindMapImporter(this.c).import_files(files);
     }
     //@+node:felix.20230511002352.33: *4* ic.importWebCommand & helpers
-    public importWebCommand(files: string[], webType: string): void {
+    public async importWebCommand(files: string[], webType: string): Promise<void> {
         const c = this.c;
         const current = this.c.p;
         if (current == null) {
@@ -1197,7 +1197,7 @@ export class LeoImportCommands {
         this.webType = webType;
         for (const fileName of files) {
             g.setGlobalOpenDir(fileName);
-            let p = this.createOutlineFromWeb(fileName, current);
+            let p = await this.createOutlineFromWeb(fileName, current);
             p.contract();
             p.setDirty();
             c.setChanged();
@@ -1205,10 +1205,10 @@ export class LeoImportCommands {
         c.redraw(current);
     }
     //@+node:felix.20230511002352.34: *5* createOutlineFromWeb
-    public createOutlineFromWeb(path: string, parent: Position): Position {
+    public async createOutlineFromWeb(p_path: string, parent: Position): Promise<Position> {
         const c = this.c;
         const u = c.undoer;
-        let [junk, fileName] = g.os_path_split(path);
+        let [junk, fileName] = g.os_path_split(p_path);
         const undoData = u.beforeInsertNode(parent);
         // Create the top-level headline.
         let p = parent.insertAsLastChild();
@@ -1217,7 +1217,7 @@ export class LeoImportCommands {
             this.setBodyString(p, "@ignore\n@language cweb");
         }
         // Scan the file, creating one section for each function definition.
-        this.scanWebFile(path, p);
+        await this.scanWebFile(p_path, p);
         u.afterInsertNode(p, 'Import', undoData);
         return p;
 
@@ -1980,7 +1980,7 @@ export class MORE_Importer {
     /**
      * ctor for MORE_Importer class.
      */
-    constructor( c: Commands){
+    constructor(c: Commands) {
         this.c = c
     }
 
@@ -1997,12 +1997,12 @@ export class MORE_Importer {
         ];
 
         const names = await g.app.gui.runOpenFileDialog(
-                c,
-                "Import MORE Files",
-                types,
-                "", //  ".txt",
-                true
-            ) as string[];
+            c,
+            "Import MORE Files",
+            types,
+            "", //  ".txt",
+            true
+        ) as string[];
         // c.bringToFront()
         if (names && names.length) {
             g.chdir(names[0]);
@@ -2014,52 +2014,52 @@ export class MORE_Importer {
      * Import a list of MORE (.csv) files.
      */
     public async import_files(files: string[]): Promise<void> {
-        
+
         const c: Commands = this.c;
         if (files && files.length) {
             let changed = false;
             // this.tab_width = c.getTabWidth(c.p);  // ! NEEDED ? 
-            let p: Position|undefined;
+            let p: Position | undefined;
 
             for (const fileName of files) {
                 g.setGlobalOpenDir(fileName);
                 p = await this.import_file(fileName);
-                if (p && p.__bool__()){
+                if (p && p.__bool__()) {
                     p.contract();
                     p.setDirty();
                     c.setChanged();
                     changed = true;
                 }
             }
-            if (changed){
+            if (changed) {
                 c.redraw(p!);
             }
         }
     }
     //@+node:felix.20230520220221.4: *3* MORE.import_file
-    public async import_file(fileName: string) : Promise<Position | undefined> {// Not a command, so no event arg.
+    public async import_file(fileName: string): Promise<Position | undefined> {// Not a command, so no event arg.
         const c = this.c;
         const u = c.undoer;
         const ic = c.importCommands;
-        if (!c.p || !c.p.__bool__()){
+        if (!c.p || !c.p.__bool__()) {
             return undefined;
         }
         ic.setEncoding();
         g.setGlobalOpenDir(fileName);
         let [s, e] = await g.readFileIntoString(fileName);
-        if (s == null){
+        if (s == null) {
             return undefined;
         }
         s = s.replace(/\r/g, '');  // Fixes bug 626101.
         const lines = g.splitLines(s);
         // Convert the string to an outline and insert it after the current node.
-        if (this.check_lines(lines)){
+        if (this.check_lines(lines)) {
             const last = c.lastTopLevel();
             const undoData = u.beforeInsertNode(c.p);
             const root = last.insertAfter();
             root.h = fileName;
             const p = this.import_lines(lines, root);
-            if (p && p.__bool__()){
+            if (p && p.__bool__()) {
                 c.endEditing();
                 c.validateOutline();
                 p.setDirty();
@@ -2070,20 +2070,20 @@ export class MORE_Importer {
                 return root;
             }
         }
-        if (!g.unitTesting){
+        if (!g.unitTesting) {
             g.es("not a valid MORE file", fileName);
         }
         return undefined;
 
     }
     //@+node:felix.20230520220221.5: *3* MORE.import_lines
-    public import_lines(strings: string[], first_p: Position) : Position|undefined {
+    public import_lines(strings: string[], first_p: Position): Position | undefined {
         const c = this.c;
 
-        if (!strings){
+        if (!strings) {
             return undefined
         }
-        if (!this.check_lines(strings)){
+        if (!this.check_lines(strings)) {
             return undefined
         }
         let [firstLevel, junk] = this.headlineLevel(strings[0]);
@@ -2091,29 +2091,29 @@ export class MORE_Importer {
         let theRoot: Position | undefined = undefined;
         let last_p: Position | undefined = undefined;
         let index = 0;
-        while (index < strings.length){
+        while (index < strings.length) {
             const progress = index;
             const s = strings[index];
             let [level, junk2] = this.headlineLevel(s);
             level -= firstLevel;
-            if (level >= 0){
+            if (level >= 0) {
                 //@+<< Link a new position p into the outline >>
                 //@+node:felix.20230520220221.6: *4* << Link a new position p into the outline >>
-                console.assert( level >= 0);
+                console.assert(level >= 0);
                 let p: Position;
-                if (!last_p || !last_p.__bool__()){
+                if (!last_p || !last_p.__bool__()) {
                     theRoot = p = first_p.insertAsLastChild();  // 2016/10/06.
-                }else if (level === lastLevel){
+                } else if (level === lastLevel) {
                     p = last_p.insertAfter();
-                }else if (level === lastLevel + 1){
+                } else if (level === lastLevel + 1) {
                     p = last_p.insertAsNthChild(0);
-                }else{
-                    console.assert( level < lastLevel);
-                    while (level < lastLevel){
+                } else {
+                    console.assert(level < lastLevel);
+                    while (level < lastLevel) {
                         lastLevel -= 1;
                         last_p = last_p.parent();
-                        console.assert( last_p && last_p.__bool__());
-                        console.assert( lastLevel >= 0);
+                        console.assert(last_p && last_p.__bool__());
+                        console.assert(lastLevel >= 0);
                     }
                     p = last_p.insertAfter();
                 }
@@ -2123,10 +2123,10 @@ export class MORE_Importer {
                 //@+<< Set the headline string, skipping over the leader >>
                 //@+node:felix.20230520220221.7: *4* << Set the headline string, skipping over the leader >>
                 let j = 0;
-                while (g.match(s, j, '\t') || g.match(s, j, ' ')){
+                while (g.match(s, j, '\t') || g.match(s, j, ' ')) {
                     j += 1;
                 }
-                if( g.match(s, j, "+ ") || g.match(s, j, "- ")){
+                if (g.match(s, j, "+ ") || g.match(s, j, "- ")) {
                     j += 2;
                 }
                 p.initHeadString(s.substring(j));
@@ -2135,15 +2135,15 @@ export class MORE_Importer {
                 //@+node:felix.20230520220221.8: *4* << Count the number of following body lines >>
                 let bodyLines = 0;
                 index += 1;  // Skip the headline.
-                while( index < strings.length){
+                while (index < strings.length) {
                     const s = strings[index];
                     let [level, junk] = this.headlineLevel(s);
                     level -= firstLevel;
-                    if (level >= 0){
+                    if (level >= 0) {
                         break;
                     }
                     // Remove first backslash of the body line.
-                    if( g.match(s, 0, '\\')){
+                    if (g.match(s, 0, '\\')) {
                         strings[index] = s.substring(1);
                     }
                     bodyLines += 1;
@@ -2152,12 +2152,12 @@ export class MORE_Importer {
                 //@-<< Count the number of following body lines >>
                 //@+<< Add the lines to the body text of p >>
                 //@+node:felix.20230520220221.9: *4* << Add the lines to the body text of p >>
-                if (bodyLines > 0){
-                    let  body = "";
+                if (bodyLines > 0) {
+                    let body = "";
                     let n = index - bodyLines;
-                    while( n < index){
+                    while (n < index) {
                         body += strings[n].trimEnd();
-                        if (n !== index - 1){
+                        if (n !== index - 1) {
                             body += "\n";
                         }
                         n += 1;
@@ -2166,12 +2166,12 @@ export class MORE_Importer {
                 }
                 //@-<< Add the lines to the body text of p >>
                 p.setDirty();
-            }else{
+            } else {
                 index += 1;
             }
-            console.assert( progress < index);
+            console.assert(progress < index);
         }
-        if (theRoot && theRoot.__bool__()){
+        if (theRoot && theRoot.__bool__()) {
             theRoot.setDirty();
             c.setChanged();
         }
@@ -2184,16 +2184,16 @@ export class MORE_Importer {
      * return the headline level of s,or -1 if the string is not a MORE headline.
      */
     public headlineLevel(s: string): [number, boolean] {
-        
+
         let level = 0;
         let i = 0;
-        while( i < s.length && ' \t'.includes(s[i]) ){  // 2016/10/06: allow blanks or tabs.
+        while (i < s.length && ' \t'.includes(s[i])) {  // 2016/10/06: allow blanks or tabs.
             level += 1;
             i += 1;
         }
         const plusFlag = g.match(s, i, "+");
 
-        if (g.match(s, i, "+ ") || g.match(s, i, "- ")){
+        if (g.match(s, i, "+ ") || g.match(s, i, "- ")) {
             return [level, plusFlag];
         }
         return [-1, plusFlag];
@@ -2208,27 +2208,27 @@ export class MORE_Importer {
 
     public check_lines(strings: string[]): boolean {
 
-        if (!strings || !strings.length){
+        if (!strings || !strings.length) {
             return false;
         }
         let [level1, plusFlag] = this.headlineLevel(strings[0]);
-        if (level1 === -1){
+        if (level1 === -1) {
             return false;
         }
         // Check the level of all headlines.
         let lastLevel = level1;
-        for (const s of strings){
+        for (const s of strings) {
             let [level, newFlag] = this.headlineLevel(s)
-            if (level === -1){
+            if (level === -1) {
                 return true;  // A body line.
             }
-            if (level < level1 || level > lastLevel + 1){
+            if (level < level1 || level > lastLevel + 1) {
                 return false;  // improper level.
             }
-            if( level > lastLevel && !plusFlag){
+            if (level > lastLevel && !plusFlag) {
                 return false;  // parent of this node has no children.
             }
-            if (level === lastLevel && plusFlag){
+            if (level === lastLevel && plusFlag) {
                 return false;  // last node has missing child.
             }
             lastLevel = level;
@@ -2885,7 +2885,7 @@ export class ToDoImporter {
     // task_s = r'\s*(.+)'
     // line_s = fr"^{mark_s}?{priority_s}?{date_s}?{date_s}?{task_s}$"
     line_pat = /^([x]\ )?(\([A-Z]\)\ )?([0-9]{4}-[0-9]{2}-[0-9]{2}\ )?([0-9]{4}-[0-9]{2}-[0-9]{2}\ )?\s*(.+)$/;
-    
+
     constructor(c: Commands) {
         this.c = c;
     }
@@ -2895,15 +2895,15 @@ export class ToDoImporter {
     /**
      * Return the tasks from the given path.
      */
-    public async get_tasks_from_file(p_path: string) : Promise<any[]> {
-        
+    public async get_tasks_from_file(p_path: string): Promise<any[]> {
+
         const tag = 'import-todo-text-files';
-        const w_exists = await os.path.exists(p_path);
-        if (!w_exists){
-            print(`${tag}: file not found: ${p_path}`);
+        const w_exists = await g.os_path_exists(p_path);
+        if (!w_exists) {
+            console.log(`${tag}: file not found: ${p_path}`);
             return [];
         }
-        try{
+        try {
 
             const w_uri = g.makeVscodeUri(p_path);
             const readData = await vscode.workspace.fs.readFile(w_uri);
@@ -2915,7 +2915,7 @@ export class ToDoImporter {
             const tasks = this.parse_file_contents(contents);
 
             return tasks;
-        }catch (exception){
+        } catch (exception) {
             console.log(`unexpected exception in ${tag}`);
             g.es_exception(exception);
             return [];
@@ -2927,24 +2927,24 @@ export class ToDoImporter {
      *
      * Return a dict: keys are full paths, values are lists of ToDoTasks"
      */
-    public import_files(files: string[]): {[key: string]: any[]} { 
-        
-        const d: {[key: string]: any[]}  = {};
+    public async import_files(files: string[]): Promise<{ [key: string]: any[] }> {
+
+        const d: { [key: string]: any[] } = {};
         const tag = 'import-todo-text-files';
-        for (const w_path of files){
-            try{
+        for (const w_path of files) {
+            try {
 
                 // with open(w_path, 'r') as f:
                 //     contents = f.read()
 
-                const w_uri = g.makeVscodeUri(p_path);
+                const w_uri = g.makeVscodeUri(w_path);
                 const readData = await vscode.workspace.fs.readFile(w_uri);
                 const contents = Buffer.from(readData).toString('utf8');
                 const tasks = this.parse_file_contents(contents);
                 d[w_path] = tasks;
 
-            }catch (exception){
-                print(`unexpected exception in ${tag}`);
+            } catch (exception) {
+                console.log(`unexpected exception in ${tag}`);
                 g.es_exception(exception);
             }
         }
@@ -2957,74 +2957,91 @@ export class ToDoImporter {
      * Parse the contents of a file.
      * Return a list of ToDoTask objects.
      */
-    public parse_file_contents(s: string) any[] {
-        
-        trace = false;
-        tasks = [];
-        for line in g.splitLines(s):
-            if !line.strip()
+    public parse_file_contents(s: string): any[] {
+
+        let trace = false;
+        const tasks: ToDoTask[] = [];
+        for (const line of g.splitLines(s)) {
+            if (!line.trim()) {
                 continue;
-            if trace
-                print(`task: {line.rstrip()!s}`);;
-            m = this.line_pat.match(line);
-            if !m
-                print(`invalid task: {line.rstrip()!s}`);;
+            }
+            if (trace) {
+                console.log(`task: ${line.toString().trimEnd()}`);
+            }
+            const m = line.match(this.line_pat);
+            if (!m) {
+                console.log(`invalid task: ${line.toString().trimEnd()}`);
                 continue;
+            }
             // Groups 1, 2 and 5 are context independent.
-            completed = m.group(1);
-            priority = m.group(2);
-            task_s = m.group(5);
-            if !task_s
-                print(`invalid task: {line.rstrip()!s}`);
+            const completed = m[1];
+            const priority = m[2];
+            const task_s = m[5];
+            if (!task_s) {
+                console.log(`invalid task: ${line.toString().trimEnd()}`);
                 continue;
+            }
             // Groups 3 and 4 are context dependent.
-            if m.group(3) and m.group(4)
-                complete_date = m.group(3);
-                start_date = m.group(4);
-            elif completed
-                complete_date = m.group(3);
+            let complete_date, start_date;
+            if (m[3] && m[4]) {
+                complete_date = m[3];
+                start_date = m[4];
+            } else if (completed) {
+                complete_date = m[3];
                 start_date = '';
-            else
-                start_date = m.group(3) or '';
+            } else {
+                start_date = m[3] || '';
                 complete_date = '';
-            if completed and !complete_date
-                print(`no completion date: {line.rstrip()!s}`);;
+            }
+            if (completed && !complete_date) {
+                console.log(`no completion date: ${line.toString().trimEnd()}`);
+            }
+            tasks.push(new ToDoTask(
+                !!completed, priority, start_date, complete_date, task_s
+            ));
 
-            tasks.append(ToDoTask(
-                bool(completed), priority, start_date, complete_date, task_s));
-
+        }
         return tasks;
 
     }
     //@+node:felix.20230521004305.5: *3* todo_i.prompt_for_files
-    def prompt_for_files(self) -> Dict[str, Any]:
-        """
-        Prompt for a list of todo.text files and import them.
+    /**
+     * Prompt for a list of todo.text files and import them.
 
         Return a python dict. Keys are full paths; values are lists of ToDoTask objects.
-        """
-        c = self.c
-        types = [
-            ("Text files", "*.txt"),
-            ("All files", "*"),
-        ]
-        names = g.app.gui.runOpenFileDialog(c,
-            title="Import todo.txt File",
-            filetypes=types,
-            defaultextension=".txt",
-            multiple=True,
-        )
-        c.bringToFront()
-        if not names:
-            return {}
-        g.chdir(names[0])
-        d = self.import_files(names)
-        for key in sorted(d):
-            tasks = d.get(key)
-            print(f"tasks in {g.shortFileName(key)}...\n")
-            for task in tasks:
-                print(f"    {task}")
-        return d
+     */
+    public async prompt_for_files(): Promise<{ [key: string]: any }> {
+
+        const c = this.c;
+        const types: [string, string][] = [
+            ["Text files", "*.txt"],
+            ["All files", "*"],
+        ];
+        const names = await g.app.gui.runOpenFileDialog(
+            c,
+            "Import todo.txt File",
+            types,
+            ".txt",
+            true
+        ) as string[];
+
+        // c.bringToFront() ; 
+
+        if (!names || !names.length) {
+            return {};
+        }
+        g.chdir(names[0]);
+        const d = await this.import_files(names);
+        for (const key of Object.keys(d).sort()) {
+            const tasks = d[key];
+            console.log(`tasks in ${g.shortFileName(key)}...\n`);
+            for (const task of tasks) {
+                console.log(`    ${task}`);
+            }
+        }
+        return d;
+
+    }
     //@-others
 
 }
@@ -3048,7 +3065,7 @@ export class ToDoTask {
     public context_pat = /(@\S+)/;
     public key_val_pat = /((\S+):(\S+))/;  // Might be a false match.
 
-    constructor (
+    constructor(
         completed: boolean,
         priority: string,
         start_date: string,
@@ -3069,29 +3086,29 @@ export class ToDoTask {
 
     //@+others
     //@+node:felix.20230521004313.2: *3* task.__repr__ & __str__
-    public __repr__(): string{
-        const start_s =this.start_date? this.start_date : '';
-        const end_s = this.complete_date ?  this.complete_date : '';
-        const mark_s = this.completed  ? '[X]' : '[ ]';
+    public __repr__(): string {
+        const start_s = this.start_date ? this.start_date : '';
+        const end_s = this.complete_date ? this.complete_date : '';
+        const mark_s = this.completed ? '[X]' : '[ ]';
         const result = [
-            `Task: `
-            `${mark_s} `
-            `${this.priority} `
-            `start: ${start_s} `
-            `end: ${end_s} `
-            `${this.task_s}`
+            `Task: `,
+            `${mark_s} `,
+            `${this.priority} `,
+            `start: ${start_s} `,
+            `end: ${end_s} `,
+            `${this.task_s}`,
         ];
         // for (const ivar of ['contexts', 'projects', 'key_vals'])
         //     aList = getattr(self, ivar, None)
         //     if aList 
         //         result.append(f"{' '*13}{ivar}: {aList}")
-        if(this.contexts){
+        if (this.contexts) {
             result.push(`${' '.repeat(13)}contexts: ${this.contexts.toString()}`);
         }
-        if(this.projects){
+        if (this.projects) {
             result.push(`${' '.repeat(13)}projects: ${this.projects.toString()}`);
         }
-        if(this.key_vals){
+        if (this.key_vals) {
             result.push(`${' '.repeat(13)}key_vals: ${this.key_vals.toString()}`);
         }
 
@@ -3099,328 +3116,468 @@ export class ToDoTask {
 
     }
 
-    public __str__() : string {return this.__repr__();}
-    public toString() : string {return this.__repr__();}
+    public __str__(): string { return this.__repr__(); }
+    public toString(): string { return this.__repr__(); }
     //@+node:felix.20230521004313.3: *3* task.parse_task
+    public parse_task(): void {
 
+        let trace = (false && !g.unitTesting);
+        let s = this.task_s;
+        const table: [string, RegExp, string[]][] = [
+            ['context', this.context_pat, this.contexts],
+            ['project', this.project_pat, this.projects],
+            ['key:val', this.key_val_pat, this.key_vals],
+        ];
+        for (let [kind, pat, aList] of table) {
+            let m: RegExpExecArray | null;
+            const pat_global = new RegExp(pat, 'g');
+            while ((m = pat_global.exec(s)) !== null) {
 
-    def parse_task(self) -> None:
+                // TODO : ? NEEDED ?
+                // pat_s = repr(pat).replace("re.compile('", "").replace("')", "")
+                // pat_s = pat_s.replace(r'\\', '\\')
 
-        trace = False and not g.unitTesting
-        s = self.task_s
-        table = (
-            ('context', self.context_pat, self.contexts),
-            ('project', self.project_pat, self.projects),
-            ('key:val', self.key_val_pat, self.key_vals),
-        )
-        for kind, pat, aList in table:
-            for m in re.finditer(pat, s):
-                pat_s = repr(pat).replace("re.compile('", "").replace("')", "")
-                pat_s = pat_s.replace(r'\\', '\\')
-                # Check for false key:val match:
-                if pat == self.key_val_pat:
-                    key, value = m.group(2), m.group(3)
-                    if ':' in key or ':' in value:
-                        break
-                tag = m.group(1)
-                # Add the tag.
-                if tag in aList:
-                    if trace:
-                        g.trace('Duplicate tag:', tag)
-                else:
-                    if trace:
-                        g.trace(f"Add {kind} tag: {tag!s}")
-                    aList.append(tag)
-                # Remove the tag from the task.
-                s = re.sub(pat, "", s)
-        if s != self.task_s:
-            self.task_s = s.strip()
+                // Check for false key:val match:
+                if (kind === 'key:val') {
+                    let [key, value] = [m[2], m[3]];
+                    if (key.includes(':') || value.includes(':')) {
+                        break;
+                    }
+                }
+                const tag = m[1];
+
+                // Add the tag.
+                if (aList.includes(tag)) {
+                    if (trace) {
+                        g.trace('Duplicate tag:', tag);
+                    }
+
+                } else {
+                    if (trace) {
+                        g.trace(`Add ${kind} tag: ${tag.toString()}`);
+                    }
+                    aList.push(tag);
+
+                }
+                // Remove the tag from the task.
+                // s = re.sub(pat, "", s);
+                s = s.replace(pat, ""); // No 'g' flag, so one at a time from  while loop
+
+            }
+        }
+
+        if (s !== this.task_s) {
+            this.task_s = s.trim();
+        }
+    }
     //@-others
 
 }
 //@+node:felix.20230521004344.1: ** class ZimImportController
-class ZimImportController:
-    """
-    A class to import Zim folders and files: http://zim-wiki.org/
-    First use Zim to export your project to rst files.
+/**
+ * A class to import Zim folders and files: http://zim-wiki.org/
+ * First use Zim to export your project to rst files.
+ *
+ * Original script by Davy Cottet.
+ *
+ * User options:
+ *    @int rst_level = 0
+ *    @string rst_type
+ *    @string zim_node_name
+ *    @string path_to_zim
+ */
+export class ZimImportController {
 
-    Original script by Davy Cottet.
+    public c: Commands;
+    public pathToZim: string;
+    public rstLevel: number;
+    public rstType: string;
+    public zimNodeName: string;
 
-    User options:
-        @int rst_level = 0
-        @string rst_type
-        @string zim_node_name
-        @string path_to_zim
-
-    """
     //@+others
     //@+node:felix.20230521004344.2: *3* zic.__init__ & zic.reloadSettings
-    def __init__(self, c: Cmdr) -> None:
-        """Ctor for ZimImportController class."""
-        self.c = c
-        self.pathToZim = c.config.getString('path-to-zim')
-        self.rstLevel = c.config.getInt('zim-rst-level') or 0
-        self.rstType = c.config.getString('zim-rst-type') or 'rst'
-        self.zimNodeName = c.config.getString('zim-node-name') or 'Imported Zim Tree'
+    /**
+     * Ctor for ZimImportController class.
+     */
+    constructor(c: Commands) {
+        this.c = c;
+        this.pathToZim = c.config.getString('path-to-zim');
+        this.rstLevel = c.config.getInt('zim-rst-level') || 0;
+        this.rstType = c.config.getString('zim-rst-type') || 'rst';
+        this.zimNodeName = c.config.getString('zim-node-name') || 'Imported Zim Tree';
+    }
     //@+node:felix.20230521004344.3: *3* zic.parseZimIndex
-    def parseZimIndex(self) -> List[Tuple[int, str, List[str]]]:
-        """
-        Parse Zim wiki index.rst and return a list of tuples (level, name, path) or None.
-        """
-        # c = self.c
-        pathToZim = g.os_path_abspath(self.pathToZim)
-        pathToIndex = g.os_path_join(pathToZim, 'index.rst')
-        if not g.os_path_exists(pathToIndex):
-            g.es(f"not found: {pathToIndex}", color='red')
-            return None
-        index = open(pathToIndex).read()
-        parse = re.findall(r'(\t*)-\s`(.+)\s<(.+)>`_', index)
-        if not parse:
-            g.es(f"invalid index: {pathToIndex}", color='red')
-            return None
-        results = []
-        for result in parse:
-            level = len(result[0])
-            name = result[1].decode('utf-8')
-            unquote = urllib.parse.unquote
-            # mypy: error: "str" has no attribute "decode"; maybe "encode"?  [attr-defined]
-            path = [
-                g.os_path_abspath(g.os_path_join(pathToZim, unquote(result[2]).decode('utf-8')))
-            ]  # type:ignore
-            results.append((level, name, path))
-        return results
-    //@+node:felix.20230521004344.4: *3* zic.rstToLastChild
-    def rstToLastChild(self, p: Position, name: str, rst: List[str]) -> Position:
-        """Import an rst file as a last child of pos node with the specified name"""
-        c = self.c
-        c.importCommands.importFilesCommand(
-            files=rst,
-            parent=p,
-            treeType='@rst',
-        )
-        rstNode = p.getLastChild()
-        rstNode.h = name
-        return rstNode
-    //@+node:felix.20230521004344.5: *3* zic.clean
-    def clean(self, zimNode: Position, rstType: str) -> None:
-        """Clean useless nodes"""
-        warning = 'Warning: this node is ignored when writing this file'
-        for p in zimNode.subtree_iter():
-            # looking for useless bodies
-            if p.hasFirstChild() and warning in p.b:
-                child = p.getFirstChild()
-                fmt = "@rst-no-head %s declarations"
-                table = (
-                    fmt % p.h.replace(' ', '_'),
-                    fmt % p.h.replace(rstType, '').strip().replace(' ', '_'),
-                )
-                # Replace content with @rest-no-head first child (without title head) and delete it
-                if child.h in table:
-                    p.b = '\n'.join(child.b.split('\n')[3:])
-                    child.doDelete()
-                    # Replace content of empty body parent node with first child with same name
-                elif p.h == child.h or (f"{rstType} {child.h}" == p.h):
-                    if not child.hasFirstChild():
-                        p.b = child.b
-                        child.doDelete()
-                    elif not child.hasNext():
-                        p.b = child.b
-                        child.copyTreeFromSelfTo(p)
-                        child.doDelete()
-                    else:
-                        child.h = 'Introduction'
-            elif p.hasFirstChild(
-                ) and p.h.startswith("@rst-no-head") and not p.b.strip():
-                child = p.getFirstChild()
-                p_no_head = p.h.replace("@rst-no-head", "").strip()
-                # Replace empty @rst-no-head by its same named children
-                if child.h.strip() == p_no_head and not child.hasFirstChild():
-                    p.h = p_no_head
-                    p.b = child.b
-                    child.doDelete()
-            elif p.h.startswith("@rst-no-head"):
-                lines = p.b.split('\n')
-                p.h = lines[1]
-                p.b = '\n'.join(lines[3:])
-    //@+node:felix.20230521004344.6: *3* zic.run
-    def run(self) -> None:
-        """Create the zim node as the last top-level node."""
-        c = self.c
-        # Make sure a path is given.
-        if not self.pathToZim:
-            g.es('Missing setting: @string path_to_zim', color='red')
-            return
-        root = c.rootPosition()
-        while root.hasNext():
-            root.moveToNext()
-        zimNode = root.insertAfter()
-        zimNode.h = self.zimNodeName
-        # Parse the index file
-        files = self.parseZimIndex()
-        if files:
-            # Do the import
-            rstNodes: Dict[str, Position] = {'0': zimNode}
-            for level, name, rst in files:
-                if level == self.rstLevel:
-                    name = f"{self.rstType} {name}"
-                rstNodes[str(level + 1)] = self.rstToLastChild(rstNodes[str(level)], name, rst)
-            # Clean nodes
-            g.es('Start cleaning process. Please wait...', color='blue')
-            self.clean(zimNode, self.rstType)
-            g.es('Done', color='blue')
-            # Select zimNode
-            c.selectPosition(zimNode)
-            c.redraw()
-    //@-others
-//@+node:felix.20230521004413.1: ** class LegacyExternalFileImporter
-class LegacyExternalFileImporter:
-    """
-    A class to import external files written by versions of Leo earlier
-    than 5.0.
-    """
-    # Sentinels to ignore, without the leading comment delim.
-    ignore = ('@+at', '@-at', '@+leo', '@-leo', '@nonl', '@nl', '@-others')
+    /**
+     * Parse Zim wiki index.rst and return a list of tuples (level, name, path) or None.
+     */
+    public async parseZimIndex(): Promise<[number, string, string[]][] | undefined> {
 
-    def __init__(self, c: Cmdr) -> None:
-        self.c = c
+        // c = self.c
+        const pathToZim = g.os_path_abspath(this.pathToZim);
+        const pathToIndex = g.os_path_join(pathToZim, 'index.rst');
+        const w_exists = await g.os_path_exists(pathToIndex);
+        if (!w_exists) {
+            g.es(`not found: ${pathToIndex}`)
+            return undefined;
+        }
+
+        //index = open(pathToIndex).read()
+        const w_uri = g.makeVscodeUri(pathToIndex);
+        const readData = await vscode.workspace.fs.readFile(w_uri);
+        const index = Buffer.from(readData).toString('utf8');
+
+        // parse = re.findall(r'(\t*)-\s`(.+)\s<(.+)>`_', index)
+        const regex = /(\t*)-\s`(.+)\s<(.+)>`_/g;
+        const parse = [];
+        let match;
+
+        while ((match = regex.exec(index)) !== null) {
+            const [, m1, m2, m3] = match; // skip match[0]
+            parse.push([m1, m2, m3]);
+        }
+
+        if (!parse.length) {
+            g.es(`invalid index: ${pathToIndex}`);
+            return undefined;
+        }
+        const results: [number, string, string[]][] = [];
+        for (const result of parse) {
+            const level = result[0].length;
+            const name = result[1]; // .decode('utf-8') // already decoded from buffer above in leojs.
+            const unquote = decodeURIComponent; // urllib.parse.unquote;
+            // mypy: error: "str" has no attribute "decode"; maybe "encode"?  [attr-defined]
+            const w_path = [
+                g.os_path_abspath(g.os_path_join(pathToZim, unquote(result[2]))) // already decoded from buffer above in leojs.
+            ];
+            results.push([level, name, w_path]);
+
+        }
+
+        return results;
+
+    }
+    //@+node:felix.20230521004344.4: *3* zic.rstToLastChild
+    /**
+     * Import an rst file as a last child of pos node with the specified name
+     */
+    public async rstToLastChild(p: Position, p_name: string, rst: string[]): Promise<Position> {
+        const c = this.c;
+        await c.importCommands.importFilesCommand(
+            rst,
+            p,
+            undefined,
+            '@rst',
+        );
+        const rstNode = p.getLastChild();
+        rstNode.h = p_name;
+        return rstNode;
+
+    }
+    //@+node:felix.20230521004344.5: *3* zic.clean
+    /**
+     * Clean useless nodes
+     */
+    public clean(zimNode: Position, rstType: string): void {
+
+        const warning = 'Warning: this node is ignored when writing this file';
+        for (const p of zimNode.subtree_iter()) {
+            // looking for useless bodies
+            if (p.hasFirstChild() && p.b.includes(warning)) {
+                const child = p.getFirstChild();
+                // fmt = "@rst-no-head %s declarations"
+                const table = [
+                    // fmt % p.h.replace(/ /g, "_"),
+                    `@rst-no-head ${p.h.replace(/ /g, "_")} declarations`,
+                    `@rst-no-head ${p.h.split(rstType).join('').trim().replace(/ /g, "_")} declarations`,
+                    // fmt % p.h.split(rstType).join('').trim().replace(/ /g, "_"),
+                ];
+                // Replace content with @rest-no-head first child (without title head) and delete it
+                if (table.includes(child.h)) {
+                    p.b = child.b.split('\n').slice(3).join('\n');
+                    child.doDelete();
+                    // Replace content of empty body parent node with first child with same name
+                } else if (p.h === child.h || (`${rstType} ${child.h}` === p.h)) {
+                    if (!child.hasFirstChild()) {
+                        p.b = child.b;
+                        child.doDelete();
+                    } else if (!child.hasNext()) {
+                        p.b = child.b;
+                        child.copyTreeFromSelfTo(p);
+                        child.doDelete();
+                    } else {
+                        child.h = 'Introduction';
+                    }
+                }
+            } else if (p.hasFirstChild() && p.h.startsWith("@rst-no-head") && !p.b.trim()) {
+                const child = p.getFirstChild();
+                const p_no_head = p.h.replace("@rst-no-head", "").trim();
+                // Replace empty @rst-no-head by its same named children
+                if (child.h.trim() === p_no_head && !child.hasFirstChild()) {
+                    p.h = p_no_head;
+                    p.b = child.b;
+                    child.doDelete();
+                }
+            } else if (p.h.startsWith("@rst-no-head")) {
+                const lines = p.b.split('\n');
+                p.h = lines[1];
+                p.b = lines.slice(3).join('\n');
+            }
+
+        }
+    }
+    //@+node:felix.20230521004344.6: *3* zic.run
+    /**
+     * Create the zim node as the last top-level node.
+     */
+    public async run(): Promise<void> {
+
+        const c = this.c;
+        // Make sure a path is given.
+        if (!this.pathToZim) {
+            g.es('Missing setting: @string path_to_zim');
+            return;
+        }
+        const root = c.rootPosition()!;
+        while (root.hasNext()) {
+            root.moveToNext();
+        }
+        const zimNode = root.insertAfter();
+        zimNode.h = this.zimNodeName;
+        // Parse the index file
+        const files = await this.parseZimIndex();
+        if (files && files.length) {
+            // Do the import
+            const rstNodes: { [key: string]: Position } = { '0': zimNode };
+            for (let [level, name, rst] of files) {
+                if (level === this.rstLevel) {
+                    name = `${this.rstType} ${name}`
+                }
+                rstNodes[(level + 1).toString()] = await this.rstToLastChild(rstNodes[level.toString()], name, rst);
+            }
+            // Clean nodes
+            g.es('Start cleaning process. Please wait...');
+            this.clean(zimNode, this.rstType);
+            g.es('Done');
+            // Select zimNode
+            c.selectPosition(zimNode);
+            c.redraw();
+        }
+
+    }
+    //@-others
+
+}
+//@+node:felix.20230521004413.2: ** class Node
+/**
+ * Hold node data.
+ */
+class Node {
+    public h: string;
+    public level: number;
+    public lines: string[];
+
+    constructor(h: string, level: number) {
+        this.h = h.trim();
+        this.level = level;
+        this.lines = [];
+    }
+}
+//@+node:felix.20230521004413.1: ** class LegacyExternalFileImporter
+/**
+ * A class to import external files written by versions of Leo earlier
+ * than 5.0.
+ */
+export class LegacyExternalFileImporter {
+
+    public c: Commands;
+    // Sentinels to ignore, without the leading comment delim.
+    public ignore = ['@+at', '@-at', '@+leo', '@-leo', '@nonl', '@nl', '@-others'];
+
+    constructor(c: Commands) {
+        this.c = c
+    }
 
     //@+others
-    //@+node:felix.20230521004413.2: *3* class Node
-    class Node:
-
-        def __init__(self, h: str, level: int) -> None:
-            """Hold node data."""
-            self.h = h.strip()
-            self.level = level
-            self.lines: List[str] = []
     //@+node:felix.20230521004413.3: *3* legacy.add
-    def add(self, line: str, stack: List[Any]) -> None:
-        """Add a line to the present node."""
-        if stack:
-            node = stack[-1]
-            node.lines.append(line)
-        else:
-            print('orphan line: ', repr(line))
+    /**
+     * Add a line to the present node.
+     */
+    public add(line: string, stack: Node[]): void {
+
+        if (stack && stack.length) {
+            const node = stack[stack.length - 1];
+            node.lines.push(line);
+        } else {
+            console.log('orphan line: ', line.toString());
+        }
+    }
     //@+node:felix.20230521004413.4: *3* legacy.compute_delim1
-    def compute_delim1(self, path: str) -> str:
-        """Return the opening comment delim for the given file."""
-        junk, ext = os.path.splitext(path)
-        if not ext:
-            return None
-        language = g.app.extension_dict.get(ext[1:])
-        if not language:
-            return None
-        delim1, delim2, delim3 = g.set_delims_from_language(language)
-        g.trace(language, delim1 or delim2)
-        return delim1 or delim2
+    /**
+     * Return the opening comment delim for the given file.
+     */
+    public compute_delim1(p_path: string): string | undefined {
+
+        let [junk, ext] = g.os_path_splitext(p_path);
+        if (!ext) {
+            return undefined;
+        }
+        const language = g.app.extension_dict[ext.substring(1)];
+        if (!language) {
+            return undefined;
+        }
+        let [delim1, delim2, delim3] = g.set_delims_from_language(language);
+        g.trace(language, delim1 || delim2);
+        return delim1 || delim2;
+
+    }
     //@+node:felix.20230521004413.5: *3* legacy.import_file
-    def import_file(self, path: str) -> None:
-        """Import one legacy external file."""
-        c = self.c
-        root_h = g.shortFileName(path)
-        delim1 = self.compute_delim1(path)
-        if not delim1:
-            g.es_print('unknown file extension:', color='red')
-            g.es_print(path)
-            return
-        # Read the file into s.
-        with open(path, 'r') as f:
-            s = f.read()
-        # Do nothing if the file is a newer external file.
-        if delim1 + '@+leo-ver=4' not in s:
-            g.es_print('not a legacy external file:', color='red')
-            g.es_print(path)
-            return
-        # Compute the local ignore list for this file.
-        ignore = tuple(delim1 + z for z in self.ignore)
-        # Handle each line of the file.
-        nodes: List[Any] = []  # An list of Nodes, in file order.
-        stack: List[Any] = []  # A stack of Nodes.
-        for line in g.splitLines(s):
-            s = line.lstrip()
-            lws = line[: len(line) - len(line.lstrip())]
-            if s.startswith(delim1 + '@@'):
-                self.add(lws + s[2:], stack)
-            elif s.startswith(ignore):
-                # Ignore these. Use comments instead of @doc bodies.
-                pass
-            elif (
-                s.startswith(delim1 + '@+others') or
-                s.startswith(delim1 + '@' + lws + '@+others')
-            ):
-                self.add(lws + '@others\n', stack)
-            elif s.startswith(delim1 + '@<<'):
-                n = len(delim1 + '@<<')
-                self.add(lws + '<<' + s[n:].rstrip() + '\n', stack)
-            elif s.startswith(delim1 + '@+node:'):
-                # Compute the headline.
-                if stack:
-                    h = s[8:]
-                    i = h.find(':')
-                    h = h[i + 1 :] if ':' in h else h
-                else:
-                    h = root_h
-                # Create a node and push it.
-                node = self.Node(h, len(stack))
-                nodes.append(node)
-                stack.append(node)
-            elif s.startswith(delim1 + '@-node'):
-                # End the node.
-                stack.pop()
-            elif s.startswith(delim1 + '@'):
-                print('oops:', repr(s))
-            else:
-                self.add(line, stack)
-        if stack:
-            print('Unbalanced node sentinels')
-        # Generate nodes.
-        last = c.lastTopLevel()
-        root = last.insertAfter()
-        root.h = f"imported file: {root_h}"
-        stack = [root]
-        for node in nodes:
-            b = textwrap.dedent(''.join(node.lines))
-            level = node.level
-            if level == 0:
+    /**
+     * Import one legacy external file.
+     */
+    public async import_file(p_path: string): Promise<void> {
+
+        const c = this.c;
+        const root_h = g.shortFileName(p_path);
+        const delim1 = this.compute_delim1(p_path);
+        if (!delim1) {
+            g.es_print('unknown file extension:');
+            g.es_print(p_path);
+            return;
+        }
+
+        // Read the file into s.
+        // with open(p_path, 'r') as f
+        //     s = f.read()
+
+        const w_uri = g.makeVscodeUri(p_path);
+        const readData = await vscode.workspace.fs.readFile(w_uri);
+        let s = Buffer.from(readData).toString('utf8');
+
+        // Do nothing if the file is a newer external file.
+        if (!s.includes(delim1 + '@+leo-ver=4')) {
+            g.es_print('not a legacy external file:');
+            g.es_print(p_path);
+            return;
+        }
+        // Compute the local ignore list for this file.
+        const ignore = this.ignore.map(z => delim1 + z); // tuple(delim1 + z for z in this.ignore);
+
+        // Handle each line of the file.
+        const nodes: Node[] = [];  // An list of Nodes, in file order.
+        let stack: Node[] = [];  // A stack of Nodes.
+        for (const line of g.splitLines(s)) {
+            s = line.trimStart();
+            const lws = line.substring(0, line.length - line.trimStart().length);
+            if (s.startsWith(delim1 + '@@')) {
+                this.add(lws + s.substring(2), stack)
+            } else if (ignore.some(prefix => s.startsWith(prefix))) {
+                // Ignore these. Use comments instead of @doc bodies.
+                // pass
+            } else if (
+                s.startsWith(delim1 + '@+others') || s.startsWith(delim1 + '@' + lws + '@+others')
+            ) {
+                this.add(lws + '@others\n', stack);
+            } else if (s.startsWith(delim1 + '@<<')) {
+                const n = (delim1 + '@<<').length;
+                this.add(lws + '<<' + s.substring(n).trimEnd() + '\n', stack)
+            } else if (s.startsWith(delim1 + '@+node:')) {
+                // Compute the headline.
+                let h;
+                if (stack && stack.length) {
+                    h = s.substring(8);
+                    let i = h.indexOf(':');
+                    h = h.includes(':') ? h.substring(i + 1) : h
+                } else {
+                    h = root_h;
+                }
+                // Create a node and push it.
+                const node = new Node(h, stack.length);
+                nodes.push(node);
+                stack.push(node);
+            } else if (s.startsWith(delim1 + '@-node')) {
+                // End the node.
+                stack.pop();
+            } else if (s.startsWith(delim1 + '@')) {
+                console.log('oops:', s.toString());
+            } else {
+                this.add(line, stack);
+            }
+        }
+        if (stack && stack.length) {
+            console.log('Unbalanced node sentinels');
+        }
+        // Generate nodes.
+        const last = c.lastTopLevel();
+        const root = last.insertAfter();
+        root.h = `imported file: ${root_h}`;
+        let stack2 = [root];
+        for (const node of nodes) {
+            const b = g.dedent(node.lines.join(''))
+            const level = node.level
+            if (level === 0) {
                 root.h = root_h
                 root.b = b
-            else:
-                parent = stack[level - 1]
-                p = parent.insertAsLastChild()
-                p.b = b
-                p.h = node.h
-                # Good for debugging.
-                # p.h = f"{level} {node.h}"
-                stack = stack[:level] + [p]
-        c.selectPosition(root)
-        root.expand()  # c.expandAllSubheads()
-        c.redraw()
+            } else {
+                const parent = stack2[level - 1];
+                const p = parent.insertAsLastChild();
+                p.b = b;
+                p.h = node.h;
+                // Good for debugging.
+                // p.h = f"{level} {node.h}"
+                stack2 = stack2.slice(0, level);
+                stack2.push(p);
+            }
+        }
+        c.selectPosition(root);
+        root.expand();  // c.expandAllSubheads()
+        c.redraw();
+
+    }
     //@+node:felix.20230521004413.6: *3* legacy.import_files
-    def import_files(self, paths: List[str]) -> None:
-        """Import zero or more files."""
-        for path in paths:
-            if os.path.exists(path):
-                self.import_file(path)
-            else:
-                g.es_print(f"not found: {path!r}")
+    /** 
+     * Import zero or more files.
+     */
+    public async import_files(paths: string[]): Promise<void> {
+
+        for (const w_path of paths) {
+            const w_exists = await g.os_path_exists(w_path);
+            if (w_exists) {
+                await this.import_file(w_path);
+            } else {
+                g.es_print(`not found: ${path.toString()}`);
+            }
+        }
+    }
     //@+node:felix.20230521004413.7: *3* legacy.prompt_for_files
-    def prompt_for_files(self) -> None:
-        """Prompt for a list of legacy external .py files and import them."""
-        c = self.c
-        types = [
-            ("Legacy external files", "*.py"),
-            ("All files", "*"),
-        ]
-        paths = g.app.gui.runOpenFileDialog(c,
-            title="Import Legacy External Files",
-            filetypes=types,
-            defaultextension=".py",
-            multiple=True)
-        c.bringToFront()
-        if paths:
+    /** 
+     * Prompt for a list of legacy external .py files and import them.
+     */
+    public async prompt_for_files(): Promise<void> {
+
+        const c = this.c;
+        const types: [string, string][] = [
+            ["Legacy external files", "*.py"],
+            ["All files", "*"],
+        ];
+
+        const paths = await g.app.gui.runOpenFileDialog(
+            c,
+            "Import Legacy External Files",
+            types,
+            ".py",
+            true
+        ) as string[];
+
+        // c.bringToFront()
+
+        if (paths && paths.length) {
             g.chdir(paths[0])
-            self.import_files(paths)
+            await this.import_files(paths);
+        }
+    }
     //@-others
+
+}
 //@-others
 //@@language typescript
 //@@tabwidth -4
