@@ -175,8 +175,8 @@ export class RstCommands {
     public reloadSettings(): void {
 
         const c = this.c;
-        const getBool = c.config.getBool;
-        const getString = c.config.getString;
+        const getBool = c.config.getBool.bind(c.config);
+        const getString = c.config.getString.bind(c.config);
 
         // Action option for rst3 command.
         this.rst3_action = getString('rst3-action') || 'none';

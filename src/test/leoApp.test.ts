@@ -9,6 +9,8 @@ import { afterEach, before, beforeEach } from 'mocha';
 import * as g from '../core/leoGlobals';
 import { LeoUnitTest } from './leoTest2';
 
+/* eslint-disable require-await */
+
 //@+others
 //@+node:felix.20220129221242.1: ** suite TestApp(LeoUnitTest)
 suite('Test cases for leoApp.ts', () => {
@@ -51,7 +53,7 @@ suite('Test cases for leoApp.ts', () => {
     });
     */
     //@+node:felix.20220129221913.3: *3* TestApp.test_official_g_app_ivars
-    test('test_official_g_app_ivars', () => {
+    test('test_official_g_app_ivars', async () => {
 
         const ivars = [
             // Global managers.
@@ -82,12 +84,11 @@ suite('Test cases for leoApp.ts', () => {
         ivars.forEach(ivar => {
             assert.ok(g.app.hasOwnProperty(ivar), `missing g.app ivar: ${ivar}`);
         });
-        return Promise.resolve();
 
     });
 
     //@+node:felix.20220129221913.4: *3* TestApp.test_consistency_of_leoApp_tables
-    test('test_consistency_of_leoApp_tables', () => {
+    test('test_consistency_of_leoApp_tables', async () => {
         const delims_d = g.app.language_delims_dict;
         const lang_d = g.app.language_extension_dict;
         const ext_d = g.app.extension_dict;
@@ -102,7 +103,6 @@ suite('Test cases for leoApp.ts', () => {
             const lang = ext_d[ext];
             assert.ok(lang_d[lang], lang);
         }
-        return Promise.resolve();
     });
 
     //@+node:felix.20220129221913.5: *3* TestApp.test_lm_openAnyLeoFile

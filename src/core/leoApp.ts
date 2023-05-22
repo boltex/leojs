@@ -2597,7 +2597,7 @@ export class LoadManager {
                 // We can't print the signon until we know the gui.
                 g.app.computeSignon();  // Set app.signon/signon1 for commanders.
             }, () => {
-                throw ('LEOJS: ERRRR IN READING GLOBAL SETTING');
+                console.error('LEOJS: ERROR IN READING GLOBAL SETTING');
             });
 
         });
