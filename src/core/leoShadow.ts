@@ -557,7 +557,7 @@ export class ShadowController {
         // 2010/01/07: check at.errors also.
         if (copy && x.errors === 0 && at.errors === 0) {
             s = new_private_lines.join('');
-            x.replaceFileWithString(at.encoding, fn, s);
+            await x.replaceFileWithString(at.encoding, fn, s);
         }
         return copy;
     }

@@ -1801,18 +1801,18 @@ export class Commands {
      * Go to line n (zero-based) of a script.
      * A convenience method called from g.handleScriptException.
      */
-    public goToLineNumber(n: number): void {
+    public async goToLineNumber(n: number): Promise<void> {
         const c = this;
-        c.gotoCommands.find_file_line(n);
+        await c.gotoCommands.find_file_line(n);
     }
 
     /**
      * Go to line n (zero-based) of a script.
      * A convenience method called from g.handleScriptException.
      */
-    public goToScriptLineNumber(n: number, p: Position): void {
+    public async goToScriptLineNumber(n: number, p: Position): Promise<void> {
         const c = this;
-        c.gotoCommands.find_script_line(n, p);
+        await c.gotoCommands.find_script_line(n, p);
     }
     //@+node:felix.20211226232349.1: *4* setFileTimeStamp
     /**
@@ -2473,12 +2473,12 @@ export class Commands {
      * Back up given fileName or c.fileName().
      * If useTimeStamp is True, append a timestamp to the filename.
      */
-    public backup(
+    public async backup(
         fileName: string | undefined = undefined,
         prefix: string | undefined = undefined,
         silent: boolean = false,
         useTimeStamp: boolean = true
-    ): string | undefined {
+    ): Promise<string | undefined> {
         const c: Commands = this;
 
         let fn: string = fileName || c.fileName();
@@ -2513,7 +2513,7 @@ export class Commands {
         if (w_path) {
             // pylint: disable=no-member
             // Defined in commanderFileCommands.py.
-            c.saveTo(w_path, silent);
+            await c.saveTo(w_path, silent);
             // Issues saved message.
             // g.es('in', theDir)
         }
@@ -2831,7 +2831,7 @@ export class Commands {
     /**
      * Warn about syntax errors in files.
      */
-    public syntaxErrorDialog(): void {
+    public async syntaxErrorDialog(): Promise<void> {
         const c: Commands = this;
 
         if (
@@ -2844,7 +2844,7 @@ export class Commands {
 
             const list_s: string = aList.join('\n');
 
-            g.app.gui.runAskOkDialog(
+            await g.app.gui.runAskOkDialog(
                 c,
                 'Python Errors',
                 `Python errors in:\n\n${list_s}`,

@@ -353,7 +353,7 @@ export class AtFile {
                 at._file_bytes = g.toEncodedString('');
                 return [undefined, undefined];
             }
-            at.warnOnReadOnlyFile(fn);
+            await at.warnOnReadOnlyFile(fn);
         } catch (exception) {
             at.error(`unexpected exception opening: '@file ${fn}'`);
             at._file_bytes = g.toEncodedString('');
@@ -381,7 +381,7 @@ export class AtFile {
             return undefined;
         }
         // This method is the gateway to the shadow algorithm.
-        x.updatePublicAndPrivateFiles(at.root!, fn, shadow_fn!);
+        await x.updatePublicAndPrivateFiles(at.root!, fn, shadow_fn!);
         return shadow_fn;
 
     }
@@ -738,7 +738,7 @@ export class AtFile {
         // Sets at.startSentinelComment/endSentinelComment.
         at.scanAllDirectives(root);
         const new_public_lines = await at.read_at_clean_lines(fileName);
-        const old_private_lines = this.write_at_clean_sentinels(root);
+        const old_private_lines = await this.write_at_clean_sentinels(root);
         const marker = x.markerFromFileLines(old_private_lines, fileName);
         let [old_public_lines, junk] = x.separate_sentinels(old_private_lines, marker);
         let new_private_lines;
@@ -797,9 +797,9 @@ export class AtFile {
      * Return all lines of the @clean tree as if it were
      * written as an @file node.
      */
-    public write_at_clean_sentinels(root: Position): string[] {
+    public async write_at_clean_sentinels(root: Position): Promise<string[]> {
         const at = this;
-        const result = at.atFileToString(root, true);
+        const result = await at.atFileToString(root, true);
         const s = g.toUnicode(result, at.encoding);
         return g.splitLines(s);
     }
@@ -832,12 +832,12 @@ export class AtFile {
             p.firstChild().doDelete();
         }
         if (shadow_exists) {
-            at.read(p);
+            await at.read(p);
         } else {
             const ok = await at.importAtShadowNode(p);
             if (ok) {
                 // Create the private file automatically.
-                at.writeOneAtShadowNode(p);
+                await at.writeOneAtShadowNode(p);
             }
         }
     }
@@ -856,7 +856,7 @@ export class AtFile {
             p.firstChild().doDelete();
         }
         // Import the outline, exactly as @auto does.
-        ic.createOutline(p.copy());
+        await ic.createOutline(p.copy());
         if (ic.errors) {
             g.error('errors inhibited read @shadow', fn);
         }
@@ -871,13 +871,13 @@ export class AtFile {
     /**
      * A convenience wrapper for FastAtRead.read_into_root()
      */
-    public async fast_read_into_root(
+    public fast_read_into_root(
         c: Commands,
         contents: string,
         gnx2vnode: { [key: string]: VNode },
         path: string,
         root: Position,
-    ): Promise<boolean> {
+    ): boolean {
         return new FastAtRead(c, gnx2vnode).read_into_root(contents, path, root);
     }
     //@+node:felix.20230415162513.23: *4* at.Reading utils...
@@ -1344,7 +1344,7 @@ export class AtFile {
         let [files, root] = at.findFilesToWrite(all);
         for (const p of files) {
             try {
-                at.writeAllHelper(p, root);
+                await at.writeAllHelper(p, root);
             } catch (exception) {
                 at.internalWriteError(p);
             }
@@ -1623,7 +1623,7 @@ export class AtFile {
             }
 
         } catch (exception) {
-            at.writeException(fileName || "", root);
+            await at.writeException(fileName || "", root);
         }
     }
 
@@ -1659,7 +1659,7 @@ export class AtFile {
         let writtenFiles = false;
         c.init_error_dialogs();
         // #1450.
-        at.initWriteIvars(p.copy());
+        await at.initWriteIvars(p.copy());
         p = p.copy();
         let after = p.nodeAfterTree();
         while (p && !p.__eq__(after)) {  // Don't use iterator.
@@ -1708,7 +1708,7 @@ export class AtFile {
         ];
         for (let [pred, func] of table) {
             if (pred.bind(p)()) {
-                func.bind(at)(p);  // type:ignore
+                await func.bind(at)(p);  // type:ignore
                 return;
             }
         }
@@ -1750,7 +1750,7 @@ export class AtFile {
             await at.replaceFile(contents, at.encoding!, fileName!, root, root.isAtAutoRstNode());
             return true;
         } catch (exception) {
-            at.writeException(fileName || "", root);
+            await at.writeException(fileName || "", root);
             return false;
         }
     }
@@ -1841,7 +1841,7 @@ export class AtFile {
                 await at.replaceFile(contents, at.encoding!, fileName, root);
             }
         } catch (exception) {
-            at.writeException(fileName || "", root);
+            await at.writeException(fileName || "", root);
         }
     }
     //@+node:felix.20230415162517.26: *6* at.writeOneAtEditNode
@@ -1876,11 +1876,11 @@ export class AtFile {
                 return false;
             }
             const contents = g.splitLines(p.b).filter(s => at.directiveKind4(s, 0) === AtFile.noDirective).join('');
-            at.replaceFile(contents, at.encoding!, fileName, root);
+            await at.replaceFile(contents, at.encoding!, fileName, root);
             c.raise_error_dialogs('write');
             return true;
         } catch (exception) {
-            at.writeException(fileName || "", root);
+            await at.writeException(fileName || "", root);
             return false;
         }
     }
@@ -1917,7 +1917,7 @@ export class AtFile {
                 await at.replaceFile(contents, at.encoding!, fileName, root);
             }
         } catch (exception) {
-            at.writeException(fileName || "", root);
+            await at.writeException(fileName || "", root);
         }
     }
     //@+node:felix.20230415162517.28: *6* at.writeOneAtNosentNode
@@ -1952,7 +1952,7 @@ export class AtFile {
                 await at.replaceFile(contents, at.encoding!, fileName, root);
             }
         } catch (exception) {
-            at.writeException(fileName || "", root);
+            await at.writeException(fileName || "", root);
         }
     }
     //@+node:felix.20230415162517.29: *6* at.writeOneAtShadowNode & helper
@@ -1978,7 +1978,7 @@ export class AtFile {
             // A hack to support unknown extensions. May set c.target_language.
             this.adjustTargetLanguage(fn);
             full_path = c.fullPath(p);
-            at.initWriteIvars(root);
+            await at.initWriteIvars(root);
             // Force python sentinels to suppress an error message.
             // The actual sentinels will be set below.
             at.endSentinelComment = undefined;
@@ -2023,9 +2023,9 @@ export class AtFile {
             if (!at.errors) {
                 // Write the public and private files.
                 // makeShadowDirectory takes a *public* file name.
-                x.makeShadowDirectory(full_path);
-                x.replaceFileWithString(at.encoding!, private_fn, at.private_s);
-                x.replaceFileWithString(at.encoding!, full_path, at.public_s);
+                await x.makeShadowDirectory(full_path);
+                await x.replaceFileWithString(at.encoding!, private_fn, at.private_s);
+                await x.replaceFileWithString(at.encoding!, full_path, at.public_s);
             }
             at.checkPythonCode(at.private_s, full_path, root);
             if (at.errors) {
@@ -2036,7 +2036,7 @@ export class AtFile {
             }
             return !at.errors;
         } catch (exception) {
-            at.writeException(full_path, root);
+            await at.writeException(full_path, root);
             return false;
         }
     }
@@ -2081,7 +2081,7 @@ export class AtFile {
             }
             return at.errors ? '' : at.outputList.join('');
         } catch (exception) {
-            at.writeException(fileName || "", root);
+            await at.writeException(fileName || "", root);
             return '';
         }
     }
@@ -2104,7 +2104,7 @@ export class AtFile {
             }
             return (await at.writeAtAutoContents(fileName, root)) || '';
         } catch (exception) {
-            at.writeException(fileName || "", root);
+            await at.writeException(fileName || "", root);
             return '';
         }
     }
@@ -2134,7 +2134,7 @@ export class AtFile {
             const contents = g.splitLines(root.b).filter(s => at.directiveKind4(s, 0) === AtFile.noDirective).join('');
             return contents;
         } catch (exception) {
-            at.writeException(fileName || "", root);
+            await at.writeException(fileName || "", root);
             return '';
         }
     }
@@ -2142,12 +2142,12 @@ export class AtFile {
     /**
      * Write an external file to a string, and return its contents.
      */
-    public atFileToString(root: Position, sentinels = true): string {
+    public async atFileToString(root: Position, sentinels = true): Promise<string> {
         const at = this;
         const c = this.c;
         try {
             c.endEditing();
-            at.initWriteIvars(root);
+            await at.initWriteIvars(root);
             at.sentinels = sentinels;
             at.outputList = [];
             at.putFile(root, undefined, sentinels);
@@ -3563,7 +3563,7 @@ export class AtFile {
             // at.outputFile.close();
             at.outputFile = '';
         }
-        at.remove(fileName);
+        await at.remove(fileName);
         at.addToOrphanList(root);
     }
     //@+node:felix.20230415162522.1: *3* at.Utilities

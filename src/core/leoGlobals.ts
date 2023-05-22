@@ -1951,7 +1951,7 @@ export async function makeAllNonExistentDirectories(theDir: string): Promise<str
  *
  * Return the commander of the newly-opened outline.
  */
-export async function openWithFileName(fileName: string, old_c: Commands | undefined, gui: NullGui): Promise<Commands | undefined> {
+export function openWithFileName(fileName: string, old_c: Commands | undefined, gui: NullGui): Promise<Commands | undefined> {
     return app.loadManager!.loadLocalFile(fileName, gui, old_c);
 }
 //@+node:felix.20220106231022.1: *3* g.readFileIntoString
@@ -2294,7 +2294,7 @@ export function findRootsWithPredicate(c: Commands, root: Position, predicate?: 
 
     const seen: VNode[] = [];
     const roots = [];
-    if (predicate == undefined) {
+    if (predicate == null) {
 
         // A useful default predicate for python.
         // pylint: disable=function-redefined

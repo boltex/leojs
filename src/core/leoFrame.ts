@@ -144,7 +144,7 @@ export class LeoFrame {
                 // See https://bugs.launchpad.net/leo-editor/+bug/381527
                 // Write the @edit node if needed.
                 if (root.isDirty()) {
-                    c.atFileCommands.writeOneAtEditNode(root);
+                    await c.atFileCommands.writeOneAtEditNode(root);
                 }
                 return false;  // Don't save and don't veto.
             }
@@ -943,13 +943,12 @@ export class StringTextWrapper {
     }
 
     //@+node:felix.20221102232754.3: *3* stw.Clipboard
-    public clipboard_clear(): void {
-        g.app.gui.replaceClipboardWith('');
+    public clipboard_clear(): Thenable<void> {
+        return g.app.gui.replaceClipboardWith('');
     }
     public async clipboard_append(s: string): Promise<void> {
         const s1 = await g.app.gui.getTextFromClipboard();
-        g.app.gui.replaceClipboardWith(s1 + s);
-        return;
+        return g.app.gui.replaceClipboardWith(s1 + s);
     }
 
     //@+node:felix.20221102232754.4: *3* stw.Do-nothings

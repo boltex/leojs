@@ -157,7 +157,7 @@ export class BaseLeoCompare {
             return;
         }
         if (this.outputFileName) {
-            this.openOutputFile();
+            await this.openOutputFile();
         }
         const ok = !this.outputFileName || this.outputFile;
         if (!ok) {
@@ -248,12 +248,12 @@ export class BaseLeoCompare {
 
     }
     //@+node:felix.20230430023337.6: *3* compare_files (entry)
-    public async compare_files(name1: string, name2: string): Promise<void> {
+    public compare_files(name1: string, name2: string): Promise<void> {
         if (name1 === name2) {
             this.show("File names are identical.\nPlease pick distinct files.");
-            return;
+            return Promise.resolve();
         }
-        this.compare_two_files(name1, name2);
+        return this.compare_two_files(name1, name2);
     }
     //@+node:felix.20230430023337.7: *3* compare_list_of_files (entry for scripts)
     public async compare_list_of_files(aList1: string[]): Promise<void> {
@@ -263,7 +263,7 @@ export class BaseLeoCompare {
             const path1 = aList[0];
             for (const path2 of aList.slice(1)) {
                 g.trace('COMPARE', path1, path2);
-                this.compare_two_files(path1, path2);
+                await this.compare_two_files(path1, path2);
             }
         }
     }
@@ -288,7 +288,7 @@ export class BaseLeoCompare {
 
             if (f1 && f1.length && f2 && f2.length && ok1) {
                 // Don't compare if there is an error opening the output file.
-                this.compare_open_files(f1, f2, name1, name2);
+                await this.compare_open_files(f1, f2, name1, name2);
             }
 
         }
@@ -654,12 +654,11 @@ export class BaseLeoCompare {
     //@+node:felix.20230430023337.23: *4* compare.show
     public show(s: string): void {
         // g.pr(s)
-        if (this.outputFile)
+        if (this.outputFile) {
             // this.outputFile is opened in 'wb' mode.
             // this.outputFile.write(g.toEncodedString(s + '\n'))
             this.outputFile = this.outputFile + s;
-
-        else if (this.c) {
+        } else if (this.c) {
             g.es(s);
         } else {
             g.pr(s);
@@ -770,7 +769,7 @@ export class CompareLeoOutlines {
 
         const differ = new difflib.Differ();
 
-        const diff_list = difflib.unifiedDiff(lines1, lines2, { fromfile: fn1, tofile: fn2 })
+        const diff_list = difflib.unifiedDiff(lines1, lines2, { fromfile: fn1, tofile: fn2 });
         //  list(
         //     difflib.unified_diff(lines1, lines2, fn1, fn2);
         // );
@@ -972,10 +971,10 @@ export class CompareLeoOutlines {
      *
      * Using open commanders works because we always read entire .leo files.
      */
-    public async open_outline(fn: string): Promise<Commands | undefined> {
+    public open_outline(fn: string): Promise<Commands | undefined> {
         for (const frame of g.app.windowList) {
             if (frame.c.fileName() === fn) {
-                return frame.c;
+                return Promise.resolve(frame.c);
             }
         }
         // const gui = this.visible?undefined:g.app.nullGui;
@@ -996,7 +995,7 @@ export class TopLevelCompareCommands {
         'Opens all the files and creates a top-level node in c\'s outline showing' +
         'the diffs of those files, two at a time.'
     )
-    public async diff_and_open_leo_files(this: Commands): Promise<void> {
+    public diff_and_open_leo_files(this: Commands): Promise<void> {
         return diff_leo_files_helper(
             this,
             "Diff And Open Leo Files",
@@ -1009,7 +1008,7 @@ export class TopLevelCompareCommands {
         'Open a dialog prompting for two or more .leo files.' +
         'Creates a top-level node showing the diffs of those files, two at a time.'
     )
-    public async diff_leo_files(this: Commands): Promise<void> {
+    public diff_leo_files(this: Commands): Promise<void> {
         return diff_leo_files_helper(
             this,
             "Diff Leo Files",

@@ -262,12 +262,12 @@ export class RstCommands {
     }
     //@+node:felix.20230427003032.13: *4* rst.rst3 command & helpers
     @cmd('rst3', 'Write all @rst nodes.')
-    public rst3(): number {
+    public async rst3(): Promise<number> {
 
         const t1 = process.hrtime();
         this.n_intermediate = 0;
         this.n_docutils = 0;
-        this.processTopTree(this.c.p);
+        await this.processTopTree(this.c.p);
         const t2 = process.hrtime();
         g.es_print(
             `rst3: wrote...\n` +
@@ -333,7 +333,7 @@ export class RstCommands {
     /**
      * Call processTree for @rst and @slides node p's subtree or p's ancestors.
      */
-    public processTopTree(p: Position): void {
+    public async processTopTree(p: Position): Promise<void> {
         const predicate = (p: Position): boolean => {
             return this.is_rst_node(p) || g.match_word(p.h, 0, '@slides');
         };
@@ -343,7 +343,7 @@ export class RstCommands {
         const roots = g.findRootsWithPredicate(this.c, p, predicate);
         if (roots && roots.length) {
             for (const p of roots) {
-                this.processTree(p);
+                await this.processTree(p);
             }
             this.do_actions();
         } else {
@@ -354,7 +354,7 @@ export class RstCommands {
     /**
      * Process all @rst nodes in a tree.
      */
-    public processTree(root: Position): void {
+    public async processTree(root: Position): Promise<void> {
         for (const p of root.self_and_subtree()) {
             if (this.is_rst_node(p)) {
                 if (this.in_rst_tree(p)) {
@@ -364,14 +364,14 @@ export class RstCommands {
                     const fn = p.h.substring(4).trim();
                     if (fn) {
                         const source = this.write_rst_tree(p, fn);
-                        this.write_docutils_files(fn, p, source);
+                        await this.write_docutils_files(fn, p, source);
                     }
                 }
             } else if (g.match_word(p.h, 0, "@slides")) {
                 if (this.in_slides_tree(p)) {
                     g.trace(`ignoring nested @slides node: ${p.h}`);
                 } else {
-                    this.write_slides(p);
+                    await this.write_slides(p);
                 }
             }
         }
@@ -405,7 +405,7 @@ export class RstCommands {
     /**
      * Convert p's children to slides.
      */
-    public write_slides(p: Position): void {
+    public async write_slides(p: Position): Promise<void> {
 
         const c = this.c;
         p = p.copy();
@@ -438,7 +438,7 @@ export class RstCommands {
             this.writeSlideTitle(title, n - 1, n_tot);
             this.result_list.push(child.b);
             const source = this.compute_result();
-            this.write_docutils_files(fn2, p, source);
+            await this.write_docutils_files(fn2, p, source);
         }
     }
     //@+node:felix.20230427003032.20: *6* rst.writeSlideTitle
@@ -518,7 +518,7 @@ export class RstCommands {
 
         // Write the intermediate file.
         if (this.write_intermediate_file) {
-            this.writeIntermediateFile(fn, source);
+            await this.writeIntermediateFile(fn, source);
         }
 
         // Should we call docutils?

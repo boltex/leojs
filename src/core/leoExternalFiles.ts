@@ -51,7 +51,7 @@ export class ExternalFile {
     /**
      * Return True if the external file still exists.
      */
-    public async exists(): Promise<boolean | vscode.FileStat> {
+    public exists(): Promise<boolean | vscode.FileStat> {
         return g.os_path_exists(this.path);
     }
     //@-others
@@ -143,11 +143,11 @@ export class ExternalFilesController {
      * Close all "Open With" files associated with frame.
      * Called by g.app.destroyWindow.
      */
-    public destroy_frame(frame: LeoFrame): void {
+    public async destroy_frame(frame: LeoFrame): Promise<void> {
         let files = this.files.filter(ef => ef.c.frame === frame);
         let paths = files.map(ef => ef.path);
         for (const ef of files) {
-            this.destroy_temp_file(ef);
+            await this.destroy_temp_file(ef);
         }
         this.files = this.files.filter(z => !paths.includes(z.path));
     }
@@ -195,13 +195,13 @@ export class ExternalFilesController {
             // Check all external files.
             while (this.unchecked_files) {
                 const ef = this.unchecked_files.pop()!;  // #1959: ensure progress.
-                this.idle_check_open_with_file(c, ef);
+                await this.idle_check_open_with_file(c, ef);
             }
         } else if (this.unchecked_commanders.length) {
             // Check the next commander for which
             // @bool check_for_changed_external_file is True.
             c = this.unchecked_commanders.pop();
-            this.idle_check_commander(c!);
+            await this.idle_check_commander(c!);
         } else {
             // Add all commanders for which
             // @bool check_for_changed_external_file is True.
@@ -224,7 +224,7 @@ export class ExternalFilesController {
      */
     public async idle_check_commander(c: Commands): Promise<void> {
         // #1240: Check the .leo file itself.
-        this.idle_check_leo_file(c);
+        await this.idle_check_leo_file(c);
         //
         // #1100: always scan the entire file for @<file> nodes.
         // #1134: Nested @<file> nodes are no longer valid, but this will do no harm.
@@ -251,7 +251,7 @@ export class ExternalFilesController {
             }
             if (['yes', 'yes-all'].includes(state)) {
                 c.redraw(p);
-                c.refreshFromDisk();
+                await c.refreshFromDisk();
                 c.redraw();
             }
         }
@@ -301,13 +301,13 @@ export class ExternalFilesController {
         const val = await this.ask(c!, ef.path, (ef.p as Position).copy());
         if (val === 'yes-all') {
             for (const ef of this.unchecked_files) {
-                this.update_open_with_node(ef);
+                await this.update_open_with_node(ef);
             }
             this.unchecked_files = [];
         } else if (val === 'no-all') {
             this.unchecked_files = [];
         } else if (val === 'yes') {
-            this.update_open_with_node(ef);
+            await this.update_open_with_node(ef);
         } else if (val === 'no') {
             // pass
         }
@@ -648,11 +648,11 @@ export class ExternalFilesController {
     /**
      * Remove any existing *temp* file for p and path, updating this.files.
      */
-    public remove_temp_file(p: Position, p_path: string): void {
+    public async remove_temp_file(p: Position, p_path: string): Promise<void> {
 
         for (const ef of this.files) {
             if (p_path && p_path === ef.path && ef.p && p.v === ef.p.v) {
-                this.destroy_temp_file(ef);
+                await this.destroy_temp_file(ef);
                 this.files = this.files.filter(z => z !== ef);
                 return;
             }
@@ -666,11 +666,11 @@ export class ExternalFilesController {
      *
      * Called by g.app.finishQuit.
      */
-    public shut_down(): void {
+    public async shut_down(): Promise<void> {
 
         // Dont call g.es or g.trace! The log stream no longer exists.
         for (const ef of [...this.files]) {
-            this.destroy_temp_file(ef);
+            await this.destroy_temp_file(ef);
         }
 
         this.files = [];
@@ -774,7 +774,7 @@ export class ExternalFilesController {
     /**
      * Return the modification time for the path.
      */
-    public async get_mtime(path: string): Promise<number> {
+    public get_mtime(path: string): Promise<number> {
 
         return g.os_path_getmtime(g.os_path_realpath(path));
 
@@ -886,13 +886,13 @@ export class ExternalFilesController {
     public async warn(c: Commands, path: string, p: Position): Promise<void> {
 
         if (g.unitTesting || !g.app.commanders().includes(c)) {
-            return;
+            return Promise.resolve();
         }
         if (!p || !p.__bool__()) {
             g.trace('NO P');
-            return;
+            return Promise.resolve();
         }
-        g.app.gui.runAskOkDialog(
+        await g.app.gui.runAskOkDialog(
             c,
             'External file changed',
             [

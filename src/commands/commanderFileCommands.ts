@@ -135,7 +135,7 @@ export class CommanderFileCommands {
         'close-window',
         'Close the Leo window, prompting to save it if it has been changed.'
     )
-    public async close(this: Commands, new_c?: Commands): Promise<unknown> {
+    public close(this: Commands, new_c?: Commands): Promise<unknown> {
 
         return g.app.closeLeoWindow(this.frame, new_c);
 
@@ -362,7 +362,7 @@ export class CommanderFileCommands {
                         // c2.k.makeAllBindings(); // ? needed ?
 
                         // Fix #579: Key bindings don't take for commands defined in plugins.
-                        g.chdir(fileName);
+                        await g.chdir(fileName);
                         g.setGlobalOpenDir(fileName);
                     }
                     if (c2 && closeFlag) {
@@ -508,7 +508,7 @@ export class CommanderFileCommands {
             if (shouldDelete) {
                 p.v._deleteAllChildren();
             }
-            at.read(p);
+            await at.read(p);
         } else if (word === '@edit') {
             await at.readOneAtEditNode(fn, p);
             // Always deletes children.
@@ -575,7 +575,7 @@ export class CommanderFileCommands {
             // Calls c.clearChanged() if no error.
             g.app.syntax_error_files = [];
             await c.fileCommands.save(c.mFileName);
-            c.syntaxErrorDialog();
+            await c.syntaxErrorDialog();
             return c.raise_error_dialogs('write');
         } else {
             const root: Position = c.rootPosition()!;
@@ -586,7 +586,7 @@ export class CommanderFileCommands {
                 fileName = undefined;
                 // Write the @edit node if needed.
                 if (root.isDirty()) {
-                    c.atFileCommands.writeOneAtEditNode(root);
+                    await c.atFileCommands.writeOneAtEditNode(root);
                 }
                 c.clearChanged();  // Clears all dirty bits.
             } else {
@@ -626,7 +626,7 @@ export class CommanderFileCommands {
 
         const c: Commands = this;
 
-        c.save();  // Force a write of the present window.
+        await c.save();  // Force a write of the present window.
 
         for (let c2 of g.app.commanders()) {
             if (c2 !== c && c2.isChanged()) {
@@ -1218,7 +1218,7 @@ export class CommanderFileCommands {
 
             // ! Replaced with vscode.workspace.fs !
             // const theFile: number = openSync(fileName[0], 'r');
-            g.chdir(fileName);
+            await g.chdir(fileName);
             const c: Commands = g.app.newCommander(fileName);
             // ? needed ?
             //frame = c.frame;
@@ -1268,7 +1268,7 @@ export class CommanderFileCommands {
 
         if (fileName) {
             try {
-                g.chdir(fileName);
+                await g.chdir(fileName);
                 if (s.startsWith('@nocolor\n')) {
                     s = s.slice('@nocolor\n'.length);
                 }
@@ -1315,7 +1315,7 @@ export class CommanderFileCommands {
         if (fileName) {
             try {
                 // with open(fileName, 'w') as f:
-                g.chdir(fileName);
+                await g.chdir(fileName);
                 if (s.startsWith('@nocolor\n')) {
                     s = s.substring('@nocolor\n'.length);
                 }
@@ -1411,7 +1411,7 @@ export class CommanderFileCommands {
         "\n" +
         "**Note**: Use the set-reference-file command to create the separator node.\n"
     )
-    public async updateRefLeoFile(this: Commands): Promise<unknown> {
+    public updateRefLeoFile(this: Commands): Promise<unknown> {
         const c: Commands = this;
         return c.fileCommands.save_ref();
     }
@@ -1428,7 +1428,7 @@ export class CommanderFileCommands {
         "\n" +
         "**Note**: Use the set-reference-file command to create the separator node.\n"
     )
-    public async readRefLeoFile(this: Commands): Promise<unknown> {
+    public readRefLeoFile(this: Commands): Promise<unknown> {
         const c: Commands = this;
         return c.fileCommands.updateFromRefFile();
     }

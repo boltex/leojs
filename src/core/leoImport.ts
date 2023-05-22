@@ -162,7 +162,7 @@ export class FreeMindImporter {
         // c.bringToFront();
 
         if (names && names.length) {
-            g.chdir(names[0]);
+            await g.chdir(names[0]);
             await this.import_files(names);
         }
     }
@@ -1825,7 +1825,7 @@ export class MindMapImporter {
             const readData = await vscode.workspace.fs.readFile(w_uri);
             const s = Buffer.from(readData).toString('utf8');
 
-            this.scan(s, p); // ! leojs: Use string from file content instead
+            await this.scan(s, p); // ! leojs: Use string from file content instead
             // f.close()
             c.redraw();
 
@@ -1875,8 +1875,8 @@ export class MindMapImporter {
         ) as string[];
         // c.bringToFront();
         if (names && names.length) {
-            g.chdir(names[0]);
-            this.import_files(names);
+            await g.chdir(names[0]);
+            await this.import_files(names);
         }
     }
     //@+node:felix.20230520010426.5: *3* mindmap.scan & helpers
@@ -2006,8 +2006,8 @@ export class MORE_Importer {
         ) as string[];
         // c.bringToFront()
         if (names && names.length) {
-            g.chdir(names[0]);
-            this.import_files(names);
+            await g.chdir(names[0]);
+            await this.import_files(names);
         }
     }
     //@+node:felix.20230520220221.3: *3* MORE.import_files
@@ -2433,7 +2433,7 @@ export class RecursiveImportController {
             return;
         }
         // #1484: Use this for @auto as well.
-        c.importCommands.importFilesCommand(
+        await c.importCommands.importFilesCommand(
             [p_path],
             parent,
             true,
@@ -2739,8 +2739,8 @@ export class TabImporter {
 
         // c.bringToFront();
         if (names && names.length) {
-            g.chdir(names[0]);
-            this.import_files(names);
+            await g.chdir(names[0]);
+            await this.import_files(names);
         }
     }
     //@+node:felix.20230511002653.7: *3* tabbed.scan
@@ -3031,7 +3031,7 @@ export class ToDoImporter {
         if (!names || !names.length) {
             return {};
         }
-        g.chdir(names[0]);
+        await g.chdir(names[0]);
         const d = await this.import_files(names);
         for (const key of Object.keys(d).sort()) {
             const tasks = d[key];
@@ -3572,7 +3572,7 @@ export class LegacyExternalFileImporter {
         // c.bringToFront()
 
         if (paths && paths.length) {
-            g.chdir(paths[0]);
+            await g.chdir(paths[0]);
             await this.import_files(paths);
         }
     }

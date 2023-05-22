@@ -1100,7 +1100,7 @@ export class LeoApp {
                 // tslint:disable-next-line: strict-comparisons
                 if (w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!.defaultValue === this.leoID) {
                     // Set as undefined - same as default
-                    w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, undefined, true);
+                    await w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, undefined, true);
                 } else {
                     // Set as value which is not default
                     await w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, this.leoID, true);
@@ -3045,7 +3045,7 @@ export class LoadManager {
             await vscode.workspace.fs.stat(w_uri);
             // OK exists
             c.fileCommands.initIvars();
-            c.fileCommands.getLeoFile(fn, undefined, undefined, false);
+            await c.fileCommands.getLeoFile(fn, undefined, undefined, false);
         } catch {
             // Does not exist !
         }

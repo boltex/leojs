@@ -964,7 +964,7 @@ export class FileCommands {
         'write-missing-at-file-nodes',
         'Write all @file nodes for which the corresponding external file does not exist.'
     )
-    public async writeMissingAtFileNodes(): Promise<unknown> {
+    public writeMissingAtFileNodes(): Promise<unknown> {
         const c: Commands = this.c;
         c.endEditing();
         return c.atFileCommands.writeMissing(c.p);
@@ -973,7 +973,7 @@ export class FileCommands {
     @cmd(
         'write-outline-only',
         'Write the entire outline without writing any derived files.')
-    public async writeOutlineOnly(): Promise<unknown> {
+    public writeOutlineOnly(): Promise<unknown> {
         const c: Commands = this.c;
         c.endEditing();
         return this.writeOutline(this.mFileName);
@@ -1041,7 +1041,7 @@ export class FileCommands {
 
             let n = 1;
             // TODO
-            vscode.window.showInformationMessage("TODO : writeZipArchive for " + `${archive_name} containing ${n} file${g.plural(n)}`);
+            await vscode.window.showInformationMessage("TODO : writeZipArchive for " + `${archive_name} containing ${n} file${g.plural(n)}`);
 
             // const f = new AdmZip();
 
@@ -1655,7 +1655,7 @@ export class FileCommands {
      *
      * This method follows behavior of readSaxFile.
      */
-    public async retrieveVnodesFromDb(conn: any): Promise<VNode | undefined> {
+    public retrieveVnodesFromDb(conn: any): Promise<VNode | undefined> {
 
         const c: Commands = this.c;
         const fc: FileCommands = this;
@@ -1670,7 +1670,7 @@ export class FileCommands {
 
         const vnodes: VNode[] = [];
 
-        return undefined;
+        return Promise.resolve(undefined);
         // TODO
         /*
         try:
@@ -1720,7 +1720,7 @@ export class FileCommands {
     /**
      * Initializes tables and returns None
      */
-    public async initNewDb(conn: any): Promise<VNode> {
+    public initNewDb(conn: any): Promise<VNode> {
         const c: Commands = this.c;
         const fc: FileCommands = this;
         const v: VNode = new VNode(c);
@@ -1731,7 +1731,7 @@ export class FileCommands {
         //c.frame.resizePanesToRatio(r1, r2)
         c.sqlite_connection = conn;
         fc.exportToSqlite(c.mFileName);
-        return v;
+        return Promise.resolve(v);
     }
     //@+node:felix.20211213224232.17: *6* fc.getWindowGeometryFromDb
     // ! unneeded
@@ -2435,7 +2435,7 @@ export class FileCommands {
             // Disable path-changed messages in writeAllHelper.
             c.ignoreChangedPaths = true;
             try {
-                this.write_Leo_file(fileName);
+                await this.write_Leo_file(fileName);
             }
             finally {
                 c.ignoreChangedPaths = false;
@@ -2768,13 +2768,13 @@ export class FileCommands {
 
         if (c.checkOutline()) {
             g.error('Structural errors in outline! outline not written');
-            return false;
+            return Promise.resolve(false);
         }
 
         // TODO : recentFilesManager !
         // g.app.recentFilesManager.writeRecentFilesFile(c);
 
-        fc.writeAllAtFileNodes(); // Ignore any errors.
+        await fc.writeAllAtFileNodes(); // Ignore any errors.
         return fc.writeOutline(fileName);
 
     }
@@ -2831,7 +2831,7 @@ export class FileCommands {
             return true;
         }
         catch (exception) {
-            this.handleWriteLeoFileException(fileName, backupName!);
+            await this.handleWriteLeoFileException(fileName, backupName!);
             return false;
         }
     }
@@ -3082,7 +3082,7 @@ export class FileCommands {
             return true;
         }
         catch (exception) {
-            this.handleWriteLeoFileException(fileName, backupName!);
+            await this.handleWriteLeoFileException(fileName, backupName!);
             return false;
         }
     }
@@ -3090,14 +3090,14 @@ export class FileCommands {
     /**
      * Write all @<file> nodes and set orphan bits.
      */
-    public writeAllAtFileNodes(): boolean {
+    public async writeAllAtFileNodes(): Promise<boolean> {
 
         const c: Commands = this.c;
 
 
         try {
             // To allow Leo to quit properly, do *not* signal failure here.
-            c.atFileCommands.writeAll(false);
+            await c.atFileCommands.writeAll(false);
             return true;
         }
         catch (exception) {
