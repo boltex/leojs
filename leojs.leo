@@ -566,32 +566,7 @@
 <v t="felix.20221119204422.1"><vh>@file src/core/leoGui.ts</vh></v>
 </v>
 <v t="felix.20230505220205.1"><vh>Importer plugins</vh>
-<v t="felix.20230505220205.3"><vh>@file src/importers/c.ts</vh></v>
-<v t="felix.20230505220205.8"><vh>@file src/importers/coffeescript.ts</vh></v>
-<v t="felix.20230505220205.14"><vh>@file src/importers/csharp.ts</vh></v>
-<v t="felix.20230505220205.17"><vh>@file src/importers/ctext.ts</vh></v>
-<v t="felix.20230505220205.21"><vh>@file src/importers/cython.ts</vh></v>
-<v t="felix.20230505220205.24"><vh>@file src/importers/dart.ts</vh></v>
-<v t="felix.20230505220205.27"><vh>@file src/importers/elisp.ts</vh></v>
-<v t="felix.20230505220205.31"><vh>@file src/importers/html.ts</vh></v>
-<v t="felix.20230505220205.33"><vh>@file src/importers/ini.ts</vh></v>
-<v t="felix.20230505220205.37"><vh>@file src/importers/java.ts</vh></v>
-<v t="felix.20230505220205.41"><vh>@file src/importers/javascript.ts</vh></v>
-<v t="felix.20230505220205.52"><vh>@file src/importers/leo_rst.ts</vh></v>
-<v t="felix.20230505220205.61"><vh>@file src/importers/linescanner.ts</vh></v>
-<v t="felix.20230505220205.90"><vh>@file src/importers/lua.ts</vh></v>
-<v t="felix.20230505220205.94"><vh>@file src/importers/markdown.ts</vh></v>
-<v t="felix.20230505220205.102"><vh>@file src/importers/org.ts</vh></v>
-<v t="felix.20230505220205.106"><vh>@file src/importers/otl.ts</vh></v>
-<v t="felix.20230505220205.110"><vh>@file src/importers/pascal.ts</vh></v>
-<v t="felix.20230505220205.114"><vh>@file src/importers/perl.ts</vh></v>
-<v t="felix.20230505220205.117"><vh>@file src/importers/php.ts</vh></v>
-<v t="felix.20230505220205.122"><vh>@file src/importers/python.ts</vh></v>
-<v t="felix.20230505220205.141"><vh>@file src/importers/rust.ts</vh></v>
-<v t="felix.20230505220205.144"><vh>@file src/importers/tcl.ts</vh></v>
-<v t="felix.20230505220205.148"><vh>@file src/importers/treepad.ts</vh></v>
-<v t="felix.20230505220205.151"><vh>@file src/importers/typescript.ts</vh></v>
-<v t="felix.20230505220205.157"><vh>@file src/importers/xml.ts</vh></v>
+<v t="felix.20230522010520.1"><vh>TODO</vh></v>
 </v>
 <v t="felix.20220128232146.1"><vh>unittests</vh>
 <v t="felix.20220130224933.1"><vh>@file src/test/leoTest2.ts</vh></v>
@@ -14949,5 +14924,6 @@ export function getDurationSeconds(p_start: [number, number], p_end?: [number, n
 // Each plugin must define a top-level importer_dict dictionary describing the plugin.
 @language typescript
 </t>
+<t tx="felix.20230522010520.1"></t>
 </tnodes>
 </leo_file>
