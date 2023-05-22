@@ -135,7 +135,7 @@ export class LeoUnitTest {
 
     constructor() { }
 
-    public async setUpClass(): Promise<Commands> {
+    public setUpClass(): Promise<Commands> {
         return create_app('null');
     }
 

@@ -105,10 +105,9 @@ export class FastRead {
     /**
      * Read the file, change splitter ratios, and return its hidden vnode.
      */
-    public async readFile(path: string): Promise<VNode | undefined> {
+    public async readFile(p_path: string): Promise<VNode | undefined> {
 
-        // const w_uri = vscode.Uri.file(path);
-        const w_uri = g.makeVscodeUri(path);
+        const w_uri = g.makeVscodeUri(p_path);
         const readData = await vscode.workspace.fs.readFile(w_uri);
         const s = Buffer.from(readData).toString('utf8');
 
@@ -116,7 +115,7 @@ export class FastRead {
 
         let v: VNode | undefined;
         let g_element: et.Element | undefined;
-        [v, g_element] = this.readWithElementTree(path, s);
+        [v, g_element] = this.readWithElementTree(p_path, s);
 
         if (!v) {  // #1510.
             return undefined;
@@ -138,7 +137,6 @@ export class FastRead {
      */
     public async readJsonFile(p_path: string): Promise<VNode | undefined> {
 
-        // const w_uri = vscode.Uri.file(path);
         const w_uri = g.makeVscodeUri(p_path);
         const readData = await vscode.workspace.fs.readFile(w_uri);
         const s = Buffer.from(readData).toString('utf8');
@@ -189,7 +187,7 @@ export class FastRead {
     // TODO : NEEDED ?
     // translate_table = {z: None for z in range(20) if chr(z) not in '\t\r\n'}
 
-    public readWithElementTree(path: string | undefined, s: Uint8Array | string): [VNode, et.Element] | [undefined, undefined] {
+    public readWithElementTree(p_path: string | undefined, s: Uint8Array | string): [VNode, et.Element] | [undefined, undefined] {
 
         let contents = g.toUnicode(s);
 
@@ -203,8 +201,8 @@ export class FastRead {
         } catch (e) {
             let message: string;
             // #970: Report failure here.
-            if (path && path.length) {
-                message = `bad .leo file: ${g.shortFileName(path)}`;
+            if (p_path && p_path.length) {
+                message = `bad .leo file: ${g.shortFileName(p_path)}`;
             } else {
                 message = 'The clipboard is not a valid .leo file';
             }
@@ -546,12 +544,12 @@ export class FastRead {
         return v;
     }
     //@+node:felix.20230322233910.1: *3* fast.readWithJsonTree & helpers
-    public readWithJsonTree(path: string | undefined, s: string): [VNode | undefined, any] {
+    public readWithJsonTree(p_path: string | undefined, s: string): [VNode | undefined, any] {
         let d: any;
         try {
             d = JSON.parse(s);
         } catch (exception) {
-            g.trace(`Error converting JSON from .leojs file: ${path}`);
+            g.trace(`Error converting JSON from .leojs file: ${p_path}`);
             g.es_exception();
             return [undefined, undefined];
         }
@@ -569,7 +567,7 @@ export class FastRead {
             this.handleBits();
         }
         catch (exception) {
-            g.trace(`Error .leojs JSON is not valid: ${path}`);
+            g.trace(`Error .leojs JSON is not valid: ${p_path}`);
             g.es_exception(exception);
             return [undefined, undefined];
         }

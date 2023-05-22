@@ -511,7 +511,7 @@ export class RstCommands {
         let [junk, ext] = g.os_path_splitext(fn);
         ext = ext.toLowerCase();
         fn = this.computeOutputFileName(fn);
-        const ok = this.createDirectoryForFile(fn);
+        const ok = await this.createDirectoryForFile(fn);
         if (!ok) {
             return;
         }

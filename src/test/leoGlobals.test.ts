@@ -14,17 +14,19 @@ import { LeoUnitTest } from './leoTest2';
 suite('Tests for leo.core.leoGlobals', () => {
     let self: LeoUnitTest;
 
-    before(async () => {
+    before(() => {
         self = new LeoUnitTest();
         return self.setUpClass();
     });
 
-    beforeEach(async () => {
+    beforeEach(() => {
         self.setUp();
+        return Promise.resolve();
     });
 
-    afterEach(async () => {
+    afterEach(() => {
         self.tearDown();
+        return Promise.resolve();
     });
 
     //@+others
@@ -59,7 +61,7 @@ suite('Tests for leo.core.leoGlobals', () => {
      */
     //@+node:felix.20220129223719.5: *3* TestGlobals.test_g_comment_delims_from_extension
 
-    test('test_g_comment_delims_from_extension', async () => {
+    test('test_g_comment_delims_from_extension', () => {
         // New in Leo 4.6, set_delims_from_language returns '' instead of None.
         const table: [string, string[]][] = [
             ['.c', ['//', '/*', '*/']], // escaped
@@ -81,7 +83,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         }
     });
     //@+node:felix.20220129223719.6: *3* TestGlobals.test_g_convertPythonIndexToRowCol
-    test('test_g_convertPythonIndexToRowCol', async () => {
+    test('test_g_convertPythonIndexToRowCol', () => {
         const s1 = 'abc\n\np\nxy';
         const table1: [number, [number, number]][] = [
             [-1, [0, 0]], // One too small.
@@ -146,7 +148,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
 
     //@+node:felix.20220129223719.7: *3* TestGlobals.test_g_convertRowColToPythonIndex
-    test('test_g_convertRowColToPythonIndex', async () => {
+    test('test_g_convertRowColToPythonIndex', () => {
         const s1: string = 'abc\n\np\nxy';
         const s2: string = 'abc\n\np\nxy\n';
         const table1: [number, [number, number]][] = [
@@ -206,7 +208,7 @@ suite('Tests for leo.core.leoGlobals', () => {
      */
 
     //@+node:felix.20220129223719.9: *3* TestGlobals.test_g_ensureLeadingNewlines
-    test('test_g_ensureLeadingNewlines', async () => {
+    test('test_g_ensureLeadingNewlines', () => {
         const s = ' \n \n\t\naa bc';
         const s2 = 'aa bc';
         for (let i of [0, 1, 2, 3]) {
@@ -216,7 +218,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         }
     });
     //@+node:felix.20220129223719.10: *3* TestGlobals.test_g_ensureTrailingNewlines
-    test('test_g_ensureTrailingNewlines', async () => {
+    test('test_g_ensureTrailingNewlines', () => {
         const s = 'aa bc \n \n\t\n';
         const s2 = 'aa bc';
         for (let i of [0, 1, 2, 3]) {
@@ -227,7 +229,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
     //@+node:felix.20230423154801.1: *3* TestGlobals.test_g_finalize
     // def test_g_finalize(self):
-        
+
     //     # This is also a strong test of g.finalize.
     //     import os
     //     c = self.c
@@ -236,7 +238,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     //     # Setup environment.
     //     expected_leo_base = 'C:/leo_base' if g.isWindows else '/leo_base'
     //     c.mFileName = "/leo_base/test.leo"
-        
+
     //     # Note: These directories do *not* have to exist.
     //     os.environ = {
     //         'HOME': '/home',  # Linux.
@@ -266,7 +268,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     //             self.assertEqual(expected, got)
     //@+node:felix.20230423154806.1: *3* TestGlobals.test_g_finalize_join
     // def test_g_finalize_join(self):
-        
+
     //     # This is also a strong test of g.finalize.
     //     import os
     //     c = self.c
@@ -275,7 +277,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     //     # Setup environment.
     //     expected_leo_base = 'C:/leo_base' if g.isWindows else '/leo_base'
     //     c.mFileName = "/leo_base/test.leo"
-        
+
     //     # Note: These directories do *not* have to exist.
     //     os.environ = {
     //         'HOME': '/home',  # Linux.
@@ -310,7 +312,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     //             (('yyy', '~'),                      f"{home}"),
     //             (('zzz', '$LEO_BASE',),             f"{expected_leo_base}"),
     //             (('${LEO_BASE}b',),                 f"{expected_leo_base}b"),
-        
+
     //             # This goes beyond the limits of what Windows can do.
     //             # (('a${LEO_BASE}b',),                f"a{expected_leo_base}b"),            
     //         )
@@ -322,7 +324,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     //                 got = got.replace('C:', 'c:')
     //             self.assertEqual(expected, got)
     //@+node:felix.20220129223719.11: *3* TestGlobals.test_g_find_word
-    test('test_g_find_word', async () => {
+    test('test_g_find_word', () => {
         const table: [string, string, number, number][] = [
             ['abc a bc x', 'bc', 0, 6],
             ['abc a bc x', 'bc', 1, 6],
@@ -340,7 +342,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         }
     });
     //@+node:felix.20220129223719.12: *3* TestGlobals.test_g_fullPath
-    test('test_g_fullPath', async () => {
+    test('test_g_fullPath', () => {
         const c = self.c;
 
         const child = c.rootPosition()!.insertAfter();
@@ -354,7 +356,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert.ok(w_path.endsWith(end), w_path.toString());
     });
     //@+node:felix.20220129223719.13: *3* TestGlobals.test_g_get_directives_dict
-    test('test_g_get_directives_dict', async () => {
+    test('test_g_get_directives_dict', () => {
         const c = self.c;
         const p = c.p;
 
@@ -377,7 +379,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert.ok(!d['path'], d['path']);
     });
     //@+node:felix.20220129223719.14: *3* TestGlobals.test_g_getDocString
-    test('test_g_getDocString', async () => {
+    test('test_g_getDocString', () => {
         let s1 = 'no docstring';
         let s2 = g.dedent(
             `\
@@ -402,7 +404,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         }
     });
     //@+node:felix.20220129223719.15: *3* TestGlobals.test_g_getLine
-    test('test_g_getLine', async () => {
+    test('test_g_getLine', () => {
         const s: string = 'a\ncd\n\ne';
         const table: [number, [number, number]][] = [
             [-1, [0, 2]], // One too few.
@@ -428,7 +430,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
 
     //@+node:felix.20220129223719.16: *3* TestGlobals.test_g_getWord
-    test('test_g_getWord', async () => {
+    test('test_g_getWord', () => {
         const s = 'abc xy_z5 pdq';
         let i: number;
         let j: number;
@@ -472,7 +474,7 @@ suite('Tests for leo.core.leoGlobals', () => {
             # Top-level .py file.
      */
     //@+node:felix.20220129223719.20: *3* TestGlobals.test_g_isDirective
-    test('test_g_isDirective', async () => {
+    test('test_g_isDirective', () => {
         const table: [boolean, string][] = [
             [true, '@language python\n'],
             [true, '@tabwidth -4 #test\n'],
@@ -494,7 +496,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
 
     //@+node:felix.20220129223719.21: *3* TestGlobals.test_g_match_word
-    test('test_g_match_word', async () => {
+    test('test_g_match_word', () => {
         const table: [boolean, number, string, string][] = [
             [true, 0, 'a', 'a'],
             [false, 0, 'a', 'b'],
@@ -530,7 +532,7 @@ suite('Tests for leo.core.leoGlobals', () => {
             print(path13, g.os.path.abspath(path13))
      */
     //@+node:felix.20220129223719.23: *3* TestGlobals.test_g_removeBlankLines
-    test('test_g_removeBlankLines', async () => {
+    test('test_g_removeBlankLines', () => {
         let s: string;
         let expected: string;
         const table = [
@@ -544,7 +546,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         }
     });
     //@+node:felix.20220129223719.24: *3* TestGlobals.test_g_removeLeadingBlankLines
-    test('test_g_removeLeadingBlankLines', async () => {
+    test('test_g_removeLeadingBlankLines', () => {
         let s: string;
         let expected: string;
         const table = [
@@ -558,7 +560,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         }
     });
     //@+node:felix.20220129223719.25: *3* TestGlobals.test_g_removeTrailing
-    test('test_g_removeTrailing', async () => {
+    test('test_g_removeTrailing', () => {
         let s: string = 'aa bc \n \n\t\n';
         const table = [
             ['\t\n ', 'aa bc'],
@@ -573,7 +575,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         }
     });
     //@+node:felix.20220129223719.26: *3* TestGlobals.test_g_sanitize_filename
-    test('test_g_sanitize_filename', async () => {
+    test('test_g_sanitize_filename', () => {
         const table = [
             ['A25&()', 'A'], // Non-alpha characters.
             ['B\tc', 'B c'], // Tabs.
@@ -606,19 +608,19 @@ suite('Tests for leo.core.leoGlobals', () => {
             self.assertEqual(got, expected, msg=repr(s))
      */
     //@+node:felix.20220129223719.27: *3* TestGlobals.test_g_scanAtHeaderDirectives_header
-    test('test_g_scanAtHeaderDirectives_header', async () => {
+    test('test_g_scanAtHeaderDirectives_header', () => {
         const c = self.c;
         const aList = g.get_directives_dict_list(c.p);
         g.scanAtHeaderDirectives(aList); // ? Same as no-neader ?
     });
     //@+node:felix.20220129223719.28: *3* TestGlobals.test_g_scanAtHeaderDirectives_noheader
-    test('test_g_scanAtHeaderDirectives_noheader', async () => {
+    test('test_g_scanAtHeaderDirectives_noheader', () => {
         const c = self.c;
         const aList = g.get_directives_dict_list(c.p);
         g.scanAtHeaderDirectives(aList); // ? Same as header ?
     });
     //@+node:felix.20220129223719.29: *3* TestGlobals.test_g_scanAtLineendingDirectives_cr
-    test('test_g_scanAtLineendingDirectives_cr', async () => {
+    test('test_g_scanAtLineendingDirectives_cr', () => {
         const c = self.c;
         const p = c.p;
         p.b = '@lineending cr\n';
@@ -627,7 +629,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert.strictEqual(s, '\r');
     });
     //@+node:felix.20220129223719.30: *3* TestGlobals.test_g_scanAtLineendingDirectives_crlf
-    test('test_g_scanAtLineendingDirectives_crlf', async () => {
+    test('test_g_scanAtLineendingDirectives_crlf', () => {
         const c = self.c;
         const p = c.p;
         p.b = '@lineending crlf\n';
@@ -644,7 +646,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         self.assertEqual(s, '\r\n')
      */
     //@+node:felix.20220129223719.31: *3* TestGlobals.test_g_scanAtLineendingDirectives_lf
-    test('test_g_scanAtLineendingDirectives_lf', async () => {
+    test('test_g_scanAtLineendingDirectives_lf', () => {
         const c = self.c;
         const p = c.p;
         p.b = '@lineending lf\n';
@@ -661,7 +663,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         self.assertEqual(s, '\n')
      */
     //@+node:felix.20220129223719.32: *3* TestGlobals.test_g_scanAtLineendingDirectives_nl
-    test('test_g_scanAtLineendingDirectives_nl', async () => {
+    test('test_g_scanAtLineendingDirectives_nl', () => {
         const c = self.c;
         const p = c.p;
         p.b = '@lineending nl\n';
@@ -678,7 +680,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         self.assertEqual(s, '\n')
      */
     //@+node:felix.20220129223719.33: *3* TestGlobals.test_g_scanAtLineendingDirectives_platform
-    test('test_g_scanAtLineendingDirectives_platform', async () => {
+    test('test_g_scanAtLineendingDirectives_platform', () => {
         const c = self.c;
         const p = c.p;
         p.b = '@lineending platform\n';
@@ -702,7 +704,7 @@ suite('Tests for leo.core.leoGlobals', () => {
             self.assertEqual(s, '\n')
      */
     //@+node:felix.20220129223719.34: *3* TestGlobals.test_g_scanAtPagewidthDirectives_minus_40
-    test('test_g_scanAtPagewidthDirectives_minus_40', async () => {
+    test('test_g_scanAtPagewidthDirectives_minus_40', () => {
         const c = self.c;
         const p = c.p;
         p.b = '@pagewidth -40\n';
@@ -723,7 +725,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert n in (None, 80), repr(n)
      */
     //@+node:felix.20220129223719.35: *3* TestGlobals.test_g_scanAtPagewidthDirectives_40
-    test('test_g_scanAtPagewidthDirectives_40', async () => {
+    test('test_g_scanAtPagewidthDirectives_40', () => {
         const c = self.c;
         const p = c.p;
         p.b = '@pagewidth 40\n';
@@ -740,7 +742,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         self.assertEqual(n, 40)
      */
     //@+node:felix.20220129223719.36: *3* TestGlobals.test_g_scanAtTabwidthDirectives_6
-    test('test_g_scanAtTabwidthDirectives_6', async () => {
+    test('test_g_scanAtTabwidthDirectives_6', () => {
         const c = self.c;
         const p = c.p;
         p.b = '@tabwidth 6\n';
@@ -750,7 +752,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
 
     //@+node:felix.20220129223719.37: *3* TestGlobals.test_g_scanAtTabwidthDirectives_minus_6
-    test('test_g_scanAtTabwidthDirectives_minus_6', async () => {
+    test('test_g_scanAtTabwidthDirectives_minus_6', () => {
         const c = self.c;
         const p = c.p;
         p.b = '@tabwidth -6\n';
@@ -759,7 +761,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert.strictEqual(n, -6);
     });
     //@+node:felix.20220129223719.38: *3* TestGlobals.test_g_scanAtWrapDirectives_nowrap
-    test('test_g_scanAtWrapDirectives_nowrap', async () => {
+    test('test_g_scanAtWrapDirectives_nowrap', () => {
         const c = self.c;
         const p = c.p;
         p.b = '@nowrap\n';
@@ -776,7 +778,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert s is False, repr(s)
      */
     //@+node:felix.20220129223719.39: *3* TestGlobals.test_g_scanAtWrapDirectives_wrap_with_wrap_
-    test('test_g_scanAtWrapDirectives_wrap_with_wrap_', async () => {
+    test('test_g_scanAtWrapDirectives_wrap_with_wrap_', () => {
         const c = self.c;
         const p = c.p;
         p.b = '@wrap\n';
@@ -793,7 +795,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert s is True, repr(s)
      */
     //@+node:felix.20220129223719.40: *3* TestGlobals.test_g_scanAtWrapDirectives_wrap_without_nowrap_
-    test('test_g_scanAtWrapDirectives_wrap_without_nowrap_', async () => {
+    test('test_g_scanAtWrapDirectives_wrap_without_nowrap_', () => {
         const c = self.c;
         const p = c.p;
         const aList = g.get_directives_dict_list(p);
@@ -807,7 +809,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         assert s is None, repr(s)
      */
     //@+node:felix.20220129223719.41: *3* TestGlobals.test_g_set_delims_from_language
-    test('test_g_set_delims_from_language', async () => {
+    test('test_g_set_delims_from_language', () => {
         const table: [string, string[]][] = [
             ['c', ['//', '/*', '*/']],
             ['python', ['#', '', '']],
@@ -825,7 +827,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
 
     //@+node:felix.20220129223719.42: *3* TestGlobals.test_g_set_delims_from_string
-    test('test_g_set_delims_from_string', async () => {
+    test('test_g_set_delims_from_string', () => {
         const table: [string, string, string[]][] = [
             ['c', '@comment // /* */', ['//', '/*', '*/']],
             ['c', '// /* */', ['//', '/*', '*/']],
@@ -847,7 +849,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
 
     //@+node:felix.20220129223719.43: *3* TestGlobals.test_g_skip_blank_lines
-    test('test_g_skip_blank_lines', async () => {
+    test('test_g_skip_blank_lines', () => {
         let end = g.skip_blank_lines('', 0);
         assert.strictEqual(end, 0);
         end = g.skip_blank_lines(' ', 0);
@@ -863,7 +865,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
 
     //@+node:felix.20220129223719.44: *3* TestGlobals.test_g_skip_line
-    test('test_g_skip_line', async () => {
+    test('test_g_skip_line', () => {
         const s: string = 'a\n\nc';
 
         const table: [number, number][] = [
@@ -886,7 +888,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
 
     //@+node:felix.20220129223719.45: *3* TestGlobals.test_g_skip_to_end_of_line
-    test('test_g_skip_to_end_of_line', async () => {
+    test('test_g_skip_to_end_of_line', () => {
         const s: string = 'a\n\nc';
 
         const table: [number, number][] = [
@@ -909,7 +911,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
 
     //@+node:felix.20220129223719.46: *3* TestGlobals.test_g_skip_to_start_of_line
-    test('test_g_skip_to_start_of_line', async () => {
+    test('test_g_skip_to_start_of_line', () => {
         const s1: string = 'a\n\nc';
 
         const table1: [number, number][] = [
@@ -961,7 +963,7 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
 
     //@+node:felix.20220129223719.47: *3* TestGlobals.test_g_splitLongFileName
-    test('test_g_splitLongFileName', async () => {
+    test('test_g_splitLongFileName', () => {
         const table = [String.raw`abcd/xy\pdqabc/aaa.py`];
         for (let s of table) {
             g.splitLongFileName(s, 3);
@@ -975,7 +977,7 @@ suite('Tests for leo.core.leoGlobals', () => {
             g.splitLongFileName(s, limit=3)
      */
     //@+node:felix.20220129223719.48: *3* TestGlobals.test_g_stripPathCruft
-    test('test_g_stripPathCruft', async () => {
+    test('test_g_stripPathCruft', () => {
         const table: [string | undefined, string | undefined][] = [
             [undefined, undefined], // Retain empty paths for warning.
             ['', ''],

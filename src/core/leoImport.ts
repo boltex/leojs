@@ -20,6 +20,7 @@ import * as g from './leoGlobals';
 import { command } from "../core/decorators";
 import { Commands } from "./leoCommands";
 import { Position, VNode } from './leoNodes';
+import { Bead } from "./leoUndo";
 //@-<< leoImport imports >>
 //@+others
 //@+node:felix.20230519221548.1: ** class FreeMindImporter
@@ -1091,7 +1092,7 @@ export class LeoImportCommands {
             fileName = fileName.replace('\\', '/');  // 2011/10/09.
             g.setGlobalOpenDir(fileName);
             const isThin = await at.scanHeaderForThin(fileName);
-            let undoData;
+            let undoData: Bead;
             if (command) {
                 undoData = u.beforeInsertNode(parent);
             }
@@ -3545,7 +3546,7 @@ export class LegacyExternalFileImporter {
             if (w_exists) {
                 await this.import_file(w_path);
             } else {
-                g.es_print(`not found: ${path.toString()}`);
+                g.es_print(`not found: ${w_path.toString()}`);
             }
         }
     }

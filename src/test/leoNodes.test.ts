@@ -16,25 +16,27 @@ import { LeoUnitTest } from './leoTest2';
 suite('Unit tests for leo/core/leoNodes.ts.', () => {
     let self: LeoUnitTest;
 
-    before(async () => {
+    before(() => {
         self = new LeoUnitTest();
         return self.setUpClass();
     });
 
-    beforeEach(async () => {
+    beforeEach(() => {
         self.setUp();
         const c = self.c;
         self.create_test_outline();
         c.selectPosition(c.rootPosition()!);
+        return Promise.resolve();
     });
 
-    afterEach(async () => {
+    afterEach(() => {
         self.tearDown();
+        return Promise.resolve();
     });
 
     //@+others
     //@+node:felix.20220129225027.4: *3* TestNodes.test_all_generators_return_unique_positions
-    test('test_all_generators_return_unique_positions', async () => {
+    test('test_all_generators_return_unique_positions', () => {
         const c = self.c;
         const p = self.c.p;
         const root = p.next();
@@ -70,7 +72,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.5: *3* TestNodes.test_all_nodes_coverage
-    test('test_all_nodes_coverage', async () => {
+    test('test_all_nodes_coverage', () => {
         // @test c iters: <coverage tests>
         const c = self.c;
         const v1: VNode[] = [...c.all_positions()].map((p) => p.v);
@@ -84,7 +86,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.6: *3* TestNodes.test_at_most_one_VNode_has_str_leo_pos_attribute
-    test('test_at_most_one_VNode_has_str_leo_pos_attribute', async () => {
+    test('test_at_most_one_VNode_has_str_leo_pos_attribute', () => {
         const c = self.c;
         let n = 0;
         for (let v of c.all_unique_vnodes_iter()) {
@@ -99,7 +101,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.7: *3* TestNodes.test_at_others_directive
-    test('test_at_others_directive', async () => {
+    test('test_at_others_directive', () => {
         const p = self.c.p;
         const p1 = p.insertAsLastChild();
         p1.setHeadString('@file zzz');
@@ -112,7 +114,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.8: *3* TestNodes.test_c_positionExists
-    test('test_c_positionExists', async () => {
+    test('test_c_positionExists', () => {
         const c = self.c;
         const p = self.c.p;
         let child = p.insertAsLastChild();
@@ -127,7 +129,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.9: *3* TestNodes.test_c_positionExists_for_all_nodes
-    test('test_c_positionExists_for_all_nodes', async () => {
+    test('test_c_positionExists_for_all_nodes', () => {
         const c = self.c;
         for (let p of c.all_positions()) {
             assert.ok(c.positionExists(p));
@@ -136,7 +138,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.10: *3* TestNodes.test_c_safe_all_positions
-    test('test_c_safe_all_positions', async () => {
+    test('test_c_safe_all_positions', () => {
         const c = self.c;
         const aList1 = [...c.all_positions()];
         const aList2 = [...c.safe_all_positions()];
@@ -144,7 +146,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.11: *3* TestNodes.test_check_all_gnx_s_exist_and_are_unique
-    test('test_check_all_gnx_s_exist_and_are_unique', async () => {
+    test('test_check_all_gnx_s_exist_and_are_unique', () => {
         const c = self.c;
         const d: { [key: string]: VNode[] } = {}; // Keys are gnx's, values are lists of vnodes with that gnx.
         for (let p of c.all_positions()) {
@@ -163,7 +165,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.12: *3* TestNodes.test_clone_and_move_the_clone_to_the_root
-    test('test_clone_and_move_the_clone_to_the_root', async () => {
+    test('test_clone_and_move_the_clone_to_the_root', () => {
         const c = self.c;
         const p = self.c.p;
         const child = p.insertAsNthChild(0);
@@ -195,7 +197,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.13: *3* TestNodes.test_consistency_between_parents_iter_and_v_parents
-    test('test_consistency_between_parents_iter_and_v_parents', async () => {
+    test('test_consistency_between_parents_iter_and_v_parents', () => {
         const c = self.c;
         for (let p of c.all_positions()) {
             const parents1 = p.v.parents;
@@ -211,7 +213,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.14: *3* TestNodes.test_consistency_of_back_next_links
-    test('test_consistency_of_back_next_links', async () => {
+    test('test_consistency_of_back_next_links', () => {
         const c = self.c;
         for (let p of c.all_positions()) {
             const back = p.back();
@@ -226,7 +228,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.15: *3* TestNodes.test_consistency_of_c_all_positions__and_p_ThreadNext_
-    test('test_consistency_of_c_all_positions__and_p_ThreadNext_', async () => {
+    test('test_consistency_of_c_all_positions__and_p_ThreadNext_', () => {
         const c = self.c;
         const p2 = c.rootPosition()!;
         for (let p of c.all_positions()) {
@@ -237,7 +239,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.16: *3* TestNodes.test_consistency_of_firstChild__children_iter_
-    test('test_consistency_of_firstChild__children_iter_', async () => {
+    test('test_consistency_of_firstChild__children_iter_', () => {
         const c = self.c;
         let p2!: Position;
         for (let p of c.all_positions()) {
@@ -252,7 +254,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.17: *3* TestNodes.test_consistency_of_level
-    test('test_consistency_of_level', async () => {
+    test('test_consistency_of_level', () => {
         const c = self.c;
         for (let p of c.all_positions()) {
             if (p.hasParent()) {
@@ -271,7 +273,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.18: *3* TestNodes.test_consistency_of_parent__parents_iter_
-    test('test_consistency_of_parent__parents_iter_', async () => {
+    test('test_consistency_of_parent__parents_iter_', () => {
         const c = self.c;
         let p2!: Position;
         for (let p of c.all_positions()) {
@@ -285,7 +287,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.19: *3* TestNodes.test_consistency_of_parent_child_links
-    test('test_consistency_of_parent_child_links', async () => {
+    test('test_consistency_of_parent_child_links', () => {
         // Test consistency of p.parent, p.next, p.back and p.firstChild.
         const c = self.c;
         for (let p of c.all_positions()) {
@@ -306,7 +308,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.20: *3* TestNodes.test_consistency_of_threadBack_Next_links
-    test('test_consistency_of_threadBack_Next_links', async () => {
+    test('test_consistency_of_threadBack_Next_links', () => {
         const c = self.c;
         for (let p of c.all_positions()) {
             const threadBack = p.threadBack();
@@ -321,7 +323,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.21: *3* TestNodes.test_convertTreeToString_and_allies
-    test('test_convertTreeToString_and_allies', async () => {
+    test('test_convertTreeToString_and_allies', () => {
         const p = self.c.p;
         const sib = p.next();
         assert.ok(sib && sib.__bool__());
@@ -332,7 +334,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.22: *3* TestNodes.test_delete_node
-    test('test_delete_node', async () => {
+    test('test_delete_node', () => {
         const c = self.c;
         let p = self.c.p;
         const p2 = p.insertAsNthChild(0);
@@ -371,7 +373,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.23: *3* TestNodes.test_deleting_the_root_should_select_another_node
-    test('test_deleting_the_root_should_select_another_node', async () => {
+    test('test_deleting_the_root_should_select_another_node', () => {
         const c = self.c;
         const p = self.c.p;
         const root_h = p.h;
@@ -387,7 +389,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.24: *3* TestNodes.test_demote
-    test('test_demote', async () => {
+    test('test_demote', () => {
         const c = self.c;
         let p = self.c.p;
         const p2 = p.insertAsNthChild(0);
@@ -431,7 +433,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.25: *3* TestNodes.test_insert_node
-    test('test_insert_node', async () => {
+    test('test_insert_node', () => {
         const c = self.c;
         let p = self.c.p;
         assert.strictEqual(p.h, 'root');
@@ -473,7 +475,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.26: *3* TestNodes.test_leoNodes_properties
-    test('test_leoNodes_properties', async () => {
+    test('test_leoNodes_properties', () => {
         const c = self.c;
         let p = self.c.p;
         const v = p.v;
@@ -496,7 +498,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.27: *3* TestNodes.test_move_outline_down__undo_redo
-    test('test_move_outline_down__undo_redo', async () => {
+    test('test_move_outline_down__undo_redo', () => {
         const c = self.c;
         const p = self.c.p;
         const p2 = p.insertAsNthChild(0);
@@ -536,7 +538,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.28: *3* TestNodes.test_move_outline_left
-    test('test_move_outline_left', async () => {
+    test('test_move_outline_left', () => {
         const c = self.c;
         const p = self.c.p;
         const p2 = p.insertAsNthChild(0);
@@ -555,7 +557,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.29: *3* TestNodes.test_move_outline_right
-    test('test_move_outline_right', async () => {
+    test('test_move_outline_right', () => {
         const c = self.c;
         const p = self.c.p;
         const p2 = p.insertAsNthChild(0);
@@ -577,7 +579,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.30: *3* TestNodes.test_move_outline_up
-    test('test_move_outline_up', async () => {
+    test('test_move_outline_up', () => {
         const c = self.c;
         const p = self.c.p;
         const p2 = p.insertAsNthChild(0);
@@ -603,7 +605,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.31: *3* TestNodes.test_new_vnodes_methods
-    test('test_new_vnodes_methods', async () => {
+    test('test_new_vnodes_methods', () => {
         const c = self.c;
         const p = self.c.p;
 
@@ -618,21 +620,21 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.32: *3* TestNodes.test_newlines_in_headlines
-    test('test_newlines_in_headlines', async () => {
+    test('test_newlines_in_headlines', () => {
         const p = self.c.p;
         p.h = '\nab\nxy\n';
         assert.strictEqual(p.h, 'abxy');
     });
 
     //@+node:felix.20220129225027.33: *3* TestNodes.test_node_that_does_nott_belong_to_a_derived_file
-    test('test_node_that_does_not_belong_to_a_derived_file', async () => {
+    test('test_node_that_does_not_belong_to_a_derived_file', () => {
         const p = self.c.p;
         const p1 = p.insertAsLastChild();
         assert.ok(!p1.textOffset());
     });
 
     //@+node:felix.20220129225027.34: *3* TestNodes.test_organizer_node
-    test('test_organizer_node', async () => {
+    test('test_organizer_node', () => {
         const p = self.c.p;
         const p1 = p.insertAsLastChild();
         p1.setHeadString('@file zzz');
@@ -642,7 +644,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.35: *3* TestNodes.test_p__eq_
-    test('test_p__eq_', async () => {
+    test('test_p__eq_', () => {
         const c = self.c;
         const p = self.c.p;
         // These must not return NotImplemented!
@@ -654,7 +656,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.36: *3* TestNodes.test_p_comparisons
-    test('test_p_comparisons', async () => {
+    test('test_p_comparisons', () => {
         const c = self.c;
         const p = self.c.p;
         const copy = p.copy();
@@ -668,7 +670,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.37: *3* TestNodes.test_p_deletePositionsInList
-    test('test_p_deletePositionsInList', async () => {
+    test('test_p_deletePositionsInList', () => {
         const c = self.c;
         let p = self.c.p;
         const root = p.insertAsLastChild();
@@ -705,7 +707,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.38: *3* TestNodes.test_p_hasNextBack
-    test('test_p_hasNextBack', async () => {
+    test('test_p_hasNextBack', () => {
         const c = self.c;
         for (let p of c.all_positions()) {
             const back = p.back();
@@ -722,7 +724,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.39: *3* TestNodes.test_p_hasParentChild
-    test('test_p_hasParentChild', async () => {
+    test('test_p_hasParentChild', () => {
         const c = self.c;
         for (let p of c.all_positions()) {
             const child = p.firstChild();
@@ -739,7 +741,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.40: *3* TestNodes.test_p_hasThreadNextBack
-    test('test_p_hasThreadNextBack', async () => {
+    test('test_p_hasThreadNextBack', () => {
         const c = self.c;
         for (let p of c.all_positions()) {
             const threadBack = p.getThreadBack();
@@ -757,7 +759,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.41: *3* TestNodes.test_p_isAncestorOf
-    test('test_p_isAncestorOf', async () => {
+    test('test_p_isAncestorOf', () => {
         const c = self.c;
         for (let p of c.all_positions()) {
             const child = p.firstChild();
@@ -773,7 +775,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.42: *3* TestNodes.test_p_isCurrentPosition
-    test('test_p_isCurrentPosition', async () => {
+    test('test_p_isCurrentPosition', () => {
         const c = self.c;
         let p = self.c.p;
         assert.ok(!c.isCurrentPosition(undefined));
@@ -781,7 +783,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.43: *3* TestNodes.test_p_isRootPosition
-    test('test_p_isRootPosition', async () => {
+    test('test_p_isRootPosition', () => {
         const c = self.c;
         let p = self.c.p;
         assert.ok(!c.isRootPosition(undefined));
@@ -789,7 +791,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.44: *3* TestNodes.test_p_moveToFirst_LastChild
-    test('test_p_moveToFirst_LastChild', async () => {
+    test('test_p_moveToFirst_LastChild', () => {
         const c = self.c;
         let p = self.c.p;
         const root2 = p.next();
@@ -804,7 +806,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.45: *3* TestNodes.test_p_moveToVisBack_in_a_chapter
-    test('test_p_moveToVisBack_in_a_chapter', async () => {
+    test('test_p_moveToVisBack_in_a_chapter', () => {
         const c = self.c;
         let p = self.c.p;
 
@@ -826,7 +828,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.46: *3* TestNodes.test_p_nosentinels
-    test('test_p_nosentinels', async () => {
+    test('test_p_nosentinels', () => {
         let p = self.c.p;
         // TODO
         const s1 = g.splitLines(p.b.substring(2)).join(''); //  ''.join(g.splitLines(p.b)[2:]);
@@ -835,7 +837,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.47: *3* TestNodes.test_p_relinkAsCloneOf
-    test('test_p_relinkAsCloneOf', async () => {
+    test('test_p_relinkAsCloneOf', () => {
         const c = self.c;
         const u = self.c.undoer;
         let p = self.c.p.next();
@@ -875,7 +877,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.48: *3* TestNodes.test_p_setBodyString
-    test('test_p_setBodyString', async () => {
+    test('test_p_setBodyString', () => {
         // Test that c.setBodyString works immediately.
         const c = self.c;
         // w = self.c.frame.body.wrapper;
@@ -888,7 +890,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.49: *3* TestNodes.test_p_u
-    test('test_p_u', async () => {
+    test('test_p_u', () => {
         const p = self.c.p;
         assert.deepStrictEqual(p.u, p.v.u);
         p.v.u = {};
@@ -901,7 +903,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.50: *3* TestNodes.test_p_unique_nodes
-    test('test_p_unique_nodes', async () => {
+    test('test_p_unique_nodes', () => {
         assert.strictEqual([...self.root_p.unique_nodes()].length, 5);
     });
     /* def test_p_unique_nodes(self):
@@ -909,7 +911,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         self.assertEqual(len(list(self.root_p.unique_nodes())), 5)
      */
     //@+node:felix.20220129225027.51: *3* TestNodes.test_paste_node
-    test('test_paste_node', async () => {
+    test('test_paste_node', () => {
         const c = self.c;
         let p = self.c.p;
         const child = p.insertAsNthChild(0);
@@ -946,7 +948,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.52: *3* TestNodes.test_paste_retaining_clones
-    test('test_paste_retaining_clones', async () => {
+    test('test_paste_retaining_clones', () => {
         const c = self.c;
         let p = self.c.p;
         const child = p.insertAsNthChild(0);
@@ -971,7 +973,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.53: *3* TestNodes.test_position_not_hashable
-    test('test_position_not_hashable', async () => {
+    test('test_position_not_hashable', () => {
         let p = self.c.p;
 
         try {
@@ -985,7 +987,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.54: *3* TestNodes.test_promote
-    test('test_promote', async () => {
+    test('test_promote', () => {
         const c = self.c;
         let p = self.c.p;
         const p2 = p.insertAsNthChild(0);
@@ -1038,7 +1040,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.55: *3* TestNodes.test_root_of_a_derived_file
-    test('test_root_of_a_derived_file', async () => {
+    test('test_root_of_a_derived_file', () => {
         const p = self.c.p;
         const p1 = p.insertAsLastChild();
         p1.setHeadString('@file zzz');
@@ -1046,7 +1048,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.56: *3* TestNodes.test_section_node
-    test('test_section_node', async () => {
+    test('test_section_node', () => {
         const p = self.c.p;
         const p1 = p.insertAsLastChild();
         p1.setHeadString('@file zzz');
@@ -1063,7 +1065,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     });
 
     //@+node:felix.20220129225027.57: *3* TestNodes.test_v_atAutoNodeName_and_v_atAutoRstNodeName
-    test('test_v_atAutoNodeName_and_v_atAutoRstNodeName', async () => {
+    test('test_v_atAutoNodeName_and_v_atAutoRstNodeName', () => {
         const p = self.c.p;
 
         const table: [string, string, string][] = [

@@ -15,17 +15,19 @@ suite('Test Undo', () => {
 
     let self: LeoUnitTest;
 
-    before(async () => {
+    before(() => {
         self = new LeoUnitTest();
         return self.setUpClass();
     });
 
-    beforeEach(async () => {
+    beforeEach(() => {
         self.setUp();
+        return Promise.resolve();
     });
 
-    afterEach(async () => {
+    afterEach(() => {
         self.tearDown();
+        return Promise.resolve();
     });
 
     //@+others
@@ -64,7 +66,7 @@ suite('Test Undo', () => {
         assert.strictEqual(result, before, 'after undo2');
     };
     //@+node:felix.20220129225102.3: *3* TestUndo.test_addComments
-    test('test_addComments', async () => {
+    test('test_addComments', () => {
         const c = self.c;
 
     });
@@ -98,7 +100,7 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.4: *3* TestUndo.test_convertAllBlanks
-    test('test_convertAllBlanks', async () => {
+    test('test_convertAllBlanks', () => {
         const c = self.c;
 
     });
@@ -125,7 +127,7 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.5: *3* TestUndo.test_convertAllTabs
-    test('test_convertAllTabs', async () => {
+    test('test_convertAllTabs', () => {
         const c = self.c;
 
     });
@@ -152,7 +154,7 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.6: *3* TestUndo.test_convertBlanks
-    test('test_convertBlanks', async () => {
+    test('test_convertBlanks', () => {
         const c = self.c;
 
     });
@@ -179,7 +181,7 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.7: *3* TestUndo.test_convertTabs
-    test('test_convertTabs', async () => {
+    test('test_convertTabs', () => {
         const c = self.c;
 
     });
@@ -206,7 +208,7 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.8: *3* TestUndo.test_dedentBody
-    test('test_dedentBody', async () => {
+    test('test_dedentBody', () => {
         const c = self.c;
 
     });
@@ -230,7 +232,7 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.9: *3* TestUndo.test_deleteComments
-    test('test_deleteComments', async () => {
+    test('test_deleteComments', () => {
         const c = self.c;
 
     });
@@ -264,7 +266,7 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.10: *3* TestUndo.test_deleteComments 2
-    test('test_deleteComments_2', async () => {
+    test('test_deleteComments_2', () => {
         const c = self.c;
 
     });
@@ -306,7 +308,7 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.11: *3* TestUndo.test_edit_headline
-    test('test_edit_headline', async () => {
+    test('test_edit_headline', () => {
         const c = self.c;
         const p = self.c.p;
         let node1 = p.insertAsLastChild();
@@ -343,7 +345,7 @@ suite('Test Undo', () => {
         assert.ok(c.p.__eq__(node1));
     });
     //@+node:felix.20220129225102.12: *3* TestUndo.test_extract_test
-    test('test_extract_test', async () => {
+    test('test_extract_test', () => {
         const c = self.c;
         const before = g.dedent(
             `\
@@ -386,7 +388,7 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.13: *3* TestUndo.test_line_to_headline
-    test('test_line_to_headline', async () => {
+    test('test_line_to_headline', () => {
         const c = self.c;
         const before = g.dedent(`\
             before
@@ -420,7 +422,7 @@ suite('Test Undo', () => {
         self.runTest(before, after, i, j, func)
      */
     //@+node:felix.20220129225102.14: *3* TestUndo.test_restore_marked_bits
-    test('test_restore_marked_bits', async () => {
+    test('test_restore_marked_bits', () => {
         const c = self.c;
         const p = self.c.p;
 
@@ -496,7 +498,7 @@ suite('Test Undo', () => {
      * Test an off-by-one error in c.undoer.bead.
      * The buggy redoGroup code worked if the undo group was the first item on the undo stack.
      */
-    test('test_undo_group', async () => {
+    test('test_undo_group', () => {
         const c = self.c;
 
         const p = self.c.p;

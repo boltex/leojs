@@ -86,7 +86,7 @@ export class CommanderOutlineCommands {
         if (g.app.inBridge) {
             return s;
         }
-        g.app.gui.replaceClipboardWith(s);
+        void g.app.gui.replaceClipboardWith(s);
         return s;
     }
     //@+node:felix.20230322003228.1: *4* c_oc.copyOutlineAsJson
@@ -173,7 +173,7 @@ export class CommanderOutlineCommands {
         if (g.app.inBridge) {
             return s;
         }
-        g.app.gui.replaceClipboardWith(s);
+        void g.app.gui.replaceClipboardWith(s);
         return s;
     }
     //@+node:felix.20211208235043.3: *4* c_oc.cutOutline
@@ -1915,7 +1915,7 @@ export class CommanderOutlineCommands {
         'This command is not undoable.\n' +
         'Consider using clone-marked-nodes, followed by copy/paste instead.'
     )
-    public moveMarked(this: Commands): void {
+    public async moveMarked(this: Commands): Promise<unknown> {
         const c: Commands = this;
         const p1 = c.p.copy();
         // Check for marks.
@@ -1931,64 +1931,62 @@ export class CommanderOutlineCommands {
             return;
         }
 
-        g.app.gui.runAskYesNoDialog(
+        const result = await g.app.gui.runAskYesNoDialog(
             c,
             'Move Marked Nodes?',
             'move-marked-nodes is not undoable. Proceed?'
-        ).then((result) => {
-            if (result === 'no') {
-                return;
-            }
+        );
+        if (result === 'no') {
+            return;
+        }
 
-            // Create a new *root* node to hold the moved nodes.
-            // This node's position remains stable while other nodes move.
-            const parent = createMoveMarkedNode(c);
-            console.assert(!parent.isMarked());
-            const moved: Position[] = [];
-            let p = c.rootPosition()!;
-            while (p && p.__bool__()) {
-                console.assert(parent.__eq__(c.rootPosition()!));
-                // Careful: don't move already-moved nodes.
-                if (p.isMarked() && !parent.isAncestorOf(p)) {
-                    moved.push(p.copy());
-                    const next = p.positionAfterDeletedTree();
-                    p.moveToLastChildOf(parent);
-                    // This does not change parent's position.
-                    p = next;
+        // Create a new *root* node to hold the moved nodes.
+        // This node's position remains stable while other nodes move.
+        const parent = createMoveMarkedNode(c);
+        console.assert(!parent.isMarked());
+        const moved: Position[] = [];
+        let p = c.rootPosition()!;
+        while (p && p.__bool__()) {
+            console.assert(parent.__eq__(c.rootPosition()!));
+            // Careful: don't move already-moved nodes.
+            if (p.isMarked() && !parent.isAncestorOf(p)) {
+                moved.push(p.copy());
+                const next = p.positionAfterDeletedTree();
+                p.moveToLastChildOf(parent);
+                // This does not change parent's position.
+                p = next;
+            } else {
+                p.moveToThreadNext();
+            }
+        }
+        if (moved.length) {
+            // Find a position p2 outside of parent's tree with p2.v == p1.v.
+            // Such a position may not exist.
+            let p2: Position = c.rootPosition()!;
+            let found: boolean = false;
+            while (p2 && p2.__bool__()) {
+                if (p2.__eq__(parent)) {
+                    p2.moveToNodeAfterTree();
+                } else if (p2.v.gnx === p1.v.gnx) {
+                    found = true;
+                    break;
                 } else {
-                    p.moveToThreadNext();
+                    p2.moveToThreadNext();
                 }
             }
-            if (moved.length) {
-                // Find a position p2 outside of parent's tree with p2.v == p1.v.
-                // Such a position may not exist.
-                let p2: Position = c.rootPosition()!;
-                let found: boolean = false;
-                while (p2 && p2.__bool__()) {
-                    if (p2.__eq__(parent)) {
-                        p2.moveToNodeAfterTree();
-                    } else if (p2.v.gnx === p1.v.gnx) {
-                        found = true;
-                        break;
-                    } else {
-                        p2.moveToThreadNext();
-                    }
-                }
-                if (!found) {
-                    // Not found.  Move to last top-level.
-                    p2 = c.lastTopLevel();
-                }
-                parent.moveAfter(p2);
-                // u.afterMoveMarkedNodes(moved, p1)
-                if (!g.unitTesting) {
-                    g.blue(`moved ${moved.length} nodes`);
-                }
-                c.setChanged();
+            if (!found) {
+                // Not found.  Move to last top-level.
+                p2 = c.lastTopLevel();
             }
-            // Calling c.contractAllHeadlines() causes problems when in a chapter.
-            c.redraw(parent);
-
-        });
+            parent.moveAfter(p2);
+            // u.afterMoveMarkedNodes(moved, p1)
+            if (!g.unitTesting) {
+                g.blue(`moved ${moved.length} nodes`);
+            }
+            c.setChanged();
+        }
+        // Calling c.contractAllHeadlines() causes problems when in a chapter.
+        c.redraw(parent);
 
     }
 

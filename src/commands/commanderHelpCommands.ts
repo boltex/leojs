@@ -26,7 +26,7 @@ export class CommanderHelpCommands {
         'about-leo',
         'Bring up an About Leo Dialog.'
     )
-    public about(this: Commands): void {
+    public about(this: Commands): Thenable<unknown> {
         const c = this;
 
         // Don't use triple-quoted strings or continued strings here.
@@ -38,7 +38,7 @@ export class CommanderHelpCommands {
             "Leo and LeoJS are distributed under the MIT License";
         const url = "https://leo-editor.github.io/leo-editor/"; // unused for now
         const email = "edreamleo@gmail.com"; // unused for now
-        g.app.gui.runAboutLeoDialog(c, version, theCopyright, url, email);
+        return g.app.gui.runAboutLeoDialog(c, version, theCopyright, url, email);
 
     }
 
@@ -54,7 +54,7 @@ export class CommanderHelpCommands {
     )
     public leoDocumentation(this: Commands): void {
 
-        vscode.window.showInformationMessage('TODO : open-leo-docs-leo');
+        void vscode.window.showInformationMessage('TODO : open-leo-docs-leo');
 
         /*     
         c = self
@@ -81,7 +81,7 @@ export class CommanderHelpCommands {
     )
     public leoQuickStart(this: Commands): void {
 
-        vscode.window.showInformationMessage('TODO : open-quickstart-leo');
+        void vscode.window.showInformationMessage('TODO : open-quickstart-leo');
 
         /* 
         c = self
@@ -110,7 +110,7 @@ export class CommanderHelpCommands {
     )
     public openCheatSheet(this: Commands): void {
 
-        vscode.window.showInformationMessage('TODO : open-cheat-sheet-leo');
+        void vscode.window.showInformationMessage('TODO : open-cheat-sheet-leo');
 
         /* 
         c = self
@@ -140,7 +140,7 @@ export class CommanderHelpCommands {
         'leo-settings',
         'Open default Leo settings as a new Leo Document.'
     )
-    public async openLeoSettings(this: Commands): Promise<Commands | undefined> {
+    public openLeoSettings(this: Commands): Promise<Commands | undefined> {
 
         /* 
         c, lm = self, g.app.loadManager
@@ -178,10 +178,10 @@ export class CommanderHelpCommands {
             g.doHook("new", { old_c: old_c, c: c, new_c: c });
             g.app.disable_redraw = false;
             c.redraw();
-            return c;
+            return Promise.resolve(c);
         }
         catch (exception) {
-            return undefined;
+            return Promise.resolve(undefined);
         }
 
     }
@@ -314,7 +314,7 @@ export class CommanderHelpCommands {
     )
     public leoHome(this: Commands): void {
 
-        vscode.env.openExternal(
+        void vscode.env.openExternal(
             vscode.Uri.parse(
                 'https://leo-editor.github.io/leo-editor/'
             )
@@ -329,7 +329,7 @@ export class CommanderHelpCommands {
     )
     public openLeoTOC(this: Commands): void {
 
-        vscode.env.openExternal(
+        void vscode.env.openExternal(
             vscode.Uri.parse(
                 'https://leo-editor.github.io/leo-editor/leo_toc.html'
             )
@@ -344,7 +344,7 @@ export class CommanderHelpCommands {
     )
     public openLeoTutorials(this: Commands): void {
 
-        vscode.env.openExternal(
+        void vscode.env.openExternal(
             vscode.Uri.parse(
                 'https://leo-editor.github.io/leo-editor/tutorial.html'
             )
@@ -359,7 +359,7 @@ export class CommanderHelpCommands {
     )
     public openLeoUsersGuide(this: Commands): void {
 
-        vscode.env.openExternal(
+        void vscode.env.openExternal(
             vscode.Uri.parse(
                 'https://leo-editor.github.io/leo-editor/usersguide.html"'
             )
@@ -374,7 +374,7 @@ export class CommanderHelpCommands {
     )
     public openLeoVideos(this: Commands): void {
 
-        vscode.env.openExternal(
+        void vscode.env.openExternal(
             vscode.Uri.parse(
                 'https://leo-editor.github.io/leo-editor/screencasts.html'
             )

@@ -17,17 +17,19 @@ suite('Test cases for leoCommands.ts', () => {
 
     let self: LeoUnitTest;
 
-    before(async () => {
+    before(() => {
         self = new LeoUnitTest();
         return self.setUpClass();
     });
 
-    beforeEach(async () => {
+    beforeEach(() => {
         self.setUp();
+        return Promise.resolve();
     });
 
-    afterEach(async () => {
+    afterEach(() => {
         self.tearDown();
+        return Promise.resolve();
     });
 
     //@+others
@@ -129,13 +131,13 @@ suite('Test cases for leoCommands.ts', () => {
             assert arg0 in expected or arg1 in expected, message
      */
     //@+node:felix.20220129224954.6: *3* TestCommands.test_c_alert
-    test('test_c_alert', async () => {
+    test('test_c_alert', () => {
         const c = self.c;
         c.alert('test of c.alert');
     });
 
     //@+node:felix.20220129224954.7: *3* TestCommands.test_c_checkOutline
-    test('test_c_checkOutline', async () => {
+    test('test_c_checkOutline', () => {
         const c = self.c;
         const errors = c.checkOutline();
         assert.strictEqual(errors, 0);
@@ -161,7 +163,7 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(result, 'error')
      */
     //@+node:felix.20220129224954.11: *3* TestCommands.test_c_contractAllHeadlines
-    test('test_c_contractAllHeadlines', async () => {
+    test('test_c_contractAllHeadlines', () => {
         const c = self.c;
         c.contractAllHeadlines();
         const p: Position = c.rootPosition()!;
@@ -173,7 +175,7 @@ suite('Test cases for leoCommands.ts', () => {
     });
 
     //@+node:felix.20220129224954.12: *3* TestCommands.test_c_demote_illegal_clone_demote
-    test('test_c_demote_illegal_clone_demote', async () => {
+    test('test_c_demote_illegal_clone_demote', () => {
         const c = self.c;
         const p: Position = c.p;
         // Create two cloned children.
@@ -192,7 +194,7 @@ suite('Test cases for leoCommands.ts', () => {
         assert.strictEqual(2, p.numberOfChildren());
     });
     //@+node:felix.20220129224954.13: *3* TestCommands.test_c_expand_path_expression
-    test('test_c_expand_path_expression', async () => {
+    test('test_c_expand_path_expression', () => {
         const c = self.c;
 
         const sep = path.sep;
@@ -213,7 +215,7 @@ suite('Test cases for leoCommands.ts', () => {
     });
     //@+node:felix.20230423155356.1: *3* TestCommands.test_find_b_h
     // ! uncomment if c.find_b and c.find_h are implemented !
-    // test('test_find_b_h', async () => {
+    // test('test_find_b_h', () => {
     //     const c = self.c;
     //     const p = self.c.p;
 
@@ -257,14 +259,14 @@ suite('Test cases for leoCommands.ts', () => {
 
      */
     //@+node:felix.20220129224954.15: *3* TestCommands.test_c_hiddenRootNode_fileIndex
-    test('test_c_hiddenRootNode_fileIndex', async () => {
+    test('test_c_hiddenRootNode_fileIndex', () => {
         const c = self.c;
         assert.ok(c.hiddenRootNode.fileIndex.startsWith('hidden-root-vnode-gnx'),
             c.hiddenRootNode.fileIndex);
 
     });
     //@+node:felix.20220129224954.16: *3* TestCommands.test_c_hoist_chapter_node
-    test('test_c_hoist_chapter_node', async () => {
+    test('test_c_hoist_chapter_node', () => {
         const c = self.c;
         // Create the @settings and @chapter nodes.
         const settings = c.rootPosition()!.insertAfter();
@@ -285,7 +287,7 @@ suite('Test cases for leoCommands.ts', () => {
         assert.strictEqual(c.hoistStack.length, [].length);
     });
     //@+node:felix.20220129224954.17: *3* TestCommands.test_c_hoist_followed_by_goto_first_node
-    test('test_c_hoist_followed_by_goto_first_node', async () => {
+    test('test_c_hoist_followed_by_goto_first_node', () => {
         const c = self.c;
         // Create the @settings and @chapter nodes.
         const settings = c.rootPosition()!.insertAfter();
@@ -316,7 +318,7 @@ suite('Test cases for leoCommands.ts', () => {
         }
     });
     //@+node:felix.20220129224954.18: *3* TestCommands.test_c_hoist_with_no_children
-    test('test_c_hoist_with_no_children', async () => {
+    test('test_c_hoist_with_no_children', () => {
         const c = self.c;
         c.hoist();
         c.dehoist();
@@ -324,7 +326,7 @@ suite('Test cases for leoCommands.ts', () => {
     //@+node:felix.20220129224954.19: *3* TestCommands.test_c_insertBodyTime
     // TODO: uncomment if insertBodyTime is implemented
     /*
-    test('test_c_insertBodyTime', async () => {
+    test('test_c_insertBodyTime', () => {
         const c = self.c;
         // p = c.p
         // w = c.frame.body.wrapper
@@ -344,7 +346,7 @@ suite('Test cases for leoCommands.ts', () => {
      */
 
     //@+node:felix.20220129224954.20: *3* TestCommands.test_c_markAllAtFileNodesDirty
-    test('test_c_markAllAtFileNodesDirty', async () => {
+    test('test_c_markAllAtFileNodesDirty', () => {
         const c = self.c;
         // const marks = [p.v for p in c.all_positions() if p.isMarked()]
         const marks = [...c.all_positions()].filter(p => p.isMarked()).map(p => p.v);
@@ -378,7 +380,7 @@ suite('Test cases for leoCommands.ts', () => {
         assert.ok(ok);
     });
     //@+node:felix.20220129224954.21: *3* TestCommands.test_c_markSubheads
-    test('test_c_markSubheads', async () => {
+    test('test_c_markSubheads', () => {
         const c = self.c;
         const child1 = c.rootPosition()!.insertAsLastChild();
         const child2 = c.rootPosition()!.insertAsLastChild();
@@ -387,7 +389,7 @@ suite('Test cases for leoCommands.ts', () => {
     });
 
     //@+node:felix.20220129224954.22: *3* TestCommands.test_c_pasteOutline_does_not_clone_top_node
-    test('test_c_pasteOutline_does_not_clone_top_node', async () => {
+    test('test_c_pasteOutline_does_not_clone_top_node', () => {
         const c = self.c;
         const p = c.p;
         p.b = '# text.';
@@ -401,7 +403,7 @@ suite('Test cases for leoCommands.ts', () => {
     //@+node:felix.20220129224954.23: *3* TestCommands.test_c_scanAllDirectives
     // TODO: uncomment when atFile 'scanAllDirectives' is implemented
     /* 
-        test('test_c_scanAllDirectives', async () => {
+        test('test_c_scanAllDirectives', () => {
             const c = self.c;
             const d = c.scanAllDirectives(c.p);
             // These are the commander defaults, without any settings.
@@ -419,7 +421,7 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(d.get('pagewidth'), 132)
      */
     //@+node:felix.20220129224954.24: *3* TestCommands.test_c_scanAtPathDirectives
-    test('test_c_scanAtPathDirectives', async () => {
+    test('test_c_scanAtPathDirectives', () => {
         const c = self.c;
         const p = self.c.p;
         const child = p.insertAfter();
@@ -435,7 +437,7 @@ suite('Test cases for leoCommands.ts', () => {
     });
 
     //@+node:felix.20220129224954.25: *3* TestCommands.test_c_scanAtPathDirectives_same_name_subdirs
-    test('test_c_scanAtPathDirectives_same_name_subdirs', async () => {
+    test('test_c_scanAtPathDirectives_same_name_subdirs', () => {
         const c = self.c;
         // p2 = p.firstChild().firstChild().firstChild()
         const p = c.p;
@@ -454,7 +456,7 @@ suite('Test cases for leoCommands.ts', () => {
     //@+node:felix.20220129224954.26: *3* TestCommands.test_c_tabNannyNode
     // TODO: uncomment when 'tabNannyNode' is implemented
     /*
-    test('test_c_tabNannyNode', async () => {
+    test('test_c_tabNannyNode', () => {
         const c = self.c;
         const p = c.p;
 
@@ -500,7 +502,7 @@ suite('Test cases for leoCommands.ts', () => {
             pass
      */
     //@+node:felix.20220129224954.27: *3* TestCommands.test_c_unmarkAll
-    test('test_c_unmarkAll', async () => {
+    test('test_c_unmarkAll', () => {
         const c = self.c;
         c.unmarkAll();
         for (let p of c.all_positions()) {
@@ -587,7 +589,7 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(p.b, expected)
      */
     //@+node:felix.20220129224954.32: *3* TestCommands.test_efc_ask
-    test('test_efc_ask', async () => {
+    test('test_efc_ask', () => {
         const c = self.c;
         const p = c.p;
         // Not a perfect test, but stil significant.
@@ -602,7 +604,7 @@ suite('Test cases for leoCommands.ts', () => {
         assert.ok([true, false].includes(result), result);
     });
     //@+node:felix.20220129224954.33: *3* TestCommands.test_efc_compute_ext
-    test('test_efc_compute_ext', async () => {
+    test('test_efc_compute_ext', () => {
         const c = self.c;
         const p = c.p;
         // Not a perfect test, but stil significant.
@@ -627,7 +629,7 @@ suite('Test cases for leoCommands.ts', () => {
         }
     });
     //@+node:felix.20220129224954.34: *3* TestCommands.test_efc_compute_temp_file_path
-    test('test_efc_compute_temp_file_path', async () => {
+    test('test_efc_compute_temp_file_path', () => {
         const c = self.c;
         const p = c.p;
         // Not a perfect test, but stil significant.
@@ -642,7 +644,7 @@ suite('Test cases for leoCommands.ts', () => {
         assert.ok(s.endsWith('.py'));
     });
     //@+node:felix.20220129224954.35: *3* TestCommands.test_koi8_r_encoding
-    test('test_koi8_r_encoding', async () => {
+    test('test_koi8_r_encoding', () => {
         const c = self.c;
         const p = c.p;
         const p1 = p.insertAsLastChild();
@@ -656,7 +658,7 @@ suite('Test cases for leoCommands.ts', () => {
         assert.strictEqual(p1.b, p2.b);
     });
     //@+node:felix.20220129224954.36: *3* TestCommands.test_official_commander_ivars
-    test('test_official_commander_ivars', async () => {
+    test('test_official_commander_ivars', () => {
         const c = self.c;
         const f = c.frame;
         assert.strictEqual(c, f.c);

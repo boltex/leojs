@@ -234,7 +234,8 @@ export class ExternalFilesController {
                 continue;
             }
             const w_path = c.fullPath(p);
-            if (!this.has_changed(w_path)) {
+            const w_hasChanged = await this.has_changed(w_path);
+            if (!w_hasChanged) {
                 continue;
             }
             // Prevent further checks for path.
@@ -263,7 +264,9 @@ export class ExternalFilesController {
     public async idle_check_leo_file(c: Commands): Promise<void> {
 
         const w_path = c.fileName();
-        if (!this.has_changed(w_path)) {
+        const w_hasChanged = await this.has_changed(w_path);
+
+        if (!w_hasChanged) {
             return;
         }
         // Always update the path & time to prevent future warnings.

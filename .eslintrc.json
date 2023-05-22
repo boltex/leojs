@@ -16,6 +16,7 @@
         "@typescript-eslint/semi": "warn",
         "@typescript-eslint/strict-boolean-expressions": "warn",
         "@typescript-eslint/no-floating-promises": "error",
+        "@typescript-eslint/no-misused-promises": "error",
         "require-await": "error",
         "no-return-await": "error",
         "curly": "warn",

@@ -99,7 +99,7 @@ export class LeoStatusBar {
             clearTimeout(this._updateStatusBarTimeout);
         }
 
-        utils.setContext(Constants.CONTEXT_FLAGS.LEO_SELECTED, !!this.statusBarFlag);
+        void utils.setContext(Constants.CONTEXT_FLAGS.LEO_SELECTED, !!this.statusBarFlag);
 
         this._leoStatusBarItem.text = Constants.GUI.STATUSBAR_INDICATOR +
             (this._string ? this._string : '') + " " +

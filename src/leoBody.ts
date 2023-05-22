@@ -198,9 +198,9 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         throw vscode.FileSystemError.NoPermissions();
     }
 
-    public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
+    public async writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): Promise<void> {
         if (!this.preventSaveToLeo) {
-            this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
+            await this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
         } else {
             this.preventSaveToLeo = false;
         }
@@ -208,9 +208,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         if (!this._openedBodiesGnx.includes(w_gnx)) {
             console.error("LeoJS: Tried to save body other than selected node's body", w_gnx);
         }
-
         this._setOpenedBodyTime(w_gnx);
-
         this._fireSoon({ type: vscode.FileChangeType.Changed, uri: p_uri });
     }
 

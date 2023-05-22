@@ -3730,5 +3730,8 @@
     "path-browserify": "^1.0.1",
     "safe-json-stringify": "^1.2.0",
     "stream": "^0.0.2"
-  }
+  },
+  "gitCommit": "fd0e36b",
+  "gitBranch": "atFiles",
+  "gitDate": "2023-05-22 02:36:07 -0400"
 }

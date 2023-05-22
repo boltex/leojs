@@ -15,17 +15,19 @@ suite('Test cases for leoApp.ts', () => {
 
     let self: LeoUnitTest;
 
-    before(async () => {
+    before(() => {
         self = new LeoUnitTest();
         return self.setUpClass();
     });
 
-    beforeEach(async () => {
+    beforeEach(() => {
         self.setUp();
+        return Promise.resolve();
     });
 
-    afterEach(async () => {
+    afterEach(() => {
         self.tearDown();
+        return Promise.resolve();
     });
 
     //@+others
@@ -49,7 +51,7 @@ suite('Test cases for leoApp.ts', () => {
     });
     */
     //@+node:felix.20220129221913.3: *3* TestApp.test_official_g_app_ivars
-    test('test_official_g_app_ivars', async () => {
+    test('test_official_g_app_ivars', () => {
 
         const ivars = [
             // Global managers.
@@ -80,11 +82,12 @@ suite('Test cases for leoApp.ts', () => {
         ivars.forEach(ivar => {
             assert.ok(g.app.hasOwnProperty(ivar), `missing g.app ivar: ${ivar}`);
         });
+        return Promise.resolve();
 
     });
 
     //@+node:felix.20220129221913.4: *3* TestApp.test_consistency_of_leoApp_tables
-    test('test_consistency_of_leoApp_tables', async () => {
+    test('test_consistency_of_leoApp_tables', () => {
         const delims_d = g.app.language_delims_dict;
         const lang_d = g.app.language_extension_dict;
         const ext_d = g.app.extension_dict;
@@ -99,7 +102,7 @@ suite('Test cases for leoApp.ts', () => {
             const lang = ext_d[ext];
             assert.ok(lang_d[lang], lang);
         }
-
+        return Promise.resolve();
     });
 
     //@+node:felix.20220129221913.5: *3* TestApp.test_lm_openAnyLeoFile

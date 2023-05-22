@@ -2575,27 +2575,31 @@ export class LoadManager {
         // const verbose:boolean = !script;
 
         // Init the app.
-        return lm.initApp().finally(async () => {
+        return lm.initApp().finally(() => {
             // g.app.setGlobalDb()
 
             // lm.reportDirectories(verbose)
 
             // Read settings *after* setting g.app.config and *before* opening plugins.
             // This means if-gui has effect only in per-file settings.
-            await lm.readGlobalSettingsFiles();
-            // reads only standard settings files, using a null gui.
-            // uses lm.files[0] to compute the local directory
-            // that might contain myLeoSettings.leo.
-            // Read the recent files file.
-            const localConfigFile = (lm.files && lm.files.length) ? lm.files[0] : undefined;
+            lm.readGlobalSettingsFiles().then(() => {
+                // reads only standard settings files, using a null gui.
+                // uses lm.files[0] to compute the local directory
+                // that might contain myLeoSettings.leo.
+                // Read the recent files file.
+                const localConfigFile = (lm.files && lm.files.length) ? lm.files[0] : undefined;
 
-            // TODO: ? recent-file management ?
-            // g.app.recentFilesManager.readRecentFiles(localConfigFile);
+                // TODO: ? recent-file management ?
+                // g.app.recentFilesManager.readRecentFiles(localConfigFile);
 
-            // Create the gui after reading options and settings.
-            lm.createGui();
-            // We can't print the signon until we know the gui.
-            g.app.computeSignon();  // Set app.signon/signon1 for commanders.
+                // Create the gui after reading options and settings.
+                lm.createGui();
+                // We can't print the signon until we know the gui.
+                g.app.computeSignon();  // Set app.signon/signon1 for commanders.
+            }, () => {
+                throw ('LEOJS: ERRRR IN READING GLOBAL SETTING');
+            });
+
         });
 
     }

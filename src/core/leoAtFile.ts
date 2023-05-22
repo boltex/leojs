@@ -271,7 +271,7 @@ export class AtFile {
         // Create directories if enabled.
         const root_dir = g.os_path_dirname(targetFileName);
         if (make_dirs && root_dir) {
-            const ok = g.makeAllNonExistentDirectories(root_dir);
+            const ok = await g.makeAllNonExistentDirectories(root_dir);
             if (!ok) {
                 g.error(`Error creating directories: ${root_dir}`);
                 return undefined;
@@ -639,7 +639,7 @@ export class AtFile {
             c.persistenceController.update_after_read_foreign_file(p);
         }
         // Finish.
-        const w_exists = g.os_path_exists(fileName);
+        const w_exists = await g.os_path_exists(fileName);
         if (ic.errors || !w_exists) {
             p.clearDirty();
         } else {
