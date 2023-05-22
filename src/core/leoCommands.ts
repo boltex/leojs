@@ -19,7 +19,7 @@ import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
 import { AtFile } from './leoAtFile';
 import { LeoFind } from './leoFind';
-import { LeoImportCommands } from './leoImport';
+import { LeoImportCommands, TopLevelImportCommands } from './leoImport';
 import { ChapterController } from './leoChapters';
 import { PersistenceDataController, TopLevelPersistanceCommands } from './leoPersistence';
 import { EditCommandsClass, TopLevelEditCommands } from '../commands/editCommands';
@@ -4046,6 +4046,7 @@ export interface Commands
     CommanderHelpCommands,
     CommanderEditCommands,
     TopLevelCompareCommands,
+    TopLevelImportCommands,
     TopLevelPersistanceCommands,
     TopLevelEditCommands {
     canCutOutline: () => boolean;
@@ -4079,6 +4080,8 @@ applyMixins(Commands, [
     CommanderFileCommands,
     CommanderHelpCommands,
     CommanderEditCommands,
+    TopLevelCompareCommands,
+    TopLevelImportCommands,
     TopLevelPersistanceCommands,
     TopLevelEditCommands
 ]);

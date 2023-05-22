@@ -17,6 +17,7 @@ const lxml = false;
 
 // Leo imports...
 import * as g from './leoGlobals';
+import { command } from "../core/decorators";
 import { Commands } from "./leoCommands";
 import { Position, VNode } from './leoNodes';
 //@-<< leoImport imports >>
@@ -3573,6 +3574,109 @@ export class LegacyExternalFileImporter {
         if (paths && paths.length) {
             g.chdir(paths[0])
             await this.import_files(paths);
+        }
+    }
+    //@-others
+
+}
+//@+node:felix.20230521235405.1: ** class TopLevelImportCommands
+export class TopLevelImportCommands {
+
+    //@+others
+    //@+node:felix.20230521235405.2: *3* @g.command(import-free-mind-files)
+    @command(
+        'import-free-mind-files',
+        'Prompt for free-mind files and import them.'
+    )
+    public async import_free_mind_files(this: Commands): Promise<void> {
+        const c: Commands = this;
+        if (c) {
+            await new FreeMindImporter(c).prompt_for_files();
+        }
+    }
+    //@+node:felix.20230521235405.3: *3* @g.command(import-legacy-external-file)
+    @command(
+        'import-legacy-external-files',
+        'Prompt for legacy external files and import them.'
+    )
+    public async import_legacy_external_files(this: Commands): Promise<void> {
+        const c: Commands = this;
+        if (c) {
+            await new LegacyExternalFileImporter(c).prompt_for_files();
+        }
+    }
+    //@+node:felix.20230521235405.4: *3* @g.command(import-mind-map-files
+    @command(
+        'import-mind-jet-files',
+        'Prompt for mind-jet files and import them.'
+    )
+    public async import_mind_jet_files(this: Commands): Promise<void> {
+        const c: Commands = this;
+        if (c) {
+            await new MindMapImporter(c).prompt_for_files();
+        }
+    }
+    //@+node:felix.20230521235405.5: *3* @g.command(import-MORE-files)
+    @command(
+        'import-MORE-files',
+        'Prompt for MORE files and import them.')
+    public async import_MORE_files_command(this: Commands): Promise<void> {
+        const c: Commands = this;
+        if (c) {
+            await new MORE_Importer(c).prompt_for_files();
+        }
+    }
+    //@+node:felix.20230521235405.6: *3* @g.command(import-tabbed-files)
+    @command(
+        'import-tabbed-files',
+        'Prompt for tabbed files and import them.')
+    public async import_tabbed_files_command(this: Commands): Promise<void> {
+        const c: Commands = this;
+        if (c) {
+            await new TabImporter(c).prompt_for_files();
+        }
+    }
+    //@+node:felix.20230521235405.7: *3* @g.command(import-todo-text-files)
+    @command(
+        'import-todo-text-files',
+        'Prompt for free-mind files and import them.')
+    public async import_todo_text_files(this: Commands): Promise<void> {
+        const c: Commands = this;
+        if (c) {
+            await new ToDoImporter(c).prompt_for_files();
+        }
+    }
+    //@+node:felix.20230521235405.8: *3* @g.command(import-zim-folder)
+    @command(
+        'import-zim-folder',
+        `
+        Import a zim folder, http://zim-wiki.org/, as the last top-level node of the outline.
+
+        First use Zim to export your project to rst files.
+
+        This command requires the following Leo settings::
+
+            @int rst_level = 0
+            @string rst_type
+            @string zim_node_name
+            @string path_to_zim
+        `
+    )
+    public async import_zim_command(this: Commands): Promise<void> {
+        const c: Commands = this;
+        if (c) {
+            await new ZimImportController(c).run();
+        }
+    }
+    //@+node:felix.20230521235405.9: *3* @g.command(parse-body)
+    @command(
+        'parse-body',
+        'Parse p.b as source code, creating a tree of descendant nodes.'
+    )
+    public parse_body_command(this: Commands): void {
+        const c: Commands = this;
+        if (c && c.p && c.p.__bool__()) {
+            c.importCommands.parse_body(c.p);
         }
     }
     //@-others

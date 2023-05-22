@@ -57,7 +57,7 @@ interface VNodeJSON {
 const PRIVAREA: string = '---begin-private-area---';
 //@-<< constants >>
 //@+others
-//@+node:felix.20211212220328.1: ** u.cmd (decorator)
+//@+node:felix.20211212220328.1: ** cmd (decorator)
 /**
  * Command decorator for the FileCommands class.
  */

@@ -608,7 +608,7 @@ export class PersistenceDataController {
 
         if (this.at_persistence) {
             const p = this.has_at_data_node(root);
-            return p && p.__bool__() && g.findNodeInTree(this.c, p, '@gnxs');
+            return p && p.__bool__() && g.findNodeInTree(this.c, p, '@gnxs') || undefined;
         }
         return undefined;
 
