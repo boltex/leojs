@@ -541,7 +541,8 @@ export class LeoApp {
         // this.prolog_string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
         this.prolog_prefix_string = "<?xml version=\"1.0\" encoding=";
         this.prolog_postfix_string = "?>";
-        this.prolog_namespace_string = 'xmlns:leo="http://edreamleo.org/namespaces/leo-python-editor/1.1"';
+        // this.prolog_namespace_string = 'xmlns:leo="http://edreamleo.org/namespaces/leo-python-editor/1.1"';
+        this.prolog_namespace_string = 'xmlns:leo="https://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1"';
     }
 
     //@+node:felix.20210103024632.19: *5* app.define_language_delims_dict
