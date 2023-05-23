@@ -1948,7 +1948,7 @@ export class AtFile {
                 g.es("not written:", g.shortFileName(fileName));
                 at.addToOrphanList(root);
             } else {
-                const contents = at.outputList.join();
+                const contents = at.outputList.join('');
                 await at.replaceFile(contents, at.encoding!, fileName, root);
             }
         } catch (exception) {

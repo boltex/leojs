@@ -657,7 +657,7 @@ export class RstCommands {
             return undefined;
         }
 
-        const join = g.finalize_join;
+        // const join = g.finalize_join; // leojs : use g.finalize_join directly!
         const openDirectory = this.c.frame.openDirectory;
         const overrides: { [key: string]: any } = { 'output_encoding': this.encoding };
         let ext2: string;
@@ -702,12 +702,12 @@ export class RstCommands {
         //
         // Make the stylesheet path relative to open directory.
         const rel_stylesheet_path = this.stylesheet_path || '';
-        const stylesheet_path = [openDirectory, rel_stylesheet_path].join();
+        const stylesheet_path = g.finalize_join(openDirectory, rel_stylesheet_path);
         console.assert(this.stylesheet_name);
-        const w_path = [this.stylesheet_path, this.stylesheet_name].join();
+        const w_path = g.finalize_join(this.stylesheet_path, this.stylesheet_name);
         if (!this.stylesheet_embed) {
 
-            let rel_path = [rel_stylesheet_path, this.stylesheet_name].join();
+            let rel_path = g.finalize_join(rel_stylesheet_path, this.stylesheet_name);
             rel_path = rel_path.replace(/\\/g, '/');
             overrides['stylesheet'] = rel_path;
             overrides['stylesheet_path'] = undefined;

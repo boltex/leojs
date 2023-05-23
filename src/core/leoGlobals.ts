@@ -396,7 +396,7 @@ export class FileLikeObject {
 
     //@+node:felix.20220213000459.5: *4* FileLikeObject.get & getvalue & read (coreGlobals.py)
     public get(): string {
-        return this._list.join();
+        return this._list.join('');
     }
 
     // Todo : maybe add names to prototype instead

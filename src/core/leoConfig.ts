@@ -364,7 +364,7 @@ export class ParserBaseClass {
                 aList.push(s.trimStart());
             }
         }
-        s = aList.join();
+        s = aList.join('');
         // Set the global config ivars.
         g.app.config.enabledPluginsString = s;
         g.app.config.enabledPluginsFileName = c ? c.shortFileName() : '<no settings file>';
