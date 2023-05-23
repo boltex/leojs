@@ -3919,7 +3919,7 @@ export function es_exception(p_error?: any, c?: Commands): string {
  */
 export function es_print(...args: any[]): void {
     pr(...args);
-    if (app && !unitTesting) {
+    if (app && app.gui && !unitTesting) {
         es(...args);
     }
 }

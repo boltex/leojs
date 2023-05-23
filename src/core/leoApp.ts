@@ -2357,6 +2357,9 @@ export class LoadManager {
      */
     public async load(fileName?: string): Promise<unknown> {
 
+        console.log('load fileName', fileName);
+
+
         const lm: LoadManager = this;
 
         const t1 = process.hrtime();
@@ -2563,7 +2566,7 @@ export class LoadManager {
     /**
      * Scan options, set directories and read settings.
      */
-    public async doPrePluginsInit(fileName?: string): Promise<unknown> {
+    public async doPrePluginsInit(fileName?: string): Promise<void> {
         const lm: LoadManager = this;
         await lm.computeStandardDirectories();
 
@@ -2575,32 +2578,28 @@ export class LoadManager {
         // const verbose:boolean = !script;
 
         // Init the app.
-        return lm.initApp().finally(() => {
-            // g.app.setGlobalDb()
+        await lm.initApp();
+        // g.app.setGlobalDb()
 
-            // lm.reportDirectories(verbose)
+        // lm.reportDirectories(verbose)
 
-            // Read settings *after* setting g.app.config and *before* opening plugins.
-            // This means if-gui has effect only in per-file settings.
-            lm.readGlobalSettingsFiles().then(() => {
-                // reads only standard settings files, using a null gui.
-                // uses lm.files[0] to compute the local directory
-                // that might contain myLeoSettings.leo.
-                // Read the recent files file.
-                const localConfigFile = (lm.files && lm.files.length) ? lm.files[0] : undefined;
+        // Read settings *after* setting g.app.config and *before* opening plugins.
+        // This means if-gui has effect only in per-file settings.
+        await lm.readGlobalSettingsFiles();
 
-                // TODO: ? recent-file management ?
-                // g.app.recentFilesManager.readRecentFiles(localConfigFile);
+        // reads only standard settings files, using a null gui.
+        // uses lm.files[0] to compute the local directory
+        // that might contain myLeoSettings.leo.
+        // Read the recent files file.
+        const localConfigFile = (lm.files && lm.files.length) ? lm.files[0] : undefined;
 
-                // Create the gui after reading options and settings.
-                lm.createGui();
-                // We can't print the signon until we know the gui.
-                g.app.computeSignon();  // Set app.signon/signon1 for commanders.
-            }, () => {
-                console.error('LEOJS: ERROR IN READING GLOBAL SETTING');
-            });
+        // TODO: ? recent-file management ?
+        // g.app.recentFilesManager.readRecentFiles(localConfigFile);
 
-        });
+        // Create the gui after reading options and settings.
+        lm.createGui();
+        // We can't print the signon until we know the gui.
+        return g.app.computeSignon();  // Set app.signon/signon1 for commanders.
 
     }
 

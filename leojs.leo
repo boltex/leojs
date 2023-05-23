@@ -3995,10 +3995,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "fd0e36b",
-  "gitBranch": "atFiles",
-  "gitDate": "2023-05-22 02:36:07 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -7776,9 +7773,9 @@ import * as g from './core/leoGlobals';
 }
 
 </t>
-<t tx="felix.20211010192923.11">public async writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): Promise&lt;void&gt; {
+<t tx="felix.20211010192923.11">public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
     if (!this.preventSaveToLeo) {
-        await this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
+        void this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
     } else {
         this.preventSaveToLeo = false;
     }

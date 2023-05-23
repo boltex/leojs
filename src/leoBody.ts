@@ -198,9 +198,9 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
         throw vscode.FileSystemError.NoPermissions();
     }
 
-    public async writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): Promise<void> {
+    public writeFile(p_uri: vscode.Uri, p_content: Uint8Array, p_options: { create: boolean, overwrite: boolean }): void {
         if (!this.preventSaveToLeo) {
-            await this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
+            void this._leoUi.triggerBodySave(true); // Might have been a vscode 'save' via the menu
         } else {
             this.preventSaveToLeo = false;
         }
