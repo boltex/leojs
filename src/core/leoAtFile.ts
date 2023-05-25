@@ -390,6 +390,7 @@ export class AtFile {
      * Read an @thin or @file tree.
      */
     public async read(root: Position, fromString?: string): Promise<boolean> {
+        console.log('read!----------------');
         const at = this;
         const c = this.c;
         let file_s;
@@ -464,7 +465,11 @@ export class AtFile {
         const t1 = process.hrtime();
         c.init_error_dialogs();
         const files = at.findFilesToRead(root, true);
+
         for (const p of files) {
+
+            console.log('readFileAtPosition: ', p.h);
+
             await at.readFileAtPosition(p);
         }
         for (const p of files) {
@@ -721,7 +726,7 @@ export class AtFile {
      * Update the @clean/@nosent node at root.
      */
     public async readOneAtCleanNode(root: Position): Promise<boolean> {
-
+        console.log('readOneAtCleanNode!----------------');
         const at = this;
         const c = this.c;
         const x = this.c.shadowController;
@@ -750,7 +755,8 @@ export class AtFile {
             root.b = new_public_lines.join('');
             return true;
         }
-        if (new_private_lines === old_private_lines) {
+        // if (new_private_lines === old_private_lines) {
+        if (new_private_lines.length === old_private_lines.length && new_private_lines.every((value, index) => value === old_private_lines[index])) {
             return true;
         }
         if (!g.unitTesting) {
@@ -878,6 +884,8 @@ export class AtFile {
         path: string,
         root: Position,
     ): boolean {
+        console.log('fast_read_into_root');
+
         return new FastAtRead(c, gnx2vnode).read_into_root(contents, path, root);
     }
     //@+node:felix.20230415162513.23: *4* at.Reading utils...
@@ -922,7 +930,7 @@ export class AtFile {
         let end = "";
         let isThin = false;
         // Example: \*@+leo-ver=5-thin-encoding=utf-8,.*/
-        const pattern = /(.+)@\+leo(-ver=([0123456789]+))?(-thin)?(-encoding=(.*)(\.))?(.*)'/;
+        const pattern = /(.+)@\+leo(-ver=([0123456789]+))?(-thin)?(-encoding=(.*)(\.))?(.*)/;
         // The old code weirdly allowed '.' in version numbers.
         // group 1: opening delim
         // group 2: -ver=
@@ -3974,24 +3982,42 @@ export class FastAtRead {
         // This must be a function, because of @comments & @delims.
         let [comment_delim_start, comment_delim_end] = comment_delims;
         comment_delim_end = comment_delim_end || '';
-        comment_delim_start.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const delim1 = comment_delim_start.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const delim2 = comment_delim_end.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        // const delim1 = comment_delim_start.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // const delim2 = comment_delim_end.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        const delim1 = comment_delim_start; // .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const delim2 = comment_delim_end; // .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
         const ref = g.angleBrackets('(.*)');
 
         // Equivalent of table loop assignments of original Leo.
-        this.after_pat = new RegExp(String.raw`^\s*${delim1}@afterref${delim2}$`); // @afterref
-        this.all_pat = new RegExp(String.raw`^(\s*)${delim1}@(\+|-)all\b(.*)${delim2}$`); // @all
-        this.code_pat = new RegExp(String.raw`^\s*${delim1}@@c(ode)?${delim2}$`); // @c and @code
-        this.comment_pat = new RegExp(String.raw`^\s*${delim1}@@comment(.*)${delim2}`); // @comment
-        this.delims_pat = new RegExp(String.raw`^\s*${delim1}@delims(.*)${delim2}`); // @delims
-        this.doc_pat = new RegExp(String.raw`^\s*${delim1}@\+(at|doc)?(\s.*?)?${delim2}\n`); // @doc or @
-        this.first_pat = new RegExp(String.raw`^\s*${delim1}@@first${delim2}$`); // @first
-        this.last_pat = new RegExp(String.raw`^\s*${delim1}@@last${delim2}$`); // @last
-        this.node_start_pat = new RegExp(String.raw`^(\s*)${delim1}@\+node:([^:]+): \*(\d+)?(\*?) (.*)${delim2}$`); // @node
-        this.others_pat = new RegExp(String.raw`^(\s*)${delim1}@(\+|-)others\b(.*)${delim2}$`, 'd'); // @others
-        this.ref_pat = new RegExp(String.raw`^(\s*)${delim1}@(\+|-)${ref}\s*${delim2}$`, 'd'); // section ref
-        this.section_delims_pat = new RegExp(String.raw`^\s*${delim1}@@section-delims[ \t]+([^ \w\n\t]+)[ \t]+([^ \w\n\t]+)[ \t]*${delim2}$`); // @section-delims
+
+        // this.after_pat = new RegExp(`^\s*${delim1}@afterref${delim2}$`); // @afterref
+        // this.all_pat = new RegExp(`^(\s*)${delim1}@(\+|-)all\b(.*)${delim2}$`); // @all
+        // this.code_pat = new RegExp(`^\s*${delim1}@@c(ode)?${delim2}$`); // @c and @code
+        // this.comment_pat = new RegExp(`^\s*${delim1}@@comment(.*)${delim2}`); // @comment
+        // this.delims_pat = new RegExp(`^\s*${delim1}@delims(.*)${delim2}`); // @delims
+        // this.doc_pat = new RegExp(`^\s*${delim1}@\+(at|doc)?(\s.*?)?${delim2}\n`); // @doc or @
+        // this.first_pat = new RegExp(`^\s*${delim1}@@first${delim2}$`); // @first
+        // this.last_pat = new RegExp(`^\s*${delim1}@@last${delim2}$`); // @last
+        // this.node_start_pat = new RegExp(`^(\s*)${delim1}@\+node:([^:]+): \*(\d+)?(\*?) (.*)${delim2}$`); // @node
+        // this.others_pat = new RegExp(`^(\s*)${delim1}@(\+|-)others\b(.*)${delim2}$`, 'd'); // @others
+        // this.ref_pat = new RegExp(`^(\s*)${delim1}@(\+|-)${ref}\s*${delim2}$`, 'd'); // section ref
+        // this.section_delims_pat = new RegExp(`^\s*${delim1}@@section-delims[ \t]+([^ \w\n\t]+)[ \t]+([^ \w\n\t]+)[ \t]*${delim2}$`); // @section-delims
+
+        this.after_pat = new RegExp(String.raw`^\s*${delim1}@afterref${delim2}$`, 'm'); // @afterref
+        this.all_pat = new RegExp(String.raw`^(\s*)${delim1}@(\+|-)all\b(.*)${delim2}$`, 'm'); // @all
+        this.code_pat = new RegExp(String.raw`^\s*${delim1}@@c(ode)?${delim2}$`, 'm'); // @c and @code
+        this.comment_pat = new RegExp(String.raw`^\s*${delim1}@@comment(.*)${delim2}`, 'm'); // @comment
+        this.delims_pat = new RegExp(String.raw`^\s*${delim1}@delims(.*)${delim2}`, 'm'); // @delims
+        this.doc_pat = new RegExp(String.raw`^\s*${delim1}@\+(at|doc)?(\s.*?)?${delim2}\n`, 'm'); // @doc or @
+        this.first_pat = new RegExp(String.raw`^\s*${delim1}@@first${delim2}$`, 'm'); // @first
+        this.last_pat = new RegExp(String.raw`^\s*${delim1}@@last${delim2}$`, 'm'); // @last
+        this.node_start_pat = new RegExp(String.raw`^(\s*)${delim1}@\+node:([^:]+): \*(\d+)?(\*?) (.*)${delim2}$`, 'm'); // @node
+        this.others_pat = new RegExp(String.raw`^(\s*)${delim1}@(\+|-)others\b(.*)${delim2}$`, 'md'); // @others
+        this.ref_pat = new RegExp(String.raw`^(\s*)${delim1}@(\+|-)${ref}\s*${delim2}$`, 'md'); // section ref
+        this.section_delims_pat = new RegExp(String.raw`^\s*${delim1}@@section-delims[ \t]+([^ \w\n\t]+)[ \t]+([^ \w\n\t]+)[ \t]*${delim2}$`, 'm'); // @section-delims
 
     }
     //@+node:felix.20230413222859.4: *3* fast_at.scan_header
@@ -4080,6 +4106,7 @@ export class FastAtRead {
         //@-<< init scan_lines >>
         let w_break = false;
         let i: number = 0; // To keep pylint happy.
+        console.log('lines', lines);
         for (let [w_i, line] of lines.slice(start).entries()) {
             i = w_i;
             // Strip the line only once.
@@ -4566,7 +4593,7 @@ export class FastAtRead {
      * anchored in root.v.
      */
     public read_into_root(contents: string, path: string, root: Position): boolean {
-
+        console.log('read_into_root');
         this.path = path;
         this.root = root;
         const sfn = g.shortFileName(path);

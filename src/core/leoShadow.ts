@@ -312,7 +312,7 @@ export class ShadowController {
         x.sentinels[0] = [];
         for (const [tag, ai, aj, bi, bj] of sm.getOpcodes()) {
             const f = x.dispatch_dict[tag] || x.op_bad;
-            f(tag, ai, aj, bi, bj);
+            f.bind(this)(tag, ai, aj, bi, bj);
         }
         // Put the trailing sentinels & check the result.
         x.results.push(...x.trailing_sentinels);
@@ -355,6 +355,9 @@ export class ShadowController {
 
         const x = this;
         const lines = x.old_sent_lines;
+
+        console.log('got in', lines);
+
         // The sentinels preceding each non-sentinel line,
         // not including @verbatim sentinels.
         let sentinels: string[] = [];
@@ -387,6 +390,9 @@ export class ShadowController {
             }
         }
         x.trailing_sentinels = sentinels;
+
+        console.log('got out', new_lines);
+
         return new_lines;
     }
     //@+node:felix.20230410203541.17: *5* x.init_ivars
@@ -432,7 +438,9 @@ export class ShadowController {
      */
     public op_equal(tag: string, ai: number, aj: number, bi: number, bj: number): void {
         const x = this;
-        console.assert(aj - ai === bj - bi && x.a.slice(ai, aj) === x.b.slice(bi, bj));
+        const w_a = x.a.slice(ai, aj);
+        const w_b = x.b.slice(bi, bj);
+        console.assert(aj - ai === bj - bi && w_a.length === w_b.length && w_a.every((value, index) => value === w_b[index]));
         for (let i = ai; i < aj; i++) {
             x.put_sentinels(i);
             // works because x.lines[ai:aj] == x.lines[bi:bj]
