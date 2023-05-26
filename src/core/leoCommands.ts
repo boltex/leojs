@@ -3977,6 +3977,75 @@ export class Commands {
         }
         return undodata;
     }
+    //@+node:felix.20230525222516.1: *4* c.find_b & find_h
+    //@+node:felix.20230525222516.2: *5* c.find_b
+    /**
+     * Return list of all Positions whose body matches the regex at least once.
+     */
+    public find_b(
+        regex: RegExp,
+        flags = 'ig',
+        it?: Generator<Position, any, unknown> | Position[]
+    ): Position[] {
+
+        const c = this;
+
+        if (!flags.includes('g')) {
+            flags = flags + 'g';
+        }
+
+        function* reFindIter(pattern: RegExp, text: string): IterableIterator<any> {
+            let match;
+            while ((match = pattern.exec(text)) !== null) {
+                yield match;
+            }
+        }
+
+        if (it == null) {
+            it = c.all_positions();
+        }
+        try {
+            const pattern = new RegExp(regex, flags);
+            return [...it].filter(p => [...reFindIter(pattern, p.b)].some((m: RegExpExecArray) => m)).map(p => p.copy());
+
+            // return [p.copy() for p in it if any(m for m in re.finditer(pattern, p.b))];            
+
+        } catch (exception) {
+            g.es_error('Exception in c.find_b');
+            g.es_exception(exception);
+            return [];
+        }
+    }
+    //@+node:felix.20230525222516.3: *5* c.find_h
+    /**
+     *  Return list of all Positions whose headline matches the regex.
+     */
+    public find_h(
+        regex: RegExp,
+        flags = 'i',
+        it?: Generator<Position, any, unknown> | Position[]
+    ): Position[] {
+
+        const c = this;
+
+
+        if (!flags.includes('g')) {
+            flags = flags + 'g';
+        }
+
+        if (it == null) {
+            it = c.all_positions();
+        }
+        try {
+            const pattern = new RegExp(regex, flags);
+            return [...it].filter(z => pattern.test(z.h)).map(z => z.copy());
+            // return [z.copy() for z in it if re.match(pattern, z.h)];
+        } catch (exception) {
+            g.es_error('Exception in c.find_h');
+            g.es_exception(exception);
+            return [];
+        }
+    }
     //@+node:felix.20220605203342.1: *3* c.Settings
     //@+node:felix.20220605203342.2: *4* c.registerReloadSettings
     public registerReloadSettings(obj: any): void {

@@ -3983,29 +3983,12 @@ export class FastAtRead {
         let [comment_delim_start, comment_delim_end] = comment_delims;
         comment_delim_end = comment_delim_end || '';
 
-        // const delim1 = comment_delim_start.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // const delim2 = comment_delim_end.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-        const delim1 = comment_delim_start; // .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const delim2 = comment_delim_end; // .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const delim1 = comment_delim_start;
+        const delim2 = comment_delim_end;
 
         const ref = g.angleBrackets('(.*)');
 
-        // Equivalent of table loop assignments of original Leo.
-
-        // this.after_pat = new RegExp(`^\s*${delim1}@afterref${delim2}$`); // @afterref
-        // this.all_pat = new RegExp(`^(\s*)${delim1}@(\+|-)all\b(.*)${delim2}$`); // @all
-        // this.code_pat = new RegExp(`^\s*${delim1}@@c(ode)?${delim2}$`); // @c and @code
-        // this.comment_pat = new RegExp(`^\s*${delim1}@@comment(.*)${delim2}`); // @comment
-        // this.delims_pat = new RegExp(`^\s*${delim1}@delims(.*)${delim2}`); // @delims
-        // this.doc_pat = new RegExp(`^\s*${delim1}@\+(at|doc)?(\s.*?)?${delim2}\n`); // @doc or @
-        // this.first_pat = new RegExp(`^\s*${delim1}@@first${delim2}$`); // @first
-        // this.last_pat = new RegExp(`^\s*${delim1}@@last${delim2}$`); // @last
-        // this.node_start_pat = new RegExp(`^(\s*)${delim1}@\+node:([^:]+): \*(\d+)?(\*?) (.*)${delim2}$`); // @node
-        // this.others_pat = new RegExp(`^(\s*)${delim1}@(\+|-)others\b(.*)${delim2}$`, 'd'); // @others
-        // this.ref_pat = new RegExp(`^(\s*)${delim1}@(\+|-)${ref}\s*${delim2}$`, 'd'); // section ref
-        // this.section_delims_pat = new RegExp(`^\s*${delim1}@@section-delims[ \t]+([^ \w\n\t]+)[ \t]+([^ \w\n\t]+)[ \t]*${delim2}$`); // @section-delims
-
+        // Equivalent of table loop assignments of original Leo. (Added 'm' flag for newlines at end of those lines)
         this.after_pat = new RegExp(String.raw`^\s*${delim1}@afterref${delim2}$`, 'm'); // @afterref
         this.all_pat = new RegExp(String.raw`^(\s*)${delim1}@(\+|-)all\b(.*)${delim2}$`, 'm'); // @all
         this.code_pat = new RegExp(String.raw`^\s*${delim1}@@c(ode)?${delim2}$`, 'm'); // @c and @code
@@ -4106,7 +4089,6 @@ export class FastAtRead {
         //@-<< init scan_lines >>
         let w_break = false;
         let i: number = 0; // To keep pylint happy.
-        console.log('lines', lines);
         for (let [w_i, line] of lines.slice(start).entries()) {
             i = w_i;
             // Strip the line only once.

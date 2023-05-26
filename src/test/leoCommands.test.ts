@@ -214,30 +214,44 @@ suite('Test cases for leoCommands.ts', () => {
         }
     });
     //@+node:felix.20230423155356.1: *3* TestCommands.test_find_b_h
-    // ! uncomment if c.find_b and c.find_h are implemented !
-    // test('test_find_b_h', () => {
-    //     const c = self.c;
-    //     const p = self.c.p;
+    test('test_find_b_h', () => {
+        const c = self.c;
+        const p = self.c.p;
 
-    //     // Create two children of c.p.
-    //     const child1 = p.insertAsLastChild()
-    //     child1.h = 'child1 headline'
-    //     child1.b = 'child1 line1\nchild2 line2\n'
-    //     const child2 = p.insertAsLastChild()
-    //     child2.h = 'child2 headline'
-    //     child2.b = 'child2 line1\nchild2 line2\n'
+        // Create two children of c.p.
+        const child1 = p.insertAsLastChild();
+        child1.h = 'child1 headline';
+        child1.b = 'child1 line1\nchild2 line2\n';
+        const child2 = p.insertAsLastChild();
+        child2.h = 'child2 headline';
+        child2.b = 'child2 line1\nchild2 line2\n';
 
-    //     // Tests.
-    //     const list1 = c.find_h(r'^child1')
-    //     assert.strictEqual( list1 == [child1], repr(list1));
-    //     const list2 = c.find_h(r'^child1', it=[child2])
-    //     assert.strictEqual( not list2, repr(list2));
-    //     const list3 = c.find_b(r'.*\bline2\n')
-    //     assert.strictEqual( list3 == [child1, child2], repr(list3));
-    //     const list4 = c.find_b(r'.*\bline2\n', it=[child1])
-    //     assert.strictEqual( list4 == [child1], repr(list3));
+        function compareArrays(arr1: Position[], arr2: Position[]) {
+            // Check if the arrays have the same length
+            if (arr1.length !== arr2.length) {
+                return false;
+            }
 
-    // });
+            for (let [index, elem] of arr1.entries()) {
+                if (!arr2[index].__eq__(elem)) {
+                    return false;
+                }
+            }
+            // all where equal positions
+            return true;
+        }
+
+        // Tests.
+        const list1 = c.find_h(/^child1/);
+        assert.ok(compareArrays(list1, [child1]), list1?.toString() || '');
+        const list2 = c.find_h(/^child1/, '', [child2]);
+        assert.ok(!list2 || !list2.length, list2?.toString() || '');
+        const list3 = c.find_b(/.*\bline2\n/);
+        assert.ok(compareArrays(list3, [child1, child2]), list3?.toString() || '');
+        const list4 = c.find_b(/.*\bline2\n/, '', [child1]);
+        assert.ok(compareArrays(list4, [child1]), list3?.toString() || '');
+
+    });
 
     //@+node:felix.20220129224954.14: *3* TestCommands.test_c_findMatchingBracket
     // ! uncomment if g.MatchBrackets is implemented !
