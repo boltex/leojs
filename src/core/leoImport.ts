@@ -126,7 +126,6 @@ export class FreeMindImporter {
 
         if (files && files.length) {
             let p;
-            // this.tab_width = c.getTabWidth(c.p); // ! NEEDED ? 
             for (const fileName of files) {
                 g.setGlobalOpenDir(fileName);
                 p = await this.create_outline(fileName);
@@ -170,107 +169,6 @@ export class FreeMindImporter {
     //@-others
 
 }
-//@+node:felix.20230519232325.1: ** class JSON_Import_Helper
-/**
- * A class that helps client scripts import .json files.
- *
- * Client scripts supply data describing how to create Leo outlines from
- * the .json data.
- */
-export class JSON_Import_Helper {
-
-    public c: Commands;
-    public vnodes_dict: { [key: string]: VNode };
-    public gnx_dict: { [key: string]: { [key: string]: string } } = {};
-
-    /**
-    * ctor for the JSON_Import_Helper class.
-    */
-    constructor(c: Commands) {
-
-        this.c = c;
-        this.vnodes_dict = {};  // Keys are gnxs.
-    }
-    //@+others
-    //@+node:felix.20230519232325.2: *3* json.create_nodes (generalize)
-    /**
-     * Create the tree of nodes rooted in parent.
-     */
-    public create_nodes(parent: Position, parent_d: { [key: string]: string }): void {
-
-        const d = this.gnx_dict;
-        for (const child_gnx of parent_d['children']) {
-            const d2 = d[child_gnx];
-            if (this.vnodes_dict[child_gnx]) {
-                // It's a clone.
-                const v = this.vnodes_dict[child_gnx];
-                const n = parent.numberOfChildren();
-                const child = new Position(v);
-                child._linkAsNthChild(parent, n);
-                // Don't create children again.
-            } else {
-                const child = parent.insertAsLastChild();
-                child.h = d2['h'] || '<**no h**>';
-                child.b = d2['b'] || '';
-                if (d2['gnx']) {
-                    const gnx = d2['gnx'];  // 2021/06/23: found by mypy.
-                    child.v.fileIndex = gnx;
-                    this.vnodes_dict[gnx] = child.v;
-                }
-                if (d2['ua']) {
-                    child.u = d2['ua'];
-                }
-                this.create_nodes(child, d2);
-            }
-
-        }
-    }
-    //@+node:felix.20230519232325.3: *3* json.create_outline (generalize)
-    public create_outline(p_path: string): Position {
-        const c = this.c;
-        let [junk, fileName] = g.os_path_split(p_path);
-        const undoData = c.undoer.beforeInsertNode(c.p);
-        // Create the top-level headline.
-        const p = c.lastTopLevel().insertAfter();
-        let fn = g.shortFileName(p_path).trim();
-        if (fn.endsWith('.json')) {
-            fn = fn.slice(0, -5);
-        }
-        p.h = fn;
-        this.scan(p_path, p);
-        c.undoer.afterInsertNode(p, 'Import', undoData);
-        return p;
-
-    }
-    //@+node:felix.20230519232325.4: *3* json.scan (generalize)
-    /**
-     * Create an outline from a .json file.
-     */
-    public scan(s: string, parent: Position): boolean {
-
-        const c = this.c;
-        const d = JSON.parse(s);
-        this.gnx_dict = {};
-        if (d['nodes']) {
-            for (const d2 of d['nodes']) {
-                const gnx = d2['gnx'];
-                this.gnx_dict[gnx] = d2;
-            }
-        }
-
-        const top_d = d['top'];
-        if (top_d) {
-            // Don't set parent.h or parent.gnx or parent.v.u.
-            parent.b = top_d['b'] || '';
-            this.create_nodes(parent, top_d);
-            c.redraw();
-        }
-        return !!top_d;
-
-    }
-    //@-others
-
-}
 //@+node:felix.20230511002352.1: ** class LeoImportCommands
 /**
  * A class implementing all of Leo's import/export code. This class
@@ -287,7 +185,6 @@ export class LeoImportCommands {
     public fileType: string | undefined;
     public methodName: string | undefined;
     public output_newline: string;
-    public tab_width: number | undefined;
     public treeType: string;
     public verbose: boolean;
     public webType: string;
@@ -307,7 +204,6 @@ export class LeoImportCommands {
         this.fileType = undefined;  // ".py", ".c", etc.
         this.methodName = undefined;  // x, as in < < x methods > > =
         this.output_newline = g.getOutputNewline(c);  // Value of @bool output_newline
-        this.tab_width = c.tab_width;
         this.treeType = "@file";  // None or "@file"
         this.verbose = true;  // Leo 6.6
         this.webType = "@noweb";  // "cweb" or "noweb"
@@ -1078,7 +974,6 @@ export class LeoImportCommands {
         const c = this.c;
         const u = this.c.undoer;
         const current = c.p && c.p.__bool__() ? c.p : c.rootPosition()!;
-        this.tab_width = c.getTabWidth(current);
 
         if (!paths || !paths.length) {
             return undefined;
@@ -1134,7 +1029,6 @@ export class LeoImportCommands {
         if (!c || !c.p || !c.p.__bool__() || !files || !files.length) {
             return;
         }
-        this.tab_width = c.getTabWidth(c.p);
         this.treeType = treeType || '@file';
         this.verbose = verbose;
         if (!parent || !parent.__bool__()) {
@@ -1195,7 +1089,6 @@ export class LeoImportCommands {
         if (!files || !files.length) {
             return;
         }
-        this.tab_width = c.getTabWidth(current);  // New in 4.3.
         this.webType = webType;
         for (const fileName of files) {
             g.setGlobalOpenDir(fileName);
@@ -1274,7 +1167,7 @@ export class LeoImportCommands {
                     i = g.skip_ws(s, i + 2);  // skip the @d or @f
                     if (i < s.length && g.is_c_id(s[i])) {
                         j = i;
-                        g.skip_c_id(s, i); // TODO : MAYBE FIX THIS LINE! ////////////////////////////////
+                        i = g.skip_c_id(s, i);
                         return s.substring(j, i);
                     }
                     return directive;
@@ -1282,7 +1175,7 @@ export class LeoImportCommands {
                 if (g.match(s, i, "@c") || g.match(s, i, "@p")) {
                     // Look for a function def.
                     name = this.findFunctionDef(s, i + 2);
-                    return name ? name : "outer function";
+                    return name || "outer function";
                 }
                 if (g.match(s, i, "@<")) {
                     // Look for a section def.
@@ -1844,7 +1737,6 @@ export class MindMapImporter {
     public async import_files(files: string[]): Promise<void> {
         const c: Commands = this.c;
         if (files && files.length) {
-            // this.tab_width = c.getTabWidth(c.p);  // ! NEEDED ? 
             let p: Position;
             for (const fileName of files) {
                 g.setGlobalOpenDir(fileName);
@@ -2020,7 +1912,6 @@ export class MORE_Importer {
         const c: Commands = this.c;
         if (files && files.length) {
             let changed = false;
-            // this.tab_width = c.getTabWidth(c.p);  // ! NEEDED ? 
             let p: Position | undefined;
 
             for (const fileName of files) {
@@ -3134,10 +3025,6 @@ export class ToDoTask {
             let m: RegExpExecArray | null;
             const pat_global = new RegExp(pat, 'g');
             while ((m = pat_global.exec(s)) !== null) {
-
-                // TODO : ? NEEDED ?
-                // pat_s = repr(pat).replace("re.compile('", "").replace("')", "")
-                // pat_s = pat_s.replace(r'\\', '\\')
 
                 // Check for false key:val match:
                 if (kind === 'key:val') {
