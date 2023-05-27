@@ -34,6 +34,7 @@ suite('Test cases for leoCommands.ts', () => {
 
     //@+others
     //@+node:felix.20220129224954.2: *3* TestCommands.test_add_comments_with_multiple_language_directives
+    // ! NO addComments IN LEOJS
     // ! uncomment when addComments, setSelectionRange and body pane are implemented !
     /* def test_add_comments_with_multiple_language_directives(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
@@ -60,6 +61,7 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(p.b, expected)
      */
     //@+node:felix.20220129224954.3: *3* TestCommands.test_add_html_comments
+    // ! NO addComments IN LEOJS
     // ! uncomment when addComments, setSelectionRange and body pane are implemented !
     /* def test_add_html_comments(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
@@ -81,6 +83,7 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(p.b, expected)
      */
     //@+node:felix.20220129224954.4: *3* TestCommands.test_add_python_comments
+    // ! NO addComments IN LEOJS
     // ! uncomment when addComments, setSelectionRange and body pane are implemented !
     /* def test_add_python_comments(self):
         c, p, w = self.c, self.c.p, self.c.frame.body.wrapper
@@ -102,7 +105,7 @@ suite('Test cases for leoCommands.ts', () => {
         self.assertEqual(p.b, expected)
      */
     //@+node:felix.20220129224954.5: *3* TestCommands.test_all_commands_have_an_event_arg
-    // ! No 'event' argument in commands of leojs (so far) !
+    // ! NO 'event' ARGUMENT IN COMMANDS OF LEOJS (so far) !
     /* def test_all_commands_have_an_event_arg(self):
         c = self.c
         d = c.commandsDict
@@ -145,23 +148,33 @@ suite('Test cases for leoCommands.ts', () => {
 
     //@+node:felix.20220129224954.8: *3* TestCommands.test_c_checkPythonCode
     // ! uncomment when checkPythonCode is implemented !
-    /* def test_c_checkPythonCode(self):
-        c = self.c
+    /* 
+    test('test_c_checkPythonCode', () => {
+
+     
+        const c = self.c;
+
         c.checkPythonCode(event=None, ignoreAtIgnore=False, checkOnSave=False)
-     */
+    });
+    */
     //@+node:felix.20220129224954.9: *3* TestCommands.test_c_checkPythonNode
     // ! uncomment when checkPythonCode is implemented !
-    /* def test_c_checkPythonNode(self):
-        c, p = self.c, self.c.p
-        p.b = textwrap.dedent("""\
+    /* 
+    test('test_c_checkPythonNode', () => {
+        const c = self.c;
+        const p =  self.c.p;
+        
+        p.b = g.dedent(`\
             @language python
 
             def abc:  # missing parens.
                 pass
-        """)
-        result = c.checkPythonCode(event=None, checkOnSave=False, ignoreAtIgnore=True)
+        `
+        )
+        const result = c.checkPythonCode(event=None, checkOnSave=False, ignoreAtIgnore=True)
         self.assertEqual(result, 'error')
-     */
+    });
+    */
     //@+node:felix.20220129224954.11: *3* TestCommands.test_c_contractAllHeadlines
     test('test_c_contractAllHeadlines', () => {
         const c = self.c;
@@ -338,8 +351,6 @@ suite('Test cases for leoCommands.ts', () => {
         c.dehoist();
     });
     //@+node:felix.20220129224954.19: *3* TestCommands.test_c_insertBodyTime
-    // TODO: uncomment if insertBodyTime is implemented
-    /*
     test('test_c_insertBodyTime', () => {
         const c = self.c;
         // p = c.p
@@ -348,16 +359,6 @@ suite('Test cases for leoCommands.ts', () => {
         // w.setInsertPoint(len(s))
         c.insertBodyTime();
     });
-    */
-
-    /* def test_c_insertBodyTime(self):
-        c = self.c
-        # p = c.p
-        # w = c.frame.body.wrapper
-        # s = w.getAllText()
-        # w.setInsertPoint(len(s))
-        c.insertBodyTime()
-     */
 
     //@+node:felix.20220129224954.20: *3* TestCommands.test_c_markAllAtFileNodesDirty
     test('test_c_markAllAtFileNodesDirty', () => {
@@ -415,25 +416,14 @@ suite('Test cases for leoCommands.ts', () => {
         assert.ok(!p2.isCloned());
     });
     //@+node:felix.20220129224954.23: *3* TestCommands.test_c_scanAllDirectives
-    // TODO: uncomment when atFile 'scanAllDirectives' is implemented
-    /* 
-        test('test_c_scanAllDirectives', () => {
-            const c = self.c;
-            const d = c.scanAllDirectives(c.p);
-            // These are the commander defaults, without any settings.
-            assert.strictEqual(d.get('language'), 'python');
-            assert.strictEqual(d.get('tabwidth'), -4);
-            assert.strictEqual(d.get('pagewidth'), 132);
-        });
-    */
-    /* def test_c_scanAllDirectives(self):
-        c = self.c
-        d = c.scanAllDirectives(c.p)
-        # These are the commander defaults, without any settings.
-        self.assertEqual(d.get('language'), 'python')
-        self.assertEqual(d.get('tabwidth'), -4)
-        self.assertEqual(d.get('pagewidth'), 132)
-     */
+    test('test_c_scanAllDirectives', () => {
+        const c = self.c;
+        const d = c.scanAllDirectives(c.p);
+        // These are the commander defaults, without any settings.
+        assert.strictEqual(d['language'], 'python');
+        assert.strictEqual(d['tabwidth'], -4);
+        assert.strictEqual(d['pagewidth'], 132);
+    });
     //@+node:felix.20220129224954.24: *3* TestCommands.test_c_scanAtPathDirectives
     test('test_c_scanAtPathDirectives', () => {
         const c = self.c;
@@ -524,16 +514,24 @@ suite('Test cases for leoCommands.ts', () => {
         }
     });
     //@+node:felix.20220129224954.28: *3* TestCommands.test_class_StubConfig
-    // TODO: uncomment if 'g.NullObject' is implemented
-    /* def test_class_StubConfig(self):
-        c = self.c
-        class StubConfig(g.NullObject):
-            pass
+    test('test_class_StubConfig', () => {
+        const c = self.c;
 
-        x = StubConfig()
-        assert not x.getBool(c, 'mySetting')
-        assert not x.enabledPluginsFileName
-     */
+        class StubConfig extends g.NullObject {
+            // pass
+        }
+        const x = new StubConfig();
+
+        // assert.ok( !x.getBool(c, 'mySetting'));
+        //@ts-expect-error Check if it's undefined
+        assert.ok(!x.getBool || !x.getBool(c, 'mySetting'));
+
+
+        // assert.ok( !x.enabledPluginsFileName);
+        //@ts-expect-error Check if it's undefined
+        assert.ok(!x.enabledPluginsFileName);
+    });
+
     //@+node:felix.20220129224954.29: *3* TestCommands.test_delete_comments_with_multiple_at_language_directives
     // ! uncomment when deleteComments, setSelectionRange and body pane are implemented !
     /* def test_delete_comments_with_multiple_at_language_directives(self):

@@ -106,29 +106,31 @@ suite('Test cases for leoApp.ts', () => {
     });
 
     //@+node:felix.20220129221913.5: *3* TestApp.test_lm_openAnyLeoFile
-    /*
-    def test_lm_openAnyLeoFile(self):
-        lm = g.app.loadManager
-        # Create a zip file for testing.
-        s = 'this is a test file'
-        testDir = g.os_path_join(g.app.loadDir, '..', 'test')
-        assert g.os_path_exists(testDir), testDir
-        path = g.finalize_join(testDir, 'testzip.zip')
-        if os.path.exists(path):
-            os.remove(path)
-        f = zipfile.ZipFile(path, 'x')
-        assert f, path
-        try:
-            f.writestr('leo-zip-file', s)
-            f.close()
-            # Open the file, and get the contents.
-            f = lm.openAnyLeoFile(path)
-            s2 = f.read()
-            f.close()
-        finally:
-            os.remove(path)
-        self.assertEqual(s, s2)
-    */
+    /**
+     * ! deprecated Now using async vscode.workspace.fs functions
+     */
+    // def test_lm_openAnyLeoFile(self):
+    //     lm = g.app.loadManager
+    //     # Create a zip file for testing.
+    //     s = 'this is a test file'
+    //     testDir = g.os_path_join(g.app.loadDir, '..', 'test')
+    //     assert g.os_path_exists(testDir), testDir
+    //     path = g.finalize_join(testDir, 'testzip.zip')
+    //     if os.path.exists(path):
+    //         os.remove(path)
+    //     f = zipfile.ZipFile(path, 'x')
+    //     assert f, path
+    //     try:
+    //         f.writestr('leo-zip-file', s)
+    //         f.close()
+    //         # Open the file, and get the contents.
+    //         f = lm.openAnyLeoFile(path)
+    //         s2 = f.read()
+    //         f.close()
+    //     finally:
+    //         os.remove(path)
+    //     self.assertEqual(s, s2)
+
 
     //@+node:felix.20220129221913.6: *3* TestApp.test_rfm_writeRecentFilesFileHelper
     /*

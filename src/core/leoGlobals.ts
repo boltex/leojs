@@ -4210,8 +4210,8 @@ export function finalize(p_path: string): string {
     }
 
     if (process && process.env) {
-        //p_path = os.path.expandvars(p_path)
-        p_path = p_path.replace(/\${(\w+)}/g, (match, varName) => {
+        // Equivalent to python's p_path = os.path.expandvars(p_path)
+        p_path = p_path.replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, (match, varName) => {
             return process.env[varName] || '';
         });
     }
