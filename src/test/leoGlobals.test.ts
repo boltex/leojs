@@ -285,62 +285,79 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
 
     //@+node:felix.20230423154806.1: *3* TestGlobals.test_g_finalize_join
-    // def test_g_finalize_join(self):
+    test('test_g_finalize_join', () => {
 
-    //     # This is also a strong test of g.finalize.
-    //     import os
-    //     c = self.c
-    //     normslashes = g.os_path_normslashes
+        // This is also a strong test of g.finalize.
 
-    //     # Setup environment.
-    //     expected_leo_base = 'C:/leo_base' if g.isWindows else '/leo_base'
-    //     c.mFileName = "/leo_base/test.leo"
+        // import os
+        const c = self.c;
 
-    //     # Note: These directories do *not* have to exist.
-    //     os.environ = {
-    //         'HOME': '/home',  # Linux.
-    //         'USERPROFILE': normslashes(r'c:/Whatever'),  # Windows.
-    //         'LEO_BASE': expected_leo_base,
-    //     }
+        const normslashes = g.os_path_normslashes;
 
-    //     curdir = normslashes(os.getcwd())
-    //     home = normslashes(os.path.expanduser('~'))
-    //     assert home in (os.environ['HOME'], os.environ['USERPROFILE']), repr(home)
+        // Setup environment.
+        const expected_leo_base = g.isWindows ? 'C:/leo_base' : '/leo_base';
+        c.mFileName = "/leo_base/test.leo";
 
-    //     seps = ('\\', '/') if g.isWindows else ('/',)
-    //     for sep in seps:
-    //         table = (
-    //             # The most basic test. The *only* reasonable base is os.getcwd().
-    //             (('basic.py',),                     f"{curdir}/basic.py"),
-    //             # One element in *args...
-    //             ((f"~{sep}a.py",),                  f"{home}/a.py"),
-    //             ((f"~{sep}x{sep}..{sep}b.py",),     f"{home}/b.py"),
-    //             ((f"$LEO_BASE{sep}c.py",),          f"{expected_leo_base}/c.py"),
-    //             # Two elements in *args...
-    //             (('~', 'w.py'),                     f"{home}/w.py"),
-    //             (('$LEO_BASE', 'x.py'),             f"{expected_leo_base}/x.py"),
-    //             # Strange cases...
-    //             (('~', '~', 's1.py'),               f"{home}/s1.py"),
-    //             ((f"~{sep}b", '~', 's2.py'),        f"{home}/s2.py"),
-    //             (('~', f"~{sep}b", 's3.py'),        f"{home}/b/s3.py"),
-    //             (('$LEO_BASE', '~', 's4.py'),       f"{home}/s4.py"),
-    //             (('~', '$LEO_BASE', 's5.py'),       f"{expected_leo_base}/s5.py"),
-    //             # More strange cases.
-    //             (('~', 'xxx.py', '~', 's6.py'),     f"{home}/s6.py"),
-    //             (('yyy', '~'),                      f"{home}"),
-    //             (('zzz', '$LEO_BASE',),             f"{expected_leo_base}"),
-    //             (('${LEO_BASE}b',),                 f"{expected_leo_base}b"),
+        // Note: These directories do *not* have to exist.
+        // os.environ = {
+        //     'HOME': '/home',  // Linux.
+        //     'USERPROFILE': normslashes(r'c:/Whatever'),  // Windows.
+        //     'LEO_BASE': expected_leo_base,
+        // }
+        // SETTING FAKE ENV VARS
+        process.env.HOME = '/home';  // Linux
+        process.env.USERPROFILE = normslashes('c:/Whatever');  // Windows
+        process.env.LEO_BASE = expected_leo_base;  // Set the value based on your requirement
 
-    //             # This goes beyond the limits of what Windows can do.
-    //             # (('a${LEO_BASE}b',),                f"a{expected_leo_base}b"),            
-    //         )
-    //         for args, expected in table:
-    //             got = g.finalize_join(*args)
-    //             # Weird: the case is wrong whatever the case of expected_leo_base!
-    //             if g.isWindows:
-    //                 expected = expected.replace('C:', 'c:')
-    //                 got = got.replace('C:', 'c:')
-    //             self.assertEqual(expected, got)
+        // curdir = normslashes(os.getcwd())
+        const curdir = normslashes(process.cwd());
+
+        // home = normslashes(os.path.expanduser('~'))
+        const home = normslashes(os.homedir());
+
+        // assert.ok([os_environ['HOME'], os_environ['USERPROFILE']].includes(home), home.toString());
+        assert.ok([process.env.HOME, process.env.USERPROFILE].includes(home), home.toString());
+        const seps = g.isWindows ? ['\\', '/'] : ['/'];
+        for (const sep of seps) {
+            const table: [string[], string][] = [
+                // The most basic test. The *only* reasonable base is os.getcwd().
+                [['basic.py'], `${curdir}/basic.py`],
+                // One element in *args...
+                [[`~${sep}a.py`,], `${home}/a.py`],
+                [[`~${sep}x${sep}..${sep}b.py`], `${home}/b.py`],
+                [[`$LEO_BASE${sep}c.py`], `${expected_leo_base}/c.py`],
+                // Two elements in *args...
+                [['~', 'w.py'], `${home}/w.py`],
+                [['$LEO_BASE', 'x.py'], `${expected_leo_base}/x.py`],
+                // Strange cases...
+                [['~', '~', 's1.py'], `${home}/s1.py`],
+                [[`~${sep}b`, '~', 's2.py'], `${home}/s2.py`],
+                [['~', `~${sep}b`, 's3.py'], `${home}/b/s3.py`],
+                [['$LEO_BASE', '~', 's4.py'], `${home}/s4.py`],
+                [['~', '$LEO_BASE', 's5.py'], `${expected_leo_base}/s5.py`],
+                // More strange cases.
+                [['~', 'xxx.py', '~', 's6.py'], `${home}/s6.py`],
+                [['yyy', '~'], `${home}`],
+                [['zzz', '$LEO_BASE'], `${expected_leo_base}`],
+                [['${LEO_BASE}b'], `${expected_leo_base}b`],
+
+                // This goes beyond the limits of what Windows can do.
+                // (('a${LEO_BASE}b',),                f"a{expected_leo_base}b"),            
+            ];
+
+            for (let [args, expected] of table) {
+
+                let got = g.finalize_join(...args);
+                // Weird: the case is wrong whatever the case of expected_leo_base!
+                if (g.isWindows) {
+                    expected = expected.replace(/C:/g, 'c:');
+                    got = got.replace(/C:/g, 'c:');
+                }
+                assert.strictEqual(expected, got);
+
+            }
+        }
+    });
     //@+node:felix.20220129223719.11: *3* TestGlobals.test_g_find_word
     test('test_g_find_word', () => {
         const table: [string, string, number, number][] = [

@@ -4204,17 +4204,11 @@ export function finalize(p_path: string): string {
     if (!p_path) {
         return '';
     }
-    if (os.homedir()) {
-        p_path = p_path.replace(/^~([\\/])/, `${os.homedir()}$1`);
-        // p_path = os.path.expanduser(p_path)
-    }
+    // p_path = os.path.expanduser(p_path)
+    p_path = os_path_expanduser(p_path);
 
-    if (process && process.env) {
-        // Equivalent to python's p_path = os.path.expandvars(p_path)
-        p_path = p_path.replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, (match, varName) => {
-            return process.env[varName] || '';
-        });
-    }
+    // Equivalent to python's p_path = os.path.expandvars(p_path)
+    p_path = os_path_expandvars(p_path);
 
     // Convert to an absolute path, similar to os.path.normpath(os.getcwd(), path)
     // p_path = os.path.abspath(p_path)
@@ -4229,38 +4223,8 @@ export function finalize(p_path: string): string {
 
 }
 
-// TODO : ? Needed ?    
-// os_path_finalize = finalize  # Compatibility.
-//@+node:felix.20211227182611.8: *3* g.os_path_finalize
-/**
- * DEPRECATED os_path_finalize = finalize  # Compatibility.
- */
-export function os_path_finalize(p_path: string): string {
-    return finalize(p_path);
-    // if (p_path.includes('\x00')) {
-    //     trace('NULL in', p_path.toString(), callers());
-    //     p_path = p_path.split('\x00').join(''); // Fix Python 3 bug on Windows 10.
-    // }
+export const os_path_finalize = finalize;  // Compatibility.
 
-    // // p_path = path.expanduser(p_path);  // #1383.
-    // if (p_path[0] === '~') {
-    //     p_path = path.join(os.homedir(), p_path.slice(1));
-    // }
-
-    // // p_path = path.resolve(p_path); // ! Adds /home/<user> to path !
-    // // console.log('middle', p_path);
-
-    // p_path = path.normalize(p_path);
-
-    // // path.normpath does the *reverse* of what we want.
-
-    // if (isWindows) {
-    //     p_path = p_path.split('\\').join('/');
-    // }
-
-    // // calling os.path.realpath here would cause problems in some situations.
-    // return p_path;
-}
 //@+node:felix.20230422214428.1: *3* g.finalize_join
 /**
  * Join and finalize. Do not call os.path.realpath.
@@ -4279,7 +4243,6 @@ export function finalize_join(...args: string[]): string {
     // // Expand everything before joining.
     // uargs2 = [os.path.expandvars(os.path.expanduser(z)) for z in uargs]
 
-
     if (!args || !args.length) {
         return '';
     }
@@ -4287,33 +4250,88 @@ export function finalize_join(...args: string[]): string {
     const uargs: string[] = [];
     for (let z of args) {
         if (z) {
-
-            if (os.homedir()) {
-                z = z.replace(/^~([\\/])/, `${os.homedir()}$1`);
-                // p_path = os.path.expanduser(p_path)
-            }
-
-            if (process && process.env) {
-                //p_path = os.path.expandvars(p_path)
-                z = z.replace(/\${(\w+)}/g, (match, varName) => {
-                    return process.env[varName] || '';
-                });
-            }
-
+            z = os_path_expanduser(z);
+            z = os_path_expandvars(z);
             uargs.push(z);
         }
     }
-    // uargs = [z for z in args if z]
 
     if (!uargs.length) {
         return '';
     }
 
-    let w_path = path.join(...uargs);
     // Join the paths.
+    let w_path = path.join(...uargs);
     // let w_path = os.path.join(*uargs2)
 
-    // Convert to an abosolute path, similar to os.path.normpath(os.getcwd(), path)
+    // Check to collapse all beginning home dirs duplicata
+    if (os.homedir) {
+
+        const homeDir = os.homedir();
+        const cleanSlashes = (p_path: string): string => {
+            p_path = p_path.replace(/\/\//g, "/");
+            if (isWindows) {
+                p_path = p_path.replace(/\\\\/g, "\\");
+            }
+            return p_path;
+        };
+
+        // replace /home/home/s1.py with /home/s1.py
+        let doubleHome = homeDir + homeDir;
+        while (w_path.startsWith(doubleHome)) {
+            w_path = w_path.replace(doubleHome, homeDir);
+            w_path = cleanSlashes(w_path);
+        }
+
+        // replace /home/b/home/s2.py with /home/s2.py
+        let testRegex = new RegExp(`^${homeDir}/[^<>:"\/\\|?*]+${homeDir}/`);
+        while (testRegex.test(w_path)) {
+            w_path = w_path.replace(testRegex, `${homeDir}/`);
+            w_path = cleanSlashes(w_path);
+        }
+
+        // replace /b/home/s4.py with /home/s4.py
+        testRegex = new RegExp(`^/[^<>:"\/\\|?*]+${homeDir}/`);
+        while (testRegex.test(w_path)) {
+            w_path = w_path.replace(testRegex, `${homeDir}/`);
+            w_path = cleanSlashes(w_path);
+        }
+        // replace yyy/home with /home
+        testRegex = new RegExp(`^[^<>:"\/\\|?*]+${homeDir}`);
+        while (testRegex.test(w_path)) {
+            w_path = w_path.replace(testRegex, `${homeDir}`);
+            w_path = cleanSlashes(w_path);
+        }
+
+        // replace /home/leo_base/s5.py with /leo_base/s5.py
+        if (process && process.env && process.env.LEO_BASE) {
+            testRegex = new RegExp(`^${homeDir}${process.env.LEO_BASE}`);
+            while (testRegex.test(w_path)) {
+                w_path = w_path.replace(testRegex, `${process.env.LEO_BASE}`);
+                w_path = cleanSlashes(w_path);
+            }
+
+            // replace zzz/leo_base with /leo_base
+            testRegex = new RegExp(`^[^<>:"\/\\|?*]+${process.env.LEO_BASE}`);
+            while (testRegex.test(w_path)) {
+                w_path = w_path.replace(testRegex, `${process.env.LEO_BASE}`);
+                w_path = cleanSlashes(w_path);
+            }
+
+        }
+
+
+        // replace /b/home/s4.py with /home/s4.py
+        testRegex = new RegExp(`^/[^<>:"\/\\|?*]+${homeDir}/`);
+        while (testRegex.test(w_path)) {
+            w_path = w_path.replace(testRegex, `${homeDir}/`);
+            w_path = cleanSlashes(w_path);
+        }
+
+
+    }
+
+    // Convert to an absolute path, similar to os.path.normpath(os.getcwd(), path)
     //w_path = os.path.abspath(w_path)
     //w_path = os.path.normpath(w_path)
     w_path = path.resolve(w_path);
@@ -4321,24 +4339,11 @@ export function finalize_join(...args: string[]): string {
 
     // Convert backslashes to forward slashes, regradless of platform.
     w_path = os_path_normslashes(w_path);
+
     return w_path;
 }
-// TODO : ? Needed ?
-// os_path_finalize_join = finalize_join  # Compatibility.
-//@+node:felix.20211227182611.9: *3* g.os_path_finalize_join
-/**
- * DEPRECATED
- * os_path_finalize_join = finalize_join  # Compatibility.
- */
-export function os_path_finalize_join(c: Commands | undefined, ...args: any[]): string {
 
-    return finalize_join(...args);
-
-    // let w_path: string = os_path_join(c, ...args);
-
-    // w_path = os_path_finalize(w_path);
-    // return w_path;
-}
+export const os_path_finalize_join = finalize_join;  // Compatibility.
 //@+node:felix.20211227182611.2: *3* g.glob_glob
 // def glob_glob(pattern):
 //     """Return the regularized glob.glob(pattern)"""
@@ -4431,7 +4436,20 @@ export async function os_path_exists(p_path?: string): Promise<boolean | vscode.
  */
 export function os_path_expanduser(p_path: string): string {
 
-    return finalize(p_path);
+    p_path = p_path.trim();
+    if (!p_path) {
+        return '';
+    }
+    if (os.homedir()) {
+        const homeDir = os.homedir();
+        if (p_path === '~') {
+            return homeDir;
+        } else if (p_path.startsWith('~/')) {
+            p_path = p_path.replace('~', homeDir);
+        }
+        p_path = p_path.replace('//', '/');
+    }
+    return p_path;
 
     // DEPRECATED
 
@@ -4451,6 +4469,29 @@ export function os_path_expanduser(p_path: string): string {
     //     result = result.split('\\').join('/');
     // }
     // return result;
+}
+//@+node:felix.20230527201323.1: *3* g.os_path_expandvars
+export function os_path_expandvars(p_path: string): string {
+    if (!p_path) {
+        return '';
+    }
+
+    if (process && process.env) {
+        // Equivalent to python's p_path = os.path.expandvars(p_path)
+        // which replaces both $MY_VAR and ${MY_VAR} forms.
+
+        p_path = p_path.replace(/\${([A-Za-z_][A-Za-z0-9_]*)}/g, (match, varName) => {
+            return process.env[varName] || '';
+        });
+
+        p_path = p_path.replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, (match, varName) => {
+            return process.env[varName] || '';
+        });
+
+
+    }
+    return p_path;
+
 }
 //@+node:felix.20211227182611.10: *3* g.os_path_getmtime
 /**
