@@ -5,7 +5,7 @@
  */
 import * as assert from 'assert';
 import { afterEach, before, beforeEach } from 'mocha';
-import * as os from "os";
+import * as os from 'os';
 
 import * as g from '../core/leoGlobals';
 import { LeoUnitTest } from './leoTest2';
@@ -230,7 +230,6 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
     //@+node:felix.20230423154801.1: *3* TestGlobals.test_g_finalize
     test('test_g_finalize', () => {
-
         // This is also a strong test of g.finalize.
 
         // import os
@@ -240,7 +239,7 @@ suite('Tests for leo.core.leoGlobals', () => {
 
         // Setup environment.
         const expected_leo_base = g.isWindows ? 'C:/leo_base' : '/leo_base';
-        c.mFileName = "/leo_base/test.leo";
+        c.mFileName = '/leo_base/test.leo';
 
         // Note: These directories do *not* have to exist.
         // os.environ = {
@@ -249,9 +248,9 @@ suite('Tests for leo.core.leoGlobals', () => {
         //     'LEO_BASE': expected_leo_base,
         // }
         // SETTING FAKE ENV VARS
-        process.env.HOME = '/home';  // Linux
-        process.env.USERPROFILE = normslashes('c:/Whatever');  // Windows
-        process.env.LEO_BASE = expected_leo_base;  // Set the value based on your requirement
+        process.env.HOME = '/home'; // Linux
+        process.env.USERPROFILE = normslashes('c:/Whatever'); // Windows
+        process.env.LEO_BASE = expected_leo_base; // Set the value based on your requirement
 
         // curdir = normslashes(os.getcwd())
         const curdir = normslashes(process.cwd());
@@ -260,10 +259,13 @@ suite('Tests for leo.core.leoGlobals', () => {
         const home = normslashes(os.homedir());
 
         console.log('TESTING: home is now', home);
-        console.log('process.env', process.env.toString());
+        console.log('process.env', JSON.stringify(process.env));
 
         // assert.ok([os_environ['HOME'], os_environ['USERPROFILE']].includes(home), home.toString());
-        assert.ok([process.env.HOME, process.env.USERPROFILE].includes(home), home.toString());
+        assert.ok(
+            [process.env.HOME, process.env.USERPROFILE].includes(home),
+            home.toString()
+        );
 
         const seps = g.isWindows ? ['\\', '/'] : ['/'];
         for (const sep of seps) {
@@ -284,12 +286,10 @@ suite('Tests for leo.core.leoGlobals', () => {
                 assert.strictEqual(expected, got);
             }
         }
-
     });
 
     //@+node:felix.20230423154806.1: *3* TestGlobals.test_g_finalize_join
     test('test_g_finalize_join', () => {
-
         // This is also a strong test of g.finalize.
 
         // import os
@@ -299,7 +299,7 @@ suite('Tests for leo.core.leoGlobals', () => {
 
         // Setup environment.
         const expected_leo_base = g.isWindows ? 'C:/leo_base' : '/leo_base';
-        c.mFileName = "/leo_base/test.leo";
+        c.mFileName = '/leo_base/test.leo';
 
         // Note: These directories do *not* have to exist.
         // os.environ = {
@@ -308,9 +308,9 @@ suite('Tests for leo.core.leoGlobals', () => {
         //     'LEO_BASE': expected_leo_base,
         // }
         // SETTING FAKE ENV VARS
-        process.env.HOME = '/home';  // Linux
-        process.env.USERPROFILE = normslashes('c:/Whatever');  // Windows
-        process.env.LEO_BASE = expected_leo_base;  // Set the value based on your requirement
+        process.env.HOME = '/home'; // Linux
+        process.env.USERPROFILE = normslashes('c:/Whatever'); // Windows
+        process.env.LEO_BASE = expected_leo_base; // Set the value based on your requirement
 
         // curdir = normslashes(os.getcwd())
         const curdir = normslashes(process.cwd());
@@ -319,7 +319,10 @@ suite('Tests for leo.core.leoGlobals', () => {
         const home = normslashes(os.homedir());
 
         // assert.ok([os_environ['HOME'], os_environ['USERPROFILE']].includes(home), home.toString());
-        assert.ok([process.env.HOME, process.env.USERPROFILE].includes(home), home.toString());
+        assert.ok(
+            [process.env.HOME, process.env.USERPROFILE].includes(home),
+            home.toString()
+        );
 
         const seps = g.isWindows ? ['\\', '/'] : ['/'];
         for (const sep of seps) {
@@ -327,7 +330,7 @@ suite('Tests for leo.core.leoGlobals', () => {
                 // The most basic test. The *only* reasonable base is os.getcwd().
                 [['basic.py'], `${curdir}/basic.py`],
                 // One element in *args...
-                [[`~${sep}a.py`,], `${home}/a.py`],
+                [[`~${sep}a.py`], `${home}/a.py`],
                 [[`~${sep}x${sep}..${sep}b.py`], `${home}/b.py`],
                 [[`$LEO_BASE${sep}c.py`], `${expected_leo_base}/c.py`],
                 // Two elements in *args...
@@ -346,11 +349,10 @@ suite('Tests for leo.core.leoGlobals', () => {
                 [['${LEO_BASE}b'], `${expected_leo_base}b`],
 
                 // This goes beyond the limits of what Windows can do.
-                // (('a${LEO_BASE}b',),                f"a{expected_leo_base}b"),            
+                // (('a${LEO_BASE}b',),                f"a{expected_leo_base}b"),
             ];
 
             for (let [args, expected] of table) {
-
                 let got = g.finalize_join(...args);
                 // Weird: the case is wrong whatever the case of expected_leo_base!
                 if (g.isWindows) {
@@ -358,7 +360,6 @@ suite('Tests for leo.core.leoGlobals', () => {
                     got = got.replace(/C:/g, 'c:');
                 }
                 assert.strictEqual(expected, got);
-
             }
         }
     });
@@ -989,13 +990,13 @@ suite('Tests for leo.core.leoGlobals', () => {
                     j,
                     result,
                     'i ' +
-                    i.toString() +
-                    ' s ' +
-                    s +
-                    ' got ' +
-                    j.toString() +
-                    ' expected ' +
-                    result.toString()
+                        i.toString() +
+                        ' s ' +
+                        s +
+                        ' got ' +
+                        j.toString() +
+                        ' expected ' +
+                        result.toString()
                 );
             });
         });
