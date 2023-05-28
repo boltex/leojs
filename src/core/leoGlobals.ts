@@ -4440,7 +4440,7 @@ export function os_path_expanduser(p_path: string): string {
     if (!p_path) {
         return '';
     }
-    if (os.homedir()) {
+    if (os && os.homedir && os.homedir()) {
         const homeDir = os.homedir();
         if (p_path === '~') {
             return homeDir;

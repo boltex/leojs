@@ -259,6 +259,9 @@ suite('Tests for leo.core.leoGlobals', () => {
         // home = normslashes(os.path.expanduser('~'))
         const home = normslashes(os.homedir());
 
+        console.log('TESTING: home is now', home);
+        console.log('process.env', process.env.toString());
+
         // assert.ok([os_environ['HOME'], os_environ['USERPROFILE']].includes(home), home.toString());
         assert.ok([process.env.HOME, process.env.USERPROFILE].includes(home), home.toString());
 
@@ -317,6 +320,7 @@ suite('Tests for leo.core.leoGlobals', () => {
 
         // assert.ok([os_environ['HOME'], os_environ['USERPROFILE']].includes(home), home.toString());
         assert.ok([process.env.HOME, process.env.USERPROFILE].includes(home), home.toString());
+
         const seps = g.isWindows ? ['\\', '/'] : ['/'];
         for (const sep of seps) {
             const table: [string[], string][] = [
