@@ -2236,7 +2236,7 @@ export async function write_file_if_changed(fn: string, s: string, encoding: Buf
  */
 export function makeVscodeUri(p_fn: string): vscode.Uri {
 
-    if (isBrowser || app.vscodeUriScheme !== 'file') {
+    if (isBrowser || (app.vscodeUriScheme && app.vscodeUriScheme !== 'file')) {
         const newUri = app.vscodeWorkspaceUri!.with({ path: p_fn });
         return newUri;
 
@@ -4267,8 +4267,8 @@ export function finalize_join(...args: string[]): string {
     // Check to collapse all beginning home dirs duplicata
     if (os.homedir) {
 
-        const homeDir =  path.join(os.homedir());
-        const escHomeDir =   homeDir.replace(/\\/g, "\\\\");
+        const homeDir = path.join(os.homedir());
+        const escHomeDir = homeDir.replace(/\\/g, "\\\\");
         const cleanSlashes = (p_path: string): string => {
             p_path = p_path.replace(/\/\//g, "/");
             if (isWindows) {
@@ -4290,7 +4290,7 @@ export function finalize_join(...args: string[]): string {
             w_path = w_path.replace(testRegex, `${homeDir}/`);
             w_path = cleanSlashes(w_path);
         }
-        if(isWindows){
+        if (isWindows) {
             let testRegex = new RegExp(`^${escHomeDir}\\\\[^<>:"\/\\|?*]+${escHomeDir}\\\\`);
             while (testRegex.test(w_path)) {
                 w_path = w_path.replace(testRegex, `${homeDir}\\`);
@@ -4304,7 +4304,7 @@ export function finalize_join(...args: string[]): string {
             w_path = w_path.replace(testRegex, `${homeDir}/`);
             w_path = cleanSlashes(w_path);
         }
-        if(isWindows){
+        if (isWindows) {
             // grab C:\leo_base\c:\Whatever\s4.py replace with c:\Whatever\s4.py
             testRegex = new RegExp(`^[^<>"\/|?*]+${escHomeDir}\\\\`);
             while (testRegex.test(w_path)) {
@@ -4324,10 +4324,8 @@ export function finalize_join(...args: string[]): string {
         if (process && process.env && process.env.LEO_BASE) {
             const escLeoBase = path.join(process.env.LEO_BASE).replace(/\\/g, "\\\\");
             const escHomeLeoBase = path.join(homeDir, process.env.LEO_BASE).replace(/\\/g, "\\\\");
-            // * WORKED IN LINUX
-            // testRegex = new RegExp(`^${escHomeDir}${escLeoBase}`);
+
             testRegex = new RegExp(`^${escHomeLeoBase}`);
-            
             while (testRegex.test(w_path)) {
                 w_path = w_path.replace(testRegex, `${escLeoBase}`);
                 w_path = cleanSlashes(w_path);
@@ -4348,7 +4346,7 @@ export function finalize_join(...args: string[]): string {
             w_path = w_path.replace(testRegex, `${escHomeDir}/`);
             w_path = cleanSlashes(w_path);
         }
-        if(isWindows){
+        if (isWindows) {
             testRegex = new RegExp(`^\\\\[^<>:"\/\\|?*]+${escHomeDir}\\\\`);
             while (testRegex.test(w_path)) {
                 w_path = w_path.replace(testRegex, `${escHomeDir}\\`);
@@ -4474,7 +4472,7 @@ export function os_path_expanduser(p_path: string): string {
         } else if (p_path.startsWith('~/')) {
             p_path = p_path.replace('~', homeDir);
         }
-        if(isWindows){
+        if (isWindows) {
             if (p_path.startsWith('~\\')) {
                 p_path = p_path.replace('~', homeDir);
             }

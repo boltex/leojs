@@ -6,6 +6,7 @@
 import * as assert from 'assert';
 import { afterEach, before, beforeEach } from 'mocha';
 import * as os from 'os';
+import * as fs from 'fs/promises';
 
 import * as g from '../core/leoGlobals';
 import { LeoUnitTest } from './leoTest2';
@@ -257,9 +258,6 @@ suite('Tests for leo.core.leoGlobals', () => {
 
         // home = normslashes(os.path.expanduser('~'))
         const home = normslashes(os.homedir());
-
-        console.log('TESTING: home is now', home);
-        console.log('process.env', JSON.stringify(process.env));
 
         // assert.ok([os_environ['HOME'], os_environ['USERPROFILE']].includes(home), home.toString());
         assert.ok(
@@ -990,13 +988,13 @@ suite('Tests for leo.core.leoGlobals', () => {
                     j,
                     result,
                     'i ' +
-                        i.toString() +
-                        ' s ' +
-                        s +
-                        ' got ' +
-                        j.toString() +
-                        ' expected ' +
-                        result.toString()
+                    i.toString() +
+                    ' s ' +
+                    s +
+                    ' got ' +
+                    j.toString() +
+                    ' expected ' +
+                    result.toString()
                 );
             });
         });
@@ -1039,17 +1037,26 @@ suite('Tests for leo.core.leoGlobals', () => {
     });
 
     //@+node:felix.20220129223719.49: *3* TestGlobals.test_g_warnOnReadOnlyFile
-    /* def test_g_warnOnReadOnlyFile(self):
-        c = self.c
-        fc = c.fileCommands
-        path = g.os_path_finalize_join(g.app.loadDir, '..', 'test', 'test-read-only.txt')
-        if os.path.exists(path):
-            os.chmod(path, stat.S_IREAD)
-            fc.warnOnReadOnlyFiles(path)
-            assert fc.read_only
-        else:
-            fc.warnOnReadOnlyFiles(path)
-     */
+    test('test_g_warnOnReadOnlyFile', async () => {
+        const c = self.c;
+
+        const fc = c.fileCommands;
+        const w_path = g.os_path_finalize_join(g.app.loadDir || '', '..', 'test', 'test-read-only.txt')
+        const w_exists = await g.os_path_exists(w_path);
+
+        if (w_exists && fs.chmod) {
+
+            // os.chmod(w_path, stat.S_IREAD);
+            const w_uri = g.makeVscodeUri(w_path);
+            // await vscode.workspace.fs.writeFile(w_uri, contents);
+            await fs.chmod(w_path, fs.constants.S_IRUSR);
+
+            await fc.warnOnReadOnlyFiles(w_path);
+            assert.ok(fc.read_only);
+        } else {
+            await fc.warnOnReadOnlyFiles(w_path);
+        }
+    });
     //@-others
 });
 //@-others
