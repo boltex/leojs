@@ -5,6 +5,7 @@
  */
 import * as assert from 'assert';
 import { afterEach, after, before, beforeEach } from 'mocha';
+
 import * as g from '../core/leoGlobals';
 import * as vscode from 'vscode';
 import { LeoUnitTest } from './leoTest2';

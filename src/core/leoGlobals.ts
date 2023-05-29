@@ -3986,6 +3986,49 @@ export const trace = console.log;
 // TODO : Replace with output to proper 'Leo terminal output'
 
 //@+node:felix.20211104211115.1: ** g.Miscellaneous
+//@+node:felix.20230529144955.1: *3* g.maketrans
+export function maketrans(from: string, to: string, deletechars?: string): Record<number, string | null> {
+    const translationTable: Record<number, string | null> = {};
+    const maxLength = Math.min(from.length, to.length);
+
+    for (let i = 0; i < maxLength; i++) {
+        translationTable[from.charCodeAt(i)] = to.charAt(i);
+    }
+
+    if (deletechars) {
+        for (let i = 0; i < deletechars.length; i++) {
+            const charCode = deletechars.charCodeAt(i);
+            translationTable[charCode] = null;  // Mark for deletion
+        }
+    }
+
+    return translationTable;
+}
+//@+node:felix.20230529152331.1: *3* g.maketrans_from_dict
+export function maketrans_from_dict(dict: Record<string, string | null>): Record<number, string | null> {
+    const translationTable: Record<number, string | null> = {};
+
+    for (const key in dict) {
+        if (dict.hasOwnProperty(key)) {
+            const charCode = key.charCodeAt(0);
+            translationTable[charCode] = dict[key];
+        }
+    }
+
+    return translationTable;
+}
+//@+node:felix.20230529144946.1: *3* g.translate
+export function translate(text: string, translationTable: Record<number, string | null>): string {
+    let translatedText = "";
+    for (let i = 0; i < text.length; i++) {
+        const charCode = text.charCodeAt(i);
+        const translation = translationTable[charCode];
+        if (translation !== null) {
+            translatedText += translation || text.charAt(i);
+        }
+    }
+    return translatedText;
+}
 //@+node:felix.20221017010728.1: *3* g.process_time
 /**
  * python process_time equivalent that returns the current timestamp in SECONDS

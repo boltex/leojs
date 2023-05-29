@@ -8,12 +8,6 @@
  * Support for LeoJS's new unit tests, contained in src/tests/.
  */
 
-// import time
-// import unittest
-// import warnings
-// from leo.core import leoGlobals as g
-// from leo.core import leoApp
-
 import * as g from '../core/leoGlobals';
 import { LeoApp, LoadManager } from '../core/leoApp';
 import { Commands } from "../core/leoCommands";
@@ -22,6 +16,7 @@ import { GlobalConfigManager } from '../core/leoConfig';
 import { NullGui } from '../core/leoGui';
 import * as assert from 'assert';
 import { ISettings } from '../core/leoFind';
+import { AtFile } from '../core/leoAtFile';
 
 //@+others
 //@+node:felix.20220130224933.2: ** function.create_app
@@ -128,6 +123,7 @@ export class LeoUnitTest {
     public root_p!: Position;
     public settings_p!: Position;
     public x: any;
+    public at!: AtFile;
     public settings!: ISettings;
 
     //@+others

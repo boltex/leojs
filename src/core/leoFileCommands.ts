@@ -86,7 +86,10 @@ class BadLeoFile extends Error {
 export class FastRead {
 
     public c: Commands;
-    public gnx2vnode: { [key: string]: VNode; };
+    public gnx2vnode: { [key: string]: VNode };
+    // #1510: https://en.wikipedia.org/wiki/Valid_characters_in_XML.
+
+    public translate_dict: { [key: string]: any } = {}; // {z: None for z in range(20) if chr(z) not in '\t\r\n'}
 
     public nativeVnodeAttributes: string[] = [
         'a',
@@ -98,6 +101,12 @@ export class FastRead {
     constructor(c: Commands, gnx2vnode: { [key: string]: VNode; }) {
         this.c = c;
         this.gnx2vnode = gnx2vnode;
+        for (let z = 0; z < 20; z++) {
+            const char = String.fromCharCode(z);
+            if (!['\t', '\r', '\n'].includes(char)) {
+                this.translate_dict[z] = null;
+            }
+        }
     }
 
     //@+others
@@ -182,17 +191,13 @@ export class FastRead {
         return v;
     }
     //@+node:felix.20211213223342.4: *3* fast.readWithElementTree & helpers
-    // #1510: https://en.wikipedia.org/wiki/Valid_characters_in_XML.
+    public readWithElementTree(p_path: string | undefined, s_or_b: Uint8Array | string): [VNode, et.Element] | [undefined, undefined] {
 
-    // TODO : NEEDED ?
-    // translate_table = {z: None for z in range(20) if chr(z) not in '\t\r\n'}
+        let contents = g.toUnicode(s_or_b);
 
-    public readWithElementTree(p_path: string | undefined, s: Uint8Array | string): [VNode, et.Element] | [undefined, undefined] {
-
-        let contents = g.toUnicode(s);
-
-        // TODO : NEEDED ?
         // contents = contents.translate(this.translate_table); // #1036 and #1046.
+        const table = g.maketrans_from_dict(this.translate_dict); // contents.maketrans(this.translate_dict);  // #1510.
+        contents = g.translate(contents, table); // contents.translate(table); // #1036, #1046.
 
         let xroot: et.ElementTree;
 

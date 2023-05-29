@@ -1,7 +1,7 @@
 //@+leo-ver=5-thin
-//@+node:felix.20220129003553.1: * @file src/test/leoShadow.test.ts
+//@+node:felix.20230528205401.1: * @file src/test/leoPersistence.test.ts
 /**
- * Tests of leoShadow.ts
+ * Tests of leoPersistence.ts
  */
 import * as assert from 'assert';
 import { afterEach, before, beforeEach } from 'mocha';

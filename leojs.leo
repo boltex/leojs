@@ -578,9 +578,12 @@
 <v t="felix.20220129003154.1"><vh>@file src/test/leoExternalFiles.test.ts</vh></v>
 <v t="felix.20220129003044.1"><vh>@file src/test/leoFileCommands.test.ts</vh></v>
 <v t="felix.20220129003458.1"><vh>@file src/test/leoFind.test.ts</vh></v>
+<v t="felix.20230528193401.1"><vh>@file src/test/leoFrame.test.ts</vh></v>
 <v t="felix.20220129002458.1"><vh>@file src/test/leoGlobals.test.ts</vh></v>
 <v t="felix.20220129003526.1"><vh>@file src/test/leoImport.test.ts</vh></v>
 <v t="felix.20220129002948.1"><vh>@file src/test/leoNodes.test.ts</vh></v>
+<v t="felix.20230528205401.1"><vh>@file src/test/leoPersistence.test.ts</vh></v>
+<v t="felix.20230528205401.2"><vh>@file src/test/leoRst.test.ts</vh></v>
 <v t="felix.20220129003553.1"><vh>@file src/test/leoShadow.test.ts</vh></v>
 <v t="felix.20220129003013.1"><vh>@file src/test/leoUndo.test.ts</vh></v>
 </v>

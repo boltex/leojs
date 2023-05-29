@@ -199,9 +199,9 @@ export class LeoApp {
     public commander_db: any = null; // The singleton db, managed by g.app.commander_cacher.
     public config!: GlobalConfigManager; // The singleton leoConfig instance.
     public db: any = undefined; // The singleton global db, managed by g.app.global_cacher.
-    public externalFilesController: any = null; // The singleton ExternalFilesController instance.
+    public externalFilesController!: ExternalFilesController; // The singleton ExternalFilesController instance.
     public global_cacher: any = null; // The singleton leoCacher.GlobalCacher instance.
-    public idleTimeManager: any = null; // The singleton IdleTimeManager instance.
+    public idleTimeManager!: IdleTimeManager; // The singleton IdleTimeManager instance.
     public ipk: any = null; // python kernel instance
     public loadManager: LoadManager | undefined; // The singleton LoadManager instance.
     // public logManager: any = null;
@@ -1189,7 +1189,7 @@ export class LeoApp {
         }
         // This may remove frame from the window list.
         if (g.app.windowList.includes(frame)) {
-            g.app.destroyWindow(frame);
+            await g.app.destroyWindow(frame);
 
             // Remove frame
             let index = g.app.windowList.indexOf(frame, 0);
@@ -1215,12 +1215,12 @@ export class LeoApp {
     /**
      * Destroy all ivars in a Leo frame.
      */
-    public destroyWindow(frame: LeoFrame): void {
+    public async destroyWindow(frame: LeoFrame): Promise<void> {
         if (g.app.debug.includes('shutdown')) {
             g.pr(`destroyWindow:  ${frame.c.shortFileName()}`);
         }
         if (g.app.externalFilesController && g.app.externalFilesController.destroy_frame) {
-            g.app.externalFilesController.destroy_frame(frame);
+            await g.app.externalFilesController.destroy_frame(frame);
         }
         if (g.app.windowList.includes(frame)) {
             g.app.forgetOpenFile(frame.c.fileName());
