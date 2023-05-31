@@ -418,6 +418,15 @@ export class Position {
         }
         return `<pos [${p.stack.length}] None>`;
     }
+    public toString(): string {
+        return this.__str__();
+    }
+    public valueOf(): string {
+        if (this.__bool__()) {
+            return this.__str__();
+        }
+        return "";
+    }
 
     //@+node:felix.20210126210412.8: *4* p.archivedPosition
     /**
@@ -2669,7 +2678,7 @@ Position.prototype.atAsisFileNodeName = Position.prototype.atSilentFileNodeName;
 Position.prototype.isAtNoSentFileNode =
     Position.prototype.isAtNoSentinelsFileNode;
 Position.prototype.isAtAsisFileNode = Position.prototype.isAtSilentFileNode;
-Position.prototype.__repr__ = Position.prototype.__str__;
+Position.prototype.__repr__ = Position.prototype.valueOf;
 Position.prototype.simpleLevel = Position.prototype.level;
 
 Position.prototype.initBodyString = Position.prototype.setBodyString;
@@ -2766,6 +2775,9 @@ export class VNode {
     public __repr__(): string {
         return `<VNode ${this.gnx} ${this.headString()}>`;
     }
+    public valueOf(): string {
+        return this.__repr__();
+    }
 
     //@+node:felix.20210130233340.4: *4* v.dump
     public dumpLink(link: string): string {
@@ -2784,8 +2796,7 @@ export class VNode {
     }
 
     //@+node:felix.20211209010457.1: *3* v.toString
-    // = () : trick for toString as per https://stackoverflow.com/a/35361695/920301
-    public toString = (): string => {
+    public toString(): string {
         return `VNode (gnx: ${this.gnx})`;
     };
     //@+node:felix.20210112210731.1: *3* v.Comparisons
@@ -3727,7 +3738,7 @@ VNode.prototype.initBodyString = VNode.prototype.setBodyString;
 VNode.prototype.setHeadText = VNode.prototype.setHeadString;
 VNode.prototype.initHeadString = VNode.prototype.setHeadString;
 VNode.prototype.setTnodeText = VNode.prototype.setBodyString;
-VNode.prototype.__str__ = VNode.prototype.__repr__;
+VNode.prototype.__str__ = VNode.prototype.toString;
 
 //@-others
 //@@language typescript

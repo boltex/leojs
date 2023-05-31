@@ -4029,8 +4029,8 @@ export function translate(text: string, translationTable: Record<number, string 
     }
     return translatedText;
 }
-//@+node:felix.20230530001033.1: *3* g.compareStringArrays
-export function compareStringArrays(arr1: string[], arr2: string[]): boolean {
+//@+node:felix.20230530001033.1: *3* g.compareArrays
+export function compareArrays(arr1: any[], arr2: any[]): boolean {
     if (arr1.length !== arr2.length) {
         return false;
     }
