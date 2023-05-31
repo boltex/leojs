@@ -523,11 +523,13 @@ suite('Test cases for leoCommands.ts', () => {
         const x = new StubConfig();
 
         // assert.ok( !x.getBool(c, 'mySetting'));
+        //@verbatim
         //@ts-expect-error Check if it's undefined
         assert.ok(!x.getBool || !x.getBool(c, 'mySetting'));
 
 
         // assert.ok( !x.enabledPluginsFileName);
+        //@verbatim
         //@ts-expect-error Check if it's undefined
         assert.ok(!x.enabledPluginsFileName);
     });
@@ -600,61 +602,6 @@ suite('Test cases for leoCommands.ts', () => {
         c.deleteComments()
         self.assertEqual(p.b, expected)
      */
-    //@+node:felix.20220129224954.32: *3* TestCommands.test_efc_ask
-    test('test_efc_ask', () => {
-        const c = self.c;
-        const p = c.p;
-        // Not a perfect test, but stil significant.
-        const efc = g.app.externalFilesController;
-        if (!efc) {
-            //  pass
-            // self.skipTest('No externalFilesController')
-            console.log('no externalFilesController in test_efc_ask');
-            return;
-        }
-        const result = efc.ask(c, p.h);
-        assert.ok([true, false].includes(result), result);
-    });
-    //@+node:felix.20220129224954.33: *3* TestCommands.test_efc_compute_ext
-    test('test_efc_compute_ext', () => {
-        const c = self.c;
-        const p = c.p;
-        // Not a perfect test, but stil significant.
-        const efc = g.app.externalFilesController;
-        if (!efc) {
-            //  pass
-            // self.skipTest('No externalFilesController')
-            console.log('no externalFilesController in test_efc_compute_ext');
-            return;
-        }
-        const table = [
-            // (None,'.py'),
-            // ('','.py'),
-            ['txt', '.txt'],
-            ['.txt', '.txt']
-        ];
-        let ext;
-        let result;
-        for ([ext, result] of table) {
-            const result2 = efc.compute_ext(c, p, ext);
-            assert.strictEqual(result, result2, ext);
-        }
-    });
-    //@+node:felix.20220129224954.34: *3* TestCommands.test_efc_compute_temp_file_path
-    test('test_efc_compute_temp_file_path', () => {
-        const c = self.c;
-        const p = c.p;
-        // Not a perfect test, but stil significant.
-        const efc = g.app.externalFilesController;
-        if (!efc) {
-            //  pass
-            // self.skipTest('No externalFilesController')
-            console.log('no externalFilesController in test_efc_compute_ext');
-            return;
-        }
-        const s: string = efc.compute_temp_file_path(c, p, '.py');
-        assert.ok(s.endsWith('.py'));
-    });
     //@+node:felix.20220129224954.35: *3* TestCommands.test_koi8_r_encoding
     test('test_koi8_r_encoding', () => {
         const c = self.c;

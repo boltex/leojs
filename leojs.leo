@@ -571,6 +571,7 @@
 <v t="felix.20220128232146.1"><vh>unittests</vh>
 <v t="felix.20220130224933.1"><vh>@file src/test/leoTest2.ts</vh></v>
 <v t="felix.20220129002501.1"><vh>@file src/test/extension.test.ts</vh></v>
+<v t="felix.20230529171913.1"><vh>@file src/test/test_importers.ts</vh></v>
 <v t="felix.20220129200448.1"><vh>@file src/test/leoApp.test.ts</vh></v>
 <v t="felix.20220129003133.1"><vh>@file src/test/leoAtFile.test.ts</vh></v>
 <v t="felix.20220129002752.1"><vh>@file src/test/leoCommands.test.ts</vh></v>

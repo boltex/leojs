@@ -3,7 +3,6 @@
 //@+<< imports >>
 //@+node:felix.20210220195150.1: ** << imports >>
 import * as vscode from "vscode";
-import { Utils as uriUtils } from "vscode-uri";
 import * as g from './leoGlobals';
 import { VNode, Position, StatusFlags } from './leoNodes';
 import { Commands } from './leoCommands';

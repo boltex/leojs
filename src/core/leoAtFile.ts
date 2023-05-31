@@ -3868,7 +3868,7 @@ export class AtFile {
                 // sqlite database file is never actually overwritten by Leo,
                 // so do *not* check its timestamp.
                 //pass
-            } else if (efc.has_changed(fn)) {
+            } else if (await efc.has_changed(fn)) {
                 if (trace) {
                     g.trace('Return True: changed:', sfn);
                 }

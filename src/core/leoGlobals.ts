@@ -917,7 +917,7 @@ export function objToString(obj: any, tag?: string): string {
 /**
  * Pretty print any Python object using pr.
  */
-export function printObj(obj: any, indent = '', printCaller = false, tag = null): void {
+export function printObj(obj: any, indent = '', printCaller = false, tag?: string): void {
     // TODO : Replace with output to proper pr function
     //     pr(objToString(obj, indent=indent, printCaller=printCaller, tag=tag))
     pr(obj);
@@ -4028,6 +4028,29 @@ export function translate(text: string, translationTable: Record<number, string 
         }
     }
     return translatedText;
+}
+//@+node:felix.20230530001033.1: *3* g.compareStringArrays
+export function compareStringArrays(arr1: string[], arr2: string[]): boolean {
+    if (arr1.length !== arr2.length) {
+        return false;
+    }
+    return arr1.every((value, index) => value === arr2[index]);
+}
+//@+node:felix.20230530135543.1: *3* g.comparePositionArray
+export function comparePositionArray(arr1: Position[], arr2: Position[]): boolean {
+    if (arr1.length !== arr2.length) {
+        return false;
+    }
+    return arr1.every((val1, index) => {
+        const val2 = arr2[index];
+        if (val1 && val1.__bool__() && val2 && val2.__bool__()) {
+            return val1.__eq__(val2);
+        } else {
+            // some don't exist... are they the same in some way? 
+            // no 'v' to check so default to 'false'. 
+            return false;
+        }
+    });
 }
 //@+node:felix.20221017010728.1: *3* g.process_time
 /**

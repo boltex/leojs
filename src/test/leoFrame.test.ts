@@ -5,27 +5,52 @@
  */
 import * as assert from 'assert';
 import { afterEach, before, beforeEach } from 'mocha';
-import * as path from 'path';
 
-import * as g from '../core/leoGlobals';
-import { Position, VNode } from '../core/leoNodes';
 import { LeoUnitTest } from './leoTest2';
+import { LeoFrame } from '../core/leoFrame';
 
 //@+others
-//@+node:felix.20230528193503.1: ** class TestFrame(LeoUnitTest)
-class TestFrame(LeoUnitTest):
-    """Test cases for leoKeys.py"""
+//@+node:felix.20230528193503.1: ** suite TestFrame(LeoUnitTest)
+suite('Test cases for leoFrame.ts', () => {
+    let self: LeoUnitTest;
+
+    before(() => {
+        self = new LeoUnitTest();
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
     //@+others
     //@+node:felix.20230528193503.2: *3* TestFrame.test_official_frame_ivars
-    def test_official_frame_ivars(self):
-        c = self.c
-        f = c.frame
-        self.assertEqual(f.c, c)
-        self.assertEqual(c.frame, f)
-        for ivar in ('body', 'iconBar', 'log', 'statusLine', 'tree',):
-            assert hasattr(f, ivar), 'missing frame ivar: %s' % ivar
-            val = getattr(f, ivar)
-            self.assertTrue(val is not None, msg=ivar)
+    test('test_official_frame_ivars', () => {
+        const c = self.c;
+        const f = c.frame;
+        assert.strictEqual(f.c, c);
+        assert.strictEqual(c.frame, f);
+
+        const table: (keyof LeoFrame)[] = [
+            'body',
+            'iconBar',
+            'log',
+            // 'statusLine',  // UNUSED IN LEOJS
+            'tree'
+        ];
+        for (const ivar of table) {
+            assert.ok(f[ivar], `missing frame ivar: ${ivar}`);
+            const val = f[ivar];
+            assert.ok(val !== null, ivar);
+        }
+    });
     //@-others
+});
 //@-others
 //@-leo

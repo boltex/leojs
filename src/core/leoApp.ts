@@ -165,6 +165,7 @@ export class LeoApp {
     public globalOpenDir: string | undefined; // The directory last used to open a file.
     public homeDir: string | undefined; // The user's home directory.
     public homeLeoDir: string | undefined; // The user's home/.leo directory.
+    public testDir: string | undefined; // Used in unit tests
     public loadDir: string | undefined; // The leo / core directory.
     public machineDir: string | undefined; // The machine - specific directory.
 
@@ -1594,7 +1595,7 @@ export class LoadManager {
         // These use g.app.loadDir...
         g.app.extensionsDir = ""; // join(g.app.loadDir, '..', 'extensions'); // UNSUSED The leo / extensions directory
         // g.app.leoEditorDir = join(g.app.loadDir, '..', '..');
-        // g.app.testDir = join(g.app.loadDir, '..', 'test');
+        g.app.testDir = join(g.app.loadDir, '..', 'test');
 
         return;
     }
@@ -2601,6 +2602,171 @@ export class LoadManager {
         lm.createGui();
         // We can't print the signon until we know the gui.
         return g.app.computeSignon();  // Set app.signon/signon1 for commanders.
+
+    }
+
+    //@+node:felix.20230529220941.1: *5* LM.createAllImporterData & helpers
+    /**
+     * New in Leo 5.5:
+     *
+     * Create global data structures describing importers and writers.
+     */
+    public createAllImporterData(): void {
+        console.assert(g.app.loadDir);  // This is the only data required.
+        this.createWritersData();  // Was an AtFile method.
+        this.createImporterData();  // Was a LeoImportCommands method.
+    }
+    //@+node:felix.20230529220941.2: *6* LM.createImporterData & helper
+    /** 
+     * Create the data structures describing importer plugins.
+     */
+    public createImporterData(): void {
+
+        console.log('TODO : createImporterData');
+
+        // // Allow plugins to be defined in ~/.leo/plugins.
+        // for (const pattern of [
+        //     // ~/.leo/plugins.
+        //     g.finalize_join(g.app.homeDir, '.leo', 'plugins'),
+        //     // leo/plugins/importers.
+        //     g.finalize_join(g.app.loadDir, '..', 'plugins', 'importers', '*.py'),
+        // ]){
+        //     filenames = g.glob_glob(pattern)
+        //     for filename in filenames:
+        //         sfn = g.shortFileName(filename)
+        //         if sfn != '__init__.py':
+        //             try:
+        //                 module_name = sfn[:-3]
+        //                 // Important: use importlib to give imported modules their fully qualified names.
+        //                 m = importlib.import_module(f"leo.plugins.importers.{module_name}")
+        //                 self.parse_importer_dict(sfn, m)
+        //                 // print('createImporterData', m.__name__)
+        //             except Exception:
+        //                 g.warning(f"can not import leo.plugins.importers.{module_name}")
+        //                 g.printObj(filenames)
+
+
+        // }
+    }
+    //@+node:felix.20230529220941.3: *7* LM.parse_importer_dict
+    /**
+     *  Set entries in g.app.classDispatchDict, g.app.atAutoDict and
+     * g.app.atAutoNames using entries in m.importer_dict.
+     */
+    public parse_importer_dict(sfn: string, m: any): void {
+
+        console.log('TODO : parse_importer_dict');
+
+        // importer_d = getattr(m, 'importer_dict', None)
+        // if importer_d
+        //     at_auto = importer_d.get('@auto', [])
+        //     scanner_func = importer_d.get('func', None)
+        //     // scanner_name = scanner_class.__name__
+        //     extensions = importer_d.get('extensions', [])
+        //     if at_auto
+        //         // Make entries for each @auto type.
+        //         d = g.app.atAutoDict
+        //         for s in at_auto:
+        //             d[s] = scanner_func
+        //             g.app.atAutoDict[s] = scanner_func
+        //             g.app.atAutoNames.add(s)
+        //     if extensions
+        //         // Make entries for each extension.
+        //         d = g.app.classDispatchDict
+        //         for ext in extensions:
+        //             d[ext] = scanner_func  #importer_d.get('func')#scanner_class
+
+
+
+        // elif sfn not in (
+        //     // These are base classes, not real plugins.
+        //     'basescanner.py',
+        //     'linescanner.py',
+        // ):
+        //     g.warning(f"leo/plugins/importers/{sfn} has no importer_dict")
+
+
+    }
+    //@+node:felix.20230529220941.4: *6* LM.createWritersData & helper
+    /**
+     * Create the data structures describing writer plugins.
+     */
+    public createWritersData(): void {
+
+        console.log('TODO : createWritersData');
+
+        // // Do *not* remove this trace.
+        // const trace = false && 'createWritersData' not in g.app.debug_dict
+        // if trace
+        //     // Suppress multiple traces.
+        //     g.app.debug_dict['createWritersData'] = True
+        // g.app.writersDispatchDict = {}
+        // g.app.atAutoWritersDict = {}
+
+        // // Allow plugins to be defined in ~/.leo/plugins.
+        // for pattern in (
+        //     g.finalize_join(g.app.homeDir, '.leo', 'plugins'),  // ~/.leo/plugins.
+        //     g.finalize_join(g.app.loadDir, '..', 'plugins', 'writers', '*.py'),  // leo/plugins/writers
+        // ):
+        //     for filename in g.glob_glob(pattern):
+        //         sfn = g.shortFileName(filename)
+        //         if sfn.endswith('.py') && sfn !== '__init__.py':
+        //             try:
+        //                 // Important: use importlib to give imported modules their fully qualified names.
+        //                 m = importlib.import_module(f"leo.plugins.writers.{sfn[:-3]}")
+        //                 self.parse_writer_dict(sfn, m)
+        //             except Exception:
+        //                 g.es_exception()
+        //                 g.warning(f"can not import leo.plugins.writers.{sfn}")
+        // if trace:
+        //     g.trace('LM.writersDispatchDict')
+        //     g.printDict(g.app.writersDispatchDict)
+        //     g.trace('LM.atAutoWritersDict')
+        //     g.printDict(g.app.atAutoWritersDict)
+
+    }
+    //@+node:felix.20230529220941.5: *7* LM.parse_writer_dict
+    /**
+     * Set entries in g.app.writersDispatchDict and g.app.atAutoWritersDict
+     * using entries in m.writers_dict.
+     */
+    public parse_writer_dict(sfn: string, m: any): void {
+
+        console.log('TODO : createWritersData');
+
+        // writer_d = getattr(m, 'writer_dict', None)
+        // if writer_d
+        //     at_auto = writer_d.get('@auto', [])
+        //     scanner_class = writer_d.get('class', None)
+        //     extensions = writer_d.get('extensions', [])
+        //     if at_auto
+        //         // Make entries for each @auto type.
+        //         d = g.app.atAutoWritersDict
+        //         for s in at_auto
+        //             aClass = d.get(s)
+        //             if aClass and aClass != scanner_class
+        //                 g.trace(
+        //                     f"{sfn}: duplicate {s} class {aClass.__name__} "
+        //                     f"in {m.__file__}:")
+        //             else
+        //                 d[s] = scanner_class
+        //                 g.app.atAutoNames.add(s)
+
+
+        //     if extensions
+        //         // Make entries for each extension.
+        //         d = g.app.writersDispatchDict
+        //         for ext in extensions
+        //             aClass = d.get(ext)
+        //             if aClass and aClass != scanner_class
+        //                 g.trace(f"{sfn}: duplicate {ext} class", aClass, scanner_class)
+        //             else
+        //                 d[ext] = scanner_class
+
+
+        // elif sfn not in ('basewriter.py',):
+        //     g.warning(f"leo/plugins/writers/{sfn} has no writer_dict")
+
 
     }
 
