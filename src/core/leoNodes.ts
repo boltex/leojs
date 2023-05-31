@@ -58,6 +58,32 @@ export class NodeIndices {
         }
     }
 
+    //@+node:felix.20230531001257.1: *3* ni.compute_last_index
+    /**
+     * Scan the entire leo outline to compute ni.last_index.
+     */
+    public compute_last_index(c: Commands): void {
+
+        const ni = this;
+        // Partial, experimental, fix for #658.
+        // Do not change self.lastIndex here!
+        // self.lastIndex = 0
+        for (const v of c.all_unique_nodes()) {
+            const gnx = v.fileIndex;
+            if (gnx) {
+                let [id_, t, n] = this.scanGnx(gnx)
+                if (t == ni.timeString && n != null) {
+                    try {
+                        const w_n = Number(n);  // type:ignore
+                        this.lastIndex = Math.max(this.lastIndex, w_n);  // type:ignore
+                    } catch (exception) {
+                        g.es_exception(exception);
+                        this.lastIndex += 1;
+                    }
+                }
+            }
+        }
+    }
     //@+node:felix.20220101212728.1: *3* ni.computeNewIndex
     /**
      * Return a new gnx.
@@ -176,6 +202,25 @@ export class NodeIndices {
             theId = this.defaultId;
         }
         return [theId, t, n];
+    }
+    //@+node:felix.20230531001333.1: *3* ni.tupleToString
+    /**
+     * Convert a gnx tuple returned by scanGnx
+     * to its string representation.
+     */
+    public tupleToString(aTuple: [any, any, any]): string {
+
+        let [theId, t, n] = aTuple;
+        let s;
+        // This logic must match the existing logic so that
+        // previously written gnx's can be found.
+        if ([undefined, 0, ''].includes(n)) {
+            s = `${theId}.${t}`;
+        } else {
+            s = `${theId}.${t}.${n}`;
+        }
+        return g.toUnicode(s);
+
     }
     //@+node:felix.20210218214329.12: *3* ni.update
     /**
@@ -1909,7 +1954,7 @@ export class Position {
     public copyTreeAfter(copyGnxs = false): Position {
         const p: Position = this;
         const p2 = p.insertAfter();
-        p.copyTreeFromSelfTo(p2, copyGnxs=copyGnxs);
+        p.copyTreeFromSelfTo(p2, copyGnxs = copyGnxs);
         return p2;
     }
 
@@ -1919,18 +1964,18 @@ export class Position {
         p2.v._bodyString = g.toUnicode(p.b, undefined, true);  // 2017/01/24
         //
         // #1019794: p.copyTreeFromSelfTo, should deepcopy p.v.u.
-        try{
+        try {
             p2.v.u = JSON.parse(JSON.stringify(p.v.u));
-        } catch(e){
+        } catch (e) {
             p2.v.u = {};
         }
         // p2.v.u = copy.deepcopy(p.v.u);
-        if (copyGnxs){
+        if (copyGnxs) {
             p2.v.fileIndex = p.v.fileIndex;
         }
         // 2009/10/02: no need to copy arg to iter
 
-        for (const child of p.children()){
+        for (const child of p.children()) {
             const child2 = p2.insertAsLastChild();
             child.copyTreeFromSelfTo(child2, copyGnxs);
         }

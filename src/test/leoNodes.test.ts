@@ -1088,5 +1088,87 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
 
     //@-others
 });
+//@+node:felix.20230530210928.1: ** suite TestNodeIndices(LeoUnitTest)
+suite('Unit tests for NodeIndices class in leo/core/leoNodes.ts.', () => {
+    let self: LeoUnitTest;
+
+    before(() => {
+        self = new LeoUnitTest();
+        return self.setUpClass();
+    });
+
+    beforeEach(() => {
+        self.setUp();
+        // Create the nodes in the commander.
+        const c = self.c;
+        self.create_test_outline();
+        // Make sure all indices in the test outline have the proper id, set in create_app.
+        for (const v of c.all_nodes()) {
+            assert.ok(v.fileIndex.startsWith(g.app.leoID), v.fileIndex.toString());
+        }
+        c.selectPosition(c.rootPosition()!);
+        return Promise.resolve();
+    });
+
+    afterEach(() => {
+        self.tearDown();
+        return Promise.resolve();
+    });
+
+    //@+others
+    //@+node:felix.20230530210928.3: *3* TestNodeIndices.test_compute_last_index
+    test('test_compute_last_index', () => {
+        const ni = g.app.nodeIndices!;
+        ni.compute_last_index(self.c);
+        assert.ok(typeof ni.lastIndex === 'number');
+    });
+    //@+node:felix.20230530210928.4: *3* TestNodeIndices.test_computeNewIndex
+    test('test_computeNewIndex', () => {
+        const ni = g.app.nodeIndices!;
+        const gnx = ni.computeNewIndex();
+        assert.ok(typeof gnx === 'string');
+    });
+    //@+node:felix.20230530210928.5: *3* TestNodeIndices.test_scanGnx
+    test('test_scanGnx', () => {
+        const ni = g.app.nodeIndices!;
+        for (let [s, id1, t1, n1] of [
+            ['ekr.123', 'ekr', '123', undefined],
+            ['ekr.456.2', 'ekr', '456', '2'],
+            ['', g.app.leoID, undefined, undefined],
+        ]) {
+            let [id2, t2, n2] = ni.scanGnx(s!);
+            assert.strictEqual(id1, id2);
+            assert.strictEqual(t1, t2);
+            assert.strictEqual(n1, n2);
+        }
+    });
+    //@+node:felix.20230530210928.6: *3* TestNodeIndices.test_tupleToString
+    test('test_tupleToString', () => {
+        const ni = g.app.nodeIndices!;
+        for (let [s1, id1, t1, n1] of [
+            ['ekr.123', 'ekr', '123', undefined],
+            ['ekr.456.2', 'ekr', '456', '2'],
+            [`${g.app.leoID}.1`, g.app.leoID, '1', undefined],
+        ]) {
+            const s = ni.tupleToString([id1, t1, n1]);
+            assert.strictEqual(s, s1);
+        }
+    });
+    //@+node:felix.20230530210928.7: *3* TestNodeIndices.test_updateLastIndex
+    test('test_updateLastIndex', () => {
+        const ni = g.app.nodeIndices!;
+        const old_last = ni.lastIndex;
+        const table: [string, number][] = [
+            ['', old_last],  // For error logic: no change.
+            [`${g.app.leoID}.${ni.timeString}.1000`, 1000],
+        ];
+        for (let [gnx, new_last] of table) {
+            ni.lastIndex = old_last;
+            ni.updateLastIndex(gnx);
+            assert.strictEqual(ni.lastIndex, new_last);
+        }
+    });
+    //@-others
+});
 //@-others
 //@-leo
