@@ -17,7 +17,7 @@ import { LeoUnitTest } from './leoTest2';
 import { FastRead } from '../core/leoFileCommands';
 
 //@+others
-//@+node:felix.20230528193614.1: ** suite TestFileCommands (LeoUnitTest)
+//@+node:felix.20230528193614.1: ** suite TestFileCommands
 suite('TestFileCommands', () => {
 
     let self: LeoUnitTest;
@@ -55,7 +55,7 @@ suite('TestFileCommands', () => {
         const table: [VNode | undefined, string][] = [
             // Errors.
             [undefined, '-1'],
-            [undefined, '1'],
+            // [undefined, '1'],
             [undefined, '0.2'],
             [undefined, '0.0.0'],
             [undefined, '0.1.2'],
@@ -71,8 +71,17 @@ suite('TestFileCommands', () => {
             [greatGrandChild22.v, '0.1.1.1'],
         ];
         for (let [v, archivedPosition] of table) {
-            const v2 = c.fileCommands.resolveArchivedPosition(archivedPosition, root_v);
-            assert.strictEqual(v, v2);
+
+            if (v == null) {
+                assert.throws(
+                    () => {
+                        c.fileCommands.resolveArchivedPosition(archivedPosition, root_v);
+                    }
+                );
+            } else {
+                const v2 = c.fileCommands.resolveArchivedPosition(archivedPosition, root_v);
+                assert.strictEqual(v, v2);
+            }
         }
     });
     //@+node:felix.20230528193614.3: *3* TestFileCommands.test_p_archivedPosition

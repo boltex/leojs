@@ -1459,7 +1459,7 @@ export class FileCommands {
                 }
             }
             if (v) {
-                c.setFileTimeStamp(fileName);
+                await c.setFileTimeStamp(fileName);
                 if (readAtFileNodesFlag) {
                     recoveryNode = await fc.readExternalFiles(fileName);
                 }
@@ -2049,8 +2049,10 @@ export class FileCommands {
     public resolveArchivedPosition(archivedPosition: string, root_v: VNode): VNode | undefined {
 
         function oops(message: string): void {
-            // Give an error only if no file errors have been seen.
-            // g.trace(message);
+            // Raise an exception during unit tests.
+            if (g.unitTesting) {
+                throw (message);
+            }
         }
 
         let aList: number[];
@@ -2062,7 +2064,7 @@ export class FileCommands {
             });
             aList.reverse();
         } catch (exception) {
-            oops(`"${archivedPosition}"`);
+            oops(`Unexpected exception: ${archivedPosition.toString()}`);
             return undefined;
         }
 
@@ -2073,8 +2075,8 @@ export class FileCommands {
 
         let last_v: VNode = root_v;
         let n: number = aList.pop()!;
-        if (n !== 0) {
-            oops(`root index="${n}"`);
+        if (n < 0) {
+            oops(`Negative root index: ${n.toString()}: ${archivedPosition}`);
             return undefined;
         }
 
@@ -2085,7 +2087,7 @@ export class FileCommands {
             if (n < children.length) {
                 last_v = children[n];
             } else {
-                oops(`bad index="${n}", children.length="${children.length}"`);
+                oops(`bad index="${n}", children.length=${children.length}`);
                 return undefined;
             }
         }
@@ -2207,7 +2209,7 @@ export class FileCommands {
             if (g.app && g.app.commander_cacher && g.app.commander_cacher.save) {
                 g.app.commander_cacher.save(c, fileName);
             }
-            ok = c.checkFileTimeStamp(fileName);
+            ok = await c.checkFileTimeStamp(fileName);
             if (ok) {
                 if (c.sqlite_connection) {
                     c.sqlite_connection.close();
@@ -2823,7 +2825,7 @@ export class FileCommands {
                 g.app.commander_cacher.save(c, fileName);
             }
 
-            c.setFileTimeStamp(fileName);
+            await c.setFileTimeStamp(fileName);
             // Delete backup file.
             const w_exists = await g.os_path_exists(backupName);
             if (backupName && w_exists) {
@@ -3074,7 +3076,7 @@ export class FileCommands {
             // f.close();
             // fs.closeSync(f);
 
-            c.setFileTimeStamp(fileName);
+            await c.setFileTimeStamp(fileName);
             // Delete backup file.
             const w_exists = await g.os_path_exists(backupName);
 

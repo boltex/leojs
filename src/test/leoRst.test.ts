@@ -17,7 +17,7 @@ import { Position, VNode } from '../core/leoNodes';
 import { LeoUnitTest } from './leoTest2';
 
 //@+others
-//@+node:felix.20230530003957.1: ** suite TestRst (LeoUnitTest)
+//@+node:felix.20230530003957.1: ** suite TestRst
 suite('A class to run rst-related unit tests.', () => {
     let self: LeoUnitTest;
 

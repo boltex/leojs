@@ -12,7 +12,7 @@ import { LeoUnitTest } from './leoTest2';
 /* eslint-disable require-await */
 
 //@+others
-//@+node:felix.20220129221242.1: ** suite TestApp(LeoUnitTest)
+//@+node:felix.20220129221242.1: ** suite TestApp
 suite('Test cases for leoApp.ts', () => {
 
     let self: LeoUnitTest;

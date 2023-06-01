@@ -4113,7 +4113,7 @@ export function convertPythonDayjs(s: string): string {
  * This is similar to Python's "textwrap.dedent" function
  * from https://gist.github.com/malthe/02350255c759d5478e89
  */
-export function dedent(text: string) {
+export function dedent(text: string): string {
     const re_whitespace = /^([ \t]*)(.*)\n/gm; // Needs 'g' flag for exec in while loop
     let l;
     let m;
@@ -4141,7 +4141,7 @@ export function dedent(text: string) {
 /**
  * python re.escape equivalent in typescript
  */
-export function reEscape(text: string) {
+export function reEscape(text: string): string {
     return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 //@+node:felix.20221219233315.1: *3* g.ltrim

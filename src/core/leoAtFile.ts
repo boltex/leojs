@@ -103,6 +103,7 @@ export class AtFile {
     public public_s = "";
     public private_s = "";
     public explicitLineEnding = false;
+    public at_shadow_test_hack: boolean | undefined;
 
     //@+others
     //@+node:felix.20211225231532.1: *3* at.Birth & init
@@ -415,7 +416,7 @@ export class AtFile {
         //
         // Set the time stamp.
         if (fileName) {
-            c.setFileTimeStamp(fileName);
+            await c.setFileTimeStamp(fileName);
         }
         else if (!fileName && !fromString && !file_s) {
             return false;
@@ -3352,7 +3353,7 @@ export class AtFile {
         if (!w_exists) {
             ok = await g.writeFile(contents, encoding, fileName);
             if (ok) {
-                c.setFileTimeStamp(fileName);
+                await c.setFileTimeStamp(fileName);
                 if (!g.unitTesting) {
                     g.es(`${timestamp}created: ${fileName}`);
                 }
@@ -3403,7 +3404,7 @@ export class AtFile {
         // Write a changed file.
         ok = await g.writeFile(contents, encoding, fileName);
         if (ok) {
-            c.setFileTimeStamp(fileName);
+            await c.setFileTimeStamp(fileName);
             if (!g.unitTesting) {
                 g.es(`${timestamp}wrote: ${sfn}`);
             }

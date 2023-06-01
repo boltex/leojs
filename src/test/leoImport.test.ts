@@ -13,7 +13,7 @@ import { BaseTestImporter } from './test_importers';
 import { MindMapImporter } from '../core/leoImport';
 
 //@+others
-//@+node:felix.20230528193654.1: ** suite TestLeoImport(BaseTestImporter)
+//@+node:felix.20230528193654.1: ** suite TestLeoImport
 suite('Test cases for leoImport.ts', () => {
     let self: BaseTestImporter;
 

@@ -7,11 +7,10 @@ import * as assert from 'assert';
 import { afterEach, before, beforeEach } from 'mocha';
 
 import * as g from '../core/leoGlobals';
-import { VNode } from '../core/leoNodes';
 import { LeoUnitTest } from './leoTest2';
 
 //@+others
-//@+node:felix.20230531185518.1: ** suite TestOutlineCommands(LeoUnitTest)
+//@+node:felix.20230531185518.1: ** suite TestOutlineCommands
 suite('TestOutlineCommands', () => {
 
     let self: LeoUnitTest;

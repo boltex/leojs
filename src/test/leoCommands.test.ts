@@ -12,7 +12,7 @@ import { Position, VNode } from '../core/leoNodes';
 import { LeoUnitTest } from './leoTest2';
 
 //@+others
-//@+node:felix.20220129224954.1: ** suite TestCommands(LeoUnitTest)
+//@+node:felix.20220129224954.1: ** suite TestCommands
 suite('Test cases for leoCommands.ts', () => {
 
     let self: LeoUnitTest;

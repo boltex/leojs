@@ -206,7 +206,7 @@ export class ShadowController {
 
             await vscode.workspace.fs.writeFile(w_writeUri, writeData);
 
-            c.setFileTimeStamp(fileName);  // Fix #1053.  This is an *ancient* bug.
+            await c.setFileTimeStamp(fileName);  // Fix #1053.  This is an *ancient* bug.
             if (!g.unitTesting) {
                 const kind = exists ? 'wrote' : 'created';
                 g.es(`${kind}: ${fileName}`);

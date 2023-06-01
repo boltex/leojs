@@ -12,7 +12,7 @@ import { Position, VNode } from '../core/leoNodes';
 import { LeoUnitTest } from './leoTest2';
 
 //@+others
-//@+node:felix.20220129225027.1: ** suite TestNodes(LeoUnitTest)
+//@+node:felix.20220129225027.1: ** suite TestNodes
 suite('Unit tests for leo/core/leoNodes.ts.', () => {
     let self: LeoUnitTest;
 
@@ -42,18 +42,25 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     test('test_archivedPosition', () => {
         const c = self.c;
         const fc = self.c.fileCommands;
-        const root_p = c.rootPosition();
+        const root_p = c.rootPosition()!;
         const root_v = c.rootPosition()!.v;
+        g.trace(root_p._childIndex)
         for (const p of c.all_positions()) {
+            // ap1 and ap2 are lists of ints.
             const ap1 = p.archivedPosition();
             const ap2 = p.archivedPosition(root_p);
             assert.ok(ap1 && ap1.length, p.h);
-            assert.ok(g.compareArrays(ap1, ap2), p.h);
-            // TODO : 
-            // ! FIX IN LEO FIRST !
-            // const p1 = fc.resolveArchivedPosition(ap1, root_v);
-            // const p2 = fc.resolveArchivedPosition(ap2, root_v);
-            // assert.ok(p1.__eq__( p2), p.h)
+            assert.ok(ap2 && ap2.length, p.h);
+
+            const ap1_s = ap1.map(z => z.toString()).join('.');
+            const ap2_s = ap2.map(z => z.toString()).join('.');
+
+            const p1 = fc.resolveArchivedPosition(ap1_s, root_v);
+            assert.ok(p1, root_v.toString());
+            const p2 = fc.resolveArchivedPosition(ap2_s, root_v);
+            assert.ok(p2, root_v.toString());
+            assert.ok(p1 === p2, p.h);
+
         };
     });
     //@+node:felix.20230530211011.4: *5* TestNodes.test_p__eq_
@@ -1328,7 +1335,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
 
     //@-others
 });
-//@+node:felix.20230530210928.1: ** suite TestNodeIndices(LeoUnitTest)
+//@+node:felix.20230530210928.1: ** suite TestNodeIndices
 suite('Unit tests for NodeIndices class in leo/core/leoNodes.ts.', () => {
     let self: LeoUnitTest;
 

@@ -12,7 +12,7 @@ import { Position, VNode } from '../core/leoNodes';
 import { LeoUnitTest } from './leoTest2';
 
 //@+others
-//@+node:felix.20230530003947.1: ** suite TestPersistence(LeoUnitTest)
+//@+node:felix.20230530003947.1: ** suite TestPersistence
 suite('Unit tests for leo/core/leoPersistence.ts.', () => {
     let self: LeoUnitTest;
 

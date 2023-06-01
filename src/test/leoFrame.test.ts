@@ -10,7 +10,7 @@ import { LeoUnitTest } from './leoTest2';
 import { LeoFrame } from '../core/leoFrame';
 
 //@+others
-//@+node:felix.20230528193503.1: ** suite TestFrame(LeoUnitTest)
+//@+node:felix.20230528193503.1: ** suite TestFrame
 suite('Test cases for leoFrame.ts', () => {
     let self: LeoUnitTest;
 

@@ -14,7 +14,7 @@ import { IdleTimeManager } from '../core/leoApp';
 import { ExternalFilesController } from '../core/leoExternalFiles';
 
 //@+others
-//@+node:felix.20230528193548.1: ** suite TestExternalFiles (LeoUnitTest)
+//@+node:felix.20230528193548.1: ** suite TestExternalFiles
 suite('TestExternalFiles', () => {
 
     let self: LeoUnitTest;

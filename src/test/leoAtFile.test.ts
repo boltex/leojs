@@ -14,7 +14,7 @@ import { LeoUnitTest } from './leoTest2';
 import { AtFile, FastAtRead } from '../core/leoAtFile';
 
 //@+others
-//@+node:felix.20230528191911.1: ** suite TestAtFile(LeoUnitTest)
+//@+node:felix.20230528191911.1: ** suite TestAtFile
 suite('Test cases for leoAtFile.ts', () => {
 
     let self: LeoUnitTest;
@@ -417,7 +417,7 @@ suite('Test cases for leoAtFile.ts', () => {
     //@+node:felix.20230528191911.19: *3* TestAtFile.test_putCodeLine
     test('test_putCodeLine', async () => {
         /* def test_putCodeLine(self):
-    
+
             const at = self.at;
             const p = self.c.p;
             await at.initWriteIvars(p)
@@ -688,7 +688,7 @@ suite('Test cases for leoAtFile.ts', () => {
     //@-others
 
 });
-//@+node:felix.20230528191921.1: ** suite TestFastAtRead(LeoUnitTest)
+//@+node:felix.20230528191921.1: ** suite TestFastAtRead
 suite('Test the FastAtRead class', () => {
 
     let self: LeoUnitTest;

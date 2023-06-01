@@ -366,7 +366,7 @@ export class CommanderFileCommands {
                         g.setGlobalOpenDir(fileName);
                     }
                     if (c2 && closeFlag) {
-                        g.app.destroyWindow(p_c.frame);
+                        await g.app.destroyWindow(p_c.frame);
                         // ! Need to remove here in leojs !
                         let index = g.app.windowList.indexOf(p_c.frame, 0);
                         if (index > -1) {

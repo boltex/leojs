@@ -1818,9 +1818,9 @@ export class Commands {
     /**
      * Update the timestamp for fn..
      */
-    public setFileTimeStamp(fn: string): void {
+    public async setFileTimeStamp(fn: string): Promise<void> {
         if (g.app.externalFilesController && g.app.externalFilesController.set_time) {
-            g.app.externalFilesController.set_time(fn);
+            await g.app.externalFilesController.set_time(fn);
         }
         // TODO !
         console.log('TODO : setFileTimeStamp AND g.app.externalFilesController.set_time');
@@ -2567,13 +2567,13 @@ export class Commands {
      * Return True if the file given by fn has not been changed
      * since Leo read it or if the user agrees to overwrite it.
      */
-    public checkFileTimeStamp(fn: string): boolean {
+    public checkFileTimeStamp(fn: string): Promise<boolean> {
         const c: Commands = this;
 
         if (g.app.externalFilesController && g.app.externalFilesController.check_overwrite) {
             return g.app.externalFilesController.check_overwrite(c, fn);
         }
-        return true;
+        return Promise.resolve(true);
     }
     //@+node:felix.20211223223002.6: *4* c.createNodeFromExternalFile
     /**
@@ -2688,27 +2688,28 @@ export class Commands {
      *
      * See ExternalFilesController.open_with for details about d.
      */
-    public openWith(d?: any): void {
-        const c: Commands = this;
+    // ! LEOJS DOES NOT OFFER TO OPEN IN EXTERNAL EDITOR !
+    // public openWith(d?: any): void {
+    //     const c: Commands = this;
 
-        if (d && g.app.externalFilesController) {
-            // Select an ancestor @<file> node if possible.
-            if (!d['p'] || !d['p'].__bool__()) {
-                d['p'] = undefined;
-                const p: Position = c.p;
-                while (p && p.__bool__()) {
-                    if (p.isAnyAtFileNode()) {
-                        d['p'] = p;
-                        break;
-                    }
-                    p.moveToParent();
-                }
-            }
-            g.app.externalFilesController.open_with(c, d);
-        } else if (!d) {
-            g.trace('can not happen: no d', g.callers());
-        }
-    }
+    //     if (d && g.app.externalFilesController) {
+    //         // Select an ancestor @<file> node if possible.
+    //         if (!d['p'] || !d['p'].__bool__()) {
+    //             d['p'] = undefined;
+    //             const p: Position = c.p;
+    //             while (p && p.__bool__()) {
+    //                 if (p.isAnyAtFileNode()) {
+    //                     d['p'] = p;
+    //                     break;
+    //                 }
+    //                 p.moveToParent();
+    //             }
+    //         }
+    //         g.app.externalFilesController.open_with(c, d);
+    //     } else if (!d) {
+    //         g.trace('can not happen: no d', g.callers());
+    //     }
+    // }
     //@+node:felix.20211223223002.11: *4* c.recreateGnxDict
     /**
      * Recreate the gnx dict prior to refreshing nodes from disk.

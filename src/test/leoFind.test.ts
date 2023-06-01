@@ -38,7 +38,7 @@ class DummyTagController extends TagController {
     }
 }
 
-//@+node:felix.20221226222117.1: ** suite TestFind(LeoUnitTest)
+//@+node:felix.20221226222117.1: ** suite TestFind
 suite('Test cases for leoFind.ts', () => {
     let self: LeoUnitTest;
 
