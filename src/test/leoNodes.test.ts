@@ -44,7 +44,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const fc = self.c.fileCommands;
         const root_p = c.rootPosition()!;
         const root_v = c.rootPosition()!.v;
-        g.trace(root_p._childIndex)
+        g.trace(root_p._childIndex);
         for (const p of c.all_positions()) {
             // ap1 and ap2 are lists of ints.
             const ap1 = p.archivedPosition();
@@ -78,7 +78,9 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
 
     test('test_p__gt__', () => {
         // p.__gt__ is the foundation for >, <, >=, <=.
-        // ! IN LEOJS THE valueOf OVERRIDE IS USED INSTEAD !
+
+        // ! TEST IF valueOf OVERRIDE IS USED INSTEAD !
+
         const p = self.c.rootPosition()!;
         let n = 0;
         // Test all possible comparisons.
@@ -87,14 +89,14 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
             const next = p.threadNext();  // Make a copy.
             while (prev) {
                 n += 1;
-                assert.ok(p != prev);
+                assert.ok(p !== prev);
                 assert.ok(prev < p);
                 assert.ok(p > prev);
                 prev.moveToThreadBack();
             }
             while (next) {
                 n += 1;
-                assert.ok(p != prev);
+                assert.ok(p !== prev);
                 assert.ok(next > p);
                 assert.ok(p < next);
                 next.moveToThreadNext();
@@ -407,7 +409,10 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const p = self.c.rootPosition()!;
         while (p) {
             for (const sib of p.following_siblings()) {
-                assert.ok(p != sib);
+
+                // ! TEST IF valueOf OVERRIDE IS USED INSTEAD !
+
+                assert.ok(p !== sib);
                 assert.ok(p < sib);
             }
             p.moveToThreadNext();
@@ -419,11 +424,11 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
 
         const p_true = (p: Position): boolean => {
             return true;
-        }
+        };
 
         const p_false = (p: Position): boolean => {
             return false;
-        }
+        };
 
         // Create top-level @file node..
         const root1 = c.rootPosition()!.insertAfter();
@@ -461,6 +466,9 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const p = self.c.rootPosition()!;
         while (p) {
             for (const descendant of p.unique_subtree()) {
+
+                // ! TEST IF valueOf OVERRIDE IS USED INSTEAD !
+
                 assert.ok(p <= descendant);
             }
             p.moveToThreadNext();
@@ -1278,7 +1286,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         ];
 
         for (const func of table1) {
-            assert.ok(!func.bind(v)(), func.name)
+            assert.ok(!func.bind(v)(), func.name);
         }
         const table2 = [
             v.bodyString,

@@ -11,9 +11,8 @@ import * as g from '../core/leoGlobals';
 
 // TODO : DOCUTILS
 //import * as docutils from "xxx"
-
 const docutils = false;
-import { Position, VNode } from '../core/leoNodes';
+
 import { LeoUnitTest } from './leoTest2';
 
 //@+others

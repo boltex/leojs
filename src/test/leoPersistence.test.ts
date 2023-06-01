@@ -5,10 +5,9 @@
  */
 import * as assert from 'assert';
 import { afterEach, before, beforeEach } from 'mocha';
-import * as path from 'path';
 
 import * as g from '../core/leoGlobals';
-import { Position, VNode } from '../core/leoNodes';
+import { Position } from '../core/leoNodes';
 import { LeoUnitTest } from './leoTest2';
 
 //@+others

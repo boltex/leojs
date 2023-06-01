@@ -9,7 +9,7 @@ import { afterEach, before, beforeEach } from 'mocha';
 import * as path from 'path';
 
 import * as g from '../core/leoGlobals';
-import { Position, VNode } from '../core/leoNodes';
+import { Position } from '../core/leoNodes';
 import { LeoUnitTest } from './leoTest2';
 import { Marker, ShadowController } from '../core/leoShadow';
 
@@ -29,7 +29,7 @@ export class TestAtShadow extends LeoUnitTest {
 
         super.setUp();
         const delims: [string, string, string] = ['#', '', ''];
-        const c = this.c
+        const c = this.c;
 
         const base_dir = g.os_path_dirname(__dirname);
         c.mFileName = g.finalize_join(base_dir, '..', '..', 'test666.leo');
@@ -66,12 +66,12 @@ export class TestAtShadow extends LeoUnitTest {
      */
     public async make_lines(old: Position, p_new: Position): Promise<[string[], string[]]> {
 
-        const c = this.c
+        const c = this.c;
         // Calculate all required lines.
-        const old_private_lines: string[] = await this.makePrivateLines(old)
-        const new_private_lines: string[] = await this.makePrivateLines(p_new)
-        const old_public_lines: string[] = this.makePublicLines(old_private_lines)
-        const new_public_lines: string[] = this.makePublicLines(new_private_lines)
+        const old_private_lines: string[] = await this.makePrivateLines(old);
+        const new_private_lines: string[] = await this.makePrivateLines(p_new);
+        const old_public_lines: string[] = this.makePublicLines(old_private_lines);
+        const new_public_lines: string[] = this.makePublicLines(new_private_lines);
         const expected_private_lines: string[] = this.mungePrivateLines(
             new_private_lines, 'node:new', 'node:old'
         );
@@ -190,7 +190,7 @@ suite('TestAtShadow', () => {
             node 1 line 2
             node 2 line 1
             node 2 line 2
-        `).replace(/AT/g, '@')
+        `).replace(/AT/g, '@');
         // Create the 'new' node.
         const w_new = p.insertAsLastChild();
         w_new.h = 'new';
@@ -286,7 +286,7 @@ suite('TestAtShadow', () => {
             node 1 line 2
             node 2 line 1
             node 2 line 2
-        `).replace(/at\-others/g, '@others')
+        `).replace(/at\-others/g, '@others');
         // Create the 'new' node.
         const w_new = p.insertAsLastChild();
         w_new.h = 'new';
@@ -296,7 +296,7 @@ suite('TestAtShadow', () => {
             node 1 line 2
             node 2 line 1 changed
             node 2 line 2
-        `).replace(/at\-others/g, '@others')
+        `).replace(/at\-others/g, '@others');
         // Run the test.
         let [results, expected] = await self.make_lines(old, w_new);
         assert.ok(g.compareArrays(results, expected));
@@ -313,7 +313,7 @@ suite('TestAtShadow', () => {
             node 1 line 2
             node 2 line 1
             node 2 line 2
-        `).replace(/at\-others/g, '@others')
+        `).replace(/at\-others/g, '@others');
         // Create the 'new' node.
         const w_new = p.insertAsLastChild();
         w_new.h = 'new';
@@ -322,7 +322,7 @@ suite('TestAtShadow', () => {
             node 1 line 1
             node 2 line 1
             node 2 line 2
-        `).replace(/at\-others/g, '@others')
+        `).replace(/at\-others/g, '@others');
         // Run the test.
         let [results, expected] = await self.make_lines(old, w_new);
         assert.ok(g.compareArrays(results, expected));
@@ -338,7 +338,7 @@ suite('TestAtShadow', () => {
             node 1 line 1
             node 2 line 1
             node 2 line 2
-        `).replace(/at\-others/g, '@others')
+        `).replace(/at\-others/g, '@others');
         // Create the 'new' node.
         const w_new = p.insertAsLastChild();
         w_new.h = 'new';
@@ -346,7 +346,7 @@ suite('TestAtShadow', () => {
             at-others
             node 1 line 1
             node 2 line 2
-        `).replace(/at\-others/g, '@others')
+        `).replace(/at\-others/g, '@others');
         // Run the test.
         let [results, expected] = await self.make_lines(old, w_new);
         assert.ok(g.compareArrays(results, expected));
@@ -523,7 +523,7 @@ suite('TestAtShadow', () => {
             at-others
             node 1 line 1
             node 2 line 1
-        `).replace(/at\-others/g, '@others')
+        `).replace(/at\-others/g, '@others');
         // Create the 'new' node.
         const w_new = p.insertAsLastChild();
         w_new.h = 'new';
@@ -682,7 +682,7 @@ suite('TestAtShadow', () => {
             node 1 line 2
             node 2 line 1
             node 2 line 2
-        `).replace(/at\-others/g, '@others')
+        `).replace(/at\-others/g, '@others');
         // Create the 'new' node.
         const w_new = p.insertAsLastChild();
         w_new.h = 'new';
@@ -692,7 +692,7 @@ suite('TestAtShadow', () => {
             node 1 line 2 changed
             node 2 line 1 changed
             node 2 line 2 changed
-        `).replace(/at\-others/g, '@others')
+        `).replace(/at\-others/g, '@others');
         // Run the test.
         let [results, expected] = await self.make_lines(old, w_new);
         assert.ok(g.compareArrays(results, expected));
@@ -790,7 +790,7 @@ suite('TestAtShadow', () => {
             node 1 line 2
             node 2 line 1
             node 2 line 2
-        `).replace(/at\-/, '@')
+        `).replace(/at\-/, '@');
         // Create the 'new' node.
         const w_new = p.insertAsLastChild();
         w_new.h = 'new';
@@ -802,7 +802,7 @@ suite('TestAtShadow', () => {
             node 1 line 2
             node 2 line 1
             node 2 line 2
-        `).replace(/at\-/g, '@')
+        `).replace(/at\-/g, '@');
         // Run the test.
         let [results, expected] = await self.make_lines(old, w_new);
         assert.ok(g.compareArrays(results, expected));
@@ -822,7 +822,7 @@ suite('TestAtShadow', () => {
             node 2 line 1
             node 2 line 2
             node 2 line 3
-        `).replace(/at\-/, '@')
+        `).replace(/at\-/, '@');
         // Create the 'new' node.
         const w_new = p.insertAsLastChild();
         w_new.h = 'new';
@@ -833,7 +833,7 @@ suite('TestAtShadow', () => {
             node 2 line 1
             node 2 line 2
             node 2 line 3
-        `).replace(/at\-/, '@')
+        `).replace(/at\-/, '@');
         // Run the test.
         let [results, expected] = await self.make_lines(old, w_new);
         assert.ok(g.compareArrays(results, expected));
@@ -851,7 +851,7 @@ suite('TestAtShadow', () => {
             #  at- should be handled by verbatim
             node 2 line 1
             node 2 line 2
-        `).replace(/at\-/, '@')
+        `).replace(/at\-/, '@');
         // Create the 'new' node.
         const w_new = p.insertAsLastChild();
         w_new.h = 'new';
@@ -860,7 +860,7 @@ suite('TestAtShadow', () => {
             node 1 line 1
             node 2 line 1
             node 2 line 2
-        `).replace(/at\-/, '@')
+        `).replace(/at\-/, '@');
         // Run the test.
         let [results, expected] = await self.make_lines(old, w_new);
         assert.ok(g.compareArrays(results, expected));

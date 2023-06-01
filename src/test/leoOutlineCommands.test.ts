@@ -24,8 +24,11 @@ suite('TestOutlineCommands', () => {
         self.setUp();
         const c = self.c;
         const p = self.c.p;
-        assert.ok(p == self.root_p);
-        assert.ok(p.h == 'root');
+
+        // ! TEST IF valueOf OVERRIDE IS USED INSTEAD !
+
+        assert.ok(p === self.root_p);
+        assert.ok(p.h === 'root');
         const table = [
             'child a',
             'child z',
@@ -53,8 +56,11 @@ suite('TestOutlineCommands', () => {
     test('create_test_sort_outline', () => {
 
         const p = self.c.p;
-        assert.ok(p == self.root_p);
-        assert.ok(p.h == 'root');
+
+        // ! TEST IF valueOf OVERRIDE IS USED INSTEAD !
+
+        assert.ok(p === self.root_p);
+        assert.ok(p.h === 'root');
         const table = [
             'child a',
             'child z',

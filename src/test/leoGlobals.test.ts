@@ -1041,7 +1041,7 @@ suite('Tests for leo.core.leoGlobals', () => {
         const c = self.c;
 
         const fc = c.fileCommands;
-        const w_path = g.os_path_finalize_join(g.app.loadDir || '', '..', 'test', 'test-read-only.txt')
+        const w_path = g.os_path_finalize_join(g.app.loadDir || '', '..', 'test', 'test-read-only.txt');
         const w_exists = await g.os_path_exists(w_path);
 
         if (w_exists && fs.chmod) {

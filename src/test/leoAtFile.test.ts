@@ -548,7 +548,7 @@ suite('Test cases for leoAtFile.ts', () => {
             // https://stackoverflow.com/questions/23212435
             // f = tempfile.NamedTemporaryFile(delete=False, encoding=encoding, mode='w')
             // fn = f.name
-            const contents = 'test contents'
+            const contents = 'test contents';
             const timestamp: number = new Date().getTime();
             const fn = "tempfile" + timestamp.toString(32) + ".tmp";
 
@@ -1242,7 +1242,7 @@ suite('Test the FastAtRead class', () => {
 
         //Test 1: without black delims.
         g.app.write_black_sentinels = false;
-        x.read_into_root(contents, 'test', root)
+        x.read_into_root(contents, 'test', root);
         assert.strictEqual(root.b, expected_body);
         let s = await c.atFileCommands.atFileToString(root, true);
         assert.strictEqual(contents, s);
