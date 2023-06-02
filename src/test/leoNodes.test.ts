@@ -84,24 +84,31 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
         const p = self.c.rootPosition()!;
         let n = 0;
         // Test all possible comparisons.
-        while (p) {
+        while (p.__bool__()) {
             const prev = p.threadBack();  // Make a copy.
             const next = p.threadNext();  // Make a copy.
-            while (prev) {
+            while (prev.__bool__()) {
                 n += 1;
                 assert.ok(p !== prev);
                 assert.ok(prev < p);
                 assert.ok(p > prev);
+                assert.ok(prev.__lt__(p));
+                assert.ok(p.__gt__(prev));
                 prev.moveToThreadBack();
             }
-            while (next) {
+            while (next.__bool__()) {
                 n += 1;
                 assert.ok(p !== prev);
                 assert.ok(next > p);
                 assert.ok(p < next);
+                assert.ok(next.__gt__(p));
+                assert.ok(p.__lt__(next));
                 next.moveToThreadNext();
             }
             p.moveToThreadNext();
+            if (p && p.__bool__()) {
+                console.log('p.h', p.h);
+            }
         }
     });
     //@+node:felix.20230530211011.6: *5* TestNodes.test_p_key
@@ -115,15 +122,15 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     test('test_p_comparisons', () => {
         const c = self.c;
         const p = self.c.p;
-        const root = c.rootPosition();
-        assert.strictEqual(root, p);
+        const root = c.rootPosition()!;
+        assert.ok(root.__eq__(p));
         const child = p.firstChild();
         assert.ok(child);
         const grandChild = child.firstChild();
         assert.ok(grandChild);
         const copy = p.copy();
-        assert.strictEqual(p, copy);
-        assert.notEqual(p, p.threadNext());
+        assert.ok(p.__eq__(copy));
+        assert.ok(!p.__eq__(p.threadNext()));
         assert.ok(p.__eq__(p));
         assert.ok(!p.__ne__(copy));
         assert.ok(p.__eq__(root));
@@ -407,7 +414,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     //@+node:felix.20230530211011.30: *5* TestNodes.test_p_following_siblings
     test('test_p_following_siblings', () => {
         const p = self.c.rootPosition()!;
-        while (p) {
+        while (p && p.__bool__()) {
             for (const sib of p.following_siblings()) {
 
                 // ! TEST IF valueOf OVERRIDE IS USED INSTEAD !
@@ -464,7 +471,7 @@ suite('Unit tests for leo/core/leoNodes.ts.', () => {
     //@+node:felix.20230530211011.34: *5* TestNodes.test_p_unique_subtree
     test('test_p_unique_subtree', () => {
         const p = self.c.rootPosition()!;
-        while (p) {
+        while (p && p.__bool__()) {
             for (const descendant of p.unique_subtree()) {
 
                 // ! TEST IF valueOf OVERRIDE IS USED INSTEAD !

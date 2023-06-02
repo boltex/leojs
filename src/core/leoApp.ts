@@ -102,9 +102,6 @@ export class IdleTimeManager {
             'IdleTimeManager.on_idle'
         );
 
-        if (this.timer) {
-            this.timer.start();
-        }
     }
     //@-others
 

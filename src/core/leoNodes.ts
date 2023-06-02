@@ -404,6 +404,9 @@ export class Position {
     }
 
     //@+node:felix.20210126210412.7: *4* p.__str__ and p.__repr__
+    /** 
+     * For Position string output printout
+     */
     public __str__(): string {
         const p: Position = this;
         if (p.v) {
@@ -418,16 +421,36 @@ export class Position {
         }
         return `<pos [${p.stack.length}] None>`;
     }
+
+    /** 
+     * * For Position string output printout
+     */
     public toString(): string {
         return this.__str__();
     }
-    public valueOf(): string {
-        if (this.__bool__()) {
-            return this.__str__();
-        }
-        return "";
-    }
 
+
+    //@+node:felix.20230601210333.1: *4* p.valueOf
+    /**
+     * For > >= < <= greater/lesser comparisons in javascript. 
+     * Note: Boolean evaluation still has to call valueOf, or __bool__.
+     */
+    public valueOf(): number {
+        if (this.__bool__()) {
+            let order = 1;
+            const c: Commands = this.v.context;
+            const p1: Position | undefined = c.rootPosition();
+            while (p1 && p1.v) {
+                if (this.__eq__(p1)) {
+                    break;
+                }
+                order += 1;
+                p1.moveToThreadNext();
+            }
+            return order; // 1 for rootPosition, the first child of the hiddenRootNode.
+        }
+        return 0; // falsy.
+    }
     //@+node:felix.20210126210412.8: *4* p.archivedPosition
     /**
      * Return a representation of a position suitable for use in .leo files.
@@ -510,7 +533,7 @@ export class Position {
 
     //@+node:felix.20210204224730.2: *4* p.convertTreeToString
     /**
-     * Convert a positions  suboutline to a string in MORE format.
+     * Convert a positions suboutline to a string in MORE format.
      */
     public convertTreeToString(): string {
         const p1: Position = this;
@@ -2631,7 +2654,7 @@ export interface Position {
     atAsisFileNodeName: () => string;
     isAtNoSentFileNode: () => boolean;
     isAtAsisFileNode: () => boolean;
-    __repr__: () => string;
+    __repr__: () => number;
     simpleLevel: () => number;
 
     initBodyString: (s: string) => void;

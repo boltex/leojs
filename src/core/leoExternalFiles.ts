@@ -191,9 +191,9 @@ export class ExternalFilesController {
             }
         }
         // Fix #262: Improve performance when @bool check-for-changed-external-files is True.
-        if (this.unchecked_files) {
+        if (this.unchecked_files && this.unchecked_files.length) {
             // Check all external files.
-            while (this.unchecked_files) {
+            while (this.unchecked_files.length) {
                 const ef = this.unchecked_files.pop()!;  // #1959: ensure progress.
                 await this.idle_check_open_with_file(c, ef);
             }

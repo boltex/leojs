@@ -26,8 +26,7 @@ suite('TestOutlineCommands', () => {
         const p = self.c.p;
 
         // ! TEST IF valueOf OVERRIDE IS USED INSTEAD !
-
-        assert.ok(p === self.root_p);
+        assert.ok(p.__eq__(self.root_p));
         assert.ok(p.h === 'root');
         const table = [
             'child a',
@@ -57,9 +56,7 @@ suite('TestOutlineCommands', () => {
 
         const p = self.c.p;
 
-        // ! TEST IF valueOf OVERRIDE IS USED INSTEAD !
-
-        assert.ok(p === self.root_p);
+        assert.ok(p.__eq__(self.root_p));
         assert.ok(p.h === 'root');
         const table = [
             'child a',

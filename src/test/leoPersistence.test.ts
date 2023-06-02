@@ -180,12 +180,12 @@ suite('Unit tests for leo/core/leoPersistence.ts.', () => {
         assert.ok(data && data.__bool__());
         const data2 = pd.has_at_data_node(root);
         assert.ok(data2 && data2.__bool__());
-        assert.ok(data.__eq__(data2), data.__repr__() + data2.__repr__());
+        assert.ok(data.__eq__(data2), data.toString() + data2.toString());
         const gnxs = g.findNodeInTree(c, persistence, '@gnxs');
         assert.ok(gnxs && gnxs.__bool__());
         const gnxs2 = pd.has_at_gnxs_node(root);
         assert.ok(gnxs2 && gnxs2.__bool__());
-        assert.ok(gnxs.__eq__(gnxs2), gnxs.__repr__() + gnxs2.__repr__());
+        assert.ok(gnxs.__eq__(gnxs2), gnxs.toString() + gnxs2.toString());
     });
     //@+node:felix.20230530003947.10: *3* TestPersistence.test_pd_restore_gnxs
     test('test_pd_restore_gnxs', () => {
