@@ -751,9 +751,11 @@ export class PersistenceDataController {
      */
     public unl(p: Position): string {
 
-        const parents = [...p.self_and_parents(false)];
-        const parts = parents.map((p2) => this.expected_headline(p2)).reverse();
-        return parts.join('-->');
+        const parts: string[] = [];
+        for (const p_2 of p.self_and_parents(false)) {
+            parts.push(this.expected_headline(p_2));
+        }
+        return parts.reverse().join('-->');
 
     }
     //@+node:felix.20230424003144.46: *5* pd.unl_tail

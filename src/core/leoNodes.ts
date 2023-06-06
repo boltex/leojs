@@ -464,7 +464,6 @@ export class Position {
             }
         } else {
             for (let z of p.self_and_parents(false)) {
-                aList.push(z._childIndex);
                 if (z.__eq__(root_p)) {
                     aList.push(0);
                     break;

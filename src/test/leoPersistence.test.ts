@@ -215,6 +215,8 @@ suite('Unit tests for leo/core/leoPersistence.ts.', () => {
         const node1 = root.insertAsLastChild();
         node1.h = 'node1';
         c.selectPosition(node1);
+        const p = c.p;
+        assert.ok(c.p && c.p.__bool__());
         const unl = pd.unl(c.p);
         const expected = `-->${c.p.h}`;
         assert.ok(unl.endsWith(expected), unl.toString());
