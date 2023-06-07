@@ -99,9 +99,6 @@ suite('TestFileCommands', () => {
             grandChild1.__bool__() &&
             grandChild2.__bool__()
         );
-        // Tests...
-        let val = p.archivedPosition(p);
-        assert.strictEqual(val, [0]);
 
         const arraysHaveSameElements = (arr1: any[], arr2: any[]): boolean => {
             if (arr1.length !== arr2.length) {
@@ -116,6 +113,10 @@ suite('TestFileCommands', () => {
 
             return true; // All elements match in the same order
         };
+
+        // Tests...
+        let val = p.archivedPosition(p);
+        assert.ok(arraysHaveSameElements(val, [0]));
 
         for (const [i, z] of [...p.children_iter()].entries()) {
             val = z.archivedPosition(p);
