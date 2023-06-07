@@ -40,7 +40,7 @@ suite('Test cases for leoFrame.ts', () => {
         const table: (keyof LeoFrame)[] = [
             'body',
             'iconBar',
-            'log',
+            // 'log',  // UNUSED IN LEOJS
             // 'statusLine',  // UNUSED IN LEOJS
             'tree'
         ];
