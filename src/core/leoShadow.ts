@@ -224,7 +224,13 @@ export class ShadowController {
      */
     public shadowDirName(filename: string): string {
         const x = this;
-        return g.os_path_dirname(x.shadowPathName(filename));
+        const sp = x.shadowPathName(filename);
+        const dn = g.os_path_dirname(sp);
+
+        g.es(`shadowDirName for ${filename} => shadowPathName: ${sp}, gives os_path_dirname: ${dn} `);
+
+        return dn;
+
     }
     /**
      * Return the full path name of filename, resolved using c.fileName()
@@ -246,11 +252,16 @@ export class ShadowController {
             // build the cache path as a subdir of the base dir
             fileDir = [baseDir, fname, fileDir].join("/");
         };
-        return baseDir && g.finalize_join(  // 1341
+
+        const result = baseDir && g.finalize_join(  // 1341
             baseDir,
             fileDir,  // Bug fix: honor any directories specified in filename.
             x.shadow_subdir!,
             x.shadow_prefix + g.shortFileName(filename));
+
+        g.es(`shadowPathName for ${filename} => baseDir: ${baseDir}, os_path_dirname: ${fileDir}, gives finalize_join ${result} `);
+
+        return result;
 
     }
     //@+node:felix.20230410203541.10: *3* x.Propagation

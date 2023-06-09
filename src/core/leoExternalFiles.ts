@@ -27,12 +27,12 @@ export class ExternalFile {
     /**
      * Ctor for ExternalFile class.
      */
-    constructor(c: Commands, ext: string, p: Position, path: string, time: number) {
+    constructor(c: Commands, ext: string, p: Position, p_path: string, time: number) {
         this.c = c;
         this.ext = ext;
         this.p = p && p.__bool__() && p.copy();
         // The nearest @<file> node.
-        this.path = path;
+        this.path = p_path;
         this.time = time;  // Used to inhibit endless dialog loop.
         // See efc.idle_check_open_with_file.
     }
@@ -121,17 +121,17 @@ export class ExternalFilesController {
      * Return True if the file given by fn has not been changed
      * since Leo read it or if the user agrees to overwrite it.
      */
-    public async check_overwrite(c: Commands, path: string): Promise<boolean> {
+    public async check_overwrite(c: Commands, p_path: string): Promise<boolean> {
 
-        if (c.sqlite_connection && c.mFileName === path) {
+        if (c.sqlite_connection && c.mFileName === p_path) {
             // sqlite database file is never actually overwritten by Leo
             // so no need to check its timestamp. It is modified through
             // sqlite methods.
             return true;
         }
 
-        if (await this.has_changed(path)) {
-            const val = await this.ask(c, path);
+        if (await this.has_changed(p_path)) {
+            const val = await this.ask(c, p_path);
             return ['yes', 'yes-all'].includes(val);  // #1888
         }
 
@@ -480,7 +480,8 @@ export class ExternalFilesController {
         let td = path.resolve(os.tmpdir());
 
         while (ancestors.length > 1) {
-            td = path.join(td, ancestors.pop()!);
+
+            td = g.PYTHON_os_path_join(td, ancestors.pop()!);
             const w_exists = await g.os_path_exists(td);
             if (!w_exists) {
                 const w_uri = g.makeVscodeUri(td);
@@ -491,7 +492,7 @@ export class ExternalFilesController {
         }
         // Compute the full path.
         const w_name = ancestors.pop() + ext;
-        const w_path = path.join(td, w_name);
+        const w_path = g.PYTHON_os_path_join(td, w_name);
         return w_path;
 
     }
@@ -511,7 +512,7 @@ export class ExternalFilesController {
             g.es(`Temporary files will be stored in: ${leoTempDir}`);
         }
 
-        const td = path.join(path.resolve(os.tmpdir()), leoTempDir);
+        const td = g.PYTHON_os_path_join(path.resolve(os.tmpdir()), leoTempDir);
         const w_exists = await g.os_path_exists(td);
         if (!w_exists) {
             const w_uri = g.makeVscodeUri(td);
@@ -522,7 +523,7 @@ export class ExternalFilesController {
         // ! NO 'id' in javascript!
         // TODO : TEST IF OTHER STRING IS OK!
         const name = g.sanitize_filename(p.h) + '_' + p.v.gnx + ext;
-        const w_path = path.join(td, name);
+        const w_path = g.PYTHON_os_path_join(td, name);
         return w_path;
 
     }
@@ -777,9 +778,9 @@ export class ExternalFilesController {
     /**
      * Return the modification time for the path.
      */
-    public get_mtime(path: string): Promise<number> {
+    public get_mtime(p_path: string): Promise<number> {
 
-        return g.os_path_getmtime(g.os_path_realpath(path));
+        return g.os_path_getmtime(g.os_path_realpath(p_path));
 
     }
 
@@ -789,9 +790,9 @@ export class ExternalFilesController {
      *
      * see set_time() for notes
      */
-    public get_time(path: string): number {
+    public get_time(p_path: string): number {
 
-        return this._time_d[g.os_path_realpath(path)];
+        return this._time_d[g.os_path_realpath(p_path)];
 
     }
     //@+node:felix.20230503004807.27: *4* efc.has_changed
@@ -886,7 +887,7 @@ export class ExternalFilesController {
      *
      * There is *no way* to update the tree automatically.
      */
-    public async warn(c: Commands, path: string, p: Position): Promise<void> {
+    public async warn(c: Commands, p_path: string, p: Position): Promise<void> {
 
         if (g.unitTesting || !g.app.commanders().includes(c)) {
             return Promise.resolve();
@@ -899,7 +900,7 @@ export class ExternalFilesController {
             c,
             'External file changed',
             [
-                `${g.splitLongFileName(path)} has changed outside Leo.\n`,
+                `${g.splitLongFileName(p_path)} has changed outside Leo.\n`,
                 'Leo can not update this file automatically.\n',
                 `This file was created from ${p.h}.\n`,
                 'Warning: refresh-from-disk will destroy all children.'

@@ -4303,12 +4303,6 @@ export const os_path_finalize = finalize;  // Compatibility.
  */
 export function finalize_join(...args: string[]): string {
 
-    // uargs = [z for z in args if z]
-    // if not uargs:
-    //     return ''
-    // // Expand everything before joining.
-    // uargs2 = [os.path.expandvars(os.path.expanduser(z)) for z in uargs]
-
     if (!args || !args.length) {
         return '';
     }
@@ -4327,13 +4321,12 @@ export function finalize_join(...args: string[]): string {
     }
 
     // Join the paths.
-    let w_path = path.join(...uargs);
-    // let w_path = os.path.join(*uargs2)
+    let w_path = PYTHON_os_path_join(...uargs);
 
     // Check to collapse all beginning home dirs duplicata
-    if (os.homedir) {
+    if (false && os.homedir) {
 
-        const homeDir = path.join(os.homedir());
+        const homeDir = PYTHON_os_path_join(os.homedir());
         const escHomeDir = homeDir.replace(/\\/g, "\\\\");
         const cleanSlashes = (p_path: string): string => {
             p_path = p_path.replace(/\/\//g, "/");
@@ -4344,7 +4337,7 @@ export function finalize_join(...args: string[]): string {
         };
 
         // replace /home/home/s1.py with /home/s1.py
-        const doubleHome = path.join(homeDir, homeDir); // homeDir + homeDir;
+        const doubleHome = PYTHON_os_path_join(homeDir, homeDir); // homeDir + homeDir;
         while (w_path.startsWith(doubleHome)) {
             w_path = w_path.replace(doubleHome, homeDir);
             w_path = cleanSlashes(w_path);
@@ -4388,8 +4381,8 @@ export function finalize_join(...args: string[]): string {
 
         // replace /home/leo_base/s5.py with /leo_base/s5.py
         if (process && process.env && process.env.LEO_BASE) {
-            const escLeoBase = path.join(process.env.LEO_BASE).replace(/\\/g, "\\\\");
-            const escHomeLeoBase = path.join(homeDir, process.env.LEO_BASE).replace(/\\/g, "\\\\");
+            const escLeoBase = PYTHON_os_path_join(process.env.LEO_BASE).replace(/\\/g, "\\\\");
+            const escHomeLeoBase = PYTHON_os_path_join(homeDir, process.env.LEO_BASE).replace(/\\/g, "\\\\");
 
             testRegex = new RegExp(`^${escHomeLeoBase}`);
             while (testRegex.test(w_path)) {
@@ -4699,6 +4692,46 @@ export async function os_path_isfile(p_path?: string): Promise<boolean> {
 
 
 }
+//@+node:felix.20230608221301.1: *3* g.PYTHON_os_path_join
+/**
+ * PYTHON'S OS PATH JOIN ! 
+ * os.path.join(path, *paths)
+ *
+ * Join one or more path segments intelligently. The return value is the concatenation
+ * of path and all members of *paths, with exactly one directory separator following 
+ * each non-empty part, except the last.
+ *
+ * That is, the result will only end in a separator
+ * if the last part is either empty or ends in a separator. 
+ *
+ * If a segment is an absolute path (which on Windows requires both a drive and a root),
+ * then all previous segments are ignored and joining continues from the absolute path segment.
+ *
+ * On Windows, the drive is not reset when a rooted path segment (e.g., r'\foo') is encountered.
+ *
+ * If a segment is on a different drive or is an absolute path, all previous segments 
+ * are ignored and the drive is reset. 
+ *
+ * Note that since there is a current directory for each drive, 
+ * os.path.join("c:", "foo") represents a path relative to the current 
+ * directory on drive C: (c:foo), not c:\foo.
+ */
+export function PYTHON_os_path_join(...args: any[]): string {
+    let uargs: string[] = [];
+    for (let z of args) {
+        if (z) {
+            if (path.isAbsolute(z)) {
+                uargs = [];
+            }
+            uargs.push(z);
+        }
+    }
+    if (!uargs.length) {
+        return '';
+    }
+    let w_path = path.join(...uargs);
+    return w_path;
+}
 //@+node:felix.20211227182611.15: *3* g.os_path_join
 /**
  * Join paths, like os.path.join, with enhancements:
@@ -4722,36 +4755,7 @@ export function os_path_join(...args: any[]): string {
     if (!uargs.length) {
         return '';
     }
-    let w_path = path.join(...uargs);
-
-    // // Note:  This is exactly the same convention as used by getBaseDirectory.
-    // if (uargs[0] === '!!') {
-    //     uargs[0] = app.loadDir || '';
-    // } else if (uargs[0] === '.') {
-    //     if (c && c.openDirectory) {
-    //         uargs[0] = c.openDirectory;
-    //     }
-    // }
-    // let w_path: string;
-
-    // try {
-    //     w_path = path.join(...uargs);
-    // }
-    // catch (typeError) {
-    //     trace(uargs, callers());
-    //     throw (typeError);
-    // }
-    // // May not be needed on some Pythons.
-    // if (w_path.includes('\x00')) {
-    //     trace('NULL in', w_path.toString(), callers());
-    //     w_path = w_path.split('\x00').join(''); // Fix Python 3 bug on Windows 10.
-    // }
-
-    // // os.path.normpath does the *reverse* of what we want.
-    // if (isWindows) {
-    //     w_path = w_path.split('\\').join('/');
-    // }
-
+    let w_path = PYTHON_os_path_join(...uargs);
     w_path = os_path_normslashes(w_path);
     return w_path;
 }
