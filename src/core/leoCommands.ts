@@ -2339,56 +2339,69 @@ export class Commands {
     }
     //@+node:felix.20220102021736.1: *3* c.expand_path_expression
     /**
-     * Expand all {{anExpression}} in c's context.
+     * Apply Python's *standard* os.path tools to s:
+     *
+     * - os.path.expanduser: https://docs.python.org/3/library/os.path.html#os.path.expanduser
+     * - os.path.expandvars: https://docs.python.org/3/library/os.path.html#os.path.expandvars
+     *
+     * Do *not* call os.path.abspath, os.path.normpath, or g.os_path_normslashes.
      */
     public expand_path_expression(s: string): string {
-        const c: Commands = this;
-
         if (!s) {
             return '';
         }
-        s = g.toUnicode(s);
+        let w_path = g.toUnicode(s);
+        w_path = g.os_path_expanduser(w_path);
+        w_path = g.os_path_expandvars(w_path);
+        return w_path;
 
-        // find and replace repeated path expressions
-        let previ: number = 0;
-        const aList: string[] = [];
+        // const c: Commands = this;
 
-        while (previ < s.length) {
-            const i = s.indexOf('{{', previ);
-            const j = s.indexOf('}}', previ);
-            if (-1 < i && i < j) {
-                // Add anything from previous index up to '{{'
-                if (previ < i) {
-                    aList.push(s.substring(previ, i));
-                }
-                // Get expression and find substitute
-                const exp: string = s.substring(i + 2, j).trim();
-                if (exp) {
-                    try {
-                        const s2 = c.replace_path_expression(exp);
-                        aList.push(s2);
-                    } catch (exception) {
-                        g.es(
-                            `Exception evaluating {{ ${exp} }} in ${s.trim()}`
-                        );
-                        g.es_exception(exception, c);
-                    }
-                }
-                // Prepare to search again after the last '}}'
-                previ = j + 2;
-            } else {
-                // Add trailing fragment (fragile in case of mismatched '{{'/'}}')
-                aList.push(s.substring(previ));
-                break;
-            }
-        }
+        // if (!s) {
+        //     return '';
+        // }
+        // s = g.toUnicode(s);
 
-        let val: string = aList.join('');
-        if (g.isWindows) {
-            val = val.split('\\').join('/');
-        }
+        // // find and replace repeated path expressions
+        // let previ: number = 0;
+        // const aList: string[] = [];
 
-        return val;
+        // while (previ < s.length) {
+        //     const i = s.indexOf('{{', previ);
+        //     const j = s.indexOf('}}', previ);
+        //     if (-1 < i && i < j) {
+        //         // Add anything from previous index up to '{{'
+        //         if (previ < i) {
+        //             aList.push(s.substring(previ, i));
+        //         }
+        //         // Get expression and find substitute
+        //         const exp: string = s.substring(i + 2, j).trim();
+        //         if (exp) {
+        //             try {
+        //                 const s2 = c.replace_path_expression(exp);
+        //                 aList.push(s2);
+        //             } catch (exception) {
+        //                 g.es(
+        //                     `Exception evaluating {{ ${exp} }} in ${s.trim()}`
+        //                 );
+        //                 g.es_exception(exception, c);
+        //             }
+        //         }
+        //         // Prepare to search again after the last '}}'
+        //         previ = j + 2;
+        //     } else {
+        //         // Add trailing fragment (fragile in case of mismatched '{{'/'}}')
+        //         aList.push(s.substring(previ));
+        //         break;
+        //     }
+        // }
+
+        // let val: string = aList.join('');
+        // if (g.isWindows) {
+        //     val = val.split('\\').join('/');
+        // }
+
+        // return val;
     }
     //@+node:felix.20220102021736.2: *4* c.replace_path_expression
     /**

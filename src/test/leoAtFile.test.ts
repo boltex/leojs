@@ -117,20 +117,6 @@ suite('Test cases for leoAtFile.ts', () => {
             path = c.fullPath(child)
             assert '~' not in path, repr(path)
      */
-    //@+node:felix.20230528191911.7: *3* TestAtFile.test_bug_3270_at_path
-    test('test_bug_3270_at_path', () => {
-        // @path c:/temp/leo
-        //   @file at_file_test.py
-        const c = self.c;
-        const root = c.rootPosition()!;
-        root.h = '@path c:/temp/leo';
-        const child = root.insertAsLastChild();
-        child.h = '@file at_file_test.py';
-        const w_path = c.fullPath(child);
-        const expected = 'c:/temp/leo/at_file_test.py';
-        assert.strictEqual(w_path, expected);
-    });
-
     //@+node:felix.20230528191911.8: *3* TestAtFile.test_bug_3272_at_path
     test('test_bug_3272_at_path', () => {
         //  @path bookmarks

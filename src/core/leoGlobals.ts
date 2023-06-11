@@ -4326,6 +4326,7 @@ export function finalize_join(...args: string[]): string {
     // Convert to an absolute path, similar to os.path.normpath(os.getcwd(), path)
     // w_path = os.path.abspath(w_path)
     // w_path = os.path.normpath(w_path)
+
     w_path = path.resolve(w_path);
     w_path = path.normalize(w_path);
 
