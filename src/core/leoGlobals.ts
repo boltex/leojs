@@ -69,7 +69,8 @@ export const globalDirectiveList: string[] = [
     'beautify',
     'colorcache', 'code', 'color', 'comment', 'c',
     'delims', 'doc',
-    'encoding', 'end_raw',
+    'encoding',
+    // 'end_raw', // #2276.
     'first', 'header', 'ignore',
     'killbeautify', 'killcolor',
     'language', 'last', 'lineending',
@@ -79,7 +80,8 @@ export const globalDirectiveList: string[] = [
     'nopyflakes',  // Leo 6.1.
     'nosearch',  // Leo 5.3.
     'others', 'pagewidth', 'path', 'quiet',
-    'raw', 'root-code', 'root-doc', 'root', 'silent',
+    // 'raw', // #2276.
+    'root-code', 'root-doc', 'root', 'silent',
     'tabwidth', 'terse',
     'unit', 'verbose', 'wrap'
 ];
@@ -1265,7 +1267,7 @@ export function isValidLanguage(language: string): boolean {
     // fn = g.os_path_join(g.app.loadDir, '..', 'modes', {language}.py)
     //return g.os_path_exists(fn)
 
-    return languagesList.includes('language');
+    return languagesList.includes(language);
 }
 //@+node:felix.20220110224137.1: *3* g.scanAtCommentAndLanguageDirectives
 /**

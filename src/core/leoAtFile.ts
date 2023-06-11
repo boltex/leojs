@@ -3011,11 +3011,11 @@ export class AtFile {
         let w_group1EndIndex: number;
         if (m && m.length) {
             const word = m[1];
-            w_group1EndIndex = m.index + word.length;
+            w_group1EndIndex = m.index + word.length + 1;
             if (!g.globalDirectiveList.includes(word)) {
                 return AtFile.noDirective;
             }
-            const s3 = s2[w_group1EndIndex];
+            const s3 = s2.substring(w_group1EndIndex);
             if (s3 && ".(".includes(s3[0])) {
                 return AtFile.noDirective;
             }
