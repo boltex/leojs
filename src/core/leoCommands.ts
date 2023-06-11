@@ -2355,6 +2355,8 @@ export class Commands {
         w_path = g.os_path_expandvars(w_path);
         return w_path;
 
+        // ! OLD INSECURE IMPLEMENTATION !
+
         // const c: Commands = this;
 
         // if (!s) {

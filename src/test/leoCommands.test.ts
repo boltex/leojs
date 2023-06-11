@@ -6,6 +6,7 @@
 import * as assert from 'assert';
 import { afterEach, before, beforeEach } from 'mocha';
 import * as path from 'path';
+import * as os from 'os';
 
 import * as g from '../core/leoGlobals';
 import { Position, VNode } from '../core/leoNodes';
@@ -208,23 +209,59 @@ suite('Test cases for leoCommands.ts', () => {
     });
     //@+node:felix.20220129224954.13: *3* TestCommands.test_c_expand_path_expression
     test('test_c_expand_path_expression', () => {
+
+        // import os
         const c = self.c;
 
-        const sep = path.sep;
+        const abs_base = '/leo_base';
+        c.mFileName = `${abs_base}/test.leo`;
+        // os.environ = {
+        //     'HOME': '/home',  // Linux.
+        //     'USERPROFILE': r'c:\EKR',  // Windows.
+        //     'LEO_BASE': abs_base,
+        // };
+        // SETTING FAKE ENV VARS
+        process.env.HOME = '/home'; // Linux
+        process.env.USERPROFILE = 'c:\\EKR'; // Windows
+        process.env.LEO_BASE = abs_base; // Set the value based on your requirement
 
-        const table = [
-            ['~{{sep}}tmp{{sep}}x.py', `~${sep}tmp${sep}x.py`]
-        ];
+        const home = os.homedir();
+        assert.ok(
+            [process.env.HOME, process.env.USERPROFILE].includes(home),
+            home.toString()
+        );
 
-        let s: string;
-        let expected: string;
-        for ([s, expected] of table) {
-            if (g.isWindows) {
-                expected = expected.split('\\').join('/');
+        // c.expand_path_expressions *only* calls os.path.expanduser and os.path.expandvars.
+        const seps = g.isWindows ? ['\\', '/'] : ['/'];
+        for (const sep of seps) {
+            const table: [string, string][] = [
+                [`~${sep}a.py`, `${home}${sep}a.py`],
+                [`~${sep}x${sep}..${sep}b.py`, `${home}${sep}x${sep}..${sep}b.py`],
+                [`$LEO_BASE${sep}b.py`, `${abs_base}${sep}b.py`],
+                ['c.py', 'c.py'],
+            ];
+            for (const [s, expected] of table) {
+                const got = c.expand_path_expression(s);
+                assert.strictEqual(got, expected, s);
             }
-            const got = c.expand_path_expression(s);
-            assert.strictEqual(got, expected, s);
         }
+        // const c = self.c;
+
+        // const sep = path.sep;
+
+        // const table = [
+        //     ['~{{sep}}tmp{{sep}}x.py', `~${sep}tmp${sep}x.py`]
+        // ];
+
+        // let s: string;
+        // let expected: string;
+        // for ([s, expected] of table) {
+        //     if (g.isWindows) {
+        //         expected = expected.split('\\').join('/');
+        //     }
+        //     const got = c.expand_path_expression(s);
+        //     assert.strictEqual(got, expected, s);
+        // }
     });
     //@+node:felix.20230423155356.1: *3* TestCommands.test_find_b_h
     test('test_find_b_h', () => {
