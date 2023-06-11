@@ -1255,19 +1255,11 @@ export function isDirective(s: string): boolean {
 
 //@+node:felix.20220112002732.1: *3* g.isValidLanguage
 /**
- * True if language exists in leo/modes.
+ * True if the given language may be used as an external file.
  */
 export function isValidLanguage(language: string): boolean {
+    return !!(language && app.language_delims_dict[language]);
 
-    // 2020/08/12: A hack for c++
-    if (['c++', 'cpp'].includes(language)) {
-        language = 'cplusplus';
-    }
-    // TODO !
-    // fn = g.os_path_join(g.app.loadDir, '..', 'modes', {language}.py)
-    //return g.os_path_exists(fn)
-
-    return languagesList.includes(language);
 }
 //@+node:felix.20220110224137.1: *3* g.scanAtCommentAndLanguageDirectives
 /**
