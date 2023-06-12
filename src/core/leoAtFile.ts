@@ -2408,7 +2408,7 @@ export class AtFile {
         for (const child of p.children()) {
             const w_p = child.copy();
             const after = w_p.nodeAfterTree();
-            while (w_p && w_p.__eq__(after)) {
+            while (w_p && !w_p.__eq__(after)) {
                 if (at.validInAtOthers(w_p)) {
                     at.putOpenNodeSentinel(w_p);
                     const at_others_flag = at.putBody(w_p);

@@ -398,15 +398,13 @@ suite('Tests for leo.core.leoGlobals', () => {
         const c = self.c;
         const p = c.p;
 
-        p.b = g.dedent(
-            `\
-            @language python
-            @comment a b c
-                # @comment must follow @language.
-            @tabwidth -8
-            @pagewidth 72
-            @encoding utf-8\n`
-        );
+        p.b = g.dedent(`\
+            ATlanguage python
+            ATcomment a b c
+            ATtabwidth -8
+            ATpagewidth 72
+            ATencoding utf-8
+    `).replace(/AT/g, '@');
 
         const d = g.get_directives_dict(p);
         assert.strictEqual(d['language'], 'python');
@@ -419,16 +417,14 @@ suite('Tests for leo.core.leoGlobals', () => {
     //@+node:felix.20220129223719.14: *3* TestGlobals.test_g_getDocString
     test('test_g_getDocString', () => {
         let s1 = 'no docstring';
-        let s2 = g.dedent(
-            `\
-            # comment
-            """docstring2."""\n`
-        );
-        let s3 = g.dedent(
-            `\
-            """docstring3."""
-            \'\'\'docstring2.\'\'\'\n`
-        );
+        let s2 = g.dedent(`\
+    # comment
+    """docstring2."""
+    `);
+        let s3 = g.dedent(`\
+    """docstring3."""
+    \'\'\'docstring2.\'\'\'
+    `);
         const table = [
             [s1, ''],
             [s2, 'docstring2.'],

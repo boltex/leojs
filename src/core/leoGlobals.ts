@@ -4102,32 +4102,40 @@ export function convertPythonDayjs(s: string): string {
     return s;
 }
 
-//@+node:felix.20220206010631.1: *3* g.dedent
+//@+node:felix.20230611195053.1: *3* g.dedent
 /**
- * This is similar to Python's "textwrap.dedent" function
- * from https://gist.github.com/malthe/02350255c759d5478e89
+ * Implementation of Python's "textwrap.dedent" function
  */
 export function dedent(text: string): string {
-    const re_whitespace = /^([ \t]*)(.*)\n/gm; // Needs 'g' flag for exec in while loop
-    let l;
-    let m;
-    let i;
+    const whitespaceOnlyRe = /^[ \t]+$/gm;
+    const leadingWhitespaceRe = /^(^[ \t]*)(?:[^ \t\n])/gm;
 
-    while ((m = re_whitespace.exec(text)) !== null) { // assign in cond.
-        if (!m[2]) {
+    let margin = null;
+    text = text.replace(whitespaceOnlyRe, '');
+    const indents = text.match(leadingWhitespaceRe) || [];
+    for (let indent of indents) {
+        indent = indent.slice(0, -1);
+        if (margin === null) {
+            margin = indent;
+        } else if (indent.startsWith(margin)) {
             continue;
-        }
-
-        if (l = m[1].length) { // assign in cond.
-            i = (i !== undefined) ? Math.min(i, l) : l;
+        } else if (margin.startsWith(indent)) {
+            margin = indent;
         } else {
-            break;
+            for (let i = 0; i < margin.length; i++) {
+                if (margin[i] !== indent[i]) {
+                    margin = margin.substring(0, i);
+                    break;
+                }
+            }
         }
     }
 
-    if (i) {
-        text = text.replace(new RegExp('^[ \t]{' + i + '}(.*\n)', 'gm'), '$1');
+    if (margin) {
+        const marginRe = new RegExp(`^${margin}`, 'gm');
+        text = text.replace(marginRe, '');
     }
+
     return text;
 }
 //@+node:felix.20221218195057.1: *3* g.reEscape

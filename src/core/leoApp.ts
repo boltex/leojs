@@ -1583,7 +1583,7 @@ export class LoadManager {
     public async computeStandardDirectories(): Promise<unknown> {
 
         const lm = this;
-        const join = path.join;
+        const join = g.PYTHON_os_path_join;
         g.app.loadDir = lm.computeLoadDir(); // UNUSED The leo / core directory. 
         g.app.globalConfigDir = lm.computeGlobalConfigDir(); // UNUSED leo / config directory 
         g.app.homeDir = await lm.computeHomeDir(); // * The user's home directory.
@@ -1690,7 +1690,16 @@ export class LoadManager {
      * Returns the directory containing leo.py.
      */
     public computeLoadDir(): string {
-        let loadDir: string = ""; // ! unused : RETURN EMPTY / FALSY FOR NOW
+
+        let loadDir: string = __dirname || "./";
+        let w_uri;
+        if (vscode.workspace.workspaceFolders) {
+            w_uri = vscode.workspace.workspaceFolders[0].uri;
+        }
+
+        // const loadDir2 = w_uri?.fsPath;
+        loadDir = g.finalize(loadDir);
+        return loadDir;
         /* 
         try:
             # Fix a hangnail: on Windows the drive letter returned by

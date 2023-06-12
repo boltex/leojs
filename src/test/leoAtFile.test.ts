@@ -308,7 +308,7 @@ suite('Test cases for leoAtFile.ts', () => {
 
             @ A single-line doc part.`);
         child.v.fileIndex = '<GNX>';
-        const contents = g.dedent(`\;
+        const contents = g.dedent(`\
             ATall
         `).replace(/AT/g, '@');
         const expected = g.dedent(`\

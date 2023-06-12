@@ -52,7 +52,7 @@ export async function create_app(gui_name: string = 'null'): Promise<Commands> {
 
     // g.app.recentFilesManager = leoApp.RecentFilesManager()
 
-    // lm.computeStandardDirectories()
+    await lm.computeStandardDirectories();
 
     const leoID = await g.app.setLeoID(false, true);
 
