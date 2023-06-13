@@ -706,7 +706,7 @@ suite('Test the FastAtRead class', () => {
         //@+<< define contents >>
         //@+node:felix.20230528191921.3: *4* << define contents >>
         // Be careful: no line should look like a Leo sentinel!
-        const contents = g.dedent(`
+        const contents = g.dedent(`\
             #AT+leo-ver=5-thin
             #AT+node:${root.gnx}: * ${h}
             #AT@language python
@@ -725,7 +725,7 @@ suite('Test the FastAtRead class', () => {
         //@-<< define contents >>
         //@+<< define expected_body >>
         //@+node:felix.20230528191921.4: *4* << define expected_body >>
-        const expected_body = g.dedent(`
+        const expected_body = g.dedent(`\
             ATlanguage python
 
             a = 1
@@ -737,7 +737,7 @@ suite('Test the FastAtRead class', () => {
         //@+<< define expected_contents >>
         //@+node:felix.20230528191921.5: *4* << define expected_contents >>
         // Be careful: no line should look like a Leo sentinel!
-        const expected_contents = g.dedent(`
+        const expected_contents = g.dedent(`\
             #AT+leo-ver=5-thin
             #AT+node:${root.gnx}: * ${h}
             #AT@language python
@@ -766,7 +766,7 @@ suite('Test the FastAtRead class', () => {
         //@+<< define contents >>
         //@+node:felix.20230528191921.7: *4* << define contents >> (test_at_all)
         // Be careful: no line should look like a Leo sentinel!
-        const contents = g.dedent(`
+        const contents = g.dedent(`\
         #AT+leo-ver=5-thin
         #AT+node:${root.gnx}: * ${h}
         # This is Leo's final resting place for dead code.
@@ -803,7 +803,7 @@ suite('Test the FastAtRead class', () => {
         //@+<< define contents >>
         //@+node:felix.20230528191921.9: *4* << define contents >> (test_at_comment)
         // Be careful: no line should look like a Leo sentinel!
-        const contents = g.dedent(`
+        const contents = g.dedent(`\
         !!! -*- coding: utf-8 -*-
         !!!AT+leo-ver=5-thin
         !!!AT+node:${root.gnx}: * ${h}
@@ -857,7 +857,7 @@ suite('Test the FastAtRead class', () => {
         //@+<< define contents >>
         //@+node:felix.20230528191921.11: *4* << define contents >> (test_at_delims)
         // Be careful: no line should look like a Leo sentinel!
-        const contents = g.dedent(`
+        const contents = g.dedent(`\
         !! -*- coding: utf-8 -*-
         #AT+leo-ver=5-thin
         #AT+node:${root.gnx}: * ${h}
@@ -909,7 +909,7 @@ suite('Test the FastAtRead class', () => {
         //@+<< define contents >>
         //@+node:felix.20230528191921.13: *4* << define contents >> (test_at_last)
         // Be careful: no line should look like a Leo sentinel!
-        const contents = g.dedent(`
+        const contents = g.dedent(`\
         #AT+leo-ver=5-thin
         #AT+node:${root.gnx}: * ${h}
         # Test of ATlast
@@ -926,7 +926,7 @@ suite('Test the FastAtRead class', () => {
         //@-<< define contents >>
         //@+<< define expected_body >>
         //@+node:felix.20230528191921.14: *4* << define expected_body >> (test_at_last)
-        const expected_body = g.dedent(`
+        const expected_body = g.dedent(`\
         # Test of ATlast
         ATothers
         ATlanguage python
@@ -949,9 +949,9 @@ suite('Test the FastAtRead class', () => {
         //@+<< define contents >>
         //@+node:felix.20230528191921.16: *4* << define contents >> (test_at_others)
         // Be careful: no line should look like a Leo sentinel!
-        const contents = g.dedent(`
+        const contents = g.dedent(`\
         #AT+leo-ver=5-thin
-        #AT+node:${root.gnx}: *${h}
+        #AT+node:${root.gnx}: * ${h}
         #AT@language python
 
         class AtOthersTestClass:
@@ -977,7 +977,7 @@ suite('Test the FastAtRead class', () => {
         //@+<< define contents >>
         //@+node:felix.20230528191921.18: *4* << define contents >> (test_at_section_delim)
         // The contents of a personal test file, slightly altered.
-        const contents = g.dedent(`
+        const contents = g.dedent(`\
         #AT+leo-ver=5-thin
         #AT+node:${root.gnx}: * ${h}
 
@@ -1029,7 +1029,7 @@ suite('Test the FastAtRead class', () => {
         //@+<< define contents >>
         //@+node:felix.20230528191921.20: *4* << define contents >> (test_clones)
         // Be careful: no line should look like a Leo sentinel!
-        const contents = g.dedent(`
+        const contents = g.dedent(`\
         #AT+leo-ver=5-thin
         #AT+node:${root.gnx}: * ${h}
         #AT@language python
@@ -1082,7 +1082,7 @@ suite('Test the FastAtRead class', () => {
         //@+<< define contents >>
         //@+node:felix.20230528191921.22: *4* << define contents >> (test_cweb)
         // pylint: disable=anomalous-backslash-in-string
-        const contents = g.dedent(`
+        const contents = g.dedent(`\
             ATq@@+leo-ver=5-thin@>
             ATq@@+node:${root.gnx}: * @${h}@>
             ATq@@@@language cweb@>
@@ -1114,7 +1114,7 @@ suite('Test the FastAtRead class', () => {
             BSLaTeX and BSc should not be colored.
             if else, while, do // C keywords.
             ATq@@-leo@>
-            `).replace(/AT/g, '@').replace(/LB/g, '<<').replace(/BS/g, '\\');
+        `).replace(/AT/g, '@').replace(/LB/g, '<<').replace(/BS/g, '\\');
         //@-<< define contents >>
         x.read_into_root(contents, 'test', root);
         const s = await c.atFileCommands.atFileToString(root, true);
@@ -1131,7 +1131,7 @@ suite('Test the FastAtRead class', () => {
         //@+<< define contents >>
         //@+node:felix.20230528191921.24: *4* << define contents >> (test_doc_parts)
         // Be careful: no line should look like a Leo sentinel!
-        let contents = g.dedent(`
+        let contents = g.dedent(`\
         #AT+leo-ver=5-thin
         #AT+node:${root.gnx}: * ${h}
         #AT@language python
@@ -1176,7 +1176,7 @@ suite('Test the FastAtRead class', () => {
         //@+<< define contents >>
         //@+node:felix.20230528191921.26: *4* << define contents >> (test_html_doc_part)
         // Be careful: no line should look like a Leo sentinel!
-        const contents = g.dedent(`
+        const contents = g.dedent(`\
         <!--AT+leo-ver=5-thin-->
         <!--AT+node:${root.gnx}: * ${h}-->
         <!--AT@language html-->
@@ -1205,7 +1205,7 @@ suite('Test the FastAtRead class', () => {
         //@+<< define contents >>
         //@+node:felix.20230528191921.28: *4* << define contents >> (test_verbatim)
         // Be careful: no line should look like a Leo sentinel!
-        let contents = g.dedent(`
+        let contents = g.dedent(`\
             #AT+leo-ver=5-thin
             #AT+node:${root.gnx}: * ${h}
             #AT@language python
@@ -1218,7 +1218,7 @@ suite('Test the FastAtRead class', () => {
         //@-<< define contents >>
         //@+<< define expected_body >>
         //@+node:felix.20230528191921.29: *4* << define expected_body >> (test_verbatim)
-        let expected_body = g.dedent(`
+        let expected_body = g.dedent(`\
         ATlanguage python
         # Test of @verbatim
         print('hi')

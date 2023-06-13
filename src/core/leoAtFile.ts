@@ -4408,7 +4408,7 @@ export class FastAtRead {
                 body.push(`@delims ${delims}\n`);
                 //
                 // Parse the delims.
-                this.delims_pat = new RegExp(String.raw`^([^ ]+)\s*([^ ]+)?`);
+                this.delims_pat = new RegExp(String.raw`^([^ ]+)\s*([^ ]+)?`, 'm'); // @delims
                 const m2 = this.delims_pat.exec(delims);
                 if (!m2) {
                     g.trace(`Ignoring invalid @delims: ${line} `);
@@ -4447,7 +4447,7 @@ export class FastAtRead {
                     section_delim1 = d1;
                     const d2 = m[2] ? m[2].replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : '';
                     section_delim2 = d2;
-                    this.ref_pat = new RegExp(String.raw`^(\s*)${comment_delim1}@(\+|-)${d1}(.*)${d2}\s*${comment_delim2}$`);
+                    this.ref_pat = new RegExp(String.raw`^(\s*)${comment_delim1}@(\+|-)${d1}(.*)${d2}\s*${comment_delim2}$`, 'md'); // section ref
                 }
                 body.push(`@section-delims ${m[1]} ${m[2]}\n`);
                 continue;
