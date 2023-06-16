@@ -63,6 +63,7 @@ export const isWindows: boolean = process.platform?.startsWith('win');
 //@+<< define g.globalDirectiveList >>
 //@+node:felix.20210102180402.1: ** << define g.globalDirectiveList >>
 // Visible externally so plugins may add to the list of directives.
+// The atFile write logic uses this, but not the atFile read logic.
 export const globalDirectiveList: string[] = [
     // Order does not matter.
     'all',
@@ -81,8 +82,9 @@ export const globalDirectiveList: string[] = [
     'nosearch',  // Leo 5.3.
     'others', 'pagewidth', 'path', 'quiet',
     // 'raw', // #2276.
-    'root-code', 'root-doc', 'root', 'silent',
-    'tabwidth', 'terse',
+    'section-delims',  // Leo 6.6. #2276.
+    'silent',
+    'tabwidth',
     'unit', 'verbose', 'wrap'
 ];
 

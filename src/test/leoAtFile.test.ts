@@ -1006,6 +1006,10 @@ suite('Test the FastAtRead class', () => {
         //@-<< define contents >>
         x.read_into_root(contents, 'test', root);
         const s = await c.atFileCommands.atFileToString(root, true);
+
+        console.log('first assert equal contents', contents);
+        console.log('first assert equal s', s);
+
         assert.strictEqual(contents, s);
         const child1 = root.firstChild();
         const child2 = child1.next();
@@ -1016,6 +1020,10 @@ suite('Test the FastAtRead class', () => {
             [child3, 'eggs'],
         ];
         for (let [child, w_h] of table) {
+
+            console.log('next assert equal child.h', child.h);
+            console.log('next assert equal w_h', w_h);
+
             assert.strictEqual(child.h, h);
         }
     });
