@@ -143,6 +143,9 @@ export class LeoUnitTest {
         // Set g.unitTesting *early*, for guards.
         (g.unitTesting as boolean) = true;
 
+        // Default.
+        g.app.write_black_sentinels = false;
+
         // Create a new commander for each test.
         // This is fast, because setUpClass has done all the imports.
         const c = new Commands("", new NullGui());

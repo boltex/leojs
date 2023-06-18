@@ -188,7 +188,7 @@ export const g_is_directive_pattern = new RegExp(/^\s*@([\w-]+)\s*/);
 // It must allow @language python, @nocolor-node, etc.
 
 // #2267: Support for @section-delims.
-export const g_section_delims_pat = new RegExp(/^@section-delims[ \t]+([^ \w\n\t]+)[ \t]+([^ \w\n\t]+)[ \t]*$/);
+export const g_section_delims_pat = new RegExp(/^@section-delims[ \t]+([^ \w\n\t]+)[ \t]+([^ \w\n\t]+)[ \t]*$/, 'm');
 
 export const g_pos_pattern = new RegExp(/:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$/);
 export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');

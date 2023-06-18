@@ -1006,10 +1006,6 @@ suite('Test the FastAtRead class', () => {
         //@-<< define contents >>
         x.read_into_root(contents, 'test', root);
         const s = await c.atFileCommands.atFileToString(root, true);
-
-        console.log('first assert equal contents', contents);
-        console.log('first assert equal s', s);
-
         assert.strictEqual(contents, s);
         const child1 = root.firstChild();
         const child2 = child1.next();
@@ -1020,11 +1016,7 @@ suite('Test the FastAtRead class', () => {
             [child3, 'eggs'],
         ];
         for (let [child, w_h] of table) {
-
-            console.log('next assert equal child.h', child.h);
-            console.log('next assert equal w_h', w_h);
-
-            assert.strictEqual(child.h, h);
+            assert.strictEqual(child.h, w_h);
         }
     });
     //@+node:felix.20230528191921.19: *3* TestFastAtRead.test_clones
@@ -1168,7 +1160,7 @@ suite('Test the FastAtRead class', () => {
 
         // Test 2: with black delims.
         g.app.write_black_sentinels = true;
-        contents = contents.replace('#@', '# @');
+        contents = contents.replace(/#@/g, '# @');
         x.read_into_root(contents, 'test', root);
         s = await c.atFileCommands.atFileToString(root, true);
         // g.printObj(contents2, tag='contents2')
