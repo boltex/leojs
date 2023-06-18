@@ -1235,7 +1235,7 @@ suite('Test the FastAtRead class', () => {
 
         //Test 2: with black delims.
         g.app.write_black_sentinels = true;
-        contents = contents.replace('#@', '# @');
+        contents = contents.replace(/#@/g, '# @');
         expected_body = expected_body.replace('#@', '# @');
         x.read_into_root(contents, 'test', root);
         assert.strictEqual(root.b, expected_body);
