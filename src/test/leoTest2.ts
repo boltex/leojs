@@ -54,12 +54,7 @@ export async function create_app(gui_name: string = 'null'): Promise<Commands> {
 
     await lm.computeStandardDirectories();
 
-    const leoID = await g.app.setLeoID(false, true);
-
-    if (!leoID) {
-        throw Error("unable to set LeoID.");
-    }
-
+    g.app.leoID = 'TestLeoId';  // Use a standard user id for all tests.
     g.app.nodeIndices = new NodeIndices(g.app.leoID);
     g.app.config = new GlobalConfigManager();
 

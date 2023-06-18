@@ -60,7 +60,8 @@ suite('Test cases for leoImport.ts', () => {
                 ],
                 [1, 'a1', ''],
                 [1, 'a2', ''],
-            ]
+            ],
+            true
         );
     });
     //@+node:felix.20230528193654.3: *3* TestLeoImport.test_parse_body
@@ -81,15 +82,18 @@ suite('Test cases for leoImport.ts', () => {
         x.parse_body(target);
 
         const expected_results: [number, string, string][] = [
-            [0, '',  // check_outline ignores the top-level headline.
+            [0, '',  // Ignore the top-level headline.
+                '<< target: preamble >>\n' +
                 '@others\n' +
                 'return new_func\n' +
                 '@language python\n' +
                 '@tabwidth -4\n'
             ],
-            [1, 'def macro',
+            [1, '<< target: preamble >>',
                 'import os\n' +
-                '\n' +
+                '\n'
+            ],
+            [1, 'def macro',
                 'def macro(func):\n' +
                 '    @others\n'
             ],
@@ -99,7 +103,7 @@ suite('Test cases for leoImport.ts', () => {
             ],
         ];
         // Don't call run_test.
-        self.check_outline(target, expected_results, false);
+        self.check_outline(target, expected_results, true);
 
     });
     //@-others

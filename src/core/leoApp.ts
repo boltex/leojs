@@ -1064,9 +1064,9 @@ export class LeoApp {
 
         verbose = verbose && !g.unitTesting && !this.silentMode;
 
-        if (g.unitTesting) {
-            this.leoID = "unittestid";
-        }
+        // if (g.unitTesting) {
+        //     this.leoID = "unittestid";
+        // }
 
         let w_userName = ""; // = "TestUserName";
 
