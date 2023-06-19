@@ -2365,9 +2365,6 @@ export class LoadManager {
      */
     public async load(fileName?: string): Promise<unknown> {
 
-        console.log('load fileName', fileName);
-
-
         const lm: LoadManager = this;
 
         const t1 = process.hrtime();
@@ -2376,7 +2373,9 @@ export class LoadManager {
         await lm.doPrePluginsInit(fileName);
         g.app.computeSignon();
         g.app.printSignon();
-
+        if (lm.options['version']) {
+            return;
+        }
         if (!g.app.gui) {
             return;
         }
