@@ -2835,7 +2835,7 @@ export class LoadManager {
         // Complete the plugins class last.
         // g.app.pluginsController.finishCreate();
 
-        return g.app.leoID;
+        return;
 
     }
 
