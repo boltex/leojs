@@ -2389,8 +2389,10 @@ export class LoadManager {
             return;
         }
 
+        // ! ----------------------- MAYBE REPLACE WITH VSCODE FILE-CHANGE DETECTION ---------------- 
         // TODO: idleTimeManager
         // g.app.idleTimeManager.start();
+        // ! ----------------------------------------------------------------------------------------
 
         const t3 = process.hrtime();
         const ok = await lm.doPostPluginsInit(); // loads recent, or, new untitled.
@@ -2810,6 +2812,8 @@ export class LoadManager {
     //@+node:felix.20210120004121.16: *5* LM.initApp
     public async initApp(verbose?: boolean): Promise<unknown> {
 
+        // Can be done early. Uses only g.app.loadDir & g.app.homeDir.
+        this.createAllImporterData();
         console.assert(g.app.loadManager);
 
         // Make sure we call the new leoPlugins.init top-level function.

@@ -1782,15 +1782,13 @@ export class MindMapImporter {
 
             output: "csv"
         }).fromString(f);
-        // TODO : TEST csv READER REPLACEMENT IN LEOJS !
-        // reader = csv.reader(f);  // Yields list of lists.
 
         const max_chars_in_header = 80;
         const n1 = target.level();
         let n = n1;
         let p = target.copy();
-
-        for (const row of reader.slice(1)) {
+        // reader = reader.slice(1); // ! NO NEED TO REMOVE TOP ROW IN LEOJS !
+        for (const row of reader) {
             // Row is a List of fields.
             const new_level = this.csv_level(row) + n1;
             this.csv_string(row);

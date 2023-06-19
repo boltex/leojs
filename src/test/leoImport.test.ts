@@ -60,8 +60,7 @@ suite('Test cases for leoImport.ts', () => {
                 ],
                 [1, 'a1', ''],
                 [1, 'a2', ''],
-            ],
-            true
+            ]
         );
     });
     //@+node:felix.20230528193654.3: *3* TestLeoImport.test_parse_body
@@ -103,7 +102,7 @@ suite('Test cases for leoImport.ts', () => {
             ],
         ];
         // Don't call run_test.
-        self.check_outline(target, expected_results, true);
+        self.check_outline(target, expected_results, false);
 
     });
     //@-others

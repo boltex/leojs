@@ -885,8 +885,6 @@ export class AtFile {
         path: string,
         root: Position,
     ): boolean {
-        console.log('fast_read_into_root');
-
         return new FastAtRead(c, gnx2vnode).read_into_root(contents, path, root);
     }
     //@+node:felix.20230415162513.23: *4* at.Reading utils...
@@ -4576,7 +4574,6 @@ export class FastAtRead {
      * anchored in root.v.
      */
     public read_into_root(contents: string, path: string, root: Position): boolean {
-        console.log('read_into_root');
         this.path = path;
         this.root = root;
         const sfn = g.shortFileName(path);

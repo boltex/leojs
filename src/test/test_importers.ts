@@ -79,7 +79,7 @@ export class BaseTestImporter extends LeoUnitTest {
                 assert.strictEqual(e_h, a_h, msg);
             }
 
-            assert.strictEqual(g.splitLines(e_str), g.splitLines(a_str), msg);
+            assert.ok(g.compareArrays(g.splitLines(e_str), g.splitLines(a_str)), msg);
 
         }
 
