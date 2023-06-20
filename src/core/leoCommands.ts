@@ -459,9 +459,10 @@ export class Commands {
                 }
                 catch (e) {
                     g.es('interrupted');
-                    // if raiseFlag:
-                    //      raise
-                    // g.handleScriptException(c, script_p, script, script1);
+                    if (raiseFlag) {
+                        throw (e);
+                    }
+                    // g.handleScriptException(c, script_p);
 
                 }
                 finally {
@@ -489,7 +490,7 @@ export class Commands {
         define_g: any,
         define_name: any,
         namespace: any,
-        script: any
+        script: string
     ): void {
         const c: Commands = this;
         let p: Position | undefined;
@@ -505,7 +506,7 @@ export class Commands {
             d['__name__'] = define_name;
         }
         d['script_args'] = args || [];
-        d['script_gnx'] = g.app.scriptDict.get('script_gnx');
+        d['script_gnx'] = g.app.scriptDict['script_gnx'];
         if (namespace) {
             // d.update(namespace)
             Object.assign(d, namespace);
@@ -517,7 +518,7 @@ export class Commands {
             c.inCommand = false;
             g.app.inScript = true;
             (g.inScript as boolean) = g.app.inScript; // g.inScript is a synonym for g.app.inScript.
-            console.log('TODO RUN SCRIPT: ', script);
+
 
             // if (c.write_script_file){
             //     scriptFile = self.writeScriptFile(script)
@@ -525,6 +526,35 @@ export class Commands {
             // }else{
             //     exec(script, d)
             // }
+
+            if (c.write_script_file) {
+                // TODO !
+                console.log('HAS : "c.write_script_file" -> TODO RUN SCRIPT FROM FILE : ', script);
+                // scriptFile = self.writeScriptFile(script)
+                // exec(compile(script, scriptFile, 'exec'), d)
+            } else {
+                // exec(script, d)
+                // TODO : Implement better setup & namespace ! 
+                new Function(
+                    "c",
+                    "g",
+                    "input",
+                    "p",
+                    "__name__",
+                    "script_args",
+                    "script_gnx",
+                    script
+                )(
+                    d["c"],
+                    d["g"],
+                    d["input"],
+                    d["p"],
+                    d["__name__"],
+                    d["script_args"],
+                    d["script_gnx"],
+                );
+            }
+
         }
         catch (e) {
             // pass

@@ -5188,13 +5188,11 @@ export function python_tokenize(s: string): [string, string, number][] {
  */
 export async function getScript(c: Commands, p: Position,
     useSelectedText: boolean = true,
-    forcePythonSentinels: boolean = true,
+    forceJavascriptSentinels: boolean = true, // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
     useSentinels: boolean = true
 ): Promise<string> {
-    console.log("TODO : 'get script' called!");
-    return "";
 
-    let script: string;
+    let script: string = "";
     let s: string;
     const w = c.frame.body.wrapper;
 
@@ -5215,7 +5213,7 @@ export async function getScript(c: Commands, p: Position,
         s = extractExecutableString(c, p, s);
         script = await composeScript(
             c, p, s,
-            forcePythonSentinels,
+            forceJavascriptSentinels, // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
             useSentinels
         );
     }
@@ -5235,7 +5233,7 @@ export async function composeScript(
     c: Commands,
     p: Position,
     s: string,
-    forcePythonSentinels: boolean = true,
+    forceJavascriptSentinels: boolean = true, // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
     useSentinels: boolean = true
 ): Promise<string> {
 
@@ -5261,7 +5259,7 @@ export async function composeScript(
         script = await at.stringToString(
             p.copy(),
             s,
-            forcePythonSentinels,
+            forceJavascriptSentinels, // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
             useSentinels
         );
         // Important, the script is an **encoded string**, not a unicode string.

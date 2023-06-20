@@ -587,6 +587,6 @@ export class GoToCommands {
 }
 //@-others
 
-// only @g.command('show-file-line') 
+// only @g.command('show-file-line')
 // rest is the helper class without commands
 //@-leo
