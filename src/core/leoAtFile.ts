@@ -2176,7 +2176,7 @@ export class AtFile {
     public async stringToString(
         root: Position,
         s: string,
-        forcePythonSentinels = true,
+        forceJavascriptSentinels = true, // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
         sentinels = true,
     ): Promise<string> {
         const at = this;
@@ -2184,10 +2184,10 @@ export class AtFile {
         try {
             c.endEditing();
             await at.initWriteIvars(root);
-            if (forcePythonSentinels) {
+            if (forceJavascriptSentinels) {
                 at.endSentinelComment = undefined;
-                at.startSentinelComment = "#";
-                at.language = "python";
+                at.startSentinelComment = "//"; // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
+                at.language = "javascript"; // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
             }
             at.sentinels = sentinels;
             at.outputList = [];

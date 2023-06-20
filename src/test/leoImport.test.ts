@@ -64,6 +64,8 @@ suite('Test cases for leoImport.ts', () => {
         );
     });
     //@+node:felix.20230528193654.3: *3* TestLeoImport.test_parse_body
+    // ! UNCOMMENT WHEN importers ARE IMPLEMENTED
+    /*
     test('test_parse_body', () => {
         const c = self.c;
         const x = c.importCommands;
@@ -103,8 +105,9 @@ suite('Test cases for leoImport.ts', () => {
         ];
         // Don't call run_test.
         self.check_outline(target, expected_results, false);
-
+        
     });
+    */
     //@-others
 });
 //@-others
