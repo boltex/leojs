@@ -1,6 +1,8 @@
 //@+leo-ver=5-thin
 //@+node:felix.20210102012632.1: * @file src/core/leoNodes.ts
-// Leo's fundamental data classes.
+/**
+ * Leo's fundamental data classes.
+ */
 //@+<< imports >>
 //@+node:felix.20210127001502.1: ** << imports >>
 import * as g from './leoGlobals';
@@ -56,6 +58,32 @@ export class NodeIndices {
         }
     }
 
+    //@+node:felix.20230531001257.1: *3* ni.compute_last_index
+    /**
+     * Scan the entire leo outline to compute ni.last_index.
+     */
+    public compute_last_index(c: Commands): void {
+
+        const ni = this;
+        // Partial, experimental, fix for #658.
+        // Do not change self.lastIndex here!
+        // self.lastIndex = 0
+        for (const v of c.all_unique_nodes()) {
+            const gnx = v.fileIndex;
+            if (gnx) {
+                let [id_, t, n] = this.scanGnx(gnx)
+                if (t == ni.timeString && n != null) {
+                    try {
+                        const w_n = Number(n);  // type:ignore
+                        this.lastIndex = Math.max(this.lastIndex, w_n);  // type:ignore
+                    } catch (exception) {
+                        g.es_exception(exception);
+                        this.lastIndex += 1;
+                    }
+                }
+            }
+        }
+    }
     //@+node:felix.20220101212728.1: *3* ni.computeNewIndex
     /**
      * Return a new gnx.
@@ -175,6 +203,25 @@ export class NodeIndices {
         }
         return [theId, t, n];
     }
+    //@+node:felix.20230531001333.1: *3* ni.tupleToString
+    /**
+     * Convert a gnx tuple returned by scanGnx
+     * to its string representation.
+     */
+    public tupleToString(aTuple: [any, any, any]): string {
+
+        let [theId, t, n] = aTuple;
+        let s;
+        // This logic must match the existing logic so that
+        // previously written gnx's can be found.
+        if ([undefined, 0, ''].includes(n)) {
+            s = `${theId}.${t}`;
+        } else {
+            s = `${theId}.${t}.${n}`;
+        }
+        return g.toUnicode(s);
+
+    }
     //@+node:felix.20210218214329.12: *3* ni.update
     /**
      * Update self.timeString and self.lastIndex
@@ -190,6 +237,34 @@ export class NodeIndices {
         return t_s;
     }
 
+    //@+node:felix.20230426235322.1: *3* ni.updateLastIndex
+    /**
+     * Update ni.lastIndex if the gnx affects it.
+     */
+    public updateLastIndex(gnx: string): undefined {
+
+        let [id_, t, n] = this.scanGnx(gnx);
+        // pylint: disable=literal-comparison
+        // Don't you dare touch this code to keep pylint happy.
+        if (!id_ || (n as any !== 0 && !n)) {
+            return;  // the gnx is not well formed or n in ('',None)
+        }
+        if (id_ === this.userId && t === this.timeString) {
+            try {
+                const n2 = parseInt(n!);
+                if (n2 > this.lastIndex) {
+                    this.lastIndex = n2;
+                    if (!g.unitTesting) {
+                        g.trace(gnx, '-->', n2);
+                    }
+                }
+            }
+            catch (exception) {
+                g.trace('can not happen', n);
+            }
+
+        }
+    }
     //@-others
 }
 
@@ -329,6 +404,9 @@ export class Position {
     }
 
     //@+node:felix.20210126210412.7: *4* p.__str__ and p.__repr__
+    /** 
+     * For Position string output printout
+     */
     public __str__(): string {
         const p: Position = this;
         if (p.v) {
@@ -344,6 +422,35 @@ export class Position {
         return `<pos [${p.stack.length}] None>`;
     }
 
+    /** 
+     * * For Position string output printout
+     */
+    public toString(): string {
+        return this.__str__();
+    }
+
+
+    //@+node:felix.20230601210333.1: *4* p.valueOf
+    /**
+     * For > >= < <= greater/lesser comparisons in javascript. 
+     * Note: Boolean evaluation still has to call valueOf, or __bool__.
+     */
+    public valueOf(): number {
+        if (this.__bool__()) {
+            let order = 1;
+            const c: Commands = this.v.context;
+            const p1: Position | undefined = c.rootPosition();
+            while (p1 && p1.v) {
+                if (this.__eq__(p1)) {
+                    break;
+                }
+                order += 1;
+                p1.moveToThreadNext();
+            }
+            return order; // 1 for rootPosition, the first child of the hiddenRootNode.
+        }
+        return 0; // falsy.
+    }
     //@+node:felix.20210126210412.8: *4* p.archivedPosition
     /**
      * Return a representation of a position suitable for use in .leo files.
@@ -357,7 +464,6 @@ export class Position {
             }
         } else {
             for (let z of p.self_and_parents(false)) {
-                aList.push(z._childIndex);
                 if (z.__eq__(root_p)) {
                     aList.push(0);
                     break;
@@ -426,7 +532,7 @@ export class Position {
 
     //@+node:felix.20210204224730.2: *4* p.convertTreeToString
     /**
-     * Convert a positions  suboutline to a string in MORE format.
+     * Convert a positions suboutline to a string in MORE format.
      */
     public convertTreeToString(): string {
         const p1: Position = this;
@@ -1867,6 +1973,44 @@ export class Position {
         return new Position(this.v, this._childIndex, this.stack);
     }
 
+    //@+node:felix.20230521190938.1: *4* p.copyTreeAfter, copyTreeTo
+    // These used by unit tests, by the group_operations plugin,
+    // and by the files-compare-leo-files command.
+
+    // To do: use v.copyTree instead.
+
+    /**
+     * Copy p and insert it after itself.
+     */
+    public copyTreeAfter(copyGnxs = false): Position {
+        const p: Position = this;
+        const p2 = p.insertAfter();
+        p.copyTreeFromSelfTo(p2, copyGnxs = copyGnxs);
+        return p2;
+    }
+
+    public copyTreeFromSelfTo(p2: Position, copyGnxs = false): void {
+        const p: Position = this;
+        p2.v._headString = g.toUnicode(p.h, undefined, true);  // 2017/01/24
+        p2.v._bodyString = g.toUnicode(p.b, undefined, true);  // 2017/01/24
+        //
+        // #1019794: p.copyTreeFromSelfTo, should deepcopy p.v.u.
+        try {
+            p2.v.u = JSON.parse(JSON.stringify(p.v.u));
+        } catch (e) {
+            p2.v.u = {};
+        }
+        // p2.v.u = copy.deepcopy(p.v.u);
+        if (copyGnxs) {
+            p2.v.fileIndex = p.v.fileIndex;
+        }
+        // 2009/10/02: no need to copy arg to iter
+
+        for (const child of p.children()) {
+            const child2 = p2.insertAsLastChild();
+            child.copyTreeFromSelfTo(child2, copyGnxs);
+        }
+    }
     //@+node:felix.20211026001924.1: *4* p.copyWithNewVnodes
     /**
      * Return an **unlinked** copy of p with a new vnode v.
@@ -2198,7 +2342,7 @@ export class Position {
     /**
      * position property returning the script formed by p and its descendants
      */
-    public get script(): string {
+    public get script(): Promise<string> {
         const p: Position = this;
         return g.getScript(
             p.v.context,
@@ -2509,7 +2653,7 @@ export interface Position {
     atAsisFileNodeName: () => string;
     isAtNoSentFileNode: () => boolean;
     isAtAsisFileNode: () => boolean;
-    __repr__: () => string;
+    __repr__: () => number;
     simpleLevel: () => number;
 
     initBodyString: (s: string) => void;
@@ -2556,7 +2700,7 @@ Position.prototype.atAsisFileNodeName = Position.prototype.atSilentFileNodeName;
 Position.prototype.isAtNoSentFileNode =
     Position.prototype.isAtNoSentinelsFileNode;
 Position.prototype.isAtAsisFileNode = Position.prototype.isAtSilentFileNode;
-Position.prototype.__repr__ = Position.prototype.__str__;
+Position.prototype.__repr__ = Position.prototype.valueOf;
 Position.prototype.simpleLevel = Position.prototype.level;
 
 Position.prototype.initBodyString = Position.prototype.setBodyString;
@@ -2624,6 +2768,8 @@ export class VNode {
 
     public tempTnodeList: undefined | string[]; // TODO : Type better than that!
     public unknownAttributes: undefined | { [key: string]: any };
+    public tempAttributes: undefined | { [key: string]: any };
+    public at_read: undefined | { [key: string]: any };
     unicode_warning_given: boolean = false;
 
     //@+others
@@ -2651,6 +2797,9 @@ export class VNode {
     public __repr__(): string {
         return `<VNode ${this.gnx} ${this.headString()}>`;
     }
+    public valueOf(): string {
+        return this.__repr__();
+    }
 
     //@+node:felix.20210130233340.4: *4* v.dump
     public dumpLink(link: string): string {
@@ -2669,8 +2818,7 @@ export class VNode {
     }
 
     //@+node:felix.20211209010457.1: *3* v.toString
-    // = () : trick for toString as per https://stackoverflow.com/a/35361695/920301
-    public toString = (): string => {
+    public toString(): string {
         return `VNode (gnx: ${this.gnx})`;
     };
     //@+node:felix.20210112210731.1: *3* v.Comparisons
@@ -2683,20 +2831,15 @@ export class VNode {
         if (!h) {
             h = this.headString();
         }
-
         if (!g.match(h, 0, '@')) {
             return '';
         }
-
         const i: number = g.skip_id(h, 1, '-');
-
         const word: string = h.substring(0, i);
-
         if (names.includes(word) && g.match_word(h, 0, word)) {
             const name = h.substring(i).trim();
             return name;
         }
-
         return '';
     }
 
@@ -2779,7 +2922,7 @@ export class VNode {
      * Returns True if the receiver contains @others in its body at the start of a line.
      */
     public isAtAllNode(): boolean {
-        const flag: boolean = g.is_special(this._bodyString, '@all') < 0;
+        let [flag, i] = g.is_special(this._bodyString, '@all');
         return flag;
     }
 
@@ -2846,7 +2989,7 @@ export class VNode {
         if (g.match_word(this._headString, 0, '@ignore')) {
             return true;
         }
-        const flag: boolean = g.is_special(this._bodyString, '@ignore') < 0;
+        let [flag, i] = g.is_special(this._bodyString, '@ignore');
         return flag;
     }
 
@@ -2855,7 +2998,7 @@ export class VNode {
      * Returns True if the receiver contains @others in its body at the start of a line.
      */
     public isAtOthersNode(): boolean {
-        const flag: boolean = g.is_special(this._bodyString, '@others') < 0;
+        let [flag, i] = g.is_special(this._bodyString, '@others');
         return flag;
     }
 
@@ -3249,7 +3392,7 @@ export class VNode {
             w.setInsertPoint(ins);
         }
         if (traceTime) {
-            const delta_t: number = utils.getDurationMs(t1!, process.hrtime()); //  time.time() - t1;
+            const delta_t: number = utils.getDurationSeconds(t1!); //  time.time() - t1;
             if (delta_t > 0.1) {
                 g.trace(`${delta_t} sec`);
             }
@@ -3617,7 +3760,7 @@ VNode.prototype.initBodyString = VNode.prototype.setBodyString;
 VNode.prototype.setHeadText = VNode.prototype.setHeadString;
 VNode.prototype.initHeadString = VNode.prototype.setHeadString;
 VNode.prototype.setTnodeText = VNode.prototype.setBodyString;
-VNode.prototype.__str__ = VNode.prototype.__repr__;
+VNode.prototype.__str__ = VNode.prototype.toString;
 
 //@-others
 //@@language typescript

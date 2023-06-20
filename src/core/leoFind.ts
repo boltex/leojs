@@ -6,7 +6,7 @@
 //@+<< leoFind imports >>
 //@+node:felix.20221012210017.1: ** << leoFind imports >>
 import * as g from './leoGlobals';
-import { new_cmd_decorator } from "../core/decorators";
+import { new_cmd_decorator } from "./decorators";
 import { Commands } from "./leoCommands";
 import { Position, VNode } from './leoNodes';
 import { StringCheckBox, StringFindTabManager, StringRadioButton } from './findTabManager';
@@ -1254,8 +1254,8 @@ export class LeoFind {
     //@+node:felix.20221018001528.1: *4* find.change-all & helper
     @cmd('change-all', 'Replace all instances of the search string with the replacement string.')
     @cmd('replace-all', 'Replace all instances of the search string with the replacement string.')
-    public interactive_change_all(): void {
-        g.app.gui.findAll(true); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_change_all(): Thenable<unknown> {
+        return g.app.gui.findAll(true); // TODO : Only have gui for dialog, move implementation here.
     }
     // def interactive_change_all(self, event: Event=None) -> None:  # pragma: no cover (interactive)
     //     """Replace all instances of the search string with the replacement string."""
@@ -1582,8 +1582,8 @@ export class LeoFind {
         'matching the search string, except @nosearch trees.\n' +
         'The list is *not* flattened: clones appear only once in the' +
         'descendants of the organizer node.')
-    public interactive_clone_find_all(): void {
-        g.app.gui.cloneFind(false, false); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_clone_find_all(): Thenable<unknown> {
+        return g.app.gui.cloneFind(false, false); // TODO : Only have gui for dialog, move implementation here.
     }
 
     // def interactive_clone_find_all(self,
@@ -1662,8 +1662,8 @@ export class LeoFind {
         'The list is flattened: every cloned node appears as a direct child' +
         'of the organizer node, even if the clone also is a descendant of' +
         'another cloned node.')
-    public interactive_cff(): void {
-        g.app.gui.cloneFind(false, true); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_cff(): Thenable<unknown> {
+        return g.app.gui.cloneFind(false, true); // TODO : Only have gui for dialog, move implementation here.
     }
     // def interactive_cff(self, event: Event=None, preloaded: bool=False) -> None:  # pragma: no cover (interactive)
     //     """
@@ -1836,8 +1836,8 @@ export class LeoFind {
         'Create a summary node containing descriptions of all matches of the' +
         'search string.'
     )
-    public interactive_find_all(): void {
-        g.app.gui.findAll(); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_find_all(): Thenable<unknown> {
+        return g.app.gui.findAll(); // TODO : Only have gui for dialog, move implementation here.
 
     }
     // def interactive_find_all(self, event: Event=None) -> None:  # pragma: no cover (interactive)
@@ -2197,8 +2197,8 @@ export class LeoFind {
     //@+node:felix.20221016013001.26: *4* find.re-search
     @cmd('re-search', 'Same as start-find, with regex.')
     @cmd('re-search-forward', 'Same as start-find, with regex.')
-    public interactive_re_search_forward(): void {
-        g.app.gui.interactiveSearch(false, true, false); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_re_search_forward(): Promise<unknown> {
+        return g.app.gui.interactiveSearch(false, true, false); // TODO : Only have gui for dialog, move implementation here.
     }
     // def interactive_re_search_forward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, with regex."""
@@ -2215,8 +2215,8 @@ export class LeoFind {
     //     )
     //@+node:felix.20221016013001.27: *4* find.re-search-backward
     @cmd('re-search-backward', 'Same as start-find, but with regex and in reverse.')
-    public interactive_re_search_backward(): void {
-        g.app.gui.interactiveSearch(true, true, false); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_re_search_backward(): Promise<unknown> {
+        return g.app.gui.interactiveSearch(true, true, false); // TODO : Only have gui for dialog, move implementation here.
     }
     // def interactive_re_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, but with regex and in reverse."""
@@ -2236,8 +2236,8 @@ export class LeoFind {
 
     //@+node:felix.20221016013001.28: *4* find.search_backward
     @cmd('search-backward', 'Same as start-find, but in reverse.')
-    public interactive_search_backward(): void {
-        g.app.gui.interactiveSearch(true, false, false); // TODO : Only have gui for dialog, move implementation here.
+    public interactive_search_backward(): Promise<unknown> {
+        return g.app.gui.interactiveSearch(true, false, false); // TODO : Only have gui for dialog, move implementation here.
     }
     // def interactive_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     """Same as start-find, but in reverse."""
@@ -2431,8 +2431,8 @@ export class LeoFind {
     //@+node:felix.20221020230510.1: *4* find.word-search
     @cmd('word-search', 'Same as start-search, with whole_word setting.')
     @cmd('word-search-forward', 'Same as start-search, with whole_word setting.')
-    public word_search_forward(): void {
-        g.app.gui.interactiveSearch(false, false, true); // TODO : Only have gui for dialog, move implementation here.
+    public word_search_forward(): Promise<unknown> {
+        return g.app.gui.interactiveSearch(false, false, true); // TODO : Only have gui for dialog, move implementation here.
     }
     // @cmd('word-search')
     // @cmd('word-search-forward')
@@ -2451,8 +2451,8 @@ export class LeoFind {
     //     )
     //@+node:felix.20221016013001.36: *4* find.word-search-backward
     @cmd('word-search-backward', 'Same as start-search-backward, with whole_word setting.')
-    public word_search_backward(): void {
-        g.app.gui.interactiveSearch(true, false, true); // TODO : Only have gui for dialog, move implementation here.
+    public word_search_backward(): Promise<unknown> {
+        return g.app.gui.interactiveSearch(true, false, true); // TODO : Only have gui for dialog, move implementation here.
     }
     // def word_search_backward(self, event: Event) -> None:  # pragma: no cover (interactive)
     //     # Set flags for show_find_options.

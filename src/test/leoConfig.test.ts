@@ -10,27 +10,29 @@ import * as g from '../core/leoGlobals';
 import { LeoUnitTest } from './leoTest2';
 
 //@+others
-//@+node:felix.20221226215842.1: ** suite TestConfig(LeoUnitTest)
+//@+node:felix.20221226215842.1: ** suite TestConfig
 suite('Test cases for leoConfig.ts', () => {
 
     let self: LeoUnitTest;
 
-    before(async () => {
+    before(() => {
         self = new LeoUnitTest();
         return self.setUpClass();
     });
 
-    beforeEach(async () => {
+    beforeEach(() => {
         self.setUp();
+        return Promise.resolve();
     });
 
-    afterEach(async () => {
+    afterEach(() => {
         self.tearDown();
+        return Promise.resolve();
     });
 
     //@+others
     //@+node:felix.20221226215842.2: *3* TestConfig.test_g_app_config_and_c_config
-    test('test_g_app_config_and_c_config', async () => {
+    test('test_g_app_config_and_c_config', () => {
         const c = self.c;
 
         assert.ok(g.app.config);
@@ -38,7 +40,7 @@ suite('Test cases for leoConfig.ts', () => {
 
     });
     //@+node:felix.20221226215842.3: *3* TestConfig.test_c_config_printSettings
-    test('test_c_config_printSettings', async () => {
+    test('test_c_config_printSettings', () => {
         const c = self.c;
 
         c.config.printSettings();

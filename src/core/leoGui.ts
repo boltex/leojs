@@ -1,13 +1,13 @@
 //@+leo-ver=5-thin
 //@+node:felix.20221119204422.1: * @file src/core/leoGui.ts
-/*
-A module containing the base gui-related classes.
-
-These classes hide the details of which gui is actually being used.
-Leo's core calls this class to allocate all gui objects.
-
-Plugins may define their own gui classes by setting g.app.gui.
-*/
+/**
+ * A module containing the base gui-related classes.
+ *
+ * These classes hide the details of which gui is actually being used.
+ * Leo's core calls this class to allocate all gui objects.
+ *
+ * Plugins may define their own gui classes by setting g.app.gui.
+ */
 //@+<< leoGui imports >>
 //@+node:felix.20221120015443.1: ** << leoGui imports >>
 import * as g from './leoGlobals';
@@ -15,6 +15,7 @@ import { StringFindTabManager } from './findTabManager';
 import { Position } from './leoNodes';
 import { Commands } from './leoCommands';
 import { StringTextWrapper } from './leoFrame';
+import { IdleTime } from './idle_time';
 //@-<< leoGui imports >>
 //@+others
 //@+node:felix.20221119205229.1: ** class LeoGui
@@ -29,7 +30,7 @@ export class LeoGui {
     public consoleOnly: boolean;  //  True if g.es goes to console.
     public globalFindTabManager: StringFindTabManager | undefined;
     public globalFindTab: any;
-    public idleTimeClass: any;  //  Hard to annotate.
+    public idleTimeClass: any; // IdleTime | undefined | g.NullObject;  //  Hard to annotate.
     public isNullGui: boolean;
     public lastFrame: any;
     public leoIcon: any;
@@ -544,7 +545,7 @@ export class NullGui extends LeoGui {
         this.script = undefined;
         this.lastFrame = undefined;  // The outer frame, to set g.app.log in runMainLoop.
         this.isNullGui = true;
-        this.idleTimeClass = new g.NullObject();
+        this.idleTimeClass = g.NullObject;
 
     }
 
@@ -656,7 +657,9 @@ export class NullGui extends LeoGui {
     public runAskYesNoDialog(
         c: Commands,
         title: string,
-        message: string
+        message: string,
+        yes_all?: boolean,
+        no_all?: boolean,
     ): Thenable<string> {
         return Promise.resolve("");
     }
@@ -664,7 +667,12 @@ export class NullGui extends LeoGui {
     public runAskYesNoCancelDialog(
         c: Commands,
         title: string,
-        message: string
+        message: string,
+        yesMessage = "Yes",
+        noMessage = "No",
+        yesToAllMessage = "",
+        defaultButton = "Yes",
+        cancelMessage = ""
     ): Thenable<string> {
         return Promise.resolve("");
     }

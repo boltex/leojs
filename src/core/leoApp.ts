@@ -1,7 +1,7 @@
 //@+leo-ver=5-thin
 //@+node:felix.20210102012334.1: * @file src/core/leoApp.ts
 //@+<< imports >>
-//@+node:felix.20210102211149.1: ** << imports >> (leoApp)
+//@+node:felix.20210102211149.1: ** << imports >>
 import * as vscode from "vscode";
 import * as Bowser from "bowser";
 import * as os from "os";
@@ -34,6 +34,7 @@ export class IdleTimeManager {
 
     callback_list: ((...args: any[]) => any)[];
     timer: any;
+    on_idle_count = 0;
 
     /**
      * Ctor for IdleTimeManager class.
@@ -45,50 +46,63 @@ export class IdleTimeManager {
 
     //@+others
     //@+node:felix.20210102213337.2: *3* itm.add_callback
-    /*
-    def add_callback(self, callback):
-        """Add a callback to be called at every idle time."""
-        self.callback_list.append(callback)
-    */
+    /**
+     * Add a callback to be called at every idle time.
+     */
+    public add_callback(callback: (...args: any[]) => any): void {
 
+        this.callback_list.push(callback);
+
+    }
     //@+node:felix.20210102213337.3: *3* itm.on_idle
-    /*
-    on_idle_count = 0
+    /**
+     * IdleTimeManager: Run all idle-time callbacks.
+     */
+    public on_idle(timer: any): void {
 
-    def on_idle(self, timer):
-        """IdleTimeManager: Run all idle-time callbacks."""
-        if not g.app: return
-        if g.app.killed: return
-        if not g.app.pluginsController:
-            g.trace('No g.app.pluginsController', g.callers())
-            timer.stop()
-            return  # For debugger.
-        self.on_idle_count += 1
-        # Handle the registered callbacks.
-        for callback in self.callback_list:
-            try:
-                callback()
-            except Exception:
-                g.es_exception()
-                g.es_print(f"removing callback: {callback}")
-                self.callback_list.remove(callback)
-        # Handle idle-time hooks.
-        g.app.pluginsController.on_idle()
+        if (!g.app) {
+            return;
+        }
+        if (g.app.killed) {
+            return;
+        }
+        if (!g.app.pluginsController) {
+            g.trace('No g.app.pluginsController', g.callers());
+            timer.stop();
+            return;  // For debugger.
+        }
+        this.on_idle_count += 1;
+        // Handle the registered callbacks.
+        for (const callback of this.callback_list) {
+            try {
+                callback();
+            } catch (exception) {
+                g.es_exception(exception);
+                g.es_print(`removing callback: ${callback.toString()}`);
+                const index = this.callback_list.indexOf(callback);
+                if (index > -1) { // only splice array when item is found
+                    this.callback_list.splice(index, 1); // 2nd parameter means remove one item only
+                }
+                // this.callback_list.remove(callback);
+            }
+        }
+        // Handle idle-time hooks.
+        g.app.pluginsController.on_idle();
 
-    */
-
+    }
     //@+node:felix.20210102213337.4: *3* itm.start
-    /*
-    def start(self):
-        """Start the idle-time timer."""
-        self.timer = g.IdleTime(
-            self.on_idle,
-            delay=500,
-            tag='IdleTimeManager.on_idle')
-        if self.timer:
-            self.timer.start()
-    */
+    /**
+     * Start the idle-time timer.
+     */
+    public start(): void {
 
+        this.timer = g.IdleTime(
+            this.on_idle,
+            500,
+            'IdleTimeManager.on_idle'
+        );
+
+    }
     //@-others
 
 }
@@ -117,6 +131,7 @@ export class LeoApp {
     public silentMode: boolean = false; // True: no sign-on.
     public trace_binding: string | undefined; // The name of a binding to trace, or None.
     public trace_setting: string | undefined; // The name of a setting to trace, or None.
+    public write_black_sentinels = false; // True: write a space befor '@' in sentinel lines.
 
     //@-<< LeoApp: command-line arguments >>
     //@+<< LeoApp: Debugging & statistics >>
@@ -147,6 +162,7 @@ export class LeoApp {
     public globalOpenDir: string | undefined; // The directory last used to open a file.
     public homeDir: string | undefined; // The user's home directory.
     public homeLeoDir: string | undefined; // The user's home/.leo directory.
+    public testDir: string | undefined; // Used in unit tests
     public loadDir: string | undefined; // The leo / core directory.
     public machineDir: string | undefined; // The machine - specific directory.
 
@@ -181,9 +197,9 @@ export class LeoApp {
     public commander_db: any = null; // The singleton db, managed by g.app.commander_cacher.
     public config!: GlobalConfigManager; // The singleton leoConfig instance.
     public db: any = undefined; // The singleton global db, managed by g.app.global_cacher.
-    public externalFilesController: any = null; // The singleton ExternalFilesController instance.
+    public externalFilesController!: ExternalFilesController; // The singleton ExternalFilesController instance.
     public global_cacher: any = null; // The singleton leoCacher.GlobalCacher instance.
-    public idleTimeManager: any = null; // The singleton IdleTimeManager instance.
+    public idleTimeManager!: IdleTimeManager; // The singleton IdleTimeManager instance.
     public ipk: any = null; // python kernel instance
     public loadManager: LoadManager | undefined; // The singleton LoadManager instance.
     // public logManager: any = null;
@@ -523,7 +539,8 @@ export class LeoApp {
         // this.prolog_string = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
         this.prolog_prefix_string = "<?xml version=\"1.0\" encoding=";
         this.prolog_postfix_string = "?>";
-        this.prolog_namespace_string = 'xmlns:leo="http://edreamleo.org/namespaces/leo-python-editor/1.1"';
+        // this.prolog_namespace_string = 'xmlns:leo="http://edreamleo.org/namespaces/leo-python-editor/1.1"';
+        this.prolog_namespace_string = 'xmlns:leo="https://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1"';
     }
 
     //@+node:felix.20210103024632.19: *5* app.define_language_delims_dict
@@ -531,7 +548,7 @@ export class LeoApp {
 
         this.language_delims_dict = {
             // Internally, lower case is used for all language names.
-            // Keys are languages, values are 1, 2 or 3-tuples of delims.
+            // Keys are languages, values are strings that contain 1, 2 or 3 delims separated by spaces.
             "actionscript": "// /* */", // jason 2003-07 - 03
             "ada": "--",
             "ada95": "--",
@@ -562,7 +579,7 @@ export class LeoApp {
             "coffeescript": "#", // 2016 / 02 / 26.
             "config": "#", // Leo 4.5.1
             "cplusplus": "// /* */",
-            "cpp": "// /* */",// C++.
+            "cpp": "// /* */", // C++.
             "csharp": "// /* */", // C#
             "css": "/* */", // 4 / 1 / 04
             "cweb": "@q@ @>", // Use the "cweb hack"
@@ -1047,9 +1064,9 @@ export class LeoApp {
 
         verbose = verbose && !g.unitTesting && !this.silentMode;
 
-        if (g.unitTesting) {
-            this.leoID = "unittestid";
-        }
+        // if (g.unitTesting) {
+        //     this.leoID = "unittestid";
+        // }
 
         let w_userName = ""; // = "TestUserName";
 
@@ -1082,7 +1099,7 @@ export class LeoApp {
                 // tslint:disable-next-line: strict-comparisons
                 if (w_vscodeConfig.inspect(Constants.CONFIG_NAMES.LEO_ID)!.defaultValue === this.leoID) {
                     // Set as undefined - same as default
-                    w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, undefined, true);
+                    await w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, undefined, true);
                 } else {
                     // Set as value which is not default
                     await w_vscodeConfig.update(Constants.CONFIG_NAMES.LEO_ID, this.leoID, true);
@@ -1170,7 +1187,7 @@ export class LeoApp {
         }
         // This may remove frame from the window list.
         if (g.app.windowList.includes(frame)) {
-            g.app.destroyWindow(frame);
+            await g.app.destroyWindow(frame);
 
             // Remove frame
             let index = g.app.windowList.indexOf(frame, 0);
@@ -1196,12 +1213,12 @@ export class LeoApp {
     /**
      * Destroy all ivars in a Leo frame.
      */
-    public destroyWindow(frame: LeoFrame): void {
+    public async destroyWindow(frame: LeoFrame): Promise<void> {
         if (g.app.debug.includes('shutdown')) {
             g.pr(`destroyWindow:  ${frame.c.shortFileName()}`);
         }
         if (g.app.externalFilesController && g.app.externalFilesController.destroy_frame) {
-            g.app.externalFilesController.destroy_frame(frame);
+            await g.app.externalFilesController.destroy_frame(frame);
         }
         if (g.app.windowList.includes(frame)) {
             g.app.forgetOpenFile(frame.c.fileName());
@@ -1336,6 +1353,33 @@ export class LeoApp {
     //             title='Already Open Files',
     //             message=message,
     //             text="Ok")
+    //@+node:felix.20230518231054.1: *3* app.Import utils
+    //@+node:felix.20230518231054.2: *4* app.scanner_for_at_auto
+    /**
+     * A factory returning a scanner function for p, an @auto node.
+     */
+    public scanner_for_at_auto(c: Commands, p: Position): ((...args: any[]) => any) | undefined {
+
+        const d = g.app.atAutoDict;
+        for (const key in d) { // USING 'in' for KEYS
+
+            const func = d[key];
+            if (func && g.match_word(p.h, 0, key)) {
+                return func;
+            }
+        }
+        return undefined;
+
+    }
+    //@+node:felix.20230518231054.3: *4* app.scanner_for_ext
+    /**
+     * A factory returning a scanner function for the given file extension.
+     */
+    public scanner_for_ext(c: Commands, ext: string): ((...args: any[]) => any) | undefined {
+
+        return g.app.classDispatchDict[ext];
+
+    }
     //@+node:felix.20220417215246.1: *3* app.makeAllBindings
     /**
      * LeoApp.makeAllBindings:
@@ -1451,19 +1495,19 @@ export class LoadManager {
 
     //@+node:felix.20220610002953.1: *3* LM.Directory & file utils
     //@+node:felix.20220610002953.2: *4* LM.completeFileName
-    /* 
-    def completeFileName(self, fileName):
-        fileName = g.toUnicode(fileName)
-        fileName = g.os_path_finalize(fileName)
-        # 2011/10/12: don't add .leo to *any* file.
-        return fileName
-     */
+
+    public completeFileName(fileName: string): string {
+        fileName = g.toUnicode(fileName);
+        fileName = g.finalize(fileName);
+        // 2011/10/12: don't add .leo to *any* file.
+        return fileName;
+    }
     //@+node:felix.20220610002953.3: *4* LM.computeLeoSettingsPath
     /* 
     def computeLeoSettingsPath(self):
         """Return the full path to leoSettings.leo."""
         # lm = self
-        join = g.os_path_finalize_join
+        join = g.finalize_join
         settings_fn = 'leoSettings.leo'
         table = (
             # First, leoSettings.leo in the home directories.
@@ -1489,7 +1533,7 @@ export class LoadManager {
     public async computeMyLeoSettingsPath(): Promise<string | undefined> {
 
         const lm = this;
-        const join = g.os_path_finalize_join;
+        const join = g.finalize_join;
         const settings_fn = 'myLeoSettings.leo';
         // This seems pointless: we need a machine *directory*.
 
@@ -1503,14 +1547,14 @@ export class LoadManager {
 
         const table = [
             // First, myLeoSettings.leo in the local directory
-            join(undefined, localDir, settings_fn),
+            join(localDir, settings_fn),
         ];
         // Next, myLeoSettings.leo in the home directories.
         if (g.app.homeDir) {
-            table.push(join(undefined, g.app.homeDir, settings_fn));
+            table.push(join(g.app.homeDir, settings_fn));
         }
         if (g.app.homeLeoDir) {
-            table.push(join(undefined, g.app.homeLeoDir, settings_fn));
+            table.push(join(g.app.homeLeoDir, settings_fn));
         }
 
         let hasBreak = false;
@@ -1539,7 +1583,7 @@ export class LoadManager {
     public async computeStandardDirectories(): Promise<unknown> {
 
         const lm = this;
-        const join = path.join;
+        const join = g.PYTHON_os_path_join;
         g.app.loadDir = lm.computeLoadDir(); // UNUSED The leo / core directory. 
         g.app.globalConfigDir = lm.computeGlobalConfigDir(); // UNUSED leo / config directory 
         g.app.homeDir = await lm.computeHomeDir(); // * The user's home directory.
@@ -1548,7 +1592,7 @@ export class LoadManager {
         // These use g.app.loadDir...
         g.app.extensionsDir = ""; // join(g.app.loadDir, '..', 'extensions'); // UNSUSED The leo / extensions directory
         // g.app.leoEditorDir = join(g.app.loadDir, '..', '..');
-        // g.app.testDir = join(g.app.loadDir, '..', 'test');
+        g.app.testDir = join(g.app.loadDir, '..', 'test');
 
         return;
     }
@@ -1556,7 +1600,7 @@ export class LoadManager {
     //@+node:felix.20220610002953.6: *5* LM.computeGlobalConfigDir
 
     public computeGlobalConfigDir(): string {
-        let theDir: string = ""; // * unused : RETURN EMPTY / FALSY FOR NOW
+        let theDir: string = ""; // ! unused : RETURN EMPTY / FALSY FOR NOW
 
         /* 
         const leo_config_dir = getattr(sys, 'leo_config_directory', None)
@@ -1595,7 +1639,7 @@ export class LoadManager {
         if (home) {
             // Important: This returns the _working_ directory if home is None!
             // This was the source of the 4.3 .leoID.txt problems.
-            home = g.os_path_finalize(home);
+            home = g.finalize(home);
             const exists = await g.os_path_exists(home);
             const isDir = await g.os_path_isdir(home);
             if (!exists || !isDir) {
@@ -1615,7 +1659,7 @@ export class LoadManager {
             return "";
         }
 
-        homeLeoDir = g.os_path_finalize_join(undefined, g.app.homeDir, '.leo');
+        homeLeoDir = g.finalize_join(g.app.homeDir, '.leo');
         const exists = await g.os_path_exists(homeLeoDir);
 
         if (exists) {
@@ -1646,7 +1690,16 @@ export class LoadManager {
      * Returns the directory containing leo.py.
      */
     public computeLoadDir(): string {
-        let loadDir: string = ""; // * unused : RETURN EMPTY / FALSY FOR NOW
+
+        let loadDir: string = __dirname || "./";
+        let w_uri;
+        if (vscode.workspace.workspaceFolders) {
+            w_uri = vscode.workspace.workspaceFolders[0].uri;
+        }
+
+        // const loadDir2 = w_uri?.fsPath;
+        loadDir = g.finalize(loadDir);
+        return loadDir;
         /* 
         try:
             # Fix a hangnail: on Windows the drive letter returned by
@@ -1668,7 +1721,7 @@ export class LoadManager {
                     if len(path) > 2 and path[1] == ':':
                         # Convert the drive name to upper case.
                         path = path[0].upper() + path[1:]
-                path = g.os_path_finalize(path)
+                path = g.finalize(path)
                 loadDir = g.os_path_dirname(path)
             else: loadDir = None
             if (
@@ -1682,7 +1735,7 @@ export class LoadManager {
                     loadDir += "/leo/plugins"
                 else:
                     g.pr("Exception getting load directory")
-            loadDir = g.os_path_finalize(loadDir)
+            loadDir = g.finalize(loadDir)
             return loadDir
         except Exception:
             print("Exception getting load directory")
@@ -1714,7 +1767,7 @@ export class LoadManager {
         """
         Return a list of *existing* directories that might contain theme .leo files.
         """
-        join = g.os_path_finalize_join
+        join = g.finalize_join
         home = g.app.homeDir
         leo = join(g.app.loadDir, '..')
         table = [
@@ -1813,8 +1866,8 @@ export class LoadManager {
         if g.unitTesting or g.app.batchMode:
             return None
         fn = g.app.config.getString(setting='default_leo_file') or '~/.leo/workbook.leo'
-        fn = g.os_path_finalize(fn)
-        directory = g.os_path_finalize(os.path.dirname(fn))
+        fn = g.finalize(fn)
+        directory = g.finalize(os.path.dirname(fn))
         # #1415.
         return fn if os.path.exists(directory) else None
      */
@@ -2320,7 +2373,9 @@ export class LoadManager {
         await lm.doPrePluginsInit(fileName);
         g.app.computeSignon();
         g.app.printSignon();
-
+        if (lm.options['version']) {
+            return;
+        }
         if (!g.app.gui) {
             return;
         }
@@ -2333,8 +2388,10 @@ export class LoadManager {
             return;
         }
 
+        // ! ----------------------- MAYBE REPLACE WITH VSCODE FILE-CHANGE DETECTION ---------------- 
         // TODO: idleTimeManager
         // g.app.idleTimeManager.start();
+        // ! ----------------------------------------------------------------------------------------
 
         const t3 = process.hrtime();
         const ok = await lm.doPostPluginsInit(); // loads recent, or, new untitled.
@@ -2480,7 +2537,7 @@ export class LoadManager {
         if g.app.batchMode and g.os_path_exists(fn):
             return c
         # Open the cheatsheet.
-        fn = g.os_path_finalize_join(g.app.loadDir, '..', 'doc', 'CheatSheet.leo')
+        fn = g.finalize_join(g.app.loadDir, '..', 'doc', 'CheatSheet.leo')
         if not g.os_path_exists(fn):
             g.es(f"file not found: {fn}")
             return None
@@ -2518,7 +2575,7 @@ export class LoadManager {
     /**
      * Scan options, set directories and read settings.
      */
-    public async doPrePluginsInit(fileName?: string): Promise<unknown> {
+    public async doPrePluginsInit(fileName?: string): Promise<void> {
         const lm: LoadManager = this;
         await lm.computeStandardDirectories();
 
@@ -2530,28 +2587,193 @@ export class LoadManager {
         // const verbose:boolean = !script;
 
         // Init the app.
-        return lm.initApp().finally(async () => {
-            // g.app.setGlobalDb()
+        await lm.initApp();
+        // g.app.setGlobalDb()
 
-            // lm.reportDirectories(verbose)
+        // lm.reportDirectories(verbose)
 
-            // Read settings *after* setting g.app.config and *before* opening plugins.
-            // This means if-gui has effect only in per-file settings.
-            await lm.readGlobalSettingsFiles();
-            // reads only standard settings files, using a null gui.
-            // uses lm.files[0] to compute the local directory
-            // that might contain myLeoSettings.leo.
-            // Read the recent files file.
-            const localConfigFile = (lm.files && lm.files.length) ? lm.files[0] : undefined;
+        // Read settings *after* setting g.app.config and *before* opening plugins.
+        // This means if-gui has effect only in per-file settings.
+        await lm.readGlobalSettingsFiles();
 
-            // TODO: ? recent-file management ?
-            // g.app.recentFilesManager.readRecentFiles(localConfigFile);
+        // reads only standard settings files, using a null gui.
+        // uses lm.files[0] to compute the local directory
+        // that might contain myLeoSettings.leo.
+        // Read the recent files file.
+        const localConfigFile = (lm.files && lm.files.length) ? lm.files[0] : undefined;
 
-            // Create the gui after reading options and settings.
-            lm.createGui();
-            // We can't print the signon until we know the gui.
-            g.app.computeSignon();  // Set app.signon/signon1 for commanders.
-        });
+        // TODO: ? recent-file management ?
+        // g.app.recentFilesManager.readRecentFiles(localConfigFile);
+
+        // Create the gui after reading options and settings.
+        lm.createGui();
+        // We can't print the signon until we know the gui.
+        return g.app.computeSignon();  // Set app.signon/signon1 for commanders.
+
+    }
+
+    //@+node:felix.20230529220941.1: *5* LM.createAllImporterData & helpers
+    /**
+     * New in Leo 5.5:
+     *
+     * Create global data structures describing importers and writers.
+     */
+    public createAllImporterData(): void {
+        console.assert(g.app.loadDir);  // This is the only data required.
+        this.createWritersData();  // Was an AtFile method.
+        this.createImporterData();  // Was a LeoImportCommands method.
+    }
+    //@+node:felix.20230529220941.2: *6* LM.createImporterData & helper
+    /** 
+     * Create the data structures describing importer plugins.
+     */
+    public createImporterData(): void {
+
+        console.log('TODO : createImporterData');
+
+        // // Allow plugins to be defined in ~/.leo/plugins.
+        // for (const pattern of [
+        //     // ~/.leo/plugins.
+        //     g.finalize_join(g.app.homeDir, '.leo', 'plugins'),
+        //     // leo/plugins/importers.
+        //     g.finalize_join(g.app.loadDir, '..', 'plugins', 'importers', '*.py'),
+        // ]){
+        //     filenames = g.glob_glob(pattern)
+        //     for filename in filenames:
+        //         sfn = g.shortFileName(filename)
+        //         if sfn != '__init__.py':
+        //             try:
+        //                 module_name = sfn[:-3]
+        //                 // Important: use importlib to give imported modules their fully qualified names.
+        //                 m = importlib.import_module(f"leo.plugins.importers.{module_name}")
+        //                 self.parse_importer_dict(sfn, m)
+        //                 // print('createImporterData', m.__name__)
+        //             except Exception:
+        //                 g.warning(f"can not import leo.plugins.importers.{module_name}")
+        //                 g.printObj(filenames)
+
+
+        // }
+    }
+    //@+node:felix.20230529220941.3: *7* LM.parse_importer_dict
+    /**
+     *  Set entries in g.app.classDispatchDict, g.app.atAutoDict and
+     * g.app.atAutoNames using entries in m.importer_dict.
+     */
+    public parse_importer_dict(sfn: string, m: any): void {
+
+        console.log('TODO : parse_importer_dict');
+
+        // importer_d = getattr(m, 'importer_dict', None)
+        // if importer_d
+        //     at_auto = importer_d.get('@auto', [])
+        //     scanner_func = importer_d.get('func', None)
+        //     // scanner_name = scanner_class.__name__
+        //     extensions = importer_d.get('extensions', [])
+        //     if at_auto
+        //         // Make entries for each @auto type.
+        //         d = g.app.atAutoDict
+        //         for s in at_auto:
+        //             d[s] = scanner_func
+        //             g.app.atAutoDict[s] = scanner_func
+        //             g.app.atAutoNames.add(s)
+        //     if extensions
+        //         // Make entries for each extension.
+        //         d = g.app.classDispatchDict
+        //         for ext in extensions:
+        //             d[ext] = scanner_func  #importer_d.get('func')#scanner_class
+
+
+
+        // elif sfn not in (
+        //     // These are base classes, not real plugins.
+        //     'basescanner.py',
+        //     'linescanner.py',
+        // ):
+        //     g.warning(f"leo/plugins/importers/{sfn} has no importer_dict")
+
+
+    }
+    //@+node:felix.20230529220941.4: *6* LM.createWritersData & helper
+    /**
+     * Create the data structures describing writer plugins.
+     */
+    public createWritersData(): void {
+
+        console.log('TODO : createWritersData');
+
+        // // Do *not* remove this trace.
+        // const trace = false && 'createWritersData' not in g.app.debug_dict
+        // if trace
+        //     // Suppress multiple traces.
+        //     g.app.debug_dict['createWritersData'] = True
+        // g.app.writersDispatchDict = {}
+        // g.app.atAutoWritersDict = {}
+
+        // // Allow plugins to be defined in ~/.leo/plugins.
+        // for pattern in (
+        //     g.finalize_join(g.app.homeDir, '.leo', 'plugins'),  // ~/.leo/plugins.
+        //     g.finalize_join(g.app.loadDir, '..', 'plugins', 'writers', '*.py'),  // leo/plugins/writers
+        // ):
+        //     for filename in g.glob_glob(pattern):
+        //         sfn = g.shortFileName(filename)
+        //         if sfn.endswith('.py') && sfn !== '__init__.py':
+        //             try:
+        //                 // Important: use importlib to give imported modules their fully qualified names.
+        //                 m = importlib.import_module(f"leo.plugins.writers.{sfn[:-3]}")
+        //                 self.parse_writer_dict(sfn, m)
+        //             except Exception:
+        //                 g.es_exception()
+        //                 g.warning(f"can not import leo.plugins.writers.{sfn}")
+        // if trace:
+        //     g.trace('LM.writersDispatchDict')
+        //     g.printDict(g.app.writersDispatchDict)
+        //     g.trace('LM.atAutoWritersDict')
+        //     g.printDict(g.app.atAutoWritersDict)
+
+    }
+    //@+node:felix.20230529220941.5: *7* LM.parse_writer_dict
+    /**
+     * Set entries in g.app.writersDispatchDict and g.app.atAutoWritersDict
+     * using entries in m.writers_dict.
+     */
+    public parse_writer_dict(sfn: string, m: any): void {
+
+        console.log('TODO : createWritersData');
+
+        // writer_d = getattr(m, 'writer_dict', None)
+        // if writer_d
+        //     at_auto = writer_d.get('@auto', [])
+        //     scanner_class = writer_d.get('class', None)
+        //     extensions = writer_d.get('extensions', [])
+        //     if at_auto
+        //         // Make entries for each @auto type.
+        //         d = g.app.atAutoWritersDict
+        //         for s in at_auto
+        //             aClass = d.get(s)
+        //             if aClass and aClass != scanner_class
+        //                 g.trace(
+        //                     f"{sfn}: duplicate {s} class {aClass.__name__} "
+        //                     f"in {m.__file__}:")
+        //             else
+        //                 d[s] = scanner_class
+        //                 g.app.atAutoNames.add(s)
+
+
+        //     if extensions
+        //         // Make entries for each extension.
+        //         d = g.app.writersDispatchDict
+        //         for ext in extensions
+        //             aClass = d.get(ext)
+        //             if aClass and aClass != scanner_class
+        //                 g.trace(f"{sfn}: duplicate {ext} class", aClass, scanner_class)
+        //             else
+        //                 d[ext] = scanner_class
+
+
+        // elif sfn not in ('basewriter.py',):
+        //     g.warning(f"leo/plugins/writers/{sfn} has no writer_dict")
+
 
     }
 
@@ -2589,6 +2811,8 @@ export class LoadManager {
     //@+node:felix.20210120004121.16: *5* LM.initApp
     public async initApp(verbose?: boolean): Promise<unknown> {
 
+        // Can be done early. Uses only g.app.loadDir & g.app.homeDir.
+        this.createAllImporterData();
         console.assert(g.app.loadManager);
 
         // Make sure we call the new leoPlugins.init top-level function.
@@ -2610,7 +2834,7 @@ export class LoadManager {
         // Complete the plugins class last.
         // g.app.pluginsController.finishCreate();
 
-        return g.app.leoID;
+        return;
 
     }
 
@@ -2641,7 +2865,7 @@ export class LoadManager {
         }
 
         // Step 0: Return if the file is already open.
-        // fn = g.os_path_finalize(fn);
+        // fn = g.finalize(fn);
 
         if (fn) {
             c = lm.findOpenFile(fn);
@@ -2847,7 +3071,7 @@ export class LoadManager {
 
             }else if( c.looksLikeDerivedFile(fn)){
                 // 2011/10/10: Create an @file node.
-                p = c.importCommands.importDerivedFiles(parent=c.rootPosition(),
+                p = await c.importCommands.importDerivedFiles(parent=c.rootPosition(),
                     paths=[fn], command=undefined);  // Not undoable.
                 if p && p.hasBack()
                     p.back().doDelete();
@@ -2975,7 +3199,7 @@ export class LoadManager {
         const w_result = await c.fileCommands.openLeoFile(fn, readAtFileNodesFlag);
         if (w_result) {
             if (!c.openDirectory) {
-                const theDir = g.os_path_finalize(g.os_path_dirname(fn));  // 1341
+                const theDir = g.finalize(g.os_path_dirname(fn));  // 1341
                 c.openDirectory = theDir;
                 c.frame.openDirectory = theDir;
             }
@@ -3000,7 +3224,7 @@ export class LoadManager {
             await vscode.workspace.fs.stat(w_uri);
             // OK exists
             c.fileCommands.initIvars();
-            c.fileCommands.getLeoFile(fn, undefined, undefined, false);
+            await c.fileCommands.getLeoFile(fn, undefined, undefined, false);
         } catch {
             // Does not exist !
         }

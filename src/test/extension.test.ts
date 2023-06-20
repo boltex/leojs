@@ -13,10 +13,10 @@ suite('Extension test examples', () => {
 
 	// * Example tests for leojs
 
-	before(async () => {
+	before(() => {
 		let w_wait: number = 5000;
 
-		vscode.window.showInformationMessage(`Starting leojs extension tests in ${w_wait} ms`);
+		void vscode.window.showInformationMessage(`Starting leojs extension tests in ${w_wait} ms`);
 
 		return new Promise<void>((resolve) => {
 			setTimeout(() => {
@@ -25,8 +25,8 @@ suite('Extension test examples', () => {
 		});
 	});
 
-	test('Test leojs Extension with exposed commands', async () => {
-		vscode.window.showInformationMessage('Starting leojs extension tests now!');
+	test('Test leojs Extension with exposed commands', () => {
+		void vscode.window.showInformationMessage('Starting leojs extension tests now!');
 
 		assert.strictEqual(-1, [1, 2, 3].indexOf(5));
 		assert.strictEqual(-1, [1, 2, 3].indexOf(0));
@@ -58,6 +58,8 @@ suite('Extension test examples', () => {
 
 		// TODO: more tests
 		// 5 - test 'new' leojs document and repeat tests
+
+		return Promise.resolve();
 
 	});
 

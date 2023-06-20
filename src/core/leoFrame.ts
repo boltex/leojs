@@ -7,7 +7,7 @@
 //@+node:felix.20220512211158.1: ** << imports >>
 import * as g from './leoGlobals';
 import { LeoGui } from './leoGui';
-import { Commands } from "./leoCommands";
+import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
 import { Chapter } from './leoChapters';
 import { StringFindTabManager } from './findTabManager';
@@ -16,7 +16,6 @@ import { StringFindTabManager } from './findTabManager';
 //@+others
 //@+node:felix.20220512211744.1: ** class LeoFrame
 export class LeoFrame {
-
     public c: Commands;
     public title: string;
     public gui: LeoGui;
@@ -57,12 +56,12 @@ export class LeoFrame {
 
         // #1817: Clear the gnxDict.
         c.fileCommands.gnxDict = {};
-        // 
+        //
         //  Create the first node.
         let v = new VNode(c);
         let p = new Position(v);
         v.initHeadString('NewHeadline');
-        // 
+        //
         //  New in Leo 4.5: p.moveToRoot would be wrong:
         //                  the node hasn't been linked yet.
         p._linkAsRoot();
@@ -74,7 +73,6 @@ export class LeoFrame {
     }
     //@+node:felix.20220512222542.1: *3* finishCreate
     public finishCreate() {
-
         const c = this.c;
         if (!this.gui.isNullGui) {
             g.app.windowList.push(this);
@@ -86,7 +84,6 @@ export class LeoFrame {
         this.ftm = ftm;
         // this.createFindTab(); // unused in leojs
         this.createFirstTreeNode();
-
     }
     //@+node:felix.20221105172641.1: *3* LeoFrame.getTitle & setTitle
     public getTitle(): string {
@@ -100,10 +97,8 @@ export class LeoFrame {
      * Set the tab width in effect for this frame.
      */
     public setTabWidth(w: number): void {
-
         // Subclasses may override this to affect drawing.
         this.tab_width = w;
-
     }
     //@+node:felix.20220516001519.1: *3* LeoFrame.promptForSave
     /**
@@ -111,12 +106,12 @@ export class LeoFrame {
      * Return True if the user vetos the quit or save operation.
      */
     public async promptForSave(): Promise<boolean> {
-
         const c = this.c;
-        const theType = g.app.quitting ? "quitting?" : "closing?";
+        const theType = g.app.quitting ? 'quitting?' : 'closing?';
         // See if we are in quick edit/save mode.
         let root = c.rootPosition()!;
-        const quick_save = !c.mFileName && !root.next().__bool__() && root.isAtEditNode();
+        const quick_save =
+            !c.mFileName && !root.next().__bool__() && root.isAtEditNode();
 
         let name: string;
         if (quick_save) {
@@ -130,11 +125,11 @@ export class LeoFrame {
             `Save changes to ${g.splitLongFileName(name)} before ${theType}`
         );
 
-        if (answer === "cancel") {
-            return true;  // Veto.
+        if (answer === 'cancel') {
+            return true; // Veto.
         }
-        if (answer === "no") {
-            return false;  // Don't save and don't veto.
+        if (answer === 'no') {
+            return false; // Don't save and don't veto.
         }
         if (!c.mFileName) {
             const root = c.rootPosition()!;
@@ -144,36 +139,33 @@ export class LeoFrame {
                 // See https://bugs.launchpad.net/leo-editor/+bug/381527
                 // Write the @edit node if needed.
                 if (root.isDirty()) {
-                    c.atFileCommands.writeOneAtEditNode(root);
+                    await c.atFileCommands.writeOneAtEditNode(root);
                 }
-                return false;  // Don't save and don't veto.
+                return false; // Don't save and don't veto.
             }
             c.mFileName = await g.app.gui.runSaveFileDialog(
                 c,
-                "Save",
-                [["Leo files", "*.leo *.leojs *.db"]],
-                ".leo"
+                'Save',
+                [['Leo files', '*.leo *.leojs *.db']],
+                '.leo'
             );
 
             c.bringToFront();
         }
         if (c.mFileName) {
             const ok = await c.fileCommands.save(c.mFileName);
-            return !ok;  // Veto if the save did not succeed.
+            return !ok; // Veto if the save did not succeed.
         }
-        return true;  // Veto.
-
+        return true; // Veto.
     }
     //@+node:felix.20221105165429.1: *3* LeoFrame.frame.scanForTabWidth
     /**
      * Return the tab width in effect at p.
      */
     public scanForTabWidth(p: Position): void {
-
         const c = this.c;
         const tab_width = c.getTabWidth(p);
         c.frame.setTabWidth(tab_width || 0);
-
     }
     //@+node:felix.20221027154024.1: *3* putStatusLine
     public putStatusLine(s: string, bg?: string, fg?: string): void {
@@ -181,19 +173,17 @@ export class LeoFrame {
         // console.log('TODO ? putStatusLine', s);
     }
     //@-others
-
 }
 //@+node:felix.20221102232737.1: ** class NullBody (LeoBody)
 /**
  * A do-nothing body class.
  */
 export class NullBody {
-
     public c: Commands;
     public frame: LeoFrame;
     public insertPoint = 0;
     public selection = [0, 0];
-    public s = "";  // The body text
+    public s = ''; // The body text
     // public widget: Widget = None
     public wrapper: StringTextWrapper;
     public use_chapters: boolean;
@@ -267,7 +257,7 @@ export class NullBody {
         if (w.leo_chapter !== undefined) {
             s = `${w.leo_chapter.name}: ${s}`;
         }
-        return s || "";
+        return s || '';
     }
     //@+node:felix.20221105150955.3: *4* LeoBody.createChapterIvar
     public createChapterIvar(w: StringTextWrapper): void {
@@ -286,7 +276,6 @@ export class NullBody {
      * Return True if w.leo_p exists or can be reconstituted.
      */
     public ensurePositionExists(w: StringTextWrapper): boolean {
-
         const c = this.c;
         if (w.leo_p && c.positionExists(w.leo_p)) {
             return true;
@@ -301,14 +290,12 @@ export class NullBody {
         // This *can* happen when selecting a deleted node.
         w.leo_p = c.p;
         return false;
-
     }
     //@+node:felix.20221105150955.7: *4* LeoBody.switchToChapter
     /**
      * select w.leo_chapter.
      */
     public switchToChapter(w: StringTextWrapper): void {
-
         const c = this.c;
         const cc = c.chapterController;
         if (w.leo_chapter !== undefined) {
@@ -320,7 +307,6 @@ export class NullBody {
                 c.bodyWantsFocus();
             }
         }
-
     }
     //@+node:felix.20221105150955.8: *4* LeoBody.updateInjectedIvars
     // Called from addEditor and assignPositionToEditor.
@@ -329,7 +315,6 @@ export class NullBody {
      * Inject updated ivars in w, a gui widget.
      */
     public updateInjectedIvars(w: StringTextWrapper, p: Position): void {
-
         if (!w) {
             return;
         }
@@ -345,7 +330,6 @@ export class NullBody {
         w.leo_p = p.copy();
         w.leo_v = w.leo_p.v;
         w.leo_label_s = p.h;
-
     }
     //@+node:felix.20230312221628.1: *3* LeoBody.Text
     //@+node:felix.20230312221628.2: *4* LeoBody.getInsertLines
@@ -410,7 +394,6 @@ export class NullBody {
      * (or the text after the insert point if no selection)
      */
     public getSelectionLines(): [string, string, string] {
-
         if (g.app.batchMode) {
             return ['', '', ''];
         }
@@ -433,10 +416,9 @@ export class NullBody {
         const before = g.checkUnicode(s.substring(0, i));
         const sel = g.checkUnicode(s.substring(i, j));
         const after = g.checkUnicode(s.substring(j, s.length));
-        return [before, sel, after];  // 3 strings.
+        return [before, sel, after]; // 3 strings.
     }
     //@-others
-
 }
 
 //@+node:felix.20221102232749.1: ** class NullTree (LeoTree)
@@ -451,11 +433,10 @@ export class NullTree {
     public edit_text_dict: { [key: string]: [Position, any] };
     // "public" ivars: correspond to setters & getters.
     public drag_p: Position | undefined;
-    public generation: number;  // low-level vnode methods increment public count.
-    public redrawCount: number;  // For traces
+    public generation: number; // low-level vnode methods increment public count.
+    public redrawCount: number; // For traces
     public updateCount: number;
-    public use_chapters: boolean;  // May be overridden in subclasses.
-
+    public use_chapters: boolean; // May be overridden in subclasses.
 
     public c: Commands;
     public editWidgetsDict: { [key: string]: StringTextWrapper }; // Keys are vnodes, values are StringTextWidgets.
@@ -467,7 +448,6 @@ export class NullTree {
     //@+others
     //@+node:felix.20221102232749.2: *3*  NullTree.__init__
     constructor(frame: LeoFrame) {
-
         this.frame = frame;
 
         // New in 3.12: keys vnodes, values are edit_widgets.
@@ -475,10 +455,9 @@ export class NullTree {
         this.edit_text_dict = {};
         // "public" ivars: correspond to setters & getters.
         this.drag_p = undefined;
-        this.generation = 0;  // low-level vnode methods increment this count.
-        this.redrawCount = 0;  // For traces
-        this.use_chapters = false;  // May be overridden in subclasses.
-
+        this.generation = 0; // low-level vnode methods increment this count.
+        this.redrawCount = 0; // For traces
+        this.use_chapters = false; // May be overridden in subclasses.
 
         this.c = frame.c;
         this.editWidgetsDict = {}; // Keys are vnodes, values are StringTextWidgets.
@@ -488,22 +467,19 @@ export class NullTree {
         this.treeWidget = { _name: 'tree' }; // new g.NullObject();
         this.redrawCount = 0;
         this.updateCount = 0;
-
     }
     //@+node:felix.20221105000046.1: *3* LeoTree.endEditLabel
     /**
      * End editing of a headline and update p.h.
      */
     public endEditLabel(): void {
-
         // Important: this will redraw if necessary.
         this.onHeadChanged(this.c.p);
-        // ! LEOJS: Mimic qt_tree 
+        // ! LEOJS: Mimic qt_tree
         const d = this.editWidgetsDict;
         if (d[this.c.p.v.gnx]) {
             delete d[this.c.p.v.gnx];
         }
-
     }
     //@+node:felix.20221105000303.1: *3* LeoTree.onHeadChanged
 
@@ -512,7 +488,6 @@ export class NullTree {
      * Set the old undo text to the previous revert point.
      */
     public onHeadChanged(p: Position, undoType = 'Typing'): void {
-
         const c = this.c;
         const u = this.c.undoer;
         const w = this.edit_widget(p);
@@ -520,7 +495,7 @@ export class NullTree {
             // g.trace('no w');
             return;
         }
-        const ch = '\n';  // We only report the final keystroke.
+        const ch = '\n'; // We only report the final keystroke.
         let s = w.getAllText();
         //@+<< truncate s if it has multiple lines >>
         //@+node:felix.20221105000303.2: *4* << truncate s if it has multiple lines >>
@@ -531,12 +506,12 @@ export class NullTree {
         // Warn if there are multiple lines.
         const i = s.indexOf('\n');
         if (i > -1) {
-            g.warning("truncating headline to one line");
+            g.warning('truncating headline to one line');
             s = s.substring(0, i);
         }
         const limit = 1000;
         if (s.length > limit) {
-            g.warning("truncating headline to " + limit + " characters");
+            g.warning('truncating headline to ' + limit + ' characters');
             s = s.substring(0, limit);
         }
         s = g.checkUnicode(s || '');
@@ -546,14 +521,14 @@ export class NullTree {
         // Make the change official, but undo to the *old* revert point.
         const changed = s !== p.h;
         if (!changed) {
-            return;  // Leo 6.4: only call the hooks if the headline has actually changed.
+            return; // Leo 6.4: only call the hooks if the headline has actually changed.
         }
         // if( g.doHook("headkey1", c, p, ch, changed)){
         //     return;  // The hook claims to have handled the event.
         // }
         // Handle undo.
         const undoData = u.beforeChangeHeadline(p);
-        p.initHeadString(s);  // change p.h *after* calling undoer's before method.
+        p.initHeadString(s); // change p.h *after* calling undoer's before method.
         if (!c.changed) {
             c.setChanged();
         }
@@ -566,7 +541,6 @@ export class NullTree {
         // Fix bug 1280689: don't call the non-existent c.treeEditFocusHelper
         c.redraw_after_head_changed();
         // g.doHook("headkey2", c, p, ch, changed);
-
     }
     //@+node:felix.20221210191616.1: *3* LeoTree.select & helpers
     /**
@@ -591,23 +565,20 @@ export class NullTree {
             // print(f"{tag:30}: {len(p.b):4} {p.gnx} {p.h}")
         }
 
-
         try {
             // this.tree_select_lockout = true;
             // this.prev_v = c.p.v
             this.selectHelper(p);
-        }
-
-        finally {
+        } finally {
             // this.tree_select_lockout = False
             if (c.enableRedrawFlag) {
                 p = c.p;
                 // Don't redraw during unit testing: an important speedup.
                 if (c.expandAllAncestors(p) && !g.unitTesting) {
                     // This can happen when doing goto-next-clone.
-                    c.redraw_later();  // This *does* happen sometimes.
+                    c.redraw_later(); // This *does* happen sometimes.
                 } else {
-                    c.outerUpdate();  // Bring the tree up to date.
+                    c.outerUpdate(); // Bring the tree up to date.
                     // ! NOT USED IN LEOJS
                     // if (this.setItemForCurrentPosition){
                     //     // pylint: disable=no-member
@@ -626,7 +597,6 @@ export class NullTree {
      * Do **not** "optimize" this by returning if p==c.p!
      */
     public selectHelper(p: Position): void {
-
         if (!p || !p.__bool__()) {
             // This is not an error! We may be changing roots.
             // Do *not* test c.positionExists(p) here!
@@ -634,7 +604,7 @@ export class NullTree {
         }
         const c = this.c;
         if (!c.frame.body.wrapper) {
-            return;  // Defensive.
+            return; // Defensive.
         }
         if (p.v.context !== c) {
             // Selecting a foreign position will not be pretty.
@@ -662,8 +632,20 @@ export class NullTree {
 
         if (call_event_handlers) {
             //  g.doHook("select2", c=c, new_p=p, old_p=old_p, new_v=p, old_v=old_p)
-            g.doHook("select2", { c: c, new_p: p, old_p: old_p, new_v: p, old_v: old_p });
-            g.doHook("select3", { c: c, new_p: p, old_p: old_p, new_v: p, old_v: old_p });
+            g.doHook('select2', {
+                c: c,
+                new_p: p,
+                old_p: old_p,
+                new_v: p,
+                old_v: old_p,
+            });
+            g.doHook('select3', {
+                c: c,
+                new_p: p,
+                old_p: old_p,
+                new_v: p,
+                old_v: old_p,
+            });
         }
     }
     //@+node:felix.20221210193746.2: *5* 1. LeoTree.unselect_helper
@@ -671,17 +653,22 @@ export class NullTree {
      * Unselect the old node, calling the unselect hooks.
      */
     public unselect_helper(old_p: Position, p: Position): void {
-
         const c = this.c;
         const call_event_handlers = !p.__eq__(old_p);
         let unselect: boolean;
         if (call_event_handlers) {
-            unselect = !g.doHook("unselect1", { c: c, new_p: p, old_p: old_p, new_v: p, old_v: old_p });
+            unselect = !g.doHook('unselect1', {
+                c: c,
+                new_p: p,
+                old_p: old_p,
+                new_v: p,
+                old_v: old_p,
+            });
         } else {
             unselect = true;
         }
 
-        // Actually unselect the old node. 
+        // Actually unselect the old node.
         if (unselect && old_p && old_p.__bool__() && !old_p.__eq__(p)) {
             this.endEditLabel();
             // #1168: Ctrl-minus selects multiple nodes.
@@ -691,7 +678,13 @@ export class NullTree {
             //     this.unselectItem(old_p)
         }
         if (call_event_handlers) {
-            g.doHook("unselect2", { c: c, new_p: p, old_p: old_p, new_v: p, old_v: old_p });
+            g.doHook('unselect2', {
+                c: c,
+                new_p: p,
+                old_p: old_p,
+                new_v: p,
+                old_v: old_p,
+            });
         }
     }
 
@@ -700,12 +693,18 @@ export class NullTree {
      * Select the new node, part 1.
      */
     public select_new_node(old_p: Position, p: Position): void {
-
         const c = this.c;
         const call_event_handlers = !p.__eq__(old_p);
 
-        if (call_event_handlers && g.doHook("select1",
-            { c: c, new_p: p, old_p: old_p, new_v: p, old_v: old_p })
+        if (
+            call_event_handlers &&
+            g.doHook('select1', {
+                c: c,
+                new_p: p,
+                old_p: old_p,
+                new_v: p,
+                old_v: old_p,
+            })
         ) {
             if (g.app.debug.includes('select')) {
                 g.trace('select1 override');
@@ -716,7 +715,6 @@ export class NullTree {
         // c.frame.setWrap(p);  // Not that expensive  // NOT USED IN LEOJS
         this.set_body_text_after_select(p, old_p);
         c.nodeHistory.update(p);
-
     }
 
     //@+node:felix.20221210193746.4: *6* LeoTree.set_body_text_after_select
@@ -724,10 +722,9 @@ export class NullTree {
      * Set the text after selecting a node.
      */
     public set_body_text_after_select(p: Position, old_p: Position): void {
-
         const c = this.c;
         const w = c.frame.body.wrapper;
-        const s = p.v.b;  // Guaranteed to be unicode.
+        const s = p.v.b; // Guaranteed to be unicode.
         // Part 1: get the old text.
         const old_s = w.getAllText();
         if (p && p.__bool__() && p.__eq__(old_p) && s === old_s) {
@@ -740,7 +737,6 @@ export class NullTree {
         w.setAllText(s);
         // This is now done after c.p has been changed.
         // p.restoreCursorAndScroll()
-
     }
 
     //@+node:felix.20221210193746.5: *5* 3. LeoTree.change_current_position
@@ -748,7 +744,6 @@ export class NullTree {
      * Select the new node, part 2.
      */
     public change_current_position(old_p: Position, p: Position): void {
-
         const c = this.c;
         // c.setCurrentPosition(p)
         // This is now done in set_body_text_after_select.
@@ -765,7 +760,6 @@ export class NullTree {
         // Do not call treeFocusHelper here!
         // c.treeFocusHelper()
         c.undoer.onSelect(old_p, p);
-
     }
 
     //@+node:felix.20221210193746.6: *5* 4. LeoTree.scroll_cursor
@@ -773,7 +767,7 @@ export class NullTree {
      * Scroll the cursor.
      */
     public scroll_cursor(p: Position): void {
-        p.restoreCursorAndScroll();  // Was in setBodyTextAfterSelect
+        p.restoreCursorAndScroll(); // Was in setBodyTextAfterSelect
     }
 
     //@+node:felix.20221210193746.7: *5* 5. LeoTree.set_status_line
@@ -808,17 +802,18 @@ export class NullTree {
         //     w.setAllText(p.h);
         // }
         return w;
-
     }
     //@+node:felix.20221102232749.4: *3* NullTree.editLabel
     /**
      * Start editing p's headline.
      */
-    public editLabel(p: Position, selectAll = false, selection?: any): [undefined, StringTextWrapper | undefined] {
-
+    public editLabel(
+        p: Position,
+        selectAll = false,
+        selection?: any
+    ): [undefined, StringTextWrapper | undefined] {
         this.endEditLabel();
         if (p && p.__bool__()) {
-
             // ! LEOJS : Mimic from qt_tree
 
             const d = this.editWidgetsDict;
@@ -826,10 +821,7 @@ export class NullTree {
             let wrapper = d[p.v.gnx];
 
             if (!wrapper) {
-                wrapper = new StringTextWrapper(
-                    this.c,
-                    'head-wrapper'
-                );
+                wrapper = new StringTextWrapper(this.c, 'head-wrapper');
                 d[p.v.gnx] = wrapper;
                 wrapper.setAllText(p.h);
             }
@@ -839,7 +831,6 @@ export class NullTree {
             return [e, wrapper];
         }
         return [undefined, undefined];
-
     }
     //@+node:felix.20221102232749.5: *3* NullTree.printWidgets
     public printWidgets(): void {
@@ -880,7 +871,6 @@ export class NullTree {
      * This is called from the undo/redo logic to change the text before redrawing.
      */
     public setHeadline(p: Position, s: string): void {
-
         const w = this.edit_widget(p);
         if (w) {
             w.delete(0, w.getLastIndex());
@@ -895,14 +885,12 @@ export class NullTree {
     }
 
     //@-others
-
 }
 //@+node:felix.20221102232754.1: ** class StringTextWrapper
 /**
  * A class that represents text as a Python string.
  */
 export class StringTextWrapper {
-
     public c: Commands;
     public name: string;
     public ins: number;
@@ -928,7 +916,7 @@ export class StringTextWrapper {
         this.s = '';
         this.supportsHighLevelInterface = true;
         this.virtualInsertPoint = 0;
-        this.widget = undefined;  // This ivar must exist, and be None.
+        this.widget = undefined; // This ivar must exist, and be None.
     }
 
     public toString(): string {
@@ -939,17 +927,16 @@ export class StringTextWrapper {
      * StringTextWrapper
      */
     public getName(): string {
-        return this.name;  // Essential.
+        return this.name; // Essential.
     }
 
     //@+node:felix.20221102232754.3: *3* stw.Clipboard
-    public clipboard_clear(): void {
-        g.app.gui.replaceClipboardWith('');
+    public clipboard_clear(): Thenable<void> {
+        return g.app.gui.replaceClipboardWith('');
     }
     public async clipboard_append(s: string): Promise<void> {
         const s1 = await g.app.gui.getTextFromClipboard();
-        g.app.gui.replaceClipboardWith(s1 + s);
-        return;
+        return g.app.gui.replaceClipboardWith(s1 + s);
     }
 
     //@+node:felix.20221102232754.4: *3* stw.Do-nothings
@@ -961,7 +948,13 @@ export class StringTextWrapper {
     public enable(enabled = true): void {
         // pass
     }
-    public flashCharacter(i: number, bg = 'white', fg = 'red', flashes = 3, delay = 75): void {
+    public flashCharacter(
+        i: number,
+        bg = 'white',
+        fg = 'red',
+        flashes = 3,
+        delay = 75
+    ): void {
         // pass
     }
     public getXScrollPosition(): number {
@@ -995,18 +988,15 @@ export class StringTextWrapper {
      * StringTextWrapper
      */
     public appendText(s: string): void {
-
-        this.s = this.s + g.toUnicode(s);  // defensive
+        this.s = this.s + g.toUnicode(s); // defensive
         this.ins = this.s.length;
         this.sel = [this.ins, this.ins];
-
     }
     //@+node:felix.20221102232754.7: *4* stw.delete
     /**
      * StringTextWrapper.
      */
     public delete(i: number, j?: number): void {
-
         if (j === undefined) {
             j = i + 1;
         }
@@ -1018,7 +1008,6 @@ export class StringTextWrapper {
         this.setAllText(s.substring(0, i) + s.substring(j));
         // Bug fix: 2011/11/13: Significant in external tests.
         this.setSelectionRange(i, i, i);
-
     }
     //@+node:felix.20221102232754.8: *4* stw.deleteTextSelection
     /**
@@ -1035,13 +1024,11 @@ export class StringTextWrapper {
      * StringTextWrapper.
      */
     public get(i: number, j?: number): string {
-
         if (j === undefined) {
             j = i + 1;
         }
         const s = this.s.substring(i, j);
         return g.toUnicode(s);
-
     }
     //@+node:felix.20221102232754.10: *4* stw.getAllText
     /**
@@ -1090,20 +1077,18 @@ export class StringTextWrapper {
      * Return the selected range of the widget.
      */
     public getSelectionRange(sort = true): [number, number] {
-
         let sel = this.sel;
         let i;
         let j;
         if (sel.length === 2 && sel[0] >= 0 && sel[1] >= 0) {
             [i, j] = sel;
             if (sort && i > j) {
-                sel = [j, i];  // Bug fix: 10/5/07
+                sel = [j, i]; // Bug fix: 10/5/07
             }
             return sel;
         }
         i = this.ins;
         return [i, i];
-
     }
     //@+node:felix.20221102232754.15: *4* stw.hasSelection
     /**
@@ -1120,13 +1105,10 @@ export class StringTextWrapper {
      * StringTextWrapper.
      */
     public insert(i: number, s: string): void {
-        console.log('StringTextWrapper: before insert', this.s);
-
         this.s = this.s.substring(0, i) + s + this.s.substring(i);
         i += s.length;
         this.ins = i;
         this.sel = [i, i];
-        console.log('StringTextWrapper: after insert', this.s);
     }
     //@+node:felix.20221102232754.17: *4* stw.selectAllText
     /**
@@ -1174,7 +1156,6 @@ export class StringTextWrapper {
         return [row, col];
     }
     //@-others
-
 }
 
 //@-others

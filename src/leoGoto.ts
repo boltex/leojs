@@ -37,7 +37,7 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
         }
     }
 
-    public navigateNavEntry(p_nav: LeoGotoNavKey): void {
+    public async navigateNavEntry(p_nav: LeoGotoNavKey): Promise<void> {
         if (!this._nodeList.length) {
             return;
         }
@@ -63,12 +63,10 @@ export class LeoGotoProvider implements vscode.TreeDataProvider<LeoGotoNode> {
                 break;
 
         }
-
-        this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]).then(() => {
-            this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex], {
-                select: true,
-                focus: true
-            });
+        await this._leoUI.gotoNavEntry(this._nodeList[this._selectedNodeIndex]);
+        await this._lastGotoView?.reveal(this._nodeList[this._selectedNodeIndex], {
+            select: true,
+            focus: true
         });
     }
 

@@ -1,4 +1,4 @@
-// Mix of MIT licenced node-jpickle by Jeremy Lainé, and picklejs by Frank Salim
+// Mix of MIT licenced node-jpickle by Jeremy Lainé, and pickle-js by Frank Salim
 
 const emulated: { [key: string]: (args: any) => any } = {
     'datetime.datetime': function (args: any) {

@@ -126,7 +126,7 @@ export class Config implements ConfigMembers {
      * @param p_changes is an array of codes and values to be changed
      * @returns a promise that resolves upon completion
      */
-    public async setLeojsSettings(p_changes: ConfigSetting[]): Promise<unknown> {
+    public setLeojsSettings(p_changes: ConfigSetting[]): Promise<unknown> {
         this._isBusySettingConfig = true;
         const w_promises: Thenable<void>[] = [];
         const w_vscodeConfig = vscode.workspace.getConfiguration(Constants.CONFIG_NAME);
@@ -156,20 +156,20 @@ export class Config implements ConfigMembers {
     public setFontConfig(p_settings: FontSettings): void {
         if (p_settings.zoomLevel || p_settings.zoomLevel === 0) {
             if (!isNaN(p_settings.zoomLevel) && p_settings.zoomLevel <= 12 && p_settings.zoomLevel >= -12) {
-                vscode.workspace.getConfiguration("window")
+                void vscode.workspace.getConfiguration("window")
                     .update("zoomLevel", p_settings.zoomLevel, true);
             } else {
-                vscode.window.showInformationMessage(
+                void vscode.window.showInformationMessage(
                     Constants.USER_MESSAGES.ZOOM_LEVEL_RANGE_LIMIT
                 );
             }
         }
         if (p_settings.fontSize) {
             if (!isNaN(p_settings.fontSize) && p_settings.fontSize <= 30 && p_settings.fontSize >= 6) {
-                vscode.workspace.getConfiguration("editor")
+                void vscode.workspace.getConfiguration("editor")
                     .update("fontSize", p_settings.fontSize, true);
             } else {
-                vscode.window.showInformationMessage(
+                void vscode.window.showInformationMessage(
                     Constants.USER_MESSAGES.FONT_SIZE_RANGE_LIMIT
                 );
             }
@@ -206,15 +206,15 @@ export class Config implements ConfigMembers {
         }
         if (w_result === false) {
             if (p_forced) {
-                this.setEnablePreview();
-                vscode.window.showInformationMessage(Constants.USER_MESSAGES.ENABLE_PREVIEW_SET);
+                void this.setEnablePreview();
+                void vscode.window.showInformationMessage(Constants.USER_MESSAGES.ENABLE_PREVIEW_SET);
             } else {
-                vscode.window.showWarningMessage(
+                void vscode.window.showWarningMessage(
                     Constants.USER_MESSAGES.ENABLE_PREVIEW_RECOMMEND,
                     Constants.USER_MESSAGES.FIX_IT
                 ).then(p_chosenButton => {
                     if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
-                        vscode.commands.executeCommand(Constants.COMMANDS.SET_ENABLE_PREVIEW);
+                        void vscode.commands.executeCommand(Constants.COMMANDS.SET_ENABLE_PREVIEW);
                     }
                 });
             }
@@ -235,15 +235,15 @@ export class Config implements ConfigMembers {
         }
         if (w_result === true) {
             if (p_forced) {
-                this.clearCloseEmptyGroups();
-                vscode.window.showInformationMessage(Constants.USER_MESSAGES.CLOSE_EMPTY_CLEARED);
+                void this.clearCloseEmptyGroups();
+                void vscode.window.showInformationMessage(Constants.USER_MESSAGES.CLOSE_EMPTY_CLEARED);
             } else {
-                vscode.window.showWarningMessage(
+                void vscode.window.showWarningMessage(
                     Constants.USER_MESSAGES.CLOSE_EMPTY_RECOMMEND,
                     Constants.USER_MESSAGES.FIX_IT
                 ).then(p_chosenButton => {
                     if (p_chosenButton === Constants.USER_MESSAGES.FIX_IT) {
-                        vscode.commands.executeCommand(Constants.COMMANDS.CLEAR_CLOSE_EMPTY_GROUPS);
+                        void vscode.commands.executeCommand(Constants.COMMANDS.CLEAR_CLOSE_EMPTY_GROUPS);
                     }
                 });
             }

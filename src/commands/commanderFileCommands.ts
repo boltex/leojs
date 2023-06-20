@@ -1,8 +1,11 @@
 //@+leo-ver=5-thin
 //@+node:felix.20211017230407.1: * @file src/commands/commanderFileCommands.ts
-// File commands that used to be defined in leoCommands.py
+/**
+ * File commands that used to be defined in leoCommands.py
+ */
 import * as vscode from "vscode";
 import { Utils as uriUtils } from "vscode-uri";
+import * as utils from "../utils";
 
 import * as g from "../core/leoGlobals";
 import { commander_command } from "../core/decorators";
@@ -132,7 +135,7 @@ export class CommanderFileCommands {
         'close-window',
         'Close the Leo window, prompting to save it if it has been changed.'
     )
-    public async close(this: Commands, new_c?: Commands): Promise<unknown> {
+    public close(this: Commands, new_c?: Commands): Promise<unknown> {
 
         return g.app.closeLeoWindow(this.frame, new_c);
 
@@ -200,7 +203,7 @@ export class CommanderFileCommands {
         others = [z for z in names if z not in derived]
 
         if derived
-            ic.importDerivedFiles(c.p, derived);
+            await ic.importDerivedFiles(c.p, derived);
 
 
         let junk: string;
@@ -271,7 +274,7 @@ export class CommanderFileCommands {
     )
     public new(this: Commands, gui: NullGui): Commands {
 
-        // t1 = time.process_time()
+        const t1 = process.hrtime();
         // from leo.core import leoApp
         const lm = g.app.loadManager!;
         const old_c = this;
@@ -284,7 +287,7 @@ export class CommanderFileCommands {
         // g.app.lockLog()
 
         // Retain all previous settings. Very important for theme code.
-        // t2 = time.process_time()
+        const t2 = process.hrtime();
 
         const c = g.app.newCommander(
             '',
@@ -294,7 +297,7 @@ export class CommanderFileCommands {
                 lm.globalBindingsDict,
             ));
 
-        // t3 = time.process_time()
+        const t3 = process.hrtime();
         // frame = c.frame
         // g.app.unlockLog()
         // if not old_c:
@@ -316,17 +319,17 @@ export class CommanderFileCommands {
 
         c.redraw();
 
-        // t4 = time.process_time()
-        /* 
-        if 'speed' in g.app.debug:
-            g.trace()
-            print(
-                f"    1: {t2-t1:5.2f}\n"  // 0.00 sec.
-                f"    2: {t3-t2:5.2f}\n"  // 0.36 sec: c.__init__
-                f"    3: {t4-t3:5.2f}\n"  // 0.17 sec: Everything else.
-                f"total: {t4-t1:5.2f}"
-            )
-        */
+        const t4 = process.hrtime();
+
+        if (g.app.debug.includes('speed')) {
+            g.trace();
+            g.es(
+                `    1: ${utils.getDurationSeconds(t1, t2)}\n` +  // 0.00 sec.
+                `    2: ${utils.getDurationSeconds(t2, t3)}\n` +  // 0.36 sec: c.__init__
+                `    3: ${utils.getDurationSeconds(t3, t4)}\n` +  // 0.17 sec: Everything else.
+                `total: ${utils.getDurationSeconds(t1, t4)}`
+            );
+        }
         return c;  // For unit tests and scripts.
 
     }
@@ -359,11 +362,11 @@ export class CommanderFileCommands {
                         // c2.k.makeAllBindings(); // ? needed ?
 
                         // Fix #579: Key bindings don't take for commands defined in plugins.
-                        g.chdir(fileName);
+                        await g.chdir(fileName);
                         g.setGlobalOpenDir(fileName);
                     }
                     if (c2 && closeFlag) {
-                        g.app.destroyWindow(p_c.frame);
+                        await g.app.destroyWindow(p_c.frame);
                         // ! Need to remove here in leojs !
                         let index = g.app.windowList.indexOf(p_c.frame, 0);
                         if (index > -1) {
@@ -383,7 +386,7 @@ export class CommanderFileCommands {
                     if (w_looksDerived) {
                         console.log('TODO : IMPORT FILES');
                         // TODO : IMPORT FILES
-                        // ok = p_c.importCommands.importDerivedFiles(
+                        // ok = await p_c.importCommands.importDerivedFiles(
                         //     p_c.p,
                         //     [fileName],
                         //     'Open');
@@ -505,7 +508,7 @@ export class CommanderFileCommands {
             if (shouldDelete) {
                 p.v._deleteAllChildren();
             }
-            at.read(p);
+            await at.read(p);
         } else if (word === '@edit') {
             await at.readOneAtEditNode(fn, p);
             // Always deletes children.
@@ -572,7 +575,7 @@ export class CommanderFileCommands {
             // Calls c.clearChanged() if no error.
             g.app.syntax_error_files = [];
             await c.fileCommands.save(c.mFileName);
-            c.syntaxErrorDialog();
+            await c.syntaxErrorDialog();
             return c.raise_error_dialogs('write');
         } else {
             const root: Position = c.rootPosition()!;
@@ -583,7 +586,7 @@ export class CommanderFileCommands {
                 fileName = undefined;
                 // Write the @edit node if needed.
                 if (root.isDirty()) {
-                    c.atFileCommands.writeOneAtEditNode(root);
+                    await c.atFileCommands.writeOneAtEditNode(root);
                 }
                 c.clearChanged();  // Clears all dirty bits.
             } else {
@@ -623,7 +626,7 @@ export class CommanderFileCommands {
 
         const c: Commands = this;
 
-        c.save();  // Force a write of the present window.
+        await c.save();  // Force a write of the present window.
 
         for (let c2 of g.app.commanders()) {
             if (c2 !== c && c2.isChanged()) {
@@ -768,7 +771,8 @@ export class CommanderFileCommands {
         if (!fn) {
             g.es('can not revert unnamed file.');
         }
-        if (!g.os_path_exists(fn)) {
+        const w_exists = await g.os_path_exists(fn);
+        if (!w_exists) {
             g.es(`Can not revert unsaved file: ${fn}`);
             return;
         }
@@ -1214,7 +1218,7 @@ export class CommanderFileCommands {
 
             // ! Replaced with vscode.workspace.fs !
             // const theFile: number = openSync(fileName[0], 'r');
-            g.chdir(fileName);
+            await g.chdir(fileName);
             const c: Commands = g.app.newCommander(fileName);
             // ? needed ?
             //frame = c.frame;
@@ -1264,7 +1268,7 @@ export class CommanderFileCommands {
 
         if (fileName) {
             try {
-                g.chdir(fileName);
+                await g.chdir(fileName);
                 if (s.startsWith('@nocolor\n')) {
                     s = s.slice('@nocolor\n'.length);
                 }
@@ -1311,7 +1315,7 @@ export class CommanderFileCommands {
         if (fileName) {
             try {
                 // with open(fileName, 'w') as f:
-                g.chdir(fileName);
+                await g.chdir(fileName);
                 if (s.startsWith('@nocolor\n')) {
                     s = s.substring('@nocolor\n'.length);
                 }
@@ -1407,7 +1411,7 @@ export class CommanderFileCommands {
         "\n" +
         "**Note**: Use the set-reference-file command to create the separator node.\n"
     )
-    public async updateRefLeoFile(this: Commands): Promise<unknown> {
+    public updateRefLeoFile(this: Commands): Promise<unknown> {
         const c: Commands = this;
         return c.fileCommands.save_ref();
     }
@@ -1424,7 +1428,7 @@ export class CommanderFileCommands {
         "\n" +
         "**Note**: Use the set-reference-file command to create the separator node.\n"
     )
-    public async readRefLeoFile(this: Commands): Promise<unknown> {
+    public readRefLeoFile(this: Commands): Promise<unknown> {
         const c: Commands = this;
         return c.fileCommands.updateFromRefFile();
     }

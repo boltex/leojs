@@ -38,22 +38,24 @@ class DummyTagController extends TagController {
     }
 }
 
-//@+node:felix.20221226222117.1: ** suite TestFind(LeoUnitTest)
+//@+node:felix.20221226222117.1: ** suite TestFind
 suite('Test cases for leoFind.ts', () => {
     let self: LeoUnitTest;
 
-    before(async () => {
+    before(() => {
         self = new LeoUnitTest();
         return self.setUpClass();
     });
 
-    beforeEach(async () => {
+    beforeEach(() => {
         self.setUp();
         setUp();
+        return Promise.resolve();
     });
 
-    afterEach(async () => {
+    afterEach(() => {
         self.tearDown();
+        return Promise.resolve();
     });
 
     //@+others
@@ -129,7 +131,7 @@ suite('Test cases for leoFind.ts', () => {
     //@+node:felix.20221226222117.5: *4* TestFind.change-all
     // def test_change_all(self):
 
-    test('test_change_all', async () => {
+    test('test_change_all', () => {
         const c = self.c;
         const settings = self.settings;
         const x = self.x;
@@ -198,7 +200,7 @@ suite('Test cases for leoFind.ts', () => {
         x.do_change_all(settings);
     });
     //@+node:felix.20221226222117.6: *4* TestFind.change-all (@file node)
-    test('test_change_all_with_at_file_node', async () => {
+    test('test_change_all_with_at_file_node', () => {
         const c = self.c;
         const settings = self.settings;
         const x = self.x;
@@ -219,7 +221,7 @@ suite('Test cases for leoFind.ts', () => {
         assert.ok(root.v.isDirty(), root.h);
     });
     //@+node:felix.20221226222117.7: *4* TestFind.change-all (headline)
-    test('test_change_all_headline', async () => {
+    test('test_change_all_headline', () => {
         const settings = self.settings;
         const x = self.x;
         settings.find_text = 'child';
@@ -232,7 +234,7 @@ suite('Test cases for leoFind.ts', () => {
         x.do_change_all(settings);
     });
     //@+node:felix.20221226222117.8: *4* TestFind.clone-find-all
-    test('test_clone_find_all', async () => {
+    test('test_clone_find_all', () => {
         const settings = self.settings;
         const x = self.x;
         // Regex find.
@@ -250,7 +252,7 @@ suite('Test cases for leoFind.ts', () => {
         x.do_clone_find_all(settings);
     });
     //@+node:felix.20221226222117.9: *4* TestFind.clone-find-all-flattened
-    test('test_clone_find_all_flattened', async () => {
+    test('test_clone_find_all_flattened', () => {
         const settings = self.settings;
         const x = self.x;
         // regex find.
@@ -267,7 +269,7 @@ suite('Test cases for leoFind.ts', () => {
         x.do_clone_find_all_flattened(settings);
     });
     //@+node:felix.20221226222117.10: *4* TestFind.clone-find-marked
-    test('test_clone_find_marked', async () => {
+    test('test_clone_find_marked', () => {
         const c = self.c;
         const x = self.x;
         const root = c.rootPosition()!;
@@ -277,7 +279,7 @@ suite('Test cases for leoFind.ts', () => {
         root.setMarked();
     });
     //@+node:felix.20221226222117.11: *4* TestFind.clone-find-parents
-    test('test_clone_find_parents', async () => {
+    test('test_clone_find_parents', () => {
         const c = self.c;
         const x = self.x;
         const root = c.rootPosition()!;
@@ -287,7 +289,7 @@ suite('Test cases for leoFind.ts', () => {
         x.cloneFindParents();
     });
     //@+node:felix.20221226222117.12: *4* TestFind.clone-find-tag
-    test('test_clone-find-tag', async () => {
+    test('test_clone-find-tag', () => {
         const c = self.c;
         const x = self.x;
         c.theTagController = new DummyTagController([c.rootPosition()!], c);
@@ -300,7 +302,7 @@ suite('Test cases for leoFind.ts', () => {
         x.do_clone_find_tag('test');
     });
     //@+node:felix.20221226222117.13: *4* TestFind.find-all
-    test('test_find_all', async () => {
+    test('test_find_all', () => {
         const settings = self.settings;
         const x = self.x;
 
@@ -364,7 +366,7 @@ suite('Test cases for leoFind.ts', () => {
         x.do_find_all(settings);
     });
     //@+node:felix.20221226222117.14: *4* TestFind.find-def
-    test('test_find_def', async () => {
+    test('test_find_def', () => {
 
         const x = self.x;
         // Test 1: Test methods called by x.find_def.
@@ -389,7 +391,7 @@ suite('Test cases for leoFind.ts', () => {
 
     });
     //@+node:felix.20221226222117.15: *4* TestFind.find-next
-    test('test_find_next', async () => {
+    test('test_find_next', () => {
         const settings = self.settings;
         const x = self.x;
         let p, pos, newpos;
@@ -401,7 +403,7 @@ suite('Test cases for leoFind.ts', () => {
         assert.strictEqual(s, settings.find_text);
     });
     //@+node:felix.20221226222117.16: *4* TestFind.find-next (file-only)
-    test('test_find_next_file_only', async () => {
+    test('test_find_next_file_only', () => {
         const settings = self.settings;
         const x = self.x;
         let p, pos, newpos;
@@ -414,7 +416,7 @@ suite('Test cases for leoFind.ts', () => {
         assert.strictEqual(s, settings.find_text);
     });
     //@+node:felix.20221226222117.17: *4* TestFind.find-next (suboutline-only)
-    test('test_find_next_suboutline_only', async () => {
+    test('test_find_next_suboutline_only', () => {
         const settings = self.settings;
         const x = self.x;
         let p, pos, newpos;
@@ -427,7 +429,7 @@ suite('Test cases for leoFind.ts', () => {
         assert.strictEqual(s, settings.find_text);
     });
     //@+node:felix.20221226222117.18: *4* TestFind.change-then-find (headline)
-    test('test_change_then_find_in_headline', async () => {
+    test('test_change_then_find_in_headline', () => {
         //     # Test #2220:
         //     # https://github.com/leo-editor/leo-editor/issues/2220
         // Let block.
@@ -459,7 +461,7 @@ suite('Test cases for leoFind.ts', () => {
         assert.strictEqual(p.h, 'XX1 Test2 Test3');
     });
     //@+node:felix.20221226222117.19: *4* TestFind.find-prev
-    test('test_find_prev', async () => {
+    test('test_find_prev', () => {
         const c = self.c;
         const settings = self.settings;
         const x = self.x;
@@ -479,7 +481,7 @@ suite('Test cases for leoFind.ts', () => {
         assert.strictEqual(s, settings.find_text);
     });
     //@+node:felix.20221226222117.20: *4* TestFind.find-var
-    test('test_find_var', async () => {
+    test('test_find_var', () => {
         const x = self.x;
         const settings = x._compute_find_def_settings('v5 =');
         let p, pos, newpos;
@@ -490,7 +492,7 @@ suite('Test cases for leoFind.ts', () => {
         assert.strictEqual(s, 'v5 =');
     });
     //@+node:felix.20221226222117.21: *4* TestFind.replace-then-find
-    test('test_replace_then_find', async () => {
+    test('test_replace_then_find', () => {
         const settings = self.settings;
         const w = self.c.frame.body.wrapper;
         const x = self.x;
@@ -510,7 +512,7 @@ suite('Test cases for leoFind.ts', () => {
         w.setSelectionRange(0, 0);
         x.do_change_then_find(settings);
     });
-    test('test_replace_then_find_regex', async () => {
+    test('test_replace_then_find_regex', () => {
         const settings = self.settings;
         const w = self.c.frame.body.wrapper;
         const x = self.x;
@@ -526,7 +528,7 @@ suite('Test cases for leoFind.ts', () => {
         w.setSelectionRange(pos, newpos, pos);
         x.do_change_then_find(settings);
     });
-    test('test_replace_then_find_in_headline', async () => {
+    test('test_replace_then_find_in_headline', () => {
         const settings = self.settings;
         const x = self.x;
         // const p = settings.p!; // ! TODO : CHECK IF ERROR !
@@ -544,7 +546,7 @@ suite('Test cases for leoFind.ts', () => {
         assert.strictEqual(s, settings.find_text);
     });
     //@+node:felix.20221226222117.22: *4* TestFind.tag-children
-    test('test_tag_children', async () => {
+    test('test_tag_children', () => {
         const c = self.c;
         const x = self.x;
         const p = c.rootPosition()!.next();
@@ -556,7 +558,7 @@ suite('Test cases for leoFind.ts', () => {
         x.do_tag_children(p, 'test');
     });
     //@+node:felix.20221226222117.23: *4* testFind.test_batch_change_regex
-    test('test_batch_change_regex', async () => {
+    test('test_batch_change_regex', () => {
         const c = self.c;
         const x = self.x;
         // self.dump_tree();
@@ -600,7 +602,7 @@ suite('Test cases for leoFind.ts', () => {
         assert.strictEqual(n, 1);
     });
     //@+node:felix.20221226222117.24: *4* testFind.test_batch_change_word
-    test('test_batch_change_word', async () => {
+    test('test_batch_change_word', () => {
         //     // settings, x = self.settings, self.x
         const c = self.c;
         const x = self.x;
@@ -620,7 +622,7 @@ suite('Test cases for leoFind.ts', () => {
         assert.ok(n > 0);
     });
     //@+node:felix.20221226222117.25: *4* TestFind.test_tree
-    test('test_tree', async () => {
+    test('test_tree', () => {
         const c = self.c;
 
         const table = [
@@ -641,7 +643,7 @@ suite('Test cases for leoFind.ts', () => {
     });
     //@+node:felix.20221226222117.26: *3* Tests of Helpers...
     //@+node:felix.20221226222117.27: *4* TestFind.test_argument_errors
-    test('test_argument_errors', async () => {
+    test('test_argument_errors', () => {
         const settings = self.settings;
         const x = self.x;
         // Bad search pattern.
@@ -652,7 +654,7 @@ suite('Test cases for leoFind.ts', () => {
         x.do_change_all(settings);
     });
     //@+node:felix.20221226222117.28: *4* TestFind.test_cfa_backwards_search
-    test('test_cfa_backwards_search', async () => {
+    test('test_cfa_backwards_search', () => {
         const settings = self.settings;
         const x = self.x;
         const pattern = 'def';
@@ -669,7 +671,7 @@ suite('Test cases for leoFind.ts', () => {
         }
     });
     //@+node:felix.20221226222117.29: *4* TestFind.test_cfa_find_next_match
-    test('test_cfa_find_next_match', async () => {
+    test('test_cfa_find_next_match', () => {
         const c = self.c;
         const settings = self.settings;
         const x = self.x;
@@ -680,13 +682,13 @@ suite('Test cases for leoFind.ts', () => {
         }
     });
     //@+node:felix.20221226222117.30: *4* TestFind.test_cfa_match_word
-    test('test_cfa_match_word', async () => {
+    test('test_cfa_match_word', () => {
         const x = self.x;
         x._inner_search_match_word("def spam():", 0, "spam");
         x._inner_search_match_word("def spam():", 0, "xxx");
     });
     //@+node:felix.20221226222117.31: *4* TestFind.test_cfa_plain_search
-    test('test_cfa_plain_search', async () => {
+    test('test_cfa_plain_search', () => {
         const settings = self.settings;
         const x = self.x;
         const pattern = 'def';
@@ -703,7 +705,7 @@ suite('Test cases for leoFind.ts', () => {
         }
     });
     //@+node:felix.20221226222117.32: *4* TestFind.test_cfa_regex_search
-    test('test_cfa_regex_search', async () => {
+    test('test_cfa_regex_search', () => {
         const x = self.x;
         let pattern;
         pattern = '(.*)pattern';
@@ -735,7 +737,7 @@ suite('Test cases for leoFind.ts', () => {
         x._inner_search_regex("", 0, 0, pattern, backwards, nocase);
     });
     //@+node:felix.20221226222117.33: *4* TestFind.test_check_args
-    test('test_check_args', async () => {
+    test('test_check_args', () => {
         // Bad search patterns..
         const x = self.x;
         const settings = self.settings;
@@ -756,7 +758,7 @@ suite('Test cases for leoFind.ts', () => {
         x.do_change_then_find(settings);
     });
     //@+node:felix.20221226222117.34: *4* TestFind.test_clean_init
-    test('test_clean_init', async () => {
+    test('test_clean_init', () => {
         const c = self.c;
         const x = new LeoFind(c);
         const table = [
@@ -770,7 +772,7 @@ suite('Test cases for leoFind.ts', () => {
         assert.strictEqual(x.reverse, false);
     });
     //@+node:felix.20221226222117.35: *4* TestFind.test_compute_result_status
-    test('test_compute_result_status', async () => {
+    test('test_compute_result_status', () => {
         const x = self.x;
         // find_all_flag is true
         const all_settings = x.default_settings();
@@ -791,7 +793,7 @@ suite('Test cases for leoFind.ts', () => {
         x.compute_result_status(false);
     });
     //@+node:felix.20230224225251.1: *4* TestFind.test_find_all_plain
-    test('test_find_all_plain', async () => {
+    test('test_find_all_plain', () => {
         const c = self.c;
         const fc = c.findCommands;
         const table = [
@@ -823,7 +825,7 @@ suite('Test cases for leoFind.ts', () => {
         }
     });
     //@+node:felix.20230224225257.1: *4* TestFind.test_find_all_regex
-    test('test_find_all_regex', async () => {
+    test('test_find_all_regex', () => {
         const c = self.c;
         const fc = c.findCommands;
         const regex_table = [
@@ -840,7 +842,7 @@ suite('Test cases for leoFind.ts', () => {
         }
     });
     //@+node:felix.20221226222117.36: *4* TestFind.test_inner_search_backward
-    test('test_inner_search_backward', async () => {
+    test('test_inner_search_backward', () => {
         const c = self.c;
         const x = new LeoFind(c);
 
@@ -889,7 +891,7 @@ suite('Test cases for leoFind.ts', () => {
         test(word_table, 'word_table', false, true);
     });
     //@+node:felix.20221226222117.37: *4* TestFind.test_inner_search_plain
-    test('test_inner_search_plain', async () => {
+    test('test_inner_search_plain', () => {
         const c = self.c;
         const x = new LeoFind(c);
         const test = (table: any, table_name: string, nocase: boolean, word: boolean) => {
@@ -937,7 +939,7 @@ suite('Test cases for leoFind.ts', () => {
         test(word_table, 'word_table', false, true);
     });
     //@+node:felix.20221226222117.38: *4* TestFind.test_inner_search_regex
-    test('test_inner_search_regex', async () => {
+    test('test_inner_search_regex', () => {
         const c = self.c;
         const x = new LeoFind(c);
 
@@ -983,7 +985,7 @@ suite('Test cases for leoFind.ts', () => {
         test(back_table, 'back_table', true, false);
     });
     //@+node:felix.20221226222117.39: *4* TestFind.test_make_regex_subs
-    test('test_make_regex_subs', async () => {
+    test('test_make_regex_subs', () => {
         const x = self.x;
         x.re_obj = new RegExp('(.*)pattern', "mgd"); // re.compile('(.*)pattern')  // The search pattern.
         const m = x.re_obj.exec('test pattern');  // The find pattern.
@@ -991,7 +993,7 @@ suite('Test cases for leoFind.ts', () => {
         x.make_regex_subs(change_text, m);
     });
     //@+node:felix.20221226222117.40: *4* TestFind.test_next_node_after_fail
-    test('test_fnm_next_after_fail', async () => {
+    test('test_fnm_next_after_fail', () => {
         const settings = self.settings;
         const x = self.x;
         for (const reverse of [true, false]) {
@@ -1004,7 +1006,7 @@ suite('Test cases for leoFind.ts', () => {
         }
     });
     //@+node:felix.20221226222117.41: *4* TestFind.test_replace_all_plain_search
-    test('test_replace_all_plain_search', async () => {
+    test('test_replace_all_plain_search', () => {
         const c = self.c;
         const fc = c.findCommands;
         const plain_table: [string, string, string, number, string][] = [
@@ -1024,7 +1026,7 @@ suite('Test cases for leoFind.ts', () => {
         }
     });
     //@+node:felix.20221226222117.42: *4* TestFind.test_replace_all_plain_search_ignore_case
-    test('test_replace_all_plain_search_ignore_case', async () => {
+    test('test_replace_all_plain_search_ignore_case', () => {
         const c = self.c;
         const fc = c.findCommands;
         const plain_table: [string, string, string, number, string][] = [
@@ -1043,7 +1045,7 @@ suite('Test cases for leoFind.ts', () => {
         };
     });
     //@+node:felix.20221226222117.43: *4* TestFind.test_replace_all_regex_search
-    test('test_replace_all_regex_search', async () => {
+    test('test_replace_all_regex_search', () => {
         const c = self.c;
         const fc = c.findCommands;
         const regex_table: [string, string, string, number, string][] = [
@@ -1064,7 +1066,7 @@ suite('Test cases for leoFind.ts', () => {
         }
     });
     //@+node:felix.20221226222117.44: *4* TestFind.test_replace_all_word_search
-    test('test_replace_all_word_search', async () => {
+    test('test_replace_all_word_search', () => {
         const c = self.c;
         const fc = c.findCommands;
         const word_table: [string, string, string, number, string][] = [
@@ -1083,7 +1085,7 @@ suite('Test cases for leoFind.ts', () => {
         }
     });
     //@+node:felix.20221226222117.45: *4* TestFind.test_replace_all_word_search_ignore_case
-    test('test_replace_all_word_search_ignore_case', async () => {
+    test('test_replace_all_word_search_ignore_case', () => {
         const c = self.c;
         const fc = c.findCommands;
         const word_table: [string, string, string, number, string][] = [
@@ -1102,7 +1104,7 @@ suite('Test cases for leoFind.ts', () => {
         }
     });
     //@+node:felix.20221226222117.46: *4* TestFind.test_replace_back_slashes
-    test('test_replace_back_slashes', async () => {
+    test('test_replace_back_slashes', () => {
         const c = self.c;
         const x = new LeoFind(c);
         const table = [
@@ -1120,7 +1122,7 @@ suite('Test cases for leoFind.ts', () => {
         }
     });
     //@+node:felix.20221226222117.47: *4* TestFind.test_switch_style
-    test('test_switch_style', async () => {
+    test('test_switch_style', () => {
         const x = self.x;
         const table = [
             ['', undefined],

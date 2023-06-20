@@ -1,6 +1,8 @@
 //@+leo-ver=5-thin
 //@+node:felix.20220414231314.1: * @file src/commands/commanderEditCommands.ts
-// * Outline commands that used to be defined in leoCommands.py
+/**
+ * Outline commands that used to be defined in leoCommands.py
+ */
 import * as g from "../core/leoGlobals";
 import { commander_command } from "../core/decorators";
 import { Commands } from "../core/leoCommands";

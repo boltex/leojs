@@ -1,6 +1,8 @@
 //@+leo-ver=5-thin
 //@+node:felix.20211026230613.1: * @file src/core/leoUndo.ts
-// * Leo's undo/redo manager.
+/**
+ * Leo's undo/redo manager.
+ */
 //@+<< How Leo implements unlimited undo >>
 //@+node:felix.20211026230613.2: ** << How Leo implements unlimited undo >>
 //@+at
@@ -43,7 +45,7 @@
 //@+<< imports >>
 //@+node:felix.20220104010834.1: ** << imports >>
 import * as g from './leoGlobals';
-import { new_cmd_decorator } from "../core/decorators";
+import { new_cmd_decorator } from "./decorators";
 import { Position, VNode } from './leoNodes';
 import { Commands } from './leoCommands';
 import { ChapterController } from './leoChapters';

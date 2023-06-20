@@ -1,6 +1,8 @@
 //@+leo-ver=5-thin
 //@+node:felix.20220612234816.1: * @file src/commands/commanderHelpCommands.ts
-// Help commands that used to be defined in leoCommands.py
+/**
+ * Help commands that used to be defined in leoCommands.py
+ */
 import * as vscode from "vscode";
 import { Utils as uriUtils } from "vscode-uri";
 
@@ -12,7 +14,7 @@ import { Commands } from "../core/leoCommands";
 import { LoadManager, PreviousSettings } from "../core/leoApp";
 import { leojsSettingsXml } from "../leojsSettings";
 
-import dayjs = require('dayjs');
+const dayjs = require('dayjs');
 
 //@+others
 //@+node:felix.20220613000058.1: ** Class CommanderHelpCommands
@@ -24,7 +26,7 @@ export class CommanderHelpCommands {
         'about-leo',
         'Bring up an About Leo Dialog.'
     )
-    public about(this: Commands): void {
+    public about(this: Commands): Thenable<unknown> {
         const c = this;
 
         // Don't use triple-quoted strings or continued strings here.
@@ -36,7 +38,7 @@ export class CommanderHelpCommands {
             "Leo and LeoJS are distributed under the MIT License";
         const url = "https://leo-editor.github.io/leo-editor/"; // unused for now
         const email = "edreamleo@gmail.com"; // unused for now
-        g.app.gui.runAboutLeoDialog(c, version, theCopyright, url, email);
+        return g.app.gui.runAboutLeoDialog(c, version, theCopyright, url, email);
 
     }
 
@@ -52,12 +54,12 @@ export class CommanderHelpCommands {
     )
     public leoDocumentation(this: Commands): void {
 
-        vscode.window.showInformationMessage('TODO : open-leo-docs-leo');
+        void vscode.window.showInformationMessage('TODO : open-leo-docs-leo');
 
         /*     
         c = self
         name = "LeoDocs.leo"
-        fileName = g.os_path_finalize_join(g.app.loadDir, "..", "doc", name)
+        fileName = g.finalize_join(g.app.loadDir, "..", "doc", name)
         # Bug fix: 2012/04/09: only call g.openWithFileName if the file exists.
         if g.os_path_exists(fileName):
             c2 = g.openWithFileName(fileName, old_c=c)
@@ -79,12 +81,12 @@ export class CommanderHelpCommands {
     )
     public leoQuickStart(this: Commands): void {
 
-        vscode.window.showInformationMessage('TODO : open-quickstart-leo');
+        void vscode.window.showInformationMessage('TODO : open-quickstart-leo');
 
         /* 
         c = self
         name = "quickstart.leo"
-        fileName = g.os_path_finalize_join(g.app.loadDir, "..", "doc", name)
+        fileName = g.finalize_join(g.app.loadDir, "..", "doc", name)
         # Bug fix: 2012/04/09: only call g.openWithFileName if the file exists.
         if g.os_path_exists(fileName):
             c2 = g.openWithFileName(fileName, old_c=c)
@@ -108,11 +110,11 @@ export class CommanderHelpCommands {
     )
     public openCheatSheet(this: Commands): void {
 
-        vscode.window.showInformationMessage('TODO : open-cheat-sheet-leo');
+        void vscode.window.showInformationMessage('TODO : open-cheat-sheet-leo');
 
         /* 
         c = self
-        fn = g.os_path_finalize_join(g.app.loadDir, '..', 'doc', 'CheatSheet.leo')
+        fn = g.finalize_join(g.app.loadDir, '..', 'doc', 'CheatSheet.leo')
         if not g.os_path_exists(fn):
             g.es(f"file not found: {fn}")
             return
@@ -138,7 +140,7 @@ export class CommanderHelpCommands {
         'leo-settings',
         'Open default Leo settings as a new Leo Document.'
     )
-    public async openLeoSettings(this: Commands): Promise<Commands | undefined> {
+    public openLeoSettings(this: Commands): Promise<Commands | undefined> {
 
         /* 
         c, lm = self, g.app.loadManager
@@ -176,14 +178,13 @@ export class CommanderHelpCommands {
             g.doHook("new", { old_c: old_c, c: c, new_c: c });
             g.app.disable_redraw = false;
             c.redraw();
-            return c;
+            return Promise.resolve(c);
         }
         catch (exception) {
-            return undefined;
+            return Promise.resolve(undefined);
         }
 
     }
-
 
     @commander_command(
         'open-my-leo-settings',
@@ -212,7 +213,7 @@ export class CommanderHelpCommands {
             let fileName;
             // check it doesn't already exist
             for (let w_path of [homeLeoDir]) {
-                fileName = g.os_path_join(undefined, w_path || '/', name);
+                fileName = g.os_path_join(w_path || '/', name);
                 const exists = await g.os_path_exists(fileName);
                 if (exists) {
                     return undefined;
@@ -232,7 +233,7 @@ export class CommanderHelpCommands {
             }
 
             // get '@enabled-plugins' from g.app.globalConfigDir ! SKIPPED IN LEOJS !
-            // fileName = g.os_path_join(undefined, configDir, "leoSettings.leo");
+            // fileName = g.os_path_join(configDir, "leoSettings.leo");
             // const leosettings = await g.openWithFileName(fileName, c, g.app.gui);
             // const enabledplugins = g.findNodeAnywhere(leosettings!, '@enabled-plugins');
             // if (!enabledplugins || !enabledplugins.__bool__()) {
@@ -246,14 +247,14 @@ export class CommanderHelpCommands {
 
             // now create "~/.leo/myLeoSettings.leo" OR /myLeoSettings if leojs runs in browser!
             if (homeLeoDir) {
-                fileName = g.os_path_join(undefined, homeLeoDir, name);
+                fileName = g.os_path_join(homeLeoDir, name);
             } else {
                 let localDir = g.os_path_dirname(lm.files.length ? lm.files[0] : '');
                 // IF NO FILES IN lm.files THEN USE WORKSPACE ROOT !
                 if (!localDir) {
                     localDir = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.path : "";
                 }
-                fileName = g.os_path_join(undefined, localDir, name);;
+                fileName = g.os_path_join(localDir, name);;
             }
 
             const c2 = await g.openWithFileName(fileName, c, g.app.gui);
@@ -313,7 +314,7 @@ export class CommanderHelpCommands {
     )
     public leoHome(this: Commands): void {
 
-        vscode.env.openExternal(
+        void vscode.env.openExternal(
             vscode.Uri.parse(
                 'https://leo-editor.github.io/leo-editor/'
             )
@@ -328,7 +329,7 @@ export class CommanderHelpCommands {
     )
     public openLeoTOC(this: Commands): void {
 
-        vscode.env.openExternal(
+        void vscode.env.openExternal(
             vscode.Uri.parse(
                 'https://leo-editor.github.io/leo-editor/leo_toc.html'
             )
@@ -343,7 +344,7 @@ export class CommanderHelpCommands {
     )
     public openLeoTutorials(this: Commands): void {
 
-        vscode.env.openExternal(
+        void vscode.env.openExternal(
             vscode.Uri.parse(
                 'https://leo-editor.github.io/leo-editor/tutorial.html'
             )
@@ -358,7 +359,7 @@ export class CommanderHelpCommands {
     )
     public openLeoUsersGuide(this: Commands): void {
 
-        vscode.env.openExternal(
+        void vscode.env.openExternal(
             vscode.Uri.parse(
                 'https://leo-editor.github.io/leo-editor/usersguide.html"'
             )
@@ -373,7 +374,7 @@ export class CommanderHelpCommands {
     )
     public openLeoVideos(this: Commands): void {
 
-        vscode.env.openExternal(
+        void vscode.env.openExternal(
             vscode.Uri.parse(
                 'https://leo-editor.github.io/leo-editor/screencasts.html'
             )

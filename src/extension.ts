@@ -10,7 +10,7 @@ process.hrtime = require('browser-process-hrtime'); // Overwrite 'hrtime' of pro
 /**
  * Entry point for Leo in Javascript.
  */
-export function activate(p_context: vscode.ExtensionContext) {
+export async function activate(p_context: vscode.ExtensionContext) {
 
     if (p_context.extensionUri) {
         console.log('context.extensionUri', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
@@ -36,20 +36,18 @@ export function activate(p_context: vscode.ExtensionContext) {
     const w_previousVersion = p_context.globalState.get<string>(Constants.VERSION_STATE_KEY);
 
     // * Close remaining Leo Bodies restored by vscode from last session.
-    closeLeoTextEditors();
+    await closeLeoTextEditors();
 
     // * Show a welcome screen on version updates, then start the actual extension.
-    showWelcomeIfNewer(w_leojsVersion, w_previousVersion)
+    void showWelcomeIfNewer(w_leojsVersion, w_previousVersion)
         .then(() => {
-
-            p_context.globalState.update(Constants.VERSION_STATE_KEY, w_leojsVersion);
-
+            void p_context.globalState.update(Constants.VERSION_STATE_KEY, w_leojsVersion);
         });
 
     if (!g.app) {
         (g.app as LeoApp) = new LeoApp();
     } else {
-        vscode.window.showWarningMessage("g.app leojs application instance already exists!");
+        void vscode.window.showWarningMessage("g.app leojs application instance already exists!");
     }
 
     p_context.subscriptions.push(
@@ -69,44 +67,47 @@ export function activate(p_context: vscode.ExtensionContext) {
             // Only setting if undefined, because regular vscode can still work on remote github virtual filesystem
             g.app.vscodeUriScheme = 'file';
         }
-        runLeo(p_context);
+        await runLeo(p_context);
     } else {
         // Web Browser Extension: CHeck for type of workspace opened first
         if (g.app.vscodeUriScheme) {
 
             if (!vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme)) {
-                vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info").then(selection => {
+                void vscode.window.showInformationMessage("Non-writable filesystem scheme: " + g.app.vscodeUriScheme, "More Info").then(selection => {
                     if (selection === "More Info") {
                         vscode.env.openExternal(
-                            vscode.Uri.parse(
-                                'https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations'
-                            )
-                        );
+                            vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_current-limitations')
+                        ).then(() => { }, (e) => {
+                            console.error('LEOJS: Could not open external vscode help URL in browser.', e);
+                        });
                     }
                 });
                 console.log('NOT started because not writable workspace');
-                setStartupDoneContext(true);
+                void setStartupDoneContext(true);
                 return;
             }
 
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.app.vscodeUriScheme !== 'file') {
-                runLeo(p_context);
+                await runLeo(p_context);
             } else {
                 // Is local filesystem
-                vscode.window.showInformationMessage("LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ", "More Info").then(selection => {
+                void vscode.window.showInformationMessage("LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ", "More Info").then(selection => {
                     if (selection === "More Info") {
-                        vscode.env.openExternal(vscode.Uri.parse(
-                            'https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project'));
+                        vscode.env.openExternal(
+                            vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project')
+                        ).then(() => { }, (e) => {
+                            console.error('LEOJS: Could not open external vscode help URL in browser.', e);
+                        });
                     }
                 });
                 console.log('NOT started because no remote workspace yet');
-                setStartupDoneContext(true);
+                void setStartupDoneContext(true);
                 return;
             }
         } else {
             console.log('NOT started because no remote workspace yet');
-            setStartupDoneContext(true);
+            void setStartupDoneContext(true);
         }
 
     }
@@ -134,37 +135,40 @@ function setScheme(p_event: vscode.WorkspaceFoldersChangeEvent, p_context: vscod
         if (!g.app.loadManager && g.isBrowser) {
             // Check if not file scheme : only virtual workspaces are suported if g.isBrowser is true.
             if (g.app.vscodeUriScheme !== 'file') {
-                runLeo(p_context);
+                void runLeo(p_context);
             } else {
                 // Is local filesystem
-                vscode.window.showInformationMessage("LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ", "More Info").then(selection => {
+                void vscode.window.showInformationMessage("LeoJS in browser supports remote virtual filesystems: Local Filesystem requires desktop VSCode application: ", "More Info").then(selection => {
                     if (selection === "More Info") {
-                        vscode.env.openExternal(vscode.Uri.parse(
-                            'https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project'));
+                        vscode.env.openExternal(
+                            vscode.Uri.parse('https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project')
+                        ).then(() => { }, (e) => {
+                            console.error('LEOJS: Could not open external vscode help URL in browser.', e);
+                        });
                     }
                 });
                 console.log('NOT started because no remote workspace yet');
-                setStartupDoneContext(true);
+                void setStartupDoneContext(true);
                 return;
             }
         }
     } else {
         console.log('TODO : HANDLE WORKSPACE CHANGE DETECTED! but no workspace');
-        setStartupDoneContext(true);
+        void setStartupDoneContext(true);
     }
 
 }
 
-function runLeo(p_context: vscode.ExtensionContext) {
+async function runLeo(p_context: vscode.ExtensionContext) {
     const w_start = process.hrtime(); // For calculating total startup time duration
 
     // Initialize and run Leo
     console.assert(g.app);
 
     g.app.loadManager = new LoadManager(p_context);
-    g.app.loadManager.load().then(() => {
-        console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
-    });
+    await g.app.loadManager.load();
+    console.log(`leojs startup launched in ${utils.getDurationMs(w_start)} ms`);
+
 }
 
 // this method is called when your extension is deactivated
@@ -173,7 +177,7 @@ export function deactivate() { }
 /**
  * * Closes all visible text editors that have Leo filesystem scheme (that are not dirty)
  */
-function closeLeoTextEditors(): Thenable<unknown> {
+async function closeLeoTextEditors(): Promise<unknown> {
     const w_foundTabs: vscode.Tab[] = [];
 
     vscode.window.tabGroups.all.forEach((p_tabGroup) => {
@@ -191,9 +195,9 @@ function closeLeoTextEditors(): Thenable<unknown> {
     let q_closedTabs;
     if (w_foundTabs.length) {
         q_closedTabs = vscode.window.tabGroups.close(w_foundTabs, true);
-        w_foundTabs.forEach((p_tab) => {
+        for (const p_tab of w_foundTabs) {
             if (p_tab.input) {
-                vscode.commands.executeCommand(
+                await vscode.commands.executeCommand(
                     'vscode.removeFromRecentlyOpened',
                     (p_tab.input as vscode.TabInputText).uri
                 );
@@ -201,9 +205,9 @@ function closeLeoTextEditors(): Thenable<unknown> {
                 // (w_oldUri will be deleted last below)
                 const w_edit = new vscode.WorkspaceEdit();
                 w_edit.deleteFile((p_tab.input as vscode.TabInputText).uri, { ignoreIfNotExists: true });
-                vscode.workspace.applyEdit(w_edit);
+                await vscode.workspace.applyEdit(w_edit);
             }
-        });
+        }
     } else {
         q_closedTabs = Promise.resolve(true);
     }
@@ -216,14 +220,14 @@ function closeLeoTextEditors(): Thenable<unknown> {
  * @param p_previousVersion Previous version, as a string, from context.globalState.get service
  * @returns A promise that triggers when command to show the welcome screen is finished, or immediately if not needed
  */
-async function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undefined): Promise<unknown> {
+function showWelcomeIfNewer(p_version: string, p_previousVersion: string | undefined): Thenable<unknown> {
     let w_showWelcomeScreen: boolean = false;
     if (p_previousVersion === undefined) {
         console.log('leojs first-time install');
         w_showWelcomeScreen = true;
     } else {
         if (p_previousVersion !== p_version) {
-            vscode.window.showInformationMessage(`leojs upgraded from v${p_previousVersion} to v${p_version}`);
+            void vscode.window.showInformationMessage(`leojs upgraded from v${p_previousVersion} to v${p_version}`);
         }
         const [w_major, w_minor] = p_version.split('.').map(p_stringVal => parseInt(p_stringVal, 10));
         const [w_prevMajor, w_prevMinor] = p_previousVersion.split('.').map(p_stringVal => parseInt(p_stringVal, 10));
@@ -239,8 +243,7 @@ async function showWelcomeIfNewer(p_version: string, p_previousVersion: string |
         }
     }
     if (w_showWelcomeScreen) {
-        // todo
-        // return vscode.commands.executeCommand(Constants.COMMANDS.SHOW_WELCOME);
+        return vscode.commands.executeCommand(Constants.COMMANDS.SHOW_WELCOME);
     } else {
         return Promise.resolve();
     }

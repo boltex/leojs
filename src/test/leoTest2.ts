@@ -8,12 +8,6 @@
  * Support for LeoJS's new unit tests, contained in src/tests/.
  */
 
-// import time
-// import unittest
-// import warnings
-// from leo.core import leoGlobals as g
-// from leo.core import leoApp
-
 import * as g from '../core/leoGlobals';
 import { LeoApp, LoadManager } from '../core/leoApp';
 import { Commands } from "../core/leoCommands";
@@ -22,6 +16,7 @@ import { GlobalConfigManager } from '../core/leoConfig';
 import { NullGui } from '../core/leoGui';
 import * as assert from 'assert';
 import { ISettings } from '../core/leoFind';
+import { AtFile } from '../core/leoAtFile';
 
 //@+others
 //@+node:felix.20220130224933.2: ** function.create_app
@@ -57,14 +52,9 @@ export async function create_app(gui_name: string = 'null'): Promise<Commands> {
 
     // g.app.recentFilesManager = leoApp.RecentFilesManager()
 
-    // lm.computeStandardDirectories()
+    await lm.computeStandardDirectories();
 
-    const leoID = await g.app.setLeoID(false, true);
-
-    if (!leoID) {
-        throw Error("unable to set LeoID.");
-    }
-
+    g.app.leoID = 'TestLeoId';  // Use a standard user id for all tests.
     g.app.nodeIndices = new NodeIndices(g.app.leoID);
     g.app.config = new GlobalConfigManager();
 
@@ -128,6 +118,7 @@ export class LeoUnitTest {
     public root_p!: Position;
     public settings_p!: Position;
     public x: any;
+    public at!: AtFile;
     public settings!: ISettings;
 
     //@+others
@@ -135,7 +126,7 @@ export class LeoUnitTest {
 
     constructor() { }
 
-    public async setUpClass(): Promise<Commands> {
+    public setUpClass(): Promise<Commands> {
         return create_app('null');
     }
 
@@ -146,6 +137,9 @@ export class LeoUnitTest {
     public setUp(): void {
         // Set g.unitTesting *early*, for guards.
         (g.unitTesting as boolean) = true;
+
+        // Default.
+        g.app.write_black_sentinels = false;
 
         // Create a new commander for each test.
         // This is fast, because setUpClass has done all the imports.
@@ -209,6 +203,22 @@ export class LeoUnitTest {
         clone.moveToLastChildOf(p);
     }
 
+    //@+node:felix.20230529213901.1: *3* LeoUnitTest.dump_headlines
+    /**
+     * Dump root's headlines, or all headlines if root is None.
+     */
+    public dump_headlines(root?: Position, tag?: string): void {
+
+        console.log('');
+        if (tag) {
+            console.log(tag);
+        }
+        const _iter = root ? root.self_and_subtree.bind(root) : this.c.all_positions.bind(this.c);
+        for (const p of _iter()) {
+            console.log('');
+            console.log('level:', p.level(), p.h);
+        }
+    }
     //@+node:felix.20230224231417.1: *3* LeoUnitTest.dump_tree
     /**
      * Dump root's tree, or the entire tree if root is None.

@@ -23,26 +23,21 @@
  * - @string shadow_prefix (default: x): prefix of shadow files.
  *   This prefix allows the shadow file and the original file to have different names.
  *   This is useful for name-based tools like py.test.
-*/
+ */
 //@-<< leoShadow docstring >>
 //@+<< leoShadow imports & annotations >>
 //@+node:felix.20230410142048.1: ** << leoShadow imports & annotations >>
-import * as vscode from "vscode";
-import * as difflib from "difflib";
+import * as vscode from 'vscode';
+import * as difflib from 'difflib';
 import * as g from './leoGlobals';
 import * as path from 'path';
 
 import { Position } from './leoNodes';
 import { Commands } from './leoCommands';
 
-type DispatchKeys =
-    'delete' |
-    'equal' |
-    'insert' |
-    'replace';
+type DispatchKeys = 'delete' | 'equal' | 'insert' | 'replace';
 
 //@-<< leoShadow imports & annotations >>
-
 //@+others
 //@+node:felix.20230410203541.1: ** class ShadowController
 /**
@@ -59,14 +54,13 @@ export class ShadowController {
     public shadow_subdir: string | undefined;
     public shadow_prefix: string | undefined;
     public shadow_in_home_dir: boolean | undefined;
-    public delim1: string = "";
-    public delim2: string = "";
+    public delim1: string = '';
+    public delim2: string = '';
     public marker: Marker | undefined;
     public old_sent_lines: string[] = [];
-    public verbatim_line: string = "";
+    public verbatim_line: string = '';
     public sentinels: string[][] = [];
     public trailing_sentinels: string[] = [];
-
 
     //@+others
     //@+node:felix.20230410203541.2: *3*  x.ctor & x.reloadSettings
@@ -77,10 +71,10 @@ export class ShadowController {
         this.c = c;
         // Opcode dispatch dict.
         this.dispatch_dict = {
-            'delete': this.op_delete,
-            'equal': this.op_equal,
-            'insert': this.op_insert,
-            'replace': this.op_replace,
+            delete: this.op_delete,
+            equal: this.op_equal,
+            insert: this.op_insert,
+            replace: this.op_replace,
         };
         this.encoding = c.config.default_derived_file_encoding;
         this.errors = 0;
@@ -92,13 +86,13 @@ export class ShadowController {
         this.reloadSettings();
     }
 
-
     /**
      * ShadowController.reloadSettings.
      */
     public reloadSettings(): void {
         const c = this.c;
-        this.shadow_subdir = c.config.getString('shadow-subdir') || '.leo_shadow';
+        this.shadow_subdir =
+            c.config.getString('shadow-subdir') || '.leo_shadow';
         this.shadow_prefix = c.config.getString('shadow-prefix') || '';
         this.shadow_in_home_dir = c.config.getBool('shadow-in-home-dir', false);
         this.shadow_subdir = g.os_path_normpath(this.shadow_subdir);
@@ -109,7 +103,7 @@ export class ShadowController {
         const c = this.c;
         const filename = c.fileName();
         if (filename) {
-            return g.os_path_dirname(g.os_path_finalize(filename));  // 1341
+            return g.os_path_dirname(g.finalize(filename)); // 1341
         }
         console.log('');
         this.error('Can not compute shadow path: .leo file has not been saved');
@@ -129,7 +123,7 @@ export class ShadowController {
     public pathName(filename: string): string {
         const x = this;
         const theDir = x.baseDirName();
-        return theDir ? g.os_path_finalize_join(undefined, theDir, filename) : '';  // 1341
+        return theDir ? g.finalize_join(theDir, filename) : ''; // 1341
     }
     //@+node:felix.20230410203541.6: *4* x.isSignificantPublicFile
     /**
@@ -140,11 +134,7 @@ export class ShadowController {
         const w_exists = await g.os_path_exists(fn);
         const w_isfile = await g.os_path_isfile(fn);
         const w_getsize = await g.os_path_getsize(fn);
-        return !!(
-            w_exists &&
-            w_isfile &&
-            w_getsize > 10
-        );
+        return !!(w_exists && w_isfile && w_getsize > 10);
     }
     //@+node:felix.20230410203541.7: *4* x.makeShadowDirectory
     /**
@@ -167,8 +157,11 @@ export class ShadowController {
      * Replace the file with s if s is different from theFile's contents.
      * Return True if theFile was changed.
      */
-    public async replaceFileWithString(encoding: string, fileName: string, s: string): Promise<boolean> {
-
+    public async replaceFileWithString(
+        encoding: BufferEncoding,
+        fileName: string,
+        s: string
+    ): Promise<boolean> {
         const x = this;
         const c = this.c;
         const exists = await g.os_path_exists(fileName);
@@ -203,11 +196,11 @@ export class ShadowController {
             // f.write(g.toEncodedString(s, encoding));
 
             const w_writeUri = g.makeVscodeUri(fileName);
-            const writeData = Buffer.from(g.toEncodedString(s, encoding), 'utf8');
+            const writeData = g.toEncodedString(s, encoding);
 
             await vscode.workspace.fs.writeFile(w_writeUri, writeData);
 
-            c.setFileTimeStamp(fileName);  // Fix #1053.  This is an *ancient* bug.
+            await c.setFileTimeStamp(fileName); // Fix #1053.  This is an *ancient* bug.
             if (!g.unitTesting) {
                 const kind = exists ? 'wrote' : 'created';
                 g.es(`${kind}: ${fileName}`);
@@ -225,13 +218,14 @@ export class ShadowController {
      */
     public shadowDirName(filename: string): string {
         const x = this;
-        return g.os_path_dirname(x.shadowPathName(filename));
+        const sp = x.shadowPathName(filename);
+        const dn = g.os_path_dirname(sp);
+        return dn;
     }
     /**
      * Return the full path name of filename, resolved using c.fileName()
      */
     public shadowPathName(filename: string): string | undefined {
-
         const x = this;
         const c = x.c;
         const baseDir = x.baseDirName();
@@ -239,21 +233,29 @@ export class ShadowController {
         // 2011/01/26: bogomil: redirect shadow dir
         if (this.shadow_in_home_dir) {
             // Each .leo file has a separate shadow_cache in base dir
-            const fname = [g.os_path_splitext(path.basename(c.mFileName))[0], "shadow_cache"].join("_");
+            const fname = [
+                g.os_path_splitext(path.basename(c.mFileName))[0],
+                'shadow_cache',
+            ].join('_');
             // On Windows incorporate the drive letter to the private file path
             if (g.isWindows) {
                 fileDir = fileDir.replace(':', '%');
             }
             // build the cache path as a subdir of the base dir
-            fileDir = [baseDir, fname, fileDir].join("/");
-        };
-        return baseDir && g.os_path_finalize_join(  // 1341
-            undefined,
-            baseDir,
-            fileDir,  // Bug fix: honor any directories specified in filename.
-            x.shadow_subdir,
-            x.shadow_prefix + g.shortFileName(filename));
+            fileDir = [baseDir, fname, fileDir].join('/');
+        }
 
+        const result =
+            baseDir &&
+            g.finalize_join(
+                // 1341
+                baseDir,
+                fileDir, // Bug fix: honor any directories specified in filename.
+                x.shadow_subdir!,
+                x.shadow_prefix + g.shortFileName(filename)
+            );
+
+        return result;
     }
     //@+node:felix.20230410203541.10: *3* x.Propagation
     //@+node:felix.20230410203541.11: *4* x.check_output
@@ -281,9 +283,10 @@ export class ShadowController {
             x.show_error(
                 sents1,
                 sents2,
-                "Sentinels not preserved!",
-                "old sentinels",
-                "new sentinels");
+                'Sentinels not preserved!',
+                'old sentinels',
+                'new sentinels'
+            );
         }
         return ok;
     }
@@ -294,11 +297,11 @@ export class ShadowController {
      * The Mulder update algorithm, revised by EKR.
      *
      * Use the diff between the old and new public lines to insperse sentinels
-     * from old_private_lines into the result. 
+     * from old_private_lines into the result.
      *
      * The algorithm never deletes or rearranges sentinels. However, verbatim
      * sentinels may be inserted or deleted as needed.
-    */
+     */
     //@-<< docstring >>
     public propagate_changed_lines(
         new_public_lines: string[],
@@ -314,7 +317,7 @@ export class ShadowController {
         x.sentinels[0] = [];
         for (const [tag, ai, aj, bi, bj] of sm.getOpcodes()) {
             const f = x.dispatch_dict[tag] || x.op_bad;
-            f(tag, ai, aj, bi, bj);
+            f.bind(this)(tag, ai, aj, bi, bj);
         }
         // Put the trailing sentinels & check the result.
         x.results.push(...x.trailing_sentinels);
@@ -354,9 +357,9 @@ export class ShadowController {
      * Return the list of non-sentinel lines in x.old_sent_lines.
      */
     public init_data(): string[] {
-
         const x = this;
         const lines = x.old_sent_lines;
+
         // The sentinels preceding each non-sentinel line,
         // not including @verbatim sentinels.
         let sentinels: string[] = [];
@@ -389,6 +392,7 @@ export class ShadowController {
             }
         }
         x.trailing_sentinels = sentinels;
+
         return new_lines;
     }
     //@+node:felix.20230410203541.17: *5* x.init_ivars
@@ -398,7 +402,7 @@ export class ShadowController {
     public init_ivars(
         new_public_lines: string[],
         old_private_lines: string[],
-        marker: Marker,
+        marker: Marker
     ): void {
         const x = this;
         [x.delim1, x.delim2] = marker.getDelims();
@@ -414,7 +418,13 @@ export class ShadowController {
     /**
      * Report an unexpected opcode.
      */
-    public op_bad(tag: string, ai: number, aj: number, bi: number, bj: number): void {
+    public op_bad(
+        tag: string,
+        ai: number,
+        aj: number,
+        bi: number,
+        bj: number
+    ): void {
         const x = this;
         x.error(`unknown SequenceMatcher opcode: ${tag}`);
     }
@@ -422,7 +432,13 @@ export class ShadowController {
     /**
      * Handle the 'delete' opcode.
      */
-    public op_delete(tag: string, ai: number, aj: number, bi: number, bj: number): void {
+    public op_delete(
+        tag: string,
+        ai: number,
+        aj: number,
+        bi: number,
+        bj: number
+    ): void {
         const x = this;
         for (let i = ai; i < aj; i++) {
             x.put_sentinels(i);
@@ -432,9 +448,21 @@ export class ShadowController {
     /**
      * Handle the 'equal' opcode.
      */
-    public op_equal(tag: string, ai: number, aj: number, bi: number, bj: number): void {
+    public op_equal(
+        tag: string,
+        ai: number,
+        aj: number,
+        bi: number,
+        bj: number
+    ): void {
         const x = this;
-        console.assert(aj - ai === bj - bi && x.a.slice(ai, aj) === x.b.slice(bi, bj));
+        const w_a = x.a.slice(ai, aj);
+        const w_b = x.b.slice(bi, bj);
+        console.assert(
+            aj - ai === bj - bi &&
+                w_a.length === w_b.length &&
+                w_a.every((value, index) => value === w_b[index])
+        );
         for (let i = ai; i < aj; i++) {
             x.put_sentinels(i);
             // works because x.lines[ai:aj] == x.lines[bi:bj]
@@ -445,7 +473,13 @@ export class ShadowController {
     /**
      * Handle the 'insert' opcode.
      */
-    public op_insert(tag: string, ai: number, aj: number, bi: number, bj: number): void {
+    public op_insert(
+        tag: string,
+        ai: number,
+        aj: number,
+        bi: number,
+        bj: number
+    ): void {
         const x = this;
         for (let i = bi; i < bj; i++) {
             x.put_plain_line(x.b[i]);
@@ -457,8 +491,13 @@ export class ShadowController {
     /**
      * Handle the 'replace' opcode.
      */
-    public op_replace(tag: string, ai: number, aj: number, bi: number, bj: number): void {
-
+    public op_replace(
+        tag: string,
+        ai: number,
+        aj: number,
+        bi: number,
+        bj: number
+    ): void {
         const x = this;
         if (1) {
             // Intersperse sentinels and lines.
@@ -473,7 +512,6 @@ export class ShadowController {
             while (b_lines.length) {
                 x.put_plain_line(b_lines.shift()!);
             }
-
         } else {
             // Feasible. Causes the present unit tests to fail.
             for (let i = ai; i < aj; i++) {
@@ -525,16 +563,21 @@ export class ShadowController {
     /**
      * Propagate the changes from the public file (without_sentinels) to the private file (with_sentinels)
      */
-    public async propagate_changes(old_public_file: string, old_private_file: string): Promise<boolean> {
+    public async propagate_changes(
+        old_public_file: string,
+        old_private_file: string
+    ): Promise<boolean> {
         const x = this;
         const at = this.c.atFileCommands;
         at.errors = 0;
         this.encoding = at.encoding!;
-        let s = await at.readFileToUnicode(old_private_file);  // Sets at.encoding and inits at.readLines.
-        const old_private_lines = g.splitLines(s || '');  // #1466.
+        let s = await at.readFileToUnicode(old_private_file); // Sets at.encoding and inits at.readLines.
+        const old_private_lines = g.splitLines(s || ''); // #1466.
         s = await at.readFileToUnicode(old_public_file);
         if (at.encoding !== this.encoding) {
-            g.trace(`can not happen: encoding mismatch: ${at.encoding} ${this.encoding}`);
+            g.trace(
+                `can not happen: encoding mismatch: ${at.encoding} ${this.encoding}`
+            );
             at.encoding = this.encoding;
         }
         const old_public_lines = g.splitLines(s);
@@ -545,7 +588,10 @@ export class ShadowController {
         //     g.trace(f"\npublic lines...{old_public_file}")
         //     for s in old_public_lines
         //         g.trace(type(s), isinstance(s, str), repr(s))
-        const marker = x.markerFromFileLines(old_private_lines, old_private_file);
+        const marker = x.markerFromFileLines(
+            old_private_lines,
+            old_private_file
+        );
         const new_private_lines = x.propagate_changed_lines(
             old_public_lines,
             old_private_lines,
@@ -559,7 +605,7 @@ export class ShadowController {
         // 2010/01/07: check at.errors also.
         if (copy && x.errors === 0 && at.errors === 0) {
             s = new_private_lines.join('');
-            x.replaceFileWithString(at.encoding, fn, s);
+            await x.replaceFileWithString(at.encoding, fn, s);
         }
         return copy;
     }
@@ -568,7 +614,11 @@ export class ShadowController {
      * handle crucial @shadow read logic.
      * This will be called only if the public and private files both exist.
      */
-    public async updatePublicAndPrivateFiles(root: Position, fn: string, shadow_fn: string): Promise<void> {
+    public async updatePublicAndPrivateFiles(
+        root: Position,
+        fn: string,
+        shadow_fn: string
+    ): Promise<void> {
         const x = this;
         const w_isSig = await x.isSignificantPublicFile(fn);
         if (w_isSig) {
@@ -659,7 +709,10 @@ export class ShadowController {
      * Do not return @verbatim sentinels.
      * Returns (regular_lines, sentinel_lines)
      */
-    public separate_sentinels(lines: string[], marker: Marker): [string[], string[]] {
+    public separate_sentinels(
+        lines: string[],
+        marker: Marker
+    ): [string[], string[]] {
         const x = this;
         const regular_lines: string[] = [];
         const sentinel_lines: string[] = [];
@@ -684,7 +737,6 @@ export class ShadowController {
                 regular_lines.push(line);
             }
             i += 1;
-
         }
         return [regular_lines, sentinel_lines];
     }
@@ -694,12 +746,14 @@ export class ShadowController {
         lines2: string[],
         message: string,
         lines1_message: string,
-        lines2_message: string,
+        lines2_message: string
     ): void {
         const x = this;
         const banner1 = '='.repeat(30);
         const banner2 = '-'.repeat(30);
-        g.es_print(`${banner1}\n${message}\n${banner1}\n${lines1_message}\n${banner2}`);
+        g.es_print(
+            `${banner1}\n${message}\n${banner1}\n${lines1_message}\n${banner2}`
+        );
         x.show_error_lines(lines1, 'shadow_errors.tmp1');
         g.es_print(`\n${banner1}\n${lines2_message}\n${banner1}`);
         x.show_error_lines(lines2, 'shadow_errors.tmp2');
@@ -712,14 +766,12 @@ export class ShadowController {
         }
     }
     //@-others
-
 }
 //@+node:felix.20230410203541.36: ** class x.Marker
 /**
  * A class representing comment delims in @shadow files.
  */
 export class Marker {
-
     public delim1: string;
     public delim2: string;
     public delim3: string;
@@ -732,9 +784,9 @@ export class Marker {
     constructor(delims: [string, string, string]) {
         let delim1, delim2, delim3;
         [delim1, delim2, delim3] = delims;
-        this.delim1 = delim1;  // Single-line comment delim.
-        this.delim2 = delim2;  // Block comment starting delim.
-        this.delim3 = delim3;  // Block comment ending delim.
+        this.delim1 = delim1; // Single-line comment delim.
+        this.delim2 = delim2; // Block comment starting delim.
+        this.delim3 = delim3; // Block comment ending delim.
         if (!delim1 && !delim2) {
             this.delim1 = g.app.language_delims_dict['unknown_language'];
         }
@@ -768,10 +820,10 @@ export class Marker {
             return s.startsWith(this.delim1 + '@' + suffix);
         }
         if (this.delim2) {
-            return s.startsWith(
-                this.delim2 + '@' + suffix) &&
-                s.endsWith(this.delim3
-                );
+            return (
+                s.startsWith(this.delim2 + '@' + suffix) &&
+                s.endsWith(this.delim3)
+            );
         }
         return false;
     }
@@ -783,7 +835,6 @@ export class Marker {
         return this.isSentinel(s, 'verbatim');
     }
     //@-others
-
 }
 //@-others
 //@@language typescript

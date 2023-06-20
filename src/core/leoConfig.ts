@@ -253,7 +253,7 @@ export class ParserBaseClass {
     /**
      * Handle an @commands tree.
      */
-    public doCommands(p: Position, kind: string, name: string, val: any): void {
+    public async doCommands(p: Position, kind: string, name: string, val: any): Promise<void> {
 
         const c = this.c;
         const aList: [Position, string][] = [];
@@ -271,7 +271,7 @@ export class ParserBaseClass {
                 seen.push(p.v);
                 if (g.match_word(p.h, 0, tag)) {
                     // We can not assume that p will be valid when it is used.
-                    const script = g.getScript(c, p, false, true, true);
+                    const script = await g.getScript(c, p, false, true, true);
                     aList.push([p.copy(), script]);
                 }
                 p.moveToThreadNext();
@@ -364,7 +364,7 @@ export class ParserBaseClass {
                 aList.push(s.trimStart());
             }
         }
-        s = aList.join();
+        s = aList.join('');
         // Set the global config ivars.
         g.app.config.enabledPluginsString = s;
         g.app.config.enabledPluginsFileName = c ? c.shortFileName() : '<no settings file>';
@@ -1294,7 +1294,7 @@ export class ParserBaseClass {
         if (gs) {
             console.assert(gs instanceof g.GeneralSetting, gs);
             const w_path = gs.path;
-            if (g.os_path_finalize(c.mFileName) !== g.os_path_finalize(w_path)) {
+            if (g.finalize(c.mFileName) !== g.finalize(w_path)) {
                 g.es("over-riding setting:", name, "from", w_path);  // 1341
             }
         }
@@ -2578,7 +2578,7 @@ export class LocalConfigManager {
         if (gs) {
             // assert isinstance(gs, g.GeneralSetting), repr(gs)
             let w_path = gs.path!;
-            if (warn && g.os_path_finalize(c.mFileName) !== g.os_path_finalize(w_path)) {  // #1341.
+            if (warn && g.finalize(c.mFileName) !== g.finalize(w_path)) {  // #1341.
                 g.es("over-riding setting:", name, "from", w_path);
             }
         }

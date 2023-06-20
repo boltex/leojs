@@ -4,6 +4,8 @@
 	"recommendations": [
 		"dbaeumer.vscode-eslint",
 		"amodio.tsl-problem-matcher",
-		"aaron-bond.better-comments"
+		"aaron-bond.better-comments",
+		"eamodio.gitlens",
+		"github.vscode-pull-request-github"
 	]
 }

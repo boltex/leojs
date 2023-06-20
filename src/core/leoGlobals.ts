@@ -11,7 +11,6 @@ import { Utils as uriUtils } from "vscode-uri";
 
 import * as os from 'os';
 import * as safeJsonStringify from 'safe-json-stringify';
-// import * as fs from 'fs';
 import * as path from 'path';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
@@ -24,11 +23,11 @@ import { NullGui } from "./leoGui";
     from functools import reduce/
     try:
         import gc
-    except ImportError:
+    catch ImportError:
         gc = None
     try:
         import gettext
-    except ImportError:  # does not exist in jython.
+    catch ImportError:  # does not exist in jython.
         gettext = None
     import glob
     import io
@@ -64,13 +63,15 @@ export const isWindows: boolean = process.platform?.startsWith('win');
 //@+<< define g.globalDirectiveList >>
 //@+node:felix.20210102180402.1: ** << define g.globalDirectiveList >>
 // Visible externally so plugins may add to the list of directives.
+// The atFile write logic uses this, but not the atFile read logic.
 export const globalDirectiveList: string[] = [
     // Order does not matter.
     'all',
     'beautify',
     'colorcache', 'code', 'color', 'comment', 'c',
     'delims', 'doc',
-    'encoding', 'end_raw',
+    'encoding',
+    // 'end_raw', // #2276.
     'first', 'header', 'ignore',
     'killbeautify', 'killcolor',
     'language', 'last', 'lineending',
@@ -80,8 +81,10 @@ export const globalDirectiveList: string[] = [
     'nopyflakes',  // Leo 6.1.
     'nosearch',  // Leo 5.3.
     'others', 'pagewidth', 'path', 'quiet',
-    'raw', 'root-code', 'root-doc', 'root', 'silent',
-    'tabwidth', 'terse',
+    // 'raw', // #2276.
+    'section-delims',  // Leo 6.6. #2276.
+    'silent',
+    'tabwidth',
     'unit', 'verbose', 'wrap'
 ];
 
@@ -184,7 +187,9 @@ export const g_is_directive_pattern = new RegExp(/^\s*@([\w-]+)\s*/);
 // This pattern excludes @encoding.whatever and @encoding(whatever)
 // It must allow @language python, @nocolor-node, etc.
 
-export const g_noweb_root = new RegExp('<' + '<' + '*' + '>' + '>' + '=', 'mg');
+// #2267: Support for @section-delims.
+export const g_section_delims_pat = new RegExp(/^@section-delims[ \t]+([^ \w\n\t]+)[ \t]+([^ \w\n\t]+)[ \t]*$/, 'm');
+
 export const g_pos_pattern = new RegExp(/:(\d+),?(\d+)?,?([-\d]+)?,?(\d+)?$/);
 export const g_tabwidth_pat = new RegExp(/(^@tabwidth)/, 'm');
 
@@ -367,11 +372,11 @@ export const codecs = {
  */
 export class FileLikeObject {
 
-    public encoding: string;
+    public encoding: BufferEncoding;
     public ptr: number;
     private _list: string[];
 
-    constructor(encoding: string = 'utf-8', fromString?: string) {
+    constructor(encoding: BufferEncoding = 'utf-8', fromString?: string) {
         this.encoding = encoding || 'utf-8';
         this._list = splitLines(fromString);  // Must preserve newlines!
         this.ptr = 0;
@@ -395,7 +400,7 @@ export class FileLikeObject {
 
     //@+node:felix.20220213000459.5: *4* FileLikeObject.get & getvalue & read (coreGlobals.py)
     public get(): string {
-        return this._list.join();
+        return this._list.join('');
     }
 
     // Todo : maybe add names to prototype instead
@@ -472,9 +477,9 @@ export class NullObject {
 export class GeneralSetting {
 
     public kind: string;
-    public encoding: string | undefined = undefined;
+    public encoding: BufferEncoding | undefined = undefined;
     public ivar: string | undefined = undefined;
-    public setting: string | undefined = undefined;
+    public source: string | undefined = undefined;
     public val: any | undefined = undefined;
     public path: string | undefined = undefined;
     public tag: string = 'setting';
@@ -483,9 +488,9 @@ export class GeneralSetting {
     constructor(
         p_generalSetting: {
             kind: string;
-            encoding?: string;
+            encoding?: BufferEncoding;
             ivar?: string;
-            setting?: string;
+            source?: string;
             val?: any;
             path?: string;
             tag?: string;
@@ -498,7 +503,7 @@ export class GeneralSetting {
         this.kind = p_generalSetting.kind;
         this.path = p_generalSetting.path;
         this.unl = p_generalSetting.unl;
-        this.setting = p_generalSetting.setting;
+        this.source = p_generalSetting.source;
         this.val = p_generalSetting.val;
         if (p_generalSetting.tag) {
             this.tag = p_generalSetting.tag;
@@ -508,12 +513,23 @@ export class GeneralSetting {
     public __repr__(): string {
         // Better for g.printObj.
         let val;
-        if (val) {
+        if (this.val) {
             val = this.val.toString().split("\n").join(" ");
         }
         return (
-            `GS: ${shortFileName(this.path)} ` +
-            `${this.kind} = ${val} `);
+            // `GS: ${shortFileName(this.path)} ` +
+            // `${this.kind} = ${val} `
+
+
+            `GS: path: ${shortFileName(this.path || '')} ` +
+            `source: ${this.source || ''} ` +
+            `kind: ${this.kind} val: ${val}`
+
+        );
+
+
+
+
     }
     public dump(): string {
         return this.__repr__();
@@ -570,7 +586,7 @@ export class SettingsDict extends Map<string, any> {
                 kind: this.get(p_key).kind,
                 encoding: this.get(p_key).encoding,
                 ivar: this.get(p_key).ivar,
-                setting: this.get(p_key).setting,
+                source: this.get(p_key).source,
                 val: this.get(p_key).val,
                 path: this.get(p_key).path,
                 tag: this.get(p_key).tag,
@@ -768,6 +784,50 @@ export function get_line_after(s: string, i: number): string {
 // getLineAfter = get_line_after
 export const getLineAfter = get_line_after;
 
+//@+node:felix.20230423224653.1: *3* g.getIvarsDict and checkUnchangedIvars
+/**
+ * Return a dictionary of ivars:values for non-methods of obj.
+ */
+export function getIvarsDict(obj: any): { [key: string]: any } {
+
+    const d: { [key: string]: any } = {};
+
+    //    [[key, getattr(obj, key)] for key in dir(obj)
+    // if not isinstance(getattr(obj, key), types.MethodType)])
+    for (const key in obj) {
+        // console.log(key); // prints 'a', 'b', and 'c'
+        const w_callable = (typeof obj[key] === 'function') || (obj[key] instanceof Function);
+        if (!w_callable) {
+            d[key] = obj[key];
+        }
+    }
+    return d;
+}
+
+export function checkUnchangedIvars(
+    obj: any,
+    d: { [key: string]: any },
+    exceptions?: string[]
+): boolean {
+    if (!exceptions || !exceptions.length) {
+        exceptions = [];
+    }
+    let ok = true;
+    for (const key in d) { // USE 'IN' FOR KEY!
+        if (!exceptions.includes(key)) {
+            if (obj[key] !== d[key]) {
+                trace(
+                    `changed ivar: ${key} ` +
+                    `old: ${d[key]} ` +
+                    `new: ${obj[key]}`
+                );
+                ok = false;
+            }
+        }
+    }
+    return ok;
+
+}
 //@+node:felix.20211104221354.1: *3* g.listToString     (coreGlobals.py)
 /**
  * Pretty print any array / python list to string
@@ -861,7 +921,7 @@ export function objToString(obj: any, tag?: string): string {
 /**
  * Pretty print any Python object using pr.
  */
-export function printObj(obj: any, indent = '', printCaller = false, tag = null): void {
+export function printObj(obj: any, indent = '', printCaller = false, tag?: string): void {
     // TODO : Replace with output to proper pr function
     //     pr(objToString(obj, indent=indent, printCaller=printCaller, tag=tag))
     pr(obj);
@@ -904,7 +964,8 @@ export function comment_delims_from_extension(filename: string): [string, string
 
 //@+node:felix.20220111004937.1: *3* g.findAllValidLanguageDirectives
 /**
- * Return list of all valid @language directives in s
+ * Return list of all languages for which there is a valid @language
+ * directive in s.
  */
 export function findAllValidLanguageDirectives(s: string): string[] {
 
@@ -912,7 +973,7 @@ export function findAllValidLanguageDirectives(s: string): string[] {
         return [];
     }
     const languages: string[] = [];
-    let m: any;
+    let m: RegExpExecArray | null;
     while ((m = g_language_pat.exec(s)) !== null) {
         const language: string = m[1];
         if (isValidLanguage(language)) {
@@ -923,7 +984,8 @@ export function findAllValidLanguageDirectives(s: string): string[] {
 }
 //@+node:felix.20220112011652.1: *3* g.findFirstAtLanguageDirective
 /**
- * Return the first *valid* @language directive in s.
+ * Return the first language for which there is a valid @language
+ * directive in s.
  */
 export function findFirstValidAtLanguageDirective(s: string): string | undefined {
 
@@ -940,22 +1002,35 @@ export function findFirstValidAtLanguageDirective(s: string): string | undefined
     }
     return undefined;
 }
-//@+node:felix.20211104213229.1: *3* g.get_directives_dict (must be fast)
-// The caller passes [root_node] or None as the second arg.
-// This allows us to distinguish between None and [None].
+//@+node:felix.20230423231138.1: *3* g.findReference
+/**
+ * Return the position containing the section definition for name.
+ *
+ * Called from the syntax coloring method that colorizes section references.
+ * Also called from write at.putRefAt.
+ */
+export function findReference(name: string, root: Position): Position | undefined {
 
+    for (const p of root.subtree(false)) {
+        console.assert(!p.__eq__(root));
+        if (p.matchHeadline(name) && !p.isAtIgnoreNode()) {
+            return p.copy();
+        }
+    }
+    return undefined;
+
+}
+//@+node:felix.20211104213229.1: *3* g.get_directives_dict (must be fast)
 /**
  *  Scan p for Leo directives found in globalDirectiveList.
  *
  * Returns a dict containing the stripped remainder of the line
- * following the first occurrence of each recognized directive
+ * following the first occurrence of each recognized directive.
  */
-export function get_directives_dict(p: Position, root?: Position[]): { [key: string]: string } {
+export function get_directives_dict(p: Position): { [key: string]: string } {
 
     let d: { [key: string]: string } = {};
-    // #1688:    legacy: Always compute the pattern.
-    //           g.directives_pat is updated whenever loading a plugin.
-    //
+
     // The headline has higher precedence because it is more visible.
     let m: RegExpExecArray | null;
     for (let s of [p.h, p.b]) {
@@ -981,20 +1056,6 @@ export function get_directives_dict(p: Position, root?: Position[]): { [key: str
         }
     }
 
-    if (root && root.length) {
-        const root_node: Position = root[0];
-        //anIter = g_noweb_root.exec(p.b);
-        // for (let m of anIter) {
-        while ((m = g_noweb_root.exec(p.b)) !== null) {
-            if (root_node && root_node.__bool__()) {
-                d["root"] = "0";  // value not important
-            } else {
-                es(`${angleBrackets("*")} may only occur in a topmost node(i.e., without a parent)`);
-            }
-            break;
-        }
-    }
-
     return d;
 }
 //@+node:felix.20211104213315.1: *3* g.get_directives_dict_list (must be fast)
@@ -1008,9 +1069,8 @@ export function get_directives_dict_list(p: Position): { [key: string]: string; 
     const result: { [key: string]: string; }[] = [];
     const p1: Position = p.copy();
     for (let p of p1.self_and_parents(false)) {
-        const root: Position[] | undefined = p.hasParent() ? undefined : [p];
         // No copy necessary: g.get_directives_dict does not change p.
-        result.push(get_directives_dict(p, root));
+        result.push(get_directives_dict(p));
     }
     return result;
 }
@@ -1197,19 +1257,11 @@ export function isDirective(s: string): boolean {
 
 //@+node:felix.20220112002732.1: *3* g.isValidLanguage
 /**
- * True if language exists in leo/modes.
+ * True if the given language may be used as an external file.
  */
 export function isValidLanguage(language: string): boolean {
+    return !!(language && app.language_delims_dict[language]);
 
-    // 2020/08/12: A hack for c++
-    if (['c++', 'cpp'].includes(language)) {
-        language = 'cplusplus';
-    }
-    // TODO !
-    // fn = g.os_path_join(g.app.loadDir, '..', 'modes', {language}.py)
-    //return g.os_path_exists(fn)
-
-    return languagesList.includes('language');
 }
 //@+node:felix.20220110224137.1: *3* g.scanAtCommentAndLanguageDirectives
 /**
@@ -1248,10 +1300,10 @@ export function scanAtCommentAndAtLanguageDirectives(aList: { [key: string]: str
 /**
  * Scan aList for @encoding directives.
  */
-export function scanAtEncodingDirectives(aList: any[]): string | undefined {
+export function scanAtEncodingDirectives(aList: any[]): BufferEncoding | undefined {
 
     for (let d of aList) {
-        const encoding = d['encoding'];
+        const encoding = d['encoding'] as BufferEncoding | undefined;
         if (encoding && isValidEncoding(encoding)) {
             return encoding;
         }
@@ -1343,7 +1395,7 @@ export function scanAtTabwidthDirectives(aList: any[], issue_error_flag = false)
 /**
  * Scan p and all ancestors looking for '@tabwidth' directives.
  */
-export function scanAllAtTabWidthDirectives(c: Commands, p: Position): number | undefined {
+export function scanAllAtTabWidthDirectives(c: Commands, p?: Position): number | undefined {
     let ret: number | undefined;
     if (c && p && p.__bool__()) {
         const aList: any[] = get_directives_dict_list(p);
@@ -1669,71 +1721,159 @@ export function ensure_extension(name: string, ext: string): string {
 
     return name + ext;
 }
+//@+node:felix.20230430163312.1: *3* g.filecmp_cmp
+export async function filecmp_cmp(path1: string, path2: string, shallow = true): Promise<boolean> {
+    let w_same = false;
+    let w_uri: vscode.Uri;
+    w_uri = makeVscodeUri(path1); // first uri, no matter if shallow or not.
+    if (shallow) {
+        const stats1 = await vscode.workspace.fs.stat(w_uri);
+        w_uri = makeVscodeUri(path2);
+        const stats2 = await vscode.workspace.fs.stat(w_uri);
+        w_same = stats1.size === stats2.size && stats1.mtime === stats2.mtime;
+    } else {
+        const file1 = await vscode.workspace.fs.readFile(w_uri);
+        w_uri = makeVscodeUri(path2);
+        const file2 = await vscode.workspace.fs.readFile(w_uri);
+        w_same = Buffer.compare(file1, file2) === 0;
+    }
+    return w_same;
+}
 //@+node:felix.20211228213652.1: *3* g.fullPath
 /**
- * Return the full path (including fileName) in effect at p. Neither the
- * path nor the fileName will be created if it does not exist.
+ * Return the full path (including fileName) in effect at p.
+ *
+ * Create neither the path nor the fileName.
+ *
+ * This function is deprecated. Use c.fullPath(p) instead.
  */
-export function fullPath(c: Commands, p_p: Position, simulate: boolean = false): string {
+export function fullPath(c: Commands, p: Position, simulate: boolean = false): string {
+    return c.fullPath(p, simulate);
     // Search p and p's parents.
-    for (let p of p_p.self_and_parents(false)) {
-        const aList: any[] = get_directives_dict_list(p);
-        const w_path: string = c.scanAtPathDirectives(aList);
-        let fn: string = simulate ? p.h : p.anyAtFileNodeName();
-        //fn = p.h if simulate else p.anyAtFileNodeName()
-        // Use p.h for unit tests.
-        if (fn) {
-            // Fix #102: expand path expressions.
-            fn = c.expand_path_expression(fn);  // #1341.
-            // fn = os.path.expanduser(fn);  // 1900.
+    // for (let p of p_p.self_and_parents(false)) {
+    //     const aList: any[] = get_directives_dict_list(p);
+    //     const w_path: string = c.scanAtPathDirectives(aList);
+    //     let fn: string = simulate ? p.h : p.anyAtFileNodeName();
+    //     //fn = p.h if simulate else p.anyAtFileNodeName()
+    //     // Use p.h for unit tests.
+    //     if (fn) {
+    //         // Fix #102: expand path expressions.
+    //         fn = c.expand_path_expression(fn);  // #1341.
+    //         // fn = os.path.expanduser(fn);  // 1900.
 
-            if (fn[0] === '~') {
-                fn = path.join(os.homedir(), fn.slice(1));
-            }
+    //         if (fn[0] === '~') {
+    //             fn = path.join(os.homedir(), fn.slice(1));
+    //         }
 
-            return os_path_finalize_join(undefined, w_path, fn);  // #1341.
-        }
+    //         return os_path_finalize_join(undefined, w_path, fn);  // #1341.
+    //     }
 
-    }
-    return '';
+    // }
+    // return '';
 }
 //@+node:felix.20220102154348.1: *3* g.getBaseDirectory
 /**
- * Handles the conventions applying to the "relative_path_base_directory" configuration option.
+ * This function is deprectated.
  *
- * Convert '!' or '.' to proper directory references.
+ * Previously it convert '!' or '.' to proper directory references using
+ * @string relative-path-base-directory.
  */
 export function getBaseDirectory(c: Commands): string {
 
-    // let base: string = app.config.relative_path_base_directory;
+    return '';
 
-    if (!c) {
-        return '';  // No relative base given.
-    }
-    let base: string = c.config.getString('relative-path-base-directory');
+    // TODO : REMOVE IF TOTALLY UNUSED
 
-    if (base && base === "!") {
-        base = app.loadDir!;
-    } else if (base && base === ".") {
-        base = c.openDirectory!;
-    } else {
-        return '';  // Settings error.
-    }
+    // // let base: string = app.config.relative_path_base_directory;
 
-    if (os_path_isabs(base)) {
-        // Set c.chdir_to_relative_path as needed.
-        if (c.chdir_to_relative_path === undefined) {
-            c.chdir_to_relative_path = c.config.getBool('chdir-to-relative-path');
+    // if (!c) {
+    //     return '';  // No relative base given.
+    // }
+    // let base: string = c.config.getString('relative-path-base-directory');
+
+    // if (base && base === "!") {
+    //     base = app.loadDir!;
+    // } else if (base && base === ".") {
+    //     base = c.openDirectory!;
+    // } else {
+    //     return '';  // Settings error.
+    // }
+
+    // if (os_path_isabs(base)) {
+    //     // Set c.chdir_to_relative_path as needed.
+    //     if (c.chdir_to_relative_path === undefined) {
+    //         c.chdir_to_relative_path = c.config.getBool('chdir-to-relative-path');
+    //     }
+    //     // Call os.chdir if requested.
+    //     if (c.chdir_to_relative_path) {
+    //         // os.chdir(base);
+    //         process.chdir(base);
+    //     }
+    //     return base;  // base need not exist yet.
+    // }
+
+    // return '';  // No relative base given.
+}
+//@+node:felix.20230518232533.1: *3* g.getEncodingAt
+/**
+ * Return the encoding in effect at p and/or for string s.
+ *
+ * Read logic:  s is not None.
+ * Write logic: s is None.
+ */
+export function getEncodingAt(p: Position, b?: Uint8Array): BufferEncoding | undefined {
+    let e: BufferEncoding | undefined;
+    let junk_s;
+    // A BOM overrides everything.
+    if (b) {
+        [e, junk_s] = stripBOM(b);
+        if (e) {
+            return e;
         }
-        // Call os.chdir if requested.
-        if (c.chdir_to_relative_path) {
-            // os.chdir(base);
-            process.chdir(base);
-        }
-        return base;  // base need not exist yet.
     }
+    const aList = get_directives_dict_list(p);
+    e = scanAtEncodingDirectives(aList);
+    if (b && Buffer.from(b).toString().trim() && !e) {
+        e = 'utf-8' as BufferEncoding;;
+    }
+    return e;
 
-    return '';  // No relative base given.
+}
+//@+node:felix.20230518225302.1: *3* g.is_binary_file/external_file/string
+// export function is_binary_file(f: any): boolean {
+
+//     return f and isinstance(f, io.BufferedIOBase)
+
+// }
+export async function is_binary_external_file(fileName: string): Promise<boolean> {
+
+    try {
+        // with open(fileName, 'rb') as f:
+        //     s = f.read(1024)  // bytes, in Python 3.
+        const w_readUri = makeVscodeUri(fileName);
+        const readData = await vscode.workspace.fs.readFile(w_readUri);
+        const trimmedData = readData.slice(0, 1024);
+        const s = Buffer.from(trimmedData).toString();
+        return is_binary_string(s);
+        // except IOError:
+        //     return False
+    } catch (exception) {
+        es_exception(exception);
+        return false;
+    }
+}
+export function is_binary_string(s: string): boolean {
+
+    // http://stackoverflow.com/questions/898669
+    // aList is a list of all non-binary characters.
+    // aList = [7, 8, 9, 10, 12, 13, 27] + list(range(0x20, 0x100))
+    // return bool(s.translate(None, bytes(aList)))  // type:ignore
+
+    const nullCharacter = '\x00';
+    const nonPrintableCharactersRegex = /[^\x09\x0A\x0D\x20-\x7E]/;
+
+    return s.includes(nullCharacter) || nonPrintableCharactersRegex.test(s);
+
 }
 //@+node:felix.20221219233638.1: *3* g.is_sentinel
 /**
@@ -1785,10 +1925,9 @@ export async function makeAllNonExistentDirectories(theDir: string): Promise<str
     // Return True if the directory already exists.
     theDir = os_path_normpath(theDir);
 
-    let [w_isDir, w_exists] = await Promise.all([os_path_isdir(theDir), os_path_exists(theDir)]);
-    const ok = w_isDir && w_exists;
+    let [w_exists, w_isDir] = await Promise.all([os_path_exists(theDir), os_path_isdir(theDir)]);
 
-    if (ok) {
+    if (w_exists && w_isDir) {
         return theDir;
     }
 
@@ -1808,7 +1947,7 @@ export async function makeAllNonExistentDirectories(theDir: string): Promise<str
  *
  * Return the commander of the newly-opened outline.
  */
-export async function openWithFileName(fileName: string, old_c: Commands, gui: NullGui): Promise<Commands | undefined> {
+export function openWithFileName(fileName: string, old_c: Commands | undefined, gui: NullGui): Promise<Commands | undefined> {
     return app.loadManager!.loadLocalFile(fileName, gui, old_c);
 }
 //@+node:felix.20220106231022.1: *3* g.readFileIntoString
@@ -1824,10 +1963,10 @@ export async function openWithFileName(fileName: string, old_c: Commands, gui: N
     - None, which typically means 'utf-8'.
  */
 export async function readFileIntoString(fileName: string,
-    encoding: string = 'utf-8',  // BOM may override this.
+    encoding: BufferEncoding = 'utf-8',  // BOM may override this.
     kind: string | undefined = undefined,  // @file, @edit, ...
     verbose: boolean = true,
-): Promise<[string | undefined, string | undefined]> {
+): Promise<[string | undefined, BufferEncoding | undefined]> {
 
     if (!fileName) {
         if (verbose) {
@@ -1844,7 +1983,7 @@ export async function readFileIntoString(fileName: string,
         return [undefined, undefined];
     }
 
-    if (!os_path_exists(fileName)) {
+    if (! await os_path_exists(fileName)) {
         if (verbose) {
             error('file not found:', fileName);
         }
@@ -1852,42 +1991,25 @@ export async function readFileIntoString(fileName: string,
     }
 
     let s: string | undefined;
-    let e: string | undefined;
+    let e: BufferEncoding | undefined;
     let junk: string;
 
     try {
-        e = undefined;
-        let buffer: any;
-
-        // ! SKIP FOR NOW
-        // TODO
-        /*
-        const f: number = fs.openSync(fileName, 'rb')
-        fs.readSync(f, buffer, );
-
-        // Fix #391.
-        if (!s){
+        const w_uri = makeVscodeUri(fileName);
+        let readData = await vscode.workspace.fs.readFile(w_uri);
+        if (!readData) {
             return ['', undefined];
         }
-        // New in Leo 4.11: check for unicode BOM first.
-        [e, s] = stripBOM(s)
-        if (!e){
+        [e, readData] = stripBOM(readData);
+        if (!e) {
             // Python's encoding comments override everything else.
-            [junk, ext] = os_path_splitext(fileName);
-            if (ext === '.py'){
-                e = getPythonEncodingFromString(s);
+            let [junk, ext] = os_path_splitext(fileName);
+            if (ext === '.py') {
+                e = getPythonEncodingFromString(readData);
             }
         }
-        s = toUnicode(s, e || encoding);
-        */
-
-        // const w_uri = vscode.Uri.file(fileName);
-        const w_uri = makeVscodeUri(fileName);
-        const readData = await vscode.workspace.fs.readFile(w_uri);
-        const s = Buffer.from(readData).toString('utf8');
-
-        // s = fs.readFile(fileName, { encoding: 'utf8' });
-
+        s = toUnicode(readData, e || encoding);
+        // const s = Buffer.from(readData).toString('utf-8');
         return [s, e];
     }
     catch (iOError) {
@@ -1907,6 +2029,57 @@ export async function readFileIntoString(fileName: string,
 
 }
 
+//@+node:felix.20230423233617.1: *3* g.readFileToUnicodeString
+/**
+ * Return the raw contents of the file whose full path is fn.
+ */
+export async function readFileIntoUnicodeString(
+    fn: string,
+    encoding: BufferEncoding | undefined,
+    silent = false,
+): Promise<string | undefined> {
+    try {
+        const w_uri = makeVscodeUri(fn);
+        let s = await vscode.workspace.fs.readFile(w_uri);
+        return toUnicode(s, encoding);
+    } catch (e) {
+        if (!silent) {
+            error('can not open', fn);
+        }
+        error(`readFileIntoUnicodeString: unexpected exception reading ${fn}`);
+        es_exception();
+    }
+
+    return undefined;
+
+}
+//@+node:felix.20230501215854.1: *3* g.readlineForceUnixNewline
+//@+at Stephen P. Schaefer 9/7/2002
+//
+// The Unix readline() routine delivers "\r\n" line end strings verbatim,
+// while the windows versions force the string to use the Unix convention
+// of using only "\n". This routine causes the Unix readline to do the
+// same.
+//@@c
+
+export function readlineForceUnixNewline(f: string[], fileName?: string): string {
+    // Addapted for leojs : receives array of string with their newline endings intact
+    let s = f.shift();
+    if (s == null) {
+        s = '';
+    }
+    //   try {
+    //     s = f.readline();
+    //   } catch (err) {
+    //     console.log(`UnicodeDecodeError: ${fileName}`, f, err);
+    //   }
+    if (s.length >= 2 && s.slice(-2) === "\r\n") {
+        s = s.slice(0, -2) + "\n";
+    }
+
+    return s;
+
+}
 //@+node:felix.20220412004053.1: *3* g.sanitize_filename
 /**
  * Prepares string s to be a valid file name:
@@ -1992,6 +2165,63 @@ export function splitLongFileName(fn: string, limit: number = 40): string {
     }
     return result.join('');
 }
+//@+node:felix.20230422213613.1: *3* g.writeFile
+/**
+ * Create a file with the given contents.
+ */
+export async function writeFile(contents: Uint8Array | string, encoding: BufferEncoding, fileName: string): Promise<boolean> {
+
+    try {
+        if (typeof contents === 'string') {
+            contents = toEncodedString(contents, encoding);
+        }
+
+        // // 'wb' preserves line endings.
+        // with open(fileName, 'wb') as f:
+        //     f.write(contents)  // type:ignore
+
+        const w_uri = makeVscodeUri(fileName);
+        await vscode.workspace.fs.writeFile(w_uri, contents);
+
+        return true;
+    } catch (e) {
+        console.log(`exception writing: ${fileName}:\n${e}`);
+        // g.trace(g.callers())
+        // g.es_exception()
+        return false;
+    }
+}
+//@+node:felix.20230422213619.1: *3* g.write_file_if_changed
+/**
+ * Replace file whose filename is give with s, but *only* if file's
+ * context has changed (or the file does not exist).
+ * & Return true if the file was written.
+ */
+export async function write_file_if_changed(fn: string, s: string, encoding: BufferEncoding = 'utf-8'): Promise<boolean> {
+    try {
+        const encoded_s = toEncodedString(s, encoding, true);
+        if (await os_path_exists(fn)) {
+            // with open(fn, 'rb') as f
+            //     contents = f.read()
+            const w_uri = makeVscodeUri(fn);
+            const contents = await vscode.workspace.fs.readFile(w_uri);
+            if (Buffer.compare(contents, encoded_s) === 0) {
+                return false;
+            }
+        }
+        // with open(fn, 'wb') as f
+        //     f.write(encoded_s);
+        const w_uri = makeVscodeUri(fn);
+        await vscode.workspace.fs.writeFile(w_uri, encoded_s);
+        return true;
+
+    } catch (exception) {
+        es_print(`Exception writing ${fn}`);
+        es_exception();
+        return false;
+    }
+}
+
 //@+node:felix.20220526234706.1: *3* g.makeVscodeUri
 /**
  * * VSCODE compatibility helper method:
@@ -2002,7 +2232,7 @@ export function splitLongFileName(fn: string, limit: number = 40): string {
  */
 export function makeVscodeUri(p_fn: string): vscode.Uri {
 
-    if (isBrowser || app.vscodeUriScheme !== 'file') {
+    if (isBrowser || (app.vscodeUriScheme && app.vscodeUriScheme !== 'file')) {
         const newUri = app.vscodeWorkspaceUri!.with({ path: p_fn });
         return newUri;
 
@@ -2046,6 +2276,70 @@ export function find_word(s: string, word: string, i: number = 0): number {
     }
 
     return -1;
+}
+//@+node:felix.20230427235714.1: *3* g.findRootsWithPredicate
+/**
+ * Commands often want to find one or more **roots**, given a position p.
+ * A root is the position of any node matching a predicate.
+ *
+ * This function formalizes the search order used by the black,
+ * pylint, pyflakes and the rst3 commands, returning a list of zero
+ * or more found roots.
+ */
+export function findRootsWithPredicate(c: Commands, root: Position, predicate?: (p: Position) => boolean): Position[] {
+
+    const seen: VNode[] = [];
+    const roots = [];
+    if (predicate == null) {
+
+        // A useful default predicate for python.
+        // pylint: disable=function-redefined
+
+        predicate = (p: Position): boolean => {
+            const headline = p.h.trim();
+            const is_python = headline.endsWith('py') || headline.endsWith('pyw');
+            return p.isAnyAtFileNode() && is_python;
+        };
+    }
+
+    // 1. Search p's tree.
+    for (const p of root.self_and_subtree(false)) {
+        if (predicate(p) && !seen.includes(p.v)) {
+            seen.push(p.v);
+            roots.push(p.copy());
+        }
+    }
+
+    if (roots.length) {
+        return roots;
+    }
+    // 2. Look up the tree.
+    for (const p of root.parents()) {
+        if (predicate(p)) {
+            return [p.copy()];
+        }
+    }
+    // 3. Expand the search if root is a clone.
+    const clones: VNode[] = [];
+    for (const p of root.self_and_parents(false)) {
+        if (p.isCloned()) {
+            clones.push(p.v);
+        }
+    }
+    if (clones.length) {
+        for (const p of c.all_positions(false)) {
+            if (predicate(p)) {
+                // Match if any node in p's tree matches any clone.
+                for (const p2 of p.self_and_subtree()) {
+                    if (clones.includes(p2.v)) {
+                        return [p.copy()];
+                    }
+                }
+            }
+        }
+    }
+    return [];
+
 }
 //@+node:felix.20221025000455.1: *3* g.see_more_lines
 /**
@@ -2104,11 +2398,29 @@ export function find_line_start(s: string, p_i: number): number {
         return i + 1;
     }
 }
+//@+node:felix.20230423232315.1: *4* g.find_on_line
+export function find_on_line(s: string, i: number, pattern: string): number {
+    let j = s.indexOf('\n', i);
+    if (j === -1) {
+        j = s.length;
+    }
+
+    var k = s.indexOf(pattern, i);
+    if (k >= 0 && k < j) {
+        return k;
+    }
+    return -1;
+
+}
+//@+node:felix.20230519000231.1: *4* g.is_c_id
+export function is_c_id(ch: string): boolean {
+    return isWordChar(ch);
+}
 //@+node:felix.20211104221002.1: *4* g.is_special
 /**
  * Return non-negative number if the body text contains the @ directive.
  */
-export function is_special(s: string, directive: string): number {
+export function is_special(s: string, directive: string): [boolean, number] {
     console.assert(directive && directive.substring(0, 1) === '@');
     // Most directives must start the line.
     const lws: boolean = ["@others", "@all"].includes(directive);
@@ -2118,9 +2430,9 @@ export function is_special(s: string, directive: string): number {
 
     if (m) {
         // javascript returns index including spaces before the match after newline
-        return m.index + m[0].length - m[1].length;
+        return [true, m.index + m[0].length - m[1].length];
     }
-    return -1;
+    return [false, -1];
 }
 
 //@+node:felix.20211104220753.1: *4* g.is_nl
@@ -2170,7 +2482,7 @@ export function match(s: string, i: number, pattern: string): boolean {
     return !!s && !!pattern && s.substring(i, i + pattern.length + 1).startsWith(pattern);
 }
 
-//@+node:felix.20211104221309.1: *4* g.match_word
+//@+node:felix.20211104221309.1: *4* g.match_word & g.match_words
 export function match_word(s: string, i: number, pattern: string): boolean {
     // Using a regex is surprisingly tricky.
     if (!pattern) {
@@ -2203,6 +2515,9 @@ export function match_word(s: string, i: number, pattern: string): boolean {
         return s.substring(i).search(pat) === 0; */
 }
 
+export function match_words(s: string, i: number, patterns: string[]): boolean {
+    return patterns.some((pattern) => match_word(s, i, pattern));
+}
 //@+node:felix.20220208154405.1: *4* g.skip_blank_lines
 /**
  * This routine differs from skip_ws_and_nl in that
@@ -2236,7 +2551,7 @@ export function skip_c_id(s: string, i: number): number {
     return i;
 }
 //@+node:felix.20211104220621.1: *4* g.skip_id
-export function skip_id(s: string, i: number, chars: string | null = null): number {
+export function skip_id(s: string, i: number, chars?: string): number {
     chars = chars ? chars.toString() : '';
     const n = s.length;
     while (i < n && (isWordChar(s.charAt(i)) || chars.indexOf(s.charAt(i)) >= 0)) {
@@ -2520,7 +2835,7 @@ export function doHook(tag: string, keywords?: { [key: string]: any }): any {
         # Pass the hook to the hook handler.
         # g.pr('doHook',f.__name__,keywords.get('c'))
         return f(tag, keywords)
-    except Exception:
+    catch Exception:
         g.es_exception()
         g.app.hookError = True  # Suppress this function.
         g.app.idle_time_hooks_enabled = False
@@ -2577,6 +2892,77 @@ def pluginIsLoaded(fn):
     return pc.isLoaded(fn)
 */
 
+//@+node:felix.20230508013117.1: ** g.Idle time functions
+//@+node:felix.20230508013117.2: *3* g.disableIdleTimeHook
+/**
+ * Disable the global idle-time hook.
+ */
+export function disableIdleTimeHook(): void {
+    app.idle_time_hooks_enabled = false;
+}
+//@+node:felix.20230508013117.3: *3* g.enableIdleTimeHook
+/**
+ * Enable idle-time processing.
+ */
+export function enableIdleTimeHook(...args: any): void {
+    app.idle_time_hooks_enabled = true;
+}
+//@+node:felix.20230508013117.4: *3* g.IdleTime
+/**
+ * A thin wrapper for the LeoQtGui.IdleTime class.
+ *
+ * The IdleTime class executes a handler with a given delay at idle time.
+ * The handler takes a single argument, the IdleTime instance::
+ *
+ *       def handler(timer):
+ *           '''IdleTime handler.  timer is an IdleTime instance.'''
+ *           delta_t = timer.time-timer.starting_time
+ *           g.trace(timer.count, '%2.4f' % (delta_t))
+ *           if timer.count >= 5:
+ *               g.trace('done')
+ *               timer.stop()
+ *
+ *       # Execute handler every 500 msec. at idle time.
+ *       timer = g.IdleTime(handler,delay=500)
+ *       if timer: timer.start()
+ *
+ *   Timer instances are completely independent::
+ *
+ *       def handler1(timer):
+ *           delta_t = timer.time-timer.starting_time
+ *           g.trace('%2s %2.4f' % (timer.count,delta_t))
+ *           if timer.count >= 5:
+ *               g.trace('done')
+ *               timer.stop()
+ *
+ *       def handler2(timer):
+ *           delta_t = timer.time-timer.starting_time
+ *           g.trace('%2s %2.4f' % (timer.count,delta_t))
+ *           if timer.count >= 10:
+ *               g.trace('done')
+ *               timer.stop()
+ *
+ *       timer1 = g.IdleTime(handler1, delay=500)
+ *       timer2 = g.IdleTime(handler2, delay=1000)
+ *       if timer1 and timer2:
+ *           timer1.start()
+ *           timer2.start()
+ */
+export function IdleTime(handler: any, delay = 500, tag?: string): any {
+    try {
+        return new app.gui.idleTimeClass(handler, delay, tag);
+    } catch (exception) {
+        return undefined;
+    }
+}
+//@+node:felix.20230508013117.5: *3* g.idleTimeHookHandler (stub)
+/**
+ * This function exists for compatibility.
+ */
+export function idleTimeHookHandler(timer: any): void {
+    es_print('Replaced by IdleTimeManager.on_idle');
+    trace(callers());
+}
 //@+node:felix.20211104210935.1: ** g.Importing
 //@+node:felix.20211104210938.1: ** g.Indices, Strings, Unicode & Whitespace
 //@+node:felix.20220410005950.1: *3* g.Indices
@@ -2908,7 +3294,7 @@ export function checkUnicode(s: string, encoding?: string): string {
         s = s.decode(encoding, 'replace')
         g.trace(g.callers())
         g.error(f"{tag}: unicode error. encoding: {encoding!r}, s:\n{s!r}")
-    except Exception:
+    catch Exception:
         g.trace(g.callers())
         g.es_excption()
         g.error(f"{tag}: unexpected error! encoding: {encoding!r}, s:\n{s!r}")
@@ -2917,6 +3303,41 @@ export function checkUnicode(s: string, encoding?: string): string {
     return s;
     */
 
+}
+//@+node:felix.20230420014718.1: *4* g.getPythonEncodingFromString
+/**
+ * Return the encoding given by Python's encoding line.
+ * s is the entire file.
+ */
+export function getPythonEncodingFromString(readData?: Uint8Array | string): BufferEncoding | undefined {
+
+    let encoding = undefined;
+    let [tag, tag2] = ['# -*- coding:', '-*-'];
+    let [n1, n2] = [tag.length, tag2.length];
+    if (readData) {
+        // For Python 3.x we must convert to unicode before calling startsWith.
+        // The encoding doesn't matter: we only look at the first line, and if
+        // the first line is an encoding line, it will contain only ascii characters.
+        const s = toUnicode(readData, 'ascii');
+        const lines = splitLines(s);
+        let line1 = lines[0].trim();
+        let e: BufferEncoding;
+        if (line1.startsWith(tag) && line1.endsWith(tag2)) {
+            e = line1.substring(n1, -n2).trim() as BufferEncoding;
+            if (e && isValidEncoding(e)) {
+                encoding = e;
+            }
+        } else if (match_word(line1, 0, '@first')) {  // 2011/10/21.
+            line1 = line1.substring('@first'.length).trim();
+            if (line1.startsWith(tag) && line1.endsWith(tag2)) {
+                e = line1.substring(n1, -n2).trim() as BufferEncoding;
+                if (e && isValidEncoding(e)) {
+                    encoding = e;
+                }
+            }
+        }
+    }
+    return encoding;
 }
 //@+node:felix.20220410215214.1: *4* g.isWordChar*
 /**
@@ -2980,7 +3401,9 @@ export function toUnicode(s: string | Uint8Array, encoding: BufferEncoding | nul
         //     unicode_warnings[callers] = True
         //     g.error(f"{tag}: unexpected argument of type {s.__class__.__name__}")
         //     g.trace(callers)
-        error(`${tag}: unexpected argument of type ${typeof s}`);
+        if (reportErrors && (s !== null && s !== undefined)) {
+            error(`${tag}: unexpected argument of type ${typeof s}`);
+        }
         return '';
     }
     if (!encoding) {
@@ -3327,10 +3750,11 @@ export function isValidEncoding(encoding: string): boolean {
 /**
  * Convert unicode string to an encoded string.
  */
-export function toEncodedString(s: any, encoding = 'utf-8', reportErrors = false): string {
-    if ((typeof s) !== "string") {
-        return s;
-    }
+export function toEncodedString(s: any, encoding: BufferEncoding = 'utf-8', reportErrors = false): Uint8Array {
+    return Buffer.from(s, encoding);
+    // if ((typeof s) !== "string") {
+    //     return s;
+    // }
     // TODO : TEST AND CHECK IF MORE THAN utf-8 IS NEEDED
     // use atob() for ascii to base 64, or other functionality for more encodings
     // (other examples)
@@ -3350,7 +3774,7 @@ export function toEncodedString(s: any, encoding = 'utf-8', reportErrors = false
     //     if reportErrors:
     //         error(f"Error converting {s} from unicode to {encoding} encoding")
 
-    return s; // skip for now
+    // return s; // skip for now
 }
 
 //@+node:felix.20211104210858.1: ** g.Logging & Printing
@@ -3491,7 +3915,7 @@ export function es_exception(p_error?: any, c?: Commands): string {
  */
 export function es_print(...args: any[]): void {
     pr(...args);
-    if (app && !unitTesting) {
+    if (app && app.gui && !unitTesting) {
         es(...args);
     }
 }
@@ -3508,7 +3932,7 @@ export function internalError(...args: any[]): void {
     // es_print('Please report this error to Leo\'s developers', 'red');
     es_print('Please report this error to LeoJS developers');
 }
-//@+node:felix.20211104222740.1: *3* g.pr              (coreGlobals.py)
+//@+node:felix.20211104222740.1: *3* g.pr
 /**
  * Print all non-keyword args.
  */
@@ -3524,7 +3948,33 @@ export const pr = console.log;
 //             result.append(repr(arg))
 //     print(','.join(result))
 
-//@+node:felix.20211104230337.1: *3* g.trace           (coreGlobals.py)
+//@+node:felix.20230518224754.1: *3* g.print_exception
+/**
+ * Print exception info about the last exception.
+ */
+export function print_exception(
+    p_exception: any
+    // full: bool = True,
+    // c: Cmdr = None,
+    // flush: bool = False,
+    // color: str = "red",
+): void {
+    console.log(p_exception.toString());
+    // val is the second argument to the raise statement.
+    // typ, val, tb = sys.exc_info()
+    // if full:
+    //     lines = traceback.format_exception(typ, val, tb)
+    // else:
+    //     lines = traceback.format_exception_only(typ, val)
+    // print(''.join(lines), flush=flush)
+    // try:
+    //     fileName, n = g.getLastTracebackFileAndLineNumber()
+    //     return fileName, n
+    // except Exception:
+    //     return "<no file>", 0
+
+}
+//@+node:felix.20211104230337.1: *3* g.trace
 /**
  * Print a tracing message
  */
@@ -3532,6 +3982,72 @@ export const trace = console.log;
 // TODO : Replace with output to proper 'Leo terminal output'
 
 //@+node:felix.20211104211115.1: ** g.Miscellaneous
+//@+node:felix.20230529144955.1: *3* g.maketrans
+export function maketrans(from: string, to: string, deletechars?: string): Record<number, string | null> {
+    const translationTable: Record<number, string | null> = {};
+    const maxLength = Math.min(from.length, to.length);
+
+    for (let i = 0; i < maxLength; i++) {
+        translationTable[from.charCodeAt(i)] = to.charAt(i);
+    }
+
+    if (deletechars) {
+        for (let i = 0; i < deletechars.length; i++) {
+            const charCode = deletechars.charCodeAt(i);
+            translationTable[charCode] = null;  // Mark for deletion
+        }
+    }
+
+    return translationTable;
+}
+//@+node:felix.20230529152331.1: *3* g.maketrans_from_dict
+export function maketrans_from_dict(dict: Record<string, string | null>): Record<number, string | null> {
+    const translationTable: Record<number, string | null> = {};
+
+    for (const key in dict) {
+        if (dict.hasOwnProperty(key)) {
+            const charCode = key.charCodeAt(0);
+            translationTable[charCode] = dict[key];
+        }
+    }
+
+    return translationTable;
+}
+//@+node:felix.20230529144946.1: *3* g.translate
+export function translate(text: string, translationTable: Record<number, string | null>): string {
+    let translatedText = "";
+    for (let i = 0; i < text.length; i++) {
+        const charCode = text.charCodeAt(i);
+        const translation = translationTable[charCode];
+        if (translation !== null) {
+            translatedText += translation || text.charAt(i);
+        }
+    }
+    return translatedText;
+}
+//@+node:felix.20230530001033.1: *3* g.compareArrays
+export function compareArrays(arr1: any[], arr2: any[]): boolean {
+    if (arr1.length !== arr2.length) {
+        return false;
+    }
+    return arr1.every((value, index) => value === arr2[index]);
+}
+//@+node:felix.20230530135543.1: *3* g.comparePositionArray
+export function comparePositionArray(arr1: Position[], arr2: Position[]): boolean {
+    if (arr1.length !== arr2.length) {
+        return false;
+    }
+    return arr1.every((val1, index) => {
+        const val2 = arr2[index];
+        if (val1 && val1.__bool__() && val2 && val2.__bool__()) {
+            return val1.__eq__(val2);
+        } else {
+            // some don't exist... are they the same in some way? 
+            // no 'v' to check so default to 'false'. 
+            return false;
+        }
+    });
+}
 //@+node:felix.20221017010728.1: *3* g.process_time
 /**
  * python process_time equivalent that returns the current timestamp in SECONDS
@@ -3588,32 +4104,40 @@ export function convertPythonDayjs(s: string): string {
     return s;
 }
 
-//@+node:felix.20220206010631.1: *3* g.dedent
+//@+node:felix.20230611195053.1: *3* g.dedent
 /**
- * This is similar to Python's "textwrap.dedent" function
- * from https://gist.github.com/malthe/02350255c759d5478e89
+ * Implementation of Python's "textwrap.dedent" function
  */
-export function dedent(text: string) {
-    const re_whitespace = /^([ \t]*)(.*)\n/gm; // Needs 'g' flag for exec in while loop
-    let l;
-    let m;
-    let i;
+export function dedent(text: string): string {
+    const whitespaceOnlyRe = /^[ \t]+$/gm;
+    const leadingWhitespaceRe = /^(^[ \t]*)(?:[^ \t\n])/gm;
 
-    while ((m = re_whitespace.exec(text)) !== null) { // assign in cond.
-        if (!m[2]) {
+    let margin = null;
+    text = text.replace(whitespaceOnlyRe, '');
+    const indents = text.match(leadingWhitespaceRe) || [];
+    for (let indent of indents) {
+        indent = indent.slice(0, -1);
+        if (margin === null) {
+            margin = indent;
+        } else if (indent.startsWith(margin)) {
             continue;
-        }
-
-        if (l = m[1].length) { // assign in cond.
-            i = (i !== undefined) ? Math.min(i, l) : l;
+        } else if (margin.startsWith(indent)) {
+            margin = indent;
         } else {
-            break;
+            for (let i = 0; i < margin.length; i++) {
+                if (margin[i] !== indent[i]) {
+                    margin = margin.substring(0, i);
+                    break;
+                }
+            }
         }
     }
 
-    if (i) {
-        text = text.replace(new RegExp('^[ \t]{' + i + '}(.*\n)', 'gm'), '$1');
+    if (margin) {
+        const marginRe = new RegExp(`^${margin}`, 'gm');
+        text = text.replace(marginRe, '');
     }
+
     return text;
 }
 //@+node:felix.20221218195057.1: *3* g.reEscape
@@ -3621,7 +4145,7 @@ export function dedent(text: string) {
 /**
  * python re.escape equivalent in typescript
  */
-export function reEscape(text: string) {
+export function reEscape(text: string): string {
     return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 //@+node:felix.20221219233315.1: *3* g.ltrim
@@ -3656,6 +4180,15 @@ export function plural(obj: any): string {
     return n === 1 ? '' : "s";
 }
 
+//@+node:felix.20230501203659.1: *3* g.rjust
+export function rjust(s: string, n: number, ch = ' '): string {
+    if (s.length >= n) {
+        return s;
+    } else {
+        const pad = ch.repeat(n - s.length);
+        return pad + s;
+    }
+}
 //@+node:felix.20230220001637.1: *3* g.useSyntaxColoring
 /**
  * True if p's parents enable coloring in p.
@@ -3701,9 +4234,113 @@ export function findColorDirectives(p: Position): string[] {
         return s.substring(1);
     });
 }
+//@+node:felix.20230420214829.1: *3* g.divmod
+export function divmod(dividend: number, divisor: number): [number, number] {
+    const quotient = Math.floor(dividend / divisor);
+    const remainder = dividend % divisor;
+    return [quotient, remainder];
+}
+//@+node:felix.20230516013609.1: *3* g.os_listdir
+export async function os_listdir(p_path: string): Promise<string[]> {
+    let result: string[] = [];
+    try {
+        const w_uri = makeVscodeUri(p_path);
+        const w_dirInfo = await vscode.workspace.fs.readDirectory(w_uri);
+        result = w_dirInfo.map(p_dirInfo => p_dirInfo[0]);
+    } catch (e) {
+        es(`Error listing directory ${p_path}`);
+    }
+    return result;
+}
+//@+node:felix.20230426001612.1: *3* g.zip
+export function zip<T>(...arrays: T[][]): T[][] {
+    const length = Math.min(...arrays.map((arr) => arr.length));
+    return Array.from({ length }, (_, i) => arrays.map((arr) => arr[i]));
+}
 //@+node:felix.20211227182611.1: ** g.os_path_ Wrappers
 //@+at Note: all these methods return Unicode strings. It is up to the user to
 // convert to an encoded string as needed, say when opening a file.
+//@+node:felix.20230422214424.1: *3* g.finalize
+/**
+ * 
+ * Finalize the path. Do not call os.path.realpath.
+ *
+ * - Call os.path.expanduser and os.path.expandvars.
+ * - Convert to an absolute path, relative to os.getwd().
+ * - On Windows, convert backslashes to forward slashes.
+ */
+export function finalize(p_path: string): string {
+
+    if (!p_path) {
+        return '';
+    }
+    // p_path = os.path.expanduser(p_path)
+    p_path = os_path_expanduser(p_path);
+
+    // Equivalent to python's p_path = os.path.expandvars(p_path)
+    p_path = os_path_expandvars(p_path);
+
+    // Convert to an absolute path, similar to os.path.normpath(os.getcwd(), path)
+    // p_path = os.path.abspath(p_path)
+    p_path = path.resolve(p_path);
+
+    // p_path = os.path.normpath(p_path)
+    p_path = path.normalize(p_path);
+
+    // Convert backslashes to forward slashes, regradless of platform.
+    p_path = os_path_normslashes(p_path);
+    return p_path;
+
+}
+
+export const os_path_finalize = finalize;  // Compatibility.
+
+//@+node:felix.20230422214428.1: *3* g.finalize_join
+/**
+ * Join and finalize. Do not call os.path.realpath.
+ *
+ * - Return an empty string if all of the args are empty.
+ * - Call os.path.expanduser and  os.path.expandvars for each arg.
+ * - Call os.path.join on the resulting list of expanded arguments.
+ * - Convert to an absolute path, relative to os.getwd().
+ * - On Windows, convert backslashes to forward slashes.
+ */
+export function finalize_join(...args: string[]): string {
+
+    if (!args || !args.length) {
+        return '';
+    }
+
+    const uargs: string[] = [];
+    for (let z of args) {
+        if (z) {
+            z = os_path_expanduser(z);
+            z = os_path_expandvars(z);
+            uargs.push(z);
+        }
+    }
+
+    if (!uargs.length) {
+        return '';
+    }
+
+    // Join the paths.
+    let w_path = PYTHON_os_path_join(...uargs);
+
+    // Convert to an absolute path, similar to os.path.normpath(os.getcwd(), path)
+    // w_path = os.path.abspath(w_path)
+    // w_path = os.path.normpath(w_path)
+
+    w_path = path.resolve(w_path);
+    w_path = path.normalize(w_path);
+
+    // Convert backslashes to forward slashes, regradless of platform.
+    w_path = os_path_normslashes(w_path);
+
+    return w_path;
+}
+
+export const os_path_finalize_join = finalize_join;  // Compatibility.
 //@+node:felix.20211227182611.2: *3* g.glob_glob
 // def glob_glob(pattern):
 //     """Return the regularized glob.glob(pattern)"""
@@ -3738,14 +4375,12 @@ export function os_path_abspath(p_path: string): string {
 }
 
 //@+node:felix.20211227182611.4: *3* g.os_path_basename
-// def os_path_basename(path: str):
+// def os_path_basename(path: str) -> str:
 //     """Return the second half of the pair returned by split(path)."""
 //     if not path:
 //         return ''
 //     path = os.path.basename(path)
-//     # os.path.normpath does the *reverse* of what we want.
-//     if g.isWindows:
-//         path = path.replace('\\', '/')
+//     path = g.os_path_normslashes(path)
 //     return path
 //@+node:felix.20211227205112.1: *3* g.os_path_dirname
 /**
@@ -3802,72 +4437,86 @@ export function os_path_expanduser(p_path: string): string {
     if (!p_path) {
         return '';
     }
+    if (os && os.homedir && os.homedir()) {
+        const homeDir = os.homedir();
+        if (p_path === '~') {
+            return homeDir;
+        } else if (p_path.startsWith('~/')) {
+            p_path = p_path.replace('~', homeDir);
+        }
+        if (isWindows) {
+            if (p_path.startsWith('~\\')) {
+                p_path = p_path.replace('~', homeDir);
+            }
+            p_path = p_path.replace('\\\\', '\\');
 
-    // os.path.expanduser(p_path)
-    if (p_path[0] === '~') {
-        p_path = path.join(os.homedir(), p_path.slice(1));
+        }
+        p_path = p_path.replace('//', '/');
     }
-    let result: string = path.normalize(p_path);
-
-    // os.path.normpath does the *reverse* of what we want.
-    if (isWindows) {
-        result = result.split('\\').join('/');
-    }
-    return result;
-}
-//@+node:felix.20211227182611.8: *3* g.os_path_finalize
-/**
- * Expand '~', then return os.path.normpath, os.path.abspath of the path.
- * There is no corresponding os.path method
- */
-export function os_path_finalize(p_path: string): string {
-
-    if (p_path.includes('\x00')) {
-        trace('NULL in', p_path.toString(), callers());
-        p_path = p_path.split('\x00').join(''); // Fix Python 3 bug on Windows 10.
-    }
-
-    // p_path = path.expanduser(p_path);  // #1383.
-    if (p_path[0] === '~') {
-        p_path = path.join(os.homedir(), p_path.slice(1));
-    }
-
-    // p_path = path.resolve(p_path); // ! Adds /home/<user> to path !
-    // console.log('middle', p_path);
-
-    p_path = path.normalize(p_path);
-
-    // path.normpath does the *reverse* of what we want.
-
-    if (isWindows) {
-        p_path = p_path.split('\\').join('/');
-    }
-
-    // calling os.path.realpath here would cause problems in some situations.
     return p_path;
+
+    // DEPRECATED
+
+    // p_path = p_path.trim();
+    // if (!p_path) {
+    //     return '';
+    // }
+
+    // // os.path.expanduser(p_path)
+    // if (p_path[0] === '~') {
+    //     p_path = path.join(os.homedir(), p_path.slice(1));
+    // }
+    // let result: string = path.normalize(p_path);
+
+    // // os.path.normpath does the *reverse* of what we want.
+    // if (isWindows) {
+    //     result = result.split('\\').join('/');
+    // }
+    // return result;
 }
-//@+node:felix.20211227182611.9: *3* g.os_path_finalize_join
-/**
- * Join and finalize.
+//@+node:felix.20230527201323.1: *3* g.os_path_expandvars
+export function os_path_expandvars(p_path: string): string {
+    if (!p_path) {
+        return '';
+    }
 
- * *keys may contain a 'c' kwarg, used by g.os_path_join.
- */
-export function os_path_finalize_join(c: Commands | undefined, ...args: any[]): string {
+    if (process && process.env) {
+        // Equivalent to python's p_path = os.path.expandvars(p_path)
+        // which replaces both $MY_VAR and ${MY_VAR} forms.
 
-    let w_path: string = os_path_join(c, ...args);
+        p_path = p_path.replace(/\${([A-Za-z_][A-Za-z0-9_]*)}/g, (match, varName) => {
+            return process.env[varName] || '';
+        });
 
-    w_path = os_path_finalize(w_path);
-    return w_path;
+        p_path = p_path.replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, (match, varName) => {
+            return process.env[varName] || '';
+        });
+
+
+    }
+    return p_path;
+
 }
 //@+node:felix.20211227182611.10: *3* g.os_path_getmtime
-// def os_path_getmtime(path: str):
-//     """Return the modification time of path."""
-//     if not path:
-//         return 0
-//     try:
-//         return os.path.getmtime(path)
-//     except Exception:
-//         return 0
+/**
+ * Return the modification time of path. 
+ */
+export async function os_path_getmtime(p_path: string): Promise<number> {
+
+    if (!p_path) {
+        return 0;
+    }
+    try {
+
+        // return os.path.getmtime(p_path);
+        const w_uri = makeVscodeUri(p_path);
+        const w_stats = await vscode.workspace.fs.stat(w_uri);
+        return w_stats.mtime;
+
+    } catch (exception) {
+        return 0;
+    }
+}
 //@+node:felix.20211227182611.11: *3* g.os_path_getsize
 /**
  * Return the size of path.
@@ -3935,7 +4584,7 @@ export async function os_path_isdir(p_path: string): Promise<boolean> {
 /**
  * Return True if path is a file.
  */
-export async function os_path_isfile(p_path: string): Promise<boolean> {
+export async function os_path_isfile(p_path?: string): Promise<boolean> {
     if (p_path) {
 
         // const w_uri = vscode.Uri.file(p_path);
@@ -3956,6 +4605,46 @@ export async function os_path_isfile(p_path: string): Promise<boolean> {
 
 
 }
+//@+node:felix.20230608221301.1: *3* g.PYTHON_os_path_join
+/**
+ * PYTHON'S OS PATH JOIN ! 
+ * os.path.join(path, *paths)
+ *
+ * Join one or more path segments intelligently. The return value is the concatenation
+ * of path and all members of *paths, with exactly one directory separator following 
+ * each non-empty part, except the last.
+ *
+ * That is, the result will only end in a separator
+ * if the last part is either empty or ends in a separator. 
+ *
+ * If a segment is an absolute path (which on Windows requires both a drive and a root),
+ * then all previous segments are ignored and joining continues from the absolute path segment.
+ *
+ * On Windows, the drive is not reset when a rooted path segment (e.g., r'\foo') is encountered.
+ *
+ * If a segment is on a different drive or is an absolute path, all previous segments 
+ * are ignored and the drive is reset. 
+ *
+ * Note that since there is a current directory for each drive, 
+ * os.path.join("c:", "foo") represents a path relative to the current 
+ * directory on drive C: (c:foo), not c:\foo.
+ */
+export function PYTHON_os_path_join(...args: any[]): string {
+    let uargs: string[] = [];
+    for (let z of args) {
+        if (z) {
+            if (path.isAbsolute(z)) {
+                uargs = [];
+            }
+            uargs.push(z);
+        }
+    }
+    if (!uargs.length) {
+        return '';
+    }
+    let w_path = path.join(...uargs);
+    return w_path;
+}
 //@+node:felix.20211227182611.15: *3* g.os_path_join
 /**
  * Join paths, like os.path.join, with enhancements:
@@ -3964,7 +4653,7 @@ export async function os_path_isfile(p_path: string): Promise<boolean> {
  * A '.'  arg prepends c.openDirectory to the list of paths,
  * provided there is a 'c' kwarg.
  */
-export function os_path_join(c: Commands | undefined, ...args: any[]): string {
+export function os_path_join(...args: any[]): string {
 
     // c = keys.get('c')
 
@@ -3979,45 +4668,27 @@ export function os_path_join(c: Commands | undefined, ...args: any[]): string {
     if (!uargs.length) {
         return '';
     }
-    // Note:  This is exactly the same convention as used by getBaseDirectory.
-    if (uargs[0] === '!!') {
-        uargs[0] = app.loadDir || '';
-    } else if (uargs[0] === '.') {
-        if (c && c.openDirectory) {
-            uargs[0] = c.openDirectory;
-        }
-    }
-    let w_path: string;
-
-    try {
-        w_path = path.join(...uargs);
-    }
-    catch (typeError) {
-        trace(uargs, callers());
-        throw (typeError);
-    }
-    // May not be needed on some Pythons.
-    if (w_path.includes('\x00')) {
-        trace('NULL in', w_path.toString(), callers());
-        w_path = w_path.split('\x00').join(''); // Fix Python 3 bug on Windows 10.
-    }
-
-    // os.path.normpath does the *reverse* of what we want.
-    if (isWindows) {
-        w_path = w_path.split('\\').join('/');
-    }
-
+    let w_path = PYTHON_os_path_join(...uargs);
+    w_path = os_path_normslashes(w_path);
     return w_path;
 }
 //@+node:felix.20211227182611.16: *3* g.os_path_normcase
-// def os_path_normcase(path: str):
-//     """Normalize the path's case."""
-//     if not path:
-//         return ''
-//     path = os.path.normcase(path)
-//     if g.isWindows:
-//         path = path.replace('\\', '/')
-//     return path
+/**
+ * Normalize the path's case.
+ */
+export function os_path_normcase(p_path: string): string {
+    if (!p_path) {
+        return '';
+    }
+
+    // p_path = os.path.normcase(p_path);
+    if (isWindows) {
+        p_path = p_path.toLowerCase();
+    }
+
+    p_path = os_path_normslashes(p_path);
+    return p_path;
+}
 //@+node:felix.20211227182611.17: *3* g.os_path_normpath
 /**
  * Normalize the path.
@@ -4028,21 +4699,30 @@ export function os_path_normpath(p_path: string): string {
     }
     p_path = path.normalize(p_path);
     // os.path.normpath does the *reverse* of what we want.
-    if (isWindows) {
-        p_path = p_path.split('\\').join('/').toLowerCase();
-    }
+    // if (isWindows) {
+    //     p_path = p_path.split('\\').join('/').toLowerCase();
+    // }
+    p_path = os_path_normslashes(p_path);
     return p_path;
+
 }
 
 
 //@+node:felix.20211227182611.18: *3* g.os_path_normslashes
-// def os_path_normslashes(path: str):
-
-//     # os.path.normpath does the *reverse* of what we want.
-//     if g.isWindows and path:
-//         path = path.replace('\\', '/')
-//     return path
-
+/**
+ * Convert backslashes to forward slashes (Windows only).
+ *
+ * In effect, this convert Windows paths to POSIX paths.
+ */
+export function os_path_normslashes(p_path: string): string {
+    if (!p_path) {
+        return '';
+    }
+    if (isWindows) {
+        p_path = p_path.split('\\').join('/');
+    }
+    return p_path;
+}
 //@+node:felix.20211227182611.19: *3* g.os_path_realpath
 /**
  * Return the canonical path of the specified filename, eliminating any
@@ -4060,14 +4740,73 @@ export function os_path_realpath(p_path: string): string {
 
     p_path = p_path; // fixme
     // p_path = vscode.workspace.fs.realPath(p_path);
-    // os.path.normpath does the *reverse* of what we want.
+    // // os.path.normpath does the *reverse* of what we want.
 
-    if (isWindows) {
-        p_path = p_path.split('\\').join('/');
-    }
+    // if (isWindows) {
+    //     p_path = p_path.split('\\').join('/');
+    // }
+    p_path = os_path_normslashes(p_path);
     return p_path;
 }
 
+//@+node:felix.20230423204948.1: *3* g.os_path_samefile
+export async function os_path_samefile(fn1: string, fn2: string): Promise<boolean> {
+
+    // 1- with string themselves
+    if (os_path_normpath(os_path_normcase(fn1)) === os_path_normpath(os_path_normcase(fn2))) {
+        return true;
+    }
+
+    // 2- with fs.stat ino and dev
+    const w_uri1 = makeVscodeUri(fn1);
+    const w_uri2 = makeVscodeUri(fn2);
+
+    // 2.5 with vscode.Uri :
+    //  path
+    //  fsPath
+    //  toString
+    if (w_uri1.path === w_uri2.path || w_uri1.fsPath === w_uri2.fsPath || w_uri1.toString() === w_uri2.path.toString()) {
+        return true;
+    }
+
+    // IF REAL NODE FS ONLY !
+    try {
+        const w_stat1: vscode.FileStat = await vscode.workspace.fs.stat(w_uri1);
+        const w_stat2: vscode.FileStat = await vscode.workspace.fs.stat(w_uri2);
+        if (
+            (w_stat1 as any)['ino'] &&
+            (w_stat1 as any)['dev'] &&
+            (w_stat2 as any)['ino'] &&
+            (w_stat2 as any)['dev']
+        ) {
+            if (
+                (w_stat1 as any)['ino'] === (w_stat2 as any)['ino'] &&
+                (w_stat1 as any)['dev'] === (w_stat2 as any)['dev']
+            ) {
+                return true;
+            }
+        }
+    }
+    catch (e) {
+        // A file didnt exist! 
+        return false;
+    }
+
+    // 3- with path.resolve
+    let absPath1 = path.resolve(fn1);
+    let absPath2 = path.resolve(fn2);
+    if (absPath1 === absPath2) {
+        return true;
+    }
+
+    // 4- with fs.realpath
+    // DOES NOT EXIST IN VSCODE vscode.workspace.fs !
+
+    // 5- finalize
+    absPath1 = finalize(fn1);
+    absPath2 = finalize(fn2);
+    return fn1 === fn2;
+}
 //@+node:felix.20211227182611.20: *3* g.os_path_split
 export function os_path_split(p_path: string): [string, string] {
 
@@ -4216,23 +4955,23 @@ export function os_path_splitext(p_path: string): [string, string] {
 //             # Fix bug 1226358: File URL's are broken on MacOS:
 //             # use fname, not quoted_fname, as the argument to subprocess.call.
 //             subprocess.call(['open', fname])
-//         except OSError:
+//         catch OSError:
 //             pass  # There may be a spurious "Interrupted system call"
-//         except ImportError:
+//         catch ImportError:
 //             os.system(f"open {quoted_fname}")
 //     else:
 //         try:
 //             ree = None
 //             wre = tempfile.NamedTemporaryFile()
 //             ree = io.open(wre.name, 'rb', buffering=0)
-//         except IOError:
+//         catch IOError:
 //             g.trace(f"error opening temp file for {fname!r}")
 //             if ree:
 //                 ree.close()
 //             return
 //         try:
 //             subPopen = subprocess.Popen(['xdg-open', fname], stderr=wre, shell=False)
-//         except Exception:
+//         catch Exception:
 //             g.es_print(f"error opening {fname!r}")
 //             g.es_exception()
 //         try:
@@ -4243,7 +4982,7 @@ export function os_path_splitext(p_path: string): [string, string] {
 //             itoPoll.start()
 //             # Let the Leo-Editor process run
 //             # so that Leo-Editor is usable while the file is open.
-//         except Exception:
+//         catch Exception:
 //             g.es_exception(f"exception executing g.startfile for {fname!r}")
 //@+node:felix.20211227182611.23: *4* stderr2log()
 // def stderr2log(g, ree, fname):
@@ -4306,7 +5045,7 @@ export function createTopologyList(c: Commands, root?: Position, useHeadlines?: 
         aList = [v.numberOfChildren()];  // type ignore
     }
     let child = v.firstChild();
-    while (child) {
+    while (child && child.__bool__()) {
         aList.push(createTopologyList(c, child, useHeadlines));  // type ignore
         child = child.next();
     }
@@ -4447,15 +5186,13 @@ export function python_tokenize(s: string): [string, string, number][] {
  * Return the expansion of all of node p's body text if
  * p is not the current node or if there is no text selection.
  */
-export function getScript(c: Commands, p: Position,
+export async function getScript(c: Commands, p: Position,
     useSelectedText: boolean = true,
-    forcePythonSentinels: boolean = true,
+    forceJavascriptSentinels: boolean = true, // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
     useSentinels: boolean = true
-): string {
-    console.log("TODO : 'get script' called!");
-    return "";
+): Promise<string> {
 
-    let script: string;
+    let script: string = "";
     let s: string;
     const w = c.frame.body.wrapper;
 
@@ -4474,9 +5211,9 @@ export function getScript(c: Commands, p: Position,
         // Remove extra leading whitespace so the user may execute indented code.
         s = dedent(s);
         s = extractExecutableString(c, p, s);
-        script = composeScript(
+        script = await composeScript(
             c, p, s,
-            forcePythonSentinels,
+            forceJavascriptSentinels, // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
             useSentinels
         );
     }
@@ -4492,13 +5229,13 @@ export function getScript(c: Commands, p: Position,
 /**
  * Compose a script from p.b.
  */
-export function composeScript(
+export async function composeScript(
     c: Commands,
     p: Position,
     s: string,
-    forcePythonSentinels: boolean = true,
+    forceJavascriptSentinels: boolean = true, // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
     useSentinels: boolean = true
-): string {
+): Promise<string> {
 
     // This causes too many special cases.
     // if not g.unitTesting and forceEncoding:
@@ -4519,10 +5256,10 @@ export function composeScript(
         app.inScript = true;
         app.scriptDict["script1"] = s;
         // Important: converts unicode to utf-8 encoded strings.
-        script = at.stringToString(
+        script = await at.stringToString(
             p.copy(),
             s,
-            forcePythonSentinels,
+            forceJavascriptSentinels, // ! LEOJS HAS JAVASCRIPT AS DEFAULT SCRIPT LANGUAGE
             useSentinels
         );
         // Important, the script is an **encoded string**, not a unicode string.
@@ -4583,7 +5320,7 @@ export function extractExecutableString(c: Commands, p: Position, s: string): st
 
 //@+node:felix.20220211012808.1: *3* g.find*Node*
 //@+others
-//@+node:felix.20220211012829.1: *4* findNodeAnywhere
+//@+node:felix.20220211012829.1: *4* g.findNodeAnywhere
 export function findNodeAnywhere(c: Commands, headline: string, exact: boolean = true): Position | undefined {
     const h = headline.trim();
     for (let p of c.all_unique_positions(false)) {
@@ -4599,6 +5336,29 @@ export function findNodeAnywhere(c: Commands, headline: string, exact: boolean =
         }
     }
     return undefined;
+}
+//@+node:felix.20230427000458.1: *4* g.findNodeInTree
+/**
+ * Search for a node in v's tree matching the given headline.
+ */
+export function findNodeInTree(c: Commands, p: Position, headline: string, exact = true): Position | undefined {
+
+    const h = headline.trim();
+    const p1 = p.copy();
+    for (const p of p1.subtree()) {
+        if (p.h.trim() === h) {
+            return p.copy();
+        }
+    }
+    if (!exact) {
+        for (const p of p1.subtree()) {
+            if (p.h.trim().startsWith(h)) {
+                return p.copy();
+            }
+        }
+    }
+    return undefined;
+
 }
 //@-others
 //@+node:felix.20211104211349.1: ** g.Unit Tests

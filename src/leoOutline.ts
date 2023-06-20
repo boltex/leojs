@@ -82,7 +82,6 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
         let desc: string = "";
         // * some smaller grayed-out text accompanying the main label
         if (w_u) {
-
             const w_uLength = Object.keys(w_u).length;
             if (w_uLength) {
                 desc = "\u{1F4CE} (" + w_uLength + ")";
@@ -97,7 +96,6 @@ export class LeoOutlineProvider implements vscode.TreeDataProvider<Position> {
                     desc = desc + "\u{1F3F7} (" + Object.keys(w_u.__node_tags).length + ")";
                 }
             }
-
         } else {
             // desc = "id:" + this.id; // ! debug test
             // desc = "gnx:" + this.gnx; // ! debug test

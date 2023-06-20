@@ -19,17 +19,20 @@ import { Undoer } from './leoUndo';
 import { LocalConfigManager } from './leoConfig';
 import { AtFile } from './leoAtFile';
 import { LeoFind } from './leoFind';
-import { LeoImportCommands } from './leoImport';
+import { LeoImportCommands, TopLevelImportCommands } from './leoImport';
 import { ChapterController } from './leoChapters';
+import { PersistenceDataController, TopLevelPersistanceCommands } from './leoPersistence';
 import { EditCommandsClass, TopLevelEditCommands } from '../commands/editCommands';
+import { TopLevelCompareCommands } from './leoCompare';
 import { GoToCommands } from '../commands/gotoCommands';
 import { LeoFrame, StringTextWrapper } from './leoFrame';
 import { PreviousSettings } from './leoApp';
-
-import dayjs = require('dayjs');
 import { TagController } from './nodeTags';
 import { QuickSearchController } from './quicksearch';
-var utc = require('dayjs/plugin/utc');
+import { ShadowController } from './leoShadow';
+import { RstCommands } from './leoRst';
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 
 //@-<< imports >>
@@ -79,11 +82,13 @@ export class Commands {
     public atFileCommands: AtFile;
     public findCommands: LeoFind;
     public importCommands: LeoImportCommands;
+    public persistenceController: PersistenceDataController;
 
     public theTagController: TagController;
     public quicksearchController: QuickSearchController;
 
     public chapterController: ChapterController;
+    public shadowController: ShadowController;
     public undoer: Undoer;
     public nodeHistory: NodeHistory;
     public gui: NullGui;
@@ -216,6 +221,7 @@ export class Commands {
     public editFileCommands: any = undefined;
     public evalController: any = undefined;
     public gotoCommands: GoToCommands;
+    public rstCommands: RstCommands;
     public helpCommands: any = undefined;
     public keyHandler: any = undefined; // TODO same as k
     public k: any = undefined; // TODO same as keyHandler
@@ -268,7 +274,7 @@ export class Commands {
         this.initConfigSettings();
 
         this.chapterController = new ChapterController(c);
-        // this.shadowController // TODO: = leoShadow.ShadowController(c);
+        this.shadowController = new ShadowController(c);
 
         this.theTagController = new TagController(c);
         this.quicksearchController = new QuickSearchController(c);
@@ -277,9 +283,13 @@ export class Commands {
         this.findCommands = new LeoFind(c);
         this.atFileCommands = new AtFile(c);
         this.importCommands = new LeoImportCommands(c);
+        this.persistenceController = new PersistenceDataController(c);
 
         this.editCommands = new EditCommandsClass(c);
         this.gotoCommands = new GoToCommands(c);
+
+        this.rstCommands = new RstCommands(c);
+
         this.undoer = new Undoer(c);
 
         // From finishCreate
@@ -379,7 +389,7 @@ export class Commands {
         'execute-script',
         'Execute a *Leo* script, written in python.'
     )
-    public executeScript(
+    public async executeScript(
         args: any = undefined,
         p: Position | undefined = undefined,
         script: string = "",
@@ -390,7 +400,7 @@ export class Commands {
         namespace: { [key: string]: any } | undefined = undefined,
         raiseFlag: boolean = false,
         runPyflakes: boolean = true,
-    ): void {
+    ): Promise<void> {
         /*
         Execute a *Leo* script, written in python.
         Keyword args:
@@ -418,7 +428,7 @@ export class Commands {
             if (c.forceExecuteEntireBody) {
                 useSelectedText = false;
             }
-            script = g.getScript(c, p || c.p, useSelectedText);
+            script = await g.getScript(c, p || c.p, useSelectedText);
         }
         const script_p: Position = p || c.p;  // Only for error reporting below.
         // #532: check all scripts with pyflakes.
@@ -449,9 +459,10 @@ export class Commands {
                 }
                 catch (e) {
                     g.es('interrupted');
-                    // if raiseFlag:
-                    //      raise
-                    // g.handleScriptException(c, script_p, script, script1);
+                    if (raiseFlag) {
+                        throw (e);
+                    }
+                    // g.handleScriptException(c, script_p);
 
                 }
                 finally {
@@ -479,7 +490,7 @@ export class Commands {
         define_g: any,
         define_name: any,
         namespace: any,
-        script: any
+        script: string
     ): void {
         const c: Commands = this;
         let p: Position | undefined;
@@ -495,7 +506,7 @@ export class Commands {
             d['__name__'] = define_name;
         }
         d['script_args'] = args || [];
-        d['script_gnx'] = g.app.scriptDict.get('script_gnx');
+        d['script_gnx'] = g.app.scriptDict['script_gnx'];
         if (namespace) {
             // d.update(namespace)
             Object.assign(d, namespace);
@@ -507,7 +518,7 @@ export class Commands {
             c.inCommand = false;
             g.app.inScript = true;
             (g.inScript as boolean) = g.app.inScript; // g.inScript is a synonym for g.app.inScript.
-            console.log('TODO RUN SCRIPT: ', script);
+
 
             // if (c.write_script_file){
             //     scriptFile = self.writeScriptFile(script)
@@ -515,6 +526,35 @@ export class Commands {
             // }else{
             //     exec(script, d)
             // }
+
+            if (c.write_script_file) {
+                // TODO !
+                console.log('HAS : "c.write_script_file" -> TODO RUN SCRIPT FROM FILE : ', script);
+                // scriptFile = self.writeScriptFile(script)
+                // exec(compile(script, scriptFile, 'exec'), d)
+            } else {
+                // exec(script, d)
+                // TODO : Implement better setup & namespace ! 
+                new Function(
+                    "c",
+                    "g",
+                    "input",
+                    "p",
+                    "__name__",
+                    "script_args",
+                    "script_gnx",
+                    script
+                )(
+                    d["c"],
+                    d["g"],
+                    d["input"],
+                    d["p"],
+                    d["__name__"],
+                    d["script_args"],
+                    d["script_gnx"],
+                );
+            }
+
         }
         catch (e) {
             // pass
@@ -881,7 +921,7 @@ export class Commands {
     /**
      * Return the tab width in effect at p.
      */
-    public getTabWidth(p: Position): number | undefined {
+    public getTabWidth(p?: Position): number | undefined {
         const c: Commands = this;
         const val: number | undefined = g.scanAllAtTabWidthDirectives(c, p);
         return val;
@@ -1727,6 +1767,26 @@ export class Commands {
         return true;
     }
     //@+node:felix.20211226232321.1: *3* c.Convenience methods
+    //@+node:felix.20230423004652.1: *4* c.fullPath
+    /**
+     * Return the full path (including fileName) in effect at p. Neither the
+     * path nor the fileName will be created if it does not exist.
+     */
+    public fullPath(p_p: Position, simulate: boolean = false): string {
+
+        // Search p and p's parents.
+        for (let p of p_p.self_and_parents(false)) {
+            const aList: any[] = g.get_directives_dict_list(p);
+            const w_path: string = this.scanAtPathDirectives(aList);
+            let fn: string = simulate ? p.h : p.anyAtFileNodeName();
+            //fn = p.h if simulate else p.anyAtFileNodeName()
+            // Use p.h for unit tests.
+            if (fn) {
+                return g.finalize_join(w_path, fn);
+            }
+        }
+        return '';
+    }
     //@+node:felix.20220611011224.1: *4* c.getTime
     public getTime(body = true): string {
         const c = this;
@@ -1766,13 +1826,31 @@ export class Commands {
         return s;
     }
 
+    //@+node:felix.20230423004739.1: *4* c.goToLineNumber & goToScriptLineNumber
+    /**
+     * Go to line n (zero-based) of a script.
+     * A convenience method called from g.handleScriptException.
+     */
+    public async goToLineNumber(n: number): Promise<void> {
+        const c = this;
+        await c.gotoCommands.find_file_line(n);
+    }
+
+    /**
+     * Go to line n (zero-based) of a script.
+     * A convenience method called from g.handleScriptException.
+     */
+    public async goToScriptLineNumber(n: number, p: Position): Promise<void> {
+        const c = this;
+        await c.gotoCommands.find_script_line(n, p);
+    }
     //@+node:felix.20211226232349.1: *4* setFileTimeStamp
     /**
      * Update the timestamp for fn..
      */
-    public setFileTimeStamp(fn: string): void {
+    public async setFileTimeStamp(fn: string): Promise<void> {
         if (g.app.externalFilesController && g.app.externalFilesController.set_time) {
-            g.app.externalFilesController.set_time(fn);
+            await g.app.externalFilesController.set_time(fn);
         }
         // TODO !
         console.log('TODO : setFileTimeStamp AND g.app.externalFilesController.set_time');
@@ -1905,33 +1983,11 @@ export class Commands {
     public scanAtPathDirectives(aList: any[]): string {
         const c: Commands = this;
         c.scanAtPathDirectivesCount += 1; // An important statistic.
-        // Step 1: Compute the starting path.
-        // The correct fallback directory is the absolute path to the base.
-        let base: string;
-        if (c.openDirectory) {
-            // Bug fix: 2008/9/18
-            base = c.openDirectory;
-        } else {
-            base = c.config.getString('relative-path-base-directory');
-            if (base && base === '!') {
-                base = g.app.loadDir!;
-            } else if (base && base === '.') {
-                base = c.openDirectory!;
-            } else {
-                base = ''; // Settings error.
-            }
-        }
-        base = c.expand_path_expression(base); // #1341.
-        base = g.os_path_expanduser(base); // #1889.
+        let base: string = c.openDirectory!;
+        const absbase: string = g.finalize_join(g.app.loadDir!, base);
 
-        const absbase: string = g.os_path_finalize_join(
-            undefined,
-            g.app.loadDir!,
-            base
-        ); // #1341.
-        // Step 2: look for @path directives.
+        // Look for @path directives.
         const w_paths: string[] = [];
-
         for (let d of aList) {
             // Look for @path directives.
             let w_path: string = d['path'];
@@ -1941,22 +1997,19 @@ export class Commands {
                 // Convert "path" or <path> to path.
                 w_path = g.stripPathCruft(w_path);
                 if (w_path && !warning) {
-                    w_path = c.expand_path_expression(w_path); // #1341.
-                    w_path = g.os_path_expanduser(w_path); // #1889.
                     w_paths.push(w_path);
                     // We will silently ignore empty @path directives.
                 }
             }
         }
+
         // Add absbase and reverse the list.
         w_paths.push(absbase);
         w_paths.reverse();
 
-        // Step 3: Compute the full, effective, absolute path.
-        const w_path: string = g.os_path_finalize_join(undefined, ...w_paths); // #1341.
-
+        // Compute the full, effective, absolute path.
+        const w_path: string = g.finalize_join(...w_paths);
         return w_path || g.getBaseDirectory(c);
-        // 2010/10/22: A useful default.
     }
     //@+node:felix.20211106224948.1: *3* c.Executing commands & scripts
     //@+node:felix.20211106224948.3: *4* c.doCommand
@@ -2052,7 +2105,7 @@ export class Commands {
         if (!command_func) {
             const message = `no command function for ${command_name}`;
             if (g.unitTesting || g.app.inBridge) {
-                throw message;
+                throw new Error(message);
             }
             // g.es_print(message, 'red');
             g.es_print(message);
@@ -2292,10 +2345,10 @@ export class Commands {
                 // make the first element absolute
                 parts[0] = driveSpec + os.sep + parts[0]
             allParts = [path] + parts
-            path = g.os_path_finalize_join(*allParts)  // #1431
+            path = g.finalize_join(*allParts)
 
         }else{
-            path = g.os_path_finalize_join(g.app.homeLeoDir, 'scriptFile.py');  // #1431
+            path = g.finalize_join(g.app.homeLeoDir, 'scriptFile.py');
         }
         //
         // Write the file.
@@ -2310,63 +2363,77 @@ export class Commands {
                 // c.config.getString('script-file-path'))
             path = undefined
 
-
         return path;
         */
         return undefined;
     }
     //@+node:felix.20220102021736.1: *3* c.expand_path_expression
     /**
-     * Expand all {{anExpression}} in c's context.
+     * Apply Python's *standard* os.path tools to s:
+     *
+     * - os.path.expanduser: https://docs.python.org/3/library/os.path.html#os.path.expanduser
+     * - os.path.expandvars: https://docs.python.org/3/library/os.path.html#os.path.expandvars
+     *
+     * Do *not* call os.path.abspath, os.path.normpath, or g.os_path_normslashes.
      */
     public expand_path_expression(s: string): string {
-        const c: Commands = this;
-
         if (!s) {
             return '';
         }
-        s = g.toUnicode(s);
+        let w_path = g.toUnicode(s);
+        w_path = g.os_path_expanduser(w_path);
+        w_path = g.os_path_expandvars(w_path);
+        return w_path;
 
-        // find and replace repeated path expressions
-        let previ: number = 0;
-        const aList: string[] = [];
+        // ! OLD INSECURE IMPLEMENTATION !
 
-        while (previ < s.length) {
-            const i = s.indexOf('{{', previ);
-            const j = s.indexOf('}}', previ);
-            if (-1 < i && i < j) {
-                // Add anything from previous index up to '{{'
-                if (previ < i) {
-                    aList.push(s.substring(previ, i));
-                }
-                // Get expression and find substitute
-                const exp: string = s.substring(i + 2, j).trim();
-                if (exp) {
-                    try {
-                        const s2 = c.replace_path_expression(exp);
-                        aList.push(s2);
-                    } catch (exception) {
-                        g.es(
-                            `Exception evaluating {{ ${exp} }} in ${s.trim()}`
-                        );
-                        g.es_exception(exception, c);
-                    }
-                }
-                // Prepare to search again after the last '}}'
-                previ = j + 2;
-            } else {
-                // Add trailing fragment (fragile in case of mismatched '{{'/'}}')
-                aList.push(s.substring(previ));
-                break;
-            }
-        }
+        // const c: Commands = this;
 
-        let val: string = aList.join('');
-        if (g.isWindows) {
-            val = val.split('\\').join('/');
-        }
+        // if (!s) {
+        //     return '';
+        // }
+        // s = g.toUnicode(s);
 
-        return val;
+        // // find and replace repeated path expressions
+        // let previ: number = 0;
+        // const aList: string[] = [];
+
+        // while (previ < s.length) {
+        //     const i = s.indexOf('{{', previ);
+        //     const j = s.indexOf('}}', previ);
+        //     if (-1 < i && i < j) {
+        //         // Add anything from previous index up to '{{'
+        //         if (previ < i) {
+        //             aList.push(s.substring(previ, i));
+        //         }
+        //         // Get expression and find substitute
+        //         const exp: string = s.substring(i + 2, j).trim();
+        //         if (exp) {
+        //             try {
+        //                 const s2 = c.replace_path_expression(exp);
+        //                 aList.push(s2);
+        //             } catch (exception) {
+        //                 g.es(
+        //                     `Exception evaluating {{ ${exp} }} in ${s.trim()}`
+        //                 );
+        //                 g.es_exception(exception, c);
+        //             }
+        //         }
+        //         // Prepare to search again after the last '}}'
+        //         previ = j + 2;
+        //     } else {
+        //         // Add trailing fragment (fragile in case of mismatched '{{'/'}}')
+        //         aList.push(s.substring(previ));
+        //         break;
+        //     }
+        // }
+
+        // let val: string = aList.join('');
+        // if (g.isWindows) {
+        //     val = val.split('\\').join('/');
+        // }
+
+        // return val;
     }
     //@+node:felix.20220102021736.2: *4* c.replace_path_expression
     /**
@@ -2451,12 +2518,12 @@ export class Commands {
      * Back up given fileName or c.fileName().
      * If useTimeStamp is True, append a timestamp to the filename.
      */
-    public backup(
+    public async backup(
         fileName: string | undefined = undefined,
         prefix: string | undefined = undefined,
         silent: boolean = false,
         useTimeStamp: boolean = true
-    ): string | undefined {
+    ): Promise<string | undefined> {
         const c: Commands = this;
 
         let fn: string = fileName || c.fileName();
@@ -2481,11 +2548,9 @@ export class Commands {
 
             // time.strftime("%Y%m%d-%H%M%S")
             const stamp: string = new Date().format('YYYYMMDD-hhmmss');
-
             const branch: string = prefix ? prefix + '-' : '';
-
             fn = `${branch}${base}-${stamp}.leo`;
-            w_path = g.os_path_finalize_join(undefined, theDir, fn);
+            w_path = g.finalize_join(theDir, fn);
         } else {
             w_path = fn;
         }
@@ -2493,7 +2558,7 @@ export class Commands {
         if (w_path) {
             // pylint: disable=no-member
             // Defined in commanderFileCommands.py.
-            c.saveTo(w_path, silent);
+            await c.saveTo(w_path, silent);
             // Issues saved message.
             // g.es('in', theDir)
         }
@@ -2513,7 +2578,7 @@ export class Commands {
     //     """
     //     c = self
     //     old_cwd = os.getcwd()
-    //     join = g.os_path_finalize_join
+    //     join = g.finalize_join
     //     if not base_dir:
     //         if env_key:
     //             try:
@@ -2547,13 +2612,13 @@ export class Commands {
      * Return True if the file given by fn has not been changed
      * since Leo read it or if the user agrees to overwrite it.
      */
-    public checkFileTimeStamp(fn: string): boolean {
+    public checkFileTimeStamp(fn: string): Promise<boolean> {
         const c: Commands = this;
 
         if (g.app.externalFilesController && g.app.externalFilesController.check_overwrite) {
             return g.app.externalFilesController.check_overwrite(c, fn);
         }
-        return true;
+        return Promise.resolve(true);
     }
     //@+node:felix.20211223223002.6: *4* c.createNodeFromExternalFile
     /**
@@ -2668,27 +2733,28 @@ export class Commands {
      *
      * See ExternalFilesController.open_with for details about d.
      */
-    public openWith(d?: any): void {
-        const c: Commands = this;
+    // ! LEOJS DOES NOT OFFER TO OPEN IN EXTERNAL EDITOR !
+    // public openWith(d?: any): void {
+    //     const c: Commands = this;
 
-        if (d && g.app.externalFilesController) {
-            // Select an ancestor @<file> node if possible.
-            if (!d['p'] || !d['p'].__bool__()) {
-                d['p'] = undefined;
-                const p: Position = c.p;
-                while (p && p.__bool__()) {
-                    if (p.isAnyAtFileNode()) {
-                        d['p'] = p;
-                        break;
-                    }
-                    p.moveToParent();
-                }
-            }
-            g.app.externalFilesController.open_with(c, d);
-        } else if (!d) {
-            g.trace('can not happen: no d', g.callers());
-        }
-    }
+    //     if (d && g.app.externalFilesController) {
+    //         // Select an ancestor @<file> node if possible.
+    //         if (!d['p'] || !d['p'].__bool__()) {
+    //             d['p'] = undefined;
+    //             const p: Position = c.p;
+    //             while (p && p.__bool__()) {
+    //                 if (p.isAnyAtFileNode()) {
+    //                     d['p'] = p;
+    //                     break;
+    //                 }
+    //                 p.moveToParent();
+    //             }
+    //         }
+    //         g.app.externalFilesController.open_with(c, d);
+    //     } else if (!d) {
+    //         g.trace('can not happen: no d', g.callers());
+    //     }
+    // }
     //@+node:felix.20211223223002.11: *4* c.recreateGnxDict
     /**
      * Recreate the gnx dict prior to refreshing nodes from disk.
@@ -2811,7 +2877,7 @@ export class Commands {
     /**
      * Warn about syntax errors in files.
      */
-    public syntaxErrorDialog(): void {
+    public async syntaxErrorDialog(): Promise<void> {
         const c: Commands = this;
 
         if (
@@ -2824,7 +2890,7 @@ export class Commands {
 
             const list_s: string = aList.join('\n');
 
-            g.app.gui.runAskOkDialog(
+            await g.app.gui.runAskOkDialog(
                 c,
                 'Python Errors',
                 `Python errors in:\n\n${list_s}`,
@@ -3764,7 +3830,7 @@ export class Commands {
             __name__: string;
         } & { __ivars__: string[] } = c.commandsDict[commandName];
 
-        if (f && (f as any)['__name__'] != (func as any)['__name__']) {
+        if (f && ((f as any)['__name__'] !== (func as any)['__name__'])) {
             g.trace('redefining', commandName, f, '->', func);
         }
         c.commandsDict[commandName] = func;
@@ -3814,7 +3880,6 @@ export class Commands {
                         }
                     }
                 }
-
                 clones.push(p.copy());
             }
         }
@@ -3835,7 +3900,6 @@ export class Commands {
         } else if (failMsg) {
             g.es(failMsg);
         }
-
         return root;
 
     }
@@ -3959,6 +4023,75 @@ export class Commands {
         }
         return undodata;
     }
+    //@+node:felix.20230525222516.1: *4* c.find_b & find_h
+    //@+node:felix.20230525222516.2: *5* c.find_b
+    /**
+     * Return list of all Positions whose body matches the regex at least once.
+     */
+    public find_b(
+        regex: RegExp,
+        flags = 'ig',
+        it?: Generator<Position, any, unknown> | Position[]
+    ): Position[] {
+
+        const c = this;
+
+        if (!flags.includes('g')) {
+            flags = flags + 'g';
+        }
+
+        function* reFindIter(pattern: RegExp, text: string): IterableIterator<any> {
+            let match;
+            while ((match = pattern.exec(text)) !== null) {
+                yield match;
+            }
+        }
+
+        if (it == null) {
+            it = c.all_positions();
+        }
+        try {
+            const pattern = new RegExp(regex, flags);
+            return [...it].filter(p => [...reFindIter(pattern, p.b)].some((m: RegExpExecArray) => m)).map(p => p.copy());
+
+            // return [p.copy() for p in it if any(m for m in re.finditer(pattern, p.b))];            
+
+        } catch (exception) {
+            g.es_error('Exception in c.find_b');
+            g.es_exception(exception);
+            return [];
+        }
+    }
+    //@+node:felix.20230525222516.3: *5* c.find_h
+    /**
+     *  Return list of all Positions whose headline matches the regex.
+     */
+    public find_h(
+        regex: RegExp,
+        flags = 'i',
+        it?: Generator<Position, any, unknown> | Position[]
+    ): Position[] {
+
+        const c = this;
+
+
+        if (!flags.includes('g')) {
+            flags = flags + 'g';
+        }
+
+        if (it == null) {
+            it = c.all_positions();
+        }
+        try {
+            const pattern = new RegExp(regex, flags);
+            return [...it].filter(z => pattern.test(z.h)).map(z => z.copy());
+            // return [z.copy() for z in it if re.match(pattern, z.h)];
+        } catch (exception) {
+            g.es_error('Exception in c.find_h');
+            g.es_exception(exception);
+            return [];
+        }
+    }
     //@+node:felix.20220605203342.1: *3* c.Settings
     //@+node:felix.20220605203342.2: *4* c.registerReloadSettings
     public registerReloadSettings(obj: any): void {
@@ -4027,6 +4160,9 @@ export interface Commands
     CommanderFileCommands,
     CommanderHelpCommands,
     CommanderEditCommands,
+    TopLevelCompareCommands,
+    TopLevelImportCommands,
+    TopLevelPersistanceCommands,
     TopLevelEditCommands {
     canCutOutline: () => boolean;
     canShiftBodyRight: () => boolean;
@@ -4059,6 +4195,9 @@ applyMixins(Commands, [
     CommanderFileCommands,
     CommanderHelpCommands,
     CommanderEditCommands,
+    TopLevelCompareCommands,
+    TopLevelImportCommands,
+    TopLevelPersistanceCommands,
     TopLevelEditCommands
 ]);
 Commands.prototype.canCutOutline = Commands.prototype.canDeleteHeadline;
