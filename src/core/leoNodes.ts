@@ -71,11 +71,11 @@ export class NodeIndices {
         for (const v of c.all_unique_nodes()) {
             const gnx = v.fileIndex;
             if (gnx) {
-                let [id_, t, n] = this.scanGnx(gnx)
-                if (t == ni.timeString && n != null) {
+                let [id_, t, n] = this.scanGnx(gnx);
+                if (t === ni.timeString && n != null) {
                     try {
-                        const w_n = Number(n);  // type:ignore
-                        this.lastIndex = Math.max(this.lastIndex, w_n);  // type:ignore
+                        const w_n = Number(n);
+                        this.lastIndex = Math.max(this.lastIndex, w_n);
                     } catch (exception) {
                         g.es_exception(exception);
                         this.lastIndex += 1;
