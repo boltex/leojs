@@ -723,10 +723,9 @@ export class Constants {
         UNDO: "undo",
         REDO: "redo",
         // * Tree Building
-        EXECUTE_SCRIPT: "execute-script", // TODO
-        REFRESH_FROM_DISK: "TODO_REFRESH_FROM_DISK", // TODO
-        REFRESH_FROM_DISK_PNODE: "TODO_REFRESH_FROM_DISK_PNODE", // TODO
-        GIT_DIFF: "TODO_GIT_DIFF", // TODO
+        EXECUTE_SCRIPT: "execute-script",
+        REFRESH_FROM_DISK: "refresh-from-disk",
+        GIT_DIFF: "TODO_GIT_DIFF", // TODO in editFileCommands.ts !
         // * Outline from body text
         EXTRACT: "extract",
         EXTRACT_NAMES: "extract-names",

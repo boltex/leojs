@@ -1510,7 +1510,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
 
 [CMD.SET_OPENED_FILE, (p_index: number) =&gt; p_leoUI.selectOpenedLeoDocument(p_index, true)],
 
-[CMD.REFRESH_FROM_DISK, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline })],
+[CMD.REFRESH_FROM_DISK, (p_node: Position) =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { node: p_node, refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Outline, keepSelection: true })],
 
 [CMD.REFRESH_FROM_DISK_SELECTION, () =&gt; p_leoUI.command(LEOCMD.REFRESH_FROM_DISK, { refreshType: REFRESH_TREE_BODY, finalFocus: Focus.Body })],
 
@@ -1866,10 +1866,9 @@ public static LEO_COMMANDS = {
     UNDO: "undo",
     REDO: "redo",
     // * Tree Building
-    EXECUTE_SCRIPT: "execute-script", // TODO
-    REFRESH_FROM_DISK: "TODO_REFRESH_FROM_DISK", // TODO
-    REFRESH_FROM_DISK_PNODE: "TODO_REFRESH_FROM_DISK_PNODE", // TODO
-    GIT_DIFF: "TODO_GIT_DIFF", // TODO
+    EXECUTE_SCRIPT: "execute-script",
+    REFRESH_FROM_DISK: "refresh-from-disk",
+    GIT_DIFF: "TODO_GIT_DIFF", // TODO in editFileCommands.ts !
     // * Outline from body text
     EXTRACT: "extract",
     EXTRACT_NAMES: "extract-names",
