@@ -196,7 +196,9 @@ export class FastRead {
 
         // contents = contents.translate(this.translate_table); // #1036 and #1046.
         const table = g.maketrans_from_dict(this.translate_dict); // contents.maketrans(this.translate_dict);  // #1510.
-        contents = g.translate(contents, table); // contents.translate(table); // #1036, #1046.
+        // ? NEEDED ?
+        // ! THIS BREAKS OPEN AND PASTE FROM XML LEO FILES !
+        // contents = g.translate(contents, table); // contents.translate(table); // #1036, #1046.
 
         let xroot: et.ElementTree;
 
