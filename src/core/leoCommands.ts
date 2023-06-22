@@ -1980,7 +1980,7 @@ export class Commands {
      * Scan aList for @path directives.
      * Return a reasonable default if no @path directive is found.
      */
-    public scanAtPathDirectives(aList: any[]): string {
+    public scanAtPathDirectives(aList: { [key: string]: string; }[]): string {
         const c: Commands = this;
         c.scanAtPathDirectivesCount += 1; // An important statistic.
         let base: string = c.openDirectory!;
@@ -1988,11 +1988,12 @@ export class Commands {
 
         // Look for @path directives.
         const w_paths: string[] = [];
+        let w_path: string;
         for (let d of aList) {
             // Look for @path directives.
-            let w_path: string = d['path'];
+            w_path = d['path'];
             const warning = d['@path_in_body'];
-            if (w_path !== undefined) {
+            if (!(w_path == null)) {
                 // retain empty paths for warnings.
                 // Convert "path" or <path> to path.
                 w_path = g.stripPathCruft(w_path);
@@ -2008,8 +2009,8 @@ export class Commands {
         w_paths.reverse();
 
         // Compute the full, effective, absolute path.
-        const w_path: string = g.finalize_join(...w_paths);
-        return w_path || g.getBaseDirectory(c);
+        w_path = g.finalize_join(...w_paths);
+        return w_path;
     }
     //@+node:felix.20211106224948.1: *3* c.Executing commands & scripts
     //@+node:felix.20211106224948.3: *4* c.doCommand

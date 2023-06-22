@@ -4336,7 +4336,6 @@ export function finalize_join(...args: string[]): string {
 
     // Convert backslashes to forward slashes, regradless of platform.
     w_path = os_path_normslashes(w_path);
-
     return w_path;
 }
 
