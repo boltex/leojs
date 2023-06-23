@@ -2899,6 +2899,10 @@ export class LoadManager {
             gui,
             w_previousSettings
         );
+
+        // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
+        c.openDirectory = g.app.vscodeWorkspaceUri?.path;
+
         g.doHook('open0');
 
         g.doHook("open1", { old_c: old_c, c: c, new_c: c, fileName: undefined });

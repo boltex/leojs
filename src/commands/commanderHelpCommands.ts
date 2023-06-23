@@ -163,6 +163,10 @@ export class CommanderHelpCommands {
                 "",
                 g.app.gui,
             );
+
+            // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
+            c.openDirectory = g.app.vscodeWorkspaceUri?.path;
+
             const w_fastRead: FastRead = new FastRead(c, c.fileCommands.gnxDict);
 
             let ok: VNode | undefined;
