@@ -1172,6 +1172,8 @@ export class LeoApp {
         if (c.changed) {
             c.promptingForClose = true;
             const veto = await frame.promptForSave();
+            console.log('VETO (true we exit doing nothing)', veto);
+
             c.promptingForClose = false;
             if (veto) {
                 return false;

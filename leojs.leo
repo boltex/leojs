@@ -10617,14 +10617,14 @@ set leoCanGoNext(p_value: boolean) {
         .then((answer) =&gt; {
             if (answer === yesMessage) {
                 return 'yes';
-            } else if (noMessage) {
+            } else if (answer === noMessage) {
                 return 'no';
             } else if (answer === yesToAllMessage) {
                 return 'yes-to-all';
             } else if (answer === cancelMessage) {
                 return 'cancel';
             } else {
-                return 'cancel';
+                return 'cancel'; // undefined will yield this 'cancel'.
             }
         });
 }
