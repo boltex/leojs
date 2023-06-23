@@ -88,7 +88,7 @@ export class FastRead {
     public gnx2vnode: { [key: string]: VNode };
     // #1510: https://en.wikipedia.org/wiki/Valid_characters_in_XML.
 
-    public translate_dict: { [key: string]: any } = {}; // {z: None for z in range(20) if chr(z) not in '\t\r\n'}
+    public translate_dict: { [key: number]: string | null } = {}; // {z: None for z in range(20) if chr(z) not in '\t\r\n'}
 
     public nativeVnodeAttributes: string[] = [
         'a',
@@ -194,11 +194,11 @@ export class FastRead {
 
         let contents = g.toUnicode(s_or_b);
 
-        // contents = contents.translate(this.translate_table); // #1036 and #1046.
-        const table = g.maketrans_from_dict(this.translate_dict); // contents.maketrans(this.translate_dict);  // #1510.
-        // ? NEEDED ?
-        // ! THIS BREAKS OPEN AND PASTE FROM XML LEO FILES !
+        // ! NOT USING maketrans_from_dict BECAUSE KEYS OF DICT ALREADY NUMERIC !
+        // const table = g.maketrans_from_dict(this.translate_dict); // contents.maketrans(this.translate_dict);  // #1510.
         // contents = g.translate(contents, table); // contents.translate(table); // #1036, #1046.
+
+        contents = g.translate(contents, this.translate_dict); // contents.translate(table); // #1036, #1046.
 
         let xroot: et.ElementTree;
 

@@ -4001,12 +4001,26 @@ export function maketrans(from: string, to: string, deletechars?: string): Recor
     return translationTable;
 }
 //@+node:felix.20230529152331.1: *3* g.maketrans_from_dict
+/**
+ * Converts dict to numeric charCode keys, Warning: don't use if keys already numeric!
+ * @param dict With only strings as keys! Dont use if already numeric keys!
+ * @returns dict with charCode number as keys.
+ */
 export function maketrans_from_dict(dict: Record<string, string | null>): Record<number, string | null> {
     const translationTable: Record<number, string | null> = {};
 
     for (const key in dict) {
         if (dict.hasOwnProperty(key)) {
-            const charCode = key.charCodeAt(0);
+            let charCode;
+            // ! IF ALREADY A NUMBER KEY : KEEP THIS KEY! 
+            // (see https://www.programiz.com/python-programming/methods/string/maketrans
+            //  and look for call with single parameter)
+            if (typeof key === 'number') {
+                charCode = key;
+            } else {
+                // string
+                charCode = key.charCodeAt(0);
+            }
             translationTable[charCode] = dict[key];
         }
     }
