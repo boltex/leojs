@@ -300,14 +300,6 @@ export class CommanderFileCommands {
         // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
         c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
 
-        console.log('g.app.vscodeWorkspaceUri?.path', g.app.vscodeWorkspaceUri?.path);
-        console.log('g.app.vscodeWorkspaceUri?.fsPath', g.app.vscodeWorkspaceUri?.fsPath);
-        console.log('g.app.vscodeWorkspaceUri?.toString()', g.app.vscodeWorkspaceUri?.toString());
-        console.log('g.app.vscodeWorkspaceUri?.toString(true)', g.app.vscodeWorkspaceUri?.toString(true));
-
-
-
-
         const t3 = process.hrtime();
         // frame = c.frame
         // g.app.unlockLog()

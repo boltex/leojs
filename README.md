@@ -28,23 +28,28 @@ Will be available _'soon'_ when a first beta version is submitted to the Extensi
 
 ## Running Development version as a web extension
 
+> For exact information on this procedure, see [Test your web extension](https://code.visualstudio.com/api/extension-guides/web-extensions#test-your-web-extension-in-vscode.dev).
+
 To try out running as a web extension on vscode.dev, use the following commands:
 
-1. From the development folder, open a terminal and start an HTTP server by running `npx serve --cors -l 5000`
+First, you'll need to [install mkcert](https://github.com/FiloSottile/mkcert#installation).
 
-2. Open another terminal and run `npx localtunnel -p 5000`
+Then, generate the localhost.pem and localhost-key.pem files into a location you won't lose them (for example $HOME/certs):
 
-3. Click on the generated URL and select the _Click-to-Continue_ button. (Copy the URL to your clipboard.)
+```
+$ mkdir -p $HOME/certs
+$ cd $HOME/certs
+$ mkcert -install
+$ mkcert localhost
+```
 
-4. Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.dev/github/boltex/practice-leo-phys` and run **Developer: Install Web Extension...** from the Command Palette and paste the generated URL.
+Then, from your extension's path, start an HTTP server by running 
 
-## Features done so far
+```
+$ npx serve --cors -l 5000 --ssl-cert $HOME/certs/localhost.pem --ssl-key $HOME/certs/localhost-key.pem
+```
 
--   The commands and menus icons for outline editing
--   Undo and navigation history commands
--   The minibuffer Command-Palette
--   Panels for Outline, Undo history, Leo documents, find and goto panes (no @buttons panes support yet)
--   Basic 'New', 'Open' and 'Save' operations (no external @files/@clean... nor scripting support yet)
+Finally, open vscode.dev pointing to a github repo, similar to: `https://vscode.dev/github/boltex/practice-leo-phys` and run **Developer: Install Web Extension...** from the Command Palette and paste `https://localhost:5000` 
 
 ## Keybindings
 
@@ -84,10 +89,9 @@ _Move Outline commands need the 'Alt' key modifier only when focus is on body pa
 | `Ctrl + =`         |     |          |     |           |    |            | Replace             |
 | `Ctrl + -`         |     |          |     |           |    |            | Replace then Find   |
 | `Alt + X`          |     |          |     |           |    |            | Minibuffer Palette  |
-
-<!-- | `Ctrl + Shift + D` |     |          |     |           |    |            | Extract             | -->
-<!-- | `Ctrl + Shift + N` |     |          |     |           |    |            | Extract Names       | -->
-<!-- | `Ctrl + B`         |     |          |     |           |    |            | Execute Script      |  -->
+| `Ctrl + Shift + D` |     |          |     |           |    |            | Extract             |
+| `Ctrl + Shift + N` |     |          |     |           |    |            | Extract Names       |
+| `Ctrl + B`         |     |          |     |           |    |            | Execute Script      | 
 
 | Tree Navigation    |           |                 |                          |
 | :----------------- | :-------- | :-------------- | :----------------------- |
