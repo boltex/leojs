@@ -1962,7 +1962,8 @@ export function openWithFileName(fileName: string, old_c: Commands | undefined, 
     - The encoding given by the 'encoding' keyword arg.
     - None, which typically means 'utf-8'.
  */
-export async function readFileIntoString(fileName: string,
+export async function readFileIntoString(
+    fileName: string,
     encoding: BufferEncoding = 'utf-8',  // BOM may override this.
     kind: string | undefined = undefined,  // @file, @edit, ...
     verbose: boolean = true,
@@ -2233,8 +2234,18 @@ export async function write_file_if_changed(fn: string, s: string, encoding: Buf
 export function makeVscodeUri(p_fn: string): vscode.Uri {
 
     if (isBrowser || (app.vscodeUriScheme && app.vscodeUriScheme !== 'file')) {
-        const newUri = app.vscodeWorkspaceUri!.with({ path: p_fn });
-        return newUri;
+        try {
+            const newUri = app.vscodeWorkspaceUri!.with({ path: p_fn });
+            return newUri;
+        }
+        catch (e) {
+            console.log(
+                "ERROR: tried to build a vscode.URI from a browser scheme's URI 'with' method"
+            );
+            throw new Error(
+                "g.makeVscodeUri cannot make an URI with the string: " + p_fn
+            );
+        }
 
     } else {
         // Normal file in desktop app
@@ -4419,19 +4430,14 @@ export function os_path_dirname(p_path?: string): string {
  * Return Truish FileStat if path exists. False otherwise
  */
 export async function os_path_exists(p_path?: string): Promise<boolean | vscode.FileStat> {
-
     if (!p_path) {
         return false;
     }
-
     if (p_path.includes('\x00')) {
         trace('NULL in', p_path.toString(), callers());
         p_path = p_path.split('\x00').join(''); // Fix Python 3 bug on Windows 10.
     }
-
-    // const w_uri = vscode.Uri.file(p_path);
     const w_uri = makeVscodeUri(p_path);
-
     try {
         const stat = await vscode.workspace.fs.stat(w_uri);
         return stat;
@@ -4445,7 +4451,6 @@ export async function os_path_exists(p_path?: string): Promise<boolean | vscode.
  * wrap os.path.expanduser
  */
 export function os_path_expanduser(p_path: string): string {
-
     p_path = p_path.trim();
     if (!p_path) {
         return '';
@@ -4492,7 +4497,6 @@ export function os_path_expandvars(p_path: string): string {
     if (!p_path) {
         return '';
     }
-
     if (process && process.env) {
         // Equivalent to python's p_path = os.path.expandvars(p_path)
         // which replaces both $MY_VAR and ${MY_VAR} forms.
@@ -4504,8 +4508,6 @@ export function os_path_expandvars(p_path: string): string {
         p_path = p_path.replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g, (match, varName) => {
             return process.env[varName] || '';
         });
-
-
     }
     return p_path;
 
@@ -4515,17 +4517,14 @@ export function os_path_expandvars(p_path: string): string {
  * Return the modification time of path. 
  */
 export async function os_path_getmtime(p_path: string): Promise<number> {
-
     if (!p_path) {
         return 0;
     }
     try {
-
         // return os.path.getmtime(p_path);
         const w_uri = makeVscodeUri(p_path);
         const w_stats = await vscode.workspace.fs.stat(w_uri);
         return w_stats.mtime;
-
     } catch (exception) {
         return 0;
     }
@@ -4535,12 +4534,8 @@ export async function os_path_getmtime(p_path: string): Promise<number> {
  * Return the size of path.
  */
 export async function os_path_getsize(p_path: string): Promise<number> {
-
     if (p_path) {
-
-        // const w_uri = vscode.Uri.file(p_path);
         const w_uri = makeVscodeUri(p_path);
-
         try {
             const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(w_uri);
             // OK exists
@@ -4549,7 +4544,6 @@ export async function os_path_getsize(p_path: string): Promise<number> {
             // Does not exist !
             return 0;
         }
-
     } else {
         return 0;
     }
@@ -4561,13 +4555,11 @@ export async function os_path_getsize(p_path: string): Promise<number> {
  * Return True if path is an absolute path.
  */
 export function os_path_isabs(p_path: string): boolean {
-
     if (p_path) {
         return path.isAbsolute(p_path);
     } else {
         return false;
     }
-
 }
 //@+node:felix.20211227182611.13: *3* g.os_path_isdir
 /**
@@ -4575,11 +4567,8 @@ export function os_path_isabs(p_path: string): boolean {
  */
 export async function os_path_isdir(p_path: string): Promise<boolean> {
     if (p_path) {
-
-        // const w_uri = vscode.Uri.file(p_path);
-        const w_uri = makeVscodeUri(p_path);
-
         try {
+            const w_uri = makeVscodeUri(p_path);
             const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(w_uri);
             // OK exists
             return fileStat.type === vscode.FileType.Directory;
@@ -4587,7 +4576,6 @@ export async function os_path_isdir(p_path: string): Promise<boolean> {
             // Does not exist !
             return false;
         }
-
     } else {
         return false;
     }
@@ -4599,11 +4587,8 @@ export async function os_path_isdir(p_path: string): Promise<boolean> {
  */
 export async function os_path_isfile(p_path?: string): Promise<boolean> {
     if (p_path) {
-
-        // const w_uri = vscode.Uri.file(p_path);
-        const w_uri = makeVscodeUri(p_path);
-
         try {
+            const w_uri = makeVscodeUri(p_path);
             const fileStat: vscode.FileStat = await vscode.workspace.fs.stat(w_uri);
             // OK exists
             return fileStat.type === vscode.FileType.File;
@@ -4611,12 +4596,9 @@ export async function os_path_isfile(p_path?: string): Promise<boolean> {
             // Does not exist !
             return false;
         }
-
     } else {
         return false;
     }
-
-
 }
 //@+node:felix.20230608221301.1: *3* g.PYTHON_os_path_join
 /**
@@ -4667,17 +4649,12 @@ export function PYTHON_os_path_join(...args: any[]): string {
  * provided there is a 'c' kwarg.
  */
 export function os_path_join(...args: any[]): string {
-
-    // c = keys.get('c')
-
     const uargs: string[] = [];
     for (let z of args) {
         if (z) {
             uargs.push(z);
         }
     }
-    // uargs = [z for z in args if z]
-
     if (!uargs.length) {
         return '';
     }
@@ -4693,12 +4670,9 @@ export function os_path_normcase(p_path: string): string {
     if (!p_path) {
         return '';
     }
-
-    // p_path = os.path.normcase(p_path);
     if (isWindows) {
         p_path = p_path.toLowerCase();
     }
-
     p_path = os_path_normslashes(p_path);
     return p_path;
 }
@@ -4743,7 +4717,6 @@ export function os_path_normslashes(p_path: string): string {
  * operating system).
  */
 export function os_path_realpath(p_path: string): string {
-
     if (!p_path) {
         return '';
     }
@@ -4755,9 +4728,6 @@ export function os_path_realpath(p_path: string): string {
     // p_path = vscode.workspace.fs.realPath(p_path);
     // // os.path.normpath does the *reverse* of what we want.
 
-    // if (isWindows) {
-    //     p_path = p_path.split('\\').join('/');
-    // }
     p_path = os_path_normslashes(p_path);
     return p_path;
 }
@@ -4902,16 +4872,12 @@ export function os_path_splitext(p_path: string): [string, string] {
 
     if (p_path.includes('.')) {
         const parts = p_path.split('.');
-
         tail = parts.pop()!;
-
         head = parts.join('.');
-
         if (!head || head.endsWith('/') || head.endsWith('\\')) {
             // leading period
             return [p_path, ''];
         }
-
         // edge case
         if (head.endsWith('.')) {
             try {
@@ -4938,18 +4904,6 @@ export function os_path_splitext(p_path: string): [string, string] {
         // no extension
         return [p_path, ''];
     }
-
-
-
-
-    //     if not path:
-    //         return ''
-    //     head, tail = os.path.splitext(path)
-    //     return head, tail
-
-
-
-
 }
 //@+node:felix.20211227182611.22: *3* g.os_startfile
 // def os_startfile(fname):
@@ -5064,6 +5018,7 @@ export function createTopologyList(c: Commands, root?: Position, useHeadlines?: 
     }
 
     return aList;
+
 }
 //@+node:felix.20220411212559.3: *3* g.getDocString
 /**
@@ -5098,6 +5053,7 @@ export function getDocString(s: string): string {
         return s.slice(i + 3, j);
     }
     return '';
+
 }
 //@+node:felix.20220411212559.4: *3* g.getDocStringForFunction
 /**
@@ -5147,6 +5103,7 @@ export function getDocStringForFunction(func: any): string {
         s = func.docstring;
     }
     return s;
+
 }
 //@+node:felix.20220411212559.5: *3* g.python_tokenize (not used)
 /**
@@ -5188,6 +5145,7 @@ export function python_tokenize(s: string): [string, string, number][] {
         line_number += (val.split("\n").length - 1); // val.count('\n');  // A comment.
         result.push([kind, val, line_number]);
     }
+
     return result;
 
 }
@@ -5260,9 +5218,7 @@ export async function composeScript(
     }
     const at = c.atFileCommands;
     const old_in_script = app.inScript;
-
     let script;
-
     try {
         // #1297: set inScript flags.
         inScript = true;
@@ -5283,6 +5239,7 @@ export async function composeScript(
         app.inScript = old_in_script;
         inScript = old_in_script;
     }
+
     return script;
 
 }
@@ -5295,18 +5252,17 @@ export async function composeScript(
  */
 export function extractExecutableString(c: Commands, p: Position, s: string): string {
 
-    //
     // Rewritten to fix //1071.
     if (unitTesting) {
         return s;  // Regretable, but necessary.
     }
-    //
+
     // Return s if no @language in effect. Should never happen.
     const language = scanForAtLanguage(c, p);
     if (!language) {
         return s;
     }
-    //
+
     // Return s if @language is unambiguous.
     const pattern = /^@language\s+(\w+)/g;
     const matches = ((s || '').match(pattern) || []); // list(re.finditer(pattern, s, re.MULTILINE))
@@ -5314,11 +5270,9 @@ export function extractExecutableString(c: Commands, p: Position, s: string): st
         return s;
     }
 
-    //
     // Scan the lines, extracting only the valid lines.
     let extracting = false;
     let result = [];
-
     for (let line of splitLines(s)) {
         const m = pattern.exec(line);// re.match(pattern, line);
         if (m) {
@@ -5327,6 +5281,7 @@ export function extractExecutableString(c: Commands, p: Position, s: string): st
             result.push(line);
         }
     }
+
     return result.join("");
 
 }
@@ -5335,12 +5290,15 @@ export function extractExecutableString(c: Commands, p: Position, s: string): st
 //@+others
 //@+node:felix.20220211012829.1: *4* g.findNodeAnywhere
 export function findNodeAnywhere(c: Commands, headline: string, exact: boolean = true): Position | undefined {
+
     const h = headline.trim();
+
     for (let p of c.all_unique_positions(false)) {
         if (p.h.trim() === h) {
             return p.copy();
         }
     }
+
     if (!exact) {
         for (let p of c.all_unique_positions(false)) {
             if (p.h.trim().startsWith(h)) {
@@ -5348,7 +5306,9 @@ export function findNodeAnywhere(c: Commands, headline: string, exact: boolean =
             }
         }
     }
+
     return undefined;
+
 }
 //@+node:felix.20230427000458.1: *4* g.findNodeInTree
 /**
@@ -5370,6 +5330,7 @@ export function findNodeInTree(c: Commands, p: Position, headline: string, exact
             }
         }
     }
+
     return undefined;
 
 }

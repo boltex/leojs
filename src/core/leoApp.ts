@@ -3223,7 +3223,6 @@ export class LoadManager {
         // Re-read the file.
         // const theFile = lm.openAnyLeoFile(fn);
 
-        // const w_uri = vscode.Uri.file(fn);
         const w_uri = g.makeVscodeUri(fn);
 
         try {

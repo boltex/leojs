@@ -58,14 +58,6 @@ export class LeoSettingsProvider {
 
                     this._panel.iconPath = vscode.Uri.joinPath(this._extensionUri, 'resources', 'leoapp128px.png')
 
-                    // this._panel.iconPath = vscode.Uri.file(this._context.asAbsolutePath('resources/leoapp128px.png'));
-
-                    // light: vscode.Uri.joinPath(p_context.extensionUri, Constants.GUI.ICON_LIGHT_DOCUMENT),
-
-                    // this._panel.iconPath = this._panel.webview.asWebviewUri(
-                    //     vscode.Uri.joinPath(this._extensionUri, 'resources', 'leoapp128px.png')
-                    // );
-
                     const w_nonce = utils.getNonce();
 
                     this._panel.webview.html = p_baseHtml

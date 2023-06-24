@@ -1116,12 +1116,10 @@ export class FileCommands {
     }
     //@+node:felix.20211213224228.3: *4* fc.deleteBackupFile
     public async deleteBackupFile(fileName: string): Promise<void> {
-        // const w_uri = vscode.Uri.file(fileName);
-        const w_uri = g.makeVscodeUri(fileName);
-        try {
-            await vscode.workspace.fs.delete(w_uri, { useTrash: false });
 
-            console.log('Did Delete : ', fileName);
+        try {
+            const w_uri = g.makeVscodeUri(fileName);
+            await vscode.workspace.fs.delete(w_uri, { useTrash: false });
         }
         catch (exception) {
             if (this.read_only) {
@@ -1153,9 +1151,7 @@ export class FileCommands {
             let dst: string;
             [src, dst] = [backupName, fileName];
             try {
-                // const w_srcUri = vscode.Uri.file(src);
                 const w_srcUri = g.makeVscodeUri(src);
-                // const w_dstUri = vscode.Uri.file(dst);
                 const w_dstUri = g.makeVscodeUri(dst);
                 await vscode.workspace.fs.rename(w_srcUri, w_dstUri, { overwrite: true });
             }
@@ -1172,11 +1168,8 @@ export class FileCommands {
         // self.read_only is not valid for Save As and Save To commands.
         const w_exists = await g.os_path_exists(fileName);
         if (w_exists) {
-            // const w_uri = vscode.Uri.file(fileName);
             const w_uri = g.makeVscodeUri(fileName);
-
             const fileStat = await vscode.workspace.fs.stat(w_uri);
-
             if (fileStat.permissions && (fileStat.permissions & 1)) {
                 g.error("can not write: read only:", fileName);
                 return true;
@@ -1204,21 +1197,15 @@ export class FileCommands {
     }
     //@+node:felix.20211213224228.8: *4* fc.warnOnReadOnlyFiles
     public async warnOnReadOnlyFiles(fileName: string): Promise<boolean> {
-
         try {
-
-            // const w_uri = vscode.Uri.file(fileName);
             const w_uri = g.makeVscodeUri(fileName);
-
             const fileStat = await vscode.workspace.fs.stat(w_uri);
-
             if (fileStat.permissions && (fileStat.permissions & 1)) {
                 g.error("can not write: read only:", fileName);
                 this.read_only = true;
             } else {
                 this.read_only = false;
             }
-
         }
         catch (exception) {
             // File does not exist
@@ -2356,7 +2343,6 @@ export class FileCommands {
             fileName = c.mFileName;
         }
 
-
         // New in 4.2.  Return ok flag so shutdown logic knows if all went well.
         let ok = g.doHook("save1", { c: c, p: p, fileName: fileName! });
 
@@ -2365,17 +2351,13 @@ export class FileCommands {
             [fileName, content] = getPublicLeoFile();
             fileName = g.finalize_join(c.openDirectory!, fileName);
 
-            // const w_uri = vscode.Uri.file(fileName);
             const w_uri = g.makeVscodeUri(fileName);
             const writeData = Buffer.from(content, 'utf8');
             await vscode.workspace.fs.writeFile(w_uri, writeData);
-            // fs.writeFileSync(fileName!, content);
-
 
             // * Equivalent to :
             //      with open(fileName, 'w', encoding="utf-8", newline='\n') as out:
             //          out.write(content)
-
 
             g.es('updated reference file:', g.shortFileName(fileName));
 
@@ -3053,13 +3035,6 @@ export class FileCommands {
             return false;
         }
 
-        /*
-        const f: number | undefined = this.openOutlineForWriting(fileName);
-        if (!f) {
-            return false;
-        }
-        */
-
         this.mFileName = fileName;
 
         try {
@@ -3068,15 +3043,8 @@ export class FileCommands {
             //s = bytes(s, this.leo_file_encoding, 'replace');
             const s = Buffer.from(xml_s, this.leo_file_encoding as BufferEncoding);
 
-            // f.write(s);
-            //fs.writeFileSync(f, s);
-
-            // const w_uri = vscode.Uri.file(fileName);
             const w_uri = g.makeVscodeUri(fileName);
             await vscode.workspace.fs.writeFile(w_uri, s);
-
-            // f.close();
-            // fs.closeSync(f);
 
             await c.setFileTimeStamp(fileName);
             // Delete backup file.

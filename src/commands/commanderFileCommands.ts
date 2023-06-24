@@ -1275,7 +1275,6 @@ export class CommanderFileCommands {
                 if (s.startsWith('@nocolor\n')) {
                     s = s.slice('@nocolor\n'.length);
                 }
-                // const w_uri = vscode.Uri.file(fileName);
                 const w_uri = g.makeVscodeUri(fileName);
                 const writeData = Buffer.from(s, 'utf8');
                 await vscode.workspace.fs.writeFile(w_uri, writeData);

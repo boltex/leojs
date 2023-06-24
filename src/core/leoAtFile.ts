@@ -1534,7 +1534,7 @@ export class AtFile {
         const newPath = g.os_path_normcase(c.fullPath(p));
         let changed;
         try { // #1367: samefile can throw an exception.
-            const w_same = await g.os_path_samefile(oldPath, newPath); // TODO !
+            const w_same = await g.os_path_samefile(oldPath, newPath);
             changed = oldPath && !w_same;
         } catch (exception) {
             changed = true;
