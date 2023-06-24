@@ -298,7 +298,7 @@ export class CommanderFileCommands {
             ));
 
         // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
-        c.openDirectory = g.app.vscodeWorkspaceUri?.path;
+        c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
 
         console.log('g.app.vscodeWorkspaceUri?.path', g.app.vscodeWorkspaceUri?.path);
         console.log('g.app.vscodeWorkspaceUri?.fsPath', g.app.vscodeWorkspaceUri?.fsPath);
