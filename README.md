@@ -4,14 +4,15 @@
 
 ### Literate Programming with _Directed Acyclic Graphs_ ([dag](https://en.wikipedia.org/wiki/Directed_acyclic_graph))
 
-LeoJS is [LeoInteg](https://github.com/boltex/leointeg#-leo-editor-integration-with-visual-studio-code)'s younger sibling project : a vsCode extension, currently in early alpha.
+>LeoJS is a typescript implementation of the Leo Editor, integrated as a VSCode extension. It's core is a line-by-line translation of it's original python source code.
 
-Inspired by <https://github.com/leo-editor/leo-editor/issues/1025>.
-
-See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
-or on [github](https://github.com/leo-editor/leo-editor), and vscode at [code.visualstudio.com](https://code.visualstudio.com/).
+- See Leo, the Literate Editor with Outline, at [leo-editor.github.io/leo-editor](https://leo-editor.github.io/leo-editor/)
+or on [github](https://github.com/leo-editor/leo-editor).
+- See VSCode at [code.visualstudio.com](https://code.visualstudio.com/).
 
 ![Screenshot](https://raw.githubusercontent.com/boltex/leojs/master/resources/animated-screenshot.gif)
+
+# 🚧 This Extension is a WIP 🏗️
 
 ## Development Version Installation
 
@@ -24,7 +25,7 @@ You can then run the **Run Extension** target, as shown above, in the **Debug Vi
 ## Web extension version
 Will be available _'soon'_ when a first beta version is submitted to the Extension Market. (See [VSCode for the web](https://code.visualstudio.com/docs/editor/vscode-web#_opening-a-project) for usage example)
 
-**In the meantime**, see 'Running Development version as a web extension' below to try out with development version.
+**In the meantime**, see 'Running Development version as a web extension' below to try out leojs in a browser.
 
 ## Running Development version as a web extension
 

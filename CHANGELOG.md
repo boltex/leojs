@@ -26,3 +26,8 @@
 - implemented c.registerCommand (instead of c.k.registerCommand)
 - Fixed reading/writing JSON leojs file format
 - Removed status bar indicator (until vscode API can provide focus status)
+
+# 0.1.5 June 24 2023
+
+- Implemented Leo's atFile, atShadow and external files features
+- Implemented javascript scripting, along with c, g and p references.
