@@ -3976,7 +3976,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
     "url": "https://github.com/boltex/leojs"
   },
   "engines": {
-    "vscode": "^1.76.0"
+    "vscode": "^1.79.2"
   },
   "keywords": [
     "leo",
@@ -4009,10 +4009,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
   },
   "dependencies": {
     &lt;&lt; dependencies &gt;&gt;
-  },
-  "gitCommit": "e0c958c",
-  "gitBranch": "devel",
-  "gitDate": "2023-06-24 14:37:29 -0400"
+  }
 }
 </t>
 <t tx="felix.20201214205159.10">{
@@ -6315,7 +6312,7 @@ public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interr
 "@types/mocha": "^9.1.0",
 "@types/node": "16.x",
 "@types/safe-json-stringify": "^1.1.2",
-"@types/vscode": "^1.76.0",
+"@types/vscode": "^1.79.0",
 "@types/webpack-env": "^1.16.3",
 "@typescript-eslint/eslint-plugin": "^5.16.0",
 "@typescript-eslint/parser": "^5.16.0",

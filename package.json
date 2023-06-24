@@ -13,7 +13,7 @@
     "url": "https://github.com/boltex/leojs"
   },
   "engines": {
-    "vscode": "^1.76.0"
+    "vscode": "^1.79.2"
   },
   "keywords": [
     "leo",
@@ -3693,7 +3693,7 @@
     "@types/mocha": "^9.1.0",
     "@types/node": "16.x",
     "@types/safe-json-stringify": "^1.1.2",
-    "@types/vscode": "^1.76.0",
+    "@types/vscode": "^1.79.0",
     "@types/webpack-env": "^1.16.3",
     "@typescript-eslint/eslint-plugin": "^5.16.0",
     "@typescript-eslint/parser": "^5.16.0",
@@ -3730,8 +3730,5 @@
     "path-browserify": "^1.0.1",
     "safe-json-stringify": "^1.2.0",
     "stream": "^0.0.2"
-  },
-  "gitCommit": "e0c958c",
-  "gitBranch": "devel",
-  "gitDate": "2023-06-24 14:37:29 -0400"
+  }
 }
