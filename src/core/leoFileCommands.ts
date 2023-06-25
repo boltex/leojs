@@ -1629,7 +1629,7 @@ export class FileCommands {
         const theDir: string = g.os_path_dirname(fileName);
         if (theDir) {
             c.openDirectory = theDir;
-            // c.frame.openDirectory  =  theDir;
+            c.frame.openDirectory = theDir;
         }
         let v: VNode;
         let ratio: number;

@@ -1163,6 +1163,11 @@ export class AtFile {
         const c = this.c;
         const p = this.c.p;
 
+        // ! LEOJS : warn if no openDirectory before write/read external files.
+        if (!c.openDirectory) {
+            void g.warnNoOpenDirectory();
+        }
+
         c.init_error_dialogs();
 
         const after = p.nodeAfterTree();
@@ -1202,6 +1207,11 @@ export class AtFile {
         const at = this;
         const c = this.c;
         const p = this.c.p;
+
+        // ! LEOJS : warn if no openDirectory before write/read external files.
+        if (!c.openDirectory) {
+            void g.warnNoOpenDirectory();
+        }
 
         c.init_error_dialogs();
 
@@ -1244,6 +1254,11 @@ export class AtFile {
         const c = this.c;
         const p = this.c.p;
 
+        // ! LEOJS : warn if no openDirectory before write/read external files.
+        if (!c.openDirectory) {
+            void g.warnNoOpenDirectory();
+        }
+
         c.init_error_dialogs();
 
         const after = p.nodeAfterTree();
@@ -1285,6 +1300,11 @@ export class AtFile {
         const at = this;
         const c = this.c;
         const p = this.c.p;
+
+        // ! LEOJS : warn if no openDirectory before write/read external files.
+        if (!c.openDirectory) {
+            void g.warnNoOpenDirectory();
+        }
 
         c.init_error_dialogs();
 
@@ -1341,6 +1361,14 @@ export class AtFile {
      * Write @file nodes in all or part of the outline
      */
     public async writeAll(all = false, dirty = false): Promise<void> {
+
+        const c = this.c;
+
+        // ! LEOJS : warn if no openDirectory before write/read external files.
+        if (!c.openDirectory) {
+            void g.warnNoOpenDirectory();
+        }
+
         const at = this;
         // This is the *only* place where these are set.
         // promptForDangerousWrite sets cancelFlag only if canCancelFlag is True.

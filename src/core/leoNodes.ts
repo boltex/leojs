@@ -72,7 +72,7 @@ export class NodeIndices {
             const gnx = v.fileIndex;
             if (gnx) {
                 let [id_, t, n] = this.scanGnx(gnx);
-                if (t === ni.timeString && n != null) {
+                if (t === ni.timeString && !(n == null)) {
                     try {
                         const w_n = Number(n);
                         this.lastIndex = Math.max(this.lastIndex, w_n);

@@ -3408,9 +3408,11 @@ export class LeoUI extends NullGui {
  * * 'getStates' action for use in debounced method call
  */
 private _triggerGetStates(): void {
+
+    const c = g.app.windowList[this.frameIndex].c;
+
     if (this._refreshType.states) {
         this._refreshType.states = false;
-        const c = g.app.windowList[this.frameIndex].c;
         const p = c.p;
         let w_canHoist = true;
         let w_topIsChapter = false;
@@ -3444,7 +3446,7 @@ private _triggerGetStates(): void {
         this.refreshUndoPane();
     }
     // Set leoChanged and leoOpenedFilename
-    const c = g.app.windowList[this.frameIndex].c;
+
     this.leoStates.leoChanged = c.changed;
     this.leoStates.leoOpenedFileName = c.fileName();
 
@@ -10824,6 +10826,18 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
 
         console.log('WORKSPACE CHANGE DETECTED! workspace JSON: ' + JSON.stringify(g.app.vscodeWorkspaceUri.toJSON()));
         console.log('WORKSPACE CHANGE DETECTED! workspace toString: ' + g.app.vscodeWorkspaceUri.toString());
+
+        // * Set new and unsaved document's c.openDirectory.
+        //  g.app.windowList[this.frameIndex].c;
+        for (const w_frame of g.app.windowList) {
+            if (!w_frame.c.openDirectory) {
+                // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
+                w_frame.c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
+                if (w_frame.c.openDirectory) {
+                    w_frame.c.frame.openDirectory = w_frame.c.openDirectory;
+                }
+            }
+        }
 
         // not started yet? 
         if (!g.app.loadManager &amp;&amp; g.isBrowser) {

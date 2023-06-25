@@ -299,6 +299,9 @@ export class CommanderFileCommands {
 
         // ! LEOJS : SET c.openDirectory to the g.app.vscodeWorkspaceUri !
         c.openDirectory = g.app.vscodeWorkspaceUri?.fsPath;
+        if (c.openDirectory) {
+            c.frame.openDirectory = c.openDirectory;
+        }
 
         const t3 = process.hrtime();
         // frame = c.frame
@@ -463,6 +466,11 @@ export class CommanderFileCommands {
         const c: Commands = this;
         let p: Position = this.p;
         const u: Undoer = this.undoer;
+
+        // ! LEOJS : warn if no openDirectory before write/read external files.
+        if (!c.openDirectory) {
+            void g.warnNoOpenDirectory();
+        }
 
         c.nodeConflictList = [];
 

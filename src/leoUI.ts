@@ -529,9 +529,11 @@ export class LeoUI extends NullGui {
      * * 'getStates' action for use in debounced method call
      */
     private _triggerGetStates(): void {
+
+        const c = g.app.windowList[this.frameIndex].c;
+
         if (this._refreshType.states) {
             this._refreshType.states = false;
-            const c = g.app.windowList[this.frameIndex].c;
             const p = c.p;
             let w_canHoist = true;
             let w_topIsChapter = false;
@@ -565,7 +567,7 @@ export class LeoUI extends NullGui {
             this.refreshUndoPane();
         }
         // Set leoChanged and leoOpenedFilename
-        const c = g.app.windowList[this.frameIndex].c;
+
         this.leoStates.leoChanged = c.changed;
         this.leoStates.leoOpenedFileName = c.fileName();
 

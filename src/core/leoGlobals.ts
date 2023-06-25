@@ -4277,6 +4277,43 @@ export async function os_listdir(p_path: string): Promise<string[]> {
     }
     return result;
 }
+//@+node:felix.20230624200527.1: *3* g.warnNoOpenDirectory
+/**
+ * Give warning when trying to refresh or write external files 
+ * and c.openDirectory is undefined.
+ * Occurs when new & unsaved leo document, along with no vscode workspace opened
+ */
+export function warnNoOpenDirectory(p_items?: string[]): Thenable<string | undefined> {
+
+    const w_message = "Directory for this outline is undefined\n" +
+        "Save it first, or open a VSCode workspace.";
+
+    let q_warning: Thenable<string | undefined>;
+
+    if (p_items && p_items.length) {
+        q_warning = vscode.window.showWarningMessage(w_message, ...p_items);
+    } else {
+        q_warning = vscode.window.showWarningMessage(
+            w_message,
+            "Save",
+            "Open Folder"
+        );
+    }
+    return q_warning.then((p_result) => {
+        // handle choices
+        if (p_result === "Save") {
+            void vscode.commands.executeCommand("leojs.saveLeoFile");
+        } else if (p_result === "Open Folder") {
+            if (isBrowser) {
+                void vscode.commands.executeCommand("remoteHub.openRepository");
+            } else {
+                void vscode.commands.executeCommand("workbench.action.files.openFolder");
+            }
+        }
+        return p_result;
+    });
+
+}
 //@+node:felix.20230426001612.1: *3* g.zip
 export function zip<T>(...arrays: T[][]): T[][] {
     const length = Math.min(...arrays.map((arr) => arr.length));
