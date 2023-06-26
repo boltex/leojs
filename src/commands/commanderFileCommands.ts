@@ -403,7 +403,7 @@ export class CommanderFileCommands {
 
                 }
             }
-            p_c.raise_error_dialogs('write');
+            await p_c.raise_error_dialogs('write');
             // g.app.runAlreadyOpenDialog(p_c); // ? Needed ?
 
             // openWithFileName sets focus if ok.
@@ -1124,7 +1124,6 @@ export class CommanderFileCommands {
         u.afterChangeTree(p, 'Read @auto Nodes', undoData);
         c.redraw();
         return c.raise_error_dialogs('read');
-
     }
     //@+node:felix.20220105210716.32: *4* c_file.readAtFileNodes
     @commander_command(

@@ -3088,6 +3088,9 @@ export function isUpper(s: string): boolean {
 }
 //@+node:felix.20221015172825.1: *4* g.capitalize
 export function capitalize(s: string): string {
+    if (s.length === 0) {
+        return s;
+    }
     return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 }
 //@+node:felix.20221015014725.1: *4* g.enumerate

@@ -93,6 +93,7 @@ export class Commands {
     public nodeHistory: NodeHistory;
     public gui: NullGui;
     public replace_errors: string[] = [];
+    public warnings_dict: { [key: string]: boolean } = {};
 
     // TODO fake frame needed FOR wrapper and hasSelection
     // TODO : maybe MERGE frame.tree.generation WITH _treeId?
@@ -2798,96 +2799,97 @@ export class Commands {
         g.es('the', commandName, "command is not valid in batch mode");
     }
     //@+node:felix.20211225212946.1: *5* c.raise_error_dialogs
-    // warnings_dict = {}
+    /**
+     * Warn about read/write failures.
+     */
+    public async raise_error_dialogs(kind: string = 'read'): Promise<unknown> {
 
-    public raise_error_dialogs(kind: string = 'read'): void {
-        console.log('TODO raise_error_dialogs !');
-
-
-        /*
-        """Warn about read/write failures."""
-        c = self
-        use_dialogs = False
-        if g.unitTesting:
-            c.init_error_dialogs()
-            return
-        #
-        # Issue one or two dialogs or messages.
-        saved_body = c.rootPosition().b
-            # Save the root's body. Somehow the dialog destroys it!
-        if c.import_error_nodes or c.ignored_at_file_nodes or c.orphan_at_file_nodes:
-            g.app.gui.dismiss_splash_screen()
-        else:
-            # #1007: Exit now, so we don't have to restore c.rootPosition().b.
-            c.init_error_dialogs()
-            return
-        if c.import_error_nodes:
-            files = '\n'.join(sorted(set(c.import_error_nodes)))  # type:ignore
-            if files not in self.warnings_dict:
-                self.warnings_dict[files] = True
-                import_message1 = 'The following were not imported properly.'
-                import_message2 = f"Inserted @ignore in...\n{files}"
-                g.es_print(import_message1, color='red')
-                g.es_print(import_message2)
-                if use_dialogs:
-                    import_dialog_message = f"{import_message1}\n{import_message2}"
-                    g.app.gui.runAskOkDialog(c,
-                        message=import_dialog_message, title='Import errors')
-        if c.ignored_at_file_nodes:
-            files = '\n'.join(sorted(set(c.ignored_at_file_nodes)))  # type:ignore
-            if files not in self.warnings_dict:
-                self.warnings_dict[files] = True
-                kind_s = 'read' if kind == 'read' else 'written'
-                ignored_message = f"The following were not {kind_s} because they contain @ignore:"
-                kind = 'read' if kind.startswith('read') else 'written'
-                g.es_print(ignored_message, color='red')
-                g.es_print(files)
-                if use_dialogs:
-                    ignored_dialog_message = f"{ignored_message}\n{files}"
-                    g.app.gui.runAskOkDialog(c,
-                        message=ignored_dialog_message, title=f"Not {kind.capitalize()}")
-        #
-        # #1050: always raise a dialog for orphan @<file> nodes.
-        if c.orphan_at_file_nodes:
-            message = '\n'.join([
+        const c: Commands = this;
+        const use_dialogs = false;
+        if (g.unitTesting) {
+            c.init_error_dialogs();
+            return;
+        }
+        // Issue one or two dialogs or messages.
+        const saved_body = c.rootPosition()!.b;  // Save the root's body. The dialog destroys it!
+        if (c.import_error_nodes.length || c.ignored_at_file_nodes.length || c.orphan_at_file_nodes.length) {
+            g.app.gui.dismiss_splash_screen();
+        } else {
+            // #1007: Exit now, so we don't have to restore c.rootPosition().b.
+            c.init_error_dialogs();
+            return;
+        }
+        let files: string;
+        if (c.import_error_nodes.length) {
+            files = [...new Set(c.import_error_nodes)].sort().join('\n');
+            if (!this.warnings_dict[files]) {
+                this.warnings_dict[files] = true;
+                const import_message1 = 'The following were not imported properly.';
+                const import_message2 = `Inserted @ignore in...\n${files}`;
+                g.es_print(import_message1);
+                g.es_print(import_message2);
+                if (use_dialogs) {
+                    const import_dialog_message = `${import_message1}\n${import_message2}`;
+                    await g.app.gui.runAskOkDialog(c,
+                        'Import errors', import_dialog_message);
+                }
+            }
+        }
+        if (c.ignored_at_file_nodes.length) {
+            files = [...new Set(c.ignored_at_file_nodes)].sort().join('\n');
+            if (!this.warnings_dict[files]) {
+                this.warnings_dict[files] = true;
+                const kind_s = kind === 'read' ? 'read' : 'written';
+                const ignored_message = `The following were not ${kind_s} because they contain @ignore:`;
+                kind = kind.startsWith('read') ? 'read' : 'written';
+                g.es_print(ignored_message);
+                g.es_print(files);
+                if (use_dialogs) {
+                    const ignored_dialog_message = `${ignored_message}\n${files}`;
+                    await g.app.gui.runAskOkDialog(c,
+                        `Not ${g.capitalize(kind)}`, ignored_dialog_message);
+                }
+            }
+        }
+        // #1050: always raise a dialog for orphan @<file> nodes.
+        if (c.orphan_at_file_nodes.length) {
+            const message = [
                 'The following were not written because of errors:\n',
-                '\n'.join(sorted(set(c.orphan_at_file_nodes))),  # type:ignore
+                [...new Set(c.orphan_at_file_nodes)].sort().join('\n'),
                 '',
-                'Warning: changes to these files will be lost\n'
+                'Warning: changes to these files will be lost\n',
                 'unless you can save the files successfully.'
-            ])
-            g.app.gui.runAskOkDialog(c, message=message, title='Not Written')
-            # Mark all the nodes dirty.
-            for z in c.all_unique_positions():
-                if z.isOrphan():
-                    z.setDirty()
-                    z.clearOrphan()
-            c.setChanged()
-            c.redraw()
-        # Restore the root position's body.
-        c.rootPosition().v.b = saved_body
-            # #1007: just set v.b.
-        c.init_error_dialogs()
+            ].join('\n');
+            await g.app.gui.runAskOkDialog(c, 'Not Written', message);
+            // Mark all the nodes dirty.
+            for (const z of c.all_unique_positions()) {
+                if (z.isOrphan()) {
+                    z.setDirty();
+                    z.clearOrphan();
+                }
+            }
+            c.setChanged();
+            c.redraw();
+        }
+        // Restore the root position's body.
+        c.rootPosition()!.v.b = saved_body;  // #1007: just set v.b.
+        c.init_error_dialogs();
 
-        */
     }
-    //@+node:felix.20220108205755.1: *5* c.syntaxErrorDialog
+
+    //@+node:felix.20230626180727.1: *5* c.syntaxErrorDialog
     /**
      * Warn about syntax errors in files.
      */
     public async syntaxErrorDialog(): Promise<void> {
         const c: Commands = this;
-
         if (
             g.app.syntax_error_files && g.app.syntax_error_files.length &&
-            c.config.getBool('syntax-error-popup')
+            c.config.getBool('syntax-error-popup', false)
         ) {
-            const aList: string[] = [...g.app.syntax_error_files].sort();
-
+            const aList: string[] = [...new Set(g.app.syntax_error_files)].sort();
             g.app.syntax_error_files = [];
-
             const list_s: string = aList.join('\n');
-
             await g.app.gui.runAskOkDialog(
                 c,
                 'Python Errors',
@@ -2896,6 +2898,7 @@ export class Commands {
             );
         }
     }
+
     //@+node:felix.20211022202201.1: *4* c.Drawing
 
     //@+node:felix.20211120225325.1: *5* c.bringToFront

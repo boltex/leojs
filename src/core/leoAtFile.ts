@@ -481,7 +481,7 @@ export class AtFile {
             g.es(`read ${files.length} files in ${utils.getDurationSeconds(t1, t2)} seconds`);
         }
         c.changed = old_changed;
-        c.raise_error_dialogs();
+        await c.raise_error_dialogs();
     }
     //@+node:felix.20230415162513.9: *6* at.findFilesToRead
     public findFilesToRead(root: Position, all: boolean): Position[] {
@@ -585,7 +585,7 @@ export class AtFile {
             }
         }
         c.changed = old_changed;
-        c.raise_error_dialogs();
+        await c.raise_error_dialogs();
     }
     //@+node:felix.20230415162513.12: *5* at.readAtShadowNodes
     /**
@@ -1158,21 +1158,16 @@ export class AtFile {
         'Write all @auto nodes in the selected outline.'
     )
     public async writeAtAutoNodes(): Promise<void> {
-
         const at = this;
         const c = this.c;
         const p = this.c.p;
-
         // ! LEOJS : warn if no openDirectory before write/read external files.
         if (!c.openDirectory) {
             void g.warnNoOpenDirectory();
         }
-
         c.init_error_dialogs();
-
         const after = p.nodeAfterTree();
         let found = false;
-
         while (p && p.__bool__() && !p.__eq__(after)) {
             if (p.isAtAutoNode() && !p.isAtIgnoreNode()) {
                 const ok = await at.writeOneAtAutoNode(p);
@@ -1194,8 +1189,7 @@ export class AtFile {
         } else {
             g.es("no @auto nodes in the selected tree");
         }
-        c.raise_error_dialogs('write');
-
+        await c.raise_error_dialogs('write');
     }
     //@+node:felix.20230415162517.5: *6* at.writeDirtyAtAutoNodes
     @cmd(
@@ -1203,7 +1197,6 @@ export class AtFile {
         'Write all dirty @auto nodes in the selected outline.'
     )
     public async writeDirtyAtAutoNodes(): Promise<void> {
-
         const at = this;
         const c = this.c;
         const p = this.c.p;
@@ -1212,12 +1205,9 @@ export class AtFile {
         if (!c.openDirectory) {
             void g.warnNoOpenDirectory();
         }
-
         c.init_error_dialogs();
-
         const after = p.nodeAfterTree();
         let found = false;
-
         while (p && p.__bool__() && !p.__eq__(after)) {
             if (p.isAtAutoNode() && !p.isAtIgnoreNode() && p.isDirty()) {
                 const ok = await at.writeOneAtAutoNode(p);
@@ -1231,7 +1221,6 @@ export class AtFile {
                 p.moveToThreadNext();
             }
         }
-
         if (g.unitTesting) {
             return;
         }
@@ -1240,8 +1229,7 @@ export class AtFile {
         } else {
             g.es("no dirty @auto nodes in the selected tree");
         }
-        c.raise_error_dialogs('write');
-
+        await c.raise_error_dialogs('write');
     }
     //@+node:felix.20230415162517.6: *6* at.writeAtShadowNodes
     @cmd(
@@ -1249,7 +1237,6 @@ export class AtFile {
         'Write all @shadow nodes in the selected outline.'
     )
     public async writeAtShadowNodes(): Promise<boolean> {
-
         const at = this;
         const c = this.c;
         const p = this.c.p;
@@ -1258,12 +1245,9 @@ export class AtFile {
         if (!c.openDirectory) {
             void g.warnNoOpenDirectory();
         }
-
         c.init_error_dialogs();
-
         const after = p.nodeAfterTree();
         let found = false;
-
         while (p && p.__bool__() && !p.__eq__(after)) {
             if (p.atShadowFileNodeName() && !p.isAtIgnoreNode()) {
                 const ok = await at.writeOneAtShadowNode(p);
@@ -1286,9 +1270,8 @@ export class AtFile {
         } else {
             g.es("no @shadow nodes in the selected tree");
         }
-        c.raise_error_dialogs('write');
+        await c.raise_error_dialogs('write');
         return found;
-
     }
     //@+node:felix.20230415162517.7: *6* at.writeDirtyAtShadowNodes
     @cmd(
@@ -1296,7 +1279,6 @@ export class AtFile {
         'Write all @shadow nodes in the selected outline.'
     )
     public async writeDirtyAtShadowNodes(): Promise<boolean> {
-
         const at = this;
         const c = this.c;
         const p = this.c.p;
@@ -1305,12 +1287,9 @@ export class AtFile {
         if (!c.openDirectory) {
             void g.warnNoOpenDirectory();
         }
-
         c.init_error_dialogs();
-
         const after = p.nodeAfterTree();
         let found = false;
-
         while (p && p.__bool__() && !p.__eq__(after)) {
             if (p.atShadowFileNodeName() && !p.isAtIgnoreNode() && p.isDirty()) {
                 const ok = await at.writeOneAtShadowNode(p);
@@ -1333,10 +1312,8 @@ export class AtFile {
         } else {
             g.es("no dirty @shadow nodes in the selected tree");
         }
-
-        c.raise_error_dialogs('write');
+        await c.raise_error_dialogs('write');
         return found;
-
     }
     //@+node:felix.20230415162517.8: *5* at.putFile
     /**
@@ -1361,14 +1338,12 @@ export class AtFile {
      * Write @file nodes in all or part of the outline
      */
     public async writeAll(all = false, dirty = false): Promise<void> {
-
         const c = this.c;
 
         // ! LEOJS : warn if no openDirectory before write/read external files.
         if (!c.openDirectory) {
             void g.warnNoOpenDirectory();
         }
-
         const at = this;
         // This is the *only* place where these are set.
         // promptForDangerousWrite sets cancelFlag only if canCancelFlag is True.
@@ -1398,7 +1373,6 @@ export class AtFile {
      * We must do this in a prepass, so as to avoid errors later.
      */
     public findFilesToWrite(force: boolean): [Position[], Position] {
-
         const trace = g.app.debug.includes('save') && !g.unitTesting;
         if (trace) {
             g.trace(`writing *${force ? 'selected' : 'all'}* files`);
@@ -1419,12 +1393,9 @@ export class AtFile {
             p = c.rootPosition();
             after = undefined;
         }
-
         const seen = []; // Used as a set
         let files: Position[] = [];
-
         while (p && p.__bool__() && !p.__eq__(after)) {
-
             if (p.isAtIgnoreNode() && !p.isAtAsisFileNode()) {
                 // Honor @ignore in *body* text, but *not* in @asis nodes.
                 if (p.isAnyAtFileNode()) {
@@ -1455,7 +1426,6 @@ export class AtFile {
                 p.moveToThreadNext();
             }
         }
-
         // When scanning *all* nodes, we only actually write dirty nodes.
         if (!force) {
             files = files.filter(z => z.isDirty());  // [z for z in files if z.isDirty()]
@@ -1464,7 +1434,6 @@ export class AtFile {
             g.printObj(files.map(z => z.h), 'Files to be saved');
         }
         return [files, root!];
-
     }
     //@+node:felix.20230415162517.11: *6* at.internalWriteError
     /**
@@ -1727,8 +1696,7 @@ export class AtFile {
                 g.es("no @file node in the selected tree");
             }
         }
-        c.raise_error_dialogs('write');
-
+        await c.raise_error_dialogs('write');
     }
     //@+node:felix.20230415162517.20: *7* at.writeMissingNode
     public async writeMissingNode(p: Position): Promise<void> {
@@ -1914,7 +1882,7 @@ export class AtFile {
             }
             const contents = g.splitLines(p.b).filter(s => at.directiveKind4(s, 0) === AtFile.noDirective).join('');
             await at.replaceFile(contents, at.encoding!, fileName, root);
-            c.raise_error_dialogs('write');
+            await c.raise_error_dialogs('write');
             return true;
         } catch (exception) {
             await at.writeException(fileName || "", root);
