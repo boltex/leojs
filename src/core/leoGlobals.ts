@@ -7,8 +7,9 @@
 //@+<< imports >>
 //@+node:felix.20210102181122.1: ** << imports >>
 import * as vscode from "vscode";
-import { Utils as uriUtils } from "vscode-uri";
+// import { Utils as uriUtils } from "vscode-uri";
 
+// import * as Bowser from "bowser";
 import * as os from 'os';
 import * as safeJsonStringify from 'safe-json-stringify';
 import * as path from 'path';
@@ -55,7 +56,7 @@ import { NullGui } from "./leoGui";
 
 //@-<< imports >>
 
-// TODO: Make those platform detection methods better with 'bowser' js lib
+// TODO: Maybe make those platform detection methods better with 'bowser' library
 export const isBrowser: boolean = !!(process as any)?.browser; // coerced to boolean
 export const isMac: boolean = process.platform?.startsWith('darwin');
 export const isWindows: boolean = process.platform?.startsWith('win');
@@ -403,7 +404,6 @@ export class FileLikeObject {
         return this._list.join('');
     }
 
-    // Todo : maybe add names to prototype instead
     public getvalue(): string {
         return this.get();
     }
@@ -1770,49 +1770,6 @@ export function fullPath(c: Commands, p: Position, simulate: boolean = false): s
 
     // }
     // return '';
-}
-//@+node:felix.20220102154348.1: *3* g.getBaseDirectory
-/**
- * This function is deprectated.
- *
- * Previously it convert '!' or '.' to proper directory references using
- * @string relative-path-base-directory.
- */
-export function getBaseDirectory(c: Commands): string {
-
-    return '';
-
-    // TODO : REMOVE IF TOTALLY UNUSED
-
-    // // let base: string = app.config.relative_path_base_directory;
-
-    // if (!c) {
-    //     return '';  // No relative base given.
-    // }
-    // let base: string = c.config.getString('relative-path-base-directory');
-
-    // if (base && base === "!") {
-    //     base = app.loadDir!;
-    // } else if (base && base === ".") {
-    //     base = c.openDirectory!;
-    // } else {
-    //     return '';  // Settings error.
-    // }
-
-    // if (os_path_isabs(base)) {
-    //     // Set c.chdir_to_relative_path as needed.
-    //     if (c.chdir_to_relative_path === undefined) {
-    //         c.chdir_to_relative_path = c.config.getBool('chdir-to-relative-path');
-    //     }
-    //     // Call os.chdir if requested.
-    //     if (c.chdir_to_relative_path) {
-    //         // os.chdir(base);
-    //         process.chdir(base);
-    //     }
-    //     return base;  // base need not exist yet.
-    // }
-
-    // return '';  // No relative base given.
 }
 //@+node:felix.20230518232533.1: *3* g.getEncodingAt
 /**

@@ -60,6 +60,9 @@ export class IdleTimeManager {
      */
     public on_idle(timer: any): void {
 
+        console.log('leoApps on_idle cycle running !');
+
+
         if (!g.app) {
             return;
         }
@@ -98,7 +101,7 @@ export class IdleTimeManager {
 
         this.timer = g.IdleTime(
             this.on_idle,
-            500,
+            5000, // 500, // ! ORIGINAL INTERVAL IS 500 !
             'IdleTimeManager.on_idle'
         );
 
@@ -1130,14 +1133,15 @@ export class LeoApp {
         }
         if (id_.length < 3) {
             id_ = "";
-            // throw new Error("Invalid Leo ID");
-            // TODO: Show Leo Id syntax error message
-            // g.EmergencyDialog(
-            //   title=f"Invalid Leo ID: {tag}",
-            //    message=(
-            //        f"Invalid Leo ID: {old_id!r}\n\n"
-            //       "Your id should contain only letters and numbers\n"
-            //        "and must be at least 3 characters in length."))
+            void vscode.window.showInformationMessage(
+                `Invalid Leo ID: ${tag}`,
+                {
+                    detail: `Invalid Leo ID: ${old_id}\n\n` +
+                        "Your id should contain only letters and numbers\n" +
+                        "and must be at least 3 characters in length.",
+                    modal: true
+                }
+            );
         }
         return id_;
     }
@@ -2198,7 +2202,8 @@ export class LoadManager {
      */
     public uninvert(d: g.SettingsDict): SettingsDict {
 
-        // console.assert(d.keyType === g.KeyStroke, d.keyType); // TODO ? Needed ?
+        // ! LEOJS : NO KEYSTROKES HANDLING
+        // console.assert(d.keyType === g.KeyStroke, d.keyType);
         const result = new SettingsDict(`uninverted ${d.name()}`);
 
         for (let stroke of Object.keys(d)) {
@@ -2329,7 +2334,7 @@ export class LoadManager {
         lm.globalSettingsDict = settings_d;
         lm.globalBindingsDict = bindings_d;
 
-        // TODO : ? THEMES NOT NEEDED ?
+        // ! LEOJS : THEMES NOT NEEDED !
         /* 
         // Add settings from --theme or @string theme-name files.
         // This must be done *after* reading myLeoSettigns.leo.
@@ -2391,8 +2396,7 @@ export class LoadManager {
         }
 
         // ! ----------------------- MAYBE REPLACE WITH VSCODE FILE-CHANGE DETECTION ---------------- 
-        // TODO: idleTimeManager
-        // g.app.idleTimeManager.start();
+        g.app.idleTimeManager.start();
         // ! ----------------------------------------------------------------------------------------
 
         const t3 = process.hrtime();
@@ -2494,7 +2498,7 @@ export class LoadManager {
             return false;
         }
         // #199.
-        // TODO
+        // LEOJS TODO ?
         // g.app.runAlreadyOpenDialog(c1);
 
         // Final inits...

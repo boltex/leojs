@@ -1488,8 +1488,7 @@ export class FileCommands {
         g.es(`read outline in ${(t2 / 1000).toFixed(2)} seconds`);
 
         // return [v, c.frame.ratio];
-        // TODO : Eliminate frame and/or ratio
-        return [v!, 0.5];
+        return [v!, 0.5]; // LEOJS : Fake uneeded Ratio ! 
     }
     //@+node:felix.20211213224232.10: *5* fc.openLeoFile
     /**
@@ -1525,11 +1524,6 @@ export class FileCommands {
             readAtFileNodesFlag,
             silent
         );
-
-        // TODO : Eliminate Ratio concepts for leojs
-        // if (v) {
-        //     frame.resizePanesToRatio(ratio, frame.secondary_ratio);
-        // }
 
         return v;
     }
@@ -1662,7 +1656,7 @@ export class FileCommands {
         const vnodes: VNode[] = [];
 
         return Promise.resolve(undefined);
-        // TODO
+        // TODO !
         /*
         try:
             for row in conn.execute(sql):
@@ -1878,7 +1872,7 @@ export class FileCommands {
         //@+node:felix.20211213224232.26: *6* function: nosqlite_commander
         const nosqlite_commander: any = {};
 
-        // TODO
+        // TODO !
         // @contextmanager
         // def nosqlite_commander(fname):
         //     oldname = c.mFileName
@@ -2273,10 +2267,7 @@ export class FileCommands {
             fc.putPrefs();
             fc.putFindSettings();
             let fname: string = put_v_elements()!;
-
-            // TODO: verify if needed
             put_t_elements();
-
             fc.putPostlog();
             //return [fname, fc.outputFile.getvalue()];
             return [fname, fc.outputFile]; // outputfile as string
@@ -2447,8 +2438,8 @@ export class FileCommands {
         const fc: FileCommands = this;
 
         if (c.sqlite_connection === undefined) {
-            // ! TEMP
-            // TODO ?
+
+            // TODO !
             // c.sqlite_connection = new sqlite3.Database(fileName);
         }
         const conn = c.sqlite_connection;
@@ -2500,7 +2491,7 @@ export class FileCommands {
 
             fc.exportGeomToSqlite(conn);
             fc.exportHashesToSqlite(conn);
-            // conn.commit(); // TODO : uneeded?
+            // conn.commit(); // TODO : support db sqlite files!
             ok = true;
         }
         catch (e) {
@@ -2766,9 +2757,6 @@ export class FileCommands {
         return fc.writeOutline(fileName);
 
     }
-
-    // TODO : Aliases
-    // write_LEO_file = write_Leo_file  // For compatibility with old plugins.
     //@+node:felix.20211213224237.21: *5* fc.write_leojs & helpers
     /**
      * Write the outline in .leojs (JSON) format.
@@ -2921,6 +2909,7 @@ export class FileCommands {
         //  [width, height, left, top] = c.frame.get_window_info()
 
         // TODO : No globals for now
+        // TODO support db sqlite files !
 
         // if 1:  // Write to the cache, not the file.
         //     d: Dict[str, str] = {}
@@ -3077,8 +3066,7 @@ export class FileCommands {
         catch (exception) {
             // #1260415: https://bugs.launchpad.net/leo-editor/+bug/1260415
 
-            // TODO : Make es_error if really needed
-            // g.es_error("exception writing external files");
+            g.es_error("exception writing external files");
 
             g.es_exception(exception);
             // g.es('Internal error writing one or more external files.', 'red');
@@ -3198,20 +3186,21 @@ export class FileCommands {
         // Create aList of tuples (p,v) having a valid unknownAttributes dict.
         // Create dictionary: keys are vnodes, values are corresponding archived positions.
         // const aList: [Position, VNode][] | [VNode, any][] = [];
-        // TODO : FIX TYPING
-        let aList: [any, any][] = [];
+
+        let aList_pv: [Position, VNode][] = [];
+        let aList_va: [VNode, any][] = [];
 
         const pDict: { [key: string]: number[] } = {};
         for (let p2 of p.self_and_subtree(false)) {
             if (p2.v['unknownAttributes']) {
-                aList.push([p2.copy(), p2.v]);
+                aList_pv.push([p2.copy(), p2.v]);
                 pDict[p2.v.gnx] = p2.archivedPosition(p);
             }
         }
 
         // Create aList of pairs (v,d) where d contains only pickleable entries.
-        if (aList.length) {
-            aList = this.createUaList(aList);
+        if (aList_pv.length) {
+            aList_va = this.createUaList(aList_pv);
         } else {
             return '';
         }
@@ -3221,7 +3210,7 @@ export class FileCommands {
 
         // aList is now type [VNode, any][]
         // for v, d2 in aList:
-        for (let p_a of aList) {
+        for (let p_a of aList_va) {
 
             let v: VNode;
             let d2: any;
@@ -3314,15 +3303,6 @@ export class FileCommands {
         if (!c.mFileName) {
             return;
         }
-
-        // TODO : remove/replace unneeded window sizing settings
-
-        // c.db['body_outline_ratio'] = str(c.frame.ratio);
-        // c.db['body_secondary_ratio'] = str(c.frame.secondary_ratio);
-
-        // [w, h, l, t] = c.frame.get_window_info();
-
-        // c.db['window_position'] = [str(t), str(l), str(h), str(w)];
 
         if (trace) {
             g.trace(`\nset c.db for ${c.shortFileName()}`);
@@ -3636,13 +3616,6 @@ export class FileCommands {
         this.rootPosition = c.rootPosition();
         this.vnodesDict = {};
         if (this.usingClipboard) {
-            // TODO : MAYBE UNNEEDED?
-            // this.expanded_gnxs = [];
-            // this.marked_gnxs = [];
-
-            // These will be ignored.
-
-
             this.put_v_element(this.currentPosition);
             // Write only current tree.
         } else {

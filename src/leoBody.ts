@@ -167,7 +167,7 @@ export class LeoBodyProvider implements vscode.FileSystemProvider {
                     return w_buffer;
                 } else {
                     if (!this._errorRefreshFlag) {
-                        this._leoUi.fullRefresh(); // TODO ?
+                        this._leoUi.fullRefresh();
                     }
                     if (this._lastGnx === w_gnx) {
                         // was last gnx of closed file about to be switched to new document selected

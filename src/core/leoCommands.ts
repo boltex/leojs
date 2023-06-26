@@ -1852,8 +1852,6 @@ export class Commands {
         if (g.app.externalFilesController && g.app.externalFilesController.set_time) {
             await g.app.externalFilesController.set_time(fn);
         }
-        // TODO !
-        console.log('TODO : setFileTimeStamp AND g.app.externalFilesController.set_time');
     }
     //@+node:felix.20211228212851.1: *3* c.Directive scanning
     // These are all new in Leo 4.5.1.
@@ -1968,7 +1966,7 @@ export class Commands {
             "lang-dict": lang_dict,  // Leo 6.4: New.
             "lineending": d['lineending'],
             "pagewidth": d['pagewidth'],
-            "path": d['path'], // Redundant: || g.getBaseDirectory(c),
+            "path": d['path'],
             "tabwidth": d['tabwidth'],
             "wrap": d['wrap'],
         };
@@ -3015,11 +3013,6 @@ export class Commands {
             c.selectPosition(p);
         }
     }
-
-    // TODO : Compatibility
-    // force_redraw = redraw
-    // redraw_now = redraw
-
     //@+node:felix.20211120224231.1: *6* c.redraw_after_icons_changed
     /**
      * Update the icon for the presently selected node

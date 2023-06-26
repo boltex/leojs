@@ -1206,7 +1206,7 @@ export class CommanderOutlineCommands {
                 const old_name: string | boolean = (!!chapter) && chapter.name;
                 const new_name: string = cc.findChapterNameForPosition(p)!;
                 if (new_name !== old_name) {
-                    cc.selectChapterByName(new_name); // TODO
+                    cc.selectChapterByName(new_name);
                 }
             }
             // Always do a full redraw.

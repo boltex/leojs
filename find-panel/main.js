@@ -295,13 +295,15 @@
 
     function focusOnField(p_id) {
         const inputField = document.querySelector('#' + p_id);
-        // @ts-expect-error
-        inputField.select();
-        // TODO : TEST IF NEEDED TO PREVENT FLICKER ON FIRST TRY?
-        setTimeout(() => {
+        if (inputField) {
             // @ts-expect-error
             inputField.select();
-        }, 0);
+            // TODO : TEST IF NEEDED TO PREVENT FLICKER ON FIRST TRY?
+            setTimeout(() => {
+                // @ts-expect-error
+                inputField.select();
+            }, 0);
+        }
     }
 
     function getSettings() {

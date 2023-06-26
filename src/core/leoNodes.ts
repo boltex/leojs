@@ -2766,7 +2766,6 @@ export class VNode {
     selectionLength: number; // The length of the selected body text.
     selectionStart: number; // The start of the selected body text.
 
-    public tempTnodeList: undefined | string[]; // TODO : Type better than that!
     public unknownAttributes: undefined | { [key: string]: any };
     public tempAttributes: undefined | { [key: string]: any };
     public at_read: undefined | { [key: string]: any };

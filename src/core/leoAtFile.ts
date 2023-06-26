@@ -1504,6 +1504,8 @@ export class AtFile {
      * the @persistence data, thereby annoyingly changing the .leo file.
      */
     public async writeAllHelper(p: Position, root: Position): Promise<void> {
+        console.log("in writeAllHelper");
+
         const at = this;
         at.root = root;
         if (p.isAtIgnoreNode()) {
@@ -2006,6 +2008,9 @@ export class AtFile {
         const x = c.shadowController;
         let full_path = "";
         let ivars_dict: { [key: string]: any } = {};
+
+        console.log("in writeOneAtShadowNode");
+
         try {
             c.endEditing();  // Capture the current headline.
             const fn = p.atShadowFileNodeName();
@@ -3144,6 +3149,8 @@ export class AtFile {
      */
     public async precheck(fileName: string, root: Position): Promise<boolean> {
         const at = this;
+        console.log("in precheck :", fileName);
+
         //
         // #1450: First, check that the directory exists.
         const theDir = g.os_path_dirname(fileName);
@@ -3154,7 +3161,8 @@ export class AtFile {
         }
         //
         // Now check the file.
-        if (! await at.shouldPromptForDangerousWrite(fileName, root)) {
+        const shouldPrompt = await at.shouldPromptForDangerousWrite(fileName, root);
+        if (!shouldPrompt) {
             // Fix bug 889175: Remember the full fileName.
             at.rememberReadPath(fileName, root);
             return true;
@@ -3870,7 +3878,12 @@ export class AtFile {
      * See #50: https://github.com/leo-editor/leo-editor/issues/50
      */
     public async shouldPromptForDangerousWrite(fn: string, p: Position): Promise<boolean> {
-        const trace = g.app.debug.includes('save');
+
+        console.log('in shouldPromptForDangerousWrite, file: ', fn);
+
+
+        const trace = true || g.app.debug.includes('save'); // TODO : CLEANUP ! 
+
         const sfn = g.shortFileName(fn);
         const c = this.c;
         const efc = g.app.externalFilesController;
@@ -3892,10 +3905,14 @@ export class AtFile {
         if (efc) {
             // Like c.checkFileTimeStamp.
             if (c.sqlite_connection && c.mFileName === fn) {
+                console.log('c.sqlite_connection && c.mFileName === fn ', fn);
+
                 // sqlite database file is never actually overwritten by Leo,
                 // so do *not* check its timestamp.
                 //pass
             } else if (await efc.has_changed(fn)) {
+                console.log(' else if (await efc.has_changed(fn)) ', fn);
+
                 if (trace) {
                     g.trace('Return True: changed:', sfn);
                 }

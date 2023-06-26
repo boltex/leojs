@@ -207,7 +207,6 @@
 <v t="felix.20220505215924.8"><vh>findSymbol</vh></v>
 <v t="felix.20220505215924.9"><vh>replace &amp; replaceThenFind</vh></v>
 <v t="felix.20230121211548.1"><vh>interactiveSearch</vh></v>
-<v t="felix.20230122201158.1"><vh>interactiveSearchTab</vh></v>
 <v t="felix.20220505215924.10"><vh>findAll &amp; replaceAll</vh></v>
 <v t="felix.20220505215924.11"><vh>cloneFind</vh></v>
 <v t="felix.20220505215924.12"><vh>setSearchOption</vh></v>
@@ -1286,16 +1285,6 @@ export async function activate(p_context: vscode.ExtensionContext) {
     console.log('env scheme', vscode.env.uriScheme);
     console.log('env appHost', vscode.env.appHost);
 
-    // * Close remaining leojs Bodies restored by vscode from last session.
-    // TODO : USE TABGROUPS
-    // vscode.window.visibleTextEditors.forEach(p_textEditor =&gt; {
-    //     if (p_textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
-    //         if (p_textEditor.hide) {
-    //             p_textEditor.hide();
-    //         }
-    //     }
-    // });
-
     const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
     const w_leojsVersion = w_leojsExtension.packageJSON.version;
 
@@ -1774,8 +1763,6 @@ public static COMMANDS = {
     GOTO_NAV_FIRST: Constants.NAME + ".gotoNavFirst",
     GOTO_NAV_LAST: Constants.NAME + ".gotoNavLast",
 
-    // INTERACTIVE_SEARCH_TAB: Constants.NAME + ".interactiveSearchTab", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
-
     START_SEARCH: Constants.NAME + ".startSearch",
     SEARCH_BACKWARD: Constants.NAME + ".searchBackward",
     RE_SEARCH: Constants.NAME + ".reSearch",
@@ -2093,8 +2080,11 @@ public static USER_MESSAGES = {
     CLEARED_RECENT: "Cleared recent files list",
     CHOOSE_OPENED_FILE: "Select an opened Leojs File",
     FILE_NOT_OPENED: "No files opened.",
+
+    // STATUS BAR UNUSED FOR NOW IN LEOJS // 
     STATUSBAR_TOOLTIP_ON: "Leo Key Bindings are in effect", // TODO : Add description of what happens if clicked
     STATUSBAR_TOOLTIP_OFF: "Leo Key Bindings off", // TODO : Add description of what happens if clicked
+
     PROMPT_EDIT_HEADLINE: "Edit Headline",
     PROMPT_INSERT_NODE: "Insert Node",
     PROMPT_INSERT_CHILD: "Insert Child",
@@ -2254,9 +2244,6 @@ public static CONTEXT_FLAGS = {
 
     // Flags for focus context
     FOCUS_FIND: "leojsFindFocus",
-
-    // Flag for interactive Search
-    // INTERACTIVE_SEARCH: "leojsInteractiveSearch", // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
 
     // Context flags that are mapped 'directly' onto leojs config settings
     // * PREFIXED WITH 'leojs' *
@@ -3279,8 +3266,8 @@ export class LeoUI extends NullGui {
     public findFocusTree = false;
     public findHeadlineRange: [number, number] = [0, 0];
     public findHeadlinePosition: Position | undefined;
+
     // * Interactive Find Input
-    // TODO : Convert this subsystem into a class!
     private _interactiveSearchInputBox: vscode.InputBox | undefined;
     private _interactiveSearchIsReplace: boolean = false; // Starts false for 'search'. True is replace
     private _interactiveSearchOptions: {
@@ -6537,6 +6524,7 @@ public async openLeoFile(p_uri?: vscode.Uri): Promise&lt;unknown&gt; {
  * @returns A promise that resolves when the a file is finally opened, rejected otherwise
  */
 public showRecentLeoFiles(): Thenable&lt;unknown&gt; {
+
     void vscode.window.showInformationMessage('TODO: Implement showRecentLeoFiles');
 
     // if shown, chosen and opened
@@ -6991,8 +6979,6 @@ private _setupOpenedLeoDocument(): void {
         this._bodyFileSystemStarted = true;
     }
 
-    // this._leoStatusBar.update(true, 0, true); // todo
-    // this._leoStatusBar.show(); // Just selected a node // todo
     this.loadSearchSettings();
 }
 
@@ -8000,7 +7986,7 @@ public refreshPossibleGnxList(): string[] {
                 return w_buffer;
             } else {
                 if (!this._errorRefreshFlag) {
-                    this._leoUi.fullRefresh(); // TODO ?
+                    this._leoUi.fullRefresh();
                 }
                 if (this._lastGnx === w_gnx) {
                     // was last gnx of closed file about to be switched to new document selected
@@ -8782,7 +8768,7 @@ public setLeoIDCommand(): Thenable&lt;unknown&gt; {
 </t>
 <t tx="felix.20220201225503.1">public ensure_commander_visible(c: Commands): void {
     // TODO !
-    console.log("TODO ensure_commander_visible");
+    // console.log("TODO ensure_commander_visible");
 }
 
 </t>
@@ -9433,57 +9419,32 @@ public loadSearchSettings(): void {
     if (!g.app.windowList.length || !g.app.windowList[this.frameIndex]) {
         return;
     }
-
     const c = g.app.windowList[this.frameIndex].c;
     const scon = c.quicksearchController;
     const leoISettings = c.findCommands.ftm.get_settings();
-
-    const w_searchSettings: LeoGuiFindTabManagerSettings = {
-        // Nav options
-        nav_text: scon.navText,
-        show_parents: scon.showParents,
-        is_tag: scon.isTag,
-        search_options: scon.searchOptions,
-        //Find/change strings...
-        find_text: leoISettings.find_text,
-        change_text: leoISettings.change_text,
-        // Find options...
-        ignore_case: leoISettings.ignore_case,
-        mark_changes: leoISettings.mark_changes,
-        mark_finds: leoISettings.mark_finds,
-        node_only: leoISettings.node_only,
-        file_only: leoISettings.file_only,
-        pattern_match: leoISettings.pattern_match,
-        search_body: leoISettings.search_body,
-        search_headline: leoISettings.search_headline,
-        suboutline_only: leoISettings.suboutline_only,
-        whole_word: leoISettings.whole_word
-    };
-
-    // TODO : PASS DIRECTLY ! (combine w_searchSettings above and w_settings below once this is stable)
-
     const w_settings: LeoSearchSettings = {
-        isTag: w_searchSettings.is_tag,
-        navText: w_searchSettings.nav_text,
-        showParents: w_searchSettings.show_parents,
-        searchOptions: w_searchSettings.search_options,
+        // Nav options
+        navText: scon.navText,
+        showParents: scon.showParents,
+        isTag: scon.isTag,
+        searchOptions: scon.searchOptions,
         //Find/change strings...
-        findText: w_searchSettings.find_text,
-        replaceText: w_searchSettings.change_text,
+        findText: leoISettings.find_text,
+        replaceText: leoISettings.change_text,
         // Find options...
-        wholeWord: w_searchSettings.whole_word,
-        ignoreCase: w_searchSettings.ignore_case,
-        regExp: w_searchSettings.pattern_match,
-        markFinds: w_searchSettings.mark_finds,
-        markChanges: w_searchSettings.mark_changes,
-        searchHeadline: w_searchSettings.search_headline,
-        searchBody: w_searchSettings.search_body,
+        ignoreCase: leoISettings.ignore_case,
+        markChanges: leoISettings.mark_changes,
+        markFinds: leoISettings.mark_finds,
+        wholeWord: leoISettings.whole_word,
+        regExp: leoISettings.pattern_match,
+        searchHeadline: leoISettings.search_headline,
+        searchBody: leoISettings.search_body,
         // 0, 1 or 2 for outline, sub-outline, or node.
         searchScope:
             0 +
-            (w_searchSettings.suboutline_only ? 1 : 0) +
-            (w_searchSettings.node_only ? 2 : 0) +
-            (w_searchSettings.file_only ? 3 : 0),
+            (leoISettings.suboutline_only ? 1 : 0) +
+            (leoISettings.node_only ? 2 : 0) +
+            (leoISettings.file_only ? 3 : 0),
     };
     if (w_settings.searchScope &gt; 2) {
         console.error('searchScope SHOULD BE 0, 1, 2 only: ', w_settings.searchScope);
@@ -10748,6 +10709,9 @@ private _handleRClicks(p_rclicks: any[], topLevelName?: string): Thenable&lt;any
  * @returns the launchRefresh promise started after it's done finding the node
  */
 public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
+
+    void vscode.window.showInformationMessage('TODO: Implement gotoScript ' + p_node.label);
+
     return Promise.resolve(true);
     /*
     return this._isBusyTriggerSave(false)
@@ -10794,7 +10758,6 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
 
 </t>
 <t tx="felix.20220520011951.1">public resolveTreeItem(item: LeoUndoNode, element: LeoUndoNode, token: vscode.CancellationToken): vscode.ProviderResult&lt;LeoUndoNode&gt; {
-    // item.tooltip = "TODO leojs Undo Tooltip";
     if (item.contextValue === Constants.CONTEXT_FLAGS.UNDO_BEAD) {
         item.tooltip = "Undo Bead #" + item.beadIndex;
     }
@@ -11388,8 +11351,6 @@ public async showBody(p_aside: boolean, p_preventTakingFocus?: boolean, p_preven
             (this._bodyLastChangedDocument.isDirty || this._editorTouched) &amp;&amp;
             w_openedDocumentGnx === utils.leoUriToStr(this._bodyLastChangedDocument.uri)
         ) {
-            console.log('had to save so ------ fireRefreshFile !!'); // TODO : CLEANUP !
-
             // ! FAKE SAVE to make sure body is not dirty !
             this._leoFileSystem.preventSaveToLeo = true;
             this._editorTouched = false;
@@ -11900,7 +11861,6 @@ private _switchBody(
                                 this._bodyLastChangedDocument &amp;&amp;
                                 (p_tab.input as vscode.TabInputText).uri.fsPath === this._bodyLastChangedDocument.uri.fsPath
                             ) {
-                                console.log('LAST SECOND SAVE1!'); // TODO : CLEANUP !
                                 this._leoFileSystem.preventSaveToLeo = true;
                                 this._editorTouched = false;
                                 q_lastSecondSaveFound = this._bodyLastChangedDocument.save();
@@ -11938,7 +11898,6 @@ private _switchBody(
                         this._bodyLastChangedDocument &amp;&amp;
                         (p_tab.input as vscode.TabInputText).uri.fsPath === this._bodyLastChangedDocument.uri.fsPath
                     ) {
-                        console.log('LAST SECOND SAVE2!'); // TODO : CLEANUP !
                         this._leoFileSystem.preventSaveToLeo = true;
                         this._editorTouched = false;
                         q_lastSecondSaveAll = this._bodyLastChangedDocument.save();
@@ -12191,16 +12150,6 @@ private _revealNode(
  */
 public isTsStillValid(ts: number): boolean {
 
-    // TODO !
-    // if (
-    //     this._commandStack.lastReceivedNode &amp;&amp;
-    //     this._commandStack.lastReceivedNodeTS &gt; ts &amp;&amp;
-    //     (this._commandStack._finalRefreshType.tree || this._commandStack._finalRefreshType.node)
-    // ) {
-    //     // new commandStack lastReceivedNode, is different and newer and tree/node has to refresh
-    //     return false;
-    // }
-
     // also test other sources, and check if command also not started to go back to original gnx
     // by checking if the test above only failed for gnx being the same
     if (
@@ -12215,7 +12164,6 @@ public isTsStillValid(ts: number): boolean {
         this.lastSelectedNode &amp;&amp;
         this._lastSelectedNodeTS &gt; ts &amp;&amp;
         this._lastRefreshNodeTS &lt; this._lastSelectedNodeTS
-        // this._commandStack.lastReceivedNodeTS &lt; this._lastSelectedNodeTS // TODO !
     ) {
         // new lastSelectedNode is different and newer
         return false;
@@ -12239,6 +12187,7 @@ public fullRefresh(): void {
                 documents: true,
                 buttons: true,
                 states: true,
+                goto: true,
             }
         );
         void this.launchRefresh();
@@ -12299,7 +12248,6 @@ private _onGotoTreeViewVisibilityChanged(
 ): void {
     if (p_event.visible) {
         this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
-        // this.refreshGotoPane();  // No need to refresh because no selection needs to be set
     }
 }
 
@@ -12343,20 +12291,7 @@ private _onActiveEditorChanged(
     if (!p_internalCall) {
         void this.triggerBodySave(true); // Save in case edits were pending
     }
-    // todo : Bring back status bar item?
-    // // * Status flag check
-    // if (!p_editor &amp;&amp; this._leoStatusBar.statusBarFlag) {
-    //     return;
-    //     // this._leoStatusBar.update(false);
-    // }
-    // // * Status flag check
-    // setTimeout(() =&gt; {
-    //     if (vscode.window.activeTextEditor) {
-    //         this._leoStatusBar.update(
-    //             vscode.window.activeTextEditor.document.uri.scheme === Constants.URI_LEO_SCHEME
-    //         );
-    //     }
-    // }, 0);
+
 }
 
 </t>
@@ -14775,8 +14710,6 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 
 [CMD.GOTO_NAV_ENTRY, (p_node: LeoGotoNode) =&gt; p_leoUI.gotoNavEntry(p_node)],
 
-// [CMD.INTERACTIVE_SEARCH_TAB, () =&gt; p_leoUI.interactiveSearchTab()], // TODO : UNUSED FOR NOW : NO WAY TO DETECT TAB IN INPUTBOX !
-
 [CMD.START_SEARCH, () =&gt; p_leoUI.command(LEOCMD.START_SEARCH, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 [CMD.SEARCH_BACKWARD, () =&gt; p_leoUI.command(LEOCMD.SEARCH_BACKWARD, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
 [CMD.RE_SEARCH, () =&gt; p_leoUI.command(LEOCMD.RE_SEARCH, { refreshType: NO_REFRESH, finalFocus: Focus.NoChange })],
@@ -14807,22 +14740,6 @@ public async interactiveSearch(p_backward: boolean, p_regex: boolean, p_word: bo
 [CMD.TAG_NODE, (p_node?: Position) =&gt; p_leoUI.command(LEOCMD.TAG_NODE, { node: p_node, refreshType: NO_REFRESH, finalFocus: Focus.NoChange, keepSelection: true })],
 [CMD.REMOVE_TAG, (p_node?: Position) =&gt; p_leoUI.command(LEOCMD.REMOVE_TAG, { node: p_node, refreshType: NO_REFRESH, finalFocus: Focus.NoChange, keepSelection: true })],
 [CMD.REMOVE_TAGS, (p_node?: Position) =&gt; p_leoUI.command(LEOCMD.REMOVE_ALL_TAGS, { node: p_node, refreshType: REFRESH_TREE, finalFocus: Focus.NoChange, keepSelection: true })],
-
-</t>
-<t tx="felix.20230122201158.1">/**
- * Handler for pressing 'TAB' when interactiveSearch is opened.
- */
-public interactiveSearchTab(): void {
-    // TODO : UNUSED FOR NOW : NO WAY IN VSCODE TO DETECT TAB IN INPUTBOX !
-    console.log('interactiveSearchTab!!');
-    if (this._interactiveSearchInputBox &amp;&amp; !this._interactiveSearchIsReplace) {
-        this._interactiveSearchIsReplace = true;
-        this._interactiveSearchOptions.search = this._interactiveSearchInputBox.value;
-        this._interactiveSearchInputBox.prompt = "'Enter' to search";
-        this._interactiveSearchInputBox.placeholder = "Replace pattern here";
-        this._interactiveSearchInputBox.value = "";
-    }
-}
 
 </t>
 <t tx="felix.20230222212520.1">/**

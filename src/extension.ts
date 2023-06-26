@@ -20,16 +20,6 @@ export async function activate(p_context: vscode.ExtensionContext) {
     console.log('env scheme', vscode.env.uriScheme);
     console.log('env appHost', vscode.env.appHost);
 
-    // * Close remaining leojs Bodies restored by vscode from last session.
-    // TODO : USE TABGROUPS
-    // vscode.window.visibleTextEditors.forEach(p_textEditor => {
-    //     if (p_textEditor.document.uri.scheme === Constants.URI_LEO_SCHEME) {
-    //         if (p_textEditor.hide) {
-    //             p_textEditor.hide();
-    //         }
-    //     }
-    // });
-
     const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
     const w_leojsVersion = w_leojsExtension.packageJSON.version;
 

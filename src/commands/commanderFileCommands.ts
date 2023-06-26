@@ -579,7 +579,7 @@ export class CommanderFileCommands {
             c.mFileName = fileName;
         }
         if (!c.mFileName) {
-            // c.frame.title = ""; // TODO : CHECK IF NEEDED !! 
+            c.frame.title = "";
             c.mFileName = "";
         }
         if (c.mFileName) {

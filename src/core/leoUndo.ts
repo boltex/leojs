@@ -286,18 +286,6 @@ export class Undoer {
         const u: Undoer = this;
         u.clearOptionalIvars();
 
-        // TODO : for debugging/testing
-        /*
-        if false && !g.unitTesting:  // Debugging.
-        console.log('-' * 40)
-            for (let key in list(bunch.keys()))
-                g.trace(f"{key:20} {bunch.get(key)!r}")
-        console.log('-' * 20)
-        if g.unitTesting:  // #1694: An ever-present unit test.
-            val = bunch.get('oldMarked')
-            assert val in (True, False), f"{val!r} {g.callers()!s}"
-        */
-
         // bunch is not a dict, so bunch.keys() is required.
         for (let key of Object.keys(bunch)) {
             const val: any = bunch[key];
@@ -487,7 +475,6 @@ export class Undoer {
     public trace(): void {
         const ivars: string[] = ['kind', 'undoType'];
         for (let ivar of ivars) {
-            // TODO : test
             g.pr(ivar, (this as any)[ivar]);
         }
     }
@@ -975,9 +962,6 @@ export class Undoer {
         bunch.oldHead = p.h;
         return bunch;
     }
-
-    // beforeChangeHead = beforeChangeHeadline // TODO (not used) !
-
     //@+node:felix.20230331230548.1: *5* u.beforeChangeMultiHeadline
     /**
      * Return data that gets passed to afterChangeMultiHeadline.
@@ -995,7 +979,6 @@ export class Undoer {
         bunch.headlines = headlines;
         return bunch;
     }
-    // beforeChangeMultiHead = beforeChangeMultiHeadline // TODO (not used) ! 
     //@+node:felix.20211026230613.54: *5* u.beforeChangeNodeContents
     /**
      * Return data that gets passed to afterChangeNode.
@@ -1017,8 +1000,8 @@ export class Undoer {
         const c: Commands = u.c;
         const w: StringTextWrapper = c.frame.body.wrapper;
         const bunch: Bead = u.createCommonBunch(p);
-        bunch.oldSel = [0, 0]; // w.getSelectionRange(); // TODO !
-        bunch.oldText = p.b; //w.getAllText(); // TODO !
+        bunch.oldSel = [0, 0]; // w.getSelectionRange(); // TODO ?
+        bunch.oldText = p.b; //w.getAllText(); // TODO ?
         bunch.oldTree = u.saveTree(p);
         return bunch;
     }
@@ -1242,7 +1225,7 @@ export class Undoer {
         }
 
         // Update editors.
-        // c.frame.body.updateEditors(); // TODO : test if needed
+        // c.frame.body.updateEditors(); // ! LEOJS will refresh !
 
         // Update icons.
         const val: number = p.computeIcon();
@@ -1251,7 +1234,7 @@ export class Undoer {
             redraw_flag = true;
         }
         //
-        // Recolor the body. // TODO : test if needed
+        // Recolor the body.
         c.frame.scanForTabWidth(p);  // Calls frame.setTabWidth()
 
         c.recolor();
@@ -2250,7 +2233,10 @@ export class Undoer {
         // c.recolor();
 
         if (u.inHead) {
-            // c.editHeadline(); // TODO : NEEDED ???
+
+            // ! LEOJS has no editing headline features nor wrapper around tree.editLabel
+            // c.editHeadline();
+
             u.inHead = false;
         } else {
             c.bodyWantsFocus();

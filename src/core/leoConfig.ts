@@ -641,7 +641,7 @@ export class ParserBaseClass {
     //@+node:felix.20220529184714.27: *5* pbc.dumpMenuTree
     public dumpMenuTree(aList: any[], level = 0, path = ''): void {
 
-        // Todo 
+        // Todo ?
 
         /*
 
@@ -661,8 +661,11 @@ export class ParserBaseClass {
 
     //@+node:felix.20220529184714.28: *5* pbc.patchMenuTree
     public patchMenuTree(orig: any[], targetPath: string, path = ''): any {
-        // TODO 
+
+        // TODO ?
+
         /* 
+        
         kind: str
         val: Any
         val2: Any
@@ -690,7 +693,7 @@ export class ParserBaseClass {
     //@+node:felix.20220529184714.29: *4* pbc.doMenus & helper
     public doMenus(p: Position, kind: string, name: string, val: any): void {
 
-        console.log('TODO: doMenus');
+        console.log('TODO: doMenus ?');
 
         /* 
         
@@ -2251,14 +2254,15 @@ export class LocalConfigManager {
      * Return the value of @directory setting, or None if the directory does not exist.
      * @param setting 
      */
-    public getDirectory(setting: string): string | undefined {
+    public async getDirectory(setting: string): Promise<string | undefined> {
         // Fix https://bugs.launchpad.net/leo-editor/+bug/1173763
         const theDir: string = this.get(setting, 'directory');
-        // TODO MAYBE CHECK???
-        // if( g.os_path_exists(theDir) && g.os_path_isdir(theDir)){
-        //     return theDir;
-        // }
-        if (theDir) {
+        if (!theDir) {
+            return undefined;
+        }
+        const w_exists = await g.os_path_exists(theDir);
+        const w_isDir = await g.os_path_isdir(theDir);
+        if (w_exists && w_isDir) {
             return theDir;
         }
         return undefined;

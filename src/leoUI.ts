@@ -127,8 +127,8 @@ export class LeoUI extends NullGui {
     public findFocusTree = false;
     public findHeadlineRange: [number, number] = [0, 0];
     public findHeadlinePosition: Position | undefined;
+
     // * Interactive Find Input
-    // TODO : Convert this subsystem into a class!
     private _interactiveSearchInputBox: vscode.InputBox | undefined;
     private _interactiveSearchIsReplace: boolean = false; // Starts false for 'search'. True is replace
     private _interactiveSearchOptions: {
@@ -641,8 +641,6 @@ export class LeoUI extends NullGui {
             this._bodyFileSystemStarted = true;
         }
 
-        // this._leoStatusBar.update(true, 0, true); // todo
-        // this._leoStatusBar.show(); // Just selected a node // todo
         this.loadSearchSettings();
     }
 
@@ -797,7 +795,6 @@ export class LeoUI extends NullGui {
     ): void {
         if (p_event.visible) {
             this._leoGotoProvider.setLastGotoView(p_explorerView ? this._leoGotoExplorer : this._leoGoto);
-            // this.refreshGotoPane();  // No need to refresh because no selection needs to be set
         }
     }
 
@@ -863,20 +860,7 @@ export class LeoUI extends NullGui {
         if (!p_internalCall) {
             void this.triggerBodySave(true); // Save in case edits were pending
         }
-        // todo : Bring back status bar item?
-        // // * Status flag check
-        // if (!p_editor && this._leoStatusBar.statusBarFlag) {
-        //     return;
-        //     // this._leoStatusBar.update(false);
-        // }
-        // // * Status flag check
-        // setTimeout(() => {
-        //     if (vscode.window.activeTextEditor) {
-        //         this._leoStatusBar.update(
-        //             vscode.window.activeTextEditor.document.uri.scheme === Constants.URI_LEO_SCHEME
-        //         );
-        //     }
-        // }, 0);
+
     }
 
     /**
@@ -1542,6 +1526,7 @@ export class LeoUI extends NullGui {
                     documents: true,
                     buttons: true,
                     states: true,
+                    goto: true,
                 }
             );
             void this.launchRefresh();
@@ -1553,16 +1538,6 @@ export class LeoUI extends NullGui {
       * @param ts timestamp of last time
      */
     public isTsStillValid(ts: number): boolean {
-
-        // TODO !
-        // if (
-        //     this._commandStack.lastReceivedNode &&
-        //     this._commandStack.lastReceivedNodeTS > ts &&
-        //     (this._commandStack._finalRefreshType.tree || this._commandStack._finalRefreshType.node)
-        // ) {
-        //     // new commandStack lastReceivedNode, is different and newer and tree/node has to refresh
-        //     return false;
-        // }
 
         // also test other sources, and check if command also not started to go back to original gnx
         // by checking if the test above only failed for gnx being the same
@@ -1578,7 +1553,6 @@ export class LeoUI extends NullGui {
             this.lastSelectedNode &&
             this._lastSelectedNodeTS > ts &&
             this._lastRefreshNodeTS < this._lastSelectedNodeTS
-            // this._commandStack.lastReceivedNodeTS < this._lastSelectedNodeTS // TODO !
         ) {
             // new lastSelectedNode is different and newer
             return false;
@@ -1900,7 +1874,6 @@ export class LeoUI extends NullGui {
                                     this._bodyLastChangedDocument &&
                                     (p_tab.input as vscode.TabInputText).uri.fsPath === this._bodyLastChangedDocument.uri.fsPath
                                 ) {
-                                    console.log('LAST SECOND SAVE1!'); // TODO : CLEANUP !
                                     this._leoFileSystem.preventSaveToLeo = true;
                                     this._editorTouched = false;
                                     q_lastSecondSaveFound = this._bodyLastChangedDocument.save();
@@ -1938,7 +1911,6 @@ export class LeoUI extends NullGui {
                             this._bodyLastChangedDocument &&
                             (p_tab.input as vscode.TabInputText).uri.fsPath === this._bodyLastChangedDocument.uri.fsPath
                         ) {
-                            console.log('LAST SECOND SAVE2!'); // TODO : CLEANUP !
                             this._leoFileSystem.preventSaveToLeo = true;
                             this._editorTouched = false;
                             q_lastSecondSaveAll = this._bodyLastChangedDocument.save();
@@ -2223,8 +2195,6 @@ export class LeoUI extends NullGui {
                 (this._bodyLastChangedDocument.isDirty || this._editorTouched) &&
                 w_openedDocumentGnx === utils.leoUriToStr(this._bodyLastChangedDocument.uri)
             ) {
-                console.log('had to save so ------ fireRefreshFile !!'); // TODO : CLEANUP !
-
                 // ! FAKE SAVE to make sure body is not dirty !
                 this._leoFileSystem.preventSaveToLeo = true;
                 this._editorTouched = false;
@@ -4020,21 +3990,6 @@ export class LeoUI extends NullGui {
     }
 
     /**
-     * Handler for pressing 'TAB' when interactiveSearch is opened.
-     */
-    public interactiveSearchTab(): void {
-        // TODO : UNUSED FOR NOW : NO WAY IN VSCODE TO DETECT TAB IN INPUTBOX !
-        console.log('interactiveSearchTab!!');
-        if (this._interactiveSearchInputBox && !this._interactiveSearchIsReplace) {
-            this._interactiveSearchIsReplace = true;
-            this._interactiveSearchOptions.search = this._interactiveSearchInputBox.value;
-            this._interactiveSearchInputBox.prompt = "'Enter' to search";
-            this._interactiveSearchInputBox.placeholder = "Replace pattern here";
-            this._interactiveSearchInputBox.value = "";
-        }
-    }
-
-    /**
      * * Find / Replace All
      * @returns Promise of LeoBridgePackage from execution or undefined if cancelled
      */
@@ -4233,57 +4188,32 @@ export class LeoUI extends NullGui {
         if (!g.app.windowList.length || !g.app.windowList[this.frameIndex]) {
             return;
         }
-
         const c = g.app.windowList[this.frameIndex].c;
         const scon = c.quicksearchController;
         const leoISettings = c.findCommands.ftm.get_settings();
-
-        const w_searchSettings: LeoGuiFindTabManagerSettings = {
-            // Nav options
-            nav_text: scon.navText,
-            show_parents: scon.showParents,
-            is_tag: scon.isTag,
-            search_options: scon.searchOptions,
-            //Find/change strings...
-            find_text: leoISettings.find_text,
-            change_text: leoISettings.change_text,
-            // Find options...
-            ignore_case: leoISettings.ignore_case,
-            mark_changes: leoISettings.mark_changes,
-            mark_finds: leoISettings.mark_finds,
-            node_only: leoISettings.node_only,
-            file_only: leoISettings.file_only,
-            pattern_match: leoISettings.pattern_match,
-            search_body: leoISettings.search_body,
-            search_headline: leoISettings.search_headline,
-            suboutline_only: leoISettings.suboutline_only,
-            whole_word: leoISettings.whole_word
-        };
-
-        // TODO : PASS DIRECTLY ! (combine w_searchSettings above and w_settings below once this is stable)
-
         const w_settings: LeoSearchSettings = {
-            isTag: w_searchSettings.is_tag,
-            navText: w_searchSettings.nav_text,
-            showParents: w_searchSettings.show_parents,
-            searchOptions: w_searchSettings.search_options,
+            // Nav options
+            navText: scon.navText,
+            showParents: scon.showParents,
+            isTag: scon.isTag,
+            searchOptions: scon.searchOptions,
             //Find/change strings...
-            findText: w_searchSettings.find_text,
-            replaceText: w_searchSettings.change_text,
+            findText: leoISettings.find_text,
+            replaceText: leoISettings.change_text,
             // Find options...
-            wholeWord: w_searchSettings.whole_word,
-            ignoreCase: w_searchSettings.ignore_case,
-            regExp: w_searchSettings.pattern_match,
-            markFinds: w_searchSettings.mark_finds,
-            markChanges: w_searchSettings.mark_changes,
-            searchHeadline: w_searchSettings.search_headline,
-            searchBody: w_searchSettings.search_body,
+            ignoreCase: leoISettings.ignore_case,
+            markChanges: leoISettings.mark_changes,
+            markFinds: leoISettings.mark_finds,
+            wholeWord: leoISettings.whole_word,
+            regExp: leoISettings.pattern_match,
+            searchHeadline: leoISettings.search_headline,
+            searchBody: leoISettings.search_body,
             // 0, 1 or 2 for outline, sub-outline, or node.
             searchScope:
                 0 +
-                (w_searchSettings.suboutline_only ? 1 : 0) +
-                (w_searchSettings.node_only ? 2 : 0) +
-                (w_searchSettings.file_only ? 3 : 0),
+                (leoISettings.suboutline_only ? 1 : 0) +
+                (leoISettings.node_only ? 2 : 0) +
+                (leoISettings.file_only ? 3 : 0),
         };
         if (w_settings.searchScope > 2) {
             console.error('searchScope SHOULD BE 0, 1, 2 only: ', w_settings.searchScope);
@@ -4784,6 +4714,7 @@ export class LeoUI extends NullGui {
      * @returns A promise that resolves when the a file is finally opened, rejected otherwise
      */
     public showRecentLeoFiles(): Thenable<unknown> {
+
         void vscode.window.showInformationMessage('TODO: Implement showRecentLeoFiles');
 
         // if shown, chosen and opened
@@ -5526,6 +5457,9 @@ export class LeoUI extends NullGui {
      * @returns the launchRefresh promise started after it's done finding the node
      */
     public gotoScript(p_node: LeoButtonNode): Promise<boolean> {
+
+        void vscode.window.showInformationMessage('TODO: Implement gotoScript ' + p_node.label);
+
         return Promise.resolve(true);
         /*
         return this._isBusyTriggerSave(false)
@@ -5679,7 +5613,7 @@ export class LeoUI extends NullGui {
 
     public ensure_commander_visible(c: Commands): void {
         // TODO !
-        console.log("TODO ensure_commander_visible");
+        // console.log("TODO ensure_commander_visible");
     }
 
     /**
