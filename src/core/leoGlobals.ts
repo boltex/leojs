@@ -444,7 +444,12 @@ export class FileLikeObject {
 export class NullObject {
 
     // def __init__(self, *args, **keys): pass
-    constructor() { }
+    constructor(...args: any[]) {
+        if (args) {
+            // pass
+        }
+
+    }
 
     public toString(): string {
         return "NullObject";
@@ -2918,6 +2923,7 @@ export function enableIdleTimeHook(...args: any): void {
  */
 export function IdleTime(handler: any, delay = 500, tag?: string): any {
     try {
+        console.log("MAKING IdleTime IN LEOGLOBALS");
         return new app.gui.idleTimeClass(handler, delay, tag);
     } catch (exception) {
         return undefined;

@@ -111,7 +111,7 @@ export class ExternalFilesController {
         // get_time(path), see set_time() for notes.
         this._time_d = {};
         this.yesno_all_answer = undefined; // answer, 'yes-all', or 'no-all'
-        g.app.idleTimeManager.add_callback(this.on_idle);
+        g.app.idleTimeManager.add_callback(this.on_idle.bind(this));
     }
     //@+node:felix.20230503004807.3: *3* efc.entries
     //@+node:felix.20230503004807.4: *4* efc.check_overwrite (called from c.checkTimeStamp)

@@ -15,7 +15,6 @@ import { StringFindTabManager } from './findTabManager';
 import { Position } from './leoNodes';
 import { Commands } from './leoCommands';
 import { StringTextWrapper } from './leoFrame';
-import { IdleTime } from './idle_time';
 //@-<< leoGui imports >>
 //@+others
 //@+node:felix.20221119205229.1: ** class LeoGui

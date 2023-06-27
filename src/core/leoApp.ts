@@ -65,18 +65,31 @@ export class IdleTimeManager {
         if (!g.app) {
             return;
         }
+        console.log(' ----------------------- 1');
+
         if (g.app.killed) {
             return;
         }
+        console.log(' ----------------------- 2');
         if (!g.app.pluginsController) {
             g.trace('No g.app.pluginsController', g.callers());
             timer.stop();
             return;  // For debugger.
         }
+        console.log(' ----------------------- 3 !!');
+
         this.on_idle_count += 1;
+        console.log(' ----------------------- 4!!!!');
+
+        // console.log('this.callback_list length', this.callback_list.length);
+        console.log('this', this);
+        console.log(' ----------------------- 5! ');
+
         // Handle the registered callbacks.
         for (const callback of this.callback_list) {
             try {
+                console.log('callback', callback);
+
                 callback();
             } catch (exception) {
                 g.es_exception(exception);
@@ -89,7 +102,8 @@ export class IdleTimeManager {
             }
         }
         // Handle idle-time hooks.
-        g.app.pluginsController.on_idle();
+        // ! TODO !
+        // g.app.pluginsController.on_idle();
 
     }
     //@+node:felix.20210102213337.4: *3* itm.start
@@ -98,13 +112,17 @@ export class IdleTimeManager {
      */
     public start(): void {
 
+        console.log("called 'start' in  IdleTimeManager");
+
         this.timer = g.IdleTime(
-            this.on_idle,
+            this.on_idle.bind(this),
             5000, // 500, // ! ORIGINAL INTERVAL IS 500 !
             'IdleTimeManager.on_idle'
         );
-
-        console.log('timer started ');
+        if (this.timer) {
+            this.timer.start();
+        }
+        console.log('idletimemanager tried start its timer! ');
     }
     //@-others
 
@@ -2825,6 +2843,11 @@ export class LoadManager {
 
         // Make sure we call the new leoPlugins.init top-level function.
         // leoPlugins.init(); // TODO: plugins system ? 
+        // ! TEMP EQUIVALENT TO leoPlugins.init(); 
+        g.app.pluginsController = {
+            // TODO 
+        }; // new LeoPluginsController();
+
 
         // Force the user to set g.app.leoID.
         await g.app.setLeoID(true, verbose);
