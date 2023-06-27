@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Created by Leo: http://leoeditor.com/leo_toc.html -->
-<leo_file xmlns:leo="http://leoeditor.com/namespaces/leo-python-editor/1.1" >
+<!-- Created by Leo: https://leo-editor.github.io/leo-editor/leo_toc.html -->
+<leo_file xmlns:leo="http://leo-editor.github.io/leo-editor/namespaces/leo-python-editor/1.1" >
 <leo_header file_format="2"/>
 <globals/>
 <preferences/>
@@ -1690,10 +1690,10 @@ is true (and recent_files_omit_directories is False)
 <t tx="tbrown.20110212091818.20118">Set to False, dragging nodes between different outlines
 creates copies.  Set to True, the node is moved and no
 longer exists in the source outline.</t>
-<t tx="tbrown.20150807123339.1" lineYOffset="4b002e">Set to True to enable node appearance modifications
+<t tx="tbrown.20150807123339.1">Set to True to enable node appearance modifications
 See tree-declutter-patterns
 </t>
-<t tx="tbrown.20150807123421.1" lineYOffset="4b002e"># **Decluttering** replaces controls custom formatting of headlines, including:
+<t tx="tbrown.20150807123421.1"># **Decluttering** replaces controls custom formatting of headlines, including:
 
 # - Hiding or changing headline text,
 # - Adding icons to headlines,

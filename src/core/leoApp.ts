@@ -60,8 +60,7 @@ export class IdleTimeManager {
      */
     public on_idle(timer: any): void {
 
-        console.log('leoApps on_idle cycle running !');
-
+        console.log(' ----------------------- leoApps on_idle cycle running !');
 
         if (!g.app) {
             return;
@@ -105,6 +104,7 @@ export class IdleTimeManager {
             'IdleTimeManager.on_idle'
         );
 
+        console.log('timer started ');
     }
     //@-others
 
@@ -2394,6 +2394,8 @@ export class LoadManager {
         if (g.app.killed) {
             return;
         }
+
+        console.log('idle time START!');
 
         // ! ----------------------- MAYBE REPLACE WITH VSCODE FILE-CHANGE DETECTION ---------------- 
         g.app.idleTimeManager.start();
