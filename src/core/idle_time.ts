@@ -64,10 +64,6 @@ export class IdleTime {
      * ctor for IdleTime class.
      */
     constructor(handler: () => any, delay = 500, tag = "") {
-
-        console.log('constructing IdleTime !');
-
-
         // For use by handlers...
         this.count = 0;  // The number of times handler has been called.
         this.starting_time = undefined;  // Time that the timer started.
@@ -85,7 +81,6 @@ export class IdleTime {
         // Add this instance to the global idle_timers.list.
         // This reference prevents this instance from being destroyed.
         g.app.idle_timers.push(this);
-
     }
     //@+node:felix.20230509194418.4: *3* IdleTime.__repr__
     /**
@@ -112,7 +107,6 @@ export class IdleTime {
      * Call self.handler not more than once every self.delay msec.
      */
     public at_idle_time(): void {
-        console.log('-------------------- at_idle_time !');
         if (g.app.killed) {
             this.stop();
         }
@@ -143,7 +137,6 @@ export class IdleTime {
      * Carefully call the handler.
      */
     public call_handler(): void {
-
         try {
             this.count += 1;
             this.time = Date.now();
@@ -171,7 +164,6 @@ export class IdleTime {
      * Start idle-time processing
      */
     public start(): void {
-        console.log('start IdleTime !');
         this.enabled = true;
         if (this.starting_time == null) {
             this.starting_time = Date.now();

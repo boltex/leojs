@@ -174,9 +174,6 @@ export class ExternalFilesController {
      * for which @bool check_for_changed_external_file is True.
      */
     public async on_idle(): Promise<void> {
-
-        console.log('ETC on_idle cycle running !');
-
         //
         // #1240: Note: The "asking" dialog prevents idle time.
         //

@@ -3117,8 +3117,6 @@ export class AtFile {
      */
     public async precheck(fileName: string, root: Position): Promise<boolean> {
         const at = this;
-        console.log("in precheck :", fileName);
-
         //
         // #1450: First, check that the directory exists.
         const theDir = g.os_path_dirname(fileName);
@@ -3847,11 +3845,7 @@ export class AtFile {
      */
     public async shouldPromptForDangerousWrite(fn: string, p: Position): Promise<boolean> {
 
-        console.log('in shouldPromptForDangerousWrite, file: ', fn);
-
-
         const trace = true || g.app.debug.includes('save'); // TODO : CLEANUP ! 
-
         const sfn = g.shortFileName(fn);
         const c = this.c;
         const efc = g.app.externalFilesController;
@@ -3873,14 +3867,10 @@ export class AtFile {
         if (efc) {
             // Like c.checkFileTimeStamp.
             if (c.sqlite_connection && c.mFileName === fn) {
-                console.log('c.sqlite_connection && c.mFileName === fn ', fn);
-
                 // sqlite database file is never actually overwritten by Leo,
                 // so do *not* check its timestamp.
                 //pass
             } else if (await efc.has_changed(fn)) {
-                console.log(' else if (await efc.has_changed(fn)) ', fn);
-
                 if (trace) {
                     g.trace('Return True: changed:', sfn);
                 }

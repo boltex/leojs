@@ -1278,12 +1278,12 @@ public refreshTreeRoot(): void {
 export async function activate(p_context: vscode.ExtensionContext) {
 
     if (p_context.extensionUri) {
-        console.log('context.extensionUri', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
+        console.log('STARTUP: context.extensionUri: ', p_context.extensionUri.fsPath, p_context.extensionUri.scheme, p_context.extensionUri.toJSON(),);
     }
-    console.log('g.osBrowser', g.isBrowser);
-    console.log('test path.sep: ', path.sep);
-    console.log('env scheme', vscode.env.uriScheme);
-    console.log('env appHost', vscode.env.appHost);
+    console.log('STARTUP:          g.osBrowser: ', g.isBrowser);
+    console.log('STARTUP:             path.sep: ', path.sep);
+    console.log('STARTUP:           env scheme: ', vscode.env.uriScheme);
+    console.log('STARTUP:          env appHost: ', vscode.env.appHost);
 
     const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
     const w_leojsVersion = w_leojsExtension.packageJSON.version;
@@ -10785,7 +10785,7 @@ public gotoScript(p_node: LeoButtonNode): Promise&lt;boolean&gt; {
         g.app.vscodeUriScheme = vscode.workspace.workspaceFolders[0].uri.scheme;
         g.app.vscodeUriAuthority = vscode.workspace.workspaceFolders[0].uri.authority;
         g.app.vscodeUriPath = vscode.workspace.workspaceFolders[0].uri.path;
-        console.log('Writable filesystem: ', vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme));
+        console.log('is Writable Filesystem: ', vscode.workspace.fs.isWritableFileSystem(g.app.vscodeUriScheme));
 
         console.log('WORKSPACE CHANGE DETECTED! workspace JSON: ' + JSON.stringify(g.app.vscodeWorkspaceUri.toJSON()));
         console.log('WORKSPACE CHANGE DETECTED! workspace toString: ' + g.app.vscodeWorkspaceUri.toString());

@@ -59,37 +59,21 @@ export class IdleTimeManager {
      * IdleTimeManager: Run all idle-time callbacks.
      */
     public on_idle(timer: any): void {
-
-        console.log(' ----------------------- leoApps on_idle cycle running !');
-
         if (!g.app) {
             return;
         }
-        console.log(' ----------------------- 1');
-
         if (g.app.killed) {
             return;
         }
-        console.log(' ----------------------- 2');
         if (!g.app.pluginsController) {
             g.trace('No g.app.pluginsController', g.callers());
             timer.stop();
             return;  // For debugger.
         }
-        console.log(' ----------------------- 3 !!');
-
         this.on_idle_count += 1;
-        console.log(' ----------------------- 4!!!!');
-
-        // console.log('this.callback_list length', this.callback_list.length);
-        console.log('this', this);
-        console.log(' ----------------------- 5! ');
-
         // Handle the registered callbacks.
         for (const callback of this.callback_list) {
             try {
-                console.log('callback', callback);
-
                 callback();
             } catch (exception) {
                 g.es_exception(exception);
@@ -102,27 +86,22 @@ export class IdleTimeManager {
             }
         }
         // Handle idle-time hooks.
-        // ! TODO !
+        // ? TODO : pluginsController ?
         // g.app.pluginsController.on_idle();
-
     }
     //@+node:felix.20210102213337.4: *3* itm.start
     /**
      * Start the idle-time timer.
      */
     public start(): void {
-
-        console.log("called 'start' in  IdleTimeManager");
-
         this.timer = g.IdleTime(
             this.on_idle.bind(this),
             5000, // 500, // ! ORIGINAL INTERVAL IS 500 !
             'IdleTimeManager.on_idle'
         );
-        if (this.timer) {
-            this.timer.start();
+        if (this.timer && this.timer.start) {
+            this.timer.start(); // this.timer is a idleTimeClass, which can be a dummy object in unit-tests
         }
-        console.log('idletimemanager tried start its timer! ');
     }
     //@-others
 
@@ -1194,8 +1173,6 @@ export class LeoApp {
         if (c.changed) {
             c.promptingForClose = true;
             const veto = await frame.promptForSave();
-            console.log('VETO (true we exit doing nothing)', veto);
-
             c.promptingForClose = false;
             if (veto) {
                 return false;
@@ -2412,8 +2389,6 @@ export class LoadManager {
         if (g.app.killed) {
             return;
         }
-
-        console.log('idle time START!');
 
         // ! ----------------------- MAYBE REPLACE WITH VSCODE FILE-CHANGE DETECTION ---------------- 
         g.app.idleTimeManager.start();

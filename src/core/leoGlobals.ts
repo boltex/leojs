@@ -2923,7 +2923,6 @@ export function enableIdleTimeHook(...args: any): void {
  */
 export function IdleTime(handler: any, delay = 500, tag?: string): any {
     try {
-        console.log("MAKING IdleTime IN LEOGLOBALS");
         return new app.gui.idleTimeClass(handler, delay, tag);
     } catch (exception) {
         return undefined;

@@ -459,9 +459,6 @@
             w_inputEl.addEventListener('input', function (p_event) {
                 // @ts-expect-error
                 searchSettings[p_inputId] = this.value;
-
-                console.log('searchSettings of', p_inputId, " is: ", searchSettings);
-
                 processChange();
             });
         }

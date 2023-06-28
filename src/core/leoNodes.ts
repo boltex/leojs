@@ -1594,10 +1594,6 @@ export class Position {
             p._childIndex -= 1;
             p.v = parent_v.children[n - 1];
         } else {
-            // console.log('Deleting a node??', p.h);
-            // console.log('parent_v', parent_v?.h);
-            // console.log('n', n);
-            // console.log('parent_v.children.length', parent_v?.children.length);
             // * For now, use undefined p.v to signal null/invalid positions
             // @ts-ignore
             p.v = undefined;
