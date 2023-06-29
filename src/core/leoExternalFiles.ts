@@ -253,6 +253,8 @@ export class ExternalFilesController {
                 c.redraw(p);
                 await c.refreshFromDisk();
                 c.redraw();
+                // ! LEOJS : FORCE GUI REFRESH AFTER A refreshFromDisk COMMAND !
+                g.app.gui.fullRefresh();
             }
         }
     }
@@ -336,6 +338,12 @@ export class ExternalFilesController {
             p.setDirty();
             c.setChanged();
         }
+
+        // TODO : NEEDED ------------------------------------------------------------- ??? 
+        // ! LEOJS : FORCE GUI REFRESH AFTER A refreshFromDisk COMMAND !
+        // g.app.gui.fullRefresh();
+        //               ------------------------------------------------------------- ??? 
+
 
     }
     //@+node:felix.20230503004807.12: *4* efc.open_with & helpers
