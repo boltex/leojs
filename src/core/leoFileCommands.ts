@@ -2159,7 +2159,7 @@ export class FileCommands {
 
         if (str_pos === undefined) {
             const d: any = root.v.u;
-            if (d) {
+            if (d && Object.keys(d).length) {
                 str_pos = d['str_leo_pos'];
             }
         }
@@ -3201,7 +3201,8 @@ export class FileCommands {
         // Create aList of pairs (v,d) where d contains only pickleable entries.
         if (aList_pv.length) {
             aList_va = this.createUaList(aList_pv);
-        } else {
+        }
+        if (!aList_va.length) {
             return '';
         }
 
@@ -3272,7 +3273,7 @@ export class FileCommands {
                     }
 
                 }
-                if (d) {
+                if (Object.keys(d).length) {
                     result.push([torv, d]);
                 }
 
