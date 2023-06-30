@@ -886,30 +886,18 @@ export class FileCommands {
         'dump-clone-parents',
         'Print the parent vnodes of all cloned vnodes.'
     )
-    public dump_clone_parents(this: Commands): void {
-        // ! Not used outside of being a command
-
-        // TODO TEST THIS
-        // c = event.get('c')
-
-        // const c: Commands = this.c;
-        //
-        // or
-        const c: Commands = this;
-
+    public dump_clone_parents(): void {
+        const c: Commands = this.c;
         if (!c) {
             return;
         }
-
-        console.log('dump-clone-parents...');
-
+        g.es_print('dump-clone-parents...');
         const d = c.fileCommands.gnxDict;
-
         for (let gnx in d) {
             const v: VNode = d[gnx];
             if (v.parents.length > 1) {
-                console.log(v.h);
-                g.printObj(v.parents);
+                g.es_print(v.h);
+                g.es_print(v.parents);
             }
         }
     }
@@ -918,25 +906,16 @@ export class FileCommands {
         'dump-gnx-dict',
         'Dump c.fileCommands.gnxDict.'
     )
-    public dump_gnx_dict(this: Commands): void {
-        // ! Not used outside of being a command
-
-        // TODO TEST THIS
-        // c = event.get('c')
-
-        // const c: Commands = this.c;
-        //
-        // or
-        const c: Commands = this;
-
-        // TODO TEST THIS!
+    public dump_gnx_dict(): void {
+        const c: Commands = this.c;
         if (!c) {
             return;
         }
-
         const d: any = c.fileCommands.gnxDict;
-
-        g.printObj(d, 'gnxDict');
+        for (const key in d) {
+            g.es(d[key]);
+        }
+        console.log('gnxDict', d);
     }
     //@+node:felix.20211213224222.1: *3* fc: Commands
     //@+node:felix.20211213224222.2: *4* writeAtFileNodes

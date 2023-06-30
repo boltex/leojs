@@ -12173,25 +12173,22 @@ public isTsStillValid(ts: number): boolean {
 
 </t>
 <t tx="felix.20220923001725.1">/**
- * * Adds 'do nothing' to the frontend stack and refreshes all parts.
+ * * Refreshes all parts.
  * @returns Promise back from command's execution, if added on stack, undefined otherwise.
  */
 public fullRefresh(): void {
-    // Todo : Check if timeout necessary
-    setTimeout(() =&gt; {
-        this.setupRefresh(
-            this.finalFocus,
-            {
-                tree: true,
-                body: true,
-                documents: true,
-                buttons: true,
-                states: true,
-                goto: true,
-            }
-        );
-        void this.launchRefresh();
-    }, 0);
+    this.setupRefresh(
+        this.finalFocus,
+        {
+            tree: true,
+            body: true,
+            documents: true,
+            buttons: true,
+            states: true,
+            goto: true,
+        }
+    );
+    void this.launchRefresh();
 }
 
 </t>

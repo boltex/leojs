@@ -840,7 +840,10 @@ export function checkUnchangedIvars(
 export function listToString(obj: any): string {
     // return JSON.stringify(obj, undefined, 4);
     let result: string = "";
-    result = safeJsonStringify(obj, null, 2);
+
+    result = obj.toString(); // TODO : TEST THIS!
+    // result = safeJsonStringify(obj, null, 2);// TODO : TEST THIS! 
+
     // let cache: any[] = [];
     // result = JSON.stringify(obj, function (key, value) {
     //     if (typeof value === 'object' && value !== null) {

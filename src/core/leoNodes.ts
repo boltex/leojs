@@ -2804,17 +2804,17 @@ export class VNode {
     public dump(label: string = ''): void {
         const v: VNode = this;
         const s: string = '-'.repeat(10);
-        console.log(`${s} ${label} ${v}`);
-        // console.log(`gnx: ${v.gnx}`);
-        console.log(`parents.length: ${v.parents.length}`);
-        console.log(`children.length: ${v.children.length}`);
-        console.log(`parents: ${g.listToString(v.parents)}`);
-        console.log(`children: ${g.listToString(v.children)}`);
+        g.es_print(`${s} ${label} ${v}`);
+        // g.es_print(`gnx: ${v.gnx}`);
+        g.es_print(`parents.length: ${v.parents.length}`);
+        g.es_print(`children.length: ${v.children.length}`);
+        g.es_print(`parents: ${g.listToString(v.parents)}`);
+        g.es_print(`children: ${g.listToString(v.children)}`);
     }
 
     //@+node:felix.20211209010457.1: *3* v.toString
     public toString(): string {
-        return `VNode (gnx: ${this.gnx})`;
+        return this.__repr__();
     };
     //@+node:felix.20210112210731.1: *3* v.Comparisons
     //@+node:felix.20210112210731.2: *4* v.findAtFileName
