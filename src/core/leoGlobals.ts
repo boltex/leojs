@@ -4726,8 +4726,8 @@ export function os_path_realpath(p_path: string): string {
         return '';
     }
 
-    // TODO !
-    console.log('Todo: better os_path_realpath!');
+    // TODO : better os_path_realpath !
+    // console.log('Todo: better os_path_realpath!');
 
     p_path = p_path; // fixme
     // p_path = vscode.workspace.fs.realPath(p_path);

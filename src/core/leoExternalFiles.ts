@@ -170,9 +170,6 @@ export class ExternalFilesController {
      * for which @bool check_for_changed_external_file is True.
      */
     public async on_idle(): Promise<void> {
-
-        console.log('on_idle in leoExternalFiles');
-
         //
         // #1240: Note: The "asking" dialog prevents idle time.
         //
@@ -261,12 +258,8 @@ export class ExternalFilesController {
      * Check c's .leo file for external changes.
      */
     public async idle_check_leo_file(c: Commands): Promise<void> {
-
-        console.log('idle_check_leo_file of commander ', c.mFileName);
-
         const w_path = c.fileName();
         const w_hasChanged = await this.has_changed(w_path);
-
         if (!w_hasChanged) {
             return;
         }
@@ -286,9 +279,6 @@ export class ExternalFilesController {
      * Update the open-with node given by ef.
      */
     public async idle_check_open_with_file(c: Commands | undefined, ef: ExternalFile): Promise<void> {
-
-        console.log('idle_check_open_with_file');
-
         console.assert(ef instanceof ExternalFile, ef.toString());
         if (!ef.path) {
             return;
@@ -797,10 +787,6 @@ export class ExternalFilesController {
      * Return True if the file at path has changed outside of Leo.
      */
     public async has_changed(p_path: string): Promise<boolean> {
-
-        console.log('has_changed', p_path);
-
-
         if (!p_path) {
             return false;
         }
@@ -816,15 +802,8 @@ export class ExternalFilesController {
         // First, check the modification times.
         const old_time = this.get_time(p_path);
         const new_time = await this.get_mtime(p_path);
-        console.log("HAS CHANGED ?", p_path);
-
-        console.log('old_time', old_time);
-        console.log('new_time', new_time);
-
         if (!old_time) {
             // Initialize.
-            console.log('First time! Initialize ', p_path);
-
             await this.set_time(p_path, new_time);
             this.checksum_d[p_path] = await this.checksum(p_path);
             return false;
