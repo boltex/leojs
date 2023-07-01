@@ -552,7 +552,7 @@ export class NullGui extends LeoGui {
     public finishStartup(): void { }
 
     public launchRefresh(): void { }
-    public fullRefresh(): void { }
+    public fullRefresh(p_keepFocus?: boolean): void { }
 
     public replaceClipboardWith(s: string): Thenable<void> {
         this.clipboardContents = s; // also set immediate clipboard string

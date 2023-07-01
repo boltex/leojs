@@ -249,7 +249,7 @@ export class ExternalFilesController {
                 await c.refreshFromDisk();
                 c.redraw();
                 // ! LEOJS : FORCE GUI REFRESH AFTER A refreshFromDisk COMMAND !
-                g.app.gui.fullRefresh();
+                g.app.gui.fullRefresh(true);
             }
         }
     }
@@ -331,7 +331,7 @@ export class ExternalFilesController {
 
         // TODO : NEEDED ------------------------------------------------------------- ??? 
         // ! LEOJS : FORCE GUI REFRESH AFTER A refreshFromDisk COMMAND !
-        // g.app.gui.fullRefresh();
+        // g.app.gui.fullRefresh(true);
         //               ------------------------------------------------------------- ??? 
 
 

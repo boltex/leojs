@@ -1515,15 +1515,15 @@ export class LeoUI extends NullGui {
      * * Refreshes all parts.
      * @returns Promise back from command's execution, if added on stack, undefined otherwise.
      */
-    public fullRefresh(): void {
+    public fullRefresh(p_keepFocus?: boolean): void {
         this.setupRefresh(
-            this.finalFocus,
+            p_keepFocus ? Focus.NoChange : this.finalFocus,
             {
                 tree: true,
                 body: true,
-                documents: true,
-                buttons: true,
                 states: true,
+                buttons: true,
+                documents: true,
                 goto: true,
             }
         );

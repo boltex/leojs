@@ -727,7 +727,6 @@ export class AtFile {
      * Update the @clean/@nosent node at root.
      */
     public async readOneAtCleanNode(root: Position): Promise<boolean> {
-        console.log('readOneAtCleanNode!----------------');
         const at = this;
         const c = this.c;
         const x = this.c.shadowController;
