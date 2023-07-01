@@ -690,6 +690,37 @@ export class ExternalFilesController {
         }
         const is_leo = p_path.endsWith('.db') || p_path.endsWith('.leo');
         const is_external_file = !is_leo;
+
+        // check with leoServer's config first. 
+        if (is_external_file) {
+
+            // * g.app.gui.config.defaultReloadIgnore DEFINED IN PACKAGE.JSON AS: 
+            // "enum": [
+            //     "none",
+            //     "yes-all",
+            //     "no-all"
+            //   ],
+            //   "enumDescriptions": [
+            //     "Choose each time",
+            //     "Reload All",
+            //     "Ignore All"
+            //   ]
+
+            if (g.app.gui.config && g.app.gui.config.defaultReloadIgnore) {
+                const checkConfig = g.app.gui.config.defaultReloadIgnore.toLowerCase();
+                if (!checkConfig.includes('none')) {
+                    let w_message = "Changes to external files were detected.";
+                    if (checkConfig.includes('yes')) {
+                        void vscode.window.showInformationMessage(w_message + " Nodes refreshed.");
+                        return 'yes-all';
+                    } else {
+                        void vscode.window.showInformationMessage(w_message + " They were ignored.");
+                        return 'no-all';
+                    }
+                }
+            }
+        }
+
         //
         // Create the message.
         let message1 = `${g.splitLongFileName(p_path)} has changed outside Leo.\n`;

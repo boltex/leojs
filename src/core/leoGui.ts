@@ -532,6 +532,7 @@ export class NullGui extends LeoGui {
     public clipboardContents: string = "";
     public isNullGui: boolean = true;
     public focusWidget: StringTextWrapper | undefined;
+    public config: any; // configuration service singleton for a specific external UI (e.g.: leojs)
 
     /**
      * ctor for the NullGui class.
