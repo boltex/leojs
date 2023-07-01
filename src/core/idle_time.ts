@@ -107,6 +107,8 @@ export class IdleTime {
      * Call self.handler not more than once every self.delay msec.
      */
     public at_idle_time(): void {
+        console.log('at_idle_time in IdleTime');
+
         if (g.app.killed) {
             this.stop();
         }
@@ -164,6 +166,8 @@ export class IdleTime {
      * Start idle-time processing
      */
     public start(): void {
+        console.log('START in IdleTime class!');
+
         this.enabled = true;
         if (this.starting_time == null) {
             this.starting_time = Date.now();

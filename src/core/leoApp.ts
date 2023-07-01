@@ -59,6 +59,10 @@ export class IdleTimeManager {
      * IdleTimeManager: Run all idle-time callbacks.
      */
     public on_idle(timer: any): void {
+
+        console.log('IdleTimeManager on_idle');
+
+
         if (!g.app) {
             return;
         }
@@ -94,6 +98,8 @@ export class IdleTimeManager {
      * Start the idle-time timer.
      */
     public start(): void {
+        console.log('START in IdleTimeManager, interval 5000');
+
         this.timer = g.IdleTime(
             this.on_idle.bind(this),
             5000, // 500, // ! ORIGINAL INTERVAL IS 500 !

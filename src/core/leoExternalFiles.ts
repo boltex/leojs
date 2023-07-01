@@ -122,21 +122,17 @@ export class ExternalFilesController {
      * since Leo read it or if the user agrees to overwrite it.
      */
     public async check_overwrite(c: Commands, p_path: string): Promise<boolean> {
-
         if (c.sqlite_connection && c.mFileName === p_path) {
             // sqlite database file is never actually overwritten by Leo
             // so no need to check its timestamp. It is modified through
             // sqlite methods.
             return true;
         }
-
         if (await this.has_changed(p_path)) {
             const val = await this.ask(c, p_path);
             return ['yes', 'yes-all'].includes(val);  // #1888
         }
-
         return true;
-
     }
     //@+node:felix.20230503004807.5: *4* efc.destroy_frame
     /**
@@ -174,6 +170,9 @@ export class ExternalFilesController {
      * for which @bool check_for_changed_external_file is True.
      */
     public async on_idle(): Promise<void> {
+
+        console.log('on_idle in leoExternalFiles');
+
         //
         // #1240: Note: The "asking" dialog prevents idle time.
         //
@@ -213,7 +212,6 @@ export class ExternalFilesController {
                     this.unchecked_files.push(file);
                 }
             }
-
         }
     }
     //@+node:felix.20230503004807.8: *5* efc.idle_check_commander
@@ -264,6 +262,8 @@ export class ExternalFilesController {
      */
     public async idle_check_leo_file(c: Commands): Promise<void> {
 
+        console.log('idle_check_leo_file of commander ', c.mFileName);
+
         const w_path = c.fileName();
         const w_hasChanged = await this.has_changed(w_path);
 
@@ -286,6 +286,8 @@ export class ExternalFilesController {
      * Update the open-with node given by ef.
      */
     public async idle_check_open_with_file(c: Commands | undefined, ef: ExternalFile): Promise<void> {
+
+        console.log('idle_check_open_with_file');
 
         console.assert(ef instanceof ExternalFile, ef.toString());
         if (!ef.path) {
@@ -322,10 +324,8 @@ export class ExternalFilesController {
      */
     public async update_open_with_node(ef: ExternalFile): Promise<void> {
         console.assert(ef instanceof ExternalFile, ef.toString());
-
         const c = ef.c;
         const p = (ef.p as Position).copy();
-
         g.blue(`updated ${p.h}`);
         let [s, e] = await g.readFileIntoString(ef.path);
         p.b = s!;
@@ -394,7 +394,6 @@ export class ExternalFilesController {
      * Return the file extension to be used in the temp file.
      */
     public compute_ext(c: Commands, p: Position, ext: string): string {
-
         if (ext) {
             if (ext.startsWith("'")) {
                 ext = ext.replace(/^'+/, '');
@@ -446,7 +445,6 @@ export class ExternalFilesController {
             g.error('c.temp_file_path failed');
         }
         return w_path;
-
     }
     //@+node:felix.20230503004807.15: *6* efc.clean_file_name
     /**
@@ -501,7 +499,6 @@ export class ExternalFilesController {
         const w_name = ancestors.pop() + ext;
         const w_path = g.PYTHON_os_path_join(td, w_name);
         return w_path;
-
     }
     //@+node:felix.20230503004807.16: *6* efc.legacy_file_name
     /**
@@ -532,7 +529,6 @@ export class ExternalFilesController {
         const name = g.sanitize_filename(p.h) + '_' + p.v.gnx + ext;
         const w_path = g.PYTHON_os_path_join(td, name);
         return w_path;
-
     }
     //@+node:felix.20230503004807.17: *5* efc.create_temp_file
     /**
@@ -540,7 +536,6 @@ export class ExternalFilesController {
      * Add the corresponding ExternalFile instance to self.files
      */
     public async create_temp_file(c: Commands, ext: string, p: Position): Promise<string | undefined> {
-
         const w_path = await this.compute_temp_file_path(c, p, ext);
         const exists = await g.os_path_exists(w_path);
         // Compute encoding and s.
@@ -767,7 +762,6 @@ export class ExternalFilesController {
      * Destroy the *temp* file corresponding to ef, an ExternalFile instance.
      */
     public async destroy_temp_file(ef: ExternalFile): Promise<void> {
-
         // Do not use g.trace here.
         const w_exists = await g.os_path_exists(ef.path);
         if (ef.path && w_exists) {
@@ -786,9 +780,7 @@ export class ExternalFilesController {
      * Return the modification time for the path.
      */
     public get_mtime(p_path: string): Promise<number> {
-
         return g.os_path_getmtime(g.os_path_realpath(p_path));
-
     }
 
     //@+node:felix.20230503004807.26: *4* efc.get_time
@@ -798,15 +790,16 @@ export class ExternalFilesController {
      * see set_time() for notes
      */
     public get_time(p_path: string): number {
-
         return this._time_d[g.os_path_realpath(p_path)];
-
     }
     //@+node:felix.20230503004807.27: *4* efc.has_changed
     /**
      * Return True if the file at path has changed outside of Leo.
      */
     public async has_changed(p_path: string): Promise<boolean> {
+
+        console.log('has_changed', p_path);
+
 
         if (!p_path) {
             return false;
@@ -821,10 +814,17 @@ export class ExternalFilesController {
         }
         //
         // First, check the modification times.
-        const old_time = await this.get_time(p_path);
+        const old_time = this.get_time(p_path);
         const new_time = await this.get_mtime(p_path);
+        console.log("HAS CHANGED ?", p_path);
+
+        console.log('old_time', old_time);
+        console.log('new_time', new_time);
+
         if (!old_time) {
             // Initialize.
+            console.log('First time! Initialize ', p_path);
+
             await this.set_time(p_path, new_time);
             this.checksum_d[p_path] = await this.checksum(p_path);
             return false;
@@ -852,14 +852,12 @@ export class ExternalFilesController {
      * Return the cached @bool check_for_changed_external_file setting.
      */
     public is_enabled(c: Commands): boolean {
-
         const d = this.enabled_d;
         let val = d.get(c);
         if (val == null) {
             val = c.config.getBool('check-for-changed-external-files', false);
             d.set(c, val);
         }
-
         return val;
     }
     //@+node:felix.20230503004807.29: *4* efc.join
@@ -895,7 +893,6 @@ export class ExternalFilesController {
      * There is *no way* to update the tree automatically.
      */
     public async warn(c: Commands, p_path: string, p: Position): Promise<void> {
-
         if (g.unitTesting || !g.app.commanders().includes(c)) {
             return Promise.resolve();
         }
