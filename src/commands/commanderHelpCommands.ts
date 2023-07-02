@@ -261,7 +261,7 @@ export class CommanderHelpCommands {
                 if (!localDir) {
                     localDir = vscode.workspace.workspaceFolders ? vscode.workspace.workspaceFolders[0].uri.path : "";
                 }
-                fileName = g.os_path_join(localDir, name);;
+                fileName = g.os_path_join(localDir, name);
             }
 
             const c2 = await g.openWithFileName(fileName, c, g.app.gui);

@@ -16,6 +16,7 @@ import { Bead, Undoer } from "../core/leoUndo";
 import { LoadManager, PreviousSettings } from "../core/leoApp";
 import { AtFile } from "../core/leoAtFile";
 import { NullGui } from "../core/leoGui";
+import { LeoImportCommands, MORE_Importer } from "../core/leoImport";
 
 //@+others
 //@+node:felix.20220105223215.1: ** function: import_txt_file
@@ -149,7 +150,7 @@ export class CommanderFileCommands {
 
         const c: Commands = this;
 
-        const ic: any = c.importCommands;
+        const ic: LeoImportCommands = c.importCommands;
 
         const types: [string, string][] = [
             ["All files", "*"],
@@ -169,90 +170,79 @@ export class CommanderFileCommands {
             ["Text files", "*.txt"]
         ];
 
-        const names = await g.app.gui.runOpenFileDialog(
+        let names: string[] = await g.app.gui.runOpenFileDialog(
             c,
             "Import File",
             types,
             ".py",
-            true);
+            true) as string[]; // Has multiple flag when calling runOpenFileDialog
 
-        return console.log('GOT NAMES FOR FILE IMPORT!', names);
-
-        // TODO
-        /*
-        c.bringToFront()
-
-        if names
-            g.chdir(names[0]);
-        else
+        c.bringToFront();
+        if (names && names.length) {
+            await g.chdir(names[0]);
+        } else {
             names = [];
-
-        if not names
-            if g.unitTesting
+        }
+        if (!names.length) {
+            if (g.unitTesting) {
                 // a kludge for unit testing.
                 c.init_error_dialogs();
-                c.raise_error_dialogs('read');
-
-
+                await c.raise_error_dialogs('read');
+            }
             return;
-
+        }
         // New in Leo 4.9: choose the type of import based on the extension.
         c.init_error_dialogs();
-        derived = [z for z in names if c.looksLikeDerivedFile(z)]
-
-        others = [z for z in names if z not in derived]
-
-        if derived
+        const derived: string[] = names.filter(z => c.looksLikeDerivedFile(z));
+        const others: string[] = names.filter(z => !derived.includes(z));
+        if (derived && derived.length) {
             await ic.importDerivedFiles(c.p, derived);
-
+        }
 
         let junk: string;
         let ext: string;
 
-        for let fn of others
+        for (let fn of others) {
             [junk, ext] = g.os_path_splitext(fn);
-            ext = ext.lower();  // #1522
-            if ext.startswith('.')
-                ext = ext[1:];
-
-            if ext == 'csv'
-                ic.importMindMap([fn]);
-            else if ext in ('cw', 'cweb')
-                ic.importWebCommand([fn], "cweb");
-
+            ext = ext.toLowerCase();  // #1522
+            if (ext.startsWith('.')) {
+                ext = ext.slice(1);
+            }
+            if (ext === 'csv') {
+                await ic.importMindMap([fn]);
+            } else if (['cw', 'cweb'].includes(ext)) {
+                await ic.importWebCommand([fn], "cweb");
+            }
             // Not useful. Use @auto x.json instead.
             // else if ext == 'json':
-                // ic.importJSON([fn])
-            else if fn.endswith('mm.html')
-                ic.importFreeMind([fn]);
-            else if ext in ('nw', 'noweb')
-                ic.importWebCommand([fn], "noweb");
-            else if ext == 'more'
-                leoImport.MORE_Importer(c).import_file(fn);  // #1522.
-            else if ext == 'txt'
+            // ic.importJSON([fn])
+            else if (fn.endsWith('mm.html')) {
+                await ic.importFreeMind([fn]);
+            } else if (['nw', 'noweb'].includes(ext)) {
+                await ic.importWebCommand([fn], "noweb");
+            } else if (ext === 'more') {
+                await new MORE_Importer(c).import_file(fn);  // #1522.
+            } else if (ext === 'txt') {
                 // #1522: Create an @edit node.
-                import_txt_file(c, fn);
-            else
+                await import_txt_file(c, fn);
+            } else {
                 // Make *sure* that parent.b is empty.
-                last = c.lastTopLevel();
-                parent = last.insertAfter();
+                const last = c.lastTopLevel();
+                const parent = last.insertAfter();
                 parent.v.h = 'Imported Files';
-                ic.importFilesCommand(
+                await ic.importFilesCommand(
                     [fn],
                     parent,
+                    undefined,
                     '@auto'  // was '@clean'
-                        // Experimental: attempt to use permissive section ref logic.
+                    // Experimental: attempt to use permissive section ref logic.
                 );
-
-            c.redraw()
-        c.raise_error_dialogs('read')
-        */
-
-
+            }
+            c.redraw();
+        }
+        await c.raise_error_dialogs('read');
     }
-
-    // TODO : aliases
-
+    // * LEOJS NOT USED : Not referenced in Leo's codebase either
     /*
     g.command_alias('importAtFile', importAnyFile)
     g.command_alias('importAtRoot', importAnyFile)
