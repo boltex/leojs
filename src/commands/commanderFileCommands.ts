@@ -9,8 +9,7 @@ import * as utils from "../utils";
 
 import * as g from "../core/leoGlobals";
 import { commander_command } from "../core/decorators";
-import { Position, VNode } from "../core/leoNodes";
-import { FileCommands } from "../core/leoFileCommands";
+import { Position } from "../core/leoNodes";
 import { Commands } from "../core/leoCommands";
 import { Bead, Undoer } from "../core/leoUndo";
 import { LoadManager, PreviousSettings } from "../core/leoApp";
