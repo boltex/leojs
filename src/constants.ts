@@ -811,9 +811,6 @@ export class Constants {
         'insert-as-first-child': 'async-insert-as-first-child',
         'insert-as-last-child': 'async-insert-as-last-child',
         'insert-node-before': 'async-insert-node-before',
-
-        // TODO : select chapter
-
     };
 
 }

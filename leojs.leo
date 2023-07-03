@@ -3821,9 +3821,10 @@ public async minibuffer(): Promise&lt;unknown&gt; {
  * * Asks for a new headline label, and replaces the current label with this new one one the specified, or currently selected node
  * @param p_node Specifies which node to rename, or leave undefined to rename the currently selected node
  * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
+ * @param p_prompt Optional prompt, to override the default 'edit headline' prompt. (for insert-* commands usage)
  * @returns Thenable that resolves when done
  */
-public editHeadline(p_node?: Position, p_fromOutline?: boolean): Thenable&lt;Position&gt; {
+public editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?: string): Thenable&lt;Position&gt; {
     this.setupRefresh(
         p_fromOutline ? Focus.Outline : Focus.Body,
         { tree: true, states: true }
@@ -3831,8 +3832,7 @@ public editHeadline(p_node?: Position, p_fromOutline?: boolean): Thenable&lt;Pos
     const c = g.app.windowList[this.frameIndex].c;
     const u = c.undoer;
     const w_p: Position = p_node || c.p;
-    this._headlineInputOptions.prompt =
-        Constants.USER_MESSAGES.PROMPT_EDIT_HEADLINE;
+    this._headlineInputOptions.prompt = p_prompt || Constants.USER_MESSAGES.PROMPT_EDIT_HEADLINE;
     this._headlineInputOptions.value = w_p.h; // preset input pop up
     return vscode.window.showInputBox(this._headlineInputOptions).then((p_newHeadline) =&gt; {
         if (p_newHeadline &amp;&amp; p_newHeadline !== "\n") {
@@ -8550,9 +8550,6 @@ public static MINIBUFFER_OVERRIDDEN_NAMES: { [key: string]: string } = {
     'insert-as-first-child': 'async-insert-as-first-child',
     'insert-as-last-child': 'async-insert-as-last-child',
     'insert-node-before': 'async-insert-node-before',
-
-    // TODO : select chapter
-
 };
 
 </t>

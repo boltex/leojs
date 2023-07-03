@@ -1690,7 +1690,7 @@ export class CommanderOutlineCommands {
     public asyncInsertChild(this: Commands): Thenable<Position> {
         const c: Commands = this;
         const p = c.insertHeadline('Insert Child', true);
-        return g.app.gui.editHeadline(p);
+        return g.app.gui.editHeadline(p, true, 'Insert Child');
     }
     //@+node:felix.20211031143555.7: *4* c_oc.insertHeadline (insert-*)
     @commander_command(
@@ -1779,7 +1779,7 @@ export class CommanderOutlineCommands {
         const c: Commands = this;
         // Fix #600.
         const p = this.insertHeadlineHelper(c, op_name, as_child, false, false);
-        return g.app.gui.editHeadline(p);
+        return g.app.gui.editHeadline(p, true, op_name);
     }
     @commander_command(
         'async-insert-as-first-child',
@@ -1788,7 +1788,7 @@ export class CommanderOutlineCommands {
     public asyncInsertNodeAsFirstChild(this: Commands): Thenable<Position> {
         const c: Commands = this;
         const p = this.insertHeadlineHelper(c, undefined, false, true, false);
-        return g.app.gui.editHeadline(p);
+        return g.app.gui.editHeadline(p, true, "Insert As First Child");
     }
     @commander_command(
         'async-insert-as-last-child',
@@ -1797,7 +1797,7 @@ export class CommanderOutlineCommands {
     public asyncInsertNodeAsLastChild(this: Commands): Thenable<Position> {
         const c: Commands = this;
         const p = this.insertHeadlineHelper(c, undefined, false, false, true);
-        return g.app.gui.editHeadline(p);
+        return g.app.gui.editHeadline(p, true, "Insert As Last Child");
     }
     //@+node:felix.20211031143555.9: *4* c_oc.insertHeadlineBefore
     @commander_command(
@@ -1853,8 +1853,10 @@ export class CommanderOutlineCommands {
         p.setDirty();
         c.setChanged();
         u.afterInsertNode(p, op_name, undoData);
-        return c.redrawAndEdit(p, true);
 
+        // return c.redrawAndEdit(p, true);
+        c.redraw(p);
+        return g.app.gui.editHeadline(p, true, op_name);
     }
     //@+node:felix.20211025223803.1: *3* c_oc.Mark commands
     //@+node:felix.20211025223803.2: *4* c_oc.cloneMarked

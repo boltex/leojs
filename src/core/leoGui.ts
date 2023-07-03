@@ -200,7 +200,7 @@ export class LeoGui {
     /**
      * Asks for node headline string and inserts node.
      */
-    public editHeadline(p_node?: Position, p_fromOutline?: boolean): any {
+    public editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?: string): any {
         this.oops();
     }
     /**
