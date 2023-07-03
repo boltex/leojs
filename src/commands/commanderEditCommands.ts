@@ -133,6 +133,25 @@ export class CommanderEditCommands {
         u.afterChangeBody(p, 'Indent Region', bunch);
         return true;
     }
+    //@+node:felix.20230702194637.1: *3* c_ec.editHeadline (edit-headline)
+    @commander_command('edit-headline', 'Begin editing the headline of the selected node.')
+    public editHeadline(): Thenable<unknown> {
+
+        return g.app.gui.editHeadline();
+
+        // c = self
+        // k, tree = c.k, c.frame.tree
+        // if g.app.batchMode:
+        //     c.notValidInBatchMode("Edit Headline")
+        //     return None, None
+        // e, wrapper = tree.editLabel(c.p)
+        // if k:
+        //     # k.setDefaultInputState()
+        //     k.setEditingState()
+        //     k.showStateAndMode(w=wrapper)
+        // return e, wrapper  # Neither of these is used by any caller.
+
+    }
     //@+node:felix.20230221160425.3: *3* def createLastChildNode
     /**
      * A helper function for the three extract commands.

@@ -2620,7 +2620,6 @@ export class Commands {
      */
     public checkFileTimeStamp(fn: string): Promise<boolean> {
         const c: Commands = this;
-
         if (g.app.externalFilesController && g.app.externalFilesController.check_overwrite) {
             return g.app.externalFilesController.check_overwrite(c, fn);
         }
@@ -2636,15 +2635,12 @@ export class Commands {
         let s: string | undefined;
         let e: string | undefined;
         [s, e] = await g.readFileIntoString(fn);
-
         if (s === undefined) {
             return;
         }
-
         let head: string;
         let ext: string;
         [head, ext] = g.os_path_splitext(fn);
-
         if (ext.startsWith('.')) {
             ext = ext.slice(1);
         }
@@ -2690,10 +2686,8 @@ export class Commands {
      */
     public markAllAtFileNodesDirty(): void {
         const c: Commands = this;
-
         c.endEditing();
         const p: Position = c.rootPosition()!;
-
         while (p && p.__bool__()) {
             if (p.isAtFileNode()) {
                 p.setDirty();
@@ -2767,7 +2761,6 @@ export class Commands {
     public recreateGnxDict(): void {
         const c: Commands = this;
         const d: { [key: string]: VNode } = {};
-
         for (let v of c.all_unique_nodes()) {
             const gnxString: string = v.fileIndex;
             if (typeof gnxString === 'string') {
@@ -2786,7 +2779,6 @@ export class Commands {
     //@+node:felix.20211120224234.1: *5* c.alert
     public alert(message: string): void {
         const c: Commands = this;
-
         // The unit tests just tests the args.
         if (!g.unitTesting) {
             g.es(message);
@@ -2809,7 +2801,6 @@ export class Commands {
      * Warn about read/write failures.
      */
     public async raise_error_dialogs(kind: string = 'read'): Promise<unknown> {
-
         const c: Commands = this;
         const use_dialogs = false;
         if (g.unitTesting) {
@@ -2880,7 +2871,6 @@ export class Commands {
         // Restore the root position's body.
         c.rootPosition()!.v.b = saved_body;  // #1007: just set v.b.
         c.init_error_dialogs();
-
     }
 
     //@+node:felix.20230626180727.1: *5* c.syntaxErrorDialog
@@ -2989,7 +2979,6 @@ export class Commands {
                 mods.length = 0;
             }
         }
-
     }
 
     //@+node:felix.20211120224224.1: *5* c.recolor
@@ -3181,7 +3170,6 @@ export class Commands {
         if (c.expansionLevel !== old_expansion_level) {
             c.redraw();
         }
-
         /*
         // It's always useful to announce the level.
         // c.k.setLabelBlue('level: %s' % (max_level+1))
@@ -3219,7 +3207,6 @@ export class Commands {
                 const name = w['name'];  // ?w['objectName'] : MyClass.name
                 g.trace('(c)', name);
             }
-
             c.requestedFocusWidget = w;
         }
     }
@@ -3245,7 +3232,6 @@ export class Commands {
      * Indicate that the focus is in an invalid location, or is unknown.
      */
     public invalidateFocus(): void {
-
         // c = self
         // c.requestedFocusWidget = None
         // pass
@@ -3465,8 +3451,6 @@ export class Commands {
         return (-1 < i1 && i1 < j1) || (-1 < i2 && i2 < j2);
     }
     //@+node:felix.20211023195447.15: *6* c.canFindMatchingBracket
-    //@@nobeautify
-
     public canFindMatchingBracket(): boolean {
         const c: Commands = this;
         const brackets: string = '()[]{}';
@@ -3718,34 +3702,34 @@ export class Commands {
         selectAll: boolean = false,
         selection: any = undefined,
         keepMinibuffer: boolean = false
-    ): void {
+    ): Thenable<Position> {
         const c: Commands = this;
         const k: any = this.k;
         c.redraw(p); // This *must* be done now.
         if (p && p.__bool__()) {
-            // TODO : allow headline rename ?
+
             // This should request focus.
-
-            // * Unused in leojs *
             // c.frame.tree.editLabel(p, selectAll, selection);
+            return g.app.gui.editHeadline();
 
-            if (k && !keepMinibuffer) {
-                // Setting the input state has no effect on focus.
-                if (selectAll) {
-                    k.setInputState('insert');
-                } else {
-                    k.setDefaultInputState();
-                }
-                // This *does* affect focus.
-                k.showStateAndMode();
-            }
+            // if (k && !keepMinibuffer) {
+            //     // Setting the input state has no effect on focus.
+            //     if (selectAll) {
+            //         k.setInputState('insert');
+            //     } else {
+            //         k.setDefaultInputState();
+            //     }
+            //     // This *does* affect focus.
+            //     k.showStateAndMode();
+            // }
         } else {
             g.trace('** no p');
+            return Promise.resolve(p);
         }
         // Update the focus immediately.
-        if (!keepMinibuffer) {
-            c.outerUpdate();
-        }
+        // if (!keepMinibuffer) {
+        //     c.outerUpdate();
+        // }
     }
     //@+node:felix.20211005023456.1: *5* c.selectPosition
     /**

@@ -199,7 +199,12 @@ export class LeoGui {
     }
     /**
      * Asks for node headline string and inserts node.
-     * ! NOT USED FOR NOW IN LEOJS !
+     */
+    public editHeadline(p_node?: Position, p_fromOutline?: boolean): any {
+        this.oops();
+    }
+    /**
+     * Asks for node headline string and inserts node.
      */
     public insertNode(
         p_node: Position | undefined,

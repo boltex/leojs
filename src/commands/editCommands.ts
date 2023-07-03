@@ -168,7 +168,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'insert-headline-time',
         'Insert a date/time stamp in the headline of the selected node.'
     )
-    public insertHeadlineTime(): void {
+    public insertHeadlineTime(): Thenable<Position> {
 
         const c = this.c;
         const p = c.p;
@@ -176,7 +176,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
 
         if (g.app.batchMode) {
             c.notValidInBatchMode("Insert Headline Time");
-            return;
+            return Promise.resolve(p);
         }
 
         c.endEditing();
@@ -198,7 +198,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
             u.afterChangeNodeContents(p, undoType, undoData);
         }
 
-        c.redrawAndEdit(p, true);
+        return c.redrawAndEdit(p, true);
 
     }
     //@+node:felix.20220503225231.1: *3* ec.capitalizeHeadline

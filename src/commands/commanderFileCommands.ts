@@ -1186,7 +1186,7 @@ export class CommanderFileCommands {
         await g.chdir(fileName);
         s = '@nocolor\n' + s;
         const w = c.frame.body.wrapper;
-        const p: Position = c.insertHeadline(undoType)!;
+        const p: Position = await c.asyncInsertHeadline(undoType, false);
         p.setHeadString('@read-file-into-node ' + fileName);
         p.setBodyString(s);
         w.setAllText(s);

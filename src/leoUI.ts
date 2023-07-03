@@ -2953,7 +2953,15 @@ export class LeoUI extends NullGui {
 
             this._addToMinibufferHistory(p_picked.label);
             const c = g.app.windowList[this.frameIndex].c;
-            const w_commandResult = c.executeMinibufferCommand(p_picked.label);
+
+            let w_command = p_picked.label; // May be overriden with async commands
+
+            // * LEOJS : OVERRIDE with custom async commands where applicable
+            if (Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label]) {
+                w_command = Constants.MINIBUFFER_OVERRIDDEN_NAMES[p_picked.label];
+            }
+
+            const w_commandResult = c.executeMinibufferCommand(w_command);
 
             if (w_commandResult && w_commandResult.then) {
                 // IS A PROMISE
@@ -2989,20 +2997,17 @@ export class LeoUI extends NullGui {
      * @param p_fromOutline Signifies that the focus was, and should be brought back to, the outline
      * @returns Thenable that resolves when done
      */
-    public editHeadline(p_node?: Position, p_fromOutline?: boolean): Thenable<unknown> {
+    public editHeadline(p_node?: Position, p_fromOutline?: boolean): Thenable<Position> {
         this.setupRefresh(
             p_fromOutline ? Focus.Outline : Focus.Body,
             { tree: true, states: true }
         );
-
         const c = g.app.windowList[this.frameIndex].c;
         const u = c.undoer;
-        if (!p_node) {
-            p_node = c.p; // Current selection
-        }
+        const w_p: Position = p_node || c.p;
         this._headlineInputOptions.prompt =
             Constants.USER_MESSAGES.PROMPT_EDIT_HEADLINE;
-        this._headlineInputOptions.value = p_node.h; // preset input pop up
+        this._headlineInputOptions.value = w_p.h; // preset input pop up
         return vscode.window.showInputBox(this._headlineInputOptions).then((p_newHeadline) => {
             if (p_newHeadline && p_newHeadline !== "\n") {
                 let w_truncated = false;
@@ -3015,28 +3020,26 @@ export class LeoUI extends NullGui {
                     w_truncated = true;
                 }
 
-                if (p_newHeadline && p_node && p_node.h !== p_newHeadline) {
+                if (p_newHeadline && w_p && w_p.h !== p_newHeadline) {
                     if (w_truncated) {
                         void vscode.window.showInformationMessage("Truncating headline");
                     }
 
-                    const undoData = u.beforeChangeHeadline(p_node);
-                    c.setHeadString(p_node, p_newHeadline);  // Set v.h *after* calling the undoer's before method.
+                    const undoData = u.beforeChangeHeadline(w_p);
+                    c.setHeadString(w_p, p_newHeadline);  // Set v.h *after* calling the undoer's before method.
                     if (!c.changed) {
                         c.setChanged();
                     }
-                    u.afterChangeHeadline(p_node, 'Edit Headline', undoData);
+                    u.afterChangeHeadline(w_p, 'Edit Headline', undoData);
                     void this.launchRefresh();
-                    // if edited and accepted
-                    return Promise.resolve(true);
                 }
 
             } else {
                 if (p_fromOutline) {
                     this.showOutline(true);
                 }
-                return Promise.resolve(undefined); // if cancelled or unchanged
             }
+            return w_p;
         });
     }
 

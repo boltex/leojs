@@ -806,7 +806,12 @@ export class Constants {
         'paste-node': 'async-paste-node',
         'paste-retaining-clones': 'async-paste-retaining-clones',
         'paste-as-template': 'async-paste-as-template',
-        // TODO : insertNode, insertChild, ...
+        'insert-child': 'async-insert-child',
+        'insert-node': 'async-insert-node',
+        'insert-as-first-child': 'async-insert-as-first-child',
+        'insert-as-last-child': 'async-insert-as-last-child',
+        'insert-node-before': 'async-insert-node-before',
+
         // TODO : select chapter
 
     };
