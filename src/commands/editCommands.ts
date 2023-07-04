@@ -260,127 +260,88 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'goto-char',
         'Put the cursor at the n\'th character of the buffer.'
     )
-    public gotoCharacter(): void {
-        console.log('TODO : goto-char');
-        /*     
-        k = this.c.k
-        this.w = this.editWidget(event)
-        if this.w:
-            k.setLabelBlue("Goto n'th character: ")
-            k.get1Arg(event, handler=this.gotoCharacter1)
+    public async gotoCharacter(): Promise<unknown> {
 
-        */
+        let w_n = await g.app.gui.get1Arg({
+            title: "Goto n'th character",
+            prompt: "Goto n'th character",
+            placeHolder: "Character Number",
+        });
 
-    }
-
-
-    public gotoCharacter1(): void {
-        console.log('TODO : gotoCharacter1');
-
-        /* 
-        const c =  this.c;
-        const k = this.c.k;
-        const n = k.arg;
-        const w = this.w;
         let ok = false;
-        if n.isdigit():
-            n = int(n)
-            if n >= 0:
-                w.setInsertPoint(n)
-                w.seeInsertPoint()
-                ok = True
+        this.w = this.editWidget();
+        const w = this.w;
 
+        if (w_n && /^\d+$/.test(w_n)) {
+            const n: number = Number(w_n);
+            if (n >= 0) {
+                w.setInsertPoint(n);
+                w.seeInsertPoint();
+                ok = true;
+            }
 
-        if not ok:
-            g.warning('goto-char takes non-negative integer argument')
-
-        k.resetLabel();
-        k.clearState();
-        c.widgetWantsFocus(w);
-         */
+        }
+        if (!ok) {
+            g.warning('goto-char takes non-negative integer argument');
+        }
+        return undefined;
     }
+
     //@+node:felix.20220503225323.4: *4* ec.gotoGlobalLine
     @cmd(
         'goto-global-line',
         'Put the cursor at the line in the *outline* corresponding to the line\n' +
         'with the given line number *in the external file*.\n' +
         'For external files containing sentinels, there may be *several* lines\n' +
-        'in the file that correspond to the same line in the outline.\n' +
-        'An Easter Egg: <Alt-x>number invokes this code.'
+        'in the file that correspond to the same line in the outline.'
     )
-    public gotoGlobalLine(): void {
-
-        console.log('TODO : goto-global-line');
-
-        /* 
-
-        // Improved docstring for #253: Goto Global line (Alt-G) is inconsistent.
-        // https://github.com/leo-editor/leo-editor/issues/253
-        k = this.c.k
-        this.w = this.editWidget(event)
-        if this.w:
-            k.setLabelBlue('Goto global line: ')
-            k.get1Arg(event, handler=this.gotoGlobalLine1)
-
-        */
-    }
-
-    public gotoGlobalLine1(): void {
-        console.log('TODO : gotoGlobalLine1');
-
-        /* 
-
-        c, k = this.c, this.c.k
-        n = k.arg
-        k.resetLabel()
-        k.clearState()
-        if n.isdigit():
+    public async gotoGlobalLine(p_lineNumber: number): Promise<unknown> {
+        // Bypass if called with number
+        const c = this.c;
+        if (p_lineNumber || p_lineNumber === 0) {
+            return c.gotoCommands.find_file_line(p_lineNumber);
+        }
+        // Otherwise, ask user
+        let w_n = await g.app.gui.get1Arg({
+            title: "Goto global line",
+            prompt: "Goto global line",
+            placeHolder: "Line Number",
+        });
+        if (w_n && /^\d+$/.test(w_n)) {
             // Very important: n is one-based.
-            c.gotoCommands.find_file_line(n=int(n))
-
-        */
-
+            return c.gotoCommands.find_file_line(Number(w_n));
+        }
     }
     //@+node:felix.20220503225323.5: *4* ec.gotoLine
     @cmd(
         'goto-line',
         'Put the cursor at the n\'th line of the buffer.'
     )
-    public gotoLine(): void {
-        console.log('TODO : goto-line');
+    public async gotoLine(): Promise<unknown> {
+        let w_n = await g.app.gui.get1Arg({
+            title: "Goto line",
+            prompt: "Goto line",
+            placeHolder: "Line Number",
+        });
 
-        /* 
+        let ok = false;
+        this.w = this.editWidget();
+        const w = this.w;
 
-        k = self.c.k
-        self.w = self.editWidget(event)
-        if self.w:
-            k.setLabelBlue('Goto line: ')
-            k.get1Arg(event, handler=self.gotoLine1)
+        if (w_n && /^\d+$/.test(w_n)) {
+            const n: number = Number(w_n);
+            const s = w.getAllText();
+            const i = g.convertRowColToPythonIndex(s, n - 1, 0);
+            w.setInsertPoint(i);
+            w.seeInsertPoint();
 
-        */
-
+        }
+        if (!ok) {
+            g.warning('goto-char takes non-negative integer argument');
+        }
+        return undefined;
     }
 
-    public gotoLine1(): void {
-        console.log('TODO : gotoLine1');
-
-        /* 
-
-        c, k = self.c, self.c.k
-        n, w = k.arg, self.w
-        if n.isdigit():
-            n = int(n)
-            s = w.getAllText()
-            i = g.convertRowColToPythonIndex(s, n - 1, 0)
-            w.setInsertPoint(i)
-            w.seeInsertPoint()
-        k.resetLabel()
-        k.clearState()
-        c.widgetWantsFocus(w)
-
-        */
-
-    }
     //@+node:felix.20230402171528.1: *3* ec: headline numbers
     //@+node:felix.20230402171528.2: *4* hn-add-all & helper
     @cmd(
