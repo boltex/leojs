@@ -2998,7 +2998,8 @@ export class LeoUI extends NullGui {
      * @param p_prompt Optional prompt, to override the default 'edit headline' prompt. (for insert-* commands usage)
      * @returns Thenable that resolves when done
      */
-    public editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?: string): Thenable<Position> {
+    public async editHeadline(p_node?: Position, p_fromOutline?: boolean, p_prompt?: string): Promise<Position> {
+        await this.triggerBodySave(true);
         this.setupRefresh(
             p_fromOutline ? Focus.Outline : Focus.Body,
             { tree: true, states: true }
@@ -3008,39 +3009,38 @@ export class LeoUI extends NullGui {
         const w_p: Position = p_node || c.p;
         this._headlineInputOptions.prompt = p_prompt || Constants.USER_MESSAGES.PROMPT_EDIT_HEADLINE;
         this._headlineInputOptions.value = w_p.h; // preset input pop up
-        return vscode.window.showInputBox(this._headlineInputOptions).then((p_newHeadline) => {
-            if (p_newHeadline && p_newHeadline !== "\n") {
-                let w_truncated = false;
-                if (p_newHeadline.indexOf("\n") >= 0) {
-                    p_newHeadline = p_newHeadline.split("\n")[0];
-                    w_truncated = true;
-                }
-                if (p_newHeadline.length > 1000) {
-                    p_newHeadline = p_newHeadline.substring(0, 1000);
-                    w_truncated = true;
-                }
-
-                if (p_newHeadline && w_p && w_p.h !== p_newHeadline) {
-                    if (w_truncated) {
-                        void vscode.window.showInformationMessage("Truncating headline");
-                    }
-
-                    const undoData = u.beforeChangeHeadline(w_p);
-                    c.setHeadString(w_p, p_newHeadline);  // Set v.h *after* calling the undoer's before method.
-                    if (!c.changed) {
-                        c.setChanged();
-                    }
-                    u.afterChangeHeadline(w_p, 'Edit Headline', undoData);
-                    void this.launchRefresh();
-                }
-
-            } else {
-                if (p_fromOutline) {
-                    this.showOutline(true);
-                }
+        let p_newHeadline = await vscode.window.showInputBox(this._headlineInputOptions);
+        if (p_newHeadline && p_newHeadline !== "\n") {
+            let w_truncated = false;
+            if (p_newHeadline.indexOf("\n") >= 0) {
+                p_newHeadline = p_newHeadline.split("\n")[0];
+                w_truncated = true;
             }
-            return w_p;
-        });
+            if (p_newHeadline.length > 1000) {
+                p_newHeadline = p_newHeadline.substring(0, 1000);
+                w_truncated = true;
+            }
+
+            if (p_newHeadline && w_p && w_p.h !== p_newHeadline) {
+                if (w_truncated) {
+                    void vscode.window.showInformationMessage("Truncating headline");
+                }
+
+                const undoData = u.beforeChangeHeadline(w_p);
+                c.setHeadString(w_p, p_newHeadline); // Set v.h *after* calling the undoer's before method.
+                if (!c.changed) {
+                    c.setChanged();
+                }
+                u.afterChangeHeadline(w_p, 'Edit Headline', undoData);
+                void this.launchRefresh();
+            }
+
+        } else {
+            if (p_fromOutline) {
+                this.showOutline(true);
+            }
+        }
+        return w_p;
     }
 
     /**
@@ -3050,7 +3050,8 @@ export class LeoUI extends NullGui {
      * @param p_interrupt Signifies the insert action is actually interrupting itself (e.g. rapid CTRL+I actions by the user)
      * @returns Thenable that resolves when done
      */
-    public insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interrupt: boolean, p_asChild: boolean): Thenable<unknown> {
+    public async insertNode(p_node: Position | undefined, p_fromOutline: boolean, p_interrupt: boolean, p_asChild: boolean): Promise<unknown> {
+        await this.triggerBodySave(true);
         let w_finalFocus: Focus = p_fromOutline ? Focus.Outline : Focus.Body; // Use w_fromOutline for where we intend to leave focus when done with the insert
         if (p_interrupt) {
             this._focusInterrupt = true;
@@ -3064,55 +3065,55 @@ export class LeoUI extends NullGui {
         }
         this._headlineInputOptions.value = Constants.USER_MESSAGES.DEFAULT_HEADLINE;
 
-        return vscode.window.showInputBox(this._headlineInputOptions).then((p_newHeadline) => {
-            // * if node has child and is expanded: turn p_asChild to true!
+        const p_newHeadline = await vscode.window.showInputBox(this._headlineInputOptions);
+        // * if node has child and is expanded: turn p_asChild to true!
 
-            this.lastCommandTimer = process.hrtime();
-            if (this.commandTimer === undefined) {
-                this.commandTimer = this.lastCommandTimer;
-            }
-            this.lastCommandRefreshTimer = this.lastCommandTimer;
-            if (this.commandRefreshTimer === undefined) {
-                this.commandRefreshTimer = this.lastCommandTimer;
-            }
+        this.lastCommandTimer = process.hrtime();
+        if (this.commandTimer === undefined) {
+            this.commandTimer = this.lastCommandTimer;
+        }
+        this.lastCommandRefreshTimer = this.lastCommandTimer;
+        if (this.commandRefreshTimer === undefined) {
+            this.commandRefreshTimer = this.lastCommandTimer;
+        }
 
-            const c = g.app.windowList[this.frameIndex].c;
+        const c = g.app.windowList[this.frameIndex].c;
 
-            let value: any = undefined;
-            const p = p_node ? p_node : c.p;
+        let value: any = undefined;
+        const p = p_node ? p_node : c.p;
 
-            if (p.__eq__(c.p)) {
-                this.setupRefresh(w_finalFocus, { tree: true, body: true, documents: true, buttons: true, states: true });
-                this._insertAndSetHeadline(p_newHeadline, p_asChild); // no need for re-selection
+        if (p.__eq__(c.p)) {
+            this.setupRefresh(w_finalFocus, { tree: true, body: true, documents: true, buttons: true, states: true });
+            this._insertAndSetHeadline(p_newHeadline, p_asChild); // no need for re-selection
+        } else {
+            const old_p = c.p;  // c.p is old already selected
+            c.selectPosition(p); // p is now the new one to be operated on
+            this._insertAndSetHeadline(p_newHeadline, p_asChild);
+            // Only if 'keep' old position was needed (specified with a p_node parameter), and old_p still exists
+            if (!!p_node && c.positionExists(old_p)) {
+                // no need to refresh body
+                this.setupRefresh(w_finalFocus, { tree: true, documents: true, buttons: true, states: true });
+                c.selectPosition(old_p);
             } else {
-                const old_p = c.p;  // c.p is old already selected
-                c.selectPosition(p); // p is now the new one to be operated on
-                this._insertAndSetHeadline(p_newHeadline, p_asChild);
-                // Only if 'keep' old position was needed (specified with a p_node parameter), and old_p still exists
+                old_p._childIndex = old_p._childIndex + 1;
                 if (!!p_node && c.positionExists(old_p)) {
                     // no need to refresh body
                     this.setupRefresh(w_finalFocus, { tree: true, documents: true, buttons: true, states: true });
                     c.selectPosition(old_p);
                 } else {
-                    old_p._childIndex = old_p._childIndex + 1;
-                    if (!!p_node && c.positionExists(old_p)) {
-                        // no need to refresh body
-                        this.setupRefresh(w_finalFocus, { tree: true, documents: true, buttons: true, states: true });
-                        c.selectPosition(old_p);
-                    } else {
-                        this.setupRefresh(w_finalFocus, { tree: true, body: true, documents: true, buttons: true, states: true });
-                    }
+                    this.setupRefresh(w_finalFocus, { tree: true, body: true, documents: true, buttons: true, states: true });
                 }
             }
-            if (this.trace) {
-                if (this.lastCommandTimer) {
-                    console.log('lastCommandTimer', utils.getDurationMs(this.lastCommandTimer));
-                }
+        }
+        if (this.trace) {
+            if (this.lastCommandTimer) {
+                console.log('lastCommandTimer', utils.getDurationMs(this.lastCommandTimer));
             }
-            this.lastCommandTimer = undefined;
-            void this.launchRefresh();
-            return Promise.resolve(value);
-        });
+        }
+        this.lastCommandTimer = undefined;
+        void this.launchRefresh();
+        return value;
+
     }
 
     /**
