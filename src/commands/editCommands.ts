@@ -293,7 +293,8 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'Put the cursor at the line in the *outline* corresponding to the line\n' +
         'with the given line number *in the external file*.\n' +
         'For external files containing sentinels, there may be *several* lines\n' +
-        'in the file that correspond to the same line in the outline.'
+        'in the file that correspond to the same line in the outline.' +
+        'An Easter Egg: <Alt-x>number invokes this code.'
     )
     public async gotoGlobalLine(p_lineNumber?: number): Promise<unknown> {
         // Bypass if called with number
