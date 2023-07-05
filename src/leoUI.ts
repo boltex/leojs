@@ -2857,14 +2857,13 @@ export class LeoUI extends NullGui {
             }
         }
 
-        const w_noDetails = commands
-            .filter(
-                p_command => !p_command.detail && !(
-                    p_command.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_BUTTON_START) ||
-                    p_command.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_DEL_BUTTON_START) ||
-                    p_command.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_COMMAND_START)
-                )
-            );
+        const w_noDetails = commands.filter(
+            p_command => !p_command.detail && !(
+                p_command.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_BUTTON_START) ||
+                p_command.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_DEL_BUTTON_START) ||
+                p_command.label.startsWith(Constants.USER_MESSAGES.MINIBUFFER_COMMAND_START)
+            )
+        );
         for (const p_command of w_noDetails) {
             p_command.description = Constants.USER_MESSAGES.MINIBUFFER_USER_DEFINED;
         }
@@ -2876,10 +2875,10 @@ export class LeoUI extends NullGui {
             return a.label < b.label ? -1 : (a.label === b.label ? 0 : 1);
         });
 
-        const w_result: vscode.QuickPickItem[] = [];
+        const w_choices: vscode.QuickPickItem[] = [];
 
         if (this._minibufferHistory.length) {
-            w_result.push({
+            w_choices.push({
                 label: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_LABEL,
                 description: Constants.USER_MESSAGES.MINIBUFFER_HISTORY_DESC
             });
@@ -2887,29 +2886,84 @@ export class LeoUI extends NullGui {
 
         // Finish minibuffer list
         if (w_noDetails.length) {
-            w_result.push(...w_noDetails);
+            w_choices.push(...w_noDetails);
         }
 
         // Separator above real commands, if needed...
         if (w_noDetails.length || this._minibufferHistory.length) {
-            w_result.push({
+            w_choices.push({
                 label: "", kind: vscode.QuickPickItemKind.Separator
             });
         }
 
-        w_result.push(...w_withDetails);
+        w_choices.push(...w_withDetails);
 
-        const w_options: vscode.QuickPickOptions = {
-            placeHolder: Constants.USER_MESSAGES.MINIBUFFER_PROMPT,
-            matchOnDetail: true,
-        };
-        const w_picked = await vscode.window.showQuickPick(w_result, w_options);
+        const w_disposables: vscode.Disposable[] = [];
+
+        const q_minibufferQuickPick: Promise<vscode.QuickPickItem | undefined> = new Promise((resolve, reject) => {
+            const quickPick = vscode.window.createQuickPick();
+            quickPick.items = w_choices;
+            quickPick.placeholder = Constants.USER_MESSAGES.MINIBUFFER_PROMPT;
+            quickPick.matchOnDetail = true;
+
+            w_disposables.push(
+                quickPick.onDidChangeSelection(selection => {
+                    if (selection[0]) {
+                        resolve(selection[0]);
+                        quickPick.hide();
+                    }
+                }),
+                quickPick.onDidAccept(accepted => {
+                    if (/^\d+$/.test(quickPick.value)) {
+                        // * Was an integer
+                        this.setupRefresh(Focus.Body,
+                            {
+                                tree: true,
+                                body: true,
+                                documents: false,
+                                buttons: false,
+                                states: true
+                            }
+                        );
+                        // not awaited
+                        c.editCommands.gotoGlobalLine(Number(quickPick.value)).then(() => {
+                            void this.launchRefresh();
+                        }, () => {
+                            // pass
+                        });
+                        resolve(undefined);
+                        quickPick.hide();
+                    }
+                }),
+                quickPick.onDidChangeValue(changed => {
+                    if (/^\d+$/.test(changed)) {
+                        if (quickPick.items.length) {
+                            quickPick.items = [];
+                        }
+                    } else if (quickPick.items !== w_choices) {
+                        quickPick.items = w_choices;
+                    }
+                }),
+                quickPick.onDidHide(() => {
+                    resolve(undefined);
+                }),
+                quickPick
+            );
+            quickPick.show();
+
+        });
+
+        const w_picked: vscode.QuickPickItem | undefined = await q_minibufferQuickPick;
+        // const w_picked = await vscode.window.showQuickPick(w_choices, w_options);
+        w_disposables.forEach(d => d.dispose());
+
         // First, check for undo-history list being requested
         if (w_picked && w_picked.label === Constants.USER_MESSAGES.MINIBUFFER_HISTORY_LABEL) {
             return this.minibufferHistory();
         }
-        return this._doMinibufferCommand(w_picked);
-
+        if (w_picked) {
+            return this._doMinibufferCommand(w_picked);
+        }
     }
 
     /**
@@ -2921,7 +2975,7 @@ export class LeoUI extends NullGui {
         // Wait for _isBusyTriggerSave resolve because the full body save may change available commands
         await this.triggerBodySave(true);
         if (!this._minibufferHistory.length) {
-            return Promise.resolve(undefined);
+            return;
         }
         const w_commandList: vscode.QuickPickItem[] = this._minibufferHistory.map(
             p_command => { return { label: p_command }; }
@@ -2938,7 +2992,7 @@ export class LeoUI extends NullGui {
     /**
      * * Perform chosen minibuffer command
      */
-    private _doMinibufferCommand(p_picked: vscode.QuickPickItem | undefined): Promise<unknown> {
+    private _doMinibufferCommand(p_picked?: vscode.QuickPickItem): Promise<unknown> {
         if (p_picked && p_picked.label) {
             // Setup refresh
             this.setupRefresh(Focus.NoChange,

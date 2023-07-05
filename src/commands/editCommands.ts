@@ -295,7 +295,7 @@ export class EditCommandsClass extends BaseEditCommandsClass {
         'For external files containing sentinels, there may be *several* lines\n' +
         'in the file that correspond to the same line in the outline.'
     )
-    public async gotoGlobalLine(p_lineNumber: number): Promise<unknown> {
+    public async gotoGlobalLine(p_lineNumber?: number): Promise<unknown> {
         // Bypass if called with number
         const c = this.c;
         if (p_lineNumber || p_lineNumber === 0) {

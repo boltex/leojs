@@ -3844,7 +3844,7 @@ export class AtFile {
      */
     public async shouldPromptForDangerousWrite(fn: string, p: Position): Promise<boolean> {
 
-        const trace = true || g.app.debug.includes('save'); // TODO : CLEANUP ! 
+        const trace = g.app.debug.includes('save');
         const sfn = g.shortFileName(fn);
         const c = this.c;
         const efc = g.app.externalFilesController;
