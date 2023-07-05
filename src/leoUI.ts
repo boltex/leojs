@@ -2954,7 +2954,7 @@ export class LeoUI extends NullGui {
         });
 
         const w_picked: vscode.QuickPickItem | undefined = await q_minibufferQuickPick;
-        // const w_picked = await vscode.window.showQuickPick(w_choices, w_options);
+
         w_disposables.forEach(d => d.dispose());
 
         // First, check for undo-history list being requested
