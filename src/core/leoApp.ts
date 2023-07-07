@@ -1439,12 +1439,14 @@ export class LeoApp {
             // master is a TabbedTopLevel.
             // Selecting the new tab ensures focus is set.
             master.select(c)
-        if 1:
-            c.initialFocusHelper()
-        else:
-            c.bodyWantsFocus()
-        c.outerUpdate()
         */
+
+        if (1) {
+            c.initialFocusHelper();
+        } else {
+            c.bodyWantsFocus();
+        }
+        c.outerUpdate();
     }
     //@-others
 

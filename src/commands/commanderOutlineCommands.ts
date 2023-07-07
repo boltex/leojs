@@ -932,7 +932,7 @@ export class CommanderOutlineCommands {
             }
             c.selectPosition(p.firstChild());
         }
-        // c.treeFocusHelper();
+        c.treeFocusHelper();
     }
     //@+node:felix.20211020002058.15: *4* c_oc.expandNodeOrGoToFirstChild
     @commander_command(
@@ -1542,7 +1542,7 @@ export class CommanderOutlineCommands {
         if (c.validateOutline()) {
             u.afterCloneNode(clone, 'Clone Node', undoData);
             c.redraw(clone); // redraw selects p
-            // c.treeWantsFocus(); // ? needed ?
+            c.treeWantsFocus();
             return clone;  // For mod_labels and chapters plugins.
         }
         clone.doDelete();
@@ -2195,7 +2195,7 @@ export class CommanderOutlineCommands {
         const p: Position = this.p;
         const u: Undoer = c.undoer;
         if (!p || !p.__bool__() || !p.hasNext()) {
-            // c.treeFocusHelper();
+            c.treeFocusHelper();
             return;
         }
         // Make sure all the moves will be valid.
@@ -2203,7 +2203,7 @@ export class CommanderOutlineCommands {
 
         while (next && next.__bool__()) {
             if (!c.checkMoveWithParentWithWarning(next, p, true)) {
-                // c.treeFocusHelper();
+                c.treeFocusHelper();
                 return;
             }
             next.moveToNext();
@@ -2255,7 +2255,7 @@ export class CommanderOutlineCommands {
             if (c.hoistStack.length) {
                 cantMoveMessage(c);
             }
-            // c.treeFocusHelper()
+            c.treeFocusHelper();
             return;
         }
         const parent: Position = p.parent();
@@ -2267,7 +2267,7 @@ export class CommanderOutlineCommands {
             if (c.hoistStack.length) {
                 cantMoveMessage(c);
             }
-            // c.treeFocusHelper();
+            c.treeFocusHelper();
             return;
         }
         c.endEditing();
@@ -2329,11 +2329,11 @@ export class CommanderOutlineCommands {
             if (c.hoistStack.length) {
                 cantMoveMessage(c);
             }
-            // c.treeFocusHelper();
+            c.treeFocusHelper();
             return;
         }
         if (!p.hasParent()) {
-            // c.treeFocusHelper();
+            c.treeFocusHelper();
             return;
         }
         const parent: Position = p.parent();
@@ -2367,16 +2367,16 @@ export class CommanderOutlineCommands {
             if (c.hoistStack.length) {
                 cantMoveMessage(c);
             }
-            // c.treeFocusHelper();
+            c.treeFocusHelper();
             return;
         }
         const back: Position = p.back();
         if (!back || !back.__bool__()) {
-            // c.treeFocusHelper();
+            c.treeFocusHelper();
             return;
         }
         if (!c.checkMoveWithParentWithWarning(p, back, true)) {
-            // c.treeFocusHelper();
+            c.treeFocusHelper();
             return;
         }
         c.endEditing();
@@ -2406,12 +2406,11 @@ export class CommanderOutlineCommands {
             if (c.hoistStack.length) {
                 cantMoveMessage(c);
             }
-            // c.treeFocusHelper();
+            c.treeFocusHelper();
             return;
         }
         const back = p.visBack(c);
         if (!back || !back.__bool__()) {
-            // c.treeFocusHelper();
             return;
         }
         const back2 = back.visBack(c);
@@ -2485,7 +2484,7 @@ export class CommanderOutlineCommands {
         const p: Position = this.p;
         const u: Undoer = c.undoer;
         if (!p || !p.__bool__() || !p.hasChildren()) {
-            // c.treeFocusHelper()
+            c.treeFocusHelper()
             return;
         }
         c.endEditing();

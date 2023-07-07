@@ -262,6 +262,8 @@ export class Commands {
         // From initObjects
         this.hiddenRootNode = new VNode(this, 'hidden-root-vnode-gnx');
         this.hiddenRootNode.h = '<hidden root vnode>';
+        this.k = {};
+        this.keyHandler = this.k; // TODO: REPLACE EMPTY OBJECT ??
 
         // Create the gui frame.
         const title = this.computeWindowTitle(c.mFileName);
@@ -3037,7 +3039,7 @@ export class Commands {
             }
             //c.frame.tree.redraw_after_contract(p);
             c.redraw(p);
-            //c.treeFocusHelper();
+            c.treeFocusHelper();
         } else {
             c.requestLaterRedraw = true;
         }
@@ -3053,7 +3055,7 @@ export class Commands {
             }
             //c.frame.tree.redraw_after_expand(p);
             c.redraw(p);
-            //c.treeFocusHelper();
+            c.treeFocusHelper();
         } else {
             c.requestLaterRedraw = true;
         }
@@ -3790,7 +3792,10 @@ export class Commands {
         if (p && p.__bool__()) {
             // Do not call expandAllAncestors here.
             c.selectPosition(p);
+            c.redraw_after_select(p);
+
         }
+        c.treeFocusHelper();  // This is essential.
     }
 
     //@+node:felix.20220210211453.1: *3* c.Scripting utils

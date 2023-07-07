@@ -3858,7 +3858,7 @@ public async minibuffer(): Promise&lt;unknown&gt; {
     });
 
     const w_picked: vscode.QuickPickItem | undefined = await q_minibufferQuickPick;
-    // const w_picked = await vscode.window.showQuickPick(w_choices, w_options);
+
     w_disposables.forEach(d =&gt; d.dispose());
 
     // First, check for undo-history list being requested
@@ -6961,14 +6961,17 @@ public async _launchRefresh(): Promise&lt;unknown&gt; {
  * @param p_finalFocus Flag for focus to be placed in outline
  * @param p_refreshType Refresh flags for each UI part
 */
-public setupRefresh(p_finalFocus: Focus, p_refreshType: ReqRefresh, p_preserveRange?: boolean): void {
+public setupRefresh(p_finalFocus: Focus, p_refreshType?: ReqRefresh, p_preserveRange?: boolean): void {
     if (p_preserveRange) {
         this.refreshPreserveRange = true; // Will be cleared after a refresh cycle.
     }
     // Set final "focus-placement" EITHER true or false
     this.finalFocus = p_finalFocus;
-    // Set all properties WITHOUT clearing others.
-    Object.assign(this._refreshType, p_refreshType);
+
+    if (p_refreshType) {
+        // Set all properties WITHOUT clearing others.
+        Object.assign(this._refreshType, p_refreshType);
+    }
 }
 
 </t>
@@ -12823,6 +12826,22 @@ public static OLD_POS_OFFSETS = {
 </t>
 <t tx="felix.20221026222034.1">public set_focus(commander: Commands, widget: any): void {
     this.focusWidget = widget;
+
+    const w_widgetName = this.widget_name(widget);
+
+    // * LeoJS custom finalFocus replacement.
+    if (widget &amp;&amp; this.finalFocus === Focus.NoChange) {
+        // * Check which panel to focus
+        let w_target = Focus.NoChange;
+        if (w_widgetName === 'body') {
+            w_target = Focus.Body;
+        } else if (w_widgetName === 'tree') {
+            w_target = Focus.Outline;
+        }
+        this.setupRefresh(w_target);
+    } else {
+        // pass
+    }
 }
 
 </t>
@@ -12841,6 +12860,8 @@ public static OLD_POS_OFFSETS = {
         name = w.objectName();
     } else if (w['_name']) {
         name = w._name;
+    } else if (w['name']) {
+        name = w.name;
     } else {
         name = w.toString();
     }
@@ -12946,6 +12967,13 @@ public show_find_success(c: Commands, in_headline: boolean, insert: number, p: P
 
         }
         // g.app.gui.set_focus(c, { _name: 'tree' });
+    } else {
+        try {
+            g.app.gui.set_focus(c, c.frame.body.widget);
+        }
+        catch (e) {
+            console.log('oops!', e);
+        }
     }
 
     // edit_widget

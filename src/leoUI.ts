@@ -1346,14 +1346,17 @@ export class LeoUI extends NullGui {
      * @param p_finalFocus Flag for focus to be placed in outline
      * @param p_refreshType Refresh flags for each UI part
     */
-    public setupRefresh(p_finalFocus: Focus, p_refreshType: ReqRefresh, p_preserveRange?: boolean): void {
+    public setupRefresh(p_finalFocus: Focus, p_refreshType?: ReqRefresh, p_preserveRange?: boolean): void {
         if (p_preserveRange) {
             this.refreshPreserveRange = true; // Will be cleared after a refresh cycle.
         }
         // Set final "focus-placement" EITHER true or false
         this.finalFocus = p_finalFocus;
-        // Set all properties WITHOUT clearing others.
-        Object.assign(this._refreshType, p_refreshType);
+
+        if (p_refreshType) {
+            // Set all properties WITHOUT clearing others.
+            Object.assign(this._refreshType, p_refreshType);
+        }
     }
 
     /**
@@ -5646,6 +5649,13 @@ export class LeoUI extends NullGui {
 
             }
             // g.app.gui.set_focus(c, { _name: 'tree' });
+        } else {
+            try {
+                g.app.gui.set_focus(c, c.frame.body.widget);
+            }
+            catch (e) {
+                console.log('oops!', e);
+            }
         }
 
         // edit_widget
@@ -5722,6 +5732,8 @@ export class LeoUI extends NullGui {
             name = w.objectName();
         } else if (w['_name']) {
             name = w._name;
+        } else if (w['name']) {
+            name = w.name;
         } else {
             name = w.toString();
         }
@@ -5730,6 +5742,22 @@ export class LeoUI extends NullGui {
 
     public set_focus(commander: Commands, widget: any): void {
         this.focusWidget = widget;
+
+        const w_widgetName = this.widget_name(widget);
+
+        // * LeoJS custom finalFocus replacement.
+        if (widget && this.finalFocus === Focus.NoChange) {
+            // * Check which panel to focus
+            let w_target = Focus.NoChange;
+            if (w_widgetName === 'body') {
+                w_target = Focus.Body;
+            } else if (w_widgetName === 'tree') {
+                w_target = Focus.Outline;
+            }
+            this.setupRefresh(w_target);
+        } else {
+            // pass
+        }
     }
 
     public get_focus(c?: Commands): StringTextWrapper {

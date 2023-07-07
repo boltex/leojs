@@ -184,7 +184,7 @@ export class NullBody {
     public insertPoint = 0;
     public selection = [0, 0];
     public s = ''; // The body text
-    // public widget: Widget = None
+    public widget: any;
     public wrapper: StringTextWrapper;
     public use_chapters: boolean;
     public editorWrappers: { [key: string]: any } = {};
@@ -197,7 +197,7 @@ export class NullBody {
         frame.body = this;
         this.frame = frame;
         this.use_chapters = false;
-        // this.widget: Widget = None
+        this.widget = { _name: 'body' };
         this.wrapper = new StringTextWrapper(this.c, 'body');
         this.editorWrappers['1'] = this.wrapper;
         // this.colorizer: Any = NullColorizer(this.c)  # A Union.
@@ -427,7 +427,7 @@ export class NullBody {
  */
 export class NullTree {
     public frame: LeoFrame;
-    public canvas = {};
+    public canvas = { name: 'tree' };
     // New in 3.12: keys vnodes, values are edit_widgets.
     // New in 4.2: keys are vnodes, values are pairs (p,edit widgets).
     public edit_text_dict: { [key: string]: [Position, any] };
@@ -442,7 +442,6 @@ export class NullTree {
     public editWidgetsDict: { [key: string]: StringTextWrapper }; // Keys are vnodes, values are StringTextWidgets.
     // public font = undefined;
     // public fontName = undefined;
-    // public canvas = undefined;
     public treeWidget: g.NullObject | any;
 
     //@+others
