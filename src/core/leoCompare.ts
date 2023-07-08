@@ -766,13 +766,7 @@ export class CompareLeoOutlines {
         const s2 = await this.get_file(fn2);
         const lines1 = g.splitLines(s1);
         const lines2 = g.splitLines(s2);
-
-        const differ = new difflib.Differ();
-
         const diff_list = difflib.unifiedDiff(lines1, lines2, { fromfile: fn1, tofile: fn2 });
-        //  list(
-        //     difflib.unified_diff(lines1, lines2, fn1, fn2);
-        // );
         diff_list.splice(0, 0, '@language patch\n');
         this.file_node = this.create_file_node(diff_list, fn1, fn2);
         // These will be left open
@@ -977,8 +971,7 @@ export class CompareLeoOutlines {
                 return Promise.resolve(frame.c);
             }
         }
-        // const gui = this.visible?undefined:g.app.nullGui;
-        const gui = g.app.nullGui; // TODO -> CHECK IF GUI NEEDED ?!
+        const gui = this.visible ? undefined : g.app.nullGui;
         return g.openWithFileName(fn, undefined, gui);
     }
     //@-others

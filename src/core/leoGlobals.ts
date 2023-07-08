@@ -16,7 +16,7 @@ import * as path from 'path';
 import { LeoApp } from './leoApp';
 import { Commands } from './leoCommands';
 import { Position, VNode } from './leoNodes';
-import { NullGui } from "./leoGui";
+import { LeoGui } from "./leoGui";
 
 /*
     import binascii
@@ -1912,7 +1912,7 @@ export async function makeAllNonExistentDirectories(theDir: string): Promise<str
  *
  * Return the commander of the newly-opened outline.
  */
-export function openWithFileName(fileName: string, old_c: Commands | undefined, gui: NullGui): Promise<Commands | undefined> {
+export function openWithFileName(fileName: string, old_c: Commands | undefined, gui?: LeoGui): Promise<Commands | undefined> {
     return app.loadManager!.loadLocalFile(fileName, gui, old_c);
 }
 //@+node:felix.20220106231022.1: *3* g.readFileIntoString

@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 import { Utils as uriUtils } from "vscode-uri";
 import * as path from 'path';
 import * as g from './leoGlobals';
-import { NullGui } from './leoGui';
+import { LeoGui } from './leoGui';
 import { new_cmd_decorator } from './decorators';
 import { FileCommands } from './leoFileCommands';
 import { CommanderOutlineCommands } from '../commands/commanderOutlineCommands';
@@ -91,7 +91,7 @@ export class Commands {
     public shadowController: ShadowController;
     public undoer: Undoer;
     public nodeHistory: NodeHistory;
-    public gui: NullGui;
+    public gui: LeoGui;
     public replace_errors: string[] = [];
     public warnings_dict: { [key: string]: boolean } = {};
 
@@ -242,7 +242,7 @@ export class Commands {
     //@+node:felix.20210223002937.1: *3* constructor & helpers
     constructor(
         fileName: string,
-        gui?: NullGui,
+        gui?: LeoGui,
         previousSettings?: PreviousSettings,
         relativeFileName?: string
     ) {

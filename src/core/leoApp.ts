@@ -8,7 +8,7 @@ import * as os from "os";
 import * as path from 'path';
 import * as g from './leoGlobals';
 import * as utils from "../utils";
-import { NullGui } from "./leoGui";
+import { LeoGui, NullGui } from "./leoGui";
 import { NodeIndices, VNode, Position } from './leoNodes';
 import { Commands } from './leoCommands';
 import { FastRead, FileCommands } from "./leoFileCommands";
@@ -1402,7 +1402,7 @@ export class LeoApp {
      */
     public newCommander(
         fileName: string,
-        gui?: NullGui,
+        gui?: LeoGui,
         previousSettings?: PreviousSettings,
         relativeFileName?: string,
     ): Commands {
@@ -2847,7 +2847,7 @@ export class LoadManager {
     }
 
     //@+node:felix.20210120004121.31: *4* LM.loadLocalFile & helpers
-    public async loadLocalFile(fn: string, gui: NullGui, old_c?: Commands): Promise<Commands | undefined> {
+    public async loadLocalFile(fn: string, gui?: LeoGui, old_c?: Commands): Promise<Commands | undefined> {
 
         /*Completely read a file, creating the corresonding outline.
 
@@ -2895,7 +2895,7 @@ export class LoadManager {
     /**
      * Open an empty, untitled, new Leo file.
      */
-    public async openEmptyLeoFile(gui: NullGui, old_c?: Commands): Promise<Commands> {
+    public async openEmptyLeoFile(gui?: LeoGui, old_c?: Commands): Promise<Commands> {
 
         const lm = this;
         const w_previousSettings = await lm.getPreviousSettings(undefined);
@@ -2944,7 +2944,7 @@ export class LoadManager {
      * Creates an empty outline if fn is a non-existent Leo file.
      * Creates an wrapper outline if fn is an external file, existing or not.
      */
-    public async openFileByName(fn: string, gui: NullGui, old_c?: Commands, previousSettings?: PreviousSettings): Promise<Commands | undefined> {
+    public async openFileByName(fn: string, gui?: LeoGui, old_c?: Commands, previousSettings?: PreviousSettings): Promise<Commands | undefined> {
 
         const lm: LoadManager = this;
         // Disable the log.
