@@ -26,10 +26,8 @@ export class TopLevelEditCommands {
         'Mark the node and all its parents.'
     )
     public mark_first_parents(this: Commands): Position[] {
-
         const c: Commands = this;
         const changed: Position[] = [];
-
         if (!c) {
             return changed;
         }
@@ -46,6 +44,76 @@ export class TopLevelEditCommands {
             c.redraw();
         }
         return changed;
+    }
+    //@+node:felix.20230708211842.1: *3* @g.command('merge-node-with-next-node')
+    @command(
+        'merge-node-with-next-node',
+        'Merge p.b into p.next().b and delete p, *provided* that p has no children.' +
+        'Undo works, but redo doesn\'t: probably a bug in the u.before/AfterChangeGroup.'
+    )
+    public merge_node_with_next_node(this: Commands): void {
+        const c: Commands = this;
+        if (!c) {
+            return;
+        }
+        const [command, p, u, w] = ['merge-node-with-next-node', c.p, c.undoer, c.frame.body.wrapper];
+        if (!p || !p.__bool__() || !p.b.trim() || p.hasChildren()) {
+            return;
+        }
+        const next = p.next();
+        if (!next || !next.__bool__()) {
+            return;
+        }
+        // Outer undo.
+        u.beforeChangeGroup(p, command);
+        // Inner undo 1: change next.b.
+        const bunch1 = u.beforeChangeBody(next);
+        next.b = p.b.trimEnd() + '\n\n' + next.b;
+        w.setAllText(next.b);
+        u.afterChangeBody(next, command, bunch1);
+        // Inner undo 2: delete p.
+        const bunch2 = u.beforeDeleteNode(p);
+        p.doDelete(next);  // This adjusts next._childIndex.
+        c.selectPosition(next);
+        u.afterDeleteNode(next, command, bunch2);
+        // End outer undo:
+        u.afterChangeGroup(next, command);
+        c.redraw(next);
+    }
+    //@+node:felix.20230708211849.1: *3* @g.command('merge-node-with-prev-node')
+    @command(
+        'merge-node-with-prev-node',
+        'Merge p.b into p.back().b and delete p, *provided* that p has no children.' +
+        'Undo works, but redo doesn\'t: probably a bug in the u.before/AfterChangeGroup.'
+    )
+    public merge_node_with_prev_node(this: Commands): void {
+        const c: Commands = this;
+        if (!c) {
+            return;
+        }
+        const [command, p, u, w] = ['merge-node-with-prev-node', c.p, c.undoer, c.frame.body.wrapper];
+        if (!p || !p.__bool__() || !p.b.trim() || p.hasChildren()) {
+            return;
+        }
+        const prev = p.back();
+        if (!prev || !prev.__bool__()) {
+            return;
+        }
+        // Outer undo.
+        u.beforeChangeGroup(p, command);
+        // Inner undo 1: change prev.b.
+        const bunch1 = u.beforeChangeBody(prev);
+        prev.b = prev.b.trimEnd() + '\n\n' + p.b;
+        w.setAllText(prev.b);
+        u.afterChangeBody(prev, command, bunch1);
+        // Inner undo 2: delete p, select prev.
+        const bunch2 = u.beforeDeleteNode(p);
+        p.doDelete();  // No need to adjust prev._childIndex.
+        c.selectPosition(prev);
+        u.afterDeleteNode(prev, command, bunch2);
+        // End outer undo.
+        u.afterChangeGroup(prev, command);
+        c.redraw(prev);
     }
     //@+node:felix.20220504203200.3: *3* @g.command('promote-bodies')
     @command(
@@ -112,6 +180,67 @@ export class TopLevelEditCommands {
         }
     }
 
+    //@+node:felix.20230708211954.1: *3* @g.command('show-clone-ancestors')
+    @command(
+        'show-clone-ancestors',
+        'Display links to all ancestor nodes of the node c.p.'
+    )
+    public show_clone_ancestors(this: Commands): void {
+
+        const c: Commands = this;
+        if (!c) {
+            return;
+        }
+        const p = c.p;
+
+        g.es("TODO : show-clone-ancestors when UNL is done");
+        /*
+        g.es(`Ancestors of ${p.h}...`);
+        for (const clone of c.all_positions()){
+            if (clone.v === p.v){
+                const unl = clone.get_legacy_UNL();
+                const message = unl;
+                // Drop the file part.
+                i = unl.find('#')
+                if i > 0:
+                    message = unl[i + 1 :]
+                // Drop the target node from the message.
+                parts = message.split('-->')
+                if len(parts) > 1:
+                    message = '-->'.join(parts[:-1])
+                c.frame.log.put(message + '\n', nodeLink=f"{unl}::1")
+            }
+        }
+        */
+
+    }
+    //@+node:felix.20230708211959.1: *3* @g.command('show-clone-parents')
+    @command('show-clone-parents',
+        'Display links to all parent nodes of the node c.p.'
+    )
+    public show_clones(this: Commands): void {
+
+        const c: Commands = this;
+        if (!c) {
+            return;
+        }
+
+        g.es("TODO : show-clone-parents when UNL is done");
+
+        /*
+        seen = []
+        for clone in c.vnode2allPositions(c.p.v):
+            parent = clone.parent()
+            if parent and parent not in seen:
+                seen.append(parent)
+                unl = message = parent.get_legacy_UNL()
+                // Drop the file part.
+                i = unl.find('#')
+                if i > 0:
+                    message = unl[i + 1 :]
+                c.frame.log.put(message + '\n', nodeLink=f"{unl}::1")
+        */
+    }
     //@+node:felix.20220504203200.5: *3* @g.command('unmark-first-parents')
     @command(
         'unmark-first-parents',
