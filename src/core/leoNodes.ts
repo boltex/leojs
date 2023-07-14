@@ -1530,10 +1530,6 @@ export class Position {
             // This is the only call to v._cutlink.
             child._cutLink(n, parent_v);
         } else {
-            // console.log('n', n);
-            // console.log('parent_v.children.length', parent_v.children.length);
-            // console.log('parent_v.children[n]', parent_v.children[n].fileIndex);
-            // console.log('child', child.fileIndex);
             this.badUnlink(parent_v, n, child);
         }
     }
@@ -1544,7 +1540,7 @@ export class Position {
      */
     public badUnlink(parent_v: VNode, n: number, child: VNode): void {
         if (0 <= n && n < parent_v.children.length) {
-            g.trace(`**can not happen: children[{n}] != p.v`);
+            g.trace(`**can not happen: children[${n}] != p.v`);
             g.trace(
                 'parent_v.children...\n',
                 g.listToString(parent_v.children)
@@ -2046,6 +2042,7 @@ export class Position {
             if (!!newNode && sib.__eq__(newNode)) {
                 // Adjust newNode._childIndex if newNode is a following sibling of p.
                 newNode._childIndex -= 1;
+                console.log('HAD TO LOWER _childIndex!, its now ', newNode._childIndex);
                 break;
             }
         }

@@ -19,6 +19,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
     console.log('STARTUP:             path.sep: ', path.sep);
     console.log('STARTUP:           env scheme: ', vscode.env.uriScheme);
     console.log('STARTUP:          env appHost: ', vscode.env.appHost);
+    console.log('STARTUP:          process.cwd(): ', process.cwd());
 
     const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
     const w_leojsVersion = w_leojsExtension.packageJSON.version;

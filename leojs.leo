@@ -351,7 +351,7 @@
 <v t="felix.20201214151451.8"><vh>_updateLeoObjectIndicator</vh></v>
 </v>
 </v>
-<v t="felix.20201214154816.1"><vh>@clean src/types.d.ts</vh>
+<v t="felix.20201214154816.1"><vh>@clean src/types.ts</vh>
 <v t="felix.20211007213900.1"><vh>ConfigMembers</vh></v>
 <v t="felix.20211007213909.1"><vh>ConfigSetting</vh></v>
 <v t="felix.20211007213915.1"><vh>FontSettings</vh></v>
@@ -555,8 +555,8 @@
 <v t="felix.20211017230407.1"><vh>@file src/commands/commanderFileCommands.ts</vh></v>
 <v t="felix.20220612234816.1"><vh>@file src/commands/commanderHelpCommands.ts</vh></v>
 <v t="felix.20211002221425.1"><vh>@file src/commands/commanderOutlineCommands.ts</vh></v>
-<v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 <v t="felix.20220503003653.1"><vh>@file src/commands/editCommands.ts</vh></v>
+<v t="felix.20211212162627.1"><vh>@file src/commands/editFileCommands.ts</vh></v>
 <v t="felix.20220503003725.1"><vh>@file src/commands/gotoCommands.ts</vh></v>
 </v>
 <v t="felix.20221119204248.1"><vh>Gui base classes</vh>
@@ -1284,6 +1284,7 @@ export async function activate(p_context: vscode.ExtensionContext) {
     console.log('STARTUP:             path.sep: ', path.sep);
     console.log('STARTUP:           env scheme: ', vscode.env.uriScheme);
     console.log('STARTUP:          env appHost: ', vscode.env.appHost);
+    console.log('STARTUP:          process.cwd(): ', process.cwd());
 
     const w_leojsExtension = vscode.extensions.getExtension(Constants.PUBLISHER + '.' + Constants.NAME)!;
     const w_leojsVersion = w_leojsExtension.packageJSON.version;

@@ -1435,7 +1435,6 @@ export class FileCommands {
         }
         catch (p_error) {
             console.log('ERROR IN getLeoFile', p_error);
-
         }
         finally {
             // lastTopLevel is a better fallback, imo.

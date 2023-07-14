@@ -1679,6 +1679,11 @@ export async function chdir(p_path: string): Promise<void> {
     }
 
 }
+//@+node:felix.20230711213447.1: *3* g.mkdir
+export async function mkdir(folderName: string): Promise<void> {
+    const w_uri = makeVscodeUri(folderName);
+    await vscode.workspace.fs.createDirectory(w_uri);
+}
 //@+node:felix.20220511212935.1: *3* g.computeWindowTitle
 export function computeWindowTitle(fileName: string): string {
     let branch;
@@ -1704,6 +1709,29 @@ export function computeWindowTitle(fileName: string): string {
         title = branch + ": " + title;
     }
     return title;
+}
+//@+node:felix.20230712232252.1: *3* g.createHiddenCommander
+/**
+ * Read the file into a hidden commander (Similar to g.openWithFileName).
+ */
+export async function createHiddenCommander(fn: string): Promise<Commands | undefined> {
+
+    const c = new Commands(fn, app.nullGui);
+    // const theFile = app.loadManager.openAnyLeoFile(fn); // LEOJS : UNUSED
+    // if (theFile){
+    //     await c.fileCommands.openLeoFile(fn, true, true);
+    // }
+    try {
+        const exists = await os_path_exists(fn);
+        if (app.loadManager!.isLeoFile(fn) && exists) {
+            await c.fileCommands.openLeoFile(fn, true, true);
+            return c;
+        }
+    } catch (e) {
+        es_exception(e);
+    }
+    return undefined;
+
 }
 //@+node:felix.20220108215158.1: *3* g.defaultLeoFileExtension
 export function defaultLeoFileExtension(c?: Commands): string {
@@ -2045,6 +2073,11 @@ export function readlineForceUnixNewline(f: string[], fileName?: string): string
 
     return s;
 
+}
+//@+node:felix.20230711202208.1: *3* g.os_remove
+export async function os_remove(fileName: string): Promise<void> {
+    const w_uri = makeVscodeUri(fileName);
+    await vscode.workspace.fs.delete(w_uri);
 }
 //@+node:felix.20220412004053.1: *3* g.sanitize_filename
 /**
@@ -4244,6 +4277,10 @@ export async function os_listdir(p_path: string): Promise<string[]> {
         es(`Error listing directory ${p_path}`);
     }
     return result;
+}
+//@+node:felix.20230711005109.1: *3* g.setStatusLabel
+export function setStatusLabel(s: string): Thenable<unknown> {
+    return vscode.window.showInformationMessage(s);
 }
 //@+node:felix.20230624200527.1: *3* g.warnNoOpenDirectory
 /**

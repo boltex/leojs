@@ -536,6 +536,7 @@ export class CommanderFileCommands {
         'Prints the current working directory'
     )
     public pwd_command(this: Commands): void {
+        // TODO : GET WORKING DIR OF THE WORKSPACE !
         g.es_print('pwd:', process.cwd());
     }
     //@+node:felix.20220105210716.14: *4* c_file.save
