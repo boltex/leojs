@@ -1684,6 +1684,11 @@ export async function mkdir(folderName: string): Promise<void> {
     const w_uri = makeVscodeUri(folderName);
     await vscode.workspace.fs.createDirectory(w_uri);
 }
+//@+node:felix.20230714230415.1: *3* g.rmdir
+export async function rmdir(folderName: string): Promise<void> {
+    const w_uri = makeVscodeUri(folderName);
+    await vscode.workspace.fs.delete(w_uri, {recursive: true});
+}
 //@+node:felix.20220511212935.1: *3* g.computeWindowTitle
 export function computeWindowTitle(fileName: string): string {
     let branch;
@@ -1703,7 +1708,7 @@ export function computeWindowTitle(fileName: string): string {
     }
     // Yet another fix for bug 1194209: regularize slashes.
     if ('/\\'.includes(path.sep)) {
-        title = title.replace('/', path.sep).replace('\\', path.sep);
+        title = title.replace(/\//g, path.sep).replace(/\\/g, path.sep);
     }
     if (branch) {
         title = branch + ": " + title;
@@ -2029,8 +2034,8 @@ export async function readFileIntoString(
  */
 export async function readFileIntoUnicodeString(
     fn: string,
-    encoding: BufferEncoding | undefined,
-    silent = false,
+    encoding?: BufferEncoding,
+    silent?: boolean,
 ): Promise<string | undefined> {
     try {
         const w_uri = makeVscodeUri(fn);
@@ -2041,11 +2046,9 @@ export async function readFileIntoUnicodeString(
             error('can not open', fn);
         }
         error(`readFileIntoUnicodeString: unexpected exception reading ${fn}`);
-        es_exception();
+        es_exception(e);
     }
-
     return undefined;
-
 }
 //@+node:felix.20230501215854.1: *3* g.readlineForceUnixNewline
 //@+at Stephen P. Schaefer 9/7/2002
@@ -2742,10 +2745,70 @@ export function skip_ws_and_nl(s: string, i: number): number {
  * Return the git (branch, commit) info associated for the given file.
  */
 export function gitInfoForFile(filename: string): [string, string] {
-    // console.log('TODO : gitInfoForFile');
+
+    console.log('TODO : gitInfoForFile');
+
     return ['', '']; // TODO !
     // g.gitInfo and g.gitHeadPath now do all the work.
     // return g.gitInfo(filename)
+}
+//@+node:felix.20230714231140.1: *3* g.gitHeadPath
+
+/**
+ * Compute the path to .git/HEAD given the path.
+ */
+export async function gitHeadPath(path_s: string): Promise<string|undefined> {
+    // const w_path = path(path_s);
+    // #1780: Look up the directory tree, looking the .git directory.
+    while (await os_path_exists(path_s)){
+        const head = path.join(path_s, '.git', 'HEAD')
+        if( await os_path_exists(head)){
+            return head;
+        }
+        if (path_s === path.dirname(path_s)){ // path.parent()
+            break;
+        }
+        path_s = path.dirname(path_s);
+    }
+    return undefined;
+}
+//@+node:felix.20230714231513.1: *3* g.execGitCommand
+/**
+ * Execute the given git command in the given directory.
+ */
+export function execGitCommand(command: string, directory: string): Promise<string[]> {
+    
+    console.log("TODO : execGitCommand");
+    return Promise.resolve([]);
+
+    /*
+    const git_dir = g.finalize_join(directory, '.git')
+    if not g.os_path_exists(git_dir):
+        g.trace('not found:', git_dir, g.callers())
+        return []
+    if '\n' in command:
+        g.trace('removing newline from', command)
+        command = command.replace('\n', '')
+    # #1777: Save/restore os.curdir
+    old_dir = os.getcwd()
+    if directory:
+        os.chdir(directory)
+
+    try
+        p = subprocess.Popen(
+            shlex.split(command),
+            stdout=subprocess.PIPE,
+            stderr=None,  # Shows error traces.
+            shell=False,
+        )
+        out, err = p.communicate()
+        lines = [g.toUnicode(z) for z in g.splitLines(out or [])]
+    finally
+        os.chdir(old_dir)
+
+    return lines;
+    */
+    
 }
 //@+node:felix.20211106230549.1: ** g.Hooks & Plugins
 //@+node:felix.20211106230549.2: *3* g.act_on_node
@@ -4441,13 +4504,17 @@ export function os_path_abspath(p_path: string): string {
 }
 
 //@+node:felix.20211227182611.4: *3* g.os_path_basename
-// def os_path_basename(path: str) -> str:
-//     """Return the second half of the pair returned by split(path)."""
-//     if not path:
-//         return ''
-//     path = os.path.basename(path)
-//     path = g.os_path_normslashes(path)
-//     return path
+/**
+ * Return the second half of the pair returned by split(path).
+ */
+export function os_path_basename(p_path: string): string {
+    if (!p_path){
+        return '';
+    }
+    p_path = path.basename(p_path);
+    p_path = os_path_normslashes(p_path);
+    return p_path;
+}
 //@+node:felix.20211227205112.1: *3* g.os_path_dirname
 /**
  * Return the first half of the pair returned by split(path).
